@@ -19,7 +19,7 @@ Scope {
 
     CustomShortcut {
         name: "showall"
-        description: "Toggle launcher"
+        description: "Toggle launcher & Dashboard & OSD"
         onPressed: root.launcherInterrupted = false
         onReleased: {
             if (!root.launcherInterrupted) {
