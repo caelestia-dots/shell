@@ -19,17 +19,26 @@ Row {
         radius: Appearance.rounding.full
         color: Colours.palette.m3surfaceContainerHigh
 
-        CachingImage {
+        MaterialIcon {
+            anchors.centerIn: parent
+
+            text: "person"
+            fill: 1
+            font.pointSize: (info.implicitHeight / 2) || 1
+        }
+
+        Image {
+            id: avatarImage
             anchors.fill: parent
-            path: `${Paths.home}/.face`
+            source: `${Paths.cache}/thumbnails/@93x93-exact.png?${Date.now()}`
             fillMode: Image.PreserveAspectCrop
             smooth: true
+            cache: false
         }
 
         Rectangle {
             id: overlay
             anchors.fill: parent
-            radius: avatarRect.radius
             color: Qt.rgba(0, 0, 0, 0.4)
             opacity: mouseArea.containsMouse ? 1.0 : 0.0
             visible: opacity > 0
@@ -59,11 +68,13 @@ Row {
         Process {
             id: avatarUpdateProc
             running: false
-            command: [`${Paths.home}/.local/share/caelestia/shell/scripts/caelestia-avatar-picker.sh`]
+            command: ["python3", `${Quickshell.shellRoot}/assets/face-selector.py`]
 
             stdout: SplitParser {
                 onRead: {
-                    notifyProc.running = true
+                    avatarImage.source = ""; // Clear to force reload
+                    avatarImage.source = `${Paths.cache}/thumbnails/@93x93-exact.png?${Date.now()}` // Reload updated image
+                    notifyProc.running = true;
                 }
             }
         }
