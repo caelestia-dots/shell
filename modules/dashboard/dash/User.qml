@@ -10,13 +10,13 @@ Row {
     id: root
 
     padding: Appearance.padding.large
-    spacing: Appearance.spacing.large
+    spacing: Appearance.spacing.normal
 
     StyledClippingRect {
         implicitWidth: info.implicitHeight
         implicitHeight: info.implicitHeight
 
-        radius: Appearance.rounding.full
+        radius: Appearance.rounding.large
         color: Colours.palette.m3surfaceContainerHigh
 
         MaterialIcon {
@@ -72,8 +72,8 @@ Row {
 
             stdout: SplitParser {
                 onRead: {
-                    avatarImage.source = ""; // Clear to force reload
-                    avatarImage.source = `${Paths.cache}/thumbnails/@93x93-exact.png?${Date.now()}` // Reload updated image
+                    avatarImage.source = "";
+                    avatarImage.source = `${Paths.cache}/thumbnails/@93x93-exact.png?${Date.now()}`
                     notifyProc.running = true;
                 }
             }
