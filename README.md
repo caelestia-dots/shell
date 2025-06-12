@@ -23,11 +23,43 @@
 
 https://github.com/user-attachments/assets/0840f496-575c-4ca6-83a8-87bb01a85c5f
 
-## Components
+caelestia-shell is a feature-rich, customizable desktop shell environment specifically designed for the Hyprland Wayland compositor. Built using QML and the Quickshell framework, it offers a modern and fluid user experience.
 
-- Widgets: [`Quickshell`](https://quickshell.outfoxxed.me)
-- Window manager: [`Hyprland`](https://hyprland.org)
-- Dots: [`caelestia`](https://github.com/caelestia-dots)
+## Core Technologies
+
+- **Hyprland:** A dynamic tiling Wayland compositor that `caelestia-shell` is designed to integrate with, providing a modern and fluid window management experience. ([Hyprland Website](https://hyprland.org))
+- **Quickshell:** The QML-based framework used to build `caelestia-shell`. It allows for the creation of custom shell components and user interfaces. ([Quickshell Website](https://quickshell.outfoxxed.me))
+- **QML (Qt Modeling Language):** A declarative language used for designing user interfaces and defining their behavior. Most of `caelestia-shell`'s UI and logic is written in QML.
+
+## Features
+
+### Bar
+Displays an OS icon, customizable workspaces (configurable count, labels, activity indicators, and window previews via popups), active window title, a system tray, clock, status icons (network, Bluetooth, battery) with detailed popout views, and a power button.
+- *Configuration: `config/BarConfig.qml`*
+
+### Dashboard
+Accessible via a keyboard shortcut, the dashboard presents a user profile picture (sourced from `~/.face`), current weather information, date and time, a calendar, system resource monitors (CPU, RAM, disk usage), and media player controls.
+- *Configuration: `config/DashboardConfig.qml`*
+
+### Launcher
+A searchable application launcher. It may also include quick actions or wallpaper switching capabilities.
+- *Configuration: `config/LauncherConfig.qml`*
+
+### Notifications
+A system for displaying notifications from applications and the system itself, ensuring users stay informed about important events.
+- *Configuration: `config/NotifsConfig.qml`*
+
+### On-Screen Display (OSD)
+Provides visual feedback for various actions, such as volume adjustments, brightness changes, and other system status indicators.
+- *Configuration: `config/OsdConfig.qml`*
+
+### Session Management
+Manages the user session, including options for locking the screen, logging out, restarting, or shutting down the system.
+- *Configuration: `config/SessionConfig.qml`*
+
+### Customizable Appearance
+Offers extensive customization options for the shell's visual elements, including global settings for corner rounding, spacing, padding, fonts, and animations. Color schemes can also be defined and applied.
+- *Configuration: `config/Appearance.qml`*
 
 ## Installation
 
@@ -38,7 +70,7 @@ Install [`caelestia-scripts`](https://github.com/caelestia-dots/scripts) and run
 ### Manual installation
 
 Install all [dependencies](https://github.com/caelestia-dots/scripts/blob/main/install/shell.fish#L10), then
-clone this repo into `$XDG_CONFIG_HOME/quickshell/caelestia` and run `qs -c caelestia`.
+clone this repo into `$XDG_CONFIG_HOME/quickshell/caelestia`. This directory will also be where you customize the shell (see 'Features' section above for configuration files). Then run `qs -c caelestia` to start the shell.
 
 ## Usage
 
@@ -92,16 +124,37 @@ target notifs
   function clear(): void
 ```
 
-### PFP/Wallpapers
+### Configuration
+`caelestia-shell` is configured by editing QML files located in the `$XDG_CONFIG_HOME/quickshell/caelestia/config/` directory. If you installed manually, this is the same directory where you cloned the repository.
 
-The profile picture for the dashboard is read from the file `~/.face`, so to set it just put your image there.
+Key configuration files include:
+- `Appearance.qml`: Controls global theming aspects like rounding, spacing, padding, fonts, and animations. (See "Customizable Appearance" under Features).
+- `BarConfig.qml`: Configures the bar, its elements, and behavior. (See "Bar" under Features).
+- `DashboardConfig.qml`: Manages the content and layout of the dashboard. (See "Dashboard" under Features).
+- `LauncherConfig.qml`: Defines settings for the application launcher. (See "Launcher" under Features).
+- `NotifsConfig.qml`: Adjusts notification appearance and behavior. (See "Notifications" under Features).
+- `OsdConfig.qml`: Configures the on-screen display elements. (See "On-Screen Display (OSD)" under Features).
+- `SessionConfig.qml`: Handles session-related options like logout and lock screen. (See "Session Management" under Features).
 
-The wallpapers for the wallpaper switcher are read from `~/Pictures/Wallpapers`, so put your wallpapers there for
-them to show up in the switcher (you need to restart the shell after changing stuff in `~/Pictures/Wallpapers` sadly,
-no watching for changes yet).
+Changes to these configuration files typically require a shell reload to take effect. This can usually be done by restarting the `caelestia-shell.service` if using systemd, or by re-running `qs -c caelestia` if you started it manually.
 
-To set the wallpaper, you can use the command `caelestia wallpaper`. Use `caelestia wallpaper -h` for more info about
-the command.
+#### Specific Asset Paths
+- **Profile Picture (PFP):** The dashboard reads the user's profile picture from `~/.face`. Place your desired image file at this location.
+- **Wallpapers:** The wallpaper switcher sources images from `~/Pictures/Wallpapers/`. Store your wallpaper collection in this directory. Currently, the shell needs to be restarted to recognize new wallpapers in this folder. To set the wallpaper via command line, use `caelestia wallpaper set <path_to_image>`.
+
+## Contributing
+
+We welcome contributions to `caelestia-shell`! If you're interested in helping improve the project, please follow these standard guidelines:
+
+1.  **Fork the repository** on GitHub.
+2.  **Create a new branch** for your feature or bug fix: `git checkout -b my-awesome-feature`.
+3.  **Make your changes** and commit them with clear, descriptive messages.
+4.  **Push your branch** to your fork: `git push origin my-awesome-feature`.
+5.  **Submit a pull request** to the main `caelestia-shell` repository.
+
+For significant changes, such as new features or major refactoring, please open an issue first to discuss your ideas with the maintainers. This helps ensure that your contributions align with the project's goals and ongoing development.
+
+While the project is currently undergoing a significant overhaul (as mentioned in the warning at the top of this document), pull requests for bug fixes or features that have been discussed and agreed upon are still very welcome. We appreciate your understanding and effort in helping make `caelestia-shell` better!
 
 ## Credits
 
@@ -116,6 +169,10 @@ which helped me a lot with learning how to use Quickshell.
 
 Finally another thank you to all the configs I took inspiration from (only one for now):
 - [Axenide/Ax-Shell](https://github.com/Axenide/Ax-Shell)
+
+## License
+
+This project is licensed under the GNU General Public License Version 3. See the [LICENSE](LICENSE) file for details.
 
 ## Stonks 📈
 
