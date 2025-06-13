@@ -85,11 +85,9 @@ Row {
             command: [
                 "notify-send",
                 "-u", "low",
-                "-i", "dialog-information-symbolic",
+                "-i", "icon_user",
                 "Profile Updated",
                 "Your avatar has been successfully changed.",
-                "-a", "Shell",
-                "-A", "OK=Got it!"
             ]
         }
     }
