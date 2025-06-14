@@ -31,7 +31,9 @@ Item {
         MaterialIcon {
             id: icon
 
-            text: root.modelData?.icon ?? ""
+            text: root.modelData?.disabled
+                ? "disabled_by_default"
+                : (root.modelData?.icon ?? "")
             font.pointSize: Appearance.font.size.extraLarge
 
             anchors.verticalCenter: parent.verticalCenter
@@ -48,14 +50,18 @@ Item {
             StyledText {
                 id: name
 
-                text: root.modelData?.name ?? ""
+                text: root.modelData?.disabled
+                    ? (root.modelData?.name ?? "") + " - Disabled"
+                    : (root.modelData?.name ?? "")
                 font.pointSize: Appearance.font.size.normal
             }
 
             StyledText {
                 id: desc
 
-                text: root.modelData?.desc ?? ""
+                text: root.modelData?.disabled
+                    ? (root.modelData?.disabledReason ?? "")
+                    : (root.modelData?.desc ?? "")
                 font.pointSize: Appearance.font.size.small
                 color: Colours.alpha(Colours.palette.m3outline, true)
 

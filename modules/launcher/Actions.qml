@@ -68,6 +68,39 @@ Singleton {
             }
         },
         Action {
+            name: qsTr("Shutdown")
+            desc: qsTr("Shutdown the system")
+            icon: "power_settings_new"
+            disabled: !LauncherConfig.allowDangerousActions
+            disabledReason: qsTr("Enable dangerous actions in config/LauncherConfig.qml first")
+
+            function onClicked(list: AppList): void {
+                root.handleDangerousAction(list, shutdown);
+            }
+        },
+        Action {
+            name: qsTr("Reboot")
+            desc: qsTr("Reboot the system")
+            icon: "cached"
+            disabled: !LauncherConfig.allowDangerousActions
+            disabledReason: qsTr("Enable dangerous actions in config/LauncherConfig.qml first")
+
+            function onClicked(list: AppList): void {
+                root.handleDangerousAction(list, reboot);
+            }
+        },
+        Action {
+            name: qsTr("Logout")
+            desc: qsTr("Logout of the current session")
+            icon: "exit_to_app"
+            disabled: !LauncherConfig.allowDangerousActions
+            disabledReason: qsTr("Enable dangerous actions in config/LauncherConfig.qml first")
+
+            function onClicked(list: AppList): void {
+                root.handleDangerousAction(list, logout);
+            }
+        },
+        Action {
             name: qsTr("Lock")
             desc: qsTr("Lock the current session")
             icon: "lock"
@@ -107,6 +140,39 @@ Singleton {
         list.search.text = `${LauncherConfig.actionPrefix}${text} `;
     }
 
+    function handleDangerousAction(list: AppList, process: QtObject): void {
+        list.visibilities.launcher = false;
+        if (!LauncherConfig.allowDangerousActions) {
+            dangerousActions.running = true;
+            return;
+        }
+        process.running = true;
+    }
+
+    Process {
+        id: dangerousActions
+
+        command: ["notify-send", "Quickshell", qsTr("Enable dangerous actions in config/LauncherConfig.qml to use this action."), "-i", "dialog-warning"]
+    }
+
+    Process {
+        id: shutdown
+
+        command: ["systemctl", "poweroff"]
+    }
+
+    Process {
+        id: reboot
+
+        command: ["systemctl", "reboot"]
+    }
+
+    Process {
+        id: logout
+
+        command: ["sh", "-c", "(uwsm stop | grep -q 'Compositor is not running' && loginctl terminate-user $USER) || uwsm stop"]
+    }   
+
     Process {
         id: lock
 
@@ -123,6 +189,8 @@ Singleton {
         required property string name
         required property string desc
         required property string icon
+        property bool disabled
+        property string disabledReason
 
         function onClicked(list: AppList): void {
         }
