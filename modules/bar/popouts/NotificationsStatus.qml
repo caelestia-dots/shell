@@ -9,6 +9,10 @@ Column {
     spacing: Appearance.spacing.normal
 
     StyledText {
-        text: Notifs.notificationsEnabled ? qsTr("Notifications are enabled") : qsTr("Notifications are disabled")
+        text: Notifs.notificationsEnabled ? "Notifications are enabled" : "Notifications are disabled"
+    }
+
+    StyledText {
+        text: Notifs.notificationsEnabled ? `You have ${Notifs.popups.length} Notifications` : `You have ${Notifs.pending.length} Notifications`
     }
 }

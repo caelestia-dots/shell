@@ -13,7 +13,7 @@ Singleton {
 
     readonly property list<Notif> list: []
     readonly property list<Notif> popups: list.filter(n => n.popup)
-    property var pending: []
+    property list<Notification> pending: []
     property bool notificationsEnabled: true
 
     NotificationServer {
