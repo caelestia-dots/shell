@@ -25,7 +25,7 @@ Item {
         id: notificationsstatus
 
         animate: true
-        text: Notifs.notificationsEnabled ? "notifications" : "notifications_off"
+        text: Notifs.notificationsEnabled ? ( Notifs.popups[0] ? "notifications_unread" : "notifications") : "notifications_off"
         color: root.colour
 
         anchors.horizontalCenter: parent.horizontalCenter
