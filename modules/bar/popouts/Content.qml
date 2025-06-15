@@ -34,6 +34,11 @@ Item {
         }
 
         Popout {
+            name: "notificationsstatus"
+            source: "NotificationsStatus.qml"
+        }
+
+        Popout {
             name: "network"
             source: "Network.qml"
         }
