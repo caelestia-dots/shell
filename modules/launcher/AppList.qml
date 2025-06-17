@@ -10,14 +10,19 @@ import QtQuick.Controls
 ListView {
     id: root
 
-    required property int padding
     required property TextField search
     required property PersistentProperties visibilities
 
     property bool isAction: search.text.startsWith(Config.launcher.actionPrefix)
+    property bool isScheme: search.text.startsWith(`${Config.launcher.actionPrefix}scheme `)
+    property bool isVariant: search.text.startsWith(`${Config.launcher.actionPrefix}variant `)
 
     function getModelValues() {
         let text = search.text;
+        if (isScheme)
+            return Schemes.fuzzyQuery(text);
+        if (isVariant)
+            return M3Variants.fuzzyQuery(text);
         if (isAction)
             return Actions.fuzzyQuery(text);
         if (text.startsWith(Config.launcher.actionPrefix))
@@ -43,7 +48,15 @@ ListView {
         opacity: 0.08
     }
 
-    delegate: isAction ? actionItem : appItem
+    delegate: {
+        if (isScheme)
+            return schemeItem;
+        if (isVariant)
+            return variantItem;
+        if (isAction)
+            return actionItem;
+        return appItem;
+    }
 
     ScrollBar.vertical: StyledScrollBar {}
 
@@ -110,44 +123,70 @@ ListView {
         }
     }
 
+    Component {
+        id: schemeItem
+
+        SchemeItem {
+            list: root
+        }
+    }
+
+    Component {
+        id: variantItem
+
+        VariantItem {
+            list: root
+        }
+    }
+
     Behavior on isAction {
-        SequentialAnimation {
-            ParallelAnimation {
-                Anim {
-                    target: root
-                    property: "opacity"
-                    from: 1
-                    to: 0
-                    duration: Appearance.anim.durations.small
-                    easing.bezierCurve: Appearance.anim.curves.standardAccel
-                }
-                Anim {
-                    target: root
-                    property: "scale"
-                    from: 1
-                    to: 0.9
-                    duration: Appearance.anim.durations.small
-                    easing.bezierCurve: Appearance.anim.curves.standardAccel
-                }
+        ChangeAnim {}
+    }
+
+    Behavior on isScheme {
+        ChangeAnim {}
+    }
+
+    Behavior on isVariant {
+        ChangeAnim {}
+    }
+
+    component ChangeAnim: SequentialAnimation {
+        ParallelAnimation {
+            Anim {
+                target: root
+                property: "opacity"
+                from: 1
+                to: 0
+                duration: Appearance.anim.durations.small
+                easing.bezierCurve: Appearance.anim.curves.standardAccel
             }
-            PropertyAction {}
-            ParallelAnimation {
-                Anim {
-                    target: root
-                    property: "opacity"
-                    from: 0
-                    to: 1
-                    duration: Appearance.anim.durations.small
-                    easing.bezierCurve: Appearance.anim.curves.standardDecel
-                }
-                Anim {
-                    target: root
-                    property: "scale"
-                    from: 0.9
-                    to: 1
-                    duration: Appearance.anim.durations.small
-                    easing.bezierCurve: Appearance.anim.curves.standardDecel
-                }
+            Anim {
+                target: root
+                property: "scale"
+                from: 1
+                to: 0.9
+                duration: Appearance.anim.durations.small
+                easing.bezierCurve: Appearance.anim.curves.standardAccel
+            }
+        }
+        PropertyAction {}
+        ParallelAnimation {
+            Anim {
+                target: root
+                property: "opacity"
+                from: 0
+                to: 1
+                duration: Appearance.anim.durations.small
+                easing.bezierCurve: Appearance.anim.curves.standardDecel
+            }
+            Anim {
+                target: root
+                property: "scale"
+                from: 0.9
+                to: 1
+                duration: Appearance.anim.durations.small
+                easing.bezierCurve: Appearance.anim.curves.standardDecel
             }
         }
     }

@@ -53,12 +53,7 @@ Singleton {
     }
 
     function setMode(mode: string): void {
-        setModeProc.command = ["caelestia", "scheme", "-m", mode];
-        setModeProc.startDetached();
-    }
-
-    Process {
-        id: setModeProc
+        Quickshell.execDetached(["caelestia", "scheme", "set", "--notify", "-m", mode]);
     }
 
     FileView {

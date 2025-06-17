@@ -75,7 +75,7 @@ Singleton {
 
             function onClicked(list: AppList): void {
                 list.visibilities.launcher = false;
-                shutdown.running = true;
+                Quickshell.execDetached(["systemctl", "poweroff"]);
             }
         },
         Action {
@@ -86,7 +86,7 @@ Singleton {
 
             function onClicked(list: AppList): void {
                 list.visibilities.launcher = false;
-                reboot.running = true;
+                Quickshell.execDetached(["systemctl", "reboot"]);
             }
         },
         Action {
@@ -97,7 +97,7 @@ Singleton {
 
             function onClicked(list: AppList): void {
                 list.visibilities.launcher = false;
-                logout.running = true;
+                Quickshell.execDetached(["sh", "-c", "(uwsm stop | grep -q 'Compositor is not running' && loginctl terminate-user $USER) || uwsm stop"]);
             }
         },
         Action {
@@ -107,7 +107,7 @@ Singleton {
 
             function onClicked(list: AppList): void {
                 list.visibilities.launcher = false;
-                lock.running = true;
+                Quickshell.execDetached(["loginctl", "lock-session"]);
             }
         },
         Action {
@@ -117,7 +117,7 @@ Singleton {
 
             function onClicked(list: AppList): void {
                 list.visibilities.launcher = false;
-                sleep.running = true;
+                Quickshell.execDetached(["systemctl", "suspend-then-hibernate"]);
             }
         }
     ]
@@ -140,42 +140,11 @@ Singleton {
         list.search.text = `${Config.launcher.actionPrefix}${text} `;
     }
 
-    Process {
-        id: shutdown
-
-        command: ["systemctl", "poweroff"]
-    }
-
-    Process {
-        id: reboot
-
-        command: ["systemctl", "reboot"]
-    }
-
-    Process {
-        id: logout
-
-        command: ["sh", "-c", "(uwsm stop | grep -q 'Compositor is not running' && loginctl terminate-user $USER) || uwsm stop"]
-    }
-
-    Process {
-        id: lock
-
-        command: ["loginctl", "lock-session"]
-    }
-
-    Process {
-        id: sleep
-
-        command: ["systemctl", "suspend-then-hibernate"]
-    }
-
     component Action: QtObject {
         required property string name
         required property string desc
         required property string icon
         property bool disabled
-        property string disabledReason
 
         function onClicked(list: AppList): void {
         }
