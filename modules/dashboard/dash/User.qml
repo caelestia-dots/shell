@@ -5,9 +5,12 @@ import "root:/utils"
 import Quickshell
 import Quickshell.Io
 import QtQuick
+import QtQuick.Dialogs
 
 Row {
     id: root
+
+    required property PersistentProperties visibilities
 
     padding: Appearance.padding.large
     spacing: Appearance.spacing.normal
@@ -28,8 +31,88 @@ Row {
         }
 
         CachingImage {
+            id: pfp
+
             anchors.fill: parent
             path: `${Paths.home}/.face`
+        }
+
+        MouseArea {
+            anchors.fill: parent
+
+            cursorShape: Qt.PointingHandCursor
+            hoverEnabled: true
+
+            onClicked: {
+                root.visibilities.launcher = false;
+                dialog.open();
+            }
+
+            StyledRect {
+                anchors.fill: parent
+
+                color: Qt.alpha(Colours.palette.m3primary, 0.1)
+                opacity: parent.containsMouse ? 1 : 0
+
+                Behavior on opacity {
+                    NumberAnimation {
+                        duration: Appearance.anim.durations.normal
+                        easing.type: Easing.BezierSpline
+                        easing.bezierCurve: Appearance.anim.curves.standard
+                    }
+                }
+            }
+
+            StyledRect {
+                anchors.centerIn: parent
+
+                implicitWidth: selectIcon.implicitHeight + Appearance.padding.small * 2
+                implicitHeight: selectIcon.implicitHeight + Appearance.padding.small * 2
+
+                radius: Appearance.rounding.normal
+                color: Colours.palette.m3primary
+                scale: parent.containsMouse ? 1 : 0.5
+                opacity: parent.containsMouse ? 1 : 0
+
+                MaterialIcon {
+                    id: selectIcon
+
+                    anchors.centerIn: parent
+                    anchors.horizontalCenterOffset: -font.pointSize * 0.02
+
+                    text: "frame_person"
+                    color: Colours.palette.m3onPrimary
+                    font.pointSize: Appearance.font.size.extraLarge
+                }
+
+                Behavior on scale {
+                    NumberAnimation {
+                        duration: Appearance.anim.durations.expressiveFastSpatial
+                        easing.type: Easing.BezierSpline
+                        easing.bezierCurve: Appearance.anim.curves.expressiveFastSpatial
+                    }
+                }
+
+                Behavior on opacity {
+                    NumberAnimation {
+                        duration: Appearance.anim.durations.expressiveFastSpatial
+                        easing.type: Easing.BezierSpline
+                        easing.bezierCurve: Appearance.anim.curves.expressiveFastSpatial
+                    }
+                }
+            }
+        }
+
+        FileDialog {
+            id: dialog
+
+            nameFilters: [`Image files (${Wallpapers.extensions.map(e => `*.${e}`).join(" ")})`]
+
+            onAccepted: {
+                Paths.copy(selectedFile, `${Paths.home}/.face`);
+                pfp.pathChanged();
+                Quickshell.execDetached(["notify-send", "-a", "caelestia-shell", "-u", "low", "Profile picture changed", `Profile picture changed to ${Paths.strip(selectedFile)}`]);
+            }
         }
     }
 

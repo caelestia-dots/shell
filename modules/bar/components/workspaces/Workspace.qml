@@ -62,6 +62,17 @@ Item {
                 }
             }
 
+            move: Transition {
+                Anim {
+                    properties: "scale"
+                    to: 1
+                    easing.bezierCurve: Appearance.anim.curves.standardDecel
+                }
+                Anim {
+                    properties: "x,y"
+                }
+            }
+
             Repeater {
                 model: ScriptModel {
                     values: Hyprland.clients.filter(c => c.workspace?.id === root.ws)

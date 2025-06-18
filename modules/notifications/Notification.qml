@@ -36,7 +36,7 @@ StyledRect {
 
         anchors.fill: parent
         hoverEnabled: true
-        cursorShape: pressed ? Qt.ClosedHandCursor : undefined
+        cursorShape: body.hoveredLink ? Qt.PointingHandCursor : pressed ? Qt.ClosedHandCursor : undefined
         acceptedButtons: Qt.LeftButton | Qt.MiddleButton
         preventStealing: true
 
@@ -197,10 +197,12 @@ StyledRect {
                                 return "download";
                             if (summary.includes("update"))
                                 return "update";
-                            if (summary.startsWith("file"))
-                                return "folder_copy";
-                            if (summary.startsWith("unable to"))
+                            if (summary.includes("unable to"))
                                 return "deployed_code_alert";
+                            if (summary.includes("profile"))
+                                return "person";
+                            if (summary.includes("file"))
+                                return "folder_copy";
                             if (root.modelData.urgency === NotificationUrgency.Critical)
                                 return "release_alert";
                             return "chat";
@@ -413,6 +415,11 @@ StyledRect {
             color: Colours.palette.m3onSurfaceVariant
             font.pointSize: Appearance.font.size.small
             wrapMode: Text.WrapAtWordBoundaryOrAnywhere
+
+            onLinkActivated: link => {
+                Qt.openUrlExternally(link);
+                root.modelData.popup = false;
+            }
 
             opacity: root.expanded ? 1 : 0
 

@@ -85,6 +85,7 @@ Item {
 
                 Dash {
                     shouldUpdate: visible && this === view.currentItem
+                    visibilities: root.visibilities
                 }
 
                 Media {

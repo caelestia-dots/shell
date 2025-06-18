@@ -8,6 +8,7 @@ GridLayout {
     id: root
 
     required property bool shouldUpdate
+    required property var visibilities
 
     rowSpacing: Appearance.spacing.normal
     columnSpacing: Appearance.spacing.normal
@@ -20,6 +21,8 @@ GridLayout {
 
         User {
             id: user
+
+            visibilities: root.visibilities
         }
     }
 

@@ -18,6 +18,7 @@ Singleton {
     readonly property string current: showPreview ? previewPath : actualCurrent
     property string previewPath
     property string actualCurrent
+    property bool previewColourLock
 
     readonly property list<var> preppedWalls: list.map(w => ({
                 name: Fuzzy.prepare(w.name),
@@ -35,8 +36,7 @@ Singleton {
 
     function setWallpaper(path: string): void {
         actualCurrent = path;
-        setWall.path = path;
-        setWall.startDetached();
+        Quickshell.execDetached(["caelestia", "wallpaper", "-f", path]);
     }
 
     function preview(path: string): void {
@@ -47,7 +47,8 @@ Singleton {
 
     function stopPreview(): void {
         showPreview = false;
-        Colours.endPreviewOnNextChange = true;
+        if (!previewColourLock)
+            Colours.showPreview = false;
     }
 
     reloadableId: "wallpapers"
@@ -72,7 +73,10 @@ Singleton {
         path: root.currentNamePath
         watchChanges: true
         onFileChanged: reload()
-        onLoaded: root.actualCurrent = text().trim()
+        onLoaded: {
+            root.actualCurrent = text().trim();
+            root.previewColourLock = false;
+        }
     }
 
     Process {
@@ -85,14 +89,6 @@ Singleton {
                 Colours.showPreview = true;
             }
         }
-    }
-
-    Process {
-        id: setWall
-
-        property string path
-
-        command: ["caelestia", "wallpaper", "-f", path]
     }
 
     Process {

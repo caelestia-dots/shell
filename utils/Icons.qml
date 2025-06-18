@@ -102,7 +102,9 @@ Singleton {
             "395": "snowing"
         })
 
-    readonly property var desktopEntrySubs: ({})
+    readonly property var desktopEntrySubs: ({
+            "gimp-3.0": "gimp"
+        })
 
     readonly property var categoryIcons: ({
             WebBrowser: "web",

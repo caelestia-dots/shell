@@ -4,6 +4,7 @@ import "root:/widgets"
 import "root:/services"
 import "root:/config"
 import QtQuick
+import QtQuick.Dialogs
 
 Item {
     id: root
@@ -14,10 +15,84 @@ Item {
     anchors.fill: parent
 
     onSourceChanged: {
-        if (current === one)
+        if (!source)
+            current = null;
+        else if (current === one)
             two.update();
         else
             one.update();
+    }
+
+    Loader {
+        anchors.fill: parent
+
+        active: !root.source
+        asynchronous: true
+
+        sourceComponent: StyledRect {
+            color: Colours.palette.m3surfaceContainer
+
+            Row {
+                anchors.centerIn: parent
+                spacing: Appearance.spacing.large
+
+                MaterialIcon {
+                    text: "sentiment_stressed"
+                    color: Colours.palette.m3onSurfaceVariant
+                    font.pointSize: Appearance.font.size.extraLarge * 5
+                    font.variableAxes: ({
+                            opsz: Appearance.font.size.extraLarge * 5
+                        })
+                }
+
+                Column {
+                    anchors.verticalCenter: parent.verticalCenter
+                    spacing: Appearance.spacing.small
+
+                    StyledText {
+                        text: qsTr("Wallpaper missing?")
+                        color: Colours.palette.m3onSurfaceVariant
+                        font.pointSize: Appearance.font.size.extraLarge * 2
+                        font.bold: true
+                    }
+
+                    StyledRect {
+                        implicitWidth: selectWallText.implicitWidth + Appearance.padding.large * 2
+                        implicitHeight: selectWallText.implicitHeight + Appearance.padding.small * 2
+
+                        radius: Appearance.rounding.full
+                        color: Colours.palette.m3primary
+
+                        FileDialog {
+                            id: dialog
+
+                            nameFilters: [`Image files (${Wallpapers.extensions.map(e => `*.${e}`).join(" ")})`]
+
+                            onAccepted: Wallpapers.setWallpaper(selectedFile.toString().replace("file://", ""))
+                        }
+
+                        StateLayer {
+                            radius: parent.radius
+                            color: Colours.palette.m3onPrimary
+
+                            function onClicked(): void {
+                                dialog.open();
+                            }
+                        }
+
+                        StyledText {
+                            id: selectWallText
+
+                            anchors.centerIn: parent
+
+                            text: qsTr("Set it now!")
+                            color: Colours.palette.m3onPrimary
+                            font.pointSize: Appearance.font.size.large
+                        }
+                    }
+                }
+            }
+        }
     }
 
     Img {

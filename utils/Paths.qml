@@ -1,7 +1,6 @@
 pragma Singleton
 
 import Quickshell
-import Quickshell.Io
 import Qt.labs.platform
 
 Singleton {
@@ -17,16 +16,15 @@ Singleton {
 
     readonly property url imagecache: `${cache}/imagecache`
 
-    function mkdir(path: url): void {
-        mkdirProc.path = path.toString().replace("file://", "");
-        mkdirProc.startDetached();
+    function strip(path: url): string {
+        return path.toString().replace("file://", "");
     }
 
-    Process {
-        id: mkdirProc
+    function mkdir(path: url): void {
+        Quickshell.execDetached(["mkdir", "-p", strip(path)]);
+    }
 
-        property string path
-
-        command: ["mkdir", "-p", path]
+    function copy(from: url, to: url): void {
+        Quickshell.execDetached(["cp", strip(from), strip(to)]);
     }
 }

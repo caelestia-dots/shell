@@ -12,7 +12,8 @@ Singleton {
     readonly property list<string> colourNames: ["rosewater", "flamingo", "pink", "mauve", "red", "maroon", "peach", "yellow", "green", "teal", "sky", "sapphire", "blue", "lavender"]
 
     property bool showPreview
-    property bool endPreviewOnNextChange
+    property string scheme
+    property string flavour
     property bool light
     readonly property Colours palette: showPreview ? preview : current
     readonly property Colours current: Colours {}
@@ -38,17 +39,17 @@ Singleton {
         const colours = isPreview ? preview : current;
         const scheme = JSON.parse(data);
 
+        if (!isPreview) {
+            root.scheme = scheme.name;
+            flavour = scheme.flavour;
+        }
+
         light = scheme.mode === "light";
 
         for (const [name, colour] of Object.entries(scheme.colours)) {
             const propName = colourNames.includes(name) ? name : `m3${name}`;
             if (colours.hasOwnProperty(propName))
                 colours[propName] = `#${colour}`;
-        }
-
-        if (!isPreview || (isPreview && endPreviewOnNextChange)) {
-            showPreview = false;
-            endPreviewOnNextChange = false;
         }
     }
 

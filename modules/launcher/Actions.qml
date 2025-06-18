@@ -42,6 +42,7 @@ Singleton {
             name: qsTr("Transparency")
             desc: qsTr("Change shell transparency")
             icon: "opacity"
+            disabled: true
 
             function onClicked(list: AppList): void {
                 root.autocomplete(list, "transparency");
