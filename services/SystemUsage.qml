@@ -56,8 +56,16 @@ Singleton {
             meminfo.reload();
             storage.running = true;
             cpuTemp.running = true;
-            gpuUsage.running = true;
-            gpuTemp.running = true;
+        }
+    }
+
+    Timer {
+        id: gpuTimer
+        running: true
+        interval: 5000  // Update GPU metrics every 5 seconds instead of 3
+        repeat: true
+        onTriggered: {
+            gpuMetrics.running = true;
         }
     }
 
@@ -70,7 +78,7 @@ Singleton {
             if (data) {
                 const stats = data.slice(1).map(n => parseInt(n, 10));
                 const total = stats.reduce((a, b) => a + b, 0);
-                const idle = stats[3] + (stats[4] ?? 0);
+                const idle = stats[3];
 
                 const totalDiff = total - root.lastCpuTotal;
                 const idleDiff = idle - root.lastCpuIdle;
@@ -97,41 +105,19 @@ Singleton {
         id: storage
 
         running: true
-        command: ["sh", "-c", "df | grep '^/dev/' | awk '{print $1, $3, $4}'"]
-        stdout: StdioCollector {
-            onStreamFinished: {
-                const deviceMap = new Map();
-
-                for (const line of text.trim().split("\n")) {
-                    if (line.trim() === "")
-                        continue;
-
-                    const parts = line.trim().split(/\s+/);
-                    if (parts.length >= 3) {
-                        const device = parts[0];
-                        const used = parseInt(parts[1], 10) || 0;
-                        const avail = parseInt(parts[2], 10) || 0;
-
-                        // Only keep the entry with the largest total space for each device
-                        if (!deviceMap.has(device) || (used + avail) > (deviceMap.get(device).used + deviceMap.get(device).avail)) {
-                            deviceMap.set(device, {
-                                used: used,
-                                avail: avail
-                            });
-                        }
-                    }
+        command: ["sh", "-c", "df | grep '^/dev/' | awk '{print $3, $4}'"]
+        stdout: SplitParser {
+            splitMarker: ""
+            onRead: data => {
+                let used = 0;
+                let avail = 0;
+                for (const line of data.trim().split("\n")) {
+                    const [u, a] = line.split(" ");
+                    used += parseInt(u, 10);
+                    avail += parseInt(a, 10);
                 }
-
-                let totalUsed = 0;
-                let totalAvail = 0;
-
-                for (const [device, stats] of deviceMap) {
-                    totalUsed += stats.used;
-                    totalAvail += stats.avail;
-                }
-
-                root.storageUsed = totalUsed;
-                root.storageTotal = totalUsed + totalAvail;
+                root.storageUsed = used;
+                root.storageTotal = used + avail;
             }
         }
     }
@@ -140,56 +126,31 @@ Singleton {
         id: cpuTemp
 
         running: true
-        command: ["sh", "-c", "cat /sys/class/thermal/thermal_zone*/temp"]
-        stdout: StdioCollector {
-            onStreamFinished: {
-                const temps = text.trim().split(" ");
-                const sum = temps.reduce((acc, d) => acc + parseInt(d, 10), 0);
-                root.cpuTemp = sum / temps.length / 1000;
+        command: ["sh", "-c", "sensors | awk '/Package id/ {print $4}' | sed 's/+//;s/°C.*//' | head -1"]
+        stdout: SplitParser {
+            splitMarker: ""
+            onRead: data => {
+                const temp = parseFloat(data.trim());
+                root.cpuTemp = isNaN(temp) ? 0 : temp;
             }
         }
     }
 
     Process {
-        id: gpuUsage
+        id: gpuMetrics
 
         running: true
-        command: ["sh", "-c", "cat /sys/class/drm/card*/device/gpu_busy_percent"]
-        stdout: StdioCollector {
-            onStreamFinished: {
-                const percs = text.trim().split("\n");
-                const sum = percs.reduce((acc, d) => acc + parseInt(d, 10), 0);
-                root.gpuPerc = sum / percs.length / 100;
-            }
-        }
-    }
-
-    Process {
-        id: gpuTemp
-
-        running: true
-        command: ["sensors"]
-        stdout: StdioCollector {
-            onStreamFinished: {
-                let eligible = false;
-                let sum = 0;
-                let count = 0;
-
-                for (const line of text.trim().split("\n")) {
-                    if (line === "Adapter: PCI adapter")
-                        eligible = true;
-                    else if (line === "")
-                        eligible = false;
-                    else if (eligible) {
-                        const match = line.match(/^(temp[0-9]+|GPU core|edge)+:\s+\+([0-9]+\.[0-9]+)°C/);
-                        if (match) {
-                            sum += parseFloat(match[2]);
-                            count++;
-                        }
-                    }
+        command: ["nvidia-smi", "--query-gpu=utilization.gpu,temperature.gpu", "--format=csv,noheader,nounits"]
+        stdout: SplitParser {
+            splitMarker: ""
+            onRead: data => {
+                const values = data.trim().split(",");
+                if (values.length >= 2) {
+                    const usage = parseInt(values[0].trim(), 10);
+                    const temp = parseFloat(values[1].trim());
+                    root.gpuPerc = isNaN(usage) ? 0 : usage / 100;
+                    root.gpuTemp = isNaN(temp) ? 0 : temp;
                 }
-
-                root.gpuTemp = count > 0 ? sum / count : 0;
             }
         }
     }
