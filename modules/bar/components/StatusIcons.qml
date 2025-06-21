@@ -11,23 +11,36 @@ Item {
 
     property color colour: Colours.palette.m3secondary
 
+    readonly property Item notificationsstatus: notificationsstatus
     readonly property Item network: network
     readonly property real bs: bluetooth.y
     readonly property real be: repeater.count > 0 ? devices.y + devices.implicitHeight : bluetooth.y + bluetooth.implicitHeight
     readonly property Item battery: battery
 
     clip: true
-    implicitWidth: Math.max(network.implicitWidth, bluetooth.implicitWidth, devices.implicitWidth, battery.implicitWidth)
-    implicitHeight: network.implicitHeight + bluetooth.implicitHeight + bluetooth.anchors.topMargin + (repeater.count > 0 ? devices.implicitHeight + devices.anchors.topMargin : 0) + battery.implicitHeight + battery.anchors.topMargin
+    implicitWidth: Math.max(notificationsstatus.implicitWidth, network.implicitWidth, bluetooth.implicitWidth, devices.implicitWidth, battery.implicitWidth)
+    implicitHeight: notificationsstatus.implicitHeight + network.implicitHeight + network.anchors.topMargin + bluetooth.implicitHeight + bluetooth.anchors.topMargin + (repeater.count > 0 ? devices.implicitHeight + devices.anchors.topMargin : 0) + battery.implicitHeight + battery.anchors.topMargin
+    
+    MaterialIcon {
+        id: notificationsstatus
+
+        animate: true
+        text: Notifs.notificationsEnabled ? ( Notifs.popups[0] ? "notifications_unread" : "notifications") : "notifications_off"
+        color: root.colour
+
+        anchors.horizontalCenter: parent.horizontalCenter
+    }
 
     MaterialIcon {
         id: network
 
+        anchors.horizontalCenter: notificationsstatus.horizontalCenter
+        anchors.top: notificationsstatus.bottom
+        anchors.topMargin: Appearance.spacing.small
+
         animate: true
         text: Network.active ? Icons.getNetworkIcon(Network.active.strength ?? 0) : "wifi_off"
         color: root.colour
-
-        anchors.horizontalCenter: parent.horizontalCenter
     }
 
     MaterialIcon {
