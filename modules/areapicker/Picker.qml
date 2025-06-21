@@ -77,7 +77,7 @@ MouseArea {
         if (closeAnim.running)
             return;
 
-        Quickshell.execDetached(["sh", "-c", `grim -l 0 -g '${Math.ceil(rsx)},${Math.ceil(rsy)} ${Math.floor(sw)}x${Math.floor(sh)}' - | swappy -f -`]);
+        Quickshell.execDetached(["sh", "-c", `grim -l 0 -g '${screen.x + Math.ceil(rsx)},${screen.y + Math.ceil(rsy)} ${Math.floor(sw)}x${Math.floor(sh)}' - | swappy -f -`]);
         closeAnim.start();
     }
 
