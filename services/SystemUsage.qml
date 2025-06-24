@@ -9,6 +9,7 @@ Singleton {
 
     property real cpuPerc
     property real cpuTemp
+    property string gpuType: "NONE"
     property real gpuPerc
     property real gpuTemp
     property int memUsed
@@ -136,15 +137,42 @@ Singleton {
     }
 
     Process {
+        id: gpuTypeCheck
+        
+        running: true
+        command: ["sh", "-c", "if ls /sys/class/drm/card*/device/gpu_busy_percent 2>/dev/null | grep -q .; then echo GENERIC; elif command -v nvidia-smi >/dev/null; then echo NVIDIA; else echo NONE; fi"]
+        stdout: StdioCollector {
+            onStreamFinished: {
+                root.gpuType = text.trim();
+                gpuUsage.running = true;
+            }
+        }
+    }
+
+    Process {
         id: gpuUsage
 
         running: true
-        command: ["sh", "-c", "cat /sys/class/drm/card*/device/gpu_busy_percent"]
+        command: root.gpuType === "GENERIC"
+            ? ["sh", "-c", "cat /sys/class/drm/card*/device/gpu_busy_percent"]
+            : root.gpuType === "NVIDIA"
+                ? ["nvidia-smi", "--query-gpu=utilization.gpu,temperature.gpu", "--format=csv,noheader,nounits"]
+                : ["sh", "-c", "echo 0,0"]
         stdout: StdioCollector {
             onStreamFinished: {
-                const percs = text.trim().split("\n");
-                const sum = percs.reduce((acc, d) => acc + parseInt(d, 10), 0);
-                root.gpuPerc = sum / percs.length / 100;
+                if (root.gpuType === "GENERIC") {
+                    const percs = text.trim().split("\n");
+                    const sum = percs.reduce((acc, d) => acc + parseInt(d, 10), 0);
+                    root.gpuPerc = sum / percs.length / 100;
+                } else if (root.gpuType === "NVIDIA") {
+                    const [usage, temp] = text.trim().split(",");
+                    root.gpuPerc = parseInt(usage, 10) / 100;
+                    root.gpuTemp = parseInt(temp, 10);
+                } else {
+                    root.gpuPerc = 0;
+                    root.gpuTemp = 0;
+                }
+
             }
         }
     }
@@ -185,8 +213,7 @@ Singleton {
                         }
                     }
                 }
-
-                root.gpuTemp = count > 0 ? sum / count : 0;
+                if (root.gpuType === "GENERIC") root.gpuTemp = count > 0 ? sum / count : 0;
             }
         }
     }
