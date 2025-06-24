@@ -160,10 +160,10 @@ Singleton {
             })
         stdout: StdioCollector {
             onStreamFinished: {
-		const cpuTemp = text.match(/(?:Package id [0-9]+|Tdie):\s+((\+|-)[0-9.]+)(°| )C/);
+		let cpuTemp = text.match(/(?:Package id [0-9]+|Tdie):\s+((\+|-)[0-9.]+)(°| )C/);
 		if (!cpuTemp) {
 		    // If AMD Tdie pattern failed, try fallback on Tctl
-		    const cpuTemp = text.match(/Tctl:\s+((\+|-)[0-9.]+)(°| )C/);
+		    cpuTemp = text.match(/Tctl:\s+((\+|-)[0-9.]+)(°| )C/);
 		}
                 if (cpuTemp)
                     root.cpuTemp = parseFloat(cpuTemp[1]);
