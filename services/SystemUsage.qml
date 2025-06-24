@@ -138,7 +138,7 @@ Singleton {
 
     Process {
         id: gpuTypeCheck
-        
+
         running: true
         command: ["sh", "-c", "if ls /sys/class/drm/card*/device/gpu_busy_percent 2>/dev/null | grep -q .; then echo GENERIC; elif command -v nvidia-smi >/dev/null; then echo NVIDIA; else echo NONE; fi"]
         stdout: StdioCollector {
@@ -153,11 +153,7 @@ Singleton {
         id: gpuUsage
 
         running: true
-        command: root.gpuType === "GENERIC"
-            ? ["sh", "-c", "cat /sys/class/drm/card*/device/gpu_busy_percent"]
-            : root.gpuType === "NVIDIA"
-                ? ["nvidia-smi", "--query-gpu=utilization.gpu,temperature.gpu", "--format=csv,noheader,nounits"]
-                : ["sh", "-c", "echo 0,0"]
+        command: root.gpuType === "GENERIC" ? ["sh", "-c", "cat /sys/class/drm/card*/device/gpu_busy_percent"] : root.gpuType === "NVIDIA" ? ["nvidia-smi", "--query-gpu=utilization.gpu,temperature.gpu", "--format=csv,noheader,nounits"] : ["echo"]
         stdout: StdioCollector {
             onStreamFinished: {
                 if (root.gpuType === "GENERIC") {
@@ -172,7 +168,6 @@ Singleton {
                     root.gpuPerc = 0;
                     root.gpuTemp = 0;
                 }
-
             }
         }
     }
@@ -188,13 +183,16 @@ Singleton {
             })
         stdout: StdioCollector {
             onStreamFinished: {
-		let cpuTemp = text.match(/(?:Package id [0-9]+|Tdie):\s+((\+|-)[0-9.]+)(°| )C/);
-		if (!cpuTemp) {
-		    // If AMD Tdie pattern failed, try fallback on Tctl
-		    cpuTemp = text.match(/Tctl:\s+((\+|-)[0-9.]+)(°| )C/);
-		}
+                let cpuTemp = text.match(/(?:Package id [0-9]+|Tdie):\s+((\+|-)[0-9.]+)(°| )C/);
+                if (!cpuTemp) {
+                    // If AMD Tdie pattern failed, try fallback on Tctl
+                    cpuTemp = text.match(/Tctl:\s+((\+|-)[0-9.]+)(°| )C/);
+                }
                 if (cpuTemp)
                     root.cpuTemp = parseFloat(cpuTemp[1]);
+
+                if (root.gpuType !== "GENERIC")
+                    return;
 
                 let eligible = false;
                 let sum = 0;
@@ -213,7 +211,8 @@ Singleton {
                         }
                     }
                 }
-                if (root.gpuType === "GENERIC") root.gpuTemp = count > 0 ? sum / count : 0;
+
+                root.gpuTemp = count > 0 ? sum / count : 0;
             }
         }
     }
