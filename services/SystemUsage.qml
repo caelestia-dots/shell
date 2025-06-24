@@ -15,14 +15,14 @@ Singleton {
     property int memUsed
     property int memTotal
     readonly property real memPerc: memTotal > 0 ? memUsed / memTotal : 0
-    property int storageUsed
-    property int storageTotal
+    property double storageUsed
+    property double storageTotal
     property real storagePerc: storageTotal > 0 ? storageUsed / storageTotal : 0
 
     property int lastCpuIdle
     property int lastCpuTotal
 
-    function formatKib(kib: int): var {
+    function formatKib(kib: double): var {
         const mib = 1024;
         const gib = 1024 ** 2;
         const tib = 1024 ** 3;
