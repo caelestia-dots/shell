@@ -15,10 +15,11 @@ Item {
     readonly property real bs: bluetooth.y
     readonly property real be: repeater.count > 0 ? devices.y + devices.implicitHeight : bluetooth.y + bluetooth.implicitHeight
     readonly property Item battery: battery
+    readonly property Item screencast: screencast
 
     clip: true
     implicitWidth: Math.max(network.implicitWidth, bluetooth.implicitWidth, devices.implicitWidth, battery.implicitWidth)
-    implicitHeight: network.implicitHeight + bluetooth.implicitHeight + bluetooth.anchors.topMargin + (repeater.count > 0 ? devices.implicitHeight + devices.anchors.topMargin : 0) + battery.implicitHeight + battery.anchors.topMargin
+    implicitHeight: network.implicitHeight + bluetooth.implicitHeight + bluetooth.anchors.topMargin + (repeater.count > 0 ? devices.implicitHeight + devices.anchors.topMargin : 0) + battery.implicitHeight + battery.anchors.topMargin + (screencast.visible ? (screencast.implicitHeight+ screencast.anchors.topMargin) : 0)
 
     MaterialIcon {
         id: network
@@ -97,6 +98,19 @@ Item {
         }
         color: !UPower.onBattery || UPower.displayDevice.percentage > 0.2 ? root.colour : Colours.palette.m3error
         fill: 1
+    }
+
+   MaterialIcon {
+        id: screencast
+
+        visible: Hyprland.isScreencasting
+        animate: true
+        text:  "screen_record"
+        color: Colours.palette.m3error
+
+        anchors.horizontalCenter: parent.horizontalCenter
+        anchors.top: battery.bottom
+        anchors.topMargin: Appearance.spacing.smaller / 2
     }
 
     Behavior on implicitWidth {

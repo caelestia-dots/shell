@@ -14,6 +14,7 @@ Singleton {
     readonly property HyprlandWorkspace focusedWorkspace: Hyprland.focusedWorkspace
     readonly property HyprlandMonitor focusedMonitor: Hyprland.focusedMonitor
     readonly property int activeWsId: focusedWorkspace?.id ?? 1
+    property bool isScreencasting: false
 
     function dispatch(request: string): void {
         Hyprland.dispatch(request);
@@ -30,6 +31,8 @@ Singleton {
                 Hyprland.refreshMonitors();
             else if (event.name.includes("workspace"))
                 Hyprland.refreshWorkspaces();
+            else if (event.name.includes("screencast")) 
+                root.isScreencasting = event.data.startsWith("1");
             else
                 Hyprland.refreshToplevels();
         }

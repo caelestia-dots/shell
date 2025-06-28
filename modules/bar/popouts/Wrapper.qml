@@ -140,7 +140,6 @@ Item {
                 comp.active: true
             }
         }
-
         transitions: [
             Transition {
                 from: ""
