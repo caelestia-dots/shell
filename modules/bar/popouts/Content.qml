@@ -48,6 +48,11 @@ Item {
             source: "Battery.qml"
         }
 
+        Popout {
+            name: "screencast"
+            source: "Screencast.qml"
+        }
+
         Repeater {
             model: ScriptModel {
                 values: [...SystemTray.items.values]
@@ -109,7 +114,6 @@ Item {
                 popout.scale: 1
             }
         }
-
         transitions: [
             Transition {
                 from: "active"
