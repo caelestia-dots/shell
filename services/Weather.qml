@@ -9,11 +9,13 @@ Singleton {
     id: root
 
     property string loc
+    property bool useFahrenheit 
     property string icon
     property string description
-    property real temperature
+    property string temperature
 
     function reload(): void {
+        useFahrenheit = Config.dashboard.useFahrenheit
         if (Config.dashboard.weatherLocation)
             loc = Config.dashboard.weatherLocation;
         else if (!loc || timer.elapsed() > 900)
@@ -27,7 +29,7 @@ Singleton {
         const json = JSON.parse(text).current_condition[0];
         icon = Icons.getWeatherIcon(json.weatherCode);
         description = json.weatherDesc[0].value;
-        temperature = parseFloat(json.temp_C);
+        temperature = useFahrenheit ? `${parseFloat(json.temp_F)}°F` : `${parseFloat(json.temp_C)}°C`;
     })
 
     Component.onCompleted: reload()
