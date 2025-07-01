@@ -23,8 +23,8 @@ Singleton {
 
     function launch(entry: DesktopEntry): void {
         if (entry.execString.startsWith("sh -c"))
-            Quickshell.execDetached(["sh", "-c", `app2unit -- ${entry.execString}`]);
+            Quickshell.execDetached(["sh", "-c", `gtk-launch -- ${entry.execString}`]);
         else
-            Quickshell.execDetached(["sh", "-c", `app2unit -- '${entry.id}.desktop' || app2unit -- ${entry.execString}`]);
+            Quickshell.execDetached(["sh", "-c", `gtk-launch -- '${entry.id}.desktop' || app2unit -- ${entry.execString}`]);
     }
 }
