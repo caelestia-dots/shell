@@ -23,8 +23,27 @@ in
   config = lib.mkIf cfg.enable {
     home.packages = [
       pkgs.material-symbols
-      pkgs.self.packages.${pkgs.system}.default
+      self.packages.${pkgs.system}.default
     ];
     stylix.iconTheme = cfg.iconTheme;
+    systemd.user.services = {
+      caeshell = {
+        Unit = {
+          Description = "";
+          Documentation = "";
+          PartOf = [ config.wayland.systemd.target ];
+          After = [ config.wayland.systemd.target ];
+        };
+        Service = {
+          ExecStart = "${self.packages.${pkgs.system}.default}/bin/caeshell";
+          ExecReload = "${pkgs.coreutils}/bin/kill -SIGUSR1 $MAINPID";
+          Restart = "on-failure";
+          KillMode = "mixed";
+        };
+        Install = {
+          WantedBy = [ config.wayland.systemd.target ];
+        };
+      };
+    };
   };
 }

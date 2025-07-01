@@ -22,29 +22,31 @@
       };
 
       # 1. Define your package as a local variable
+      caeshellRuntimeInputs = with pkgs; [
+        quickshell.packages.${system}.default
+        ddcutil
+        brightnessctl
+        cava
+        networkmanager
+        lm_sensors
+        qt6.qtdeclarative
+        material-symbols
+        nerd-fonts.jetbrains-mono
+        grim
+        swappy
+        pipewire
+        aubio
+        libqalculate
+        bluez
+        inotify-tools
+      ];
+
       caeshellPkg = pkgs.stdenv.mkDerivation {
         name = "caeshell";
         version = "0.1.0";
         src = ./.;
 
-        buildInputs = with pkgs; [
-          quickshell.packages.${system}.default
-          ddcutil
-          brightnessctl
-          cava
-          networkmanager
-          lm_sensors
-          qt6.qtdeclarative
-          material-symbols
-          nerd-fonts.jetbrains-mono
-          grim
-          swappy
-          pipewire
-          aubio
-          libqalculate
-          bluez
-          inotify-tools
-        ];
+        buildInputs = caeshellRuntimeInputs;
 
         nativeBuildInputs = [
           pkgs.makeWrapper
@@ -67,14 +69,15 @@
           runHook preInstall
           # Create a bin directory for executables
           mkdir -p $out/bin $out/lib
+          local runtime_path="${pkgs.lib.makeBinPath caeshellRuntimeInputs}:$out/lib"
           # Copy library files and assets
           cp -r $src/* $out/lib
           # Copy the compiled binary
           cp beat_detector $out/lib/beat_detector
 
           # Wrap the main script and place it in $out/bin
-          makeWrapper $out/lib/run.fish $out/bin/caeshell \
-            --set PATH "$out/lib:${pkgs.lib.makeBinPath [ pkgs.fish ]}" \
+          makeWrapper $out/lib/run.sh $out/bin/caeshell \
+            --prefix PATH : "$runtime_path" \
             --set CAELESTIA_BD_PATH "$out/lib/beat_detector"
           runHook postInstall
         '';
@@ -87,14 +90,6 @@
         default = caeshellPkg;
         caeshell = caeshellPkg;
       };
-      overlay =
-        final: prev:
-        let
-          pkgs = final;
-        in
-        {
-          caeshell = self.packages.system.default;
-        };
       # 3. Pass the package variable into your module
       homeModules.caeshell = import ./module.nix self;
     };
