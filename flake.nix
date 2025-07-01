@@ -5,10 +5,6 @@
       url = "git+https://git.outfoxxed.me/outfoxxed/quickshell";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    home-manager = {
-      url = "github:nix-community/home-manager";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
   };
 
   # Use { self, ... } to easily access inputs and this flake's own outputs
@@ -17,7 +13,6 @@
       self,
       nixpkgs,
       quickshell,
-      home-manager,
     }:
     let
       # Define system and pkgs once for reuse
@@ -92,14 +87,15 @@
         default = caeshellPkg;
         caeshell = caeshellPkg;
       };
-
+      overlay =
+        final: prev:
+        let
+          pkgs = final;
+        in
+        {
+          caeshell = self.packages.system.default;
+        };
       # 3. Pass the package variable into your module
-      homeModules.caeshell = import ./module.nix {
-        # This makes the package available inside module.nix
-        caeshellPackage = caeshellPkg;
-        # Pass pkgs and lib as well, as they are very useful in modules
-        inherit pkgs;
-        lib = pkgs.lib;
-      };
+      homeModules.caeshell = import ./module.nix self;
     };
 }

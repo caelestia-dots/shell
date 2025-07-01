@@ -1,3 +1,4 @@
+self:
 {
   config,
   pkgs,
@@ -21,8 +22,8 @@ in
 
   config = lib.mkIf cfg.enable {
     home.packages = [
-      caeshellPackage
       pkgs.material-symbols
+      pkgs.caeshell
     ];
     qt.iconTheme = cfg.iconTheme;
   };
