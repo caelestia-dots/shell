@@ -15,7 +15,7 @@ in
     enable = lib.mkEnableOption "a custom btop module for Home Manager";
 
     iconTheme = lib.mkOption {
-      type = lib.types.attributeSet;
+      type = lib.types.attrs;
       description = "The iconTheme of qt.";
     };
   };
