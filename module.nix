@@ -21,6 +21,7 @@ in
   };
 
   config = lib.mkIf cfg.enable {
+    nixpkgs.overlays = [ self.packages.${pkgs.system}.default ];
     home.packages = [
       pkgs.material-symbols
       pkgs.caeshell
