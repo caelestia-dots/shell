@@ -21,10 +21,9 @@ in
   };
 
   config = lib.mkIf cfg.enable {
-    nixpkgs.overlays = [ self.packages.${pkgs.system}.default ];
     home.packages = [
       pkgs.material-symbols
-      pkgs.caeshell
+      pkgs.self.packages.${pkgs.system}.default
     ];
     stylix.iconTheme = cfg.iconTheme;
   };
