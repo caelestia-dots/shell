@@ -3,68 +3,97 @@
     nixpkgs.url = "nixpkgs/nixos-unstable";
     quickshell = {
       url = "git+https://git.outfoxxed.me/outfoxxed/quickshell";
-
       inputs.nixpkgs.follows = "nixpkgs";
     };
   };
 
+  # Use { self, ... } to easily access inputs and this flake's own outputs
   outputs =
-    inputs:
+    {
+      self,
+      nixpkgs,
+      quickshell,
+    }:
     let
+      # Define system and pkgs once for reuse
       system = "x86_64-linux";
+      pkgs = import nixpkgs {
+        inherit system;
+      };
+
+      # 1. Define your package as a local variable
+      caeshellPkg = pkgs.stdenv.mkDerivation {
+        name = "caeshell";
+        version = "0.1.0";
+        src = ./.;
+
+        buildInputs = with pkgs; [
+          quickshell.packages.${system}.default
+          ddcutil
+          brightnessctl
+          cava
+          networkmanager
+          lm_sensors
+          qt6.qtdeclarative
+          material-symbols
+          (nerd-fonts.override { fonts = [ "JetBrainsMono" ]; })
+          grim
+          swappy
+          pipewire
+          aubio
+          libqalculate
+          bluez
+          inotify-tools
+        ];
+
+        nativeBuildInputs = [
+          pkgs.makeWrapper
+          pkgs.qt6.wrapQtAppsHook
+          pkgs.pkg-config
+          # Use pkgs.pipewire.dev for development headers
+          pkgs.pipewire.dev
+        ];
+
+        doCheck = false;
+
+        buildPhase = ''
+          runHook preBuild
+          g++ -std=c++17 -Wall -Wextra -o beat_detector assets/beat_detector.cpp \
+            $(pkg-config --cflags --libs aubio libpipewire-0.3)
+          runHook postBuild
+        '';
+
+        installPhase = ''
+          runHook preInstall
+          # Create a bin directory for executables
+          mkdir -p $out/bin $out/lib
+          # Copy library files and assets
+          cp -r $src/* $out/lib
+          # Copy the compiled binary
+          cp beat_detector $out/lib/beat_detector
+
+          # Wrap the main script and place it in $out/bin
+          makeWrapper $out/lib/run.fish $out/bin/caeshell \
+            --set PATH "$out/lib:${pkgs.lib.makeBinPath [ pkgs.fish ]}" \
+            --set CAELESTIA_BD_PATH "$out/lib/beat_detector"
+          runHook postInstall
+        '';
+      };
+
     in
     {
-      packages.${system} =
-        let
-          pkgs = import inputs.nixpkgs {
-            config.allowUnfree = true;
-            inherit system;
-          };
-        in
-        {
-          default = pkgs.stdenv.mkDerivation {
-            name = "caeshell";
-            version = "0.1.0";
-            buildInputs = with pkgs; [
-              inputs.quickshell.packages.${system}.default
-              ddcutil
-              brightnessctl
-              cava
-              networkmanager
-              lm_sensors
-              qt6.qtdeclarative
-              material-symbols
-              nerd-fonts.jetbrains-mono
-              grim
-              swappy
-              pipewire
-              aubio
-              libqalculate
-              bluez
-              inotify-tools
-              material-symbols
-            ];
-            nativeBuildInputs = [
-              pkgs.makeWrapper
-              pkgs.qt6.wrapQtAppsHook
-              pkgs.pkg-config
-              pkgs.pipewire.dev
-            ];
-            src = ./.;
-            doCheck = false;
-            buildPhase = ''
-              g++ -std=c++17 -Wall -Wextra -o beat_detector assets/beat_detector.cpp \
-              $(pkg-config --cflags --libs aubio libpipewire-0.3)
-            '';
-            installPhase = ''
-              mkdir -p $out/lib
-              cp -r $src/* $out/lib
-              cp beat_detector $out/lib/beat_detector
-              wrapProgram $out/lib/run.fish \
-                --set PATH "$out/lib:$PATH" \
-                --set CAELESTIA_BD_PATH $out/lib/beat_detector
-            '';
-          };
-        };
+      # 2. Expose the package using the variable
+      packages.${system}.default = caeshellPkg;
+      # You can also give it a specific name
+      packages.${system}.caeshell = caeshellPkg;
+
+      # 3. Pass the package variable into your module
+      homeManagerModules.caeshell = import ./module.nix {
+        # This makes the package available inside module.nix
+        caeshellPackage = caeshellPkg;
+        # Pass pkgs and lib as well, as they are very useful in modules
+        inherit pkgs;
+        lib = pkgs.lib;
+      };
     };
 }
