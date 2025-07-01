@@ -11,6 +11,8 @@ Slider {
     required property string icon
     property real oldValue
 
+    wheelEnabled: true
+
     orientation: Qt.Vertical
 
     background: StyledRect {
