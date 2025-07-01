@@ -5,6 +5,10 @@
       url = "git+https://git.outfoxxed.me/outfoxxed/quickshell";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    home-manager = {
+      url = "github:nix-community/home-manager";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   # Use { self, ... } to easily access inputs and this flake's own outputs
@@ -13,6 +17,7 @@
       self,
       nixpkgs,
       quickshell,
+      home-manager,
     }:
     let
       # Define system and pkgs once for reuse
@@ -36,7 +41,7 @@
           lm_sensors
           qt6.qtdeclarative
           material-symbols
-          (nerd-fonts.override { fonts = [ "JetBrainsMono" ]; })
+          nerd-fonts.jetbrains-mono
           grim
           swappy
           pipewire
@@ -83,12 +88,13 @@
     in
     {
       # 2. Expose the package using the variable
-      packages.${system}.default = caeshellPkg;
-      # You can also give it a specific name
-      packages.${system}.caeshell = caeshellPkg;
+      packages.${system} = {
+        default = caeshellPkg;
+        caeshell = caeshellPkg;
+      };
 
       # 3. Pass the package variable into your module
-      homeManagerModules.caeshell = import ./module.nix {
+      homeModules.caeshell = import ./module.nix {
         # This makes the package available inside module.nix
         caeshellPackage = caeshellPkg;
         # Pass pkgs and lib as well, as they are very useful in modules
