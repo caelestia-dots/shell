@@ -25,6 +25,6 @@ in
       pkgs.material-symbols
       pkgs.caeshell
     ];
-    qt.iconTheme = cfg.iconTheme;
+    stylix.iconTheme = cfg.iconTheme;
   };
 }
