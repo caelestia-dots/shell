@@ -1,3 +1,5 @@
+pragma ComponentBehavior: Bound
+
 import "root:/widgets"
 import "root:/services"
 import "root:/config"
@@ -36,7 +38,15 @@ Item {
 
         anchors.fill: parent
         color: Colours.alpha(Colours.palette.m3surface, false)
-        visible: false
+
+        layer.enabled: true
+        layer.effect: MultiEffect {
+            maskEnabled: true
+            maskInverted: true
+            maskSource: mask
+            maskThresholdMin: 0.5
+            maskSpreadAtMin: 1
+        }
     }
 
     Item {
@@ -57,16 +67,6 @@ Item {
                 Anim {}
             }
         }
-    }
-
-    MultiEffect {
-        anchors.fill: parent
-        source: base
-        maskEnabled: true
-        maskInverted: true
-        maskSource: mask
-        maskThresholdMin: 0.5
-        maskSpreadAtMin: 1
     }
 
     Shape {

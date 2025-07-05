@@ -6,7 +6,7 @@ import Quickshell.Io
 Singleton {
     id: root
 
-    property real bpm
+    property real bpm: 1
 
     Process {
         running: true

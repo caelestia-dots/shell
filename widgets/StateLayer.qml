@@ -67,7 +67,7 @@ MouseArea {
                 to: 0
                 duration: Appearance.anim.durations.large
                 easing.type: Easing.BezierSpline
-                easing.bezierCurve: Appearance.anim.curves.standardDecel
+                easing.bezierCurve: Appearance.anim.curves.standard
             }
         }
     }

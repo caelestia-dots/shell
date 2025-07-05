@@ -151,26 +151,19 @@ StyledRect {
                     asynchronous: true
 
                     anchors.centerIn: parent
-                    visible: !root.modelData.appIcon.endsWith("symbolic")
 
                     width: Math.round(parent.width * 0.6)
                     height: Math.round(parent.width * 0.6)
 
                     sourceComponent: IconImage {
-                        implicitSize: Math.round(parent.width * 0.6)
+                        anchors.fill: parent
                         source: Quickshell.iconPath(root.modelData.appIcon)
                         asynchronous: true
-                    }
-                }
 
-                Loader {
-                    active: root.modelData.appIcon.endsWith("symbolic")
-                    asynchronous: true
-                    anchors.fill: icon
-
-                    sourceComponent: Colouriser {
-                        source: icon
-                        colorizationColor: root.modelData.urgency === NotificationUrgency.Critical ? Colours.palette.m3onError : root.modelData.urgency === NotificationUrgency.Low ? Colours.palette.m3onSurface : Colours.palette.m3onTertiaryContainer
+                        layer.enabled: root.modelData.appIcon.endsWith("symbolic")
+                        layer.effect: Colouriser {
+                            colorizationColor: root.modelData.urgency === NotificationUrgency.Critical ? Colours.palette.m3onError : root.modelData.urgency === NotificationUrgency.Low ? Colours.palette.m3onSurface : Colours.palette.m3onTertiaryContainer
+                        }
                     }
                 }
 

@@ -40,7 +40,7 @@ RowLayout {
             Layout.fillWidth: true
 
             animate: true
-            text: `${Weather.temperature}°C`
+            text: Config.dashboard.useFahrenheit ? Weather.tempF : Weather.tempC
             color: Colours.palette.m3primary
             horizontalAlignment: Text.AlignHCenter
             font.pointSize: Appearance.font.size.extraLarge

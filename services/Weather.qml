@@ -11,7 +11,8 @@ Singleton {
     property string loc
     property string icon
     property string description
-    property real temperature
+    property string tempC: "0°C"
+    property string tempF: "0°F"
 
     function reload(): void {
         if (Config.dashboard.weatherLocation)
@@ -27,7 +28,8 @@ Singleton {
         const json = JSON.parse(text).current_condition[0];
         icon = Icons.getWeatherIcon(json.weatherCode);
         description = json.weatherDesc[0].value;
-        temperature = parseFloat(json.temp_C);
+        tempC = `${parseFloat(json.temp_C)}°C`;
+        tempF = `${parseFloat(json.temp_F)}°F`;
     })
 
     Component.onCompleted: reload()

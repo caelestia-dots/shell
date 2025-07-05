@@ -144,7 +144,7 @@ ColumnLayout {
             text: qsTr("Kill")
 
             function onClicked(): void {
-                Hyprland.dispatch(`movetoworkspace ${wsId},address:0x${root.client?.address}`);
+                Hyprland.dispatch(`killwindow address:0x${root.client?.address}`);
             }
         }
     }
