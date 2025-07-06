@@ -111,6 +111,8 @@ Item {
 
             cursorShape: Qt.PointingHandCursor
 
+            property int scrollAccumulatedY: 0
+
             onPressed: event => {
                 root.state.currentTab = tab.TabBar.index;
 
@@ -125,10 +127,21 @@ Item {
                 rippleAnim.restart();
             }
             onWheel: event => {
-                if (event.angleDelta.y < 0)
-                    root.state.currentTab = Math.min(root.state.currentTab + 1, bar.count - 1);
-                else if (event.angleDelta.y > 0)
+                // Update accumulated scroll
+                if (Math.sign(event.angleDelta.y) !== Math.sign(scrollAccumulatedY)) {
+                    scrollAccumulatedY = 0;
+                }
+                scrollAccumulatedY += event.angleDelta.y;
+                // Check for positive scroll (up)
+                if (scrollAccumulatedY >= 120 && event.angleDelta.y > 0) {
                     root.state.currentTab = Math.max(root.state.currentTab - 1, 0);
+                    scrollAccumulatedY = 0;
+                }
+                // Check for negative scroll (down)
+                else if (scrollAccumulatedY <= -120 && event.angleDelta.y < 0) {
+                    root.state.currentTab = Math.min(root.state.currentTab + 1, bar.count - 1);
+                    scrollAccumulatedY = 0;
+                }
             }
 
             SequentialAnimation {

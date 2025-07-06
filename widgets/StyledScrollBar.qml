@@ -24,11 +24,24 @@ ScrollBar {
     MouseArea {
         z: -1
         anchors.fill: parent
+        property int scrollAccumulatedY: 0
         onWheel: event => {
-            if (event.angleDelta.y > 0)
+            // Update accumulated scroll
+            if (Math.sign(event.angleDelta.y) !== Math.sign(scrollAccumulatedY)) {
+                scrollAccumulatedY = 0;
+            }
+            scrollAccumulatedY += event.angleDelta.y;
+              
+            // Check for positive scroll (up)
+            if (scrollAccumulatedY >= 120 && event.angleDelta.y > 0) {
                 root.decrease();
-            else if (event.angleDelta.y < 0)
+                scrollAccumulatedY = 0;
+            }
+            // Check for negative scroll (down)
+            else if (scrollAccumulatedY <= -120 && event.angleDelta.y < 0) {
                 root.increase();
+                scrollAccumulatedY = 0;
+            }
         }
     }
 }

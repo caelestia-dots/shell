@@ -21,12 +21,25 @@ Item {
         anchors.bottom: child.top
         anchors.left: parent.left
         anchors.right: parent.right
+        property int scrollAccumulatedY: 0
 
         onWheel: event => {
-            if (event.angleDelta.y > 0)
+            // Update accumulated scroll
+            if (Math.sign(event.angleDelta.y) !== Math.sign(scrollAccumulatedY)) {
+                scrollAccumulatedY = 0;
+            }
+            scrollAccumulatedY += event.angleDelta.y;
+
+            // Check for positive scroll (up)
+            if (scrollAccumulatedY >= 120 && event.angleDelta.y > 0) {
                 Audio.setVolume(Audio.volume + 0.1);
-            else if (event.angleDelta.y < 0)
+                scrollAccumulatedY = 0;
+            }
+            // Check for negative scroll (down)
+            else if (scrollAccumulatedY <= -120 && event.angleDelta.y < 0) {
                 Audio.setVolume(Audio.volume - 0.1);
+                scrollAccumulatedY = 0;
+            }
         }
     }
 
@@ -35,13 +48,25 @@ Item {
         anchors.bottom: parent.bottom
         anchors.left: parent.left
         anchors.right: parent.right
+        property int scrollAccumulatedY: 0
 
         onWheel: event => {
-            const monitor = root.monitor;
-            if (event.angleDelta.y > 0)
+            // Update accumulated scroll
+            if (Math.sign(event.angleDelta.y) !== Math.sign(scrollAccumulatedY)) {
+                scrollAccumulatedY = 0;
+            }
+            scrollAccumulatedY += event.angleDelta.y;
+
+            // Check for positive scroll (up)
+            if (scrollAccumulatedY >= 120 && event.angleDelta.y > 0) {
                 monitor.setBrightness(monitor.brightness + 0.1);
-            else if (event.angleDelta.y < 0)
+                scrollAccumulatedY = 0;
+            }
+            // Check for negative scroll (down)
+            else if (scrollAccumulatedY <= -120 && event.angleDelta.y < 0) {
                 monitor.setBrightness(monitor.brightness - 0.1);
+                scrollAccumulatedY = 0;
+            }
         }
     }
 
