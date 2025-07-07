@@ -1,5 +1,5 @@
 <h1 align=center>caelestia-shell</h1>
-
+It is forked from [`caelestia-shell`](https://github.com/caelestia-dots/shell)
 <div align=center>
 
 ![GitHub last commit](https://img.shields.io/github/last-commit/caelestia-dots/shell?style=for-the-badge&labelColor=101418&color=9ccbfb)
@@ -9,13 +9,13 @@
 
 </div>
 
-https://github.com/user-attachments/assets/0840f496-575c-4ca6-83a8-87bb01a85c5f
+<https://github.com/user-attachments/assets/0840f496-575c-4ca6-83a8-87bb01a85c5f>
 
 ## Components
 
--   Widgets: [`Quickshell`](https://quickshell.outfoxxed.me)
--   Window manager: [`Hyprland`](https://hyprland.org)
--   Dots: [`caelestia`](https://github.com/caelestia-dots)
+- Widgets: [`Quickshell`](https://quickshell.outfoxxed.me)
+- Window manager: [`Niri`](https://github.com/YaLTeR/niri)
+- Dots: [`caelestia`](https://github.com/caelestia-dots)
 
 ## Installation
 
@@ -36,25 +36,25 @@ like [`yay`](https://github.com/Jguer/yay) or manually downloading the PKGBUILD 
 
 Dependencies:
 
--   [`caelestia-cli`](https://github.com/caelestia-dots/cli)
--   [`quickshell-git`](https://quickshell.outfoxxed.me) - this has to be the git version, not the latest tagged version
--   [`ddcutil`](https://github.com/rockowitz/ddcutil)
--   [`brightnessctl`](https://github.com/Hummer12007/brightnessctl)
--   [`app2unit`](https://github.com/Vladimir-csp/app2unit)
--   [`cava`](https://github.com/karlstav/cava)
--   [`networkmanager`](https://networkmanager.dev)
--   [`lm-sensors`](https://github.com/lm-sensors/lm-sensors)
--   [`fish`](https://github.com/fish-shell/fish-shell)
--   [`aubio`](https://github.com/aubio/aubio)
--   [`libpipewire`](https://pipewire.org)
--   `glibc`
--   `qt6-declarative`
--   `gcc-libs`
--   [`material-symbols`](https://fonts.google.com/icons)
--   [`jetbrains-mono-nerd`](https://www.nerdfonts.com/font-downloads)
--   [`grim`](https://gitlab.freedesktop.org/emersion/grim)
--   [`swappy`](https://github.com/jtheoof/swappy)
--   [`libqalculate`](https://github.com/Qalculate/libqalculate)
+- [`caelestia-cli`](https://github.com/caelestia-dots/cli)
+- [`quickshell-git`](https://quickshell.outfoxxed.me) - this has to be the git version, not the latest tagged version
+- [`ddcutil`](https://github.com/rockowitz/ddcutil)
+- [`brightnessctl`](https://github.com/Hummer12007/brightnessctl)
+- [`app2unit`](https://github.com/Vladimir-csp/app2unit)
+- [`cava`](https://github.com/karlstav/cava)
+- [`networkmanager`](https://networkmanager.dev)
+- [`lm-sensors`](https://github.com/lm-sensors/lm-sensors)
+- [`fish`](https://github.com/fish-shell/fish-shell)
+- [`aubio`](https://github.com/aubio/aubio)
+- [`libpipewire`](https://pipewire.org)
+- `glibc`
+- `qt6-declarative`
+- `gcc-libs`
+- [`material-symbols`](https://fonts.google.com/icons)
+- [`jetbrains-mono-nerd`](https://www.nerdfonts.com/font-downloads)
+- [`grim`](https://gitlab.freedesktop.org/emersion/grim)
+- [`swappy`](https://github.com/jtheoof/swappy)
+- [`libqalculate`](https://github.com/Qalculate/libqalculate)
 
 To install the shell manually, install all dependencies and clone this repo to `$XDG_CONFIG_HOME/quickshell/caelestia`.
 Then compile the beat detector and install it to `/usr/lib/caelestia/beat_detector`.
@@ -214,7 +214,7 @@ which helped me a lot with learning how to use Quickshell.
 
 Finally another thank you to all the configs I took inspiration from (only one for now):
 
--   [Axenide/Ax-Shell](https://github.com/Axenide/Ax-Shell)
+- [Axenide/Ax-Shell](https://github.com/Axenide/Ax-Shell)
 
 ## Stonks 📈
 

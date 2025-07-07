@@ -25,6 +25,6 @@ Singleton {
         if (entry.execString.startsWith("sh -c"))
             Quickshell.execDetached(["sh", "-c", `gtk-launch -- ${entry.execString}`]);
         else
-            Quickshell.execDetached(["sh", "-c", `gtk-launch -- '${entry.id}.desktop' || app2unit -- ${entry.execString}`]);
+            Quickshell.execDetached(["sh", "-c", `gtk-launch -- '${entry.id}.desktop' || gtk-launch  -- ${entry.execString}`]);
     }
 }

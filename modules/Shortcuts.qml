@@ -16,7 +16,6 @@ Scope {
             v.launcher = v.dashboard = v.osd = !(v.launcher || v.dashboard || v.osd);
         }
     }
-
     CustomShortcut {
         name: "session"
         description: "Toggle session menu"
