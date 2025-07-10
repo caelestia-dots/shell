@@ -19,7 +19,7 @@ Singleton {
     property alias paths: adapter.paths
 
     FileView {
-        path: `${Paths.config}/shell.json`
+        path: `${Paths.stringify(Paths.config)}/shell.json`
         watchChanges: true
         onFileChanged: reload()
         onAdapterUpdated: writeAdapter()

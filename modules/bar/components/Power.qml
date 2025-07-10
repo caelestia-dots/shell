@@ -4,6 +4,10 @@ import "root:/config"
 import Quickshell
 
 MaterialIcon {
+    id: root
+
+    required property PersistentProperties visibilities
+
     text: "power_settings_new"
     color: Colours.palette.m3error
     font.bold: true
@@ -20,8 +24,7 @@ MaterialIcon {
         radius: Appearance.rounding.full
 
         function onClicked(): void {
-            const v = Visibilities.screens[QsWindow.window.screen];
-            v.session = !v.session;
+            root.visibilities.session = !root.visibilities.session;
         }
     }
 }

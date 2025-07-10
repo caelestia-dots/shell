@@ -8,7 +8,7 @@ Image {
 
     property string path
     property string hash
-    readonly property string cachePath: `${Paths.imagecache}/${hash}@${width}x${height}.png`.slice(7)
+    readonly property string cachePath: `${Paths.stringify(Paths.imagecache)}/${hash}@${width}x${height}.png`.slice(7)
 
     asynchronous: true
     cache: false
@@ -16,7 +16,7 @@ Image {
     sourceSize.width: width
     sourceSize.height: height
 
-    onPathChanged: shaProc.exec(["sha256sum", path.replace("file://", "")])
+    onPathChanged: shaProc.exec(["sha256sum", Paths.strip(path)])
 
     onCachePathChanged: {
         if (hash)

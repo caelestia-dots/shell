@@ -11,6 +11,7 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Effects
 import QtQuick.Layouts
+import QtQuick.Shapes
 
 Item {
     id: root
@@ -47,15 +48,11 @@ Item {
         onTriggered: Players.active?.positionChanged()
     }
 
-    Connections {
-        target: Cava
-
-        function onValuesChanged(): void {
-            visualiser.requestPaint();
-        }
+    Ref {
+        service: Cava
     }
 
-    Canvas {
+    Shape {
         id: visualiser
 
         readonly property real centerX: width / 2
@@ -67,50 +64,47 @@ Item {
         anchors.fill: cover
         anchors.margins: -Config.dashboard.sizes.mediaVisualiserSize
 
-        onColourChanged: requestPaint()
+        preferredRendererType: Shape.CurveRenderer
+        data: visualiserBars.instances
+    }
 
-        onPaint: {
-            const ctx = getContext("2d");
-            ctx.reset();
+    Variants {
+        id: visualiserBars
 
-            const values = Cava.values;
-            const len = values.length;
+        model: Array.from({
+            length: Config.dashboard.visualiserBars
+        }, (_, i) => i)
 
-            ctx.strokeStyle = colour;
-            ctx.lineWidth = 360 / len - Appearance.spacing.small / 4;
-            ctx.lineCap = "round";
+        ShapePath {
+            id: visualiserBar
 
-            const size = Config.dashboard.sizes.mediaVisualiserSize;
-            const cx = centerX;
-            const cy = centerY;
-            const rx = innerX + ctx.lineWidth / 2;
-            const ry = innerY + ctx.lineWidth / 2;
+            required property int modelData
+            readonly property int value: Math.max(1, Math.min(100, Cava.values[modelData]))
 
-            for (let i = 0; i < len; i++) {
-                const v = Math.max(1, Math.min(100, values[i]));
+            readonly property real angle: modelData * 2 * Math.PI / Config.dashboard.visualiserBars
+            readonly property real magnitude: value / 100 * Config.dashboard.sizes.mediaVisualiserSize
+            readonly property real cos: Math.cos(angle)
+            readonly property real sin: Math.sin(angle)
 
-                const angle = i * 2 * Math.PI / len;
-                const magnitude = v / 100 * size;
-                const cos = Math.cos(angle);
-                const sin = Math.sin(angle);
+            capStyle: ShapePath.RoundCap
+            strokeWidth: 360 / Config.dashboard.visualiserBars - Appearance.spacing.small / 4
+            strokeColor: Colours.palette.m3primary
 
-                ctx.moveTo(cx + rx * cos, cy + ry * sin);
-                ctx.lineTo(cx + (rx + magnitude) * cos, cy + (ry + magnitude) * sin);
+            startX: visualiser.centerX + (visualiser.innerX + strokeWidth / 2) * cos
+            startY: visualiser.centerY + (visualiser.innerY + strokeWidth / 2) * sin
+
+            PathLine {
+                x: visualiser.centerX + (visualiser.innerX + visualiserBar.strokeWidth / 2 + visualiserBar.magnitude) * visualiserBar.cos
+                y: visualiser.centerY + (visualiser.innerY + visualiserBar.strokeWidth / 2 + visualiserBar.magnitude) * visualiserBar.sin
             }
 
-            ctx.stroke();
-        }
-
-        Behavior on colour {
-            ColorAnimation {
-                duration: Appearance.anim.durations.normal
-                easing.type: Easing.BezierSpline
-                easing.bezierCurve: Appearance.anim.curves.standard
+            Behavior on strokeColor {
+                ColorAnimation {
+                    duration: Appearance.anim.durations.normal
+                    easing.type: Easing.BezierSpline
+                    easing.bezierCurve: Appearance.anim.curves.standard
+                }
             }
-        }
-
-        Ref {
-            service: Cava
         }
     }
 

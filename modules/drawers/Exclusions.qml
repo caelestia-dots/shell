@@ -13,7 +13,7 @@ Scope {
 
     ExclusionZone {
         anchors.left: true
-        exclusiveZone: root.bar.implicitWidth
+        exclusiveZone: root.bar.exclusiveZone
     }
 
     ExclusionZone {

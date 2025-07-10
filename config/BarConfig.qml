@@ -1,6 +1,10 @@
 import Quickshell.Io
 
 JsonObject {
+    property bool persistent: true
+    property bool showOnHover: true
+    property int dragThreshold: 20
+
     property JsonObject sizes: JsonObject {
         property int innerHeight: 30
         property int windowPreviewSize: 400

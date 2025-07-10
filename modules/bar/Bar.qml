@@ -1,7 +1,7 @@
 import "root:/widgets"
 import "root:/services"
 import "root:/config"
-import "root:/modules/bar/popouts" as BarPopouts
+import "popouts" as BarPopouts
 import "components"
 import "components/workspaces"
 import Quickshell
@@ -11,6 +11,7 @@ Item {
     id: root
 
     required property ShellScreen screen
+    required property PersistentProperties visibilities
     required property BarPopouts.Wrapper popouts
 
     function checkPopout(y: real): void {
@@ -95,12 +96,12 @@ Item {
             implicitWidth: workspacesInner.implicitWidth + Appearance.padding.small * 2
             implicitHeight: workspacesInner.implicitHeight + Appearance.padding.small * 2
 
-            MouseArea {
+            CustomMouseArea {
                 anchors.fill: parent
                 anchors.leftMargin: -Config.border.thickness
                 anchors.rightMargin: -Config.border.thickness
 
-                onWheel: event => {
+                function onWheel(event: WheelEvent): void {
                     const activeWs = Hyprland.activeToplevel?.workspace?.name;
                     if (activeWs?.startsWith("special:"))
                         Hyprland.dispatch(`togglespecialworkspace ${activeWs.slice(8)}`);
@@ -169,6 +170,8 @@ Item {
             anchors.horizontalCenter: parent.horizontalCenter
             anchors.bottom: parent.bottom
             anchors.bottomMargin: Appearance.padding.large
+
+            visibilities: root.visibilities
         }
     }
 }

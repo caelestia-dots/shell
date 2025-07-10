@@ -11,6 +11,7 @@ Row {
     id: root
 
     required property PersistentProperties visibilities
+    required property PersistentProperties state
 
     padding: Appearance.padding.large
     spacing: Appearance.spacing.normal
@@ -35,7 +36,7 @@ Row {
             id: pfp
 
             anchors.fill: parent
-            path: `${Paths.home}/.face`
+            path: `${Paths.stringify(Paths.home)}/.face`
         }
 
         MouseArea {
@@ -46,7 +47,7 @@ Row {
 
             onClicked: {
                 root.visibilities.launcher = false;
-                dialog.open();
+                root.state.facePicker.open();
             }
 
             StyledRect {
@@ -101,18 +102,6 @@ Row {
                         easing.bezierCurve: Appearance.anim.curves.expressiveFastSpatial
                     }
                 }
-            }
-        }
-
-        FileDialog {
-            id: dialog
-
-            nameFilters: [`Image files (${Wallpapers.extensions.map(e => `*.${e}`).join(" ")})`]
-
-            onAccepted: {
-                Paths.copy(selectedFile, `${Paths.home}/.face`);
-                pfp.pathChanged();
-                Quickshell.execDetached(["notify-send", "-a", "caelestia-shell", "-u", "low", "Profile picture changed", `Profile picture changed to ${Paths.strip(selectedFile)}`]);
             }
         }
     }

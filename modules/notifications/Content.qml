@@ -8,6 +8,8 @@ import QtQuick
 Item {
     id: root
 
+    required property PersistentProperties visibilities
+    required property Item panel
     readonly property int padding: Appearance.padding.large
 
     anchors.top: parent.top
@@ -24,24 +26,21 @@ Item {
         for (let i = 0; i < count; i++)
             height += list.itemAtIndex(i)?.nonAnimHeight ?? 0;
 
-        const screen = QsWindow.window?.screen;
-        const visibilities = Visibilities.screens[screen];
-        const panel = Visibilities.panels[screen];
         if (visibilities && panel) {
             if (visibilities.osd) {
-                const h = panel.osd.y - Config.border.rounding * 2;
+                const h = panel.osd.y - Config.border.rounding * 2 - padding * 2;
                 if (height > h)
                     height = h;
             }
 
             if (visibilities.session) {
-                const h = panel.session.y - Config.border.rounding * 2;
+                const h = panel.session.y - Config.border.rounding * 2 - padding * 2;
                 if (height > h)
                     height = h;
             }
         }
 
-        return Math.min((screen?.height ?? 0) - Config.border.thickness * 2, height + padding * 2);
+        return Math.min((QsWindow.window?.screen?.height ?? 0) - Config.border.thickness * 2, height + padding * 2);
     }
 
     ClippingWrapperRectangle {
@@ -51,7 +50,7 @@ Item {
         color: "transparent"
         radius: Appearance.rounding.normal
 
-        ListView {
+        StyledListView {
             id: list
 
             model: ScriptModel {
@@ -145,6 +144,48 @@ Item {
             displaced: Transition {
                 Anim {
                     property: "y"
+                }
+            }
+
+            ExtraIndicator {
+                anchors.top: parent.top
+                extra: {
+                    const count = list.count;
+                    if (count === 0)
+                        return 0;
+
+                    const scrollY = list.contentY;
+
+                    let height = 0;
+                    for (let i = 0; i < count; i++) {
+                        height += (list.itemAtIndex(i)?.nonAnimHeight ?? 0) + Appearance.spacing.smaller;
+
+                        if (height - Appearance.spacing.smaller >= scrollY)
+                            return i;
+                    }
+
+                    return count;
+                }
+            }
+
+            ExtraIndicator {
+                anchors.bottom: parent.bottom
+                extra: {
+                    const count = list.count;
+                    if (count === 0)
+                        return 0;
+
+                    const scrollY = list.contentHeight - (list.contentY + list.height);
+
+                    let height = 0;
+                    for (let i = count - 1; i >= 0; i--) {
+                        height += (list.itemAtIndex(i)?.nonAnimHeight ?? 0) + Appearance.spacing.smaller;
+
+                        if (height - Appearance.spacing.smaller >= scrollY)
+                            return count - i - 1;
+                    }
+
+                    return 0;
                 }
             }
         }

@@ -6,6 +6,7 @@ import "root:/modules/session" as Session
 import "root:/modules/launcher" as Launcher
 import "root:/modules/dashboard" as Dashboard
 import "root:/modules/bar/popouts" as BarPopouts
+import "root:/modules/utilities" as Utilities
 import Quickshell
 import QtQuick
 
@@ -22,12 +23,11 @@ Item {
     readonly property Launcher.Wrapper launcher: launcher
     readonly property Dashboard.Wrapper dashboard: dashboard
     readonly property BarPopouts.Wrapper popouts: popouts
+    readonly property Utilities.Wrapper utilities: utilities
 
     anchors.fill: parent
     anchors.margins: Config.border.thickness
     anchors.leftMargin: bar.implicitWidth
-
-    Component.onCompleted: Visibilities.panels[screen] = this
 
     Osd.Wrapper {
         id: osd
@@ -43,6 +43,9 @@ Item {
 
     Notifications.Wrapper {
         id: notifications
+
+        visibilities: root.visibilities
+        panel: root
 
         anchors.top: parent.top
         anchors.right: parent.right
@@ -91,5 +94,14 @@ Item {
                 return off + diff;
             return off;
         }
+    }
+
+    Utilities.Wrapper {
+        id: utilities
+
+        visibility: root.visibilities.utilities
+
+        anchors.bottom: parent.bottom
+        anchors.right: parent.right
     }
 }

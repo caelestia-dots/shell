@@ -7,7 +7,7 @@ import Quickshell
 import QtQuick
 import QtQuick.Controls
 
-ListView {
+StyledListView {
     id: root
 
     required property TextField search

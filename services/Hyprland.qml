@@ -23,15 +23,23 @@ Singleton {
         target: Hyprland
 
         function onRawEvent(event: HyprlandEvent): void {
-            if (event.name.endsWith("v2"))
+            const n = event.name;
+            if (n.endsWith("v2"))
                 return;
 
-            if (event.name.includes("mon"))
-                Hyprland.refreshMonitors();
-            else if (event.name.includes("workspace"))
+            if (["workspace", "moveworkspace", "activespecial", "focusedmon"].includes(n)) {
                 Hyprland.refreshWorkspaces();
-            else
+                Hyprland.refreshMonitors();
+            } else if (["openwindow", "closewindow", "movewindow"].includes(n)) {
                 Hyprland.refreshToplevels();
+                Hyprland.refreshWorkspaces();
+            } else if (n.includes("mon")) {
+                Hyprland.refreshMonitors();
+            } else if (n.includes("workspace")) {
+                Hyprland.refreshWorkspaces();
+            } else if (n.includes("window") || n.includes("group") || ["pin", "fullscreen", "changefloatingmode", "minimize"].includes(n)) {
+                Hyprland.refreshToplevels();
+            }
         }
     }
 }

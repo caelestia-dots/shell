@@ -147,6 +147,9 @@ All configuration options are in `~/.config/caelestia/shell.json`.
 ```json
 {
     "bar": {
+        "dragThreshold": 20,
+        "persistent": true,
+        "showOnHover": true,
         "workspaces": {
             "activeIndicator": true,
             "activeLabel": "󰮯 ",
@@ -171,6 +174,7 @@ All configuration options are in `~/.config/caelestia/shell.json`.
     },
     "launcher": {
         "actionPrefix": ">",
+        "dragThreshold": 50,
         "enableDangerousActions": false,
         "maxShown": 8,
         "maxWallpapers": 9

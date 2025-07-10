@@ -87,6 +87,7 @@ Item {
                 Pane {
                     sourceComponent: Dash {
                         visibilities: root.visibilities
+                        state: root.state
                     }
                 }
 

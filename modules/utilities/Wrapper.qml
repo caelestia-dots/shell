@@ -1,24 +1,21 @@
-import "root:/services"
 import "root:/config"
-import Quickshell
 import QtQuick
 
 Item {
     id: root
 
-    required property ShellScreen screen
     required property bool visibility
 
-    visible: width > 0
-    implicitWidth: 0
-    implicitHeight: content.implicitHeight
+    visible: height > 0
+    implicitHeight: 0
+    implicitWidth: content.implicitWidth
 
     states: State {
         name: "visible"
         when: root.visibility
 
         PropertyChanges {
-            root.implicitWidth: content.implicitWidth
+            root.implicitHeight: content.implicitHeight
         }
     }
 
@@ -29,8 +26,8 @@ Item {
 
             NumberAnimation {
                 target: root
-                property: "implicitWidth"
-                duration: Appearance.anim.durations.normal
+                property: "implicitHeight"
+                duration: Appearance.anim.durations.expressiveDefaultSpatial
                 easing.type: Easing.BezierSpline
                 easing.bezierCurve: Appearance.anim.curves.expressiveDefaultSpatial
             }
@@ -41,7 +38,7 @@ Item {
 
             NumberAnimation {
                 target: root
-                property: "implicitWidth"
+                property: "implicitHeight"
                 duration: Appearance.anim.durations.normal
                 easing.type: Easing.BezierSpline
                 easing.bezierCurve: Appearance.anim.curves.emphasized
@@ -51,7 +48,5 @@ Item {
 
     Content {
         id: content
-
-        monitor: Brightness.getMonitorForScreen(root.screen)
     }
 }

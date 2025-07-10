@@ -43,7 +43,7 @@ ColumnLayout {
 
             CachingImage {
                 anchors.fill: parent
-                path: `${Paths.home}/.face`
+                path: `${Paths.stringify(Paths.home)}/.face`
             }
         }
 
@@ -186,6 +186,7 @@ ColumnLayout {
 
             orientation: Qt.Horizontal
             spacing: Appearance.spacing.small / 2
+            interactive: false
 
             model: ScriptModel {
                 values: root.passwordBuffer.split("")

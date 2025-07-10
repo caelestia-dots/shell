@@ -29,6 +29,12 @@ WrapperItem {
     rightMargin: 0
     topMargin: 0
 
+    Timer {
+        running: true
+        interval: 10
+        onTriggered: notifs.countChanged()
+    }
+
     Behavior on implicitWidth {
         Anim {
             duration: Appearance.anim.durations.large
@@ -201,42 +207,22 @@ WrapperItem {
             move: Transition {
                 Anim {
                     property: "y"
+                    duration: Appearance.anim.durations.large
+                    easing.bezierCurve: Appearance.anim.curves.emphasized
                 }
             }
 
             displaced: Transition {
                 Anim {
                     property: "y"
+                    duration: Appearance.anim.durations.large
+                    easing.bezierCurve: Appearance.anim.curves.emphasized
                 }
             }
 
-            StyledRect {
+            ExtraIndicator {
                 anchors.bottom: parent.bottom
-                anchors.right: parent.right
-                anchors.margins: Appearance.padding.normal
-
-                color: Colours.palette.m3tertiaryContainer
-                radius: Appearance.rounding.small
-
-                implicitWidth: count.implicitWidth + Appearance.padding.normal * 2
-                implicitHeight: count.implicitHeight + Appearance.padding.small * 2
-
-                scale: Notifs.popups.length > Config.lock.maxNotifs ? 1 : 0
-
-                StyledText {
-                    id: count
-
-                    anchors.centerIn: parent
-                    text: qsTr("+%1").arg(Notifs.popups.length - Config.lock.maxNotifs)
-                    color: Colours.palette.m3onTertiaryContainer
-                }
-
-                Behavior on scale {
-                    Anim {
-                        duration: Appearance.anim.durations.expressiveFastSpatial
-                        easing.bezierCurve: Appearance.anim.curves.expressiveFastSpatial
-                    }
-                }
+                extra: Notifs.list.length - Config.lock.maxNotifs
             }
         }
     }

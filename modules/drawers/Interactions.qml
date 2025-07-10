@@ -18,10 +18,16 @@ MouseArea {
     property point dragStart
     property bool dashboardShortcutActive
     property bool osdShortcutActive
+    property bool utilitiesShortcutActive
 
     function withinPanelHeight(panel: Item, x: real, y: real): bool {
         const panelY = Config.border.thickness + panel.y;
         return y >= panelY - Config.border.rounding && y <= panelY + panel.height + Config.border.rounding;
+    }
+
+    function withinPanelWidth(panel: Item, x: real, y: real): bool {
+        const panelX = bar.implicitWidth + panel.x;
+        return x >= panelX - Config.border.rounding && x <= panelX + panel.width + Config.border.rounding;
     }
 
     function inRightPanel(panel: Item, x: real, y: real): bool {
@@ -29,8 +35,11 @@ MouseArea {
     }
 
     function inTopPanel(panel: Item, x: real, y: real): bool {
-        const panelX = bar.implicitWidth + panel.x;
-        return y < Config.border.thickness + panel.y + panel.height && x >= panelX - Config.border.rounding && x <= panelX + panel.width + Config.border.rounding;
+        return y < Config.border.thickness + panel.y + panel.height && withinPanelWidth(panel, x, y);
+    }
+
+    function inBottomPanel(panel: Item, x: real, y: real): bool {
+        return y > root.height - Config.border.thickness - panel.height - Config.border.rounding && withinPanelWidth(panel, x, y);
     }
 
     anchors.fill: parent
@@ -47,13 +56,34 @@ MouseArea {
             if (!dashboardShortcutActive) {
                 visibilities.dashboard = false;
             }
+            if (!utilitiesShortcutActive) {
+                visibilities.utilities = false;
+            }
             popouts.hasCurrent = false;
+
+            if (Config.bar.showOnHover)
+                bar.isHovered = false;
         }
     }
 
     onPositionChanged: event => {
         const x = event.x;
         const y = event.y;
+
+        // Show bar in non-exclusive mode on hover
+        if (!visibilities.bar && Config.bar.showOnHover && x < bar.implicitWidth) {
+            bar.isHovered = true;
+        }
+
+        // Show/hide bar on drag
+        if (pressed && dragStart.x < bar.implicitWidth) {
+            const dragX = x - dragStart.x;
+            if (dragX > Config.bar.dragThreshold) {
+                visibilities.bar = true;
+            } else if (dragX < -Config.bar.dragThreshold) {
+                visibilities.bar = false;
+            }
+        }
 
         // Show osd on hover
         const showOsd = inRightPanel(panels.osd, x, y);
@@ -69,12 +99,21 @@ MouseArea {
         }
 
         // Show/hide session on drag
-        if (pressed && withinPanelHeight(panels.session, x, y)) {
+        if (pressed && inRightPanel(panels.session, dragStart.x, dragStart.y) && withinPanelHeight(panels.session, x, y)) {
             const dragX = x - dragStart.x;
             if (dragX < -Config.session.dragThreshold)
                 visibilities.session = true;
             else if (dragX > Config.session.dragThreshold)
                 visibilities.session = false;
+        }
+
+        // Show/hide launcher on drag
+        if (pressed && inBottomPanel(panels.launcher, dragStart.x, dragStart.y) && withinPanelWidth(panels.launcher, x, y)) {
+            const dragY = y - dragStart.y;
+            if (dragY < -Config.launcher.dragThreshold)
+                visibilities.launcher = true;
+            else if (dragY > Config.launcher.dragThreshold)
+                visibilities.launcher = false;
         }
 
         // Show dashboard on hover
@@ -86,6 +125,17 @@ MouseArea {
         } else if (showDashboard) {
             // If hovering over dashboard area while in shortcut mode, transition to hover control
             dashboardShortcutActive = false;
+        }
+
+        // Show utilities on hover
+        const showUtilities = inBottomPanel(panels.utilities, x, y);
+
+        // Always update visibility based on hover if not in shortcut mode
+        if (!utilitiesShortcutActive) {
+            visibilities.utilities = showUtilities;
+        } else if (showUtilities) {
+            // If hovering over utilities area while in shortcut mode, transition to hover control
+            utilitiesShortcutActive = false;
         }
 
         // Show popouts on hover
@@ -110,6 +160,7 @@ MouseArea {
             if (!root.visibilities.launcher) {
                 root.dashboardShortcutActive = false;
                 root.osdShortcutActive = false;
+                root.utilitiesShortcutActive = false;
 
                 // Also hide dashboard and OSD if they're not being hovered
                 const inDashboardArea = root.inTopPanel(root.panels.dashboard, root.mouseX, root.mouseY);
@@ -148,6 +199,19 @@ MouseArea {
             } else {
                 // OSD hidden, clear shortcut flag
                 root.osdShortcutActive = false;
+            }
+        }
+
+        function onUtilitiesChanged() {
+            if (root.visibilities.utilities) {
+                // Utilities became visible, immediately check if this should be shortcut mode
+                const inUtilitiesArea = root.inBottomPanel(root.panels.utilities, root.mouseX, root.mouseY);
+                if (!inUtilitiesArea) {
+                    root.utilitiesShortcutActive = true;
+                }
+            } else {
+                // Utilities hidden, clear shortcut flag
+                root.utilitiesShortcutActive = false;
             }
         }
     }

@@ -6,6 +6,7 @@ import "root:/modules/session" as Session
 import "root:/modules/launcher" as Launcher
 import "root:/modules/dashboard" as Dashboard
 import "root:/modules/bar/popouts" as BarPopouts
+import "root:/modules/utilities" as Utilities
 import QtQuick
 import QtQuick.Shapes
 
@@ -62,5 +63,12 @@ Shape {
 
         startX: wrapper.x
         startY: wrapper.y - rounding * sideRounding
+    }
+
+    Utilities.Background {
+        wrapper: panels.utilities
+
+        startX: root.width
+        startY: root.height
     }
 }

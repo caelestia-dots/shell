@@ -3,6 +3,7 @@ pragma ComponentBehavior: Bound
 import "root:/widgets"
 import "root:/services"
 import "root:/config"
+import "root:/utils"
 import QtQuick
 import QtQuick.Dialogs
 
@@ -63,9 +64,10 @@ Item {
                         FileDialog {
                             id: dialog
 
+                            title: qsTr("Select a wallpaper")
+                            acceptLabel: qsTr("Select")
                             nameFilters: [`Image files (${Wallpapers.extensions.map(e => `*.${e}`).join(" ")})`]
-
-                            onAccepted: Wallpapers.setWallpaper(selectedFile.toString().replace("file://", ""))
+                            onAccepted: Wallpapers.setWallpaper(Paths.strip(selectedFile))
                         }
 
                         StateLayer {
