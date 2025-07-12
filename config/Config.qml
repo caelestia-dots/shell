@@ -17,6 +17,7 @@ Singleton {
     property alias winfo: adapter.winfo
     property alias lock: adapter.lock
     property alias paths: adapter.paths
+    property alias background: adapter.background
 
     FileView {
         path: `${Paths.stringify(Paths.config)}/shell.json`
@@ -37,6 +38,7 @@ Singleton {
             property JsonObject winfo: WInfoConfig {}
             property JsonObject lock: LockConfig {}
             property JsonObject paths: UserPaths {}
+            property JsonObject background: JsonObject { property bool enabled: true }
         }
     }
 }

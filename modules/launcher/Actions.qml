@@ -35,6 +35,7 @@ Singleton {
             name: qsTr("Wallpaper")
             desc: qsTr("Change the current wallpaper")
             icon: "image"
+            disabled: !Config.background.enabled
 
             function onClicked(list: AppList): void {
                 root.autocomplete(list, "wallpaper");
