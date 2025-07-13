@@ -11,6 +11,7 @@ Singleton {
 
     property list<var> ddcMonitors: []
     readonly property list<Monitor> monitors: variants.instances
+    property bool appleDisplayPresent: false
 
     function getMonitorForScreen(screen: ShellScreen): var {
         return monitors.find(m => m.modelData === screen);
@@ -46,6 +47,15 @@ Singleton {
     }
 
     Process {
+        id: asdDetect
+        command: ["asdbctl", "get"]
+        stdout: StdioCollector {
+            onStreamFinished: root.appleDisplayPresent = text.trim().length > 0;
+        }
+        running: true
+    }
+
+    Process {
         id: ddcProc
 
         command: ["ddcutil", "detect", "--brief"]
@@ -55,6 +65,10 @@ Singleton {
                         busNum: d.match(/I2C bus:[ ]*\/dev\/i2c-([0-9]+)/)[1]
                     }))
         }
+    }
+
+    Process {
+        id: setProc
     }
 
     CustomShortcut {
@@ -75,13 +89,19 @@ Singleton {
         required property ShellScreen modelData
         readonly property bool isDdc: root.ddcMonitors.some(m => m.model === modelData.model)
         readonly property string busNum: root.ddcMonitors.find(m => m.model === modelData.model)?.busNum ?? ""
+        readonly property bool isAppleDisplay: root.appleDisplayPresent && modelData.model.startsWith("StudioDisplay")
         property real brightness
 
         readonly property Process initProc: Process {
             stdout: StdioCollector {
                 onStreamFinished: {
-                    const [, , , current, max] = text.split(" ");
-                    monitor.brightness = parseInt(current) / parseInt(max);
+                    if (monitor.isAppleDisplay) {
+                        const val = parseInt(text.trim());
+                        monitor.brightness = val / 101;
+                    } else {
+                        const [, , , cur, max] = text.split(" ");
+                        monitor.brightness = parseInt(cur) / parseInt(max);
+                    }
                 }
             }
         }
@@ -92,16 +112,33 @@ Singleton {
             if (Math.round(brightness * 100) === rounded)
                 return;
             brightness = value;
-            Quickshell.execDetached(isDdc ? ["ddcutil", "-b", busNum, "setvcp", "10", rounded] : ["brightnessctl", "s", `${rounded}%`]);
+
+            if (isAppleDisplay) {
+                setProc.command = ["asdbctl", "set", rounded];
+            } else if (isDdc) {
+                setProc.command = ["ddcutil", "-b", busNum, "setvcp", "10", rounded];
+            } else {
+                setProc.command = ["brightnessctl", "s", `${rounded}%`];
+            }
+
+            setProc.startDetached();
         }
 
         onBusNumChanged: {
-            initProc.command = isDdc ? ["ddcutil", "-b", busNum, "getvcp", "10", "--brief"] : ["sh", "-c", `echo "a b c $(brightnessctl g) $(brightnessctl m)"`];
+            initProc.command = isAppleDisplay
+                ? ["asdbctl", "get"]
+                : isDdc
+                  ? ["ddcutil", "-b", busNum, "getvcp", "10", "--brief"]
+                  : ["sh", "-c", "echo a b c $(brightnessctl g) $(brightnessctl m)"];
             initProc.running = true;
         }
 
         Component.onCompleted: {
-            initProc.command = isDdc ? ["ddcutil", "-b", busNum, "getvcp", "10", "--brief"] : ["sh", "-c", `echo "a b c $(brightnessctl g) $(brightnessctl m)"`];
+            initProc.command = isAppleDisplay
+                ? ["asdbctl", "get"]
+                : isDdc
+                  ? ["ddcutil", "-b", busNum, "getvcp", "10", "--brief"]
+                  : ["sh", "-c", "echo a b c $(brightnessctl g) $(brightnessctl m)"];
             initProc.running = true;
         }
     }
