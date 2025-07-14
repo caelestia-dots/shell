@@ -56,7 +56,7 @@ WrapperItem {
 
         SessionButton {
             icon: "logout"
-            command: ["loginctl", "terminate-user", ""]
+            command: ["hyprctl", "dispatch", "exit"]
         }
 
         SessionButton {

@@ -109,7 +109,7 @@ Singleton {
 
             function onClicked(list: AppList): void {
                 list.visibilities.launcher = false;
-                Quickshell.execDetached(["loginctl", "terminate-user", ""]);
+                Quickshell.execDetached(["hyprctl", "dispatch", "exit"]);
             }
         },
         Action {
