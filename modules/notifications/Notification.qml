@@ -312,10 +312,39 @@ StyledRect {
         }
 
         Item {
+            id: closeBtn
+
+            anchors.top: parent.top
+            anchors.right: parent.right
+
+            implicitWidth: closeIcon.height
+            implicitHeight: closeIcon.height
+
+            StateLayer {
+                radius: Appearance.rounding.full
+                color: root.modelData.urgency === NotificationUrgency.Critical ? Colours.palette.m3onSecondaryContainer : Colours.palette.m3onSurface
+
+                function onClicked() {
+                    root.modelData.notification.dismiss();
+                }
+            }
+
+            MaterialIcon {
+                id: closeIcon
+
+                anchors.centerIn: parent
+
+                text: "close"
+                font.pointSize: Appearance.font.size.normal
+            }
+        }
+
+        Item {
             id: expandBtn
 
             anchors.right: parent.right
-            anchors.top: parent.top
+            anchors.bottom: parent.bottom
+            anchors.bottomMargin: Appearance.padding.large
 
             implicitWidth: expandIcon.height
             implicitHeight: expandIcon.height
