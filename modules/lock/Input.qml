@@ -17,6 +17,12 @@ ColumnLayout {
 
     spacing: Appearance.spacing.large * 2
 
+    onLockChanged: {
+        if (lock) {
+            pam.start();
+        }
+    }
+
     RowLayout {
         Layout.alignment: Qt.AlignHCenter
         Layout.topMargin: Appearance.padding.large * 3
@@ -86,11 +92,13 @@ ColumnLayout {
         }
 
         Keys.onPressed: event => {
-            if (pam.active)
+            if (pam.active && pam.config == qsTr("login"))
                 return;
 
             if (event.key === Qt.Key_Enter || event.key === Qt.Key_Return) {
                 placeholder.animate = false;
+                pam.abort();
+                pam.config = qsTr("login"); // change connection method to stop using fprint
                 pam.start();
             } else if (event.key === Qt.Key_Backspace) {
                 if (event.modifiers & Qt.ControlModifier) {
@@ -107,6 +115,11 @@ ColumnLayout {
 
         PamContext {
             id: pam
+
+            config: qsTr("only_fprint")
+            // to use fingerptint connection, your `only_fprint` file should contains:
+            // auth sufficient pam_fprintd.so
+            // auth required pam_unix.so
 
             onResponseRequiredChanged: {
                 if (!responseRequired)
@@ -148,8 +161,14 @@ ColumnLayout {
             anchors.centerIn: parent
 
             text: {
-                if (pam.active)
-                    return qsTr("Loading...");
+                if (pam.active) {
+                    if (pam.config == qsTr("login")) {
+                        return qsTr("Loading...");
+                    }
+                    if (pam.config == qsTr("only_fprint")) {
+                        return qsTr("Waiting fingerprint (start typing to cancel)");
+                    }
+                }
                 if (pamState === "error")
                     return qsTr("An error occured");
                 if (pamState === "max")
