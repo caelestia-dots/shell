@@ -6,10 +6,15 @@ import "modules/drawers"
 import "modules/background"
 import "modules/areapicker"
 import "modules/lock"
+import "config"
 import Quickshell
+import QtQuick
 
 ShellRoot {
-    Background {}
+    Loader {
+      active: Config.background.enabled
+      sourceComponent: Background {}
+    }
     Drawers {}
     AreaPicker {}
     Lock {}

@@ -18,6 +18,7 @@ Singleton {
     property alias lock: adapter.lock
     property alias services: adapter.services
     property alias paths: adapter.paths
+    property alias background: adapter.background
 
     FileView {
         path: `${Paths.stringify(Paths.config)}/shell.json`
@@ -39,6 +40,7 @@ Singleton {
             property JsonObject lock: LockConfig {}
             property JsonObject services: ServiceConfig {}
             property JsonObject paths: UserPaths {}
+            property JsonObject background: JsonObject { property bool enabled: true }
         }
     }
 }
