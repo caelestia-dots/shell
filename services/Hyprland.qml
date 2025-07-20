@@ -35,8 +35,6 @@ Singleton {
                 Hyprland.refreshWorkspaces();
             } else if (n.includes("mon")) {
                 Hyprland.refreshMonitors();
-            } else if (n.includes("workspace")) {
-                Hyprland.refreshWorkspaces();
             } else if (n.includes("window") || n.includes("group") || ["pin", "fullscreen", "changefloatingmode", "minimize"].includes(n)) {
                 Hyprland.refreshToplevels();
             }
