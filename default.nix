@@ -23,7 +23,7 @@
   findutils,
   file,
   material-symbols,
-  jetbrains-mono,
+  nerd-fonts-jetbrains-mono,
   gcc,
   quickshell,
   aubio,
@@ -57,7 +57,7 @@
   fontconfig = makeFontsConf {
     fontDirectories = [
       material-symbols
-      jetbrains-mono
+      nerd-fonts-jetbrains-mono
     ];
   };
 in
