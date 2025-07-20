@@ -23,6 +23,7 @@
   findutils,
   file,
   material-symbols,
+  jetbrains-mono,
   gcc,
   quickshell,
   aubio,
@@ -54,7 +55,10 @@
     ++ lib.optional withCli caelestia-cli;
 
   fontconfig = makeFontsConf {
-    fontDirectories = [material-symbols];
+    fontDirectories = [
+      material-symbols
+      jetbrains-mono
+    ];
   };
 in
   stdenv.mkDerivation {
