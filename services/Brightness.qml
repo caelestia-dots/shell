@@ -48,11 +48,12 @@ Singleton {
 
     Process {
         id: asdDetect
-        command: ["asdbctl", "get"]
-        stdout: StdioCollector {
-            onStreamFinished: root.appleDisplayPresent = text.trim().length > 0;
-        }
+
         running: true
+        command: ["sh", "-c", "asdbctl get"] // To avoid warnings if asdbctl is not installed
+        stdout: StdioCollector {
+            onStreamFinished: root.appleDisplayPresent = text.trim().length > 0
+        }
     }
 
     Process {
@@ -124,22 +125,18 @@ Singleton {
             setProc.startDetached();
         }
 
-        onBusNumChanged: {
-            initProc.command = isAppleDisplay
-                ? ["asdbctl", "get"]
-                : isDdc
-                  ? ["ddcutil", "-b", busNum, "getvcp", "10", "--brief"]
-                  : ["sh", "-c", "echo a b c $(brightnessctl g) $(brightnessctl m)"];
+        function initBrightness(): void {
+            if (isAppleDisplay)
+                initProc.command = ["asdbctl", "get"];
+            else if (isDdc)
+                initProc.command = ["ddcutil", "-b", busNum, "getvcp", "10", "--brief"];
+            else
+                initProc.command = ["sh", "-c", "echo a b c $(brightnessctl g) $(brightnessctl m)"];
+
             initProc.running = true;
         }
 
-        Component.onCompleted: {
-            initProc.command = isAppleDisplay
-                ? ["asdbctl", "get"]
-                : isDdc
-                  ? ["ddcutil", "-b", busNum, "getvcp", "10", "--brief"]
-                  : ["sh", "-c", "echo a b c $(brightnessctl g) $(brightnessctl m)"];
-            initProc.running = true;
-        }
+        onBusNumChanged: initBrightness()
+        Component.onCompleted: initBrightness()
     }
 }
