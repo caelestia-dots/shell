@@ -47,8 +47,6 @@ Singleton {
     }
 
     Process {
-        id: asdDetect
-
         running: true
         command: ["sh", "-c", "asdbctl get"] // To avoid warnings if asdbctl is not installed
         stdout: StdioCollector {
@@ -66,10 +64,6 @@ Singleton {
                         busNum: d.match(/I2C bus:[ ]*\/dev\/i2c-([0-9]+)/)[1]
                     }))
         }
-    }
-
-    Process {
-        id: setProc
     }
 
     CustomShortcut {
@@ -114,15 +108,12 @@ Singleton {
                 return;
             brightness = value;
 
-            if (isAppleDisplay) {
-                setProc.command = ["asdbctl", "set", rounded];
-            } else if (isDdc) {
-                setProc.command = ["ddcutil", "-b", busNum, "setvcp", "10", rounded];
-            } else {
-                setProc.command = ["brightnessctl", "s", `${rounded}%`];
-            }
-
-            setProc.startDetached();
+            if (isAppleDisplay)
+                Quickshell.execDetached(["asdbctl", "set", rounded]);
+            else if (isDdc)
+                Quickshell.execDetached(["ddcutil", "-b", busNum, "setvcp", "10", rounded]);
+            else
+                Quickshell.execDetached(["brightnessctl", "s", `${rounded}%`]);
         }
 
         function initBrightness(): void {
