@@ -14,7 +14,7 @@ Singleton {
     readonly property Anim anim: Anim {}
 
     component DesktopClock: QtObject {
-        readonly property bool enabled: true
+        readonly property bool enabled: false
         readonly property color color: "#FFFFFF"
     }
 
