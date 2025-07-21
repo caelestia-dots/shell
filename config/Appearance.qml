@@ -11,6 +11,7 @@ Singleton {
     readonly property Padding padding: Padding {}
     readonly property Font font: Font {}
     readonly property Anim anim: Anim {}
+    readonly property bool desktopClockEnabled: true
 
     component Rounding: QtObject {
         readonly property int small: 12
