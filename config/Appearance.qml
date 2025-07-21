@@ -9,14 +9,8 @@ Singleton {
     readonly property Rounding rounding: Rounding {}
     readonly property Spacing spacing: Spacing {}
     readonly property Padding padding: Padding {}
-    readonly property DesktopClock desktopClock: DesktopClock {}
     readonly property Font font: Font {}
     readonly property Anim anim: Anim {}
-
-    component DesktopClock: QtObject {
-        readonly property bool enabled: false
-        readonly property color color: "#FFFFFF"
-    }
 
     component Rounding: QtObject {
         readonly property int small: 12

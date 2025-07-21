@@ -142,12 +142,4 @@ Item {
             }
         }
     }
-
-    DesktopClock {
-        visible: Appearance.desktopClock.enabled
-        anchors.right: parent.right
-        anchors.bottom: parent.bottom
-        anchors.margins: Appearance.padding.large
-        z: 1000
-    }
 }

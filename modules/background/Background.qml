@@ -26,6 +26,13 @@ LazyLoader {
             anchors.right: true
 
             Wallpaper {}
+
+            DesktopClock {
+                visible: Config.background.desktopClock.enabled
+                anchors.right: parent.right
+                anchors.bottom: parent.bottom
+                anchors.margins: Appearance.padding.large
+            }
         }
     }
 }

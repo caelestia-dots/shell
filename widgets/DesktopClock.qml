@@ -1,13 +1,13 @@
 import QtQuick
 import QtQuick.Controls
 import qs.config
+import qs.services
+import qs.widgets
 
 Item {
     id: clockRoot
-    width: 200
-    height: 80
-
-    property alias time: timeText.text
+    width: timeText.implicitWidth + Appearance.padding.large * 2
+    height: timeText.implicitHeight + Appearance.padding.large * 2
 
     Timer {
         id: timer
@@ -15,25 +15,14 @@ Item {
         running: true
         repeat: true
         onTriggered: {
-            var now = new Date();
-            var h = now.getHours().toString().padStart(2, '0');
-            var m = now.getMinutes().toString().padStart(2, '0');
-            var s = now.getSeconds().toString().padStart(2, '0');
-            timeText.text = h + ":" + m + ":" + s;
+            timeText.text = Time.format("hh:mm:ss");
         }
     }
 
-    Rectangle {
-        anchors.fill: parent
-        color: "#00000080"
-        radius: 16
-    }
-
-    Text {
+    StyledText {
         id: timeText
         anchors.centerIn: parent
-        font.pixelSize: 48
-        color: Appearance.desktopClock.color
+        font.pointSize: Appearance.font.size.extraLarge
         font.bold: true
         text: "--:--:--"
     }
