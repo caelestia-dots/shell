@@ -1,27 +1,27 @@
 pragma Singleton
 
-import "root:/utils/scripts/fuzzysort.js" as Fuzzy
-import "root:/config"
+import ".."
+import qs.config
+import qs.utils
 import Quickshell
 import Quickshell.Io
 import QtQuick
 
-Singleton {
+Searcher {
     id: root
 
-    readonly property list<var> preppedSchemes: schemes.instances.map(s => ({
-                name: Fuzzy.prepare(s.name),
-                flavour: Fuzzy.prepare(s.flavour),
-                scheme: s
-            }))
-
-    function fuzzyQuery(search: string): var {
-        return Fuzzy.go(search.slice(`${Config.launcher.actionPrefix}scheme `.length), preppedSchemes, {
-            all: true,
-            keys: ["name", "flavour"],
-            scoreFn: r => r[0].score > 0 ? r[0].score * 0.9 + r[1].score * 0.1 : 0
-        }).map(r => r.obj.scheme);
+    function transformSearch(search: string): string {
+        return search.slice(`${Config.launcher.actionPrefix}scheme `.length);
     }
+
+    function selector(item: var): string {
+        return `${item.name} ${item.flavour}`;
+    }
+
+    list: schemes.instances
+    useFuzzy: Config.launcher.useFuzzy.schemes
+    keys: ["name", "flavour"]
+    weights: [0.9, 0.1]
 
     Variants {
         id: schemes

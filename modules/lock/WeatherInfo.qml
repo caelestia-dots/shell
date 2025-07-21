@@ -1,6 +1,6 @@
-import "root:/widgets"
-import "root:/services"
-import "root:/config"
+import qs.widgets
+import qs.services
+import qs.config
 import QtQuick
 import QtQuick.Layouts
 
@@ -40,7 +40,7 @@ RowLayout {
             Layout.fillWidth: true
 
             animate: true
-            text: Config.dashboard.useFahrenheit ? Weather.tempF : Weather.tempC
+            text: Config.services.useFahrenheit ? Weather.tempF : Weather.tempC
             color: Colours.palette.m3primary
             horizontalAlignment: Text.AlignHCenter
             font.pointSize: Appearance.font.size.extraLarge

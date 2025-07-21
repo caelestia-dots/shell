@@ -1,4 +1,4 @@
-import "root:/utils"
+import qs.utils
 import Quickshell.Io
 
 JsonObject {

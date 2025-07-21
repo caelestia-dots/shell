@@ -1,8 +1,7 @@
-import "root:/widgets"
-import "root:/services"
-import "root:/config"
-import Quickshell
-import Quickshell.Widgets
+import "../services"
+import qs.widgets
+import qs.services
+import qs.config
 import QtQuick
 
 Item {

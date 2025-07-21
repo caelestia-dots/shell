@@ -1,4 +1,4 @@
-import "root:/config"
+import qs.config
 import QtQuick
 
 Rectangle {

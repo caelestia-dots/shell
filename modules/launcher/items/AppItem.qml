@@ -1,13 +1,16 @@
-import "root:/widgets"
-import "root:/services"
-import "root:/config"
+import "../services"
+import qs.widgets
+import qs.services
+import qs.config
+import Quickshell
+import Quickshell.Widgets
 import QtQuick
 
 Item {
     id: root
 
-    required property Actions.Action modelData
-    required property var list
+    required property DesktopEntry modelData
+    required property PersistentProperties visibilities
 
     implicitHeight: Config.launcher.sizes.itemHeight
 
@@ -18,7 +21,8 @@ Item {
         radius: Appearance.rounding.full
 
         function onClicked(): void {
-            root.modelData?.onClicked(root.list);
+            Apps.launch(root.modelData);
+            root.visibilities.launcher = false;
         }
     }
 
@@ -28,11 +32,11 @@ Item {
         anchors.rightMargin: Appearance.padding.larger
         anchors.margins: Appearance.padding.smaller
 
-        MaterialIcon {
+        IconImage {
             id: icon
 
-            text: root.modelData?.icon ?? ""
-            font.pointSize: Appearance.font.size.extraLarge
+            source: Quickshell.iconPath(root.modelData?.icon, "image-missing")
+            implicitSize: parent.height * 0.8
 
             anchors.verticalCenter: parent.verticalCenter
         }
@@ -43,7 +47,7 @@ Item {
             anchors.verticalCenter: icon.verticalCenter
 
             implicitWidth: parent.width - icon.width
-            implicitHeight: name.implicitHeight + desc.implicitHeight
+            implicitHeight: name.implicitHeight + comment.implicitHeight
 
             StyledText {
                 id: name
@@ -53,9 +57,9 @@ Item {
             }
 
             StyledText {
-                id: desc
+                id: comment
 
-                text: root.modelData?.desc ?? ""
+                text: (root.modelData?.comment || root.modelData?.genericName || root.modelData?.name) ?? ""
                 font.pointSize: Appearance.font.size.small
                 color: Colours.alpha(Colours.palette.m3outline, true)
 

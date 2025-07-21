@@ -1,26 +1,31 @@
-import "root:/widgets"
+import qs.widgets
+import qs.config
 import Quickshell
 import Quickshell.Wayland
 
-Variants {
-    model: Quickshell.screens
+LazyLoader {
+    activeAsync: Config.background.enabled
 
-    StyledWindow {
-        id: win
+    Variants {
+        model: Quickshell.screens
 
-        required property ShellScreen modelData
+        StyledWindow {
+            id: win
 
-        screen: modelData
-        name: "background"
-        WlrLayershell.exclusionMode: ExclusionMode.Ignore
-        WlrLayershell.layer: WlrLayer.Background
-        color: "black"
+            required property ShellScreen modelData
 
-        anchors.top: true
-        anchors.bottom: true
-        anchors.left: true
-        anchors.right: true
+            screen: modelData
+            name: "background"
+            WlrLayershell.exclusionMode: ExclusionMode.Ignore
+            WlrLayershell.layer: WlrLayer.Background
+            color: "black"
 
-        Wallpaper {}
+            anchors.top: true
+            anchors.bottom: true
+            anchors.left: true
+            anchors.right: true
+
+            Wallpaper {}
+        }
     }
 }

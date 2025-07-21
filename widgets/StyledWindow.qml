@@ -1,5 +1,5 @@
-import "root:/utils"
-import "root:/config"
+import qs.utils
+import qs.config
 import Quickshell
 import Quickshell.Wayland
 

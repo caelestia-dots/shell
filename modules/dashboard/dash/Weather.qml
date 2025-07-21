@@ -1,7 +1,7 @@
-import "root:/widgets"
-import "root:/services"
-import "root:/config"
-import "root:/utils"
+import qs.widgets
+import qs.services
+import qs.config
+import qs.utils
 import QtQuick
 
 Item {
@@ -38,7 +38,7 @@ Item {
             anchors.horizontalCenter: parent.horizontalCenter
 
             animate: true
-            text: Config.dashboard.useFahrenheit ? Weather.tempF : Weather.tempC
+            text: Config.services.useFahrenheit ? Weather.tempF : Weather.tempC
             color: Colours.palette.m3primary
             font.pointSize: Appearance.font.size.extraLarge
             font.weight: 500

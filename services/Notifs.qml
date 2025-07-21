@@ -1,8 +1,8 @@
 pragma Singleton
 pragma ComponentBehavior: Bound
 
-import "root:/widgets"
-import "root:/config"
+import qs.widgets
+import qs.config
 import Quickshell
 import Quickshell.Io
 import Quickshell.Services.Notifications

@@ -1,7 +1,7 @@
 pragma ComponentBehavior: Bound
 
-import "root:/services"
-import "root:/config"
+import qs.services
+import qs.config
 import QtQuick
 
 Text {

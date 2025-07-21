@@ -1,7 +1,7 @@
-import "root:/widgets"
-import "root:/services"
-import "root:/utils"
-import "root:/config"
+import qs.widgets
+import qs.services
+import qs.utils
+import qs.config
 
 StyledText {
     text: Icons.osIcon

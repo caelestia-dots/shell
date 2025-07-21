@@ -6,8 +6,9 @@ JsonObject {
     property real clearThreshold: 0.3
     property int expandThreshold: 20
     property bool actionOnClick: false
+    property Sizes sizes: Sizes {}
 
-    property JsonObject sizes: JsonObject {
+    component Sizes: JsonObject {
         property int width: 400
         property int image: 41
         property int badge: 20

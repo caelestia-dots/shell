@@ -1,7 +1,7 @@
-import "root:/widgets"
-import "root:/services"
-import "root:/config"
-import "root:/utils"
+import qs.widgets
+import qs.services
+import qs.config
+import qs.utils
 import Quickshell
 import Quickshell.Io
 import QtQuick
@@ -126,26 +126,38 @@ Row {
         }
 
         InfoLine {
+            id: uptime
+
             icon: "timer"
-            text: uptimeProc.uptime
+            text: qsTr("Loading uptime...")
             colour: Colours.palette.m3tertiary
 
             Timer {
                 running: true
                 repeat: true
                 interval: 15000
-                onTriggered: uptimeProc.running = true
+                onTriggered: fileUptime.reload()
             }
 
-            Process {
-                id: uptimeProc
+            FileView {
+                id: fileUptime
 
-                property string uptime
+                path: "/proc/uptime"
+                onLoaded: {
+                    const up = parseInt(text().split(" ")[0] ?? 0);
 
-                running: true
-                command: ["uptime", "-p"]
-                stdout: StdioCollector {
-                    onStreamFinished: uptimeProc.uptime = text.trim()
+                    const days = Math.floor(up / 86400);
+                    const hours = Math.floor((up % 86400) / 3600);
+                    const minutes = Math.floor((up % 3600) / 60);
+
+                    let str = qsTr("up ");
+                    if (days > 0)
+                        str += `${days} day${days === 1 ? "" : "s"}`;
+                    if (hours > 0)
+                        str += `${str ? ", " : ""}${hours} hour${hours === 1 ? "" : "s"}`;
+                    if (minutes > 0 || !str)
+                        str += `${str ? ", " : ""}${minutes} minute${minutes === 1 ? "" : "s"}`;
+                    uptime.text = str;
                 }
             }
         }

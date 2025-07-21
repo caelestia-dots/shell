@@ -146,6 +146,9 @@ All configuration options are in `~/.config/caelestia/shell.json`.
 
 ```json
 {
+    "background": {
+        "enabled": true
+    },
     "bar": {
         "dragThreshold": 20,
         "persistent": true,
@@ -168,16 +171,21 @@ All configuration options are in `~/.config/caelestia/shell.json`.
     },
     "dashboard": {
         "mediaUpdateInterval": 500,
-        "visualiserBars": 45,
-        "weatherLocation": "10,10",
-        "useFahrenheit": false,
+        "visualiserBars": 45
     },
     "launcher": {
         "actionPrefix": ">",
         "dragThreshold": 50,
         "enableDangerousActions": false,
         "maxShown": 8,
-        "maxWallpapers": 9
+        "maxWallpapers": 9,
+        "useFuzzy": {
+            "apps": false,
+            "actions": false,
+            "schemes": false,
+            "variants": false,
+            "wallpapers": false
+        }
     },
     "lock": {
         "maxNotifs": 5
@@ -196,6 +204,10 @@ All configuration options are in `~/.config/caelestia/shell.json`.
         "mediaGif": "root:/assets/bongocat.gif",
         "sessionGif": "root:/assets/kurukuru.gif",
         "wallpaperDir": "~/Pictures/Wallpapers"
+    },
+    "services": {
+      "weatherLocation": "10,10",
+      "useFahrenheit": false
     },
     "session": {
         "dragThreshold": 30

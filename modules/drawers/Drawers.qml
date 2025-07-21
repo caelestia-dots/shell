@@ -1,9 +1,9 @@
 pragma ComponentBehavior: Bound
 
-import "root:/widgets"
-import "root:/services"
-import "root:/config"
-import "root:/modules/bar"
+import qs.widgets
+import qs.services
+import qs.config
+import qs.modules.bar
 import Quickshell
 import Quickshell.Wayland
 import Quickshell.Hyprland

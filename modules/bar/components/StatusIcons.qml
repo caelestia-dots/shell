@@ -1,8 +1,9 @@
-import "root:/widgets"
-import "root:/services"
-import "root:/utils"
-import "root:/config"
+import qs.widgets
+import qs.services
+import qs.utils
+import qs.config
 import Quickshell
+import Quickshell.Bluetooth
 import Quickshell.Services.UPower
 import QtQuick
 
@@ -38,7 +39,7 @@ Item {
         anchors.topMargin: Appearance.spacing.smaller / 2
 
         animate: true
-        text: Bluetooth.powered ? "bluetooth" : "bluetooth_disabled"
+        text: Bluetooth.defaultAdapter.enabled ? "bluetooth" : "bluetooth_disabled"
         color: root.colour
     }
 
@@ -55,16 +56,35 @@ Item {
             id: repeater
 
             model: ScriptModel {
-                values: Bluetooth.devices.filter(d => d.connected)
+                values: Bluetooth.devices.values.filter(d => d.state !== BluetoothDeviceState.Disconnected)
             }
 
             MaterialIcon {
-                required property Bluetooth.Device modelData
+                id: device
+
+                required property BluetoothDevice modelData
 
                 animate: true
                 text: Icons.getBluetoothIcon(modelData.icon)
                 color: root.colour
                 fill: 1
+
+                SequentialAnimation on opacity {
+                    running: device.modelData.state !== BluetoothDeviceState.Connected
+                    alwaysRunToEnd: true
+                    loops: Animation.Infinite
+
+                    Anim {
+                        from: 1
+                        to: 0
+                        easing.bezierCurve: Appearance.anim.curves.standardAccel
+                    }
+                    Anim {
+                        from: 0
+                        to: 1
+                        easing.bezierCurve: Appearance.anim.curves.standardDecel
+                    }
+                }
             }
         }
     }
@@ -99,19 +119,13 @@ Item {
         fill: 1
     }
 
-    Behavior on implicitWidth {
-        NumberAnimation {
-            duration: Appearance.anim.durations.normal
-            easing.type: Easing.BezierSpline
-            easing.bezierCurve: Appearance.anim.curves.emphasized
-        }
+    Behavior on implicitHeight {
+        Anim {}
     }
 
-    Behavior on implicitHeight {
-        NumberAnimation {
-            duration: Appearance.anim.durations.normal
-            easing.type: Easing.BezierSpline
-            easing.bezierCurve: Appearance.anim.curves.emphasized
-        }
+    component Anim: NumberAnimation {
+        duration: Appearance.anim.durations.large
+        easing.type: Easing.BezierSpline
+        easing.bezierCurve: Appearance.anim.curves.emphasized
     }
 }

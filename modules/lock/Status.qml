@@ -1,9 +1,10 @@
-import "root:/widgets"
-import "root:/services"
-import "root:/config"
-import "root:/utils"
+import qs.widgets
+import qs.services
+import qs.config
+import qs.utils
 import Quickshell
 import Quickshell.Widgets
+import Quickshell.Bluetooth
 import Quickshell.Services.UPower
 import QtQuick
 import QtQuick.Layouts
@@ -100,7 +101,7 @@ WrapperItem {
                 Layout.alignment: Qt.AlignVCenter
 
                 animate: true
-                text: Bluetooth.powered ? "bluetooth" : "bluetooth_disabled"
+                text: Bluetooth.defaultAdapter.enabled ? "bluetooth" : "bluetooth_disabled"
                 font.pointSize: Appearance.font.size.large
             }
 
@@ -111,7 +112,7 @@ WrapperItem {
 
                 sourceComponent: StyledText {
                     animate: true
-                    text: qsTr("%n device(s) connected", "", Bluetooth.devices.filter(d => d.connected).length)
+                    text: qsTr("%n device(s) connected", "", Bluetooth.devices.values.filter(d => d.connected).length)
                     font.pointSize: Appearance.font.size.normal
                 }
             }

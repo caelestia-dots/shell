@@ -1,14 +1,19 @@
 pragma Singleton
 
-import "root:/utils/scripts/fuzzysort.js" as Fuzzy
-import "root:/config"
+import ".."
+import qs.config
+import qs.utils
 import Quickshell
 import QtQuick
 
-Singleton {
+Searcher {
     id: root
 
-    readonly property list<Variant> list: [
+    function transformSearch(search: string): string {
+        return search.slice(`${Config.launcher.actionPrefix}variant `.length);
+    }
+
+    list: [
         Variant {
             variant: "vibrant"
             icon: "sentiment_very_dissatisfied"
@@ -64,18 +69,7 @@ Singleton {
             description: "All colours are grayscale, no chroma."
         }
     ]
-
-    readonly property list<var> preppedVariants: list.map(v => ({
-                name: Fuzzy.prepare(v.variant),
-                variant: v
-            }))
-
-    function fuzzyQuery(search: string): var {
-        return Fuzzy.go(search.slice(`${Config.launcher.actionPrefix}variant `.length), preppedVariants, {
-            all: true,
-            key: "name"
-        }).map(r => r.obj.variant);
-    }
+    useFuzzy: Config.launcher.useFuzzy.variants
 
     component Variant: QtObject {
         required property string variant

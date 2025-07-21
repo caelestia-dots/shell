@@ -1,8 +1,10 @@
 pragma ComponentBehavior: Bound
 
-import "root:/widgets"
-import "root:/services"
-import "root:/config"
+import "items"
+import "services"
+import qs.widgets
+import qs.services
+import qs.config
 import Quickshell
 import QtQuick
 import QtQuick.Controls
@@ -13,28 +15,9 @@ StyledListView {
     required property TextField search
     required property PersistentProperties visibilities
 
-    property bool isAction: search.text.startsWith(Config.launcher.actionPrefix)
-    property bool isCalc: search.text.startsWith(`${Config.launcher.actionPrefix}calc `)
-    property bool isScheme: search.text.startsWith(`${Config.launcher.actionPrefix}scheme `)
-    property bool isVariant: search.text.startsWith(`${Config.launcher.actionPrefix}variant `)
-
-    function getModelValues() {
-        let text = search.text;
-        if (isCalc)
-            return [0];
-        if (isScheme)
-            return Schemes.fuzzyQuery(text);
-        if (isVariant)
-            return M3Variants.fuzzyQuery(text);
-        if (isAction)
-            return Actions.fuzzyQuery(text);
-        if (text.startsWith(Config.launcher.actionPrefix))
-            text = search.text.slice(Config.launcher.actionPrefix.length);
-        return Apps.fuzzyQuery(text);
-    }
-
     model: ScriptModel {
-        values: root.getModelValues()
+        id: model
+
         onValuesChanged: root.currentIndex = 0
     }
 
@@ -51,21 +34,118 @@ StyledListView {
         opacity: 0.08
     }
 
-    delegate: {
-        if (isCalc)
-            return calcItem;
-        if (isScheme)
-            return schemeItem;
-        if (isVariant)
-            return variantItem;
-        if (isAction)
-            return actionItem;
-        return appItem;
+    state: {
+        const text = search.text;
+        const prefix = Config.launcher.actionPrefix;
+        if (text.startsWith(prefix)) {
+            for (const action of ["calc", "scheme", "variant"])
+                if (text.startsWith(`${prefix}${action} `))
+                    return action;
+
+            return "actions";
+        }
+
+        return "apps";
+    }
+
+    states: [
+        State {
+            name: "apps"
+
+            PropertyChanges {
+                model.values: Apps.query(search.text)
+                root.delegate: appItem
+            }
+        },
+        State {
+            name: "actions"
+
+            PropertyChanges {
+                model.values: Actions.query(search.text)
+                root.delegate: actionItem
+            }
+        },
+        State {
+            name: "calc"
+
+            PropertyChanges {
+                model.values: [0]
+                root.delegate: calcItem
+            }
+        },
+        State {
+            name: "scheme"
+
+            PropertyChanges {
+                model.values: Schemes.query(search.text)
+                root.delegate: schemeItem
+            }
+        },
+        State {
+            name: "variant"
+
+            PropertyChanges {
+                model.values: M3Variants.query(search.text)
+                root.delegate: variantItem
+            }
+        }
+    ]
+
+    transitions: Transition {
+        SequentialAnimation {
+            ParallelAnimation {
+                Anim {
+                    target: root
+                    property: "opacity"
+                    from: 1
+                    to: 0
+                    duration: Appearance.anim.durations.small
+                    easing.bezierCurve: Appearance.anim.curves.standardAccel
+                }
+                Anim {
+                    target: root
+                    property: "scale"
+                    from: 1
+                    to: 0.9
+                    duration: Appearance.anim.durations.small
+                    easing.bezierCurve: Appearance.anim.curves.standardAccel
+                }
+            }
+            PropertyAction {
+                targets: [model, root]
+                properties: "values,delegate"
+            }
+            ParallelAnimation {
+                Anim {
+                    target: root
+                    property: "opacity"
+                    from: 0
+                    to: 1
+                    duration: Appearance.anim.durations.small
+                    easing.bezierCurve: Appearance.anim.curves.standardDecel
+                }
+                Anim {
+                    target: root
+                    property: "scale"
+                    from: 0.9
+                    to: 1
+                    duration: Appearance.anim.durations.small
+                    easing.bezierCurve: Appearance.anim.curves.standardDecel
+                }
+            }
+            PropertyAction {
+                targets: [root.add, root.remove]
+                property: "enabled"
+                value: true
+            }
+        }
     }
 
     ScrollBar.vertical: StyledScrollBar {}
 
     add: Transition {
+        enabled: !root.state
+
         Anim {
             properties: "opacity,scale"
             from: 0
@@ -74,6 +154,8 @@ StyledListView {
     }
 
     remove: Transition {
+        enabled: !root.state
+
         Anim {
             properties: "opacity,scale"
             from: 1
@@ -149,62 +231,6 @@ StyledListView {
 
         VariantItem {
             list: root
-        }
-    }
-
-    Behavior on isAction {
-        ChangeAnim {}
-    }
-
-    Behavior on isCalc {
-        ChangeAnim {}
-    }
-
-    Behavior on isScheme {
-        ChangeAnim {}
-    }
-
-    Behavior on isVariant {
-        ChangeAnim {}
-    }
-
-    component ChangeAnim: SequentialAnimation {
-        ParallelAnimation {
-            Anim {
-                target: root
-                property: "opacity"
-                from: 1
-                to: 0
-                duration: Appearance.anim.durations.small
-                easing.bezierCurve: Appearance.anim.curves.standardAccel
-            }
-            Anim {
-                target: root
-                property: "scale"
-                from: 1
-                to: 0.9
-                duration: Appearance.anim.durations.small
-                easing.bezierCurve: Appearance.anim.curves.standardAccel
-            }
-        }
-        PropertyAction {}
-        ParallelAnimation {
-            Anim {
-                target: root
-                property: "opacity"
-                from: 0
-                to: 1
-                duration: Appearance.anim.durations.small
-                easing.bezierCurve: Appearance.anim.curves.standardDecel
-            }
-            Anim {
-                target: root
-                property: "scale"
-                from: 0.9
-                to: 1
-                duration: Appearance.anim.durations.small
-                easing.bezierCurve: Appearance.anim.curves.standardDecel
-            }
         }
     }
 

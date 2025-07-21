@@ -1,18 +1,16 @@
 pragma Singleton
 
-import "root:/utils/scripts/fuzzysort.js" as Fuzzy
-import "root:/services"
-import "root:/config"
+import ".."
+import qs.services
+import qs.config
+import qs.utils
 import Quickshell
-import Quickshell.Io
 import QtQuick
 
-Singleton {
+Searcher {
     id: root
 
-    property string qalcResult
-
-    readonly property list<Action> list: [
+    readonly property list<Action> actions: [
         Action {
             name: qsTr("Calculator")
             desc: qsTr("Do simple math equations (powered by Qalc)")
@@ -134,23 +132,16 @@ Singleton {
         }
     ]
 
-    readonly property list<var> preppedActions: list.filter(a => !a.disabled).map(a => ({
-                name: Fuzzy.prepare(a.name),
-                desc: Fuzzy.prepare(a.desc),
-                action: a
-            }))
-
-    function fuzzyQuery(search: string): var {
-        return Fuzzy.go(search.slice(Config.launcher.actionPrefix.length), preppedActions, {
-            all: true,
-            keys: ["name", "desc"],
-            scoreFn: r => r[0].score > 0 ? r[0].score * 0.9 + r[1].score * 0.1 : 0
-        }).map(r => r.obj.action);
+    function transformSearch(search: string): string {
+        return search.slice(Config.launcher.actionPrefix.length);
     }
 
     function autocomplete(list: AppList, text: string): void {
         list.search.text = `${Config.launcher.actionPrefix}${text} `;
     }
+
+    list: actions.filter(a => !a.disabled)
+    useFuzzy: Config.launcher.useFuzzy.actions
 
     component Action: QtObject {
         required property string name

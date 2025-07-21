@@ -1,7 +1,7 @@
-import "root:/services"
-import "root:/config"
-import "root:/modules/bar/popouts" as BarPopouts
-import "root:/modules/osd" as Osd
+import qs.services
+import qs.config
+import qs.modules.bar.popouts as BarPopouts
+import qs.modules.osd as Osd
 import Quickshell
 import QtQuick
 
@@ -53,12 +53,13 @@ MouseArea {
                 visibilities.osd = false;
                 osdHovered = false;
             }
-            if (!dashboardShortcutActive) {
+
+            if (!dashboardShortcutActive)
                 visibilities.dashboard = false;
-            }
-            if (!utilitiesShortcutActive) {
+
+            if (!utilitiesShortcutActive)
                 visibilities.utilities = false;
-            }
+
             popouts.hasCurrent = false;
 
             if (Config.bar.showOnHover)
@@ -71,18 +72,16 @@ MouseArea {
         const y = event.y;
 
         // Show bar in non-exclusive mode on hover
-        if (!visibilities.bar && Config.bar.showOnHover && x < bar.implicitWidth) {
+        if (!visibilities.bar && Config.bar.showOnHover && x < bar.implicitWidth)
             bar.isHovered = true;
-        }
 
         // Show/hide bar on drag
         if (pressed && dragStart.x < bar.implicitWidth) {
             const dragX = x - dragStart.x;
-            if (dragX > Config.bar.dragThreshold) {
+            if (dragX > Config.bar.dragThreshold)
                 visibilities.bar = true;
-            } else if (dragX < -Config.bar.dragThreshold) {
+            else if (dragX < -Config.bar.dragThreshold)
                 visibilities.bar = false;
-            }
         }
 
         // Show osd on hover

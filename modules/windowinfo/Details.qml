@@ -1,6 +1,6 @@
-import "root:/widgets"
-import "root:/services"
-import "root:/config"
+import qs.widgets
+import qs.services
+import qs.config
 import Quickshell.Hyprland
 import QtQuick
 import QtQuick.Layouts

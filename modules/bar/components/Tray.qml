@@ -1,4 +1,4 @@
-import "root:/config"
+import qs.config
 import Quickshell.Services.SystemTray
 import QtQuick
 

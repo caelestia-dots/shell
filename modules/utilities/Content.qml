@@ -1,6 +1,6 @@
-import "root:/widgets"
-import "root:/services"
-import "root:/config"
+import qs.widgets
+import qs.services
+import qs.config
 import Quickshell
 import Quickshell.Widgets
 import QtQuick
@@ -12,8 +12,8 @@ Item {
     anchors.bottom: parent.bottom
     anchors.right: parent.right
 
-    implicitWidth: 300
-    implicitHeight: 100
+    // implicitWidth: 300
+    // implicitHeight: 100
 
     // Rectangle {
     //     anchors.fill: parent

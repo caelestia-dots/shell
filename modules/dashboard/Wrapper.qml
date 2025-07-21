@@ -1,11 +1,11 @@
 pragma ComponentBehavior: Bound
 
-import "root:/services"
-import "root:/config"
-import "root:/utils"
+import qs.widgets.filedialog
+import qs.services
+import qs.config
+import qs.utils
 import Quickshell
 import QtQuick
-import QtQuick.Dialogs
 
 Item {
     id: root
@@ -16,11 +16,11 @@ Item {
 
         readonly property FileDialog facePicker: FileDialog {
             title: qsTr("Select a profile picture")
-            acceptLabel: qsTr("Select")
-            nameFilters: [`Image files (${Wallpapers.extensions.map(e => `*.${e}`).join(" ")})`]
-            onAccepted: {
-                Paths.copy(selectedFile, `${Paths.home}/.face`);
-                Quickshell.execDetached(["notify-send", "-a", "caelestia-shell", "-u", "low", "-h", `STRING:image-path:${Paths.strip(selectedFile)}`, "Profile picture changed", `Profile picture changed to ${Paths.shortenHome(Paths.strip(selectedFile))}`]);
+            filterLabel: qsTr("Image files")
+            filters: Wallpapers.extensions
+            onAccepted: path => {
+                Paths.copy(path, `${Paths.home}/.face`);
+                Quickshell.execDetached(["notify-send", "-a", "caelestia-shell", "-u", "low", "-h", `STRING:image-path:${path}`, "Profile picture changed", `Profile picture changed to ${Paths.shortenHome(path)}`]);
             }
         }
     }

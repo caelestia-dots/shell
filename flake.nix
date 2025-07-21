@@ -1,96 +1,68 @@
 {
+  description = "Desktop shell for Caelestia dots";
+
   inputs = {
-    nixpkgs.url = "nixpkgs/nixos-unstable";
+    nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
+
     quickshell = {
       url = "git+https://git.outfoxxed.me/outfoxxed/quickshell";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+
+    app2unit = {
+      url = "github:soramanew/app2unit";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
+    caelestia-cli = {
+      url = "github:caelestia-dots/cli";
+      inputs.nixpkgs.follows = "nixpkgs";
+      inputs.app2unit.follows = "app2unit";
+      inputs.caelestia-shell.follows = "";
+    };
   };
 
-  # Use { self, ... } to easily access inputs and this flake's own outputs
-  outputs =
-    {
-      self,
-      nixpkgs,
-      quickshell,
-    }:
-    let
-      # Define system and pkgs once for reuse
-      system = "x86_64-linux";
-      pkgs = import nixpkgs {
-        inherit system;
+  outputs = {
+    self,
+    nixpkgs,
+    ...
+  } @ inputs: let
+    forAllSystems = fn:
+      nixpkgs.lib.genAttrs nixpkgs.lib.platforms.linux (
+        system: fn nixpkgs.legacyPackages.${system}
+      );
+  in {
+    formatter = forAllSystems (pkgs: pkgs.alejandra);
+
+    packages = forAllSystems (pkgs: rec {
+      caelestia-shell = pkgs.callPackage ./default.nix {
+        rev = self.rev or self.dirtyRev;
+        quickshell = inputs.quickshell.packages.${pkgs.system}.default.override {
+          withX11 = false;
+          withI3 = false;
+        };
+        app2unit = inputs.app2unit.packages.${pkgs.system}.default;
+        caelestia-cli = inputs.caelestia-cli.packages.${pkgs.system}.default;
       };
+      default = caelestia-shell;
+    });
 
-      # 1. Define your package as a local variable
-      caeshellRuntimeInputs = with pkgs; [
-        quickshell.packages.${system}.default
-        ddcutil
-        brightnessctl
-        cava
-        networkmanager
-        lm_sensors
-        qt6.qtdeclarative
-        material-symbols
-        nerd-fonts.jetbrains-mono
-        grim
-        swappy
-        pipewire
-        aubio
-        libqalculate
-        bluez
-        inotify-tools
-      ];
-
-      caeshellPkg = pkgs.stdenv.mkDerivation {
-        name = "caeshell";
-        version = "0.1.0";
-        src = ./.;
-
-        buildInputs = caeshellRuntimeInputs;
-
-        nativeBuildInputs = [
-          pkgs.makeWrapper
-          pkgs.qt6.wrapQtAppsHook
-          pkgs.pkg-config
-          # Use pkgs.pipewire.dev for development headers
-          pkgs.pipewire.dev
-        ];
-
-        doCheck = false;
-
-        buildPhase = ''
-          runHook preBuild
-          g++ -std=c++17 -Wall -Wextra -o beat_detector assets/beat_detector.cpp \
-            $(pkg-config --cflags --libs aubio libpipewire-0.3)
-          runHook postBuild
-        '';
-
-        installPhase = ''
-          runHook preInstall
-          # Create a bin directory for executables
-          mkdir -p $out/bin $out/lib
-          local runtime_path="${pkgs.lib.makeBinPath caeshellRuntimeInputs}:$out/lib"
-          # Copy library files and assets
-          cp -r $src/* $out/lib
-          # Copy the compiled binary
-          cp beat_detector $out/lib/beat_detector
-
-          # Wrap the main script and place it in $out/bin
-          makeWrapper $out/lib/run.sh $out/bin/caeshell \
-            --prefix PATH : "$runtime_path" \
-            --set CAELESTIA_BD_PATH "$out/lib/beat_detector"
-          runHook postInstall
-        '';
-      };
-
-    in
-    {
-      # 2. Expose the package using the variable
-      packages.${system} = {
-        default = caeshellPkg;
-        caeshell = caeshellPkg;
-      };
-      # 3. Pass the package variable into your module
-      homeModules.caeshell = import ./module.nix self;
-    };
+    devShells = forAllSystems (pkgs: {
+      default = let
+        shell = self.packages.${pkgs.system}.caelestia-shell;
+      in
+        pkgs.mkShellNoCC {
+          inputsFrom = [shell];
+          packages = [pkgs.material-symbols];
+          CAELESTIA_BD_PATH = "${shell}/bin/beat_detector";
+          QT_LOGGING_RULES = builtins.concatStringsSep ";" [
+            "quickshell.dbus.properties.warning=false"
+            "quickshell.dbus.dbusmenu.warning=false"
+            "quickshell.service.notifications.warning=false"
+            "quickshell.service.sni.host.warning=false"
+            "qt.qpa.wayland.textinput.warning=false"
+          ];
+        };
+    });
+  };
 }

@@ -1,6 +1,6 @@
-import "root:/widgets"
-import "root:/services"
-import "root:/config"
+import "items"
+import qs.services
+import qs.config
 import Quickshell
 import QtQuick
 import QtQuick.Controls
@@ -27,7 +27,7 @@ PathView {
         readonly property string search: root.search.text.split(" ").slice(1).join(" ")
 
         values: {
-            const list = Wallpapers.fuzzyQuery(search);
+            const list = Wallpapers.query(search);
             if (list.length > 1 && list.length % 2 === 0)
                 list.length -= 1; // Always show odd number
             return list;

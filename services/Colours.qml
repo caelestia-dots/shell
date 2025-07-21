@@ -1,7 +1,7 @@
 pragma Singleton
 
-import "root:/config"
-import "root:/utils"
+import qs.config
+import qs.utils
 import Quickshell
 import Quickshell.Io
 import QtQuick
@@ -15,9 +15,9 @@ Singleton {
     property string scheme
     property string flavour
     property bool light
-    readonly property Colours palette: showPreview ? preview : current
-    readonly property Colours current: Colours {}
-    readonly property Colours preview: Colours {}
+    readonly property M3Palette palette: showPreview ? preview : current
+    readonly property M3Palette current: M3Palette {}
+    readonly property M3Palette preview: M3Palette {}
     readonly property Transparency transparency: Transparency {}
 
     function alpha(c: color, layer: bool): color {
@@ -70,7 +70,7 @@ Singleton {
         readonly property real layers: 0.58
     }
 
-    component Colours: QtObject {
+    component M3Palette: QtObject {
         property color m3primary_paletteKeyColor: "#7870AB"
         property color m3secondary_paletteKeyColor: "#78748A"
         property color m3tertiary_paletteKeyColor: "#976A7D"
