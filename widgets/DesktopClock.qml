@@ -9,21 +9,12 @@ Item {
     width: timeText.implicitWidth + Appearance.padding.large * 2
     height: timeText.implicitHeight + Appearance.padding.large * 2
 
-    Timer {
-        id: timer
-        interval: 1000
-        running: true
-        repeat: true
-        onTriggered: {
-            timeText.text = Time.format("hh:mm:ss");
-        }
-    }
 
     StyledText {
         id: timeText
         anchors.centerIn: parent
         font.pointSize: Appearance.font.size.extraLarge
         font.bold: true
-        text: "--:--:--"
+        text: Time.format("hh:mm:ss");
     }
 }
