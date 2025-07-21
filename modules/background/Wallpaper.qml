@@ -144,7 +144,7 @@ Item {
     }
 
     DesktopClock {
-        visible: Appearance.desktopClockEnabled
+        visible: Appearance.desktopClock.enabled
         anchors.right: parent.right
         anchors.bottom: parent.bottom
         anchors.margins: Appearance.padding.large

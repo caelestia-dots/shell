@@ -1,5 +1,6 @@
 import QtQuick
 import QtQuick.Controls
+import qs.config
 
 Item {
     id: clockRoot
@@ -32,7 +33,7 @@ Item {
         id: timeText
         anchors.centerIn: parent
         font.pixelSize: 48
-        color: "white"
+        color: Appearance.desktopClock.color
         font.bold: true
         text: "--:--:--"
     }
