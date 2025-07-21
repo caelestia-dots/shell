@@ -12,7 +12,7 @@ Scope {
     readonly property Brightness.Monitor monitor: Brightness.getMonitorForScreen(screen)
 
     function show(): void {
-        root.visibilities.osd = true;
+        root.visibilities.osd = Config.osd.enabled;
         timer.restart();
     }
 

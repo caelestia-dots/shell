@@ -31,6 +31,9 @@ MouseArea {
     }
 
     function inRightPanel(panel: Item, x: real, y: real): bool {
+        if(!Config.osd.enabled) {
+            return false;
+        }
         return x > bar.implicitWidth + panel.x && withinPanelHeight(panel, x, y);
     }
 
