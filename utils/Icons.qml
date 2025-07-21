@@ -1,5 +1,6 @@
 pragma Singleton
 
+import qs.services
 import Quickshell
 import Quickshell.Io
 import Quickshell.Services.Notifications
@@ -150,13 +151,13 @@ Singleton {
     property string osIcon: ""
     property string osName
 
-    function getDesktopEntry(name: string): DesktopEntry {
+    function getDesktopEntry(name: string): var {
         name = name.toLowerCase().replace(/ /g, "-");
 
         if (desktopEntrySubs.hasOwnProperty(name))
             name = desktopEntrySubs[name];
 
-        return DesktopEntries.applications.values.find(a => a.id.toLowerCase() === name) ?? null;
+        return Apps.list.find(a => a.id.toLowerCase() === name) ?? null;
     }
 
     function getAppIcon(name: string, fallback: string): string {
