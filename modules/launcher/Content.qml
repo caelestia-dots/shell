@@ -102,6 +102,12 @@ Item {
             Keys.onDownPressed: list.currentList?.incrementCurrentIndex()
 
             Keys.onEscapePressed: root.visibilities.launcher = false
+            Keys.onPressed: {
+                if (event.key === Qt.Key_C && event.modifiers & Qt.ControlModifier) {
+                    root.visibilities.launcher = false;
+                    event.accepted = true;
+                }
+            }
 
             Connections {
                 target: root.visibilities
