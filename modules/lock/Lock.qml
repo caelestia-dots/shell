@@ -6,8 +6,15 @@ import Quickshell.Io
 import Quickshell.Wayland
 
 Scope {
+    id: root
+    property bool fprint
+
     LazyLoader {
         id: loader
+
+        onActiveChanged: {
+            proc.running = true;
+        }
 
         WlSessionLock {
             id: lock
@@ -23,6 +30,7 @@ Scope {
 
             LockSurface {
                 lock: lock
+                fprint: root.fprint
             }
         }
     }
@@ -52,6 +60,41 @@ Scope {
 
         function isLocked(): bool {
             return loader.active;
+        }
+    }
+
+    Process {
+        id: proc
+        running: true
+        command: ["sh", "-c", "if [ -f /etc/pam.d/caelestia ]; then echo true; else echo false; fi"]
+        stdout: StdioCollector {
+            onStreamFinished: {
+                root.fprint = text.includes("true");
+            }
+        }
+    }
+
+    CustomShortcut {
+        name: "useFprint"
+        description: "Use fprint"
+        onPressed: root.fprint = true
+    }
+
+    CustomShortcut {
+        name: "dontUseFprint"
+        description: "Use password only"
+        onPressed: root.fprint = false
+    }
+
+    IpcHandler {
+        target: "fprint"
+
+        function useFprint(): void {
+            root.fprint = true;
+        }
+
+        function dontUseFprint(): void {
+            root.fprint = false;
         }
     }
 }

@@ -10,6 +10,7 @@ WlSessionLockSurface {
     id: root
 
     required property WlSessionLock lock
+    required property bool fprint
 
     property bool thisLocked
     readonly property bool locked: thisLocked && !lock.unlocked
@@ -94,6 +95,7 @@ WlSessionLockSurface {
         anchors.topMargin: -backgrounds.inputTop
 
         lock: root
+        fprint: root.fprint
     }
 
     WeatherInfo {
