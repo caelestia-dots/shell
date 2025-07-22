@@ -28,6 +28,17 @@ ColumnLayout {
         }
     }
 
+    CustomShortcut {
+        // when WlSessionLock is active, used in hypridle when waking up
+        name: "restartFprint"
+        description: "Restart the pam service to use the fprint service"
+        onPressed: {
+            console.debug("called me");
+            pam.abort();
+            pam.start();
+        }
+    }
+
     RowLayout {
         Layout.alignment: Qt.AlignHCenter
         Layout.topMargin: Appearance.padding.large * 3
