@@ -33,7 +33,6 @@ ColumnLayout {
         name: "restartFprint"
         description: "Restart the pam service to use the fprint service"
         onPressed: {
-            console.debug("called me");
             pam.abort();
             pam.start();
         }
