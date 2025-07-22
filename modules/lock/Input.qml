@@ -13,14 +13,18 @@ ColumnLayout {
     id: root
 
     required property WlSessionLockSurface lock
+    required property bool fprint
 
     property string passwordBuffer
 
     spacing: Appearance.spacing.large * 2
 
     onLockChanged: {
-        if (lock) {
+        if (lock && fprint) {
             pam.start();
+        }
+        if (!lock) {
+            pam.abort();
         }
     }
 
@@ -93,13 +97,13 @@ ColumnLayout {
         }
 
         Keys.onPressed: event => {
-            if (pam.active && pam.config == qsTr("login"))
+            if (pam.active && !root.fprint)
                 return;
 
             if (event.key === Qt.Key_Enter || event.key === Qt.Key_Return) {
                 placeholder.animate = false;
                 pam.abort();
-                pam.config = qsTr("login"); // change connection method to stop using fprint
+                pam.config = "login";
                 pam.start();
             } else if (event.key === Qt.Key_Backspace) {
                 if (event.modifiers & Qt.ControlModifier) {
@@ -117,8 +121,8 @@ ColumnLayout {
         PamContext {
             id: pam
 
-            config: qsTr("only_fprint")
-            // to use fingerptint connection, your `only_fprint` file should contains:
+            config: root.fprint ? "caelestia" : "login"
+            // to use fingerptint connection, your `caelestia` file should contains:
             // auth sufficient pam_fprintd.so
             // auth required pam_unix.so
 
@@ -163,11 +167,10 @@ ColumnLayout {
 
             text: {
                 if (pam.active) {
-                    if (pam.config == qsTr("login")) {
-                        return qsTr("Loading...");
-                    }
-                    if (pam.config == qsTr("only_fprint")) {
+                    if (root.fprint && pam.config == "caelestia") {
                         return qsTr("Waiting fingerprint (start typing to cancel)");
+                    } else {
+                        return qsTr("Loading...");
                     }
                 }
                 if (pamState === "error")
