@@ -96,5 +96,9 @@ Scope {
         function dontUseFprint(): void {
             root.fprint = false;
         }
+
+        function isFprintUsed(): bool {
+            return root.fprint;
+        }
     }
 }
