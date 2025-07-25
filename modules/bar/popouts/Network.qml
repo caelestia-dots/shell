@@ -147,28 +147,6 @@ ColumnLayout {
                     }
                 }
             }
-
-            Loader {
-                asynchronous: true
-                active: networkItem.modelData.isSaved
-                sourceComponent: Item {
-                    implicitWidth: connectBtn.implicitWidth
-                    implicitHeight: connectBtn.implicitHeight
-
-                    StateLayer {
-                        radius: Appearance.rounding.full
-
-                        function onClicked(): void {
-                            Network.forgetNetwork(networkItem.modelData.ssid);
-                        }
-                    }
-
-                    MaterialIcon {
-                        anchors.centerIn: parent
-                        text: "delete"
-                    }
-                }
-            }
         }
     }
 
