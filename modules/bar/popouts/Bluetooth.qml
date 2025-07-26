@@ -232,4 +232,51 @@ ColumnLayout {
         easing.type: Easing.BezierSpline
         easing.bezierCurve: Appearance.anim.curves.standard
     }
+
+    StyledRect {
+        Layout.fillWidth: true
+        height: 40
+        radius: Appearance.rounding.normal
+        color: Colours.palette.m3surfaceContainer
+
+        StateLayer {
+            anchors.fill: parent
+            radius: parent.radius
+            color: Colours.palette.m3onSurface
+
+            function onClicked(): void {
+                // Try common bluetooth managers in order of preference
+                const managers = ["blueman-manager", "blueberry", "gnome-bluetooth", "bluetooth-sendto"];
+                for (const manager of managers) {
+                    try {
+                        Quickshell.execDetached([manager]);
+                        return;
+                    } catch (e) {
+                        continue;
+                    }
+                }
+                // Fallback to system settings
+                Quickshell.execDetached(["systemsettings5", "bluetooth"]);
+            }
+        }
+
+        Row {
+            anchors.centerIn: parent
+            spacing: Appearance.spacing.small
+            width: parent.width - Appearance.padding.large * 2
+
+            MaterialIcon {
+                text: "settings"
+                color: Colours.palette.m3onSurface
+                anchors.verticalCenter: parent.verticalCenter
+            }
+
+            StyledText {
+                width: parent.width
+                text: qsTr("Settings")
+                color: Colours.palette.m3onSurface
+                anchors.verticalCenter: parent.verticalCenter
+            }
+        }
+    }
 }
