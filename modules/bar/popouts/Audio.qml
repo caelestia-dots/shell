@@ -1,17 +1,15 @@
-import "root:/widgets"
-import "root:/services"
-import "root:/config"
-import QtQuick
-import QtQuick.Controls
+import qs.widgets
+import qs.services
+import qs.config
 import QtQuick.Layouts
 import Quickshell
 
-
-Column {
+ColumnLayout {
     id: root
 
+    required property var wrapper
+
     spacing: Appearance.spacing.normal
-    width: Math.max(volumeSlider.implicitWidth, pavuButton.implicitWidth)
 
     VerticalSlider {
         id: volumeSlider
@@ -33,38 +31,27 @@ Column {
         implicitHeight: Config.osd.sizes.sliderHeight
     }
 
-    Rectangle {
-        width: parent.width
-        height: 1
-        color: Qt.rgba(1, 1, 1, 0.1)
-        visible: true
-    }
-
     StyledRect {
         id: pavuButton
-        width: parent.width
-        height: 40
+
+        implicitWidth: implicitHeight
+        implicitHeight: icon.implicitHeight + Appearance.padding.small * 2
+
         radius: Appearance.rounding.normal
         color: Colours.palette.m3surfaceContainer
 
         StateLayer {
-            radius: parent.radius
-            color: Colours.palette.m3onSurface
             function onClicked(): void {
+                root.wrapper.hasCurrent = false;
                 Quickshell.execDetached(["pavucontrol"]);
             }
         }
 
-        Row {
-            anchors.centerIn: parent
-            spacing: 0
-            width: parent.width - Appearance.padding.small * 2
+        MaterialIcon {
+            id: icon
 
-            MaterialIcon {
-                text: "settings"
-                color: Colours.palette.m3onSurface
-                anchors.verticalCenter: parent.verticalCenter
-            }
+            anchors.centerIn: parent
+            text: "settings"
         }
     }
 }

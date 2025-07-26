@@ -47,7 +47,9 @@ Item {
 
         Popout {
             name: "audio"
-            source: "Audio.qml"
+            sourceComponent: Audio {
+                wrapper: root.wrapper
+            }
         }
 
         Repeater {
