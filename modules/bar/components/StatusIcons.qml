@@ -6,37 +6,33 @@ import Quickshell
 import Quickshell.Bluetooth
 import Quickshell.Services.UPower
 import QtQuick
+import QtQuick.Layouts
 
 Item {
     id: root
 
     property color colour: Colours.palette.m3secondary
 
-    property bool showAudio: false
-    property bool showNetwork: true
-    property bool showBluetooth: true
-    property bool showBattery: true
-
-    readonly property var hoverAreas: [
+    readonly property list<var> hoverAreas: [
         {
             name: "audio",
             item: audioIcon,
-            enabled: showAudio && audioIcon.visible
+            enabled: Config.bar.status.showAudio && audioIcon.visible
         },
         {
-            name: "network", 
+            name: "network",
             item: networkIcon,
-            enabled: showNetwork && networkIcon.visible
+            enabled: Config.bar.status.showNetwork && networkIcon.visible
         },
         {
             name: "bluetooth",
             item: bluetoothGroup,
-            enabled: showBluetooth && (bluetoothIcon.visible || bluetoothDevices.visible)
+            enabled: Config.bar.status.showBluetooth && (bluetoothIcon.visible || bluetoothDevices.visible)
         },
         {
             name: "battery",
             item: batteryIcon,
-            enabled: showBattery && batteryIcon.visible
+            enabled: Config.bar.status.showBattery && batteryIcon.visible
         }
     ]
 
@@ -44,9 +40,9 @@ Item {
     implicitWidth: iconColumn.implicitWidth
     implicitHeight: iconColumn.implicitHeight
 
-    Column {
+    ColumnLayout {
         id: iconColumn
-        
+
         anchors.horizontalCenter: parent.horizontalCenter
         spacing: Appearance.spacing.smaller / 2
 
@@ -54,11 +50,9 @@ Item {
         MaterialIcon {
             id: audioIcon
             objectName: "audio"
-            visible: root.showAudio
+            visible: Config.bar.status.showAudio
             animate: true
-            text: Audio.muted ? "volume_off" :
-                Audio.volume >= 0.66 ? "volume_up" :
-                Audio.volume >= 0.33 ? "volume_down" : "volume_mute"
+            text: Audio.muted ? "volume_off" : Audio.volume >= 0.66 ? "volume_up" : Audio.volume >= 0.33 ? "volume_down" : "volume_mute"
             color: root.colour
         }
 
@@ -66,7 +60,7 @@ Item {
         MaterialIcon {
             id: networkIcon
             objectName: "network"
-            visible: root.showNetwork
+            visible: Config.bar.status.showNetwork
             animate: true
             text: Network.active ? Icons.getNetworkIcon(Network.active.strength ?? 0) : "wifi_off"
             color: root.colour
@@ -75,7 +69,7 @@ Item {
         // Bluetooth section (grouped for hover area)
         Item {
             id: bluetoothGroup
-            visible: root.showBluetooth
+            visible: Config.bar.status.showBluetooth
             implicitWidth: Math.max(bluetoothIcon.implicitWidth, bluetoothDevices.implicitWidth)
             implicitHeight: bluetoothIcon.implicitHeight + (bluetoothDevices.visible ? bluetoothDevices.implicitHeight + bluetoothDevices.anchors.topMargin : 0)
 
@@ -83,7 +77,7 @@ Item {
             MaterialIcon {
                 id: bluetoothIcon
                 objectName: "bluetooth"
-                visible: root.showBluetooth
+                visible: Config.bar.status.showBluetooth
                 animate: true
                 text: Bluetooth.powered ? "bluetooth" : "bluetooth_disabled"
                 color: root.colour
@@ -119,7 +113,7 @@ Item {
         MaterialIcon {
             id: batteryIcon
             objectName: "battery"
-            visible: root.showBattery
+            visible: Config.bar.status.showBattery
             animate: true
             text: {
                 if (!UPower.displayDevice.isLaptopBattery) {
