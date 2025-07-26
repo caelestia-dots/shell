@@ -39,12 +39,11 @@ ColumnLayout {
 
     Repeater {
         model: ScriptModel {
-            values: [...Network.networks]
-                .sort((a, b) => {
-                    if (a.active !== b.active) return b.active - a.active;
-                    return b.strength - a.strength;
-                })
-                .slice(0, 8)
+            values: [...Network.networks].sort((a, b) => {
+                if (a.active !== b.active)
+                    return b.active - a.active;
+                return b.strength - a.strength;
+            }).slice(0, 8)
         }
 
         RowLayout {
@@ -159,7 +158,7 @@ ColumnLayout {
         color: Network.scanning ? Colours.palette.m3surfaceContainer : Colours.palette.m3primaryContainer
 
         StateLayer {
-            color: Network.scanning ? Colours.palette.m3onSurfaceContainer : Colours.palette.m3onPrimaryContainer
+            color: Network.scanning ? Colours.palette.m3onSurface : Colours.palette.m3onPrimaryContainer
             enabled: !Network.scanning && Network.wifiEnabled
 
             function onClicked(): void {
@@ -174,7 +173,7 @@ ColumnLayout {
 
             MaterialIcon {
                 text: Network.scanning ? "refresh" : "wifi_find"
-                color: Network.scanning ? Colours.palette.m3onSurfaceContainer : Colours.palette.m3onPrimaryContainer
+                color: Network.scanning ? Colours.palette.m3onSurface : Colours.palette.m3onPrimaryContainer
 
                 RotationAnimation on rotation {
                     running: Network.scanning
@@ -187,7 +186,7 @@ ColumnLayout {
 
             StyledText {
                 text: Network.scanning ? qsTr("Scanning...") : qsTr("Rescan networks")
-                color: Network.scanning ? Colours.palette.m3onSurfaceContainer : Colours.palette.m3onPrimaryContainer
+                color: Network.scanning ? Colours.palette.m3onSurface : Colours.palette.m3onPrimaryContainer
             }
         }
     }
@@ -199,23 +198,6 @@ ColumnLayout {
         function onActiveChanged(): void {
             if (Network.active && root.connectingToSsid === Network.active.ssid) {
                 root.connectingToSsid = "";
-            }
-        }
-    }
-
-    StyledRect {
-        Layout.topMargin: Appearance.spacing.small
-        implicitWidth: expandBtn.implicitWidth + Appearance.padding.normal * 2
-        implicitHeight: expandBtn.implicitHeight + Appearance.padding.small
-
-        radius: Appearance.rounding.normal
-        color: Colours.palette.m3primaryContainer
-
-        StateLayer {
-            color: Colours.palette.m3onPrimaryContainer
-
-            function onClicked(): void {
-                root.wrapper.detach("bluetooth");
             }
         }
     }
