@@ -65,17 +65,6 @@ Item {
             text: Network.active ? Icons.getNetworkIcon(Network.active.strength ?? 0) : "wifi_off"
             color: root.colour
         }
-        MaterialIcon {
-            id: bluetooth
-
-            anchors.horizontalCenter: network.horizontalCenter
-            anchors.top: network.bottom
-            anchors.topMargin: Appearance.spacing.smaller / 2
-
-            animate: true
-            text: Bluetooth.defaultAdapter?.enabled ? "bluetooth" : "bluetooth_disabled"
-            color: root.colour
-        }
 
         // Bluetooth section (grouped for hover area)
         Item {
@@ -90,7 +79,7 @@ Item {
                 objectName: "bluetooth"
                 visible: Config.bar.status.showBluetooth
                 animate: true
-                text: Bluetooth.powered ? "bluetooth" : "bluetooth_disabled"
+                text: Bluetooth.defaultAdapter?.enabled ? "bluetooth" : "bluetooth_disabled"
                 color: root.colour
                 anchors.horizontalCenter: parent.horizontalCenter
             }
@@ -106,11 +95,12 @@ Item {
 
                 Repeater {
                     model: ScriptModel {
-                        values: Bluetooth.devices.filter(d => d.connected)
+                        values: Bluetooth.devices.values.filter(d => d.connected)
                     }
 
                     MaterialIcon {
-                        required property Bluetooth.Device modelData
+                        required property BluetoothDevice modelData
+
                         animate: true
                         text: Icons.getBluetoothIcon(modelData.icon)
                         color: root.colour
