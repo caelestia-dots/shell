@@ -26,12 +26,13 @@ Item {
         // Check status icons hover areas
         let statusIconFound = false;
         for (const area of statusIconsInner.hoverAreas) {
-            if (!area.enabled) continue;
-            
+            if (!area.enabled)
+                continue;
+
             const item = area.item;
             const itemY = statusIcons.y + statusIconsInner.y + item.y - spacing / 2;
             const itemHeight = item.implicitHeight + spacing;
-            
+
             if (y >= itemY && y <= itemY + itemHeight) {
                 popouts.currentName = area.name;
                 popouts.currentCenter = Qt.binding(() => statusIcons.y + statusIconsInner.y + item.y + item.implicitHeight / 2);
