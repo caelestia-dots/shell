@@ -10,13 +10,15 @@ import QtQuick
 import QtQuick.Layouts
 
 WrapperItem {
-    readonly property real nonAnimWidth: (notifs.count > 0 ? Config.notifs.sizes.width : status.implicitWidth) + margin
+    property alias showNotifs: notifs.active
+
+    readonly property real nonAnimWidth: (notifs.item?.count > 0 ? Config.notifs.sizes.width : status.implicitWidth) + margin
     readonly property real nonAnimHeight: {
-        if (notifs.count > 0) {
-            const count = Math.min(notifs.count, Config.lock.maxNotifs);
+        if (notifs.active && notifs.item.count > 0) {
+            const count = Math.min(notifs.item.count, Config.lock.maxNotifs);
             let height = status.implicitHeight + Appearance.spacing.normal + Appearance.spacing.smaller * (count - 1);
             for (let i = 0; i < count; i++)
-                height += notifs.itemAtIndex(i)?.nonAnimHeight ?? 0;
+                height += notifs.item.itemAtIndex(i)?.nonAnimHeight ?? 0;
             return height + margin;
         }
 
@@ -33,7 +35,7 @@ WrapperItem {
     Timer {
         running: true
         interval: 10
-        onTriggered: notifs.countChanged()
+        onTriggered: notifs.item?.countChanged()
     }
 
     Behavior on implicitWidth {
@@ -118,112 +120,114 @@ WrapperItem {
             }
         }
 
-        ListView {
+        Loader {
             id: notifs
 
             Layout.fillWidth: true
             Layout.fillHeight: true
 
-            model: ScriptModel {
-                values: [...Notifs.list].reverse()
-            }
-
-            orientation: Qt.Vertical
-            spacing: 0
-            clip: true
-            interactive: false
-
-            delegate: Item {
-                id: wrapper
-
-                required property Notifs.Notif modelData
-                required property int index
-                readonly property alias nonAnimHeight: notif.nonAnimHeight
-                property int idx
-
-                onIndexChanged: {
-                    if (index !== -1)
-                        idx = index;
+            sourceComponent: ListView {
+                model: ScriptModel {
+                    values: [...Notifs.list].reverse()
                 }
 
-                implicitWidth: notif.implicitWidth
-                implicitHeight: notif.nonAnimHeight + (idx === 0 ? 0 : Appearance.spacing.smaller)
+                orientation: Qt.Vertical
+                spacing: 0
+                clip: true
+                interactive: false
 
-                ListView.onRemove: removeAnim.start()
+                delegate: Item {
+                    id: wrapper
 
-                SequentialAnimation {
-                    id: removeAnim
+                    required property Notifs.Notif modelData
+                    required property int index
+                    readonly property alias nonAnimHeight: notif.nonAnimHeight
+                    property int idx
 
-                    PropertyAction {
-                        target: wrapper
-                        property: "ListView.delayRemove"
-                        value: true
+                    onIndexChanged: {
+                        if (index !== -1)
+                            idx = index;
                     }
-                    PropertyAction {
-                        target: wrapper
-                        property: "enabled"
-                        value: false
+
+                    implicitWidth: notif.implicitWidth
+                    implicitHeight: notif.nonAnimHeight + (idx === 0 ? 0 : Appearance.spacing.smaller)
+
+                    ListView.onRemove: removeAnim.start()
+
+                    SequentialAnimation {
+                        id: removeAnim
+
+                        PropertyAction {
+                            target: wrapper
+                            property: "ListView.delayRemove"
+                            value: true
+                        }
+                        PropertyAction {
+                            target: wrapper
+                            property: "enabled"
+                            value: false
+                        }
+                        PropertyAction {
+                            target: wrapper
+                            property: "implicitHeight"
+                            value: 0
+                        }
+                        PropertyAction {
+                            target: wrapper
+                            property: "z"
+                            value: 1
+                        }
+                        Anim {
+                            target: notif
+                            property: "x"
+                            to: (notif.x >= 0 ? Config.notifs.sizes.width : -Config.notifs.sizes.width) * 2
+                            duration: Appearance.anim.durations.normal
+                            easing.bezierCurve: Appearance.anim.curves.emphasized
+                        }
+                        PropertyAction {
+                            target: wrapper
+                            property: "ListView.delayRemove"
+                            value: false
+                        }
                     }
-                    PropertyAction {
-                        target: wrapper
-                        property: "implicitHeight"
-                        value: 0
+
+                    ClippingRectangle {
+                        anchors.top: parent.top
+                        anchors.topMargin: wrapper.idx === 0 ? 0 : Appearance.spacing.smaller
+
+                        color: "transparent"
+                        radius: notif.radius
+                        implicitWidth: notif.implicitWidth
+                        implicitHeight: notif.nonAnimHeight
+
+                        Notification {
+                            id: notif
+
+                            modelData: wrapper.modelData
+                        }
                     }
-                    PropertyAction {
-                        target: wrapper
-                        property: "z"
-                        value: 1
-                    }
+                }
+
+                move: Transition {
                     Anim {
-                        target: notif
-                        property: "x"
-                        to: (notif.x >= 0 ? Config.notifs.sizes.width : -Config.notifs.sizes.width) * 2
-                        duration: Appearance.anim.durations.normal
+                        property: "y"
+                        duration: Appearance.anim.durations.large
                         easing.bezierCurve: Appearance.anim.curves.emphasized
                     }
-                    PropertyAction {
-                        target: wrapper
-                        property: "ListView.delayRemove"
-                        value: false
+                }
+
+                displaced: Transition {
+                    Anim {
+                        property: "y"
+                        duration: Appearance.anim.durations.large
+                        easing.bezierCurve: Appearance.anim.curves.emphasized
                     }
                 }
 
-                ClippingRectangle {
-                    anchors.top: parent.top
-                    anchors.topMargin: wrapper.idx === 0 ? 0 : Appearance.spacing.smaller
-
-                    color: "transparent"
-                    radius: notif.radius
-                    implicitWidth: notif.implicitWidth
-                    implicitHeight: notif.nonAnimHeight
-
-                    Notification {
-                        id: notif
-
-                        modelData: wrapper.modelData
-                    }
+                ExtraIndicator {
+                    anchors.bottom: parent.bottom
+                    extra: Notifs.list.length - Config.lock.maxNotifs
                 }
-            }
-
-            move: Transition {
-                Anim {
-                    property: "y"
-                    duration: Appearance.anim.durations.large
-                    easing.bezierCurve: Appearance.anim.curves.emphasized
-                }
-            }
-
-            displaced: Transition {
-                Anim {
-                    property: "y"
-                    duration: Appearance.anim.durations.large
-                    easing.bezierCurve: Appearance.anim.curves.emphasized
-                }
-            }
-
-            ExtraIndicator {
-                anchors.bottom: parent.bottom
-                extra: Notifs.list.length - Config.lock.maxNotifs
             }
         }
     }

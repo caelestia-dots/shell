@@ -114,7 +114,7 @@ Variants {
                 property bool dashboard
                 property bool utilities
 
-                Component.onCompleted: Visibilities.screens[scope.modelData] = this
+                Component.onCompleted: Visibilities.load(scope.modelData, this)
             }
 
             Interactions {

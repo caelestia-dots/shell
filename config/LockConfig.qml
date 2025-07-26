@@ -22,7 +22,7 @@ JsonObject {
         property int mediaCoverBorder: 3
         property int largeScreenWidth: 2560
         property int smallScreenWidth: 1080
-        property int buttonsWidth: 500
+        property int buttonsWidth: 400
         property int buttonsWidthSmall: 300
     }
 }

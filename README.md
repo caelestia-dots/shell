@@ -66,6 +66,11 @@ g++ -std=c++17 -Wall -Wextra -I/usr/include/pipewire-0.3 -I/usr/include/spa-0.2 
 sudo mv beat_detector /usr/lib/caelestia/beat_detector
 ```
 
+> [!TIP]
+> The beat detector can actually be installed anywhere. However, if it is not installed to the default
+> location of `/usr/lib/caelestia/beat_detector`, you must set the environment variable `CAELESTIA_BD_PATH`
+> to wherever you have installed the beat detector.
+
 ## Usage
 
 The shell can be started via the `caelestia shell -d` command or `qs -c caelestia`.
@@ -146,6 +151,9 @@ All configuration options are in `~/.config/caelestia/shell.json`.
 
 ```json
 {
+    "background": {
+        "enabled": true
+    },
     "bar": {
         "dragThreshold": 20,
         "persistent": true,

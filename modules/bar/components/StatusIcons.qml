@@ -65,6 +65,17 @@ Item {
             text: Network.active ? Icons.getNetworkIcon(Network.active.strength ?? 0) : "wifi_off"
             color: root.colour
         }
+        MaterialIcon {
+            id: bluetooth
+
+            anchors.horizontalCenter: network.horizontalCenter
+            anchors.top: network.bottom
+            anchors.topMargin: Appearance.spacing.smaller / 2
+
+            animate: true
+            text: Bluetooth.defaultAdapter?.enabled ? "bluetooth" : "bluetooth_disabled"
+            color: root.colour
+        }
 
         // Bluetooth section (grouped for hover area)
         Item {

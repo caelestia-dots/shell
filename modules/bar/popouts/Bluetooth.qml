@@ -1,39 +1,76 @@
 pragma ComponentBehavior: Bound
 
 import qs.widgets
+import qs.services
 import qs.config
 import qs.utils
 import Quickshell
 import Quickshell.Bluetooth
 import QtQuick
 import QtQuick.Layouts
-import QtQuick.Controls
 
 ColumnLayout {
     id: root
 
-    spacing: Appearance.spacing.normal
+    required property Item wrapper
+
+    spacing: Appearance.spacing.small
 
     StyledText {
-        text: qsTr("Bluetooth %1").arg(BluetoothAdapterState.toString(Bluetooth.defaultAdapter.state).toLowerCase())
+        Layout.topMargin: Appearance.padding.normal
+        Layout.rightMargin: Appearance.padding.small
+        text: qsTr("Bluetooth %1").arg(BluetoothAdapterState.toString(Bluetooth.defaultAdapter?.state).toLowerCase())
+        font.weight: 500
+    }
+
+    Toggle {
+        label: qsTr("Enabled")
+        checked: Bluetooth.defaultAdapter?.enabled ?? false
+        toggle.onToggled: {
+            const adapter = Bluetooth.defaultAdapter;
+            if (adapter)
+                adapter.enabled = checked;
+        }
+    }
+
+    Toggle {
+        label: qsTr("Discovering")
+        checked: Bluetooth.defaultAdapter?.discovering ?? false
+        toggle.onToggled: {
+            const adapter = Bluetooth.defaultAdapter;
+            if (adapter)
+                adapter.discovering = checked;
+        }
     }
 
     StyledText {
-        text: qsTr("%n connected device(s)", "", Bluetooth.devices.values.filter(d => d.connected).length)
+        Layout.topMargin: Appearance.spacing.small
+        Layout.rightMargin: Appearance.padding.small
+        text: {
+            const devices = Bluetooth.devices.values;
+            let available = qsTr("%1 device%2 available").arg(devices.length).arg(devices.length === 1 ? "" : "s");
+            const connected = devices.filter(d => d.connected).length;
+            if (connected > 0)
+                available += qsTr(" (%1 connected)").arg(connected);
+            return available;
+        }
+        color: Colours.palette.m3onSurfaceVariant
+        font.pointSize: Appearance.font.size.small
     }
 
     Repeater {
         model: ScriptModel {
-            values: [...Bluetooth.devices.values].sort((a, b) => (b.connected - a.connected) || (b.paired - a.paired))
+            values: [...Bluetooth.devices.values].sort((a, b) => (b.connected - a.connected) || (b.paired - a.paired)).slice(0, 5)
         }
 
         RowLayout {
             id: device
 
-            required property var modelData
+            required property BluetoothDevice modelData
             readonly property bool loading: device.modelData.state === BluetoothDeviceState.Connecting || device.modelData.state === BluetoothDeviceState.Disconnecting
 
             Layout.fillWidth: true
+            Layout.rightMargin: Appearance.padding.small
             spacing: Appearance.spacing.small
 
             opacity: 0
@@ -57,25 +94,27 @@ ColumnLayout {
             }
 
             StyledText {
+                Layout.leftMargin: Appearance.spacing.small / 2
+                Layout.rightMargin: Appearance.spacing.small / 2
                 Layout.fillWidth: true
                 text: device.modelData.name
             }
 
-            Item {
+            StyledRect {
                 id: connectBtn
 
-                implicitWidth: loadingIndicator.implicitWidth - Appearance.padding.small * 2
-                implicitHeight: loadingIndicator.implicitHeight - Appearance.padding.small * 2
+                implicitWidth: implicitHeight
+                implicitHeight: connectIcon.implicitHeight + Appearance.padding.small
 
-                BusyIndicator {
-                    id: loadingIndicator
+                radius: Appearance.rounding.full
+                color: device.modelData.state === BluetoothDeviceState.Connected ? Colours.palette.m3primary : Colours.palette.m3surface
 
+                StyledBusyIndicator {
                     anchors.centerIn: parent
 
-                    implicitWidth: Appearance.font.size.large * 2 + Appearance.padding.small * 2
-                    implicitHeight: Appearance.font.size.large * 2 + Appearance.padding.small * 2
+                    implicitWidth: implicitHeight
+                    implicitHeight: connectIcon.implicitHeight
 
-                    background: null
                     running: opacity > 0
                     opacity: device.loading ? 1 : 0
 
@@ -85,7 +124,7 @@ ColumnLayout {
                 }
 
                 StateLayer {
-                    radius: Appearance.rounding.full
+                    color: device.modelData.state === BluetoothDeviceState.Connected ? Colours.palette.m3onPrimary : Colours.palette.m3onSurface
                     disabled: device.loading
 
                     function onClicked(): void {
@@ -94,23 +133,24 @@ ColumnLayout {
                 }
 
                 MaterialIcon {
+                    id: connectIcon
+
                     anchors.centerIn: parent
                     animate: true
                     text: device.modelData.connected ? "link_off" : "link"
+                    color: device.modelData.state === BluetoothDeviceState.Connected ? Colours.palette.m3onPrimary : Colours.palette.m3onSurface
 
-                    font.pointSize: device.loading ? Appearance.font.size.normal : Appearance.font.size.larger
+                    opacity: device.loading ? 0 : 1
 
-                    Behavior on font.pointSize {
-                        Anim {
-                            duration: Appearance.anim.durations.small
-                        }
+                    Behavior on opacity {
+                        Anim {}
                     }
                 }
             }
 
             Loader {
                 asynchronous: true
-                active: device.modelData.paired
+                active: device.modelData.bonded
                 sourceComponent: Item {
                     implicitWidth: connectBtn.implicitWidth
                     implicitHeight: connectBtn.implicitHeight
@@ -129,6 +169,61 @@ ColumnLayout {
                     }
                 }
             }
+        }
+    }
+
+    StyledRect {
+        Layout.topMargin: Appearance.spacing.small
+        implicitWidth: expandBtn.implicitWidth + Appearance.padding.normal * 2
+        implicitHeight: expandBtn.implicitHeight + Appearance.padding.small
+
+        radius: Appearance.rounding.normal
+        color: Colours.palette.m3primaryContainer
+
+        StateLayer {
+            color: Colours.palette.m3onPrimaryContainer
+
+            function onClicked(): void {
+                root.wrapper.detach("bluetooth");
+            }
+        }
+
+        RowLayout {
+            id: expandBtn
+
+            anchors.centerIn: parent
+            spacing: Appearance.spacing.small
+
+            StyledText {
+                Layout.leftMargin: Appearance.padding.smaller
+                text: qsTr("Open panel")
+                color: Colours.palette.m3onPrimaryContainer
+            }
+
+            MaterialIcon {
+                text: "chevron_right"
+                color: Colours.palette.m3onPrimaryContainer
+                font.pointSize: Appearance.font.size.large
+            }
+        }
+    }
+
+    component Toggle: RowLayout {
+        required property string label
+        property alias checked: toggle.checked
+        property alias toggle: toggle
+
+        Layout.fillWidth: true
+        Layout.rightMargin: Appearance.padding.small
+        spacing: Appearance.spacing.normal
+
+        StyledText {
+            Layout.fillWidth: true
+            text: parent.label
+        }
+
+        StyledSwitch {
+            id: toggle
         }
     }
 

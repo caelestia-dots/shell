@@ -17,7 +17,7 @@ Item {
         readonly property FileDialog facePicker: FileDialog {
             title: qsTr("Select a profile picture")
             filterLabel: qsTr("Image files")
-            filters: Wallpapers.extensions
+            filters: Images.validImageExtensions
             onAccepted: path => {
                 Paths.copy(path, `${Paths.home}/.face`);
                 Quickshell.execDetached(["notify-send", "-a", "caelestia-shell", "-u", "low", "-h", `STRING:image-path:${path}`, "Profile picture changed", `Profile picture changed to ${Paths.shortenHome(path)}`]);

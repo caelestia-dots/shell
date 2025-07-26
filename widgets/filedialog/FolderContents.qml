@@ -6,10 +6,10 @@ import qs.config
 import qs.utils
 import Quickshell
 import Quickshell.Io
-import Quickshell.Widgets
 import QtQuick
 import QtQuick.Layouts
 import QtQuick.Effects
+import QtQuick.Controls
 import Qt.labs.folderlistmodel
 
 Item {
@@ -91,6 +91,8 @@ Item {
                 root.dialog.accepted(currentItem.filePath);
         }
 
+        ScrollBar.vertical: StyledScrollBar {}
+
         model: FolderListModel {
             showDirsFirst: true
             folder: {
@@ -137,7 +139,7 @@ Item {
                 }
             }
 
-            IconImage {
+            CachingIconImage {
                 id: icon
 
                 anchors.horizontalCenter: parent.horizontalCenter
@@ -168,7 +170,7 @@ Item {
                     stdout: StdioCollector {
                         onStreamFinished: {
                             const mime = text.split(";")[0].replace("/", "-");
-                            icon.source = mime.startsWith("image-") ? item.fileUrl : Quickshell.iconPath(mime, "image-missing");
+                            icon.source = Images.validImageTypes.some(t => mime === `image-${t}`) ? item.fileUrl : Quickshell.iconPath(mime, "image-missing");
                         }
                     }
                 }

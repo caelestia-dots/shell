@@ -3,6 +3,7 @@ pragma ComponentBehavior: Bound
 import qs.services
 import qs.config
 import qs.modules.windowinfo
+import qs.modules.detachedcontent
 import Quickshell
 import Quickshell.Wayland
 import Quickshell.Hyprland
@@ -21,6 +22,7 @@ Item {
     property bool hasCurrent
 
     property string detachedMode
+    property string queuedMode
     readonly property bool isDetached: detachedMode.length > 0
 
     property int animLength: Appearance.anim.durations.normal
@@ -28,7 +30,12 @@ Item {
 
     function detach(mode: string): void {
         animLength = Appearance.anim.durations.large;
-        detachedMode = mode;
+        if (mode === "winfo") {
+            detachedMode = mode;
+        } else {
+            detachedMode = "any";
+            queuedMode = mode;
+        }
         focus = true;
     }
 
@@ -72,10 +79,6 @@ Item {
 
         sourceComponent: Content {
             wrapper: root
-            screen: root.screen
-            currentName: root.currentName
-            currentCenter: root.currentCenter
-            hasCurrent: root.hasCurrent
         }
     }
 
@@ -87,6 +90,19 @@ Item {
         sourceComponent: WindowInfo {
             screen: root.screen
             client: Hyprland.activeToplevel
+        }
+    }
+
+    Comp {
+        id: detachedContent
+
+        shouldBeActive: root.detachedMode === "any"
+        asynchronous: true
+        anchors.centerIn: parent
+
+        sourceComponent: DetachedContent {
+            screen: root.screen
+            active: root.queuedMode
         }
     }
 

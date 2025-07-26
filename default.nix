@@ -23,6 +23,7 @@
   findutils,
   file,
   material-symbols,
+  nerd-fonts,
   gcc,
   quickshell,
   aubio,
@@ -54,7 +55,7 @@
     ++ lib.optional withCli caelestia-cli;
 
   fontconfig = makeFontsConf {
-    fontDirectories = [material-symbols];
+    fontDirectories = [material-symbols nerd-fonts.jetbrains-mono];
   };
 in
   stdenv.mkDerivation {

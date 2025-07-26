@@ -53,13 +53,15 @@ MouseArea {
                 visibilities.osd = false;
                 osdHovered = false;
             }
-            if (!dashboardShortcutActive) {
+
+            if (!dashboardShortcutActive)
                 visibilities.dashboard = false;
-            }
-            if (!utilitiesShortcutActive) {
+
+            if (!utilitiesShortcutActive)
                 visibilities.utilities = false;
-            }
-            popouts.hasCurrent = false;
+
+            if (!popouts.currentName.startsWith("traymenu"))
+                popouts.hasCurrent = false;
 
             if (Config.bar.showOnHover)
                 bar.isHovered = false;
@@ -71,18 +73,16 @@ MouseArea {
         const y = event.y;
 
         // Show bar in non-exclusive mode on hover
-        if (!visibilities.bar && Config.bar.showOnHover && x < bar.implicitWidth) {
+        if (!visibilities.bar && Config.bar.showOnHover && x < bar.implicitWidth)
             bar.isHovered = true;
-        }
 
         // Show/hide bar on drag
         if (pressed && dragStart.x < bar.implicitWidth) {
             const dragX = x - dragStart.x;
-            if (dragX > Config.bar.dragThreshold) {
+            if (dragX > Config.bar.dragThreshold)
                 visibilities.bar = true;
-            } else if (dragX < -Config.bar.dragThreshold) {
+            else if (dragX < -Config.bar.dragThreshold)
                 visibilities.bar = false;
-            }
         }
 
         // Show osd on hover
@@ -139,16 +139,8 @@ MouseArea {
         }
 
         // Show popouts on hover
-        const popout = panels.popouts;
-        if (x < bar.implicitWidth + popout.width) {
-            if (x < bar.implicitWidth)
-                // Handle like part of bar
-                bar.checkPopout(y);
-            else
-                // Keep on hover
-                popouts.hasCurrent = withinPanelHeight(popout, x, y);
-        } else
-            popouts.hasCurrent = false;
+        if (x < bar.implicitWidth)
+            bar.checkPopout(y);
     }
 
     // Monitor individual visibility changes

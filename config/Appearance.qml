@@ -9,7 +9,7 @@ Singleton {
     readonly property Rounding rounding: Rounding {}
     readonly property Spacing spacing: Spacing {}
     readonly property Padding padding: Padding {}
-    readonly property Font font: Font {}
+    readonly property FontStuff font: FontStuff {}
     readonly property Anim anim: Anim {}
 
     component Rounding: QtObject {
@@ -50,7 +50,7 @@ Singleton {
         readonly property int extraLarge: 28
     }
 
-    component Font: QtObject {
+    component FontStuff: QtObject {
         readonly property FontFamily family: FontFamily {}
         readonly property FontSize size: FontSize {}
     }

@@ -1,26 +1,43 @@
 import qs.widgets
+import qs.config
 import Quickshell
 import Quickshell.Wayland
+import QtQuick
 
-Variants {
-    model: Quickshell.screens
+LazyLoader {
+    active: Config.background.enabled
 
-    StyledWindow {
-        id: win
+    Variants {
+        model: Quickshell.screens
 
-        required property ShellScreen modelData
+        StyledWindow {
+            id: win
 
-        screen: modelData
-        name: "background"
-        WlrLayershell.exclusionMode: ExclusionMode.Ignore
-        WlrLayershell.layer: WlrLayer.Background
-        color: "black"
+            required property ShellScreen modelData
 
-        anchors.top: true
-        anchors.bottom: true
-        anchors.left: true
-        anchors.right: true
+            screen: modelData
+            name: "background"
+            WlrLayershell.exclusionMode: ExclusionMode.Ignore
+            WlrLayershell.layer: WlrLayer.Background
+            color: "black"
 
-        Wallpaper {}
+            anchors.top: true
+            anchors.bottom: true
+            anchors.left: true
+            anchors.right: true
+
+            Wallpaper {}
+
+            Loader {
+                anchors.right: parent.right
+                anchors.bottom: parent.bottom
+                anchors.margins: Appearance.padding.large
+
+                active: Config.background.desktopClock.enabled
+                asynchronous: true
+
+                source: "DesktopClock.qml"
+            }
+        }
     }
 }

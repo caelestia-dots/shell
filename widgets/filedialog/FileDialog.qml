@@ -53,6 +53,11 @@ LazyLoader {
         color: Colours.palette.m3surface
         title: loader.title
 
+        onVisibleChanged: {
+            if (!visible)
+                rejected();
+        }
+
         RowLayout {
             anchors.fill: parent
 
