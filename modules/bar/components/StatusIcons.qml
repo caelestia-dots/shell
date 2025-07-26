@@ -1,3 +1,5 @@
+pragma ComponentBehavior: Bound
+
 import qs.widgets
 import qs.services
 import qs.utils
@@ -95,16 +97,35 @@ Item {
 
                 Repeater {
                     model: ScriptModel {
-                        values: Bluetooth.devices.values.filter(d => d.connected)
+                        values: Bluetooth.devices.values.filter(d => d.state !== BluetoothDeviceState.Disconnected)
                     }
 
                     MaterialIcon {
+                        id: device
+
                         required property BluetoothDevice modelData
 
                         animate: true
                         text: Icons.getBluetoothIcon(modelData.icon)
                         color: root.colour
                         fill: 1
+
+                        SequentialAnimation on opacity {
+                            running: device.modelData.state !== BluetoothDeviceState.Connected
+                            alwaysRunToEnd: true
+                            loops: Animation.Infinite
+
+                            Anim {
+                                from: 1
+                                to: 0
+                                easing.bezierCurve: Appearance.anim.curves.standardAccel
+                            }
+                            Anim {
+                                from: 0
+                                to: 1
+                                easing.bezierCurve: Appearance.anim.curves.standardDecel
+                            }
+                        }
                     }
                 }
             }
