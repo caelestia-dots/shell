@@ -181,6 +181,7 @@ All configuration options are in `~/.config/caelestia/shell.json`.
     "launcher": {
         "actionPrefix": ">",
         "dragThreshold": 50,
+        "vimKeybinds": false,
         "enableDangerousActions": false,
         "maxShown": 8,
         "maxWallpapers": 9,

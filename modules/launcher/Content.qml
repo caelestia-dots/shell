@@ -102,6 +102,27 @@ Item {
 
             Keys.onEscapePressed: root.visibilities.launcher = false
 
+            Keys.onPressed: event => {
+                if (!Config.launcher.vimKeybinds)
+                    return;
+
+                if (event.modifiers & Qt.ControlModifier) {
+                    if (event.key === Qt.Key_J) {
+                        list.currentList?.incrementCurrentIndex();
+                        event.accepted = true;
+                    } else if (event.key === Qt.Key_K) {
+                        list.currentList?.decrementCurrentIndex();
+                        event.accepted = true;
+                    }
+                } else if (event.key === Qt.Key_Tab) {
+                    list.currentList?.incrementCurrentIndex();
+                    event.accepted = true;
+                } else if (event.key === Qt.Key_Backtab || (event.key === Qt.Key_Tab && (event.modifiers & Qt.ShiftModifier))) {
+                    list.currentList?.decrementCurrentIndex();
+                    event.accepted = true;
+                }
+            }
+
             Connections {
                 target: root.visibilities
 
