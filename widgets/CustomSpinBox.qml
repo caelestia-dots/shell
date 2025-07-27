@@ -9,8 +9,8 @@ RowLayout {
     id: root
 
     property int value
-    property real max: NaN
-    property real min: NaN
+    property real max: Infinity
+    property real min: -Infinity
     property alias repeatRate: timer.interval
 
     signal valueModified(value: int)

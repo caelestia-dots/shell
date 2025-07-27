@@ -4,6 +4,7 @@ import QtQuick.Effects
 
 MultiEffect {
     colorization: 1
+    brightness: colorizationColor.hslLightness
 
     Behavior on colorizationColor {
         ColorAnimation {

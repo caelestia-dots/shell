@@ -12,6 +12,8 @@ TextField {
     placeholderTextColor: Colours.palette.m3outline
     font.family: Appearance.font.family.sans
     font.pointSize: Appearance.font.size.smaller
+    renderType: TextField.NativeRendering
+    cursorVisible: !readOnly
 
     background: null
 
@@ -23,10 +25,17 @@ TextField {
         implicitWidth: 2
         color: Colours.palette.m3primary
         radius: Appearance.rounding.normal
-        onXChanged: {
-            opacity = 1;
-            disableBlink = true;
-            enableBlink.start();
+
+        Connections {
+            target: root
+
+            function onCursorPositionChanged(): void {
+                if (root.activeFocus && root.cursorVisible) {
+                    cursor.opacity = 1;
+                    cursor.disableBlink = true;
+                    enableBlink.restart();
+                }
+            }
         }
 
         Timer {
@@ -37,10 +46,16 @@ TextField {
         }
 
         Timer {
-            running: root.cursorVisible && !cursor.disableBlink
+            running: root.activeFocus && root.cursorVisible && !cursor.disableBlink
             repeat: true
+            triggeredOnStart: true
             interval: 500
             onTriggered: parent.opacity = parent.opacity === 1 ? 0 : 1
+        }
+
+        Binding {
+            when: !root.activeFocus || !root.cursorVisible
+            cursor.opacity: 0
         }
 
         Behavior on opacity {

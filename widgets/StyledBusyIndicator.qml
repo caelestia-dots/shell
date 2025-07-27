@@ -18,6 +18,7 @@ BusyIndicator {
         id: shape
 
         preferredRendererType: Shape.CurveRenderer
+        asynchronous: true
 
         RotationAnimator on rotation {
             from: 0

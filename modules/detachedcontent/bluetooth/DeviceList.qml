@@ -51,16 +51,60 @@ ColumnLayout {
         }
     }
 
-    StyledText {
+    RowLayout {
         Layout.topMargin: Appearance.spacing.large
-        text: qsTr("Devices")
-        font.pointSize: Appearance.font.size.large
-        font.weight: 500
-    }
+        Layout.fillWidth: true
+        spacing: Appearance.spacing.normal
 
-    StyledText {
-        text: qsTr("All available bluetooth devices")
-        color: Colours.palette.m3outline
+        ColumnLayout {
+            Layout.fillWidth: true
+            spacing: Appearance.spacing.small
+
+            StyledText {
+                Layout.fillWidth: true
+                text: qsTr("Devices (%1)").arg(Bluetooth.devices.values.length)
+                font.pointSize: Appearance.font.size.large
+                font.weight: 500
+            }
+
+            StyledText {
+                Layout.fillWidth: true
+                text: qsTr("All available bluetooth devices")
+                color: Colours.palette.m3outline
+            }
+        }
+
+        StyledRect {
+            implicitWidth: implicitHeight
+            implicitHeight: scanIcon.implicitHeight + Appearance.padding.normal * 2
+
+            radius: Bluetooth.defaultAdapter?.discovering ? Appearance.rounding.normal : implicitHeight / 2
+            color: Bluetooth.defaultAdapter?.discovering ? Colours.palette.m3secondary : Colours.palette.m3secondaryContainer
+
+            StateLayer {
+                color: Bluetooth.defaultAdapter?.discovering ? Colours.palette.m3onSecondary : Colours.palette.m3onSecondaryContainer
+
+                function onClicked(): void {
+                    const adapter = Bluetooth.defaultAdapter;
+                    if (adapter)
+                        adapter.discovering = !adapter.discovering;
+                }
+            }
+
+            MaterialIcon {
+                id: scanIcon
+
+                anchors.centerIn: parent
+                animate: true
+                text: "bluetooth_searching"
+                color: Bluetooth.defaultAdapter?.discovering ? Colours.palette.m3onSecondary : Colours.palette.m3onSecondaryContainer
+                fill: Bluetooth.defaultAdapter?.discovering ? 1 : 0
+            }
+
+            Behavior on radius {
+                Anim {}
+            }
+        }
     }
 
     StyledListView {

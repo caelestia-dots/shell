@@ -274,7 +274,173 @@ ColumnLayout {
                 CustomSpinBox {
                     min: 0
                     value: root.session.bt.currentAdapter.discoverableTimeout
-                    onValueModified: root.session.bt.currentAdapter.discoverableTimeout = value
+                    onValueModified: value => root.session.bt.currentAdapter.discoverableTimeout = value
+                }
+            }
+
+            RowLayout {
+                Layout.fillWidth: true
+                spacing: Appearance.spacing.small
+
+                Item {
+                    id: renameAdapter
+
+                    Layout.fillWidth: true
+                    Layout.rightMargin: Appearance.spacing.small
+
+                    implicitHeight: renameLabel.implicitHeight + adapterNameEdit.implicitHeight
+
+                    states: State {
+                        name: "editingAdapterName"
+                        when: root.session.bt.editingAdapterName
+
+                        AnchorChanges {
+                            target: adapterNameEdit
+                            anchors.top: renameAdapter.top
+                        }
+                        PropertyChanges {
+                            renameAdapter.implicitHeight: adapterNameEdit.implicitHeight
+                            renameLabel.opacity: 0
+                            adapterNameEdit.padding: Appearance.padding.normal
+                        }
+                    }
+
+                    transitions: Transition {
+                        AnchorAnimation {
+                            duration: Appearance.anim.durations.normal
+                            easing.type: Easing.BezierSpline
+                            easing.bezierCurve: Appearance.anim.curves.standard
+                        }
+                        Anim {
+                            properties: "implicitHeight,opacity,padding"
+                        }
+                    }
+
+                    StyledText {
+                        id: renameLabel
+
+                        anchors.left: parent.left
+
+                        text: qsTr("Rename adapter (currently does not work)")  // FIXME: remove disclaimer when fixed
+                        color: Colours.palette.m3outline
+                        font.pointSize: Appearance.font.size.small
+                    }
+
+                    StyledTextField {
+                        id: adapterNameEdit
+
+                        anchors.left: parent.left
+                        anchors.right: parent.right
+                        anchors.top: renameLabel.bottom
+                        anchors.leftMargin: root.session.bt.editingAdapterName ? 0 : -Appearance.padding.normal
+
+                        text: root.session.bt.currentAdapter.name
+                        readOnly: !root.session.bt.editingAdapterName
+                        onAccepted: {
+                            root.session.bt.editingAdapterName = false;
+                            // Doesn't work for now, will be added to QS later
+                            // root.session.bt.currentAdapter.name = text;
+                        }
+
+                        leftPadding: Appearance.padding.normal
+                        rightPadding: Appearance.padding.normal
+
+                        background: StyledRect {
+                            radius: Appearance.rounding.small
+                            border.width: 2
+                            border.color: Colours.palette.m3primary
+                            opacity: root.session.bt.editingAdapterName ? 1 : 0
+
+                            Behavior on border.color {
+                                ColorAnimation {
+                                    duration: Appearance.anim.durations.normal
+                                    easing.type: Easing.BezierSpline
+                                    easing.bezierCurve: Appearance.anim.curves.standard
+                                }
+                            }
+
+                            Behavior on opacity {
+                                Anim {}
+                            }
+                        }
+
+                        Behavior on anchors.leftMargin {
+                            Anim {}
+                        }
+                    }
+                }
+
+                StyledRect {
+                    implicitWidth: implicitHeight
+                    implicitHeight: cancelEditIcon.implicitHeight + Appearance.padding.smaller * 2
+
+                    radius: implicitHeight / 2
+                    color: Colours.palette.m3secondaryContainer
+                    opacity: root.session.bt.editingAdapterName ? 1 : 0
+                    scale: root.session.bt.editingAdapterName ? 1 : 0.5
+
+                    StateLayer {
+                        color: Colours.palette.m3onSecondaryContainer
+                        disabled: !root.session.bt.editingAdapterName
+
+                        function onClicked(): void {
+                            root.session.bt.editingAdapterName = false;
+                            adapterNameEdit.text = Qt.binding(() => root.session.bt.currentAdapter.name);
+                        }
+                    }
+
+                    MaterialIcon {
+                        id: cancelEditIcon
+
+                        anchors.centerIn: parent
+                        animate: true
+                        text: "cancel"
+                        color: Colours.palette.m3onSecondaryContainer
+                    }
+
+                    Behavior on opacity {
+                        Anim {}
+                    }
+
+                    Behavior on scale {
+                        Anim {
+                            duration: Appearance.anim.durations.expressiveFastSpatial
+                            easing.bezierCurve: Appearance.anim.curves.expressiveFastSpatial
+                        }
+                    }
+                }
+
+                StyledRect {
+                    implicitWidth: implicitHeight
+                    implicitHeight: editIcon.implicitHeight + Appearance.padding.smaller * 2
+
+                    radius: root.session.bt.editingAdapterName ? implicitHeight / 2 : Appearance.rounding.small
+                    color: root.session.bt.editingAdapterName ? Colours.palette.m3primary : "transparent"
+
+                    StateLayer {
+                        color: root.session.bt.editingAdapterName ? Colours.palette.m3onPrimary : Colours.palette.m3onSurface
+
+                        function onClicked(): void {
+                            root.session.bt.editingAdapterName = !root.session.bt.editingAdapterName;
+                            if (root.session.bt.editingAdapterName)
+                                adapterNameEdit.forceActiveFocus();
+                            else
+                                adapterNameEdit.accepted();
+                        }
+                    }
+
+                    MaterialIcon {
+                        id: editIcon
+
+                        anchors.centerIn: parent
+                        animate: true
+                        text: root.session.bt.editingAdapterName ? "check_circle" : "edit"
+                        color: root.session.bt.editingAdapterName ? Colours.palette.m3onPrimary : Colours.palette.m3onSurface
+                    }
+
+                    Behavior on radius {
+                        Anim {}
+                    }
                 }
             }
         }

@@ -86,7 +86,7 @@ Singleton {
         readonly property string busNum: root.ddcMonitors.find(m => m.model === modelData.model)?.busNum ?? ""
         readonly property bool isAppleDisplay: root.appleDisplayPresent && modelData.model.startsWith("StudioDisplay")
         property real brightness
-        property real queuedBrightness
+        property real queuedBrightness: NaN
 
         readonly property Process initProc: Process {
             stdout: StdioCollector {
@@ -104,7 +104,12 @@ Singleton {
 
         readonly property Timer timer: Timer {
             interval: 500
-            onTriggered: monitor.setBrightness(monitor.queuedBrightness)
+            onTriggered: {
+                if (!isNaN(monitor.queuedBrightness)) {
+                    monitor.setBrightness(monitor.queuedBrightness);
+                    monitor.queuedBrightness = NaN;
+                }
+            }
         }
 
         function setBrightness(value: real): void {

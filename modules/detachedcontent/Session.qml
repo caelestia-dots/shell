@@ -15,5 +15,6 @@ QtObject {
     component Bt: QtObject {
         property BluetoothDevice active
         property BluetoothAdapter currentAdapter: Bluetooth.defaultAdapter
+        property bool editingAdapterName
     }
 }
