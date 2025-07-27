@@ -55,6 +55,7 @@
           inputsFrom = [shell];
           packages = with pkgs; [material-symbols nerd-fonts.jetbrains-mono];
           CAELESTIA_BD_PATH = "${shell}/bin/beat_detector";
+          CAELESTIA_KBBD_PATH = "${shell}/bin/kb_brief_detector";
         };
     });
   };

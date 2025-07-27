@@ -28,6 +28,8 @@
   quickshell,
   aubio,
   pipewire,
+  libxkbcommon,
+  pkg-config,
   caelestia-cli,
   withCli ? false,
 }: let
@@ -64,7 +66,7 @@ in
     src = ./.;
 
     nativeBuildInputs = [gcc makeWrapper];
-    buildInputs = [quickshell aubio pipewire];
+    buildInputs = [quickshell aubio pipewire libxkbcommon pkg-config];
     propagatedBuildInputs = runtimeDeps;
 
     buildPhase = ''
@@ -76,14 +78,21 @@ in
       	assets/beat_detector.cpp \
       	-o bin/beat_detector \
       	-lpipewire-0.3 -laubio
+      g++ -std=c++17 -Wall -Wextra \
+        -I${libxkbcommon.dev}/include \
+       	assets/kb_brief_detector.cpp \
+       	-o bin/kb_brief_detector \
+        $(pkg-config --cflags --libs xkbregistry xkbcommon)
     '';
 
     installPhase = ''
       install -Dm755 bin/beat_detector $out/bin/beat_detector
+      install -Dm755 bin/kb_brief_detector $out/bin/kb_brief_detector
       makeWrapper ${quickshell}/bin/qs $out/bin/caelestia-shell \
       	--prefix PATH : "${lib.makeBinPath runtimeDeps}" \
       	--set FONTCONFIG_FILE "${fontconfig}" \
       	--set CAELESTIA_BD_PATH $out/bin/beat_detector \
+      	--set CAELESTIA_KBBD_PATH $out/bin/kb_brief_detector \
       	--add-flags '-p ${./.}'
     '';
 
