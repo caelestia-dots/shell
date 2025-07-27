@@ -16,6 +16,7 @@ Singleton {
     readonly property HyprlandMonitor focusedMonitor: Hyprland.focusedMonitor
     readonly property int activeWsId: focusedWorkspace?.id ?? 1
     property string kbLayout: "?"
+    property string kbLayoutBrief: "?"
 
     function dispatch(request: string): void {
         Hyprland.dispatch(request);
@@ -31,6 +32,7 @@ Singleton {
 
             if (n === "activelayout") {
                 root.kbLayout = event.parse(2)[1];
+                kbBriefProc.running = true;
             } else if (["workspace", "moveworkspace", "activespecial", "focusedmon"].includes(n)) {
                 Hyprland.refreshWorkspaces();
                 Hyprland.refreshMonitors();
@@ -48,10 +50,20 @@ Singleton {
     }
 
     Process {
-        running: true
-        command: ["hyprctl", "-j", "devices"]
+        id: kbBriefProc
+
+        running: false
+        command: [Quickshell.env("CAELESTIA_KBBD_PATH") || "/usr/lib/caelestia/kb_brief_detector", root.kbLayout]
+
         stdout: StdioCollector {
-            onStreamFinished: root.kbLayout = JSON.parse(text).keyboards.find(k => k.main).layout
+            onStreamFinished: root.kbLayoutBrief = text.toString().toUpperCase()
         }
+    }
+
+    // to initialize kbLayout and kbLayoutBrief via HyprlandEvent
+    Process {
+
+        running: true
+        command: ["sh", "-c", "hyprctl switchxkblayout current next && hyprctl switchxkblayout current prev"]
     }
 }
