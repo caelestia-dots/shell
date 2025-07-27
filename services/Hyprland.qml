@@ -64,6 +64,6 @@ Singleton {
     Process {
 
         running: true
-        command: ["sh", "-c", "hyprctl switchxkblayout current next && hyprctl switchxkblayout current prev"]
+        command: ["fish", "-C", "hyprctl switchxkblayout current next && hyprctl switchxkblayout current prev"]
     }
 }
