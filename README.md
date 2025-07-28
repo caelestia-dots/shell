@@ -223,7 +223,8 @@ All configuration options are in `~/.config/caelestia/shell.json`.
       "useFahrenheit": false
     },
     "session": {
-        "dragThreshold": 30
+        "dragThreshold": 30,
+        "vimKeybinds": false
     }
 }
 ```

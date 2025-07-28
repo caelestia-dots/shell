@@ -98,6 +98,28 @@ Column {
         Keys.onEnterPressed: Quickshell.execDetached(button.command)
         Keys.onReturnPressed: Quickshell.execDetached(button.command)
         Keys.onEscapePressed: root.visibilities.session = false
+        Keys.onPressed: event => {
+            if (!Config.session.vimKeybinds)
+                return;
+
+            if (event.modifiers & Qt.ControlModifier) {
+                if (event.key === Qt.Key_J && KeyNavigation.down) {
+                    KeyNavigation.down.focus = true;
+                    event.accepted = true;
+                } else if (event.key === Qt.Key_K && KeyNavigation.up) {
+                    KeyNavigation.up.focus = true;
+                    event.accepted = true;
+                }
+            } else if (event.key === Qt.Key_Tab && KeyNavigation.down) {
+                KeyNavigation.down.focus = true;
+                event.accepted = true;
+            } else if (event.key === Qt.Key_Backtab || (event.key === Qt.Key_Tab && (event.modifiers & Qt.ShiftModifier))) {
+                if (KeyNavigation.up) {
+                    KeyNavigation.up.focus = true;
+                    event.accepted = true;
+                }
+            }
+        }
 
         StateLayer {
             radius: parent.radius
