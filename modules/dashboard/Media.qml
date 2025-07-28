@@ -26,7 +26,14 @@ Item {
     function lengthStr(length: int): string {
         if (length < 0)
             return "-1:-1";
-        return `${Math.floor(length / 60)}:${Math.floor(length % 60).toString().padStart(2, "0")}`;
+
+        const hours = Math.floor(length / 3600);
+        const mins = Math.floor((length % 3600) / 60);
+        const secs = Math.floor(length % 60).toString().padStart(2, "0");
+
+        if (hours > 0)
+            return `${hours}:${mins.toString().padStart(2, "0")}:${secs}`;
+        return `${mins}:${secs}`;
     }
 
     implicitWidth: cover.implicitWidth + Config.dashboard.sizes.mediaVisualiserSize * 2 + details.implicitWidth + details.anchors.leftMargin + bongocat.implicitWidth + bongocat.anchors.leftMargin * 2 + Appearance.padding.large * 2

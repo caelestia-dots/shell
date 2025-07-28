@@ -72,7 +72,7 @@ Item {
     Comp {
         id: content
 
-        shouldBeActive: !root.detachedMode
+        shouldBeActive: root.hasCurrent && !root.detachedMode
         asynchronous: true
         anchors.right: parent.right
         anchors.verticalCenter: parent.verticalCenter

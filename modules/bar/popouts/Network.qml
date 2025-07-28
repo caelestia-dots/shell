@@ -49,7 +49,7 @@ ColumnLayout {
         RowLayout {
             id: networkItem
 
-            required property var modelData
+            required property Network.AccessPoint modelData
             readonly property bool isConnecting: root.connectingToSsid === modelData.ssid
             readonly property bool loading: networkItem.isConnecting
 

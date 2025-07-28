@@ -30,7 +30,7 @@ Item {
 
         Popout {
             name: "network"
-            source: "Network.qml"
+            sourceComponent: Network {}
         }
 
         Popout {

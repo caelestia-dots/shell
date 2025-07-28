@@ -125,7 +125,7 @@ ColumnLayout {
                     property bool expanded
 
                     implicitWidth: adapterPicker.implicitWidth + Appearance.padding.normal * 2
-                    implicitHeight: adapterPicker.implicitHeight + Appearance.padding.normal * 2
+                    implicitHeight: adapterPicker.implicitHeight + Appearance.padding.smaller * 2
 
                     StateLayer {
                         radius: Appearance.rounding.small
@@ -140,6 +140,8 @@ ColumnLayout {
 
                         anchors.fill: parent
                         anchors.margins: Appearance.padding.normal
+                        anchors.topMargin: Appearance.padding.smaller
+                        anchors.bottomMargin: Appearance.padding.smaller
                         spacing: Appearance.spacing.normal
 
                         StyledText {
