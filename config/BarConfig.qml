@@ -22,7 +22,7 @@ JsonObject {
     }
 
     component Clock: JsonObject {
-        property bool useTwelveHourClock: false
+        property string format: "hh:mm"
     }
 
     component Status: JsonObject {

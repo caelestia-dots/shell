@@ -177,7 +177,7 @@ All configuration options are in `~/.config/caelestia/shell.json`.
             "shown": 5
         },
         "clock": {
-          "useTwelveHourClock": false
+          "format": "hh:mm"
         }
     },
     "border": {
