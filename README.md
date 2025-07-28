@@ -175,6 +175,9 @@ All configuration options are in `~/.config/caelestia/shell.json`.
             "rounded": true,
             "showWindows": true,
             "shown": 5
+        },
+        "clock": {
+          "useTwelveHourClock": false
         }
     },
     "border": {

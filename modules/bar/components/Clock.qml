@@ -22,10 +22,12 @@ Column {
     StyledText {
         id: text
 
+        readonly property string clockFormat: (Config.bar.clock.useTwelveHourClock) ? "hh\nmm\na" : "hh\nmm"
+
         anchors.horizontalCenter: parent.horizontalCenter
 
         horizontalAlignment: StyledText.AlignHCenter
-        text: Time.format("hh\nmm")
+        text: Time.format(clockFormat)
         font.pointSize: Appearance.font.size.smaller
         font.family: Appearance.font.family.mono
         color: root.colour
