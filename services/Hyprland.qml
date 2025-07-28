@@ -53,16 +53,17 @@ Singleton {
         id: kbBriefProc
 
         running: false
-        command: [Quickshell.env("CAELESTIA_KBBD_PATH") || "/usr/lib/caelestia/kb_brief_detector", root.kbLayout]
-
+        command: [
+            "fish", "-c",
+            "set evdev (find /usr/share/X11/xkb/rules /usr/local/share/X11/xkb/rules /run/current-system/sw/share/X11/xkb/rules -maxdepth 1 -name evdev.xml 2>/dev/null | head -n1); xmllint $evdev --xpath 'string(//layout[configItem/description=\"" + root.kbLayout + "\"]/configItem/shortDescription)'"
+        ]
         stdout: StdioCollector {
-            onStreamFinished: root.kbLayoutBrief = text.toString().toUpperCase()
+            onStreamFinished: root.kbLayoutBrief = text.toString().trim().toUpperCase()
         }
     }
 
     // to initialize kbLayout and kbLayoutBrief via HyprlandEvent
     Process {
-
         running: true
         command: ["fish", "-C", "hyprctl switchxkblayout current next && hyprctl switchxkblayout current prev"]
     }
