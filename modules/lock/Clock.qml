@@ -36,7 +36,17 @@ ColumnLayout {
 
         StyledText {
             Layout.alignment: Qt.AlignVCenter
-            text: root.timeComponents[1] + (root.timeComponents[2] || "")
+            text: root.timeComponents[1]
+            color: Colours.palette.m3secondary
+            font.pointSize: Appearance.font.size.extraLarge * 4
+            font.family: Appearance.font.family.mono
+            font.weight: 800
+        }
+
+        StyledText {
+            Layout.alignment: Qt.AlignVCenter
+            visible: root.use12HourFormat
+            text: root.timeComponents[2]
             color: Colours.palette.m3secondary
             font.pointSize: Appearance.font.size.extraLarge * 4
             font.family: Appearance.font.family.mono

@@ -175,7 +175,7 @@ All configuration options are in `~/.config/caelestia/shell.json`.
             "rounded": true,
             "showWindows": true,
             "shown": 5
-        },
+        }
     },
     "border": {
         "rounding": 25,
