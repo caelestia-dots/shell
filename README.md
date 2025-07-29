@@ -160,6 +160,7 @@ All configuration options are in `~/.config/caelestia/shell.json`.
         "showOnHover": true,
         "status": {
             "showAudio": false,
+            "audioCommand": "pavucontrol",
             "showBattery": true,
             "showBluetooth": true,
             "showKbLayout": false,
