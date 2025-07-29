@@ -43,7 +43,7 @@ ColumnLayout {
         StateLayer {
             function onClicked(): void {
                 root.wrapper.hasCurrent = false;
-                Quickshell.execDetached(["pavucontrol"]);
+                Quickshell.execDetached([Config.bar.status.audioCommand]);
             }
         }
 

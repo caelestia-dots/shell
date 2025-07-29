@@ -22,6 +22,7 @@ JsonObject {
 
     component Status: JsonObject {
         property bool showAudio: false
+        property string audioCommand: "pavucontrol"
         property bool showKbLayout: false
         property bool showNetwork: true
         property bool showBluetooth: true
