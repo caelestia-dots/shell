@@ -224,7 +224,13 @@ All configuration options are in `~/.config/caelestia/shell.json`.
     },
     "session": {
         "dragThreshold": 30,
-        "vimKeybinds": false
+        "vimKeybinds": false,
+        "commands": {
+            "logout": ["loginctl", "terminate-user", ""],
+            "shutdown": ["systemctl", "poweroff"],
+            "hibernate": ["systemctl", "hibernate"],
+            "reboot": ["systemctl", "reboot"]
+        }
     }
 }
 ```

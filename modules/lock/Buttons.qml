@@ -50,22 +50,22 @@ Item {
 
         SessionButton {
             icon: "logout"
-            command: ["loginctl", "terminate-user", ""]
+            command: Config.session.commands.logout
         }
 
         SessionButton {
             icon: "power_settings_new"
-            command: ["systemctl", "poweroff"]
+            command: Config.session.commands.shutdown
         }
 
         SessionButton {
             icon: "downloading"
-            command: ["systemctl", "hibernate"]
+            command: Config.session.commands.hibernate
         }
 
         SessionButton {
             icon: "cached"
-            command: ["systemctl", "reboot"]
+            command: Config.session.commands.reboot
         }
 
         Behavior on anchors.margins {

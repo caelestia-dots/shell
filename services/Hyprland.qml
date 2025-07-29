@@ -30,7 +30,7 @@ Singleton {
                 return;
 
             if (n === "activelayout") {
-                kbProc.running = true;
+                root.kbLayout = event.parse(2)[1].slice(0, 2).toLowerCase();
             } else if (["workspace", "moveworkspace", "activespecial", "focusedmon"].includes(n)) {
                 Hyprland.refreshWorkspaces();
                 Hyprland.refreshMonitors();
@@ -48,12 +48,10 @@ Singleton {
     }
 
     Process {
-        id: kbProc
-
         running: true
         command: ["hyprctl", "-j", "devices"]
         stdout: StdioCollector {
-            onStreamFinished: root.kbLayout = JSON.parse(text).keyboards.find(k => k.main).layout
+            onStreamFinished: root.kbLayout = JSON.parse(text).keyboards.find(k => k.main).active_keymap.slice(0, 2).toLowerCase()
         }
     }
 }

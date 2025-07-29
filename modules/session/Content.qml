@@ -23,7 +23,7 @@ Column {
         id: logout
 
         icon: "logout"
-        command: ["loginctl", "terminate-user", ""]
+        command: Config.session.commands.logout
 
         KeyNavigation.down: shutdown
 
@@ -46,7 +46,7 @@ Column {
         id: shutdown
 
         icon: "power_settings_new"
-        command: ["systemctl", "poweroff"]
+        command: Config.session.commands.shutdown
 
         KeyNavigation.up: logout
         KeyNavigation.down: hibernate
@@ -68,7 +68,7 @@ Column {
         id: hibernate
 
         icon: "downloading"
-        command: ["systemctl", "hibernate"]
+        command: Config.session.commands.hibernate
 
         KeyNavigation.up: shutdown
         KeyNavigation.down: reboot
@@ -78,7 +78,7 @@ Column {
         id: reboot
 
         icon: "cached"
-        command: ["systemctl", "reboot"]
+        command: Config.session.commands.reboot
 
         KeyNavigation.up: hibernate
     }
