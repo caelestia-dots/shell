@@ -8,13 +8,17 @@ ColumnLayout {
 
     spacing: 0
 
+    readonly property bool use12HourFormat: Config.services.useTwelveHourClock
+    readonly property string timeFormat: use12HourFormat ? "hh:mm:A" : "hh:mm"
+    readonly property list<string> timeComponents: Time.format(timeFormat).split(":")
+
     RowLayout {
         Layout.alignment: Qt.AlignHCenter
         spacing: Appearance.spacing.small
 
         StyledText {
             Layout.alignment: Qt.AlignVCenter
-            text: Time.format("HH")
+            text: root.timeComponents[0]
             color: Colours.palette.m3secondary
             font.pointSize: Appearance.font.size.extraLarge * 4
             font.family: Appearance.font.family.mono
@@ -32,7 +36,7 @@ ColumnLayout {
 
         StyledText {
             Layout.alignment: Qt.AlignVCenter
-            text: Time.format("mm")
+            text: root.timeComponents[1] + (root.timeComponents[2] || "")
             color: Colours.palette.m3secondary
             font.pointSize: Appearance.font.size.extraLarge * 4
             font.family: Appearance.font.family.mono

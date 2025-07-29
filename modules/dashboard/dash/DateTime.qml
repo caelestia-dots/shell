@@ -10,62 +10,74 @@ Item {
     anchors.bottom: parent.bottom
     implicitWidth: Config.dashboard.sizes.dateTimeWidth
 
-    StyledText {
-        id: hours
+    readonly property bool use12HourFormat: Config.services.useTwelveHourClock
+    readonly property string timeFormat: use12HourFormat ? "hh:mm:A" : "hh:mm"
+    readonly property list<string> timeComponents: Time.format(timeFormat).split(":")
 
-        anchors.left: parent.left
-        anchors.right: parent.right
-        anchors.top: parent.top
-        anchors.topMargin: (root.height - (hours.implicitHeight + sep.implicitHeight + sep.anchors.topMargin + mins.implicitHeight + mins.anchors.topMargin + date.implicitHeight + date.anchors.topMargin)) / 2
+    Column {
+        id: timeColumn
+        anchors.centerIn: parent
+        spacing: Appearance.spacing.normal
 
-        horizontalAlignment: Text.AlignHCenter
-        text: Time.format("HH")
-        color: Colours.palette.m3secondary
-        font.pointSize: Appearance.font.size.extraLarge
-        font.weight: 500
-    }
+        Item {
+            id: timeDisplay
+            width: root.width
+            height: childrenRect.height
 
-    StyledText {
-        id: sep
+            Column {
+                anchors.horizontalCenter: parent.horizontalCenter
+                spacing: -(Appearance.font.size.extraLarge * 0.5)
 
-        anchors.left: parent.left
-        anchors.right: parent.right
-        anchors.top: hours.bottom
-        anchors.topMargin: -font.pointSize * 0.5
+                StyledText {
+                    id: hoursText
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    horizontalAlignment: Text.AlignHCenter
+                    text: root.timeComponents[0]
+                    color: Colours.palette.m3secondary
+                    font.pointSize: Appearance.font.size.extraLarge
+                    font.weight: 500
+                }
 
-        horizontalAlignment: Text.AlignHCenter
-        text: "•••"
-        color: Colours.palette.m3primary
-        font.pointSize: Appearance.font.size.extraLarge * 0.9
-    }
+                StyledText {
+                    id: separator
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    horizontalAlignment: Text.AlignHCenter
+                    text: "•••"
+                    color: Colours.palette.m3primary
+                    font.pointSize: Appearance.font.size.extraLarge * 0.9
+                }
 
-    StyledText {
-        id: mins
+                StyledText {
+                    id: minutesText
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    horizontalAlignment: Text.AlignHCenter
+                    text: root.timeComponents[1]
+                    color: Colours.palette.m3secondary
+                    font.pointSize: Appearance.font.size.extraLarge
+                    font.weight: 500
+                }
 
-        anchors.left: parent.left
-        anchors.right: parent.right
-        anchors.top: sep.bottom
-        anchors.topMargin: -sep.font.pointSize * 0.45
+                StyledText {
+                    id: amPmText
+                    visible: root.use12HourFormat
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    horizontalAlignment: Text.AlignHCenter
+                    text: root.timeComponents[2]
+                    color: Colours.palette.m3secondary
+                    font.pointSize: Appearance.font.size.extraLarge
+                    font.weight: 500
+                }
+            }
+        }
 
-        horizontalAlignment: Text.AlignHCenter
-        text: Time.format("mm")
-        color: Colours.palette.m3secondary
-        font.pointSize: Appearance.font.size.extraLarge
-        font.weight: 500
-    }
-
-    StyledText {
-        id: date
-
-        anchors.left: parent.left
-        anchors.right: parent.right
-        anchors.top: mins.bottom
-        anchors.topMargin: Appearance.spacing.normal
-
-        horizontalAlignment: Text.AlignHCenter
-        text: Time.format("ddd, d")
-        color: Colours.palette.m3tertiary
-        font.pointSize: Appearance.font.size.normal
-        font.weight: 500
+        StyledText {
+            id: dateDisplay
+            width: root.width
+            horizontalAlignment: Text.AlignHCenter
+            text: Time.format("ddd, d")
+            color: Colours.palette.m3tertiary
+            font.pointSize: Appearance.font.size.normal
+            font.weight: 500
+        }
     }
 }

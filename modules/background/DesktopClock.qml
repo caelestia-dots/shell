@@ -10,8 +10,10 @@ Item {
     StyledText {
         id: timeText
 
+        readonly property string clockFormat: Config.services.useTwelveHourClock ? "hh:mm:ss A" : "hh:mm:ss"
+
         anchors.centerIn: parent
-        text: Time.format("hh:mm:ss")
+        text: Time.format(clockFormat)
         font.pointSize: Appearance.font.size.extraLarge
         font.bold: true
     }

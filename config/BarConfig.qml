@@ -5,7 +5,6 @@ JsonObject {
     property bool showOnHover: true
     property int dragThreshold: 20
     property Workspaces workspaces: Workspaces {}
-    property Clock clock: Clock {}
     property Status status: Status {}
     property Sizes sizes: Sizes {}
 
@@ -19,10 +18,6 @@ JsonObject {
         property string label: "  "
         property string occupiedLabel: "󰮯 "
         property string activeLabel: "󰮯 "
-    }
-
-    component Clock: JsonObject {
-        property string format: "hh:mm"
     }
 
     component Status: JsonObject {

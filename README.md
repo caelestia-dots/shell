@@ -176,9 +176,6 @@ All configuration options are in `~/.config/caelestia/shell.json`.
             "showWindows": true,
             "shown": 5
         },
-        "clock": {
-          "format": "hh:mm"
-        }
     },
     "border": {
         "rounding": 25,
@@ -223,7 +220,8 @@ All configuration options are in `~/.config/caelestia/shell.json`.
     },
     "services": {
       "weatherLocation": "10,10",
-      "useFahrenheit": false
+      "useFahrenheit": false,
+      "useTwelveHourClock": false
     },
     "session": {
         "dragThreshold": 30

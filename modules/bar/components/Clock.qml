@@ -22,7 +22,7 @@ Column {
     StyledText {
         id: text
 
-        readonly property string clockFormat: Config.bar.clock.format.replace(/:/g, "\n")
+        readonly property string clockFormat: Config.services.useTwelveHourClock ? "hh\nmm\nA" : "hh\nmm"
 
         anchors.horizontalCenter: parent.horizontalCenter
 
