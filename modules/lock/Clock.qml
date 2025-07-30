@@ -8,9 +8,7 @@ ColumnLayout {
 
     spacing: 0
 
-    readonly property list<string> timeComponents: Time.format(
-        Config.services.useTwelveHourClock ? "hh:mm:A" : "hh:mm"
-    ).split(":")
+    readonly property list<string> timeComponents: Time.format(Config.services.useTwelveHourClock ? "hh:mm:A" : "hh:mm").split(":")
 
     RowLayout {
         Layout.alignment: Qt.AlignHCenter
