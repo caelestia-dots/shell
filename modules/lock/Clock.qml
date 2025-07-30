@@ -8,9 +8,9 @@ ColumnLayout {
 
     spacing: 0
 
-    readonly property bool use12HourFormat: Config.services.useTwelveHourClock
-    readonly property string timeFormat: use12HourFormat ? "hh:mm:A" : "hh:mm"
-    readonly property list<string> timeComponents: Time.format(timeFormat).split(":")
+    readonly property list<string> timeComponents: Time.format(
+        Config.services.useTwelveHourClock ? "hh:mm:A" : "hh:mm"
+    ).split(":")
 
     RowLayout {
         Layout.alignment: Qt.AlignHCenter
@@ -44,8 +44,8 @@ ColumnLayout {
         }
 
         StyledText {
+            visible: Config.services.useTwelveHourClock
             Layout.alignment: Qt.AlignVCenter
-            visible: root.use12HourFormat
             text: root.timeComponents[2]
             color: Colours.palette.m3secondary
             font.pointSize: Appearance.font.size.extraLarge * 4

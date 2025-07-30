@@ -2,6 +2,7 @@ import qs.widgets
 import qs.services
 import qs.config
 import QtQuick
+import QtQuick.Layouts
 
 Item {
     id: root
@@ -10,27 +11,28 @@ Item {
     anchors.bottom: parent.bottom
     implicitWidth: Config.dashboard.sizes.dateTimeWidth
 
-    readonly property bool use12HourFormat: Config.services.useTwelveHourClock
-    readonly property string timeFormat: use12HourFormat ? "hh:mm:A" : "hh:mm"
-    readonly property list<string> timeComponents: Time.format(timeFormat).split(":")
+    readonly property list<string> timeComponents: Time.format(Config.services.useTwelveHourClock ? "hh:mm:A" : "hh:mm").split(":")
 
-    Column {
+    ColumnLayout {
         id: timeColumn
+
         anchors.centerIn: parent
         spacing: Appearance.spacing.normal
 
         Item {
             id: timeDisplay
+
             width: root.width
             height: childrenRect.height
 
-            Column {
+            ColumnLayout {
                 anchors.horizontalCenter: parent.horizontalCenter
                 spacing: -(Appearance.font.size.extraLarge * 0.5)
 
                 StyledText {
                     id: hoursText
-                    anchors.horizontalCenter: parent.horizontalCenter
+
+                    Layout.alignment: Qt.AlignHCenter
                     horizontalAlignment: Text.AlignHCenter
                     text: root.timeComponents[0]
                     color: Colours.palette.m3secondary
@@ -40,7 +42,8 @@ Item {
 
                 StyledText {
                     id: separator
-                    anchors.horizontalCenter: parent.horizontalCenter
+
+                    Layout.alignment: Qt.AlignHCenter
                     horizontalAlignment: Text.AlignHCenter
                     text: "•••"
                     color: Colours.palette.m3primary
@@ -49,7 +52,8 @@ Item {
 
                 StyledText {
                     id: minutesText
-                    anchors.horizontalCenter: parent.horizontalCenter
+
+                    Layout.alignment: Qt.AlignHCenter
                     horizontalAlignment: Text.AlignHCenter
                     text: root.timeComponents[1]
                     color: Colours.palette.m3secondary
@@ -59,8 +63,9 @@ Item {
 
                 StyledText {
                     id: amPmText
-                    visible: root.use12HourFormat
-                    anchors.horizontalCenter: parent.horizontalCenter
+
+                    visible: Config.services.useTwelveHourClock
+                    Layout.alignment: Qt.AlignHCenter
                     horizontalAlignment: Text.AlignHCenter
                     text: root.timeComponents[2]
                     color: Colours.palette.m3secondary
@@ -72,7 +77,9 @@ Item {
 
         StyledText {
             id: dateDisplay
+
             width: root.width
+            Layout.alignment: Qt.AlignHCenter
             horizontalAlignment: Text.AlignHCenter
             text: Time.format("ddd, d")
             color: Colours.palette.m3tertiary
