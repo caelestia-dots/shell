@@ -115,8 +115,8 @@ Item {
                             return "bluetooth_disabled"
                         }
 
-                        const connectedCount = Bluetooth.devices.values.filter(d => d.connected).length
-                        if (connectedCount > 0) {
+                        const isConnected = !!Bluetooth.devices.values.find(d => d.connected);
+                        if (isConnected) {
                             return "bluetooth_connected"
                         }
 
