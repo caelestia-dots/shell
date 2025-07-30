@@ -1,106 +1,80 @@
-pragma ComponentBehavior: Bound
+pragma Singleton
 
-import Quickshell
-import Quickshell.Io
 import QtQuick
+import Quickshell.Services.Greetd
 
 QtObject {
     id: root
     
-    signal authenticationSucceeded()
-    signal authenticationFailed(string message)
-    signal sessionStarted()
+    property string currentUser: ""
+    property string currentSession: ""
+    property bool isAuthenticating: false
+    property string authMessage: ""
+    property string authError: ""
     
-    property string username: ""
-    property string password: ""
-    property string session: ""
-    property bool authenticating: false
+    readonly property bool available: Greetd.available
+    readonly property var state: Greetd.state
     
-    // Socket connection to greetd
-    property var socket: null
-    property string socketPath: "/run/greetd.sock"
-    
-    function authenticate(user: string, pass: string, sess: string): void {
-        if (authenticating) return;
+    // Internal connections handler
+    property Connections greetdConnections: Connections {
+        target: Greetd
         
-        username = user;
-        password = pass;
-        session = sess;
-        authenticating = true;
-        
-        // Try using greetd directly via socket or fall back to using agreety/tuigreet
-        connectToGreetd();
-    }
-    
-    function connectToGreetd(): void {
-        // For now, we'll use a simpler approach with a helper script
-        // that interfaces with greetd. In a production environment,
-        // you'd implement the full greetd protocol over the socket.
-        
-        greetdProcess.start();
-    }
-    
-    Process {
-        id: greetdProcess
-        
-        // This assumes you have a helper script that handles greetd communication
-        // You'll need to create this script based on your greetd configuration
-        command: ["sh", "-c", `echo '${root.password}' | greetd-client login ${root.username} - ${root.session}`]
-        
-        onExited: (code, status) => {
-            root.authenticating = false;
-            
-            if (code === 0) {
-                root.authenticationSucceeded();
-                // Start the session
-                startSession();
+        function onAuthMessage(message: string, error: bool): void {
+            if (error) {
+                root.authError = message;
+                root.authMessage = "";
             } else {
-                // Parse error from stderr if available
-                const errorMsg = stderr || "Authentication failed";
-                root.authenticationFailed(errorMsg);
+                root.authMessage = message;
+                root.authError = "";
             }
         }
         
-        property string stderr: ""
+        function onReadyToLaunch(): void {
+            // Launch the session
+            Greetd.launch(root.currentSession);
+        }
         
-        onStderrChanged: line => {
-            stderr += line;
+        function onAuthFailure(): void {
+            root.authError = "Authentication failed";
+            root.isAuthenticating = false;
+        }
+        
+        function onError(error: string): void {
+            root.authError = error;
+            root.isAuthenticating = false;
+        }
+        
+        function onLaunched(): void {
+            // Greetd has acknowledged the launch
+            // The greeter should exit
+            Qt.quit();
         }
     }
     
-    function startSession(): void {
-        // The session should be started by greetd after successful authentication
-        // This is typically handled by the greetd configuration
-        root.sessionStarted();
+    function startAuthentication(username: string, session: string): void {
+        if (!Greetd.available || isAuthenticating) return;
         
-        // For systemd-based systems, you might need to signal that the greeter is done
-        Utils.exec(["loginctl", "activate", root.session]);
+        currentUser = username;
+        currentSession = session;
+        isAuthenticating = true;
+        authMessage = "";
+        authError = "";
+        
+        Greetd.createSession(username);
     }
     
-    // Alternative approach using a custom greetd protocol implementation
-    function createGreetdAuthScript(): string {
-        // This would be a more robust implementation that properly
-        // communicates with greetd over its socket protocol
-        return `#!/bin/sh
-# Greetd authentication helper
-# This script interfaces with greetd to authenticate users
-
-USERNAME="$1"
-PASSWORD="$2"
-SESSION="$3"
-
-# Connect to greetd socket and perform authentication
-# Implementation depends on your specific greetd setup
-# You might use socat, nc, or a custom program
-
-# For now, we'll use greetd-client if available
-if command -v greetd-client >/dev/null 2>&1; then
-    echo "$PASSWORD" | greetd-client login "$USERNAME" - "$SESSION"
-else
-    # Fallback to manual session start (requires proper permissions)
-    echo "Error: greetd-client not found"
-    exit 1
-fi
-`;
+    function respond(password: string): void {
+        if (!isAuthenticating) return;
+        Greetd.respond(password);
+    }
+    
+    function cancel(): void {
+        isAuthenticating = false;
+        currentUser = "";
+        currentSession = "";
+        authMessage = "";
+        authError = "";
+        // Reset greetd state if needed
+        // The proper way depends on the greetd API version
     }
 }

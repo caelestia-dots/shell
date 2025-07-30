@@ -1,12 +1,14 @@
-import qs.widgets
-import qs.services
-import qs.config
-import qs.utils
+import "./deps/widgets"
+import "./deps/services"
+import "./deps/config"
+import "./deps/utils"
+import "./"
 import Quickshell
 import Quickshell.Io
 import QtQuick
 import QtQuick.Layouts
 import QtQuick.Controls
+import QtQuick.Effects
 
 ColumnLayout {
     id: root
@@ -28,24 +30,25 @@ ColumnLayout {
         usernameField.focus = true;
     }
     
-    spacing: Appearance.spacing.large * 2
-    
-    Component.onCompleted: {
-        // Set initial username to current user or empty
-        usernameBuffer = Quickshell.env("USER") || "";
-        // Sessions are loaded by SessionDetector
-        availableSessions = sessionDetector.sessions;
-        selectedSession = sessionDetector.defaultSession;
-    }
+    spacing: Appearance.spacing.large
     
     SessionDetector {
         id: sessionDetector
+    }
+    
+    Component.onCompleted: {
+        // Try to get the last logged-in user from environment
+        // This is set in the caelestia-greetd script
+        usernameBuffer = Quickshell.env("LAST_USER") || "";
+        // Load sessions from SessionDetector
+        root.availableSessions = sessionDetector.sessions;
+        root.selectedSession = sessionDetector.defaultSession;
         
-        onSessionsChanged: {
-            root.availableSessions = sessions;
-            if (!root.selectedSession || !sessions.find(s => s.id === root.selectedSession)) {
-                root.selectedSession = defaultSession;
-            }
+        // If username is pre-populated, focus on password field
+        if (usernameBuffer) {
+            passwordField.focus = true;
+        } else {
+            usernameField.focus = true;
         }
     }
     
@@ -56,25 +59,33 @@ ColumnLayout {
         errorMessage = "";
         
         // Use GreetdClient for authentication
-        greetdClient.authenticate(usernameBuffer, passwordBuffer, selectedSession);
+        GreetdClient.startAuthentication(usernameBuffer, selectedSession);
     }
     
-    GreetdClient {
-        id: greetdClient
+    Connections {
+        target: GreetdClient
         
-        onAuthenticationSucceeded: {
-            root.isAuthenticating = false;
-            root.sessionRequested(root.usernameBuffer, root.passwordBuffer, root.selectedSession);
+        function onAuthMessageChanged(): void {
+            if (GreetdClient.authMessage && GreetdClient.authMessage.toLowerCase().includes("password")) {
+                // Respond with password when prompted
+                GreetdClient.respond(root.passwordBuffer);
+            }
         }
         
-        onAuthenticationFailed: message => {
-            root.isAuthenticating = false;
-            root.errorMessage = message || qsTr("Authentication failed");
-            root.passwordBuffer = "";
-            passwordField.focus = true;
-            
-            // Clear error after 3 seconds
-            errorTimer.restart();
+        function onAuthErrorChanged(): void {
+            if (GreetdClient.authError) {
+                root.isAuthenticating = false;
+                root.errorMessage = GreetdClient.authError;
+                root.passwordBuffer = "";
+                passwordField.focus = true;
+                
+                // Clear error after 3 seconds
+                errorTimer.restart();
+            }
+        }
+        
+        function onIsAuthenticatingChanged(): void {
+            root.isAuthenticating = GreetdClient.isAuthenticating;
         }
     }
     
@@ -87,7 +98,7 @@ ColumnLayout {
     // User info row
     RowLayout {
         Layout.alignment: Qt.AlignHCenter
-        Layout.topMargin: Appearance.padding.large * 3
+        Layout.topMargin: Appearance.padding.large
         Layout.maximumWidth: Config.lock.sizes.inputWidth - Appearance.rounding.large * 2
         
         spacing: Appearance.spacing.large
@@ -124,7 +135,7 @@ ColumnLayout {
             StyledText {
                 Layout.fillWidth: true
                 text: qsTr("Welcome to %1").arg(Quickshell.env("HOSTNAME") || "System")
-                font.pointSize: Appearance.font.size.extraLarge
+                font.pointSize: Appearance.font.size.large
                 font.weight: 500
                 elide: Text.ElideRight
             }
@@ -133,7 +144,7 @@ ColumnLayout {
                 Layout.fillWidth: true
                 text: errorMessage || qsTr("Please log in")
                 color: errorMessage ? Colours.palette.m3error : Colours.palette.m3tertiary
-                font.pointSize: Appearance.font.size.large
+                font.pointSize: Appearance.font.size.normal
                 elide: Text.ElideRight
             }
         }
@@ -145,11 +156,13 @@ ColumnLayout {
         
         Layout.fillWidth: true
         Layout.preferredWidth: Config.lock.sizes.inputWidth
-        Layout.preferredHeight: Appearance.font.size.normal + Appearance.padding.large * 2
+        Layout.preferredHeight: Appearance.font.size.normal + Appearance.padding.normal * 2
         
-        focus: true
+        focus: false
         color: Colours.palette.m3surfaceContainer
         radius: Appearance.rounding.small
+        border.width: activeFocus ? 2 : 0
+        border.color: Colours.palette.m3primary
         
         Keys.onPressed: event => {
             if (isAuthenticating) return;
@@ -167,12 +180,18 @@ ColumnLayout {
             }
         }
         
+        MouseArea {
+            anchors.fill: parent
+            cursorShape: Qt.IBeamCursor
+            onClicked: usernameField.focus = true
+        }
+        
         StyledText {
             anchors.centerIn: parent
             
             text: root.usernameBuffer || qsTr("Username")
             color: root.usernameBuffer ? Colours.palette.m3onSurface : Colours.palette.m3outline
-            font.pointSize: Appearance.font.size.larger
+            font.pointSize: Appearance.font.size.normal
         }
     }
     
@@ -182,11 +201,13 @@ ColumnLayout {
         
         Layout.fillWidth: true
         Layout.preferredWidth: Config.lock.sizes.inputWidth
-        Layout.preferredHeight: Appearance.font.size.normal + Appearance.padding.large * 2
+        Layout.preferredHeight: Appearance.font.size.normal + Appearance.padding.normal * 2
         
         color: Colours.palette.m3surfaceContainer
         radius: Appearance.rounding.small
         clip: true
+        border.width: activeFocus ? 2 : 0
+        border.color: Colours.palette.m3primary
         
         Keys.onPressed: event => {
             if (isAuthenticating) return;
@@ -208,6 +229,12 @@ ColumnLayout {
             }
         }
         
+        MouseArea {
+            anchors.fill: parent
+            cursorShape: Qt.IBeamCursor
+            onClicked: passwordField.focus = true
+        }
+        
         StyledText {
             id: passwordPlaceholder
             
@@ -215,7 +242,7 @@ ColumnLayout {
             
             text: isAuthenticating ? qsTr("Authenticating...") : qsTr("Password")
             color: isAuthenticating ? Colours.palette.m3secondary : Colours.palette.m3outline
-            font.pointSize: Appearance.font.size.larger
+            font.pointSize: Appearance.font.size.normal
             
             opacity: root.passwordBuffer ? 0 : 1
             
@@ -301,10 +328,12 @@ ColumnLayout {
         
         Layout.fillWidth: true
         Layout.preferredWidth: Config.lock.sizes.inputWidth
-        Layout.preferredHeight: Appearance.font.size.normal + Appearance.padding.large * 2
+        Layout.preferredHeight: Appearance.font.size.normal + Appearance.padding.normal * 2
         
         color: Colours.palette.m3surfaceContainer
         radius: Appearance.rounding.small
+        border.width: activeFocus ? 2 : 0
+        border.color: Colours.palette.m3primary
         
         property bool expanded: false
         
@@ -329,34 +358,39 @@ ColumnLayout {
         
         RowLayout {
             anchors.fill: parent
-            anchors.margins: Appearance.padding.large
+            anchors.leftMargin: Appearance.padding.normal
+            anchors.rightMargin: Appearance.padding.normal
+            anchors.verticalCenter: parent.verticalCenter
             
             StyledText {
                 Layout.fillWidth: true
+                Layout.alignment: Qt.AlignVCenter
                 text: {
                     const session = root.availableSessions.find(s => s.id === root.selectedSession);
                     return session ? session.name : root.selectedSession;
                 }
                 color: Colours.palette.m3onSurface
-                font.pointSize: Appearance.font.size.larger
+                font.pointSize: Appearance.font.size.normal
                 elide: Text.ElideRight
+                verticalAlignment: Text.AlignVCenter
             }
             
             MaterialIcon {
+                Layout.alignment: Qt.AlignVCenter
                 text: sessionDropdown.expanded ? "expand_less" : "expand_more"
                 color: Colours.palette.m3onSurface
-                font.pointSize: Appearance.font.size.larger
+                font.pointSize: Appearance.font.size.normal
             }
         }
         
-        // Dropdown menu
+        // Dropdown menu (opens upward)
         StyledRect {
-            anchors.top: parent.bottom
-            anchors.topMargin: Appearance.spacing.small
+            anchors.bottom: parent.top
+            anchors.bottomMargin: Appearance.spacing.small
             anchors.left: parent.left
             anchors.right: parent.right
             
-            implicitHeight: sessionList.contentHeight
+            implicitHeight: Math.min(sessionList.contentHeight, 150) // Limit max height
             
             visible: sessionDropdown.expanded
             color: Colours.palette.m3surfaceContainer
@@ -380,24 +414,96 @@ ColumnLayout {
                 
                 delegate: ItemDelegate {
                     width: parent.width
-                    height: Appearance.font.size.normal + Appearance.padding.large * 2
+                    height: Appearance.font.size.normal + Appearance.padding.normal * 2
+                    
+                    onClicked: {
+                        root.selectedSession = modelData.id;
+                        sessionDropdown.expanded = false;
+                        sessionDropdown.focus = true;
+                    }
                     
                     background: StateLayer {
                         color: Colours.palette.m3onSurface
-                        
-                        function onClicked(): void {
-                            root.selectedSession = modelData.id;
-                            sessionDropdown.expanded = false;
-                        }
                     }
                     
                     StyledText {
                         anchors.centerIn: parent
                         text: modelData.name
                         color: Colours.palette.m3onSurface
-                        font.pointSize: Appearance.font.size.larger
+                        font.pointSize: Appearance.font.size.normal
                     }
                 }
+            }
+        }
+    }
+    
+    // Login button
+    StyledRect {
+        id: loginButton
+        
+        Layout.fillWidth: true
+        Layout.preferredWidth: Config.lock.sizes.inputWidth
+        Layout.preferredHeight: Appearance.font.size.normal + Appearance.padding.normal * 2
+        Layout.topMargin: Appearance.spacing.normal
+        
+        color: isAuthenticating ? Colours.palette.m3secondaryContainer : Colours.palette.m3primary
+        radius: Appearance.rounding.small
+        
+        enabled: !isAuthenticating && usernameBuffer && passwordBuffer
+        opacity: enabled ? 1 : 0.5
+        
+        Behavior on opacity {
+            NumberAnimation {
+                duration: Appearance.anim.durations.normal
+                easing.type: Easing.BezierSpline
+                easing.bezierCurve: Appearance.anim.curves.standard
+            }
+        }
+        
+        Behavior on color {
+            ColorAnimation {
+                duration: Appearance.anim.durations.normal
+                easing.type: Easing.BezierSpline
+                easing.bezierCurve: Appearance.anim.curves.standard
+            }
+        }
+        
+        StateLayer {
+            radius: parent.radius
+            color: Colours.palette.m3onPrimary
+            enabled: parent.enabled
+            
+            function onClicked(): void {
+                if (parent.enabled) {
+                    root.authenticate();
+                }
+            }
+        }
+        
+        RowLayout {
+            anchors.centerIn: parent
+            spacing: Appearance.spacing.small
+            
+            MaterialIcon {
+                visible: isAuthenticating
+                text: "progress_activity"
+                color: Colours.palette.m3onSecondaryContainer
+                font.pointSize: Appearance.font.size.normal
+                
+                RotationAnimation on rotation {
+                    running: isAuthenticating
+                    from: 0
+                    to: 360
+                    duration: 1000
+                    loops: Animation.Infinite
+                }
+            }
+            
+            StyledText {
+                text: isAuthenticating ? qsTr("Logging in...") : qsTr("Log In")
+                color: isAuthenticating ? Colours.palette.m3onSecondaryContainer : Colours.palette.m3onPrimary
+                font.pointSize: Appearance.font.size.normal
+                font.weight: 600
             }
         }
     }
