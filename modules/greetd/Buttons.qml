@@ -1,8 +1,8 @@
 pragma ComponentBehavior: Bound
 
-import qs.widgets
-import qs.services
-import qs.config
+import "./deps/widgets"
+import "./deps/services"
+import "./deps/config"
 import Quickshell
 import QtQuick
 import QtQuick.Layouts

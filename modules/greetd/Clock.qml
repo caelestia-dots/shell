@@ -1,6 +1,6 @@
-import qs.widgets
-import qs.services
-import qs.config
+import "./deps/widgets"
+import "./deps/services"
+import "./deps/config"
 import QtQuick.Layouts
 
 ColumnLayout {
@@ -16,7 +16,7 @@ ColumnLayout {
             Layout.alignment: Qt.AlignVCenter
             text: Time.format("HH")
             color: Colours.palette.m3secondary
-            font.pointSize: Appearance.font.size.extraLarge * 4
+            font.pointSize: Appearance.font.size.extraLarge * 1.5
             font.family: Appearance.font.family.mono
             font.weight: 800
         }
@@ -25,7 +25,7 @@ ColumnLayout {
             Layout.alignment: Qt.AlignVCenter
             text: ":"
             color: Colours.palette.m3primary
-            font.pointSize: Appearance.font.size.extraLarge * 4
+            font.pointSize: Appearance.font.size.extraLarge * 1.5
             font.family: Appearance.font.family.mono
             font.weight: 800
         }
@@ -34,7 +34,7 @@ ColumnLayout {
             Layout.alignment: Qt.AlignVCenter
             text: Time.format("mm")
             color: Colours.palette.m3secondary
-            font.pointSize: Appearance.font.size.extraLarge * 4
+            font.pointSize: Appearance.font.size.extraLarge * 1.5
             font.family: Appearance.font.family.mono
             font.weight: 800
         }
@@ -42,11 +42,11 @@ ColumnLayout {
 
     StyledText {
         Layout.alignment: Qt.AlignHCenter
-        Layout.bottomMargin: Appearance.padding.large * 3
+        Layout.bottomMargin: Appearance.padding.large * 2
 
         text: Time.format("dddd, d MMMM yyyy")
         color: Colours.palette.m3tertiary
-        font.pointSize: Appearance.font.size.extraLarge
+        font.pointSize: Appearance.font.size.large
         font.family: Appearance.font.family.mono
         font.bold: true
     }

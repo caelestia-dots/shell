@@ -1,12 +1,12 @@
 pragma ComponentBehavior: Bound
 
-import qs.services
-import qs.config
+import "./deps/services"
+import "./deps/config"
 import Quickshell
 import QtQuick
 import QtQuick.Effects
 
-ShellRoot {
+Item {
     id: root
     
     signal sessionStarted()
@@ -14,9 +14,6 @@ ShellRoot {
     function reset(): void {
         greetdInput.reset();
     }
-    
-    anchors.fill: parent
-    color: "transparent"
     
     // Background with blur effect
     Item {
@@ -49,72 +46,88 @@ ShellRoot {
         }
     }
     
+    // Hide the original Backgrounds component since we'll use simpler backgrounds
     Backgrounds {
         id: backgrounds
         
-        weatherWidth: weather.implicitWidth
-        buttonsWidth: buttons.nonAnimWidth ?? 0
-        buttonsHeight: buttons.nonAnimHeight ?? 0
-        statusWidth: status.nonAnimWidth ?? 0
-        statusHeight: status.nonAnimHeight ?? 0
+        visible: false
+        locked: true
+        buttonsWidth: 50
+        buttonsHeight: 50
         isNormal: root.width > Config.lock.sizes.smallScreenWidth
         isLarge: root.width > Config.lock.sizes.largeScreenWidth
+    }
+    
+    // Clock with background at top
+    Item {
+        id: clockContainer
+        anchors.top: parent.top
+        anchors.horizontalCenter: parent.horizontalCenter
+        anchors.topMargin: 50
+        width: Config.lock.sizes.clockWidth
+        height: Config.lock.sizes.clockHeight
         
-        layer.enabled: true
-        layer.effect: MultiEffect {
-            shadowEnabled: true
-            blurMax: 15
-            shadowColor: Qt.alpha(Colours.palette.m3shadow, 0.7)
+        Rectangle {
+            anchors.fill: parent
+            color: Colours.palette.m3surface
+            radius: Appearance.rounding.large * 2
+            
+            layer.enabled: true
+            layer.effect: MultiEffect {
+                shadowEnabled: true
+                blurMax: 15
+                shadowColor: Qt.alpha(Colours.palette.m3shadow, 0.7)
+            }
+        }
+        
+        Clock {
+            anchors.centerIn: parent
         }
     }
     
-    Clock {
+    // Input with background at bottom
+    Item {
+        id: inputContainer
+        anchors.bottom: parent.bottom
         anchors.horizontalCenter: parent.horizontalCenter
-        anchors.bottom: parent.top
-        anchors.bottomMargin: -backgrounds.clockBottom
-    }
-    
-    GreetdInput {
-        id: greetdInput
+        anchors.bottomMargin: 100
+        width: Config.lock.sizes.inputWidth
+        height: Config.lock.sizes.inputHeight
         
-        anchors.horizontalCenter: parent.horizontalCenter
-        anchors.top: parent.bottom
-        anchors.topMargin: -backgrounds.inputTop
+        Rectangle {
+            anchors.fill: parent
+            color: Colours.palette.m3surface
+            radius: Appearance.rounding.large * 2
+            
+            layer.enabled: true
+            layer.effect: MultiEffect {
+                shadowEnabled: true
+                blurMax: 15
+                shadowColor: Qt.alpha(Colours.palette.m3shadow, 0.7)
+            }
+        }
         
-        onSessionRequested: (username, password, session) => {
-            // This will be handled by the greetd authentication process
-            root.sessionStarted();
+        GreetdInput {
+            id: greetdInput
+            
+            anchors.fill: parent
+            anchors.margins: 20
+            
+            onSessionRequested: (username, password, session) => {
+                // This will be handled by the greetd authentication process
+                root.sessionStarted();
+            }
         }
     }
     
-    WeatherInfo {
-        id: weather
-        
-        anchors.top: parent.bottom
-        anchors.right: parent.left
-        anchors.topMargin: -backgrounds.weatherTop
-        anchors.rightMargin: -backgrounds.weatherRight
-    }
-    
+    // Power buttons in bottom right
     Buttons {
         id: buttons
         
-        anchors.top: parent.bottom
-        anchors.left: parent.right
-        anchors.topMargin: -backgrounds.buttonsTop
-        anchors.leftMargin: -backgrounds.buttonsLeft
+        anchors.bottom: parent.bottom
+        anchors.right: parent.right
+        anchors.margins: 40
         
         visible: root.width > Config.lock.sizes.largeScreenWidth
-    }
-    
-    Status {
-        id: status
-        
-        anchors.bottom: parent.top
-        anchors.left: parent.right
-        anchors.bottomMargin: -backgrounds.statusBottom
-        anchors.leftMargin: -backgrounds.statusLeft
-        
-        showNotifs: false // No notifications on login screen
     }
 }

@@ -1,36 +1,24 @@
-pragma ComponentBehavior: Bound
-
-import qs.widgets
 import Quickshell
-import Quickshell.Io
 import QtQuick
 
-Scope {
-    id: root
-    
-    property bool sessionStarted: false
-    
-    // Main greetd surface
-    GreetdSurface {
-        id: greetdSurface
+ShellRoot {
+    FloatingWindow {
+        id: mainWindow
         
-        onSessionStarted: {
-            root.sessionStarted = true;
-            // The greetd process will handle starting the session
-            // This scope can be unloaded after successful login
-        }
-    }
-    
-    // IPC handler for potential external control
-    IpcHandler {
-        target: "greetd"
+        visible: true
         
-        function reset(): void {
-            greetdSurface.reset();
+        // Use screen dimensions
+        implicitWidth: 1920
+        implicitHeight: 1080
+        
+        color: "transparent"
+        
+        GreetdSurface {
+            anchors.fill: parent
         }
         
-        function isActive(): bool {
-            return !root.sessionStarted;
+        Component.onCompleted: {
+            console.log("Greetd window created")
         }
     }
 }
