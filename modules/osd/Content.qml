@@ -15,7 +15,7 @@ Column {
 
     spacing: Appearance.spacing.normal
 
-    VerticalSlider {
+    StyledSlider {
         icon: {
             if (Audio.muted)
                 return "no_sound";
@@ -32,7 +32,7 @@ Column {
         implicitHeight: Config.osd.sizes.sliderHeight
     }
 
-    VerticalSlider {
+    StyledSlider {
         icon: `brightness_${(Math.round(value * 6) + 1)}`
         value: root.monitor?.brightness ?? 0
         onMoved: root.monitor?.setBrightness(value)

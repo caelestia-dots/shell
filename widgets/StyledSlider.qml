@@ -9,11 +9,11 @@ Slider {
     id: root
 
     required property string icon
+    property bool isHorizontal: false
     property real oldValue
 
     wheelEnabled: true
-
-    orientation: Qt.Vertical
+    orientation: isHorizontal ? Qt.Horizontal : Qt.Vertical
 
     background: StyledRect {
         color: Colours.alpha(Colours.palette.m3surfaceContainer, true)
@@ -21,13 +21,13 @@ Slider {
 
         StyledRect {
             anchors.left: parent.left
-            anchors.right: parent.right
+            anchors.bottom: parent.bottom
 
-            y: root.handle.y
-            implicitHeight: parent.height - y
+            width: isHorizontal ? root.handle.x + root.handle.width : parent.width
+            height: isHorizontal ? parent.height : parent.height - root.handle.y
 
             color: Colours.alpha(Colours.palette.m3secondary, true)
-            radius: Appearance.rounding.full
+            radius: parent.radius
         }
     }
 
@@ -36,9 +36,11 @@ Slider {
 
         property bool moving
 
-        y: root.visualPosition * (root.availableHeight - height)
-        implicitWidth: root.width
-        implicitHeight: root.width
+        x: isHorizontal ? (root.availableWidth - width) * root.position : (parent.width - width) / 2
+        y: isHorizontal ? (parent.height - height) / 2 : (root.availableHeight - height) * (1 - root.position)
+
+        width: isHorizontal ? root.height : root.width
+        height: width
 
         RectangularShadow {
             anchors.fill: parent
@@ -52,7 +54,6 @@ Slider {
             id: rect
 
             anchors.fill: parent
-
             color: Colours.alpha(Colours.palette.m3inverseSurface, true)
             radius: Appearance.rounding.full
 
@@ -120,7 +121,6 @@ Slider {
 
     Timer {
         id: stateChangeDelay
-
         interval: 500
         onTriggered: {
             if (!root.pressed)
