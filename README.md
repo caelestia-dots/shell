@@ -193,6 +193,7 @@ All configuration options are in `~/.config/caelestia/shell.json`.
         "enableDangerousActions": false,
         "maxShown": 8,
         "maxWallpapers": 9,
+        "terminal": "foot",
         "useFuzzy": {
             "apps": false,
             "actions": false,
