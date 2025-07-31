@@ -19,6 +19,14 @@ Singleton {
         }
     }
 
+    function setAudioSink(newSink: PwNode): void {
+      Pipewire.preferredDefaultAudioSink = newSink
+    }
+
+    function setAudioSource(newSource: PwNode): void {
+      Pipewire.preferredDefaultAudioSource = newSource
+    }
+
     PwObjectTracker {
         objects: [Pipewire.defaultAudioSink, Pipewire.defaultAudioSource]
     }

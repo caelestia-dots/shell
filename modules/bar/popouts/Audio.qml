@@ -1,57 +1,73 @@
 import qs.widgets
 import qs.services
 import qs.config
+
 import QtQuick.Layouts
-import Quickshell
+import QtQuick
+import QtQuick.Controls
+
+import Quickshell.Services.Pipewire
 
 ColumnLayout {
     id: root
 
     required property var wrapper
 
-    spacing: Appearance.spacing.normal
-
-    VerticalSlider {
-        id: volumeSlider
-
-        icon: {
-            if (Audio.muted)
-                return "no_sound";
-            if (value >= 0.5)
-                return "volume_up";
-            if (value > 0)
-                return "volume_down";
-            return "volume_mute";
-        }
-
-        value: Audio.volume
-        onMoved: Audio.setVolume(value)
-
-        implicitWidth: Config.osd.sizes.sliderWidth
-        implicitHeight: Config.osd.sizes.sliderHeight
-    }
-
-    StyledRect {
-        id: pavuButton
-
-        implicitWidth: implicitHeight
-        implicitHeight: icon.implicitHeight + Appearance.padding.small * 2
-
-        radius: Appearance.rounding.normal
-        color: Colours.palette.m3surfaceContainer
-
-        StateLayer {
-            function onClicked(): void {
-                root.wrapper.hasCurrent = false;
-                Quickshell.execDetached(["app2unit", "--", ...Config.bar.externalAudioProgram]);
+    property var devices: Pipewire.nodes.values.reduce((acc, node) => {
+        if (!node.isStream) {
+            if (node.isSink) {
+                acc.output.push(node)
+            } else if (node.audio) {
+                acc.input.push(node)
             }
         }
+        return acc
+    }, { input: [], output: [] })
 
-        MaterialIcon {
-            id: icon
+    property list<PwNode> inputDevices: devices.input
+    property list<PwNode> outputDevices: devices.output
 
-            anchors.centerIn: parent
-            text: "settings"
+    ColumnLayout {
+        spacing: -Appearance.spacing.small
+
+        Label {
+            text: qsTr("Output")
+            font.weight: 500
+            bottomPadding: Appearance.spacing.small
+        }
+
+        Repeater {
+            model: root.outputDevices
+
+            StyledRadioButton {
+                id: control
+
+                text: modelData.description
+                checked: Audio.sink?.id === modelData.id
+                font.pointSize: Appearance.font.size.small
+                onClicked: Audio.setAudioSink(modelData)
+            }
+        }
+    }
+
+    ColumnLayout {
+        spacing: -Appearance.spacing.small
+
+        Label {
+            text: qsTr("Input")
+            font.weight: 500
+            bottomPadding: Appearance.spacing.small
+        }
+
+        Repeater {
+            model: root.inputDevices
+
+            StyledRadioButton {
+                text: modelData.description
+                checked: Audio.source?.id === modelData.id
+                font.pointSize: Appearance.font.size.small
+                onClicked: Audio.setAudioSource(modelData)
+            }
         }
     }
 }
