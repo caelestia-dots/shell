@@ -11,7 +11,11 @@ Slider {
     required property string icon
     property real oldValue
 
-    wheelEnabled: true
+    signal wheel(WheelEvent event)
+    CustomMouseArea {
+        anchors.fill: parent
+        onWheel: event => root.wheel(event)
+    }
 
     orientation: Qt.Vertical
 

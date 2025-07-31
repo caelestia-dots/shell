@@ -28,6 +28,13 @@ Column {
         value: Audio.volume
         onMoved: Audio.setVolume(value)
 
+        onWheel: event => {
+            if (event.angleDelta.y > 0)
+                Audio.setVolume(Audio.volume + 0.1);
+            else if (event.angleDelta.y < 0)
+                Audio.setVolume(Audio.volume - 0.1);
+        }
+
         implicitWidth: Config.osd.sizes.sliderWidth
         implicitHeight: Config.osd.sizes.sliderHeight
     }
@@ -36,6 +43,16 @@ Column {
         icon: `brightness_${(Math.round(value * 6) + 1)}`
         value: root.monitor?.brightness ?? 0
         onMoved: root.monitor?.setBrightness(value)
+
+        onWheel: event => {
+            const monitor = root.monitor;
+            if (!monitor)
+                return;
+            if (event.angleDelta.y > 0)
+                monitor.setBrightness(monitor.brightness + 0.1);
+            else if (event.angleDelta.y < 0)
+                monitor.setBrightness(monitor.brightness - 0.1);
+        }
 
         implicitWidth: Config.osd.sizes.sliderWidth
         implicitHeight: Config.osd.sizes.sliderHeight
