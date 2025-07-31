@@ -1,6 +1,7 @@
 import qs.widgets
 import qs.services
 import qs.config
+import QtQuick
 import QtQuick.Layouts
 
 ColumnLayout {
@@ -43,12 +44,13 @@ ColumnLayout {
 
         StyledText {
             visible: Config.services.useTwelveHourClock
+            Layout.leftMargin: Appearance.spacing.normal
             Layout.alignment: Qt.AlignVCenter
+
             text: root.timeComponents[2]
-            color: Colours.palette.m3secondary
-            font.pointSize: Appearance.font.size.extraLarge * 4
-            font.family: Appearance.font.family.mono
-            font.weight: 800
+            color: Colours.palette.m3primary
+            font.pointSize: Appearance.font.size.extraLarge * 3
+            font.weight: 700
         }
     }
 
