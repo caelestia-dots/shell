@@ -14,6 +14,7 @@ Slider {
     signal wheel(WheelEvent event)
     CustomMouseArea {
         anchors.fill: parent
+        acceptedButtons: Qt.NoButton
         onWheel: event => root.wheel(event)
     }
 
