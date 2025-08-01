@@ -32,7 +32,7 @@ ColumnLayout {
         Label {
             text: qsTr("Output")
             font.weight: 500
-            bottomPadding: Appearance.spacing.small
+            Layout.bottomMargin: Appearance.spacing.small
         }
 
         Repeater {
@@ -55,7 +55,7 @@ ColumnLayout {
         Label {
             text: qsTr("Input")
             font.weight: 500
-            bottomPadding: Appearance.spacing.small
+            Layout.bottomMargin: Appearance.spacing.small
         }
 
         Repeater {
@@ -68,6 +68,12 @@ ColumnLayout {
                 onClicked: Audio.setAudioSource(modelData)
             }
         }
+    }
+
+    StyledText {
+        text: qsTr("Settings")
+        font.weight: 500
+        Layout.topMargin: Appearance.spacing.small
     }
 
     RowLayout {

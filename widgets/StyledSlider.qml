@@ -121,6 +121,7 @@ Slider {
 
     Timer {
         id: stateChangeDelay
+
         interval: 500
         onTriggered: {
             if (!root.pressed)

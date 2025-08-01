@@ -12,22 +12,22 @@ Singleton {
     readonly property bool muted: sink?.audio?.muted ?? false
     readonly property real volume: sink?.audio?.volume ?? 0
 
-    function setVolume(volume: real): void {
+    function setVolume(newVolume: real): void {
         if (sink?.ready && sink?.audio) {
             sink.audio.muted = false;
-            sink.audio.volume = volume;
+            sink.audio.volume = newVolume;
         }
     }
 
     function setAudioSink(newSink: PwNode): void {
-      Pipewire.preferredDefaultAudioSink = newSink
+        Pipewire.preferredDefaultAudioSink = newSink
     }
 
     function setAudioSource(newSource: PwNode): void {
-      Pipewire.preferredDefaultAudioSource = newSource
+        Pipewire.preferredDefaultAudioSource = newSource
     }
 
     PwObjectTracker {
-        objects: [Pipewire.defaultAudioSink, Pipewire.defaultAudioSource]
+        objects: [sink, source]
     }
 }
