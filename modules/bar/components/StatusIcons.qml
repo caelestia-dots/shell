@@ -110,12 +110,11 @@ Item {
                 MaterialIcon {
                     animate: true
                     text: {
-                        const adapter = Bluetooth.defaultAdapter;
                         if (!Bluetooth.defaultAdapter?.enabled) {
                             return "bluetooth_disabled"
                         }
 
-                        const isConnected = !!Bluetooth.devices.values.find(d => d.connected);
+                        const isConnected = Bluetooth.devices.values.some(d => d.connected);
                         if (isConnected) {
                             return "bluetooth_connected"
                         }
