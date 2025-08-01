@@ -1,6 +1,7 @@
 import qs.widgets
 import qs.services
 import qs.config
+import qs.utils
 import QtQuick
 
 Column {
@@ -16,15 +17,7 @@ Column {
     spacing: Appearance.spacing.normal
 
     StyledSlider {
-        icon: {
-            if (Audio.muted)
-                return "no_sound";
-            if (value >= 0.5)
-                return "volume_up";
-            if (value > 0)
-                return "volume_down";
-            return "volume_mute";
-        }
+        icon: Icons.getVolumeIcon(value, Audio.muted)
         value: Audio.volume
         onMoved: Audio.setVolume(value)
 

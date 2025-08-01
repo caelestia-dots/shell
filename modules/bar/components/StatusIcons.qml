@@ -58,7 +58,7 @@ Item {
 
             sourceComponent: MaterialIcon {
                 animate: true
-                text: Audio.muted ? "volume_off" : Audio.volume >= 0.66 ? "volume_up" : Audio.volume >= 0.33 ? "volume_down" : "volume_mute"
+                text: Icons.getVolumeIcon(Audio.volume, Audio.muted)
                 color: root.colour
             }
         }
