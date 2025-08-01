@@ -25,7 +25,7 @@ Item {
 
     function lengthStr(length: int): string {
         if (length < 0)
-            return "-1:-1";
+            return "";
 
         const hours = Math.floor(length / 3600);
         const mins = Math.floor((length % 3600) / 60);
@@ -160,7 +160,7 @@ Item {
         ElideText {
             id: title
 
-            label: (Players.active?.trackTitle ?? qsTr("No media")) || qsTr("Unknown title")
+            label: Players.active ? (Players.active.trackTitle || qsTr("Unkown title")) : null
             color: Colours.palette.m3primary
             font.pointSize: Appearance.font.size.normal
         }
@@ -168,7 +168,7 @@ Item {
         ElideText {
             id: album
 
-            label: (Players.active?.trackAlbum ?? qsTr("No media")) || qsTr("Unknown album")
+            label: Players.active ? (Players.active.trackAlbum || qsTr("Unknown album")) : null
             color: Colours.palette.m3outline
             font.pointSize: Appearance.font.size.small
         }
@@ -176,7 +176,7 @@ Item {
         ElideText {
             id: artist
 
-            label: (Players.active?.trackArtist ?? qsTr("No media")) || qsTr("Unknown artist")
+            label: Players.active ? (Players.active.trackArtist || qsTr("Unknown artist")) : qsTr("No media")
             color: Colours.palette.m3secondary
         }
 
@@ -403,6 +403,7 @@ Item {
                         Layout.maximumWidth: playerSelector.implicitWidth - implicitHeight - parent.spacing - Appearance.padding.normal * 2
                         text: Players.active?.identity ?? "No players"
                         color: Colours.palette.m3onSecondaryContainer
+                        font.pointSize: Appearance.font.size.small
                         elide: Text.ElideRight
                     }
                 }
