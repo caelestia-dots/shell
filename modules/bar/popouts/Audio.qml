@@ -14,11 +14,8 @@ ColumnLayout {
 
     property var devices: Pipewire.nodes.values.reduce((acc, node) => {
         if (!node.isStream) {
-            if (node.isSink) {
-                acc.output.push(node)
-            } else if (node.audio) {
-                acc.input.push(node)
-            }
+            if (node.isSink) acc.output.push(node)
+            else if (node.audio) acc.input.push(node)
         }
         return acc
     }, { input: [], output: [] })
