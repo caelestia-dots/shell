@@ -1,2 +1,12 @@
 /result
 /.qmlls.ini
+
+# Beat detector
+beat_detector
+
+# Claude-related files
+.claude/
+*.claude
+CLAUDE.md
+.claude-code/
+.claude-session/
