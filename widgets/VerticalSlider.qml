@@ -11,8 +11,6 @@ Slider {
     required property string icon
     property real oldValue
 
-    signal wheel(WheelEvent event)
-
     orientation: Qt.Vertical
 
     background: StyledRect {
@@ -59,7 +57,7 @@ Slider {
             MouseArea {
                 anchors.fill: parent
                 cursorShape: Qt.PointingHandCursor
-                onPressed: event => event.accepted = false
+                acceptedButtons: Qt.NoButton
             }
 
             MaterialIcon {
@@ -116,12 +114,6 @@ Slider {
         oldValue = value;
         handle.moving = true;
         stateChangeDelay.restart();
-    }
-
-    CustomMouseArea {
-        anchors.fill: parent
-        acceptedButtons: Qt.NoButton
-        onWheel: event => root.wheel(event)
     }
 
     Timer {
