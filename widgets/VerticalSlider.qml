@@ -12,11 +12,6 @@ Slider {
     property real oldValue
 
     signal wheel(WheelEvent event)
-    CustomMouseArea {
-        anchors.fill: parent
-        acceptedButtons: Qt.NoButton
-        onWheel: event => root.wheel(event)
-    }
 
     orientation: Qt.Vertical
 
@@ -121,6 +116,12 @@ Slider {
         oldValue = value;
         handle.moving = true;
         stateChangeDelay.restart();
+    }
+
+    CustomMouseArea {
+        anchors.fill: parent
+        acceptedButtons: Qt.NoButton
+        onWheel: event => root.wheel(event)
     }
 
     Timer {
