@@ -12,10 +12,30 @@ ColumnLayout {
     id: root
 
     required property WlSessionLockSurface lock
+    required property bool fprint
 
     property string passwordBuffer
 
     spacing: Appearance.spacing.large * 2
+
+    onLockChanged: {
+        if (lock && fprint) {
+            pam.start();
+        }
+        if (!lock) {
+            pam.abort();
+        }
+    }
+
+    CustomShortcut {
+        // when WlSessionLock is active, used in hypridle when waking up
+        name: "restartFprint"
+        description: "Restart the pam service to use the fprint service"
+        onPressed: {
+            pam.abort();
+            pam.start();
+        }
+    }
 
     RowLayout {
         Layout.alignment: Qt.AlignHCenter
@@ -86,11 +106,13 @@ ColumnLayout {
         }
 
         Keys.onPressed: event => {
-            if (pam.active)
+            if (pam.active && !root.fprint)
                 return;
 
             if (event.key === Qt.Key_Enter || event.key === Qt.Key_Return) {
                 placeholder.animate = false;
+                pam.abort();
+                pam.config = "login";
                 pam.start();
             } else if (event.key === Qt.Key_Backspace) {
                 if (event.modifiers & Qt.ControlModifier) {
@@ -107,6 +129,11 @@ ColumnLayout {
 
         PamContext {
             id: pam
+
+            config: root.fprint ? "caelestia" : "login"
+            // to use fingerptint connection, your `caelestia` file should contains:
+            // auth sufficient pam_fprintd.so
+            // auth required pam_unix.so
 
             onResponseRequiredChanged: {
                 if (!responseRequired)
@@ -148,8 +175,13 @@ ColumnLayout {
             anchors.centerIn: parent
 
             text: {
-                if (pam.active)
-                    return qsTr("Loading...");
+                if (pam.active) {
+                    if (root.fprint && pam.config == "caelestia") {
+                        return qsTr("Waiting fingerprint (start typing to cancel)");
+                    } else {
+                        return qsTr("Loading...");
+                    }
+                }
                 if (pamState === "error")
                     return qsTr("An error occured");
                 if (pamState === "max")
