@@ -10,8 +10,6 @@
 
 </div>
 
-https://github.com/user-attachments/assets/0840f496-575c-4ca6-83a8-87bb01a85c5f
-
 ## Components
 
 -   Widgets: [`Quickshell`](https://quickshell.outfoxxed.me)
