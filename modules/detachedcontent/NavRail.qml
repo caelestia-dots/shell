@@ -168,7 +168,7 @@ Item {
 
                 anchors.left: icon.right
                 anchors.verticalCenter: parent.verticalCenter
-                anchors.leftMargin: Appearance.spacing.small
+                anchors.leftMargin: Appearance.spacing.normal
 
                 opacity: 0
                 text: item.label

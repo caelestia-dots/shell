@@ -151,12 +151,17 @@ All configuration options are in `~/.config/caelestia/shell.json`.
 
 ```json
 {
+    "general": {
+        "apps": {
+            "terminal": ["foot"],
+            "audio": ["pavucontrol"]
+        }
+    },
     "background": {
         "enabled": true
     },
     "bar": {
         "dragThreshold": 20,
-        "externalAudioProgram": ["pavucontrol"],
         "persistent": true,
         "showOnHover": true,
         "status": {

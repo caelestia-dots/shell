@@ -145,7 +145,7 @@ ColumnLayout {
         StateLayer {
             function onClicked(): void {
                 root.wrapper.hasCurrent = false;
-                Quickshell.execDetached(["app2unit", "--", ...Config.bar.externalAudioProgram]);
+                Quickshell.execDetached(["app2unit", "--", ...Config.general.apps.audio]);
             }
         }
 

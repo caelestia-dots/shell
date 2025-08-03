@@ -209,7 +209,7 @@ ColumnLayout {
                                     implicitHeight: adapterInner.implicitHeight + Appearance.padding.normal * 2
 
                                     StateLayer {
-                                        enabled: adapterPickerButton.expanded
+                                        disabled: !adapterPickerButton.expanded
 
                                         function onClicked(): void {
                                             adapterPickerButton.expanded = false;

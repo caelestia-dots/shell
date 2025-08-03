@@ -157,27 +157,45 @@ Item {
 
         spacing: Appearance.spacing.small
 
-        ElideText {
+        StyledText {
             id: title
 
-            label: (Players.active?.trackTitle ?? qsTr("No media")) || qsTr("Unknown title")
-            color: Colours.palette.m3primary
+            Layout.fillWidth: true
+            Layout.maximumWidth: parent.implicitWidth
+
+            animate: true
+            horizontalAlignment: Text.AlignHCenter
+            text: (Players.active?.trackTitle ?? qsTr("No media")) || qsTr("Unknown title")
+            color: Players.active ? Colours.palette.m3primary : Colours.palette.m3onSurface
             font.pointSize: Appearance.font.size.normal
         }
 
-        ElideText {
+        StyledText {
             id: album
 
-            label: (Players.active?.trackAlbum ?? qsTr("No media")) || qsTr("Unknown album")
+            Layout.fillWidth: true
+            Layout.maximumWidth: parent.implicitWidth
+
+            animate: true
+            horizontalAlignment: Text.AlignHCenter
+            visible: !!Players.active
+            text: Players.active?.trackAlbum || qsTr("Unknown album")
             color: Colours.palette.m3outline
             font.pointSize: Appearance.font.size.small
         }
 
-        ElideText {
+        StyledText {
             id: artist
 
-            label: (Players.active?.trackArtist ?? qsTr("No media")) || qsTr("Unknown artist")
-            color: Colours.palette.m3secondary
+            Layout.fillWidth: true
+            Layout.maximumWidth: parent.implicitWidth
+
+            animate: true
+            horizontalAlignment: Text.AlignHCenter
+            text: (Players.active?.trackArtist ?? qsTr("Play some music for stuff to show up here!")) || qsTr("Unknown artist")
+            color: Players.active ? Colours.palette.m3secondary : Colours.palette.m3outline
+            elide: Text.ElideRight
+            wrapMode: Players.active ? Text.NoWrap : Text.WordWrap
         }
 
         RowLayout {
@@ -374,10 +392,11 @@ Item {
 
                 Layout.alignment: Qt.AlignVCenter
 
-                implicitWidth: slider.implicitWidth / 2
-                implicitHeight: currentPlayer.implicitHeight + Appearance.padding.small * 2
-                radius: Appearance.rounding.small
+                implicitWidth: slider.implicitWidth * 0.6
+                implicitHeight: currentPlayer.implicitHeight + Appearance.padding.smaller * 2
+                radius: Appearance.rounding.normal
                 color: Colours.palette.m3surfaceContainer
+                z: 1
 
                 StateLayer {
                     disabled: Players.list.length <= 1
@@ -393,14 +412,13 @@ Item {
                     anchors.centerIn: parent
                     spacing: Appearance.spacing.small
 
-                    IconImage {
-                        Layout.fillHeight: true
-                        implicitWidth: height
-                        source: Players.active ? Icons.getAppIcon(Players.active.identity, "image-missing") : "image-missing"
+                    PlayerIcon {
+                        player: Players.active
                     }
 
                     StyledText {
                         Layout.fillWidth: true
+                        Layout.maximumWidth: playerSelector.implicitWidth - implicitHeight - parent.spacing - Appearance.padding.normal * 2
                         text: Players.active?.identity ?? "No players"
                         color: Colours.palette.m3onSecondaryContainer
                         elide: Text.ElideRight
@@ -425,20 +443,19 @@ Item {
                 StyledClippingRect {
                     id: playerSelectorBg
 
-                    anchors.left: parent.left
-                    anchors.right: parent.right
+                    anchors.horizontalCenter: parent.horizontalCenter
                     anchors.bottom: parent.bottom
+                    implicitWidth: playerSelector.expanded ? playerList.implicitWidth : playerSelector.implicitWidth
                     implicitHeight: playerSelector.expanded ? playerList.implicitHeight : playerSelector.implicitHeight
 
                     color: Colours.palette.m3secondaryContainer
-                    radius: Appearance.rounding.small
+                    radius: Appearance.rounding.normal
                     opacity: playerSelector.expanded ? 1 : 0
 
                     ColumnLayout {
                         id: playerList
 
-                        anchors.left: parent.left
-                        anchors.right: parent.right
+                        anchors.horizontalCenter: parent.horizontalCenter
                         anchors.bottom: parent.bottom
 
                         spacing: 0
@@ -452,7 +469,9 @@ Item {
                                 required property MprisPlayer modelData
 
                                 Layout.fillWidth: true
-                                implicitHeight: playerInner.implicitHeight + Appearance.padding.small * 2
+                                Layout.minimumWidth: playerSelector.implicitWidth
+                                implicitWidth: playerInner.implicitWidth + Appearance.padding.normal * 2
+                                implicitHeight: playerInner.implicitHeight + Appearance.padding.smaller * 2
 
                                 StateLayer {
                                     disabled: !playerSelector.expanded
@@ -469,17 +488,13 @@ Item {
                                     anchors.centerIn: parent
                                     spacing: Appearance.spacing.small
 
-                                    IconImage {
-                                        Layout.fillHeight: true
-                                        implicitWidth: height
-                                        source: Icons.getAppIcon(player.modelData.identity, "image-missing")
+                                    PlayerIcon {
+                                        player: player.modelData
                                     }
 
                                     StyledText {
-                                        Layout.fillWidth: true
                                         text: player.modelData.identity
                                         color: Colours.palette.m3onSecondaryContainer
-                                        elide: Text.ElideRight
                                     }
                                 }
                             }
@@ -489,6 +504,13 @@ Item {
                     Behavior on opacity {
                         Anim {
                             duration: Appearance.anim.durations.expressiveDefaultSpatial
+                        }
+                    }
+
+                    Behavior on implicitWidth {
+                        Anim {
+                            duration: Appearance.anim.durations.expressiveDefaultSpatial
+                            easing.bezierCurve: Appearance.anim.curves.expressiveDefaultSpatial
                         }
                     }
 
@@ -540,24 +562,31 @@ Item {
         }
     }
 
-    component ElideText: StyledText {
-        id: elideText
+    component PlayerIcon: Loader {
+        id: loader
 
-        property alias label: metrics.text
+        required property MprisPlayer player
+        readonly property string icon: Icons.getAppIcon(player?.identity)
 
-        Layout.fillWidth: true
+        Layout.fillHeight: true
+        asynchronous: true
+        sourceComponent: !player || icon === "image://icon/" ? fallbackIcon : playerImage
 
-        animate: true
-        horizontalAlignment: Text.AlignHCenter
-        text: metrics.elidedText
+        Component {
+            id: playerImage
 
-        TextMetrics {
-            id: metrics
+            IconImage {
+                implicitWidth: height
+                source: loader.icon
+            }
+        }
 
-            font.family: elideText.font.family
-            font.pointSize: elideText.font.pointSize
-            elide: Text.ElideRight
-            elideWidth: elideText.width
+        Component {
+            id: fallbackIcon
+
+            MaterialIcon {
+                text: loader.player ? "animated_images" : "music_off"
+            }
         }
     }
 
