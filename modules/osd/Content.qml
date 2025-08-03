@@ -1,4 +1,5 @@
 import qs.widgets
+import qs.widgets.sliders
 import qs.services
 import qs.config
 import qs.utils
@@ -27,7 +28,7 @@ Column {
                 Audio.setVolume(Audio.volume - 0.1);
         }
 
-        StyledSlider {
+        FilledSlider {
             anchors.fill: parent
 
             icon: Icons.getVolumeIcon(value, Audio.isMuted)
@@ -50,7 +51,7 @@ Column {
                 monitor.setBrightness(monitor.brightness - 0.1);
         }
 
-        StyledSlider {
+        FilledSlider {
             anchors.fill: parent
 
             icon: `brightness_${(Math.round(value * 6) + 1)}`

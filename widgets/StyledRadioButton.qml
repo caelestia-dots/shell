@@ -6,8 +6,6 @@ import QtQuick.Controls
 RadioButton {
     id: root
 
-    implicitWidth: contentItem.implicitWidth + 32
-
     indicator: Rectangle {
         id: outerCircle
         width: 18
