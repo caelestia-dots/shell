@@ -3,6 +3,7 @@ pragma ComponentBehavior: Bound
 import ".."
 import qs.widgets
 import qs.config
+import Quickshell.Bluetooth
 import QtQuick
 import QtQuick.Layouts
 
@@ -38,13 +39,47 @@ RowLayout {
         Layout.fillHeight: true
 
         Loader {
+            id: loader
+
+            property BluetoothDevice pane: root.session.bt.active
+
             anchors.fill: parent
             anchors.margins: Appearance.padding.large * 2 + Appearance.padding.normal
             anchors.leftMargin: Appearance.padding.large * 2
             anchors.rightMargin: Appearance.padding.large * 2 + Appearance.padding.normal / 2
 
             asynchronous: true
-            sourceComponent: root.session.bt.active ? details : settings
+            sourceComponent: pane ? details : settings
+
+            Behavior on pane {
+                SequentialAnimation {
+                    ParallelAnimation {
+                        Anim {
+                            property: "opacity"
+                            to: 0
+                            easing.bezierCurve: Appearance.anim.curves.standardAccel
+                        }
+                        Anim {
+                            property: "scale"
+                            to: 0.8
+                            easing.bezierCurve: Appearance.anim.curves.standardAccel
+                        }
+                    }
+                    PropertyAction {}
+                    ParallelAnimation {
+                        Anim {
+                            property: "opacity"
+                            to: 1
+                            easing.bezierCurve: Appearance.anim.curves.standardDecel
+                        }
+                        Anim {
+                            property: "scale"
+                            to: 1
+                            easing.bezierCurve: Appearance.anim.curves.standardDecel
+                        }
+                    }
+                }
+            }
         }
 
         InnerBorder {
@@ -54,11 +89,17 @@ RowLayout {
         Component {
             id: settings
 
-            Settings {
-                anchors.margins: Appearance.padding.normal
-                anchors.leftMargin: Appearance.padding.normal / 2
+            StyledFlickable {
+                flickableDirection: Flickable.VerticalFlick
+                contentHeight: settingsInner.height
 
-                session: root.session
+                Settings {
+                    id: settingsInner
+
+                    anchors.left: parent.left
+                    anchors.right: parent.right
+                    session: root.session
+                }
             }
         }
 
@@ -66,11 +107,14 @@ RowLayout {
             id: details
 
             Details {
-                anchors.margins: Appearance.padding.normal
-                anchors.leftMargin: Appearance.padding.normal / 2
-
                 session: root.session
             }
         }
+    }
+
+    component Anim: NumberAnimation {
+        target: loader
+        duration: Appearance.anim.durations.normal / 2
+        easing.type: Easing.BezierSpline
     }
 }

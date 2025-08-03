@@ -1,7 +1,6 @@
 import qs.services
 import qs.config
 import QtQuick
-import QtQuick.Effects
 
 StyledRect {
     required property int extra
@@ -15,15 +14,16 @@ StyledRect {
     implicitWidth: count.implicitWidth + Appearance.padding.normal * 2
     implicitHeight: count.implicitHeight + Appearance.padding.small * 2
 
-    layer.enabled: opacity > 0
-    layer.effect: MultiEffect {
-        shadowEnabled: true
-        blurMax: 10
-        shadowColor: Colours.palette.m3shadow
-    }
-
     opacity: extra > 0 ? 1 : 0
     scale: extra > 0 ? 1 : 0.5
+
+    Elevation {
+        anchors.fill: parent
+        radius: parent.radius
+        opacity: parent.opacity
+        z: -1
+        level: 2
+    }
 
     StyledText {
         id: count

@@ -43,6 +43,19 @@ ClippingRectangle {
             }
         }
 
+        Pane {
+            index: 2
+            sourceComponent: Item {
+                StyledText {
+                    anchors.centerIn: parent
+                    text: qsTr("Work in progress")
+                    color: Colours.palette.m3outline
+                    font.pointSize: Appearance.font.size.extraLarge
+                    font.weight: 500
+                }
+            }
+        }
+
         Behavior on y {
             NumberAnimation {
                 duration: Appearance.anim.durations.normal
@@ -69,6 +82,7 @@ ClippingRectangle {
             id: loader
 
             anchors.fill: parent
+            clip: true
             asynchronous: true
             active: {
                 if (root.session.activeIndex === pane.index)

@@ -19,35 +19,63 @@ ColumnLayout {
     anchors.fill: parent
     spacing: Appearance.spacing.small
 
-    StyledText {
-        text: qsTr("Settings")
-        font.pointSize: Appearance.font.size.large
-        font.weight: 500
-    }
+    RowLayout {
+        spacing: Appearance.spacing.smaller
 
-    StyledText {
-        text: qsTr("General bluetooth settings")
-        color: Colours.palette.m3outline
-    }
+        StyledText {
+            text: qsTr("Settings")
+            font.pointSize: Appearance.font.size.large
+            font.weight: 500
+        }
 
-    StyledRect {
-        Layout.fillWidth: true
-        implicitHeight: settingsText.implicitHeight + Appearance.padding.normal * 2
+        Item {
+            Layout.fillWidth: true
+        }
 
-        radius: Appearance.rounding.normal
-        color: Colours.palette.m3surfaceContainer
+        ToggleButton {
+            toggled: Bluetooth.defaultAdapter?.enabled ?? false
+            icon: "power"
+            accent: "Tertiary"
 
-        StateLayer {
             function onClicked(): void {
-                root.session.bt.active = null;
+                const adapter = Bluetooth.defaultAdapter;
+                if (adapter)
+                    adapter.enabled = !adapter.enabled;
             }
         }
 
-        StyledText {
-            id: settingsText
+        ToggleButton {
+            toggled: Bluetooth.defaultAdapter?.discoverable ?? false
+            icon: QsWindow.window.screen.height <= 1080 ? "group_search" : ""
+            label: QsWindow.window.screen.height <= 1080 ? "" : qsTr("Discoverable")
 
-            anchors.centerIn: parent
-            text: qsTr("Bluetooth settings")
+            function onClicked(): void {
+                const adapter = Bluetooth.defaultAdapter;
+                if (adapter)
+                    adapter.discoverable = !adapter.discoverable;
+            }
+        }
+
+        ToggleButton {
+            toggled: Bluetooth.defaultAdapter?.pairable ?? false
+            icon: "missing_controller"
+            label: QsWindow.window.screen.height <= 960 ? "" : qsTr("Pairable")
+
+            function onClicked(): void {
+                const adapter = Bluetooth.defaultAdapter;
+                if (adapter)
+                    adapter.pairable = !adapter.pairable;
+            }
+        }
+
+        ToggleButton {
+            toggled: !root.session.bt.active
+            icon: "settings"
+            accent: "Primary"
+
+            function onClicked(): void {
+                root.session.bt.active = null;
+            }
         }
     }
 
@@ -115,10 +143,11 @@ ColumnLayout {
         Layout.fillWidth: true
         Layout.fillHeight: true
         clip: true
+        spacing: Appearance.spacing.small / 2
 
         ScrollBar.vertical: StyledScrollBar {}
 
-        delegate: Item {
+        delegate: StyledRect {
             id: device
 
             required property BluetoothDevice modelData
@@ -129,10 +158,11 @@ ColumnLayout {
             anchors.right: parent.right
             implicitHeight: deviceInner.implicitHeight + Appearance.padding.normal * 2
 
+            color: root.session.bt.active === modelData ? Colours.palette.m3surfaceContainer : "transparent"
+            radius: Appearance.rounding.normal
+
             StateLayer {
                 id: stateLayer
-
-                radius: Appearance.rounding.small
 
                 function onClicked(): void {
                     root.session.bt.active = device.modelData;
@@ -242,6 +272,78 @@ ColumnLayout {
                         }
                     }
                 }
+            }
+        }
+    }
+
+    component ToggleButton: StyledRect {
+        id: toggleBtn
+
+        required property bool toggled
+        property string icon
+        property string label
+        property string accent: "Secondary"
+
+        function onClicked(): void {
+        }
+
+        Layout.preferredWidth: implicitWidth + (toggleStateLayer.pressed ? Appearance.padding.larger * 2 : toggled ? Appearance.padding.small * 2 : 0)
+        implicitWidth: toggleBtnInner.implicitWidth + Appearance.padding.large * 2
+        implicitHeight: toggleBtnIcon.implicitHeight + Appearance.padding.normal * 2
+
+        radius: toggled || toggleStateLayer.pressed ? Appearance.rounding.small : Math.min(width, height) / 2
+        color: toggled ? Colours.palette[`m3${accent.toLowerCase()}`] : Colours.palette[`m3${accent.toLowerCase()}Container`]
+
+        StateLayer {
+            id: toggleStateLayer
+
+            color: toggleBtn.toggled ? Colours.palette[`m3on${toggleBtn.accent}`] : Colours.palette[`m3on${toggleBtn.accent}Container`]
+
+            function onClicked(): void {
+                toggleBtn.onClicked();
+            }
+        }
+
+        RowLayout {
+            id: toggleBtnInner
+
+            anchors.centerIn: parent
+            spacing: Appearance.spacing.normal
+
+            MaterialIcon {
+                id: toggleBtnIcon
+
+                visible: !!text
+                fill: toggleBtn.toggled ? 1 : 0
+                text: toggleBtn.icon
+                color: toggleBtn.toggled ? Colours.palette[`m3on${toggleBtn.accent}`] : Colours.palette[`m3on${toggleBtn.accent}Container`]
+                font.pointSize: Appearance.font.size.large
+
+                Behavior on fill {
+                    Anim {}
+                }
+            }
+
+            Loader {
+                asynchronous: true
+                active: !!toggleBtn.label
+                visible: active
+
+                sourceComponent: StyledText {
+                    text: toggleBtn.label
+                    color: toggleBtn.toggled ? Colours.palette[`m3on${toggleBtn.accent}`] : Colours.palette[`m3on${toggleBtn.accent}Container`]
+                }
+            }
+        }
+
+        Behavior on radius {
+            Anim {}
+        }
+
+        Behavior on Layout.preferredWidth {
+            Anim {
+                duration: Appearance.anim.durations.expressiveFastSpatial
+                easing.bezierCurve: Appearance.anim.curves.expressiveFastSpatial
             }
         }
     }

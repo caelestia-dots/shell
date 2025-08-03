@@ -7,7 +7,6 @@ import qs.config
 import Quickshell.Bluetooth
 import QtQuick
 import QtQuick.Layouts
-import QtQuick.Effects
 
 ColumnLayout {
     id: root
@@ -76,6 +75,16 @@ ColumnLayout {
                     const adapter = Bluetooth.defaultAdapter;
                     if (adapter)
                         adapter.discoverable = checked;
+                }
+            }
+
+            Toggle {
+                label: qsTr("Pairable")
+                checked: Bluetooth.defaultAdapter?.pairable ?? false
+                toggle.onToggled: {
+                    const adapter = Bluetooth.defaultAdapter;
+                    if (adapter)
+                        adapter.pairable = checked;
                 }
             }
         }
@@ -154,14 +163,12 @@ ColumnLayout {
                         }
                     }
 
-                    RectangularShadow {
+                    Elevation {
                         anchors.fill: adapterListBg
                         radius: adapterListBg.radius
-                        color: Qt.alpha(Colours.palette.m3shadow, 0.7)
                         opacity: adapterPickerButton.expanded ? 1 : 0
                         scale: adapterPickerButton.expanded ? 1 : 0.7
-                        blur: 5
-                        spread: 0
+                        level: 2
 
                         Behavior on opacity {
                             Anim {}
@@ -448,8 +455,67 @@ ColumnLayout {
         }
     }
 
-    Item {
-        Layout.fillHeight: true
+    StyledText {
+        Layout.topMargin: Appearance.spacing.large
+        text: qsTr("Adapter information")
+        font.pointSize: Appearance.font.size.larger
+        font.weight: 500
+    }
+
+    StyledText {
+        text: qsTr("Information about the default adapter")
+        color: Colours.palette.m3outline
+    }
+
+    StyledRect {
+        Layout.fillWidth: true
+        implicitHeight: adapterInfo.implicitHeight + Appearance.padding.large * 2
+
+        radius: Appearance.rounding.normal
+        color: Colours.palette.m3surfaceContainer
+
+        ColumnLayout {
+            id: adapterInfo
+
+            anchors.left: parent.left
+            anchors.right: parent.right
+            anchors.verticalCenter: parent.verticalCenter
+            anchors.margins: Appearance.padding.large
+
+            spacing: Appearance.spacing.small / 2
+
+            StyledText {
+                text: qsTr("Adapter state")
+            }
+
+            StyledText {
+                text: Bluetooth.defaultAdapter ? BluetoothAdapterState.toString(Bluetooth.defaultAdapter.state) : qsTr("Unknown")
+                color: Colours.palette.m3outline
+                font.pointSize: Appearance.font.size.small
+            }
+
+            StyledText {
+                Layout.topMargin: Appearance.spacing.normal
+                text: qsTr("Dbus path")
+            }
+
+            StyledText {
+                text: Bluetooth.defaultAdapter?.dbusPath ?? ""
+                color: Colours.palette.m3outline
+                font.pointSize: Appearance.font.size.small
+            }
+
+            StyledText {
+                Layout.topMargin: Appearance.spacing.normal
+                text: qsTr("Adapter id")
+            }
+
+            StyledText {
+                text: Bluetooth.defaultAdapter?.adapterId ?? ""
+                color: Colours.palette.m3outline
+                font.pointSize: Appearance.font.size.small
+            }
+        }
     }
 
     component Toggle: RowLayout {

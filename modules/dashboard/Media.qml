@@ -9,7 +9,6 @@ import Quickshell.Widgets
 import Quickshell.Services.Mpris
 import QtQuick
 import QtQuick.Controls
-import QtQuick.Effects
 import QtQuick.Layouts
 import QtQuick.Shapes
 
@@ -425,13 +424,11 @@ Item {
                     }
                 }
 
-                RectangularShadow {
+                Elevation {
                     anchors.fill: playerSelectorBg
                     radius: playerSelectorBg.radius
-                    color: Qt.alpha(Colours.palette.m3shadow, 0.7)
                     opacity: playerSelector.expanded ? 1 : 0
-                    blur: 5
-                    spread: 0
+                    level: 2
 
                     Behavior on opacity {
                         Anim {

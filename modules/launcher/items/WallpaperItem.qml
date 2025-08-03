@@ -4,7 +4,6 @@ import qs.config
 import Quickshell
 import Quickshell.Widgets
 import QtQuick
-import QtQuick.Effects
 
 StyledRect {
     id: root
@@ -33,13 +32,11 @@ StyledRect {
         }
     }
 
-    RectangularShadow {
-        opacity: root.PathView.isCurrentItem ? 0.7 : 0
+    Elevation {
         anchors.fill: image
         radius: image.radius
-        color: Colours.palette.m3shadow
-        blur: 10
-        spread: 3
+        opacity: root.PathView.isCurrentItem ? 1 : 0
+        level: 4
 
         Behavior on opacity {
             Anim {}
