@@ -59,7 +59,7 @@
   };
 in
   stdenv.mkDerivation {
-    pname = "caelestia-shell";
+    pname = "minshell";
     version = "${rev}";
     src = ./.;
 
@@ -80,7 +80,7 @@ in
 
     installPhase = ''
       install -Dm755 bin/beat_detector $out/bin/beat_detector
-      makeWrapper ${quickshell}/bin/qs $out/bin/caelestia-shell \
+      makeWrapper ${quickshell}/bin/qs $out/bin/minshell \
       	--prefix PATH : "${lib.makeBinPath runtimeDeps}" \
       	--set FONTCONFIG_FILE "${fontconfig}" \
       	--set CAELESTIA_BD_PATH $out/bin/beat_detector \
@@ -88,9 +88,9 @@ in
     '';
 
     meta = {
-      description = "A very segsy desktop shell";
-      homepage = "https://github.com/caelestia-dots/shell";
+      description = "A very minty desktop shell";
+      homepage = "https://github.com/GustavoGarone/minshell";
       license = lib.licenses.gpl3Only;
-      mainProgram = "caelestia-shell";
+      mainProgram = "minshell";
     };
   }

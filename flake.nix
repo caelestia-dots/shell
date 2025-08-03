@@ -35,7 +35,7 @@
     formatter = forAllSystems (pkgs: pkgs.alejandra);
 
     packages = forAllSystems (pkgs: rec {
-      caelestia-shell = pkgs.callPackage ./default.nix {
+      minshell = pkgs.callPackage ./default.nix {
         rev = self.rev or self.dirtyRev;
         quickshell = inputs.quickshell.packages.${pkgs.system}.default.override {
           withX11 = false;
@@ -44,12 +44,12 @@
         app2unit = inputs.app2unit.packages.${pkgs.system}.default;
         caelestia-cli = inputs.caelestia-cli.packages.${pkgs.system}.default;
       };
-      default = caelestia-shell;
+      default = minshell;
     });
 
     devShells = forAllSystems (pkgs: {
       default = let
-        shell = self.packages.${pkgs.system}.caelestia-shell;
+        shell = self.packages.${pkgs.system}.minshell;
       in
         pkgs.mkShellNoCC {
           inputsFrom = [shell];
