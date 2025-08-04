@@ -165,7 +165,7 @@ RowLayout {
 
             spacing: Appearance.spacing.small
 
-            LineSlider {
+            StyledSlider {
                 id: slider
 
                 Layout.rightMargin: root.isLarge ? Appearance.spacing.small : 0

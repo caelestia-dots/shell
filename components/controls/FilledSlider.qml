@@ -12,7 +12,6 @@ Slider {
     property bool isHorizontal: false
     property real oldValue
 
-    wheelEnabled: true
     orientation: isHorizontal ? Qt.Horizontal : Qt.Vertical
 
     background: StyledRect {

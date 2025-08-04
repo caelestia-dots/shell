@@ -7,24 +7,41 @@ import QtQuick.Controls
 RadioButton {
     id: root
 
-    indicator: Rectangle {
+    indicator: StyledRect {
         id: outerCircle
-        width: 18
-        height: 18
-        radius: width / 2
+
+        implicitWidth: 18
+        implicitHeight: 18
+        radius: Appearance.rounding.full
         color: "transparent"
         border.color: checked ? Colours.palette.m3primary : Colours.palette.m3onSurfaceVariant
         border.width: 2
         anchors.verticalCenter: parent.verticalCenter
 
-        Rectangle {
+        Behavior on border.color {
+            ColorAnimation {
+                duration: Appearance.anim.durations.normal
+                easing.type: Easing.BezierSpline
+                easing.bezierCurve: Appearance.anim.curves.standard
+            }
+        }
+
+        StyledRect {
             id: innerDot
-            width: 8
-            height: 8
+
+            implicitWidth: 8
+            implicitHeight: 8
             radius: width / 2
-            color: Colours.palette.m3primary
+            color: root.checked ? Colours.palette.m3primary : "transparent"
             anchors.centerIn: parent
-            visible: root.checked
+
+            Behavior on color {
+                ColorAnimation {
+                    duration: Appearance.anim.durations.normal
+                    easing.type: Easing.BezierSpline
+                    easing.bezierCurve: Appearance.anim.curves.standard
+                }
+            }
         }
     }
 

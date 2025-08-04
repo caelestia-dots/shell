@@ -39,6 +39,6 @@ Singleton {
     }
 
     PwObjectTracker {
-        objects: [...sinks, ...sources]
+        objects: [...root.sinks, ...root.sources]
     }
 }

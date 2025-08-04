@@ -280,7 +280,7 @@ Item {
             }
         }
 
-        LineSlider {
+        StyledSlider {
             id: slider
 
             enabled: !!Players.active

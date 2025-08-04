@@ -63,7 +63,7 @@ ColumnLayout {
         Layout.topMargin: Appearance.spacing.small
     }
 
-    LineSlider {
+    StyledSlider {
         implicitWidth: root.implicitWidth
         implicitHeight: Appearance.padding.normal * 3
         value: Audio.volume
