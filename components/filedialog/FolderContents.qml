@@ -1,6 +1,8 @@
 pragma ComponentBehavior: Bound
 
 import ".."
+import "../controls"
+import "../images"
 import qs.services
 import qs.config
 import qs.utils

@@ -1,7 +1,8 @@
 pragma ComponentBehavior: Bound
 
-import qs.widgets
-import qs.widgets.filedialog
+import qs.components
+import qs.components.images
+import qs.components.filedialog
 import qs.services
 import qs.config
 import qs.utils

@@ -1,6 +1,7 @@
 pragma ComponentBehavior: Bound
 
-import qs.widgets
+import qs.components
+import qs.components.effects
 import qs.services
 import qs.config
 import qs.utils
@@ -441,49 +442,49 @@ StyledRect {
                 }
             }
         }
+    }
 
-        component Action: StyledRect {
-            id: action
+    component Action: StyledRect {
+        id: action
 
-            required property var modelData
+        required property var modelData
 
+        radius: Appearance.rounding.full
+        color: root.modelData.urgency === NotificationUrgency.Critical ? Colours.palette.m3secondary : Colours.palette.m3surfaceContainerHigh
+
+        Layout.preferredWidth: actionText.width + Appearance.padding.normal * 2
+        Layout.preferredHeight: actionText.height + Appearance.padding.small * 2
+        implicitWidth: actionText.width + Appearance.padding.normal * 2
+        implicitHeight: actionText.height + Appearance.padding.small * 2
+
+        StateLayer {
             radius: Appearance.rounding.full
-            color: root.modelData.urgency === NotificationUrgency.Critical ? Colours.palette.m3secondary : Colours.palette.m3surfaceContainerHigh
+            color: root.modelData.urgency === NotificationUrgency.Critical ? Colours.palette.m3onSecondary : Colours.palette.m3onSurface
 
-            Layout.preferredWidth: actionText.width + Appearance.padding.normal * 2
-            Layout.preferredHeight: actionText.height + Appearance.padding.small * 2
-            implicitWidth: actionText.width + Appearance.padding.normal * 2
-            implicitHeight: actionText.height + Appearance.padding.small * 2
-
-            StateLayer {
-                radius: Appearance.rounding.full
-                color: root.modelData.urgency === NotificationUrgency.Critical ? Colours.palette.m3onSecondary : Colours.palette.m3onSurface
-
-                function onClicked(): void {
-                    action.modelData.invoke();
-                }
+            function onClicked(): void {
+                action.modelData.invoke();
             }
+        }
 
-            StyledText {
-                id: actionText
+        StyledText {
+            id: actionText
 
-                anchors.centerIn: parent
-                text: actionTextMetrics.elidedText
-                color: root.modelData.urgency === NotificationUrgency.Critical ? Colours.palette.m3onSecondary : Colours.palette.m3onSurfaceVariant
-                font.pointSize: Appearance.font.size.small
-            }
+            anchors.centerIn: parent
+            text: actionTextMetrics.elidedText
+            color: root.modelData.urgency === NotificationUrgency.Critical ? Colours.palette.m3onSecondary : Colours.palette.m3onSurfaceVariant
+            font.pointSize: Appearance.font.size.small
+        }
 
-            TextMetrics {
-                id: actionTextMetrics
+        TextMetrics {
+            id: actionTextMetrics
 
-                text: action.modelData.text
-                font.family: actionText.font.family
-                font.pointSize: actionText.font.pointSize
-                elide: Text.ElideRight
-                elideWidth: {
-                    const numActions = root.modelData.actions.length + 1;
-                    return (inner.width - actions.spacing * (numActions - 1)) / numActions - Appearance.padding.normal * 2;
-                }
+            text: action.modelData.text
+            font.family: actionText.font.family
+            font.pointSize: actionText.font.pointSize
+            elide: Text.ElideRight
+            elideWidth: {
+                const numActions = root.modelData.actions.length + 1;
+                return (inner.width - actions.spacing * (numActions - 1)) / numActions - Appearance.padding.normal * 2;
             }
         }
     }

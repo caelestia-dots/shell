@@ -1,3 +1,4 @@
+import ".."
 import qs.services
 import qs.config
 import QtQuick

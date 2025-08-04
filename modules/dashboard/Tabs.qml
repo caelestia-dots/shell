@@ -1,6 +1,7 @@
 pragma ComponentBehavior: Bound
 
-import qs.widgets
+import qs.components
+import qs.components.controls
 import qs.services
 import qs.config
 import Quickshell
@@ -26,6 +27,8 @@ Item {
 
         currentIndex: root.state.currentTab
         background: null
+
+        onCurrentIndexChanged: root.state.currentTab = currentIndex
 
         Tab {
             iconName: "dashboard"

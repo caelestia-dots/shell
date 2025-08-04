@@ -1,8 +1,6 @@
 pragma ComponentBehavior: Bound
 
-import qs.widgets
 import qs.config
-import Quickshell
 import Quickshell.Widgets
 import Quickshell.Services.SystemTray
 import QtQuick

@@ -1,4 +1,5 @@
-import qs.widgets
+import ".."
+import "../effects"
 import qs.services
 import qs.config
 import QtQuick

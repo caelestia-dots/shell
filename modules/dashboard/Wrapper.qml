@@ -1,6 +1,6 @@
 pragma ComponentBehavior: Bound
 
-import qs.widgets.filedialog
+import qs.components.filedialog
 import qs.config
 import qs.utils
 import Quickshell

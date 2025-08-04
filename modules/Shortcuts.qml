@@ -1,4 +1,4 @@
-import qs.widgets
+import qs.components.misc
 import qs.services
 import Quickshell
 import Quickshell.Io

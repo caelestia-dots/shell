@@ -1,6 +1,6 @@
 pragma ComponentBehavior: Bound
 
-import qs.widgets
+import qs.components
 import qs.services
 import qs.config
 import Quickshell
@@ -47,10 +47,12 @@ MouseArea {
 
     function checkClientRects(x: real, y: real): void {
         for (const client of clients) {
-            const {
+            let {
                 at: [cx, cy],
                 size: [cw, ch]
             } = client.lastIpcObject;
+            cx -= screen.x;
+            cy -= screen.y;
             if (cx <= x && cy <= y && cx + cw >= x && cy + ch >= y) {
                 onClient = true;
                 sx = cx;

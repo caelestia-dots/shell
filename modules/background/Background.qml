@@ -1,13 +1,14 @@
-import qs.widgets
+import qs.components.containers
 import qs.config
 import Quickshell
 import Quickshell.Wayland
 import QtQuick
 
-LazyLoader {
+Loader {
+    asynchronous: true
     active: Config.background.enabled
 
-    Variants {
+    sourceComponent: Variants {
         model: Quickshell.screens
 
         StyledWindow {

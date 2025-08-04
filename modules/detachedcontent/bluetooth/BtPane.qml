@@ -1,7 +1,8 @@
 pragma ComponentBehavior: Bound
 
 import ".."
-import qs.widgets
+import qs.components.effects
+import qs.components.containers
 import qs.config
 import Quickshell.Bluetooth
 import QtQuick

@@ -1,5 +1,5 @@
-import qs.widgets
-import qs.widgets.sliders
+import qs.components
+import qs.components.controls
 import qs.services
 import qs.config
 import Quickshell.Widgets

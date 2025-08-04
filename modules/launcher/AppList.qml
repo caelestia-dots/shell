@@ -2,7 +2,9 @@ pragma ComponentBehavior: Bound
 
 import "items"
 import "services"
-import qs.widgets
+import qs.components
+import qs.components.controls
+import qs.components.containers
 import qs.services
 import qs.config
 import Quickshell
