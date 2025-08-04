@@ -19,10 +19,10 @@ Slider {
 
         StyledRect {
             anchors.left: parent.left
-            anchors.bottom: parent.bottom
+            anchors.right: parent.right
 
-            width: parent.width
-            height: parent.height - root.handle.y
+            y: root.handle.y
+            implicitHeight: parent.height - y
 
             color: Colours.alpha(Colours.palette.m3secondary, true)
             radius: parent.radius
@@ -34,11 +34,9 @@ Slider {
 
         property bool moving
 
-        x: (parent.width - width) / 2
-        y: (root.availableHeight - height) * (1 - root.position)
-
-        width: root.width
-        height: width
+        y: root.visualPosition * (root.availableHeight - height)
+        implicitWidth: root.width
+        implicitHeight: root.width
 
         Elevation {
             anchors.fill: parent
@@ -50,6 +48,7 @@ Slider {
             id: rect
 
             anchors.fill: parent
+
             color: Colours.alpha(Colours.palette.m3inverseSurface, true)
             radius: Appearance.rounding.full
 

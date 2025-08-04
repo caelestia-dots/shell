@@ -31,7 +31,7 @@ RadioButton {
 
             implicitWidth: 8
             implicitHeight: 8
-            radius: width / 2
+            radius: Appearance.rounding.full
             color: root.checked ? Colours.palette.m3primary : "transparent"
             anchors.centerIn: parent
         }
