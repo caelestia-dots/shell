@@ -34,14 +34,6 @@ RadioButton {
             radius: width / 2
             color: root.checked ? Colours.palette.m3primary : "transparent"
             anchors.centerIn: parent
-
-            Behavior on color {
-                ColorAnimation {
-                    duration: Appearance.anim.durations.normal
-                    easing.type: Easing.BezierSpline
-                    easing.bezierCurve: Appearance.anim.curves.standard
-                }
-            }
         }
     }
 
