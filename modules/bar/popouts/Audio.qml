@@ -6,35 +6,24 @@ import QtQuick
 import QtQuick.Layouts
 import QtQuick.Controls
 import Quickshell
-import Quickshell.Services.Pipewire
+import Qt.labs.platform
 
 ColumnLayout {
     id: root
 
     required property var wrapper
 
-    property var devices: Pipewire.nodes.values.reduce((acc, node) => {
-        if (!node.isStream) {
-            if (node.isSink) acc.output.push(node)
-            else if (node.audio) acc.input.push(node)
-        }
-        return acc
-    }, { input: [], output: [] })
-
-    property list<PwNode> inputDevices: devices.input
-    property list<PwNode> outputDevices: devices.output
-
     ColumnLayout {
         spacing: -Appearance.spacing.small
 
-        Label {
+        StyledText {
             text: qsTr("Output")
             font.weight: 500
             Layout.bottomMargin: Appearance.spacing.small
         }
 
         Repeater {
-            model: root.outputDevices
+            model: Audio.sinks
 
             StyledRadioButton {
                 id: control
@@ -50,14 +39,14 @@ ColumnLayout {
     ColumnLayout {
         spacing: -Appearance.spacing.small
 
-        Label {
+        StyledText {
             text: qsTr("Input")
             font.weight: 500
             Layout.bottomMargin: Appearance.spacing.small
         }
 
         Repeater {
-            model: root.inputDevices
+            model: Audio.sources
 
             StyledRadioButton {
                 text: modelData.description
