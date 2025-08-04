@@ -9,10 +9,9 @@ Slider {
     id: root
 
     required property string icon
-    property bool isHorizontal: false
     property real oldValue
 
-    orientation: isHorizontal ? Qt.Horizontal : Qt.Vertical
+    orientation: Qt.Vertical
 
     background: StyledRect {
         color: Colours.alpha(Colours.palette.m3surfaceContainer, true)
@@ -22,8 +21,8 @@ Slider {
             anchors.left: parent.left
             anchors.bottom: parent.bottom
 
-            width: isHorizontal ? root.handle.x + root.handle.width : parent.width
-            height: isHorizontal ? parent.height : parent.height - root.handle.y
+            width: parent.width
+            height: parent.height - root.handle.y
 
             color: Colours.alpha(Colours.palette.m3secondary, true)
             radius: parent.radius
@@ -35,10 +34,10 @@ Slider {
 
         property bool moving
 
-        x: isHorizontal ? (root.availableWidth - width) * root.position : (parent.width - width) / 2
-        y: isHorizontal ? (parent.height - height) / 2 : (root.availableHeight - height) * (1 - root.position)
+        x: (parent.width - width) / 2
+        y: (root.availableHeight - height) * (1 - root.position)
 
-        width: isHorizontal ? root.height : root.width
+        width: root.width
         height: width
 
         Elevation {
