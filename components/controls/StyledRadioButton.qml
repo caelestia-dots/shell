@@ -12,13 +12,32 @@ RadioButton {
     indicator: Rectangle {
         id: outerCircle
 
-        implicitWidth: 18
-        implicitHeight: 18
+        implicitWidth: 20
+        implicitHeight: 20
         radius: Appearance.rounding.full
         color: "transparent"
         border.color: root.checked ? Colours.palette.m3primary : Colours.palette.m3onSurfaceVariant
         border.width: 2
         anchors.verticalCenter: parent.verticalCenter
+
+        StateLayer {
+            anchors.margins: -Appearance.padding.smaller
+            color: root.checked ? Colours.palette.m3onSurface : Colours.palette.m3primary
+            z: -1
+
+            function onClicked(): void {
+                root.click();
+            }
+        }
+
+        StyledRect {
+            anchors.centerIn: parent
+            implicitWidth: 8
+            implicitHeight: 8
+
+            radius: Appearance.rounding.full
+            color: root.checked ? Colours.palette.m3primary : "transparent"
+        }
 
         Behavior on border.color {
             ColorAnimation {
@@ -26,16 +45,6 @@ RadioButton {
                 easing.type: Easing.BezierSpline
                 easing.bezierCurve: Appearance.anim.curves.standard
             }
-        }
-
-        StyledRect {
-            id: innerDot
-
-            implicitWidth: 8
-            implicitHeight: 8
-            radius: Appearance.rounding.full
-            color: root.checked ? Colours.palette.m3primary : "transparent"
-            anchors.centerIn: parent
         }
     }
 
