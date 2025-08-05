@@ -18,6 +18,7 @@ Item {
     required property real statusHeight
     required property bool isNormal
     required property bool isLarge
+    required property bool mediaVisible
 
     readonly property real clockBottom: innerMask.anchors.margins + clockPath.height
     readonly property real inputTop: innerMask.anchors.margins + inputPath.height
@@ -278,8 +279,8 @@ Item {
         ShapePath {
             id: mediaPath
 
-            property int width: root.locked ? (root.isLarge ? Config.lock.sizes.mediaWidth : Config.lock.sizes.mediaWidthSmall) - Config.lock.sizes.border / 4 : 0
-            property real height: root.locked ? (root.isLarge ? Config.lock.sizes.mediaHeight : Config.lock.sizes.mediaHeightSmall) : 0
+            property int width: (root.locked && root.mediaVisible) ? (root.isLarge ? Config.lock.sizes.mediaWidth : Config.lock.sizes.mediaWidthSmall) - Config.lock.sizes.border / 4 : 0
+            property real height: (root.locked && root.mediaVisible) ? (root.isLarge ? Config.lock.sizes.mediaHeight : Config.lock.sizes.mediaHeightSmall) : 0
 
             readonly property real rounding: Appearance.rounding.large * 2
             readonly property real roundingX: width < rounding * 2 ? width / 2 : rounding

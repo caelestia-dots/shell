@@ -73,6 +73,7 @@ WlSessionLockSurface {
         statusHeight: status.nonAnimHeight ?? 0
         isNormal: root.screen.width > Config.lock.sizes.smallScreenWidth
         isLarge: root.screen.width > Config.lock.sizes.largeScreenWidth
+        mediaVisible: media.active
 
         layer.enabled: true
         layer.effect: MultiEffect {
@@ -108,7 +109,7 @@ WlSessionLockSurface {
     Loader {
         id: media
 
-        active: root.screen.width > Config.lock.sizes.smallScreenWidth
+        active: root.screen.width > Config.lock.sizes.smallScreenWidth && !!Players.active
         asynchronous: true
 
         state: root.screen.width > Config.lock.sizes.largeScreenWidth ? "tl" : "br"
