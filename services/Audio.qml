@@ -6,6 +6,9 @@ import Quickshell.Services.Pipewire
 Singleton {
     id: root
 
+    readonly property int minVolume: 0
+    readonly property int maxVolume: 1
+
     readonly property var nodes: Pipewire.nodes.values.reduce((acc, node) => {
         if (!node.isStream) {
             if (node.isSink) acc.sinks.push(node)
@@ -26,8 +29,15 @@ Singleton {
     function setVolume(newVolume: real): void {
         if (sink?.ready && sink?.audio) {
             sink.audio.muted = false;
-            sink.audio.volume = newVolume;
+            sink.audio.volume = Math.max(minVolume, Math.min(maxVolume, newVolume));
         }
+    }
+
+    function incrementVolume(amount = 0.1) {
+        setVolume(volume + amount)
+    }
+    function decrementVolume(amount = 0.1) {
+        setVolume(volume - amount)
     }
 
     function setAudioSink(newSink: PwNode): void {

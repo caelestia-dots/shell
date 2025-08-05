@@ -87,9 +87,9 @@ Item {
 
             onWheel: event => {
                 if (event.angleDelta.y > 0)
-                    Audio.setVolume(Audio.volume + 0.1);
+                    Audio.incrementVolume()
                 else if (event.angleDelta.y < 0)
-                    Audio.setVolume(Audio.volume - 0.1);
+                    Audio.decrementVolume()
             }
 
             StyledSlider {
@@ -97,6 +97,8 @@ Item {
                 anchors.right: parent.right
                 implicitHeight: parent.implicitHeight
 
+                from: Audio.minVolume
+                to: Audio.maxVolume
                 value: Audio.volume
                 onMoved: Audio.setVolume(value)
 
