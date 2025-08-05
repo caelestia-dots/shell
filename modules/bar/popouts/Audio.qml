@@ -1,25 +1,42 @@
+pragma ComponentBehavior: Bound
+
 import qs.components
 import qs.components.controls
 import qs.services
 import qs.config
+import Quickshell
+import Quickshell.Services.Pipewire
 import QtQuick
 import QtQuick.Layouts
 import QtQuick.Controls
-import Quickshell
-import Qt.labs.platform
 
-ColumnLayout {
+Item {
     id: root
 
     required property var wrapper
 
+    implicitWidth: layout.implicitWidth + Appearance.padding.normal * 2
+    implicitHeight: layout.implicitHeight + Appearance.padding.normal * 2
+
+    ButtonGroup {
+        id: sinks
+    }
+
+    ButtonGroup {
+        id: sources
+    }
+
     ColumnLayout {
-        spacing: -Appearance.spacing.small
+        id: layout
+
+        anchors.left: parent.left
+        anchors.verticalCenter: parent.verticalCenter
+        spacing: 0
 
         StyledText {
+            Layout.bottomMargin: Appearance.spacing.small / 2
             text: qsTr("Output")
             font.weight: 500
-            Layout.bottomMargin: Appearance.spacing.small
         }
 
         Repeater {
@@ -28,80 +45,90 @@ ColumnLayout {
             StyledRadioButton {
                 id: control
 
-                text: modelData.description
+                required property PwNode modelData
+
+                ButtonGroup.group: sinks
                 checked: Audio.sink?.id === modelData.id
-                font.pointSize: Appearance.font.size.small
                 onClicked: Audio.setAudioSink(modelData)
+
+                text: modelData.description
+                font.pointSize: Appearance.font.size.small
             }
         }
-    }
-
-    ColumnLayout {
-        spacing: -Appearance.spacing.small
 
         StyledText {
+            Layout.topMargin: Appearance.spacing.small
+            Layout.bottomMargin: Appearance.spacing.small / 2
             text: qsTr("Input")
             font.weight: 500
-            Layout.bottomMargin: Appearance.spacing.small
         }
 
         Repeater {
             model: Audio.sources
 
             StyledRadioButton {
-                text: modelData.description
+                required property PwNode modelData
+
+                ButtonGroup.group: sources
                 checked: Audio.source?.id === modelData.id
-                font.pointSize: Appearance.font.size.small
                 onClicked: Audio.setAudioSource(modelData)
-            }
-        }
-    }
 
-    StyledText {
-        text: qsTr("Volume")
-        font.weight: 500
-        Layout.topMargin: Appearance.spacing.small
-    }
-
-    StyledSlider {
-        implicitWidth: root.implicitWidth
-        implicitHeight: Appearance.padding.normal * 3
-        value: Audio.volume
-        onMoved: Audio.setVolume(value);
-    }
-
-    StyledRect {
-        visible: Config.bar.externalAudioProgram.length > 0
-        Layout.topMargin: Appearance.spacing.small
-        implicitWidth: expandBtn.implicitWidth + Appearance.padding.normal * 2
-        implicitHeight: expandBtn.implicitHeight + Appearance.padding.small
-
-        radius: Appearance.rounding.normal
-        color: Colours.palette.m3primaryContainer
-
-        StateLayer {
-            function onClicked(): void {
-                root.wrapper.hasCurrent = false;
-                Quickshell.execDetached(["app2unit", "--", ...Config.general.apps.audio]);
+                text: modelData.description
+                font.pointSize: Appearance.font.size.small
             }
         }
 
-        RowLayout {
-            id: expandBtn
+        StyledText {
+            Layout.topMargin: Appearance.spacing.small
+            Layout.bottomMargin: Appearance.spacing.small / 2
+            text: qsTr("Volume")
+            font.weight: 500
+        }
 
-            anchors.centerIn: parent
-            spacing: Appearance.spacing.small
+        StyledSlider {
+            Layout.fillWidth: true
+            implicitHeight: Appearance.padding.normal * 3
 
-            StyledText {
-                Layout.leftMargin: Appearance.padding.smaller
-                text: qsTr("Open settings")
+            value: Audio.volume
+            onMoved: Audio.setVolume(value)
+        }
+
+        StyledRect {
+            Layout.topMargin: Appearance.spacing.small
+            visible: Config.general.apps.audio.length > 0
+
+            implicitWidth: expandBtn.implicitWidth + Appearance.padding.normal * 2
+            implicitHeight: expandBtn.implicitHeight + Appearance.padding.small
+
+            radius: Appearance.rounding.normal
+            color: Colours.palette.m3primaryContainer
+
+            StateLayer {
                 color: Colours.palette.m3onPrimaryContainer
+
+                function onClicked(): void {
+                    root.wrapper.hasCurrent = false;
+                    Quickshell.execDetached(["app2unit", "--", ...Config.general.apps.audio]);
+                }
             }
 
-            MaterialIcon {
-                text: "chevron_right"
-                color: Colours.palette.m3onPrimaryContainer
-                font.pointSize: Appearance.font.size.large
+            RowLayout {
+                id: expandBtn
+
+                anchors.centerIn: parent
+                spacing: Appearance.spacing.small
+
+                StyledText {
+                    Layout.leftMargin: Appearance.padding.smaller
+                    text: qsTr("Open settings")
+                    color: Colours.palette.m3onPrimaryContainer
+                }
+
+                MaterialIcon {
+                    text: "chevron_right"
+                    color: Colours.palette.m3onPrimaryContainer
+                    font.pointSize: Appearance.font.size.large
+                }
             }
         }
     }

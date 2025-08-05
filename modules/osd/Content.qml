@@ -30,7 +30,7 @@ Column {
         FilledSlider {
             anchors.fill: parent
 
-            icon: Icons.getVolumeIcon(value, Audio.isMuted)
+            icon: Icons.getVolumeIcon(value, Audio.muted)
             value: Audio.volume
             onMoved: Audio.setVolume(value)
         }
