@@ -1,19 +1,27 @@
 import qs.utils
 import Quickshell.Io
 import QtQuick
+import Quickshell
 
 Image {
     id: root
 
     property string path
     property string hash
-    readonly property string cachePath: `${Paths.stringify(Paths.imagecache)}/${hash}@${width}x${height}.png`
+    property string cachePath
+
+    readonly property real effectiveScale: QsWindow.window ? QsWindow.window.devicePixelRatio : Screen.devicePixelRatio
+    readonly property int effectiveWidth: Math.round(width * effectiveScale)
+    readonly property int effectiveHeight: Math.round(height * effectiveScale)
 
     asynchronous: true
     fillMode: Image.PreserveAspectCrop
-    sourceSize.width: width
-    sourceSize.height: height
+    sourceSize.width: effectiveWidth
+    sourceSize.height: effectiveHeight
 
+    onHashChanged: {
+        cachePath = `${Paths.imagecache}/${hash}@${effectiveWidth}x${effectiveHeight}.png`;
+    }
     onPathChanged: shaProc.exec(["sha256sum", Paths.strip(path)])
 
     onCachePathChanged: {
