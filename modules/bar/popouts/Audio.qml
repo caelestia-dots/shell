@@ -50,9 +50,7 @@ Item {
                 ButtonGroup.group: sinks
                 checked: Audio.sink?.id === modelData.id
                 onClicked: Audio.setAudioSink(modelData)
-
                 text: modelData.description
-                font.pointSize: Appearance.font.size.small
             }
         }
 
@@ -72,9 +70,7 @@ Item {
                 ButtonGroup.group: sources
                 checked: Audio.source?.id === modelData.id
                 onClicked: Audio.setAudioSource(modelData)
-
                 text: modelData.description
-                font.pointSize: Appearance.font.size.small
             }
         }
 
@@ -94,7 +90,7 @@ Item {
         }
 
         StyledRect {
-            Layout.topMargin: Appearance.spacing.small
+            Layout.topMargin: Appearance.spacing.normal
             visible: Config.general.apps.audio.length > 0
 
             implicitWidth: expandBtn.implicitWidth + Appearance.padding.normal * 2

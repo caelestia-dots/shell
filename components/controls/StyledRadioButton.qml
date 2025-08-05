@@ -7,6 +7,8 @@ import QtQuick.Controls
 RadioButton {
     id: root
 
+    font.pointSize: Appearance.font.size.smaller
+
     indicator: Rectangle {
         id: outerCircle
 
@@ -42,6 +44,6 @@ RadioButton {
         font.pointSize: root.font.pointSize
         anchors.verticalCenter: parent.verticalCenter
         anchors.left: outerCircle.right
-        anchors.leftMargin: 8
+        anchors.leftMargin: Appearance.spacing.smaller
     }
 }
