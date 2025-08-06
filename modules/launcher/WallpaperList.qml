@@ -16,22 +16,22 @@ PathView {
             return 0;
         const itemWidth = Config.launcher.sizes.wallpaperWidth * 0.8;
         const max = Config.launcher.maxWallpapers;
-        if (max * itemWidth > screenWidth) {
-            const items = Math.floor(screenWidth / itemWidth);
-            return items > 1 && items % 2 === 0 ? items - 1 : items;
-        }
-        return max;
+        const maxItemsOnScreen = Math.floor(screenWidth / itemWidth);
+
+        const visible = Math.min(maxItemsOnScreen, max, scriptModel.values.length)
+        if (visible === 2)
+            return 1
+        else if (visible > 1 && visible %2 === 0)
+            return visible - 1
+        return visible;
     }
 
     model: ScriptModel {
+        id: scriptModel
+
         readonly property string search: root.search.text.split(" ").slice(1).join(" ")
 
-        values: {
-            const list = Wallpapers.query(search);
-            if (list.length > 1 && list.length % 2 === 0)
-                list.length -= 1; // Always show odd number
-            return list;
-        }
+        values: Wallpapers.query(search)
         onValuesChanged: root.currentIndex = search ? 0 : values.findIndex(w => w.path === Wallpapers.actualCurrent)
     }
 

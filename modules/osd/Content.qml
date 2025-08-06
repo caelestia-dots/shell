@@ -1,6 +1,7 @@
 import qs.components.controls
 import qs.services
 import qs.config
+import qs.utils
 import QtQuick
 
 Column {
@@ -21,23 +22,15 @@ Column {
 
         onWheel: event => {
             if (event.angleDelta.y > 0)
-                Audio.setVolume(Audio.volume + 0.1);
+                Audio.incrementVolume();
             else if (event.angleDelta.y < 0)
-                Audio.setVolume(Audio.volume - 0.1);
+                Audio.decrementVolume();
         }
 
-        VerticalSlider {
+        FilledSlider {
             anchors.fill: parent
 
-            icon: {
-                if (Audio.muted)
-                    return "no_sound";
-                if (value >= 0.5)
-                    return "volume_up";
-                if (value > 0)
-                    return "volume_down";
-                return "volume_mute";
-            }
+            icon: Icons.getVolumeIcon(value, Audio.muted)
             value: Audio.volume
             onMoved: Audio.setVolume(value)
         }
@@ -57,7 +50,7 @@ Column {
                 monitor.setBrightness(monitor.brightness - 0.1);
         }
 
-        VerticalSlider {
+        FilledSlider {
             anchors.fill: parent
 
             icon: `brightness_${(Math.round(value * 6) + 1)}`

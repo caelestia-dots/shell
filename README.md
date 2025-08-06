@@ -225,6 +225,7 @@ All configuration options are in `~/.config/caelestia/shell.json`.
         "wallpaperDir": "~/Pictures/Wallpapers"
     },
     "services": {
+        "audioIncrement": 0.1,
         "weatherLocation": "10,10",
         "useFahrenheit": false,
         "useTwelveHourClock": false

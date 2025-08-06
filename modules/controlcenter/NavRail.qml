@@ -115,7 +115,7 @@ Item {
             PropertyChanges {
                 expandedLabel.opacity: 1
                 smallLabel.opacity: 0
-                background.implicitWidth: Config.dcontent.sizes.expandedNavWidth
+                background.implicitWidth: Config.controlCenter.sizes.expandedNavWidth
                 background.implicitHeight: icon.implicitHeight + Appearance.padding.normal * 2
                 item.implicitHeight: background.implicitHeight
             }

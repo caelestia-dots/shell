@@ -223,6 +223,16 @@ Singleton {
         return "chat";
     }
 
+    function getVolumeIcon(volume: real, isMuted: bool): string {
+        if (isMuted)
+            return "no_sound";
+        if (volume >= 0.5)
+            return "volume_up";
+        if (volume > 0)
+            return "volume_down";
+        return "volume_mute";
+    }
+
     FileView {
         path: "/etc/os-release"
         onLoaded: {

@@ -17,6 +17,8 @@ ColumnLayout {
     id: root
 
     required property Session session
+    readonly property bool smallDiscoverable: width <= 540
+    readonly property bool smallPairable: width <= 480
 
     anchors.fill: parent
     spacing: Appearance.spacing.small
@@ -48,8 +50,8 @@ ColumnLayout {
 
         ToggleButton {
             toggled: Bluetooth.defaultAdapter?.discoverable ?? false
-            icon: QsWindow.window.screen.height <= 1080 ? "group_search" : ""
-            label: QsWindow.window.screen.height <= 1080 ? "" : qsTr("Discoverable")
+            icon: root.smallDiscoverable ? "group_search" : ""
+            label: root.smallDiscoverable ? "" : qsTr("Discoverable")
 
             function onClicked(): void {
                 const adapter = Bluetooth.defaultAdapter;
@@ -61,7 +63,7 @@ ColumnLayout {
         ToggleButton {
             toggled: Bluetooth.defaultAdapter?.pairable ?? false
             icon: "missing_controller"
-            label: QsWindow.window.screen.height <= 960 ? "" : qsTr("Pairable")
+            label: root.smallPairable ? "" : qsTr("Pairable")
 
             function onClicked(): void {
                 const adapter = Bluetooth.defaultAdapter;
@@ -294,7 +296,7 @@ ColumnLayout {
         function onClicked(): void {
         }
 
-        Layout.preferredWidth: implicitWidth + (toggleStateLayer.pressed ? Appearance.padding.larger * 2 : toggled ? Appearance.padding.small * 2 : 0)
+        Layout.preferredWidth: implicitWidth + (toggleStateLayer.pressed ? Appearance.padding.normal * 2 : toggled ? Appearance.padding.small * 2 : 0)
         implicitWidth: toggleBtnInner.implicitWidth + Appearance.padding.large * 2
         implicitHeight: toggleBtnIcon.implicitHeight + Appearance.padding.normal * 2
 
@@ -344,7 +346,10 @@ ColumnLayout {
         }
 
         Behavior on radius {
-            Anim {}
+            Anim {
+                duration: Appearance.anim.durations.expressiveFastSpatial
+                easing.bezierCurve: Appearance.anim.curves.expressiveFastSpatial
+            }
         }
 
         Behavior on Layout.preferredWidth {

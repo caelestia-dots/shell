@@ -17,8 +17,8 @@ Item {
         id: session
     }
 
-    implicitWidth: implicitHeight * Config.dcontent.sizes.ratio
-    implicitHeight: screen.height * Config.dcontent.sizes.heightMult
+    implicitWidth: implicitHeight * Config.controlCenter.sizes.ratio
+    implicitHeight: screen.height * Config.controlCenter.sizes.heightMult
 
     RowLayout {
         anchors.fill: parent

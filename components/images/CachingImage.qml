@@ -1,4 +1,5 @@
 import qs.utils
+import Quickshell
 import Quickshell.Io
 import QtQuick
 
@@ -7,12 +8,16 @@ Image {
 
     property string path
     property string hash
-    readonly property string cachePath: `${Paths.stringify(Paths.imagecache)}/${hash}@${width}x${height}.png`
+    readonly property string cachePath: `${Paths.stringify(Paths.imagecache)}/${hash}@${effectiveWidth}x${effectiveHeight}.png`
+
+    readonly property real effectiveScale: QsWindow.window?.devicePixelRatio ?? 1
+    readonly property int effectiveWidth: Math.ceil(width * effectiveScale)
+    readonly property int effectiveHeight: Math.ceil(height * effectiveScale)
 
     asynchronous: true
     fillMode: Image.PreserveAspectCrop
-    sourceSize.width: width
-    sourceSize.height: height
+    sourceSize.width: effectiveWidth
+    sourceSize.height: effectiveHeight
 
     onPathChanged: shaProc.exec(["sha256sum", Paths.strip(path)])
 

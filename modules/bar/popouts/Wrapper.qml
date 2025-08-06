@@ -3,7 +3,7 @@ pragma ComponentBehavior: Bound
 import qs.services
 import qs.config
 import qs.modules.windowinfo
-import qs.modules.detachedcontent
+import qs.modules.controlcenter
 import Quickshell
 import Quickshell.Wayland
 import Quickshell.Hyprland
@@ -94,13 +94,11 @@ Item {
     }
 
     Comp {
-        id: detachedContent
-
         shouldBeActive: root.detachedMode === "any"
         asynchronous: true
         anchors.centerIn: parent
 
-        sourceComponent: DetachedContent {
+        sourceComponent: ControlCenter {
             screen: root.screen
             active: root.queuedMode
         }
