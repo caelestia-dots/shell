@@ -30,9 +30,8 @@ WrapperItem {
     implicitHeight: nonAnimHeight
 
     margin: Appearance.padding.large * 2
-    leftMargin: -50
-    rightMargin: 70
-    topMargin: -20
+    rightMargin: 0
+    topMargin: 0
 
     Timer {
         running: true
