@@ -30,8 +30,9 @@ WrapperItem {
     implicitHeight: nonAnimHeight
 
     margin: Appearance.padding.large * 2
-    rightMargin: 0
-    topMargin: 0
+    leftMargin: -50
+    rightMargin: 70
+    topMargin: -20
 
     Timer {
         running: true
@@ -71,7 +72,7 @@ WrapperItem {
 
                 sourceComponent: StyledText {
                     animate: true
-                    text: qsTr("%1%2% remaining").arg(UPower.onBattery ? "" : "(+) ").arg(Math.round(UPower.displayDevice.percentage * 100))
+                    text: qsTr("%1%2% remaining").arg(UPower.onBattery ? "" : "󰂄  ").arg(Math.round(UPower.displayDevice.percentage * 100))
                     color: !UPower.onBattery || UPower.displayDevice.percentage > 0.2 ? Colours.palette.m3onSurface : Colours.palette.m3error
                 }
             }
