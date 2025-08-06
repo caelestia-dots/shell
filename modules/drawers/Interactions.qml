@@ -120,7 +120,7 @@ MouseArea {
         }
 
         // Show dashboard on hover
-        const showDashboard = inTopPanel(panels.dashboard, x, y);
+        const showDashboard = inTopPanel(panels.dashboard, x, y) && Config.dashboard.showOnHover;
 
         // Always update visibility based on hover if not in shortcut mode
         if (!dashboardShortcutActive) {
