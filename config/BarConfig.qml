@@ -3,6 +3,7 @@ import Quickshell.Io
 JsonObject {
     property bool persistent: true
     property bool showOnHover: true
+    property bool showActiveWindow: true
     property int dragThreshold: 20
     property Workspaces workspaces: Workspaces {}
     property Status status: Status {}

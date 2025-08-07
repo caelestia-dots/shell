@@ -17,8 +17,6 @@ Item {
 
     function checkPopout(y: real): void {
         const spacing = Appearance.spacing.small;
-        const aw = activeWindow.child;
-        const awy = activeWindow.y + aw.y;
 
         const ty = tray.y;
         const th = tray.implicitHeight;
@@ -43,10 +41,15 @@ Item {
             }
         }
 
-        if (y >= awy && y <= awy + aw.implicitHeight) {
-            popouts.currentName = "activewindow";
-            popouts.currentCenter = Qt.binding(() => activeWindow.y + aw.y + aw.implicitHeight / 2);
-            popouts.hasCurrent = true;
+        const aw = activeWindowLoader.item?.child;
+        if (aw) {
+            const awy = activeWindowLoader.y + aw.y;
+
+            if (y >= awy && y <= awy + aw.implicitHeight) {
+                popouts.currentName = "activewindow";
+                popouts.currentCenter = Qt.binding(() => activeWindowLoader.y + aw.y + aw.implicitHeight / 2);
+                popouts.hasCurrent = true;
+            }
         } else if (y > ty && y < ty + th) {
             const index = Math.floor(((y - ty) / th) * trayItems.count);
             const item = trayItems.itemAt(index);
@@ -72,7 +75,7 @@ Item {
         anchors.bottom: parent.bottom
         anchors.horizontalCenter: parent.horizontalCenter
 
-        implicitWidth: Math.max(osIcon.implicitWidth, workspaces.implicitWidth, activeWindow.implicitWidth, tray.implicitWidth, clock.implicitWidth, statusIcons.implicitWidth, power.implicitWidth)
+        implicitWidth: Math.max(osIcon.implicitWidth, workspaces.implicitWidth, (activeWindowLoader.item?.implicitWidth ?? 0), tray.implicitWidth, clock.implicitWidth, statusIcons.implicitWidth, power.implicitWidth)
 
         OsIcon {
             id: osIcon
@@ -116,15 +119,23 @@ Item {
             }
         }
 
-        ActiveWindow {
-            id: activeWindow
+        Loader {
+            id: activeWindowLoader
+
+            active: Config.bar.showActiveWindow
+            asynchronous: true
 
             anchors.horizontalCenter: parent.horizontalCenter
             anchors.top: workspaces.bottom
             anchors.bottom: tray.top
             anchors.margins: Appearance.spacing.large
 
-            monitor: Brightness.getMonitorForScreen(root.screen)
+            sourceComponent: ActiveWindow {
+                id: activeWindow
+
+                anchors.fill: parent
+                monitor: Brightness.getMonitorForScreen(root.screen)
+            }
         }
 
         Tray {

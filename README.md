@@ -164,6 +164,7 @@ All configuration options are in `~/.config/caelestia/shell.json`.
         "dragThreshold": 20,
         "persistent": true,
         "showOnHover": true,
+        "showActiveWindow": true,
         "status": {
             "showAudio": false,
             "showBattery": true,
