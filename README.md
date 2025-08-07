@@ -188,7 +188,10 @@ All configuration options are in `~/.config/caelestia/shell.json`.
         "thickness": 10
     },
     "dashboard": {
+        "enabled": true,
+        "dragThreshold": 50,
         "mediaUpdateInterval": 500,
+        "showOnHover": true,
         "visualiserBars": 45
     },
     "launcher": {
