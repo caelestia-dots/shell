@@ -132,6 +132,7 @@ ColumnLayout {
                     return root.lock.unlock();
                 }
                 if (res === PamResult.Error) {
+                    abort();
                     start();
                     return;
                 }
