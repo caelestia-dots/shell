@@ -1,3 +1,5 @@
+pragma ComponentBehavior: Bound
+
 import qs.components
 import qs.components.controls
 import qs.services
@@ -48,6 +50,8 @@ Item {
         anchors.top: topSection.bottom
         anchors.bottom: bottomSection.top
         anchors.horizontalCenter: parent.horizontalCenter
+        anchors.topMargin: Appearance.spacing.normal
+        anchors.bottomMargin: Appearance.spacing.normal
     }
 
     BarSection {
@@ -59,93 +63,68 @@ Item {
     }
 
     component BarSection: ColumnLayout {
-        id: test
+        id: barSection
+
         required property var model
         spacing: Appearance.spacing.normal
 
+        readonly property var componentMap: {
+            "logo": osIconComponent,
+            "workspaces": workspacesComponent,
+            "activeWindow": activeWindowComponent,
+            "tray": trayComponent,
+            "clock": clockComponent,
+            "statusIcons": statusIconsComponent,
+            "power": powerComponent
+        }
+
+        Component {
+            id: osIconComponent;
+            OsIcon {}
+        }
+        Component {
+            id: workspacesComponent;
+            Workspaces { id: workspacesInner }
+        }
+        Component {
+            id: activeWindowComponent
+            ActiveWindow {
+                Layout.fillHeight: true
+                monitor: Brightness.getMonitorForScreen(root.screen)
+            }
+        }
+        Component {
+            id: trayComponent;
+            Tray {}
+        }
+        Component {
+            id: clockComponent;
+            Clock {}
+        }
+        Component {
+            id: statusIconsComponent;
+            StatusIcons {}
+        }
+        Component {
+            id: powerComponent
+            Power {
+                visibilities: root.visibilities
+            }
+        }
+
         Repeater {
-            model: test.model
+            id: repeater
+            model: barSection.model
 
-            DelegateChooser {
-                role: "id"
+            Loader {
+                required property string id
+                required property bool enabled
 
-                DelegateChoice {
-                    roleValue: "logo"
-                    delegate: Loader {
-                        active: modelData.enabled
-                        Layout.alignment: Qt.AlignHCenter
-
-                        sourceComponent: OsIcon {}
-                    }
-                }
-
-                DelegateChoice {
-                    roleValue: "workspaces"
-                    delegate: Loader {
-                        active: modelData.enabled
-                        Layout.alignment: Qt.AlignHCenter
-
-                        sourceComponent: Workspaces {
-                            id: workspacesInner
-                        }
-                    }
-                }
-
-                DelegateChoice {
-                    roleValue: "activeWindow"
-                    delegate: Loader {
-                        active: modelData.enabled
-                        Layout.alignment: Qt.AlignHCenter
-                        Layout.fillHeight: true
-
-                        sourceComponent: ActiveWindow {
-                            Layout.fillHeight: true
-                            monitor: Brightness.getMonitorForScreen(root.screen)
-                        }
-                    }
-                }
-
-                DelegateChoice {
-                    roleValue: "tray"
-                    delegate: Loader {
-                        active: modelData.enabled
-                        Layout.alignment: Qt.AlignHCenter
-
-                        sourceComponent: Tray {}
-                    }
-                }
-
-                DelegateChoice {
-                    roleValue: "clock"
-                    delegate: Loader {
-                        active: modelData.enabled
-                        Layout.alignment: Qt.AlignHCenter
-
-                        sourceComponent: Clock {}
-                    }
-                }
-
-                DelegateChoice {
-                    roleValue: "statusIcons"
-                    delegate: Loader {
-                        active: modelData.enabled
-                        Layout.alignment: Qt.AlignHCenter
-
-                        sourceComponent: StatusIcons {}
-                    }
-                }
-
-                DelegateChoice {
-                    roleValue: "power"
-                    delegate: Loader {
-                        active: modelData.enabled
-                        Layout.alignment: Qt.AlignHCenter
-
-                        sourceComponent: Power {
-                            visibilities: root.visibilities
-                        }
-                    }
-                }
+                active: enabled
+                asynchronous: true
+                Layout.alignment: Qt.AlignHCenter
+                Layout.fillHeight: id === "activeWindow"
+                sourceComponent: barSection.componentMap[id] || null
             }
         }
     }
