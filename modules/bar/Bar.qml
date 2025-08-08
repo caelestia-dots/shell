@@ -38,7 +38,8 @@ Item {
     BarSection {
         id: topSection
 
-        model: root.topEntries
+        model: root.sortedEntries.top
+        // model: root.topEntries
         anchors.top: parent.top
         anchors.horizontalCenter: parent.horizontalCenter
     }
@@ -46,7 +47,8 @@ Item {
     BarSection {
         id: centerSection
 
-        model: root.centerEntries
+        // model: root.centerEntries
+        model: root.sortedEntries.center
         anchors.top: topSection.bottom
         anchors.bottom: bottomSection.top
         anchors.horizontalCenter: parent.horizontalCenter
@@ -57,9 +59,18 @@ Item {
     BarSection {
         id: bottomSection
 
-        model: root.bottomEntries
+        model: root.sortedEntries.bottom
+        // model: root.bottomEntries
         anchors.bottom: parent.bottom
         anchors.horizontalCenter: parent.horizontalCenter
+    }
+
+    component WrappedLoader: Loader {
+        required property bool enabled
+
+        active: enabled
+        asynchronous: true
+        Layout.alignment: Qt.AlignHCenter
     }
 
     component BarSection: ColumnLayout {
@@ -68,63 +79,59 @@ Item {
         required property var model
         spacing: Appearance.spacing.normal
 
-        readonly property var componentMap: {
-            "logo": osIconComponent,
-            "workspaces": workspacesComponent,
-            "activeWindow": activeWindowComponent,
-            "tray": trayComponent,
-            "clock": clockComponent,
-            "statusIcons": statusIconsComponent,
-            "power": powerComponent
-        }
-
-        Component {
-            id: osIconComponent;
-            OsIcon {}
-        }
-        Component {
-            id: workspacesComponent;
-            Workspaces { id: workspacesInner }
-        }
-        Component {
-            id: activeWindowComponent
-            ActiveWindow {
-                Layout.fillHeight: true
-                monitor: Brightness.getMonitorForScreen(root.screen)
-            }
-        }
-        Component {
-            id: trayComponent;
-            Tray {}
-        }
-        Component {
-            id: clockComponent;
-            Clock {}
-        }
-        Component {
-            id: statusIconsComponent;
-            StatusIcons {}
-        }
-        Component {
-            id: powerComponent
-            Power {
-                visibilities: root.visibilities
-            }
-        }
-
         Repeater {
-            id: repeater
             model: barSection.model
 
-            Loader {
-                required property string id
-                required property bool enabled
+            DelegateChooser {
+                role: "id"
 
-                active: enabled
-                asynchronous: true
-                Layout.alignment: Qt.AlignHCenter
-                Layout.fillHeight: id === "activeWindow"
-                sourceComponent: barSection.componentMap[id] || null
+                DelegateChoice {
+                    roleValue: "logo"
+                    delegate: WrappedLoader {
+                        sourceComponent: OsIcon {}
+                    }
+                }
+                DelegateChoice {
+                    roleValue: "workspaces"
+                    delegate: WrappedLoader {
+                        sourceComponent: Workspaces {}
+                    }
+                }
+                DelegateChoice {
+                    roleValue: "activeWindow"
+                    delegate: WrappedLoader {
+                        Layout.fillHeight: true
+                        sourceComponent: ActiveWindow {
+                            monitor: Brightness.getMonitorForScreen(root.screen)
+                        }
+                    }
+                }
+                DelegateChoice {
+                    roleValue: "tray"
+                    delegate: WrappedLoader {
+                        sourceComponent: Tray {}
+                    }
+                }
+                DelegateChoice {
+                    roleValue: "clock"
+                    delegate: WrappedLoader {
+                        sourceComponent: Clock {}
+                    }
+                }
+                DelegateChoice {
+                    roleValue: "statusIcons"
+                    delegate: WrappedLoader {
+                        sourceComponent: StatusIcons {}
+                    }
+                }
+                DelegateChoice {
+                    roleValue: "power"
+                    delegate: WrappedLoader {
+                        sourceComponent: Power {
+                            visibilities: root.visibilities
+                        }
+                    }
+                }
             }
         }
     }
