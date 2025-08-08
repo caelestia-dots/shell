@@ -20,7 +20,6 @@ ColumnLayout {
     readonly property bool smallDiscoverable: width <= 540
     readonly property bool smallPairable: width <= 480
 
-    anchors.fill: parent
     spacing: Appearance.spacing.small
 
     RowLayout {
@@ -167,7 +166,7 @@ ColumnLayout {
             anchors.right: parent.right
             implicitHeight: deviceInner.implicitHeight + Appearance.padding.normal * 2
 
-            color: Qt.alpha(Colours.palette.m3surfaceContainer, root.session.bt.active === modelData ? 1 : 0)
+            color: Qt.alpha(Colours.tPalette.m3surfaceContainer, root.session.bt.active === modelData ? Colours.tPalette.m3surfaceContainer.a : 0)
             radius: Appearance.rounding.normal
 
             StateLayer {
@@ -191,7 +190,7 @@ ColumnLayout {
                     implicitHeight: icon.implicitHeight + Appearance.padding.normal * 2
 
                     radius: Appearance.rounding.normal
-                    color: device.connected ? Colours.palette.m3primaryContainer : device.modelData.bonded ? Colours.palette.m3secondaryContainer : Colours.palette.m3surfaceContainerHigh
+                    color: device.connected ? Colours.palette.m3primaryContainer : device.modelData.bonded ? Colours.palette.m3secondaryContainer : Colours.tPalette.m3surfaceContainerHigh
 
                     StyledRect {
                         anchors.fill: parent

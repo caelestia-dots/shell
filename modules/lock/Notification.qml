@@ -19,7 +19,7 @@ StyledRect {
     readonly property bool hasAppIcon: modelData.appIcon.length > 0
     readonly property int nonAnimHeight: Math.max(image.height, details.implicitHeight) + Appearance.padding.normal * 2
 
-    color: root.modelData.urgency === NotificationUrgency.Critical ? Colours.palette.m3secondaryContainer : Colours.palette.m3surfaceContainer
+    color: root.modelData.urgency === NotificationUrgency.Critical ? Colours.palette.m3secondaryContainer : Colours.tPalette.m3surfaceContainer
     radius: Appearance.rounding.normal
     implicitWidth: Config.notifs.sizes.width
 
@@ -113,7 +113,7 @@ StyledRect {
 
         sourceComponent: StyledRect {
             radius: Appearance.rounding.full
-            color: root.modelData.urgency === NotificationUrgency.Critical ? Colours.palette.m3error : root.modelData.urgency === NotificationUrgency.Low ? Colours.palette.m3surfaceContainerHighest : Colours.palette.m3tertiaryContainer
+            color: root.modelData.urgency === NotificationUrgency.Critical ? Colours.palette.m3error : root.modelData.urgency === NotificationUrgency.Low ? Colours.tPalette.m3surfaceContainerHighest : Colours.palette.m3tertiaryContainer
             implicitWidth: root.hasImage ? Config.notifs.sizes.badge : Config.notifs.sizes.image
             implicitHeight: root.hasImage ? Config.notifs.sizes.badge : Config.notifs.sizes.image
 

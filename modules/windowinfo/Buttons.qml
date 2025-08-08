@@ -81,7 +81,7 @@ ColumnLayout {
                     readonly property int wsId: Math.floor((Hyprland.activeWsId - 1) / 10) * 10 + index + 1
                     readonly property bool isCurrent: root.client?.workspace.id === wsId
 
-                    color: isCurrent ? Colours.palette.m3surfaceContainerHighest : Colours.palette.m3tertiaryContainer
+                    color: isCurrent ? Colours.tPalette.m3surfaceContainerHighest : Colours.palette.m3tertiaryContainer
                     onColor: isCurrent ? Colours.palette.m3onSurface : Colours.palette.m3onTertiaryContainer
                     text: wsId
                     disabled: isCurrent

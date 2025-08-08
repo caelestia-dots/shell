@@ -112,7 +112,7 @@ Column {
         implicitWidth: saver.implicitHeight + balance.implicitHeight + perf.implicitHeight + Appearance.padding.normal * 2 + Appearance.spacing.large * 2
         implicitHeight: Math.max(saver.implicitHeight, balance.implicitHeight, perf.implicitHeight) + Appearance.padding.small * 2
 
-        color: Colours.palette.m3surfaceContainer
+        color: Colours.tPalette.m3surfaceContainer
         radius: Appearance.rounding.full
 
         StyledRect {

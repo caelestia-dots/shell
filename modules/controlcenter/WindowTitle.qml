@@ -11,7 +11,7 @@ StyledRect {
     required property Session session
 
     implicitHeight: text.implicitHeight + Appearance.padding.normal
-    color: Colours.palette.m3surfaceContainer
+    color: Colours.tPalette.m3surfaceContainer
 
     StyledText {
         id: text

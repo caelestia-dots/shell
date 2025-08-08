@@ -125,7 +125,7 @@ Item {
         implicitWidth: Config.dashboard.sizes.mediaCoverArtSize
         implicitHeight: Config.dashboard.sizes.mediaCoverArtSize
 
-        color: Colours.palette.m3surfaceContainerHigh
+        color: Colours.tPalette.m3surfaceContainerHigh
         radius: Appearance.rounding.full
 
         MaterialIcon {
@@ -330,7 +330,7 @@ Item {
                 fontSize: Appearance.font.size.larger
                 padding: Appearance.padding.small
                 fill: false
-                color: Colours.palette.m3surfaceContainer
+                color: Colours.tPalette.m3surfaceContainer
 
                 function onClicked(): void {
                     Players.active?.raise();
@@ -348,7 +348,7 @@ Item {
                 implicitWidth: slider.implicitWidth * 0.6
                 implicitHeight: currentPlayer.implicitHeight + Appearance.padding.smaller * 2
                 radius: Appearance.rounding.normal
-                color: Colours.palette.m3surfaceContainer
+                color: Colours.tPalette.m3surfaceContainer
                 z: 1
 
                 StateLayer {
@@ -373,7 +373,7 @@ Item {
                         Layout.fillWidth: true
                         Layout.maximumWidth: playerSelector.implicitWidth - implicitHeight - parent.spacing - Appearance.padding.normal * 2
                         text: Players.active?.identity ?? "No players"
-                        color: Colours.palette.m3onSecondaryContainer
+                        color: Players.active ? Colours.palette.m3onSurface : Colours.palette.m3onSurfaceVariant
                         elide: Text.ElideRight
                     }
                 }
@@ -480,7 +480,7 @@ Item {
                 fontSize: Appearance.font.size.larger
                 padding: Appearance.padding.small
                 fill: false
-                color: Colours.palette.m3surfaceContainer
+                color: Colours.tPalette.m3surfaceContainer
 
                 function onClicked(): void {
                     Players.active?.quit();

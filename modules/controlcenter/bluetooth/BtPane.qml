@@ -4,6 +4,7 @@ import ".."
 import qs.components.effects
 import qs.components.containers
 import qs.config
+import Quickshell.Widgets
 import Quickshell.Bluetooth
 import QtQuick
 import QtQuick.Layouts
@@ -23,6 +24,7 @@ RowLayout {
         Layout.fillHeight: true
 
         DeviceList {
+            anchors.fill: parent
             anchors.margins: Appearance.padding.large + Appearance.padding.normal
             anchors.leftMargin: Appearance.padding.large
             anchors.rightMargin: Appearance.padding.large + Appearance.padding.normal / 2
@@ -40,44 +42,52 @@ RowLayout {
         Layout.fillWidth: true
         Layout.fillHeight: true
 
-        Loader {
-            id: loader
-
-            property BluetoothDevice pane: root.session.bt.active
-
+        ClippingRectangle {
             anchors.fill: parent
-            anchors.margins: Appearance.padding.large * 2 + Appearance.padding.normal
-            anchors.leftMargin: Appearance.padding.large * 2
-            anchors.rightMargin: Appearance.padding.large * 2 + Appearance.padding.normal / 2
+            anchors.margins: Appearance.padding.normal
+            anchors.leftMargin: 0
+            anchors.rightMargin: Appearance.padding.normal / 2
 
-            asynchronous: true
-            sourceComponent: pane ? details : settings
+            radius: rightBorder.innerRadius
+            color: "transparent"
 
-            Behavior on pane {
-                SequentialAnimation {
-                    ParallelAnimation {
-                        Anim {
-                            property: "opacity"
-                            to: 0
-                            easing.bezierCurve: Appearance.anim.curves.standardAccel
+            Loader {
+                id: loader
+
+                property BluetoothDevice pane: root.session.bt.active
+
+                anchors.fill: parent
+                anchors.margins: Appearance.padding.large * 2
+
+                asynchronous: true
+                sourceComponent: pane ? details : settings
+
+                Behavior on pane {
+                    SequentialAnimation {
+                        ParallelAnimation {
+                            Anim {
+                                property: "opacity"
+                                to: 0
+                                easing.bezierCurve: Appearance.anim.curves.standardAccel
+                            }
+                            Anim {
+                                property: "scale"
+                                to: 0.8
+                                easing.bezierCurve: Appearance.anim.curves.standardAccel
+                            }
                         }
-                        Anim {
-                            property: "scale"
-                            to: 0.8
-                            easing.bezierCurve: Appearance.anim.curves.standardAccel
-                        }
-                    }
-                    PropertyAction {}
-                    ParallelAnimation {
-                        Anim {
-                            property: "opacity"
-                            to: 1
-                            easing.bezierCurve: Appearance.anim.curves.standardDecel
-                        }
-                        Anim {
-                            property: "scale"
-                            to: 1
-                            easing.bezierCurve: Appearance.anim.curves.standardDecel
+                        PropertyAction {}
+                        ParallelAnimation {
+                            Anim {
+                                property: "opacity"
+                                to: 1
+                                easing.bezierCurve: Appearance.anim.curves.standardDecel
+                            }
+                            Anim {
+                                property: "scale"
+                                to: 1
+                                easing.bezierCurve: Appearance.anim.curves.standardDecel
+                            }
                         }
                     }
                 }
@@ -85,6 +95,8 @@ RowLayout {
         }
 
         InnerBorder {
+            id: rightBorder
+
             leftThickness: Appearance.padding.normal / 2
         }
 

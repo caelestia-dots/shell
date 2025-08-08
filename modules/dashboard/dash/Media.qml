@@ -38,7 +38,7 @@ Item {
 
         ShapePath {
             fillColor: "transparent"
-            strokeColor: Colours.palette.m3surfaceContainerHigh
+            strokeColor: Colours.layer(Colours.palette.m3surfaceContainerHigh, 2)
             strokeWidth: Config.dashboard.sizes.mediaProgressThickness
             capStyle: ShapePath.RoundCap
 
@@ -94,7 +94,7 @@ Item {
         anchors.margins: Appearance.padding.large + Config.dashboard.sizes.mediaProgressThickness + Appearance.spacing.small
 
         implicitHeight: width
-        color: Colours.palette.m3surfaceContainerHigh
+        color: Colours.tPalette.m3surfaceContainerHigh
         radius: Appearance.rounding.full
 
         MaterialIcon {

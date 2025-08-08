@@ -17,7 +17,12 @@ Singleton {
     readonly property url imagecache: `${cache}/imagecache`
 
     function stringify(path: url): string {
-        return path.toString().replace(/%20/g, " ");
+        let str = path.toString();
+        if (str.startsWith("root:/"))
+            str = `file://${Quickshell.shellDir}/${str.slice(6)}`;
+        else if (str.startsWith("/"))
+            str = `file://${str}`;
+        return new URL(str).pathname;
     }
 
     function expandTilde(path: string): string {

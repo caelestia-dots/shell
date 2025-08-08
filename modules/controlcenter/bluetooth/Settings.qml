@@ -48,7 +48,7 @@ ColumnLayout {
         implicitHeight: adapterStatus.implicitHeight + Appearance.padding.large * 2
 
         radius: Appearance.rounding.normal
-        color: Colours.palette.m3surfaceContainer
+        color: Colours.tPalette.m3surfaceContainer
 
         ColumnLayout {
             id: adapterStatus
@@ -109,7 +109,7 @@ ColumnLayout {
         implicitHeight: adapterSettings.implicitHeight + Appearance.padding.large * 2
 
         radius: Appearance.rounding.normal
-        color: Colours.palette.m3surfaceContainer
+        color: Colours.tPalette.m3surfaceContainer
 
         ColumnLayout {
             id: adapterSettings
@@ -474,7 +474,7 @@ ColumnLayout {
         implicitHeight: adapterInfo.implicitHeight + Appearance.padding.large * 2
 
         radius: Appearance.rounding.normal
-        color: Colours.palette.m3surfaceContainer
+        color: Colours.tPalette.m3surfaceContainer
 
         ColumnLayout {
             id: adapterInfo
@@ -535,6 +535,8 @@ ColumnLayout {
 
         StyledSwitch {
             id: toggle
+
+            cLayer: 2
         }
     }
 

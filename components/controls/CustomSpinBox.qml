@@ -30,7 +30,7 @@ RowLayout {
         background: StyledRect {
             implicitWidth: 100
             radius: Appearance.rounding.small
-            color: Colours.palette.m3surfaceContainerHigh
+            color: Colours.tPalette.m3surfaceContainerHigh
         }
     }
 

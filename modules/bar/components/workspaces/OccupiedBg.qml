@@ -51,7 +51,7 @@ Item {
             readonly property Workspace start: root.workspaces[modelData.start - 1 - root.groupOffset] ?? null
             readonly property Workspace end: root.workspaces[modelData.end - 1 - root.groupOffset] ?? null
 
-            color: Colours.alpha(Colours.palette.m3surfaceContainerHigh, true)
+            color: Colours.tPalette.m3surfaceContainerHigh
             radius: Config.bar.workspaces.rounded ? Appearance.rounding.full : 0
 
             x: start?.x ?? 0

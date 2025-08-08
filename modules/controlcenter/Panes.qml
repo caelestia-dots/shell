@@ -2,7 +2,6 @@ pragma ComponentBehavior: Bound
 
 import "bluetooth"
 import qs.components
-import qs.components.effects
 import qs.services
 import qs.config
 import Quickshell.Widgets
@@ -62,10 +61,6 @@ ClippingRectangle {
                 easing.bezierCurve: Appearance.anim.curves.standard
             }
         }
-    }
-
-    InnerBorder {
-        leftThickness: 0
     }
 
     component Pane: Item {

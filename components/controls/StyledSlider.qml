@@ -32,7 +32,7 @@ Slider {
 
             implicitWidth: parent.width - root.handle.x - root.handle.implicitWidth - root.implicitHeight / 6
 
-            color: Colours.palette.m3surfaceContainer
+            color: Colours.tPalette.m3surfaceContainer
             radius: Appearance.rounding.full
             topLeftRadius: root.implicitHeight / 15
             bottomLeftRadius: root.implicitHeight / 15

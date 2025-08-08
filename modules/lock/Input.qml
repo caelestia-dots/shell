@@ -31,7 +31,7 @@ ColumnLayout {
             implicitHeight: Config.lock.sizes.faceSize
 
             radius: Appearance.rounding.large
-            color: Colours.palette.m3surfaceContainer
+            color: Colours.tPalette.m3surfaceContainer
 
             MaterialIcon {
                 anchors.centerIn: parent
@@ -77,7 +77,7 @@ ColumnLayout {
         Layout.preferredHeight: Appearance.font.size.normal + Appearance.padding.large * 2
 
         focus: true
-        color: Colours.palette.m3surfaceContainer
+        color: Colours.tPalette.m3surfaceContainer
         radius: Appearance.rounding.small
         clip: true
 

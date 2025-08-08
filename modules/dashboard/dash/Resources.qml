@@ -55,7 +55,7 @@ Row {
 
             implicitWidth: Config.dashboard.sizes.resourceProgessThickness
 
-            color: Colours.palette.m3surfaceContainerHigh
+            color: Colours.layer(Colours.palette.m3surfaceContainerHigh, 2)
             radius: Appearance.rounding.full
 
             StyledRect {

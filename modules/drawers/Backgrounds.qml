@@ -20,45 +20,44 @@ Shape {
     anchors.margins: Config.border.thickness
     anchors.leftMargin: bar.implicitWidth
     preferredRendererType: Shape.CurveRenderer
-    opacity: Colours.transparency.enabled ? Colours.transparency.base : 1
 
     Osd.Background {
-        wrapper: panels.osd
+        wrapper: root.panels.osd
 
-        startX: root.width - panels.session.width
+        startX: root.width - root.panels.session.width
         startY: (root.height - wrapper.height) / 2 - rounding
     }
 
     Notifications.Background {
-        wrapper: panels.notifications
+        wrapper: root.panels.notifications
 
         startX: root.width
         startY: 0
     }
 
     Session.Background {
-        wrapper: panels.session
+        wrapper: root.panels.session
 
         startX: root.width
         startY: (root.height - wrapper.height) / 2 - rounding
     }
 
     Launcher.Background {
-        wrapper: panels.launcher
+        wrapper: root.panels.launcher
 
         startX: (root.width - wrapper.width) / 2 - rounding
         startY: root.height
     }
 
     Dashboard.Background {
-        wrapper: panels.dashboard
+        wrapper: root.panels.dashboard
 
         startX: (root.width - wrapper.width) / 2 - rounding
         startY: 0
     }
 
     BarPopouts.Background {
-        wrapper: panels.popouts
+        wrapper: root.panels.popouts
         invertBottomRounding: wrapper.y + wrapper.height + 1 >= root.height
 
         startX: wrapper.x
@@ -66,7 +65,7 @@ Shape {
     }
 
     Utilities.Background {
-        wrapper: panels.utilities
+        wrapper: root.panels.utilities
 
         startX: root.width
         startY: root.height

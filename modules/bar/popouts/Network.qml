@@ -102,7 +102,7 @@ ColumnLayout {
                 implicitHeight: connectIcon.implicitHeight + Appearance.padding.small
 
                 radius: Appearance.rounding.full
-                color: networkItem.modelData.active ? Colours.palette.m3primary : Colours.palette.m3surface
+                color: networkItem.modelData.active ? Colours.palette.m3primary : Colours.tPalette.m3surface
 
                 StyledBusyIndicator {
                     anchors.centerIn: parent
@@ -156,7 +156,7 @@ ColumnLayout {
         implicitHeight: rescanBtn.implicitHeight + Appearance.padding.small * 2
 
         radius: Appearance.rounding.normal
-        color: Network.scanning ? Colours.palette.m3surfaceContainer : Colours.palette.m3primaryContainer
+        color: Network.scanning ? Colours.tPalette.m3surfaceContainer : Colours.palette.m3primaryContainer
 
         StateLayer {
             color: Network.scanning ? Colours.palette.m3onSurface : Colours.palette.m3onPrimaryContainer

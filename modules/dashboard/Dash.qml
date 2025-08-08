@@ -84,6 +84,6 @@ GridLayout {
 
     component Rect: StyledRect {
         radius: Appearance.rounding.small
-        color: Colours.palette.m3surfaceContainer
+        color: Colours.tPalette.m3surfaceContainer
     }
 }

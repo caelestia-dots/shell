@@ -64,7 +64,7 @@ Item {
                 implicitHeight: deviceStatus.implicitHeight + Appearance.padding.large * 2
 
                 radius: Appearance.rounding.normal
-                color: Colours.palette.m3surfaceContainer
+                color: Colours.tPalette.m3surfaceContainer
 
                 ColumnLayout {
                     id: deviceStatus
@@ -118,7 +118,7 @@ Item {
                 implicitHeight: deviceProps.implicitHeight + Appearance.padding.large * 2
 
                 radius: Appearance.rounding.normal
-                color: Colours.palette.m3surfaceContainer
+                color: Colours.tPalette.m3surfaceContainer
 
                 ColumnLayout {
                     id: deviceProps
@@ -326,7 +326,7 @@ Item {
                 implicitHeight: deviceInfo.implicitHeight + Appearance.padding.large * 2
 
                 radius: Appearance.rounding.normal
-                color: Colours.palette.m3surfaceContainer
+                color: Colours.tPalette.m3surfaceContainer
 
                 ColumnLayout {
                     id: deviceInfo
@@ -652,6 +652,8 @@ Item {
 
         StyledSwitch {
             id: toggle
+
+            cLayer: 2
         }
     }
 
