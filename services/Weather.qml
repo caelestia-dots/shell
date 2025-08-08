@@ -15,13 +15,14 @@ Singleton {
     property string tempF: "0°F"
 
     function reload(): void {
-        if (Config.services.weatherLocation)
-            loc = Config.services.weatherLocation;
-        else if (!loc || timer.elapsed() > 900)
-            Requests.get("https://ipinfo.io/json", text => {
-                loc = JSON.parse(text).loc ?? "";
-                timer.restart();
-            });
+        // TODO: put back
+        // if (Config.services.weatherLocation)
+        //     loc = Config.services.weatherLocation;
+        // else if (!loc || timer.elapsed() > 900)
+        //     Requests.get("https://ipinfo.io/json", text => {
+        //         loc = JSON.parse(text).loc ?? "";
+        //         timer.restart();
+        //     });
     }
 
     onLocChanged: Requests.get(`https://wttr.in/${loc}?format=j1`, text => {

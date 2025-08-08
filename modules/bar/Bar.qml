@@ -7,6 +7,7 @@ import "components"
 import "components/workspaces"
 import Quickshell
 import QtQuick
+import QtQuick.Layouts
 
 Item {
     id: root
@@ -15,162 +16,137 @@ Item {
     required property PersistentProperties visibilities
     required property BarPopouts.Wrapper popouts
 
-    function checkPopout(y: real): void {
-        const spacing = Appearance.spacing.small;
-        const aw = activeWindow.child;
-        const awy = activeWindow.y + aw.y;
+    property var sortedEntries: Config.bar.entries.reduce((acc, entry) => {
+        (acc[entry.alignment] || acc.top).push(entry);
+        return acc;
+    }, { top: [], center: [], bottom: [] })
 
-        const ty = tray.y;
-        const th = tray.implicitHeight;
-        const trayItems = tray.items;
-
-        // Check status icons hover areas
-        let statusIconFound = false;
-        for (const area of statusIconsInner.hoverAreas) {
-            if (!area.enabled)
-                continue;
-
-            const item = area.item;
-            const itemY = statusIcons.y + statusIconsInner.y + item.y - spacing / 2;
-            const itemHeight = item.implicitHeight + spacing;
-
-            if (y >= itemY && y <= itemY + itemHeight) {
-                popouts.currentName = area.name;
-                popouts.currentCenter = Qt.binding(() => statusIcons.y + statusIconsInner.y + item.y + item.implicitHeight / 2);
-                popouts.hasCurrent = true;
-                statusIconFound = true;
-                break;
-            }
-        }
-
-        if (y >= awy && y <= awy + aw.implicitHeight) {
-            popouts.currentName = "activewindow";
-            popouts.currentCenter = Qt.binding(() => activeWindow.y + aw.y + aw.implicitHeight / 2);
-            popouts.hasCurrent = true;
-        } else if (y > ty && y < ty + th) {
-            const index = Math.floor(((y - ty) / th) * trayItems.count);
-            const item = trayItems.itemAt(index);
-
-            popouts.currentName = `traymenu${index}`;
-            popouts.currentCenter = Qt.binding(() => tray.y + item.y + item.implicitHeight / 2);
-            popouts.hasCurrent = true;
-        } else if (!statusIconFound) {
-            popouts.hasCurrent = false;
-        }
-    }
+    property var topEntries: sortedEntries.top
+    property var centerEntries: sortedEntries.center
+    property var bottomEntries: sortedEntries.bottom
 
     anchors.top: parent.top
     anchors.bottom: parent.bottom
     anchors.left: parent.left
+    anchors.bottomMargin: Appearance.padding.large
+    anchors.topMargin: Appearance.padding.large
 
-    implicitWidth: child.implicitWidth + Config.border.thickness * 2
+    Component.onCompleted: implicitWidth = Qt.binding(() =>  Math.max(topSection.implicitWidth, centerSection.implicitWidth, bottomSection.implicitWidth) + Config.border.thickness * 2)
 
-    Item {
-        id: child
+    BarSection {
+        id: topSection
 
+        model: root.topEntries
         anchors.top: parent.top
+        anchors.horizontalCenter: parent.horizontalCenter
+    }
+
+    BarSection {
+        id: centerSection
+
+        model: root.centerEntries
+        anchors.top: topSection.bottom
+        anchors.bottom: bottomSection.top
+        anchors.horizontalCenter: parent.horizontalCenter
+    }
+
+    BarSection {
+        id: bottomSection
+
+        model: root.bottomEntries
         anchors.bottom: parent.bottom
         anchors.horizontalCenter: parent.horizontalCenter
+    }
 
-        implicitWidth: Math.max(osIcon.implicitWidth, workspaces.implicitWidth, activeWindow.implicitWidth, tray.implicitWidth, clock.implicitWidth, statusIcons.implicitWidth, power.implicitWidth)
+    component BarSection: ColumnLayout {
+        id: test
+        required property var model
+        spacing: Appearance.spacing.normal
 
-        OsIcon {
-            id: osIcon
+        Repeater {
+            model: test.model
 
-            anchors.horizontalCenter: parent.horizontalCenter
-            anchors.top: parent.top
-            anchors.topMargin: Appearance.padding.large
-        }
+            DelegateChooser {
+                role: "id"
 
-        StyledRect {
-            id: workspaces
+                DelegateChoice {
+                    roleValue: "logo"
+                    delegate: Loader {
+                        active: modelData.enabled
+                        Layout.alignment: Qt.AlignHCenter
 
-            anchors.horizontalCenter: parent.horizontalCenter
-            anchors.top: osIcon.bottom
-            anchors.topMargin: Appearance.spacing.normal
+                        sourceComponent: OsIcon {}
+                    }
+                }
 
-            radius: Appearance.rounding.full
-            color: Colours.palette.m3surfaceContainer
+                DelegateChoice {
+                    roleValue: "workspaces"
+                    delegate: Loader {
+                        active: modelData.enabled
+                        Layout.alignment: Qt.AlignHCenter
 
-            implicitWidth: workspacesInner.implicitWidth + Appearance.padding.small * 2
-            implicitHeight: workspacesInner.implicitHeight + Appearance.padding.small * 2
+                        sourceComponent: Workspaces {
+                            id: workspacesInner
+                        }
+                    }
+                }
 
-            CustomMouseArea {
-                anchors.fill: parent
-                anchors.leftMargin: -Config.border.thickness
-                anchors.rightMargin: -Config.border.thickness
+                DelegateChoice {
+                    roleValue: "activeWindow"
+                    delegate: Loader {
+                        active: modelData.enabled
+                        Layout.alignment: Qt.AlignHCenter
+                        Layout.fillHeight: true
 
-                function onWheel(event: WheelEvent): void {
-                    const activeWs = Hyprland.activeToplevel?.workspace?.name;
-                    if (activeWs?.startsWith("special:"))
-                        Hyprland.dispatch(`togglespecialworkspace ${activeWs.slice(8)}`);
-                    else if (event.angleDelta.y < 0 || Hyprland.activeWsId > 1)
-                        Hyprland.dispatch(`workspace r${event.angleDelta.y > 0 ? "-" : "+"}1`);
+                        sourceComponent: ActiveWindow {
+                            Layout.fillHeight: true
+                            monitor: Brightness.getMonitorForScreen(root.screen)
+                        }
+                    }
+                }
+
+                DelegateChoice {
+                    roleValue: "tray"
+                    delegate: Loader {
+                        active: modelData.enabled
+                        Layout.alignment: Qt.AlignHCenter
+
+                        sourceComponent: Tray {}
+                    }
+                }
+
+                DelegateChoice {
+                    roleValue: "clock"
+                    delegate: Loader {
+                        active: modelData.enabled
+                        Layout.alignment: Qt.AlignHCenter
+
+                        sourceComponent: Clock {}
+                    }
+                }
+
+                DelegateChoice {
+                    roleValue: "statusIcons"
+                    delegate: Loader {
+                        active: modelData.enabled
+                        Layout.alignment: Qt.AlignHCenter
+
+                        sourceComponent: StatusIcons {}
+                    }
+                }
+
+                DelegateChoice {
+                    roleValue: "power"
+                    delegate: Loader {
+                        active: modelData.enabled
+                        Layout.alignment: Qt.AlignHCenter
+
+                        sourceComponent: Power {
+                            visibilities: root.visibilities
+                        }
+                    }
                 }
             }
-
-            Workspaces {
-                id: workspacesInner
-
-                anchors.centerIn: parent
-            }
-        }
-
-        ActiveWindow {
-            id: activeWindow
-
-            anchors.horizontalCenter: parent.horizontalCenter
-            anchors.top: workspaces.bottom
-            anchors.bottom: tray.top
-            anchors.margins: Appearance.spacing.large
-
-            monitor: Brightness.getMonitorForScreen(root.screen)
-        }
-
-        Tray {
-            id: tray
-
-            anchors.horizontalCenter: parent.horizontalCenter
-            anchors.bottom: clock.top
-            anchors.bottomMargin: Appearance.spacing.larger
-        }
-
-        Clock {
-            id: clock
-
-            anchors.horizontalCenter: parent.horizontalCenter
-            anchors.bottom: statusIcons.top
-            anchors.bottomMargin: Appearance.spacing.normal
-        }
-
-        StyledRect {
-            id: statusIcons
-
-            anchors.left: parent.left
-            anchors.right: parent.right
-            anchors.bottom: power.top
-            anchors.bottomMargin: Appearance.spacing.normal
-
-            radius: Appearance.rounding.full
-            color: Colours.palette.m3surfaceContainer
-
-            implicitHeight: statusIconsInner.implicitHeight + Appearance.padding.normal * 2
-
-            StatusIcons {
-                id: statusIconsInner
-
-                anchors.centerIn: parent
-            }
-        }
-
-        Power {
-            id: power
-
-            anchors.horizontalCenter: parent.horizontalCenter
-            anchors.bottom: parent.bottom
-            anchors.bottomMargin: Appearance.padding.large
-
-            visibilities: root.visibilities
         }
     }
 }

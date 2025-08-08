@@ -10,10 +10,13 @@ import Quickshell.Services.UPower
 import QtQuick
 import QtQuick.Layouts
 
-Item {
+StyledRect {
     id: root
 
     property color colour: Colours.palette.m3secondary
+
+    color: Colours.palette.m3surfaceContainer
+    radius: Appearance.rounding.full
 
     readonly property list<var> hoverAreas: [
         {
@@ -39,13 +42,13 @@ Item {
     ]
 
     clip: true
-    implicitWidth: iconColumn.implicitWidth
-    implicitHeight: iconColumn.implicitHeight
+    implicitWidth: iconColumn.implicitWidth + Appearance.padding.normal * 2
+    implicitHeight: iconColumn.implicitHeight + Appearance.padding.normal * 2
 
     ColumnLayout {
         id: iconColumn
 
-        anchors.horizontalCenter: parent.horizontalCenter
+        anchors.centerIn: parent
         spacing: Appearance.spacing.smaller / 2
 
         // Audio icon

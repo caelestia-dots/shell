@@ -2,10 +2,12 @@ pragma ComponentBehavior: Bound
 
 import qs.services
 import qs.config
+import qs.components
+import qs.components.controls
 import QtQuick
 import QtQuick.Layouts
 
-Item {
+StyledRect {
     id: root
 
     readonly property list<Workspace> workspaces: layout.children.filter(c => c.isWorkspace).sort((w1, w2) => w1.ws - w2.ws)
@@ -15,60 +17,81 @@ Item {
     }, {})
     readonly property int groupOffset: Math.floor((Hyprland.activeWsId - 1) / Config.bar.workspaces.shown) * Config.bar.workspaces.shown
 
-    implicitWidth: layout.implicitWidth
-    implicitHeight: layout.implicitHeight
+    implicitWidth: layout.implicitWidth + Appearance.padding.small * 2
+    implicitHeight: layout.implicitHeight + Appearance.padding.small * 2
+    color: Colours.palette.m3surfaceContainer
+    radius: Appearance.rounding.full
 
-    ColumnLayout {
-        id: layout
+    Item {
+        id: inner
 
-        spacing: 0
-        layer.enabled: true
-        layer.smooth: true
+        anchors.fill: parent
+        anchors.margins: Appearance.padding.small
 
-        Repeater {
-            model: Config.bar.workspaces.shown
+        ColumnLayout {
+            id: layout
 
-            Workspace {
+            spacing: 0
+            layer.enabled: true
+            layer.smooth: true
+
+            Repeater {
+                model: Config.bar.workspaces.shown
+
+                Workspace {
+                    occupied: root.occupied
+                    groupOffset: root.groupOffset
+                }
+            }
+        }
+
+        Loader {
+            active: Config.bar.workspaces.occupiedBg
+            asynchronous: true
+
+            z: -1
+            anchors.fill: parent
+
+            sourceComponent: OccupiedBg {
+                workspaces: root.workspaces
                 occupied: root.occupied
                 groupOffset: root.groupOffset
             }
         }
-    }
 
-    Loader {
-        active: Config.bar.workspaces.occupiedBg
-        asynchronous: true
+        Loader {
+            active: Config.bar.workspaces.activeIndicator
+            asynchronous: true
 
-        z: -1
-        anchors.fill: parent
-
-        sourceComponent: OccupiedBg {
-            workspaces: root.workspaces
-            occupied: root.occupied
-            groupOffset: root.groupOffset
+            sourceComponent: ActiveIndicator {
+                workspaces: root.workspaces
+                mask: layout
+                maskWidth: inner.width
+                maskHeight: inner.height
+                groupOffset: root.groupOffset
+            }
         }
-    }
 
-    Loader {
-        active: Config.bar.workspaces.activeIndicator
-        asynchronous: true
+        MouseArea {
+            anchors.fill: parent
 
-        sourceComponent: ActiveIndicator {
-            workspaces: root.workspaces
-            mask: layout
-            maskWidth: root.width
-            maskHeight: root.height
-            groupOffset: root.groupOffset
+            onPressed: event => {
+                const ws = layout.childAt(event.x, event.y).index + root.groupOffset + 1;
+                if (Hyprland.activeWsId !== ws)
+                    Hyprland.dispatch(`workspace ${ws}`);
+            }
         }
-    }
 
-    MouseArea {
-        anchors.fill: parent
+        CustomMouseArea {
+            anchors.fill: parent
 
-        onPressed: event => {
-            const ws = layout.childAt(event.x, event.y).index + root.groupOffset + 1;
-            if (Hyprland.activeWsId !== ws)
-                Hyprland.dispatch(`workspace ${ws}`);
+            function onWheel(event: WheelEvent): void {
+                const activeWs = Hyprland.activeToplevel?.workspace?.name;
+                if (activeWs?.startsWith("special:"))
+                    Hyprland.dispatch(`togglespecialworkspace ${activeWs.slice(8)}`);
+                else if (event.angleDelta.y < 0 || Hyprland.activeWsId > 1)
+                    Hyprland.dispatch(`workspace r${event.angleDelta.y > 0 ? "-" : "+"}1`);
+            }
         }
     }
 }

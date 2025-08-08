@@ -42,8 +42,6 @@ Item {
     }
 
     Loader {
-        id: windows
-
         active: Config.bar.workspaces.showWindows
         asynchronous: true
 
