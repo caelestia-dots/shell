@@ -19,7 +19,7 @@ StyledRect {
 
     implicitWidth: layout.implicitWidth + Appearance.padding.small * 2
     implicitHeight: layout.implicitHeight + Appearance.padding.small * 2
-    color: Colours.palette.m3surfaceContainer
+    color: Colours.tPalette.m3surfaceContainer
     radius: Appearance.rounding.full
 
     Item {
@@ -72,16 +72,6 @@ StyledRect {
             }
         }
 
-        MouseArea {
-            anchors.fill: parent
-
-            onPressed: event => {
-                const ws = layout.childAt(event.x, event.y).index + root.groupOffset + 1;
-                if (Hyprland.activeWsId !== ws)
-                    Hyprland.dispatch(`workspace ${ws}`);
-            }
-        }
-
         CustomMouseArea {
             anchors.fill: parent
 
@@ -91,6 +81,12 @@ StyledRect {
                     Hyprland.dispatch(`togglespecialworkspace ${activeWs.slice(8)}`);
                 else if (event.angleDelta.y < 0 || Hyprland.activeWsId > 1)
                     Hyprland.dispatch(`workspace r${event.angleDelta.y > 0 ? "-" : "+"}1`);
+            }
+
+            onPressed: event => {
+                const ws = layout.childAt(event.x, event.y).index + root.groupOffset + 1;
+                if (Hyprland.activeWsId !== ws)
+                    Hyprland.dispatch(`workspace ${ws}`);
             }
         }
     }

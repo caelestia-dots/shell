@@ -1,5 +1,3 @@
-pragma ComponentBehavior: Bound
-
 import qs.components
 import qs.components.controls
 import qs.services
@@ -18,14 +16,67 @@ Item {
     required property PersistentProperties visibilities
     required property BarPopouts.Wrapper popouts
 
-    property var sortedEntries: Config.bar.entries.reduce((acc, entry) => {
-        (acc[entry.alignment] || acc.top).push(entry);
-        return acc;
-    }, { top: [], center: [], bottom: [] })
+    function checkPopout(y: real): void {
+        const spacing = Appearance.spacing.small;
+        let popoutFound = false;
 
-    property var topEntries: sortedEntries.top
-    property var centerEntries: sortedEntries.center
-    property var bottomEntries: sortedEntries.bottom
+        for (let i = 0; i < column.children.length; i++) {
+            const loader = column.children[i];
+            if (!loader.active || !loader.item) continue;
+
+            const role = Config.bar.entries[i].id;
+            const item = loader.item;
+
+            const itemPos = loader.mapToItem(root, 0, 0);
+            const itemY = itemPos.y;
+            const itemHeight = loader.implicitHeight;
+
+            if (role === "statusIcons" && item.hoverAreas) {
+                for (const area of item.hoverAreas) {
+                    if (!area.enabled) continue;
+                    const areaPos = area.item.mapToItem(root, 0, 0);
+                    const areaHeight = area.item.implicitHeight + spacing;
+                    if (y >= areaPos.y - spacing / 2 && y <= areaPos.y - spacing / 2 + areaHeight) {
+                        popouts.currentName = area.name;
+                        popouts.currentCenter = area.item.mapToItem(root, 0, area.item.implicitHeight / 2).y;
+                        popouts.hasCurrent = true;
+                        popoutFound = true;
+                        break;
+                    }
+                }
+                if (popoutFound) break;
+            }
+
+            if (role === "activeWindow") {
+                if (y >= itemY && y <= itemY + item.height) {
+                    popouts.currentName = "activewindow";
+                    popouts.currentCenter = item.mapToItem(root, 0, item.height / 2).y;
+                    popouts.hasCurrent = true;
+                    popoutFound = true;
+                    break;
+                }
+            }
+
+            if (role === "tray" && item.items) {
+                const th = item.implicitHeight;
+                if (y >= itemY && y <= itemY + th) {
+                    const index = Math.floor(((y - itemY) / th) * item.items.count);
+                    const trayItem = item.items.itemAt(index);
+                    if (trayItem) {
+                        popouts.currentName = `traymenu${index}`;
+                        popouts.currentCenter = trayItem.mapToItem(root, 0, trayItem.implicitHeight / 2).y;
+                        popouts.hasCurrent = true;
+                        popoutFound = true;
+                        break;
+                    }
+                }
+            }
+        }
+
+        if (!popoutFound) {
+            popouts.hasCurrent = false;
+        }
+    }
 
     anchors.top: parent.top
     anchors.bottom: parent.bottom
@@ -33,58 +84,38 @@ Item {
     anchors.bottomMargin: Appearance.padding.large
     anchors.topMargin: Appearance.padding.large
 
-    Component.onCompleted: implicitWidth = Qt.binding(() =>  Math.max(topSection.implicitWidth, centerSection.implicitWidth, bottomSection.implicitWidth) + Config.border.thickness * 2)
-
-    BarSection {
-        id: topSection
-
-        model: root.sortedEntries.top
-        // model: root.topEntries
-        anchors.top: parent.top
-        anchors.horizontalCenter: parent.horizontalCenter
-    }
-
-    BarSection {
-        id: centerSection
-
-        // model: root.centerEntries
-        model: root.sortedEntries.center
-        anchors.top: topSection.bottom
-        anchors.bottom: bottomSection.top
-        anchors.horizontalCenter: parent.horizontalCenter
-        anchors.topMargin: Appearance.spacing.normal
-        anchors.bottomMargin: Appearance.spacing.normal
-    }
-
-    BarSection {
-        id: bottomSection
-
-        model: root.sortedEntries.bottom
-        // model: root.bottomEntries
-        anchors.bottom: parent.bottom
-        anchors.horizontalCenter: parent.horizontalCenter
-    }
+    Component.onCompleted: implicitWidth = Qt.binding(() =>  column.implicitWidth + Config.border.thickness * 2)
 
     component WrappedLoader: Loader {
         required property bool enabled
+        required property string id
+
+        id: id
 
         active: enabled
         asynchronous: true
         Layout.alignment: Qt.AlignHCenter
     }
 
-    component BarSection: ColumnLayout {
-        id: barSection
+    ColumnLayout {
+        id: column
 
-        required property var model
-        spacing: Appearance.spacing.normal
+        anchors.fill: parent
 
         Repeater {
-            model: barSection.model
+            model: Config.bar.entries
 
             DelegateChooser {
                 role: "id"
 
+                DelegateChoice {
+                    id: test
+                    roleValue: "spacer"
+                    delegate: Item {
+                        Layout.fillHeight: true
+                        Layout.fillWidth: true
+                    }
+                }
                 DelegateChoice {
                     roleValue: "logo"
                     delegate: WrappedLoader {
@@ -99,8 +130,9 @@ Item {
                 }
                 DelegateChoice {
                     roleValue: "activeWindow"
+                    id: activeWindowDelegate
                     delegate: WrappedLoader {
-                        Layout.fillHeight: true
+                        Layout.fillHeight: enabled
                         sourceComponent: ActiveWindow {
                             monitor: Brightness.getMonitorForScreen(root.screen)
                         }
@@ -121,6 +153,7 @@ Item {
                 DelegateChoice {
                     roleValue: "statusIcons"
                     delegate: WrappedLoader {
+                        id: statusIcons
                         sourceComponent: StatusIcons {}
                     }
                 }

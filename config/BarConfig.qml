@@ -12,38 +12,35 @@ JsonObject {
         {
             id: "logo",
             enabled: true,
-            alignment: "top"
         },
         {
             id: "workspaces",
             enabled: true,
-            alignment: "top"
+        },
+        {
+            id: "spacer",
+            enabled: true
         },
         {
             id: "activeWindow",
             enabled: true,
-            alignment: "center"
         },
         {
             id: "tray",
             enabled: true,
-            alignment: "bottom"
         },
         {
             id: "clock",
             enabled: true,
-            alignment: "bottom"
         },
         {
             id: "statusIcons",
             enabled: true,
-            alignment: "bottom"
         },
         {
             id: "power",
             enabled: true,
-            alignment: "bottom"
-        }
+        },
     ]
 
     component Workspaces: JsonObject {

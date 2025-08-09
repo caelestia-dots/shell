@@ -13,9 +13,10 @@ import QtQuick.Layouts
 StyledRect {
     id: root
 
+    // required property var config // TODO
     property color colour: Colours.palette.m3secondary
 
-    color: Colours.palette.m3surfaceContainer
+    color: Colours.tPalette.m3surfaceContainer
     radius: Appearance.rounding.full
 
     readonly property list<var> hoverAreas: [
