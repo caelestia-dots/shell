@@ -80,11 +80,15 @@ in
 
     installPhase = ''
       install -Dm755 bin/beat_detector $out/bin/beat_detector
+
+      mkdir -p $out/share/caelestia-shell
+      cp -r ./* $out/share/caelestia-shell
+
       makeWrapper ${quickshell}/bin/qs $out/bin/caelestia-shell \
       	--prefix PATH : "${lib.makeBinPath runtimeDeps}" \
       	--set FONTCONFIG_FILE "${fontconfig}" \
       	--set CAELESTIA_BD_PATH $out/bin/beat_detector \
-      	--add-flags '-p ${./.}'
+      	--add-flags "-p $out/share/caelestia-shell"
     '';
 
     meta = {

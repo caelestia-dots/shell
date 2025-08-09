@@ -36,14 +36,17 @@ MouseArea {
     property real sw: Math.abs(sx - ex)
     property real sh: Math.abs(sy - ey)
 
-    property list<var> clients: Hyprland.toplevels.values.filter(c => c.workspace?.id === Hyprland.activeWsId).sort((a, b) => {
-        // Pinned first, then floating, then any other
-        if (a.lastIpcObject.pinned === b.lastIpcObject.pinned)
-            return a.lastIpcObject.floating === b.lastIpcObject.floating ? 0 : a.lastIpcObject.floating ? -1 : 1;
-        if (a.lastIpcObject.pinned)
-            return -1;
-        return 1;
-    })
+    property list<var> clients: {
+        const ws = Hyprland.activeToplevel?.workspace?.id ?? Hyprland.activeWsId;
+        return Hyprland.toplevels.values.filter(c => c.workspace?.id === ws).sort((a, b) => {
+            // Pinned first, then floating, then any other
+            if (a.lastIpcObject.pinned === b.lastIpcObject.pinned)
+                return a.lastIpcObject.floating === b.lastIpcObject.floating ? 0 : a.lastIpcObject.floating ? -1 : 1;
+            if (a.lastIpcObject.pinned)
+                return -1;
+            return 1;
+        });
+    }
 
     function checkClientRects(x: real, y: real): void {
         for (const client of clients) {
@@ -75,10 +78,22 @@ MouseArea {
             clients = clients;
 
         opacity = 1;
-        sx = screen.width / 2 - 100;
-        sy = screen.height / 2 - 100;
-        ex = screen.width / 2 + 100;
-        ey = screen.height / 2 + 100;
+
+        const c = clients[0];
+        if (c) {
+            const cx = c.lastIpcObject.at[0] - screen.x;
+            const cy = c.lastIpcObject.at[1] - screen.y;
+            onClient = true;
+            sx = cx;
+            sy = cy;
+            ex = cx + c.lastIpcObject.size[0];
+            ey = cy + c.lastIpcObject.size[1];
+        } else {
+            sx = screen.width / 2 - 100;
+            sy = screen.height / 2 - 100;
+            ex = screen.width / 2 + 100;
+            ey = screen.height / 2 + 100;
+        }
     }
 
     onPressed: event => {

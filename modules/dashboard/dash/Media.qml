@@ -95,7 +95,7 @@ Item {
 
         implicitHeight: width
         color: Colours.tPalette.m3surfaceContainerHigh
-        radius: Appearance.rounding.full
+        radius: Infinity
 
         MaterialIcon {
             anchors.centerIn: parent

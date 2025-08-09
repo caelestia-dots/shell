@@ -1,5 +1,3 @@
-import qs.utils
-import qs.config
 import Quickshell
 import Quickshell.Wayland
 

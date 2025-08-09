@@ -450,7 +450,7 @@ StyledRect {
         required property var modelData
 
         radius: Appearance.rounding.full
-        color: root.modelData.urgency === NotificationUrgency.Critical ? Colours.palette.m3secondary : Colours.tPalette.m3surfaceContainerHigh
+        color: root.modelData.urgency === NotificationUrgency.Critical ? Colours.palette.m3secondary : Colours.layer(Colours.palette.m3surfaceContainerHigh, 2)
 
         Layout.preferredWidth: actionText.width + Appearance.padding.normal * 2
         Layout.preferredHeight: actionText.height + Appearance.padding.small * 2

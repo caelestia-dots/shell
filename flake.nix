@@ -9,15 +9,9 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    app2unit = {
-      url = "github:soramanew/app2unit";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
     caelestia-cli = {
       url = "github:caelestia-dots/cli";
       inputs.nixpkgs.follows = "nixpkgs";
-      inputs.app2unit.follows = "app2unit";
       inputs.caelestia-shell.follows = "";
     };
   };
@@ -41,9 +35,9 @@
           withX11 = false;
           withI3 = false;
         };
-        app2unit = inputs.app2unit.packages.${pkgs.system}.default;
         caelestia-cli = inputs.caelestia-cli.packages.${pkgs.system}.default;
       };
+      with-cli = caelestia-shell.override {withCli = true;};
       default = caelestia-shell;
     });
 

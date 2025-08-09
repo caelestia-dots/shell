@@ -74,7 +74,7 @@ jobs:
 
       - name: Check for changes
         id: check
-        run: echo modified=$(test -n "$(git status --porcelain)" && echo 'true' || echo 'false') >> $GITHUB_OUTPUT
+        run: echo modified=$(git diff --exit-code flake.lock && echo 'false' || echo 'true') >> $GITHUB_OUTPUT
 
       - name: Commit and push changes
         if: steps.check.outputs.modified == 'true'

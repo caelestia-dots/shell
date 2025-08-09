@@ -1,3 +1,4 @@
+import qs.components.controls
 import qs.services
 import qs.config
 import qs.modules.bar.popouts as BarPopouts
@@ -5,7 +6,7 @@ import qs.modules.osd as Osd
 import Quickshell
 import QtQuick
 
-MouseArea {
+CustomMouseArea {
     id: root
 
     required property ShellScreen screen
@@ -40,6 +41,23 @@ MouseArea {
 
     function inBottomPanel(panel: Item, x: real, y: real): bool {
         return y > root.height - Config.border.thickness - panel.height - Config.border.rounding && withinPanelWidth(panel, x, y);
+    }
+
+    function onWheel(event: WheelEvent): void {
+        if (event.x < bar.implicitWidth) {
+            if (event.y < screen.height / 2) {
+                if (event.angleDelta.y > 0)
+                    Audio.incrementVolume();
+                else if (event.angleDelta.y < 0)
+                    Audio.decrementVolume();
+            } else {
+                const monitor = Brightness.getMonitorForScreen(screen);
+                if (event.angleDelta.y > 0)
+                    monitor.setBrightness(monitor.brightness + 0.1);
+                else if (event.angleDelta.y < 0)
+                    monitor.setBrightness(monitor.brightness - 0.1);
+            }
+        }
     }
 
     anchors.fill: parent

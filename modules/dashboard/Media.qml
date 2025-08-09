@@ -126,7 +126,7 @@ Item {
         implicitHeight: Config.dashboard.sizes.mediaCoverArtSize
 
         color: Colours.tPalette.m3surfaceContainerHigh
-        radius: Appearance.rounding.full
+        radius: Infinity
 
         MaterialIcon {
             anchors.centerIn: parent
