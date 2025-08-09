@@ -52,6 +52,20 @@ Item {
             }
         }
 
+        Popout {
+            name: "calendar"
+            sourceComponent: Calendar {
+                wrapper: root.wrapper
+            }
+        }
+
+        Popout {
+            name: "notifications"
+            sourceComponent: Notifications {
+                wrapper: root.wrapper
+            }
+        }
+
         Repeater {
             model: ScriptModel {
                 values: [...SystemTray.items.values]

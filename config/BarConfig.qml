@@ -21,6 +21,7 @@ JsonObject {
     }
 
     component Status: JsonObject {
+        property bool showNotifications: true
         property bool showAudio: false
         property bool showKbLayout: false
         property bool showNetwork: true
