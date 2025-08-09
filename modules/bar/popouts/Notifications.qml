@@ -163,6 +163,7 @@ ColumnLayout {
                         width: parent.width
                         modelData: wrapper.modelData
                         color: Colours.palette.m3surfaceContainerHigh
+                        opacity: 0.6
                     }
                 }
 
