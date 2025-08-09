@@ -205,7 +205,8 @@ All configuration options are in `~/.config/caelestia/shell.json`.
             "showBattery": true,
             "showBluetooth": true,
             "showKbLayout": false,
-            "showNetwork": true
+            "showNetwork": true,
+            "showNotifications": true,
         },
         "workspaces": {
             "activeIndicator": true,
