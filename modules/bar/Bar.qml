@@ -17,7 +17,6 @@ Item {
     required property BarPopouts.Wrapper popouts
 
     function checkPopout(y: real): void {
-        const spacing = Appearance.spacing.small;
         let popoutFound = false;
 
         for (let i = 0; i < column.children.length; i++) {
@@ -27,16 +26,13 @@ Item {
             const role = Config.bar.entries[i].id;
             const item = loader.item;
 
-            const itemPos = loader.mapToItem(root, 0, 0);
-            const itemY = itemPos.y;
-            const itemHeight = loader.implicitHeight;
-
             if (role === "statusIcons" && item.hoverAreas) {
                 for (const area of item.hoverAreas) {
                     if (!area.enabled) continue;
-                    const areaPos = area.item.mapToItem(root, 0, 0);
-                    const areaHeight = area.item.implicitHeight + spacing;
-                    if (y >= areaPos.y - spacing / 2 && y <= areaPos.y - spacing / 2 + areaHeight) {
+
+                    const spacing = Appearance.spacing.normal;
+                    const areaTop = area.item.mapToItem(root, 0, 0).y - spacing / 2;
+                    if (y >= areaTop && y <= areaTop + (area.item.implicitHeight + spacing)) {
                         popouts.currentName = area.name;
                         popouts.currentCenter = area.item.mapToItem(root, 0, area.item.implicitHeight / 2).y;
                         popouts.hasCurrent = true;
@@ -48,9 +44,12 @@ Item {
             }
 
             if (role === "activeWindow") {
-                if (y >= itemY && y <= itemY + item.height) {
+                const visHeight = item.child.implicitHeight;
+                const visTop = item.child.mapToItem(root, 0, 0).y;
+
+                if (y >= visTop && y <= visTop + visHeight) {
                     popouts.currentName = "activewindow";
-                    popouts.currentCenter = item.mapToItem(root, 0, item.height / 2).y;
+                    popouts.currentCenter = item.child.mapToItem(root, 0, visHeight / 2).y;
                     popouts.hasCurrent = true;
                     popoutFound = true;
                     break;
@@ -59,12 +58,13 @@ Item {
 
             if (role === "tray" && item.items) {
                 const th = item.implicitHeight;
-                if (y >= itemY && y <= itemY + th) {
-                    const index = Math.floor(((y - itemY) / th) * item.items.count);
+                const ty = item.mapToItem(root, 0, 0).y;
+                if (y >= ty && y <= ty + th) {
+                    const index = Math.floor(((y - ty) / th) * item.items.count);
                     const trayItem = item.items.itemAt(index);
                     if (trayItem) {
                         popouts.currentName = `traymenu${index}`;
-                        popouts.currentCenter = trayItem.mapToItem(root, 0, trayItem.implicitHeight / 2).y;
+                        popouts.currentCenter = Qt.binding(() => trayItem.mapToItem(root, 0, trayItem.implicitHeight / 2).y);
                         popouts.hasCurrent = true;
                         popoutFound = true;
                         break;
@@ -111,9 +111,8 @@ Item {
                 DelegateChoice {
                     id: test
                     roleValue: "spacer"
-                    delegate: Item {
-                        Layout.fillHeight: true
-                        Layout.fillWidth: true
+                    delegate: WrappedLoader {
+                        Layout.fillHeight: enabled
                     }
                 }
                 DelegateChoice {

@@ -13,7 +13,6 @@ import QtQuick.Layouts
 StyledRect {
     id: root
 
-    // required property var config // TODO
     property color colour: Colours.palette.m3secondary
 
     color: Colours.tPalette.m3surfaceContainer
