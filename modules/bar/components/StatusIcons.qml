@@ -9,6 +9,7 @@ import Quickshell.Bluetooth
 import Quickshell.Services.UPower
 import QtQuick
 import QtQuick.Layouts
+import "services" as Services
 
 Item {
     id: root
@@ -16,6 +17,11 @@ Item {
     property color colour: Colours.palette.m3secondary
 
     readonly property list<var> hoverAreas: [
+        {
+            name: "notifications",
+            item: notificationsIcon,
+            enabled: Config.bar.status.showNotifications
+        },
         {
             name: "audio",
             item: audioIcon,
@@ -47,6 +53,30 @@ Item {
 
         anchors.horizontalCenter: parent.horizontalCenter
         spacing: Appearance.spacing.smaller / 2
+
+        // Notifications icon
+        Loader {
+            id: notificationsIcon
+
+            asynchronous: true
+            active: Config.bar.status.showNotifications
+            visible: active
+
+            sourceComponent: MaterialIcon {
+                animate: true
+                text: {
+                    if (Notifs.dnd) return "notifications_off"
+                    if (Notifs.list.length > 0) return "notifications"
+                    return "notifications_none"
+                }
+                color: Notifs.dnd ? Colours.palette.m3error : root.colour
+
+                MouseArea {
+                    anchors.fill: parent
+                    onClicked: Notifs.toggleDnd()
+                }
+            }
+        }
 
         // Audio icon
         Loader {

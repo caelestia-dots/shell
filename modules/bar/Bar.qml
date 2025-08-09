@@ -24,6 +24,9 @@ Item {
         const th = tray.implicitHeight;
         const trayItems = tray.items;
 
+        const clockY = clock.y;
+        const clockHeight = clock.implicitHeight;
+
         // Check status icons hover areas
         let statusIconFound = false;
         for (const area of statusIconsInner.hoverAreas) {
@@ -47,6 +50,10 @@ Item {
             popouts.currentName = "activewindow";
             popouts.currentCenter = Qt.binding(() => activeWindow.y + aw.y + aw.implicitHeight / 2);
             popouts.hasCurrent = true;
+        } else if (y >= clockY && y <= clockY + clockHeight) {
+            popouts.currentName = "calendar";
+            popouts.currentCenter = Qt.binding(() => clock.y + clock.implicitHeight / 2);
+            popouts.hasCurrent = true;
         } else if (y > ty && y < ty + th) {
             const index = Math.floor(((y - ty) / th) * trayItems.count);
             const item = trayItems.itemAt(index);
@@ -63,7 +70,7 @@ Item {
     anchors.bottom: parent.bottom
     anchors.left: parent.left
 
-    implicitWidth: child.implicitWidth + Math.max(Appearance.padding.smaller, Config.border.thickness) * 2
+    implicitWidth: child.implicitWidth + Config.border.thickness * 2
 
     Item {
         id: child
@@ -97,8 +104,8 @@ Item {
 
             CustomMouseArea {
                 anchors.fill: parent
-                anchors.leftMargin: -Math.max(Appearance.padding.smaller, Config.border.thickness)
-                anchors.rightMargin: -Math.max(Appearance.padding.smaller, Config.border.thickness)
+                anchors.leftMargin: -Config.border.thickness
+                anchors.rightMargin: -Config.border.thickness
 
                 function onWheel(event: WheelEvent): void {
                     const activeWs = Hyprland.activeToplevel?.workspace?.name;
