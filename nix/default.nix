@@ -31,6 +31,7 @@
   pipewire,
   caelestia-cli,
   withCli ? false,
+  extraRuntimeDeps ? [],
 }: let
   runtimeDeps =
     [
@@ -53,6 +54,7 @@
       findutils
       file
     ]
+    ++ extraRuntimeDeps
     ++ lib.optional withCli caelestia-cli;
 
   fontconfig = makeFontsConf {
