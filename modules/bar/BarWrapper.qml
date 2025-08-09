@@ -63,6 +63,7 @@ Item {
     Loader {
         id: content
 
+        asynchronous: true
         Component.onCompleted: active = Qt.binding(() => Config.bar.persistent || root.visibilities.bar || root.isHovered || root.visible)
 
         anchors.top: parent.top

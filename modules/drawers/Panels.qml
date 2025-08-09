@@ -92,7 +92,7 @@ Item {
             const diff = root.height - Math.floor(off + nonAnimHeight);
             if (diff < 0)
                 return off + diff;
-            return off;
+            return Math.max(off, 0);
         }
     }
 
