@@ -13,10 +13,21 @@ ColumnLayout {
     id: root
 
     required property WlSessionLockSurface lock
+    required property bool fprint
+    property int maxFprintTries: 3
 
     property string passwordBuffer
 
     spacing: Appearance.spacing.large * 2
+
+    onLockChanged: {
+        if (lock && fprint) {
+            pamFprint.start();
+        }
+        if (!lock) {
+            pamFprint.abort();
+        }
+    }
 
     RowLayout {
         Layout.alignment: Qt.AlignHCenter
@@ -87,12 +98,12 @@ ColumnLayout {
         }
 
         Keys.onPressed: event => {
-            if (pam.active)
+            if (pamPwd.active)
                 return;
 
             if (event.key === Qt.Key_Enter || event.key === Qt.Key_Return) {
                 placeholder.animate = false;
-                pam.start();
+                pamPwd.start();
             } else if (event.key === Qt.Key_Backspace) {
                 if (event.modifiers & Qt.ControlModifier) {
                     charList.implicitWidth = charList.implicitWidth; // Break binding
@@ -107,7 +118,56 @@ ColumnLayout {
         }
 
         PamContext {
-            id: pam
+            id: pamFprint
+
+            active: true
+            property int nbTries: 0
+
+            config: "caelestia"
+            // to use fingerptint connection, your `caelestia` file should contains:
+            // auth required pam_fprintd.so max-tries=1
+
+            onCompleted: res => {
+                if (res === PamResult.Success) {
+                    return root.lock.unlock();
+                }
+                if (res === PamResult.Error) {
+                    abort();
+                    start();
+                    return;
+                }
+                if (res === PamResult.Failed) {
+                    placeholder.pamState = "fail";
+                    return;
+                }
+                if (res === PamResult.MaxTries) {
+                    // as pam doesn't trigger the result until all tries are done, we put only one in the config.
+                    // Then, when the max tries is reached (here 3 but arbitrary), we dont restart this pam context
+                    nbTries += 1;
+                    if (nbTries < root.maxFprintTries)
+                        start();
+                    if (nbTries >= root.maxFprintTries)
+                        placeholder.pamState = "maxFprint";
+                    icon.color = Colours.palette.m3error;
+                }
+            }
+        }
+        Timer {
+            id: iconColorTrigger
+            running: icon.color === Colours.palette.m3error
+            interval: 250
+            repeat: false
+            onTriggered: {
+                icon.animate = true;
+                icon.color = Colours.palette.m3outline;
+                icon.animate = false;
+            }
+        }
+
+        PamContext {
+            id: pamPwd
+
+            config: "login" // default
 
             onResponseRequiredChanged: {
                 if (!responseRequired)
@@ -126,7 +186,7 @@ ColumnLayout {
                 if (res === PamResult.Error)
                     placeholder.pamState = "error";
                 else if (res === PamResult.MaxTries)
-                    placeholder.pamState = "max";
+                    placeholder.pamState = "maxPwd";
                 else if (res === PamResult.Failed)
                     placeholder.pamState = "fail";
 
@@ -149,19 +209,22 @@ ColumnLayout {
             anchors.centerIn: parent
 
             text: {
-                if (pam.active)
+                if (pamPwd.active) {
                     return qsTr("Loading...");
+                }
                 if (pamState === "error")
                     return qsTr("An error occured");
-                if (pamState === "max")
+                if (pamState === "maxPwd")
                     return qsTr("You have reached the maximum number of tries");
+                if (pamState === "maxFprint")
+                    return qsTr("Fingerprint failed, try using password");
                 if (pamState === "fail")
                     return qsTr("Incorrect password");
                 return qsTr("Enter your password");
             }
 
             animate: true
-            color: pam.active ? Colours.palette.m3secondary : pamState ? Colours.palette.m3error : Colours.palette.m3outline
+            color: pamPwd.active ? Colours.palette.m3secondary : pamState ? Colours.palette.m3error : Colours.palette.m3outline
             font.pointSize: Appearance.font.size.larger
 
             opacity: root.passwordBuffer ? 0 : 1
@@ -251,6 +314,22 @@ ColumnLayout {
 
                 Anim {}
             }
+        }
+
+        MaterialIcon {
+            id: icon
+
+            text: root.fprint && pamFprint.active ? 'fingerprint' : !root.lock.locked ? 'lock_open_right' : 'password'
+
+            anchors.verticalCenter: parent.verticalCenter
+            anchors.right: parent.right
+            anchors.rightMargin: 12
+
+            color: Colours.palette.m3outline
+            font.pointSize: Appearance.font.size.larger
+
+            animate: false
+            animateProp: 'color'
         }
     }
 
