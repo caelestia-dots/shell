@@ -52,22 +52,19 @@ ColumnLayout {
     }
 
     RowLayout {
-        Layout.margins: Appearance.padding.normal
-        Layout.topMargin: Appearance.padding.large
-        Layout.bottomMargin: Appearance.padding.small
+        Layout.margins: Appearance.padding.larger
         Layout.fillWidth: true
-
-        spacing: Appearance.spacing.normal
+        spacing: Appearance.spacing.large
 
         MaterialIcon {
             text: "calendar_month"
             color: Colours.palette.m3primary
-            font.pixelSize: Appearance.font.size.large
+            font.pixelSize: Appearance.font.size.large * 2
         }
 
         ColumnLayout {
             Layout.fillWidth: true
-            spacing: Appearance.spacing.smaller
+            spacing: Appearance.spacing.small
 
             StyledText {
                 text: Time.format("dddd, MMMM d")
@@ -78,16 +75,15 @@ ColumnLayout {
             StyledText {
                 text: Time.format("yyyy")
                 color: Colours.palette.m3onSurfaceVariant
-                font.pointSize: Appearance.font.size.small
+                font.pointSize: Appearance.font.size.smaller
             }
         }
 
         StyledText {
             text: Time.format(Config.services.useTwelveHourClock ? "h:mm A" : "HH:mm")
             color: Colours.palette.m3primary
-
             font.weight: 600
-            font.pointSize: Appearance.font.size.large
+            font.pointSize: Appearance.font.size.large * 1.3
             font.family: Appearance.font.family.mono
         }
     }
