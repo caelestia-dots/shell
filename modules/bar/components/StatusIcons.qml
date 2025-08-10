@@ -9,7 +9,6 @@ import Quickshell.Bluetooth
 import Quickshell.Services.UPower
 import QtQuick
 import QtQuick.Layouts
-import "services" as Services
 
 Item {
     id: root
