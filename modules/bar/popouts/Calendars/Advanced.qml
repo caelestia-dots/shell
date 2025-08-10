@@ -139,7 +139,7 @@ ColumnLayout {
                     Layout.fillWidth: true
 
                     text: {
-                        const monthNames = Array.from({ length: 12 }, (_, i) => Qt.locale().monthName(i + 1, Qt.locale().LongFormat))
+                        const monthNames = Array.from({ length: 12 }, (_, i) => Qt.locale().monthName(i, Qt.locale().LongFormat))
                         return monthNames[root.currentMonth] + " " + root.currentYear
                     }
                     horizontalAlignment: Text.AlignHCenter
