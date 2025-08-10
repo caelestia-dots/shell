@@ -113,6 +113,7 @@ Item {
                 id: workspacesInner
 
                 anchors.centerIn: parent
+                monitorName: screen.name
             }
         }
 

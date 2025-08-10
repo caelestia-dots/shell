@@ -8,12 +8,15 @@ import QtQuick.Layouts
 Item {
     id: root
 
+    required property string monitorName
+
+    readonly property int activeWsId: Hyprland.getActiveWorkspaceForMonitor(monitorName)
     readonly property list<Workspace> workspaces: layout.children.filter(c => c.isWorkspace).sort((w1, w2) => w1.ws - w2.ws)
     readonly property var occupied: Hyprland.workspaces.values.reduce((acc, curr) => {
         acc[curr.id] = curr.lastIpcObject.windows > 0;
         return acc;
     }, {})
-    readonly property int groupOffset: Math.floor((Hyprland.activeWsId - 1) / Config.bar.workspaces.shown) * Config.bar.workspaces.shown
+    readonly property int groupOffset: Math.floor((activeWsId - 1) / Config.bar.workspaces.shown) * Config.bar.workspaces.shown
 
     implicitWidth: layout.implicitWidth
     implicitHeight: layout.implicitHeight
@@ -29,6 +32,7 @@ Item {
             model: Config.bar.workspaces.shown
 
             Workspace {
+                activeWsId: root.activeWsId
                 occupied: root.occupied
                 groupOffset: root.groupOffset
             }

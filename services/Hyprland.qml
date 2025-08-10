@@ -21,6 +21,11 @@ Singleton {
         Hyprland.dispatch(request);
     }
 
+    function getActiveWorkspaceForMonitor(monitorName) {
+        const monitor = monitors.values.find(m => m.name === monitorName);
+        return monitor ? monitor.lastIpcObject.activeWorkspace.id : -1;
+    }
+
     Connections {
         target: Hyprland
 

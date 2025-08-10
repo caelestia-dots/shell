@@ -10,6 +10,7 @@ Item {
     id: root
 
     required property int index
+    required property int activeWsId
     required property var occupied
     required property int groupOffset
 
@@ -32,8 +33,8 @@ Item {
         readonly property string activeLabel: Config.bar.workspaces.activeLabel || (root.isOccupied ? occupiedLabel : label)
 
         animate: true
-        text: Hyprland.activeWsId === root.ws ? activeLabel : root.isOccupied ? occupiedLabel : label
-        color: Config.bar.workspaces.occupiedBg || root.isOccupied || Hyprland.activeWsId === root.ws ? Colours.palette.m3onSurface : Colours.layer(Colours.palette.m3outlineVariant, 2)
+        text: activeWsId === root.ws ? activeLabel : root.isOccupied ? occupiedLabel : label
+        color: Config.bar.workspaces.occupiedBg || root.isOccupied || activeWsId === root.ws ? Colours.palette.m3onSurface : Colours.layer(Colours.palette.m3outlineVariant, 2)
         horizontalAlignment: StyledText.AlignHCenter
         verticalAlignment: StyledText.AlignVCenter
 
