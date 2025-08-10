@@ -4,6 +4,7 @@ import qs.config
 import Quickshell
 import Quickshell.Services.SystemTray
 import QtQuick
+import "Calendars"
 
 Item {
     id: root
@@ -53,9 +54,16 @@ Item {
         }
 
         Popout {
-            name: "calendar"
-            sourceComponent: Calendar {
-                wrapper: root.wrapper
+            name: "calendar-advanced"
+            sourceComponent: Loader {
+                source: "Calendars/Advanced.qml"
+            }
+        }
+
+        Popout {
+            name: "calendar-simple"
+            sourceComponent: Loader {
+                source: "Calendars/Simple.qml"
             }
         }
 

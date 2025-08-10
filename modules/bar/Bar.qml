@@ -16,6 +16,7 @@ Item {
     required property BarPopouts.Wrapper popouts
 
     function checkPopout(y: real): void {
+
         const spacing = Appearance.spacing.small;
         const aw = activeWindow.child;
         const awy = activeWindow.y + aw.y;
@@ -50,10 +51,13 @@ Item {
             popouts.currentName = "activewindow";
             popouts.currentCenter = Qt.binding(() => activeWindow.y + aw.y + aw.implicitHeight / 2);
             popouts.hasCurrent = true;
-        } else if (y >= clockY && y <= clockY + clockHeight) {
-            popouts.currentName = "calendar";
+
+        } else if (y >= clockY && y <= clockY + clockHeight && Config.bar.clock.showCalendar) {
+            const style = Config.bar.clock.style || "advanced";
+            popouts.currentName = style === "simple" ? "calendar-simple" : "calendar-advanced";
             popouts.currentCenter = Qt.binding(() => clock.y + clock.implicitHeight / 2);
             popouts.hasCurrent = true;
+
         } else if (y > ty && y < ty + th) {
             const index = Math.floor(((y - ty) / th) * trayItems.count);
             const item = trayItems.itemAt(index);
@@ -61,6 +65,7 @@ Item {
             popouts.currentName = `traymenu${index}`;
             popouts.currentCenter = Qt.binding(() => tray.y + item.y + item.implicitHeight / 2);
             popouts.hasCurrent = true;
+            
         } else if (!statusIconFound) {
             popouts.hasCurrent = false;
         }
