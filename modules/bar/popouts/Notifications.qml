@@ -12,7 +12,6 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 import "../../notifications" as NotificationComponents
-import "services" as Services
 
 ColumnLayout {
     id: root
@@ -21,10 +20,6 @@ ColumnLayout {
 
     spacing: Appearance.spacing.normal
     width: 420
-    implicitWidth: width
-    Layout.preferredWidth: width
-    Layout.minimumWidth: width
-    Layout.maximumWidth: width
 
     readonly property int maxListHeight: Math.min(480, (QsWindow.window?.screen?.height ?? 800) * 0.6)
 
@@ -46,9 +41,8 @@ ColumnLayout {
     }
 
     RowLayout {
+        Layout.margins: Appearance.padding.normal
         Layout.topMargin: Appearance.padding.large
-        Layout.leftMargin: Appearance.padding.normal
-        Layout.rightMargin: Appearance.padding.normal
         Layout.bottomMargin: Appearance.padding.small
         Layout.fillWidth: true
         spacing: Appearance.spacing.normal
@@ -133,58 +127,52 @@ ColumnLayout {
         Layout.preferredHeight: Math.min(maxListHeight, (notifList?.implicitHeight ?? 0) + Appearance.padding.normal * 2)
         Layout.minimumHeight: Math.min(260, maxListHeight)
 
-        ScrollView {
+        ListView {
             id: notifScroll
             anchors.fill: parent
             anchors.margins: Appearance.padding.normal
+            spacing: Appearance.spacing.normal
             clip: true
 
-            ListView {
-                id: notifList
-                width: parent.width
-                spacing: Appearance.spacing.normal
-                interactive: true
+            model: ScriptModel {
+                values: [...Notifs.list].reverse()
+            }
 
-                model: ScriptModel {
-                    values: [...Notifs.list].reverse()
+            delegate: Item {
+                id: wrapper
+                required property int index
+                required property var modelData
+                readonly property alias nonAnimHeight: notif.nonAnimHeight
+            
+                width: ListView.view ? ListView.view.width : 0
+                height: notif.implicitHeight
+            
+                NotificationComponents.Notification {
+                    id: notif
+                    width: parent.width
+                    modelData: wrapper.modelData
+                    color: Colours.palette.m3surfaceContainerHigh
+                    opacity: 0.8
                 }
+            }
 
-                delegate: Item {
-                    id: wrapper
-                    required property int index
-                    required property var modelData
-                    readonly property alias nonAnimHeight: notif.nonAnimHeight
-
-                    width: notifList.width
-                    height: notif.implicitHeight
-
-                    NotificationComponents.Notification {
-                        id: notif
-                        width: parent.width
-                        modelData: wrapper.modelData
-                        color: Colours.palette.m3surfaceContainerHigh
-                        opacity: 0.6
-                    }
+            add: Transition {
+                NumberAnimation {
+                    property: "opacity"
+                    from: 0
+                    to: 1
+                    duration: Appearance.anim.durations.normal
+                    easing.type: Easing.OutCubic
                 }
+            }
 
-                add: Transition {
-                    NumberAnimation {
-                        property: "opacity"
-                        from: 0
-                        to: 1
-                        duration: Appearance.anim.durations.normal
-                        easing.type: Easing.OutCubic
-                    }
-                }
+            remove: null
 
-                remove: null // No fade-out animation
-
-                displaced: Transition {
-                    NumberAnimation {
-                        property: "y"
-                        duration: Appearance.anim.durations.normal
-                        easing.type: Easing.OutCubic
-                    }
+            displaced: Transition {
+                NumberAnimation {
+                    property: "y"
+                    duration: Appearance.anim.durations.normal
+                    easing.type: Easing.OutCubic
                 }
             }
         }
@@ -210,10 +198,7 @@ ColumnLayout {
     }
 
     StyledRect {
-        Layout.topMargin: Appearance.spacing.normal
-        Layout.leftMargin: Appearance.padding.normal
-        Layout.rightMargin: Appearance.padding.normal
-        Layout.bottomMargin: Appearance.padding.normal
+        Layout.margins: Appearance.spacing.normal
         Layout.fillWidth: true
         implicitHeight: clearBtn.implicitHeight + Appearance.padding.normal * 2
 
@@ -237,6 +222,7 @@ ColumnLayout {
 
         RowLayout {
             id: clearBtn
+            
             anchors.centerIn: parent
             spacing: Appearance.spacing.small
             opacity: notifCount === 0 ? 0.4 : 1.0
