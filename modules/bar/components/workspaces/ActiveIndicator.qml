@@ -7,13 +7,14 @@ import QtQuick
 StyledRect {
     id: root
 
+    required property int activeWsId
     required property list<Workspace> workspaces
     required property Item mask
     required property real maskWidth
     required property real maskHeight
     required property int groupOffset
 
-    readonly property int currentWsIdx: Hyprland.activeWsId - 1 - groupOffset
+    readonly property int currentWsIdx: activeWsId - 1 - groupOffset
     property real leading: getWsY(currentWsIdx)
     property real trailing: getWsY(currentWsIdx)
     property real currentSize: workspaces[currentWsIdx]?.size ?? 0

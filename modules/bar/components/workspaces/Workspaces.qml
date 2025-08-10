@@ -58,6 +58,7 @@ Item {
         asynchronous: true
 
         sourceComponent: ActiveIndicator {
+            activeWsId: root.activeWsId
             workspaces: root.workspaces
             mask: layout
             maskWidth: root.width
