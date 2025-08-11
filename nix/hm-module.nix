@@ -4,6 +4,7 @@ self: {
   lib,
   ...
 }: let
+  cli-default = self.inputs.caelestia-cli.packages.${pkgs.system}.default;
   shell-default = self.packages.${pkgs.system}.default;
 
   cfg = config.programs.caelestia;
@@ -26,10 +27,19 @@ in {
         default = "";
         description = "Caelestia shell extra configs written to shell.json";
       };
+      cli = {
+        enable = mkEnableOption "Enable Caelestia CLI";
+        package = mkOption {
+          type = types.package;
+          default = cli-default;
+          description = "The package of Caelestia CLI";
+        };
+      };
     };
   };
 
   config = let
+    cli = cfg.cli.package or cli-default;
     shell = cfg.package or shell-default;
   in
     lib.mkIf cfg.enable {
@@ -71,6 +81,6 @@ in {
         builtins.toJSON (lib.recursiveUpdate
           (cfg.settings or {}) (builtins.fromJSON extraConfig));
 
-      home.packages = [shell];
+      home.packages = [shell] ++ lib.optional cfg.cli.enable cli;
     };
 }
