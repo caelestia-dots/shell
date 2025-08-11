@@ -62,7 +62,7 @@ in
   stdenv.mkDerivation {
     pname = "caelestia-shell";
     version = "${rev}";
-    src = ./.;
+    src = ./..;
 
     nativeBuildInputs = [gcc makeWrapper];
     buildInputs = [quickshell aubio pipewire];

@@ -5,7 +5,7 @@ self: {
   ...
 }: let
   cli-default = self.inputs.caelestia-cli.packages.${pkgs.system}.default;
-  shell-default = self.packages.${pkgs.system}.default;
+  shell-default = self.packages.${pkgs.system}.with-cli;
 
   cfg = config.programs.caelestia;
 in {
@@ -32,7 +32,7 @@ in {
         package = mkOption {
           type = types.package;
           default = cli-default;
-          description = "The package of Caelestia CLI";
+          description = "The package of Caelestia CLI"; # Doesn't override the shell's CLI, only change from home.packages
         };
       };
     };
