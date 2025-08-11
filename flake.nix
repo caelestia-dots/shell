@@ -51,5 +51,7 @@
           CAELESTIA_BD_PATH = "${shell}/bin/beat_detector";
         };
     });
+
+    homeManagerModules.default = import ./nix/hm-module.nix self;
   };
 }
