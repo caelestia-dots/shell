@@ -42,7 +42,7 @@ in {
         extraConfig = mkOption {
           type = types.str;
           default = "{}";
-          description = "Caelestia shell extra configs written to shell.json";
+          description = "Caelestia CLI extra configs written to cli.json";
         };
       };
     };
