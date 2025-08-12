@@ -16,6 +16,7 @@ ColumnLayout {
     required property PersistentProperties visibilities
     required property BarPopouts.Wrapper popouts
     readonly property int padding: Math.max(Appearance.padding.smaller, Config.border.thickness)
+    readonly property int vPadding: Appearance.padding.large
 
     function checkPopout(y: real): void {
         const ch = childAt(width / 2, y) as WrappedLoader;
@@ -81,8 +82,8 @@ ColumnLayout {
             DelegateChoice {
                 roleValue: "activeWindow"
                 delegate: WrappedLoader {
-                    // Layout.fillHeight: true
                     sourceComponent: ActiveWindow {
+                        bar: root
                         monitor: Brightness.getMonitorForScreen(root.screen)
                     }
                 }
@@ -124,8 +125,14 @@ ColumnLayout {
         Layout.alignment: Qt.AlignHCenter
         Layout.leftMargin: root.padding
         Layout.rightMargin: root.padding
-        Layout.topMargin: index === 0 ? Appearance.padding.large : 0
-        Layout.bottomMargin: index === Config.bar.entries.length - 1 ? Appearance.padding.large : 0
+
+        // Cursed ahh thing to add padding to first and last enabled components
+        Layout.topMargin: root.children.find(c => c.id && c.enabled) === this ? root.vPadding : 0
+        Layout.bottomMargin: root.children.slice(0).reduceRight((a, c, _, arr) => {
+            if (c.id && c.enabled)
+                arr.length = 0;
+            return c;
+        }) === this ? root.vPadding : 0
 
         visible: enabled
         active: enabled
