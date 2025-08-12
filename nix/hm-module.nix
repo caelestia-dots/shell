@@ -34,6 +34,16 @@ in {
           default = cli-default;
           description = "The package of Caelestia CLI"; # Doesn't override the shell's CLI, only change from home.packages
         };
+        settings = mkOption {
+          type = types.attrs;
+          default = {};
+          description = "Caelestia CLI settings";
+        };
+        extraConfig = mkOption {
+          type = types.str;
+          default = "{}";
+          description = "Caelestia shell extra configs written to shell.json";
+        };
       };
     };
   };
@@ -68,14 +78,21 @@ in {
         };
       };
 
-      xdg.configFile."caelestia/shell.json".text = let
-        extraConfig =
-          if cfg.extraConfig != ""
-          then cfg.extraConfig
-          else "{}";
-      in
-        builtins.toJSON (lib.recursiveUpdate
-          (cfg.settings or {}) (builtins.fromJSON extraConfig));
+      xdg.configFile = let
+        mkConfig = c:
+          lib.pipe (
+            if c.extraConfig != ""
+            then c.extraConfig
+            else "{}"
+          ) [
+            builtins.fromJSON
+            (lib.recursiveUpdate c.settings)
+            builtins.toJSON
+          ];
+      in {
+        "caelestia/shell.json".text = mkConfig cfg;
+        "caelestia/cli.json".text = mkConfig cfg.cli;
+      };
 
       home.packages = [shell] ++ lib.optional cfg.cli.enable cli;
     };
