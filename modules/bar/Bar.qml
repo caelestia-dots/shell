@@ -113,7 +113,7 @@ Item {
                 id: workspacesInner
 
                 anchors.centerIn: parent
-                monitorName: screen.name
+                monitorName: Config.bar.workspaces.perMonitorWorkspaces ? screen.name : undefined
             }
         }
 

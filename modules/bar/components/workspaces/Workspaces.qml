@@ -8,9 +8,9 @@ import QtQuick.Layouts
 Item {
     id: root
 
-    required property string monitorName
+    property string monitorName: ""
 
-    readonly property int activeWsId: Hyprland.getActiveWorkspaceForMonitor(monitorName)
+    readonly property int activeWsId: Config.bar.workspaces.perMonitorWorkspaces ? Hyprland.getActiveWorkspaceForMonitor(monitorName) : Hyprland.activeWsId
     readonly property list<Workspace> workspaces: layout.children.filter(c => c.isWorkspace).sort((w1, w2) => w1.ws - w2.ws)
     readonly property var occupied: Hyprland.workspaces.values.reduce((acc, curr) => {
         acc[curr.id] = curr.lastIpcObject.windows > 0;
