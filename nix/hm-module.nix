@@ -46,29 +46,25 @@ in {
       systemd.user.services.caelestia = {
         Unit = {
           Description = "Caelestia Shell Service";
-          After = ["hyprland-session.target"];
-          Requires = ["hyprland-session.target"];
+          After = ["graphical-session.target"];
           PartOf = ["graphical-session.target"];
         };
 
         Service = {
+          Type = "exec";
           ExecStart = "${shell}/bin/caelestia-shell";
           Restart = "on-failure";
           RestartSec = "5s";
+          TimeoutStopSec = "5s";
           Environment = [
             "QT_QPA_PLATFORM=wayland"
           ];
 
-          PassEnvironment = [
-            "WAYLAND_DISPLAY"
-            "XDG_RUNTIME_DIR"
-            "HYPRLAND_INSTANCE_SIGNATURE"
-          ];
           Slice = "session.slice";
         };
 
         Install = {
-          WantedBy = ["hyprland-session.target"];
+          WantedBy = ["graphical-session.target"];
         };
       };
 
