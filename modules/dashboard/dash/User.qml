@@ -4,7 +4,6 @@ import qs.services
 import qs.config
 import qs.utils
 import Quickshell
-import Quickshell.Io
 import QtQuick
 
 Row {
@@ -21,7 +20,7 @@ Row {
         implicitHeight: info.implicitHeight
 
         radius: Appearance.rounding.large
-        color: Colours.tPalette.m3surfaceContainerHigh
+        color: Colours.layer(Colours.palette.m3surfaceContainerHigh, 2)
 
         MaterialIcon {
             anchors.centerIn: parent
@@ -113,15 +112,15 @@ Row {
         spacing: Appearance.spacing.normal
 
         InfoLine {
-            icon: Icons.osIcon
-            text: Icons.osName
+            icon: SysInfo.osIcon
+            text: SysInfo.osPrettyName || SysInfo.osName
             colour: Colours.palette.m3primary
             materialIcon: false
         }
 
         InfoLine {
             icon: "select_window_2"
-            text: Quickshell.env("XDG_CURRENT_DESKTOP") || Quickshell.env("XDG_SESSION_DESKTOP")
+            text: SysInfo.wm
             colour: Colours.palette.m3secondary
         }
 
@@ -129,37 +128,8 @@ Row {
             id: uptime
 
             icon: "timer"
-            text: qsTr("Loading uptime...")
+            text: qsTr("up %1").arg(SysInfo.uptime)
             colour: Colours.palette.m3tertiary
-
-            Timer {
-                running: true
-                repeat: true
-                interval: 15000
-                onTriggered: fileUptime.reload()
-            }
-
-            FileView {
-                id: fileUptime
-
-                path: "/proc/uptime"
-                onLoaded: {
-                    const up = parseInt(text().split(" ")[0] ?? 0);
-
-                    const days = Math.floor(up / 86400);
-                    const hours = Math.floor((up % 86400) / 3600);
-                    const minutes = Math.floor((up % 3600) / 60);
-
-                    let str = "";
-                    if (days > 0)
-                        str += `${days} day${days === 1 ? "" : "s"}`;
-                    if (hours > 0)
-                        str += `${str ? ", " : ""}${hours} hour${hours === 1 ? "" : "s"}`;
-                    if (minutes > 0 || !str)
-                        str += `${str ? ", " : ""}${minutes} minute${minutes === 1 ? "" : "s"}`;
-                    uptime.text = qsTr("up %1").arg(str);
-                }
-            }
         }
     }
 

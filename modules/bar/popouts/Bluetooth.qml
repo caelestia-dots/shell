@@ -108,7 +108,7 @@ ColumnLayout {
                 implicitHeight: connectIcon.implicitHeight + Appearance.padding.small
 
                 radius: Appearance.rounding.full
-                color: device.modelData.state === BluetoothDeviceState.Connected ? Colours.palette.m3primary : Colours.tPalette.m3surface
+                color: Qt.alpha(Colours.palette.m3primary, device.modelData.state === BluetoothDeviceState.Connected ? 1 : 0)
 
                 StyledBusyIndicator {
                     anchors.centerIn: parent

@@ -1,7 +1,6 @@
 pragma Singleton
 
 import Quickshell
-import Quickshell.Io
 import Quickshell.Services.Notifications
 
 Singleton {
@@ -143,9 +142,6 @@ Singleton {
             Office: "content_paste"
         })
 
-    property string osIcon: ""
-    property string osName
-
     function getAppIcon(name: string, fallback: string): string {
         const icon = DesktopEntries.heuristicLookup(name)?.icon;
         if (fallback !== "undefined")
@@ -231,27 +227,5 @@ Singleton {
         if (volume > 0)
             return "volume_down";
         return "volume_mute";
-    }
-
-    FileView {
-        path: "/etc/os-release"
-        onLoaded: {
-            const lines = text().split("\n");
-            let osId = lines.find(l => l.startsWith("ID="))?.split("=")[1].replace(/"/g, "");
-            if (root.osIcons.hasOwnProperty(osId))
-                root.osIcon = root.osIcons[osId];
-            else {
-                const osIdLike = lines.find(l => l.startsWith("ID_LIKE="))?.split("=")[1].replace(/"/g, "");
-                if (osIdLike)
-                    for (const id of osIdLike.split(" "))
-                        if (root.osIcons.hasOwnProperty(id))
-                            return root.osIcon = root.osIcons[id];
-            }
-
-            let nameLine = lines.find(l => l.startsWith("PRETTY_NAME="));
-            if (!nameLine)
-                nameLine = lines.find(l => l.startsWith("NAME="));
-            root.osName = nameLine.split("=")[1].replace(/"/g, "");
-        }
     }
 }

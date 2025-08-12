@@ -23,6 +23,7 @@
   findutils,
   file,
   material-symbols,
+  rubik,
   nerd-fonts,
   gcc,
   quickshell,
@@ -55,7 +56,7 @@
     ++ lib.optional withCli caelestia-cli;
 
   fontconfig = makeFontsConf {
-    fontDirectories = [material-symbols nerd-fonts.jetbrains-mono];
+    fontDirectories = [material-symbols rubik nerd-fonts.caskaydia-cove];
   };
 in
   stdenv.mkDerivation {
