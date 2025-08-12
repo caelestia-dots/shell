@@ -1,5 +1,5 @@
-import qs.components
-import qs.components.controls
+pragma ComponentBehavior: Bound
+
 import qs.services
 import qs.config
 import "popouts" as BarPopouts
@@ -9,162 +9,125 @@ import Quickshell
 import QtQuick
 import QtQuick.Layouts
 
-Item {
+ColumnLayout {
     id: root
 
     required property ShellScreen screen
     required property PersistentProperties visibilities
     required property BarPopouts.Wrapper popouts
+    readonly property int padding: Math.max(Appearance.padding.smaller, Config.border.thickness)
 
     function checkPopout(y: real): void {
-        let popoutFound = false;
-
-        for (let i = 0; i < column.children.length; i++) {
-            const loader = column.children[i];
-            if (!loader.active || !loader.item) continue;
-
-            const role = Config.bar.entries[i].id;
-            const item = loader.item;
-
-            if (role === "statusIcons" && item.hoverAreas) {
-                for (const area of item.hoverAreas) {
-                    if (!area.enabled) continue;
-
-                    const spacing = Appearance.spacing.normal;
-                    const areaTop = area.item.mapToItem(root, 0, 0).y - spacing / 2;
-                    if (y >= areaTop && y <= areaTop + (area.item.implicitHeight + spacing)) {
-                        popouts.currentName = area.name;
-                        popouts.currentCenter = area.item.mapToItem(root, 0, area.item.implicitHeight / 2).y;
-                        popouts.hasCurrent = true;
-                        popoutFound = true;
-                        break;
-                    }
-                }
-                if (popoutFound) break;
-            }
-
-            if (role === "activeWindow") {
-                const visHeight = item.child.implicitHeight;
-                const visTop = item.child.mapToItem(root, 0, 0).y;
-
-                if (y >= visTop && y <= visTop + visHeight) {
-                    popouts.currentName = "activewindow";
-                    popouts.currentCenter = item.child.mapToItem(root, 0, visHeight / 2).y;
-                    popouts.hasCurrent = true;
-                    popoutFound = true;
-                    break;
-                }
-            }
-
-            if (role === "tray" && item.items) {
-                const th = item.implicitHeight;
-                const ty = item.mapToItem(root, 0, 0).y;
-                if (y >= ty && y <= ty + th) {
-                    const index = Math.floor(((y - ty) / th) * item.items.count);
-                    const trayItem = item.items.itemAt(index);
-                    if (trayItem) {
-                        popouts.currentName = `traymenu${index}`;
-                        popouts.currentCenter = Qt.binding(() => trayItem.mapToItem(root, 0, trayItem.implicitHeight / 2).y);
-                        popouts.hasCurrent = true;
-                        popoutFound = true;
-                        break;
-                    }
-                }
-            }
+        const ch = childAt(width / 2, y) as WrappedLoader;
+        if (!ch) {
+            popouts.hasCurrent = false;
+            return;
         }
 
-        if (!popoutFound) {
-            popouts.hasCurrent = false;
+        const id = ch.id;
+        const top = ch.y;
+        const item = ch.item;
+        const itemHeight = item.implicitHeight;
+
+        if (id === "statusIcons") {
+            const items = item.items;
+            const icon = items.childAt(items.width / 2, mapToItem(items, 0, y).y);
+            if (icon) {
+                popouts.currentName = icon.name;
+                popouts.currentCenter = Qt.binding(() => icon.mapToItem(root, 0, icon.implicitHeight / 2).y);
+                popouts.hasCurrent = true;
+            }
+        } else if (id === "tray") {
+            const index = Math.floor(((y - top) / itemHeight) * item.items.count);
+            const trayItem = item.items.itemAt(index);
+            if (trayItem) {
+                popouts.currentName = `traymenu${index}`;
+                popouts.currentCenter = Qt.binding(() => trayItem.mapToItem(root, 0, trayItem.implicitHeight / 2).y);
+                popouts.hasCurrent = true;
+            }
+        } else if (id === "activeWindow") {
+            popouts.currentName = id.toLowerCase();
+            popouts.currentCenter = item.mapToItem(root, 0, itemHeight / 2).y;
+            popouts.hasCurrent = true;
         }
     }
 
-    anchors.top: parent.top
-    anchors.bottom: parent.bottom
-    anchors.left: parent.left
-    anchors.bottomMargin: Appearance.padding.large
-    anchors.topMargin: Appearance.padding.large
+    spacing: Appearance.spacing.normal
 
-    Component.onCompleted: implicitWidth = Qt.binding(() =>  column.implicitWidth + Config.border.thickness * 2)
+    Repeater {
+        model: Config.bar.entries
+
+        DelegateChooser {
+            role: "id"
+
+            DelegateChoice {
+                roleValue: "spacer"
+                delegate: WrappedLoader {
+                    Layout.fillHeight: enabled
+                }
+            }
+            DelegateChoice {
+                roleValue: "logo"
+                delegate: WrappedLoader {
+                    sourceComponent: OsIcon {}
+                }
+            }
+            DelegateChoice {
+                roleValue: "workspaces"
+                delegate: WrappedLoader {
+                    sourceComponent: Workspaces {}
+                }
+            }
+            DelegateChoice {
+                roleValue: "activeWindow"
+                delegate: WrappedLoader {
+                    // Layout.fillHeight: true
+                    sourceComponent: ActiveWindow {
+                        monitor: Brightness.getMonitorForScreen(root.screen)
+                    }
+                }
+            }
+            DelegateChoice {
+                roleValue: "tray"
+                delegate: WrappedLoader {
+                    sourceComponent: Tray {}
+                }
+            }
+            DelegateChoice {
+                roleValue: "clock"
+                delegate: WrappedLoader {
+                    sourceComponent: Clock {}
+                }
+            }
+            DelegateChoice {
+                roleValue: "statusIcons"
+                delegate: WrappedLoader {
+                    sourceComponent: StatusIcons {}
+                }
+            }
+            DelegateChoice {
+                roleValue: "power"
+                delegate: WrappedLoader {
+                    sourceComponent: Power {
+                        visibilities: root.visibilities
+                    }
+                }
+            }
+        }
+    }
 
     component WrappedLoader: Loader {
         required property bool enabled
         required property string id
+        required property int index
 
-        id: id
-
-        active: enabled
-        asynchronous: true
         Layout.alignment: Qt.AlignHCenter
-    }
+        Layout.leftMargin: root.padding
+        Layout.rightMargin: root.padding
+        Layout.topMargin: index === 0 ? Appearance.padding.large : 0
+        Layout.bottomMargin: index === Config.bar.entries.length - 1 ? Appearance.padding.large : 0
 
-    ColumnLayout {
-        id: column
-
-        anchors.fill: parent
-
-        Repeater {
-            model: Config.bar.entries
-
-            DelegateChooser {
-                role: "id"
-
-                DelegateChoice {
-                    id: test
-                    roleValue: "spacer"
-                    delegate: WrappedLoader {
-                        Layout.fillHeight: enabled
-                    }
-                }
-                DelegateChoice {
-                    roleValue: "logo"
-                    delegate: WrappedLoader {
-                        sourceComponent: OsIcon {}
-                    }
-                }
-                DelegateChoice {
-                    roleValue: "workspaces"
-                    delegate: WrappedLoader {
-                        sourceComponent: Workspaces {}
-                    }
-                }
-                DelegateChoice {
-                    roleValue: "activeWindow"
-                    id: activeWindowDelegate
-                    delegate: WrappedLoader {
-                        Layout.fillHeight: enabled
-                        sourceComponent: ActiveWindow {
-                            monitor: Brightness.getMonitorForScreen(root.screen)
-                        }
-                    }
-                }
-                DelegateChoice {
-                    roleValue: "tray"
-                    delegate: WrappedLoader {
-                        sourceComponent: Tray {}
-                    }
-                }
-                DelegateChoice {
-                    roleValue: "clock"
-                    delegate: WrappedLoader {
-                        sourceComponent: Clock {}
-                    }
-                }
-                DelegateChoice {
-                    roleValue: "statusIcons"
-                    delegate: WrappedLoader {
-                        id: statusIcons
-                        sourceComponent: StatusIcons {}
-                    }
-                }
-                DelegateChoice {
-                    roleValue: "power"
-                    delegate: WrappedLoader {
-                        sourceComponent: Power {
-                            visibilities: root.visibilities
-                        }
-                    }
-                }
-            }
-        }
+        visible: enabled
+        active: enabled
     }
 }

@@ -11,35 +11,39 @@ JsonObject {
     property list<var> entries: [
         {
             id: "logo",
-            enabled: true,
+            enabled: true
         },
         {
             id: "workspaces",
-            enabled: true,
+            enabled: true
         },
         {
             id: "spacer",
-            enabled: false
+            enabled: true
         },
         {
             id: "activeWindow",
-            enabled: true,
+            enabled: true
+        },
+        {
+            id: "spacer",
+            enabled: true
         },
         {
             id: "tray",
-            enabled: true,
+            enabled: true
         },
         {
             id: "clock",
-            enabled: true,
+            enabled: true
         },
         {
             id: "statusIcons",
-            enabled: true,
+            enabled: true
         },
         {
             id: "power",
-            enabled: true,
+            enabled: true
         },
     ]
 
