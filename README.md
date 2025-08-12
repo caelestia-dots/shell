@@ -198,6 +198,44 @@ All configuration options are in `~/.config/caelestia/shell.json`.
     },
     "bar": {
         "dragThreshold": 20,
+        "entries": [
+        	{
+   	            "id": "logo",
+   	            "enabled": true
+   	        },
+   	        {
+   	            "id": "workspaces",
+   	            "enabled": true
+   	        },
+   	        {
+   	            "id": "spacer",
+   	            "enabled": true
+   	        },
+   	        {
+   	            "id": "activeWindow",
+   	            "enabled": true
+   	        },
+   	        {
+   	            "id": "spacer",
+   	            "enabled": true
+   	        },
+   	        {
+   	            "id": "tray",
+   	            "enabled": true
+   	        },
+   	        {
+   	            "id": "clock",
+   	            "enabled": true
+   	        },
+   	        {
+   	            "id": "statusIcons",
+   	            "enabled": true
+   	        },
+   	        {
+   	            "id": "power",
+   	            "enabled": true
+   	        }
+        ],
         "persistent": true,
         "showOnHover": true,
         "status": {
