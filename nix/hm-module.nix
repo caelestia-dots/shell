@@ -68,7 +68,7 @@ in {
         };
       };
 
-      home.file.".config/caelestia/shell.json".text = let
+      xdg.configFile."caelestia/shell.json".text = let
         extraConfig =
           if cfg.extraConfig != ""
           then cfg.extraConfig
