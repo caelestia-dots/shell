@@ -3,7 +3,6 @@ pragma ComponentBehavior: Bound
 import qs.services
 import qs.config
 import qs.components
-import qs.components.controls
 import QtQuick
 import QtQuick.Layouts
 
@@ -72,16 +71,8 @@ StyledRect {
             }
         }
 
-        CustomMouseArea {
+        MouseArea {
             anchors.fill: parent
-
-            function onWheel(event: WheelEvent): void {
-                const activeWs = Hyprland.activeToplevel?.workspace?.name;
-                if (activeWs?.startsWith("special:"))
-                    Hyprland.dispatch(`togglespecialworkspace ${activeWs.slice(8)}`);
-                else if (event.angleDelta.y < 0 || Hyprland.activeWsId > 1)
-                    Hyprland.dispatch(`workspace r${event.angleDelta.y > 0 ? "-" : "+"}1`);
-            }
 
             onPressed: event => {
                 const ws = layout.childAt(event.x, event.y).index + root.groupOffset + 1;

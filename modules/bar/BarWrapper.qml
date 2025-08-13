@@ -21,6 +21,10 @@ Item {
         content.item?.checkPopout(y);
     }
 
+    function handleWheel(y: real, angleDelta: point): void {
+        content.item?.handleWheel(y, angleDelta);
+    }
+
     visible: width > Config.border.thickness
     implicitWidth: Config.border.thickness
     implicitHeight: content.implicitHeight
