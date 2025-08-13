@@ -33,8 +33,8 @@ Item {
         readonly property string activeLabel: Config.bar.workspaces.activeLabel || (root.isOccupied ? occupiedLabel : label)
 
         animate: true
-        text: activeWsId === root.ws ? activeLabel : root.isOccupied ? occupiedLabel : label
-        color: Config.bar.workspaces.occupiedBg || root.isOccupied || activeWsId === root.ws ? Colours.palette.m3onSurface : Colours.layer(Colours.palette.m3outlineVariant, 2)
+        text: root.activeWsId === root.ws ? activeLabel : root.isOccupied ? occupiedLabel : label
+        color: Config.bar.workspaces.occupiedBg || root.isOccupied || root.activeWsId === root.ws ? Colours.palette.m3onSurface : Colours.layer(Colours.palette.m3outlineVariant, 2)
         horizontalAlignment: StyledText.AlignHCenter
         verticalAlignment: StyledText.AlignVCenter
 
