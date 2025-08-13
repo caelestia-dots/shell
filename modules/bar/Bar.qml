@@ -103,7 +103,9 @@ ColumnLayout {
             DelegateChoice {
                 roleValue: "workspaces"
                 delegate: WrappedLoader {
-                    sourceComponent: Workspaces {}
+                    sourceComponent: Workspaces {
+                        screen: root.screen
+                    }
                 }
             }
             DelegateChoice {
