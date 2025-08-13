@@ -56,6 +56,8 @@ ColumnLayout {
     spacing: Appearance.spacing.normal
 
     Repeater {
+        id: repeater
+
         model: Config.bar.entries
 
         DelegateChooser {
@@ -122,17 +124,32 @@ ColumnLayout {
         required property string id
         required property int index
 
+        function findFirstEnabled(): Item {
+            const count = repeater.count;
+            for (let i = 0; i < count; i++) {
+                const item = repeater.itemAt(i);
+                if (item?.enabled)
+                    return item;
+            }
+            return null;
+        }
+
+        function findLastEnabled(): Item {
+            for (let i = repeater.count - 1; i >= 0; i--) {
+                const item = repeater.itemAt(i);
+                if (item?.enabled)
+                    return item;
+            }
+            return null;
+        }
+
         Layout.alignment: Qt.AlignHCenter
         Layout.leftMargin: root.padding
         Layout.rightMargin: root.padding
 
         // Cursed ahh thing to add padding to first and last enabled components
-        Layout.topMargin: root.children.find(c => c.id && c.enabled) === this ? root.vPadding : 0
-        Layout.bottomMargin: root.children.slice(0).reduceRight((a, c, _, arr) => {
-            if (c.id && c.enabled)
-                arr.length = 0;
-            return c;
-        }) === this ? root.vPadding : 0
+        Layout.topMargin: findFirstEnabled() === this ? root.vPadding : 0
+        Layout.bottomMargin: findLastEnabled() === this ? root.vPadding : 0
 
         visible: enabled
         active: enabled
