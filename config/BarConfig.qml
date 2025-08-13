@@ -54,7 +54,7 @@ JsonObject {
         property bool occupiedBg: false
         property bool showWindows: true
         property bool activeTrail: false
-        property bool perMonitorWorkspaces: false
+        property bool perMonitorWorkspaces: true
         property string label: "  "
         property string occupiedLabel: "󰮯 "
         property string activeLabel: "󰮯 "

@@ -252,6 +252,7 @@ All configuration options are in `~/.config/caelestia/shell.json`.
             "label": "  ",
             "occupiedBg": false,
             "occupiedLabel": "󰮯 ",
+            "perMonitorWorkspaces": true,
             "rounded": true,
             "showWindows": true,
             "shown": 5
