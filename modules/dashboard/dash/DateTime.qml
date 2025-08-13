@@ -27,6 +27,7 @@ Item {
             text: root.timeComponents[0]
             color: Colours.palette.m3secondary
             font.pointSize: Appearance.font.size.extraLarge
+            font.family: Appearance.font.family.clock
             font.weight: 600
         }
 
@@ -36,6 +37,7 @@ Item {
             text: "•••"
             color: Colours.palette.m3primary
             font.pointSize: Appearance.font.size.extraLarge * 0.9
+            font.family: Appearance.font.family.clock
         }
 
         StyledText {
@@ -44,6 +46,7 @@ Item {
             text: root.timeComponents[1]
             color: Colours.palette.m3secondary
             font.pointSize: Appearance.font.size.extraLarge
+            font.family: Appearance.font.family.clock
             font.weight: 600
         }
 
@@ -58,6 +61,7 @@ Item {
                 text: root.timeComponents[2] ?? ""
                 color: Colours.palette.m3secondary
                 font.pointSize: Appearance.font.size.large
+                font.family: Appearance.font.family.clock
                 font.weight: 600
             }
         }
@@ -69,6 +73,7 @@ Item {
             text: Time.format("ddd, d")
             color: Colours.palette.m3tertiary
             font.pointSize: Appearance.font.size.normal
+            font.family: Appearance.font.family.clock
             font.weight: 500
             elide: Text.ElideRight
         }

@@ -14,10 +14,15 @@ Item {
     required property BarPopouts.Wrapper popouts
 
     readonly property int exclusiveZone: Config.bar.persistent || visibilities.bar ? content.implicitWidth : Config.border.thickness
+    readonly property bool shouldBeVisible: Config.bar.persistent || visibilities.bar || isHovered
     property bool isHovered
 
     function checkPopout(y: real): void {
         content.item?.checkPopout(y);
+    }
+
+    function handleWheel(y: real, angleDelta: point): void {
+        content.item?.handleWheel(y, angleDelta);
     }
 
     visible: width > Config.border.thickness
@@ -26,7 +31,7 @@ Item {
 
     states: State {
         name: "visible"
-        when: Config.bar.persistent || root.visibilities.bar || root.isHovered
+        when: root.shouldBeVisible
 
         PropertyChanges {
             root.implicitWidth: content.implicitWidth
@@ -63,7 +68,7 @@ Item {
     Loader {
         id: content
 
-        Component.onCompleted: active = Qt.binding(() => Config.bar.persistent || root.visibilities.bar || root.isHovered || root.visible)
+        Component.onCompleted: active = Qt.binding(() => root.shouldBeVisible || root.visible)
 
         anchors.top: parent.top
         anchors.bottom: parent.bottom

@@ -39,12 +39,10 @@ MouseArea {
     property list<var> clients: {
         const ws = Hyprland.activeToplevel?.workspace?.id ?? Hyprland.activeWsId;
         return Hyprland.toplevels.values.filter(c => c.workspace?.id === ws).sort((a, b) => {
-            // Pinned first, then floating, then any other
-            if (a.lastIpcObject.pinned === b.lastIpcObject.pinned)
-                return a.lastIpcObject.floating === b.lastIpcObject.floating ? 0 : a.lastIpcObject.floating ? -1 : 1;
-            if (a.lastIpcObject.pinned)
-                return -1;
-            return 1;
+            // Pinned first, then fullscreen, then floating, then any other
+            const ac = a.lastIpcObject;
+            const bc = b.lastIpcObject;
+            return (bc.pinned - ac.pinned) || ((bc.fullscreen !== 0) - (ac.fullscreen !== 0)) || (bc.floating - ac.floating);
         });
     }
 

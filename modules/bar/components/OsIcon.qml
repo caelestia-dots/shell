@@ -4,7 +4,7 @@ import qs.utils
 import qs.config
 
 StyledText {
-    text: Icons.osIcon
+    text: SysInfo.osIcon
     font.pointSize: Appearance.font.size.smaller
     font.family: Appearance.font.family.mono
     color: Colours.palette.m3tertiary

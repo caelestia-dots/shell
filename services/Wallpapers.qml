@@ -86,7 +86,7 @@ Searcher {
         id: getWallsProc
 
         running: true
-        command: ["find", Paths.expandTilde(Config.paths.wallpaperDir), "-type", "d", "-path", '*/.*', "-prune", "-o", "-not", "-name", '.*', "-type", "f", "-print"]
+        command: ["find", "-L", Paths.expandTilde(Config.paths.wallpaperDir), "-type", "d", "-path", '*/.*', "-prune", "-o", "-not", "-name", '.*', "-type", "f", "-print"]
         stdout: StdioCollector {
             onStreamFinished: wallpapers.model = text.trim().split("\n").filter(w => Images.isValidImageByName(w)).sort()
         }

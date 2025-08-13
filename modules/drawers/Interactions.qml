@@ -45,18 +45,7 @@ CustomMouseArea {
 
     function onWheel(event: WheelEvent): void {
         if (event.x < bar.implicitWidth) {
-            if (event.y < screen.height / 2) {
-                if (event.angleDelta.y > 0)
-                    Audio.incrementVolume();
-                else if (event.angleDelta.y < 0)
-                    Audio.decrementVolume();
-            } else {
-                const monitor = Brightness.getMonitorForScreen(screen);
-                if (event.angleDelta.y > 0)
-                    monitor.setBrightness(monitor.brightness + 0.1);
-                else if (event.angleDelta.y < 0)
-                    monitor.setBrightness(monitor.brightness - 0.1);
-            }
+            bar.handleWheel(event.y, event.angleDelta);
         }
     }
 

@@ -20,7 +20,7 @@ Item {
         anchors.left: parent.left
 
         animate: true
-        text: Weather.icon || "cloud_alert"
+        text: Weather.icon
         color: Colours.palette.m3secondary
         font.pointSize: Appearance.font.size.extraLarge * 2
     }
@@ -38,7 +38,7 @@ Item {
             anchors.horizontalCenter: parent.horizontalCenter
 
             animate: true
-            text: Config.services.useFahrenheit ? Weather.tempF : Weather.tempC
+            text: Weather.temp
             color: Colours.palette.m3primary
             font.pointSize: Appearance.font.size.extraLarge
             font.weight: 500
@@ -48,7 +48,7 @@ Item {
             anchors.horizontalCenter: parent.horizontalCenter
 
             animate: true
-            text: Weather.description || qsTr("No weather")
+            text: Weather.description
 
             elide: Text.ElideRight
             width: Math.min(implicitWidth, root.parent.width - icon.implicitWidth - info.anchors.leftMargin - Appearance.padding.large * 2)

@@ -10,51 +10,29 @@ import Quickshell.Services.UPower
 import QtQuick
 import QtQuick.Layouts
 
-Item {
+StyledRect {
     id: root
 
     property color colour: Colours.palette.m3secondary
+    readonly property alias items: iconColumn
 
-    readonly property list<var> hoverAreas: [
-        {
-            name: "audio",
-            item: audioIcon,
-            enabled: Config.bar.status.showAudio
-        },
-        {
-            name: "network",
-            item: networkIcon,
-            enabled: Config.bar.status.showNetwork
-        },
-        {
-            name: "bluetooth",
-            item: bluetoothGroup,
-            enabled: Config.bar.status.showBluetooth
-        },
-        {
-            name: "battery",
-            item: batteryIcon,
-            enabled: Config.bar.status.showBattery
-        }
-    ]
+    color: Colours.tPalette.m3surfaceContainer
+    radius: Appearance.rounding.full
 
     clip: true
-    implicitWidth: iconColumn.implicitWidth
-    implicitHeight: iconColumn.implicitHeight
+    implicitWidth: iconColumn.implicitWidth + Appearance.padding.normal * 2
+    implicitHeight: iconColumn.implicitHeight + Appearance.padding.normal * 2
 
     ColumnLayout {
         id: iconColumn
 
-        anchors.horizontalCenter: parent.horizontalCenter
+        anchors.centerIn: parent
         spacing: Appearance.spacing.smaller / 2
 
         // Audio icon
-        Loader {
-            id: audioIcon
-
-            asynchronous: true
+        WrappedLoader {
+            name: "audio"
             active: Config.bar.status.showAudio
-            visible: active
 
             sourceComponent: MaterialIcon {
                 animate: true
@@ -65,8 +43,6 @@ Item {
 
         // Keyboard layout icon
         Loader {
-            id: kbLayout
-
             Layout.alignment: Qt.AlignHCenter
             asynchronous: true
             active: Config.bar.status.showKbLayout
@@ -81,12 +57,9 @@ Item {
         }
 
         // Network icon
-        Loader {
-            id: networkIcon
-
-            asynchronous: true
+        WrappedLoader {
+            name: "network"
             active: Config.bar.status.showNetwork
-            visible: active
 
             sourceComponent: MaterialIcon {
                 animate: true
@@ -95,13 +68,10 @@ Item {
             }
         }
 
-        // Bluetooth section (grouped for hover area)
-        Loader {
-            id: bluetoothGroup
-
-            asynchronous: true
+        // Bluetooth section
+        WrappedLoader {
+            name: "bluetooth"
             active: Config.bar.status.showBluetooth
-            visible: active
 
             sourceComponent: ColumnLayout {
                 spacing: Appearance.spacing.smaller / 2
@@ -157,12 +127,9 @@ Item {
         }
 
         // Battery icon
-        Loader {
-            id: batteryIcon
-
-            asynchronous: true
+        WrappedLoader {
+            name: "battery"
             active: Config.bar.status.showBattery
-            visible: active
 
             sourceComponent: MaterialIcon {
                 animate: true
@@ -192,6 +159,14 @@ Item {
 
     Behavior on implicitHeight {
         Anim {}
+    }
+
+    component WrappedLoader: Loader {
+        required property string name
+
+        Layout.alignment: Qt.AlignHCenter
+        asynchronous: true
+        visible: active
     }
 
     component Anim: NumberAnimation {

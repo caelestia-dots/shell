@@ -8,6 +8,45 @@ JsonObject {
     property Status status: Status {}
     property Sizes sizes: Sizes {}
 
+    property list<var> entries: [
+        {
+            id: "logo",
+            enabled: true
+        },
+        {
+            id: "workspaces",
+            enabled: true
+        },
+        {
+            id: "spacer",
+            enabled: true
+        },
+        {
+            id: "activeWindow",
+            enabled: true
+        },
+        {
+            id: "spacer",
+            enabled: true
+        },
+        {
+            id: "tray",
+            enabled: true
+        },
+        {
+            id: "clock",
+            enabled: true
+        },
+        {
+            id: "statusIcons",
+            enabled: true
+        },
+        {
+            id: "power",
+            enabled: true
+        },
+    ]
+
     component Workspaces: JsonObject {
         property int shown: 5
         property bool rounded: true
