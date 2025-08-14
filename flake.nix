@@ -35,6 +35,7 @@
           withX11 = false;
           withI3 = false;
         };
+        app2unit = pkgs.callPackage ./nix/app2unit.nix {inherit pkgs;};
         caelestia-cli = inputs.caelestia-cli.packages.${pkgs.system}.default;
       };
       with-cli = caelestia-shell.override {withCli = true;};
