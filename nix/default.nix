@@ -70,6 +70,11 @@ in
     buildInputs = [quickshell aubio pipewire];
     propagatedBuildInputs = runtimeDeps;
 
+    patchPhase = ''
+      substituteInPlace assets/pam.d/fprint \
+        --replace-fail pam_fprintd.so /run/current-system/sw/lib/security/pam_fprintd.so
+    '';
+
     buildPhase = ''
       mkdir -p bin
       g++ -std=c++17 -Wall -Wextra \

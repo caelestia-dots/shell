@@ -40,7 +40,7 @@ Item {
         anchors.centerIn: parent
 
         text: {
-            if (root.pam.active)
+            if (root.pam.passwd.active)
                 return qsTr("Loading...");
             if (root.pam.state === "error")
                 return qsTr("An error occured");
@@ -52,7 +52,7 @@ Item {
         }
 
         animate: true
-        color: root.pam.active ? Colours.palette.m3secondary : root.pam.state ? Colours.palette.m3error : Colours.palette.m3outline
+        color: root.pam.passwd.active ? Colours.palette.m3secondary : root.pam.state ? Colours.palette.m3error : Colours.palette.m3outline
         font.pointSize: Appearance.font.size.normal
         font.family: Appearance.font.family.mono
 

@@ -1,6 +1,7 @@
 pragma ComponentBehavior: Bound
 
 import qs.components
+import qs.components.controls
 import qs.components.images
 import qs.services
 import qs.config
@@ -149,9 +150,36 @@ ColumnLayout {
             anchors.margins: Appearance.padding.small
             spacing: Appearance.spacing.normal
 
-            MaterialIcon {
-                Layout.leftMargin: Appearance.padding.smaller
-                text: "lock"
+            Item {
+                implicitWidth: implicitHeight
+                implicitHeight: fprintIcon.implicitHeight + Appearance.padding.small * 2
+
+                MaterialIcon {
+                    id: fprintIcon
+
+                    anchors.centerIn: parent
+                    animate: true
+                    text: {
+                        if (root.lock.pam.fprintState === "error")
+                            return "error";
+                        if (root.lock.pam.fprint.tries >= Config.lock.maxFprintTries || root.lock.pam.fprintState === "fail")
+                            return "fingerprint_off";
+                        if (root.lock.pam.fprint.active)
+                            return "fingerprint";
+                        return "lock";
+                    }
+                    color: !root.lock.pam.fprintRunning && root.lock.pam.fprintState ? Colours.palette.m3error : Colours.palette.m3onSurface
+                    opacity: root.lock.pam.fprintRunning ? 0 : 1
+
+                    Behavior on opacity {
+                        Anim {}
+                    }
+                }
+
+                StyledBusyIndicator {
+                    anchors.fill: parent
+                    running: root.lock.pam.fprintRunning
+                }
             }
 
             InputField {
