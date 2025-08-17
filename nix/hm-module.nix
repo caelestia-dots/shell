@@ -4,8 +4,10 @@ self: {
   lib,
   ...
 }: let
-  cli-default = self.inputs.caelestia-cli.packages.${pkgs.system}.default;
-  shell-default = self.packages.${pkgs.system}.with-cli;
+  inherit (pkgs.stdenv.hostPlatform) system;
+
+  cli-default = self.inputs.caelestia-cli.packages.${system}.default;
+  shell-default = self.packages.${system}.with-cli;
 
   cfg = config.programs.caelestia;
 in {
