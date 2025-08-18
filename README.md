@@ -59,13 +59,26 @@ Dependencies:
 To install the shell manually, install all dependencies and clone this repo to `$XDG_CONFIG_HOME/quickshell/caelestia`.
 Then compile the beat detector and install it to `/usr/lib/caelestia/beat_detector`.
 
-```sh
-cd $XDG_CONFIG_HOME/quickshell
-git clone https://github.com/caelestia-dots/shell.git caelestia
-g++ -std=c++17 -Wall -Wextra -I/usr/include/pipewire-0.3 -I/usr/include/spa-0.2 -I/usr/include/aubio -o beat_detector caelestia/assets/beat_detector.cpp -lpipewire-0.3 -laubio
-sudo mv beat_detector /usr/lib/caelestia/beat_detector
-```
+### Audio Beat Detector 
 
+* PipeWire only, super lightweight, barely touches CPU/RAM, outputs clean BPM for scripts and visulaziers...etc .
+
+**Build Instructions**
+
+If you're installing the shell manually, you'll need to compile this component.
+
+1.  **Install Dependencies**:
+
+      * **Debian/Ubuntu**: `sudo apt install libpipewire-0.3-dev libaubio-dev`
+      * **Arch Linux**: `sudo pacman -S pipewire aubio`
+      * **Fedora**: `sudo dnf install pipewire-devel aubio-devel`
+
+2.  **Compile**:
+
+    ```sh
+    g++ -std=c++17 -O2 -o beat_detector beat_detector.cpp -lpipewire-0.3 -laubio
+    ```
+    
 > [!TIP]
 > The beat detector can actually be installed anywhere. However, if it is not installed to the default
 > location of `/usr/lib/caelestia/beat_detector`, you must set the environment variable `CAELESTIA_BD_PATH`
