@@ -25,6 +25,12 @@ Item {
         return active?.length ? active.position / active.length : 0;
     }
 
+    function getPlayerName(identity) {
+        if (!identity) return "No players";
+        const rename = Config.dashboard.playerRenames.find(r => r.from === identity);
+        return rename ? rename.to : identity;
+    }
+
     function lengthStr(length: int): string {
         if (length < 0)
             return "-1:-1";
@@ -372,7 +378,7 @@ Item {
                     StyledText {
                         Layout.fillWidth: true
                         Layout.maximumWidth: playerSelector.implicitWidth - implicitHeight - parent.spacing - Appearance.padding.normal * 2
-                        text: Players.active?.identity ?? "No players"
+                        text: getPlayerName(Players.active?.identity)
                         color: Players.active ? Colours.palette.m3onSurface : Colours.palette.m3onSurfaceVariant
                         elide: Text.ElideRight
                     }
@@ -444,7 +450,7 @@ Item {
                                     }
 
                                     StyledText {
-                                        text: player.modelData.identity
+                                        text: getPlayerName(player.modelData.identity)
                                         color: Colours.palette.m3onSecondaryContainer
                                     }
                                 }
