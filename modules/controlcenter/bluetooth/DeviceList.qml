@@ -113,7 +113,7 @@ ColumnLayout {
             implicitWidth: implicitHeight
             implicitHeight: scanIcon.implicitHeight + Appearance.padding.normal * 2
 
-            radius: Bluetooth.defaultAdapter?.discovering ? Appearance.rounding.normal : implicitHeight / 2
+            radius: Bluetooth.defaultAdapter?.discovering ? Appearance.rounding.normal : implicitHeight / 2 * Math.min(1, Appearance.rounding.scale)
             color: Bluetooth.defaultAdapter?.discovering ? Colours.palette.m3secondary : Colours.palette.m3secondaryContainer
 
             StateLayer {
@@ -290,7 +290,7 @@ ColumnLayout {
         implicitWidth: toggleBtnInner.implicitWidth + Appearance.padding.large * 2
         implicitHeight: toggleBtnIcon.implicitHeight + Appearance.padding.normal * 2
 
-        radius: toggled || toggleStateLayer.pressed ? Appearance.rounding.small : Math.min(width, height) / 2
+        radius: toggled || toggleStateLayer.pressed ? Appearance.rounding.small : Math.min(width, height) / 2 * Math.min(1, Appearance.rounding.scale)
         color: toggled ? Colours.palette[`m3${accent.toLowerCase()}`] : Colours.palette[`m3${accent.toLowerCase()}Container`]
 
         StateLayer {
