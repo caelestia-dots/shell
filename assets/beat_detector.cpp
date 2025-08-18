@@ -55,9 +55,9 @@ private:
 
 public:
     explicit BeatDetector(uint32_t buf_size = 512, 
-                         bool enable_logging = false,
-                         bool enable_performance_stats = false,
-                         bool enable_pitch_detection = false) 
+                          bool enable_logging = false,
+                          bool enable_performance_stats = false,
+                          bool enable_pitch_detection = false) 
         : main_loop_(nullptr)
         , context_(nullptr)
         , core_(nullptr)
@@ -98,13 +98,17 @@ public:
         start_time_ = std::chrono::steady_clock::now();
         
         if (enable_logging_) {
-            auto now = std::chrono::system_clock::now();
-            auto time_t = std::chrono::system_clock::to_time_t(now);
-            std::stringstream filename;
-            filename << "beat_log_" << std::put_time(std::localtime(&time_t), "%Y%m%d_%H%M%S") << ".txt";
-            log_file_.open(filename.str());
+            const char* log_path = "/tmp/beat_detector.log";
+            // Check file size to see if we need to write the header.
+            std::ifstream checker(log_path, std::ifstream::ate | std::ifstream::binary);
+            bool write_header = !checker.is_open() || checker.tellg() == 0;
+            checker.close(); // Explicitly close the file checker
+
+            log_file_.open(log_path, std::ios_base::app);
             if (log_file_.is_open()) {
-                log_file_ << "# Timestamp,BPM,Onset,Pitch(Hz),ProcessTime(ms)\n";
+                if (write_header) {
+                    log_file_ << "# Timestamp,BPM,Onset,Pitch(Hz),ProcessTime(ms)\n";
+                }
             }
         }
         
@@ -240,7 +244,7 @@ private:
     }
     
     static void on_state_changed(void* userdata, enum pw_stream_state /* old_state */, 
-                                enum pw_stream_state state, const char* /* error */) {
+                                 enum pw_stream_state state, const char* /* error */) {
         auto* detector = static_cast<BeatDetector*>(userdata);
         
         if (state == PW_STREAM_STATE_ERROR) {
@@ -308,10 +312,10 @@ private:
                     now.time_since_epoch()) % 1000;
                 
                 log_file_ << std::put_time(std::localtime(&time_t), "%H:%M:%S") 
-                         << "." << std::setfill('0') << std::setw(3) << ms.count() << ","
-                         << (is_beat ? last_bpm_ : 0) << ","
-                         << (is_onset ? 1 : 0) << ","
-                         << pitch_hz << ",";
+                          << "." << std::setfill('0') << std::setw(3) << ms.count() << ","
+                          << (is_beat ? last_bpm_ : 0) << ","
+                          << (is_onset ? 1 : 0) << ","
+                          << pitch_hz << ",";
             }
         }
         
@@ -373,9 +377,9 @@ BeatDetector* BeatDetector::instance_{nullptr};
 void print_usage() {
     std::cout << "Usage: ./beat_detector [buffer_size] [--log] [--stats] [--pitch]\n";
     std::cout << "  buffer_size: 64-8192 (default: 512)\n";
-    std::cout << "  --log:       Enable logging\n";
-    std::cout << "  --stats:     Enable performance statistics\n";
-    std::cout << "  --pitch:     Enable pitch detection\n";
+    std::cout << "  --log:        Enable logs\n";
+    std::cout << "  --stats:      Enable performance statistics\n";
+    std::cout << "  --pitch:      Enable pitch detection\n";
 }
 
 int main(int argc, char* argv[]) {
