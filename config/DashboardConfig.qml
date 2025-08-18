@@ -7,7 +7,7 @@ JsonObject {
     property int visualiserBars: 45
     property int dragThreshold: 50
     property Sizes sizes: Sizes {}
-    property list<var> playerRenames: []
+    property list<var> mediaPlayerAliases: []
 
     component Sizes: JsonObject {
         readonly property int tabIndicatorHeight: 3

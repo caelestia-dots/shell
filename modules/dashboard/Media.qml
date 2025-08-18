@@ -27,7 +27,7 @@ Item {
 
     function getPlayerName(identity) {
         if (!identity) return "No players";
-        const rename = Config.dashboard.playerRenames.find(r => r.from === identity);
+        const rename = Config.dashboard.mediaPlayerAliases.find(r => r.from === identity);
         return rename ? rename.to : identity;
     }
 
