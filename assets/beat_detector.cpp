@@ -197,7 +197,7 @@ private:
             .trigger_done = nullptr,
         };
         
-        // Non-intrusive properties for better compatibility
+        // Non-intrusive properties, fix some compatibility issues
         pw_properties* props = pw_properties_new(
             PW_KEY_MEDIA_TYPE, "Audio",
             PW_KEY_MEDIA_CATEGORY, "Capture",
@@ -230,7 +230,7 @@ private:
         const spa_pod* params[1];
         params[0] = spa_format_audio_raw_build(&pod_builder, SPA_PARAM_EnumFormat, &audio_info);
         
-        // Use standard connection flags for better compatibility
+        // Use standard connection flags instead
         pw_stream_flags flags = static_cast<pw_stream_flags>(
             PW_STREAM_FLAG_AUTOCONNECT |
             PW_STREAM_FLAG_MAP_BUFFERS
