@@ -32,8 +32,8 @@ Singleton {
                     destroy();
             }
 
-            minimumSize.width: 1000
-            minimumSize.height: 600
+            minimumSize.width: 1200
+            minimumSize.height: 700
 
             implicitWidth: cc.implicitWidth
             implicitHeight: cc.implicitHeight

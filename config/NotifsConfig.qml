@@ -10,7 +10,7 @@ JsonObject {
     property Sizes sizes: Sizes {}
 
     component Sizes: JsonObject {
-        property int width: 400
+        property int width: 500
         property int image: 41
         property int badge: 20
     }

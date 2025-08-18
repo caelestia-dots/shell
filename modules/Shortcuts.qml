@@ -77,4 +77,24 @@ Scope {
             WindowFactory.create();
         }
     }
+
+    IpcHandler {
+        target: "launcher"
+
+        function wallpaper(): void {
+            const visibilities = Visibilities.getForActive();
+            visibilities.launcher = true;
+            // Auto-type ">wallpaper " to jump to wallpaper section
+            Qt.callLater(() => {
+                const activeWindow = Quickshell.windows.find(w => w.contentItem.objectName === "LauncherWindow");
+                if (activeWindow) {
+                    const searchField = activeWindow.contentItem.children.find(c => c.objectName === "searchField");
+                    if (searchField) {
+                        searchField.text = ">wallpaper ";
+                        searchField.cursorPosition = searchField.text.length;
+                    }
+                }
+            });
+        }
+    }
 }

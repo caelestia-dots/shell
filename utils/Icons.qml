@@ -128,15 +128,19 @@ Singleton {
 
     function getBluetoothIcon(icon: string): string {
         if (icon.includes("headset") || icon.includes("headphones"))
-            return "headphones";
-        if (icon.includes("audio"))
+            return "headset_mic";
+        if (icon.includes("audio") || icon.includes("speaker"))
             return "speaker";
         if (icon.includes("phone"))
-            return "smartphone";
+            return "phone";
         if (icon.includes("mouse"))
             return "mouse";
         if (icon.includes("keyboard"))
             return "keyboard";
+        if (icon.includes("gamepad") || icon.includes("joystick"))
+            return "gamepad";
+        if (icon.includes("computer") || icon.includes("laptop"))
+            return "computer";
         return "bluetooth";
     }
 

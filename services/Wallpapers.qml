@@ -20,7 +20,14 @@ Searcher {
 
     function setWallpaper(path: string): void {
         actualCurrent = path;
-        Quickshell.execDetached(["caelestia", "wallpaper", "-f", path, ...smartArg]);
+        // Use swww to set wallpaper with smooth transition
+        Quickshell.execDetached(["swww", "img", path, "--transition-type", "wipe", "--transition-duration", "2"]);
+        // Generate and apply wallust colors
+        Quickshell.execDetached(["wallust", "run", path, "-s"]);
+        // Update system colors using your color script
+        Quickshell.execDetached([Paths.expandTilde("~/.config/hypr/scripts/WallustSwww.sh")]);
+        // Save current wallpaper path for persistence
+        Quickshell.execDetached(["sh", "-c", `echo "${path}" > ${Paths.expandTilde("~/.cache/swww/current_wallpaper")}`]);
     }
 
     function preview(path: string): void {
@@ -74,7 +81,7 @@ Searcher {
     Process {
         id: getPreviewColoursProc
 
-        command: ["caelestia", "wallpaper", "-p", root.previewPath, ...root.smartArg]
+        command: ["wallust", "run", root.previewPath, "-s"]
         stdout: StdioCollector {
             onStreamFinished: {
                 Colours.load(text, true);

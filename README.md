@@ -305,7 +305,7 @@ All configuration options are in `~/.config/caelestia/shell.json`.
     },
     "paths": {
         "mediaGif": "root:/assets/bongocat.gif",
-        "sessionGif": "root:/assets/kurukuru.gif",
+        "sessionGif": "root:/assets/docker.gif",
         "wallpaperDir": "~/Pictures/Wallpapers"
     },
     "services": {

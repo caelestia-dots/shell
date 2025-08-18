@@ -1,0 +1,14 @@
+# Create a Monitor profile you want to on this directory
+
+# Create a unique file name i.e. Mirror, or Office, Scale, etc etc
+
+# tip: You can easily create a profile using nwg-displays
+# after creating a profile using nwg-displays, copy the ~/.config/hypr/monitors.conf file to this directory with a unique file name
+# suggest not to call it default
+
+
+# Note, after selecting Profiles wanted via Rofi (SUPER SHIFT E), previous content of ~/.config/hypr/monitors.conf will be backed up and named as Previous_Profile.conf
+
+# Monitor profile should be loaded automatically once selected by KooL Rofi Settings ROfi Menu, unless you disabled the auto-reload function on Hyprland settings.
+# However, if it does not load, kindly log out and re-login. This seem apparent if you are using a Virtual Environment.
+

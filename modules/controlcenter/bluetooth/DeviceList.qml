@@ -49,7 +49,7 @@ ColumnLayout {
 
         ToggleButton {
             toggled: Bluetooth.defaultAdapter?.discoverable ?? false
-            icon: root.smallDiscoverable ? "group_search" : ""
+            icon: root.smallDiscoverable ? "search" : ""
             label: root.smallDiscoverable ? "" : qsTr("Discoverable")
 
             function onClicked(): void {
@@ -61,7 +61,7 @@ ColumnLayout {
 
         ToggleButton {
             toggled: Bluetooth.defaultAdapter?.pairable ?? false
-            icon: "missing_controller"
+            icon: "link"
             label: root.smallPairable ? "" : qsTr("Pairable")
 
             function onClicked(): void {
@@ -131,7 +131,7 @@ ColumnLayout {
 
                 anchors.centerIn: parent
                 animate: true
-                text: "bluetooth_searching"
+                text: "search"
                 color: Bluetooth.defaultAdapter?.discovering ? Colours.palette.m3onSecondary : Colours.palette.m3onSecondaryContainer
                 fill: Bluetooth.defaultAdapter?.discovering ? 1 : 0
             }
@@ -261,7 +261,7 @@ ColumnLayout {
 
                         anchors.centerIn: parent
                         animate: true
-                        text: device.modelData.connected ? "link_off" : "link"
+                        text: device.modelData.connected ? "bluetooth_disabled" : "link"
                         color: device.connected ? Colours.palette.m3onPrimaryContainer : Colours.palette.m3onSurface
 
                         opacity: device.loading ? 0 : 1

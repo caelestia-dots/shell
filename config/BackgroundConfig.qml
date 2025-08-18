@@ -1,7 +1,7 @@
 import Quickshell.Io
 
 JsonObject {
-    property bool enabled: true
+    property bool enabled: false
     property DesktopClock desktopClock: DesktopClock {}
 
     component DesktopClock: JsonObject {

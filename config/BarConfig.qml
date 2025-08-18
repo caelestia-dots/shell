@@ -66,7 +66,7 @@ JsonObject {
     }
 
     component Status: JsonObject {
-        property bool showAudio: false
+        property bool showAudio: true
         property bool showKbLayout: false
         property bool showNetwork: true
         property bool showBluetooth: true
@@ -74,10 +74,10 @@ JsonObject {
     }
 
     component Sizes: JsonObject {
-        property int innerWidth: 40
-        property int windowPreviewSize: 400
-        property int trayMenuWidth: 300
-        property int batteryWidth: 250
-        property int networkWidth: 320
+        property int innerWidth: 42
+        property int windowPreviewSize: 500
+        property int trayMenuWidth: 350
+        property int batteryWidth: 300
+        property int networkWidth: 380
     }
 }

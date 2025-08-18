@@ -433,7 +433,7 @@ Item {
             model: ListModel {
                 ListElement {
                     name: "trust"
-                    icon: "handshake"
+                    icon: "verified"
                 }
                 ListElement {
                     name: "block"
@@ -441,11 +441,11 @@ Item {
                 }
                 ListElement {
                     name: "pair"
-                    icon: "missing_controller"
+                    icon: "link"
                 }
                 ListElement {
                     name: "connect"
-                    icon: "bluetooth_connected"
+                    icon: "bluetooth"
                 }
             }
 
