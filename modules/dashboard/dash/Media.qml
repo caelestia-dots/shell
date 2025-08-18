@@ -110,12 +110,59 @@ Item {
             id: image
 
             anchors.fill: parent
-
-            source: Players.active?.trackArtUrl ?? ""
+            
             asynchronous: true
             fillMode: Image.PreserveAspectCrop
             sourceSize.width: width
             sourceSize.height: height
+            
+            property string lastTitle: ""
+            
+            Component.onCompleted: updateThumbnail()
+            
+            function updateThumbnail() {
+                const thumbnailUrl = MediaThumbnails.getThumbnailUrl(Players.active) ?? ""
+                if (thumbnailUrl) {
+                    source = thumbnailUrl
+                }
+                lastTitle = Players.active?.trackTitle ?? ""
+            }
+            
+            Timer {
+                interval: 500  // Check every 500ms instead of 2 seconds
+                running: !!Players.active
+                repeat: true
+                onTriggered: {
+                    const currentTitle = Players.active?.trackTitle ?? ""
+                    if (currentTitle !== image.lastTitle) {
+                        image.updateThumbnail()
+                    }
+                }
+            }
+            
+            Connections {
+                target: Players
+                function onActiveChanged() {
+                    image.updateThumbnail()
+                }
+            }
+            
+            Connections {
+                target: Players.active
+                function onTrackTitleChanged() {
+                    image.updateThumbnail()
+                }
+                function onTrackArtUrlChanged() {
+                    image.updateThumbnail()
+                }
+            }
+            
+            Connections {
+                target: MediaThumbnails
+                function onThumbnailUpdated() {
+                    image.updateThumbnail()
+                }
+            }
         }
     }
 
