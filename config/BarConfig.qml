@@ -80,7 +80,7 @@ JsonObject {
         property bool showBluetooth: true
         property bool showBattery: true
     }
-
+//test
     component Sizes: JsonObject {
         property int innerWidth: 40
         property int windowPreviewSize: 400
