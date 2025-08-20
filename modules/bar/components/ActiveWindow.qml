@@ -9,73 +9,62 @@ import QtQuick
 Item {
     id: root
 
+    required property var bar
     required property Brightness.Monitor monitor
     property color colour: Colours.palette.m3primary
-    readonly property Item child: child
 
-    implicitWidth: child.implicitWidth
-    implicitHeight: child.implicitHeight
+    readonly property int maxHeight: {
+        const otherModules = bar.children.filter(c => c.id && c.item !== this && c.id !== "spacer");
+        const otherHeight = otherModules.reduce((acc, curr) => acc + curr.height, 0);
+        // Length - 2 cause repeater counts as a child
+        return bar.height - otherHeight - bar.spacing * (bar.children.length - 1) - bar.vPadding * 2;
+    }
+    property Title current: text1
 
-    Item {
-        id: child
+    clip: true
+    implicitWidth: Math.max(icon.implicitWidth, current.implicitHeight)
+    implicitHeight: icon.implicitHeight + current.implicitWidth + current.anchors.topMargin
 
-        property Item current: text1
+    MaterialIcon {
+        id: icon
 
-        anchors.centerIn: parent
+        anchors.horizontalCenter: parent.horizontalCenter
 
-        clip: true
-        implicitWidth: Math.max(icon.implicitWidth, current.implicitHeight)
-        implicitHeight: icon.implicitHeight + current.implicitWidth + current.anchors.topMargin
+        animate: true
+        text: Icons.getAppCategoryIcon(Hyprland.activeToplevel?.lastIpcObject.class, "desktop_windows")
+        color: root.colour
+    }
 
-        MaterialIcon {
-            id: icon
+    Title {
+        id: text1
+    }
 
-            animate: true
-            text: Icons.getAppCategoryIcon(Hyprland.activeToplevel?.lastIpcObject.class, "desktop_windows")
-            color: root.colour
+    Title {
+        id: text2
+    }
 
-            anchors.horizontalCenter: parent.horizontalCenter
+    TextMetrics {
+        id: metrics
+
+        text: Hyprland.activeToplevel?.title ?? qsTr("Desktop")
+        font.pointSize: Appearance.font.size.smaller
+        font.family: Appearance.font.family.mono
+        elide: Qt.ElideRight
+        elideWidth: root.maxHeight - icon.height
+
+        onTextChanged: {
+            const next = root.current === text1 ? text2 : text1;
+            next.text = elidedText;
+            root.current = next;
         }
+        onElideWidthChanged: root.current.text = elidedText
+    }
 
-        Title {
-            id: text1
-        }
-
-        Title {
-            id: text2
-        }
-
-        TextMetrics {
-            id: metrics
-
-            text: Hyprland.activeToplevel?.title ?? qsTr("Desktop")
-            font.pointSize: Appearance.font.size.smaller
-            font.family: Appearance.font.family.mono
-            elide: Qt.ElideRight
-            elideWidth: root.height - icon.height
-
-            onTextChanged: {
-                const next = child.current === text1 ? text2 : text1;
-                next.text = elidedText;
-                child.current = next;
-            }
-            onElideWidthChanged: child.current.text = elidedText
-        }
-
-        Behavior on implicitWidth {
-            NumberAnimation {
-                duration: Appearance.anim.durations.normal
-                easing.type: Easing.BezierSpline
-                easing.bezierCurve: Appearance.anim.curves.emphasized
-            }
-        }
-
-        Behavior on implicitHeight {
-            NumberAnimation {
-                duration: Appearance.anim.durations.normal
-                easing.type: Easing.BezierSpline
-                easing.bezierCurve: Appearance.anim.curves.emphasized
-            }
+    Behavior on implicitHeight {
+        NumberAnimation {
+            duration: Appearance.anim.durations.normal
+            easing.type: Easing.BezierSpline
+            easing.bezierCurve: Appearance.anim.curves.emphasized
         }
     }
 
@@ -89,7 +78,7 @@ Item {
         font.pointSize: metrics.font.pointSize
         font.family: metrics.font.family
         color: root.colour
-        opacity: child.current === this ? 1 : 0
+        opacity: root.current === this ? 1 : 0
 
         transform: Rotation {
             angle: 90

@@ -9,7 +9,7 @@ import QtQuick
 Item {
     id: root
 
-    required property list<Workspace> workspaces
+    required property Repeater workspaces
     required property var occupied
     required property int groupOffset
 
@@ -48,18 +48,17 @@ Item {
 
             required property var modelData
 
-            readonly property Workspace start: root.workspaces[modelData.start - 1 - root.groupOffset] ?? null
-            readonly property Workspace end: root.workspaces[modelData.end - 1 - root.groupOffset] ?? null
+            readonly property Workspace start: root.workspaces.itemAt((modelData.start - 1) % Config.bar.workspaces.shown) ?? null
+            readonly property Workspace end: root.workspaces.itemAt((modelData.end - 1) % Config.bar.workspaces.shown) ?? null
 
-            color: Colours.tPalette.m3surfaceContainerHigh
-            radius: Config.bar.workspaces.rounded ? Appearance.rounding.full : 0
+            anchors.horizontalCenter: root.horizontalCenter
 
-            x: start?.x ?? 0
-            y: start?.y ?? 0
-            implicitWidth: Config.bar.sizes.innerHeight
-            implicitHeight: end?.y + end?.height - start?.y
+            y: (start?.y ?? 0) - 1
+            implicitWidth: Config.bar.sizes.innerWidth - Appearance.padding.small * 2 + 2
+            implicitHeight: start && end ? end.y + end.size - start.y + 2 : 0
 
-            anchors.horizontalCenter: parent.horizontalCenter
+            color: Colours.layer(Colours.palette.m3surfaceContainerHigh, 2)
+            radius: Appearance.rounding.full
 
             scale: 0
             Component.onCompleted: scale = 1
@@ -70,11 +69,11 @@ Item {
                 }
             }
 
-            Behavior on x {
+            Behavior on y {
                 Anim {}
             }
 
-            Behavior on y {
+            Behavior on implicitHeight {
                 Anim {}
             }
         }

@@ -1,56 +1,10 @@
 pragma Singleton
 
 import Quickshell
-import Quickshell.Io
 import Quickshell.Services.Notifications
 
 Singleton {
     id: root
-
-    readonly property var osIcons: ({
-            almalinux: "",
-            alpine: "",
-            arch: "",
-            archcraft: "",
-            arcolinux: "",
-            artix: "",
-            centos: "",
-            debian: "",
-            devuan: "",
-            elementary: "",
-            endeavouros: "",
-            fedora: "",
-            freebsd: "",
-            garuda: "",
-            gentoo: "",
-            hyperbola: "",
-            kali: "",
-            linuxmint: "󰣭",
-            mageia: "",
-            openmandriva: "",
-            manjaro: "",
-            neon: "",
-            nixos: "",
-            opensuse: "",
-            suse: "",
-            sles: "",
-            sles_sap: "",
-            "opensuse-tumbleweed": "",
-            parrot: "",
-            pop: "",
-            raspbian: "",
-            rhel: "",
-            rocky: "",
-            slackware: "",
-            solus: "",
-            steamos: "",
-            tails: "",
-            trisquel: "",
-            ubuntu: "",
-            vanilla: "",
-            void: "",
-            zorin: ""
-        })
 
     readonly property var weatherIcons: ({
             "113": "clear_day",
@@ -143,9 +97,6 @@ Singleton {
             Office: "content_paste"
         })
 
-    property string osIcon: ""
-    property string osName
-
     function getAppIcon(name: string, fallback: string): string {
         const icon = DesktopEntries.heuristicLookup(name)?.icon;
         if (fallback !== "undefined")
@@ -233,25 +184,18 @@ Singleton {
         return "volume_mute";
     }
 
-    FileView {
-        path: "/etc/os-release"
-        onLoaded: {
-            const lines = text().split("\n");
-            let osId = lines.find(l => l.startsWith("ID="))?.split("=")[1].replace(/"/g, "");
-            if (root.osIcons.hasOwnProperty(osId))
-                root.osIcon = root.osIcons[osId];
-            else {
-                const osIdLike = lines.find(l => l.startsWith("ID_LIKE="))?.split("=")[1].replace(/"/g, "");
-                if (osIdLike)
-                    for (const id of osIdLike.split(" "))
-                        if (root.osIcons.hasOwnProperty(id))
-                            return root.osIcon = root.osIcons[id];
-            }
-
-            let nameLine = lines.find(l => l.startsWith("PRETTY_NAME="));
-            if (!nameLine)
-                nameLine = lines.find(l => l.startsWith("NAME="));
-            root.osName = nameLine.split("=")[1].replace(/"/g, "");
-        }
+    function getSpecialWsIcon(name: string): string {
+        name = name.toLowerCase().slice("special:".length);
+        if (name === "special")
+            return "star";
+        if (name === "communication")
+            return "forum";
+        if (name === "music")
+            return "music_cast";
+        if (name === "todo")
+            return "checklist";
+        if (name === "sysmon")
+            return "monitor_heart";
+        return name[0].toUpperCase();
     }
 }

@@ -23,6 +23,7 @@
   findutils,
   file,
   material-symbols,
+  rubik,
   nerd-fonts,
   gcc,
   quickshell,
@@ -30,6 +31,7 @@
   pipewire,
   caelestia-cli,
   withCli ? false,
+  extraRuntimeDeps ? [],
 }: let
   runtimeDeps =
     [
@@ -52,16 +54,17 @@
       findutils
       file
     ]
+    ++ extraRuntimeDeps
     ++ lib.optional withCli caelestia-cli;
 
   fontconfig = makeFontsConf {
-    fontDirectories = [material-symbols nerd-fonts.jetbrains-mono];
+    fontDirectories = [material-symbols rubik nerd-fonts.caskaydia-cove];
   };
 in
   stdenv.mkDerivation {
     pname = "caelestia-shell";
     version = "${rev}";
-    src = ./.;
+    src = ./..;
 
     nativeBuildInputs = [gcc makeWrapper];
     buildInputs = [quickshell aubio pipewire];

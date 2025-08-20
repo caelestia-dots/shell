@@ -53,7 +53,7 @@ Item {
             }
         }
 
-        // Merge both calendar and kblayout popouts
+        // Merge: calendar popouts and notifications, plus kblayout from main
         Popout {
             name: "calendar-advanced"
             sourceComponent: Loader {

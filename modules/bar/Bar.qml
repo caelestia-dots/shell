@@ -17,8 +17,8 @@ ColumnLayout {
     required property BarPopouts.Wrapper popouts
     readonly property int vPadding: Appearance.padding.large
 
-    // Merged checkPopout: prefer Merge2 logic, as it's more explicit and feature-rich
     function checkPopout(y: real): void {
+        // Use the more explicit and feature-rich Merge2 logic for popout detection
         const spacing = Appearance.spacing.small;
         const aw = activeWindow.child;
         const awy = activeWindow.y + aw.y;

@@ -133,17 +133,17 @@ Variants {
                     visibilities: visibilities
                     bar: bar
                 }
-            }
 
-            BarWrapper {
-                id: bar
+                BarWrapper {
+                    id: bar
 
-                anchors.top: parent.top
-                anchors.bottom: parent.bottom
+                    anchors.top: parent.top
+                    anchors.bottom: parent.bottom
 
-                screen: scope.modelData
-                visibilities: visibilities
-                popouts: panels.popouts
+                    screen: scope.modelData
+                    visibilities: visibilities
+                    popouts: panels.popouts
+                }
             }
         }
     }

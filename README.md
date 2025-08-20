@@ -51,7 +51,7 @@ Dependencies:
 -   `qt6-declarative`
 -   `gcc-libs`
 -   [`material-symbols`](https://fonts.google.com/icons)
--   [`jetbrains-mono-nerd`](https://www.nerdfonts.com/font-downloads)
+-   [`caskaydia-cove-nerd`](https://www.nerdfonts.com/font-downloads)
 -   [`grim`](https://gitlab.freedesktop.org/emersion/grim)
 -   [`swappy`](https://github.com/jtheoof/swappy)
 -   [`libqalculate`](https://github.com/Qalculate/libqalculate)
@@ -165,8 +165,8 @@ All configuration options are in `~/.config/caelestia/shell.json`.
         "font": {
             "family": {
                 "material": "Material Symbols Rounded",
-                "mono": "JetBrains Mono NF",
-                "sans": "IBM Plex Sans"
+                "mono": "CaskaydiaCove NF",
+                "sans": "Rubik"
             },
             "size": {
                 "scale": 1
@@ -194,10 +194,51 @@ All configuration options are in `~/.config/caelestia/shell.json`.
         }
     },
     "background": {
+        "desktopClock": {
+            "enabled": false
+        },
         "enabled": true
     },
     "bar": {
         "dragThreshold": 20,
+        "entries": [
+        	{
+   	            "id": "logo",
+   	            "enabled": true
+   	        },
+   	        {
+   	            "id": "workspaces",
+   	            "enabled": true
+   	        },
+   	        {
+   	            "id": "spacer",
+   	            "enabled": true
+   	        },
+   	        {
+   	            "id": "activeWindow",
+   	            "enabled": true
+   	        },
+   	        {
+   	            "id": "spacer",
+   	            "enabled": true
+   	        },
+   	        {
+   	            "id": "tray",
+   	            "enabled": true
+   	        },
+   	        {
+   	            "id": "clock",
+   	            "enabled": true
+   	        },
+   	        {
+   	            "id": "statusIcons",
+   	            "enabled": true
+   	        },
+   	        {
+   	            "id": "power",
+   	            "enabled": true
+   	        }
+        ],
         "persistent": true,
         "showOnHover": true,
         "clock": {
@@ -212,14 +253,18 @@ All configuration options are in `~/.config/caelestia/shell.json`.
             "showNetwork": true,
             "showNotifications": true
         },
+        "tray": {
+            "background": false,
+            "recolour": false
+        },
         "workspaces": {
             "activeIndicator": true,
-            "activeLabel": "󰮯 ",
+            "activeLabel": "󰮯",
             "activeTrail": false,
             "label": "  ",
             "occupiedBg": false,
-            "occupiedLabel": "󰮯 ",
-            "rounded": true,
+            "occupiedLabel": "󰮯",
+            "perMonitorWorkspaces": true,
             "showWindows": true,
             "shown": 5
         }
@@ -251,7 +296,7 @@ All configuration options are in `~/.config/caelestia/shell.json`.
         }
     },
     "lock": {
-        "maxNotifs": 5
+        "recolourLogo": false
     },
     "notifs": {
         "actionOnClick": false,
@@ -272,7 +317,8 @@ All configuration options are in `~/.config/caelestia/shell.json`.
         "audioIncrement": 0.1,
         "weatherLocation": "10,10",
         "useFahrenheit": false,
-        "useTwelveHourClock": false
+        "useTwelveHourClock": false,
+        "smartScheme": true
     },
     "session": {
         "dragThreshold": 30,

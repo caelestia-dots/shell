@@ -33,5 +33,7 @@ Scope {
         name: "border-exclusion"
         exclusiveZone: Config.border.thickness
         mask: Region {}
+        implicitWidth: 1
+        implicitHeight: 1
     }
 }

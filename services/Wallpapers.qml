@@ -10,6 +10,7 @@ Searcher {
     id: root
 
     readonly property string currentNamePath: Paths.strip(`${Paths.state}/wallpaper/path.txt`)
+    readonly property list<string> smartArg: Config.services.smartScheme ? [] : ["--no-smart"]
 
     property bool showPreview: false
     readonly property string current: showPreview ? previewPath : actualCurrent
@@ -19,7 +20,7 @@ Searcher {
 
     function setWallpaper(path: string): void {
         actualCurrent = path;
-        Quickshell.execDetached(["caelestia", "wallpaper", "-f", path]);
+        Quickshell.execDetached(["caelestia", "wallpaper", "-f", path, ...smartArg]);
     }
 
     function preview(path: string): void {
@@ -73,7 +74,7 @@ Searcher {
     Process {
         id: getPreviewColoursProc
 
-        command: ["caelestia", "wallpaper", "-p", root.previewPath]
+        command: ["caelestia", "wallpaper", "-p", root.previewPath, ...root.smartArg]
         stdout: StdioCollector {
             onStreamFinished: {
                 Colours.load(text, true);
@@ -86,7 +87,7 @@ Searcher {
         id: getWallsProc
 
         running: true
-        command: ["find", Paths.expandTilde(Config.paths.wallpaperDir), "-type", "d", "-path", '*/.*', "-prune", "-o", "-not", "-name", '.*', "-type", "f", "-print"]
+        command: ["find", "-L", Paths.expandTilde(Config.paths.wallpaperDir), "-type", "d", "-path", '*/.*', "-prune", "-o", "-not", "-name", '.*', "-type", "f", "-print"]
         stdout: StdioCollector {
             onStreamFinished: wallpapers.model = text.trim().split("\n").filter(w => Images.isValidImageByName(w)).sort()
         }
