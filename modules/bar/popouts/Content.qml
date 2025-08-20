@@ -53,6 +53,7 @@ Item {
             }
         }
 
+        // Merge both calendar and kblayout popouts
         Popout {
             name: "calendar-advanced"
             sourceComponent: Loader {
@@ -72,6 +73,11 @@ Item {
             sourceComponent: Notifications {
                 wrapper: root.wrapper
             }
+        }
+
+        Popout {
+            name: "kblayout"
+            source: "KbLayout.qml"
         }
 
         Repeater {
