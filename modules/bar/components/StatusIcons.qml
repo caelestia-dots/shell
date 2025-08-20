@@ -16,7 +16,7 @@ StyledRect {
     property color colour: Colours.palette.m3secondary
     readonly property alias items: iconColumn
 
-    // Merge both branches: include hoverAreas property (from Merge2) and color/radius (from main)
+    // Combine hoverAreas property (from Merge2) and color/radius (from main)
     readonly property list<var> hoverAreas: [
         {
             name: "notifications",

@@ -17,8 +17,8 @@ ColumnLayout {
     required property BarPopouts.Wrapper popouts
     readonly property int vPadding: Appearance.padding.large
 
+    // Merged checkPopout: prefer Merge2 logic, as it's more explicit and feature-rich
     function checkPopout(y: real): void {
-        // --- Merge2 logic ---
         const spacing = Appearance.spacing.small;
         const aw = activeWindow.child;
         const awy = activeWindow.y + aw.y;
@@ -71,42 +71,6 @@ ColumnLayout {
         } else if (!statusIconFound) {
             popouts.hasCurrent = false;
         }
-        // --- End Merge2 logic ---
-
-
-        // --- main branch logic for childAt() (can be used for other handlers or in the future) ---
-        // const ch = childAt(width / 2, y) as WrappedLoader;
-        // if (!ch) {
-        //     popouts.hasCurrent = false;
-        //     return;
-        // }
-        //
-        // const id = ch.id;
-        // const top = ch.y;
-        // const item = ch.item;
-        // const itemHeight = item.implicitHeight;
-        //
-        // if (id === "statusIcons") {
-        //     const items = item.items;
-        //     const icon = items.childAt(items.width / 2, mapToItem(items, 0, y).y);
-        //     if (icon) {
-        //         popouts.currentName = icon.name;
-        //         popouts.currentCenter = Qt.binding(() => icon.mapToItem(root, 0, icon.implicitHeight / 2).y);
-        //         popouts.hasCurrent = true;
-        //     }
-        // } else if (id === "tray") {
-        //     const index = Math.floor(((y - top) / itemHeight) * item.items.count);
-        //     const trayItem = item.items.itemAt(index);
-        //     if (trayItem) {
-        //         popouts.currentName = `traymenu${index}`;
-        //         popouts.currentCenter = Qt.binding(() => trayItem.mapToItem(root, 0, trayItem.implicitHeight / 2).y);
-        //         popouts.hasCurrent = true;
-        //     }
-        // } else if (id === "activeWindow") {
-        //     popouts.currentName = id.toLowerCase();
-        //     popouts.currentCenter = item.mapToItem(root, 0, itemHeight / 2).y;
-        //     popouts.hasCurrent = true;
-        // }
     }
 
     function handleWheel(y: real, angleDelta: point): void {
