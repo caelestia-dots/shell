@@ -237,6 +237,10 @@ All configuration options are in `~/.config/caelestia/shell.json`.
    	        {
    	            "id": "power",
    	            "enabled": true
+   	        },
+   	        {
+   	            "id": "idleInhibitor",
+   	            "enabled": true
    	        }
         ],
         "persistent": true,
