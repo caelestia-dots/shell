@@ -95,8 +95,7 @@ ColumnLayout {
             anchors.centerIn: parent
 
             text: "person"
-            fill: 1
-            grade: 200
+            color: Colours.palette.m3onSurfaceVariant
             font.pointSize: Math.floor(root.centerWidth / 4)
         }
 
@@ -124,7 +123,7 @@ ColumnLayout {
         }
 
         Keys.onPressed: event => {
-            if (!root.lock.locked)
+            if (root.lock.unlocking)
                 return;
 
             if (event.key === Qt.Key_Enter || event.key === Qt.Key_Return)

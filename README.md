@@ -254,13 +254,12 @@ All configuration options are in `~/.config/caelestia/shell.json`.
         },
         "workspaces": {
             "activeIndicator": true,
-            "activeLabel": "󰮯 ",
+            "activeLabel": "󰮯",
             "activeTrail": false,
             "label": "  ",
             "occupiedBg": false,
-            "occupiedLabel": "󰮯 ",
+            "occupiedLabel": "󰮯",
             "perMonitorWorkspaces": true,
-            "rounded": true,
             "showWindows": true,
             "shown": 5
         }

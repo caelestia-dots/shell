@@ -183,4 +183,19 @@ Singleton {
             return "volume_down";
         return "volume_mute";
     }
+
+    function getSpecialWsIcon(name: string): string {
+        name = name.toLowerCase().slice("special:".length);
+        if (name === "special")
+            return "star";
+        if (name === "communication")
+            return "forum";
+        if (name === "music")
+            return "music_cast";
+        if (name === "todo")
+            return "checklist";
+        if (name === "sysmon")
+            return "monitor_heart";
+        return name[0].toUpperCase();
+    }
 }

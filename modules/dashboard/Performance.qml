@@ -168,7 +168,7 @@ RowLayout {
                 ctx.reset();
 
                 ctx.lineWidth = res.thickness;
-                ctx.lineCap = "round";
+                ctx.lineCap = Appearance.rounding.scale === 0 ? "square" : "round";
 
                 const radius = (Math.min(width, height) - ctx.lineWidth) / 2;
                 const cx = centerX;

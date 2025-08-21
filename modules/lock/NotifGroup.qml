@@ -31,6 +31,11 @@ StyledRect {
     radius: Appearance.rounding.normal
     color: root.urgency === "critical" ? Colours.palette.m3secondaryContainer : Colours.layer(Colours.palette.m3surfaceContainerHigh, 2)
 
+    RetainableLock {
+        object: root.notifs[0]?.notiftication ?? null
+        locked: true
+    }
+
     RowLayout {
         id: content
 
@@ -281,6 +286,11 @@ StyledRect {
             return `${summary} <span style='color:${colour}'>${body.slice(0, t - summary.length)}...</span>`;
         }
         color: root.urgency === "critical" ? Colours.palette.m3onSecondaryContainer : Colours.palette.m3onSurface
+
+        RetainableLock {
+            object: notifLine.modelData.notification
+            locked: true
+        }
 
         TextMetrics {
             id: metrics
