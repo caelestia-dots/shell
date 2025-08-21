@@ -18,7 +18,7 @@ in {
         description = "The package of Caelestia shell";
       };
       settings = mkOption {
-        type = types.attrs;
+        type = types.attrsOf types.anything;
         default = {};
         description = "Caelestia shell settings";
       };
@@ -35,7 +35,7 @@ in {
           description = "The package of Caelestia CLI"; # Doesn't override the shell's CLI, only change from home.packages
         };
         settings = mkOption {
-          type = types.attrs;
+          type = types.attrsOf types.anything;
           default = {};
           description = "Caelestia CLI settings";
         };
