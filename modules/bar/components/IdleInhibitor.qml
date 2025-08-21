@@ -31,7 +31,7 @@ Item {
         anchors.horizontalCenterOffset: -1
 
         text: IdleInhibitor.enabled ? "visibility" : "visibility_off"
-        color: Colours.palette.m3error
+        color: IdleInhibitor.enabled ? Colours.palette.m3primary : Colours.palette.m3tertiary
         font.bold: true
         font.pointSize: Appearance.font.size.normal
     }
