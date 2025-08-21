@@ -132,7 +132,8 @@ in
       	--set CAELESTIA_II_PATH ${idleInhibitor}/bin/inhibit_idle \
       	--add-flags "-p $out/share/caelestia-shell"
 
-      	install -Dm755 ${beatDetector}/bin/beat_detector ${idleInhibitor}/bin/inhibit_idle $out/bin/
+      	ln -sf ${beatDetector}/bin/beat_detector $out/bin
+      	ln -sf ${idleInhibitor}/bin/inhibit_idle $out/bin
     '';
 
     meta = {
