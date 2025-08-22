@@ -70,7 +70,6 @@ in {
           TimeoutStopSec = "5s";
           Environment = [
             "QT_QPA_PLATFORM=wayland"
-            "QT_QPA_PLATFORMTHEME=gtk3"
           ];
 
           Slice = "session.slice";
