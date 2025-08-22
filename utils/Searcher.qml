@@ -27,7 +27,7 @@ Singleton {
 	            if(typeof e[k][0] === "string")
 	                obj[k] = Fuzzy.prepare(e[k].join());
 	        }
-            else
+            else if(typeof e[k] === "string")
                 obj[k] = Fuzzy.prepare(e[k]);
         }
         return obj;
