@@ -288,6 +288,13 @@ All configuration options are in `~/.config/caelestia/shell.json`.
             "schemes": false,
             "variants": false,
             "wallpapers": false
+        },
+        "appQueryWeigths": {
+		        "name": 2,
+		        "comment": 1,
+		        "genericName": 0,
+		        "categories": 1,
+		        "keywords": 0
         }
     },
     "lock": {

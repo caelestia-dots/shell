@@ -8,6 +8,15 @@ Searcher {
     id: root
 
     list: DesktopEntries.applications.values.filter(a => !a.noDisplay).sort((a, b) => a.name.localeCompare(b.name))
+    keys: ["name", "comment", "genericName", "categories", "keywords"]
+    weights: [
+    	Config.launcher.appQueryWeights.name,
+    	Config.launcher.appQueryWeights.comment,
+    	Config.launcher.appQueryWeights.genericName,
+    	Config.launcher.appQueryWeights.categories,
+    	Config.launcher.appQueryWeights.keywords
+    ]
+
     useFuzzy: Config.launcher.useFuzzy.apps
 
     function launch(entry: DesktopEntry): void {
