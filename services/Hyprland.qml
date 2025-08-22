@@ -15,7 +15,8 @@ Singleton {
     readonly property HyprlandWorkspace focusedWorkspace: Hyprland.focusedWorkspace
     readonly property HyprlandMonitor focusedMonitor: Hyprland.focusedMonitor
     readonly property int activeWsId: focusedWorkspace?.id ?? 1
-    property string kbLayout: "?"
+    readonly property string kbLayout: kbLayoutFull.slice(0, 2).toLowerCase()
+    property string kbLayoutFull: "?"
 
     function dispatch(request: string): void {
         Hyprland.dispatch(request);
@@ -34,7 +35,7 @@ Singleton {
                 return;
 
             if (n === "activelayout") {
-                root.kbLayout = event.parse(2)[1].slice(0, 2).toLowerCase();
+                root.kbLayoutFull = event.parse(2)[1];
             } else if (["workspace", "moveworkspace", "activespecial", "focusedmon"].includes(n)) {
                 Hyprland.refreshWorkspaces();
                 Hyprland.refreshMonitors();
@@ -55,7 +56,7 @@ Singleton {
         running: true
         command: ["hyprctl", "-j", "devices"]
         stdout: StdioCollector {
-            onStreamFinished: root.kbLayout = JSON.parse(text).keyboards.find(k => k.main).active_keymap.slice(0, 2).toLowerCase()
+            onStreamFinished: root.kbLayoutFull = JSON.parse(text).keyboards.find(k => k.main).active_keymap
         }
     }
 }

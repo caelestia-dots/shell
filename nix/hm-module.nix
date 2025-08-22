@@ -4,8 +4,10 @@ self: {
   lib,
   ...
 }: let
-  cli-default = self.inputs.caelestia-cli.packages.${pkgs.system}.default;
-  shell-default = self.packages.${pkgs.system}.with-cli;
+  inherit (pkgs.stdenv.hostPlatform) system;
+
+  cli-default = self.inputs.caelestia-cli.packages.${system}.default;
+  shell-default = self.packages.${system}.with-cli;
 
   cfg = config.programs.caelestia;
 in {
@@ -18,7 +20,7 @@ in {
         description = "The package of Caelestia shell";
       };
       settings = mkOption {
-        type = types.attrs;
+        type = types.attrsOf types.anything;
         default = {};
         description = "Caelestia shell settings";
       };
@@ -35,7 +37,7 @@ in {
           description = "The package of Caelestia CLI"; # Doesn't override the shell's CLI, only change from home.packages
         };
         settings = mkOption {
-          type = types.attrs;
+          type = types.attrsOf types.anything;
           default = {};
           description = "Caelestia CLI settings";
         };
@@ -68,6 +70,7 @@ in {
           TimeoutStopSec = "5s";
           Environment = [
             "QT_QPA_PLATFORM=wayland"
+            "QT_QPA_PLATFORMTHEME=gtk3"
           ];
 
           Slice = "session.slice";

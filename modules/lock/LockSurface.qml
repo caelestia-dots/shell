@@ -13,10 +13,8 @@ WlSessionLockSurface {
     required property WlSessionLock lock
     required property Pam pam
 
+    readonly property alias unlocking: unlockAnim.running
     readonly property bool animating: initAnim.running || unlockAnim.running
-    property bool locked
-
-    Component.onCompleted: locked = true
 
     color: "transparent"
 
@@ -24,7 +22,6 @@ WlSessionLockSurface {
         target: root.lock
 
         function onUnlock(): void {
-            root.locked = false;
             unlockAnim.start();
         }
     }
@@ -43,7 +40,7 @@ WlSessionLockSurface {
             Anim {
                 target: lockBg
                 property: "radius"
-                to: lockContent.size / 4
+                to: lockContent.radius
             }
             Anim {
                 target: content
@@ -172,8 +169,6 @@ WlSessionLockSurface {
 
         layer.enabled: true
         layer.effect: MultiEffect {
-            id: backgroundBlur
-
             autoPaddingEnabled: false
             blurEnabled: true
             blur: 1
@@ -186,6 +181,7 @@ WlSessionLockSurface {
         id: lockContent
 
         readonly property int size: lockIcon.implicitHeight + Appearance.padding.large * 4
+        readonly property int radius: size / 4 * Appearance.rounding.scale
 
         anchors.centerIn: parent
         implicitWidth: size
@@ -199,7 +195,7 @@ WlSessionLockSurface {
 
             anchors.fill: parent
             color: Colours.palette.m3surface
-            radius: parent.size / 4
+            radius: parent.radius
             opacity: Colours.transparency.enabled ? Colours.transparency.base : 1
 
             layer.enabled: true

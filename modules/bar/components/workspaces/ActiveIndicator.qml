@@ -8,33 +8,27 @@ StyledRect {
     id: root
 
     required property int activeWsId
-    required property list<Workspace> workspaces
+    required property Repeater workspaces
     required property Item mask
-    required property real maskWidth
-    required property real maskHeight
-    required property int groupOffset
 
-    readonly property int currentWsIdx: activeWsId - 1 - groupOffset
-    property real leading: getWsY(currentWsIdx)
-    property real trailing: getWsY(currentWsIdx)
-    property real currentSize: workspaces[currentWsIdx]?.size ?? 0
+    readonly property int currentWsIdx: (activeWsId - 1) % Config.bar.workspaces.shown
+
+    property real leading: workspaces.itemAt(currentWsIdx)?.y ?? 0
+    property real trailing: workspaces.itemAt(currentWsIdx)?.y ?? 0
+    property real currentSize: workspaces.itemAt(currentWsIdx)?.size ?? 0
     property real offset: Math.min(leading, trailing)
     property real size: {
         const s = Math.abs(leading - trailing) + currentSize;
-        if (Config.bar.workspaces.activeTrail && lastWs > currentWsIdx)
-            return Math.min(getWsY(lastWs) + (workspaces[lastWs]?.size ?? 0) - offset, s);
+        if (Config.bar.workspaces.activeTrail && lastWs > currentWsIdx) {
+            const ws = workspaces.itemAt(lastWs);
+            // console.log(ws, lastWs);
+            return ws ? Math.min(ws.y + ws.size - offset, s) : 0;
+        }
         return s;
     }
 
     property int cWs
     property int lastWs
-
-    function getWsY(idx: int): real {
-        let y = 0;
-        for (let i = 0; i < idx; i++)
-            y += workspaces[i]?.size ?? 0;
-        return y;
-    }
 
     onCurrentWsIdxChanged: {
         lastWs = cWs;
@@ -42,11 +36,10 @@ StyledRect {
     }
 
     clip: true
-    x: 1
-    y: offset + 1
-    implicitWidth: Config.bar.sizes.innerHeight - 2
-    implicitHeight: size - 2
-    radius: Config.bar.workspaces.rounded ? Appearance.rounding.full : 0
+    y: offset + mask.y
+    implicitWidth: Config.bar.sizes.innerWidth - Appearance.padding.small * 2
+    implicitHeight: size
+    radius: Appearance.rounding.full
     color: Colours.palette.m3primary
 
     Colouriser {
@@ -56,8 +49,8 @@ StyledRect {
 
         x: 0
         y: -parent.offset
-        implicitWidth: root.maskWidth
-        implicitHeight: root.maskHeight
+        implicitWidth: root.mask.implicitWidth
+        implicitHeight: root.mask.implicitHeight
 
         anchors.horizontalCenter: parent.horizontalCenter
     }

@@ -93,7 +93,7 @@ Item {
             readonly property real cos: Math.cos(angle)
             readonly property real sin: Math.sin(angle)
 
-            capStyle: ShapePath.RoundCap
+            capStyle: Appearance.rounding.scale === 0 ? ShapePath.SquareCap : ShapePath.RoundCap
             strokeWidth: 360 / Config.dashboard.visualiserBars - Appearance.spacing.small / 4
             strokeColor: Colours.palette.m3primary
 
@@ -231,7 +231,7 @@ Item {
                 implicitWidth: Math.max(playIcon.implicitWidth, playIcon.implicitHeight) + padding * 2
                 implicitHeight: implicitWidth
 
-                radius: Players.active?.isPlaying ? Appearance.rounding.small : implicitHeight / 2
+                radius: Players.active?.isPlaying ? Appearance.rounding.small : implicitHeight / 2 * Math.min(1, Appearance.rounding.scale)
                 color: {
                     if (!Players.active?.canTogglePlaying)
                         return Qt.alpha(Colours.palette.m3onSurface, 0.1);

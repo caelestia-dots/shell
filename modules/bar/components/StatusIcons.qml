@@ -20,7 +20,7 @@ StyledRect {
     radius: Appearance.rounding.full
 
     clip: true
-    implicitWidth: iconColumn.implicitWidth + Appearance.padding.normal * 2
+    implicitWidth: Config.bar.sizes.innerWidth
     implicitHeight: iconColumn.implicitHeight + Appearance.padding.normal * 2
 
     ColumnLayout {
@@ -42,11 +42,9 @@ StyledRect {
         }
 
         // Keyboard layout icon
-        Loader {
-            Layout.alignment: Qt.AlignHCenter
-            asynchronous: true
+        WrappedLoader {
+            name: "kblayout"
             active: Config.bar.status.showKbLayout
-            visible: active
 
             sourceComponent: StyledText {
                 animate: true

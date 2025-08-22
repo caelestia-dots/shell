@@ -52,6 +52,11 @@ Item {
             }
         }
 
+        Popout {
+            name: "kblayout"
+            source: "KbLayout.qml"
+        }
+
         Repeater {
             model: ScriptModel {
                 values: [...SystemTray.items.values]

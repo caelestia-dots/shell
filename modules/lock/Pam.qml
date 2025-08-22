@@ -63,4 +63,12 @@ Scope {
         interval: 4000
         onTriggered: root.state = ""
     }
+
+    Connections {
+        target: root.lock
+
+        function onUnlock(): void {
+            root.buffer = "";
+        }
+    }
 }

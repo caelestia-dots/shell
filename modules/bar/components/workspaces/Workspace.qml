@@ -6,7 +6,7 @@ import Quickshell
 import QtQuick
 import QtQuick.Layouts
 
-Item {
+ColumnLayout {
     id: root
 
     required property int index
@@ -16,41 +16,44 @@ Item {
 
     readonly property bool isWorkspace: true // Flag for finding workspace children
     // Unanimated prop for others to use as reference
-    readonly property real size: childrenRect.height + (hasWindows ? Appearance.padding.smaller : 0)
+    readonly property int size: implicitHeight + (hasWindows ? Appearance.padding.small : 0)
 
     readonly property int ws: groupOffset + index + 1
     readonly property bool isOccupied: occupied[ws] ?? false
     readonly property bool hasWindows: isOccupied && Config.bar.workspaces.showWindows
 
-    Layout.preferredWidth: childrenRect.width
+    Layout.alignment: Qt.AlignHCenter
     Layout.preferredHeight: size
+
+    spacing: 0
 
     StyledText {
         id: indicator
 
-        readonly property string label: Config.bar.workspaces.label || root.ws
-        readonly property string occupiedLabel: Config.bar.workspaces.occupiedLabel || label
-        readonly property string activeLabel: Config.bar.workspaces.activeLabel || (root.isOccupied ? occupiedLabel : label)
+        Layout.alignment: Qt.AlignHCenter | Qt.AlignTop
+        Layout.preferredHeight: Config.bar.sizes.innerWidth - Appearance.padding.small * 2
 
         animate: true
-        text: root.activeWsId === root.ws ? activeLabel : root.isOccupied ? occupiedLabel : label
+        text: {
+            const label = Config.bar.workspaces.label || root.ws;
+            const occupiedLabel = Config.bar.workspaces.occupiedLabel || label;
+            const activeLabel = Config.bar.workspaces.activeLabel || (root.isOccupied ? occupiedLabel : label);
+            return root.activeWsId === root.ws ? activeLabel : root.isOccupied ? occupiedLabel : label;
+        }
         color: Config.bar.workspaces.occupiedBg || root.isOccupied || root.activeWsId === root.ws ? Colours.palette.m3onSurface : Colours.layer(Colours.palette.m3outlineVariant, 2)
-        horizontalAlignment: StyledText.AlignHCenter
-        verticalAlignment: StyledText.AlignVCenter
-
-        width: Config.bar.sizes.innerHeight
-        height: Config.bar.sizes.innerHeight
+        verticalAlignment: Qt.AlignVCenter
     }
 
     Loader {
         id: windows
 
-        active: Config.bar.workspaces.showWindows
-        asynchronous: true
+        Layout.alignment: Qt.AlignHCenter
+        Layout.fillHeight: true
+        Layout.topMargin: -Config.bar.sizes.innerWidth / 10
 
-        anchors.horizontalCenter: indicator.horizontalCenter
-        anchors.top: indicator.bottom
-        anchors.topMargin: -Config.bar.sizes.innerHeight / 10
+        visible: active
+        active: root.hasWindows
+        asynchronous: true
 
         sourceComponent: Column {
             spacing: 0
@@ -89,10 +92,6 @@ Item {
                 }
             }
         }
-    }
-
-    Behavior on Layout.preferredWidth {
-        Anim {}
     }
 
     Behavior on Layout.preferredHeight {
