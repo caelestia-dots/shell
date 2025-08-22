@@ -8,6 +8,32 @@ import QtQuick
 
 Item {
     id: root
+    // Helper function to retrieve active window icon
+    function getActiveWindowIcon() {
+        const ws = Hyprland.focusedWorkspace;
+        if (!ws)
+            return "desktop_windows";
+
+        const at = Hyprland.activeToplevel;
+        if (at && at.workspace === ws) {
+            return Icons.getAppCategoryIcon(at.lastIpcObject.class, "desktop_windows");
+        }
+        return "desktop_windows";
+    }
+
+    // Helper function to retrieve active window title
+    function getActiveWindowTitle() {
+        const ws = Hyprland.focusedWorkspace;
+        if (!ws)
+            return qsTr("Desktop");
+
+        const at = Hyprland.activeToplevel;
+        if (at && at.workspace === ws) {
+            return at.title && at.title.length ? at.title : qsTr("Desktop");
+        }
+
+        return qsTr("Desktop");
+    }
 
     required property var bar
     required property Brightness.Monitor monitor
@@ -31,7 +57,7 @@ Item {
         anchors.horizontalCenter: parent.horizontalCenter
 
         animate: true
-        text: Icons.getAppCategoryIcon(Hyprland.activeToplevel?.lastIpcObject.class, "desktop_windows")
+        text: getActiveWindowIcon()
         color: root.colour
     }
 
@@ -46,7 +72,7 @@ Item {
     TextMetrics {
         id: metrics
 
-        text: Hyprland.activeToplevel?.title ?? qsTr("Desktop")
+        text: getActiveWindowTitle()
         font.pointSize: Appearance.font.size.smaller
         font.family: Appearance.font.family.mono
         elide: Qt.ElideRight
