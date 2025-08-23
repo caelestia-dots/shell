@@ -12,7 +12,12 @@ Item {
 
     required property Item wrapper
 
-    implicitWidth: Hyprland.activeToplevel ? child.implicitWidth : -Appearance.padding.large * 2
+    // Helper function to retrieve the current active window on currrent workspace
+    function getActiveWindow() {
+        return (Hyprland.activeToplevel && Hyprland.activeToplevel.workspace === Hyprland.focusedWorkspace) ? Hyprland.activeToplevel : null;
+    }
+
+    implicitWidth: getActiveWindow() ? child.implicitWidth : -Appearance.padding.large * 2
     implicitHeight: child.implicitHeight
 
     Column {
@@ -33,7 +38,7 @@ Item {
 
                 Layout.alignment: Qt.AlignVCenter
                 implicitSize: details.implicitHeight
-                source: Icons.getAppIcon(Hyprland.activeToplevel?.lastIpcObject.class ?? "", "image-missing")
+                source: getActiveWindow() ? Icons.getAppIcon(getActiveWindow().lastIpcObject.class, "image-missing") : "image-missing"
             }
 
             ColumnLayout {
@@ -44,14 +49,14 @@ Item {
 
                 StyledText {
                     Layout.fillWidth: true
-                    text: Hyprland.activeToplevel?.title ?? ""
+                    text: getActiveWindow() ? getActiveWindow().title : ""
                     font.pointSize: Appearance.font.size.normal
                     elide: Text.ElideRight
                 }
 
                 StyledText {
                     Layout.fillWidth: true
-                    text: Hyprland.activeToplevel?.lastIpcObject.class ?? ""
+                    text: getActiveWindow() ? getActiveWindow().lastIpcObject.class : ""
                     color: Colours.palette.m3onSurfaceVariant
                     elide: Text.ElideRight
                 }
@@ -91,7 +96,7 @@ Item {
             ScreencopyView {
                 id: preview
 
-                captureSource: Hyprland.activeToplevel?.wayland ?? null
+                captureSource: getActiveWindow() ? getActiveWindow().wayland : null
                 live: visible
 
                 constraintSize.width: Config.bar.sizes.windowPreviewSize
