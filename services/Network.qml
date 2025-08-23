@@ -57,7 +57,7 @@ Singleton {
         running: true
         command: ["nmcli", "radio", "wifi"]
         environment: ({
-                LANG: "c.UTF-8",
+                LANG: "C.UTF-8",
                 LC_ALL: "C.UTF-8"
             })
         stdout: StdioCollector {
@@ -110,7 +110,7 @@ Singleton {
         running: true
         command: ["nmcli", "-g", "ACTIVE,SIGNAL,FREQ,SSID,BSSID,SECURITY", "d", "w"]
         environment: ({
-                LANG: "c.UTF-8",
+                LANG: "C.UTF-8",
                 LC_ALL: "C.UTF-8"
             })
         stdout: StdioCollector {

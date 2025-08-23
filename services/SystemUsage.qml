@@ -175,8 +175,8 @@ Singleton {
 
         command: ["sensors"]
         environment: ({
-                LANG: "C",
-                LC_ALL: "C"
+                LANG: "C.UTF-8",
+                LC_ALL: "C.UTF-8"
             })
         stdout: StdioCollector {
             onStreamFinished: {
