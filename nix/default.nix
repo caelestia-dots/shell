@@ -68,7 +68,7 @@ in
     src = ./..;
 
     nativeBuildInputs = [gcc makeWrapper qt6.wrapQtAppsHook];
-    buildInputs = [quickshell aubio pipewire];
+    buildInputs = [quickshell aubio pipewire qt6.qtbase];
     propagatedBuildInputs = runtimeDeps;
 
     buildPhase = ''
