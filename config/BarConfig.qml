@@ -46,6 +46,10 @@ JsonObject {
             id: "power",
             enabled: true
         },
+        {
+            id: "idleInhibitor",
+            enabled: false
+        }
     ]
 
     component Workspaces: JsonObject {

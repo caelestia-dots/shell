@@ -4,23 +4,18 @@ import qs.config
 import Quickshell
 import QtQuick
 
-Item {
+StyledRect {
     id: root
 
-    implicitWidth: icon.implicitHeight + Appearance.padding.small * 2
-    implicitHeight: icon.implicitHeight
+    implicitWidth: implicitHeight
+    implicitHeight: icon.implicitHeight + Appearance.padding.small * 2
+
+    radius: Appearance.rounding.full
+    color: Qt.alpha(Colours.palette.m3primaryContainer, IdleInhibitor.enabled ? 1 : 0)
 
     StateLayer {
-        // Cursed workaround to make the height larger than the parent
-        anchors.fill: undefined
-        anchors.centerIn: parent
-        implicitWidth: implicitHeight
-        implicitHeight: icon.implicitHeight + Appearance.padding.small * 2
-
-        radius: Appearance.rounding.full
-
         function onClicked(): void {
-            IdleInhibitor.enabled = !IdleInhibitor.enabled; 
+            IdleInhibitor.enabled = !IdleInhibitor.enabled;
         }
     }
 
@@ -30,8 +25,8 @@ Item {
         anchors.centerIn: parent
         anchors.horizontalCenterOffset: -1
 
-        text: IdleInhibitor.enabled ? "visibility" : "visibility_off"
-        color: IdleInhibitor.enabled ? Colours.palette.m3primary : Colours.palette.m3tertiary
+        text: "coffee"
+        color: IdleInhibitor.enabled ? Colours.palette.m3onPrimaryContainer : Colours.palette.m3secondary
         font.bold: true
         font.pointSize: Appearance.font.size.normal
     }
