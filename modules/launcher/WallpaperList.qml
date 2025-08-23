@@ -12,18 +12,31 @@ PathView {
 
     required property TextField search
     required property PersistentProperties visibilities
-    readonly property int numItems: {
-        const screenWidth = QsWindow.window?.screen.width * 0.8;
-        if (!screenWidth)
-            return 0;
-        const itemWidth = Config.launcher.sizes.wallpaperWidth * 0.8;
-        const max = Config.launcher.maxWallpapers;
-        const maxItemsOnScreen = Math.floor(screenWidth / itemWidth);
+    required property var panels
+    required property var wrapper
 
-        const visible = Math.min(maxItemsOnScreen, max, scriptModel.values.length);
+    readonly property int itemWidth: Config.launcher.sizes.wallpaperWidth * 0.8 + Appearance.padding.larger * 2
+
+    readonly property int numItems: {
+        const screen = QsWindow.window?.screen;
+        if (!screen)
+            return 0;
+
+        // Screen width - 4x outer rounding - 2x max side thickness (cause centered)
+        let outerMargins = Math.max(Config.border.thickness, panels.bar.implicitWidth);
+        if (panels.popouts.hasCurrent && panels.popouts.currentCenter + panels.popouts.nonAnimHeight / 2 > screen.height - wrapper.implicitHeight - Config.border.thickness * 2)
+            outerMargins = panels.bar.implicitWidth + panels.popouts.nonAnimWidth;
+        const maxWidth = screen.width - Config.border.rounding * 4 - outerMargins * 2;
+
+        if (maxWidth <= 0)
+            return 0;
+
+        const maxItemsOnScreen = Math.floor(maxWidth / itemWidth);
+        const visible = Math.min(maxItemsOnScreen, Config.launcher.maxWallpapers, scriptModel.values.length);
+
         if (visible === 2)
             return 1;
-        else if (visible > 1 && visible % 2 === 0)
+        if (visible > 1 && visible % 2 === 0)
             return visible - 1;
         return visible;
     }
@@ -45,7 +58,7 @@ PathView {
             Wallpapers.preview(currentItem.modelData.path);
     }
 
-    implicitWidth: Math.min(numItems, count) * (Config.launcher.sizes.wallpaperWidth * 0.8 + Appearance.padding.larger * 2)
+    implicitWidth: Math.min(numItems, count) * itemWidth
     pathItemCount: numItems
     cacheItemCount: 4
 

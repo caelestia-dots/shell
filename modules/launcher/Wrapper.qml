@@ -6,6 +6,7 @@ Item {
     id: root
 
     required property PersistentProperties visibilities
+    required property var panels
 
     visible: height > 0
     implicitHeight: 0
@@ -50,6 +51,8 @@ Item {
     Content {
         id: content
 
+        wrapper: root
         visibilities: root.visibilities
+        panels: root.panels
     }
 }

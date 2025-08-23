@@ -11,7 +11,6 @@ import Quickshell
 import Quickshell.Widgets
 import Quickshell.Services.Mpris
 import QtQuick
-import QtQuick.Controls
 import QtQuick.Layouts
 import QtQuick.Shapes
 
@@ -71,6 +70,7 @@ Item {
         anchors.fill: cover
         anchors.margins: -Config.dashboard.sizes.mediaVisualiserSize
 
+        asynchronous: true
         preferredRendererType: Shape.CurveRenderer
         data: visualiserBars.instances
     }

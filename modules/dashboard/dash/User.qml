@@ -41,24 +41,17 @@ Row {
 
         MouseArea {
             anchors.fill: parent
-
-            cursorShape: Qt.PointingHandCursor
             hoverEnabled: true
-
-            onClicked: {
-                root.visibilities.launcher = false;
-                root.state.facePicker.open();
-            }
 
             StyledRect {
                 anchors.fill: parent
 
-                color: Qt.alpha(Colours.palette.m3primary, 0.1)
+                color: Qt.alpha(Colours.palette.m3scrim, 0.5)
                 opacity: parent.containsMouse ? 1 : 0
 
                 Behavior on opacity {
                     NumberAnimation {
-                        duration: Appearance.anim.durations.normal
+                        duration: Appearance.anim.durations.expressiveFastSpatial
                         easing.type: Easing.BezierSpline
                         easing.bezierCurve: Appearance.anim.curves.standard
                     }
@@ -75,6 +68,15 @@ Row {
                 color: Colours.palette.m3primary
                 scale: parent.containsMouse ? 1 : 0.5
                 opacity: parent.containsMouse ? 1 : 0
+
+                StateLayer {
+                    color: Colours.palette.m3onPrimary
+
+                    function onClicked(): void {
+                        root.visibilities.launcher = false;
+                        root.state.facePicker.open();
+                    }
+                }
 
                 MaterialIcon {
                     id: selectIcon
@@ -99,7 +101,7 @@ Row {
                     NumberAnimation {
                         duration: Appearance.anim.durations.expressiveFastSpatial
                         easing.type: Easing.BezierSpline
-                        easing.bezierCurve: Appearance.anim.curves.expressiveFastSpatial
+                        easing.bezierCurve: Appearance.anim.curves.standard
                     }
                 }
             }

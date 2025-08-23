@@ -11,7 +11,9 @@ import QtQuick.Controls
 Item {
     id: root
 
+    required property var wrapper
     required property PersistentProperties visibilities
+    required property var panels
     required property TextField search
     required property int padding
     required property int rounding
@@ -103,6 +105,8 @@ Item {
         sourceComponent: WallpaperList {
             search: root.search
             visibilities: root.visibilities
+            panels: root.panels
+            wrapper: root.wrapper
         }
     }
 

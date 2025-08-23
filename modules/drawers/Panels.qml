@@ -1,4 +1,3 @@
-import qs.services
 import qs.config
 import qs.modules.osd as Osd
 import qs.modules.notifications as Notifications
@@ -64,6 +63,7 @@ Item {
         id: launcher
 
         visibilities: root.visibilities
+        panels: root
 
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.bottom: parent.bottom

@@ -38,32 +38,43 @@ Item {
             anchors.verticalCenter: parent.verticalCenter
         }
 
-        Item {
+        Column {
             anchors.left: icon.right
             anchors.leftMargin: Appearance.spacing.larger
             anchors.verticalCenter: icon.verticalCenter
 
-            implicitWidth: parent.width - icon.width
-            implicitHeight: name.implicitHeight + desc.implicitHeight
+            width: parent.width - icon.width - anchors.leftMargin - (current.active ? current.width + Appearance.spacing.normal : 0)
+            spacing: 0
 
             StyledText {
-                id: name
-
                 text: root.modelData?.name ?? ""
                 font.pointSize: Appearance.font.size.normal
             }
 
             StyledText {
-                id: desc
-
                 text: root.modelData?.description ?? ""
                 font.pointSize: Appearance.font.size.small
                 color: Colours.palette.m3outline
 
                 elide: Text.ElideRight
-                width: root.width - icon.width - Appearance.rounding.normal * 2
+                anchors.left: parent.left
+                anchors.right: parent.right
+            }
+        }
 
-                anchors.top: name.bottom
+        Loader {
+            id: current
+
+            anchors.right: parent.right
+            anchors.verticalCenter: parent.verticalCenter
+
+            active: root.modelData?.variant === Schemes.currentVariant
+            asynchronous: true
+
+            sourceComponent: MaterialIcon {
+                text: "check"
+                color: Colours.palette.m3onSurfaceVariant
+                font.pointSize: Appearance.font.size.large
             }
         }
     }

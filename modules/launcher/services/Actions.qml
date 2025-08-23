@@ -58,6 +58,16 @@ Searcher {
             }
         },
         Action {
+            name: qsTr("Random")
+            desc: qsTr("Switch to a random wallpaper")
+            icon: "casino"
+
+            function onClicked(list: AppList): void {
+                list.visibilities.launcher = false;
+                Quickshell.execDetached(["caelestia", "wallpaper", "-r"]);
+            }
+        },
+        Action {
             name: qsTr("Light")
             desc: qsTr("Change the scheme to light mode")
             icon: "light_mode"

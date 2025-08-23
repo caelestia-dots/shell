@@ -11,7 +11,10 @@ import QtQuick
 Item {
     id: root
 
+    required property var wrapper
     required property PersistentProperties visibilities
+    required property var panels
+
     readonly property int padding: Appearance.padding.large
     readonly property int rounding: Appearance.rounding.large
 
@@ -34,7 +37,9 @@ Item {
         ContentList {
             id: list
 
+            wrapper: root.wrapper
             visibilities: root.visibilities
+            panels: root.panels
             search: search
             padding: root.padding
             rounding: root.rounding
