@@ -21,7 +21,7 @@ Column {
         implicitHeight: Config.osd.sizes.sliderHeight
         // Add scroll accumulation properties
         property int scrollAccumulatedY: 0
-        property int scrollThreshold: 250  // Adjust this to make it more/less sensitive
+        property int scrollThreshold: Config.osd.scrollSensitivity  // Adjust this to make it more/less sensitive
 
         onWheel: event => {
             // Update accumulated scroll
@@ -53,7 +53,7 @@ Column {
 
         // Add scroll accumulation properties
         property int scrollAccumulatedY: 0
-        property int scrollThreshold: 250  // Adjust this to make it more/less sensitive
+        property int scrollThreshold: Config.osd.scrollSensitivity  // Adjust this to make it more/less sensitive
         onWheel: event => {
             const monitor = root.monitor;
 
