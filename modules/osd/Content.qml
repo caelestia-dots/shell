@@ -19,14 +19,25 @@ Column {
     CustomMouseArea {
         implicitWidth: Config.osd.sizes.sliderWidth
         implicitHeight: Config.osd.sizes.sliderHeight
+        // Add scroll accumulation properties
+        property int scrollAccumulatedY: 0
+        property int scrollThreshold: Config.osd.scrollSensitivity  // Adjust this to make it more/less sensitive
 
         onWheel: event => {
-            if (event.angleDelta.y > 0)
-                Audio.incrementVolume();
-            else if (event.angleDelta.y < 0)
-                Audio.decrementVolume();
-        }
+            // Update accumulated scroll
+            if (Math.sign(event.angleDelta.y) !== Math.sign(scrollAccumulatedY))
+                scrollAccumulatedY = 0;
+            scrollAccumulatedY += event.angleDelta.y;
 
+            // Trigger handler and reset if above threshold
+            if (Math.abs(scrollAccumulatedY) >= scrollThreshold) {
+                if (scrollAccumulatedY > 0)
+                    Audio.incrementVolume();
+                else if (scrollAccumulatedY < 0)
+                    Audio.decrementVolume();
+                scrollAccumulatedY = 0;
+            }
+        }
         FilledSlider {
             anchors.fill: parent
 
@@ -40,16 +51,26 @@ Column {
         implicitWidth: Config.osd.sizes.sliderWidth
         implicitHeight: Config.osd.sizes.sliderHeight
 
+        // Add scroll accumulation properties
+        property int scrollAccumulatedY: 0
+        property int scrollThreshold: Config.osd.scrollSensitivity  // Adjust this to make it more/less sensitive
         onWheel: event => {
             const monitor = root.monitor;
+
             if (!monitor)
                 return;
-            if (event.angleDelta.y > 0)
-                monitor.setBrightness(monitor.brightness + 0.1);
-            else if (event.angleDelta.y < 0)
-                monitor.setBrightness(monitor.brightness - 0.1);
-        }
+            if (Math.sign(event.angleDelta.y) !== Math.sign(scrollAccumulatedY))
+                scrollAccumulatedY = 0;
 
+            scrollAccumulatedY += event.angleDelta.y;
+            if (Math.abs(scrollAccumulatedY) >= scrollThreshold) {
+                if (scrollAccumulatedY > 0)
+                    monitor.setBrightness(monitor.brightness + 0.1);
+                else if (scrollAccumulatedY < 0)
+                    monitor.setBrightness(monitor.brightness - 0.1);
+                scrollAccumulatedY = 0;
+            }
+        }
         FilledSlider {
             anchors.fill: parent
 
