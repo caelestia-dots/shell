@@ -38,7 +38,7 @@ Column {
 
     // Brightness Slider
     WrappedLoader {
-        name: "brightness"
+        name: "brightnessSlider"
         active: Config.osd.sliders.showBrightnessSlider
         sourceComponent: CustomMouseArea {
             implicitWidth: Config.osd.sizes.sliderWidth
