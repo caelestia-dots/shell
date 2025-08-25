@@ -17,6 +17,8 @@ Column {
         color: root.colour
 
         anchors.horizontalCenter: parent.horizontalCenter
+
+        visible: Config.bar.clock.showCalendarIcon
     }
 
     StyledText {
