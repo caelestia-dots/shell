@@ -60,6 +60,9 @@ in {
           Description = "Caelestia Shell Service";
           After = ["graphical-session.target"];
           PartOf = ["graphical-session.target"];
+          X-Restart-Triggers = lib.mkIf (cfg.settings != { }) [
+            "${config.xdg.configFile."caelestia/shell.json".source}"
+          ];
         };
 
         Service = {
