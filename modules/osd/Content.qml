@@ -3,7 +3,6 @@ import qs.services
 import qs.config
 import qs.utils
 import QtQuick
-import QtQuick.Layouts
 
 Column {
     id: root
@@ -66,8 +65,6 @@ Column {
     }
     component WrappedLoader: Loader {
         required property string name
-
-        Layout.alignment: Qt.AlignHCenter
         asynchronous: true
         visible: active
     }
