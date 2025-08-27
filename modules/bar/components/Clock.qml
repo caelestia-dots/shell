@@ -1,3 +1,5 @@
+pragma ComponentBehavior: Bound
+
 import qs.components
 import qs.services
 import qs.config
@@ -10,15 +12,17 @@ Column {
 
     spacing: Appearance.spacing.small
 
-    MaterialIcon {
-        id: icon
-
-        text: "calendar_month"
-        color: root.colour
-
+    Loader {
         anchors.horizontalCenter: parent.horizontalCenter
 
-        visible: Config.bar.clock.showCalendarIcon
+        active: Config.bar.clock.showIcon
+        visible: active
+        asynchronous: true
+
+        sourceComponent: MaterialIcon {
+            text: "calendar_month"
+            color: root.colour
+        }
     }
 
     StyledText {
