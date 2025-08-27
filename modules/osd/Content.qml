@@ -1,3 +1,5 @@
+pragma ComponentBehavior: Bound
+
 import qs.components.controls
 import qs.services
 import qs.config
@@ -16,6 +18,7 @@ Column {
 
     spacing: Appearance.spacing.normal
 
+    // Speaker volume
     CustomMouseArea {
         implicitWidth: Config.osd.sizes.sliderWidth
         implicitHeight: Config.osd.sizes.sliderHeight
@@ -36,10 +39,10 @@ Column {
         }
     }
 
-    // Brightness Slider
+    // Brightness
     WrappedLoader {
-        name: "brightnessSlider"
-        active: Config.osd.sliders.showBrightnessSlider
+        active: Config.osd.enableBrightness
+
         sourceComponent: CustomMouseArea {
             implicitWidth: Config.osd.sizes.sliderWidth
             implicitHeight: Config.osd.sizes.sliderHeight
@@ -64,7 +67,6 @@ Column {
         }
     }
     component WrappedLoader: Loader {
-        required property string name
         asynchronous: true
         visible: active
     }

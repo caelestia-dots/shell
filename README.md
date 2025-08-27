@@ -307,10 +307,9 @@ default, you must create it manually.
         "expire": false
     },
     "osd": {
-        "hideDelay": 2000,
-        "sliders": {
-            "showBrightnessSlider": true
-        }
+        "enabled": true,
+        "enableBrightness": true,
+        "hideDelay": 2000
     },
     "paths": {
         "mediaGif": "root:/assets/bongocat.gif",
