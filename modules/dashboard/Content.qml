@@ -9,34 +9,43 @@ import QtQuick.Layouts
 
 Item {
     id: root
-
+    
     required property PersistentProperties visibilities
     required property PersistentProperties state
     readonly property real nonAnimWidth: view.implicitWidth + viewWrapper.anchors.margins * 2
+    readonly property bool showTabs: Config.dashboard.enableMedia || Config.dashboard.enablePerformance
 
     implicitWidth: nonAnimWidth
-    implicitHeight: tabs.implicitHeight + tabs.anchors.topMargin + view.implicitHeight + viewWrapper.anchors.margins * 2
+    implicitHeight: (showTabs ? tabs.implicitHeight + tabs.anchors.topMargin : 0) + view.implicitHeight + viewWrapper.anchors.margins * 2
 
-    Tabs {
+    Loader {
         id: tabs
-
+        asynchronous: true
         anchors.top: parent.top
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.topMargin: Appearance.padding.normal
         anchors.margins: Appearance.padding.large
 
-        nonAnimWidth: root.nonAnimWidth - anchors.margins * 2
-        state: root.state
+        sourceComponent: showTabs ? tabsComponent : null
+    }
+
+    Component {
+        id: tabsComponent
+        Tabs {
+            nonAnimWidth: root.nonAnimWidth - parent.anchors.margins * 2
+            state: root.state
+        }
     }
 
     ClippingRectangle {
         id: viewWrapper
 
-        anchors.top: tabs.bottom
+        anchors.top: showTabs ? tabs.bottom : parent.top
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.bottom: parent.bottom
+        anchors.topMargin: !showTabs ? Appearance.padding.normal : Appearance.padding.large
         anchors.margins: Appearance.padding.large
 
         radius: Appearance.rounding.normal
@@ -46,18 +55,41 @@ Item {
             id: view
 
             readonly property int currentIndex: root.state.currentTab
-            readonly property Item currentItem: row.children[currentIndex]
-
+            readonly property Item currentItem: panelGenerator.count > 0 ? panelGenerator.itemAt(currentIndex) : null
+            property list<Component> panelModel: [
+                dash,
+                Config.dashboard.enableMedia ? media : null,
+                Config.dashboard.enablePerformance ? performance : null
+            ].filter(panel => panel != null)
+            
             anchors.fill: parent
 
             flickableDirection: Flickable.HorizontalFlick
 
-            implicitWidth: currentItem.implicitWidth
-            implicitHeight: currentItem.implicitHeight
+            implicitWidth: currentItem?.implicitWidth ?? 0
+            implicitHeight: currentItem?.implicitHeight ?? 0
 
-            contentX: currentItem.x
+            contentX: currentItem?.x ?? 0
             contentWidth: row.implicitWidth
             contentHeight: row.implicitHeight
+
+            Component {
+                id: dash
+                Dash {
+                    visibilities: root.visibilities
+                    state: root.state
+                }
+            }
+
+            Component {
+                id: media
+                Media { visibilities: root.visibilities }
+            }
+
+            Component {
+                id: performance
+                Performance {}
+            }
 
             onContentXChanged: {
                 if (!moving)
@@ -80,25 +112,20 @@ Item {
                     contentX = Qt.binding(() => currentItem.x);
             }
 
+            onPanelModelChanged: {
+                panelGenerator.model = panelModel
+            }
+
             RowLayout {
                 id: row
-
-                Pane {
-                    sourceComponent: Dash {
-                        visibilities: root.visibilities
-                        state: root.state
+                
+                Repeater {
+                    id: panelGenerator
+                    delegate: Pane {
+                        required property Component modelData
+                        sourceComponent: modelData
                     }
-                }
-
-                Pane {
-                    sourceComponent: Media {
-                        visibilities: root.visibilities
-                    }
-                }
-
-                Pane {
-                    sourceComponent: Performance {}
-                }
+                }                
             }
 
             Behavior on contentX {
