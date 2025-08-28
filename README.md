@@ -313,7 +313,8 @@ default, you must create it manually.
             "schemes": false,
             "variants": false,
             "wallpapers": false
-        }
+        },
+        "showOnHover": false
     },
     "lock": {
         "recolourLogo": false
