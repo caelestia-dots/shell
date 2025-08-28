@@ -244,7 +244,7 @@ ColumnLayout {
             if (pam.fprintState === "fail")
                 return qsTr("Fingerprint not recognized (%1/%2). Please try again or use password.").arg(pam.fprint.tries).arg(Config.lock.maxFprintTries);
 
-            return "";
+            return CapsLockState.active ? "CAPSLOCK ON" : "";
         }
 
         Layout.fillWidth: true
