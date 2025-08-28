@@ -219,7 +219,9 @@ default, you must create it manually.
     },
     "bar": {
         "clock": {
-            "showIcon": true
+            "showIcon": true,
+            "showCalendar": true,
+            "calendarStyle": "simple"
         },
         "dragThreshold": 20,
         "entries": [
@@ -271,7 +273,8 @@ default, you must create it manually.
             "showBattery": true,
             "showBluetooth": true,
             "showKbLayout": false,
-            "showNetwork": true
+            "showNetwork": true,
+            "showNotifications": true
         },
         "tray": {
             "background": false,
