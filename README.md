@@ -367,7 +367,9 @@ The module automatically adds Caelestia shell to the path with **full functional
         "enabled": true,
         "dragThreshold": 50,
         "mediaUpdateInterval": 500,
-        "showOnHover": true
+        "showOnHover": true,
+        "enableMedia": true,
+        "enablePerformance": true
     },
     "launcher": {
         "actionPrefix": ">",
