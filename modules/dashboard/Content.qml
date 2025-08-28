@@ -9,7 +9,7 @@ import QtQuick.Layouts
 
 Item {
     id: root
-    
+
     required property PersistentProperties visibilities
     required property PersistentProperties state
     readonly property real nonAnimWidth: view.implicitWidth + viewWrapper.anchors.margins * 2
@@ -56,12 +56,8 @@ Item {
 
             readonly property int currentIndex: root.state.currentTab
             readonly property Item currentItem: panelGenerator.count > 0 ? panelGenerator.itemAt(currentIndex) : null
-            property list<Component> panelModel: [
-                dash,
-                Config.dashboard.enableMedia ? media : null,
-                Config.dashboard.enablePerformance ? performance : null
-            ].filter(panel => panel != null)
-            
+            property list<Component> panelModel: [dash, Config.dashboard.enableMedia ? media : null, Config.dashboard.enablePerformance ? performance : null].filter(panel => panel != null)
+
             anchors.fill: parent
 
             flickableDirection: Flickable.HorizontalFlick
@@ -83,7 +79,9 @@ Item {
 
             Component {
                 id: media
-                Media { visibilities: root.visibilities }
+                Media {
+                    visibilities: root.visibilities
+                }
             }
 
             Component {
@@ -113,19 +111,19 @@ Item {
             }
 
             onPanelModelChanged: {
-                panelGenerator.model = panelModel
+                panelGenerator.model = panelModel;
             }
 
             RowLayout {
                 id: row
-                
+
                 Repeater {
                     id: panelGenerator
                     delegate: Pane {
                         required property Component modelData
                         sourceComponent: modelData
                     }
-                }                
+                }
             }
 
             Behavior on contentX {
