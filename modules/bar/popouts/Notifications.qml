@@ -105,7 +105,7 @@ ColumnLayout {
                 Layout.alignment: Qt.AlignHCenter
                 text: "notifications_none"
                 color: Colours.palette.m3onSurfaceVariant
-                font.pixelSize: 120
+                font.pointSize: 120
                 opacity: 0.6
             }
 
