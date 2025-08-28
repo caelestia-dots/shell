@@ -1,5 +1,4 @@
 {
-  rev,
   lib,
   stdenv,
   makeWrapper,
@@ -36,6 +35,8 @@
   withCli ? false,
   extraRuntimeDeps ? [],
 }: let
+  version = "1.0.0";
+
   runtimeDeps =
     [
       fish
@@ -64,8 +65,8 @@
   };
 in
   stdenv.mkDerivation {
+    inherit version;
     pname = "caelestia-shell";
-    version = "${rev}";
     src = ./..;
 
     nativeBuildInputs = [cmake ninja pkg-config makeWrapper qt6.wrapQtAppsHook];
@@ -74,10 +75,10 @@ in
 
     cmakeBuildType = "Release";
     cmakeFlags = [
+      (lib.cmakeFeature "VERSION" version)
       (lib.cmakeFeature "INSTALL_LIBDIR" "${placeholder "out"}/lib")
       (lib.cmakeFeature "INSTALL_QMLDIR" qt6.qtbase.qtQmlPrefix)
       (lib.cmakeFeature "INSTALL_QSCONFDIR" "${placeholder "out"}/share/caelestia-shell")
-      (lib.cmakeFeature "GIT_REVISION" rev)
     ];
 
     patchPhase = ''

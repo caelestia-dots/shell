@@ -1,0 +1,42 @@
+name: Create release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup cmake
+        uses: lukka/get-cmake@latest
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install libpipewire-0.3-dev libaubio-dev qt6-base-dev qt6-declarative-dev
+
+      - name: Build package
+        run: |
+          cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/ -DVERSION=$GITHUB_REF_NAME
+          cmake --build build --target package
+
+      - name: Create latest packages
+        run: |
+          for f in build/packages/caelestia-shell-*; do
+            filename=${f##*/}
+            cp $f build/packages/caelestia-shell-latest.${filename#caelestia-shell-[0-9]*.[0-9]*.[0-9]*.}
+          done
+
+      - name: Create release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: build/packages/caelestia-shell-*
+          generate_release_notes: true
