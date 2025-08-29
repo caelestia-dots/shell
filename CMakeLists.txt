@@ -26,8 +26,13 @@ set(INSTALL_QSCONFDIR "etc/xdg/quickshell/caelestia" CACHE STRING "Quickshell co
 
 add_compile_options(-Wall -Wextra)
 
-add_subdirectory(assets/cpp)
-add_subdirectory(plugin)
+if(NOT DONT_BUILD_ASSETS)
+    add_subdirectory(assets/cpp)
+endif()
+
+if(NOT DONT_BUILD_PLUGIN)
+    add_subdirectory(plugin)
+endif()
 
 foreach(dir assets components config modules services utils)
     install(DIRECTORY ${dir} DESTINATION "${INSTALL_QSCONFDIR}")
