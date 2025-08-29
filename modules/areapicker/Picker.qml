@@ -16,6 +16,7 @@ MouseArea {
     required property LazyLoader loader
     required property ShellScreen screen
 
+    readonly property real effectiveScale: QsWindow?.window?.devicePixelRatio ?? 1
     property int borderWidth
     property int rounding
 
@@ -77,7 +78,7 @@ MouseArea {
 
     function save(): void {
         const tmpfile = `file:///tmp/caelestia-picker-${Quickshell.processId}-${Date.now()}.png`;
-        CUtils.saveItem(screencopy, tmpfile, Qt.rect(Math.ceil(rsx), Math.ceil(rsy), Math.floor(sw), Math.floor(sh)), path => Quickshell.execDetached(["swappy", "-f", path]));
+        CUtils.saveItem(screencopy, tmpfile, Qt.rect(Math.ceil(rsx * effectiveScale), Math.ceil(rsy * effectiveScale), Math.floor(sw * effectiveScale), Math.floor(sh * effectiveScale)), path => Quickshell.execDetached(["swappy", "-f", path]));
         closeAnim.start();
     }
 
