@@ -8,8 +8,8 @@
 #include <QFile>
 
 qreal CachingImageManager::effectiveScale() const {
-    if (m_item->window() && m_item->window()->screen()) {
-        return m_item->window()->screen()->devicePixelRatio();
+    if (m_item->window()) {
+        return m_item->window()->devicePixelRatio();
     }
 
     return 1.0;
@@ -36,8 +36,21 @@ void CachingImageManager::setItem(QQuickItem* item) {
         return;
     }
 
+    if (m_widthConn) {
+        disconnect(m_widthConn);
+    }
+    if (m_heightConn) {
+        disconnect(m_heightConn);
+    }
+
     m_item = item;
     emit itemChanged();
+
+    if (item) {
+        m_widthConn = connect(item, &QQuickItem::widthChanged, this, [this]() { updateSource(); });
+        m_heightConn = connect(item, &QQuickItem::heightChanged, this, [this]() { updateSource(); });
+        updateSource();
+    }
 }
 
 QUrl CachingImageManager::cacheDir() const {
@@ -69,36 +82,53 @@ void CachingImageManager::setPath(const QString& path) {
     emit pathChanged();
 
     if (!path.isEmpty()) {
-        QThreadPool::globalInstance()->start([path, this] {
-            const QString sha = sha256sum(path);
-
-            QMetaObject::invokeMethod(this, [path, sha, this]() {
-                const QString filename = QString("%1@%2x%3.png")
-                    .arg(sha)
-                    .arg(effectiveWidth())
-                    .arg(effectiveHeight());
-
-                m_cachePath = m_cacheDir.resolved(QUrl(filename));
-                emit cachePathChanged();
-
-                if (!m_cachePath.isLocalFile()) {
-                    qWarning() << "CachingImageManager::setPath: cachePath" << m_cachePath << "is not a local file";
-                    return;
-                }
-
-                bool cacheExists = QFile::exists(m_cachePath.toLocalFile());
-
-                if (cacheExists) {
-                    m_item->setProperty("source", m_cachePath);
-                } else {
-                    m_item->setProperty("source", QUrl::fromLocalFile(path));
-                }
-
-                m_usingCache = cacheExists;
-                emit usingCacheChanged();
-            });
-        });
+        updateSource(path);
     }
+}
+
+void CachingImageManager::updateSource() {
+    updateSource(m_path);
+}
+
+void CachingImageManager::updateSource(const QString& path) {
+    if (path.isEmpty()) {
+        return;
+    }
+
+    QThreadPool::globalInstance()->start([path, this] {
+        const QString sha = sha256sum(path);
+
+        QMetaObject::invokeMethod(this, [path, sha, this]() {
+            const QString filename = QString("%1@%2x%3.png")
+                .arg(sha)
+                .arg(effectiveWidth())
+                .arg(effectiveHeight());
+
+            const QUrl cache = m_cacheDir.resolved(QUrl(filename));
+            if (m_cachePath == cache) {
+                return;
+            }
+
+            m_cachePath = cache;
+            emit cachePathChanged();
+
+            if (!cache.isLocalFile()) {
+                qWarning() << "CachingImageManager::updateSource: cachePath" << cache << "is not a local file";
+                return;
+            }
+
+            bool cacheExists = QFile::exists(cache.toLocalFile());
+
+            if (cacheExists) {
+                m_item->setProperty("source", cache);
+            } else {
+                m_item->setProperty("source", QUrl::fromLocalFile(path));
+            }
+
+            m_usingCache = cacheExists;
+            emit usingCacheChanged();
+        }, Qt::QueuedConnection);
+    });
 }
 
 QUrl CachingImageManager::cachePath() const {

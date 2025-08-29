@@ -30,6 +30,9 @@ public:
     [[nodiscard]] QUrl cachePath() const;
     [[nodiscard]] bool usingCache() const;
 
+    Q_INVOKABLE void updateSource();
+    Q_INVOKABLE void updateSource(const QString& path);
+
 signals:
     void itemChanged();
     void cacheDirChanged();
@@ -46,9 +49,12 @@ private:
     QUrl m_cachePath;
     bool m_usingCache;
 
+    QMetaObject::Connection m_widthConn;
+    QMetaObject::Connection m_heightConn;
+
     [[nodiscard]] qreal effectiveScale() const;
-    int effectiveWidth() const;
-    int effectiveHeight() const;
+    [[nodiscard]] int effectiveWidth() const;
+    [[nodiscard]] int effectiveHeight() const;
 
     [[nodiscard]] QString sha256sum(const QString& path) const;
 };

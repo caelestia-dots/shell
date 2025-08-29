@@ -33,21 +33,22 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib")
 
 set(DISTRIBUTOR "Unset" CACHE STRING "Distributor")
+set(ENABLE_MODULES "assets;plugin;shell" CACHE STRING "Modules to build/install")
 set(INSTALL_LIBDIR "usr/lib/caelestia" CACHE STRING "Library install dir")
 set(INSTALL_QMLDIR "usr/lib/qt6/qml" CACHE STRING "QML install dir")
 set(INSTALL_QSCONFDIR "etc/xdg/quickshell/caelestia" CACHE STRING "Quickshell config install dir")
 
 add_compile_options(-Wall -Wextra)
 
-if(NOT DONT_BUILD_ASSETS AND NOT PLUGIN_ONLY AND NOT SHELL_ONLY)
+if("assets" IN_LIST ENABLE_MODULES)
     add_subdirectory(assets/cpp)
 endif()
 
-if(NOT DONT_BUILD_PLUGIN AND NOT ASSETS_ONLY AND NOT SHELL_ONLY)
+if("plugin" IN_LIST ENABLE_MODULES)
     add_subdirectory(plugin)
 endif()
 
-if(NOT DONT_BUILD_SHELL AND NOT ASSETS_ONLY AND NOT PLUGIN_ONLY)
+if("shell" IN_LIST ENABLE_MODULES)
     foreach(dir assets components config modules services utils)
         install(DIRECTORY ${dir} DESTINATION "${INSTALL_QSCONFDIR}")
     endforeach()

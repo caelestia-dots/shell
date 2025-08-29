@@ -83,7 +83,7 @@
 
     cmakeFlags =
       [
-        (lib.cmakeBool "ASSETS_ONLY" true)
+        (lib.cmakeFeature "ENABLE_MODULES" "assets")
         (lib.cmakeFeature "INSTALL_LIBDIR" "${placeholder "out"}/lib")
       ]
       ++ cmakeVersionFlags;
@@ -102,7 +102,7 @@
     dontWrapQtApps = true;
     cmakeFlags =
       [
-        (lib.cmakeBool "PLUGIN_ONLY" true)
+        (lib.cmakeFeature "ENABLE_MODULES" "plugin")
         (lib.cmakeFeature "INSTALL_QMLDIR" qt6.qtbase.qtQmlPrefix)
       ]
       ++ cmakeVersionFlags;
@@ -120,7 +120,7 @@ in
     cmakeBuildType = "Release";
     cmakeFlags =
       [
-        (lib.cmakeBool "SHELL_ONLY" true)
+        (lib.cmakeFeature "ENABLE_MODULES" "shell")
         (lib.cmakeFeature "INSTALL_QSCONFDIR" "${placeholder "out"}/share/caelestia-shell")
       ]
       ++ cmakeVersionFlags;
