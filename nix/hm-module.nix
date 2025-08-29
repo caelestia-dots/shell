@@ -19,6 +19,13 @@ in {
         default = shell-default;
         description = "The package of Caelestia shell";
       };
+      systemd = {
+        enable = mkOption {
+          type = types.bool;
+          default = true;
+          description = "Enable the systemd service for Caelestia shell";
+        };
+      };
       settings = mkOption {
         type = types.attrsOf types.anything;
         default = {};
@@ -55,12 +62,12 @@ in {
     shell = cfg.package or shell-default;
   in
     lib.mkIf cfg.enable {
-      systemd.user.services.caelestia = {
+      systemd.user.services.caelestia = lib.mkIf cfg.systemd.enable {
         Unit = {
           Description = "Caelestia Shell Service";
           After = ["graphical-session.target"];
           PartOf = ["graphical-session.target"];
-          X-Restart-Triggers = lib.mkIf (cfg.settings != { }) [
+          X-Restart-Triggers = lib.mkIf (cfg.settings != {}) [
             "${config.xdg.configFile."caelestia/shell.json".source}"
           ];
         };
