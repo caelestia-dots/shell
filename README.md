@@ -63,6 +63,8 @@ or a devshell. The shell can then be run via `caelestia-shell`.
 > The default package does not have the CLI enabled by default, which is required for full funcionality.
 > To enable the CLI, use the `with-cli` package.
 
+For home-manager, you can also use the Caelestia's home manager module (explained in [configuring](https://github.com/caelestia-dots/shell?tab=readme-ov-file#configuring)) that installs and configures the shell and the CLI.
+
 ### Manual installation
 
 Dependencies:
@@ -207,14 +209,23 @@ For NixOS users, a home manager module is also available.
 ```nix
 programs.caelestia = {
   enable = true;
+  systemd.enable = false; # if you prefer starting from your compositor
   settings = {
     bar.status = {
       showBattery = false;
     };
     paths.wallpaperDir = "~/Images";
   };
+  cli = {
+    enable = true; # Also add caelestia-cli to path
+    settings = {
+      theme.enableGtk = false;
+    };
+  };
 };
 ```
+
+The module automatically adds Caelestia shell to the path with **full functionality**. The CLI is not required, however you have the option to enable and configure it.
 
 </details>
 
@@ -478,7 +489,7 @@ which helped me a lot with learning how to use Quickshell.
 
 Finally another thank you to all the configs I took inspiration from (only one for now):
 
--   [Axenide/Ax-Shell](https://github.com/Axenide/Ax-Shell)
+- [Axenide/Ax-Shell](https://github.com/Axenide/Ax-Shell)
 
 ## Stonks 📈
 
