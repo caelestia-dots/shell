@@ -7,6 +7,9 @@ JsonObject {
     property int dragThreshold: 50
     property Sizes sizes: Sizes {}
 
+    property bool enableMedia: true
+    property bool enablePerformance: true
+
     component Sizes: JsonObject {
         readonly property int tabIndicatorHeight: 3
         readonly property int tabIndicatorSpacing: 5
