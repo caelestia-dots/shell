@@ -73,8 +73,8 @@ in {
       systemd.user.services.caelestia = lib.mkIf cfg.systemd.enable {
         Unit = {
           Description = "Caelestia Shell Service";
-          After = ["graphical-session.target"];
-          PartOf = ["graphical-session.target"];
+          After = [cfg.systemd.target];
+          PartOf = [cfg.systemd.target];
           X-Restart-Triggers = lib.mkIf (cfg.settings != {}) [
             "${config.xdg.configFile."caelestia/shell.json".source}"
           ];
@@ -95,7 +95,7 @@ in {
         };
 
         Install = {
-          WantedBy = ["graphical-session.target"];
+          WantedBy = [cfg.systemd.target];
         };
       };
 
