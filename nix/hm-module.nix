@@ -25,6 +25,13 @@ in {
           default = true;
           description = "Enable the systemd service for Caelestia shell";
         };
+        target = mkOption {
+          type = types.str;
+          description = ''
+            The systemd target that will automatically start the Caelestia shell.
+          '';
+          default = "graphical-session.target";
+        };
       };
       settings = mkOption {
         type = types.attrsOf types.anything;
@@ -86,7 +93,7 @@ in {
         };
 
         Install = {
-          WantedBy = ["graphical-session.target"];
+          WantedBy = [ cfg.systemd.target ];
         };
       };
 
