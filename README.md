@@ -215,7 +215,7 @@ programs.caelestia = {
   enable = true;
   systemd = {
     enable = false; # if you prefer starting from your compositor
-    target = "graphical-session.target" # if you're using `hyprland with uwsm`, for example, `wayland-session@hyprland.desktop.target`
+    target = "graphical-session.target"; # if you're using `hyprland with uwsm`, for example, `wayland-session@hyprland.desktop.target`
   };
   settings = {
     bar.status = {
