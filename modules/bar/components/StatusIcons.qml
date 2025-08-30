@@ -45,12 +45,26 @@ StyledRect {
         WrappedLoader {
             name: "kblayout"
             active: Config.bar.status.showKbLayout
-
             sourceComponent: StyledText {
                 animate: true
-                text: Hypr.kbLayout
+                text: Hypr.capsLock ? Hypr.kbLayout.toUpperCase() : Hypr.kbLayout
                 color: root.colour
                 font.family: Appearance.font.family.mono
+
+                Rectangle {
+                    anchors.centerIn: parent
+                    width: parent.width + Appearance.padding.normal
+                    height: parent.height + Appearance.padding.normal
+                    radius: Appearance.rounding.full
+                    color: Hypr.capsLock ? Colours.palette.m3primaryContainer : "transparent"
+                    z: -1
+
+                    Behavior on color {
+                        ColorAnimation {
+                            duration: Appearance.AnimDurations.small
+                        }
+                    }
+                }
             }
         }
 
