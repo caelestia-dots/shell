@@ -88,7 +88,7 @@ in {
           TimeoutStopSec = "5s";
           Environment = [
             "QT_QPA_PLATFORM=wayland"
-          ];
+          ]
           ++ cfg.extraEnvironment;
 
           Slice = "session.slice";
