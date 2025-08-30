@@ -220,7 +220,7 @@ programs.caelestia = {
     };
     paths.wallpaperDir = "~/Images";
   };
-  extraEnvironment = [
+  environment = [
     "QT_QPA_PLATFORMTHEME=gtk3" # Some icon issues might be resolved.
   ];
   cli = {
