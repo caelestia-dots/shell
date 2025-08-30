@@ -5,6 +5,7 @@ import qs.services
 import qs.config
 import QtQuick
 import QtQuick.Layouts
+import QtQml
 
 Item {
     id: root
@@ -26,17 +27,17 @@ Item {
             Layout.alignment: Qt.AlignHCenter
             text: root.timeComponents[0]
             color: Colours.palette.m3secondary
-            font.pointSize: Appearance.font.size.extraLarge
+            font.pointSize: Appearance.font.size.extraLarge * 1.3
             font.family: Appearance.font.family.clock
             font.weight: 600
         }
 
         StyledText {
-            Layout.topMargin: -(font.pointSize * 0.1)
+            Layout.topMargin: 0
             Layout.alignment: Qt.AlignHCenter
             text: "•••"
             color: Colours.palette.m3primary
-            font.pointSize: Appearance.font.size.extraLarge * 0.9
+            font.pointSize: Appearance.font.size.extraLarge
             font.family: Appearance.font.family.clock
         }
 
@@ -45,7 +46,7 @@ Item {
             Layout.alignment: Qt.AlignHCenter
             text: root.timeComponents[1]
             color: Colours.palette.m3secondary
-            font.pointSize: Appearance.font.size.extraLarge
+            font.pointSize: Appearance.font.size.extraLarge * 1.3
             font.family: Appearance.font.family.clock
             font.weight: 600
         }
@@ -64,18 +65,6 @@ Item {
                 font.family: Appearance.font.family.clock
                 font.weight: 600
             }
-        }
-
-        StyledText {
-            Layout.topMargin: Appearance.spacing.normal
-            Layout.fillWidth: true
-            horizontalAlignment: Text.AlignHCenter
-            text: Time.format("ddd, d")
-            color: Colours.palette.m3tertiary
-            font.pointSize: Appearance.font.size.normal
-            font.family: Appearance.font.family.clock
-            font.weight: 500
-            elide: Text.ElideRight
         }
     }
 }
