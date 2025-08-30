@@ -43,7 +43,7 @@ StyledRect {
                     if (Notifs.dnd)
                         return "notifications_off";
                     if (Notifs.list.length > 0)
-                        return "notifications";
+                        return "notifications_active";
                     return "notifications_none";
                 }
                 color: Notifs.dnd ? Colours.palette.m3error : root.colour
