@@ -158,7 +158,7 @@ Column {
                 horizontalAlignment: Text.AlignHCenter
                 text: Qt.formatDate(dayItem.model.date, "d")
                 color: {
-                    var dayOfWeek = (dayItem.model.date.getDay()+1)%7;
+                    var dayOfWeek = dayItem.model.date.getDay();
                     if (dayItem.model.today) {
                         return Colours.palette.m3onPrimary;
                     } else if (dayOfWeek === 0 || dayOfWeek === 6) {
