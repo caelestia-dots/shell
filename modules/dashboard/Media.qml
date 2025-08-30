@@ -289,6 +289,22 @@ Item {
                 if (active?.canSeek && active?.positionSupported)
                     active.position = value * active.length;
             }
+
+            MouseArea {
+                anchors.fill: parent
+                acceptedButtons: Qt.NoButton
+
+                onWheel: function(wheel) {
+                    const active = Players.active;
+                    if (!active?.canSeek || !active?.positionSupported) return;
+                    
+                    wheel.accepted = true;
+                    const delta = wheel.angleDelta.y > 0 ? 10 : -10;    // Time 10 seconds
+                    Qt.callLater(() => {
+                        active.position = Math.max(0, Math.min(active.length, active.position + delta));
+                    });
+                }
+            }
         }
 
         Item {
