@@ -93,7 +93,7 @@ in {
         };
 
         Install = {
-          WantedBy = [ cfg.systemd.target ];
+          WantedBy = [cfg.systemd.target];
         };
       };
 
