@@ -213,16 +213,16 @@ For NixOS users, a home manager module is also available.
 ```nix
 programs.caelestia = {
   enable = true;
-  systemd = {
-    enable = false; # if you prefer starting from your compositor
-    target = "graphical-session.target" # if you're using `hyprland with uwsm`, for example, `wayland-session@hyprland.desktop.target`
-  };
+  systemd.enable = false; # if you prefer starting from your compositor
   settings = {
     bar.status = {
       showBattery = false;
     };
     paths.wallpaperDir = "~/Images";
   };
+  extraEnvironment = [
+    "QT_QPA_PLATFORMTHEME=gtk3" # Some icon issues might be resolved.
+  ];
   cli = {
     enable = true; # Also add caelestia-cli to path
     settings = {
