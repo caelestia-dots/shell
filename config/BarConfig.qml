@@ -76,10 +76,13 @@ JsonObject {
         property bool showNetwork: true
         property bool showBluetooth: true
         property bool showBattery: true
+        property bool showNotifications: true
     }
 
     component Clock: JsonObject {
         property bool showIcon: true
+        property bool showCalendar: true
+        property string calendarStyle: "advanced"
     }
 
     component Sizes: JsonObject {

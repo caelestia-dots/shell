@@ -13,6 +13,13 @@ Singleton {
 
     readonly property list<Notif> list: []
     readonly property list<Notif> popups: list.filter(n => n.popup)
+    
+    property bool dnd: false
+    property int refCount: 0
+    
+    function toggleDnd(): void {
+        dnd = !dnd
+    }
 
     NotificationServer {
         id: server
@@ -27,8 +34,9 @@ Singleton {
         onNotification: notif => {
             notif.tracked = true;
 
+            // Only show notifications if DND is not enabled
             root.list.push(notifComp.createObject(root, {
-                popup: true,
+                popup: !root.dnd,
                 notification: notif
             }));
         }
