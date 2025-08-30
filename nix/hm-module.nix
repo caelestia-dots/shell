@@ -36,7 +36,7 @@ in {
         default = "";
         description = "Caelestia shell extra configs written to shell.json";
       };
-      extraEnvironment = mkOption {
+      environment = mkOption {
         type = types.listOf types.str;
         description = "Extra Environment variables to pass to the Caelestia shell systemd service.";
         default = [ ];
@@ -89,7 +89,7 @@ in {
           Environment = [
             "QT_QPA_PLATFORM=wayland"
           ]
-          ++ cfg.extraEnvironment;
+          ++ cfg.environment;
 
           Slice = "session.slice";
         };
