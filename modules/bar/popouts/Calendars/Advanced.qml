@@ -12,7 +12,7 @@ import QtQuick.Layouts
 
 ColumnLayout {
     id: root
-
+    
     spacing: Appearance.spacing.normal
     width: 360
 
@@ -25,9 +25,9 @@ ColumnLayout {
     y: -10
 
     Component.onCompleted: {
-        opacity = 1;
-        scale = 1;
-        y = 0;
+        opacity = 1
+        scale = 1
+        y = 0
     }
 
     Behavior on opacity {
@@ -118,10 +118,10 @@ ColumnLayout {
                         color: Colours.palette.m3onPrimaryContainer
 
                         function onClicked(): void {
-                            root.currentMonth = root.currentMonth - 1;
+                            root.currentMonth = root.currentMonth - 1
                             if (root.currentMonth < 0) {
-                                root.currentMonth = 11;
-                                root.currentYear = root.currentYear - 1;
+                                root.currentMonth = 11
+                                root.currentYear = root.currentYear - 1
                             }
                         }
                     }
@@ -139,10 +139,8 @@ ColumnLayout {
                     Layout.fillWidth: true
 
                     text: {
-                        const monthNames = Array.from({
-                            length: 12
-                        }, (_, i) => Qt.locale().monthName(i, Qt.locale().LongFormat));
-                        return monthNames[root.currentMonth] + " " + root.currentYear;
+                        const monthNames = Array.from({ length: 12 }, (_, i) => Qt.locale().monthName(i, Qt.locale().LongFormat))
+                        return monthNames[root.currentMonth] + " " + root.currentYear
                     }
                     horizontalAlignment: Text.AlignHCenter
                     font.weight: 600
@@ -158,10 +156,10 @@ ColumnLayout {
                     StateLayer {
                         color: Colours.palette.m3onPrimaryContainer
                         function onClicked(): void {
-                            root.currentMonth = root.currentMonth + 1;
+                            root.currentMonth = root.currentMonth + 1
                             if (root.currentMonth > 11) {
-                                root.currentMonth = 0;
-                                root.currentYear = root.currentYear + 1;
+                                root.currentMonth = 0
+                                root.currentYear = root.currentYear + 1
                             }
                         }
                     }
@@ -223,8 +221,7 @@ ColumnLayout {
                         StateLayer {
                             visible: dayItem.model.month === root.currentMonth
                             color: Colours.palette.m3onSurface
-                            function onClicked(): void {
-                            }
+                            function onClicked(): void {}
                         }
 
                         StyledText {
@@ -232,7 +229,8 @@ ColumnLayout {
                             anchors.centerIn: parent
                             horizontalAlignment: Text.AlignHCenter
                             text: Qt.formatDate(dayItem.model.date, "d")
-                            color: dayItem.model.today ? Colours.palette.m3onPrimary : dayItem.model.month === root.currentMonth ? Colours.palette.m3onSurfaceVariant : Colours.palette.m3outline
+                            color: dayItem.model.today ? Colours.palette.m3onPrimary : 
+                                   dayItem.model.month === root.currentMonth ? Colours.palette.m3onSurfaceVariant : Colours.palette.m3outline
 
                             font.pointSize: Appearance.font.size.small
                             font.weight: dayItem.model.today ? 600 : 400
@@ -260,9 +258,9 @@ ColumnLayout {
                 color: Colours.palette.m3onPrimaryContainer
 
                 function onClicked(): void {
-                    const today = new Date();
-                    root.currentYear = today.getFullYear();
-                    root.currentMonth = today.getMonth();
+                    const today = new Date()
+                    root.currentYear = today.getFullYear()
+                    root.currentMonth = today.getMonth()
                 }
             }
 
