@@ -137,7 +137,7 @@ Item {
             }
 
             StyledText {
-                text: root.state === "wallpapers" && Wallpapers.list.length === 0 ? qsTr("Try putting some wallpapers in %1").arg(Paths.shortenHome(Config.paths.wallpaperDir)) : qsTr("Try searching for something else")
+                text: root.state === "wallpapers" && Wallpapers.list.length === 0 ? qsTr("Try putting some wallpapers in %1").arg(Paths.shortenHome(Paths.wallsdir)) : qsTr("Try searching for something else")
                 color: Colours.palette.m3onSurfaceVariant
                 font.pointSize: Appearance.font.size.normal
             }

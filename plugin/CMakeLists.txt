@@ -1,4 +1,4 @@
-find_package(Qt6 REQUIRED COMPONENTS Core Qml)
+find_package(Qt6 REQUIRED COMPONENTS Core Qml Gui)
 
 if(QT_KNOWN_POLICY_QTP0001)
     qt_policy(SET QTP0001 NEW)

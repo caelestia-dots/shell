@@ -1,4 +1,5 @@
 {
+  rev,
   lib,
   stdenv,
   makeWrapper,
@@ -63,25 +64,68 @@
   fontconfig = makeFontsConf {
     fontDirectories = [material-symbols rubik nerd-fonts.caskaydia-cove];
   };
+
+  cmakeVersionFlags = [
+    (lib.cmakeFeature "VERSION" version)
+    (lib.cmakeFeature "GIT_REVISION" rev)
+    (lib.cmakeFeature "DISTRIBUTOR" "nix-flake")
+  ];
+
+  assets = stdenv.mkDerivation {
+    name = "caelestia-assets";
+    src = lib.fileset.toSource {
+      root = ./..;
+      fileset = lib.fileset.union ./../CMakeLists.txt ./../assets/cpp;
+    };
+
+    nativeBuildInputs = [cmake ninja pkg-config];
+    buildInputs = [aubio pipewire];
+
+    cmakeFlags =
+      [
+        (lib.cmakeFeature "ENABLE_MODULES" "assets")
+        (lib.cmakeFeature "INSTALL_LIBDIR" "${placeholder "out"}/lib")
+      ]
+      ++ cmakeVersionFlags;
+  };
+
+  plugin = stdenv.mkDerivation {
+    name = "caelestia-qml-plugin";
+    src = lib.fileset.toSource {
+      root = ./..;
+      fileset = lib.fileset.union ./../CMakeLists.txt ./../plugin;
+    };
+
+    nativeBuildInputs = [cmake ninja];
+    buildInputs = [qt6.qtbase qt6.qtdeclarative];
+
+    dontWrapQtApps = true;
+    cmakeFlags =
+      [
+        (lib.cmakeFeature "ENABLE_MODULES" "plugin")
+        (lib.cmakeFeature "INSTALL_QMLDIR" qt6.qtbase.qtQmlPrefix)
+      ]
+      ++ cmakeVersionFlags;
+  };
 in
   stdenv.mkDerivation {
     inherit version;
     pname = "caelestia-shell";
     src = ./..;
 
-    nativeBuildInputs = [cmake ninja pkg-config makeWrapper qt6.wrapQtAppsHook];
-    buildInputs = [quickshell aubio pipewire xkeyboard-config qt6.qtbase qt6.qtdeclarative];
+    nativeBuildInputs = [cmake ninja makeWrapper qt6.wrapQtAppsHook];
+    buildInputs = [quickshell assets plugin xkeyboard-config qt6.qtbase];
     propagatedBuildInputs = runtimeDeps;
 
     cmakeBuildType = "Release";
-    cmakeFlags = [
-      (lib.cmakeFeature "VERSION" version)
-      (lib.cmakeFeature "INSTALL_LIBDIR" "${placeholder "out"}/lib")
-      (lib.cmakeFeature "INSTALL_QMLDIR" qt6.qtbase.qtQmlPrefix)
-      (lib.cmakeFeature "INSTALL_QSCONFDIR" "${placeholder "out"}/share/caelestia-shell")
-    ];
+    cmakeFlags =
+      [
+        (lib.cmakeFeature "ENABLE_MODULES" "shell")
+        (lib.cmakeFeature "INSTALL_QSCONFDIR" "${placeholder "out"}/share/caelestia-shell")
+      ]
+      ++ cmakeVersionFlags;
 
-    patchPhase = ''
+    prePatch = ''
       substituteInPlace assets/pam.d/fprint \
         --replace-fail pam_fprintd.so /run/current-system/sw/lib/security/pam_fprintd.so
     '';
@@ -90,10 +134,17 @@ in
       makeWrapper ${quickshell}/bin/qs $out/bin/caelestia-shell \
       	--prefix PATH : "${lib.makeBinPath runtimeDeps}" \
       	--set FONTCONFIG_FILE "${fontconfig}" \
-      	--set CAELESTIA_LIB_DIR $out/lib \
+      	--set CAELESTIA_LIB_DIR ${assets}/lib \
         --set CAELESTIA_XKB_RULES_PATH ${xkeyboard-config}/share/xkeyboard-config-2/rules/base.lst \
       	--add-flags "-p $out/share/caelestia-shell"
+
+      mkdir -p $out/lib
+      ln -s ${assets}/lib/* $out/lib/
     '';
+
+    passthru = {
+      inherit plugin assets;
+    };
 
     meta = {
       description = "A very segsy desktop shell";

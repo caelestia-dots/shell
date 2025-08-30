@@ -1,6 +1,7 @@
 #include "cutils.hpp"
 
 #include <qobject.h>
+#include <QtQuick/QQuickWindow>
 #include <QtQuick/QQuickItem>
 #include <QtQuick/QQuickItemGrabResult>
 #include <QThreadPool>
@@ -38,15 +39,21 @@ void CUtils::saveItem(QQuickItem* target, const QUrl& path, const QRect& rect, Q
         return;
     }
 
+    auto scaledRect = rect;
+    if (rect.isValid()) {
+        qreal scale = target->window()->devicePixelRatio();
+        scaledRect = QRect(rect.left() * scale, rect.top() * scale, rect.width() * scale, rect.height() * scale);
+    }
+
     QSharedPointer<QQuickItemGrabResult> grabResult = target->grabToImage();
 
     QObject::connect(grabResult.data(), &QQuickItemGrabResult::ready, this,
-        [grabResult, rect, path, onSaved, onFailed, this]() {
-            QThreadPool::globalInstance()->start([grabResult, rect, path, onSaved, onFailed, this] {
+        [grabResult, scaledRect, path, onSaved, onFailed, this]() {
+            QThreadPool::globalInstance()->start([grabResult, scaledRect, path, onSaved, onFailed, this] {
                 QImage image = grabResult->image();
 
-                if (!rect.isEmpty()) {
-                    image = image.copy(rect);
+                if (scaledRect.isValid()) {
+                    image = image.copy(scaledRect);
                 }
 
                 const QString file = path.toLocalFile();

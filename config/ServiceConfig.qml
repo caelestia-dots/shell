@@ -12,7 +12,8 @@ JsonObject {
     property string defaultPlayer: "Spotify"
     property list<var> playerAliases: [
         {
-            "com.github.th_ch.youtube_music": "YT Music"
+            "from": "com.github.th_ch.youtube_music",
+            "to": "YT Music"
         }
     ]
 }

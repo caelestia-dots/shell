@@ -13,7 +13,6 @@ class CachingImageManager : public QObject {
 
     Q_PROPERTY(QString path READ path WRITE setPath NOTIFY pathChanged);
     Q_PROPERTY(QUrl cachePath READ cachePath NOTIFY cachePathChanged);
-    Q_PROPERTY(bool usingCache READ usingCache NOTIFY usingCacheChanged);
 
 public:
     explicit CachingImageManager(QObject* parent = nullptr): QObject(parent) {};
@@ -28,7 +27,9 @@ public:
     void setPath(const QString& path);
 
     [[nodiscard]] QUrl cachePath() const;
-    [[nodiscard]] bool usingCache() const;
+
+    Q_INVOKABLE void updateSource();
+    Q_INVOKABLE void updateSource(const QString& path);
 
 signals:
     void itemChanged();
@@ -39,16 +40,21 @@ signals:
     void usingCacheChanged();
 
 private:
+    QString m_shaPath;
+
     QQuickItem* m_item;
     QUrl m_cacheDir;
 
     QString m_path;
     QUrl m_cachePath;
-    bool m_usingCache;
+
+    QMetaObject::Connection m_widthConn;
+    QMetaObject::Connection m_heightConn;
 
     [[nodiscard]] qreal effectiveScale() const;
-    int effectiveWidth() const;
-    int effectiveHeight() const;
+    [[nodiscard]] int effectiveWidth() const;
+    [[nodiscard]] int effectiveHeight() const;
 
+    void createCache(const QString& path, const QString& cache, const QString& fillMode, const QSize& size) const;
     [[nodiscard]] QString sha256sum(const QString& path) const;
 };

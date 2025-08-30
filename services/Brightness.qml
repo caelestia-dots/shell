@@ -60,8 +60,8 @@ Singleton {
         command: ["ddcutil", "detect", "--brief"]
         stdout: StdioCollector {
             onStreamFinished: root.ddcMonitors = text.trim().split("\n\n").filter(d => d.startsWith("Display ")).map(d => ({
-                        model: d.match(/Monitor:.*:(.*):.*/)[1],
-                        busNum: d.match(/I2C bus:[ ]*\/dev\/i2c-([0-9]+)/)[1]
+                        busNum: d.match(/I2C bus:[ ]*\/dev\/i2c-([0-9]+)/)[1],
+                        connector: d.match(/DRM connector:\s+(.*)/)[1].replace(/^card\d+-/, "") // strip "card1-"
                     }))
         }
     }
@@ -82,8 +82,8 @@ Singleton {
         id: monitor
 
         required property ShellScreen modelData
-        readonly property bool isDdc: root.ddcMonitors.some(m => m.model === modelData.model)
-        readonly property string busNum: root.ddcMonitors.find(m => m.model === modelData.model)?.busNum ?? ""
+        readonly property bool isDdc: root.ddcMonitors.some(m => m.connector === modelData.name)
+        readonly property string busNum: root.ddcMonitors.find(m => m.connector === modelData.name)?.busNum ?? ""
         readonly property bool isAppleDisplay: root.appleDisplayPresent && modelData.model.startsWith("StudioDisplay")
         property real brightness
         property real queuedBrightness: NaN

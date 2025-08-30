@@ -23,4 +23,4 @@ install(TARGETS "${module_plugin_target}" LIBRARY DESTINATION "${module_dir}" RU
 install(FILES "${module_qmldir}" DESTINATION "${module_dir}")
 install(FILES "${module_typeinfo}" DESTINATION "${module_dir}")
 
-target_link_libraries(caelestia PRIVATE Qt::Core Qt::Qml)
+target_link_libraries(caelestia PRIVATE Qt::Core Qt::Qml Qt::Gui)

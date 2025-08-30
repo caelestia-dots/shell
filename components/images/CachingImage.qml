@@ -1,5 +1,6 @@
 import qs.utils
 import Caelestia
+import Quickshell
 import QtQuick
 
 Image {
@@ -15,9 +16,12 @@ Image {
     sourceSize.width: sourceWidth
     sourceSize.height: sourceHeight
 
-    onStatusChanged: {
-        if (!manager.usingCache && status === Image.Ready)
-            CUtils.saveItem(this, manager.cachePath);
+    Connections {
+        target: QsWindow.window
+
+        function onDevicePixelRatioChanged(): void {
+            manager.updateSource();
+        }
     }
 
     CachingImageManager {

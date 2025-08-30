@@ -87,7 +87,7 @@ Searcher {
         id: getWallsProc
 
         running: true
-        command: ["find", "-L", Paths.expandTilde(Config.paths.wallpaperDir), "-type", "d", "-path", '*/.*', "-prune", "-o", "-not", "-name", '.*', "-type", "f", "-print"]
+        command: ["find", "-L", Paths.expandTilde(Paths.wallsdir), "-type", "d", "-path", '*/.*', "-prune", "-o", "-not", "-name", '.*', "-type", "f", "-print"]
         stdout: StdioCollector {
             onStreamFinished: wallpapers.model = text.trim().split("\n").filter(w => Images.isValidImageByName(w)).sort()
         }
@@ -97,7 +97,7 @@ Searcher {
         id: watchWallsProc
 
         running: true
-        command: ["inotifywait", "-r", "-e", "close_write,moved_to,create", "-m", Paths.expandTilde(Config.paths.wallpaperDir)]
+        command: ["inotifywait", "-r", "-e", "close_write,moved_to,create", "-m", Paths.expandTilde(Paths.wallsdir)]
         stdout: SplitParser {
             onRead: data => {
                 if (Images.isValidImageByName(data))
@@ -125,6 +125,6 @@ Searcher {
     component Wallpaper: QtObject {
         required property string modelData
         readonly property string path: modelData
-        readonly property string name: path.slice(Paths.expandTilde(Config.paths.wallpaperDir).length + 1, path.lastIndexOf("."))
+        readonly property string name: path.slice(Paths.expandTilde(Paths.wallsdir).length + 1, path.lastIndexOf("."))
     }
 }

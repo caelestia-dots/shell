@@ -15,28 +15,23 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup cmake
-        uses: lukka/get-cmake@latest
-
-      - name: Install dependencies
+      - name: Create packages
         run: |
-          sudo apt-get update
-          sudo apt-get install libpipewire-0.3-dev libaubio-dev qt6-base-dev qt6-declarative-dev
-
-      - name: Build package
-        run: |
-          cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/ -DVERSION=$GITHUB_REF_NAME
-          cmake --build build --target package
-
-      - name: Create latest packages
-        run: |
-          for f in build/packages/caelestia-shell-*; do
-            filename=${f##*/}
-            cp $f build/packages/caelestia-shell-latest.${filename#caelestia-shell-[0-9]*.[0-9]*.[0-9]*.}
-          done
+          mkdir -p release
+          rsync -av \
+            --exclude='release' \
+            --exclude='.*' \
+            --exclude='nix' \
+            --exclude='flake.lock' \
+            --exclude='flake.nix' \
+            . release
+          tar -czf caelestia-shell-${{ github.ref_name }}.tar.gz release
+          cp caelestia-shell-${{ github.ref_name }}.tar.gz caelestia-shell-latest.tar.gz
 
       - name: Create release
         uses: softprops/action-gh-release@v2
         with:
-          files: build/packages/caelestia-shell-*
+          files: |
+            caelestia-shell-${{ github.ref_name }}.tar.gz
+            caelestia-shell-latest.tar.gz
           generate_release_notes: true
