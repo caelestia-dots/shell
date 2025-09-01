@@ -78,6 +78,46 @@ Singleton {
         onPressed: root.decreaseBrightness()
     }
 
+    IpcHandler {
+        target: "brightness"
+
+        function get(): real {
+            const focusedName = Hypr.focusedMonitor.name;
+            const monitor = monitors.find(m => focusedName === m.modelData.name);
+            return monitor ? monitor.brightness : -1;
+        }
+
+        // Handles brightness value like brightnessctl: 0.1, +0.1, 0.1-, 10%, +10%, 10%-
+        function set(value: string): void {
+            const focusedName = Hypr.focusedMonitor.name;
+            const monitor = monitors.find(m => focusedName === m.modelData.name);
+            if (!monitor)
+                return;
+
+            let targetBrightness;
+            if (value.endsWith('%-')) {
+                const percent = parseFloat(value.slice(0, -2));
+                targetBrightness = monitor.brightness - (percent / 100);
+            } else if (value.startsWith('+') && value.endsWith('%')) {
+                const percent = parseFloat(value.slice(1, -1));
+                targetBrightness = monitor.brightness + (percent / 100);
+            } else if (value.endsWith('%')) {
+                const percent = parseFloat(value.slice(0, -1));
+                targetBrightness = percent / 100;
+            } else if (value.startsWith('+')) {
+                const increment = parseFloat(value.slice(1));
+                targetBrightness = monitor.brightness + increment;
+            } else if (value.endsWith('-')) {
+                const decrement = parseFloat(value.slice(0, -1));
+                targetBrightness = monitor.brightness - decrement;
+            } else {
+                targetBrightness = parseFloat(value);
+            }
+
+            monitor.setBrightness(targetBrightness);
+        }
+    }
+
     component Monitor: QtObject {
         id: monitor
 
