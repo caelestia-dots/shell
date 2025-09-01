@@ -132,7 +132,7 @@ Item {
             Component.onCompleted: {
                 wsId = modelData.id;
                 icon = Icons.getSpecialWsIcon(modelData.name);
-                hasWindows = Config.bar.workspaces.showWindows && modelData.lastIpcObject.windows > 0;
+                hasWindows = Config.bar.workspaces.showWindowsOnSpecialWorkspaces && modelData.lastIpcObject.windows > 0;
             }
 
             // Hacky thing cause modelData gets destroyed before the remove anim finishes
@@ -151,16 +151,16 @@ Item {
 
                 function onLastIpcObjectChanged(): void {
                     if (ws.modelData)
-                        ws.hasWindows = Config.bar.workspaces.showWindows && ws.modelData.lastIpcObject.windows > 0;
+                        ws.hasWindows = Config.bar.workspaces.showWindowsOnSpecialWorkspaces && ws.modelData.lastIpcObject.windows > 0;
                 }
             }
 
             Connections {
                 target: Config.bar.workspaces
 
-                function onShowWindowsChanged(): void {
+                function onShowWindowsOnSpecialWorkspacesChanged(): void {
                     if (ws.modelData)
-                        ws.hasWindows = Config.bar.workspaces.showWindows && ws.modelData.lastIpcObject.windows > 0;
+                        ws.hasWindows = Config.bar.workspaces.showWindowsOnSpecialWorkspaces && ws.modelData.lastIpcObject.windows > 0;
                 }
             }
 

@@ -58,6 +58,7 @@ JsonObject {
         property bool activeIndicator: true
         property bool occupiedBg: false
         property bool showWindows: true
+        property bool showWindowsOnSpecialWorkspaces: showWindows
         property bool activeTrail: false
         property bool perMonitorWorkspaces: true
         property string label: "  "
