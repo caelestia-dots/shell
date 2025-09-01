@@ -58,6 +58,11 @@ Item {
             source: "KbLayout.qml"
         }
 
+        Popout {
+            name: "CapsLock"
+            source: "CapsLock.qml"
+        }
+
         Repeater {
             model: ScriptModel {
                 values: [...SystemTray.items.values]

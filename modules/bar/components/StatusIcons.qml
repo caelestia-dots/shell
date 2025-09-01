@@ -45,16 +45,30 @@ StyledRect {
         WrappedLoader {
             name: "kblayout"
             active: Config.bar.status.showKbLayout
+
             sourceComponent: StyledText {
                 animate: true
-                text: Hypr.capsLock ? Hypr.kbLayout.toUpperCase() : Hypr.kbLayout
+                text: Hypr.kbLayout
                 color: root.colour
                 font.family: Appearance.font.family.mono
+            }
+        }
 
-                Rectangle {
+        // Capslock icon
+        WrappedLoader {
+            name: "CapsLock"
+            active: Config.bar.status.showCapsLock
+
+            sourceComponent: MaterialIcon {
+                animate: true
+                text: Hypr.capsLock ? "󰘲" : "󰘶"
+                color: root.colour
+            }
+
+            Rectangle {
                     anchors.centerIn: parent
-                    width: parent.width + Appearance.padding.normal
-                    height: parent.height + Appearance.padding.normal
+                    width: parent.width + Appearance.padding.large
+                    height: parent.height + Appearance.padding.small
                     radius: Appearance.rounding.full
                     color: Hypr.capsLock ? Colours.palette.m3primaryContainer : "transparent"
                     z: -1
@@ -62,7 +76,6 @@ StyledRect {
                     Behavior on color {
                         ColorAnimation {
                             duration: Appearance.AnimDurations.small
-                        }
                     }
                 }
             }
