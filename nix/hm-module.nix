@@ -33,7 +33,7 @@ in {
           description = ''
             The systemd target that will automatically start the Caelestia shell.
           '';
-          default = "graphical-session.target";
+          default = config.wayland.systemd.target;
         };
         environment = mkOption {
           type = types.listOf types.str;
