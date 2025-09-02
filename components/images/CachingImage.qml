@@ -8,13 +8,8 @@ Image {
 
     property alias path: manager.path
 
-    property int sourceWidth
-    property int sourceHeight
-
     asynchronous: true
     fillMode: Image.PreserveAspectCrop
-    sourceSize.width: sourceWidth
-    sourceSize.height: sourceHeight
 
     Connections {
         target: QsWindow.window

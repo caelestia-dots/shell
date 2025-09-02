@@ -3,6 +3,7 @@ import qs.components.effects
 import qs.components.images
 import qs.services
 import qs.config
+import Caelestia
 import Quickshell
 import Quickshell.Widgets
 import QtQuick
@@ -10,7 +11,7 @@ import QtQuick
 StyledRect {
     id: root
 
-    required property Wallpapers.Wallpaper modelData
+    required property FileSystemEntry modelData
     required property PersistentProperties visibilities
 
     scale: 0.5
@@ -75,7 +76,7 @@ StyledRect {
         horizontalAlignment: Text.AlignHCenter
         elide: Text.ElideRight
         renderType: Text.QtRendering
-        text: root.modelData.name
+        text: root.modelData.relativePath
         font.pointSize: Appearance.font.size.normal
     }
 

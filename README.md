@@ -213,7 +213,10 @@ For NixOS users, a home manager module is also available.
 ```nix
 programs.caelestia = {
   enable = true;
-  systemd.enable = false; # if you prefer starting from your compositor
+  systemd = {
+    enable = false; # if you prefer starting from your compositor
+    target = "graphical-session.target";
+  };
   settings = {
     bar.status = {
       showBattery = false;
