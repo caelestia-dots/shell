@@ -11,6 +11,9 @@ self: {
 
   cfg = config.programs.caelestia;
 in {
+  imports = [
+    (lib.mkRenamedOptionModule ["programs" "caelestia" "environment"] ["programs" "caelestia" "systemd" "environment"])
+  ];
   options = with lib; {
     programs.caelestia = {
       enable = mkEnableOption "Enable Caelestia shell";
@@ -32,6 +35,14 @@ in {
           '';
           default = "graphical-session.target";
         };
+        environment = mkOption {
+          type = types.listOf types.str;
+          description = "Extra Environment variables to pass to the Caelestia shell systemd service.";
+          default = [];
+          example = [
+            "QT_QPA_PLATFORMTHEME=gtk3"
+          ];
+        };
       };
       settings = mkOption {
         type = types.attrsOf types.anything;
@@ -42,14 +53,6 @@ in {
         type = types.str;
         default = "";
         description = "Caelestia shell extra configs written to shell.json";
-      };
-      environment = mkOption {
-        type = types.listOf types.str;
-        description = "Extra Environment variables to pass to the Caelestia shell systemd service.";
-        default = [ ];
-        example = [
-          "QT_QPA_PLATFORMTHEME=gtk3"
-        ];
       };
       cli = {
         enable = mkEnableOption "Enable Caelestia CLI";
@@ -93,10 +96,11 @@ in {
           Restart = "on-failure";
           RestartSec = "5s";
           TimeoutStopSec = "5s";
-          Environment = [
-            "QT_QPA_PLATFORM=wayland"
-          ]
-          ++ cfg.environment;
+          Environment =
+            [
+              "QT_QPA_PLATFORM=wayland"
+            ]
+            ++ cfg.systemd.environment;
 
           Slice = "session.slice";
         };

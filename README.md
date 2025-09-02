@@ -13,9 +13,9 @@ https://github.com/user-attachments/assets/0840f496-575c-4ca6-83a8-87bb01a85c5f
 
 ## Components
 
--   Widgets: [`Quickshell`](https://quickshell.outfoxxed.me)
--   Window manager: [`Hyprland`](https://hyprland.org)
--   Dots: [`caelestia`](https://github.com/caelestia-dots)
+- Widgets: [`Quickshell`](https://quickshell.outfoxxed.me)
+- Window manager: [`Hyprland`](https://hyprland.org)
+- Dots: [`caelestia`](https://github.com/caelestia-dots)
 
 ## Installation
 
@@ -73,32 +73,32 @@ For home-manager, you can also use the Caelestia's home manager module (explaine
 
 Dependencies:
 
--   [`caelestia-cli`](https://github.com/caelestia-dots/cli)
--   [`quickshell-git`](https://quickshell.outfoxxed.me) - this has to be the git version, not the latest tagged version
--   [`ddcutil`](https://github.com/rockowitz/ddcutil)
--   [`brightnessctl`](https://github.com/Hummer12007/brightnessctl)
--   [`app2unit`](https://github.com/Vladimir-csp/app2unit)
--   [`cava`](https://github.com/karlstav/cava)
--   [`networkmanager`](https://networkmanager.dev)
--   [`lm-sensors`](https://github.com/lm-sensors/lm-sensors)
--   [`fish`](https://github.com/fish-shell/fish-shell)
--   [`aubio`](https://github.com/aubio/aubio)
--   [`libpipewire`](https://pipewire.org)
--   `glibc`
--   `qt6-declarative`
--   `gcc-libs`
--   [`material-symbols`](https://fonts.google.com/icons)
--   [`caskaydia-cove-nerd`](https://www.nerdfonts.com/font-downloads)
--   [`swappy`](https://github.com/jtheoof/swappy)
--   [`libqalculate`](https://github.com/Qalculate/libqalculate)
--   [`bash`](https://www.gnu.org/software/bash)
--   `qt6-base`
--   `qt6-declarative`
+- [`caelestia-cli`](https://github.com/caelestia-dots/cli)
+- [`quickshell-git`](https://quickshell.outfoxxed.me) - this has to be the git version, not the latest tagged version
+- [`ddcutil`](https://github.com/rockowitz/ddcutil)
+- [`brightnessctl`](https://github.com/Hummer12007/brightnessctl)
+- [`app2unit`](https://github.com/Vladimir-csp/app2unit)
+- [`cava`](https://github.com/karlstav/cava)
+- [`networkmanager`](https://networkmanager.dev)
+- [`lm-sensors`](https://github.com/lm-sensors/lm-sensors)
+- [`fish`](https://github.com/fish-shell/fish-shell)
+- [`aubio`](https://github.com/aubio/aubio)
+- [`libpipewire`](https://pipewire.org)
+- `glibc`
+- `qt6-declarative`
+- `gcc-libs`
+- [`material-symbols`](https://fonts.google.com/icons)
+- [`caskaydia-cove-nerd`](https://www.nerdfonts.com/font-downloads)
+- [`swappy`](https://github.com/jtheoof/swappy)
+- [`libqalculate`](https://github.com/Qalculate/libqalculate)
+- [`bash`](https://www.gnu.org/software/bash)
+- `qt6-base`
+- `qt6-declarative`
 
 Build dependencies:
 
--   [`cmake`](https://cmake.org)
--   [`ninja`](https://github.com/ninja-build/ninja)
+- [`cmake`](https://cmake.org)
+- [`ninja`](https://github.com/ninja-build/ninja)
 
 To install the shell manually, install all dependencies and clone this repo to `$XDG_CONFIG_HOME/quickshell/caelestia`.
 Then simply build and install using `cmake`.
@@ -216,6 +216,7 @@ programs.caelestia = {
   systemd = {
     enable = false; # if you prefer starting from your compositor
     target = "graphical-session.target";
+    environment = [];
   };
   settings = {
     bar.status = {
@@ -223,7 +224,6 @@ programs.caelestia = {
     };
     paths.wallpaperDir = "~/Images";
   };
-  environment = [];
   cli = {
     enable = true; # Also add caelestia-cli to path
     settings = {
@@ -246,198 +246,198 @@ The module automatically adds Caelestia shell to the path with **full functional
 
 ```json
 {
-    "appearance": {
-        "anim": {
-            "durations": {
-                "scale": 1
-            }
-        },
-        "font": {
-            "family": {
-                "material": "Material Symbols Rounded",
-                "mono": "CaskaydiaCove NF",
-                "sans": "Rubik"
-            },
-            "size": {
-                "scale": 1
-            }
-        },
-        "padding": {
-            "scale": 1
-        },
-        "rounding": {
-            "scale": 1
-        },
-        "spacing": {
-            "scale": 1
-        },
-        "transparency": {
-            "enabled": false,
-            "base": 0.85,
-            "layers": 0.4
-        }
+  "appearance": {
+    "anim": {
+      "durations": {
+        "scale": 1
+      }
     },
-    "general": {
-        "apps": {
-            "terminal": ["foot"],
-            "audio": ["pavucontrol"]
-        }
+    "font": {
+      "family": {
+        "material": "Material Symbols Rounded",
+        "mono": "CaskaydiaCove NF",
+        "sans": "Rubik"
+      },
+      "size": {
+        "scale": 1
+      }
     },
-    "background": {
-        "desktopClock": {
-            "enabled": false
-        },
-        "enabled": true,
-        "visualiser": {
-            "enabled": false,
-            "autoHide": true,
-            "rounding": 1,
-            "spacing": 1
-        }
+    "padding": {
+      "scale": 1
     },
-    "bar": {
-        "clock": {
-            "showIcon": true
-        },
-        "dragThreshold": 20,
-        "entries": [
-            {
-                "id": "logo",
-                "enabled": true
-            },
-            {
-                "id": "workspaces",
-                "enabled": true
-            },
-            {
-                "id": "spacer",
-                "enabled": true
-            },
-            {
-                "id": "activeWindow",
-                "enabled": true
-            },
-            {
-                "id": "spacer",
-                "enabled": true
-            },
-            {
-                "id": "tray",
-                "enabled": true
-            },
-            {
-                "id": "clock",
-                "enabled": true
-            },
-            {
-                "id": "statusIcons",
-                "enabled": true
-            },
-            {
-                "id": "power",
-                "enabled": true
-            },
-            {
-                "id": "idleInhibitor",
-                "enabled": false
-            }
-        ],
-        "persistent": true,
-        "showOnHover": true,
-        "status": {
-            "showAudio": false,
-            "showBattery": true,
-            "showBluetooth": true,
-            "showKbLayout": false,
-            "showNetwork": true
-        },
-        "tray": {
-            "background": false,
-            "recolour": false
-        },
-        "workspaces": {
-            "activeIndicator": true,
-            "activeLabel": "󰮯",
-            "activeTrail": false,
-            "label": "  ",
-            "occupiedBg": false,
-            "occupiedLabel": "󰮯",
-            "perMonitorWorkspaces": true,
-            "showWindows": true,
-            "shown": 5
-        }
+    "rounding": {
+      "scale": 1
     },
-    "border": {
-        "rounding": 25,
-        "thickness": 10
+    "spacing": {
+      "scale": 1
     },
-    "dashboard": {
-        "enabled": true,
-        "dragThreshold": 50,
-        "mediaUpdateInterval": 500,
-        "showOnHover": true
-    },
-    "launcher": {
-        "actionPrefix": ">",
-        "dragThreshold": 50,
-        "vimKeybinds": false,
-        "enableDangerousActions": false,
-        "maxShown": 8,
-        "maxWallpapers": 9,
-        "specialPrefix": "@",
-        "useFuzzy": {
-            "apps": false,
-            "actions": false,
-            "schemes": false,
-            "variants": false,
-            "wallpapers": false
-        },
-        "showOnHover": false
-    },
-    "lock": {
-        "recolourLogo": false
-    },
-    "notifs": {
-        "actionOnClick": false,
-        "clearThreshold": 0.3,
-        "defaultExpireTimeout": 5000,
-        "expandThreshold": 20,
-        "expire": false
-    },
-    "osd": {
-        "enabled": true,
-        "enableBrightness": true,
-        "enableMicrophone": false,
-        "hideDelay": 2000
-    },
-    "paths": {
-        "mediaGif": "root:/assets/bongocat.gif",
-        "sessionGif": "root:/assets/kurukuru.gif",
-        "wallpaperDir": "~/Pictures/Wallpapers"
-    },
-    "services": {
-        "audioIncrement": 0.1,
-        "defaultPlayer": "Spotify",
-        "gpuType": "",
-        "playerAliases": [
-            { "from": "com.github.th_ch.youtube_music", "to": "YT Music" }
-        ],
-        "weatherLocation": "",
-        "useFahrenheit": false,
-        "useTwelveHourClock": false,
-        "smartScheme": true,
-        "visualiserBars": 45
-    },
-    "session": {
-        "dragThreshold": 30,
-        "vimKeybinds": false,
-        "commands": {
-            "logout": ["loginctl", "terminate-user", ""],
-            "shutdown": ["systemctl", "poweroff"],
-            "hibernate": ["systemctl", "hibernate"],
-            "reboot": ["systemctl", "reboot"]
-        }
+    "transparency": {
+      "enabled": false,
+      "base": 0.85,
+      "layers": 0.4
     }
+  },
+  "general": {
+    "apps": {
+      "terminal": ["foot"],
+      "audio": ["pavucontrol"]
+    }
+  },
+  "background": {
+    "desktopClock": {
+      "enabled": false
+    },
+    "enabled": true,
+    "visualiser": {
+      "enabled": false,
+      "autoHide": true,
+      "rounding": 1,
+      "spacing": 1
+    }
+  },
+  "bar": {
+    "clock": {
+      "showIcon": true
+    },
+    "dragThreshold": 20,
+    "entries": [
+      {
+        "id": "logo",
+        "enabled": true
+      },
+      {
+        "id": "workspaces",
+        "enabled": true
+      },
+      {
+        "id": "spacer",
+        "enabled": true
+      },
+      {
+        "id": "activeWindow",
+        "enabled": true
+      },
+      {
+        "id": "spacer",
+        "enabled": true
+      },
+      {
+        "id": "tray",
+        "enabled": true
+      },
+      {
+        "id": "clock",
+        "enabled": true
+      },
+      {
+        "id": "statusIcons",
+        "enabled": true
+      },
+      {
+        "id": "power",
+        "enabled": true
+      },
+      {
+        "id": "idleInhibitor",
+        "enabled": false
+      }
+    ],
+    "persistent": true,
+    "showOnHover": true,
+    "status": {
+      "showAudio": false,
+      "showBattery": true,
+      "showBluetooth": true,
+      "showKbLayout": false,
+      "showNetwork": true
+    },
+    "tray": {
+      "background": false,
+      "recolour": false
+    },
+    "workspaces": {
+      "activeIndicator": true,
+      "activeLabel": "󰮯",
+      "activeTrail": false,
+      "label": "  ",
+      "occupiedBg": false,
+      "occupiedLabel": "󰮯",
+      "perMonitorWorkspaces": true,
+      "showWindows": true,
+      "shown": 5
+    }
+  },
+  "border": {
+    "rounding": 25,
+    "thickness": 10
+  },
+  "dashboard": {
+    "enabled": true,
+    "dragThreshold": 50,
+    "mediaUpdateInterval": 500,
+    "showOnHover": true
+  },
+  "launcher": {
+    "actionPrefix": ">",
+    "dragThreshold": 50,
+    "vimKeybinds": false,
+    "enableDangerousActions": false,
+    "maxShown": 8,
+    "maxWallpapers": 9,
+    "specialPrefix": "@",
+    "useFuzzy": {
+      "apps": false,
+      "actions": false,
+      "schemes": false,
+      "variants": false,
+      "wallpapers": false
+    },
+    "showOnHover": false
+  },
+  "lock": {
+    "recolourLogo": false
+  },
+  "notifs": {
+    "actionOnClick": false,
+    "clearThreshold": 0.3,
+    "defaultExpireTimeout": 5000,
+    "expandThreshold": 20,
+    "expire": false
+  },
+  "osd": {
+    "enabled": true,
+    "enableBrightness": true,
+    "enableMicrophone": false,
+    "hideDelay": 2000
+  },
+  "paths": {
+    "mediaGif": "root:/assets/bongocat.gif",
+    "sessionGif": "root:/assets/kurukuru.gif",
+    "wallpaperDir": "~/Pictures/Wallpapers"
+  },
+  "services": {
+    "audioIncrement": 0.1,
+    "defaultPlayer": "Spotify",
+    "gpuType": "",
+    "playerAliases": [
+      { "from": "com.github.th_ch.youtube_music", "to": "YT Music" }
+    ],
+    "weatherLocation": "",
+    "useFahrenheit": false,
+    "useTwelveHourClock": false,
+    "smartScheme": true,
+    "visualiserBars": 45
+  },
+  "session": {
+    "dragThreshold": 30,
+    "vimKeybinds": false,
+    "commands": {
+      "logout": ["loginctl", "terminate-user", ""],
+      "shutdown": ["systemctl", "poweroff"],
+      "hibernate": ["systemctl", "hibernate"],
+      "reboot": ["systemctl", "reboot"]
+    }
+  }
 }
 ```
 
