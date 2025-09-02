@@ -76,8 +76,8 @@ in {
   };
 
   config = let
-    cli = cfg.cli.package or cli-default;
-    shell = cfg.package or shell-default;
+    cli = cfg.cli.package;
+    shell = cfg.package;
   in
     lib.mkIf cfg.enable {
       systemd.user.services.caelestia = lib.mkIf cfg.systemd.enable {
