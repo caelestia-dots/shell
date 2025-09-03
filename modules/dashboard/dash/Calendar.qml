@@ -16,97 +16,105 @@ Column {
     spacing: Appearance.spacing.small
 
     property date currentDate: new Date()
-    property int currMonth: currentDate.getMonth()
-    property int currYear: currentDate.getFullYear()
+    readonly property int currMonth: currentDate.getMonth()
+    readonly property int currYear: currentDate.getFullYear()
 
     RowLayout {
         id: monthNavigationRow
 
-        width: parent.width - (root.padding * 2)
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.margins: parent.padding
         spacing: Appearance.spacing.small
 
-        Item {
-            Layout.preferredWidth: 30
-            Layout.preferredHeight: 30
+        StyledRect {
+            implicitWidth: implicitHeight
+            implicitHeight: prevMonthText.implicitHeight + Appearance.padding.small * 2
 
-            StyledRect {
-                anchors.centerIn: parent
+            radius: Appearance.rounding.full
 
-                implicitWidth: implicitHeight
-                implicitHeight: prevMonthText.implicitHeight + Appearance.padding.small * 2
+            StateLayer {
+                id: prevMonthStateLayer
 
-                radius: Appearance.rounding.full
-                color: prevMonthMouseArea.containsMouse ? Colours.palette.m3primary : "transparent"
+                function onClicked(): void {
+                    root.currentDate = new Date(root.currYear, root.currMonth - 1, 1);
+                }
             }
 
             MaterialIcon {
                 id: prevMonthText
+
                 anchors.centerIn: parent
                 text: "chevron_left"
-                color: prevMonthMouseArea.containsMouse ? Colours.palette.m3onPrimary : Colours.palette.m3primary 
+                color: Colours.palette.m3tertiary
                 font.pointSize: Appearance.font.size.normal
                 font.weight: 700
             }
-
-            MouseArea {
-                id: prevMonthMouseArea
-                anchors.fill: parent
-                hoverEnabled: true
-                onClicked: {
-                    root.currentDate = new Date(root.currYear, root.currMonth - 1, 1);
-                }
-            }
-        }
-
-        StyledText {
-            id: monthYearDisplay
-
-            Layout.fillWidth: true
-            horizontalAlignment: Text.AlignHCenter
-            text: grid.title
-            color: Colours.palette.m3primary
-            font.pointSize: Appearance.font.size.normal
-            font.weight: 500
-            font.capitalization: Font.Capitalize
         }
 
         Item {
-            Layout.preferredWidth: 30
-            Layout.preferredHeight: 30
+            Layout.fillWidth: true
 
-            StyledRect {
-                anchors.centerIn: parent
+            implicitWidth: monthYearDisplay.implicitWidth + Appearance.padding.small * 2
+            implicitHeight: monthYearDisplay.implicitHeight + Appearance.padding.small * 2
 
-                implicitWidth: implicitHeight
-                implicitHeight: nextMonthText.implicitHeight + Appearance.padding.small * 2
+            StateLayer {
+                anchors.fill: monthYearDisplay
+                anchors.margins: -Appearance.padding.small
+                anchors.leftMargin: -Appearance.padding.normal
+                anchors.rightMargin: -Appearance.padding.normal
 
                 radius: Appearance.rounding.full
-                color: nextMonthMouseArea.containsMouse ? Colours.palette.m3primary : "transparent"
+                disabled: root.currentDate.toDateString() == new Date().toDateString()
+
+                function onClicked(): void {
+                    root.currentDate = new Date();
+                }
+            }
+
+            StyledText {
+                id: monthYearDisplay
+
+                anchors.centerIn: parent
+                text: grid.title
+                color: Colours.palette.m3primary
+                font.pointSize: Appearance.font.size.normal
+                font.weight: 500
+                font.capitalization: Font.Capitalize
+            }
+        }
+
+        StyledRect {
+            implicitWidth: implicitHeight
+            implicitHeight: nextMonthText.implicitHeight + Appearance.padding.small * 2
+
+            radius: Appearance.rounding.full
+
+            StateLayer {
+                id: nextMonthStateLayer
+
+                function onClicked(): void {
+                    root.currentDate = new Date(root.currYear, root.currMonth + 1, 1);
+                }
             }
 
             MaterialIcon {
                 id: nextMonthText
+
                 anchors.centerIn: parent
                 text: "chevron_right"
-                color: nextMonthMouseArea.containsMouse ? Colours.palette.m3onPrimary : Colours.palette.m3primary
+                color: Colours.palette.m3tertiary
                 font.pointSize: Appearance.font.size.normal
                 font.weight: 700
-            }
-
-            MouseArea {
-                id: nextMonthMouseArea
-                anchors.fill: parent
-                hoverEnabled: true
-                onClicked: {
-                    root.currentDate = new Date(root.currYear, root.currMonth + 1, 1);
-                }
             }
         }
     }
 
     DayOfWeekRow {
         id: daysRow
+
         locale: grid.locale
+
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.margins: parent.padding
@@ -116,9 +124,8 @@ Column {
 
             horizontalAlignment: Text.AlignHCenter
             text: model.shortName
-            font.family: Appearance.font.family.sans
             font.weight: 500
-            color: (model.day === 0 || model.day === 6) ? Colours.palette.m3primary : Colours.palette.m3onSurfaceVariant
+            color: (model.day === 0 || model.day === 6) ? Colours.palette.m3secondary : Colours.palette.m3onSurfaceVariant
         }
     }
 
@@ -161,18 +168,16 @@ Column {
                 horizontalAlignment: Text.AlignHCenter
                 text: grid.locale.toString(dayItem.model.day)
                 color: {
-                    var dayOfWeek = dayItem.model.date.getUTCDay();
-                    if (dayItem.model.today) {
+                    if (dayItem.model.today)
                         return Colours.palette.m3onPrimary;
-                    } else if (dayOfWeek === 0 || dayOfWeek === 6) {
-                        return Colours.palette.m3primary;
-                    } else if (dayItem.model.month === grid.month) {
-                        return Colours.palette.m3onSurfaceVariant;
-                    } else {
-                        return Colours.palette.m3outline;
-                    }
+
+                    const dayOfWeek = dayItem.model.date.getUTCDay();
+                    if (dayOfWeek === 0 || dayOfWeek === 6)
+                        return Colours.palette.m3secondary;
+
+                    return Colours.palette.m3onSurfaceVariant;
                 }
-                opacity: dayItem.model.month === grid.month ? 1.0 : 0.4
+                opacity: dayItem.model.today || dayItem.model.month === grid.month ? 1 : 0.4
                 font.pointSize: Appearance.font.size.normal
                 font.weight: 500
             }

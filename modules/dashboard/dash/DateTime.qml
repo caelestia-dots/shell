@@ -26,17 +26,16 @@ Item {
             Layout.alignment: Qt.AlignHCenter
             text: root.timeComponents[0]
             color: Colours.palette.m3secondary
-            font.pointSize: Appearance.font.size.extraLarge * 1.3
+            font.pointSize: Appearance.font.size.extraLarge
             font.family: Appearance.font.family.clock
             font.weight: 600
         }
 
         StyledText {
-            Layout.topMargin: 0
             Layout.alignment: Qt.AlignHCenter
             text: "•••"
             color: Colours.palette.m3primary
-            font.pointSize: Appearance.font.size.extraLarge
+            font.pointSize: Appearance.font.size.extraLarge * 0.9
             font.family: Appearance.font.family.clock
         }
 
@@ -45,7 +44,7 @@ Item {
             Layout.alignment: Qt.AlignHCenter
             text: root.timeComponents[1]
             color: Colours.palette.m3secondary
-            font.pointSize: Appearance.font.size.extraLarge * 1.3
+            font.pointSize: Appearance.font.size.extraLarge
             font.family: Appearance.font.family.clock
             font.weight: 600
         }
@@ -59,7 +58,7 @@ Item {
 
             sourceComponent: StyledText {
                 text: root.timeComponents[2] ?? ""
-                color: Colours.palette.m3secondary
+                color: Colours.palette.m3primary
                 font.pointSize: Appearance.font.size.large
                 font.family: Appearance.font.family.clock
                 font.weight: 600
