@@ -29,14 +29,14 @@ Column {
         anchors.margins: parent.padding
         spacing: Appearance.spacing.small
 
-        StyledRect {
+        Item {
             implicitWidth: implicitHeight
             implicitHeight: prevMonthText.implicitHeight + Appearance.padding.small * 2
 
-            radius: Appearance.rounding.full
-
             StateLayer {
                 id: prevMonthStateLayer
+
+                radius: Appearance.rounding.full
 
                 function onClicked(): void {
                     root.state.currentDate = new Date(root.currYear, root.currMonth - 1, 1);
@@ -86,14 +86,14 @@ Column {
             }
         }
 
-        StyledRect {
+        Item {
             implicitWidth: implicitHeight
             implicitHeight: nextMonthText.implicitHeight + Appearance.padding.small * 2
 
-            radius: Appearance.rounding.full
-
             StateLayer {
                 id: nextMonthStateLayer
+
+                radius: Appearance.rounding.full
 
                 function onClicked(): void {
                     root.state.currentDate = new Date(root.currYear, root.currMonth + 1, 1);
