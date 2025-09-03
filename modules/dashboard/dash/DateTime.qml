@@ -5,7 +5,6 @@ import qs.services
 import qs.config
 import QtQuick
 import QtQuick.Layouts
-import QtQml
 
 Item {
     id: root

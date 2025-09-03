@@ -16,6 +16,8 @@ Column {
     spacing: Appearance.spacing.small
 
     property date currentDate: new Date()
+    property int currMonth: currentDate.getMonth()
+    property int currYear: currentDate.getFullYear()
 
     RowLayout {
         id: monthNavigationRow
@@ -51,7 +53,7 @@ Column {
                 anchors.fill: parent
                 hoverEnabled: true
                 onClicked: {
-                    root.currentDate = new Date(root.currentDate.getFullYear(), root.currentDate.getMonth() - 1, 1);
+                    root.currentDate = new Date(root.currYear, root.currMonth - 1, 1);
                 }
             }
         }
@@ -96,7 +98,7 @@ Column {
                 anchors.fill: parent
                 hoverEnabled: true
                 onClicked: {
-                    root.currentDate = new Date(root.currentDate.getFullYear(), root.currentDate.getMonth() + 1, 1);
+                    root.currentDate = new Date(root.currYear, root.currMonth + 1, 1);
                 }
             }
         }
@@ -123,8 +125,8 @@ Column {
     MonthGrid {
         id: grid
 
-        month: root.currentDate.getMonth()
-        year: root.currentDate.getFullYear()
+        month: root.currMonth
+        year: root.currYear
 
         anchors.left: parent.left
         anchors.right: parent.right
@@ -157,9 +159,9 @@ Column {
                 anchors.centerIn: parent
 
                 horizontalAlignment: Text.AlignHCenter
-                text: grid.locale.toString(dayItem.model.date, "d")
+                text: grid.locale.toString(dayItem.model.day)
                 color: {
-                    var dayOfWeek = dayItem.model.date.getDay();
+                    var dayOfWeek = dayItem.model.date.getUTCDay();
                     if (dayItem.model.today) {
                         return Colours.palette.m3onPrimary;
                     } else if (dayOfWeek === 0 || dayOfWeek === 6) {
