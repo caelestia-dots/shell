@@ -61,14 +61,15 @@ StyledRect {
 
             sourceComponent: MaterialIcon {
                 animate: true
-                text: Hypr.capsLock ? "󰘲" : "󰘶"
+                text: "keyboard_capslock"
                 color: root.colour
+                font.pointSize: 18
             }
 
             Rectangle {
                     anchors.centerIn: parent
-                    width: parent.width + Appearance.padding.large
-                    height: parent.height + Appearance.padding.small
+                    width: parent.width + Appearance.padding.normal * 0.7
+                    height: parent.height + Appearance.padding.small * 0.6
                     radius: Appearance.rounding.full
                     color: Hypr.capsLock ? Colours.palette.m3primaryContainer : "transparent"
                     z: -1
