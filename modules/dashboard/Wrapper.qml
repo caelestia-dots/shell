@@ -15,6 +15,7 @@ Item {
     required property PersistentProperties visibilities
     readonly property PersistentProperties state: PersistentProperties {
         property int currentTab
+        property date currentDate: new Date()
 
         readonly property FileDialog facePicker: FileDialog {
             title: qsTr("Select a profile picture")

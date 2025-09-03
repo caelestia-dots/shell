@@ -11,14 +11,15 @@ import QtQuick.Layouts
 Column {
     id: root
 
+    required property var state
+
+    readonly property int currMonth: state.currentDate.getMonth()
+    readonly property int currYear: state.currentDate.getFullYear()
+
     anchors.left: parent.left
     anchors.right: parent.right
     padding: Appearance.padding.large
     spacing: Appearance.spacing.small
-
-    property date currentDate: new Date()
-    readonly property int currMonth: currentDate.getMonth()
-    readonly property int currYear: currentDate.getFullYear()
 
     RowLayout {
         id: monthNavigationRow
@@ -38,7 +39,7 @@ Column {
                 id: prevMonthStateLayer
 
                 function onClicked(): void {
-                    root.currentDate = new Date(root.currYear, root.currMonth - 1, 1);
+                    root.state.currentDate = new Date(root.currYear, root.currMonth - 1, 1);
                 }
             }
 
@@ -66,10 +67,10 @@ Column {
                 anchors.rightMargin: -Appearance.padding.normal
 
                 radius: Appearance.rounding.full
-                disabled: root.currentDate.toDateString() == new Date().toDateString()
+                disabled: root.state.currentDate.toDateString() == new Date().toDateString()
 
                 function onClicked(): void {
-                    root.currentDate = new Date();
+                    root.state.currentDate = new Date();
                 }
             }
 
@@ -95,7 +96,7 @@ Column {
                 id: nextMonthStateLayer
 
                 function onClicked(): void {
-                    root.currentDate = new Date(root.currYear, root.currMonth + 1, 1);
+                    root.state.currentDate = new Date(root.currYear, root.currMonth + 1, 1);
                 }
             }
 

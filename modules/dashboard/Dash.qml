@@ -56,6 +56,8 @@ GridLayout {
 
         Calendar {
             id: calendar
+
+            state: root.state
         }
     }
 
