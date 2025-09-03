@@ -4,6 +4,7 @@ JsonObject {
     property bool persistent: true
     property bool showOnHover: true
     property int dragThreshold: 20
+    property bool scrollActions: false     // FALSE BY DEFAULT SO ANNOYING
     property Workspaces workspaces: Workspaces {}
     property Tray tray: Tray {}
     property Status status: Status {}
