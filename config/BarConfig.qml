@@ -76,7 +76,7 @@ JsonObject {
         property bool showNetwork: true
         property bool showBluetooth: true
         property bool showBattery: true
-        property bool showCapsLock: false
+        property bool showLockStatus: true
     }
 
     component Clock: JsonObject {

@@ -331,7 +331,7 @@ programs.caelestia = {
             "showBluetooth": true,
             "showKbLayout": false,
             "showNetwork": true,
-            "showCapsLock": false
+            "showLockStatus": true
         },
         "tray": {
             "background": false,

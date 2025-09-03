@@ -59,8 +59,8 @@ Item {
         }
 
         Popout {
-            name: "CapsLock"
-            source: "CapsLock.qml"
+            name: "lockstatus"
+            source: "LockStatus.qml"
         }
 
         Repeater {
