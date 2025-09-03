@@ -59,6 +59,11 @@ Item {
         }
 
         Popout {
+            name: "lockstatus"
+            source: "LockStatus.qml"
+        }
+
+        Popout {
             name: "calendar-advanced"
             sourceComponent: Loader {
                 source: "Calendars/Advanced.qml"
@@ -128,7 +133,6 @@ Item {
         opacity: 0
         scale: 0.8
         active: false
-        asynchronous: true
 
         states: State {
             name: "active"

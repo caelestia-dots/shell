@@ -58,11 +58,13 @@ JsonObject {
         property bool activeIndicator: true
         property bool occupiedBg: false
         property bool showWindows: true
+        property bool showWindowsOnSpecialWorkspaces: showWindows
         property bool activeTrail: false
         property bool perMonitorWorkspaces: true
-        property string label: "  "
+        property string label: "  " // if empty, will show workspace name's first letter
         property string occupiedLabel: "󰮯"
         property string activeLabel: "󰮯"
+        property string capitalisation: "preserve" // upper, lower, or preserve - relevant only if label is empty
     }
 
     component Tray: JsonObject {
@@ -76,6 +78,7 @@ JsonObject {
         property bool showNetwork: true
         property bool showBluetooth: true
         property bool showBattery: true
+        property bool showLockStatus: true
         property bool showNotifications: true
     }
 

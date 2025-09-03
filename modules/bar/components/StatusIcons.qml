@@ -21,12 +21,16 @@ StyledRect {
 
     clip: true
     implicitWidth: Config.bar.sizes.innerWidth
-    implicitHeight: iconColumn.implicitHeight + Appearance.padding.normal * 2
+    implicitHeight: iconColumn.implicitHeight + Appearance.padding.normal * 2 - (Config.bar.status.showLockStatus && !Hypr.capsLock && !Hypr.numLock ? iconColumn.spacing : 0)
 
     ColumnLayout {
         id: iconColumn
 
-        anchors.centerIn: parent
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.bottom: parent.bottom
+        anchors.bottomMargin: Appearance.padding.normal
+
         spacing: Appearance.spacing.smaller / 2
 
         // Notifications icon
@@ -51,6 +55,76 @@ StyledRect {
                 MouseArea {
                     anchors.fill: parent
                     onClicked: Notifs.toggleDnd()
+                }
+            }
+        }
+
+        // Lock keys status
+        WrappedLoader {
+            name: "lockstatus"
+            active: Config.bar.status.showLockStatus
+
+            sourceComponent: ColumnLayout {
+                spacing: 0
+
+                Item {
+                    implicitWidth: capslockIcon.implicitWidth
+                    implicitHeight: Hypr.capsLock ? capslockIcon.implicitHeight : 0
+
+                    MaterialIcon {
+                        id: capslockIcon
+
+                        anchors.centerIn: parent
+
+                        scale: Hypr.capsLock ? 1 : 0.5
+                        opacity: Hypr.capsLock ? 1 : 0
+
+                        text: "keyboard_capslock_badge"
+                        color: root.colour
+
+                        Behavior on opacity {
+                            Anim {}
+                        }
+
+                        Behavior on scale {
+                            Anim {}
+                        }
+                    }
+
+                    Behavior on implicitHeight {
+                        Anim {}
+                    }
+                }
+
+                Item {
+                    Layout.topMargin: Hypr.capsLock && Hypr.numLock ? iconColumn.spacing : 0
+
+                    implicitWidth: numlockIcon.implicitWidth
+                    implicitHeight: Hypr.numLock ? numlockIcon.implicitHeight : 0
+
+                    MaterialIcon {
+                        id: numlockIcon
+
+                        anchors.centerIn: parent
+
+                        scale: Hypr.numLock ? 1 : 0.5
+                        opacity: Hypr.numLock ? 1 : 0
+
+                        text: "looks_one"
+                        color: root.colour
+
+                        Behavior on opacity {
+                            Anim {}
+                        }
+
+                        Behavior on scale {
+                            Anim {}
+                        }
+                    }
+
+                    Behavior on implicitHeight {
+                        Anim {}
+                    }
                 }
             }
         }
@@ -94,6 +168,8 @@ StyledRect {
 
         // Bluetooth section
         WrappedLoader {
+            Layout.preferredHeight: implicitHeight
+
             name: "bluetooth"
             active: Config.bar.status.showBluetooth
 
@@ -150,6 +226,10 @@ StyledRect {
                     }
                 }
             }
+
+            Behavior on Layout.preferredHeight {
+                Anim {}
+            }
         }
 
         // Battery icon
@@ -180,13 +260,6 @@ StyledRect {
                 color: !UPower.onBattery || UPower.displayDevice.percentage > 0.2 ? root.colour : Colours.palette.m3error
                 fill: 1
             }
-        }
-    }
-
-    Behavior on implicitHeight {
-        Anim {
-            duration: Appearance.anim.durations.large
-            easing.bezierCurve: Appearance.anim.curves.emphasized
         }
     }
 

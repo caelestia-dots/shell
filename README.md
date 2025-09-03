@@ -67,7 +67,7 @@ or a devshell. The shell can then be run via `caelestia-shell`.
 > The default package does not have the CLI enabled by default, which is required for full funcionality.
 > To enable the CLI, use the `with-cli` package.
 
-For home-manager, you can also use the Caelestia's home manager module (explained in [configuring](https://github.com/caelestia-dots/shell?tab=readme-ov-file#configuring)) that installs and configures the shell and the CLI.
+For home-manager, you can also use the Caelestia's home manager module (explained in [configuring](https://github.com/caelestia-dots/shell?tab=readme-ov-file#home-manager-module)) that installs and configures the shell and the CLI.
 
 ### Manual installation
 
@@ -206,39 +206,14 @@ git pull
 All configuration options should be put in `~/.config/caelestia/shell.json`. This file is _not_ created by
 default, you must create it manually.
 
-For NixOS users, a home manager module is also available.
-
-<details><summary><code>home.nix</code></summary>
-
-```nix
-programs.caelestia = {
-  enable = true;
-  systemd.enable = false; # if you prefer starting from your compositor
-  settings = {
-    bar.status = {
-      showBattery = false;
-    };
-    paths.wallpaperDir = "~/Images";
-  };
-  cli = {
-    enable = true; # Also add caelestia-cli to path
-    settings = {
-      theme.enableGtk = false;
-    };
-  };
-};
-```
-
-The module automatically adds Caelestia shell to the path with **full functionality**. The CLI is not required, however you have the option to enable and configure it.
-
-</details>
+### Example configuration
 
 > [!NOTE]
 > The example configuration only includes recommended configuration options. For more advanced customisation
 > such as modifying the size of individual items or changing constants in the code, there are some other
 > options which can be found in the source files in the `config` directory.
 
-<details><summary>Example configuration</summary>
+<details><summary>Example</summary>
 
 ```json
 {
@@ -348,6 +323,7 @@ The module automatically adds Caelestia shell to the path with **full functional
             "showBluetooth": true,
             "showKbLayout": false,
             "showNetwork": true,
+            "showLockStatus": true,
             "showNotifications": true
         },
         "tray": {
@@ -418,9 +394,7 @@ The module automatically adds Caelestia shell to the path with **full functional
         "audioIncrement": 0.1,
         "defaultPlayer": "Spotify",
         "gpuType": "",
-        "playerAliases": [
-            { "from": "com.github.th_ch.youtube_music", "to": "YT Music" }
-        ],
+        "playerAliases": [{ "from": "com.github.th_ch.youtube_music", "to": "YT Music" }],
         "weatherLocation": "",
         "useFahrenheit": false,
         "useTwelveHourClock": false,
@@ -439,6 +413,39 @@ The module automatically adds Caelestia shell to the path with **full functional
     }
 }
 ```
+
+</details>
+
+### Home Manager Module
+
+For NixOS users, a home manager module is also available.
+
+<details><summary><code>home.nix</code></summary>
+
+```nix
+programs.caelestia = {
+  enable = true;
+  systemd = {
+    enable = false; # if you prefer starting from your compositor
+    target = "graphical-session.target";
+    environment = [];
+  };
+  settings = {
+    bar.status = {
+      showBattery = false;
+    };
+    paths.wallpaperDir = "~/Images";
+  };
+  cli = {
+    enable = true; # Also add caelestia-cli to path
+    settings = {
+      theme.enableGtk = false;
+    };
+  };
+};
+```
+
+The module automatically adds Caelestia shell to the path with **full functionality**. The CLI is not required, however you have the option to enable and configure it.
 
 </details>
 
@@ -497,7 +504,7 @@ which helped me a lot with learning how to use Quickshell.
 
 Finally another thank you to all the configs I took inspiration from (only one for now):
 
-- [Axenide/Ax-Shell](https://github.com/Axenide/Ax-Shell)
+-   [Axenide/Ax-Shell](https://github.com/Axenide/Ax-Shell)
 
 ## Stonks 📈
 
