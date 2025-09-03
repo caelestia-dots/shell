@@ -49,6 +49,11 @@ ColumnLayout {
             popouts.currentName = id.toLowerCase();
             popouts.currentCenter = item.mapToItem(root, 0, itemHeight / 2).y;
             popouts.hasCurrent = true;
+        } else if (id === "clock" && Config.bar.clock.showCalendar) {
+            const style = Config.bar.clock.calendarStyle || "simple";
+            popouts.currentName = style === "simple" ? "calendar-simple" : "calendar-advanced";
+            popouts.currentCenter = Qt.binding(() => item.mapToItem(root, 0, itemHeight / 2).y);
+            popouts.hasCurrent = true;
         }
     }
 

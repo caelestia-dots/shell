@@ -297,7 +297,9 @@ The module automatically adds Caelestia shell to the path with **full functional
     },
     "bar": {
         "clock": {
-            "showIcon": true
+            "showIcon": true,
+            "showCalendar": true,
+            "calendarStyle": "simple"
         },
         "dragThreshold": 20,
         "entries": [
@@ -349,7 +351,8 @@ The module automatically adds Caelestia shell to the path with **full functional
             "showBattery": true,
             "showBluetooth": true,
             "showKbLayout": false,
-            "showNetwork": true
+            "showNetwork": true,
+            "showNotifications": true
         },
         "tray": {
             "background": false,
