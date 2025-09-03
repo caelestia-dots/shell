@@ -1,6 +1,7 @@
 pragma ComponentBehavior: Bound
 
 import qs.components
+import qs.components.effects
 import qs.services
 import qs.config
 import QtQuick
@@ -129,57 +130,107 @@ Column {
         }
     }
 
-    MonthGrid {
-        id: grid
-
-        month: root.currMonth
-        year: root.currYear
-
+    Item {
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.margins: parent.padding
 
-        spacing: 3
-        locale: Qt.locale()
+        implicitHeight: grid.implicitHeight
 
-        delegate: Item {
-            id: dayItem
+        MonthGrid {
+            id: grid
 
-            required property var model
+            month: root.currMonth
+            year: root.currYear
 
-            implicitWidth: implicitHeight
-            implicitHeight: text.implicitHeight + Appearance.padding.small * 2
+            anchors.left: parent.left
+            anchors.right: parent.right
 
-            StyledRect {
-                anchors.centerIn: parent
+            spacing: 3
+            locale: Qt.locale()
 
-                implicitWidth: parent.implicitHeight
-                implicitHeight: parent.implicitHeight
+            delegate: Item {
+                id: dayItem
 
-                radius: Appearance.rounding.full
-                color: dayItem.model.today ? Colours.palette.m3primary : "transparent"
+                required property var model
+
+                implicitWidth: implicitHeight
+                implicitHeight: text.implicitHeight + Appearance.padding.small * 2
+
+                StyledText {
+                    id: text
+
+                    anchors.centerIn: parent
+
+                    horizontalAlignment: Text.AlignHCenter
+                    text: grid.locale.toString(dayItem.model.day)
+                    color: {
+                        const dayOfWeek = dayItem.model.date.getUTCDay();
+                        if (dayOfWeek === 0 || dayOfWeek === 6)
+                            return Colours.palette.m3secondary;
+
+                        return Colours.palette.m3onSurfaceVariant;
+                    }
+                    opacity: dayItem.model.today || dayItem.model.month === grid.month ? 1 : 0.4
+                    font.pointSize: Appearance.font.size.normal
+                    font.weight: 500
+                }
+            }
+        }
+
+        StyledClippingRect {
+            id: todayIndicator
+
+            readonly property Item todayItem: grid.contentItem.children.find(c => c.model.today) ?? null
+            property Item today
+
+            onTodayItemChanged: {
+                if (todayItem)
+                    today = todayItem;
             }
 
-            StyledText {
-                id: text
+            x: today ? today.x + (today.width - implicitWidth) / 2 : 0
+            y: today?.y ?? 0
 
-                anchors.centerIn: parent
+            implicitWidth: today?.implicitWidth ?? 0
+            implicitHeight: today?.implicitHeight ?? 0
 
-                horizontalAlignment: Text.AlignHCenter
-                text: grid.locale.toString(dayItem.model.day)
-                color: {
-                    if (dayItem.model.today)
-                        return Colours.palette.m3onPrimary;
+            radius: Appearance.rounding.full
+            color: Colours.palette.m3primary
 
-                    const dayOfWeek = dayItem.model.date.getUTCDay();
-                    if (dayOfWeek === 0 || dayOfWeek === 6)
-                        return Colours.palette.m3secondary;
+            opacity: todayItem ? 1 : 0
+            scale: todayItem ? 1 : 0.7
 
-                    return Colours.palette.m3onSurfaceVariant;
+            Colouriser {
+                x: -todayIndicator.x
+                y: -todayIndicator.y
+
+                implicitWidth: grid.width
+                implicitHeight: grid.height
+
+                source: grid
+                sourceColor: Colours.palette.m3onSurface
+                colorizationColor: Colours.palette.m3onPrimary
+            }
+
+            Behavior on opacity {
+                Anim {}
+            }
+
+            Behavior on scale {
+                Anim {}
+            }
+
+            Behavior on x {
+                Anim {
+                    easing.bezierCurve: Appearance.anim.curves.emphasized
                 }
-                opacity: dayItem.model.today || dayItem.model.month === grid.month ? 1 : 0.4
-                font.pointSize: Appearance.font.size.normal
-                font.weight: 500
+            }
+
+            Behavior on y {
+                Anim {
+                    easing.bezierCurve: Appearance.anim.curves.emphasized
+                }
             }
         }
     }
