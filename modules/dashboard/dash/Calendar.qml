@@ -37,10 +37,10 @@ Column {
                 color: prevMonthMouseArea.containsMouse ? Colours.palette.m3primary : "transparent"
             }
 
-            StyledText {
+            MaterialIcon {
                 id: prevMonthText
                 anchors.centerIn: parent
-                text: "<"
+                text: "chevron_left"
                 color: prevMonthMouseArea.containsMouse ? Colours.palette.m3onPrimary : Colours.palette.m3primary 
                 font.pointSize: Appearance.font.size.normal
                 font.weight: 700
@@ -61,7 +61,7 @@ Column {
 
             Layout.fillWidth: true
             horizontalAlignment: Text.AlignHCenter
-            text: Qt.formatDateTime(root.currentDate, "MMMM yyyy")
+            text: grid.title
             color: Colours.palette.m3primary
             font.pointSize: Appearance.font.size.normal
             font.weight: 500
@@ -82,10 +82,10 @@ Column {
                 color: nextMonthMouseArea.containsMouse ? Colours.palette.m3primary : "transparent"
             }
 
-            StyledText {
+            MaterialIcon {
                 id: nextMonthText
                 anchors.centerIn: parent
-                text: ">"
+                text: "chevron_right"
                 color: nextMonthMouseArea.containsMouse ? Colours.palette.m3onPrimary : Colours.palette.m3primary
                 font.pointSize: Appearance.font.size.normal
                 font.weight: 700
@@ -104,7 +104,7 @@ Column {
 
     DayOfWeekRow {
         id: daysRow
-
+        locale: grid.locale
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.margins: parent.padding
@@ -113,10 +113,10 @@ Column {
             required property var model
 
             horizontalAlignment: Text.AlignHCenter
-            text: model.shortName.toLowerCase()
+            text: model.shortName
             font.family: Appearance.font.family.sans
             font.weight: 500
-            color: (model.index === 0 || model.index === 6) ? Colours.palette.m3primary : Colours.palette.m3onSurfaceVariant
+            color: (model.day === 0 || model.day === 6) ? Colours.palette.m3primary : Colours.palette.m3onSurfaceVariant
         }
     }
 
@@ -131,6 +131,7 @@ Column {
         anchors.margins: parent.padding
 
         spacing: 3
+        locale: Qt.locale()
 
         delegate: Item {
             id: dayItem
@@ -147,7 +148,7 @@ Column {
                 implicitHeight: parent.implicitHeight
 
                 radius: Appearance.rounding.full
-                color: model.today ? Colours.palette.m3primary : "transparent"
+                color: dayItem.model.today ? Colours.palette.m3primary : "transparent"
             }
 
             StyledText {
@@ -156,7 +157,7 @@ Column {
                 anchors.centerIn: parent
 
                 horizontalAlignment: Text.AlignHCenter
-                text: Qt.formatDate(dayItem.model.date, "d")
+                text: grid.locale.toString(dayItem.model.date, "d")
                 color: {
                     var dayOfWeek = dayItem.model.date.getDay();
                     if (dayItem.model.today) {
