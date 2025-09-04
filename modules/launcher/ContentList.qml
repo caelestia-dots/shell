@@ -1,5 +1,6 @@
 pragma ComponentBehavior: Bound
 
+import "services"
 import qs.components
 import qs.services
 import qs.config
@@ -81,6 +82,17 @@ Item {
 
         anchors.left: parent.left
         anchors.right: parent.right
+
+        Connections {
+            target: root.visibilities
+            function onLauncherChanged() {
+                if (root.visibilities.launcher && appList.item) {
+                    if (appList.item.state === "apps") {
+                        appList.item.state = appList.item.state;
+                    }
+                }
+            }
+        }
 
         sourceComponent: AppList {
             search: root.search
@@ -170,3 +182,4 @@ Item {
         }
     }
 }
+
