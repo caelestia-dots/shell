@@ -86,7 +86,7 @@
     };
 
     nativeBuildInputs = [cmake ninja pkg-config];
-    buildInputs = [qt6.qtbase qt6.qtdeclarative qt6.multimedia libqalculate aubio];
+    buildInputs = [qt6.qtbase qt6.qtdeclarative qt6.qtmultimedia libqalculate aubio];
 
     dontWrapQtApps = true;
     cmakeFlags =
