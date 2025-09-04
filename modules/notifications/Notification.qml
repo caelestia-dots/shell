@@ -1,6 +1,7 @@
 pragma ComponentBehavior: Bound
 
 import QtQuick
+import QtQuick.Layouts
 import QtQuick.Shapes
 import Quickshell
 import Quickshell.Services.Notifications
@@ -351,9 +352,10 @@ StyledRect {
                 active: Config.notifs.timeoutCircle
                 asynchronous: true
                 anchors.centerIn: closeBtn
-                
+
                 sourceComponent: Shape {
                     id: progressCircle
+
                     width: closeBtn.implicitWidth + Tokens.padding.small
                     height: closeBtn.implicitHeight + Tokens.padding.small
                     preferredRendererType: Shape.CurveRenderer
@@ -394,12 +396,12 @@ StyledRect {
                 implicitHeight: closeIcon.implicitHeight
 
                 StateLayer {
-                    radius: Tokens.rounding.full
-                    color: Colours.palette.m3onSurface
-
                     function onClicked() {
                         root.modelData.notification.dismiss();
                     }
+
+                    radius: Tokens.rounding.full
+                    color: Colours.palette.m3onSurface
                 }
 
                 MaterialIcon {
@@ -409,7 +411,7 @@ StyledRect {
 
                     animate: true
                     text: "close"
-                    font.pointSize: Tokens.font.size.normal
+                    font.pointSize: Tokens.font.icon.medium
                 }
             }
 
@@ -591,6 +593,7 @@ StyledRect {
 
     Loader {
         id: progressBar
+
         active: Config.notifs.timeoutBar
         asynchronous: true
 
@@ -621,9 +624,9 @@ StyledRect {
         radius: Tokens.rounding.full
         color: root.modelData.urgency === NotificationUrgency.Critical ? Colours.palette.m3secondary : Colours.layer(Colours.palette.m3surfaceContainerHigh, 2)
 
-        Layout.preferredWidth: actionText.width + Tokens.padding.normal * 2
+        Layout.preferredWidth: actionText.width + Tokens.padding.medium * 2
         Layout.preferredHeight: actionText.height + Tokens.padding.small * 2
-        implicitWidth: actionText.width + Tokens.padding.normal * 2
+        implicitWidth: actionText.width + Tokens.padding.medium * 2
         implicitHeight: actionText.height + Tokens.padding.small * 2
 
         StateLayer {
@@ -638,7 +641,7 @@ StyledRect {
             anchors.centerIn: parent
             text: actionTextMetrics.elidedText
             color: root.modelData.urgency === NotificationUrgency.Critical ? Colours.palette.m3onSecondary : Colours.palette.m3onSurfaceVariant
-            font.pointSize: Tokens.font.size.small
+            font.pointSize: Tokens.font.body.small
         }
 
         TextMetrics {
@@ -650,7 +653,7 @@ StyledRect {
             elide: Text.ElideRight
             elideWidth: {
                 const numActions = root.modelData.actions.length + 1;
-                return (inner.width - actions.spacing * (numActions - 1)) / numActions - root.Tokens.padding.normal * 2;
+                return (inner.width - actions.spacing * (numActions - 1)) / numActions - root.Tokens.padding.medium * 2;
             }
         }
     }
