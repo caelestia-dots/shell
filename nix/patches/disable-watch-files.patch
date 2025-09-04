@@ -1,0 +1,13 @@
+diff --git a/shell.qml b/shell.qml
+index b5c2c9d..3e3920f 100644
+--- a/shell.qml
++++ b/shell.qml
+@@ -9,6 +9,8 @@ import "modules/lock"
+ import Quickshell
+ 
+ ShellRoot {
++    settings.watchFiles: false
++
+     Background {}
+     Drawers {}
+     AreaPicker {}

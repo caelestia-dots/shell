@@ -126,6 +126,8 @@ in
         --replace-fail pam_fprintd.so /run/current-system/sw/lib/security/pam_fprintd.so
     '';
 
+    patches = [./patches/disable-watch-files.patch];
+
     postInstall = ''
       makeWrapper ${quickshell}/bin/qs $out/bin/caelestia-shell \
       	--prefix PATH : "${lib.makeBinPath runtimeDeps}" \
