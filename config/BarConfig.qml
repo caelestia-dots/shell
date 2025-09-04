@@ -4,7 +4,7 @@ JsonObject {
     property bool persistent: true
     property bool showOnHover: true
     property int dragThreshold: 20
-    property bool scrollActions: false     // FALSE BY DEFAULT SO ANNOYING
+    property ScrollActions scrollActions: ScrollActions {}
     property Workspaces workspaces: Workspaces {}
     property Tray tray: Tray {}
     property Status status: Status {}
@@ -53,6 +53,12 @@ JsonObject {
             enabled: false
         }
     ]
+
+    component ScrollActions: JsonObject {
+        property bool workspaces: true
+        property bool volume: true
+        property bool brightness: true
+    }
 
     component Workspaces: JsonObject {
         property int shown: 5
