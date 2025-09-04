@@ -33,7 +33,7 @@ Item {
 
         let height = (count - 1) * Tokens.spacing.medium;
         for (let i = 0; i < count; i++)
-            height += (list.itemAtIndex(i) as NotifWrapper)?.nonAnimHeight ?? 0;
+            height += (list.itemAtIndex(i) as NotifWrapper)?.implicitHeight ?? 0;
 
         if (visibilities.osd) {
             const h = osdPanel.y - clampedPadding;
