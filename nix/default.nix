@@ -124,9 +124,9 @@ in
     prePatch = ''
       substituteInPlace assets/pam.d/fprint \
         --replace-fail pam_fprintd.so /run/current-system/sw/lib/security/pam_fprintd.so
+      substituteInPlace shell.qml \
+        --replace-fail 'ShellRoot {' 'ShellRoot {  settings.watchFiles: false'
     '';
-
-    patches = [./patches/disable-watch-files.patch];
 
     postInstall = ''
       makeWrapper ${quickshell}/bin/qs $out/bin/caelestia-shell \
