@@ -70,7 +70,7 @@ Searcher {
         id: variants
 
         model: [...DesktopEntries.applications.values]
-            .filter(a => !Config.launcher.excludedApps.includes(a.id))
+            .filter(a => !Config.launcher.hiddenApps.includes(a.id))
             .sort((a, b) => a.name.localeCompare(b.name))
 
         QtObject {
