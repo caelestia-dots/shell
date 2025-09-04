@@ -69,7 +69,9 @@ Searcher {
     Variants {
         id: variants
 
-        model: [...DesktopEntries.applications.values].sort((a, b) => a.name.localeCompare(b.name))
+        model: [...DesktopEntries.applications.values]
+            .filter(a => !Config.launcher.excludedApps.includes(a.id))
+            .sort((a, b) => a.name.localeCompare(b.name))
 
         QtObject {
             required property DesktopEntry modelData
