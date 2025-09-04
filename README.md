@@ -365,6 +365,11 @@ default, you must create it manually.
             "wallpapers": false
         },
         "showOnHover": false
+        "hiddenApps": [
+            "fish",
+            "qt5ct",
+            "qt6ct",
+        ],
     },
     "lock": {
         "recolourLogo": false
