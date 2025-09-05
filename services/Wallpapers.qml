@@ -39,6 +39,7 @@ Searcher {
     }
 
     list: wallpapers.entries
+    key: "path"
     useFuzzy: Config.launcher.useFuzzy.wallpapers
     extraOpts: useFuzzy ? ({}) : ({
             forward: false
