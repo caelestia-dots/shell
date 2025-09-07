@@ -54,6 +54,11 @@ Item {
         }
 
         Popout {
+            name: "microphone"
+            source: "Microphone.qml"
+        }
+
+        Popout {
             name: "kblayout"
             source: "KbLayout.qml"
         }

@@ -115,6 +115,18 @@ StyledRect {
             }
         }
 
+        // Microphone icon
+        WrappedLoader {
+            name: "microphone"
+            active: Config.bar.status.showMicrophone
+
+            sourceComponent: MaterialIcon {
+                animate: true
+                text: Icons.getMicVolumeIcon(!Audio.sourceMuted)
+                color: root.colour
+            }
+        }
+
         // Keyboard layout icon
         WrappedLoader {
             name: "kblayout"

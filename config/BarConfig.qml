@@ -74,6 +74,7 @@ JsonObject {
 
     component Status: JsonObject {
         property bool showAudio: false
+        property bool showMicrophone: true
         property bool showKbLayout: false
         property bool showNetwork: true
         property bool showBluetooth: true
