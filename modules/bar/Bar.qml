@@ -75,8 +75,8 @@ ColumnLayout {
                 monitor.setBrightness(monitor.brightness + 0.1);
             else if (angleDelta.y < 0)
                 monitor.setBrightness(monitor.brightness - 0.1);
-            }
         }
+    }
 
     spacing: Appearance.spacing.normal
 
