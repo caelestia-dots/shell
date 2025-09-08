@@ -7,11 +7,13 @@ Singleton {
     id: root
 
     property alias enabled: props.enabled
+    property alias temperature: props.temperature
 
     PersistentProperties {
         id: props
 
         property bool enabled
+        property int temperature: 2500
 
         reloadableId: "hyprsunset"
     }
@@ -19,20 +21,17 @@ Singleton {
     Process {
         id: hyprsunsetProcess
         running: false
+        command: root.enabled ?
+            ["hyprctl", "hyprsunset", "identity"] :
+            ["hyprctl", "hyprsunset", "temperature", root.temperature.toString()]
 
-        function updateCommand() {
-            if (root.enabled) {
-                command = ["hyprctl", "hyprsunset", "temperature", "2500"];
-            } else {
-                command = ["hyprctl", "hyprsunset", "identity"];
-            }
+        function execute() {
             running = true;
         }
     }
 
-    onEnabledChanged: {
-        hyprsunsetProcess.updateCommand();
-    }
+    onEnabledChanged: hyprsunsetProcess.execute()
+    onTemperatureChanged: if (root.enabled) hyprsunsetProcess.execute()
 
     IpcHandler {
         target: "hyprsunset"

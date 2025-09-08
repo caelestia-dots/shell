@@ -152,7 +152,15 @@ ColumnLayout {
             DelegateChoice {
                 roleValue: "hyprsunset"
                 delegate: WrappedLoader {
-                    sourceComponent: Hyprsunset {}
+                    sourceComponent: Hyprsunset {
+                        Component.onCompleted: {
+                            const entry = Config.bar.entries.find(e => e.id === "hyprsunset");
+                            const temperature = entry?.temperature || 2500;
+                            const controlledTemperature = Math.max(1000, Math.min(6000, temperature));
+
+                            Hyprsunset.temperature = controlledTemperature;
+                        }
+                    }
                 }
             }
         }
