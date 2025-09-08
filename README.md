@@ -311,6 +311,11 @@ default, you must create it manually.
             {
                 "id": "idleInhibitor",
                 "enabled": false
+            },
+            {
+                "id": "hyprsunset",
+                "enabled": false,
+                "temperature": 2500
             }
         ],
         "persistent": true,
