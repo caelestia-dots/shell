@@ -149,6 +149,12 @@ ColumnLayout {
                     sourceComponent: IdleInhibitor {}
                 }
             }
+            DelegateChoice {
+                roleValue: "hyprsunset"
+                delegate: WrappedLoader {
+                    sourceComponent: Hyprsunset {}
+                }
+            }
         }
     }
 
