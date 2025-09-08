@@ -53,7 +53,7 @@ JsonObject {
         },
         {
             id: "hyprsunset",
-            enabled: true,
+            enabled: false,
             temperature: 2500
         }
     ]
