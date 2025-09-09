@@ -351,20 +351,6 @@ default, you must create it manually.
     },
     "launcher": {
         "actionPrefix": ">",
-        "dragThreshold": 50,
-        "vimKeybinds": false,
-        "enableDangerousActions": false,
-        "maxShown": 8,
-        "maxWallpapers": 9,
-        "specialPrefix": "@",
-        "useFuzzy": {
-            "apps": false,
-            "actions": false,
-            "schemes": false,
-            "variants": false,
-            "wallpapers": false
-        },
-        "showOnHover": false,
         "actions": [
             {
                 "name": "Calculator",
@@ -470,7 +456,21 @@ default, you must create it manually.
                 "enabled": true,
                 "dangerous": false
             }
-        ]
+        ],
+        "dragThreshold": 50,
+        "vimKeybinds": false,
+        "enableDangerousActions": false,
+        "maxShown": 8,
+        "maxWallpapers": 9,
+        "specialPrefix": "@",
+        "useFuzzy": {
+            "apps": false,
+            "actions": false,
+            "schemes": false,
+            "variants": false,
+            "wallpapers": false
+        },
+        "showOnHover": false
     },
     "lock": {
         "recolourLogo": false
