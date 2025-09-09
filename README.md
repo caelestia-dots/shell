@@ -418,7 +418,7 @@ default, you must create it manually.
                 "name": "Light",
                 "icon": "light_mode",
                 "description": "Change the scheme to light mode",
-                "command": ["internal", "setLightMode"],
+                "command": ["setMode", "light"],
                 "enabled": true,
                 "dangerous": false
             },
@@ -426,7 +426,7 @@ default, you must create it manually.
                 "name": "Dark",
                 "icon": "dark_mode",
                 "description": "Change the scheme to dark mode",
-                "command": ["internal", "setDarkMode"],
+                "command": ["setMode", "dark"],
                 "enabled": true,
                 "dangerous": false
             },
