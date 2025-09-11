@@ -123,7 +123,7 @@ Singleton {
                         active: net[0] === "yes",
                         strength: parseInt(net[1]),
                         frequency: parseInt(net[2]),
-                        ssid: net[3],
+                        ssid: net[3].replace(rep2, ":"),
                         bssid: net[4]?.replace(rep2, ":") ?? "",
                         security: net[5] || ""
                     };
