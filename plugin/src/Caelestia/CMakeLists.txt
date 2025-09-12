@@ -1,4 +1,4 @@
-find_package(Qt6 REQUIRED COMPONENTS Core Qml Gui Concurrent Sql)
+find_package(Qt6 REQUIRED COMPONENTS Core Qml Gui Concurrent Sql Quick)
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(Qalculate IMPORTED_TARGET libqalculate REQUIRED)
 pkg_check_modules(Pipewire IMPORTED_TARGET libpipewire-0.3 REQUIRED)
@@ -53,4 +53,5 @@ target_link_libraries(caelestia PRIVATE
     PkgConfig::Pipewire
     PkgConfig::Aubio
     PkgConfig::Cava
+    Qt::Quick
 )
