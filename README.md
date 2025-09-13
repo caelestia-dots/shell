@@ -484,7 +484,9 @@ default, you must create it manually.
         "clearThreshold": 0.3,
         "defaultExpireTimeout": 5000,
         "expandThreshold": 20,
-        "expire": false
+        "expire": false,
+        "timeoutBar": false,
+        "timeoutCircle": false,
     },
     "osd": {
         "enabled": true,
