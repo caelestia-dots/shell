@@ -6,6 +6,8 @@ import Quickshell
 import Quickshell.Bluetooth
 import QtQuick
 import QtQuick.Layouts
+import Quickshell
+import Quickshell.Io
 
 StyledRect {
     id: root
@@ -79,6 +81,30 @@ StyledRect {
                 WindowFactory.create(null, {
                     screen: QsWindow.window?.screen ?? null
                 });
+            }
+        }
+
+        Toggle {
+            id: gameMode
+            icon: "gamepad"
+            text: qsTr("Game Mode")
+            toggle: true
+
+            function onClicked(): void {
+                if (internalChecked) {
+                   Quickshell.execDetached(["bash", "-c", `hyprctl --batch "keyword animations:enabled 0; keyword decoration:shadow:enabled 0; keyword decoration:blur:enabled 0; keyword general:gaps_in 0; keyword general:gaps_out 0; keyword general:border_size 1; keyword decoration:rounding 0; keyword general:allow_tearing 1"`])
+                } else {
+                    Quickshell.execDetached(["hyprctl", "reload"])
+                }
+            }
+
+            Process {
+                id: fetchActiveState
+                running: true
+                command: ["bash", "-c", `test "$(hyprctl getoption animations:enabled -j | jq ".int")" -ne 0`]
+                onExited: (exitCode, exitStatus) => {
+                    gameMode.internalChecked = exitCode !== 0
+                }
             }
         }
     }

@@ -11,8 +11,6 @@ ColumnLayout {
 
     IdleInhibit {}
 
-    GameMode {}
-
     Toggles {
         visibilities: root.visibilities
     }
