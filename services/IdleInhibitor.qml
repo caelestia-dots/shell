@@ -2,6 +2,7 @@ pragma Singleton
 
 import Quickshell
 import Quickshell.Io
+import Quickshell.Wayland
 
 Singleton {
     id: root
@@ -23,9 +24,21 @@ Singleton {
         reloadableId: "idleInhibitor"
     }
 
-    Process {
-        running: root.enabled
-        command: ["systemd-inhibit", "--what=idle", "--who=caelestia-shell", "--why=Idle inhibitor active", "--mode=block", "sleep", "inf"]
+    // A non-visible PanelWindow required by IdleInhibitor
+    PanelWindow {
+        id: win
+
+        anchors.left: true
+        width: 0
+        height: 0
+
+        aboveWindows: false
+        WlrLayershell.exclusionMode: ExclusionMode.Ignore
+    }
+
+    IdleInhibitor {
+        enabled: root.enabled
+        window: win
     }
 
     IpcHandler {
