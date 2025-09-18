@@ -1,6 +1,8 @@
 pragma ComponentBehavior: Bound
 
 import qs.components
+import qs.components.controls
+import qs.components.containers
 import qs.services
 import qs.config
 import QtQuick
@@ -114,6 +116,44 @@ StyledRect {
                 text: root.modelData.body.replace(/(.)\n(?!\n)/g, "$1\n\n") || qsTr("No body here! :/")
                 color: root.modelData.urgency === "critical" ? Colours.palette.m3secondary : Colours.palette.m3outline
                 wrapMode: Text.WordWrap
+            }
+
+            StyledListView {
+                Layout.fillWidth: true
+                implicitHeight: contentHeight
+                orientation: Qt.Horizontal
+
+                model: [closeId, ...root.modelData.actions]
+
+                delegate: Loader {
+                    id: action
+
+                    required property var modelData
+
+                    sourceComponent: modelData.identifier === "close" ? closeBtn : textBtn
+
+                    Component {
+                        id: closeBtn
+
+                        IconButton {
+                            icon: action.modelData.identifier
+                        }
+                    }
+
+                    Component {
+                        id: textBtn
+
+                        TextButton {
+                            text: action.modelData.text
+                        }
+                    }
+                }
+
+                QtObject {
+                    id: closeId
+
+                    readonly property string identifier: "close"
+                }
             }
         }
     }
