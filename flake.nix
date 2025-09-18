@@ -53,7 +53,7 @@
       in
         pkgs.mkShell.override {stdenv = shell.stdenv;} {
           inputsFrom = [shell shell.plugin shell.extras];
-          packages = with pkgs; [material-symbols rubik nerd-fonts.caskaydia-cove];
+          packages = with inputs.nixpkgs-unstable.legacyPackages.${pkgs.system}; [material-symbols rubik nerd-fonts.caskaydia-cove];
           CAELESTIA_XKB_RULES_PATH = "${pkgs.xkeyboard_config}/share/xkeyboard-config-2/rules/base.lst";
         };
     });
