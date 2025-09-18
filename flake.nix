@@ -58,6 +58,8 @@
         };
     });
 
-    homeManagerModules.default = import ./nix/hm-module.nix self;
+    homeManagerModules.default = import ./nix/hm-module.nix self {
+      pkgs = inputs.nixpkgs-unstable.legacyPackages.${pkgs.system};
+    };
   };
 }
