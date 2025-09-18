@@ -3,7 +3,7 @@
   fetchFromGitHub,
   ...
 }:
-pkgs._unstable.app2unit.overrideAttrs (final: prev: rec {
+pkgs.app2unit.overrideAttrs (final: prev: rec {
   version = "1.0.3"; # Fix old issue related to missing env var
   src = fetchFromGitHub {
     owner = "Vladimir-csp";
