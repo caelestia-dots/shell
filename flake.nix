@@ -21,11 +21,6 @@
     nixpkgs,
     ...
   } @ inputs: let
-    forAllSystems = fn:
-      nixpkgs.lib.genAttrs nixpkgs.lib.platforms.linux (
-        system: fn nixpkgs.legacyPackages.${system}
-      );
-  in {
     overlays = {
   unstable = final: _prev: {
     stable = import inputs.unstable {
@@ -37,6 +32,13 @@
     };
   };
 };
+  
+    forAllSystems = fn:
+      nixpkgs.lib.genAttrs nixpkgs.lib.platforms.linux (
+        system: fn nixpkgs.legacyPackages.${system}
+      );
+  in {
+    
     nixpkgs.overlays = [ overlays.stable-packages ];
     formatter = forAllSystems (pkgs: pkgs.alejandra);
 
