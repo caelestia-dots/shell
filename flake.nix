@@ -31,7 +31,6 @@
 
     packages = forAllSystems (pkgs: rec {
       caelestia-shell = pkgs.callPackage ./nix {
-        pkgs = inputs.nixpkgs-unstable.legacyPackages.${pkgs.system};
         rev = self.rev or self.dirtyRev;
         stdenv = pkgs.clangStdenv;
         quickshell = inputs.quickshell.packages.${pkgs.system}.default.override {
