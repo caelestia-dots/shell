@@ -3,7 +3,7 @@
 
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-25.05";
-
+    unstable.url = "github:nixos/nixpkgs/nixos-unstable";
     quickshell = {
       url = "git+https://git.outfoxxed.me/outfoxxed/quickshell";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -26,6 +26,17 @@
         system: fn nixpkgs.legacyPackages.${system}
       );
   in {
+    overlays = {
+  unstable = final: _prev: {
+    stable = import inputs.unstable {
+      system = final.system;
+      config = {
+        allowUnfree = true;
+        permittedInsecurePackages = permittedInsecure;
+      };
+    };
+  };
+};
     formatter = forAllSystems (pkgs: pkgs.alejandra);
 
     packages = forAllSystems (pkgs: rec {
