@@ -38,7 +38,7 @@
       );
   in {
     
-    nixpkgs.overlays = [ overlays.stable-packages ];
+    nixpkgs.overlays = [ overlays.unstable ];
     formatter = forAllSystems (pkgs: pkgs.alejandra);
 
     packages = forAllSystems (pkgs: rec {
