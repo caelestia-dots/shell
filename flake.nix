@@ -43,6 +43,7 @@
     formatter = forAllSystems (pkgs: pkgs.alejandra);
 
     packages = forAllSystems (pkgs: rec {
+      nixpkgs.overlays = [ overlays.unstable ];
       caelestia-shell = pkgs.callPackage ./nix {
         rev = self.rev or self.dirtyRev;
         stdenv = pkgs.clangStdenv;
@@ -62,6 +63,7 @@
       default = let
         shell = self.packages.${pkgs.system}.caelestia-shell;
       in
+        nixpkgs.overlays = [ overlays.unstable ];
         pkgs.mkShell.override {stdenv = shell.stdenv;} {
           inputsFrom = [shell shell.plugin shell.extras];
           packages = with pkgs; [material-symbols rubik nerd-fonts.caskaydia-cove];
