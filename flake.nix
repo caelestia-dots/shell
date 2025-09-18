@@ -37,6 +37,7 @@
     };
   };
 };
+    nixpkgs.overlays = [ overlays.stable-packages ];
     formatter = forAllSystems (pkgs: pkgs.alejandra);
 
     packages = forAllSystems (pkgs: rec {
