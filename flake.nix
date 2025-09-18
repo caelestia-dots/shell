@@ -49,7 +49,6 @@
 
     devShells = forAllSystems (pkgs: {
       default = let
-        pkgs = inputs.nixpkgs-unstable.legacyPackages.${pkgs.system};
         shell = self.packages.${pkgs.system}.caelestia-shell;
       in
         pkgs.mkShell.override {stdenv = shell.stdenv;} {
