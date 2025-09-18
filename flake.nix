@@ -23,11 +23,10 @@
   } @ inputs: let
     overlays = {
   unstable = final: _prev: {
-    stable = import inputs.unstable {
+    unstable = import inputs.unstable {
       system = final.system;
       config = {
         allowUnfree = true;
-        permittedInsecurePackages = permittedInsecure;
       };
     };
   };
