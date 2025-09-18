@@ -3,7 +3,8 @@
 
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-25.05";
-    unstable.url = "github:nixos/nixpkgs/nixos-unstable";
+    nixpkgs-unstable.url = "github:nixos/nixpkgs/nixos-unstable";
+
     quickshell = {
       url = "git+https://git.outfoxxed.me/outfoxxed/quickshell";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -19,31 +20,16 @@
   outputs = {
     self,
     nixpkgs,
-    unstable,
     ...
   } @ inputs: let
-    overlays = {
-  unstable = final: _prev: {
-    _unstable = import unstable {
-      system = final.system;
-      config = {
-        allowUnfree = true;
-      };
-    };
-  };
-};
-  
     forAllSystems = fn:
       nixpkgs.lib.genAttrs nixpkgs.lib.platforms.linux (
         system: fn nixpkgs.legacyPackages.${system}
       );
   in {
-    
-    nixpkgs.overlays = [ overlays.unstable ];
     formatter = forAllSystems (pkgs: pkgs.alejandra);
 
     packages = forAllSystems (pkgs: rec {
-      nixpkgs.overlays = [ overlays.unstable ];
       caelestia-shell = pkgs.callPackage ./nix {
         rev = self.rev or self.dirtyRev;
         stdenv = pkgs.clangStdenv;
@@ -51,7 +37,9 @@
           withX11 = false;
           withI3 = false;
         };
-        app2unit = pkgs.callPackage ./nix/app2unit.nix {inherit pkgs;};
+        app2unit = pkgs.callPackage ./nix/app2unit.nix {
+          pkgs = inputs.nixpkgs-unstable.legacyPackages.${pkgs.system};
+        };
         caelestia-cli = inputs.caelestia-cli.packages.${pkgs.system}.default;
       };
       with-cli = caelestia-shell.override {withCli = true;};
@@ -63,7 +51,6 @@
       default = let
         shell = self.packages.${pkgs.system}.caelestia-shell;
       in
-        nixpkgs.overlays = [ overlays.unstable ];
         pkgs.mkShell.override {stdenv = shell.stdenv;} {
           inputsFrom = [shell shell.plugin shell.extras];
           packages = with pkgs; [material-symbols rubik nerd-fonts.caskaydia-cove];
