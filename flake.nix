@@ -19,6 +19,7 @@
   outputs = {
     self,
     nixpkgs,
+    unstable,
     ...
   } @ inputs: let
     overlays = {
