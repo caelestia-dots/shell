@@ -73,6 +73,12 @@ Singleton {
                 root.list.push(notifComp.createObject(root, notif));
             root.loaded = true;
         }
+        onLoadFailed: err => {
+            if (err === FileViewError.FileNotFound) {
+                root.loaded = true;
+                setText("[]");
+            }
+        }
     }
 
     CustomShortcut {
