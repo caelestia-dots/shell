@@ -11,10 +11,16 @@
     };
 
     caelestia-cli = {
-      url = "github:Av3lle/cli";
+      url = "github:caelestia-dots/cli";
       inputs.nixpkgs.follows = "nixpkgs";
       inputs.caelestia-shell.follows = "";
     };
+
+    #caelestia-cli = {
+    #  url = "github:Av3lle/cli";
+    #  inputs.nixpkgs.follows = "nixpkgs";
+    #  inputs.caelestia-shell.follows = "";
+    #};
   };
 
   outputs = {
