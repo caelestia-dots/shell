@@ -30,7 +30,9 @@ Singleton {
                     appName: n.appName,
                     image: n.image,
                     expireTimeout: n.expireTimeout,
-                    urgency: n.urgency
+                    urgency: n.urgency,
+                    hasActionIcons: n.hasActionIcons,
+                    actions: n.actions
                 }))));
     }
 
@@ -144,7 +146,12 @@ Singleton {
         property string image: notification?.image ?? ""
         property real expireTimeout: notification?.expireTimeout ?? Config.notifs.defaultExpireTimeout
         property int urgency: notification?.urgency ?? NotificationUrgency.Normal
-        readonly property list<NotificationAction> actions: notification?.actions ?? []
+        property bool hasActionIcons: notification?.hasActionIcons ?? false
+        property list<var> actions: notification?.actions.map(a => ({
+                identifier: a.identifier,
+                text: a.text,
+                invoke: () => a.invoke()
+            })) ?? []
 
         readonly property Timer timer: Timer {
             running: true
