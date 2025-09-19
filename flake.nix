@@ -66,7 +66,7 @@
       in
         pkgs.mkShell.override {stdenv = shell.stdenv;} {
           inputsFrom = [shell shell.plugin shell.extras];
-          packages = with unstable; [material-symbols rubik nerd-fonts.caskaydia-cove];
+          packages = with pkgs; [material-symbols rubik nerd-fonts.caskaydia-cove];
           CAELESTIA_XKB_RULES_PATH = "${unstable.xkeyboard-config}/share/xkeyboard-config-2/rules/base.lst";
         };
     });
