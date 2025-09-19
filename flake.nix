@@ -45,7 +45,7 @@
           withI3 = false;
         };
         app2unit = pkgs.callPackage ./nix/app2unit.nix {
-          pkgs = unstable;
+          pkgs = inputs.nixpkgs-unstable.legacyPackages.${pkgs.system};
         };
         caelestia-cli = inputs.caelestia-cli.packages.${pkgs.system}.default;
         xkeyboard-config = inputs.nixpkgs-unstable.legacyPackages.${pkgs.system}.xkeyboard-config;
