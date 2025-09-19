@@ -10,17 +10,17 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    #caelestia-cli = {
+    # url = "github:caelestia-dots/cli";
+    # inputs.nixpkgs.follows = "nixpkgs";
+    #  inputs.caelestia-shell.follows = "";
+    #};
+
     caelestia-cli = {
-      url = "github:caelestia-dots/cli";
+      url = "github:Av3lle/cli";
       inputs.nixpkgs.follows = "nixpkgs";
       inputs.caelestia-shell.follows = "";
     };
-
-    #caelestia-cli = {
-    #  url = "github:Av3lle/cli";
-    #  inputs.nixpkgs.follows = "nixpkgs";
-    #  inputs.caelestia-shell.follows = "";
-    #};
   };
 
   outputs = {
@@ -67,7 +67,7 @@
         pkgs.mkShell.override {stdenv = shell.stdenv;} {
           inputsFrom = [shell shell.plugin shell.extras];
           packages = with pkgs; [material-symbols rubik nerd-fonts.caskaydia-cove];
-          CAELESTIA_XKB_RULES_PATH = "${unstable.xkeyboard-config}/share/xkeyboard-config-2/rules/base.lst";
+          CAELESTIA_XKB_RULES_PATH = "${inputs.nixpkgs-unstable.legacyPackages.${pkgs.system}.xkeyboard-config}/share/xkeyboard-config-2/rules/base.lst";
         };
     });
 
