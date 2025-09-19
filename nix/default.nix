@@ -24,7 +24,7 @@
   libcava,
   fftw,
   pipewire,
-  xkeyboard_config,
+  xkeyboard-config,
   cmake,
   ninja,
   pkg-config,
@@ -104,7 +104,7 @@ in
     src = ./..;
 
     nativeBuildInputs = [cmake ninja makeWrapper qt6.wrapQtAppsHook];
-    buildInputs = [quickshell extras plugin xkeyboard_config qt6.qtbase];
+    buildInputs = [quickshell extras plugin xkeyboard-config qt6.qtbase];
     propagatedBuildInputs = runtimeDeps;
 
     cmakeBuildType =
@@ -132,7 +132,7 @@ in
       	--prefix PATH : "${lib.makeBinPath runtimeDeps}" \
       	--set FONTCONFIG_FILE "${fontconfig}" \
       	--set CAELESTIA_LIB_DIR ${extras}/lib \
-        --set CAELESTIA_XKB_RULES_PATH ${xkeyboard_config}/share/xkeyboard-config-2/rules/base.lst \
+        --set CAELESTIA_XKB_RULES_PATH ${xkeyboard-config}/share/xkeyboard-config-2/rules/base.lst \
       	--add-flags "-p $out/share/caelestia-shell"
 
       mkdir -p $out/lib
