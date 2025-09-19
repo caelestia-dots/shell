@@ -92,7 +92,6 @@ Item {
             anchors.fill: parent
 
             spacing: Appearance.spacing.small
-            clip: true
 
             model: ScriptModel {
                 values: [...new Set(Notifs.list.filter(n => !n.closed).map(n => n.appName))].reverse()
