@@ -1,10 +1,11 @@
 pragma ComponentBehavior: Bound
 
 import qs.components
-import qs.components.controls
 import qs.components.containers
 import qs.services
 import qs.config
+import Quickshell
+import Quickshell.Widgets
 import QtQuick
 import QtQuick.Layouts
 
@@ -118,41 +119,94 @@ StyledRect {
                 wrapMode: Text.WordWrap
             }
 
-            StyledListView {
+            StyledFlickable {
+                Layout.topMargin: Appearance.spacing.small
                 Layout.fillWidth: true
                 implicitHeight: contentHeight
-                orientation: Qt.Horizontal
+                contentWidth: actionList.implicitWidth
+                contentHeight: actionList.implicitHeight
 
-                model: [closeId, ...root.modelData.actions]
+                RowLayout {
+                    id: actionList
 
-                delegate: Loader {
-                    id: action
+                    spacing: Appearance.spacing.small
 
-                    required property var modelData
+                    Repeater {
+                        model: [{ isClose: true }, ...root.modelData.actions]
 
-                    sourceComponent: modelData.identifier === "close" ? closeBtn : textBtn
+                        StyledRect {
+                            id: action
 
-                    Component {
-                        id: closeBtn
+                            required property var modelData
 
-                        IconButton {
-                            icon: action.modelData.identifier
+                            Layout.fillWidth: true
+                            Layout.fillHeight: true
+                            implicitWidth: actionInner.implicitWidth + Appearance.padding.normal * 2
+                            implicitHeight: actionInner.implicitHeight + Appearance.padding.small * 2
+
+                            Layout.preferredWidth: implicitWidth + (actionStateLayer.pressed ? Appearance.padding.large : 0)
+                            radius: actionStateLayer.pressed ? Appearance.rounding.small / 2 : Appearance.rounding.small
+                            color: Colours.layer(Colours.palette.m3surfaceContainerHighest, 4)
+
+                            StateLayer {
+                                id: actionStateLayer
+
+                                function onClicked(): void {
+                                    if (action.modelData.isClose)
+                                        root.modelData.close()
+                                    else if (action.modelData.invoke)
+                                        action.modelData.invoke();
+                                    else if (!root.modelData.resident)
+                                        root.modelData.close();
+                                }
+                            }
+
+                            Loader {
+                                id: actionInner
+
+                                anchors.centerIn: parent
+                                sourceComponent: action.modelData.isClose ? closeBtn : root.modelData.hasActionIcons ? iconComp : textComp
+                            }
+
+                            Component {
+                                id: closeBtn
+
+                                MaterialIcon {
+                                    text: "close"
+                                }
+                            }
+
+                            Component {
+                                id: iconComp
+
+                                IconImage {
+                                    source: Quickshell.iconPath(action.modelData.identifier)
+                                }
+                            }
+
+                            Component {
+                                id: textComp
+
+                                StyledText {
+                                    text: action.modelData.text
+                                }
+                            }
+
+                            Behavior on Layout.preferredWidth {
+                                Anim {
+                                    duration: Appearance.anim.durations.expressiveFastSpatial
+                                    easing.bezierCurve: Appearance.anim.curves.expressiveFastSpatial
+                                }
+                            }
+
+                            Behavior on radius {
+                                Anim {
+                                    duration: Appearance.anim.durations.expressiveFastSpatial
+                                    easing.bezierCurve: Appearance.anim.curves.expressiveFastSpatial
+                                }
+                            }
                         }
                     }
-
-                    Component {
-                        id: textBtn
-
-                        TextButton {
-                            text: action.modelData.text
-                        }
-                    }
-                }
-
-                QtObject {
-                    id: closeId
-
-                    readonly property string identifier: "close"
                 }
             }
         }

@@ -31,6 +31,7 @@ Singleton {
                     image: n.image,
                     expireTimeout: n.expireTimeout,
                     urgency: n.urgency,
+                    resident: n.resident,
                     hasActionIcons: n.hasActionIcons,
                     actions: n.actions
                 }))));
@@ -146,6 +147,7 @@ Singleton {
         property string image: notification?.image ?? ""
         property real expireTimeout: notification?.expireTimeout ?? Config.notifs.defaultExpireTimeout
         property int urgency: notification?.urgency ?? NotificationUrgency.Normal
+        property bool resident: notification?.resident ?? false
         property bool hasActionIcons: notification?.hasActionIcons ?? false
         property list<var> actions: notification?.actions.map(a => ({
                 identifier: a.identifier,
