@@ -31,11 +31,7 @@
   } @ inputs: let
     forAllSystems = fn:
       nixpkgs.lib.genAttrs nixpkgs.lib.platforms.linux (
-        system: 
-          fn {
-            pkgs = nixpkgs.legacyPackages.${system};
-            unstable = nixpkgs-unstable.legacyPackages.${system};
-          }
+        system: fn nixpkgs.legacyPackages.${system};
       );
   in {
     formatter = forAllSystems (pkgs: pkgs.alejandra);
@@ -52,8 +48,8 @@
           pkgs = unstable;
         };
         caelestia-cli = inputs.caelestia-cli.packages.${pkgs.system}.default;
-        xkeyboard-config = unstable.xkeyboard-config;
-        material-symbols = unstable.material-symbols;
+        xkeyboard-config = inputs.nixpkgs-unstable.legacyPackages.${pkgs.system}.xkeyboard-config;
+        material-symbols = inputs.nixpkgs-unstable.legacyPackages.${pkgs.system}.material-symbols;
       };
       with-cli = caelestia-shell.override {withCli = true;};
       debug = caelestia-shell.override {debug = true;};
