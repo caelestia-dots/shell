@@ -31,7 +31,7 @@
   } @ inputs: let
     forAllSystems = fn:
       nixpkgs.lib.genAttrs nixpkgs.lib.platforms.linux (
-        system: fn nixpkgs.legacyPackages.${system};
+        system: fn nixpkgs.legacyPackages.${system}
       );
   in {
     formatter = forAllSystems (pkgs: pkgs.alejandra);
