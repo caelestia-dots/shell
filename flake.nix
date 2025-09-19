@@ -28,10 +28,13 @@
     nixpkgs,
     ...
   } @ inputs: let
-    unstable = inputs.nixpkgs-unstable.legacyPackages.${pkgs.system};
     forAllSystems = fn:
       nixpkgs.lib.genAttrs nixpkgs.lib.platforms.linux (
-        system: fn nixpkgs.legacyPackages.${system}
+        system: 
+          fn {
+            pkgs = nixpkgs.legacyPackages.${system};
+            unstable = nixpkgs-unstable.legacyPackages.${system};
+          }
       );
   in {
     formatter = forAllSystems (pkgs: pkgs.alejandra);
@@ -62,8 +65,8 @@
       in
         pkgs.mkShell.override {stdenv = shell.stdenv;} {
           inputsFrom = [shell shell.plugin shell.extras];
-          packages = with inputs.nixpkgs-unstable.legacyPackages.${pkgs.system}; [material-symbols rubik nerd-fonts.caskaydia-cove];
-          CAELESTIA_XKB_RULES_PATH = "${inputs.nixpkgs-unstable.legacyPackages.${pkgs.system}.xkeyboard-config}/share/xkeyboard-config-2/rules/base.lst";
+          packages = with unstable; [material-symbols rubik nerd-fonts.caskaydia-cove];
+          CAELESTIA_XKB_RULES_PATH = "${unstable.xkeyboard-config}/share/xkeyboard-config-2/rules/base.lst";
         };
     });
 
