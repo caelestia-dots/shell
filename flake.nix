@@ -28,6 +28,7 @@
     nixpkgs,
     ...
   } @ inputs: let
+    unstable = inputs.nixpkgs-unstable.legacyPackages.${pkgs.system};
     forAllSystems = fn:
       nixpkgs.lib.genAttrs nixpkgs.lib.platforms.linux (
         system: fn nixpkgs.legacyPackages.${system}
@@ -44,11 +45,11 @@
           withI3 = false;
         };
         app2unit = pkgs.callPackage ./nix/app2unit.nix {
-          pkgs = inputs.nixpkgs-unstable.legacyPackages.${pkgs.system};
+          pkgs = unstable;
         };
         caelestia-cli = inputs.caelestia-cli.packages.${pkgs.system}.default;
-        xkeyboard-config = inputs.nixpkgs-unstable.legacyPackages.${pkgs.system}.xkeyboard-config;
-        material-symbols = inputs.nixpkgs-unstable.legacyPackages.${pkgs.system}.material-symbols;
+        xkeyboard-config = unstable.xkeyboard-config;
+        material-symbols = unstable.material-symbols;
       };
       with-cli = caelestia-shell.override {withCli = true;};
       debug = caelestia-shell.override {debug = true;};
