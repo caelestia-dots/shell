@@ -19,6 +19,7 @@ Item {
     implicitHeight: flickable.contentHeight
 
     layer.enabled: true
+    layer.smooth: true
     layer.effect: OpacityMask {
         maskSource: gradientMask
     }
@@ -32,7 +33,6 @@ Item {
 
         Rectangle {
             anchors.fill: parent
-            radius: Appearance.rounding.full
 
             gradient: Gradient {
                 orientation: Gradient.Horizontal

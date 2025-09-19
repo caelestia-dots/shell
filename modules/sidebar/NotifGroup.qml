@@ -6,7 +6,6 @@ import qs.services
 import qs.config
 import qs.utils
 import Quickshell
-import Quickshell.Widgets
 import Quickshell.Services.Notifications
 import QtQuick
 import QtQuick.Layouts
