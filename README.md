@@ -528,7 +528,7 @@ default, you must create it manually.
     "sidebar": {
         "dragThreshold": 80,
         "enabled": true
-    }.
+    },
     "utilities": {
         "enabled": true
     }
