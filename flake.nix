@@ -41,6 +41,7 @@
           pkgs = inputs.nixpkgs-unstable.legacyPackages.${pkgs.system};
         };
         caelestia-cli = inputs.caelestia-cli.packages.${pkgs.system}.default;
+        xkeyboard_config = inputs.nixpkgs-unstable.legacyPackages.${pkgs.system}.xkeyboard-config;
       };
       with-cli = caelestia-shell.override {withCli = true;};
       debug = caelestia-shell.override {debug = true;};
@@ -55,7 +56,7 @@
         pkgs.mkShell.override {stdenv = shell.stdenv;} {
           inputsFrom = [shell shell.plugin shell.extras];
           packages = with pkgs; [material-symbols rubik nerd-fonts.caskaydia-cove];
-          CAELESTIA_XKB_RULES_PATH = "${pkgs.xkeyboard-config}/share/xkeyboard-config-2/rules/base.lst";
+          CAELESTIA_XKB_RULES_PATH = "${inputs.nixpkgs-unstable.legacyPackages.${pkgs.system}.xkeyboard-config}/share/xkeyboard-config-2/rules/base.lst";
         };
     });
 
