@@ -123,16 +123,25 @@ StyledRect {
                 Layout.topMargin: Appearance.spacing.small
                 Layout.fillWidth: true
                 implicitHeight: contentHeight
-                contentWidth: actionList.implicitWidth
+                contentWidth: Math.max(width, actionList.implicitWidth)
                 contentHeight: actionList.implicitHeight
 
                 RowLayout {
                     id: actionList
 
+                    anchors.fill: parent
                     spacing: Appearance.spacing.small
 
                     Repeater {
-                        model: [{ isClose: true }, ...root.modelData.actions]
+                        model: [
+                            {
+                                isClose: true
+                            },
+                            ...root.modelData.actions,
+                            {
+                                isCopy: true
+                            }
+                        ]
 
                         StyledRect {
                             id: action
@@ -148,16 +157,28 @@ StyledRect {
                             radius: actionStateLayer.pressed ? Appearance.rounding.small / 2 : Appearance.rounding.small
                             color: Colours.layer(Colours.palette.m3surfaceContainerHighest, 4)
 
+                            Timer {
+                                id: copyTimer
+
+                                interval: 3000
+                                onTriggered: actionInner.item.text = "content_copy"
+                            }
+
                             StateLayer {
                                 id: actionStateLayer
 
                                 function onClicked(): void {
-                                    if (action.modelData.isClose)
-                                        root.modelData.close()
-                                    else if (action.modelData.invoke)
-                                        action.modelData.invoke();
-                                    else if (!root.modelData.resident)
+                                    if (action.modelData.isClose) {
                                         root.modelData.close();
+                                    } else if (action.modelData.isCopy) {
+                                        Quickshell.clipboardText = root.modelData.body;
+                                        actionInner.item.text = "inventory";
+                                        copyTimer.start();
+                                    } else if (action.modelData.invoke) {
+                                        action.modelData.invoke();
+                                    } else if (!root.modelData.resident) {
+                                        root.modelData.close();
+                                    }
                                 }
                             }
 
@@ -165,14 +186,15 @@ StyledRect {
                                 id: actionInner
 
                                 anchors.centerIn: parent
-                                sourceComponent: action.modelData.isClose ? closeBtn : root.modelData.hasActionIcons ? iconComp : textComp
+                                sourceComponent: action.modelData.isClose || action.modelData.isCopy ? iconBtn : root.modelData.hasActionIcons ? iconComp : textComp
                             }
 
                             Component {
-                                id: closeBtn
+                                id: iconBtn
 
                                 MaterialIcon {
-                                    text: "close"
+                                    animate: action.modelData.isCopy ?? false
+                                    text: action.modelData.isCopy ? "content_copy" : "close"
                                 }
                             }
 
