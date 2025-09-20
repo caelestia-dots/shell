@@ -66,7 +66,9 @@ ColumnLayout {
         implicitHeight: (Appearance.font.size.larger + Appearance.padding.small) * (root.props.recordingListExpanded ? 10 : 3)
         clip: true
 
-        StyledScrollBar.vertical: StyledScrollBar {}
+        StyledScrollBar.vertical: StyledScrollBar {
+            flickable: list
+        }
 
         delegate: RowLayout {
             id: recording
@@ -101,6 +103,7 @@ ColumnLayout {
                 type: IconButton.Text
                 onClicked: {
                     root.visibilities.utilities = false;
+                    root.visibilities.sidebar = false;
                     Quickshell.execDetached(["app2unit", "--", ...Config.general.apps.playback, recording.modelData.path]);
                 }
             }
@@ -110,6 +113,7 @@ ColumnLayout {
                 type: IconButton.Text
                 onClicked: {
                     root.visibilities.utilities = false;
+                    root.visibilities.sidebar = false;
                     Quickshell.execDetached(["app2unit", "--", ...Config.general.apps.explorer, recording.modelData.path]);
                 }
             }

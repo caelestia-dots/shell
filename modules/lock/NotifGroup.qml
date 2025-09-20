@@ -16,7 +16,7 @@ StyledRect {
 
     required property string modelData
 
-    readonly property list<var> notifs: Notifs.list.filter(notif => notif.appName === modelData).reverse()
+    readonly property list<var> notifs: Notifs.list.filter(notif => notif.appName === modelData)
     readonly property string image: notifs.find(n => n.image.length > 0)?.image ?? ""
     readonly property string appIcon: notifs.find(n => n.appIcon.length > 0)?.appIcon ?? ""
     readonly property string urgency: notifs.some(n => n.urgency === NotificationUrgency.Critical) ? "critical" : notifs.some(n => n.urgency === NotificationUrgency.Normal) ? "normal" : "low"
@@ -227,7 +227,7 @@ StyledRect {
 
                     ParallelAnimation {
                         running: notif.modelData.closed
-                        onFinished: notif.modelData.lock(notif)
+                        onFinished: notif.modelData.unlock(notif)
 
                         Anim {
                             target: notif

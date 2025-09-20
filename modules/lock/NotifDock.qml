@@ -84,7 +84,10 @@ ColumnLayout {
             clip: true
 
             model: ScriptModel {
-                values: [...new Set(Notifs.list.map(notif => notif.appName))].reverse()
+                values: {
+                    const list = Notifs.notClosed.map(n => [n.appName, null]);
+                    return [...new Map(list).keys()];
+                }
             }
 
             delegate: NotifGroup {}

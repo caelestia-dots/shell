@@ -5,39 +5,32 @@ import qs.services
 import qs.config
 import Quickshell
 import QtQuick
-import QtQuick.Layouts
 
 Item {
     id: root
 
     required property Props props
-    required property list<var> notifs
-    required property bool expanded
     required property Flickable container
 
-    readonly property real nonAnimHeight: {
-        let h = -root.spacing;
-        for (let i = 0; i < repeater.count; i++) {
-            const item = repeater.itemAt(i);
-            if (!item.modelData.closed)
-                h += item.nonAnimHeight + root.spacing;
-        }
-        return h;
-    }
-
-    readonly property int spacing: Math.round(Appearance.spacing.small / 2)
+    readonly property alias repeater: repeater
+    readonly property int spacing: Appearance.spacing.small
     property bool flag
 
-    signal requestToggleExpand(expand: bool)
-
-    Layout.fillWidth: true
-    implicitHeight: nonAnimHeight
+    anchors.left: parent.left
+    anchors.right: parent.right
+    implicitHeight: {
+        const item = repeater.itemAt(repeater.count - 1);
+        return item ? item.y + item.implicitHeight : 0;
+    }
 
     Repeater {
         id: repeater
 
         model: ScriptModel {
-            values: root.expanded ? root.notifs : root.notifs.slice(0, Config.notifs.groupPreviewNum)
+            values: {
+                const list = Notifs.list.map(n => [n.appName, null]);
+                return [...new Map(list).keys()];
+            }
             onValuesChanged: root.flagChanged()
         }
 
@@ -45,17 +38,23 @@ Item {
             id: notif
 
             required property int index
-            required property Notifs.Notif modelData
+            required property string modelData
 
+            readonly property bool closed: notifInner.notifCount === 0
             readonly property alias nonAnimHeight: notifInner.nonAnimHeight
             property int startY
+
+            function closeAll(): void {
+                for (const n of Notifs.notClosed.filter(n => n.appName === modelData))
+                    n.close();
+            }
 
             y: {
                 root.flag; // Force update
                 let y = 0;
                 for (let i = 0; i < index; i++) {
                     const item = repeater.itemAt(i);
-                    if (!item.modelData.closed)
+                    if (!item.closed)
                         y += item.nonAnimHeight + root.spacing;
                 }
                 return y;
@@ -75,7 +74,7 @@ Item {
             hoverEnabled: true
             cursorShape: pressed ? Qt.ClosedHandCursor : undefined
             acceptedButtons: Qt.LeftButton | Qt.RightButton | Qt.MiddleButton
-            preventStealing: !root.expanded
+            preventStealing: true
 
             drag.target: this
             drag.axis: Drag.XAxis
@@ -83,26 +82,23 @@ Item {
             onPressed: event => {
                 startY = event.y;
                 if (event.button === Qt.RightButton)
-                    root.requestToggleExpand(!root.expanded);
+                    notifInner.toggleExpand(!notifInner.expanded);
                 else if (event.button === Qt.MiddleButton)
-                    modelData.close();
+                    closeAll();
             }
             onPositionChanged: event => {
-                if (pressed && !root.expanded) {
+                if (pressed) {
                     const diffY = event.y - startY;
                     if (Math.abs(diffY) > Config.notifs.expandThreshold)
-                        root.requestToggleExpand(diffY > 0);
+                        notifInner.toggleExpand(diffY > 0);
                 }
             }
             onReleased: event => {
                 if (Math.abs(x) < width * Config.notifs.clearThreshold)
                     x = 0;
                 else
-                    modelData.close();
+                    closeAll();
             }
-
-            Component.onCompleted: modelData.lock(this)
-            Component.onDestruction: modelData.unlock(this)
 
             ParallelAnimation {
                 running: true
@@ -116,14 +112,15 @@ Item {
                 Anim {
                     target: notif
                     property: "scale"
-                    from: 0.7
+                    from: 0
                     to: 1
+                    duration: Appearance.anim.durations.expressiveDefaultSpatial
+                    easing.bezierCurve: Appearance.anim.curves.expressiveDefaultSpatial
                 }
             }
 
             ParallelAnimation {
-                running: notif.modelData.closed
-                onFinished: notif.modelData.unlock(notif)
+                running: notif.closed
 
                 Anim {
                     target: notif
@@ -132,18 +129,17 @@ Item {
                 }
                 Anim {
                     target: notif
-                    property: "x"
-                    to: notif.x >= 0 ? notif.width : -notif.width
+                    property: "scale"
+                    to: 0.6
                 }
             }
 
-            Notif {
+            NotifGroup {
                 id: notifInner
 
-                anchors.fill: parent
                 modelData: notif.modelData
                 props: root.props
-                expanded: root.expanded
+                container: root.container
             }
 
             Behavior on x {
@@ -159,13 +155,6 @@ Item {
                     easing.bezierCurve: Appearance.anim.curves.expressiveDefaultSpatial
                 }
             }
-        }
-    }
-
-    Behavior on implicitHeight {
-        Anim {
-            duration: Appearance.anim.durations.expressiveDefaultSpatial
-            easing.bezierCurve: Appearance.anim.curves.expressiveDefaultSpatial
         }
     }
 }

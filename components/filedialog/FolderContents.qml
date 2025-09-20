@@ -11,7 +11,6 @@ import Quickshell
 import QtQuick
 import QtQuick.Layouts
 import QtQuick.Effects
-import QtQuick.Controls
 
 Item {
     id: root
@@ -99,7 +98,9 @@ Item {
                 root.dialog.accepted(currentItem.modelData.path);
         }
 
-        ScrollBar.vertical: StyledScrollBar {}
+        StyledScrollBar.vertical: StyledScrollBar {
+            flickable: view
+        }
 
         model: FileSystemModel {
             path: {

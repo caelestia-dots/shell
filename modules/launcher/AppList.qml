@@ -9,7 +9,6 @@ import qs.services
 import qs.config
 import Quickshell
 import QtQuick
-import QtQuick.Controls
 
 StyledListView {
     id: root
@@ -161,7 +160,9 @@ StyledListView {
         }
     }
 
-    ScrollBar.vertical: StyledScrollBar {}
+    StyledScrollBar.vertical: StyledScrollBar {
+        flickable: root
+    }
 
     add: Transition {
         enabled: !root.state

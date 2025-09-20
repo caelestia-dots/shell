@@ -12,17 +12,24 @@ import QtQuick
 Singleton {
     id: root
 
-    readonly property list<Notif> list: []
+    property list<Notif> list: []
+    readonly property list<Notif> notClosed: list.filter(n => !n.closed)
     readonly property list<Notif> popups: list.filter(n => n.popup)
     property alias dnd: props.dnd
 
     property bool loaded
 
     onListChanged: {
-        if (!loaded)
-            return;
+        if (loaded)
+            saveTimer.restart();
+    }
 
-        storage.setText(JSON.stringify(list.filter(n => !n.closed).map(n => ({
+    Timer {
+        id: saveTimer
+
+        interval: 1000
+        onTriggered: storage.setText(JSON.stringify(root.notClosed.map(n => ({
+                    time: n.time,
                     id: n.id,
                     summary: n.summary,
                     body: n.body,
@@ -30,8 +37,11 @@ Singleton {
                     appName: n.appName,
                     image: n.image,
                     expireTimeout: n.expireTimeout,
-                    urgency: n.urgency
-                }))));
+                    urgency: n.urgency,
+                    resident: n.resident,
+                    hasActionIcons: n.hasActionIcons,
+                    actions: n.actions
+                }))))
     }
 
     PersistentProperties {
@@ -56,10 +66,11 @@ Singleton {
         onNotification: notif => {
             notif.tracked = true;
 
-            root.list.push(notifComp.createObject(root, {
+            const comp = notifComp.createObject(root, {
                 popup: !props.dnd && ![...Visibilities.screens.values()].some(v => v.sidebar),
                 notification: notif
-            }));
+            });
+            root.list = [comp, ...root.list];
         }
     }
 
@@ -71,7 +82,14 @@ Singleton {
             const data = JSON.parse(text());
             for (const notif of data)
                 root.list.push(notifComp.createObject(root, notif));
+            root.list.sort((a, b) => a.time - b.time);
             root.loaded = true;
+        }
+        onLoadFailed: err => {
+            if (err === FileViewError.FileNotFound) {
+                root.loaded = true;
+                setText("[]");
+            }
         }
     }
 
@@ -130,15 +148,17 @@ Singleton {
         }
 
         property Notification notification
-        property string id: notification?.id ?? ""
-        property string summary: notification?.summary ?? ""
-        property string body: notification?.body ?? ""
-        property string appIcon: notification?.appIcon ?? ""
-        property string appName: notification?.appName ?? ""
-        property string image: notification?.image ?? ""
-        property real expireTimeout: notification?.expireTimeout ?? Config.notifs.defaultExpireTimeout
-        property int urgency: notification?.urgency ?? NotificationUrgency.Normal
-        readonly property list<NotificationAction> actions: notification?.actions ?? []
+        property string id
+        property string summary
+        property string body
+        property string appIcon
+        property string appName
+        property string image
+        property real expireTimeout: Config.notifs.defaultExpireTimeout
+        property int urgency: NotificationUrgency.Normal
+        property bool resident
+        property bool hasActionIcons
+        property list<var> actions
 
         readonly property Timer timer: Timer {
             running: true
@@ -154,6 +174,50 @@ Singleton {
 
             function onClosed(): void {
                 notif.close();
+            }
+
+            function onSummaryChanged(): void {
+                notif.summary = notif.notification.summary;
+            }
+
+            function onBodyChanged(): void {
+                notif.body = notif.notification.body;
+            }
+
+            function onAppIconChanged(): void {
+                notif.appIcon = notif.notification.appIcon;
+            }
+
+            function onAppNameChanged(): void {
+                notif.appName = notif.notification.appName;
+            }
+
+            function onImageChanged(): void {
+                notif.image = notif.notification.image;
+            }
+
+            function onExpireTimeoutChanged(): void {
+                notif.expireTimeout = notif.notification.expireTimeout;
+            }
+
+            function onUrgencyChanged(): void {
+                notif.urgency = notif.notification.urgency;
+            }
+
+            function onResidentChanged(): void {
+                notif.resident = notif.notification.resident;
+            }
+
+            function onHasActionIconsChanged(): void {
+                notif.hasActionIcons = notif.notification.hasActionIcons;
+            }
+
+            function onActionsChanged(): void {
+                notif.actions = notif.notification.actions.map(a => ({
+                            identifier: a.identifier,
+                            text: a.text,
+                            invoke: () => a.invoke()
+                        }));
             }
         }
 
@@ -178,6 +242,27 @@ Singleton {
                 notification?.dismiss();
                 destroy();
             }
+        }
+
+        Component.onCompleted: {
+            if (!notification)
+                return;
+
+            id = notification.id;
+            summary = notification.summary;
+            body = notification.body;
+            appIcon = notification.appIcon;
+            appName = notification.appName;
+            image = notification.image;
+            expireTimeout = notification.expireTimeout;
+            urgency = notification.urgency;
+            resident = notification.resident;
+            hasActionIcons = notification.hasActionIcons;
+            actions = notification.actions.map(a => ({
+                        identifier: a.identifier,
+                        text: a.text,
+                        invoke: () => a.invoke()
+                    }));
         }
     }
 

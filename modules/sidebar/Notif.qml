@@ -106,7 +106,7 @@ StyledRect {
         anchors.topMargin: Appearance.spacing.small / 2
 
         sourceComponent: ColumnLayout {
-            spacing: Math.floor(Appearance.spacing.small / 2)
+            spacing: Appearance.spacing.smaller
 
             StyledText {
                 Layout.fillWidth: true
@@ -114,6 +114,10 @@ StyledRect {
                 text: root.modelData.body.replace(/(.)\n(?!\n)/g, "$1\n\n") || qsTr("No body here! :/")
                 color: root.modelData.urgency === "critical" ? Colours.palette.m3secondary : Colours.palette.m3outline
                 wrapMode: Text.WordWrap
+            }
+
+            NotifActionList {
+                notif: root.modelData
             }
         }
     }

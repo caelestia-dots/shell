@@ -15,6 +15,7 @@ Item {
     id: root
 
     required property Props props
+    readonly property int notifCount: Notifs.list.reduce((acc, n) => n.closed ? acc : acc + 1, 0)
 
     anchors.fill: parent
     anchors.margins: Appearance.padding.normal
@@ -29,7 +30,7 @@ Item {
         anchors.right: parent.right
         anchors.margins: Appearance.padding.small
 
-        text: Notifs.list.length > 0 ? qsTr("%1 notification%2").arg(Notifs.list.length).arg(Notifs.list.length === 1 ? "" : "s") : qsTr("Notifications")
+        text: root.notifCount > 0 ? qsTr("%1 notification%2").arg(root.notifCount).arg(root.notifCount === 1 ? "" : "s") : qsTr("Notifications")
         color: Colours.palette.m3outline
         font.pointSize: Appearance.font.size.normal
         font.family: Appearance.font.family.mono
@@ -53,7 +54,7 @@ Item {
             anchors.centerIn: parent
             asynchronous: true
             active: opacity > 0
-            opacity: Notifs.list.length > 0 ? 0 : 1
+            opacity: root.notifCount > 0 ? 0 : 1
 
             sourceComponent: ColumnLayout {
                 spacing: Appearance.spacing.large
@@ -88,125 +89,24 @@ Item {
             }
         }
 
-        StyledListView {
+        StyledFlickable {
+            id: view
+
             anchors.fill: parent
 
-            spacing: Appearance.spacing.small
-            clip: true
+            flickableDirection: Flickable.VerticalFlick
+            contentWidth: width
+            contentHeight: notifList.implicitHeight
 
-            model: ScriptModel {
-                values: [...new Set(Notifs.list.filter(n => !n.closed).map(n => n.appName))].reverse()
+            StyledScrollBar.vertical: StyledScrollBar {
+                flickable: view
             }
 
-            delegate: MouseArea {
-                id: notif
+            NotifDockList {
+                id: notifList
 
-                required property int index
-                required property string modelData
-
-                property int startY
-
-                function closeAll(): void {
-                    for (const n of Notifs.list.filter(n => !n.closed && n.appName === modelData))
-                        n.close();
-                }
-
-                implicitWidth: root.width
-                implicitHeight: notifInner.implicitHeight
-
-                hoverEnabled: true
-                cursorShape: pressed ? Qt.ClosedHandCursor : undefined
-                acceptedButtons: Qt.LeftButton | Qt.RightButton | Qt.MiddleButton
-                preventStealing: true
-
-                drag.target: this
-                drag.axis: Drag.XAxis
-
-                onPressed: event => {
-                    if (event.button === Qt.LeftButton)
-                        startY = event.y;
-                    else if (event.button === Qt.RightButton)
-                        notifInner.toggleExpand();
-                    else if (event.button === Qt.MiddleButton)
-                        closeAll();
-                }
-                onPositionChanged: event => {
-                    if (pressed) {
-                        const diffY = event.y - startY;
-                        if (Math.abs(diffY) > Config.notifs.expandThreshold)
-                            notifInner.toggleExpand(diffY > 0);
-                    }
-                }
-                onReleased: event => {
-                    if (Math.abs(x) < width * Config.notifs.clearThreshold)
-                        x = 0;
-                    else
-                        closeAll();
-                }
-
-                NotifGroup {
-                    id: notifInner
-
-                    modelData: notif.modelData
-                    props: root.props
-                }
-
-                Behavior on x {
-                    Anim {
-                        duration: Appearance.anim.durations.expressiveDefaultSpatial
-                        easing.bezierCurve: Appearance.anim.curves.expressiveDefaultSpatial
-                    }
-                }
-            }
-
-            add: Transition {
-                Anim {
-                    property: "opacity"
-                    from: 0
-                    to: 1
-                }
-                Anim {
-                    property: "scale"
-                    from: 0
-                    to: 1
-                    duration: Appearance.anim.durations.expressiveDefaultSpatial
-                    easing.bezierCurve: Appearance.anim.curves.expressiveDefaultSpatial
-                }
-            }
-
-            remove: Transition {
-                Anim {
-                    property: "opacity"
-                    to: 0
-                }
-                Anim {
-                    property: "scale"
-                    to: 0.6
-                }
-            }
-
-            move: Transition {
-                Anim {
-                    properties: "opacity,scale"
-                    to: 1
-                }
-                Anim {
-                    property: "y"
-                    duration: Appearance.anim.durations.expressiveDefaultSpatial
-                    easing.bezierCurve: Appearance.anim.curves.expressiveDefaultSpatial
-                }
-            }
-
-            displaced: Transition {
-                Anim {
-                    properties: "opacity,scale"
-                    to: 1
-                }
-                Anim {
-                    property: "y"
-                    duration: Appearance.anim.durations.expressiveDefaultSpatial
-                    easing.bezierCurve: Appearance.anim.curves.expressiveDefaultSpatial
-                }
+                props: root.props
+                container: view
             }
         }
     }
@@ -217,8 +117,14 @@ Item {
         repeat: true
         interval: 50
         onTriggered: {
-            if (Notifs.list.length > 0)
-                Notifs.list[0].close();
+            let next = null;
+            for (let i = 0; i < notifList.repeater.count; i++) {
+                next = notifList.repeater.itemAt(i);
+                if (!next?.closed)
+                    break;
+            }
+            if (next)
+                next.closeAll();
             else
                 stop();
         }
@@ -229,8 +135,8 @@ Item {
         anchors.bottom: parent.bottom
         anchors.margins: Appearance.padding.normal
 
-        scale: Notifs.list.length > 0 ? 1 : 0.5
-        opacity: Notifs.list.length > 0 ? 1 : 0
+        scale: root.notifCount > 0 ? 1 : 0.5
+        opacity: root.notifCount > 0 ? 1 : 0
         active: opacity > 0
 
         sourceComponent: IconButton {
@@ -239,7 +145,7 @@ Item {
             icon: "clear_all"
             radius: Appearance.rounding.normal
             padding: Appearance.padding.normal
-            font.pointSize: Math.round(Appearance.font.size.large * 1.3)
+            font.pointSize: Math.round(Appearance.font.size.large * 1.2)
             onClicked: clearTimer.start()
 
             Elevation {
