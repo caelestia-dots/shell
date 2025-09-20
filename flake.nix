@@ -2,15 +2,22 @@
   description = "Desktop shell for Caelestia dots";
 
   inputs = {
-    nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
+    nixpkgs.url = "github:nixos/nixpkgs/nixos-25.05";
+    nixpkgs-unstable.url = "github:nixos/nixpkgs/nixos-unstable";
 
     quickshell = {
       url = "git+https://git.outfoxxed.me/outfoxxed/quickshell";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    #caelestia-cli = {
+    # url = "github:caelestia-dots/cli";
+    # inputs.nixpkgs.follows = "nixpkgs";
+    #  inputs.caelestia-shell.follows = "";
+    #};
+
     caelestia-cli = {
-      url = "github:caelestia-dots/cli";
+      url = "github:Av3lle/cli";
       inputs.nixpkgs.follows = "nixpkgs";
       inputs.caelestia-shell.follows = "";
     };
@@ -19,6 +26,7 @@
   outputs = {
     self,
     nixpkgs,
+    nixpkgs-unstable,
     ...
   } @ inputs: let
     forAllSystems = fn:
@@ -36,8 +44,12 @@
           withX11 = false;
           withI3 = false;
         };
-        app2unit = pkgs.callPackage ./nix/app2unit.nix {inherit pkgs;};
+        app2unit = pkgs.callPackage ./nix/app2unit.nix {
+          pkgs = inputs.nixpkgs-unstable.legacyPackages.${pkgs.system};
+        };
         caelestia-cli = inputs.caelestia-cli.packages.${pkgs.system}.default;
+        xkeyboard-config = inputs.nixpkgs-unstable.legacyPackages.${pkgs.system}.xkeyboard-config;
+        material-symbols = inputs.nixpkgs-unstable.legacyPackages.${pkgs.system}.material-symbols;
       };
       with-cli = caelestia-shell.override {withCli = true;};
       debug = caelestia-shell.override {debug = true;};
@@ -51,7 +63,7 @@
         pkgs.mkShell.override {stdenv = shell.stdenv;} {
           inputsFrom = [shell shell.plugin shell.extras];
           packages = with pkgs; [material-symbols rubik nerd-fonts.caskaydia-cove];
-          CAELESTIA_XKB_RULES_PATH = "${pkgs.xkeyboard-config}/share/xkeyboard-config-2/rules/base.lst";
+          CAELESTIA_XKB_RULES_PATH = "${inputs.nixpkgs-unstable.legacyPackages.${pkgs.system}.xkeyboard-config}/share/xkeyboard-config-2/rules/base.lst";
         };
     });
 
