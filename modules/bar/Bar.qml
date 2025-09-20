@@ -38,12 +38,31 @@ ColumnLayout {
                 popouts.hasCurrent = true;
             }
         } else if (id === "tray") {
-            const index = Math.floor(((y - top) / itemHeight) * item.items.count);
-            const trayItem = item.items.itemAt(index);
-            if (trayItem) {
-                popouts.currentName = `traymenu${index}`;
-                popouts.currentCenter = Qt.binding(() => trayItem.mapToItem(root, 0, trayItem.implicitHeight / 2).y);
-                popouts.hasCurrent = true;
+            const trayContainer = item.children.find(child => child.objectName === "layout" || child.spacing !== undefined);
+            const compactIndicator = item.children.find(child => child.objectName === "compactIndicator");
+            
+            if (trayContainer) {
+                const localY = mapToItem(trayContainer, 0, y).y;
+                
+                if (compactIndicator && compactIndicator.visible) {
+                    const indicatorY = mapToItem(item, 0, y).y;
+                    const indicatorTop = compactIndicator.y;
+                    const indicatorBottom = compactIndicator.y + compactIndicator.height;
+                    
+                    if (indicatorY >= indicatorTop && indicatorY <= indicatorBottom) {
+                        return; // Don't show any menu when hovering the indicator
+                    }
+                }
+                
+                const trayItem = trayContainer.childAt(trayContainer.width / 2, localY);
+                if (trayItem && trayItem.modelData && trayItem.enabled) {
+                    const index = Array.from({length: item.items.count}, (_, i) => item.items.itemAt(i)).indexOf(trayItem);
+                    if (index >= 0) {
+                        popouts.currentName = `traymenu${index}`;
+                        popouts.currentCenter = Qt.binding(() => trayItem.mapToItem(root, 0, trayItem.implicitHeight / 2).y);
+                        popouts.hasCurrent = true;
+                    }
+                }
             }
         } else if (id === "activeWindow") {
             popouts.currentName = id.toLowerCase();
