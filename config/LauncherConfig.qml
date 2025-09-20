@@ -65,7 +65,7 @@ JsonObject {
         {
             name: "Translate",
             icon: "translate",
-            description: "Translate text using LibreTranslate",
+            description: "Translate text using Google Translate",
             command: ["autocomplete", "translate"],
             enabled: true,
             dangerous: false
