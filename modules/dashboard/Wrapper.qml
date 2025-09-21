@@ -6,7 +6,6 @@ import qs.config
 import qs.utils
 import Caelestia
 import Quickshell
-import Quickshell.Hyprland
 import QtQuick
 
 Item {
@@ -76,12 +75,6 @@ Item {
             }
         }
     ]
-
-    HyprlandFocusGrab {
-        active: !Config.dashboard.showOnHover && root.visibilities.dashboard && Config.dashboard.enabled
-        windows: [QsWindow.window]
-        onCleared: root.visibilities.dashboard = false
-    }
 
     Timer {
         id: timer

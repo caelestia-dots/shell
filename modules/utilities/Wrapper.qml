@@ -18,7 +18,7 @@ Item {
 
         reloadableId: "utilities"
     }
-    readonly property bool shouldBeActive: visibilities.sidebar || (visibilities.utilities && Config.utilities.enabled)
+    readonly property bool shouldBeActive: visibilities.sidebar || (visibilities.utilities && Config.utilities.enabled && !(visibilities.session && Config.session.enabled))
 
     visible: height > 0
     implicitHeight: 0

@@ -3,6 +3,7 @@ pragma ComponentBehavior: Bound
 import qs.components
 import qs.services
 import qs.config
+import Quickshell
 import QtQuick
 import QtQuick.Layouts
 
@@ -12,8 +13,10 @@ StyledRect {
     required property Notifs.Notif modelData
     required property Props props
     required property bool expanded
+    required property var visibilities
 
-    readonly property real nonAnimHeight: expanded ? summary.implicitHeight + expandedContent.implicitHeight + expandedContent.anchors.topMargin + Appearance.padding.normal * 2 : summary.implicitHeight
+    readonly property StyledText body: expandedContent.item?.body ?? null
+    readonly property real nonAnimHeight: expanded ? summary.implicitHeight + expandedContent.implicitHeight + expandedContent.anchors.topMargin + Appearance.padding.normal * 2 : summaryHeightMetrics.height
 
     implicitHeight: nonAnimHeight
 
@@ -34,13 +37,21 @@ StyledRect {
             timeStr.anchors.margins: Appearance.padding.normal
             expandedContent.anchors.margins: Appearance.padding.normal
             summary.width: root.width - Appearance.padding.normal * 2 - timeStr.implicitWidth - Appearance.spacing.small
+            summary.maximumLineCount: Number.MAX_SAFE_INTEGER
         }
     }
 
     transitions: Transition {
         Anim {
-            properties: "margins,width"
+            properties: "margins,width,maximumLineCount"
         }
+    }
+
+    TextMetrics {
+        id: summaryHeightMetrics
+
+        font: summary.font
+        text: " " // Use this height to prevent weird characters from changing the line height
     }
 
     StyledText {
@@ -53,6 +64,8 @@ StyledRect {
         text: root.modelData.summary
         color: root.modelData.urgency === "critical" ? Colours.palette.m3onSecondaryContainer : Colours.palette.m3onSurface
         elide: Text.ElideRight
+        wrapMode: Text.WordWrap
+        maximumLineCount: 1
     }
 
     StyledText {
@@ -106,14 +119,23 @@ StyledRect {
         anchors.topMargin: Appearance.spacing.small / 2
 
         sourceComponent: ColumnLayout {
+            readonly property alias body: body
+
             spacing: Appearance.spacing.smaller
 
             StyledText {
+                id: body
+
                 Layout.fillWidth: true
                 textFormat: Text.MarkdownText
                 text: root.modelData.body.replace(/(.)\n(?!\n)/g, "$1\n\n") || qsTr("No body here! :/")
                 color: root.modelData.urgency === "critical" ? Colours.palette.m3secondary : Colours.palette.m3outline
                 wrapMode: Text.WordWrap
+
+                onLinkActivated: link => {
+                    Quickshell.execDetached(["app2unit", "-O", "--", link]);
+                    root.visibilities.sidebar = false;
+                }
             }
 
             NotifActionList {

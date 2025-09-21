@@ -15,6 +15,7 @@ Item {
     id: root
 
     required property Props props
+    required property var visibilities
     readonly property int notifCount: Notifs.list.reduce((acc, n) => n.closed ? acc : acc + 1, 0)
 
     anchors.fill: parent
@@ -22,7 +23,7 @@ Item {
 
     Component.onCompleted: Notifs.list.forEach(n => n.popup = false)
 
-    StyledText {
+    Item {
         id: title
 
         anchors.top: parent.top
@@ -30,12 +31,46 @@ Item {
         anchors.right: parent.right
         anchors.margins: Appearance.padding.small
 
-        text: root.notifCount > 0 ? qsTr("%1 notification%2").arg(root.notifCount).arg(root.notifCount === 1 ? "" : "s") : qsTr("Notifications")
-        color: Colours.palette.m3outline
-        font.pointSize: Appearance.font.size.normal
-        font.family: Appearance.font.family.mono
-        font.weight: 500
-        elide: Text.ElideRight
+        implicitHeight: Math.max(count.implicitHeight, titleText.implicitHeight)
+
+        StyledText {
+            id: count
+
+            anchors.verticalCenter: parent.verticalCenter
+            anchors.left: parent.left
+            anchors.leftMargin: root.notifCount > 0 ? 0 : -width - titleText.anchors.leftMargin
+            opacity: root.notifCount > 0 ? 1 : 0
+
+            text: root.notifCount
+            color: Colours.palette.m3outline
+            font.pointSize: Appearance.font.size.normal
+            font.family: Appearance.font.family.mono
+            font.weight: 500
+
+            Behavior on anchors.leftMargin {
+                Anim {}
+            }
+
+            Behavior on opacity {
+                Anim {}
+            }
+        }
+
+        StyledText {
+            id: titleText
+
+            anchors.verticalCenter: parent.verticalCenter
+            anchors.left: count.right
+            anchors.right: parent.right
+            anchors.leftMargin: Appearance.spacing.small
+
+            text: root.notifCount > 0 ? qsTr("notification%1").arg(root.notifCount === 1 ? "" : "s") : qsTr("Notifications")
+            color: Colours.palette.m3outline
+            font.pointSize: Appearance.font.size.normal
+            font.family: Appearance.font.family.mono
+            font.weight: 500
+            elide: Text.ElideRight
+        }
     }
 
     ClippingRectangle {
@@ -106,6 +141,7 @@ Item {
                 id: notifList
 
                 props: root.props
+                visibilities: root.visibilities
                 container: view
             }
         }

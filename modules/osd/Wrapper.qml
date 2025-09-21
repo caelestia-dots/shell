@@ -13,6 +13,7 @@ Item {
     required property var visibilities
     property bool hovered
     readonly property Brightness.Monitor monitor: Brightness.getMonitorForScreen(root.screen)
+    readonly property bool shouldBeActive: visibilities.osd && Config.osd.enabled && !(visibilities.utilities && Config.utilities.enabled)
 
     property real volume
     property bool muted
@@ -39,7 +40,7 @@ Item {
 
     states: State {
         name: "visible"
-        when: root.visibilities.osd && Config.osd.enabled
+        when: root.shouldBeActive
 
         PropertyChanges {
             root.implicitWidth: content.implicitWidth
@@ -118,7 +119,7 @@ Item {
         anchors.verticalCenter: parent.verticalCenter
         anchors.left: parent.left
 
-        Component.onCompleted: active = Qt.binding(() => (root.visibilities.osd && Config.osd.enabled) || root.visible)
+        Component.onCompleted: active = Qt.binding(() => root.shouldBeActive || root.visible)
 
         sourceComponent: Content {
             monitor: root.monitor
