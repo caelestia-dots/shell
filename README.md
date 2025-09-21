@@ -499,7 +499,10 @@ default, you must create it manually.
         "hideDelay": 2000
     },
     "paths": {
-        "mediaGif": "root:/assets/bongocat.gif",
+        "mediaGif": {
+            "f1": "root:/assets/bongocat/f1.svg",
+            "f2": "root:/assets/bongocat/f2.svg"
+        },
         "sessionGif": "root:/assets/kurukuru.gif",
         "wallpaperDir": "~/Pictures/Wallpapers"
     },

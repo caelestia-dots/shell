@@ -201,7 +201,7 @@ Item {
         }
     }
 
-    Item {
+    BongoCat {
         id: bongocat
 
         anchors.top: controls.bottom
@@ -211,29 +211,6 @@ Item {
         anchors.topMargin: Appearance.spacing.small
         anchors.bottomMargin: Appearance.padding.large
         anchors.margins: Appearance.padding.large * 2
-
-        property bool showFrame1: true
-
-        Image {
-            anchors.fill: parent
-            source: "root:/assets/bongocat/f1.svg"
-            visible: parent.showFrame1
-            fillMode: Image.PreserveAspectFit
-        }
-
-        Image {
-            anchors.fill: parent
-            source: "root:/assets/bongocat/f2.svg"
-            visible: !parent.showFrame1
-            fillMode: Image.PreserveAspectFit
-        }
-
-        Timer {
-            running: Players.active?.isPlaying ?? false
-            interval: Math.max(60000 / (Audio.beatTracker.bpm || 120), 200)
-            repeat: true
-            onTriggered: parent.showFrame1 = !parent.showFrame1
-        }
     }
 
     component Control: StyledRect {
