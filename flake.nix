@@ -2,9 +2,8 @@
   description = "Desktop shell for Caelestia dots";
 
   inputs = {
-    #nixpkgs.url = "github:nixos/nixpkgs/nixos-25.05";
-    #nixpkgs-unstable.url = "github:nixos/nixpkgs/nixos-unstable";
-    nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
+    nixpkgs.url = "github:nixos/nixpkgs/nixos-25.05";
+    nixpkgs-unstable.url = "github:nixos/nixpkgs/nixos-unstable";
 
     quickshell = {
       url = "git+https://git.outfoxxed.me/outfoxxed/quickshell";
@@ -27,6 +26,7 @@
   outputs = {
     self,
     nixpkgs,
+    nixpkgs-unstable,
     ...
   } @ inputs: let
     forAllSystems = fn:
@@ -38,7 +38,6 @@
 
     packages = forAllSystems (pkgs: rec {
       caelestia-shell = pkgs.callPackage ./nix {
-        pkgs = inputs.nixpkgs.legacyPackages.${pkgs.system};
         rev = self.rev or self.dirtyRev;
         stdenv = pkgs.clangStdenv;
         quickshell = inputs.quickshell.packages.${pkgs.system}.default.override {
@@ -46,11 +45,11 @@
           withI3 = false;
         };
         app2unit = pkgs.callPackage ./nix/app2unit.nix {
-          pkgs = inputs.nixpkgs.legacyPackages.${pkgs.system};
+          pkgs = inputs.nixpkgs-unstable.legacyPackages.${pkgs.system};
         };
         caelestia-cli = inputs.caelestia-cli.packages.${pkgs.system}.default;
-        #xkeyboard-config = pkgs.xkeyboard-config;
-        #material-symbols = inputs.nixpkgs.legacyPackages.${pkgs.system}.material-symbols;
+        #xkeyboard-config = inputs.nixpkgs-unstable.legacyPackages.${pkgs.system}.xkeyboard-config;
+        #material-symbols = inputs.nixpkgs-unstable.legacyPackages.${pkgs.system}.material-symbols;
       };
       with-cli = caelestia-shell.override {withCli = true;};
       debug = caelestia-shell.override {debug = true;};
@@ -64,7 +63,7 @@
         pkgs.mkShell.override {stdenv = shell.stdenv;} {
           inputsFrom = [shell shell.plugin shell.extras];
           packages = with pkgs; [material-symbols rubik nerd-fonts.caskaydia-cove];
-          CAELESTIA_XKB_RULES_PATH = "${inputs.nixpkgs.legacyPackages.${pkgs.system}.xkeyboard-config}/share/xkeyboard-config-2/rules/base.lst";
+          CAELESTIA_XKB_RULES_PATH = "${inputs.nixpkgs-unstable.legacyPackages.${pkgs.system}.xkeyboard-config}/share/xkeyboard-config-2/rules/base.lst";
         };
     });
 
