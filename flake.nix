@@ -38,6 +38,7 @@
 
     packages = forAllSystems (pkgs: rec {
       caelestia-shell = pkgs.callPackage ./nix {
+        pkgs = inputs.nixpkgs.legacyPackages.${pkgs.system};
         rev = self.rev or self.dirtyRev;
         stdenv = pkgs.clangStdenv;
         quickshell = inputs.quickshell.packages.${pkgs.system}.default.override {
@@ -48,8 +49,8 @@
           pkgs = inputs.nixpkgs.legacyPackages.${pkgs.system};
         };
         caelestia-cli = inputs.caelestia-cli.packages.${pkgs.system}.default;
-        xkeyboard-config = pkgs.xkeyboard-config;
-        material-symbols = inputs.nixpkgs.legacyPackages.${pkgs.system}.material-symbols;
+        #xkeyboard-config = pkgs.xkeyboard-config;
+        #material-symbols = inputs.nixpkgs.legacyPackages.${pkgs.system}.material-symbols;
       };
       with-cli = caelestia-shell.override {withCli = true;};
       debug = caelestia-shell.override {debug = true;};
