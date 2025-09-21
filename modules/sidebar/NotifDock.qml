@@ -15,6 +15,7 @@ Item {
     id: root
 
     required property Props props
+    required property var visibilities
     readonly property int notifCount: Notifs.list.reduce((acc, n) => n.closed ? acc : acc + 1, 0)
 
     anchors.fill: parent
@@ -140,6 +141,7 @@ Item {
                 id: notifList
 
                 props: root.props
+                visibilities: root.visibilities
                 container: view
             }
         }

@@ -14,6 +14,7 @@ Item {
     required property list<var> notifs
     required property bool expanded
     required property Flickable container
+    required property var visibilities
 
     readonly property real nonAnimHeight: {
         let h = -root.spacing;
@@ -104,7 +105,7 @@ Item {
             implicitHeight: notifInner.implicitHeight
 
             hoverEnabled: true
-            cursorShape: pressed ? Qt.ClosedHandCursor : undefined
+            cursorShape: notifInner.body?.hoveredLink ? Qt.PointingHandCursor : pressed ? Qt.ClosedHandCursor : undefined
             acceptedButtons: Qt.LeftButton | Qt.RightButton | Qt.MiddleButton
             preventStealing: !root.expanded
             enabled: !modelData.closed
@@ -176,6 +177,7 @@ Item {
                 modelData: notif.modelData
                 props: root.props
                 expanded: root.expanded
+                visibilities: root.visibilities
             }
 
             Behavior on opacity {

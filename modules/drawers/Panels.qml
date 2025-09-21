@@ -6,6 +6,7 @@ import qs.modules.launcher as Launcher
 import qs.modules.dashboard as Dashboard
 import qs.modules.bar.popouts as BarPopouts
 import qs.modules.utilities as Utilities
+import qs.modules.utilities.toasts as Toasts
 import qs.modules.sidebar as Sidebar
 import Quickshell
 import QtQuick
@@ -17,14 +18,15 @@ Item {
     required property PersistentProperties visibilities
     required property Item bar
 
-    readonly property Osd.Wrapper osd: osd
-    readonly property Notifications.Wrapper notifications: notifications
-    readonly property Session.Wrapper session: session
-    readonly property Launcher.Wrapper launcher: launcher
-    readonly property Dashboard.Wrapper dashboard: dashboard
-    readonly property BarPopouts.Wrapper popouts: popouts
-    readonly property Utilities.Wrapper utilities: utilities
-    readonly property Sidebar.Wrapper sidebar: sidebar
+    readonly property alias osd: osd
+    readonly property alias notifications: notifications
+    readonly property alias session: session
+    readonly property alias launcher: launcher
+    readonly property alias dashboard: dashboard
+    readonly property alias popouts: popouts
+    readonly property alias utilities: utilities
+    readonly property alias toasts: toasts
+    readonly property alias sidebar: sidebar
 
     anchors.fill: parent
     anchors.margins: Config.border.thickness
@@ -110,6 +112,14 @@ Item {
 
         anchors.bottom: parent.bottom
         anchors.right: parent.right
+    }
+
+    Toasts.Toasts {
+        id: toasts
+
+        anchors.bottom: sidebar.visible ? parent.bottom : utilities.top
+        anchors.right: sidebar.left
+        anchors.margins: Appearance.padding.normal
     }
 
     Sidebar.Wrapper {

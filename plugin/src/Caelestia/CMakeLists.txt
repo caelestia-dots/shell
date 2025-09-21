@@ -44,6 +44,7 @@ qml_module(caelestia
         qalculator.hpp qalculator.cpp
         appdb.hpp appdb.cpp
         requests.hpp requests.cpp
+        toaster.hpp toaster.cpp
     LIBRARIES
         Qt::Gui
         Qt::Quick

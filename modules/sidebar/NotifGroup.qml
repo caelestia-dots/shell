@@ -16,6 +16,7 @@ StyledRect {
     required property string modelData
     required property Props props
     required property Flickable container
+    required property var visibilities
 
     readonly property list<var> notifs: Notifs.list.filter(n => n.appName === modelData)
     readonly property int notifCount: notifs.reduce((acc, n) => n.closed ? acc : acc + 1, 0)
@@ -234,6 +235,7 @@ StyledRect {
                 notifs: root.notifs
                 expanded: root.expanded
                 container: root.container
+                visibilities: root.visibilities
                 onRequestToggleExpand: expand => root.toggleExpand(expand)
             }
         }

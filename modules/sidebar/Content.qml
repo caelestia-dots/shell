@@ -25,6 +25,7 @@ Item {
 
             NotifDock {
                 props: root.props
+                visibilities: root.visibilities
             }
         }
 
