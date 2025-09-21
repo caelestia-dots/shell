@@ -21,6 +21,7 @@
   qt6,
   quickshell,
   aubio,
+  gpu-screen-recorder,
   libcava,
   fftw,
   pipewire,
