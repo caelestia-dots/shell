@@ -21,7 +21,6 @@
   qt6,
   quickshell,
   aubio,
-  gpu-screen-recorder,
   libcava,
   fftw,
   pipewire,
@@ -49,7 +48,6 @@
       libqalculate
       bash
       hyprland
-      gpu-screen-recorder
     ]
     ++ extraRuntimeDeps
     ++ lib.optional withCli caelestia-cli;
