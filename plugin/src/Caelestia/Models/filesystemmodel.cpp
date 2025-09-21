@@ -276,8 +276,12 @@ void FileSystemModel::updateEntriesForDir(const QString& dir) {
     const auto showHidden = m_showHidden;
     const auto filter = m_filter;
     const auto nameFilters = m_nameFilters;
-    const auto oldEntries = m_entries;
     const auto baseDir = m_dir;
+
+    QSet<QString> oldPaths;
+    for (const auto& entry : m_entries) {
+        oldPaths << entry->path();
+    }
 
     const auto future = QtConcurrent::run([=](QPromise<QPair<QSet<QString>, QSet<QString>>>& promise) {
         const auto flags = recursive ? QDirIterator::Subdirectories : QDirIterator::NoIteratorFlags;
@@ -334,11 +338,6 @@ void FileSystemModel::updateEntriesForDir(const QString& dir) {
             }
 
             newPaths.insert(path);
-        }
-
-        QSet<QString> oldPaths;
-        for (const auto& entry : oldEntries) {
-            oldPaths.insert(entry->path());
         }
 
         if (promise.isCanceled() || newPaths == oldPaths) {
