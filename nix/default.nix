@@ -49,6 +49,7 @@
       libqalculate
       bash
       hyprland
+      gpu-screen-recorder
     ]
     ++ extraRuntimeDeps
     ++ lib.optional withCli caelestia-cli;
