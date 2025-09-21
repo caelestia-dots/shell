@@ -48,8 +48,8 @@
           pkgs = inputs.nixpkgs-unstable.legacyPackages.${pkgs.system};
         };
         caelestia-cli = inputs.caelestia-cli.packages.${pkgs.system}.default;
-        #xkeyboard-config = inputs.nixpkgs-unstable.legacyPackages.${pkgs.system}.xkeyboard-config;
-        #material-symbols = inputs.nixpkgs-unstable.legacyPackages.${pkgs.system}.material-symbols;
+        xkeyboard-config = inputs.nixpkgs-unstable.legacyPackages.${pkgs.system}.xkeyboard-config;
+        material-symbols = inputs.nixpkgs-unstable.legacyPackages.${pkgs.system}.material-symbols;
       };
       with-cli = caelestia-shell.override {withCli = true;};
       debug = caelestia-shell.override {debug = true;};
