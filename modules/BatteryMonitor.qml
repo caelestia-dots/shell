@@ -16,7 +16,7 @@ Scope {
             if (UPower.onBattery) {
                 Toaster.toast(qsTr("Charger unplugged"), qsTr("Battery is now on AC"), "power_off");
             } else {
-                Toaster.toast(qsTr("Charger plugged in"), qsTr("Battery is charging"), "battery_android_frame_bolt");
+                Toaster.toast(qsTr("Charger plugged in"), qsTr("Battery is charging"), "power");
                 for (const level of root.warnLevels)
                     level.warned = false;
             }
