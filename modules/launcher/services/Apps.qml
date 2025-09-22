@@ -33,13 +33,13 @@ Searcher {
             keys = ["categories", "name"];
             weights = [0.9, 0.1];
         } else if (search.startsWith(`${prefix}d `)) {
-            keys = ["desc", "name"];
+            keys = ["comment", "name"];
             weights = [0.9, 0.1];
         } else if (search.startsWith(`${prefix}e `)) {
             keys = ["execString", "name"];
             weights = [0.9, 0.1];
         } else if (search.startsWith(`${prefix}w `)) {
-            keys = ["wmClass", "name"];
+            keys = ["startupClass", "name"];
             weights = [0.9, 0.1];
         } else if (search.startsWith(`${prefix}g `)) {
             keys = ["genericName", "name"];

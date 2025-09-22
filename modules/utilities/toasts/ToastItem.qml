@@ -68,7 +68,7 @@ StyledRect {
             }
 
             implicitWidth: implicitHeight
-            implicitHeight: icon.implicitHeight + Appearance.padding.normal * 2
+            implicitHeight: icon.implicitHeight + Appearance.padding.smaller * 2
 
             MaterialIcon {
                 id: icon
@@ -84,7 +84,7 @@ StyledRect {
                         return Colours.palette.m3onError;
                     return Colours.palette.m3onSurfaceVariant;
                 }
-                font.pointSize: Appearance.font.size.large
+                font.pointSize: Math.round(Appearance.font.size.large * 1.2)
             }
         }
 

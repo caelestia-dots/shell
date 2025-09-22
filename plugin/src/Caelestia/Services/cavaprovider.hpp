@@ -13,6 +13,8 @@ public:
     explicit CavaProcessor(QObject* parent = nullptr);
     ~CavaProcessor();
 
+    void setBars(int bars);
+
 signals:
     void valuesChanged(QVector<double> values);
 
@@ -26,8 +28,6 @@ private:
 
     int m_bars;
     QVector<double> m_values;
-
-    Q_INVOKABLE void setBars(int bars);
 
     void reload();
     void initCava();

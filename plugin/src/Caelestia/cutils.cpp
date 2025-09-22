@@ -1,11 +1,12 @@
 #include "cutils.hpp"
 
+#include <QtConcurrent/qtconcurrentrun.h>
 #include <QtQuick/qquickitemgrabresult.h>
 #include <QtQuick/qquickwindow.h>
 #include <qdir.h>
 #include <qfileinfo.h>
+#include <qfuturewatcher.h>
 #include <qqmlengine.h>
-#include <qthreadpool.h>
 
 namespace caelestia {
 
@@ -56,7 +57,7 @@ void CUtils::saveItem(QQuickItem* target, const QUrl& path, const QRect& rect, Q
 
     QObject::connect(grabResult.data(), &QQuickItemGrabResult::ready, this,
         [grabResult, scaledRect, path, onSaved, onFailed, this]() {
-            QThreadPool::globalInstance()->start([grabResult, scaledRect, path, onSaved, onFailed, this] {
+            const auto future = QtConcurrent::run([=]() {
                 QImage image = grabResult->image();
 
                 if (scaledRect.isValid()) {
@@ -65,25 +66,27 @@ void CUtils::saveItem(QQuickItem* target, const QUrl& path, const QRect& rect, Q
 
                 const QString file = path.toLocalFile();
                 const QString parent = QFileInfo(file).absolutePath();
-                const bool success = QDir().mkpath(parent) && image.save(file);
-
-                QMetaObject::invokeMethod(
-                    this,
-                    [file, success, path, onSaved, onFailed, this]() {
-                        if (success) {
-                            if (onSaved.isCallable()) {
-                                onSaved.call(
-                                    { QJSValue(file), qmlEngine(this)->toScriptValue(QVariant::fromValue(path)) });
-                            }
-                        } else {
-                            qWarning() << "CUtils::saveItem: failed to save" << path;
-                            if (onFailed.isCallable()) {
-                                onFailed.call({ qmlEngine(this)->toScriptValue(QVariant::fromValue(path)) });
-                            }
-                        }
-                    },
-                    Qt::QueuedConnection);
+                return QDir().mkpath(parent) && image.save(file);
             });
+
+            auto* watcher = new QFutureWatcher<bool>(this);
+            auto* engine = qmlEngine(this);
+
+            QObject::connect(watcher, &QFutureWatcher<bool>::finished, this, [=]() {
+                if (watcher->result()) {
+                    if (onSaved.isCallable()) {
+                        onSaved.call(
+                            { QJSValue(path.toLocalFile()), engine->toScriptValue(QVariant::fromValue(path)) });
+                    }
+                } else {
+                    qWarning() << "CUtils::saveItem: failed to save" << path;
+                    if (onFailed.isCallable()) {
+                        onFailed.call({ engine->toScriptValue(QVariant::fromValue(path)) });
+                    }
+                }
+                watcher->deleteLater();
+            });
+            watcher->setFuture(future);
         });
 }
 
@@ -132,20 +135,17 @@ void CUtils::getDominantColour(QQuickItem* item, int rescaleSize, QJSValue callb
 
     QObject::connect(
         grabResult.data(), &QQuickItemGrabResult::ready, this, [grabResult, rescaleSize, callback, this]() {
-            const QImage image = grabResult->image();
+            const auto future = QtConcurrent::run(&CUtils::findDominantColour, this, grabResult->image(), rescaleSize);
+            auto* watcher = new QFutureWatcher<QColor>(this);
+            auto* engine = qmlEngine(this);
 
-            QThreadPool::globalInstance()->start([grabResult, image, rescaleSize, callback, this]() {
-                const QColor color = this->findDominantColour(image, rescaleSize);
-
+            QObject::connect(watcher, &QFutureWatcher<QColor>::finished, this, [=]() {
                 if (callback.isCallable()) {
-                    QMetaObject::invokeMethod(
-                        this,
-                        [color, callback, this]() {
-                            callback.call({ qmlEngine(this)->toScriptValue(QVariant::fromValue(color)) });
-                        },
-                        Qt::QueuedConnection);
+                    callback.call({ engine->toScriptValue(QVariant::fromValue(watcher->result())) });
                 }
+                watcher->deleteLater();
             });
+            watcher->setFuture(future);
         });
 }
 
@@ -159,25 +159,26 @@ void CUtils::getDominantColour(const QString& path, int rescaleSize, QJSValue ca
         return;
     }
 
-    QThreadPool::globalInstance()->start([path, rescaleSize, callback, this]() {
+    const auto future = QtConcurrent::run([=, this]() {
         const QImage image(path);
 
         if (image.isNull()) {
             qWarning() << "CUtils::getDominantColour: failed to load image" << path;
-            return;
+            return QColor();
         }
 
-        const QColor color = this->findDominantColour(image, rescaleSize);
-
-        if (callback.isCallable()) {
-            QMetaObject::invokeMethod(
-                this,
-                [color, callback, this]() {
-                    callback.call({ qmlEngine(this)->toScriptValue(QVariant::fromValue(color)) });
-                },
-                Qt::QueuedConnection);
-        }
+        return findDominantColour(image, rescaleSize);
     });
+    auto* watcher = new QFutureWatcher<QColor>(this);
+    auto* engine = qmlEngine(this);
+
+    QObject::connect(watcher, &QFutureWatcher<QColor>::finished, this, [=]() {
+        if (watcher->result().isValid() && callback.isCallable()) {
+            callback.call({ engine->toScriptValue(QVariant::fromValue(watcher->result())) });
+        }
+        watcher->deleteLater();
+    });
+    watcher->setFuture(future);
 }
 
 QColor CUtils::findDominantColour(const QImage& image, int rescaleSize) const {
@@ -251,20 +252,17 @@ void CUtils::getAverageLuminance(QQuickItem* item, int rescaleSize, QJSValue cal
 
     QObject::connect(
         grabResult.data(), &QQuickItemGrabResult::ready, this, [grabResult, rescaleSize, callback, this]() {
-            const QImage image = grabResult->image();
+            const auto future =
+                QtConcurrent::run(&CUtils::findAverageLuminance, this, grabResult->image(), rescaleSize);
+            auto* watcher = new QFutureWatcher<qreal>(this);
 
-            QThreadPool::globalInstance()->start([grabResult, image, rescaleSize, callback, this]() {
-                const qreal luminance = this->findAverageLuminance(image, rescaleSize);
-
+            QObject::connect(watcher, &QFutureWatcher<qreal>::finished, this, [=]() {
                 if (callback.isCallable()) {
-                    QMetaObject::invokeMethod(
-                        this,
-                        [luminance, callback]() {
-                            callback.call({ QJSValue(luminance) });
-                        },
-                        Qt::QueuedConnection);
+                    callback.call({ QJSValue(watcher->result()) });
                 }
+                watcher->deleteLater();
             });
+            watcher->setFuture(future);
         });
 }
 
@@ -278,25 +276,25 @@ void CUtils::getAverageLuminance(const QString& path, int rescaleSize, QJSValue 
         return;
     }
 
-    QThreadPool::globalInstance()->start([path, rescaleSize, callback, this]() {
+    const auto future = QtConcurrent::run([=, this]() {
         const QImage image(path);
 
         if (image.isNull()) {
             qWarning() << "CUtils::getAverageLuminance: failed to load image" << path;
-            return;
+            return 0.0;
         }
 
-        const qreal luminance = this->findAverageLuminance(image, rescaleSize);
-
-        if (callback.isCallable()) {
-            QMetaObject::invokeMethod(
-                this,
-                [luminance, callback]() {
-                    callback.call({ QJSValue(luminance) });
-                },
-                Qt::QueuedConnection);
-        }
+        return findAverageLuminance(image, rescaleSize);
     });
+    auto* watcher = new QFutureWatcher<qreal>(this);
+
+    QObject::connect(watcher, &QFutureWatcher<qreal>::finished, this, [=]() {
+        if (callback.isCallable()) {
+            callback.call({ QJSValue(watcher->result()) });
+        }
+        watcher->deleteLater();
+    });
+    watcher->setFuture(future);
 }
 
 qreal CUtils::findAverageLuminance(const QImage& image, int rescaleSize) const {
