@@ -139,13 +139,18 @@ Singleton {
         readonly property string timeStr: {
             const diff = Time.date.getTime() - time.getTime();
             const m = Math.floor(diff / 60000);
-            const h = Math.floor(m / 60);
 
-            if (h < 1 && m < 1)
-                return "now";
-            if (h < 1)
-                return `${m}m`;
-            return `${h}h`;
+            if (m < 1)
+                return qsTr("now");
+
+            const h = Math.floor(m / 60);
+            const d = Math.floor(h / 24);
+
+            if (d > 0)
+                return `${d}d`;
+            if (h > 0)
+                return `${h}h`;
+            return `${m}m`;
         }
 
         property Notification notification

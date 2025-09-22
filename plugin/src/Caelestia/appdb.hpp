@@ -3,6 +3,7 @@
 #include <qhash.h>
 #include <qobject.h>
 #include <qqmlintegration.h>
+#include <qtimer.h>
 
 namespace caelestia {
 
@@ -16,13 +17,13 @@ class AppEntry : public QObject {
 
     Q_PROPERTY(quint32 frequency READ frequency NOTIFY frequencyChanged)
     Q_PROPERTY(QString id READ id CONSTANT)
-    Q_PROPERTY(QString name READ name CONSTANT)
-    Q_PROPERTY(QString desc READ desc CONSTANT)
-    Q_PROPERTY(QString execString READ execString CONSTANT)
-    Q_PROPERTY(QString wmClass READ wmClass CONSTANT)
-    Q_PROPERTY(QString genericName READ genericName CONSTANT)
-    Q_PROPERTY(QString categories READ categories CONSTANT)
-    Q_PROPERTY(QString keywords READ keywords CONSTANT)
+    Q_PROPERTY(QString name READ name NOTIFY nameChanged)
+    Q_PROPERTY(QString comment READ comment NOTIFY commentChanged)
+    Q_PROPERTY(QString execString READ execString NOTIFY execStringChanged)
+    Q_PROPERTY(QString startupClass READ startupClass NOTIFY startupClassChanged)
+    Q_PROPERTY(QString genericName READ genericName NOTIFY genericNameChanged)
+    Q_PROPERTY(QString categories READ categories NOTIFY categoriesChanged)
+    Q_PROPERTY(QString keywords READ keywords NOTIFY keywordsChanged)
 
 public:
     explicit AppEntry(QObject* entry, quint32 frequency, QObject* parent = nullptr);
@@ -35,15 +36,22 @@ public:
 
     [[nodiscard]] QString id() const;
     [[nodiscard]] QString name() const;
-    [[nodiscard]] QString desc() const;
+    [[nodiscard]] QString comment() const;
     [[nodiscard]] QString execString() const;
-    [[nodiscard]] QString wmClass() const;
+    [[nodiscard]] QString startupClass() const;
     [[nodiscard]] QString genericName() const;
     [[nodiscard]] QString categories() const;
     [[nodiscard]] QString keywords() const;
 
 signals:
     void frequencyChanged();
+    void nameChanged();
+    void commentChanged();
+    void execStringChanged();
+    void startupClassChanged();
+    void genericNameChanged();
+    void categoriesChanged();
+    void keywordsChanged();
 
 private:
     QObject* m_entry;
@@ -80,6 +88,8 @@ signals:
     void appsChanged();
 
 private:
+    QTimer* m_timer;
+
     const QString m_uuid;
     QString m_path;
     QList<QObject*> m_entries;

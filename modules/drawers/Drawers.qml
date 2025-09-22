@@ -28,6 +28,20 @@ Variants {
             id: win
 
             readonly property bool hasFullscreen: Hypr.monitorFor(screen)?.activeWorkspace?.toplevels.values.some(t => t.lastIpcObject.fullscreen === 2) ?? false
+            readonly property int dragMaskPadding: {
+                if (focusGrab.active || panels.popouts.isDetached)
+                    return 0;
+
+                const mon = Hypr.monitorFor(screen);
+                if (mon?.lastIpcObject.specialWorkspace.name || mon?.activeWorkspace?.lastIpcObject.windows > 0)
+                    return 0;
+
+                const thresholds = [];
+                for (const panel of ["dashboard", "launcher", "session", "sidebar"])
+                    if (Config[panel].enabled)
+                        thresholds.push(Config[panel].dragThreshold);
+                return Math.max(...thresholds);
+            }
 
             onHasFullscreenChanged: {
                 visibilities.launcher = false;
@@ -40,24 +54,20 @@ Variants {
             WlrLayershell.exclusionMode: ExclusionMode.Ignore
             WlrLayershell.keyboardFocus: visibilities.launcher || visibilities.session ? WlrKeyboardFocus.OnDemand : WlrKeyboardFocus.None
 
-            mask: focusGrab.active || panels.popouts.isDetached || Hypr.focusedMonitor?.activeWorkspace?.lastIpcObject.windows > 0 ? inputMask : null
+            mask: Region {
+                x: bar.implicitWidth + win.dragMaskPadding
+                y: Config.border.thickness + win.dragMaskPadding
+                width: win.width - bar.implicitWidth - Config.border.thickness - win.dragMaskPadding * 2
+                height: win.height - Config.border.thickness * 2 - win.dragMaskPadding * 2
+                intersection: Intersection.Xor
+
+                regions: regions.instances
+            }
 
             anchors.top: true
             anchors.bottom: true
             anchors.left: true
             anchors.right: true
-
-            Region {
-                id: inputMask
-
-                x: bar.implicitWidth
-                y: Config.border.thickness
-                width: win.width - bar.implicitWidth - Config.border.thickness
-                height: win.height - Config.border.thickness * 2
-                intersection: Intersection.Xor
-
-                regions: regions.instances
-            }
 
             Variants {
                 id: regions

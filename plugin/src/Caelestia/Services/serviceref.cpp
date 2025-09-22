@@ -8,13 +8,7 @@ ServiceRef::ServiceRef(Service* service, QObject* parent)
     : QObject(parent)
     , m_service(service) {
     if (m_service) {
-        m_service->ref();
-    }
-}
-
-ServiceRef::~ServiceRef() {
-    if (m_service) {
-        m_service->unref();
+        m_service->ref(this);
     }
 }
 
@@ -28,14 +22,14 @@ void ServiceRef::setService(Service* service) {
     }
 
     if (m_service) {
-        m_service->unref();
+        m_service->unref(this);
     }
 
     m_service = service;
     emit serviceChanged();
 
     if (m_service) {
-        m_service->ref();
+        m_service->ref(this);
     }
 }
 
