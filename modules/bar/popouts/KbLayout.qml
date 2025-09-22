@@ -27,16 +27,6 @@ Item {
             font.weight: 500
         }
 
-        // Timer to refresh layout after switching
-        Timer {
-            id: refreshTimer
-            interval: 300
-            repeat: false
-            onTriggered: {
-                kbLayoutText.text = qsTr("Keyboard layout: %1").arg(Hypr.kbLayoutFull)
-            }
-        }
-
             // Switch Layout button
             StyledRect {
             Layout.topMargin: Appearance.spacing.small
