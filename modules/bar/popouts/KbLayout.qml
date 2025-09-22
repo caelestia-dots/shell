@@ -1,5 +1,3 @@
-pragma ComponentBehavior: Bound
-
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
@@ -11,7 +9,6 @@ import Quickshell
 
 Item {
     id: root
-    property var wrapper  // not required for standalone popout
 
     implicitWidth: layout.implicitWidth + Appearance.padding.normal * 2
     implicitHeight: layout.implicitHeight + Appearance.padding.normal * 2
