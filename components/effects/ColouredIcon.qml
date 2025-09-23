@@ -8,23 +8,28 @@ IconImage {
     id: root
 
     required property color colour
-    property color dominantColour
 
     asynchronous: true
 
     layer.enabled: true
     layer.effect: Colouriser {
-        sourceColor: root.dominantColour
+        sourceColor: analyser.dominantColour
         colorizationColor: root.colour
     }
 
     layer.onEnabledChanged: {
         if (layer.enabled && status === Image.Ready)
-            CUtils.getDominantColour(this, c => dominantColour = c);
+            analyser.requestUpdate();
     }
 
     onStatusChanged: {
         if (layer.enabled && status === Image.Ready)
-            CUtils.getDominantColour(this, c => dominantColour = c);
+            analyser.requestUpdate();
+    }
+
+    ImageAnalyser {
+        id: analyser
+
+        sourceItem: root
     }
 }

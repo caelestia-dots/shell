@@ -154,7 +154,7 @@ void AppDb::incrementFrequency(const QString& id) {
     query.bindValue(":id", id);
     query.exec();
 
-    for (auto app : m_apps) {
+    for (auto* app : std::as_const(m_apps)) {
         if (app->id() == id) {
             const auto before = apps();
 
@@ -186,7 +186,7 @@ quint32 AppDb::getFrequency(const QString& id) const {
 }
 
 void AppDb::updateAppFrequencies() {
-    for (auto app : m_apps) {
+    for (auto* app : std::as_const(m_apps)) {
         app->setFrequency(getFrequency(app->id()));
     }
 }
@@ -194,7 +194,7 @@ void AppDb::updateAppFrequencies() {
 void AppDb::updateApps() {
     bool dirty = false;
 
-    for (auto entry : m_entries) {
+    for (const auto& entry : std::as_const(m_entries)) {
         const auto id = entry->property("id").toString();
         if (!m_apps.contains(id)) {
             dirty = true;
@@ -203,12 +203,13 @@ void AppDb::updateApps() {
     }
 
     QSet<QString> newIds;
-    for (auto entry : m_entries) {
+    for (const auto& entry : std::as_const(m_entries)) {
         newIds.insert(entry->property("id").toString());
     }
 
     QList<AppEntry*> toDelete;
-    for (auto id : m_apps.keys()) {
+    for (auto it = m_apps.keyBegin(); it != m_apps.keyEnd(); ++it) {
+        const auto& id = *it;
         if (!newIds.contains(id)) {
             dirty = true;
             toDelete << m_apps.take(id);

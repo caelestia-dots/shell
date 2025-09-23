@@ -20,6 +20,16 @@ Singleton {
 
     property bool loaded
 
+    onDndChanged: {
+        if (!Config.utilities.toasts.dndChanged)
+            return;
+
+        if (dnd)
+            Toaster.toast(qsTr("Do not disturb enabled"), qsTr("Popup notifications are now disabled"), "do_not_disturb_on");
+        else
+            Toaster.toast(qsTr("Do not disturb disabled"), qsTr("Popup notifications are now enabled"), "do_not_disturb_off");
+    }
+
     onListChanged: {
         if (loaded)
             saveTimer.restart();

@@ -1,5 +1,7 @@
 pragma Singleton
 
+import qs.config
+import Caelestia
 import Quickshell
 import Quickshell.Io
 import QtQuick
@@ -14,10 +16,15 @@ Singleton {
     }
 
     onEnabledChanged: {
-        if (enabled)
+        if (enabled) {
             setDynamicConfs();
-        else
+            if (Config.utilities.toasts.gameModeChanged)
+                Toaster.toast(qsTr("Game mode enabled"), qsTr("Disabled Hyprland animations, blur, gaps and shadows"), "gamepad");
+        } else {
             Quickshell.execDetached(["hyprctl", "reload"]);
+            if (Config.utilities.toasts.gameModeChanged)
+                Toaster.toast(qsTr("Game mode disabled"), qsTr("Hyprland settings restored"), "gamepad");
+        }
     }
 
     PersistentProperties {
