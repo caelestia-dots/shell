@@ -25,13 +25,19 @@ StyledRect {
 
     property bool internalChecked
     property color activeColour: type === TextButton.Filled ? Colours.palette.m3primary : Colours.palette.m3secondary
-    property color inactiveColour: type === TextButton.Filled ? Colours.tPalette.m3surfaceContainer : Colours.palette.m3secondaryContainer
+    property color inactiveColour: {
+        if (!toggle && type === TextButton.Filled)
+            return Colours.palette.m3primary;
+        return type === TextButton.Filled ? Colours.tPalette.m3surfaceContainer : Colours.palette.m3secondaryContainer;
+    }
     property color activeOnColour: {
         if (type === TextButton.Text)
             return Colours.palette.m3primary;
         return type === TextButton.Filled ? Colours.palette.m3onPrimary : Colours.palette.m3onSecondary;
     }
     property color inactiveOnColour: {
+        if (!toggle && type === TextButton.Filled)
+            return Colours.palette.m3onPrimary;
         if (type === TextButton.Text)
             return Colours.palette.m3primary;
         return type === TextButton.Filled ? Colours.palette.m3onSurface : Colours.palette.m3onSecondaryContainer;
