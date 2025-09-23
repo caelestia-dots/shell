@@ -17,12 +17,39 @@ ColumnLayout {
         font.weight: 500
     }
 
-    TextButton {
-        Layout.bottomMargin: Appearance.padding.normal
-        Layout.rightMargin: Appearance.padding.normal
-        Layout.fillWidth: true
+    StyledRect {
+            Layout.topMargin: Appearance.spacing.small
 
-        text: qsTr("Switch layout")
-        onClicked: Quickshell.execDetached(["hyprctl", "switchxkblayout", "all", "next"])
-    }
+            implicitWidth: expandBtn.implicitWidth + Appearance.padding.normal * 2
+            implicitHeight: expandBtn.implicitHeight + Appearance.padding.small
+
+            Layout.fillWidth: true
+
+            radius: Appearance.rounding.normal
+            color: Colours.palette.m3primaryContainer
+
+            StateLayer {
+                color: Colours.palette.m3onPrimaryContainer
+                onClicked: Quickshell.execDetached(["hyprctl", "switchxkblayout", "all", "next"])
+            }
+
+            RowLayout {
+                id: expandBtn
+
+                anchors.centerIn: parent
+                spacing: Appearance.spacing.small
+
+                MaterialIcon {
+                    Layout.leftMargin: Appearance.padding.smaller
+                    text: "keyboard"
+                    color: Colours.palette.m3onPrimaryContainer
+                    font.pointSize: Appearance.font.size.large
+                }
+
+                StyledText {
+                    text: qsTr("Switch layout")
+                    color: Colours.palette.m3onPrimaryContainer
+                }
+            }
+        }
 }
