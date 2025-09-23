@@ -5,13 +5,13 @@ JsonObject {
     property int maxToasts: 4
 
     property Sizes sizes: Sizes {}
-    property AudioNotifications audioNotifications: AudioNotifications {}
+    property AudioToasts audioToasts: AudioToasts {}
 
     component Sizes: JsonObject {
         property int width: 430
     }
 
-    component AudioNotifications: JsonObject {
+    component AudioToasts: JsonObject {
         property bool enabled: true
         property string outputChangedTitle: "Audio Output Changed"
         property string inputChangedTitle: "Audio Input Changed"

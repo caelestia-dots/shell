@@ -15,7 +15,7 @@ Scope {
         target: Pipewire
 
         function onDefaultAudioSinkChanged(): void {
-            if (!Config.utilities.audioNotifications.enabled) return;
+            if (!Config.utilities.audioToasts.enabled) return;
             
             const sink = Pipewire.defaultAudioSink;
             if (!sink || !sink.ready) return;
@@ -24,11 +24,11 @@ Scope {
             
             if (root.previousSinkName && root.previousSinkName !== newSinkName) {
                 Toaster.toast(
-                    qsTr(Config.utilities.audioNotifications.outputChangedTitle), 
-                    qsTr(Config.utilities.audioNotifications.outputChangedMessage).arg(newSinkName),
-                    Config.utilities.audioNotifications.outputIcon,
+                    qsTr(Config.utilities.audioToasts.outputChangedTitle), 
+                    qsTr(Config.utilities.audioToasts.outputChangedMessage).arg(newSinkName),
+                    Config.utilities.audioToasts.outputIcon,
                     Toast.Info,
-                    Config.utilities.audioNotifications.timeout
+                    Config.utilities.audioToasts.timeout
                 );
             }
             
@@ -40,7 +40,7 @@ Scope {
         target: Pipewire
 
         function onDefaultAudioSourceChanged(): void {
-            if (!Config.utilities.audioNotifications.enabled) return;
+            if (!Config.utilities.audioToasts.enabled) return;
             
             const source = Pipewire.defaultAudioSource;
             if (!source || !source.ready) return;
@@ -49,11 +49,11 @@ Scope {
             
             if (root.previousSourceName && root.previousSourceName !== newSourceName) {
                 Toaster.toast(
-                    qsTr(Config.utilities.audioNotifications.inputChangedTitle), 
-                    qsTr(Config.utilities.audioNotifications.inputChangedMessage).arg(newSourceName),
-                    Config.utilities.audioNotifications.inputIcon,
+                    qsTr(Config.utilities.audioToasts.inputChangedTitle), 
+                    qsTr(Config.utilities.audioToasts.inputChangedMessage).arg(newSourceName),
+                    Config.utilities.audioToasts.inputIcon,
                     Toast.Info,
-                    Config.utilities.audioNotifications.timeout
+                    Config.utilities.audioToasts.timeout
                 );
             }
             
