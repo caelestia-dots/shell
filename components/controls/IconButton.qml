@@ -18,6 +18,7 @@ StyledRect {
     property real padding: type === IconButton.Text ? Appearance.padding.small / 2 : Appearance.padding.smaller
     property alias font: label.font
     property int type: IconButton.Filled
+    property bool disabled
 
     property alias stateLayer: stateLayer
     property alias label: label
@@ -36,13 +37,15 @@ StyledRect {
             return Colours.palette.m3onPrimary;
         return type === IconButton.Tonal ? Colours.palette.m3onSecondaryContainer : Colours.palette.m3onSurfaceVariant;
     }
+    property color disabledColour: Qt.alpha(Colours.palette.m3onSurface, 0.1)
+    property color disabledOnColour: Qt.alpha(Colours.palette.m3onSurface, 0.38)
 
     signal clicked
 
     onCheckedChanged: internalChecked = checked
 
     radius: internalChecked ? Appearance.rounding.small : implicitHeight / 2
-    color: type === IconButton.Text ? "transparent" : internalChecked ? activeColour : inactiveColour
+    color: type === IconButton.Text ? "transparent" : disabled ? disabledColour : internalChecked ? activeColour : inactiveColour
 
     implicitWidth: implicitHeight
     implicitHeight: label.implicitHeight + padding * 2
@@ -51,6 +54,7 @@ StyledRect {
         id: stateLayer
 
         color: root.internalChecked ? root.activeOnColour : root.inactiveOnColour
+        disabled: root.disabled
 
         function onClicked(): void {
             if (root.toggle)
@@ -63,7 +67,7 @@ StyledRect {
         id: label
 
         anchors.centerIn: parent
-        color: root.internalChecked ? root.activeOnColour : root.inactiveOnColour
+        color: root.disabled ? root.disabledOnColour : root.internalChecked ? root.activeOnColour : root.inactiveOnColour
         fill: !root.toggle || root.internalChecked ? 1 : 0
 
         Behavior on fill {

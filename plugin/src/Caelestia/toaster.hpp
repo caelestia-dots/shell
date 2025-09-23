@@ -69,7 +69,7 @@ public:
     [[nodiscard]] QList<Toast*> toasts() const;
 
     Q_INVOKABLE void toast(const QString& title, const QString& message, const QString& icon = QString(),
-        Toast::Type type = Toast::Type::Info, int timeout = 5000);
+        caelestia::Toast::Type type = Toast::Type::Info, int timeout = 5000);
 
 signals:
     void toastsChanged();

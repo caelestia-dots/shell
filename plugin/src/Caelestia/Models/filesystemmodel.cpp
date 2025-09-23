@@ -64,6 +64,14 @@ QString FileSystemEntry::mimeType() const {
     return m_mimeType;
 }
 
+void FileSystemEntry::updateRelativePath(const QDir& dir) {
+    const auto relPath = dir.relativeFilePath(m_path);
+    if (m_relativePath != relPath) {
+        m_relativePath = relPath;
+        emit relativePathChanged();
+    }
+}
+
 FileSystemModel::FileSystemModel(QObject* parent)
     : QAbstractListModel(parent)
     , m_recursive(false)
@@ -105,6 +113,11 @@ void FileSystemModel::setPath(const QString& path) {
     emit pathChanged();
 
     m_dir.setPath(m_path);
+
+    for (const auto& entry : std::as_const(m_entries)) {
+        entry->updateRelativePath(m_dir);
+    }
+
     update();
 }
 
@@ -253,11 +266,14 @@ void FileSystemModel::updateWatcher() {
 void FileSystemModel::updateEntries() {
     if (m_path.isEmpty()) {
         if (!m_entries.isEmpty()) {
+            auto toDelete = m_entries;
+
             beginResetModel();
-            qDeleteAll(m_entries);
             m_entries.clear();
-            emit entriesChanged();
             endResetModel();
+            emit entriesChanged();
+
+            qDeleteAll(toDelete);
         }
 
         return;
@@ -276,10 +292,9 @@ void FileSystemModel::updateEntriesForDir(const QString& dir) {
     const auto showHidden = m_showHidden;
     const auto filter = m_filter;
     const auto nameFilters = m_nameFilters;
-    const auto baseDir = m_dir;
 
     QSet<QString> oldPaths;
-    for (const auto& entry : m_entries) {
+    for (const auto& entry : std::as_const(m_entries)) {
         oldPaths << entry->path();
     }
 
@@ -290,7 +305,8 @@ void FileSystemModel::updateEntriesForDir(const QString& dir) {
 
         if (filter == Images) {
             QStringList extraNameFilters = nameFilters;
-            for (const auto& format : QImageReader::supportedImageFormats()) {
+            const auto formats = QImageReader::supportedImageFormats();
+            for (const auto& format : formats) {
                 extraNameFilters << "*." + format;
             }
 
@@ -384,7 +400,7 @@ void FileSystemModel::applyChanges(const QSet<QString>& removedPaths, const QSet
 
     int start = -1;
     int end = -1;
-    for (int idx : removedIndices) {
+    for (int idx : std::as_const(removedIndices)) {
         if (start == -1) {
             start = idx;
             end = idx;
@@ -422,7 +438,7 @@ void FileSystemModel::applyChanges(const QSet<QString>& removedPaths, const QSet
     int insertStart = -1;
     int prevRow = -1;
     QList<FileSystemEntry*> batchItems;
-    for (const auto& entry : newEntries) {
+    for (const auto& entry : std::as_const(newEntries)) {
         const auto it = std::lower_bound(
             m_entries.begin(), m_entries.end(), entry, [this](const FileSystemEntry* a, const FileSystemEntry* b) {
                 return compareEntries(a, b);

@@ -40,7 +40,8 @@ Singleton {
         onLoaded: {
             try {
                 JSON.parse(text());
-                Toaster.toast(qsTr("Config loaded"), qsTr("Config loaded in %1ms").arg(timer.elapsedMs()), "rule_settings");
+                if (adapter.utilities.toasts.configLoaded)
+                    Toaster.toast(qsTr("Config loaded"), qsTr("Config loaded in %1ms").arg(timer.elapsedMs()), "rule_settings");
             } catch (e) {
                 Toaster.toast(qsTr("Failed to load config"), e.message, "settings_alert", Toast.Error);
             }

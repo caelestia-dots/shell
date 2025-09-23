@@ -45,6 +45,7 @@ qml_module(caelestia
         appdb.hpp appdb.cpp
         requests.hpp requests.cpp
         toaster.hpp toaster.cpp
+        imageanalyser.hpp imageanalyser.cpp
     LIBRARIES
         Qt::Gui
         Qt::Quick

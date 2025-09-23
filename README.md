@@ -279,9 +279,21 @@ default, you must create it manually.
         },
         "idle": {
             "inhibitWhenAudio": true,
-            "lockTimeout": 180,
-            "dpmsTimeout": 300,
-            "sleepTimeout": 600
+            "timeouts": [
+                {
+                    "timeout": 180,
+                    "idleAction": "lock"
+                },
+                {
+                    "timeout": 300,
+                    "idleAction": "dpms off",
+                    "returnAction": "dpms on"
+                },
+                {
+                    "timeout": 600,
+                    "idleAction": ["systemctl", "suspend-then-hibernate"]
+                }
+            ]
         }
     },
     "background": {
@@ -555,7 +567,17 @@ default, you must create it manually.
     },
     "utilities": {
         "enabled": true,
-        "maxToasts": 4
+        "maxToasts": 4,
+        "toasts": {
+            "audioInputChanged": true,
+            "audioOutputChanged": true,
+            "capsLockChanged": true,
+            "chargingChanged": true,
+            "configLoaded": true,
+            "dndChanged": true,
+            "gameModeChanged": true,
+            "numLockChanged": true
+        }
     }
 }
 ```

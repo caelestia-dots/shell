@@ -16,15 +16,21 @@ Row {
     property real verticalPadding: Appearance.padding.smaller
     property int type: SplitButton.Filled
     property bool disabled
+    property string fallbackIcon
+    property string fallbackText
+
     property alias menuItems: menu.items
     property alias active: menu.active
     property alias expanded: menu.expanded
     property alias menu: menu
+    property alias iconLabel: iconLabel
+    property alias label: label
+    property alias stateLayer: stateLayer
 
     property color colour: type == SplitButton.Filled ? Colours.palette.m3primary : Colours.palette.m3secondaryContainer
     property color textColour: type == SplitButton.Filled ? Colours.palette.m3onPrimary : Colours.palette.m3onSecondaryContainer
-    readonly property color disabledColour: Qt.alpha(Colours.palette.m3onSurface, 0.1)
-    readonly property color disabledTextColour: Qt.alpha(Colours.palette.m3onSurface, 0.38)
+    property color disabledColour: Qt.alpha(Colours.palette.m3onSurface, 0.1)
+    property color disabledTextColour: Qt.alpha(Colours.palette.m3onSurface, 0.38)
 
     spacing: Math.floor(Appearance.spacing.small / 2)
 
@@ -62,7 +68,7 @@ Row {
 
                 Layout.alignment: Qt.AlignVCenter
                 animate: true
-                text: root.active?.activeIcon ?? ""
+                text: root.active?.activeIcon ?? root.fallbackIcon
                 color: root.disabled ? root.disabledTextColour : root.textColour
                 fill: 1
             }
@@ -73,7 +79,7 @@ Row {
                 Layout.alignment: Qt.AlignVCenter
                 Layout.preferredWidth: implicitWidth
                 animate: true
-                text: root.active?.activeText ?? ""
+                text: root.active?.activeText ?? root.fallbackText
                 color: root.disabled ? root.disabledTextColour : root.textColour
                 clip: true
 
