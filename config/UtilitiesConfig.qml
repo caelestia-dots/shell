@@ -12,13 +12,8 @@ JsonObject {
     }
 
     component AudioToasts: JsonObject {
-        property bool enabled: true
-        property string outputChangedTitle: "Audio Output Changed"
-        property string inputChangedTitle: "Audio Input Changed"
-        property string outputChangedMessage: "Now using: %1"
-        property string inputChangedMessage: "Now using: %1"
-        property string outputIcon: "volume_up"
-        property string inputIcon: "mic"
+        property bool outputEnabled: true
+        property bool inputEnabled: true
         property int timeout: 3000
     }
 }

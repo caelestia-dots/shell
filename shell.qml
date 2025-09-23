@@ -19,7 +19,6 @@ ShellRoot {
 
     Shortcuts {}
     BatteryMonitor {}
-    AudioDeviceMonitor {}
     IdleMonitors {
         lock: lock
     }

@@ -2,11 +2,16 @@ pragma Singleton
 
 import qs.config
 import Caelestia.Services
+import Caelestia
 import Quickshell
 import Quickshell.Services.Pipewire
+import QtQuick
 
 Singleton {
     id: root
+
+    property string previousSinkName: ""
+    property string previousSourceName: ""
 
     readonly property var nodes: Pipewire.nodes.values.reduce((acc, node) => {
         if (!node.isStream) {
@@ -86,5 +91,64 @@ Singleton {
 
     BeatTracker {
         id: beatTracker
+    }
+
+    Connections {
+        target: Pipewire
+
+        function onDefaultAudioSinkChanged(): void {
+            if (!Config.utilities.audioToasts.outputEnabled) return;
+            
+            const sink = Pipewire.defaultAudioSink;
+            if (!sink || !sink.ready) return;
+
+            const newSinkName = sink.description || sink.name || "Unknown Device";
+            
+            if (root.previousSinkName && root.previousSinkName !== newSinkName) {
+                Toaster.toast(
+                    qsTr("Audio Output Changed"), 
+                    qsTr("Now using: %1").arg(newSinkName),
+                    "volume_up",
+                    Toast.Info,
+                    Config.utilities.audioToasts.timeout
+                );
+            }
+            
+            root.previousSinkName = newSinkName;
+        }
+    }
+
+    Connections {
+        target: Pipewire
+
+        function onDefaultAudioSourceChanged(): void {
+            if (!Config.utilities.audioToasts.inputEnabled) return;
+            
+            const source = Pipewire.defaultAudioSource;
+            if (!source || !source.ready) return;
+
+            const newSourceName = source.description || source.name || "Unknown Device";
+            
+            if (root.previousSourceName && root.previousSourceName !== newSourceName) {
+                Toaster.toast(
+                    qsTr("Audio Input Changed"), 
+                    qsTr("Now using: %1").arg(newSourceName),
+                    "mic",
+                    Toast.Info,
+                    Config.utilities.audioToasts.timeout
+                );
+            }
+            
+            root.previousSourceName = newSourceName;
+        }
+    }
+
+    Component.onCompleted: {
+        if (Pipewire.defaultAudioSink && Pipewire.defaultAudioSink.ready) {
+            root.previousSinkName = Pipewire.defaultAudioSink.description || Pipewire.defaultAudioSink.name || "Unknown Device";
+        }
+        if (Pipewire.defaultAudioSource && Pipewire.defaultAudioSource.ready) {
+            root.previousSourceName = Pipewire.defaultAudioSource.description || Pipewire.defaultAudioSource.name || "Unknown Device";
+        }
     }
 }
