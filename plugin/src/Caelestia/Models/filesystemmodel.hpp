@@ -17,7 +17,7 @@ class FileSystemEntry : public QObject {
     QML_UNCREATABLE("FileSystemEntry instances can only be retrieved from a FileSystemModel")
 
     Q_PROPERTY(QString path READ path CONSTANT)
-    Q_PROPERTY(QString relativePath READ relativePath CONSTANT)
+    Q_PROPERTY(QString relativePath READ relativePath NOTIFY relativePathChanged)
     Q_PROPERTY(QString name READ name CONSTANT)
     Q_PROPERTY(QString baseName READ baseName CONSTANT)
     Q_PROPERTY(QString parentDir READ parentDir CONSTANT)
@@ -41,11 +41,16 @@ public:
     [[nodiscard]] bool isImage() const;
     [[nodiscard]] QString mimeType() const;
 
+    void updateRelativePath(const QDir& dir);
+
+signals:
+    void relativePathChanged();
+
 private:
     const QFileInfo m_fileInfo;
 
     const QString m_path;
-    const QString m_relativePath;
+    QString m_relativePath;
 
     mutable bool m_isImage;
     mutable bool m_isImageInitialised;

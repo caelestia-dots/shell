@@ -64,6 +64,14 @@ QString FileSystemEntry::mimeType() const {
     return m_mimeType;
 }
 
+void FileSystemEntry::updateRelativePath(const QDir& dir) {
+    const auto relPath = dir.relativeFilePath(m_path);
+    if (m_relativePath != relPath) {
+        m_relativePath = relPath;
+        emit relativePathChanged();
+    }
+}
+
 FileSystemModel::FileSystemModel(QObject* parent)
     : QAbstractListModel(parent)
     , m_recursive(false)
@@ -105,6 +113,11 @@ void FileSystemModel::setPath(const QString& path) {
     emit pathChanged();
 
     m_dir.setPath(m_path);
+
+    for (const auto& entry : m_entries) {
+        entry->updateRelativePath(m_dir);
+    }
+
     update();
 }
 
@@ -253,11 +266,14 @@ void FileSystemModel::updateWatcher() {
 void FileSystemModel::updateEntries() {
     if (m_path.isEmpty()) {
         if (!m_entries.isEmpty()) {
+            auto toDelete = m_entries;
+
             beginResetModel();
-            qDeleteAll(m_entries);
             m_entries.clear();
-            emit entriesChanged();
             endResetModel();
+            emit entriesChanged();
+
+            qDeleteAll(toDelete);
         }
 
         return;

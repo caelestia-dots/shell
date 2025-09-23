@@ -14,9 +14,21 @@ JsonObject {
 
     component Idle: JsonObject {
         property bool inhibitWhenAudio: true
-        property real lockTimeout: 180 // 3 mins
-        property real dpmsTimeout: 300 // 5 mins
-        property real sleepTimeout: 600 // 10 mins
+        property list<var> timeouts: [
+            {
+                timeout: 180,
+                idleAction: "lock"
+            },
+            {
+                timeout: 300,
+                idleAction: "dpms off",
+                returnAction: "dpms on"
+            },
+            {
+                timeout: 600,
+                idleAction: ["systemctl", "suspend-then-hibernate"]
+            }
+        ]
     }
 
     component Battery: JsonObject {
