@@ -4,6 +4,8 @@ import Quickshell
 import Quickshell.Io
 import QtQuick
 import qs.config
+import Caelestia.Services
+import Caelestia
 
 Singleton {
     id: root
@@ -13,15 +15,26 @@ Singleton {
     readonly property bool connecting: connectProc.running || disconnectProc.running
     readonly property bool enabled: Config.utilities.vpn.enabled
 
+    onConnectedChanged: {
+        if (!Config.utilities.toasts.vpnChanged)
+            return;
+
+        if (connected) {
+            Toaster.toast(qsTr("VPN connected"), qsTr("Connected to %1").arg(connectionName), "vpn_key");
+        } else {
+            Toaster.toast(qsTr("VPN disconnected"), qsTr("Disconnected from %1").arg(connectionName), "vpn_key_off");
+        }
+    }
+
     function connect(): void {
         if (!connected && !connecting) {
-            connectProc.exec(["sudo", "wg-quick", "up", connectionName]);
+            connectProc.exec(["wg-quick", "up", connectionName]);
         }
     }
 
     function disconnect(): void {
         if (connected && !connecting) {
-            disconnectProc.exec(["sudo", "wg-quick", "down", connectionName]);
+            disconnectProc.exec(["wg-quick", "down", connectionName]);
         }
     }
 
@@ -37,10 +50,22 @@ Singleton {
         statusProc.running = true;
     }
 
+    // Monitor NetworkManager for connection state changes
+    Process {
+        id: nmMonitor
+        
+        running: true
+        command: ["nmcli", "monitor"]
+        stdout: SplitParser {
+            onRead: {
+                statusCheckTimer.restart();
+            }
+        }
+    }
+
     Process {
         id: statusProc
 
-        running: true
         command: ["sudo", "wg", "show", connectionName]
         stdout: StdioCollector {
             onStreamFinished: {
@@ -60,7 +85,7 @@ Singleton {
         id: connectProc
 
         onExited: {
-            statusTimer.start();
+            statusCheckTimer.start();
         }
         stderr: StdioCollector {
             onStreamFinished: {
@@ -77,7 +102,7 @@ Singleton {
         id: disconnectProc
 
         onExited: {
-            statusTimer.start();
+            statusCheckTimer.start();
         }
         stderr: StdioCollector {
             onStreamFinished: {
@@ -89,15 +114,12 @@ Singleton {
     }
 
     Timer {
-        id: statusTimer
-        interval: 1000
+        id: statusCheckTimer
+        interval: 500
         onTriggered: root.checkStatus()
     }
 
-    Timer {
-        running: true
-        repeat: true
-        interval: 30000
-        onTriggered: root.checkStatus()
+    Component.onCompleted: {
+        statusCheckTimer.start();
     }
 }
