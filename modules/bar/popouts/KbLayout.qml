@@ -30,7 +30,7 @@ ColumnLayout {
 
             StateLayer {
                 color: Colours.palette.m3onPrimaryContainer
-                onClicked: Quickshell.execDetached(["hyprctl", "switchxkblayout", "all", "next"])
+                onClicked: Hypr.extras.message("switchxkblayout all next")
             }
 
             RowLayout {

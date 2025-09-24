@@ -5,7 +5,6 @@ import qs.services
 import qs.config
 import Caelestia
 import Quickshell
-import Quickshell.Io
 import Quickshell.Wayland
 import QtQuick
 import QtQuick.Effects
@@ -16,13 +15,10 @@ MouseArea {
     required property LazyLoader loader
     required property ShellScreen screen
 
-    property int borderWidth
-    property int rounding
-
     property bool onClient
 
-    property real realBorderWidth: onClient ? borderWidth : 2
-    property real realRounding: onClient ? rounding : 0
+    property real realBorderWidth: onClient ? (Hypr.options["general:border_size"] ?? 1) : 2
+    property real realRounding: onClient ? (Hypr.options["decoration:rounding"] ?? 0) : 0
 
     property real ssx
     property real ssy
@@ -89,6 +85,8 @@ MouseArea {
     cursorShape: Qt.CrossCursor
 
     Component.onCompleted: {
+        Hypr.extras.refreshOptions();
+
         // Break binding if frozen
         if (loader.freeze)
             clients = clients;
@@ -183,22 +181,6 @@ MouseArea {
             target: root.loader
             property: "activeAsync"
             value: false
-        }
-    }
-
-    Process {
-        running: true
-        command: ["hyprctl", "-j", "getoption", "general:border_size"]
-        stdout: StdioCollector {
-            onStreamFinished: root.borderWidth = JSON.parse(text).int
-        }
-    }
-
-    Process {
-        running: true
-        command: ["hyprctl", "-j", "getoption", "decoration:rounding"]
-        stdout: StdioCollector {
-            onStreamFinished: root.rounding = JSON.parse(text).int
         }
     }
 
