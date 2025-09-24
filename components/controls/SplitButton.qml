@@ -16,6 +16,7 @@ Row {
     property real verticalPadding: Appearance.padding.smaller
     property int type: SplitButton.Filled
     property bool disabled
+    property bool menuOnTop
     property string fallbackIcon
     property string fallbackText
 
@@ -144,9 +145,20 @@ Row {
         Menu {
             id: menu
 
+            states: State {
+                when: root.menuOnTop
+
+                AnchorChanges {
+                    target: menu
+                    anchors.top: undefined
+                    anchors.bottom: expandBtn.top
+                }
+            }
+
             anchors.top: parent.bottom
             anchors.right: parent.right
             anchors.topMargin: Appearance.spacing.small
+            anchors.bottomMargin: Appearance.spacing.small
         }
     }
 }

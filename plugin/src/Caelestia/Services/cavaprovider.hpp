@@ -4,7 +4,7 @@
 #include <cava/cavacore.h>
 #include <qqmlintegration.h>
 
-namespace caelestia {
+namespace caelestia::services {
 
 class CavaProcessor : public AudioProcessor {
     Q_OBJECT
@@ -61,4 +61,4 @@ private:
     void updateValues(QVector<double> values);
 };
 
-} // namespace caelestia
+} // namespace caelestia::services

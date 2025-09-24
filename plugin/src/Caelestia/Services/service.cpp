@@ -3,7 +3,7 @@
 #include <qdebug.h>
 #include <qpointer.h>
 
-namespace caelestia {
+namespace caelestia::services {
 
 Service::Service(QObject* parent)
     : QObject(parent) {}
@@ -23,4 +23,4 @@ void Service::unref(QObject* sender) {
     }
 }
 
-} // namespace caelestia
+} // namespace caelestia::services

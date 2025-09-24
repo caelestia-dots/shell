@@ -10,7 +10,7 @@
 #include <stop_token>
 #include <vector>
 
-namespace caelestia {
+namespace caelestia::services {
 
 PipeWireWorker::PipeWireWorker(std::stop_token token, AudioCollector* collector)
     : m_loop(nullptr)
@@ -243,4 +243,4 @@ void AudioCollector::stop() {
     }
 }
 
-} // namespace caelestia
+} // namespace caelestia::services

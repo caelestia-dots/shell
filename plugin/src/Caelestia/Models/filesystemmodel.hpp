@@ -9,7 +9,7 @@
 #include <qobject.h>
 #include <qqmlintegration.h>
 
-namespace caelestia {
+namespace caelestia::models {
 
 class FileSystemEntry : public QObject {
     Q_OBJECT
@@ -121,9 +121,6 @@ signals:
     void nameFiltersChanged();
     void entriesChanged();
 
-    void added(const caelestia::FileSystemEntry* entry);
-    void removed(const QString& path);
-
 private:
     QDir m_dir;
     QFileSystemWatcher m_watcher;
@@ -147,4 +144,4 @@ private:
     [[nodiscard]] bool compareEntries(const FileSystemEntry* a, const FileSystemEntry* b) const;
 };
 
-} // namespace caelestia
+} // namespace caelestia::models

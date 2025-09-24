@@ -334,9 +334,7 @@ Item {
                 label.elide: Text.ElideRight
 
                 stateLayer.disabled: true
-                menu.anchors.top: undefined
-                menu.anchors.bottom: menu.parent.top
-                menu.anchors.bottomMargin: Appearance.spacing.small
+                menuOnTop: true
 
                 Variants {
                     id: playerList

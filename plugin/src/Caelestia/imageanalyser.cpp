@@ -26,7 +26,7 @@ ImageAnalyser::ImageAnalyser(QObject* parent)
             m_dominantColour = result.first;
             emit dominantColourChanged();
         }
-        if (qFuzzyCompare(m_luminance + 1.0, result.second + 1.0)) {
+        if (!qFuzzyCompare(m_luminance + 1.0, result.second + 1.0)) {
             m_luminance = result.second;
             emit luminanceChanged();
         }

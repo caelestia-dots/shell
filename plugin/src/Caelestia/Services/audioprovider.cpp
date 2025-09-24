@@ -5,7 +5,7 @@
 #include <qdebug.h>
 #include <qthread.h>
 
-namespace caelestia {
+namespace caelestia::services {
 
 AudioProcessor::AudioProcessor(QObject* parent)
     : QObject(parent) {}
@@ -75,4 +75,4 @@ void AudioProvider::stop() {
     }
 }
 
-} // namespace caelestia
+} // namespace caelestia::services

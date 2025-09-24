@@ -9,7 +9,7 @@
 #include <qpainter.h>
 #include <qtconcurrentrun.h>
 
-namespace caelestia {
+namespace caelestia::internal {
 
 qreal CachingImageManager::effectiveScale() const {
     if (m_item && m_item->window()) {
@@ -220,4 +220,4 @@ QString CachingImageManager::sha256sum(const QString& path) {
     return hash.result().toHex();
 }
 
-} // namespace caelestia
+} // namespace caelestia::internal

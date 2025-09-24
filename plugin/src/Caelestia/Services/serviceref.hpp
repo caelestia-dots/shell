@@ -4,7 +4,7 @@
 #include <qpointer.h>
 #include <qqmlintegration.h>
 
-namespace caelestia {
+namespace caelestia::services {
 
 class ServiceRef : public QObject {
     Q_OBJECT
@@ -25,4 +25,4 @@ private:
     QPointer<Service> m_service;
 };
 
-} // namespace caelestia
+} // namespace caelestia::services

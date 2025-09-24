@@ -3,7 +3,7 @@
 #include <qobject.h>
 #include <qset.h>
 
-namespace caelestia {
+namespace caelestia::services {
 
 class Service : public QObject {
     Q_OBJECT
@@ -21,4 +21,4 @@ private:
     virtual void stop() = 0;
 };
 
-} // namespace caelestia
+} // namespace caelestia::services
