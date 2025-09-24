@@ -138,6 +138,17 @@ Singleton {
         }
     }
 
+    Connections {
+        target: Hypr
+
+        function onKbLayoutFullChanged() {
+            if (!Config.utilities.toasts.keyboardLayoutChanged)
+                return;
+
+            Toaster.toast(qsTr("Keyboard layout changed"), qsTr("New layout: %1").arg(Hypr.kbLayoutFull), "keyboard");
+        }
+    }
+
     component Notif: QtObject {
         id: notif
 
