@@ -252,6 +252,8 @@ default, you must create it manually.
         "apps": {
             "terminal": ["foot"],
             "audio": ["pavucontrol"]
+            "playback": ["mpv"],
+            "explorer": ["thunar"]
         },
         "battery": {
             "warnLevels": [
