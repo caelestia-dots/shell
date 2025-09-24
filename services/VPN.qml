@@ -28,13 +28,13 @@ Singleton {
 
     function connect(): void {
         if (!connected && !connecting) {
-            connectProc.exec(["wg-quick", "up", connectionName]);
+            connectProc.exec(["pkexec", "wg-quick", "up", connectionName]);
         }
     }
 
     function disconnect(): void {
         if (connected && !connecting) {
-            disconnectProc.exec(["wg-quick", "down", connectionName]);
+            disconnectProc.exec(["pkexec", "wg-quick", "down", connectionName]);
         }
     }
 
@@ -47,51 +47,48 @@ Singleton {
     }
 
     function checkStatus(): void {
-        statusProc.running = true;
+        if (enabled) {
+            statusProc.running = true;
+        }
     }
 
-    // Monitor NetworkManager for connection state changes
     Process {
         id: nmMonitor
-        
-        running: true
+        running: enabled
         command: ["nmcli", "monitor"]
         stdout: SplitParser {
-            onRead: {
-                statusCheckTimer.restart();
-            }
+            onRead: statusCheckTimer.restart()
         }
     }
 
     Process {
         id: statusProc
 
-        command: ["sudo", "wg", "show", connectionName]
+        command: ["nmcli", "-g", "NAME,DEVICE", "connection", "show", "--active"]
+        environment: ({
+            LANG: "C.UTF-8",
+            LC_ALL: "C.UTF-8"
+        })
         stdout: StdioCollector {
             onStreamFinished: {
-                root.connected = text.trim().length > 0;
-            }
-        }
-        stderr: StdioCollector {
-            onStreamFinished: {
-                if (text.trim().length > 0) {
-                    root.connected = false;
-                }
+                const lines = text.trim().split("\n");
+                root.connected = lines.some(line => {
+                    const [name, device] = line.split(":");
+                    return name === connectionName && device && device !== "--";
+                });
             }
         }
     }
 
     Process {
         id: connectProc
-
-        onExited: {
-            statusCheckTimer.start();
-        }
+        onExited: statusCheckTimer.start()
         stderr: StdioCollector {
             onStreamFinished: {
-                if (text.trim().length > 0 && !text.includes("[#]") && !text.includes("already exists")) {
-                    console.warn("VPN connection error:", text);
-                } else if (text.includes("already exists")) {
+                const error = text.trim();
+                if (error && !error.includes("[#]") && !error.includes("already exists")) {
+                    console.warn("VPN connection error:", error);
+                } else if (error.includes("already exists")) {
                     root.connected = true;
                 }
             }
@@ -100,14 +97,12 @@ Singleton {
 
     Process {
         id: disconnectProc
-
-        onExited: {
-            statusCheckTimer.start();
-        }
+        onExited: statusCheckTimer.start()
         stderr: StdioCollector {
             onStreamFinished: {
-                if (text.trim().length > 0 && !text.includes("[#]")) {
-                    console.warn("VPN disconnection error:", text);
+                const error = text.trim();
+                if (error && !error.includes("[#]")) {
+                    console.warn("VPN disconnection error:", error);
                 }
             }
         }
@@ -119,7 +114,5 @@ Singleton {
         onTriggered: root.checkStatus()
     }
 
-    Component.onCompleted: {
-        statusCheckTimer.start();
-    }
+    Component.onCompleted: enabled && statusCheckTimer.start()
 }
