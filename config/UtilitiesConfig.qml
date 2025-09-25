@@ -10,6 +10,7 @@ JsonObject {
 
     component Sizes: JsonObject {
         property int width: 430
+        property int toastWidth: 430
     }
 
     component Toasts: JsonObject {
