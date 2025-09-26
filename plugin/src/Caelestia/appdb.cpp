@@ -17,8 +17,13 @@ AppEntry::AppEntry(QObject* entry, unsigned int frequency, QObject* parent)
         { "name", "comment", "execString", "startupClass", "genericName", "categories", "keywords" }) {
         const auto metaProp = mo->property(mo->indexOfProperty(prop));
         const auto thisMetaProp = tmo->property(tmo->indexOfProperty(prop));
-        connect(m_entry, metaProp.notifySignal(), this, thisMetaProp.notifySignal());
+        QObject::connect(m_entry, metaProp.notifySignal(), this, thisMetaProp.notifySignal());
     }
+
+    QObject::connect(m_entry, &QObject::destroyed, this, [this]() {
+        m_entry = nullptr;
+        deleteLater();
+    });
 }
 
 QObject* AppEntry::entry() const {
@@ -42,34 +47,58 @@ void AppEntry::incrementFrequency() {
 }
 
 QString AppEntry::id() const {
+    if (!m_entry) {
+        return "";
+    }
     return m_entry->property("id").toString();
 }
 
 QString AppEntry::name() const {
+    if (!m_entry) {
+        return "";
+    }
     return m_entry->property("name").toString();
 }
 
 QString AppEntry::comment() const {
+    if (!m_entry) {
+        return "";
+    }
     return m_entry->property("comment").toString();
 }
 
 QString AppEntry::execString() const {
+    if (!m_entry) {
+        return "";
+    }
     return m_entry->property("execString").toString();
 }
 
 QString AppEntry::startupClass() const {
+    if (!m_entry) {
+        return "";
+    }
     return m_entry->property("startupClass").toString();
 }
 
 QString AppEntry::genericName() const {
+    if (!m_entry) {
+        return "";
+    }
     return m_entry->property("genericName").toString();
 }
 
 QString AppEntry::categories() const {
+    if (!m_entry) {
+        return "";
+    }
     return m_entry->property("categories").toStringList().join(" ");
 }
 
 QString AppEntry::keywords() const {
+    if (!m_entry) {
+        return "";
+    }
     return m_entry->property("keywords").toStringList().join(" ");
 }
 
@@ -79,7 +108,7 @@ AppDb::AppDb(QObject* parent)
     , m_uuid(QUuid::createUuid().toString()) {
     m_timer->setSingleShot(true);
     m_timer->setInterval(300);
-    connect(m_timer, &QTimer::timeout, this, &AppDb::updateApps);
+    QObject::connect(m_timer, &QTimer::timeout, this, &AppDb::updateApps);
 
     auto db = QSqlDatabase::addDatabase("QSQLITE", m_uuid);
     db.setDatabaseName(":memory:");
@@ -198,7 +227,13 @@ void AppDb::updateApps() {
         const auto id = entry->property("id").toString();
         if (!m_apps.contains(id)) {
             dirty = true;
-            m_apps.insert(id, new AppEntry(entry, getFrequency(id), this));
+            auto* const newEntry = new AppEntry(entry, getFrequency(id), this);
+            QObject::connect(newEntry, &QObject::destroyed, this, [id, this]() {
+                if (m_apps.remove(id)) {
+                    emit appsChanged();
+                }
+            });
+            m_apps.insert(id, newEntry);
         }
     }
 

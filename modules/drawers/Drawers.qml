@@ -96,6 +96,7 @@ Variants {
                     visibilities.sidebar = false;
                     visibilities.dashboard = false;
                     panels.popouts.hasCurrent = false;
+                    bar.closeTray();
                 }
             }
 

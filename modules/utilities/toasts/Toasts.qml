@@ -5,7 +5,6 @@ import qs.config
 import Caelestia
 import Quickshell
 import QtQuick
-import QtQuick.Layouts
 
 Item {
     id: root
@@ -13,7 +12,7 @@ Item {
     readonly property int spacing: Appearance.spacing.small
     property bool flag
 
-    implicitWidth: Config.utilities.sizes.width - Appearance.padding.normal * 2
+    implicitWidth: Config.utilities.sizes.toastWidth - Appearance.padding.normal * 2
     implicitHeight: {
         let h = -spacing;
         for (let i = 0; i < repeater.count; i++) {

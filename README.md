@@ -251,7 +251,9 @@ default, you must create it manually.
     "general": {
         "apps": {
             "terminal": ["foot"],
-            "audio": ["pavucontrol"]
+            "audio": ["pavucontrol"],
+            "playback": ["mpv"],
+            "explorer": ["thunar"]
         },
         "battery": {
             "warnLevels": [
@@ -278,6 +280,7 @@ default, you must create it manually.
             "criticalLevel": 3
         },
         "idle": {
+            "lockBeforeSleep": true,
             "inhibitWhenAudio": true,
             "timeouts": [
                 {
@@ -369,6 +372,7 @@ default, you must create it manually.
         },
         "tray": {
             "background": false,
+            "compact": false,
             "iconSubs": [],
             "recolour": false
         },

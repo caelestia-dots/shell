@@ -22,7 +22,7 @@ Item {
 
     visible: height > 0
     implicitHeight: 0
-    implicitWidth: Math.max(sidebar.width, Config.utilities.sizes.width)
+    implicitWidth: sidebar.visible ? sidebar.width : Config.utilities.sizes.width
 
     onStateChanged: {
         if (state === "visible" && timer.running) {
@@ -86,7 +86,7 @@ Item {
         active: true
 
         sourceComponent: Content {
-            implicitWidth: Config.utilities.sizes.width - Appearance.padding.large * 2
+            implicitWidth: root.implicitWidth - Appearance.padding.large * 2
             props: root.props
             visibilities: root.visibilities
         }

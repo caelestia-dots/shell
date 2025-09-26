@@ -1,3 +1,5 @@
+pragma ComponentBehavior: Bound
+
 import qs.components
 import qs.services
 import qs.config
@@ -7,13 +9,26 @@ import QtQuick
 StyledRect {
     id: root
 
+    readonly property alias layout: layout
     readonly property alias items: items
+    readonly property alias expandIcon: expandIcon
+
+    readonly property int padding: Config.bar.tray.background ? Appearance.padding.normal : Appearance.padding.small
+    readonly property int spacing: Config.bar.tray.background ? Appearance.spacing.small : 0
+
+    property bool expanded
+
+    readonly property real nonAnimHeight: {
+        if (!Config.bar.tray.compact)
+            return layout.implicitHeight + padding * 2;
+        return (expanded ? expandIcon.implicitHeight + layout.implicitHeight + spacing : expandIcon.implicitHeight) + padding * 2;
+    }
 
     clip: true
-    visible: width > 0 && height > 0 // To avoid warnings about being visible with no size
+    visible: height > 0
 
     implicitWidth: Config.bar.sizes.innerWidth
-    implicitHeight: layout.implicitHeight + (Config.bar.tray.background ? Appearance.padding.normal : Appearance.padding.small) * 2
+    implicitHeight: nonAnimHeight
 
     color: Qt.alpha(Colours.tPalette.m3surfaceContainer, Config.bar.tray.background ? Colours.tPalette.m3surfaceContainer.a : 0)
     radius: Appearance.rounding.full
@@ -21,8 +36,12 @@ StyledRect {
     Column {
         id: layout
 
-        anchors.centerIn: parent
+        anchors.horizontalCenter: parent.horizontalCenter
+        anchors.top: parent.top
+        anchors.topMargin: root.padding
         spacing: Appearance.spacing.small
+
+        opacity: root.expanded || !Config.bar.tray.compact ? 1 : 0
 
         add: Transition {
             Anim {
@@ -51,17 +70,49 @@ StyledRect {
 
             TrayItem {}
         }
+
+        Behavior on opacity {
+            Anim {}
+        }
     }
 
-    Behavior on implicitWidth {
-        Anim {
-            easing.bezierCurve: Appearance.anim.curves.emphasized
+    Loader {
+        id: expandIcon
+
+        anchors.horizontalCenter: parent.horizontalCenter
+        anchors.bottom: parent.bottom
+
+        active: Config.bar.tray.compact
+
+        sourceComponent: Item {
+            implicitWidth: expandIconInner.implicitWidth
+            implicitHeight: expandIconInner.implicitHeight - Appearance.padding.small * 2
+
+            MaterialIcon {
+                id: expandIconInner
+
+                anchors.horizontalCenter: parent.horizontalCenter
+                anchors.bottom: parent.bottom
+                anchors.bottomMargin: Config.bar.tray.background ? Appearance.padding.small : -Appearance.padding.small
+                text: "expand_less"
+                font.pointSize: Appearance.font.size.large
+                rotation: root.expanded ? 180 : 0
+
+                Behavior on rotation {
+                    Anim {}
+                }
+
+                Behavior on anchors.bottomMargin {
+                    Anim {}
+                }
+            }
         }
     }
 
     Behavior on implicitHeight {
         Anim {
-            easing.bezierCurve: Appearance.anim.curves.emphasized
+            duration: Appearance.anim.durations.expressiveDefaultSpatial
+            easing.bezierCurve: Appearance.anim.curves.expressiveDefaultSpatial
         }
     }
 }

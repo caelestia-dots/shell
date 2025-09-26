@@ -32,7 +32,7 @@ public:
     [[nodiscard]] bool numLock() const;
     [[nodiscard]] bool main() const;
 
-    bool updateLastIpcObject(const QJsonObject& object);
+    bool updateLastIpcObject(QJsonObject object);
 
 signals:
     void lastIpcObjectChanged();
@@ -60,7 +60,7 @@ public:
 
     [[nodiscard]] QList<HyprKeyboard*> keyboards() const;
 
-    bool updateLastIpcObject(const QJsonObject& object);
+    bool updateLastIpcObject(QJsonObject object);
 
 signals:
     void keyboardsChanged();
