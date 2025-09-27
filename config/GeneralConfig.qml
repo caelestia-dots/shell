@@ -10,6 +10,7 @@ JsonObject {
         property list<string> audio: ["pavucontrol"]
         property list<string> playback: ["mpv"]
         property list<string> explorer: ["thunar"]
+        property list<string> image: ["imv"]
     }
 
     component Idle: JsonObject {
