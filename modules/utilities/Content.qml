@@ -20,6 +20,12 @@ Item {
 
         IdleInhibit {}
 
+        Screenshot {
+            props: root.props
+            visibilities: root.visibilities
+            z: 1
+        }
+
         Record {
             props: root.props
             visibilities: root.visibilities
@@ -32,6 +38,10 @@ Item {
     }
 
     RecordingDeleteModal {
+        props: root.props
+    }
+
+    ScreenshotDeleteModal {
         props: root.props
     }
 }
