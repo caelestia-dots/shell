@@ -95,8 +95,8 @@ bool HyprDevices::updateLastIpcObject(QJsonObject object) {
 
     for (auto it = m_keyboards.begin(); it != m_keyboards.end();) {
         auto* const keyboard = *it;
-        const auto inNewValues = std::any_of(val.begin(), val.end(), [keyboard](const QJsonValue& object) {
-            return object.toObject().value("address").toString() == keyboard->address();
+        const auto inNewValues = std::any_of(val.begin(), val.end(), [keyboard](const QJsonValue& o) {
+            return o.toObject().value("address").toString() == keyboard->address();
         });
 
         if (!inNewValues) {
@@ -112,8 +112,8 @@ bool HyprDevices::updateLastIpcObject(QJsonObject object) {
         const auto obj = o.toObject();
         const auto addr = obj.value("address").toString();
 
-        auto it = std::find_if(m_keyboards.begin(), m_keyboards.end(), [addr](const HyprKeyboard* keyboard) {
-            return keyboard->address() == addr;
+        auto it = std::find_if(m_keyboards.begin(), m_keyboards.end(), [addr](const HyprKeyboard* kb) {
+            return kb->address() == addr;
         });
 
         if (it != m_keyboards.end()) {

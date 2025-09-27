@@ -280,6 +280,7 @@ default, you must create it manually.
             "criticalLevel": 3
         },
         "idle": {
+            "lockBeforeSleep": true,
             "inhibitWhenAudio": true,
             "timeouts": [
                 {

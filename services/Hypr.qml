@@ -44,7 +44,7 @@ Singleton {
     }
 
     function reloadDynamicConfs(): void {
-        extras.batchMessage(["keyword bindln ,Caps_Lock,global,caelestia:refreshDevices", "keyword bindln ,Num_Lock,global,caelestia:refreshDevices"]);
+        extras.batchMessage(["keyword bindlni ,Caps_Lock,global,caelestia:refreshDevices", "keyword bindlni ,Num_Lock,global,caelestia:refreshDevices"]);
     }
 
     Component.onCompleted: reloadDynamicConfs()
