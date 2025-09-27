@@ -5,19 +5,23 @@
 
 namespace caelestia::internal {
 
-class SleepNotifier : public QObject {
+class LogindManager : public QObject {
     Q_OBJECT
     QML_ELEMENT
 
 public:
-    explicit SleepNotifier(QObject* parent = nullptr);
+    explicit LogindManager(QObject* parent = nullptr);
 
 signals:
     void aboutToSleep();
     void resumed();
+    void lockRequested();
+    void unlockRequested();
 
 private slots:
     void handlePrepareForSleep(bool sleep);
+    void handleLockRequested();
+    void handleUnlockRequested();
 };
 
 } // namespace caelestia::internal

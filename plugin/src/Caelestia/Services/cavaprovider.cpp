@@ -32,18 +32,24 @@ void CavaProcessor::process() {
     cava_execute(m_in, count, m_out, m_plan);
 
     // Apply monstercat filter
-    for (int i = 0; i < m_bars; i++) {
-        for (int j = i - 1; j >= 0; j--) {
-            m_out[j] = std::max(m_out[i] / std::pow(1.5, i - j), m_out[j]);
-        }
-        for (int j = i + 1; j < m_bars; j++) {
-            m_out[j] = std::max(m_out[i] / std::pow(1.5, j - i), m_out[j]);
-        }
+    QVector<double> values(m_bars);
+
+    // Left to right pass
+    const double inv = 1.0 / 1.5;
+    double carry = 0.0;
+    for (int i = 0; i < m_bars; ++i) {
+        carry = std::max(m_out[i], carry * inv);
+        values[i] = carry;
+    }
+
+    // Right to left pass and combine
+    carry = 0.0;
+    for (int i = m_bars - 1; i >= 0; --i) {
+        carry = std::max(m_out[i], carry * inv);
+        values[i] = std::max(values[i], carry);
     }
 
     // Update values
-    QVector<double> values(m_bars);
-    std::copy(m_out, m_out + m_bars, values.begin());
     if (values != m_values) {
         m_values = std::move(values);
         emit valuesChanged(m_values);

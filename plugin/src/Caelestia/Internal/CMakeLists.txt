@@ -5,7 +5,7 @@ qml_module(caelestia-internal
         circularindicatormanager.hpp circularindicatormanager.cpp
         hyprdevices.hpp hyprdevices.cpp
         hyprextras.hpp hyprextras.cpp
-        sleepnotifier.hpp sleepnotifier.cpp
+        logindmanager.hpp logindmanager.cpp
     LIBRARIES
         Qt::Gui
         Qt::Quick

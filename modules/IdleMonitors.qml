@@ -27,11 +27,13 @@ Scope {
             Quickshell.execDetached(action);
     }
 
-    SleepNotifier {
+    LogindManager {
         onAboutToSleep: {
             if (Config.general.idle.lockBeforeSleep)
                 root.lock.lock.locked = true;
         }
+        onLockRequested: root.lock.lock.locked = true
+        onUnlockRequested: root.lock.lock.unlock()
     }
 
     Variants {
