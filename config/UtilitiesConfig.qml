@@ -27,6 +27,7 @@ JsonObject {
 
     component VPN: JsonObject {
         property bool enabled: false
-        property string connectionName: "wg0"
+        property string provider: "netbird"
+        property string connectionName: ""
     }
 }

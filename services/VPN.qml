@@ -12,6 +12,7 @@ Singleton {
 
     property bool connected: false
     readonly property string connectionName: Config.utilities.vpn.connectionName
+    readonly property string provider: Config.utilities.vpn.provider ?? "wireguard"
     readonly property bool connecting: connectProc.running || disconnectProc.running
     readonly property bool enabled: Config.utilities.vpn.enabled
 
@@ -19,22 +20,29 @@ Singleton {
         if (!Config.utilities.toasts.vpnChanged)
             return;
 
+        const displayName = provider === "wireguard" ? connectionName : provider;
         if (connected) {
-            Toaster.toast(qsTr("VPN connected"), qsTr("Connected to %1").arg(connectionName), "vpn_key");
+            Toaster.toast(qsTr("VPN connected"), qsTr("Connected to %1").arg(displayName), "vpn_key");
         } else {
-            Toaster.toast(qsTr("VPN disconnected"), qsTr("Disconnected from %1").arg(connectionName), "vpn_key_off");
+            Toaster.toast(qsTr("VPN disconnected"), qsTr("Disconnected from %1").arg(displayName), "vpn_key_off");
         }
     }
 
     function connect(): void {
         if (!connected && !connecting) {
-            connectProc.exec(["pkexec", "wg-quick", "up", connectionName]);
+            const cmd = provider === "wireguard" 
+                ? ["pkexec", "wg-quick", "up", connectionName]
+                : [provider, "up"];
+            connectProc.exec(cmd);
         }
     }
 
     function disconnect(): void {
         if (connected && !connecting) {
-            disconnectProc.exec(["pkexec", "wg-quick", "down", connectionName]);
+            const cmd = provider === "wireguard"
+                ? ["pkexec", "wg-quick", "down", connectionName] 
+                : [provider, "down"];
+            disconnectProc.exec(cmd);
         }
     }
 
@@ -64,18 +72,26 @@ Singleton {
     Process {
         id: statusProc
 
-        command: ["nmcli", "-g", "NAME,DEVICE", "connection", "show", "--active"]
+        command: ["ip", "link", "show"]
         environment: ({
             LANG: "C.UTF-8",
             LC_ALL: "C.UTF-8"
         })
         stdout: StdioCollector {
             onStreamFinished: {
-                const lines = text.trim().split("\n");
-                root.connected = lines.some(line => {
-                    const [name, device] = line.split(":");
-                    return name === connectionName && device && device !== "--";
-                });
+                // Universal interface detection - works for all VPN types
+                const defaultPatterns = {
+                    "netbird": ["wt0"],
+                    "tailscale": ["tailscale0"],
+                    "wireguard": [] // Will use connectionName
+                };
+                
+                // Use connectionName if provided, otherwise provider defaults
+                const patterns = connectionName 
+                    ? [connectionName] 
+                    : (defaultPatterns[provider] || []);
+                
+                root.connected = patterns.some(pattern => text.includes(pattern + ":"));
             }
         }
     }
