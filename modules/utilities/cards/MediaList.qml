@@ -221,8 +221,10 @@ ColumnLayout {
                 width: bigCol.implicitWidth
                 height: bigCol.implicitHeight
                 x: Math.max(0, (phWrap.width - width) / 2)
+                
                 // Desired center based on CURRENT animated height to prevent overflow during animation
                 property real desiredCenter: Math.max(0, (viewport.animatedHeight - height) / 2)
+
                 y: phWrap.clampedYFor(big, viewport.expandedTarget ? big.desiredCenter : 0)
 
                 Behavior on opacity { Anim { duration: heightAnim.duration } }
@@ -258,6 +260,7 @@ ColumnLayout {
                 width: smallRow.implicitWidth
                 height: smallRow.implicitHeight
                 x: Math.max(0, (phWrap.width - width) / 2)
+
                 property real desiredCenter: Math.max(0, (viewport.animatedHeight - height) / 2)
                 y: phWrap.clampedYFor(small, viewport.expandedTarget ? small.desiredCenter : small.desiredCenter)
 
@@ -265,6 +268,7 @@ ColumnLayout {
                 Behavior on scale   { Anim { duration: heightAnim.duration } }
                 // Remove Y animation for small variant to eliminate stagger during collapse
                 // Behavior on y       { Anim { duration: heightAnim.duration * 0.6; easing: heightAnim.easing } }
+
 
                 Row {
                     id: smallRow
