@@ -176,28 +176,55 @@ ColumnLayout {
             active: opacity > 0
             asynchronous: true
 
-            sourceComponent: ColumnLayout {
-                spacing: Appearance.spacing.small
+            sourceComponent: list.implicitHeight > 150 ? expandedPlaceholder : collapsedPlaceholder
 
-                MaterialIcon {
-                    Layout.alignment: Qt.AlignHCenter
-                    text: root.textPrefix === "Screenshot" ? "image" : "videocam"
-                    font.pointSize: Appearance.font.size.larger * 2
-                    color: Colours.palette.m3onSurfaceVariant
+            Component {
+                id: expandedPlaceholder
+
+                ColumnLayout {
+                    spacing: Appearance.spacing.small
+
+                    MaterialIcon {
+                        Layout.alignment: Qt.AlignHCenter
+                        text: root.textPrefix === "Screenshot" ? "image" : "videocam"
+                        font.pointSize: Appearance.font.size.larger * 2
+                        color: Colours.palette.m3onSurfaceVariant
+                    }
+
+                    StyledText {
+                        Layout.alignment: Qt.AlignHCenter
+                        text: qsTr("No %1 found").arg(root.title.toLowerCase())
+                        color: Colours.palette.m3onSurfaceVariant
+                        font.pointSize: Appearance.font.size.normal
+                    }
+
+                    StyledText {
+                        Layout.alignment: Qt.AlignHCenter
+                        text: qsTr("Take a %1 to see it here").arg(root.title.toLowerCase().slice(0, -1))
+                        color: Colours.palette.m3onSurfaceVariant
+                        font.pointSize: Appearance.font.size.small
+                    }
                 }
+            }
 
-                StyledText {
-                    Layout.alignment: Qt.AlignHCenter
-                    text: qsTr("No %1 found").arg(root.title.toLowerCase())
-                    color: Colours.palette.m3onSurfaceVariant
-                    font.pointSize: Appearance.font.size.normal
-                }
+            Component {
+                id: collapsedPlaceholder
 
-                StyledText {
-                    Layout.alignment: Qt.AlignHCenter
-                    text: qsTr("Take a %1 to see it here").arg(root.title.toLowerCase().slice(0, -1))
-                    color: Colours.palette.m3onSurfaceVariant
-                    font.pointSize: Appearance.font.size.small
+                RowLayout {
+                    spacing: Appearance.spacing.smaller
+
+                    MaterialIcon {
+                        text: root.textPrefix === "Screenshot" ? "image" : "videocam"
+                        font.pointSize: Appearance.font.size.normal
+                        color: Colours.palette.m3onSurfaceVariant
+                    }
+
+                    StyledText {
+                        text: qsTr("No %1").arg(root.title.toLowerCase())
+                        color: Colours.palette.m3onSurfaceVariant
+                        font.pointSize: Appearance.font.size.small
+                        elide: Text.ElideRight
+                    }
                 }
             }
 
@@ -208,8 +235,8 @@ ColumnLayout {
 
         Behavior on implicitHeight {
             Anim {
-                duration: Appearance.anim.durations.expressiveDefaultSpatial
-                easing.bezierCurve: Appearance.anim.curves.expressiveDefaultSpatial
+                duration: 80
+                easing.bezierCurve: [0, 0, 1, 1]  // Linear easing for speed
             }
         }
     }
