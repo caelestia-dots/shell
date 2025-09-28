@@ -16,6 +16,7 @@ Loader {
     required property var props
 
     anchors.fill: parent
+    z: 1000
 
     opacity: root.props.recordingConfirmDelete ? 1 : 0
     active: opacity > 0
