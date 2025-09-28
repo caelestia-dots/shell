@@ -110,6 +110,14 @@ Item {
             spacing: Appearance.spacing.large
 
             PlayerControl {
+                icon: "volume_down"
+
+                function onClicked(): void {
+                    Audio.decrementVolume();
+                }
+            }
+
+            PlayerControl {
                 icon: "skip_previous"
 
                 function onClicked(): void {
@@ -137,6 +145,14 @@ Item {
                 function onClicked(): void {
                     if (Players.active?.canGoNext)
                         Players.active.next();
+                }
+            }
+
+            PlayerControl {
+                icon: "volume_up"
+
+                function onClicked(): void {
+                    Audio.incrementVolume();
                 }
             }
         }
