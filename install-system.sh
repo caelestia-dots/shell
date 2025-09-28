@@ -8,6 +8,9 @@ cmake -S . -B build \
   -DCMAKE_BUILD_TYPE=RelWithDebInfo \
   -DCMAKE_CXX_COMPILER=clazy \
   -DCMAKE_INSTALL_PREFIX=/usr \
+  -DINSTALL_LIBDIR=lib/caelestia \
+  -DINSTALL_QMLDIR=lib/qt6/qml \
+  -DINSTALL_QSCONFDIR=etc/xdg/quickshell/caelestia \
   -DCMAKE_BUILD_WITH_INSTALL_RPATH=ON \
   -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
 
