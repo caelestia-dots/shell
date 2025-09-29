@@ -15,6 +15,10 @@ MouseArea {
 
     required property LazyLoader loader
     required property ShellScreen screen
+    // When true, we will start a recording of the selected region instead of taking a screenshot
+    property bool recording: false
+    // Only used when recording=true. If true, include default output+input audio.
+    property bool recordWithSound: false
 
     property bool onClient
 
@@ -73,16 +77,78 @@ MouseArea {
     }
 
     function save(): void {
-        // Ensure screenshots directory exists
-        Quickshell.execDetached(["mkdir", "-p", Paths.shotsdir]);
+        // If we're in recording mode, start gpu-screen-recorder with region geometry
+        if (root.loader.recording) {
+            // Compute geometry in PHYSICAL pixels, normalized to the global physical origin (top-left across all monitors).
+            // This handles fractional scales correctly.
+            let minPhysX = 0;
+            let minPhysY = 0;
+            let haveAny = false;
+            try {
+                for (const m of Hypr.monitors) {
+                    const mi = m.lastIpcObject;
+                    if (!mi)
+                        continue;
+                    const mx = mi.x * (mi.scale || 1);
+                    const my = mi.y * (mi.scale || 1);
+                    if (!haveAny) {
+                        minPhysX = mx;
+                        minPhysY = my;
+                        haveAny = true;
+                    } else {
+                        if (mx < minPhysX)
+                            minPhysX = mx;
+                        if (my < minPhysY)
+                            minPhysY = my;
+                    }
+                }
+            } catch (e) {
+                // Fallback to zeros if Hypr monitor list is unavailable
+                minPhysX = 0;
+                minPhysY = 0;
+            }
 
-        // Build timestamped filename in the screenshots directory
+            const mon = Hypr.monitorFor(screen);
+            const mi = mon?.lastIpcObject;
+            const s = mi?.scale || 1;
+
+            const gx = Math.max(0, Math.round((rsx + screen.x) * s - minPhysX));
+            const gy = Math.max(0, Math.round((rsy + screen.y) * s - minPhysY));
+            const gw = Math.max(1, Math.round(sw * s));
+            const gh = Math.max(1, Math.round(sh * s));
+
+            // Ensure recordings directory exists
+            Quickshell.execDetached(["mkdir", "-p", Paths.recsdir]);
+
+            // Output file
+            const now = new Date();
+            const pad = n => n.toString().padStart(2, "0");
+            const ofile = `${Paths.recsdir}/Recording_${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}_${pad(now.getHours())}-${pad(now.getMinutes())}-${pad(now.getSeconds())}.mp4`;
+
+            const region = `${gw}x${gh}+${gx}+${gy}`;
+            const cmd = [
+                "gpu-screen-recorder",
+                "-w", "region",
+                "-region", region,
+                "-o", ofile
+            ];
+            if (root.loader.recordWithSound) {
+                // Merge default output and input into one track; users can tweak later via settings if needed
+                cmd.push("-a", "default_output|default_input");
+            }
+            Quickshell.execDetached(cmd);
+            // Update UI state to reflect that a recording likely started
+            Recorder.refresh();
+            closeAnim.start();
+            return;
+        }
+
+        // Screenshot flow (unchanged)
+        Quickshell.execDetached(["mkdir", "-p", Paths.shotsdir]);
         const now = new Date();
         const pad = n => n.toString().padStart(2, "0");
         const fname = `Screenshot_${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}_${pad(now.getHours())}-${pad(now.getMinutes())}-${pad(now.getSeconds())}.png`;
         const destUrl = Qt.resolvedUrl(`${Paths.shotsdir}/${fname}`);
-
-    // Save the selected region to the screenshots folder
 
         CUtils.saveItem(
             screencopy,

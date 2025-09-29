@@ -41,17 +41,26 @@ StyledRect {
             mkShot("web_asset", "Active window (edit)", "Window", ["caelestia", "shell", "picker", "open"])
         ]
 
-        // Helper to create recording items that call Recorder directly
+        // Helper to create recording items that call Recorder directly (fullscreen variants)
         const mkRec = (icon, text, activeText, args) => {
             const call = args ? 'Recorder.start(' + JSON.stringify(args) + ')' : 'Recorder.start()';
             const qml = 'import qs.components.controls; import qs.services; MenuItem { icon: "' + icon + '"; text: qsTr("' + text + '"); activeText: qsTr("' + activeText + '"); onClicked: { ' + call + ' } }';
             return Qt.createQmlObject(qml, root);
         }
+        // Helper to create region recording items that go through AreaPicker (scale-correct geometry)
+        const mkRecRegion = (icon, text, activeText, withSound) => {
+            const cmd = withSound ? ['caelestia', 'shell', 'picker', 'openRecordSound']
+                                  : ['caelestia', 'shell', 'picker', 'openRecord'];
+            const qml = 'import qs.components.controls; MenuItem { property var mediaRoot; icon: "' + icon + '"; text: qsTr("' + text + '"); activeText: qsTr("' + activeText + '"); onClicked: { if (mediaRoot && mediaRoot.triggerShot) mediaRoot.triggerShot(' + JSON.stringify(cmd) + ') } }';
+            const item = Qt.createQmlObject(qml, root);
+            item.mediaRoot = root;
+            return item;
+        }
         recordingMenuItems = [
             mkRec("fullscreen", "Record fullscreen", "Fullscreen", null),
-            mkRec("screenshot_region", "Record region", "Region", ["-r"]),
+            mkRecRegion("screenshot_region", "Record region", "Region", false),
             mkRec("select_to_speak", "Record fullscreen with sound", "Fullscreen", ["-s"]),
-            mkRec("volume_up", "Record region with sound", "Region", ["-sr"])
+            mkRecRegion("volume_up", "Record region with sound", "Region", true)
         ]
     }
 
