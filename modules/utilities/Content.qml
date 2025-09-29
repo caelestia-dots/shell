@@ -18,7 +18,11 @@ Item {
         anchors.fill: parent
         spacing: Appearance.spacing.normal
 
-        IdleInhibit {}
+        IdleInhibit {
+            visible: Config.general.idle.enabled
+            Layout.preferredHeight: Config.general.idle.enabled ? implicitHeight : 0
+            Layout.fillHeight: Config.general.idle.enabled
+        }
 
         Record {
             props: root.props
