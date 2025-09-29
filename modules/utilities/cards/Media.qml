@@ -204,7 +204,10 @@ StyledRect {
                 Behavior on opacity { Anim { duration: 250; easing.bezierCurve: Appearance.anim.curves.expressiveDefaultSpatial } }
                 Behavior on scale { Anim { duration: 250; easing.bezierCurve: Appearance.anim.curves.expressiveDefaultSpatial } }
             }
-            Behavior on Layout.preferredHeight { Anim {} }
+            Behavior on Layout.preferredHeight {
+                enabled: false // let inner list drive height; avoid damping overshoot
+                Anim {}
+            }
         }
     }
 
@@ -350,7 +353,7 @@ StyledRect {
         running: false
         alwaysRunToEnd: true
 
-        // Animate container height to the active body's height
+        // Simple height animation for tab switch (no overshoot, let inner list handle its own bounce)
         Anim { target: body; property: "Layout.preferredHeight"; to: root.tabIndex === 0 ? shotsBody.implicitHeight : recsBody.implicitHeight; duration: 200; easing.bezierCurve: Appearance.anim.curves.expressiveDefaultSpatial }
 
         onStopped: {

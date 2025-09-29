@@ -39,9 +39,12 @@ ColumnLayout {
     required property string expandedProp
 
     spacing: 0
+    // Make parent containers (e.g., Loader) see our live height so overshoot is visible
+    implicitHeight: header.implicitHeight + viewport.animatedHeight
 
     // ---------- HEADER ----------
     WrapperMouseArea {
+        id: header
         Layout.fillWidth: true
         cursorShape: Qt.PointingHandCursor
         onClicked: root.props[root.expandedProp] = !root.props[root.expandedProp]
@@ -85,7 +88,17 @@ ColumnLayout {
         readonly property int collapsedRows: 3
         readonly property int expandedRows: 10
         readonly property real targetHeight: rowHeight * (root.props[root.expandedProp] ? expandedRows : collapsedRows)
+        // Keep a separate, animatable height; initialize to target and break binding at startup
         property real animatedHeight: targetHeight
+        Component.onCompleted: animatedHeight = targetHeight
+
+        onTargetHeightChanged: {
+            // Explicit two-step bounce: hop past the target, then settle back
+            const expanding = targetHeight > animatedHeight;
+            bounceAnim.stop();
+            bounceAnim.overshoot = expanding ? targetHeight * 1.10 : targetHeight * 0.90;
+            bounceAnim.start();
+        }
 
         // Live target toggle (drives immediate slide/scale)
         property bool expandedTarget: root.props[root.expandedProp]
@@ -93,12 +106,14 @@ ColumnLayout {
         Layout.preferredHeight: animatedHeight
         height: animatedHeight
 
-        Behavior on animatedHeight {
-            Anim {
-                id: heightAnim
-                duration: Appearance.anim.durations.expressiveDefaultSpatial
-                easing.bezierCurve: Appearance.anim.curves.expressiveDefaultSpatial
-            }
+        // Explicit overshoot sequence (works for both expand and collapse)
+        SequentialAnimation {
+            id: bounceAnim
+            property real overshoot: 0
+            running: false
+            alwaysRunToEnd: true
+            NumberAnimation { target: viewport; property: "animatedHeight"; to: bounceAnim.overshoot; duration: 110; easing.type: Easing.OutCubic }
+            NumberAnimation { target: viewport; property: "animatedHeight"; to: viewport.targetHeight; duration: 130; easing.type: Easing.InCubic }
         }
 
         // ---------- LIST ----------
@@ -227,9 +242,10 @@ ColumnLayout {
 
                 y: phWrap.clampedYFor(big, viewport.expandedTarget ? big.desiredCenter : 0)
 
-                Behavior on opacity { Anim { duration: heightAnim.duration } }
-                Behavior on scale   { Anim { duration: heightAnim.duration } }
-                Behavior on y       { Anim { duration: heightAnim.duration * 0.6; easing: heightAnim.easing } }
+                // Keep placeholder animations unchanged (decoupled from heightAnim)
+                Behavior on opacity { Anim { duration: Appearance.anim.durations.expressiveDefaultSpatial; easing.bezierCurve: Appearance.anim.curves.expressiveDefaultSpatial } }
+                Behavior on scale   { Anim { duration: Appearance.anim.durations.expressiveDefaultSpatial; easing.bezierCurve: Appearance.anim.curves.expressiveDefaultSpatial } }
+                // Behavior on y       { Anim { duration: Appearance.anim.durations.expressiveDefaultSpatial * 0.2; easing.bezierCurve: Appearance.anim.curves.expressiveDefaultSpatial } }
 
                 Column {
                     id: bigCol
@@ -264,8 +280,9 @@ ColumnLayout {
                 property real desiredCenter: Math.max(0, (viewport.animatedHeight - height) / 2)
                 y: phWrap.clampedYFor(small, viewport.expandedTarget ? small.desiredCenter : small.desiredCenter)
 
-                Behavior on opacity { Anim { duration: heightAnim.duration } }
-                Behavior on scale   { Anim { duration: heightAnim.duration } }
+                // Keep placeholder animations unchanged (decoupled from heightAnim)
+                Behavior on opacity { Anim { duration: Appearance.anim.durations.expressiveDefaultSpatial; easing.bezierCurve: Appearance.anim.curves.expressiveDefaultSpatial } }
+                Behavior on scale   { Anim { duration: Appearance.anim.durations.expressiveDefaultSpatial; easing.bezierCurve: Appearance.anim.curves.expressiveDefaultSpatial } }
                 // Remove Y animation for small variant to eliminate stagger during collapse
                 // Behavior on y       { Anim { duration: heightAnim.duration * 0.6; easing: heightAnim.easing } }
 
