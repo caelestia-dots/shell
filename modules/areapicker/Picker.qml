@@ -77,7 +77,7 @@ MouseArea {
     }
 
     function save(): void {
-        // If we're in recording mode, start gpu-screen-recorder with region geometry
+        // If we're in recording mode, start gpu-screen-recorder with region geometry and show notifications
         if (root.loader.recording) {
             // Compute geometry in PHYSICAL pixels, normalized to the global physical origin (top-left across all monitors).
             // This handles fractional scales correctly.
@@ -120,10 +120,10 @@ MouseArea {
             // Ensure recordings directory exists
             Quickshell.execDetached(["mkdir", "-p", Paths.recsdir]);
 
-            // Output file
+            // Output file with timestamp
             const now = new Date();
             const pad = n => n.toString().padStart(2, "0");
-            const ofile = `${Paths.recsdir}/Recording_${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}_${pad(now.getHours())}-${pad(now.getMinutes())}-${pad(now.getSeconds())}.mp4`;
+            const ofile = `${Paths.recsdir}/recording_${now.getFullYear()}${pad(now.getMonth() + 1)}${pad(now.getDate())}_${pad(now.getHours())}-${pad(now.getMinutes())}-${pad(now.getSeconds())}.mp4`;
 
             const region = `${gw}x${gh}+${gx}+${gy}`;
             const cmd = [
@@ -133,29 +133,46 @@ MouseArea {
                 "-o", ofile
             ];
             if (root.loader.recordWithSound) {
-                // Merge default output and input into one track; users can tweak later via settings if needed
-                cmd.push("-a", "default_output|default_input");
+                cmd.push("-a", "default_output");
             }
+            
+            // Show start notification
+            const notifCmd = [
+                "notify-send",
+                "-a", "caelestia-cli",
+                "-p",
+                "Recording started",
+                "Recording..."
+            ];
+            Quickshell.execDetached(notifCmd);
+            
+            // Start recording
             Quickshell.execDetached(cmd);
+            
             // Update UI state to reflect that a recording likely started
             Recorder.refresh();
             closeAnim.start();
             return;
         }
 
-        // Screenshot flow (unchanged)
-        Quickshell.execDetached(["mkdir", "-p", Paths.shotsdir]);
-        const now = new Date();
-        const pad = n => n.toString().padStart(2, "0");
-        const fname = `Screenshot_${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}_${pad(now.getHours())}-${pad(now.getMinutes())}-${pad(now.getSeconds())}.png`;
-        const destUrl = Qt.resolvedUrl(`${Paths.shotsdir}/${fname}`);
-
-        CUtils.saveItem(
-            screencopy,
-            destUrl,
-            Qt.rect(Math.ceil(rsx), Math.ceil(rsy), Math.floor(sw), Math.floor(sh)),
-            path => Quickshell.execDetached(["swappy", "-f", Paths.toLocalFile(destUrl)])
-        );
+        // Screenshot flow - use CLI for proper notifications and action handling
+        // Compute logical coordinates for grim (handles scaling internally)
+        const screenRelX = Math.ceil(rsx);
+        const screenRelY = Math.ceil(rsy);
+        const screenRelW = Math.floor(sw);
+        const screenRelH = Math.floor(sh);
+        
+        // Convert to global logical coordinates
+        const globalX = screenRelX + screen.x;
+        const globalY = screenRelY + screen.y;
+        const region = `${screenRelW}x${screenRelH}+${globalX}+${globalY}`;
+        
+        // Use CLI for screenshots to get proper notifications with actions
+        const cmd = ["caelestia", "screenshot", "-r", region];
+        if (root.loader.freeze) {
+            cmd.push("-f");
+        }
+        Quickshell.execDetached(cmd);
         closeAnim.start();
     }
 
