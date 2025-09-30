@@ -78,10 +78,11 @@ MouseArea {
 
     function save(): void {
         // Compute logical coordinates (same for both screenshots and recordings)
-        const screenRelX = Math.ceil(rsx);
-        const screenRelY = Math.ceil(rsy);
-        const screenRelW = Math.floor(sw);
-        const screenRelH = Math.floor(sh);
+        // Use consistent rounding to avoid invalid regions
+        const screenRelX = Math.floor(rsx);
+        const screenRelY = Math.floor(rsy);
+        const screenRelW = Math.max(1, Math.ceil(sw));  // Ensure minimum 1px width
+        const screenRelH = Math.max(1, Math.ceil(sh));  // Ensure minimum 1px height
         
         // Convert to global logical coordinates
         const globalX = screenRelX + screen.x;

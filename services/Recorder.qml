@@ -66,7 +66,7 @@ Singleton {
                     Quickshell.execDetached(["caelestia", "record", "-p"]);
                     props.paused = !props.paused;
                 } else if (!wasRunning && props.running) {
-                    // External start detected (should not happen with CLI-only approach)
+                    // External start detected (e.g., region recording via area picker CLI)
                     props.paused = false;
                     props.elapsed = 0;
                 }
@@ -76,7 +76,7 @@ Singleton {
                 props.paused = false;
                 props.elapsed = 0;
             } else if (wasRunning && !props.running) {
-                // External stop detected (should not happen with CLI-only approach)
+                // External stop detected (e.g., recording finished externally)
                 props.paused = false;
                 props.elapsed = 0;
             }
@@ -88,10 +88,11 @@ Singleton {
     }
 
     // Poll for recorder state while running or when actions are pending
+    // Also poll periodically when not running to detect external starts (e.g., region recording via CLI)
     Timer {
-        interval: 1000
+        interval: props.running || root.needsStart || root.needsStop || root.needsPause ? 1000 : 3000
         repeat: true
-        running: props.running || root.needsStart || root.needsStop || root.needsPause
+        running: true  // Always poll, but less frequently when idle
         onTriggered: checkProc.running = true
     }
 

@@ -340,8 +340,15 @@ StyledRect {
     function triggerShot(cmd) {
         root.visibilities.utilities = false;
         root.visibilities.sidebar = false;
-        root.pendingCommand = cmd;
-        delayTimer.restart();
+        
+        // Fullscreen screenshots don't need UI close delay - execute immediately
+        if (cmd.length === 2 && cmd[0] === "caelestia" && cmd[1] === "screenshot") {
+            Quickshell.execDetached(cmd);
+        } else {
+            // Area-based screenshots need delay for UI to close
+            root.pendingCommand = cmd;
+            delayTimer.restart();
+        }
     }
 
     Timer {
