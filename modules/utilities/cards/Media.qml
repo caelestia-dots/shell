@@ -341,11 +341,18 @@ StyledRect {
         root.visibilities.utilities = false;
         root.visibilities.sidebar = false;
         
+        // Check if this is a recording command and start fast polling for instant feedback
+        const isRecordingCmd = cmd.length >= 3 && cmd[0] === "caelestia" && cmd[1] === "shell" && cmd[2] === "picker" && 
+                              (cmd[3] === "openRecord" || cmd[3] === "openRecordSound");
+        if (isRecordingCmd) {
+            Recorder.startFastPolling();
+        }
+        
         // Fullscreen screenshots don't need UI close delay - execute immediately
         if (cmd.length === 2 && cmd[0] === "caelestia" && cmd[1] === "screenshot") {
             Quickshell.execDetached(cmd);
         } else {
-            // Area-based screenshots need delay for UI to close
+            // Area-based screenshots/recordings need delay for UI to close
             root.pendingCommand = cmd;
             delayTimer.restart();
         }

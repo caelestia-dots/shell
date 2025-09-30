@@ -95,6 +95,8 @@ MouseArea {
             if (root.loader.recordWithSound) {
                 cmd.push("-s");
             }
+            // Start fast polling for instant recording state detection
+            Recorder.startFastPolling();
             Quickshell.execDetached(cmd);
         } else {
             // Use CLI for screenshot - it handles notifications and actions

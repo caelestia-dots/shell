@@ -14,20 +14,34 @@ Singleton {
     property list<string> startArgs: []
     property bool needsStop
     property bool needsPause
+    
+    // Fast polling for instant feedback on recording actions
+    property bool fastPolling: false
+    property int fastPollCount: 0
 
     function start(extraArgs: list<string>): void {
         needsStart = true;
         startArgs = extraArgs || [];
+        startFastPolling();
         checkProc.running = true;
     }
 
     function stop(): void {
         needsStop = true;
+        startFastPolling();
         checkProc.running = true;
     }
 
     function togglePause(): void {
         needsPause = true;
+        startFastPolling();
+        checkProc.running = true;
+    }
+    
+    // Start fast polling for instant feedback (called externally for area recordings)
+    function startFastPolling(): void {
+        fastPolling = true;
+        fastPollCount = 0;
         checkProc.running = true;
     }
 
@@ -87,13 +101,31 @@ Singleton {
         }
     }
 
-    // Poll for recorder state while running or when actions are pending
-    // Also poll periodically when not running to detect external starts (e.g., region recording via CLI)
+    // Smart polling: fast when actions are pending or during fast poll burst, slower when idle
     Timer {
-        interval: props.running || root.needsStart || root.needsStop || root.needsPause ? 1000 : 3000
+        interval: {
+            if (root.fastPolling || root.needsStart || root.needsStop || root.needsPause) {
+                return 200; // Very fast polling for instant feedback
+            } else if (props.running) {
+                return 1000; // Normal polling when recording
+            } else {
+                return 3000; // Slow polling when idle
+            }
+        }
         repeat: true
-        running: true  // Always poll, but less frequently when idle
-        onTriggered: checkProc.running = true
+        running: true
+        onTriggered: {
+            checkProc.running = true;
+            
+            // Manage fast polling burst - stop after 10 fast polls (2 seconds)
+            if (root.fastPolling) {
+                root.fastPollCount++;
+                if (root.fastPollCount >= 10) {
+                    root.fastPolling = false;
+                    root.fastPollCount = 0;
+                }
+            }
+        }
     }
 
     Connections {
