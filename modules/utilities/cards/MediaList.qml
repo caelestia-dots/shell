@@ -12,6 +12,7 @@ import Quickshell
 import Quickshell.Widgets
 import QtQuick
 import QtQuick.Layouts
+import QtQml.Models
 
 // ============================
 // OVERFLOW-PROOF EXPANDABLE LIST
@@ -122,10 +123,39 @@ ColumnLayout {
             anchors.fill: parent
             clip: true
 
-            model: FileSystemModel {
-                path: root.path
-                nameFilters: root.nameFilters
-                sortReverse: true
+            model: SortFilterProxyModel {
+                id: sortedMediaModel
+
+                sourceModel: FileSystemModel {
+                    path: root.path
+                    nameFilters: root.nameFilters
+                }
+
+                property var timestampPattern: new RegExp(`^${root.textPrefix}_(\\d{4})(\\d{2})(\\d{2})_(\\d{2})-(\\d{2})-(\\d{2})`, "i")
+
+                sorters: [
+                    ExpressionSorter {
+                        expression: {
+                            const entry = model.modelData;
+                            if (!entry)
+                                return 0;
+
+                            const match = entry.baseName.match(sortedMediaModel.timestampPattern);
+                            if (!match)
+                                return 0;
+
+                            return Number(`${match[1]}${match[2]}${match[3]}${match[4]}${match[5]}${match[6]}`);
+                        }
+                        ascendingOrder: false
+                    },
+                    ExpressionSorter {
+                        expression: {
+                            const entry = model.modelData;
+                            return entry ? entry.baseName : "";
+                        }
+                        ascendingOrder: false
+                    }
+                ]
             }
 
             StyledScrollBar.vertical: StyledScrollBar { flickable: list }
