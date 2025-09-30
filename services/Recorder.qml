@@ -14,7 +14,6 @@ Singleton {
     property list<string> startArgs: []
     property bool needsStop
     property bool needsPause
-    property bool externalStart: false  // Track if recording was started externally (e.g., via area picker)
 
     function start(extraArgs: list<string>): void {
         needsStart = true;
@@ -67,31 +66,17 @@ Singleton {
                     Quickshell.execDetached(["caelestia", "record", "-p"]);
                     props.paused = !props.paused;
                 } else if (!wasRunning && props.running) {
-                    // External start detected (e.g., via AreaPicker path)
+                    // External start detected (should not happen with CLI-only approach)
                     props.paused = false;
                     props.elapsed = 0;
-                    root.externalStart = true;
                 }
             } else if (root.needsStart) {
                 Quickshell.execDetached(["caelestia", "record", ...root.startArgs]);
                 props.running = true;
                 props.paused = false;
                 props.elapsed = 0;
-                root.externalStart = false;  // CLI start, not external
             } else if (wasRunning && !props.running) {
-                // External stop detected
-                if (root.externalStart) {
-                    // Show stop notification for external recordings
-                    const notifCmd = [
-                        "notify-send",
-                        "-a", "caelestia-cli",
-                        "--action=open=Open folder",
-                        "Recording stopped",
-                        "Recording saved to recordings folder"
-                    ];
-                    Quickshell.execDetached(notifCmd);
-                    root.externalStart = false;
-                }
+                // External stop detected (should not happen with CLI-only approach)
                 props.paused = false;
                 props.elapsed = 0;
             }

@@ -37,6 +37,7 @@ StyledRect {
             return item;
         }
         screenshotMenuItems = [
+            mkShot("fullscreen", "Fullscreen", "Fullscreen", ["caelestia", "screenshot"]),
             mkShot("crop_free", "Area (edit)", "Area", ["caelestia", "shell", "picker", "openFreeze"]),
             mkShot("web_asset", "Active window (edit)", "Window", ["caelestia", "shell", "picker", "open"])
         ]

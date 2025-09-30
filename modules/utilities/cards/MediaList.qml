@@ -12,8 +12,6 @@ import Quickshell
 import Quickshell.Widgets
 import QtQuick
 import QtQuick.Layouts
-import QtQml.Models
-
 // ============================
 // OVERFLOW-PROOF EXPANDABLE LIST
 // Key ideas:
@@ -123,46 +121,67 @@ ColumnLayout {
             anchors.fill: parent
             clip: true
 
-            model: SortFilterProxyModel {
-                id: sortedMediaModel
-
-                sourceModel: FileSystemModel {
-                    path: root.path
-                    nameFilters: root.nameFilters
-                }
-
-                property var timestampPattern: new RegExp(`^${root.textPrefix}_(\\d{4})(\\d{2})(\\d{2})_(\\d{2})-(\\d{2})-(\\d{2})`, "i")
-
-                sorters: [
-                    ExpressionSorter {
-                        expression: {
-                            const entry = model.modelData;
-                            if (!entry)
-                                return 0;
-
-                            const match = entry.baseName.match(sortedMediaModel.timestampPattern);
-                            if (!match)
-                                return 0;
-
-                            return Number(`${match[1]}${match[2]}${match[3]}${match[4]}${match[5]}${match[6]}`);
-                        }
-                        ascendingOrder: false
-                    },
-                    ExpressionSorter {
-                        expression: {
-                            const entry = model.modelData;
-                            return entry ? entry.baseName : "";
-                        }
-                        ascendingOrder: false
-                    }
-                ]
+            property var sourceModel: FileSystemModel {
+                path: root.path
+                nameFilters: root.nameFilters
             }
+            
+            property var sortedFiles: []
+            
+            Component.onCompleted: updateSortedFiles()
+            
+            Connections {
+                target: list.sourceModel
+                function onModelAboutToBeReset() { list.updateSortedFiles() }
+                function onModelReset() { list.updateSortedFiles() }
+                function onRowsInserted() { list.updateSortedFiles() }
+                function onRowsRemoved() { list.updateSortedFiles() }
+            }
+            
+            function updateSortedFiles() {
+                if (!sourceModel) return;
+                
+                let files = [];
+                for (let i = 0; i < sourceModel.rowCount(); i++) {
+                    let index = sourceModel.index(i, 0);
+                    let entry = sourceModel.data(index, Qt.UserRole);
+                    if (entry) {
+                        files.push(entry);
+                    }
+                }
+                
+                // Sort by timestamp first, then by name
+                let timestampPattern = new RegExp(`^${root.textPrefix}_(\\d{4})(\\d{2})(\\d{2})_(\\d{2})-(\\d{2})-(\\d{2})`, "i");
+                
+                files.sort(function(a, b) {
+                    let matchA = timestampPattern.exec(a.baseName || "");
+                    let matchB = timestampPattern.exec(b.baseName || "");
+                    
+                    if (matchA && matchB) {
+                        let timeA = Number(`${matchA[1]}${matchA[2]}${matchA[3]}${matchA[4]}${matchA[5]}${matchA[6]}`);
+                        let timeB = Number(`${matchB[1]}${matchB[2]}${matchB[3]}${matchB[4]}${matchB[5]}${matchB[6]}`);
+                        return timeB - timeA; // Descending order (newest first)
+                    }
+                    
+                    if (matchA && !matchB) return -1;
+                    if (!matchA && matchB) return 1;
+                    
+                    // Fall back to name comparison
+                    let nameA = (a.baseName || "").toLowerCase();
+                    let nameB = (b.baseName || "").toLowerCase();
+                    return nameB.localeCompare(nameA); // Descending order
+                });
+                
+                sortedFiles = files;
+            }
+
+            model: sortedFiles
 
             StyledScrollBar.vertical: StyledScrollBar { flickable: list }
 
             delegate: RowLayout {
                 id: item
-                required property FileSystemEntry modelData
+                required property var modelData
                 property string baseName
 
                 anchors.left: list.contentItem.left
@@ -170,7 +189,7 @@ ColumnLayout {
                 anchors.rightMargin: Appearance.spacing.small
                 spacing: Appearance.spacing.small / 2
 
-                Component.onCompleted: baseName = modelData.baseName
+                Component.onCompleted: baseName = modelData.baseName || ""
 
                 StyledText {
                     Layout.fillWidth: true

@@ -77,86 +77,7 @@ MouseArea {
     }
 
     function save(): void {
-        // If we're in recording mode, start gpu-screen-recorder with region geometry and show notifications
-        if (root.loader.recording) {
-            // Compute geometry in PHYSICAL pixels, normalized to the global physical origin (top-left across all monitors).
-            // This handles fractional scales correctly.
-            let minPhysX = 0;
-            let minPhysY = 0;
-            let haveAny = false;
-            try {
-                for (const m of Hypr.monitors) {
-                    const mi = m.lastIpcObject;
-                    if (!mi)
-                        continue;
-                    const mx = mi.x * (mi.scale || 1);
-                    const my = mi.y * (mi.scale || 1);
-                    if (!haveAny) {
-                        minPhysX = mx;
-                        minPhysY = my;
-                        haveAny = true;
-                    } else {
-                        if (mx < minPhysX)
-                            minPhysX = mx;
-                        if (my < minPhysY)
-                            minPhysY = my;
-                    }
-                }
-            } catch (e) {
-                // Fallback to zeros if Hypr monitor list is unavailable
-                minPhysX = 0;
-                minPhysY = 0;
-            }
-
-            const mon = Hypr.monitorFor(screen);
-            const mi = mon?.lastIpcObject;
-            const s = mi?.scale || 1;
-
-            const gx = Math.max(0, Math.round((rsx + screen.x) * s - minPhysX));
-            const gy = Math.max(0, Math.round((rsy + screen.y) * s - minPhysY));
-            const gw = Math.max(1, Math.round(sw * s));
-            const gh = Math.max(1, Math.round(sh * s));
-
-            // Ensure recordings directory exists
-            Quickshell.execDetached(["mkdir", "-p", Paths.recsdir]);
-
-            // Output file with timestamp
-            const now = new Date();
-            const pad = n => n.toString().padStart(2, "0");
-            const ofile = `${Paths.recsdir}/recording_${now.getFullYear()}${pad(now.getMonth() + 1)}${pad(now.getDate())}_${pad(now.getHours())}-${pad(now.getMinutes())}-${pad(now.getSeconds())}.mp4`;
-
-            const region = `${gw}x${gh}+${gx}+${gy}`;
-            const cmd = [
-                "gpu-screen-recorder",
-                "-w", "region",
-                "-region", region,
-                "-o", ofile
-            ];
-            if (root.loader.recordWithSound) {
-                cmd.push("-a", "default_output");
-            }
-            
-            // Show start notification
-            const notifCmd = [
-                "notify-send",
-                "-a", "caelestia-cli",
-                "-p",
-                "Recording started",
-                "Recording..."
-            ];
-            Quickshell.execDetached(notifCmd);
-            
-            // Start recording
-            Quickshell.execDetached(cmd);
-            
-            // Update UI state to reflect that a recording likely started
-            Recorder.refresh();
-            closeAnim.start();
-            return;
-        }
-
-        // Screenshot flow - use CLI for proper notifications and action handling
-        // Compute logical coordinates for grim (handles scaling internally)
+        // Compute logical coordinates (same for both screenshots and recordings)
         const screenRelX = Math.ceil(rsx);
         const screenRelY = Math.ceil(rsy);
         const screenRelW = Math.floor(sw);
@@ -167,12 +88,22 @@ MouseArea {
         const globalY = screenRelY + screen.y;
         const region = `${screenRelW}x${screenRelH}+${globalX}+${globalY}`;
         
-        // Use CLI for screenshots to get proper notifications with actions
-        const cmd = ["caelestia", "screenshot", "-r", region];
-        if (root.loader.freeze) {
-            cmd.push("-f");
+        if (root.loader.recording) {
+            // Use CLI for recording - it handles fractional scaling conversion to physical pixels
+            const cmd = ["caelestia", "record", "-r", region];
+            if (root.loader.recordWithSound) {
+                cmd.push("-s");
+            }
+            Quickshell.execDetached(cmd);
+        } else {
+            // Use CLI for screenshot - it handles notifications and actions
+            const cmd = ["caelestia", "screenshot", "-r", region];
+            if (root.loader.freeze) {
+                cmd.push("-f");
+            }
+            Quickshell.execDetached(cmd);
         }
-        Quickshell.execDetached(cmd);
+        
         closeAnim.start();
     }
 
