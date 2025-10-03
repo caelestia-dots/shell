@@ -1,4 +1,4 @@
-import "cards"
+import "cards" as UtilCards
 import qs.config
 import QtQuick
 import QtQuick.Layouts
@@ -18,20 +18,25 @@ Item {
         anchors.fill: parent
         spacing: Appearance.spacing.normal
 
-        IdleInhibit {}
+    UtilCards.IdleInhibit {}
 
-        Record {
+        // Combined media card: Screenshots + Recordings in tabs
+        UtilCards.Media {
             props: root.props
             visibilities: root.visibilities
             z: 1
         }
 
-        Toggles {
+        UtilCards.Toggles {
             visibilities: root.visibilities
         }
     }
 
     RecordingDeleteModal {
+        props: root.props
+    }
+
+    ScreenshotDeleteModal {
         props: root.props
     }
 }
