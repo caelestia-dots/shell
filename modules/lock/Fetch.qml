@@ -114,7 +114,7 @@ ColumnLayout {
                 active: UPower.displayDevice.isLaptopBattery
 
                 sourceComponent: FetchText {
-                    text: `BATT: ${UPower.onBattery ? "" : "(+) "}${Math.round(UPower.displayDevice.percentage * 100)}%`
+                    text: `BATT: ${UPower.displayDevice.state === 2 ? "" : "(+) "}${Math.round(UPower.displayDevice.percentage * 100)}%`
                 }
             }
         }
