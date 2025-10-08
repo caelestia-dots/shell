@@ -2,6 +2,7 @@ pragma ComponentBehavior: Bound
 
 import qs.components.containers
 import qs.components.misc
+import QtQuick
 import Quickshell
 import Quickshell.Wayland
 import Quickshell.Io
@@ -12,6 +13,10 @@ Scope {
 
         property bool freeze
         property bool closing
+        property bool recording: false
+        property bool recordWithSound: false
+
+            // no-op
 
         Variants {
             model: Quickshell.screens
@@ -40,6 +45,8 @@ Scope {
                 Picker {
                     loader: root
                     screen: win.modelData
+                    recording: root.recording
+                    recordWithSound: root.recordWithSound
                 }
             }
         }
@@ -51,12 +58,33 @@ Scope {
         function open(): void {
             root.freeze = false;
             root.closing = false;
+            root.recording = false;
+            root.recordWithSound = false;
             root.activeAsync = true;
         }
 
         function openFreeze(): void {
             root.freeze = true;
             root.closing = false;
+            root.recording = false;
+            root.recordWithSound = false;
+            root.activeAsync = true;
+        }
+
+        // Recording variants reuse the same area picker to select geometry, then start Recorder
+        function openRecord(): void {
+            root.freeze = false;
+            root.closing = false;
+            root.recording = true;
+            root.recordWithSound = false;
+            root.activeAsync = true;
+        }
+
+        function openRecordSound(): void {
+            root.freeze = false;
+            root.closing = false;
+            root.recording = true;
+            root.recordWithSound = true;
             root.activeAsync = true;
         }
     }

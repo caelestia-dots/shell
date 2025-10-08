@@ -54,6 +54,7 @@ JsonObject {
         property bool workspaces: true
         property bool volume: true
         property bool brightness: true
+        property bool invertScrollDirection: false
     }
 
     component Workspaces: JsonObject {
