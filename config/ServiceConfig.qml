@@ -8,6 +8,7 @@ JsonObject {
     property string gpuType: ""
     property int visualiserBars: 45
     property real audioIncrement: 0.1
+    property real maxVolume: 1.0
     property bool smartScheme: true
     property string defaultPlayer: "Spotify"
     property list<var> playerAliases: [
