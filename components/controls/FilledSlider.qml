@@ -11,11 +11,8 @@ Slider {
     required property string icon
     property real oldValue
     property bool initialized
-    property real maxValue: 1.0
 
     orientation: Qt.Vertical
-    from: 0
-    to: maxValue
 
     background: StyledRect {
         color: Colours.tPalette.m3surfaceContainer
