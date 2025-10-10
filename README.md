@@ -581,7 +581,22 @@ default, you must create it manually.
             "configLoaded": true,
             "dndChanged": true,
             "gameModeChanged": true,
-            "numLockChanged": true
+            "numLockChanged": true,
+            "vpnChanged": true
+        },
+        "vpn": {
+            "enabled": false,
+            // Simple string provider (for warp, netbird, tailscale):
+            // "provider": ["warp"]
+            // Or object with overrides (for wireguard or custom configs):
+            "provider": [
+                {
+                    "name": "wireguard",
+                    "interface": "your-connection-name",
+                    "displayName": "Wireguard (Your VPN)"
+                    // Optional overrides: connectCmd, disconnectCmd
+                }
+            ]
         }
     }
 }
