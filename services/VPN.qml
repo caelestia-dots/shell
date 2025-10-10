@@ -11,16 +11,73 @@ Singleton {
     id: root
 
     property bool connected: false
-    readonly property string connectionName: Config.utilities.vpn.connectionName
-    readonly property string provider: Config.utilities.vpn.provider ?? "wireguard"
     readonly property bool connecting: connectProc.running || disconnectProc.running
     readonly property bool enabled: Config.utilities.vpn.enabled
+
+    readonly property var providerInput: (Config.utilities.vpn.provider && Config.utilities.vpn.provider.length > 0) ? Config.utilities.vpn.provider[0] : "wireguard"
+    readonly property bool isCustomProvider: typeof providerInput === "object"
+    readonly property string providerName: isCustomProvider ? (providerInput.name || "custom") : String(providerInput)
+    readonly property string interfaceName: isCustomProvider ? (providerInput.interface || "") : ""
+
+    function getBuiltinDefaults(name, iface) {
+        const builtins = {
+            "wireguard": {
+                connectCmd: ["pkexec", "wg-quick", "up", iface],
+                disconnectCmd: ["pkexec", "wg-quick", "down", iface],
+                interface: iface,
+                displayName: iface
+            },
+            "warp": {
+                connectCmd: ["warp-cli", "connect"],
+                disconnectCmd: ["warp-cli", "disconnect"],
+                interface: "CloudflareWARP",
+                displayName: "Warp"
+            },
+            "netbird": {
+                connectCmd: ["netbird", "up"],
+                disconnectCmd: ["netbird", "down"],
+                interface: "wt0",
+                displayName: "NetBird"
+            },
+            "tailscale": {
+                connectCmd: ["tailscale", "up"],
+                disconnectCmd: ["tailscale", "down"],
+                interface: "tailscale0",
+                displayName: "Tailscale"
+            }
+        };
+        
+        return builtins[name] || {
+            connectCmd: [name, "up"],
+            disconnectCmd: [name, "down"],
+            interface: iface || name,
+            displayName: name
+        };
+    }
+
+    readonly property var currentConfig: {
+        const name = providerName;
+        const iface = interfaceName;
+        const defaults = getBuiltinDefaults(name, iface);
+        
+        if (isCustomProvider) {
+            const custom = providerInput;
+            return {
+                connectCmd: custom.connectCmd || defaults.connectCmd,
+                disconnectCmd: custom.disconnectCmd || defaults.disconnectCmd,
+                interface: custom.interface || defaults.interface,
+                displayName: custom.displayName || defaults.displayName
+            };
+        }
+        
+        return defaults;
+    }
 
     onConnectedChanged: {
         if (!Config.utilities.toasts.vpnChanged)
             return;
 
-        const displayName = provider === "wireguard" ? connectionName : provider;
+        const displayName = currentConfig ? (currentConfig.displayName || "VPN") : "VPN";
         if (connected) {
             Toaster.toast(qsTr("VPN connected"), qsTr("Connected to %1").arg(displayName), "vpn_key");
         } else {
@@ -29,20 +86,14 @@ Singleton {
     }
 
     function connect(): void {
-        if (!connected && !connecting) {
-            const cmd = provider === "wireguard" 
-                ? ["pkexec", "wg-quick", "up", connectionName]
-                : [provider, "up"];
-            connectProc.exec(cmd);
+        if (!connected && !connecting && currentConfig && currentConfig.connectCmd) {
+            connectProc.exec(currentConfig.connectCmd);
         }
     }
 
     function disconnect(): void {
-        if (connected && !connecting) {
-            const cmd = provider === "wireguard"
-                ? ["pkexec", "wg-quick", "down", connectionName] 
-                : [provider, "down"];
-            disconnectProc.exec(cmd);
+        if (connected && !connecting && currentConfig && currentConfig.disconnectCmd) {
+            disconnectProc.exec(currentConfig.disconnectCmd);
         }
     }
 
@@ -79,19 +130,8 @@ Singleton {
         })
         stdout: StdioCollector {
             onStreamFinished: {
-                // Universal interface detection - works for all VPN types
-                const defaultPatterns = {
-                    "netbird": ["wt0"],
-                    "tailscale": ["tailscale0"],
-                    "wireguard": [] // Will use connectionName
-                };
-                
-                // Use connectionName if provided, otherwise provider defaults
-                const patterns = connectionName 
-                    ? [connectionName] 
-                    : (defaultPatterns[provider] || []);
-                
-                root.connected = patterns.some(pattern => text.includes(pattern + ":"));
+                const iface = currentConfig ? currentConfig.interface : "";
+                root.connected = iface && text.includes(iface + ":");
             }
         }
     }

@@ -585,8 +585,17 @@ default, you must create it manually.
         },
         "vpn": {
             "enabled": false,
-            "provider": "wireguard",
-            "connectionName": "your-connection-name"
+            // Simple string provider (for warp, netbird, tailscale):
+            // "provider": ["warp"]
+            // Or object with overrides (for wireguard or custom configs):
+            "provider": [
+                {
+                    "name": "wireguard",
+                    "interface": "your-connection-name",
+                    "displayName": "Wireguard (Your VPN)"
+                    // Optional overrides: connectCmd, disconnectCmd
+                }
+            ]
         }
     }
 }

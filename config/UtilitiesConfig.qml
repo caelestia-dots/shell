@@ -27,7 +27,6 @@ JsonObject {
 
     component VPN: JsonObject {
         property bool enabled: false
-        property string provider: "netbird"
-        property string connectionName: ""
+        property list<var> provider: ["netbird"]
     }
 }
