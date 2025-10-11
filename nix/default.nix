@@ -29,6 +29,9 @@
   ninja,
   pkg-config,
   caelestia-cli,
+  papirus-icon-theme,
+  adwaita-icon-theme,
+  hicolor-icon-theme,
   debug ? false,
   withCli ? false,
   extraRuntimeDeps ? [],
@@ -48,6 +51,9 @@
       libqalculate
       bash
       hyprland
+	  papirus-icon-theme
+	  adwaita-icon-theme
+	  hicolor-icon-theme
     ]
     ++ extraRuntimeDeps
     ++ lib.optional withCli caelestia-cli;
