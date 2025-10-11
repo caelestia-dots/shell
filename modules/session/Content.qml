@@ -47,6 +47,7 @@ Column {
 
     AnimatedImage {
         width: Config.session.sizes.button
+        visible: Config.session.showAnimatedImage
         height: Config.session.sizes.button
         sourceSize.width: width
         sourceSize.height: height

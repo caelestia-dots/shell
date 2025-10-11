@@ -8,6 +8,8 @@ JsonObject {
 
     property Sizes sizes: Sizes {}
 
+    property bool showAnimatedImage: true
+
     component Commands: JsonObject {
         property list<string> logout: ["loginctl", "terminate-user", ""]
         property list<string> shutdown: ["systemctl", "poweroff"]
