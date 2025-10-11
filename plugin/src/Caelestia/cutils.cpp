@@ -101,7 +101,10 @@ bool CUtils::copyFile(const QUrl& source, const QUrl& target, bool overwrite) co
     }
 
     if (overwrite) {
-        QFile::remove(target.toLocalFile());
+        if (!QFile::remove(target.toLocalFile())) {
+            qWarning() << "CUtils::copyFile: overwrite was specified but failed to remove" << target.toLocalFile();
+            return false;
+        }
     }
 
     return QFile::copy(source.toLocalFile(), target.toLocalFile());
