@@ -31,7 +31,6 @@
   caelestia-cli,
   papirus-icon-theme,
   adwaita-icon-theme,
-  hicolor-icon-theme,
   debug ? false,
   withCli ? false,
   extraRuntimeDeps ? [],
