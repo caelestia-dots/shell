@@ -136,17 +136,17 @@ in
         --replace-fail 'ShellRoot {' 'ShellRoot {  settings.watchFiles: false'
     '';
 
-    postInstall = ''
-      makeWrapper ${quickshell}/bin/qs $out/bin/caelestia-shell \
-      	--prefix PATH : "${lib.makeBinPath runtimeDeps}" \
-      	--set FONTCONFIG_FILE "${fontconfig}" \
-      	--set CAELESTIA_LIB_DIR ${extras}/lib \
-        --set CAELESTIA_XKB_RULES_PATH ${xkeyboard-config}/share/xkeyboard-config-2/rules/base.lst \
-      	--add-flags "-p $out/share/caelestia-shell"
-
-      mkdir -p $out/lib
-      ln -s ${extras}/lib/* $out/lib/
-    '';
+	postInstall = ''
+		makeWrapper ${quickshell}/bin/qs $out/bin/caelestia-shell \
+    		--prefix PATH : "${lib.makeBinPath runtimeDeps}" \
+    		--set FONTCONFIG_FILE "${fontconfig}" \
+    		--set CAELESTIA_LIB_DIR ${extras}/lib \
+    		--set CAELESTIA_XKB_RULES_PATH ${xkeyboard-config}/share/xkeyboard-config-2/rules/base.lst \
+    		--prefix XDG_DATA_DIRS : "${papirus-icon-theme}/share:${adwaita-icon-theme}/share:${hicolor-icon-theme}/share" \
+    		--add-flags "-p $out/share/caelestia-shell"
+  		mkdir -p $out/lib
+  		ln -s ${extras}/lib/* $out/lib/
+	'';
 
     passthru = {
       inherit plugin extras;
