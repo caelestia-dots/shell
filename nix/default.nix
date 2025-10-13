@@ -136,7 +136,7 @@ in
         --replace-fail 'ShellRoot {' 'ShellRoot {  settings.watchFiles: false'
     '';
 
-	postFixup = ''
+	postInstall = ''
 		makeWrapper ${quickshell}/bin/qs $out/bin/caelestia-shell \
     		--prefix PATH : "${lib.makeBinPath runtimeDeps}" \
     		--set FONTCONFIG_FILE "${fontconfig}" \
