@@ -591,6 +591,7 @@ default, you must create it manually.
             "kbLayoutChanged": true,
             "numLockChanged": true,
             "vpnChanged": true,
+            "nowPlaying": false
         },
         "vpn": {
             "enabled": false,
