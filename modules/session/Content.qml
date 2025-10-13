@@ -47,12 +47,12 @@ Column {
 
     AnimatedImage {
         width: Config.session.sizes.button
-        visible: Config.session.showAnimatedImage
         height: Config.session.sizes.button
         sourceSize.width: width
         sourceSize.height: height
 
         playing: visible
+        visible: Config.session.showAnimatedImage
         asynchronous: true
         speed: 0.7
         source: Paths.absolutePath(Config.paths.sessionGif)

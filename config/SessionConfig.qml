@@ -4,11 +4,10 @@ JsonObject {
     property bool enabled: true
     property int dragThreshold: 30
     property bool vimKeybinds: false
+    property bool showAnimatedImage: true
     property Commands commands: Commands {}
 
     property Sizes sizes: Sizes {}
-
-    property bool showAnimatedImage: true
 
     component Commands: JsonObject {
         property list<string> logout: ["loginctl", "terminate-user", ""]

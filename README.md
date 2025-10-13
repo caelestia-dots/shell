@@ -566,6 +566,7 @@ default, you must create it manually.
         "dragThreshold": 30,
         "enabled": true,
         "vimKeybinds": false,
+        "showAnimatedImage": true,
         "commands": {
             "logout": ["loginctl", "terminate-user", ""],
             "shutdown": ["systemctl", "poweroff"],
