@@ -4,20 +4,36 @@ import Quickshell
 import Quickshell.Io
 import QtQuick
 import qs.config
-import Caelestia.Services
 import Caelestia
 
 Singleton {
     id: root
 
     property bool connected: false
+
     readonly property bool connecting: connectProc.running || disconnectProc.running
     readonly property bool enabled: Config.utilities.vpn.enabled
-
     readonly property var providerInput: (Config.utilities.vpn.provider && Config.utilities.vpn.provider.length > 0) ? Config.utilities.vpn.provider[0] : "wireguard"
     readonly property bool isCustomProvider: typeof providerInput === "object"
     readonly property string providerName: isCustomProvider ? (providerInput.name || "custom") : String(providerInput)
     readonly property string interfaceName: isCustomProvider ? (providerInput.interface || "") : ""
+    readonly property var currentConfig: {
+        const name = providerName;
+        const iface = interfaceName;
+        const defaults = getBuiltinDefaults(name, iface);
+        
+        if (isCustomProvider) {
+            const custom = providerInput;
+            return {
+                connectCmd: custom.connectCmd || defaults.connectCmd,
+                disconnectCmd: custom.disconnectCmd || defaults.disconnectCmd,
+                interface: custom.interface || defaults.interface,
+                displayName: custom.displayName || defaults.displayName
+            };
+        }
+        
+        return defaults;
+    }
 
     function getBuiltinDefaults(name, iface) {
         const builtins = {
@@ -55,29 +71,11 @@ Singleton {
         };
     }
 
-    readonly property var currentConfig: {
-        const name = providerName;
-        const iface = interfaceName;
-        const defaults = getBuiltinDefaults(name, iface);
-        
-        if (isCustomProvider) {
-            const custom = providerInput;
-            return {
-                connectCmd: custom.connectCmd || defaults.connectCmd,
-                disconnectCmd: custom.disconnectCmd || defaults.disconnectCmd,
-                interface: custom.interface || defaults.interface,
-                displayName: custom.displayName || defaults.displayName
-            };
-        }
-        
-        return defaults;
-    }
-
     onConnectedChanged: {
         if (!Config.utilities.toasts.vpnChanged)
             return;
 
-        const displayName = currentConfig ? (currentConfig.displayName || "VPN") : "VPN";
+        const displayName = root.currentConfig ? (root.currentConfig.displayName || "VPN") : "VPN";
         if (connected) {
             Toaster.toast(qsTr("VPN connected"), qsTr("Connected to %1").arg(displayName), "vpn_key");
         } else {
@@ -86,14 +84,14 @@ Singleton {
     }
 
     function connect(): void {
-        if (!connected && !connecting && currentConfig && currentConfig.connectCmd) {
-            connectProc.exec(currentConfig.connectCmd);
+        if (!connected && !connecting && root.currentConfig && root.currentConfig.connectCmd) {
+            connectProc.exec(root.currentConfig.connectCmd);
         }
     }
 
     function disconnect(): void {
-        if (connected && !connecting && currentConfig && currentConfig.disconnectCmd) {
-            disconnectProc.exec(currentConfig.disconnectCmd);
+        if (connected && !connecting && root.currentConfig && root.currentConfig.disconnectCmd) {
+            disconnectProc.exec(root.currentConfig.disconnectCmd);
         }
     }
 
@@ -106,14 +104,15 @@ Singleton {
     }
 
     function checkStatus(): void {
-        if (enabled) {
+        if (root.enabled) {
             statusProc.running = true;
         }
     }
 
     Process {
         id: nmMonitor
-        running: enabled
+
+        running: root.enabled
         command: ["nmcli", "monitor"]
         stdout: SplitParser {
             onRead: statusCheckTimer.restart()
@@ -130,7 +129,7 @@ Singleton {
         })
         stdout: StdioCollector {
             onStreamFinished: {
-                const iface = currentConfig ? currentConfig.interface : "";
+                const iface = root.currentConfig ? root.currentConfig.interface : "";
                 root.connected = iface && text.includes(iface + ":");
             }
         }
@@ -138,6 +137,7 @@ Singleton {
 
     Process {
         id: connectProc
+
         onExited: statusCheckTimer.start()
         stderr: StdioCollector {
             onStreamFinished: {
@@ -153,6 +153,7 @@ Singleton {
 
     Process {
         id: disconnectProc
+
         onExited: statusCheckTimer.start()
         stderr: StdioCollector {
             onStreamFinished: {
@@ -166,9 +167,10 @@ Singleton {
 
     Timer {
         id: statusCheckTimer
+
         interval: 500
         onTriggered: root.checkStatus()
     }
 
-    Component.onCompleted: enabled && statusCheckTimer.start()
+    Component.onCompleted: root.enabled && statusCheckTimer.start()
 }
