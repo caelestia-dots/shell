@@ -53,6 +53,7 @@
 	  papirus-icon-theme
 	  adwaita-icon-theme
 	  hicolor-icon-theme
+	  acpi
     ]
     ++ extraRuntimeDeps
     ++ lib.optional withCli caelestia-cli;
