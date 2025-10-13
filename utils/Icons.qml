@@ -194,6 +194,13 @@ Singleton {
 
     function getSpecialWsIcon(name: string): string {
         name = name.toLowerCase().slice("special:".length);
+        
+        for (const iconConfig of Config.bar.workspaces.specialWorkspaceIcons) {
+            if (iconConfig.name === name) {
+                return iconConfig.icon;
+            }
+        }
+        
         if (name === "special")
             return "star";
         if (name === "communication")

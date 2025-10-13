@@ -68,6 +68,7 @@ JsonObject {
         property string occupiedLabel: "󰮯"
         property string activeLabel: "󰮯"
         property string capitalisation: "preserve" // upper, lower, or preserve - relevant only if label is empty
+        property list<var> specialWorkspaceIcons: []
     }
 
     component Tray: JsonObject {

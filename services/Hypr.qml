@@ -33,6 +33,8 @@ Singleton {
     readonly property alias options: extras.options
     readonly property alias devices: extras.devices
 
+    property bool hadKeyboard
+
     signal configReloaded
 
     function dispatch(request: string): void {
@@ -67,6 +69,13 @@ Singleton {
             Toaster.toast(qsTr("Num lock enabled"), qsTr("Num lock is currently enabled"), "looks_one");
         else
             Toaster.toast(qsTr("Num lock disabled"), qsTr("Num lock is currently disabled"), "timer_1");
+    }
+
+    onKbLayoutFullChanged: {
+        if (hadKeyboard && Config.utilities.toasts.kbLayoutChanged)
+            Toaster.toast(qsTr("Keyboard layout changed"), qsTr("Layout changed to: %1").arg(kbLayoutFull), "keyboard");
+
+        hadKeyboard = !!keyboard;
     }
 
     Connections {

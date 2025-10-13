@@ -225,6 +225,7 @@ default, you must create it manually.
         },
         "font": {
             "family": {
+                "clock": "Rubik",
                 "material": "Material Symbols Rounded",
                 "mono": "CaskaydiaCove NF",
                 "sans": "Rubik"
@@ -385,7 +386,13 @@ default, you must create it manually.
             "occupiedLabel": "󰮯",
             "perMonitorWorkspaces": true,
             "showWindows": true,
-            "shown": 5
+            "shown": 5,
+            "specialWorkspaceIcons": [
+                {
+                    "name": "steam",
+                    "icon": "sports_esports"
+                }
+            ]
         }
     },
     "border": {
@@ -545,6 +552,7 @@ default, you must create it manually.
     },
     "services": {
         "audioIncrement": 0.1,
+        "maxVolume": 1.0,
         "defaultPlayer": "Spotify",
         "gpuType": "",
         "playerAliases": [{ "from": "com.github.th_ch.youtube_music", "to": "YT Music" }],
@@ -580,8 +588,9 @@ default, you must create it manually.
             "configLoaded": true,
             "dndChanged": true,
             "gameModeChanged": true,
+            "kbLayoutChanged": true,
             "numLockChanged": true,
-            "vpnChanged": true
+            "vpnChanged": true,
         },
         "vpn": {
             "enabled": false,
