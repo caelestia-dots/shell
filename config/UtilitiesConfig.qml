@@ -21,5 +21,6 @@ JsonObject {
         property bool audioInputChanged: true
         property bool capsLockChanged: true
         property bool numLockChanged: true
+        property bool kbLayoutChanged: true
     }
 }
