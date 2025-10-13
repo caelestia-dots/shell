@@ -32,7 +32,7 @@
   papirus-icon-theme,
   adwaita-icon-theme,
   debug ? false,
-  withCli ? false,
+  withCli ? true,
   extraRuntimeDeps ? [],
 }: let
   version = "1.0.0";
