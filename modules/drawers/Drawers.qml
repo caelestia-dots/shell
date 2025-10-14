@@ -19,15 +19,26 @@ Variants {
 
         required property ShellScreen modelData
 
+        readonly property bool hasFullscreen: Hypr.monitorFor(modelData)?.activeWorkspace?.toplevels.values.some(t => t.lastIpcObject.fullscreen === 2) ?? false
+        property int borderThickness: Config.border.effectiveThickness(hasFullscreen)
+
+        onBorderThicknessChanged: Visibilities.borderThickness.set(modelData, borderThickness)
+
+        Behavior on borderThickness {
+            Anim {}
+        }
+
+        Component.onCompleted: Visibilities.borderThickness.set(modelData, borderThickness)
+
         Exclusions {
             screen: scope.modelData
             bar: bar
+            borderThickness: scope.borderThickness
         }
 
         StyledWindow {
             id: win
 
-            readonly property bool hasFullscreen: Hypr.monitorFor(screen)?.activeWorkspace?.toplevels.values.some(t => t.lastIpcObject.fullscreen === 2) ?? false
             readonly property int dragMaskPadding: {
                 if (focusGrab.active || panels.popouts.isDetached)
                     return 0;
@@ -43,22 +54,26 @@ Variants {
                 return Math.max(...thresholds);
             }
 
-            onHasFullscreenChanged: {
-                visibilities.launcher = false;
-                visibilities.session = false;
-                visibilities.dashboard = false;
+            Connections {
+                target: scope
+                function onHasFullscreenChanged() {
+                    visibilities.launcher = false;
+                    visibilities.session = false;
+                    visibilities.dashboard = false;
+                }
             }
 
             screen: scope.modelData
             name: "drawers"
+            WlrLayershell.layer: WlrLayer.Overlay
             WlrLayershell.exclusionMode: ExclusionMode.Ignore
             WlrLayershell.keyboardFocus: visibilities.launcher || visibilities.session ? WlrKeyboardFocus.OnDemand : WlrKeyboardFocus.None
 
             mask: Region {
                 x: bar.implicitWidth + win.dragMaskPadding
-                y: Config.border.thickness + win.dragMaskPadding
-                width: win.width - bar.implicitWidth - Config.border.thickness - win.dragMaskPadding * 2
-                height: win.height - Config.border.thickness * 2 - win.dragMaskPadding * 2
+                y: scope.borderThickness + win.dragMaskPadding
+                width: win.width - bar.implicitWidth - scope.borderThickness - win.dragMaskPadding * 2
+                height: win.height - scope.borderThickness * 2 - win.dragMaskPadding * 2
                 intersection: Intersection.Xor
 
                 regions: regions.instances
@@ -78,7 +93,7 @@ Variants {
                     required property Item modelData
 
                     x: modelData.x + bar.implicitWidth
-                    y: modelData.y + Config.border.thickness
+                    y: modelData.y + scope.borderThickness
                     width: modelData.width
                     height: modelData.height
                     intersection: Intersection.Subtract
@@ -122,11 +137,13 @@ Variants {
 
                 Border {
                     bar: bar
+                    borderThickness: scope.borderThickness
                 }
 
                 Backgrounds {
                     panels: panels
                     bar: bar
+                    borderThickness: scope.borderThickness
                 }
             }
 
@@ -150,6 +167,7 @@ Variants {
                 visibilities: visibilities
                 panels: panels
                 bar: bar
+                borderThickness: scope.borderThickness
 
                 Panels {
                     id: panels
@@ -157,6 +175,7 @@ Variants {
                     screen: scope.modelData
                     visibilities: visibilities
                     bar: bar
+                    borderThickness: scope.borderThickness
                 }
 
                 BarWrapper {
@@ -168,6 +187,7 @@ Variants {
                     screen: scope.modelData
                     visibilities: visibilities
                     popouts: panels.popouts
+                    borderThickness: scope.borderThickness
 
                     Component.onCompleted: Visibilities.bars.set(scope.modelData, this)
                 }

@@ -40,7 +40,7 @@ Item {
             id: content
 
             anchors.fill: parent
-            anchors.margins: Config.border.thickness
+            anchors.margins: Visibilities.getBorderThickness(root.screen)
             anchors.leftMargin: Visibilities.bars.get(root.screen).exclusiveZone + Appearance.spacing.small * Config.background.visualiser.spacing
 
             Side {}
