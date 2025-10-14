@@ -211,8 +211,8 @@ void FileSystemModel::setNameFilters(const QStringList& nameFilters) {
     update();
 }
 
-QList<FileSystemEntry*> FileSystemModel::entries() const {
-    return m_entries;
+QQmlListProperty<FileSystemEntry> FileSystemModel::entries() {
+    return QQmlListProperty<FileSystemEntry>(this, &m_entries);
 }
 
 void FileSystemModel::watchDirIfRecursive(const QString& path) {

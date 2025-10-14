@@ -3,6 +3,7 @@
 #include <qjsonobject.h>
 #include <qobject.h>
 #include <qqmlintegration.h>
+#include <qqmllist.h>
 
 namespace caelestia::internal::hypr {
 
@@ -53,12 +54,13 @@ class HyprDevices : public QObject {
     QML_ELEMENT
     QML_UNCREATABLE("HyprDevices instances can only be retrieved from a HyprExtras")
 
-    Q_PROPERTY(QList<HyprKeyboard*> keyboards READ keyboards NOTIFY keyboardsChanged)
+    Q_PROPERTY(
+        QQmlListProperty<caelestia::internal::hypr::HyprKeyboard> keyboards READ keyboards NOTIFY keyboardsChanged)
 
 public:
     explicit HyprDevices(QObject* parent = nullptr);
 
-    [[nodiscard]] QList<HyprKeyboard*> keyboards() const;
+    [[nodiscard]] QQmlListProperty<HyprKeyboard> keyboards();
 
     bool updateLastIpcObject(QJsonObject object);
 

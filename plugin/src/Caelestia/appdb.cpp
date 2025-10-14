@@ -147,11 +147,11 @@ void AppDb::setPath(const QString& path) {
     updateAppFrequencies();
 }
 
-QList<QObject*> AppDb::entries() const {
+QObjectList AppDb::entries() const {
     return m_entries;
 }
 
-void AppDb::setEntries(const QList<QObject*>& entries) {
+void AppDb::setEntries(const QObjectList& entries) {
     if (m_entries == entries) {
         return;
     }
@@ -162,15 +162,8 @@ void AppDb::setEntries(const QList<QObject*>& entries) {
     m_timer->start();
 }
 
-QList<AppEntry*> AppDb::apps() const {
-    auto apps = m_apps.values();
-    std::sort(apps.begin(), apps.end(), [](AppEntry* a, AppEntry* b) {
-        if (a->frequency() != b->frequency()) {
-            return a->frequency() > b->frequency();
-        }
-        return a->name().localeAwareCompare(b->name()) < 0;
-    });
-    return apps;
+QQmlListProperty<AppEntry> AppDb::apps() {
+    return QQmlListProperty<AppEntry>(this, &getSortedApps());
 }
 
 void AppDb::incrementFrequency(const QString& id) {
@@ -183,21 +176,29 @@ void AppDb::incrementFrequency(const QString& id) {
     query.bindValue(":id", id);
     query.exec();
 
-    for (auto* app : std::as_const(m_apps)) {
-        if (app->id() == id) {
-            const auto before = apps();
+    auto* app = m_apps.value(id);
+    if (app) {
+        const auto before = getSortedApps();
 
-            app->incrementFrequency();
+        app->incrementFrequency();
 
-            if (before != apps()) {
-                emit appsChanged();
-            }
-
-            return;
+        if (before != getSortedApps()) {
+            emit appsChanged();
         }
+    } else {
+        qWarning() << "AppDb::incrementFrequency: could not find app with id" << id;
     }
+}
 
-    qWarning() << "AppDb::incrementFrequency: could not find app with id" << id;
+QList<AppEntry*>& AppDb::getSortedApps() const {
+    m_sortedApps = m_apps.values();
+    std::sort(m_sortedApps.begin(), m_sortedApps.end(), [](AppEntry* a, AppEntry* b) {
+        if (a->frequency() != b->frequency()) {
+            return a->frequency() > b->frequency();
+        }
+        return a->name().localeAwareCompare(b->name()) < 0;
+    });
+    return m_sortedApps;
 }
 
 quint32 AppDb::getFrequency(const QString& id) const {
@@ -215,8 +216,14 @@ quint32 AppDb::getFrequency(const QString& id) const {
 }
 
 void AppDb::updateAppFrequencies() {
+    const auto before = getSortedApps();
+
     for (auto* app : std::as_const(m_apps)) {
         app->setFrequency(getFrequency(app->id()));
+    }
+
+    if (before != getSortedApps()) {
+        emit appsChanged();
     }
 }
 

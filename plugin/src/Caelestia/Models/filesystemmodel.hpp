@@ -8,6 +8,7 @@
 #include <qmimedatabase.h>
 #include <qobject.h>
 #include <qqmlintegration.h>
+#include <qqmllist.h>
 
 namespace caelestia::models {
 
@@ -71,7 +72,7 @@ class FileSystemModel : public QAbstractListModel {
     Q_PROPERTY(Filter filter READ filter WRITE setFilter NOTIFY filterChanged)
     Q_PROPERTY(QStringList nameFilters READ nameFilters WRITE setNameFilters NOTIFY nameFiltersChanged)
 
-    Q_PROPERTY(QList<FileSystemEntry*> entries READ entries NOTIFY entriesChanged)
+    Q_PROPERTY(QQmlListProperty<caelestia::models::FileSystemEntry> entries READ entries NOTIFY entriesChanged)
 
 public:
     enum Filter {
@@ -109,7 +110,7 @@ public:
     [[nodiscard]] QStringList nameFilters() const;
     void setNameFilters(const QStringList& nameFilters);
 
-    [[nodiscard]] QList<FileSystemEntry*> entries() const;
+    [[nodiscard]] QQmlListProperty<FileSystemEntry> entries();
 
 signals:
     void pathChanged();
