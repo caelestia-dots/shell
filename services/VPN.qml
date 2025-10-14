@@ -71,18 +71,6 @@ Singleton {
         };
     }
 
-    onConnectedChanged: {
-        if (!Config.utilities.toasts.vpnChanged)
-            return;
-
-        const displayName = root.currentConfig ? (root.currentConfig.displayName || "VPN") : "VPN";
-        if (connected) {
-            Toaster.toast(qsTr("VPN connected"), qsTr("Connected to %1").arg(displayName), "vpn_key");
-        } else {
-            Toaster.toast(qsTr("VPN disconnected"), qsTr("Disconnected from %1").arg(displayName), "vpn_key_off");
-        }
-    }
-
     function connect(): void {
         if (!connected && !connecting && root.currentConfig && root.currentConfig.connectCmd) {
             connectProc.exec(root.currentConfig.connectCmd);
@@ -108,6 +96,20 @@ Singleton {
             statusProc.running = true;
         }
     }
+
+    onConnectedChanged: {
+        if (!Config.utilities.toasts.vpnChanged)
+            return;
+
+        const displayName = root.currentConfig ? (root.currentConfig.displayName || "VPN") : "VPN";
+        if (connected) {
+            Toaster.toast(qsTr("VPN connected"), qsTr("Connected to %1").arg(displayName), "vpn_key");
+        } else {
+            Toaster.toast(qsTr("VPN disconnected"), qsTr("Disconnected from %1").arg(displayName), "vpn_key_off");
+        }
+    }
+
+    Component.onCompleted: root.enabled && statusCheckTimer.start()
 
     Process {
         id: nmMonitor
@@ -171,6 +173,4 @@ Singleton {
         interval: 500
         onTriggered: root.checkStatus()
     }
-
-    Component.onCompleted: root.enabled && statusCheckTimer.start()
 }
