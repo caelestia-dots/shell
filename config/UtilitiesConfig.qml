@@ -29,5 +29,6 @@ JsonObject {
     component Vpn: JsonObject {
         property bool enabled: false
         property list<var> provider: ["netbird"]
+        property bool keyboardLayoutChanged: true
     }
 }
