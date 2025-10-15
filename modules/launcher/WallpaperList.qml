@@ -22,10 +22,10 @@ PathView {
         if (!screen)
             return 0;
 
-        // Screen width - 4x outer rounding - 2x max side thickness (cause centered)
-        const barMargins = Math.max(Config.border.thickness, panels.bar.implicitWidth);
+        const borderThickness = Visibilities.getBorderThickness(screen);
+        const barMargins = Math.max(borderThickness, panels.bar.implicitWidth);
         let outerMargins = 0;
-        if (panels.popouts.hasCurrent && panels.popouts.currentCenter + panels.popouts.nonAnimHeight / 2 > screen.height - content.implicitHeight - Config.border.thickness * 2)
+        if (panels.popouts.hasCurrent && panels.popouts.currentCenter + panels.popouts.nonAnimHeight / 2 > screen.height - content.implicitHeight - borderThickness * 2)
             outerMargins = panels.popouts.nonAnimWidth;
         if ((visibilities.utilities || visibilities.sidebar) && panels.utilities.implicitWidth > outerMargins)
             outerMargins = panels.utilities.implicitWidth;

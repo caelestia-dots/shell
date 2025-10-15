@@ -24,6 +24,8 @@ Loader {
     sourceComponent: MouseArea {
         id: deleteConfirmation
 
+        readonly property int borderThickness: Visibilities.getBorderThickness(QsWindow.window?.screen)
+
         property string path
 
         Component.onCompleted: path = root.props.recordingConfirmDelete
@@ -34,8 +36,8 @@ Loader {
         Item {
             anchors.fill: parent
             anchors.margins: -Appearance.padding.large
-            anchors.rightMargin: -Appearance.padding.large - Config.border.thickness
-            anchors.bottomMargin: -Appearance.padding.large - Config.border.thickness
+            anchors.rightMargin: -Appearance.padding.large - deleteConfirmation.borderThickness
+            anchors.bottomMargin: -Appearance.padding.large - deleteConfirmation.borderThickness
             opacity: 0.5
 
             StyledRect {
@@ -53,7 +55,7 @@ Loader {
 
                 ShapePath {
                     startX: -Config.border.rounding * 2
-                    startY: shape.height - Config.border.thickness
+                    startY: shape.height - deleteConfirmation.borderThickness
                     strokeWidth: 0
                     fillGradient: LinearGradient {
                         orientation: LinearGradient.Horizontal
@@ -81,7 +83,7 @@ Loader {
                     }
                     PathLine {
                         relativeX: 0
-                        relativeY: Config.border.rounding + Config.border.thickness
+                        relativeY: Config.border.rounding + deleteConfirmation.borderThickness
                     }
                     PathLine {
                         relativeX: -Config.border.rounding * 2
@@ -90,7 +92,7 @@ Loader {
                 }
 
                 ShapePath {
-                    startX: shape.width - Config.border.rounding - Config.border.thickness
+                    startX: shape.width - Config.border.rounding - deleteConfirmation.borderThickness
                     strokeWidth: 0
                     fillGradient: LinearGradient {
                         orientation: LinearGradient.Vertical
@@ -118,7 +120,7 @@ Loader {
                         relativeY: -Config.border.rounding
                     }
                     PathLine {
-                        relativeX: Config.border.thickness
+                        relativeX: deleteConfirmation.borderThickness
                         relativeY: 0
                     }
                     PathLine {
