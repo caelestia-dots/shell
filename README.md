@@ -590,7 +590,7 @@ default, you must create it manually.
             "gameModeChanged": true,
             "kbLayoutChanged": true,
             "numLockChanged": true,
-            "vpnChanged": true,
+            "vpnChanged": true
         },
         "vpn": {
             "enabled": false,
