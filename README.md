@@ -306,6 +306,7 @@ default, you must create it manually.
         },
         "enabled": true,
         "visualiser": {
+            "blur": false,
             "enabled": false,
             "autoHide": true,
             "rounding": 1,
@@ -356,6 +357,11 @@ default, you must create it manually.
             }
         ],
         "persistent": true,
+        "popouts": {
+            "activeWindow": true,
+            "statusIcons": true,
+            "tray": true
+        },
         "scrollActions": {
             "brightness": true,
             "workspaces": true,
