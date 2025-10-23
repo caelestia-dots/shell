@@ -40,7 +40,7 @@ in {
           description = "Extra Environment variables to pass to the Caelestia shell systemd service.";
           default = [];
           example = [
-            "QT_QPA_PLATFORMTHEME=gtk3"
+            "QT_QPA_PLATFORMTHEME=qt6ct"
           ];
         };
       };
