@@ -53,7 +53,7 @@
       hyprland
 	  papirus-icon-theme
 	  adwaita-icon-theme
-	  pkgs.hicolor-icon-theme 
+	  hicolor-icon-theme 
 	  acpi
     ]
     ++ extraRuntimeDeps
