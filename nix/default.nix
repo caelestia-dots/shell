@@ -31,7 +31,7 @@
   caelestia-cli,
   papirus-icon-theme,
   adwaita-icon-theme,
-  hicolor-icon-theme,
+  hicolor-icon-theme,  # if using pkgs.hicolor-icon-theme,
   debug ? false,
   withCli ? true,
   extraRuntimeDeps ? [],
@@ -53,7 +53,7 @@
       hyprland
 	  papirus-icon-theme
 	  adwaita-icon-theme
-	  hicolor-icon-theme
+	  pkgs.hicolor-icon-theme 
 	  acpi
     ]
     ++ extraRuntimeDeps
