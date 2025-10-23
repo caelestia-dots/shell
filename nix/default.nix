@@ -32,6 +32,7 @@
   papirus-icon-theme,
   adwaita-icon-theme,
   hicolor-icon-theme,  # if using pkgs.hicolor-icon-theme,
+  acpi,
   debug ? false,
   withCli ? true,
   extraRuntimeDeps ? [],
