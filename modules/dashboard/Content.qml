@@ -103,6 +103,10 @@ Item {
                 Pane {
                     sourceComponent: Performance {}
                 }
+
+                Pane {
+                    sourceComponent: AiChat {}
+                }
             }
 
             Behavior on contentX {

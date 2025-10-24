@@ -25,6 +25,7 @@ Singleton {
     property alias sidebar: adapter.sidebar
     property alias services: adapter.services
     property alias paths: adapter.paths
+    property alias ai: adapter.ai
 
     ElapsedTimer {
         id: timer
@@ -72,6 +73,7 @@ Singleton {
             property SidebarConfig sidebar: SidebarConfig {}
             property ServiceConfig services: ServiceConfig {}
             property UserPaths paths: UserPaths {}
+            property AiConfig ai: AiConfig {}
         }
     }
 }

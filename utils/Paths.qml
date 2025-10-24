@@ -23,6 +23,12 @@ Singleton {
     readonly property string shotsdir: Quickshell.env("CAELESTIA_SCREENSHOTS_DIR") || `${pictures}/Screenshots`
     readonly property string libdir: Quickshell.env("CAELESTIA_LIB_DIR") || "/usr/lib/caelestia"
 
+    // AI-related directories
+    readonly property string aiChats: `${state}/ai/chats`
+    readonly property string aiScripts: Quickshell.shellPath("assets/scripts/ai")
+    readonly property string aiPromptsDefault: Quickshell.shellPath("assets/defaults/ai/prompts")
+    readonly property string aiPromptsUser: `${config}/ai/prompts`
+
     function toLocalFile(path: url): string {
         path = Qt.resolvedUrl(path);
         return path.toString() ? CUtils.toLocalFile(path) : "";

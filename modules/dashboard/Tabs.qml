@@ -45,6 +45,11 @@ Item {
             text: qsTr("Performance")
         }
 
+        Tab {
+            iconName: "smart_toy"
+            text: qsTr("AI Chat")
+        }
+
         // Tab {
         //     iconName: "workspaces"
         //     text: qsTr("Workspaces")
