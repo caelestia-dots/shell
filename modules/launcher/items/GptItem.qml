@@ -8,12 +8,21 @@ import QtQuick.Layouts
 
 Item {
     id: root
+    focus: true // ensure this item listens to keys globally if needed
 
     required property var list
-    readonly property string query: encodeURIComponent(list.search.text.slice(`${Config.launcher.actionPrefix}gpt `.length))
+    readonly property string query: encodeURIComponent(
+        list.search.text.slice(`${Config.launcher.actionPrefix}gpt `.length)
+    )
 
     function onClicked(): void {
-        Quickshell.execDetached(["fish", "-C",`xdg-open 'https://chatgpt.com/?q=${query}'`]);
+        if (query.length === 0)
+            return;
+
+        Quickshell.execDetached([
+            "fish", "-C",
+            `xdg-open 'https://chatgpt.com/?q=${query}'`
+        ])
         root.list.visibilities.launcher = false;
     }
 
@@ -22,13 +31,22 @@ Item {
     anchors.left: parent?.left
     anchors.right: parent?.right
 
-    // Keys.onReturnPressed: onClicked()
+    // ✅ Pressing Enter on the item itself
+    Keys.onReturnPressed: root.onClicked()
+    Keys.onEnterPressed: root.onClicked()
+
+    // ✅ Pressing Enter inside the search bar triggers this too
+    Component.onCompleted: {
+        if (list && list.search) {
+            list.search.Keys.onReturnPressed.connect(root.onClicked)
+            list.search.Keys.onEnterPressed.connect(root.onClicked)
+        }
+    }
 
     StateLayer {
         radius: Appearance.rounding.normal
-
         function onClicked(): void {
-            root.onClicked();
+            root.onClicked()
         }
     }
 
@@ -37,7 +55,6 @@ Item {
         anchors.right: parent.right
         anchors.verticalCenter: parent.verticalCenter
         anchors.margins: Appearance.padding.larger
-
         spacing: Appearance.spacing.normal
 
         MaterialIcon {
