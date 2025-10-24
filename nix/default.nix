@@ -146,6 +146,7 @@ in
     		--set CAELESTIA_XKB_RULES_PATH ${xkeyboard-config}/share/xkeyboard-config-2/rules/base.lst \
     		#--set XDG_DATA_DIRS : "${papirus-icon-theme}/share:${adwaita-icon-theme}/share:${hicolor-icon-theme}/share" \
 			--set XDG_DATA_DIRS "${lib.makeSearchPathOutput "share" [ papirus-icon-theme adwaita-icon-theme hicolor-icon-theme ]}"
+
     		--add-flags "-p $out/share/caelestia-shell"
   		mkdir -p $out/lib
   		ln -s ${extras}/lib/* $out/lib/
