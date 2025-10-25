@@ -31,13 +31,14 @@
   caelestia-cli,
   papirus-icon-theme,
   adwaita-icon-theme,
-  hicolor-icon-theme,
+  hicolor-icon-theme, # if using pkgs.hicolor-icon-theme
   acpi,
   debug ? false,
   withCli ? true,
-  extraRuntimeDeps ? [],
-}: let
+  extraRuntimeDeps ? []
+}:
 
+let
   version = "1.0.0";
 
   runtimeDeps =
@@ -80,11 +81,15 @@
       root = ./..;
       fileset = lib.fileset.union ./../CMakeLists.txt ./../extras;
     };
+
     nativeBuildInputs = [ cmake ninja ];
-    cmakeFlags = [
-      (lib.cmakeFeature "ENABLE_MODULES" "extras")
-      (lib.cmakeFeature "INSTALL_LIBDIR" "${placeholder "out"}/lib")
-    ] ++ cmakeVersionFlags;
+
+    cmakeFlags =
+      [
+        (lib.cmakeFeature "ENABLE_MODULES" "extras")
+        (lib.cmakeFeature "INSTALL_LIBDIR" "${placeholder "out"}/lib")
+      ]
+      ++ cmakeVersionFlags;
   };
 
   plugin = stdenv.mkDerivation {
@@ -94,38 +99,45 @@
       root = ./..;
       fileset = lib.fileset.union ./../CMakeLists.txt ./../plugin;
     };
+
     nativeBuildInputs = [ cmake ninja pkg-config ];
     buildInputs = [ qt6.qtbase qt6.qtdeclarative libqalculate pipewire aubio libcava fftw ];
     dontWrapQtApps = true;
-    cmakeFlags = [
-      (lib.cmakeFeature "ENABLE_MODULES" "plugin")
-      (lib.cmakeFeature "INSTALL_QMLDIR" qt6.qtbase.qtQmlPrefix)
-    ] ++ cmakeVersionFlags;
+
+    cmakeFlags =
+      [
+        (lib.cmakeFeature "ENABLE_MODULES" "plugin")
+        (lib.cmakeFeature "INSTALL_QMLDIR" qt6.qtbase.qtQmlPrefix)
+      ]
+      ++ cmakeVersionFlags;
   };
 
-  # Generate correct XDG data directories (for icon themes)
+  # Proper XDG data dir resolution for icon themes
   xdgDirs = lib.makeSearchPathOutput "share" [
     papirus-icon-theme
     adwaita-icon-theme
     hicolor-icon-theme
   ];
 
-in stdenv.mkDerivation {
-  inherit version cmakeBuildType;
+in
+stdenv.mkDerivation rec {
   pname = "caelestia-shell${lib.optionalString debug "-debug"}";
-  name = "${pname}-${version}";
+  version = "1.0.0";
   src = ./..;
 
   nativeBuildInputs = [ cmake ninja makeWrapper qt6.wrapQtAppsHook ];
   buildInputs = [ quickshell extras plugin xkeyboard-config qt6.qtbase ];
   propagatedBuildInputs = runtimeDeps;
 
-  cmakeFlags = [
-    (lib.cmakeFeature "ENABLE_MODULES" "shell")
-    (lib.cmakeFeature "INSTALL_QSCONFDIR" "${placeholder "out"}/share/caelestia-shell")
-  ] ++ cmakeVersionFlags;
-
+  cmakeBuildType = if debug then "Debug" else "RelWithDebInfo";
   dontStrip = debug;
+
+  cmakeFlags =
+    [
+      (lib.cmakeFeature "ENABLE_MODULES" "shell")
+      (lib.cmakeFeature "INSTALL_QSCONFDIR" "${placeholder "out"}/share/caelestia-shell")
+    ]
+    ++ cmakeVersionFlags;
 
   prePatch = ''
     substituteInPlace assets/pam.d/fprint \
@@ -136,7 +148,7 @@ in stdenv.mkDerivation {
   '';
 
   postInstall = ''
-    # Wrap main executable
+    # Wrap the main executable
     makeWrapper ${quickshell}/bin/qs $out/bin/caelestia-shell \
       --prefix PATH : "${lib.makeBinPath runtimeDeps}" \
       --set FONTCONFIG_FILE "${fontconfig}" \
@@ -160,7 +172,6 @@ in stdenv.mkDerivation {
     mainProgram = "caelestia-shell";
   };
 }
-
 
 
 
