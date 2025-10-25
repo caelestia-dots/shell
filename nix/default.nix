@@ -113,6 +113,7 @@
 in stdenv.mkDerivation {
   inherit version cmakeBuildType;
   pname = "caelestia-shell${lib.optionalString debug "-debug"}";
+  name = "${pname}-${version}";
   src = ./..;
 
   nativeBuildInputs = [ cmake ninja makeWrapper qt6.wrapQtAppsHook ];
