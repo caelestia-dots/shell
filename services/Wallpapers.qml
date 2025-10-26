@@ -21,13 +21,26 @@ Searcher {
 
     function setWallpaper(path: string): void {
         actualCurrent = path;
-        Quickshell.execDetached(["caelestia", "wallpaper", "-f", path, ...smartArg]);
+        
+        const isGif = path.toLowerCase().endsWith(".gif");
+        
+        if (isGif) {
+            // Bypass CLI and write directly to path.txt for GIFs
+            writeGifPathProc.command = ["sh", "-c", `echo '${path}' > '${currentNamePath}'`];
+            writeGifPathProc.running = true;
+            
+            if (Colours.scheme === "dynamic") {
+                setGifColoursProc.command = ["caelestia", "wallpaper", "-p", path, ...smartArg];
+                setGifColoursProc.running = true;
+            }
+        } else {
+            Quickshell.execDetached(["caelestia", "wallpaper", "-f", path, ...smartArg]);
+        }
     }
 
     function preview(path: string): void {
         previewPath = path;
         showPreview = true;
-
         if (Colours.scheme === "dynamic")
             getPreviewColoursProc.running = true;
     }
@@ -87,6 +100,45 @@ Searcher {
             onStreamFinished: {
                 Colours.load(text, true);
                 Colours.showPreview = true;
+            }
+        }
+    }
+
+    Process {
+        id: writeGifPathProc
+        // Command is set dynamically in setWallpaper()
+        // Writes GIF path directly to path.txt since CLI doesn't support GIFs
+    }
+
+    Process {
+        id: setGifColoursProc
+        stdout: StdioCollector {
+            onStreamFinished: {
+                const scheme = JSON.parse(text);
+                
+                Colours.load(text, false);
+                
+                // Persist the scheme JSON directly to file
+                const schemePath = `${Paths.state}/scheme.json`;
+                saveGifSchemeProc.command = ["sh", "-c", `echo '${text}' > '${schemePath}'`];
+                saveGifSchemeProc.schemeData = scheme;
+                saveGifSchemeProc.running = true;
+            }
+        }
+    }
+
+    Process {
+        id: saveGifSchemeProc
+        property var schemeData: null
+        
+        // Saves the GIF color scheme to the persistent scheme.json file
+        onExited: {
+            if (schemeData) {
+                Quickshell.execDetached([
+                    "caelestia", "scheme", "set",
+                    "-m", schemeData.mode,
+                    "-v", schemeData.variant
+                ]);
             }
         }
     }
