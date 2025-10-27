@@ -122,7 +122,6 @@ let
 in
 stdenv.mkDerivation rec {
   pname = "caelestia-shell${lib.optionalString debug "-debug"}";
-  name = pname;
   version = "1.0.0";
   src = ./..;
 
