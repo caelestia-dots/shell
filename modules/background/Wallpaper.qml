@@ -107,10 +107,14 @@ Item {
         id: img
 
         function update(): void {
-            if (path === root.source)
+          if (path === root.source) {
+            if (status === Image.Ready)
                 root.current = this;
-            else
-                path = root.source;
+          }
+          else {
+                path = "";
+                Qt.callLater(()=> {path = root.source});
+          }
         }
 
         anchors.fill: parent
@@ -119,7 +123,7 @@ Item {
         scale: Wallpapers.showPreview ? 1 : 0.8
 
         onStatusChanged: {
-            if (status === Image.Ready)
+            if (status === Image.Ready && path === root.source)
                 root.current = this;
         }
 
