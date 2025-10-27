@@ -85,8 +85,8 @@ bool HyprKeyboard::updateLastIpcObject(QJsonObject object) {
 HyprDevices::HyprDevices(QObject* parent)
     : QObject(parent) {}
 
-QList<HyprKeyboard*> HyprDevices::keyboards() const {
-    return m_keyboards;
+QQmlListProperty<HyprKeyboard> HyprDevices::keyboards() {
+    return QQmlListProperty<HyprKeyboard>(this, &m_keyboards);
 }
 
 bool HyprDevices::updateLastIpcObject(QJsonObject object) {

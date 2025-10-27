@@ -12,7 +12,7 @@ class HyprExtras : public QObject {
     QML_ELEMENT
 
     Q_PROPERTY(QVariantHash options READ options NOTIFY optionsChanged)
-    Q_PROPERTY(HyprDevices* devices READ devices CONSTANT)
+    Q_PROPERTY(caelestia::internal::hypr::HyprDevices* devices READ devices CONSTANT)
 
 public:
     explicit HyprExtras(QObject* parent = nullptr);

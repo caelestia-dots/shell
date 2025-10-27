@@ -97,8 +97,8 @@ void Toast::unlock(QObject* sender) {
 Toaster::Toaster(QObject* parent)
     : QObject(parent) {}
 
-QList<Toast*> Toaster::toasts() const {
-    return m_toasts;
+QQmlListProperty<Toast> Toaster::toasts() {
+    return QQmlListProperty<Toast>(this, &m_toasts);
 }
 
 void Toaster::toast(const QString& title, const QString& message, const QString& icon, Toast::Type type, int timeout) {

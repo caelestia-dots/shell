@@ -45,7 +45,7 @@ Item {
 
         Popout {
             name: "battery"
-            source: "Battery.qml"
+            sourceComponent: Battery {}
         }
 
         Popout {
@@ -57,12 +57,12 @@ Item {
 
         Popout {
             name: "kblayout"
-            source: "KbLayout.qml"
+            sourceComponent: KbLayout {}
         }
 
         Popout {
             name: "lockstatus"
-            source: "LockStatus.qml"
+            sourceComponent: LockStatus {}
         }
 
         Repeater {
@@ -106,7 +106,7 @@ Item {
         id: popout
 
         required property string name
-        property bool shouldBeActive: root.wrapper.currentName === name
+        readonly property bool shouldBeActive: root.wrapper.currentName === name
 
         anchors.verticalCenter: parent.verticalCenter
         anchors.right: parent.right

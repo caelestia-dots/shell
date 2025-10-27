@@ -2,6 +2,7 @@
 
 #include <qobject.h>
 #include <qqmlintegration.h>
+#include <qqmllist.h>
 #include <qset.h>
 
 namespace caelestia {
@@ -61,12 +62,12 @@ class Toaster : public QObject {
     QML_ELEMENT
     QML_SINGLETON
 
-    Q_PROPERTY(QList<Toast*> toasts READ toasts NOTIFY toastsChanged)
+    Q_PROPERTY(QQmlListProperty<caelestia::Toast> toasts READ toasts NOTIFY toastsChanged)
 
 public:
     explicit Toaster(QObject* parent = nullptr);
 
-    [[nodiscard]] QList<Toast*> toasts() const;
+    [[nodiscard]] QQmlListProperty<Toast> toasts();
 
     Q_INVOKABLE void toast(const QString& title, const QString& message, const QString& icon = QString(),
         caelestia::Toast::Type type = Toast::Type::Info, int timeout = 5000);

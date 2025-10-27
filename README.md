@@ -306,6 +306,7 @@ default, you must create it manually.
         },
         "enabled": true,
         "visualiser": {
+            "blur": false,
             "enabled": false,
             "autoHide": true,
             "rounding": 1,
@@ -356,6 +357,11 @@ default, you must create it manually.
             }
         ],
         "persistent": true,
+        "popouts": {
+            "activeWindow": true,
+            "statusIcons": true,
+            "tray": true
+        },
         "scrollActions": {
             "brightness": true,
             "workspaces": true,
@@ -386,7 +392,13 @@ default, you must create it manually.
             "occupiedLabel": "󰮯",
             "perMonitorWorkspaces": true,
             "showWindows": true,
-            "shown": 5
+            "shown": 5,
+            "specialWorkspaceIcons": [
+                {
+                    "name": "steam",
+                    "icon": "sports_esports"
+                }
+            ]
         }
     },
     "border": {
@@ -546,6 +558,7 @@ default, you must create it manually.
     },
     "services": {
         "audioIncrement": 0.1,
+        "maxVolume": 1.0,
         "defaultPlayer": "Spotify",
         "gpuType": "",
         "playerAliases": [{ "from": "com.github.th_ch.youtube_music", "to": "YT Music" }],
@@ -581,7 +594,20 @@ default, you must create it manually.
             "configLoaded": true,
             "dndChanged": true,
             "gameModeChanged": true,
-            "numLockChanged": true
+            "kbLayoutChanged": true,
+            "numLockChanged": true,
+            "vpnChanged": true,
+            "nowPlaying": false
+        },
+        "vpn": {
+            "enabled": false,
+            "provider": [
+                {
+                    "name": "wireguard",
+                    "interface": "your-connection-name",
+                    "displayName": "Wireguard (Your VPN)"
+                }
+            ]
         }
     }
 }
