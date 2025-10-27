@@ -22,11 +22,18 @@ Scope {
     signal flashMsg
 
     function handleKey(event: KeyEvent): void {
-        if (passwd.active || state === "max")
+        if (passwd.active || state === "max" || howdy.active)
             return;
-
         if (event.key === Qt.Key_Enter || event.key === Qt.Key_Return) {
-            passwd.start();
+            if (buffer.length > 0) {
+                // If buffer has text, start password check
+                passwd.start();
+            } else {
+                // Buffer is empty, try howdy
+                if (howdy.available) {
+                    howdy.start();
+                }
+            }
         } else if (event.key === Qt.Key_Backspace) {
             if (event.modifiers & Qt.ControlModifier) {
                 buffer = "";
@@ -145,7 +152,7 @@ Scope {
 
             tries = 0;
             errorTries = 0;
-            start();
+        // start(); // Start only when press Enter
         }
 
         config: "howdy"
