@@ -1,25 +1,40 @@
-//@ pragma Env QS_NO_RELOAD_POPUP=1
-//@ pragma Env QSG_RENDER_LOOP=threaded
-//@ pragma Env QT_QUICK_FLICKABLE_WHEEL_DECELERATION=10000
+import QtQuick 2.15
+import Qt.labs.folderlistmodel 2.1
+import caelestia.shell 1.0
 
-import "modules"
-import "modules/drawers"
-import "modules/background"
-import "modules/areapicker"
-import "modules/lock"
-import Quickshell
+Wallpaper {
+    id: wallpaper
+    anchors.fill: parent
 
-ShellRoot {
-    Background {}
-    Drawers {}
-    AreaPicker {}
-    Lock {
-        id: lock
+    // Path to your wallpaper folder
+    property string wallpaperFolder: "~/Pictures/Wallpapers"
+
+    // Scan the folder for images
+    FolderListModel {
+        id: folderModel
+        folder: wallpaperFolder
+        nameFilters: ["*.jpg", "*.png", "*.jpeg"]
     }
 
-    Shortcuts {}
-    BatteryMonitor {}
-    IdleMonitors {
-        lock: lock
+    // Pick a random wallpaper on startup
+    Component.onCompleted: {
+        if (folderModel.count > 0) {
+            var randomIndex = Math.floor(Math.random() * folderModel.count)
+            wallpaper.source = folderModel.get(randomIndex).filePath
+        }
+    }
+
+    // Optional: rotate every X minutes
+    Timer {
+        interval: 600000  // 10 minutes (600,000 ms)
+        running: true
+        repeat: true
+        onTriggered: {
+            if (folderModel.count > 0) {
+                var randomIndex = Math.floor(Math.random() * folderModel.count)
+                wallpaper.source = folderModel.get(randomIndex).filePath
+            }
+        }
     }
 }
+

@@ -77,6 +77,7 @@ let
   extras = stdenv.mkDerivation {
     inherit cmakeBuildType;
     pname = "caelestia-extras${lib.optionalString debug "-debug"}";
+	version = "1.0.0";
     src = lib.fileset.toSource {
       root = ./..;
       fileset = lib.fileset.union ./../CMakeLists.txt ./../extras;
@@ -95,6 +96,7 @@ let
   plugin = stdenv.mkDerivation {
     inherit cmakeBuildType;
     pname = "caelestia-qml-plugin${lib.optionalString debug "-debug"}";
+	version = "1.0.0";
     src = lib.fileset.toSource {
       root = ./..;
       fileset = lib.fileset.union ./../CMakeLists.txt ./../plugin;
@@ -113,11 +115,11 @@ let
   };
 
   # Proper XDG data dir resolution for icon themes
-  xdgDirs = lib.makeSearchPathOutput "share" [
+  xdgDirs = builtins.concatStringsSep ":" (map (pkg: "${pkg}/share") [
     papirus-icon-theme
     adwaita-icon-theme
     hicolor-icon-theme
-  ];
+  ]);
 
 in
 stdenv.mkDerivation rec {
@@ -142,10 +144,8 @@ stdenv.mkDerivation rec {
   prePatch = ''
     substituteInPlace assets/pam.d/fprint \
       --replace-fail pam_fprintd.so /run/current-system/sw/lib/security/pam_fprintd.so
+	'';
 
-    substituteInPlace shell.qml \
-      --replace-fail 'ShellRoot {' 'ShellRoot { settings.watchFiles: false'
-  '';
 
   postInstall = ''
     # Wrap the main executable
