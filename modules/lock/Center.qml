@@ -152,21 +152,27 @@ ColumnLayout {
 
             Item {
                 implicitWidth: implicitHeight
-                implicitHeight: fprintIcon.implicitHeight + Appearance.padding.small * 2
+                implicitHeight: authIcon.implicitHeight + Appearance.padding.small * 2
 
                 MaterialIcon {
-                    id: fprintIcon
+                    id: authIcon
 
                     anchors.centerIn: parent
                     animate: true
                     text: {
+                        if (root.lock.pam.howdy.tries >= Config.lock.maxHowdyTries)
+                            return "visibility_off";
                         if (root.lock.pam.fprint.tries >= Config.lock.maxFprintTries)
                             return "fingerprint_off";
+
+                        if (root.lock.pam.howdy.active)
+                            return "visibility";
                         if (root.lock.pam.fprint.active)
                             return "fingerprint";
+
                         return "lock";
                     }
-                    color: root.lock.pam.fprint.tries >= Config.lock.maxFprintTries ? Colours.palette.m3error : Colours.palette.m3onSurface
+                    color: (root.lock.pam.howdy.tries >= Config.lock.maxHowdyTries || root.lock.pam.fprint.tries >= Config.lock.maxFprintTries) ? Colours.palette.m3error : Colours.palette.m3onSurface
                     opacity: root.lock.pam.passwd.active ? 0 : 1
 
                     Behavior on opacity {
@@ -291,6 +297,8 @@ ColumnLayout {
 
             readonly property Pam pam: root.lock.pam
             readonly property string msg: {
+                if (pam.howdyState === "error")
+                    return qsTr("Howdy ERROR: %1").arg(pam.howdy.message);
                 if (pam.fprintState === "error")
                     return qsTr("FP ERROR: %1").arg(pam.fprint.message);
                 if (pam.state === "error")
@@ -299,23 +307,48 @@ ColumnLayout {
                 if (pam.lockMessage)
                     return pam.lockMessage;
 
+                if (pam.state === "max" && pam.fprintState === "max" && pam.howdyState === "max")
+                    return qsTr("Maximum password, fingerprint, and face attempts reached.");
                 if (pam.state === "max" && pam.fprintState === "max")
                     return qsTr("Maximum password and fingerprint attempts reached.");
+                if (pam.state === "max" && pam.howdyState === "max")
+                    return qsTr("Maximum password and face attempts reached.");
+                if (pam.fprintState === "max" && pam.howdyState === "max")
+                    return qsTr("Maximum fingerprint and face attempts reached.");
+
                 if (pam.state === "max") {
+                    if (pam.fprint.available && pam.howdy.available)
+                        return qsTr("Maximum password attempts reached. Please use fingerprint or face.");
                     if (pam.fprint.available)
                         return qsTr("Maximum password attempts reached. Please use fingerprint.");
+                    if (pam.howdy.available)
+                        return qsTr("Maximum password attempts reached. Please use face.");
                     return qsTr("Maximum password attempts reached.");
                 }
-                if (pam.fprintState === "max")
+                if (pam.fprintState === "max") {
+                    if (pam.howdy.available)
+                        return qsTr("Maximum fingerprint attempts reached. Please use face or password.");
                     return qsTr("Maximum fingerprint attempts reached. Please use password.");
+                }
+                if (pam.howdyState === "max") {
+                    if (pam.fprint.available)
+                        return qsTr("Maximum face attempts reached. Please use fingerprint or password.");
+                    return qsTr("Maximum face attempts reached. Please use password.");
+                }
 
                 if (pam.state === "fail") {
+                    if (pam.fprint.available && pam.howdy.available)
+                        return qsTr("Incorrect password. Please try again or use fingerprint/face.");
                     if (pam.fprint.available)
                         return qsTr("Incorrect password. Please try again or use fingerprint.");
+                    if (pam.howdy.available)
+                        return qsTr("Incorrect password. Please try again or use face.");
                     return qsTr("Incorrect password. Please try again.");
                 }
                 if (pam.fprintState === "fail")
                     return qsTr("Fingerprint not recognized (%1/%2). Please try again or use password.").arg(pam.fprint.tries).arg(Config.lock.maxFprintTries);
+                if (pam.howdyState === "fail")
+                    return qsTr("Face not recognized (%1/%2). Please try again or use password.").arg(pam.howdy.tries).arg(Config.lock.maxHowdyTries);
 
                 return "";
             }

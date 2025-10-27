@@ -12,9 +12,11 @@ Scope {
 
     readonly property alias passwd: passwd
     readonly property alias fprint: fprint
+    readonly property alias howdy: howdy
     property string lockMessage
     property string state
     property string fprintState
+    property string howdyState
     property string buffer
 
     signal flashMsg
@@ -128,6 +130,56 @@ Scope {
         }
     }
 
+    PamContext {
+        id: howdy
+
+        property bool available
+        property int tries
+        property int errorTries
+
+        function checkAvail(): void {
+            if (!available || !Config.lock.enableHowdy || !root.lock.secure) {
+                abort();
+                return;
+            }
+
+            tries = 0;
+            errorTries = 0;
+            start();
+        }
+
+        config: "howdy"
+        configDirectory: Quickshell.shellDir + "/assets/pam.d"
+
+        onCompleted: res => {
+            if (!available)
+                return;
+
+            if (res === PamResult.Success)
+                return root.lock.unlock();
+
+            if (res === PamResult.Error) {
+                root.howdyState = "error";
+                errorTries++;
+                if (errorTries < 5) {
+                    abort();
+                    howdyErrorRetry.restart();
+                }
+            } else if (res === PamResult.MaxTries || res === PamResult.Failed) {
+                tries++;
+                if (tries < Config.lock.maxHowdyTries) {
+                    root.howdyState = "fail";
+                    start();
+                } else {
+                    root.howdyState = "max";
+                    abort();
+                }
+            }
+
+            root.flashMsg();
+            howdyStateReset.restart();
+        }
+    }
     Process {
         id: availProc
 
@@ -135,6 +187,15 @@ Scope {
         onExited: code => {
             fprint.available = code === 0;
             fprint.checkAvail();
+        }
+    }
+    Process {
+        id: howdyAvailProc
+
+        command: ["sh", "-c", "command -v howdy"]
+        onExited: code => {
+            howdy.available = code === 0;
+            howdy.checkAvail();
         }
     }
 
@@ -165,21 +226,41 @@ Scope {
         }
     }
 
+    Timer {
+        id: howdyErrorRetry
+
+        interval: 800
+        onTriggered: howdy.start()
+    }
+
+    Timer {
+        id: howdyStateReset
+
+        interval: 4000
+        onTriggered: {
+            root.howdyState = "";
+            howdy.errorTries = 0;
+        }
+    }
+
     Connections {
         target: root.lock
 
         function onSecureChanged(): void {
             if (root.lock.secure) {
                 availProc.running = true;
+                howdyAvailProc.running = true;
                 root.buffer = "";
                 root.state = "";
                 root.fprintState = "";
+                root.howdyState = "";
                 root.lockMessage = "";
             }
         }
 
         function onUnlock(): void {
             fprint.abort();
+            howdy.abort();
         }
     }
 
@@ -188,6 +269,10 @@ Scope {
 
         function onEnableFprintChanged(): void {
             fprint.checkAvail();
+        }
+
+        function onEnableHowdyChanged(): void {
+            howdy.checkAvail();
         }
     }
 }

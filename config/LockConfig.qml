@@ -4,6 +4,8 @@ JsonObject {
     property bool recolourLogo: false
     property bool enableFprint: true
     property int maxFprintTries: 3
+    property bool enableHowdy: true
+    property int maxHowdyTries: 2
     property Sizes sizes: Sizes {}
 
     component Sizes: JsonObject {
