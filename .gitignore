@@ -1,3 +1,4 @@
+.direnv
 /result
 /.qmlls.ini
 
@@ -10,3 +11,7 @@ beat_detector
 CLAUDE.md
 .claude-code/
 .claude-session/
+
+# Build artifacts
+build/
+.cache/

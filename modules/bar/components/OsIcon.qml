@@ -1,11 +1,10 @@
-import qs.widgets
+import qs.components.effects
 import qs.services
-import qs.utils
 import qs.config
+import qs.utils
 
-StyledText {
-    text: Icons.osIcon
-    font.pointSize: Appearance.font.size.smaller
-    font.family: Appearance.font.family.mono
-    color: Colours.palette.m3tertiary
+ColouredIcon {
+    source: SysInfo.osLogo
+    implicitSize: Appearance.font.size.large * 1.2
+    colour: Colours.palette.m3tertiary
 }

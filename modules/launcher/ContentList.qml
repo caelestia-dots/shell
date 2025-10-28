@@ -1,18 +1,21 @@
 pragma ComponentBehavior: Bound
 
-import qs.widgets
+import qs.components
+import qs.components.controls
 import qs.services
 import qs.config
 import qs.utils
 import Quickshell
 import QtQuick
-import QtQuick.Controls
 
 Item {
     id: root
 
+    required property var content
     required property PersistentProperties visibilities
-    required property TextField search
+    required property var panels
+    required property real maxHeight
+    required property StyledTextField search
     required property int padding
     required property int rounding
 
@@ -31,7 +34,7 @@ Item {
 
             PropertyChanges {
                 root.implicitWidth: Config.launcher.sizes.itemWidth
-                root.implicitHeight: appList.implicitHeight > 0 ? appList.implicitHeight : empty.implicitHeight
+                root.implicitHeight: Math.min(root.maxHeight, appList.implicitHeight > 0 ? appList.implicitHeight : empty.implicitHeight)
                 appList.active: true
             }
 
@@ -53,24 +56,20 @@ Item {
 
     Behavior on state {
         SequentialAnimation {
-            NumberAnimation {
+            Anim {
                 target: root
                 property: "opacity"
                 from: 1
                 to: 0
                 duration: Appearance.anim.durations.small
-                easing.type: Easing.BezierSpline
-                easing.bezierCurve: Appearance.anim.curves.standard
             }
             PropertyAction {}
-            NumberAnimation {
+            Anim {
                 target: root
                 property: "opacity"
                 from: 0
                 to: 1
                 duration: Appearance.anim.durations.small
-                easing.type: Easing.BezierSpline
-                easing.bezierCurve: Appearance.anim.curves.standard
             }
         }
     }
@@ -79,10 +78,8 @@ Item {
         id: appList
 
         active: false
-        asynchronous: true
 
-        anchors.left: parent.left
-        anchors.right: parent.right
+        anchors.fill: parent
 
         sourceComponent: AppList {
             search: root.search
@@ -94,7 +91,6 @@ Item {
         id: wallpaperList
 
         active: false
-        asynchronous: true
 
         anchors.top: parent.top
         anchors.bottom: parent.bottom
@@ -103,6 +99,8 @@ Item {
         sourceComponent: WallpaperList {
             search: root.search
             visibilities: root.visibilities
+            panels: root.panels
+            content: root.content
         }
     }
 
@@ -137,35 +135,26 @@ Item {
             }
 
             StyledText {
-                text: root.state === "wallpapers" && Wallpapers.list.length === 0 ? qsTr("Try putting some wallpapers in %1").arg(Paths.shortenHome(Config.paths.wallpaperDir)) : qsTr("Try searching for something else")
+                text: root.state === "wallpapers" && Wallpapers.list.length === 0 ? qsTr("Try putting some wallpapers in %1").arg(Paths.shortenHome(Paths.wallsdir)) : qsTr("Try searching for something else")
                 color: Colours.palette.m3onSurfaceVariant
                 font.pointSize: Appearance.font.size.normal
             }
         }
 
         Behavior on opacity {
-            NumberAnimation {
-                duration: Appearance.anim.durations.normal
-                easing.type: Easing.BezierSpline
-                easing.bezierCurve: Appearance.anim.curves.standard
-            }
+            Anim {}
         }
 
         Behavior on scale {
-            NumberAnimation {
-                duration: Appearance.anim.durations.normal
-                easing.type: Easing.BezierSpline
-                easing.bezierCurve: Appearance.anim.curves.standard
-            }
+            Anim {}
         }
     }
 
     Behavior on implicitWidth {
         enabled: root.visibilities.launcher
 
-        NumberAnimation {
+        Anim {
             duration: Appearance.anim.durations.large
-            easing.type: Easing.BezierSpline
             easing.bezierCurve: Appearance.anim.curves.emphasizedDecel
         }
     }
@@ -173,9 +162,8 @@ Item {
     Behavior on implicitHeight {
         enabled: root.visibilities.launcher
 
-        NumberAnimation {
+        Anim {
             duration: Appearance.anim.durations.large
-            easing.type: Easing.BezierSpline
             easing.bezierCurve: Appearance.anim.curves.emphasizedDecel
         }
     }

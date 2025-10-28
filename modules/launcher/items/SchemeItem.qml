@@ -1,5 +1,5 @@
 import "../services"
-import qs.widgets
+import qs.components
 import qs.services
 import qs.config
 import QtQuick
@@ -16,7 +16,7 @@ Item {
     anchors.right: parent?.right
 
     StateLayer {
-        radius: Appearance.rounding.full
+        radius: Appearance.rounding.normal
 
         function onClicked(): void {
             root.modelData?.onClicked(root.list);
@@ -67,25 +67,38 @@ Item {
             anchors.leftMargin: Appearance.spacing.normal
             anchors.verticalCenter: parent.verticalCenter
 
-            width: parent.width - preview.width
+            width: parent.width - preview.width - anchors.leftMargin - (current.active ? current.width + Appearance.spacing.normal : 0)
             spacing: 0
 
             StyledText {
-                id: name
-
-                text: root.modelData?.name ?? ""
+                text: root.modelData?.flavour ?? ""
                 font.pointSize: Appearance.font.size.normal
             }
 
             StyledText {
-                id: comment
-
-                text: root.modelData?.flavour ?? ""
+                text: root.modelData?.name ?? ""
                 font.pointSize: Appearance.font.size.small
                 color: Colours.palette.m3outline
 
                 elide: Text.ElideRight
-                width: parent.width - Appearance.rounding.normal * 2
+                anchors.left: parent.left
+                anchors.right: parent.right
+            }
+        }
+
+        Loader {
+            id: current
+
+            anchors.right: parent.right
+            anchors.verticalCenter: parent.verticalCenter
+
+            active: `${root.modelData?.name} ${root.modelData?.flavour}` === Schemes.currentScheme
+            asynchronous: true
+
+            sourceComponent: MaterialIcon {
+                text: "check"
+                color: Colours.palette.m3onSurfaceVariant
+                font.pointSize: Appearance.font.size.large
             }
         }
     }

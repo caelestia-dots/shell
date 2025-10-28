@@ -1,6 +1,7 @@
 pragma ComponentBehavior: Bound
 
-import qs.widgets
+import qs.components
+import qs.components.controls
 import qs.services
 import qs.config
 import qs.utils
@@ -49,7 +50,7 @@ ColumnLayout {
         RowLayout {
             id: networkItem
 
-            required property var modelData
+            required property Network.AccessPoint modelData
             readonly property bool isConnecting: root.connectingToSsid === modelData.ssid
             readonly property bool loading: networkItem.isConnecting
 
@@ -101,20 +102,11 @@ ColumnLayout {
                 implicitHeight: connectIcon.implicitHeight + Appearance.padding.small
 
                 radius: Appearance.rounding.full
-                color: networkItem.modelData.active ? Colours.palette.m3primary : Colours.palette.m3surface
+                color: Qt.alpha(Colours.palette.m3primary, networkItem.modelData.active ? 1 : 0)
 
-                StyledBusyIndicator {
-                    anchors.centerIn: parent
-
-                    implicitWidth: implicitHeight
-                    implicitHeight: connectIcon.implicitHeight
-
-                    running: opacity > 0
-                    opacity: networkItem.loading ? 1 : 0
-
-                    Behavior on opacity {
-                        Anim {}
-                    }
+                CircularIndicator {
+                    anchors.fill: parent
+                    running: networkItem.loading
                 }
 
                 StateLayer {
@@ -154,11 +146,11 @@ ColumnLayout {
         Layout.fillWidth: true
         implicitHeight: rescanBtn.implicitHeight + Appearance.padding.small * 2
 
-        radius: Appearance.rounding.normal
-        color: Network.scanning ? Colours.palette.m3surfaceContainer : Colours.palette.m3primaryContainer
+        radius: Appearance.rounding.full
+        color: Colours.palette.m3primaryContainer
 
         StateLayer {
-            color: Network.scanning ? Colours.palette.m3onSurface : Colours.palette.m3onPrimaryContainer
+            color: Colours.palette.m3onPrimaryContainer
             disabled: Network.scanning || !Network.wifiEnabled
 
             function onClicked(): void {
@@ -168,29 +160,35 @@ ColumnLayout {
 
         RowLayout {
             id: rescanBtn
+
             anchors.centerIn: parent
             spacing: Appearance.spacing.small
+            opacity: Network.scanning ? 0 : 1
 
             MaterialIcon {
                 id: scanIcon
 
                 animate: true
-                text: Network.scanning ? "refresh" : "wifi_find"
-                color: Network.scanning ? Colours.palette.m3onSurface : Colours.palette.m3onPrimaryContainer
-
-                RotationAnimation on rotation {
-                    running: Network.scanning
-                    loops: Animation.Infinite
-                    from: 0
-                    to: 360
-                    duration: 1000
-                }
+                text: "wifi_find"
+                color: Colours.palette.m3onPrimaryContainer
             }
 
             StyledText {
-                text: Network.scanning ? qsTr("Scanning...") : qsTr("Rescan networks")
-                color: Network.scanning ? Colours.palette.m3onSurface : Colours.palette.m3onPrimaryContainer
+                text: qsTr("Rescan networks")
+                color: Colours.palette.m3onPrimaryContainer
             }
+
+            Behavior on opacity {
+                Anim {}
+            }
+        }
+
+        CircularIndicator {
+            anchors.centerIn: parent
+            strokeWidth: Appearance.padding.small / 2
+            bgColour: "transparent"
+            implicitHeight: parent.implicitHeight - Appearance.padding.smaller * 2
+            running: Network.scanning
         }
     }
 
@@ -227,11 +225,5 @@ ColumnLayout {
         StyledSwitch {
             id: toggle
         }
-    }
-
-    component Anim: NumberAnimation {
-        duration: Appearance.anim.durations.normal
-        easing.type: Easing.BezierSpline
-        easing.bezierCurve: Appearance.anim.curves.standard
     }
 }

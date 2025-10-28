@@ -1,5 +1,6 @@
 pragma ComponentBehavior: Bound
 
+import qs.components
 import qs.config
 import Quickshell
 import Quickshell.Services.SystemTray
@@ -9,11 +10,13 @@ Item {
     id: root
 
     required property Item wrapper
+    readonly property Popout currentPopout: content.children.find(c => c.shouldBeActive) ?? null
+    readonly property Item current: currentPopout?.item ?? null
 
     anchors.centerIn: parent
 
-    implicitWidth: (content.children.find(c => c.shouldBeActive)?.implicitWidth ?? 0) + Appearance.padding.large * 2
-    implicitHeight: (content.children.find(c => c.shouldBeActive)?.implicitHeight ?? 0) + Appearance.padding.large * 2
+    implicitWidth: (currentPopout?.implicitWidth ?? 0) + Appearance.padding.large * 2
+    implicitHeight: (currentPopout?.implicitHeight ?? 0) + Appearance.padding.large * 2
 
     Item {
         id: content
@@ -30,7 +33,7 @@ Item {
 
         Popout {
             name: "network"
-            source: "Network.qml"
+            sourceComponent: Network {}
         }
 
         Popout {
@@ -42,7 +45,7 @@ Item {
 
         Popout {
             name: "battery"
-            source: "Battery.qml"
+            sourceComponent: Battery {}
         }
 
         Popout {
@@ -50,6 +53,16 @@ Item {
             sourceComponent: Audio {
                 wrapper: root.wrapper
             }
+        }
+
+        Popout {
+            name: "kblayout"
+            sourceComponent: KbLayout {}
+        }
+
+        Popout {
+            name: "lockstatus"
+            sourceComponent: LockStatus {}
         }
 
         Repeater {
@@ -93,7 +106,7 @@ Item {
         id: popout
 
         required property string name
-        property bool shouldBeActive: root.wrapper.currentName === name
+        readonly property bool shouldBeActive: root.wrapper.currentName === name
 
         anchors.verticalCenter: parent.verticalCenter
         anchors.right: parent.right
@@ -101,7 +114,6 @@ Item {
         opacity: 0
         scale: 0.8
         active: false
-        asynchronous: true
 
         states: State {
             name: "active"
@@ -145,11 +157,5 @@ Item {
                 }
             }
         ]
-    }
-
-    component Anim: NumberAnimation {
-        duration: Appearance.anim.durations.normal
-        easing.type: Easing.BezierSpline
-        easing.bezierCurve: Appearance.anim.curves.standard
     }
 }

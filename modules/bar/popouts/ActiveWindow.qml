@@ -1,4 +1,4 @@
-import qs.widgets
+import qs.components
 import qs.services
 import qs.utils
 import qs.config
@@ -12,7 +12,7 @@ Item {
 
     required property Item wrapper
 
-    implicitWidth: Hyprland.activeToplevel ? child.implicitWidth : -Appearance.padding.large * 2
+    implicitWidth: Hypr.activeToplevel ? child.implicitWidth : -Appearance.padding.large * 2
     implicitHeight: child.implicitHeight
 
     Column {
@@ -33,7 +33,7 @@ Item {
 
                 Layout.alignment: Qt.AlignVCenter
                 implicitSize: details.implicitHeight
-                source: Icons.getAppIcon(Hyprland.activeToplevel?.lastIpcObject.class ?? "", "image-missing")
+                source: Icons.getAppIcon(Hypr.activeToplevel?.lastIpcObject.class ?? "", "image-missing")
             }
 
             ColumnLayout {
@@ -44,14 +44,14 @@ Item {
 
                 StyledText {
                     Layout.fillWidth: true
-                    text: Hyprland.activeToplevel?.title ?? ""
+                    text: Hypr.activeToplevel?.title ?? ""
                     font.pointSize: Appearance.font.size.normal
                     elide: Text.ElideRight
                 }
 
                 StyledText {
                     Layout.fillWidth: true
-                    text: Hyprland.activeToplevel?.lastIpcObject.class ?? ""
+                    text: Hypr.activeToplevel?.lastIpcObject.class ?? ""
                     color: Colours.palette.m3onSurfaceVariant
                     elide: Text.ElideRight
                 }
@@ -91,7 +91,7 @@ Item {
             ScreencopyView {
                 id: preview
 
-                captureSource: Hyprland.activeToplevel?.wayland ?? null
+                captureSource: Hypr.activeToplevel?.wayland ?? null
                 live: visible
 
                 constraintSize.width: Config.bar.sizes.windowPreviewSize

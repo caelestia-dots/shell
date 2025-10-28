@@ -1,56 +1,11 @@
 pragma Singleton
 
+import qs.config
 import Quickshell
-import Quickshell.Io
 import Quickshell.Services.Notifications
 
 Singleton {
     id: root
-
-    readonly property var osIcons: ({
-            almalinux: "",
-            alpine: "",
-            arch: "",
-            archcraft: "",
-            arcolinux: "",
-            artix: "",
-            centos: "",
-            debian: "",
-            devuan: "",
-            elementary: "",
-            endeavouros: "",
-            fedora: "",
-            freebsd: "",
-            garuda: "",
-            gentoo: "",
-            hyperbola: "",
-            kali: "",
-            linuxmint: "󰣭",
-            mageia: "",
-            openmandriva: "",
-            manjaro: "",
-            neon: "",
-            nixos: "",
-            opensuse: "",
-            suse: "",
-            sles: "",
-            sles_sap: "",
-            "opensuse-tumbleweed": "",
-            parrot: "",
-            pop: "",
-            raspbian: "",
-            rhel: "",
-            rocky: "",
-            slackware: "",
-            solus: "",
-            steamos: "",
-            tails: "",
-            trisquel: "",
-            ubuntu: "",
-            vanilla: "",
-            void: "",
-            zorin: ""
-        })
 
     readonly property var weatherIcons: ({
             "113": "clear_day",
@@ -103,10 +58,6 @@ Singleton {
             "395": "snowing"
         })
 
-    readonly property var desktopEntrySubs: ({
-            "gimp-3.0": "gimp"
-        })
-
     readonly property var categoryIcons: ({
             WebBrowser: "web",
             Printing: "print",
@@ -147,24 +98,15 @@ Singleton {
             Office: "content_paste"
         })
 
-    property string osIcon: ""
-    property string osName
-
-    function getDesktopEntry(name: string): DesktopEntry {
-        name = name.toLowerCase().replace(/ /g, "-");
-
-        if (desktopEntrySubs.hasOwnProperty(name))
-            name = desktopEntrySubs[name];
-
-        return DesktopEntries.applications.values.find(a => a.id.toLowerCase() === name) ?? null;
-    }
-
     function getAppIcon(name: string, fallback: string): string {
-        return Quickshell.iconPath(getDesktopEntry(name)?.icon, fallback);
+        const icon = DesktopEntries.heuristicLookup(name)?.icon;
+        if (fallback !== "undefined")
+            return Quickshell.iconPath(icon, fallback);
+        return Quickshell.iconPath(icon);
     }
 
     function getAppCategoryIcon(name: string, fallback: string): string {
-        const categories = getDesktopEntry(name)?.categories;
+        const categories = DesktopEntries.heuristicLookup(name)?.categories;
 
         if (categories)
             for (const [key, value] of Object.entries(categoryIcons))
@@ -206,6 +148,7 @@ Singleton {
     }
 
     function getNotifIcon(summary: string, urgency: int): string {
+        summary = summary.toLowerCase();
         if (summary.includes("reboot"))
             return "restart_alt";
         if (summary.includes("recording"))
@@ -233,25 +176,53 @@ Singleton {
         return "chat";
     }
 
-    FileView {
-        path: "/etc/os-release"
-        onLoaded: {
-            const lines = text().split("\n");
-            let osId = lines.find(l => l.startsWith("ID="))?.split("=")[1].replace(/"/g, "");
-            if (root.osIcons.hasOwnProperty(osId))
-                root.osIcon = root.osIcons[osId];
-            else {
-                const osIdLike = lines.find(l => l.startsWith("ID_LIKE="))?.split("=")[1].replace(/"/g, "");
-                if (osIdLike)
-                    for (const id of osIdLike.split(" "))
-                        if (root.osIcons.hasOwnProperty(id))
-                            return root.osIcon = root.osIcons[id];
-            }
+    function getVolumeIcon(volume: real, isMuted: bool): string {
+        if (isMuted)
+            return "no_sound";
+        if (volume >= 0.5)
+            return "volume_up";
+        if (volume > 0)
+            return "volume_down";
+        return "volume_mute";
+    }
 
-            let nameLine = lines.find(l => l.startsWith("PRETTY_NAME="));
-            if (!nameLine)
-                nameLine = lines.find(l => l.startsWith("NAME="));
-            root.osName = nameLine.split("=")[1].replace(/"/g, "");
+    function getMicVolumeIcon(volume: real, isMuted: bool): string {
+        if (!isMuted && volume > 0)
+            return "mic";
+        return "mic_off";
+    }
+
+    function getSpecialWsIcon(name: string): string {
+        name = name.toLowerCase().slice("special:".length);
+        
+        for (const iconConfig of Config.bar.workspaces.specialWorkspaceIcons) {
+            if (iconConfig.name === name) {
+                return iconConfig.icon;
+            }
         }
+        
+        if (name === "special")
+            return "star";
+        if (name === "communication")
+            return "forum";
+        if (name === "music")
+            return "music_cast";
+        if (name === "todo")
+            return "checklist";
+        if (name === "sysmon")
+            return "monitor_heart";
+        return name[0].toUpperCase();
+    }
+
+    function getTrayIcon(id: string, icon: string): string {
+        for (const sub of Config.bar.tray.iconSubs)
+            if (sub.id === id)
+                return sub.image ? Qt.resolvedUrl(sub.image) : Quickshell.iconPath(sub.icon);
+
+        if (icon.includes("?path=")) {
+            const [name, path] = icon.split("?path=");
+            icon = Qt.resolvedUrl(`${path}/${name.slice(name.lastIndexOf("/") + 1)}`);
+        }
+        return icon;
     }
 }

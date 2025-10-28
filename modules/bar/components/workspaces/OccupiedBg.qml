@@ -1,6 +1,6 @@
 pragma ComponentBehavior: Bound
 
-import qs.widgets
+import qs.components
 import qs.services
 import qs.config
 import Quickshell
@@ -9,7 +9,7 @@ import QtQuick
 Item {
     id: root
 
-    required property list<Workspace> workspaces
+    required property Repeater workspaces
     required property var occupied
     required property int groupOffset
 
@@ -48,18 +48,24 @@ Item {
 
             required property var modelData
 
-            readonly property Workspace start: root.workspaces[modelData.start - 1 - root.groupOffset] ?? null
-            readonly property Workspace end: root.workspaces[modelData.end - 1 - root.groupOffset] ?? null
+            readonly property Workspace start: root.workspaces.itemAt(getWsIdx(modelData.start)) ?? null
+            readonly property Workspace end: root.workspaces.itemAt(getWsIdx(modelData.end)) ?? null
 
-            color: Colours.alpha(Colours.palette.m3surfaceContainerHigh, true)
-            radius: Config.bar.workspaces.rounded ? Appearance.rounding.full : 0
+            function getWsIdx(ws: int): int {
+                let i = ws - 1;
+                while (i < 0)
+                    i += Config.bar.workspaces.shown;
+                return i % Config.bar.workspaces.shown;
+            }
 
-            x: start?.x ?? 0
-            y: start?.y ?? 0
-            implicitWidth: Config.bar.sizes.innerHeight
-            implicitHeight: end?.y + end?.height - start?.y
+            anchors.horizontalCenter: root.horizontalCenter
 
-            anchors.horizontalCenter: parent.horizontalCenter
+            y: (start?.y ?? 0) - 1
+            implicitWidth: Config.bar.sizes.innerWidth - Appearance.padding.small * 2 + 2
+            implicitHeight: start && end ? end.y + end.size - start.y + 2 : 0
+
+            color: Colours.layer(Colours.palette.m3surfaceContainerHigh, 2)
+            radius: Appearance.rounding.full
 
             scale: 0
             Component.onCompleted: scale = 1
@@ -70,20 +76,14 @@ Item {
                 }
             }
 
-            Behavior on x {
-                Anim {}
-            }
-
             Behavior on y {
                 Anim {}
             }
-        }
-    }
 
-    component Anim: NumberAnimation {
-        duration: Appearance.anim.durations.normal
-        easing.type: Easing.BezierSpline
-        easing.bezierCurve: Appearance.anim.curves.standard
+            Behavior on implicitHeight {
+                Anim {}
+            }
+        }
     }
 
     component Pill: QtObject {

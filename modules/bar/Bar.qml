@@ -1,4 +1,5 @@
-import qs.widgets
+pragma ComponentBehavior: Bound
+
 import qs.services
 import qs.config
 import "popouts" as BarPopouts
@@ -6,170 +7,199 @@ import "components"
 import "components/workspaces"
 import Quickshell
 import QtQuick
+import QtQuick.Layouts
 
-Item {
+ColumnLayout {
     id: root
 
     required property ShellScreen screen
     required property PersistentProperties visibilities
     required property BarPopouts.Wrapper popouts
+    readonly property int vPadding: Appearance.padding.large
 
-    function checkPopout(y: real): void {
-        const spacing = Appearance.spacing.small;
-        const aw = activeWindow.child;
-        const awy = activeWindow.y + aw.y;
+    function closeTray(): void {
+        if (!Config.bar.tray.compact)
+            return;
 
-        const ty = tray.y;
-        const th = tray.implicitHeight;
-        const trayItems = tray.items;
-
-        // Check status icons hover areas
-        let statusIconFound = false;
-        for (const area of statusIconsInner.hoverAreas) {
-            if (!area.enabled)
-                continue;
-
-            const item = area.item;
-            const itemY = statusIcons.y + statusIconsInner.y + item.y - spacing / 2;
-            const itemHeight = item.implicitHeight + spacing;
-
-            if (y >= itemY && y <= itemY + itemHeight) {
-                popouts.currentName = area.name;
-                popouts.currentCenter = Qt.binding(() => statusIcons.y + statusIconsInner.y + item.y + item.implicitHeight / 2);
-                popouts.hasCurrent = true;
-                statusIconFound = true;
-                break;
+        for (let i = 0; i < repeater.count; i++) {
+            const item = repeater.itemAt(i);
+            if (item?.enabled && item.id === "tray") {
+                item.item.expanded = false;
             }
-        }
-
-        if (y >= awy && y <= awy + aw.implicitHeight) {
-            popouts.currentName = "activewindow";
-            popouts.currentCenter = Qt.binding(() => activeWindow.y + aw.y + aw.implicitHeight / 2);
-            popouts.hasCurrent = true;
-        } else if (y > ty && y < ty + th) {
-            const index = Math.floor(((y - ty) / th) * trayItems.count);
-            const item = trayItems.itemAt(index);
-
-            popouts.currentName = `traymenu${index}`;
-            popouts.currentCenter = Qt.binding(() => tray.y + item.y + item.implicitHeight / 2);
-            popouts.hasCurrent = true;
-        } else if (!statusIconFound) {
-            popouts.hasCurrent = false;
         }
     }
 
-    anchors.top: parent.top
-    anchors.bottom: parent.bottom
-    anchors.left: parent.left
+    function checkPopout(y: real): void {
+        const ch = childAt(width / 2, y) as WrappedLoader;
 
-    implicitWidth: child.implicitWidth + Config.border.thickness * 2
+        if (ch?.id !== "tray")
+            closeTray();
 
-    Item {
-        id: child
-
-        anchors.top: parent.top
-        anchors.bottom: parent.bottom
-        anchors.horizontalCenter: parent.horizontalCenter
-
-        implicitWidth: Math.max(osIcon.implicitWidth, workspaces.implicitWidth, activeWindow.implicitWidth, tray.implicitWidth, clock.implicitWidth, statusIcons.implicitWidth, power.implicitWidth)
-
-        OsIcon {
-            id: osIcon
-
-            anchors.horizontalCenter: parent.horizontalCenter
-            anchors.top: parent.top
-            anchors.topMargin: Appearance.padding.large
+        if (!ch) {
+            popouts.hasCurrent = false;
+            return;
         }
 
-        StyledRect {
-            id: workspaces
+        const id = ch.id;
+        const top = ch.y;
+        const item = ch.item;
+        const itemHeight = item.implicitHeight;
 
-            anchors.horizontalCenter: parent.horizontalCenter
-            anchors.top: osIcon.bottom
-            anchors.topMargin: Appearance.spacing.normal
+        if (id === "statusIcons" && Config.bar.popouts.statusIcons) {
+            const items = item.items;
+            const icon = items.childAt(items.width / 2, mapToItem(items, 0, y).y);
+            if (icon) {
+                popouts.currentName = icon.name;
+                popouts.currentCenter = Qt.binding(() => icon.mapToItem(root, 0, icon.implicitHeight / 2).y);
+                popouts.hasCurrent = true;
+            }
+        } else if (id === "tray" && Config.bar.popouts.tray) {
+            if (!Config.bar.tray.compact || (item.expanded && !item.expandIcon.contains(mapToItem(item.expandIcon, item.implicitWidth / 2, y)))) {
+                const index = Math.floor(((y - top - item.padding * 2 + item.spacing) / item.layout.implicitHeight) * item.items.count);
+                const trayItem = item.items.itemAt(index);
+                if (trayItem) {
+                    popouts.currentName = `traymenu${index}`;
+                    popouts.currentCenter = Qt.binding(() => trayItem.mapToItem(root, 0, trayItem.implicitHeight / 2).y);
+                    popouts.hasCurrent = true;
+                } else {
+                    popouts.hasCurrent = false;
+                }
+            } else {
+                popouts.hasCurrent = false;
+                item.expanded = true;
+            }
+        } else if (id === "activeWindow" && Config.bar.popouts.activeWindow) {
+            popouts.currentName = id.toLowerCase();
+            popouts.currentCenter = item.mapToItem(root, 0, itemHeight / 2).y;
+            popouts.hasCurrent = true;
+        }
+    }
 
-            radius: Appearance.rounding.full
-            color: Colours.palette.m3surfaceContainer
+    function handleWheel(y: real, angleDelta: point): void {
+        const ch = childAt(width / 2, y) as WrappedLoader;
+        if (ch?.id === "workspaces" && Config.bar.scrollActions.workspaces) {
+            // Workspace scroll
+            const mon = (Config.bar.workspaces.perMonitorWorkspaces ? Hypr.monitorFor(screen) : Hypr.focusedMonitor);
+            const specialWs = mon?.lastIpcObject.specialWorkspace.name;
+            if (specialWs?.length > 0)
+                Hypr.dispatch(`togglespecialworkspace ${specialWs.slice(8)}`);
+            else if (angleDelta.y < 0 || (Config.bar.workspaces.perMonitorWorkspaces ? mon.activeWorkspace?.id : Hypr.activeWsId) > 1)
+                Hypr.dispatch(`workspace r${angleDelta.y > 0 ? "-" : "+"}1`);
+        } else if (y < screen.height / 2 && Config.bar.scrollActions.volume) {
+            // Volume scroll on top half
+            if (angleDelta.y > 0)
+                Audio.incrementVolume();
+            else if (angleDelta.y < 0)
+                Audio.decrementVolume();
+        } else if (Config.bar.scrollActions.brightness) {
+            // Brightness scroll on bottom half
+            const monitor = Brightness.getMonitorForScreen(screen);
+            if (angleDelta.y > 0)
+                monitor.setBrightness(monitor.brightness + 0.1);
+            else if (angleDelta.y < 0)
+                monitor.setBrightness(monitor.brightness - 0.1);
+        }
+    }
 
-            implicitWidth: workspacesInner.implicitWidth + Appearance.padding.small * 2
-            implicitHeight: workspacesInner.implicitHeight + Appearance.padding.small * 2
+    spacing: Appearance.spacing.normal
 
-            CustomMouseArea {
-                anchors.fill: parent
-                anchors.leftMargin: -Config.border.thickness
-                anchors.rightMargin: -Config.border.thickness
+    Repeater {
+        id: repeater
 
-                function onWheel(event: WheelEvent): void {
-                    const activeWs = Hyprland.activeToplevel?.workspace?.name;
-                    if (activeWs?.startsWith("special:"))
-                        Hyprland.dispatch(`togglespecialworkspace ${activeWs.slice(8)}`);
-                    else if (event.angleDelta.y < 0 || Hyprland.activeWsId > 1)
-                        Hyprland.dispatch(`workspace r${event.angleDelta.y > 0 ? "-" : "+"}1`);
+        model: Config.bar.entries
+
+        DelegateChooser {
+            role: "id"
+
+            DelegateChoice {
+                roleValue: "spacer"
+                delegate: WrappedLoader {
+                    Layout.fillHeight: enabled
                 }
             }
-
-            Workspaces {
-                id: workspacesInner
-
-                anchors.centerIn: parent
+            DelegateChoice {
+                roleValue: "logo"
+                delegate: WrappedLoader {
+                    sourceComponent: OsIcon {}
+                }
+            }
+            DelegateChoice {
+                roleValue: "workspaces"
+                delegate: WrappedLoader {
+                    sourceComponent: Workspaces {
+                        screen: root.screen
+                    }
+                }
+            }
+            DelegateChoice {
+                roleValue: "activeWindow"
+                delegate: WrappedLoader {
+                    sourceComponent: ActiveWindow {
+                        bar: root
+                        monitor: Brightness.getMonitorForScreen(root.screen)
+                    }
+                }
+            }
+            DelegateChoice {
+                roleValue: "tray"
+                delegate: WrappedLoader {
+                    sourceComponent: Tray {}
+                }
+            }
+            DelegateChoice {
+                roleValue: "clock"
+                delegate: WrappedLoader {
+                    sourceComponent: Clock {}
+                }
+            }
+            DelegateChoice {
+                roleValue: "statusIcons"
+                delegate: WrappedLoader {
+                    sourceComponent: StatusIcons {}
+                }
+            }
+            DelegateChoice {
+                roleValue: "power"
+                delegate: WrappedLoader {
+                    sourceComponent: Power {
+                        visibilities: root.visibilities
+                    }
+                }
             }
         }
+    }
 
-        ActiveWindow {
-            id: activeWindow
+    component WrappedLoader: Loader {
+        required property bool enabled
+        required property string id
+        required property int index
 
-            anchors.horizontalCenter: parent.horizontalCenter
-            anchors.top: workspaces.bottom
-            anchors.bottom: tray.top
-            anchors.margins: Appearance.spacing.large
-
-            monitor: Brightness.getMonitorForScreen(root.screen)
-        }
-
-        Tray {
-            id: tray
-
-            anchors.horizontalCenter: parent.horizontalCenter
-            anchors.bottom: clock.top
-            anchors.bottomMargin: Appearance.spacing.larger
-        }
-
-        Clock {
-            id: clock
-
-            anchors.horizontalCenter: parent.horizontalCenter
-            anchors.bottom: statusIcons.top
-            anchors.bottomMargin: Appearance.spacing.normal
-        }
-
-        StyledRect {
-            id: statusIcons
-
-            anchors.left: parent.left
-            anchors.right: parent.right
-            anchors.bottom: power.top
-            anchors.bottomMargin: Appearance.spacing.normal
-
-            radius: Appearance.rounding.full
-            color: Colours.palette.m3surfaceContainer
-
-            implicitHeight: statusIconsInner.implicitHeight + Appearance.padding.normal * 2
-
-            StatusIcons {
-                id: statusIconsInner
-
-                anchors.centerIn: parent
+        function findFirstEnabled(): Item {
+            const count = repeater.count;
+            for (let i = 0; i < count; i++) {
+                const item = repeater.itemAt(i);
+                if (item?.enabled)
+                    return item;
             }
+            return null;
         }
 
-        Power {
-            id: power
-
-            anchors.horizontalCenter: parent.horizontalCenter
-            anchors.bottom: parent.bottom
-            anchors.bottomMargin: Appearance.padding.large
-
-            visibilities: root.visibilities
+        function findLastEnabled(): Item {
+            for (let i = repeater.count - 1; i >= 0; i--) {
+                const item = repeater.itemAt(i);
+                if (item?.enabled)
+                    return item;
+            }
+            return null;
         }
+
+        Layout.alignment: Qt.AlignHCenter
+
+        // Cursed ahh thing to add padding to first and last enabled components
+        Layout.topMargin: findFirstEnabled() === this ? root.vPadding : 0
+        Layout.bottomMargin: findLastEnabled() === this ? root.vPadding : 0
+
+        visible: enabled
+        active: enabled
     }
 }

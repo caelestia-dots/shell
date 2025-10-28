@@ -1,15 +1,16 @@
-import qs.widgets
+import qs.components
+import qs.components.effects
+import qs.components.images
 import qs.services
 import qs.config
+import Caelestia.Models
 import Quickshell
-import Quickshell.Widgets
 import QtQuick
-import QtQuick.Effects
 
-StyledRect {
+Item {
     id: root
 
-    required property Wallpapers.Wallpaper modelData
+    required property FileSystemEntry modelData
     required property PersistentProperties visibilities
 
     scale: 0.5
@@ -33,29 +34,35 @@ StyledRect {
         }
     }
 
-    RectangularShadow {
-        opacity: root.PathView.isCurrentItem ? 0.7 : 0
+    Elevation {
         anchors.fill: image
         radius: image.radius
-        color: Colours.palette.m3shadow
-        blur: 10
-        spread: 3
+        opacity: root.PathView.isCurrentItem ? 1 : 0
+        level: 4
 
         Behavior on opacity {
             Anim {}
         }
     }
 
-    ClippingRectangle {
+    StyledClippingRect {
         id: image
 
         anchors.horizontalCenter: parent.horizontalCenter
         y: Appearance.padding.large
-        color: "transparent"
+        color: Colours.tPalette.m3surfaceContainer
         radius: Appearance.rounding.normal
 
         implicitWidth: Config.launcher.sizes.wallpaperWidth
         implicitHeight: implicitWidth / 16 * 9
+
+        MaterialIcon {
+            anchors.centerIn: parent
+            text: "image"
+            color: Colours.tPalette.m3outline
+            font.pointSize: Appearance.font.size.extraLarge * 2
+            font.weight: 600
+        }
 
         CachingImage {
             path: root.modelData.path
@@ -76,7 +83,7 @@ StyledRect {
         horizontalAlignment: Text.AlignHCenter
         elide: Text.ElideRight
         renderType: Text.QtRendering
-        text: root.modelData.name
+        text: root.modelData.relativePath
         font.pointSize: Appearance.font.size.normal
     }
 
@@ -86,11 +93,5 @@ StyledRect {
 
     Behavior on opacity {
         Anim {}
-    }
-
-    component Anim: NumberAnimation {
-        duration: Appearance.anim.durations.normal
-        easing.type: Easing.BezierSpline
-        easing.bezierCurve: Appearance.anim.curves.standard
     }
 }

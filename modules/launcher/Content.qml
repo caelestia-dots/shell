@@ -1,7 +1,8 @@
 pragma ComponentBehavior: Bound
 
 import "services"
-import qs.widgets
+import qs.components
+import qs.components.controls
 import qs.services
 import qs.config
 import Quickshell
@@ -11,14 +12,14 @@ Item {
     id: root
 
     required property PersistentProperties visibilities
+    required property var panels
+    required property real maxHeight
+
     readonly property int padding: Appearance.padding.large
     readonly property int rounding: Appearance.rounding.large
 
     implicitWidth: listWrapper.width + padding * 2
     implicitHeight: searchWrapper.height + listWrapper.height + padding * 2
-
-    anchors.top: parent.top
-    anchors.horizontalCenter: parent.horizontalCenter
 
     Item {
         id: listWrapper
@@ -33,7 +34,10 @@ Item {
         ContentList {
             id: list
 
+            content: root
             visibilities: root.visibilities
+            panels: root.panels
+            maxHeight: root.maxHeight - searchWrapper.implicitHeight - root.padding * 3
             search: search
             padding: root.padding
             rounding: root.rounding
@@ -43,7 +47,7 @@ Item {
     StyledRect {
         id: searchWrapper
 
-        color: Colours.alpha(Colours.palette.m3surfaceContainer, true)
+        color: Colours.tPalette.m3surfaceContainer
         radius: Appearance.rounding.full
 
         anchors.left: parent.left
@@ -102,23 +106,40 @@ Item {
 
             Keys.onEscapePressed: root.visibilities.launcher = false
 
+            Keys.onPressed: event => {
+                if (!Config.launcher.vimKeybinds)
+                    return;
+
+                if (event.modifiers & Qt.ControlModifier) {
+                    if (event.key === Qt.Key_J) {
+                        list.currentList?.incrementCurrentIndex();
+                        event.accepted = true;
+                    } else if (event.key === Qt.Key_K) {
+                        list.currentList?.decrementCurrentIndex();
+                        event.accepted = true;
+                    }
+                } else if (event.key === Qt.Key_Tab) {
+                    list.currentList?.incrementCurrentIndex();
+                    event.accepted = true;
+                } else if (event.key === Qt.Key_Backtab || (event.key === Qt.Key_Tab && (event.modifiers & Qt.ShiftModifier))) {
+                    list.currentList?.decrementCurrentIndex();
+                    event.accepted = true;
+                }
+            }
+
+            Component.onCompleted: forceActiveFocus()
+
             Connections {
                 target: root.visibilities
 
                 function onLauncherChanged(): void {
-                    if (root.visibilities.launcher)
-                        search.focus = true;
-                    else {
+                    if (!root.visibilities.launcher)
                         search.text = "";
-                        const current = list.currentList;
-                        if (current)
-                            current.currentIndex = 0;
-                    }
                 }
 
                 function onSessionChanged(): void {
-                    if (root.visibilities.launcher && !root.visibilities.session)
-                        search.focus = true;
+                    if (!root.visibilities.session)
+                        search.forceActiveFocus();
                 }
             }
         }
@@ -155,18 +176,14 @@ Item {
             }
 
             Behavior on width {
-                NumberAnimation {
+                Anim {
                     duration: Appearance.anim.durations.small
-                    easing.type: Easing.BezierSpline
-                    easing.bezierCurve: Appearance.anim.curves.standard
                 }
             }
 
             Behavior on opacity {
-                NumberAnimation {
+                Anim {
                     duration: Appearance.anim.durations.small
-                    easing.type: Easing.BezierSpline
-                    easing.bezierCurve: Appearance.anim.curves.standard
                 }
             }
         }

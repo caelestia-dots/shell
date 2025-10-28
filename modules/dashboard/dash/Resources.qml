@@ -1,4 +1,5 @@
-import qs.widgets
+import qs.components
+import qs.components.misc
 import qs.services
 import qs.config
 import QtQuick
@@ -54,7 +55,7 @@ Row {
 
             implicitWidth: Config.dashboard.sizes.resourceProgessThickness
 
-            color: Colours.palette.m3surfaceContainerHigh
+            color: Colours.layer(Colours.palette.m3surfaceContainerHigh, 2)
             radius: Appearance.rounding.full
 
             StyledRect {
@@ -78,10 +79,8 @@ Row {
         }
 
         Behavior on value {
-            NumberAnimation {
+            Anim {
                 duration: Appearance.anim.durations.large
-                easing.type: Easing.BezierSpline
-                easing.bezierCurve: Appearance.anim.curves.standard
             }
         }
     }

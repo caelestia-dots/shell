@@ -7,6 +7,7 @@ import qs.modules.launcher as Launcher
 import qs.modules.dashboard as Dashboard
 import qs.modules.bar.popouts as BarPopouts
 import qs.modules.utilities as Utilities
+import qs.modules.sidebar as Sidebar
 import QtQuick
 import QtQuick.Shapes
 
@@ -20,45 +21,45 @@ Shape {
     anchors.margins: Config.border.thickness
     anchors.leftMargin: bar.implicitWidth
     preferredRendererType: Shape.CurveRenderer
-    opacity: Colours.transparency.enabled ? Colours.transparency.base : 1
 
     Osd.Background {
-        wrapper: panels.osd
+        wrapper: root.panels.osd
 
-        startX: root.width - panels.session.width
+        startX: root.width - root.panels.session.width - root.panels.sidebar.width
         startY: (root.height - wrapper.height) / 2 - rounding
     }
 
     Notifications.Background {
-        wrapper: panels.notifications
+        wrapper: root.panels.notifications
+        sidebar: sidebar
 
         startX: root.width
         startY: 0
     }
 
     Session.Background {
-        wrapper: panels.session
+        wrapper: root.panels.session
 
-        startX: root.width
+        startX: root.width - root.panels.sidebar.width
         startY: (root.height - wrapper.height) / 2 - rounding
     }
 
     Launcher.Background {
-        wrapper: panels.launcher
+        wrapper: root.panels.launcher
 
         startX: (root.width - wrapper.width) / 2 - rounding
         startY: root.height
     }
 
     Dashboard.Background {
-        wrapper: panels.dashboard
+        wrapper: root.panels.dashboard
 
         startX: (root.width - wrapper.width) / 2 - rounding
         startY: 0
     }
 
     BarPopouts.Background {
-        wrapper: panels.popouts
+        wrapper: root.panels.popouts
         invertBottomRounding: wrapper.y + wrapper.height + 1 >= root.height
 
         startX: wrapper.x
@@ -66,9 +67,20 @@ Shape {
     }
 
     Utilities.Background {
-        wrapper: panels.utilities
+        wrapper: root.panels.utilities
+        sidebar: sidebar
 
         startX: root.width
         startY: root.height
+    }
+
+    Sidebar.Background {
+        id: sidebar
+
+        wrapper: root.panels.sidebar
+        panels: root.panels
+
+        startX: root.width
+        startY: root.panels.notifications.height
     }
 }

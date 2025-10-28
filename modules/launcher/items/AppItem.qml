@@ -1,5 +1,5 @@
 import "../services"
-import qs.widgets
+import qs.components
 import qs.services
 import qs.config
 import Quickshell
@@ -18,7 +18,7 @@ Item {
     anchors.right: parent?.right
 
     StateLayer {
-        radius: Appearance.rounding.full
+        radius: Appearance.rounding.normal
 
         function onClicked(): void {
             Apps.launch(root.modelData);
@@ -61,7 +61,7 @@ Item {
 
                 text: (root.modelData?.comment || root.modelData?.genericName || root.modelData?.name) ?? ""
                 font.pointSize: Appearance.font.size.small
-                color: Colours.alpha(Colours.palette.m3outline, true)
+                color: Colours.palette.m3outline
 
                 elide: Text.ElideRight
                 width: root.width - icon.width - Appearance.rounding.normal * 2
