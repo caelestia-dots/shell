@@ -22,7 +22,7 @@ Scope {
     signal flashMsg
 
     function handleKey(event: KeyEvent): void {
-        if (passwd.active || state === "max" || howdy.active)
+        if (passwd.active)
             return;
         if (event.key === Qt.Key_Enter || event.key === Qt.Key_Return) {
             if (buffer.length > 0) {
