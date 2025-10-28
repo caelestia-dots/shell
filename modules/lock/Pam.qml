@@ -26,12 +26,22 @@ Scope {
             return;
         if (event.key === Qt.Key_Enter || event.key === Qt.Key_Return) {
             if (buffer.length > 0) {
-                // If buffer has text, start password check
+                if (fprint.active)
+                    fprint.abort();
+                if (howdy.active)
+                    howdy.abort();
+
                 passwd.start();
             } else {
-                // Buffer is empty, try howdy
                 if (howdy.available) {
+                    if (fprint.active)
+                        fprint.abort();
                     howdy.start();
+                } else if (fprint.available) {
+                    // *** FIX: Abort howdy before starting fprint ***
+                    if (howdy.active)
+                        howdy.abort();
+                    fprint.start();
                 }
             }
         } else if (event.key === Qt.Key_Backspace) {
@@ -266,8 +276,11 @@ Scope {
         }
 
         function onUnlock(): void {
-            fprint.abort();
-            howdy.abort();
+            if (fprint.active)
+                fprint.abort();
+
+            if (howdy.active)
+                howdy.abort();
         }
     }
 
