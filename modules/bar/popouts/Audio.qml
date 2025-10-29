@@ -171,7 +171,7 @@ Item {
                         IconButton {
                             Layout.preferredWidth: implicitWidth
                             Layout.preferredHeight: Appearance.padding.normal * 3
-                            
+
                             icon: {
                                 if (modelData.source.audio.muted)
                                     return "no_sound";
@@ -183,7 +183,7 @@ Item {
                             }
                             checked: modelData.source.audio.muted
                             radius: Appearance.rounding.normal
-                            activeColour: Colours.palette.m3errorContainer 
+                            activeColour: Colours.palette.m3errorContainer
                             inactiveColour: Colours.palette.m3primaryContainer
                             activeOnColour: Colours.palette.m3onErrorContainer
                             inactiveOnColour: Colours.palette.m3onPrimaryContainer
