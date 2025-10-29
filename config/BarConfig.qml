@@ -57,10 +57,15 @@ JsonObject {
         property bool brightness: true
     }
 
+    component AudioPopup: JsonObject {
+        property bool showPrograms: false
+        property bool onlyShowActive: true
+    }
     component Popouts: JsonObject {
         property bool activeWindow: true
         property bool tray: true
         property bool statusIcons: true
+        property AudioPopup audio: AudioPopup {}
     }
 
     component Workspaces: JsonObject {

@@ -104,6 +104,142 @@ Item {
             }
         }
 
+        ColumnLayout {
+            // get a list of nodes that output to the default sink
+            PwNodeLinkTracker {
+              id: linkTracker
+              node: Pipewire.defaultAudioSink
+            }
+            PwObjectTracker {
+                objects: [linkTracker.linkGroups]
+            }
+
+            property bool activeSourceExists: linkTracker.linkGroups.some(e => !Config.bar.popouts.audio.onlyShowActive || e.state == PwLinkState.Active)
+            property bool enabled: Config.bar.popouts.audio.showPrograms && activeSourceExists
+            // The master volume slider above takes a bit too much space compared to radio buttons, so I used half the margin on top of this
+            Layout.topMargin: enabled ? Appearance.spacing.small / 2 : 0
+            // Stop programs with long names to stretch the popup
+            Layout.maximumWidth: parent.implicitWidth
+            visible: enabled
+
+            StyledText {
+                text: qsTr("Programs")
+                font.weight: 500
+            }
+            Repeater {
+                model: linkTracker.linkGroups.filter(e => e.source.isStream)
+
+                ColumnLayout {
+                    required property PwLinkGroup modelData
+                    PwObjectTracker {
+                        objects: [modelData]
+                    }
+                    PwObjectTracker {
+                        objects: [modelData.source]
+                    }
+                    Layout.topMargin: Appearance.spacing.small
+
+                    spacing: Appearance.spacing.small / 2
+                    visible: !Config.bar.popouts.audio.onlyShowActive || modelData.state === PwLinkState.Active
+
+                    // description
+                    RowLayout {
+                        StyledText {
+                            Layout.fillWidth: true
+                            elide: Text.ElideRight
+                            wrapMode: Text.NoWrap
+
+                            font.pointSize: Appearance.font.size.small
+                            font.weight: 100
+                            text: {
+                              // Copied from https://git.outfoxxed.me/quickshell/quickshell-examples/src/branch/master/mixer
+                              // application.name -> description -> name
+                              const app = modelData.source.properties["application.name"] ?? (modelData.source.description != "" ? modelData.source.description : modelData.source.name);
+                              const media = modelData.source.properties["media.name"];
+                              return media != undefined ? `${app} - ${media}` : app;
+                            }
+                        }
+                        // The volume is seperated from title to make sure it is not elided away
+                        StyledText {
+                            font.pointSize: Appearance.font.size.small
+                            font.weight: 100
+                            text: qsTr("(%1)").arg(modelData.source.audio.muted ? qsTr("Muted") : `${Math.round(modelData.source.audio.volume * 100)}%`)
+                        }
+                    }
+                    RowLayout {
+                        // mute button
+                        IconButton {
+                            Layout.preferredWidth: implicitWidth
+                            Layout.preferredHeight: Appearance.padding.normal * 3
+                            
+                            icon: {
+                                if (modelData.source.audio.muted)
+                                    return "no_sound";
+                                if (modelData.source.audio.volume >= 0.5)
+                                    return "volume_up";
+                                if (modelData.source.audio.volume > 0)
+                                    return "volume_down";
+                                return "volume_mute";
+                            }
+                            checked: modelData.source.audio.muted
+                            radius: Appearance.rounding.normal
+                            activeColour: Colours.palette.m3errorContainer 
+                            inactiveColour: Colours.palette.m3primaryContainer
+                            activeOnColour: Colours.palette.m3onErrorContainer
+                            inactiveOnColour: Colours.palette.m3onPrimaryContainer
+                            toggle: true
+                            radiusAnim.duration: Appearance.anim.durations.expressiveFastSpatial
+                            radiusAnim.easing.bezierCurve: Appearance.anim.curves.expressiveFastSpatial
+                            onClicked: {
+                                if (modelData.source.ready && modelData.source.audio) {
+                                    modelData.source.audio.muted = !modelData.source.audio.muted;
+                                }
+                            }
+                            Behavior on Layout.preferredWidth {
+                                Anim {
+                                    duration: Appearance.anim.durations.expressiveFastSpatial
+                                    easing.bezierCurve: Appearance.anim.curves.expressiveFastSpatial
+                                }
+                            }
+                        }
+                        // volume slider
+                        CustomMouseArea {
+                            Layout.fillWidth: true
+
+                            implicitHeight: Appearance.padding.smaller * 3
+
+                            function setVolume(newVolume: real): void {
+                                if (modelData.source.ready && modelData.source.audio) {
+                                    modelData.source.audio.muted = false;
+                                    modelData.source.audio.volume = Math.max(0, Math.min(1, newVolume));
+                                }
+                            }
+
+                            onWheel: event => {
+                                if (event.angleDelta.y > 0)
+                                    setVolume(modelData.source.audio.volume + Config.services.audioIncrement);
+                                else if (event.angleDelta.y < 0)
+                                    setVolume(modelData.source.audio.volume - Config.services.audioIncrement);
+                            }
+
+                            StyledSlider {
+                                anchors.left: parent.left
+                                anchors.right: parent.right
+                                implicitHeight: parent.implicitHeight
+
+                                value: modelData.source.audio.muted ? 0 : modelData.source.audio.volume
+                                onMoved: setVolume(value)
+
+                                Behavior on value {
+                                    Anim {}
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
         StyledRect {
             Layout.topMargin: Appearance.spacing.normal
             visible: Config.general.apps.audio.length > 0
