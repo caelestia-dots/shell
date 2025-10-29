@@ -228,7 +228,7 @@ Item {
                                 implicitHeight: parent.implicitHeight
 
                                 value: modelData.source.audio.muted ? 0 : modelData.source.audio.volume
-                                onMoved: setVolume(value)
+                                onMoved: parent.setVolume(value)
 
                                 Behavior on value {
                                     Anim {}
