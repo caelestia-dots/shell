@@ -12,8 +12,10 @@ Item {
 
     required property Item wrapper
 
-    implicitWidth: Hypr.activeToplevel ? child.implicitWidth : -Appearance.padding.large * 2
-    implicitHeight: child.implicitHeight
+    // implicitWidth: Niri.focusedWindow.id ? child.implicitWidth : Appearance.padding.large * 2
+    // implicitHeight: child.implicitHeight
+    width: 400
+    height: 400
 
     Column {
         id: child
@@ -33,7 +35,7 @@ Item {
 
                 Layout.alignment: Qt.AlignVCenter
                 implicitSize: details.implicitHeight
-                source: Icons.getAppIcon(Hypr.activeToplevel?.lastIpcObject.class ?? "", "image-missing")
+                source: Icons.getAppIcon(niri.focusedWindow?.appId, "desktop_windows")
             }
 
             ColumnLayout {
@@ -44,14 +46,14 @@ Item {
 
                 StyledText {
                     Layout.fillWidth: true
-                    text: Hypr.activeToplevel?.title ?? ""
+                    text: niri.focusedWindow?.title ?? qsTr("Application")
                     font.pointSize: Appearance.font.size.normal
                     elide: Text.ElideRight
                 }
 
                 StyledText {
                     Layout.fillWidth: true
-                    text: Hypr.activeToplevel?.lastIpcObject.class ?? ""
+                    text: niri.focusedWindow?.appId ?? ""
                     color: Colours.palette.m3onSurfaceVariant
                     elide: Text.ElideRight
                 }
@@ -81,21 +83,6 @@ Item {
 
                     font.pointSize: Appearance.font.size.large
                 }
-            }
-        }
-
-        ClippingWrapperRectangle {
-            color: "transparent"
-            radius: Appearance.rounding.small
-
-            ScreencopyView {
-                id: preview
-
-                captureSource: Hypr.activeToplevel?.wayland ?? null
-                live: visible
-
-                constraintSize.width: Config.bar.sizes.windowPreviewSize
-                constraintSize.height: Config.bar.sizes.windowPreviewSize
             }
         }
     }

@@ -13,6 +13,7 @@ StyledClippingRect {
     required property bool wsIsFocused
     required property bool wsIsUrgent
     required property bool wsIsActive
+    required property string wsName
 
     implicitWidth: Config.bar.sizes.innerWidth - 5
     implicitHeight: root.height
@@ -42,7 +43,9 @@ StyledClippingRect {
             animate: true
             text: {
                 // if the workspace is empty, its active window id = 0
-                if (wsActiveWindowId > 0) {
+                if (wsName !== "") {
+                    return wsName
+                } else if (wsActiveWindowId > 0) {
                     return Config.bar.workspaces.activeLabel
                 } else {
                     return Config.bar.workspaces.label

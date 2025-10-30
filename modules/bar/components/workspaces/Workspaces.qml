@@ -55,6 +55,7 @@ StyledClippingRect {
                     wsIsActive: isActive
                     wsActiveWindowId: activeWindowId
                     wsIsUrgent: isUrgent
+                    wsName: name
                 }
             }
         }
