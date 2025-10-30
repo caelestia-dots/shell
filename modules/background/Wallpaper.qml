@@ -25,6 +25,11 @@ Item {
             one.update();
     }
 
+    Component.onCompleted: {
+        if (source)
+            Qt.callLater(() => one.update());
+    }
+
     Loader {
         anchors.fill: parent
 

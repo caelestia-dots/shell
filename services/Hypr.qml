@@ -110,14 +110,30 @@ Singleton {
 
         path: Quickshell.env("CAELESTIA_XKB_RULES_PATH") || "/usr/share/X11/xkb/rules/base.lst"
         onLoaded: {
-            const lines = text().match(/! layout\n([\s\S]*?)\n\n/)[1].split("\n");
-            for (const line of lines) {
-                if (!line.trim() || line.trim().startsWith("!"))
-                    continue;
+            const layoutMatch = text().match(/! layout\n([\s\S]*?)\n\n/);
+            if (layoutMatch) {
+                const lines = layoutMatch[1].split("\n");
+                for (const line of lines) {
+                    if (!line.trim() || line.trim().startsWith("!"))
+                        continue;
 
-                const match = line.match(/^\s*([a-z]{2,})\s+([a-zA-Z() ]+)$/);
-                if (match)
-                    root.kbMap.set(match[2], match[1]);
+                    const match = line.match(/^\s*([a-z]{2,})\s+([a-zA-Z() ]+)$/);
+                    if (match)
+                        root.kbMap.set(match[2], match[1]);
+                }
+            }
+
+            const variantMatch = text().match(/! variant\n([\s\S]*?)\n\n/);
+            if (variantMatch) {
+                const lines = variantMatch[1].split("\n");
+                for (const line of lines) {
+                    if (!line.trim() || line.trim().startsWith("!"))
+                        continue;
+
+                    const match = line.match(/^\s*([a-zA-Z0-9_-]+)\s+([a-z]{2,}): (.+)$/);
+                    if (match)
+                        root.kbMap.set(match[3], match[2]);
+                }
             }
         }
     }
