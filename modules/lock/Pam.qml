@@ -207,12 +207,14 @@ Scope {
 
     Timer {
         id: errorRetry
+
         interval: 800
         onTriggered: fprint.start()
     }
 
     Timer {
         id: stateReset
+
         interval: 4000
         onTriggered: {
             if (root.state !== "max")
@@ -222,6 +224,7 @@ Scope {
 
     Timer {
         id: fprintStateReset
+
         interval: 4000
         onTriggered: {
             root.fprintState = "";
@@ -231,12 +234,14 @@ Scope {
 
     Timer {
         id: howdyErrorRetry
+
         interval: 800
         onTriggered: howdy.start()
     }
 
     Timer {
         id: howdyStateReset
+
         interval: 4000
         onTriggered: {
             root.howdyState = "";
@@ -247,6 +252,7 @@ Scope {
     // Timer to delay the start of Howdy after unlock
     Timer {
         id: howdyStartDelayTimer
+
         interval: 2000
         repeat: false
         onTriggered: {
@@ -283,6 +289,7 @@ Scope {
 
     Connections {
         target: Config.lock
+
         function onEnableFprintChanged(): void {
             fprint.checkAvail();
         }
@@ -291,21 +298,6 @@ Scope {
         }
     }
 
-    Connections {
-        target: root
-
-        function onScreenIsIdleChanged() {
-            if (root.screenIsIdle) {
-                if (howdy.available && howdy.active) {
-                    howdy.abort();
-                }
-            } else {
-                if (howdy.available && root.lock.secure && !howdy.active) {
-                    howdy.checkAvail();
-                } else {}
-            }
-        }
-    }
     Connections {
         target: root
 
