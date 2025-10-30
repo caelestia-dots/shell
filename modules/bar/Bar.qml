@@ -79,6 +79,11 @@ ColumnLayout {
         const ch = childAt(width / 2, y) as WrappedLoader;
         if (ch?.id === "workspaces" && Config.bar.scrollActions.workspaces) {
             // Workspace scroll
+
+            // find focused workspace
+            // find max index
+            // if index < max, focusWorkspace(index + 1)
+
             const mon = (Config.bar.workspaces.perMonitorWorkspaces ? Hypr.monitorFor(screen) : Hypr.focusedMonitor);
             const specialWs = mon?.lastIpcObject.specialWorkspace.name;
             if (specialWs?.length > 0)

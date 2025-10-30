@@ -8,16 +8,28 @@ import "modules/background"
 import "modules/areapicker"
 import "modules/lock"
 import Quickshell
+import QtQuick
+import Niri 0.1
 
 ShellRoot {
+    id : shellroot
+    Niri {
+        id: niri
+        Component.onCompleted: connect()
+
+        onConnected: console.log("Connected to niri")
+        onErrorOccurred: function(error) {
+            console.error("Niri error:", error)
+        }
+    }
     Background {}
-    Drawers {}
+    LazyLoader { active: true; component: Drawers {} }
     AreaPicker {}
     Lock {
         id: lock
     }
 
-    Shortcuts {}
+    // Shortcuts {}
     BatteryMonitor {}
     IdleMonitors {
         lock: lock

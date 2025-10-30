@@ -51,7 +51,8 @@ Singleton {
 
             if (code === 0) {
                 if (root.needsStop) {
-                    Quickshell.execDetached(["caelestia", "record"]);
+                    // TODO: use gpu-screen-recorder
+                    Quickshell.execDetached(["gpu-screen-recorder", "record"]);
                     props.running = false;
                     props.paused = false;
                 } else if (root.needsPause) {

@@ -31,10 +31,9 @@ Item {
         anchors.horizontalCenter: parent.horizontalCenter
 
         animate: true
-        text: Icons.getAppCategoryIcon(Hypr.activeToplevel?.lastIpcObject.class, "desktop_windows")
+        text: Icons.getAppCategoryIcon(niri.focusedWindow?.appId, "desktop_windows")
         color: root.colour
     }
-
     Title {
         id: text1
     }
@@ -46,7 +45,7 @@ Item {
     TextMetrics {
         id: metrics
 
-        text: Hypr.activeToplevel?.title ?? qsTr("Desktop")
+        text: niri.focusedWindow?.title ?? qsTr("Desktop")
         font.pointSize: Appearance.font.size.smaller
         font.family: Appearance.font.family.mono
         elide: Qt.ElideRight

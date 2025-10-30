@@ -29,6 +29,7 @@ Variants {
 
             readonly property bool hasFullscreen: Hypr.monitorFor(screen)?.activeWorkspace?.toplevels.values.some(t => t.lastIpcObject.fullscreen === 2) ?? false
             readonly property int dragMaskPadding: {
+                return 0;
                 if (focusGrab.active || panels.popouts.isDetached)
                     return 0;
 

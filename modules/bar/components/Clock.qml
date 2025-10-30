@@ -31,7 +31,7 @@ Column {
         anchors.horizontalCenter: parent.horizontalCenter
 
         horizontalAlignment: StyledText.AlignHCenter
-        text: Time.format(Config.services.useTwelveHourClock ? "hh\nmm\nA" : "hh\nmm")
+        text: Time.format("hh\nmm")
         font.pointSize: Appearance.font.size.smaller
         font.family: Appearance.font.family.mono
         color: root.colour
