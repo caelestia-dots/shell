@@ -4,11 +4,6 @@
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
 
-    quickshell = {
-      url = "git+https://git.outfoxxed.me/outfoxxed/quickshell";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
     caelestia-cli = {
       url = "github:caelestia-dots/cli";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -32,10 +27,6 @@
       caelestia-shell = pkgs.callPackage ./nix {
         rev = self.rev or self.dirtyRev;
         stdenv = pkgs.clangStdenv;
-        quickshell = inputs.quickshell.packages.${pkgs.system}.default.override {
-          withX11 = false;
-          withI3 = false;
-        };
         app2unit = pkgs.callPackage ./nix/app2unit.nix {inherit pkgs;};
         caelestia-cli = inputs.caelestia-cli.packages.${pkgs.system}.default;
       };
