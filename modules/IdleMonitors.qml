@@ -32,8 +32,8 @@ Scope {
             if (Config.general.idle.lockBeforeSleep)
                 root.lock.lock.locked = true;
         }
-        onLockRequested: root.lock.lock.locked = true
-        onUnlockRequested: root.lock.lock.unlock()
+        onLockRequested: root.lock.locked = true
+        onUnlockRequested: root.lock.unlock()
     }
 
     Variants {
@@ -45,6 +45,7 @@ Scope {
             enabled: root.enabled && (modelData.enabled ?? true)
             timeout: modelData.timeout
             respectInhibitors: modelData.respectInhibitors ?? true
+
             onIsIdleChanged: {
                 root.handleIdleAction(isIdle ? modelData.idleAction : modelData.returnAction);
 
@@ -58,8 +59,6 @@ Scope {
                     if (root.lock.pam) {
                         root.lock.pam.screenIsIdle = isIdle;
                     }
-                } else {
-                    console.log("[IdleMonitor] 'dpms off' string NOT found.");
                 }
             }
         }
