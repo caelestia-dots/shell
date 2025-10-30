@@ -18,32 +18,16 @@ Scope {
     property string fprintState
     property string howdyState
     property string buffer
+    property bool screenIsIdle: false
 
     signal flashMsg
 
     function handleKey(event: KeyEvent): void {
-        if (passwd.active)
+        if (passwd.active || state === "max")
             return;
-        if (event.key === Qt.Key_Enter || event.key === Qt.Key_Return) {
-            if (buffer.length > 0) {
-                if (fprint.active)
-                    fprint.abort();
-                if (howdy.active)
-                    howdy.abort();
 
-                passwd.start();
-            } else {
-                if (howdy.available) {
-                    if (fprint.active)
-                        fprint.abort();
-                    howdy.start();
-                } else if (fprint.available) {
-                    // *** FIX: Abort howdy before starting fprint ***
-                    if (howdy.active)
-                        howdy.abort();
-                    fprint.start();
-                }
-            }
+        if (event.key === Qt.Key_Enter || event.key === Qt.Key_Return) {
+            passwd.start();
         } else if (event.key === Qt.Key_Backspace) {
             if (event.modifiers & Qt.ControlModifier) {
                 buffer = "";
@@ -55,7 +39,6 @@ Scope {
             buffer += event.text;
         }
     }
-
     PamContext {
         id: passwd
 
@@ -159,22 +142,24 @@ Scope {
                 abort();
                 return;
             }
-
             tries = 0;
             errorTries = 0;
-        // start(); // Start only when press Enter
+            if (root.screenIsIdle) {
+                return;
+            }
+            start();
         }
 
         config: "howdy"
         configDirectory: Quickshell.shellDir + "/assets/pam.d"
 
         onCompleted: res => {
+            console.log("[Howdy] onCompleted. Result:", res);
             if (!available)
                 return;
-
-            if (res === PamResult.Success)
+            if (res === PamResult.Success) {
                 return root.lock.unlock();
-
+            }
             if (res === PamResult.Error) {
                 root.howdyState = "error";
                 errorTries++;
@@ -184,15 +169,11 @@ Scope {
                 }
             } else if (res === PamResult.MaxTries || res === PamResult.Failed) {
                 tries++;
-                if (tries < Config.lock.maxHowdyTries) {
-                    root.howdyState = "fail";
+                root.howdyState = "fail";
+                if (!root.screenIsIdle) {
                     start();
-                } else {
-                    root.howdyState = "max";
-                    abort();
                 }
             }
-
             root.flashMsg();
             howdyStateReset.restart();
         }
@@ -272,6 +253,8 @@ Scope {
                 root.fprintState = "";
                 root.howdyState = "";
                 root.lockMessage = "";
+            } else {
+                root.screenIsIdle = false;
             }
         }
 
@@ -293,6 +276,21 @@ Scope {
 
         function onEnableHowdyChanged(): void {
             howdy.checkAvail();
+        }
+    }
+
+    Connections {
+        target: root
+        function onScreenIsIdleChanged() {
+            if (root.screenIsIdle) {
+                if (howdy.available && howdy.active) {
+                    howdy.abort();
+                }
+            } else {
+                if (howdy.available && root.lock.secure && !howdy.active) {
+                    howdy.checkAvail();
+                }
+            }
         }
     }
 }

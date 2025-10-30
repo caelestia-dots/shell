@@ -45,7 +45,23 @@ Scope {
             enabled: root.enabled && (modelData.enabled ?? true)
             timeout: modelData.timeout
             respectInhibitors: modelData.respectInhibitors ?? true
-            onIsIdleChanged: root.handleIdleAction(isIdle ? modelData.idleAction : modelData.returnAction)
+            onIsIdleChanged: {
+                root.handleIdleAction(isIdle ? modelData.idleAction : modelData.returnAction);
+
+                let idleActionString = "";
+                if (typeof modelData.idleAction === "string")
+                    idleActionString = modelData.idleAction;
+                else if (Array.isArray(modelData.idleAction))
+                    idleActionString = modelData.idleAction.join(" ");
+
+                if (idleActionString.includes("dpms off")) {
+                    if (root.lock.pam) {
+                        root.lock.pam.screenIsIdle = isIdle;
+                    }
+                } else {
+                    console.log("[IdleMonitor] 'dpms off' string NOT found.");
+                }
+            }
         }
     }
 }
