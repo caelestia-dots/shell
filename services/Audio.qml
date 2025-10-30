@@ -14,7 +14,9 @@ Singleton {
     property string previousSourceName: ""
 
     readonly property var nodes: Pipewire.nodes.values.reduce((acc, node) => {
-        if (!node.isStream) {
+        if (node.isStream && node.isSink) {
+            acc.streams.push(node);
+        } else {
             if (node.isSink)
                 acc.sinks.push(node);
             else if (node.audio)
@@ -23,11 +25,13 @@ Singleton {
         return acc;
     }, {
         sources: [],
-        sinks: []
+        sinks: [],
+        streams: []
     })
 
     readonly property list<PwNode> sinks: nodes.sinks
     readonly property list<PwNode> sources: nodes.sources
+    readonly property list<PwNode> streams: nodes.streams
 
     readonly property PwNode sink: Pipewire.defaultAudioSink
     readonly property PwNode source: Pipewire.defaultAudioSource
@@ -109,7 +113,7 @@ Singleton {
     }
 
     PwObjectTracker {
-        objects: [...root.sinks, ...root.sources]
+        objects: [...root.sinks, ...root.sources, ...root.streams]
     }
 
     CavaProvider {

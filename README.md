@@ -360,11 +360,7 @@ default, you must create it manually.
         "popouts": {
             "activeWindow": true,
             "statusIcons": true,
-            "tray": true,
-            "audio": {
-                "showPrograms": false,
-                "onlyShowActive": true
-            }
+            "tray": true
         },
         "scrollActions": {
             "brightness": true,
