@@ -83,6 +83,7 @@ Scope {
 
         function checkAvail(): void {
             if (!available || !Config.lock.enableFprint || !root.lock.secure) {
+            // if (true) {
                 abort();
                 return;
             }
@@ -180,6 +181,7 @@ Scope {
 
         function onUnlock(): void {
             fprint.abort();
+            passwd.abort();
         }
     }
 
