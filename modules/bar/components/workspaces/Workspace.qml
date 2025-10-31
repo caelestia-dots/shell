@@ -70,8 +70,8 @@ StyledClippingRect {
             Layout.fillHeight: true
             Layout.topMargin: -Config.bar.sizes.innerWidth / 10
 
-            visible: bgRoot.wsIsFocused
-            active: bgRoot.wsIsFocused
+            visible: bgRoot.wsIsActive
+            active: bgRoot.wsIsActive
             asynchronous: true
 
             sourceComponent: Column {
@@ -123,13 +123,6 @@ StyledClippingRect {
                                 }
                             }
                         }
-                        // Rectangle {
-                        //     width: size
-                        //     height: size
-                        //     color: Colours.palette.m3onSurfaceVariant
-                        //     visible: iconPath === ""
-                        //     radius: 4
-                        // }
                     }
                 }
             }

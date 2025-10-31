@@ -50,12 +50,19 @@ StyledClippingRect {
                     required property bool isUrgent
                     required property bool isFocused
                     required property string name
+                    required property string output
                     wsId: id
                     wsIsFocused: isFocused
                     wsIsActive: isActive
                     wsActiveWindowId: activeWindowId
                     wsIsUrgent: isUrgent
                     wsName: name
+
+                    // only show the workspace of the current output
+                    visible: {
+                        screen: ShellScreen
+                        return output === screen.name
+                    }
                 }
             }
         }
