@@ -93,8 +93,8 @@ Scope {
             start();
         }
 
-        // config: "fprint"
-        // configDirectory: Quickshell.shellDir + "/assets/pam.d"
+        config: "fprint"
+        configDirectory: Quickshell.shellDir + "/assets/pam.d"
 
         onCompleted: res => {
             if (!available)
