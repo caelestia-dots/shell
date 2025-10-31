@@ -12,10 +12,8 @@ Item {
 
     required property Item wrapper
 
-    // implicitWidth: Niri.focusedWindow.id ? child.implicitWidth : Appearance.padding.large * 2
-    // implicitHeight: child.implicitHeight
-    width: 400
-    height: 400
+    implicitWidth: child.implicitWidth
+    implicitHeight: child.implicitHeight
 
     Column {
         id: child
@@ -49,6 +47,7 @@ Item {
                     text: niri.focusedWindow?.title ?? qsTr("Application")
                     font.pointSize: Appearance.font.size.normal
                     elide: Text.ElideRight
+                    Layout.preferredWidth: 200
                 }
 
                 StyledText {
@@ -84,6 +83,20 @@ Item {
                     font.pointSize: Appearance.font.size.large
                 }
             }
+        }
+
+        ScreencopyView {
+            id: preview
+            live: true
+
+            captureSource: {
+                console.log("Hello")
+                wayland: Wayland
+                return wayland.getClientByPid(niri.focusedWindow.pid)
+            }
+
+            constraintSize.width: Config.bar.sizes.windowPreviewSize
+            constraintSize.height: Config.bar.sizes.windowPreviewSize
         }
     }
 }
