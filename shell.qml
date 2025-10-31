@@ -22,7 +22,7 @@ ShellRoot {
             console.error("Niri error:", error)
         }
     }
-    Background {}
+    // Background {}
     LazyLoader { active: true; component: Drawers {} }
     AreaPicker {}
     Lock {
