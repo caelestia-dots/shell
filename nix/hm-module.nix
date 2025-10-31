@@ -68,7 +68,7 @@ in {
         };
         extraConfig = mkOption {
           type = types.str;
-          default = "{}";
+          default = "";
           description = "Caelestia CLI extra configs written to cli.json";
         };
       };
@@ -121,9 +121,14 @@ in {
             (lib.recursiveUpdate c.settings)
             builtins.toJSON
           ];
+        shouldGenerate = c: c.extraConfig != "" || c.settings != {};
       in {
-        "caelestia/shell.json".text = mkConfig cfg;
-        "caelestia/cli.json".text = mkConfig cfg.cli;
+        "caelestia/shell.json" = lib.mkIf (shouldGenerate cfg) {
+          text = mkConfig cfg;
+        };
+        "caelestia/cli.json" = lib.mkIf (shouldGenerate cfg.cli) {
+          text = mkConfig cfg.cli;
+        };
       };
 
       home.packages = [shell] ++ lib.optional cfg.cli.enable cli;
