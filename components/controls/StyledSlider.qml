@@ -7,6 +7,21 @@ import QtQuick.Templates
 Slider {
     id: root
 
+    enum SliderType {
+        Default = 0,
+        Error = 1
+    }
+    property int type: StyledSlider.SliderType.Default
+
+    function getBarColour() {
+        if (type === StyledSlider.SliderType.Default) return Colours.palette.m3primary;
+        if (type === StyledSlider.SliderType.Error) return Colours.palette.m3error;
+    }
+    function getHandleColour() {
+        if (type === StyledSlider.SliderType.Default) return Colours.palette.m3surfaceContainer;
+        if (type === StyledSlider.SliderType.Error) return Colours.palette.m3errorContainer;
+    }
+
     background: Item {
         StyledRect {
             anchors.top: parent.top
@@ -17,7 +32,7 @@ Slider {
 
             implicitWidth: root.handle.x - root.implicitHeight / 6
 
-            color: Colours.palette.m3primary
+            color: root.getBarColour()
             radius: Appearance.rounding.full
             topRightRadius: root.implicitHeight / 15
             bottomRightRadius: root.implicitHeight / 15
@@ -32,7 +47,7 @@ Slider {
 
             implicitWidth: parent.width - root.handle.x - root.handle.implicitWidth - root.implicitHeight / 6
 
-            color: Colours.tPalette.m3surfaceContainer
+            color: root.getHandleColour()
             radius: Appearance.rounding.full
             topLeftRadius: root.implicitHeight / 15
             bottomLeftRadius: root.implicitHeight / 15
@@ -45,7 +60,7 @@ Slider {
         implicitWidth: root.implicitHeight / 4.5
         implicitHeight: root.implicitHeight
 
-        color: Colours.palette.m3primary
+        color: root.getBarColour()
         radius: Appearance.rounding.full
 
         MouseArea {

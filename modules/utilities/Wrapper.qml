@@ -16,8 +16,6 @@ Item {
         property string recordingConfirmDelete
         property string recordingMode
 
-        property bool audioMixerExpanded: false
-
         reloadableId: "utilities"
     }
     readonly property bool shouldBeActive: visibilities.sidebar || (visibilities.utilities && Config.utilities.enabled && !(visibilities.session && Config.session.enabled))

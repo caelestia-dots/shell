@@ -26,10 +26,6 @@ Item {
             z: 1
         }
 
-        AudioMixer {
-            props: root.props
-        }
-
         Toggles {
             visibilities: root.visibilities
         }
