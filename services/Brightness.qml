@@ -180,14 +180,8 @@ Singleton {
                         monitor.vcpMax = 100; // Apple path writes 0..100
                         monitor.brightness = val / 101; // keep original behavior
                     } else if (monitor.isDdc) {
-                        // ddcutil getvcp 10 --brief ends with "... cur max"
-                        const cur = nums.at(-2);
-                        const max = nums.at(-1);
-                        // If parsing succeeds, use reported max; otherwise keep 250 fallback.
-                        if (!isNaN(max)) monitor.vcpMax = max;
-                        monitor.brightness = (!isNaN(cur) && !isNaN(monitor.vcpMax) && monitor.vcpMax > 0)
-                            ? cur / monitor.vcpMax
-                            : 0;
+                        const [, , , cur, max] = text.split(" ");
+                        monitor.brightness = parseInt(cur) / parseInt(max);
                     } else {
                         // brightnessctl path: our echo prints ... <cur> <max> at the end
                         const cur = nums.at(-2) ?? 0;
