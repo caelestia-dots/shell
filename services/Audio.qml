@@ -14,8 +14,9 @@ Singleton {
     property string previousSourceName: ""
 
     readonly property var nodes: Pipewire.nodes.values.reduce((acc, node) => {
-        if (node.isStream && node.isSink) {
-            acc.streams.push(node);
+        if (node.isStream) {
+            if (node.isSink)
+                acc.streams.push(node);
         } else {
             if (node.isSink)
                 acc.sinks.push(node);
