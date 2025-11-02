@@ -5,6 +5,7 @@ JsonObject {
     property bool showOnHover: true
     property int mediaUpdateInterval: 500
     property int dragThreshold: 50
+    property bool showAudioMixerOverMediaGif: false
     property Sizes sizes: Sizes {}
 
     component Sizes: JsonObject {
