@@ -50,6 +50,12 @@ Scope {
         }
     }
 
+    CustomShortcut {  
+         name: "caffeine"  
+         description: "Toggle caffeine mode"  
+         onPressed: IdleInhibitor.enabled = !IdleInhibitor.enabled  
+    }
+
     CustomShortcut {
         name: "launcher"
         description: "Toggle launcher"
