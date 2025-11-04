@@ -14,6 +14,7 @@ ColumnLayout {
     id: root
 
     required property var lock
+    readonly property bool canDismissNotifs: Config.lock.allowDismissNotifs && Notifs.list.length > 0
 
     anchors.fill: parent
     anchors.margins: Appearance.padding.large
@@ -37,8 +38,8 @@ ColumnLayout {
             implicitWidth: implicitHeight
             implicitHeight: clearIcon.implicitHeight + Appearance.padding.small * 2
 
-            visible: Notifs.list.length > 0
-            opacity: Notifs.list.length > 0 ? 1 : 0
+            visible: canDismissNotifs
+            opacity: canDismissNotifs ? 1 : 0
 
             color: Colours.layer(Colours.palette.m3surfaceContainerHighest, 2)
             radius: Appearance.rounding.full

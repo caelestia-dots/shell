@@ -34,6 +34,7 @@ StyledRect {
     MouseArea {
         anchors.fill: parent
         acceptedButtons: Qt.MiddleButton
+        enabled: Config.lock.allowDismissNotifs
         onClicked: [...root.notifs].forEach(n => n.close())
     }
 
