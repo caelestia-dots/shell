@@ -31,6 +31,12 @@ StyledRect {
     radius: Appearance.rounding.normal
     color: root.urgency === "critical" ? Colours.palette.m3secondaryContainer : Colours.layer(Colours.palette.m3surfaceContainerHigh, 2)
 
+    MouseArea {
+        anchors.fill: parent
+        acceptedButtons: Qt.MiddleButton
+        onClicked: [...root.notifs].forEach(n => n.close())
+    }
+
     RowLayout {
         id: content
 

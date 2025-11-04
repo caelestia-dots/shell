@@ -20,13 +20,45 @@ ColumnLayout {
 
     spacing: Appearance.spacing.smaller
 
-    StyledText {
+    RowLayout {
         Layout.fillWidth: true
-        text: Notifs.list.length > 0 ? qsTr("%1 notification%2").arg(Notifs.list.length).arg(Notifs.list.length === 1 ? "" : "s") : qsTr("Notifications")
-        color: Colours.palette.m3outline
-        font.family: Appearance.font.family.mono
-        font.weight: 500
-        elide: Text.ElideRight
+        spacing: Appearance.spacing.normal
+
+        StyledText {
+            Layout.fillWidth: true
+            text: Notifs.list.length > 0 ? qsTr("%1 notification%2").arg(Notifs.list.length).arg(Notifs.list.length === 1 ? "" : "s") : qsTr("Notifications")
+            color: Colours.palette.m3outline
+            font.family: Appearance.font.family.mono
+            font.weight: 500
+            elide: Text.ElideRight
+        }
+
+        StyledRect {
+            implicitWidth: implicitHeight
+            implicitHeight: clearIcon.implicitHeight + Appearance.padding.small * 2
+
+            visible: Notifs.list.length > 0
+            opacity: Notifs.list.length > 0 ? 1 : 0
+
+            color: Colours.layer(Colours.palette.m3surfaceContainerHighest, 2)
+            radius: Appearance.rounding.full
+
+            StateLayer {
+                color: Colours.palette.m3onSurface
+                onClicked: [...Notifs.list].forEach(n => n.close())
+            }
+
+            MaterialIcon {
+                id: clearIcon
+                anchors.centerIn: parent
+                text: "delete"
+                color: Colours.palette.m3onSurface
+            }
+
+            Behavior on opacity {
+                Anim {}
+            }
+        }
     }
 
     ClippingRectangle {
