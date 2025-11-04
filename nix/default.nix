@@ -140,6 +140,9 @@ in
 
       mkdir -p $out/lib
       ln -s ${extras}/lib/* $out/lib/
+
+      # Ensure wrap_term_launch.sh is executable
+      chmod 755 $out/share/caelestia-shell/assets/wrap_term_launch.sh
     '';
 
     passthru = {
