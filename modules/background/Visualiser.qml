@@ -7,6 +7,7 @@ import Caelestia.Services
 import Quickshell
 import QtQuick
 import QtQuick.Effects
+import Quickshell.Widgets
 
 Item {
     id: root
@@ -35,28 +36,35 @@ Item {
 
     // Bar gradient colors
     property color barColorTop: Qt.alpha(Colours.palette.m3primary, 1)
-    property color barColorBottom: Qt.alpha(Colours.palette.m3inversePrimary, 0.8)
+    property color barColorBottom: Qt.alpha(Colours.palette.m3inversePrimary, 0.7)
 
     // Rounded corner radius
     property real barRadius: Appearance.rounding.small * Config.background.visualiser.rounding
 
-    // MultiEffect blur
-    MultiEffect {
-        anchors.fill: parent
-        source: wallpaper
-        maskSource: canvasWrapper
-        maskEnabled: true
-        blurEnabled: Config.background.visualiser.blur
-        blur: 1
-        blurMax: Math.min(16, Config.background.visualiser.blurMax)
-        autoPaddingEnabled: false
-    }
+    // This loader was supposed to be for blur but i genuinley cant figure out how to stop it from desyncing with the canvas
+    // Loader {
+    //     anchors.fill: parent
+    //     active: root.opacity > 0 && Config.background.visualiser.blur
+    //     sourceComponent: MultiEffect {
+    //         source: root.wallpaper
+    //         maskSource: canvas
+    //         maskEnabled: true
+    //         blurEnabled: true
+    //         blur: 1
+    //         blurMax: 32
+    //         autoPaddingEnabled: false
+    //     }
+    // }
 
     Item {
         id: canvasWrapper
         anchors.fill: parent
         y: offset
         height: parent.height - offset * 2
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.leftMargin: Visibilities.bars.get(root.screen).exclusiveZone + Appearance.spacing.small * Config.background.visualiser.spacing
+        anchors.margins: Config.border.thickness
 
         Canvas {
             id: canvas
@@ -65,7 +73,6 @@ Item {
             property real spacing: Appearance.spacing.small * Config.background.visualiser.spacing
             property real barWidth: (width * 0.4 / barCount) - spacing
 
-            // Animated display values
             property var displayValues: Array(barCount * 2).fill(0)
 
             property real smoothing: Math.max(0.01, Math.min(1, 32 / Appearance.anim.durations.small))
@@ -89,6 +96,14 @@ Item {
                 if (!Audio.cava.values)
                     return;
 
+                var gradientTopY = height * 0.7;
+                var gradientBottomY = height;
+                var sharedGradient = ctx.createLinearGradient(0, gradientTopY, 0, gradientBottomY);
+                sharedGradient.addColorStop(0, barColorTop);
+                sharedGradient.addColorStop(1, barColorBottom);
+
+                ctx.fillStyle = sharedGradient;
+
                 for (var i = 0; i < barCount; i++) {
                     // Left bar
                     var targetLeft = Math.max(0, Math.min(1, Audio.cava.values[i]));
@@ -97,11 +112,6 @@ Item {
                     var xLeft = i * (width * 0.4 / barCount);
                     var hLeft = displayValues[i] * height * 0.4;
                     var yLeft = height - hLeft;
-
-                    var gradLeft = ctx.createLinearGradient(0, yLeft, 0, height);
-                    gradLeft.addColorStop(0, barColorTop);
-                    gradLeft.addColorStop(1, barColorBottom);
-                    ctx.fillStyle = gradLeft;
 
                     drawRoundedRect(ctx, xLeft, yLeft, barWidth, hLeft, barRadius);
                     ctx.fill();
@@ -113,11 +123,6 @@ Item {
                     var xRight = width * 0.6 + i * (width * 0.4 / barCount);
                     var hRight = displayValues[barCount + i] * height * 0.4;
                     var yRight = height - hRight;
-
-                    var gradRight = ctx.createLinearGradient(0, yRight, 0, height);
-                    gradRight.addColorStop(0, barColorTop);
-                    gradRight.addColorStop(1, barColorBottom);
-                    ctx.fillStyle = gradRight;
 
                     drawRoundedRect(ctx, xRight, yRight, barWidth, hRight, barRadius);
                     ctx.fill();
