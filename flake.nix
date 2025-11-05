@@ -32,12 +32,12 @@
       caelestia-shell = pkgs.callPackage ./nix {
         rev = self.rev or self.dirtyRev;
         stdenv = pkgs.clangStdenv;
-        quickshell = inputs.quickshell.packages.${pkgs.system}.default.override {
+        quickshell = inputs.quickshell.packages.${pkgs.stdenv.hostPlatform.system}.default.override {
           withX11 = false;
           withI3 = false;
         };
         app2unit = pkgs.callPackage ./nix/app2unit.nix {inherit pkgs;};
-        caelestia-cli = inputs.caelestia-cli.packages.${pkgs.system}.default;
+        caelestia-cli = inputs.caelestia-cli.packages.${pkgs.stdenv.hostPlatform.system}.default;
       };
       with-cli = caelestia-shell.override {withCli = true;};
       debug = caelestia-shell.override {debug = true;};
@@ -46,7 +46,7 @@
 
     devShells = forAllSystems (pkgs: {
       default = let
-        shell = self.packages.${pkgs.system}.caelestia-shell;
+        shell = self.packages.${pkgs.stdenv.hostPlatform.system}.caelestia-shell;
       in
         pkgs.mkShell.override {stdenv = shell.stdenv;} {
           inputsFrom = [shell shell.plugin shell.extras];
