@@ -5,146 +5,130 @@ import qs.services
 import qs.config
 import Caelestia.Services
 import Quickshell
-import Quickshell.Widgets
 import QtQuick
 import QtQuick.Effects
 
 Item {
     id: root
+    anchors.fill: parent
 
     required property ShellScreen screen
     required property Wallpaper wallpaper
 
     readonly property bool shouldBeActive: Config.background.visualiser.enabled && (!Config.background.visualiser.autoHide || Hypr.monitorFor(screen).activeWorkspace.toplevels.values.every(t => t.lastIpcObject.floating))
+
     property real offset: shouldBeActive ? 0 : screen.height * 0.2
-
     opacity: shouldBeActive ? 1 : 0
-
-    Loader {
-        anchors.fill: parent
-        active: root.opacity > 0 && Config.background.visualiser.blur
-
-        sourceComponent: MultiEffect {
-            source: root.wallpaper
-            maskSource: wrapper
-            maskEnabled: true
-            blurEnabled: true
-            blur: 1
-            blurMax: 32
-            autoPaddingEnabled: false
-        }
-    }
-
-    Item {
-        id: wrapper
-
-        anchors.fill: parent
-        layer.enabled: true
-
-        Loader {
-            anchors.fill: parent
-            anchors.topMargin: root.offset
-            anchors.bottomMargin: -root.offset
-
-            active: root.opacity > 0
-
-            sourceComponent: Item {
-                ServiceRef {
-                    service: Audio.cava
-                }
-
-                Item {
-                    id: content
-
-                    anchors.fill: parent
-                    anchors.margins: Config.border.thickness
-                    anchors.leftMargin: Visibilities.bars.get(root.screen).exclusiveZone + Appearance.spacing.small * Config.background.visualiser.spacing
-
-                    Side {
-                        content: content
-                    }
-                    Side {
-                        content: content
-                        isRight: true
-                    }
-
-                    Behavior on anchors.leftMargin {
-                        Anim {}
-                    }
-                }
-            }
-        }
-    }
 
     Behavior on offset {
         Anim {}
     }
-
     Behavior on opacity {
         Anim {}
     }
 
-    component Side: Repeater {
-        id: side
+    // Keep Audio service alive
+    ServiceRef {
+        id: cavaRef
+        service: Audio.cava
+    }
 
-        required property Item content
-        property bool isRight
+    // Bar gradient colors
+    property color barColorTop: Qt.alpha(Colours.palette.m3primary, 1)
+    property color barColorBottom: Qt.alpha(Colours.palette.m3inversePrimary, 0.8)
 
-        model: Config.services.visualiserBars
+    // Rounded corner radius
+    property real barRadius: Appearance.rounding.small * Config.background.visualiser.rounding
 
-        ClippingRectangle {
-            id: bar
+    // MultiEffect blur
+    MultiEffect {
+        anchors.fill: parent
+        source: wallpaper
+        maskSource: canvasWrapper
+        maskEnabled: true
+        blurEnabled: Config.background.visualiser.blur
+        blur: 1
+        blurMax: Math.min(16, Config.background.visualiser.blurMax)
+        autoPaddingEnabled: false
+    }
 
-            required property int modelData
-            property real value: Math.max(0, Math.min(1, Audio.cava.values[side.isRight ? modelData : side.count - modelData - 1]))
+    Item {
+        id: canvasWrapper
+        anchors.fill: parent
+        y: offset
+        height: parent.height - offset * 2
 
-            clip: true
+        Canvas {
+            id: canvas
+            anchors.fill: parent
+            property int barCount: Config.services.visualiserBars
+            property real spacing: Appearance.spacing.small * Config.background.visualiser.spacing
+            property real barWidth: (width * 0.4 / barCount) - spacing
 
-            x: modelData * ((side.content.width * 0.4) / Config.services.visualiserBars) + (side.isRight ? side.content.width * 0.6 : 0)
-            implicitWidth: (side.content.width * 0.4) / Config.services.visualiserBars - Appearance.spacing.small * Config.background.visualiser.spacing
+            // Animated display values
+            property var displayValues: Array(barCount * 2).fill(0)
 
-            y: side.content.height - height
-            implicitHeight: bar.value * side.content.height * 0.4
+            property real smoothing: Math.max(0.01, Math.min(1, 32 / Appearance.anim.durations.small))
 
-            color: "transparent"
-            topLeftRadius: Appearance.rounding.small * Config.background.visualiser.rounding
-            topRightRadius: Appearance.rounding.small * Config.background.visualiser.rounding
-
-            Rectangle {
-                topLeftRadius: parent.topLeftRadius
-                topRightRadius: parent.topRightRadius
-
-                gradient: Gradient {
-                    orientation: Gradient.Vertical
-
-                    GradientStop {
-                        position: 0
-                        color: Qt.alpha(Colours.palette.m3primary, 0.7)
-
-                        Behavior on color {
-                            CAnim {}
-                        }
-                    }
-                    GradientStop {
-                        position: 1
-                        color: Qt.alpha(Colours.palette.m3inversePrimary, 0.7)
-
-                        Behavior on color {
-                            CAnim {}
-                        }
-                    }
-                }
-
-                anchors.left: parent.left
-                anchors.right: parent.right
-                y: parent.height - height
-                implicitHeight: side.content.height * 0.4
+            function drawRoundedRect(ctx, x, y, w, h, r) {
+                r = Math.min(r, w / 2, h / 2);
+                ctx.beginPath();
+                ctx.moveTo(x + r, y);
+                ctx.lineTo(x + w - r, y);
+                ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+                ctx.lineTo(x + w, y + h);
+                ctx.lineTo(x, y + h);
+                ctx.lineTo(x, y + r);
+                ctx.quadraticCurveTo(x, y, x + r, y);
+                ctx.closePath();
             }
 
-            Behavior on value {
-                Anim {
-                    duration: Appearance.anim.durations.small
+            onPaint: {
+                var ctx = getContext("2d");
+                ctx.clearRect(0, 0, width, height);
+                if (!Audio.cava.values)
+                    return;
+
+                for (var i = 0; i < barCount; i++) {
+                    // Left bar
+                    var targetLeft = Math.max(0, Math.min(1, Audio.cava.values[i]));
+                    displayValues[i] += (targetLeft - displayValues[i]) * smoothing;
+
+                    var xLeft = i * (width * 0.4 / barCount);
+                    var hLeft = displayValues[i] * height * 0.4;
+                    var yLeft = height - hLeft;
+
+                    var gradLeft = ctx.createLinearGradient(0, yLeft, 0, height);
+                    gradLeft.addColorStop(0, barColorTop);
+                    gradLeft.addColorStop(1, barColorBottom);
+                    ctx.fillStyle = gradLeft;
+
+                    drawRoundedRect(ctx, xLeft, yLeft, barWidth, hLeft, barRadius);
+                    ctx.fill();
+
+                    // Right bar
+                    var targetRight = Math.max(0, Math.min(1, Audio.cava.values[barCount - i - 1]));
+                    displayValues[barCount + i] += (targetRight - displayValues[barCount + i]) * smoothing;
+
+                    var xRight = width * 0.6 + i * (width * 0.4 / barCount);
+                    var hRight = displayValues[barCount + i] * height * 0.4;
+                    var yRight = height - hRight;
+
+                    var gradRight = ctx.createLinearGradient(0, yRight, 0, height);
+                    gradRight.addColorStop(0, barColorTop);
+                    gradRight.addColorStop(1, barColorBottom);
+                    ctx.fillStyle = gradRight;
+
+                    drawRoundedRect(ctx, xRight, yRight, barWidth, hRight, barRadius);
+                    ctx.fill();
                 }
+            }
+
+            Timer {
+                interval: 16
+                running: true
+                repeat: true
+                onTriggered: canvas.requestPaint()
             }
         }
     }
