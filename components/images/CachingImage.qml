@@ -17,6 +17,7 @@ Item {
 
     property bool playbackEnabled: true
     property bool pauseWhenHidden: true
+    property bool preferAnimated: true
 
     readonly property bool animated: manager.animated
     readonly property Item contentItem: loader.status === Loader.Ready ? loader.item : null
@@ -50,7 +51,7 @@ Item {
         target: QsWindow.window
 
         function onDevicePixelRatioChanged(): void {
-            if (!manager.animated)
+            if (!manager.animated || !root.preferAnimated)
                 manager.updateSource();
         }
     }
@@ -62,7 +63,7 @@ Item {
         active: !!root.path
         asynchronous: true
 
-        sourceComponent: manager.animated ? animatedComponent : staticComponent
+        sourceComponent: manager.animated && root.preferAnimated ? animatedComponent : staticComponent
 
         onStatusChanged: {
             if (status === Loader.Ready)
@@ -101,5 +102,6 @@ Item {
 
         item: root
         cacheDir: Qt.resolvedUrl(Paths.imagecache)
+        preferAnimated: root.preferAnimated
     }
 }

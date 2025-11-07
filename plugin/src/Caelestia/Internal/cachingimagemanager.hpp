@@ -17,6 +17,7 @@ class CachingImageManager : public QObject {
     Q_PROPERTY(QUrl cachePath READ cachePath NOTIFY cachePathChanged)
 
     Q_PROPERTY(bool animated READ animated NOTIFY animatedChanged)
+    Q_PROPERTY(bool preferAnimated READ preferAnimated WRITE setPreferAnimated NOTIFY preferAnimatedChanged)
 
 public:
     explicit CachingImageManager(QObject* parent = nullptr)
@@ -36,6 +37,8 @@ public:
     [[nodiscard]] QUrl cachePath() const;
 
     [[nodiscard]] bool animated() const { return m_animated; }
+    [[nodiscard]] bool preferAnimated() const { return m_preferAnimated; }
+    void setPreferAnimated(bool preferAnimated);
 
     Q_INVOKABLE void updateSource();
     Q_INVOKABLE void updateSource(const QString& path);
@@ -48,6 +51,7 @@ signals:
     void cachePathChanged();
     void usingCacheChanged();
     void animatedChanged();
+    void preferAnimatedChanged();
 
 private:
     QString m_shaPath;
@@ -59,6 +63,7 @@ private:
     QUrl m_cachePath;
 
     bool m_animated;
+    bool m_preferAnimated = true;
 
     QMetaObject::Connection m_widthConn;
     QMetaObject::Connection m_heightConn;

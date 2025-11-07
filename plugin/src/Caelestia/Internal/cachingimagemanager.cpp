@@ -100,6 +100,19 @@ void CachingImageManager::setPath(const QString& path) {
     }
 }
 
+void CachingImageManager::setPreferAnimated(bool preferAnimated) {
+    if (m_preferAnimated == preferAnimated) {
+        return;
+    }
+
+    m_preferAnimated = preferAnimated;
+    emit preferAnimatedChanged();
+
+    if (!m_path.isEmpty()) {
+        updateSource(m_path);
+    }
+}
+
 void CachingImageManager::updateSource() {
     updateSource(m_path);
 }
@@ -115,7 +128,9 @@ void CachingImageManager::updateSource(const QString& path) {
         emit animatedChanged();
     }
 
-    if (animated) {
+    const bool useAnimation = animated && m_preferAnimated;
+
+    if (useAnimation) {
         const QSize size = effectiveSize();
 
         if (!m_item || !size.width() || !size.height()) {
@@ -205,12 +220,6 @@ QUrl CachingImageManager::cachePath() const {
 
 void CachingImageManager::createCache(
     const QString& path, const QString& cache, const QString& fillMode, const QSize& size) const {
-    // Main thread is fast as fuk boiiii
-    if (isAnimated(path)) {
-        qDebug() << "CachingImageManager::createCache: skip animated" << path;
-        return;
-    }
-
     QThreadPool::globalInstance()->start([path, cache, fillMode, size] {
         QImage image(path);
 
