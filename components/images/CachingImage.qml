@@ -56,6 +56,19 @@ Item {
         }
     }
 
+    Image {
+        id: animatedPlaceholder
+
+        anchors.fill: parent
+        asynchronous: root.asynchronous
+        cache: false
+        fillMode: root.fillMode
+        smooth: root.smooth
+        visible: manager.animated && root.preferAnimated && root.source && (!root.contentItem || root.contentItem.status !== Image.Ready)
+        source: root.source
+        sourceSize: root.sourceSize
+    }
+
     Loader {
         id: loader
 
