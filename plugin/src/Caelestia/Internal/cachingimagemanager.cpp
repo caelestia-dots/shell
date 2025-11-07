@@ -88,6 +88,13 @@ void CachingImageManager::setPath(const QString& path) {
     m_path = path;
     emit pathChanged();
 
+    // eww but I'll do it again here
+    const bool animated = !path.isEmpty() && isAnimated(path);
+    if (m_animated != animated) {
+        m_animated = animated;
+        emit animatedChanged();
+    }
+
     if (!path.isEmpty()) {
         updateSource(path);
     }
@@ -98,8 +105,36 @@ void CachingImageManager::updateSource() {
 }
 
 void CachingImageManager::updateSource(const QString& path) {
-    if (path.isEmpty() || path == m_shaPath) {
-        // Path is empty or already calculating sha for path
+    if (path.isEmpty()) {
+        return;
+    }
+
+    const bool animated = isAnimated(path);
+    if (m_animated != animated) {
+        m_animated = animated;
+        emit animatedChanged();
+    }
+
+    if (animated) {
+        const QSize size = effectiveSize();
+
+        if (!m_item || !size.width() || !size.height()) {
+            m_shaPath.clear();
+            return;
+        }
+
+        const QUrl cache;
+        if (m_cachePath != cache) {
+            m_cachePath = cache;
+            emit cachePathChanged();
+        }
+
+        m_item->setProperty("source", QUrl::fromLocalFile(path));
+        m_shaPath.clear();
+        return;
+    }
+
+    if (path == m_shaPath) {
         return;
     }
 
@@ -170,6 +205,12 @@ QUrl CachingImageManager::cachePath() const {
 
 void CachingImageManager::createCache(
     const QString& path, const QString& cache, const QString& fillMode, const QSize& size) const {
+    // Main thread is fast as fuk boiiii
+    if (isAnimated(path)) {
+        qDebug() << "CachingImageManager::createCache: skip animated" << path;
+        return;
+    }
+
     QThreadPool::globalInstance()->start([path, cache, fillMode, size] {
         QImage image(path);
 
@@ -218,6 +259,14 @@ QString CachingImageManager::sha256sum(const QString& path) {
     file.close();
 
     return hash.result().toHex();
+}
+
+bool CachingImageManager::isAnimated(const QString& path) {
+    QImageReader reader(path);
+    if (!reader.canRead() || !reader.supportsAnimation()) {
+        return false;
+    }
+    return reader.imageCount() > 1;
 }
 
 } // namespace caelestia::internal
