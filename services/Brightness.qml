@@ -78,18 +78,10 @@ Singleton {
 
         command: ["ddcutil", "detect", "--brief"]
         stdout: StdioCollector {
-            onStreamFinished: {
-                const blocks = text.trim().split("\n\n").filter(d => d.startsWith("Display "));
-                root.ddcMonitors = blocks.map(d => {
-                    const busMatch = d.match(/I2C bus:\s*\/dev\/i2c-([0-9]+)/i);
-                    // Accept both "DRM connector:" and "DRM_connector:"
-                    const connMatch = d.match(/DRM[_ ]connector:\s+(.*)/i);
-                    return {
-                        busNum: busMatch ? busMatch[1] : "",
-                        connector: connMatch ? connMatch[1].replace(/^card\d+-/, "") : ""
-                    };
-                }).filter(m => m.busNum && m.connector);
-            }
+            onStreamFinished: root.ddcMonitors = text.trim().split("\n\n").filter(d => d.startsWith("Display ")).map(d => ({
+                        busNum: d.match(/I2C bus:[ ]*\/dev\/i2c-([0-9]+)/)[1],
+                        connector: d.match(/DRM connector:\s+(.*)/)[1].replace(/^card\d+-/, "") // strip "card1-"
+                    }))
         }
     }
 
@@ -167,27 +159,16 @@ Singleton {
         readonly property bool isAppleDisplay: root.appleDisplayPresent && modelData.model.startsWith("StudioDisplay")
         property real brightness
         property real queuedBrightness: NaN
-        // Default to 250 for your Dell AW3423DW; override with parsed max if available.
-        property int vcpMax: 250
 
         readonly property Process initProc: Process {
             stdout: StdioCollector {
                 onStreamFinished: {
-                    // Extract integers defensively; works for ddcutil and brightnessctl echoes
-                    const nums = (text.match(/\d+/g) ?? []).map(n => parseInt(n, 10)).filter(n => !isNaN(n));
                     if (monitor.isAppleDisplay) {
-                        const val = nums.at(-1) ?? 0;
-                        monitor.vcpMax = 100; // Apple path writes 0..100
-                        monitor.brightness = val / 101; // keep original behavior
-                    } else if (monitor.isDdc) {
+                        const val = parseInt(text.trim());
+                        monitor.brightness = val / 101;
+                    } else {
                         const [, , , cur, max] = text.split(" ");
                         monitor.brightness = parseInt(cur) / parseInt(max);
-                    } else {
-                        // brightnessctl path: our echo prints ... <cur> <max> at the end
-                        const cur = nums.at(-2) ?? 0;
-                        const max = nums.at(-1) ?? 100;
-                        monitor.vcpMax = 100; // writes use % for brightnessctl
-                        monitor.brightness = max > 0 ? cur / max : 0;
                     }
                 }
             }
@@ -205,8 +186,8 @@ Singleton {
 
         function setBrightness(value: real): void {
             value = Math.max(0, Math.min(1, value));
-            const scaled100 = Math.round(value * 100);
-            if (Math.round((brightness ?? 0) * 100) === scaled100)
+            const rounded = Math.round(value * 100);
+            if (Math.round(brightness * 100) === rounded)
                 return;
 
             if (isDdc && timer.running) {
@@ -216,14 +197,12 @@ Singleton {
 
             brightness = value;
 
-            if (isAppleDisplay) {
-                Quickshell.execDetached(["asdbctl", "set", Math.round(value * 100)]);
-            } else if (isDdc) {
-                // Write using vcpMax (defaults to 250; uses parsed max when available)
-                Quickshell.execDetached(["ddcutil", "-b", busNum, "setvcp", "10", Math.round(value * vcpMax)]);
-            } else {
-                Quickshell.execDetached(["brightnessctl", "s", `${scaled100}%`]);
-            }
+            if (isAppleDisplay)
+                Quickshell.execDetached(["asdbctl", "set", rounded]);
+            else if (isDdc)
+                Quickshell.execDetached(["ddcutil", "-b", busNum, "setvcp", "10", rounded]);
+            else
+                Quickshell.execDetached(["brightnessctl", "s", `${rounded}%`]);
 
             if (isDdc)
                 timer.restart();
