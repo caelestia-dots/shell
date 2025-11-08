@@ -441,7 +441,7 @@ Item {
                 }
                 StyledListView {
                     id: list
-                    model: Audio.streams
+                    model: Audio.sinkStreams
                     anchors.top: audioMixerTitle.bottom
                     anchors.topMargin: Appearance.spacing.normal
                     anchors.left: parent.left
