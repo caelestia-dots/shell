@@ -31,6 +31,14 @@ Loader {
             anchors.left: true
             anchors.right: true
 
+            // Wallpaper {
+            //     id: wallpaper
+            // }
+
+            // VideoWallpaper {
+            //     id: wallpaper
+            // }
+
             Wallpaper {
                 id: wallpaper
             }

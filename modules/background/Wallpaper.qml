@@ -10,139 +10,96 @@ import QtQuick
 
 Item {
     id: root
-
-    property string source: Wallpapers.current
-    property Image current: one
-
     anchors.fill: parent
 
+    property string source: Wallpapers.current
+    property ImageWallpaper current: null
+    property bool switching: false
+    property bool initialized: false
+
+    function finalizeSwitch(candidate) {
+        console.log("[Wallpaper.qml] finalizeSwitch:", candidate === one ? "one" : "two");
+
+        if (!candidate || root.current === candidate || root.switching)
+            return;
+
+        root.switching = true;
+
+        const old = root.current;
+        root.current = candidate;
+
+        Qt.callLater(() => {
+            candidate.isCurrent = true;
+
+            if (old && old !== candidate) {
+                Qt.callLater(() => {
+                    old.isCurrent = false;
+                    root.switching = false;
+                });
+            } else {
+                root.switching = false;
+            }
+        });
+    }
+
+    function onLoadFailed(candidate) {
+        console.warn("Wallpaper failed to load:", candidate.source);
+    }
+
     onSourceChanged: {
+        console.log("[Wallpaper.qml] Wallpaper source changed to:", source);
         if (!source)
-            current = null;
-        else if (current === one)
-            two.update();
-        else
-            one.update();
+            return;
+
+        if (!initialized) {
+            console.log("[Wallpaper.qml] Ignoring initial change");
+            return;
+        }
+
+        const inactive = (root.current === one) ? two : one;
+        console.log("[Wallpaper.qml] Preparing inactive:", inactive === one ? "one" : "two");
+
+        const handler = function () {
+            if (!inactive.source || inactive.source.trim() === "") {
+                console.warn("[Wallpaper.qml] Skipping ready() — empty source");
+                return;
+            }
+            console.log("[Wallpaper.qml] Inactive wallpaper ready:", inactive.source);
+            Qt.callLater(() => finalizeSwitch(inactive));
+            inactive.ready.disconnect(handler);
+        };
+
+        inactive.ready.connect(handler);
+        inactive.update(source);
     }
 
     Component.onCompleted: {
-        if (source)
-            Qt.callLater(() => one.update());
-    }
-
-    Loader {
-        anchors.fill: parent
-
-        active: !root.source
-        asynchronous: true
-
-        sourceComponent: StyledRect {
-            color: Colours.palette.m3surfaceContainer
-
-            Row {
-                anchors.centerIn: parent
-                spacing: Appearance.spacing.large
-
-                MaterialIcon {
-                    text: "sentiment_stressed"
-                    color: Colours.palette.m3onSurfaceVariant
-                    font.pointSize: Appearance.font.size.extraLarge * 5
-                }
-
-                Column {
-                    anchors.verticalCenter: parent.verticalCenter
-                    spacing: Appearance.spacing.small
-
-                    StyledText {
-                        text: qsTr("Wallpaper missing?")
-                        color: Colours.palette.m3onSurfaceVariant
-                        font.pointSize: Appearance.font.size.extraLarge * 2
-                        font.bold: true
-                    }
-
-                    StyledRect {
-                        implicitWidth: selectWallText.implicitWidth + Appearance.padding.large * 2
-                        implicitHeight: selectWallText.implicitHeight + Appearance.padding.small * 2
-
-                        radius: Appearance.rounding.full
-                        color: Colours.palette.m3primary
-
-                        FileDialog {
-                            id: dialog
-
-                            title: qsTr("Select a wallpaper")
-                            filterLabel: qsTr("Image files")
-                            filters: Images.validImageExtensions
-                            onAccepted: path => Wallpapers.setWallpaper(path)
-                        }
-
-                        StateLayer {
-                            radius: parent.radius
-                            color: Colours.palette.m3onPrimary
-
-                            function onClicked(): void {
-                                dialog.open();
-                            }
-                        }
-
-                        StyledText {
-                            id: selectWallText
-
-                            anchors.centerIn: parent
-
-                            text: qsTr("Set it now!")
-                            color: Colours.palette.m3onPrimary
-                            font.pointSize: Appearance.font.size.large
-                        }
-                    }
-                }
-            }
+        if (source) {
+            one.update(source);
+            one.ready.connect(function handler() {
+                console.log("[Wallpaper.qml] First wallpaper ready:", one.source);
+                one.isCurrent = true;
+                root.current = one;
+                root.initialized = true;
+                one.ready.disconnect(handler);
+            });
         }
     }
 
-    Img {
+    // Double-buffered wallpapers
+    ImageWallpaper {
         id: one
-    }
-
-    Img {
-        id: two
-    }
-
-    component Img: CachingImage {
-        id: img
-
-        function update(): void {
-            if (path === root.source)
-                root.current = this;
-            else
-                path = root.source;
-        }
-
         anchors.fill: parent
+        z: 0
+        isCurrent: true
+        onFailed: onLoadFailed(one)
+    }
 
-        opacity: 0
-        scale: Wallpapers.showPreview ? 1 : 0.8
-
-        onStatusChanged: {
-            if (status === Image.Ready)
-                root.current = this;
-        }
-
-        states: State {
-            name: "visible"
-            when: root.current === img
-
-            PropertyChanges {
-                img.opacity: 1
-                img.scale: 1
-            }
-        }
-
-        transitions: Transition {
-            Anim {
-                target: img
-                properties: "opacity,scale"
-            }
-        }
+    ImageWallpaper {
+        id: two
+        anchors.fill: parent
+        z: 1
+        isCurrent: false
+        onFailed: onLoadFailed(two)
     }
 }
