@@ -3,6 +3,7 @@ pragma ComponentBehavior: Bound
 import qs.components
 import qs.components.effects
 import qs.components.controls
+import qs.components.containers
 import qs.services
 import qs.utils
 import qs.config
@@ -10,9 +11,12 @@ import Caelestia.Services
 import Quickshell
 import Quickshell.Widgets
 import Quickshell.Services.Mpris
+import Quickshell.Services.Pipewire
 import QtQuick
 import QtQuick.Layouts
 import QtQuick.Shapes
+import QtQuick.Controls
+import QtQuick.Effects
 
 Item {
     id: root
@@ -37,8 +41,8 @@ Item {
         return `${mins}:${secs}`;
     }
 
-    implicitWidth: cover.implicitWidth + Config.dashboard.sizes.mediaVisualiserSize * 2 + details.implicitWidth + details.anchors.leftMargin + bongocat.implicitWidth + bongocat.anchors.leftMargin * 2 + Appearance.padding.large * 2
-    implicitHeight: Math.max(cover.implicitHeight + Config.dashboard.sizes.mediaVisualiserSize * 2, details.implicitHeight, bongocat.implicitHeight) + Appearance.padding.large * 2
+    implicitWidth: cover.implicitWidth + Config.dashboard.sizes.mediaVisualiserSize * 2 + details.implicitWidth + details.anchors.leftMargin + mediaGif.implicitWidth + mediaGif.anchors.leftMargin * 2 + Appearance.padding.large * 2
+    implicitHeight: Math.max(cover.implicitHeight + Config.dashboard.sizes.mediaVisualiserSize * 2, details.implicitHeight, mediaGif.implicitHeight) + Appearance.padding.large * 2
 
     Behavior on playerProgress {
         Anim {
@@ -364,7 +368,7 @@ Item {
     }
 
     Item {
-        id: bongocat
+        id: mediaGif
 
         anchors.verticalCenter: parent.verticalCenter
         anchors.left: details.right
@@ -373,17 +377,9 @@ Item {
         implicitWidth: visualiser.width
         implicitHeight: visualiser.height
 
-        AnimatedImage {
-            anchors.centerIn: parent
-
-            width: visualiser.width * 0.75
-            height: visualiser.height * 0.75
-
-            playing: Players.active?.isPlaying ?? false
-            speed: Audio.beatTracker.bpm / 300
-            source: Paths.absolutePath(Config.paths.mediaGif)
-            asynchronous: true
-            fillMode: AnimatedImage.PreserveAspectFit
+        Loader {
+            anchors.fill: parent
+            sourceComponent: Config.dashboard.showAudioMixerOverMediaGif ? mixerCardComponent : mediaGifComponent
         }
     }
 
@@ -397,6 +393,193 @@ Item {
             Anim {
                 duration: Appearance.anim.durations.expressiveFastSpatial
                 easing.bezierCurve: Appearance.anim.curves.expressiveFastSpatial
+            }
+        }
+    }
+
+
+    Component {
+        id: mediaGifComponent
+        AnimatedImage {
+            id: mediaGif
+            anchors.centerIn: parent
+
+            width: visualiser.width * 0.75
+            height: visualiser.height * 0.75
+
+            playing: Players.active?.isPlaying ?? false
+            speed: Audio.beatTracker.bpm / 300
+            source: Paths.absolutePath(Config.paths.mediaGif)
+            asynchronous: true
+            fillMode: AnimatedImage.PreserveAspectFit
+        }
+    }
+
+    Component {
+        id: mixerCardComponent
+        StyledRect {
+            id: mixerCard
+            radius: Appearance.rounding.small
+            color: Colours.tPalette.m3surfaceContainer
+            width: mediaGif.implicitWidth
+            height: mediaGif.implicitHeight
+
+            StyledRect {
+                id: padding
+                anchors.fill: parent
+                anchors.margins: Appearance.padding.normal
+
+                StyledText {
+                    id: audioMixerTitle
+
+                    Layout.minimumWidth: mixerCard.width - Appearance.spacing.normal * 2
+                    horizontalAlignment: Text.AlignLeft
+                    text: qsTr("Audio Mixer")
+                    color: Colours.palette.m3outline
+                    font.pointSize: Appearance.font.size.larger
+                    elide: Text.ElideRight
+                }
+                StyledListView {
+                    id: list
+                    model: Audio.sinkStreams
+                    anchors.top: audioMixerTitle.bottom
+                    anchors.topMargin: Appearance.spacing.normal
+                    anchors.left: parent.left
+                    anchors.right: parent.right
+                    anchors.bottom: parent.bottom
+                    spacing: Appearance.spacing.small
+                    clip: true
+
+                    StyledScrollBar.vertical: StyledScrollBar {
+                        flickable: list
+                    }
+
+                    delegate: RowLayout {
+                        required property PwNode modelData
+                        anchors.left: list.contentItem.left
+                        anchors.right: list.contentItem.right
+                        spacing: Appearance.spacing.normal
+
+                        // Icon and mute button
+                        Item {
+                            Layout.alignment: Qt.AlignVCente
+
+                            implicitWidth: Appearance.padding.smaller * 3
+                            implicitHeight: Appearance.padding.smaller * 3
+
+                            IconImage {
+                                id: icon
+                                anchors.fill: parent
+                                source: Icons.getAppIcon(modelData.name, "image-missing")
+                            }
+                            MultiEffect {
+                                anchors.fill: icon
+                                source: icon
+                                colorization: modelData.audio.muted && 1
+                                // set to pure red instead of m3error so that the red color is more intense
+                                colorizationColor: modelData.audio.muted && Qt.rgba(1.0, 0.0, 0.0, 1.0)
+                            }
+                            WrapperMouseArea {
+                                id: ma
+                                anchors.fill: parent
+                                hoverEnabled: true
+                                cursorShape: Qt.PointingHandCursor
+                                onClicked: modelData.audio.muted = !modelData.audio.muted
+                            }
+                            ToolTip {
+                                delay: Appearance.anim.durations.normal
+                                visible: ma.containsMouse
+                                opacity: opened ? 1 : 0
+
+                                contentItem: StyledText {
+                                    leftPadding: Appearance.spacing.small
+                                    rightPadding: Appearance.spacing.small
+                                    color: modelData.audio.muted ? Colours.palette.m3onErrorContainer : Colours.palette.m3onPrimaryContainer
+                                    text: {
+                                        // Copied from https://git.outfoxxed.me/quickshell/quickshell-examples/src/branch/master/mixer
+                                        // application.name -> description -> name
+                                        const app = modelData.properties["application.name"] ?? (modelData.description != "" ? modelData.description : modelData.name);
+                                        let media = modelData.properties["media.name"];
+                                        return media != undefined ? `${app} - ${media}` : app;
+                                    }
+                                }
+                                background: StyledRect {
+                                    color: modelData.audio.muted ? Colours.palette.m3errorContainer : Colours.palette.m3primaryContainer
+                                    radius: Appearance.rounding.small
+                                }
+                                Behavior on opacity {
+                                    Anim {
+                                        duration: Appearance.anim.durations.normal
+                                    }
+                                }
+                            }
+                        }
+                        // Slider
+                        CustomMouseArea {
+                            Layout.fillWidth: true
+                            implicitHeight: Appearance.padding.smaller * 3
+
+                            function setVolume(newVolume: real): void {
+                                if (modelData.ready && modelData.audio) {
+                                    modelData.audio.muted = false;
+                                    modelData.audio.volume = Math.max(0, Math.min(1, newVolume));
+                                }
+                            }
+
+                            onWheel: event => {
+                                if (event.angleDelta.y > 0)
+                                    setVolume(modelData.audio.volume + Config.services.audioIncrement);
+                                else if (event.angleDelta.y < 0)
+                                    setVolume(modelData.audio.volume - Config.services.audioIncrement);
+                            }
+
+                            StyledSlider {
+                                anchors.left: parent.left
+                                anchors.right: parent.right
+                                implicitHeight: parent.implicitHeight
+
+                                opacity: modelData.audio.muted ? 0.6 : 1
+                                value: modelData.audio.volume
+                                type: modelData.audio.muted ? StyledSlider.SliderType.Error : StyledSlider.SliderType.Default
+                                onMoved: parent.setVolume(value)
+
+                                Behavior on value {
+                                    Anim {}
+                                }
+                                Behavior on opacity {
+                                    Anim {
+                                        duration: Appearance.anim.durations.normal
+                                    }
+                                }
+                            }
+                        }
+                        // Volume Text
+                        StyledText {
+                            id: volumeLevel
+                            property string displayText: `${Math.round(modelData.audio.volume * 100)}%`
+                            color: modelData.audio.muted ? Colours.palette.m3error : Colours.palette.m3primary
+                            opacity: modelData.audio.muted ? 0.6 : 1
+                            font.pointSize: Appearance.font.size.normal
+                            text: displayText
+
+                            // Set the width of the text to the max width it can get,
+                            // so that when values change slider dont change it's when volume text changes size
+                            FontMetrics {
+                                id: fm
+                                font: volumeLevel.font
+                            }
+                            Component.onCompleted: {
+                                const maxWidth = Math.ceil(fm.advanceWidth("100%"));
+                                volumeLevel.Layout.minimumWidth = maxWidth
+                            }
+                            Behavior on opacity {
+                                Anim {
+                                    duration: Appearance.anim.durations.normal
+                                }
+                            }
+                        }
+                    }
+                }
             }
         }
     }
