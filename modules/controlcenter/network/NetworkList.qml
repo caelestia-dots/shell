@@ -10,6 +10,8 @@ import QtQuick.Layouts
 ColumnLayout {
     id: root
 
+    property var selectedNetwork: null
+
     spacing: Appearance.spacing.large
 
     RowLayout {
@@ -70,8 +72,7 @@ ColumnLayout {
 
             onClicked: {
                 if (network.isSecure) {
-                    // TODO: Show password dialog
-                    console.log("Secure network, password required:", network.ssid);
+                    root.selectedNetwork = network;
                 } else {
                     Network.connectToNetwork(network.ssid, "");
                 }
@@ -185,6 +186,33 @@ ColumnLayout {
                 text: network.active ? "check_circle" : "chevron_right"
                 font.pointSize: Appearance.font.size.large
                 color: network.active ? Colours.palette.m3primary : Colours.palette.m3outline
+            }
+        }
+    }
+
+    // Password Dialog Loader
+    Loader {
+        id: passwordDialogLoader
+
+        anchors.fill: parent
+        active: root.selectedNetwork !== null
+        sourceComponent: passwordDialog
+        z: 1000
+    }
+
+    Component {
+        id: passwordDialog
+
+        PasswordDialog {
+            network: root.selectedNetwork
+
+            onAccepted: password => {
+                Network.connectToNetwork(root.selectedNetwork.ssid, password);
+                root.selectedNetwork = null;
+            }
+
+            onCancelled: {
+                root.selectedNetwork = null;
             }
         }
     }
