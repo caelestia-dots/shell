@@ -13,93 +13,86 @@ Item {
     anchors.fill: parent
 
     property string source: Wallpapers.current
-    property ImageWallpaper current: null
-    property bool switching: false
     property bool initialized: false
 
-    function finalizeSwitch(candidate) {
-        console.log("[Wallpaper.qml] finalizeSwitch:", candidate === one ? "one" : "two");
-
-        if (!candidate || root.current === candidate || root.switching)
-            return;
-
-        root.switching = true;
-
-        const old = root.current;
-        root.current = candidate;
-
-        Qt.callLater(() => {
-            candidate.isCurrent = true;
-
-            if (old && old !== candidate) {
-                Qt.callLater(() => {
-                    old.isCurrent = false;
-                    root.switching = false;
-                });
-            } else {
-                root.switching = false;
-            }
-        });
-    }
-
-    function onLoadFailed(candidate) {
-        console.warn("Wallpaper failed to load:", candidate.source);
-    }
-
-    onSourceChanged: {
-        console.log("[Wallpaper.qml] Wallpaper source changed to:", source);
-        if (!source)
-            return;
-
-        if (!initialized) {
-            console.log("[Wallpaper.qml] Ignoring initial change");
-            return;
+    function isVideo(path) {
+        path = path.toString();
+        if (!path || path.trim() === "")
+            return false;
+        const videoExtensions = [".mp4", ".mkv", ".webm", ".avi", ".mov", ".flv", ".wmv"];
+        const lowerPath = path.toLowerCase();
+        for (let i = 0; i < videoExtensions.length; i++) {
+            if (lowerPath.endsWith(videoExtensions[i]))
+                return true;
         }
-
-        const inactive = (root.current === one) ? two : one;
-        console.log("[Wallpaper.qml] Preparing inactive:", inactive === one ? "one" : "two");
-
-        const handler = function () {
-            if (!inactive.source || inactive.source.trim() === "") {
-                console.warn("[Wallpaper.qml] Skipping ready() — empty source");
-                return;
-            }
-            console.log("[Wallpaper.qml] Inactive wallpaper ready:", inactive.source);
-            Qt.callLater(() => finalizeSwitch(inactive));
-            inactive.ready.disconnect(handler);
-        };
-
-        inactive.ready.connect(handler);
-        inactive.update(source);
+        return false;
     }
 
-    Component.onCompleted: {
-        if (source) {
-            one.update(source);
-            one.ready.connect(function handler() {
-                console.log("[Wallpaper.qml] First wallpaper ready:", one.source);
-                one.isCurrent = true;
-                root.current = one;
-                root.initialized = true;
-                one.ready.disconnect(handler);
+    function switchWallpaper() {
+        if (oneLoader.item.isCurrent) {
+            twoLoader.item.update(source);
+            twoLoader.item.ready.connect(function handler() {
+                oneLoader.item.isCurrent = false;
+                twoLoader.item.isCurrent = true;
+                console.log("source changed -> one:", oneLoader.item.isCurrent, "two:", twoLoader.item.isCurrent);
+                twoLoader.item.ready.disconnect(handler);
+            });
+        } else if (twoLoader.item.isCurrent) {
+            oneLoader.item.update(source);
+            oneLoader.item.ready.connect(function handler() {
+                twoLoader.item.isCurrent = false;
+                oneLoader.item.isCurrent = true;
+                console.log("source changed -> one:", oneLoader.item.isCurrent, "two:", twoLoader.item.isCurrent);
+                oneLoader.item.ready.disconnect(handler);
             });
         }
     }
 
-    // Double-buffered wallpapers
-    ImageWallpaper {
-        id: one
-        anchors.fill: parent
-        z: 0
-        isCurrent: true
-        onFailed: onLoadFailed(one)
+    function tryInitialize(from) {
+        console.log("got init from: ", from);
+        if (!oneLoader.item || !twoLoader.item || initialized)
+            return;
+
+        oneLoader.item.isCurrent = true;
+
+        switchWallpaper();
+
+        console.log("from init: ", "one: ", oneLoader.item.isCurrent, " two: ", twoLoader.item.isCurrent);
+
+        initialized = true;
     }
 
-    ImageWallpaper {
-        id: two
+    Loader {
+        id: oneLoader
+        asynchronous: true
         anchors.fill: parent
-        z: 1
-        isCurrent: false
-        onFailed: onLoadFailed(two)
+        sourceComponent: isVideo(root.source) ? videoComponent : imageComponent
+        onLoaded: tryInitialize("oneLoader")
+    }
+
+    Loader {
+        id: twoLoader
+        asynchronous: true
+        anchors.fill: parent
+        sourceComponent: isVideo(root.source) ? videoComponent : imageComponent
+        onLoaded: tryInitialize("twoLoader")
+    }
+
+    // --- Alternation logic ---
+    onSourceChanged: {
+        if (!initialized || !source) {
+            return;
+        }
+
+        switchWallpaper();
+    }
+
+    Component {
+        id: imageComponent
+        ImageWallpaper {}
+    }
+    Component {
+        id: videoComponent
+        VideoWallpaper {}
     }
 }

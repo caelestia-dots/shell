@@ -7,6 +7,7 @@ import qs.config
 import Quickshell
 import Quickshell.Wayland
 import QtQuick
+import Caelestia.Models
 
 Loader {
     asynchronous: true
@@ -19,6 +20,7 @@ Loader {
             id: win
 
             required property ShellScreen modelData
+            // required property FileSystemEntry fsmodel
 
             screen: modelData
             name: "background"
@@ -30,14 +32,6 @@ Loader {
             anchors.bottom: true
             anchors.left: true
             anchors.right: true
-
-            // Wallpaper {
-            //     id: wallpaper
-            // }
-
-            // VideoWallpaper {
-            //     id: wallpaper
-            // }
 
             Wallpaper {
                 id: wallpaper

@@ -12,26 +12,30 @@ Item {
     id: root
     anchors.fill: parent
 
-    property string source: ""
     property bool isCurrent: false
+
     signal ready
-    signal failed
 
     function update(explicitSource) {
-        const target = explicitSource || source;
-        if (!target || target.trim() === "")
+        explicitSource = explicitSource.toString();
+        const target = explicitSource;
+
+        if (img.path === target && img.status === Image.Ready) {
+            console.log("Same path, emitting ready manually for:", target);
+            Qt.callLater(() => root.ready());
             return;
+        }
 
-        root.source = target;
-        img.source = target;
+        img.path = target;
 
-        if (img.status === Image.Ready)
-            Qt.callLater(() => root.ready());
-    }
+        img.onStatusChanged.connect(function handler() {
+            if (img.status === Image.Ready) {
+                Qt.callLater(() => root.ready());
+                console.log("Called ready for: ", target);
 
-    Component.onCompleted: {
-        if (isCurrent && img.status === Image.Ready)
-            Qt.callLater(() => root.ready());
+                img.onStatusChanged.disconnect(handler);
+            }
+        });
     }
 
     CachingImage {
@@ -39,17 +43,8 @@ Item {
         anchors.fill: parent
         asynchronous: true
         fillMode: Image.PreserveAspectCrop
-        path: root.source
         opacity: root.isCurrent ? 1 : 0
         scale: Wallpapers.showPreview ? 1 : 0.8
-
-        onStatusChanged: {
-            if (status === Image.Ready && root.source)
-                Qt.callLater(() => root.ready());
-            else if (status === Image.Error)
-                Qt.callLater(() => root.failed());
-        }
-
         states: State {
             name: "visible"
             when: root.isCurrent
