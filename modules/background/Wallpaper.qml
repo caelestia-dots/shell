@@ -49,8 +49,9 @@ Item {
     }
 
     function tryInitialize(from) {
+        initialized: false;
         console.log("got init from: ", from);
-        if (!oneLoader.item || !twoLoader.item || initialized)
+        if (!oneLoader.item || !twoLoader.item)
             return;
 
         oneLoader.item.isCurrent = true;

@@ -19,36 +19,39 @@ Item {
     signal ready
     signal failed
 
+    // Track the currently active path to prevent old handlers from firing
+    property string activePath: ""
+
     function update(path) {
         path = path.toString();
         if (!path || path.trim() === "")
             return;
 
-        // If same path and already ready, emit ready manually
-        // if (player.source === path && player.playbackState === MediaPlayer.PlayingState) {
-        //     console.log("Same video, emitting ready manually for:", path);
-        //     Qt.callLater(() => root.ready());
-        //     return;
-        // }
-        player.stop();
         root.source = path;
         player.source = path;
 
-        // Connect to status changes
+        console.log("update ⚠️ Switching video to:", path);
+
         player.onMediaStatusChanged.connect(function handler() {
-            if (player.mediaStatus === MediaPlayer.LoadedMedia) {
-                Qt.callLater(() => root.ready());
-                console.log("Called ready for video:", path);
-                player.onMediaStatusChanged.disconnect(handler);
+            switch (player.mediaStatus) {
+            case MediaPlayer.LoadedMedia:
+                if (root.source === path) {
+                    console.log("Media loaded LoadedMedia, emitting ready:", path);
+                    Qt.callLater(() => root.ready());
+                    player.onMediaStatusChanged.disconnect(handler);
+                }
+                break;
+            default:
+                break;
             }
         });
 
-        // Optionally start playback (loops infinitely)
         player.play();
     }
 
     MediaPlayer {
         id: player
+
         autoPlay: false
         loops: MediaPlayer.Infinite
 
@@ -56,6 +59,21 @@ Item {
         audioOutput: AudioOutput {}
 
         onErrorOccurred: root.failed()
+
+        function updateEnabled() {
+            if (root.isCurrent) {
+                if (source && mediaStatus !== MediaPlayer.PlayingState) {
+                    console.log("Starting video:", source);
+                    play();
+                }
+            } else {
+                if (mediaStatus !== MediaPlayer.NoMedia) {
+                    console.log("Stopping video:", source);
+                    stop();
+                    source = "";
+                }
+            }
+        }
     }
 
     VideoOutput {
@@ -79,6 +97,13 @@ Item {
         Anim {
             target: video
             properties: "opacity,scale"
+        }
+    }
+
+    Connections {
+        target: root
+        function onIsCurrentChanged() {
+            player.updateEnabled();
         }
     }
 }
