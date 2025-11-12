@@ -31,35 +31,36 @@
   caelestia-cli,
   debug ? false,
   withCli ? false,
-  extraRuntimeDeps ? [],
-}: let
+  extraRuntimeDeps ? [ ],
+}:
+let
   version = "1.0.0";
 
-  runtimeDeps =
-    [
-      fish
-      ddcutil
-      brightnessctl
-      app2unit
-      networkmanager
-      lm_sensors
-      swappy
-      wl-clipboard
-      libqalculate
-      bash
-      hyprland
-    ]
-    ++ extraRuntimeDeps
-    ++ lib.optional withCli caelestia-cli;
+  runtimeDeps = [
+    fish
+    ddcutil
+    brightnessctl
+    app2unit
+    networkmanager
+    lm_sensors
+    swappy
+    wl-clipboard
+    libqalculate
+    bash
+    hyprland
+  ]
+  ++ extraRuntimeDeps
+  ++ lib.optional withCli caelestia-cli;
 
   fontconfig = makeFontsConf {
-    fontDirectories = [material-symbols rubik nerd-fonts.caskaydia-cove];
+    fontDirectories = [
+      material-symbols
+      rubik
+      nerd-fonts.caskaydia-cove
+    ];
   };
 
-  cmakeBuildType =
-    if debug
-    then "Debug"
-    else "RelWithDebInfo";
+  cmakeBuildType = if debug then "Debug" else "RelWithDebInfo";
 
   cmakeVersionFlags = [
     (lib.cmakeFeature "VERSION" version)
@@ -75,14 +76,16 @@
       fileset = lib.fileset.union ./../CMakeLists.txt ./../extras;
     };
 
-    nativeBuildInputs = [cmake ninja];
+    nativeBuildInputs = [
+      cmake
+      ninja
+    ];
 
-    cmakeFlags =
-      [
-        (lib.cmakeFeature "ENABLE_MODULES" "extras")
-        (lib.cmakeFeature "INSTALL_LIBDIR" "${placeholder "out"}/lib")
-      ]
-      ++ cmakeVersionFlags;
+    cmakeFlags = [
+      (lib.cmakeFeature "ENABLE_MODULES" "extras")
+      (lib.cmakeFeature "INSTALL_LIBDIR" "${placeholder "out"}/lib")
+    ]
+    ++ cmakeVersionFlags;
   };
 
   plugin = stdenv.mkDerivation {
@@ -93,66 +96,87 @@
       fileset = lib.fileset.union ./../CMakeLists.txt ./../plugin;
     };
 
-    nativeBuildInputs = [cmake ninja pkg-config];
-    buildInputs = [qt6.qtbase qt6.qtdeclarative libqalculate pipewire aubio libcava fftw];
+    nativeBuildInputs = [
+      cmake
+      ninja
+      pkg-config
+    ];
+    buildInputs = [
+      qt6.qtbase
+      qt6.qtdeclarative
+      libqalculate
+      pipewire
+      aubio
+      libcava
+      fftw
+    ];
 
     dontWrapQtApps = true;
-    cmakeFlags =
-      [
-        (lib.cmakeFeature "ENABLE_MODULES" "plugin")
-        (lib.cmakeFeature "INSTALL_QMLDIR" qt6.qtbase.qtQmlPrefix)
-      ]
-      ++ cmakeVersionFlags;
+    cmakeFlags = [
+      (lib.cmakeFeature "ENABLE_MODULES" "plugin")
+      (lib.cmakeFeature "INSTALL_QMLDIR" qt6.qtbase.qtQmlPrefix)
+    ]
+    ++ cmakeVersionFlags;
   };
 in
-  stdenv.mkDerivation {
-    inherit version cmakeBuildType;
-    pname = "caelestia-shell${lib.optionalString debug "-debug"}";
-    src = ./..;
+stdenv.mkDerivation {
+  inherit version cmakeBuildType;
+  pname = "caelestia-shell${lib.optionalString debug "-debug"}";
+  src = ./..;
 
-    nativeBuildInputs = [cmake ninja makeWrapper qt6.wrapQtAppsHook];
-    buildInputs = [quickshell extras plugin xkeyboard-config qt6.qtbase];
-    propagatedBuildInputs = runtimeDeps;
+  nativeBuildInputs = [
+    cmake
+    ninja
+    makeWrapper
+    qt6.wrapQtAppsHook
+  ];
+  buildInputs = [
+    quickshell
+    extras
+    plugin
+    xkeyboard-config
+    qt6.qtbase
+  ];
+  propagatedBuildInputs = runtimeDeps;
 
-    cmakeFlags =
-      [
-        (lib.cmakeFeature "ENABLE_MODULES" "shell")
-        (lib.cmakeFeature "INSTALL_QSCONFDIR" "${placeholder "out"}/share/caelestia-shell")
-      ]
-      ++ cmakeVersionFlags;
+  cmakeFlags = [
+    (lib.cmakeFeature "ENABLE_MODULES" "shell")
+    (lib.cmakeFeature "INSTALL_QSCONFDIR" "${placeholder "out"}/share/caelestia-shell")
+  ]
+  ++ cmakeVersionFlags;
 
-    dontStrip = debug;
+  dontStrip = debug;
 
-    prePatch = ''
-      substituteInPlace assets/pam.d/fprint \
-        --replace-fail pam_fprintd.so /run/current-system/sw/lib/security/pam_fprintd.so
-      substituteInPlace shell.qml \
-        --replace-fail 'ShellRoot {' 'ShellRoot {  settings.watchFiles: false'
-    '';
+  prePatch = ''
+    substituteInPlace assets/pam.d/fprint \
+      --replace-fail pam_fprintd.so /run/current-system/sw/lib/security/pam_fprintd.so
+    substituteInPlace shell.qml \
+      --replace-fail 'ShellRoot {' 'ShellRoot {  settings.watchFiles: false'
+  '';
 
-    postInstall = ''
-      makeWrapper ${quickshell}/bin/qs $out/bin/caelestia-shell \
-      	--prefix PATH : "${lib.makeBinPath runtimeDeps}" \
-      	--set FONTCONFIG_FILE "${fontconfig}" \
-      	--set CAELESTIA_LIB_DIR ${extras}/lib \
-        --set CAELESTIA_XKB_RULES_PATH ${xkeyboard-config}/share/xkeyboard-config-2/rules/base.lst \
-      	--add-flags "-p $out/share/caelestia-shell"
+  postInstall = ''
+    makeWrapper ${quickshell}/bin/qs $out/bin/caelestia-shell \
+    	--prefix PATH : "${lib.makeBinPath runtimeDeps}" \
+    	--set FONTCONFIG_FILE "${fontconfig}" \
+    	--set CAELESTIA_LIB_DIR ${extras}/lib \
+      --set CAELESTIA_XKB_RULES_PATH ${xkeyboard-config}/share/xkeyboard-config-2/rules/base.lst \
+    	--add-flags "-p $out/share/caelestia-shell"
 
-      mkdir -p $out/lib
-      ln -s ${extras}/lib/* $out/lib/
+    mkdir -p $out/lib
+    ln -s ${extras}/lib/* $out/lib/
 
-      # Ensure wrap_term_launch.sh is executable
-      chmod 755 $out/share/caelestia-shell/assets/wrap_term_launch.sh
-    '';
+    # Ensure wrap_term_launch.sh is executable
+    chmod 755 $out/share/caelestia-shell/assets/wrap_term_launch.sh
+  '';
 
-    passthru = {
-      inherit plugin extras;
-    };
+  passthru = {
+    inherit plugin extras;
+  };
 
-    meta = {
-      description = "A very segsy desktop shell";
-      homepage = "https://github.com/caelestia-dots/shell";
-      license = lib.licenses.gpl3Only;
-      mainProgram = "caelestia-shell";
-    };
-  }
+  meta = {
+    description = "A very segsy desktop shell";
+    homepage = "https://github.com/caelestia-dots/shell";
+    license = lib.licenses.gpl3Only;
+    mainProgram = "caelestia-shell";
+  };
+}
