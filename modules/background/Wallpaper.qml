@@ -19,7 +19,7 @@ Item {
         path = path.toString();
         if (!path || path.trim() === "")
             return false;
-        const videoExtensions = [".mp4", ".mkv", ".webm", ".avi", ".mov", ".flv", ".wmv"];
+        const videoExtensions = [".mp4", ".mkv", ".webm", ".avi", ".mov", ".flv", ".wmv", ".gif"];
         const lowerPath = path.toLowerCase();
         for (let i = 0; i < videoExtensions.length; i++) {
             if (lowerPath.endsWith(videoExtensions[i]))

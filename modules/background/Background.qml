@@ -7,7 +7,6 @@ import qs.config
 import Quickshell
 import Quickshell.Wayland
 import QtQuick
-import Caelestia.Models
 
 Loader {
     asynchronous: true
@@ -20,8 +19,6 @@ Loader {
             id: win
 
             required property ShellScreen modelData
-            // required property FileSystemEntry fsmodel
-
             screen: modelData
             name: "background"
             WlrLayershell.exclusionMode: ExclusionMode.Ignore
