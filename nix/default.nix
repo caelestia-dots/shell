@@ -14,6 +14,7 @@
   wl-clipboard,
   libqalculate,
   bash,
+  gpu-screen-recorder,
   hyprland,
   material-symbols,
   rubik,
@@ -48,6 +49,7 @@ let
     libqalculate
     bash
     hyprland
+    gpu-screen-recorder
   ]
   ++ extraRuntimeDeps
   ++ lib.optional withCli caelestia-cli;
