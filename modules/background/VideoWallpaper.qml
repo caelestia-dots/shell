@@ -19,7 +19,6 @@ Item {
     signal ready
     signal failed
 
-    // Track the currently active path to prevent old handlers from firing
     property string activePath: ""
 
     function update(path) {
@@ -33,16 +32,12 @@ Item {
         console.log("update ⚠️ Switching video to:", path);
 
         player.onMediaStatusChanged.connect(function handler() {
-            switch (player.mediaStatus) {
-            case MediaPlayer.LoadedMedia:
+            if (player.mediaStatus === MediaPlayer.BufferedMedia || player.mediaStatus === MediaPlayer.LoadedMedia) {
                 if (root.source === path) {
                     console.log("Media loaded LoadedMedia, emitting ready:", path);
                     Qt.callLater(() => root.ready());
                     player.onMediaStatusChanged.disconnect(handler);
                 }
-                break;
-            default:
-                break;
             }
         });
 
@@ -60,7 +55,7 @@ Item {
 
         onErrorOccurred: root.failed()
 
-        function updateEnabled() {
+        function tryPlayVideo() {
             if (root.isCurrent) {
                 if (source && mediaStatus !== MediaPlayer.PlayingState) {
                     console.log("Starting video:", source);
@@ -70,7 +65,7 @@ Item {
                 if (mediaStatus !== MediaPlayer.NoMedia) {
                     console.log("Stopping video:", source);
                     stop();
-                    source = "";
+                    // source = "";
                 }
             }
         }
@@ -103,7 +98,7 @@ Item {
     Connections {
         target: root
         function onIsCurrentChanged() {
-            player.updateEnabled();
+            player.tryPlayVideo();
         }
     }
 }

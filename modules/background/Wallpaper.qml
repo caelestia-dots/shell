@@ -14,6 +14,9 @@ Item {
 
     property string source: Wallpapers.current
     property bool initialized: false
+    property int loadersReady: 0
+    property int previousCurrent: 2
+    property bool initStart: false
 
     function isVideo(path) {
         path = path.toString();
@@ -28,39 +31,69 @@ Item {
         return false;
     }
 
+    function waitForItem(loader, callback) {
+        if (loader.item !== null) {
+            callback();
+            return;
+        }
+
+        // Wait for next frame until item exists
+        Qt.callLater(function () {
+            waitForItem(loader, callback);
+        });
+    }
+
     function switchWallpaper() {
+        if (oneLoader.item.isCurrent)
+            previousCurrent = 1;
+        else if (twoLoader.item.isCurrent)
+            previousCurrent = 2;
         if (oneLoader.item.isCurrent) {
-            twoLoader.item.update(source);
-            twoLoader.item.ready.connect(function handler() {
-                oneLoader.item.isCurrent = false;
-                twoLoader.item.isCurrent = true;
-                console.log("source changed -> one:", oneLoader.item.isCurrent, "two:", twoLoader.item.isCurrent);
-                twoLoader.item.ready.disconnect(handler);
+            twoLoader.sourceComponent = isVideo(source) ? videoComponent : imageComponent;
+
+            waitForItem(twoLoader, function () {
+                twoLoader.item.update(source);
+                twoLoader.item.ready.connect(function handler() {
+                    oneLoader.item.isCurrent = false;
+                    twoLoader.item.isCurrent = true;
+                    console.log("source changed from two -> one:", oneLoader.item.isCurrent, "two:", twoLoader.item.isCurrent);
+                    twoLoader.item.ready.disconnect(handler);
+                });
             });
         } else if (twoLoader.item.isCurrent) {
-            oneLoader.item.update(source);
-            oneLoader.item.ready.connect(function handler() {
-                twoLoader.item.isCurrent = false;
-                oneLoader.item.isCurrent = true;
-                console.log("source changed -> one:", oneLoader.item.isCurrent, "two:", twoLoader.item.isCurrent);
-                oneLoader.item.ready.disconnect(handler);
+            oneLoader.sourceComponent = isVideo(source) ? videoComponent : imageComponent;
+
+            waitForItem(oneLoader, function () {
+                oneLoader.item.update(source);
+                oneLoader.item.ready.connect(function handler() {
+                    twoLoader.item.isCurrent = false;
+                    oneLoader.item.isCurrent = true;
+                    console.log("source changed from one -> one:", oneLoader.item.isCurrent, "two:", twoLoader.item.isCurrent);
+                    oneLoader.item.ready.disconnect(handler);
+                });
             });
         }
     }
 
     function tryInitialize(from) {
-        initialized: false;
-        console.log("got init from: ", from);
-        if (!oneLoader.item || !twoLoader.item)
+        loadersReady += 1;
+
+        if (loadersReady < 2)
             return;
 
-        oneLoader.item.isCurrent = true;
-
-        switchWallpaper();
-
-        console.log("from init: ", "one: ", oneLoader.item.isCurrent, " two: ", twoLoader.item.isCurrent);
+        if (previousCurrent === 1) {
+            oneLoader.item.isCurrent = true;
+            twoLoader.item.isCurrent = false;
+        } else {
+            oneLoader.item.isCurrent = false;
+            twoLoader.item.isCurrent = true;
+        }
 
         initialized = true;
+        if (!initStart) {
+            switchWallpaper();
+            initStart = true;
+        }
     }
 
     Loader {
@@ -79,7 +112,6 @@ Item {
         onLoaded: tryInitialize("twoLoader")
     }
 
-    // --- Alternation logic ---
     onSourceChanged: {
         if (!initialized || !source) {
             return;
