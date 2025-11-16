@@ -12,7 +12,10 @@ Item {
     id: root
 
     property string source: Wallpapers.current
-    property Image current: one
+    property CachingImage current: one
+    readonly property Item imageItem: (current && current.contentItem) ? current.contentItem : null
+    property var sessionLock: null
+    readonly property bool sessionLocked: sessionLock ? sessionLock.secure : false
 
     anchors.fill: parent
 
@@ -112,20 +115,46 @@ Item {
         id: img
 
         function update(): void {
-            if (path === root.source)
+            if (!root.source) return;
+
+            if (path === root.source) {
                 root.current = this;
-            else
-                path = root.source;
+                return;
+            }
+
+            const target = root.source;
+            path = target;
+
+            if (img.animated) {
+                Qt.callLater(() => {
+                    if (img.path === target && root.source === target)
+                        root.current = img;
+                });
+            }
         }
 
         anchors.fill: parent
 
         opacity: 0
         scale: Wallpapers.showPreview ? 1 : 0.8
+        playbackEnabled: root.current === img && !root.sessionLocked
 
         onStatusChanged: {
-            if (status === Image.Ready)
-                root.current = this;
+            if (status === Image.Ready) root.current = this;
+        }
+
+        onPlaybackEnabledChanged: {
+            if (root.current === img && img.animated && playbackEnabled)
+                img.restart();
+        }
+
+        Connections {
+            target: root
+
+            function onCurrentChanged(): void {
+                if (root.current === img && img.animated)
+                    img.restart();
+            }
         }
 
         states: State {
