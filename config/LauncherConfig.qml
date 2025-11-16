@@ -63,6 +63,14 @@ JsonObject {
             dangerous: false
         },
         {
+            name: "Translate",
+            icon: "translate",
+            description: "Translate text using Google Translate",
+            command: ["autocomplete", "translate"],
+            enabled: true,
+            dangerous: false
+        },
+        {
             name: "Transparency",
             icon: "opacity",
             description: "Change shell transparency",
