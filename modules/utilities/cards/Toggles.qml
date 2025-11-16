@@ -92,6 +92,7 @@ StyledRect {
                 visible: VPN.enabled
                 onClicked: VPN.toggle()
             }
+
         }
     }
 

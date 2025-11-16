@@ -97,7 +97,7 @@ ColumnLayout {
             StyledText {
                 Layout.fillWidth: true
                 text: qsTr("Devices (%1)").arg(Bluetooth.devices.values.length)
-                font.pointSize: Appearance.font.size.large
+                font.pointSize: Appearance.font.size.normal
                 font.weight: 500
             }
 

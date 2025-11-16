@@ -26,7 +26,7 @@ ColumnLayout {
 
     StyledText {
         Layout.alignment: Qt.AlignHCenter
-        text: qsTr("Bluetooth settings")
+        text: qsTr("Bluetooth Settings")
         font.pointSize: Appearance.font.size.large
         font.bold: true
     }

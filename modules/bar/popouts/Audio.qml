@@ -9,6 +9,7 @@ import Quickshell.Services.Pipewire
 import QtQuick
 import QtQuick.Layouts
 import QtQuick.Controls
+import "../../controlcenter/network"
 
 Item {
     id: root
@@ -104,43 +105,16 @@ Item {
             }
         }
 
-        StyledRect {
+        IconTextButton {
+            Layout.fillWidth: true
             Layout.topMargin: Appearance.spacing.normal
-            visible: Config.general.apps.audio.length > 0
+            inactiveColour: Colours.palette.m3primaryContainer
+            inactiveOnColour: Colours.palette.m3onPrimaryContainer
+            verticalPadding: Appearance.padding.small
+            text: qsTr("Open settings")
+            icon: "settings"
 
-            implicitWidth: expandBtn.implicitWidth + Appearance.padding.normal * 2
-            implicitHeight: expandBtn.implicitHeight + Appearance.padding.small
-
-            radius: Appearance.rounding.normal
-            color: Colours.palette.m3primaryContainer
-
-            StateLayer {
-                color: Colours.palette.m3onPrimaryContainer
-
-                function onClicked(): void {
-                    root.wrapper.hasCurrent = false;
-                    Quickshell.execDetached(["app2unit", "--", ...Config.general.apps.audio]);
-                }
-            }
-
-            RowLayout {
-                id: expandBtn
-
-                anchors.centerIn: parent
-                spacing: Appearance.spacing.small
-
-                StyledText {
-                    Layout.leftMargin: Appearance.padding.smaller
-                    text: qsTr("Open settings")
-                    color: Colours.palette.m3onPrimaryContainer
-                }
-
-                MaterialIcon {
-                    text: "chevron_right"
-                    color: Colours.palette.m3onPrimaryContainer
-                    font.pointSize: Appearance.font.size.large
-                }
-            }
+            onClicked: root.wrapper.detach("audio")
         }
     }
 }

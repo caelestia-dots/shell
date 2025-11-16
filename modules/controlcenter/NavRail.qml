@@ -158,7 +158,7 @@ Item {
 
         NavItem {
             Layout.topMargin: Appearance.spacing.large * 2
-            icon: "network_manage"
+            icon: "router"
             label: "network"
         }
 
@@ -168,8 +168,23 @@ Item {
         }
 
         NavItem {
-            icon: "tune"
+            icon: "volume_up"
             label: "audio"
+        }
+
+        NavItem {
+            icon: "palette"
+            label: "appearance"
+        }
+
+        NavItem {
+            icon: "task_alt"
+            label: "taskbar"
+        }
+
+        NavItem {
+            icon: "apps"
+            label: "launcher"
         }
     }
 

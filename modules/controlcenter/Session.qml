@@ -2,15 +2,17 @@ import Quickshell.Bluetooth
 import QtQuick
 
 QtObject {
-    readonly property list<string> panes: ["network", "bluetooth", "audio"]
+    readonly property list<string> panes: ["network", "bluetooth", "audio", "appearance", "taskbar", "launcher"]
 
     required property var root
     property bool floating: false
-    property string active: panes[0]
+    property string active: "network"
     property int activeIndex: 0
     property bool navExpanded: false
 
     readonly property Bt bt: Bt {}
+    readonly property Network network: Network {}
+    readonly property Ethernet ethernet: Ethernet {}
 
     onActiveChanged: activeIndex = panes.indexOf(active)
     onActiveIndexChanged: active = panes[activeIndex]
@@ -21,5 +23,15 @@ QtObject {
         property bool editingAdapterName
         property bool fabMenuOpen
         property bool editingDeviceName
+    }
+
+    component Network: QtObject {
+        property var active
+        property bool showPasswordDialog: false
+        property var pendingNetwork
+    }
+
+    component Ethernet: QtObject {
+        property var active
     }
 }
