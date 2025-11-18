@@ -11,6 +11,7 @@ JsonObject {
     property Status status: Status {}
     property Clock clock: Clock {}
     property Sizes sizes: Sizes {}
+    property list<string> excludedScreens: []
 
     property list<var> entries: [
         {

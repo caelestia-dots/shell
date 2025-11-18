@@ -399,7 +399,8 @@ default, you must create it manually.
                     "icon": "sports_esports"
                 }
             ]
-        }
+        },
+        "excludedScreens": [""]
     },
     "border": {
         "rounding": 25,

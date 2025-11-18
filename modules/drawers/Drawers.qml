@@ -18,6 +18,7 @@ Variants {
         id: scope
 
         required property ShellScreen modelData
+        readonly property bool barDisabled: Config.bar.excludedScreens.includes(modelData.name)
 
         Exclusions {
             screen: scope.modelData
@@ -55,9 +56,15 @@ Variants {
             WlrLayershell.keyboardFocus: visibilities.launcher || visibilities.session ? WlrKeyboardFocus.OnDemand : WlrKeyboardFocus.None
 
             mask: Region {
-                x: bar.implicitWidth + win.dragMaskPadding
+                x: {
+                    if (scope.barDisabled) return win.dragMaskPadding;
+                    return bar.implicitWidth + win.dragMaskPadding
+                }
                 y: Config.border.thickness + win.dragMaskPadding
-                width: win.width - bar.implicitWidth - Config.border.thickness - win.dragMaskPadding * 2
+                width: {
+                    if (scope.barDisabled) return win.width - Config.border.thickness - win.dragMaskPadding * 2
+                    return win.width - bar.implicitWidth - Config.border.thickness - win.dragMaskPadding * 2
+                }
                 height: win.height - Config.border.thickness * 2 - win.dragMaskPadding * 2
                 intersection: Intersection.Xor
 
@@ -122,6 +129,7 @@ Variants {
 
                 Border {
                     bar: bar
+                    barDisabled: scope.barDisabled
                 }
 
                 Backgrounds {
@@ -161,6 +169,8 @@ Variants {
 
                 BarWrapper {
                     id: bar
+
+                    visible: !scope.barDisabled
 
                     anchors.top: parent.top
                     anchors.bottom: parent.bottom
