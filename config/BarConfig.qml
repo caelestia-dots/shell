@@ -7,6 +7,7 @@ JsonObject {
     property ScrollActions scrollActions: ScrollActions {}
     property Popouts popouts: Popouts {}
     property Workspaces workspaces: Workspaces {}
+    property ActiveWindow activeWindow: ActiveWindow {}
     property Tray tray: Tray {}
     property Status status: Status {}
     property Clock clock: Clock {}
@@ -76,6 +77,10 @@ JsonObject {
         property string activeLabel: "󰮯"
         property string capitalisation: "preserve" // upper, lower, or preserve - relevant only if label is empty
         property list<var> specialWorkspaceIcons: []
+    }
+
+    component ActiveWindow: JsonObject {
+        property int rotation: 90
     }
 
     component Tray: JsonObject {

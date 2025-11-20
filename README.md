@@ -399,6 +399,9 @@ default, you must create it manually.
                     "icon": "sports_esports"
                 }
             ]
+        },
+        "activeWindow": {
+            "rotation": 270
         }
     },
     "border": {
