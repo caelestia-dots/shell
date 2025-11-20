@@ -22,7 +22,7 @@ Variants {
 
         Exclusions {
             screen: scope.modelData
-            bar: bar
+            bar: barLoader.item
         }
 
         StyledWindow {
@@ -58,12 +58,12 @@ Variants {
             mask: Region {
                 x: {
                     if (scope.barDisabled) return win.dragMaskPadding;
-                    return bar.implicitWidth + win.dragMaskPadding
+                    return barLoader.item.implicitWidth + win.dragMaskPadding
                 }
                 y: Config.border.thickness + win.dragMaskPadding
                 width: {
                     if (scope.barDisabled) return win.width - Config.border.thickness - win.dragMaskPadding * 2
-                    return win.width - bar.implicitWidth - Config.border.thickness - win.dragMaskPadding * 2
+                    return win.width - barLoader.item.implicitWidth - Config.border.thickness - win.dragMaskPadding * 2
                 }
                 height: win.height - Config.border.thickness * 2 - win.dragMaskPadding * 2
                 intersection: Intersection.Xor
@@ -84,7 +84,7 @@ Variants {
                 Region {
                     required property Item modelData
 
-                    x: modelData.x + bar.implicitWidth
+                    x: modelData.x + (barDisabled ? 0 : barLoader.item.implicitWidth)
                     y: modelData.y + Config.border.thickness
                     width: modelData.width
                     height: modelData.height
@@ -103,7 +103,7 @@ Variants {
                     visibilities.sidebar = false;
                     visibilities.dashboard = false;
                     panels.popouts.hasCurrent = false;
-                    bar.closeTray();
+                    bar?.closeTray();
                 }
             }
 
@@ -128,13 +128,12 @@ Variants {
                 }
 
                 Border {
-                    bar: bar
-                    barDisabled: scope.barDisabled
+                    bar: barLoader.item
                 }
 
                 Backgrounds {
                     panels: panels
-                    bar: bar
+                    bar: barLoader.item
                 }
             }
 
@@ -157,29 +156,27 @@ Variants {
                 popouts: panels.popouts
                 visibilities: visibilities
                 panels: panels
-                bar: bar
+                bar: barLoader.item
 
                 Panels {
                     id: panels
 
                     screen: scope.modelData
                     visibilities: visibilities
-                    bar: bar
+                    bar: barLoader.item
                 }
 
-                BarWrapper {
-                    id: bar
-
-                    visible: !scope.barDisabled
-
+                Loader {
+                    id: barLoader
+                    active: !scope.barDisabled
                     anchors.top: parent.top
                     anchors.bottom: parent.bottom
-
-                    screen: scope.modelData
-                    visibilities: visibilities
-                    popouts: panels.popouts
-
-                    Component.onCompleted: Visibilities.bars.set(scope.modelData, this)
+                    sourceComponent: BarWrapper {
+                        screen: scope.modelData
+                        visibilities: visibilities
+                        popouts: panels.popouts
+                        Component.onCompleted: Visibilities.bars.set(scope.modelData, this)
+                    }
                 }
             }
         }

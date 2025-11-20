@@ -10,7 +10,6 @@ Item {
     id: root
 
     required property Item bar
-    required property bool barDisabled
 
     anchors.fill: parent
 
@@ -38,7 +37,7 @@ Item {
         Rectangle {
             anchors.fill: parent
             anchors.margins: Config.border.thickness
-            anchors.leftMargin: root.barDisabled ? Config.border.thickness : root.bar.implicitWidth
+            anchors.leftMargin: bar === null ? Config.border.thickness : root.bar.implicitWidth
             radius: Config.border.rounding
         }
     }

@@ -19,7 +19,7 @@ Shape {
 
     anchors.fill: parent
     anchors.margins: Config.border.thickness
-    anchors.leftMargin: bar.implicitWidth
+    anchors.leftMargin: bar === null ? 0 : bar.implicitWidth
     preferredRendererType: Shape.CurveRenderer
 
     Osd.Background {
