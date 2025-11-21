@@ -401,7 +401,7 @@ default, you must create it manually.
             ]
         },
         "activeWindow": {
-            "rotation": 270
+            "inverted": false
         }
     },
     "border": {

@@ -80,7 +80,7 @@ JsonObject {
     }
 
     component ActiveWindow: JsonObject {
-        property int rotation: 90
+        property bool inverted: false
     }
 
     component Tray: JsonObject {

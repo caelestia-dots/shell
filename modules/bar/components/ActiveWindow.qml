@@ -12,7 +12,7 @@ Item {
     required property var bar
     required property Brightness.Monitor monitor
     property color colour: Colours.palette.m3primary
-    property int rotation: Config.bar.activeWindow.rotation
+    property bool inverted: Config.bar.activeWindow.inverted
 
     readonly property int maxHeight: {
         const otherModules = bar.children.filter(c => c.id && c.item !== this && c.id !== "spacer");
@@ -82,10 +82,10 @@ Item {
 
         transform: [
             Translate {
-                x: root.rotation === 270 ? -implicitWidth + text.implicitHeight : 0
+                x: root.inverted ? -implicitWidth + text.implicitHeight : 0
             },
             Rotation {
-                angle: root.rotation
+                angle: root.inverted ? 270 : 90
                 origin.x: text.implicitHeight / 2
                 origin.y: text.implicitHeight / 2
             }
