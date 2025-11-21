@@ -30,7 +30,7 @@ Item {
 
     anchors.fill: parent
     anchors.margins: Config.border.thickness
-    anchors.leftMargin: bar === null ? 0 : bar.implicitWidth
+    anchors.leftMargin: bar.implicitWidth
 
     Osd.Wrapper {
         id: osd

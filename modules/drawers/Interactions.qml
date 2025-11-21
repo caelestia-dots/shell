@@ -24,16 +24,16 @@ CustomMouseArea {
     }
 
     function withinPanelWidth(panel: Item, x: real, y: real): bool {
-        const panelX = getBarWidth() + panel.x;
+        const panelX = bar.implicitWidth + panel.x;
         return x >= panelX - Config.border.rounding && x <= panelX + panel.width + Config.border.rounding;
     }
 
     function inLeftPanel(panel: Item, x: real, y: real): bool {
-        return x < getBarWidth() + panel.x + panel.width && withinPanelHeight(panel, x, y);
+        return x < bar.implicitWidth + panel.x + panel.width && withinPanelHeight(panel, x, y);
     }
 
     function inRightPanel(panel: Item, x: real, y: real): bool {
-        return x > getBarWidth() + panel.x && withinPanelHeight(panel, x, y);
+        return x > bar.implicitWidth + panel.x && withinPanelHeight(panel, x, y);
     }
 
     function inTopPanel(panel: Item, x: real, y: real): bool {
@@ -45,14 +45,9 @@ CustomMouseArea {
     }
 
     function onWheel(event: WheelEvent): void {
-        if (event.x < getBarWidth()) {
-            bar?.handleWheel(event.y, event.angleDelta);
+        if (event.x < bar.implicitWidth) {
+            bar.handleWheel(event.y, event.angleDelta);
         }
-    }
-
-    function getBarWidth(): real {
-        if (bar === null) return 0;
-        return bar.implicitWidth;
     }
 
     anchors.fill: parent
@@ -75,11 +70,11 @@ CustomMouseArea {
 
             if (!popouts.currentName.startsWith("traymenu") || (popouts.current?.depth ?? 0) <= 1) {
                 popouts.hasCurrent = false;
-                bar?.closeTray();
+                bar.closeTray();
             }
 
             if (Config.bar.showOnHover)
-                if (bar !== null) bar.isHovered = false;
+                bar.isHovered = false;
         }
     }
 
@@ -93,11 +88,11 @@ CustomMouseArea {
         const dragY = y - dragStart.y;
 
         // Show bar in non-exclusive mode on hover
-        if (bar !== null && !visibilities.bar && Config.bar.showOnHover && x < getBarWidth())
+        if (!visibilities.bar && Config.bar.showOnHover && x < bar.implicitWidth)
             bar.isHovered = true;
 
         // Show/hide bar on drag
-        if (pressed && dragStart.x < getBarWidth()) {
+        if (pressed && dragStart.x < bar.implicitWidth) {
             if (dragX > Config.bar.dragThreshold)
                 visibilities.bar = true;
             else if (dragX < -Config.bar.dragThreshold)
@@ -118,7 +113,7 @@ CustomMouseArea {
                 root.panels.osd.hovered = true;
             }
 
-            const showSidebar = pressed && dragStart.x > getBarWidth() + panels.sidebar.x;
+            const showSidebar = pressed && dragStart.x > bar.implicitWidth + panels.sidebar.x;
 
             // Show/hide session on drag
             if (pressed && inRightPanel(panels.session, dragStart.x, dragStart.y) && withinPanelHeight(panels.session, x, y)) {
@@ -204,11 +199,11 @@ CustomMouseArea {
         }
 
         // Show popouts on hover
-        if (x < getBarWidth()) {
-            bar?.checkPopout(y);
+        if (x < bar.implicitWidth) {
+            bar.checkPopout(y);
         } else if ((!popouts.currentName.startsWith("traymenu") || (popouts.current?.depth ?? 0) <= 1) && !inLeftPanel(panels.popouts, x, y)) {
             popouts.hasCurrent = false;
-            bar?.closeTray();
+            bar.closeTray();
         }
     }
 

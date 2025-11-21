@@ -18,11 +18,26 @@ Variants {
         id: scope
 
         required property ShellScreen modelData
-        readonly property bool barDisabled: Config.bar.excludedScreens.includes(modelData.name)
+        readonly property bool barDisabled: {
+            const regexChecker = /^\^.*\$$/;
+            for (let i = 0; i < Config.bar.excludedScreens.length; i++) {
+                const filter = Config.bar.excludedScreens[i];
+                // If filter is a regex
+                if (regexChecker.test(filter)) {
+                    if (RegExp(filter).test(modelData.name))
+                        return true;
+                }
+                else {
+                    if (filter === modelData.name)
+                        return true;
+                }
+            }
+            return false;
+        }
 
         Exclusions {
             screen: scope.modelData
-            bar: barLoader.item
+            bar: bar
         }
 
         StyledWindow {
@@ -58,12 +73,12 @@ Variants {
             mask: Region {
                 x: {
                     if (scope.barDisabled) return win.dragMaskPadding;
-                    return barLoader.item.implicitWidth + win.dragMaskPadding
+                    return bar.implicitWidth + win.dragMaskPadding
                 }
                 y: Config.border.thickness + win.dragMaskPadding
                 width: {
                     if (scope.barDisabled) return win.width - Config.border.thickness - win.dragMaskPadding * 2
-                    return win.width - barLoader.item.implicitWidth - Config.border.thickness - win.dragMaskPadding * 2
+                    return win.width - bar.implicitWidth - Config.border.thickness - win.dragMaskPadding * 2
                 }
                 height: win.height - Config.border.thickness * 2 - win.dragMaskPadding * 2
                 intersection: Intersection.Xor
@@ -84,7 +99,7 @@ Variants {
                 Region {
                     required property Item modelData
 
-                    x: modelData.x + (barDisabled ? 0 : barLoader.item.implicitWidth)
+                    x: modelData.x + (barDisabled ? 0 : bar.implicitWidth)
                     y: modelData.y + Config.border.thickness
                     width: modelData.width
                     height: modelData.height
@@ -103,7 +118,7 @@ Variants {
                     visibilities.sidebar = false;
                     visibilities.dashboard = false;
                     panels.popouts.hasCurrent = false;
-                    barLoader.item?.closeTray();
+                    bar.closeTray();
                 }
             }
 
@@ -128,12 +143,12 @@ Variants {
                 }
 
                 Border {
-                    bar: barLoader.item
+                    bar: bar
                 }
 
                 Backgrounds {
                     panels: panels
-                    bar: barLoader.item
+                    bar: bar
                 }
             }
 
@@ -156,27 +171,30 @@ Variants {
                 popouts: panels.popouts
                 visibilities: visibilities
                 panels: panels
-                bar: barLoader.item
+                bar: bar
 
                 Panels {
                     id: panels
 
                     screen: scope.modelData
                     visibilities: visibilities
-                    bar: barLoader.item
+                    bar: bar
                 }
 
-                Loader {
-                    id: barLoader
-                    active: !scope.barDisabled
+                BarWrapper {
+                    id: bar
+
                     anchors.top: parent.top
                     anchors.bottom: parent.bottom
-                    sourceComponent: BarWrapper {
-                        screen: scope.modelData
-                        visibilities: visibilities
-                        popouts: panels.popouts
-                        Component.onCompleted: Visibilities.bars.set(scope.modelData, this)
-                    }
+
+                    screen: scope.modelData
+                    visibilities: visibilities
+                    popouts: panels.popouts
+
+                    visible: !scope.barDisabled
+                    disabled: scope.barDisabled
+
+                    Component.onCompleted: Visibilities.bars.set(scope.modelData, this)
                 }
             }
         }

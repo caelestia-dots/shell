@@ -12,10 +12,11 @@ Item {
     required property ShellScreen screen
     required property PersistentProperties visibilities
     required property BarPopouts.Wrapper popouts
+    required property bool disabled
 
     readonly property int padding: Math.max(Appearance.padding.smaller, Config.border.thickness)
     readonly property int contentWidth: Config.bar.sizes.innerWidth + padding * 2
-    readonly property int exclusiveZone: Config.bar.persistent || visibilities.bar ? contentWidth : Config.border.thickness
+    readonly property int exclusiveZone: !disabled && (Config.bar.persistent || visibilities.bar) ? contentWidth : Config.border.thickness
     readonly property bool shouldBeVisible: Config.bar.persistent || visibilities.bar || isHovered
     property bool isHovered
 
@@ -36,7 +37,7 @@ Item {
 
     states: State {
         name: "visible"
-        when: root.shouldBeVisible
+        when: !disabled && root.shouldBeVisible
 
         PropertyChanges {
             root.implicitWidth: root.contentWidth
@@ -74,7 +75,7 @@ Item {
         anchors.bottom: parent.bottom
         anchors.right: parent.right
 
-        active: root.shouldBeVisible || root.visible
+        active: !root.disabled && (root.shouldBeVisible || root.visible)
 
         sourceComponent: Bar {
             width: root.contentWidth

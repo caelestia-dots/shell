@@ -13,7 +13,7 @@ Scope {
 
     ExclusionZone {
         anchors.left: true
-        exclusiveZone: Config.bar.excludedScreens.includes(root.screen.name) ? Config.border.thickness : root.bar.exclusiveZone
+        exclusiveZone: root.bar.exclusiveZone
     }
 
     ExclusionZone {
