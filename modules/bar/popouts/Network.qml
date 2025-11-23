@@ -47,98 +47,259 @@ ColumnLayout {
             }).slice(0, 8)
         }
 
-        RowLayout {
+        ColumnLayout {
             id: networkItem
-
+            
             required property Network.AccessPoint modelData
             readonly property bool isConnecting: root.connectingToSsid === modelData.ssid
-            readonly property bool loading: networkItem.isConnecting
-
-            Layout.fillWidth: true
-            Layout.rightMargin: Appearance.padding.small
-            spacing: Appearance.spacing.small
-
-            opacity: 0
-            scale: 0.7
-
-            Component.onCompleted: {
-                opacity = 1;
-                scale = 1;
-            }
-
-            Behavior on opacity {
-                Anim {}
-            }
-
-            Behavior on scale {
-                Anim {}
-            }
-
-            MaterialIcon {
-                text: Icons.getNetworkIcon(networkItem.modelData.strength)
-                color: networkItem.modelData.active ? Colours.palette.m3primary : Colours.palette.m3onSurfaceVariant
-            }
-
-            MaterialIcon {
-                visible: networkItem.modelData.isSecure
-                text: "lock"
-                font.pointSize: Appearance.font.size.small
-            }
-
-            StyledText {
-                Layout.leftMargin: Appearance.spacing.small / 2
-                Layout.rightMargin: Appearance.spacing.small / 2
+            
+            RowLayout {
                 Layout.fillWidth: true
-                text: networkItem.modelData.ssid
-                elide: Text.ElideRight
-                font.weight: networkItem.modelData.active ? 500 : 400
-                color: networkItem.modelData.active ? Colours.palette.m3primary : Colours.palette.m3onSurface
+                Layout.rightMargin: Appearance.padding.small
+                spacing: Appearance.spacing.small
+
+                opacity: 0
+                scale: 0.7
+
+                Component.onCompleted: {
+                    opacity = 1;
+                    scale = 1;
+                }
+
+                Behavior on opacity {
+                    Anim {}
+                }
+
+                Behavior on scale {
+                    Anim {}
+                }
+
+                MaterialIcon {
+                    text: Icons.getNetworkIcon(networkItem.modelData.strength)
+                    color: networkItem.modelData.active ? Colours.palette.m3primary : Colours.palette.m3onSurfaceVariant
+                }
+
+                MaterialIcon {
+                    visible: networkItem.modelData.isSecure
+                    text: "lock"
+                    font.pointSize: Appearance.font.size.small
+                }
+
+                StyledText {
+                    Layout.leftMargin: Appearance.spacing.small / 2
+                    Layout.rightMargin: Appearance.spacing.small / 2
+                    Layout.fillWidth: true
+                    text: networkItem.modelData.ssid
+                    elide: Text.ElideRight
+                    font.weight: networkItem.modelData.active ? 500 : 400
+                    color: networkItem.modelData.active ? Colours.palette.m3primary : Colours.palette.m3onSurface
+                }
+
+                StyledRect {
+                    id: connectBtn
+
+                    implicitWidth: implicitHeight
+                    implicitHeight: connectIcon.implicitHeight + Appearance.padding.small
+
+                    radius: Appearance.rounding.full
+                    color: Qt.alpha(Colours.palette.m3primary, networkItem.modelData.active ? 1 : 0)
+
+                    CircularIndicator {
+                        anchors.fill: parent
+                        running: networkItem.isConnecting
+                    }
+
+                    StateLayer {
+                        color: networkItem.modelData.active ? Colours.palette.m3onPrimary : Colours.palette.m3onSurface
+                        disabled: networkItem.isConnecting || !Network.wifiEnabled
+
+                        function onClicked(): void {
+                            if (networkItem.modelData.active) {
+                                Network.disconnectFromNetwork();
+                            } else {
+                                root.connectingToSsid = networkItem.modelData.ssid;
+                                Network.connectToNetwork(root.connectingToSsid);
+                            }
+                        }
+                    }
+
+                    MaterialIcon {
+                        id: connectIcon
+
+                        anchors.centerIn: parent
+                        animate: true
+                        text: networkItem.modelData.active ? "link_off" : "link"
+                        color: networkItem.modelData.active ? Colours.palette.m3onPrimary : Colours.palette.m3onSurface
+
+                        opacity: networkItem.isConnecting ? 0 : 1
+
+                        Behavior on opacity {
+                            Anim {}
+                        }
+                    }
+                }
             }
 
             StyledRect {
-                id: connectBtn
+                id: askWifiPassword
+                visible: networkItem.isConnecting && Network.isconnectionFailed
 
-                implicitWidth: implicitHeight
-                implicitHeight: connectIcon.implicitHeight + Appearance.padding.small
+                Layout.rightMargin: Appearance.padding.small
+                Layout.fillWidth: true
+                implicitHeight: confirmPswdIcon.implicitHeight + Appearance.padding.small*2
 
-                radius: Appearance.rounding.full
-                color: Qt.alpha(Colours.palette.m3primary, networkItem.modelData.active ? 1 : 0)
+                color: Colours.palette.m3onSecondary;
+                radius: Appearance.rounding.large
 
-                CircularIndicator {
-                    anchors.fill: parent
-                    running: networkItem.loading
-                }
+                RowLayout {
+                    anchors.fill: askWifiPassword
+                    spacing: Appearance.spacing.small
 
-                StateLayer {
-                    color: networkItem.modelData.active ? Colours.palette.m3onPrimary : Colours.palette.m3onSurface
-                    disabled: networkItem.loading || !Network.wifiEnabled
+                    opacity: 0
+                    scale: 0.7
+                    
+                    Component.onCompleted: {
+                        opacity = 1;
+                        scale = 1;
+                    }
 
-                    function onClicked(): void {
-                        if (networkItem.modelData.active) {
-                            Network.disconnectFromNetwork();
-                        } else {
-                            root.connectingToSsid = networkItem.modelData.ssid;
-                            Network.connectToNetwork(networkItem.modelData.ssid, "");
+                    StyledRect {
+                        id: hidePswdBtn
+                        property bool isclicked: false;
+
+                        Layout.leftMargin: Appearance.padding.small/2
+                        implicitWidth: implicitHeight
+                        implicitHeight: hidePswdIcon.implicitHeight + Appearance.padding.small
+
+                        radius: Appearance.rounding.full
+                        color: Qt.alpha(Colours.palette.m3primary, hidePswdBtn.isclicked ? 1 : 0)
+
+                        StateLayer {
+                            disabled: false
+
+                            function onClicked(): void {
+                                hidePswdBtn.isclicked = !hidePswdBtn.isclicked;
+                            }
+                        }
+
+                        MaterialIcon {
+                            id: hidePswdIcon
+
+                            anchors.centerIn: parent
+                            animate: true
+                            text: hidePswdBtn.isclicked ? "visibility_off" : "visibility"
+                            color: askWifiPassword.visible && hidePswdBtn.isclicked ? Colours.palette.m3onPrimary : Colours.palette.m3onSurface
+                        }
+                    }
+
+                    StyledTextField {
+                        id: wifiPasswordField
+                        Layout.leftMargin: Appearance.spacing.small / 2
+                        Layout.rightMargin: Appearance.spacing.small / 2
+                        Layout.fillWidth: true
+                        placeholderText: "Enter Password"
+                        passwordMaskDelay: 300
+                        echoMode: hidePswdBtn.isclicked ? TextInput.Normal : TextInput.Password   // hides characters
+                        selectByMouse: true             // allow mouse text selection
+                        mouseSelectionMode: TextInput.SelectCharacters
+                        focus: true
+                        onActiveFocusChanged: {
+                            if (!activeFocus)
+                                forceActiveFocus();
+                        }
+                    }
+
+                    StyledRect {
+                        id: confirmPswdBtn
+                        property bool isclicked: false;
+
+                        implicitWidth: implicitHeight
+                        implicitHeight: confirmPswdIcon.implicitHeight + Appearance.padding.small
+
+                        radius: Appearance.rounding.full
+                        color: Qt.alpha(Colours.palette.m3primary, confirmPswdBtn.isclicked ? 1 : 0)
+
+                        StateLayer {
+                            disabled: false
+
+                            function onClicked(): void {
+                                confirmPswdBtn.isclicked = true;
+                                Network.connectToSecureNetwork(root.connectingToSsid, wifiPasswordField.text);
+                                confirmwaitTimer.start();
+                            }
+                        }
+
+                        MaterialIcon {
+                            id: confirmPswdIcon
+
+                            anchors.centerIn: parent
+                            animate: true
+                            text: "check"
+                            color: askWifiPassword.visible && confirmPswdBtn.isclicked ? Colours.palette.m3onPrimary : Colours.palette.m3onSurface
+                        }
+
+                        Timer {
+                            id: confirmwaitTimer
+                            interval: 100
+                            repeat: false
+                            onTriggered: {
+                                confirmPswdBtn.isclicked = false;
+                            }
+                        }
+                    }
+
+                    StyledRect {
+                        id: cancelPswdBtn
+                        property bool isclicked: false
+
+                        Layout.rightMargin: Appearance.spacing.small / 2
+                        implicitWidth: implicitHeight
+                        implicitHeight: cancelPswdIcon.implicitHeight + Appearance.padding.small
+
+                        radius: Appearance.rounding.full
+                        color: Qt.alpha(Colours.palette.m3primary, cancelPswdBtn.isclicked ? 1 : 0)
+
+                        StateLayer {
+                            disabled: false
+
+                            function onClicked(): void {
+                                cancelPswdBtn.isclicked = true;
+                                cancelwaitTimer.start();
+                            }
+                        }
+
+                        MaterialIcon {
+                            id: cancelPswdIcon
+
+                            anchors.centerIn: parent
+                            animate: true
+                            text: "close"  
+                            color: askWifiPassword.visible && cancelPswdBtn.isclicked ? Colours.palette.m3onPrimary : Colours.palette.m3onSurface
+                        }
+
+                        Timer {
+                            id: cancelwaitTimer
+                            interval: 100
+                            repeat: false
+                            onTriggered: {
+                                cancelPswdBtn.isclicked = false;
+                                Network.isconnectionFailed = false;
+                                root.connectingToSsid = "";
+                            }
                         }
                     }
                 }
 
-                MaterialIcon {
-                    id: connectIcon
-
-                    anchors.centerIn: parent
-                    animate: true
-                    text: networkItem.modelData.active ? "link_off" : "link"
-                    color: networkItem.modelData.active ? Colours.palette.m3onPrimary : Colours.palette.m3onSurface
-
-                    opacity: networkItem.loading ? 0 : 1
-
-                    Behavior on opacity {
-                        Anim {}
+                onVisibleChanged : {
+                    if (!visible) {
+                        hidePswdBtn.isclicked = false;
                     }
                 }
             }
         }
+
+
+        
     }
 
     StyledRect {
