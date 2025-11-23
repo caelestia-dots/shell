@@ -5,6 +5,7 @@ import Caelestia.Services
 import Caelestia
 import Quickshell
 import Quickshell.Services.Pipewire
+import Quickshell.Io
 import QtQuick
 
 Singleton {
@@ -12,6 +13,31 @@ Singleton {
 
     property string previousSinkName: ""
     property string previousSourceName: ""
+
+    property real pendingVolume: 0
+
+    Process {
+        id: volumeProcess
+    }
+
+    Timer {
+        id: volumeDebounceTimer
+        interval: 50
+        repeat: false
+        onTriggered: {
+            if (!root.sink || !root.sink.ready)
+                return;
+
+            var volPercent = Math.round(root.pendingVolume * 100) + "%";
+
+            if (!volumeProcess.running) {
+                volumeProcess.command = ["pactl", "set-sink-volume", "@DEFAULT_SINK@", volPercent];
+                volumeProcess.running = true;
+            } else {
+                restart();
+            }
+        }
+    }
 
     readonly property var nodes: Pipewire.nodes.values.reduce((acc, node) => {
         if (!node.isStream) {
@@ -42,10 +68,18 @@ Singleton {
     readonly property alias beatTracker: beatTracker
 
     function setVolume(newVolume: real): void {
-        if (sink?.ready && sink?.audio) {
+        if (!sink?.ready)
+            return;
+
+        var finalVol = Math.max(0, Math.min(Config.services.maxVolume, newVolume));
+
+        if (sink.audio) {
             sink.audio.muted = false;
-            sink.audio.volume = Math.max(0, Math.min(Config.services.maxVolume, newVolume));
+            sink.audio.volume = finalVol;
         }
+
+        root.pendingVolume = finalVol;
+        volumeDebounceTimer.restart();
     }
 
     function incrementVolume(amount: real): void {
