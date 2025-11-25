@@ -9,7 +9,7 @@ import QtQuick
 Singleton {
     id: root
 
-    property string city
+    property string loc
     property var cc
     property var forecast
     readonly property string icon: cc ? Icons.getWeatherIcon(cc.weatherCode) : "cloud_alert"
@@ -20,15 +20,15 @@ Singleton {
 
     function reload(): void {
         if (Config.services.weatherLocation)
-            city = Config.services.weatherLocation;
-        else if (!city || timer.elapsed() > 900)
+            loc = Config.services.weatherLocation;
+        else if (!loc || timer.elapsed() > 900)
             Requests.get("https://ipinfo.io/json", text => {
-                city = JSON.parse(text).city ?? "";
+                loc = JSON.parse(text).loc ?? "";
                 timer.restart();
             });
     }
 
-    onCityChanged: Requests.get(`https://wttr.in/${city}?format=j1`, text => {
+    onLocChanged: Requests.get(`https://wttr.in/${loc}?format=j1`, text => {
         const json = JSON.parse(text);
         cc = json.current_condition[0];
         forecast = json.weather;
