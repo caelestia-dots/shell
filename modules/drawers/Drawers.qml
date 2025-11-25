@@ -20,14 +20,12 @@ Variants {
         required property ShellScreen modelData
         readonly property bool barDisabled: {
             const regexChecker = /^\^.*\$$/;
-            for (let i = 0; i < Config.bar.excludedScreens.length; i++) {
-                const filter = Config.bar.excludedScreens[i];
+            for (const filter of Config.bar.excludedScreens) {
                 // If filter is a regex
                 if (regexChecker.test(filter)) {
-                    if (RegExp(filter).test(modelData.name))
+                    if ((new RegExp(filter)).test(modelData.name))
                         return true;
-                }
-                else {
+                } else {
                     if (filter === modelData.name)
                         return true;
                 }
@@ -71,15 +69,9 @@ Variants {
             WlrLayershell.keyboardFocus: visibilities.launcher || visibilities.session ? WlrKeyboardFocus.OnDemand : WlrKeyboardFocus.None
 
             mask: Region {
-                x: {
-                    if (scope.barDisabled) return win.dragMaskPadding;
-                    return bar.implicitWidth + win.dragMaskPadding
-                }
+                x: bar.implicitWidth + win.dragMaskPadding
                 y: Config.border.thickness + win.dragMaskPadding
-                width: {
-                    if (scope.barDisabled) return win.width - Config.border.thickness - win.dragMaskPadding * 2
-                    return win.width - bar.implicitWidth - Config.border.thickness - win.dragMaskPadding * 2
-                }
+                width: win.width - bar.implicitWidth - Config.border.thickness - win.dragMaskPadding * 2
                 height: win.height - Config.border.thickness * 2 - win.dragMaskPadding * 2
                 intersection: Intersection.Xor
 
@@ -99,7 +91,7 @@ Variants {
                 Region {
                     required property Item modelData
 
-                    x: modelData.x + (barDisabled ? 0 : bar.implicitWidth)
+                    x: modelData.x + bar.implicitWidth
                     y: modelData.y + Config.border.thickness
                     width: modelData.width
                     height: modelData.height
@@ -191,7 +183,6 @@ Variants {
                     visibilities: visibilities
                     popouts: panels.popouts
 
-                    visible: !scope.barDisabled
                     disabled: scope.barDisabled
 
                     Component.onCompleted: Visibilities.bars.set(scope.modelData, this)

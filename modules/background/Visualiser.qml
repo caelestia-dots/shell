@@ -58,10 +58,7 @@ Item {
 
                     anchors.fill: parent
                     anchors.margins: Config.border.thickness
-                    anchors.leftMargin: {
-                        if (Config.bar.excludedScreens.includes(modelData.name)) return Config.border.thickness;
-                        return Visibilities.bars.get(root.screen).exclusiveZone + Appearance.spacing.small * Config.background.visualiser.spacing;
-                    }
+                    anchors.leftMargin: Visibilities.bars.get(root.screen).exclusiveZone + Appearance.spacing.small * Config.background.visualiser.spacing
 
                     Side {
                         content: content
