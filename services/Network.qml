@@ -11,6 +11,9 @@ Singleton {
     readonly property AccessPoint active: networks.find(n => n.active) ?? null
     property bool wifiEnabled: true
     readonly property bool scanning: rescanProc.running
+    property bool isconnectionFailed: false
+
+    property string _currentssid: ""
 
     function enableWifi(enabled: bool): void {
         const cmd = enabled ? "on" : "off";
@@ -26,9 +29,16 @@ Singleton {
         rescanProc.running = true;
     }
 
-    function connectToNetwork(ssid: string, password: string): void {
-        // TODO: Implement password
-        connectProc.exec(["nmcli", "conn", "up", ssid]);
+    function connectToNetwork(ssid: string): void {
+        isconnectionFailed = false;
+        _currentssid = ssid;
+        connectProc.exec(["nmcli", "conn", "up", _currentssid]);
+    }
+
+    function connectToSecureNetwork(ssid: string, password: string): void {
+        isconnectionFailed = false;
+        _currentssid = ssid;
+        connectProc.exec(["nmcli", "dev", "wifi", "connect", _currentssid, "password", password])
     }
 
     function disconnectFromNetwork(): void {
@@ -39,6 +49,10 @@ Singleton {
 
     function getWifiStatus(): void {
         wifiStatusProc.running = true;
+    }
+
+    function deleteNetwork(ssid: string): bool {
+        disconnectProc.exec(["nmcli", "conn", "delete", ssid])
     }
 
     Process {
@@ -91,6 +105,13 @@ Singleton {
         }
         stderr: StdioCollector {
             onStreamFinished: console.warn("Network connection error:", text)
+        }
+
+        onExited: code => {
+            if(code != 0) {
+                root.isconnectionFailed = true;
+                root.deleteNetwork(root._currentssid);
+            }
         }
     }
 
