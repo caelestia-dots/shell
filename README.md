@@ -577,7 +577,7 @@ default, you must create it manually.
         "enabled": true,
         "vimKeybinds": false,
         "commands": {
-            "logout": ["pkill", "-KILL", "-u", "$(whoami)"],
+            "logout": ["bash", "-c", "pkill -KILL -u $(whoami)"],
             "shutdown": ["systemctl", "poweroff"],
             "hibernate": ["systemctl", "sleep"],
             "reboot": ["systemctl", "reboot"]
