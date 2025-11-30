@@ -40,17 +40,40 @@ Singleton {
         return monitors.find(m => m.modelData.name === query);
     }
 
+    // ===============================================================
+    //  Custom Brightness Step Logic
+    // ===============================================================
+
     function increaseBrightness(): void {
         const monitor = getMonitor("active");
-        if (monitor)
-            monitor.setBrightness(monitor.brightness + 0.1);
+        if (!monitor) return;
+
+        // Round to whole percent to avoid float boundary issues
+        const currentPercent = Math.round(monitor.brightness * 100);
+        const step = (currentPercent < 10) ? 1 : 5;
+
+        const newPercent = Math.min(currentPercent + step, 100);
+        const newBrightness = newPercent / 100;
+        monitor.setBrightness(newBrightness);
     }
 
     function decreaseBrightness(): void {
         const monitor = getMonitor("active");
-        if (monitor)
-            monitor.setBrightness(monitor.brightness - 0.1);
+        if (!monitor) return;
+
+        const currentPercent = Math.round(monitor.brightness * 100);
+        const step = (currentPercent <= 10) ? 1 : 5;
+
+        let newPercent = Math.max(currentPercent - step, 0);
+
+        if (newPercent === currentPercent && currentPercent > 0)
+            newPercent = currentPercent - 1;
+
+        const newBrightness = newPercent / 100;
+        monitor.setBrightness(newBrightness);
     }
+
+    // ===============================================================
 
     onMonitorsChanged: {
         ddcMonitors = [];
@@ -59,15 +82,13 @@ Singleton {
 
     Variants {
         id: variants
-
         model: Quickshell.screens
-
         Monitor {}
     }
 
     Process {
         running: true
-        command: ["sh", "-c", "asdbctl get"] // To avoid warnings if asdbctl is not installed
+        command: ["sh", "-c", "asdbctl get"]
         stdout: StdioCollector {
             onStreamFinished: root.appleDisplayPresent = text.trim().length > 0
         }
@@ -75,13 +96,14 @@ Singleton {
 
     Process {
         id: ddcProc
-
         command: ["ddcutil", "detect", "--brief"]
         stdout: StdioCollector {
-            onStreamFinished: root.ddcMonitors = text.trim().split("\n\n").filter(d => d.startsWith("Display ")).map(d => ({
-                        busNum: d.match(/I2C bus:[ ]*\/dev\/i2c-([0-9]+)/)[1],
-                        connector: d.match(/DRM connector:\s+(.*)/)[1].replace(/^card\d+-/, "") // strip "card1-"
-                    }))
+            onStreamFinished: root.ddcMonitors = text.trim().split("\n\n")
+                .filter(d => d.startsWith("Display "))
+                .map(d => ({
+                    busNum: d.match(/I2C bus:[ ]*\/dev\/i2c-([0-9]+)/)[1],
+                    connector: d.match(/DRM connector:\s+(.*)/)[1].replace(/^card\d+-/, "")
+                }))
         }
     }
 
@@ -104,7 +126,6 @@ Singleton {
             return getFor("active");
         }
 
-        // Allows searching by active/model/serial/id/name
         function getFor(query: string): real {
             return root.getMonitor(query)?.brightness ?? -1;
         }
@@ -113,7 +134,6 @@ Singleton {
             return setFor("active", value);
         }
 
-        // Handles brightness value like brightnessctl: 0.1, +0.1, 0.1-, 10%, +10%, 10%-
         function setFor(query: string, value: string): string {
             const monitor = root.getMonitor(query);
             if (!monitor)
@@ -145,7 +165,6 @@ Singleton {
                 return `Failed to parse value: ${value}\nExpected: 0.1, +0.1, 0.1-, 10%, +10%, 10%-`;
 
             monitor.setBrightness(targetBrightness);
-
             return `Set monitor ${monitor.modelData.name} brightness to ${+monitor.brightness.toFixed(2)}`;
         }
     }
