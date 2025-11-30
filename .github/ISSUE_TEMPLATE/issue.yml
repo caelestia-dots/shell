@@ -44,7 +44,7 @@ body:
     - type: textarea
       attributes:
           label: "Step 3. Describe the issue"
-          value: "\n<!-- Firsly describe your issue here! -->\n\n<details><summary>Logs</summary>\n\n```\n<!-- Put your log content here!-->\n```\n\n</details>"
+          value: "\n<!-- Firstly describe your issue here! -->\n\n<details><summary>Logs</summary>\n\n```\n<!-- Put your log content here!-->\n```\n\n</details>"
       validations:
           required: true
 
