@@ -1,4 +1,5 @@
 import "../services"
+import "root:/utils/RegExp.js" as RegExpChecker
 import qs.components
 import qs.services
 import qs.config
@@ -46,7 +47,7 @@ Item {
             anchors.leftMargin: Appearance.spacing.normal
             anchors.verticalCenter: icon.verticalCenter
 
-            implicitWidth: parent.width - icon.width
+            implicitWidth: parent.width - icon.width - favoriteIcon.width
             implicitHeight: name.implicitHeight + comment.implicitHeight
 
             StyledText {
@@ -64,9 +65,23 @@ Item {
                 color: Colours.palette.m3outline
 
                 elide: Text.ElideRight
-                width: root.width - icon.width - Appearance.rounding.normal * 2
+                width: root.width - icon.width - favoriteIcon.width - Appearance.rounding.normal * 2
 
                 anchors.top: name.bottom
+            }
+        }
+
+        Loader {
+            id: favoriteIcon
+
+            anchors.verticalCenter: parent.verticalCenter
+            anchors.right: parent.right
+            active: RegExpChecker.compareInList(Config.launcher.favoriteApps, modelData.id)
+
+            sourceComponent: MaterialIcon {
+                text: "favorite"
+                fill: 1
+                color: Colours.palette.m3tertiary
             }
         }
     }

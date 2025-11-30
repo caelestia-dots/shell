@@ -1,5 +1,6 @@
 pragma ComponentBehavior: Bound
 
+import "root:/utils/RegExp.js" as RegExpChecker
 import qs.components
 import qs.components.containers
 import qs.services
@@ -18,20 +19,7 @@ Variants {
         id: scope
 
         required property ShellScreen modelData
-        readonly property bool barDisabled: {
-            const regexChecker = /^\^.*\$$/;
-            for (const filter of Config.bar.excludedScreens) {
-                // If filter is a regex
-                if (regexChecker.test(filter)) {
-                    if ((new RegExp(filter)).test(modelData.name))
-                        return true;
-                } else {
-                    if (filter === modelData.name)
-                        return true;
-                }
-            }
-            return false;
-        }
+        readonly property bool barDisabled: RegExpChecker.compareInList(Config.bar.excludedScreens, modelData.name)
 
         Exclusions {
             screen: scope.modelData
