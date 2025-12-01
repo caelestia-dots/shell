@@ -1,10 +1,10 @@
 pragma ComponentBehavior: Bound
 
-import "root:/utils/RegExp.js" as RegExpChecker
 import qs.components
 import qs.components.containers
 import qs.services
 import qs.config
+import qs.utils
 import qs.modules.bar
 import Quickshell
 import Quickshell.Wayland
@@ -19,7 +19,7 @@ Variants {
         id: scope
 
         required property ShellScreen modelData
-        readonly property bool barDisabled: RegExpChecker.compareInList(Config.bar.excludedScreens, modelData.name)
+        readonly property bool barDisabled: RegularExpressions.compareInList(Config.bar.excludedScreens, modelData.name)
 
         Exclusions {
             screen: scope.modelData

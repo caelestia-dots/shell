@@ -1,8 +1,8 @@
 import "../services"
-import "root:/utils/RegExp.js" as RegExpChecker
 import qs.components
 import qs.services
 import qs.config
+import qs.utils
 import Quickshell
 import Quickshell.Widgets
 import QtQuick
@@ -76,12 +76,12 @@ Item {
 
             anchors.verticalCenter: parent.verticalCenter
             anchors.right: parent.right
-            active: RegExpChecker.compareInList(Config.launcher.favoriteApps, modelData.id)
+            active: RegularExpressions.compareInList(Config.launcher.favoriteApps, modelData.id)
 
             sourceComponent: MaterialIcon {
                 text: "favorite"
                 fill: 1
-                color: Colours.palette.m3tertiary
+                color: Colours.palette.m3primary
             }
         }
     }

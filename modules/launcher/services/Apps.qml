@@ -1,6 +1,5 @@
 pragma Singleton
 
-import "root:/utils/RegExp.js" as RegExpChecker
 import qs.config
 import qs.utils
 import Caelestia
@@ -74,6 +73,6 @@ Searcher {
 
         path: `${Paths.state}/apps.sqlite`
         favoriteApps: Config.launcher.favoriteApps
-        entries: DesktopEntries.applications.values.filter(a => !RegExpChecker.compareInList(Config.launcher.hiddenApps, a.id))
+        entries: DesktopEntries.applications.values.filter(a => !RegularExpressions.compareInList(Config.launcher.hiddenApps, a.id))
     }
 }

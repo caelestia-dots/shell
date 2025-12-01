@@ -4,8 +4,8 @@
 #include <qobject.h>
 #include <qqmlintegration.h>
 #include <qqmllist.h>
+#include <qregularexpression.h>
 #include <qtimer.h>
-#include <QRegularExpression>
 
 namespace caelestia {
 
@@ -99,14 +99,14 @@ private:
     const QString m_uuid;
     QString m_path;
     QObjectList m_entries;
-    QStringList m_favoriteApps; // unedited string list from qml
+    QStringList m_favoriteApps;                    // unedited string list from qml
     QList<QRegularExpression> m_favoriteAppsRegex; // pre-regexified m_favoriteApps list
     QHash<QString, AppEntry*> m_apps;
     mutable QList<AppEntry*> m_sortedApps;
 
     QString regexifyString(const QString& original) const;
     QList<AppEntry*>& getSortedApps() const;
-    bool isFavorite(const AppEntry& app) const;
+    bool isFavorite(const AppEntry* app) const;
     quint32 getFrequency(const QString& id) const;
     void updateAppFrequencies();
     void updateApps();

@@ -175,7 +175,7 @@ void AppDb::setFavoriteApps(const QStringList& favApps) {
     m_favoriteAppsRegex.clear();
     m_favoriteAppsRegex.reserve(m_favoriteApps.size());
     for (const QString& item : m_favoriteApps) {
-        const QRegularExpression re = QRegularExpression(regexifyString(item));
+        const QRegularExpression re(regexifyString(item));
         if (re.isValid()) {
             m_favoriteAppsRegex << re;
         } else {
@@ -225,8 +225,8 @@ void AppDb::incrementFrequency(const QString& id) {
 QList<AppEntry*>& AppDb::getSortedApps() const {
     m_sortedApps = m_apps.values();
     std::sort(m_sortedApps.begin(), m_sortedApps.end(), [this](AppEntry* a, AppEntry* b) {
-        bool aIsFav = isFavorite(*a);
-        bool bIsFav = isFavorite(*b);
+        bool aIsFav = isFavorite(a);
+        bool bIsFav = isFavorite(b);
         if (aIsFav != bIsFav) {
             return aIsFav;
         }
@@ -238,9 +238,9 @@ QList<AppEntry*>& AppDb::getSortedApps() const {
     return m_sortedApps;
 }
 
-bool AppDb::isFavorite(const AppEntry& app) const {
+bool AppDb::isFavorite(const AppEntry* app) const {
     for (const QRegularExpression& re : m_favoriteAppsRegex) {
-        if (re.match(app.id()).hasMatch()) {
+        if (re.match(app->id()).hasMatch()) {
             return true;
         }
     }
