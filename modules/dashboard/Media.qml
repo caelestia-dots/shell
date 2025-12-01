@@ -181,7 +181,7 @@ Item {
 
             animate: true
             horizontalAlignment: Text.AlignHCenter
-            visible: !!Players.active
+            visible: Players.active ? true : false
             text: Players.active?.trackAlbum || qsTr("Unknown album")
             color: Colours.palette.m3outline
             font.pointSize: Appearance.font.size.small
@@ -224,7 +224,7 @@ Item {
                 label.animate: true
                 toggle: true
                 padding: Appearance.padding.small / 2
-                checked: Players.active?.isPlaying
+                checked: Players.active?.isPlaying ?? false
                 font.pointSize: Math.round(Appearance.font.size.large * 1.5)
                 disabled: !Players.active?.canTogglePlaying
                 onClicked: Players.active?.togglePlaying()
@@ -242,7 +242,7 @@ Item {
         StyledSlider {
             id: slider
 
-            enabled: !!Players.active
+            enabled: Players.active ? true : false
             implicitWidth: 280
             implicitHeight: Appearance.padding.normal * 3
 
@@ -323,7 +323,7 @@ Item {
                 id: playerSelector
 
                 disabled: !Players.list.length
-                active: menuItems.find(m => m.modelData === Players.active) ?? menuItems[0]
+                active: Players.active ? (menuItems.find(m => m.modelData === Players.active) ?? menuItems[0]) : null
                 menu.onItemSelected: item => Players.manualActive = item.modelData
 
                 menuItems: playerList.instances
@@ -379,7 +379,7 @@ Item {
             width: visualiser.width * 0.75
             height: visualiser.height * 0.75
 
-            playing: Players.active?.isPlaying ?? false
+            playing: !!(Players.active?.isPlaying ?? false)
             speed: Audio.beatTracker.bpm / 300
             source: Paths.absolutePath(Config.paths.mediaGif)
             asynchronous: true
