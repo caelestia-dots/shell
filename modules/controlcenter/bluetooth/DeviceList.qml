@@ -147,7 +147,7 @@ ColumnLayout {
         model: ScriptModel {
             id: deviceModel
 
-            values: [...Bluetooth.devices.values].sort((a, b) => (b.connected - a.connected) || (b.paired - a.paired))
+            values: [...Bluetooth.devices.values].sort((a, b) => (b.connected - a.connected) || (b.paired - a.paired) || a.name.localeCompare(b.name))
         }
 
         Layout.fillWidth: true
