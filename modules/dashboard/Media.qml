@@ -323,7 +323,7 @@ Item {
                 id: playerSelector
 
                 disabled: !Players.list.length
-                active: Players.active ? (menuItems.find(m => m.modelData === Players.active) ?? menuItems[0]) : null
+                active: menuItems.find(m => m.modelData === Players.active) ?? menuItems[0] ?? null
                 menu.onItemSelected: item => Players.manualActive = item.modelData
 
                 menuItems: playerList.instances
