@@ -76,7 +76,7 @@ Item {
 
             anchors.verticalCenter: parent.verticalCenter
             anchors.right: parent.right
-            active: RegularExpressions.compareInList(Config.launcher.favoriteApps, modelData.id)
+            active: modelData && Strings.testRegexList(Config.launcher.favoriteApps, modelData.id)
 
             sourceComponent: MaterialIcon {
                 text: "favorite"

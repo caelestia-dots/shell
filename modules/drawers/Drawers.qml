@@ -19,7 +19,7 @@ Variants {
         id: scope
 
         required property ShellScreen modelData
-        readonly property bool barDisabled: RegularExpressions.compareInList(Config.bar.excludedScreens, modelData.name)
+        readonly property bool barDisabled: Strings.testRegexList(Config.bar.excludedScreens, modelData.name)
 
         Exclusions {
             screen: scope.modelData
