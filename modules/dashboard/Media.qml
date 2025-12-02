@@ -181,7 +181,7 @@ Item {
 
             animate: true
             horizontalAlignment: Text.AlignHCenter
-            visible: Players.active ? true : false
+            visible: !!Players.active
             text: Players.active?.trackAlbum || qsTr("Unknown album")
             color: Colours.palette.m3outline
             font.pointSize: Appearance.font.size.small
@@ -242,7 +242,7 @@ Item {
         StyledSlider {
             id: slider
 
-            enabled: Players.active ? true : false
+            enabled: !!Players.active
             implicitWidth: 280
             implicitHeight: Appearance.padding.normal * 3
 
@@ -379,7 +379,7 @@ Item {
             width: visualiser.width * 0.75
             height: visualiser.height * 0.75
 
-            playing: !!(Players.active?.isPlaying ?? false)
+            playing: Players.active?.isPlaying ?? false
             speed: Audio.beatTracker.bpm / 300
             source: Paths.absolutePath(Config.paths.mediaGif)
             asynchronous: true
