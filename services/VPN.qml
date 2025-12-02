@@ -21,7 +21,7 @@ Singleton {
         const name = providerName;
         const iface = interfaceName;
         const defaults = getBuiltinDefaults(name, iface);
-        
+
         if (isCustomProvider) {
             const custom = providerInput;
             return {
@@ -31,7 +31,7 @@ Singleton {
                 displayName: custom.displayName || defaults.displayName
             };
         }
-        
+
         return defaults;
     }
 
@@ -62,7 +62,7 @@ Singleton {
                 displayName: "Tailscale"
             }
         };
-        
+
         return builtins[name] || {
             connectCmd: [name, "up"],
             disconnectCmd: [name, "down"],
