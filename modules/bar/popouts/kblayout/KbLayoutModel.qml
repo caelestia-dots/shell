@@ -38,7 +38,7 @@ Item {
         id: _xkbXmlBase
         command: ["xmllint", "--xpath", "//layout/configItem[name and description]", "/usr/share/X11/xkb/rules/base.xml"]
         stdout: StdioCollector { onStreamFinished: _buildXmlMap(text) }
-        onRunningChanged: if (!running && exitCode !== 0) _xkbXmlEvdev.running = true
+        onRunningChanged: if (!running && (typeof exitCode !== "undefined") && exitCode !== 0) _xkbXmlEvdev.running = true
     }
     Process {
         id: _xkbXmlEvdev
@@ -164,13 +164,15 @@ Item {
         arr = arr.filter(i => i.layoutIndex !== activeIndex);
         arr.forEach(i => _visibleModel.append(i));
 
-        if (_layoutsModel.count > 4 && !_notifiedLimit) {
+        if (!Config.utilities.toasts.kbLimit)
+            return;
+
+        if (_layoutsModel.count > 4) {
             Toaster.toast(
                 qsTr("Keyboard layout limit"),
                 qsTr("XKB supports only 4 layouts at a time"),
                 "warning"
             );
-            _notifiedLimit = true;
         }
     }
 
