@@ -184,6 +184,13 @@ Singleton {
             }
         }
 
+        readonly property Timer pollTimer: Timer {
+            interval: 100
+            repeat: true
+            running: true
+            onTriggered: initBrightness()
+        }
+
         function setBrightness(value: real): void {
             value = Math.max(0, Math.min(1, value));
             const rounded = Math.round(value * 100);
