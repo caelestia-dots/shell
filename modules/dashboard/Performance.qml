@@ -37,6 +37,7 @@ RowLayout {
         Layout.topMargin: root.dynamicPadding
         Layout.bottomMargin: root.dynamicPadding
         Layout.leftMargin: root.dynamicPadding * 2
+        Layout.rightMargin: !Config.dashboard.performance.showGpu && !Config.dashboard.performance.showCpu && !Config.dashboard.performance.showMemory && !Config.dashboard.performance.showStorage ? root.dynamicPadding * 3 : 0
 
         visible: Config.dashboard.performance.showBattery
 
@@ -75,6 +76,7 @@ RowLayout {
         Layout.topMargin: root.dynamicPadding
         Layout.bottomMargin: root.dynamicPadding
         Layout.leftMargin: !Config.dashboard.performance.showBattery ? root.dynamicPadding * 2 : 0
+        Layout.rightMargin: !Config.dashboard.performance.showCpu && !Config.dashboard.performance.showMemory && !Config.dashboard.performance.showStorage ? root.dynamicPadding * 3 : 0
 
         visible: Config.dashboard.performance.showGpu
 
@@ -94,6 +96,7 @@ RowLayout {
         Layout.topMargin: root.dynamicPadding
         Layout.bottomMargin: root.dynamicPadding
         Layout.leftMargin: !Config.dashboard.performance.showBattery && !Config.dashboard.performance.showGpu ? root.dynamicPadding * 2 : 0
+        Layout.rightMargin: !Config.dashboard.performance.showMemory && !Config.dashboard.performance.showStorage ? root.dynamicPadding * 3 : 0
 
         visible: Config.dashboard.performance.showCpu
         primary: true
@@ -113,6 +116,7 @@ RowLayout {
         Layout.alignment: Qt.AlignVCenter
         Layout.topMargin: root.dynamicPadding
         Layout.bottomMargin: root.dynamicPadding
+        Layout.rightMargin: !Config.dashboard.performance.showStorage ? root.dynamicPadding * 3 : 0
 
         visible: Config.dashboard.performance.showMemory
         primary: !Config.dashboard.performance.showCpu
