@@ -122,7 +122,7 @@ RowLayout {
         primary: !Config.dashboard.performance.showCpu
 
         value1: SystemUsage.memPerc
-        value2: SystemUsage.memPerc
+        // value2: SystemUsage.memPerc
 
         label1: {
             const fmt = SystemUsage.formatKib(SystemUsage.memUsed);
@@ -147,7 +147,7 @@ RowLayout {
         visible: Config.dashboard.performance.showStorage
 
         value1: SystemUsage.storagePerc
-        value2: SystemUsage.storagePerc
+        // value2: SystemUsage.storagePerc
 
         label1: {
             const fmt = SystemUsage.formatKib(SystemUsage.storageUsed);
