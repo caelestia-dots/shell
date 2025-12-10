@@ -103,7 +103,6 @@ Singleton {
             onStreamFinished: {
                 if (text.length > 0) {
                     console.warn("Network connection error:", text);
-                    root.connectionFailed(root.connectingSsid, text);
                 }
             }
         }

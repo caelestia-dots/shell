@@ -120,6 +120,7 @@ Item {
 
                     StateLayer {
                         color: Colours.palette.m3onPrimary
+                        // Disable when password is empty - this dialog is only shown for secured networks
                         disabled: passwordField.text.length === 0
 
                         function onClicked(): void {
