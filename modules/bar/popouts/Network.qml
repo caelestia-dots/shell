@@ -99,6 +99,7 @@ ColumnLayout {
             }
 
             // Manual password entry button for secured networks
+            // Allows entering/updating password without attempting connection first
             StyledRect {
                 id: passwordBtn
 
@@ -153,16 +154,9 @@ ColumnLayout {
                         if (networkItem.modelData.active) {
                             Network.disconnectFromNetwork();
                         } else {
-                            // Check if network is secured and needs password
-                            if (networkItem.modelData.isSecure) {
-                                root.pendingConnectionSsid = networkItem.modelData.ssid;
-                                root.showPasswordDialog = true;
-                                passwordDialog.open();
-                            } else {
-                                // Open network, connect without password
-                                root.connectingToSsid = networkItem.modelData.ssid;
-                                Network.connectToNetwork(networkItem.modelData.ssid, "");
-                            }
+                            // Try to connect - for secured networks, try saved credentials first
+                            root.connectingToSsid = networkItem.modelData.ssid;
+                            Network.connectToNetwork(networkItem.modelData.ssid, "");
                         }
                     }
                 }
