@@ -3,6 +3,7 @@ import Quickshell.Io
 JsonObject {
     property bool recolourLogo: false
     property bool enableFprint: true
+    property bool allowDismissNotifs: false
     property int maxFprintTries: 3
     property Sizes sizes: Sizes {}
 

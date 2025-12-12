@@ -540,6 +540,7 @@ default, you must create it manually.
         "hiddenApps": []
     },
     "lock": {
+        "allowDismissNotifs": false,
         "recolourLogo": false
     },
     "notifs": {
