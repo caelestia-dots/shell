@@ -41,7 +41,7 @@ Item {
         ConfigParser.updateValue(root.fullPath, value);
     }
     
-    // Boolean property
+    // Boolean property (writable)
     RowLayout {
         anchors.fill: parent
         anchors.leftMargin: Appearance.padding.normal
@@ -63,7 +63,37 @@ Item {
         }
     }
 
-    // String property
+    // Boolean property (readonly)
+    RowLayout {
+        anchors.fill: parent
+        anchors.leftMargin: Appearance.padding.normal
+        anchors.rightMargin: Appearance.padding.normal
+        visible: propertyData.type === "bool" && !propertyData.writable
+        spacing: Appearance.spacing.normal
+
+        MaterialIcon {
+            text: "lock"
+            color: Colours.palette.m3onSurfaceVariant
+            font.pointSize: Appearance.font.size.small
+            opacity: 0.6
+        }
+
+        StyledText {
+            Layout.fillWidth: true
+            text: ConfigParser.formatPropertyName(propertyData.name)
+            font.pointSize: Appearance.font.size.normal
+            color: Colours.palette.m3onSurfaceVariant
+        }
+
+        StyledSwitch {
+            Layout.alignment: Qt.AlignRight
+            checked: currentValue ?? false
+            enabled: false
+            opacity: 0.5
+        }
+    }
+
+    // String property (writable)
     RowLayout {
         anchors.fill: parent
         anchors.leftMargin: Appearance.padding.normal
@@ -97,7 +127,47 @@ Item {
         }
     }
 
-    // Integer property
+    // String property (readonly)
+    RowLayout {
+        anchors.fill: parent
+        anchors.leftMargin: Appearance.padding.normal
+        anchors.rightMargin: Appearance.padding.normal
+        visible: propertyData.type === "string" && !propertyData.writable
+        spacing: Appearance.spacing.normal
+
+        MaterialIcon {
+            text: "lock"
+            color: Colours.palette.m3onSurfaceVariant
+            font.pointSize: Appearance.font.size.small
+            opacity: 0.6
+        }
+
+        StyledText {
+            Layout.fillWidth: true
+            text: ConfigParser.formatPropertyName(propertyData.name)
+            font.pointSize: Appearance.font.size.normal
+            color: Colours.palette.m3onSurfaceVariant
+        }
+
+        StyledTextField {
+            Layout.alignment: Qt.AlignRight
+            text: currentValue ?? ""
+            enabled: false
+            opacity: 0.5
+            padding: Appearance.padding.small
+            leftPadding: Appearance.padding.normal
+            rightPadding: Appearance.padding.normal
+
+            background: StyledRect {
+                implicitWidth: widthReference.implicitWidth
+                implicitHeight: 36
+                radius: Appearance.rounding.small
+                color: Colours.tPalette.m3surfaceContainerHigh
+            }
+        }
+    }
+
+    // Integer property (writable)
     RowLayout {
         anchors.fill: parent
         anchors.leftMargin: Appearance.padding.normal
@@ -119,7 +189,37 @@ Item {
         }
     }
 
-    // Real property
+    // Integer property (readonly)
+    RowLayout {
+        anchors.fill: parent
+        anchors.leftMargin: Appearance.padding.normal
+        anchors.rightMargin: Appearance.padding.normal
+        visible: propertyData.type === "int" && !propertyData.writable
+        spacing: Appearance.spacing.normal
+
+        MaterialIcon {
+            text: "lock"
+            color: Colours.palette.m3onSurfaceVariant
+            font.pointSize: Appearance.font.size.small
+            opacity: 0.6
+        }
+
+        StyledText {
+            Layout.fillWidth: true
+            text: ConfigParser.formatPropertyName(propertyData.name)
+            font.pointSize: Appearance.font.size.normal
+            color: Colours.palette.m3onSurfaceVariant
+        }
+
+        CustomSpinBox {
+            Layout.alignment: Qt.AlignRight
+            value: currentValue ?? 0
+            enabled: false
+            opacity: 0.5
+        }
+    }
+
+    // Real property (writable)
     RowLayout {
         anchors.fill: parent
         anchors.leftMargin: Appearance.padding.normal
@@ -153,6 +253,46 @@ Item {
             onEditingFinished: {
                 const num = parseFloat(text);
                 if (!isNaN(num)) root.updateValue(num);
+            }
+        }
+    }
+
+    // Real property (readonly)
+    RowLayout {
+        anchors.fill: parent
+        anchors.leftMargin: Appearance.padding.normal
+        anchors.rightMargin: Appearance.padding.normal
+        visible: propertyData.type === "real" && !propertyData.writable
+        spacing: Appearance.spacing.normal
+
+        MaterialIcon {
+            text: "lock"
+            color: Colours.palette.m3onSurfaceVariant
+            font.pointSize: Appearance.font.size.small
+            opacity: 0.6
+        }
+
+        StyledText {
+            Layout.fillWidth: true
+            text: ConfigParser.formatPropertyName(propertyData.name)
+            font.pointSize: Appearance.font.size.normal
+            color: Colours.palette.m3onSurfaceVariant
+        }
+
+        StyledTextField {
+            Layout.alignment: Qt.AlignRight
+            text: Number(currentValue ?? 0).toFixed(2)
+            enabled: false
+            opacity: 0.5
+            padding: Appearance.padding.small
+            leftPadding: Appearance.padding.normal
+            rightPadding: Appearance.padding.normal
+
+            background: StyledRect {
+                implicitWidth: widthReference.implicitWidth
+                implicitHeight: 36
+                radius: Appearance.rounding.small
+                color: Colours.tPalette.m3surfaceContainerHigh
             }
         }
     }

@@ -16,7 +16,7 @@ Item {
     readonly property var sectionPath: [activeSection]
     readonly property var currentSectionData: ConfigParser.configSections.find(s => s.name === activeSection) ?? null
     readonly property var configObject: ConfigParser.getSectionData(activeSection)
-    readonly property var properties: (ConfigParser.loaded && configObject) ? ConfigParser.getPropertiesForObject(configObject) : []
+    readonly property var properties: (ConfigParser.loaded && configObject) ? ConfigParser.getPropertiesForObject(configObject, [activeSection]) : []
 
     opacity: 0
     Component.onCompleted: opacity = 1

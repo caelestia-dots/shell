@@ -80,7 +80,7 @@ ColumnLayout {
         spacing: 0
 
         Repeater {
-            model: root.expanded ? ConfigParser.getPropertiesForObject(root.nestedObject) : []
+            model: root.expanded ? ConfigParser.getPropertiesForObject(root.nestedObject, root.nestedPath) : []
 
             delegate: PropertyEditor {
                 required property var modelData

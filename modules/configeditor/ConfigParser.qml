@@ -33,6 +33,23 @@ Singleton {
         { name: "sidebar", title: "Sidebar", icon: "side_navigation" },
         { name: "services", title: "Services", icon: "apps" }
     ]
+    
+    // Map of readonly properties by path
+    readonly property var readonlyProperties: ({
+        "dashboard.sizes.tabIndicatorHeight": true,
+        "dashboard.sizes.tabIndicatorSpacing": true,
+        "dashboard.sizes.infoWidth": true,
+        "dashboard.sizes.infoIconSize": true,
+        "dashboard.sizes.dateTimeWidth": true,
+        "dashboard.sizes.mediaWidth": true,
+        "dashboard.sizes.mediaProgressSweep": true,
+        "dashboard.sizes.mediaProgressThickness": true,
+        "dashboard.sizes.resourceProgessThickness": true,
+        "dashboard.sizes.weatherWidth": true,
+        "dashboard.sizes.mediaCoverArtSize": true,
+        "dashboard.sizes.mediaVisualiserSize": true,
+        "dashboard.sizes.resourceSize": true
+    })
 
     Component.onCompleted: loadTimer.start()
 
@@ -115,7 +132,7 @@ Singleton {
         return "unknown";
     }
 
-    function getPropertiesForObject(obj): var {
+    function getPropertiesForObject(obj, propertyPath = []): var {
         if (!obj || typeof obj !== "object") return [];
 
         const props = [];
@@ -126,7 +143,9 @@ Singleton {
             const type = getPropertyType(value);
             
             if (type !== "unknown") {
-                props.push({ name: key, type: type, value: value, writable: true });
+                const fullPath = [...propertyPath, key].join(".");
+                const writable = !root.readonlyProperties[fullPath];
+                props.push({ name: key, type: type, value: value, writable: writable });
             }
         }
         return props;
