@@ -78,9 +78,6 @@ Item {
             inactive.item.ready.connect(function handler() {
                 active.item.isCurrent = false;
                 inactive.item.isCurrent = true;
-
-                // console.log("wallpaper switched:", "one:", oneLoader.item.isCurrent, "two:", twoLoader.item.isCurrent);
-
                 inactive.item.ready.disconnect(handler);
             });
         });

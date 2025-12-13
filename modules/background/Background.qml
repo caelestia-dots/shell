@@ -19,6 +19,7 @@ Loader {
             id: win
 
             required property ShellScreen modelData
+
             screen: modelData
             name: "background"
             WlrLayershell.exclusionMode: ExclusionMode.Ignore

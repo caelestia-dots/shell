@@ -96,7 +96,7 @@ Item {
                         onMediaStatusChanged: {
                             if (mediaStatus === MediaPlayer.LoadedMedia) {
                                 play();
-                                position = 1;   // force decode
+                                position = 1;
                             }
                         }
 
