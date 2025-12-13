@@ -48,8 +48,10 @@ Item {
         loops: MediaPlayer.Infinite
 
         videoOutput: video
-        audioOutput: AudioOutput {}
-
+        audioOutput: AudioOutput {
+            muted: Config.background.wallpaper.muteAudio
+            volume: Config.background.wallpaper.volume
+        }
         onErrorOccurred: root.failed()
 
         function tryPlayVideo() {
