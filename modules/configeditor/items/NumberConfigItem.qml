@@ -12,6 +12,13 @@ BaseConfigItem {
 
     readonly property bool isInteger: propertyData.type === "int"
 
+    // Hidden reference to get exact CustomSpinBox dimensions
+    CustomSpinBox {
+        id: spinBoxReference
+        visible: false
+        value: 0
+    }
+
     RowLayout {
         anchors.fill: parent
         anchors.leftMargin: Appearance.padding.normal
@@ -30,29 +37,36 @@ BaseConfigItem {
             Layout.alignment: Qt.AlignRight
             value: root.currentValue ?? 0
             onValueModified: root.updateValue(value)
+            // textFieldHeight: 36
         }
 
-        StyledTextField {
+        Item {
             visible: !root.isInteger
             Layout.alignment: Qt.AlignRight
-            Layout.preferredWidth: 150
-            text: Number(root.currentValue ?? 0).toFixed(2)
-            placeholderText: qsTr("Enter number...")
-            inputMethodHints: Qt.ImhFormattedNumbersOnly
-            padding: Appearance.padding.small
-            leftPadding: Appearance.padding.normal
-            rightPadding: Appearance.padding.normal
+            Layout.preferredWidth: spinBoxReference.implicitWidth
+            Layout.preferredHeight: spinBoxReference.implicitHeight
 
-            background: StyledRect {
-                implicitWidth: 150
-                implicitHeight: 36
-                radius: Appearance.rounding.small
-                color: Colours.tPalette.m3surfaceContainerHigh
-            }
+            StyledTextField {
+                anchors.fill: parent
+                text: Number(root.currentValue ?? 0).toFixed(2)
+                placeholderText: qsTr("Enter number...")
+                inputMethodHints: Qt.ImhFormattedNumbersOnly
+                padding: Appearance.padding.small
+                leftPadding: Appearance.padding.normal
+                rightPadding: Appearance.padding.normal
+                verticalAlignment: TextInput.AlignVCenter
+                
 
-            onEditingFinished: {
-                const num = parseFloat(text);
-                if (!isNaN(num)) root.updateValue(num);
+                background: StyledRect {
+                    radius: Appearance.rounding.small
+                    color: Colours.tPalette.m3surfaceContainerHigh
+                    implicitHeight: 36
+                }
+
+                onEditingFinished: {
+                    const num = parseFloat(text);
+                    if (!isNaN(num)) root.updateValue(num);
+                }
             }
         }
     }

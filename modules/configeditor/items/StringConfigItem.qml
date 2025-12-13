@@ -10,6 +10,13 @@ import QtQuick.Layouts
 BaseConfigItem {
     id: root
 
+    // Hidden reference to get exact CustomSpinBox dimensions
+    CustomSpinBox {
+        id: spinBoxReference
+        visible: false
+        value: 0
+    }
+
     RowLayout {
         anchors.fill: parent
         anchors.leftMargin: Appearance.padding.normal
@@ -23,23 +30,27 @@ BaseConfigItem {
             color: Colours.palette.m3onSurface
         }
 
-        StyledTextField {
+        Item {
             Layout.alignment: Qt.AlignRight
-            Layout.preferredWidth: 200
-            text: root.currentValue ?? ""
-            placeholderText: qsTr("Enter value...")
-            padding: Appearance.padding.small
-            leftPadding: Appearance.padding.normal
-            rightPadding: Appearance.padding.normal
+            Layout.preferredWidth: spinBoxReference.implicitWidth
+            Layout.preferredHeight: spinBoxReference.implicitHeight
 
-            background: StyledRect {
-                implicitWidth: 200
-                implicitHeight: 36
-                radius: Appearance.rounding.small
-                color: Colours.tPalette.m3surfaceContainerHigh
+            StyledTextField {
+                anchors.fill: parent
+                text: root.currentValue ?? ""
+                placeholderText: qsTr("Enter value...")
+                padding: Appearance.padding.small
+                leftPadding: Appearance.padding.normal
+                rightPadding: Appearance.padding.normal
+                verticalAlignment: TextInput.AlignVCenter
+
+                background: StyledRect {
+                    radius: Appearance.rounding.small
+                    color: Colours.tPalette.m3surfaceContainerHigh
+                }
+
+                onEditingFinished: root.updateValue(text)
             }
-
-            onEditingFinished: root.updateValue(text)
         }
     }
 }
