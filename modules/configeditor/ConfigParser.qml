@@ -1,0 +1,177 @@
+pragma Singleton
+
+import qs.config
+import Quickshell
+import Quickshell.Io
+import QtQuick
+
+Singleton {
+    id: root
+
+    readonly property string configPath: Quickshell.env("HOME") + "/.config/caelestia/shell.json"
+    property var configData: ({})
+    property bool loaded: false
+    property var expandedStates: ({})
+    
+    signal valueChanged(path: list<string>)
+
+    readonly property var configSections: [
+        { name: "appearance", title: "Appearance", icon: "palette" },
+        { name: "general", title: "General", icon: "settings" },
+        { name: "background", title: "Background", icon: "wallpaper" },
+        { name: "bar", title: "Bar", icon: "horizontal_rule" },
+        { name: "border", title: "Border", icon: "border_style" },
+        { name: "dashboard", title: "Dashboard", icon: "dashboard" },
+        { name: "controlCenter", title: "Control Center", icon: "tune" },
+        { name: "launcher", title: "Launcher", icon: "rocket_launch" },
+        { name: "notifs", title: "Notifications", icon: "notifications" },
+        { name: "osd", title: "OSD", icon: "speaker" },
+        { name: "session", title: "Session", icon: "power_settings_new" },
+        { name: "winfo", title: "Window Info", icon: "info" },
+        { name: "lock", title: "Lock Screen", icon: "lock" },
+        { name: "utilities", title: "Utilities", icon: "widgets" },
+        { name: "sidebar", title: "Sidebar", icon: "side_navigation" },
+        { name: "services", title: "Services", icon: "apps" }
+    ]
+
+    Component.onCompleted: loadTimer.start()
+
+    Timer {
+        id: loadTimer
+        interval: 100
+        onTriggered: loadConfig()
+    }
+
+    function loadConfig() {
+        const sections = {};
+        for (const section of configSections) {
+            sections[section.name] = collectObjectData(Config[section.name]);
+        }
+        root.configData = sections;
+        root.loaded = true;
+    }
+
+    function collectObjectData(obj) {
+        if (!obj) return {};
+        
+        const data = {};
+        for (const key in obj) {
+            if (key.startsWith("_") || key === "objectName" || key.endsWith("Changed"))
+                continue;
+            if (typeof obj[key] === "function")
+                continue;
+            
+            const value = obj[key];
+            
+            if (value === null || value === undefined) {
+                continue;
+            } else if (typeof value === "boolean" || typeof value === "number" || typeof value === "string") {
+                data[key] = value;
+            } else if (Array.isArray(value)) {
+                data[key] = Array.from(value);
+            } else if (typeof value === "object") {
+                data[key] = collectObjectData(value);
+            }
+        }
+        return data;
+    }
+
+    Process {
+        id: saveProcess
+        command: ["sh", "-c", ""]
+
+        onExited: (code, status) => {
+            if (code === 0) {
+                Config.reload();
+            } else {
+                console.error("Failed to save config:", saveProcess.stderr);
+            }
+        }
+    }
+
+    function saveConfig() {
+        if (!root.configData) return false;
+        
+        try {
+            const jsonString = JSON.stringify(root.configData, null, 4);
+            const escapedJson = jsonString.replace(/'/g, "'\"'\"'");
+            saveProcess.command = ["sh", "-c", `printf '%s' '${escapedJson}' > ${root.configPath}`];
+            saveProcess.running = true;
+            return true;
+        } catch (e) {
+            console.error("Failed to save config:", e);
+            return false;
+        }
+    }
+
+    function getPropertyType(value): string {
+        if (value === null || value === undefined) return "unknown";
+        if (typeof value === "boolean") return "bool";
+        if (typeof value === "number") return Number.isInteger(value) ? "int" : "real";
+        if (typeof value === "string") return "string";
+        if (typeof value === "object" && value !== null) {
+            return Array.isArray(value) ? "list<var>" : "object";
+        }
+        return "unknown";
+    }
+
+    function getPropertiesForObject(obj): var {
+        if (!obj || typeof obj !== "object") return [];
+
+        const props = [];
+        for (const key in obj) {
+            if (!obj.hasOwnProperty(key)) continue;
+            
+            const value = obj[key];
+            const type = getPropertyType(value);
+            
+            if (type !== "unknown") {
+                props.push({ name: key, type: type, value: value, writable: true });
+            }
+        }
+        return props;
+    }
+
+    function getSectionData(sectionName: string): var {
+        return (root.loaded && root.configData) ? (root.configData[sectionName] || null) : null;
+    }
+
+    function updateValue(path: list<string>, value): void {
+        if (!root.configData || path.length === 0) return;
+
+        // Update in configData
+        let obj = root.configData;
+        for (let i = 0; i < path.length - 1; i++) {
+            if (!obj[path[i]]) return;
+            obj = obj[path[i]];
+        }
+        const lastKey = path[path.length - 1];
+        obj[lastKey] = value;
+
+        // Update in Config object
+        const configSection = Config[path[0]];
+        if (configSection) {
+            let configObj = configSection;
+            for (let i = 1; i < path.length - 1; i++) {
+                if (!configObj[path[i]]) return;
+                configObj = configObj[path[i]];
+            }
+            configObj[lastKey] = value;
+        }
+
+        saveConfig();
+        root.valueChanged(path);
+    }
+    
+    function setExpandedState(path: string, expanded: bool): void {
+        root.expandedStates[path] = expanded;
+    }
+    
+    function getExpandedState(path: string): bool {
+        return root.expandedStates[path] ?? false;
+    }
+
+    function formatPropertyName(name: string): string {
+        return name.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase()).trim();
+    }
+}
