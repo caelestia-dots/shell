@@ -29,12 +29,9 @@ Item {
         root.source = path;
         player.source = path;
 
-        console.log("update ⚠️ Switching video to:", path);
-
         player.onMediaStatusChanged.connect(function handler() {
             if (player.mediaStatus === MediaPlayer.BufferedMedia || player.mediaStatus === MediaPlayer.LoadedMedia) {
                 if (root.source === path) {
-                    console.log("Media loaded LoadedMedia, emitting ready:", path);
                     Qt.callLater(() => root.ready());
                     player.onMediaStatusChanged.disconnect(handler);
                 }
@@ -58,14 +55,11 @@ Item {
         function tryPlayVideo() {
             if (root.isCurrent) {
                 if (source && mediaStatus !== MediaPlayer.PlayingState) {
-                    console.log("Starting video:", source);
                     play();
                 }
             } else {
                 if (mediaStatus !== MediaPlayer.NoMedia) {
-                    console.log("Stopping video:", source);
                     stop();
-                    // source = "";
                 }
             }
         }

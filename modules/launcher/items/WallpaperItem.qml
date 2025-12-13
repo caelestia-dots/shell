@@ -6,12 +6,26 @@ import qs.config
 import Caelestia.Models
 import Quickshell
 import QtQuick
+import QtMultimedia
 
 Item {
     id: root
 
     required property FileSystemEntry modelData
     required property PersistentProperties visibilities
+
+    function isVideo(path) {
+        path = path.toString();
+        if (!path || path.trim() === "")
+            return false;
+        const videoExtensions = [".mp4", ".mkv", ".webm", ".avi", ".mov", ".flv", ".wmv", ".gif"];
+        const lower = path.toLowerCase();
+        for (let i = 0; i < videoExtensions.length; i++) {
+            if (lower.endsWith(videoExtensions[i]))
+                return true;
+        }
+        return false;
+    }
 
     scale: 0.5
     opacity: 0
@@ -62,16 +76,58 @@ Item {
             color: Colours.tPalette.m3outline
             font.pointSize: Appearance.font.size.extraLarge * 2
             font.weight: 600
+            visible: !isVideo(root.modelData.path)
         }
 
-        CachingImage {
-            path: root.modelData.path
-            smooth: !root.PathView.view.moving
-
+        Loader {
             anchors.fill: parent
+            active: isVideo(root.modelData.path)
+
+            sourceComponent: Component {
+                Item {
+                    anchors.fill: parent
+
+                    MediaPlayer {
+                        id: player
+                        source: root.modelData.path
+                        autoPlay: false
+                        videoOutput: vidThumb
+
+                        onMediaStatusChanged: {
+                            if (mediaStatus === MediaPlayer.LoadedMedia) {
+                                play();
+                                position = 1;   // force decode
+                            }
+                        }
+
+                        onPositionChanged: {
+                            if (position >= 1)
+                                pause();
+                        }
+                    }
+
+                    VideoOutput {
+                        id: vidThumb
+                        anchors.fill: parent
+                        fillMode: VideoOutput.PreserveAspectCrop
+                    }
+                }
+            }
+        }
+
+        Loader {
+            anchors.fill: parent
+            active: !isVideo(root.modelData.path)
+
+            sourceComponent: Component {
+                CachingImage {
+                    path: root.modelData.path
+                    smooth: !root.PathView.view.moving
+                    anchors.fill: parent
+                }
+            }
         }
     }
-
     StyledText {
         id: label
 

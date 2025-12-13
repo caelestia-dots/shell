@@ -21,7 +21,6 @@ Item {
         const target = explicitSource;
 
         if (img.path === target && img.status === Image.Ready) {
-            console.log("Same path, emitting ready manually for:", target);
             Qt.callLater(() => root.ready());
             return;
         }
@@ -31,7 +30,6 @@ Item {
         img.onStatusChanged.connect(function handler() {
             if (img.status === Image.Ready) {
                 Qt.callLater(() => root.ready());
-                console.log("Called ready for: ", target);
 
                 img.onStatusChanged.disconnect(handler);
             }
