@@ -2,6 +2,7 @@ pragma ComponentBehavior: Bound
 
 import qs.components
 import qs.components.controls
+import qs.components.misc
 import qs.services
 import qs.config
 import qs.utils
@@ -13,6 +14,8 @@ ColumnLayout {
     id: root
 
     property string connectingToSsid: ""
+    property string pendingConnectionSsid: ""
+    property bool showPasswordDialog: false
 
     spacing: Appearance.spacing.small
     width: Config.bar.sizes.networkWidth
@@ -95,6 +98,40 @@ ColumnLayout {
                 color: networkItem.modelData.active ? Colours.palette.m3primary : Colours.palette.m3onSurface
             }
 
+            // Manual password entry button for secured networks
+            // Allows entering/updating password without attempting connection first
+            StyledRect {
+                id: passwordBtn
+
+                visible: networkItem.modelData.isSecure
+                implicitWidth: implicitHeight
+                implicitHeight: passwordIcon.implicitHeight + Appearance.padding.small
+
+                radius: Appearance.rounding.full
+                color: "transparent"
+
+                StateLayer {
+                    color: Colours.palette.m3onSurface
+                    disabled: networkItem.loading || !Network.wifiEnabled
+
+                    function onClicked(): void {
+                        root.pendingConnectionSsid = networkItem.modelData.ssid;
+                        root.showPasswordDialog = true;
+                        passwordDialog.open();
+                    }
+                }
+
+                MaterialIcon {
+                    id: passwordIcon
+
+                    anchors.centerIn: parent
+                    animate: true
+                    text: "password"
+                    font.pointSize: Appearance.font.size.small
+                    color: Colours.palette.m3onSurfaceVariant
+                }
+            }
+
             StyledRect {
                 id: connectBtn
 
@@ -117,6 +154,7 @@ ColumnLayout {
                         if (networkItem.modelData.active) {
                             Network.disconnectFromNetwork();
                         } else {
+                            // Try to connect - for secured networks, try saved credentials first
                             root.connectingToSsid = networkItem.modelData.ssid;
                             Network.connectToNetwork(networkItem.modelData.ssid, "");
                         }
@@ -192,6 +230,29 @@ ColumnLayout {
         }
     }
 
+    PasswordDialog {
+        id: passwordDialog
+
+        Layout.fillWidth: true
+        Layout.rightMargin: Appearance.padding.small
+        Layout.topMargin: Appearance.spacing.small
+
+        ssid: root.pendingConnectionSsid
+
+        onAccepted: {
+            root.connectingToSsid = root.pendingConnectionSsid;
+            Network.connectToNetwork(root.pendingConnectionSsid, password);
+            close();
+            root.showPasswordDialog = false;
+        }
+
+        onRejected: {
+            close();
+            root.showPasswordDialog = false;
+            root.pendingConnectionSsid = "";
+        }
+    }
+
     // Reset connecting state when network changes
     Connections {
         target: Network
@@ -205,6 +266,20 @@ ColumnLayout {
         function onScanningChanged(): void {
             if (!Network.scanning)
                 scanIcon.rotation = 0;
+        }
+
+        function onConnectionFailed(ssid: string, error: string): void {
+            // Reset connecting state on failure
+            if (root.connectingToSsid === ssid) {
+                root.connectingToSsid = "";
+                // For secured networks, offer to re-enter password
+                const network = Network.networks.find(n => n.ssid === ssid);
+                if (network && network.isSecure) {
+                    root.pendingConnectionSsid = ssid;
+                    root.showPasswordDialog = true;
+                    passwordDialog.open();
+                }
+            }
         }
     }
 

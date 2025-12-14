@@ -12,6 +12,10 @@ Singleton {
     property bool wifiEnabled: true
     readonly property bool scanning: rescanProc.running
 
+    signal connectionFailed(ssid: string, error: string)
+
+    property string connectingSsid: ""
+
     function enableWifi(enabled: bool): void {
         const cmd = enabled ? "on" : "off";
         enableWifiProc.exec(["nmcli", "radio", "wifi", cmd]);
@@ -27,8 +31,14 @@ Singleton {
     }
 
     function connectToNetwork(ssid: string, password: string): void {
-        // TODO: Implement password
-        connectProc.exec(["nmcli", "conn", "up", ssid]);
+        root.connectingSsid = ssid;
+        if (password && password.length > 0) {
+            // Connect with password - for new networks or updating password
+            connectProc.exec(["nmcli", "dev", "wifi", "connect", ssid, "password", password]);
+        } else {
+            // Try to connect using saved credentials
+            connectProc.exec(["nmcli", "conn", "up", ssid]);
+        }
     }
 
     function disconnectFromNetwork(): void {
@@ -90,7 +100,17 @@ Singleton {
             onRead: getNetworks.running = true
         }
         stderr: StdioCollector {
-            onStreamFinished: console.warn("Network connection error:", text)
+            onStreamFinished: {
+                if (text.length > 0) {
+                    console.warn("Network connection error:", text);
+                }
+            }
+        }
+        onExited: {
+            if (exitCode !== 0 && root.connectingSsid.length > 0) {
+                root.connectionFailed(root.connectingSsid, "Connection failed");
+            }
+            root.connectingSsid = "";
         }
     }
 
