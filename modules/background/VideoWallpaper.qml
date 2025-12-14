@@ -72,6 +72,7 @@ Item {
         anchors.fill: parent
         opacity: root.isCurrent ? 1 : 0
         scale: Wallpapers.showPreview ? 1 : 0.8
+        fillMode: VideoOutput.PreserveAspectCrop
     }
 
     states: State {
