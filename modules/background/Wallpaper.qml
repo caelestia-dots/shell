@@ -37,7 +37,6 @@ Item {
             initialize();
             return;
         }
-
         Qt.callLater(waitForBothItems);
     }
 
@@ -48,6 +47,7 @@ Item {
             return;
         if (!itemsReady)
             return;
+
         initStarted = true;
 
         oneLoader.item.isCurrent = true;
@@ -59,8 +59,9 @@ Item {
     }
 
     function switchWallpaper() {
-        if (!initialized || !source)
+        if (!initialized || !root.source)
             return;
+
         let active, inactive;
 
         if (oneLoader.item.isCurrent) {
@@ -89,6 +90,75 @@ Item {
             return;
         }
         Qt.callLater(() => waitForItem(loader, callback));
+    }
+
+    Loader {
+        id: placeholderLoader
+        anchors.fill: parent
+        z: 10
+        asynchronous: true
+        active: !root.source
+
+        sourceComponent: StyledRect {
+            color: Colours.palette.m3surfaceContainer
+
+            Row {
+                anchors.centerIn: parent
+                spacing: Appearance.spacing.large
+
+                MaterialIcon {
+                    text: "sentiment_stressed"
+                    color: Colours.palette.m3onSurfaceVariant
+                    font.pointSize: Appearance.font.size.extraLarge * 5
+                }
+
+                Column {
+                    anchors.verticalCenter: parent.verticalCenter
+                    spacing: Appearance.spacing.small
+
+                    StyledText {
+                        text: qsTr("Wallpaper missing?")
+                        color: Colours.palette.m3onSurfaceVariant
+                        font.pointSize: Appearance.font.size.extraLarge * 2
+                        font.bold: true
+                    }
+
+                    StyledRect {
+                        implicitWidth: selectWallText.implicitWidth
+                                       + Appearance.padding.large * 2
+                        implicitHeight: selectWallText.implicitHeight
+                                        + Appearance.padding.small * 2
+
+                        radius: Appearance.rounding.full
+                        color: Colours.palette.m3primary
+
+                        FileDialog {
+                            id: dialog
+                            title: qsTr("Select a wallpaper")
+                            filterLabel: qsTr("Image files")
+                            filters: Images.validImageExtensions
+                            onAccepted: path => Wallpapers.setWallpaper(path)
+                        }
+
+                        StateLayer {
+                            radius: parent.radius
+                            color: Colours.palette.m3onPrimary
+                            function onClicked(): void {
+                                dialog.open();
+                            }
+                        }
+
+                        StyledText {
+                            id: selectWallText
+                            anchors.centerIn: parent
+                            text: qsTr("Set it now!")
+                            color: Colours.palette.m3onPrimary
+                            font.pointSize: Appearance.font.size.large
+                        }
+                    }
+                }
+            }
+        }
     }
 
     Loader {
@@ -126,6 +196,7 @@ Item {
         id: imageComponent
         ImageWallpaper {}
     }
+
     Component {
         id: videoComponent
         VideoWallpaper {}
