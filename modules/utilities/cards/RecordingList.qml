@@ -65,6 +65,8 @@ ColumnLayout {
         Layout.rightMargin: -Appearance.spacing.small
         implicitHeight: (Appearance.font.size.larger + Appearance.padding.small) * (root.props.recordingListExpanded ? 10 : 3)
         clip: true
+        cacheBuffer: 300
+        reuseItems: true
 
         StyledScrollBar.vertical: StyledScrollBar {
             flickable: list

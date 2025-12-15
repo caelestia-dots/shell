@@ -154,6 +154,8 @@ ColumnLayout {
         Layout.fillHeight: true
         clip: true
         spacing: Appearance.spacing.small / 2
+        cacheBuffer: 400
+        reuseItems: true
 
         StyledScrollBar.vertical: StyledScrollBar {
             flickable: view

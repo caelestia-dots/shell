@@ -25,6 +25,8 @@ StyledListView {
     spacing: Appearance.spacing.small
     orientation: Qt.Vertical
     implicitHeight: (Config.launcher.sizes.itemHeight + spacing) * Math.min(Config.launcher.maxShown, count) - spacing
+    cacheBuffer: 500
+    reuseItems: true
 
     preferredHighlightBegin: 0
     preferredHighlightEnd: height

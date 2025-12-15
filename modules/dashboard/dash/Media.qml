@@ -216,7 +216,10 @@ Item {
         speed: Audio.beatTracker.bpm / 300
         source: Paths.absolutePath(Config.paths.mediaGif)
         asynchronous: true
+        cache: true
         fillMode: AnimatedImage.PreserveAspectFit
+        sourceSize.width: width
+        sourceSize.height: height
     }
 
     component Control: StyledRect {
