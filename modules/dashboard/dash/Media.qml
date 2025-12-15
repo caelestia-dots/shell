@@ -219,8 +219,8 @@ Item {
         asynchronous: true
         cache: true
         fillMode: AnimatedImage.PreserveAspectFit
-        sourceSize.width: width
-        sourceSize.height: height
+        sourceSize.width: Math.ceil(width / 10) * 10
+        sourceSize.height: Math.ceil(height / 10) * 10
     }
 
     component Control: StyledRect {
