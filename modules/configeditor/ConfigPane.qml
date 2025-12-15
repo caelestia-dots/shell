@@ -13,13 +13,39 @@ Item {
     id: root
 
     property string activeSection: "appearance"
-    readonly property var sectionPath: [activeSection]
+    property var sectionPath: [activeSection]
     readonly property var currentSectionData: ConfigParser.configSections.find(s => s.name === activeSection) ?? null
-    readonly property var configObject: ConfigParser.getSectionData(activeSection)
-    readonly property var properties: (ConfigParser.loaded && configObject) ? ConfigParser.getPropertiesForObject(configObject, [activeSection]) : []
+    property var configObject: null
+    property var properties: []
 
     opacity: 0
-    Component.onCompleted: opacity = 1
+    Component.onCompleted: {
+        updateConfigObject();
+        opacity = 1;
+    }
+    
+    onActiveSectionChanged: {
+        sectionPath = [activeSection];
+        console.log("=== TAB CHANGED TO:", activeSection, "===");
+        console.log("Section path:", JSON.stringify(sectionPath));
+        updateConfigObject();
+    }
+
+    // Update configObject when any value changes
+    Connections {
+        target: ConfigParser
+        function onValueChanged(path) {
+            if (path.length > 0 && path[0] === root.activeSection) {
+                updateConfigObject();
+            }
+        }
+    }
+
+    function updateConfigObject() {
+        root.configObject = ConfigParser.getSectionData(root.activeSection);
+        root.properties = (ConfigParser.loaded && root.configObject) ? 
+            ConfigParser.getPropertiesForObject(root.configObject, [root.activeSection]) : [];
+    }
 
     Behavior on opacity {
         Anim { duration: Appearance.anim.durations.normal }
@@ -102,7 +128,7 @@ Item {
             }
 
             StyledScrollBar {
-                flickable: parent
+                flickable: flickable
             }
         }
     }

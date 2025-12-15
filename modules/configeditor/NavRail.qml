@@ -122,7 +122,7 @@ StyledRect {
             }
 
             StyledScrollBar {
-                flickable: parent
+                flickable: navFlickable
             }
         }
     }

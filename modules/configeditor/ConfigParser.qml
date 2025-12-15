@@ -12,6 +12,7 @@ Singleton {
     property var configData: ({})
     property bool loaded: false
     property var expandedStates: ({})
+    property var jsonFileData: ({})
     
     signal valueChanged(path: list<string>)
 
@@ -59,13 +60,87 @@ Singleton {
         onTriggered: loadConfig()
     }
 
+    FileView {
+        id: jsonFile
+        path: root.configPath
+        watchChanges: true
+        
+        onLoaded: {
+            try {
+                root.jsonFileData = JSON.parse(text());
+                loadConfig();
+            } catch (e) {
+                console.error("Failed to parse shell.json:", e);
+                // Fall back to Config object if JSON parsing fails
+                loadConfigFromObject();
+            }
+        }
+        
+        onFileChanged: {
+            // Reload when file changes externally
+            try {
+                root.jsonFileData = JSON.parse(text());
+                loadConfig();
+            } catch (e) {
+                console.error("Failed to parse shell.json after change:", e);
+            }
+        }
+        
+        onLoadFailed: err => {
+            console.warn("Failed to load shell.json:", FileViewError.toString(err));
+            // Fall back to Config object if file doesn't exist
+            loadConfigFromObject();
+        }
+    }
+
     function loadConfig() {
+        const sections = {};
+        for (const section of configSections) {
+            const sectionName = section.name;
+            // Merge JSON data with defaults from Config object
+            // Priority: JSON file > Config object defaults
+            const jsonSection = root.jsonFileData[sectionName] || {};
+            const configSection = Config[sectionName];
+            sections[sectionName] = mergeWithDefaults(jsonSection, configSection);
+        }
+        root.configData = sections;
+        root.loaded = true;
+    }
+    
+    function loadConfigFromObject() {
+        // Fallback: load from Config object (defaults + JSON merged by JsonAdapter)
         const sections = {};
         for (const section of configSections) {
             sections[section.name] = collectObjectData(Config[section.name]);
         }
         root.configData = sections;
         root.loaded = true;
+    }
+    
+    function mergeWithDefaults(jsonData, configObject) {
+        // Create object with all properties from Config (for structure)
+        const result = collectObjectData(configObject);
+        
+        // Override with values from JSON file
+        function applyJsonValues(target, source) {
+            for (const key in source) {
+                if (source.hasOwnProperty(key)) {
+                    const value = source[key];
+                    if (value !== null && typeof value === "object" && !Array.isArray(value)) {
+                        if (!target[key] || typeof target[key] !== "object") {
+                            target[key] = {};
+                        }
+                        applyJsonValues(target[key], value);
+                    } else {
+                        // Use JSON value, which takes priority
+                        target[key] = value;
+                    }
+                }
+            }
+        }
+        
+        applyJsonValues(result, jsonData);
+        return result;
     }
 
     function collectObjectData(obj) {
@@ -107,10 +182,11 @@ Singleton {
     }
 
     function saveConfig() {
-        if (!root.configData) return false;
+        if (!root.jsonFileData) return false;
         
         try {
-            const jsonString = JSON.stringify(root.configData, null, 4);
+            // Save only the JSON file data (not the merged data with defaults)
+            const jsonString = JSON.stringify(root.jsonFileData, null, 4);
             const escapedJson = jsonString.replace(/'/g, "'\"'\"'");
             saveProcess.command = ["sh", "-c", `printf '%s' '${escapedJson}' > ${root.configPath}`];
             saveProcess.running = true;
@@ -158,7 +234,7 @@ Singleton {
     function updateValue(path: list<string>, value): void {
         if (!root.configData || path.length === 0) return;
 
-        // Update in configData
+        // Update in configData (for UI display)
         let obj = root.configData;
         for (let i = 0; i < path.length - 1; i++) {
             if (!obj[path[i]]) {
@@ -170,21 +246,21 @@ Singleton {
         const lastKey = path[path.length - 1];
         obj[lastKey] = value;
 
-        // Update in Config object
-        const configSection = Config[path[0]];
-        if (configSection) {
-            let configObj = configSection;
-            for (let i = 1; i < path.length - 1; i++) {
-                if (!configObj[path[i]]) {
-                    console.warn("Path segment not found in Config object:", path[i], "at index", i);
-                    return;
-                }
-                configObj = configObj[path[i]];
+        // Update in jsonFileData (the source of truth for the JSON file)
+        let jsonObj = root.jsonFileData;
+        for (let i = 0; i < path.length - 1; i++) {
+            if (!jsonObj[path[i]]) {
+                jsonObj[path[i]] = {};
             }
-            configObj[lastKey] = value;
+            jsonObj = jsonObj[path[i]];
         }
+        jsonObj[lastKey] = value;
 
+        // Save to file first
         saveConfig();
+        
+        // Then notify Config object to reload from file
+        // This ensures Config picks up the value from JSON
         root.valueChanged(path);
     }
     

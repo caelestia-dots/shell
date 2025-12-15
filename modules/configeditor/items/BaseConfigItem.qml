@@ -15,18 +15,16 @@ Item {
     required property var propertyData
     required property var sectionPath
 
-    property var currentValue: configObject[propertyData.name]
     readonly property var fullPath: [...sectionPath, propertyData.name]
+    property var currentValue: configObject[propertyData.name]
     
     implicitHeight: 56
 
-    // Update current value when config changes
     Connections {
         target: ConfigParser
         function onValueChanged(path) {
             if (path.length === root.fullPath.length && 
                 path.every((v, i) => v === root.fullPath[i])) {
-                // Force re-evaluation by explicitly getting the value
                 root.currentValue = root.configObject[root.propertyData.name];
             }
         }
