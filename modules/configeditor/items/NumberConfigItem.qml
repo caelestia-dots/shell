@@ -11,12 +11,25 @@ BaseConfigItem {
     id: root
 
     readonly property bool isInteger: propertyData.type === "int"
+    readonly property int nestingLevel: sectionPath.length - 1
 
     // Hidden reference to get exact CustomSpinBox dimensions
     CustomSpinBox {
         id: spinBoxReference
         visible: false
         value: 0
+    }
+
+    // Subtle background for nested items
+    Rectangle {
+        anchors.fill: parent
+        color: nestingLevel > 1 ? Qt.rgba(
+            Colours.palette.m3surfaceContainerHighest.r,
+            Colours.palette.m3surfaceContainerHighest.g,
+            Colours.palette.m3surfaceContainerHighest.b,
+            0.15 * (nestingLevel - 1)
+        ) : "transparent"
+        radius: Appearance.rounding.small
     }
 
     RowLayout {

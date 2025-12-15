@@ -10,6 +10,20 @@ import QtQuick.Layouts
 BaseConfigItem {
     id: root
 
+    readonly property int nestingLevel: sectionPath.length - 1
+    
+    // Subtle background for nested items
+    Rectangle {
+        anchors.fill: parent
+        color: nestingLevel > 1 ? Qt.rgba(
+            Colours.palette.m3surfaceContainerHighest.r,
+            Colours.palette.m3surfaceContainerHighest.g,
+            Colours.palette.m3surfaceContainerHighest.b,
+            0.15 * (nestingLevel - 1)
+        ) : "transparent"
+        radius: Appearance.rounding.small
+    }
+
     RowLayout {
         anchors.fill: parent
         anchors.leftMargin: Appearance.padding.normal

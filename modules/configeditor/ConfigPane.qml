@@ -79,24 +79,13 @@ Item {
                 Repeater {
                     model: root.properties
 
-                    delegate: Loader {
+                    delegate: PropertyEditor {
                         required property var modelData
                         required property int index
                         
-                        Layout.fillWidth: true
-                        Layout.preferredHeight: item?.implicitHeight ?? 0
-                        visible: modelData?.name && ConfigParser.formatPropertyName(modelData.name).trim()
-
-                        sourceComponent: {
-                            switch (modelData?.type) {
-                                case "bool": return boolItem;
-                                case "int":
-                                case "real": return numberItem;
-                                case "string": return stringItem;
-                                case "object": return objectHeader;
-                                default: return null;
-                            }
-                        }
+                        configObject: root.configObject
+                        propertyData: modelData
+                        sectionPath: root.sectionPath
 
                         // Separator
                         StyledRect {
@@ -118,43 +107,4 @@ Item {
         }
     }
 
-    Component {
-        id: boolItem
-
-        BoolConfigItem {
-            configObject: root.configObject
-            propertyData: modelData
-            sectionPath: root.sectionPath
-        }
-    }
-
-    Component {
-        id: stringItem
-
-        StringConfigItem {
-            configObject: root.configObject
-            propertyData: modelData
-            sectionPath: root.sectionPath
-        }
-    }
-
-    Component {
-        id: numberItem
-
-        NumberConfigItem {
-            configObject: root.configObject
-            propertyData: modelData
-            sectionPath: root.sectionPath
-        }
-    }
-    
-    Component {
-        id: objectHeader
-
-        ObjectHeader {
-            configObject: root.configObject
-            propertyData: modelData
-            sectionPath: root.sectionPath
-        }
-    }
 }

@@ -51,7 +51,7 @@ Singleton {
         "dashboard.sizes.resourceSize": true
     })
 
-    Component.onCompleted: loadTimer.start()
+    Component.onCompleted: loadConfig()
 
     Timer {
         id: loadTimer
