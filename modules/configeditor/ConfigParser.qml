@@ -13,6 +13,7 @@ Singleton {
     property bool loaded: false
     property var expandedStates: ({})
     property var jsonFileData: ({})
+    property bool isSaving: false
     
     signal valueChanged(path: list<string>)
 
@@ -77,6 +78,10 @@ Singleton {
         }
         
         onFileChanged: {
+            // Don't reload if we're the ones who just saved
+            if (root.isSaving) {
+                return;
+            }
             // Reload when file changes externally
             try {
                 root.jsonFileData = JSON.parse(text());
@@ -173,18 +178,25 @@ Singleton {
         command: ["sh", "-c", ""]
 
         onExited: (code, status) => {
-            if (code === 0) {
-                Config.reload();
-            } else {
+            if (code !== 0) {
                 console.error("Failed to save config:", saveProcess.stderr);
             }
+            // Reset saving flag after a short delay to allow file system to settle
+            resetSavingTimer.start();
         }
+    }
+
+    Timer {
+        id: resetSavingTimer
+        interval: 200
+        onTriggered: root.isSaving = false
     }
 
     function saveConfig() {
         if (!root.jsonFileData) return false;
         
         try {
+            root.isSaving = true;
             // Save only the JSON file data (not the merged data with defaults)
             const jsonString = JSON.stringify(root.jsonFileData, null, 4);
             const escapedJson = jsonString.replace(/'/g, "'\"'\"'");
@@ -193,6 +205,7 @@ Singleton {
             return true;
         } catch (e) {
             console.error("Failed to save config:", e);
+            root.isSaving = false;
             return false;
         }
     }
