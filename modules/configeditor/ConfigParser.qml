@@ -161,7 +161,10 @@ Singleton {
         // Update in configData
         let obj = root.configData;
         for (let i = 0; i < path.length - 1; i++) {
-            if (!obj[path[i]]) return;
+            if (!obj[path[i]]) {
+                console.warn("Path segment not found in configData:", path[i], "at index", i);
+                return;
+            }
             obj = obj[path[i]];
         }
         const lastKey = path[path.length - 1];
@@ -172,7 +175,10 @@ Singleton {
         if (configSection) {
             let configObj = configSection;
             for (let i = 1; i < path.length - 1; i++) {
-                if (!configObj[path[i]]) return;
+                if (!configObj[path[i]]) {
+                    console.warn("Path segment not found in Config object:", path[i], "at index", i);
+                    return;
+                }
                 configObj = configObj[path[i]];
             }
             configObj[lastKey] = value;

@@ -15,13 +15,34 @@ ColumnLayout {
     required property var sectionPath
 
     readonly property var nestedPath: [...sectionPath, propertyData.name]
-    readonly property var nestedObject: configObject[propertyData.name]
+    property var nestedObject: configObject[propertyData.name]
     readonly property string statePath: nestedPath.join(".")
     readonly property int nestingLevel: sectionPath.length - 1
     readonly property int leftIndent: nestingLevel * Appearance.padding.larger
     property bool expanded: ConfigParser.getExpandedState(statePath)
     
     onExpandedChanged: ConfigParser.setExpandedState(statePath, expanded)
+
+    // Update nested object when any value in the path changes
+    Connections {
+        target: ConfigParser
+        function onValueChanged(path) {
+            // Check if the changed path is within our nested object's scope
+            if (path.length >= root.nestedPath.length) {
+                let isInScope = true;
+                for (let i = 0; i < root.nestedPath.length; i++) {
+                    if (path[i] !== root.nestedPath[i]) {
+                        isInScope = false;
+                        break;
+                    }
+                }
+                if (isInScope) {
+                    // Force re-evaluation of nestedObject
+                    root.nestedObject = root.configObject[root.propertyData.name];
+                }
+            }
+        }
+    }
 
     spacing: 0
 

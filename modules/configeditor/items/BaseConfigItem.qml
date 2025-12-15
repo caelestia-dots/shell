@@ -26,12 +26,14 @@ Item {
         function onValueChanged(path) {
             if (path.length === root.fullPath.length && 
                 path.every((v, i) => v === root.fullPath[i])) {
+                // Force re-evaluation by explicitly getting the value
                 root.currentValue = root.configObject[root.propertyData.name];
             }
         }
     }
 
     function updateValue(value) {
+        console.log("Updating value at path:", JSON.stringify(root.fullPath), "to:", value);
         ConfigParser.updateValue(root.fullPath, value);
     }
 }
