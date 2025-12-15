@@ -37,6 +37,7 @@ Item {
     }
 
     Shape {
+        asynchronous: true
         preferredRendererType: Shape.CurveRenderer
 
         ShapePath {
