@@ -170,7 +170,7 @@ Singleton {
     Timer {
         id: statusCheckTimer
 
-        interval: 500
+        interval: 2000
         onTriggered: root.checkStatus()
     }
 }

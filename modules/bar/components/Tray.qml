@@ -83,6 +83,7 @@ StyledRect {
         anchors.bottom: parent.bottom
 
         active: Config.bar.tray.compact
+        asynchronous: true
 
         sourceComponent: Item {
             implicitWidth: expandIconInner.implicitWidth

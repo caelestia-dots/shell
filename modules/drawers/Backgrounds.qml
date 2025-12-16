@@ -20,6 +20,7 @@ Shape {
     anchors.fill: parent
     anchors.margins: Config.border.thickness
     anchors.leftMargin: bar.implicitWidth
+    asynchronous: true
     preferredRendererType: Shape.CurveRenderer
 
     Osd.Background {
