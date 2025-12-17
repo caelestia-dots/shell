@@ -76,6 +76,7 @@ Item {
         anchors.right: parent.right
 
         active: root.shouldBeVisible || root.visible
+        asynchronous: true
 
         sourceComponent: Bar {
             width: root.contentWidth

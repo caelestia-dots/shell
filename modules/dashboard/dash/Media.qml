@@ -37,6 +37,7 @@ Item {
     }
 
     Shape {
+        asynchronous: true
         preferredRendererType: Shape.CurveRenderer
 
         ShapePath {
@@ -216,7 +217,10 @@ Item {
         speed: Audio.beatTracker.bpm / 300
         source: Paths.absolutePath(Config.paths.mediaGif)
         asynchronous: true
+        cache: true
         fillMode: AnimatedImage.PreserveAspectFit
+        sourceSize.width: Math.ceil(width / 10) * 10
+        sourceSize.height: Math.ceil(height / 10) * 10
     }
 
     component Control: StyledRect {

@@ -53,6 +53,7 @@ Column {
 
         playing: visible
         asynchronous: true
+        cache: true
         speed: 0.7
         source: Paths.absolutePath(Config.paths.sessionGif)
     }
