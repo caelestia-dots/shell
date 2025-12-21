@@ -419,6 +419,14 @@ default, you must create it manually.
         "actionPrefix": ">",
         "actions": [
             {
+                "name": "Chatgpt",
+                "icon": "smart_toy",
+                "description": "Ask anything to ChatGpt",
+                "command": ["autocomplete", "gpt"],
+                "enabled": true,
+                "dangerous": false
+            },
+            {
                 "name": "Calculator",
                 "icon": "calculate",
                 "description": "Do simple math equations (powered by Qalc)",
