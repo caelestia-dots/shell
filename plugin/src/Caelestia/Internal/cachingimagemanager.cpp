@@ -88,8 +88,28 @@ void CachingImageManager::setPath(const QString& path) {
     m_path = path;
     emit pathChanged();
 
+    // eww but I'll do it again here
+    const bool animated = !path.isEmpty() && isAnimated(path);
+    if (m_animated != animated) {
+        m_animated = animated;
+        emit animatedChanged();
+    }
+
     if (!path.isEmpty()) {
         updateSource(path);
+    }
+}
+
+void CachingImageManager::setPreferAnimated(bool preferAnimated) {
+    if (m_preferAnimated == preferAnimated) {
+        return;
+    }
+
+    m_preferAnimated = preferAnimated;
+    emit preferAnimatedChanged();
+
+    if (!m_path.isEmpty()) {
+        updateSource(m_path);
     }
 }
 
@@ -98,8 +118,38 @@ void CachingImageManager::updateSource() {
 }
 
 void CachingImageManager::updateSource(const QString& path) {
-    if (path.isEmpty() || path == m_shaPath) {
-        // Path is empty or already calculating sha for path
+    if (path.isEmpty()) {
+        return;
+    }
+
+    const bool animated = isAnimated(path);
+    if (m_animated != animated) {
+        m_animated = animated;
+        emit animatedChanged();
+    }
+
+    const bool useAnimation = animated && m_preferAnimated;
+
+    if (useAnimation) {
+        const QSize size = effectiveSize();
+
+        if (!m_item || !size.width() || !size.height()) {
+            m_shaPath.clear();
+            return;
+        }
+
+        const QUrl cache;
+        if (m_cachePath != cache) {
+            m_cachePath = cache;
+            emit cachePathChanged();
+        }
+
+        m_item->setProperty("source", QUrl::fromLocalFile(path));
+        m_shaPath.clear();
+        return;
+    }
+
+    if (path == m_shaPath) {
         return;
     }
 
@@ -218,6 +268,14 @@ QString CachingImageManager::sha256sum(const QString& path) {
     file.close();
 
     return hash.result().toHex();
+}
+
+bool CachingImageManager::isAnimated(const QString& path) {
+    QImageReader reader(path);
+    if (!reader.canRead() || !reader.supportsAnimation()) {
+        return false;
+    }
+    return reader.imageCount() > 1;
 }
 
 } // namespace caelestia::internal
