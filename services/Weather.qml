@@ -54,9 +54,7 @@ Singleton {
                 const result = json.results[0];
                 loc = result.latitude + "," + result.longitude;
                 city = result.name;
-                console.log("Geocoding success: " + cityName + " -> " + loc);
             } else {
-                console.error("Geocoding failed for: " + cityName);
                 loc = ""; 
                 reload(); 
             }
