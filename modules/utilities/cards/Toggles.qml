@@ -92,6 +92,13 @@ StyledRect {
                 visible: VPN.enabled
                 onClicked: VPN.toggle()
             }
+
+            Toggle {
+                icon: "dark_mode"
+                checked: NightLight.on
+                visible: NightLight.enabled
+                onClicked: NightLight.toggle()
+            }
         }
     }
 
