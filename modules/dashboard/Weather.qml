@@ -123,7 +123,6 @@ Item {
             font.pointSize: Appearance.font.size.normal
             font.weight: 600
             color: Colours.palette.m3onSurface
-            Layout.topMargin: Appearance.spacing.medium
         }
 
         StyledRect {
