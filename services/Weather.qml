@@ -15,11 +15,11 @@ Singleton {
     property var forecast
 
     readonly property string icon: cc ? Icons.getWeatherIcon(cc.weatherCode) : "cloud_alert"
-    readonly property string description: cc?.weatherDesc[0].value ?? qsTr("No weather")
+    readonly property string description: cc?.weatherDesc ?? qsTr("No weather")
     readonly property string temp: Config.services.useFahrenheit ? `${cc?.temp_F ?? 0}°F` : `${cc?.temp_C ?? 0}°C`
     readonly property string feelsLike: Config.services.useFahrenheit ? `${cc?.FeelsLikeF ?? 0}°F` : `${cc?.FeelsLikeC ?? 0}°C`
     readonly property int humidity: cc?.humidity ?? 0
-    readonly property real windSpeed: cc?.windSpeed ?? 0.0
+    readonly property real windSpeed: (cc && cc.windSpeed !== undefined) ? cc.windSpeed : 0.0
     readonly property string sunrise: cc ? Qt.formatDateTime(new Date(cc.sunrise), Config.services.useTwelveHourClock ? "h:mm A" : "h:mm") : "--:--"
     readonly property string sunset: cc ? Qt.formatDateTime(new Date(cc.sunset), Config.services.useTwelveHourClock ? "h:mm A" : "h:mm") : "--:--"
 
@@ -77,7 +77,7 @@ Singleton {
 
             cc = {
                 "weatherCode": String(json.current.weather_code),
-                "weatherDesc": [{ "value": getWeatherCondition(String(json.current.weather_code))}],
+                "weatherDesc": getWeatherCondition(String(json.current.weather_code)),
                 "temp_C": Math.round(json.current.temperature_2m),
                 "temp_F": Math.round(json.current.temperature_2m * 9/5 + 32),
                 "FeelsLikeC": Math.round(json.current.apparent_temperature),
@@ -125,7 +125,7 @@ Singleton {
         return baseUrl + "?" + params.join("&");
     }
 
-    function getWeatherCondition(code: string) {
+    function getWeatherCondition(code: string) : string {
         const conditions = {
             "0": "Clear",
             "1": "Clear",

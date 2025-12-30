@@ -87,7 +87,7 @@ Item {
                     }
                     StyledText {
                         text: Weather.description
-                        font.pointSize: Appearance.font.size.medium
+                        font.pointSize: Appearance.font.size.normal
                         color: Colours.palette.m3onSurfaceVariant
                     }
                 }
@@ -120,7 +120,7 @@ Item {
 
         StyledText {
             text: qsTr("7-Day Forecast")
-            font.pointSize: Appearance.font.size.medium
+            font.pointSize: Appearance.font.size.normal
             font.weight: 600
             color: Colours.palette.m3onSurface
             Layout.topMargin: Appearance.spacing.medium
@@ -149,7 +149,7 @@ Item {
 
                             StyledText {
                                 text: index === 0 ? qsTr("Today") : new Date(modelData.date).toLocaleDateString(Qt.locale(), "ddd")
-                                font.pointSize: Appearance.font.size.medium
+                                font.pointSize: Appearance.font.size.normal
                                 font.weight: 600
                                 color: Colours.palette.m3primary
                                 anchors.horizontalCenter: parent.horizontalCenter
