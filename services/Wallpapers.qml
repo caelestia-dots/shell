@@ -38,7 +38,8 @@ Searcher {
             Colours.showPreview = false;
     }
 
-    list: wallpapers.entries
+    // Filtramos la lista para quitar el wallpaper que ya se está usando
+    list: wallpapers.entries.filter(entry => entry.path !== root.actualCurrent)
     key: "relativePath"
     useFuzzy: Config.launcher.useFuzzy.wallpapers
     extraOpts: useFuzzy ? ({}) : ({
@@ -74,9 +75,9 @@ Searcher {
     FileSystemModel {
         id: wallpapers
 
-        recursive: true
-        path: Paths.wallsdir
-        filter: FileSystemModel.ImagesAndVideos
+        recursive: false
+        path: "/home/direfulbattle/Videos"
+	nameFilters: ["*.jpg", "*.jpeg", "*.png", "*.mp4", "*.mkv", "*.webm", "*.gif"]
     }
 
     Process {

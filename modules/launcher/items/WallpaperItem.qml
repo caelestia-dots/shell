@@ -139,7 +139,7 @@ Item {
         horizontalAlignment: Text.AlignHCenter
         elide: Text.ElideRight
         renderType: Text.QtRendering
-        text: root.modelData.relativePath
+	text: root.modelData.relativePath.replace(/\.[^/.]+$/, "")
         font.pointSize: Appearance.font.size.normal
     }
 

@@ -136,8 +136,8 @@ Item {
                             id: dialog
                             title: qsTr("Select a wallpaper")
                             filterLabel: qsTr("Image files")
-                            filters: Images.validImageExtensions
-                            onAccepted: path => Wallpapers.setWallpaper(path)
+                            filters: ["*.jpg", "*.png", "*.jpeg", "*.mp4", "*.mkv", "*.webm", "*.gif"]
+			    onAccepted: path => Wallpapers.setWallpaper(path)
                         }
 
                         StateLayer {
