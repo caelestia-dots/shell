@@ -3,10 +3,12 @@ import qs.components.effects
 import qs.components.images
 import qs.services
 import qs.config
+import qs.utils
 import Caelestia.Models
 import Quickshell
 import QtQuick
 import QtMultimedia
+import Caelestia.Internal
 
 Item {
     id: root
@@ -78,46 +80,9 @@ Item {
             font.weight: 600
             visible: !isVideo(root.modelData.path)
         }
-
         Loader {
             anchors.fill: parent
-            active: isVideo(root.modelData.path)
-
-            sourceComponent: Component {
-                Item {
-                    anchors.fill: parent
-
-                    MediaPlayer {
-                        id: player
-                        source: root.modelData.path
-                        autoPlay: false
-                        videoOutput: vidThumb
-
-                        onMediaStatusChanged: {
-                            if (mediaStatus === MediaPlayer.LoadedMedia) {
-                                play();
-                                position = 1;
-                            }
-                        }
-
-                        onPositionChanged: {
-                            if (position >= 1)
-                                pause();
-                        }
-                    }
-
-                    VideoOutput {
-                        id: vidThumb
-                        anchors.fill: parent
-                        fillMode: VideoOutput.PreserveAspectCrop
-                    }
-                }
-            }
-        }
-
-        Loader {
-            anchors.fill: parent
-            active: !isVideo(root.modelData.path)
+            active: !root.isVideo(root.modelData.path)
 
             sourceComponent: Component {
                 CachingImage {
@@ -125,6 +90,28 @@ Item {
                     smooth: !root.PathView.view.moving
                     anchors.fill: parent
                 }
+            }
+        }
+
+        // For videos, use VideoThumbnailer
+        Loader {
+            id: videoLoader
+            anchors.fill: parent
+            active: root.isVideo(root.modelData.path)
+
+            sourceComponent: Component {
+                Image {
+
+                    anchors.fill: parent
+                    fillMode: Image.PreserveAspectCrop
+                    source: thumb.cachePath
+                }
+            }
+
+            VideoThumbnailer {
+                id: thumb
+                path: root.modelData.path
+                cacheDir: "file:///home/ateebx/.cache/caelestia/videothumbcache/"
             }
         }
     }
