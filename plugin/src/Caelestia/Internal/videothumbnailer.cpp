@@ -51,12 +51,29 @@ void VideoThumbnailer::setPath(const QString& path) {
 
 QUrl VideoThumbnailer::cacheDir() const { return m_cacheDir; }
 void VideoThumbnailer::setCacheDir(const QUrl& dir) {
-    if (m_cacheDir == dir) return;
-    m_cacheDir = dir;
-    if (!m_cacheDir.path().endsWith('/'))
-        m_cacheDir.setPath(m_cacheDir.path() + '/');
+    if (!dir.isValid())
+        return;
+
+    qDebug() << "VideoThumbnailer path:" << dir;
+    QUrl normalized;
+
+    if (dir.isLocalFile()) {
+        normalized = QUrl::fromLocalFile(dir.toLocalFile());
+    } else if (dir.scheme().isEmpty()) {
+        // Handle accidental plain paths
+        normalized = QUrl::fromLocalFile(dir.toString());
+    } else {
+        return; // reject non-file URLs
+    }
+
+    if (normalized == m_cacheDir)
+        return;
+
+    m_cacheDir = normalized;
+    qDebug() << "VideoThumbnailer normalized cacheDir:" << m_cacheDir;
     emit cacheDirChanged();
 }
+
 
 QUrl VideoThumbnailer::cachePath() const { return m_cachePath; }
 bool VideoThumbnailer::ready() const { return m_ready; }
@@ -68,7 +85,7 @@ void VideoThumbnailer::generateThumbnail(const QString& path, const QString& cac
     QStringList args{
         "-y",           // overwrite
         "-i", path,
-        "-vf", "scale=280:158:force_original_aspect_ratio=increase,crop=280:158",
+        // "-vf", "scale=280:158:force_original_aspect_ratio=increase,crop=280:158",
         "-vframes", "1",
         cacheFile
     };

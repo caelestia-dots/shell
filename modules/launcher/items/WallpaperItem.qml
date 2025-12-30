@@ -92,6 +92,14 @@ Item {
                 }
             }
         }
+        // Timer {
+        //     interval: 100
+        //     running: true
+        //     repeat: false
+        //     onTriggered: {
+        //         console.log("file://" + Paths.videothumbcache);
+        //     }
+        // }
 
         // For videos, use VideoThumbnailer
         Loader {
@@ -100,18 +108,17 @@ Item {
             active: root.isVideo(root.modelData.path)
 
             sourceComponent: Component {
-                Image {
-
+                CachingImage {
                     anchors.fill: parent
                     fillMode: Image.PreserveAspectCrop
-                    source: thumb.cachePath
-                }
-            }
+                    path: Qt.resolvedUrl(thumb.cachePath.toString().replace("file://", ""))
 
-            VideoThumbnailer {
-                id: thumb
-                path: root.modelData.path
-                cacheDir: "file:///home/ateebx/.cache/caelestia/videothumbcache/"
+                    VideoThumbnailer {
+                        id: thumb
+                        path: root.modelData.path
+                        cacheDir: Paths.videothumbcache
+                    }
+                }
             }
         }
     }
