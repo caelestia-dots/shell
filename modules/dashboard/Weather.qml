@@ -48,13 +48,13 @@ Item {
                 WeatherStat { 
                     icon: "wb_twilight"
                     label: "Sunrise"
-                    value: Weather.cc ? Weather.cc.sunrise : "--:--"
+                    value: Weather.sunrise
                     colour: Colours.palette.m3tertiary
                 }
                 WeatherStat { 
                     icon: "bedtime"
                     label: "Sunset"
-                    value: Weather.cc ? Weather.cc.sunset : "--:--"
+                    value: Weather.sunset
                     colour: Colours.palette.m3tertiary
                 }
             }

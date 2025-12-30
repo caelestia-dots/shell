@@ -20,6 +20,8 @@ Singleton {
     readonly property string feelsLike: Config.services.useFahrenheit ? `${cc?.FeelsLikeF ?? 0}°F` : `${cc?.FeelsLikeC ?? 0}°C`
     readonly property int humidity: cc?.humidity ?? 0
     readonly property real windSpeed: cc?.windSpeed ?? 0.0
+    readonly property string sunrise: cc ? Qt.formatDateTime(new Date(cc.sunrise), Config.services.useTwelveHourClock ? "h:mm A" : "h:mm") : "--:--"
+    readonly property string sunset: cc ? Qt.formatDateTime(new Date(cc.sunset), Config.services.useTwelveHourClock ? "h:mm A" : "h:mm") : "--:--"
 
     function reload(): void {
         let configLocation = Config.services.weatherLocation;
@@ -83,8 +85,8 @@ Singleton {
                 "humidity": json.current.relative_humidity_2m,
                 "windSpeed": json.current.wind_speed_10m,
                 "isDay": json.current.is_day,
-                "sunrise": Qt.formatDateTime(new Date(json.daily.sunrise[0]), Config.services.useTwelveHourClock ? "h:mm A" : "h:mm"),
-                "sunset": Qt.formatDateTime(new Date(json.daily.sunset[0]), Config.services.useTwelveHourClock ? "h:mm A" : "h:mm")
+                "sunrise": json.daily.sunrise[0],
+                "sunset": json.daily.sunset[0]
             };
 
             let forecastList = []
