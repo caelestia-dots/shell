@@ -405,6 +405,10 @@ default, you must create it manually.
                     "icon": "sports_esports"
                 }
             ]
+        },
+        "excludedScreens": [""],
+        "activeWindow": {
+            "inverted": false
         }
     },
     "border": {

@@ -1,6 +1,7 @@
 pragma Singleton
 
 import ".."
+import "../../configeditor"
 import qs.services
 import qs.config
 import qs.utils
@@ -43,6 +44,9 @@ Searcher {
             } else if (command[0] === "setMode" && command.length > 1) {
                 list.visibilities.launcher = false;
                 Colours.setMode(command[1]);
+            } else if (command[0] === "openConfigEditor") {
+                list.visibilities.launcher = false;
+                ConfigEditor.show();
             } else {
                 list.visibilities.launcher = false;
                 Quickshell.execDetached(command);

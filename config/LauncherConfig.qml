@@ -31,6 +31,14 @@ JsonObject {
 
     property list<var> actions: [
         {
+            name: "Config",
+            icon: "settings",
+            description: "Open the configuration editor",
+            command: ["openConfigEditor"],
+            enabled: true,
+            dangerous: false
+        },
+        {
             name: "Calculator",
             icon: "calculate",
             description: "Do simple math equations (powered by Qalc)",

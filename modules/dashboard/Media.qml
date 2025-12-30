@@ -224,7 +224,7 @@ Item {
                 label.animate: true
                 toggle: true
                 padding: Appearance.padding.small / 2
-                checked: Players.active?.isPlaying
+                checked: Players.active?.isPlaying ?? false
                 font.pointSize: Math.round(Appearance.font.size.large * 1.5)
                 disabled: !Players.active?.canTogglePlaying
                 onClicked: Players.active?.togglePlaying()
@@ -323,7 +323,7 @@ Item {
                 id: playerSelector
 
                 disabled: !Players.list.length
-                active: menuItems.find(m => m.modelData === Players.active) ?? menuItems[0]
+                active: menuItems.find(m => m.modelData === Players.active) ?? menuItems[0] ?? null
                 menu.onItemSelected: item => Players.manualActive = item.modelData
 
                 menuItems: playerList.instances
