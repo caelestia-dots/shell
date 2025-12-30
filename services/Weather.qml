@@ -83,8 +83,8 @@ Singleton {
                 "humidity": json.current.relative_humidity_2m,
                 "windSpeed": json.current.wind_speed_10m,
                 "isDay": json.current.is_day,
-                "sunrise": json.daily.sunrise[0].split("T")[1],
-                "sunset": json.daily.sunset[0].split("T")[1]
+                "sunrise": Qt.formatDateTime(new Date(json.daily.sunrise[0]), Config.services.useTwelveHourClock ? "h:mm A" : "h:mm"),
+                "sunset": Qt.formatDateTime(new Date(json.daily.sunset[0]), Config.services.useTwelveHourClock ? "h:mm A" : "h:mm")
             };
 
             let forecastList = []
