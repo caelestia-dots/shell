@@ -1,17 +1,19 @@
-import qs.widgets
+import qs.components
+import qs.components.effects
+import qs.components.images
+import qs.components.filedialog
 import qs.services
 import qs.config
 import qs.utils
 import Quickshell
-import Quickshell.Io
 import QtQuick
-import QtQuick.Dialogs
 
 Row {
     id: root
 
     required property PersistentProperties visibilities
     required property PersistentProperties state
+    required property FileDialog facePicker
 
     padding: Appearance.padding.large
     spacing: Appearance.spacing.normal
@@ -21,7 +23,7 @@ Row {
         implicitHeight: info.implicitHeight
 
         radius: Appearance.rounding.large
-        color: Colours.palette.m3surfaceContainerHigh
+        color: Colours.layer(Colours.palette.m3surfaceContainerHigh, 2)
 
         MaterialIcon {
             anchors.centerIn: parent
@@ -36,31 +38,22 @@ Row {
             id: pfp
 
             anchors.fill: parent
-            path: `${Paths.stringify(Paths.home)}/.face`
+            path: `${Paths.home}/.face`
         }
 
         MouseArea {
             anchors.fill: parent
-
-            cursorShape: Qt.PointingHandCursor
             hoverEnabled: true
-
-            onClicked: {
-                root.visibilities.launcher = false;
-                root.state.facePicker.open();
-            }
 
             StyledRect {
                 anchors.fill: parent
 
-                color: Qt.alpha(Colours.palette.m3primary, 0.1)
+                color: Qt.alpha(Colours.palette.m3scrim, 0.5)
                 opacity: parent.containsMouse ? 1 : 0
 
                 Behavior on opacity {
-                    NumberAnimation {
-                        duration: Appearance.anim.durations.normal
-                        easing.type: Easing.BezierSpline
-                        easing.bezierCurve: Appearance.anim.curves.standard
+                    Anim {
+                        duration: Appearance.anim.durations.expressiveFastSpatial
                     }
                 }
             }
@@ -76,6 +69,15 @@ Row {
                 scale: parent.containsMouse ? 1 : 0.5
                 opacity: parent.containsMouse ? 1 : 0
 
+                StateLayer {
+                    color: Colours.palette.m3onPrimary
+
+                    function onClicked(): void {
+                        root.visibilities.launcher = false;
+                        root.facePicker.open();
+                    }
+                }
+
                 MaterialIcon {
                     id: selectIcon
 
@@ -88,18 +90,15 @@ Row {
                 }
 
                 Behavior on scale {
-                    NumberAnimation {
+                    Anim {
                         duration: Appearance.anim.durations.expressiveFastSpatial
-                        easing.type: Easing.BezierSpline
                         easing.bezierCurve: Appearance.anim.curves.expressiveFastSpatial
                     }
                 }
 
                 Behavior on opacity {
-                    NumberAnimation {
+                    Anim {
                         duration: Appearance.anim.durations.expressiveFastSpatial
-                        easing.type: Easing.BezierSpline
-                        easing.bezierCurve: Appearance.anim.curves.expressiveFastSpatial
                     }
                 }
             }
@@ -112,16 +111,40 @@ Row {
         anchors.verticalCenter: parent.verticalCenter
         spacing: Appearance.spacing.normal
 
-        InfoLine {
-            icon: Icons.osIcon
-            text: Icons.osName
-            colour: Colours.palette.m3primary
-            materialIcon: false
+        Item {
+            id: line
+
+            implicitWidth: icon.implicitWidth + text.width + text.anchors.leftMargin
+            implicitHeight: Math.max(icon.implicitHeight, text.implicitHeight)
+
+            ColouredIcon {
+                id: icon
+
+                anchors.left: parent.left
+                anchors.leftMargin: (Config.dashboard.sizes.infoIconSize - implicitWidth) / 2
+
+                source: SysInfo.osLogo
+                implicitSize: Math.floor(Appearance.font.size.normal * 1.34)
+                colour: Colours.palette.m3primary
+            }
+
+            StyledText {
+                id: text
+
+                anchors.verticalCenter: icon.verticalCenter
+                anchors.left: icon.right
+                anchors.leftMargin: icon.anchors.leftMargin
+                text: `:  ${SysInfo.osPrettyName || SysInfo.osName}`
+                font.pointSize: Appearance.font.size.normal
+
+                width: Config.dashboard.sizes.infoWidth
+                elide: Text.ElideRight
+            }
         }
 
         InfoLine {
             icon: "select_window_2"
-            text: Quickshell.env("XDG_CURRENT_DESKTOP") || Quickshell.env("XDG_SESSION_DESKTOP")
+            text: SysInfo.wm
             colour: Colours.palette.m3secondary
         }
 
@@ -129,37 +152,8 @@ Row {
             id: uptime
 
             icon: "timer"
-            text: qsTr("Loading uptime...")
+            text: qsTr("up %1").arg(SysInfo.uptime)
             colour: Colours.palette.m3tertiary
-
-            Timer {
-                running: true
-                repeat: true
-                interval: 15000
-                onTriggered: fileUptime.reload()
-            }
-
-            FileView {
-                id: fileUptime
-
-                path: "/proc/uptime"
-                onLoaded: {
-                    const up = parseInt(text().split(" ")[0] ?? 0);
-
-                    const days = Math.floor(up / 86400);
-                    const hours = Math.floor((up % 86400) / 3600);
-                    const minutes = Math.floor((up % 3600) / 60);
-
-                    let str = qsTr("up ");
-                    if (days > 0)
-                        str += `${days} day${days === 1 ? "" : "s"}`;
-                    if (hours > 0)
-                        str += `${str ? ", " : ""}${hours} hour${hours === 1 ? "" : "s"}`;
-                    if (minutes > 0 || !str)
-                        str += `${str ? ", " : ""}${minutes} minute${minutes === 1 ? "" : "s"}`;
-                    uptime.text = str;
-                }
-            }
         }
     }
 
@@ -169,7 +163,6 @@ Row {
         required property string icon
         required property string text
         required property color colour
-        property bool materialIcon: true
 
         implicitWidth: icon.implicitWidth + text.width + text.anchors.leftMargin
         implicitHeight: Math.max(icon.implicitHeight, text.implicitHeight)
@@ -184,7 +177,6 @@ Row {
             text: line.icon
             color: line.colour
             font.pointSize: Appearance.font.size.normal
-            font.family: line.materialIcon ? Appearance.font.family.material : Appearance.font.family.sans
         }
 
         StyledText {

@@ -1,6 +1,6 @@
 pragma ComponentBehavior: Bound
 
-import qs.widgets
+import qs.components
 import qs.services
 import qs.config
 import Quickshell
@@ -29,7 +29,7 @@ Item {
 
         implicitWidth: view.implicitWidth
 
-        color: Colours.palette.m3surfaceContainer
+        color: Colours.tPalette.m3surfaceContainer
         radius: Appearance.rounding.small
 
         Loader {

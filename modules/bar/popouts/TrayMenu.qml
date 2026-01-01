@@ -1,11 +1,10 @@
 pragma ComponentBehavior: Bound
 
-import qs.widgets
+import qs.components
 import qs.services
 import qs.config
 import Quickshell
 import Quickshell.Widgets
-import Quickshell.Hyprland
 import QtQuick
 import QtQuick.Controls
 
@@ -22,18 +21,12 @@ StackView {
         handle: root.trayItem
     }
 
-    pushEnter: Anim {}
-    pushExit: Anim {}
-    popEnter: Anim {}
-    popExit: Anim {}
+    pushEnter: NoAnim {}
+    pushExit: NoAnim {}
+    popEnter: NoAnim {}
+    popExit: NoAnim {}
 
-    HyprlandFocusGrab {
-        active: true
-        windows: [QsWindow.window]
-        onCleared: root.popouts.hasCurrent = false
-    }
-
-    component Anim: Transition {
+    component NoAnim: Transition {
         NumberAnimation {
             duration: 0
         }
@@ -58,19 +51,11 @@ StackView {
         StackView.onRemoved: destroy()
 
         Behavior on opacity {
-            NumberAnimation {
-                duration: Appearance.anim.durations.normal
-                easing.type: Easing.BezierSpline
-                easing.bezierCurve: Appearance.anim.curves.standard
-            }
+            Anim {}
         }
 
         Behavior on scale {
-            NumberAnimation {
-                duration: Appearance.anim.durations.normal
-                easing.type: Easing.BezierSpline
-                easing.bezierCurve: Appearance.anim.curves.standard
-            }
+            Anim {}
         }
 
         QsMenuOpener {

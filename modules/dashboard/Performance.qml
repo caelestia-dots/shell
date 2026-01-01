@@ -1,4 +1,5 @@
-import qs.widgets
+import qs.components
+import qs.components.misc
 import qs.services
 import qs.config
 import QtQuick
@@ -8,6 +9,10 @@ RowLayout {
     id: root
 
     readonly property int padding: Appearance.padding.large
+
+    function displayTemp(temp: real): string {
+        return `${Math.ceil(Config.services.useFahrenheit ? temp * 1.8 + 32 : temp)}°${Config.services.useFahrenheit ? "F" : "C"}`;
+    }
 
     spacing: Appearance.spacing.large * 3
 
@@ -24,7 +29,7 @@ RowLayout {
         value1: Math.min(1, SystemUsage.gpuTemp / 90)
         value2: SystemUsage.gpuPerc
 
-        label1: `${Math.ceil(SystemUsage.gpuTemp)}°C`
+        label1: root.displayTemp(SystemUsage.gpuTemp)
         label2: `${Math.round(SystemUsage.gpuPerc * 100)}%`
 
         sublabel1: qsTr("GPU temp")
@@ -41,7 +46,7 @@ RowLayout {
         value1: Math.min(1, SystemUsage.cpuTemp / 90)
         value2: SystemUsage.cpuPerc
 
-        label1: `${Math.ceil(SystemUsage.cpuTemp)}°C`
+        label1: root.displayTemp(SystemUsage.cpuTemp)
         label2: `${Math.round(SystemUsage.cpuPerc * 100)}%`
 
         sublabel1: qsTr("CPU temp")
@@ -163,7 +168,7 @@ RowLayout {
                 ctx.reset();
 
                 ctx.lineWidth = res.thickness;
-                ctx.lineCap = "round";
+                ctx.lineCap = Appearance.rounding.scale === 0 ? "square" : "round";
 
                 const radius = (Math.min(width, height) - ctx.lineWidth) / 2;
                 const cx = centerX;
@@ -196,51 +201,27 @@ RowLayout {
         }
 
         Behavior on value1 {
-            NumberAnimation {
-                duration: Appearance.anim.durations.normal
-                easing.type: Easing.BezierSpline
-                easing.bezierCurve: Appearance.anim.curves.standard
-            }
+            Anim {}
         }
 
         Behavior on value2 {
-            NumberAnimation {
-                duration: Appearance.anim.durations.normal
-                easing.type: Easing.BezierSpline
-                easing.bezierCurve: Appearance.anim.curves.standard
-            }
+            Anim {}
         }
 
         Behavior on fg1 {
-            ColorAnimation {
-                duration: Appearance.anim.durations.normal
-                easing.type: Easing.BezierSpline
-                easing.bezierCurve: Appearance.anim.curves.standard
-            }
+            CAnim {}
         }
 
         Behavior on fg2 {
-            ColorAnimation {
-                duration: Appearance.anim.durations.normal
-                easing.type: Easing.BezierSpline
-                easing.bezierCurve: Appearance.anim.curves.standard
-            }
+            CAnim {}
         }
 
         Behavior on bg1 {
-            ColorAnimation {
-                duration: Appearance.anim.durations.normal
-                easing.type: Easing.BezierSpline
-                easing.bezierCurve: Appearance.anim.curves.standard
-            }
+            CAnim {}
         }
 
         Behavior on bg2 {
-            ColorAnimation {
-                duration: Appearance.anim.durations.normal
-                easing.type: Easing.BezierSpline
-                easing.bezierCurve: Appearance.anim.curves.standard
-            }
+            CAnim {}
         }
     }
 }

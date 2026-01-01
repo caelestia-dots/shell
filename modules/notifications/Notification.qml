@@ -1,6 +1,7 @@
 pragma ComponentBehavior: Bound
 
-import qs.widgets
+import qs.components
+import qs.components.effects
 import qs.services
 import qs.config
 import qs.utils
@@ -17,27 +18,24 @@ StyledRect {
     readonly property bool hasImage: modelData.image.length > 0
     readonly property bool hasAppIcon: modelData.appIcon.length > 0
     readonly property int nonAnimHeight: summary.implicitHeight + (root.expanded ? appName.height + body.height + actions.height + actions.anchors.topMargin : bodyPreview.height) + inner.anchors.margins * 2
-    property bool expanded
+    property bool expanded: Config.notifs.openExpanded
 
-    color: root.modelData.urgency === NotificationUrgency.Critical ? Colours.palette.m3secondaryContainer : Colours.palette.m3surfaceContainer
+    color: root.modelData.urgency === NotificationUrgency.Critical ? Colours.palette.m3secondaryContainer : Colours.tPalette.m3surfaceContainer
     radius: Appearance.rounding.normal
     implicitWidth: Config.notifs.sizes.width
     implicitHeight: inner.implicitHeight
 
     x: Config.notifs.sizes.width
-    Component.onCompleted: x = 0
+    Component.onCompleted: {
+        x = 0;
+        modelData.lock(this);
+    }
+    Component.onDestruction: modelData.unlock(this)
 
     Behavior on x {
-        NumberAnimation {
-            duration: Appearance.anim.durations.normal
-            easing.type: Easing.BezierSpline
+        Anim {
             easing.bezierCurve: Appearance.anim.curves.emphasizedDecel
         }
-    }
-
-    RetainableLock {
-        object: root.modelData.notification
-        locked: true
     }
 
     MouseArea {
@@ -62,7 +60,7 @@ StyledRect {
             root.modelData.timer.stop();
             startY = event.y;
             if (event.button === Qt.MiddleButton)
-                root.modelData.notification.dismiss();
+                root.modelData.close();
         }
         onReleased: event => {
             if (!containsMouse)
@@ -71,7 +69,7 @@ StyledRect {
             if (Math.abs(root.x) < Config.notifs.sizes.width * Config.notifs.clearThreshold)
                 root.x = 0;
             else
-                root.modelData.notification.dismiss(); // TODO: change back to popup when notif dock impled
+                root.modelData.popup = false;
         }
         onPositionChanged: event => {
             if (pressed) {
@@ -146,7 +144,7 @@ StyledRect {
 
                 sourceComponent: StyledRect {
                     radius: Appearance.rounding.full
-                    color: root.modelData.urgency === NotificationUrgency.Critical ? Colours.palette.m3error : root.modelData.urgency === NotificationUrgency.Low ? Colours.palette.m3surfaceContainerHighest : Colours.palette.m3tertiaryContainer
+                    color: root.modelData.urgency === NotificationUrgency.Critical ? Colours.palette.m3error : root.modelData.urgency === NotificationUrgency.Low ? Colours.layer(Colours.palette.m3surfaceContainerHighest, 2) : Colours.palette.m3secondaryContainer
                     implicitWidth: root.hasImage ? Config.notifs.sizes.badge : Config.notifs.sizes.image
                     implicitHeight: root.hasImage ? Config.notifs.sizes.badge : Config.notifs.sizes.image
 
@@ -161,15 +159,11 @@ StyledRect {
                         width: Math.round(parent.width * 0.6)
                         height: Math.round(parent.width * 0.6)
 
-                        sourceComponent: IconImage {
+                        sourceComponent: ColouredIcon {
                             anchors.fill: parent
                             source: Quickshell.iconPath(root.modelData.appIcon)
-                            asynchronous: true
-
+                            colour: root.modelData.urgency === NotificationUrgency.Critical ? Colours.palette.m3onError : root.modelData.urgency === NotificationUrgency.Low ? Colours.palette.m3onSurface : Colours.palette.m3onSecondaryContainer
                             layer.enabled: root.modelData.appIcon.endsWith("symbolic")
-                            layer.effect: Colouriser {
-                                colorizationColor: root.modelData.urgency === NotificationUrgency.Critical ? Colours.palette.m3onError : root.modelData.urgency === NotificationUrgency.Low ? Colours.palette.m3onSurface : Colours.palette.m3onTertiaryContainer
-                            }
                         }
                     }
 
@@ -181,9 +175,9 @@ StyledRect {
                         anchors.verticalCenterOffset: Appearance.font.size.large * 0.02
 
                         sourceComponent: MaterialIcon {
-                            text: Icons.getNotifIcon(root.modelData.summary.toLowerCase(), root.modelData.urgency)
+                            text: Icons.getNotifIcon(root.modelData.summary, root.modelData.urgency)
 
-                            color: root.modelData.urgency === NotificationUrgency.Critical ? Colours.palette.m3onError : root.modelData.urgency === NotificationUrgency.Low ? Colours.palette.m3onSurface : Colours.palette.m3onTertiaryContainer
+                            color: root.modelData.urgency === NotificationUrgency.Critical ? Colours.palette.m3onError : root.modelData.urgency === NotificationUrgency.Low ? Colours.palette.m3onSurface : Colours.palette.m3onSecondaryContainer
                             font.pointSize: Appearance.font.size.large
                         }
                     }
@@ -398,7 +392,7 @@ StyledRect {
                         return;
 
                     Quickshell.execDetached(["app2unit", "-O", "--", link]);
-                    root.modelData.notification.dismiss(); // TODO: change back to popup when notif dock impled
+                    root.modelData.popup = false;
                 }
 
                 opacity: root.expanded ? 1 : 0
@@ -427,7 +421,7 @@ StyledRect {
                     modelData: QtObject {
                         readonly property string text: qsTr("Close")
                         function invoke(): void {
-                            root.modelData.notification.dismiss();
+                            root.modelData.close();
                         }
                     }
                 }
@@ -441,56 +435,50 @@ StyledRect {
                 }
             }
         }
-
-        component Action: StyledRect {
-            id: action
-
-            required property var modelData
-
-            radius: Appearance.rounding.full
-            color: root.modelData.urgency === NotificationUrgency.Critical ? Colours.palette.m3secondary : Colours.palette.m3surfaceContainerHigh
-
-            Layout.preferredWidth: actionText.width + Appearance.padding.normal * 2
-            Layout.preferredHeight: actionText.height + Appearance.padding.small * 2
-            implicitWidth: actionText.width + Appearance.padding.normal * 2
-            implicitHeight: actionText.height + Appearance.padding.small * 2
-
-            StateLayer {
-                radius: Appearance.rounding.full
-                color: root.modelData.urgency === NotificationUrgency.Critical ? Colours.palette.m3onSecondary : Colours.palette.m3onSurface
-
-                function onClicked(): void {
-                    action.modelData.invoke();
-                }
-            }
-
-            StyledText {
-                id: actionText
-
-                anchors.centerIn: parent
-                text: actionTextMetrics.elidedText
-                color: root.modelData.urgency === NotificationUrgency.Critical ? Colours.palette.m3onSecondary : Colours.palette.m3onSurfaceVariant
-                font.pointSize: Appearance.font.size.small
-            }
-
-            TextMetrics {
-                id: actionTextMetrics
-
-                text: action.modelData.text
-                font.family: actionText.font.family
-                font.pointSize: actionText.font.pointSize
-                elide: Text.ElideRight
-                elideWidth: {
-                    const numActions = root.modelData.actions.length + 1;
-                    return (inner.width - actions.spacing * (numActions - 1)) / numActions - Appearance.padding.normal * 2;
-                }
-            }
-        }
     }
 
-    component Anim: NumberAnimation {
-        duration: Appearance.anim.durations.normal
-        easing.type: Easing.BezierSpline
-        easing.bezierCurve: Appearance.anim.curves.standard
+    component Action: StyledRect {
+        id: action
+
+        required property var modelData
+
+        radius: Appearance.rounding.full
+        color: root.modelData.urgency === NotificationUrgency.Critical ? Colours.palette.m3secondary : Colours.layer(Colours.palette.m3surfaceContainerHigh, 2)
+
+        Layout.preferredWidth: actionText.width + Appearance.padding.normal * 2
+        Layout.preferredHeight: actionText.height + Appearance.padding.small * 2
+        implicitWidth: actionText.width + Appearance.padding.normal * 2
+        implicitHeight: actionText.height + Appearance.padding.small * 2
+
+        StateLayer {
+            radius: Appearance.rounding.full
+            color: root.modelData.urgency === NotificationUrgency.Critical ? Colours.palette.m3onSecondary : Colours.palette.m3onSurface
+
+            function onClicked(): void {
+                action.modelData.invoke();
+            }
+        }
+
+        StyledText {
+            id: actionText
+
+            anchors.centerIn: parent
+            text: actionTextMetrics.elidedText
+            color: root.modelData.urgency === NotificationUrgency.Critical ? Colours.palette.m3onSecondary : Colours.palette.m3onSurfaceVariant
+            font.pointSize: Appearance.font.size.small
+        }
+
+        TextMetrics {
+            id: actionTextMetrics
+
+            text: action.modelData.text
+            font.family: actionText.font.family
+            font.pointSize: actionText.font.pointSize
+            elide: Text.ElideRight
+            elideWidth: {
+                const numActions = root.modelData.actions.length + 1;
+                return (inner.width - actions.spacing * (numActions - 1)) / numActions - Appearance.padding.normal * 2;
+            }
+        }
     }
 }

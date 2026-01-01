@@ -1,6 +1,6 @@
 pragma ComponentBehavior: Bound
 
-import qs.widgets
+import qs.components
 import qs.services
 import qs.utils
 import qs.config
@@ -9,102 +9,61 @@ import QtQuick
 Item {
     id: root
 
+    required property var bar
     required property Brightness.Monitor monitor
     property color colour: Colours.palette.m3primary
-    readonly property Item child: child
 
-    implicitWidth: child.implicitWidth
-    implicitHeight: child.implicitHeight
+    readonly property int maxHeight: {
+        const otherModules = bar.children.filter(c => c.id && c.item !== this && c.id !== "spacer");
+        const otherHeight = otherModules.reduce((acc, curr) => acc + (curr.item.nonAnimHeight ?? curr.height), 0);
+        // Length - 2 cause repeater counts as a child
+        return bar.height - otherHeight - bar.spacing * (bar.children.length - 1) - bar.vPadding * 2;
+    }
+    property Title current: text1
 
-    CustomMouseArea {
-        anchors.top: parent.top
-        anchors.bottom: child.top
-        anchors.left: parent.left
-        anchors.right: parent.right
+    clip: true
+    implicitWidth: Math.max(icon.implicitWidth, current.implicitHeight)
+    implicitHeight: icon.implicitHeight + current.implicitWidth + current.anchors.topMargin
 
-        function onWheel(event: WheelEvent): void {
-            if (event.angleDelta.y > 0)
-                Audio.setVolume(Audio.volume + 0.1);
-            else if (event.angleDelta.y < 0)
-                Audio.setVolume(Audio.volume - 0.1);
-        }
+    MaterialIcon {
+        id: icon
+
+        anchors.horizontalCenter: parent.horizontalCenter
+
+        animate: true
+        text: Icons.getAppCategoryIcon(Hypr.activeToplevel?.lastIpcObject.class, "desktop_windows")
+        color: root.colour
     }
 
-    CustomMouseArea {
-        anchors.top: child.bottom
-        anchors.bottom: parent.bottom
-        anchors.left: parent.left
-        anchors.right: parent.right
-
-        function onWheel(event: WheelEvent): void {
-            const monitor = root.monitor;
-            if (event.angleDelta.y > 0)
-                monitor.setBrightness(monitor.brightness + 0.1);
-            else if (event.angleDelta.y < 0)
-                monitor.setBrightness(monitor.brightness - 0.1);
-        }
+    Title {
+        id: text1
     }
 
-    Item {
-        id: child
+    Title {
+        id: text2
+    }
 
-        property Item current: text1
+    TextMetrics {
+        id: metrics
 
-        anchors.centerIn: parent
+        text: Hypr.activeToplevel?.title ?? qsTr("Desktop")
+        font.pointSize: Appearance.font.size.smaller
+        font.family: Appearance.font.family.mono
+        elide: Qt.ElideRight
+        elideWidth: root.maxHeight - icon.height
 
-        clip: true
-        implicitWidth: Math.max(icon.implicitWidth, current.implicitHeight)
-        implicitHeight: icon.implicitHeight + current.implicitWidth + current.anchors.topMargin
-
-        MaterialIcon {
-            id: icon
-
-            animate: true
-            text: Icons.getAppCategoryIcon(Hyprland.activeToplevel?.lastIpcObject.class, "desktop_windows")
-            color: root.colour
-
-            anchors.horizontalCenter: parent.horizontalCenter
+        onTextChanged: {
+            const next = root.current === text1 ? text2 : text1;
+            next.text = elidedText;
+            root.current = next;
         }
+        onElideWidthChanged: root.current.text = elidedText
+    }
 
-        Title {
-            id: text1
-        }
-
-        Title {
-            id: text2
-        }
-
-        TextMetrics {
-            id: metrics
-
-            text: Hyprland.activeToplevel?.title ?? qsTr("Desktop")
-            font.pointSize: Appearance.font.size.smaller
-            font.family: Appearance.font.family.mono
-            elide: Qt.ElideRight
-            elideWidth: root.height - icon.height
-
-            onTextChanged: {
-                const next = child.current === text1 ? text2 : text1;
-                next.text = elidedText;
-                child.current = next;
-            }
-            onElideWidthChanged: child.current.text = elidedText
-        }
-
-        Behavior on implicitWidth {
-            NumberAnimation {
-                duration: Appearance.anim.durations.normal
-                easing.type: Easing.BezierSpline
-                easing.bezierCurve: Appearance.anim.curves.emphasized
-            }
-        }
-
-        Behavior on implicitHeight {
-            NumberAnimation {
-                duration: Appearance.anim.durations.normal
-                easing.type: Easing.BezierSpline
-                easing.bezierCurve: Appearance.anim.curves.emphasized
-            }
+    Behavior on implicitHeight {
+        Anim {
+            duration: Appearance.anim.durations.expressiveDefaultSpatial
+            easing.bezierCurve: Appearance.anim.curves.expressiveDefaultSpatial
         }
     }
 
@@ -118,23 +77,24 @@ Item {
         font.pointSize: metrics.font.pointSize
         font.family: metrics.font.family
         color: root.colour
-        opacity: child.current === this ? 1 : 0
+        opacity: root.current === this ? 1 : 0
 
-        transform: Rotation {
-            angle: 90
-            origin.x: text.implicitHeight / 2
-            origin.y: text.implicitHeight / 2
-        }
+        transform: [
+            Translate {
+                x: Config.bar.activeWindow.inverted ? -implicitWidth + text.implicitHeight : 0
+            },
+            Rotation {
+                angle: Config.bar.activeWindow.inverted ? 270 : 90
+                origin.x: text.implicitHeight / 2
+                origin.y: text.implicitHeight / 2
+            }
+        ]
 
         width: implicitHeight
         height: implicitWidth
 
         Behavior on opacity {
-            NumberAnimation {
-                duration: Appearance.anim.durations.normal
-                easing.type: Easing.BezierSpline
-                easing.bezierCurve: Appearance.anim.curves.standard
-            }
+            Anim {}
         }
     }
 }

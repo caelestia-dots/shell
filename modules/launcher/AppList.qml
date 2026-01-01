@@ -2,17 +2,18 @@ pragma ComponentBehavior: Bound
 
 import "items"
 import "services"
-import qs.widgets
+import qs.components
+import qs.components.controls
+import qs.components.containers
 import qs.services
 import qs.config
 import Quickshell
 import QtQuick
-import QtQuick.Controls
 
 StyledListView {
     id: root
 
-    required property TextField search
+    required property StyledTextField search
     required property PersistentProperties visibilities
 
     model: ScriptModel {
@@ -25,13 +26,26 @@ StyledListView {
     orientation: Qt.Vertical
     implicitHeight: (Config.launcher.sizes.itemHeight + spacing) * Math.min(Config.launcher.maxShown, count) - spacing
 
-    highlightMoveDuration: Appearance.anim.durations.normal
-    highlightResizeDuration: 0
+    preferredHighlightBegin: 0
+    preferredHighlightEnd: height
+    highlightRangeMode: ListView.ApplyRange
 
+    highlightFollowsCurrentItem: false
     highlight: StyledRect {
-        radius: Appearance.rounding.full
+        radius: Appearance.rounding.normal
         color: Colours.palette.m3onSurface
         opacity: 0.08
+
+        y: root.currentItem?.y ?? 0
+        implicitWidth: root.width
+        implicitHeight: root.currentItem?.implicitHeight ?? 0
+
+        Behavior on y {
+            Anim {
+                duration: Appearance.anim.durations.expressiveDefaultSpatial
+                easing.bezierCurve: Appearance.anim.curves.expressiveDefaultSpatial
+            }
+        }
     }
 
     state: {
@@ -48,12 +62,17 @@ StyledListView {
         return "apps";
     }
 
+    onStateChanged: {
+        if (state === "scheme" || state === "variant")
+            Schemes.reload();
+    }
+
     states: [
         State {
             name: "apps"
 
             PropertyChanges {
-                model.values: Apps.query(search.text)
+                model.values: Apps.search(search.text)
                 root.delegate: appItem
             }
         },
@@ -141,7 +160,9 @@ StyledListView {
         }
     }
 
-    ScrollBar.vertical: StyledScrollBar {}
+    StyledScrollBar.vertical: StyledScrollBar {
+        flickable: root
+    }
 
     add: Transition {
         enabled: !root.state
@@ -232,11 +253,5 @@ StyledListView {
         VariantItem {
             list: root
         }
-    }
-
-    component Anim: NumberAnimation {
-        duration: Appearance.anim.durations.normal
-        easing.type: Easing.BezierSpline
-        easing.bezierCurve: Appearance.anim.curves.standard
     }
 }

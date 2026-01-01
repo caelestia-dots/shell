@@ -10,42 +10,35 @@ Singleton {
     readonly property list<AccessPoint> networks: []
     readonly property AccessPoint active: networks.find(n => n.active) ?? null
     property bool wifiEnabled: true
-    property bool scanning: false
-
-    reloadableId: "network"
+    readonly property bool scanning: rescanProc.running
 
     function enableWifi(enabled: bool): void {
         const cmd = enabled ? "on" : "off";
-        enableWifiProcess.command = ["nmcli", "radio", "wifi", cmd];
-        enableWifiProcess.running = true;
+        enableWifiProc.exec(["nmcli", "radio", "wifi", cmd]);
     }
 
     function toggleWifi(): void {
         const cmd = wifiEnabled ? "off" : "on";
-        enableWifiProcess.command = ["nmcli", "radio", "wifi", cmd];
-        enableWifiProcess.running = true;
+        enableWifiProc.exec(["nmcli", "radio", "wifi", cmd]);
     }
 
     function rescanWifi(): void {
-        scanning = true;
-        rescanProcess.running = true;
+        rescanProc.running = true;
     }
 
     function connectToNetwork(ssid: string, password: string): void {
         // TODO: Implement password
-        connectProcess.command = ["nmcli", "conn", "up", ssid];
-        connectProcess.running = true;
+        connectProc.exec(["nmcli", "conn", "up", ssid]);
     }
 
     function disconnectFromNetwork(): void {
         if (active) {
-            disconnectProcess.command = ["nmcli", "connection", "down", active.ssid];
-            disconnectProcess.running = true;
+            disconnectProc.exec(["nmcli", "connection", "down", active.ssid]);
         }
     }
 
     function getWifiStatus(): void {
-        wifiStatusProcess.running = true;
+        wifiStatusProc.running = true;
     }
 
     Process {
@@ -57,53 +50,53 @@ Singleton {
     }
 
     Process {
-        id: wifiStatusProcess
+        id: wifiStatusProc
+
+        running: true
         command: ["nmcli", "radio", "wifi"]
         environment: ({
-            LANG: "C",
-            LC_ALL: "C"
-        })
+                LANG: "C.UTF-8",
+                LC_ALL: "C.UTF-8"
+            })
         stdout: StdioCollector {
             onStreamFinished: {
                 root.wifiEnabled = text.trim() === "enabled";
             }
         }
-        Component.onCompleted: running = true
     }
 
     Process {
-        id: enableWifiProcess
-        stdout: SplitParser {
-            onRead: {
-                getWifiStatus();
-                getNetworks.running = true;
-            }
+        id: enableWifiProc
+
+        onExited: {
+            root.getWifiStatus();
+            getNetworks.running = true;
         }
     }
 
     Process {
-        id: rescanProcess
+        id: rescanProc
+
         command: ["nmcli", "dev", "wifi", "list", "--rescan", "yes"]
-        stdout: SplitParser {
-            onRead: {
-                scanning = false;
-                getNetworks.running = true;
-            }
+        onExited: {
+            getNetworks.running = true;
         }
     }
 
     Process {
-        id: connectProcess
+        id: connectProc
+
         stdout: SplitParser {
             onRead: getNetworks.running = true
         }
-        stderr: SplitParser {
-            onRead: console.warn("Network connection error:", data)
+        stderr: StdioCollector {
+            onStreamFinished: console.warn("Network connection error:", text)
         }
     }
 
     Process {
-        id: disconnectProcess
+        id: disconnectProc
+
         stdout: SplitParser {
             onRead: getNetworks.running = true
         }
@@ -111,11 +104,12 @@ Singleton {
 
     Process {
         id: getNetworks
+
         running: true
         command: ["nmcli", "-g", "ACTIVE,SIGNAL,FREQ,SSID,BSSID,SECURITY", "d", "w"]
         environment: ({
-                LANG: "C",
-                LC_ALL: "C"
+                LANG: "C.UTF-8",
+                LC_ALL: "C.UTF-8"
             })
         stdout: StdioCollector {
             onStreamFinished: {
@@ -129,12 +123,12 @@ Singleton {
                         active: net[0] === "yes",
                         strength: parseInt(net[1]),
                         frequency: parseInt(net[2]),
-                        ssid: net[3],
+                        ssid: net[3]?.replace(rep2, ":") ?? "",
                         bssid: net[4]?.replace(rep2, ":") ?? "",
-                        security: net[5] || ""
+                        security: net[5] ?? ""
                     };
                 }).filter(n => n.ssid && n.ssid.length > 0);
-                
+
                 // Group networks by SSID and prioritize connected ones
                 const networkMap = new Map();
                 for (const network of allNetworks) {
@@ -154,9 +148,9 @@ Singleton {
                         // If existing is active and new is not, keep existing
                     }
                 }
-                
+
                 const networks = Array.from(networkMap.values());
-                
+
                 const rNetworks = root.networks;
 
                 const destroyed = rNetworks.filter(rn => !networks.find(n => n.frequency === rn.frequency && n.ssid === rn.ssid && n.bssid === rn.bssid));

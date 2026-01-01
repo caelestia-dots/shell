@@ -1,7 +1,8 @@
 pragma ComponentBehavior: Bound
 
-import qs.widgets
-import qs.widgets.filedialog
+import qs.components
+import qs.components.images
+import qs.components.filedialog
 import qs.services
 import qs.config
 import qs.utils
@@ -22,6 +23,11 @@ Item {
             two.update();
         else
             one.update();
+    }
+
+    Component.onCompleted: {
+        if (source)
+            Qt.callLater(() => one.update());
     }
 
     Loader {
@@ -133,12 +139,9 @@ Item {
         }
 
         transitions: Transition {
-            NumberAnimation {
+            Anim {
                 target: img
                 properties: "opacity,scale"
-                duration: Appearance.anim.durations.normal
-                easing.type: Easing.BezierSpline
-                easing.bezierCurve: Appearance.anim.curves.standard
             }
         }
     }

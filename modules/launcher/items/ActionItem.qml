@@ -1,5 +1,5 @@
 import "../services"
-import qs.widgets
+import qs.components
 import qs.services
 import qs.config
 import QtQuick
@@ -7,7 +7,7 @@ import QtQuick
 Item {
     id: root
 
-    required property Actions.Action modelData
+    required property var modelData
     required property var list
 
     implicitHeight: Config.launcher.sizes.itemHeight
@@ -16,7 +16,7 @@ Item {
     anchors.right: parent?.right
 
     StateLayer {
-        radius: Appearance.rounding.full
+        radius: Appearance.rounding.normal
 
         function onClicked(): void {
             root.modelData?.onClicked(root.list);
@@ -58,7 +58,7 @@ Item {
 
                 text: root.modelData?.desc ?? ""
                 font.pointSize: Appearance.font.size.small
-                color: Colours.alpha(Colours.palette.m3outline, true)
+                color: Colours.palette.m3outline
 
                 elide: Text.ElideRight
                 width: root.width - icon.width - Appearance.rounding.normal * 2

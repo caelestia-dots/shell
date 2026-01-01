@@ -1,4 +1,3 @@
-import qs.services
 import qs.config
 import qs.modules.osd as Osd
 import qs.modules.notifications as Notifications
@@ -7,6 +6,8 @@ import qs.modules.launcher as Launcher
 import qs.modules.dashboard as Dashboard
 import qs.modules.bar.popouts as BarPopouts
 import qs.modules.utilities as Utilities
+import qs.modules.utilities.toasts as Toasts
+import qs.modules.sidebar as Sidebar
 import Quickshell
 import QtQuick
 
@@ -17,13 +18,15 @@ Item {
     required property PersistentProperties visibilities
     required property Item bar
 
-    readonly property Osd.Wrapper osd: osd
-    readonly property Notifications.Wrapper notifications: notifications
-    readonly property Session.Wrapper session: session
-    readonly property Launcher.Wrapper launcher: launcher
-    readonly property Dashboard.Wrapper dashboard: dashboard
-    readonly property BarPopouts.Wrapper popouts: popouts
-    readonly property Utilities.Wrapper utilities: utilities
+    readonly property alias osd: osd
+    readonly property alias notifications: notifications
+    readonly property alias session: session
+    readonly property alias launcher: launcher
+    readonly property alias dashboard: dashboard
+    readonly property alias popouts: popouts
+    readonly property alias utilities: utilities
+    readonly property alias toasts: toasts
+    readonly property alias sidebar: sidebar
 
     anchors.fill: parent
     anchors.margins: Config.border.thickness
@@ -32,20 +35,20 @@ Item {
     Osd.Wrapper {
         id: osd
 
-        clip: root.visibilities.session
+        clip: session.width > 0 || sidebar.width > 0
         screen: root.screen
-        visibility: root.visibilities.osd
+        visibilities: root.visibilities
 
         anchors.verticalCenter: parent.verticalCenter
         anchors.right: parent.right
-        anchors.rightMargin: session.width
+        anchors.rightMargin: session.width + sidebar.width
     }
 
     Notifications.Wrapper {
         id: notifications
 
         visibilities: root.visibilities
-        panel: root
+        panels: root
 
         anchors.top: parent.top
         anchors.right: parent.right
@@ -54,16 +57,21 @@ Item {
     Session.Wrapper {
         id: session
 
+        clip: sidebar.width > 0
         visibilities: root.visibilities
+        panels: root
 
         anchors.verticalCenter: parent.verticalCenter
         anchors.right: parent.right
+        anchors.rightMargin: sidebar.width
     }
 
     Launcher.Wrapper {
         id: launcher
 
+        screen: root.screen
         visibilities: root.visibilities
+        panels: root
 
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.bottom: parent.bottom
@@ -92,16 +100,36 @@ Item {
             const diff = root.height - Math.floor(off + nonAnimHeight);
             if (diff < 0)
                 return off + diff;
-            return off;
+            return Math.max(off, 0);
         }
     }
 
     Utilities.Wrapper {
         id: utilities
 
-        visibility: root.visibilities.utilities
+        visibilities: root.visibilities
+        sidebar: sidebar
 
         anchors.bottom: parent.bottom
+        anchors.right: parent.right
+    }
+
+    Toasts.Toasts {
+        id: toasts
+
+        anchors.bottom: sidebar.visible ? parent.bottom : utilities.top
+        anchors.right: sidebar.left
+        anchors.margins: Appearance.padding.normal
+    }
+
+    Sidebar.Wrapper {
+        id: sidebar
+
+        visibilities: root.visibilities
+        panels: root
+
+        anchors.top: notifications.bottom
+        anchors.bottom: utilities.top
         anchors.right: parent.right
     }
 }

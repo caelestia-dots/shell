@@ -1,9 +1,9 @@
 pragma ComponentBehavior: Bound
 
-import qs.widgets
+import qs.components.effects
+import qs.services
 import qs.config
-import Quickshell
-import Quickshell.Widgets
+import qs.utils
 import Quickshell.Services.SystemTray
 import QtQuick
 
@@ -23,18 +23,12 @@ MouseArea {
             modelData.secondaryActivate();
     }
 
-    IconImage {
+    ColouredIcon {
         id: icon
 
-        source: {
-            let icon = root.modelData.icon;
-            if (icon.includes("?path=")) {
-                const [name, path] = icon.split("?path=");
-                icon = `file://${path}/${name.slice(name.lastIndexOf("/") + 1)}`;
-            }
-            return icon;
-        }
-        asynchronous: true
         anchors.fill: parent
+        source: Icons.getTrayIcon(root.modelData.id, root.modelData.icon)
+        colour: Colours.palette.m3secondary
+        layer.enabled: Config.bar.tray.recolour
     }
 }

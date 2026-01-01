@@ -1,4 +1,5 @@
-import qs.widgets
+import qs.components
+import qs.components.filedialog
 import qs.services
 import qs.config
 import "dash"
@@ -10,6 +11,7 @@ GridLayout {
 
     required property PersistentProperties visibilities
     required property PersistentProperties state
+    required property FileDialog facePicker
 
     rowSpacing: Appearance.spacing.normal
     columnSpacing: Appearance.spacing.normal
@@ -25,6 +27,7 @@ GridLayout {
 
             visibilities: root.visibilities
             state: root.state
+            facePicker: root.facePicker
         }
     }
 
@@ -56,6 +59,8 @@ GridLayout {
 
         Calendar {
             id: calendar
+
+            state: root.state
         }
     }
 
@@ -84,6 +89,6 @@ GridLayout {
 
     component Rect: StyledRect {
         radius: Appearance.rounding.small
-        color: Colours.palette.m3surfaceContainer
+        color: Colours.tPalette.m3surfaceContainer
     }
 }

@@ -1,4 +1,4 @@
-import qs.widgets
+import qs.components
 import qs.services
 import qs.config
 import QtQuick
@@ -11,7 +11,8 @@ Item {
         id: timeText
 
         anchors.centerIn: parent
-        text: Time.format("hh:mm:ss")
+        text: Time.format(Config.services.useTwelveHourClock ? "hh:mm:ss A" : "hh:mm:ss")
+        font.family: Appearance.font.family.clock
         font.pointSize: Appearance.font.size.extraLarge
         font.bold: true
     }

@@ -1,5 +1,6 @@
 pragma Singleton
 
+import qs.config
 import Quickshell
 import Quickshell.Io
 import QtQuick
@@ -9,7 +10,8 @@ Singleton {
 
     property real cpuPerc
     property real cpuTemp
-    property string gpuType: "NONE"
+    readonly property string gpuType: Config.services.gpuType.toUpperCase() || autoGpuType
+    property string autoGpuType: "NONE"
     property real gpuPerc
     property real gpuTemp
     property real memUsed
@@ -141,10 +143,10 @@ Singleton {
     Process {
         id: gpuTypeCheck
 
-        running: true
-        command: ["sh", "-c", "if ls /sys/class/drm/card*/device/gpu_busy_percent 2>/dev/null | grep -q .; then echo GENERIC; elif command -v nvidia-smi >/dev/null; then echo NVIDIA; else echo NONE; fi"]
+        running: !Config.services.gpuType
+        command: ["sh", "-c", "if command -v nvidia-smi &>/dev/null && nvidia-smi -L &>/dev/null; then echo NVIDIA; elif ls /sys/class/drm/card*/device/gpu_busy_percent 2>/dev/null | grep -q .; then echo GENERIC; else echo NONE; fi"]
         stdout: StdioCollector {
-            onStreamFinished: root.gpuType = text.trim()
+            onStreamFinished: root.autoGpuType = text.trim()
         }
     }
 
@@ -175,8 +177,8 @@ Singleton {
 
         command: ["sensors"]
         environment: ({
-                LANG: "C",
-                LC_ALL: "C"
+                LANG: "C.UTF-8",
+                LC_ALL: "C.UTF-8"
             })
         stdout: StdioCollector {
             onStreamFinished: {

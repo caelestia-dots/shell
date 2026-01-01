@@ -1,31 +1,37 @@
-import qs.widgets
-import qs.services
+import "cards"
 import qs.config
-import Quickshell
-import Quickshell.Widgets
 import QtQuick
+import QtQuick.Layouts
 
 Item {
     id: root
 
-    anchors.top: parent.top
-    anchors.bottom: parent.bottom
-    anchors.right: parent.right
+    required property var props
+    required property var visibilities
 
-    // implicitWidth: 300
-    // implicitHeight: 100
+    implicitWidth: layout.implicitWidth
+    implicitHeight: layout.implicitHeight
 
-    // Rectangle {
-    //     anchors.fill: parent
-    // }
+    ColumnLayout {
+        id: layout
 
-    Behavior on implicitHeight {
-        Anim {}
+        anchors.fill: parent
+        spacing: Appearance.spacing.normal
+
+        IdleInhibit {}
+
+        Record {
+            props: root.props
+            visibilities: root.visibilities
+            z: 1
+        }
+
+        Toggles {
+            visibilities: root.visibilities
+        }
     }
 
-    component Anim: NumberAnimation {
-        duration: Appearance.anim.durations.expressiveDefaultSpatial
-        easing.type: Easing.BezierSpline
-        easing.bezierCurve: Appearance.anim.curves.expressiveDefaultSpatial
+    RecordingDeleteModal {
+        props: root.props
     }
 }

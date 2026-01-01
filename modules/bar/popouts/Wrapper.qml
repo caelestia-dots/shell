@@ -1,9 +1,10 @@
 pragma ComponentBehavior: Bound
 
+import qs.components
 import qs.services
 import qs.config
 import qs.modules.windowinfo
-import qs.modules.detachedcontent
+import qs.modules.controlcenter
 import Quickshell
 import Quickshell.Wayland
 import Quickshell.Hyprland
@@ -16,6 +17,7 @@ Item {
 
     readonly property real nonAnimWidth: x > 0 || hasCurrent ? children.find(c => c.shouldBeActive)?.implicitWidth ?? content.implicitWidth : 0
     readonly property real nonAnimHeight: children.find(c => c.shouldBeActive)?.implicitHeight ?? content.implicitHeight
+    readonly property Item current: content.item?.current ?? null
 
     property string currentName
     property real currentCenter
@@ -72,7 +74,7 @@ Item {
     Comp {
         id: content
 
-        shouldBeActive: !root.detachedMode
+        shouldBeActive: root.hasCurrent && !root.detachedMode
         asynchronous: true
         anchors.right: parent.right
         anchors.verticalCenter: parent.verticalCenter
@@ -89,20 +91,22 @@ Item {
 
         sourceComponent: WindowInfo {
             screen: root.screen
-            client: Hyprland.activeToplevel
+            client: Hypr.activeToplevel
         }
     }
 
     Comp {
-        id: detachedContent
-
         shouldBeActive: root.detachedMode === "any"
         asynchronous: true
         anchors.centerIn: parent
 
-        sourceComponent: DetachedContent {
+        sourceComponent: ControlCenter {
             screen: root.screen
             active: root.queuedMode
+
+            function close(): void {
+                root.close();
+            }
         }
     }
 
@@ -168,7 +172,6 @@ Item {
                     }
                     Anim {
                         property: "opacity"
-                        easing.bezierCurve: Appearance.anim.curves.standard
                     }
                 }
             },
@@ -179,7 +182,6 @@ Item {
                 SequentialAnimation {
                     Anim {
                         property: "opacity"
-                        easing.bezierCurve: Appearance.anim.curves.standard
                     }
                     PropertyAction {
                         property: "active"
@@ -187,11 +189,5 @@ Item {
                 }
             }
         ]
-    }
-
-    component Anim: NumberAnimation {
-        duration: Appearance.anim.durations.normal
-        easing.type: Easing.BezierSpline
-        easing.bezierCurve: Appearance.anim.curves.emphasized
     }
 }

@@ -1,57 +1,55 @@
 pragma ComponentBehavior: Bound
 
-import qs.widgets
+import qs.components.misc
 import Quickshell
 import Quickshell.Io
 import Quickshell.Wayland
 
 Scope {
-    LazyLoader {
-        id: loader
+    property alias lock: lock
 
-        WlSessionLock {
-            id: lock
+    WlSessionLock {
+        id: lock
 
-            property bool unlocked
+        signal unlock
 
-            locked: true
-
-            onLockedChanged: {
-                if (!locked)
-                    loader.active = false;
-            }
-
-            LockSurface {
-                lock: lock
-            }
+        LockSurface {
+            lock: lock
+            pam: pam
         }
+    }
+
+    Pam {
+        id: pam
+
+        lock: lock
     }
 
     CustomShortcut {
         name: "lock"
         description: "Lock the current session"
-        onPressed: loader.activeAsync = true
+        onPressed: lock.locked = true
     }
 
     CustomShortcut {
         name: "unlock"
         description: "Unlock the current session"
-        onPressed: loader.item.locked = false
+        onPressed: lock.unlock()
     }
 
     IpcHandler {
         target: "lock"
 
         function lock(): void {
-            loader.activeAsync = true;
+            lock.locked = true;
         }
 
         function unlock(): void {
-            loader.item.locked = false;
+            lock.unlock();
         }
 
         function isLocked(): bool {
-            return loader.active;
+            return lock.locked;
         }
     }
 }

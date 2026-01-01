@@ -1,6 +1,6 @@
 pragma ComponentBehavior: Bound
 
-import qs.widgets
+import qs.components.containers
 import qs.config
 import Quickshell
 import QtQuick
@@ -33,5 +33,7 @@ Scope {
         name: "border-exclusion"
         exclusiveZone: Config.border.thickness
         mask: Region {}
+        implicitWidth: 1
+        implicitHeight: 1
     }
 }

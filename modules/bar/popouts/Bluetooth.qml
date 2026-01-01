@@ -1,6 +1,7 @@
 pragma ComponentBehavior: Bound
 
-import qs.widgets
+import qs.components
+import qs.components.controls
 import qs.services
 import qs.config
 import qs.utils
@@ -107,20 +108,11 @@ ColumnLayout {
                 implicitHeight: connectIcon.implicitHeight + Appearance.padding.small
 
                 radius: Appearance.rounding.full
-                color: device.modelData.state === BluetoothDeviceState.Connected ? Colours.palette.m3primary : Colours.palette.m3surface
+                color: Qt.alpha(Colours.palette.m3primary, device.modelData.state === BluetoothDeviceState.Connected ? 1 : 0)
 
-                StyledBusyIndicator {
-                    anchors.centerIn: parent
-
-                    implicitWidth: implicitHeight
-                    implicitHeight: connectIcon.implicitHeight
-
-                    running: opacity > 0
-                    opacity: device.loading ? 1 : 0
-
-                    Behavior on opacity {
-                        Anim {}
-                    }
+                CircularIndicator {
+                    anchors.fill: parent
+                    running: device.loading
                 }
 
                 StateLayer {
@@ -225,11 +217,5 @@ ColumnLayout {
         StyledSwitch {
             id: toggle
         }
-    }
-
-    component Anim: NumberAnimation {
-        duration: Appearance.anim.durations.normal
-        easing.type: Easing.BezierSpline
-        easing.bezierCurve: Appearance.anim.curves.standard
     }
 }

@@ -1,0 +1,37 @@
+name: Create release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Create packages
+        run: |
+          mkdir -p release
+          rsync -av \
+            --exclude='release' \
+            --exclude='.*' \
+            --exclude='nix' \
+            --exclude='flake.lock' \
+            --exclude='flake.nix' \
+            . release
+          tar -czf caelestia-shell-${{ github.ref_name }}.tar.gz release
+          cp caelestia-shell-${{ github.ref_name }}.tar.gz caelestia-shell-latest.tar.gz
+
+      - name: Create release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            caelestia-shell-${{ github.ref_name }}.tar.gz
+            caelestia-shell-latest.tar.gz
+          generate_release_notes: true

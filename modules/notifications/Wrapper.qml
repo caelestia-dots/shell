@@ -1,21 +1,39 @@
+import qs.components
 import qs.config
-import Quickshell
 import QtQuick
 
 Item {
     id: root
 
-    required property PersistentProperties visibilities
-    required property Item panel
+    required property var visibilities
+    required property Item panels
 
     visible: height > 0
+    implicitWidth: Math.max(panels.sidebar.width, content.implicitWidth)
     implicitHeight: content.implicitHeight
-    implicitWidth: content.implicitWidth
+
+    states: State {
+        name: "hidden"
+        when: root.visibilities.sidebar && Config.sidebar.enabled
+
+        PropertyChanges {
+            root.implicitHeight: 0
+        }
+    }
+
+    transitions: Transition {
+        Anim {
+            target: root
+            property: "implicitHeight"
+            duration: Appearance.anim.durations.expressiveDefaultSpatial
+            easing.bezierCurve: Appearance.anim.curves.expressiveDefaultSpatial
+        }
+    }
 
     Content {
         id: content
 
         visibilities: root.visibilities
-        panel: root.panel
+        panels: root.panels
     }
 }

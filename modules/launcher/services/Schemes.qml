@@ -10,12 +10,19 @@ import QtQuick
 Searcher {
     id: root
 
+    property string currentScheme
+    property string currentVariant
+
     function transformSearch(search: string): string {
         return search.slice(`${Config.launcher.actionPrefix}scheme `.length);
     }
 
     function selector(item: var): string {
         return `${item.name} ${item.flavour}`;
+    }
+
+    function reload(): void {
+        getCurrent.running = true;
     }
 
     list: schemes.instances
@@ -48,7 +55,21 @@ Searcher {
                     for (const f of s)
                         flat.push(f);
 
-                schemes.model = flat;
+                schemes.model = flat.sort((a, b) => (a.name + a.flavour).localeCompare((b.name + b.flavour)));
+            }
+        }
+    }
+
+    Process {
+        id: getCurrent
+
+        running: true
+        command: ["caelestia", "scheme", "get", "-nfv"]
+        stdout: StdioCollector {
+            onStreamFinished: {
+                const [name, flavour, variant] = text.trim().split("\n");
+                root.currentScheme = `${name} ${flavour}`;
+                root.currentVariant = variant;
             }
         }
     }

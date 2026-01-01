@@ -1,47 +1,65 @@
+pragma ComponentBehavior: Bound
+
+import qs.components
+import qs.services
 import qs.config
 import Quickshell.Services.SystemTray
 import QtQuick
 
-Item {
+StyledRect {
     id: root
 
-    readonly property Repeater items: items
+    readonly property alias layout: layout
+    readonly property alias items: items
+    readonly property alias expandIcon: expandIcon
+
+    readonly property int padding: Config.bar.tray.background ? Appearance.padding.normal : Appearance.padding.small
+    readonly property int spacing: Config.bar.tray.background ? Appearance.spacing.small : 0
+
+    property bool expanded
+
+    readonly property real nonAnimHeight: {
+        if (!Config.bar.tray.compact)
+            return layout.implicitHeight + padding * 2;
+        return (expanded ? expandIcon.implicitHeight + layout.implicitHeight + spacing : expandIcon.implicitHeight) + padding * 2;
+    }
 
     clip: true
-    visible: width > 0 && height > 0 // To avoid warnings about being visible with no size
+    visible: height > 0
 
-    implicitWidth: layout.implicitWidth
-    implicitHeight: layout.implicitHeight
+    implicitWidth: Config.bar.sizes.innerWidth
+    implicitHeight: nonAnimHeight
+
+    color: Qt.alpha(Colours.tPalette.m3surfaceContainer, Config.bar.tray.background ? Colours.tPalette.m3surfaceContainer.a : 0)
+    radius: Appearance.rounding.full
 
     Column {
         id: layout
 
+        anchors.horizontalCenter: parent.horizontalCenter
+        anchors.top: parent.top
+        anchors.topMargin: root.padding
         spacing: Appearance.spacing.small
 
+        opacity: root.expanded || !Config.bar.tray.compact ? 1 : 0
+
         add: Transition {
-            NumberAnimation {
+            Anim {
                 properties: "scale"
                 from: 0
                 to: 1
-                duration: Appearance.anim.durations.normal
-                easing.type: Easing.BezierSpline
                 easing.bezierCurve: Appearance.anim.curves.standardDecel
             }
         }
 
         move: Transition {
-            NumberAnimation {
+            Anim {
                 properties: "scale"
                 to: 1
-                duration: Appearance.anim.durations.normal
-                easing.type: Easing.BezierSpline
                 easing.bezierCurve: Appearance.anim.curves.standardDecel
             }
-            NumberAnimation {
+            Anim {
                 properties: "x,y"
-                duration: Appearance.anim.durations.normal
-                easing.type: Easing.BezierSpline
-                easing.bezierCurve: Appearance.anim.curves.standard
             }
         }
 
@@ -52,21 +70,49 @@ Item {
 
             TrayItem {}
         }
+
+        Behavior on opacity {
+            Anim {}
+        }
     }
 
-    Behavior on implicitWidth {
-        NumberAnimation {
-            duration: Appearance.anim.durations.normal
-            easing.type: Easing.BezierSpline
-            easing.bezierCurve: Appearance.anim.curves.emphasized
+    Loader {
+        id: expandIcon
+
+        anchors.horizontalCenter: parent.horizontalCenter
+        anchors.bottom: parent.bottom
+
+        active: Config.bar.tray.compact
+
+        sourceComponent: Item {
+            implicitWidth: expandIconInner.implicitWidth
+            implicitHeight: expandIconInner.implicitHeight - Appearance.padding.small * 2
+
+            MaterialIcon {
+                id: expandIconInner
+
+                anchors.horizontalCenter: parent.horizontalCenter
+                anchors.bottom: parent.bottom
+                anchors.bottomMargin: Config.bar.tray.background ? Appearance.padding.small : -Appearance.padding.small
+                text: "expand_less"
+                font.pointSize: Appearance.font.size.large
+                rotation: root.expanded ? 180 : 0
+
+                Behavior on rotation {
+                    Anim {}
+                }
+
+                Behavior on anchors.bottomMargin {
+                    Anim {}
+                }
+            }
         }
     }
 
     Behavior on implicitHeight {
-        NumberAnimation {
-            duration: Appearance.anim.durations.normal
-            easing.type: Easing.BezierSpline
-            easing.bezierCurve: Appearance.anim.curves.emphasized
+        Anim {
+            duration: Appearance.anim.durations.expressiveDefaultSpatial
+            easing.bezierCurve: Appearance.anim.curves.expressiveDefaultSpatial
         }
     }
 }
