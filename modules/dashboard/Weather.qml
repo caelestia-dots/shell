@@ -8,8 +8,8 @@ import QtQuick.Layouts
 Item {
     id: root
 
-    implicitWidth: weather_dashboard.implicitWidth > 800 ? weather_dashboard.implicitWidth + (Appearance.padding.large * 2) : 850
-    implicitHeight: weather_dashboard.implicitHeight + (Appearance.padding.large * 2)
+    implicitWidth: weather_dashboard.implicitWidth > 800 ? weather_dashboard.implicitWidth : 840
+    implicitHeight: weather_dashboard.implicitHeight
 
     readonly property var today: Weather.forecast && Weather.forecast.length > 0 ? Weather.forecast[0] : null
 
@@ -18,7 +18,6 @@ Item {
     ColumnLayout {
         id: weather_dashboard
         anchors.fill: parent
-        anchors.margins: Appearance.padding.large
         spacing: Appearance.spacing.normal
 
         RowLayout {
@@ -44,6 +43,7 @@ Item {
 
             Row {
                 spacing: Appearance.spacing.large
+                Layout.rightMargin: Appearance.padding.normal
                 
                 WeatherStat { 
                     icon: "wb_twilight"
@@ -128,6 +128,7 @@ Item {
         StyledRect {
             implicitWidth: forecastRow.implicitWidth
             implicitHeight: forecastRow.implicitHeight
+            anchors.horizontalCenter : parent.horizontalCenter
 
             Row {
                 id: forecastRow
