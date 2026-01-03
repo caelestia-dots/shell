@@ -27,13 +27,11 @@ Singleton {
         let configLocation = Config.services.weatherLocation;
 
         if (configLocation && configLocation !== "") {
-            if (configLocation.indexOf(",") !== -1 && !isNaN(parseFloat(configLocation.split(",")[0]))) {
+            if (configLocation.indexOf(",") !== -1 && !isNaN(parseFloat(configLocation.split(",")[0])))
                 loc = configLocation;
-            } else {
+            else
                 fetchCoordsFromCity(configLocation);
-            }
-        } 
-        else if (!loc || timer.elapsed() > 900) {
+        } else if (!loc || timer.elapsed() > 900) {
             Requests.get("https://ipinfo.io/json", text => {
                 const response = JSON.parse(text);
                 if (response.loc) {
@@ -46,9 +44,7 @@ Singleton {
     }
 
     function fetchCoordsFromCity(cityName) {
-        const url = "https://geocoding-api.open-meteo.com/v1/search?name=" 
-                    + encodeURIComponent(cityName) 
-                    + "&count=1&language=en&format=json";
+        const url = "https://geocoding-api.open-meteo.com/v1/search?name=" + encodeURIComponent(cityName) + "&count=1&language=en&format=json";
 
         Requests.get(url, text => {
             const json = JSON.parse(text);
@@ -57,31 +53,29 @@ Singleton {
                 loc = result.latitude + "," + result.longitude;
                 city = result.name;
             } else {
-                loc = ""; 
-                reload(); 
+                loc = "";
+                reload();
             }
         });
     }
 
-    onLocChanged: {
-        fetchWeatherData()
-    }
-    
     function fetchWeatherData() {
-        let url = getWeatherUrl();
-        if (url === "") return;
+        const url = getWeatherUrl();
+        if (url === "")
+            return;
 
         Requests.get(url, text => {
             const json = JSON.parse(text);
-            if (!json.current || !json.daily) return;
+            if (!json.current || !json.daily)
+                return;
 
             cc = {
                 "weatherCode": String(json.current.weather_code),
                 "weatherDesc": getWeatherCondition(String(json.current.weather_code)),
                 "temp_C": Math.round(json.current.temperature_2m),
-                "temp_F": Math.round(json.current.temperature_2m * 9/5 + 32),
+                "temp_F": Math.round(json.current.temperature_2m * 9 / 5 + 32),
                 "FeelsLikeC": Math.round(json.current.apparent_temperature),
-                "FeelsLikeF": Math.round(json.current.apparent_temperature * 9/5 + 32),
+                "FeelsLikeF": Math.round(json.current.apparent_temperature * 9 / 5 + 32),
                 "humidity": json.current.relative_humidity_2m,
                 "windSpeed": json.current.wind_speed_10m,
                 "isDay": json.current.is_day,
@@ -89,43 +83,34 @@ Singleton {
                 "sunset": json.daily.sunset[0]
             };
 
-            let forecastList = []
-            for (let i = 0; i < json.daily.time.length; i++) {
+            const forecastList = [];
+            for (let i = 0; i < json.daily.time.length; i++)
                 forecastList.push({
                     "date": json.daily.time[i],
                     "maxTempC": Math.round(json.daily.temperature_2m_max[i]),
-                    "maxTempF": Math.round(json.daily.temperature_2m_max[i] * 9/5 + 32),
+                    "maxTempF": Math.round(json.daily.temperature_2m_max[i] * 9 / 5 + 32),
                     "minTempC": Math.round(json.daily.temperature_2m_min[i]),
-                    "minTempF": Math.round(json.daily.temperature_2m_min[i] * 9/5 + 32),
+                    "minTempF": Math.round(json.daily.temperature_2m_min[i] * 9 / 5 + 32),
                     "weatherCode": String(json.daily.weather_code[i]),
                     "icon": Icons.getWeatherIcon(String(json.daily.weather_code[i]))
                 });
-            }
+
             forecast = forecastList;
         });
     }
 
     function getWeatherUrl() {
-        if (!loc || loc.indexOf(",") === -1) return "";
+        if (!loc || loc.indexOf(",") === -1)
+            return "";
 
-        let coords = loc.split(",");
-        let lat = coords[0];
-        let lon = coords[1];
-
+        const [lat, lon] = loc.split(",");
         const baseUrl = "https://api.open-meteo.com/v1/forecast";
-        const params = [
-            "latitude=" + lat,
-            "longitude=" + lon,
-            "daily=weather_code,temperature_2m_max,temperature_2m_min,sunrise,sunset",
-            "current=temperature_2m,relative_humidity_2m,apparent_temperature,is_day,weather_code,wind_speed_10m",
-            "timezone=auto",
-            "forecast_days=7"
-        ];
+        const params = ["latitude=" + lat, "longitude=" + lon, "daily=weather_code,temperature_2m_max,temperature_2m_min,sunrise,sunset", "current=temperature_2m,relative_humidity_2m,apparent_temperature,is_day,weather_code,wind_speed_10m", "timezone=auto", "forecast_days=7"];
 
         return baseUrl + "?" + params.join("&");
     }
 
-    function getWeatherCondition(code: string) : string {
+    function getWeatherCondition(code: string): string {
         const conditions = {
             "0": "Clear",
             "1": "Clear",
@@ -158,6 +143,9 @@ Singleton {
         };
         return conditions[code] || "Unknown";
     }
+
+    onLocChanged: fetchWeatherData()
+
     // Refresh current location hourly
     Timer {
         interval: 3600000 // 1 hour
