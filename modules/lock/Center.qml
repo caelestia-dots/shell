@@ -237,12 +237,12 @@ ColumnLayout {
                     return qsTr("Keyboard layout: %1").arg(Hypr.kbLayoutFull);
                 }
 
-                if (Hypr.capsLock && Hypr.numLock)
-                    return qsTr("Caps lock and Num lock are ON.");
+                // if (Hypr.capsLock && Hypr.numLock)
+                //     return qsTr("Caps lock and Num lock are ON.");
                 if (Hypr.capsLock)
                     return qsTr("Caps lock is ON.");
-                if (Hypr.numLock)
-                    return qsTr("Num lock is ON.");
+                // if (Hypr.numLock)
+                //     return qsTr("Num lock is ON.");
 
                 return "";
             }

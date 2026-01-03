@@ -19,7 +19,7 @@ ColumnLayout {
     spacing: Appearance.spacing.small
 
     Loader {
-        Layout.topMargin: Appearance.padding.large * 2
+        Layout.topMargin: Appearance.padding.large
         Layout.bottomMargin: -Appearance.padding.large
         Layout.alignment: Qt.AlignHCenter
 
@@ -30,7 +30,7 @@ ColumnLayout {
         sourceComponent: StyledText {
             text: qsTr("Weather")
             color: Colours.palette.m3primary
-            font.pointSize: Appearance.font.size.extraLarge
+            font.pointSize: Appearance.font.size.large
             font.weight: 500
         }
     }

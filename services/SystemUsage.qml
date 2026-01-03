@@ -17,6 +17,9 @@ Singleton {
     property real memUsed
     property real memTotal
     readonly property real memPerc: memTotal > 0 ? memUsed / memTotal : 0
+    property real swapUsed
+    property real swapTotal
+    readonly property real swapPerc: swapTotal > 0 ? swapUsed / swapTotal : 0
     property real storageUsed
     property real storageTotal
     property real storagePerc: storageTotal > 0 ? storageUsed / storageTotal : 0
@@ -95,6 +98,9 @@ Singleton {
             const data = text();
             root.memTotal = parseInt(data.match(/MemTotal: *(\d+)/)[1], 10) || 1;
             root.memUsed = (root.memTotal - parseInt(data.match(/MemAvailable: *(\d+)/)[1], 10)) || 0;
+
+            root.swapTotal = parseInt(data.match(/SwapTotal: *(\d+)/)[1], 10) || 0;
+            root.swapUsed = (root.swapTotal - parseInt(data.match(/SwapFree: *(\d+)/)[1], 10)) || 0;
         }
     }
 

@@ -60,19 +60,23 @@ RowLayout {
         Layout.rightMargin: root.padding * 3
 
         value1: SystemUsage.memPerc
-        value2: SystemUsage.storagePerc
+        value2: SystemUsage.swapPerc
 
         label1: {
-            const fmt = SystemUsage.formatKib(SystemUsage.memUsed);
-            return `${+fmt.value.toFixed(1)}${fmt.unit}`;
+            // const fmt = SystemUsage.formatKib(SystemUsage.memUsed);
+            // return `${+fmt.value.toFixed(1)}${fmt.unit}`;
+            const usage = SystemUsage.memUsed / SystemUsage.memTotal * 100;
+            return `${+usage.toFixed(1)}%`;
         }
         label2: {
             const fmt = SystemUsage.formatKib(SystemUsage.storageUsed);
-            return `${Math.floor(fmt.value)}${fmt.unit}`;
+            // return `${Math.floor(fmt.value)}${fmt.unit}`;
+            const usage = SystemUsage.swapUsed / SystemUsage.swapTotal * 100;
+            return `${+usage.toFixed(1)}%`;
         }
 
-        sublabel1: qsTr("Memory")
-        sublabel2: qsTr("Storage")
+        sublabel1: qsTr("RAM Usage")
+        sublabel2: qsTr("SWAP")
     }
 
     component Resource: Item {
