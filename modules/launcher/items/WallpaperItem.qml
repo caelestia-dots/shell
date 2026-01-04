@@ -80,46 +80,16 @@ Item {
             font.weight: 600
             visible: !isVideo(root.modelData.path)
         }
-        Loader {
+        CachingImage {
             anchors.fill: parent
-            active: !root.isVideo(root.modelData.path)
-
-            sourceComponent: Component {
-                CachingImage {
-                    path: root.modelData.path
-                    smooth: !root.PathView.view.moving
-                    anchors.fill: parent
-                }
-            }
+            fillMode: Image.PreserveAspectCrop
+            visible: thumb.ready
+            path: thumb.cachePath
         }
-        // Timer {
-        //     interval: 100
-        //     running: true
-        //     repeat: false
-        //     onTriggered: {
-        //         console.log("file://" + Paths.videothumbcache);
-        //     }
-        // }
-
-        // For videos, use VideoThumbnailer
-        Loader {
-            id: videoLoader
-            anchors.fill: parent
-            active: root.isVideo(root.modelData.path)
-
-            sourceComponent: Component {
-                CachingImage {
-                    anchors.fill: parent
-                    fillMode: Image.PreserveAspectCrop
-                    path: Qt.resolvedUrl(thumb.cachePath.toString().replace("file://", ""))
-
-                    VideoThumbnailer {
-                        id: thumb
-                        path: root.modelData.path
-                        cacheDir: Paths.videothumbcache
-                    }
-                }
-            }
+        VideoThumbnailer {
+            id: thumb
+            path: root.modelData.path
+            cacheDir: Paths.videothumbcache
         }
     }
     StyledText {

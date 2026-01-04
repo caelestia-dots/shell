@@ -4,6 +4,8 @@
 #include <QQuickItem>
 #include <QUrl>
 #include <QSize>
+#include <QAtomicInteger>
+#include <QTimer>
 
 namespace caelestia::internal {
 
@@ -13,7 +15,7 @@ class VideoThumbnailer : public QObject {
 
     Q_PROPERTY(QString path READ path WRITE setPath NOTIFY pathChanged REQUIRED)
     Q_PROPERTY(QUrl cacheDir READ cacheDir WRITE setCacheDir NOTIFY cacheDirChanged REQUIRED)
-    Q_PROPERTY(QUrl cachePath READ cachePath NOTIFY cachePathChanged)
+    Q_PROPERTY(QString cachePath READ cachePath NOTIFY cachePathChanged)
     Q_PROPERTY(bool ready READ ready NOTIFY readyChanged)
 
 public:
@@ -25,7 +27,7 @@ public:
     QUrl cacheDir() const;
     void setCacheDir(const QUrl& dir);
 
-    QUrl cachePath() const;
+    QString cachePath() const;
     bool ready() const;
 
 signals:
@@ -37,8 +39,11 @@ signals:
 private:
     QString m_path;
     QUrl m_cacheDir;
-    QUrl m_cachePath;
+    QString m_cachePath;
     bool m_ready = false;
+
+    QTimer m_debounceTimer;
+    QAtomicInteger<quint64> m_taskId {0};
 
     void generateThumbnail(const QString& path, const QString& cacheFile);
     QString sha256sum(const QString& path) const;

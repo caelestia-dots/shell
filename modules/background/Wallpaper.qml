@@ -124,10 +124,8 @@ Item {
                     }
 
                     StyledRect {
-                        implicitWidth: selectWallText.implicitWidth
-                                       + Appearance.padding.large * 2
-                        implicitHeight: selectWallText.implicitHeight
-                                        + Appearance.padding.small * 2
+                        implicitWidth: selectWallText.implicitWidth + Appearance.padding.large * 2
+                        implicitHeight: selectWallText.implicitHeight + Appearance.padding.small * 2
 
                         radius: Appearance.rounding.full
                         color: Colours.palette.m3primary
@@ -168,7 +166,6 @@ Item {
         sourceComponent: imageComponent
         onLoaded: {
             loadedCount++;
-            console.log("oneLoader loaded");
             if (loadedCount === 2)
                 waitForBothItems();
         }
@@ -181,7 +178,6 @@ Item {
         sourceComponent: imageComponent
         onLoaded: {
             loadedCount++;
-            console.log("twoLoader loaded");
             if (loadedCount === 2)
                 waitForBothItems();
         }
