@@ -3,59 +3,40 @@ pragma Singleton
 import qs.config
 import Quickshell
 import Quickshell.Services.Notifications
+import QtQuick
 
 Singleton {
     id: root
 
     readonly property var weatherIcons: ({
-            "113": "clear_day",
-            "116": "partly_cloudy_day",
-            "119": "cloud",
-            "122": "cloud",
-            "143": "foggy",
-            "176": "rainy",
-            "179": "rainy",
-            "182": "rainy",
-            "185": "rainy",
-            "200": "thunderstorm",
-            "227": "cloudy_snowing",
-            "230": "snowing_heavy",
-            "248": "foggy",
-            "260": "foggy",
-            "263": "rainy",
-            "266": "rainy",
-            "281": "rainy",
-            "284": "rainy",
-            "293": "rainy",
-            "296": "rainy",
-            "299": "rainy",
-            "302": "weather_hail",
-            "305": "rainy",
-            "308": "weather_hail",
-            "311": "rainy",
-            "314": "rainy",
-            "317": "rainy",
-            "320": "cloudy_snowing",
-            "323": "cloudy_snowing",
-            "326": "cloudy_snowing",
-            "329": "snowing_heavy",
-            "332": "snowing_heavy",
-            "335": "snowing",
-            "338": "snowing_heavy",
-            "350": "rainy",
-            "353": "rainy",
-            "356": "rainy",
-            "359": "weather_hail",
-            "362": "rainy",
-            "365": "rainy",
-            "368": "cloudy_snowing",
-            "371": "snowing",
-            "374": "rainy",
-            "377": "rainy",
-            "386": "thunderstorm",
-            "389": "thunderstorm",
-            "392": "thunderstorm",
-            "395": "snowing"
+            "0": "clear_day",
+            "1": "clear_day",
+            "2": "partly_cloudy_day",
+            "3": "cloud",
+            "45": "foggy",
+            "48": "foggy",
+            "51": "rainy",
+            "53": "rainy",
+            "55": "rainy",
+            "56": "rainy",
+            "57": "rainy",
+            "61": "rainy",
+            "63": "rainy",
+            "65": "rainy",
+            "66": "rainy",
+            "67": "rainy",
+            "71": "cloudy_snowing",
+            "73": "cloudy_snowing",
+            "75": "snowing_heavy",
+            "77": "cloudy_snowing",
+            "80": "rainy",
+            "81": "rainy",
+            "82": "rainy",
+            "85": "cloudy_snowing",
+            "86": "snowing_heavy",
+            "95": "thunderstorm",
+            "96": "thunderstorm",
+            "99": "thunderstorm"
         })
 
     readonly property var categoryIcons: ({
@@ -115,16 +96,28 @@ Singleton {
         return fallback;
     }
 
-    function getNetworkIcon(strength: int): string {
-        if (strength >= 80)
-            return "signal_wifi_4_bar";
-        if (strength >= 60)
-            return "network_wifi_3_bar";
-        if (strength >= 40)
-            return "network_wifi_2_bar";
-        if (strength >= 20)
-            return "network_wifi_1_bar";
-        return "signal_wifi_0_bar";
+    function getNetworkIcon(strength: int, isSecure = false): string {
+        if (isSecure) {
+            if (strength >= 80)
+                return "network_wifi_locked";
+            if (strength >= 60)
+                return "network_wifi_3_bar_locked";
+            if (strength >= 40)
+                return "network_wifi_2_bar_locked";
+            if (strength >= 20)
+                return "network_wifi_1_bar_locked";
+            return "signal_wifi_0_bar";
+        } else {
+            if (strength >= 80)
+                return "network_wifi";
+            if (strength >= 60)
+                return "network_wifi_3_bar";
+            if (strength >= 40)
+                return "network_wifi_2_bar";
+            if (strength >= 20)
+                return "network_wifi_1_bar";
+            return "signal_wifi_0_bar";
+        }
     }
 
     function getBluetoothIcon(icon: string): string {
@@ -194,13 +187,13 @@ Singleton {
 
     function getSpecialWsIcon(name: string): string {
         name = name.toLowerCase().slice("special:".length);
-        
+
         for (const iconConfig of Config.bar.workspaces.specialWorkspaceIcons) {
             if (iconConfig.name === name) {
                 return iconConfig.icon;
             }
         }
-        
+
         if (name === "special")
             return "star";
         if (name === "communication")

@@ -2,6 +2,7 @@ import ".."
 import qs.services
 import qs.config
 import QtQuick
+import QtQuick.Layouts
 
 StyledRect {
     id: root
@@ -35,7 +36,7 @@ StyledRect {
 
     onCheckedChanged: internalChecked = checked
 
-    radius: internalChecked ? Appearance.rounding.small : implicitHeight / 2
+    radius: internalChecked ? Appearance.rounding.small : implicitHeight / 2 * Math.min(1, Appearance.rounding.scale)
     color: type === IconTextButton.Text ? "transparent" : internalChecked ? activeColour : inactiveColour
 
     implicitWidth: row.implicitWidth + horizontalPadding * 2
@@ -53,7 +54,7 @@ StyledRect {
         }
     }
 
-    Row {
+    RowLayout {
         id: row
 
         anchors.centerIn: parent
@@ -62,7 +63,8 @@ StyledRect {
         MaterialIcon {
             id: iconLabel
 
-            anchors.verticalCenter: parent.verticalCenter
+            Layout.alignment: Qt.AlignVCenter
+            Layout.topMargin: Math.round(fontInfo.pointSize * 0.0575)
             color: root.internalChecked ? root.activeOnColour : root.inactiveOnColour
             fill: root.internalChecked ? 1 : 0
 
@@ -74,7 +76,8 @@ StyledRect {
         StyledText {
             id: label
 
-            anchors.verticalCenter: parent.verticalCenter
+            Layout.alignment: Qt.AlignVCenter
+            Layout.topMargin: -Math.round(iconLabel.fontInfo.pointSize * 0.0575)
             color: root.internalChecked ? root.activeOnColour : root.inactiveOnColour
         }
     }

@@ -109,6 +109,7 @@ Item {
 
         visibilities: root.visibilities
         sidebar: sidebar
+        popouts: popouts
 
         anchors.bottom: parent.bottom
         anchors.right: parent.right

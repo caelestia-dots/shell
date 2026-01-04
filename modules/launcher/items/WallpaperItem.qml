@@ -67,6 +67,7 @@ Item {
         CachingImage {
             path: root.modelData.path
             smooth: !root.PathView.view.moving
+            cache: true
 
             anchors.fill: parent
         }
