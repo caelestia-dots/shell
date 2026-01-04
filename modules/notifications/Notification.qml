@@ -10,6 +10,7 @@ import Quickshell.Widgets
 import Quickshell.Services.Notifications
 import QtQuick
 import QtQuick.Layouts
+import QtQuick.Shapes
 
 StyledRect {
     id: root
@@ -23,7 +24,7 @@ StyledRect {
     color: root.modelData.urgency === NotificationUrgency.Critical ? Colours.palette.m3secondaryContainer : Colours.tPalette.m3surfaceContainer
     radius: Appearance.rounding.normal
     implicitWidth: Config.notifs.sizes.width
-    implicitHeight: inner.implicitHeight
+    implicitHeight: inner.implicitHeight + progressBar.implicitHeight
 
     x: Config.notifs.sizes.width
     Component.onCompleted: {
@@ -311,11 +312,77 @@ StyledRect {
                 font.pointSize: Appearance.font.size.small
             }
 
+            Loader {
+                active: Config.notifs.timeoutCircle
+                asynchronous: true
+                anchors.centerIn: closeBtn
+
+                sourceComponent: Shape {
+                    id: progressCircle
+                    width: closeBtn.implicitWidth + Appearance.padding.small
+                    height: closeBtn.implicitHeight + Appearance.padding.small
+                    preferredRendererType: Shape.CurveRenderer
+
+                    ShapePath {
+                        capStyle: ShapePath.FlatCap
+                        fillColor: "transparent"
+                        strokeWidth: Appearance.padding.small
+                        strokeColor: Colours.palette.m3tertiary
+
+                        PathAngleArc {
+                            centerX: progressCircle.width / 2
+                            centerY: progressCircle.height / 2
+                            radiusX: progressCircle.width / 2 - Appearance.padding.small / 2
+                            radiusY: progressCircle.height / 2 - Appearance.padding.small / 2
+
+                            startAngle: -90
+
+                            NumberAnimation on sweepAngle {
+                                from: 360
+                                to: 0
+                                duration: Config.notifs.defaultExpireTimeout
+                                running: root.modelData.timer.running
+                            }
+                        }
+                    }
+                }
+            }
+
             Item {
-                id: expandBtn
+                id: closeBtn
 
                 anchors.right: parent.right
                 anchors.top: parent.top
+
+                implicitWidth: closeIcon.height
+                implicitHeight: closeIcon.height
+
+                StateLayer {
+                    radius: Appearance.rounding.full
+                    color: Colours.palette.m3onSurface
+
+                    function onClicked() {
+                        root.modelData.notification.dismiss();
+                    }
+                }
+
+                MaterialIcon {
+                    id: closeIcon
+
+                    anchors.centerIn: parent
+
+                    animate: true
+                    text: "close"
+                    font.pointSize: Appearance.font.size.normal
+                }
+            }
+
+            Item {
+                id: expandBtn
+
+                anchors.right: closeBtn.left
+                anchors.top: parent.top
+                anchors.rightMargin: Appearance.spacing.small
 
                 implicitWidth: expandIcon.height
                 implicitHeight: expandIcon.height
@@ -433,6 +500,30 @@ StyledRect {
                         Action {}
                     }
                 }
+            }
+        }
+    }
+
+    Loader {
+        id: progressBar
+        active: Config.notifs.timeoutBar
+        asynchronous: true
+
+        anchors.right: parent.right
+        anchors.bottom: parent.bottom
+
+        sourceComponent: StyledRect {
+            anchors.topMargin: Appearance.padding.small
+
+            implicitHeight: Appearance.padding.small
+
+            color: Colours.palette.m3tertiary
+
+            NumberAnimation on implicitWidth {
+                from: root.width
+                to: 0
+                duration: Config.notifs.defaultExpireTimeout
+                running: root.modelData.timer.running
             }
         }
     }
