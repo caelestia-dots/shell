@@ -90,7 +90,7 @@ ColumnLayout {
                 active: root.height > (batLoader.active ? 200 : 110)
 
                 sourceComponent: FetchText {
-                    text: `WM  : ${SysInfo.wm}`
+                    text: `HOST: ${SysInfo.host}`
                 }
             }
 

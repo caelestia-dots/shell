@@ -143,8 +143,8 @@ Row {
         }
 
         InfoLine {
-            icon: "select_window_2"
-            text: SysInfo.wm
+            icon: "computer"
+            text: SysInfo.host
             colour: Colours.palette.m3secondary
         }
 

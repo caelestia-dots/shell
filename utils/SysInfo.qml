@@ -15,6 +15,7 @@ Singleton {
     property bool isDefaultLogo: true
 
     property string uptime
+    property string host: Quickshell.env("HOST")
     readonly property string user: Quickshell.env("USER")
     readonly property string wm: Quickshell.env("XDG_CURRENT_DESKTOP") || Quickshell.env("XDG_SESSION_DESKTOP")
     readonly property string shell: Quickshell.env("SHELL").split("/").pop()
@@ -61,12 +62,21 @@ Singleton {
 
             let str = "";
             if (days > 0)
-                str += `${days} day${days === 1 ? "" : "s"}`;
+                str += `${days} d`;
             if (hours > 0)
-                str += `${str ? ", " : ""}${hours} hour${hours === 1 ? "" : "s"}`;
+                str += `${str ? ", " : ""}${hours} hrs`;
             if (minutes > 0 || !str)
-                str += `${str ? ", " : ""}${minutes} minute${minutes === 1 ? "" : "s"}`;
+                str += `${str ? ", " : ""}${minutes} min`;
             root.uptime = str;
+        }
+    }
+
+    FileView {
+        id: fileHostName;
+
+        path: "/etc/hostname"
+        onLoaded: {
+            root.host = text().trim();
         }
     }
 }
