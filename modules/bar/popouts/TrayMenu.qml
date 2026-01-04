@@ -117,13 +117,51 @@ StackView {
 
                             anchors.left: parent.left
 
-                            active: item.modelData.icon !== ""
+                            active: item.modelData.buttonType !== 0 || item.modelData.icon !== ""
                             asynchronous: true
 
-                            sourceComponent: IconImage {
+                            sourceComponent: {
+                                if (item.modelData.buttonType === 1) return checkBoxComp;
+                                if (item.modelData.buttonType === 2) return radioButtonComp;
+                                return iconImageComp;
+                            }
+                        }
+
+                        Component {
+                            id: iconImageComp
+                            IconImage {
                                 implicitSize: label.implicitHeight
 
                                 source: item.modelData.icon
+                            }
+                        }
+
+                        Component {
+                            id: checkBoxComp
+
+                            Item {
+                                implicitWidth: label.implicitHeight
+                                implicitHeight: label.implicitHeight
+
+                                MaterialIcon {
+                                    anchors.centerIn: parent
+                                    text: item.modelData.checkState > 0 ? "check_circle" : "radio_button_unchecked"
+                                    color: item.modelData.enabled ? Colours.palette.m3onSurface : Colours.palette.m3outline
+                                }
+                            }
+                        }
+
+                        Component {
+                            id: radioButtonComp
+                            Item {
+                                implicitWidth: label.implicitHeight
+                                implicitHeight: label.implicitHeight
+
+                                MaterialIcon {
+                                    anchors.centerIn: parent
+                                    text: item.modelData.checkState > 0 ? "radio_button_checked" : "radio_button_unchecked"
+                                    color: item.modelData.enabled ? Colours.palette.m3onSurface : Colours.palette.m3outline
+                                }
                             }
                         }
 
