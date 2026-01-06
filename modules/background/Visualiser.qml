@@ -75,7 +75,7 @@ Item {
 
             property var displayValues: Array(barCount * 2).fill(0)
 
-            property real smoothing: Math.max(0.01, Math.min(1, 32 / Appearance.anim.durations.small))
+            property real smoothing: 1 - (0.95 * Config.background.visualiser.smoothing)
 
             function drawRoundedRect(ctx, x, y, w, h, r) {
                 r = Math.min(r, w / 2, h / 2);

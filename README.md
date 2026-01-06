@@ -306,7 +306,7 @@ default, you must create it manually.
         },
         "enabled": true,
         "visualiser": {
-            "blur": false,
+            "smoothing": 0.6,
             "enabled": false,
             "autoHide": true,
             "rounding": 1,

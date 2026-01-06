@@ -12,7 +12,7 @@ JsonObject {
     component Visualiser: JsonObject {
         property bool enabled: false
         property bool autoHide: true
-        property bool blur: false
+        property real smoothing: 0.6
         property real rounding: 1
         property real spacing: 1
     }
