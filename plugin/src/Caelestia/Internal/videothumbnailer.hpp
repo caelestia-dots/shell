@@ -2,10 +2,10 @@
 
 #include <QObject>
 #include <QQuickItem>
-#include <QUrl>
 #include <QSize>
-#include <QAtomicInteger>
+#include <QThread>
 #include <QTimer>
+#include <QUrl>
 
 namespace caelestia::internal {
 
@@ -20,6 +20,7 @@ class VideoThumbnailer : public QObject {
 
 public:
     explicit VideoThumbnailer(QObject* parent = nullptr);
+    ~VideoThumbnailer();
 
     QString path() const;
     void setPath(const QString& path);
@@ -36,6 +37,10 @@ signals:
     void cachePathChanged();
     void readyChanged();
 
+private slots:
+    void startProcessing();
+    void handleWorkerFinished(const QString& cachePath);
+
 private:
     QString m_path;
     QUrl m_cacheDir;
@@ -43,10 +48,9 @@ private:
     bool m_ready = false;
 
     QTimer m_debounceTimer;
-    QAtomicInteger<quint64> m_taskId {0};
 
-    void generateThumbnail(const QString& path, const QString& cacheFile);
-    QString sha256sum(const QString& path) const;
+    class Worker;
+    QThread* m_workerThread = nullptr;
 };
 
 } // namespace caelestia::internal

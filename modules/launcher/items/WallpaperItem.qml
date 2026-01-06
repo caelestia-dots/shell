@@ -85,11 +85,11 @@ Item {
             fillMode: Image.PreserveAspectCrop
             visible: thumb.ready
             path: thumb.cachePath
-        }
-        VideoThumbnailer {
-            id: thumb
-            path: root.modelData.path
-            cacheDir: Paths.videothumbcache
+            VideoThumbnailer {
+                id: thumb
+                path: root.modelData.path
+                cacheDir: Paths.videothumbcache
+            }
         }
     }
     StyledText {

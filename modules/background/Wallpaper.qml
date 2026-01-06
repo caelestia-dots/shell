@@ -37,7 +37,7 @@ Item {
             initialize();
             return;
         }
-        Qt.callLater(waitForBothItems);
+        waitForBothItems();
     }
 
     function initialize() {
