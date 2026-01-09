@@ -55,7 +55,25 @@ Item {
     implicitWidth: nonAnimWidth
     implicitHeight: nonAnimHeight
 
-    Keys.onEscapePressed: close()
+    focus: hasCurrent
+    Keys.onEscapePressed: {
+        // Forward escape to password popout if active, otherwise close
+        if (currentName === "wirelesspassword" && content.item) {
+            const passwordPopout = content.item.children.find(c => c.name === "wirelesspassword");
+            if (passwordPopout && passwordPopout.item) {
+                passwordPopout.item.closeDialog();
+                return;
+            }
+        }
+        close();
+    }
+    
+    Keys.onPressed: event => {
+        // Don't intercept keys when password popout is active - let it handle them
+        if (currentName === "wirelesspassword") {
+            event.accepted = false;
+        }
+    }
 
     HyprlandFocusGrab {
         active: root.isDetached
@@ -65,6 +83,14 @@ Item {
 
     Binding {
         when: root.isDetached
+
+        target: QsWindow.window
+        property: "WlrLayershell.keyboardFocus"
+        value: WlrKeyboardFocus.OnDemand
+    }
+    
+    Binding {
+        when: root.hasCurrent && root.currentName === "wirelesspassword"
 
         target: QsWindow.window
         property: "WlrLayershell.keyboardFocus"
