@@ -36,7 +36,7 @@ Row {
     spacing: Math.floor(Appearance.spacing.small / 2)
 
     StyledRect {
-        radius: implicitHeight / 2
+        radius: implicitHeight / 2 * Math.min(1, Appearance.rounding.scale)
         topRightRadius: Appearance.rounding.small / 2
         bottomRightRadius: Appearance.rounding.small / 2
         color: root.disabled ? root.disabledColour : root.colour
@@ -96,9 +96,9 @@ Row {
     StyledRect {
         id: expandBtn
 
-        property real rad: root.expanded ? implicitHeight / 2 : Appearance.rounding.small / 2
+        property real rad: root.expanded ? implicitHeight / 2 * Math.min(1, Appearance.rounding.scale) : Appearance.rounding.small / 2
 
-        radius: implicitHeight / 2
+        radius: implicitHeight / 2 * Math.min(1, Appearance.rounding.scale)
         topLeftRadius: rad
         bottomLeftRadius: rad
         color: root.disabled ? root.disabledColour : root.colour

@@ -547,6 +547,7 @@ default, you must create it manually.
         "clearThreshold": 0.3,
         "defaultExpireTimeout": 5000,
         "expandThreshold": 20,
+        "openExpanded": false,
         "expire": false
     },
     "osd": {
@@ -562,6 +563,7 @@ default, you must create it manually.
     },
     "services": {
         "audioIncrement": 0.1,
+        "brightnessIncrement": 0.1,
         "maxVolume": 1.0,
         "defaultPlayer": "Spotify",
         "gpuType": "",
