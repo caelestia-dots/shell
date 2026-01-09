@@ -70,40 +70,24 @@ SectionContainer {
     SectionContainer {
         contentSpacing: Appearance.spacing.normal
 
-        SliderInput {
+        ReadonlySlider {
             Layout.fillWidth: true
-            
             label: qsTr("Resource size")
             value: root.rootItem.resourceSize
             from: 100
             to: 400
             suffix: "px"
-            validator: IntValidator { bottom: 100; top: 400 }
-            formatValueFunction: (val) => Math.round(val).toString()
-            parseValueFunction: (text) => parseInt(text)
-            
-            onValueModified: (newValue) => {
-                root.rootItem.resourceSize = Math.round(newValue);
-                root.rootItem.saveConfig();
-            }
+            readonly: true
         }
 
-        SliderInput {
+        ReadonlySlider {
             Layout.fillWidth: true
-            
             label: qsTr("Progress thickness")
             value: root.rootItem.resourceProgessThickness
             from: 5
             to: 20
             suffix: "px"
-            validator: IntValidator { bottom: 5; top: 20 }
-            formatValueFunction: (val) => Math.round(val).toString()
-            parseValueFunction: (text) => parseInt(text)
-            
-            onValueModified: (newValue) => {
-                root.rootItem.resourceProgessThickness = Math.round(newValue);
-                root.rootItem.saveConfig();
-            }
+            readonly: true
         }
     }
 }

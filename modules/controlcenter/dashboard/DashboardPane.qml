@@ -61,19 +61,7 @@ Item {
         Config.dashboard.performance.showCpu = root.showCpu;
         Config.dashboard.performance.showMemory = root.showMemory;
         Config.dashboard.performance.showStorage = root.showStorage;
-        Config.dashboard.sizes.tabIndicatorHeight = root.tabIndicatorHeight;
-        Config.dashboard.sizes.tabIndicatorSpacing = root.tabIndicatorSpacing;
-        Config.dashboard.sizes.infoWidth = root.infoWidth;
-        Config.dashboard.sizes.infoIconSize = root.infoIconSize;
-        Config.dashboard.sizes.dateTimeWidth = root.dateTimeWidth;
-        Config.dashboard.sizes.mediaWidth = root.mediaWidth;
-        Config.dashboard.sizes.mediaProgressSweep = root.mediaProgressSweep;
-        Config.dashboard.sizes.mediaProgressThickness = root.mediaProgressThickness;
-        Config.dashboard.sizes.resourceProgessThickness = root.resourceProgessThickness;
-        Config.dashboard.sizes.weatherWidth = root.weatherWidth;
-        Config.dashboard.sizes.mediaCoverArtSize = root.mediaCoverArtSize;
-        Config.dashboard.sizes.mediaVisualiserSize = root.mediaVisualiserSize;
-        Config.dashboard.sizes.resourceSize = root.resourceSize;
+        // Note: sizes properties are readonly and cannot be modified
         Config.save();
     }
 
