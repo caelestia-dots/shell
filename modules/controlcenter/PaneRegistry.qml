@@ -41,6 +41,12 @@ QtObject {
             readonly property string label: "launcher"
             readonly property string icon: "apps"
             readonly property string component: "launcher/LauncherPane.qml"
+        },
+        QtObject {
+            readonly property string id: "dashboard"
+            readonly property string label: "dashboard"
+            readonly property string icon: "dashboard"
+            readonly property string component: "dashboard/DashboardPane.qml"
         }
     ]
 
