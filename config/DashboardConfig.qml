@@ -6,6 +6,15 @@ JsonObject {
     property int mediaUpdateInterval: 500
     property int dragThreshold: 50
     property Sizes sizes: Sizes {}
+    property Performance performance: Performance {}
+
+    component Performance: JsonObject {
+        property bool showBattery: false
+        property bool showGpu: true
+        property bool showCpu: true
+        property bool showMemory: true
+        property bool showStorage: false
+    }
 
     component Sizes: JsonObject {
         readonly property int tabIndicatorHeight: 3
