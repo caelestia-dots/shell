@@ -6,6 +6,8 @@ import Quickshell
 import Quickshell.Services.SystemTray
 import QtQuick
 
+import "./kblayout"
+
 Item {
     id: root
 
