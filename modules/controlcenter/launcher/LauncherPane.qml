@@ -24,6 +24,7 @@ Item {
 
     property var selectedApp: root.session.launcher.active
     property bool hideFromLauncherChecked: false
+    property bool favoriteChecked: false
 
     anchors.fill: parent
 
@@ -43,15 +44,18 @@ Item {
     function updateToggleState() {
         if (!root.selectedApp) {
             root.hideFromLauncherChecked = false;
+            root.favoriteChecked = false;
             return;
         }
 
         const appId = root.selectedApp.id || root.selectedApp.entry?.id;
 
         if (Config.launcher.hiddenApps && Config.launcher.hiddenApps.length > 0) {
-            root.hideFromLauncherChecked = Config.launcher.hiddenApps.includes(appId);
+            root.hideFromLauncherChecked = Strings.testRegexList(Config.launcher.hiddenApps, appId);
+            root.favoriteChecked = Strings.testRegexList(Config.launcher.favoriteApps, appId);
         } else {
             root.hideFromLauncherChecked = false;
+            root.favoriteChecked = false;
         }
     }
 
@@ -84,6 +88,7 @@ Item {
         id: allAppsDb
 
         path: `${Paths.state}/apps.sqlite`
+        favoriteApps: Config.launcher.favoriteApps
         entries: DesktopEntries.applications.values
     }
 
@@ -294,7 +299,7 @@ Item {
 
                 sourceComponent: StyledListView {
                     id: appsListView
-                    
+
                     Layout.fillWidth: true
                     Layout.fillHeight: true
 
@@ -356,6 +361,28 @@ Item {
                                 Layout.fillWidth: true
                                 text: modelData.name || modelData.entry?.name || qsTr("Unknown")
                                 font.pointSize: Appearance.font.size.normal
+                            }
+
+                            Loader {
+                                Layout.alignment: Qt.AlignVCenter
+                                active: modelData !== undefined && Strings.testRegexList(Config.launcher.favoriteApps, modelData.id)
+
+                                sourceComponent: MaterialIcon {
+                                    text: "favorite"
+                                    fill: 1
+                                    color: Colours.palette.m3primary
+                                }
+                            }
+
+                            Loader {
+                                Layout.alignment: Qt.AlignVCenter
+                                active: modelData !== undefined && Strings.testRegexList(Config.launcher.hiddenApps, modelData.id)
+
+                                sourceComponent: MaterialIcon {
+                                    text: "visibility_off"
+                                    fill: 1
+                                    color: Colours.palette.m3primary
+                                }
                             }
                         }
 
@@ -446,12 +473,15 @@ Item {
                     if (displayedApp) {
                         const appId = displayedApp.id || displayedApp.entry?.id;
                         if (Config.launcher.hiddenApps && Config.launcher.hiddenApps.length > 0) {
-                            root.hideFromLauncherChecked = Config.launcher.hiddenApps.includes(appId);
+                            root.hideFromLauncherChecked = Strings.testRegexList(Config.launcher.hiddenApps, appId);
+                            root.favoriteChecked = Strings.testRegexList(Config.launcher.favoriteApps, appId);
                         } else {
                             root.hideFromLauncherChecked = false;
+                            root.favoriteChecked = false;
                         }
                     } else {
                         root.hideFromLauncherChecked = false;
+                        root.favoriteChecked = false;
                     }
                 }
             }
@@ -563,33 +593,62 @@ Item {
                         anchors.top: parent.top
                         spacing: Appearance.spacing.normal
 
-                    SwitchRow {
-                        Layout.topMargin: Appearance.spacing.normal
-                        visible: appDetailsLayout.displayedApp !== null
-                        label: qsTr("Hide from launcher")
-                        checked: root.hideFromLauncherChecked
-                        enabled: appDetailsLayout.displayedApp !== null
-                        onToggled: checked => {
-                            root.hideFromLauncherChecked = checked;
-                            const app = appDetailsLayout.displayedApp;
-                            if (app) {
-                                const appId = app.id || app.entry?.id;
-                                const hiddenApps = Config.launcher.hiddenApps ? [...Config.launcher.hiddenApps] : [];
-                                if (checked) {
-                                    if (!hiddenApps.includes(appId)) {
-                                        hiddenApps.push(appId);
+                        SwitchRow {
+                            Layout.topMargin: Appearance.spacing.normal
+                            visible: appDetailsLayout.displayedApp !== null
+                            label: qsTr("Mark as favorite")
+                            checked: root.favoriteChecked
+                            enabled: appDetailsLayout.displayedApp !== null && !root.hideFromLauncherChecked
+                            opacity: enabled ? 1 : 0.6
+                            onToggled: checked => {
+                                root.favoriteChecked = checked;
+                                const app = appDetailsLayout.displayedApp;
+                                if (app) {
+                                    const appId = app.id || app.entry?.id;
+                                    const favoriteApps = Config.launcher.favoriteApps ? [...Config.launcher.favoriteApps] : [];
+                                    if (checked) {
+                                        if (!favoriteApps.includes(appId)) {
+                                            favoriteApps.push(appId);
+                                        }
+                                    } else {
+                                        const index = favoriteApps.indexOf(appId);
+                                        if (index !== -1) {
+                                            favoriteApps.splice(index, 1);
+                                        }
                                     }
-                                } else {
-                                    const index = hiddenApps.indexOf(appId);
-                                    if (index !== -1) {
-                                        hiddenApps.splice(index, 1);
-                                    }
+                                    Config.launcher.favoriteApps = favoriteApps;
+                                    Config.save();
                                 }
-                                Config.launcher.hiddenApps = hiddenApps;
-                                Config.save();
                             }
                         }
-                    }
+                        SwitchRow {
+                            Layout.topMargin: Appearance.spacing.normal
+                            visible: appDetailsLayout.displayedApp !== null
+                            label: qsTr("Hide from launcher")
+                            checked: root.hideFromLauncherChecked
+                            enabled: appDetailsLayout.displayedApp !== null && !root.favoriteChecked
+                            opacity: enabled ? 1 : 0.6
+                            onToggled: checked => {
+                                root.hideFromLauncherChecked = checked;
+                                const app = appDetailsLayout.displayedApp;
+                                if (app) {
+                                    const appId = app.id || app.entry?.id;
+                                    const hiddenApps = Config.launcher.hiddenApps ? [...Config.launcher.hiddenApps] : [];
+                                    if (checked) {
+                                        if (!hiddenApps.includes(appId)) {
+                                            hiddenApps.push(appId);
+                                        }
+                                    } else {
+                                        const index = hiddenApps.indexOf(appId);
+                                        if (index !== -1) {
+                                            hiddenApps.splice(index, 1);
+                                        }
+                                    }
+                                    Config.launcher.hiddenApps = hiddenApps;
+                                    Config.save();
+                                }
+                            }
+                        }
 
                     }
                 }
