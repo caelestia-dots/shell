@@ -604,7 +604,8 @@ default, you must create it manually.
             "kbLayoutChanged": true,
             "numLockChanged": true,
             "vpnChanged": true,
-            "nowPlaying": false
+            "nowPlaying": false,
+            "nighLight": true
         },
         "vpn": {
             "enabled": false,
@@ -615,6 +616,10 @@ default, you must create it manually.
                     "displayName": "Wireguard (Your VPN)"
                 }
             ]
+        },
+        "nightLight": {
+            "enabled": false,
+            "temperature": 4500
         }
     }
 }
