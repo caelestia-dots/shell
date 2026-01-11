@@ -9,19 +9,69 @@ import QtQuick.Layouts
 RowLayout {
     id: root
 
-    property int value
+    property real value
     property real max: Infinity
     property real min: -Infinity
+    property real step: 1
     property alias repeatRate: timer.interval
 
-    signal valueModified(value: int)
+    signal valueModified(value: real)
 
     spacing: Appearance.spacing.small
 
+    property bool isEditing: false
+    property string displayText: root.value.toString()
+
+    onValueChanged: {
+        if (!root.isEditing) {
+            root.displayText = root.value.toString();
+        }
+    }
+
     StyledTextField {
+        id: textField
+
         inputMethodHints: Qt.ImhFormattedNumbersOnly
-        text: root.value
-        onAccepted: root.valueModified(text)
+        text: root.isEditing ? text : root.displayText
+        validator: DoubleValidator {
+            bottom: root.min
+            top: root.max
+            decimals: root.step < 1 ? Math.max(1, Math.ceil(-Math.log10(root.step))) : 0
+        }
+        onActiveFocusChanged: {
+            if (activeFocus) {
+                root.isEditing = true;
+            } else {
+                root.isEditing = false;
+                root.displayText = root.value.toString();
+            }
+        }
+        onAccepted: {
+            const numValue = parseFloat(text);
+            if (!isNaN(numValue)) {
+                const clampedValue = Math.max(root.min, Math.min(root.max, numValue));
+                root.value = clampedValue;
+                root.displayText = clampedValue.toString();
+                root.valueModified(clampedValue);
+            } else {
+                text = root.displayText;
+            }
+            root.isEditing = false;
+        }
+        onEditingFinished: {
+            if (text !== root.displayText) {
+                const numValue = parseFloat(text);
+                if (!isNaN(numValue)) {
+                    const clampedValue = Math.max(root.min, Math.min(root.max, numValue));
+                    root.value = clampedValue;
+                    root.displayText = clampedValue.toString();
+                    root.valueModified(clampedValue);
+                } else {
+                    text = root.displayText;
+                }
+            }
+            root.isEditing = false;
+        }
 
         padding: Appearance.padding.small
         leftPadding: Appearance.padding.normal
@@ -50,7 +100,13 @@ RowLayout {
             onReleased: timer.stop()
 
             function onClicked(): void {
-                root.valueModified(Math.min(root.max, root.value + 1));
+                let newValue = Math.min(root.max, root.value + root.step);
+                // Round to avoid floating point precision errors
+                const decimals = root.step < 1 ? Math.max(1, Math.ceil(-Math.log10(root.step))) : 0;
+                newValue = Math.round(newValue * Math.pow(10, decimals)) / Math.pow(10, decimals);
+                root.value = newValue;
+                root.displayText = newValue.toString();
+                root.valueModified(newValue);
             }
         }
 
@@ -79,7 +135,13 @@ RowLayout {
             onReleased: timer.stop()
 
             function onClicked(): void {
-                root.valueModified(Math.max(root.min, root.value - 1));
+                let newValue = Math.max(root.min, root.value - root.step);
+                // Round to avoid floating point precision errors
+                const decimals = root.step < 1 ? Math.max(1, Math.ceil(-Math.log10(root.step))) : 0;
+                newValue = Math.round(newValue * Math.pow(10, decimals)) / Math.pow(10, decimals);
+                root.value = newValue;
+                root.displayText = newValue.toString();
+                root.valueModified(newValue);
             }
         }
 

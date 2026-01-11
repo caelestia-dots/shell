@@ -9,6 +9,7 @@ import Quickshell
 import Quickshell.Bluetooth
 import QtQuick
 import QtQuick.Layouts
+import "../../controlcenter/network"
 
 ColumnLayout {
     id: root
@@ -20,7 +21,7 @@ ColumnLayout {
     StyledText {
         Layout.topMargin: Appearance.padding.normal
         Layout.rightMargin: Appearance.padding.small
-        text: qsTr("Bluetooth %1").arg(BluetoothAdapterState.toString(Bluetooth.defaultAdapter?.state).toLowerCase())
+        text: qsTr("Bluetooth")
         font.weight: 500
     }
 
@@ -61,7 +62,7 @@ ColumnLayout {
 
     Repeater {
         model: ScriptModel {
-            values: [...Bluetooth.devices.values].sort((a, b) => (b.connected - a.connected) || (b.paired - a.paired)).slice(0, 5)
+            values: [...Bluetooth.devices.values].sort((a, b) => (b.connected - a.connected) || (b.paired - a.paired) || a.name.localeCompare(b.name)).slice(0, 5)
         }
 
         RowLayout {
@@ -164,40 +165,16 @@ ColumnLayout {
         }
     }
 
-    StyledRect {
-        Layout.topMargin: Appearance.spacing.small
-        implicitWidth: expandBtn.implicitWidth + Appearance.padding.normal * 2
-        implicitHeight: expandBtn.implicitHeight + Appearance.padding.small
+    IconTextButton {
+        Layout.fillWidth: true
+        Layout.topMargin: Appearance.spacing.normal
+        inactiveColour: Colours.palette.m3primaryContainer
+        inactiveOnColour: Colours.palette.m3onPrimaryContainer
+        verticalPadding: Appearance.padding.small
+        text: qsTr("Open settings")
+        icon: "settings"
 
-        radius: Appearance.rounding.normal
-        color: Colours.palette.m3primaryContainer
-
-        StateLayer {
-            color: Colours.palette.m3onPrimaryContainer
-
-            function onClicked(): void {
-                root.wrapper.detach("bluetooth");
-            }
-        }
-
-        RowLayout {
-            id: expandBtn
-
-            anchors.centerIn: parent
-            spacing: Appearance.spacing.small
-
-            StyledText {
-                Layout.leftMargin: Appearance.padding.smaller
-                text: qsTr("Open panel")
-                color: Colours.palette.m3onPrimaryContainer
-            }
-
-            MaterialIcon {
-                text: "chevron_right"
-                color: Colours.palette.m3onPrimaryContainer
-                font.pointSize: Appearance.font.size.large
-            }
-        }
+        onClicked: root.wrapper.detach("bluetooth")
     }
 
     component Toggle: RowLayout {

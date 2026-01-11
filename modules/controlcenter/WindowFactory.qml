@@ -32,11 +32,13 @@ Singleton {
                     destroy();
             }
 
-            minimumSize.width: 1000
-            minimumSize.height: 600
-
             implicitWidth: cc.implicitWidth
             implicitHeight: cc.implicitHeight
+
+            minimumSize.width: implicitWidth
+            minimumSize.height: implicitHeight
+            maximumSize.width: implicitWidth
+            maximumSize.height: implicitHeight
 
             title: qsTr("Caelestia Settings - %1").arg(cc.active.slice(0, 1).toUpperCase() + cc.active.slice(1))
 

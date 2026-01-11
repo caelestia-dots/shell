@@ -32,8 +32,65 @@ Item {
         }
 
         Popout {
+            id: networkPopout
             name: "network"
-            sourceComponent: Network {}
+            sourceComponent: Network {
+                wrapper: root.wrapper
+                view: "wireless"
+            }
+        }
+
+        Popout {
+            name: "ethernet"
+            sourceComponent: Network {
+                wrapper: root.wrapper
+                view: "ethernet"
+            }
+        }
+
+        Popout {
+            id: passwordPopout
+            name: "wirelesspassword"
+            sourceComponent: WirelessPassword {
+                id: passwordComponent
+                wrapper: root.wrapper
+                network: networkPopout.item?.passwordNetwork ?? null
+            }
+            
+            Connections {
+                target: root.wrapper
+                function onCurrentNameChanged() {
+                    // Update network immediately when password popout becomes active
+                    if (root.wrapper.currentName === "wirelesspassword") {
+                        // Set network immediately if available
+                        if (networkPopout.item && networkPopout.item.passwordNetwork) {
+                            if (passwordPopout.item) {
+                                passwordPopout.item.network = networkPopout.item.passwordNetwork;
+                            }
+                        }
+                        // Also try after a short delay in case networkPopout.item wasn't ready
+                        Qt.callLater(() => {
+                            if (passwordPopout.item && networkPopout.item && networkPopout.item.passwordNetwork) {
+                                passwordPopout.item.network = networkPopout.item.passwordNetwork;
+                            }
+                        }, 100);
+                    }
+                }
+            }
+            
+            Connections {
+                target: networkPopout
+                function onItemChanged() {
+                    // When network popout loads, update password popout if it's active
+                    if (root.wrapper.currentName === "wirelesspassword" && passwordPopout.item) {
+                        Qt.callLater(() => {
+                            if (networkPopout.item && networkPopout.item.passwordNetwork) {
+                                passwordPopout.item.network = networkPopout.item.passwordNetwork;
+                            }
+                        });
+                    }
+                }
+            }
         }
 
         Popout {

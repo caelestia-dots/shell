@@ -15,7 +15,7 @@ Scope {
         function onOnBatteryChanged(): void {
             if (UPower.onBattery) {
                 if (Config.utilities.toasts.chargingChanged)
-                    Toaster.toast(qsTr("Charger unplugged"), qsTr("Battery is now on AC"), "power_off");
+                    Toaster.toast(qsTr("Charger unplugged"), qsTr("Battery is discharging"), "power_off");
             } else {
                 if (Config.utilities.toasts.chargingChanged)
                     Toaster.toast(qsTr("Charger plugged in"), qsTr("Battery is charging"), "power");

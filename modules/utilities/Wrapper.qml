@@ -10,6 +10,7 @@ Item {
 
     required property var visibilities
     required property Item sidebar
+    required property Item popouts
 
     readonly property PersistentProperties props: PersistentProperties {
         property bool recordingListExpanded: false
@@ -89,6 +90,7 @@ Item {
             implicitWidth: root.implicitWidth - Appearance.padding.large * 2
             props: root.props
             visibilities: root.visibilities
+            popouts: root.popouts
         }
     }
 }
