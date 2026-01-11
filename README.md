@@ -657,6 +657,13 @@ The module automatically adds Caelestia shell to the path with **full functional
 
 ## FAQ
 
+### Got stucked? Join our discord server for help and assist
+
+Here is the official server link 
+```sh
+https://discord.gg/BGDCFCmMBk
+```
+
 ### My screen is flickering, help pls!
 
 Try disabling VRR in the hyprland config. You can do this by adding the following to `~/.config/caelestia/hypr-user.conf`:
