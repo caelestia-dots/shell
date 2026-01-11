@@ -32,8 +32,8 @@ Scope {
             if (Config.general.idle.lockBeforeSleep)
                 root.lock.lock.locked = true;
         }
-        onLockRequested: root.lock.lock.locked = true
-        onUnlockRequested: root.lock.lock.unlock()
+        onLockRequested: root.lock.locked = true
+        onUnlockRequested: root.lock.unlock()
     }
 
     Variants {
@@ -45,7 +45,22 @@ Scope {
             enabled: root.enabled && (modelData.enabled ?? true)
             timeout: modelData.timeout
             respectInhibitors: modelData.respectInhibitors ?? true
-            onIsIdleChanged: root.handleIdleAction(isIdle ? modelData.idleAction : modelData.returnAction)
+
+            onIsIdleChanged: {
+                root.handleIdleAction(isIdle ? modelData.idleAction : modelData.returnAction);
+
+                let idleActionString = "";
+                if (typeof modelData.idleAction === "string")
+                    idleActionString = modelData.idleAction;
+                else if (Array.isArray(modelData.idleAction))
+                    idleActionString = modelData.idleAction.join(" ");
+
+                if (idleActionString.includes("dpms off")) {
+                    if (root.lock.pam) {
+                        root.lock.pam.screenIsIdle = isIdle;
+                    }
+                }
+            }
         }
     }
 }
