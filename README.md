@@ -657,12 +657,10 @@ The module automatically adds Caelestia shell to the path with **full functional
 
 ## FAQ
 
-### Got stucked? Join our discord server for help and assist
+### Need help or support?
 
-Here is the official server link 
-```sh
+You can join the community Discord server for assistance and discussion:  
 https://discord.gg/BGDCFCmMBk
-```
 
 ### My screen is flickering, help pls!
 
