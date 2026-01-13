@@ -1,6 +1,7 @@
 pragma ComponentBehavior: Bound
 
 import ".."
+import "../components"
 import qs.components
 import qs.components.controls
 import qs.components.effects
@@ -17,18 +18,9 @@ ColumnLayout {
 
     spacing: Appearance.spacing.normal
 
-    MaterialIcon {
-        Layout.alignment: Qt.AlignHCenter
-        text: "bluetooth"
-        font.pointSize: Appearance.font.size.extraLarge * 3
-        font.bold: true
-    }
-
-    StyledText {
-        Layout.alignment: Qt.AlignHCenter
-        text: qsTr("Bluetooth settings")
-        font.pointSize: Appearance.font.size.large
-        font.bold: true
+    SettingsHeader {
+        icon: "bluetooth"
+        title: qsTr("Bluetooth Settings")
     }
 
     StyledText {
@@ -284,8 +276,12 @@ ColumnLayout {
 
                 CustomSpinBox {
                     min: 0
-                    value: root.session.bt.currentAdapter.discoverableTimeout
-                    onValueModified: value => root.session.bt.currentAdapter.discoverableTimeout = value
+                    value: root.session.bt.currentAdapter?.discoverableTimeout ?? 0
+                    onValueModified: value => {
+                        if (root.session.bt.currentAdapter) {
+                            root.session.bt.currentAdapter.discoverableTimeout = value;
+                        }
+                    }
                 }
             }
 
@@ -332,7 +328,7 @@ ColumnLayout {
 
                         anchors.left: parent.left
 
-                        text: qsTr("Rename adapter (currently does not work)")  // FIXME: remove disclaimer when fixed
+                        text: qsTr("Rename adapter (currently does not work)")
                         color: Colours.palette.m3outline
                         font.pointSize: Appearance.font.size.small
                     }
@@ -345,12 +341,10 @@ ColumnLayout {
                         anchors.top: renameLabel.bottom
                         anchors.leftMargin: root.session.bt.editingAdapterName ? 0 : -Appearance.padding.normal
 
-                        text: root.session.bt.currentAdapter.name
+                        text: root.session.bt.currentAdapter?.name ?? ""
                         readOnly: !root.session.bt.editingAdapterName
                         onAccepted: {
                             root.session.bt.editingAdapterName = false;
-                            // Doesn't work for now, will be added to QS later
-                            // root.session.bt.currentAdapter.name = text;
                         }
 
                         leftPadding: Appearance.padding.normal
@@ -392,7 +386,7 @@ ColumnLayout {
 
                         function onClicked(): void {
                             root.session.bt.editingAdapterName = false;
-                            adapterNameEdit.text = Qt.binding(() => root.session.bt.currentAdapter.name);
+                            adapterNameEdit.text = Qt.binding(() => root.session.bt.currentAdapter?.name ?? "");
                         }
                     }
 
