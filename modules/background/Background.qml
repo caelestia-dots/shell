@@ -8,48 +8,52 @@ import Quickshell
 import Quickshell.Wayland
 import QtQuick
 
-Loader {
-    asynchronous: true
-    active: Config.background.enabled
+Variants {
+    model: Quickshell.screens
 
-    sourceComponent: Variants {
-        model: Quickshell.screens
+    StyledWindow {
+        id: win
+        required property ShellScreen modelData
 
-        StyledWindow {
-            id: win
+        screen: modelData
+        name: "background"
+        WlrLayershell.exclusionMode: ExclusionMode.Ignore
+        WlrLayershell.layer: WlrLayer.Background
+        color: "black"
 
-            required property ShellScreen modelData
+        anchors.top: true
+        anchors.bottom: true
+        anchors.left: true
+        anchors.right: true
 
-            screen: modelData
-            name: "background"
-            WlrLayershell.exclusionMode: ExclusionMode.Ignore
-            WlrLayershell.layer: WlrLayer.Background
-            color: "black"
+        Loader {
+            active: Config.background.enabled
+            asynchronous: true
 
-            anchors.top: true
-            anchors.bottom: true
-            anchors.left: true
-            anchors.right: true
+            anchors.fill: parent
 
-            Wallpaper {
-                id: wallpaper
-            }
-
-            Visualiser {
+            sourceComponent: Item {
                 anchors.fill: parent
-                screen: win.modelData
-                wallpaper: wallpaper
-            }
 
-            Loader {
-                anchors.right: parent.right
-                anchors.bottom: parent.bottom
-                anchors.margins: Appearance.padding.large
+                Wallpaper {
+                    id: wallpaper
+                }
 
-                active: Config.background.desktopClock.enabled
-                asynchronous: true
+                Visualiser {
+                    anchors.fill: parent
+                    screen: win.modelData
+                    wallpaper: wallpaper
+                }
 
-                source: "DesktopClock.qml"
+                Loader {
+                    anchors.right: parent.right
+                    anchors.bottom: parent.bottom
+                    anchors.margins: Appearance.padding.large
+
+                    active: Config.background.desktopClock.enabled
+                    asynchronous: true
+                    source: "DesktopClock.qml"
+                }
             }
         }
     }
