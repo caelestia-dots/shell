@@ -1,8 +1,10 @@
 pragma ComponentBehavior: Bound
 
 import QtQuick
+
 import Quickshell
 import Quickshell.Io
+
 import qs.config
 import Caelestia
 
@@ -12,6 +14,7 @@ Item {
 
     ListModel { id: _visibleModel }
     property alias visibleModel: _visibleModel
+
     property string activeLabel: ""
     property int activeIndex: -1
 
@@ -31,6 +34,7 @@ Item {
     }
 
     ListModel { id: _layoutsModel }
+
     property var _xkbMap: ({})
     property bool _notifiedLimit: false
 
@@ -40,6 +44,7 @@ Item {
         stdout: StdioCollector { onStreamFinished: _buildXmlMap(text) }
         onRunningChanged: if (!running && (typeof exitCode !== "undefined") && exitCode !== 0) _xkbXmlEvdev.running = true
     }
+
     Process {
         id: _xkbXmlEvdev
         command: ["xmllint", "--xpath", "//layout/configItem[name and description]", "/usr/share/X11/xkb/rules/evdev.xml"]
@@ -48,7 +53,9 @@ Item {
 
     function _buildXmlMap(xml) {
         const map = {};
-        const re = /<configItem>[\s\S]*?<name>\s*([^<\s]+)\s*<\/name>[\s\S]*?<description>\s*([^<]+)\s*<\/description>/g;
+
+        const re = /<name>\s*([^<]+?)\s*<\/name>[\s\S]*?<description>\s*([^<]+?)\s*<\/description>/g;
+
         let m;
         while ((m = re.exec(xml)) !== null) {
             const code = (m[1] || "").trim();
@@ -56,6 +63,10 @@ Item {
             if (!code || !desc) continue;
             map[code] = _short(desc);
         }
+
+        if (Object.keys(map).length === 0)
+            return;
+
         _xkbMap = map;
 
         if (_layoutsModel.count > 0) {
@@ -133,6 +144,7 @@ Item {
                     activeIndex = -1;
                     activeLabel = "";
                 }
+
                 _rebuildVisible();
             }
         }
@@ -146,8 +158,10 @@ Item {
     function _setLayouts(raw) {
         const parts = raw.split(",").map(s => s.trim()).filter(Boolean);
         _layoutsModel.clear();
+
         const seen = new Set();
         let idx = 0;
+
         for (const p of parts) {
             if (seen.has(p)) continue;
             seen.add(p);
@@ -158,9 +172,11 @@ Item {
 
     function _rebuildVisible() {
         _visibleModel.clear();
+
         let arr = [];
         for (let i = 0; i < _layoutsModel.count; i++)
             arr.push(_layoutsModel.get(i));
+
         arr = arr.filter(i => i.layoutIndex !== activeIndex);
         arr.forEach(i => _visibleModel.append(i));
 
@@ -177,7 +193,7 @@ Item {
     }
 
     function _pretty(token) {
-        const code = token.replace(/\(.*\)$/, "");
+        const code = token.replace(/\(.*\)$/, "").trim();
         if (_xkbMap[code]) return code.toUpperCase() + " - " + _xkbMap[code];
         return code.toUpperCase() + " - " + code;
     }
