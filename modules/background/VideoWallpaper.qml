@@ -40,6 +40,16 @@ Item {
         });
     }
 
+    function setSessionLocked(locked) {
+        if (locked) {
+            if (player && player.mediaStatus !== MediaPlayer.NoMedia) {
+                player.pause();
+            }
+        } else {
+            player.play();
+        }
+    }
+
     MediaPlayer {
         id: player
         autoPlay: false

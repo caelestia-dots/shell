@@ -17,12 +17,24 @@ Item {
     property int loadedCount: 0
     property bool itemsReady: false
     property bool initStarted: false
+    property var sessionLock: null
+    readonly property bool sessionLocked: sessionLock ? sessionLock.secure : false
+
+    function applySessionLock(loader) {
+        if (!loader || !loader.item)
+            return;
+
+        if (typeof loader.item.setSessionLocked === "function")
+            loader.item.setSessionLocked(sessionLocked);
+    }
 
     function isVideo(path) {
         path = path.toString();
         if (!path || path.trim() === "")
             return false;
+
         const videoExtensions = [".mp4", ".mkv", ".webm", ".avi", ".mov", ".flv", ".wmv", ".gif"];
+
         const lower = path.toLowerCase();
         for (let i = 0; i < videoExtensions.length; i++) {
             if (lower.endsWith(videoExtensions[i]))
@@ -37,15 +49,11 @@ Item {
             initialize();
             return;
         }
-        waitForBothItems();
+        Qt.callLater(waitForBothItems);
     }
 
     function initialize() {
-        if (initStarted)
-            return;
-        if (loadedCount < 2)
-            return;
-        if (!itemsReady)
+        if (initStarted || loadedCount < 2 || !itemsReady)
             return;
 
         initStarted = true;
@@ -54,15 +62,15 @@ Item {
         twoLoader.item.isCurrent = false;
 
         initialized = true;
-
-        Qt.callLater(() => switchWallpaper());
+        Qt.callLater(switchWallpaper);
     }
 
     function switchWallpaper() {
         if (!initialized || !root.source)
             return;
 
-        let active, inactive;
+        let active;
+        let inactive;
 
         if (oneLoader.item.isCurrent) {
             active = oneLoader;
@@ -76,6 +84,7 @@ Item {
 
         waitForItem(inactive, function () {
             inactive.item.update(source);
+
             inactive.item.ready.connect(function handler() {
                 active.item.isCurrent = false;
                 inactive.item.isCurrent = true;
@@ -90,6 +99,11 @@ Item {
             return;
         }
         Qt.callLater(() => waitForItem(loader, callback));
+    }
+
+    onSessionLockedChanged: {
+        applySessionLock(oneLoader);
+        applySessionLock(twoLoader);
     }
 
     Loader {
@@ -164,11 +178,14 @@ Item {
         anchors.fill: parent
         asynchronous: true
         sourceComponent: imageComponent
+
         onLoaded: {
             loadedCount++;
             if (loadedCount === 2)
                 waitForBothItems();
         }
+
+        onItemChanged: applySessionLock(oneLoader)
     }
 
     Loader {
@@ -181,6 +198,8 @@ Item {
             if (loadedCount === 2)
                 waitForBothItems();
         }
+
+        onItemChanged: applySessionLock(twoLoader)
     }
 
     onSourceChanged: {
