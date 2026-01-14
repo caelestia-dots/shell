@@ -25,20 +25,23 @@ Item {
             return;
 
         root.source = path;
+        player.source = "";
         player.source = path;
-        player.play();
 
         player.onMediaStatusChanged.connect(function handler() {
             if (player.mediaStatus === MediaPlayer.BufferedMedia || player.mediaStatus === MediaPlayer.LoadedMedia) {
                 if (root.source === path) {
-                    root.ready();
+                    player.play();
+                    Qt.callLater(root.ready);
                     player.onMediaStatusChanged.disconnect(handler);
                 }
             }
         });
     }
 
-    function setSessionLocked(locked) {
+    function isPaused(locked) {
+        if (isCurrent === false)
+            return;
         if (locked) {
             if (player && player.mediaStatus !== MediaPlayer.NoMedia) {
                 player.pause();
@@ -65,7 +68,9 @@ Item {
                 }
             } else {
                 if (mediaStatus !== MediaPlayer.NoMedia) {
-                    stop();
+                    player.pause();
+
+                    // player.source = "";
                 }
             }
         }

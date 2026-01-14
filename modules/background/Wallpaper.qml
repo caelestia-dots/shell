@@ -19,13 +19,22 @@ Item {
     property bool initStarted: false
     property var sessionLock: null
     readonly property bool sessionLocked: sessionLock ? sessionLock.secure : false
+    property bool gamemodeEnabled: GameMode.enabled
 
     function applySessionLock(loader) {
         if (!loader || !loader.item)
             return;
 
-        if (typeof loader.item.setSessionLocked === "function")
-            loader.item.setSessionLocked(sessionLocked);
+        if (typeof loader.item.isPaused === "function")
+            loader.item.isPaused(sessionLocked);
+    }
+
+    function gamemodePause(loader) {
+        if (!loader || !loader.item)
+            return;
+
+        if (typeof loader.item.isPaused === "function")
+            loader.item.isPaused(gamemodeEnabled);
     }
 
     function isVideo(path) {
@@ -104,6 +113,10 @@ Item {
     onSessionLockedChanged: {
         applySessionLock(oneLoader);
         applySessionLock(twoLoader);
+    }
+    onGamemodeEnabledChanged: {
+        gamemodePause(oneLoader);
+        gamemodePause(twoLoader);
     }
 
     Loader {
