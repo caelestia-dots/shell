@@ -17,8 +17,6 @@ Item {
     property bool isCurrent: false
 
     signal ready
-    signal failed
-
     property string activePath: ""
 
     function update(path) {
@@ -59,7 +57,6 @@ Item {
             muted: Config.background.wallpaper.muteAudio
             volume: Config.background.wallpaper.volume
         }
-        onErrorOccurred: root.failed()
 
         function tryPlayVideo() {
             if (root.isCurrent) {
