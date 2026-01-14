@@ -28,25 +28,22 @@ Item {
 
         root.source = path;
         player.source = path;
+        player.play();
 
         player.onMediaStatusChanged.connect(function handler() {
             if (player.mediaStatus === MediaPlayer.BufferedMedia || player.mediaStatus === MediaPlayer.LoadedMedia) {
                 if (root.source === path) {
-                    Qt.callLater(() => root.ready());
+                    root.ready();
                     player.onMediaStatusChanged.disconnect(handler);
                 }
             }
         });
-
-        player.play();
     }
 
     MediaPlayer {
         id: player
-
         autoPlay: false
         loops: MediaPlayer.Infinite
-
         videoOutput: video
         audioOutput: AudioOutput {
             muted: Config.background.wallpaper.muteAudio

@@ -30,7 +30,6 @@ Item {
         img.onStatusChanged.connect(function handler() {
             if (img.status === Image.Ready) {
                 Qt.callLater(() => root.ready());
-
                 img.onStatusChanged.disconnect(handler);
             }
         });
