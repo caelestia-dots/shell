@@ -539,7 +539,47 @@ default, you must create it manually.
         },
         "showOnHover": false,
         "favoriteApps": [],
-        "hiddenApps": []
+        "hiddenApps": [],
+        "appCategories": [
+            {
+                "appId": "code-oss",
+                "category": "Development"
+            },
+            {
+                "appId": "spotify",
+                "category": "Media"
+            },
+            {
+                "appId": "steam",
+                "category": "Games"
+            }
+        ],
+        "categories": [
+            {
+                "name": "Development",
+                "icon": "code"
+            },
+            {
+                "name": "Graphics",
+                "icon": "palette"
+            },
+            {
+                "name": "Communication",
+                "icon": "chat"
+            },
+            {
+                "name": "Media",
+                "icon": "play_circle"
+            },
+            {
+                "name": "Games",
+                "icon": "sports_esports"
+            },
+            {
+                "name": "Utilities",
+                "icon": "build"
+            }
+        ]
     },
     "lock": {
         "recolourLogo": false

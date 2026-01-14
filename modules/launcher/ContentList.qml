@@ -18,6 +18,7 @@ Item {
     required property StyledTextField search
     required property int padding
     required property int rounding
+    required property string activeCategory
 
     readonly property bool showWallpapers: search.text.startsWith(`${Config.launcher.actionPrefix}wallpaper `)
     readonly property Item currentList: showWallpapers ? wallpaperList.item : appList.item
@@ -84,6 +85,7 @@ Item {
         sourceComponent: AppList {
             search: root.search
             visibilities: root.visibilities
+            activeCategory: root.activeCategory
         }
     }
 

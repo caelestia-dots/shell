@@ -3,10 +3,12 @@ pragma ComponentBehavior: Bound
 import "services"
 import qs.components
 import qs.components.controls
+import qs.components.containers
 import qs.services
 import qs.config
 import Quickshell
 import QtQuick
+import QtQuick.Layouts
 
 Item {
     id: root
@@ -17,9 +19,182 @@ Item {
 
     readonly property int padding: Appearance.padding.large
     readonly property int rounding: Appearance.rounding.large
+    
+    property string activeCategory: "all"
+    
+    readonly property var categoryList: [
+        { id: "all", name: qsTr("All"), icon: "apps" },
+        { id: "favorites", name: qsTr("Favorites"), icon: "favorite" }
+    ].concat(Config.launcher.categories.map(cat => ({ id: cat.name.toLowerCase(), name: cat.name, icon: cat.icon })))
+    
+    function navigateCategory(direction: int): void {
+        const currentIndex = categoryList.findIndex(cat => cat.id === activeCategory);
+        if (currentIndex === -1) return;
+        
+        const newIndex = currentIndex + direction;
+        if (newIndex >= 0 && newIndex < categoryList.length) {
+            activeCategory = categoryList[newIndex].id;
+            scrollToActiveTab();
+        }
+    }
+    
+    function scrollToActiveTab(): void {
+        Qt.callLater(() => {
+            if (!tabsFlickable || !tabsRow) return;
+            
+            const currentIndex = categoryList.findIndex(cat => cat.id === activeCategory);
+            if (currentIndex === -1) return;
+            
+            // Calculate position of the active tab
+            let tabX = 0;
+            for (let i = 0; i < currentIndex && i < tabsRow.children.length; i++) {
+                const child = tabsRow.children[i];
+                if (child) {
+                    tabX += child.width + tabsRow.spacing;
+                }
+            }
+            
+            const activeTab = tabsRow.children[currentIndex];
+            if (!activeTab) return;
+            
+            const tabWidth = activeTab.width;
+            const viewportStart = tabsFlickable.contentX;
+            const viewportEnd = tabsFlickable.contentX + tabsFlickable.width;
+            
+            // Scroll if tab is not fully visible
+            if (tabX < viewportStart) {
+                tabsFlickable.contentX = tabX;
+            } else if (tabX + tabWidth > viewportEnd) {
+                tabsFlickable.contentX = Math.min(
+                    tabsFlickable.contentWidth - tabsFlickable.width,
+                    tabX + tabWidth - tabsFlickable.width
+                );
+            }
+        });
+    }
 
     implicitWidth: listWrapper.width + padding * 2
-    implicitHeight: searchWrapper.height + listWrapper.height + padding * 2
+    implicitHeight: searchWrapper.height + listWrapper.height + tabsWrapper.height + padding * 3 + Appearance.spacing.normal
+
+    StyledRect {
+        id: tabsWrapper
+
+        color: Colours.layer(Colours.palette.m3surfaceContainer, 2)
+        radius: Appearance.rounding.large
+
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.bottom: listWrapper.top
+        anchors.margins: root.padding
+        anchors.bottomMargin: Appearance.spacing.small
+
+        implicitHeight: tabsRow.height + Appearance.padding.normal * 2
+
+        RowLayout {
+            id: tabsContent
+            anchors.fill: parent
+            anchors.margins: Appearance.padding.normal
+            spacing: Appearance.spacing.smaller
+
+            IconButton {
+                icon: "chevron_left"
+                visible: tabsFlickable.contentWidth > tabsFlickable.width
+                onClicked: {
+                    tabsFlickable.contentX = Math.max(0, tabsFlickable.contentX - 100);
+                }
+            }
+
+            StyledFlickable {
+                id: tabsFlickable
+                Layout.fillWidth: true
+                Layout.preferredHeight: tabsRow.height
+                flickableDirection: Flickable.HorizontalFlick
+                contentWidth: tabsRow.width
+                clip: true
+
+                MouseArea {
+                    anchors.fill: parent
+                    propagateComposedEvents: true
+                    
+                    onWheel: wheel => {
+                        const delta = wheel.angleDelta.y || wheel.angleDelta.x;
+                        tabsFlickable.contentX = Math.max(0, Math.min(
+                            tabsFlickable.contentWidth - tabsFlickable.width,
+                            tabsFlickable.contentX - delta
+                        ));
+                        wheel.accepted = true;
+                    }
+                    
+                    onPressed: mouse => {
+                        mouse.accepted = false;
+                    }
+                }
+
+                Row {
+                    id: tabsRow
+                    spacing: Appearance.spacing.small
+
+                    Repeater {
+                        model: root.categoryList
+
+                        delegate: StyledRect {
+                            required property var modelData
+                            
+                            property bool isActive: root.activeCategory === modelData.id
+
+                            implicitWidth: tabContent.width + Appearance.padding.normal * 2
+                            implicitHeight: tabContent.height + Appearance.padding.smaller * 2
+
+                            color: isActive ? Colours.palette.m3secondaryContainer : "transparent"
+                            radius: Appearance.rounding.full
+
+                            StateLayer {
+                                radius: parent.radius
+                                function onClicked(): void {
+                                    root.activeCategory = modelData.id;
+                                }
+                            }
+
+                            Row {
+                                id: tabContent
+                                anchors.centerIn: parent
+                                spacing: Appearance.spacing.smaller
+
+                                MaterialIcon {
+                                    anchors.verticalCenter: parent.verticalCenter
+                                    text: modelData.icon
+                                    font.pointSize: Appearance.font.size.small
+                                    color: isActive ? Colours.palette.m3onSecondaryContainer : Colours.palette.m3onSurface
+                                }
+
+                                StyledText {
+                                    anchors.verticalCenter: parent.verticalCenter
+                                    text: modelData.name
+                                    font.pointSize: Appearance.font.size.small
+                                    font.weight: isActive ? 500 : 400
+                                    color: isActive ? Colours.palette.m3onSecondaryContainer : Colours.palette.m3onSurface
+                                }
+                            }
+
+                            Behavior on color {
+                                ColorAnimation {
+                                    duration: Appearance.anim.durations.small
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            IconButton {
+                icon: "chevron_right"
+                visible: tabsFlickable.contentWidth > tabsFlickable.width
+                onClicked: {
+                    tabsFlickable.contentX = Math.min(tabsFlickable.contentWidth - tabsFlickable.width, tabsFlickable.contentX + 100);
+                }
+            }
+        }
+    }
 
     Item {
         id: listWrapper
@@ -37,10 +212,11 @@ Item {
             content: root
             visibilities: root.visibilities
             panels: root.panels
-            maxHeight: root.maxHeight - searchWrapper.implicitHeight - root.padding * 3
+            maxHeight: root.maxHeight - searchWrapper.implicitHeight - tabsWrapper.implicitHeight - root.padding * 4
             search: search
             padding: root.padding
             rounding: root.rounding
+            activeCategory: root.activeCategory
         }
     }
 
@@ -103,6 +279,20 @@ Item {
 
             Keys.onUpPressed: list.currentList?.decrementCurrentIndex()
             Keys.onDownPressed: list.currentList?.incrementCurrentIndex()
+            
+            Keys.onLeftPressed: event => {
+                if (event.modifiers === Qt.NoModifier) {
+                    root.navigateCategory(-1);
+                    event.accepted = true;
+                }
+            }
+            
+            Keys.onRightPressed: event => {
+                if (event.modifiers === Qt.NoModifier) {
+                    root.navigateCategory(1);
+                    event.accepted = true;
+                }
+            }
 
             Keys.onEscapePressed: root.visibilities.launcher = false
 

@@ -15,11 +15,42 @@ StyledListView {
 
     required property StyledTextField search
     required property PersistentProperties visibilities
+    required property string activeCategory
 
     model: ScriptModel {
         id: model
 
         onValuesChanged: root.currentIndex = 0
+    }
+    
+    // Helper function to get category for an app
+    function getAppCategory(appId: string): string {
+        if (!Config.launcher.appCategories) return "";
+        for (let i = 0; i < Config.launcher.appCategories.length; i++) {
+            const item = Config.launcher.appCategories[i];
+            if (item && item.appId === appId) {
+                return item.category || "";
+            }
+        }
+        return "";
+    }
+    
+    function filterAppsByCategory(apps) {
+        if (root.activeCategory === "all") {
+            return apps;
+        } else if (root.activeCategory === "favorites") {
+            return apps.filter(app => {
+                const appId = app.id || app.entry?.id;
+                return Config.launcher.favoriteApps && Config.launcher.favoriteApps.includes(appId);
+            });
+        } else {
+            // Custom category
+            return apps.filter(app => {
+                const appId = app.id || app.entry?.id;
+                const appCategory = getAppCategory(appId);
+                return appCategory && appCategory.toLowerCase() === root.activeCategory;
+            });
+        }
     }
 
     spacing: Appearance.spacing.small
@@ -72,7 +103,7 @@ StyledListView {
             name: "apps"
 
             PropertyChanges {
-                model.values: Apps.search(search.text)
+                model.values: root.filterAppsByCategory(Apps.search(search.text))
                 root.delegate: appItem
             }
         },
