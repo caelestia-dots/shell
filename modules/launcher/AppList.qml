@@ -20,19 +20,97 @@ StyledListView {
     model: ScriptModel {
         id: model
 
-        onValuesChanged: root.currentIndex = 0
+        onValuesChanged: {
+            root.currentIndex = 0;
+        }
     }
     
-    // Helper function to get category for an app
-    function getAppCategory(appId: string): string {
-        if (!Config.launcher.appCategories) return "";
-        for (let i = 0; i < Config.launcher.appCategories.length; i++) {
-            const item = Config.launcher.appCategories[i];
-            if (item && item.appId === appId) {
-                return item.category || "";
+    property string previousCategory: ""
+    property var pendingModelUpdate: null
+    
+    onActiveCategoryChanged: {
+        if (previousCategory !== "" && root.state === "apps") {
+            // Stop any running animation first
+            if (categoryChangeAnimation.running) {
+                categoryChangeAnimation.stop();
+                // Reset opacity and scale immediately
+                root.opacity = 1;
+                root.scale = 1;
+            }
+            // Store the new filtered apps
+            pendingModelUpdate = root.filterAppsByCategory(Apps.search(search.text));
+            // Start fade out animation
+            categoryChangeAnimation.start();
+        }
+        previousCategory = activeCategory;
+    }
+    
+    SequentialAnimation {
+        id: categoryChangeAnimation
+        
+        ParallelAnimation {
+            Anim {
+                target: root
+                property: "opacity"
+                to: 0
+                duration: Appearance.anim.durations.small
+                easing.bezierCurve: Appearance.anim.curves.standardAccel
+            }
+            Anim {
+                target: root
+                property: "scale"
+                to: 0.95
+                duration: Appearance.anim.durations.small
+                easing.bezierCurve: Appearance.anim.curves.emphasizedAccel
             }
         }
-        return "";
+        
+        ScriptAction {
+            script: {
+                // Update model while invisible
+                if (root.pendingModelUpdate !== null) {
+                    model.values = root.pendingModelUpdate;
+                    root.pendingModelUpdate = null;
+                }
+            }
+        }
+        
+        ParallelAnimation {
+            Anim {
+                target: root
+                property: "opacity"
+                to: 1
+                duration: Appearance.anim.durations.small
+                easing.bezierCurve: Appearance.anim.curves.standardDecel
+            }
+            Anim {
+                target: root
+                property: "scale"
+                to: 1
+                duration: Appearance.anim.durations.small
+                easing.bezierCurve: Appearance.anim.curves.emphasizedDecel
+            }
+        }
+    }
+    
+    // Helper function to check if app has a specific category
+    function appHasCategory(appId: string, categoryName: string): bool {
+        if (!Config.launcher.categories) return false;
+        
+        for (let i = 0; i < Config.launcher.categories.length; i++) {
+            const category = Config.launcher.categories[i];
+            if (!category || category.name.toLowerCase() !== categoryName.toLowerCase()) continue;
+            if (!category.apps) continue;
+            
+            if (typeof category.apps === 'object' && category.apps.length !== undefined) {
+                for (let j = 0; j < category.apps.length; j++) {
+                    if (category.apps[j] === appId) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
     }
     
     function filterAppsByCategory(apps) {
@@ -47,8 +125,7 @@ StyledListView {
             // Custom category
             return apps.filter(app => {
                 const appId = app.id || app.entry?.id;
-                const appCategory = getAppCategory(appId);
-                return appCategory && appCategory.toLowerCase() === root.activeCategory;
+                return appHasCategory(appId, root.activeCategory);
             });
         }
     }
@@ -105,6 +182,8 @@ StyledListView {
             PropertyChanges {
                 model.values: root.filterAppsByCategory(Apps.search(search.text))
                 root.delegate: appItem
+                root.opacity: 1
+                root.scale: 1
             }
         },
         State {
@@ -198,30 +277,58 @@ StyledListView {
     add: Transition {
         enabled: !root.state
 
-        Anim {
-            properties: "opacity,scale"
-            from: 0
-            to: 1
+        ParallelAnimation {
+            Anim {
+                property: "opacity"
+                from: 0
+                to: 1
+                duration: Appearance.anim.durations.normal
+                easing.bezierCurve: Appearance.anim.curves.standardDecel
+            }
+            Anim {
+                property: "scale"
+                from: 0.8
+                to: 1
+                duration: Appearance.anim.durations.normal
+                easing.bezierCurve: Appearance.anim.curves.emphasizedDecel
+            }
         }
     }
 
     remove: Transition {
         enabled: !root.state
 
-        Anim {
-            properties: "opacity,scale"
-            from: 1
-            to: 0
+        ParallelAnimation {
+            Anim {
+                property: "opacity"
+                from: 1
+                to: 0
+                duration: Appearance.anim.durations.normal
+                easing.bezierCurve: Appearance.anim.curves.standardAccel
+            }
+            Anim {
+                property: "scale"
+                from: 1
+                to: 0.8
+                duration: Appearance.anim.durations.normal
+                easing.bezierCurve: Appearance.anim.curves.emphasizedAccel
+            }
         }
     }
 
     move: Transition {
-        Anim {
-            property: "y"
-        }
-        Anim {
-            properties: "opacity,scale"
-            to: 1
+        ParallelAnimation {
+            Anim {
+                property: "y"
+                duration: Appearance.anim.durations.normal
+                easing.bezierCurve: Appearance.anim.curves.emphasized
+            }
+            Anim {
+                properties: "opacity,scale"
+                to: 1
+                duration: Appearance.anim.durations.normal
+                easing.bezierCurve: Appearance.anim.curves.standardDecel
+            }
         }
     }
 

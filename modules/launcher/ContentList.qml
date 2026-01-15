@@ -24,6 +24,7 @@ Item {
     readonly property Item currentList: showWallpapers ? wallpaperList.item : appList.item
 
     anchors.horizontalCenter: parent.horizontalCenter
+    anchors.top: parent.top
     anchors.bottom: parent.bottom
 
     clip: true

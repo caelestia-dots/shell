@@ -94,42 +94,85 @@ Item {
 
     property string searchText: ""
 
-    // Helper function to get category for an app
-    function getAppCategory(appId: string): string {
-        if (!Config.launcher.appCategories) return "";
-        for (let i = 0; i < Config.launcher.appCategories.length; i++) {
-            const item = Config.launcher.appCategories[i];
-            if (item && item.appId === appId) {
-                return item.category || "";
-            }
-        }
-        return "";
-    }
-
-    // Helper function to set category for an app
-    function setAppCategory(appId: string, category: string): void {
-        const newCategories = [];
-        let found = false;
+    // Helper function to get categories for an app (returns array)
+    function getAppCategories(appId: string): list<string> {
+        const cats = [];
+        if (!Config.launcher.categories) return cats;
         
-        // Copy existing categories, updating if found
-        for (let i = 0; i < Config.launcher.appCategories.length; i++) {
-            const item = Config.launcher.appCategories[i];
-            if (item && item.appId === appId) {
-                if (category) {
-                    newCategories.push({ appId: appId, category: category });
+        for (let i = 0; i < Config.launcher.categories.length; i++) {
+            const category = Config.launcher.categories[i];
+            if (!category || !category.apps) continue;
+            
+            // Check if this app is in this category's apps list
+            if (typeof category.apps === 'object' && category.apps.length !== undefined) {
+                for (let j = 0; j < category.apps.length; j++) {
+                    if (category.apps[j] === appId) {
+                        cats.push(category.name);
+                        break;
+                    }
                 }
-                found = true;
-            } else {
-                newCategories.push(item);
             }
         }
+        return cats;
+    }
+    
+    // Helper function to check if app has a specific category
+    function appHasCategory(appId: string, categoryName: string): bool {
+        if (!Config.launcher.categories) return false;
         
-        // Add new entry if not found
-        if (!found && category) {
-            newCategories.push({ appId: appId, category: category });
+        for (let i = 0; i < Config.launcher.categories.length; i++) {
+            const category = Config.launcher.categories[i];
+            if (!category || category.name.toLowerCase() !== categoryName.toLowerCase()) continue;
+            if (!category.apps) continue;
+            
+            if (typeof category.apps === 'object' && category.apps.length !== undefined) {
+                for (let j = 0; j < category.apps.length; j++) {
+                    if (category.apps[j] === appId) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
+    
+    // Helper function to toggle category for an app
+    function toggleAppCategory(appId: string, categoryName: string): void {
+        if (!Config.launcher.categories) return;
+        
+        const newCategories = [];
+        
+        for (let i = 0; i < Config.launcher.categories.length; i++) {
+            const category = Config.launcher.categories[i];
+            if (!category) continue;
+            
+            const newCategory = {
+                name: category.name,
+                icon: category.icon,
+                apps: []
+            };
+            
+            // Copy existing apps
+            if (category.apps && typeof category.apps === 'object' && category.apps.length !== undefined) {
+                for (let j = 0; j < category.apps.length; j++) {
+                    newCategory.apps.push(category.apps[j]);
+                }
+            }
+            
+            // Toggle this app in this category
+            if (category.name.toLowerCase() === categoryName.toLowerCase()) {
+                const index = newCategory.apps.indexOf(appId);
+                if (index >= 0) {
+                    newCategory.apps.splice(index, 1);
+                } else {
+                    newCategory.apps.push(appId);
+                }
+            }
+            
+            newCategories.push(newCategory);
         }
         
-        Config.launcher.appCategories = newCategories;
+        Config.launcher.categories = newCategories;
         Config.save();
     }
 
@@ -151,14 +194,16 @@ Item {
             }
         } else {
             // Custom category
+            console.log(`Filtering for category: ${root.activeCategory}`);
             for (let i = 0; i < allAppsDb.apps.length; i++) {
                 const app = allAppsDb.apps[i];
                 const appId = app.id || app.entry?.id;
-                const appCategory = getAppCategory(appId);
-                if (appCategory && appCategory.toLowerCase() === root.activeCategory) {
+                if (appHasCategory(appId, root.activeCategory)) {
+                    console.log(`Found app in category: ${appId}`);
                     baseApps.push(app);
                 }
             }
+            console.log(`Total apps in ${root.activeCategory}: ${baseApps.length}`);
         }
         
         // Then filter by search text
@@ -279,8 +324,7 @@ Item {
                     Repeater {
                         model: [
                             { id: "all", name: qsTr("All"), icon: "apps" },
-                            { id: "favorites", name: qsTr("Favorites"), icon: "favorite" },
-                            { id: "commands", name: qsTr("Commands"), icon: "terminal" }
+                            { id: "favorites", name: qsTr("Favorites"), icon: "favorite" }
                         ].concat(Config.launcher.categories.map(cat => ({ id: cat.name.toLowerCase(), name: cat.name, icon: cat.icon })))
 
                         delegate: StyledRect {
@@ -819,8 +863,7 @@ Item {
                                         const app = appDetailsLayout.displayedApp;
                                         if (!app) return false;
                                         const appId = app.id || app.entry?.id;
-                                        const appCategory = root.getAppCategory(appId);
-                                        return appCategory && appCategory.toLowerCase() === categoryName.toLowerCase();
+                                        return root.appHasCategory(appId, categoryName);
                                     }
 
                                     color: isAssigned ? Colours.palette.m3secondaryContainer : Colours.tPalette.m3surfaceContainerHigh
@@ -832,14 +875,8 @@ Item {
                                             const app = appDetailsLayout.displayedApp;
                                             if (!app) return;
                                             const appId = app.id || app.entry?.id;
-                                            
-                                            if (isAssigned) {
-                                                // Remove category assignment
-                                                root.setAppCategory(appId, "");
-                                            } else {
-                                                // Assign to this category
-                                                root.setAppCategory(appId, categoryName);
-                                            }
+                                            console.log(`Toggling category ${categoryName} for app ${appId}`);
+                                            root.toggleAppCategory(appId, categoryName);
                                         }
                                     }
 
@@ -882,14 +919,24 @@ Item {
                                     const app = appDetailsLayout.displayedApp;
                                     if (!app) return false;
                                     const appId = app.id || app.entry?.id;
-                                    return root.getAppCategory(appId) !== "";
+                                    return root.getAppCategories(appId).length > 0;
                                 }
 
                                 onClicked: {
                                     const app = appDetailsLayout.displayedApp;
                                     if (!app) return;
                                     const appId = app.id || app.entry?.id;
-                                    root.setAppCategory(appId, "");
+                                    
+                                    // Remove all categories for this app
+                                    const newCategories = [];
+                                    for (let i = 0; i < Config.launcher.appCategories.length; i++) {
+                                        const item = Config.launcher.appCategories[i];
+                                        if (!item || item.appId !== appId) {
+                                            newCategories.push(item);
+                                        }
+                                    }
+                                    Config.launcher.appCategories = newCategories;
+                                    Config.save();
                                 }
                             }
                         }

@@ -538,46 +538,38 @@ default, you must create it manually.
             "wallpapers": false
         },
         "showOnHover": false,
-        "favoriteApps": [],
-        "hiddenApps": [],
-        "appCategories": [
-            {
-                "appId": "code-oss",
-                "category": "Development"
-            },
-            {
-                "appId": "spotify",
-                "category": "Media"
-            },
-            {
-                "appId": "steam",
-                "category": "Games"
-            }
-        ],
+        "favoriteApps": ["zen", "vesktop", "code-oss"],
+        "hiddenApps": ["electron34", "thunar-settings"],
         "categories": [
             {
                 "name": "Development",
-                "icon": "code"
+                "icon": "code",
+                "apps": ["code-oss", "github-desktop"]
             },
             {
                 "name": "Graphics",
-                "icon": "palette"
+                "icon": "palette",
+                "apps": ["org.inkscape.Inkscape", "gimp"]
             },
             {
                 "name": "Communication",
-                "icon": "chat"
+                "icon": "chat",
+                "apps": ["vesktop", "discord"]
             },
             {
                 "name": "Media",
-                "icon": "play_circle"
+                "icon": "play_circle",
+                "apps": ["spotify", "obs"]
             },
             {
                 "name": "Games",
-                "icon": "sports_esports"
+                "icon": "sports_esports",
+                "apps": ["steam"]
             },
             {
                 "name": "Utilities",
-                "icon": "build"
+                "icon": "build",
+                "apps": ["obs", "thunar"]
             }
         ]
     },

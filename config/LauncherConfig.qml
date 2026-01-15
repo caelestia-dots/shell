@@ -12,15 +12,14 @@ JsonObject {
     property bool vimKeybinds: false
     property list<string> favoriteApps: []
     property list<string> hiddenApps: []
-    property list<var> appCategories: [] // List of { appId: string, category: string } objects
     property list<var> categories: [
-        { name: "Development", icon: "code" },
-        { name: "Graphics", icon: "palette" },
-        { name: "Communication", icon: "chat" },
-        { name: "Media", icon: "play_circle" },
-        { name: "Office", icon: "description" },
-        { name: "Games", icon: "sports_esports" },
-        { name: "Utilities", icon: "build" }
+        { name: "Development", icon: "code", apps: [] },
+        { name: "Graphics", icon: "palette", apps: [] },
+        { name: "Communication", icon: "chat", apps: [] },
+        { name: "Media", icon: "play_circle", apps: [] },
+        { name: "Office", icon: "description", apps: [] },
+        { name: "Games", icon: "sports_esports", apps: [] },
+        { name: "Utilities", icon: "build", apps: [] }
     ]
     property UseFuzzy useFuzzy: UseFuzzy {}
     property Sizes sizes: Sizes {}

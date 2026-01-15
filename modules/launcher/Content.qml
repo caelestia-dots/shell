@@ -21,6 +21,7 @@ Item {
     readonly property int rounding: Appearance.rounding.large
     
     property string activeCategory: "all"
+    property bool showNavbar: true
     
     readonly property var categoryList: [
         { id: "all", name: qsTr("All"), icon: "apps" },
@@ -74,7 +75,7 @@ Item {
     }
 
     implicitWidth: listWrapper.width + padding * 2
-    implicitHeight: searchWrapper.height + listWrapper.height + tabsWrapper.height + padding * 3 + Appearance.spacing.normal
+    implicitHeight: searchWrapper.height + list.height + (showNavbar ? tabsWrapper.height + padding * 2 : 0) + padding * 3 + Appearance.spacing.normal
 
     StyledRect {
         id: tabsWrapper
@@ -84,21 +85,42 @@ Item {
 
         anchors.left: parent.left
         anchors.right: parent.right
-        anchors.bottom: listWrapper.top
-        anchors.margins: root.padding
-        anchors.bottomMargin: Appearance.spacing.small
+        anchors.top: parent.top
+        anchors.leftMargin: root.padding
+        anchors.rightMargin: root.padding
+        anchors.topMargin: root.padding
 
-        implicitHeight: tabsRow.height + Appearance.padding.normal * 2
+        visible: opacity > 0
+        opacity: root.showNavbar ? 1 : 0
+        implicitHeight: root.showNavbar ? tabsRow.height + Appearance.padding.small + Appearance.padding.normal : 0
+        
+        Behavior on opacity {
+            Anim {
+                duration: Appearance.anim.durations.normal
+                easing.bezierCurve: Appearance.anim.curves.standard
+            }
+        }
+        
+        Behavior on implicitHeight {
+            Anim {
+                duration: Appearance.anim.durations.normal
+                easing.bezierCurve: Appearance.anim.curves.emphasized
+            }
+        }
 
         RowLayout {
             id: tabsContent
             anchors.fill: parent
-            anchors.margins: Appearance.padding.normal
+            anchors.leftMargin: Appearance.padding.normal
+            anchors.rightMargin: Appearance.padding.normal
+            anchors.topMargin: Appearance.padding.small
+            anchors.bottomMargin: Appearance.padding.normal
             spacing: Appearance.spacing.smaller
 
             IconButton {
                 icon: "chevron_left"
                 visible: tabsFlickable.contentWidth > tabsFlickable.width
+                type: IconButton.Tonal
                 onClicked: {
                     tabsFlickable.contentX = Math.max(0, tabsFlickable.contentX - 100);
                 }
@@ -189,6 +211,7 @@ Item {
             IconButton {
                 icon: "chevron_right"
                 visible: tabsFlickable.contentWidth > tabsFlickable.width
+                type: IconButton.Tonal
                 onClicked: {
                     tabsFlickable.contentX = Math.min(tabsFlickable.contentWidth - tabsFlickable.width, tabsFlickable.contentX + 100);
                 }
@@ -200,10 +223,12 @@ Item {
         id: listWrapper
 
         implicitWidth: list.width
-        implicitHeight: list.height + root.padding
+        implicitHeight: list.height
 
         anchors.horizontalCenter: parent.horizontalCenter
+        anchors.top: tabsWrapper.bottom
         anchors.bottom: searchWrapper.top
+        anchors.topMargin: root.padding
         anchors.bottomMargin: root.padding
 
         ContentList {
@@ -256,6 +281,10 @@ Item {
             bottomPadding: Appearance.padding.larger
 
             placeholderText: qsTr("Type \"%1\" for commands").arg(Config.launcher.actionPrefix)
+            
+            onTextChanged: {
+                root.showNavbar = !text.startsWith(Config.launcher.actionPrefix);
+            }
 
             onAccepted: {
                 const currentItem = list.currentList?.currentItem;
