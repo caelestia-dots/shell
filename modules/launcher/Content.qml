@@ -74,8 +74,8 @@ Item {
         });
     }
 
-    implicitWidth: listWrapper.width + padding * 2
-    implicitHeight: searchWrapper.height + list.height + (showNavbar ? tabsWrapper.height + padding * 2 : 0) + padding * 3 + Appearance.spacing.normal
+    implicitWidth: list.width + padding * 2
+    implicitHeight: searchWrapper.implicitHeight + list.implicitHeight + (showNavbar ? tabsWrapper.implicitHeight + padding * 2 : 0) + padding * 2 + Appearance.spacing.normal
 
     StyledRect {
         id: tabsWrapper
@@ -219,11 +219,8 @@ Item {
         }
     }
 
-    Item {
-        id: listWrapper
-
-        implicitWidth: list.width
-        implicitHeight: list.height
+    ContentList {
+        id: list
 
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.top: tabsWrapper.bottom
@@ -231,18 +228,14 @@ Item {
         anchors.topMargin: root.padding
         anchors.bottomMargin: root.padding
 
-        ContentList {
-            id: list
-
-            content: root
-            visibilities: root.visibilities
-            panels: root.panels
-            maxHeight: root.maxHeight - searchWrapper.implicitHeight - tabsWrapper.implicitHeight - root.padding * 4
-            search: search
-            padding: root.padding
-            rounding: root.rounding
-            activeCategory: root.activeCategory
-        }
+        content: root
+        visibilities: root.visibilities
+        panels: root.panels
+        maxHeight: root.maxHeight - searchWrapper.implicitHeight - (root.showNavbar ? tabsWrapper.implicitHeight : 0) - root.padding * 4
+        search: search
+        padding: root.padding
+        rounding: root.rounding
+        activeCategory: root.activeCategory
     }
 
     StyledRect {
