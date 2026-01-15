@@ -25,16 +25,8 @@ Item {
         if (!loader || !loader.item)
             return;
 
-        if (typeof loader.item.isPaused === "function")
-            loader.item.isPaused(sessionLocked);
-    }
-
-    function gamemodePause(loader) {
-        if (!loader || !loader.item)
-            return;
-
-        if (typeof loader.item.isPaused === "function")
-            loader.item.isPaused(gamemodeEnabled);
+        if (typeof loader.item.pauseVideo === "function")
+            loader.item.pauseVideo(sessionLocked);
     }
 
     function isVideo(path) {
@@ -113,10 +105,6 @@ Item {
     onSessionLockedChanged: {
         applySessionLock(oneLoader);
         applySessionLock(twoLoader);
-    }
-    onGamemodeEnabledChanged: {
-        gamemodePause(oneLoader);
-        gamemodePause(twoLoader);
     }
 
     Loader {

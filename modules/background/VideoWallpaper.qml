@@ -13,33 +13,37 @@ Item {
     id: root
     anchors.fill: parent
 
-    property string source: ""
     property bool isCurrent: false
-
     signal ready
-    property string activePath: ""
+    property string source: ""
+    property bool gamemodeEnabled: GameMode.enabled
+    property bool pendingUnload: false
+    property string visualMode: !root.isCurrent ? "none" : gamemodeEnabled ? "placeholder" : "video"
 
     function update(path) {
+        if (gamemodeEnabled) {
+            root.source = path;
+            Qt.callLater(root.ready);
+            return;
+        }
         path = path.toString();
         if (!path || path.trim() === "")
             return;
 
-        root.source = path;
         player.source = "";
         player.source = path;
+        root.source = path;
 
         player.onMediaStatusChanged.connect(function handler() {
             if (player.mediaStatus === MediaPlayer.BufferedMedia || player.mediaStatus === MediaPlayer.LoadedMedia) {
-                if (root.source === path) {
-                    player.play();
-                    Qt.callLater(root.ready);
-                    player.onMediaStatusChanged.disconnect(handler);
-                }
+                player.play();
+                Qt.callLater(root.ready);
+                player.onMediaStatusChanged.disconnect(handler);
             }
         });
     }
 
-    function isPaused(locked) {
+    function pauseVideo(locked) {
         if (isCurrent === false)
             return;
         if (locked) {
@@ -48,6 +52,20 @@ Item {
             }
         } else {
             player.play();
+        }
+    }
+
+    onGamemodeEnabledChanged: {
+        if (gamemodeEnabled) {
+            pendingUnload = true;
+            player.pause();
+            // video.opacity = 0;
+            // gameModePlaceholder.opacity = 1;
+        } else if (root.isCurrent) {
+            update(root.source);
+            player.tryPlayVideo();
+            // video.opacity = 1;
+            // gameModePlaceholder.opacity = 0;
         }
     }
 
@@ -69,6 +87,7 @@ Item {
             } else {
                 if (mediaStatus !== MediaPlayer.NoMedia) {
                     player.pause();
+                    pendingUnload = true;
 
                     // player.source = "";
                 }
@@ -79,27 +98,85 @@ Item {
     VideoOutput {
         id: video
         anchors.fill: parent
-        opacity: root.isCurrent ? 1 : 0
+        opacity: visualMode === "video" ? 1 : 0
         scale: Wallpapers.showPreview ? 1 : 0.8
         fillMode: VideoOutput.PreserveAspectCrop
-    }
 
-    states: State {
-        name: "visible"
-        when: root.isCurrent
-        PropertyChanges {
-            target: video
-            opacity: 1
-            scale: 1
+        Behavior on opacity {
+            Anim {
+                onRunningChanged: {
+                    if (running)
+                        return;
+                    if (video.opacity === 0 && pendingUnload) {
+                        player.source = "";
+                    }
+                }
+            }
         }
     }
 
-    transitions: Transition {
-        Anim {
-            target: video
-            properties: "opacity,scale"
+    StyledRect {
+        id: gameModePlaceholder
+        opacity: visualMode === "placeholder" ? 1 : 0
+        anchors.fill: parent
+        color: Colours.palette.m3surfaceContainer
+
+        Behavior on opacity {
+            Anim {}
+        }
+
+        Row {
+            anchors.centerIn: parent
+            spacing: Appearance.spacing.large
+
+            MaterialIcon {
+                text: "stadia_controller"
+                color: Colours.palette.m3onSurfaceVariant
+                font.pointSize: Appearance.font.size.extraLarge * 5
+            }
+
+            Column {
+                anchors.verticalCenter: parent.verticalCenter
+                spacing: Appearance.spacing.small
+
+                StyledText {
+                    text: qsTr("Video wallpapers are disabled in Game Mode")
+                    color: Colours.palette.m3onSurfaceVariant
+                    font.pointSize: Appearance.font.size.extraLarge
+                    font.bold: true
+                }
+            }
         }
     }
+
+    states: [
+        State {
+            name: "visible"
+            when: root.isCurrent
+            PropertyChanges {
+                target: video
+                opacity: 1
+                scale: 1
+            }
+        }
+    ]
+
+    transitions: [
+        Transition {
+            Anim {
+                target: video
+                properties: "opacity,scale"
+            }
+
+            onRunningChanged: {
+                if (running)
+                    return;
+                if (video.opacity === 0 && pendingUnload) {
+                    player.source = "";
+                }
+            }
+        }
+    ]
 
     Connections {
         target: root
