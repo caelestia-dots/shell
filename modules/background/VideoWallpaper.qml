@@ -30,8 +30,8 @@ Item {
         if (!path || path.trim() === "")
             return;
 
-        player.source = "";
         player.source = path;
+
         root.source = path;
 
         player.onMediaStatusChanged.connect(function handler() {
@@ -57,8 +57,8 @@ Item {
 
     onGamemodeEnabledChanged: {
         if (gamemodeEnabled) {
-            pendingUnload = true;
             player.pause();
+            pendingUnload = true;
             // video.opacity = 0;
             // gameModePlaceholder.opacity = 1;
         } else if (root.isCurrent) {
@@ -99,7 +99,7 @@ Item {
         id: video
         anchors.fill: parent
         opacity: visualMode === "video" ? 1 : 0
-        scale: Wallpapers.showPreview ? 1 : 0.8
+        scale: (root.isCurrent ? 1 : Wallpapers.showPreview ? 1 : 0.8)
         fillMode: VideoOutput.PreserveAspectCrop
 
         Behavior on opacity {
@@ -107,11 +107,16 @@ Item {
                 onRunningChanged: {
                     if (running)
                         return;
-                    if (video.opacity === 0 && pendingUnload) {
+                    if (pendingUnload && video.opacity === 0) {
                         player.source = "";
+                        pendingUnload = false;
                     }
                 }
             }
+        }
+
+        Behavior on scale {
+            Anim {}
         }
     }
 
@@ -149,34 +154,34 @@ Item {
         }
     }
 
-    states: [
-        State {
-            name: "visible"
-            when: root.isCurrent
-            PropertyChanges {
-                target: video
-                opacity: 1
-                scale: 1
-            }
-        }
-    ]
+    // states: [
+    //     State {
+    //         name: "visible"
+    //         when: root.isCurrent
+    //         PropertyChanges {
+    //             target: video
+    //             opacity: 1
+    //             scale: 1
+    //         }
+    //     }
+    // ]
 
-    transitions: [
-        Transition {
-            Anim {
-                target: video
-                properties: "opacity,scale"
-            }
+    // transitions: [
+    //     Transition {
+    //         Anim {
+    //             target: video
+    //             properties: "opacity,scale"
+    //         }
 
-            onRunningChanged: {
-                if (running)
-                    return;
-                if (video.opacity === 0 && pendingUnload) {
-                    player.source = "";
-                }
-            }
-        }
-    ]
+    //         onRunningChanged: {
+    //             if (running)
+    //                 return;
+    //             if (video.opacity === 0 && pendingUnload) {
+    //                 player.source = "";
+    //             }
+    //         }
+    //     }
+    // ]
 
     Connections {
         target: root
