@@ -4,6 +4,7 @@
 #include <qobject.h>
 #include <qqmlintegration.h>
 #include <qqmllist.h>
+#include <qregularexpression.h>
 #include <qtimer.h>
 
 namespace caelestia {
@@ -66,6 +67,7 @@ class AppDb : public QObject {
     Q_PROPERTY(QString uuid READ uuid CONSTANT)
     Q_PROPERTY(QString path READ path WRITE setPath NOTIFY pathChanged REQUIRED)
     Q_PROPERTY(QObjectList entries READ entries WRITE setEntries NOTIFY entriesChanged REQUIRED)
+    Q_PROPERTY(QStringList favoriteApps READ favoriteApps WRITE setFavoriteApps REQUIRED)
     Q_PROPERTY(QQmlListProperty<caelestia::AppEntry> apps READ apps NOTIFY appsChanged)
 
 public:
@@ -78,6 +80,9 @@ public:
 
     [[nodiscard]] QObjectList entries() const;
     void setEntries(const QObjectList& entries);
+
+    [[nodiscard]] QStringList favoriteApps() const;
+    void setFavoriteApps(const QStringList& favApps);
 
     [[nodiscard]] QQmlListProperty<AppEntry> apps();
 
@@ -94,10 +99,14 @@ private:
     const QString m_uuid;
     QString m_path;
     QObjectList m_entries;
+    QStringList m_favoriteApps;                    // unedited string list from qml
+    QList<QRegularExpression> m_favoriteAppsRegex; // pre-regexified m_favoriteApps list
     QHash<QString, AppEntry*> m_apps;
     mutable QList<AppEntry*> m_sortedApps;
 
+    QString regexifyString(const QString& original) const;
     QList<AppEntry*>& getSortedApps() const;
+    bool isFavorite(const AppEntry* app) const;
     quint32 getFrequency(const QString& id) const;
     void updateAppFrequencies();
     void updateApps();
