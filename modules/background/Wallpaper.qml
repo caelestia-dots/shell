@@ -81,7 +81,10 @@ Item {
             inactive = oneLoader;
         }
 
-        inactive.sourceComponent = isVideo(source) ? videoComponent : imageComponent;
+        inactive.sourceComponent = null;
+        Qt.callLater(() => {
+            inactive.sourceComponent = isVideo(source) ? videoComponent : imageComponent;
+        });
 
         waitForItem(inactive, function () {
             inactive.item.update(source);
