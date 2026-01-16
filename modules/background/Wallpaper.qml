@@ -151,8 +151,8 @@ Item {
                         FileDialog {
                             id: dialog
                             title: qsTr("Select a wallpaper")
-                            filterLabel: qsTr("Image files")
-                            filters: Images.validImageExtensions
+                            filterLabel: qsTr("Files")
+                            filters: ["jpg", "jpeg", "png", "webp", "tif", "tiff", "svg", "mp4", "mkv", "webm", "avi", "mov", "flv", "wmv", "gif"]
                             onAccepted: path => Wallpapers.setWallpaper(path)
                         }
 
