@@ -9,7 +9,6 @@ import Quickshell.Wayland
 import QtQuick
 
 Loader {
-    asynchronous: true
     active: Config.background.enabled
 
     sourceComponent: Variants {
@@ -47,7 +46,6 @@ Loader {
                 anchors.margins: Appearance.padding.large
 
                 active: Config.background.desktopClock.enabled
-                asynchronous: true
 
                 source: "DesktopClock.qml"
             }

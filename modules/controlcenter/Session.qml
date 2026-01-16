@@ -16,6 +16,6 @@ QtObject {
     readonly property EthernetState ethernet: EthernetState {}
     readonly property LauncherState launcher: LauncherState {}
 
-    onActiveChanged: activeIndex = panes.indexOf(active)
-    onActiveIndexChanged: active = panes[activeIndex]
+    onActiveChanged: activeIndex = Math.max(0, panes.indexOf(active))
+    onActiveIndexChanged: if (panes[activeIndex]) active = panes[activeIndex]
 }

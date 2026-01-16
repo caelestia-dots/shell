@@ -40,7 +40,6 @@ Column {
         anchors.horizontalCenter: parent.horizontalCenter
 
         active: PowerProfiles.degradationReason !== PerformanceDegradationReason.None
-        asynchronous: true
 
         height: active ? (item?.implicitHeight ?? 0) : 0
 

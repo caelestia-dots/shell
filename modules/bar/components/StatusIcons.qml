@@ -265,7 +265,6 @@ StyledRect {
         required property string name
 
         Layout.alignment: Qt.AlignHCenter
-        asynchronous: true
         visible: active
     }
 }
