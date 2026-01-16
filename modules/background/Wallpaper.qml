@@ -34,7 +34,6 @@ Item {
         anchors.fill: parent
 
         active: !root.source
-        asynchronous: true
 
         sourceComponent: StyledRect {
             color: Colours.palette.m3surfaceContainer

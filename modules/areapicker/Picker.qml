@@ -197,7 +197,6 @@ MouseArea {
         anchors.fill: parent
 
         active: root.loader.freeze
-        asynchronous: true
 
         sourceComponent: ScreencopyView {
             captureSource: root.screen

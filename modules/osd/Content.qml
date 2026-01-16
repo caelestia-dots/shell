@@ -112,7 +112,6 @@ Item {
         Layout.preferredHeight: shouldBeActive ? Config.osd.sizes.sliderHeight : 0
         opacity: shouldBeActive ? 1 : 0
         active: opacity > 0
-        asynchronous: true
         visible: active
 
         Behavior on Layout.preferredHeight {

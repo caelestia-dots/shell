@@ -103,7 +103,6 @@ Item {
                     Layout.fillHeight: true
                     Layout.bottomMargin: -Appearance.padding.large * 2
                     
-                    asynchronous: true
                     active: {
                         const isActive = root.session.activeIndex === 3;
                         const isAdjacent = Math.abs(root.session.activeIndex - 3) === 1;

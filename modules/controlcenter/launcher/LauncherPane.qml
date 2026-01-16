@@ -476,7 +476,6 @@ Item {
                 id: appsListLoader
                 Layout.fillWidth: true
                 Layout.fillHeight: true
-                asynchronous: true
                 active: true
 
                 sourceComponent: StyledListView {
@@ -605,7 +604,6 @@ Item {
                     transformOrigin: Item.Center
                     clip: false
 
-                    asynchronous: true
                     sourceComponent: rightLauncherPane.targetComponent
                     active: true
 

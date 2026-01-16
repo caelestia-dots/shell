@@ -108,7 +108,7 @@ ClippingRectangle {
             const diff = Math.abs(root.session.activeIndex - pane.paneIndex);
             const isActivePane = diff === 0;
             let shouldBeActive = false;
-            
+
             if (!layout.initialOpeningComplete) {
                 shouldBeActive = isActivePane;
             } else {
@@ -120,7 +120,7 @@ ClippingRectangle {
                     shouldBeActive = layout.animationComplete;
                 }
             }
-            
+
             loader.active = shouldBeActive;
         }
 
@@ -129,11 +129,10 @@ ClippingRectangle {
 
             anchors.fill: parent
             clip: false
-            asynchronous: true
             active: false
             
             Component.onCompleted: {
-                pane.updateActive();
+                Qt.callLater(pane.updateActive);
             }
             
             onActiveChanged: {
