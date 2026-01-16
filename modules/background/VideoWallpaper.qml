@@ -31,7 +31,6 @@ Item {
             return;
 
         player.source = path;
-
         root.source = path;
 
         player.onMediaStatusChanged.connect(function handler() {
@@ -44,6 +43,8 @@ Item {
     }
 
     function pauseVideo(locked) {
+        if (gamemodeEnabled)
+            return;
         if (isCurrent === false)
             return;
         if (locked) {
@@ -59,13 +60,9 @@ Item {
         if (gamemodeEnabled) {
             player.pause();
             pendingUnload = true;
-            // video.opacity = 0;
-            // gameModePlaceholder.opacity = 1;
         } else if (root.isCurrent) {
             update(root.source);
             player.tryPlayVideo();
-            // video.opacity = 1;
-            // gameModePlaceholder.opacity = 0;
         }
     }
 
@@ -88,8 +85,6 @@ Item {
                 if (mediaStatus !== MediaPlayer.NoMedia) {
                     player.pause();
                     pendingUnload = true;
-
-                    // player.source = "";
                 }
             }
         }
@@ -108,7 +103,18 @@ Item {
                     if (running)
                         return;
                     if (pendingUnload && video.opacity === 0) {
-                        player.source = "";
+                        player.stop();
+                        Qt.callLater(() => {
+                            if (gamemodeEnabled) {
+                                player.source = "";
+                                return;
+                            }
+
+                            if (!root.isCurrent) {
+                                player.source = "";
+                            }
+                        });
+
                         pendingUnload = false;
                     }
                 }
@@ -145,7 +151,7 @@ Item {
                 spacing: Appearance.spacing.small
 
                 StyledText {
-                    text: qsTr("Video wallpapers are disabled in Game Mode")
+                    text: qsTr("Video wallpapers are disabled in game mode")
                     color: Colours.palette.m3onSurfaceVariant
                     font.pointSize: Appearance.font.size.extraLarge
                     font.bold: true
@@ -153,35 +159,6 @@ Item {
             }
         }
     }
-
-    // states: [
-    //     State {
-    //         name: "visible"
-    //         when: root.isCurrent
-    //         PropertyChanges {
-    //             target: video
-    //             opacity: 1
-    //             scale: 1
-    //         }
-    //     }
-    // ]
-
-    // transitions: [
-    //     Transition {
-    //         Anim {
-    //             target: video
-    //             properties: "opacity,scale"
-    //         }
-
-    //         onRunningChanged: {
-    //             if (running)
-    //                 return;
-    //             if (video.opacity === 0 && pendingUnload) {
-    //                 player.source = "";
-    //             }
-    //         }
-    //     }
-    // ]
 
     Connections {
         target: root
