@@ -4,342 +4,640 @@ import qs.services
 import qs.config
 import QtQuick
 import QtQuick.Layouts
+
 import Quickshell.Services.UPower
 
 RowLayout {
     id: root
 
-    readonly property int padding: Appearance.padding.large
-    readonly property int visibleCount: (Config.dashboard.performance.showBattery ? 1 : 0) +
-                                        (Config.dashboard.performance.showGpu ? 1 : 0) +
-                                        (Config.dashboard.performance.showCpu ? 1 : 0) +
-                                        (Config.dashboard.performance.showMemory ? 1 : 0) +
-                                        (Config.dashboard.performance.showStorage ? 1 : 0)
-    // Scale factor: 1.0 for 3 or less, progressively smaller for more items
-    readonly property real scaleFactor: visibleCount <= 3 ? 1.0 : (visibleCount === 4 ? 0.85 : 0.72)
-    readonly property real dynamicSpacing: Appearance.spacing.large * (visibleCount <= 3 ? 3 : (visibleCount === 4 ? 2 : 1.5))
-    readonly property real dynamicPrimaryMult: visibleCount <= 3 ? 1.2 : 1.0
-    readonly property real dynamicPadding: padding * scaleFactor
+    spacing: Appearance.spacing.normal
 
     function displayTemp(temp: real): string {
         return `${Math.ceil(Config.services.useFahrenheit ? temp * 1.8 + 32 : temp)}°${Config.services.useFahrenheit ? "F" : "C"}`;
     }
 
-    spacing: root.dynamicSpacing
-
     Ref {
         service: SystemUsage
     }
 
-    // Battery Resource
-    Resource {
-        Layout.alignment: Qt.AlignVCenter
-        Layout.topMargin: root.dynamicPadding
-        Layout.bottomMargin: root.dynamicPadding
-        Layout.leftMargin: root.dynamicPadding * 2
-        Layout.rightMargin: !Config.dashboard.performance.showGpu && !Config.dashboard.performance.showCpu && !Config.dashboard.performance.showMemory && !Config.dashboard.performance.showStorage ? root.dynamicPadding * 3 : 0
+    ColumnLayout {
+        Layout.fillHeight: true
+        Layout.fillWidth: true
+        spacing: Appearance.spacing.normal
 
-        visible: Config.dashboard.performance.showBattery
+        RowLayout {
+            Layout.fillWidth: true
+            spacing: Appearance.spacing.normal
 
-        value1: UPower.displayDevice.isLaptopBattery ? UPower.displayDevice.percentage : 0
-        value2: 0
+            HeroCard {
+                Layout.fillWidth: true
+                Layout.minimumWidth: 400
+                Layout.preferredHeight: 150
 
-        label1: UPower.displayDevice.isLaptopBattery ? `${Math.round(UPower.displayDevice.percentage * 100)}%` : "N/A"
-        label2: {
-            if (!UPower.displayDevice.isLaptopBattery) return "No Battery";
-            if (UPower.onBattery) {
-                const timeToEmpty = UPower.displayDevice.timeToEmpty;
-                if (timeToEmpty > 0) {
-                    const hours = Math.floor(timeToEmpty / 3600);
-                    const minutes = Math.floor((timeToEmpty % 3600) / 60);
-                    return hours > 0 ? `${hours}h ${minutes}m` : `${minutes}m`;
+                visible: Config.dashboard.performance.showCpu
+
+                icon: "memory"
+                title: SystemUsage.cpuName ? `CPU - ${SystemUsage.cpuName}` : qsTr("CPU")
+                mainValue: `${Math.round(SystemUsage.cpuPerc * 100)}%`
+                mainLabel: qsTr("Usage")
+                secondaryValue: root.displayTemp(SystemUsage.cpuTemp)
+                secondaryLabel: qsTr("Temp")
+                usage: SystemUsage.cpuPerc
+                temperature: SystemUsage.cpuTemp
+                accentColor: Colours.palette.m3primary
+            }
+
+            HeroCard {
+                Layout.fillWidth: true
+                Layout.minimumWidth: 400
+                Layout.preferredHeight: 150
+
+                visible: Config.dashboard.performance.showGpu
+
+                icon: "display_settings"
+                title: SystemUsage.gpuName ? `GPU - ${SystemUsage.gpuName}` : qsTr("GPU")
+                mainValue: `${Math.round(SystemUsage.gpuPerc * 100)}%`
+                mainLabel: qsTr("Usage")
+                secondaryValue: root.displayTemp(SystemUsage.gpuTemp)
+                secondaryLabel: qsTr("Temp")
+                usage: SystemUsage.gpuPerc
+                temperature: SystemUsage.gpuTemp
+                accentColor: Colours.palette.m3secondary
+            }
+        }
+
+        RowLayout {
+            Layout.fillWidth: true
+            spacing: Appearance.spacing.normal
+
+            GaugeCard {
+                Layout.minimumWidth: 250
+                Layout.preferredHeight: 220
+
+                visible: Config.dashboard.performance.showMemory
+
+                icon: "memory_alt"
+                title: qsTr("Memory")
+                percentage: SystemUsage.memPerc
+                subtitle: {
+                    const usedFmt = SystemUsage.formatKib(SystemUsage.memUsed);
+                    const totalFmt = SystemUsage.formatKib(SystemUsage.memTotal);
+                    return `${usedFmt.value.toFixed(1)} / ${Math.floor(totalFmt.value)} ${totalFmt.unit}`;
                 }
-                return qsTr("Discharging");
-            } else {
-                const timeToFull = UPower.displayDevice.timeToFull;
-                if (timeToFull > 0) {
-                    const hours = Math.floor(timeToFull / 3600);
-                    const minutes = Math.floor((timeToFull % 3600) / 60);
-                    return hours > 0 ? `${hours}h ${minutes}m` : `${minutes}m`;
+                accentColor: Colours.palette.m3tertiary
+            }
+
+            StorageCard {
+                Layout.fillWidth: true
+                Layout.minimumWidth: 550
+                Layout.preferredHeight: 220
+
+                visible: Config.dashboard.performance.showStorage
+            }
+        }
+    }
+
+    BatteryTank {
+        Layout.preferredWidth: 120
+        Layout.fillHeight: true
+        Layout.minimumHeight: 350 // Match combined height + spacing roughly, or let it fill
+
+        visible: UPower.displayDevice.isLaptopBattery && Config.dashboard.performance.showBattery
+    }
+
+    component BatteryTank: StyledClippingRect {
+        id: batteryTank
+
+        property real percentage: UPower.displayDevice.percentage
+        property bool isCharging: UPower.displayDevice.state === UPowerDeviceState.Charging
+        property color accentColor: Colours.palette.m3primary
+
+        property real animatedPercentage: 0
+
+        color: Colours.tPalette.m3surfaceContainer
+        radius: Appearance.rounding.large
+
+        Component.onCompleted: animatedPercentage = percentage
+        onPercentageChanged: animatedPercentage = percentage
+
+        Behavior on animatedPercentage {
+            Anim { duration: Appearance.anim.durations.large }
+        }
+
+        // Background Fill
+        StyledRect {
+            anchors.left: parent.left
+            anchors.right: parent.right
+            anchors.bottom: parent.bottom
+            height: parent.height * batteryTank.animatedPercentage
+
+            color: Qt.alpha(batteryTank.accentColor, 0.15)
+        }
+
+        ColumnLayout {
+            anchors.fill: parent
+            anchors.margins: Appearance.padding.large
+            spacing: Appearance.spacing.small
+
+            // Header Section
+            ColumnLayout {
+                Layout.fillWidth: true
+                spacing: Appearance.spacing.small
+
+                MaterialIcon {
+                    text: {
+                        if (!UPower.displayDevice.isLaptopBattery) {
+                            if (PowerProfiles.profile === PowerProfile.PowerSaver)
+                                return "energy_savings_leaf";
+                            if (PowerProfiles.profile === PowerProfile.Performance)
+                                return "rocket_launch";
+                            return "balance";
+                        }
+
+                        const perc = UPower.displayDevice.percentage;
+                        const charging = [UPowerDeviceState.Charging, UPowerDeviceState.FullyCharged, UPowerDeviceState.PendingCharge].includes(UPower.displayDevice.state);
+                        if (perc === 1)
+                            return charging ? "battery_charging_full" : "battery_full";
+                        let level = Math.floor(perc * 7);
+                        if (charging && (level === 4 || level === 1))
+                            level--;
+                        return charging ? `battery_charging_${(level + 3) * 10}` : `battery_${level}_bar`;
+                    }
+                    font.pointSize: Appearance.font.size.large
+                    color: batteryTank.accentColor
                 }
-                return qsTr("Charging");
-            }
-        }
 
-        sublabel1: qsTr("Battery")
-        sublabel2: UPower.onBattery ? qsTr("Remaining") : qsTr("To Full")
-    }
-
-    // GPU Resource
-    Resource {
-        Layout.alignment: Qt.AlignVCenter
-        Layout.topMargin: root.dynamicPadding
-        Layout.bottomMargin: root.dynamicPadding
-        Layout.leftMargin: !Config.dashboard.performance.showBattery ? root.dynamicPadding * 2 : 0
-        Layout.rightMargin: !Config.dashboard.performance.showCpu && !Config.dashboard.performance.showMemory && !Config.dashboard.performance.showStorage ? root.dynamicPadding * 3 : 0
-
-        visible: Config.dashboard.performance.showGpu
-
-        value1: Math.min(1, SystemUsage.gpuTemp / 90)
-        value2: SystemUsage.gpuPerc
-
-        label1: root.displayTemp(SystemUsage.gpuTemp)
-        label2: `${Math.round(SystemUsage.gpuPerc * 100)}%`
-
-        sublabel1: qsTr("GPU temp")
-        sublabel2: qsTr("Usage")
-    }
-
-    // CPU Resource (primary)
-    Resource {
-        Layout.alignment: Qt.AlignVCenter
-        Layout.topMargin: root.dynamicPadding
-        Layout.bottomMargin: root.dynamicPadding
-        Layout.leftMargin: !Config.dashboard.performance.showBattery && !Config.dashboard.performance.showGpu ? root.dynamicPadding * 2 : 0
-        Layout.rightMargin: !Config.dashboard.performance.showMemory && !Config.dashboard.performance.showStorage ? root.dynamicPadding * 3 : 0
-
-        visible: Config.dashboard.performance.showCpu
-        primary: true
-
-        value1: Math.min(1, SystemUsage.cpuTemp / 90)
-        value2: SystemUsage.cpuPerc
-
-        label1: root.displayTemp(SystemUsage.cpuTemp)
-        label2: `${Math.round(SystemUsage.cpuPerc * 100)}%`
-
-        sublabel1: qsTr("CPU temp")
-        sublabel2: qsTr("Usage")
-    }
-
-    // Memory Resource
-    Resource {
-        Layout.alignment: Qt.AlignVCenter
-        Layout.topMargin: root.dynamicPadding
-        Layout.bottomMargin: root.dynamicPadding
-        Layout.rightMargin: !Config.dashboard.performance.showStorage ? root.dynamicPadding * 3 : 0
-
-        visible: Config.dashboard.performance.showMemory
-        primary: !Config.dashboard.performance.showCpu
-
-        value1: SystemUsage.memPerc
-        // value2: SystemUsage.memPerc
-
-        label1: {
-            const fmt = SystemUsage.formatKib(SystemUsage.memUsed);
-            return `${+fmt.value.toFixed(1)}${fmt.unit}`;
-        }
-        label2: `${Math.round(SystemUsage.memPerc * 100)}%`
-
-        sublabel1: qsTr("Memory")
-        sublabel2: {
-            const totalFmt = SystemUsage.formatKib(SystemUsage.memTotal);
-            return `of ${Math.floor(totalFmt.value)}${totalFmt.unit}`;
-        }
-    }
-
-    // Storage Resource
-    Resource {
-        Layout.alignment: Qt.AlignVCenter
-        Layout.topMargin: root.dynamicPadding
-        Layout.bottomMargin: root.dynamicPadding
-        Layout.rightMargin: root.dynamicPadding * 3
-
-        visible: Config.dashboard.performance.showStorage
-
-        value1: SystemUsage.storagePerc
-        // value2: SystemUsage.storagePerc
-
-        label1: {
-            const fmt = SystemUsage.formatKib(SystemUsage.storageUsed);
-            return `${Math.floor(fmt.value)}${fmt.unit}`;
-        }
-        label2: `${Math.round(SystemUsage.storagePerc * 100)}%`
-
-        sublabel1: qsTr("Storage")
-        sublabel2: {
-            const totalFmt = SystemUsage.formatKib(SystemUsage.storageTotal);
-            return `of ${Math.floor(totalFmt.value)}${totalFmt.unit}`;
-        }
-    }
-
-    component Resource: Item {
-        id: res
-
-        required property real value1
-        required property real value2
-        required property string sublabel1
-        required property string sublabel2
-        required property string label1
-        required property string label2
-
-        property bool primary
-        readonly property real primaryMult: primary ? root.dynamicPrimaryMult : 1
-        readonly property real sizeMultiplier: root.scaleFactor * primaryMult
-
-        readonly property real thickness: Config.dashboard.sizes.resourceProgessThickness * sizeMultiplier
-        readonly property bool showSecondArc: value2 > 0
-
-        property color fg1: Colours.palette.m3primary
-        property color fg2: Colours.palette.m3secondary
-        property color bg1: Colours.palette.m3primaryContainer
-        property color bg2: Colours.palette.m3secondaryContainer
-
-        implicitWidth: Config.dashboard.sizes.resourceSize * sizeMultiplier
-        implicitHeight: Config.dashboard.sizes.resourceSize * sizeMultiplier
-
-        onValue1Changed: canvas.requestPaint()
-        onValue2Changed: canvas.requestPaint()
-        onFg1Changed: canvas.requestPaint()
-        onFg2Changed: canvas.requestPaint()
-        onBg1Changed: canvas.requestPaint()
-        onBg2Changed: canvas.requestPaint()
-
-        Column {
-            anchors.centerIn: parent
-
-            StyledText {
-                anchors.horizontalCenter: parent.horizontalCenter
-
-                text: res.label1
-                font.pointSize: Appearance.font.size.extraLarge * res.sizeMultiplier
+                StyledText {
+                    Layout.fillWidth: true
+                    text: qsTr("Battery")
+                    font.pointSize: Appearance.font.size.normal
+                    color: Colours.palette.m3onSurface
+                }
             }
 
-            StyledText {
-                anchors.horizontalCenter: parent.horizontalCenter
+            Item { Layout.fillHeight: true }
 
-                text: res.sublabel1
+            // Bottom Info Section
+            ColumnLayout {
+                Layout.fillWidth: true
+                spacing: -4
+
+                StyledText {
+                    Layout.alignment: Qt.AlignRight
+                    text: `${Math.round(batteryTank.percentage * 100)}%`
+                    font.pointSize: Appearance.font.size.extraLarge
+                    font.weight: Font.Medium
+                    color: batteryTank.accentColor
+                }
+
+                StyledText {
+                    Layout.alignment: Qt.AlignRight
+                    text: {
+                        if (batteryTank.isCharging) {
+                            return qsTr("Charging");
+                        }
+                        const s = UPower.displayDevice.timeToEmpty;
+                        const hr = Math.floor(s / 3600);
+                        const min = Math.floor((s % 3600) / 60);
+                        if (hr > 0) return `${hr}h ${min}m`;
+                        return `${min}m`;
+                    }
+                    font.pointSize: Appearance.font.size.smaller
+                    color: Colours.palette.m3onSurfaceVariant
+                }
+            }
+        }
+    }
+
+    component CardHeader: RowLayout {
+        property string icon
+        property string title
+        property color accentColor: Colours.palette.m3primary
+
+        Layout.fillWidth: true
+        spacing: Appearance.spacing.small
+
+        MaterialIcon {
+            text: parent.icon
+            fill: 1
+            color: parent.accentColor
+            font.pointSize: Appearance.font.size.large
+        }
+
+        StyledText {
+            Layout.fillWidth: true
+            text: parent.title
+            font.pointSize: Appearance.font.size.normal
+            elide: Text.ElideRight
+        }
+    }
+
+    component ProgressBar: StyledRect {
+        id: progressBar
+
+        property real value: 0
+        property color fgColor: Colours.palette.m3primary
+        property color bgColor: Colours.layer(Colours.palette.m3surfaceContainerHigh, 2)
+
+        property real animatedValue: 0
+
+        color: bgColor
+        radius: Appearance.rounding.full
+
+        Component.onCompleted: animatedValue = value
+        onValueChanged: animatedValue = value
+
+        Behavior on animatedValue {
+            Anim { duration: Appearance.anim.durations.large }
+        }
+
+        StyledRect {
+            anchors.left: parent.left
+            anchors.top: parent.top
+            anchors.bottom: parent.bottom
+            width: parent.width * progressBar.animatedValue
+
+            color: progressBar.fgColor
+            radius: Appearance.rounding.full
+        }
+    }
+
+    component HeroCard: StyledClippingRect {
+        id: heroCard
+
+        property string icon
+        property string title
+        property string mainValue
+        property string mainLabel
+        property string secondaryValue
+        property string secondaryLabel
+        property real usage: 0
+        property real temperature: 0
+        property color accentColor: Colours.palette.m3primary
+
+        readonly property real maxTemp: 100
+        readonly property real tempProgress: Math.min(1, Math.max(0, temperature / maxTemp))
+
+        property real animatedUsage: 0
+        property real animatedTemp: 0
+
+        color: Colours.tPalette.m3surfaceContainer
+        radius: Appearance.rounding.large
+
+        Component.onCompleted: {
+            animatedUsage = usage
+            animatedTemp = tempProgress
+        }
+
+        onUsageChanged: animatedUsage = usage
+        onTempProgressChanged: animatedTemp = tempProgress
+
+        Behavior on animatedUsage {
+            Anim { duration: Appearance.anim.durations.large }
+        }
+
+        Behavior on animatedTemp {
+            Anim { duration: Appearance.anim.durations.large }
+        }
+
+        StyledRect {
+            anchors.left: parent.left
+            anchors.top: parent.top
+            anchors.bottom: parent.bottom
+            width: parent.width * heroCard.animatedUsage
+
+            color: Qt.alpha(heroCard.accentColor, 0.15)
+        }
+
+        ColumnLayout {
+            anchors.fill: parent
+            anchors.margins: Appearance.padding.large
+            spacing: Appearance.spacing.small
+
+            CardHeader {
+                icon: heroCard.icon
+                title: heroCard.title
+                accentColor: heroCard.accentColor
+            }
+
+            Item { Layout.fillHeight: true }
+
+            RowLayout {
+                Layout.fillWidth: true
+                spacing: Appearance.spacing.normal
+
+                Row {
+                    spacing: Appearance.spacing.small
+
+                    StyledText {
+                        text: heroCard.secondaryValue
+                        font.pointSize: Appearance.font.size.normal
+                        font.weight: Font.Medium
+                    }
+
+                    StyledText {
+                        text: heroCard.secondaryLabel
+                        font.pointSize: Appearance.font.size.smaller
+                        color: Colours.palette.m3onSurfaceVariant
+                        anchors.baseline: parent.children[0].baseline
+                    }
+                }
+
+                Item { Layout.fillWidth: true }
+
+                Column {
+                    spacing: -4
+
+                    StyledText {
+                        anchors.right: parent.right
+                        text: heroCard.mainValue
+                        font.pointSize: Appearance.font.size.large
+                        font.weight: Font.Medium
+                        color: heroCard.accentColor
+                    }
+
+                    StyledText {
+                        anchors.right: parent.right
+                        text: heroCard.mainLabel
+                        font.pointSize: Appearance.font.size.smaller
+                        color: Colours.palette.m3onSurfaceVariant
+                    }
+                }
+            }
+
+            ProgressBar {
+                Layout.preferredWidth: parent.width / 2 - Appearance.padding.large
+                Layout.alignment: Qt.AlignLeft
+                implicitHeight: 8
+
+                value: heroCard.tempProgress
+                fgColor: heroCard.accentColor
+                bgColor: Qt.alpha(heroCard.accentColor, 0.2)
+            }
+        }
+    }
+
+    component GaugeCard: StyledRect {
+        id: gaugeCard
+
+        property string icon
+        property string title
+        property real percentage: 0
+        property string subtitle
+        property color accentColor: Colours.palette.m3primary
+
+        readonly property real arcStartAngle: 0.75 * Math.PI
+        readonly property real arcSweep: 1.5 * Math.PI
+
+        property real animatedPercentage: 0
+
+        color: Colours.tPalette.m3surfaceContainer
+        radius: Appearance.rounding.large
+        clip: true
+
+        Component.onCompleted: animatedPercentage = percentage
+        onPercentageChanged: animatedPercentage = percentage
+
+        Behavior on animatedPercentage {
+            Anim { duration: Appearance.anim.durations.large }
+        }
+
+        ColumnLayout {
+            anchors.fill: parent
+            anchors.margins: Appearance.padding.large
+            spacing: Appearance.spacing.smaller
+
+            CardHeader {
+                icon: gaugeCard.icon
+                title: gaugeCard.title
+                accentColor: gaugeCard.accentColor
+            }
+
+            Item {
+                Layout.fillWidth: true
+                Layout.fillHeight: true
+
+                Canvas {
+                    id: gaugeCanvas
+
+                    anchors.centerIn: parent
+                    width: Math.min(parent.width, parent.height)
+                    height: width
+
+                    onPaint: {
+                        const ctx = getContext("2d");
+                        ctx.reset();
+
+                        const cx = width / 2;
+                        const cy = height / 2;
+                        const radius = (Math.min(width, height) - 12) / 2;
+                        const lineWidth = 10;
+
+                        ctx.beginPath();
+                        ctx.arc(cx, cy, radius, gaugeCard.arcStartAngle, gaugeCard.arcStartAngle + gaugeCard.arcSweep);
+                        ctx.lineWidth = lineWidth;
+                        ctx.lineCap = "round";
+                        ctx.strokeStyle = Colours.layer(Colours.palette.m3surfaceContainerHigh, 2);
+                        ctx.stroke();
+
+                        if (gaugeCard.animatedPercentage > 0) {
+                            ctx.beginPath();
+                            ctx.arc(cx, cy, radius, gaugeCard.arcStartAngle, gaugeCard.arcStartAngle + gaugeCard.arcSweep * gaugeCard.animatedPercentage);
+                            ctx.lineWidth = lineWidth;
+                            ctx.lineCap = "round";
+                            ctx.strokeStyle = gaugeCard.accentColor;
+                            ctx.stroke();
+                        }
+                    }
+
+                    Connections {
+                        target: gaugeCard
+                        function onAnimatedPercentageChanged() {
+                            gaugeCanvas.requestPaint();
+                        }
+                    }
+
+                    Connections {
+                        target: Colours
+                        function onPaletteChanged() {
+                            gaugeCanvas.requestPaint();
+                        }
+                    }
+
+                    Component.onCompleted: requestPaint()
+                }
+
+                StyledText {
+                    anchors.centerIn: parent
+                    text: `${Math.round(gaugeCard.percentage * 100)}%`
+                    font.pointSize: Appearance.font.size.extraLarge
+                    font.weight: Font.Medium
+                    color: gaugeCard.accentColor
+                }
+            }
+
+            StyledText {
+                Layout.alignment: Qt.AlignHCenter
+                text: gaugeCard.subtitle
+                font.pointSize: Appearance.font.size.smaller
                 color: Colours.palette.m3onSurfaceVariant
-                font.pointSize: Appearance.font.size.smaller * res.sizeMultiplier
             }
         }
+    }
 
-        Column {
-            anchors.horizontalCenter: parent.right
-            anchors.top: parent.verticalCenter
-            anchors.horizontalCenterOffset: -res.thickness / 2
-            anchors.topMargin: res.thickness / 2 + Appearance.spacing.small * root.scaleFactor
-            visible: res.showSecondArc
+    component StorageCard: StyledRect {
+        id: storageCard
 
-            StyledText {
-                anchors.horizontalCenter: parent.horizontalCenter
+        color: Colours.tPalette.m3surfaceContainer
+        radius: Appearance.rounding.large
+        clip: true
 
-                text: res.label2
-                font.pointSize: Appearance.font.size.smaller * res.sizeMultiplier
+        ColumnLayout {
+            anchors.fill: parent
+            anchors.margins: Appearance.padding.large
+            spacing: Appearance.spacing.normal
+
+            CardHeader {
+                icon: "hard_disk"
+                title: qsTr("Storage")
+                accentColor: Colours.palette.m3secondary
             }
 
-            StyledText {
-                anchors.horizontalCenter: parent.horizontalCenter
+            Repeater {
+                model: SystemUsage.disks.slice(0, 5)
 
-                text: res.sublabel2
-                color: Colours.palette.m3onSurfaceVariant
-                font.pointSize: Appearance.font.size.small * res.sizeMultiplier
+                delegate: DiskRow {
+                    required property var modelData
+                    required property int index
+
+                    Layout.fillWidth: true
+                    Layout.fillHeight: true
+
+                    diskName: modelData.mount
+                    used: modelData.used
+                    total: modelData.total
+                    percentage: modelData.perc
+                    diskColor: index === 0 ? Colours.palette.m3primary :
+                               index === 1 ? Colours.palette.m3secondary :
+                               index === 2 ? Colours.palette.m3tertiary :
+                               index === 3 ? Colours.palette.m3outline :
+                               Colours.palette.m3error
+                }
             }
+
+            Item { Layout.fillHeight: SystemUsage.disks.length < 5 }
+        }
+    }
+
+    component DiskRow: Item {
+        id: diskRow
+
+        property string diskName
+        property real used
+        property real total
+        property real percentage
+        property color diskColor: Colours.palette.m3primary
+
+        property real animatedPercentage: 0
+        property bool hovered: false
+
+        implicitHeight: rowLayout.implicitHeight
+
+        Component.onCompleted: animatedPercentage = percentage
+        onPercentageChanged: animatedPercentage = percentage
+
+        Behavior on animatedPercentage {
+            Anim { duration: Appearance.anim.durations.large }
         }
 
-        // Alternative layout for single value displays (like battery status)
-        Column {
-            anchors.horizontalCenter: parent.right
-            anchors.top: parent.verticalCenter
-            anchors.horizontalCenterOffset: -res.thickness / 2
-            anchors.topMargin: res.thickness / 2 + Appearance.spacing.small * root.scaleFactor
-            visible: !res.showSecondArc
-
-            StyledText {
-                anchors.horizontalCenter: parent.horizontalCenter
-
-                text: res.label2
-                font.pointSize: Appearance.font.size.smaller * res.sizeMultiplier
-            }
-
-            StyledText {
-                anchors.horizontalCenter: parent.horizontalCenter
-
-                text: res.sublabel2
-                color: Colours.palette.m3onSurfaceVariant
-                font.pointSize: Appearance.font.size.small * res.sizeMultiplier
-            }
+        MouseArea {
+            anchors.fill: parent
+            hoverEnabled: true
+            onEntered: diskRow.hovered = true
+            onExited: diskRow.hovered = false
         }
 
-        Canvas {
-            id: canvas
-
-            readonly property real centerX: width / 2
-            readonly property real centerY: height / 2
-
-            readonly property real arc1Start: degToRad(45)
-            readonly property real arc1End: degToRad(220)
-            readonly property real arc2Start: degToRad(230)
-            readonly property real arc2End: degToRad(360)
-
-            function degToRad(deg: int): real {
-                return deg * Math.PI / 180;
-            }
+        RowLayout {
+            id: rowLayout
 
             anchors.fill: parent
+            spacing: Appearance.spacing.normal
 
-            onPaint: {
-                const ctx = getContext("2d");
-                ctx.reset();
+            Rectangle {
+                width: 4
+                Layout.fillHeight: true
+                Layout.topMargin: 2
+                Layout.bottomMargin: 2
+                radius: 2
+                color: diskRow.diskColor
+            }
 
-                ctx.lineWidth = res.thickness;
-                ctx.lineCap = Appearance.rounding.scale === 0 ? "square" : "round";
+            StyledText {
+                Layout.preferredWidth: 80
+                text: diskRow.diskName
+                font.pointSize: Appearance.font.size.small
+            }
 
-                const radius = (Math.min(width, height) - ctx.lineWidth) / 2;
-                const cx = centerX;
-                const cy = centerY;
-                const a1s = arc1Start;
-                const a1e = arc1End;
-                const a2s = arc2Start;
-                const a2e = arc2End;
+            ProgressBar {
+                Layout.fillWidth: true
+                Layout.fillHeight: true
+                Layout.topMargin: 4
+                Layout.bottomMargin: 4
 
-                // First arc (always drawn)
-                ctx.beginPath();
-                ctx.arc(cx, cy, radius, a1s, a1e, false);
-                ctx.strokeStyle = res.bg1;
-                ctx.stroke();
+                value: diskRow.percentage
+                fgColor: diskRow.diskColor
+            }
 
-                ctx.beginPath();
-                ctx.arc(cx, cy, radius, a1s, (a1e - a1s) * res.value1 + a1s, false);
-                ctx.strokeStyle = res.fg1;
-                ctx.stroke();
+            Item {
+                Layout.preferredWidth: usageText.visible ? usageText.implicitWidth : percentText.implicitWidth
+                Layout.minimumWidth: 35
+                implicitHeight: Math.max(percentText.implicitHeight, usageText.implicitHeight)
 
-                // Second arc (only drawn if value2 > 0)
-                if (res.showSecondArc) {
-                    ctx.beginPath();
-                    ctx.arc(cx, cy, radius, a2s, a2e, false);
-                    ctx.strokeStyle = res.bg2;
-                    ctx.stroke();
+                Behavior on Layout.preferredWidth {
+                    Anim { duration: Appearance.anim.durations.normal }
+                }
 
-                    ctx.beginPath();
-                    ctx.arc(cx, cy, radius, a2s, (a2e - a2s) * res.value2 + a2s, false);
-                    ctx.strokeStyle = res.fg2;
-                    ctx.stroke();
+                StyledText {
+                    id: percentText
+
+                    anchors.right: parent.right
+                    anchors.verticalCenter: parent.verticalCenter
+
+                    visible: !diskRow.hovered
+                    opacity: diskRow.hovered ? 0 : 1
+                    text: `${Math.round(diskRow.percentage * 100)}%`
+                    font.pointSize: Appearance.font.size.small
+                    font.weight: Font.Medium
+                    color: diskRow.diskColor
+                    horizontalAlignment: Text.AlignRight
+
+                    Behavior on opacity {
+                        Anim { duration: Appearance.anim.durations.normal }
+                    }
+                }
+
+                StyledText {
+                    id: usageText
+
+                    anchors.right: parent.right
+                    anchors.verticalCenter: parent.verticalCenter
+
+                    visible: diskRow.hovered
+                    opacity: diskRow.hovered ? 1 : 0
+                    text: {
+                        const usedFmt = SystemUsage.formatKib(diskRow.used);
+                        const totalFmt = SystemUsage.formatKib(diskRow.total);
+                        return `${usedFmt.value.toFixed(0)}/${totalFmt.value.toFixed(0)}${totalFmt.unit}`;
+                    }
+                    font.pointSize: Appearance.font.size.smaller
+                    color: Colours.palette.m3onSurfaceVariant
+                    horizontalAlignment: Text.AlignRight
+
+                    Behavior on opacity {
+                        Anim { duration: Appearance.anim.durations.normal }
+                    }
                 }
             }
-        }
-
-        Behavior on value1 {
-            Anim {}
-        }
-
-        Behavior on value2 {
-            Anim {}
-        }
-
-        Behavior on fg1 {
-            CAnim {}
-        }
-
-        Behavior on fg2 {
-            CAnim {}
-        }
-
-        Behavior on bg1 {
-            CAnim {}
-        }
-
-        Behavior on bg2 {
-            CAnim {}
         }
     }
 }
