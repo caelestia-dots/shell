@@ -54,7 +54,7 @@ RowLayout {
 
                 visible: Config.dashboard.performance.showGpu
 
-                icon: "display_settings"
+                icon: "desktop_windows"
                 title: SystemUsage.gpuName ? `GPU - ${SystemUsage.gpuName}` : qsTr("GPU")
                 mainValue: `${Math.round(SystemUsage.gpuPerc * 100)}%`
                 mainLabel: qsTr("Usage")
@@ -154,10 +154,14 @@ RowLayout {
                             return "balance";
                         }
 
+                        if (UPower.displayDevice.state === UPowerDeviceState.FullyCharged)
+                            return "battery_full";
+
                         const perc = UPower.displayDevice.percentage;
-                        const charging = [UPowerDeviceState.Charging, UPowerDeviceState.FullyCharged, UPowerDeviceState.PendingCharge].includes(UPower.displayDevice.state);
-                        if (perc === 1)
-                            return charging ? "battery_charging_full" : "battery_full";
+                        const charging = [UPowerDeviceState.Charging, UPowerDeviceState.PendingCharge].includes(UPower.displayDevice.state);
+                        if (perc >= 0.99)
+                            return "battery_full";
+                        
                         let level = Math.floor(perc * 7);
                         if (charging && (level === 4 || level === 1))
                             level--;
@@ -193,10 +197,14 @@ RowLayout {
                 StyledText {
                     Layout.alignment: Qt.AlignRight
                     text: {
+                        if (UPower.displayDevice.state === UPowerDeviceState.FullyCharged) {
+                            return qsTr("Full");
+                        }
                         if (batteryTank.isCharging) {
                             return qsTr("Charging");
                         }
                         const s = UPower.displayDevice.timeToEmpty;
+                        if (s === 0) return qsTr("...");
                         const hr = Math.floor(s / 3600);
                         const min = Math.floor((s % 3600) / 60);
                         if (hr > 0) return `${hr}h ${min}m`;
@@ -311,7 +319,10 @@ RowLayout {
 
         ColumnLayout {
             anchors.fill: parent
-            anchors.margins: Appearance.padding.large
+            anchors.leftMargin: Appearance.padding.large
+            anchors.rightMargin: Appearance.padding.large
+            anchors.topMargin: Appearance.padding.small
+            anchors.bottomMargin: Appearance.padding.small
             spacing: Appearance.spacing.small
 
             CardHeader {
@@ -320,59 +331,68 @@ RowLayout {
                 accentColor: heroCard.accentColor
             }
 
-            Item { Layout.fillHeight: true }
-
             RowLayout {
                 Layout.fillWidth: true
+                Layout.fillHeight: true
                 spacing: Appearance.spacing.normal
 
-                Row {
+                Column {
+                    Layout.alignment: Qt.AlignBottom
+                    Layout.fillWidth: true
                     spacing: Appearance.spacing.small
 
-                    StyledText {
-                        text: heroCard.secondaryValue
-                        font.pointSize: Appearance.font.size.normal
-                        font.weight: Font.Medium
+                    Row {
+                        spacing: Appearance.spacing.small
+
+                        StyledText {
+                            text: heroCard.secondaryValue
+                            font.pointSize: Appearance.font.size.normal
+                            font.weight: Font.Medium
+                        }
+
+                        StyledText {
+                            text: heroCard.secondaryLabel
+                            font.pointSize: Appearance.font.size.smaller
+                            color: Colours.palette.m3onSurfaceVariant
+                            anchors.baseline: parent.children[0].baseline
+                        }
                     }
 
-                    StyledText {
-                        text: heroCard.secondaryLabel
-                        font.pointSize: Appearance.font.size.smaller
-                        color: Colours.palette.m3onSurfaceVariant
-                        anchors.baseline: parent.children[0].baseline
+                    ProgressBar {
+                        width: parent.width * 0.5 // localized width, or use Layout if this Column became a Layout
+                        height: 6
+
+                        value: heroCard.tempProgress
+                        fgColor: heroCard.accentColor
+                        bgColor: Qt.alpha(heroCard.accentColor, 0.2)
                     }
                 }
 
                 Item { Layout.fillWidth: true }
-
-                Column {
-                    spacing: -4
-
-                    StyledText {
-                        anchors.right: parent.right
-                        text: heroCard.mainValue
-                        font.pointSize: Appearance.font.size.large
-                        font.weight: Font.Medium
-                        color: heroCard.accentColor
-                    }
-
-                    StyledText {
-                        anchors.right: parent.right
-                        text: heroCard.mainLabel
-                        font.pointSize: Appearance.font.size.smaller
-                        color: Colours.palette.m3onSurfaceVariant
-                    }
-                }
             }
 
-            ProgressBar {
-                Layout.preferredWidth: parent.width / 2 - Appearance.padding.large
-                Layout.alignment: Qt.AlignLeft
-                implicitHeight: 8
+            Column {
+                parent: heroCard
+                anchors.right: parent.right
+                anchors.verticalCenter: parent.verticalCenter
+                anchors.margins: Appearance.padding.large
+                anchors.rightMargin: Appearance.padding.large * 2
+                spacing: -8
 
-                value: heroCard.tempProgress
-                fgColor: heroCard.accentColor
-                bgColor: Qt.alpha(heroCard.accentColor, 0.2)
+                StyledText {
+                    anchors.right: parent.right
+                    text: heroCard.mainValue
+                    font.pointSize: Appearance.font.size.extraLarge * 1.5
+                    font.weight: Font.Medium
+                    color: heroCard.accentColor
+                }
+
+                StyledText {
+                    anchors.right: parent.right
+                    text: heroCard.mainLabel
+                    font.pointSize: Appearance.font.size.normal
+                    color: Colours.palette.m3onSurfaceVariant
+                }
             }
         }
     }
@@ -511,7 +531,7 @@ RowLayout {
                     required property int index
 
                     Layout.fillWidth: true
-                    Layout.fillHeight: true
+                    Layout.fillHeight: false    
 
                     diskName: modelData.mount
                     used: modelData.used
