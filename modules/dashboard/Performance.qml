@@ -136,7 +136,7 @@ RowLayout {
 
         ColumnLayout {
             anchors.fill: parent
-            anchors.margins: Appearance.padding.large
+            anchors.margins: Config.dashboard.performance.batteryTankMargin
             spacing: Appearance.spacing.small
 
             // Header Section
@@ -167,14 +167,14 @@ RowLayout {
                             level--;
                         return charging ? `battery_charging_${(level + 3) * 10}` : `battery_${level}_bar`;
                     }
-                    font.pointSize: Appearance.font.size.large
+                    font.pointSize: Config.dashboard.performance.largeIconSize
                     color: batteryTank.accentColor
                 }
 
                 StyledText {
                     Layout.fillWidth: true
                     text: qsTr("Battery")
-                    font.pointSize: Appearance.font.size.normal
+                    font.pointSize: Config.dashboard.performance.normalTextSize
                     color: Colours.palette.m3onSurface
                 }
             }
@@ -184,12 +184,12 @@ RowLayout {
             // Bottom Info Section
             ColumnLayout {
                 Layout.fillWidth: true
-                spacing: -4
+                spacing: Config.dashboard.performance.percentValueSpacing
 
                 StyledText {
                     Layout.alignment: Qt.AlignRight
                     text: `${Math.round(batteryTank.percentage * 100)}%`
-                    font.pointSize: Appearance.font.size.extraLarge
+                    font.pointSize: Config.dashboard.performance.percentageTextSize
                     font.weight: Font.Medium
                     color: batteryTank.accentColor
                 }
@@ -210,7 +210,7 @@ RowLayout {
                         if (hr > 0) return `${hr}h ${min}m`;
                         return `${min}m`;
                     }
-                    font.pointSize: Appearance.font.size.smaller
+                    font.pointSize: Config.dashboard.performance.usageTextSize
                     color: Colours.palette.m3onSurfaceVariant
                 }
             }
@@ -229,13 +229,13 @@ RowLayout {
             text: parent.icon
             fill: 1
             color: parent.accentColor
-            font.pointSize: Appearance.font.size.large
+            font.pointSize: Config.dashboard.performance.largeIconSize
         }
 
         StyledText {
             Layout.fillWidth: true
             text: parent.title
-            font.pointSize: Appearance.font.size.normal
+            font.pointSize: Config.dashboard.performance.normalTextSize
             elide: Text.ElideRight
         }
     }
@@ -319,10 +319,10 @@ RowLayout {
 
         ColumnLayout {
             anchors.fill: parent
-            anchors.leftMargin: Appearance.padding.large
-            anchors.rightMargin: Appearance.padding.large
-            anchors.topMargin: Appearance.padding.small
-            anchors.bottomMargin: Appearance.padding.small
+            anchors.leftMargin: Config.dashboard.performance.heroCardLeftMargin
+            anchors.rightMargin: Config.dashboard.performance.heroCardRightMargin
+            anchors.topMargin: Config.dashboard.performance.heroCardTopMargin
+            anchors.bottomMargin: Config.dashboard.performance.heroCardBottomMargin
             spacing: Appearance.spacing.small
 
             CardHeader {
@@ -346,21 +346,21 @@ RowLayout {
 
                         StyledText {
                             text: heroCard.secondaryValue
-                            font.pointSize: Appearance.font.size.normal
+                            font.pointSize: Config.dashboard.performance.normalTextSize
                             font.weight: Font.Medium
                         }
 
                         StyledText {
                             text: heroCard.secondaryLabel
-                            font.pointSize: Appearance.font.size.smaller
+                            font.pointSize: Config.dashboard.performance.valueLabelSize
                             color: Colours.palette.m3onSurfaceVariant
                             anchors.baseline: parent.children[0].baseline
                         }
                     }
 
                     ProgressBar {
-                        width: parent.width * 0.5 // localized width, or use Layout if this Column became a Layout
-                        height: 6
+                        width: parent.width * Config.dashboard.performance.tempBarWidthMult
+                        height: Config.dashboard.performance.tempBarHeight
 
                         value: heroCard.tempProgress
                         fgColor: heroCard.accentColor
@@ -376,20 +376,20 @@ RowLayout {
                 anchors.right: parent.right
                 anchors.verticalCenter: parent.verticalCenter
                 anchors.margins: Appearance.padding.large
-                anchors.rightMargin: Appearance.padding.large * 2
-                spacing: -8
+                anchors.rightMargin: Config.dashboard.performance.heroCardRightValueMargin
+                spacing: Config.dashboard.performance.mainValueSpacing
 
                 StyledText {
                     anchors.right: parent.right
                     text: heroCard.mainLabel
-                    font.pointSize: Appearance.font.size.normal
+                    font.pointSize: Config.dashboard.performance.normalTextSize
                     color: Colours.palette.m3onSurfaceVariant
                 }
 
                 StyledText {
                     anchors.right: parent.right
                     text: heroCard.mainValue
-                    font.pointSize: Appearance.font.size.extraLarge
+                    font.pointSize: Config.dashboard.performance.percentageTextSize
                     font.weight: Font.Medium
                     color: heroCard.accentColor
                 }
@@ -425,7 +425,7 @@ RowLayout {
 
         ColumnLayout {
             anchors.fill: parent
-            anchors.margins: Appearance.padding.large
+            anchors.margins: Config.dashboard.performance.gaugeCardMargin
             spacing: Appearance.spacing.smaller
 
             CardHeader {
@@ -451,8 +451,8 @@ RowLayout {
 
                         const cx = width / 2;
                         const cy = height / 2;
-                        const radius = (Math.min(width, height) - 12) / 2;
-                        const lineWidth = 10;
+                        const radius = (Math.min(width, height) - Config.dashboard.performance.gaugeRadiusOffset) / 2;
+                        const lineWidth = Config.dashboard.performance.gaugeLineWidth;
 
                         ctx.beginPath();
                         ctx.arc(cx, cy, radius, gaugeCard.arcStartAngle, gaugeCard.arcStartAngle + gaugeCard.arcSweep);
@@ -491,7 +491,7 @@ RowLayout {
                 StyledText {
                     anchors.centerIn: parent
                     text: `${Math.round(gaugeCard.percentage * 100)}%`
-                    font.pointSize: Appearance.font.size.extraLarge
+                    font.pointSize: Config.dashboard.performance.percentageTextSize
                     font.weight: Font.Medium
                     color: gaugeCard.accentColor
                 }
@@ -500,7 +500,7 @@ RowLayout {
             StyledText {
                 Layout.alignment: Qt.AlignHCenter
                 text: gaugeCard.subtitle
-                font.pointSize: Appearance.font.size.smaller
+                font.pointSize: Config.dashboard.performance.usageTextSize
                 color: Colours.palette.m3onSurfaceVariant
             }
         }
@@ -515,7 +515,7 @@ RowLayout {
 
         ColumnLayout {
             anchors.fill: parent
-            anchors.margins: Appearance.padding.large
+            anchors.margins: Config.dashboard.performance.storageCardMargin
             spacing: Appearance.spacing.normal
 
             CardHeader {
@@ -585,25 +585,25 @@ RowLayout {
             spacing: Appearance.spacing.normal
 
             Rectangle {
-                width: 4
+                width: Config.dashboard.performance.diskIndicatorWidth
                 Layout.fillHeight: true
-                Layout.topMargin: 2
-                Layout.bottomMargin: 2
-                radius: 2
+                Layout.topMargin: Config.dashboard.performance.diskRowTopMargin
+                Layout.bottomMargin: Config.dashboard.performance.diskRowBottomMargin
+                radius: Config.dashboard.performance.diskIndicatorRadius
                 color: diskRow.diskColor
             }
 
             StyledText {
                 Layout.preferredWidth: 80
                 text: diskRow.diskName
-                font.pointSize: Appearance.font.size.small
+                font.pointSize: Config.dashboard.performance.usageTextSize
             }
 
             ProgressBar {
                 Layout.fillWidth: true
                 Layout.fillHeight: true
-                Layout.topMargin: 4
-                Layout.bottomMargin: 4
+                Layout.topMargin: Config.dashboard.performance.diskRowProgressTopMargin
+                Layout.bottomMargin: Config.dashboard.performance.diskRowProgressBottomMargin
 
                 value: diskRow.percentage
                 fgColor: diskRow.diskColor
@@ -627,7 +627,7 @@ RowLayout {
                     visible: !diskRow.hovered
                     opacity: diskRow.hovered ? 0 : 1
                     text: `${Math.round(diskRow.percentage * 100)}%`
-                    font.pointSize: Appearance.font.size.small
+                    font.pointSize: Config.dashboard.performance.usageTextSize
                     font.weight: Font.Medium
                     color: diskRow.diskColor
                     horizontalAlignment: Text.AlignRight
@@ -650,7 +650,7 @@ RowLayout {
                         const totalFmt = SystemUsage.formatKib(diskRow.total);
                         return `${usedFmt.value.toFixed(0)}/${totalFmt.value.toFixed(0)}${totalFmt.unit}`;
                     }
-                    font.pointSize: Appearance.font.size.smaller
+                    font.pointSize: Config.dashboard.performance.valueLabelSize
                     color: Colours.palette.m3onSurfaceVariant
                     horizontalAlignment: Text.AlignRight
 

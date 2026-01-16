@@ -40,6 +40,33 @@ Item {
     property bool showStorage: Config.dashboard.performance.showStorage ?? false
     property int resourceSize: Config.dashboard.sizes.resourceSize ?? 200
     property int resourceProgessThickness: Config.dashboard.sizes.resourceProgessThickness ?? 10
+    
+    // Performance Styling
+    property int usageTextSize: Config.dashboard.performance.usageTextSize ?? 12
+    property int valueLabelSize: Config.dashboard.performance.valueLabelSize ?? 10
+    property int percentageTextSize: Config.dashboard.performance.percentageTextSize ?? 24
+    property int normalTextSize: Config.dashboard.performance.normalTextSize ?? 14
+    property int largeIconSize: Config.dashboard.performance.largeIconSize ?? 20
+    property int tempBarHeight: Config.dashboard.performance.tempBarHeight ?? 6
+    property real tempBarWidthMult: Config.dashboard.performance.tempBarWidthMult ?? 0.5
+    property int gaugeLineWidth: Config.dashboard.performance.gaugeLineWidth ?? 10
+    property int gaugeRadiusOffset: Config.dashboard.performance.gaugeRadiusOffset ?? 12
+    property int diskIndicatorWidth: Config.dashboard.performance.diskIndicatorWidth ?? 4
+    property int diskIndicatorRadius: Config.dashboard.performance.diskIndicatorRadius ?? 2
+    property int heroCardTopMargin: Config.dashboard.performance.heroCardTopMargin ?? 8
+    property int heroCardBottomMargin: Config.dashboard.performance.heroCardBottomMargin ?? 8
+    property int heroCardLeftMargin: Config.dashboard.performance.heroCardLeftMargin ?? 16
+    property int heroCardRightMargin: Config.dashboard.performance.heroCardRightMargin ?? 16
+    property int heroCardRightValueMargin: Config.dashboard.performance.heroCardRightValueMargin ?? 32
+    property int batteryTankMargin: Config.dashboard.performance.batteryTankMargin ?? 16
+    property int mainValueSpacing: Config.dashboard.performance.mainValueSpacing ?? -8
+    property int percentValueSpacing: Config.dashboard.performance.percentValueSpacing ?? -4
+    property int gaugeCardMargin: Config.dashboard.performance.gaugeCardMargin ?? 16
+    property int storageCardMargin: Config.dashboard.performance.storageCardMargin ?? 16
+    property int diskRowTopMargin: Config.dashboard.performance.diskRowTopMargin ?? 2
+    property int diskRowBottomMargin: Config.dashboard.performance.diskRowBottomMargin ?? 2
+    property int diskRowProgressTopMargin: Config.dashboard.performance.diskRowProgressTopMargin ?? 4
+    property int diskRowProgressBottomMargin: Config.dashboard.performance.diskRowProgressBottomMargin ?? 4
 
     // Widget Sizes
     property int tabIndicatorHeight: Config.dashboard.sizes.tabIndicatorHeight ?? 3
@@ -61,6 +88,31 @@ Item {
         Config.dashboard.performance.showCpu = root.showCpu;
         Config.dashboard.performance.showMemory = root.showMemory;
         Config.dashboard.performance.showStorage = root.showStorage;
+        Config.dashboard.performance.usageTextSize = root.usageTextSize;
+        Config.dashboard.performance.valueLabelSize = root.valueLabelSize;
+        Config.dashboard.performance.percentageTextSize = root.percentageTextSize;
+        Config.dashboard.performance.normalTextSize = root.normalTextSize;
+        Config.dashboard.performance.largeIconSize = root.largeIconSize;
+        Config.dashboard.performance.tempBarHeight = root.tempBarHeight;
+        Config.dashboard.performance.tempBarWidthMult = root.tempBarWidthMult;
+        Config.dashboard.performance.gaugeLineWidth = root.gaugeLineWidth;
+        Config.dashboard.performance.gaugeRadiusOffset = root.gaugeRadiusOffset;
+        Config.dashboard.performance.diskIndicatorWidth = root.diskIndicatorWidth;
+        Config.dashboard.performance.diskIndicatorRadius = root.diskIndicatorRadius;
+        Config.dashboard.performance.heroCardTopMargin = root.heroCardTopMargin;
+        Config.dashboard.performance.heroCardBottomMargin = root.heroCardBottomMargin;
+        Config.dashboard.performance.heroCardLeftMargin = root.heroCardLeftMargin;
+        Config.dashboard.performance.heroCardRightMargin = root.heroCardRightMargin;
+        Config.dashboard.performance.heroCardRightValueMargin = root.heroCardRightValueMargin;
+        Config.dashboard.performance.batteryTankMargin = root.batteryTankMargin;
+        Config.dashboard.performance.mainValueSpacing = root.mainValueSpacing;
+        Config.dashboard.performance.percentValueSpacing = root.percentValueSpacing;
+        Config.dashboard.performance.gaugeCardMargin = root.gaugeCardMargin;
+        Config.dashboard.performance.storageCardMargin = root.storageCardMargin;
+        Config.dashboard.performance.diskRowTopMargin = root.diskRowTopMargin;
+        Config.dashboard.performance.diskRowBottomMargin = root.diskRowBottomMargin;
+        Config.dashboard.performance.diskRowProgressTopMargin = root.diskRowProgressTopMargin;
+        Config.dashboard.performance.diskRowProgressBottomMargin = root.diskRowProgressBottomMargin;
         // Note: sizes properties are readonly and cannot be modified
         Config.save();
     }

@@ -14,6 +14,40 @@ JsonObject {
         property bool showCpu: true
         property bool showMemory: true
         property bool showStorage: false
+        
+        property int usageTextSize: 12
+        property int valueLabelSize: 10
+        property int percentageTextSize: 24
+        property int normalTextSize: 14
+        property int largeIconSize: 20
+        
+        property int tempBarHeight: 6
+        property real tempBarWidthMult: 0.5
+        
+        property int gaugeLineWidth: 10
+        property int gaugeRadiusOffset: 12
+        
+        property int diskIndicatorWidth: 4
+        property int diskIndicatorRadius: 2
+        
+        property int heroCardTopMargin: 8
+        property int heroCardBottomMargin: 8
+        property int heroCardLeftMargin: 16
+        property int heroCardRightMargin: 16
+        property int heroCardRightValueMargin: 32
+        
+        property int batteryTankMargin: 16
+        
+        property int mainValueSpacing: -8
+        property int percentValueSpacing: -4
+        
+        property int gaugeCardMargin: 16
+        property int storageCardMargin: 16
+        
+        property int diskRowTopMargin: 2
+        property int diskRowBottomMargin: 2
+        property int diskRowProgressTopMargin: 4
+        property int diskRowProgressBottomMargin: 4
     }
 
     component Sizes: JsonObject {
