@@ -381,18 +381,19 @@ RowLayout {
 
                 StyledText {
                     anchors.right: parent.right
-                    text: heroCard.mainValue
-                    font.pointSize: Appearance.font.size.extraLarge * 1.5
-                    font.weight: Font.Medium
-                    color: heroCard.accentColor
-                }
-
-                StyledText {
-                    anchors.right: parent.right
                     text: heroCard.mainLabel
                     font.pointSize: Appearance.font.size.normal
                     color: Colours.palette.m3onSurfaceVariant
                 }
+
+                StyledText {
+                    anchors.right: parent.right
+                    text: heroCard.mainValue
+                    font.pointSize: Appearance.font.size.extraLarge
+                    font.weight: Font.Medium
+                    color: heroCard.accentColor
+                }
+
             }
         }
     }
