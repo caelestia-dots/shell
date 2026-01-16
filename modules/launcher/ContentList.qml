@@ -76,6 +76,9 @@ Item {
         }
     }
 
+    property var showContextMenuAt: null
+    property Item wrapperRoot: null
+    
     Loader {
         id: appList
 
@@ -87,6 +90,8 @@ Item {
             search: root.search
             visibilities: root.visibilities
             activeCategory: root.activeCategory
+            showContextMenuAt: root.showContextMenuAt
+            wrapperRoot: root.wrapperRoot
         }
     }
 

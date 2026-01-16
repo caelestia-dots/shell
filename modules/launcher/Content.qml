@@ -20,6 +20,9 @@ Item {
     readonly property int padding: Appearance.padding.large
     readonly property int rounding: Appearance.rounding.large
     
+    property var showContextMenuAt: null
+    property Item wrapperRoot: null
+    
     property string activeCategory: "all"
     property bool showNavbar: true
     
@@ -236,6 +239,8 @@ Item {
         padding: root.padding
         rounding: root.rounding
         activeCategory: root.activeCategory
+        showContextMenuAt: root.showContextMenuAt
+        wrapperRoot: root.wrapperRoot
     }
 
     StyledRect {

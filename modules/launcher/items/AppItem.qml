@@ -12,18 +12,37 @@ Item {
 
     required property DesktopEntry modelData
     required property PersistentProperties visibilities
-
+    property var showContextMenuAt: null
+    property Item wrapperRoot: null
+    
     implicitHeight: Config.launcher.sizes.itemHeight
 
     anchors.left: parent?.left
     anchors.right: parent?.right
 
     StateLayer {
+        id: stateLayer
         radius: Appearance.rounding.normal
-
-        function onClicked(): void {
-            Apps.launch(root.modelData);
-            root.visibilities.launcher = false;
+        acceptedButtons: Qt.LeftButton | Qt.RightButton
+        
+        function onClicked(event): void {
+            if (event.button === Qt.LeftButton) {
+                Apps.launch(root.modelData);
+                root.visibilities.launcher = false;
+            } else if (event.button === Qt.RightButton) {
+                if (!root.showContextMenuAt || !root.wrapperRoot || !root.modelData) {
+                    return;
+                }
+                
+                try {
+                    const pos = stateLayer.mapToItem(root.wrapperRoot, event.x, event.y);
+                    if (pos && typeof pos.x === 'number' && typeof pos.y === 'number') {
+                        root.showContextMenuAt(root.modelData, pos.x, pos.y);
+                    }
+                } catch (error) {
+                    console.error("Failed to show context menu:", error);
+                }
+            }
         }
     }
 
