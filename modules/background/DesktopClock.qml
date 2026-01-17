@@ -12,9 +12,9 @@ Item {
 
     property real scale: Config.background.desktopClock.scale
 
-    readonly property bool shadowEnabled: Config.background.desktopClock.shadow.enabled ?? true
-    readonly property real shadowOpacity: Config.background.desktopClock.shadow.opacity ?? 0.4
-    readonly property real shadowBlur: Config.background.desktopClock.shadow.blur ?? 0.8
+    readonly property bool shadowEnabled: Config.background.desktopClock.shadow.enabled
+    readonly property real shadowOpacity: Config.background.desktopClock.shadow.opacity
+    readonly property real shadowBlur: Config.background.desktopClock.shadow.blur
 
     readonly property bool isBrightWall: Colours.wallLuminance > 0.6
     
