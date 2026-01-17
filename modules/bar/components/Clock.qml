@@ -40,12 +40,4 @@ Column {
         font.family: Appearance.font.family.mono
         color: root.colour
     }
-
-    Connections {
-        target: Config.bar
-
-        function onShowSecondsChanged(): void {
-            osRelease.reload();
-        }
-    }
 }
