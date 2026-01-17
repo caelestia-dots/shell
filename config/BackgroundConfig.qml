@@ -7,6 +7,8 @@ JsonObject {
 
     component DesktopClock: JsonObject {
         property bool enabled: false
+        property real scale: 1.0
+        property string position: "bottom-right"
     }
 
     component Visualiser: JsonObject {
