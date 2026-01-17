@@ -24,7 +24,7 @@ Item {
     property Item wrapperRoot: null
     
     property string activeCategory: "all"
-    property bool showNavbar: true
+    property bool showNavbar: (Config.launcher.enableCategories ?? true) && !search.text.startsWith(Config.launcher.actionPrefix)
     
     readonly property var categoryList: [
         { id: "all", name: qsTr("All"), icon: "apps" },
@@ -78,7 +78,7 @@ Item {
     }
 
     implicitWidth: list.width + padding * 2
-    implicitHeight: searchWrapper.implicitHeight + list.implicitHeight + (showNavbar ? tabsWrapper.implicitHeight + padding * 2 : 0) + padding * 2 + Appearance.spacing.normal
+    implicitHeight: searchWrapper.implicitHeight + list.implicitHeight + tabsWrapper.implicitHeight + (showNavbar ? padding * 2 : 0) + padding * 2 + Appearance.spacing.normal
 
     StyledRect {
         id: tabsWrapper
@@ -96,6 +96,7 @@ Item {
         visible: opacity > 0
         opacity: root.showNavbar ? 1 : 0
         implicitHeight: root.showNavbar ? tabsRow.height + Appearance.padding.small + Appearance.padding.normal : 0
+        clip: true
         
         Behavior on opacity {
             Anim {
@@ -228,8 +229,15 @@ Item {
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.top: tabsWrapper.bottom
         anchors.bottom: searchWrapper.top
-        anchors.topMargin: root.padding
+        anchors.topMargin: root.showNavbar ? root.padding : 0
         anchors.bottomMargin: root.padding
+        
+        Behavior on anchors.topMargin {
+            Anim {
+                duration: Appearance.anim.durations.normal
+                easing.bezierCurve: Appearance.anim.curves.emphasized
+            }
+        }
 
         content: root
         visibilities: root.visibilities

@@ -262,6 +262,7 @@ Singleton {
         return {
             enabled: launcher.enabled,
             showOnHover: launcher.showOnHover,
+            enableCategories: launcher.enableCategories ?? true,
             maxShown: launcher.maxShown,
             maxWallpapers: launcher.maxWallpapers,
             specialPrefix: launcher.specialPrefix,

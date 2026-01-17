@@ -3,6 +3,7 @@ import Quickshell.Io
 JsonObject {
     property bool enabled: true
     property bool showOnHover: false
+    property bool enableCategories: true
     property int maxShown: 7
     property int maxWallpapers: 9 // Warning: even numbers look bad
     property string specialPrefix: "@"
