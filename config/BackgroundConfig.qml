@@ -9,12 +9,14 @@ JsonObject {
         property bool enabled: false
         property real scale: 1.0
         property string position: "bottom-right"
+        property bool enableBackground: false
+        property DesktopClockShadow shadow: DesktopClockShadow {}
+    }
 
-        property JsonObject shadow: JsonObject {
-            property bool enabled: true
-            property real opacity: 0.6
-            property real blur: 0.4
-        }
+    component DesktopClockShadow: JsonObject {
+        property bool enabled: true
+        property real opacity: 0.7
+        property real blur: 0.4
     }
 
     component Visualiser: JsonObject {
