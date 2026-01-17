@@ -108,7 +108,6 @@ Item {
                     Layout.alignment: Qt.AlignTop
                     Layout.topMargin: Appearance.padding.large * 1.4 * root.scale
                 }
-
             }
 
             StyledRect {
@@ -154,6 +153,12 @@ Item {
         Anim {
             duration: Appearance.anim.durations.expressiveDefaultSpatial
             easing.bezierCurve: Appearance.anim.curves.expressiveDefaultSpatial
+        }
+    }
+    
+    Behavior on implicitWidth {
+        Anim {
+            duration: Appearance.anim.durations.small
         }
     }
 }
