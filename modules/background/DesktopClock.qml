@@ -12,84 +12,14 @@ Item {
 
     property real scale: Config.background.desktopClock.scale
 
-    readonly property bool shadowEnabled: Config.background.desktopClock.shadow.enabled
-    readonly property real shadowOpacity: Config.background.desktopClock.shadow.opacity
-    readonly property real shadowBlur: Config.background.desktopClock.shadow.blur
-
-    readonly property bool isBrightWall: Colours.wallLuminance > 0.6
-    
-    readonly property color safePrimary: isBrightWall ? Colours.palette.m3onPrimary : Colours.palette.m3primary
-    readonly property color safeSecondary: isBrightWall ? Colours.palette.m3onSecondary : Colours.palette.m3secondary
-    readonly property color safeTertiary: isBrightWall ? Colours.palette.m3onTertiary : Colours.palette.m3tertiary
-
-    component DebugSwatch : Rectangle {
-        width: 16; height: 16
-        border.color: "white"
-        border.width: 1
-    }
+    readonly property color safePrimary: Colours.light ? Colours.palette.m3primaryContainer : Colours.palette.m3primary
+    readonly property color safeSecondary: Colours.light ? Colours.palette.m3secondaryContainer : Colours.palette.m3secondary
+    readonly property color safeTertiary: Colours.light ? Colours.palette.m3tertiaryContainer : Colours.palette.m3tertiary
 
     Behavior on scale {
         NumberAnimation {
             duration: Appearance.anim.durations.expressiveDefaultSpatial
             easing.bezierCurve: Appearance.anim.curves.expressiveDefaultSpatial
-        }
-    }
-
-    // DEBUG OVERLAY
-    ColumnLayout {
-        id: debugOverlay
-        anchors.bottom: clockContainer.top
-        anchors.left: clockContainer.left
-        anchors.bottomMargin: 10
-        spacing: 5
-        z: 100 
-
-        RowLayout {
-            spacing: 8
-            Rectangle {
-                width: 12; height: 12
-                radius: 6
-                color: root.isBrightWall ? "#ff0000" : "#444444"
-                border.color: "white"
-                border.width: 1
-            }
-            Text { 
-                text: root.isBrightWall ? "BRIGHT WALL (Using Dark Colors)" : "DARK WALL (Using Light Colors)"
-                color: "white"
-                font.pixelSize: 10
-                style: Text.Outline; styleColor: "black"
-            }
-            Text {
-                text: Colours.wallLuminance
-                color: "#ff0000"
-                font.pixelSize: 10
-            }
-        }
-
-        RowLayout {
-            spacing: 15
-            
-            ColumnLayout {
-                spacing: 2
-                Text { text: "Normal Palette"; color: "white"; font.pixelSize: 8; style: Text.Outline; styleColor: "black" }
-                Row {
-                    spacing: 2
-                    DebugSwatch { color: Colours.palette.m3primary }
-                    DebugSwatch { color: Colours.palette.m3secondary }
-                    DebugSwatch { color: Colours.palette.m3tertiary }
-                }
-            }
-
-            ColumnLayout {
-                spacing: 2
-                Text { text: "Safe"; color: "white"; font.pixelSize: 8; style: Text.Outline; styleColor: "black" }
-                Row {
-                    spacing: 2
-                    DebugSwatch { color: root.safePrimary }
-                    DebugSwatch { color: root.safeSecondary }
-                    DebugSwatch { color: root.safeTertiary }
-                }
-            }
         }
     }
 
@@ -181,9 +111,9 @@ Item {
         source: clockContainer
         anchors.fill: clockContainer
         
-        shadowEnabled: root.shadowEnabled
-        shadowColor: root.isBrightWall ? Qt.rgba(0,0,0,0.6) : Colours.palette.m3shadow
-        shadowOpacity: root.shadowOpacity
-        shadowBlur: root.shadowBlur
+        shadowEnabled: Config.background.desktopClock.shadow.enabled
+        shadowColor: Colours.palette.m3shadow
+        shadowOpacity: Config.background.desktopClock.shadow.opacity
+        shadowBlur: Config.background.desktopClock.shadow.blur
     }
 }
