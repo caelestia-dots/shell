@@ -1,0 +1,314 @@
+pragma ComponentBehavior: Bound
+
+import ".."
+import "../components"
+import qs.components
+import qs.components.controls
+import qs.components.effects
+import qs.components.containers
+import qs.services
+import qs.config
+import qs.utils
+import QtQuick
+import QtQuick.Controls
+import QtQuick.Layouts
+
+DeviceDetails {
+    id: root
+
+    required property Session session
+    readonly property var vpnProvider: root.session.vpn.active
+    readonly property bool providerEnabled: {
+        if (!vpnProvider || vpnProvider.index === undefined) return false;
+        const provider = Config.utilities.vpn.provider[vpnProvider.index];
+        return provider && typeof provider === "object" && provider.enabled === true;
+    }
+    
+    device: vpnProvider
+
+    headerComponent: Component {
+        ConnectionHeader {
+            icon: "vpn_key"
+            title: root.vpnProvider?.displayName ?? qsTr("Unknown")
+        }
+    }
+
+    sections: [
+        Component {
+            ColumnLayout {
+                spacing: Appearance.spacing.normal
+
+                SectionHeader {
+                    title: qsTr("Connection status")
+                    description: qsTr("VPN connection settings")
+                }
+
+                SectionContainer {
+                    ToggleRow {
+                        label: qsTr("Enable this provider")
+                        checked: root.providerEnabled
+                        toggle.onToggled: {
+                            if (!root.vpnProvider) return;
+                            const providers = [];
+                            const index = root.vpnProvider.index;
+                            
+                            // Copy providers and update enabled state
+                            for (let i = 0; i < Config.utilities.vpn.provider.length; i++) {
+                                const p = Config.utilities.vpn.provider[i];
+                                if (typeof p === "object") {
+                                    const newProvider = {
+                                        name: p.name,
+                                        displayName: p.displayName,
+                                        interface: p.interface
+                                    };
+                                    
+                                    if (checked) {
+                                        // Enable this one, disable others
+                                        newProvider.enabled = (i === index);
+                                    } else {
+                                        // Just disable this one
+                                        newProvider.enabled = (i === index) ? false : (p.enabled !== false);
+                                    }
+                                    
+                                    providers.push(newProvider);
+                                } else {
+                                    providers.push(p);
+                                }
+                            }
+                            
+                            Config.utilities.vpn.provider = providers;
+                            Config.save();
+                        }
+                    }
+
+                    RowLayout {
+                        Layout.fillWidth: true
+                        Layout.topMargin: Appearance.spacing.normal
+                        spacing: Appearance.spacing.normal
+                        
+                        TextButton {
+                            Layout.fillWidth: true
+                            Layout.minimumHeight: Appearance.font.size.normal + Appearance.padding.normal * 2
+                            visible: root.providerEnabled
+                            enabled: !VPN.connecting
+                            inactiveColour: Colours.palette.m3primaryContainer
+                            inactiveOnColour: Colours.palette.m3onPrimaryContainer
+                            text: VPN.connected ? qsTr("Disconnect") : qsTr("Connect")
+
+                            onClicked: {
+                                VPN.toggle();
+                            }
+                        }
+
+                        TextButton {
+                            Layout.fillWidth: true
+                            text: qsTr("Edit Provider")
+                            inactiveColour: Colours.palette.m3secondaryContainer
+                            inactiveOnColour: Colours.palette.m3onSecondaryContainer
+
+                            onClicked: {
+                                editVpnDialog.editIndex = root.vpnProvider.index;
+                                editVpnDialog.providerName = root.vpnProvider.name;
+                                editVpnDialog.displayName = root.vpnProvider.displayName;
+                                editVpnDialog.interfaceName = root.vpnProvider.interface;
+                                editVpnDialog.open();
+                            }
+                        }
+
+                        TextButton {
+                            Layout.fillWidth: true
+                            text: qsTr("Delete Provider")
+                            inactiveColour: Colours.palette.m3errorContainer
+                            inactiveOnColour: Colours.palette.m3onErrorContainer
+
+                            onClicked: {
+                                const providers = [];
+                                for (let i = 0; i < Config.utilities.vpn.provider.length; i++) {
+                                    if (i !== root.vpnProvider.index) {
+                                        providers.push(Config.utilities.vpn.provider[i]);
+                                    }
+                                }
+                                Config.utilities.vpn.provider = providers;
+                                Config.save();
+                                root.session.vpn.active = null;
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        Component {
+            ColumnLayout {
+                spacing: Appearance.spacing.normal
+
+                SectionHeader {
+                    title: qsTr("Provider details")
+                    description: qsTr("VPN provider information")
+                }
+
+                SectionContainer {
+                    contentSpacing: Appearance.spacing.small / 2
+
+                    PropertyRow {
+                        label: qsTr("Provider")
+                        value: root.vpnProvider?.name ?? qsTr("Unknown")
+                    }
+
+                    PropertyRow {
+                        showTopMargin: true
+                        label: qsTr("Display name")
+                        value: root.vpnProvider?.displayName ?? qsTr("Unknown")
+                    }
+
+                    PropertyRow {
+                        showTopMargin: true
+                        label: qsTr("Interface")
+                        value: root.vpnProvider?.interface || qsTr("N/A")
+                    }
+
+                    PropertyRow {
+                        showTopMargin: true
+                        label: qsTr("Status")
+                        value: {
+                            if (!root.providerEnabled) return qsTr("Disabled");
+                            if (VPN.connecting) return qsTr("Connecting...");
+                            if (VPN.connected) return qsTr("Connected");
+                            return qsTr("Enabled (Not connected)");
+                        }
+                    }
+
+                    PropertyRow {
+                        showTopMargin: true
+                        label: qsTr("Enabled")
+                        value: root.providerEnabled ? qsTr("Yes") : qsTr("No")
+                    }
+                }
+            }
+        }
+    ]
+
+    // Edit VPN Dialog
+    Popup {
+        id: editVpnDialog
+        
+        property int editIndex: -1
+        property string providerName: ""
+        property string displayName: ""
+        property string interfaceName: ""
+        
+        parent: Overlay.overlay
+        anchors.centerIn: parent
+        width: Math.min(400, parent.width - Appearance.padding.large * 2)
+        padding: Appearance.padding.large
+        
+        modal: true
+        closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutside
+        
+        opacity: 0
+        scale: 0.7
+        
+        onAboutToShow: {
+            opacity = 0;
+            scale = 0.7;
+        }
+        
+        onOpened: {
+            opacityAnim.to = 1;
+            scaleAnim.to = 1;
+            openAnim.start();
+        }
+        
+        onAboutToHide: {
+            opacityAnim.to = 0;
+            scaleAnim.to = 0.7;
+            closeAnim.start();
+        }
+        
+        ParallelAnimation {
+            id: openAnim
+            NumberAnimation { id: opacityAnim; target: editVpnDialog; property: "opacity"; duration: Appearance.anim.durations.expressiveFastSpatial; easing.bezierCurve: Appearance.anim.curves.expressiveFastSpatial }
+            NumberAnimation { id: scaleAnim; target: editVpnDialog; property: "scale"; duration: Appearance.anim.durations.expressiveFastSpatial; easing.bezierCurve: Appearance.anim.curves.expressiveFastSpatial }
+        }
+        
+        ParallelAnimation {
+            id: closeAnim
+            NumberAnimation { target: editVpnDialog; property: "opacity"; to: 0; duration: Appearance.anim.durations.expressiveFastSpatial; easing.bezierCurve: Appearance.anim.curves.expressiveFastSpatial }
+            NumberAnimation { target: editVpnDialog; property: "scale"; to: 0.7; duration: Appearance.anim.durations.expressiveFastSpatial; easing.bezierCurve: Appearance.anim.curves.expressiveFastSpatial }
+        }
+        
+        background: StyledRect {
+            color: Colours.palette.m3surfaceContainerHigh
+            radius: Appearance.rounding.large
+        }
+        
+        contentItem: ColumnLayout {
+            spacing: Appearance.spacing.normal
+            
+            StyledText {
+                text: qsTr("Edit VPN Provider")
+                font.pointSize: Appearance.font.size.large
+                font.weight: 500
+            }
+            
+            TextField {
+                Layout.fillWidth: true
+                placeholderText: qsTr("Display Name")
+                text: editVpnDialog.displayName
+                onTextChanged: editVpnDialog.displayName = text
+            }
+            
+            TextField {
+                Layout.fillWidth: true
+                placeholderText: qsTr("Interface (e.g., wg0, torguard)")
+                text: editVpnDialog.interfaceName
+                onTextChanged: editVpnDialog.interfaceName = text
+            }
+            
+            Item { Layout.preferredHeight: Appearance.spacing.normal }
+            
+            RowLayout {
+                Layout.fillWidth: true
+                spacing: Appearance.spacing.normal
+                
+                TextButton {
+                    Layout.fillWidth: true
+                    text: qsTr("Cancel")
+                    inactiveColour: Colours.tPalette.m3surfaceContainerHigh
+                    inactiveOnColour: Colours.palette.m3onSurface
+                    onClicked: editVpnDialog.close()
+                }
+                
+                TextButton {
+                    Layout.fillWidth: true
+                    text: qsTr("Save")
+                    enabled: editVpnDialog.interfaceName.length > 0
+                    inactiveColour: Colours.palette.m3primaryContainer
+                    inactiveOnColour: Colours.palette.m3onPrimaryContainer
+                    
+                    onClicked: {
+                        const providers = [];
+                        const oldProvider = Config.utilities.vpn.provider[editVpnDialog.editIndex];
+                        const wasEnabled = typeof oldProvider === "object" ? (oldProvider.enabled !== false) : true;
+                        
+                        for (let i = 0; i < Config.utilities.vpn.provider.length; i++) {
+                            if (i === editVpnDialog.editIndex) {
+                                providers.push({
+                                    name: editVpnDialog.providerName,
+                                    displayName: editVpnDialog.displayName || editVpnDialog.interfaceName,
+                                    interface: editVpnDialog.interfaceName,
+                                    enabled: wasEnabled
+                                });
+                            } else {
+                                providers.push(Config.utilities.vpn.provider[i]);
+                            }
+                        }
+                        
+                        Config.utilities.vpn.provider = providers;
+                        Config.save();
+                        editVpnDialog.close();
+                    }
+                }
+            }
+        }
+    }
+}
