@@ -109,7 +109,6 @@ StyledRect {
 
                 Loader {
                     anchors.centerIn: parent
-                    asynchronous: true
                     sourceComponent: root.image ? imageComp : root.appIcon ? appIconComp : materialIconComp
                 }
             }
@@ -117,7 +116,6 @@ StyledRect {
             Loader {
                 anchors.right: parent.right
                 anchors.bottom: parent.bottom
-                asynchronous: true
                 active: root.appIcon && root.image
 
                 sourceComponent: StyledRect {

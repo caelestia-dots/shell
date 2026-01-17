@@ -13,7 +13,7 @@ TextField {
     placeholderTextColor: Colours.palette.m3outline
     font.family: Appearance.font.family.sans
     font.pointSize: Appearance.font.size.smaller
-    renderType: TextField.NativeRendering
+    renderType: echoMode === TextField.Password ? TextField.QtRendering : TextField.NativeRendering
     cursorVisible: !readOnly
 
     background: null

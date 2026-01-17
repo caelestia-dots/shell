@@ -113,8 +113,6 @@ Item {
     Loader {
         id: placeholderLoader
         anchors.fill: parent
-        z: 10
-        asynchronous: true
         active: !root.source
 
         sourceComponent: StyledRect {

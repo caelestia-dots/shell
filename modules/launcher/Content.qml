@@ -47,7 +47,7 @@ Item {
     StyledRect {
         id: searchWrapper
 
-        color: Colours.tPalette.m3surfaceContainer
+        color: Colours.layer(Colours.palette.m3surfaceContainer, 2)
         radius: Appearance.rounding.full
 
         anchors.left: parent.left

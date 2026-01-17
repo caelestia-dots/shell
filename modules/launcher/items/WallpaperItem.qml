@@ -81,10 +81,13 @@ Item {
             visible: !isVideo(root.modelData.path)
         }
         CachingImage {
+            cache: true
+            smooth: !root.PathView.view.moving
             anchors.fill: parent
             fillMode: Image.PreserveAspectCrop
             visible: thumb.ready
             path: thumb.cachePath
+
             VideoThumbnailer {
                 id: thumb
                 path: root.modelData.path
