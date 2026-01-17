@@ -1,5 +1,6 @@
 pragma Singleton
 
+import qs.config
 import Quickshell
 import Quickshell.Io
 import QtQuick
@@ -12,6 +13,7 @@ Singleton {
     property string osId
     property list<string> osIdLike
     property string osLogo: Qt.resolvedUrl(`${Quickshell.shellDir}/assets/logo.svg`)
+    property string customLogo: Qt.resolvedUrl(Config.general.logo)
     property bool isDefaultLogo: true
 
     property string uptime
@@ -34,8 +36,11 @@ Singleton {
             root.osIdLike = fd("ID_LIKE").split(" ");
 
             const logo = Quickshell.iconPath(fd("LOGO"), true);
-            if (logo) {
+            if (logo && Config.general.logo === "default") {
                 root.osLogo = logo;
+                root.isDefaultLogo = false;
+            } else if (Config.general.logo !== "caelestia" && customLogo) {
+                root.osLogo = customLogo;
                 root.isDefaultLogo = false;
             }
         }
