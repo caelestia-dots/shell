@@ -313,7 +313,8 @@ default, you must create it manually.
             },
             "background": {
                 "enabled": false,
-                "opacity": 0.7
+                "opacity": 0.7,
+                "blur": true
             },
             "invertColors": false
         },

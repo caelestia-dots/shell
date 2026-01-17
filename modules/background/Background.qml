@@ -30,15 +30,22 @@ Loader {
             anchors.left: true
             anchors.right: true
 
-            Wallpaper {
-                id: wallpaper
+            Item {
+                id: behindClock
+
+                anchors.fill: parent
+
+                Wallpaper {
+                    id: wallpaper
+                }
+
+                Visualiser {
+                    anchors.fill: parent
+                    screen: win.modelData
+                    wallpaper: wallpaper
+                }
             }
 
-            Visualiser {
-                anchors.fill: parent
-                screen: win.modelData
-                wallpaper: wallpaper
-            }
 
             Loader {
                 id: clockLoader
@@ -129,7 +136,11 @@ Loader {
                     }
                 }
 
-                source: "DesktopClock.qml"
+                sourceComponent: DesktopClock {
+                    wallpaper: behindClock
+                    absX: clockLoader.x
+                    absY: clockLoader.y
+                }
             }
         }
     }

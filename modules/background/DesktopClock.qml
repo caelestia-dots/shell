@@ -1,3 +1,5 @@
+pragma ComponentBehavior: Bound
+
 import qs.components
 import qs.services
 import qs.config
@@ -8,9 +10,14 @@ import QtQuick.Effects
 Item {
     id: root
 
+    required property Item wallpaper
+    required property real absX
+    required property real absY
+
     property real scale: Config.background.desktopClock.scale
     readonly property bool bgEnabled: Config.background.desktopClock.background.enabled
-    readonly property bool invertColors: bgEnabled ? false : Config.background.desktopClock.invertColors
+    readonly property bool blurEnabled: bgEnabled && Config.background.desktopClock.background.blur
+    readonly property bool invertColors: Config.background.desktopClock.invertColors
     readonly property bool useLightSet: Colours.light ? !invertColors : invertColors
     readonly property color safePrimary: useLightSet ? Colours.palette.m3primaryContainer : Colours.palette.m3primary
     readonly property color safeSecondary: useLightSet ? Colours.palette.m3secondaryContainer : Colours.palette.m3secondary
@@ -24,14 +31,42 @@ Item {
 
         anchors.fill: parent
 
-        Rectangle {
+        layer.enabled: Config.background.desktopClock.shadow.enabled
+        layer.effect: MultiEffect {
+            shadowEnabled: true
+            shadowColor: Colours.palette.m3shadow
+            shadowOpacity: Config.background.desktopClock.shadow.opacity
+            shadowBlur: Config.background.desktopClock.shadow.blur
+        }
+
+        Loader {
+            anchors.fill: parent
+            active: root.blurEnabled
+
+            sourceComponent: MultiEffect {
+                source: ShaderEffectSource {
+                    sourceItem: root.wallpaper
+                    sourceRect: Qt.rect(root.absX, root.absY, root.width, root.height)
+                }
+                maskSource: backgroundPlate
+                maskEnabled: true
+                blurEnabled: true
+                blur: 1
+                blurMax: 64
+                autoPaddingEnabled: false
+            }
+        }
+
+        StyledRect {
             id: backgroundPlate
 
             visible: root.bgEnabled
             anchors.fill: parent
             radius: Appearance.rounding.large * root.scale
             opacity: Config.background.desktopClock.background.opacity
-            color: Colours.palette.m3shadow
+            color: Colours.palette.m3surface
+
+            layer.enabled: root.blurEnabled
         }
 
         RowLayout {
@@ -55,6 +90,7 @@ Item {
                     font.pointSize: Appearance.font.size.extraLarge * 3 * root.scale
                     color: root.safeTertiary
                     opacity: 0.8
+                    Layout.topMargin: -Appearance.padding.large * 1.5 * root.scale
                 }
 
                 StyledText {
@@ -71,12 +107,11 @@ Item {
                     color: root.safeSecondary
                     Layout.alignment: Qt.AlignTop
                     Layout.topMargin: Appearance.padding.large * 1.4 * root.scale
-                    opacity: 0.8
                 }
 
             }
 
-            Rectangle {
+            StyledRect {
                 Layout.fillHeight: true
                 Layout.preferredWidth: 4 * root.scale
                 Layout.topMargin: Appearance.spacing.larger * root.scale
@@ -115,16 +150,10 @@ Item {
         }
     }
 
-    MultiEffect {
-        source: clockContainer
-        anchors.fill: clockContainer
-        shadowEnabled: Config.background.desktopClock.shadow.enabled
-        shadowColor: Colours.palette.m3shadow
-        shadowOpacity: Config.background.desktopClock.shadow.opacity
-        shadowBlur: Config.background.desktopClock.shadow.blur
-    }
-
     Behavior on scale {
-        Anim {}
+        Anim {
+            duration: Appearance.anim.durations.expressiveDefaultSpatial
+            easing.bezierCurve: Appearance.anim.curves.expressiveDefaultSpatial
+        }
     }
 }

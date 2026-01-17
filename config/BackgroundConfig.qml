@@ -17,7 +17,7 @@ JsonObject {
     component DesktopClockBackground: JsonObject {
         property bool enabled: false
         property real opacity: 0.7
-        // property bool blur: enabled
+        property bool blur: true
     }
 
     component DesktopClockShadow: JsonObject {
