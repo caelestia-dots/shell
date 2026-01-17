@@ -7,39 +7,47 @@ import QtQuick.Effects
 
 Item {
     id: root
-    implicitWidth: layout.implicitWidth + Appearance.padding.large * 2
-    implicitHeight: layout.implicitHeight + Appearance.padding.large
 
     property real scale: Config.background.desktopClock.scale
+    readonly property bool bgEnabled: Config.background.desktopClock.background.enabled
+    readonly property bool invertColors: bgEnabled ? false : Config.background.desktopClock.invertColors
+    readonly property bool useLightSet: Colours.light ? !invertColors : invertColors
+    readonly property color safePrimary: useLightSet ? Colours.palette.m3primaryContainer : Colours.palette.m3primary
+    readonly property color safeSecondary: useLightSet ? Colours.palette.m3secondaryContainer : Colours.palette.m3secondary
+    readonly property color safeTertiary: useLightSet ? Colours.palette.m3tertiaryContainer : Colours.palette.m3tertiary
 
-    readonly property color safePrimary: Colours.light ? Colours.palette.m3primaryContainer : Colours.palette.m3primary
-    readonly property color safeSecondary: Colours.light ? Colours.palette.m3secondaryContainer : Colours.palette.m3secondary
-    readonly property color safeTertiary: Colours.light ? Colours.palette.m3tertiaryContainer : Colours.palette.m3tertiary
-
-    Behavior on scale {
-        NumberAnimation {
-            duration: Appearance.anim.durations.expressiveDefaultSpatial
-            easing.bezierCurve: Appearance.anim.curves.expressiveDefaultSpatial
-        }
-    }
+    implicitWidth: layout.implicitWidth + (Appearance.padding.large * 4 * root.scale)
+    implicitHeight: layout.implicitHeight + (Appearance.padding.large * 2 * root.scale)
 
     Item {
         id: clockContainer
+
         anchors.fill: parent
+
+        Rectangle {
+            id: backgroundPlate
+
+            visible: root.bgEnabled
+            anchors.fill: parent
+            radius: Appearance.rounding.large * root.scale
+            opacity: Config.background.desktopClock.background.opacity
+            color: Colours.palette.m3shadow
+        }
 
         RowLayout {
             id: layout
+
             anchors.centerIn: parent
             spacing: Appearance.spacing.larger * root.scale
 
             RowLayout {
                 spacing: Appearance.spacing.small
-                
+
                 StyledText {
                     text: Time.format(Config.services.useTwelveHourClock ? "hh" : "HH")
                     font.pointSize: Appearance.font.size.extraLarge * 3 * root.scale
                     font.weight: Font.Bold
-                    color: root.safePrimary 
+                    color: root.safePrimary
                 }
 
                 StyledText {
@@ -65,6 +73,7 @@ Item {
                     Layout.topMargin: Appearance.padding.large * 1.4 * root.scale
                     opacity: 0.8
                 }
+
             }
 
             Rectangle {
@@ -79,13 +88,13 @@ Item {
 
             ColumnLayout {
                 spacing: 0
-                
+
                 StyledText {
                     text: Time.format("MMMM").toUpperCase()
                     font.pointSize: Appearance.font.size.large * root.scale
                     font.letterSpacing: 4
                     font.weight: Font.Bold
-                    color: root.safeSecondary 
+                    color: root.safeSecondary
                 }
 
                 StyledText {
@@ -101,7 +110,6 @@ Item {
                     font.pointSize: Appearance.font.size.larger * root.scale
                     font.letterSpacing: 2
                     color: root.safeSecondary
-                    opacity: isBrightWall ? 1 : 0.8
                 }
             }
         }
@@ -110,10 +118,13 @@ Item {
     MultiEffect {
         source: clockContainer
         anchors.fill: clockContainer
-        
         shadowEnabled: Config.background.desktopClock.shadow.enabled
         shadowColor: Colours.palette.m3shadow
         shadowOpacity: Config.background.desktopClock.shadow.opacity
         shadowBlur: Config.background.desktopClock.shadow.blur
+    }
+
+    Behavior on scale {
+        Anim {}
     }
 }

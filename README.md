@@ -305,7 +305,17 @@ default, you must create it manually.
         "desktopClock": {
             "enabled": false,
             "scale": 1.0,
-            "position": "bottom-right"
+            "position": "bottom-right",
+            "shadow": {
+                "enabled": true,
+                "opacity": 0.7,
+                "blur": 0.4
+            },
+            "background": {
+                "enabled": false,
+                "opacity": 0.7
+            },
+            "invertColors": false
         },
         "enabled": true,
         "visualiser": {
