@@ -14,7 +14,7 @@ Singleton {
     property string osId
     property list<string> osIdLike
     property string osLogo: Qt.resolvedUrl(`${Quickshell.shellDir}/assets/logo.svg`)
-    property bool isDefaultLogo: false
+    property bool isDefaultLogo: true
 
     property string uptime
     readonly property string user: Quickshell.env("USER")
