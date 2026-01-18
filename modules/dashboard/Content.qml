@@ -106,6 +106,11 @@ Item {
                     index: 2
                     sourceComponent: Performance {}
                 }
+
+                Pane {
+                    index: 3
+                    sourceComponent: Weather {}
+                }
             }
 
             Behavior on contentX {
@@ -129,14 +134,18 @@ Item {
     }
 
     component Pane: Loader {
+        id: pane
+
         required property int index
-        
+
         Layout.alignment: Qt.AlignTop
 
         Component.onCompleted: active = Qt.binding(() => {
-            const current = view.currentIndex;
-            // Activate current pane and adjacent panes for smooth scrolling
-            return Math.abs(index - current) <= 1;
+            // Always keep current tab loaded
+            if (pane.index === view.currentIndex) return true;
+            const vx = Math.floor(view.visibleArea.xPosition * view.contentWidth);
+            const vex = Math.floor(vx + view.visibleArea.widthRatio * view.contentWidth);
+            return (vx >= x && vx <= x + implicitWidth) || (vex >= x && vex <= x + implicitWidth);
         })
     }
 }

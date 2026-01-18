@@ -62,7 +62,7 @@ ColumnLayout {
 
     Repeater {
         model: ScriptModel {
-            values: [...Bluetooth.devices.values].sort((a, b) => (b.connected - a.connected) || (b.paired - a.paired)).slice(0, 5)
+            values: [...Bluetooth.devices.values].sort((a, b) => (b.connected - a.connected) || (b.paired - a.paired) || a.name.localeCompare(b.name)).slice(0, 5)
         }
 
         RowLayout {
@@ -142,7 +142,6 @@ ColumnLayout {
             }
 
             Loader {
-                asynchronous: true
                 active: device.modelData.bonded
                 sourceComponent: Item {
                     implicitWidth: connectBtn.implicitWidth
