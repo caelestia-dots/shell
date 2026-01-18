@@ -72,8 +72,8 @@ Item {
         loops: MediaPlayer.Infinite
         videoOutput: video
         audioOutput: AudioOutput {
-            muted: Config.background.wallpaper.muteAudio
-            volume: Config.background.wallpaper.volume
+            muted: Config.background.wallpaper.audio.muteAudio
+            volume: Config.background.wallpaper.audiovolume
         }
 
         function tryPlayVideo() {

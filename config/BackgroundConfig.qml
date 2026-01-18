@@ -36,6 +36,10 @@ JsonObject {
     }
 
     component Wallpaper: JsonObject {
+        property WallpaperAudio audio: WallpaperAudio {}
+    }
+
+    component WallpaperAudio: JsonObject {
         property bool muteAudio: true
         property real volume: 1.0
     }
