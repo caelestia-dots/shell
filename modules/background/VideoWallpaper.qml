@@ -73,7 +73,7 @@ Item {
         videoOutput: video
         audioOutput: AudioOutput {
             muted: Config.background.wallpaper.audio.muteAudio
-            volume: Config.background.wallpaper.audiovolume
+            volume: Config.background.wallpaper.audio.volume
         }
 
         function tryPlayVideo() {
