@@ -105,6 +105,96 @@ Item {
             }
         }
 
+        StyledText {
+            Layout.topMargin: Appearance.spacing.normal
+            Layout.bottomMargin: -Appearance.spacing.small / 2
+            text: qsTr("Applications")
+            font.weight: 500
+            visible: Audio.streams.length > 0
+        }
+
+        Repeater {
+            model: Audio.streams
+            Layout.fillWidth: true
+            visible: Audio.streams.length > 0
+
+            delegate: ColumnLayout {
+                required property var modelData
+
+                Layout.fillWidth: true
+                Layout.topMargin: Appearance.spacing.smaller
+                spacing: Appearance.spacing.smaller
+
+                RowLayout {
+                    Layout.fillWidth: true
+                    spacing: Appearance.spacing.small
+
+                    MaterialIcon {
+                        text: "apps"
+                        font.pointSize: Appearance.font.size.small
+                        fill: 0
+                    }
+
+                    StyledText {
+                        Layout.fillWidth: true
+                        elide: Text.ElideRight
+                        maximumLineCount: 1
+                        text: Audio.getStreamName(modelData)
+                        font.pointSize: Appearance.font.size.small
+                        font.weight: 500
+                    }
+
+                    StyledRect {
+                        implicitWidth: implicitHeight
+                        implicitHeight: streamMuteIcon.implicitHeight + Appearance.padding.small * 2
+
+                        radius: Appearance.rounding.small
+                        color: Audio.getStreamMuted(modelData) ? Colours.palette.m3secondary : Colours.palette.m3secondaryContainer
+
+                        StateLayer {
+                            function onClicked(): void {
+                                Audio.setStreamMuted(modelData, !Audio.getStreamMuted(modelData));
+                            }
+                        }
+
+                        MaterialIcon {
+                            id: streamMuteIcon
+
+                            anchors.centerIn: parent
+                            text: Audio.getStreamMuted(modelData) ? "volume_off" : "volume_up"
+                            color: Audio.getStreamMuted(modelData) ? Colours.palette.m3onSecondary : Colours.palette.m3onSecondaryContainer
+                            font.pointSize: Appearance.font.size.small
+                        }
+                    }
+                }
+
+                StyledSlider {
+                    Layout.fillWidth: true
+                    implicitHeight: Appearance.padding.normal * 2
+
+                    value: Audio.getStreamVolume(modelData)
+                    enabled: !Audio.getStreamMuted(modelData)
+                    opacity: enabled ? 1 : 0.5
+                    onMoved: {
+                        Audio.setStreamVolume(modelData, value);
+                    }
+
+                    Connections {
+                        target: modelData
+                        function onAudioChanged() {
+                            if (modelData?.audio) {
+                                value = modelData.audio.volume;
+                            }
+                        }
+                    }
+
+                    Behavior on value {
+                        Anim {}
+                    }
+                }
+            }
+        }
+
         IconTextButton {
             Layout.fillWidth: true
             Layout.topMargin: Appearance.spacing.normal
