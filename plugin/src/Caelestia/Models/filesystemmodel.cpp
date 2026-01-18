@@ -374,7 +374,7 @@ void FileSystemModel::updateEntriesForDir(const QString& dir) {
     m_futures.insert(dir, future);
 
     const auto watcher = new QFutureWatcher<QPair<QSet<QString>, QSet<QString>>>(this);
-    connect(watcher, &QFutureWatcher<QPair<QSet<QString>, QSet<QString>>>::finished, this, [=]() {
+    connect(watcher, &QFutureWatcher<QPair<QSet<QString>, QSet<QString>>>::finished, this, [this, dir, watcher]() {
         m_futures.remove(dir);
 
         if (!watcher->future().isResultReadyAt(0)) {
