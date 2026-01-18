@@ -87,6 +87,7 @@ StyledRect {
 
                 Loader {
                     anchors.centerIn: parent
+                    asynchronous: true
                     sourceComponent: root.image ? imageComp : root.appIcon ? appIconComp : materialIconComp
                 }
             }
@@ -94,6 +95,7 @@ StyledRect {
             Loader {
                 anchors.right: parent.right
                 anchors.bottom: parent.bottom
+                asynchronous: true
                 active: root.appIcon && root.image
 
                 sourceComponent: StyledRect {
@@ -252,6 +254,7 @@ StyledRect {
                 opacity: root.expanded ? 1 : 0
                 Layout.preferredHeight: root.expanded ? implicitHeight : 0
                 active: opacity > 0
+                asynchronous: true
 
                 sourceComponent: ColumnLayout {
                     Repeater {
