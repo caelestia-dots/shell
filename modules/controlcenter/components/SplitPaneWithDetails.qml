@@ -56,7 +56,6 @@ Item {
                 transformOrigin: Item.Center
 
                 clip: false
-                asynchronous: true
                 sourceComponent: rightPaneItem.targetComponent
             }
 

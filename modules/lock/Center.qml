@@ -58,7 +58,6 @@ ColumnLayout {
             Layout.leftMargin: Appearance.spacing.small
             Layout.alignment: Qt.AlignVCenter
 
-            asynchronous: true
             active: Config.services.useTwelveHourClock
             visible: active
 

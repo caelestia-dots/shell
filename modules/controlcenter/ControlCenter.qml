@@ -42,7 +42,6 @@ Item {
             Layout.fillWidth: true
             Layout.columnSpan: 2
 
-            asynchronous: true
             active: root.floating
             visible: active
 

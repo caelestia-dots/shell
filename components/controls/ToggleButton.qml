@@ -74,7 +74,6 @@ StyledRect {
         }
 
         Loader {
-            asynchronous: true
             active: !!root.label
             visible: active
 
@@ -103,7 +102,6 @@ StyledRect {
     Loader {
         id: tooltipLoader
         active: root.tooltip !== ""
-        asynchronous: true
         z: 10000
         width: 0
         height: 0

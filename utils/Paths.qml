@@ -28,7 +28,7 @@ Singleton {
     }
 
     function absolutePath(path: string): string {
-        return toLocalFile(path.replace("~", home));
+        return toLocalFile(path.replace(/~|(\$({?)HOME(}?))+/, home));
     }
 
     function shortenHome(path: string): string {
