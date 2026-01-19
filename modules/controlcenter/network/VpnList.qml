@@ -279,7 +279,7 @@ ColumnLayout {
         padding: Appearance.padding.large
 
         modal: true
-        closePolicy: Popup.NoAutoClose
+        closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutside
 
         opacity: 0
         scale: 0.7
@@ -325,19 +325,21 @@ ColumnLayout {
             open();
         }
 
-        Keys.onEscapePressed: event => {
-            event.accepted = true;
-            closeWithAnimation();
-        }
-
-        Overlay.modal: MouseArea {
-            onClicked: vpnDialog.closeWithAnimation()
+        Overlay.modal: Rectangle {
+            color: Qt.rgba(0, 0, 0, 0.4 * vpnDialog.opacity)
         }
 
         onAboutToShow: {
             opacity = 0;
             scale = 0.7;
             isClosing = false;
+        }
+
+        onAboutToHide: {
+            if (!isClosing) {
+                isClosing = true;
+                closeAnim.start();
+            }
         }
 
         onOpened: {
