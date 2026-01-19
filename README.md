@@ -325,6 +325,10 @@ default, you must create it manually.
             "autoHide": true,
             "rounding": 1,
             "spacing": 1
+        },
+        "wallpaper": {
+            "muteAudio": true,
+            "volume": 1.0,
         }
     },
     "bar": {
