@@ -12,6 +12,7 @@ StyledRect {
     id: root
 
     required property string label
+    property int expandedZ: 100
     property bool enabled: true
     
     property alias menuItems: splitButton.menuItems
@@ -27,7 +28,7 @@ StyledRect {
     color: Colours.layer(Colours.palette.m3surfaceContainer, 2)
     
     clip: false 
-    z: expanded ? 100 : 1
+    z: splitButton.menu.implicitHeight > 0 ? expandedZ : 1
     opacity: enabled ? 1.0 : 0.5
 
     RowLayout {

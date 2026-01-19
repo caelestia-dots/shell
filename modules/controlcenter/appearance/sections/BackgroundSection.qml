@@ -87,6 +87,7 @@ CollapsibleSection {
         SplitButtonRow {
             label: qsTr("Horizontal Position")
             enabled: rootPane.desktopClockEnabled
+            expandedZ: 99
             
             menuItems: [
                 MenuItem { text: qsTr("Left"); icon: "align_horizontal_left"; property string val: "left" },
