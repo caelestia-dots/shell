@@ -559,6 +559,7 @@ default, you must create it manually.
             "wallpapers": false
         },
         "showOnHover": false,
+        "favoriteApps": [],
         "hiddenApps": []
     },
     "lock": {
