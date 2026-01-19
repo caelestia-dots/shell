@@ -310,8 +310,10 @@ void FileSystemModel::updateEntriesForDir(const QString& dir) {
             QStringList extraNameFilters = nameFilters;
 
             if (filter == Images || filter == ImagesAndVideos) {
-                for (const auto& fmt : QImageReader::supportedImageFormats())
-                    extraNameFilters << "*." + QString(fmt);
+                const auto formats = QImageReader::supportedImageFormats();
+                for (const auto& fmt : formats) {
+                    extraNameFilters << "*." + QString::fromLatin1(fmt);
+                }
             }
 
             if (filter == Videos || filter == ImagesAndVideos) {
