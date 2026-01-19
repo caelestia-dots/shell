@@ -206,7 +206,8 @@ Singleton {
                 showLockStatus: bar.status.showLockStatus
             },
             clock: {
-                showIcon: bar.clock.showIcon
+                showIcon: bar.clock.showIcon,
+                showSeconds: bar.clock.showSeconds
             },
             sizes: {
                 innerWidth: bar.sizes.innerWidth,
@@ -232,6 +233,7 @@ Singleton {
             showOnHover: dashboard.showOnHover,
             mediaUpdateInterval: dashboard.mediaUpdateInterval,
             dragThreshold: dashboard.dragThreshold,
+            showClockSeconds: dashboard.showClockSeconds,
             sizes: {
                 tabIndicatorHeight: dashboard.sizes.tabIndicatorHeight,
                 tabIndicatorSpacing: dashboard.sizes.tabIndicatorSpacing,
