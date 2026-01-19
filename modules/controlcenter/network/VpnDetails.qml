@@ -195,6 +195,7 @@ DeviceDetails {
         property string providerName: ""
         property string displayName: ""
         property string interfaceName: ""
+        property bool isClosing: false
         
         parent: Overlay.overlay
         anchors.centerIn: parent
@@ -202,14 +203,30 @@ DeviceDetails {
         padding: Appearance.padding.large
         
         modal: true
-        closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutside
+        closePolicy: Popup.NoAutoClose
         
         opacity: 0
         scale: 0.7
         
+        function closeWithAnimation(): void {
+            if (isClosing) return;
+            isClosing = true;
+            closeAnim.start();
+        }
+        
+        Keys.onEscapePressed: event => {
+            event.accepted = true;
+            closeWithAnimation();
+        }
+        
+        Overlay.modal: MouseArea {
+            onClicked: editVpnDialog.closeWithAnimation()
+        }
+        
         onAboutToShow: {
             opacity = 0;
             scale = 0.7;
+            isClosing = false;
         }
         
         onOpened: {
@@ -218,10 +235,8 @@ DeviceDetails {
             openAnim.start();
         }
         
-        onAboutToHide: {
-            opacityAnim.to = 0;
-            scaleAnim.to = 0.7;
-            closeAnim.start();
+        onClosed: {
+            isClosing = false;
         }
         
         ParallelAnimation {
@@ -234,6 +249,9 @@ DeviceDetails {
             id: closeAnim
             NumberAnimation { target: editVpnDialog; property: "opacity"; to: 0; duration: Appearance.anim.durations.expressiveFastSpatial; easing.bezierCurve: Appearance.anim.curves.expressiveFastSpatial }
             NumberAnimation { target: editVpnDialog; property: "scale"; to: 0.7; duration: Appearance.anim.durations.expressiveFastSpatial; easing.bezierCurve: Appearance.anim.curves.expressiveFastSpatial }
+            onFinished: {
+                editVpnDialog.close();
+            }
         }
         
         background: StyledRect {
@@ -275,7 +293,7 @@ DeviceDetails {
                     text: qsTr("Cancel")
                     inactiveColour: Colours.tPalette.m3surfaceContainerHigh
                     inactiveOnColour: Colours.palette.m3onSurface
-                    onClicked: editVpnDialog.close()
+                    onClicked: editVpnDialog.closeWithAnimation()
                 }
                 
                 TextButton {
@@ -305,7 +323,7 @@ DeviceDetails {
                         
                         Config.utilities.vpn.provider = providers;
                         Config.save();
-                        editVpnDialog.close();
+                        editVpnDialog.closeWithAnimation();
                     }
                 }
             }
