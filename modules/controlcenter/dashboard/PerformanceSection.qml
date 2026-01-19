@@ -63,6 +63,14 @@ SectionContainer {
                     root.rootItem.showStorage = checked;
                     root.rootItem.saveConfig();
                 }
+            },
+            {
+                label: qsTr("Network"),
+                propertyName: "showNetwork",
+                onToggled: function(checked) {
+                    root.rootItem.showNetwork = checked;
+                    root.rootItem.saveConfig();
+                }
             }
         ]
     }

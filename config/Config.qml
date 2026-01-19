@@ -237,6 +237,7 @@ Singleton {
                 showCpu: dashboard.performance.showCpu,
                 showMemory: dashboard.performance.showMemory,
                 showStorage: dashboard.performance.showStorage,
+                showNetwork: dashboard.performance.showNetwork,
                 usageTextSize: dashboard.performance.usageTextSize,
                 valueLabelSize: dashboard.performance.valueLabelSize,
                 percentageTextSize: dashboard.performance.percentageTextSize,

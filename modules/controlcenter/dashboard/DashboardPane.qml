@@ -37,7 +37,8 @@ Item {
     property bool showGpu: Config.dashboard.performance.showGpu ?? true
     property bool showCpu: Config.dashboard.performance.showCpu ?? true
     property bool showMemory: Config.dashboard.performance.showMemory ?? true
-    property bool showStorage: Config.dashboard.performance.showStorage ?? false
+    property bool showStorage: Config.dashboard.performance.showStorage ?? true 
+    property bool showNetwork: Config.dashboard.performance.showNetwork ?? true
     property int resourceSize: Config.dashboard.sizes.resourceSize ?? 200
     property int resourceProgessThickness: Config.dashboard.sizes.resourceProgessThickness ?? 10
     
@@ -88,6 +89,7 @@ Item {
         Config.dashboard.performance.showCpu = root.showCpu;
         Config.dashboard.performance.showMemory = root.showMemory;
         Config.dashboard.performance.showStorage = root.showStorage;
+        Config.dashboard.performance.showNetwork = root.showNetwork;
         Config.dashboard.performance.usageTextSize = root.usageTextSize;
         Config.dashboard.performance.valueLabelSize = root.valueLabelSize;
         Config.dashboard.performance.percentageTextSize = root.percentageTextSize;

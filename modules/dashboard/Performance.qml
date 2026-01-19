@@ -3,6 +3,7 @@ import qs.components.misc
 import qs.services
 import qs.config
 import QtQuick
+import QtQuick.Controls
 import QtQuick.Layouts
 
 import Quickshell.Services.UPower
@@ -73,8 +74,7 @@ RowLayout {
             GaugeCard {
                 Layout.minimumWidth: 250
                 Layout.preferredHeight: 220
-
-                visible: Config.dashboard.performance.showMemory
+                Layout.fillWidth: !Config.dashboard.performance.showStorage && !Config.dashboard.performance.showNetwork
 
                 icon: "memory_alt"
                 title: qsTr("Memory")
@@ -85,14 +85,24 @@ RowLayout {
                     return `${usedFmt.value.toFixed(1)} / ${Math.floor(totalFmt.value)} ${totalFmt.unit}`;
                 }
                 accentColor: Colours.palette.m3tertiary
+
+                visible: Config.dashboard.performance.showMemory
             }
 
-            StorageCard {
-                Layout.fillWidth: true
-                Layout.minimumWidth: 550
+            StorageGaugeCard {
+                Layout.minimumWidth: 250
                 Layout.preferredHeight: 220
+                Layout.fillWidth: !Config.dashboard.performance.showNetwork
 
                 visible: Config.dashboard.performance.showStorage
+            }
+
+            NetworkCard {
+                Layout.fillWidth: true
+                Layout.minimumWidth: 200
+                Layout.preferredHeight: 220
+
+                visible: Config.dashboard.performance.showNetwork
             }
         }
     }
@@ -506,157 +516,363 @@ RowLayout {
         }
     }
 
-    component StorageCard: StyledRect {
-        id: storageCard
+    component StorageGaugeCard: StyledRect {
+        id: storageGaugeCard
+
+        property int currentDiskIndex: 0
+        readonly property var currentDisk: SystemUsage.disks.length > 0 ? SystemUsage.disks[currentDiskIndex] : null
+        property int diskCount: 0
+
+        readonly property real arcStartAngle: 0.75 * Math.PI
+        readonly property real arcSweep: 1.5 * Math.PI
+
+        property real animatedPercentage: 0
+        property color accentColor: Colours.palette.m3secondary
 
         color: Colours.tPalette.m3surfaceContainer
         radius: Appearance.rounding.large
         clip: true
 
-        ColumnLayout {
-            anchors.fill: parent
-            anchors.margins: Config.dashboard.performance.storageCardMargin
-            spacing: Appearance.spacing.normal
-
-            CardHeader {
-                icon: "hard_disk"
-                title: qsTr("Storage")
-                accentColor: Colours.palette.m3secondary
-            }
-
-            Repeater {
-                model: SystemUsage.disks.slice(0, 5)
-
-                delegate: DiskRow {
-                    required property var modelData
-                    required property int index
-
-                    Layout.fillWidth: true
-                    Layout.fillHeight: false    
-
-                    diskName: modelData.mount
-                    used: modelData.used
-                    total: modelData.total
-                    percentage: modelData.perc
-                    diskColor: index === 0 ? Colours.palette.m3primary :
-                               index === 1 ? Colours.palette.m3secondary :
-                               index === 2 ? Colours.palette.m3tertiary :
-                               index === 3 ? Colours.palette.m3outline :
-                               Colours.palette.m3error
+        // Only update diskCount when the actual count changes
+        Connections {
+            target: SystemUsage
+            function onDisksChanged() {
+                if (SystemUsage.disks.length !== storageGaugeCard.diskCount) {
+                    storageGaugeCard.diskCount = SystemUsage.disks.length;
                 }
             }
-
-            Item { Layout.fillHeight: SystemUsage.disks.length < 5 }
         }
-    }
 
-    component DiskRow: Item {
-        id: diskRow
-
-        property string diskName
-        property real used
-        property real total
-        property real percentage
-        property color diskColor: Colours.palette.m3primary
-
-        property real animatedPercentage: 0
-        property bool hovered: false
-
-        implicitHeight: rowLayout.implicitHeight
-
-        Component.onCompleted: animatedPercentage = percentage
-        onPercentageChanged: animatedPercentage = percentage
+        Component.onCompleted: {
+            diskCount = SystemUsage.disks.length;
+            if (currentDisk) animatedPercentage = currentDisk.perc;
+        }
+        onCurrentDiskChanged: if (currentDisk) animatedPercentage = currentDisk.perc
 
         Behavior on animatedPercentage {
             Anim { duration: Appearance.anim.durations.large }
         }
 
-        MouseArea {
-            anchors.fill: parent
-            hoverEnabled: true
-            onEntered: diskRow.hovered = true
-            onExited: diskRow.hovered = false
+        Connections {
+            target: storageGaugeCard.currentDisk
+            function onPercChanged() {
+                storageGaugeCard.animatedPercentage = storageGaugeCard.currentDisk.perc;
+            }
         }
 
-        RowLayout {
-            id: rowLayout
-
+        MouseArea {
             anchors.fill: parent
-            spacing: Appearance.spacing.normal
-
-            Rectangle {
-                width: Config.dashboard.performance.diskIndicatorWidth
-                Layout.fillHeight: true
-                Layout.topMargin: Config.dashboard.performance.diskRowTopMargin
-                Layout.bottomMargin: Config.dashboard.performance.diskRowBottomMargin
-                radius: Config.dashboard.performance.diskIndicatorRadius
-                color: diskRow.diskColor
+            onWheel: wheel => {
+                if (wheel.angleDelta.y > 0) {
+                    storageGaugeCard.currentDiskIndex = (storageGaugeCard.currentDiskIndex - 1 + storageGaugeCard.diskCount) % storageGaugeCard.diskCount;
+                } else if (wheel.angleDelta.y < 0) {
+                    storageGaugeCard.currentDiskIndex = (storageGaugeCard.currentDiskIndex + 1) % storageGaugeCard.diskCount;
+                }
             }
+        }
 
-            StyledText {
-                Layout.preferredWidth: 80
-                text: diskRow.diskName
-                font.pointSize: Config.dashboard.performance.usageTextSize
-            }
+        ColumnLayout {
+            anchors.fill: parent
+            anchors.margins: Config.dashboard.performance.gaugeCardMargin
+            spacing: Appearance.spacing.smaller
 
-            ProgressBar {
-                Layout.fillWidth: true
-                Layout.fillHeight: true
-                Layout.topMargin: Config.dashboard.performance.diskRowProgressTopMargin
-                Layout.bottomMargin: Config.dashboard.performance.diskRowProgressBottomMargin
+            CardHeader {
+                icon: "hard_disk"
+                title: {
+                    const base = qsTr("Storage");
+                    if (!storageGaugeCard.currentDisk) return base;
+                    return `${base} - ${storageGaugeCard.currentDisk.mount}`;
+                }
+                accentColor: storageGaugeCard.accentColor
 
-                value: diskRow.percentage
-                fgColor: diskRow.diskColor
+                // Scroll hint icon
+                MaterialIcon {
+                    text: "unfold_more"
+                    color: Colours.palette.m3onSurfaceVariant
+                    font.pointSize: Config.dashboard.performance.normalTextSize
+                    visible: storageGaugeCard.diskCount > 1
+                    opacity: 0.7
+
+                    ToolTip.visible: hintHover.hovered
+                    ToolTip.text: qsTr("Scroll to switch disks")
+                    ToolTip.delay: 500
+
+                    HoverHandler {
+                        id: hintHover
+                    }
+                }
             }
 
             Item {
-                Layout.preferredWidth: usageText.visible ? usageText.implicitWidth : percentText.implicitWidth
-                Layout.minimumWidth: 35
-                implicitHeight: Math.max(percentText.implicitHeight, usageText.implicitHeight)
+                Layout.fillWidth: true
+                Layout.fillHeight: true
 
-                Behavior on Layout.preferredWidth {
-                    Anim { duration: Appearance.anim.durations.normal }
-                }
+                Canvas {
+                    id: storageGaugeCanvas
 
-                StyledText {
-                    id: percentText
+                    anchors.centerIn: parent
+                    width: Math.min(parent.width, parent.height)
+                    height: width
 
-                    anchors.right: parent.right
-                    anchors.verticalCenter: parent.verticalCenter
+                    onPaint: {
+                        const ctx = getContext("2d");
+                        ctx.reset();
 
-                    visible: !diskRow.hovered
-                    opacity: diskRow.hovered ? 0 : 1
-                    text: `${Math.round(diskRow.percentage * 100)}%`
-                    font.pointSize: Config.dashboard.performance.usageTextSize
-                    font.weight: Font.Medium
-                    color: diskRow.diskColor
-                    horizontalAlignment: Text.AlignRight
+                        const cx = width / 2;
+                        const cy = height / 2;
+                        const radius = (Math.min(width, height) - Config.dashboard.performance.gaugeRadiusOffset) / 2;
+                        const lineWidth = Config.dashboard.performance.gaugeLineWidth;
 
-                    Behavior on opacity {
-                        Anim { duration: Appearance.anim.durations.normal }
+                        ctx.beginPath();
+                        ctx.arc(cx, cy, radius, storageGaugeCard.arcStartAngle, storageGaugeCard.arcStartAngle + storageGaugeCard.arcSweep);
+                        ctx.lineWidth = lineWidth;
+                        ctx.lineCap = "round";
+                        ctx.strokeStyle = Colours.layer(Colours.palette.m3surfaceContainerHigh, 2);
+                        ctx.stroke();
+
+                        if (storageGaugeCard.animatedPercentage > 0) {
+                            ctx.beginPath();
+                            ctx.arc(cx, cy, radius, storageGaugeCard.arcStartAngle, storageGaugeCard.arcStartAngle + storageGaugeCard.arcSweep * storageGaugeCard.animatedPercentage);
+                            ctx.lineWidth = lineWidth;
+                            ctx.lineCap = "round";
+                            ctx.strokeStyle = storageGaugeCard.accentColor;
+                            ctx.stroke();
+                        }
                     }
+
+                    Connections {
+                        target: storageGaugeCard
+                        function onAnimatedPercentageChanged() {
+                            storageGaugeCanvas.requestPaint();
+                        }
+                    }
+
+                    Connections {
+                        target: Colours
+                        function onPaletteChanged() {
+                            storageGaugeCanvas.requestPaint();
+                        }
+                    }
+
+                    Component.onCompleted: requestPaint()
                 }
 
                 StyledText {
-                    id: usageText
+                    anchors.centerIn: parent
+                    text: storageGaugeCard.currentDisk ? `${Math.round(storageGaugeCard.currentDisk.perc * 100)}%` : "—"
+                    font.pointSize: Config.dashboard.performance.percentageTextSize
+                    font.weight: Font.Medium
+                    color: storageGaugeCard.accentColor
+                }
+            }
 
-                    anchors.right: parent.right
-                    anchors.verticalCenter: parent.verticalCenter
+            StyledText {
+                Layout.alignment: Qt.AlignHCenter
+                text: {
+                    if (!storageGaugeCard.currentDisk) return "—";
+                    const usedFmt = SystemUsage.formatKib(storageGaugeCard.currentDisk.used);
+                    const totalFmt = SystemUsage.formatKib(storageGaugeCard.currentDisk.total);
+                    return `${usedFmt.value.toFixed(1)} / ${Math.floor(totalFmt.value)} ${totalFmt.unit}`;
+                }
+                font.pointSize: Config.dashboard.performance.usageTextSize
+                color: Colours.palette.m3onSurfaceVariant
+            }
 
-                    visible: diskRow.hovered
-                    opacity: diskRow.hovered ? 1 : 0
+        }
+    }
+
+    component NetworkCard: StyledRect {
+        id: networkCard
+
+        property color accentColor: Colours.palette.m3primary
+
+        color: Colours.tPalette.m3surfaceContainer
+        radius: Appearance.rounding.large
+        clip: true
+
+        Ref {
+            service: NetworkUsage
+        }
+
+        ColumnLayout {
+            anchors.fill: parent
+            anchors.margins: Config.dashboard.performance.gaugeCardMargin
+            spacing: Appearance.spacing.small
+
+            CardHeader {
+                icon: "swap_vert"
+                title: qsTr("Network")
+                accentColor: networkCard.accentColor
+            }
+
+            // Sparkline graph
+            Item {
+                Layout.fillWidth: true
+                Layout.fillHeight: true
+
+                Canvas {
+                    id: sparklineCanvas
+
+                    anchors.fill: parent
+
+                    property var downHistory: NetworkUsage.downloadHistory
+                    property var upHistory: NetworkUsage.uploadHistory
+
+                    onDownHistoryChanged: requestPaint()
+                    onUpHistoryChanged: requestPaint()
+
+                    onPaint: {
+                        const ctx = getContext("2d");
+                        ctx.reset();
+
+                        const w = width;
+                        const h = height;
+                        const downHist = downHistory || [];
+                        const upHist = upHistory || [];
+
+                        if (downHist.length < 2 && upHist.length < 2) return;
+
+                        // Find max value for scaling
+                        const allValues = downHist.concat(upHist);
+                        const maxVal = Math.max(...allValues, 1024); // minimum 1KB/s scale
+
+                        function drawLine(history, color, fillAlpha) {
+                            if (history.length < 2) return;
+
+                            const len = history.length;
+                            const stepX = w / (NetworkUsage.historyLength - 1);
+                            const startX = w - (len - 1) * stepX;
+
+                            ctx.beginPath();
+                            ctx.moveTo(startX, h - (history[0] / maxVal) * h);
+
+                            for (let i = 1; i < len; i++) {
+                                const x = startX + i * stepX;
+                                const y = h - (history[i] / maxVal) * h;
+                                ctx.lineTo(x, y);
+                            }
+
+                            ctx.strokeStyle = color;
+                            ctx.lineWidth = 2;
+                            ctx.lineCap = "round";
+                            ctx.lineJoin = "round";
+                            ctx.stroke();
+
+                            // Fill under the line
+                            ctx.lineTo(startX + (len - 1) * stepX, h);
+                            ctx.lineTo(startX, h);
+                            ctx.closePath();
+                            ctx.fillStyle = Qt.rgba(Qt.color(color).r, Qt.color(color).g, Qt.color(color).b, fillAlpha);
+                            ctx.fill();
+                        }
+
+                        // Draw upload first (behind), then download (front)
+                        drawLine(upHist, Colours.palette.m3secondary.toString(), 0.15);
+                        drawLine(downHist, Colours.palette.m3tertiary.toString(), 0.2);
+                    }
+
+                    Connections {
+                        target: Colours
+                        function onPaletteChanged() {
+                            sparklineCanvas.requestPaint();
+                        }
+                    }
+
+                    Component.onCompleted: requestPaint()
+                }
+
+                // "No data" placeholder
+                StyledText {
+                    anchors.centerIn: parent
+                    text: qsTr("Collecting data...")
+                    font.pointSize: Config.dashboard.performance.valueLabelSize
+                    color: Colours.palette.m3onSurfaceVariant
+                    visible: NetworkUsage.downloadHistory.length < 2
+                    opacity: 0.6
+                }
+            }
+
+            // Download row
+            RowLayout {
+                Layout.fillWidth: true
+                spacing: Appearance.spacing.normal
+
+                MaterialIcon {
+                    text: "download"
+                    color: Colours.palette.m3tertiary
+                    font.pointSize: Config.dashboard.performance.normalTextSize
+                }
+
+                StyledText {
+                    text: qsTr("Down")
+                    font.pointSize: Config.dashboard.performance.usageTextSize
+                    color: Colours.palette.m3onSurfaceVariant
+                }
+
+                Item { Layout.fillWidth: true }
+
+                StyledText {
                     text: {
-                        const usedFmt = SystemUsage.formatKib(diskRow.used);
-                        const totalFmt = SystemUsage.formatKib(diskRow.total);
-                        return `${usedFmt.value.toFixed(0)}/${totalFmt.value.toFixed(0)}${totalFmt.unit}`;
+                        const fmt = NetworkUsage.formatBytes(NetworkUsage.downloadSpeed);
+                        return `${fmt.value.toFixed(1)} ${fmt.unit}`;
+                    }
+                    font.pointSize: Config.dashboard.performance.normalTextSize
+                    font.weight: Font.Medium
+                    color: Colours.palette.m3tertiary
+                }
+            }
+
+            // Upload row
+            RowLayout {
+                Layout.fillWidth: true
+                spacing: Appearance.spacing.normal
+
+                MaterialIcon {
+                    text: "upload"
+                    color: Colours.palette.m3secondary
+                    font.pointSize: Config.dashboard.performance.normalTextSize
+                }
+
+                StyledText {
+                    text: qsTr("Up")
+                    font.pointSize: Config.dashboard.performance.usageTextSize
+                    color: Colours.palette.m3onSurfaceVariant
+                }
+
+                Item { Layout.fillWidth: true }
+
+                StyledText {
+                    text: {
+                        const fmt = NetworkUsage.formatBytes(NetworkUsage.uploadSpeed);
+                        return `${fmt.value.toFixed(1)} ${fmt.unit}`;
+                    }
+                    font.pointSize: Config.dashboard.performance.normalTextSize
+                    font.weight: Font.Medium
+                    color: Colours.palette.m3secondary
+                }
+            }
+
+            // Session totals
+            RowLayout {
+                Layout.fillWidth: true
+                spacing: Appearance.spacing.small
+
+                StyledText {
+                    text: qsTr("Session:")
+                    font.pointSize: Config.dashboard.performance.valueLabelSize
+                    color: Colours.palette.m3onSurfaceVariant
+                }
+
+                Item { Layout.fillWidth: true }
+
+                StyledText {
+                    text: {
+                        const down = NetworkUsage.formatBytesTotal(NetworkUsage.downloadTotal);
+                        const up = NetworkUsage.formatBytesTotal(NetworkUsage.uploadTotal);
+                        return `↓${down.value.toFixed(1)}${down.unit} ↑${up.value.toFixed(1)}${up.unit}`;
                     }
                     font.pointSize: Config.dashboard.performance.valueLabelSize
                     color: Colours.palette.m3onSurfaceVariant
-                    horizontalAlignment: Text.AlignRight
-
-                    Behavior on opacity {
-                        Anim { duration: Appearance.anim.durations.normal }
-                    }
                 }
             }
         }
