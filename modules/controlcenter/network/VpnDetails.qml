@@ -12,6 +12,7 @@ import qs.utils
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
+import Qt5Compat.GraphicalEffects
 
 DeviceDetails {
     id: root
@@ -257,6 +258,14 @@ DeviceDetails {
         background: StyledRect {
             color: Colours.palette.m3surfaceContainerHigh
             radius: Appearance.rounding.large
+
+            layer.enabled: true
+            layer.effect: DropShadow {
+                color: Qt.rgba(0, 0, 0, 0.3)
+                radius: 16
+                samples: 33
+                verticalOffset: 4
+            }
         }
         
         contentItem: ColumnLayout {
@@ -267,19 +276,69 @@ DeviceDetails {
                 font.pointSize: Appearance.font.size.large
                 font.weight: 500
             }
-            
-            TextField {
+
+            ColumnLayout {
                 Layout.fillWidth: true
-                placeholderText: qsTr("Display Name")
-                text: editVpnDialog.displayName
-                onTextChanged: editVpnDialog.displayName = text
+                spacing: Appearance.spacing.smaller / 2
+
+                StyledText {
+                    text: qsTr("Display Name")
+                    font.pointSize: Appearance.font.size.small
+                    color: Colours.palette.m3onSurfaceVariant
+                }
+
+                StyledRect {
+                    Layout.fillWidth: true
+                    implicitHeight: 40
+                    color: displayNameField.activeFocus ? Colours.layer(Colours.palette.m3surfaceContainer, 3) : Colours.layer(Colours.palette.m3surfaceContainer, 2)
+                    radius: Appearance.rounding.small
+                    border.width: 1
+                    border.color: displayNameField.activeFocus ? Colours.palette.m3primary : Qt.alpha(Colours.palette.m3outline, 0.3)
+
+                    Behavior on color { CAnim {} }
+                    Behavior on border.color { CAnim {} }
+
+                    StyledTextField {
+                        id: displayNameField
+                        anchors.centerIn: parent
+                        width: parent.width - Appearance.padding.normal
+                        horizontalAlignment: TextInput.AlignLeft
+                        text: editVpnDialog.displayName
+                        onTextChanged: editVpnDialog.displayName = text
+                    }
+                }
             }
-            
-            TextField {
+
+            ColumnLayout {
                 Layout.fillWidth: true
-                placeholderText: qsTr("Interface (e.g., wg0, torguard)")
-                text: editVpnDialog.interfaceName
-                onTextChanged: editVpnDialog.interfaceName = text
+                spacing: Appearance.spacing.smaller / 2
+
+                StyledText {
+                    text: qsTr("Interface (e.g., wg0, torguard)")
+                    font.pointSize: Appearance.font.size.small
+                    color: Colours.palette.m3onSurfaceVariant
+                }
+
+                StyledRect {
+                    Layout.fillWidth: true
+                    implicitHeight: 40
+                    color: interfaceNameField.activeFocus ? Colours.layer(Colours.palette.m3surfaceContainer, 3) : Colours.layer(Colours.palette.m3surfaceContainer, 2)
+                    radius: Appearance.rounding.small
+                    border.width: 1
+                    border.color: interfaceNameField.activeFocus ? Colours.palette.m3primary : Qt.alpha(Colours.palette.m3outline, 0.3)
+
+                    Behavior on color { CAnim {} }
+                    Behavior on border.color { CAnim {} }
+
+                    StyledTextField {
+                        id: interfaceNameField
+                        anchors.centerIn: parent
+                        width: parent.width - Appearance.padding.normal
+                        horizontalAlignment: TextInput.AlignLeft
+                        text: editVpnDialog.interfaceName
+                        onTextChanged: editVpnDialog.interfaceName = text
+                    }
+                }
             }
             
             Item { Layout.preferredHeight: Appearance.spacing.normal }
