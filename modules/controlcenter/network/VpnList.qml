@@ -270,7 +270,6 @@ ColumnLayout {
         property string providerName: ""
         property string displayName: ""
         property string interfaceName: ""
-        property bool isClosing: false
 
         parent: Overlay.overlay
         x: Math.round((parent.width - width) / 2)
@@ -280,20 +279,31 @@ ColumnLayout {
 
         modal: true
         closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutside
-
+        
         opacity: 0
         scale: 0.7
 
+        enter: Transition {
+            ParallelAnimation {
+                NumberAnimation { property: "opacity"; from: 0; to: 1; duration: Appearance.anim.durations.normal; easing.bezierCurve: Appearance.anim.curves.emphasized }
+                NumberAnimation { property: "scale"; from: 0.7; to: 1; duration: Appearance.anim.durations.normal; easing.bezierCurve: Appearance.anim.curves.emphasized }
+            }
+        }
+
+        exit: Transition {
+            ParallelAnimation {
+                NumberAnimation { property: "opacity"; from: 1; to: 0; duration: Appearance.anim.durations.small; easing.bezierCurve: Appearance.anim.curves.emphasized }
+                NumberAnimation { property: "scale"; from: 1; to: 0.7; duration: Appearance.anim.durations.small; easing.bezierCurve: Appearance.anim.curves.emphasized }
+            }
+        }
+
         function showProviderSelection(): void {
             currentState = "selection";
-            isClosing = false;
             open();
         }
 
         function closeWithAnimation(): void {
-            if (isClosing) return;
-            isClosing = true;
-            closeAnim.start();
+            close();
         }
 
         function showAddForm(providerType: string, defaultDisplayName: string): void {
@@ -321,7 +331,6 @@ ColumnLayout {
             interfaceName = isObject ? (provider.interface || "") : "";
 
             currentState = "form";
-            isClosing = false;
             open();
         }
 
@@ -329,65 +338,8 @@ ColumnLayout {
             color: Qt.rgba(0, 0, 0, 0.4 * vpnDialog.opacity)
         }
 
-        onAboutToShow: {
-            opacity = 0;
-            scale = 0.7;
-            isClosing = false;
-        }
-
-        onAboutToHide: {
-            if (!isClosing) {
-                isClosing = true;
-                closeAnim.start();
-            }
-        }
-
-        onOpened: {
-            openAnim.start();
-        }
-
         onClosed: {
             currentState = "selection";
-            isClosing = false;
-        }
-
-        ParallelAnimation {
-            id: openAnim
-            NumberAnimation {
-                target: vpnDialog
-                property: "opacity"
-                to: 1
-                duration: Appearance.anim.durations.normal
-                easing.bezierCurve: Appearance.anim.curves.emphasized
-            }
-            NumberAnimation {
-                target: vpnDialog
-                property: "scale"
-                to: 1
-                duration: Appearance.anim.durations.normal
-                easing.bezierCurve: Appearance.anim.curves.emphasized
-            }
-        }
-
-        ParallelAnimation {
-            id: closeAnim
-            NumberAnimation {
-                target: vpnDialog
-                property: "opacity"
-                to: 0
-                duration: Appearance.anim.durations.small
-                easing.bezierCurve: Appearance.anim.curves.emphasized
-            }
-            NumberAnimation {
-                target: vpnDialog
-                property: "scale"
-                to: 0.7
-                duration: Appearance.anim.durations.small
-                easing.bezierCurve: Appearance.anim.curves.emphasized
-            }
-            onFinished: {
-                vpnDialog.close();
-            }
         }
 
         SequentialAnimation {

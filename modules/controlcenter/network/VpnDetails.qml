@@ -196,7 +196,6 @@ DeviceDetails {
         property string providerName: ""
         property string displayName: ""
         property string interfaceName: ""
-        property bool isClosing: false
         
         parent: Overlay.overlay
         anchors.centerIn: parent
@@ -209,53 +208,28 @@ DeviceDetails {
         opacity: 0
         scale: 0.7
         
+        enter: Transition {
+            ParallelAnimation {
+                NumberAnimation { property: "opacity"; from: 0; to: 1; duration: Appearance.anim.durations.expressiveFastSpatial; easing.bezierCurve: Appearance.anim.curves.expressiveFastSpatial }
+                NumberAnimation { property: "scale"; from: 0.7; to: 1; duration: Appearance.anim.durations.expressiveFastSpatial; easing.bezierCurve: Appearance.anim.curves.expressiveFastSpatial }
+            }
+        }
+
+        exit: Transition {
+            ParallelAnimation {
+                NumberAnimation { property: "opacity"; from: 1; to: 0; duration: Appearance.anim.durations.expressiveFastSpatial; easing.bezierCurve: Appearance.anim.curves.expressiveFastSpatial }
+                NumberAnimation { property: "scale"; from: 1; to: 0.7; duration: Appearance.anim.durations.expressiveFastSpatial; easing.bezierCurve: Appearance.anim.curves.expressiveFastSpatial }
+            }
+        }
+        
         function closeWithAnimation(): void {
-            if (isClosing) return;
-            isClosing = true;
-            closeAnim.start();
+            close();
         }
         
         Overlay.modal: Rectangle {
             color: Qt.rgba(0, 0, 0, 0.4 * editVpnDialog.opacity)
         }
         
-        onAboutToShow: {
-            opacity = 0;
-            scale = 0.7;
-            isClosing = false;
-        }
-
-        onAboutToHide: {
-            if (!isClosing) {
-                isClosing = true;
-                closeAnim.start();
-            }
-        }
-        
-        onOpened: {
-            opacityAnim.to = 1;
-            scaleAnim.to = 1;
-            openAnim.start();
-        }
-        
-        onClosed: {
-            isClosing = false;
-        }
-        
-        ParallelAnimation {
-            id: openAnim
-            NumberAnimation { id: opacityAnim; target: editVpnDialog; property: "opacity"; duration: Appearance.anim.durations.expressiveFastSpatial; easing.bezierCurve: Appearance.anim.curves.expressiveFastSpatial }
-            NumberAnimation { id: scaleAnim; target: editVpnDialog; property: "scale"; duration: Appearance.anim.durations.expressiveFastSpatial; easing.bezierCurve: Appearance.anim.curves.expressiveFastSpatial }
-        }
-        
-        ParallelAnimation {
-            id: closeAnim
-            NumberAnimation { target: editVpnDialog; property: "opacity"; to: 0; duration: Appearance.anim.durations.expressiveFastSpatial; easing.bezierCurve: Appearance.anim.curves.expressiveFastSpatial }
-            NumberAnimation { target: editVpnDialog; property: "scale"; to: 0.7; duration: Appearance.anim.durations.expressiveFastSpatial; easing.bezierCurve: Appearance.anim.curves.expressiveFastSpatial }
-            onFinished: {
-                editVpnDialog.close();
-            }
-        }
         
         background: StyledRect {
             color: Colours.palette.m3surfaceContainerHigh
