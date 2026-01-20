@@ -154,7 +154,7 @@ ColumnLayout {
         
         StyledFlickable {
             anchors.fill: parent
-            anchors.margins: Appearance.padding.large
+            anchors.margins: Appearance.padding.large * 1.5
             flickableDirection: Flickable.VerticalFlick
             contentHeight: vpnSettingsContent.height
             clip: true

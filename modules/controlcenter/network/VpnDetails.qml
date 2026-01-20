@@ -201,7 +201,7 @@ DeviceDetails {
         parent: Overlay.overlay
         anchors.centerIn: parent
         width: Math.min(400, parent.width - Appearance.padding.large * 2)
-        padding: Appearance.padding.large
+        padding: Appearance.padding.large * 1.5
         
         modal: true
         closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutside
