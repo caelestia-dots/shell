@@ -68,6 +68,7 @@ Item {
 
         Loader {
             Layout.alignment: Qt.AlignHCenter
+            Layout.topMargin: -(Appearance.font.size.extraLarge * 0.4)
 
             active: Config.dashboard.showClockSeconds
             visible: active
@@ -88,7 +89,7 @@ Item {
             visible: active
 
             sourceComponent: StyledText {
-                text: Config.dashboard.showClockSeconds ? root.timeComponents[3] : Time.amPmStr ?? ""
+                text: Time.amPmStr
                 color: Colours.palette.m3primary
                 font.pointSize: Appearance.font.size.large
                 font.family: Appearance.font.family.clock
