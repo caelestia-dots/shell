@@ -172,9 +172,10 @@ void AppDb::setFavouriteApps(const QStringList& favApps) {
     }
 
     m_favouriteApps = favApps;
+    emit favouriteAppsChanged();
     m_favouriteAppsRegex.clear();
     m_favouriteAppsRegex.reserve(m_favouriteApps.size());
-    for (const QString& item : m_favouriteApps) {
+    for (const QString& item : std::as_const(m_favouriteApps)) {
         const QRegularExpression re(regexifyString(item));
         if (re.isValid()) {
             m_favouriteAppsRegex << re;
