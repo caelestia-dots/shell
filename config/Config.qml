@@ -201,6 +201,7 @@ Singleton {
                 showMicrophone: bar.status.showMicrophone,
                 showKbLayout: bar.status.showKbLayout,
                 showNetwork: bar.status.showNetwork,
+                showWifi: bar.status.showWifi,
                 showBluetooth: bar.status.showBluetooth,
                 showBattery: bar.status.showBattery,
                 showLockStatus: bar.status.showLockStatus
