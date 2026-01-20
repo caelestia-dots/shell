@@ -178,7 +178,6 @@ Item {
     Loader {
         id: oneLoader
         anchors.fill: parent
-        asynchronous: true
         sourceComponent: imageComponent
 
         onLoaded: {
@@ -193,7 +192,6 @@ Item {
     Loader {
         id: twoLoader
         anchors.fill: parent
-        asynchronous: true
         sourceComponent: imageComponent
         onLoaded: {
             loadedCount++;
