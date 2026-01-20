@@ -11,7 +11,7 @@ RowLayout {
     readonly property int padding: Appearance.padding.large
 
     function displayTemp(temp: real): string {
-        return `${Math.ceil(Config.services.useFahrenheit ? temp * 1.8 + 32 : temp)}°${Config.services.useFahrenheit ? "F" : "C"}`;
+        return `${Math.ceil(Config.services.useFahrenheitPerformance ? temp * 1.8 + 32 : temp)}°${Config.services.useFahrenheitPerformance ? "F" : "C"}`;
     }
 
     spacing: Appearance.spacing.large * 3
