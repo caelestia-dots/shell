@@ -41,22 +41,14 @@ Item {
         asynchronous: true
         fillMode: Image.PreserveAspectCrop
         opacity: root.isCurrent ? 1 : 0
-        scale: Wallpapers.showPreview ? 1 : 0.8
-        states: State {
-            name: "visible"
-            when: root.isCurrent
-            PropertyChanges {
-                target: img
-                opacity: 1
-                scale: 1
-            }
+        scale: (root.isCurrent ? 1 : Wallpapers.showPreview ? 1 : 0.8)
+
+        Behavior on opacity {
+            Anim {}
         }
 
-        transitions: Transition {
-            Anim {
-                target: img
-                properties: "opacity,scale"
-            }
+        Behavior on scale {
+            Anim {}
         }
     }
 }
