@@ -47,7 +47,7 @@ Item {
             anchors.leftMargin: Appearance.spacing.normal
             anchors.verticalCenter: icon.verticalCenter
 
-            implicitWidth: parent.width - icon.width - favoriteIcon.width
+            implicitWidth: parent.width - icon.width - favouriteIcon.width
             implicitHeight: name.implicitHeight + comment.implicitHeight
 
             StyledText {
@@ -65,18 +65,18 @@ Item {
                 color: Colours.palette.m3outline
 
                 elide: Text.ElideRight
-                width: root.width - icon.width - favoriteIcon.width - Appearance.rounding.normal * 2
+                width: root.width - icon.width - favouriteIcon.width - Appearance.rounding.normal * 2
 
                 anchors.top: name.bottom
             }
         }
 
         Loader {
-            id: favoriteIcon
+            id: favouriteIcon
 
             anchors.verticalCenter: parent.verticalCenter
             anchors.right: parent.right
-            active: modelData && Strings.testRegexList(Config.launcher.favoriteApps, modelData.id)
+            active: modelData && Strings.testRegexList(Config.launcher.favouriteApps, modelData.id)
 
             sourceComponent: MaterialIcon {
                 text: "favorite"
