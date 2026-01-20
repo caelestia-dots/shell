@@ -11,7 +11,7 @@ JsonObject {
     property bool enableDangerousActions: false // Allow actions that can cause losing data, like shutdown, reboot and logout
     property int dragThreshold: 50
     property bool vimKeybinds: false
-    property list<string> favoriteApps: []
+    property list<string> favouriteApps: []
     property list<string> hiddenApps: []
     property list<var> categories: [
         { name: "Development", icon: "code", apps: [] },

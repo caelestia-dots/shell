@@ -559,8 +559,8 @@ default, you must create it manually.
             "wallpapers": false
         },
         "showOnHover": false,
-        "favoriteApps": ["zen", "vesktop", "code-oss"],
-        "hiddenApps": ["electron34", "thunar-settings"],
+        "favouriteApps": [],
+        "hiddenApps": [],
         "categories": [
             {
                 "name": "Development",

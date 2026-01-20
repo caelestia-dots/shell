@@ -271,7 +271,7 @@ Singleton {
             enableDangerousActions: launcher.enableDangerousActions,
             dragThreshold: launcher.dragThreshold,
             vimKeybinds: launcher.vimKeybinds,
-            favoriteApps: launcher.favoriteApps,
+            favouriteApps: launcher.favouriteApps,
             hiddenApps: launcher.hiddenApps,
             categories: launcher.categories,
             useFuzzy: {

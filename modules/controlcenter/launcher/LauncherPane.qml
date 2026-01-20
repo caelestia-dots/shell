@@ -23,7 +23,7 @@ Item {
 
     property var selectedApp: root.session.launcher.active
     property bool hideFromLauncherChecked: false
-    property bool favoriteChecked: false
+    property bool favouriteChecked: false
 
     anchors.fill: parent
 
@@ -43,7 +43,7 @@ Item {
     function updateToggleState() {
         if (!root.selectedApp) {
             root.hideFromLauncherChecked = false;
-            root.favoriteChecked = false;
+            root.favouriteChecked = false;
             return;
         }
 
@@ -51,10 +51,10 @@ Item {
 
         if (Config.launcher.hiddenApps && Config.launcher.hiddenApps.length > 0) {
             root.hideFromLauncherChecked = Strings.testRegexList(Config.launcher.hiddenApps, appId);
-            root.favoriteChecked = Strings.testRegexList(Config.launcher.favoriteApps, appId);
+            root.favouriteChecked = Strings.testRegexList(Config.launcher.favouriteApps, appId);
         } else {
             root.hideFromLauncherChecked = false;
-            root.favoriteChecked = false;
+            root.favouriteChecked = false;
         }
     }
 
@@ -87,7 +87,7 @@ Item {
         id: allAppsDb
 
         path: `${Paths.state}/apps.sqlite`
-        favoriteApps: Config.launcher.favoriteApps
+        favouriteApps: Config.launcher.favouriteApps
         entries: DesktopEntries.applications.values
     }
 
@@ -545,7 +545,7 @@ Item {
 
                             Loader {
                                 Layout.alignment: Qt.AlignVCenter
-                                active: modelData !== undefined && Strings.testRegexList(Config.launcher.favoriteApps, modelData.id)
+                                active: modelData !== undefined && Strings.testRegexList(Config.launcher.favouriteApps, modelData.id)
 
                                 sourceComponent: MaterialIcon {
                                     text: "favorite"
@@ -653,14 +653,14 @@ Item {
                         const appId = displayedApp.id || displayedApp.entry?.id;
                         if (Config.launcher.hiddenApps && Config.launcher.hiddenApps.length > 0) {
                             root.hideFromLauncherChecked = Strings.testRegexList(Config.launcher.hiddenApps, appId);
-                            root.favoriteChecked = Strings.testRegexList(Config.launcher.favoriteApps, appId);
+                            root.favouriteChecked = Strings.testRegexList(Config.launcher.favouriteApps, appId);
                         } else {
                             root.hideFromLauncherChecked = false;
-                            root.favoriteChecked = false;
+                            root.favouriteChecked = false;
                         }
                     } else {
                         root.hideFromLauncherChecked = false;
-                        root.favoriteChecked = false;
+                        root.favouriteChecked = false;
                     }
                 }
             }
@@ -775,27 +775,27 @@ Item {
                         SwitchRow {
                             Layout.topMargin: Appearance.spacing.normal
                             visible: appDetailsLayout.displayedApp !== null
-                            label: qsTr("Mark as favorite")
-                            checked: root.favoriteChecked
-                            enabled: appDetailsLayout.displayedApp !== null && !root.hideFromLauncherChecked
+                            label: qsTr("Mark as favourite")
+                            checked: root.favouriteChecked
+                            enabled: appDetailsLayout.displayedApp !== null && !root.hideFromLauncherChecked && (Config.launcher.favouriteApps.indexOf(appDetailsLayout.displayedApp.id || appDetailsLayout.displayedApp.entry?.id) !== -1 || !root.favouriteChecked)
                             opacity: enabled ? 1 : 0.6
                             onToggled: checked => {
-                                root.favoriteChecked = checked;
+                                root.favouriteChecked = checked;
                                 const app = appDetailsLayout.displayedApp;
                                 if (app) {
                                     const appId = app.id || app.entry?.id;
-                                    const favoriteApps = Config.launcher.favoriteApps ? [...Config.launcher.favoriteApps] : [];
+                                    const favouriteApps = Config.launcher.favouriteApps ? [...Config.launcher.favouriteApps] : [];
                                     if (checked) {
-                                        if (!favoriteApps.includes(appId)) {
-                                            favoriteApps.push(appId);
+                                        if (!favouriteApps.includes(appId)) {
+                                            favouriteApps.push(appId);
                                         }
                                     } else {
-                                        const index = favoriteApps.indexOf(appId);
+                                        const index = favouriteApps.indexOf(appId);
                                         if (index !== -1) {
-                                            favoriteApps.splice(index, 1);
+                                            favouriteApps.splice(index, 1);
                                         }
                                     }
-                                    Config.launcher.favoriteApps = favoriteApps;
+                                    Config.launcher.favouriteApps = favouriteApps;
                                     Config.save();
                                 }
                             }
@@ -805,7 +805,7 @@ Item {
                             visible: appDetailsLayout.displayedApp !== null
                             label: qsTr("Hide from launcher")
                             checked: root.hideFromLauncherChecked
-                            enabled: appDetailsLayout.displayedApp !== null && !root.favoriteChecked
+                            enabled: appDetailsLayout.displayedApp !== null && !root.favouriteChecked && (Config.launcher.hiddenApps.indexOf(appDetailsLayout.displayedApp.id || appDetailsLayout.displayedApp.entry?.id) !== -1 || !root.hideFromLauncherChecked)
                             opacity: enabled ? 1 : 0.6
                             onToggled: checked => {
                                 root.hideFromLauncherChecked = checked;
