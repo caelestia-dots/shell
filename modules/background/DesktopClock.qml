@@ -79,7 +79,7 @@ Item {
                 spacing: Appearance.spacing.small
 
                 StyledText {
-                    text: Time.format(Config.services.useTwelveHourClock ? "hh" : "HH")
+                    text: Config.services.useTwelveHourClock ? String(((Time.format("hh") % 12) === 0 ? 12 : Time.format("hh") % 12)).padStart(2, "0") : Time.format("HH")
                     font.pointSize: Appearance.font.size.extraLarge * 3 * root.scale
                     font.weight: Font.Bold
                     color: root.safePrimary
