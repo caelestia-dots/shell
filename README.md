@@ -302,6 +302,11 @@ default, you must create it manually.
         }
     },
     "background": {
+        "enabled": true,
+        "wallpaperTransition": "random",
+        "transitionDuration": 1000,
+        "autoRandomWallpaper": false,
+        "autoRandomInterval": 30,
         "desktopClock": {
             "enabled": false,
             "scale": 1.0,
@@ -318,7 +323,6 @@ default, you must create it manually.
             },
             "invertColors": false
         },
-        "enabled": true,
         "visualiser": {
             "blur": false,
             "enabled": false,
