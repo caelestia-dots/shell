@@ -460,6 +460,151 @@ Item {
                                 }
                             }
                         }
+
+                        SectionHeader {
+                            title: qsTr("Applications")
+                            description: qsTr("Control volume for individual applications")
+                        }
+
+                        SectionContainer {
+                            contentSpacing: Appearance.spacing.normal
+
+                            ColumnLayout {
+                                Layout.fillWidth: true
+                                spacing: Appearance.spacing.small
+
+                                Repeater {
+                                    model: Audio.streams
+                                    Layout.fillWidth: true
+
+                                    delegate: ColumnLayout {
+                                        required property var modelData
+                                        required property int index
+
+                                        Layout.fillWidth: true
+                                        spacing: Appearance.spacing.smaller
+
+                                        RowLayout {
+                                            Layout.fillWidth: true
+                                            spacing: Appearance.spacing.normal
+
+                                            MaterialIcon {
+                                                text: "apps"
+                                                font.pointSize: Appearance.font.size.normal
+                                                fill: 0
+                                            }
+
+                                            StyledText {
+                                                Layout.fillWidth: true
+                                                elide: Text.ElideRight
+                                                maximumLineCount: 1
+                                                text: Audio.getStreamName(modelData)
+                                                font.pointSize: Appearance.font.size.normal
+                                                font.weight: 500
+                                            }
+
+                                            StyledInputField {
+                                                id: streamVolumeInput
+                                                Layout.preferredWidth: 70
+                                                validator: IntValidator { bottom: 0; top: 100 }
+                                                enabled: !Audio.getStreamMuted(modelData)
+                                                
+                                                Component.onCompleted: {
+                                                    text = Math.round(Audio.getStreamVolume(modelData) * 100).toString();
+                                                }
+                                                
+                                                Connections {
+                                                    target: modelData
+                                                    function onAudioChanged() {
+                                                        if (!streamVolumeInput.hasFocus && modelData?.audio) {
+                                                            streamVolumeInput.text = Math.round(modelData.audio.volume * 100).toString();
+                                                        }
+                                                    }
+                                                }
+                                                
+                                                onTextEdited: (text) => {
+                                                    if (hasFocus) {
+                                                        const val = parseInt(text);
+                                                        if (!isNaN(val) && val >= 0 && val <= 100) {
+                                                            Audio.setStreamVolume(modelData, val / 100);
+                                                        }
+                                                    }
+                                                }
+                                                
+                                                onEditingFinished: {
+                                                    const val = parseInt(text);
+                                                    if (isNaN(val) || val < 0 || val > 100) {
+                                                        text = Math.round(Audio.getStreamVolume(modelData) * 100).toString();
+                                                    }
+                                                }
+                                            }
+
+                                            StyledText {
+                                                text: "%"
+                                                color: Colours.palette.m3outline
+                                                font.pointSize: Appearance.font.size.normal
+                                                opacity: Audio.getStreamMuted(modelData) ? 0.5 : 1
+                                            }
+
+                                            StyledRect {
+                                                implicitWidth: implicitHeight
+                                                implicitHeight: streamMuteIcon.implicitHeight + Appearance.padding.normal * 2
+
+                                                radius: Appearance.rounding.normal
+                                                color: Audio.getStreamMuted(modelData) ? Colours.palette.m3secondary : Colours.palette.m3secondaryContainer
+
+                                                StateLayer {
+                                                    function onClicked(): void {
+                                                        Audio.setStreamMuted(modelData, !Audio.getStreamMuted(modelData));
+                                                    }
+                                                }
+
+                                                MaterialIcon {
+                                                    id: streamMuteIcon
+
+                                                    anchors.centerIn: parent
+                                                    text: Audio.getStreamMuted(modelData) ? "volume_off" : "volume_up"
+                                                    color: Audio.getStreamMuted(modelData) ? Colours.palette.m3onSecondary : Colours.palette.m3onSecondaryContainer
+                                                }
+                                            }
+                                        }
+
+                                        StyledSlider {
+                                            Layout.fillWidth: true
+                                            implicitHeight: Appearance.padding.normal * 3
+
+                                            value: Audio.getStreamVolume(modelData)
+                                            enabled: !Audio.getStreamMuted(modelData)
+                                            opacity: enabled ? 1 : 0.5
+                                            onMoved: {
+                                                Audio.setStreamVolume(modelData, value);
+                                                if (!streamVolumeInput.hasFocus) {
+                                                    streamVolumeInput.text = Math.round(value * 100).toString();
+                                                }
+                                            }
+
+                                            Connections {
+                                                target: modelData
+                                                function onAudioChanged() {
+                                                    if (modelData?.audio) {
+                                                        value = modelData.audio.volume;
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+
+                                StyledText {
+                                    Layout.fillWidth: true
+                                    visible: Audio.streams.length === 0
+                                    text: qsTr("No applications currently playing audio")
+                                    color: Colours.palette.m3outline
+                                    font.pointSize: Appearance.font.size.small
+                                    horizontalAlignment: Text.AlignHCenter
+                                }
+                            }
+                        }
                     }
                 }
             }

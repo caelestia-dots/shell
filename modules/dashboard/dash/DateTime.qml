@@ -26,7 +26,7 @@ Item {
         StyledText {
             Layout.bottomMargin: -(font.pointSize * 0.4)
             Layout.alignment: Qt.AlignHCenter
-            text: root.timeComponents[0]
+            text: Time.hourStr
             color: Colours.palette.m3secondary
             font.pointSize: Appearance.font.size.extraLarge
             font.family: Appearance.font.family.clock
@@ -44,7 +44,7 @@ Item {
         StyledText {
             Layout.topMargin: -(font.pointSize * 0.4)
             Layout.alignment: Qt.AlignHCenter
-            text: root.timeComponents[1]
+            text: Time.minuteStr
             color: Colours.palette.m3secondary
             font.pointSize: Appearance.font.size.extraLarge
             font.family: Appearance.font.family.clock
@@ -89,7 +89,7 @@ Item {
             visible: active
 
             sourceComponent: StyledText {
-                text: Config.dashboard.showClockSeconds ? root.timeComponents[3] : root.timeComponents[2] ?? ""
+                text: Config.dashboard.showClockSeconds ? root.timeComponents[3] : Time.amPmStr ?? ""
                 color: Colours.palette.m3primary
                 font.pointSize: Appearance.font.size.large
                 font.family: Appearance.font.family.clock
