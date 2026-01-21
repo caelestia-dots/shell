@@ -25,6 +25,16 @@ StyledListView {
         }
     }
     
+    // Force model refresh when favourites change
+    Connections {
+        target: Config.launcher
+        function onFavouriteAppsChanged() {
+            if (root.state === "apps") {
+                model.values = root.filterAppsByCategory(Apps.search(search.text));
+            }
+        }
+    }
+    
     property string previousCategory: ""
     property var pendingModelUpdate: null
     
@@ -111,10 +121,10 @@ StyledListView {
     function filterAppsByCategory(apps) {
         if (root.activeCategory === "all") {
             return apps;
-        } else if (root.activeCategory === "favorites") {
+        } else if (root.activeCategory === "favourites") {
             return apps.filter(app => {
                 const appId = app.id || app.entry?.id;
-                return Config.launcher.favoriteApps && Config.launcher.favoriteApps.includes(appId);
+                return Config.launcher.favouriteApps && Config.launcher.favouriteApps.includes(appId);
             });
         } else {
             // Custom category

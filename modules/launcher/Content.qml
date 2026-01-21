@@ -17,6 +17,7 @@ Item {
     required property var panels
     required property real maxHeight
 
+    readonly property alias searchField: search
     readonly property int padding: Appearance.padding.large
     readonly property int rounding: Appearance.rounding.large
     
@@ -28,7 +29,7 @@ Item {
     
     readonly property var categoryList: [
         { id: "all", name: qsTr("All"), icon: "apps" },
-        { id: "favorites", name: qsTr("Favorites"), icon: "favorite" }
+        { id: "favourites", name: qsTr("Favourites"), icon: "favorite" }
     ].concat(Config.launcher.categories.map(cat => ({ id: cat.name.toLowerCase(), name: cat.name, icon: cat.icon })))
     
     function navigateCategory(direction: int): void {

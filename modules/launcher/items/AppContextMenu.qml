@@ -106,7 +106,7 @@ Item {
         Separator {}
 
         MenuItem {
-            text: (root.app && Strings.testRegexList(Config.launcher.favoriteApps, root.app.id)) ? qsTr("Remove from Favorites") : qsTr("Add to Favorites")
+            text: (root.app && Strings.testRegexList(Config.launcher.favouriteApps, root.app.id)) ? qsTr("Remove from Favourites") : qsTr("Add to Favourites")
             icon: "favorite"
             onTriggered: {
                 if (!root.app || !root.app.id) {
@@ -116,19 +116,19 @@ Item {
                 
                 try {
                     const appId = root.app.id;
-                    const favorites = Config.launcher.favoriteApps.slice();
-                    const index = favorites.indexOf(appId);
+                    const favourites = Config.launcher.favouriteApps.slice();
+                    const index = favourites.indexOf(appId);
                     
                     if (index > -1) {
-                        favorites.splice(index, 1);
+                        favourites.splice(index, 1);
                     } else {
-                        favorites.push(appId);
+                        favourites.push(appId);
                     }
                     
-                    Config.launcher.favoriteApps = favorites;
+                    Config.launcher.favouriteApps = favourites;
                     Config.save();
                 } catch (error) {
-                    console.error("Failed to toggle favorite:", error);
+                    console.error("Failed to toggle favourite:", error);
                 }
                 
                 root.hide();

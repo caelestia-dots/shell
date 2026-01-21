@@ -183,11 +183,11 @@ Item {
             for (let i = 0; i < allAppsDb.apps.length; i++) {
                 baseApps.push(allAppsDb.apps[i]);
             }
-        } else if (root.activeCategory === "favorites") {
+        } else if (root.activeCategory === "favourites") {
             for (let i = 0; i < allAppsDb.apps.length; i++) {
                 const app = allAppsDb.apps[i];
                 const appId = app.id || app.entry?.id;
-                if (Config.launcher.favoriteApps && Config.launcher.favoriteApps.includes(appId)) {
+                if (Config.launcher.favouriteApps && Config.launcher.favouriteApps.includes(appId)) {
                     baseApps.push(app);
                 }
             }
@@ -323,7 +323,7 @@ Item {
                     Repeater {
                         model: [
                             { id: "all", name: qsTr("All"), icon: "apps" },
-                            { id: "favorites", name: qsTr("Favorites"), icon: "favorite" }
+                            { id: "favourites", name: qsTr("Favourites"), icon: "favorite" }
                         ].concat(Config.launcher.categories.map(cat => ({ id: cat.name.toLowerCase(), name: cat.name, icon: cat.icon })))
 
                         delegate: StyledRect {

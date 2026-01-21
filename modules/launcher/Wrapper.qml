@@ -156,6 +156,13 @@ Item {
         visible: false
         
         visibilities: root.visibilities
+        
+        onClosed: {
+            // Restore focus to search field when context menu closes
+            if (content.item && content.item.searchField) {
+                content.item.searchField.forceActiveFocus();
+            }
+        }
     }
     
     function showContextMenuDirect(app: DesktopEntry, clickX: real, clickY: real): void {
