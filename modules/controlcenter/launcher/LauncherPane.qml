@@ -361,11 +361,11 @@ Item {
 
                             Loader {
                                 Layout.alignment: Qt.AlignVCenter
-                                readonly property bool isHidden: modelData ? Strings.testRegexList(Config.launcher.hiddenApps, modelData.id) : false
-                                readonly property bool isFav: modelData ? Strings.testRegexList(Config.launcher.favouriteApps, modelData.id) : false
+                                readonly property bool isHidden: modelData && Strings.testRegexList(Config.launcher.hiddenApps, modelData.id)
+                                readonly property bool isFav: modelData && Strings.testRegexList(Config.launcher.favouriteApps, modelData.id)
                                 active: isHidden || isFav
 
-                                sourceComponent: isHidden ? hiddenIcon : (isFav ? favoriteIcon : null)
+                                sourceComponent: isHidden ? hiddenIcon : (isFav ? favouriteIcon : null)
                             }
 
                             Component {
@@ -378,7 +378,7 @@ Item {
                             }
 
                             Component {
-                                id: favoriteIcon
+                                id: favouriteIcon
                                 MaterialIcon {
                                     text: "favorite"
                                     fill: 1
