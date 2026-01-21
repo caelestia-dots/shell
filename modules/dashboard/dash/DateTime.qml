@@ -9,8 +9,6 @@ import QtQuick.Layouts
 Item {
     id: root
 
-    readonly property list<string> timeComponents: Time.format(Config.services.useTwelveHourClock ? "hh:mm:A" : "hh:mm").split(":")
-
     anchors.top: parent.top
     anchors.bottom: parent.bottom
     implicitWidth: Config.dashboard.sizes.dateTimeWidth
@@ -24,7 +22,7 @@ Item {
         StyledText {
             Layout.bottomMargin: -(font.pointSize * 0.4)
             Layout.alignment: Qt.AlignHCenter
-            text: root.timeComponents[0]
+            text: Time.hourStr
             color: Colours.palette.m3secondary
             font.pointSize: Appearance.font.size.extraLarge
             font.family: Appearance.font.family.clock
@@ -42,7 +40,7 @@ Item {
         StyledText {
             Layout.topMargin: -(font.pointSize * 0.4)
             Layout.alignment: Qt.AlignHCenter
-            text: root.timeComponents[1]
+            text: Time.minuteStr
             color: Colours.palette.m3secondary
             font.pointSize: Appearance.font.size.extraLarge
             font.family: Appearance.font.family.clock
@@ -56,7 +54,7 @@ Item {
             visible: active
 
             sourceComponent: StyledText {
-                text: root.timeComponents[2] ?? ""
+                text: Time.amPmStr
                 color: Colours.palette.m3primary
                 font.pointSize: Appearance.font.size.large
                 font.family: Appearance.font.family.clock

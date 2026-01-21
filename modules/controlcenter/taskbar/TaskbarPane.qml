@@ -27,6 +27,7 @@ Item {
     property bool showMicrophone: Config.bar.status.showMicrophone ?? true
     property bool showKbLayout: Config.bar.status.showKbLayout ?? false
     property bool showNetwork: Config.bar.status.showNetwork ?? true
+    property bool showWifi: Config.bar.status.showWifi ?? true
     property bool showBluetooth: Config.bar.status.showBluetooth ?? true
     property bool showBattery: Config.bar.status.showBattery ?? true
     property bool showLockStatus: Config.bar.status.showLockStatus ?? true
@@ -69,6 +70,7 @@ Item {
         Config.bar.status.showMicrophone = root.showMicrophone;
         Config.bar.status.showKbLayout = root.showKbLayout;
         Config.bar.status.showNetwork = root.showNetwork;
+        Config.bar.status.showWifi = root.showWifi;
         Config.bar.status.showBluetooth = root.showBluetooth;
         Config.bar.status.showBattery = root.showBattery;
         Config.bar.status.showLockStatus = root.showLockStatus;
@@ -176,7 +178,7 @@ Item {
 
                     ConnectedButtonGroup {
                         rootItem: root
-                        
+
                         options: [
                             {
                                 label: qsTr("Speakers"),
@@ -207,6 +209,14 @@ Item {
                                 propertyName: "showNetwork",
                                 onToggled: function(checked) {
                                     root.showNetwork = checked;
+                                    root.saveConfig();
+                                }
+                            },
+                            {
+                                label: qsTr("Wifi"),
+                                propertyName: "showWifi",
+                                onToggled: function(checked) {
+                                    root.showWifi = checked;
                                     root.saveConfig();
                                 }
                             },
@@ -437,7 +447,7 @@ Item {
 
                             ConnectedButtonGroup {
                                 rootItem: root
-                                
+
                                 options: [
                                     {
                                         label: qsTr("Workspaces"),
@@ -525,7 +535,7 @@ Item {
 
                                 SliderInput {
                                     Layout.fillWidth: true
-                                    
+
                                     label: qsTr("Drag threshold")
                                     value: root.dragThreshold
                                     from: 0
@@ -534,7 +544,7 @@ Item {
                                     validator: IntValidator { bottom: 0; top: 100 }
                                     formatValueFunction: (val) => Math.round(val).toString()
                                     parseValueFunction: (text) => parseInt(text)
-                                    
+
                                     onValueModified: (newValue) => {
                                         root.dragThreshold = Math.round(newValue);
                                         root.saveConfig();
@@ -598,7 +608,7 @@ Item {
 
                             ConnectedButtonGroup {
                                 rootItem: root
-                                
+
                                 options: [
                                     {
                                         label: qsTr("Background"),
