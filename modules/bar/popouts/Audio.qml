@@ -96,11 +96,27 @@ Item {
                 anchors.right: parent.right
                 implicitHeight: parent.implicitHeight
 
+                from: 0
+                to: Config.services.maxVolume
                 value: Audio.volume
                 onMoved: Audio.setVolume(value)
 
+                Connections {
+                    target: Config.services
+                    function onMaxVolumeChanged() {
+                        to = Config.services.maxVolume;
+                    }
+                }
+
                 Behavior on value {
                     Anim {}
+                }
+
+                Behavior on to {
+                    Anim {
+                        duration: Appearance.anim.durations.normal
+                        easing.bezierCurve: Appearance.anim.curves.standard
+                    }
                 }
             }
         }
