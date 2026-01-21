@@ -39,7 +39,7 @@ JsonObject {
         property int heroCardRightMargin: 16
         property int heroCardRightValueMargin: 32
         property int batteryTankMargin: 16
-        property int mainValueSpacing: -8
+        property int mainValueSpacing: 0
         property int percentValueSpacing: -4
         property int gaugeCardMargin: 16
         property int storageCardMargin: 16
