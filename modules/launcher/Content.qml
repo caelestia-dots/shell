@@ -85,7 +85,7 @@ Item {
         id: tabsWrapper
 
         color: Colours.layer(Colours.palette.m3surfaceContainer, 2)
-        radius: Appearance.rounding.large
+        radius: Appearance.rounding.normal
 
         anchors.left: parent.left
         anchors.right: parent.right
@@ -119,13 +119,15 @@ Item {
             anchors.leftMargin: Appearance.padding.normal
             anchors.rightMargin: Appearance.padding.normal
             anchors.topMargin: Appearance.padding.small
-            anchors.bottomMargin: Appearance.padding.normal
+            anchors.bottomMargin: Appearance.padding.smaller
             spacing: Appearance.spacing.smaller
 
             IconButton {
                 icon: "chevron_left"
                 visible: tabsFlickable.contentWidth > tabsFlickable.width
-                type: IconButton.Tonal
+                type: IconButton.Text
+                radius: Appearance.rounding.small
+                padding: Appearance.padding.small
                 onClicked: {
                     tabsFlickable.contentX = Math.max(0, tabsFlickable.contentX - 100);
                 }
@@ -138,6 +140,13 @@ Item {
                 flickableDirection: Flickable.HorizontalFlick
                 contentWidth: tabsRow.width
                 clip: true
+                
+                Behavior on contentX {
+                    Anim {
+                        duration: Appearance.anim.durations.normal
+                        easing.bezierCurve: Appearance.anim.curves.emphasized
+                    }
+                }
 
                 MouseArea {
                     anchors.fill: parent
@@ -157,55 +166,91 @@ Item {
                     }
                 }
 
-                Row {
-                    id: tabsRow
-                    spacing: Appearance.spacing.small
-
-                    Repeater {
-                        model: root.categoryList
-
-                        delegate: StyledRect {
-                            required property var modelData
-                            
-                            property bool isActive: root.activeCategory === modelData.id
-
-                            implicitWidth: tabContent.width + Appearance.padding.normal * 2
-                            implicitHeight: tabContent.height + Appearance.padding.smaller * 2
-
-                            color: isActive ? Colours.palette.m3secondaryContainer : "transparent"
-                            radius: Appearance.rounding.full
-
-                            StateLayer {
-                                radius: parent.radius
-                                function onClicked(): void {
-                                    root.activeCategory = modelData.id;
+                Item {
+                    implicitWidth: tabsRow.width
+                    implicitHeight: tabsRow.height
+                    
+                    // Sliding indicator background
+                    StyledRect {
+                        id: activeIndicator
+                        
+                        property Item activeTab: {
+                            for (let i = 0; i < tabsRepeater.count; i++) {
+                                const tab = tabsRepeater.itemAt(i);
+                                if (tab && tab.isActive) {
+                                    return tab;
                                 }
                             }
-
-                            Row {
-                                id: tabContent
-                                anchors.centerIn: parent
-                                spacing: Appearance.spacing.smaller
-
-                                MaterialIcon {
-                                    anchors.verticalCenter: parent.verticalCenter
-                                    text: modelData.icon
-                                    font.pointSize: Appearance.font.size.small
-                                    color: isActive ? Colours.palette.m3onSecondaryContainer : Colours.palette.m3onSurface
-                                }
-
-                                StyledText {
-                                    anchors.verticalCenter: parent.verticalCenter
-                                    text: modelData.name
-                                    font.pointSize: Appearance.font.size.small
-                                    font.weight: isActive ? 500 : 400
-                                    color: isActive ? Colours.palette.m3onSecondaryContainer : Colours.palette.m3onSurface
-                                }
+                            return null;
+                        }
+                        
+                        visible: activeTab !== null
+                        color: Colours.palette.m3primary
+                        radius: 10
+                        
+                        x: activeTab ? activeTab.x : 0
+                        y: activeTab ? activeTab.y : 0
+                        width: activeTab ? activeTab.width : 0
+                        height: activeTab ? activeTab.height : 0
+                        
+                        Behavior on x {
+                            Anim {
+                                duration: Appearance.anim.durations.normal
+                                easing.bezierCurve: Appearance.anim.curves.emphasized
                             }
+                        }
+                        
+                        Behavior on width {
+                            Anim {
+                                duration: Appearance.anim.durations.normal
+                                easing.bezierCurve: Appearance.anim.curves.emphasized
+                            }
+                        }
+                    }
+                    
+                    Row {
+                        id: tabsRow
+                        spacing: Appearance.spacing.small
 
-                            Behavior on color {
-                                ColorAnimation {
-                                    duration: Appearance.anim.durations.small
+                        Repeater {
+                            id: tabsRepeater
+                            model: root.categoryList
+
+                            delegate: Item {
+                                required property var modelData
+                                required property int index
+                                
+                                property bool isActive: root.activeCategory === modelData.id
+
+                                implicitWidth: tabContent.width + Appearance.padding.normal * 2
+                                implicitHeight: tabContent.height + Appearance.padding.smaller * 2
+
+                                StateLayer {
+                                    anchors.fill: parent
+                                    radius: 6
+                                    function onClicked(): void {
+                                        root.activeCategory = modelData.id;
+                                    }
+                                }
+
+                                Row {
+                                    id: tabContent
+                                    anchors.centerIn: parent
+                                    spacing: Appearance.spacing.smaller
+
+                                    MaterialIcon {
+                                        anchors.verticalCenter: parent.verticalCenter
+                                        text: modelData.icon
+                                        font.pointSize: Appearance.font.size.small
+                                        color: isActive ? Colours.palette.m3surface : Colours.palette.m3onSurfaceVariant
+                                    }
+
+                                    StyledText {
+                                        anchors.verticalCenter: parent.verticalCenter
+                                        text: modelData.name
+                                        font.pointSize: Appearance.font.size.small
+                                        color: isActive ? Colours.palette.m3surface : Colours.palette.m3onSurfaceVariant
+                                    }
                                 }
                             }
                         }
@@ -216,7 +261,9 @@ Item {
             IconButton {
                 icon: "chevron_right"
                 visible: tabsFlickable.contentWidth > tabsFlickable.width
-                type: IconButton.Tonal
+                type: IconButton.Text
+                radius: Appearance.rounding.small
+                padding: Appearance.padding.small
                 onClicked: {
                     tabsFlickable.contentX = Math.min(tabsFlickable.contentWidth - tabsFlickable.width, tabsFlickable.contentX + 100);
                 }
