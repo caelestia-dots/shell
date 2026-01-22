@@ -12,8 +12,6 @@ Singleton {
     property string cpuName: ""
     property real cpuPerc
     property real cpuTemp
-    property real cpuFreq: 0      // Current average frequency in MHz
-    property real cpuMaxFreq: 0   // Max frequency in MHz
 
     // GPU properties
     readonly property string gpuType: Config.services.gpuType.toUpperCase() || autoGpuType
@@ -28,9 +26,15 @@ Singleton {
     readonly property real memPerc: memTotal > 0 ? memUsed / memTotal : 0
 
     // Storage properties (aggregated)
-    property real storageUsed
-    property real storageTotal
-    property real storagePerc: storageTotal > 0 ? storageUsed / storageTotal : 0
+    readonly property real storagePerc: {
+        let totalUsed = 0;
+        let totalSize = 0;
+        for (const disk of disks) {
+            totalUsed += disk.used;
+            totalSize += disk.total;
+        }
+        return totalSize > 0 ? totalUsed / totalSize : 0;
+    }
 
     // Individual disks: Array of { mount, used, total, free, perc }
     property var disks: []
@@ -103,14 +107,13 @@ Singleton {
         onTriggered: {
             stat.reload();
             meminfo.reload();
-            cpuinfo.reload();
             storage.running = true;
             gpuUsage.running = true;
             sensors.running = true;
         }
     }
 
-    // One-time CPU info detection (name and max frequency)
+    // One-time CPU info detection (name)
     FileView {
         id: cpuinfoInit
 
@@ -119,39 +122,6 @@ Singleton {
             const nameMatch = text().match(/model name\s*:\s*(.+)/);
             if (nameMatch)
                 root.cpuName = root.cleanCpuName(nameMatch[1]);
-        }
-    }
-
-    FileView {
-        id: cpuMaxFreqFile
-
-        path: "/sys/devices/system/cpu/cpu0/cpufreq/cpuinfo_max_freq"
-        onLoaded: {
-            const freq = parseInt(text().trim(), 10);
-            if (freq > 0)
-                root.cpuMaxFreq = freq / 1000; // Convert kHz to MHz
-        }
-    }
-
-    // Periodic CPU frequency reading
-    FileView {
-        id: cpuinfo
-
-        path: "/proc/cpuinfo"
-        onLoaded: {
-            const content = text();
-            const regex = /cpu MHz\s*:\s*([\d.]+)/g;
-            let match;
-            let sum = 0;
-            let count = 0;
-
-            while ((match = regex.exec(content)) !== null) {
-                sum += parseFloat(match[1]);
-                count++;
-            }
-
-            if (count > 0)
-                root.cpuFreq = sum / count;
         }
     }
 
@@ -273,8 +243,6 @@ Singleton {
                 }
 
                 root.disks = diskList;
-                root.storageUsed = totalUsed / 1024;
-                root.storageTotal = totalSize / 1024;
             }
         }
     }
