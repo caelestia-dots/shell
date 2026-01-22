@@ -1,21 +1,20 @@
-import qs.components
-import qs.components.misc
-import qs.services
-import qs.config
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
-
 import Quickshell.Services.UPower
+import qs.components
+import qs.components.misc
+import qs.config
+import qs.services
 
 RowLayout {
     id: root
 
-    spacing: Appearance.spacing.normal
-
-    function displayTemp(temp: real): string {
+    function displayTemp(temp: real) : string {
         return `${Math.ceil(Config.services.useFahrenheit ? temp * 1.8 + 32 : temp)}°${Config.services.useFahrenheit ? "F" : "C"}`;
     }
+
+    spacing: Appearance.spacing.normal
 
     Ref {
         service: SystemUsage
@@ -34,9 +33,7 @@ RowLayout {
                 Layout.fillWidth: true
                 Layout.minimumWidth: 400
                 Layout.preferredHeight: 150
-
                 visible: Config.dashboard.performance.showCpu
-
                 icon: "memory"
                 title: SystemUsage.cpuName ? `CPU - ${SystemUsage.cpuName}` : qsTr("CPU")
                 mainValue: `${Math.round(SystemUsage.cpuPerc * 100)}%`
@@ -52,9 +49,8 @@ RowLayout {
                 Layout.fillWidth: true
                 Layout.minimumWidth: 400
                 Layout.preferredHeight: 150
-
-                visible: Config.dashboard.performance.showGpu
-
+                // Hide when GPU data is unavailable (gpuType === "NONE")
+                visible: Config.dashboard.performance.showGpu && SystemUsage.gpuType !== "NONE"
                 icon: "desktop_windows"
                 title: SystemUsage.gpuName ? `GPU - ${SystemUsage.gpuName}` : qsTr("GPU")
                 mainValue: `${Math.round(SystemUsage.gpuPerc * 100)}%`
@@ -65,6 +61,7 @@ RowLayout {
                 temperature: SystemUsage.gpuTemp
                 accentColor: Colours.palette.m3secondary
             }
+
         }
 
         RowLayout {
@@ -75,7 +72,6 @@ RowLayout {
                 Layout.minimumWidth: 250
                 Layout.preferredHeight: 220
                 Layout.fillWidth: !Config.dashboard.performance.showStorage && !Config.dashboard.performance.showNetwork
-
                 icon: "memory_alt"
                 title: qsTr("Memory")
                 percentage: SystemUsage.memPerc
@@ -85,7 +81,6 @@ RowLayout {
                     return `${usedFmt.value.toFixed(1)} / ${Math.floor(totalFmt.value)} ${totalFmt.unit}`;
                 }
                 accentColor: Colours.palette.m3tertiary
-
                 visible: Config.dashboard.performance.showMemory
             }
 
@@ -93,7 +88,6 @@ RowLayout {
                 Layout.minimumWidth: 250
                 Layout.preferredHeight: 220
                 Layout.fillWidth: !Config.dashboard.performance.showNetwork
-
                 visible: Config.dashboard.performance.showStorage
             }
 
@@ -101,17 +95,17 @@ RowLayout {
                 Layout.fillWidth: true
                 Layout.minimumWidth: 200
                 Layout.preferredHeight: 220
-
                 visible: Config.dashboard.performance.showNetwork
             }
+
         }
+
     }
 
     BatteryTank {
         Layout.preferredWidth: 120
         Layout.fillHeight: true
         Layout.minimumHeight: 350 // Match combined height + spacing roughly, or let it fill
-
         visible: UPower.displayDevice.isLaptopBattery && Config.dashboard.performance.showBattery
     }
 
@@ -121,18 +115,12 @@ RowLayout {
         property real percentage: UPower.displayDevice.percentage
         property bool isCharging: UPower.displayDevice.state === UPowerDeviceState.Charging
         property color accentColor: Colours.palette.m3primary
-
         property real animatedPercentage: 0
 
         color: Colours.tPalette.m3surfaceContainer
         radius: Appearance.rounding.large
-
         Component.onCompleted: animatedPercentage = percentage
         onPercentageChanged: animatedPercentage = percentage
-
-        Behavior on animatedPercentage {
-            Anim { duration: Appearance.anim.durations.large }
-        }
 
         // Background Fill
         StyledRect {
@@ -140,7 +128,6 @@ RowLayout {
             anchors.right: parent.right
             anchors.bottom: parent.bottom
             height: parent.height * batteryTank.animatedPercentage
-
             color: Qt.alpha(batteryTank.accentColor, 0.15)
         }
 
@@ -159,11 +146,12 @@ RowLayout {
                         if (!UPower.displayDevice.isLaptopBattery) {
                             if (PowerProfiles.profile === PowerProfile.PowerSaver)
                                 return "energy_savings_leaf";
+
                             if (PowerProfiles.profile === PowerProfile.Performance)
                                 return "rocket_launch";
+
                             return "balance";
                         }
-
                         if (UPower.displayDevice.state === UPowerDeviceState.FullyCharged)
                             return "battery_full";
 
@@ -171,10 +159,11 @@ RowLayout {
                         const charging = [UPowerDeviceState.Charging, UPowerDeviceState.PendingCharge].includes(UPower.displayDevice.state);
                         if (perc >= 0.99)
                             return "battery_full";
-                        
+
                         let level = Math.floor(perc * 7);
                         if (charging && (level === 4 || level === 1))
                             level--;
+
                         return charging ? `battery_charging_${(level + 3) * 10}` : `battery_${level}_bar`;
                     }
                     font.pointSize: Config.dashboard.performance.largeIconSize
@@ -187,9 +176,12 @@ RowLayout {
                     font.pointSize: Config.dashboard.performance.normalTextSize
                     color: Colours.palette.m3onSurface
                 }
+
             }
 
-            Item { Layout.fillHeight: true }
+            Item {
+                Layout.fillHeight: true
+            }
 
             // Bottom Info Section
             ColumnLayout {
@@ -207,24 +199,38 @@ RowLayout {
                 StyledText {
                     Layout.alignment: Qt.AlignRight
                     text: {
-                        if (UPower.displayDevice.state === UPowerDeviceState.FullyCharged) {
+                        if (UPower.displayDevice.state === UPowerDeviceState.FullyCharged)
                             return qsTr("Full");
-                        }
-                        if (batteryTank.isCharging) {
+
+                        if (batteryTank.isCharging)
                             return qsTr("Charging");
-                        }
+
                         const s = UPower.displayDevice.timeToEmpty;
-                        if (s === 0) return qsTr("...");
+                        if (s === 0)
+                            return qsTr("...");
+
                         const hr = Math.floor(s / 3600);
                         const min = Math.floor((s % 3600) / 60);
-                        if (hr > 0) return `${hr}h ${min}m`;
+                        if (hr > 0)
+                            return `${hr}h ${min}m`;
+
                         return `${min}m`;
                     }
                     font.pointSize: Config.dashboard.performance.usageTextSize
                     color: Colours.palette.m3onSurfaceVariant
                 }
+
             }
+
         }
+
+        Behavior on animatedPercentage {
+            Anim {
+                duration: Appearance.anim.durations.large
+            }
+
+        }
+
     }
 
     component CardHeader: RowLayout {
@@ -248,6 +254,7 @@ RowLayout {
             font.pointSize: Config.dashboard.performance.normalTextSize
             elide: Text.ElideRight
         }
+
     }
 
     component ProgressBar: StyledRect {
@@ -256,28 +263,29 @@ RowLayout {
         property real value: 0
         property color fgColor: Colours.palette.m3primary
         property color bgColor: Colours.layer(Colours.palette.m3surfaceContainerHigh, 2)
-
         property real animatedValue: 0
 
         color: bgColor
         radius: Appearance.rounding.full
-
         Component.onCompleted: animatedValue = value
         onValueChanged: animatedValue = value
-
-        Behavior on animatedValue {
-            Anim { duration: Appearance.anim.durations.large }
-        }
 
         StyledRect {
             anchors.left: parent.left
             anchors.top: parent.top
             anchors.bottom: parent.bottom
             width: parent.width * progressBar.animatedValue
-
             color: progressBar.fgColor
             radius: Appearance.rounding.full
         }
+
+        Behavior on animatedValue {
+            Anim {
+                duration: Appearance.anim.durations.large
+            }
+
+        }
+
     }
 
     component HeroCard: StyledClippingRect {
@@ -292,38 +300,25 @@ RowLayout {
         property real usage: 0
         property real temperature: 0
         property color accentColor: Colours.palette.m3primary
-
         readonly property real maxTemp: 100
         readonly property real tempProgress: Math.min(1, Math.max(0, temperature / maxTemp))
-
         property real animatedUsage: 0
         property real animatedTemp: 0
 
         color: Colours.tPalette.m3surfaceContainer
         radius: Appearance.rounding.large
-
         Component.onCompleted: {
-            animatedUsage = usage
-            animatedTemp = tempProgress
+            animatedUsage = usage;
+            animatedTemp = tempProgress;
         }
-
         onUsageChanged: animatedUsage = usage
         onTempProgressChanged: animatedTemp = tempProgress
-
-        Behavior on animatedUsage {
-            Anim { duration: Appearance.anim.durations.large }
-        }
-
-        Behavior on animatedTemp {
-            Anim { duration: Appearance.anim.durations.large }
-        }
 
         StyledRect {
             anchors.left: parent.left
             anchors.top: parent.top
             anchors.bottom: parent.bottom
             width: parent.width * heroCard.animatedUsage
-
             color: Qt.alpha(heroCard.accentColor, 0.15)
         }
 
@@ -366,19 +361,23 @@ RowLayout {
                             color: Colours.palette.m3onSurfaceVariant
                             anchors.baseline: parent.children[0].baseline
                         }
+
                     }
 
                     ProgressBar {
                         width: parent.width * Config.dashboard.performance.tempBarWidthMult
                         height: Config.dashboard.performance.tempBarHeight
-
                         value: heroCard.tempProgress
                         fgColor: heroCard.accentColor
                         bgColor: Qt.alpha(heroCard.accentColor, 0.2)
                     }
+
                 }
 
-                Item { Layout.fillWidth: true }
+                Item {
+                    Layout.fillWidth: true
+                }
+
             }
 
             Column {
@@ -405,7 +404,23 @@ RowLayout {
                 }
 
             }
+
         }
+
+        Behavior on animatedUsage {
+            Anim {
+                duration: Appearance.anim.durations.large
+            }
+
+        }
+
+        Behavior on animatedTemp {
+            Anim {
+                duration: Appearance.anim.durations.large
+            }
+
+        }
+
     }
 
     component GaugeCard: StyledRect {
@@ -416,22 +431,15 @@ RowLayout {
         property real percentage: 0
         property string subtitle
         property color accentColor: Colours.palette.m3primary
-
         readonly property real arcStartAngle: 0.75 * Math.PI
         readonly property real arcSweep: 1.5 * Math.PI
-
         property real animatedPercentage: 0
 
         color: Colours.tPalette.m3surfaceContainer
         radius: Appearance.rounding.large
         clip: true
-
         Component.onCompleted: animatedPercentage = percentage
         onPercentageChanged: animatedPercentage = percentage
-
-        Behavior on animatedPercentage {
-            Anim { duration: Appearance.anim.durations.large }
-        }
 
         ColumnLayout {
             anchors.fill: parent
@@ -454,23 +462,19 @@ RowLayout {
                     anchors.centerIn: parent
                     width: Math.min(parent.width, parent.height)
                     height: width
-
                     onPaint: {
                         const ctx = getContext("2d");
                         ctx.reset();
-
                         const cx = width / 2;
                         const cy = height / 2;
                         const radius = (Math.min(width, height) - Config.dashboard.performance.gaugeRadiusOffset) / 2;
                         const lineWidth = Config.dashboard.performance.gaugeLineWidth;
-
                         ctx.beginPath();
                         ctx.arc(cx, cy, radius, gaugeCard.arcStartAngle, gaugeCard.arcStartAngle + gaugeCard.arcSweep);
                         ctx.lineWidth = lineWidth;
                         ctx.lineCap = "round";
                         ctx.strokeStyle = Colours.layer(Colours.palette.m3surfaceContainerHigh, 2);
                         ctx.stroke();
-
                         if (gaugeCard.animatedPercentage > 0) {
                             ctx.beginPath();
                             ctx.arc(cx, cy, radius, gaugeCard.arcStartAngle, gaugeCard.arcStartAngle + gaugeCard.arcSweep * gaugeCard.animatedPercentage);
@@ -480,22 +484,24 @@ RowLayout {
                             ctx.stroke();
                         }
                     }
+                    Component.onCompleted: requestPaint()
 
                     Connections {
-                        target: gaugeCard
                         function onAnimatedPercentageChanged() {
                             gaugeCanvas.requestPaint();
                         }
+
+                        target: gaugeCard
                     }
 
                     Connections {
-                        target: Colours
                         function onPaletteChanged() {
                             gaugeCanvas.requestPaint();
                         }
+
+                        target: Colours
                     }
 
-                    Component.onCompleted: requestPaint()
                 }
 
                 StyledText {
@@ -505,6 +511,7 @@ RowLayout {
                     font.weight: Font.Medium
                     color: gaugeCard.accentColor
                 }
+
             }
 
             StyledText {
@@ -513,7 +520,16 @@ RowLayout {
                 font.pointSize: Config.dashboard.performance.usageTextSize
                 color: Colours.palette.m3onSurfaceVariant
             }
+
         }
+
+        Behavior on animatedPercentage {
+            Anim {
+                duration: Appearance.anim.durations.large
+            }
+
+        }
+
     }
 
     component StorageGaugeCard: StyledRect {
@@ -522,52 +538,52 @@ RowLayout {
         property int currentDiskIndex: 0
         readonly property var currentDisk: SystemUsage.disks.length > 0 ? SystemUsage.disks[currentDiskIndex] : null
         property int diskCount: 0
-
         readonly property real arcStartAngle: 0.75 * Math.PI
         readonly property real arcSweep: 1.5 * Math.PI
-
         property real animatedPercentage: 0
         property color accentColor: Colours.palette.m3secondary
 
         color: Colours.tPalette.m3surfaceContainer
         radius: Appearance.rounding.large
         clip: true
+        Component.onCompleted: {
+            diskCount = SystemUsage.disks.length;
+            if (currentDisk)
+                animatedPercentage = currentDisk.perc;
+
+        }
+        onCurrentDiskChanged: {
+            if (currentDisk)
+                animatedPercentage = currentDisk.perc;
+
+        }
 
         // Only update diskCount when the actual count changes
         Connections {
-            target: SystemUsage
             function onDisksChanged() {
-                if (SystemUsage.disks.length !== storageGaugeCard.diskCount) {
+                if (SystemUsage.disks.length !== storageGaugeCard.diskCount)
                     storageGaugeCard.diskCount = SystemUsage.disks.length;
-                }
+
             }
-        }
 
-        Component.onCompleted: {
-            diskCount = SystemUsage.disks.length;
-            if (currentDisk) animatedPercentage = currentDisk.perc;
-        }
-        onCurrentDiskChanged: if (currentDisk) animatedPercentage = currentDisk.perc
-
-        Behavior on animatedPercentage {
-            Anim { duration: Appearance.anim.durations.large }
+            target: SystemUsage
         }
 
         Connections {
-            target: storageGaugeCard.currentDisk
             function onPercChanged() {
                 storageGaugeCard.animatedPercentage = storageGaugeCard.currentDisk.perc;
             }
+
+            target: storageGaugeCard.currentDisk
         }
 
         MouseArea {
             anchors.fill: parent
-            onWheel: wheel => {
-                if (wheel.angleDelta.y > 0) {
+            onWheel: (wheel) => {
+                if (wheel.angleDelta.y > 0)
                     storageGaugeCard.currentDiskIndex = (storageGaugeCard.currentDiskIndex - 1 + storageGaugeCard.diskCount) % storageGaugeCard.diskCount;
-                } else if (wheel.angleDelta.y < 0) {
+                else if (wheel.angleDelta.y < 0)
                     storageGaugeCard.currentDiskIndex = (storageGaugeCard.currentDiskIndex + 1) % storageGaugeCard.diskCount;
-                }
             }
         }
 
@@ -580,7 +596,9 @@ RowLayout {
                 icon: "hard_disk"
                 title: {
                     const base = qsTr("Storage");
-                    if (!storageGaugeCard.currentDisk) return base;
+                    if (!storageGaugeCard.currentDisk)
+                        return base;
+
                     return `${base} - ${storageGaugeCard.currentDisk.mount}`;
                 }
                 accentColor: storageGaugeCard.accentColor
@@ -592,7 +610,6 @@ RowLayout {
                     font.pointSize: Config.dashboard.performance.normalTextSize
                     visible: storageGaugeCard.diskCount > 1
                     opacity: 0.7
-
                     ToolTip.visible: hintHover.hovered
                     ToolTip.text: qsTr("Scroll to switch disks")
                     ToolTip.delay: 500
@@ -600,7 +617,9 @@ RowLayout {
                     HoverHandler {
                         id: hintHover
                     }
+
                 }
+
             }
 
             Item {
@@ -613,23 +632,19 @@ RowLayout {
                     anchors.centerIn: parent
                     width: Math.min(parent.width, parent.height)
                     height: width
-
                     onPaint: {
                         const ctx = getContext("2d");
                         ctx.reset();
-
                         const cx = width / 2;
                         const cy = height / 2;
                         const radius = (Math.min(width, height) - Config.dashboard.performance.gaugeRadiusOffset) / 2;
                         const lineWidth = Config.dashboard.performance.gaugeLineWidth;
-
                         ctx.beginPath();
                         ctx.arc(cx, cy, radius, storageGaugeCard.arcStartAngle, storageGaugeCard.arcStartAngle + storageGaugeCard.arcSweep);
                         ctx.lineWidth = lineWidth;
                         ctx.lineCap = "round";
                         ctx.strokeStyle = Colours.layer(Colours.palette.m3surfaceContainerHigh, 2);
                         ctx.stroke();
-
                         if (storageGaugeCard.animatedPercentage > 0) {
                             ctx.beginPath();
                             ctx.arc(cx, cy, radius, storageGaugeCard.arcStartAngle, storageGaugeCard.arcStartAngle + storageGaugeCard.arcSweep * storageGaugeCard.animatedPercentage);
@@ -639,22 +654,24 @@ RowLayout {
                             ctx.stroke();
                         }
                     }
+                    Component.onCompleted: requestPaint()
 
                     Connections {
-                        target: storageGaugeCard
                         function onAnimatedPercentageChanged() {
                             storageGaugeCanvas.requestPaint();
                         }
+
+                        target: storageGaugeCard
                     }
 
                     Connections {
-                        target: Colours
                         function onPaletteChanged() {
                             storageGaugeCanvas.requestPaint();
                         }
+
+                        target: Colours
                     }
 
-                    Component.onCompleted: requestPaint()
                 }
 
                 StyledText {
@@ -664,12 +681,15 @@ RowLayout {
                     font.weight: Font.Medium
                     color: storageGaugeCard.accentColor
                 }
+
             }
 
             StyledText {
                 Layout.alignment: Qt.AlignHCenter
                 text: {
-                    if (!storageGaugeCard.currentDisk) return "—";
+                    if (!storageGaugeCard.currentDisk)
+                        return "—";
+
                     const usedFmt = SystemUsage.formatKib(storageGaugeCard.currentDisk.used);
                     const totalFmt = SystemUsage.formatKib(storageGaugeCard.currentDisk.total);
                     return `${usedFmt.value.toFixed(1)} / ${Math.floor(totalFmt.value)} ${totalFmt.unit}`;
@@ -679,6 +699,14 @@ RowLayout {
             }
 
         }
+
+        Behavior on animatedPercentage {
+            Anim {
+                duration: Appearance.anim.durations.large
+            }
+
+        }
+
     }
 
     component NetworkCard: StyledRect {
@@ -713,51 +741,45 @@ RowLayout {
                 Canvas {
                     id: sparklineCanvas
 
-                    anchors.fill: parent
-
                     property var downHistory: NetworkUsage.downloadHistory
                     property var upHistory: NetworkUsage.uploadHistory
 
+                    anchors.fill: parent
                     onDownHistoryChanged: requestPaint()
                     onUpHistoryChanged: requestPaint()
-
                     onPaint: {
                         const ctx = getContext("2d");
                         ctx.reset();
-
                         const w = width;
                         const h = height;
                         const downHist = downHistory || [];
                         const upHist = upHistory || [];
-
-                        if (downHist.length < 2 && upHist.length < 2) return;
+                        if (downHist.length < 2 && upHist.length < 2)
+                            return;
 
                         // Find max value for scaling
                         const allValues = downHist.concat(upHist);
                         const maxVal = Math.max(...allValues, 1024); // minimum 1KB/s scale
 
                         function drawLine(history, color, fillAlpha) {
-                            if (history.length < 2) return;
+                            if (history.length < 2)
+                                return;
 
                             const len = history.length;
                             const stepX = w / (NetworkUsage.historyLength - 1);
                             const startX = w - (len - 1) * stepX;
-
                             ctx.beginPath();
                             ctx.moveTo(startX, h - (history[0] / maxVal) * h);
-
                             for (let i = 1; i < len; i++) {
                                 const x = startX + i * stepX;
                                 const y = h - (history[i] / maxVal) * h;
                                 ctx.lineTo(x, y);
                             }
-
                             ctx.strokeStyle = color;
                             ctx.lineWidth = 2;
                             ctx.lineCap = "round";
                             ctx.lineJoin = "round";
                             ctx.stroke();
-
                             // Fill under the line
                             ctx.lineTo(startX + (len - 1) * stepX, h);
                             ctx.lineTo(startX, h);
@@ -771,14 +793,16 @@ RowLayout {
                         drawLine(downHist, Colours.palette.m3tertiary.toString(), 0.2);
                     }
 
+                    Component.onCompleted: requestPaint()
+
                     Connections {
-                        target: Colours
                         function onPaletteChanged() {
                             sparklineCanvas.requestPaint();
                         }
+
+                        target: Colours
                     }
 
-                    Component.onCompleted: requestPaint()
                 }
 
                 // "No data" placeholder
@@ -790,6 +814,7 @@ RowLayout {
                     visible: NetworkUsage.downloadHistory.length < 2
                     opacity: 0.6
                 }
+
             }
 
             // Download row
@@ -809,7 +834,9 @@ RowLayout {
                     color: Colours.palette.m3onSurfaceVariant
                 }
 
-                Item { Layout.fillWidth: true }
+                Item {
+                    Layout.fillWidth: true
+                }
 
                 StyledText {
                     text: {
@@ -820,6 +847,7 @@ RowLayout {
                     font.weight: Font.Medium
                     color: Colours.palette.m3tertiary
                 }
+
             }
 
             // Upload row
@@ -839,7 +867,9 @@ RowLayout {
                     color: Colours.palette.m3onSurfaceVariant
                 }
 
-                Item { Layout.fillWidth: true }
+                Item {
+                    Layout.fillWidth: true
+                }
 
                 StyledText {
                     text: {
@@ -850,6 +880,7 @@ RowLayout {
                     font.weight: Font.Medium
                     color: Colours.palette.m3secondary
                 }
+
             }
 
             // Session totals
@@ -863,7 +894,9 @@ RowLayout {
                     color: Colours.palette.m3onSurfaceVariant
                 }
 
-                Item { Layout.fillWidth: true }
+                Item {
+                    Layout.fillWidth: true
+                }
 
                 StyledText {
                     text: {
@@ -874,7 +907,11 @@ RowLayout {
                     font.pointSize: Config.dashboard.performance.valueLabelSize
                     color: Colours.palette.m3onSurfaceVariant
                 }
+
             }
+
         }
+
     }
+
 }
