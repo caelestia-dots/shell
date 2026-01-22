@@ -251,39 +251,6 @@ Item {
                             Item {
                                 Layout.fillWidth: true
                             }
-
-                            ToggleButton {
-                                toggled: Config.services.maxVolume >= 1.5
-                                icon: "volume_up"
-                                accent: "Tertiary"
-                                iconSize: Appearance.font.size.normal
-                                horizontalPadding: Appearance.padding.normal
-                                verticalPadding: Appearance.padding.smaller
-                                tooltip: qsTr("Enable 150% max volume")
-
-                                onClicked: {
-                                    if (toggled) {
-                                        // Toggling off: clamp volumes to 1.0 if they exceed it
-                                        if (Audio.volume > 1.0) {
-                                            Audio.setVolume(1.0);
-                                        }
-                                        if (Audio.sourceVolume > 1.0) {
-                                            Audio.setSourceVolume(1.0);
-                                        }
-                                        // Clamp stream volumes
-                                        for (let i = 0; i < Audio.streams.length; i++) {
-                                            const stream = Audio.streams[i];
-                                            if (stream?.audio && stream.audio.volume > 1.0) {
-                                                Audio.setStreamVolume(stream, 1.0);
-                                            }
-                                        }
-                                        Config.services.maxVolume = 1.0;
-                                    } else {
-                                        // Toggling on: set max volume to 1.5
-                                        Config.services.maxVolume = 1.5;
-                                    }
-                                }
-                            }
                         }
 
                         StyledText {
@@ -402,7 +369,7 @@ Item {
                                     }
                                 }
 
-                                StyledSlider {
+                                VolumeSlider {
                                     id: outputVolumeSlider
                                     Layout.fillWidth: true
                                     implicitHeight: Appearance.padding.normal * 3
@@ -551,7 +518,7 @@ Item {
                                     }
                                 }
 
-                                StyledSlider {
+                                VolumeSlider {
                                     id: inputVolumeSlider
                                     Layout.fillWidth: true
                                     implicitHeight: Appearance.padding.normal * 3
@@ -714,7 +681,7 @@ Item {
                                             }
                                         }
 
-                                        StyledSlider {
+                                        VolumeSlider {
                                             Layout.fillWidth: true
                                             implicitHeight: Appearance.padding.normal * 3
 

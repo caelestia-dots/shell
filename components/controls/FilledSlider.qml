@@ -18,15 +18,34 @@ Slider {
         color: Colours.layer(Colours.palette.m3surfaceContainer, 2)
         radius: Appearance.rounding.full
 
+        // Normal range filled (0-100%)
         StyledRect {
             anchors.left: parent.left
             anchors.right: parent.right
+            anchors.bottom: parent.bottom
 
-            y: root.handle.y
-            implicitHeight: parent.height - y
+            implicitHeight: Math.min(parent.height - root.handle.y, parent.height * (1.0 / root.to))
 
             color: Colours.palette.m3secondary
             radius: parent.radius
+            topLeftRadius: root.value > 1.0 ? 0 : parent.radius
+            topRightRadius: root.value > 1.0 ? 0 : parent.radius
+        }
+
+        // Boost range filled (100-150%) - different color
+        StyledRect {
+            anchors.left: parent.left
+            anchors.right: parent.right
+            anchors.bottom: parent.bottom
+            anchors.bottomMargin: parent.height * (1.0 / root.to)
+
+            visible: root.value > 1.01 && implicitHeight > 1
+            implicitHeight: Math.max(0, parent.height - root.handle.y - parent.height * (1.0 / root.to))
+
+            color: Colours.palette.m3tertiary
+            radius: parent.radius
+            bottomLeftRadius: 0
+            bottomRightRadius: 0
         }
     }
 
