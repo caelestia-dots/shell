@@ -828,12 +828,6 @@ RowLayout {
                     font.pointSize: Config.dashboard.performance.normalTextSize
                 }
 
-                StyledText {
-                    text: qsTr("Down")
-                    font.pointSize: Config.dashboard.performance.usageTextSize
-                    color: Colours.palette.m3onSurfaceVariant
-                }
-
                 Item {
                     Layout.fillWidth: true
                 }
@@ -861,12 +855,6 @@ RowLayout {
                     font.pointSize: Config.dashboard.performance.normalTextSize
                 }
 
-                StyledText {
-                    text: qsTr("Up")
-                    font.pointSize: Config.dashboard.performance.usageTextSize
-                    color: Colours.palette.m3onSurfaceVariant
-                }
-
                 Item {
                     Layout.fillWidth: true
                 }
@@ -886,12 +874,12 @@ RowLayout {
             // Session totals
             RowLayout {
                 Layout.fillWidth: true
-                spacing: Appearance.spacing.small
+                spacing: Appearance.spacing.normal
 
-                StyledText {
-                    text: qsTr("Session:")
-                    font.pointSize: Config.dashboard.performance.valueLabelSize
+                MaterialIcon {
+                    text: "history"
                     color: Colours.palette.m3onSurfaceVariant
+                    font.pointSize: Config.dashboard.performance.normalTextSize
                 }
 
                 Item {
