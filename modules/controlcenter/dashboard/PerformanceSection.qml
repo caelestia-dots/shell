@@ -82,6 +82,27 @@ SectionContainer {
         }
     }
 
+    SliderInput {
+        Layout.fillWidth: true
+        label: qsTr("Update interval")
+        value: root.rootItem.updateInterval
+        from: 500
+        to: 10000
+        stepSize: 500
+        suffix: "ms"
+        decimals: 0
+        onValueModified: (newValue) => {
+            root.rootItem.updateInterval = newValue;
+            root.rootItem.saveConfig();
+        }
+
+        validator: IntValidator {
+            bottom: 500
+            top: 10000
+        }
+
+    }
+
     CollapsibleSection {
         title: qsTr("Font Sizes")
         showBackground: true
@@ -291,228 +312,6 @@ SectionContainer {
     }
 
     CollapsibleSection {
-        title: qsTr("Disk Indicator")
-        showBackground: true
-
-        SliderInput {
-            Layout.fillWidth: true
-            label: qsTr("Indicator width")
-            value: root.rootItem.diskIndicatorWidth
-            from: 2
-            to: 10
-            stepSize: 1
-            suffix: "px"
-            decimals: 0
-            onValueModified: (newValue) => {
-                root.rootItem.diskIndicatorWidth = newValue;
-                root.rootItem.saveConfig();
-            }
-
-            validator: IntValidator {
-                bottom: 2
-                top: 10
-            }
-
-        }
-
-        SliderInput {
-            Layout.fillWidth: true
-            label: qsTr("Indicator radius")
-            value: root.rootItem.diskIndicatorRadius
-            from: 0
-            to: 6
-            stepSize: 1
-            suffix: "px"
-            decimals: 0
-            onValueModified: (newValue) => {
-                root.rootItem.diskIndicatorRadius = newValue;
-                root.rootItem.saveConfig();
-            }
-
-            validator: IntValidator {
-                bottom: 0
-                top: 6
-            }
-
-        }
-
-    }
-
-    CollapsibleSection {
-        title: qsTr("Card Margins & Padding")
-        showBackground: true
-
-        SliderInput {
-            Layout.fillWidth: true
-            label: qsTr("Hero card top margin")
-            value: root.rootItem.heroCardTopMargin
-            from: 0
-            to: 32
-            stepSize: 2
-            suffix: "px"
-            decimals: 0
-            onValueModified: (newValue) => {
-                root.rootItem.heroCardTopMargin = newValue;
-                root.rootItem.saveConfig();
-            }
-
-            validator: IntValidator {
-                bottom: 0
-                top: 32
-            }
-
-        }
-
-        SliderInput {
-            Layout.fillWidth: true
-            label: qsTr("Hero card bottom margin")
-            value: root.rootItem.heroCardBottomMargin
-            from: 0
-            to: 32
-            stepSize: 2
-            suffix: "px"
-            decimals: 0
-            onValueModified: (newValue) => {
-                root.rootItem.heroCardBottomMargin = newValue;
-                root.rootItem.saveConfig();
-            }
-
-            validator: IntValidator {
-                bottom: 0
-                top: 32
-            }
-
-        }
-
-        SliderInput {
-            Layout.fillWidth: true
-            label: qsTr("Hero card left margin")
-            value: root.rootItem.heroCardLeftMargin
-            from: 0
-            to: 48
-            stepSize: 2
-            suffix: "px"
-            decimals: 0
-            onValueModified: (newValue) => {
-                root.rootItem.heroCardLeftMargin = newValue;
-                root.rootItem.saveConfig();
-            }
-
-            validator: IntValidator {
-                bottom: 0
-                top: 48
-            }
-
-        }
-
-        SliderInput {
-            Layout.fillWidth: true
-            label: qsTr("Hero card right margin")
-            value: root.rootItem.heroCardRightMargin
-            from: 0
-            to: 48
-            stepSize: 2
-            suffix: "px"
-            decimals: 0
-            onValueModified: (newValue) => {
-                root.rootItem.heroCardRightMargin = newValue;
-                root.rootItem.saveConfig();
-            }
-
-            validator: IntValidator {
-                bottom: 0
-                top: 48
-            }
-
-        }
-
-        SliderInput {
-            Layout.fillWidth: true
-            label: qsTr("Hero value right margin")
-            value: root.rootItem.heroCardRightValueMargin
-            from: 0
-            to: 64
-            stepSize: 2
-            suffix: "px"
-            decimals: 0
-            onValueModified: (newValue) => {
-                root.rootItem.heroCardRightValueMargin = newValue;
-                root.rootItem.saveConfig();
-            }
-
-            validator: IntValidator {
-                bottom: 0
-                top: 64
-            }
-
-        }
-
-        SliderInput {
-            Layout.fillWidth: true
-            label: qsTr("Battery tank margin")
-            value: root.rootItem.batteryTankMargin
-            from: 0
-            to: 48
-            stepSize: 2
-            suffix: "px"
-            decimals: 0
-            onValueModified: (newValue) => {
-                root.rootItem.batteryTankMargin = newValue;
-                root.rootItem.saveConfig();
-            }
-
-            validator: IntValidator {
-                bottom: 0
-                top: 48
-            }
-
-        }
-
-        SliderInput {
-            Layout.fillWidth: true
-            label: qsTr("Gauge card margin")
-            value: root.rootItem.gaugeCardMargin
-            from: 0
-            to: 48
-            stepSize: 2
-            suffix: "px"
-            decimals: 0
-            onValueModified: (newValue) => {
-                root.rootItem.gaugeCardMargin = newValue;
-                root.rootItem.saveConfig();
-            }
-
-            validator: IntValidator {
-                bottom: 0
-                top: 48
-            }
-
-        }
-
-        SliderInput {
-            Layout.fillWidth: true
-            label: qsTr("Storage card margin")
-            value: root.rootItem.storageCardMargin
-            from: 0
-            to: 48
-            stepSize: 2
-            suffix: "px"
-            decimals: 0
-            onValueModified: (newValue) => {
-                root.rootItem.storageCardMargin = newValue;
-                root.rootItem.saveConfig();
-            }
-
-            validator: IntValidator {
-                bottom: 0
-                top: 48
-            }
-
-        }
-
-    }
-
-    CollapsibleSection {
         title: qsTr("Spacing Adjustments")
         showBackground: true
 
@@ -554,90 +353,6 @@ SectionContainer {
             validator: IntValidator {
                 bottom: -16
                 top: 8
-            }
-
-        }
-
-        SliderInput {
-            Layout.fillWidth: true
-            label: qsTr("Disk row top margin")
-            value: root.rootItem.diskRowTopMargin
-            from: 0
-            to: 10
-            stepSize: 1
-            suffix: "px"
-            decimals: 0
-            onValueModified: (newValue) => {
-                root.rootItem.diskRowTopMargin = newValue;
-                root.rootItem.saveConfig();
-            }
-
-            validator: IntValidator {
-                bottom: 0
-                top: 10
-            }
-
-        }
-
-        SliderInput {
-            Layout.fillWidth: true
-            label: qsTr("Disk row bottom margin")
-            value: root.rootItem.diskRowBottomMargin
-            from: 0
-            to: 10
-            stepSize: 1
-            suffix: "px"
-            decimals: 0
-            onValueModified: (newValue) => {
-                root.rootItem.diskRowBottomMargin = newValue;
-                root.rootItem.saveConfig();
-            }
-
-            validator: IntValidator {
-                bottom: 0
-                top: 10
-            }
-
-        }
-
-        SliderInput {
-            Layout.fillWidth: true
-            label: qsTr("Disk progress top margin")
-            value: root.rootItem.diskRowProgressTopMargin
-            from: 0
-            to: 10
-            stepSize: 1
-            suffix: "px"
-            decimals: 0
-            onValueModified: (newValue) => {
-                root.rootItem.diskRowProgressTopMargin = newValue;
-                root.rootItem.saveConfig();
-            }
-
-            validator: IntValidator {
-                bottom: 0
-                top: 10
-            }
-
-        }
-
-        SliderInput {
-            Layout.fillWidth: true
-            label: qsTr("Disk progress bottom margin")
-            value: root.rootItem.diskRowProgressBottomMargin
-            from: 0
-            to: 10
-            stepSize: 1
-            suffix: "px"
-            decimals: 0
-            onValueModified: (newValue) => {
-                root.rootItem.diskRowProgressBottomMargin = newValue;
-                root.rootItem.saveConfig();
-            }
-
-            validator: IntValidator {
-                bottom: 0
-                top: 10
             }
 
         }

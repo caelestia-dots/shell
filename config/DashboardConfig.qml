@@ -22,6 +22,7 @@ JsonObject {
         property bool showMemory: true
         property bool showStorage: false
         property bool showNetwork: true
+        property int updateInterval: 3000
         property int usageTextSize: 12
         property int valueLabelSize: 10
         property int percentageTextSize: 24
@@ -31,8 +32,6 @@ JsonObject {
         property real tempBarWidthMult: 0.5
         property int gaugeLineWidth: 10
         property int gaugeRadiusOffset: 12
-        property int diskIndicatorWidth: 4
-        property int diskIndicatorRadius: 2
         property int heroCardTopMargin: 8
         property int heroCardBottomMargin: 8
         property int heroCardLeftMargin: 16
@@ -42,11 +41,6 @@ JsonObject {
         property int mainValueSpacing: 0
         property int percentValueSpacing: -4
         property int gaugeCardMargin: 16
-        property int storageCardMargin: 16
-        property int diskRowTopMargin: 2
-        property int diskRowBottomMargin: 2
-        property int diskRowProgressTopMargin: 4
-        property int diskRowProgressBottomMargin: 4
     }
 
     component Sizes: JsonObject {

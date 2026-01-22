@@ -97,7 +97,7 @@ Singleton {
 
     Timer {
         running: root.refCount > 0
-        interval: 3000
+        interval: Config.dashboard.performance.updateInterval
         repeat: true
         triggeredOnStart: true
         onTriggered: {

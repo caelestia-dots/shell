@@ -99,7 +99,7 @@ Singleton {
     }
 
     Timer {
-        interval: Config.services.systemUsageInterval ?? 3000
+        interval: Config.dashboard.performance.updateInterval
         running: root.refCount > 0
         repeat: true
         triggeredOnStart: true
