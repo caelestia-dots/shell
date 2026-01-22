@@ -1,11 +1,11 @@
 import ".."
 import "../components"
-import qs.components
-import qs.components.controls
-import qs.services
-import qs.config
 import QtQuick
 import QtQuick.Layouts
+import qs.components
+import qs.components.controls
+import qs.config
+import qs.services
 
 SectionContainer {
     id: root
@@ -22,67 +22,54 @@ SectionContainer {
 
     ConnectedButtonGroup {
         rootItem: root.rootItem
-        
-        options: [
-            {
-                label: qsTr("Battery"),
-                propertyName: "showBattery",
-                onToggled: function(checked) {
-                    root.rootItem.showBattery = checked;
-                    root.rootItem.saveConfig();
-                }
-            },
-            {
-                label: qsTr("GPU"),
-                propertyName: "showGpu",
-                onToggled: function(checked) {
-                    root.rootItem.showGpu = checked;
-                    root.rootItem.saveConfig();
-                }
-            },
-            {
-                label: qsTr("CPU"),
-                propertyName: "showCpu",
-                onToggled: function(checked) {
-                    root.rootItem.showCpu = checked;
-                    root.rootItem.saveConfig();
-                }
-            },
-            {
-                label: qsTr("Memory"),
-                propertyName: "showMemory",
-                onToggled: function(checked) {
-                    root.rootItem.showMemory = checked;
-                    root.rootItem.saveConfig();
-                }
-            },
-            {
-                label: qsTr("Storage"),
-                propertyName: "showStorage",
-                onToggled: function(checked) {
-                    root.rootItem.showStorage = checked;
-                    root.rootItem.saveConfig();
-                }
-            },
-            {
-                label: qsTr("Network"),
-                propertyName: "showNetwork",
-                onToggled: function(checked) {
-                    root.rootItem.showNetwork = checked;
-                    root.rootItem.saveConfig();
-                }
+        options: [{
+            "label": qsTr("Battery"),
+            "propertyName": "showBattery",
+            "onToggled": function(checked) {
+                root.rootItem.showBattery = checked;
+                root.rootItem.saveConfig();
             }
-        ]
+        }, {
+            "label": qsTr("GPU"),
+            "propertyName": "showGpu",
+            "onToggled": function(checked) {
+                root.rootItem.showGpu = checked;
+                root.rootItem.saveConfig();
+            }
+        }, {
+            "label": qsTr("CPU"),
+            "propertyName": "showCpu",
+            "onToggled": function(checked) {
+                root.rootItem.showCpu = checked;
+                root.rootItem.saveConfig();
+            }
+        }, {
+            "label": qsTr("Memory"),
+            "propertyName": "showMemory",
+            "onToggled": function(checked) {
+                root.rootItem.showMemory = checked;
+                root.rootItem.saveConfig();
+            }
+        }, {
+            "label": qsTr("Storage"),
+            "propertyName": "showStorage",
+            "onToggled": function(checked) {
+                root.rootItem.showStorage = checked;
+                root.rootItem.saveConfig();
+            }
+        }, {
+            "label": qsTr("Network"),
+            "propertyName": "showNetwork",
+            "onToggled": function(checked) {
+                root.rootItem.showNetwork = checked;
+                root.rootItem.saveConfig();
+            }
+        }]
     }
 
-    SectionContainer {
-        contentSpacing: Appearance.spacing.normal
-
-        StyledText {
-            text: qsTr("Font Sizes")
-            font.pointSize: Appearance.font.size.small
-            color: Colours.palette.m3onSurfaceVariant
-        }
+    CollapsibleSection {
+        title: qsTr("Font Sizes")
+        showBackground: true
 
         SliderInput {
             Layout.fillWidth: true
@@ -93,11 +80,16 @@ SectionContainer {
             stepSize: 1
             suffix: "pt"
             decimals: 0
-            validator: IntValidator { bottom: 8; top: 20 }
             onValueModified: (newValue) => {
                 root.rootItem.usageTextSize = newValue;
                 root.rootItem.saveConfig();
             }
+
+            validator: IntValidator {
+                bottom: 8
+                top: 20
+            }
+
         }
 
         SliderInput {
@@ -109,11 +101,16 @@ SectionContainer {
             stepSize: 1
             suffix: "pt"
             decimals: 0
-            validator: IntValidator { bottom: 8; top: 16 }
             onValueModified: (newValue) => {
                 root.rootItem.valueLabelSize = newValue;
                 root.rootItem.saveConfig();
             }
+
+            validator: IntValidator {
+                bottom: 8
+                top: 16
+            }
+
         }
 
         SliderInput {
@@ -125,11 +122,16 @@ SectionContainer {
             stepSize: 1
             suffix: "pt"
             decimals: 0
-            validator: IntValidator { bottom: 16; top: 48 }
             onValueModified: (newValue) => {
                 root.rootItem.percentageTextSize = newValue;
                 root.rootItem.saveConfig();
             }
+
+            validator: IntValidator {
+                bottom: 16
+                top: 48
+            }
+
         }
 
         SliderInput {
@@ -141,11 +143,16 @@ SectionContainer {
             stepSize: 1
             suffix: "pt"
             decimals: 0
-            validator: IntValidator { bottom: 10; top: 20 }
             onValueModified: (newValue) => {
                 root.rootItem.normalTextSize = newValue;
                 root.rootItem.saveConfig();
             }
+
+            validator: IntValidator {
+                bottom: 10
+                top: 20
+            }
+
         }
 
         SliderInput {
@@ -157,18 +164,23 @@ SectionContainer {
             stepSize: 1
             suffix: "pt"
             decimals: 0
-            validator: IntValidator { bottom: 14; top: 32 }
             onValueModified: (newValue) => {
                 root.rootItem.largeIconSize = newValue;
                 root.rootItem.saveConfig();
             }
+
+            validator: IntValidator {
+                bottom: 14
+                top: 32
+            }
+
         }
 
-        StyledText {
-            text: qsTr("Temperature Bar")
-            font.pointSize: Appearance.font.size.small
-            color: Colours.palette.m3onSurfaceVariant
-        }
+    }
+
+    CollapsibleSection {
+        title: qsTr("Temperature Bar")
+        showBackground: true
 
         SliderInput {
             Layout.fillWidth: true
@@ -179,11 +191,16 @@ SectionContainer {
             stepSize: 1
             suffix: "px"
             decimals: 0
-            validator: IntValidator { bottom: 2; top: 16 }
             onValueModified: (newValue) => {
                 root.rootItem.tempBarHeight = newValue;
                 root.rootItem.saveConfig();
             }
+
+            validator: IntValidator {
+                bottom: 2
+                top: 16
+            }
+
         }
 
         SliderInput {
@@ -191,22 +208,28 @@ SectionContainer {
             label: qsTr("Bar width multiplier")
             value: root.rootItem.tempBarWidthMult
             from: 0.2
-            to: 1.0
+            to: 1
             stepSize: 0.05
-            suffix: "×"
+            suffix: "x"
             decimals: 2
-            validator: DoubleValidator { bottom: 0.2; top: 1.0; decimals: 2 }
             onValueModified: (newValue) => {
                 root.rootItem.tempBarWidthMult = newValue;
                 root.rootItem.saveConfig();
             }
+
+            validator: DoubleValidator {
+                bottom: 0.2
+                top: 1
+                decimals: 2
+            }
+
         }
 
-        StyledText {
-            text: qsTr("Gauge Styling")
-            font.pointSize: Appearance.font.size.small
-            color: Colours.palette.m3onSurfaceVariant
-        }
+    }
+
+    CollapsibleSection {
+        title: qsTr("Gauge Styling")
+        showBackground: true
 
         SliderInput {
             Layout.fillWidth: true
@@ -217,11 +240,16 @@ SectionContainer {
             stepSize: 1
             suffix: "px"
             decimals: 0
-            validator: IntValidator { bottom: 4; top: 20 }
             onValueModified: (newValue) => {
                 root.rootItem.gaugeLineWidth = newValue;
                 root.rootItem.saveConfig();
             }
+
+            validator: IntValidator {
+                bottom: 4
+                top: 20
+            }
+
         }
 
         SliderInput {
@@ -233,18 +261,23 @@ SectionContainer {
             stepSize: 1
             suffix: "px"
             decimals: 0
-            validator: IntValidator { bottom: 4; top: 24 }
             onValueModified: (newValue) => {
                 root.rootItem.gaugeRadiusOffset = newValue;
                 root.rootItem.saveConfig();
             }
+
+            validator: IntValidator {
+                bottom: 4
+                top: 24
+            }
+
         }
 
-        StyledText {
-            text: qsTr("Disk Indicator")
-            font.pointSize: Appearance.font.size.small
-            color: Colours.palette.m3onSurfaceVariant
-        }
+    }
+
+    CollapsibleSection {
+        title: qsTr("Disk Indicator")
+        showBackground: true
 
         SliderInput {
             Layout.fillWidth: true
@@ -255,11 +288,16 @@ SectionContainer {
             stepSize: 1
             suffix: "px"
             decimals: 0
-            validator: IntValidator { bottom: 2; top: 10 }
             onValueModified: (newValue) => {
                 root.rootItem.diskIndicatorWidth = newValue;
                 root.rootItem.saveConfig();
             }
+
+            validator: IntValidator {
+                bottom: 2
+                top: 10
+            }
+
         }
 
         SliderInput {
@@ -271,18 +309,23 @@ SectionContainer {
             stepSize: 1
             suffix: "px"
             decimals: 0
-            validator: IntValidator { bottom: 0; top: 6 }
             onValueModified: (newValue) => {
                 root.rootItem.diskIndicatorRadius = newValue;
                 root.rootItem.saveConfig();
             }
+
+            validator: IntValidator {
+                bottom: 0
+                top: 6
+            }
+
         }
 
-        StyledText {
-            text: qsTr("Card Margins & Padding")
-            font.pointSize: Appearance.font.size.small
-            color: Colours.palette.m3onSurfaceVariant
-        }
+    }
+
+    CollapsibleSection {
+        title: qsTr("Card Margins & Padding")
+        showBackground: true
 
         SliderInput {
             Layout.fillWidth: true
@@ -293,11 +336,16 @@ SectionContainer {
             stepSize: 2
             suffix: "px"
             decimals: 0
-            validator: IntValidator { bottom: 0; top: 32 }
             onValueModified: (newValue) => {
                 root.rootItem.heroCardTopMargin = newValue;
                 root.rootItem.saveConfig();
             }
+
+            validator: IntValidator {
+                bottom: 0
+                top: 32
+            }
+
         }
 
         SliderInput {
@@ -309,11 +357,16 @@ SectionContainer {
             stepSize: 2
             suffix: "px"
             decimals: 0
-            validator: IntValidator { bottom: 0; top: 32 }
             onValueModified: (newValue) => {
                 root.rootItem.heroCardBottomMargin = newValue;
                 root.rootItem.saveConfig();
             }
+
+            validator: IntValidator {
+                bottom: 0
+                top: 32
+            }
+
         }
 
         SliderInput {
@@ -325,11 +378,16 @@ SectionContainer {
             stepSize: 2
             suffix: "px"
             decimals: 0
-            validator: IntValidator { bottom: 0; top: 48 }
             onValueModified: (newValue) => {
                 root.rootItem.heroCardLeftMargin = newValue;
                 root.rootItem.saveConfig();
             }
+
+            validator: IntValidator {
+                bottom: 0
+                top: 48
+            }
+
         }
 
         SliderInput {
@@ -341,11 +399,16 @@ SectionContainer {
             stepSize: 2
             suffix: "px"
             decimals: 0
-            validator: IntValidator { bottom: 0; top: 48 }
             onValueModified: (newValue) => {
                 root.rootItem.heroCardRightMargin = newValue;
                 root.rootItem.saveConfig();
             }
+
+            validator: IntValidator {
+                bottom: 0
+                top: 48
+            }
+
         }
 
         SliderInput {
@@ -357,11 +420,16 @@ SectionContainer {
             stepSize: 2
             suffix: "px"
             decimals: 0
-            validator: IntValidator { bottom: 0; top: 64 }
             onValueModified: (newValue) => {
                 root.rootItem.heroCardRightValueMargin = newValue;
                 root.rootItem.saveConfig();
             }
+
+            validator: IntValidator {
+                bottom: 0
+                top: 64
+            }
+
         }
 
         SliderInput {
@@ -373,11 +441,16 @@ SectionContainer {
             stepSize: 2
             suffix: "px"
             decimals: 0
-            validator: IntValidator { bottom: 0; top: 48 }
             onValueModified: (newValue) => {
                 root.rootItem.batteryTankMargin = newValue;
                 root.rootItem.saveConfig();
             }
+
+            validator: IntValidator {
+                bottom: 0
+                top: 48
+            }
+
         }
 
         SliderInput {
@@ -389,11 +462,16 @@ SectionContainer {
             stepSize: 2
             suffix: "px"
             decimals: 0
-            validator: IntValidator { bottom: 0; top: 48 }
             onValueModified: (newValue) => {
                 root.rootItem.gaugeCardMargin = newValue;
                 root.rootItem.saveConfig();
             }
+
+            validator: IntValidator {
+                bottom: 0
+                top: 48
+            }
+
         }
 
         SliderInput {
@@ -405,18 +483,23 @@ SectionContainer {
             stepSize: 2
             suffix: "px"
             decimals: 0
-            validator: IntValidator { bottom: 0; top: 48 }
             onValueModified: (newValue) => {
                 root.rootItem.storageCardMargin = newValue;
                 root.rootItem.saveConfig();
             }
+
+            validator: IntValidator {
+                bottom: 0
+                top: 48
+            }
+
         }
 
-        StyledText {
-            text: qsTr("Spacing Adjustments")
-            font.pointSize: Appearance.font.size.small
-            color: Colours.palette.m3onSurfaceVariant
-        }
+    }
+
+    CollapsibleSection {
+        title: qsTr("Spacing Adjustments")
+        showBackground: true
 
         SliderInput {
             Layout.fillWidth: true
@@ -427,11 +510,16 @@ SectionContainer {
             stepSize: 1
             suffix: "px"
             decimals: 0
-            validator: IntValidator { bottom: -16; top: 8 }
             onValueModified: (newValue) => {
                 root.rootItem.mainValueSpacing = newValue;
                 root.rootItem.saveConfig();
             }
+
+            validator: IntValidator {
+                bottom: -16
+                top: 8
+            }
+
         }
 
         SliderInput {
@@ -443,11 +531,16 @@ SectionContainer {
             stepSize: 1
             suffix: "px"
             decimals: 0
-            validator: IntValidator { bottom: -16; top: 8 }
             onValueModified: (newValue) => {
                 root.rootItem.percentValueSpacing = newValue;
                 root.rootItem.saveConfig();
             }
+
+            validator: IntValidator {
+                bottom: -16
+                top: 8
+            }
+
         }
 
         SliderInput {
@@ -459,11 +552,16 @@ SectionContainer {
             stepSize: 1
             suffix: "px"
             decimals: 0
-            validator: IntValidator { bottom: 0; top: 10 }
             onValueModified: (newValue) => {
                 root.rootItem.diskRowTopMargin = newValue;
                 root.rootItem.saveConfig();
             }
+
+            validator: IntValidator {
+                bottom: 0
+                top: 10
+            }
+
         }
 
         SliderInput {
@@ -475,11 +573,16 @@ SectionContainer {
             stepSize: 1
             suffix: "px"
             decimals: 0
-            validator: IntValidator { bottom: 0; top: 10 }
             onValueModified: (newValue) => {
                 root.rootItem.diskRowBottomMargin = newValue;
                 root.rootItem.saveConfig();
             }
+
+            validator: IntValidator {
+                bottom: 0
+                top: 10
+            }
+
         }
 
         SliderInput {
@@ -491,11 +594,16 @@ SectionContainer {
             stepSize: 1
             suffix: "px"
             decimals: 0
-            validator: IntValidator { bottom: 0; top: 10 }
             onValueModified: (newValue) => {
                 root.rootItem.diskRowProgressTopMargin = newValue;
                 root.rootItem.saveConfig();
             }
+
+            validator: IntValidator {
+                bottom: 0
+                top: 10
+            }
+
         }
 
         SliderInput {
@@ -507,11 +615,18 @@ SectionContainer {
             stepSize: 1
             suffix: "px"
             decimals: 0
-            validator: IntValidator { bottom: 0; top: 10 }
             onValueModified: (newValue) => {
                 root.rootItem.diskRowProgressBottomMargin = newValue;
                 root.rootItem.saveConfig();
             }
+
+            validator: IntValidator {
+                bottom: 0
+                top: 10
+            }
+
         }
+
     }
+
 }
