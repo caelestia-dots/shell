@@ -1,4 +1,5 @@
 import "../services"
+import "../../../services" as Services
 import qs.components
 import qs.components.effects
 import qs.services
@@ -283,6 +284,67 @@ Item {
             }
         }
 
+        MenuItem {
+            text: qsTr("Open in Workspace")
+            icon: "workspaces"
+            hasSubMenu: true
+            
+            subMenuComponent: Component {
+                SubMenu {
+                    Repeater {
+                        model: Services.Hypr.workspaces
+                        
+                        MenuItem {
+                            required property var modelData
+                            
+                            property bool isCurrent: modelData.id === Services.Hypr.activeWsId
+                            
+                            text: modelData.name || qsTr("Workspace %1").arg(modelData.id)
+                            icon: isCurrent ? "radio_button_checked" : "radio_button_unchecked"
+                            bold: isCurrent
+                            
+                            onTriggered: {
+                                if (root.app && root.app.execString) {
+                                    try {
+                                        Services.Hypr.dispatch(`workspace ${modelData.id}`);
+                                        Apps.launch(root.app);
+                                        if (root.visibilities) {
+                                            root.visibilities.launcher = false;
+                                        }
+                                    } catch (error) {
+                                        console.error("Failed to open in workspace:", error);
+                                    }
+                                }
+                                root.hide();
+                            }
+                        }
+                    }
+                    
+                    Separator {}
+                    
+                    MenuItem {
+                        text: qsTr("New Workspace")
+                        icon: "add_circle"
+                        
+                        onTriggered: {
+                            if (root.app && root.app.execString) {
+                                try {
+                                    Services.Hypr.dispatch("workspace empty");
+                                    Apps.launch(root.app);
+                                    if (root.visibilities) {
+                                        root.visibilities.launcher = false;
+                                    }
+                                } catch (error) {
+                                    console.error("Failed to open in new workspace:", error);
+                                }
+                            }
+                            root.hide();
+                        }
+                    }
+                }
+            }
+        }
+
         Separator {}
 
         MenuItem {
@@ -454,7 +516,23 @@ Item {
                 if (item) {
                     item.parent = root;
                     item.x = menuContainer.width;
-                    item.y = menuItem.mapToItem(root, 0, 0).y;
+                    
+                    const menuItemY = menuItem.mapToItem(root, 0, 0).y;
+                    const subMenuHeight = item.height;
+                    const rootY = root.y;
+                    const rootHeight = root.parent ? root.parent.height : 0;
+                    
+                    const absoluteMenuItemY = rootY + menuItemY;
+                    const spaceBelow = rootHeight - absoluteMenuItemY;
+                    
+                    if (spaceBelow < subMenuHeight) {
+                        const overflow = subMenuHeight - spaceBelow;
+                        const minY = -rootY;
+                        item.y = Math.max(minY, menuItemY - overflow);
+                    } else {
+                        item.y = menuItemY;
+                    }
+                    
                     item.z = 10001;
                     item.visible = true;
                     item.width = 0;
