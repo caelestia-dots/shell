@@ -19,7 +19,7 @@ Item {
     property var activeSubMenuItem: null
     
     visible: false
-    enabled: app !== null
+    enabled: (root.visible || root.isAnimating) && app !== null
     implicitWidth: menuContainer.width
     implicitHeight: menuContainer.height
     
@@ -101,6 +101,13 @@ Item {
     onActiveFocusChanged: {
         if (!activeFocus && visible) {
             hide();
+        }
+    }
+    
+    onVisibleChanged: {
+        if (!visible && root.activeSubMenuItem) {
+            root.activeSubMenuItem.subMenuOpen = false;
+            root.activeSubMenuItem = null;
         }
     }
 
@@ -553,6 +560,7 @@ Item {
         
         width: 0
         height: subMenuColumn.implicitHeight + Appearance.padding.smaller * 2
+        visible: width > 0
         
         Behavior on width {
             Anim {

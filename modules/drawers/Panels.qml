@@ -96,12 +96,22 @@ Item {
     LauncherItems.AppContextMenu {
         id: launcherContextMenu
         
-        x: -10000
-        y: -10000
+        property real menuX: -10000
+        property real menuY: -10000
+        
+        x: menuX
+        y: menuY
         z: 10000
         visible: false
         enabled: visible
         visibilities: root.visibilities
+        
+        onVisibleChanged: {
+            if (!visible) {
+                menuX = -10000;
+                menuY = -10000;
+            }
+        }
         
         function showAt(app: var, x: real, y: real, launcherWrapper: var): void {
             // If menu is already visible, just toggle it (close) without repositioning
@@ -118,13 +128,13 @@ Item {
             const spacing = 4;
             
             // Position horizontally centered on click
-            let menuX = Math.max(padding, Math.min(x - menuWidth / 2, root.width - menuWidth - padding));
+            let posX = Math.max(padding, Math.min(x - menuWidth / 2, root.width - menuWidth - padding));
             
             if (menuWidth + padding * 2 > root.width) {
-                launcherContextMenu.x = padding;
+                launcherContextMenu.menuX = padding;
                 launcherContextMenu.width = root.width - padding * 2;
             } else {
-                launcherContextMenu.x = menuX;
+                launcherContextMenu.menuX = posX;
                 launcherContextMenu.width = menuWidth;
             }
             
@@ -133,11 +143,11 @@ Item {
             
             if (spaceBelow >= menuHeight + spacing) {
                 // Enough space below - show below
-                launcherContextMenu.y = y + spacing;
+                launcherContextMenu.menuY = y + spacing;
                 launcherContextMenu.showAbove = false;
             } else {
                 // Not enough space below - show above
-                launcherContextMenu.y = Math.max(0, y - menuHeight - spacing);
+                launcherContextMenu.menuY = Math.max(0, y - menuHeight - spacing);
                 launcherContextMenu.showAbove = true;
             }
             
