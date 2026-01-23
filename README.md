@@ -303,7 +303,20 @@ default, you must create it manually.
     },
     "background": {
         "desktopClock": {
-            "enabled": false
+            "enabled": false,
+            "scale": 1.0,
+            "position": "bottom-right",
+            "shadow": {
+                "enabled": true,
+                "opacity": 0.7,
+                "blur": 0.4
+            },
+            "background": {
+                "enabled": false,
+                "opacity": 0.7,
+                "blur": true
+            },
+            "invertColors": false
         },
         "enabled": true,
         "visualiser": {
@@ -522,6 +535,14 @@ default, you must create it manually.
                 "command": ["systemctl", "suspend-then-hibernate"],
                 "enabled": true,
                 "dangerous": false
+            },
+            {
+                "name": "Settings",
+                "icon": "settings",
+                "description": "Configure the shell",
+                "command": ["caelestia", "shell", "controlCenter", "open"],
+                "enabled": true,
+                "dangerous": false
             }
         ],
         "dragThreshold": 50,
@@ -602,6 +623,7 @@ default, you must create it manually.
             "dndChanged": true,
             "gameModeChanged": true,
             "kbLayoutChanged": true,
+            "kbLimit": true,
             "numLockChanged": true,
             "vpnChanged": true,
             "nowPlaying": false
