@@ -16,7 +16,7 @@ Item {
     readonly property bool shouldBeActive: visibilities.launcher && Config.launcher.enabled
     property int contentHeight
     property bool animationComplete: false
-
+    
     readonly property real maxHeight: {
         let max = screen.height - Config.border.thickness * 2 - Appearance.spacing.large;
         if (visibilities.dashboard)
@@ -39,10 +39,6 @@ Item {
         } else {
             showAnim.stop();
             root.animationComplete = false;
-            // Hide context menu when launcher closes
-            if (contextMenu.visible) {
-                contextMenu.hide();
-            }
             hideAnim.start();
         }
     }
@@ -137,7 +133,7 @@ Item {
             visibilities: root.visibilities
             panels: root.panels
             maxHeight: root.maxHeight
-            showContextMenuAt: root.showContextMenuDirect
+            showContextMenuAt: root.showContextMenu
             wrapperRoot: root
 
             Component.onCompleted: {
@@ -149,23 +145,16 @@ Item {
         }
     }
     
-    AppContextMenu {
-        id: contextMenu
-        
-        z: 10000
-        visible: false
-        
-        visibilities: root.visibilities
-        
-        onClosed: {
-            // Restore focus to search field when context menu closes
-            if (content.item && content.item.searchField) {
-                content.item.searchField.forceActiveFocus();
-            }
+    signal requestShowContextMenu(app: DesktopEntry, clickX: real, clickY: real)
+    signal contextMenuClosed()
+    
+    function restoreFocus(): void {
+        if (content.item && content.item.searchField) {
+            content.item.searchField.forceActiveFocus();
         }
     }
     
-    function showContextMenuDirect(app: DesktopEntry, clickX: real, clickY: real): void {
+    function showContextMenu(app: DesktopEntry, clickX: real, clickY: real): void {
         if (!app || !root.animationComplete) {
             return;
         }
@@ -176,48 +165,7 @@ Item {
             return;
         }
         
-        contextMenu.app = app;
-        
-        const menuWidth = 250;
-        const menuHeight = Math.max(contextMenu.implicitHeight || 300, 100); // Ensure minimum height
-        const padding = 16;
-        
-        // Validate menu dimensions
-        if (menuWidth <= 0 || menuHeight <= 0) {
-            console.error("Invalid menu dimensions:", menuWidth, menuHeight);
-            return;
-        }
-        
-        // Center horizontally on click with bounds checking
-        let menuX = Math.max(padding, Math.min(clickX - menuWidth / 2, root.width - menuWidth - padding));
-        
-        if (menuWidth + padding * 2 > root.width) {
-            menuX = padding;
-            contextMenu.width = root.width - padding * 2;
-        } else {
-            contextMenu.x = menuX;
-            contextMenu.width = menuWidth;
-        }
-        
-        // Position vertically based on available space
-        const spaceBelow = root.height - clickY;
-        const spaceAbove = clickY;
-        const spacing = 8;
-        
-        if (spaceBelow >= menuHeight + spacing) {
-            // Show below
-            contextMenu.y = Math.min(clickY + spacing, root.height - menuHeight);
-            contextMenu.showAbove = false;
-        } else if (spaceAbove >= menuHeight + spacing) {
-            // Show above
-            contextMenu.y = Math.max(0, clickY - menuHeight - spacing);
-            contextMenu.showAbove = true;
-        } else {
-            // Not enough space either way - show below and clip if needed
-            contextMenu.y = Math.max(0, Math.min(clickY + spacing, root.height - menuHeight));
-            contextMenu.showAbove = false;
-        }
-        
-        contextMenu.toggle();
+        // Emit signal to show context menu at Panels level
+        root.requestShowContextMenu(app, clickX, clickY);
     }
 }

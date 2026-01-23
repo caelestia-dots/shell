@@ -3,6 +3,7 @@ import qs.modules.osd as Osd
 import qs.modules.notifications as Notifications
 import qs.modules.session as Session
 import qs.modules.launcher as Launcher
+import qs.modules.launcher.items as LauncherItems
 import qs.modules.dashboard as Dashboard
 import qs.modules.bar.popouts as BarPopouts
 import qs.modules.utilities as Utilities
@@ -75,6 +76,75 @@ Item {
 
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.bottom: parent.bottom
+        
+
+        onRequestShowContextMenu: (app, clickX, clickY) => {
+            // Map coordinates from launcher to panels
+            const panelsPos = launcher.mapToItem(root, clickX, clickY);
+            launcherContextMenu.showAt(app, panelsPos.x, panelsPos.y, launcher);
+        }
+        
+        onContextMenuClosed: launcher.restoreFocus()
+        
+        onVisibleChanged: {
+            if (!visible && launcherContextMenu.visible) {
+                launcherContextMenu.hide();
+            }
+        }
+    }
+    
+    LauncherItems.AppContextMenu {
+        id: launcherContextMenu
+        
+        x: -10000
+        y: -10000
+        z: 10000
+        visible: false
+        enabled: visible
+        visibilities: root.visibilities
+        
+        function showAt(app: var, x: real, y: real, launcherWrapper: var): void {
+            // If menu is already visible, just toggle it (close) without repositioning
+            if (launcherContextMenu.visible) {
+                launcherContextMenu.toggle();
+                return;
+            }
+            
+            launcherContextMenu.app = app;
+            
+            const menuWidth = 250;
+            const menuHeight = Math.max(launcherContextMenu.implicitHeight || 300, 100);
+            const padding = 16;
+            const spacing = 4;
+            
+            // Position horizontally centered on click
+            let menuX = Math.max(padding, Math.min(x - menuWidth / 2, root.width - menuWidth - padding));
+            
+            if (menuWidth + padding * 2 > root.width) {
+                launcherContextMenu.x = padding;
+                launcherContextMenu.width = root.width - padding * 2;
+            } else {
+                launcherContextMenu.x = menuX;
+                launcherContextMenu.width = menuWidth;
+            }
+            
+            // Check if there's enough space below for the menu
+            const spaceBelow = root.height - y;
+            
+            if (spaceBelow >= menuHeight + spacing) {
+                // Enough space below - show below
+                launcherContextMenu.y = y + spacing;
+                launcherContextMenu.showAbove = false;
+            } else {
+                // Not enough space below - show above
+                launcherContextMenu.y = Math.max(0, y - menuHeight - spacing);
+                launcherContextMenu.showAbove = true;
+            }
+            
+            launcherContextMenu.toggle();
+        }
+        
+        onClosed: launcher.contextMenuClosed()
     }
 
     Dashboard.Wrapper {

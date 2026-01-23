@@ -13,13 +13,27 @@ Item {
 
     property DesktopEntry app: null
     property PersistentProperties visibilities
-    property bool showAbove: false  // Position menu above or below the item
-
+    property bool showAbove: false
+    property bool isAnimating: false
+    property var activeSubMenuItem: null
+    
     visible: false
     enabled: app !== null
-    
     implicitWidth: menuContainer.width
     implicitHeight: menuContainer.height
+    
+    states: [
+        State {
+            name: "visible"
+            when: root.visible || root.isAnimating
+            PropertyChanges { target: root; opacity: 1 }
+        },
+        State {
+            name: "hidden"
+            when: !root.visible && !root.isAnimating
+            PropertyChanges { target: root; opacity: 0 }
+        }
+    ]
 
     signal closed()
 
@@ -29,25 +43,58 @@ Item {
             return;
         }
         
-        root.visible = !root.visible;
         if (root.visible) {
+            hide();
+        } else {
+            if (root.activeSubMenuItem) {
+                if (root.activeSubMenuItem.closeSubMenuTimer) {
+                    root.activeSubMenuItem.closeSubMenuTimer.stop();
+                }
+                root.activeSubMenuItem.subMenuOpen = false;
+                root.activeSubMenuItem = null;
+            }
+            root.visible = true;
+            root.isAnimating = false;
+            menuContainer.opacity = 1;
+            menuContainer.scale = 1;
             root.forceActiveFocus();
         }
     }
 
     function hide(): void {
-        root.visible = false;
-        root.app = null;
-        root.closed();
+        if (root.activeSubMenuItem) {
+            if (root.activeSubMenuItem.closeSubMenuTimer) {
+                root.activeSubMenuItem.closeSubMenuTimer.stop();
+            }
+            root.activeSubMenuItem.subMenuOpen = false;
+        }
+        
+        root.isAnimating = true;
+        menuContainer.opacity = 0;
+        menuContainer.scale = 0.8;
+        hideTimer.restart();
+    }
+    
+    Timer {
+        id: hideTimer
+        interval: 200
+        onTriggered: {
+            if (root.activeSubMenuItem) {
+                root.activeSubMenuItem.subMenuOpen = false;
+                root.activeSubMenuItem = null;
+            }
+            root.visible = false;
+            root.isAnimating = false;
+            root.app = null;
+            root.closed();
+        }
     }
     
     function show(): void {
-        if (!root.app) {
-            return;
+        if (root.app) {
+            root.visible = true;
+            root.forceActiveFocus();
         }
-        
-        root.visible = true;
-        root.forceActiveFocus();
     }
 
     onActiveFocusChanged: {
@@ -56,7 +103,6 @@ Item {
         }
     }
 
-    // Block mouse events from passing through
     MouseArea {
         anchors.fill: parent
         hoverEnabled: true
@@ -75,6 +121,24 @@ Item {
 
         radius: Appearance.rounding.normal
         level: 3
+        
+        opacity: 0
+        scale: 0.80
+        transformOrigin: Item.TopLeft
+        
+        Behavior on opacity {
+            Anim {
+                duration: Appearance.anim.durations.normal
+                easing.bezierCurve: Appearance.anim.curves.standard
+            }
+        }
+        
+        Behavior on scale {
+            Anim {
+                duration: Appearance.anim.durations.normal
+                easing.bezierCurve: Appearance.anim.curves.standard
+            }
+        }
 
         StyledClippingRect {
             anchors.fill: parent
@@ -83,7 +147,6 @@ Item {
 
             ColumnLayout {
                 id: menuColumn
-
                 anchors.fill: parent
                 anchors.margins: Appearance.padding.smaller
                 spacing: Appearance.spacing.smaller
@@ -92,14 +155,73 @@ Item {
             text: qsTr("Launch")
             icon: "play_arrow"
             bold: true
-            onTriggered: {
-                if (root.app) {
-                    Apps.launch(root.app);
-                    if (root.visibilities) {
-                        root.visibilities.launcher = false;
+            hasSubMenu: true
+            
+            subMenuComponent: Component {
+                SubMenu {
+                    MenuItem {
+                        text: qsTr("Launch")
+                        icon: "play_arrow"
+                        onTriggered: {
+                            if (root.app) {
+                                Apps.launch(root.app);
+                                if (root.visibilities) {
+                                    root.visibilities.launcher = false;
+                                }
+                            }
+                            root.hide();
+                        }
+                    }
+                    
+                    Repeater {
+                        model: root.app ? root.app.actions : []
+                        
+                        MenuItem {
+                            required property var modelData
+                            
+                            text: modelData.name || ""
+                            icon: "play_arrow"
+                            visible: text.length > 0
+                            onTriggered: {
+                                if (root.app && modelData && modelData.execute) {
+                                    try {
+                                        modelData.execute();
+                                        if (root.visibilities) {
+                                            root.visibilities.launcher = false;
+                                        }
+                                    } catch (error) {
+                                        console.error("Failed to execute action:", error);
+                                    }
+                                }
+                                root.hide();
+                            }
+                        }
+                    }
+                    
+                    Separator {
+                        visible: root.app && root.app.actions && root.app.actions.length > 0
+                    }
+                    
+                    MenuItem {
+                        text: qsTr("Run in Terminal")
+                        icon: "terminal"
+                        onTriggered: {
+                            if (root.app && root.app.execString) {
+                                try {
+                                    Quickshell.execDetached({
+                                        command: [...Config.general.apps.terminal, "-e", root.app.execString]
+                                    });
+                                    if (root.visibilities) {
+                                        root.visibilities.launcher = false;
+                                    }
+                                } catch (error) {
+                                    console.error("Failed to run in terminal:", error);
+                                }
+                            }
+                            root.hide();
+                        }
                     }
                 }
-                root.hide();
             }
         }
 
@@ -164,28 +286,18 @@ Item {
         Separator {}
 
         MenuItem {
-            text: qsTr("Copy App ID")
-            icon: "content_copy"
-            onTriggered: {
-                if (root.app && root.app.id) {
-                    try {
-                        Quickshell.clipboard = root.app.id;
-                    } catch (error) {
-                        console.error("Failed to copy app ID:", error);
-                    }
-                }
-                root.hide();
-            }
-        }
-
-        MenuItem {
             text: qsTr("Open .desktop File")
             icon: "description"
             onTriggered: {
-                if (root.app && root.app.path) {
+                if (root.app && root.app.id) {
                     try {
+                        const desktopFileName = root.app.id + ".desktop";
+                        
+                        // Use find to locate the .desktop file in standard locations
                         Quickshell.execDetached({
-                            command: ["xdg-open", root.app.path]
+                            command: ["sh", "-c", 
+                                `file=$(find ~/.local/share/applications /usr/share/applications /usr/local/share/applications /var/lib/flatpak/exports/share/applications ~/.local/share/flatpak/exports/share/applications -name '${desktopFileName}' 2>/dev/null | head -n1); [ -n "$file" ] && xdg-open "$file" || echo "File not found"`
+                            ]
                         });
                     } catch (error) {
                         console.error("Failed to open .desktop file:", error);
@@ -204,27 +316,95 @@ Item {
         property string text: ""
         property string icon: ""
         property bool bold: false
+        property bool hasSubMenu: false
+        property Component subMenuComponent: null
+        property bool subMenuOpen: false
 
         signal triggered()
+        signal hovered()
+        
+        property Timer closeSubMenuTimer: Timer {
+            interval: 200
+            onTriggered: {
+                menuItem.subMenuOpen = false;
+            }
+        }
+        
+        function closeSubMenu(): void {
+            if (subMenuLoader.item) {
+                subMenuLoader.item.width = 0;
+                closeSubMenuTimer.restart();
+            } else {
+                menuItem.subMenuOpen = false;
+            }
+            menuItem.color = "transparent";
+        }
 
         Layout.fillWidth: true
-        Layout.preferredWidth: 220
+        Layout.minimumWidth: itemRow.implicitWidth + Appearance.padding.small * 2
         implicitHeight: itemRow.implicitHeight + Appearance.padding.small * 2
 
         radius: Appearance.rounding.small
         color: "transparent"
 
+        Timer {
+            id: hoverTimer
+            interval: 250
+            onTriggered: {
+                if (menuItem.hasSubMenu && mouseArea.containsMouse) {
+                    menuItem.subMenuOpen = true;
+                }
+            }
+        }
+        
         MouseArea {
+            id: mouseArea
             anchors.fill: parent
             hoverEnabled: true
-            cursorShape: Qt.PointingHandCursor
+            cursorShape: hasSubMenu ? Qt.ArrowCursor : Qt.PointingHandCursor
             
-            onClicked: menuItem.triggered()
+            onClicked: {
+                if (!hasSubMenu) {
+                    menuItem.triggered();
+                }
+            }
             
-            onEntered: menuItem.color = Qt.alpha(Colours.palette.m3onSurface, 0.08)
-            onExited: menuItem.color = "transparent"
-            onPressed: menuItem.color = Qt.alpha(Colours.palette.m3onSurface, 0.12)
-            onReleased: menuItem.color = containsMouse ? Qt.alpha(Colours.palette.m3onSurface, 0.08) : "transparent"
+            onEntered: {
+                menuItem.color = Qt.alpha(Colours.palette.m3onSurface, 0.08);
+                menuItem.hovered();
+                
+                const isTopLevel = menuItem.parent === menuColumn;
+                
+                if (isTopLevel) {
+                    if (root.activeSubMenuItem && root.activeSubMenuItem !== menuItem) {
+                        root.activeSubMenuItem.closeSubMenu();
+                    }
+                    
+                    if (menuItem.hasSubMenu) {
+                        root.activeSubMenuItem = menuItem;
+                        hoverTimer.restart();
+                    }
+                }
+            }
+            
+            onExited: {
+                hoverTimer.stop();
+                if (!menuItem.hasSubMenu) {
+                    menuItem.color = "transparent";
+                }
+            }
+            
+            onPressed: {
+                if (!hasSubMenu) {
+                    menuItem.color = Qt.alpha(Colours.palette.m3onSurface, 0.12);
+                }
+            }
+            
+            onReleased: {
+                if (!hasSubMenu) {
+                    menuItem.color = containsMouse ? Qt.alpha(Colours.palette.m3onSurface, 0.08) : "transparent";
+                }
+            }
         }
 
         RowLayout {
@@ -244,11 +424,93 @@ Item {
 
             StyledText {
                 Layout.alignment: Qt.AlignVCenter
-                Layout.fillWidth: true
                 text: menuItem.text
                 color: Colours.palette.m3onSurface
                 font.pointSize: Appearance.font.size.normal
                 font.weight: menuItem.bold ? Font.DemiBold : Font.Normal
+                elide: Text.ElideNone
+                wrapMode: Text.NoWrap
+            }
+            
+            Item {
+                Layout.fillWidth: true
+            }
+            
+            MaterialIcon {
+                Layout.alignment: Qt.AlignVCenter
+                text: "chevron_right"
+                visible: menuItem.hasSubMenu
+                color: Colours.palette.m3onSurfaceVariant
+                font.pointSize: Appearance.font.size.normal
+            }
+        }
+        
+        Loader {
+            id: subMenuLoader
+            active: menuItem.subMenuOpen
+            sourceComponent: menuItem.subMenuComponent
+            
+            onLoaded: {
+                if (item) {
+                    item.parent = root;
+                    item.x = menuContainer.width;
+                    item.y = menuItem.mapToItem(root, 0, 0).y;
+                    item.z = 10001;
+                    item.visible = true;
+                    item.width = 0;
+                    Qt.callLater(() => {
+                        if (item) item.width = item.targetWidth;
+                    });
+                }
+            }
+        }
+    }
+
+    component SubMenu: Item {
+        id: subMenu
+        
+        property bool containsMouse: subMenuMouseArea.containsMouse
+        default property alias content: subMenuColumn.data
+        property real targetWidth: subMenuColumn.implicitWidth + Appearance.padding.smaller * 2
+        
+        width: 0
+        height: subMenuColumn.implicitHeight + Appearance.padding.smaller * 2
+        
+        Behavior on width {
+            Anim {
+                duration: 200
+                easing.bezierCurve: Appearance.anim.curves.emphasized
+            }
+        }
+        
+        Elevation {
+            anchors.fill: parent
+            radius: Appearance.rounding.normal
+            level: 3
+            
+            MouseArea {
+                id: subMenuMouseArea
+                anchors.fill: parent
+                hoverEnabled: true
+                acceptedButtons: Qt.AllButtons
+                onClicked: (mouse) => { mouse.accepted = true; }
+                onWheel: (wheel) => { wheel.accepted = true; }
+            }
+            
+            StyledClippingRect {
+                anchors.fill: parent
+                color: Colours.palette.m3surfaceContainer
+                topLeftRadius: 0
+                topRightRadius: Appearance.rounding.normal
+                bottomLeftRadius: 0
+                bottomRightRadius: Appearance.rounding.normal
+                
+                ColumnLayout {
+                    id: subMenuColumn
+                    anchors.fill: parent
+                    anchors.margins: Appearance.padding.smaller
+                    spacing: Appearance.spacing.smaller
+                }
             }
         }
     }

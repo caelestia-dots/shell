@@ -230,6 +230,18 @@ Item {
                                     radius: 6
                                     function onClicked(): void {
                                         root.activeCategory = modelData.id;
+                                        
+                                        const tabLeft = parent.x;
+                                        const tabRight = parent.x + parent.width;
+                                        const viewLeft = tabsFlickable.contentX;
+                                        const viewRight = tabsFlickable.contentX + tabsFlickable.width;
+                                        
+                                        const targetX = tabLeft - (tabsFlickable.width - parent.width) / 2;
+                                        
+                                        tabsFlickable.contentX = Math.max(0, Math.min(
+                                            tabsFlickable.contentWidth - tabsFlickable.width,
+                                            targetX
+                                        ));
                                     }
                                 }
 

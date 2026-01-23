@@ -1,3 +1,5 @@
+pragma NativeMethodBehavior: AcceptThisObject
+
 import "../services"
 import qs.components
 import qs.services
