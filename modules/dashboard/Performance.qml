@@ -133,7 +133,7 @@ RowLayout {
 
         ColumnLayout {
             anchors.fill: parent
-            anchors.margins: Config.dashboard.performance.batteryTankMargin
+            anchors.margins: Appearance.padding.large
             spacing: Appearance.spacing.small
 
             // Header Section
@@ -166,14 +166,14 @@ RowLayout {
 
                         return charging ? `battery_charging_${(level + 3) * 10}` : `battery_${level}_bar`;
                     }
-                    font.pointSize: Config.dashboard.performance.largeIconSize
+                    font.pointSize: Appearance.font.size.large
                     color: batteryTank.accentColor
                 }
 
                 StyledText {
                     Layout.fillWidth: true
                     text: qsTr("Battery")
-                    font.pointSize: Config.dashboard.performance.normalTextSize
+                    font.pointSize: Appearance.font.size.normal
                     color: Colours.palette.m3onSurface
                 }
 
@@ -186,12 +186,12 @@ RowLayout {
             // Bottom Info Section
             ColumnLayout {
                 Layout.fillWidth: true
-                spacing: Config.dashboard.performance.percentValueSpacing
+                spacing: -4
 
                 StyledText {
                     Layout.alignment: Qt.AlignRight
                     text: `${Math.round(batteryTank.percentage * 100)}%`
-                    font.pointSize: Config.dashboard.performance.percentageTextSize
+                    font.pointSize: Appearance.font.size.extraLarge
                     font.weight: Font.Medium
                     color: batteryTank.accentColor
                 }
@@ -216,7 +216,7 @@ RowLayout {
 
                         return `${min}m`;
                     }
-                    font.pointSize: Config.dashboard.performance.usageTextSize
+                    font.pointSize: Appearance.font.size.smaller
                     color: Colours.palette.m3onSurfaceVariant
                 }
 
@@ -245,13 +245,13 @@ RowLayout {
             text: parent.icon
             fill: 1
             color: parent.accentColor
-            font.pointSize: Config.dashboard.performance.largeIconSize
+            font.pointSize: Appearance.spacing.large
         }
 
         StyledText {
             Layout.fillWidth: true
             text: parent.title
-            font.pointSize: Config.dashboard.performance.normalTextSize
+            font.pointSize: Appearance.font.size.normal
             elide: Text.ElideRight
         }
 
@@ -324,10 +324,10 @@ RowLayout {
 
         ColumnLayout {
             anchors.fill: parent
-            anchors.leftMargin: Config.dashboard.performance.heroCardLeftMargin
-            anchors.rightMargin: Config.dashboard.performance.heroCardRightMargin
-            anchors.topMargin: Config.dashboard.performance.heroCardTopMargin
-            anchors.bottomMargin: Config.dashboard.performance.heroCardBottomMargin
+            anchors.leftMargin: Appearance.padding.large
+            anchors.rightMargin: Appearance.padding.large
+            anchors.topMargin: Appearance.padding.normal
+            anchors.bottomMargin: Appearance.padding.normal
             spacing: Appearance.spacing.small
 
             CardHeader {
@@ -351,13 +351,13 @@ RowLayout {
 
                         StyledText {
                             text: heroCard.secondaryValue
-                            font.pointSize: Config.dashboard.performance.normalTextSize
+                            font.pointSize: Appearance.font.size.normal
                             font.weight: Font.Medium
                         }
 
                         StyledText {
                             text: heroCard.secondaryLabel
-                            font.pointSize: Config.dashboard.performance.valueLabelSize
+                            font.pointSize: Appearance.font.size.small
                             color: Colours.palette.m3onSurfaceVariant
                             anchors.baseline: parent.children[0].baseline
                         }
@@ -365,8 +365,8 @@ RowLayout {
                     }
 
                     ProgressBar {
-                        width: parent.width * Config.dashboard.performance.tempBarWidthMult
-                        height: Config.dashboard.performance.tempBarHeight
+                        width: parent.width * 0.5
+                        height: 6
                         value: heroCard.tempProgress
                         fgColor: heroCard.accentColor
                         bgColor: Qt.alpha(heroCard.accentColor, 0.2)
@@ -385,20 +385,20 @@ RowLayout {
                 anchors.right: parent.right
                 anchors.verticalCenter: parent.verticalCenter
                 anchors.margins: Appearance.padding.large
-                anchors.rightMargin: Config.dashboard.performance.heroCardRightValueMargin
-                spacing: Config.dashboard.performance.mainValueSpacing
+                anchors.rightMargin: 32
+                spacing: 0
 
                 StyledText {
                     anchors.right: parent.right
                     text: heroCard.mainLabel
-                    font.pointSize: Config.dashboard.performance.normalTextSize
+                    font.pointSize: Appearance.font.size.normal
                     color: Colours.palette.m3onSurfaceVariant
                 }
 
                 StyledText {
                     anchors.right: parent.right
                     text: heroCard.mainValue
-                    font.pointSize: Config.dashboard.performance.percentageTextSize
+                    font.pointSize: Appearance.font.size.extraLarge
                     font.weight: Font.Medium
                     color: heroCard.accentColor
                 }
@@ -443,7 +443,7 @@ RowLayout {
 
         ColumnLayout {
             anchors.fill: parent
-            anchors.margins: Config.dashboard.performance.gaugeCardMargin
+            anchors.margins: Appearance.padding.large
             spacing: Appearance.spacing.smaller
 
             CardHeader {
@@ -467,8 +467,8 @@ RowLayout {
                         ctx.reset();
                         const cx = width / 2;
                         const cy = height / 2;
-                        const radius = (Math.min(width, height) - Config.dashboard.performance.gaugeRadiusOffset) / 2;
-                        const lineWidth = Config.dashboard.performance.gaugeLineWidth;
+                        const radius = (Math.min(width, height) - 12) / 2;
+                        const lineWidth = 10;
                         ctx.beginPath();
                         ctx.arc(cx, cy, radius, gaugeCard.arcStartAngle, gaugeCard.arcStartAngle + gaugeCard.arcSweep);
                         ctx.lineWidth = lineWidth;
@@ -507,7 +507,7 @@ RowLayout {
                 StyledText {
                     anchors.centerIn: parent
                     text: `${Math.round(gaugeCard.percentage * 100)}%`
-                    font.pointSize: Config.dashboard.performance.percentageTextSize
+                    font.pointSize: Appearance.font.size.extraLarge
                     font.weight: Font.Medium
                     color: gaugeCard.accentColor
                 }
@@ -517,7 +517,7 @@ RowLayout {
             StyledText {
                 Layout.alignment: Qt.AlignHCenter
                 text: gaugeCard.subtitle
-                font.pointSize: Config.dashboard.performance.usageTextSize
+                font.pointSize: Appearance.font.size.smaller
                 color: Colours.palette.m3onSurfaceVariant
             }
 
@@ -589,7 +589,7 @@ RowLayout {
 
         ColumnLayout {
             anchors.fill: parent
-            anchors.margins: Config.dashboard.performance.gaugeCardMargin
+            anchors.margins: Appearance.padding.large
             spacing: Appearance.spacing.smaller
 
             CardHeader {
@@ -607,7 +607,7 @@ RowLayout {
                 MaterialIcon {
                     text: "unfold_more"
                     color: Colours.palette.m3onSurfaceVariant
-                    font.pointSize: Config.dashboard.performance.normalTextSize
+                    font.pointSize: Appearance.font.size.normal
                     visible: storageGaugeCard.diskCount > 1
                     opacity: 0.7
                     ToolTip.visible: hintHover.hovered
@@ -637,8 +637,8 @@ RowLayout {
                         ctx.reset();
                         const cx = width / 2;
                         const cy = height / 2;
-                        const radius = (Math.min(width, height) - Config.dashboard.performance.gaugeRadiusOffset) / 2;
-                        const lineWidth = Config.dashboard.performance.gaugeLineWidth;
+                        const radius = (Math.min(width, height) - 12) / 2;
+                        const lineWidth = 10;
                         ctx.beginPath();
                         ctx.arc(cx, cy, radius, storageGaugeCard.arcStartAngle, storageGaugeCard.arcStartAngle + storageGaugeCard.arcSweep);
                         ctx.lineWidth = lineWidth;
@@ -677,7 +677,7 @@ RowLayout {
                 StyledText {
                     anchors.centerIn: parent
                     text: storageGaugeCard.currentDisk ? `${Math.round(storageGaugeCard.currentDisk.perc * 100)}%` : "—"
-                    font.pointSize: Config.dashboard.performance.percentageTextSize
+                    font.pointSize: Appearance.font.size.extraLarge
                     font.weight: Font.Medium
                     color: storageGaugeCard.accentColor
                 }
@@ -694,7 +694,7 @@ RowLayout {
                     const totalFmt = SystemUsage.formatKib(storageGaugeCard.currentDisk.total);
                     return `${usedFmt.value.toFixed(1)} / ${Math.floor(totalFmt.value)} ${totalFmt.unit}`;
                 }
-                font.pointSize: Config.dashboard.performance.usageTextSize
+                font.pointSize: Appearance.font.size.smaller
                 color: Colours.palette.m3onSurfaceVariant
             }
 
@@ -724,7 +724,7 @@ RowLayout {
 
         ColumnLayout {
             anchors.fill: parent
-            anchors.margins: Config.dashboard.performance.gaugeCardMargin
+            anchors.margins: Appearance.padding.large
             spacing: Appearance.spacing.small
 
             CardHeader {
@@ -826,7 +826,7 @@ RowLayout {
                 StyledText {
                     anchors.centerIn: parent
                     text: qsTr("Collecting data...")
-                    font.pointSize: Config.dashboard.performance.valueLabelSize
+                    font.pointSize: Appearance.font.size.small
                     color: Colours.palette.m3onSurfaceVariant
                     visible: NetworkUsage.downloadHistory.length < 2
                     opacity: 0.6
@@ -842,7 +842,7 @@ RowLayout {
                 MaterialIcon {
                     text: "download"
                     color: Colours.palette.m3tertiary
-                    font.pointSize: Config.dashboard.performance.normalTextSize
+                    font.pointSize: Appearance.font.size.normal
                 }
 
                 Item {
@@ -854,7 +854,7 @@ RowLayout {
                         const fmt = NetworkUsage.formatBytes(NetworkUsage.downloadSpeed);
                         return `${fmt.value.toFixed(1)} ${fmt.unit}`;
                     }
-                    font.pointSize: Config.dashboard.performance.normalTextSize
+                    font.pointSize: Appearance.font.size.normal
                     font.weight: Font.Medium
                     color: Colours.palette.m3tertiary
                 }
@@ -869,7 +869,7 @@ RowLayout {
                 MaterialIcon {
                     text: "upload"
                     color: Colours.palette.m3secondary
-                    font.pointSize: Config.dashboard.performance.normalTextSize
+                    font.pointSize: Appearance.font.size.normal
                 }
 
                 Item {
@@ -881,7 +881,7 @@ RowLayout {
                         const fmt = NetworkUsage.formatBytes(NetworkUsage.uploadSpeed);
                         return `${fmt.value.toFixed(1)} ${fmt.unit}`;
                     }
-                    font.pointSize: Config.dashboard.performance.normalTextSize
+                    font.pointSize: Appearance.font.size.normal
                     font.weight: Font.Medium
                     color: Colours.palette.m3secondary
                 }
@@ -896,7 +896,7 @@ RowLayout {
                 MaterialIcon {
                     text: "history"
                     color: Colours.palette.m3onSurfaceVariant
-                    font.pointSize: Config.dashboard.performance.normalTextSize
+                    font.pointSize: Appearance.font.size.normal
                 }
 
                 Item {
@@ -909,7 +909,7 @@ RowLayout {
                         const up = NetworkUsage.formatBytesTotal(NetworkUsage.uploadTotal);
                         return `↓${down.value.toFixed(1)}${down.unit} ↑${up.value.toFixed(1)}${up.unit}`;
                     }
-                    font.pointSize: Config.dashboard.performance.valueLabelSize
+                    font.pointSize: Appearance.font.size.small
                     color: Colours.palette.m3onSurfaceVariant
                 }
 

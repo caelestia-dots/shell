@@ -23,24 +23,6 @@ JsonObject {
         property bool showStorage: false
         property bool showNetwork: true
         property int updateInterval: 3000
-        property int usageTextSize: 12
-        property int valueLabelSize: 10
-        property int percentageTextSize: 24
-        property int normalTextSize: 14
-        property int largeIconSize: 20
-        property int tempBarHeight: 6
-        property real tempBarWidthMult: 0.5
-        property int gaugeLineWidth: 10
-        property int gaugeRadiusOffset: 12
-        property int heroCardTopMargin: 8
-        property int heroCardBottomMargin: 8
-        property int heroCardLeftMargin: 16
-        property int heroCardRightMargin: 16
-        property int heroCardRightValueMargin: 32
-        property int batteryTankMargin: 16
-        property int mainValueSpacing: 0
-        property int percentValueSpacing: -4
-        property int gaugeCardMargin: 16
     }
 
     component Sizes: JsonObject {
