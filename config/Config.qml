@@ -126,6 +126,7 @@ Singleton {
 
     function serializeGeneral(): var {
         return {
+            logo: general.logo,
             apps: {
                 terminal: general.apps.terminal,
                 audio: general.apps.audio,
@@ -148,7 +149,20 @@ Singleton {
         return {
             enabled: background.enabled,
             desktopClock: {
-                enabled: background.desktopClock.enabled
+                enabled: background.desktopClock.enabled,
+                scale: background.desktopClock.scale,
+                position: background.desktopClock.position,
+                invertColors: background.desktopClock.invertColors,
+                background: {
+                    enabled: background.desktopClock.background.enabled,
+                    opacity: background.desktopClock.background.opacity,
+                    blur: background.desktopClock.background.blur
+                },
+                shadow: {
+                    enabled: background.desktopClock.shadow.enabled,
+                    opacity: background.desktopClock.shadow.opacity,
+                    blur: background.desktopClock.shadow.blur
+                }
             },
             visualiser: {
                 enabled: background.visualiser.enabled,
@@ -200,6 +214,7 @@ Singleton {
                 showMicrophone: bar.status.showMicrophone,
                 showKbLayout: bar.status.showKbLayout,
                 showNetwork: bar.status.showNetwork,
+                showWifi: bar.status.showWifi,
                 showBluetooth: bar.status.showBluetooth,
                 showBattery: bar.status.showBattery,
                 showLockStatus: bar.status.showLockStatus

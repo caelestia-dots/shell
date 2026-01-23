@@ -38,6 +38,15 @@ Item {
     property real borderThickness: Config.border.thickness ?? 1
 
     property bool desktopClockEnabled: Config.background.desktopClock.enabled ?? false
+    property real desktopClockScale: Config.background.desktopClock.scale ?? 1
+    property string desktopClockPosition: Config.background.desktopClock.position ?? "bottom-right"
+    property bool desktopClockShadowEnabled: Config.background.desktopClock.shadow.enabled ?? true
+    property real desktopClockShadowOpacity: Config.background.desktopClock.shadow.opacity ?? 0.7
+    property real desktopClockShadowBlur: Config.background.desktopClock.shadow.blur ?? 0.4
+    property bool desktopClockBackgroundEnabled: Config.background.desktopClock.background.enabled ?? false
+    property real desktopClockBackgroundOpacity: Config.background.desktopClock.background.opacity ?? 0.7
+    property bool desktopClockBackgroundBlur: Config.background.desktopClock.background.blur ?? false
+    property bool desktopClockInvertColors: Config.background.desktopClock.invertColors ?? false
     property bool backgroundEnabled: Config.background.enabled ?? true
     property bool visualiserEnabled: Config.background.visualiser.enabled ?? false
     property bool visualiserAutoHide: Config.background.visualiser.autoHide ?? true
@@ -64,6 +73,15 @@ Item {
 
         Config.background.desktopClock.enabled = root.desktopClockEnabled;
         Config.background.enabled = root.backgroundEnabled;
+        Config.background.desktopClock.scale = root.desktopClockScale
+        Config.background.desktopClock.position = root.desktopClockPosition
+        Config.background.desktopClock.shadow.enabled = root.desktopClockShadowEnabled
+        Config.background.desktopClock.shadow.opacity = root.desktopClockShadowOpacity
+        Config.background.desktopClock.shadow.blur = root.desktopClockShadowBlur
+        Config.background.desktopClock.background.enabled = root.desktopClockBackgroundEnabled
+        Config.background.desktopClock.background.opacity = root.desktopClockBackgroundOpacity
+        Config.background.desktopClock.background.blur = root.desktopClockBackgroundBlur
+        Config.background.desktopClock.invertColors = root.desktopClockInvertColors
 
         Config.background.visualiser.enabled = root.visualiserEnabled;
         Config.background.visualiser.autoHide = root.visualiserAutoHide;
