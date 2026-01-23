@@ -10,11 +10,10 @@ Slider {
     wheelEnabled: true
 
     background: Item {
-        readonly property real normalRangeEnd: root.availableWidth * (1.0 / root.to)
         readonly property real trackMargin: root.implicitHeight / 3
         readonly property real handleOffset: root.implicitHeight / 6
         
-        // Normal range filled (0-100%)
+        // Filled section (active)
         StyledRect {
             anchors.top: parent.top
             anchors.bottom: parent.bottom
@@ -22,33 +21,15 @@ Slider {
             anchors.topMargin: parent.trackMargin
             anchors.bottomMargin: parent.trackMargin
 
-            implicitWidth: Math.min(root.handle.x - parent.handleOffset, parent.normalRangeEnd)
+            implicitWidth: root.handle.x - parent.handleOffset
 
             color: Colours.palette.m3primary
             radius: Appearance.rounding.full
-            topRightRadius: root.value > 1.0 ? 0 : Appearance.rounding.full
-            bottomRightRadius: root.value > 1.0 ? 0 : Appearance.rounding.full
+            topRightRadius: root.implicitHeight / 15
+            bottomRightRadius: root.implicitHeight / 15
         }
 
-        // Boost range filled (100-150%) - different color
-        StyledRect {
-            anchors.top: parent.top
-            anchors.bottom: parent.bottom
-            anchors.left: parent.left
-            anchors.leftMargin: parent.normalRangeEnd
-            anchors.topMargin: parent.trackMargin
-            anchors.bottomMargin: parent.trackMargin
-
-            visible: root.value > 1.0
-            implicitWidth: root.handle.x - parent.handleOffset - parent.normalRangeEnd
-
-            color: Colours.palette.m3tertiary
-            radius: Appearance.rounding.full
-            topLeftRadius: 0
-            bottomLeftRadius: 0
-        }
-
-        // Unfilled track
+        // Unfilled track (rail) - changes color when above 100%
         StyledRect {
             anchors.top: parent.top
             anchors.bottom: parent.bottom
@@ -58,7 +39,7 @@ Slider {
 
             implicitWidth: parent.width - root.handle.x - root.handle.implicitWidth - parent.handleOffset
 
-            color: Colours.palette.m3surfaceContainerHighest
+            color: root.value >= 1.01 ? Colours.palette.m3tertiary : Colours.palette.m3surfaceContainerHighest
             radius: Appearance.rounding.full
             topLeftRadius: root.implicitHeight / 15
             bottomLeftRadius: root.implicitHeight / 15
@@ -71,7 +52,7 @@ Slider {
         implicitWidth: root.implicitHeight / 4.5
         implicitHeight: root.implicitHeight
 
-        color: root.value > 1.0 ? Colours.palette.m3tertiary : Colours.palette.m3primary
+        color: Colours.palette.m3primary
         radius: Appearance.rounding.full
 
         MouseArea {
