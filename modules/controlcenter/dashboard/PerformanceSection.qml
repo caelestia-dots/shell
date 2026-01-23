@@ -82,25 +82,4 @@ SectionContainer {
         }
     }
 
-    SliderInput {
-        Layout.fillWidth: true
-        label: qsTr("Update interval")
-        value: root.rootItem.updateInterval
-        from: 500
-        to: 10000
-        stepSize: 500
-        suffix: "ms"
-        decimals: 0
-        onValueModified: (newValue) => {
-            root.rootItem.updateInterval = newValue;
-            root.rootItem.saveConfig();
-        }
-
-        validator: IntValidator {
-            bottom: 500
-            top: 10000
-        }
-
-    }
-
 }

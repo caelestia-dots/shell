@@ -244,7 +244,7 @@ Singleton {
         return {
             enabled: dashboard.enabled,
             showOnHover: dashboard.showOnHover,
-            mediaUpdateInterval: dashboard.mediaUpdateInterval,
+            updateInterval: dashboard.updateInterval,
             dragThreshold: dashboard.dragThreshold,
             performance: {
                 showBattery: dashboard.performance.showBattery,
@@ -252,8 +252,7 @@ Singleton {
                 showCpu: dashboard.performance.showCpu,
                 showMemory: dashboard.performance.showMemory,
                 showStorage: dashboard.performance.showStorage,
-                showNetwork: dashboard.performance.showNetwork,
-                updateInterval: dashboard.performance.updateInterval
+                showNetwork: dashboard.performance.showNetwork
             },
             sizes: {
                 tabIndicatorHeight: dashboard.sizes.tabIndicatorHeight,

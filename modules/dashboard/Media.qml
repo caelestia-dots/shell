@@ -48,7 +48,7 @@ Item {
 
     Timer {
         running: Players.active?.isPlaying ?? false
-        interval: Config.dashboard.mediaUpdateInterval
+        interval: Config.dashboard.updateInterval
         triggeredOnStart: true
         repeat: true
         onTriggered: Players.active?.positionChanged()

@@ -44,6 +44,25 @@ SectionContainer {
         SliderInput {
             Layout.fillWidth: true
             
+            label: qsTr("Update interval")
+            value: root.rootItem.updateInterval
+            from: 100
+            to: 10000
+            stepSize: 100
+            suffix: "ms"
+            validator: IntValidator { bottom: 100; top: 10000 }
+            formatValueFunction: (val) => Math.round(val).toString()
+            parseValueFunction: (text) => parseInt(text)
+            
+            onValueModified: (newValue) => {
+                root.rootItem.updateInterval = Math.round(newValue);
+                root.rootItem.saveConfig();
+            }
+        }
+
+        SliderInput {
+            Layout.fillWidth: true
+            
             label: qsTr("Drag threshold")
             value: root.rootItem.dragThreshold
             from: 0

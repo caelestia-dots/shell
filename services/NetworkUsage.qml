@@ -99,7 +99,7 @@ Singleton {
     }
 
     Timer {
-        interval: Config.dashboard.performance.updateInterval
+        interval: Config.dashboard.updateInterval
         running: root.refCount > 0
         repeat: true
         triggeredOnStart: true
