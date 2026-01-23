@@ -11,7 +11,7 @@ Item {
 
     anchors.top: parent.top
     anchors.bottom: parent.bottom
-    implicitWidth: 110
+    implicitWidth: Config.dashboard.sizes.dateTimeWidth
 
     ColumnLayout {
         anchors.left: parent.left
