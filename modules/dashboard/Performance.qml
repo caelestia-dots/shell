@@ -743,10 +743,28 @@ RowLayout {
 
                     property var downHistory: NetworkUsage.downloadHistory
                     property var upHistory: NetworkUsage.uploadHistory
+                    property real targetMax: 1024
+                    property real smoothMax: targetMax
+
+                    Behavior on smoothMax {
+                        Anim {
+                            duration: Appearance.anim.durations.large
+                        }
+                    }
 
                     anchors.fill: parent
-                    onDownHistoryChanged: requestPaint()
-                    onUpHistoryChanged: requestPaint()
+                    onDownHistoryChanged: updateMax()
+                    onUpHistoryChanged: updateMax()
+                    onSmoothMaxChanged: requestPaint()
+
+                    function updateMax() {
+                        const downHist = downHistory || [];
+                        const upHist = upHistory || [];
+                        const allValues = downHist.concat(upHist);
+                        targetMax = Math.max(...allValues, 1024);
+                        requestPaint();
+                    }
+
                     onPaint: {
                         const ctx = getContext("2d");
                         ctx.reset();
@@ -757,9 +775,8 @@ RowLayout {
                         if (downHist.length < 2 && upHist.length < 2)
                             return;
 
-                        // Find max value for scaling
-                        const allValues = downHist.concat(upHist);
-                        const maxVal = Math.max(...allValues, 1024); // minimum 1KB/s scale
+                        // Use animated max value for smooth scaling
+                        const maxVal = smoothMax;
 
                         function drawLine(history, color, fillAlpha) {
                             if (history.length < 2)
@@ -793,7 +810,7 @@ RowLayout {
                         drawLine(downHist, Colours.palette.m3tertiary.toString(), 0.2);
                     }
 
-                    Component.onCompleted: requestPaint()
+                    Component.onCompleted: updateMax()
 
                     Connections {
                         function onPaletteChanged() {
