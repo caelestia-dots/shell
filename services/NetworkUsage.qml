@@ -44,6 +44,11 @@ Singleton {
     property bool _initialized: false
 
     function formatBytes(bytes: real): var {
+        // Handle negative or invalid values
+        if (bytes < 0 || isNaN(bytes) || !isFinite(bytes)) {
+            return { value: 0, unit: "B/s" };
+        }
+        
         if (bytes < 1024) {
             return { value: bytes, unit: "B/s" };
         } else if (bytes < 1024 * 1024) {
@@ -56,6 +61,11 @@ Singleton {
     }
 
     function formatBytesTotal(bytes: real): var {
+        // Handle negative or invalid values
+        if (bytes < 0 || isNaN(bytes) || !isFinite(bytes)) {
+            return { value: 0, unit: "B" };
+        }
+        
         if (bytes < 1024) {
             return { value: bytes, unit: "B" };
         } else if (bytes < 1024 * 1024) {
@@ -124,24 +134,58 @@ Singleton {
 
             const timeDelta = (now - root._prevTimestamp) / 1000; // seconds
             if (timeDelta > 0) {
-                root._downloadSpeed = (data.rx - root._prevRxBytes) / timeDelta;
-                root._uploadSpeed = (data.tx - root._prevTxBytes) / timeDelta;
+                // Calculate byte deltas
+                let rxDelta = data.rx - root._prevRxBytes;
+                let txDelta = data.tx - root._prevTxBytes;
 
-                // Update history arrays
-                let newDownHist = root._downloadHistory.slice();
-                let newUpHist = root._uploadHistory.slice();
-                newDownHist.push(root._downloadSpeed);
-                newUpHist.push(root._uploadSpeed);
-                if (newDownHist.length > root.historyLength) {
-                    newDownHist.shift();
-                    newUpHist.shift();
+                // Handle counter overflow (when counters wrap around from max to 0)
+                // This happens when counters exceed 32-bit or 64-bit limits
+                if (rxDelta < 0) {
+                    // Counter wrapped around - assume 64-bit counter
+                    rxDelta += Math.pow(2, 64);
                 }
-                root._downloadHistory = newDownHist;
-                root._uploadHistory = newUpHist;
+                if (txDelta < 0) {
+                    txDelta += Math.pow(2, 64);
+                }
+
+                // Calculate speeds
+                root._downloadSpeed = rxDelta / timeDelta;
+                root._uploadSpeed = txDelta / timeDelta;
+
+                // Only add valid positive values to history to prevent graph corruption
+                if (root._downloadSpeed >= 0 && isFinite(root._downloadSpeed)) {
+                    let newDownHist = root._downloadHistory.slice();
+                    newDownHist.push(root._downloadSpeed);
+                    if (newDownHist.length > root.historyLength) {
+                        newDownHist.shift();
+                    }
+                    root._downloadHistory = newDownHist;
+                }
+
+                if (root._uploadSpeed >= 0 && isFinite(root._uploadSpeed)) {
+                    let newUpHist = root._uploadHistory.slice();
+                    newUpHist.push(root._uploadSpeed);
+                    if (newUpHist.length > root.historyLength) {
+                        newUpHist.shift();
+                    }
+                    root._uploadHistory = newUpHist;
+                }
             }
 
-            root._downloadTotal = data.rx - root._initialRxBytes;
-            root._uploadTotal = data.tx - root._initialTxBytes;
+            // Calculate totals with overflow handling
+            let downTotal = data.rx - root._initialRxBytes;
+            let upTotal = data.tx - root._initialTxBytes;
+
+            // Handle counter overflow for totals
+            if (downTotal < 0) {
+                downTotal += Math.pow(2, 64);
+            }
+            if (upTotal < 0) {
+                upTotal += Math.pow(2, 64);
+            }
+
+            root._downloadTotal = downTotal;
+            root._uploadTotal = upTotal;
 
             root._prevRxBytes = data.rx;
             root._prevTxBytes = data.tx;
