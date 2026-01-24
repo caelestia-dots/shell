@@ -558,23 +558,19 @@ RowLayout {
 
         }
 
-        // Only update diskCount when the actual count changes
+        // Update diskCount and animatedPercentage when disks data changes
         Connections {
             function onDisksChanged() {
                 if (SystemUsage.disks.length !== storageGaugeCard.diskCount)
                     storageGaugeCard.diskCount = SystemUsage.disks.length;
 
+                // Update animated percentage when disk data refreshes
+                if (storageGaugeCard.currentDisk)
+                    storageGaugeCard.animatedPercentage = storageGaugeCard.currentDisk.perc;
+
             }
 
             target: SystemUsage
-        }
-
-        Connections {
-            function onPercChanged() {
-                storageGaugeCard.animatedPercentage = storageGaugeCard.currentDisk.perc;
-            }
-
-            target: storageGaugeCard.currentDisk
         }
 
         MouseArea {
@@ -746,18 +742,12 @@ RowLayout {
                     property real targetMax: 1024
                     property real smoothMax: targetMax
 
-                    Behavior on smoothMax {
-                        Anim {
-                            duration: Appearance.anim.durations.large
-                        }
-                    }
-
                     anchors.fill: parent
                     onDownHistoryChanged: updateMax()
                     onUpHistoryChanged: updateMax()
                     onSmoothMaxChanged: requestPaint()
 
-                    function updateMax() {
+                    function updateMax(): void {
                         const downHist = downHistory || [];
                         const upHist = upHistory || [];
                         const allValues = downHist.concat(upHist);
@@ -818,6 +808,12 @@ RowLayout {
                         }
 
                         target: Colours
+                    }
+
+                    Behavior on smoothMax {
+                        Anim {
+                            duration: Appearance.anim.durations.large
+                        }
                     }
 
                 }
