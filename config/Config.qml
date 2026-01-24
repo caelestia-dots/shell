@@ -416,6 +416,7 @@ Singleton {
             gpuType: services.gpuType,
             visualiserBars: services.visualiserBars,
             audioIncrement: services.audioIncrement,
+            brightnessIncrement: services.brightnessIncrement,
             maxVolume: services.maxVolume,
             smartScheme: services.smartScheme,
             defaultPlayer: services.defaultPlayer,
