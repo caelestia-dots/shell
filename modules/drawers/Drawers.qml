@@ -18,6 +18,20 @@ Variants {
         id: scope
 
         required property ShellScreen modelData
+        readonly property bool barDisabled: {
+            const regexChecker = /^\^.*\$$/;
+            for (const filter of Config.bar.excludedScreens) {
+                // If filter is a regex
+                if (regexChecker.test(filter)) {
+                    if ((new RegExp(filter)).test(modelData.name))
+                        return true;
+                } else {
+                    if (filter === modelData.name)
+                        return true;
+                }
+            }
+            return false;
+        }
 
         Exclusions {
             screen: scope.modelData
@@ -33,7 +47,7 @@ Variants {
                     return 0;
 
                 const mon = Hypr.monitorFor(screen);
-                if (mon?.lastIpcObject.specialWorkspace.name || mon?.activeWorkspace?.lastIpcObject.windows > 0)
+                if (mon?.lastIpcObject?.specialWorkspace?.name || mon?.activeWorkspace?.lastIpcObject?.windows > 0)
                     return 0;
 
                 const thresholds = [];
@@ -168,6 +182,8 @@ Variants {
                     screen: scope.modelData
                     visibilities: visibilities
                     popouts: panels.popouts
+
+                    disabled: scope.barDisabled
 
                     Component.onCompleted: Visibilities.bars.set(scope.modelData, this)
                 }
