@@ -106,4 +106,3 @@ StyledRect {
         }
     }
 }
-
