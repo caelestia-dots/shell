@@ -12,7 +12,7 @@ import Quickshell
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
-import Qt5Compat.GraphicalEffects
+import QtQuick.Effects
 
 ColumnLayout {
     id: root
@@ -390,11 +390,14 @@ ColumnLayout {
             radius: Appearance.rounding.large
 
             layer.enabled: true
-            layer.effect: DropShadow {
-                color: Qt.rgba(0, 0, 0, 0.3)
-                radius: 16
-                samples: 33
-                verticalOffset: 4
+            layer.effect: MultiEffect {
+                shadowEnabled: true
+                shadowColor: Qt.rgba(0, 0, 0, 0.3)
+                shadowVerticalOffset: 4
+                shadowHorizontalOffset: 0
+
+                // not 1:1 with radius/samples; tune to match visually
+                shadowBlur: 0.6
             }
 
             Behavior on implicitHeight {

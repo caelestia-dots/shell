@@ -12,7 +12,7 @@ import qs.utils
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
-import Qt5Compat.GraphicalEffects
+import QtQuick.Effects
 
 DeviceDetails {
     id: root
@@ -263,12 +263,15 @@ DeviceDetails {
             radius: Appearance.rounding.large
 
             layer.enabled: true
-            layer.effect: DropShadow {
-                color: Qt.rgba(0, 0, 0, 0.3)
-                radius: 16
-                samples: 33
-                verticalOffset: 4
+            layer.effect: MultiEffect {
+                shadowEnabled: true
+                shadowColor: Qt.rgba(0, 0, 0, 0.3)
+                shadowVerticalOffset: 4
+                shadowHorizontalOffset: 0
+
+                shadowBlur: 0.6
             }
+
         }
         
         contentItem: ColumnLayout {
