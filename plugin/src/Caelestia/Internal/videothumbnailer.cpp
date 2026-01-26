@@ -8,6 +8,8 @@
 
 namespace caelestia::internal {
 
+QHash<QString, QString> VideoThumbnailer::s_memoryCache;
+
 class VideoThumbnailer::Worker : public QObject {
     Q_OBJECT
 
@@ -33,7 +35,7 @@ public slots:
         QByteArray key;
         key.reserve(256);
 
-        key.append(info.absoluteFilePath().toUtf8()); // MUCH faster than canonical
+        key.append(info.absoluteFilePath().toUtf8());
         key.append('|');
         key.append(QByteArray::number(info.size()));
         key.append('|');
@@ -100,6 +102,15 @@ void VideoThumbnailer::setPath(const QString& path) {
     m_ready = false;
     emit readyChanged();
 
+    if (s_memoryCache.contains(path)) {
+        m_cachePath = s_memoryCache.value(path);
+        emit cachePathChanged();
+        
+        m_ready = true;
+        emit readyChanged();
+        return;
+    }
+
     m_debounceTimer.start();
 }
 
@@ -165,6 +176,9 @@ void VideoThumbnailer::handleWorkerFinished(const QString& cachePath) {
 
     m_ready = true;
     emit readyChanged();
+
+    // Store in memory cache for instant future lookups
+    s_memoryCache.insert(m_path, cachePath);
 
     m_workerThread = nullptr;
 }

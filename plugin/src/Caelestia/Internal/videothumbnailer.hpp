@@ -1,5 +1,6 @@
 #pragma once
 
+#include <QHash>
 #include <QObject>
 #include <QQuickItem>
 #include <QSize>
@@ -51,6 +52,8 @@ private:
 
     class Worker;
     QThread* m_workerThread = nullptr;
+
+    static QHash<QString, QString> s_memoryCache;
 };
 
 } // namespace caelestia::internal
