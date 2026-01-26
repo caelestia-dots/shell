@@ -147,7 +147,10 @@ StyledRect {
 
             sourceComponent: MaterialIcon {
                 animate: true
-                text: Nmcli.active ? Icons.getNetworkIcon(Nmcli.active.strength ?? 0) : "wifi_off"
+                text: {
+                    const isVpnActive = VPN.connected || Nmcli.vpnConnections.some(conn => conn.active);
+                    return Nmcli.active ? Icons.getNetworkIcon(Nmcli.active.strength ?? 0, isVpnActive) : "wifi_off";
+                }
                 color: root.colour
             }
         }

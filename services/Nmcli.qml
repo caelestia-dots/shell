@@ -20,6 +20,7 @@ Singleton {
     readonly property AccessPoint active: networks.find(n => n.active) ?? null
     property list<string> savedConnections: []
     property list<string> savedConnectionSsids: []
+    property list<var> vpnConnections: []
 
     property var wifiConnectionQueue: []
     property int currentSsidQueryIndex: 0
@@ -449,6 +450,13 @@ Singleton {
         });
     }
 
+    function deactivateConnection(connectionName: string, callback: var): void {
+        executeCommand([root.nmcliCommandConnection, "down", connectionName], result => {
+            if (callback)
+                callback(result);
+        });
+    }
+
     function loadSavedConnections(callback: var): void {
         executeCommand(["-t", "-f", root.connectionListFields, root.nmcliCommandConnection, "show"], result => {
             if (!result.success) {
@@ -494,6 +502,69 @@ Singleton {
             if (callback)
                 callback(root.savedConnectionSsids);
         }
+    }
+
+    function parseConnectionOutput(output: string): list<var> {
+        if (!output || output.length === 0) {
+            return [];
+        }
+
+        const lines = output.trim().split("\n").filter(line => line.length > 0);
+        const connections = [];
+
+        for (const line of lines) {
+            const parts = line.split(":");
+            if (parts.length >= 2) {
+                connections.push({
+                    name: parts[0] || "",
+                    type: parts[1] || ""
+                });
+            }
+        }
+
+        return connections;
+    }
+
+    function isVpnType(type: string): bool {
+        if (!type || type.length === 0)
+            return false;
+        const t = type.toLowerCase();
+        return t.includes("vpn") || t.includes("wireguard");
+    }
+
+    function loadVpnConnections(callback: var): void {
+        executeCommand(["-t", "-f", root.connectionListFields, root.nmcliCommandConnection, "show"], result => {
+            if (!result.success) {
+                root.vpnConnections = [];
+                if (callback)
+                    callback([]);
+                return;
+            }
+
+            const allConnections = parseConnectionOutput(result.output).filter(c => isVpnType(c.type));
+
+            executeCommand(["-t", "-f", root.connectionListFields, root.nmcliCommandConnection, "show", "--active"], activeResult => {
+                const activeConnectionNames = new Set();
+                if (activeResult.success) {
+                    const activeConnections = parseConnectionOutput(activeResult.output).filter(c => isVpnType(c.type));
+                    for (const conn of activeConnections) {
+                        if (conn.name && conn.name.length > 0) {
+                            activeConnectionNames.add(conn.name);
+                        }
+                    }
+                }
+
+                const vpnConnectionList = allConnections.map(conn => ({
+                            name: conn.name,
+                            type: conn.type,
+                            active: activeConnectionNames.has(conn.name)
+                        }));
+
+                root.vpnConnections = vpnConnectionList;
+                if (callback)
+                    callback(vpnConnectionList);
+            });
+        });
     }
 
     function queryNextSsid(callback: var): void {
@@ -1321,12 +1392,15 @@ Singleton {
                 }
             });
         });
+
+        loadVpnConnections(() => {});
     }
 
     Component.onCompleted: {
         getWifiStatus(() => {});
         getNetworks(() => {});
         loadSavedConnections(() => {});
+        loadVpnConnections(() => {});
         getEthernetInterfaces(() => {});
 
         Qt.callLater(() => {
