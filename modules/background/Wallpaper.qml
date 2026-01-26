@@ -10,29 +10,109 @@ import QtQuick
 
 Item {
     id: root
-
-    property string source: Wallpapers.current
-    property Image current: one
-
     anchors.fill: parent
 
-    onSourceChanged: {
-        if (!source)
-            current = null;
-        else if (current === one)
-            two.update();
-        else
-            one.update();
+    property string source: Wallpapers.current
+    property bool initialized: false
+    property int loadedCount: 0
+    property bool itemsReady: false
+    property bool initStarted: false
+    property var sessionLock: null
+    readonly property bool sessionLocked: sessionLock ? sessionLock.secure : false
+    property bool gamemodeEnabled: GameMode.enabled
+
+    function applySessionLock(loader) {
+        if (!loader || !loader.item)
+            return;
+
+        if (typeof loader.item.pauseVideo === "function")
+            loader.item.pauseVideo(sessionLocked);
     }
 
-    Component.onCompleted: {
-        if (source)
-            Qt.callLater(() => one.update());
+    function isVideo(path) {
+        path = path.toString();
+        if (!path || path.trim() === "")
+            return false;
+
+        const videoExtensions = [".mp4", ".mkv", ".webm", ".avi", ".mov", ".flv", ".wmv", ".gif"];
+
+        const lower = path.toLowerCase();
+        for (let i = 0; i < videoExtensions.length; i++) {
+            if (lower.endsWith(videoExtensions[i]))
+                return true;
+        }
+        return false;
+    }
+
+    function waitForBothItems() {
+        if (oneLoader.item && twoLoader.item) {
+            itemsReady = true;
+            initialize();
+            return;
+        }
+        Qt.callLater(waitForBothItems);
+    }
+
+    function initialize() {
+        if (initStarted || loadedCount < 2 || !itemsReady)
+            return;
+
+        initStarted = true;
+
+        oneLoader.item.isCurrent = true;
+        twoLoader.item.isCurrent = false;
+
+        initialized = true;
+        Qt.callLater(switchWallpaper);
+    }
+
+    function switchWallpaper() {
+        if (!initialized || !root.source)
+            return;
+
+        let active;
+        let inactive;
+
+        if (oneLoader.item.isCurrent) {
+            active = oneLoader;
+            inactive = twoLoader;
+        } else {
+            active = twoLoader;
+            inactive = oneLoader;
+        }
+
+        inactive.sourceComponent = null;
+        Qt.callLater(() => {
+            inactive.sourceComponent = isVideo(source) ? videoComponent : imageComponent;
+        });
+
+        waitForItem(inactive, function () {
+            inactive.item.update(source);
+
+            inactive.item.ready.connect(function handler() {
+                active.item.isCurrent = false;
+                inactive.item.isCurrent = true;
+                inactive.item.ready.disconnect(handler);
+            });
+        });
+    }
+
+    function waitForItem(loader, callback) {
+        if (loader.item) {
+            callback();
+            return;
+        }
+        Qt.callLater(() => waitForItem(loader, callback));
+    }
+
+    onSessionLockedChanged: {
+        applySessionLock(oneLoader);
+        applySessionLock(twoLoader);
     }
 
     Loader {
+        id: placeholderLoader
         anchors.fill: parent
-
         active: !root.source
 
         sourceComponent: StyledRect {
@@ -68,17 +148,15 @@ Item {
 
                         FileDialog {
                             id: dialog
-
                             title: qsTr("Select a wallpaper")
-                            filterLabel: qsTr("Image files")
-                            filters: Images.validImageExtensions
+                            filterLabel: qsTr("Files")
+                            filters: ["jpg", "jpeg", "png", "webp", "tif", "tiff", "svg", "mp4", "mkv", "webm", "avi", "mov", "flv", "wmv", "gif"]
                             onAccepted: path => Wallpapers.setWallpaper(path)
                         }
 
                         StateLayer {
                             radius: parent.radius
                             color: Colours.palette.m3onPrimary
-
                             function onClicked(): void {
                                 dialog.open();
                             }
@@ -86,9 +164,7 @@ Item {
 
                         StyledText {
                             id: selectWallText
-
                             anchors.centerIn: parent
-
                             text: qsTr("Set it now!")
                             color: Colours.palette.m3onPrimary
                             font.pointSize: Appearance.font.size.large
@@ -99,49 +175,45 @@ Item {
         }
     }
 
-    Img {
-        id: one
-    }
-
-    Img {
-        id: two
-    }
-
-    component Img: CachingImage {
-        id: img
-
-        function update(): void {
-            if (path === root.source)
-                root.current = this;
-            else
-                path = root.source;
-        }
-
+    Loader {
+        id: oneLoader
         anchors.fill: parent
+        sourceComponent: imageComponent
 
-        opacity: 0
-        scale: Wallpapers.showPreview ? 1 : 0.8
-
-        onStatusChanged: {
-            if (status === Image.Ready)
-                root.current = this;
+        onLoaded: {
+            loadedCount++;
+            if (loadedCount === 2)
+                waitForBothItems();
         }
 
-        states: State {
-            name: "visible"
-            when: root.current === img
+        onItemChanged: applySessionLock(oneLoader)
+    }
 
-            PropertyChanges {
-                img.opacity: 1
-                img.scale: 1
-            }
+    Loader {
+        id: twoLoader
+        anchors.fill: parent
+        sourceComponent: imageComponent
+        onLoaded: {
+            loadedCount++;
+            if (loadedCount === 2)
+                waitForBothItems();
         }
 
-        transitions: Transition {
-            Anim {
-                target: img
-                properties: "opacity,scale"
-            }
-        }
+        onItemChanged: applySessionLock(twoLoader)
+    }
+
+    onSourceChanged: {
+        if (initialized)
+            switchWallpaper();
+    }
+
+    Component {
+        id: imageComponent
+        ImageWallpaper {}
+    }
+
+    Component {
+        id: videoComponent
+        VideoWallpaper {}
     }
 }
