@@ -175,13 +175,17 @@ Item {
             if (Config.background && Config.background.timeBasedWallpaper === true) {
                 const scheduledWallpaper = getScheduledWallpaper();
                 
-                if (scheduledWallpaper && scheduledWallpaper !== one.path) {
+                if (scheduledWallpaper) {
                     // Expand ~ to home directory
                     let expandedPath = scheduledWallpaper;
                     if (scheduledWallpaper.startsWith("~/")) {
                         expandedPath = Quickshell.env("HOME") + scheduledWallpaper.substring(1);
                     }
-                    Quickshell.execDetached(["caelestia", "wallpaper", "-f", expandedPath]);
+                    
+                    if (expandedPath !== one.path) {
+                        console.log("Time-based wallpaper change:", expandedPath);
+                        Quickshell.execDetached(["caelestia", "wallpaper", "-f", expandedPath]);
+                    }
                 }
             }
         }
@@ -197,12 +201,16 @@ Item {
             if (Config.background && Config.background.timeBasedWallpaper === true) {
                 const scheduledWallpaper = getScheduledWallpaper();
                 
-                if (scheduledWallpaper && scheduledWallpaper !== one.path) {
+                if (scheduledWallpaper) {
                     let expandedPath = scheduledWallpaper;
                     if (scheduledWallpaper.startsWith("~/")) {
                         expandedPath = Quickshell.env("HOME") + scheduledWallpaper.substring(1);
                     }
-                    Quickshell.execDetached(["caelestia", "wallpaper", "-f", expandedPath]);
+                    
+                    if (expandedPath !== one.path) {
+                        console.log("Time-based wallpaper change (startup):", expandedPath);
+                        Quickshell.execDetached(["caelestia", "wallpaper", "-f", expandedPath]);
+                    }
                 }
             }
             // Then start the regular timer for subsequent checks
@@ -227,7 +235,19 @@ Item {
                 }
                 
                 if (tbw) {
-                    // Calculate delay to next minute boundary
+                    // Check if we should apply a scheduled wallpaper immediately on startup
+                    const scheduledWallpaper = getScheduledWallpaper();
+                    if (scheduledWallpaper) {
+                        let expandedPath = scheduledWallpaper;
+                        if (scheduledWallpaper.startsWith("~/")) {
+                            expandedPath = Quickshell.env("HOME") + scheduledWallpaper.substring(1);
+                        }
+                        
+                        if (expandedPath !== one.path) {
+                            Quickshell.execDetached(["caelestia", "wallpaper", "-f", expandedPath]);
+                        }
+                    }
+                    
                     const now = new Date();
                     const secondsUntilNextMinute = 60 - now.getSeconds();
                     const msUntilNextMinute = secondsUntilNextMinute * 1000 - now.getMilliseconds();
