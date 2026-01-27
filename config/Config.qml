@@ -148,6 +148,12 @@ Singleton {
     function serializeBackground(): var {
         return {
             enabled: background.enabled,
+            wallpaperTransition: background.wallpaperTransition,
+            transitionDuration: background.transitionDuration,
+            autoRandomWallpaper: background.autoRandomWallpaper,
+            autoRandomInterval: background.autoRandomInterval,
+            timeBasedWallpaper: background.timeBasedWallpaper,
+            wallpaperSchedule: background.wallpaperSchedule,
             desktopClock: {
                 enabled: background.desktopClock.enabled,
                 scale: background.desktopClock.scale,

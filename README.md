@@ -306,7 +306,18 @@ default, you must create it manually.
         "wallpaperTransition": "random",
         "transitionDuration": 1000,
         "autoRandomWallpaper": false,
-        "autoRandomInterval": 30,
+        "autoRandomInterval": 300,
+        "timeBasedWallpaper": false,
+        "wallpaperSchedule": [
+            {
+                "startTime": "06:00",
+                "wallpaper": "~/Pictures/Wallpapers/morning.jpg"
+            },
+            {
+                "startTime": "18:00",
+                "wallpaper": "~/Pictures/Wallpapers/evening.jpg"
+            }
+        ],
         "desktopClock": {
             "enabled": false,
             "scale": 1.0,

@@ -14,7 +14,7 @@ Item {
 
     property string source: Wallpapers.current
     property Image current: one
-    property string transitionType: Config.background.wallpaperTransition
+    property string transitionType: Config.background.wallpaperTransition ?? "fade"
     property string activeTransitionType: "fade"
     property real transitionProgress: 0
     property real wipeDirection: 0
@@ -27,6 +27,58 @@ Item {
     readonly property var availableTransitions: ["fade", "wipe", "disc", "stripes"]
 
     anchors.fill: parent
+
+    function getScheduledWallpaper() {
+        try {
+            if (!root.enabled) return "";
+            
+            const tbw = Config.background.timeBasedWallpaper;
+            if (tbw !== true) return "";
+            
+            const schedule = Config.background.wallpaperSchedule;
+            if (!schedule || schedule.length === 0) return "";
+            
+            const now = new Date();
+            const currentMinutes = now.getHours() * 60 + now.getMinutes();
+            
+            for (let i = 0; i < schedule.length; i++) {
+                const entry = schedule[i];
+                if (!entry || !entry.startTime || !entry.wallpaper) continue;
+                
+                const timeParts = entry.startTime.split(":");
+                if (timeParts.length !== 2) continue;
+                
+                const startMinutes = parseInt(timeParts[0]) * 60 + parseInt(timeParts[1]);
+                if (isNaN(startMinutes)) continue;
+                
+                let endMinutes = 24 * 60;
+                if (i < schedule.length - 1) {
+                    const nextEntry = schedule[i + 1];
+                    if (nextEntry && nextEntry.startTime) {
+                        const nextParts = nextEntry.startTime.split(":");
+                        if (nextParts.length === 2) {
+                            const nextMinutes = parseInt(nextParts[0]) * 60 + parseInt(nextParts[1]);
+                            if (!isNaN(nextMinutes)) {
+                                endMinutes = nextMinutes;
+                            }
+                        }
+                    }
+                }
+                
+                if (startMinutes <= currentMinutes && currentMinutes < endMinutes) {
+                    return entry.wallpaper;
+                }
+            }
+            if (schedule.length > 0 && schedule[0].wallpaper) {
+                return schedule[0].wallpaper;
+            }
+            
+            return "";
+        } catch (e) {
+            console.error("Error in getScheduledWallpaper:", e);
+            return "";
+        }
+    }
 
     function setWallpaperWithTransition(newSource) {
         if (newSource === one.path) {
@@ -93,7 +145,7 @@ Item {
 
     Timer {
         id: debounceTimer
-        interval: Config.background.transitionDuration + 100
+        interval: 1100
         repeat: false
         onTriggered: {
             if (pendingWallpaper && pendingWallpaper !== one.path && pendingWallpaper === source) {
@@ -104,8 +156,8 @@ Item {
 
     Timer {
         id: autoRandomTimer
-        interval: Config.background.autoRandomInterval * 1000
-        running: Config.background.autoRandomWallpaper
+        interval: 300000
+        running: false
         repeat: true
         triggeredOnStart: false
         onTriggered: {
@@ -113,9 +165,80 @@ Item {
         }
     }
 
+    Timer {
+        id: timeBasedTimer
+        interval: 60000
+        running: false
+        repeat: true
+        triggeredOnStart: false
+        onTriggered: {
+            if (Config.background && Config.background.timeBasedWallpaper === true) {
+                const scheduledWallpaper = getScheduledWallpaper();
+                
+                if (scheduledWallpaper && scheduledWallpaper !== one.path) {
+                    // Expand ~ to home directory
+                    let expandedPath = scheduledWallpaper;
+                    if (scheduledWallpaper.startsWith("~/")) {
+                        expandedPath = Quickshell.env("HOME") + scheduledWallpaper.substring(1);
+                    }
+                    Quickshell.execDetached(["caelestia", "wallpaper", "-f", expandedPath]);
+                }
+            }
+        }
+    }
+    
+    Timer {
+        id: minuteAlignTimer
+        interval: 1000
+        running: false
+        repeat: false
+        onTriggered: {
+            // Check schedule immediately when aligned to minute
+            if (Config.background && Config.background.timeBasedWallpaper === true) {
+                const scheduledWallpaper = getScheduledWallpaper();
+                
+                if (scheduledWallpaper && scheduledWallpaper !== one.path) {
+                    let expandedPath = scheduledWallpaper;
+                    if (scheduledWallpaper.startsWith("~/")) {
+                        expandedPath = Quickshell.env("HOME") + scheduledWallpaper.substring(1);
+                    }
+                    Quickshell.execDetached(["caelestia", "wallpaper", "-f", expandedPath]);
+                }
+            }
+            // Then start the regular timer for subsequent checks
+            timeBasedTimer.running = true;
+        }
+    }
+    
     Component.onCompleted: {
         if (source)
             Qt.callLater(() => { one.path = source; });
+        
+        Qt.callLater(() => {
+            try {
+                debounceTimer.interval = (Config.background.transitionDuration ?? 1000) + 100;
+                autoRandomTimer.interval = (Config.background.autoRandomInterval ?? 300) * 1000;
+                
+                const arw = Config.background.autoRandomWallpaper ?? false;
+                const tbw = Config.background.timeBasedWallpaper ?? false;
+                
+                if (arw && !tbw) {
+                    autoRandomTimer.running = true;
+                }
+                
+                if (tbw) {
+                    // Calculate delay to next minute boundary
+                    const now = new Date();
+                    const secondsUntilNextMinute = 60 - now.getSeconds();
+                    const msUntilNextMinute = secondsUntilNextMinute * 1000 - now.getMilliseconds();
+                    
+                    minuteAlignTimer.interval = msUntilNextMinute;
+                    minuteAlignTimer.start();
+                }
+            } catch (e) {
+                console.error("Error setting up timers:", e);
+            }
+        });
     }
 
     Loader {
@@ -307,7 +430,7 @@ Item {
         property: "transitionProgress"
         from: 0.0
         to: 1.0
-        duration: Config.background.transitionDuration
+        duration: Config.background.transitionDuration ?? 1000
         easing.type: Easing.InOutCubic
         onFinished: {
             one.path = two.path;
