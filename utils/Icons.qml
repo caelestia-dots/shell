@@ -172,7 +172,8 @@ Singleton {
     function getVolumeIcon(volume: real, isMuted: bool): string {
         if (isMuted)
             return "no_sound";
-        if (volume >= 0.5)
+        const halfMax = Config.services.maxVolume * 0.5;
+        if (volume >= halfMax)
             return "volume_up";
         if (volume > 0)
             return "volume_down";

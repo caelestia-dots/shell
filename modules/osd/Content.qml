@@ -48,6 +48,13 @@ Item {
                 value: root.volume
                 to: Config.services.maxVolume
                 onMoved: Audio.setVolume(value)
+
+                Connections {
+                    target: Config.services
+                    function onMaxVolumeChanged() {
+                        to = Config.services.maxVolume;
+                    }
+                }
             }
         }
 
@@ -73,6 +80,13 @@ Item {
                     value: root.sourceVolume
                     to: Config.services.maxVolume
                     onMoved: Audio.setSourceVolume(value)
+
+                    Connections {
+                        target: Config.services
+                        function onMaxVolumeChanged() {
+                            to = Config.services.maxVolume;
+                        }
+                    }
                 }
             }
         }

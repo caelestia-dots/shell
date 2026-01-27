@@ -15,15 +15,16 @@ Slider {
     orientation: Qt.Vertical
 
     background: StyledRect {
-        color: Colours.layer(Colours.palette.m3surfaceContainer, 2)
+        color: root.value >= 1.01 ? Colours.palette.m3tertiary : Colours.layer(Colours.palette.m3surfaceContainer, 2)
         radius: Appearance.rounding.full
 
+        // Filled section (active)
         StyledRect {
             anchors.left: parent.left
             anchors.right: parent.right
+            anchors.bottom: parent.bottom
 
-            y: root.handle.y
-            implicitHeight: parent.height - y
+            implicitHeight: parent.height - root.handle.y
 
             color: Colours.palette.m3secondary
             radius: parent.radius

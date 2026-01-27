@@ -10,6 +10,7 @@ import QtQuick
 import QtQuick.Layouts
 import QtQuick.Controls
 import "../../controlcenter/network"
+import "../../controlcenter/audio"
 
 Item {
     id: root
@@ -91,16 +92,28 @@ Item {
                     Audio.decrementVolume();
             }
 
-            StyledSlider {
+            VolumeSlider {
                 anchors.left: parent.left
                 anchors.right: parent.right
                 implicitHeight: parent.implicitHeight
 
+                from: 0
+                to: Config.services.maxVolume
                 value: Audio.volume
                 onMoved: Audio.setVolume(value)
 
-                Behavior on value {
-                    Anim {}
+                Connections {
+                    target: Config.services
+                    function onMaxVolumeChanged() {
+                        to = Config.services.maxVolume;
+                    }
+                }
+
+                Behavior on to {
+                    Anim {
+                        duration: Appearance.anim.durations.normal
+                        easing.bezierCurve: Appearance.anim.curves.standard
+                    }
                 }
             }
         }
