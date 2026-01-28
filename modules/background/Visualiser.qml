@@ -27,17 +27,20 @@ Item {
         Anim {}
     }
 
-    // Keep Audio service alive
     ServiceRef {
         id: cavaRef
         service: Audio.cava
     }
 
-    // Bar gradient colors
+    ShaderEffectSource {
+        id: wallpaperSource
+        sourceItem: root.wallpaper
+        live: true
+    }
+
     property color barColorTop: Qt.alpha(Colours.palette.m3primary, 1)
     property color barColorBottom: Qt.alpha(Colours.palette.m3inversePrimary, 0.7)
 
-    // Rounded corner radius
     property real barRadius: Appearance.rounding.small * Config.background.visualiser.rounding
 
     Loader {
@@ -50,12 +53,12 @@ Item {
         anchors.margins: Config.border.thickness
         active: root.opacity > 0 && Config.background.visualiser.blur
         sourceComponent: MultiEffect {
-            source: root.wallpaper
+            source: wallpaperSource
             maskSource: canvas
             maskEnabled: true
             maskSpreadAtMax: 0
             maskSpreadAtMin: 0
-            maskThresholdMin: 0.65 // eliminates strange blur outline
+            maskThresholdMin: 0.67 // eliminates blur spreading out of bounds
             blurEnabled: true
             blur: 1
             blurMax: 32
@@ -85,11 +88,10 @@ Item {
 
             property real smoothing: 1 - (0.95 * Config.background.visualiser.smoothing)
 
-            property real spatialRadius: 1
+            property int spatialRadius: Config.background.visualiser.curvature
 
             property var spatialValues: Array(barCount * 2).fill(0)
 
-            // clip: true
             function drawRoundedRect(ctx, x, y, w, h, r) {
                 r = Math.min(r, w / 2, h / 2);
                 ctx.beginPath();
@@ -112,7 +114,6 @@ Item {
                     if (idx < 0 || idx >= values.length)
                         continue;
 
-                    // Gaussian-ish weight
                     var w = Math.exp(-(o * o) / (2 * radius * radius));
                     sum += values[idx] * w;
                     weightSum += w;
@@ -138,8 +139,6 @@ Item {
                 ctx.fillStyle = sharedGradient;
 
                 for (var i = 0; i < barCount; i++) {
-                    /* ---------- TIME SMOOTHING (unchanged) ---------- */
-
                     var targetLeft = Math.max(0, Math.min(1, Audio.cava.values[i]));
                     displayValues[i] += (targetLeft - displayValues[i]) * smoothing;
 
@@ -147,12 +146,10 @@ Item {
                     displayValues[barCount + i] += (targetRight - displayValues[barCount + i]) * smoothing;
                 }
 
-                /* ---------- SPATIAL SMOOTHING PASS ---------- */
                 for (var i = 0; i < barCount * 2; i++) {
                     spatialValues[i] = spatialSmooth(i, displayValues, spatialRadius);
                 }
 
-                /* ---------- DRAW ---------- */
                 for (var i = 0; i < barCount; i++) {
 
                     // Left
@@ -180,7 +177,7 @@ Item {
             }
 
             Timer {
-                interval: 8
+                interval: 16
                 running: true
                 repeat: true
                 onTriggered: canvas.requestPaint()

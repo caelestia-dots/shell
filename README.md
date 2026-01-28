@@ -320,9 +320,11 @@ default, you must create it manually.
         },
         "enabled": true,
         "visualiser": {
-            "smoothing": 0.6,
             "enabled": false,
             "autoHide": true,
+            "blur": true,
+            "smoothing": 0.6,
+            "curvature": 1,
             "rounding": 1,
             "spacing": 1
         }
