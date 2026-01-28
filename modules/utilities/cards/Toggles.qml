@@ -12,6 +12,7 @@ StyledRect {
     id: root
 
     required property var visibilities
+    required property Item popouts
 
     Layout.fillWidth: true
     implicitHeight: layout.implicitHeight + Appearance.padding.large * 2
@@ -67,9 +68,7 @@ StyledRect {
                 toggle: false
                 onClicked: {
                     root.visibilities.utilities = false;
-                    WindowFactory.create(null, {
-                        screen: QsWindow.window?.screen ?? null
-                    });
+                    root.popouts.detach("network");
                 }
             }
 
@@ -89,7 +88,7 @@ StyledRect {
                 icon: "vpn_key"
                 checked: VPN.connected
                 enabled: !VPN.connecting
-                visible: VPN.enabled
+                visible: Config.utilities.vpn.provider.some(p => typeof p === "object" ? (p.enabled === true) : false)
                 onClicked: VPN.toggle()
             }
         }

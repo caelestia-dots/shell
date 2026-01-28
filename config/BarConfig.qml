@@ -7,10 +7,12 @@ JsonObject {
     property ScrollActions scrollActions: ScrollActions {}
     property Popouts popouts: Popouts {}
     property Workspaces workspaces: Workspaces {}
+    property ActiveWindow activeWindow: ActiveWindow {}
     property Tray tray: Tray {}
     property Status status: Status {}
     property Clock clock: Clock {}
     property Sizes sizes: Sizes {}
+    property list<string> excludedScreens: []
 
     property list<var> entries: [
         {
@@ -78,6 +80,10 @@ JsonObject {
         property list<var> specialWorkspaceIcons: []
     }
 
+    component ActiveWindow: JsonObject {
+        property bool inverted: false
+    }
+
     component Tray: JsonObject {
         property bool background: false
         property bool recolour: false
@@ -90,6 +96,7 @@ JsonObject {
         property bool showMicrophone: false
         property bool showKbLayout: false
         property bool showNetwork: true
+        property bool showWifi: true
         property bool showBluetooth: true
         property bool showBattery: true
         property bool showLockStatus: true
@@ -105,5 +112,6 @@ JsonObject {
         property int trayMenuWidth: 300
         property int batteryWidth: 250
         property int networkWidth: 320
+        property int kbLayoutWidth: 320
     }
 }

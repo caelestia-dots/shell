@@ -143,11 +143,23 @@ StyledRect {
         // Network icon
         WrappedLoader {
             name: "network"
-            active: Config.bar.status.showNetwork
+            active: Config.bar.status.showNetwork && (!Nmcli.activeEthernet || Config.bar.status.showWifi)
 
             sourceComponent: MaterialIcon {
                 animate: true
-                text: Network.active ? Icons.getNetworkIcon(Network.active.strength ?? 0) : "wifi_off"
+                text: Nmcli.active ? Icons.getNetworkIcon(Nmcli.active.strength ?? 0) : "wifi_off"
+                color: root.colour
+            }
+        }
+
+        // Ethernet icon
+        WrappedLoader {
+            name: "ethernet"
+            active: Config.bar.status.showNetwork && Nmcli.activeEthernet
+
+            sourceComponent: MaterialIcon {
+                animate: true
+                text: "cable"
                 color: root.colour
             }
         }
@@ -253,7 +265,6 @@ StyledRect {
         required property string name
 
         Layout.alignment: Qt.AlignHCenter
-        asynchronous: true
         visible: active
     }
 }

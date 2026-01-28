@@ -35,8 +35,8 @@ Item {
         if (mode === "winfo") {
             detachedMode = mode;
         } else {
-            detachedMode = "any";
             queuedMode = mode;
+            detachedMode = "any";
         }
         focus = true;
     }
@@ -55,7 +55,25 @@ Item {
     implicitWidth: nonAnimWidth
     implicitHeight: nonAnimHeight
 
-    Keys.onEscapePressed: close()
+    focus: hasCurrent
+    Keys.onEscapePressed: {
+        // Forward escape to password popout if active, otherwise close
+        if (currentName === "wirelesspassword" && content.item) {
+            const passwordPopout = content.item.children.find(c => c.name === "wirelesspassword");
+            if (passwordPopout && passwordPopout.item) {
+                passwordPopout.item.closeDialog();
+                return;
+            }
+        }
+        close();
+    }
+
+    Keys.onPressed: event => {
+        // Don't intercept keys when password popout is active - let it handle them
+        if (currentName === "wirelesspassword") {
+            event.accepted = false;
+        }
+    }
 
     HyprlandFocusGrab {
         active: root.isDetached
@@ -71,11 +89,18 @@ Item {
         value: WlrKeyboardFocus.OnDemand
     }
 
+    Binding {
+        when: root.hasCurrent && root.currentName === "wirelesspassword"
+
+        target: QsWindow.window
+        property: "WlrLayershell.keyboardFocus"
+        value: WlrKeyboardFocus.OnDemand
+    }
+
     Comp {
         id: content
 
         shouldBeActive: root.hasCurrent && !root.detachedMode
-        asynchronous: true
         anchors.right: parent.right
         anchors.verticalCenter: parent.verticalCenter
 
@@ -86,7 +111,6 @@ Item {
 
     Comp {
         shouldBeActive: root.detachedMode === "winfo"
-        asynchronous: true
         anchors.centerIn: parent
 
         sourceComponent: WindowInfo {
@@ -97,7 +121,6 @@ Item {
 
     Comp {
         shouldBeActive: root.detachedMode === "any"
-        asynchronous: true
         anchors.centerIn: parent
 
         sourceComponent: ControlCenter {
@@ -147,7 +170,6 @@ Item {
 
         property bool shouldBeActive
 
-        asynchronous: true
         active: false
         opacity: 0
 

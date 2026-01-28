@@ -6,6 +6,7 @@ MouseArea {
     id: root
 
     property bool disabled
+    property bool showHoverBackground: true
     property color color: Colours.palette.m3onSurface
     property real radius: parent?.radius ?? 0
     property alias rect: hoverLayer
@@ -75,7 +76,7 @@ MouseArea {
 
         anchors.fill: parent
 
-        color: Qt.alpha(root.color, root.disabled ? 0 : root.pressed ? 0.1 : root.containsMouse ? 0.08 : 0)
+        color: Qt.alpha(root.color, root.disabled ? 0 : root.pressed ? 0.12 : (root.showHoverBackground && root.containsMouse) ? 0.08 : 0)
         radius: root.radius
 
         StyledRect {

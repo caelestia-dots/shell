@@ -61,7 +61,6 @@ ColumnLayout {
 
         visible: active
         active: root.hasWindows
-        asynchronous: true
 
         sourceComponent: Column {
             spacing: 0

@@ -69,7 +69,6 @@ Item {
             anchors.verticalCenter: parent.verticalCenter
 
             active: root.modelData?.variant === Schemes.currentVariant
-            asynchronous: true
 
             sourceComponent: MaterialIcon {
                 text: "check"

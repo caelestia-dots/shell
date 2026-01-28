@@ -42,7 +42,6 @@ Item {
             Layout.fillWidth: true
             Layout.columnSpan: 2
 
-            asynchronous: true
             active: root.floating
             visible: active
 
@@ -64,6 +63,11 @@ Item {
                 anchors.fill: parent
 
                 function onWheel(event: WheelEvent): void {
+                    // Prevent tab switching during initial opening animation to avoid blank pages
+                    if (!panes.initialOpeningComplete) {
+                        return;
+                    }
+
                     if (event.angleDelta.y < 0)
                         root.session.activeIndex = Math.min(root.session.activeIndex + 1, root.session.panes.length - 1);
                     else if (event.angleDelta.y > 0)
@@ -76,10 +80,13 @@ Item {
 
                 screen: root.screen
                 session: root.session
+                initialOpeningComplete: root.initialOpeningComplete
             }
         }
 
         Panes {
+            id: panes
+
             Layout.fillWidth: true
             Layout.fillHeight: true
 
@@ -88,4 +95,6 @@ Item {
             session: root.session
         }
     }
+
+    readonly property bool initialOpeningComplete: panes.initialOpeningComplete
 }
