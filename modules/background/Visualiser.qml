@@ -40,20 +40,29 @@ Item {
     // Rounded corner radius
     property real barRadius: Appearance.rounding.small * Config.background.visualiser.rounding
 
-    // This loader was supposed to be for blur but i genuinley cant figure out how to stop it from desyncing with the canvas
-    // Loader {
-    //     anchors.fill: parent
-    //     active: root.opacity > 0 && Config.background.visualiser.blur
-    //     sourceComponent: MultiEffect {
-    //         source: root.wallpaper
-    //         maskSource: canvas
-    //         maskEnabled: true
-    //         blurEnabled: true
-    //         blur: 1
-    //         blurMax: 32
-    //         autoPaddingEnabled: false
-    //     }
-    // }
+    Loader {
+        anchors.fill: parent
+        y: offset
+        height: parent.height - offset * 2
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.leftMargin: Visibilities.bars.get(root.screen).exclusiveZone + Appearance.spacing.small * Config.background.visualiser.spacing
+        anchors.margins: Config.border.thickness
+        active: root.opacity > 0 && Config.background.visualiser.blur
+        sourceComponent: MultiEffect {
+            source: root.wallpaper
+            maskSource: canvas
+            maskEnabled: true
+            maskSpreadAtMax: 0
+            maskSpreadAtMin: 0
+            maskThresholdMin: 0.65 // eliminates strange blur outline
+            blurEnabled: true
+            blur: 1
+            blurMax: 32
+            autoPaddingEnabled: false
+            shadowEnabled: false
+        }
+    }
 
     Item {
         id: canvasWrapper
@@ -76,6 +85,11 @@ Item {
 
             property real smoothing: 1 - (0.95 * Config.background.visualiser.smoothing)
 
+            property real spatialRadius: 1
+
+            property var spatialValues: Array(barCount * 2).fill(0)
+
+            // clip: true
             function drawRoundedRect(ctx, x, y, w, h, r) {
                 r = Math.min(r, w / 2, h / 2);
                 ctx.beginPath();
@@ -88,6 +102,26 @@ Item {
                 ctx.quadraticCurveTo(x, y, x + r, y);
                 ctx.closePath();
             }
+
+            function spatialSmooth(index, values, radius) {
+                var sum = 0;
+                var weightSum = 0;
+
+                for (var o = -radius; o <= radius; o++) {
+                    var idx = index + o;
+                    if (idx < 0 || idx >= values.length)
+                        continue;
+
+                    // Gaussian-ish weight
+                    var w = Math.exp(-(o * o) / (2 * radius * radius));
+                    sum += values[idx] * w;
+                    weightSum += w;
+                }
+                return weightSum > 0 ? sum / weightSum : values[index];
+            }
+
+            renderStrategy: Canvas.Cooperative
+            layer.enabled: true
 
             onPaint: {
                 var ctx = getContext("2d");
@@ -104,32 +138,49 @@ Item {
                 ctx.fillStyle = sharedGradient;
 
                 for (var i = 0; i < barCount; i++) {
-                    // Left bar
+                    /* ---------- TIME SMOOTHING (unchanged) ---------- */
+
                     var targetLeft = Math.max(0, Math.min(1, Audio.cava.values[i]));
                     displayValues[i] += (targetLeft - displayValues[i]) * smoothing;
 
-                    var xLeft = i * (width * 0.4 / barCount);
-                    var hLeft = displayValues[i] * height * 0.4;
-                    var yLeft = height - hLeft;
-
-                    drawRoundedRect(ctx, xLeft, yLeft, barWidth, hLeft, barRadius);
-                    ctx.fill();
-
-                    // Right bar
                     var targetRight = Math.max(0, Math.min(1, Audio.cava.values[barCount - i - 1]));
                     displayValues[barCount + i] += (targetRight - displayValues[barCount + i]) * smoothing;
+                }
 
+                /* ---------- SPATIAL SMOOTHING PASS ---------- */
+                for (var i = 0; i < barCount * 2; i++) {
+                    spatialValues[i] = spatialSmooth(i, displayValues, spatialRadius);
+                }
+
+                /* ---------- DRAW ---------- */
+                for (var i = 0; i < barCount; i++) {
+
+                    // Left
+                    var vLeft = spatialValues[i];
+                    var xLeft = i * (width * 0.4 / barCount);
+                    var hLeft = vLeft * height * 0.4;
+                    var yLeft = height - hLeft;
+
+                    if (hLeft > 0) {
+                        drawRoundedRect(ctx, xLeft, yLeft, barWidth, hLeft, barRadius);
+                        ctx.fill();
+                    }
+
+                    // Right
+                    var vRight = spatialValues[barCount + i];
                     var xRight = width * 0.6 + i * (width * 0.4 / barCount);
-                    var hRight = displayValues[barCount + i] * height * 0.4;
+                    var hRight = vRight * height * 0.4;
                     var yRight = height - hRight;
 
-                    drawRoundedRect(ctx, xRight, yRight, barWidth, hRight, barRadius);
-                    ctx.fill();
+                    if (hRight > 0) {
+                        drawRoundedRect(ctx, xRight, yRight, barWidth, hRight, barRadius);
+                        ctx.fill();
+                    }
                 }
             }
 
             Timer {
-                interval: 16
+                interval: 8
                 running: true
                 repeat: true
                 onTriggered: canvas.requestPaint()
