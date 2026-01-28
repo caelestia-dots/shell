@@ -19,7 +19,7 @@ Singleton {
             root.savedConnectionSsids = Nmcli.savedConnectionSsids;
         });
         // Get initial WiFi status
-        Nmcli.getWifiStatus((enabled) => {
+        Nmcli.getWifiStatus(enabled => {
             root.wifiEnabled = enabled;
         });
         // Sync networks from Nmcli on startup
@@ -41,7 +41,7 @@ Singleton {
     property var wirelessDeviceDetails: null
 
     function enableWifi(enabled: bool): void {
-        Nmcli.enableWifi(enabled, (result) => {
+        Nmcli.enableWifi(enabled, result => {
             if (result.success) {
                 root.getWifiStatus();
                 Nmcli.getNetworks(() => {
@@ -52,7 +52,7 @@ Singleton {
     }
 
     function toggleWifi(): void {
-        Nmcli.toggleWifi((result) => {
+        Nmcli.toggleWifi(result => {
             if (result.success) {
                 root.getWifiStatus();
                 Nmcli.getNetworks(() => {
@@ -73,23 +73,30 @@ Singleton {
         // Set up pending connection tracking if callback provided
         if (callback) {
             const hasBssid = bssid !== undefined && bssid !== null && bssid.length > 0;
-            root.pendingConnection = { ssid: ssid, bssid: hasBssid ? bssid : "", callback: callback };
+            root.pendingConnection = {
+                ssid: ssid,
+                bssid: hasBssid ? bssid : "",
+                callback: callback
+            };
         }
-        
-        Nmcli.connectToNetwork(ssid, password, bssid, (result) => {
+
+        Nmcli.connectToNetwork(ssid, password, bssid, result => {
             if (result && result.success) {
                 // Connection successful
-                if (callback) callback(result);
+                if (callback)
+                    callback(result);
                 root.pendingConnection = null;
             } else if (result && result.needsPassword) {
                 // Password needed - callback will handle showing dialog
-                if (callback) callback(result);
+                if (callback)
+                    callback(result);
             } else {
                 // Connection failed
                 if (result && result.error) {
                     root.connectionFailed(ssid);
                 }
-                if (callback) callback(result);
+                if (callback)
+                    callback(result);
                 root.pendingConnection = null;
             }
         });
@@ -98,22 +105,29 @@ Singleton {
     function connectToNetworkWithPasswordCheck(ssid: string, isSecure: bool, callback: var, bssid: string): void {
         // Set up pending connection tracking
         const hasBssid = bssid !== undefined && bssid !== null && bssid.length > 0;
-        root.pendingConnection = { ssid: ssid, bssid: hasBssid ? bssid : "", callback: callback };
-        
-        Nmcli.connectToNetworkWithPasswordCheck(ssid, isSecure, (result) => {
+        root.pendingConnection = {
+            ssid: ssid,
+            bssid: hasBssid ? bssid : "",
+            callback: callback
+        };
+
+        Nmcli.connectToNetworkWithPasswordCheck(ssid, isSecure, result => {
             if (result && result.success) {
                 // Connection successful
-                if (callback) callback(result);
+                if (callback)
+                    callback(result);
                 root.pendingConnection = null;
             } else if (result && result.needsPassword) {
                 // Password needed - callback will handle showing dialog
-                if (callback) callback(result);
+                if (callback)
+                    callback(result);
             } else {
                 // Connection failed
                 if (result && result.error) {
                     root.connectionFailed(ssid);
                 }
-                if (callback) callback(result);
+                if (callback)
+                    callback(result);
                 root.pendingConnection = null;
             }
         }, bssid);
@@ -133,7 +147,7 @@ Singleton {
     function forgetNetwork(ssid: string): void {
         // Delete the connection profile for this network
         // This will remove the saved password and connection settings
-        Nmcli.forgetNetwork(ssid, (result) => {
+        Nmcli.forgetNetwork(ssid, result => {
             if (result.success) {
                 // Refresh network list after deletion
                 Qt.callLater(() => {
@@ -144,7 +158,6 @@ Singleton {
             }
         });
     }
-
 
     property list<string> savedConnections: []
     property list<string> savedConnectionSsids: []
@@ -163,21 +176,21 @@ Singleton {
     function syncNetworksFromNmcli(): void {
         const rNetworks = root.networks;
         const nNetworks = Nmcli.networks;
-        
+
         // Build a map of existing networks by key
         const existingMap = new Map();
         for (const rn of rNetworks) {
             const key = `${rn.frequency}:${rn.ssid}:${rn.bssid}`;
             existingMap.set(key, rn);
         }
-        
+
         // Build a map of new networks by key
         const newMap = new Map();
         for (const nn of nNetworks) {
             const key = `${nn.frequency}:${nn.ssid}:${nn.bssid}`;
             newMap.set(key, nn);
         }
-        
+
         // Remove networks that no longer exist
         for (const [key, network] of existingMap) {
             if (!newMap.has(key)) {
@@ -188,7 +201,7 @@ Singleton {
                 }
             }
         }
-        
+
         // Add or update networks from Nmcli
         for (const [key, nNetwork] of newMap) {
             const existing = existingMap.get(key);
@@ -226,28 +239,29 @@ Singleton {
     }
 
     function getWifiStatus(): void {
-        Nmcli.getWifiStatus((enabled) => {
+        Nmcli.getWifiStatus(enabled => {
             root.wifiEnabled = enabled;
         });
     }
 
     function getEthernetDevices(): void {
         root.ethernetProcessRunning = true;
-        Nmcli.getEthernetInterfaces((interfaces) => {
+        Nmcli.getEthernetInterfaces(interfaces => {
             root.ethernetDevices = Nmcli.ethernetDevices;
             root.ethernetDeviceCount = Nmcli.ethernetDevices.length;
             root.ethernetProcessRunning = false;
         });
     }
 
-
     function connectEthernet(connectionName: string, interfaceName: string): void {
-        Nmcli.connectEthernet(connectionName, interfaceName, (result) => {
+        Nmcli.connectEthernet(connectionName, interfaceName, result => {
             if (result.success) {
                 getEthernetDevices();
                 // Refresh device details after connection
                 Qt.callLater(() => {
-                    const activeDevice = root.ethernetDevices.find(function(d) { return d.connected; });
+                    const activeDevice = root.ethernetDevices.find(function (d) {
+                        return d.connected;
+                    });
                     if (activeDevice && activeDevice.interface) {
                         updateEthernetDeviceDetails(activeDevice.interface);
                     }
@@ -257,7 +271,7 @@ Singleton {
     }
 
     function disconnectEthernet(connectionName: string): void {
-        Nmcli.disconnectEthernet(connectionName, (result) => {
+        Nmcli.disconnectEthernet(connectionName, result => {
             if (result.success) {
                 getEthernetDevices();
                 // Clear device details after disconnection
@@ -269,7 +283,7 @@ Singleton {
     }
 
     function updateEthernetDeviceDetails(interfaceName: string): void {
-        Nmcli.getEthernetDeviceDetails(interfaceName, (details) => {
+        Nmcli.getEthernetDeviceDetails(interfaceName, details => {
             root.ethernetDeviceDetails = details;
         });
     }
@@ -277,7 +291,7 @@ Singleton {
     function updateWirelessDeviceDetails(): void {
         // Find the wireless interface by looking for wifi devices
         // Pass empty string to let Nmcli find the active interface automatically
-        Nmcli.getWirelessDeviceDetails("", (details) => {
+        Nmcli.getWirelessDeviceDetails("", details => {
             root.wirelessDeviceDetails = details;
         });
     }
@@ -290,12 +304,7 @@ Singleton {
         }
 
         const mask = (0xffffffff << (32 - cidrNum)) >>> 0;
-        const octets = [
-            (mask >>> 24) & 0xff,
-            (mask >>> 16) & 0xff,
-            (mask >>> 8) & 0xff,
-            mask & 0xff
-        ];
+        const octets = [(mask >>> 24) & 0xff, (mask >>> 16) & 0xff, (mask >>> 8) & 0xff, mask & 0xff];
 
         return octets.join(".");
     }
@@ -312,5 +321,4 @@ Singleton {
             }
         }
     }
-
 }

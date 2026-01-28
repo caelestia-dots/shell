@@ -18,5 +18,6 @@ QtObject {
     readonly property VpnState vpn: VpnState {}
 
     onActiveChanged: activeIndex = Math.max(0, panes.indexOf(active))
-    onActiveIndexChanged: if (panes[activeIndex]) active = panes[activeIndex]
+    onActiveIndexChanged: if (panes[activeIndex])
+        active = panes[activeIndex]
 }

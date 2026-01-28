@@ -26,4 +26,3 @@ RowLayout {
         cLayer: 2
     }
 }
-

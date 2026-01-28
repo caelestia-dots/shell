@@ -89,4 +89,3 @@ CollapsibleSection {
         }
     }
 }
-

@@ -46,82 +46,82 @@ Loader {
                 }
             }
 
-
             Loader {
                 id: clockLoader
                 active: Config.background.desktopClock.enabled
 
                 anchors.margins: Appearance.padding.large * 2
                 anchors.leftMargin: Appearance.padding.large * 2 + Config.bar.sizes.innerWidth + Math.max(Appearance.padding.smaller, Config.border.thickness)
-                
+
                 state: Config.background.desktopClock.position
                 states: [
                     State {
                         name: "top-left"
-                        AnchorChanges { 
-                            target: clockLoader 
-                            anchors.top: parent.top 
-                            anchors.left: parent.left 
+                        AnchorChanges {
+                            target: clockLoader
+                            anchors.top: parent.top
+                            anchors.left: parent.left
                         }
                     },
                     State {
                         name: "top-center"
-                        AnchorChanges { 
+                        AnchorChanges {
                             target: clockLoader
-                            anchors.top: parent.top 
-                            anchors.horizontalCenter: parent.horizontalCenter 
+                            anchors.top: parent.top
+                            anchors.horizontalCenter: parent.horizontalCenter
                         }
                     },
                     State {
                         name: "top-right"
-                        AnchorChanges { 
+                        AnchorChanges {
                             target: clockLoader
-                            anchors.top: parent.top 
-                            anchors.right: parent.right }
+                            anchors.top: parent.top
+                            anchors.right: parent.right
+                        }
                     },
                     State {
                         name: "middle-left"
-                        AnchorChanges { 
+                        AnchorChanges {
                             target: clockLoader
                             anchors.verticalCenter: parent.verticalCenter
-                            anchors.left: parent.left 
+                            anchors.left: parent.left
                         }
                     },
                     State {
                         name: "middle-center"
-                        AnchorChanges { 
-                            target: clockLoader 
+                        AnchorChanges {
+                            target: clockLoader
                             anchors.verticalCenter: parent.verticalCenter
                             anchors.horizontalCenter: parent.horizontalCenter
                         }
                     },
                     State {
                         name: "middle-right"
-                        AnchorChanges { 
+                        AnchorChanges {
                             target: clockLoader
                             anchors.verticalCenter: parent.verticalCenter
-                            anchors.right: parent.right 
+                            anchors.right: parent.right
                         }
                     },
                     State {
                         name: "bottom-left"
-                        AnchorChanges { 
+                        AnchorChanges {
                             target: clockLoader
                             anchors.bottom: parent.bottom
-                            anchors.left: parent.left 
+                            anchors.left: parent.left
                         }
                     },
                     State {
                         name: "bottom-center"
-                        AnchorChanges { 
+                        AnchorChanges {
                             target: clockLoader
-                            anchors.bottom: parent.bottom 
+                            anchors.bottom: parent.bottom
                             anchors.horizontalCenter: parent.horizontalCenter
                         }
                     },
                     State {
                         name: "bottom-right"
-                        AnchorChanges { 
+                        AnchorChanges {
                             target: clockLoader
                             anchors.bottom: parent.bottom
                             anchors.right: parent.right
@@ -130,7 +130,7 @@ Loader {
                 ]
 
                 transitions: Transition {
-                    AnchorAnimation { 
+                    AnchorAnimation {
                         duration: Appearance.anim.durations.expressiveDefaultSpatial
                         easing.bezierCurve: Appearance.anim.curves.expressiveDefaultSpatial
                     }

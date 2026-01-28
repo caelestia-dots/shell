@@ -171,7 +171,7 @@ Item {
         rightContent: Component {
             Item {
                 id: rightPaneItem
-                
+
                 property var vpnPane: root.session && root.session.vpn ? root.session.vpn.active : null
                 property var ethernetPane: root.session && root.session.ethernet ? root.session.ethernet.active : null
                 property var wirelessPane: root.session && root.session.network ? root.session.network.active : null
@@ -181,9 +181,12 @@ Item {
                 property Component nextComponent: settingsComponent
 
                 function getComponentForPane() {
-                    if (vpnPane) return vpnDetailsComponent;
-                    if (ethernetPane) return ethernetDetailsComponent;
-                    if (wirelessPane) return wirelessDetailsComponent;
+                    if (vpnPane)
+                        return vpnDetailsComponent;
+                    if (ethernetPane)
+                        return ethernetDetailsComponent;
+                    if (wirelessPane)
+                        return wirelessDetailsComponent;
                     return settingsComponent;
                 }
 
@@ -195,12 +198,14 @@ Item {
                 Connections {
                     target: root.session && root.session.vpn ? root.session.vpn : null
                     enabled: target !== null
-                    
+
                     function onActiveChanged() {
                         // Clear others when VPN is selected
                         if (root.session && root.session.vpn && root.session.vpn.active) {
-                            if (root.session.ethernet && root.session.ethernet.active) root.session.ethernet.active = null;
-                            if (root.session.network && root.session.network.active) root.session.network.active = null;
+                            if (root.session.ethernet && root.session.ethernet.active)
+                                root.session.ethernet.active = null;
+                            if (root.session.network && root.session.network.active)
+                                root.session.network.active = null;
                         }
                         rightPaneItem.nextComponent = rightPaneItem.getComponentForPane();
                     }
@@ -209,12 +214,14 @@ Item {
                 Connections {
                     target: root.session && root.session.ethernet ? root.session.ethernet : null
                     enabled: target !== null
-                    
+
                     function onActiveChanged() {
                         // Clear others when ethernet is selected
                         if (root.session && root.session.ethernet && root.session.ethernet.active) {
-                            if (root.session.vpn && root.session.vpn.active) root.session.vpn.active = null;
-                            if (root.session.network && root.session.network.active) root.session.network.active = null;
+                            if (root.session.vpn && root.session.vpn.active)
+                                root.session.vpn.active = null;
+                            if (root.session.network && root.session.network.active)
+                                root.session.network.active = null;
                         }
                         rightPaneItem.nextComponent = rightPaneItem.getComponentForPane();
                     }
@@ -223,12 +230,14 @@ Item {
                 Connections {
                     target: root.session && root.session.network ? root.session.network : null
                     enabled: target !== null
-                    
+
                     function onActiveChanged() {
                         // Clear others when wireless is selected
                         if (root.session && root.session.network && root.session.network.active) {
-                            if (root.session.vpn && root.session.vpn.active) root.session.vpn.active = null;
-                            if (root.session.ethernet && root.session.ethernet.active) root.session.ethernet.active = null;
+                            if (root.session.vpn && root.session.vpn.active)
+                                root.session.vpn.active = null;
+                            if (root.session.ethernet && root.session.ethernet.active)
+                                root.session.ethernet.active = null;
                         }
                         rightPaneItem.nextComponent = rightPaneItem.getComponentForPane();
                     }

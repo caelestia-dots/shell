@@ -101,9 +101,15 @@ Singleton {
 
     function serializeAppearance(): var {
         return {
-            rounding: { scale: appearance.rounding.scale },
-            spacing: { scale: appearance.spacing.scale },
-            padding: { scale: appearance.padding.scale },
+            rounding: {
+                scale: appearance.rounding.scale
+            },
+            spacing: {
+                scale: appearance.spacing.scale
+            },
+            padding: {
+                scale: appearance.padding.scale
+            },
             font: {
                 family: {
                     sans: appearance.font.family.sans,
@@ -111,10 +117,14 @@ Singleton {
                     material: appearance.font.family.material,
                     clock: appearance.font.family.clock
                 },
-                size: { scale: appearance.font.size.scale }
+                size: {
+                    scale: appearance.font.size.scale
+                }
             },
             anim: {
-                durations: { scale: appearance.anim.durations.scale }
+                durations: {
+                    scale: appearance.anim.durations.scale
+                }
             },
             transparency: {
                 enabled: appearance.transparency.enabled,
@@ -416,6 +426,7 @@ Singleton {
             gpuType: services.gpuType,
             visualiserBars: services.visualiserBars,
             audioIncrement: services.audioIncrement,
+            brightnessIncrement: services.brightnessIncrement,
             maxVolume: services.maxVolume,
             smartScheme: services.smartScheme,
             defaultPlayer: services.defaultPlayer,

@@ -93,7 +93,6 @@ StyledRect {
                 inactiveOnColour: Colours.palette.m3onSurfaceVariant
                 onClicked: VPN.toggle()
             }
-
         }
     }
 
