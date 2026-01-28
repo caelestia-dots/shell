@@ -38,8 +38,16 @@ Item {
         live: true
     }
 
-    property color barColorTop: Qt.alpha(Colours.palette.m3primary, 1)
+    property color barColorTop: Qt.alpha(Colours.palette.m3primary, 0.7)
     property color barColorBottom: Qt.alpha(Colours.palette.m3inversePrimary, 0.7)
+
+    Behavior on barColorTop {
+        CAnim {}
+    }
+
+    Behavior on barColorBottom {
+        CAnim {}
+    }
 
     property real barRadius: Appearance.rounding.small * Config.background.visualiser.rounding
 
