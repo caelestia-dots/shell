@@ -361,8 +361,8 @@ Item {
 
                             Loader {
                                 Layout.alignment: Qt.AlignVCenter
-                                readonly property bool isHidden: modelData && Strings.testRegexList(Config.launcher.hiddenApps, modelData.id)
-                                readonly property bool isFav: modelData && Strings.testRegexList(Config.launcher.favouriteApps, modelData.id)
+                                readonly property bool isHidden: modelData ? Strings.testRegexList(Config.launcher.hiddenApps, modelData.id) : false
+                                readonly property bool isFav: modelData ? Strings.testRegexList(Config.launcher.favouriteApps, modelData.id) : false
                                 active: isHidden || isFav
 
                                 sourceComponent: isHidden ? hiddenIcon : (isFav ? favouriteIcon : null)
