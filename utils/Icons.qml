@@ -220,7 +220,7 @@ Singleton {
     }
 
     function getBatteryIcon(charge: int): string {
-        if (charge < 5)
+        if (charge > 0 && charge < 5)
             return "battery_0_bar";
         if (charge >= 5 && charge < 20)
             return "battery_1_bar";
