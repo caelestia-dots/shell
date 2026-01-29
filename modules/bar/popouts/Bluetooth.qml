@@ -95,6 +95,12 @@ ColumnLayout {
                 text: Icons.getBluetoothIcon(device.modelData.icon)
             }
 
+            MaterialIcon {
+                visible: device.modelData.state === BluetoothDeviceState.Connected
+                text: Icons.getBatteryIcon(device.modelData.batteryAvailable ? device.modelData.battery * 100 : -1)
+                color: device.modelData.battery < 0.2 ? Colours.palette.m3error : Colours.palette.m3onSurfaceVariant
+            }
+
             StyledText {
                 Layout.leftMargin: Appearance.spacing.small / 2
                 Layout.rightMargin: Appearance.spacing.small / 2
