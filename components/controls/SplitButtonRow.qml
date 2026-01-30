@@ -14,20 +14,20 @@ StyledRect {
     required property string label
     property int expandedZ: 100
     property bool enabled: true
-    
+
     property alias menuItems: splitButton.menuItems
     property alias active: splitButton.active
     property alias expanded: splitButton.expanded
     property alias type: splitButton.type
-    
+
     signal selected(item: MenuItem)
 
     Layout.fillWidth: true
     implicitHeight: row.implicitHeight + Appearance.padding.large * 2
     radius: Appearance.rounding.normal
     color: Colours.layer(Colours.palette.m3surfaceContainer, 2)
-    
-    clip: false 
+
+    clip: false
     z: splitButton.menu.implicitHeight > 0 ? expandedZ : 1
     opacity: enabled ? 1.0 : 0.5
 
@@ -47,14 +47,14 @@ StyledRect {
             id: splitButton
             enabled: root.enabled
             type: SplitButton.Filled
-            
+
             menu.z: 1
-            
+
             stateLayer.onClicked: {
-                splitButton.expanded = !splitButton.expanded
+                splitButton.expanded = !splitButton.expanded;
             }
-            
-            menu.onItemSelected: (item) => {
+
+            menu.onItemSelected: item => {
                 root.selected(item);
             }
         }

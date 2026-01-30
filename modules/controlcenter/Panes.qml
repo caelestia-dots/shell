@@ -29,7 +29,7 @@ ClippingRectangle {
     MouseArea {
         anchors.fill: parent
         z: -1
-        onPressed: function(mouse) {
+        onPressed: function (mouse) {
             root.focus = true;
             mouse.accepted = false;
         }
@@ -103,7 +103,7 @@ ClippingRectangle {
         implicitHeight: root.height
 
         property bool hasBeenLoaded: false
-        
+
         function updateActive(): void {
             const diff = Math.abs(root.session.activeIndex - pane.paneIndex);
             const isActivePane = diff === 0;
@@ -130,37 +130,37 @@ ClippingRectangle {
             anchors.fill: parent
             clip: false
             active: false
-            
+
             Component.onCompleted: {
                 Qt.callLater(pane.updateActive);
             }
-            
+
             onActiveChanged: {
                 if (active && !pane.hasBeenLoaded) {
                     pane.hasBeenLoaded = true;
                 }
-                
+
                 if (active && !item) {
                     loader.setSource(pane.componentPath, {
                         "session": root.session
                     });
                 }
             }
-            
+
             onItemChanged: {
                 if (item) {
                     pane.hasBeenLoaded = true;
                 }
             }
         }
-        
+
         Connections {
             target: root.session
             function onActiveIndexChanged(): void {
                 pane.updateActive();
             }
         }
-        
+
         Connections {
             target: layout
             function onInitialOpeningCompleteChanged(): void {

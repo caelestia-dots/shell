@@ -261,20 +261,22 @@ CollapsibleSection {
 
         SliderInput {
             Layout.fillWidth: true
-            
+
             label: qsTr("Font size scale")
             value: rootPane.fontSizeScale
             from: 0.7
             to: 1.5
             decimals: 2
             suffix: "×"
-            validator: DoubleValidator { bottom: 0.7; top: 1.5 }
-            
-            onValueModified: (newValue) => {
+            validator: DoubleValidator {
+                bottom: 0.7
+                top: 1.5
+            }
+
+            onValueModified: newValue => {
                 rootPane.fontSizeScale = newValue;
                 rootPane.saveConfig();
             }
         }
     }
 }
-

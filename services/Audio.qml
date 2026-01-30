@@ -106,7 +106,8 @@ Singleton {
     }
 
     function getStreamName(stream: PwNode): string {
-        if (!stream) return qsTr("Unknown");
+        if (!stream)
+            return qsTr("Unknown");
         // Try application name first, then description, then name
         return stream.applicationName || stream.description || stream.name || qsTr("Unknown Application");
     }
