@@ -1,6 +1,7 @@
 pragma ComponentBehavior: Bound
 
 import "services"
+import "../../components" as Components
 import qs.components
 import qs.components.controls
 import qs.components.containers
@@ -20,72 +21,49 @@ Item {
     readonly property alias searchField: search
     readonly property int padding: Appearance.padding.large
     readonly property int rounding: Appearance.rounding.large
-    
+
     property var showContextMenuAt: null
     property Item wrapperRoot: null
-    
+
     property string activeCategory: "all"
     property bool showNavbar: (Config.launcher.enableCategories ?? true) && !search.text.startsWith(Config.launcher.actionPrefix)
-    
+
     readonly property var categoryList: [
-        { id: "all", name: qsTr("All"), icon: "apps" },
-        { id: "favourites", name: qsTr("Favourites"), icon: "favorite" }
-    ].concat(Config.launcher.categories.map(cat => ({ id: cat.name.toLowerCase(), name: cat.name, icon: cat.icon })))
-    
+        {
+            id: "all",
+            name: qsTr("All"),
+            icon: "apps"
+        },
+        {
+            id: "favourites",
+            name: qsTr("Favourites"),
+            icon: "favorite"
+        }
+    ].concat(Config.launcher.categories.map(cat => ({
+                id: cat.name.toLowerCase(),
+                name: cat.name,
+                icon: cat.icon
+            })))
+
     function navigateCategory(direction: int): void {
         const currentIndex = categoryList.findIndex(cat => cat.id === activeCategory);
-        if (currentIndex === -1) return;
-        
+        if (currentIndex === -1)
+            return;
+
         const newIndex = currentIndex + direction;
         if (newIndex >= 0 && newIndex < categoryList.length) {
             activeCategory = categoryList[newIndex].id;
-            scrollToActiveTab();
+            if (categoryNavbar) {
+                categoryNavbar.scrollToActiveTab();
+            }
         }
-    }
-    
-    function scrollToActiveTab(): void {
-        Qt.callLater(() => {
-            if (!tabsFlickable || !tabsRow) return;
-            
-            const currentIndex = categoryList.findIndex(cat => cat.id === activeCategory);
-            if (currentIndex === -1) return;
-            
-            // Calculate position of the active tab
-            let tabX = 0;
-            for (let i = 0; i < currentIndex && i < tabsRow.children.length; i++) {
-                const child = tabsRow.children[i];
-                if (child) {
-                    tabX += child.width + tabsRow.spacing;
-                }
-            }
-            
-            const activeTab = tabsRow.children[currentIndex];
-            if (!activeTab) return;
-            
-            const tabWidth = activeTab.width;
-            const viewportStart = tabsFlickable.contentX;
-            const viewportEnd = tabsFlickable.contentX + tabsFlickable.width;
-            
-            // Scroll if tab is not fully visible
-            if (tabX < viewportStart) {
-                tabsFlickable.contentX = tabX;
-            } else if (tabX + tabWidth > viewportEnd) {
-                tabsFlickable.contentX = Math.min(
-                    tabsFlickable.contentWidth - tabsFlickable.width,
-                    tabX + tabWidth - tabsFlickable.width
-                );
-            }
-        });
     }
 
     implicitWidth: list.width + padding * 2
-    implicitHeight: searchWrapper.implicitHeight + list.implicitHeight + tabsWrapper.implicitHeight + (showNavbar ? padding * 2 : 0) + padding * 2 + Appearance.spacing.normal
+    implicitHeight: searchWrapper.implicitHeight + list.implicitHeight + categoryNavbar.implicitHeight + (showNavbar ? padding * 2 : 0) + padding * 2 + Appearance.spacing.normal
 
-    StyledRect {
-        id: tabsWrapper
-
-        color: Colours.layer(Colours.palette.m3surfaceContainer, 2)
-        radius: Appearance.rounding.normal
+    Components.CategoryNavbar {
+        id: categoryNavbar
 
         anchors.left: parent.left
         anchors.right: parent.right
@@ -94,18 +72,20 @@ Item {
         anchors.rightMargin: root.padding
         anchors.topMargin: root.padding
 
-        visible: opacity > 0
+        categories: root.categoryList
+        activeCategory: root.activeCategory
+        showScrollButtons: true
+
         opacity: root.showNavbar ? 1 : 0
-        implicitHeight: root.showNavbar ? tabsRow.height + Appearance.padding.small + Appearance.padding.normal : 0
-        clip: true
-        
+        implicitHeight: root.showNavbar ? categoryNavbar.implicitHeight : 0
+
         Behavior on opacity {
             Anim {
                 duration: Appearance.anim.durations.normal
                 easing.bezierCurve: Appearance.anim.curves.standard
             }
         }
-        
+
         Behavior on implicitHeight {
             Anim {
                 duration: Appearance.anim.durations.normal
@@ -113,173 +93,8 @@ Item {
             }
         }
 
-        RowLayout {
-            id: tabsContent
-            anchors.fill: parent
-            anchors.leftMargin: Appearance.padding.normal
-            anchors.rightMargin: Appearance.padding.normal
-            anchors.topMargin: Appearance.padding.small
-            anchors.bottomMargin: Appearance.padding.smaller
-            spacing: Appearance.spacing.smaller
-
-            IconButton {
-                icon: "chevron_left"
-                visible: tabsFlickable.contentWidth > tabsFlickable.width
-                type: IconButton.Text
-                radius: Appearance.rounding.small
-                padding: Appearance.padding.small
-                onClicked: {
-                    tabsFlickable.contentX = Math.max(0, tabsFlickable.contentX - 100);
-                }
-            }
-
-            StyledFlickable {
-                id: tabsFlickable
-                Layout.fillWidth: true
-                Layout.preferredHeight: tabsRow.height
-                flickableDirection: Flickable.HorizontalFlick
-                contentWidth: tabsRow.width
-                clip: true
-                
-                Behavior on contentX {
-                    Anim {
-                        duration: Appearance.anim.durations.normal
-                        easing.bezierCurve: Appearance.anim.curves.emphasized
-                    }
-                }
-
-                MouseArea {
-                    anchors.fill: parent
-                    propagateComposedEvents: true
-                    
-                    onWheel: wheel => {
-                        const delta = wheel.angleDelta.y || wheel.angleDelta.x;
-                        tabsFlickable.contentX = Math.max(0, Math.min(
-                            tabsFlickable.contentWidth - tabsFlickable.width,
-                            tabsFlickable.contentX - delta
-                        ));
-                        wheel.accepted = true;
-                    }
-                    
-                    onPressed: mouse => {
-                        mouse.accepted = false;
-                    }
-                }
-
-                Item {
-                    implicitWidth: tabsRow.width
-                    implicitHeight: tabsRow.height
-                    
-                    // Sliding indicator background
-                    StyledRect {
-                        id: activeIndicator
-                        
-                        property Item activeTab: {
-                            for (let i = 0; i < tabsRepeater.count; i++) {
-                                const tab = tabsRepeater.itemAt(i);
-                                if (tab && tab.isActive) {
-                                    return tab;
-                                }
-                            }
-                            return null;
-                        }
-                        
-                        visible: activeTab !== null
-                        color: Colours.palette.m3primary
-                        radius: 10
-                        
-                        x: activeTab ? activeTab.x : 0
-                        y: activeTab ? activeTab.y : 0
-                        width: activeTab ? activeTab.width : 0
-                        height: activeTab ? activeTab.height : 0
-                        
-                        Behavior on x {
-                            Anim {
-                                duration: Appearance.anim.durations.normal
-                                easing.bezierCurve: Appearance.anim.curves.emphasized
-                            }
-                        }
-                        
-                        Behavior on width {
-                            Anim {
-                                duration: Appearance.anim.durations.normal
-                                easing.bezierCurve: Appearance.anim.curves.emphasized
-                            }
-                        }
-                    }
-                    
-                    Row {
-                        id: tabsRow
-                        spacing: Appearance.spacing.small
-
-                        Repeater {
-                            id: tabsRepeater
-                            model: root.categoryList
-
-                            delegate: Item {
-                                required property var modelData
-                                required property int index
-                                
-                                property bool isActive: root.activeCategory === modelData.id
-
-                                implicitWidth: tabContent.width + Appearance.padding.normal * 2
-                                implicitHeight: tabContent.height + Appearance.padding.smaller * 2
-
-                                StateLayer {
-                                    anchors.fill: parent
-                                    radius: 6
-                                    function onClicked(): void {
-                                        root.activeCategory = modelData.id;
-                                        
-                                        const tabLeft = parent.x;
-                                        const tabRight = parent.x + parent.width;
-                                        const viewLeft = tabsFlickable.contentX;
-                                        const viewRight = tabsFlickable.contentX + tabsFlickable.width;
-                                        
-                                        const targetX = tabLeft - (tabsFlickable.width - parent.width) / 2;
-                                        
-                                        tabsFlickable.contentX = Math.max(0, Math.min(
-                                            tabsFlickable.contentWidth - tabsFlickable.width,
-                                            targetX
-                                        ));
-                                    }
-                                }
-
-                                Row {
-                                    id: tabContent
-                                    anchors.centerIn: parent
-                                    spacing: Appearance.spacing.smaller
-
-                                    MaterialIcon {
-                                        anchors.verticalCenter: parent.verticalCenter
-                                        text: modelData.icon
-                                        font.pointSize: Appearance.font.size.small
-                                        color: isActive ? Colours.palette.m3surface : Colours.palette.m3onSurfaceVariant
-                                    }
-
-                                    StyledText {
-                                        anchors.verticalCenter: parent.verticalCenter
-                                        text: modelData.name
-                                        font.pointSize: Appearance.font.size.small
-                                        color: isActive ? Colours.palette.m3surface : Colours.palette.m3onSurfaceVariant
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-
-            IconButton {
-                icon: "chevron_right"
-                visible: tabsFlickable.contentWidth > tabsFlickable.width
-                type: IconButton.Text
-                radius: Appearance.rounding.small
-                padding: Appearance.padding.small
-                onClicked: {
-                    tabsFlickable.contentX = Math.min(tabsFlickable.contentWidth - tabsFlickable.width, tabsFlickable.contentX + 100);
-                }
-            }
+        onCategoryChanged: categoryId => {
+            root.activeCategory = categoryId;
         }
     }
 
@@ -287,11 +102,11 @@ Item {
         id: list
 
         anchors.horizontalCenter: parent.horizontalCenter
-        anchors.top: tabsWrapper.bottom
+        anchors.top: categoryNavbar.bottom
         anchors.bottom: searchWrapper.top
         anchors.topMargin: root.showNavbar ? root.padding : 0
         anchors.bottomMargin: root.padding
-        
+
         Behavior on anchors.topMargin {
             Anim {
                 duration: Appearance.anim.durations.normal
@@ -302,7 +117,7 @@ Item {
         content: root
         visibilities: root.visibilities
         panels: root.panels
-        maxHeight: root.maxHeight - searchWrapper.implicitHeight - (root.showNavbar ? tabsWrapper.implicitHeight : 0) - root.padding * 4
+        maxHeight: root.maxHeight - searchWrapper.implicitHeight - categoryNavbar.implicitHeight - (root.showNavbar ? root.padding * 2 : 0) - root.padding * 4
         search: search
         padding: root.padding
         rounding: root.rounding
@@ -347,7 +162,7 @@ Item {
             bottomPadding: Appearance.padding.larger
 
             placeholderText: qsTr("Type \"%1\" for commands").arg(Config.launcher.actionPrefix)
-            
+
             onTextChanged: {
                 root.showNavbar = !text.startsWith(Config.launcher.actionPrefix);
             }
@@ -374,14 +189,14 @@ Item {
 
             Keys.onUpPressed: list.currentList?.decrementCurrentIndex()
             Keys.onDownPressed: list.currentList?.incrementCurrentIndex()
-            
+
             Keys.onLeftPressed: event => {
                 if (event.modifiers === Qt.NoModifier) {
                     root.navigateCategory(-1);
                     event.accepted = true;
                 }
             }
-            
+
             Keys.onRightPressed: event => {
                 if (event.modifiers === Qt.NoModifier) {
                     root.navigateCategory(1);
