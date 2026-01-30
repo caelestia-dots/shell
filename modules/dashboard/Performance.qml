@@ -7,14 +7,67 @@ import qs.components.misc
 import qs.config
 import qs.services
 
-RowLayout {
+Item {
     id: root
 
     function displayTemp(temp: real) : string {
         return `${Math.ceil(Config.services.useFahrenheit ? temp * 1.8 + 32 : temp)}°${Config.services.useFahrenheit ? "F" : "C"}`;
     }
 
-    spacing: Appearance.spacing.normal
+    readonly property int minWidth: 400 + 400 + Appearance.spacing.normal + 120 + Appearance.padding.large * 2
+    readonly property bool upperRowVisible: Config.dashboard.performance.showCpu || (Config.dashboard.performance.showGpu && SystemUsage.gpuType !== "NONE")
+    readonly property int minHeight: upperRowVisible ? 400 : 220
+    implicitWidth: Math.max(minWidth, content.implicitWidth)
+    implicitHeight: Math.max(minHeight, placeholder.visible ? placeholder.height : content.implicitHeight)
+
+    StyledRect {
+        id: placeholder
+
+        anchors.centerIn: parent
+        width: 400
+        height: 350
+        radius: Appearance.rounding.large
+        color: Colours.tPalette.m3surfaceContainer
+        visible: !Config.dashboard.performance.showCpu &&
+                 !(Config.dashboard.performance.showGpu && SystemUsage.gpuType !== "NONE") &&
+                 !Config.dashboard.performance.showMemory &&
+                 !Config.dashboard.performance.showStorage &&
+                 !Config.dashboard.performance.showNetwork &&
+                 !(UPower.displayDevice.isLaptopBattery && Config.dashboard.performance.showBattery)
+
+        ColumnLayout {
+            anchors.centerIn: parent
+            spacing: Appearance.spacing.normal
+
+            MaterialIcon {
+                Layout.alignment: Qt.AlignHCenter
+                text: "tune"
+                font.pointSize: Appearance.font.size.extraLarge * 2
+                color: Colours.palette.m3onSurfaceVariant
+            }
+
+            StyledText {
+                Layout.alignment: Qt.AlignHCenter
+                text: qsTr("No widgets enabled")
+                font.pointSize: Appearance.font.size.large
+                color: Colours.palette.m3onSurface
+            }
+
+            StyledText {
+                Layout.alignment: Qt.AlignHCenter
+                text: qsTr("Enable widgets in dashboard settings")
+                font.pointSize: Appearance.font.size.small
+                color: Colours.palette.m3onSurfaceVariant
+            }
+        }
+    }
+
+    RowLayout {
+        id: content
+
+        anchors.fill: parent
+        spacing: Appearance.spacing.normal
+        visible: !placeholder.visible
 
     Ref {
         service: SystemUsage
@@ -28,6 +81,7 @@ RowLayout {
         RowLayout {
             Layout.fillWidth: true
             spacing: Appearance.spacing.normal
+            visible: Config.dashboard.performance.showCpu || (Config.dashboard.performance.showGpu && SystemUsage.gpuType !== "NONE")
 
             HeroCard {
                 Layout.fillWidth: true
@@ -49,7 +103,6 @@ RowLayout {
                 Layout.fillWidth: true
                 Layout.minimumWidth: 400
                 Layout.preferredHeight: 150
-                // Hide when GPU data is unavailable (gpuType === "NONE")
                 visible: Config.dashboard.performance.showGpu && SystemUsage.gpuType !== "NONE"
                 icon: "desktop_windows"
                 title: SystemUsage.gpuName ? `GPU - ${SystemUsage.gpuName}` : qsTr("GPU")
@@ -105,7 +158,7 @@ RowLayout {
     BatteryTank {
         Layout.preferredWidth: 120
         Layout.fillHeight: true
-        Layout.minimumHeight: 350 // Match combined height + spacing roughly, or let it fill
+        Layout.minimumHeight: 350
         visible: UPower.displayDevice.isLaptopBattery && Config.dashboard.performance.showBattery
     }
 
@@ -912,6 +965,8 @@ RowLayout {
             }
 
         }
+
+    }
 
     }
 
