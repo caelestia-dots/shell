@@ -152,11 +152,12 @@ Singleton {
                 root._downloadSpeed = rxDelta / timeDelta;
                 root._uploadSpeed = txDelta / timeDelta;
 
-                // Only add valid positive values to history to prevent graph corruption
+                const maxHistory = root.historyLength + 1;
+
                 if (root._downloadSpeed >= 0 && isFinite(root._downloadSpeed)) {
                     let newDownHist = root._downloadHistory.slice();
                     newDownHist.push(root._downloadSpeed);
-                    if (newDownHist.length > root.historyLength) {
+                    if (newDownHist.length > maxHistory) {
                         newDownHist.shift();
                     }
                     root._downloadHistory = newDownHist;
@@ -165,7 +166,7 @@ Singleton {
                 if (root._uploadSpeed >= 0 && isFinite(root._uploadSpeed)) {
                     let newUpHist = root._uploadHistory.slice();
                     newUpHist.push(root._uploadSpeed);
-                    if (newUpHist.length > root.historyLength) {
+                    if (newUpHist.length > maxHistory) {
                         newUpHist.shift();
                     }
                     root._uploadHistory = newUpHist;

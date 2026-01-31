@@ -794,11 +794,38 @@ Item {
                     property var upHistory: NetworkUsage.uploadHistory
                     property real targetMax: 1024
                     property real smoothMax: targetMax
+                    property real xOffset: 0
+                    property int _lastHistoryLength: 0
+                    property real _lastDownValue: 0
+                    property real _lastUpValue: 0
 
                     anchors.fill: parent
-                    onDownHistoryChanged: updateMax()
-                    onUpHistoryChanged: updateMax()
+                    onDownHistoryChanged: checkAndAnimate()
+                    onUpHistoryChanged: checkAndAnimate()
                     onSmoothMaxChanged: requestPaint()
+                    onXOffsetChanged: requestPaint()
+
+                    function checkAndAnimate(): void {
+                        const currentLength = (downHistory || []).length;
+                        const downHist = downHistory || [];
+                        const upHist = upHistory || [];
+                        
+                        updateMax();
+                        
+                        const currentDownLast = downHist.length > 0 ? downHist[downHist.length - 1] : 0;
+                        const currentUpLast = upHist.length > 0 ? upHist[upHist.length - 1] : 0;
+                        
+                        const hasNewData = (currentLength !== _lastHistoryLength) || 
+                                          (currentDownLast !== _lastDownValue) || 
+                                          (currentUpLast !== _lastUpValue);
+                        
+                        if (hasNewData && currentLength > 0) {
+                            _lastHistoryLength = currentLength;
+                            _lastDownValue = currentDownLast;
+                            _lastUpValue = currentUpLast;
+                            triggerSlideAnimation();
+                        }
+                    }
 
                     function updateMax(): void {
                         const downHist = downHistory || [];
@@ -806,6 +833,14 @@ Item {
                         const allValues = downHist.concat(upHist);
                         targetMax = Math.max(...allValues, 1024);
                         requestPaint();
+                    }
+
+                    function triggerSlideAnimation(): void {
+                        xOffsetBehavior.enabled = false;
+                        const stepX = width / (NetworkUsage.historyLength - 1);
+                        xOffset = -stepX;
+                        xOffsetBehavior.enabled = true;
+                        xOffset = 0;
                     }
 
                     onPaint: {
@@ -818,7 +853,6 @@ Item {
                         if (downHist.length < 2 && upHist.length < 2)
                             return;
 
-                        // Use animated max value for smooth scaling
                         const maxVal = smoothMax;
 
                         function drawLine(history, color, fillAlpha) {
@@ -827,7 +861,7 @@ Item {
 
                             const len = history.length;
                             const stepX = w / (NetworkUsage.historyLength - 1);
-                            const startX = w - (len - 1) * stepX;
+                            const startX = w - (len - 1) * stepX - xOffset;
                             ctx.beginPath();
                             ctx.moveTo(startX, h - (history[0] / maxVal) * h);
                             for (let i = 1; i < len; i++) {
@@ -840,7 +874,6 @@ Item {
                             ctx.lineCap = "round";
                             ctx.lineJoin = "round";
                             ctx.stroke();
-                            // Fill under the line
                             ctx.lineTo(startX + (len - 1) * stepX, h);
                             ctx.lineTo(startX, h);
                             ctx.closePath();
@@ -848,7 +881,7 @@ Item {
                             ctx.fill();
                         }
 
-                        // Draw upload first (behind), then download (front)
+
                         drawLine(upHist, Colours.palette.m3secondary.toString(), 0.15);
                         drawLine(downHist, Colours.palette.m3tertiary.toString(), 0.2);
                     }
@@ -866,6 +899,15 @@ Item {
                     Behavior on smoothMax {
                         Anim {
                             duration: Appearance.anim.durations.large
+                        }
+                    }
+
+                    Behavior on xOffset {
+                        id: xOffsetBehavior
+                        enabled: false
+                        Anim {
+                            duration: Config.dashboard.updateInterval
+                            easing.bezierCurve: Appearance.anim.curves.emphasizedDecel
                         }
                     }
 
