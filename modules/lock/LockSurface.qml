@@ -150,7 +150,7 @@ WlSessionLockSurface {
                 }
                 Anim {
                     target: lockContent
-                    property: "implicitHeight"
+            property: "implicitHeight"
                     to: root.screen.height * Config.lock.sizes.heightMult
                     duration: Appearance.anim.durations.expressiveDefaultSpatial
                     easing.bezierCurve: Appearance.anim.curves.expressiveDefaultSpatial
@@ -173,6 +173,7 @@ WlSessionLockSurface {
             blur: 1
             blurMax: 64
             blurMultiplier: 1
+            brightness: -0.2
         }
     }
 
