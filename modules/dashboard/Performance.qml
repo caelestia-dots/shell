@@ -794,36 +794,21 @@ Item {
                     property var upHistory: NetworkUsage.uploadHistory
                     property real targetMax: 1024
                     property real smoothMax: targetMax
-                    property real xOffset: 0
-                    property int _lastHistoryLength: 0
-                    property real _lastDownValue: 0
-                    property real _lastUpValue: 0
+                    property real slideProgress: 0
+                    property int _tickCount: 0
+                    property int _lastTickCount: -1
 
                     anchors.fill: parent
                     onDownHistoryChanged: checkAndAnimate()
                     onUpHistoryChanged: checkAndAnimate()
                     onSmoothMaxChanged: requestPaint()
-                    onXOffsetChanged: requestPaint()
+                    onSlideProgressChanged: requestPaint()
 
                     function checkAndAnimate(): void {
                         const currentLength = (downHistory || []).length;
-                        const downHist = downHistory || [];
-                        const upHist = upHistory || [];
-                        
-                        updateMax();
-                        
-                        const currentDownLast = downHist.length > 0 ? downHist[downHist.length - 1] : 0;
-                        const currentUpLast = upHist.length > 0 ? upHist[upHist.length - 1] : 0;
-                        
-                        const hasNewData = (currentLength !== _lastHistoryLength) || 
-                                          (currentDownLast !== _lastDownValue) || 
-                                          (currentUpLast !== _lastUpValue);
-                        
-                        if (hasNewData && currentLength > 0) {
-                            _lastHistoryLength = currentLength;
-                            _lastDownValue = currentDownLast;
-                            _lastUpValue = currentUpLast;
-                            triggerSlideAnimation();
+                        if (currentLength > 0 && _tickCount !== _lastTickCount) {
+                            _lastTickCount = _tickCount;
+                            updateMax();
                         }
                     }
 
@@ -835,12 +820,19 @@ Item {
                         requestPaint();
                     }
 
-                    function triggerSlideAnimation(): void {
-                        xOffsetBehavior.enabled = false;
-                        const stepX = width / (NetworkUsage.historyLength - 1);
-                        xOffset = -stepX;
-                        xOffsetBehavior.enabled = true;
-                        xOffset = 0;
+                    Timer {
+                        interval: Config.dashboard.updateInterval
+                        running: true
+                        repeat: true
+                        onTriggered: sparklineCanvas._tickCount++
+                    }
+
+                    NumberAnimation on slideProgress {
+                        from: 0
+                        to: 1
+                        duration: Config.dashboard.updateInterval
+                        loops: Animation.Infinite
+                        running: true
                     }
 
                     onPaint: {
@@ -861,7 +853,7 @@ Item {
 
                             const len = history.length;
                             const stepX = w / (NetworkUsage.historyLength - 1);
-                            const startX = w - (len - 1) * stepX - xOffset;
+                            const startX = w - (len - 1) * stepX - stepX * slideProgress + stepX;
                             ctx.beginPath();
                             ctx.moveTo(startX, h - (history[0] / maxVal) * h);
                             for (let i = 1; i < len; i++) {
@@ -899,15 +891,6 @@ Item {
                     Behavior on smoothMax {
                         Anim {
                             duration: Appearance.anim.durations.large
-                        }
-                    }
-
-                    Behavior on xOffset {
-                        id: xOffsetBehavior
-                        enabled: false
-                        Anim {
-                            duration: Config.dashboard.updateInterval
-                            easing.bezierCurve: Appearance.anim.curves.emphasizedDecel
                         }
                     }
 
