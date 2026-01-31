@@ -129,7 +129,6 @@ CollapsibleSection {
 
                     Loader {
                         active: isCurrent
-                        asynchronous: true
 
                         sourceComponent: MaterialIcon {
                             text: "check"
@@ -144,4 +143,3 @@ CollapsibleSection {
         }
     }
 }
-

@@ -25,4 +25,3 @@ ColumnLayout {
         color: Colours.palette.m3outline
     }
 }
-

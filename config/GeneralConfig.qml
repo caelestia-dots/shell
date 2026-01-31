@@ -1,6 +1,7 @@
 import Quickshell.Io
 
 JsonObject {
+    property string logo: ""
     property Apps apps: Apps {}
     property Idle idle: Idle {}
     property Battery battery: Battery {}

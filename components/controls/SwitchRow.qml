@@ -12,7 +12,7 @@ StyledRect {
     required property string label
     required property bool checked
     property bool enabled: true
-    property var onToggled: function(checked) {}
+    property var onToggled: function (checked) {}
 
     Layout.fillWidth: true
     implicitHeight: row.implicitHeight + Appearance.padding.large * 2
@@ -46,4 +46,3 @@ StyledRect {
         }
     }
 }
-

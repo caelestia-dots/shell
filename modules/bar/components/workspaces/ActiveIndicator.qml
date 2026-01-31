@@ -18,9 +18,9 @@ StyledRect {
         return i % Config.bar.workspaces.shown;
     }
 
-    property real leading: workspaces.itemAt(currentWsIdx)?.y ?? 0
-    property real trailing: workspaces.itemAt(currentWsIdx)?.y ?? 0
-    property real currentSize: workspaces.itemAt(currentWsIdx)?.size ?? 0
+    property real leading: workspaces.count > 0 ? workspaces.itemAt(currentWsIdx)?.y ?? 0 : 0
+    property real trailing: workspaces.count > 0 ? workspaces.itemAt(currentWsIdx)?.y ?? 0 : 0
+    property real currentSize: workspaces.count > 0 ? workspaces.itemAt(currentWsIdx)?.size ?? 0 : 0
     property real offset: Math.min(leading, trailing)
     property real size: {
         const s = Math.abs(leading - trailing) + currentSize;

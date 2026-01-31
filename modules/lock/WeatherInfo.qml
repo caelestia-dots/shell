@@ -23,7 +23,6 @@ ColumnLayout {
         Layout.bottomMargin: -Appearance.padding.large
         Layout.alignment: Qt.AlignHCenter
 
-        asynchronous: true
         active: root.rootHeight > 610
         visible: active
 
@@ -73,7 +72,6 @@ ColumnLayout {
 
         Loader {
             Layout.rightMargin: Appearance.padding.smaller
-            asynchronous: true
             active: root.width > 400
             visible: active
 
@@ -113,7 +111,6 @@ ColumnLayout {
         Layout.bottomMargin: Appearance.padding.large * 2
         Layout.fillWidth: true
 
-        asynchronous: true
         active: root.rootHeight > 820
         visible: active
 

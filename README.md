@@ -6,6 +6,7 @@
 ![GitHub Repo stars](https://img.shields.io/github/stars/caelestia-dots/shell?style=for-the-badge&labelColor=101418&color=b9c8da)
 ![GitHub repo size](https://img.shields.io/github/repo-size/caelestia-dots/shell?style=for-the-badge&labelColor=101418&color=d3bfe6)
 [![Ko-Fi donate](https://img.shields.io/badge/donate-kofi?style=for-the-badge&logo=ko-fi&logoColor=ffffff&label=ko-fi&labelColor=101418&color=f16061&link=https%3A%2F%2Fko-fi.com%2Fsoramane)](https://ko-fi.com/soramane)
+[![Discord invite](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fdiscordapp.com%2Fapi%2Finvites%2FBGDCFCmMBk%3Fwith_counts%3Dtrue&query=approximate_member_count&style=for-the-badge&logo=discord&logoColor=ffffff&label=discord&labelColor=101418&color=96f1f1&link=https%3A%2F%2Fdiscord.gg%2FBGDCFCmMBk)](https://discord.gg/BGDCFCmMBk)
 
 </div>
 
@@ -302,7 +303,20 @@ default, you must create it manually.
     },
     "background": {
         "desktopClock": {
-            "enabled": false
+            "enabled": false,
+            "scale": 1.0,
+            "position": "bottom-right",
+            "shadow": {
+                "enabled": true,
+                "opacity": 0.7,
+                "blur": 0.4
+            },
+            "background": {
+                "enabled": false,
+                "opacity": 0.7,
+                "blur": true
+            },
+            "invertColors": false
         },
         "enabled": true,
         "visualiser": {
@@ -375,6 +389,7 @@ default, you must create it manually.
             "showKbLayout": false,
             "showMicrophone": false,
             "showNetwork": true,
+            "showWifi": true,
             "showLockStatus": true
         },
         "tray": {
@@ -521,6 +536,14 @@ default, you must create it manually.
                 "command": ["systemctl", "suspend-then-hibernate"],
                 "enabled": true,
                 "dangerous": false
+            },
+            {
+                "name": "Settings",
+                "icon": "settings",
+                "description": "Configure the shell",
+                "command": ["caelestia", "shell", "controlCenter", "open"],
+                "enabled": true,
+                "dangerous": false
             }
         ],
         "dragThreshold": 50,
@@ -601,17 +624,19 @@ default, you must create it manually.
             "dndChanged": true,
             "gameModeChanged": true,
             "kbLayoutChanged": true,
+            "kbLimit": true,
             "numLockChanged": true,
             "vpnChanged": true,
             "nowPlaying": false
         },
         "vpn": {
-            "enabled": false,
+            "enabled": true,
             "provider": [
                 {
                     "name": "wireguard",
                     "interface": "your-connection-name",
-                    "displayName": "Wireguard (Your VPN)"
+                    "displayName": "Wireguard (Your VPN)",
+                    "enabled": false
                 }
             ]
         }
@@ -655,6 +680,11 @@ The module automatically adds Caelestia shell to the path with **full functional
 </details>
 
 ## FAQ
+
+### Need help or support?
+
+You can join the community Discord server for assistance and discussion:
+https://discord.gg/BGDCFCmMBk
 
 ### My screen is flickering, help pls!
 

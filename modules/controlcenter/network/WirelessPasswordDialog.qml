@@ -384,8 +384,7 @@ Item {
                         text = qsTr("Connecting...");
 
                         NetworkConnection.connectWithPassword(root.network, password, result => {
-                            if (result && result.success) {
-                            } else if (result && result.needsPassword) {
+                            if (result && result.success) {} else if (result && result.needsPassword) {
                                 connectionMonitor.stop();
                                 connecting = false;
                                 hasError = true;

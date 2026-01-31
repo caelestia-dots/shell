@@ -15,7 +15,7 @@ Item {
 
     required property ShellScreen screen
     readonly property HyprlandMonitor monitor: Hypr.monitorFor(screen)
-    readonly property string activeSpecial: (Config.bar.workspaces.perMonitorWorkspaces ? monitor : Hypr.focusedMonitor)?.lastIpcObject.specialWorkspace.name ?? ""
+    readonly property string activeSpecial: (Config.bar.workspaces.perMonitorWorkspaces ? monitor : Hypr.focusedMonitor)?.lastIpcObject?.specialWorkspace?.name ?? ""
 
     layer.enabled: true
     layer.effect: OpacityMask {
@@ -167,7 +167,6 @@ Item {
                 Layout.alignment: Qt.AlignHCenter | Qt.AlignTop
                 Layout.preferredHeight: Config.bar.sizes.innerWidth - Appearance.padding.small * 2
 
-                asynchronous: true
                 sourceComponent: ws.icon.length === 1 ? letterComp : iconComp
 
                 Component {
@@ -199,7 +198,6 @@ Item {
 
                 visible: active
                 active: ws.hasWindows
-                asynchronous: true
 
                 sourceComponent: Column {
                     spacing: 0
@@ -292,7 +290,6 @@ Item {
 
     Loader {
         active: Config.bar.workspaces.activeIndicator
-        asynchronous: true
         anchors.fill: parent
 
         sourceComponent: Item {

@@ -12,8 +12,11 @@ Singleton {
     property bool connected: false
 
     readonly property bool connecting: connectProc.running || disconnectProc.running
-    readonly property bool enabled: Config.utilities.vpn.enabled
-    readonly property var providerInput: (Config.utilities.vpn.provider && Config.utilities.vpn.provider.length > 0) ? Config.utilities.vpn.provider[0] : "wireguard"
+    readonly property bool enabled: Config.utilities.vpn.provider.some(p => typeof p === "object" ? (p.enabled === true) : false)
+    readonly property var providerInput: {
+        const enabledProvider = Config.utilities.vpn.provider.find(p => typeof p === "object" ? (p.enabled === true) : false);
+        return enabledProvider || "wireguard";
+    }
     readonly property bool isCustomProvider: typeof providerInput === "object"
     readonly property string providerName: isCustomProvider ? (providerInput.name || "custom") : String(providerInput)
     readonly property string interfaceName: isCustomProvider ? (providerInput.interface || "") : ""
@@ -126,9 +129,9 @@ Singleton {
 
         command: ["ip", "link", "show"]
         environment: ({
-            LANG: "C.UTF-8",
-            LC_ALL: "C.UTF-8"
-        })
+                LANG: "C.UTF-8",
+                LC_ALL: "C.UTF-8"
+            })
         stdout: StdioCollector {
             onStreamFinished: {
                 const iface = root.currentConfig ? root.currentConfig.interface : "";
