@@ -3,7 +3,7 @@ import qs.modules.osd as Osd
 import qs.modules.notifications as Notifications
 import qs.modules.session as Session
 import qs.modules.launcher as Launcher
-import qs.modules.launcher.items as LauncherItems
+import qs.modules.launcher.items.contextmenu as LauncherItems
 import qs.modules.dashboard as Dashboard
 import qs.modules.bar.popouts as BarPopouts
 import qs.modules.utilities as Utilities
@@ -14,7 +14,7 @@ import QtQuick
 
 Item {
     id: root
-
+    
     required property ShellScreen screen
     required property PersistentProperties visibilities
     required property Item bar
@@ -93,7 +93,7 @@ Item {
         }
     }
     
-    LauncherItems.AppContextMenu {
+    LauncherItems.ContextMenu {
         id: launcherContextMenu
         
         property real menuX: -10000
@@ -114,7 +114,6 @@ Item {
         }
         
         function showAt(app: var, x: real, y: real, launcherWrapper: var): void {
-            // If menu is already visible, just toggle it (close) without repositioning
             if (launcherContextMenu.visible) {
                 launcherContextMenu.toggle();
                 return;
@@ -127,8 +126,8 @@ Item {
             const padding = 16;
             const spacing = 4;
             
-            // Position horizontally centered on click
-            let posX = Math.max(padding, Math.min(x - menuWidth / 2, root.width - menuWidth - padding));
+            // Position left-aligned at cursor
+            let posX = Math.max(padding, Math.min(x, root.width - menuWidth - padding));
             
             if (menuWidth + padding * 2 > root.width) {
                 launcherContextMenu.menuX = padding;

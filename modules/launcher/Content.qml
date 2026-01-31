@@ -60,7 +60,7 @@ Item {
     }
 
     implicitWidth: list.width + padding * 2
-    implicitHeight: searchWrapper.implicitHeight + list.implicitHeight + categoryNavbar.implicitHeight + (showNavbar ? padding * 2 : 0) + padding * 2 + Appearance.spacing.normal
+    implicitHeight: searchWrapper.implicitHeight + list.implicitHeight + categoryNavbar.height + (showNavbar ? padding * 2 : 0) + padding * 2 + Appearance.spacing.normal
 
     Components.CategoryNavbar {
         id: categoryNavbar
@@ -77,7 +77,7 @@ Item {
         showScrollButtons: true
 
         opacity: root.showNavbar ? 1 : 0
-        implicitHeight: root.showNavbar ? categoryNavbar.implicitHeight : 0
+        height: root.showNavbar ? implicitHeight : 0
 
         Behavior on opacity {
             Anim {
@@ -86,7 +86,7 @@ Item {
             }
         }
 
-        Behavior on implicitHeight {
+        Behavior on height {
             Anim {
                 duration: Appearance.anim.durations.normal
                 easing.bezierCurve: Appearance.anim.curves.emphasized
