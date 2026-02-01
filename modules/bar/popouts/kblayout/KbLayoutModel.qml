@@ -46,7 +46,7 @@ Item {
         id: _xkbXmlBase
         command: ["xmllint", "--xpath", "//layout/configItem[name and description]", "/usr/share/X11/xkb/rules/base.xml"]
         stdout: StdioCollector {
-            onStreamFinished: _buildXmlMap(text)
+            onStreamFinished: model._buildXmlMap(text)
         }
         onRunningChanged: if (!running && (typeof exitCode !== "undefined") && exitCode !== 0)
             _xkbXmlEvdev.running = true
@@ -56,7 +56,7 @@ Item {
         id: _xkbXmlEvdev
         command: ["xmllint", "--xpath", "//layout/configItem[name and description]", "/usr/share/X11/xkb/rules/evdev.xml"]
         stdout: StdioCollector {
-            onStreamFinished: _buildXmlMap(text)
+            onStreamFinished: model._buildXmlMap(text)
         }
     }
 
@@ -114,7 +114,7 @@ Item {
                     const j = JSON.parse(text);
                     const raw = (j?.str || j?.value || "").toString().trim();
                     if (raw.length) {
-                        _setLayouts(raw);
+                        model._setLayouts(raw);
                         _fetchActiveLayouts.running = true;
                         return;
                     }
@@ -134,7 +134,7 @@ Item {
                     const kb = dev?.keyboards?.find(k => k.main) || dev?.keyboards?.[0];
                     const raw = (kb?.layout || "").trim();
                     if (raw.length)
-                        _setLayouts(raw);
+                        model._setLayouts(raw);
                 } catch (e) {}
                 _fetchActiveLayouts.running = true;
             }
@@ -151,14 +151,14 @@ Item {
                     const kb = dev?.keyboards?.find(k => k.main) || dev?.keyboards?.[0];
                     const idx = kb?.active_layout_index ?? -1;
 
-                    activeIndex = idx >= 0 ? idx : -1;
-                    activeLabel = (idx >= 0 && idx < _layoutsModel.count) ? _layoutsModel.get(idx).label : "";
+                    model.activeIndex = idx >= 0 ? idx : -1;
+                    model.activeLabel = (idx >= 0 && idx < _layoutsModel.count) ? _layoutsModel.get(idx).label : "";
                 } catch (e) {
-                    activeIndex = -1;
-                    activeLabel = "";
+                    model.activeIndex = -1;
+                    model.activeLabel = "";
                 }
 
-                _rebuildVisible();
+                model._rebuildVisible();
             }
         }
     }
