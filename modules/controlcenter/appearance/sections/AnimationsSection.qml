@@ -25,7 +25,7 @@ CollapsibleSection {
             Layout.fillWidth: true
 
             label: qsTr("Animation duration scale")
-            value: rootPane.animDurationsScale
+            value: root.rootPane.animDurationsScale
             from: 0.1
             to: 5.0
             decimals: 1
@@ -36,8 +36,8 @@ CollapsibleSection {
             }
 
             onValueModified: newValue => {
-                rootPane.animDurationsScale = newValue;
-                rootPane.saveConfig();
+                root.rootPane.animDurationsScale = newValue;
+                root.rootPane.saveConfig();
             }
         }
     }

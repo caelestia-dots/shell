@@ -25,7 +25,7 @@ CollapsibleSection {
             Layout.fillWidth: true
 
             label: qsTr("Padding scale")
-            value: rootPane.paddingScale
+            value: root.rootPane.paddingScale
             from: 0.5
             to: 2.0
             decimals: 1
@@ -36,8 +36,8 @@ CollapsibleSection {
             }
 
             onValueModified: newValue => {
-                rootPane.paddingScale = newValue;
-                rootPane.saveConfig();
+                root.rootPane.paddingScale = newValue;
+                root.rootPane.saveConfig();
             }
         }
     }
@@ -49,7 +49,7 @@ CollapsibleSection {
             Layout.fillWidth: true
 
             label: qsTr("Rounding scale")
-            value: rootPane.roundingScale
+            value: root.rootPane.roundingScale
             from: 0.1
             to: 5.0
             decimals: 1
@@ -60,8 +60,8 @@ CollapsibleSection {
             }
 
             onValueModified: newValue => {
-                rootPane.roundingScale = newValue;
-                rootPane.saveConfig();
+                root.rootPane.roundingScale = newValue;
+                root.rootPane.saveConfig();
             }
         }
     }
@@ -73,7 +73,7 @@ CollapsibleSection {
             Layout.fillWidth: true
 
             label: qsTr("Spacing scale")
-            value: rootPane.spacingScale
+            value: root.rootPane.spacingScale
             from: 0.1
             to: 2.0
             decimals: 1
@@ -84,8 +84,8 @@ CollapsibleSection {
             }
 
             onValueModified: newValue => {
-                rootPane.spacingScale = newValue;
-                rootPane.saveConfig();
+                root.rootPane.spacingScale = newValue;
+                root.rootPane.saveConfig();
             }
         }
     }

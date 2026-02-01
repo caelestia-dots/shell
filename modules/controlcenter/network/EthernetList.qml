@@ -71,7 +71,7 @@ DeviceList {
                 id: stateLayer
 
                 function onClicked(): void {
-                    root.session.ethernet.active = modelData;
+                    root.session.ethernet.active = ethernetItem.modelData;
                 }
             }
 
@@ -88,12 +88,12 @@ DeviceList {
                     implicitHeight: icon.implicitHeight + Appearance.padding.normal * 2
 
                     radius: Appearance.rounding.normal
-                    color: modelData.connected ? Colours.palette.m3primaryContainer : Colours.tPalette.m3surfaceContainerHigh
+                    color: ethernetItem.modelData.connected ? Colours.palette.m3primaryContainer : Colours.tPalette.m3surfaceContainerHigh
 
                     StyledRect {
                         anchors.fill: parent
                         radius: parent.radius
-                        color: Qt.alpha(modelData.connected ? Colours.palette.m3onPrimaryContainer : Colours.palette.m3onSurface, stateLayer.pressed ? 0.1 : stateLayer.containsMouse ? 0.08 : 0)
+                        color: Qt.alpha(ethernetItem.modelData.connected ? Colours.palette.m3onPrimaryContainer : Colours.palette.m3onSurface, stateLayer.pressed ? 0.1 : stateLayer.containsMouse ? 0.08 : 0)
                     }
 
                     MaterialIcon {
@@ -102,8 +102,8 @@ DeviceList {
                         anchors.centerIn: parent
                         text: "cable"
                         font.pointSize: Appearance.font.size.large
-                        fill: modelData.connected ? 1 : 0
-                        color: modelData.connected ? Colours.palette.m3onPrimaryContainer : Colours.palette.m3onSurface
+                        fill: ethernetItem.modelData.connected ? 1 : 0
+                        color: ethernetItem.modelData.connected ? Colours.palette.m3onPrimaryContainer : Colours.palette.m3onSurface
 
                         Behavior on fill {
                             Anim {}
@@ -118,7 +118,7 @@ DeviceList {
 
                     StyledText {
                         Layout.fillWidth: true
-                        text: modelData.interface || qsTr("Unknown")
+                        text: ethernetItem.modelData.interface || qsTr("Unknown")
                         elide: Text.ElideRight
                     }
 
@@ -128,10 +128,10 @@ DeviceList {
 
                         StyledText {
                             Layout.fillWidth: true
-                            text: modelData.connected ? qsTr("Connected") : qsTr("Disconnected")
-                            color: modelData.connected ? Colours.palette.m3primary : Colours.palette.m3outline
+                            text: ethernetItem.modelData.connected ? qsTr("Connected") : qsTr("Disconnected")
+                            color: ethernetItem.modelData.connected ? Colours.palette.m3primary : Colours.palette.m3outline
                             font.pointSize: Appearance.font.size.small
-                            font.weight: modelData.connected ? 500 : 400
+                            font.weight: ethernetItem.modelData.connected ? 500 : 400
                             elide: Text.ElideRight
                         }
                     }
@@ -144,16 +144,16 @@ DeviceList {
                     implicitHeight: connectIcon.implicitHeight + Appearance.padding.smaller * 2
 
                     radius: Appearance.rounding.full
-                    color: Qt.alpha(Colours.palette.m3primaryContainer, modelData.connected ? 1 : 0)
+                    color: Qt.alpha(Colours.palette.m3primaryContainer, ethernetItem.modelData.connected ? 1 : 0)
 
                     StateLayer {
-                        color: modelData.connected ? Colours.palette.m3onPrimaryContainer : Colours.palette.m3onSurface
+                        color: ethernetItem.modelData.connected ? Colours.palette.m3onPrimaryContainer : Colours.palette.m3onSurface
 
                         function onClicked(): void {
-                            if (modelData.connected && modelData.connection) {
-                                Nmcli.disconnectEthernet(modelData.connection, () => {});
+                            if (ethernetItem.modelData.connected && ethernetItem.modelData.connection) {
+                                Nmcli.disconnectEthernet(ethernetItem.modelData.connection, () => {});
                             } else {
-                                Nmcli.connectEthernet(modelData.connection || "", modelData.interface || "", () => {});
+                                Nmcli.connectEthernet(ethernetItem.modelData.connection || "", ethernetItem.modelData.interface || "", () => {});
                             }
                         }
                     }
@@ -163,8 +163,8 @@ DeviceList {
 
                         anchors.centerIn: parent
                         animate: true
-                        text: modelData.connected ? "link_off" : "link"
-                        color: modelData.connected ? Colours.palette.m3onPrimaryContainer : Colours.palette.m3onSurface
+                        text: ethernetItem.modelData.connected ? "link_off" : "link"
+                        color: ethernetItem.modelData.connected ? Colours.palette.m3onPrimaryContainer : Colours.palette.m3onSurface
                     }
                 }
             }

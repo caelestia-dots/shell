@@ -43,12 +43,14 @@ CollapsibleSection {
                 }
 
                 delegate: StyledRect {
+                    id: materialFont
+
                     required property string modelData
                     required property int index
 
                     width: ListView.view.width
 
-                    readonly property bool isCurrent: modelData === rootPane.fontFamilyMaterial
+                    readonly property bool isCurrent: modelData === root.rootPane.fontFamilyMaterial
                     color: Qt.alpha(Colours.tPalette.m3surfaceContainer, isCurrent ? Colours.tPalette.m3surfaceContainer.a : 0)
                     radius: Appearance.rounding.normal
                     border.width: isCurrent ? 1 : 0
@@ -56,8 +58,8 @@ CollapsibleSection {
 
                     StateLayer {
                         function onClicked(): void {
-                            rootPane.fontFamilyMaterial = modelData;
-                            rootPane.saveConfig();
+                            root.rootPane.fontFamilyMaterial = materialFont.modelData;
+                            root.rootPane.saveConfig();
                         }
                     }
 
@@ -72,7 +74,7 @@ CollapsibleSection {
                         spacing: Appearance.spacing.normal
 
                         StyledText {
-                            text: modelData
+                            text: materialFont.modelData
                             font.pointSize: Appearance.font.size.normal
                         }
 
@@ -81,7 +83,7 @@ CollapsibleSection {
                         }
 
                         Loader {
-                            active: isCurrent
+                            active: materialFont.isCurrent
 
                             sourceComponent: MaterialIcon {
                                 text: "check"
@@ -121,12 +123,14 @@ CollapsibleSection {
                 }
 
                 delegate: StyledRect {
+                    id: monoFont
+
                     required property string modelData
                     required property int index
 
                     width: ListView.view.width
 
-                    readonly property bool isCurrent: modelData === rootPane.fontFamilyMono
+                    readonly property bool isCurrent: modelData === root.rootPane.fontFamilyMono
                     color: Qt.alpha(Colours.tPalette.m3surfaceContainer, isCurrent ? Colours.tPalette.m3surfaceContainer.a : 0)
                     radius: Appearance.rounding.normal
                     border.width: isCurrent ? 1 : 0
@@ -134,8 +138,8 @@ CollapsibleSection {
 
                     StateLayer {
                         function onClicked(): void {
-                            rootPane.fontFamilyMono = modelData;
-                            rootPane.saveConfig();
+                            root.rootPane.fontFamilyMono = monoFont.modelData;
+                            root.rootPane.saveConfig();
                         }
                     }
 
@@ -150,7 +154,7 @@ CollapsibleSection {
                         spacing: Appearance.spacing.normal
 
                         StyledText {
-                            text: modelData
+                            text: monoFont.modelData
                             font.pointSize: Appearance.font.size.normal
                         }
 
@@ -159,7 +163,7 @@ CollapsibleSection {
                         }
 
                         Loader {
-                            active: isCurrent
+                            active: monoFont.isCurrent
 
                             sourceComponent: MaterialIcon {
                                 text: "check"
@@ -199,12 +203,14 @@ CollapsibleSection {
                 }
 
                 delegate: StyledRect {
+                    id: sansFont
+
                     required property string modelData
                     required property int index
 
                     width: ListView.view.width
 
-                    readonly property bool isCurrent: modelData === rootPane.fontFamilySans
+                    readonly property bool isCurrent: modelData === root.rootPane.fontFamilySans
                     color: Qt.alpha(Colours.tPalette.m3surfaceContainer, isCurrent ? Colours.tPalette.m3surfaceContainer.a : 0)
                     radius: Appearance.rounding.normal
                     border.width: isCurrent ? 1 : 0
@@ -212,8 +218,8 @@ CollapsibleSection {
 
                     StateLayer {
                         function onClicked(): void {
-                            rootPane.fontFamilySans = modelData;
-                            rootPane.saveConfig();
+                            root.rootPane.fontFamilySans = sansFont.modelData;
+                            root.rootPane.saveConfig();
                         }
                     }
 
@@ -228,7 +234,7 @@ CollapsibleSection {
                         spacing: Appearance.spacing.normal
 
                         StyledText {
-                            text: modelData
+                            text: sansFont.modelData
                             font.pointSize: Appearance.font.size.normal
                         }
 
@@ -237,7 +243,7 @@ CollapsibleSection {
                         }
 
                         Loader {
-                            active: isCurrent
+                            active: sansFont.isCurrent
 
                             sourceComponent: MaterialIcon {
                                 text: "check"
@@ -260,7 +266,7 @@ CollapsibleSection {
             Layout.fillWidth: true
 
             label: qsTr("Font size scale")
-            value: rootPane.fontSizeScale
+            value: root.rootPane.fontSizeScale
             from: 0.7
             to: 1.5
             decimals: 2
@@ -271,8 +277,8 @@ CollapsibleSection {
             }
 
             onValueModified: newValue => {
-                rootPane.fontSizeScale = newValue;
-                rootPane.saveConfig();
+                root.rootPane.fontSizeScale = newValue;
+                root.rootPane.saveConfig();
             }
         }
     }
