@@ -10,6 +10,12 @@ Singleton {
     id: root
 
     property bool connected: false
+    property var status: ({
+        connected: false,
+        state: "disconnected",
+        reason: "",
+        authUrl: ""
+    })
 
     readonly property bool connecting: connectProc.running || disconnectProc.running
     readonly property bool enabled: Config.utilities.vpn.provider.some(p => typeof p === "object" ? (p.enabled === true) : false)
@@ -53,7 +59,7 @@ Singleton {
                 displayName: "Warp"
             },
             "netbird": {
-                connectCmd: ["netbird", "up"],
+                connectCmd: ["netbird", "up", "--no-browser"],
                 disconnectCmd: ["netbird", "down"],
                 interface: "wt0",
                 displayName: "NetBird"
@@ -75,6 +81,10 @@ Singleton {
     }
 
     function connect(): void {
+        if (status.state === "needs-auth") {
+            emitStatusToast(status);
+            return;
+        }
         if (!connected && !connecting && root.currentConfig && root.currentConfig.connectCmd) {
             connectProc.exec(root.currentConfig.connectCmd);
         }
@@ -87,11 +97,7 @@ Singleton {
     }
 
     function toggle(): void {
-        if (connected) {
-            disconnect();
-        } else {
-            connect();
-        }
+        connected ? disconnect() : connect();
     }
 
     function checkStatus(): void {
@@ -100,15 +106,159 @@ Singleton {
         }
     }
 
-    onConnectedChanged: {
+    function getStatusCommand(): var {
+        switch (providerName) {
+            case "tailscale":
+                return ["tailscale", "status", "--json"];
+            case "netbird":
+                return ["netbird", "status", "--json"];
+            case "warp":
+                return ["warp-cli", "status"];
+            case "wireguard":
+                return ["ip", "link", "show"];
+            default:
+                return ["ip", "link", "show"];
+        }
+    }
+
+    function parseTailscaleStatus(output: string): var {
+        const status = { connected: false, state: "disconnected", reason: "", authUrl: "" };
+        try {
+            const data = JSON.parse(output);
+            const backendState = data.BackendState || "";
+            
+            if (backendState === "Running") {
+                status.connected = true;
+                status.state = "connected";
+            } else if (backendState === "Starting") {
+                status.state = "connecting";
+            } else if (backendState === "NeedsLogin" || backendState === "NeedsMachineAuth") {
+                status.state = "needs-auth";
+                status.reason = backendState === "NeedsLogin" ? "Login required" : "Machine authorization required";
+                status.authUrl = data.AuthURL || "";
+            }
+        } catch (e) {
+            status.state = "error";
+            status.reason = "Failed to parse status";
+        }
+        return status;
+    }
+
+    function parseNetBirdStatus(output: string): var {
+        const status = { connected: false, state: "disconnected", reason: "", authUrl: "" };
+        try {
+            const data = JSON.parse(output);
+            const mgmtConnected = data.management?.connected;
+            const signalConnected = data.signal?.connected;
+            
+            if (mgmtConnected && signalConnected) {
+                status.connected = true;
+                status.state = "connected";
+            } else if (data.management?.error) {
+                const error = data.management.error;
+                if (error.includes("auth") || error.includes("login")) {
+                    status.state = "needs-auth";
+                    status.reason = "Authentication required";
+                } else {
+                    status.reason = error;
+                }
+            }
+        } catch (e) {
+            status.state = "error";
+            status.reason = "Failed to parse status";
+        }
+        return status;
+    }
+
+    function parseWarpStatus(output: string): var {
+        const status = { connected: false, state: "disconnected", reason: "", authUrl: "" };
+        
+        if (output.includes("Connected")) {
+            status.connected = true;
+            status.state = "connected";
+        } else if (output.includes("Connecting")) {
+            status.state = "connecting";
+        } else if (output.includes("Unable") || output.includes("Registration Missing") || 
+                   output.includes("registration") || output.includes("register")) {
+            status.state = "needs-auth";
+            status.reason = "WARP registration required";
+        } else if (!output.includes("Disconnected")) {
+            status.state = "error";
+            status.reason = "Unknown WARP status";
+        }
+        return status;
+    }
+
+    function parseWireGuardStatus(output: string): var {
+        const status = { connected: false, state: "disconnected", reason: "", authUrl: "" };
+        const iface = root.currentConfig?.interface || "";
+        
+        if (iface && output.includes(iface + ":")) {
+            status.connected = true;
+            status.state = "connected";
+        }
+        return status;
+    }
+
+    function parseStatusOutput(output: string): var {
+        switch (providerName) {
+            case "tailscale": return parseTailscaleStatus(output);
+            case "netbird": return parseNetBirdStatus(output);
+            case "warp": return parseWarpStatus(output);
+            case "wireguard":
+            default: return parseWireGuardStatus(output);
+        }
+    }
+
+    function extractAuthUrl(text: string): string {
+        const urlMatch = text.match(/(https?:\/\/[^\s]+)/);
+        return urlMatch ? urlMatch[1] : "";
+    }
+
+    function createAuthStatus(authUrl: string): var {
+        return {
+            connected: false,
+            state: "needs-auth",
+            reason: "Authentication required",
+            authUrl: authUrl
+        };
+    }
+
+    function updateStatus(newStatus: var): void {
+        const oldState = status.state;
+        status = newStatus;
+        root.connected = newStatus.connected;
+
+        if (oldState !== newStatus.state) {
+            emitStatusToast(newStatus);
+        }
+    }
+
+    function emitStatusToast(statusObj: var): void {
         if (!Config.utilities.toasts.vpnChanged)
             return;
 
         const displayName = root.currentConfig ? (root.currentConfig.displayName || "VPN") : "VPN";
-        if (connected) {
-            Toaster.toast(qsTr("VPN connected"), qsTr("Connected to %1").arg(displayName), "vpn_key");
-        } else {
-            Toaster.toast(qsTr("VPN disconnected"), qsTr("Disconnected from %1").arg(displayName), "vpn_key_off");
+
+        switch (statusObj.state) {
+            case "connected":
+                Toaster.toast(qsTr("VPN connected"), qsTr("Connected to %1").arg(displayName), "vpn_key");
+                break;
+            case "disconnected":
+                if (status.connected) {
+                    Toaster.toast(qsTr("VPN disconnected"), qsTr("Disconnected from %1").arg(displayName), "vpn_key_off");
+                }
+                break;
+            case "needs-auth":
+                const authMsg = statusObj.reason || "Authentication required";
+                Toaster.toast(qsTr("VPN authentication required"), qsTr("%1: %2").arg(displayName).arg(authMsg), "vpn_lock");
+                break;
+            case "error":
+                if (status.state === "connected" || status.state === "connecting" || status.state === "needs-auth") {
+                    const errMsg = statusObj.reason || "Unknown error";
+                    Toaster.toast(qsTr("VPN error"), qsTr("%1: %2").arg(displayName).arg(errMsg), "error");
+                }
+                break;
         }
     }
 
@@ -127,15 +277,15 @@ Singleton {
     Process {
         id: statusProc
 
-        command: ["ip", "link", "show"]
+        command: getStatusCommand()
         environment: ({
                 LANG: "C.UTF-8",
                 LC_ALL: "C.UTF-8"
             })
         stdout: StdioCollector {
             onStreamFinished: {
-                const iface = root.currentConfig ? root.currentConfig.interface : "";
-                root.connected = iface && text.includes(iface + ":");
+                const newStatus = parseStatusOutput(text);
+                updateStatus(newStatus);
             }
         }
     }
@@ -143,12 +293,26 @@ Singleton {
     Process {
         id: connectProc
 
-        onExited: statusCheckTimer.start()
+        onExited: (exitCode) => {
+            if (status.state !== "needs-auth") {
+                statusCheckTimer.start();
+            }
+        }
+        stdout: SplitParser {
+            onRead: (data) => {
+                const authUrl = extractAuthUrl(data);
+                if (authUrl) {
+                    updateStatus(createAuthStatus(authUrl));
+                }
+            }
+        }
         stderr: StdioCollector {
             onStreamFinished: {
                 const error = text.trim();
-                if (error && !error.includes("[#]") && !error.includes("already exists")) {
-                    console.warn("VPN connection error:", error);
+                const authUrl = extractAuthUrl(error);
+
+                if (authUrl) {
+                    updateStatus(createAuthStatus(authUrl));
                 } else if (error.includes("already exists")) {
                     root.connected = true;
                 }
@@ -160,12 +324,14 @@ Singleton {
         id: disconnectProc
 
         onExited: statusCheckTimer.start()
-        stderr: StdioCollector {
-            onStreamFinished: {
-                const error = text.trim();
-                if (error && !error.includes("[#]")) {
-                    console.warn("VPN disconnection error:", error);
-                }
+    }
+
+    Process {
+        id: warpRegisterProc
+
+        onExited: (exitCode) => {
+            if (exitCode === 0) {
+                statusCheckTimer.start();
             }
         }
     }
@@ -175,5 +341,23 @@ Singleton {
 
         interval: 500
         onTriggered: root.checkStatus()
+    }
+
+    onStatusChanged: {
+        if (providerName === "warp" && status.state === "needs-auth" && 
+            status.reason.includes("registration")) {
+            warpRegisterProc.exec(["warp-cli", "registration", "new"]);
+        }
+    }
+
+    onProviderNameChanged: {
+        status = {
+            connected: false,
+            state: "disconnected",
+            reason: "",
+            authUrl: ""
+        };
+        root.connected = false;
+        statusCheckTimer.start();
     }
 }
