@@ -85,6 +85,8 @@ ColumnLayout {
         }
 
         delegate: Item {
+            id: layout
+
             required property int layoutIndex
             required property string label
 
@@ -101,11 +103,11 @@ ColumnLayout {
                 implicitHeight: parent.height - 4
 
                 radius: Appearance.rounding.full
-                enabled: !isDisabled
+                enabled: !layout.isDisabled
 
                 function onClicked(): void {
-                    if (!isDisabled)
-                        kb.switchTo(layoutIndex);
+                    if (!layout.isDisabled)
+                        kb.switchTo(layout.layoutIndex);
                 }
             }
 
@@ -116,9 +118,9 @@ ColumnLayout {
                 anchors.right: layer.right
                 anchors.leftMargin: Appearance.padding.small
                 anchors.rightMargin: Appearance.padding.small
-                text: label
+                text: layout.label
                 elide: Text.ElideRight
-                opacity: isDisabled ? 0.4 : 1.0
+                opacity: layout.isDisabled ? 0.4 : 1.0
             }
 
             ToolTip.visible: isDisabled && layer.containsMouse
