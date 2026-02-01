@@ -2,5 +2,13 @@
     "editor.defaultFormatter": "theqtcompany.qt-qml",
     "[cpp]": {
         "editor.defaultFormatter": "llvm-vs-code-extensions.vscode-clangd"
-    }
+    },
+    "cmake.options.statusBarVisibility": "visible",
+    "cmake.buildDirectory": "${workspaceFolder}/builds/${buildKit}/${buildType}",
+    "cmake.useCMakePresets": "never",
+    "qt-qml.qmlls.additionalImportPaths": [
+        "/usr/lib/qt6/qml",
+        "/home/carl/caelestia/shell/",
+        "/home/carl/caelestia/shell/build/qml"
+    ]
 }

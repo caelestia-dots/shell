@@ -3,3 +3,6 @@
 /.qmlls.ini
 build/
 .cache/
+.github/
+.vscode/settings.json
+.vscode/settings.json
