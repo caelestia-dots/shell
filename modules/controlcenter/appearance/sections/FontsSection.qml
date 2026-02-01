@@ -1,6 +1,5 @@
 pragma ComponentBehavior: Bound
 
-import ".."
 import "../../components"
 import qs.components
 import qs.components.controls

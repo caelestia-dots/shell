@@ -1,10 +1,8 @@
 pragma ComponentBehavior: Bound
 
-import ".."
 import "../../../launcher/services"
 import qs.components
 import qs.components.controls
-import qs.components.containers
 import qs.services
 import qs.config
 import Quickshell

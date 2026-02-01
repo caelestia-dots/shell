@@ -1,13 +1,6 @@
 pragma ComponentBehavior: Bound
 
-import ".."
-import qs.components
-import qs.components.effects
-import qs.components.containers
-import qs.config
-import Quickshell.Widgets
 import QtQuick
-import QtQuick.Layouts
 
 Item {
     id: root
