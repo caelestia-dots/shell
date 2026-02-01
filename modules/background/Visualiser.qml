@@ -5,146 +5,182 @@ import qs.services
 import qs.config
 import Caelestia.Services
 import Quickshell
-import Quickshell.Widgets
 import QtQuick
 import QtQuick.Effects
+import Quickshell.Widgets
 
 Item {
     id: root
+    anchors.fill: parent
 
     required property ShellScreen screen
     required property Wallpaper wallpaper
 
     readonly property bool shouldBeActive: Config.background.visualiser.enabled && (!Config.background.visualiser.autoHide || (Hypr.monitorFor(screen)?.activeWorkspace?.toplevels?.values.every(t => t.lastIpcObject?.floating) ?? true))
     property real offset: shouldBeActive ? 0 : screen.height * 0.2
-
     opacity: shouldBeActive ? 1 : 0
-
-    Loader {
-        anchors.fill: parent
-        active: root.opacity > 0 && Config.background.visualiser.blur
-
-        sourceComponent: MultiEffect {
-            source: root.wallpaper
-            maskSource: wrapper
-            maskEnabled: true
-            blurEnabled: true
-            blur: 1
-            blurMax: 32
-            autoPaddingEnabled: false
-        }
-    }
-
-    Item {
-        id: wrapper
-
-        anchors.fill: parent
-        layer.enabled: true
-
-        Loader {
-            anchors.fill: parent
-            anchors.topMargin: root.offset
-            anchors.bottomMargin: -root.offset
-
-            active: root.opacity > 0
-
-            sourceComponent: Item {
-                ServiceRef {
-                    service: Audio.cava
-                }
-
-                Item {
-                    id: content
-
-                    anchors.fill: parent
-                    anchors.margins: Config.border.thickness
-                    anchors.leftMargin: Visibilities.bars.get(root.screen).exclusiveZone + Appearance.spacing.small * Config.background.visualiser.spacing
-
-                    Side {
-                        content: content
-                    }
-                    Side {
-                        content: content
-                        isRight: true
-                    }
-
-                    Behavior on anchors.leftMargin {
-                        Anim {}
-                    }
-                }
-            }
-        }
-    }
 
     Behavior on offset {
         Anim {}
     }
-
     Behavior on opacity {
         Anim {}
     }
 
-    component Side: Repeater {
-        id: side
+    ServiceRef {
+        id: cavaRef
+        service: Audio.cava
+    }
 
-        required property Item content
-        property bool isRight
+    ShaderEffectSource {
+        id: wallpaperSource
+        sourceItem: root.wallpaper
+        live: true
+    }
 
-        model: Config.services.visualiserBars
+    property color barColorTop: Qt.alpha(Colours.palette.m3primary, 1)
+    property color barColorBottom: Qt.alpha(Colours.palette.m3inversePrimary, 0.7)
 
-        ClippingRectangle {
-            id: bar
+    property real barRadius: Appearance.rounding.small * Config.background.visualiser.rounding
 
-            required property int modelData
-            property real value: Math.max(0, Math.min(1, Audio.cava.values[side.isRight ? modelData : side.count - modelData - 1]))
+    Loader {
+        anchors.fill: parent
+        y: offset
+        height: parent.height - offset * 2
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.leftMargin: Visibilities.bars.get(root.screen).exclusiveZone + Appearance.spacing.small * Config.background.visualiser.spacing
+        anchors.margins: Config.border.thickness
+        active: root.opacity > 0 && Config.background.visualiser.blur
+        sourceComponent: MultiEffect {
+            source: wallpaperSource
+            maskSource: canvas
+            maskEnabled: true
+            maskSpreadAtMax: 0
+            maskSpreadAtMin: 0
+            maskThresholdMin: 0.67 // eliminates blur spreading out of bounds
+            blurEnabled: true
+            blur: 1
+            blurMax: 32
+            autoPaddingEnabled: false
+            shadowEnabled: false
+        }
+    }
 
-            clip: true
+    Item {
+        id: canvasWrapper
+        anchors.fill: parent
+        y: offset
+        height: parent.height - offset * 2
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.leftMargin: Visibilities.bars.get(root.screen).exclusiveZone + Appearance.spacing.small * Config.background.visualiser.spacing
+        anchors.margins: Config.border.thickness
 
-            x: modelData * ((side.content.width * 0.4) / Config.services.visualiserBars) + (side.isRight ? side.content.width * 0.6 : 0)
-            implicitWidth: (side.content.width * 0.4) / Config.services.visualiserBars - Appearance.spacing.small * Config.background.visualiser.spacing
+        Canvas {
+            id: canvas
+            anchors.fill: parent
+            property int barCount: Config.services.visualiserBars
+            property real spacing: Appearance.spacing.small * Config.background.visualiser.spacing
+            property real barWidth: (width * 0.4 / barCount) - spacing
 
-            y: side.content.height - height
-            implicitHeight: bar.value * side.content.height * 0.4
+            property var displayValues: Array(barCount * 2).fill(0)
 
-            color: "transparent"
-            topLeftRadius: Appearance.rounding.small * Config.background.visualiser.rounding
-            topRightRadius: Appearance.rounding.small * Config.background.visualiser.rounding
+            property real smoothing: 1 - (0.95 * Config.background.visualiser.smoothing)
 
-            Rectangle {
-                topLeftRadius: parent.topLeftRadius
-                topRightRadius: parent.topRightRadius
+            property int spatialRadius: Config.background.visualiser.curvature
 
-                gradient: Gradient {
-                    orientation: Gradient.Vertical
+            property var spatialValues: Array(barCount * 2).fill(0)
 
-                    GradientStop {
-                        position: 0
-                        color: Qt.alpha(Colours.palette.m3primary, 0.7)
-
-                        Behavior on color {
-                            CAnim {}
-                        }
-                    }
-                    GradientStop {
-                        position: 1
-                        color: Qt.alpha(Colours.palette.m3inversePrimary, 0.7)
-
-                        Behavior on color {
-                            CAnim {}
-                        }
-                    }
-                }
-
-                anchors.left: parent.left
-                anchors.right: parent.right
-                y: parent.height - height
-                implicitHeight: side.content.height * 0.4
+            function drawRoundedRect(ctx, x, y, w, h, r) {
+                r = Math.min(r, w / 2, h / 2);
+                ctx.beginPath();
+                ctx.moveTo(x + r, y);
+                ctx.lineTo(x + w - r, y);
+                ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+                ctx.lineTo(x + w, y + h);
+                ctx.lineTo(x, y + h);
+                ctx.lineTo(x, y + r);
+                ctx.quadraticCurveTo(x, y, x + r, y);
+                ctx.closePath();
             }
 
-            Behavior on value {
-                Anim {
-                    duration: Appearance.anim.durations.small
+            function spatialSmooth(index, values, radius) {
+                var sum = 0;
+                var weightSum = 0;
+
+                for (var o = -radius; o <= radius; o++) {
+                    var idx = index + o;
+                    if (idx < 0 || idx >= values.length)
+                        continue;
+
+                    var w = Math.exp(-(o * o) / (2 * radius * radius));
+                    sum += values[idx] * w;
+                    weightSum += w;
                 }
+                return weightSum > 0 ? sum / weightSum : values[index];
+            }
+
+            renderStrategy: Canvas.Cooperative
+            layer.enabled: true
+
+            onPaint: {
+                var ctx = getContext("2d");
+                ctx.clearRect(0, 0, width, height);
+                if (!Audio.cava.values)
+                    return;
+
+                var gradientTopY = height * 0.7;
+                var gradientBottomY = height;
+                var sharedGradient = ctx.createLinearGradient(0, gradientTopY, 0, gradientBottomY);
+                sharedGradient.addColorStop(0, barColorTop);
+                sharedGradient.addColorStop(1, barColorBottom);
+
+                ctx.fillStyle = sharedGradient;
+
+                for (var i = 0; i < barCount; i++) {
+                    var targetLeft = Math.max(0, Math.min(1, Audio.cava.values[i]));
+                    displayValues[i] += (targetLeft - displayValues[i]) * smoothing;
+
+                    var targetRight = Math.max(0, Math.min(1, Audio.cava.values[barCount - i - 1]));
+                    displayValues[barCount + i] += (targetRight - displayValues[barCount + i]) * smoothing;
+                }
+
+                for (var i = 0; i < barCount * 2; i++) {
+                    spatialValues[i] = spatialSmooth(i, displayValues, spatialRadius);
+                }
+
+                for (var i = 0; i < barCount; i++) {
+
+                    // Left
+                    var vLeft = spatialValues[i];
+                    var xLeft = i * (width * 0.4 / barCount);
+                    var hLeft = vLeft * height * 0.4;
+                    var yLeft = height - hLeft;
+
+                    if (hLeft > 0) {
+                        drawRoundedRect(ctx, xLeft, yLeft, barWidth, hLeft, barRadius);
+                        ctx.fill();
+                    }
+
+                    // Right
+                    var vRight = spatialValues[barCount + i];
+                    var xRight = width * 0.6 + i * (width * 0.4 / barCount);
+                    var hRight = vRight * height * 0.4;
+                    var yRight = height - hRight;
+
+                    if (hRight > 0) {
+                        drawRoundedRect(ctx, xRight, yRight, barWidth, hRight, barRadius);
+                        ctx.fill();
+                    }
+                }
+            }
+
+            Timer {
+                interval: 16
+                running: true
+                repeat: true
+                onTriggered: canvas.requestPaint()
             }
         }
     }
