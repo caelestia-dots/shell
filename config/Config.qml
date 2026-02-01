@@ -449,7 +449,7 @@ Singleton {
         watchChanges: true
         onFileChanged: {
             // Prevent reload loop - don't reload if we just saved
-            if (!recentlySaved) {
+            if (!root.recentlySaved) {
                 timer.restart();
                 reload();
             } else {
