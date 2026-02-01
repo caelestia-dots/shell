@@ -133,8 +133,8 @@ ColumnLayout {
         Layout.fillWidth: true
         Layout.rightMargin: Appearance.padding.small
         Layout.topMargin: Appearance.spacing.small
+        Layout.preferredHeight: 1
 
-        height: 1
         color: Colours.palette.m3onSurfaceVariant
         opacity: 0.35
     }
