@@ -9,7 +9,6 @@ import qs.utils
 import Quickshell
 import QtQuick
 import QtQuick.Layouts
-import QtQuick.Shapes
 
 Item {
     id: root
@@ -20,7 +19,6 @@ Item {
     property int activeSubmenuIndex: -1
     property int targetSubmenuIndex: -1
     property real submenuProgress: 0
-    property bool submenuWasFullyOpen: false
     property int hoveredSubmenuIndex: -1
     property real contentOpacity: 1
     property real submenuItemY: 0
@@ -31,17 +29,10 @@ Item {
     property real previousTargetHeight: 0
     property real previousTopY: 0
 
-    Behavior on contentOpacity {
-        Anim {
-            duration: Appearance.anim.durations.small
-            easing.bezierCurve: Appearance.anim.curves.emphasized
-        }
-    }
+    property real gooOverlapPx: 28
+    readonly property real gooMarginPx: 30
 
     readonly property real bottomPadding: 16
-    readonly property real cornerRadius: Appearance.rounding.normal
-    readonly property real notchRadius: 15
-    readonly property real tolerance: 0.5
 
     Timer {
         id: contentSwitchTimer
@@ -67,7 +58,6 @@ Item {
         if (activeSubmenuIndex < 0) {
             activeSubmenuIndex = displayedSubmenuIndex = hoveredSubmenuIndex;
             targetSubmenuIndex = -1;
-            contentOpacity = 1;
             Qt.callLater(() => {
                 targetWidth = submenuColumn.implicitWidth + Appearance.padding.smaller * 2;
                 targetHeight = submenuColumn.implicitHeight + Appearance.padding.smaller * 2;
@@ -77,7 +67,6 @@ Item {
             previousTargetHeight = targetHeight;
             previousTopY = submenuContainer.interpolatedTopY;
             targetSubmenuIndex = hoveredSubmenuIndex;
-            contentOpacity = 0;
             contentSwitchTimer.restart();
         }
     }
@@ -154,28 +143,87 @@ Item {
             easing.type: Easing.OutCubic
         }
     }
+
     Timer {
         id: submenuCloseTimer
-        interval: 300
+        interval: 150
         onTriggered: if (hoveredSubmenuIndex < 0) {
             submenuProgress = 0;
             Qt.callLater(() => {
                 if (submenuProgress === 0) {
                     activeSubmenuIndex = -1;
-                    submenuWasFullyOpen = false;
                 }
             });
         }
     }
 
-    onSubmenuProgressChanged: submenuWasFullyOpen = submenuProgress >= 1 ? true : (submenuProgress === 0 ? false : submenuWasFullyOpen)
     MouseArea {
         anchors.fill: parent
         hoverEnabled: true
         onClicked: mouse => mouse.accepted = true
     }
 
-    Elevation {
+    Item {
+        id: gooBounds
+        visible: root.visible
+
+        readonly property real menuLeft: menuContainer.x
+        readonly property real menuTop: menuContainer.y
+        readonly property real menuRight: menuContainer.x + menuContainer.width
+        readonly property real menuBottom: menuContainer.y + menuContainer.height
+
+        readonly property bool hasSub: submenuContainer.visible
+        readonly property real subLeft: submenuContainer.x - root.gooOverlapPx
+        readonly property real subTop: submenuContainer.y
+        readonly property real subRight: submenuContainer.x + submenuContainer.width
+        readonly property real subBottom: submenuContainer.y + submenuContainer.height
+
+        readonly property real gooLeft: (hasSub ? Math.min(menuLeft, subLeft) : menuLeft) - root.gooMarginPx
+        readonly property real gooTop: (hasSub ? Math.min(menuTop, subTop) : menuTop) - root.gooMarginPx
+        readonly property real gooRight: (hasSub ? Math.max(menuRight, subRight) : menuRight) + root.gooMarginPx
+        readonly property real gooBottom: (hasSub ? Math.max(menuBottom, subBottom) : menuBottom) + root.gooMarginPx
+
+        x: gooLeft
+        y: gooTop
+        width: Math.max(1, gooRight - gooLeft)
+        height: Math.max(1, gooBottom - gooTop)
+    }
+
+    ShaderEffect {
+        id: gooEffect
+        x: gooBounds.x
+        y: gooBounds.y
+        width: gooBounds.width
+        height: gooBounds.height
+        z: -2
+        visible: root.visible
+
+        property vector2d sizePx: Qt.vector2d(width, height)
+
+        property vector4d menuRectPx: Qt.vector4d(menuContainer.x - gooBounds.x, menuContainer.y - gooBounds.y, menuContainer.width, menuContainer.height)
+
+        property vector4d subRectPx: submenuContainer.visible ? Qt.vector4d((submenuContainer.x - gooBounds.x) - 24, submenuContainer.y - gooBounds.y, submenuContainer.width + 24, submenuContainer.height) : Qt.vector4d(0, 0, 0, 0)
+
+        property real radiusPx: Appearance.rounding.normal * 0.75
+
+        readonly property real topEdgeDiff: submenuContainer.visible ? Math.abs(menuContainer.y - submenuContainer.y) : 999
+        readonly property real bottomEdgeDiff: submenuContainer.visible ? Math.abs((menuContainer.y + menuContainer.height) - (submenuContainer.y + submenuContainer.height)) : 999
+        readonly property bool isTopAligned: submenuContainer.visible && topEdgeDiff < 10
+        readonly property bool isBottomAligned: submenuContainer.visible && bottomEdgeDiff < 10
+
+        property real smoothPxTop: isTopAligned ? 0 : 12
+        property real smoothPxBottom: isBottomAligned ? 0 : 12
+
+        property color fillColor: Colours.palette.m3surfaceContainer
+        property color shadowColor: Qt.rgba(0, 0, 0, 0.20)
+        property vector2d shadowOffsetPx: Qt.vector2d(0, 0)
+        property real shadowSoftPx: 6
+
+        vertexShader: Qt.resolvedUrl("shaders/goo_sdf.vert.qsb")
+        fragmentShader: Qt.resolvedUrl("shaders/goo_sdf.frag.qsb")
+    }
+
+    Item {
         id: menuContainer
 
         x: 0
@@ -183,26 +231,7 @@ Item {
         width: menuColumn.implicitWidth + Appearance.padding.smaller * 2
         height: menuColumn.implicitHeight + Appearance.padding.smaller * 2
 
-        radius: cornerRadius
-        level: 3
         opacity: 0
-
-        // Dynamic corner radii based on submenu position
-        property real topRightRadius: cornerRadius
-        property real bottomRightRadius: cornerRadius
-
-        Behavior on topRightRadius {
-            NumberAnimation {
-                duration: Appearance.anim.durations.normal * 0.5
-                easing.type: Easing.OutCubic
-            }
-        }
-        Behavior on bottomRightRadius {
-            NumberAnimation {
-                duration: Appearance.anim.durations.normal * 0.5
-                easing.type: Easing.OutCubic
-            }
-        }
 
         scale: 0.80
         transformOrigin: Item.TopLeft
@@ -214,33 +243,9 @@ Item {
         }
         Behavior on scale {
             Anim {
-                duration: Appearance.anim.durations.normal
+                duration: Appearance.anim.durations.normal / 2
                 easing.bezierCurve: Appearance.anim.curves.standard
             }
-        }
-
-        ContextMenus.RoundedRect {
-            anchors.fill: parent
-            fillColor: Colours.palette.m3surfaceContainer
-            topLeftRadius: cornerRadius
-            topRightRadius: menuContainer.topRightRadius
-            bottomRightRadius: menuContainer.bottomRightRadius
-            bottomLeftRadius: cornerRadius
-        }
-
-        Rectangle {
-            x: parent.width
-            y: submenuContainer.visible ? submenuContainer.y - parent.y + (submenuContainer.topLeftRadius > 0 ? cornerRadius : 0) : 0
-            width: submenuContainer.visible && submenuContainer.width > 0 ? 6 : 0
-            height: {
-                if (!submenuContainer.visible)
-                    return 0;
-                const topR = submenuContainer.topLeftRadius;
-                const botR = submenuContainer.bottomLeftRadius;
-                return Math.max(0, submenuContainer.height - (topR > 0 ? cornerRadius : 0) - (botR > 0 ? cornerRadius : 0));
-            }
-            color: Colours.palette.m3surfaceContainer
-            z: 10
         }
 
         ColumnLayout {
@@ -317,10 +322,9 @@ Item {
         }
     }
 
-    Elevation {
+    Item {
         id: submenuContainer
         z: -1
-        level: 1
 
         readonly property bool isTransitioning: targetSubmenuIndex >= 0
 
@@ -334,37 +338,27 @@ Item {
             const unclampedY = interpolatedTopY + centerOffset;
             if (activeSubmenuIndex < 0 || height === 0)
                 return unclampedY;
+
+            // Clamp to menu top edge when close
+            const topDiff = Math.abs(unclampedY - menuContainer.y);
+            if (topDiff < 10) {
+                return menuContainer.y;
+            }
+
+            // Clamp to menu bottom edge when close
+            const menuBottom = menuContainer.y + menuContainer.height;
+            const subBottom = unclampedY + height;
+            const bottomDiff = Math.abs(subBottom - menuBottom);
+            if (bottomDiff < 10) {
+                return menuBottom - height;
+            }
+
+            // Clamp to screen bottom
             const maxY = (root.parent ? root.parent.height - root.y : 1000) - height - bottomPadding;
             return Math.min(unclampedY, maxY);
         }
 
-        property real animatedTopEdge: clampedY
-        property real animatedBottomEdge: clampedY + height
-        property real topDiff: Math.abs(y - menuContainer.y)
-        property real bottomDiff: Math.abs((y + height) - (menuContainer.y + menuContainer.height))
-
-        property real topLeftRadius: (activeSubmenuIndex >= 0 && notchScale > 0 && y > menuContainer.y + tolerance) ? 0 : cornerRadius
-        property real bottomLeftRadius: (activeSubmenuIndex >= 0 && notchScale > 0 && y + height < menuContainer.y + menuContainer.height - tolerance) ? 0 : cornerRadius
-
-        // Update main menu corner radii
-        onTopDiffChanged: updateMainCorners()
-        onBottomDiffChanged: updateMainCorners()
-        onYChanged: updateMainCorners()
-        onHeightChanged: updateMainCorners()
-
-        function updateMainCorners() {
-            if (activeSubmenuIndex < 0 || height === 0) {
-                menuContainer.topRightRadius = menuContainer.bottomRightRadius = cornerRadius;
-                return;
-            }
-            menuContainer.topRightRadius = (notchScale > 0 && y < menuContainer.y - tolerance) ? 0 : cornerRadius;
-            menuContainer.bottomRightRadius = (notchScale > 0 && y + height > menuContainer.y + menuContainer.height + tolerance) ? 0 : cornerRadius;
-        }
-
-        readonly property real notchScale: submenuProgress
-        readonly property real slideOffsetY: notchRadius * 2 * (1 - submenuProgress)
-        readonly property real closeYOffset: submenuWasFullyOpen && submenuProgress < 1 ? notchRadius * (1 - submenuProgress) : 0
-        readonly property real slideOffsetX: closeYOffset
+        readonly property real slideOffsetX: -10 * (1 - submenuProgress)
 
         Behavior on interpolatedWidth {
             enabled: submenuProgress >= 1
@@ -391,33 +385,10 @@ Item {
         width: (activeSubmenuIndex >= 0 && submenuProgress > 0) ? interpolatedWidth * submenuProgress : 0
         height: (activeSubmenuIndex >= 0 && submenuProgress > 0) ? interpolatedHeight * submenuProgress : 0
 
-        x: menuContainer.width - 20 * (1 - submenuProgress)
+        x: menuContainer.width + slideOffsetX
         y: clampedY
-        radius: cornerRadius
         visible: width > 0 || height > 0
         clip: true
-
-        ContextMenus.RoundedRect {
-            anchors.fill: parent
-            fillColor: Colours.palette.m3surfaceContainer
-            topLeftRadius: submenuContainer.topLeftRadius
-            topRightRadius: cornerRadius
-            bottomRightRadius: cornerRadius
-            bottomLeftRadius: submenuContainer.bottomLeftRadius
-        }
-
-        Rectangle {
-            x: parent.width
-            y: submenuContainer.topLeftRadius > 0 ? cornerRadius : 0
-            width: submenuContainer.visible && submenuContainer.width > 0 ? 6 : 0
-            height: {
-                const topR = submenuContainer.topLeftRadius;
-                const botR = submenuContainer.bottomLeftRadius;
-                return Math.max(0, parent.height - (topR > 0 ? cornerRadius : 0) - (botR > 0 ? cornerRadius : 0));
-            }
-            color: Colours.palette.m3surfaceContainer
-            z: 10
-        }
 
         ColumnLayout {
             id: submenuColumn
@@ -425,13 +396,6 @@ Item {
             anchors.margins: Appearance.padding.smaller
             spacing: Appearance.spacing.smaller
             opacity: contentOpacity
-
-            Behavior on opacity {
-                Anim {
-                    duration: Appearance.anim.durations.small
-                    easing.bezierCurve: Appearance.anim.curves.emphasized
-                }
-            }
 
             Loader {
                 active: displayedSubmenuIndex === 0
@@ -456,29 +420,5 @@ Item {
                 }
             }
         }
-    }
-
-    ContextMenus.MenuNotch {
-        visible: submenuContainer.visible && submenuContainer.notchScale > 0.01
-        property bool onMenuSide: submenuContainer.animatedTopEdge > menuContainer.y
-        cornerX: (onMenuSide ? menuContainer.x + menuContainer.width : submenuContainer.x) - submenuContainer.slideOffsetX
-        cornerY: (onMenuSide ? submenuContainer.animatedTopEdge : menuContainer.y) + submenuContainer.slideOffsetY + submenuContainer.closeYOffset
-        radius: notchRadius * submenuContainer.notchScale
-        directionX: onMenuSide ? 1 : -1
-        directionY: -1
-        fillColor: Colours.palette.m3surfaceContainer
-        opacity: submenuContainer.notchScale
-    }
-
-    ContextMenus.MenuNotch {
-        visible: submenuContainer.visible && submenuContainer.notchScale > 0.01
-        property bool onMenuSide: submenuContainer.animatedBottomEdge < menuContainer.y + menuContainer.height
-        cornerX: (onMenuSide ? menuContainer.x + menuContainer.width : submenuContainer.x) - submenuContainer.slideOffsetX
-        cornerY: (onMenuSide ? submenuContainer.animatedBottomEdge : menuContainer.y + menuContainer.height) - submenuContainer.slideOffsetY - submenuContainer.closeYOffset
-        radius: notchRadius * submenuContainer.notchScale
-        directionX: onMenuSide ? 1 : -1
-        directionY: 1
-        fillColor: Colours.palette.m3surfaceContainer
-        opacity: submenuContainer.notchScale
     }
 }

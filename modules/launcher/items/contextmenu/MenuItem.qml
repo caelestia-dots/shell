@@ -47,14 +47,24 @@ StyledRect {
                 submenuItemY = item.y + item.height / 2;
                 submenuCloseTimer.stop();
                 openTimer.restart();
-            } else if (!isSubmenuItem) {
+            } else if (isSubmenuItem) {
+                // Hovering submenu item - keep submenu open
+                submenuCloseTimer.stop();
+            } else {
+                // Hovering regular menu item - close submenu
                 hoveredSubmenuIndex = -1;
-                submenuCloseTimer.restart();
+                if (activeSubmenuIndex >= 0) {
+                    submenuCloseTimer.restart();
+                }
             }
         }
         onExited: {
             openTimer.stop();
             item.color = "transparent";
+            if (!isSubmenuItem && activeSubmenuIndex >= 0) {
+                hoveredSubmenuIndex = -1;
+                submenuCloseTimer.restart();
+            }
         }
         onPressed: if (!hasSubMenu)
             item.color = Qt.alpha(Colours.palette.m3onSurface, 0.12)
