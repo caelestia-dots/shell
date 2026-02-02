@@ -29,4 +29,3 @@ ColumnLayout {
         font.bold: true
     }
 }
-

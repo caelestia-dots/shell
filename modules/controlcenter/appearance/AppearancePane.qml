@@ -73,15 +73,15 @@ Item {
 
         Config.background.desktopClock.enabled = root.desktopClockEnabled;
         Config.background.enabled = root.backgroundEnabled;
-        Config.background.desktopClock.scale = root.desktopClockScale
-        Config.background.desktopClock.position = root.desktopClockPosition
-        Config.background.desktopClock.shadow.enabled = root.desktopClockShadowEnabled
-        Config.background.desktopClock.shadow.opacity = root.desktopClockShadowOpacity
-        Config.background.desktopClock.shadow.blur = root.desktopClockShadowBlur
-        Config.background.desktopClock.background.enabled = root.desktopClockBackgroundEnabled
-        Config.background.desktopClock.background.opacity = root.desktopClockBackgroundOpacity
-        Config.background.desktopClock.background.blur = root.desktopClockBackgroundBlur
-        Config.background.desktopClock.invertColors = root.desktopClockInvertColors
+        Config.background.desktopClock.scale = root.desktopClockScale;
+        Config.background.desktopClock.position = root.desktopClockPosition;
+        Config.background.desktopClock.shadow.enabled = root.desktopClockShadowEnabled;
+        Config.background.desktopClock.shadow.opacity = root.desktopClockShadowOpacity;
+        Config.background.desktopClock.shadow.blur = root.desktopClockShadowBlur;
+        Config.background.desktopClock.background.enabled = root.desktopClockBackgroundEnabled;
+        Config.background.desktopClock.background.opacity = root.desktopClockBackgroundOpacity;
+        Config.background.desktopClock.background.blur = root.desktopClockBackgroundBlur;
+        Config.background.desktopClock.invertColors = root.desktopClockInvertColors;
 
         Config.background.visualiser.enabled = root.visualiserEnabled;
         Config.background.visualiser.autoHide = root.visualiserAutoHide;
@@ -116,11 +116,11 @@ Item {
 
                 Loader {
                     id: wallpaperLoader
-                    
+
                     Layout.fillWidth: true
                     Layout.fillHeight: true
                     Layout.bottomMargin: -Appearance.padding.large * 2
-                    
+
                     active: {
                         const isActive = root.session.activeIndex === 3;
                         const isAdjacent = Math.abs(root.session.activeIndex - 3) === 1;
@@ -129,13 +129,13 @@ Item {
                         const shouldActivate = loader && loader.item !== null && (isActive || isAdjacent);
                         return shouldActivate;
                     }
-                    
+
                     onStatusChanged: {
                         if (status === Loader.Error) {
                             console.error("[AppearancePane] Wallpaper loader error!");
                         }
                     }
-                    
+
                     sourceComponent: WallpaperGrid {
                         session: root.session
                     }
@@ -155,7 +155,6 @@ Item {
                 flickableDirection: Flickable.VerticalFlick
                 contentHeight: sidebarLayout.height
 
-
                 StyledScrollBar.vertical: StyledScrollBar {
                     flickable: sidebarFlickable
                 }
@@ -165,95 +164,86 @@ Item {
                     anchors.left: parent.left
                     anchors.right: parent.right
                     spacing: Appearance.spacing.small
-                    
+
                     readonly property var rootPane: sidebarFlickable.rootPane
 
-                    readonly property bool allSectionsExpanded: 
-                        themeModeSection.expanded &&
-                        colorVariantSection.expanded &&
-                        colorSchemeSection.expanded &&
-                        animationsSection.expanded &&
-                        fontsSection.expanded &&
-                        scalesSection.expanded &&
-                        transparencySection.expanded &&
-                        borderSection.expanded &&
-                        backgroundSection.expanded
+                    readonly property bool allSectionsExpanded: themeModeSection.expanded && colorVariantSection.expanded && colorSchemeSection.expanded && animationsSection.expanded && fontsSection.expanded && scalesSection.expanded && transparencySection.expanded && borderSection.expanded && backgroundSection.expanded
 
-                RowLayout {
-                    spacing: Appearance.spacing.smaller
+                    RowLayout {
+                        spacing: Appearance.spacing.smaller
 
-                    StyledText {
-                        text: qsTr("Appearance")
-                        font.pointSize: Appearance.font.size.large
-                        font.weight: 500
-                    }
+                        StyledText {
+                            text: qsTr("Appearance")
+                            font.pointSize: Appearance.font.size.large
+                            font.weight: 500
+                        }
 
-                    Item {
-                        Layout.fillWidth: true
-                    }
+                        Item {
+                            Layout.fillWidth: true
+                        }
 
-                    IconButton {
-                        icon: sidebarLayout.allSectionsExpanded ? "unfold_less" : "unfold_more"
-                        type: IconButton.Text
-                        label.animate: true
-                        onClicked: {
-                            const shouldExpand = !sidebarLayout.allSectionsExpanded;
-                            themeModeSection.expanded = shouldExpand;
-                            colorVariantSection.expanded = shouldExpand;
-                            colorSchemeSection.expanded = shouldExpand;
-                            animationsSection.expanded = shouldExpand;
-                            fontsSection.expanded = shouldExpand;
-                            scalesSection.expanded = shouldExpand;
-                            transparencySection.expanded = shouldExpand;
-                            borderSection.expanded = shouldExpand;
-                            backgroundSection.expanded = shouldExpand;
+                        IconButton {
+                            icon: sidebarLayout.allSectionsExpanded ? "unfold_less" : "unfold_more"
+                            type: IconButton.Text
+                            label.animate: true
+                            onClicked: {
+                                const shouldExpand = !sidebarLayout.allSectionsExpanded;
+                                themeModeSection.expanded = shouldExpand;
+                                colorVariantSection.expanded = shouldExpand;
+                                colorSchemeSection.expanded = shouldExpand;
+                                animationsSection.expanded = shouldExpand;
+                                fontsSection.expanded = shouldExpand;
+                                scalesSection.expanded = shouldExpand;
+                                transparencySection.expanded = shouldExpand;
+                                borderSection.expanded = shouldExpand;
+                                backgroundSection.expanded = shouldExpand;
+                            }
                         }
                     }
-                }
 
-                ThemeModeSection {
-                    id: themeModeSection
-                }
+                    ThemeModeSection {
+                        id: themeModeSection
+                    }
 
-                ColorVariantSection {
-                    id: colorVariantSection
-                }
+                    ColorVariantSection {
+                        id: colorVariantSection
+                    }
 
-                ColorSchemeSection {
-                    id: colorSchemeSection
-                }
+                    ColorSchemeSection {
+                        id: colorSchemeSection
+                    }
 
-                AnimationsSection {
-                    id: animationsSection
-                    rootPane: sidebarFlickable.rootPane
-                }
+                    AnimationsSection {
+                        id: animationsSection
+                        rootPane: sidebarFlickable.rootPane
+                    }
 
-                FontsSection {
-                    id: fontsSection
-                    rootPane: sidebarFlickable.rootPane
-                }
+                    FontsSection {
+                        id: fontsSection
+                        rootPane: sidebarFlickable.rootPane
+                    }
 
-                ScalesSection {
-                    id: scalesSection
-                    rootPane: sidebarFlickable.rootPane
-                }
+                    ScalesSection {
+                        id: scalesSection
+                        rootPane: sidebarFlickable.rootPane
+                    }
 
-                TransparencySection {
-                    id: transparencySection
-                    rootPane: sidebarFlickable.rootPane
-                }
+                    TransparencySection {
+                        id: transparencySection
+                        rootPane: sidebarFlickable.rootPane
+                    }
 
-                BorderSection {
-                    id: borderSection
-                    rootPane: sidebarFlickable.rootPane
-                }
+                    BorderSection {
+                        id: borderSection
+                        rootPane: sidebarFlickable.rootPane
+                    }
 
-                BackgroundSection {
-                    id: backgroundSection
-                    rootPane: sidebarFlickable.rootPane
+                    BackgroundSection {
+                        id: backgroundSection
+                        rootPane: sidebarFlickable.rootPane
+                    }
                 }
             }
-        }
         }
 
         rightContent: appearanceRightContentComponent

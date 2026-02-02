@@ -22,7 +22,7 @@ DeviceList {
     title: qsTr("Networks (%1)").arg(Nmcli.networks.length)
     description: qsTr("All available WiFi networks")
     activeItem: session.network.active
-    
+
     titleSuffix: Component {
         StyledText {
             visible: Nmcli.scanning
@@ -165,11 +165,13 @@ DeviceList {
                         StyledText {
                             Layout.fillWidth: true
                             text: {
-                                if (modelData.active) return qsTr("Connected");
+                                if (modelData.active)
+                                    return qsTr("Connected");
                                 if (modelData.isSecure && modelData.security && modelData.security.length > 0) {
                                     return modelData.security;
                                 }
-                                if (modelData.isSecure) return qsTr("Secured");
+                                if (modelData.isSecure)
+                                    return qsTr("Secured");
                                 return qsTr("Open");
                             }
                             color: modelData.active ? Colours.palette.m3primary : Colours.palette.m3outline
@@ -211,7 +213,7 @@ DeviceList {
         }
     }
 
-    onItemSelected: function(item) {
+    onItemSelected: function (item) {
         session.network.active = item;
         if (item && item.ssid) {
             checkSavedProfileForNetwork(item.ssid);
