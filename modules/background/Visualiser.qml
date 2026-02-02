@@ -7,7 +7,6 @@ import Caelestia.Services
 import Quickshell
 import QtQuick
 import QtQuick.Effects
-import Quickshell.Widgets
 
 Item {
     id: root
@@ -53,8 +52,8 @@ Item {
 
     Loader {
         anchors.fill: parent
-        y: offset
-        height: parent.height - offset * 2
+        y: root.offset
+        height: parent.height - root.offset * 2
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.leftMargin: Visibilities.bars.get(root.screen).exclusiveZone + Appearance.spacing.small * Config.background.visualiser.spacing
@@ -78,8 +77,8 @@ Item {
     Item {
         id: canvasWrapper
         anchors.fill: parent
-        y: offset
-        height: parent.height - offset * 2
+        y: root.offset
+        height: parent.height - root.offset * 2
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.leftMargin: Visibilities.bars.get(root.screen).exclusiveZone + Appearance.spacing.small * Config.background.visualiser.spacing
@@ -141,8 +140,8 @@ Item {
                 var gradientTopY = height * 0.7;
                 var gradientBottomY = height;
                 var sharedGradient = ctx.createLinearGradient(0, gradientTopY, 0, gradientBottomY);
-                sharedGradient.addColorStop(0, barColorTop);
-                sharedGradient.addColorStop(1, barColorBottom);
+                sharedGradient.addColorStop(0, root.barColorTop);
+                sharedGradient.addColorStop(1, root.barColorBottom);
 
                 ctx.fillStyle = sharedGradient;
 
@@ -167,7 +166,7 @@ Item {
                     var yLeft = height - hLeft;
 
                     if (hLeft > 0) {
-                        drawRoundedRect(ctx, xLeft, yLeft, barWidth, hLeft, barRadius);
+                        drawRoundedRect(ctx, xLeft, yLeft, barWidth, hLeft, root.barRadius);
                         ctx.fill();
                     }
 
@@ -178,7 +177,7 @@ Item {
                     var yRight = height - hRight;
 
                     if (hRight > 0) {
-                        drawRoundedRect(ctx, xRight, yRight, barWidth, hRight, barRadius);
+                        drawRoundedRect(ctx, xRight, yRight, barWidth, hRight, root.barRadius);
                         ctx.fill();
                     }
                 }
