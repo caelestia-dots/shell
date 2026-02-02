@@ -1,11 +1,8 @@
 pragma ComponentBehavior: Bound
 
 import qs.components
-import qs.components.images
-import qs.components.filedialog
 import qs.services
 import qs.config
-import qs.utils
 import QtQuick
 import QtMultimedia
 
@@ -84,7 +81,7 @@ Item {
             } else {
                 if (mediaStatus !== MediaPlayer.NoMedia) {
                     player.pause();
-                    pendingUnload = true;
+                    root.pendingUnload = true;
                 }
             }
         }
@@ -93,7 +90,7 @@ Item {
     VideoOutput {
         id: video
         anchors.fill: parent
-        opacity: visualMode === "video" ? 1 : 0
+        opacity: root.visualMode === "video" ? 1 : 0
         scale: (root.isCurrent ? 1 : Wallpapers.showPreview ? 1 : 0.8)
         fillMode: VideoOutput.PreserveAspectCrop
 
@@ -102,10 +99,10 @@ Item {
                 onRunningChanged: {
                     if (running)
                         return;
-                    if (pendingUnload && video.opacity === 0) {
+                    if (root.pendingUnload && video.opacity === 0) {
                         player.stop();
                         Qt.callLater(() => {
-                            if (gamemodeEnabled) {
+                            if (root.gamemodeEnabled) {
                                 player.source = "";
                                 return;
                             }
@@ -115,7 +112,7 @@ Item {
                             }
                         });
 
-                        pendingUnload = false;
+                        root.pendingUnload = false;
                     }
                 }
             }
@@ -128,7 +125,7 @@ Item {
 
     StyledRect {
         id: gameModePlaceholder
-        opacity: visualMode === "placeholder" ? 1 : 0
+        opacity: root.visualMode === "placeholder" ? 1 : 0
         anchors.fill: parent
         color: Colours.palette.m3surfaceContainer
 

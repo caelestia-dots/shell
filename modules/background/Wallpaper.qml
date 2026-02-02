@@ -1,11 +1,9 @@
 pragma ComponentBehavior: Bound
 
 import qs.components
-import qs.components.images
 import qs.components.filedialog
 import qs.services
 import qs.config
-import qs.utils
 import QtQuick
 
 Item {
@@ -181,12 +179,12 @@ Item {
         sourceComponent: imageComponent
 
         onLoaded: {
-            loadedCount++;
-            if (loadedCount === 2)
-                waitForBothItems();
+            root.loadedCount++;
+            if (root.loadedCount === 2)
+                root.waitForBothItems();
         }
 
-        onItemChanged: applySessionLock(oneLoader)
+        onItemChanged: root.applySessionLock(oneLoader)
     }
 
     Loader {
@@ -194,12 +192,12 @@ Item {
         anchors.fill: parent
         sourceComponent: imageComponent
         onLoaded: {
-            loadedCount++;
-            if (loadedCount === 2)
-                waitForBothItems();
+            root.loadedCount++;
+            if (root.loadedCount === 2)
+                root.waitForBothItems();
         }
 
-        onItemChanged: applySessionLock(twoLoader)
+        onItemChanged: root.applySessionLock(twoLoader)
     }
 
     onSourceChanged: {
