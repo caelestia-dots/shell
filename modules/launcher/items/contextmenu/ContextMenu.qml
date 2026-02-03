@@ -20,7 +20,16 @@ Item {
     property int targetSubmenuIndex: -1
     property real submenuProgress: 0
     property int hoveredSubmenuIndex: -1
-    property real contentOpacity: 1
+    property bool transitionContentVisible: false
+    property real contentOpacity: {
+        if (targetSubmenuIndex >= 0) {
+            return transitionContentVisible ? 1 : 0;
+        }
+        if (activeSubmenuIndex >= 0) {
+            return submenuProgress;
+        }
+        return 0;
+    }
     property real submenuItemY: 0
     property int displayedSubmenuIndex: -1
     property real targetWidth: 0
@@ -28,11 +37,14 @@ Item {
     property real previousTargetWidth: 0
     property real previousTargetHeight: 0
     property real previousTopY: 0
-
     property real gooOverlapPx: 28
     readonly property real gooMarginPx: 30
-
     readonly property real bottomPadding: 16
+
+    function updateSubmenuDimensions() {
+        targetWidth = submenuColumn.implicitWidth + Appearance.padding.smaller * 2;
+        targetHeight = submenuColumn.implicitHeight + Appearance.padding.smaller * 2;
+    }
 
     Timer {
         id: contentSwitchTimer
@@ -42,13 +54,9 @@ Item {
                 activeSubmenuIndex = displayedSubmenuIndex = targetSubmenuIndex;
                 targetSubmenuIndex = -1;
             }
-            contentOpacity = 1;
-            Qt.callLater(() => {
-                if (activeSubmenuIndex >= 0) {
-                    targetWidth = submenuColumn.implicitWidth + Appearance.padding.smaller * 2;
-                    targetHeight = submenuColumn.implicitHeight + Appearance.padding.smaller * 2;
-                }
-            });
+            transitionContentVisible = true;
+            if (activeSubmenuIndex >= 0)
+                Qt.callLater(updateSubmenuDimensions);
         }
     }
 
@@ -58,15 +66,13 @@ Item {
         if (activeSubmenuIndex < 0) {
             activeSubmenuIndex = displayedSubmenuIndex = hoveredSubmenuIndex;
             targetSubmenuIndex = -1;
-            Qt.callLater(() => {
-                targetWidth = submenuColumn.implicitWidth + Appearance.padding.smaller * 2;
-                targetHeight = submenuColumn.implicitHeight + Appearance.padding.smaller * 2;
-            });
+            Qt.callLater(updateSubmenuDimensions);
         } else if (activeSubmenuIndex !== hoveredSubmenuIndex) {
             previousTargetWidth = targetWidth;
             previousTargetHeight = targetHeight;
             previousTopY = submenuContainer.interpolatedTopY;
             targetSubmenuIndex = hoveredSubmenuIndex;
+            transitionContentVisible = false;
             contentSwitchTimer.restart();
         }
     }
@@ -76,12 +82,8 @@ Item {
             targetSubmenuIndex = displayedSubmenuIndex = -1;
             targetWidth = targetHeight = previousTargetWidth = previousTargetHeight = previousTopY = 0;
         } else if (displayedSubmenuIndex < 0) {
-            // First submenu open via direct activeSubmenuIndex assignment (from MenuItem timer)
             displayedSubmenuIndex = activeSubmenuIndex;
-            Qt.callLater(() => {
-                targetWidth = submenuColumn.implicitWidth + Appearance.padding.smaller * 2;
-                targetHeight = submenuColumn.implicitHeight + Appearance.padding.smaller * 2;
-            });
+            Qt.callLater(updateSubmenuDimensions);
         }
     }
 
@@ -89,11 +91,11 @@ Item {
         target: submenuColumn
         function onImplicitWidthChanged() {
             if (displayedSubmenuIndex >= 0)
-                targetWidth = submenuColumn.implicitWidth + Appearance.padding.smaller * 2;
+                updateSubmenuDimensions();
         }
         function onImplicitHeightChanged() {
             if (displayedSubmenuIndex >= 0)
-                targetHeight = submenuColumn.implicitHeight + Appearance.padding.smaller * 2;
+                updateSubmenuDimensions();
         }
     }
 
@@ -134,26 +136,37 @@ Item {
         }
     }
 
-    onActiveFocusChanged: if (!activeFocus && visible)
-        toggle()
+    onActiveFocusChanged: {
+        if (!activeFocus && visible)
+            toggle();
+    }
 
     Behavior on submenuProgress {
         NumberAnimation {
             duration: Appearance.anim.durations.normal / 1.2
-            easing.type: Easing.OutCubic
+            easing.type: Easing.InOutCubic
+        }
+    }
+
+    Behavior on contentOpacity {
+        enabled: targetSubmenuIndex >= 0
+        Anim {
+            duration: Appearance.anim.durations.normal / 1.2
+            easing.bezierCurve: Appearance.anim.curves.standard
         }
     }
 
     Timer {
         id: submenuCloseTimer
         interval: 150
-        onTriggered: if (hoveredSubmenuIndex < 0) {
-            submenuProgress = 0;
-            Qt.callLater(() => {
-                if (submenuProgress === 0) {
-                    activeSubmenuIndex = -1;
-                }
-            });
+        onTriggered: {
+            if (hoveredSubmenuIndex < 0 && targetSubmenuIndex < 0) {
+                submenuProgress = 0;
+                Qt.callLater(() => {
+                    if (submenuProgress === 0)
+                        activeSubmenuIndex = -1;
+                });
+            }
         }
     }
 
@@ -208,8 +221,8 @@ Item {
 
         readonly property real topEdgeDiff: submenuContainer.visible ? Math.abs(menuContainer.y - submenuContainer.y) : 999
         readonly property real bottomEdgeDiff: submenuContainer.visible ? Math.abs((menuContainer.y + menuContainer.height) - (submenuContainer.y + submenuContainer.height)) : 999
-        readonly property bool isTopAligned: submenuContainer.visible && topEdgeDiff < 10
-        readonly property bool isBottomAligned: submenuContainer.visible && bottomEdgeDiff < 10
+        readonly property bool isTopAligned: submenuContainer.visible && topEdgeDiff < 3
+        readonly property bool isBottomAligned: submenuContainer.visible && bottomEdgeDiff < 3
 
         property real smoothPxTop: isTopAligned ? 0 : 12
         property real smoothPxBottom: isBottomAligned ? 0 : 12
@@ -233,17 +246,10 @@ Item {
 
         opacity: 0
 
-        scale: 0.80
         transformOrigin: Item.TopLeft
         Behavior on opacity {
             Anim {
                 duration: Appearance.anim.durations.normal
-                easing.bezierCurve: Appearance.anim.curves.standard
-            }
-        }
-        Behavior on scale {
-            Anim {
-                duration: Appearance.anim.durations.normal / 2
                 easing.bezierCurve: Appearance.anim.curves.standard
             }
         }
@@ -341,7 +347,7 @@ Item {
 
             // Clamp to menu top edge when close
             const topDiff = Math.abs(unclampedY - menuContainer.y);
-            if (topDiff < 10) {
+            if (topDiff < 3) {
                 return menuContainer.y;
             }
 
@@ -349,7 +355,7 @@ Item {
             const menuBottom = menuContainer.y + menuContainer.height;
             const subBottom = unclampedY + height;
             const bottomDiff = Math.abs(subBottom - menuBottom);
-            if (bottomDiff < 10) {
+            if (bottomDiff < 3) {
                 return menuBottom - height;
             }
 
@@ -363,21 +369,21 @@ Item {
         Behavior on interpolatedWidth {
             enabled: submenuProgress >= 1
             Anim {
-                duration: Appearance.anim.durations.normal
+                duration: Appearance.anim.durations.normal * 1.2
                 easing.bezierCurve: Appearance.anim.curves.emphasized
             }
         }
         Behavior on interpolatedHeight {
             enabled: submenuProgress >= 1
             Anim {
-                duration: Appearance.anim.durations.normal
+                duration: Appearance.anim.durations.normal * 1.8
                 easing.bezierCurve: Appearance.anim.curves.emphasized
             }
         }
         Behavior on interpolatedTopY {
             enabled: submenuProgress >= 1
             Anim {
-                duration: Appearance.anim.durations.normal
+                duration: Appearance.anim.durations.normal * 1.5
                 easing.bezierCurve: Appearance.anim.curves.emphasized
             }
         }
