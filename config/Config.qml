@@ -122,6 +122,8 @@ Singleton {
                 }
             },
             anim: {
+                mediaGifSpeedAdjustment: 300,
+                sessionGifSpeed: 0.7,
                 durations: {
                     scale: appearance.anim.durations.scale
                 }
