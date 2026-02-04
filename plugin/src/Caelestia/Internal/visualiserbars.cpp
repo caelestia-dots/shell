@@ -12,7 +12,7 @@ VisualiserBars::VisualiserBars(QQuickItem* parent)
     : QQuickPaintedItem(parent) {
     setAntialiasing(true);
 
-    setRenderTarget(QQuickPaintedItem::FramebufferObject);
+    setRenderTarget(QQuickPaintedItem::Image);
 
     m_barColorTop = QColor(255, 255, 255, 180);
     m_barColorBottom = QColor(255, 255, 255, 180);
