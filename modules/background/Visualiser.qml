@@ -102,10 +102,4 @@ Item {
             audioValues: Audio.cava.values
         }
     }
-    Connections {
-        target: Audio.cava
-        function onValuesChanged() {
-            bars.audioValues = Audio.cava.values;
-        }
-    }
 }
