@@ -1,8 +1,6 @@
-import qs.services
-import qs.services as Services
-import qs.components
+pragma ComponentBehavior: Bound
 import qs.config
-import qs.utils
+import qs.services
 import Quickshell
 import QtQuick
 import QtQuick.Layouts
@@ -14,6 +12,8 @@ ColumnLayout {
     required property PersistentProperties visibilities
     required property var launchApp
     required property var toggle
+    property var children: []
+    property var menuFactory: null
 
     spacing: Appearance.spacing.smaller
 
@@ -21,7 +21,7 @@ ColumnLayout {
         text: qsTr("Launch")
         icon: "play_arrow"
         isSubmenuItem: true
-        onTriggered: launchApp()
+        onTriggered: launchSubmenu.launchApp()
     }
 
     Repeater {
@@ -43,22 +43,30 @@ ColumnLayout {
     }
 
     Separator {
-        visible: launchSubmenu.app && launchSubmenu.app.actions && launchSubmenu.app.actions.length > 0
+        visible: launchSubmenu.children && launchSubmenu.children.length > 0
     }
 
-    MenuItem {
-        text: qsTr("Run in Terminal")
-        icon: "terminal"
-        isSubmenuItem: true
-        onTriggered: {
-            if (launchSubmenu.app && launchSubmenu.app.execString) {
-                Quickshell.execDetached({
-                    command: [...Config.general.apps.terminal, "-e", launchSubmenu.app.execString]
-                });
-                if (launchSubmenu.visibilities)
-                    launchSubmenu.visibilities.launcher = false;
+    Repeater {
+        model: launchSubmenu.children || []
+
+        MenuItem {
+            required property var modelData
+            readonly property var itemData: modelData.id === "separator" ? null : (launchSubmenu.menuFactory ? launchSubmenu.menuFactory.createMenuItem(modelData, true, -1) : null)
+
+            visible: modelData.id === "separator" || (itemData !== null && itemData.text && itemData.text.length > 0)
+            isSeparator: modelData.id === "separator"
+            text: itemData?.text || ""
+            icon: itemData?.icon || ""
+            bold: itemData?.bold || false
+            hasSubMenu: false
+            submenuIndex: -1
+            isSubmenuItem: true
+
+            onTriggered: {
+                if (itemData?.onTriggered) {
+                    itemData.onTriggered();
+                }
             }
-            launchSubmenu.toggle();
         }
     }
 }

@@ -13,6 +13,8 @@ JsonObject {
     property bool vimKeybinds: false
     property list<string> favouriteApps: []
     property list<string> hiddenApps: []
+    property list<var> contextMenuMain: []
+    property list<var> contextMenuAdvanced: []
     property list<var> categories: [
         { name: "Development", icon: "code", apps: [] },
         { name: "Graphics", icon: "palette", apps: [] },

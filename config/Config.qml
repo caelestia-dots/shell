@@ -311,6 +311,8 @@ Singleton {
                 wallpaperWidth: launcher.sizes.wallpaperWidth,
                 wallpaperHeight: launcher.sizes.wallpaperHeight
             },
+            contextMenuMain: launcher.contextMenuMain,
+            contextMenuAdvanced: launcher.contextMenuAdvanced,
             actions: launcher.actions
         };
     }

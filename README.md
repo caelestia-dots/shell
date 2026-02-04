@@ -593,6 +593,23 @@ default, you must create it manually.
                 "icon": "build",
                 "apps": ["obs", "thunar"]
             }
+        ],
+        "contextMenuMain": [
+            {"launch": {"text": "Launch", "icon": "play_arrow", "bold": true}},
+            {"terminal": {"parent": "launch"}},
+            "separator",
+            "favorites",
+            "hide",
+            "workspaces"
+        ],
+        "contextMenuAdvanced": [
+            "open-path",
+            "desktop-file",
+            "separator",
+            {"custom-submenu": {"text": "Advanced Options", "icon": "settings"}},
+            {"kill": {"parent": "custom-submenu"}},
+            {"separator": {"parent": "custom-submenu"}},
+            {"copy-exec": {"parent": "custom-submenu"}}
         ]
     },
     "lock": {

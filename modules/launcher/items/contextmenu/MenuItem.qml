@@ -12,13 +12,14 @@ StyledRect {
     property bool hasSubMenu: false
     property int submenuIndex: -1
     property bool isSubmenuItem: false
+    property bool isSeparator: false
     signal triggered
     signal hovered
 
     Layout.fillWidth: true
-    Layout.minimumWidth: itemRow.implicitWidth + Appearance.padding.small * 2
-    implicitHeight: 32 + Appearance.padding.small * 2
-    radius: Appearance.rounding.small
+    Layout.minimumWidth: isSeparator ? 0 : (itemRow.implicitWidth + Appearance.padding.small * 2)
+    implicitHeight: isSeparator ? 1 : (32 + Appearance.padding.small * 2)
+    radius: isSeparator ? 0 : Appearance.rounding.small
     color: "transparent"
 
     Timer {
@@ -35,7 +36,8 @@ StyledRect {
     MouseArea {
         id: mouse
         anchors.fill: parent
-        hoverEnabled: true
+        enabled: !item.isSeparator
+        hoverEnabled: !item.isSeparator
         cursorShape: hasSubMenu ? Qt.ArrowCursor : Qt.PointingHandCursor
         onClicked: if (!hasSubMenu)
             item.triggered()
@@ -48,10 +50,8 @@ StyledRect {
                 submenuCloseTimer.stop();
                 openTimer.restart();
             } else if (isSubmenuItem) {
-                // Hovering submenu item - keep submenu open
                 submenuCloseTimer.stop();
             } else {
-                // Hovering regular menu item - close submenu
                 hoveredSubmenuIndex = -1;
                 if (activeSubmenuIndex >= 0) {
                     submenuCloseTimer.restart();
@@ -77,6 +77,8 @@ StyledRect {
         anchors.fill: parent
         anchors.margins: Appearance.padding.small
         spacing: Appearance.spacing.normal
+        visible: !item.isSeparator
+
         MaterialIcon {
             text: item.icon
             visible: text.length > 0
@@ -98,5 +100,13 @@ StyledRect {
             color: Colours.palette.m3onSurfaceVariant
             font.pointSize: Appearance.font.size.normal
         }
+    }
+
+    Rectangle {
+        anchors.centerIn: parent
+        width: parent.width - Appearance.padding.small * 2
+        height: 1
+        color: Colours.palette.m3outlineVariant
+        visible: item.isSeparator
     }
 }
