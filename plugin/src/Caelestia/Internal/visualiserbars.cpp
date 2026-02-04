@@ -306,13 +306,13 @@ void VisualiserBars::setAudioValues(const QList<double>& values) {
         return;
     }
 
-    const int n = qMin<int>(values.size(), m_barCount);
+    const qsizetype n = qMin(values.size(), qsizetype(m_barCount));
 
-    for (int i = 0; i < n; i++) {
+    for (int i = 0; i < int(n); i++) {
         m_audioValues[i] = clamp01(values[i]);
     }
 
-    for (int i = n; i < m_barCount; i++) {
+    for (int i = int(n); i < m_barCount; i++) {
         m_audioValues[i] = 0.0;
     }
 
