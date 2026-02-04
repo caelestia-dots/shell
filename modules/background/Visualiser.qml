@@ -38,6 +38,12 @@ Item {
         live: true
     }
 
+    ShaderEffectSource {
+        id: maskSource
+        sourceItem: bars
+        live: true
+    }
+
     property color barColorTop: Qt.alpha(Colours.palette.m3primary, 0.7)
     property color barColorBottom: Qt.alpha(Colours.palette.m3inversePrimary, 0.7)
 
@@ -62,7 +68,7 @@ Item {
         active: root.opacity > 0 && Config.background.visualiser.blur
         sourceComponent: MultiEffect {
             source: wallpaperSource
-            maskSource: canvasWrapper
+            maskSource: maskSource
             maskEnabled: true
             maskSpreadAtMax: 0
             maskSpreadAtMin: 0
@@ -84,10 +90,11 @@ Item {
         anchors.right: parent.right
         anchors.leftMargin: Visibilities.bars.get(root.screen).exclusiveZone + Appearance.spacing.small * Config.background.visualiser.spacing
         anchors.margins: Config.border.thickness
-        z: 0
+        // z: 0
         VisualiserBars {
             id: bars
             anchors.fill: parent
+            layer.enabled: true
 
             barCount: Config.services.visualiserBars
             spacing: Appearance.spacing.small * Config.background.visualiser.spacing
