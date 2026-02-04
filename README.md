@@ -219,6 +219,8 @@ default, you must create it manually.
 ```json
 {
     "appearance": {
+        "mediaGifSpeedAdjustment": 300,
+        "sessionGifSpeed": 0.7,
         "anim": {
             "durations": {
                 "scale": 1
