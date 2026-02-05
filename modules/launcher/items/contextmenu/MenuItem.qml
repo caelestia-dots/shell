@@ -25,8 +25,8 @@ StyledRect {
     Timer {
         id: openTimer
         interval: 250
-        onTriggered: if (hasSubMenu && mouse.containsMouse) {
-            activeSubmenuIndex = submenuIndex;
+        onTriggered: if (item.hasSubMenu && mouse.containsMouse) {
+            activeSubmenuIndex = item.submenuIndex;
             Qt.callLater(() => {
                 submenuProgress = 1;
             });
@@ -38,18 +38,18 @@ StyledRect {
         anchors.fill: parent
         enabled: !item.isSeparator
         hoverEnabled: !item.isSeparator
-        cursorShape: hasSubMenu ? Qt.ArrowCursor : Qt.PointingHandCursor
-        onClicked: if (!hasSubMenu)
+        cursorShape: item.hasSubMenu ? Qt.ArrowCursor : Qt.PointingHandCursor
+        onClicked: if (!item.hasSubMenu)
             item.triggered()
         onEntered: {
             item.color = Qt.alpha(Colours.palette.m3onSurface, 0.08);
             item.hovered();
-            if (hasSubMenu) {
-                hoveredSubmenuIndex = submenuIndex;
+            if (item.hasSubMenu) {
+                hoveredSubmenuIndex = item.submenuIndex;
                 submenuItemY = item.y + item.height / 2;
                 submenuCloseTimer.stop();
                 openTimer.restart();
-            } else if (isSubmenuItem) {
+            } else if (item.isSubmenuItem) {
                 submenuCloseTimer.stop();
             } else {
                 hoveredSubmenuIndex = -1;
@@ -61,14 +61,14 @@ StyledRect {
         onExited: {
             openTimer.stop();
             item.color = "transparent";
-            if (!isSubmenuItem && activeSubmenuIndex >= 0) {
+            if (!item.isSubmenuItem && activeSubmenuIndex >= 0) {
                 hoveredSubmenuIndex = -1;
                 submenuCloseTimer.restart();
             }
         }
-        onPressed: if (!hasSubMenu)
+        onPressed: if (!item.hasSubMenu)
             item.color = Qt.alpha(Colours.palette.m3onSurface, 0.12)
-        onReleased: if (!hasSubMenu)
+        onReleased: if (!item.hasSubMenu)
             item.color = containsMouse ? Qt.alpha(Colours.palette.m3onSurface, 0.08) : "transparent"
     }
 

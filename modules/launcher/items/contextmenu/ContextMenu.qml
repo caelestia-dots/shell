@@ -74,29 +74,51 @@ Item {
         }
     }
 
-    readonly property var menuConfigMain: (Config.launcher.contextMenuMain && Config.launcher.contextMenuMain.length > 0) 
-        ? Config.launcher.contextMenuMain 
-        : [
-            {"launch": {"text": "Launch", "icon": "play_arrow", "bold": true}},
-            "separator", "favorites", "hide", "workspaces"
-        ]
-    
-    readonly property var menuConfigAdvanced: (Config.launcher.contextMenuAdvanced && Config.launcher.contextMenuAdvanced.length > 0)
-        ? Config.launcher.contextMenuAdvanced
-        : [
-            "terminal",
-            {"desktop-file": {"text": "edit .desktop File", "icon": "code"}},
-            "open-path", "separator",
-            {"custom-submenu": {"text": "Advanced Options", "icon": "settings"}},
-            {"kill": {"parent": "custom-submenu"}},
-            {"separator": {"parent": "custom-submenu"}},
-            {"copy-exec": {"parent": "custom-submenu"}}
-        ]
-    
+    readonly property var menuConfigMain: (Config.launcher.contextMenuMain && Config.launcher.contextMenuMain.length > 0) ? Config.launcher.contextMenuMain : [
+        {
+            "launch": {
+                "text": "Launch",
+                "icon": "play_arrow",
+                "bold": true
+            }
+        },
+        "separator", "favorites", "hide", "workspaces"]
+
+    readonly property var menuConfigAdvanced: (Config.launcher.contextMenuAdvanced && Config.launcher.contextMenuAdvanced.length > 0) ? Config.launcher.contextMenuAdvanced : ["terminal",
+        {
+            "desktop-file": {
+                "text": "edit .desktop File",
+                "icon": "code"
+            }
+        },
+        "open-path", "separator",
+        {
+            "custom-submenu": {
+                "text": "Advanced Options",
+                "icon": "settings"
+            }
+        },
+        {
+            "kill": {
+                "parent": "custom-submenu"
+            }
+        },
+        {
+            "separator": {
+                "parent": "custom-submenu"
+            }
+        },
+        {
+            "copy-exec": {
+                "parent": "custom-submenu"
+            }
+        }
+    ]
+
     readonly property var menuConfig: ({
-        "main": menuConfigMain,
-        "advanced": menuConfigAdvanced
-    })
+            "main": menuConfigMain,
+            "advanced": menuConfigAdvanced
+        })
     readonly property bool hasAdvancedItems: menuConfig.advanced && menuConfig.advanced.length > 0
 
     property var menuContext: ({
@@ -154,7 +176,6 @@ Item {
     onAppChanged: buildSubmenuMap()
 
     function getSubmenuItemsForIndex(index) {
-        // Find which item this submenu index belongs to
         const allItems = [...processedMainItems, ...processedAdvancedItems];
         for (const [itemId, submenuIdx] of Object.entries(submenuMap)) {
             if (submenuIdx === index) {
@@ -436,7 +457,8 @@ Item {
                     onTriggered: navigateToPage("main")
                 }
 
-                Separator {
+                MenuItem {
+                    isSeparator: true
                     visible: currentPage === "advanced"
                 }
 
@@ -465,7 +487,8 @@ Item {
                 }
 
                 // More Options button for main page
-                Separator {
+                MenuItem {
+                    isSeparator: true
                     visible: currentPage === "main" && hasAdvancedItems
                 }
 
@@ -563,7 +586,7 @@ Item {
                     property var factoryRef: menuFactory
                     property var childrenRef: getSubmenuItemsForIndex(displayedSubmenuIndex)
 
-                    sourceComponent: ContextMenus.LaunchSubmenu {
+                    sourceComponent: ContextMenus.Submenus.LaunchSubmenu {
                         app: root.app
                         visibilities: root.visibilities
                         launchApp: root.launchApp
@@ -578,7 +601,7 @@ Item {
                     visible: active
                     Layout.fillWidth: true
                     Layout.preferredHeight: active ? implicitHeight : 0
-                    sourceComponent: ContextMenus.WorkspaceSubmenu {
+                    sourceComponent: ContextMenus.Submenus.WorkspaceSubmenu {
                         launchApp: root.launchApp
                     }
                 }
@@ -615,5 +638,5 @@ Item {
                 }
             }
         }
-    } // Close menuWrapper
+    }
 }
