@@ -217,6 +217,140 @@ ColumnLayout {
         }
     }
 
+    // VPN section
+    StyledText {
+        visible: root.view === "wireless" && Nmcli.vpnConnections.length > 0
+        Layout.preferredHeight: visible ? implicitHeight : 0
+        Layout.topMargin: visible ? Appearance.padding.normal : 0
+        Layout.rightMargin: Appearance.padding.small
+        text: qsTr("VPN")
+        font.weight: 500
+    }
+
+    StyledText {
+        visible: root.view === "wireless" && Nmcli.vpnConnections.length > 0
+        Layout.preferredHeight: visible ? implicitHeight : 0
+        Layout.topMargin: visible ? Appearance.spacing.small : 0
+        Layout.rightMargin: Appearance.padding.small
+        text: qsTr("%1 VPN connections").arg(Nmcli.vpnConnections.length)
+        color: Colours.palette.m3onSurfaceVariant
+        font.pointSize: Appearance.font.size.small
+    }
+
+    Repeater {
+        visible: root.view === "wireless" && Nmcli.vpnConnections.length > 0
+        model: ScriptModel {
+            values: Nmcli.vpnConnections
+        }
+
+        RowLayout {
+            id: vpnItem
+
+            required property var modelData
+            readonly property bool loading: false
+
+            visible: root.view === "wireless"
+            Layout.preferredHeight: visible ? implicitHeight : 0
+            Layout.fillWidth: true
+            Layout.rightMargin: Appearance.padding.small
+            spacing: Appearance.spacing.small
+
+            opacity: 0
+            scale: 0.7
+
+            Component.onCompleted: {
+                opacity = 1;
+                scale = 1;
+            }
+
+            Behavior on opacity {
+                Anim {}
+            }
+
+            Behavior on scale {
+                Anim {}
+            }
+
+            MaterialIcon {
+                text: vpnItem.modelData.active ? "vpn_key" : "vpn_key_off"
+                color: vpnItem.modelData.active ? Colours.palette.m3primary : Colours.palette.m3onSurfaceVariant
+            }
+
+            ColumnLayout {
+                Layout.leftMargin: Appearance.spacing.small / 2
+                Layout.rightMargin: Appearance.spacing.small / 2
+                Layout.fillWidth: true
+                spacing: 0
+
+                StyledText {
+                    Layout.fillWidth: true
+                    text: vpnItem.modelData.name || qsTr("Unknown")
+                    elide: Text.ElideRight
+                    font.weight: vpnItem.modelData.active ? 500 : 400
+                    color: vpnItem.modelData.active ? Colours.palette.m3primary : Colours.palette.m3onSurface
+                }
+
+                StyledText {
+                    Layout.fillWidth: true
+                    text: {
+                        if (vpnItem.modelData.active)
+                            return qsTr("Connected");
+                        return qsTr("Disconnected");
+                    }
+                    color: vpnItem.modelData.active ? Colours.palette.m3primary : Colours.palette.m3outline
+                    font.pointSize: Appearance.font.size.small
+                    font.weight: vpnItem.modelData.active ? 500 : 400
+                    elide: Text.ElideRight
+                }
+            }
+
+            StyledRect {
+                implicitWidth: implicitHeight
+                implicitHeight: vpnConnectIcon.implicitHeight + Appearance.padding.small
+
+                radius: Appearance.rounding.full
+                color: Qt.alpha(Colours.palette.m3primary, vpnItem.modelData.active ? 1 : 0)
+
+                CircularIndicator {
+                    anchors.fill: parent
+                    running: vpnItem.loading
+                }
+
+                StateLayer {
+                    color: vpnItem.modelData.active ? Colours.palette.m3onPrimary : Colours.palette.m3onSurface
+                    disabled: vpnItem.loading
+
+                    function onClicked(): void {
+                        if (vpnItem.modelData.active) {
+                            Nmcli.deactivateConnection(vpnItem.modelData.name, () => {
+                                Nmcli.loadVpnConnections(() => {});
+                            });
+                        } else {
+                            Nmcli.activateConnection(vpnItem.modelData.name, () => {
+                                Nmcli.loadVpnConnections(() => {});
+                            });
+                        }
+                    }
+                }
+
+                MaterialIcon {
+                    id: vpnConnectIcon
+
+                    anchors.centerIn: parent
+                    animate: true
+                    text: vpnItem.modelData.active ? "link_off" : "link"
+                    color: vpnItem.modelData.active ? Colours.palette.m3onPrimary : Colours.palette.m3onSurface
+
+                    opacity: vpnItem.loading ? 0 : 1
+
+                    Behavior on opacity {
+                        Anim {}
+                    }
+                }
+            }
+        }
+    }
+
     // Ethernet section
     StyledText {
         visible: root.view === "ethernet"
