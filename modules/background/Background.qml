@@ -41,6 +41,7 @@ Loader {
 
                 Wallpaper {
                     id: wallpaper
+                    screen: win.modelData
                     sessionLock: backgroundLoader.lock ? backgroundLoader.lock.lock : null
                 }
 

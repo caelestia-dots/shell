@@ -327,8 +327,13 @@ default, you must create it manually.
             "spacing": 1
         },
         "wallpaper": {
-            "muteAudio": true,
-            "volume": 1.0,
+            "audio": {
+                "muteAudio": true,
+                "volume": 1.0,
+            },
+            "video": {
+                "autoPause": false
+            }
         }
     },
     "bar": {

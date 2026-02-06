@@ -9,9 +9,9 @@ import QtMultimedia
 Item {
     id: root
     anchors.fill: parent
-
-    property bool isCurrent: false
     signal ready
+    property bool shouldPause: false
+    property bool isCurrent: false
     property string source: ""
     property bool gamemodeEnabled: GameMode.enabled
     property bool pendingUnload: false
@@ -32,25 +32,34 @@ Item {
 
         player.onMediaStatusChanged.connect(function handler() {
             if (player.mediaStatus === MediaPlayer.BufferedMedia || player.mediaStatus === MediaPlayer.LoadedMedia) {
-                player.play();
+                pausePlayVideo(root.shouldPause);
                 Qt.callLater(root.ready);
                 player.onMediaStatusChanged.disconnect(handler);
             }
         });
     }
 
-    function pauseVideo(locked) {
+    function pausePlayVideo(shouldPause) {
         if (gamemodeEnabled)
             return;
         if (isCurrent === false)
             return;
-        if (locked) {
+        if (player.mediaStatus === MediaPlayer.NoMedia)
+            return;
+
+        if (shouldPause || root.shouldPause) {
             if (player && player.mediaStatus !== MediaPlayer.NoMedia) {
                 player.pause();
             }
         } else {
-            player.play();
+            if (player.source && player.mediaStatus !== MediaPlayer.PlayingState) {
+                player.play();
+            }
         }
+    }
+
+    onShouldPauseChanged: {
+        pausePlayVideo(root.shouldPause);
     }
 
     onGamemodeEnabledChanged: {
@@ -59,7 +68,7 @@ Item {
             pendingUnload = true;
         } else if (root.isCurrent) {
             update(root.source);
-            player.tryPlayVideo();
+            pausePlayVideo(root.shouldPause);
         }
     }
 
@@ -76,7 +85,7 @@ Item {
         function tryPlayVideo() {
             if (root.isCurrent) {
                 if (source && mediaStatus !== MediaPlayer.PlayingState) {
-                    play();
+                    root.pausePlayVideo(root.shouldPause);
                 }
             } else {
                 if (mediaStatus !== MediaPlayer.NoMedia) {
@@ -160,7 +169,7 @@ Item {
     Connections {
         target: root
         function onIsCurrentChanged() {
-            player.tryPlayVideo();
+            pausePlayVideo(root.shouldPause);
         }
     }
 }

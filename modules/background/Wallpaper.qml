@@ -4,27 +4,40 @@ import qs.components
 import qs.components.filedialog
 import qs.services
 import qs.config
+import Quickshell
 import QtQuick
 
 Item {
     id: root
     anchors.fill: parent
+    required property ShellScreen screen
 
     property string source: Wallpapers.current
     property bool initialized: false
     property int loadedCount: 0
     property bool itemsReady: false
     property bool initStarted: false
+    property bool gamemodeEnabled: GameMode.enabled
     property var sessionLock: null
     readonly property bool sessionLocked: sessionLock ? sessionLock.secure : false
-    property bool gamemodeEnabled: GameMode.enabled
+    property bool shouldPause: Config.background.wallpaper.video.autoPause && !(Hypr.monitorFor(screen)?.activeWorkspace?.toplevels?.values.every(t => t.lastIpcObject?.floating) ?? true)
 
     function applySessionLock(loader) {
         if (!loader || !loader.item)
             return;
 
-        if (typeof loader.item.pauseVideo === "function")
-            loader.item.pauseVideo(sessionLocked);
+        if (typeof loader.item.pausePlayVideo === "function")
+            loader.item.pausePlayVideo(sessionLocked);
+    }
+
+    function autoPauseVideo(loader) {
+        if (!loader || !loader.item)
+            return;
+
+        const pause = root.shouldPause && !root.gamemodeEnabled;
+
+        if (typeof loader.item.shouldPause === "boolean")
+            loader.item.shouldPause = pause;
     }
 
     function isVideo(path) {
@@ -108,6 +121,11 @@ Item {
         applySessionLock(twoLoader);
     }
 
+    onShouldPauseChanged: {
+        autoPauseVideo(oneLoader);
+        autoPauseVideo(twoLoader);
+    }
+
     Loader {
         id: placeholderLoader
         anchors.fill: parent
@@ -184,7 +202,10 @@ Item {
                 root.waitForBothItems();
         }
 
-        onItemChanged: root.applySessionLock(oneLoader)
+        onItemChanged: {
+            root.applySessionLock(oneLoader);
+            root.autoPauseVideo(oneLoader);
+        }
     }
 
     Loader {
@@ -197,7 +218,10 @@ Item {
                 root.waitForBothItems();
         }
 
-        onItemChanged: root.applySessionLock(twoLoader)
+        onItemChanged: {
+            root.applySessionLock(oneLoader);
+            root.autoPauseVideo(twoLoader);
+        }
     }
 
     onSourceChanged: {
