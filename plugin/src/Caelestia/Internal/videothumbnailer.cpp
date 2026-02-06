@@ -103,12 +103,17 @@ void VideoThumbnailer::setPath(const QString& path) {
     emit readyChanged();
 
     if (s_memoryCache.contains(path)) {
-        m_cachePath = s_memoryCache.value(path);
-        emit cachePathChanged();
-        
-        m_ready = true;
-        emit readyChanged();
-        return;
+        QString cachedPath = s_memoryCache.value(path);
+        if (QFileInfo::exists(cachedPath)) {
+            m_cachePath = cachedPath;
+            emit cachePathChanged();
+
+            m_ready = true;
+            emit readyChanged();
+            return;
+        } else {
+            s_memoryCache.remove(path);
+        }
     }
 
     m_debounceTimer.start();
