@@ -66,15 +66,14 @@ private:
     qreal spatialSmooth(int index, const QVector<qreal>& values, int radius) const;
     void ensureBuffers();
 
-    // Helper for device-pixel snapping
     qreal effectiveScale() const;
     qreal snapToPixel(qreal v) const;
 
-    int m_barCount = 64;
-    qreal m_spacing = 2.0;
-    qreal m_smoothing = 0.15;
-    int m_curvature = 3;
-    qreal m_barRadius = 6.0;
+    int m_barCount;
+    qreal m_spacing;
+    qreal m_smoothing;
+    int m_curvature;
+    qreal m_barRadius;
 
     QColor m_barColorTop;
     QColor m_barColorBottom;
