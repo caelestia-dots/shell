@@ -241,7 +241,8 @@ Singleton {
                 batteryWidth: bar.sizes.batteryWidth,
                 networkWidth: bar.sizes.networkWidth
             },
-            entries: bar.entries
+            entries: bar.entries,
+            excludedScreens: bar.excludedScreens
         };
     }
 
