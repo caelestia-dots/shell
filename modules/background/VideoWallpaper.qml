@@ -42,8 +42,13 @@ Item {
     function pausePlayVideo(shouldPause) {
         if (gamemodeEnabled)
             return;
-        if (isCurrent === false)
+        if (isCurrent === false) {
+            if (player.mediaStatus !== MediaPlayer.NoMedia) {
+                player.pause();
+                root.pendingUnload = true;
+            }
             return;
+        }
         if (player.mediaStatus === MediaPlayer.NoMedia)
             return;
 
@@ -80,19 +85,6 @@ Item {
         audioOutput: AudioOutput {
             muted: Config.background.wallpaper.audio.muteAudio
             volume: Config.background.wallpaper.audio.volume
-        }
-
-        function tryPlayVideo() {
-            if (root.isCurrent) {
-                if (source && mediaStatus !== MediaPlayer.PlayingState) {
-                    root.pausePlayVideo(root.shouldPause);
-                }
-            } else {
-                if (mediaStatus !== MediaPlayer.NoMedia) {
-                    player.pause();
-                    root.pendingUnload = true;
-                }
-            }
         }
     }
 
@@ -169,7 +161,7 @@ Item {
     Connections {
         target: root
         function onIsCurrentChanged() {
-            pausePlayVideo(root.shouldPause);
+            root.pausePlayVideo(root.shouldPause);
         }
     }
 }
