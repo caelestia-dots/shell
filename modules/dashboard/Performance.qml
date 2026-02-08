@@ -15,10 +15,8 @@ Item {
     }
 
     readonly property int minWidth: 400 + 400 + Appearance.spacing.normal + 120 + Appearance.padding.large * 2
-    readonly property bool upperRowVisible: Config.dashboard.performance.showCpu || (Config.dashboard.performance.showGpu && SystemUsage.gpuType !== "NONE")
-    readonly property int minHeight: upperRowVisible ? 400 : 220
     implicitWidth: Math.max(minWidth, content.implicitWidth)
-    implicitHeight: Math.max(minHeight, placeholder.visible ? placeholder.height : content.implicitHeight)
+    implicitHeight: placeholder.visible ? placeholder.height : content.implicitHeight
 
     StyledRect {
         id: placeholder
@@ -65,7 +63,8 @@ Item {
     RowLayout {
         id: content
 
-        anchors.fill: parent
+        anchors.left: parent.left
+        anchors.right: parent.right
         spacing: Appearance.spacing.normal
         visible: !placeholder.visible
 
@@ -74,7 +73,8 @@ Item {
     }
 
     ColumnLayout {
-        Layout.fillHeight: true
+        id: mainColumn
+
         Layout.fillWidth: true
         spacing: Appearance.spacing.normal
 
@@ -120,6 +120,7 @@ Item {
         RowLayout {
             Layout.fillWidth: true
             spacing: Appearance.spacing.normal
+            visible: Config.dashboard.performance.showMemory || Config.dashboard.performance.showStorage || Config.dashboard.performance.showNetwork
 
             GaugeCard {
                 Layout.minimumWidth: 250
@@ -157,8 +158,7 @@ Item {
 
     BatteryTank {
         Layout.preferredWidth: 120
-        Layout.fillHeight: true
-        Layout.minimumHeight: 350
+        Layout.preferredHeight: mainColumn.implicitHeight
         visible: UPower.displayDevice.isLaptopBattery && Config.dashboard.performance.showBattery
     }
 
@@ -925,8 +925,8 @@ Item {
 
                 StyledText {
                     text: {
-                        const fmt = NetworkUsage.formatBytes(NetworkUsage.downloadSpeed);
-                        return `${fmt.value.toFixed(1)} ${fmt.unit}`;
+                        const fmt = NetworkUsage.formatBytes(NetworkUsage.downloadSpeed ?? 0);
+                        return fmt ? `${fmt.value.toFixed(1)} ${fmt.unit}` : "0.0 B/s";
                     }
                     font.pointSize: Appearance.font.size.normal
                     font.weight: Font.Medium
@@ -952,8 +952,8 @@ Item {
 
                 StyledText {
                     text: {
-                        const fmt = NetworkUsage.formatBytes(NetworkUsage.uploadSpeed);
-                        return `${fmt.value.toFixed(1)} ${fmt.unit}`;
+                        const fmt = NetworkUsage.formatBytes(NetworkUsage.uploadSpeed ?? 0);
+                        return fmt ? `${fmt.value.toFixed(1)} ${fmt.unit}` : "0.0 B/s";
                     }
                     font.pointSize: Appearance.font.size.normal
                     font.weight: Font.Medium
@@ -979,9 +979,9 @@ Item {
 
                 StyledText {
                     text: {
-                        const down = NetworkUsage.formatBytesTotal(NetworkUsage.downloadTotal);
-                        const up = NetworkUsage.formatBytesTotal(NetworkUsage.uploadTotal);
-                        return `↓${down.value.toFixed(1)}${down.unit} ↑${up.value.toFixed(1)}${up.unit}`;
+                        const down = NetworkUsage.formatBytesTotal(NetworkUsage.downloadTotal ?? 0);
+                        const up = NetworkUsage.formatBytesTotal(NetworkUsage.uploadTotal ?? 0);
+                        return (down && up) ? `↓${down.value.toFixed(1)}${down.unit} ↑${up.value.toFixed(1)}${up.unit}` : "↓0.0B ↑0.0B";
                     }
                     font.pointSize: Appearance.font.size.small
                     color: Colours.palette.m3onSurfaceVariant
