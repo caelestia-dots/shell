@@ -45,7 +45,7 @@ CollapsibleSection {
 
     SectionContainer {
         id: posContainer
-        
+
         contentSpacing: Appearance.spacing.small
         z: 1
 
@@ -67,16 +67,29 @@ CollapsibleSection {
         SplitButtonRow {
             label: qsTr("Vertical Position")
             enabled: rootPane.desktopClockEnabled
-            
+
             menuItems: [
-                MenuItem { text: qsTr("Top"); icon: "vertical_align_top"; property string val: "top" },
-                MenuItem { text: qsTr("Middle"); icon: "vertical_align_center"; property string val: "middle" },
-                MenuItem { text: qsTr("Bottom"); icon: "vertical_align_bottom"; property string val: "bottom" }
+                MenuItem {
+                    text: qsTr("Top")
+                    icon: "vertical_align_top"
+                    property string val: "top"
+                },
+                MenuItem {
+                    text: qsTr("Middle")
+                    icon: "vertical_align_center"
+                    property string val: "middle"
+                },
+                MenuItem {
+                    text: qsTr("Bottom")
+                    icon: "vertical_align_bottom"
+                    property string val: "bottom"
+                }
             ]
 
             Component.onCompleted: {
-                for(let i=0; i < menuItems.length; i++) {
-                    if(menuItems[i].val === posContainer.currentV) active = menuItems[i];
+                for (let i = 0; i < menuItems.length; i++) {
+                    if (menuItems[i].val === posContainer.currentV)
+                        active = menuItems[i];
                 }
             }
 
@@ -88,16 +101,29 @@ CollapsibleSection {
             label: qsTr("Horizontal Position")
             enabled: rootPane.desktopClockEnabled
             expandedZ: 99
-            
+
             menuItems: [
-                MenuItem { text: qsTr("Left"); icon: "align_horizontal_left"; property string val: "left" },
-                MenuItem { text: qsTr("Center"); icon: "align_horizontal_center"; property string val: "center" },
-                MenuItem { text: qsTr("Right"); icon: "align_horizontal_right"; property string val: "right" }
+                MenuItem {
+                    text: qsTr("Left")
+                    icon: "align_horizontal_left"
+                    property string val: "left"
+                },
+                MenuItem {
+                    text: qsTr("Center")
+                    icon: "align_horizontal_center"
+                    property string val: "center"
+                },
+                MenuItem {
+                    text: qsTr("Right")
+                    icon: "align_horizontal_right"
+                    property string val: "right"
+                }
             ]
 
             Component.onCompleted: {
-                for(let i=0; i < menuItems.length; i++) {
-                    if(menuItems[i].val === posContainer.currentH) active = menuItems[i];
+                for (let i = 0; i < menuItems.length; i++) {
+                    if (menuItems[i].val === posContainer.currentH)
+                        active = menuItems[i];
                 }
             }
 
@@ -137,17 +163,20 @@ CollapsibleSection {
 
             SliderInput {
                 Layout.fillWidth: true
-                
+
                 label: qsTr("Opacity")
                 value: rootPane.desktopClockShadowOpacity * 100
                 from: 0
                 to: 100
                 suffix: "%"
-                validator: IntValidator { bottom: 0; top: 100 }
-                formatValueFunction: (val) => Math.round(val).toString()
-                parseValueFunction: (text) => parseInt(text)
-                
-                onValueModified: (newValue) => {
+                validator: IntValidator {
+                    bottom: 0
+                    top: 100
+                }
+                formatValueFunction: val => Math.round(val).toString()
+                parseValueFunction: text => parseInt(text)
+
+                onValueModified: newValue => {
                     rootPane.desktopClockShadowOpacity = newValue / 100;
                     rootPane.saveConfig();
                 }
@@ -159,17 +188,20 @@ CollapsibleSection {
 
             SliderInput {
                 Layout.fillWidth: true
-                
+
                 label: qsTr("Blur")
                 value: rootPane.desktopClockShadowBlur * 100
                 from: 0
                 to: 100
                 suffix: "%"
-                validator: IntValidator { bottom: 0; top: 100 }
-                formatValueFunction: (val) => Math.round(val).toString()
-                parseValueFunction: (text) => parseInt(text)
-                
-                onValueModified: (newValue) => {
+                validator: IntValidator {
+                    bottom: 0
+                    top: 100
+                }
+                formatValueFunction: val => Math.round(val).toString()
+                parseValueFunction: text => parseInt(text)
+
+                onValueModified: newValue => {
                     rootPane.desktopClockShadowBlur = newValue / 100;
                     rootPane.saveConfig();
                 }
@@ -209,24 +241,26 @@ CollapsibleSection {
 
             SliderInput {
                 Layout.fillWidth: true
-                
+
                 label: qsTr("Opacity")
                 value: rootPane.desktopClockBackgroundOpacity * 100
                 from: 0
                 to: 100
                 suffix: "%"
-                validator: IntValidator { bottom: 0; top: 100 }
-                formatValueFunction: (val) => Math.round(val).toString()
-                parseValueFunction: (text) => parseInt(text)
-                
-                onValueModified: (newValue) => {
+                validator: IntValidator {
+                    bottom: 0
+                    top: 100
+                }
+                formatValueFunction: val => Math.round(val).toString()
+                parseValueFunction: text => parseInt(text)
+
+                onValueModified: newValue => {
                     rootPane.desktopClockBackgroundOpacity = newValue / 100;
                     rootPane.saveConfig();
                 }
             }
         }
     }
-
 
     StyledText {
         Layout.topMargin: Appearance.spacing.normal
@@ -258,17 +292,20 @@ CollapsibleSection {
 
         SliderInput {
             Layout.fillWidth: true
-            
+
             label: qsTr("Visualiser rounding")
             value: rootPane.visualiserRounding
             from: 0
             to: 10
             stepSize: 1
-            validator: IntValidator { bottom: 0; top: 10 }
-            formatValueFunction: (val) => Math.round(val).toString()
-            parseValueFunction: (text) => parseInt(text)
-            
-            onValueModified: (newValue) => {
+            validator: IntValidator {
+                bottom: 0
+                top: 10
+            }
+            formatValueFunction: val => Math.round(val).toString()
+            parseValueFunction: text => parseInt(text)
+
+            onValueModified: newValue => {
                 rootPane.visualiserRounding = Math.round(newValue);
                 rootPane.saveConfig();
             }
@@ -280,18 +317,20 @@ CollapsibleSection {
 
         SliderInput {
             Layout.fillWidth: true
-            
+
             label: qsTr("Visualiser spacing")
             value: rootPane.visualiserSpacing
             from: 0
             to: 2
-            validator: DoubleValidator { bottom: 0; top: 2 }
-            
-            onValueModified: (newValue) => {
+            validator: DoubleValidator {
+                bottom: 0
+                top: 2
+            }
+
+            onValueModified: newValue => {
                 rootPane.visualiserSpacing = newValue;
                 rootPane.saveConfig();
             }
         }
     }
 }
-

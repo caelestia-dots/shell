@@ -91,7 +91,6 @@ StyledRect {
                 visible: Config.utilities.vpn.provider.some(p => typeof p === "object" ? (p.enabled === true) : false)
                 onClicked: VPN.toggle()
             }
-
         }
     }
 

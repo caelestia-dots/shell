@@ -219,6 +219,8 @@ default, you must create it manually.
 ```json
 {
     "appearance": {
+        "mediaGifSpeedAdjustment": 300,
+        "sessionGifSpeed": 0.7,
         "anim": {
             "durations": {
                 "scale": 1
@@ -389,6 +391,7 @@ default, you must create it manually.
             "showKbLayout": false,
             "showMicrophone": false,
             "showNetwork": true,
+            "showWifi": true,
             "showLockStatus": true
         },
         "tray": {
@@ -682,7 +685,7 @@ The module automatically adds Caelestia shell to the path with **full functional
 
 ### Need help or support?
 
-You can join the community Discord server for assistance and discussion:  
+You can join the community Discord server for assistance and discussion:
 https://discord.gg/BGDCFCmMBk
 
 ### My screen is flickering, help pls!

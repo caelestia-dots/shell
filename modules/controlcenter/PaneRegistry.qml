@@ -90,4 +90,3 @@ QtObject {
         return null;
     }
 }
-

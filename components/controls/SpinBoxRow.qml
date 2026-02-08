@@ -14,7 +14,7 @@ StyledRect {
     required property real min
     required property real max
     property real step: 1
-    property var onValueModified: function(value) {}
+    property var onValueModified: function (value) {}
 
     Layout.fillWidth: true
     implicitHeight: row.implicitHeight + Appearance.padding.large * 2
@@ -50,4 +50,3 @@ StyledRect {
         }
     }
 }
-

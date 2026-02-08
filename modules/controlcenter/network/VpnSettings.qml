@@ -54,17 +54,17 @@ ColumnLayout {
         ListView {
             Layout.fillWidth: true
             Layout.preferredHeight: contentHeight
-            
+
             interactive: false
             spacing: Appearance.spacing.smaller
-            
+
             model: ScriptModel {
                 values: Config.utilities.vpn.provider.map((provider, index) => {
                     const isObject = typeof provider === "object";
                     const name = isObject ? (provider.name || "custom") : String(provider);
                     const displayName = isObject ? (provider.displayName || name) : name;
                     const iface = isObject ? (provider.interface || "") : "";
-                    
+
                     return {
                         index: index,
                         name: name,
