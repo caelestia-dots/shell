@@ -23,7 +23,7 @@ Item {
         radius: Appearance.rounding.full
         color: Qt.alpha(Colours.palette.m3secondaryContainer, root.active ? 1 : 0)
 
-        implicitHeight: iconItem.implicitHeight + Appearance.padding.normal * 2
+        implicitHeight: iconItem.implicitHeight + Appearance.padding.small * 2
 
         Behavior on color {
             ColorAnimation {
@@ -42,14 +42,14 @@ Item {
 
         RowLayout {
             anchors.fill: parent
-            anchors.leftMargin: Appearance.padding.large
-            anchors.rightMargin: Appearance.padding.large
+            anchors.leftMargin: Appearance.padding.small
+            anchors.rightMargin: Appearance.padding.small
             spacing: Appearance.spacing.normal
 
             MaterialIcon {
                 id: iconItem
                 text: root.icon
-                font.pointSize: Appearance.font.size.large
+                font.pointSize: Appearance.font.size.small
                 color: root.active ? Colours.palette.m3onSecondaryContainer : Colours.palette.m3onSurface
             }
 

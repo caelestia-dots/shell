@@ -23,25 +23,25 @@ StyledRect {
 
     color: Colours.palette.m3background
 
-    RowLayout {
+    ColumnLayout {
         anchors.fill: parent
         spacing: 0
 
         Rectangle {
-            Layout.fillHeight: true
-            Layout.preferredWidth: 220
+            Layout.fillWidth: true
+            Layout.preferredHeight: 48
+            Layout.alignment: Qt.AlignTop
 
             color: Colours.palette.m3surfaceContainer
 
-            ColumnLayout {
+            RowLayout {
                 anchors.fill: parent
-                anchors.margins: 16
+                anchors.margins: 8
                 spacing: 8
 
                 // Logo
                 RowLayout {
                     Layout.leftMargin: 8
-                    Layout.bottomMargin: 16
                     spacing: 12
 
                     Text {
@@ -78,13 +78,6 @@ StyledRect {
                     icon: "close"
                     onClicked: QsWindow.window.destroy();
                 }
-            }
-
-            // Separator
-            Rectangle {
-                Layout.fillHeight: true
-                Layout.preferredWidth: 1
-                color: Colours.palette.m3outlineVariant
             }
 
             // Content area
