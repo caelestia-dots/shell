@@ -1,5 +1,6 @@
 import qs.components.misc
 import qs.modules.controlcenter
+import qs.modules.welcome
 import qs.services
 import Caelestia
 import Quickshell
@@ -15,6 +16,12 @@ Scope {
         name: "controlCenter"
         description: "Open control center"
         onPressed: WindowFactory.create()
+    }
+
+    CustomShortcut {
+        name: "welcome"
+        description: "Open Welcome"
+        onPressed: WelcomeWindow.create()
     }
 
     CustomShortcut {
@@ -117,6 +124,14 @@ Scope {
 
         function open(): void {
             WindowFactory.create();
+        }
+    }
+
+    IpcHandler {
+        target: "welcome"
+
+        function open(): void {
+            WelcomeWindow.create();
         }
     }
 
