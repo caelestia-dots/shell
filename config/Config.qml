@@ -293,6 +293,8 @@ Singleton {
             actionPrefix: launcher.actionPrefix,
             enableDangerousActions: launcher.enableDangerousActions,
             dragThreshold: launcher.dragThreshold,
+            folderWrapAround: launcher.folderWrapAround,
+            folderSelection: launcher.folderSelection,
             vimKeybinds: launcher.vimKeybinds,
             hiddenApps: launcher.hiddenApps,
             useFuzzy: {

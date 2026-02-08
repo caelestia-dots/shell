@@ -101,8 +101,34 @@ Item {
                 }
             }
 
-            Keys.onUpPressed: list.currentList?.decrementCurrentIndex()
-            Keys.onDownPressed: list.currentList?.incrementCurrentIndex()
+            Keys.onUpPressed: event => {
+                if (event.modifiers & Qt.ShiftModifier && list.showWallpapers) {
+                    if (!Config.launcher.folderSelection) return;
+                    
+                    if (Config.launcher.folderWrapAround) {
+                        const len = Wallpapers.folders.length;
+                        Wallpapers.currentFolderIndex = (Wallpapers.currentFolderIndex - 1 + len) % len;
+                    } else {
+                        Wallpapers.currentFolderIndex = Math.max(0, Wallpapers.currentFolderIndex - 1);
+                    }
+                } else {
+                    list.currentList?.decrementCurrentIndex();
+                }
+            }
+            Keys.onDownPressed: event => {
+                if (event.modifiers & Qt.ShiftModifier && list.showWallpapers) {
+                    if (!Config.launcher.folderSelection) return;
+
+                    if (Config.launcher.folderWrapAround) {
+                        const len = Wallpapers.folders.length;
+                        Wallpapers.currentFolderIndex = (Wallpapers.currentFolderIndex + 1) % len;
+                    } else {
+                        Wallpapers.currentFolderIndex = Math.min(Wallpapers.folders.length - 1, Wallpapers.currentFolderIndex + 1);
+                    }
+                } else {
+                    list.currentList?.incrementCurrentIndex();
+                }
+            }
 
             Keys.onEscapePressed: root.visibilities.launcher = false
 
