@@ -6,6 +6,12 @@
 
 namespace caelestia::models {
 
+static bool isVideoFile(const QString& path) {
+    static const QStringList videoExtensions = { "mp4", "mkv", "webm", "avi", "mov", "flv", "wmv" };
+    const QString ext = QFileInfo(path).suffix().toLower();
+    return videoExtensions.contains(ext);
+}
+
 FileSystemEntry::FileSystemEntry(const QString& path, const QString& relativePath, QObject* parent)
     : QObject(parent)
     , m_fileInfo(path)
@@ -291,83 +297,86 @@ void FileSystemModel::updateEntriesForDir(const QString& dir) {
     const auto nameFilters = m_nameFilters;
 
     QSet<QString> oldPaths;
-    for (const auto& entry : std::as_const(m_entries)) {
+    for (const auto& entry : std::as_const(m_entries))
         oldPaths << entry->path();
-    }
 
     const auto future = QtConcurrent::run([=](QPromise<QPair<QSet<QString>, QSet<QString>>>& promise) {
         const auto flags = recursive ? QDirIterator::Subdirectories : QDirIterator::NoIteratorFlags;
 
-        std::optional<QDirIterator> iter;
-
-        if (filter == Images) {
-            QStringList extraNameFilters = nameFilters;
-            const auto formats = QImageReader::supportedImageFormats();
-            for (const auto& format : formats) {
-                extraNameFilters << "*." + format;
-            }
-
-            QDir::Filters filters = QDir::Files;
-            if (showHidden) {
-                filters |= QDir::Hidden;
-            }
-
-            iter.emplace(dir, extraNameFilters, filters, flags);
-        } else {
-            QDir::Filters filters;
-
-            if (filter == Files) {
-                filters = QDir::Files;
-            } else if (filter == Dirs) {
-                filters = QDir::Dirs | QDir::NoDotAndDotDot;
-            } else {
-                filters = QDir::Dirs | QDir::Files | QDir::NoDotAndDotDot;
-            }
-
-            if (showHidden) {
-                filters |= QDir::Hidden;
-            }
-
-            if (nameFilters.isEmpty()) {
-                iter.emplace(dir, filters, flags);
-            } else {
-                iter.emplace(dir, nameFilters, filters, flags);
-            }
-        }
-
         QSet<QString> newPaths;
-        while (iter->hasNext()) {
-            if (promise.isCanceled()) {
-                return;
-            }
 
-            QString path = iter->next();
+        // Build name filters dynamically
+        if (filter == Images || filter == Videos || filter == ImagesAndVideos) {
+            QStringList extraNameFilters = nameFilters;
 
-            if (filter == Images) {
-                QImageReader reader(path);
-                if (!reader.canRead()) {
-                    continue;
+            if (filter == Images || filter == ImagesAndVideos) {
+                const auto formats = QImageReader::supportedImageFormats();
+                for (const auto& fmt : formats) {
+                    extraNameFilters << "*." + QString::fromLatin1(fmt);
                 }
             }
 
-            newPaths.insert(path);
+            if (filter == Videos || filter == ImagesAndVideos) {
+                extraNameFilters << "*.mp4" << "*.mkv" << "*.webm"
+                                 << "*.avi" << "*.mov" << "*.flv" << "*.wmv";
+            }
+
+            QDir::Filters dirFilters = QDir::Files;
+            if (showHidden)
+                dirFilters |= QDir::Hidden;
+
+            QDirIterator iter(dir, extraNameFilters, dirFilters, flags);
+            while (iter.hasNext()) {
+                if (promise.isCanceled())
+                    return;
+                const QString path = iter.next();
+
+                // Determine whether to keep file
+                bool isImage = QImageReader(path).canRead();
+                bool isVideo = isVideoFile(path);
+
+                if (filter == Images && !isImage)
+                    continue;
+                if (filter == Videos && !isVideo)
+                    continue;
+                if (filter == ImagesAndVideos && !isImage && !isVideo)
+                    continue;
+
+                newPaths.insert(path);
+            }
+
+        } else {
+            // fallback for Files / Dirs / All
+            QDir::Filters dirFilters;
+            if (filter == Files)
+                dirFilters = QDir::Files;
+            else if (filter == Dirs)
+                dirFilters = QDir::Dirs | QDir::NoDotAndDotDot;
+            else
+                dirFilters = QDir::Dirs | QDir::Files | QDir::NoDotAndDotDot;
+
+            if (showHidden)
+                dirFilters |= QDir::Hidden;
+
+            QDirIterator iter(dir, nameFilters, dirFilters, flags);
+            while (iter.hasNext()) {
+                if (promise.isCanceled())
+                    return;
+                newPaths.insert(iter.next());
+            }
         }
 
-        if (promise.isCanceled() || newPaths == oldPaths) {
-            return;
+        if (!promise.isCanceled() && newPaths != oldPaths) {
+            promise.addResult(qMakePair(oldPaths - newPaths, newPaths - oldPaths));
         }
-
-        promise.addResult(qMakePair(oldPaths - newPaths, newPaths - oldPaths));
     });
 
-    if (m_futures.contains(dir)) {
+    if (m_futures.contains(dir))
         m_futures[dir].cancel();
-    }
     m_futures.insert(dir, future);
 
     const auto watcher = new QFutureWatcher<QPair<QSet<QString>, QSet<QString>>>(this);
-
-    connect(watcher, &QFutureWatcher<QPair<QSet<QString>, QSet<QString>>>::finished, this, [dir, watcher, this]() {
+    connect(watcher, &QFutureWatcher<QPair<QSet<QString>, QSet<QString>>>::finished, this, [this, dir, watcher]() {
         m_futures.remove(dir);
 
         if (!watcher->future().isResultReadyAt(0)) {

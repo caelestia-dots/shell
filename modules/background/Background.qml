@@ -9,7 +9,11 @@ import Quickshell.Wayland
 import QtQuick
 
 Loader {
+    id: backgroundLoader
+
     active: Config.background.enabled
+
+    property var lock
 
     sourceComponent: Variants {
         model: Quickshell.screens
@@ -37,6 +41,8 @@ Loader {
 
                 Wallpaper {
                     id: wallpaper
+                    screen: win.modelData
+                    sessionLock: backgroundLoader.lock ? backgroundLoader.lock.lock : null
                 }
 
                 Visualiser {
