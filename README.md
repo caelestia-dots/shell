@@ -14,28 +14,31 @@ https://github.com/user-attachments/assets/0840f496-575c-4ca6-83a8-87bb01a85c5f
 
 ## Components
 
--   Widgets: [`Quickshell`](https://quickshell.outfoxxed.me)
--   Window manager: [`Hyprland`](https://hyprland.org)
--   Dots: [`caelestia`](https://github.com/caelestia-dots)
+- Widgets: [`Quickshell`]
+- Window manager: [`Hyprland`]
+- Dots: [`caelestia`]
 
 ## Installation
 
 > [!NOTE]
-> This repo is for the desktop shell of the caelestia dots. If you want installation instructions
-> for the entire dots, head to [the main repo](https://github.com/caelestia-dots/caelestia) instead.
+> This repo is for the desktop shell of the caelestia dots. If you want
+> installation instructions for the entire dots, head to [the main repo]
+> instead.
 
 ### Arch linux
 
 > [!NOTE]
-> If you want to make your own changes/tweaks to the shell do NOT edit the files installed by the AUR
-> package. Instead, follow the instructions in the [manual installation section](#manual-installation).
+> If you want to make your own changes/tweaks to the shell do NOT edit the
+> files installed by the AUR package. Instead, follow the instructions in
+> the [manual installation section].
 
-The shell is available from the AUR as `caelestia-shell`. You can install it with an AUR helper
-like [`yay`](https://github.com/Jguer/yay) or manually downloading the PKGBUILD and running `makepkg -si`.
+The shell is available from the AUR as `caelestia-shell`. You can install it
+with an AUR helper like [`yay`] or manually downloading the PKGBUILD and
+running `makepkg -si`.
 
-A package following the latest commit also exists as `caelestia-shell-git`. This is bleeding edge
-and likely to be unstable/have bugs. Regular users are recommended to use the stable package
-(`caelestia-shell`).
+A package following the latest commit also exists as `caelestia-shell-git`.
+This is bleeding edge and likely to be unstable/have bugs. Regular users are
+recommended to use the stable package (`caelestia-shell`).
 
 ### Nix
 
@@ -60,49 +63,55 @@ Or add it to your system configuration:
 }
 ```
 
-The package is available as `caelestia-shell.packages.<system>.default`, which can be added to your
-`environment.systemPackages`, `users.users.<username>.packages`, `home.packages` if using home-manager,
+The package is available as `caelestia-shell.packages.<system>.default`,
+which can be added to your `environment.systemPackages`,
+`users.users.<username>.packages`, `home.packages` if using home-manager,
 or a devshell. The shell can then be run via `caelestia-shell`.
 
 > [!TIP]
-> The default package does not have the CLI enabled by default, which is required for full funcionality.
-> To enable the CLI, use the `with-cli` package.
+> The default package does not have the CLI enabled by default, which is
+> required for full funcionality. To enable the CLI, use the `with-cli`
+> package.
 
-For home-manager, you can also use the Caelestia's home manager module (explained in [configuring](https://github.com/caelestia-dots/shell?tab=readme-ov-file#home-manager-module)) that installs and configures the shell and the CLI.
+For home-manager, you can also use the Caelestia's home manager module
+(explained in [Configuring - Home Manager Module]) that installs and
+configures the shell and the CLI.
 
 ### Manual installation
 
 Dependencies:
 
--   [`caelestia-cli`](https://github.com/caelestia-dots/cli)
--   [`quickshell-git`](https://quickshell.outfoxxed.me) - this has to be the git version, not the latest tagged version
--   [`ddcutil`](https://github.com/rockowitz/ddcutil)
--   [`brightnessctl`](https://github.com/Hummer12007/brightnessctl)
--   [`app2unit`](https://github.com/Vladimir-csp/app2unit)
--   [`libcava`](https://github.com/LukashonakV/cava)
--   [`networkmanager`](https://networkmanager.dev)
--   [`lm-sensors`](https://github.com/lm-sensors/lm-sensors)
--   [`fish`](https://github.com/fish-shell/fish-shell)
--   [`aubio`](https://github.com/aubio/aubio)
--   [`libpipewire`](https://pipewire.org)
--   `glibc`
--   `qt6-declarative`
--   `gcc-libs`
--   [`material-symbols`](https://fonts.google.com/icons)
--   [`caskaydia-cove-nerd`](https://www.nerdfonts.com/font-downloads)
--   [`swappy`](https://github.com/jtheoof/swappy)
--   [`libqalculate`](https://github.com/Qalculate/libqalculate)
--   [`bash`](https://www.gnu.org/software/bash)
--   `qt6-base`
--   `qt6-declarative`
+- [`caelestia-cli`]
+- [`quickshell-git`] - this has to be the git version, not the latest tagged
+                       version
+- [`ddcutil`]
+- [`brightnessctl`]
+- [`app2unit`]
+- [`libcava`]
+- [`networkmanager`]
+- [`lm-sensors`]
+- [`fish`]
+- [`aubio`]
+- [`libpipewire`]
+- `glibc`
+- `qt6-declarative`
+- `gcc-libs`
+- [`material-symbols`]
+- [`caskaydia-cove-nerd`]
+- [`swappy`]
+- [`libqalculate`]
+- [`bash`]
+- `qt6-base`
+- `qt6-declarative`
 
 Build dependencies:
 
--   [`cmake`](https://cmake.org)
--   [`ninja`](https://github.com/ninja-build/ninja)
+- [`cmake`]
+- [`ninja`]
 
-To install the shell manually, install all dependencies and clone this repo to `$XDG_CONFIG_HOME/quickshell/caelestia`.
-Then simply build and install using `cmake`.
+To install the shell manually, install all dependencies and clone this repo to
+`$XDG_CONFIG_HOME/quickshell/caelestia`. Then simply build and install using
+`cmake`.
 
 ```sh
 cd $XDG_CONFIG_HOME/quickshell
@@ -115,10 +124,12 @@ sudo cmake --install build
 ```
 
 > [!TIP]
-> You can customise the installation location via the `cmake` flags `INSTALL_LIBDIR`, `INSTALL_QMLDIR` and
-> `INSTALL_QSCONFDIR` for the libraries (the beat detector), QML plugin and Quickshell config directories
-> respectively. If changing the library directory, remember to set the `CAELESTIA_LIB_DIR` environment
-> variable to the custom directory when launching the shell.
+> You can customise the installation location via the `cmake` flags
+> `INSTALL_LIBDIR`, `INSTALL_QMLDIR` and `INSTALL_QSCONFDIR` for the
+> libraries (the beat detector), QML plugin and Quickshell config
+> directories respectively. If changing the library directory, remember to
+> set the `CAELESTIA_LIB_DIR` environment variable to the custom directory
+> when launching the shell.
 >
 > e.g. installing to `~/.config/quickshell/caelestia` for easy local changes:
 >
@@ -132,16 +143,15 @@ sudo cmake --install build
 
 ## Usage
 
-The shell can be started via the `caelestia shell -d` command or `qs -c caelestia`.
-If the entire caelestia dots are installed, the shell will be autostarted on login
-via an `exec-once` in the hyprland config.
+The shell can be started via the `caelestia shell -d` command or
+`qs -c caelestia`. If the entire caelestia dots are installed, the shell will
+be autostarted on login via an `exec-once` in the hyprland config.
 
 ### Shortcuts/IPC
 
-All keybinds are accessible via Hyprland [global shortcuts](https://wiki.hyprland.org/Configuring/Binds/#dbus-global-shortcuts).
-If using the entire caelestia dots, the keybinds are already configured for you.
-Otherwise, [this file](https://github.com/caelestia-dots/caelestia/blob/main/hypr/hyprland/keybinds.conf#L1-L39)
-contains an example on how to use global shortcuts.
+All keybinds are accessible via Hyprland [global shortcuts]. If using the
+entire caelestia dots, the keybinds are already configured for you. Otherwise,
+[this file] contains an example on how to use global shortcuts.
 
 All IPC commands can be accessed via `caelestia shell ...`. For example
 
@@ -151,7 +161,7 @@ caelestia shell mpris getActive trackTitle
 
 The list of IPC commands can be shown via `caelestia shell -s`:
 
-```
+```sh
 $ caelestia shell -s
 target drawers
   function toggle(drawer: string): void
@@ -182,20 +192,22 @@ target wallpaper
 
 ### PFP/Wallpapers
 
-The profile picture for the dashboard is read from the file `~/.face`, so to set
-it you can copy your image to there or set it via the dashboard.
+The profile picture for the dashboard is read from the file `~/.face`, so to
+set it you can copy your image to there or set it via the dashboard.
 
 The wallpapers for the wallpaper switcher are read from `~/Pictures/Wallpapers`
-by default. To change it, change the wallpapers path in `~/.config/caelestia/shell.json`.
+by default. To change it, change the wallpapers path in
+`~/.config/caelestia/shell.json`.
 
-To set the wallpaper, you can use the command `caelestia wallpaper`. Use `caelestia wallpaper -h` for more info about
-the command.
+To set the wallpaper, you can use the command `caelestia wallpaper`. Use
+`caelestia wallpaper -h` for more info about the command.
 
 ## Updating
 
 If installed via the AUR package, simply update your system (e.g. using `yay`).
 
-If installed manually, you can update by running `git pull` in `$XDG_CONFIG_HOME/quickshell/caelestia`.
+If installed manually, you can update by running `git pull` in
+`$XDG_CONFIG_HOME/quickshell/caelestia`.
 
 ```sh
 cd $XDG_CONFIG_HOME/quickshell/caelestia
@@ -204,15 +216,16 @@ git pull
 
 ## Configuring
 
-All configuration options should be put in `~/.config/caelestia/shell.json`. This file is _not_ created by
-default, you must create it manually.
+All configuration options should be put in `~/.config/caelestia/shell.json`.
+This file is _not_ created by default, you must create it manually.
 
 ### Example configuration
 
 > [!NOTE]
-> The example configuration only includes recommended configuration options. For more advanced customisation
-> such as modifying the size of individual items or changing constants in the code, there are some other
-> options which can be found in the source files in the `config` directory.
+> The example configuration only includes recommended configuration options.
+> For more advanced customisation such as modifying the size of individual
+> items or changing constants in the code, there are some other options which
+> can be found in the source files in the `config` directory.
 
 <details><summary>Example</summary>
 
@@ -592,7 +605,12 @@ default, you must create it manually.
         "maxVolume": 1.0,
         "defaultPlayer": "Spotify",
         "gpuType": "",
-        "playerAliases": [{ "from": "com.github.th_ch.youtube_music", "to": "YT Music" }],
+        "playerAliases": [
+            {
+                "from": "com.github.th_ch.youtube_music",
+                "to": "YT Music"
+            }
+        ],
         "weatherLocation": "",
         "useFahrenheit": false,
         "useTwelveHourClock": false,
@@ -677,7 +695,9 @@ programs.caelestia = {
 };
 ```
 
-The module automatically adds Caelestia shell to the path with **full functionality**. The CLI is not required, however you have the option to enable and configure it.
+The module automatically adds Caelestia shell to the path with
+**full functionality**. The CLI is not required, however you have the option to
+enable and configure it.
 
 </details>
 
@@ -690,7 +710,8 @@ https://discord.gg/BGDCFCmMBk
 
 ### My screen is flickering, help pls!
 
-Try disabling VRR in the hyprland config. You can do this by adding the following to `~/.config/caelestia/hypr-user.conf`:
+Try disabling VRR in the hyprland config. You can do this by adding the
+following to `~/.config/caelestia/hypr-user.conf`:
 
 ```conf
 misc {
@@ -700,22 +721,22 @@ misc {
 
 ### I want to make my own changes to the hyprland config!
 
-You can add your custom hyprland configs to `~/.config/caelestia/hypr-user.conf`.
+You can add your custom hyprland configs to
+`~/.config/caelestia/hypr-user.conf`.
 
 ### I want to make my own changes to other stuff!
 
-See the [manual installation](https://github.com/caelestia-dots/shell?tab=readme-ov-file#manual-installation) section
-for the corresponding repo.
+See the [manual installation] section for the corresponding repo.
 
 ### I want to disable XXX feature!
 
-Please read the [configuring](https://github.com/caelestia-dots/shell?tab=readme-ov-file#configuring) section in the readme.
-If there is no corresponding option, make feature request.
+Please read the [Configuring] section in the readme. If there is no
+corresponding option, make feature request.
 
 ### How do I make my colour scheme change with my wallpaper?
 
-Set a wallpaper via the launcher or `caelestia wallpaper` and set the scheme to the dynamic scheme via the launcher
-or `caelestia scheme set`. e.g.
+Set a wallpaper via the launcher or `caelestia wallpaper` and set the scheme
+to the dynamic scheme via the launcher or `caelestia scheme set`. e.g.
 
 ```sh
 caelestia wallpaper -f <path/to/file>
@@ -724,31 +745,76 @@ caelestia scheme set -n dynamic
 
 ### My wallpapers aren't showing up in the launcher!
 
-The launcher pulls wallpapers from `~/Pictures/Wallpapers` by default. You can change this in the config. Additionally,
-the launcher only shows an odd number of wallpapers at one time. If you only have 2 wallpapers, consider getting more
+The launcher pulls wallpapers from `~/Pictures/Wallpapers` by default. You can
+change this in the config. Additionally, the launcher only shows an odd number
+of wallpapers at one time. If you only have 2 wallpapers, consider getting more
 (or just putting one).
 
 ## Credits
 
-Thanks to the Hyprland discord community (especially the homies in #rice-discussion) for all the help and suggestions
-for improving these dots!
+Thanks to the Hyprland discord community (especially the homies
+in #rice-discussion) for all the help and suggestions for improving these dots!
 
-A special thanks to [@outfoxxed](https://github.com/outfoxxed) for making Quickshell and the effort put into fixing issues
-and implementing various feature requests.
+A special thanks to [@outfoxxed] for making Quickshell and the effort put into
+fixing issues and implementing various feature requests.
 
-Another special thanks to [@end_4](https://github.com/end-4) for his [config](https://github.com/end-4/dots-hyprland)
-which helped me a lot with learning how to use Quickshell.
+Another special thanks to [@end_4] for his [config] which helped me a lot with
+learning how to use Quickshell.
 
-Finally another thank you to all the configs I took inspiration from (only one for now):
+Finally another thank you to all the configs I took inspiration from (only one
+for now):
 
--   [Axenide/Ax-Shell](https://github.com/Axenide/Ax-Shell)
+- [Axenide/Ax-Shell]
 
 ## Stonks 📈
 
 <a href="https://www.star-history.com/#caelestia-dots/shell&Date">
  <picture>
-   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=caelestia-dots/shell&type=Date&theme=dark" />
-   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=caelestia-dots/shell&type=Date" />
-   <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=caelestia-dots/shell&type=Date" />
+   <source
+    media="(prefers-color-scheme: dark)"
+    srcset="https://api.star-history.com/svg?repos=caelestia-dots/shell&type=Date&theme=dark"
+    />
+   <source
+    media="(prefers-color-scheme: light)"
+    srcset="https://api.star-history.com/svg?repos=caelestia-dots/shell&type=Date"
+    />
+   <img
+    alt="Star History Chart"
+    src="https://api.star-history.com/svg?repos=caelestia-dots/shell&type=Date"
+    />
  </picture>
 </a>
+
+[`Quickshell`]: https://quickshell.outfoxxed.me
+[`Hyprland`]: https://hyprland.org
+[`caelestia`]: https://github.com/caelestia-dots
+[the main repo]: https://github.com/caelestia-dots/caelestia
+[manual installation section]: #manual-installation
+[`yay`]: https://github.com/Jguer/yay
+[Configuring - Home Manager Module]: https://github.com/caelestia-dots/shell?tab=readme-ov-file#home-manager-module
+[`caelestia-cli`]: https://github.com/caelestia-dots/cli
+[`quickshell-git`]: https://quickshell.outfoxxed.me
+[`ddcutil`]: https://github.com/rockowitz/ddcutil
+[`brightnessctl`]: https://github.com/Hummer12007/brightnessctl
+[`app2unit`]: https://github.com/Vladimir-csp/app2unit
+[`libcava`]: https://github.com/LukashonakV/cava
+[`networkmanager`]: https://networkmanager.dev
+[`lm-sensors`]: https://github.com/lm-sensors/lm-sensors
+[`fish`]: https://github.com/fish-shell/fish-shell
+[`aubio`]: https://github.com/aubio/aubio
+[`libpipewire`]: https://pipewire.org
+[`material-symbols`]: https://fonts.google.com/icons
+[`caskaydia-cove-nerd`]: https://www.nerdfonts.com/font-downloads
+[`swappy`]: https://github.com/jtheoof/swappy
+[`libqalculate`]: https://github.com/Qalculate/libqalculate
+[`bash`]: https://www.gnu.org/software/bash
+[`cmake`]: https://cmake.org
+[`ninja`]: https://github.com/ninja-build/ninja
+[global shortcuts]: https://wiki.hyprland.org/Configuring/Binds/#dbus-global-shortcuts
+[this file]: https://github.com/caelestia-dots/caelestia/blob/main/hypr/hyprland/keybinds.conf#L1-L39
+[manual installation]: https://github.com/caelestia-dots/shell?tab=readme-ov-file#manual-installation
+[Configuring]: https://github.com/caelestia-dots/shell?tab=readme-ov-file#configuring
+[@outfoxxed]: https://github.com/outfoxxed
+[@end_4]: https://github.com/end-4
+[config]: https://github.com/end-4/dots-hyprland
+[Axenide/Ax-Shell]: https://github.com/Axenide/Ax-Shell

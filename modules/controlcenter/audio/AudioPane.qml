@@ -4,7 +4,6 @@ import ".."
 import "../components"
 import qs.components
 import qs.components.controls
-import qs.components.effects
 import qs.components.containers
 import qs.services
 import qs.config
@@ -88,6 +87,8 @@ Item {
                                 model: Audio.sinks
 
                                 delegate: StyledRect {
+                                    id: audioSink
+
                                     required property var modelData
 
                                     Layout.fillWidth: true
@@ -97,7 +98,7 @@ Item {
 
                                     StateLayer {
                                         function onClicked(): void {
-                                            Audio.setAudioSink(modelData);
+                                            Audio.setAudioSink(audioSink.modelData);
                                         }
                                     }
 
@@ -112,9 +113,9 @@ Item {
                                         spacing: Appearance.spacing.normal
 
                                         MaterialIcon {
-                                            text: Audio.sink?.id === modelData.id ? "speaker" : "speaker_group"
+                                            text: Audio.sink?.id === audioSink.modelData.id ? "speaker" : "speaker_group"
                                             font.pointSize: Appearance.font.size.large
-                                            fill: Audio.sink?.id === modelData.id ? 1 : 0
+                                            fill: Audio.sink?.id === audioSink.modelData.id ? 1 : 0
                                         }
 
                                         StyledText {
@@ -122,8 +123,8 @@ Item {
                                             elide: Text.ElideRight
                                             maximumLineCount: 1
 
-                                            text: modelData.description || qsTr("Unknown")
-                                            font.weight: Audio.sink?.id === modelData.id ? 500 : 400
+                                            text: audioSink.modelData.description || qsTr("Unknown")
+                                            font.weight: Audio.sink?.id === audioSink.modelData.id ? 500 : 400
                                         }
                                     }
 
@@ -166,6 +167,8 @@ Item {
                                 model: Audio.sources
 
                                 delegate: StyledRect {
+                                    id: audioSource
+
                                     required property var modelData
 
                                     Layout.fillWidth: true
@@ -175,7 +178,7 @@ Item {
 
                                     StateLayer {
                                         function onClicked(): void {
-                                            Audio.setAudioSource(modelData);
+                                            Audio.setAudioSource(audioSource.modelData);
                                         }
                                     }
 
@@ -192,7 +195,7 @@ Item {
                                         MaterialIcon {
                                             text: "mic"
                                             font.pointSize: Appearance.font.size.large
-                                            fill: Audio.source?.id === modelData.id ? 1 : 0
+                                            fill: Audio.source?.id === audioSource.modelData.id ? 1 : 0
                                         }
 
                                         StyledText {
@@ -200,8 +203,8 @@ Item {
                                             elide: Text.ElideRight
                                             maximumLineCount: 1
 
-                                            text: modelData.description || qsTr("Unknown")
-                                            font.weight: Audio.source?.id === modelData.id ? 500 : 400
+                                            text: audioSource.modelData.description || qsTr("Unknown")
+                                            font.weight: Audio.source?.id === audioSource.modelData.id ? 500 : 400
                                         }
                                     }
 
@@ -484,6 +487,8 @@ Item {
                                 Layout.fillWidth: true
 
                                 delegate: ColumnLayout {
+                                    id: audioStream
+
                                     required property var modelData
                                     required property int index
 
@@ -504,7 +509,7 @@ Item {
                                             Layout.fillWidth: true
                                             elide: Text.ElideRight
                                             maximumLineCount: 1
-                                            text: Audio.getStreamName(modelData)
+                                            text: Audio.getStreamName(audioStream.modelData)
                                             font.pointSize: Appearance.font.size.normal
                                             font.weight: 500
                                         }
@@ -516,17 +521,17 @@ Item {
                                                 bottom: 0
                                                 top: 100
                                             }
-                                            enabled: !Audio.getStreamMuted(modelData)
+                                            enabled: !Audio.getStreamMuted(audioStream.modelData)
 
                                             Component.onCompleted: {
-                                                text = Math.round(Audio.getStreamVolume(modelData) * 100).toString();
+                                                text = Math.round(Audio.getStreamVolume(audioStream.modelData) * 100).toString();
                                             }
 
                                             Connections {
-                                                target: modelData
+                                                target: audioStream.modelData
                                                 function onAudioChanged() {
-                                                    if (!streamVolumeInput.hasFocus && modelData?.audio) {
-                                                        streamVolumeInput.text = Math.round(modelData.audio.volume * 100).toString();
+                                                    if (!streamVolumeInput.hasFocus && audioStream.modelData?.audio) {
+                                                        streamVolumeInput.text = Math.round(audioStream.modelData.audio.volume * 100).toString();
                                                     }
                                                 }
                                             }
@@ -535,7 +540,7 @@ Item {
                                                 if (hasFocus) {
                                                     const val = parseInt(text);
                                                     if (!isNaN(val) && val >= 0 && val <= 100) {
-                                                        Audio.setStreamVolume(modelData, val / 100);
+                                                        Audio.setStreamVolume(audioStream.modelData, val / 100);
                                                     }
                                                 }
                                             }
@@ -543,7 +548,7 @@ Item {
                                             onEditingFinished: {
                                                 const val = parseInt(text);
                                                 if (isNaN(val) || val < 0 || val > 100) {
-                                                    text = Math.round(Audio.getStreamVolume(modelData) * 100).toString();
+                                                    text = Math.round(Audio.getStreamVolume(audioStream.modelData) * 100).toString();
                                                 }
                                             }
                                         }
@@ -552,7 +557,7 @@ Item {
                                             text: "%"
                                             color: Colours.palette.m3outline
                                             font.pointSize: Appearance.font.size.normal
-                                            opacity: Audio.getStreamMuted(modelData) ? 0.5 : 1
+                                            opacity: Audio.getStreamMuted(audioStream.modelData) ? 0.5 : 1
                                         }
 
                                         StyledRect {
@@ -560,11 +565,11 @@ Item {
                                             implicitHeight: streamMuteIcon.implicitHeight + Appearance.padding.normal * 2
 
                                             radius: Appearance.rounding.normal
-                                            color: Audio.getStreamMuted(modelData) ? Colours.palette.m3secondary : Colours.palette.m3secondaryContainer
+                                            color: Audio.getStreamMuted(audioStream.modelData) ? Colours.palette.m3secondary : Colours.palette.m3secondaryContainer
 
                                             StateLayer {
                                                 function onClicked(): void {
-                                                    Audio.setStreamMuted(modelData, !Audio.getStreamMuted(modelData));
+                                                    Audio.setStreamMuted(audioStream.modelData, !Audio.getStreamMuted(audioStream.modelData));
                                                 }
                                             }
 
@@ -572,8 +577,8 @@ Item {
                                                 id: streamMuteIcon
 
                                                 anchors.centerIn: parent
-                                                text: Audio.getStreamMuted(modelData) ? "volume_off" : "volume_up"
-                                                color: Audio.getStreamMuted(modelData) ? Colours.palette.m3onSecondary : Colours.palette.m3onSecondaryContainer
+                                                text: Audio.getStreamMuted(audioStream.modelData) ? "volume_off" : "volume_up"
+                                                color: Audio.getStreamMuted(audioStream.modelData) ? Colours.palette.m3onSecondary : Colours.palette.m3onSecondaryContainer
                                             }
                                         }
                                     }
@@ -582,21 +587,21 @@ Item {
                                         Layout.fillWidth: true
                                         implicitHeight: Appearance.padding.normal * 3
 
-                                        value: Audio.getStreamVolume(modelData)
-                                        enabled: !Audio.getStreamMuted(modelData)
+                                        value: Audio.getStreamVolume(audioStream.modelData)
+                                        enabled: !Audio.getStreamMuted(audioStream.modelData)
                                         opacity: enabled ? 1 : 0.5
                                         onMoved: {
-                                            Audio.setStreamVolume(modelData, value);
+                                            Audio.setStreamVolume(audioStream.modelData, value);
                                             if (!streamVolumeInput.hasFocus) {
                                                 streamVolumeInput.text = Math.round(value * 100).toString();
                                             }
                                         }
 
                                         Connections {
-                                            target: modelData
+                                            target: audioStream.modelData
                                             function onAudioChanged() {
-                                                if (modelData?.audio) {
-                                                    value = modelData.audio.volume;
+                                                if (audioStream.modelData?.audio) {
+                                                    value = audioStream.modelData.audio.volume;
                                                 }
                                             }
                                         }

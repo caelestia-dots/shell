@@ -1,11 +1,8 @@
 pragma ComponentBehavior: Bound
 
 import ".."
-import "."
 import qs.components
 import qs.components.controls
-import qs.components.effects
-import qs.components.containers
 import qs.services
 import qs.config
 import qs.utils
@@ -48,7 +45,7 @@ Item {
 
         MouseArea {
             anchors.fill: parent
-            onClicked: closeDialog()
+            onClicked: root.closeDialog()
         }
     }
 
@@ -94,7 +91,7 @@ Item {
             }
         }
 
-        Keys.onEscapePressed: closeDialog()
+        Keys.onEscapePressed: root.closeDialog()
 
         ColumnLayout {
             id: content
@@ -450,7 +447,7 @@ Item {
 
         onTriggered: {
             repeatCount++;
-            checkConnectionStatus();
+            root.checkConnectionStatus();
         }
 
         onRunningChanged: {
@@ -470,7 +467,7 @@ Item {
                     connectionMonitor.stop();
                     connectButton.connecting = false;
                     connectButton.text = qsTr("Connect");
-                    closeDialog();
+                    root.closeDialog();
                 }
             }
         }
@@ -480,7 +477,7 @@ Item {
         target: Nmcli
         function onActiveChanged() {
             if (root.visible) {
-                checkConnectionStatus();
+                root.checkConnectionStatus();
             }
         }
         function onConnectionFailed(ssid: string) {

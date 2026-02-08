@@ -1,6 +1,5 @@
 pragma ComponentBehavior: Bound
 
-import qs.components
 import qs.components.effects
 import qs.config
 import Quickshell.Widgets

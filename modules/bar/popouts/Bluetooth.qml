@@ -9,7 +9,6 @@ import Quickshell
 import Quickshell.Bluetooth
 import QtQuick
 import QtQuick.Layouts
-import "../../controlcenter/network"
 
 ColumnLayout {
     id: root

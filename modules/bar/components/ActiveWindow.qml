@@ -81,7 +81,7 @@ Item {
 
         transform: [
             Translate {
-                x: Config.bar.activeWindow.inverted ? -implicitWidth + text.implicitHeight : 0
+                x: Config.bar.activeWindow.inverted ? -root.implicitWidth + text.implicitHeight : 0
             },
             Rotation {
                 angle: Config.bar.activeWindow.inverted ? 270 : 90

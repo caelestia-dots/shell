@@ -39,18 +39,18 @@ ScrollBar {
 
     // Sync nonAnimPosition with flickable when not animating
     Connections {
-        target: flickable
+        target: root.flickable
         function onContentYChanged() {
-            if (!animating && !fullMouse.pressed) {
-                _updatingFromFlickable = true;
-                const contentHeight = flickable.contentHeight;
-                const height = flickable.height;
+            if (!root.animating && !fullMouse.pressed) {
+                root._updatingFromFlickable = true;
+                const contentHeight = root.flickable.contentHeight;
+                const height = root.flickable.height;
                 if (contentHeight > height) {
-                    nonAnimPosition = Math.max(0, Math.min(1, flickable.contentY / (contentHeight - height)));
+                    root.nonAnimPosition = Math.max(0, Math.min(1, root.flickable.contentY / (contentHeight - height)));
                 } else {
-                    nonAnimPosition = 0;
+                    root.nonAnimPosition = 0;
                 }
-                _updatingFromFlickable = false;
+                root._updatingFromFlickable = false;
             }
         }
     }
