@@ -16,7 +16,7 @@ StyledRect {
 
     function close(): void {}
 
-    readonly property var pages: [
+    readonly property list<var> pages: [
         { name: "Welcome", icon: "waving_hand" },
         { name: "Getting Started", icon: "rocket_launch" },
     ]
@@ -58,7 +58,10 @@ StyledRect {
 
                     model: root.pages
 
-                    NavButton {
+                    delegate: NavButton {
+                        required property int index
+                        required property var modelData
+
                         Layout.fillWidth: true
                         text: modelData.name
                         icon: modelData.icon
