@@ -919,6 +919,12 @@ Item {
                     font.pointSize: Appearance.font.size.normal
                 }
 
+                StyledText {
+                    text: qsTr("Download")
+                    font.pointSize: Appearance.font.size.small
+                    color: Colours.palette.m3onSurfaceVariant
+                }
+
                 Item {
                     Layout.fillWidth: true
                 }
@@ -946,6 +952,12 @@ Item {
                     font.pointSize: Appearance.font.size.normal
                 }
 
+                StyledText {
+                    text: qsTr("Upload")
+                    font.pointSize: Appearance.font.size.small
+                    color: Colours.palette.m3onSurfaceVariant
+                }
+
                 Item {
                     Layout.fillWidth: true
                 }
@@ -971,6 +983,12 @@ Item {
                     text: "history"
                     color: Colours.palette.m3onSurfaceVariant
                     font.pointSize: Appearance.font.size.normal
+                }
+
+                StyledText {
+                    text: qsTr("Total")
+                    font.pointSize: Appearance.font.size.small
+                    color: Colours.palette.m3onSurfaceVariant
                 }
 
                 Item {
