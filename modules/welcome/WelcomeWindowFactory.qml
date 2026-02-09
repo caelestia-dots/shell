@@ -24,6 +24,8 @@ Singleton {
             implicitWidth: 1000
             implicitHeight: 600
 
+            minimumSize: Qt.size(900, 250)
+
             color: "transparent"
 
             title: qsTr("Welcome to Caelestia")
