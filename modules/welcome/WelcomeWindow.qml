@@ -84,66 +84,66 @@ StyledRect {
                     onClicked: QsWindow.window.destroy();
                 }
             }
+        }
 
-            // Content area
-            Item {
-                Layout.fillWidth: true
-                Layout.fillHeight: true
-                clip: true
+        // Content area
+        Item {
+            Layout.fillWidth: true
+            Layout.fillHeight: true
+            clip: true
 
-                ColumnLayout {
-                    id: pagesLayout
+            ColumnLayout {
+                id: pagesLayout
 
-                    width: parent.width
-                    spacing: 0
-                    y: -root.currentPage * parent.height
+                width: parent.width
+                spacing: 0
+                y: -root.currentPage * parent.height
 
-                    Behavior on y {
-                        NumberAnimation {
-                            duration: Appearance.anim.durations.normal
-                            easing.type: Easing.OutCubic
+                Behavior on y {
+                    NumberAnimation {
+                        duration: Appearance.anim.durations.normal
+                        easing.type: Easing.OutCubic
+                    }
+                }
+
+                // Welcome page
+                Item {
+                    Layout.fillWidth: true
+                    implicitHeight: root.height
+
+                    Flickable {
+                        anchors.fill: parent
+                        anchors.margins: 32
+                        contentHeight: welcomeLoader.item ? welcomeLoader.item.implicitHeight : 0
+                        boundsBehavior: Flickable.StopAtBounds
+                        clip: true
+
+                        Loader {
+                            id: welcomeLoader
+                            anchors.left: parent.left
+                            anchors.right: parent.right
+                            sourceComponent: welcomeComponent
                         }
                     }
+                }
 
-                    // Welcome page
-                    Item {
-                        Layout.fillWidth: true
-                        implicitHeight: root.height
+                // Getting Started page
+                Item {
+                    Layout.fillWidth: true
+                    implicitHeight: root.height
 
-                        Flickable {
-                            anchors.fill: parent
-                            anchors.margins: 32
-                            contentHeight: welcomeLoader.item ? welcomeLoader.item.implicitHeight : 0
-                            boundsBehavior: Flickable.StopAtBounds
-                            clip: true
+                    Flickable {
+                        anchors.fill: parent
+                        anchors.margins: 32
+                        contentHeight: gettingStartedLoader.item ? gettingStartedLoader.item.implicitHeight : 0
+                        boundsBehavior: Flickable.StopAtBounds
+                        clip: true
 
-                            Loader {
-                                id: welcomeLoader
-                                anchors.left: parent.left
-                                anchors.right: parent.right
-                                sourceComponent: welcomeComponent
-                            }
-                        }
-                    }
-
-                    // Getting Started page
-                    Item {
-                        Layout.fillWidth: true
-                        implicitHeight: root.height
-
-                        Flickable {
-                            anchors.fill: parent
-                            anchors.margins: 32
-                            contentHeight: gettingStartedLoader.item ? gettingStartedLoader.item.implicitHeight : 0
-                            boundsBehavior: Flickable.StopAtBounds
-                            clip: true
-
-                            Loader {
-                                id: gettingStartedLoader
-                                anchors.left: parent.left
-                                anchors.right: parent.right
-                                sourceComponent: gettingStartedComponent
-                            }
+                        Loader {
+                            id: gettingStartedLoader
+                            anchors.left: parent.left
+                            anchors.right: parent.right
+                            sourceComponent: gettingStartedComponent
                         }
                     }
                 }
