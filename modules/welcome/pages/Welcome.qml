@@ -11,6 +11,7 @@ ColumnLayout {
 
     // Hero section
     ColumnLayout {
+        Layout.alignment: Qt.AlignHCenter
         spacing: 16
 
         MaterialIcon {
