@@ -75,8 +75,6 @@ StyledRect {
                     }
                 }
 
-                // Item { Layout.fillWidth: true }
-
                 NavButton {
                     Layout.alignment: Qt.AlignRight
                     Layout.rightMargin: 8
@@ -97,13 +95,6 @@ StyledRect {
 
                 width: parent.width
                 spacing: 0
-
-                Behavior on y {
-                    NumberAnimation {
-                        duration: Appearance.anim.durations.normal
-                        easing.type: Easing.OutCubic
-                    }
-                }
 
                 // Content loader
                 Item {
