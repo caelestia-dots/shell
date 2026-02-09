@@ -32,24 +32,26 @@ StyledRect {
 
         Rectangle {
             Layout.fillWidth: true
-            Layout.preferredHeight: 48
+            Layout.preferredHeight: logo.height + Appearance.padding.small * 2
             Layout.alignment: Qt.AlignTop
 
             color: Colours.palette.m3surfaceContainer
 
             RowLayout {
                 anchors.fill: parent
-                anchors.margins: 8
-                spacing: 8
+                anchors.margins: Appearance.padding.small
+                spacing: Appearance.spacing.small
 
                 // Logo
                 RowLayout {
-                    Layout.leftMargin: 8
-                    Layout.rightMargin: 8
+                    id: logo
+
+                    Layout.leftMargin: Appearance.padding.small
+                    Layout.rightMargin: Appearance.padding.small
 
                     Text {
                         text: "Caelestia"
-                        font.pointSize: 18
+                        font.pointSize: Appearance.font.size.large
                         font.bold: true
                         color: Colours.palette.m3onSurface
                     }
@@ -77,7 +79,7 @@ StyledRect {
 
                 NavButton {
                     Layout.alignment: Qt.AlignRight
-                    Layout.rightMargin: 8
+                    Layout.rightMargin: Appearance.padding.small
                     icon: "close"
                     onClicked: QsWindow.window.destroy();
                 }
@@ -103,17 +105,16 @@ StyledRect {
 
                     Flickable {
                         anchors.fill: parent
-                        anchors.leftMargin: 32
-                        anchors.rightMargin: 32
-                        anchors.bottomMargin: 32
-                        contentHeight: contentLoader.item ? contentLoader.item.implicitHeight : 0
+                        anchors.leftMargin: Appearance.padding.large
+                        anchors.rightMargin: Appearance.padding.large
+                        anchors.bottomMargin: Appearance.padding.large
+                        contentHeight: contentLoader.item ? contentLoader.item.implicitHeight + Appearance.padding.large * 2 : 0
                         boundsBehavior: Flickable.StopAtBounds
                         clip: true
 
                         Loader {
                             id: contentLoader
-                            anchors.left: parent.left
-                            anchors.right: parent.right
+                            anchors.fill: parent
                             sourceComponent: root.pages[root.currentPage].component
                         }
                     }

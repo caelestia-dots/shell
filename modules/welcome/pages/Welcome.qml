@@ -2,17 +2,18 @@ import QtQuick
 import QtQuick.Layouts
 import qs.services
 import qs.components
+import qs.config
 import "../components"
 
 ColumnLayout {
     id: root
 
-    spacing: 24
+    spacing: Appearance.padding.large
 
     // Hero section
     ColumnLayout {
         Layout.alignment: Qt.AlignHCenter
-        spacing: 16
+        spacing: Appearance.spacing.larger
 
         MaterialIcon {
             Layout.alignment: Qt.AlignHCenter
@@ -24,7 +25,7 @@ ColumnLayout {
         Text {
             Layout.alignment: Qt.AlignHCenter
             text: "Welcome to Caelestia"
-            font.pointSize: 32
+            font.pointSize: Appearance.font.size.extraLarge
             font.bold: true
             color: Colours.palette.m3onBackground
         }
@@ -32,17 +33,17 @@ ColumnLayout {
         Text {
             Layout.alignment: Qt.AlignHCenter
             text: "A modern, beautiful desktop shell for Wayland"
-            font.pointSize: 14
+            font.pointSize: Appearance.font.size.larger
             color: Colours.palette.m3onSurfaceVariant
         }
     }
 
     // Info cards
     GridLayout {
-        Layout.topMargin: 32
+        Layout.topMargin: Appearance.padding.large
         columns: 2
-        rowSpacing: 16
-        columnSpacing: 16
+        rowSpacing: Appearance.spacing.larger
+        columnSpacing: Appearance.spacing.larger
 
         InfoCard {
             Layout.fillWidth: true
