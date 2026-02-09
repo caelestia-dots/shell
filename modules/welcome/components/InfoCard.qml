@@ -10,7 +10,7 @@ Rectangle {
     property string title: ""
     property string description: ""
 
-    implicitHeight: 120
+    implicitHeight: 160
     radius: 16
     color: Colours.palette.m3surfaceContainerHigh
 
