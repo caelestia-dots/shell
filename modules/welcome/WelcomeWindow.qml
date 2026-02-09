@@ -17,9 +17,9 @@ StyledRect {
     function close(): void {}
 
     readonly property list<var> pages: [
-        { name: qsTr("Welcome"), icon: "waving_hand" },
+        { name: qsTr("Welcome"), icon: "waving_hand", component: welcomeComponent },
         { name: qsTr("Features"), icon: "star" },
-        { name: qsTr("Getting Started"), icon: "rocket_launch" },
+        { name: qsTr("Getting Started"), icon: "rocket_launch", component: gettingStartedComponent },
         { name: qsTr("Community"), icon: "people" },
         { name: qsTr("Get Involved"), icon: "code" },
     ]
@@ -97,7 +97,6 @@ StyledRect {
 
                 width: parent.width
                 spacing: 0
-                y: -root.currentPage * parent.height
 
                 Behavior on y {
                     NumberAnimation {
@@ -106,44 +105,25 @@ StyledRect {
                     }
                 }
 
-                // Welcome page
+                // Content loader
                 Item {
                     Layout.fillWidth: true
                     implicitHeight: root.height
 
                     Flickable {
                         anchors.fill: parent
-                        anchors.margins: 32
-                        contentHeight: welcomeLoader.item ? welcomeLoader.item.implicitHeight : 0
+                        anchors.leftMargin: 32
+                        anchors.rightMargin: 32
+                        anchors.bottomMargin: 32
+                        contentHeight: contentLoader.item ? contentLoader.item.implicitHeight : 0
                         boundsBehavior: Flickable.StopAtBounds
                         clip: true
 
                         Loader {
-                            id: welcomeLoader
+                            id: contentLoader
                             anchors.left: parent.left
                             anchors.right: parent.right
-                            sourceComponent: welcomeComponent
-                        }
-                    }
-                }
-
-                // Getting Started page
-                Item {
-                    Layout.fillWidth: true
-                    implicitHeight: root.height
-
-                    Flickable {
-                        anchors.fill: parent
-                        anchors.margins: 32
-                        contentHeight: gettingStartedLoader.item ? gettingStartedLoader.item.implicitHeight : 0
-                        boundsBehavior: Flickable.StopAtBounds
-                        clip: true
-
-                        Loader {
-                            id: gettingStartedLoader
-                            anchors.left: parent.left
-                            anchors.right: parent.right
-                            sourceComponent: gettingStartedComponent
+                            sourceComponent: root.pages[root.currentPage].component
                         }
                     }
                 }
