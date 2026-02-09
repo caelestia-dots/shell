@@ -17,8 +17,11 @@ StyledRect {
     function close(): void {}
 
     readonly property list<var> pages: [
-        { name: "Welcome", icon: "waving_hand" },
-        { name: "Getting Started", icon: "rocket_launch" },
+        { name: qsTr("Welcome"), icon: "waving_hand" },
+        { name: qsTr("Features"), icon: "star" },
+        { name: qsTr("Getting Started"), icon: "rocket_launch" },
+        { name: qsTr("Community"), icon: "people" },
+        { name: qsTr("Get Involved"), icon: "code" },
     ]
 
     color: Colours.palette.m3background
@@ -42,7 +45,7 @@ StyledRect {
                 // Logo
                 RowLayout {
                     Layout.leftMargin: 8
-                    spacing: 12
+                    Layout.rightMargin: 8
 
                     Text {
                         text: "Caelestia"
@@ -58,11 +61,13 @@ StyledRect {
 
                     model: root.pages
 
+                    Layout.fillWidth: true
+                    Layout.alignment: Qt.AlignHCenter
+
                     delegate: NavButton {
                         required property int index
                         required property var modelData
 
-                        Layout.fillWidth: true
                         text: modelData.name
                         icon: modelData.icon
                         active: root.currentPage === index
@@ -70,11 +75,11 @@ StyledRect {
                     }
                 }
 
-                Item { Layout.fillHeight: true }
+                // Item { Layout.fillWidth: true }
 
                 NavButton {
-                    Layout.fillWidth: true
-                    text: qsTr("Close")
+                    Layout.alignment: Qt.AlignRight
+                    Layout.rightMargin: 8
                     icon: "close"
                     onClicked: QsWindow.window.destroy();
                 }
