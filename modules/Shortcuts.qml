@@ -4,7 +4,6 @@ import qs.services
 import Caelestia
 import Quickshell
 import Quickshell.Io
-import QtQuick
 
 Scope {
     id: root
@@ -70,31 +69,6 @@ Scope {
         onPressed: root.launcherInterrupted = true
     }
 
-    CustomShortcut {
-        name: "cycleSpecialWorkspace"
-        description: "Cycle through open special workspaces"
-        onPressed: {
-            const openSpecials = Hypr.workspaces.values
-                .filter(w => w.name.startsWith("special:") && w.lastIpcObject.windows > 0)
-                .sort((a, b) => a.name.localeCompare(b.name));
-
-            if (openSpecials.length === 0)
-                return;
-
-            const activeSpecial = Hypr.focusedMonitor.lastIpcObject.specialWorkspace.name ?? "";
-            let nextIndex = 0;
-
-            if (activeSpecial) {
-                const currentIndex = openSpecials.findIndex(w => w.name === activeSpecial);
-                if (currentIndex !== -1) {
-                    nextIndex = (currentIndex + 1) % openSpecials.length;
-                }
-            }
-
-            Hypr.dispatch(`workspace ${openSpecials[nextIndex].name}`);
-        }
-    }
-
     IpcHandler {
         target: "drawers"
 
@@ -140,65 +114,6 @@ Scope {
 
         function error(title: string, message: string, icon: string): void {
             Toaster.toast(title, message, icon, Toast.Error);
-        }
-    }
-
-    property string lastSpecialWorkspace: ""
-
-    Connections {
-        target: Hypr.focusedMonitor
-
-        function onLastIpcObjectChanged(): void {
-            const specialName = Hypr.focusedMonitor.lastIpcObject.specialWorkspace.name;
-            
-            if (specialName && specialName.startsWith("special:")) {
-                root.lastSpecialWorkspace = specialName;
-            }
-        }
-    }
-
-    IpcHandler {
-        target: "specialWorkspace"
-
-        function cycle(direction: string): void {
-            const openSpecials = Hypr.workspaces.values
-                .filter(w => w.name.startsWith("special:") && w.lastIpcObject.windows > 0);
-
-            if (openSpecials.length === 0)
-                return;
-
-            const activeSpecial = Hypr.focusedMonitor.lastIpcObject.specialWorkspace.name ?? "";
-            
-            if (!activeSpecial) {
-                if (root.lastSpecialWorkspace) {
-                    const workspace = Hypr.workspaces.values.find(w => w.name === root.lastSpecialWorkspace);
-                    if (workspace && workspace.lastIpcObject.windows > 0) {
-                        Hypr.dispatch(`workspace ${root.lastSpecialWorkspace}`);
-                        return;
-                    }
-                }
-                Hypr.dispatch(`workspace ${openSpecials[0].name}`);
-                return;
-            }
-
-            const currentIndex = openSpecials.findIndex(w => w.name === activeSpecial);
-            let nextIndex = 0;
-            
-            if (currentIndex !== -1) {
-                if (direction === "next")
-                    nextIndex = (currentIndex + 1) % openSpecials.length;
-                else
-                    nextIndex = (currentIndex - 1 + openSpecials.length) % openSpecials.length;
-            }
-
-            Hypr.dispatch(`workspace ${openSpecials[nextIndex].name}`);
-        }
-
-        function list(): string {
-            return Hypr.workspaces.values
-                .filter(w => w.name.startsWith("special:") && w.lastIpcObject.windows > 0)
-                .map(w => w.name)
-                .join("\n");
         }
     }
 }
