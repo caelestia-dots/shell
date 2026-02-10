@@ -1,39 +1,226 @@
 import QtQuick
 import QtQuick.Layouts
+import qs.services
+import qs.components
+import qs.components.containers
+import qs.config
+import "../components"
 
-ColumnLayout {
-    spacing: 24
+Item {
+    id: root
 
-    Text {
-        text: "Getting Started"
-        font.pointSize: 28
-        font.bold: true
-        color: "#cdd6f4"
+    readonly property list<var> subsections: [
+        {
+            id: "installation",
+            name: qsTr("Installation"),
+            icon: "download"
+        },
+        {
+            id: "configuration",
+            name: qsTr("Configuration"),
+            icon: "settings"
+        },
+        {
+            id: "first-steps",
+            name: qsTr("First Steps"),
+            icon: "bolt"
+        },
+    ]
+
+    property string currentSubsection: subsections[0].id
+
+    function scrollToSubsection(subsectionId: string): void {
+        const sectionIndex = subsections.findIndex(s => s.id === subsectionId);
+
+        if (sectionIndex === -1) {
+            contentFlickable.contentY = 0;
+            return;
+        }
+
+        const targetY = sectionIndex * contentFlickable.height;
+        contentFlickable.contentY = targetY;
     }
 
-    Text {
-        Layout.fillWidth: true
-        text: "Learn how to use and update Caelestia shell"
-        font.pointSize: 12
-        color: "#a6adc8"
-        wrapMode: Text.WordWrap
-    }
+    onCurrentSubsectionChanged: scrollToSubsection(currentSubsection)
 
-    // Placeholder content
-    Rectangle {
-        Layout.fillWidth: true
-        Layout.preferredHeight: 200
-        radius: 12
-        color: "#181825"
+    RowLayout {
+        anchors.fill: parent
+        spacing: Appearance.spacing.large
 
-        Text {
-            anchors.centerIn: parent
-            text: "Content coming soon:\n• How to update the shell\n• CLI usage\n• FAQ"
-            font.pointSize: 11
-            color: "#a6adc8"
-            horizontalAlignment: Text.AlignHCenter
+        // Vertical navigation
+        VerticalNav {
+            id: verticalNav
+
+            Layout.fillHeight: true
+            Layout.preferredWidth: 200
+
+            sections: root.subsections
+            activeSection: root.currentSubsection
+            onSectionChanged: sectionId => root.currentSubsection = sectionId
+        }
+
+        // Content area
+        StyledFlickable {
+            id: contentFlickable
+
+            Layout.fillWidth: true
+            Layout.fillHeight: true
+            contentHeight: contentColumn.height
+            flickableDirection: Flickable.VerticalFlick
+            clip: true
+
+            Behavior on contentY {
+                Anim {
+                    duration: Appearance.anim.durations.normal
+                    easing.bezierCurve: Appearance.anim.curves.emphasized
+                }
+            }
+
+            ColumnLayout {
+                id: contentColumn
+
+                width: parent.width
+                spacing: 0
+
+                ColumnLayout {
+                    id: installationSection
+
+                    Layout.fillWidth: true
+                    Layout.minimumHeight: contentFlickable.height
+                    Layout.leftMargin: Appearance.padding.larger
+                    Layout.rightMargin: Appearance.padding.larger
+                    Layout.topMargin: Appearance.padding.larger
+                    spacing: Appearance.padding.large
+
+                    StyledText {
+                        text: "Installation"
+                        font.pointSize: Appearance.font.size.extraLarge
+                        font.bold: true
+                        color: Colours.palette.m3onBackground
+                    }
+
+                    StyledText {
+                        Layout.fillWidth: true
+                        text: "Get Caelestia up and running on your system."
+                        font.pointSize: Appearance.font.size.normal
+                        color: Colours.palette.m3onSurfaceVariant
+                        wrapMode: Text.WordWrap
+                    }
+
+                    StyledRect {
+                        Layout.fillWidth: true
+                        Layout.preferredHeight: contentPlaceholder1.height + Appearance.padding.large * 2
+                        Layout.topMargin: Appearance.padding.normal
+                        color: Colours.layer(Colours.palette.m3surfaceContainer, 1)
+                        radius: Appearance.rounding.normal
+
+                        StyledText {
+                            id: contentPlaceholder1
+                            anchors.centerIn: parent
+                            text: "Content coming soon:\n• System requirements\n• Installation steps\n• Dependencies"
+                            font.pointSize: Appearance.font.size.normal
+                            color: Colours.palette.m3onSurfaceVariant
+                            horizontalAlignment: Text.AlignHCenter
+                        }
+                    }
+
+                    Item {
+                        Layout.fillHeight: true
+                    }
+                }
+
+                ColumnLayout {
+                    id: configurationSection
+
+                    Layout.fillWidth: true
+                    Layout.minimumHeight: contentFlickable.height
+                    Layout.leftMargin: Appearance.padding.larger
+                    Layout.rightMargin: Appearance.padding.larger
+                    spacing: Appearance.padding.large
+
+                    StyledText {
+                        text: "Configuration"
+                        font.pointSize: Appearance.font.size.extraLarge
+                        font.bold: true
+                        color: Colours.palette.m3onBackground
+                    }
+
+                    StyledText {
+                        Layout.fillWidth: true
+                        text: "Customize Caelestia to match your workflow and preferences."
+                        font.pointSize: Appearance.font.size.normal
+                        color: Colours.palette.m3onSurfaceVariant
+                        wrapMode: Text.WordWrap
+                    }
+
+                    StyledRect {
+                        Layout.fillWidth: true
+                        Layout.preferredHeight: contentPlaceholder2.height + Appearance.padding.large * 2
+                        Layout.topMargin: Appearance.padding.normal
+                        color: Colours.layer(Colours.palette.m3surfaceContainer, 1)
+                        radius: Appearance.rounding.normal
+
+                        StyledText {
+                            id: contentPlaceholder2
+                            anchors.centerIn: parent
+                            text: "Content coming soon:\n• Configuration files\n• CLI usage\n• Theme customization"
+                            font.pointSize: Appearance.font.size.normal
+                            color: Colours.palette.m3onSurfaceVariant
+                            horizontalAlignment: Text.AlignHCenter
+                        }
+                    }
+
+                    Item {
+                        Layout.fillHeight: true
+                    }
+                }
+
+                ColumnLayout {
+                    id: firstStepsSection
+
+                    Layout.fillWidth: true
+                    Layout.minimumHeight: contentFlickable.height
+                    Layout.leftMargin: Appearance.padding.larger
+                    Layout.rightMargin: Appearance.padding.larger
+                    spacing: Appearance.padding.large
+
+                    StyledText {
+                        text: "First Steps"
+                        font.pointSize: Appearance.font.size.extraLarge
+                        font.bold: true
+                        color: Colours.palette.m3onBackground
+                    }
+
+                    StyledText {
+                        Layout.fillWidth: true
+                        text: "Learn the basics and start exploring Caelestia's features."
+                        font.pointSize: Appearance.font.size.normal
+                        color: Colours.palette.m3onSurfaceVariant
+                        wrapMode: Text.WordWrap
+                    }
+
+                    StyledRect {
+                        Layout.fillWidth: true
+                        Layout.preferredHeight: contentPlaceholder3.height + Appearance.padding.large * 2
+                        Layout.topMargin: Appearance.padding.normal
+                        color: Colours.layer(Colours.palette.m3surfaceContainer, 1)
+                        radius: Appearance.rounding.normal
+
+                        StyledText {
+                            id: contentPlaceholder3
+                            anchors.centerIn: parent
+                            text: "Content coming soon:\n• Basic navigation\n• Keyboard shortcuts\n• Quick tips"
+                            font.pointSize: Appearance.font.size.normal
+                            color: Colours.palette.m3onSurfaceVariant
+                            horizontalAlignment: Text.AlignHCenter
+                        }
+                    }
+
+                    Item {
+                        Layout.fillHeight: true
+                    }
+                }
+            }
         }
     }
-
-    Item { Layout.fillHeight: true }
 }
