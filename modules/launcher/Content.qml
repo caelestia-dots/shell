@@ -89,7 +89,7 @@ Item {
         Behavior on height {
             Anim {
                 duration: Appearance.anim.durations.normal
-                easing.bezierCurve: Appearance.anim.curves.emphasized
+                easing.bezierCurve: Appearance.anim.curves.standard
             }
         }
 
@@ -106,13 +106,6 @@ Item {
         anchors.bottom: searchWrapper.top
         anchors.topMargin: root.showNavbar ? root.padding : 0
         anchors.bottomMargin: root.padding
-
-        Behavior on anchors.topMargin {
-            Anim {
-                duration: Appearance.anim.durations.normal
-                easing.bezierCurve: Appearance.anim.curves.emphasized
-            }
-        }
 
         content: root
         visibilities: root.visibilities

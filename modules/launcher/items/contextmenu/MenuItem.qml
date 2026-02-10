@@ -42,7 +42,7 @@ StyledRect {
         onClicked: if (!item.hasSubMenu)
             item.triggered()
         onEntered: {
-            item.color = Qt.alpha(Colours.palette.m3onSurface, 0.08);
+            item.color = Qt.alpha(Colours.palette.m3primary, 0.15);
             item.hovered();
             if (item.hasSubMenu) {
                 hoveredSubmenuIndex = item.submenuIndex;
@@ -67,9 +67,9 @@ StyledRect {
             }
         }
         onPressed: if (!item.hasSubMenu)
-            item.color = Qt.alpha(Colours.palette.m3onSurface, 0.12)
+            item.color = Qt.alpha(Colours.palette.m3primary, 0.2)
         onReleased: if (!item.hasSubMenu)
-            item.color = containsMouse ? Qt.alpha(Colours.palette.m3onSurface, 0.08) : "transparent"
+            item.color = containsMouse ? Qt.alpha(Colours.palette.m3primary, 0.15) : "transparent"
     }
 
     RowLayout {
