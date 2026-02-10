@@ -13,7 +13,6 @@ ColumnLayout {
     id: root
 
     required property var lock
-    readonly property list<string> timeComponents: Time.format(Config.services.useTwelveHourClock ? "hh:mm:A" : "hh:mm").split(":")
     readonly property real centerScale: Math.min(1, (lock.screen?.height ?? 1440) / 1440)
     readonly property int centerWidth: Config.lock.sizes.centerWidth * centerScale
 
@@ -29,7 +28,7 @@ ColumnLayout {
 
         StyledText {
             Layout.alignment: Qt.AlignVCenter
-            text: root.timeComponents[0]
+            text: Time.hourStr
             color: Colours.palette.m3secondary
             font.pointSize: Math.floor(Appearance.font.size.extraLarge * 3 * root.centerScale)
             font.family: Appearance.font.family.clock
@@ -47,7 +46,7 @@ ColumnLayout {
 
         StyledText {
             Layout.alignment: Qt.AlignVCenter
-            text: root.timeComponents[1]
+            text: Time.minuteStr
             color: Colours.palette.m3secondary
             font.pointSize: Math.floor(Appearance.font.size.extraLarge * 3 * root.centerScale)
             font.family: Appearance.font.family.clock
@@ -62,7 +61,7 @@ ColumnLayout {
             visible: active
 
             sourceComponent: StyledText {
-                text: root.timeComponents[2] ?? ""
+                text: Time.amPmStr
                 color: Colours.palette.m3primary
                 font.pointSize: Math.floor(Appearance.font.size.extraLarge * 2 * root.centerScale)
                 font.family: Appearance.font.family.clock

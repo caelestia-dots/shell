@@ -88,9 +88,7 @@ ColumnLayout {
             id: backgroundRect
             anchors.fill: parent
             radius: Appearance.rounding.normal
-            color: Colours.transparency.enabled 
-                   ? Colours.layer(Colours.palette.m3surfaceContainer, root.nested ? 3 : 2)
-                   : (root.nested ? Colours.palette.m3surfaceContainerHigh : Colours.palette.m3surfaceContainer)
+            color: Colours.transparency.enabled ? Colours.layer(Colours.palette.m3surfaceContainer, root.nested ? 3 : 2) : (root.nested ? Colours.palette.m3surfaceContainerHigh : Colours.palette.m3surfaceContainer)
             opacity: root.showBackground && root.expanded ? 1.0 : 0.0
             visible: root.showBackground
 
@@ -132,4 +130,3 @@ ColumnLayout {
         }
     }
 }
-

@@ -16,21 +16,21 @@ ColumnLayout {
     property Session session: null
     property var model: null
     property Component delegate: null
-    
+
     property string title: ""
     property string description: ""
     property var activeItem: null
     property Component headerComponent: null
     property Component titleSuffix: null
     property bool showHeader: true
-    
+
     signal itemSelected(var item)
 
     spacing: Appearance.spacing.small
 
     Loader {
         id: headerLoader
-        
+
         Layout.fillWidth: true
         sourceComponent: root.headerComponent
         visible: root.headerComponent !== null && root.showHeader
@@ -58,7 +58,7 @@ ColumnLayout {
             Layout.fillWidth: true
         }
     }
-    
+
     property alias view: view
 
     StyledText {
@@ -82,4 +82,3 @@ ColumnLayout {
         clip: false
     }
 }
-

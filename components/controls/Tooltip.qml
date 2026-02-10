@@ -55,33 +55,47 @@ Popup {
     }
     Connections {
         target: root.target
-        function onXChanged() { if (root.tooltipVisible) root.updatePosition(); }
-        function onYChanged() { if (root.tooltipVisible) root.updatePosition(); }
-        function onWidthChanged() { if (root.tooltipVisible) root.updatePosition(); }
-        function onHeightChanged() { if (root.tooltipVisible) root.updatePosition(); }
+        function onXChanged() {
+            if (root.tooltipVisible)
+                root.updatePosition();
+        }
+        function onYChanged() {
+            if (root.tooltipVisible)
+                root.updatePosition();
+        }
+        function onWidthChanged() {
+            if (root.tooltipVisible)
+                root.updatePosition();
+        }
+        function onHeightChanged() {
+            if (root.tooltipVisible)
+                root.updatePosition();
+        }
     }
 
     function updatePosition() {
-        if (!target || !parent) return;
-        
+        if (!target || !parent)
+            return;
+
         // Wait for tooltipRect to have its size calculated
         Qt.callLater(() => {
-            if (!target || !parent || !tooltipRect) return;
-            
+            if (!target || !parent || !tooltipRect)
+                return;
+
             // Get target position in parent's coordinate system
             const targetPos = target.mapToItem(parent, 0, 0);
             const targetCenterX = targetPos.x + target.width / 2;
-            
+
             // Get tooltip size (use width/height if available, otherwise implicit)
             const tooltipWidth = tooltipRect.width > 0 ? tooltipRect.width : tooltipRect.implicitWidth;
             const tooltipHeight = tooltipRect.height > 0 ? tooltipRect.height : tooltipRect.implicitHeight;
-            
+
             // Center tooltip horizontally on target
             let newX = targetCenterX - tooltipWidth / 2;
-            
+
             // Position tooltip above target
             let newY = targetPos.y - tooltipHeight - Appearance.spacing.small;
-            
+
             // Keep within bounds
             const padding = Appearance.padding.normal;
             if (newX < padding) {
@@ -89,7 +103,7 @@ Popup {
             } else if (newX + tooltipWidth > (parent.width - padding)) {
                 newX = parent.width - tooltipWidth - padding;
             }
-            
+
             // Update popup position
             x = newX;
             y = newY;
@@ -156,7 +170,7 @@ Popup {
             id: tooltipText
 
             anchors.centerIn: parent
-            
+
             text: root.text
             color: Colours.palette.m3onSurface
             font.pointSize: Appearance.font.size.small
@@ -169,4 +183,3 @@ Popup {
         }
     }
 }
-

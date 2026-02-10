@@ -16,7 +16,7 @@ Item {
 
     property real scale: Config.background.desktopClock.scale
     readonly property bool bgEnabled: Config.background.desktopClock.background.enabled
-    readonly property bool blurEnabled: bgEnabled && Config.background.desktopClock.background.blur
+    readonly property bool blurEnabled: bgEnabled && Config.background.desktopClock.background.blur && !GameMode.enabled
     readonly property bool invertColors: Config.background.desktopClock.invertColors
     readonly property bool useLightSet: Colours.light ? !invertColors : invertColors
     readonly property color safePrimary: useLightSet ? Colours.palette.m3primaryContainer : Colours.palette.m3primary
@@ -79,7 +79,7 @@ Item {
                 spacing: Appearance.spacing.small
 
                 StyledText {
-                    text: Time.format(Config.services.useTwelveHourClock ? "hh" : "HH")
+                    text: Time.hourStr
                     font.pointSize: Appearance.font.size.extraLarge * 3 * root.scale
                     font.weight: Font.Bold
                     color: root.safePrimary
@@ -94,19 +94,24 @@ Item {
                 }
 
                 StyledText {
-                    text: Time.format("mm")
+                    text: Time.minuteStr
                     font.pointSize: Appearance.font.size.extraLarge * 3 * root.scale
                     font.weight: Font.Bold
                     color: root.safeSecondary
                 }
 
-                StyledText {
-                    visible: Config.services.useTwelveHourClock
-                    text: Time.format("A")
-                    font.pointSize: Appearance.font.size.large * root.scale
-                    color: root.safeSecondary
+                Loader {
                     Layout.alignment: Qt.AlignTop
                     Layout.topMargin: Appearance.padding.large * 1.4 * root.scale
+
+                    active: Config.services.useTwelveHourClock
+                    visible: active
+
+                    sourceComponent: StyledText {
+                        text: Time.amPmStr
+                        font.pointSize: Appearance.font.size.large * root.scale
+                        color: root.safeSecondary
+                    }
                 }
             }
 
@@ -155,7 +160,7 @@ Item {
             easing.bezierCurve: Appearance.anim.curves.expressiveDefaultSpatial
         }
     }
-    
+
     Behavior on implicitWidth {
         Anim {
             duration: Appearance.anim.durations.small

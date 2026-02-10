@@ -90,9 +90,9 @@ Item {
                     if (!monitor)
                         return;
                     if (event.angleDelta.y > 0)
-                        monitor.setBrightness(monitor.brightness + 0.1);
+                        monitor.setBrightness(monitor.brightness + Config.services.brightnessIncrement);
                     else if (event.angleDelta.y < 0)
-                        monitor.setBrightness(monitor.brightness - 0.1);
+                        monitor.setBrightness(monitor.brightness - Config.services.brightnessIncrement);
                 }
 
                 FilledSlider {
