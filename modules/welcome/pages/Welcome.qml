@@ -10,18 +10,18 @@ Item {
     id: root
 
     StyledFlickable {
+        id: flickable
         anchors.fill: parent
-        contentHeight: contentColumn.height
+        contentHeight: Math.max(contentColumn.implicitHeight, flickable.height)
         flickableDirection: Flickable.VerticalFlick
 
         ColumnLayout {
             id: contentColumn
             width: parent.width
+            height: Math.max(implicitHeight, flickable.height)
             spacing: Appearance.padding.large
 
-            Item {
-                Layout.preferredHeight: Appearance.padding.larger
-            }
+            Item { Layout.fillHeight: true }
 
             ColumnLayout {
                 Layout.fillWidth: true
@@ -89,9 +89,7 @@ Item {
                 }
             }
 
-            Item {
-                Layout.preferredHeight: Appearance.padding.larger
-            }
+            Item { Layout.fillHeight: true }
         }
     }
 }
