@@ -172,6 +172,7 @@ StyledRect {
                                         anchors.verticalCenter: parent.verticalCenter
                                         text: modelData.icon
                                         font.pointSize: Appearance.font.size.small
+                                        fill: 1
                                         color: isActive ? Colours.palette.m3surface : Colours.palette.m3onSurfaceVariant
                                     }
 
