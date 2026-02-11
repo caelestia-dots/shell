@@ -26,13 +26,11 @@ Item {
             ColumnLayout {
                 Layout.fillWidth: true
                 Layout.alignment: Qt.AlignHCenter
-                spacing: Appearance.spacing.larger
 
-                MaterialIcon {
+                VectorImage {
                     Layout.alignment: Qt.AlignHCenter
-                    text: "waving_hand"
-                    font.pointSize: 64
-                    color: Colours.palette.m3primary
+                    preferredRendererType: VectorImage.CurveRenderer
+                    source: Colours.currentLight ? "../assets/logo-light.svg" : "../assets/logo-dark.svg"
                 }
 
                 StyledText {
