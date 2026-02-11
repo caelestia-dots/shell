@@ -84,12 +84,6 @@ StyledRect {
                     id: logo
                     spacing: Appearance.spacing.small
 
-                    MaterialIcon {
-                        text: "waving_hand"
-                        font.pointSize: Appearance.font.size.large
-                        color: Colours.palette.m3primary
-                    }
-
                     StyledText {
                         text: "Caelestia"
                         font.pointSize: Appearance.font.size.large
