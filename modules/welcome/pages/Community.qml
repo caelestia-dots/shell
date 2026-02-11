@@ -174,6 +174,30 @@ Item {
                             id: getInvolvedContent
 
                             width: parent.width
+
+                            StyledText {
+                                Layout.fillWidth: true
+                                Layout.topMargin: Appearance.padding.large
+                                Layout.leftMargin: Appearance.padding.large
+                                Layout.rightMargin: Appearance.padding.large
+                                text: qsTr("Caelestia might have had humble beginnings, but today we have a growing number of contributors. Whether you have a bug to report, a bugfix you want to contribute, or a feature request, we'd love to hear from you!")
+                                font.pointSize: Appearance.font.size.normal
+                                color: Colours.palette.m3onSurfaceVariant
+                                wrapMode: Text.WordWrap
+                            }
+                        }
+                    }
+
+                    StyledRect {
+                        Layout.preferredHeight: getInvolvedContent2.height + Appearance.padding.large
+                        Layout.fillWidth: true
+                        color: Colours.layer(Colours.palette.m3surfaceContainer, 1)
+                        radius: Appearance.rounding.normal
+
+                        ColumnLayout {
+                            id: getInvolvedContent2
+
+                            width: parent.width
                             spacing: Appearance.padding.large
 
                             StyledText {
@@ -181,21 +205,131 @@ Item {
                                 Layout.topMargin: Appearance.padding.large
                                 Layout.leftMargin: Appearance.padding.large
                                 Layout.rightMargin: Appearance.padding.large
-                                text: qsTr("Need help or support? Want to chat with other Caelestia users? The official Caelestia Discord community is an active community that is growing daily! Why not stop in and say hi?")
+                                text: qsTr("Caelestia CLI")
+                                font.pointSize: Appearance.font.size.normal
+                                font.bold: true
+                                color: Colours.palette.m3onSurfaceVariant
+                                wrapMode: Text.WordWrap
+                            }
+
+                            StyledText {
+                                Layout.fillWidth: true
+                                Layout.leftMargin: Appearance.padding.large
+                                Layout.rightMargin: Appearance.padding.large
+                                text: qsTr("Caelestia CLI is the main control script for Caelestia. Written in Python, CLI is responsible for the caelestia command, which acts as a handler for functionality such as schemes, wallpaper management, and screen capture and recording.")
                                 font.pointSize: Appearance.font.size.normal
                                 color: Colours.palette.m3onSurfaceVariant
                                 wrapMode: Text.WordWrap
                             }
 
-                            RowLayout {
+                            StyledText {
+                                Layout.fillWidth: true
                                 Layout.leftMargin: Appearance.padding.large
                                 Layout.rightMargin: Appearance.padding.large
+                                text: qsTr("Caelestia Shell")
+                                font.pointSize: Appearance.font.size.normal
+                                font.bold: true
+                                color: Colours.palette.m3onSurfaceVariant
+                                wrapMode: Text.WordWrap
+                            }
+
+                            StyledText {
+                                Layout.fillWidth: true
+                                Layout.leftMargin: Appearance.padding.large
+                                Layout.rightMargin: Appearance.padding.large
+                                text: qsTr("Caelestia Shell provides the actual UI elements and much of the underlying functionality of Caelestia. It is primarily written in QML, and built around Quickshell.")
+                                font.pointSize: Appearance.font.size.normal
+                                color: Colours.palette.m3onSurfaceVariant
+                                wrapMode: Text.WordWrap
+                            }
+
+                            StyledText {
+                                Layout.fillWidth: true
+                                Layout.leftMargin: Appearance.padding.large
+                                Layout.rightMargin: Appearance.padding.large
+                                text: qsTr("Caelestia Dots")
+                                font.pointSize: Appearance.font.size.normal
+                                font.bold: true
+                                color: Colours.palette.m3onSurfaceVariant
+                                wrapMode: Text.WordWrap
+                            }
+
+                            StyledText {
+                                Layout.fillWidth: true
+                                Layout.leftMargin: Appearance.padding.large
+                                Layout.rightMargin: Appearance.padding.large
+                                text: qsTr("Caelestia Dots is the main repo for Caelestia, and handles all of the application configs, as well as the Caelestia install script. This is the primary point of entry for most users, and serves as the primary installation guide for Caelestia.")
+                                font.pointSize: Appearance.font.size.normal
+                                color: Colours.palette.m3onSurfaceVariant
+                                wrapMode: Text.WordWrap
+                            }
+
+                            StyledText {
+                                Layout.fillWidth: true
+                                Layout.leftMargin: Appearance.padding.large
+                                Layout.rightMargin: Appearance.padding.large
+                                text: qsTr("Caelestia Live")
+                                font.pointSize: Appearance.font.size.normal
+                                font.bold: true
+                                color: Colours.palette.m3onSurfaceVariant
+                                wrapMode: Text.WordWrap
+                            }
+
+                            StyledText {
+                                Layout.fillWidth: true
+                                Layout.leftMargin: Appearance.padding.large
+                                Layout.rightMargin: Appearance.padding.large
+                                text: qsTr("Caelestia Live is the unofficial community project to build a Caelestia-based live image. If you're reading this, congratulations! You're running Caelestia Live! Caelestia Live was built by Evertiro, and at this time, he provides all live-image specific support.")
+                                font.pointSize: Appearance.font.size.normal
+                                color: Colours.palette.m3onSurfaceVariant
+                                wrapMode: Text.WordWrap
+                            }
+                        }
+                    }
+
+                    StyledRect {
+                        Layout.preferredHeight: getInvolvedContent3.height + Appearance.padding.large
+                        Layout.fillWidth: true
+                        color: Colours.layer(Colours.palette.m3surfaceContainer, 1)
+                        radius: Appearance.rounding.normal
+
+                        ColumnLayout {
+                            id: getInvolvedContent3
+
+                            width: parent.width
+
+                            RowLayout {
+                                Layout.topMargin: Appearance.padding.large
+                                Layout.leftMargin: Appearance.padding.large
+                                Layout.rightMargin: Appearance.padding.large
+                                spacing: Appearance.padding.large
 
                                 TextButton {
-                                    text: qsTr("Join Discord")
+                                    text: qsTr("Caelestia CLI")
                                     radius: Appearance.rounding.small
 
-                                    onClicked: Qt.openUrlExternally("https://discord.gg/BGDCFCmMBk")
+                                    onClicked: Qt.openUrlExternally("https://github.com/caelestia-dots/cli")
+                                }
+
+                                TextButton {
+                                    text: qsTr("Caelestia Shell")
+                                    radius: Appearance.rounding.small
+
+                                    onClicked: Qt.openUrlExternally("https://github.com/caelestia-dots/shell")
+                                }
+
+                                TextButton {
+                                    text: qsTr("Caelestia Dots")
+                                    radius: Appearance.rounding.small
+
+                                    onClicked: Qt.openUrlExternally("https://github.com/caelestia-dots/caelestia")
+                                }
+
+                                TextButton {
+                                    text: qsTr("Caelestia Live")
+                                    radius: Appearance.rounding.small
+
+                                    onClicked: Qt.openUrlExternally("https://github.com/caelestia-community/live")
                                 }
                             }
                         }
