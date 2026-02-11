@@ -3,6 +3,7 @@ import QtQuick.Layouts
 import qs.services
 import qs.components
 import qs.components.containers
+import qs.components.controls
 import qs.config
 import "../components"
 
@@ -11,19 +12,14 @@ Item {
 
     readonly property list<var> subsections: [
         {
-            id: "installation",
-            name: qsTr("Installation"),
-            icon: "download"
+            id: "joinUs",
+            name: qsTr("Join Us"),
+            icon: "forum"
         },
         {
-            id: "configuration",
-            name: qsTr("Configuration"),
-            icon: "settings"
-        },
-        {
-            id: "first-steps",
-            name: qsTr("First Steps"),
-            icon: "bolt"
+            id: "getInvolved",
+            name: qsTr("Get Involved"),
+            icon: "code"
         },
     ]
 
@@ -83,7 +79,7 @@ Item {
                 spacing: 0
 
                 ColumnLayout {
-                    id: installationSection
+                    id: joinUsSection
 
                     Layout.fillWidth: true
                     Layout.minimumHeight: contentFlickable.height
@@ -93,7 +89,7 @@ Item {
                     spacing: Appearance.padding.large
 
                     StyledText {
-                        text: "Installation"
+                        text: qsTr("Join Us")
                         font.pointSize: Appearance.font.size.extraLarge
                         font.bold: true
                         color: Colours.palette.m3onBackground
@@ -101,7 +97,7 @@ Item {
 
                     StyledText {
                         Layout.fillWidth: true
-                        text: "Get Caelestia up and running on your system."
+                        text: qsTr("Join our thriving community on Discord.")
                         font.pointSize: Appearance.font.size.normal
                         color: Colours.palette.m3onSurfaceVariant
                         wrapMode: Text.WordWrap
@@ -109,18 +105,32 @@ Item {
 
                     StyledRect {
                         Layout.fillWidth: true
-                        Layout.preferredHeight: contentPlaceholder1.height + Appearance.padding.large * 2
-                        Layout.topMargin: Appearance.padding.normal
+                        Layout.preferredHeight: joinUsContent.height + Appearance.padding.large * 2
                         color: Colours.layer(Colours.palette.m3surfaceContainer, 1)
                         radius: Appearance.rounding.normal
 
-                        StyledText {
-                            id: contentPlaceholder1
-                            anchors.centerIn: parent
-                            text: "Content coming soon:\n• System requirements\n• Installation steps\n• Dependencies"
-                            font.pointSize: Appearance.font.size.normal
-                            color: Colours.palette.m3onSurfaceVariant
-                            horizontalAlignment: Text.AlignHCenter
+                        RowLayout {
+                            anchors.fill: parent
+
+                            StyledText {
+                                id: joinUsContent
+
+                                Layout.fillWidth: true
+                                Layout.margins: Appearance.padding.large
+                                text: qsTr("Need help or support? Want to chat with other Caelestia users? The official Caelestia Discord community is an active community that is growing daily! Why not stop in and say hi?")
+                                font.pointSize: Appearance.font.size.normal
+                                color: Colours.palette.m3onSurfaceVariant
+                                wrapMode: Text.WordWrap
+                            }
+
+                            TextButton {
+                                Layout.margins: Appearance.padding.large
+                                Layout.alignment: Qt.AlignVCenter
+                                text: qsTr("Join Discord")
+                                radius: Appearance.rounding.small
+
+                                onClicked: Qt.openUrlExternally("https://discord.gg/BGDCFCmMBk")
+                            }
                         }
                     }
 
@@ -130,16 +140,17 @@ Item {
                 }
 
                 ColumnLayout {
-                    id: configurationSection
+                    id: getInvolvedSection
 
                     Layout.fillWidth: true
                     Layout.minimumHeight: contentFlickable.height
                     Layout.leftMargin: Appearance.padding.larger
                     Layout.rightMargin: Appearance.padding.larger
+                    Layout.topMargin: Appearance.padding.larger
                     spacing: Appearance.padding.large
 
                     StyledText {
-                        text: "Configuration"
+                        text: qsTr("Get Involved")
                         font.pointSize: Appearance.font.size.extraLarge
                         font.bold: true
                         color: Colours.palette.m3onBackground
@@ -147,7 +158,7 @@ Item {
 
                     StyledText {
                         Layout.fillWidth: true
-                        text: "Customize Caelestia to match your workflow and preferences."
+                        text: qsTr("Become a contributor.")
                         font.pointSize: Appearance.font.size.normal
                         color: Colours.palette.m3onSurfaceVariant
                         wrapMode: Text.WordWrap
@@ -155,64 +166,32 @@ Item {
 
                     StyledRect {
                         Layout.fillWidth: true
-                        Layout.preferredHeight: contentPlaceholder2.height + Appearance.padding.large * 2
-                        Layout.topMargin: Appearance.padding.normal
+                        Layout.preferredHeight: getInvolvedContent.height + Appearance.padding.large * 2
                         color: Colours.layer(Colours.palette.m3surfaceContainer, 1)
                         radius: Appearance.rounding.normal
 
-                        StyledText {
-                            id: contentPlaceholder2
-                            anchors.centerIn: parent
-                            text: "Content coming soon:\n• Configuration files\n• CLI usage\n• Theme customization"
-                            font.pointSize: Appearance.font.size.normal
-                            color: Colours.palette.m3onSurfaceVariant
-                            horizontalAlignment: Text.AlignHCenter
-                        }
-                    }
+                        ColumnLayout {
+                            id: getInvolvedContent
 
-                    Item {
-                        Layout.fillHeight: true
-                    }
-                }
+                            StyledText {
+                                Layout.margins: Appearance.padding.large
+                                text: qsTr("Need help or support? Want to chat with other Caelestia users? The official Caelestia Discord community is an active community that is growing daily! Why not stop in and say hi?")
+                                font.pointSize: Appearance.font.size.normal
+                                color: Colours.palette.m3onSurfaceVariant
+                                wrapMode: Text.WordWrap
+                            }
 
-                ColumnLayout {
-                    id: firstStepsSection
+                            RowLayout {
+                                Layout.leftMargin: Appearance.padding.large
+                                Layout.rightMargin: Appearance.padding.large
 
-                    Layout.fillWidth: true
-                    Layout.minimumHeight: contentFlickable.height
-                    Layout.leftMargin: Appearance.padding.larger
-                    Layout.rightMargin: Appearance.padding.larger
-                    spacing: Appearance.padding.large
+                                TextButton {
+                                    text: qsTr("Join Discord")
+                                    radius: Appearance.rounding.small
 
-                    StyledText {
-                        text: "First Steps"
-                        font.pointSize: Appearance.font.size.extraLarge
-                        font.bold: true
-                        color: Colours.palette.m3onBackground
-                    }
-
-                    StyledText {
-                        Layout.fillWidth: true
-                        text: "Learn the basics and start exploring Caelestia's features."
-                        font.pointSize: Appearance.font.size.normal
-                        color: Colours.palette.m3onSurfaceVariant
-                        wrapMode: Text.WordWrap
-                    }
-
-                    StyledRect {
-                        Layout.fillWidth: true
-                        Layout.preferredHeight: contentPlaceholder3.height + Appearance.padding.large * 2
-                        Layout.topMargin: Appearance.padding.normal
-                        color: Colours.layer(Colours.palette.m3surfaceContainer, 1)
-                        radius: Appearance.rounding.normal
-
-                        StyledText {
-                            id: contentPlaceholder3
-                            anchors.centerIn: parent
-                            text: "Content coming soon:\n• Basic navigation\n• Keyboard shortcuts\n• Quick tips"
-                            font.pointSize: Appearance.font.size.normal
-                            color: Colours.palette.m3onSurfaceVariant
-                            horizontalAlignment: Text.AlignHCenter
+                                    onClicked: Qt.openUrlExternally("https://discord.gg/BGDCFCmMBk")
+                                }
+                            }
                         }
                     }
 
