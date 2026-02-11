@@ -19,15 +19,20 @@ Singleton {
                 acc.sinks.push(node);
             else if (node.audio)
                 acc.sources.push(node);
+        } else if (node.isStream && node.audio) {
+            // Application streams (output streams)
+            acc.streams.push(node);
         }
         return acc;
     }, {
         sources: [],
-        sinks: []
+        sinks: [],
+        streams: []
     })
 
     readonly property list<PwNode> sinks: nodes.sinks
     readonly property list<PwNode> sources: nodes.sources
+    readonly property list<PwNode> streams: nodes.streams
 
     readonly property PwNode sink: Pipewire.defaultAudioSink
     readonly property PwNode source: Pipewire.defaultAudioSource
@@ -79,6 +84,34 @@ Singleton {
         Pipewire.preferredDefaultAudioSource = newSource;
     }
 
+    function setStreamVolume(stream: PwNode, newVolume: real): void {
+        if (stream?.ready && stream?.audio) {
+            stream.audio.muted = false;
+            stream.audio.volume = Math.max(0, Math.min(Config.services.maxVolume, newVolume));
+        }
+    }
+
+    function setStreamMuted(stream: PwNode, muted: bool): void {
+        if (stream?.ready && stream?.audio) {
+            stream.audio.muted = muted;
+        }
+    }
+
+    function getStreamVolume(stream: PwNode): real {
+        return stream?.audio?.volume ?? 0;
+    }
+
+    function getStreamMuted(stream: PwNode): bool {
+        return !!stream?.audio?.muted;
+    }
+
+    function getStreamName(stream: PwNode): string {
+        if (!stream)
+            return qsTr("Unknown");
+        // Try application name first, then description, then name
+        return stream.applicationName || stream.description || stream.name || qsTr("Unknown Application");
+    }
+
     onSinkChanged: {
         if (!sink?.ready)
             return;
@@ -109,7 +142,7 @@ Singleton {
     }
 
     PwObjectTracker {
-        objects: [...root.sinks, ...root.sources]
+        objects: [...root.sinks, ...root.sources, ...root.streams]
     }
 
     CavaProvider {

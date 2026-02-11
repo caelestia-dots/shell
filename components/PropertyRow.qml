@@ -24,4 +24,3 @@ ColumnLayout {
         font.pointSize: Appearance.font.size.small
     }
 }
-
