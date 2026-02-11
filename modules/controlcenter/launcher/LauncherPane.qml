@@ -286,13 +286,14 @@ Item {
                     id: appsListLoader
                     Layout.fillWidth: true
                     Layout.fillHeight: true
+                    asynchronous: true
                     active: true
 
-                sourceComponent: StyledListView {
-                    id: appsListView
+                    sourceComponent: StyledListView {
+                        id: appsListView
 
-                    Layout.fillWidth: true
-                    Layout.fillHeight: true
+                        Layout.fillWidth: true
+                        Layout.fillHeight: true
 
                         model: root.filteredApps
                         spacing: Appearance.spacing.small / 2
@@ -349,43 +350,43 @@ Item {
                                     }
                                 }
 
-                            StyledText {
-                                Layout.fillWidth: true
-                                text: modelData.name || modelData.entry?.name || qsTr("Unknown")
-                                font.pointSize: Appearance.font.size.normal
-                            }
-
-                            Loader {
-                                Layout.alignment: Qt.AlignVCenter
-                                readonly property bool isHidden: modelData ? Strings.testRegexList(Config.launcher.hiddenApps, modelData.id) : false
-                                readonly property bool isFav: modelData ? Strings.testRegexList(Config.launcher.favouriteApps, modelData.id) : false
-                                active: isHidden || isFav
-
-                                sourceComponent: isHidden ? hiddenIcon : (isFav ? favouriteIcon : null)
-                            }
-
-                            Component {
-                                id: hiddenIcon
-                                MaterialIcon {
-                                    text: "visibility_off"
-                                    fill: 1
-                                    color: Colours.palette.m3primary
+                                StyledText {
+                                    Layout.fillWidth: true
+                                    text: modelData.name || modelData.entry?.name || qsTr("Unknown")
+                                    font.pointSize: Appearance.font.size.normal
                                 }
-                            }
 
-                            Component {
-                                id: favouriteIcon
-                                MaterialIcon {
-                                    text: "favorite"
-                                    fill: 1
-                                    color: Colours.palette.m3primary
+                                Loader {
+                                    Layout.alignment: Qt.AlignVCenter
+                                    readonly property bool isHidden: modelData ? Strings.testRegexList(Config.launcher.hiddenApps, modelData.id) : false
+                                    readonly property bool isFav: modelData ? Strings.testRegexList(Config.launcher.favouriteApps, modelData.id) : false
+                                    active: isHidden || isFav
+
+                                    sourceComponent: isHidden ? hiddenIcon : (isFav ? favouriteIcon : null)
+                                }
+
+                                Component {
+                                    id: hiddenIcon
+                                    MaterialIcon {
+                                        text: "visibility_off"
+                                        fill: 1
+                                        color: Colours.palette.m3primary
+                                    }
+                                }
+
+                                Component {
+                                    id: favouriteIcon
+                                    MaterialIcon {
+                                        text: "favorite"
+                                        fill: 1
+                                        color: Colours.palette.m3primary
+                                    }
                                 }
                             }
                         }
                     }
                 }
             }
-        }
         }
 
         rightContent: Component {
@@ -649,7 +650,6 @@ Item {
                                 }
                             }
                         }
-
                     }
                 }
             }
