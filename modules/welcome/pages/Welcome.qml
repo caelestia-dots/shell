@@ -1,5 +1,6 @@
 import QtQuick
 import QtQuick.Layouts
+import QtQuick.VectorImage
 import qs.services
 import qs.components
 import qs.components.containers
