@@ -26,28 +26,28 @@ StyledRect {
             component: welcomeComponent
         },
         {
-            id: "features",
-            name: qsTr("Features"),
-            icon: "star",
-            component: null
-        },
-        {
             id: "getting-started",
             name: qsTr("Getting Started"),
             icon: "rocket_launch",
             component: gettingStartedComponent
         },
         {
+            id: "configuration",
+            name: qsTr("Configuration"),
+            icon: "settings",
+            component: configurationComponent
+        },
+        {
+            id: "faqs",
+            name: qsTr("FAQs"),
+            icon: "help",
+            component: faqsComponent
+        },
+        {
             id: "community",
             name: qsTr("Community"),
             icon: "people",
-            component: null
-        },
-        {
-            id: "get-involved",
-            name: qsTr("Get Involved"),
-            icon: "code",
-            component: null
+            component: communityComponent
         },
     ]
 
@@ -317,5 +317,20 @@ StyledRect {
     Component {
         id: gettingStartedComponent
         GettingStarted {}
+    }
+
+    Component {
+        id: configurationComponent
+        Configuration {}
+    }
+
+    Component {
+        id: faqsComponent
+        FAQs {}
+    }
+
+    Component {
+        id: communityComponent
+        Community {}
     }
 }
