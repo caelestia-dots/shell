@@ -5,7 +5,6 @@ import qs.services
 import qs.components
 import qs.components.containers
 import qs.config
-import "../components"
 
 Item {
     id: root
@@ -47,44 +46,6 @@ Item {
                     text: "A modern, beautiful desktop shell for Wayland"
                     font.pointSize: Appearance.font.size.larger
                     color: Colours.palette.m3onSurfaceVariant
-                }
-            }
-
-            GridLayout {
-                Layout.fillWidth: true
-                Layout.topMargin: Appearance.padding.large
-                Layout.leftMargin: Appearance.padding.larger
-                Layout.rightMargin: Appearance.padding.larger
-                columns: 2
-                rowSpacing: Appearance.spacing.larger
-                columnSpacing: Appearance.spacing.larger
-
-                InfoCard {
-                    Layout.fillWidth: true
-                    icon: "rocket_launch"
-                    title: "Getting Started"
-                    description: "Learn the basics and set up your shell"
-                }
-
-                InfoCard {
-                    Layout.fillWidth: true
-                    icon: "palette"
-                    title: "Customize"
-                    description: "Make Caelestia your own with themes and colors"
-                }
-
-                InfoCard {
-                    Layout.fillWidth: true
-                    icon: "widgets"
-                    title: "Modules"
-                    description: "Explore drawers, widgets, and more"
-                }
-
-                InfoCard {
-                    Layout.fillWidth: true
-                    icon: "help"
-                    title: "Resources"
-                    description: "Documentation, community, and support"
                 }
             }
 
