@@ -165,16 +165,22 @@ Item {
                     }
 
                     StyledRect {
+                        Layout.preferredHeight: getInvolvedContent.height + Appearance.padding.large
                         Layout.fillWidth: true
-                        Layout.preferredHeight: getInvolvedContent.height + Appearance.padding.large * 2
                         color: Colours.layer(Colours.palette.m3surfaceContainer, 1)
                         radius: Appearance.rounding.normal
 
                         ColumnLayout {
                             id: getInvolvedContent
 
+                            width: parent.width
+                            spacing: Appearance.padding.large
+
                             StyledText {
-                                Layout.margins: Appearance.padding.large
+                                Layout.fillWidth: true
+                                Layout.topMargin: Appearance.padding.large
+                                Layout.leftMargin: Appearance.padding.large
+                                Layout.rightMargin: Appearance.padding.large
                                 text: qsTr("Need help or support? Want to chat with other Caelestia users? The official Caelestia Discord community is an active community that is growing daily! Why not stop in and say hi?")
                                 font.pointSize: Appearance.font.size.normal
                                 color: Colours.palette.m3onSurfaceVariant
