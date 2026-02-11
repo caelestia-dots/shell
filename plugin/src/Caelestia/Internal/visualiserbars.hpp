@@ -1,6 +1,7 @@
 #pragma once
 
 #include <QColor>
+#include <QElapsedTimer>
 #include <QList>
 #include <QQuickPaintedItem>
 #include <QVector>
@@ -22,6 +23,7 @@ class VisualiserBars : public QQuickPaintedItem {
     Q_PROPERTY(QColor barColorBottom READ barColorBottom WRITE setBarColorBottom NOTIFY barColorBottomChanged)
 
     Q_PROPERTY(QList<double> audioValues READ audioValues WRITE setAudioValues NOTIFY audioValuesChanged)
+    Q_PROPERTY(int animationDuration READ animationDuration WRITE setAnimationDuration NOTIFY animationDurationChanged)
 
 public:
     explicit VisualiserBars(QQuickItem* parent = nullptr);
@@ -51,6 +53,9 @@ public:
     QList<double> audioValues() const;
     void setAudioValues(const QList<double>& values);
 
+    int animationDuration() const;
+    void setAnimationDuration(int ms);
+
 signals:
     void barCountChanged();
     void spacingChanged();
@@ -60,9 +65,9 @@ signals:
     void barColorTopChanged();
     void barColorBottomChanged();
     void audioValuesChanged();
+    void animationDurationChanged();
 
 private:
-    qreal clamp01(qreal v) const;
     qreal spatialSmooth(int index, const QVector<qreal>& values, int radius) const;
     void ensureBuffers();
 
@@ -81,6 +86,20 @@ private:
     QVector<qreal> m_audioValues;
     QVector<qreal> m_displayValues;
     QVector<qreal> m_spatialValues;
+
+    void startAnimation(int index, qreal target);
+    void stepAnimations();
+
+    QTimer* m_frameTimer;
+    QElapsedTimer m_time;
+    qint64 m_lastFrameMs;
+
+    QVector<qreal> m_animStart;
+    QVector<qreal> m_animTarget;
+    QVector<qreal> m_animElapsed;
+    QVector<bool> m_animActive;
+
+    int m_animationDuration;
 };
 
 } // namespace caelestia::internal

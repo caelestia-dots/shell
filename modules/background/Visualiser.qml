@@ -91,12 +91,24 @@ Item {
 
             barCount: Config.services.visualiserBars
             spacing: Appearance.spacing.small * Config.background.visualiser.spacing
-            smoothing: 1 - (0.95 * Config.background.visualiser.smoothing)
+            smoothing: Config.background.visualiser.smoothing
             curvature: Config.background.visualiser.curvature
             barRadius: Appearance.rounding.small * Config.background.visualiser.rounding
             barColorTop: root.barColorTop
             barColorBottom: root.barColorBottom
-            audioValues: Audio.cava.values
+            animationDuration: Appearance.anim.durations.small
+            // audioValues: Audio.cava.values
+        }
+
+        Timer {
+            id: updateTimer
+            interval: 16  // ~60 FPS
+            running: true
+            repeat: true
+            onTriggered: {
+                // Push latest audio values to VisualiserBars every 16ms
+                bars.audioValues = Audio.cava.values;
+            }
         }
     }
 }

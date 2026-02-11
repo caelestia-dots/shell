@@ -323,8 +323,8 @@ default, you must create it manually.
             "enabled": false,
             "autoHide": true,
             "blur": true,
-            "smoothing": 0.6,
-            "curvature": 1,
+            "smoothing": 1,
+            "curvature": 0,
             "rounding": 1,
             "spacing": 1
         }
