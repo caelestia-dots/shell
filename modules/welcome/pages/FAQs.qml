@@ -11,19 +11,19 @@ Item {
 
     readonly property list<var> subsections: [
         {
-            id: "installation",
-            name: qsTr("Installation"),
-            icon: "download"
+            id: "pythonUpdates",
+            name: qsTr("Python Updates"),
+            icon: "help"
         },
         {
-            id: "configuration",
-            name: qsTr("Configuration"),
-            icon: "settings"
+            id: "qtUpdates",
+            name: qsTr("Qt Updates"),
+            icon: "help"
         },
         {
-            id: "first-steps",
-            name: qsTr("First Steps"),
-            icon: "bolt"
+            id: "configFiles",
+            name: qsTr("Config Files"),
+            icon: "help"
         },
     ]
 
@@ -83,7 +83,7 @@ Item {
                 spacing: 0
 
                 ColumnLayout {
-                    id: installationSection
+                    id: pythonUpdatesSection
 
                     Layout.fillWidth: true
                     Layout.minimumHeight: contentFlickable.height
@@ -93,7 +93,7 @@ Item {
                     spacing: Appearance.padding.large
 
                     StyledText {
-                        text: "Installation"
+                        text: "Python Updates"
                         font.pointSize: Appearance.font.size.extraLarge
                         font.bold: true
                         color: Colours.palette.m3onBackground
@@ -101,7 +101,7 @@ Item {
 
                     StyledText {
                         Layout.fillWidth: true
-                        text: "Get Caelestia up and running on your system."
+                        text: "The dreaded \"No module named 'caelestia'\" error."
                         font.pointSize: Appearance.font.size.normal
                         color: Colours.palette.m3onSurfaceVariant
                         wrapMode: Text.WordWrap
@@ -130,7 +130,7 @@ Item {
                 }
 
                 ColumnLayout {
-                    id: configurationSection
+                    id: qtUpdatesSection
 
                     Layout.fillWidth: true
                     Layout.minimumHeight: contentFlickable.height
@@ -139,7 +139,7 @@ Item {
                     spacing: Appearance.padding.large
 
                     StyledText {
-                        text: "Configuration"
+                        text: "Qt Updates"
                         font.pointSize: Appearance.font.size.extraLarge
                         font.bold: true
                         color: Colours.palette.m3onBackground
@@ -147,7 +147,7 @@ Item {
 
                     StyledText {
                         Layout.fillWidth: true
-                        text: "Customize Caelestia to match your workflow and preferences."
+                        text: "Rebuilding Quickshell after Qt updates."
                         font.pointSize: Appearance.font.size.normal
                         color: Colours.palette.m3onSurfaceVariant
                         wrapMode: Text.WordWrap
@@ -176,7 +176,7 @@ Item {
                 }
 
                 ColumnLayout {
-                    id: firstStepsSection
+                    id: configFilesSection
 
                     Layout.fillWidth: true
                     Layout.minimumHeight: contentFlickable.height
@@ -185,7 +185,7 @@ Item {
                     spacing: Appearance.padding.large
 
                     StyledText {
-                        text: "First Steps"
+                        text: "Config Files"
                         font.pointSize: Appearance.font.size.extraLarge
                         font.bold: true
                         color: Colours.palette.m3onBackground
@@ -193,7 +193,7 @@ Item {
 
                     StyledText {
                         Layout.fillWidth: true
-                        text: "Learn the basics and start exploring Caelestia's features."
+                        text: "Where are the Caelestia config files?"
                         font.pointSize: Appearance.font.size.normal
                         color: Colours.palette.m3onSurfaceVariant
                         wrapMode: Text.WordWrap

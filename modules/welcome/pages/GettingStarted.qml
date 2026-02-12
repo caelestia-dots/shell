@@ -11,14 +11,14 @@ Item {
 
     readonly property list<var> subsections: [
         {
+            id: "prerequisites",
+            name: qsTr("Prerequisites"),
+            icon: "checklist"
+        },
+        {
             id: "installation",
             name: qsTr("Installation"),
             icon: "download"
-        },
-        {
-            id: "configuration",
-            name: qsTr("Configuration"),
-            icon: "settings"
         },
         {
             id: "first-steps",
@@ -83,7 +83,7 @@ Item {
                 spacing: 0
 
                 ColumnLayout {
-                    id: installationSection
+                    id: prerequisitesSection
 
                     Layout.fillWidth: true
                     Layout.minimumHeight: contentFlickable.height
@@ -93,7 +93,7 @@ Item {
                     spacing: Appearance.padding.large
 
                     StyledText {
-                        text: "Installation"
+                        text: "Prerequisites"
                         font.pointSize: Appearance.font.size.extraLarge
                         font.bold: true
                         color: Colours.palette.m3onBackground
@@ -101,7 +101,7 @@ Item {
 
                     StyledText {
                         Layout.fillWidth: true
-                        text: "Get Caelestia up and running on your system."
+                        text: "Things to do before you start your journey."
                         font.pointSize: Appearance.font.size.normal
                         color: Colours.palette.m3onSurfaceVariant
                         wrapMode: Text.WordWrap
@@ -109,13 +109,13 @@ Item {
 
                     StyledRect {
                         Layout.fillWidth: true
-                        Layout.preferredHeight: contentPlaceholder1.height + Appearance.padding.large * 2
+                        Layout.preferredHeight: prerequisitesSection1.height + Appearance.padding.large * 2
                         Layout.topMargin: Appearance.padding.normal
                         color: Colours.layer(Colours.palette.m3surfaceContainer, 1)
                         radius: Appearance.rounding.normal
 
                         StyledText {
-                            id: contentPlaceholder1
+                            id: prerequisitesSection1
                             anchors.centerIn: parent
                             text: "Content coming soon:\n• System requirements\n• Installation steps\n• Dependencies"
                             font.pointSize: Appearance.font.size.normal
@@ -130,7 +130,7 @@ Item {
                 }
 
                 ColumnLayout {
-                    id: configurationSection
+                    id: installationSection
 
                     Layout.fillWidth: true
                     Layout.minimumHeight: contentFlickable.height
@@ -139,7 +139,7 @@ Item {
                     spacing: Appearance.padding.large
 
                     StyledText {
-                        text: "Configuration"
+                        text: "Installation"
                         font.pointSize: Appearance.font.size.extraLarge
                         font.bold: true
                         color: Colours.palette.m3onBackground
@@ -147,7 +147,7 @@ Item {
 
                     StyledText {
                         Layout.fillWidth: true
-                        text: "Customize Caelestia to match your workflow and preferences."
+                        text: "Taking your computer from raw to riced!"
                         font.pointSize: Appearance.font.size.normal
                         color: Colours.palette.m3onSurfaceVariant
                         wrapMode: Text.WordWrap
@@ -155,13 +155,13 @@ Item {
 
                     StyledRect {
                         Layout.fillWidth: true
-                        Layout.preferredHeight: contentPlaceholder2.height + Appearance.padding.large * 2
+                        Layout.preferredHeight: installationSection1.height + Appearance.padding.large * 2
                         Layout.topMargin: Appearance.padding.normal
                         color: Colours.layer(Colours.palette.m3surfaceContainer, 1)
                         radius: Appearance.rounding.normal
 
                         StyledText {
-                            id: contentPlaceholder2
+                            id: installationSection1
                             anchors.centerIn: parent
                             text: "Content coming soon:\n• Configuration files\n• CLI usage\n• Theme customization"
                             font.pointSize: Appearance.font.size.normal
@@ -201,13 +201,13 @@ Item {
 
                     StyledRect {
                         Layout.fillWidth: true
-                        Layout.preferredHeight: contentPlaceholder3.height + Appearance.padding.large * 2
+                        Layout.preferredHeight: firstStepsSection1.height + Appearance.padding.large * 2
                         Layout.topMargin: Appearance.padding.normal
                         color: Colours.layer(Colours.palette.m3surfaceContainer, 1)
                         radius: Appearance.rounding.normal
 
                         StyledText {
-                            id: contentPlaceholder3
+                            id: firstStepsSection1
                             anchors.centerIn: parent
                             text: "Content coming soon:\n• Basic navigation\n• Keyboard shortcuts\n• Quick tips"
                             font.pointSize: Appearance.font.size.normal
