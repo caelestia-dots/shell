@@ -10,6 +10,7 @@ import Quickshell.Widgets
 import Quickshell.Services.Notifications
 import QtQuick
 import QtQuick.Layouts
+import QtQuick.Shapes
 
 StyledRect {
     id: root
@@ -175,6 +176,43 @@ StyledRect {
 
                             color: root.modelData.urgency === NotificationUrgency.Critical ? Colours.palette.m3onError : root.modelData.urgency === NotificationUrgency.Low ? Colours.palette.m3onSurface : Colours.palette.m3onSecondaryContainer
                             font.pointSize: Appearance.font.size.large
+                        }
+                    }
+                }
+            }
+
+            Shape {
+                id: progressIndicator
+
+                anchors.centerIn: appIcon
+                width: appIcon.implicitWidth + Appearance.padding.small
+                height: appIcon.implicitHeight + Appearance.padding.small
+                preferredRendererType: Shape.CurveRenderer
+                antialiasing: true
+
+                ShapePath {
+                    id: progressShape
+
+                    capStyle: ShapePath.RoundCap
+                    fillColor: "transparent"
+                    strokeWidth: Appearance.padding.small
+                    strokeColor: Colours.palette.m3primary
+
+                    PathAngleArc {
+                        id: progressArc
+
+                        radiusX: progressIndicator.width / 2 - Appearance.padding.small / 2
+                        centerX: progressIndicator.width / 2
+                        radiusY: progressIndicator.height / 2 - Appearance.padding.small / 2
+                        centerY: progressIndicator.height / 2
+
+                        startAngle: -90
+                        sweepAngle: (root.modelData.hints["value"] / 100) * 360
+
+                        Behavior on sweepAngle {
+                            Anim {
+                                easing.bezierCurve: Appearance.anim.curves.emphasizedDecel
+                            }
                         }
                     }
                 }

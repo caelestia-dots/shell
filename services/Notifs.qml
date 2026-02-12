@@ -170,6 +170,7 @@ Singleton {
         property string appIcon
         property string appName
         property string image
+        property variant hints
         property real expireTimeout: Config.notifs.defaultExpireTimeout
         property int urgency: NotificationUrgency.Normal
         property bool resident
@@ -285,6 +286,10 @@ Singleton {
                             invoke: () => a.invoke()
                         }));
             }
+
+            function onHintsChanged(): void {
+                notif.hints = notif.notification.hints;
+            }
         }
 
         function lock(item: Item): void {
@@ -319,6 +324,7 @@ Singleton {
             if (notification?.image)
                 dummyImageLoader.active = true;
             expireTimeout = notification.expireTimeout;
+            hints = notification.hints;
             urgency = notification.urgency;
             resident = notification.resident;
             hasActionIcons = notification.hasActionIcons;
