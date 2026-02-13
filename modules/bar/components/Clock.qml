@@ -30,9 +30,22 @@ Column {
         anchors.horizontalCenter: parent.horizontalCenter
 
         horizontalAlignment: StyledText.AlignHCenter
-        text: Time.format(Config.services.useTwelveHourClock ? "hh\nmm\nA" : "hh\nmm")
+        text: {
+            if(Config.bar.clock.showSeconds)
+                return Time.format(Config.services.useTwelveHourClock ? "hh\nmm\nss\A" : "hh\nmm\nss");
+
+            return Time.format(Config.services.useTwelveHourClock ? "hh\nmm\nA" : "hh\nmm");
+        }
         font.pointSize: Appearance.font.size.smaller
         font.family: Appearance.font.family.mono
         color: root.colour
+    }
+
+    Connections {
+        target: Config.bar
+
+        function onShowSecondsChanged(): void {
+            osRelease.reload();
+        }
     }
 }
