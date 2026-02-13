@@ -210,4 +210,52 @@ Singleton {
     HyprExtras {
         id: extras
     }
+
+    Connections {
+        target: Hyprland
+
+        property var forced: ({})
+
+        function normAddr(a) {
+            const s = String(a ?? "").trim();
+            if (!s) return "";
+            return s.startsWith("0x") ? s : `0x${s}`;
+        }
+
+        function isWelcomeWindow(cls, title) {
+            return cls === "org.quickshell"
+                && /^Welcome to Caelestia\b/.test(title ?? "");
+        }
+
+        function onRawEvent(event: HyprlandEvent): void {
+            if (event.name === "openwindow") {
+
+                const p = event.parse(4);
+                if (!p || p.length < 4) return;
+
+                const addr = normAddr(p[0]);
+                const cls = p[2] ?? "";
+                const title = p[3] ?? "";
+
+                if (!addr || !isWelcomeWindow(cls, title)) return;
+                if (forced[addr]) return;
+
+                forced[addr] = true;
+
+                Qt.callLater(() => {
+                    Hyprland.dispatch(`setprop address:${addr} no_max_size 1`);
+                    Hyprland.dispatch(`settiled address:${addr}`);
+                });
+
+                return;
+            }
+
+            // Cleanup
+            if (event.name === "closewindow") {
+                const p = event.parse(1);
+                const addr = normAddr(p?.[0]);
+                if (addr) delete forced[addr];
+            }
+        }
+    }
 }
