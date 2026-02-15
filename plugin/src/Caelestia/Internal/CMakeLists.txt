@@ -6,6 +6,7 @@ qml_module(caelestia-internal
         hyprdevices.hpp hyprdevices.cpp
         hyprextras.hpp hyprextras.cpp
         logindmanager.hpp logindmanager.cpp
+        videothumbnailer.hpp videothumbnailer.cpp
     LIBRARIES
         Qt::Gui
         Qt::Quick
