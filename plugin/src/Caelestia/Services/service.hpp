@@ -1,17 +1,4 @@
-#pragma once
 
-#include <qobject.h>
-#include <qset.h>
-
-namespace caelestia::services {
-
-class Service : public QObject {
-    Q_OBJECT
-
-public:
-    explicit Service(QObject* parent = nullptr);
-
-    void ref(QObject* sender);
     void unref(QObject* sender);
 
 private:

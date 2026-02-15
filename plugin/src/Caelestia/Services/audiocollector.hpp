@@ -5,23 +5,7 @@
 #include <pipewire/pipewire.h>
 #include <qmutex.h>
 #include <qqmlintegration.h>
-#include <spa/param/audio/format-utils.h>
-#include <stop_token>
-#include <thread>
-#include <vector>
-
-namespace caelestia::services {
-
-namespace ac {
-
-constexpr quint32 SAMPLE_RATE = 44100;
-constexpr quint32 CHUNK_SIZE = 512;
-
-} // namespace ac
-
-class AudioCollector;
-
-class PipeWireWorker {
+#include <spa/param/audio
 public:
     explicit PipeWireWorker(std::stop_token token, AudioCollector* collector);
 
