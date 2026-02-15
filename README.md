@@ -630,6 +630,7 @@ default, you must create it manually.
             "numLockChanged": true,
             "vpnChanged": true,
             "nowPlaying": false
+            "caffeineChanged": true
         },
         "vpn": {
             "enabled": true,
