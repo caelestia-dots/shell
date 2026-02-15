@@ -15,6 +15,21 @@ Item {
     required property real nonAnimWidth
     required property PersistentProperties state
     readonly property alias count: bar.count
+    property list<var> tabsModel: [
+        {
+            iconName: "dashboard",
+            tabtext: qsTr("Dashboard")
+        },
+        Config.dashboard.enableMedia ? {
+            iconName: "queue_music",
+            tabtext: qsTr("Media")
+        } : null, Config.dashboard.enablePerformance ? {
+            iconName: "speed",
+            tabtext: qsTr("Performance")
+        } : null, Config.dashboard.enableWeather ? {
+            iconName: "cloud",
+            tabText: qsTr("Weather")
+        } : null,].filter(tab => tab != null)
 
     implicitHeight: bar.implicitHeight + indicator.implicitHeight + indicator.anchors.topMargin + separator.implicitHeight
 
@@ -30,24 +45,12 @@ Item {
 
         onCurrentIndexChanged: root.state.currentTab = currentIndex
 
-        Tab {
-            iconName: "dashboard"
-            text: qsTr("Dashboard")
-        }
-
-        Tab {
-            iconName: "queue_music"
-            text: qsTr("Media")
-        }
-
-        Tab {
-            iconName: "speed"
-            text: qsTr("Performance")
-        }
-
-        Tab {
-            iconName: "cloud"
-            text: qsTr("Weather")
+        Repeater {
+            model: tabsModel
+            Tab {
+                required property string tabtext
+                text: tabtext
+            }
         }
 
         // Tab {
@@ -62,13 +65,13 @@ Item {
         anchors.top: bar.bottom
         anchors.topMargin: Config.dashboard.sizes.tabIndicatorSpacing
 
-        implicitWidth: bar.currentItem.implicitWidth
+        implicitWidth: count > 0 ? bar.currentItem.implicitWidth : 0
         implicitHeight: Config.dashboard.sizes.tabIndicatorHeight
 
         x: {
             const tab = bar.currentItem;
             const width = (root.nonAnimWidth - bar.spacing * (bar.count - 1)) / bar.count;
-            return width * tab.TabBar.index + (width - tab.implicitWidth) / 2;
+            return width * (tab?.TabBar.index ?? 0) + (width - (tab?.implicitWidth ?? 0)) / 2;
         }
 
         clip: true

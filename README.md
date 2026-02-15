@@ -430,7 +430,10 @@ default, you must create it manually.
         "enabled": true,
         "dragThreshold": 50,
         "mediaUpdateInterval": 500,
-        "showOnHover": true
+        "showOnHover": true,
+        "enableMedia": true,
+        "enablePerformance": true,
+        "enableWeather": true
     },
     "launcher": {
         "actionPrefix": ">",

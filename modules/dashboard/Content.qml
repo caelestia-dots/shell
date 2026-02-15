@@ -11,35 +11,45 @@ import QtQuick.Layouts
 Item {
     id: root
 
+    readonly property bool showTabs: Config.dashboard.enableMedia || Config.dashboard.enablePerformance
+
     required property PersistentProperties visibilities
     required property PersistentProperties state
     required property FileDialog facePicker
     readonly property real nonAnimWidth: view.implicitWidth + viewWrapper.anchors.margins * 2
-    readonly property real nonAnimHeight: tabs.implicitHeight + tabs.anchors.topMargin + view.implicitHeight + viewWrapper.anchors.margins * 2
+    readonly property real nonAnimHeight: (showTabs ? tabs.implicitHeight + tabs.anchors.topMargin : 0) + view.implicitHeight + viewWrapper.anchors.margins * 2
 
     implicitWidth: nonAnimWidth
     implicitHeight: nonAnimHeight
 
-    Tabs {
+    Loader {
         id: tabs
-
+        asynchronous: true
         anchors.top: parent.top
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.topMargin: Appearance.padding.normal
         anchors.margins: Appearance.padding.large
 
-        nonAnimWidth: root.nonAnimWidth - anchors.margins * 2
-        state: root.state
+        sourceComponent: root.showTabs ? tabsComponent : null
+    }
+
+    Component {
+        id: tabsComponent
+        Tabs {
+            nonAnimWidth: root.nonAnimWidth - parent.anchors.margins * 2
+            state: root.state
+        }
     }
 
     ClippingRectangle {
         id: viewWrapper
 
-        anchors.top: tabs.bottom
+        anchors.top: root.showTabs ? tabs.bottom : parent.top
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.bottom: parent.bottom
+        anchors.topMargin: !root.showTabs ? Appearance.padding.normal : Appearance.padding.large
         anchors.margins: Appearance.padding.large
 
         radius: Appearance.rounding.normal
@@ -49,18 +59,45 @@ Item {
             id: view
 
             readonly property int currentIndex: root.state.currentTab
-            readonly property Item currentItem: row.children[currentIndex]
+            readonly property Item currentItem: panelGenerator.count > 0 ? panelGenerator.itemAt(currentIndex) : null
+            property list<Component> panelModel: [dash, Config.dashboard.enableMedia ? media : null, Config.dashboard.enablePerformance ? performance : null, Config.dashboard.enableWeather ? weather : null].filter(panel => panel != null)
 
             anchors.fill: parent
 
             flickableDirection: Flickable.HorizontalFlick
 
-            implicitWidth: currentItem.implicitWidth
-            implicitHeight: currentItem.implicitHeight
+            implicitWidth: currentItem?.implicitWidth ?? 0
+            implicitHeight: currentItem?.implicitHeight ?? 0
 
-            contentX: currentItem.x
+            contentX: currentItem?.x ?? 0
             contentWidth: row.implicitWidth
             contentHeight: row.implicitHeight
+
+            Component {
+                id: dash
+                Dash {
+                    visibilities: root.visibilities
+                    state: root.state
+                    facePicker: root.facePicker
+                }
+            }
+
+            Component {
+                id: media
+                Media {
+                    visibilities: root.visibilities
+                }
+            }
+
+            Component {
+                id: performance
+                Performance {}
+            }
+
+            Component {
+                id: weather
+                Weather {}
+            }
 
             onContentXChanged: {
                 if (!moving)
@@ -83,33 +120,19 @@ Item {
                     contentX = Qt.binding(() => currentItem.x);
             }
 
+            onPanelModelChanged: {
+                panelGenerator.model = panelModel;
+            }
+
             RowLayout {
                 id: row
 
-                Pane {
-                    index: 0
-                    sourceComponent: Dash {
-                        visibilities: root.visibilities
-                        state: root.state
-                        facePicker: root.facePicker
+                Repeater {
+                    id: panelGenerator
+                    delegate: Pane {
+                        required property Component modelData
+                        sourceComponent: modelData
                     }
-                }
-
-                Pane {
-                    index: 1
-                    sourceComponent: Media {
-                        visibilities: root.visibilities
-                    }
-                }
-
-                Pane {
-                    index: 2
-                    sourceComponent: Performance {}
-                }
-
-                Pane {
-                    index: 3
-                    sourceComponent: Weather {}
                 }
             }
 
