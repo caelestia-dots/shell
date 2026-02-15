@@ -436,6 +436,28 @@ default, you must create it manually.
         "actionPrefix": ">",
         "actions": [
             {
+              "name": "Example subaction",
+              "icon": "tune",
+              "description": "example of a subaction",
+              "command": ["openGroup", "example"],
+              "enabled": true,
+              "dangerous": false,
+              "children": [
+                {
+                  "name": "action1",
+                  "icon": "settings",
+                  "description": "example of action1",
+                  "command": [""]
+                },
+                {
+                  "name": "action2",
+                  "icon": "settings",
+                  "description": "example of action2",
+                  "command": [""]
+                }
+              ]
+            },
+            {
                 "name": "Calculator",
                 "icon": "calculate",
                 "description": "Do simple math equations (powered by Qalc)",
