@@ -407,7 +407,8 @@ Singleton {
             vpn: {
                 enabled: utilities.vpn.enabled,
                 provider: utilities.vpn.provider
-            }
+            },
+            quickToggles: utilities.quickToggles
         };
     }
 
