@@ -322,9 +322,11 @@ default, you must create it manually.
         },
         "enabled": true,
         "visualiser": {
-            "blur": false,
             "enabled": false,
             "autoHide": true,
+            "blur": true,
+            "smoothing": 1,
+            "curvature": 0,
             "rounding": 1,
             "spacing": 1
         }
