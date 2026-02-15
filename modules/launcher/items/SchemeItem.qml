@@ -93,6 +93,7 @@ Item {
             anchors.verticalCenter: parent.verticalCenter
 
             active: `${root.modelData?.name} ${root.modelData?.flavour}` === Schemes.currentScheme
+            asynchronous: true
 
             sourceComponent: MaterialIcon {
                 text: "check"

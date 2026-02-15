@@ -44,6 +44,15 @@ Item {
         anchors.rightMargin: session.width + sidebar.width
     }
 
+    Osd.Projector {
+        id: projector
+
+        screen: root.screen
+        visibilities: root.visibilities
+
+        anchors.centerIn: parent
+    }
+
     Notifications.Wrapper {
         id: notifications
 

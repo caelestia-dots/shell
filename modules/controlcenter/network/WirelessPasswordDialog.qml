@@ -384,26 +384,56 @@ Item {
                         text = qsTr("Connecting...");
 
                         NetworkConnection.connectWithPassword(root.network, password, result => {
-                            if (result && result.success) {} else if (result && result.needsPassword) {
-                                connectionMonitor.stop();
-                                connecting = false;
-                                hasError = true;
-                                enabled = true;
-                                text = qsTr("Connect");
-                                passwordContainer.passwordBuffer = "";
-                                if (root.network && root.network.ssid) {
-                                    Nmcli.forgetNetwork(root.network.ssid);
-                                }
+                            if (result && result.success) {
+                                // Connection command returned success - wait for monitor to see it active
+                                console.log("[UI] WiFi connection command returned success, waiting for interface update...");
                             } else {
-                                connectionMonitor.stop();
-                                connecting = false;
-                                hasError = true;
-                                enabled = true;
-                                text = qsTr("Connect");
-                                passwordContainer.passwordBuffer = "";
-                                if (root.network && root.network.ssid) {
-                                    Nmcli.forgetNetwork(root.network.ssid);
-                                }
+                                // If command returned failure, wait a moment to see if we connected anyway 
+                                // (nmcli sometimes returns failure even if it eventually connects)
+                                Qt.callLater(() => {
+                                    if (!root.visible || !connecting) return;
+                                    
+                                    const isConnectedNow = root.network && Nmcli.active && Nmcli.active.ssid && 
+                                                         Nmcli.active.ssid.toLowerCase().trim() === root.network.ssid.toLowerCase().trim();
+                                    
+                                    if (isConnectedNow) {
+                                        console.log("[UI] Ignore false failure, network is already connected.");
+                                        connectionSuccessTimer.start();
+                                    } else {
+                                        // Wait a bit more for background process to finish/update
+                                        Qt.callLater(() => {
+                                            const isConnectedAgain = root.network && Nmcli.active && Nmcli.active.ssid && 
+                                                                   Nmcli.active.ssid.toLowerCase().trim() === root.network.ssid.toLowerCase().trim();
+                                            if (isConnectedAgain) {
+                                                console.log("[UI] Ignore false failure (delayed), network is connected.");
+                                                connectionSuccessTimer.start();
+                                                return;
+                                            }
+                                            
+                                            if (result && result.needsPassword) {
+                                                connectionMonitor.stop();
+                                                connecting = false;
+                                                hasError = true;
+                                                enabled = true;
+                                                text = qsTr("Connect");
+                                                passwordContainer.passwordBuffer = "";
+                                                if (root.network && root.network.ssid) {
+                                                    Nmcli.forgetNetwork(root.network.ssid);
+                                                }
+                                            } else {
+                                                connectionMonitor.stop();
+                                                connecting = false;
+                                                hasError = true;
+                                                enabled = true;
+                                                text = qsTr("Connect");
+                                                passwordContainer.passwordBuffer = "";
+                                                if (root.network && root.network.ssid) {
+                                                    Nmcli.forgetNetwork(root.network.ssid);
+                                                }
+                                            }
+                                        });
+                                    }
+                                });
                             }
                         });
 
@@ -485,6 +515,11 @@ Item {
         }
         function onConnectionFailed(ssid: string) {
             if (root.visible && root.network && root.network.ssid === ssid && connectButton.connecting) {
+                // Final check to see if we connected anyway
+                const isConnectedNow = root.network && Nmcli.active && Nmcli.active.ssid && 
+                                     Nmcli.active.ssid.toLowerCase().trim() === root.network.ssid.toLowerCase().trim();
+                if (isConnectedNow) return;
+
                 connectionMonitor.stop();
                 connectButton.connecting = false;
                 connectButton.hasError = true;

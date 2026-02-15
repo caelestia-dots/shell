@@ -167,6 +167,7 @@ ColumnLayout {
 
             opacity: list.count === 0 ? 1 : 0
             active: opacity > 0
+            asynchronous: true
 
             sourceComponent: ColumnLayout {
                 spacing: Appearance.spacing.small

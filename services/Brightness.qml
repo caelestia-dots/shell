@@ -11,14 +11,14 @@ Singleton {
     id: root
 
     property list<var> ddcMonitors: []
-    readonly property list<Monitor> monitors: variants.instances
+    readonly property var monitors: variants.instances
     property bool appleDisplayPresent: false
 
-    function getMonitorForScreen(screen: ShellScreen): var {
+    function getMonitorForScreen(screen) {
         return monitors.find(m => m.modelData === screen);
     }
 
-    function getMonitor(query: string): var {
+    function getMonitor(query) {
         if (query === "active") {
             return monitors.find(m => Hypr.monitorFor(m.modelData)?.focused);
         }
@@ -41,13 +41,13 @@ Singleton {
         return monitors.find(m => m.modelData.name === query);
     }
 
-    function increaseBrightness(): void {
+    function increaseBrightness() {
         const monitor = getMonitor("active");
         if (monitor)
             monitor.setBrightness(monitor.brightness + Config.services.brightnessIncrement);
     }
 
-    function decreaseBrightness(): void {
+    function decreaseBrightness() {
         const monitor = getMonitor("active");
         if (monitor)
             monitor.setBrightness(monitor.brightness - Config.services.brightnessIncrement);
@@ -101,21 +101,21 @@ Singleton {
     IpcHandler {
         target: "brightness"
 
-        function get(): real {
+        function get() {
             return getFor("active");
         }
 
         // Allows searching by active/model/serial/id/name
-        function getFor(query: string): real {
+        function getFor(query) {
             return root.getMonitor(query)?.brightness ?? -1;
         }
 
-        function set(value: string): string {
+        function set(value) {
             return setFor("active", value);
         }
 
         // Handles brightness value like brightnessctl: 0.1, +0.1, 0.1-, 10%, +10%, 10%-
-        function setFor(query: string, value: string): string {
+        function setFor(query, value) {
             const monitor = root.getMonitor(query);
             if (!monitor)
                 return "Invalid monitor: " + query;
@@ -185,7 +185,7 @@ Singleton {
             }
         }
 
-        function setBrightness(value: real): void {
+        function setBrightness(value) {
             value = Math.max(0, Math.min(1, value));
             const rounded = Math.round(value * 100);
             if (Math.round(brightness * 100) === rounded)
@@ -209,7 +209,7 @@ Singleton {
                 timer.restart();
         }
 
-        function initBrightness(): void {
+        function initBrightness() {
             if (isAppleDisplay)
                 initProc.command = ["asdbctl", "get"];
             else if (isDdc)

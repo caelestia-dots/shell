@@ -16,16 +16,12 @@ Item {
     property list<var> pills: []
 
     onOccupiedChanged: {
-        if (!occupied)
-            return;
         let count = 0;
         const start = groupOffset;
         const end = start + Config.bar.workspaces.shown;
         for (const [ws, occ] of Object.entries(occupied)) {
             if (ws > start && ws <= end && occ) {
-                const isFirstInGroup = Number(ws) === start + 1;
-                const isLastInGroup = Number(ws) === end;
-                if (isFirstInGroup || !occupied[ws - 1]) {
+                if (!occupied[ws - 1]) {
                     if (pills[count])
                         pills[count].start = ws;
                     else
@@ -34,7 +30,7 @@ Item {
                         }));
                     count++;
                 }
-                if ((isLastInGroup || !occupied[ws + 1]) && pills[count - 1])
+                if (!occupied[ws + 1])
                     pills[count - 1].end = ws;
             }
         }
@@ -52,8 +48,8 @@ Item {
 
             required property var modelData
 
-            readonly property Workspace start: root.workspaces.count > 0 ? root.workspaces.itemAt(getWsIdx(modelData.start)) ?? null : null
-            readonly property Workspace end: root.workspaces.count > 0 ? root.workspaces.itemAt(getWsIdx(modelData.end)) ?? null : null
+            readonly property Workspace start: root.workspaces.itemAt(getWsIdx(modelData.start)) ?? null
+            readonly property Workspace end: root.workspaces.itemAt(getWsIdx(modelData.end)) ?? null
 
             function getWsIdx(ws: int): int {
                 let i = ws - 1;

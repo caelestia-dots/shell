@@ -77,6 +77,7 @@ StyledRect {
                         Loader {
                             Layout.rightMargin: Appearance.spacing.small
                             active: folder.index > 0
+                            asynchronous: true
                             sourceComponent: StyledText {
                                 text: "/"
                                 color: Colours.palette.m3onSurfaceVariant
@@ -91,6 +92,7 @@ StyledRect {
                             Loader {
                                 anchors.fill: parent
                                 active: folder.index < root.dialog.cwd.length - 1
+                                asynchronous: true
                                 sourceComponent: StateLayer {
                                     radius: Appearance.rounding.small
 
@@ -108,6 +110,7 @@ StyledRect {
                                 anchors.leftMargin: Appearance.padding.normal
 
                                 active: folder.index === 0 && folder.modelData === "Home"
+                                asynchronous: true
                                 sourceComponent: MaterialIcon {
                                     text: "home"
                                     color: root.dialog.cwd.length === 1 ? Colours.palette.m3onSurface : Colours.palette.m3onSurfaceVariant

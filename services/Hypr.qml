@@ -16,12 +16,12 @@ Singleton {
     readonly property var workspaces: Hyprland.workspaces
     readonly property var monitors: Hyprland.monitors
 
-    readonly property HyprlandToplevel activeToplevel: Hyprland.activeToplevel?.wayland?.activated ? Hyprland.activeToplevel : null
-    readonly property HyprlandWorkspace focusedWorkspace: Hyprland.focusedWorkspace
-    readonly property HyprlandMonitor focusedMonitor: Hyprland.focusedMonitor
+    readonly property var activeToplevel: Hyprland.activeToplevel?.wayland?.activated ? Hyprland.activeToplevel : null
+    readonly property var focusedWorkspace: Hyprland.focusedWorkspace
+    readonly property var focusedMonitor: Hyprland.focusedMonitor
     readonly property int activeWsId: focusedWorkspace?.id ?? 1
 
-    readonly property HyprKeyboard keyboard: extras.devices.keyboards.find(kb => kb.main) ?? null
+    readonly property var keyboard: extras.devices.keyboards.find(kb => kb.main) ?? null
     readonly property bool capsLock: keyboard?.capsLock ?? false
     readonly property bool numLock: keyboard?.numLock ?? false
     readonly property string defaultKbLayout: keyboard?.layout.split(",")[0] ?? "??"
@@ -34,52 +34,18 @@ Singleton {
     readonly property alias devices: extras.devices
 
     property bool hadKeyboard
-    property string lastSpecialWorkspace: ""
 
     signal configReloaded
 
-    function dispatch(request: string): void {
+    function dispatch(request) {
         Hyprland.dispatch(request);
     }
 
-    function cycleSpecialWorkspace(direction: string): void {
-        const openSpecials = workspaces.values.filter(w => w.name.startsWith("special:") && w.lastIpcObject.windows > 0);
-
-        if (openSpecials.length === 0)
-            return;
-
-        const activeSpecial = focusedMonitor.lastIpcObject.specialWorkspace.name ?? "";
-
-        if (!activeSpecial) {
-            if (lastSpecialWorkspace) {
-                const workspace = workspaces.values.find(w => w.name === lastSpecialWorkspace);
-                if (workspace && workspace.lastIpcObject.windows > 0) {
-                    dispatch(`workspace ${lastSpecialWorkspace}`);
-                    return;
-                }
-            }
-            dispatch(`workspace ${openSpecials[0].name}`);
-            return;
-        }
-
-        const currentIndex = openSpecials.findIndex(w => w.name === activeSpecial);
-        let nextIndex = 0;
-
-        if (currentIndex !== -1) {
-            if (direction === "next")
-                nextIndex = (currentIndex + 1) % openSpecials.length;
-            else
-                nextIndex = (currentIndex - 1 + openSpecials.length) % openSpecials.length;
-        }
-
-        dispatch(`workspace ${openSpecials[nextIndex].name}`);
-    }
-
-    function monitorFor(screen: ShellScreen): HyprlandMonitor {
+    function monitorFor(screen) {
         return Hyprland.monitorFor(screen);
     }
 
-    function reloadDynamicConfs(): void {
+    function reloadDynamicConfs() {
         extras.batchMessage(["keyword bindlni ,Caps_Lock,global,caelestia:refreshDevices", "keyword bindlni ,Num_Lock,global,caelestia:refreshDevices"]);
     }
 
@@ -115,7 +81,7 @@ Singleton {
     Connections {
         target: Hyprland
 
-        function onRawEvent(event: HyprlandEvent): void {
+        function onRawEvent(event) {
             const n = event.name;
             if (n.endsWith("v2"))
                 return;
@@ -135,18 +101,6 @@ Singleton {
                 Hyprland.refreshWorkspaces();
             } else if (n.includes("window") || n.includes("group") || ["pin", "fullscreen", "changefloatingmode", "minimize"].includes(n)) {
                 Hyprland.refreshToplevels();
-            }
-        }
-    }
-
-    Connections {
-        target: root.focusedMonitor
-
-        function onLastIpcObjectChanged(): void {
-            const specialName = root.focusedMonitor.lastIpcObject.specialWorkspace.name;
-
-            if (specialName && specialName.startsWith("special:")) {
-                root.lastSpecialWorkspace = specialName;
             }
         }
     }
@@ -187,16 +141,8 @@ Singleton {
     IpcHandler {
         target: "hypr"
 
-        function refreshDevices(): void {
+        function refreshDevices() {
             extras.refreshDevices();
-        }
-
-        function cycleSpecialWorkspace(direction: string): void {
-            root.cycleSpecialWorkspace(direction);
-        }
-
-        function listSpecialWorkspaces(): string {
-            return root.workspaces.values.filter(w => w.name.startsWith("special:") && w.lastIpcObject.windows > 0).map(w => w.name).join("\n");
         }
     }
 

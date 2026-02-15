@@ -37,6 +37,12 @@ QtObject {
             readonly property string component: "taskbar/TaskbarPane.qml"
         },
         QtObject {
+            readonly property string id: "display"
+            readonly property string label: "Display"
+            readonly property string icon: "monitor"
+            readonly property string component: "display/DisplayPane.qml"
+        },
+        QtObject {
             readonly property string id: "launcher"
             readonly property string label: "launcher"
             readonly property string icon: "apps"
@@ -84,3 +90,4 @@ QtObject {
         return null;
     }
 }
+

@@ -1,7 +1,6 @@
 import Quickshell.Io
 
 JsonObject {
-    property string logo: ""
     property Apps apps: Apps {}
     property Idle idle: Idle {}
     property Battery battery: Battery {}
@@ -18,16 +17,16 @@ JsonObject {
         property bool inhibitWhenAudio: true
         property list<var> timeouts: [
             {
-                timeout: 180,
+                timeout: 1000,
                 idleAction: "lock"
             },
             {
-                timeout: 300,
+                timeout: 420,
                 idleAction: "dpms off",
                 returnAction: "dpms on"
             },
             {
-                timeout: 600,
+                timeout: 1500,
                 idleAction: ["systemctl", "suspend-then-hibernate"]
             }
         ]

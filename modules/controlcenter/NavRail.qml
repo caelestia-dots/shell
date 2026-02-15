@@ -43,6 +43,7 @@ Item {
 
         Loader {
             Layout.topMargin: Appearance.spacing.large
+            asynchronous: true
             active: !root.session.floating
             visible: active
 

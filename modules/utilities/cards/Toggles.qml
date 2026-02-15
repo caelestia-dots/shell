@@ -88,9 +88,10 @@ StyledRect {
                 icon: "vpn_key"
                 checked: VPN.connected
                 enabled: !VPN.connecting
-                visible: Config.utilities.vpn.provider.some(p => typeof p === "object" ? (p.enabled === true) : false)
+                visible: VPN.enabled
                 onClicked: VPN.toggle()
             }
+
         }
     }
 

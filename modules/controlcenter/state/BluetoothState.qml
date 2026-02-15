@@ -10,3 +10,4 @@ QtObject {
     property bool fabMenuOpen: false
     property bool editingDeviceName: false
 }
+

@@ -57,3 +57,4 @@ ColumnLayout {
         Layout.maximumWidth: parent.width
     }
 }
+

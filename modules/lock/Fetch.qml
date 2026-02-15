@@ -42,7 +42,7 @@ ColumnLayout {
 
         MonoText {
             Layout.fillWidth: true
-            text: "caelestiafetch.sh"
+            text: "ZeroTwo.sh"
             font.pointSize: root.width > 400 ? Appearance.font.size.larger : Appearance.font.size.normal
             elide: Text.ElideRight
         }
@@ -143,6 +143,7 @@ ColumnLayout {
     }
 
     component WrappedLoader: Loader {
+        asynchronous: true
         visible: active
     }
 

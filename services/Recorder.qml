@@ -15,7 +15,7 @@ Singleton {
     property bool needsStop
     property bool needsPause
 
-    function start(extraArgs = []): void {
+    function start(extraArgs: list<string>): void {
         needsStart = true;
         startArgs = extraArgs;
         checkProc.running = true;

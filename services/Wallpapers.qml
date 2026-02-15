@@ -19,12 +19,12 @@ Searcher {
     property string actualCurrent
     property bool previewColourLock
 
-    function setWallpaper(path: string): void {
+    function setWallpaper(path) {
         actualCurrent = path;
         Quickshell.execDetached(["caelestia", "wallpaper", "-f", path, ...smartArg]);
     }
 
-    function preview(path: string): void {
+    function preview(path) {
         previewPath = path;
         showPreview = true;
 
@@ -32,7 +32,7 @@ Searcher {
             getPreviewColoursProc.running = true;
     }
 
-    function stopPreview(): void {
+    function stopPreview() {
         showPreview = false;
         if (!previewColourLock)
             Colours.showPreview = false;

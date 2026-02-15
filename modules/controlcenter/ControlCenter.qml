@@ -42,6 +42,7 @@ Item {
             Layout.fillWidth: true
             Layout.columnSpan: 2
 
+            asynchronous: true
             active: root.floating
             visible: active
 
@@ -67,7 +68,7 @@ Item {
                     if (!panes.initialOpeningComplete) {
                         return;
                     }
-
+                    
                     if (event.angleDelta.y < 0)
                         root.session.activeIndex = Math.min(root.session.activeIndex + 1, root.session.panes.length - 1);
                     else if (event.angleDelta.y > 0)
@@ -95,6 +96,6 @@ Item {
             session: root.session
         }
     }
-
+    
     readonly property bool initialOpeningComplete: panes.initialOpeningComplete
 }

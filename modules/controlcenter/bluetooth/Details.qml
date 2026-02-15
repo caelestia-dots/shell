@@ -358,11 +358,17 @@ StyledFlickable {
                                 }
 
                                 RowLayout {
-                                    id: batteryPercent
                                     Layout.topMargin: Appearance.spacing.small / 2
                                     Layout.fillWidth: true
                                     Layout.preferredHeight: Appearance.padding.smaller
                                     spacing: Appearance.spacing.small / 2
+
+                                    StyledRect {
+                                        Layout.fillHeight: true
+                                        implicitWidth: root.device?.batteryAvailable ? parent.width * root.device.battery : 0
+                                        radius: Appearance.rounding.full
+                                        color: Colours.palette.m3primary
+                                    }
 
                                     StyledRect {
                                         Layout.fillWidth: true
@@ -371,12 +377,12 @@ StyledFlickable {
                                         color: Colours.palette.m3secondaryContainer
 
                                         StyledRect {
-                                            anchors.left: parent.left
+                                            anchors.right: parent.right
                                             anchors.top: parent.top
                                             anchors.bottom: parent.bottom
                                             anchors.margins: parent.height * 0.25
 
-                                            implicitWidth: root.device?.batteryAvailable ? batteryPercent.width * root.device.battery : 0
+                                            implicitWidth: height
                                             radius: Appearance.rounding.full
                                             color: Colours.palette.m3primary
                                         }

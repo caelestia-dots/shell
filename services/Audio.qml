@@ -1,6 +1,7 @@
 pragma Singleton
 
 import qs.config
+import "../components/misc"
 import Caelestia.Services
 import Caelestia
 import Quickshell
@@ -13,29 +14,46 @@ Singleton {
     property string previousSinkName: ""
     property string previousSourceName: ""
 
+    CustomShortcut {
+        name: "volumeUp"
+        description: "Increase volume"
+        onPressed: root.incrementVolume()
+    }
+
+    CustomShortcut {
+        name: "volumeDown"
+        description: "Decrease volume"
+        onPressed: root.decrementVolume()
+    }
+
+    CustomShortcut {
+        name: "volumeMute"
+        description: "Toggle mute"
+        onPressed: {
+            if (sink?.audio) {
+                sink.audio.muted = !sink.audio.muted;
+            }
+        }
+    }
+
     readonly property var nodes: Pipewire.nodes.values.reduce((acc, node) => {
         if (!node.isStream) {
             if (node.isSink)
                 acc.sinks.push(node);
             else if (node.audio)
                 acc.sources.push(node);
-        } else if (node.isStream && node.audio) {
-            // Application streams (output streams)
-            acc.streams.push(node);
         }
         return acc;
     }, {
         sources: [],
-        sinks: [],
-        streams: []
+        sinks: []
     })
 
-    readonly property list<PwNode> sinks: nodes.sinks
-    readonly property list<PwNode> sources: nodes.sources
-    readonly property list<PwNode> streams: nodes.streams
+    readonly property var sinks: nodes.sinks
+    readonly property var sources: nodes.sources
 
-    readonly property PwNode sink: Pipewire.defaultAudioSink
-    readonly property PwNode source: Pipewire.defaultAudioSource
+    readonly property var sink: Pipewire.defaultAudioSink
+    readonly property var source: Pipewire.defaultAudioSource
 
     readonly property bool muted: !!sink?.audio?.muted
     readonly property real volume: sink?.audio?.volume ?? 0
@@ -46,70 +64,42 @@ Singleton {
     readonly property alias cava: cava
     readonly property alias beatTracker: beatTracker
 
-    function setVolume(newVolume: real): void {
+    function setVolume(newVolume) {
         if (sink?.ready && sink?.audio) {
             sink.audio.muted = false;
             sink.audio.volume = Math.max(0, Math.min(Config.services.maxVolume, newVolume));
         }
     }
 
-    function incrementVolume(amount: real): void {
+    function incrementVolume(amount) {
         setVolume(volume + (amount || Config.services.audioIncrement));
     }
 
-    function decrementVolume(amount: real): void {
+    function decrementVolume(amount) {
         setVolume(volume - (amount || Config.services.audioIncrement));
     }
 
-    function setSourceVolume(newVolume: real): void {
+    function setSourceVolume(newVolume) {
         if (source?.ready && source?.audio) {
             source.audio.muted = false;
             source.audio.volume = Math.max(0, Math.min(Config.services.maxVolume, newVolume));
         }
     }
 
-    function incrementSourceVolume(amount: real): void {
+    function incrementSourceVolume(amount) {
         setSourceVolume(sourceVolume + (amount || Config.services.audioIncrement));
     }
 
-    function decrementSourceVolume(amount: real): void {
+    function decrementSourceVolume(amount) {
         setSourceVolume(sourceVolume - (amount || Config.services.audioIncrement));
     }
 
-    function setAudioSink(newSink: PwNode): void {
+    function setAudioSink(newSink) {
         Pipewire.preferredDefaultAudioSink = newSink;
     }
 
-    function setAudioSource(newSource: PwNode): void {
+    function setAudioSource(newSource) {
         Pipewire.preferredDefaultAudioSource = newSource;
-    }
-
-    function setStreamVolume(stream: PwNode, newVolume: real): void {
-        if (stream?.ready && stream?.audio) {
-            stream.audio.muted = false;
-            stream.audio.volume = Math.max(0, Math.min(Config.services.maxVolume, newVolume));
-        }
-    }
-
-    function setStreamMuted(stream: PwNode, muted: bool): void {
-        if (stream?.ready && stream?.audio) {
-            stream.audio.muted = muted;
-        }
-    }
-
-    function getStreamVolume(stream: PwNode): real {
-        return stream?.audio?.volume ?? 0;
-    }
-
-    function getStreamMuted(stream: PwNode): bool {
-        return !!stream?.audio?.muted;
-    }
-
-    function getStreamName(stream: PwNode): string {
-        if (!stream)
-            return qsTr("Unknown");
-        // Try application name first, then description, then name
-        return stream.applicationName || stream.description || stream.name || qsTr("Unknown Application");
     }
 
     onSinkChanged: {
@@ -142,7 +132,7 @@ Singleton {
     }
 
     PwObjectTracker {
-        objects: [...root.sinks, ...root.sources, ...root.streams]
+        objects: [...root.sinks, ...root.sources]
     }
 
     CavaProvider {

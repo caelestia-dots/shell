@@ -87,7 +87,6 @@ Item {
                 id: row
 
                 Pane {
-                    index: 0
                     sourceComponent: Dash {
                         visibilities: root.visibilities
                         state: root.state
@@ -96,19 +95,16 @@ Item {
                 }
 
                 Pane {
-                    index: 1
                     sourceComponent: Media {
                         visibilities: root.visibilities
                     }
                 }
 
                 Pane {
-                    index: 2
                     sourceComponent: Performance {}
                 }
 
                 Pane {
-                    index: 3
                     sourceComponent: Weather {}
                 }
             }
@@ -134,16 +130,9 @@ Item {
     }
 
     component Pane: Loader {
-        id: pane
-
-        required property int index
-
         Layout.alignment: Qt.AlignTop
 
         Component.onCompleted: active = Qt.binding(() => {
-            // Always keep current tab loaded
-            if (pane.index === view.currentIndex)
-                return true;
             const vx = Math.floor(view.visibleArea.xPosition * view.contentWidth);
             const vex = Math.floor(vx + view.visibleArea.widthRatio * view.contentWidth);
             return (vx >= x && vx <= x + implicitWidth) || (vex >= x && vex <= x + implicitWidth);

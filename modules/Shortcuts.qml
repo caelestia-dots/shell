@@ -29,13 +29,35 @@ Scope {
     }
 
     CustomShortcut {
-        name: "dashboard"
+        name: "toggleDashboard"
         description: "Toggle dashboard"
         onPressed: {
             if (root.hasFullscreen)
                 return;
             const visibilities = Visibilities.getForActive();
             visibilities.dashboard = !visibilities.dashboard;
+        }
+    }
+
+    CustomShortcut {
+        name: "toggleProjector"
+        description: "Toggle projector menu"
+        onPressed: {
+            if (root.hasFullscreen)
+                return;
+            const visibilities = Visibilities.getForActive();
+            visibilities.projector = !visibilities.projector;
+        }
+    }
+
+    CustomShortcut {
+        name: "toggleSidebar"
+        description: "Toggle sidebar"
+        onPressed: {
+            if (root.hasFullscreen)
+                return;
+            const visibilities = Visibilities.getForActive();
+            visibilities.sidebar = !visibilities.sidebar;
         }
     }
 
@@ -67,29 +89,6 @@ Scope {
         name: "launcherInterrupt"
         description: "Interrupt launcher keybind"
         onPressed: root.launcherInterrupted = true
-    }
-
-
-    CustomShortcut {
-        name: "sidebar"
-        description: "Toggle sidebar"
-        onPressed: {
-            if (root.hasFullscreen)
-                return;
-            const visibilities = Visibilities.getForActive();
-            visibilities.sidebar = !visibilities.sidebar;
-        }
-    }
-
-    CustomShortcut {
-        name: "utilities"
-        description: "Toggle utilities"
-        onPressed: {
-            if (root.hasFullscreen)
-                return;
-            const visibilities = Visibilities.getForActive();
-            visibilities.utilities = !visibilities.utilities;
-        }
     }
 
     IpcHandler {

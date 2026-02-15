@@ -47,7 +47,7 @@ Variants {
                     return 0;
 
                 const mon = Hypr.monitorFor(screen);
-                if (mon?.lastIpcObject?.specialWorkspace?.name || mon?.activeWorkspace?.lastIpcObject?.windows > 0)
+                if (mon?.lastIpcObject.specialWorkspace.name || mon?.activeWorkspace?.lastIpcObject.windows > 0)
                     return 0;
 
                 const thresholds = [];
@@ -153,6 +153,7 @@ Variants {
                 property bool launcher
                 property bool dashboard
                 property bool utilities
+                property bool projector
                 property bool sidebar
 
                 Component.onCompleted: Visibilities.load(scope.modelData, this)

@@ -87,6 +87,7 @@ Item {
 
         Loader {
             anchors.centerIn: parent
+            asynchronous: true
             active: opacity > 0
             opacity: root.notifCount > 0 ? 0 : 1
 

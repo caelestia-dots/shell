@@ -195,8 +195,15 @@ Singleton {
                 mask: Region {}
 
                 Image {
-                    function tryCache(): void {
-                        if (status !== Image.Ready || width != Config.notifs.sizes.image || height != Config.notifs.sizes.image)
+                    anchors.fill: parent
+                    source: Qt.resolvedUrl(notif.image)
+                    fillMode: Image.PreserveAspectCrop
+                    cache: false
+                    asynchronous: true
+                    opacity: 0
+
+                    onStatusChanged: {
+                        if (status !== Image.Ready)
                             return;
 
                         const cacheKey = notif.appName + notif.summary + notif.id;
@@ -218,17 +225,6 @@ Singleton {
                             notif.dummyImageLoader.active = false;
                         });
                     }
-
-                    anchors.fill: parent
-                    source: Qt.resolvedUrl(notif.image)
-                    fillMode: Image.PreserveAspectCrop
-                    cache: false
-                    asynchronous: true
-                    opacity: 0
-
-                    onStatusChanged: tryCache()
-                    onWidthChanged: tryCache()
-                    onHeightChanged: tryCache()
                 }
             }
         }

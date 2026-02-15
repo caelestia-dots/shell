@@ -96,7 +96,6 @@ JsonObject {
         property bool showMicrophone: false
         property bool showKbLayout: false
         property bool showNetwork: true
-        property bool showWifi: true
         property bool showBluetooth: true
         property bool showBattery: true
         property bool showLockStatus: true
@@ -112,6 +111,5 @@ JsonObject {
         property int trayMenuWidth: 300
         property int batteryWidth: 250
         property int networkWidth: 320
-        property int kbLayoutWidth: 320
     }
 }

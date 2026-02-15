@@ -90,9 +90,9 @@ Item {
                     if (!monitor)
                         return;
                     if (event.angleDelta.y > 0)
-                        monitor.setBrightness(monitor.brightness + Config.services.brightnessIncrement);
+                        monitor.setBrightness(monitor.brightness + 0.1);
                     else if (event.angleDelta.y < 0)
-                        monitor.setBrightness(monitor.brightness - Config.services.brightnessIncrement);
+                        monitor.setBrightness(monitor.brightness - 0.1);
                 }
 
                 FilledSlider {
@@ -112,6 +112,7 @@ Item {
         Layout.preferredHeight: shouldBeActive ? Config.osd.sizes.sliderHeight : 0
         opacity: shouldBeActive ? 1 : 0
         active: opacity > 0
+        asynchronous: true
         visible: active
 
         Behavior on Layout.preferredHeight {

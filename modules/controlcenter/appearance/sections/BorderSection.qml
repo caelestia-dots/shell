@@ -23,19 +23,16 @@ CollapsibleSection {
 
         SliderInput {
             Layout.fillWidth: true
-
+            
             label: qsTr("Border rounding")
             value: rootPane.borderRounding
             from: 0.1
             to: 100
             decimals: 1
             suffix: "px"
-            validator: DoubleValidator {
-                bottom: 0.1
-                top: 100
-            }
-
-            onValueModified: newValue => {
+            validator: DoubleValidator { bottom: 0.1; top: 100 }
+            
+            onValueModified: (newValue) => {
                 rootPane.borderRounding = newValue;
                 rootPane.saveConfig();
             }
@@ -47,22 +44,20 @@ CollapsibleSection {
 
         SliderInput {
             Layout.fillWidth: true
-
+            
             label: qsTr("Border thickness")
             value: rootPane.borderThickness
             from: 0.1
             to: 100
             decimals: 1
             suffix: "px"
-            validator: DoubleValidator {
-                bottom: 0.1
-                top: 100
-            }
-
-            onValueModified: newValue => {
+            validator: DoubleValidator { bottom: 0.1; top: 100 }
+            
+            onValueModified: (newValue) => {
                 rootPane.borderThickness = newValue;
                 rootPane.saveConfig();
             }
         }
     }
 }
+

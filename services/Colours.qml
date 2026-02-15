@@ -24,13 +24,13 @@ Singleton {
     readonly property Transparency transparency: Transparency {}
     readonly property alias wallLuminance: analyser.luminance
 
-    function getLuminance(c: color): real {
+    function getLuminance(c) {
         if (c.r == 0 && c.g == 0 && c.b == 0)
             return 0;
         return Math.sqrt(0.299 * (c.r ** 2) + 0.587 * (c.g ** 2) + 0.114 * (c.b ** 2));
     }
 
-    function alterColour(c: color, a: real, layer: int): color {
+    function alterColour(c, a, layer) {
         const luminance = getLuminance(c);
 
         const offset = (!light || layer == 1 ? 1 : -layer / 2) * (light ? 0.2 : 0.3) * (1 - transparency.base) * (1 + wallLuminance * (light ? (layer == 1 ? 3 : 1) : 2.5));
@@ -55,7 +55,7 @@ Singleton {
         return Qt.hsla(c.hslHue, c.hslSaturation, 0.1, 1);
     }
 
-    function load(data: string, isPreview: bool): void {
+    function load(data, isPreview) {
         const colours = isPreview ? preview : current;
         const scheme = JSON.parse(data);
 
@@ -74,7 +74,7 @@ Singleton {
         }
     }
 
-    function setMode(mode: string): void {
+    function setMode(mode) {
         Quickshell.execDetached(["caelestia", "scheme", "set", "--notify", "-m", mode]);
     }
 

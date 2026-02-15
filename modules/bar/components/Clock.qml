@@ -17,6 +17,7 @@ Column {
 
         active: Config.bar.clock.showIcon
         visible: active
+        asynchronous: true
 
         sourceComponent: MaterialIcon {
             text: "calendar_month"

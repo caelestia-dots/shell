@@ -142,6 +142,7 @@ ColumnLayout {
             }
 
             Loader {
+                asynchronous: true
                 active: device.modelData.bonded
                 sourceComponent: Item {
                     implicitWidth: connectBtn.implicitWidth

@@ -7,3 +7,4 @@ QtObject {
     property bool showPasswordDialog: false
     property var pendingNetwork: null
 }
+

@@ -20,6 +20,7 @@ Singleton {
     readonly property AccessPoint active: networks.find(n => n.active) ?? null
     property list<string> savedConnections: []
     property list<string> savedConnectionSsids: []
+    property var ssidToConnectionMap: ({})
 
     property var wifiConnectionQueue: []
     property int currentSsidQueryIndex: 0
@@ -55,15 +56,30 @@ Singleton {
     readonly property string connectionParamPassword: "password"
     readonly property string connectionParamBssid: "802-11-wireless.bssid"
 
-    function detectPasswordRequired(error: string): bool {
+    function detectPasswordRequired(error) {
         if (!error || error.length === 0) {
             return false;
         }
 
-        return (error.includes("Secrets were required") || error.includes("Secrets were required, but not provided") || error.includes("No secrets provided") || error.includes("802-11-wireless-security.psk") || error.includes("password for") || (error.includes("password") && !error.includes("Connection activated") && !error.includes("successfully")) || (error.includes("Secrets") && !error.includes("Connection activated") && !error.includes("successfully")) || (error.includes("802.11") && !error.includes("Connection activated") && !error.includes("successfully"))) && !error.includes("Connection activated") && !error.includes("successfully");
+        const err = error.toLowerCase();
+        const triggers = [
+            "secrets were required",
+            "no secrets provided",
+            "802-11-wireless-security.psk",
+            "802-11-wireless-security.password",
+            "password for",
+            "authentication required",
+            "invalid password",
+            "bad password"
+        ];
+
+        const isSuccess = err.includes("connection activated") || err.includes("successfully");
+        if (isSuccess) return false;
+
+        return triggers.some(t => err.includes(t)) || (err.includes("password") && !isSuccess) || (err.includes("secrets") && !isSuccess);
     }
 
-    function parseNetworkOutput(output: string): list<var> {
+    function parseNetworkOutput(output) {
         if (!output || output.length === 0) {
             return [];
         }
@@ -87,7 +103,7 @@ Singleton {
         return allNetworks;
     }
 
-    function deduplicateNetworks(networks: list<var>): list<var> {
+    function deduplicateNetworks(networks) {
         if (!networks || networks.length === 0) {
             return [];
         }
@@ -111,7 +127,7 @@ Singleton {
         return Array.from(networkMap.values());
     }
 
-    function isConnectionCommand(command: list<string>): bool {
+    function isConnectionCommand(command) {
         if (!command || command.length === 0) {
             return false;
         }
@@ -119,7 +135,7 @@ Singleton {
         return command.includes(root.nmcliCommandWifi) || command.includes(root.nmcliCommandConnection);
     }
 
-    function parseDeviceStatusOutput(output: string, filterType: string): list<var> {
+    function parseDeviceStatusOutput(output, filterType) {
         if (!output || output.length === 0) {
             return [];
         }
@@ -155,7 +171,7 @@ Singleton {
         return interfaces;
     }
 
-    function isConnectedState(state: string): bool {
+    function isConnectedState(state) {
         if (!state || state.length === 0) {
             return false;
         }
@@ -163,7 +179,7 @@ Singleton {
         return state === "100 (connected)" || state === "connected" || state.startsWith("connected");
     }
 
-    function executeCommand(args: list<string>, callback: var): void {
+    function executeCommand(args, callback) {
         const proc = commandProc.createObject(root);
         proc.command = ["nmcli", ...args];
         proc.callback = callback;
@@ -182,14 +198,14 @@ Singleton {
         });
     }
 
-    function getDeviceStatus(callback: var): void {
+    function getDeviceStatus(callback) {
         executeCommand(["-t", "-f", root.deviceStatusFields, root.nmcliCommandDevice, "status"], result => {
             if (callback)
                 callback(result.output);
         });
     }
 
-    function getWirelessInterfaces(callback: var): void {
+    function getWirelessInterfaces(callback) {
         executeCommand(["-t", "-f", root.deviceStatusFields, root.nmcliCommandDevice, "status"], result => {
             const interfaces = parseDeviceStatusOutput(result.output, root.deviceTypeWifi);
             root.wirelessInterfaces = interfaces;
@@ -198,7 +214,7 @@ Singleton {
         });
     }
 
-    function getEthernetInterfaces(callback: var): void {
+    function getEthernetInterfaces(callback) {
         executeCommand(["-t", "-f", root.deviceStatusFields, root.nmcliCommandDevice, "status"], result => {
             const interfaces = parseDeviceStatusOutput(result.output, root.deviceTypeEthernet);
             const devices = [];
@@ -228,7 +244,7 @@ Singleton {
         });
     }
 
-    function connectEthernet(connectionName: string, interfaceName: string, callback: var): void {
+    function connectEthernet(connectionName, interfaceName, callback) {
         if (connectionName && connectionName.length > 0) {
             executeCommand([root.nmcliCommandConnection, "up", connectionName], result => {
                 if (result.success) {
@@ -268,7 +284,7 @@ Singleton {
         }
     }
 
-    function disconnectEthernet(connectionName: string, callback: var): void {
+    function disconnectEthernet(connectionName, callback) {
         if (!connectionName || connectionName.length === 0) {
             if (callback)
                 callback({
@@ -292,7 +308,7 @@ Singleton {
         });
     }
 
-    function getAllInterfaces(callback: var): void {
+    function getAllInterfaces(callback) {
         executeCommand(["-t", "-f", root.deviceStatusFields, root.nmcliCommandDevice, "status"], result => {
             const interfaces = parseDeviceStatusOutput(result.output, "both");
             if (callback)
@@ -300,7 +316,7 @@ Singleton {
         });
     }
 
-    function isInterfaceConnected(interfaceName: string, callback: var): void {
+    function isInterfaceConnected(interfaceName, callback) {
         executeCommand([root.nmcliCommandDevice, "status"], result => {
             const lines = result.output.trim().split("\n");
             for (const line of lines) {
@@ -317,7 +333,7 @@ Singleton {
         });
     }
 
-    function connectToNetworkWithPasswordCheck(ssid: string, isSecure: bool, callback: var, bssid: string): void {
+    function connectToNetworkWithPasswordCheck(ssid, isSecure, callback, bssid) {
         if (isSecure) {
             const hasBssid = bssid !== undefined && bssid !== null && bssid.length > 0;
             connectWireless(ssid, "", bssid, result => {
@@ -349,11 +365,11 @@ Singleton {
         }
     }
 
-    function connectToNetwork(ssid: string, password: string, bssid: string, callback: var): void {
+    function connectToNetwork(ssid, password, bssid, callback) {
         connectWireless(ssid, password, bssid, callback);
     }
 
-    function connectWireless(ssid: string, password: string, bssid: string, callback: var, retryCount: int): void {
+    function connectWireless(ssid, password, bssid, callback, retryCount) {
         const hasBssid = bssid !== undefined && bssid !== null && bssid.length > 0;
         const retries = retryCount !== undefined ? retryCount : 0;
         const maxRetries = 2;
@@ -370,18 +386,20 @@ Singleton {
             immediateCheckTimer.start();
         }
 
-        if (password && password.length > 0 && hasBssid) {
-            const bssidUpper = bssid.toUpperCase();
-            createConnectionWithPassword(ssid, bssidUpper, password, callback);
-            return;
-        }
-
         let cmd = [root.nmcliCommandDevice, root.nmcliCommandWifi, "connect", ssid];
         if (password && password.length > 0) {
             cmd.push(root.connectionParamPassword, password);
         }
+        
+        if (hasBssid) {
+            cmd.push("bssid", bssid);
+        }
+
+        console.log("[NMCLI] Connecting to WiFi:", ssid, hasBssid ? ("(BSSID: " + bssid + ")") : "");
+        
         executeCommand(cmd, result => {
             if (result.needsPassword && callback) {
+                console.log("[NMCLI] Password required for:", ssid);
                 if (callback)
                     callback(result);
                 return;
@@ -391,15 +409,19 @@ Singleton {
                 console.warn("[NMCLI] Connection failed, retrying... (attempt " + (retries + 1) + "/" + maxRetries + ")");
                 Qt.callLater(() => {
                     connectWireless(ssid, password, bssid, callback, retries + 1);
-                }, 1000);
-            } else if (!result.success && root.pendingConnection) {} else if (result.success && callback) {} else if (!result.success && !root.pendingConnection) {
+                }, 1500);
+            } else if (!result.success && root.pendingConnection) {
+                 console.error("[NMCLI] Max retries reached or connection fatal for:", ssid, result.error);
+            } else if (result.success && callback) {
+                console.log("[NMCLI] Successfully connected to:", ssid);
+            } else if (!result.success && !root.pendingConnection) {
                 if (callback)
                     callback(result);
             }
         });
     }
 
-    function createConnectionWithPassword(ssid: string, bssidUpper: string, password: string, callback: var): void {
+    function createConnectionWithPassword(ssid, bssidUpper, password, callback) {
         checkAndDeleteConnection(ssid, () => {
             const cmd = [root.nmcliCommandConnection, "add", root.connectionParamType, root.deviceTypeWifi, root.connectionParamConName, ssid, root.connectionParamIfname, "*", root.connectionParamSsid, ssid, root.connectionParamBssid, bssidUpper, root.securityKeyMgmt, root.keyMgmtWpaPsk, root.securityPsk, password];
 
@@ -426,7 +448,7 @@ Singleton {
         });
     }
 
-    function checkAndDeleteConnection(ssid: string, callback: var): void {
+    function checkAndDeleteConnection(ssid, callback) {
         executeCommand([root.nmcliCommandConnection, "show", ssid], result => {
             if (result.success) {
                 executeCommand([root.nmcliCommandConnection, "delete", ssid], deleteResult => {
@@ -442,18 +464,19 @@ Singleton {
         });
     }
 
-    function activateConnection(connectionName: string, callback: var): void {
+    function activateConnection(connectionName, callback) {
         executeCommand([root.nmcliCommandConnection, "up", connectionName], result => {
             if (callback)
                 callback(result);
         });
     }
 
-    function loadSavedConnections(callback: var): void {
+    function loadSavedConnections(callback) {
         executeCommand(["-t", "-f", root.connectionListFields, root.nmcliCommandConnection, "show"], result => {
             if (!result.success) {
                 root.savedConnections = [];
                 root.savedConnectionSsids = [];
+                root.ssidToConnectionMap = {};
                 if (callback)
                     callback([]);
                 return;
@@ -463,7 +486,7 @@ Singleton {
         });
     }
 
-    function parseConnectionList(output: string, callback: var): void {
+    function parseConnectionList(output, callback) {
         const lines = output.trim().split("\n").filter(line => line.length > 0);
         const wifiConnections = [];
         const connections = [];
@@ -487,6 +510,7 @@ Singleton {
             root.wifiConnectionQueue = wifiConnections;
             root.currentSsidQueryIndex = 0;
             root.savedConnectionSsids = [];
+            root.ssidToConnectionMap = {};
             queryNextSsid(callback);
         } else {
             root.savedConnectionSsids = [];
@@ -496,14 +520,14 @@ Singleton {
         }
     }
 
-    function queryNextSsid(callback: var): void {
+    function queryNextSsid(callback) {
         if (root.currentSsidQueryIndex < root.wifiConnectionQueue.length) {
             const connectionName = root.wifiConnectionQueue[root.currentSsidQueryIndex];
             root.currentSsidQueryIndex++;
 
             executeCommand(["-t", "-f", root.wirelessSsidField, root.nmcliCommandConnection, "show", connectionName], result => {
                 if (result.success) {
-                    processSsidOutput(result.output);
+                    processSsidOutput(result.output, connectionName);
                 }
                 queryNextSsid(callback);
             });
@@ -515,7 +539,7 @@ Singleton {
         }
     }
 
-    function processSsidOutput(output: string): void {
+    function processSsidOutput(output, connectionName) {
         const lines = output.trim().split("\n");
         for (const line of lines) {
             if (line.startsWith("802-11-wireless.ssid:")) {
@@ -528,12 +552,17 @@ Singleton {
                         newList.push(ssid);
                         root.savedConnectionSsids = newList;
                     }
+                    
+                    // Always update mapping (case-insensitive for lookup)
+                    const map = root.ssidToConnectionMap;
+                    map[ssid.toLowerCase().trim()] = connectionName;
+                    root.ssidToConnectionMap = map;
                 }
             }
         }
     }
 
-    function hasSavedProfile(ssid: string): bool {
+    function hasSavedProfile(ssid) {
         if (!ssid || ssid.length === 0) {
             return false;
         }
@@ -557,7 +586,7 @@ Singleton {
         return hasConnectionName;
     }
 
-    function forgetNetwork(ssid: string, callback: var): void {
+    function forgetNetwork(ssid, callback) {
         if (!ssid || ssid.length === 0) {
             if (callback)
                 callback({
@@ -569,7 +598,12 @@ Singleton {
             return;
         }
 
-        const connectionName = root.savedConnections.find(conn => conn && conn.toLowerCase().trim() === ssid.toLowerCase().trim()) || ssid;
+        const ssidLower = ssid.toLowerCase().trim();
+        const connectionName = root.ssidToConnectionMap[ssidLower] || 
+                             root.savedConnections.find(conn => conn && conn.toLowerCase().trim() === ssidLower) || 
+                             ssid;
+        
+        console.log("[NMCLI] Forgetting network. SSID:", ssid, "Connection Name:", connectionName);
 
         executeCommand([root.nmcliCommandConnection, "delete", connectionName], result => {
             if (result.success) {
@@ -582,7 +616,7 @@ Singleton {
         });
     }
 
-    function disconnect(interfaceName: string, callback: var): void {
+    function disconnect(interfaceName, callback) {
         if (interfaceName && interfaceName.length > 0) {
             executeCommand([root.nmcliCommandDevice, "disconnect", interfaceName], result => {
                 if (callback)
@@ -612,14 +646,14 @@ Singleton {
         }
     }
 
-    function getDeviceDetails(interfaceName: string, callback: var): void {
+    function getDeviceDetails(interfaceName, callback) {
         executeCommand([root.nmcliCommandDevice, "show", interfaceName], result => {
             if (callback)
                 callback(result.output);
         });
     }
 
-    function refreshStatus(callback: var): void {
+    function refreshStatus(callback) {
         getDeviceStatus(output => {
             const lines = output.trim().split("\n");
             let connected = false;
@@ -652,7 +686,7 @@ Singleton {
         });
     }
 
-    function bringInterfaceUp(interfaceName: string, callback: var): void {
+    function bringInterfaceUp(interfaceName, callback) {
         if (interfaceName && interfaceName.length > 0) {
             executeCommand([root.nmcliCommandDevice, "connect", interfaceName], result => {
                 if (callback) {
@@ -670,7 +704,7 @@ Singleton {
         }
     }
 
-    function bringInterfaceDown(interfaceName: string, callback: var): void {
+    function bringInterfaceDown(interfaceName, callback) {
         if (interfaceName && interfaceName.length > 0) {
             executeCommand([root.nmcliCommandDevice, "disconnect", interfaceName], result => {
                 if (callback) {
@@ -688,7 +722,7 @@ Singleton {
         }
     }
 
-    function scanWirelessNetworks(interfaceName: string, callback: var): void {
+    function scanWirelessNetworks(interfaceName, callback) {
         let cmd = [root.nmcliCommandDevice, root.nmcliCommandWifi, "rescan"];
         if (interfaceName && interfaceName.length > 0) {
             cmd.push(root.connectionParamIfname, interfaceName);
@@ -704,7 +738,7 @@ Singleton {
         rescanProc.running = true;
     }
 
-    function enableWifi(enabled: bool, callback: var): void {
+    function enableWifi(enabled, callback) {
         const cmd = enabled ? "on" : "off";
         executeCommand([root.nmcliCommandRadio, root.nmcliCommandWifi, cmd], result => {
             if (result.success) {
@@ -725,7 +759,7 @@ Singleton {
         enableWifi(newState, callback);
     }
 
-    function getWifiStatus(callback: var): void {
+    function getWifiStatus(callback) {
         executeCommand([root.nmcliCommandRadio, root.nmcliCommandWifi], result => {
             if (result.success) {
                 const enabled = result.output.trim() === "enabled";
@@ -739,7 +773,7 @@ Singleton {
         });
     }
 
-    function getNetworks(callback: var): void {
+    function getNetworks(callback) {
         executeCommand(["-g", root.networkDetailFields, "d", "w"], result => {
             if (!result.success) {
                 if (callback)
@@ -777,7 +811,7 @@ Singleton {
         });
     }
 
-    function getWirelessSSIDs(interfaceName: string, callback: var): void {
+    function getWirelessSSIDs(interfaceName, callback) {
         let cmd = ["-t", "-f", root.networkListFields, root.nmcliCommandDevice, root.nmcliCommandWifi, "list"];
         if (interfaceName && interfaceName.length > 0) {
             cmd.push(root.connectionParamIfname, interfaceName);
@@ -824,7 +858,7 @@ Singleton {
         });
     }
 
-    function handlePasswordRequired(proc: var, error: string, output: string, exitCode: int): bool {
+    function handlePasswordRequired(proc, error, output, exitCode) {
         if (!proc || !error || error.length === 0) {
             return false;
         }
@@ -916,7 +950,12 @@ Singleton {
 
                     if (!success && cmdIsConnection && root.pendingConnection) {
                         const failedSsid = root.pendingConnection.ssid;
-                        root.connectionFailed(failedSsid);
+                        const isCurrentlyConnected = root.active && root.active.ssid === failedSsid;
+                        if (!isCurrentlyConnected) {
+                            root.connectionFailed(failedSsid);
+                        } else {
+                            console.log("[NMCLI] Ignoring error as network is already connected:", failedSsid);
+                        }
                     }
 
                     callbackCalled = true;
@@ -1102,7 +1141,7 @@ Singleton {
         }
     }
 
-    function checkPendingConnection(): void {
+    function checkPendingConnection() {
         if (root.pendingConnection) {
             Qt.callLater(() => {
                 const connected = root.active && root.active.ssid === root.pendingConnection.ssid;
@@ -1128,7 +1167,7 @@ Singleton {
         }
     }
 
-    function cidrToSubnetMask(cidr: string): string {
+    function cidrToSubnetMask(cidr) {
         const cidrNum = parseInt(cidr, 10);
         if (isNaN(cidrNum) || cidrNum < 0 || cidrNum > 32) {
             return "";
@@ -1143,7 +1182,7 @@ Singleton {
         return `${octet1}.${octet2}.${octet3}.${octet4}`;
     }
 
-    function getWirelessDeviceDetails(interfaceName: string, callback: var): void {
+    function getWirelessDeviceDetails(interfaceName, callback) {
         if (!interfaceName || interfaceName.length === 0) {
             const activeInterface = root.wirelessInterfaces.find(iface => {
                 return isConnectedState(iface.state);
@@ -1172,7 +1211,7 @@ Singleton {
         });
     }
 
-    function getEthernetDeviceDetails(interfaceName: string, callback: var): void {
+    function getEthernetDeviceDetails(interfaceName, callback) {
         if (!interfaceName || interfaceName.length === 0) {
             const activeInterface = root.ethernetInterfaces.find(iface => {
                 return isConnectedState(iface.state);
@@ -1201,7 +1240,7 @@ Singleton {
         });
     }
 
-    function parseDeviceDetails(output: string, isEthernet: bool): var {
+    function parseDeviceDetails(output, isEthernet) {
         const details = {
             ipAddress: "",
             gateway: "",
@@ -1283,7 +1322,7 @@ Singleton {
         }
     }
 
-    function refreshOnConnectionChange(): void {
+    function refreshOnConnectionChange() {
         getNetworks(networks => {
             const newActive = root.active;
 
