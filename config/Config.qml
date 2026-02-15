@@ -57,7 +57,7 @@ Singleton {
                 }
 
                 // Update config with current values
-                config = serializeConfig();
+                config = root.serializeConfig();
 
                 // Save to file with pretty printing
                 fileView.setText(JSON.stringify(config, null, 2));
@@ -72,7 +72,7 @@ Singleton {
 
         interval: 2000
         onTriggered: {
-            recentlySaved = false;
+            root.recentlySaved = false;
         }
     }
 
@@ -452,7 +452,7 @@ Singleton {
         watchChanges: true
         onFileChanged: {
             // Prevent reload loop - don't reload if we just saved
-            if (!recentlySaved) {
+            if (!root.recentlySaved) {
                 timer.restart();
                 reload();
             } else {
@@ -465,9 +465,9 @@ Singleton {
                 JSON.parse(text());
                 const elapsed = timer.elapsedMs();
                 // Only show toast for external changes (not our own saves) and when elapsed time is meaningful
-                if (adapter.utilities.toasts.configLoaded && !recentlySaved && elapsed > 0) {
+                if (adapter.utilities.toasts.configLoaded && !root.recentlySaved && elapsed > 0) {
                     Toaster.toast(qsTr("Config loaded"), qsTr("Config loaded in %1ms").arg(elapsed), "rule_settings");
-                } else if (adapter.utilities.toasts.configLoaded && recentlySaved && elapsed > 0) {
+                } else if (adapter.utilities.toasts.configLoaded && root.recentlySaved && elapsed > 0) {
                     Toaster.toast(qsTr("Config saved"), qsTr("Config reloaded in %1ms").arg(elapsed), "rule_settings");
                 }
             } catch (e) {

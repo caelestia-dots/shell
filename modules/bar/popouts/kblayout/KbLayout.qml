@@ -4,10 +4,8 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 import qs.components
-import qs.components.controls
 import qs.services
 import qs.config
-import qs.utils
 
 import "."
 
@@ -85,6 +83,8 @@ ColumnLayout {
         }
 
         delegate: Item {
+            id: layout
+
             required property int layoutIndex
             required property string label
 
@@ -101,11 +101,11 @@ ColumnLayout {
                 implicitHeight: parent.height - 4
 
                 radius: Appearance.rounding.full
-                enabled: !isDisabled
+                enabled: !layout.isDisabled
 
                 function onClicked(): void {
-                    if (!isDisabled)
-                        kb.switchTo(layoutIndex);
+                    if (!layout.isDisabled)
+                        kb.switchTo(layout.layoutIndex);
                 }
             }
 
@@ -116,9 +116,9 @@ ColumnLayout {
                 anchors.right: layer.right
                 anchors.leftMargin: Appearance.padding.small
                 anchors.rightMargin: Appearance.padding.small
-                text: label
+                text: layout.label
                 elide: Text.ElideRight
-                opacity: isDisabled ? 0.4 : 1.0
+                opacity: layout.isDisabled ? 0.4 : 1.0
             }
 
             ToolTip.visible: isDisabled && layer.containsMouse
@@ -131,8 +131,8 @@ ColumnLayout {
         Layout.fillWidth: true
         Layout.rightMargin: Appearance.padding.small
         Layout.topMargin: Appearance.spacing.small
+        Layout.preferredHeight: 1
 
-        height: 1
         color: Colours.palette.m3onSurfaceVariant
         opacity: 0.35
     }

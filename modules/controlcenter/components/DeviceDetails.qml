@@ -1,10 +1,6 @@
 pragma ComponentBehavior: Bound
 
 import ".."
-import qs.components
-import qs.components.controls
-import qs.components.effects
-import qs.components.containers
 import qs.config
 import QtQuick
 import QtQuick.Layouts

@@ -1,10 +1,8 @@
 pragma ComponentBehavior: Bound
 
-import ".."
 import "../../../launcher/services"
 import qs.components
 import qs.components.controls
-import qs.components.containers
 import qs.services
 import qs.config
 import Quickshell
@@ -24,6 +22,8 @@ CollapsibleSection {
             model: Schemes.list
 
             delegate: StyledRect {
+                id: colorscheme
+
                 required property var modelData
 
                 Layout.fillWidth: true
@@ -38,8 +38,8 @@ CollapsibleSection {
 
                 StateLayer {
                     function onClicked(): void {
-                        const name = modelData.name;
-                        const flavour = modelData.flavour;
+                        const name = colorscheme.modelData.name;
+                        const flavour = colorscheme.modelData.flavour;
                         const schemeKey = `${name} ${flavour}`;
 
                         Schemes.currentScheme = schemeKey;
@@ -73,9 +73,9 @@ CollapsibleSection {
                         Layout.alignment: Qt.AlignVCenter
 
                         border.width: 1
-                        border.color: Qt.alpha(`#${modelData.colours?.outline}`, 0.5)
+                        border.color: Qt.alpha(`#${colorscheme.modelData.colours?.outline}`, 0.5)
 
-                        color: `#${modelData.colours?.surface}`
+                        color: `#${colorscheme.modelData.colours?.surface}`
                         radius: Appearance.rounding.full
                         implicitWidth: iconPlaceholder.implicitWidth
                         implicitHeight: iconPlaceholder.implicitWidth
@@ -101,7 +101,7 @@ CollapsibleSection {
                                 anchors.right: parent.right
 
                                 implicitWidth: preview.implicitWidth
-                                color: `#${modelData.colours?.primary}`
+                                color: `#${colorscheme.modelData.colours?.primary}`
                                 radius: Appearance.rounding.full
                             }
                         }
@@ -112,12 +112,12 @@ CollapsibleSection {
                         spacing: 0
 
                         StyledText {
-                            text: modelData.flavour ?? ""
+                            text: colorscheme.modelData.flavour ?? ""
                             font.pointSize: Appearance.font.size.normal
                         }
 
                         StyledText {
-                            text: modelData.name ?? ""
+                            text: colorscheme.modelData.name ?? ""
                             font.pointSize: Appearance.font.size.small
                             color: Colours.palette.m3outline
 
@@ -128,7 +128,7 @@ CollapsibleSection {
                     }
 
                     Loader {
-                        active: isCurrent
+                        active: colorscheme.isCurrent
 
                         sourceComponent: MaterialIcon {
                             text: "check"

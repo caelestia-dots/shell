@@ -1,0 +1,9 @@
+{
+    "config": {
+        "default": true,
+        "MD026": false, // Allow trailing punctuation in heading
+        "MD033": false, // Allow inline HTML
+        "MD034": false  // Allow bare URLs - not sure if GitHub allows video embeds without them
+    },
+    "globs": ["**/*.md"]
+}

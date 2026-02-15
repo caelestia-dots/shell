@@ -2,7 +2,6 @@ import qs.components
 import qs.modules.controlcenter
 import qs.services
 import qs.config
-import Quickshell
 import QtQuick
 
 Item {

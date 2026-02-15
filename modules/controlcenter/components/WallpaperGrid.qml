@@ -3,11 +3,9 @@ pragma ComponentBehavior: Bound
 import ".."
 import qs.components
 import qs.components.controls
-import qs.components.effects
 import qs.components.images
 import qs.services
 import qs.config
-import Caelestia.Models
 import QtQuick
 
 GridView {
@@ -30,6 +28,8 @@ GridView {
     }
 
     delegate: Item {
+        id: wallpaper
+
         required property var modelData
         required property int index
 
@@ -42,14 +42,14 @@ GridView {
 
         StateLayer {
             anchors.fill: parent
-            anchors.leftMargin: itemMargin
-            anchors.rightMargin: itemMargin
-            anchors.topMargin: itemMargin
-            anchors.bottomMargin: itemMargin
-            radius: itemRadius
+            anchors.leftMargin: wallpaper.itemMargin
+            anchors.rightMargin: wallpaper.itemMargin
+            anchors.topMargin: wallpaper.itemMargin
+            anchors.bottomMargin: wallpaper.itemMargin
+            radius: wallpaper.itemRadius
 
             function onClicked(): void {
-                Wallpapers.setWallpaper(modelData.path);
+                Wallpapers.setWallpaper(wallpaper.modelData.path);
             }
         }
 
@@ -57,12 +57,12 @@ GridView {
             id: image
 
             anchors.fill: parent
-            anchors.leftMargin: itemMargin
-            anchors.rightMargin: itemMargin
-            anchors.topMargin: itemMargin
-            anchors.bottomMargin: itemMargin
+            anchors.leftMargin: wallpaper.itemMargin
+            anchors.rightMargin: wallpaper.itemMargin
+            anchors.topMargin: wallpaper.itemMargin
+            anchors.bottomMargin: wallpaper.itemMargin
             color: Colours.tPalette.m3surfaceContainer
-            radius: itemRadius
+            radius: wallpaper.itemRadius
             antialiasing: true
             layer.enabled: true
             layer.smooth: true
@@ -70,7 +70,7 @@ GridView {
             CachingImage {
                 id: cachingImage
 
-                path: modelData.path
+                path: wallpaper.modelData.path
                 anchors.fill: parent
                 fillMode: Image.PreserveAspectCrop
                 cache: true
@@ -94,7 +94,7 @@ GridView {
                 id: fallbackImage
 
                 anchors.fill: parent
-                source: fallbackTimer.triggered && cachingImage.status !== Image.Ready ? modelData.path : ""
+                source: fallbackTimer.triggered && cachingImage.status !== Image.Ready ? wallpaper.modelData.path : ""
                 asynchronous: true
                 fillMode: Image.PreserveAspectCrop
                 cache: true
@@ -169,13 +169,13 @@ GridView {
 
         Rectangle {
             anchors.fill: parent
-            anchors.leftMargin: itemMargin
-            anchors.rightMargin: itemMargin
-            anchors.topMargin: itemMargin
-            anchors.bottomMargin: itemMargin
+            anchors.leftMargin: wallpaper.itemMargin
+            anchors.rightMargin: wallpaper.itemMargin
+            anchors.topMargin: wallpaper.itemMargin
+            anchors.bottomMargin: wallpaper.itemMargin
             color: "transparent"
-            radius: itemRadius + border.width
-            border.width: isCurrent ? 2 : 0
+            radius: wallpaper.itemRadius + border.width
+            border.width: wallpaper.isCurrent ? 2 : 0
             border.color: Colours.palette.m3primary
             antialiasing: true
             smooth: true
@@ -192,7 +192,7 @@ GridView {
                 anchors.top: parent.top
                 anchors.margins: Appearance.padding.small
 
-                visible: isCurrent
+                visible: wallpaper.isCurrent
                 text: "check_circle"
                 color: Colours.palette.m3primary
                 font.pointSize: Appearance.font.size.large
@@ -208,10 +208,10 @@ GridView {
             anchors.rightMargin: Appearance.padding.normal + Appearance.spacing.normal / 2
             anchors.bottomMargin: Appearance.padding.normal
 
-            text: modelData.name
+            text: wallpaper.modelData.name
             font.pointSize: Appearance.font.size.smaller
             font.weight: 500
-            color: isCurrent ? Colours.palette.m3primary : Colours.palette.m3onSurface
+            color: wallpaper.isCurrent ? Colours.palette.m3primary : Colours.palette.m3onSurface
             elide: Text.ElideMiddle
             maximumLineCount: 1
             horizontalAlignment: Text.AlignHCenter

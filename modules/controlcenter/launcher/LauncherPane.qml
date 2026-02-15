@@ -2,10 +2,8 @@ pragma ComponentBehavior: Bound
 
 import ".."
 import "../components"
-import "../../launcher/services"
 import qs.components
 import qs.components.controls
-import qs.components.effects
 import qs.components.containers
 import qs.services
 import qs.config
@@ -36,7 +34,7 @@ Item {
         target: root.session.launcher
         function onActiveChanged() {
             root.selectedApp = root.session.launcher.active;
-            updateToggleState();
+            root.updateToggleState();
         }
     }
 
@@ -137,7 +135,7 @@ Item {
     Connections {
         target: allAppsDb
         function onAppsChanged() {
-            updateFilteredApps();
+            root.updateFilteredApps();
         }
     }
 
@@ -303,6 +301,8 @@ Item {
                         }
 
                         delegate: StyledRect {
+                            id: app
+
                             required property var modelData
 
                             width: parent ? parent.width : 0
@@ -327,7 +327,7 @@ Item {
 
                             StateLayer {
                                 function onClicked(): void {
-                                    root.session.launcher.active = modelData;
+                                    root.session.launcher.active = app.modelData;
                                 }
                             }
 
@@ -343,14 +343,14 @@ Item {
                                     Layout.alignment: Qt.AlignVCenter
                                     implicitSize: 32
                                     source: {
-                                        const entry = modelData.entry;
+                                        const entry = app.modelData.entry;
                                         return entry ? Quickshell.iconPath(entry.icon, "image-missing") : "image-missing";
                                     }
                                 }
 
                                 StyledText {
                                     Layout.fillWidth: true
-                                    text: modelData.name || modelData.entry?.name || qsTr("Unknown")
+                                    text: app.modelData.name || app.modelData.entry?.name || qsTr("Unknown")
                                     font.pointSize: Appearance.font.size.normal
                                 }
                             }

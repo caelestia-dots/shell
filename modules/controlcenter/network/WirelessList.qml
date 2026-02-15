@@ -2,11 +2,8 @@ pragma ComponentBehavior: Bound
 
 import ".."
 import "../components"
-import "."
 import qs.components
 import qs.components.controls
-import qs.components.containers
-import qs.components.effects
 import qs.services
 import qs.config
 import qs.utils
@@ -101,6 +98,8 @@ DeviceList {
 
     delegate: Component {
         StyledRect {
+            id: network
+
             required property var modelData
 
             width: ListView.view ? ListView.view.width : undefined
@@ -110,9 +109,9 @@ DeviceList {
 
             StateLayer {
                 function onClicked(): void {
-                    root.session.network.active = modelData;
-                    if (modelData && modelData.ssid) {
-                        root.checkSavedProfileForNetwork(modelData.ssid);
+                    root.session.network.active = network.modelData;
+                    if (network.modelData && network.modelData.ssid) {
+                        root.checkSavedProfileForNetwork(network.modelData.ssid);
                     }
                 }
             }
@@ -132,16 +131,16 @@ DeviceList {
                     implicitHeight: icon.implicitHeight + Appearance.padding.normal * 2
 
                     radius: Appearance.rounding.normal
-                    color: modelData.active ? Colours.palette.m3primaryContainer : Colours.tPalette.m3surfaceContainerHigh
+                    color: network.modelData.active ? Colours.palette.m3primaryContainer : Colours.tPalette.m3surfaceContainerHigh
 
                     MaterialIcon {
                         id: icon
 
                         anchors.centerIn: parent
-                        text: Icons.getNetworkIcon(modelData.strength, modelData.isSecure)
+                        text: Icons.getNetworkIcon(network.modelData.strength, network.modelData.isSecure)
                         font.pointSize: Appearance.font.size.large
-                        fill: modelData.active ? 1 : 0
-                        color: modelData.active ? Colours.palette.m3onPrimaryContainer : Colours.palette.m3onSurface
+                        fill: network.modelData.active ? 1 : 0
+                        color: network.modelData.active ? Colours.palette.m3onPrimaryContainer : Colours.palette.m3onSurface
                     }
                 }
 
@@ -155,7 +154,7 @@ DeviceList {
                         elide: Text.ElideRight
                         maximumLineCount: 1
 
-                        text: modelData.ssid || qsTr("Unknown")
+                        text: network.modelData.ssid || qsTr("Unknown")
                     }
 
                     RowLayout {
@@ -165,18 +164,18 @@ DeviceList {
                         StyledText {
                             Layout.fillWidth: true
                             text: {
-                                if (modelData.active)
+                                if (network.modelData.active)
                                     return qsTr("Connected");
-                                if (modelData.isSecure && modelData.security && modelData.security.length > 0) {
-                                    return modelData.security;
+                                if (network.modelData.isSecure && network.modelData.security && network.modelData.security.length > 0) {
+                                    return network.modelData.security;
                                 }
-                                if (modelData.isSecure)
+                                if (network.modelData.isSecure)
                                     return qsTr("Secured");
                                 return qsTr("Open");
                             }
-                            color: modelData.active ? Colours.palette.m3primary : Colours.palette.m3outline
+                            color: network.modelData.active ? Colours.palette.m3primary : Colours.palette.m3outline
                             font.pointSize: Appearance.font.size.small
-                            font.weight: modelData.active ? 500 : 400
+                            font.weight: network.modelData.active ? 500 : 400
                             elide: Text.ElideRight
                         }
                     }
@@ -187,14 +186,14 @@ DeviceList {
                     implicitHeight: connectIcon.implicitHeight + Appearance.padding.smaller * 2
 
                     radius: Appearance.rounding.full
-                    color: Qt.alpha(Colours.palette.m3primaryContainer, modelData.active ? 1 : 0)
+                    color: Qt.alpha(Colours.palette.m3primaryContainer, network.modelData.active ? 1 : 0)
 
                     StateLayer {
                         function onClicked(): void {
-                            if (modelData.active) {
+                            if (network.modelData.active) {
                                 Nmcli.disconnectFromNetwork();
                             } else {
-                                NetworkConnection.handleConnect(modelData, root.session, null);
+                                NetworkConnection.handleConnect(network.modelData, root.session, null);
                             }
                         }
                     }
@@ -203,8 +202,8 @@ DeviceList {
                         id: connectIcon
 
                         anchors.centerIn: parent
-                        text: modelData.active ? "link_off" : "link"
-                        color: modelData.active ? Colours.palette.m3onPrimaryContainer : Colours.palette.m3onSurface
+                        text: network.modelData.active ? "link_off" : "link"
+                        color: network.modelData.active ? Colours.palette.m3onPrimaryContainer : Colours.palette.m3onSurface
                     }
                 }
             }

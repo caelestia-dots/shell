@@ -2,11 +2,8 @@ pragma ComponentBehavior: Bound
 
 import ".."
 import "../components"
-import "."
 import qs.components
 import qs.components.controls
-import qs.components.effects
-import qs.components.containers
 import qs.services
 import qs.config
 import qs.utils
@@ -44,11 +41,11 @@ DeviceDetails {
     Connections {
         target: Nmcli
         function onActiveChanged() {
-            updateDeviceDetails();
+            root.updateDeviceDetails();
         }
         function onWirelessDeviceDetailsChanged() {
-            if (network && network.ssid) {
-                const isActive = network.active || (Nmcli.active && Nmcli.active.ssid === network.ssid);
+            if (root.network && root.network.ssid) {
+                const isActive = root.network.active || (Nmcli.active && Nmcli.active.ssid === root.network.ssid);
                 if (isActive && Nmcli.wirelessDeviceDetails && Nmcli.wirelessDeviceDetails !== null) {
                     connectionUpdateTimer.stop();
                 }
@@ -60,10 +57,10 @@ DeviceDetails {
         id: connectionUpdateTimer
         interval: 500
         repeat: true
-        running: network && network.ssid
+        running: root.network && root.network.ssid
         onTriggered: {
-            if (network) {
-                const isActive = network.active || (Nmcli.active && Nmcli.active.ssid === network.ssid);
+            if (root.network) {
+                const isActive = root.network.active || (Nmcli.active && Nmcli.active.ssid === root.network.ssid);
                 if (isActive) {
                     if (!Nmcli.wirelessDeviceDetails || Nmcli.wirelessDeviceDetails === null) {
                         Nmcli.getWirelessDeviceDetails("", () => {});
