@@ -562,6 +562,7 @@ default, you must create it manually.
             "wallpapers": false
         },
         "showOnHover": false,
+        "favouriteApps": [],
         "hiddenApps": []
     },
     "lock": {
