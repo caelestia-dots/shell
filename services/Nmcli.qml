@@ -20,6 +20,7 @@ Singleton {
     readonly property AccessPoint active: networks.find(n => n.active) ?? null
     property list<string> savedConnections: []
     property list<string> savedConnectionSsids: []
+    property var ssidToConnectionMap: ({})
 
     property var wifiConnectionQueue: []
     property int currentSsidQueryIndex: 0
@@ -60,7 +61,22 @@ Singleton {
             return false;
         }
 
-        return (error.includes("Secrets were required") || error.includes("Secrets were required, but not provided") || error.includes("No secrets provided") || error.includes("802-11-wireless-security.psk") || error.includes("password for") || (error.includes("password") && !error.includes("Connection activated") && !error.includes("successfully")) || (error.includes("Secrets") && !error.includes("Connection activated") && !error.includes("successfully")) || (error.includes("802.11") && !error.includes("Connection activated") && !error.includes("successfully"))) && !error.includes("Connection activated") && !error.includes("successfully");
+        const err = error.toLowerCase();
+        const triggers = [
+            "secrets were required",
+            "no secrets provided",
+            "802-11-wireless-security.psk",
+            "802-11-wireless-security.password",
+            "password for",
+            "authentication required",
+            "invalid password",
+            "bad password"
+        ];
+
+        const isSuccess = err.includes("connection activated") || err.includes("successfully");
+        if (isSuccess) return false;
+
+        return triggers.some(t => err.includes(t)) || (err.includes("password") && !isSuccess) || (err.includes("secrets") && !isSuccess);
     }
 
     function parseNetworkOutput(output: string): list<var> {
@@ -370,18 +386,20 @@ Singleton {
             immediateCheckTimer.start();
         }
 
-        if (password && password.length > 0 && hasBssid) {
-            const bssidUpper = bssid.toUpperCase();
-            createConnectionWithPassword(ssid, bssidUpper, password, callback);
-            return;
-        }
-
         let cmd = [root.nmcliCommandDevice, root.nmcliCommandWifi, "connect", ssid];
         if (password && password.length > 0) {
             cmd.push(root.connectionParamPassword, password);
         }
+        
+        if (hasBssid) {
+            cmd.push("bssid", bssid);
+        }
+
+        console.log("[NMCLI] Connecting to WiFi:", ssid, hasBssid ? ("(BSSID: " + bssid + ")") : "");
+        
         executeCommand(cmd, result => {
             if (result.needsPassword && callback) {
+                console.log("[NMCLI] Password required for:", ssid);
                 if (callback)
                     callback(result);
                 return;
@@ -391,8 +409,12 @@ Singleton {
                 console.warn("[NMCLI] Connection failed, retrying... (attempt " + (retries + 1) + "/" + maxRetries + ")");
                 Qt.callLater(() => {
                     connectWireless(ssid, password, bssid, callback, retries + 1);
-                }, 1000);
-            } else if (!result.success && root.pendingConnection) {} else if (result.success && callback) {} else if (!result.success && !root.pendingConnection) {
+                }, 1500);
+            } else if (!result.success && root.pendingConnection) {
+                 console.error("[NMCLI] Max retries reached or connection fatal for:", ssid, result.error);
+            } else if (result.success && callback) {
+                console.log("[NMCLI] Successfully connected to:", ssid);
+            } else if (!result.success && !root.pendingConnection) {
                 if (callback)
                     callback(result);
             }
@@ -454,6 +476,7 @@ Singleton {
             if (!result.success) {
                 root.savedConnections = [];
                 root.savedConnectionSsids = [];
+                root.ssidToConnectionMap = {};
                 if (callback)
                     callback([]);
                 return;
@@ -487,6 +510,7 @@ Singleton {
             root.wifiConnectionQueue = wifiConnections;
             root.currentSsidQueryIndex = 0;
             root.savedConnectionSsids = [];
+            root.ssidToConnectionMap = {};
             queryNextSsid(callback);
         } else {
             root.savedConnectionSsids = [];
@@ -503,7 +527,7 @@ Singleton {
 
             executeCommand(["-t", "-f", root.wirelessSsidField, root.nmcliCommandConnection, "show", connectionName], result => {
                 if (result.success) {
-                    processSsidOutput(result.output);
+                    processSsidOutput(result.output, connectionName);
                 }
                 queryNextSsid(callback);
             });
@@ -515,7 +539,7 @@ Singleton {
         }
     }
 
-    function processSsidOutput(output: string): void {
+    function processSsidOutput(output: string, connectionName: string): void {
         const lines = output.trim().split("\n");
         for (const line of lines) {
             if (line.startsWith("802-11-wireless.ssid:")) {
@@ -528,6 +552,11 @@ Singleton {
                         newList.push(ssid);
                         root.savedConnectionSsids = newList;
                     }
+                    
+                    // Always update mapping (case-insensitive for lookup)
+                    const map = root.ssidToConnectionMap;
+                    map[ssid.toLowerCase().trim()] = connectionName;
+                    root.ssidToConnectionMap = map;
                 }
             }
         }
@@ -569,7 +598,12 @@ Singleton {
             return;
         }
 
-        const connectionName = root.savedConnections.find(conn => conn && conn.toLowerCase().trim() === ssid.toLowerCase().trim()) || ssid;
+        const ssidLower = ssid.toLowerCase().trim();
+        const connectionName = root.ssidToConnectionMap[ssidLower] || 
+                             root.savedConnections.find(conn => conn && conn.toLowerCase().trim() === ssidLower) || 
+                             ssid;
+        
+        console.log("[NMCLI] Forgetting network. SSID:", ssid, "Connection Name:", connectionName);
 
         executeCommand([root.nmcliCommandConnection, "delete", connectionName], result => {
             if (result.success) {
