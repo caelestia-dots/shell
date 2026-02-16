@@ -33,7 +33,7 @@ JsonObject {
     property list<var> actions: [
         {
             name: "Welcome",
-            icon: "caelestia",
+            icon: "waving_hand",
             description: "Welcome to Caelestia",
             command: ["caelestia", "shell", "welcome", "open"],
             enabled: true,
