@@ -104,6 +104,7 @@ JsonObject {
 
     component Clock: JsonObject {
         property bool showIcon: true
+        property bool showSeconds: false
     }
 
     component Sizes: JsonObject {
