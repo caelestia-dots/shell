@@ -15,6 +15,8 @@ Item {
 
     StyledRect {
         anchors.fill: parent
+        anchors.bottomMargin: -1
+        anchors.rightMargin: -1
         color: Colours.palette.m3surface
 
         layer.enabled: true
