@@ -47,13 +47,12 @@ Loader {
                         Wallpaper {
                             id: wallpaper
                         }
-
-                        Visualiser {
-                            anchors.fill: parent
-                            screen: win.modelData
-                            wallpaper: wallpaper
-                        }
                     }
+                }
+                Visualiser {
+                    anchors.fill: parent
+                    screen: win.modelData
+                    wallpaper: wallpaper
                 }
             }
 
