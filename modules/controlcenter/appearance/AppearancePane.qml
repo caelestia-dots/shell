@@ -48,6 +48,7 @@ Item {
     property bool desktopClockBackgroundBlur: Config.background.desktopClock.background.blur ?? false
     property bool desktopClockInvertColors: Config.background.desktopClock.invertColors ?? false
     property bool backgroundEnabled: Config.background.enabled ?? true
+    property bool wallpaperEnabled: Config.background.wallpaperEnabled ?? true
     property bool visualiserEnabled: Config.background.visualiser.enabled ?? false
     property bool visualiserAutoHide: Config.background.visualiser.autoHide ?? true
     property real visualiserRounding: Config.background.visualiser.rounding ?? 1
@@ -82,6 +83,8 @@ Item {
         Config.background.desktopClock.background.opacity = root.desktopClockBackgroundOpacity;
         Config.background.desktopClock.background.blur = root.desktopClockBackgroundBlur;
         Config.background.desktopClock.invertColors = root.desktopClockInvertColors;
+
+        Config.background.wallpaperEnabled = root.wallpaperEnabled;
 
         Config.background.visualiser.enabled = root.visualiserEnabled;
         Config.background.visualiser.autoHide = root.visualiserAutoHide;

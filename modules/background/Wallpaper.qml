@@ -14,6 +14,8 @@ Item {
     property string source: Wallpapers.current
     property Image current: one
 
+    visible: Config.background.wallpaperEnabled
+
     anchors.fill: parent
 
     onSourceChanged: {
@@ -33,7 +35,7 @@ Item {
     Loader {
         anchors.fill: parent
 
-        active: !root.source
+        active: !root.source && Config.background.wallpaperEnabled
 
         sourceComponent: StyledRect {
             color: Colours.palette.m3surfaceContainer
