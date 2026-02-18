@@ -23,7 +23,7 @@ Loader {
             name: "background"
             WlrLayershell.exclusionMode: ExclusionMode.Ignore
             WlrLayershell.layer: WlrLayer.Background
-            color: "black"
+            color: none
 
             anchors.top: true
             anchors.bottom: true
