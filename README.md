@@ -568,12 +568,12 @@ default, you must create it manually.
             {
                 "name": "Development",
                 "icon": "code",
-                "apps": ["code-oss", "github-desktop"]
+                "apps": ["code-oss"]
             },
             {
                 "name": "Graphics",
                 "icon": "palette",
-                "apps": ["org.inkscape.Inkscape", "gimp"]
+                "apps": []
             },
             {
                 "name": "Communication",
@@ -593,7 +593,7 @@ default, you must create it manually.
             {
                 "name": "Utilities",
                 "icon": "build",
-                "apps": ["obs", "thunar"]
+                "apps": ["obs"]
             }
         ],
         "contextMenuMain": [
