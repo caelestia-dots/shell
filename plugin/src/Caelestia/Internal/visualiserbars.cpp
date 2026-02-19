@@ -16,10 +16,14 @@ static constexpr qreal BEZ_X2 = 0.0;
 static constexpr qreal BEZ_Y2 = 1.0;
 
 static qreal clamp01(qreal v) {
-    if (v < 0.0)
+    if (v < 0.0) {
+        qWarning() << "Value clamped to 0.0:" << v;
         return 0.0;
-    if (v > 1.0)
+    }
+    if (v > 1.0) {
+        qWarning() << "Value clamped to 1.0:" << v;
         return 1.0;
+    }
     return v;
 }
 
@@ -54,12 +58,7 @@ static qreal cubicBezierEase(qreal x) {
 }
 
 VisualiserBars::VisualiserBars(QQuickItem* parent)
-    : QQuickPaintedItem(parent)
-    , m_barCount(0)
-    , m_spacing(0.0)
-    , m_smoothing(0.0)
-    , m_curvature(0)
-    , m_barRadius(0.0) {
+    : QQuickPaintedItem(parent) {
     setAntialiasing(true);
     setRenderTarget(QQuickPaintedItem::Image);
 
@@ -141,6 +140,14 @@ void VisualiserBars::startAnimation(int index, qreal target) {
     if (index < 0 || index >= m_displayValues.size())
         return;
 
+    constexpr qreal EPS = 0.0001;
+
+    if (m_animActive[index] && qAbs(m_animTarget[index] - target) < EPS)
+        return;
+
+    if (!m_animActive[index] && qAbs(m_displayValues[index] - target) < EPS)
+        return;
+
     m_animStart[index] = m_displayValues[index];
     m_animTarget[index] = target;
     m_animElapsed[index] = 0.0;
@@ -150,10 +157,13 @@ void VisualiserBars::startAnimation(int index, qreal target) {
 void VisualiserBars::stepAnimations() {
     const qint64 now = m_time.elapsed();
     qreal dt = static_cast<qreal>(now - m_lastFrameMs) / 1000.0;
-    m_lastFrameMs = now;
 
-    if (dt < 0.0)
+    if (dt < 0.0) {
+        qWarning() << "Negative dt detected, clamping to 0.0:" << dt;
         dt = 0.0;
+    }
+
+    m_lastFrameMs = now;
 
     bool anyActive = false;
 
@@ -163,7 +173,6 @@ void VisualiserBars::stepAnimations() {
     const qreal effectiveSmoothing = qMax(smoothing, minSmoothing);
 
     const qreal baseDurationSec = qMax(0.001, m_animationDuration / 1000.0);
-
     const qreal durationSec = baseDurationSec * effectiveSmoothing;
 
     for (int i = 0; i < m_displayValues.size(); i++) {
@@ -205,30 +214,16 @@ void VisualiserBars::paint(QPainter* p) {
 
     ensureBuffers();
 
+    for (int i = 0; i < m_barCount * 2; i++) {
+        m_spatialValues[i] = spatialSmooth(i, m_displayValues, m_curvature);
+    }
+
     p->setPen(Qt::NoPen);
 
     QLinearGradient grad(0, h * 0.7, 0, h);
     grad.setColorAt(0.0, m_barColorTop);
     grad.setColorAt(1.0, m_barColorBottom);
     p->setBrush(grad);
-
-    for (int i = 0; i < m_barCount; i++) {
-        qreal leftTarget = 0.0;
-        if (i < m_audioValues.size())
-            leftTarget = clamp01(m_audioValues[i]);
-
-        int mirroredIndex = m_barCount - i - 1;
-        qreal rightTarget = 0.0;
-        if (mirroredIndex >= 0 && mirroredIndex < m_audioValues.size())
-            rightTarget = clamp01(m_audioValues[mirroredIndex]);
-
-        startAnimation(i, leftTarget);
-        startAnimation(m_barCount + i, rightTarget);
-    }
-
-    for (int i = 0; i < m_barCount * 2; i++) {
-        m_spatialValues[i] = spatialSmooth(i, m_displayValues, m_curvature);
-    }
 
     const qreal leftStart = 0.0;
     const qreal leftWidth = w * 0.4;
@@ -317,16 +312,19 @@ int VisualiserBars::barCount() const {
 }
 
 void VisualiserBars::setBarCount(int count) {
-    if (count <= 0 || count == m_barCount)
+    if (count <= 0) {
+        qWarning() << "Invalid bar count, must be positive:" << count;
+        return;
+    }
+    if (count == m_barCount)
         return;
 
     m_barCount = count;
 
-    for (int i = 0; i < m_animActive.size(); i++) {
-        m_animActive[i] = false;
-    }
-
     ensureBuffers();
+
+    for (int i = 0; i < m_animActive.size(); i++)
+        m_animActive[i] = false;
 
     emit barCountChanged();
     update();
@@ -350,6 +348,9 @@ qreal VisualiserBars::smoothing() const {
 }
 
 void VisualiserBars::setSmoothing(qreal smoothing) {
+    if (smoothing < 0.0 || smoothing > 1.0) {
+        qWarning() << "Smoothing value clamped to [0,1]:" << smoothing;
+    }
     smoothing = clamp01(smoothing);
 
     if (qFuzzyCompare(smoothing, m_smoothing))
@@ -417,8 +418,10 @@ int VisualiserBars::animationDuration() const {
 }
 
 void VisualiserBars::setAnimationDuration(int ms) {
-    if (ms < 0)
+    if (ms < 0) {
+        qWarning() << "Animation duration clamped to 0:" << ms;
         ms = 0;
+    }
 
     if (m_animationDuration == ms)
         return;
@@ -444,6 +447,12 @@ void VisualiserBars::setAudioValues(const QList<double>& values) {
         for (int i = 0; i < m_barCount; i++)
             m_audioValues[i] = 0.0;
 
+        // animate all bars to 0
+        for (int i = 0; i < m_barCount; i++) {
+            startAnimation(i, 0.0);
+            startAnimation(m_barCount + i, 0.0);
+        }
+
         emit audioValuesChanged();
         update();
         return;
@@ -457,6 +466,19 @@ void VisualiserBars::setAudioValues(const QList<double>& values) {
 
     for (int i = int(n); i < m_barCount; i++) {
         m_audioValues[i] = 0.0;
+    }
+
+    for (int i = 0; i < m_barCount; i++) {
+        qreal leftTarget = m_audioValues[i];
+
+        int mirroredIndex = m_barCount - i - 1;
+        qreal rightTarget = 0.0;
+
+        if (mirroredIndex >= 0 && mirroredIndex < m_audioValues.size())
+            rightTarget = m_audioValues[mirroredIndex];
+
+        startAnimation(i, leftTarget);
+        startAnimation(m_barCount + i, rightTarget);
     }
 
     emit audioValuesChanged();

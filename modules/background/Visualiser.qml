@@ -20,15 +20,14 @@ Item {
     property real offset: shouldBeActive ? 0 : screen.height * 0.2
     opacity: shouldBeActive ? 1 : 0
 
-    Behavior on offset {
-        Anim {}
-    }
     Behavior on opacity {
         Anim {}
     }
 
+    readonly property bool shouldLoadBars: root.opacity > 0
+
     ServiceRef {
-        id: cavaRef
+        id: cavaRefVis
         service: Audio.cava
     }
 
@@ -44,7 +43,6 @@ Item {
     Behavior on barColorTop {
         CAnim {}
     }
-
     Behavior on barColorBottom {
         CAnim {}
     }
@@ -53,61 +51,79 @@ Item {
 
     Loader {
         anchors.fill: parent
-        y: root.offset
-        height: parent.height - root.offset * 2
+        anchors.topMargin: Config.border.thickness + root.offset
+        anchors.bottomMargin: Config.border.thickness - root.offset
+
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.leftMargin: Visibilities.bars.get(root.screen).exclusiveZone + Appearance.spacing.small * Config.background.visualiser.spacing
         anchors.margins: Config.border.thickness
-        active: root.opacity > 0 && Config.background.visualiser.blur
+
+        Behavior on anchors.topMargin {
+            Anim {}
+        }
+        Behavior on anchors.bottomMargin {
+            Anim {}
+        }
+
+        active: root.shouldLoadBars && Config.background.visualiser.blur && barsLoader.item
+
         sourceComponent: MultiEffect {
             source: wallpaperSource
-            maskSource: bars
+            maskSource: barsLoader.item
             maskEnabled: true
             maskSpreadAtMax: 0
             maskSpreadAtMin: 0
-            maskThresholdMin: 0.67 // eliminates blur spreading out of bounds
+            maskThresholdMin: 0.67
             blurEnabled: true
             blur: 1
             blurMax: 32
             autoPaddingEnabled: false
             shadowEnabled: false
         }
+
+        Behavior on height {
+            Anim {}
+        }
     }
 
-    Item {
-        id: barsWrapper
+    Loader {
+        id: barsLoader
+
         anchors.fill: parent
-        y: root.offset
-        height: parent.height - root.offset * 2
+        anchors.topMargin: Config.border.thickness + root.offset
+        anchors.bottomMargin: Config.border.thickness - root.offset
+
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.leftMargin: Visibilities.bars.get(root.screen).exclusiveZone + Appearance.spacing.small * Config.background.visualiser.spacing
         anchors.margins: Config.border.thickness
-        VisualiserBars {
-            id: bars
-            anchors.fill: parent
-            layer.enabled: true
 
-            barCount: Config.services.visualiserBars
-            spacing: Appearance.spacing.small * Config.background.visualiser.spacing
-            smoothing: Config.background.visualiser.smoothing
-            curvature: Config.background.visualiser.curvature
-            barRadius: Appearance.rounding.small * Config.background.visualiser.rounding
-            barColorTop: root.barColorTop
-            barColorBottom: root.barColorBottom
-            animationDuration: Appearance.anim.durations.small
-            // audioValues: Audio.cava.values
+        active: root.shouldLoadBars
+
+        Behavior on anchors.topMargin {
+            Anim {}
+        }
+        Behavior on anchors.bottomMargin {
+            Anim {}
         }
 
-        Timer {
-            id: updateTimer
-            interval: 16  // ~60 FPS
-            running: true
-            repeat: true
-            onTriggered: {
-                // Push latest audio values to VisualiserBars every 16ms
-                bars.audioValues = Audio.cava.values;
+        sourceComponent: Item {
+
+            anchors.fill: parent
+
+            layer.enabled: true
+            VisualiserBars {
+                anchors.fill: parent
+                barCount: Config.services.visualiserBars
+                spacing: Appearance.spacing.small * Config.background.visualiser.spacing
+                smoothing: Config.background.visualiser.smoothing
+                curvature: Config.background.visualiser.curvature
+                barRadius: Appearance.rounding.small * Config.background.visualiser.rounding
+                barColorTop: root.barColorTop
+                barColorBottom: root.barColorBottom
+                animationDuration: Appearance.anim.durations.small
+                audioValues: Audio.cava.values
             }
         }
     }
