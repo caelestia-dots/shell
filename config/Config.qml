@@ -349,6 +349,12 @@ Singleton {
             enabled: session.enabled,
             dragThreshold: session.dragThreshold,
             vimKeybinds: session.vimKeybinds,
+            icons: {
+                logout: session.icons.logout,
+                shutdown: session.icons.shutdown,
+                hibernate: session.icons.hibernate,
+                reboot: session.icons.reboot
+            },
             commands: {
                 logout: session.commands.logout,
                 shutdown: session.commands.shutdown,
