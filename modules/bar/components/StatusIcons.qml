@@ -143,7 +143,7 @@ StyledRect {
         // Network icon
         WrappedLoader {
             name: "network"
-            active: Config.bar.status.showNetwork
+            active: Config.bar.status.showNetwork && (!Nmcli.activeEthernet || Config.bar.status.showWifi)
 
             sourceComponent: MaterialIcon {
                 animate: true

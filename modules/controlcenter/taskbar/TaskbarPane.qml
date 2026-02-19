@@ -27,6 +27,7 @@ Item {
     property bool showMicrophone: Config.bar.status.showMicrophone ?? true
     property bool showKbLayout: Config.bar.status.showKbLayout ?? false
     property bool showNetwork: Config.bar.status.showNetwork ?? true
+    property bool showWifi: Config.bar.status.showWifi ?? true
     property bool showBluetooth: Config.bar.status.showBluetooth ?? true
     property bool showBattery: Config.bar.status.showBattery ?? true
     property bool showLockStatus: Config.bar.status.showLockStatus ?? true
@@ -69,6 +70,7 @@ Item {
         Config.bar.status.showMicrophone = root.showMicrophone;
         Config.bar.status.showKbLayout = root.showKbLayout;
         Config.bar.status.showNetwork = root.showNetwork;
+        Config.bar.status.showWifi = root.showWifi;
         Config.bar.status.showBluetooth = root.showBluetooth;
         Config.bar.status.showBattery = root.showBattery;
         Config.bar.status.showLockStatus = root.showLockStatus;
@@ -176,12 +178,12 @@ Item {
 
                     ConnectedButtonGroup {
                         rootItem: root
-                        
+
                         options: [
                             {
                                 label: qsTr("Speakers"),
                                 propertyName: "showAudio",
-                                onToggled: function(checked) {
+                                onToggled: function (checked) {
                                     root.showAudio = checked;
                                     root.saveConfig();
                                 }
@@ -189,7 +191,7 @@ Item {
                             {
                                 label: qsTr("Microphone"),
                                 propertyName: "showMicrophone",
-                                onToggled: function(checked) {
+                                onToggled: function (checked) {
                                     root.showMicrophone = checked;
                                     root.saveConfig();
                                 }
@@ -197,7 +199,7 @@ Item {
                             {
                                 label: qsTr("Keyboard"),
                                 propertyName: "showKbLayout",
-                                onToggled: function(checked) {
+                                onToggled: function (checked) {
                                     root.showKbLayout = checked;
                                     root.saveConfig();
                                 }
@@ -205,15 +207,23 @@ Item {
                             {
                                 label: qsTr("Network"),
                                 propertyName: "showNetwork",
-                                onToggled: function(checked) {
+                                onToggled: function (checked) {
                                     root.showNetwork = checked;
+                                    root.saveConfig();
+                                }
+                            },
+                            {
+                                label: qsTr("Wifi"),
+                                propertyName: "showWifi",
+                                onToggled: function (checked) {
+                                    root.showWifi = checked;
                                     root.saveConfig();
                                 }
                             },
                             {
                                 label: qsTr("Bluetooth"),
                                 propertyName: "showBluetooth",
-                                onToggled: function(checked) {
+                                onToggled: function (checked) {
                                     root.showBluetooth = checked;
                                     root.saveConfig();
                                 }
@@ -221,7 +231,7 @@ Item {
                             {
                                 label: qsTr("Battery"),
                                 propertyName: "showBattery",
-                                onToggled: function(checked) {
+                                onToggled: function (checked) {
                                     root.showBattery = checked;
                                     root.saveConfig();
                                 }
@@ -229,7 +239,7 @@ Item {
                             {
                                 label: qsTr("Capslock"),
                                 propertyName: "showLockStatus",
-                                onToggled: function(checked) {
+                                onToggled: function (checked) {
                                     root.showLockStatus = checked;
                                     root.saveConfig();
                                 }
@@ -258,172 +268,172 @@ Item {
                                 font.pointSize: Appearance.font.size.normal
                             }
 
-                        StyledRect {
-                            Layout.fillWidth: true
-                            implicitHeight: workspacesShownRow.implicitHeight + Appearance.padding.large * 2
-                            radius: Appearance.rounding.normal
-                            color: Colours.layer(Colours.palette.m3surfaceContainer, 2)
+                            StyledRect {
+                                Layout.fillWidth: true
+                                implicitHeight: workspacesShownRow.implicitHeight + Appearance.padding.large * 2
+                                radius: Appearance.rounding.normal
+                                color: Colours.layer(Colours.palette.m3surfaceContainer, 2)
 
-                            Behavior on implicitHeight {
-                                Anim {}
-                            }
-
-                            RowLayout {
-                                id: workspacesShownRow
-                                anchors.left: parent.left
-                                anchors.right: parent.right
-                                anchors.verticalCenter: parent.verticalCenter
-                                anchors.margins: Appearance.padding.large
-                                spacing: Appearance.spacing.normal
-
-                                StyledText {
-                                    Layout.fillWidth: true
-                                    text: qsTr("Shown")
+                                Behavior on implicitHeight {
+                                    Anim {}
                                 }
 
-                                CustomSpinBox {
-                                    min: 1
-                                    max: 20
-                                    value: root.workspacesShown
-                                    onValueModified: value => {
-                                        root.workspacesShown = value;
-                                        root.saveConfig();
+                                RowLayout {
+                                    id: workspacesShownRow
+                                    anchors.left: parent.left
+                                    anchors.right: parent.right
+                                    anchors.verticalCenter: parent.verticalCenter
+                                    anchors.margins: Appearance.padding.large
+                                    spacing: Appearance.spacing.normal
+
+                                    StyledText {
+                                        Layout.fillWidth: true
+                                        text: qsTr("Shown")
+                                    }
+
+                                    CustomSpinBox {
+                                        min: 1
+                                        max: 20
+                                        value: root.workspacesShown
+                                        onValueModified: value => {
+                                            root.workspacesShown = value;
+                                            root.saveConfig();
+                                        }
                                     }
                                 }
                             }
-                        }
 
-                        StyledRect {
-                            Layout.fillWidth: true
-                            implicitHeight: workspacesActiveIndicatorRow.implicitHeight + Appearance.padding.large * 2
-                            radius: Appearance.rounding.normal
-                            color: Colours.layer(Colours.palette.m3surfaceContainer, 2)
+                            StyledRect {
+                                Layout.fillWidth: true
+                                implicitHeight: workspacesActiveIndicatorRow.implicitHeight + Appearance.padding.large * 2
+                                radius: Appearance.rounding.normal
+                                color: Colours.layer(Colours.palette.m3surfaceContainer, 2)
 
-                            Behavior on implicitHeight {
-                                Anim {}
-                            }
-
-                            RowLayout {
-                                id: workspacesActiveIndicatorRow
-                                anchors.left: parent.left
-                                anchors.right: parent.right
-                                anchors.verticalCenter: parent.verticalCenter
-                                anchors.margins: Appearance.padding.large
-                                spacing: Appearance.spacing.normal
-
-                                StyledText {
-                                    Layout.fillWidth: true
-                                    text: qsTr("Active indicator")
+                                Behavior on implicitHeight {
+                                    Anim {}
                                 }
 
-                                StyledSwitch {
-                                    checked: root.workspacesActiveIndicator
-                                    onToggled: {
-                                        root.workspacesActiveIndicator = checked;
-                                        root.saveConfig();
+                                RowLayout {
+                                    id: workspacesActiveIndicatorRow
+                                    anchors.left: parent.left
+                                    anchors.right: parent.right
+                                    anchors.verticalCenter: parent.verticalCenter
+                                    anchors.margins: Appearance.padding.large
+                                    spacing: Appearance.spacing.normal
+
+                                    StyledText {
+                                        Layout.fillWidth: true
+                                        text: qsTr("Active indicator")
+                                    }
+
+                                    StyledSwitch {
+                                        checked: root.workspacesActiveIndicator
+                                        onToggled: {
+                                            root.workspacesActiveIndicator = checked;
+                                            root.saveConfig();
+                                        }
                                     }
                                 }
                             }
-                        }
 
-                        StyledRect {
-                            Layout.fillWidth: true
-                            implicitHeight: workspacesOccupiedBgRow.implicitHeight + Appearance.padding.large * 2
-                            radius: Appearance.rounding.normal
-                            color: Colours.layer(Colours.palette.m3surfaceContainer, 2)
+                            StyledRect {
+                                Layout.fillWidth: true
+                                implicitHeight: workspacesOccupiedBgRow.implicitHeight + Appearance.padding.large * 2
+                                radius: Appearance.rounding.normal
+                                color: Colours.layer(Colours.palette.m3surfaceContainer, 2)
 
-                            Behavior on implicitHeight {
-                                Anim {}
-                            }
-
-                            RowLayout {
-                                id: workspacesOccupiedBgRow
-                                anchors.left: parent.left
-                                anchors.right: parent.right
-                                anchors.verticalCenter: parent.verticalCenter
-                                anchors.margins: Appearance.padding.large
-                                spacing: Appearance.spacing.normal
-
-                                StyledText {
-                                    Layout.fillWidth: true
-                                    text: qsTr("Occupied background")
+                                Behavior on implicitHeight {
+                                    Anim {}
                                 }
 
-                                StyledSwitch {
-                                    checked: root.workspacesOccupiedBg
-                                    onToggled: {
-                                        root.workspacesOccupiedBg = checked;
-                                        root.saveConfig();
+                                RowLayout {
+                                    id: workspacesOccupiedBgRow
+                                    anchors.left: parent.left
+                                    anchors.right: parent.right
+                                    anchors.verticalCenter: parent.verticalCenter
+                                    anchors.margins: Appearance.padding.large
+                                    spacing: Appearance.spacing.normal
+
+                                    StyledText {
+                                        Layout.fillWidth: true
+                                        text: qsTr("Occupied background")
+                                    }
+
+                                    StyledSwitch {
+                                        checked: root.workspacesOccupiedBg
+                                        onToggled: {
+                                            root.workspacesOccupiedBg = checked;
+                                            root.saveConfig();
+                                        }
                                     }
                                 }
                             }
-                        }
 
-                        StyledRect {
-                            Layout.fillWidth: true
-                            implicitHeight: workspacesShowWindowsRow.implicitHeight + Appearance.padding.large * 2
-                            radius: Appearance.rounding.normal
-                            color: Colours.layer(Colours.palette.m3surfaceContainer, 2)
+                            StyledRect {
+                                Layout.fillWidth: true
+                                implicitHeight: workspacesShowWindowsRow.implicitHeight + Appearance.padding.large * 2
+                                radius: Appearance.rounding.normal
+                                color: Colours.layer(Colours.palette.m3surfaceContainer, 2)
 
-                            Behavior on implicitHeight {
-                                Anim {}
-                            }
-
-                            RowLayout {
-                                id: workspacesShowWindowsRow
-                                anchors.left: parent.left
-                                anchors.right: parent.right
-                                anchors.verticalCenter: parent.verticalCenter
-                                anchors.margins: Appearance.padding.large
-                                spacing: Appearance.spacing.normal
-
-                                StyledText {
-                                    Layout.fillWidth: true
-                                    text: qsTr("Show windows")
+                                Behavior on implicitHeight {
+                                    Anim {}
                                 }
 
-                                StyledSwitch {
-                                    checked: root.workspacesShowWindows
-                                    onToggled: {
-                                        root.workspacesShowWindows = checked;
-                                        root.saveConfig();
+                                RowLayout {
+                                    id: workspacesShowWindowsRow
+                                    anchors.left: parent.left
+                                    anchors.right: parent.right
+                                    anchors.verticalCenter: parent.verticalCenter
+                                    anchors.margins: Appearance.padding.large
+                                    spacing: Appearance.spacing.normal
+
+                                    StyledText {
+                                        Layout.fillWidth: true
+                                        text: qsTr("Show windows")
+                                    }
+
+                                    StyledSwitch {
+                                        checked: root.workspacesShowWindows
+                                        onToggled: {
+                                            root.workspacesShowWindows = checked;
+                                            root.saveConfig();
+                                        }
                                     }
                                 }
                             }
-                        }
 
-                        StyledRect {
-                            Layout.fillWidth: true
-                            implicitHeight: workspacesPerMonitorRow.implicitHeight + Appearance.padding.large * 2
-                            radius: Appearance.rounding.normal
-                            color: Colours.layer(Colours.palette.m3surfaceContainer, 2)
+                            StyledRect {
+                                Layout.fillWidth: true
+                                implicitHeight: workspacesPerMonitorRow.implicitHeight + Appearance.padding.large * 2
+                                radius: Appearance.rounding.normal
+                                color: Colours.layer(Colours.palette.m3surfaceContainer, 2)
 
-                            Behavior on implicitHeight {
-                                Anim {}
-                            }
-
-                            RowLayout {
-                                id: workspacesPerMonitorRow
-                                anchors.left: parent.left
-                                anchors.right: parent.right
-                                anchors.verticalCenter: parent.verticalCenter
-                                anchors.margins: Appearance.padding.large
-                                spacing: Appearance.spacing.normal
-
-                                StyledText {
-                                    Layout.fillWidth: true
-                                    text: qsTr("Per monitor workspaces")
+                                Behavior on implicitHeight {
+                                    Anim {}
                                 }
 
-                                StyledSwitch {
-                                    checked: root.workspacesPerMonitor
-                                    onToggled: {
-                                        root.workspacesPerMonitor = checked;
-                                        root.saveConfig();
+                                RowLayout {
+                                    id: workspacesPerMonitorRow
+                                    anchors.left: parent.left
+                                    anchors.right: parent.right
+                                    anchors.verticalCenter: parent.verticalCenter
+                                    anchors.margins: Appearance.padding.large
+                                    spacing: Appearance.spacing.normal
+
+                                    StyledText {
+                                        Layout.fillWidth: true
+                                        text: qsTr("Per monitor workspaces")
+                                    }
+
+                                    StyledSwitch {
+                                        checked: root.workspacesPerMonitor
+                                        onToggled: {
+                                            root.workspacesPerMonitor = checked;
+                                            root.saveConfig();
+                                        }
                                     }
                                 }
                             }
-                        }
                         }
 
                         SectionContainer {
@@ -437,12 +447,12 @@ Item {
 
                             ConnectedButtonGroup {
                                 rootItem: root
-                                
+
                                 options: [
                                     {
                                         label: qsTr("Workspaces"),
                                         propertyName: "scrollWorkspaces",
-                                        onToggled: function(checked) {
+                                        onToggled: function (checked) {
                                             root.scrollWorkspaces = checked;
                                             root.saveConfig();
                                         }
@@ -450,7 +460,7 @@ Item {
                                     {
                                         label: qsTr("Volume"),
                                         propertyName: "scrollVolume",
-                                        onToggled: function(checked) {
+                                        onToggled: function (checked) {
                                             root.scrollVolume = checked;
                                             root.saveConfig();
                                         }
@@ -458,7 +468,7 @@ Item {
                                     {
                                         label: qsTr("Brightness"),
                                         propertyName: "scrollBrightness",
-                                        onToggled: function(checked) {
+                                        onToggled: function (checked) {
                                             root.scrollBrightness = checked;
                                             root.saveConfig();
                                         }
@@ -525,17 +535,20 @@ Item {
 
                                 SliderInput {
                                     Layout.fillWidth: true
-                                    
+
                                     label: qsTr("Drag threshold")
                                     value: root.dragThreshold
                                     from: 0
                                     to: 100
                                     suffix: "px"
-                                    validator: IntValidator { bottom: 0; top: 100 }
-                                    formatValueFunction: (val) => Math.round(val).toString()
-                                    parseValueFunction: (text) => parseInt(text)
-                                    
-                                    onValueModified: (newValue) => {
+                                    validator: IntValidator {
+                                        bottom: 0
+                                        top: 100
+                                    }
+                                    formatValueFunction: val => Math.round(val).toString()
+                                    parseValueFunction: text => parseInt(text)
+
+                                    onValueModified: newValue => {
                                         root.dragThreshold = Math.round(newValue);
                                         root.saveConfig();
                                     }
@@ -598,12 +611,12 @@ Item {
 
                             ConnectedButtonGroup {
                                 rootItem: root
-                                
+
                                 options: [
                                     {
                                         label: qsTr("Background"),
                                         propertyName: "trayBackground",
-                                        onToggled: function(checked) {
+                                        onToggled: function (checked) {
                                             root.trayBackground = checked;
                                             root.saveConfig();
                                         }
@@ -611,7 +624,7 @@ Item {
                                     {
                                         label: qsTr("Compact"),
                                         propertyName: "trayCompact",
-                                        onToggled: function(checked) {
+                                        onToggled: function (checked) {
                                             root.trayCompact = checked;
                                             root.saveConfig();
                                         }
@@ -619,7 +632,7 @@ Item {
                                     {
                                         label: qsTr("Recolour"),
                                         propertyName: "trayRecolour",
-                                        onToggled: function(checked) {
+                                        onToggled: function (checked) {
                                             root.trayRecolour = checked;
                                             root.saveConfig();
                                         }
@@ -629,7 +642,6 @@ Item {
                         }
                     }
                 }
-
             }
         }
     }

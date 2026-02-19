@@ -39,6 +39,3 @@ Item {
         font.pointSize: Appearance.font.size.normal
     }
 }
-
-
-

@@ -112,6 +112,24 @@ Item {
                     }
 
                     CollapsibleSection {
+                        id: vpnListSection
+
+                        Layout.fillWidth: true
+                        title: qsTr("VPN")
+                        expanded: true
+
+                        Loader {
+                            Layout.fillWidth: true
+                            sourceComponent: Component {
+                                VpnList {
+                                    session: root.session
+                                    showHeader: false
+                                }
+                            }
+                        }
+                    }
+
+                    CollapsibleSection {
                         id: ethernetListSection
 
                         Layout.fillWidth: true
@@ -153,17 +171,22 @@ Item {
         rightContent: Component {
             Item {
                 id: rightPaneItem
-                
-                property var ethernetPane: root.session.ethernet.active
-                property var wirelessPane: root.session.network.active
-                property var pane: ethernetPane || wirelessPane
-                property string paneId: ethernetPane ? ("eth:" + (ethernetPane.interface || "")) : (wirelessPane ? ("wifi:" + (wirelessPane.ssid || wirelessPane.bssid || "")) : "settings")
+
+                property var vpnPane: root.session && root.session.vpn ? root.session.vpn.active : null
+                property var ethernetPane: root.session && root.session.ethernet ? root.session.ethernet.active : null
+                property var wirelessPane: root.session && root.session.network ? root.session.network.active : null
+                property var pane: vpnPane || ethernetPane || wirelessPane
+                property string paneId: vpnPane ? ("vpn:" + (vpnPane.name || "")) : (ethernetPane ? ("eth:" + (ethernetPane.interface || "")) : (wirelessPane ? ("wifi:" + (wirelessPane.ssid || wirelessPane.bssid || "")) : "settings"))
                 property Component targetComponent: settingsComponent
                 property Component nextComponent: settingsComponent
 
                 function getComponentForPane() {
-                    if (ethernetPane) return ethernetDetailsComponent;
-                    if (wirelessPane) return wirelessDetailsComponent;
+                    if (vpnPane)
+                        return vpnDetailsComponent;
+                    if (ethernetPane)
+                        return ethernetDetailsComponent;
+                    if (wirelessPane)
+                        return wirelessDetailsComponent;
                     return settingsComponent;
                 }
 
@@ -173,28 +196,50 @@ Item {
                 }
 
                 Connections {
-                    target: root.session.ethernet
+                    target: root.session && root.session.vpn ? root.session.vpn : null
+                    enabled: target !== null
+
                     function onActiveChanged() {
-                        // Clear wireless when ethernet is selected
-                        if (root.session.ethernet.active && root.session.network.active) {
-                            root.session.network.active = null;
-                            return; // Let the network.onActiveChanged handle the update
+                        // Clear others when VPN is selected
+                        if (root.session && root.session.vpn && root.session.vpn.active) {
+                            if (root.session.ethernet && root.session.ethernet.active)
+                                root.session.ethernet.active = null;
+                            if (root.session.network && root.session.network.active)
+                                root.session.network.active = null;
                         }
                         rightPaneItem.nextComponent = rightPaneItem.getComponentForPane();
-                        // paneId will automatically update via property binding
                     }
                 }
 
                 Connections {
-                    target: root.session.network
+                    target: root.session && root.session.ethernet ? root.session.ethernet : null
+                    enabled: target !== null
+
                     function onActiveChanged() {
-                        // Clear ethernet when wireless is selected
-                        if (root.session.network.active && root.session.ethernet.active) {
-                            root.session.ethernet.active = null;
-                            return; // Let the ethernet.onActiveChanged handle the update
+                        // Clear others when ethernet is selected
+                        if (root.session && root.session.ethernet && root.session.ethernet.active) {
+                            if (root.session.vpn && root.session.vpn.active)
+                                root.session.vpn.active = null;
+                            if (root.session.network && root.session.network.active)
+                                root.session.network.active = null;
                         }
                         rightPaneItem.nextComponent = rightPaneItem.getComponentForPane();
-                        // paneId will automatically update via property binding
+                    }
+                }
+
+                Connections {
+                    target: root.session && root.session.network ? root.session.network : null
+                    enabled: target !== null
+
+                    function onActiveChanged() {
+                        // Clear others when wireless is selected
+                        if (root.session && root.session.network && root.session.network.active) {
+                            if (root.session.vpn && root.session.vpn.active)
+                                root.session.vpn.active = null;
+                            if (root.session.ethernet && root.session.ethernet.active)
+                                root.session.ethernet.active = null;
+                        }
+                        rightPaneItem.nextComponent = rightPaneItem.getComponentForPane();
                     }
                 }
 
@@ -208,6 +253,7 @@ Item {
                     transformOrigin: Item.Center
                     clip: false
 
+                    asynchronous: true
                     sourceComponent: rightPaneItem.targetComponent
                 }
 
@@ -287,6 +333,29 @@ Item {
 
             WirelessDetails {
                 id: wirelessDetailsInner
+
+                anchors.left: parent.left
+                anchors.right: parent.right
+                anchors.top: parent.top
+                session: root.session
+            }
+        }
+    }
+
+    Component {
+        id: vpnDetailsComponent
+
+        StyledFlickable {
+            id: vpnFlickable
+            flickableDirection: Flickable.VerticalFlick
+            contentHeight: vpnDetailsInner.height
+
+            StyledScrollBar.vertical: StyledScrollBar {
+                flickable: vpnFlickable
+            }
+
+            VpnDetails {
+                id: vpnDetailsInner
 
                 anchors.left: parent.left
                 anchors.right: parent.right
