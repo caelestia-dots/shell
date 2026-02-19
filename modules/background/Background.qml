@@ -22,7 +22,8 @@ Loader {
             screen: modelData
             name: "background"
             WlrLayershell.exclusionMode: ExclusionMode.Ignore
-            WlrLayershell.layer: WlrLayer.Background
+            surfaceFormat.opaque: false
+            WlrLayershell.layer: Config.background.wallpaperEnabled ? WlrLayer.Background : WlrLayer.Bottom
             color: Config.background.wallpaperEnabled ? "black" : "transparent"
 
             anchors.top: true
