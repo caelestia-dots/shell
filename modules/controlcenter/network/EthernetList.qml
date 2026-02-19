@@ -171,7 +171,7 @@ DeviceList {
         }
     }
 
-    onItemSelected: function(item) {
+    onItemSelected: function (item) {
         session.ethernet.active = item;
     }
 }
