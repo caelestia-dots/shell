@@ -3,15 +3,31 @@ import qs.components.effects
 import qs.components.images
 import qs.services
 import qs.config
+import qs.utils
 import Caelestia.Models
 import Quickshell
 import QtQuick
+import QtMultimedia
+import Caelestia.Internal
 
 Item {
     id: root
 
     required property FileSystemEntry modelData
     required property PersistentProperties visibilities
+
+    function isVideo(path) {
+        path = path.toString();
+        if (!path || path.trim() === "")
+            return false;
+        const videoExtensions = [".mp4", ".mkv", ".webm", ".avi", ".mov", ".flv", ".wmv", ".gif"];
+        const lower = path.toLowerCase();
+        for (let i = 0; i < videoExtensions.length; i++) {
+            if (lower.endsWith(videoExtensions[i]))
+                return true;
+        }
+        return false;
+    }
 
     scale: 0.5
     opacity: 0
@@ -62,17 +78,23 @@ Item {
             color: Colours.tPalette.m3outline
             font.pointSize: Appearance.font.size.extraLarge * 2
             font.weight: 600
+            visible: !isVideo(root.modelData.path)
         }
-
         CachingImage {
-            path: root.modelData.path
-            smooth: !root.PathView.view.moving
             cache: true
-
+            smooth: !root.PathView.view.moving
             anchors.fill: parent
+            fillMode: Image.PreserveAspectCrop
+            visible: thumb.ready
+            path: thumb.cachePath
+
+            VideoThumbnailer {
+                id: thumb
+                path: root.modelData.path
+                cacheDir: Paths.videothumbcache
+            }
         }
     }
-
     StyledText {
         id: label
 

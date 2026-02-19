@@ -7,7 +7,9 @@ import qs.components.effects
 import qs.components.images
 import qs.services
 import qs.config
+import qs.utils
 import Caelestia.Models
+import Caelestia.Internal
 import QtQuick
 
 GridView {
@@ -70,7 +72,7 @@ GridView {
             CachingImage {
                 id: cachingImage
 
-                path: modelData.path
+                path: cachingImageThumb.cachePath
                 anchors.fill: parent
                 fillMode: Image.PreserveAspectCrop
                 cache: true
@@ -80,6 +82,12 @@ GridView {
                 sourceSize: Qt.size(width, height)
 
                 opacity: status === Image.Ready ? 1 : 0
+
+                VideoThumbnailer {
+                    id: cachingImageThumb
+                    path: modelData.path
+                    cacheDir: Paths.videothumbcache
+                }
 
                 Behavior on opacity {
                     NumberAnimation {
@@ -94,7 +102,7 @@ GridView {
                 id: fallbackImage
 
                 anchors.fill: parent
-                source: fallbackTimer.triggered && cachingImage.status !== Image.Ready ? modelData.path : ""
+                source: fallbackTimer.triggered && cachingImage.status !== Image.Ready ? imageThumb.cachePath : ""
                 asynchronous: true
                 fillMode: Image.PreserveAspectCrop
                 cache: true
@@ -104,6 +112,12 @@ GridView {
                 sourceSize: Qt.size(width, height)
 
                 opacity: status === Image.Ready && cachingImage.status !== Image.Ready ? 1 : 0
+
+                VideoThumbnailer {
+                    id: imageThumb
+                    path: modelData.path
+                    cacheDir: Paths.videothumbcache
+                }
 
                 Behavior on opacity {
                     NumberAnimation {
