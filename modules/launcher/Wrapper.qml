@@ -16,7 +16,7 @@ Item {
     readonly property bool shouldBeActive: visibilities.launcher && Config.launcher.enabled
     property int contentHeight
     property bool animationComplete: false
-    
+
     readonly property real maxHeight: {
         let max = screen.height - Config.border.thickness * 2 - Appearance.spacing.large;
         if (visibilities.dashboard)
@@ -37,6 +37,7 @@ Item {
             root.animationComplete = false;
             showAnim.start();
         } else {
+            root.requestCloseContextMenu();
             showAnim.stop();
             root.animationComplete = false;
             hideAnim.start();
@@ -144,28 +145,25 @@ Item {
             }
         }
     }
-    
+
     signal requestShowContextMenu(app: DesktopEntry, clickX: real, clickY: real)
-    signal contextMenuClosed()
-    
+    signal requestCloseContextMenu
+
     function restoreFocus(): void {
         if (content.item && content.item.searchField) {
             content.item.searchField.forceActiveFocus();
         }
     }
-    
+
     function showContextMenu(app: DesktopEntry, clickX: real, clickY: real): void {
         if (!app || !root.animationComplete) {
             return;
         }
-        
-        // Validate coordinates are within bounds
+
         if (clickX < 0 || clickX > root.width || clickY < 0 || clickY > root.height) {
-            console.warn("Context menu click coordinates out of bounds:", clickX, clickY);
             return;
         }
-        
-        // Emit signal to show context menu at Panels level
+
         root.requestShowContextMenu(app, clickX, clickY);
     }
 }

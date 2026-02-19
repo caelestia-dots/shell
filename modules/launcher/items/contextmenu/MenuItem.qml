@@ -61,7 +61,7 @@ StyledRect {
         onExited: {
             openTimer.stop();
             item.color = "transparent";
-            if (!item.isSubmenuItem && activeSubmenuIndex >= 0) {
+            if (activeSubmenuIndex >= 0) {
                 hoveredSubmenuIndex = -1;
                 submenuCloseTimer.restart();
             }
