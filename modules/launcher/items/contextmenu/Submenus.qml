@@ -109,4 +109,89 @@ Item {
             }
         }
     }
+
+    component CategorySubmenu: ColumnLayout {
+        id: categorySubmenu
+
+        required property DesktopEntry app
+
+        spacing: Appearance.spacing.smaller
+
+        property var pendingChanges: ({})
+        property int updateCounter: 0
+
+        function initializeState() {
+            pendingChanges = {};
+            updateCounter = 0;
+        }
+
+        function saveChanges() {
+            if (!categorySubmenu.app || Object.keys(pendingChanges).length === 0)
+                return;
+
+            const appId = categorySubmenu.app.id;
+            const newCategories = [];
+
+            for (let i = 0; i < Config.launcher.categories.length; i++) {
+                const category = Config.launcher.categories[i];
+                const newCategory = {
+                    name: category.name,
+                    icon: category.icon,
+                    apps: category.apps ? [...category.apps] : []
+                };
+
+                if (pendingChanges.hasOwnProperty(category.name)) {
+                    const shouldBeIncluded = pendingChanges[category.name];
+                    const index = newCategory.apps.indexOf(appId);
+
+                    if (shouldBeIncluded && index < 0) {
+                        newCategory.apps.push(appId);
+                    } else if (!shouldBeIncluded && index >= 0) {
+                        newCategory.apps.splice(index, 1);
+                    }
+                }
+
+                newCategories.push(newCategory);
+            }
+
+            Config.launcher.categories = newCategories;
+            Config.save();
+            pendingChanges = {};
+        }
+
+        Repeater {
+            model: Config.launcher.categories || []
+            delegate: MenuItem {
+                required property var modelData
+
+                property bool checked: {
+                    categorySubmenu.updateCounter; // Depend on counter
+
+                    if (!categorySubmenu.app || !modelData.apps)
+                        return false;
+                    const appId = categorySubmenu.app.id;
+
+                    if (categorySubmenu.pendingChanges.hasOwnProperty(modelData.name)) {
+                        return categorySubmenu.pendingChanges[modelData.name];
+                    }
+
+                    for (let i = 0; i < modelData.apps.length; i++) {
+                        if (modelData.apps[i] === appId)
+                            return true;
+                    }
+                    return false;
+                }
+
+                text: modelData.name || ""
+                icon: checked ? "check_box" : "check_box_outline_blank"
+                isSubmenuItem: true
+                preventSubmenuClose: true
+
+                onTriggered: {
+                    categorySubmenu.pendingChanges[modelData.name] = !checked;
+                    categorySubmenu.updateCounter++;
+                }
+            }
+        }
+    }
 }

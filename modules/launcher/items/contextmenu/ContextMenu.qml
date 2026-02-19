@@ -79,7 +79,7 @@ Item {
                 "bold": true
             }
         },
-        "separator", "favorites", "hide", "workspaces"]
+        "separator", "favorites", "categories", "hide", "workspaces"]
 
     readonly property var menuConfigAdvanced: (Config.launcher.contextMenuAdvanced && Config.launcher.contextMenuAdvanced.length > 0) ? Config.launcher.contextMenuAdvanced : ["terminal",
         {
@@ -595,13 +595,26 @@ Item {
                     }
                 }
 
+                Loader {
+                    id: categorySubmenuLoader
+                    active: displayedSubmenuIndex >= 0 && getSubmenuParentId(displayedSubmenuIndex) === "categories"
+                    visible: active
+                    Layout.fillWidth: true
+                    Layout.preferredHeight: active ? implicitHeight : 0
+                    sourceComponent: ContextMenus.Submenus.CategorySubmenu {
+                        app: root.app
+                        Component.onCompleted: initializeState()
+                        Component.onDestruction: saveChanges()
+                    }
+                }
+
                 // Generic submenu for custom items
                 Repeater {
                     model: {
                         if (displayedSubmenuIndex < 0)
                             return [];
                         const parentId = getSubmenuParentId(displayedSubmenuIndex);
-                        if (parentId === "launch" || parentId === "workspaces")
+                        if (parentId === "launch" || parentId === "workspaces" || parentId === "categories")
                             return [];
                         return getSubmenuItemsForIndex(displayedSubmenuIndex);
                     }

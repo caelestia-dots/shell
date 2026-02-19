@@ -27,6 +27,11 @@ QtObject {
                 icon: "workspaces",
                 hasSubmenu: true
             },
+            "categories": {
+                text: qsTr("Assign Categories"),
+                icon: "category",
+                hasSubmenu: true
+            },
             "favorites": {
                 text: qsTr("Add to Favourites"),
                 icon: "favorite",

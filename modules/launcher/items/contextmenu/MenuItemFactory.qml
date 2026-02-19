@@ -90,7 +90,7 @@ QtObject {
             return Boolean(hasConfigChildren || hasDesktopActions);
         }
 
-        if (id === "workspaces")
+        if (id === "workspaces" || id === "categories")
             return true;
 
         if (hasChildren(items, id))

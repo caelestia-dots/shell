@@ -601,6 +601,7 @@ default, you must create it manually.
             {"terminal": {"parent": "launch"}},
             "separator",
             "favorites",
+            "categories",
             "hide",
             "workspaces"
         ],

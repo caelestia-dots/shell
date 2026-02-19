@@ -13,6 +13,7 @@ StyledRect {
     property int submenuIndex: -1
     property bool isSubmenuItem: false
     property bool isSeparator: false
+    property bool preventSubmenuClose: false
     signal triggered
     signal hovered
 
@@ -61,7 +62,7 @@ StyledRect {
         onExited: {
             openTimer.stop();
             item.color = "transparent";
-            if (activeSubmenuIndex >= 0) {
+            if (activeSubmenuIndex >= 0 && !item.preventSubmenuClose) {
                 hoveredSubmenuIndex = -1;
                 submenuCloseTimer.restart();
             }
