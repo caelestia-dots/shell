@@ -37,6 +37,12 @@ Item {
         live: true
     }
 
+    ShaderEffectSource {
+        id: barsSource
+        sourceItem: barsLoader
+        live: true
+    }
+
     property color barColorTop: Qt.alpha(Colours.palette.m3primary, 0.7)
     property color barColorBottom: Qt.alpha(Colours.palette.m3inversePrimary, 0.7)
 
@@ -51,26 +57,11 @@ Item {
 
     Loader {
         anchors.fill: parent
-        anchors.topMargin: Config.border.thickness + root.offset
-        anchors.bottomMargin: Config.border.thickness - root.offset
-
-        anchors.left: parent.left
-        anchors.right: parent.right
-        anchors.leftMargin: Visibilities.bars.get(root.screen).exclusiveZone + Appearance.spacing.small * Config.background.visualiser.spacing
-        anchors.margins: Config.border.thickness
-
-        Behavior on anchors.topMargin {
-            Anim {}
-        }
-        Behavior on anchors.bottomMargin {
-            Anim {}
-        }
-
         active: root.shouldLoadBars && Config.background.visualiser.blur && barsLoader.item
 
         sourceComponent: MultiEffect {
             source: wallpaperSource
-            maskSource: barsLoader.item
+            maskSource: barsSource
             maskEnabled: true
             maskSpreadAtMax: 0
             maskSpreadAtMin: 0
@@ -81,39 +72,29 @@ Item {
             autoPaddingEnabled: false
             shadowEnabled: false
         }
-
-        Behavior on height {
-            Anim {}
-        }
     }
 
     Loader {
         id: barsLoader
-
         anchors.fill: parent
-        anchors.topMargin: Config.border.thickness + root.offset
-        anchors.bottomMargin: Config.border.thickness - root.offset
-
-        anchors.left: parent.left
-        anchors.right: parent.right
-        anchors.leftMargin: Visibilities.bars.get(root.screen).exclusiveZone + Appearance.spacing.small * Config.background.visualiser.spacing
-        anchors.margins: Config.border.thickness
-
         active: root.shouldLoadBars
 
-        Behavior on anchors.topMargin {
-            Anim {}
-        }
-        Behavior on anchors.bottomMargin {
-            Anim {}
-        }
-
         sourceComponent: Item {
-
             anchors.fill: parent
+            anchors.topMargin: Config.border.thickness + root.offset
+            anchors.bottomMargin: Config.border.thickness - root.offset
+            anchors.leftMargin: Visibilities.bars.get(root.screen).exclusiveZone + Appearance.spacing.small * Config.background.visualiser.spacing
+            anchors.margins: Config.border.thickness
 
-            layer.enabled: true
+            Behavior on anchors.topMargin {
+                Anim {}
+            }
+            Behavior on anchors.bottomMargin {
+                Anim {}
+            }
+
             VisualiserBars {
+
                 anchors.fill: parent
                 barCount: Config.services.visualiserBars
                 spacing: Appearance.spacing.small * Config.background.visualiser.spacing
