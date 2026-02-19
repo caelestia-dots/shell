@@ -150,6 +150,10 @@ Singleton {
             return "power";
         if (summary.includes("screenshot"))
             return "screenshot_monitor";
+        if (summary.includes("touchpad") && summary.includes("disabled"))
+            return "touchpad_mouse_off";
+        if (summary.includes("touchpad"))
+            return "touchpad_mouse";
         if (summary.includes("welcome"))
             return "waving_hand";
         if (summary.includes("time") || summary.includes("a break"))
