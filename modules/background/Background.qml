@@ -22,9 +22,9 @@ Loader {
             screen: modelData
             name: "background"
             WlrLayershell.exclusionMode: ExclusionMode.Ignore
-            surfaceFormat.opaque: false
             WlrLayershell.layer: Config.background.wallpaperEnabled ? WlrLayer.Background : WlrLayer.Bottom
             color: Config.background.wallpaperEnabled ? "black" : "transparent"
+            surfaceFormat.opaque: false
 
             anchors.top: true
             anchors.bottom: true
@@ -35,21 +35,16 @@ Loader {
                 id: behindClock
 
                 anchors.fill: parent
+
                 Loader {
-                    id: wallpaperLoader
+                    id: wallpaper
 
                     anchors.fill: parent
-
                     active: Config.background.wallpaperEnabled
 
-                    sourceComponent: Item {
-                        anchors.fill: parent
-
-                        Wallpaper {
-                            id: wallpaper
-                        }
-                    }
+                    sourceComponent: Wallpaper {}
                 }
+
                 Visualiser {
                     anchors.fill: parent
                     screen: win.modelData
