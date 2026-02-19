@@ -46,34 +46,64 @@ Singleton {
     function formatBytes(bytes: real): var {
         // Handle negative or invalid values
         if (bytes < 0 || isNaN(bytes) || !isFinite(bytes)) {
-            return { value: 0, unit: "B/s" };
+            return {
+                value: 0,
+                unit: "B/s"
+            };
         }
-        
+
         if (bytes < 1024) {
-            return { value: bytes, unit: "B/s" };
+            return {
+                value: bytes,
+                unit: "B/s"
+            };
         } else if (bytes < 1024 * 1024) {
-            return { value: bytes / 1024, unit: "KB/s" };
+            return {
+                value: bytes / 1024,
+                unit: "KB/s"
+            };
         } else if (bytes < 1024 * 1024 * 1024) {
-            return { value: bytes / (1024 * 1024), unit: "MB/s" };
+            return {
+                value: bytes / (1024 * 1024),
+                unit: "MB/s"
+            };
         } else {
-            return { value: bytes / (1024 * 1024 * 1024), unit: "GB/s" };
+            return {
+                value: bytes / (1024 * 1024 * 1024),
+                unit: "GB/s"
+            };
         }
     }
 
     function formatBytesTotal(bytes: real): var {
         // Handle negative or invalid values
         if (bytes < 0 || isNaN(bytes) || !isFinite(bytes)) {
-            return { value: 0, unit: "B" };
+            return {
+                value: 0,
+                unit: "B"
+            };
         }
-        
+
         if (bytes < 1024) {
-            return { value: bytes, unit: "B" };
+            return {
+                value: bytes,
+                unit: "B"
+            };
         } else if (bytes < 1024 * 1024) {
-            return { value: bytes / 1024, unit: "KB" };
+            return {
+                value: bytes / 1024,
+                unit: "KB"
+            };
         } else if (bytes < 1024 * 1024 * 1024) {
-            return { value: bytes / (1024 * 1024), unit: "MB" };
+            return {
+                value: bytes / (1024 * 1024),
+                unit: "MB"
+            };
         } else {
-            return { value: bytes / (1024 * 1024 * 1024), unit: "GB" };
+            return {
+                value: bytes / (1024 * 1024 * 1024),
+                unit: "GB"
+            };
         }
     }
 
@@ -84,14 +114,17 @@ Singleton {
 
         for (let i = 2; i < lines.length; i++) {
             const line = lines[i].trim();
-            if (!line) continue;
+            if (!line)
+                continue;
 
             const parts = line.split(/\s+/);
-            if (parts.length < 10) continue;
+            if (parts.length < 10)
+                continue;
 
             const iface = parts[0].replace(":", "");
             // Skip loopback interface
-            if (iface === "lo") continue;
+            if (iface === "lo")
+                continue;
 
             const rxBytes = parseFloat(parts[1]) || 0;
             const txBytes = parseFloat(parts[9]) || 0;
@@ -100,7 +133,10 @@ Singleton {
             totalTx += txBytes;
         }
 
-        return { rx: totalRx, tx: totalTx };
+        return {
+            rx: totalRx,
+            tx: totalTx
+        };
     }
 
     FileView {
@@ -109,7 +145,7 @@ Singleton {
     }
 
     Timer {
-        interval: Config.dashboard.updateInterval
+        interval: Config.dashboard.resourceUpdateInterval
         running: root.refCount > 0
         repeat: true
         triggeredOnStart: true
@@ -117,7 +153,8 @@ Singleton {
         onTriggered: {
             netDevFile.reload();
             const content = netDevFile.text();
-            if (!content) return;
+            if (!content)
+                return;
 
             const data = root.parseNetDev(content);
             const now = Date.now();

@@ -45,32 +45,11 @@ Singleton {
     property int refCount
 
     function cleanCpuName(name: string): string {
-        return name
-            .replace(/\(R\)/gi, "")
-            .replace(/\(TM\)/gi, "")
-            .replace(/CPU/gi, "")
-            .replace(/\d+th Gen /gi, "")
-            .replace(/\d+nd Gen /gi, "")
-            .replace(/\d+rd Gen /gi, "")
-            .replace(/\d+st Gen /gi, "")
-            .replace(/Core /gi, "")
-            .replace(/Processor/gi, "")
-            .replace(/\s+/g, " ")
-            .trim();
+        return name.replace(/\(R\)/gi, "").replace(/\(TM\)/gi, "").replace(/CPU/gi, "").replace(/\d+th Gen /gi, "").replace(/\d+nd Gen /gi, "").replace(/\d+rd Gen /gi, "").replace(/\d+st Gen /gi, "").replace(/Core /gi, "").replace(/Processor/gi, "").replace(/\s+/g, " ").trim();
     }
 
     function cleanGpuName(name: string): string {
-        return name
-            .replace(/NVIDIA GeForce /gi, "")
-            .replace(/NVIDIA /gi, "")
-            .replace(/AMD Radeon /gi, "")
-            .replace(/AMD /gi, "")
-            .replace(/Intel /gi, "")
-            .replace(/\(R\)/gi, "")
-            .replace(/\(TM\)/gi, "")
-            .replace(/Graphics/gi, "")
-            .replace(/\s+/g, " ")
-            .trim();
+        return name.replace(/NVIDIA GeForce /gi, "").replace(/NVIDIA /gi, "").replace(/AMD Radeon /gi, "").replace(/AMD /gi, "").replace(/Intel /gi, "").replace(/\(R\)/gi, "").replace(/\(TM\)/gi, "").replace(/Graphics/gi, "").replace(/\s+/g, " ").trim();
     }
 
     function formatKib(kib: real): var {
@@ -101,7 +80,7 @@ Singleton {
 
     Timer {
         running: root.refCount > 0
-        interval: Config.dashboard.updateInterval
+        interval: Config.dashboard.resourceUpdateInterval
         repeat: true
         triggeredOnStart: true
         onTriggered: {
@@ -231,7 +210,8 @@ Singleton {
 
                     // Convert bytes to KiB for consistency with formatKib
                     diskList.push({
-                        mount: disk.name,  // Using 'mount' property for compatibility
+                        mount: disk.name  // Using 'mount' property for compatibility
+                        ,
                         used: used / 1024,
                         total: total / 1024,
                         free: (total - used) / 1024,

@@ -26,7 +26,7 @@ Item {
 
     Timer {
         running: Players.active?.isPlaying ?? false
-        interval: Config.dashboard.updateInterval
+        interval: Config.dashboard.mediaUpdateInterval
         triggeredOnStart: true
         repeat: true
         onTriggered: Players.active?.positionChanged()
@@ -106,7 +106,7 @@ Item {
 
             anchors.fill: parent
 
-            source: Players.active?.trackArtUrl ?? ""
+            source: Players.active?.trackArtUrl ?? "" // qmllint disable incompatible-type
             asynchronous: true
             fillMode: Image.PreserveAspectCrop
             sourceSize.width: width

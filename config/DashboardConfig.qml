@@ -3,17 +3,11 @@ import Quickshell.Io
 JsonObject {
     property bool enabled: true
     property bool showOnHover: true
-    property int updateInterval: 1000
+    property int mediaUpdateInterval: 500
+    property int resourceUpdateInterval: 1000
     property int dragThreshold: 50
-    property Sizes sizes
-
-    sizes: Sizes {
-    }
-
-    property Performance performance
-
-    performance: Performance {
-    }
+    property Sizes sizes: Sizes {}
+    property Performance performance: Performance {}
 
     component Performance: JsonObject {
         property bool showBattery: true
@@ -23,7 +17,6 @@ JsonObject {
         property bool showStorage: true
         property bool showNetwork: true
     }
-
 
     component Sizes: JsonObject {
         readonly property int tabIndicatorHeight: 3
@@ -40,5 +33,4 @@ JsonObject {
         readonly property int mediaVisualiserSize: 80
         readonly property int resourceSize: 200
     }
-
 }
