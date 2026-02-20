@@ -113,22 +113,60 @@ Item {
                         wrapMode: Text.WordWrap
                     }
 
-                    StyledRect {
-                        Layout.fillWidth: true
-                        Layout.preferredHeight: settingsSection1.height + Appearance.padding.large * 2
-                        Layout.topMargin: Appearance.padding.normal
-                        color: Colours.layer(Colours.palette.m3surfaceContainer, 1)
-                        radius: Appearance.rounding.normal
+                   StyledRect {
+        Layout.fillWidth: true
+        Layout.preferredHeight: taskbarContent.implicitHeight + 60
+        color: Colours.palette.m3surfaceContainerLow
+        radius: Appearance.rounding.normal
+        border.color: Colours.palette.m3outlineVariant
 
-                        StyledText {
-                            id: settingsSection1
-                            anchors.centerIn: parent
-                            text: "Content coming soon:\n• System requirements\n• Installation steps\n• Dependencies"
-                            font.pointSize: Appearance.font.size.normal
-                            color: Colours.palette.m3onSurfaceVariant
-                            horizontalAlignment: Text.AlignHCenter
-                        }
+        ColumnLayout {
+            id: taskbarContent
+            anchors.fill: parent
+            anchors.margins: 30
+            spacing: 24
+
+            Repeater {
+                model: [
+                    { title: "Network", desc: "This page is dedicated to setting up your network access and VPN." },
+                    { title: "Bluetooth", desc: "Configure and look for bluetooth devices here." },
+                    { title: "Audio", desc: "Plugged in speakers or headphones? set up app specific volume limits." },
+                    { title: "Appearance", desc: "Adjust transparency, fonts, and color variants." },
+                    { title: "Taskbar", desc: "Infinitely configurable system statuses (WiFi, Battery) with expanded hover menus. Or hidden completely" },
+                    { title: "Launcher", desc: "Make sure your favorite apps stay at the top! Or hide apps you dont need visible." },
+                    { title: "Dashboard", desc: "Choose to disable or adjust sensitivity. Can also change what is displayed." },
+                ]
+
+                delegate: ColumnLayout {
+                    spacing: 4
+                    Layout.fillWidth: true
+
+                    StyledText {
+                        text: modelData.title
+                        font.bold: true
+                        font.pointSize: 11
+                        color: Colours.palette.m3primary
                     }
+
+                    StyledText {
+                        Layout.fillWidth: true
+                        text: modelData.desc
+                        font.pointSize: 10
+                        color: Colours.palette.m3onSurface
+                        wrapMode: Text.WordWrap
+                        opacity: 0.8
+                    }
+                    Rectangle {
+                        Layout.fillWidth: true
+                        height: 1
+                        color: Colours.palette.m3outlineVariant
+                        opacity: 0.3
+                        visible: index < 7
+                    }
+                }
+            }
+        }
+    }
 
                     Item {
                         Layout.fillHeight: true

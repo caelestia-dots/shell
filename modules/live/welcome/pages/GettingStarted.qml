@@ -52,7 +52,7 @@ Item {
         anchors.fill: parent
         spacing: Appearance.spacing.large
 
-        // Vertical navigation
+        
         VerticalNav {
             id: verticalNav
 
@@ -64,7 +64,7 @@ Item {
             onSectionChanged: sectionId => root.currentSubsection = sectionId
         }
 
-        // Content area
+        
         StyledFlickable {
             id: contentFlickable
 
@@ -114,7 +114,6 @@ Item {
                     StyledRect {
                         Layout.fillWidth: true
                         Layout.preferredHeight: prerequisitesColumn.implicitHeight + (Appearance.padding.large * 2)
-                        // Using a direct palette variable to avoid the 'layer' issue [cite: 75, 84]
                         color: Colours.palette.m3surfaceContainerLow
                         radius: Appearance.rounding.normal
                         border.color: Colours.palette.m3outlineVariant
@@ -139,11 +138,10 @@ Item {
                                 wrapMode: Text.WordWrap
                                 opacity: 0.8
                             }
-                            // Pill Container
+                            
                             Flow {
                                 Layout.fillWidth: true
-                                spacing: 10 // Flow uses 'spacing' for both directions; 'rowSpacing' isn't a thing here.
-
+                                spacing: 10 
                                 Repeater {
                                     model: [
                                         { label: "CPU", val: "x86_64 Dual Core" },
@@ -206,7 +204,7 @@ Item {
                         Layout.fillWidth: true
                         spacing: Appearance.padding.large
 
-                        // Card 1: The Linux Philosophy
+                        
                         StyledRect {
                             Layout.fillWidth: true
                             Layout.preferredHeight: philosophyColumn.implicitHeight + (Appearance.padding.large * 2)
@@ -237,7 +235,7 @@ Item {
                             }
                         }
 
-                        // Card 2: Learning Mindset
+                        
                         StyledRect {
                             Layout.fillWidth: true
                             Layout.preferredHeight: learningColumn.implicitHeight + (Appearance.padding.large * 2)
@@ -253,7 +251,7 @@ Item {
 
                                 RowLayout {
                                     spacing: 8
-                                    // You could add an icon here later
+                                    // add an icon here later
                                     StyledText {
                                         text: qsTr("An Aptitude for Learning")
                                         font.bold: true
@@ -349,7 +347,6 @@ Item {
                     ColumnLayout {
                         id: firstStepsSection1
                         Layout.fillWidth: true
-                        // REMOVE: Layout.minimumHeight: contentFlickable.height
                         Layout.leftMargin: Appearance.padding.larger
                         Layout.rightMargin: Appearance.padding.larger
                         Layout.topMargin: Appearance.padding.larger
@@ -384,7 +381,7 @@ Item {
                                 columnSpacing: 20
                                 rowSpacing: 20
 
-                                // Helper for creating "Key" badges
+                                
                                 Repeater {
                                     model: [
                                         { keys: "SUPER", desc: "Open App Launcher" },
@@ -398,7 +395,7 @@ Item {
                                         spacing: 15
                                         Layout.fillWidth: true
 
-                                        // The "Key" Badge
+                                       
                                         StyledRect {
                                             width: keyText.implicitWidth + 20
                                             height: 32
@@ -430,7 +427,6 @@ Item {
                     ColumnLayout {
                         id: firstStepsSection2
                         Layout.fillWidth: true
-                        // REMOVE: Layout.minimumHeight: contentFlickable.height
                         Layout.leftMargin: Appearance.padding.larger
                         Layout.rightMargin: Appearance.padding.larger
                         Layout.topMargin: Appearance.padding.larger
@@ -518,7 +514,10 @@ Item {
                 ColumnLayout {
                     id: workspacesSection
                     Layout.fillWidth: true
-                    Layout.margins: 40
+                    Layout.minimumHeight: contentFlickable.height
+                    Layout.leftMargin: Appearance.padding.larger
+                    Layout.rightMargin: Appearance.padding.larger
+                    Layout.topMargin: Appearance.padding.larger
                     spacing: Appearance.padding.large
 
                     // Header
@@ -537,7 +536,6 @@ Item {
                         }
                     }
 
-                    // Card 1: Normal Workspaces (1-10)
                     StyledRect {
                         Layout.fillWidth: true
                         Layout.preferredHeight: normalWorkCol.implicitHeight + 60
@@ -552,7 +550,7 @@ Item {
                             spacing: 20
 
                             StyledText {
-                                text: "Window Management"
+                                text: "Window Management in standard workspaces"
                                 font.bold: true
                                 color: Colours.palette.m3primary
                             }
@@ -597,7 +595,17 @@ Item {
                             }
                         }
                     }
-
+                    StyledText {
+                            text: "Access Special Workspaces"
+                            font.pointSize: Appearance.font.size.extraLarge
+                            font.bold: true
+                            color: Colours.palette.m3onBackground
+                        }
+                        StyledText {
+                            text: "Keeps Important things close and out of the way!"
+                            font.pointSize: Appearance.font.size.normal
+                            color: Colours.palette.m3onSurfaceVariant
+                        }
                     StyledRect {
                         Layout.fillWidth: true
                         Layout.preferredHeight: specialWorkCol.implicitHeight + 60
@@ -630,6 +638,7 @@ Item {
                                         { key: "M", label: "Music & Media", desc: "Spotify / MPD" },
                                         { key: "S", label: "Special Scratchpad", desc: "Floating terminal / Notes" },
                                         { key: "A", label: "ToDo Lists", desc: "Task management" }
+                                        //{ key: "Ctrl + Shift + Esc", Label: "System Monitor", desc: "Btop" }
                                     ]
                                     delegate: RowLayout {
                                         spacing: 15

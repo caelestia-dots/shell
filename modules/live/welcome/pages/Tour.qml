@@ -157,8 +157,6 @@ ColumnLayout {
                         wrapMode: Text.WordWrap
                         opacity: 0.8
                     }
-
-                    // Subtle separator line between items (except the last one)
                     Rectangle {
                         Layout.fillWidth: true
                         height: 1
