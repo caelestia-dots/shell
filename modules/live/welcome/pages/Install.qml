@@ -11,25 +11,31 @@ Item {
 
     readonly property list<var> subsections: [
         {
-            id: "prerequisites",
-            name: qsTr("Prerequisites"),
-            icon: "checklist"
+            id: "taskbar",
+            name: qsTr("Taskbar"),
+            icon: "dock_to_right"
         },
         {
-            id: "installation",
-            name: qsTr("Installation"),
-            icon: "download"
+            id: "launcher",
+            name: qsTr("Launcher"),
+            icon: "dock_to_bottom"
         },
         {
-            id: "first-steps",
-            name: qsTr("First Steps"),
-            icon: "bolt"
+            id: "side-bar",
+            name: qsTr("SideBar"),
+            icon: "dock_to_left"
         },
         {
-          id: "workspaces",
-          name:qsTr("Workspaces"),
-          icon: "stack"
+            id: "dashboard",
+            name: qsTr("Dashboard"),
+            icon: "toolbar"
+        },
+        {
+            id: "settings-menu",
+            name:qsTr("Settings Menu"),
+            icon: "settings"
         }
+
     ]
 
     property string currentSubsection: subsections[0].id
@@ -149,8 +155,7 @@ Item {
                                         { label: "CPU", val: "x86_64 Dual Core" },
                                         { label: "RAM", val: "4GB" },
                                         { label: "Disk", val: "256GB" },
-                                        { label: "GPU", val: "Modern iGPU(Iris Xe or Radeon)/Dedicated" },
-                                        { label: "Display", val: "1366x768+"}
+                                        { label: "GPU", val: "Modern iGPU/Dedicated" }
                                     ]
 
                                     delegate: StyledRect {
@@ -291,48 +296,85 @@ Item {
                 }
 
                 ColumnLayout {
-                    id: installationSection
-
-                    Layout.fillWidth: true
+                    id: taskbarSection
                     Layout.minimumHeight: contentFlickable.height
                     Layout.leftMargin: Appearance.padding.larger
                     Layout.rightMargin: Appearance.padding.larger
+                    Layout.topMargin: Appearance.padding.larger
                     spacing: Appearance.padding.large
-
-                    StyledText {
-                        text: "Installation"
-                        font.pointSize: Appearance.font.size.extraLarge
-                        font.bold: true
-                        color: Colours.palette.m3onBackground
-                    }
-
-                    StyledText {
-                        Layout.fillWidth: true
-                        text: "Taking your computer from raw to riced!"
-                        font.pointSize: Appearance.font.size.normal
-                        color: Colours.palette.m3onSurfaceVariant
-                        wrapMode: Text.WordWrap
+                    ColumnLayout {
+                        spacing: 4
+                        StyledText {
+                            text: "Taskbar"
+                            font.pointSize: Appearance.font.size.extraLarge
+                            font.bold: true
+                            color: Colours.palette.m3onBackground
+                        }
+                        StyledText {
+                            text: qsTr("The central hub for system information, located on the left side of the shell.")
+                            font.pointSize: Appearance.font.size.normal
+                            color: Colours.palette.m3onSurfaceVariant
+                        }
                     }
 
                     StyledRect {
                         Layout.fillWidth: true
-                        Layout.preferredHeight: installationSection1.height + Appearance.padding.large * 2
-                        Layout.topMargin: Appearance.padding.normal
-                        color: Colours.layer(Colours.palette.m3surfaceContainer, 1)
+                        Layout.preferredHeight: taskbarContent.implicitHeight + 60
+                        color: Colours.palette.m3surfaceContainerLow
                         radius: Appearance.rounding.normal
+                        border.color: Colours.palette.m3outlineVariant
 
-                        StyledText {
-                            id: installationSection1
-                            anchors.centerIn: parent
-                            text: "Content coming soon:\n• Configuration files\n• CLI usage\n• Theme customization"
-                            font.pointSize: Appearance.font.size.normal
-                            color: Colours.palette.m3onSurfaceVariant
-                            horizontalAlignment: Text.AlignHCenter
+                        ColumnLayout {
+                            id: taskbarContent
+                            anchors.fill: parent
+                            anchors.margins: 30
+                            spacing: 24
+
+                            Repeater {
+                                model: [
+                                    { title: "OS Icon", desc: "A decorative brand icon that opens the launcher when clicked." },
+                                    { title: "Workspaces", desc: "A modular monitor showing active spaces. Behavior can be modified in settings." },
+                                    { title: "Active Window", desc: "Displays the current window title. Hovering provides a live preview pop-out." },
+                                    { title: "System Tray", desc: "Interact with background applications and special workspace utilities." },
+                                    { title: "Status Icons", desc: "Quick-look system health (WiFi, Battery) with expanded hover menus." },
+                                    { title: "Power Menu", desc: "Access the power drawer for Logout, Restart, and Shutdown options." }
+                                ]
+
+                                delegate: ColumnLayout {
+                                    spacing: 4
+                                    Layout.fillWidth: true
+
+                                    StyledText {
+                                        text: modelData.title
+                                        font.bold: true
+                                        font.pointSize: 11
+                                        color: Colours.palette.m3primary
+                                    }
+
+                                    StyledText {
+                                        Layout.fillWidth: true
+                                        text: modelData.desc
+                                        font.pointSize: 10
+                                        color: Colours.palette.m3onSurface
+                                        wrapMode: Text.WordWrap
+                                        opacity: 0.8
+                                    }
+
+                                    // Subtle separator line between items (except the last one)
+                                    Rectangle {
+                                        Layout.fillWidth: true
+                                        height: 1
+                                        color: Colours.palette.m3outlineVariant
+                                        opacity: 0.3
+                                        visible: index < 5
+                                    }
+                                }
+                            }
                         }
                     }
-
                     Item {
                         Layout.fillHeight: true
+
                     }
                 }
 

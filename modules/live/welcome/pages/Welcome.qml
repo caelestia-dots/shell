@@ -29,8 +29,10 @@ Item {
 
                 VectorImage {
                     Layout.alignment: Qt.AlignHCenter
+                    Layout.preferredWidth: 876
+                    Layout.preferredHeight: 656
                     preferredRendererType: VectorImage.CurveRenderer
-                    source: Colours.currentLight ? "../../assets/logo-light.svg" : "../../assets/logo-dark.svg"
+                    source: Colours.currentLight ? "../assets/logo-light.svg" : "../assets/logo-dark.svg"
                 }
 
                 StyledText {

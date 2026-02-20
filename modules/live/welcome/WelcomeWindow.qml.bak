@@ -7,7 +7,6 @@ import qs.components
 import qs.components.controls
 import qs.config
 import qs.services
-import "components"
 import "pages"
 
 StyledRect {
@@ -32,12 +31,6 @@ StyledRect {
             component: gettingStartedComponent
         },
         {
-            id: "tour",
-            name: qsTr("Tour"),
-            icon: "planet",
-            component: tourComponent
-        },
-        {
             id: "configuration",
             name: qsTr("Configuration"),
             icon: "settings",
@@ -55,12 +48,6 @@ StyledRect {
             icon: "people",
             component: communityComponent
         },
-        //{
-            //id: "install",
-            //name: "Install",
-            //icon: qsTr("install_desktop"),
-            //component: installComponent
-        //},
     ]
 
     readonly property var currentPageData: pages.find(p => p.id === currentPage) ?? pages[0]
@@ -332,11 +319,6 @@ StyledRect {
     }
 
     Component {
-        id:tourComponent
-        Tour{}
-    }
-
-    Component {
         id: configurationComponent
         Configuration {}
     }
@@ -350,8 +332,4 @@ StyledRect {
         id: communityComponent
         Community {}
     }
-    //Component {
-        //id: installComponent
-        //Install {}
-    //}
 }

@@ -1,10 +1,11 @@
 import QtQuick
 import QtQuick.Layouts
 import qs.services
+import QtQuick.VectorImage
 import qs.components
 import qs.components.containers
-import qs.modules.live.components
 import qs.config
+import "../components"
 
 Item {
     id: root
@@ -264,6 +265,16 @@ Item {
                             font.pointSize: Appearance.font.size.normal
                             color: Colours.palette.m3onSurfaceVariant
                             horizontalAlignment: Text.AlignHCenter
+                        }
+                        ColumnLayout {
+                            Layout.fillWidth: true
+                            Layout.alignment: Qt.AlignHCenter
+
+                            VectorImage {
+                                Layout.alignment: Qt.AlignHCenter
+                                preferredRendererType: VectorImage.CurveRenderer
+                                source: Colours.currentLight ? "../assets/confighypr-light.svg" : "../assets/confighypr-dark.svg"
+                            }
                         }
                     }
 
