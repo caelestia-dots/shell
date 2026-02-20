@@ -1,7 +1,6 @@
 pragma Singleton
 
 import ".."
-import qs.services
 import qs.config
 import qs.utils
 import Quickshell
@@ -10,8 +9,18 @@ import QtQuick
 Searcher {
     id: root
 
+    property var currentGroup: null
+
     function transformSearch(search: string): string {
-        return search.slice(Config.launcher.actionPrefix.length);
+        const prefix = Config.launcher.actionPrefix;
+        const subPrefix = `${prefix}sub `;
+        if (search.startsWith(subPrefix))
+            return search.slice(subPrefix.length);
+        return "";
+    }
+
+    function setGroup(groupObj: var): void {
+        currentGroup = groupObj;
     }
 
     list: variants.instances
@@ -20,13 +29,16 @@ Searcher {
     Variants {
         id: variants
 
-        model: Config.launcher.actions.filter(a => (a.enabled ?? true) && (Config.launcher.enableDangerousActions || !(a.dangerous ?? false)))
+        model: (root.currentGroup?.children ?? []).filter(a =>
+            (a.enabled ?? true) && (Config.launcher.enableDangerousActions || !(a.dangerous ?? false))
+        )
 
-        Action {}
+        SubAction { }
     }
 
-    component Action: QtObject {
+    component SubAction: QtObject {
         required property var modelData
+
         readonly property string name: modelData.name ?? qsTr("Unnamed")
         readonly property string desc: modelData.description ?? qsTr("No description")
         readonly property string icon: modelData.icon ?? "help_outline"
@@ -43,9 +55,6 @@ Searcher {
             } else if (command[0] === "setMode" && command.length > 1) {
                 list.visibilities.launcher = false;
                 Colours.setMode(command[1]);
-            } else if (command[0] === "openGroup") {
-                SubActions.setGroup(modelData);
-                list.search.text = `${Config.launcher.actionPrefix}sub `;
             } else {
                 list.visibilities.launcher = false;
                 Quickshell.execDetached(command);
@@ -53,3 +62,4 @@ Searcher {
         }
     }
 }
+
