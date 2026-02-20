@@ -55,15 +55,17 @@ Item {
         
         VerticalNav {
             id: verticalNav
-
-            Layout.fillHeight: true
+            Layout.alignment: Qt.AlignTop
+            Layout.preferredHeight: 175
             Layout.preferredWidth: 200
 
             sections: root.subsections
             activeSection: root.currentSubsection
             onSectionChanged: sectionId => root.currentSubsection = sectionId
         }
-
+        Item {
+                        Layout.fillHeight: true
+                    }
         
         StyledFlickable {
             id: contentFlickable
@@ -596,7 +598,7 @@ Item {
                         }
                     }
                     StyledText {
-                            text: "Access Special Workspaces"
+                            text: "Special Workspaces"
                             font.pointSize: Appearance.font.size.extraLarge
                             font.bold: true
                             color: Colours.palette.m3onBackground
@@ -620,7 +622,7 @@ Item {
                             spacing: 20
 
                             StyledText {
-                                text: "Special Workspaces"
+                                text: "Access Special Workspaces"
                                 font.bold: true
                                 color: Colours.palette.m3onSurface
                             }

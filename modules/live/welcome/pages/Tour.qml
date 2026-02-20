@@ -29,11 +29,6 @@ Item {
             id: "dashboard",
             name: qsTr("Dashboard"),
             icon: "toolbar"
-        },
-        {
-            id: "settings-menu",
-            name:qsTr("Settings Menu"),
-            icon: "settings"
         }
 
     ]
@@ -58,19 +53,22 @@ Item {
         anchors.fill: parent
         spacing: Appearance.spacing.large
 
-        // Vertical navigation
+        
         VerticalNav {
             id: verticalNav
-
-            Layout.fillHeight: true
+            Layout.alignment: Qt.AlignTop
+            Layout.preferredHeight: 175
             Layout.preferredWidth: 200
 
             sections: root.subsections
             activeSection: root.currentSubsection
             onSectionChanged: sectionId => root.currentSubsection = sectionId
         }
+        Item {
+                        Layout.fillHeight: true
+                    }
 
-        // Content area
+        
         StyledFlickable {
             id: contentFlickable
 
@@ -397,82 +395,6 @@ ColumnLayout {
     }
 }
 //-----------------------------------------------------------------------------------------------------------------------
-ColumnLayout {
-    id: settingsmenuSection
-    Layout.minimumHeight: contentFlickable.height
-    Layout.leftMargin: Appearance.padding.larger
-    Layout.rightMargin: Appearance.padding.larger
-    Layout.topMargin: Appearance.padding.larger
-    spacing: Appearance.padding.large
-    ColumnLayout {
-        spacing: 4
-        StyledText {
-            text: "Settings Menu"
-            font.pointSize: Appearance.font.size.extraLarge
-            font.bold: true
-            color: Colours.palette.m3onBackground
-        }
-        StyledText {
-            text: qsTr("The settings menu offers extensive options to configure your shell experience.")
-            font.pointSize: Appearance.font.size.normal
-            color: Colours.palette.m3onSurfaceVariant
-        }
-    }
-
-    StyledRect {
-        Layout.fillWidth: true
-        Layout.preferredHeight: settingsContent.implicitHeight + 60
-        color: Colours.palette.m3surfaceContainerLow
-        radius: Appearance.rounding.normal
-        border.color: Colours.palette.m3outlineVariant
-
-        ColumnLayout {
-            id: settingsContent
-            anchors.fill: parent
-            anchors.margins: 30
-            spacing: 24
-
-            Repeater {
-                model: [
-                    { title: "Network & Bluetooth", desc: "Configure WiFi, LAN, VPN, and manage Bluetooth devices." },
-                    { title: "Audio", desc: "Manage input/output devices, microphones, and volume levels." },
-                    { title: "Appearance", desc: "Customize themes, transparency, fonts, and color variants." },
-                    { title: "Taskbar & Launcher", desc: "Adjust behavioral settings and visibility for shell components." }
-                ]
-                delegate: ColumnLayout {
-                    spacing: 4
-                    Layout.fillWidth: true
-
-                    StyledText {
-                        text: modelData.title
-                        font.bold: true
-                        font.pointSize: 11
-                        color: Colours.palette.m3primary
-                    }
-                    StyledText {
-                        Layout.fillWidth: true
-                        text: modelData.desc
-                        font.pointSize: 10
-                        color: Colours.palette.m3onSurface
-                        wrapMode: Text.WordWrap
-                        opacity: 0.8
-                    }
-                    Rectangle {
-                        Layout.fillWidth: true
-                        height: 1
-                        color: Colours.palette.m3outlineVariant
-                        opacity: 0.3
-                        visible: index < 3
-                    }
-                }
-            }
-        }
-    }
-    Item {
-        Layout.fillHeight: true
-
-    }
-}
             }
         }
     }
