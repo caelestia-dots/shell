@@ -218,4 +218,24 @@ Singleton {
         }
         return icon;
     }
+
+    function getBatteryIcon(charge: int): string {
+        if (charge > 0 && charge < 5)
+            return "battery_0_bar";
+        if (charge >= 5 && charge < 20)
+            return "battery_1_bar";
+        if (charge >= 20 && charge < 35)
+            return "battery_2_bar";
+        if (charge >= 35 && charge < 50)
+            return "battery_3_bar";
+        if (charge >= 50 && charge < 65)
+            return "battery_4_bar";
+        if (charge >= 65 && charge < 80)
+            return "battery_5_bar";
+        if (charge >= 80 && charge < 95)
+            return "battery_6_bar";
+        if (charge >= 95)
+            return "battery_full";
+        return "battery_alert";
+    }
 }
