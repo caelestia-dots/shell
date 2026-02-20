@@ -329,7 +329,7 @@ default, you must create it manually.
         "wallpaper": {
             "audio": {
                 "muteAudio": true,
-                "volume": 1.0,
+                "volume": 1.0
             },
             "video": {
                 "autoPause": false
