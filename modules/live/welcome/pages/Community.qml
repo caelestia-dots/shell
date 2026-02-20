@@ -43,17 +43,19 @@ Item {
         anchors.fill: parent
         spacing: Appearance.spacing.large
 
-        // Vertical navigation
         VerticalNav {
             id: verticalNav
-
-            Layout.fillHeight: true
+            Layout.alignment: Qt.AlignTop
+            Layout.preferredHeight: 90
             Layout.preferredWidth: 200
 
             sections: root.subsections
             activeSection: root.currentSubsection
             onSectionChanged: sectionId => root.currentSubsection = sectionId
         }
+        Item {
+                        Layout.fillHeight: true
+                    }
 
         // Content area
         StyledFlickable {

@@ -61,7 +61,6 @@ Item {
                         Layout.fillHeight: true
                     }
 
-        // Content area
         StyledFlickable {
             id: contentFlickable
 

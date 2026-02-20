@@ -194,7 +194,7 @@ Item {
                                     text: qsTr("Note: ARM processors (SnapDragon) are not officially supported.")
                                     font.pointSize: Appearance.font.size.small
                                     font.italic: true
-                                    color: Colours.palette.m3error // Visual warning for compatibility
+                                    color: Colours.palette.m3error 
                                     horizontalAlignment: Text.AlignHCenter
                                     wrapMode: Text.WordWrap
                                 }
@@ -253,7 +253,6 @@ Item {
 
                                 RowLayout {
                                     spacing: 8
-                                    // add an icon here later
                                     StyledText {
                                         text: qsTr("An Aptitude for Learning")
                                         font.bold: true
@@ -269,8 +268,6 @@ Item {
                                     color: Colours.palette.m3onSurface
                                     wrapMode: Text.WordWrap
                                 }
-
-                                // Picasso Quote as a stylized footer
                                 StyledText {
                                     Layout.fillWidth: true
                                     text: "I am always doing that which I cannot do, in order that I may learn how to do it. — Pablo Picasso"
@@ -463,7 +460,6 @@ Item {
                                 columnSpacing: 20
                                 rowSpacing: 20
 
-                                // Helper for creating "Key" badges
                                 Repeater {
                                     model: [
                                         { keys: "Thunar", desc: "File Manager" },
@@ -479,7 +475,6 @@ Item {
                                         spacing: 15
                                         Layout.fillWidth: true
 
-                                        // The "Key" Badge
                                         StyledRect {
                                             width: keyText.implicitWidth + 20
                                             height: 32
@@ -522,7 +517,6 @@ Item {
                     Layout.topMargin: Appearance.padding.larger
                     spacing: Appearance.padding.large
 
-                    // Header
                     ColumnLayout {
                         spacing: 4
                         StyledText {
