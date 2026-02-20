@@ -71,7 +71,7 @@ StyledRect {
         anchors.fill: parent
         spacing: 0
 
-        // Top navigation bar
+        
         StyledRect {
             id: topNav
 
@@ -91,7 +91,7 @@ StyledRect {
                 anchors.bottomMargin: Appearance.padding.normal
                 spacing: Appearance.spacing.normal
 
-                // Logo
+                
                 RowLayout {
                     id: logo
                     spacing: Appearance.spacing.small
@@ -214,7 +214,7 @@ StyledRect {
             }
         }
 
-        // Main content area
+        
         Item {
             id: contentArea
 
