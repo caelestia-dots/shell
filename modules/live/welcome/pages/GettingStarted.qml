@@ -452,7 +452,7 @@ Item {
                         }
                         StyledRect {
                             Layout.fillWidth: true
-                            Layout.preferredHeight: bindsGrid.implicitHeight + 60
+                            Layout.preferredHeight: bindsGrid.implicitHeight + 115
                             color: Colours.palette.m3surfaceContainerLow
                             radius: Appearance.rounding.normal
                             border.color: Colours.palette.m3outlineVariant
@@ -472,6 +472,10 @@ Item {
                                         { keys: "Zen", desc: "Web Browser" },
                                         { keys: "Foot", desc: "Terminal" },
                                         { keys: "Arch-Update", desc: "Update Notifications" },
+                                        { keys: "Btop", desc: "System Monitor" },
+                                        { keys: "Discord", desc: "Communication Hub" },
+                                        { keys: "Spotify", desc: "Music Player"},
+                                        { keys: "Code -OSS", desc: "Code Editor"}
                                     ]
                                     delegate: RowLayout {
                                         spacing: 15
