@@ -369,8 +369,6 @@ Item {
                                 color: Colours.palette.m3onSurfaceVariant
                             }
                         }
-
-                        // Keybinds Grid Card
                         StyledRect {
                             Layout.fillWidth: true
                             Layout.preferredHeight: bindsGrid.implicitHeight + 60
@@ -395,6 +393,85 @@ Item {
                                         { keys: "SUPER + W", desc: "Web Browser (Zen)" },
                                         { keys: "SUPER + Q", desc: "Close Active Window" },
                                         { keys: "CTRL + SHIFT + ESC", desc: "System Monitor (Btop)" }
+                                    ]
+                                    delegate: RowLayout {
+                                        spacing: 15
+                                        Layout.fillWidth: true
+
+                                        // The "Key" Badge
+                                        StyledRect {
+                                            width: keyText.implicitWidth + 20
+                                            height: 32
+                                            radius: 6
+                                            color: Colours.palette.m3surfaceContainerHigh
+                                            border.color: Colours.palette.m3outline
+
+                                            StyledText {
+                                                id: keyText
+                                                anchors.centerIn: parent
+                                                text: modelData.keys
+                                                font.bold: true
+                                                font.pointSize: 9
+                                                color: Colours.palette.m3primary
+                                            }
+                                        }
+
+                                        StyledText {
+                                            text: modelData.desc
+                                            font.pointSize: 10
+                                            color: Colours.palette.m3onSurface
+                                            Layout.fillWidth: true
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    ColumnLayout {
+                        id: firstStepsSection2
+                        Layout.fillWidth: true
+                        // REMOVE: Layout.minimumHeight: contentFlickable.height
+                        Layout.leftMargin: Appearance.padding.larger
+                        Layout.rightMargin: Appearance.padding.larger
+                        Layout.topMargin: Appearance.padding.larger
+                        spacing: Appearance.padding.large
+
+                        ColumnLayout {
+                            spacing: 4
+                            StyledText {
+                                text: "Applications"
+                                font.pointSize: Appearance.font.size.extraLarge
+                                font.bold: true
+                                color: Colours.palette.m3onBackground
+                            }
+                            StyledText {
+                                text: "Lets take a look at your default applications."
+                                font.pointSize: Appearance.font.size.normal
+                                color: Colours.palette.m3onSurfaceVariant
+                            }
+                        }
+                        StyledRect {
+                            Layout.fillWidth: true
+                            Layout.preferredHeight: bindsGrid.implicitHeight + 60
+                            color: Colours.palette.m3surfaceContainerLow
+                            radius: Appearance.rounding.normal
+                            border.color: Colours.palette.m3outlineVariant
+
+                            GridLayout {
+                                id: appsGrid
+                                anchors.fill: parent
+                                anchors.margins: 30
+                                columns: 2
+                                columnSpacing: 20
+                                rowSpacing: 20
+
+                                // Helper for creating "Key" badges
+                                Repeater {
+                                    model: [
+                                        { keys: "Thunar", desc: "File Manager" },
+                                        { keys: "Zen", desc: "Web Browser" },
+                                        { keys: "Foot", desc: "Terminal" },
+                                        { keys: "Arch-Update", desc: "Update Notifications" },
                                     ]
                                     delegate: RowLayout {
                                         spacing: 15
