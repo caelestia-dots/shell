@@ -596,6 +596,7 @@ default, you must create it manually.
         "playerAliases": [{ "from": "com.github.th_ch.youtube_music", "to": "YT Music" }],
         "weatherLocation": "",
         "useFahrenheit": false,
+        "useFahrenheitPerformance": false,
         "useTwelveHourClock": false,
         "smartScheme": true,
         "visualiserBars": 45
