@@ -19,7 +19,7 @@ SplitPaneWithDetails {
     anchors.fill: parent
 
     activeItem: session.bt.active
-    paneIdGenerator: function(item) {
+    paneIdGenerator: function (item) {
         return item ? (item.address || "") : "";
     }
 

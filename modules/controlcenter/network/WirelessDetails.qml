@@ -18,7 +18,7 @@ DeviceDetails {
 
     required property Session session
     readonly property var network: root.session.network.active
-    
+
     device: network
 
     Component.onCompleted: {
@@ -66,8 +66,7 @@ DeviceDetails {
                 const isActive = network.active || (Nmcli.active && Nmcli.active.ssid === network.ssid);
                 if (isActive) {
                     if (!Nmcli.wirelessDeviceDetails || Nmcli.wirelessDeviceDetails === null) {
-                        Nmcli.getWirelessDeviceDetails("", () => {
-                        });
+                        Nmcli.getWirelessDeviceDetails("", () => {});
                     } else {
                         connectionUpdateTimer.stop();
                     }

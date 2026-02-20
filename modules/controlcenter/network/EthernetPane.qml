@@ -16,7 +16,7 @@ SplitPaneWithDetails {
     anchors.fill: parent
 
     activeItem: session.ethernet.active
-    paneIdGenerator: function(item) {
+    paneIdGenerator: function (item) {
         return item ? (item.interface || "") : "";
     }
 

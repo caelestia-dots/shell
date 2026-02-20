@@ -14,12 +14,12 @@ RowLayout {
 
     property Component leftContent: null
     property Component rightContent: null
-    
+
     property real leftWidthRatio: 0.4
     property int leftMinimumWidth: 420
     property var leftLoaderProperties: ({})
     property var rightLoaderProperties: ({})
-    
+
     property alias leftLoader: leftLoader
     property alias rightLoader: rightLoader
 
@@ -107,4 +107,3 @@ RowLayout {
         }
     }
 }
-

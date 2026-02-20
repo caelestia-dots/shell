@@ -162,6 +162,39 @@ void AppDb::setEntries(const QObjectList& entries) {
     m_timer->start();
 }
 
+QStringList AppDb::favouriteApps() const {
+    return m_favouriteApps;
+}
+
+void AppDb::setFavouriteApps(const QStringList& favApps) {
+    if (m_favouriteApps == favApps) {
+        return;
+    }
+
+    m_favouriteApps = favApps;
+    emit favouriteAppsChanged();
+    m_favouriteAppsRegex.clear();
+    m_favouriteAppsRegex.reserve(m_favouriteApps.size());
+    for (const QString& item : std::as_const(m_favouriteApps)) {
+        const QRegularExpression re(regexifyString(item));
+        if (re.isValid()) {
+            m_favouriteAppsRegex << re;
+        } else {
+            qWarning() << "AppDb::setFavouriteApps: Regular expression is not valid: " << re.pattern();
+        }
+    }
+
+    emit appsChanged();
+}
+
+QString AppDb::regexifyString(const QString& original) const {
+    if (original.startsWith('^') && original.endsWith('$'))
+        return original;
+
+    const QString escaped = QRegularExpression::escape(original);
+    return QStringLiteral("^%1$").arg(escaped);
+}
+
 QQmlListProperty<AppEntry> AppDb::apps() {
     return QQmlListProperty<AppEntry>(this, &getSortedApps());
 }
@@ -192,13 +225,27 @@ void AppDb::incrementFrequency(const QString& id) {
 
 QList<AppEntry*>& AppDb::getSortedApps() const {
     m_sortedApps = m_apps.values();
-    std::sort(m_sortedApps.begin(), m_sortedApps.end(), [](AppEntry* a, AppEntry* b) {
+    std::sort(m_sortedApps.begin(), m_sortedApps.end(), [this](AppEntry* a, AppEntry* b) {
+        bool aIsFav = isFavourite(a);
+        bool bIsFav = isFavourite(b);
+        if (aIsFav != bIsFav) {
+            return aIsFav;
+        }
         if (a->frequency() != b->frequency()) {
             return a->frequency() > b->frequency();
         }
         return a->name().localeAwareCompare(b->name()) < 0;
     });
     return m_sortedApps;
+}
+
+bool AppDb::isFavourite(const AppEntry* app) const {
+    for (const QRegularExpression& re : m_favouriteAppsRegex) {
+        if (re.match(app->id()).hasMatch()) {
+            return true;
+        }
+    }
+    return false;
 }
 
 quint32 AppDb::getFrequency(const QString& id) const {
