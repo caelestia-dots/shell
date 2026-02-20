@@ -72,13 +72,27 @@ MouseArea {
     }
 
     function save(): void {
-        const tmpfile = Qt.resolvedUrl(`/tmp/caelestia-picker-${Quickshell.processId}-${Date.now()}.png`);
-        CUtils.saveItem(screencopy, tmpfile, Qt.rect(Math.ceil(rsx), Math.ceil(rsy), Math.floor(sw), Math.floor(sh)), path => {
+        const targetTmpFile = Qt.resolvedUrl(`/tmp/caelestia-picker-${Quickshell.processId}-${Date.now()}.png`);
+        CUtils.saveItem(screencopy, targetTmpFile, Qt.rect(Math.ceil(rsx), Math.ceil(rsy), Math.floor(sw), Math.floor(sh)), tmpFile => {
+            const timestamp = Qt.formatDateTime(new Date(), "yyyyMMddhhmmss");
+            const saveDir = "$HOME/Pictures/Screenshots";
+            const fileName = `${timestamp}.png`;
             if (root.loader.clipboardOnly) {
-                Quickshell.execDetached(["sh", "-c", "wl-copy --type image/png < " + path]);
-                Quickshell.execDetached(["notify-send", "-a", "caelestia-cli", "-i", path, "Screenshot taken", "Screenshot copied to clipboard"]);
+                Quickshell.execDetached(["sh", "-c", "wl-copy --type image/png < " + tmpFile]);
+                const bgScript = `
+                    action=$(notify-send -a "caelestia-cli" -i "${tmpFile}" "Screenshot Taken" "Copied to clipboard." --action=open="Open" --action=save="Save");
+                    mkdir -p ${saveDir};
+                    if [ "$action" = "save" ]; then
+                        mv "${tmpFile}" "${saveDir}/${fileName}";
+                        notify-send -a "caelestia-cli" -i "${saveDir}/${fileName}" "Screenshot Saved" "Image saved to ${saveDir}/${fileName}";
+                    elif [ "$action" = "open" ]; then
+                        swappy -f "${tmpFile}" -o "${saveDir}/${fileName}";
+                    fi
+                    rm "${tmpFile}";
+                `;
+                Quickshell.execDetached(["sh", "-c", bgScript]);
             } else {
-                Quickshell.execDetached(["swappy", "-f", path]);
+                Quickshell.execDetached(["swappy", "-f", tmpFile]);
             }
         });
         closeAnim.start();
