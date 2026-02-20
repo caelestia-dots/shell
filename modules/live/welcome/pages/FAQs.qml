@@ -3,32 +3,27 @@ import QtQuick.Layouts
 import qs.services
 import qs.components
 import qs.components.containers
+import qs.modules.live.components
 import qs.config
-import "../components"
 
 Item {
     id: root
 
     readonly property list<var> subsections: [
         {
-            id: "settings",
-            name: qsTr("Settings App"),
-            icon: "settings"
+            id: "pythonUpdates",
+            name: qsTr("Python Updates"),
+            icon: "help"
         },
         {
-            id: "cli",
-            name: qsTr("CLI"),
-            icon: "terminal"
+            id: "qtUpdates",
+            name: qsTr("Qt Updates"),
+            icon: "help"
         },
         {
-            id: "shell",
-            name: qsTr("Shell"),
-            icon: "desktop_windows"
-        },
-        {
-            id: "hyprland",
-            name: qsTr("Hyprland"),
-            icon: "select_window"
+            id: "configFiles",
+            name: qsTr("Config Files"),
+            icon: "help"
         },
     ]
 
@@ -88,7 +83,7 @@ Item {
                 spacing: 0
 
                 ColumnLayout {
-                    id: settingsSection
+                    id: pythonUpdatesSection
 
                     Layout.fillWidth: true
                     Layout.minimumHeight: contentFlickable.height
@@ -98,7 +93,7 @@ Item {
                     spacing: Appearance.padding.large
 
                     StyledText {
-                        text: "Settings App"
+                        text: "Python Updates"
                         font.pointSize: Appearance.font.size.extraLarge
                         font.bold: true
                         color: Colours.palette.m3onBackground
@@ -106,7 +101,7 @@ Item {
 
                     StyledText {
                         Layout.fillWidth: true
-                        text: "Quick configuration for the most common shell options."
+                        text: "The dreaded \"No module named 'caelestia'\" error."
                         font.pointSize: Appearance.font.size.normal
                         color: Colours.palette.m3onSurfaceVariant
                         wrapMode: Text.WordWrap
@@ -114,13 +109,13 @@ Item {
 
                     StyledRect {
                         Layout.fillWidth: true
-                        Layout.preferredHeight: settingsSection1.height + Appearance.padding.large * 2
+                        Layout.preferredHeight: contentPlaceholder1.height + Appearance.padding.large * 2
                         Layout.topMargin: Appearance.padding.normal
                         color: Colours.layer(Colours.palette.m3surfaceContainer, 1)
                         radius: Appearance.rounding.normal
 
                         StyledText {
-                            id: settingsSection1
+                            id: contentPlaceholder1
                             anchors.centerIn: parent
                             text: "Content coming soon:\n• System requirements\n• Installation steps\n• Dependencies"
                             font.pointSize: Appearance.font.size.normal
@@ -135,7 +130,7 @@ Item {
                 }
 
                 ColumnLayout {
-                    id: cliSection
+                    id: qtUpdatesSection
 
                     Layout.fillWidth: true
                     Layout.minimumHeight: contentFlickable.height
@@ -144,7 +139,7 @@ Item {
                     spacing: Appearance.padding.large
 
                     StyledText {
-                        text: "CLI Configuration"
+                        text: "Qt Updates"
                         font.pointSize: Appearance.font.size.extraLarge
                         font.bold: true
                         color: Colours.palette.m3onBackground
@@ -152,7 +147,7 @@ Item {
 
                     StyledText {
                         Layout.fillWidth: true
-                        text: "Customize the behavior of the caelestia CLI app."
+                        text: "Rebuilding Quickshell after Qt updates."
                         font.pointSize: Appearance.font.size.normal
                         color: Colours.palette.m3onSurfaceVariant
                         wrapMode: Text.WordWrap
@@ -160,13 +155,13 @@ Item {
 
                     StyledRect {
                         Layout.fillWidth: true
-                        Layout.preferredHeight: cliSection1.height + Appearance.padding.large * 2
+                        Layout.preferredHeight: contentPlaceholder2.height + Appearance.padding.large * 2
                         Layout.topMargin: Appearance.padding.normal
                         color: Colours.layer(Colours.palette.m3surfaceContainer, 1)
                         radius: Appearance.rounding.normal
 
                         StyledText {
-                            id: cliSection1
+                            id: contentPlaceholder2
                             anchors.centerIn: parent
                             text: "Content coming soon:\n• Configuration files\n• CLI usage\n• Theme customization"
                             font.pointSize: Appearance.font.size.normal
@@ -181,7 +176,7 @@ Item {
                 }
 
                 ColumnLayout {
-                    id: shellSection
+                    id: configFilesSection
 
                     Layout.fillWidth: true
                     Layout.minimumHeight: contentFlickable.height
@@ -190,7 +185,7 @@ Item {
                     spacing: Appearance.padding.large
 
                     StyledText {
-                        text: "Shell Configuration"
+                        text: "Config Files"
                         font.pointSize: Appearance.font.size.extraLarge
                         font.bold: true
                         color: Colours.palette.m3onBackground
@@ -198,7 +193,7 @@ Item {
 
                     StyledText {
                         Layout.fillWidth: true
-                        text: "Take your rice further with in-depth customization of the shell."
+                        text: "Where are the Caelestia config files?"
                         font.pointSize: Appearance.font.size.normal
                         color: Colours.palette.m3onSurfaceVariant
                         wrapMode: Text.WordWrap
@@ -206,59 +201,13 @@ Item {
 
                     StyledRect {
                         Layout.fillWidth: true
-                        Layout.preferredHeight: shellSection1.height + Appearance.padding.large * 2
+                        Layout.preferredHeight: contentPlaceholder3.height + Appearance.padding.large * 2
                         Layout.topMargin: Appearance.padding.normal
                         color: Colours.layer(Colours.palette.m3surfaceContainer, 1)
                         radius: Appearance.rounding.normal
 
                         StyledText {
-                            id: shellSection1
-                            anchors.centerIn: parent
-                            text: "Content coming soon:\n• Basic navigation\n• Keyboard shortcuts\n• Quick tips"
-                            font.pointSize: Appearance.font.size.normal
-                            color: Colours.palette.m3onSurfaceVariant
-                            horizontalAlignment: Text.AlignHCenter
-                        }
-                    }
-
-                    Item {
-                        Layout.fillHeight: true
-                    }
-                }
-
-                ColumnLayout {
-                    id: hyprlandSection
-
-                    Layout.fillWidth: true
-                    Layout.minimumHeight: contentFlickable.height
-                    Layout.leftMargin: Appearance.padding.larger
-                    Layout.rightMargin: Appearance.padding.larger
-                    spacing: Appearance.padding.large
-
-                    StyledText {
-                        text: "Hyprland Configuration"
-                        font.pointSize: Appearance.font.size.extraLarge
-                        font.bold: true
-                        color: Colours.palette.m3onBackground
-                    }
-
-                    StyledText {
-                        Layout.fillWidth: true
-                        text: "Tweak the underlying Hyprland configuration to suit your needs."
-                        font.pointSize: Appearance.font.size.normal
-                        color: Colours.palette.m3onSurfaceVariant
-                        wrapMode: Text.WordWrap
-                    }
-
-                    StyledRect {
-                        Layout.fillWidth: true
-                        Layout.preferredHeight: hyprlandSection1.height + Appearance.padding.large * 2
-                        Layout.topMargin: Appearance.padding.normal
-                        color: Colours.layer(Colours.palette.m3surfaceContainer, 1)
-                        radius: Appearance.rounding.normal
-
-                        StyledText {
-                            id: hyprlandSection1
+                            id: contentPlaceholder3
                             anchors.centerIn: parent
                             text: "Content coming soon:\n• Basic navigation\n• Keyboard shortcuts\n• Quick tips"
                             font.pointSize: Appearance.font.size.normal

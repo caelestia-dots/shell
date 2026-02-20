@@ -1,6 +1,6 @@
 import qs.components.misc
 import qs.modules.controlcenter
-import qs.modules.welcome
+import qs.modules.live.welcome
 import qs.services
 import Caelestia
 import Quickshell

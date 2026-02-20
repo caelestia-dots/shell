@@ -7,7 +7,6 @@ import qs.components
 import qs.components.controls
 import qs.config
 import qs.services
-import "components"
 import "pages"
 
 StyledRect {

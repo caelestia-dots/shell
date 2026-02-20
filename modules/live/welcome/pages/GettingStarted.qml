@@ -3,8 +3,8 @@ import QtQuick.Layouts
 import qs.services
 import qs.components
 import qs.components.containers
+import qs.modules.live.components
 import qs.config
-import "../components"
 
 Item {
     id: root

@@ -30,7 +30,7 @@ Item {
                 VectorImage {
                     Layout.alignment: Qt.AlignHCenter
                     preferredRendererType: VectorImage.CurveRenderer
-                    source: Colours.currentLight ? "../assets/logo-light.svg" : "../assets/logo-dark.svg"
+                    source: Colours.currentLight ? "../../assets/logo-light.svg" : "../../assets/logo-dark.svg"
                 }
 
                 StyledText {
