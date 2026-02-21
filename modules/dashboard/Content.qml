@@ -142,7 +142,8 @@ Item {
 
         Component.onCompleted: active = Qt.binding(() => {
             // Always keep current tab loaded
-            if (pane.index === view.currentIndex) return true;
+            if (pane.index === view.currentIndex)
+                return true;
             const vx = Math.floor(view.visibleArea.xPosition * view.contentWidth);
             const vex = Math.floor(vx + view.visibleArea.widthRatio * view.contentWidth);
             return (vx >= x && vx <= x + implicitWidth) || (vex >= x && vex <= x + implicitWidth);

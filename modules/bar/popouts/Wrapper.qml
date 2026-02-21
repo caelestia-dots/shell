@@ -67,7 +67,7 @@ Item {
         }
         close();
     }
-    
+
     Keys.onPressed: event => {
         // Don't intercept keys when password popout is active - let it handle them
         if (currentName === "wirelesspassword") {
@@ -88,7 +88,7 @@ Item {
         property: "WlrLayershell.keyboardFocus"
         value: WlrKeyboardFocus.OnDemand
     }
-    
+
     Binding {
         when: root.hasCurrent && root.currentName === "wirelesspassword"
 

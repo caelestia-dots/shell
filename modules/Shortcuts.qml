@@ -69,6 +69,29 @@ Scope {
         onPressed: root.launcherInterrupted = true
     }
 
+
+    CustomShortcut {
+        name: "sidebar"
+        description: "Toggle sidebar"
+        onPressed: {
+            if (root.hasFullscreen)
+                return;
+            const visibilities = Visibilities.getForActive();
+            visibilities.sidebar = !visibilities.sidebar;
+        }
+    }
+
+    CustomShortcut {
+        name: "utilities"
+        description: "Toggle utilities"
+        onPressed: {
+            if (root.hasFullscreen)
+                return;
+            const visibilities = Visibilities.getForActive();
+            visibilities.utilities = !visibilities.utilities;
+        }
+    }
+
     IpcHandler {
         target: "drawers"
 

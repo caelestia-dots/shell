@@ -2,6 +2,7 @@ import Quickshell.Io
 
 JsonObject {
     property bool enabled: true
+    property bool wallpaperEnabled: true
     property string wallpaperTransition: "fade"
     property int transitionDuration: 1000
     property bool autoRandomWallpaper: false

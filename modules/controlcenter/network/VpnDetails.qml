@@ -12,7 +12,6 @@ import qs.utils
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
-import Qt5Compat.GraphicalEffects
 
 DeviceDetails {
     id: root
@@ -20,11 +19,12 @@ DeviceDetails {
     required property Session session
     readonly property var vpnProvider: root.session.vpn.active
     readonly property bool providerEnabled: {
-        if (!vpnProvider || vpnProvider.index === undefined) return false;
+        if (!vpnProvider || vpnProvider.index === undefined)
+            return false;
         const provider = Config.utilities.vpn.provider[vpnProvider.index];
         return provider && typeof provider === "object" && provider.enabled === true;
     }
-    
+
     device: vpnProvider
 
     headerComponent: Component {
@@ -49,10 +49,11 @@ DeviceDetails {
                         label: qsTr("Enable this provider")
                         checked: root.providerEnabled
                         toggle.onToggled: {
-                            if (!root.vpnProvider) return;
+                            if (!root.vpnProvider)
+                                return;
                             const providers = [];
                             const index = root.vpnProvider.index;
-                            
+
                             // Copy providers and update enabled state
                             for (let i = 0; i < Config.utilities.vpn.provider.length; i++) {
                                 const p = Config.utilities.vpn.provider[i];
@@ -62,7 +63,7 @@ DeviceDetails {
                                         displayName: p.displayName,
                                         interface: p.interface
                                     };
-                                    
+
                                     if (checked) {
                                         // Enable this one, disable others
                                         newProvider.enabled = (i === index);
@@ -70,13 +71,13 @@ DeviceDetails {
                                         // Just disable this one
                                         newProvider.enabled = (i === index) ? false : (p.enabled !== false);
                                     }
-                                    
+
                                     providers.push(newProvider);
                                 } else {
                                     providers.push(p);
                                 }
                             }
-                            
+
                             Config.utilities.vpn.provider = providers;
                             Config.save();
                         }
@@ -86,7 +87,7 @@ DeviceDetails {
                         Layout.fillWidth: true
                         Layout.topMargin: Appearance.spacing.normal
                         spacing: Appearance.spacing.normal
-                        
+
                         TextButton {
                             Layout.fillWidth: true
                             Layout.minimumHeight: Appearance.font.size.normal + Appearance.padding.normal * 2
@@ -171,9 +172,12 @@ DeviceDetails {
                         showTopMargin: true
                         label: qsTr("Status")
                         value: {
-                            if (!root.providerEnabled) return qsTr("Disabled");
-                            if (VPN.connecting) return qsTr("Connecting...");
-                            if (VPN.connected) return qsTr("Connected");
+                            if (!root.providerEnabled)
+                                return qsTr("Disabled");
+                            if (VPN.connecting)
+                                return qsTr("Connecting...");
+                            if (VPN.connected)
+                                return qsTr("Connected");
                             return qsTr("Enabled (Not connected)");
                         }
                     }
@@ -191,62 +195,80 @@ DeviceDetails {
     // Edit VPN Dialog
     Popup {
         id: editVpnDialog
-        
+
         property int editIndex: -1
         property string providerName: ""
         property string displayName: ""
         property string interfaceName: ""
-        
+
         parent: Overlay.overlay
         anchors.centerIn: parent
         width: Math.min(400, parent.width - Appearance.padding.large * 2)
         padding: Appearance.padding.large * 1.5
-        
+
         modal: true
         closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutside
-        
+
         opacity: 0
         scale: 0.7
-        
+
         enter: Transition {
-            ParallelAnimation {
-                NumberAnimation { property: "opacity"; from: 0; to: 1; duration: Appearance.anim.durations.expressiveFastSpatial; easing.bezierCurve: Appearance.anim.curves.expressiveFastSpatial }
-                NumberAnimation { property: "scale"; from: 0.7; to: 1; duration: Appearance.anim.durations.expressiveFastSpatial; easing.bezierCurve: Appearance.anim.curves.expressiveFastSpatial }
+            Anim {
+                property: "opacity"
+                from: 0
+                to: 1
+                duration: Appearance.anim.durations.expressiveFastSpatial
+                easing.bezierCurve: Appearance.anim.curves.expressiveFastSpatial
+            }
+            Anim {
+                property: "scale"
+                from: 0.7
+                to: 1
+                duration: Appearance.anim.durations.expressiveFastSpatial
+                easing.bezierCurve: Appearance.anim.curves.expressiveFastSpatial
             }
         }
 
         exit: Transition {
-            ParallelAnimation {
-                NumberAnimation { property: "opacity"; from: 1; to: 0; duration: Appearance.anim.durations.expressiveFastSpatial; easing.bezierCurve: Appearance.anim.curves.expressiveFastSpatial }
-                NumberAnimation { property: "scale"; from: 1; to: 0.7; duration: Appearance.anim.durations.expressiveFastSpatial; easing.bezierCurve: Appearance.anim.curves.expressiveFastSpatial }
+            Anim {
+                property: "opacity"
+                from: 1
+                to: 0
+                duration: Appearance.anim.durations.expressiveFastSpatial
+                easing.bezierCurve: Appearance.anim.curves.expressiveFastSpatial
+            }
+            Anim {
+                property: "scale"
+                from: 1
+                to: 0.7
+                duration: Appearance.anim.durations.expressiveFastSpatial
+                easing.bezierCurve: Appearance.anim.curves.expressiveFastSpatial
             }
         }
-        
+
         function closeWithAnimation(): void {
             close();
         }
-        
+
         Overlay.modal: Rectangle {
             color: Qt.rgba(0, 0, 0, 0.4 * editVpnDialog.opacity)
         }
-        
-        
+
         background: StyledRect {
             color: Colours.palette.m3surfaceContainerHigh
             radius: Appearance.rounding.large
 
-            layer.enabled: true
-            layer.effect: DropShadow {
-                color: Qt.rgba(0, 0, 0, 0.3)
-                radius: 16
-                samples: 33
-                verticalOffset: 4
+            Elevation {
+                anchors.fill: parent
+                radius: parent.radius
+                level: 3
+                z: -1
             }
         }
-        
+
         contentItem: ColumnLayout {
             spacing: Appearance.spacing.normal
-            
+
             StyledText {
                 text: qsTr("Edit VPN Provider")
                 font.pointSize: Appearance.font.size.large
@@ -271,8 +293,12 @@ DeviceDetails {
                     border.width: 1
                     border.color: displayNameField.activeFocus ? Colours.palette.m3primary : Qt.alpha(Colours.palette.m3outline, 0.3)
 
-                    Behavior on color { CAnim {} }
-                    Behavior on border.color { CAnim {} }
+                    Behavior on color {
+                        CAnim {}
+                    }
+                    Behavior on border.color {
+                        CAnim {}
+                    }
 
                     StyledTextField {
                         id: displayNameField
@@ -303,8 +329,12 @@ DeviceDetails {
                     border.width: 1
                     border.color: interfaceNameField.activeFocus ? Colours.palette.m3primary : Qt.alpha(Colours.palette.m3outline, 0.3)
 
-                    Behavior on color { CAnim {} }
-                    Behavior on border.color { CAnim {} }
+                    Behavior on color {
+                        CAnim {}
+                    }
+                    Behavior on border.color {
+                        CAnim {}
+                    }
 
                     StyledTextField {
                         id: interfaceNameField
@@ -316,13 +346,12 @@ DeviceDetails {
                     }
                 }
             }
-            
-            Item { Layout.preferredHeight: Appearance.spacing.normal }
-            
+
             RowLayout {
+                Layout.topMargin: Appearance.spacing.normal
                 Layout.fillWidth: true
                 spacing: Appearance.spacing.normal
-                
+
                 TextButton {
                     Layout.fillWidth: true
                     text: qsTr("Cancel")
@@ -330,19 +359,19 @@ DeviceDetails {
                     inactiveOnColour: Colours.palette.m3onSurface
                     onClicked: editVpnDialog.closeWithAnimation()
                 }
-                
+
                 TextButton {
                     Layout.fillWidth: true
                     text: qsTr("Save")
                     enabled: editVpnDialog.interfaceName.length > 0
                     inactiveColour: Colours.palette.m3primaryContainer
                     inactiveOnColour: Colours.palette.m3onPrimaryContainer
-                    
+
                     onClicked: {
                         const providers = [];
                         const oldProvider = Config.utilities.vpn.provider[editVpnDialog.editIndex];
                         const wasEnabled = typeof oldProvider === "object" ? (oldProvider.enabled !== false) : true;
-                        
+
                         for (let i = 0; i < Config.utilities.vpn.provider.length; i++) {
                             if (i === editVpnDialog.editIndex) {
                                 providers.push({
@@ -355,7 +384,7 @@ DeviceDetails {
                                 providers.push(Config.utilities.vpn.provider[i]);
                             }
                         }
-                        
+
                         Config.utilities.vpn.provider = providers;
                         Config.save();
                         editVpnDialog.closeWithAnimation();

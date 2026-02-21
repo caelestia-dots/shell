@@ -122,4 +122,3 @@ StyledRect {
         Layout.minimumHeight: 0
     }
 }
-

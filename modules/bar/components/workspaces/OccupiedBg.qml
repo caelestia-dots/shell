@@ -16,7 +16,8 @@ Item {
     property list<var> pills: []
 
     onOccupiedChanged: {
-        if (!occupied) return;
+        if (!occupied)
+            return;
         let count = 0;
         const start = groupOffset;
         const end = start + Config.bar.workspaces.shown;

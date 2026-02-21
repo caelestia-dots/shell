@@ -138,30 +138,30 @@ ColumnLayout {
 
     Popup {
         id: vpnSettingsDialog
-        
+
         parent: Overlay.overlay
         anchors.centerIn: parent
         width: Math.min(600, parent.width - Appearance.padding.large * 2)
         height: Math.min(700, parent.height - Appearance.padding.large * 2)
-        
+
         modal: true
         closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutside
-        
+
         background: StyledRect {
             color: Colours.palette.m3surface
             radius: Appearance.rounding.large
         }
-        
+
         StyledFlickable {
             anchors.fill: parent
             anchors.margins: Appearance.padding.large * 1.5
             flickableDirection: Flickable.VerticalFlick
             contentHeight: vpnSettingsContent.height
             clip: true
-            
+
             VpnSettings {
                 id: vpnSettingsContent
-                
+
                 anchors.left: parent.left
                 anchors.right: parent.right
                 session: root.session
@@ -169,4 +169,3 @@ ColumnLayout {
         }
     }
 }
-
