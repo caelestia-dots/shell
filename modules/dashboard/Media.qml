@@ -225,7 +225,14 @@ Item {
             highlightFollowsCurrentItem: true
             highlightMoveDuration: 300
 
-            // Force snap when the lyrics are first loaded
+            layer.enabled: true
+            layer.effect: ShaderEffect {
+                property var source: lyricsView
+                property real fadeMargin: 0.5
+                fragmentShader: "../../assets/shaders/fade.frag.qsb"
+            }
+
+            // Force snap when the lyrics are first loaded: method 1
             Connections {
                 target: lyricsView.model
                 function onCountChanged() {
@@ -238,7 +245,7 @@ Item {
                 }
             }
 
-            // Force snap when the dashboard is opened
+            // Force snap when the dashboard is opened: method 2  //IDK WHICH ONE WORKS
             onVisibleChanged: {
                 if (visible && LyricsService.currentIndex !== -1) {
                     lyricsView.positionViewAtIndex(LyricsService.currentIndex, ListView.Center);
@@ -405,27 +412,26 @@ Item {
         anchors.verticalCenterOffset: LyricsService.model.count == 0 ? 0 : -playerChanger.height/2
         anchors.left: details.right
         anchors.leftMargin: Appearance.spacing.normal
-    Item {
-        id: bongocat
+        Item {
+            id: bongocat
 
 
-        implicitWidth: visualiser.width
-        implicitHeight: visualiser.height
+            implicitWidth: visualiser.width
+            implicitHeight: visualiser.height
 
-        AnimatedImage {
-            anchors.centerIn: parent
+            AnimatedImage {
+                anchors.centerIn: parent
 
-            width: visualiser.width * 0.75
-            height: visualiser.height * 0.75
+                width: visualiser.width * 0.75
+                height: visualiser.height * 0.75
 
-            playing: Players.active?.isPlaying ?? false
-            speed: Audio.beatTracker.bpm / Appearance.anim.mediaGifSpeedAdjustment
-            source: Paths.absolutePath(Config.paths.mediaGif)
-            asynchronous: true
-            fillMode: AnimatedImage.PreserveAspectFit
+                playing: Players.active?.isPlaying ?? false
+                speed: Audio.beatTracker.bpm / Appearance.anim.mediaGifSpeedAdjustment
+                source: Paths.absolutePath(Config.paths.mediaGif)
+                asynchronous: true
+                fillMode: AnimatedImage.PreserveAspectFit
+            }
         }
-    }
-
     }
     RowLayout {
         parent: LyricsService.model.count == 0 ? details: leftSection
