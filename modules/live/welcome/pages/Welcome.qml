@@ -35,7 +35,7 @@ Item {
 
                 StyledText {
                     Layout.alignment: Qt.AlignHCenter
-                    text: "Welcome to Caelestia"
+                    text: qsTr("Welcome to Caelestia")
                     font.pointSize: Appearance.font.size.extraLarge
                     font.bold: true
                     color: Colours.palette.m3onBackground
@@ -43,7 +43,7 @@ Item {
 
                 StyledText {
                     Layout.alignment: Qt.AlignHCenter
-                    text: "A modern, beautiful desktop shell for Wayland"
+                    text: qsTr("A modern, beautiful desktop shell for Wayland")
                     font.pointSize: Appearance.font.size.larger
                     color: Colours.palette.m3onSurfaceVariant
                 }
