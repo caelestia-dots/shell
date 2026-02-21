@@ -28,193 +28,174 @@ Singleton {
         onTriggered: root.isManualSeeking = false
     }
 
-    // The only way i could get local lyrics working
-    function getLrcFilename() {
-        if (!player || !player.metadata) return ""
-            let artist = player.metadata["xesam:artist"]
-            let title = player.metadata["xesam:title"]
-            if (Array.isArray(artist)) artist = artist.join(", ")
-                return (artist && title) ? `${artist} - ${title}.lrc` : ""
+    function getMetadata() {
+        if (!player || !player.metadata) return null;
+        let artist = player.metadata["xesam:artist"];
+        let title = player.metadata["xesam:title"];
+        if (Array.isArray(artist)) artist = artist.join(", ");
+        return { artist: artist || "Unknown", title: title || "Unknown" };
+    }
+
+    function loadLyrics() {
+        let meta = getMetadata();
+        if (!meta) return;
+
+        loading = true;
+        lyricsModel.clear();
+        currentIndex = -1;
+
+        let filename = `${meta.artist} - ${meta.title}.lrc`;
+        let fullPath = lyricsDir + "/" + filename;
+
+        lrcFile.path = "";
+        lrcFile.path = fullPath;
+
+        // Fallback safety: If FileView doesn't trigger onLoaded (file missing),
+        fallbackTimer.restart();
+    }
+
+    Timer {
+        id: fallbackTimer
+        interval: 200
+        onTriggered: {
+            if (lyricsModel.count === 0) fallbackToOnline();
+        }
     }
 
     FileView {
         id: lrcFile
-        path: ""
         onLoaded: {
-            let parsed = Lrc.parseLrc(text())
-            lyricsModel.clear()
-            for (let line of parsed) {
-                lyricsModel.append({ time: line.time, text: line.text })
-            }
-        }
-    }
-
-    function loadLyrics() {
-        let file = getLrcFilename()
-        loading = true
-        lyricsModel.clear()
-
-        if (!file) {
-            lrcFile.path = ""
-            loading = false
-            return
-        }
-
-        let fullPath = lyricsDir + "/" + file
-        lrcFile.path = fullPath
-
-        let artist = player.metadata["xesam:artist"]
-        let title  = player.metadata["xesam:title"]
-
-        // If no local lyrics, try online
-        Qt.callLater(() => {
-            if (lyricsModel.count === 0) {
-                fetchLRCLIB(title, artist)
+            fallbackTimer.stop();
+            let parsed = Lrc.parseLrc(text());
+            if (parsed.length > 0) {
+                updateModel(parsed);
+                loading = false;
             } else {
-                loading = false
+                fallbackToOnline();
             }
-        })
+        }
     }
 
-    //reusing my code from a different project
+    function fallbackToOnline() {
+        let meta = getMetadata();
+        if (!meta) return;
+        fetchLRCLIB(meta.title, meta.artist);
+    }
+
+    function updateModel(parsedArray) {
+        lyricsModel.clear();
+        for (let line of parsedArray) {
+            lyricsModel.append({ time: line.time, text: line.text });
+        }
+    }
 
     function fetchLRCLIB(title, artist) {
-        let url = `https://lrclib.net/api/get?artist_name=${encodeURIComponent(artist)}&track_name=${encodeURIComponent(title)}`
-
-        let xhr = new XMLHttpRequest()
-        xhr.open("GET", url)
+        let url = `https://lrclib.net/api/get?artist_name=${encodeURIComponent(artist)}&track_name=${encodeURIComponent(title)}`;
+        let xhr = new XMLHttpRequest();
+        xhr.open("GET", url);
         xhr.onreadystatechange = () => {
             if (xhr.readyState === XMLHttpRequest.DONE) {
                 if (xhr.status === 200) {
-                    let response = JSON.parse(xhr.responseText)
-                    if (response.syncedLyrics) {
-                        let parsed = Lrc.parseLrc(response.syncedLyrics)
-                        lyricsModel.clear()
-                        for (let line of parsed) {
-                            lyricsModel.append({ time: line.time, text: line.text })
-                        }
-                    } else {
-                        console.log("Not found on LrcLib")
-                        fetchNetEase(title, artist)
+                    let res = JSON.parse(xhr.responseText);
+                    if (res.syncedLyrics) {
+                        updateModel(Lrc.parseLrc(res.syncedLyrics));
+                        loading = false;
+                        return;
                     }
-                } else {
-                    console.log("Not found on LrcLib, Response: "+ xhr.status)
-                    fetchNetEase(title, artist)
                 }
-                loading = false
+                fetchNetEase(title, artist);
             }
-        }
-        xhr.send()
+        };
+        xhr.send();
     }
 
     function fetchNetEase(title, artist) {
-        loading = true;
-        console.log("Starting NetEase search for:", title, artist); // Debug log
+        const query = encodeURIComponent(title + " " + artist);
+        const url = `https://music.163.com/api/search/get?s=${query}&type=1&limit=5`; // Get 5 results to verify
 
-        const searchQuery = encodeURIComponent(title + " " + artist);
+        let xhr = new XMLHttpRequest();
+        xhr.open("GET", url);
+        xhr.setRequestHeader("User-Agent", "Mozilla/5.0");
+        xhr.onreadystatechange = () => {
+            if (xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200) {
+                let res = JSON.parse(xhr.responseText);
+                let songs = res.result?.songs || [];
 
-        const searchUrl = `https://music.163.com/api/search/get?s=${searchQuery}&type=1&limit=1`;
+                // Find a song where the artist matches
+                let bestMatch = songs.find(s => {
+                    let inputArtist = String(artist || "").toLowerCase();
+                    let sArtist = String(s.artists?.[0]?.name || "").toLowerCase();
 
-        let xhrSearch = new XMLHttpRequest();
-        xhrSearch.open("GET", searchUrl);
+                    return inputArtist.includes(sArtist) || sArtist.includes(inputArtist);
+                });
 
-        xhrSearch.setRequestHeader("User-Agent", "Mozilla/5.0");
-
-        xhrSearch.onreadystatechange = () => {
-            if (xhrSearch.readyState === XMLHttpRequest.DONE) {
-                console.log("NetEase Search Status:", xhrSearch.status);
-
-                if (xhrSearch.status === 200) {
-                    try {
-                        let searchRes = JSON.parse(xhrSearch.responseText);
-                        let songId = searchRes.result?.songs?.[0]?.id;
-
-                        if (songId) {
-                            console.log("Found NetEase Song ID:", songId);
-                            fetchNetEaseLyrics(songId);
-                        } else {
-                            console.log("NetEase: No songs found in search results");
-                            loading = false;
-                        }
-                    } catch (e) {
-                        console.log("NetEase Search Parse Error:", e);
-                        loading = false;
-                    }
+                if (bestMatch) {
+                    fetchNetEaseLyrics(bestMatch.id);
                 } else {
                     loading = false;
+                    console.log("NetEase: No reliable match found.");
                 }
+            } else if (xhr.readyState === XMLHttpRequest.DONE) {
+                loading = false;
             }
         };
-
-        xhrSearch.onerror = () => {
-            console.log("NetEase Network Error occurred");
-            loading = false;
-        };
-
-        xhrSearch.send();
+        xhr.send();
     }
 
-    function fetchNetEaseLyrics(songId) {
-        let xhrLrc = new XMLHttpRequest();
-        // This endpoint is generally more reliable for lyrics
-        xhrLrc.open("GET", `https://music.163.com/api/song/lyric?id=${songId}&lv=1&kv=1&tv=-1`);
-
-        xhrLrc.onreadystatechange = () => {
-            if (xhrLrc.readyState === XMLHttpRequest.DONE && xhrLrc.status === 200) {
-                try {
-                    let lrcRes = JSON.parse(xhrLrc.responseText);
-
-                    let lyricText = lrcRes.lrc?.lyric;
-
-                    if (lyricText) {
-                        let parsed = Lrc.parseLrc(lyricText);
-                        lyricsModel.clear();
-                        for (let line of parsed) {
-                            lyricsModel.append({ time: line.time, text: line.text });
-                        }
-                        console.log("NetEase Lyrics Loaded successfully");
-                        root.updatePosition();
-                    } else {
-                        console.log("NetEase: Song found but no lyrics available");
-                    }
-                } catch (e) {
-                    console.log("NetEase Lyric Parse Error:", e);
+    function fetchNetEaseLyrics(id) {
+        let xhr = new XMLHttpRequest();
+        xhr.open("GET", `https://music.163.com/api/song/lyric?id=${id}&lv=1&kv=1&tv=-1`);
+        xhr.onreadystatechange = () => {
+            if (xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200) {
+                let res = JSON.parse(xhr.responseText);
+                if (res.lrc?.lyric) {
+                    updateModel(Lrc.parseLrc(res.lrc.lyric));
                 }
                 loading = false;
             }
         };
-        xhrLrc.send();
+        xhr.send();
     }
 
-    // Update currentIndex based on player position
     function updatePosition() {
-        if (isManualSeeking || !player || !lyricsModel.count) return
+        if (isManualSeeking || !player || lyricsModel.count === 0) return;
 
-        let arr = []
-        for (let i = 0; i < lyricsModel.count; i++) arr.push(lyricsModel.get(i))
-        root.currentIndex = Lrc.getCurrentLine(arr, player.position)
+        let pos = player.position;
+        let newIdx = -1;
+        for (let i = lyricsModel.count - 1; i >= 0; i--) {
+            if (pos >= lyricsModel.get(i).time - 0.1) { // 100ms fudge factor
+                newIdx = i;
+                break;
+            }
+        }
+
+        if (newIdx !== currentIndex) {
+            root.currentIndex = newIdx;
+        }
     }
 
     function jumpTo(index, time) {
         root.isManualSeeking = true;
         root.currentIndex = index;
-        root.player.position = time + 0.1; //for the rounding
 
-        seekTimer.restart(); // Start/Reset the lock timer
+        if (player) {
+            player.position = time + 0.01; // for the rounding
+        }
+
+        seekTimer.restart();
     }
 
     Connections {
         target: Players
-        function onActiveChanged() { root.player = Players.active; loadLyrics() }
+        function onActiveChanged() {
+            root.player = Players.active;
+            loadLyrics();
+        }
     }
 
     Connections {
         target: root.player
-        function onMetadataChanged() {
-            lyricsModel.clear()
-            currentIndex=-1
-            loadLyrics()
-
-        }
+        ignoreUnknownSignals: true
+        function onMetadataChanged() { loadLyrics(); }
     }
 }
