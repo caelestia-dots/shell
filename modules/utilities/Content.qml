@@ -19,7 +19,7 @@ Item {
         anchors.fill: parent
         spacing: Appearance.spacing.normal
 
-        IdleInhibit {}
+        //IdleInhibit {}
 
         Record {
             props: root.props
