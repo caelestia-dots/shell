@@ -127,7 +127,6 @@ Item {
         id: cover
 
         anchors.verticalCenter: parent.verticalCenter
-        anchors.verticalCenterOffset: -(playerChanger.height)
         anchors.left: parent.left
         anchors.leftMargin: Appearance.padding.large + Config.dashboard.sizes.mediaVisualiserSize
 
@@ -151,79 +150,11 @@ Item {
 
             anchors.fill: parent
 
-            source: Players.active?.trackArtUrl ?? ""
+            source: Players.active?.trackArtUrl ?? "" // qmllint disable incompatible-type
             asynchronous: true
             fillMode: Image.PreserveAspectCrop
             sourceSize.width: width
             sourceSize.height: height
-        }
-    }
-
-    RowLayout {
-        id: playerChanger
-
-        anchors.bottom: visualiser.bottom
-        anchors.horizontalCenter: visualiser.horizontalCenter
-        //anchors.verticalCenter:slider.verticalCenter   //wish this worked!
-        anchors.bottomMargin: -(playerChanger.height)
-        spacing: Appearance.spacing.small
-
-        PlayerControl {
-            type: IconButton.Text
-            icon: "move_up"
-            inactiveOnColour: Colours.palette.m3secondary
-            padding: Appearance.padding.small
-            font.pointSize: Appearance.font.size.large
-            disabled: !Players.active?.canRaise
-            onClicked: {
-                Players.active?.raise();
-                root.visibilities.dashboard = false;
-            }
-        }
-
-        SplitButton {
-            id: playerSelector
-
-            disabled: !Players.list.length
-            active: menuItems.find(m => m.modelData === Players.active) ?? menuItems[0] ?? null
-            menu.onItemSelected: item => {
-                Players.manualActive = item.modelData
-                loadLyrics()
-            }
-
-            menuItems: playerList.instances
-            fallbackIcon: "music_off"
-            fallbackText: qsTr("No players")
-
-            label.Layout.maximumWidth: slider.implicitWidth * 0.28
-            label.elide: Text.ElideRight
-
-            stateLayer.disabled: true
-            menuOnTop: true
-
-            Variants {
-                id: playerList
-
-                model: Players.list
-
-                MenuItem {
-                    required property MprisPlayer modelData
-
-                    icon: modelData === Players.active ? "check" : ""
-                    text: Players.getIdentity(modelData)
-                    activeIcon: "animated_images"
-                }
-            }
-        }
-
-        PlayerControl {
-            type: IconButton.Text
-            icon: "delete"
-            inactiveOnColour: Colours.palette.m3error
-            padding: Appearance.padding.small
-            font.pointSize: Appearance.font.size.large
-            disabled: !Players.active?.canQuit
-            onClicked: Players.active?.quit()
         }
     }
 
@@ -291,7 +222,7 @@ Item {
             preferredHighlightEnd: height / 2 + 30
             highlightRangeMode: ListView.ApplyRange
             highlightFollowsCurrentItem: true
-            highlightMoveDuration: 300 //Appearance.anim.durations.medium
+            highlightMoveDuration: 300
 
             // Force snap when the lyrics are first loaded
             Connections {
@@ -306,8 +237,7 @@ Item {
                 }
             }
 
-
-            // Force snap when the dashboard is opened (if it was hidden)
+            // Force snap when the dashboard is opened
             onVisibleChanged: {
                 if (visible && LyricsService.currentIndex !== -1) {
                     lyricsView.positionViewAtIndex(LyricsService.currentIndex, ListView.Center);
@@ -320,14 +250,11 @@ Item {
                 height: lyricText.contentHeight + 20
                 property bool isCurrent: ListView.isCurrentItem
 
-                // This adds the glow layer only behind the text
                 MultiEffect {
                     id: effect
                     anchors.fill: lyricText
                     source: lyricText
                     scale: lyricText.scale
-
-                    // This is the key: only run the effect logic for the current line
                     enabled: delegateRoot.isCurrent
                     visible: delegateRoot.isCurrent
 
@@ -336,11 +263,10 @@ Item {
 
                     shadowEnabled: true
                     shadowColor: Colours.palette.m3primary
-                    shadowOpacity: 0.5 // Now you can keep this at a fixed high value
+                    shadowOpacity: 0.5
                     shadowBlur: 0.6
                     shadowHorizontalOffset: 0
                     shadowVerticalOffset: 0
-
                     autoPaddingEnabled: true
                 }
 
@@ -470,8 +396,59 @@ Item {
                 font.pointSize: Appearance.font.size.small
             }
         }
+        RowLayout {
+            Layout.alignment: Qt.AlignHCenter
+            spacing: Appearance.spacing.small
 
+            PlayerControl {
+                type: IconButton.Text
+                icon: "move_up"
+                inactiveOnColour: Colours.palette.m3secondary
+                padding: Appearance.padding.small
+                font.pointSize: Appearance.font.size.large
+                disabled: !Players.active?.canRaise
+                onClicked: {
+                    Players.active?.raise();
+                    root.visibilities.dashboard = false;
+                }
+            }
 
+            SplitButton {
+                id: playerSelector
+
+                disabled: !Players.list.length
+                active: menuItems.find(m => m.modelData === Players.active) ?? menuItems[0] ?? null
+                menu.onItemSelected: item => Players.manualActive = (item as PlayerItem).modelData
+
+                menuItems: playerList.instances
+                fallbackIcon: "music_off"
+                fallbackText: qsTr("No players")
+
+                label.Layout.maximumWidth: slider.implicitWidth * 0.28
+                label.elide: Text.ElideRight
+
+                stateLayer.disabled: true
+                menuOnTop: true
+
+                Variants {
+                    id: playerList
+
+                    model: Players.list
+
+                    PlayerItem {}
+                }
+            }
+
+            PlayerControl {
+                type: IconButton.Text
+                icon: "delete"
+                inactiveOnColour: Colours.palette.m3error
+                padding: Appearance.padding.small
+                font.pointSize: Appearance.font.size.large
+                disabled: !Players.active?.canQuit
+                onClicked: Players.active?.quit()
+            }
+        }
     }
 
     Item {
@@ -496,6 +473,14 @@ Item {
             asynchronous: true
             fillMode: AnimatedImage.PreserveAspectFit
         }
+    }
+
+    component PlayerItem: MenuItem {
+        required property MprisPlayer modelData
+
+        icon: modelData === Players.active ? "check" : ""
+        text: Players.getIdentity(modelData)
+        activeIcon: "animated_images"
     }
 
     component PlayerControl: IconButton {

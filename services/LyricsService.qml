@@ -22,12 +22,11 @@ Singleton {
     ListModel { id: lyricsModel }
 
 
-    // Helper to get formatted filename
+    // The only way i could get local lyrics working
     function getLrcFilename() {
         if (!player || !player.metadata) return ""
             let artist = player.metadata["xesam:artist"]
             let title = player.metadata["xesam:title"]
-            //console.log(player.metadata["xesam:asText"])
             if (Array.isArray(artist)) artist = artist.join(", ")
                 return (artist && title) ? `${artist} - ${title}.lrc` : ""
     }
@@ -58,16 +57,22 @@ Singleton {
         let fullPath = lyricsDir + "/" + file
         lrcFile.path = fullPath
 
-        // If FileView doesn't load a local file, try external
+        let artist = player.metadata["xesam:artist"]
+        let title  = player.metadata["xesam:title"]
+
+        // If no local lyrics, try online
         Qt.callLater(() => {
-            if (lyricsModel.count === 0) fetchLRCLIB()
-                else loading = false
+            if (lyricsModel.count === 0) {
+                fetchLRCLIB(title, artist)
+            } else {
+                loading = false
+            }
         })
     }
 
-    function fetchLRCLIB() {
-        let artist = player.metadata["xesam:artist"]
-        let title  = player.metadata["xesam:title"]
+    //reusing my code from a different project
+
+    function fetchLRCLIB(title, artist) {
         let url = `https://lrclib.net/api/get?artist_name=${encodeURIComponent(artist)}&track_name=${encodeURIComponent(title)}`
 
         let xhr = new XMLHttpRequest()
@@ -82,12 +87,71 @@ Singleton {
                         for (let line of parsed) {
                             lyricsModel.append({ time: line.time, text: line.text })
                         }
+                    } else {
+                        console.log("Not found on LrcLib")
+                        fetchNetEase(title, artist)
                     }
+                } else {
+                    console.log("Not found on LrcLib")
+                    fetchNetEase(title, artist)
                 }
                 loading = false
             }
         }
         xhr.send()
+    }
+
+    function fetchNetEase(title, artist) {
+        loading = true;
+        const searchQuery = encodeURIComponent(title + " " + artist);
+        const searchUrl = `https://music.163.com/api/search/get/web?type=1&s=${searchQuery}&limit=1`;
+
+        const headers = {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+            "Referer": "https://music.163.com/"
+        };
+        // NetEase works very differently from LrcLib
+        // Search for Song ID
+        let xhrSearch = new XMLHttpRequest();
+        xhrSearch.open("GET", searchUrl);
+        Object.keys(headers).forEach(key => xhrSearch.setRequestHeader(key, headers[key]));
+
+        xhrSearch.onreadystatechange = () => {
+            if (xhrSearch.readyState === XMLHttpRequest.DONE) {
+                if (xhrSearch.status === 200) {
+                    try {
+                        let searchRes = JSON.parse(xhrSearch.responseText);
+                        let songId = searchRes.result?.songs?.[0]?.id;
+
+                        if (songId) {
+                            // Get Lyrics for that ID
+                            let xhrLrc = new XMLHttpRequest();
+                            xhrLrc.open("GET", `https://music.163.com/api/song/media?id=${songId}`);
+                            Object.keys(headers).forEach(key => xhrLrc.setRequestHeader(key, headers[key]));
+
+                            xhrLrc.onreadystatechange = () => {
+                                if (xhrLrc.readyState === XMLHttpRequest.DONE && xhrLrc.status === 200) {
+                                    try {
+                                        let lrcRes = JSON.parse(xhrLrc.responseText);
+                                        if (lrcRes.lyric) {
+                                            let parsed = Lrc.parseLrc(lrcRes.lyric);
+                                            lyricsModel.clear();
+                                            for (let line of parsed) {
+                                                lyricsModel.append({ time: line.time, text: line.text });
+                                            }
+                                            root.updatePosition();
+                                        }
+                                    } catch (e) { console.log("NetEase Parse Error:", e) }
+                                    loading = false;
+                                }
+                            };
+                            xhrLrc.send();
+                        } else { loading = false; }
+                    } catch (e) { loading = false; }
+                } else { loading = false; console.log(xhrSearch.status)}
+            }
+        };
+        xhrSearch.send();
     }
 
     // Update currentIndex based on player position
@@ -105,6 +169,11 @@ Singleton {
 
     Connections {
         target: root.player
-        function onMetadataChanged() { loadLyrics() }
+        function onMetadataChanged() {
+            lyricsModel.clear()
+            currentIndex=-1
+            loadLyrics()
+
+        }
     }
 }
