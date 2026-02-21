@@ -218,7 +218,7 @@ Item {
             preferredHighlightEnd: height / 2 + 30
             highlightRangeMode: ListView.ApplyRange
             highlightFollowsCurrentItem: true
-            highlightMoveDuration: Appearance.anim.durations.normal
+            highlightMoveDuration: LyricsService.isManualSeeking ? 0 : Appearance.anim.durations.normal
 
             layer.enabled: true
             layer.effect: ShaderEffect {
@@ -227,23 +227,9 @@ Item {
                 fragmentShader: "../../assets/shaders/fade.frag.qsb"
             }
 
-            // Force snap when the lyrics are first loaded: method 1
-            Connections {
-                target: lyricsView.model
-                function onCountChanged() {
-                    if (lyricsView.model.count > 0) {
-                        // Small delay to ensure the view has laid out the items
-                        Qt.callLater(() => {
-                            lyricsView.positionViewAtIndex(LyricsService.currentIndex, ListView.Center);
-                        });
-                    }
-                }
-            }
-
-            // Force snap when the dashboard is opened: method 2  //IDK WHICH ONE WORKS
-            onVisibleChanged: {
-                if (visible && LyricsService.currentIndex !== -1) {
-                    lyricsView.positionViewAtIndex(LyricsService.currentIndex, ListView.Center);
+            onModelChanged: {
+                if (model && model.count > 0) {
+                    Qt.callLater(() => positionViewAtIndex(currentIndex, ListView.Center));
                 }
             }
 
@@ -279,7 +265,8 @@ Item {
                     cursorShape: Qt.PointingHandCursor
                     onClicked: {
                         if (model.time !== undefined) {
-                            Players.active.position = model.time
+                            LyricsService.jumpTo(index, model.time);
+
                         }
                     }
                 }

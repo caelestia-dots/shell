@@ -34,8 +34,9 @@ function parseLrc(text) {
 }
 
 function getCurrentLine(lyrics, position) {
+    const epsilon = 0.1; // 100ms tolerance
     for (let i = lyrics.length - 1; i >= 0; i--) {
-        if (position >= lyrics[i].time) {
+        if ((position + epsilon) >= lyrics[i].time) {
             return i;
         }
     }
