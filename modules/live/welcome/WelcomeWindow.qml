@@ -7,7 +7,6 @@ import qs.components
 import qs.components.controls
 import qs.config
 import qs.services
-import "components"
 import "pages"
 
 StyledRect {
@@ -71,7 +70,7 @@ StyledRect {
         anchors.fill: parent
         spacing: 0
 
-        
+
         StyledRect {
             id: topNav
 
@@ -91,7 +90,7 @@ StyledRect {
                 anchors.bottomMargin: Appearance.padding.normal
                 spacing: Appearance.spacing.normal
 
-                
+
                 RowLayout {
                     id: logo
                     spacing: Appearance.spacing.small
@@ -214,7 +213,7 @@ StyledRect {
             }
         }
 
-        
+
         Item {
             id: contentArea
 

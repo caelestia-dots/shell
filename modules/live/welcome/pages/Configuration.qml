@@ -3,10 +3,9 @@ import QtQuick.Layouts
 import qs.services
 import QtQuick.VectorImage
 import qs.components
-import qs.modules.live.components
+import qs.components.live
 import qs.components.containers
 import qs.config
-import "../../components"
 
 Item {
     id: root
@@ -54,7 +53,7 @@ Item {
             anchors.fill: parent
             spacing: Appearance.spacing.large
 
-       
+
         VerticalNav {
             id: verticalNav
             Layout.alignment: Qt.AlignTop
@@ -69,7 +68,7 @@ Item {
             Layout.fillHeight: true
             }
 
-       
+
         StyledFlickable {
             id: contentFlickable
 

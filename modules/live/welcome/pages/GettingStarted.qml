@@ -2,10 +2,9 @@ import QtQuick
 import QtQuick.Layouts
 import qs.services
 import qs.components
-import qs.modules.live.components
+import qs.components.live
 import qs.components.containers
 import qs.config
-import "../../components"
 
 Item {
     id: root
@@ -53,7 +52,7 @@ Item {
             anchors.fill: parent
             spacing: Appearance.spacing.large
 
-        
+
         VerticalNav {
             id: verticalNav
             Layout.alignment: Qt.AlignTop
@@ -67,7 +66,7 @@ Item {
             Item {
                 Layout.fillHeight: true
                 }
-        
+
         StyledFlickable {
             id: contentFlickable
 
@@ -141,10 +140,10 @@ Item {
                 wrapMode: Text.WordWrap
                 opacity: 0.8
                 }
-                            
+
             Flow {
                 Layout.fillWidth: true
-                spacing: 10 
+                spacing: 10
             Repeater {
                 model: [
                 { label: "CPU", val: "x86_64 Dual Core" },
@@ -195,7 +194,7 @@ Item {
                     text: qsTr("Note: ARM processors (SnapDragon) are not officially supported.")
                     font.pointSize: Appearance.font.size.small
                     font.italic: true
-                    color: Colours.palette.m3error 
+                    color: Colours.palette.m3error
                     horizontalAlignment: Text.AlignHCenter
                     wrapMode: Text.WordWrap
                     }
@@ -207,7 +206,7 @@ Item {
             Layout.fillWidth: true
             spacing: Appearance.padding.large
 
-                        
+
             StyledRect {
                 Layout.fillWidth: true
                 Layout.preferredHeight: philosophyColumn.implicitHeight + (Appearance.padding.large * 2)
@@ -238,7 +237,7 @@ Item {
                        }
                       }
 
-                        
+
                 StyledRect {
                     Layout.fillWidth: true
                     Layout.preferredHeight: learningColumn.implicitHeight + (Appearance.padding.large * 2)
@@ -378,7 +377,7 @@ Item {
                         columnSpacing: 20
                         rowSpacing: 20
 
-                                
+
                         Repeater {
                             model: [
                             { keys: "SUPER", desc: "Open App Launcher" },

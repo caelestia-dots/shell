@@ -2,11 +2,10 @@ import QtQuick
 import QtQuick.Layouts
 import qs.services
 import qs.components
-import qs.modules.live.components
+import qs.components.live
 import qs.components.containers
 import qs.components.controls
 import qs.config
-import "../../components"
 
 Item {
     id: root
