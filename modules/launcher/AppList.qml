@@ -55,6 +55,20 @@ StyledListView {
             for (const action of ["calc", "scheme", "variant"])
                 if (text.startsWith(`${prefix}${action} `))
                     return action;
+            
+            if (text.startsWith(`${prefix}translate `)) {
+                const textAfterTranslate = text.slice(`${prefix}translate `.length);
+                
+                const hasCompleteLanguage = Translator.languages.some(l => 
+                    textAfterTranslate.toLowerCase().startsWith(l.name.toLowerCase() + " ")
+                );
+                
+                if (hasCompleteLanguage) {
+                    return "translate";
+                } else {
+                    return "language";
+                }
+            }
 
             return "actions";
         }
@@ -106,6 +120,37 @@ StyledListView {
             PropertyChanges {
                 model.values: M3Variants.query(search.text)
                 root.delegate: variantItem
+            }
+        },
+        State {
+            name: "language"
+
+            PropertyChanges {
+                model.values: {
+                    const textAfterTranslate = search.text.slice(`${Config.launcher.actionPrefix}translate `.length);
+                    
+                    if (textAfterTranslate.length === 0) {
+                        return [
+                            { name: "English", code: "en" },
+                            { name: "French", code: "fr" },
+                            { name: "Spanish", code: "es" },
+                            { name: "German", code: "de" },
+                            { name: "Italian", code: "it" }
+                        ];
+                    }
+                    return Translator.languages.filter(l => 
+                        l.name.toLowerCase().startsWith(textAfterTranslate.toLowerCase())
+                    ).slice(0, 5);
+                }
+                root.delegate: languageItem
+            }
+        },
+        State {
+            name: "translate"
+
+            PropertyChanges {
+                model.values: [0]
+                root.delegate: translateItem
             }
         }
     ]
@@ -251,6 +296,22 @@ StyledListView {
         id: variantItem
 
         VariantItem {
+            list: root
+        }
+    }
+
+    Component {
+        id: languageItem
+
+        LanguageItem {
+            list: root
+        }
+    }
+
+    Component {
+        id: translateItem
+
+        TranslateItem {
             list: root
         }
     }
