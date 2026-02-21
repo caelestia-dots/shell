@@ -49,7 +49,7 @@ ColumnLayout {
 
                 Image {
                     asynchronous: true
-                    source: Paths.absolutePath(Config.paths.lockscreenNotifDockPic)
+                    source: Paths.absolutePath(Config.paths.lockscreenNoNotifsPic)
                     fillMode: Image.PreserveAspectFit
                     sourceSize.width: clipRect.width * 0.8
 

@@ -96,7 +96,7 @@ Item {
 
                 Image {
                     asynchronous: true
-                    source: Paths.absolutePath(Config.paths.notifDockPic)
+                    source: Paths.absolutePath(Config.paths.noNotifsPic)
                     fillMode: Image.PreserveAspectFit
                     sourceSize.width: clipRect.width * 0.8
 
