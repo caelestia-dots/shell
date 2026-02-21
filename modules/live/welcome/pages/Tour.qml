@@ -91,7 +91,7 @@ Item {
 
                 width: parent.width
                 spacing: 0
-//----------------------------------------------------------------------------------------------------------------------
+//-----page break
 ColumnLayout {
     id: taskbarSection
     Layout.minimumHeight: contentFlickable.height
@@ -172,7 +172,7 @@ ColumnLayout {
 
     }
 }
-//-------------------------------------------------------------------------------------------------------------------------
+//-----page break
 ColumnLayout {
     id: launcherSection
 
@@ -255,7 +255,7 @@ ColumnLayout {
                         Layout.fillHeight: true
                     }
                 }
-//-------------------------------------------------------------------------------------------------------------
+//-----page break
 ColumnLayout {
     id: sidebarSection
     Layout.fillWidth: true
@@ -334,7 +334,7 @@ ColumnLayout {
 
     }
 }
-//----------------------------------------------------------------------------------------------------------------------
+//-----page break
 ColumnLayout {
     id: dashboardSection
     Layout.fillWidth: true
@@ -395,7 +395,7 @@ ColumnLayout {
 
     }
 }
-//-----------------------------------------------------------------------------------------------------------------------
+//-----page break
             }
         }
     }
