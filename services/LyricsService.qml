@@ -18,6 +18,8 @@ Singleton {
     property bool isManualSeeking: false
     readonly property string lyricsDir: Paths.absolutePath(Config.paths.lyricsDir)
 
+    property int currentRequestId: 0
+
     // The data source for the UI
     readonly property alias model: lyricsModel
     ListModel { id: lyricsModel }
@@ -43,6 +45,9 @@ Singleton {
         loading = true;
         lyricsModel.clear();
         currentIndex = -1;
+
+        root.currentRequestId++;
+        let requestId = root.currentRequestId;
 
         let filename = `${meta.artist} - ${meta.title}.lrc`;
         let fullPath = lyricsDir + "/" + filename;
@@ -79,7 +84,7 @@ Singleton {
     function fallbackToOnline() {
         let meta = getMetadata();
         if (!meta) return;
-        fetchLRCLIB(meta.title, meta.artist);
+        fetchLRCLIB(meta.title, meta.artist, root.currentRequestId);
     }
 
     function updateModel(parsedArray) {
@@ -89,12 +94,15 @@ Singleton {
         }
     }
 
-    function fetchLRCLIB(title, artist) {
+    function fetchLRCLIB(title, artist, reqId) {
         let url = `https://lrclib.net/api/get?artist_name=${encodeURIComponent(artist)}&track_name=${encodeURIComponent(title)}`;
         let xhr = new XMLHttpRequest();
         xhr.open("GET", url);
         xhr.onreadystatechange = () => {
             if (xhr.readyState === XMLHttpRequest.DONE) {
+
+                if (reqId !== root.currentRequestId) return;
+
                 if (xhr.status === 200) {
                     let res = JSON.parse(xhr.responseText);
                     if (res.syncedLyrics) {
@@ -103,13 +111,13 @@ Singleton {
                         return;
                     }
                 }
-                fetchNetEase(title, artist);
+                fetchNetEase(title, artist, reqId);
             }
         };
         xhr.send();
     }
 
-    function fetchNetEase(title, artist) {
+    function fetchNetEase(title, artist, reqId) {
         const query = encodeURIComponent(title + " " + artist);
         const url = `https://music.163.com/api/search/get?s=${query}&type=1&limit=5`; // Get 5 results to verify
 
@@ -118,6 +126,9 @@ Singleton {
         xhr.setRequestHeader("User-Agent", "Mozilla/5.0");
         xhr.onreadystatechange = () => {
             if (xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200) {
+
+                if (reqId !== root.currentRequestId) return;
+
                 let res = JSON.parse(xhr.responseText);
                 let songs = res.result?.songs || [];
 
@@ -130,7 +141,7 @@ Singleton {
                 });
 
                 if (bestMatch) {
-                    fetchNetEaseLyrics(bestMatch.id);
+                    fetchNetEaseLyrics(bestMatch.id, reqId);
                 } else {
                     loading = false;
                     console.log("NetEase: No reliable match found.");
@@ -142,11 +153,14 @@ Singleton {
         xhr.send();
     }
 
-    function fetchNetEaseLyrics(id) {
+    function fetchNetEaseLyrics(id, reqId) {
         let xhr = new XMLHttpRequest();
         xhr.open("GET", `https://music.163.com/api/song/lyric?id=${id}&lv=1&kv=1&tv=-1`);
         xhr.onreadystatechange = () => {
             if (xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200) {
+
+                if (reqId !== root.currentRequestId) return;
+
                 let res = JSON.parse(xhr.responseText);
                 if (res.lrc?.lyric) {
                     updateModel(Lrc.parseLrc(res.lrc.lyric));
