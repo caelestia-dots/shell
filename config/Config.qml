@@ -216,6 +216,10 @@ Singleton {
                 capitalisation: bar.workspaces.capitalisation,
                 specialWorkspaceIcons: bar.workspaces.specialWorkspaceIcons
             },
+            activeWindow: {
+                compact: bar.activeWindow.compact,
+                inverted: bar.activeWindow.inverted
+            },
             tray: {
                 background: bar.tray.background,
                 recolour: bar.tray.recolour,
