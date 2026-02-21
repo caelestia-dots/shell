@@ -119,7 +119,7 @@ Item {
 
             StyledRect {
                 Layout.fillWidth: true
-                Layout.preferredHeight: taskbarContent.implicitHeight + 60
+                Layout.preferredHeight: taskbarContent.implicitHeight + 80
                 color: Colours.palette.m3surfaceContainerLow
                 radius: Appearance.rounding.normal
                 border.color: Colours.palette.m3outlineVariant
@@ -127,8 +127,8 @@ Item {
            ColumnLayout {
                 id: taskbarContent
                 anchors.fill: parent
-                anchors.margins: appearance.padding.larger
-                spacing: appearance.spacing.large
+                anchors.margins: appearance.padding.larger + 60
+                spacing: appearance.spacing.large + 20
 
             Repeater {
                 model: [
@@ -146,16 +146,16 @@ Item {
                     Layout.fillWidth: true
 
                 StyledText {
-                    text: modelData.title
+                    text: "     " + modelData.title
                     font.bold: true
-                    font.pointSize: 11
+                    font.pointSize: appearance.font.size.large
                     color: Colours.palette.m3primary
                     }
 
                 StyledText {
                     Layout.fillWidth: true
-                    text: modelData.desc
-                    font.pointSize: 10
+                    text: "     " + modelData.desc
+                    font.pointSize: appearance.font.size.normal
                     color: Colours.palette.m3onSurface
                     wrapMode: Text.WordWrap
                     opacity: 0.8
@@ -165,7 +165,7 @@ Item {
                     height: 1
                     color: Colours.palette.m3outlineVariant
                     opacity: 0.3
-                    visible: index < 7
+                    visible: index < 6
                     }
                 }
             }
