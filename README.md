@@ -562,6 +562,7 @@ default, you must create it manually.
             "wallpapers": false
         },
         "showOnHover": false,
+        "favouriteApps": [],
         "hiddenApps": []
     },
     "lock": {
@@ -595,6 +596,7 @@ default, you must create it manually.
         "playerAliases": [{ "from": "com.github.th_ch.youtube_music", "to": "YT Music" }],
         "weatherLocation": "",
         "useFahrenheit": false,
+        "useFahrenheitPerformance": false,
         "useTwelveHourClock": false,
         "smartScheme": true,
         "visualiserBars": 45
@@ -603,6 +605,12 @@ default, you must create it manually.
         "dragThreshold": 30,
         "enabled": true,
         "vimKeybinds": false,
+        "icons": {
+            "logout": "logout",
+            "shutdown": "power_settings_new",
+            "hibernate": "downloading",
+            "reboot": "cached"
+        },
         "commands": {
             "logout": ["loginctl", "terminate-user", ""],
             "shutdown": ["systemctl", "poweroff"],
