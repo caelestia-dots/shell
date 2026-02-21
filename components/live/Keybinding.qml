@@ -11,10 +11,9 @@ Item {
     property string label
     property string desc
 
-    RowLayout {
-        Layout.margins: Appearance.padding.large
-        Layout.fillWidth: true
+    anchors.fill: parent
 
+    RowLayout {
         StyledRect {
             implicitWidth: keybindingKey.implicitWidth + Appearance.padding.normal * 2
             implicitHeight: keybindingKey.implicitHeight + Appearance.padding.normal * 2
