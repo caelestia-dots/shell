@@ -3,8 +3,8 @@ pragma Singleton
 import qs.config
 import qs.utils
 import Caelestia
-import Quickshell
 import QtQuick
+import Quickshell
 import Quickshell.Io
 import Quickshell.Services.Mpris
 import "../utils/scripts/lrcparser.js" as Lrc
@@ -16,18 +16,56 @@ Singleton {
     property int currentIndex: -1
     property bool loading: false
     property bool isManualSeeking: false
+
     readonly property string lyricsDir: Paths.absolutePath(Config.paths.lyricsDir)
 
     property int currentRequestId: 0
 
     // The data source for the UI
     readonly property alias model: lyricsModel
+
     ListModel { id: lyricsModel }
 
     Timer {
         id: seekTimer
         interval: 500
         onTriggered: root.isManualSeeking = false
+    }
+
+    Timer {
+        id: fallbackTimer
+        interval: 200
+        onTriggered: {
+            if (lyricsModel.count === 0) fallbackToOnline();
+        }
+    }
+
+    FileView {
+        id: lrcFile
+        onLoaded: {
+            fallbackTimer.stop();
+            let parsed = Lrc.parseLrc(text());
+            if (parsed.length > 0) {
+                updateModel(parsed);
+                loading = false;
+            } else {
+                fallbackToOnline();
+            }
+        }
+    }
+
+    Connections {
+        target: Players
+        function onActiveChanged() {
+            root.player = Players.active;
+            loadLyrics();
+        }
+    }
+
+    Connections {
+        target: root.player
+        ignoreUnknownSignals: true
+        function onMetadataChanged() { loadLyrics(); }
     }
 
     function getMetadata() {
@@ -57,28 +95,6 @@ Singleton {
 
         // Fallback safety: If FileView doesn't trigger onLoaded (file missing),
         fallbackTimer.restart();
-    }
-
-    Timer {
-        id: fallbackTimer
-        interval: 200
-        onTriggered: {
-            if (lyricsModel.count === 0) fallbackToOnline();
-        }
-    }
-
-    FileView {
-        id: lrcFile
-        onLoaded: {
-            fallbackTimer.stop();
-            let parsed = Lrc.parseLrc(text());
-            if (parsed.length > 0) {
-                updateModel(parsed);
-                loading = false;
-            } else {
-                fallbackToOnline();
-            }
-        }
     }
 
     function fallbackToOnline() {
@@ -197,19 +213,5 @@ Singleton {
         }
 
         seekTimer.restart();
-    }
-
-    Connections {
-        target: Players
-        function onActiveChanged() {
-            root.player = Players.active;
-            loadLyrics();
-        }
-    }
-
-    Connections {
-        target: root.player
-        ignoreUnknownSignals: true
-        function onMetadataChanged() { loadLyrics(); }
     }
 }

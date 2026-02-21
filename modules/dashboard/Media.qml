@@ -52,9 +52,9 @@ Item {
         triggeredOnStart: true
         repeat: true
         onTriggered: {
-            if (!Players.active) return
-                LyricsService.updatePosition()
-                Players.active?.positionChanged();
+            if (!Players.active) return;
+            LyricsService.updatePosition();
+            Players.active?.positionChanged();
         }
     }
 
