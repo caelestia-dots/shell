@@ -236,7 +236,10 @@ Item {
             delegate: Item {
                 id: delegateRoot
                 width: lyricsView.width
-                height: lyricText.contentHeight + Appearance.spacing.large
+
+                readonly property bool hasContent: model.text && model.text.trim().length > 0
+                height: hasContent ? (lyricText.contentHeight + Appearance.spacing.large) : (lyricText.contentHeight + Appearance.spacing.normal)
+
                 property bool isCurrent: ListView.isCurrentItem
 
                 MultiEffect {
