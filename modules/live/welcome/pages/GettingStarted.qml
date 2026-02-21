@@ -374,57 +374,67 @@ Item {
 
                         StyledRect {
                             Layout.fillWidth: true
-                            Layout.preferredHeight: bindsGrid.implicitHeight + 60
+                            Layout.preferredHeight: firstStepsKeybindingsGrid.implicitHeight + Appearance.padding.large * 2
                             color: Colours.palette.m3surfaceContainerLow
                             radius: Appearance.rounding.normal
                             border.color: Colours.palette.m3outlineVariant
 
+                            ListModel {
+                                id: firstStepsKeybindingsList
+
+                                ListElement {
+                                    key: "SUPER"
+                                    desc: "Open App Launcher"
+                                }
+                                ListElement {
+                                    key: "SUPER + T"
+                                    desc: "Terminal (Foot)"
+                                }
+                                ListElement {
+                                    key: "SUPER + E"
+                                    desc: "File Explorer (Thunar)"
+                                }
+                                ListElement {
+                                    key: "SUPER + W"
+                                    desc: "Web Browser (Zen)"
+                                }
+                                ListElement {
+                                    key: "SUPER + Q"
+                                    desc: "Close Active Window"
+                                }
+                                ListElement {
+                                    key: "CTRL + SHIFT + ESC"
+                                    desc: "System Monitor (Btop)"
+                                }
+                            }
+
                             GridLayout {
-                                id: bindsGrid
+                                id: firstStepsKeybindingsGrid
 
                                 anchors.fill: parent
-                                anchors.margins: 30
+
                                 columns: 2
-                                columnSpacing: 20
-                                rowSpacing: 20
+                                uniformCellWidths: true
+                                uniformCellHeights: true
+                                Layout.margins: Appearance.padding.large
 
                                 Repeater {
-                                    model: [
-                                        { keys: "SUPER", desc: "Open App Launcher" },
-                                        { keys: "SUPER + T", desc: "Terminal (Foot)" },
-                                        { keys: "SUPER + E", desc: "File Explorer (Thunar)" },
-                                        { keys: "SUPER + W", desc: "Web Browser (Zen)" },
-                                        { keys: "SUPER + Q", desc: "Close Active Window" },
-                                        { keys: "CTRL + SHIFT + ESC", desc: "System Monitor (Btop)" }
-                                    ]
+                                    id: firstStepsKeybindings
 
-                                    delegate: RowLayout {
-                                        spacing: 15
+                                    model: firstStepsKeybindingsList
+
+                                    delegate: StyledRect {
+                                        id: firstStepsKeybinding
+
+                                        required property var modelData
+
                                         Layout.fillWidth: true
+                                        Layout.fillHeight: true
+                                        Layout.margins: Appearance.padding.large
 
-                                        StyledRect {
-                                            width: keyText.implicitWidth + 20
-                                            height: 32
-                                            radius: 6
-                                            color: Colours.palette.m3surfaceContainerHigh
-                                            border.color: Colours.palette.m3outline
-
-                                            StyledText {
-                                                id: keyText
-
-                                                anchors.centerIn: parent
-                                                text: modelData.keys
-                                                font.bold: true
-                                                font.pointSize: 9
-                                                color: Colours.palette.m3primary
-                                            }
-                                        }
-
-                                        StyledText {
-                                            text: modelData.desc
-                                            font.pointSize: 10
-                                            color: Colours.palette.m3onSurface
-                                            Layout.fillWidth: true
+                                        Keybinding {
+                                            key: modelData.key
+                                            label: modelData.desc
                                         }
                                     }
                                 }
