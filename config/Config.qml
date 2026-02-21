@@ -457,6 +457,7 @@ Singleton {
     function serializePaths(): var {
         return {
             wallpaperDir: paths.wallpaperDir,
+            lyricsDir: paths.lyricsDir,
             sessionGif: paths.sessionGif,
             mediaGif: paths.mediaGif
         };

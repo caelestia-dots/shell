@@ -585,7 +585,8 @@ default, you must create it manually.
     "paths": {
         "mediaGif": "root:/assets/bongocat.gif",
         "sessionGif": "root:/assets/kurukuru.gif",
-        "wallpaperDir": "~/Pictures/Wallpapers"
+        "wallpaperDir": "~/Pictures/Wallpapers",
+        "lyricsDir": "~/Music/lyrics"
     },
     "services": {
         "audioIncrement": 0.1,

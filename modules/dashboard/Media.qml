@@ -1,4 +1,4 @@
-pragma ComponentBehavior: Bound
+//pragma ComponentBehavior: Bound
 
 import qs.components
 import qs.components.controls
@@ -11,6 +11,8 @@ import Quickshell.Services.Mpris
 import QtQuick
 import QtQuick.Layouts
 import QtQuick.Shapes
+import QtQuick.Effects
+import "../../utils/scripts/lrcparser.js" as Lrc
 
 Item {
     id: root
@@ -49,7 +51,11 @@ Item {
         interval: Config.dashboard.mediaUpdateInterval
         triggeredOnStart: true
         repeat: true
-        onTriggered: Players.active?.positionChanged()
+        onTriggered: {
+            if (!Players.active) return;
+            LyricsService.updatePosition();
+            Players.active?.positionChanged();
+        }
     }
 
     ServiceRef {
@@ -200,6 +206,91 @@ Item {
             wrapMode: Players.active ? Text.NoWrap : Text.WordWrap
         }
 
+        ListView {
+            id: lyricsView
+            Layout.fillWidth: true
+            Layout.preferredHeight: LyricsService.model.count == 0 ? 0 : 200
+            clip: true
+            model: LyricsService.model
+            currentIndex: LyricsService.currentIndex
+
+            preferredHighlightBegin: height / 2 - 30
+            preferredHighlightEnd: height / 2 + 30
+            highlightRangeMode: ListView.ApplyRange
+            highlightFollowsCurrentItem: true
+            highlightMoveDuration: LyricsService.isManualSeeking ? 0 : Appearance.anim.durations.normal
+
+            layer.enabled: true
+            layer.effect: ShaderEffect {
+                property var source: lyricsView
+                property real fadeMargin: 0.5
+                fragmentShader: "../../assets/shaders/fade.frag.qsb"
+            }
+
+            onModelChanged: {
+                if (model && model.count > 0) {
+                    Qt.callLater(() => positionViewAtIndex(currentIndex, ListView.Center));
+                }
+            }
+
+            delegate: Item {
+                id: delegateRoot
+                width: lyricsView.width
+
+                readonly property bool hasContent: model.text && model.text.trim().length > 0
+                height: hasContent ? (lyricText.contentHeight + Appearance.spacing.large) : 0
+
+                property bool isCurrent: ListView.isCurrentItem
+
+                MultiEffect {
+                    id: effect
+                    anchors.fill: lyricText
+                    source: lyricText
+                    scale: lyricText.scale
+                    enabled: delegateRoot.isCurrent
+                    visible: delegateRoot.isCurrent
+
+                    blurEnabled: true
+                    blur: 0.4
+
+                    shadowEnabled: true
+                    shadowColor: Colours.palette.m3primary
+                    shadowOpacity: 0.5
+                    shadowBlur: 0.6
+                    shadowHorizontalOffset: 0
+                    shadowVerticalOffset: 0
+
+                    autoPaddingEnabled: true
+                }
+
+                MouseArea {
+                    anchors.fill: parent
+                    cursorShape: Qt.PointingHandCursor
+                    onClicked: {
+                        if (model.time !== undefined) {
+                            LyricsService.jumpTo(index, model.time);
+
+                        }
+                    }
+                }
+
+                Text {
+                    id: lyricText
+                    text: model.text
+                    width: parent.width*0.85 //to make up for the size increase on scaling
+                    anchors.centerIn: parent
+                    horizontalAlignment: Text.AlignHCenter
+                    wrapMode: Text.WordWrap
+                    font.pointSize: Appearance.font.size.normal
+                    color: isCurrent ? Colours.palette.m3primary : Colours.palette.m3onSurfaceVariant
+                    font.bold: isCurrent
+                    scale: isCurrent ? 1.15 : 1.0
+                    Behavior on color { ColorAnimation { duration: Appearance.anim.durations.small } }
+                    Behavior on scale { NumberAnimation { duration: Appearance.anim.durations.small; easing.type: Easing.OutCubic } }
+                }
+            }
+        }
+
         RowLayout {
             id: controls
 
@@ -299,83 +390,89 @@ Item {
                 font.pointSize: Appearance.font.size.small
             }
         }
+    }
 
-        RowLayout {
-            Layout.alignment: Qt.AlignHCenter
-            spacing: Appearance.spacing.small
+    ColumnLayout {
+        id: leftSection
+        anchors.verticalCenter: parent.verticalCenter
+        anchors.verticalCenterOffset: LyricsService.model.count == 0 ? 0 : -playerChanger.height/2
+        anchors.left: details.right
+        anchors.leftMargin: Appearance.spacing.normal
 
-            PlayerControl {
-                type: IconButton.Text
-                icon: "move_up"
-                inactiveOnColour: Colours.palette.m3secondary
-                padding: Appearance.padding.small
-                font.pointSize: Appearance.font.size.large
-                disabled: !Players.active?.canRaise
-                onClicked: {
-                    Players.active?.raise();
-                    root.visibilities.dashboard = false;
-                }
-            }
+        Item {
+            id: bongocat
 
-            SplitButton {
-                id: playerSelector
+            implicitWidth: visualiser.width
+            implicitHeight: visualiser.height
 
-                disabled: !Players.list.length
-                active: menuItems.find(m => m.modelData === Players.active) ?? menuItems[0] ?? null
-                menu.onItemSelected: item => Players.manualActive = (item as PlayerItem).modelData
+            AnimatedImage {
+                anchors.centerIn: parent
 
-                menuItems: playerList.instances
-                fallbackIcon: "music_off"
-                fallbackText: qsTr("No players")
+                width: visualiser.width * 0.75
+                height: visualiser.height * 0.75
 
-                label.Layout.maximumWidth: slider.implicitWidth * 0.28
-                label.elide: Text.ElideRight
-
-                stateLayer.disabled: true
-                menuOnTop: true
-
-                Variants {
-                    id: playerList
-
-                    model: Players.list
-
-                    PlayerItem {}
-                }
-            }
-
-            PlayerControl {
-                type: IconButton.Text
-                icon: "delete"
-                inactiveOnColour: Colours.palette.m3error
-                padding: Appearance.padding.small
-                font.pointSize: Appearance.font.size.large
-                disabled: !Players.active?.canQuit
-                onClicked: Players.active?.quit()
+                playing: Players.active?.isPlaying ?? false
+                speed: Audio.beatTracker.bpm / Appearance.anim.mediaGifSpeedAdjustment // qmllint disable unresolved-type
+                source: Paths.absolutePath(Config.paths.mediaGif)
+                asynchronous: true
+                fillMode: AnimatedImage.PreserveAspectFit
             }
         }
     }
 
-    Item {
-        id: bongocat
+    RowLayout {
+        parent: LyricsService.model.count == 0 ? details: leftSection
+        id: playerChanger
+        Layout.alignment: Qt.AlignHCenter
+        spacing: Appearance.spacing.small
 
-        anchors.verticalCenter: parent.verticalCenter
-        anchors.left: details.right
-        anchors.leftMargin: Appearance.spacing.normal
+        PlayerControl {
+            type: IconButton.Text
+            icon: "move_up"
+            inactiveOnColour: Colours.palette.m3secondary
+            padding: Appearance.padding.small
+            font.pointSize: Appearance.font.size.large
+            disabled: !Players.active?.canRaise
+            onClicked: {
+                Players.active?.raise();
+                root.visibilities.dashboard = false;
+            }
+        }
 
-        implicitWidth: visualiser.width
-        implicitHeight: visualiser.height
+        SplitButton {
+            id: playerSelector
 
-        AnimatedImage {
-            anchors.centerIn: parent
+            disabled: !Players.list.length
+            active: menuItems.find(m => m.modelData === Players.active) ?? menuItems[0] ?? null
+            menu.onItemSelected: item => Players.manualActive = (item as PlayerItem).modelData
 
-            width: visualiser.width * 0.75
-            height: visualiser.height * 0.75
+            menuItems: playerList.instances
+            fallbackIcon: "music_off"
+            fallbackText: qsTr("No players")
 
-            playing: Players.active?.isPlaying ?? false
-            speed: Audio.beatTracker.bpm / Appearance.anim.mediaGifSpeedAdjustment // qmllint disable unresolved-type
-            source: Paths.absolutePath(Config.paths.mediaGif)
-            asynchronous: true
-            fillMode: AnimatedImage.PreserveAspectFit
+            label.Layout.maximumWidth: slider.implicitWidth * 0.28
+            label.elide: Text.ElideRight
+
+            stateLayer.disabled: true
+            menuOnTop: true
+
+            Variants {
+                id: playerList
+
+                model: Players.list
+
+                PlayerItem {}
+            }
+        }
+
+        PlayerControl {
+            type: IconButton.Text
+            icon: "delete"
+            inactiveOnColour: Colours.palette.m3error
+            padding: Appearance.padding.small
+            font.pointSize: Appearance.font.size.large
+            disabled: !Players.active?.canQuit
+            onClicked: Players.active?.quit()
         }
     }
 
