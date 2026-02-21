@@ -223,7 +223,7 @@ Item {
             preferredHighlightEnd: height / 2 + 30
             highlightRangeMode: ListView.ApplyRange
             highlightFollowsCurrentItem: true
-            highlightMoveDuration: 300
+            highlightMoveDuration: Appearance.anim.durations.normal
 
             layer.enabled: true
             layer.effect: ShaderEffect {
@@ -255,7 +255,7 @@ Item {
             delegate: Item {
                 id: delegateRoot
                 width: lyricsView.width
-                height: lyricText.contentHeight + 20
+                height: lyricText.contentHeight + Appearance.spacing.large
                 property bool isCurrent: ListView.isCurrentItem
 
                 MultiEffect {
@@ -291,7 +291,7 @@ Item {
                 Text {
                     id: lyricText
                     text: model.text
-                    width: parent.width - 40
+                    width: parent.width*0.85 //to make up for the size increase on scaling
                     anchors.centerIn: parent
                     horizontalAlignment: Text.AlignHCenter
                     wrapMode: Text.WordWrap
@@ -299,8 +299,8 @@ Item {
                     color: isCurrent ? Colours.palette.m3primary : Colours.palette.m3onSurfaceVariant
                     font.bold: isCurrent
                     scale: isCurrent ? 1.15 : 1.0
-                    Behavior on color { ColorAnimation { duration: 200 } }
-                    Behavior on scale { NumberAnimation { duration: 200; easing.type: Easing.OutCubic } }
+                    Behavior on color { ColorAnimation { duration: Appearance.anim.durations.small } }
+                    Behavior on scale { NumberAnimation { duration: Appearance.anim.durations.small; easing.type: Easing.OutCubic } }
                 }
             }
         }

@@ -92,7 +92,7 @@ Singleton {
                         fetchNetEase(title, artist)
                     }
                 } else {
-                    console.log("Not found on LrcLib")
+                    console.log("Not found on LrcLib, Response: "+ xhr.status)
                     fetchNetEase(title, artist)
                 }
                 loading = false
@@ -143,12 +143,14 @@ Singleton {
                                         }
                                     } catch (e) { console.log("NetEase Parse Error:", e) }
                                     loading = false;
+                                } else {
+                                    console.log("Netease response:",xhrLrc.status)
                                 }
                             };
                             xhrLrc.send();
                         } else { loading = false; }
                     } catch (e) { loading = false; }
-                } else { loading = false; console.log(xhrSearch.status)}
+                } else { loading = false; console.log("Netease search response:",xhrSearch.status)}
             }
         };
         xhrSearch.send();
