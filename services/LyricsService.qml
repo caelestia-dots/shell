@@ -88,7 +88,8 @@ Singleton {
         let requestId = root.currentRequestId;
 
         let filename = `${meta.artist} - ${meta.title}.lrc`;
-        let fullPath = lyricsDir + "/" + filename;
+        let cleanDir = lyricsDir.replace(/\/$/, "");
+        let fullPath = cleanDir + "/" + filename;
 
         lrcFile.path = "";
         lrcFile.path = fullPath;
