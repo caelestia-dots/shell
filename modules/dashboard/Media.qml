@@ -1,15 +1,12 @@
 //pragma ComponentBehavior: Bound
 
 import qs.components
-import qs.components.effects
 import qs.components.controls
 import qs.services
 import qs.utils
 import qs.config
 import Caelestia.Services
 import Quickshell
-import Quickshell.Io
-import Quickshell.Widgets
 import Quickshell.Services.Mpris
 import QtQuick
 import QtQuick.Layouts
@@ -43,13 +40,11 @@ Item {
     implicitWidth: cover.implicitWidth + Config.dashboard.sizes.mediaVisualiserSize * 2 + details.implicitWidth + details.anchors.leftMargin + bongocat.implicitWidth + bongocat.anchors.leftMargin * 2 + Appearance.padding.large * 2
     implicitHeight: Math.max(cover.implicitHeight + Config.dashboard.sizes.mediaVisualiserSize * 2, details.implicitHeight, bongocat.implicitHeight) + Appearance.padding.large * 2
 
-
     Behavior on playerProgress {
         Anim {
             duration: Appearance.anim.durations.large
         }
     }
-
 
     Timer {
         running: Players.active?.isPlaying ?? false
@@ -275,6 +270,7 @@ Item {
                     shadowBlur: 0.6
                     shadowHorizontalOffset: 0
                     shadowVerticalOffset: 0
+
                     autoPaddingEnabled: true
                 }
 
@@ -404,17 +400,17 @@ Item {
                 font.pointSize: Appearance.font.size.small
             }
         }
-
     }
+
     ColumnLayout {
         id: leftSection
         anchors.verticalCenter: parent.verticalCenter
         anchors.verticalCenterOffset: LyricsService.model.count == 0 ? 0 : -playerChanger.height/2
         anchors.left: details.right
         anchors.leftMargin: Appearance.spacing.normal
+
         Item {
             id: bongocat
-
 
             implicitWidth: visualiser.width
             implicitHeight: visualiser.height
@@ -426,13 +422,14 @@ Item {
                 height: visualiser.height * 0.75
 
                 playing: Players.active?.isPlaying ?? false
-                speed: Audio.beatTracker.bpm / Appearance.anim.mediaGifSpeedAdjustment
+                speed: Audio.beatTracker.bpm / Appearance.anim.mediaGifSpeedAdjustment // qmllint disable unresolved-type
                 source: Paths.absolutePath(Config.paths.mediaGif)
                 asynchronous: true
                 fillMode: AnimatedImage.PreserveAspectFit
             }
         }
     }
+
     RowLayout {
         parent: LyricsService.model.count == 0 ? details: leftSection
         id: playerChanger
