@@ -54,6 +54,7 @@ Item {
     Timer {
         running: Players.active?.isPlaying ?? false
         interval: Config.dashboard.mediaUpdateInterval
+        triggeredOnStart: true
         repeat: true
         onTriggered: {
             if (!Players.active) return
@@ -396,67 +397,17 @@ Item {
                 font.pointSize: Appearance.font.size.small
             }
         }
-        RowLayout {
-            Layout.alignment: Qt.AlignHCenter
-            spacing: Appearance.spacing.small
 
-            PlayerControl {
-                type: IconButton.Text
-                icon: "move_up"
-                inactiveOnColour: Colours.palette.m3secondary
-                padding: Appearance.padding.small
-                font.pointSize: Appearance.font.size.large
-                disabled: !Players.active?.canRaise
-                onClicked: {
-                    Players.active?.raise();
-                    root.visibilities.dashboard = false;
-                }
-            }
-
-            SplitButton {
-                id: playerSelector
-
-                disabled: !Players.list.length
-                active: menuItems.find(m => m.modelData === Players.active) ?? menuItems[0] ?? null
-                menu.onItemSelected: item => Players.manualActive = (item as PlayerItem).modelData
-
-                menuItems: playerList.instances
-                fallbackIcon: "music_off"
-                fallbackText: qsTr("No players")
-
-                label.Layout.maximumWidth: slider.implicitWidth * 0.28
-                label.elide: Text.ElideRight
-
-                stateLayer.disabled: true
-                menuOnTop: true
-
-                Variants {
-                    id: playerList
-
-                    model: Players.list
-
-                    PlayerItem {}
-                }
-            }
-
-            PlayerControl {
-                type: IconButton.Text
-                icon: "delete"
-                inactiveOnColour: Colours.palette.m3error
-                padding: Appearance.padding.small
-                font.pointSize: Appearance.font.size.large
-                disabled: !Players.active?.canQuit
-                onClicked: Players.active?.quit()
-            }
-        }
     }
-
+    ColumnLayout {
+        id: leftSection
+        anchors.verticalCenter: parent.verticalCenter
+        anchors.verticalCenterOffset: LyricsService.model.count == 0 ? 0 : -playerChanger.height/2
+        anchors.left: details.right
+        anchors.leftMargin: Appearance.spacing.normal
     Item {
         id: bongocat
 
-        anchors.verticalCenter: parent.verticalCenter
-        anchors.left: details.right
-        anchors.leftMargin: Appearance.spacing.normal
 
         implicitWidth: visualiser.width
         implicitHeight: visualiser.height
@@ -472,6 +423,63 @@ Item {
             source: Paths.absolutePath(Config.paths.mediaGif)
             asynchronous: true
             fillMode: AnimatedImage.PreserveAspectFit
+        }
+    }
+
+    }
+    RowLayout {
+        parent: LyricsService.model.count == 0 ? details: leftSection
+        id: playerChanger
+        Layout.alignment: Qt.AlignHCenter
+        spacing: Appearance.spacing.small
+
+        PlayerControl {
+            type: IconButton.Text
+            icon: "move_up"
+            inactiveOnColour: Colours.palette.m3secondary
+            padding: Appearance.padding.small
+            font.pointSize: Appearance.font.size.large
+            disabled: !Players.active?.canRaise
+            onClicked: {
+                Players.active?.raise();
+                root.visibilities.dashboard = false;
+            }
+        }
+
+        SplitButton {
+            id: playerSelector
+
+            disabled: !Players.list.length
+            active: menuItems.find(m => m.modelData === Players.active) ?? menuItems[0] ?? null
+            menu.onItemSelected: item => Players.manualActive = (item as PlayerItem).modelData
+
+            menuItems: playerList.instances
+            fallbackIcon: "music_off"
+            fallbackText: qsTr("No players")
+
+            label.Layout.maximumWidth: slider.implicitWidth * 0.28
+            label.elide: Text.ElideRight
+
+            stateLayer.disabled: true
+            menuOnTop: true
+
+            Variants {
+                id: playerList
+
+                model: Players.list
+
+                PlayerItem {}
+            }
+        }
+
+        PlayerControl {
+            type: IconButton.Text
+            icon: "delete"
+            inactiveOnColour: Colours.palette.m3error
+            padding: Appearance.padding.small
+            font.pointSize: Appearance.font.size.large
+            disabled: !Players.active?.canQuit
+            onClicked: Players.active?.quit()
         }
     }
 
