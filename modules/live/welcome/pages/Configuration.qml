@@ -107,7 +107,7 @@ Item {
                 font.pointSize: Appearance.font.size.extraLarge
                 font.bold: true
                 color: Colours.palette.m3onBackground
-                    }
+            }
 
             StyledText {
                 Layout.fillWidth: true
@@ -115,7 +115,7 @@ Item {
                 font.pointSize: Appearance.font.size.normal
                 color: Colours.palette.m3onSurfaceVariant
                 wrapMode: Text.WordWrap
-                    }
+            }
 
             StyledRect {
                 Layout.fillWidth: true
@@ -150,7 +150,7 @@ Item {
                     font.bold: true
                     font.pointSize: appearance.font.size.large
                     color: Colours.palette.m3primary
-                    }
+                }
 
                 StyledText {
                     Layout.fillWidth: true
@@ -159,14 +159,14 @@ Item {
                     color: Colours.palette.m3onSurface
                     wrapMode: Text.WordWrap
                     opacity: 0.8
-                    }
+                }
                 Rectangle {
                     Layout.fillWidth: true
                     height: 1
                     color: Colours.palette.m3outlineVariant
                     opacity: 0.3
                     visible: index < 6
-                    }
+                }
                 }
             }
         }
@@ -191,7 +191,7 @@ Item {
                     font.pointSize: Appearance.font.size.extraLarge
                     font.bold: true
                     color: Colours.palette.m3onBackground
-                    }
+                }
 
                 StyledText {
                     Layout.fillWidth: true
@@ -199,7 +199,7 @@ Item {
                     font.pointSize: Appearance.font.size.normal
                     color: Colours.palette.m3onSurfaceVariant
                     wrapMode: Text.WordWrap
-                    }
+                }
 
                 StyledRect {
                     Layout.fillWidth: true
@@ -216,11 +216,11 @@ Item {
                     color: Colours.palette.m3onSurfaceVariant
                     horizontalAlignment: Text.AlignHCenter
                         }
-                    }
+                }
 
                 Item {
                     Layout.fillHeight: true
-                    }
+                }
                 }
 
                 ColumnLayout {
@@ -237,7 +237,7 @@ Item {
                     font.pointSize: Appearance.font.size.extraLarge
                     font.bold: true
                     color: Colours.palette.m3onBackground
-                    }
+                }
 
                 StyledText {
                     Layout.fillWidth: true
@@ -245,7 +245,7 @@ Item {
                     font.pointSize: Appearance.font.size.normal
                     color: Colours.palette.m3onSurfaceVariant
                     wrapMode: Text.WordWrap
-                    }
+                }
 
                 StyledRect {
                     Layout.fillWidth: true
@@ -262,11 +262,11 @@ Item {
                     color: Colours.palette.m3onSurfaceVariant
                     horizontalAlignment: Text.AlignHCenter
                         }
-                    }
+                }
 
                 Item {
                     Layout.fillHeight: true
-                    }
+                }
                 }
 
                 ColumnLayout {
@@ -283,7 +283,7 @@ Item {
                     font.pointSize: Appearance.font.size.extraLarge
                     font.bold: true
                     color: Colours.palette.m3onBackground
-                    }
+                }
 
                 StyledText {
                     Layout.fillWidth: true
@@ -291,7 +291,7 @@ Item {
                     font.pointSize: Appearance.font.size.normal
                     color: Colours.palette.m3onSurfaceVariant
                     wrapMode: Text.WordWrap
-                    }
+                }
 
                 StyledRect {
                     Layout.fillWidth: true
@@ -307,12 +307,12 @@ Item {
                     font.pointSize: Appearance.font.size.normal
                     color: Colours.palette.m3onSurfaceVariant
                     horizontalAlignment: Text.AlignHCenter
-                        }
+                }
                     }
 
                 Item {
                     Layout.fillHeight: true
-                    }
+                }
                 }
             }
         }

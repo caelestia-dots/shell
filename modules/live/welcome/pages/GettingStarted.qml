@@ -626,11 +626,11 @@ Item {
 
                                 Repeater {
                                     model: [
-                                        { key: "D", label: "Discord & WhatsApp", desc: "Communication hub" },
-                                        { key: "M", label: "Music & Media", desc: "Spotify / MPD" },
-                                        { key: "S", label: "Special Scratchpad", desc: "Floating terminal / Notes" },
-                                        { key: "A", label: "ToDo Lists", desc: "Task management" }
-                                        //{ key: "Ctrl + Shift + Esc", Label: "System Monitor", desc: "Btop" }
+                                        { key: "SUPER + D", label: "Discord & WhatsApp", desc: "Communication hub" },
+                                        { key: "SUPER + M", label: "Music & Media", desc: "Spotify / MPD" },
+                                        { key: "SUPER + S", label: "Special Scratchpad", desc: "Floating terminal / Notes" },
+                                        { key: "SUPER + A", label: "ToDo Lists", desc: "Task management" },
+                                        { key: "Ctrl + Shift + Esc", label: "System Monitor", desc: "Btop" }
                                     ]
                                     delegate: RowLayout {
                                         spacing: 15
@@ -644,7 +644,7 @@ Item {
 
                                             StyledText {
                                                 anchors.centerIn: parent
-                                                text: "SUPER + " + modelData.key
+                                                text: modelData.key
                                                 font.bold: true
                                                 font.pointSize: 8
                                                 color: Colours.palette.m3primary
