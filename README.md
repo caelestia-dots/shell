@@ -574,7 +574,9 @@ default, you must create it manually.
         "defaultExpireTimeout": 5000,
         "expandThreshold": 20,
         "openExpanded": false,
-        "expire": false
+        "expire": false,
+        "timeoutBar": false,
+        "timeoutCircle": false,
     },
     "osd": {
         "enabled": true,

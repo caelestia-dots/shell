@@ -25,7 +25,7 @@ Item {
 
         let height = (count - 1) * Appearance.spacing.smaller;
         for (let i = 0; i < count; i++)
-            height += list.itemAtIndex(i)?.nonAnimHeight ?? 0;
+            height += list.itemAtIndex(i)?.implicitHeight ?? 0;
 
         if (visibilities && panels) {
             if (visibilities.osd) {
