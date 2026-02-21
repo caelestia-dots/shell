@@ -78,6 +78,12 @@ StyledRect {
                 onClicked: Notifs.dnd = !Notifs.dnd
             }
 
+            //Toggle {
+                //icon: "gamepad"
+                //checked: GameMode.enabled
+                //onClicked: GameMode.enabled = !GameMode.enabled
+            //}
+
             Toggle {
                 icon: "coffee"
                 checked: IdleInhibitor.enabled
