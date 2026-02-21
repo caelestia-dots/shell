@@ -238,7 +238,7 @@ Item {
                 width: lyricsView.width
 
                 readonly property bool hasContent: model.text && model.text.trim().length > 0
-                height: hasContent ? (lyricText.contentHeight + Appearance.spacing.large) : (lyricText.contentHeight + Appearance.spacing.normal)
+                height: hasContent ? (lyricText.contentHeight + Appearance.spacing.large) : 0
 
                 property bool isCurrent: ListView.isCurrentItem
 
