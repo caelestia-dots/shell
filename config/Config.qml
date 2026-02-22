@@ -240,7 +240,8 @@ Singleton {
                 windowPreviewSize: bar.sizes.windowPreviewSize,
                 trayMenuWidth: bar.sizes.trayMenuWidth,
                 batteryWidth: bar.sizes.batteryWidth,
-                networkWidth: bar.sizes.networkWidth
+                networkWidth: bar.sizes.networkWidth,
+                kbLayoutWidth: bar.sizes.kbLayoutWidth
             },
             entries: bar.entries,
             excludedScreens: bar.excludedScreens
