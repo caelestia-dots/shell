@@ -563,7 +563,57 @@ default, you must create it manually.
         },
         "showOnHover": false,
         "favouriteApps": [],
-        "hiddenApps": []
+        "hiddenApps": [],
+        "categories": [
+            {
+                "name": "Development",
+                "icon": "code",
+                "apps": ["code-oss"]
+            },
+            {
+                "name": "Graphics",
+                "icon": "palette",
+                "apps": []
+            },
+            {
+                "name": "Communication",
+                "icon": "chat",
+                "apps": ["vesktop", "discord"]
+            },
+            {
+                "name": "Media",
+                "icon": "play_circle",
+                "apps": ["spotify", "obs"]
+            },
+            {
+                "name": "Games",
+                "icon": "sports_esports",
+                "apps": ["steam"]
+            },
+            {
+                "name": "Utilities",
+                "icon": "build",
+                "apps": ["obs"]
+            }
+        ],
+        "contextMenuMain": [
+            {"launch": {"text": "Launch", "icon": "play_arrow", "bold": true}},
+            {"terminal": {"parent": "launch"}},
+            "separator",
+            "favorites",
+            "categories",
+            "hide",
+            "workspaces"
+        ],
+        "contextMenuAdvanced": [
+            "open-path",
+            "desktop-file",
+            "separator",
+            {"custom-submenu": {"text": "Advanced Options", "icon": "settings"}},
+            {"kill": {"parent": "custom-submenu"}},
+            {"separator": {"parent": "custom-submenu"}},
+            {"copy-exec": {"parent": "custom-submenu"}}
+        ]
     },
     "lock": {
         "recolourLogo": false

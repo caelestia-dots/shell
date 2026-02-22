@@ -8,6 +8,7 @@ import qs.components.effects
 import qs.services
 import qs.config
 import QtQuick
+import QtQuick.Controls
 import QtQuick.Layouts
 
 ColumnLayout {
@@ -62,6 +63,135 @@ ColumnLayout {
             toggle.onToggled: {
                 Config.launcher.enableDangerousActions = checked;
                 Config.save();
+            }
+        }
+    }
+
+    SectionHeader {
+        Layout.topMargin: Appearance.spacing.large
+        title: qsTr("Categories")
+        description: qsTr("Manage launcher categories")
+    }
+
+    SectionContainer {
+        contentSpacing: Appearance.spacing.smaller
+
+        ToggleRow {
+            Layout.bottomMargin: Appearance.spacing.normal
+            label: qsTr("Enable categories")
+            checked: Config.launcher.enableCategories
+            toggle.onToggled: {
+                Config.launcher.enableCategories = checked;
+                Config.save();
+            }
+        }
+
+        TextButton {
+            Layout.fillWidth: true
+            text: qsTr("+ Add Category")
+            inactiveColour: Colours.palette.m3primaryContainer
+            inactiveOnColour: Colours.palette.m3onPrimaryContainer
+
+            onClicked: {
+                editCategoryDialog.editIndex = -1;
+                editCategoryDialog.categoryName = "";
+                editCategoryDialog.categoryIcon = "";
+                editCategoryDialog.open();
+            }
+        }
+
+        ListView {
+            Layout.fillWidth: true
+            Layout.preferredHeight: contentHeight
+            interactive: false
+            spacing: Appearance.spacing.smaller
+
+            model: Config.launcher.categories
+
+            delegate: StyledRect {
+                required property var modelData
+                required property int index
+
+                width: ListView.view ? ListView.view.width : undefined
+                color: Colours.tPalette.m3surfaceContainerHigh
+                radius: Appearance.rounding.normal
+
+                implicitHeight: categoryRow.implicitHeight + Appearance.padding.normal * 2
+
+                RowLayout {
+                    id: categoryRow
+                    anchors.fill: parent
+                    anchors.leftMargin: Appearance.padding.normal
+                    anchors.rightMargin: Appearance.padding.normal
+                    anchors.topMargin: Appearance.padding.normal
+                    anchors.bottomMargin: Appearance.padding.normal
+                    spacing: Appearance.spacing.normal
+
+                    MaterialIcon {
+                        text: modelData.icon
+                        color: Colours.palette.m3onSurface
+                    }
+
+                    StyledText {
+                        Layout.fillWidth: true
+                        text: modelData.name
+                        color: Colours.palette.m3onSurface
+                    }
+
+                    IconButton {
+                        type: IconButton.Tonal
+                        icon: "arrow_upward"
+                        radius: Appearance.rounding.normal
+                        visible: index > 0
+                        onClicked: {
+                            const categories = [...Config.launcher.categories];
+                            const temp = categories[index];
+                            categories[index] = categories[index - 1];
+                            categories[index - 1] = temp;
+                            Config.launcher.categories = categories;
+                            Config.save();
+                        }
+                    }
+
+                    IconButton {
+                        type: IconButton.Tonal
+                        icon: "arrow_downward"
+                        radius: Appearance.rounding.normal
+                        visible: index < Config.launcher.categories.length - 1
+                        onClicked: {
+                            const categories = [...Config.launcher.categories];
+                            const temp = categories[index];
+                            categories[index] = categories[index + 1];
+                            categories[index + 1] = temp;
+                            Config.launcher.categories = categories;
+                            Config.save();
+                        }
+                    }
+
+                    IconButton {
+                        type: IconButton.Tonal
+                        icon: "edit"
+                        radius: Appearance.rounding.normal
+                        onClicked: {
+                            editCategoryDialog.editIndex = index;
+                            editCategoryDialog.categoryName = modelData.name;
+                            editCategoryDialog.categoryIcon = modelData.icon;
+                            editCategoryDialog.open();
+                        }
+                    }
+
+                    IconButton {
+                        type: IconButton.Tonal
+                        icon: "delete"
+                        radius: Appearance.rounding.normal
+                        onClicked: {
+                            const categories = [...Config.launcher.categories];
+                            categories.splice(index, 1);
+                            Config.launcher.categories = categories;
+                            Config.save();
+                        }
+                    }
+                }
             }
         }
     }
@@ -212,6 +342,104 @@ ColumnLayout {
         PropertyRow {
             label: qsTr("Total hidden")
             value: qsTr("%1").arg(Config.launcher.hiddenApps ? Config.launcher.hiddenApps.length : 0)
+        }
+    }
+
+    Popup {
+        id: editCategoryDialog
+
+        property int editIndex: -1
+        property string categoryName: ""
+        property string categoryIcon: ""
+
+        parent: Overlay.overlay
+        x: Math.round((parent.width - width) / 2)
+        y: Math.round((parent.height - height) / 2)
+        implicitWidth: Math.min(400, parent.width - Appearance.padding.large * 2)
+        padding: Appearance.padding.large
+
+        modal: true
+        closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutside
+
+        background: StyledRect {
+            color: Colours.palette.m3surfaceContainerHigh
+            radius: Appearance.rounding.large
+        }
+
+        contentItem: ColumnLayout {
+            spacing: Appearance.spacing.normal
+
+            StyledText {
+                text: editCategoryDialog.editIndex === -1 ? qsTr("Add Category") : qsTr("Edit Category")
+                font.pointSize: Appearance.font.size.large
+                font.weight: 500
+            }
+
+            StyledText {
+                Layout.fillWidth: true
+                text: qsTr("Configure category name and icon")
+                wrapMode: Text.WordWrap
+                color: Colours.palette.m3outline
+                font.pointSize: Appearance.font.size.small
+            }
+
+            TextField {
+                id: categoryNameField
+                Layout.fillWidth: true
+                placeholderText: qsTr("Category name")
+                text: editCategoryDialog.categoryName
+                onTextChanged: editCategoryDialog.categoryName = text
+            }
+
+            TextField {
+                id: categoryIconField
+                Layout.fillWidth: true
+                placeholderText: qsTr("Icon name (e.g., folder, code)")
+                text: editCategoryDialog.categoryIcon
+                onTextChanged: editCategoryDialog.categoryIcon = text
+            }
+
+            Item { Layout.preferredHeight: Appearance.spacing.normal }
+
+            RowLayout {
+                Layout.fillWidth: true
+                spacing: Appearance.spacing.normal
+
+                TextButton {
+                    Layout.fillWidth: true
+                    text: qsTr("Cancel")
+                    inactiveColour: Colours.tPalette.m3surfaceContainerHigh
+                    inactiveOnColour: Colours.palette.m3onSurface
+
+                    onClicked: editCategoryDialog.close()
+                }
+
+                TextButton {
+                    Layout.fillWidth: true
+                    text: editCategoryDialog.editIndex === -1 ? qsTr("Add") : qsTr("Save")
+                    enabled: editCategoryDialog.categoryName.length > 0 && editCategoryDialog.categoryIcon.length > 0
+                    inactiveColour: Colours.palette.m3primaryContainer
+                    inactiveOnColour: Colours.palette.m3onPrimaryContainer
+
+                    onClicked: {
+                        const categories = [...Config.launcher.categories];
+                        const newCategory = {
+                            name: editCategoryDialog.categoryName,
+                            icon: editCategoryDialog.categoryIcon
+                        };
+
+                        if (editCategoryDialog.editIndex === -1) {
+                            categories.push(newCategory);
+                        } else {
+                            categories[editCategoryDialog.editIndex] = newCategory;
+                        }
+
+                        Config.launcher.categories = categories;
+                        Config.save();
+                        editCategoryDialog.close();
+                    }
+                }
+            }
         }
     }
 }

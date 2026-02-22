@@ -1,12 +1,15 @@
 pragma ComponentBehavior: Bound
 
 import "services"
+import "../../components" as Components
 import qs.components
 import qs.components.controls
+import qs.components.containers
 import qs.services
 import qs.config
 import Quickshell
 import QtQuick
+import QtQuick.Layouts
 
 Item {
     id: root
@@ -15,33 +18,105 @@ Item {
     required property var panels
     required property real maxHeight
 
+    readonly property alias searchField: search
     readonly property int padding: Appearance.padding.large
     readonly property int rounding: Appearance.rounding.large
 
-    implicitWidth: listWrapper.width + padding * 2
-    implicitHeight: searchWrapper.height + listWrapper.height + padding * 2
+    property var showContextMenuAt: null
+    property Item wrapperRoot: null
 
-    Item {
-        id: listWrapper
+    property string activeCategory: "all"
+    property bool showNavbar: (Config.launcher.enableCategories ?? true) && !search.text.startsWith(Config.launcher.actionPrefix)
 
-        implicitWidth: list.width
-        implicitHeight: list.height + root.padding
+    readonly property var categoryList: [
+        {
+            id: "all",
+            name: qsTr("All"),
+            icon: "apps"
+        },
+        {
+            id: "favourites",
+            name: qsTr("Favourites"),
+            icon: "favorite"
+        }
+    ].concat(Config.launcher.categories.map(cat => ({
+                id: cat.name.toLowerCase(),
+                name: cat.name,
+                icon: cat.icon
+            })))
+
+    function navigateCategory(direction: int): void {
+        const currentIndex = categoryList.findIndex(cat => cat.id === activeCategory);
+        if (currentIndex === -1)
+            return;
+
+        const newIndex = currentIndex + direction;
+        if (newIndex >= 0 && newIndex < categoryList.length) {
+            activeCategory = categoryList[newIndex].id;
+            if (categoryNavbar) {
+                categoryNavbar.scrollToActiveTab();
+            }
+        }
+    }
+
+    implicitWidth: list.width + padding * 2
+    implicitHeight: searchWrapper.implicitHeight + list.implicitHeight + categoryNavbar.height + (showNavbar ? padding * 2 : 0) + padding * 2 + Appearance.spacing.normal
+
+    Components.CategoryNavbar {
+        id: categoryNavbar
+
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.top: parent.top
+        anchors.leftMargin: root.padding
+        anchors.rightMargin: root.padding
+        anchors.topMargin: root.padding
+
+        categories: root.categoryList
+        activeCategory: root.activeCategory
+        showScrollButtons: true
+
+        opacity: root.showNavbar ? 1 : 0
+        height: root.showNavbar ? implicitHeight : 0
+
+        Behavior on opacity {
+            Anim {
+                duration: Appearance.anim.durations.normal
+                easing.bezierCurve: Appearance.anim.curves.standard
+            }
+        }
+
+        Behavior on height {
+            Anim {
+                duration: Appearance.anim.durations.normal
+                easing.bezierCurve: Appearance.anim.curves.standard
+            }
+        }
+
+        onCategoryChanged: categoryId => {
+            root.activeCategory = categoryId;
+        }
+    }
+
+    ContentList {
+        id: list
 
         anchors.horizontalCenter: parent.horizontalCenter
+        anchors.top: categoryNavbar.bottom
         anchors.bottom: searchWrapper.top
+        anchors.topMargin: root.showNavbar ? root.padding : 0
         anchors.bottomMargin: root.padding
 
-        ContentList {
-            id: list
-
-            content: root
-            visibilities: root.visibilities
-            panels: root.panels
-            maxHeight: root.maxHeight - searchWrapper.implicitHeight - root.padding * 3
-            search: search
-            padding: root.padding
-            rounding: root.rounding
-        }
+        content: root
+        visibilities: root.visibilities
+        panels: root.panels
+        maxHeight: root.maxHeight - searchWrapper.implicitHeight - categoryNavbar.implicitHeight - (root.showNavbar ? root.padding * 2 : 0) - root.padding * 4
+        search: search
+        padding: root.padding
+        rounding: root.rounding
+        activeCategory: root.activeCategory
+        showContextMenuAt: root.showContextMenuAt
+        wrapperRoot: root.wrapperRoot
     }
 
     StyledRect {
@@ -81,6 +156,10 @@ Item {
 
             placeholderText: qsTr("Type \"%1\" for commands").arg(Config.launcher.actionPrefix)
 
+            onTextChanged: {
+                root.showNavbar = !text.startsWith(Config.launcher.actionPrefix);
+            }
+
             onAccepted: {
                 const currentItem = list.currentList?.currentItem;
                 if (currentItem) {
@@ -103,6 +182,20 @@ Item {
 
             Keys.onUpPressed: list.currentList?.decrementCurrentIndex()
             Keys.onDownPressed: list.currentList?.incrementCurrentIndex()
+
+            Keys.onLeftPressed: event => {
+                if (event.modifiers === Qt.NoModifier) {
+                    root.navigateCategory(-1);
+                    event.accepted = true;
+                }
+            }
+
+            Keys.onRightPressed: event => {
+                if (event.modifiers === Qt.NoModifier) {
+                    root.navigateCategory(1);
+                    event.accepted = true;
+                }
+            }
 
             Keys.onEscapePressed: root.visibilities.launcher = false
 
