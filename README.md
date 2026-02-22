@@ -331,6 +331,8 @@ default, you must create it manually.
     },
     "bar": {
         "clock": {
+            "background": false,
+            "showDate": false,
             "showIcon": true
         },
         "dragThreshold": 20,
