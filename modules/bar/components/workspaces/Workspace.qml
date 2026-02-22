@@ -21,6 +21,7 @@ ColumnLayout {
     readonly property int ws: groupOffset + index + 1
     readonly property bool isOccupied: occupied[ws] ?? false
     readonly property bool hasWindows: isOccupied && Config.bar.workspaces.showWindows
+    readonly property bool useNumberedWorkspaces: Config.bar.workspaces.useNumberedWorkspaces
 
     Layout.alignment: Qt.AlignHCenter
     Layout.preferredHeight: size
@@ -30,6 +31,7 @@ ColumnLayout {
     StyledText {
         id: indicator
 
+        font.family: root.useNumberedWorkspaces ? Appearance.font.family.mono : undefined
         Layout.alignment: Qt.AlignHCenter | Qt.AlignTop
         Layout.preferredHeight: Config.bar.sizes.innerWidth - Appearance.padding.small * 2
 
@@ -46,7 +48,7 @@ ColumnLayout {
             const label = Config.bar.workspaces.label || displayName;
             const occupiedLabel = Config.bar.workspaces.occupiedLabel || label;
             const activeLabel = Config.bar.workspaces.activeLabel || (root.isOccupied ? occupiedLabel : label);
-            return root.activeWsId === root.ws ? activeLabel : root.isOccupied ? occupiedLabel : label;
+            return root.useNumberedWorkspaces ? root.ws % 10 : root.activeWsId === root.ws ? activeLabel : root.isOccupied ? occupiedLabel : label;
         }
         color: Config.bar.workspaces.occupiedBg || root.isOccupied || root.activeWsId === root.ws ? Colours.palette.m3onSurface : Colours.layer(Colours.palette.m3outlineVariant, 2)
         verticalAlignment: Qt.AlignVCenter
