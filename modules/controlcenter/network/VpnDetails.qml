@@ -136,6 +136,19 @@ DeviceDetails {
                             }
                         }
                     }
+
+                    TextButton {
+                        Layout.fillWidth: true
+                        Layout.topMargin: Appearance.spacing.normal
+                        visible: root.providerEnabled && VPN.status.state === "needs-auth" && VPN.status.authUrl !== ""
+                        text: qsTr("Open Login Page")
+                        inactiveColour: Colours.palette.m3tertiaryContainer
+                        inactiveOnColour: Colours.palette.m3onTertiaryContainer
+
+                        onClicked: {
+                            Qt.openUrlExternally(VPN.status.authUrl);
+                        }
+                    }
                 }
             }
         },
@@ -172,14 +185,33 @@ DeviceDetails {
                         showTopMargin: true
                         label: qsTr("Status")
                         value: {
-                            if (!root.providerEnabled)
+                            if (!root.providerEnabled) 
                                 return qsTr("Disabled");
-                            if (VPN.connecting)
+                            if (VPN.connecting) 
                                 return qsTr("Connecting...");
-                            if (VPN.connected)
-                                return qsTr("Connected");
-                            return qsTr("Enabled (Not connected)");
+                            
+                            switch (VPN.status.state) {
+                                case "connected": 
+                                    return qsTr("Connected");
+                                case "disconnected": 
+                                    return qsTr("Disconnected");
+                                case "connecting": 
+                                    return qsTr("Connecting...");
+                                case "needs-auth": 
+                                    return qsTr("Authentication required");
+                                case "error": 
+                                    return qsTr("Error");
+                                default: 
+                                    return qsTr("Unknown");
+                            }
                         }
+                    }
+
+                    PropertyRow {
+                        visible: VPN.status.reason !== ""
+                        showTopMargin: true
+                        label: qsTr("Details")
+                        value: VPN.status.reason
                     }
 
                     PropertyRow {

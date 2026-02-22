@@ -157,15 +157,32 @@ ColumnLayout {
                             StyledText {
                                 Layout.fillWidth: true
                                 text: {
-                                    if (modelData.enabled && VPN.connected)
-                                        return qsTr("Connected");
-                                    if (modelData.enabled && VPN.connecting)
+                                    if (!modelData.enabled) 
+                                        return qsTr("Disabled");
+                                        
+                                    if (VPN.connecting) 
                                         return qsTr("Connecting...");
-                                    if (modelData.enabled)
-                                        return qsTr("Enabled");
-                                    return qsTr("Disabled");
+                                    
+                                    switch (VPN.status.state) {
+                                        case "connected": return qsTr("Connected");
+                                        case "disconnected": return qsTr("Enabled");
+                                        case "connecting": return qsTr("Connecting...");
+                                        case "needs-auth": return qsTr("Auth required");
+                                        case "error": return qsTr("Error");
+                                        default: return qsTr("Enabled");
+                                    }
                                 }
-                                color: modelData.enabled ? (VPN.connected ? Colours.palette.m3primary : Colours.palette.m3onSurface) : Colours.palette.m3outline
+                                color: {
+                                    if (!modelData.enabled) 
+                                        return Colours.palette.m3outline;
+                                    if (VPN.status.state === "connected") 
+                                        return Colours.palette.m3primary;
+                                    if (VPN.status.state === "error") 
+                                        return Colours.palette.m3error;
+                                    if (VPN.status.state === "needs-auth") 
+                                        return Colours.palette.m3tertiary;
+                                    return Colours.palette.m3onSurface;
+                                }
                                 font.pointSize: Appearance.font.size.small
                                 font.weight: modelData.enabled && VPN.connected ? 500 : 400
                                 elide: Text.ElideRight
