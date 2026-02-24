@@ -4,6 +4,7 @@ import qs.services
 import qs.components
 import qs.components.live
 import qs.components.containers
+import qs.components.controls
 import qs.config
 
 Item {
@@ -11,8 +12,8 @@ Item {
 
     readonly property list<var> subsections: [
         {
-            id: "prerequisites",
-            name: qsTr("Prerequisites"),
+            id: "before-you-begin",
+            name: qsTr("Before You Begin"),
             icon: "checklist"
         },
         {
@@ -52,19 +53,22 @@ Item {
         anchors.fill: parent
         spacing: Appearance.spacing.large
 
-        VerticalNav {
-            id: verticalNav
-            Layout.alignment: Qt.AlignTop
-            Layout.preferredHeight: 175
-            Layout.preferredWidth: 200
+        ColumnLayout {
+            VerticalNav {
+                id: verticalNav
 
-            sections: root.subsections
-            activeSection: root.currentSubsection
-            onSectionChanged: sectionId => root.currentSubsection = sectionId
-        }
+                Layout.alignment: Qt.AlignTop
+                Layout.preferredHeight: 175
+                Layout.preferredWidth: 200
 
-        Item {
-            Layout.fillHeight: true
+                sections: root.subsections
+                activeSection: root.currentSubsection
+                onSectionChanged: sectionId => root.currentSubsection = sectionId
+            }
+
+            Item {
+                Layout.fillHeight: true
+            }
         }
 
         StyledFlickable {
@@ -89,43 +93,35 @@ Item {
                 width: parent.width
                 spacing: 0
 
+                // Before You Begin
                 ColumnLayout {
-                    id: prerequisitesSection
+                    id: beforeYouBeginSection
 
                     Layout.fillWidth: true
                     Layout.minimumHeight: contentFlickable.height
                     Layout.leftMargin: Appearance.padding.larger
                     Layout.rightMargin: Appearance.padding.larger
-                    Layout.topMargin: Appearance.padding.larger
                     spacing: Appearance.padding.large
 
-                    StyledText {
-                        text: "Prerequisites"
-                        font.pointSize: Appearance.font.size.extraLarge
-                        font.bold: true
-                        color: Colours.palette.m3onBackground
+                    WelcomeSectionHeader {
+                        title: qsTr("Before You Being")
+                        subtitle: qsTr("Things to know before you start your journey.")
                     }
 
-                    StyledText {
-                        Layout.fillWidth: true
-                        text: "Things you need before you start your journey."
-                        font.pointSize: Appearance.font.size.normal
-                        color: Colours.palette.m3onSurfaceVariant
-                        wrapMode: Text.WordWrap
-                    }
-
+                    // System requirements
                     StyledRect {
                         Layout.fillWidth: true
-                        Layout.preferredHeight: prerequisitesColumn.implicitHeight + (Appearance.padding.large * 2)
+                        Layout.preferredHeight: systemRequirements.implicitHeight + Appearance.padding.large * 2
                         color: Colours.palette.m3surfaceContainerLow
                         radius: Appearance.rounding.normal
                         border.color: Colours.palette.m3outlineVariant
 
                         ColumnLayout {
-                            id: prerequisitesColumn
+                            id: systemRequirements
+
                             anchors.fill: parent
                             anchors.margins: Appearance.padding.large
-                            spacing: Appearance.padding.large
+                            spacing: Appearance.spacing.larger
 
                             StyledText {
                                 text: qsTr("System Requirements")
@@ -136,48 +132,63 @@ Item {
 
                             StyledText {
                                 Layout.fillWidth: true
-                                text: qsTr("Caelestia is lightweight, but performing well requires meeting these hardware minimums.")
+                                text: qsTr("Caelestia is built on Hyprland and Quickshell. This combination is lightweight, but for best results, the following minimum requirements are advised.")
                                 font.pointSize: Appearance.font.size.small
                                 color: Colours.palette.m3onSurfaceVariant
                                 wrapMode: Text.WordWrap
-                                opacity: 0.8
                             }
 
                             Flow {
                                 Layout.fillWidth: true
-                                spacing: 10
+                                spacing: Appearance.spacing.smaller
 
                                 Repeater {
                                     model: [
-                                        { label: "CPU", val: "x86_64 Dual Core" },
-                                        { label: "RAM", val: "4GB" },
-                                        { label: "Disk", val: "256GB" },
-                                        { label: "GPU", val: "Modern iGPU(Iris Xe or Radeon)/Dedicated" },
-                                        { label: "Display", val: "1366x768+"}
+                                        {
+                                            label: qsTr("CPU"),
+                                            val: qsTr("x86_64 Dual Core")
+                                        },
+                                        {
+                                            label: qsTr("RAM"),
+                                            val: qsTr("4GB")
+                                        },
+                                        {
+                                            label: qsTr("Disk"),
+                                            val: qsTr("256GB")
+                                        },
+                                        {
+                                            label: qsTr("GPU"),
+                                            val: qsTr("Modern iGPU (Iris Xe or Radeon) or better")
+                                        },
+                                        {
+                                            label: qsTr("Display"),
+                                            val: qsTr("1366x768 or higher")
+                                        }
                                     ]
 
                                     delegate: StyledRect {
-                                        width: pillRow.implicitWidth + 24
-                                        height: 32
-                                        radius: 16
+                                        width: requirements.implicitWidth + Appearance.padding.larger * 2
+                                        height: Appearance.font.size.small + Appearance.padding.larger * 2
+                                        radius: Appearance.rounding.normal
                                         color: Colours.palette.m3surfaceContainerHigh
                                         border.color: Colours.palette.m3outlineVariant
 
                                         RowLayout {
-                                            id: pillRow
+                                            id: requirements
+
                                             anchors.centerIn: parent
-                                            spacing: 6
+                                            spacing: Appearance.spacing.small
 
                                             StyledText {
                                                 text: modelData.label + ":"
                                                 font.bold: true
-                                                font.pointSize: 10
+                                                font.pointSize: Appearance.font.size.small
                                                 color: Colours.palette.m3primary
                                             }
 
                                             StyledText {
                                                 text: modelData.val
-                                                font.pointSize: 10
+                                                font.pointSize: Appearance.font.size.small
                                                 color: Colours.palette.m3onSurface
                                             }
                                         }
@@ -187,13 +198,14 @@ Item {
 
                             StyledRect {
                                 Layout.fillWidth: true
-                                Layout.preferredHeight: noteText.implicitHeight + 16
+                                Layout.preferredHeight: requirementsNote.implicitHeight + Appearance.padding.larger * 2
                                 color: Colours.layer(Colours.palette.m3surfaceContainerHigh, 1)
                                 radius: Appearance.rounding.small
                                 Layout.topMargin: Appearance.padding.small
 
                                 StyledText {
-                                    id: noteText
+                                    id: requirementsNote
+
                                     anchors.centerIn: parent
                                     width: parent.width - 24
                                     text: qsTr("Note: ARM processors (SnapDragon) are not officially supported.")
@@ -207,82 +219,76 @@ Item {
                         }
                     }
 
-                    ColumnLayout {
-                        id: personalRequirementsSection
+                    // The Linux Philosophy
+                    StyledRect {
                         Layout.fillWidth: true
-                        spacing: Appearance.padding.large
+                        Layout.preferredHeight: linuxPhilosophy.implicitHeight + Appearance.padding.large * 2
+                        color: Colours.palette.m3surfaceContainerLow
+                        radius: Appearance.rounding.normal
+                        border.color: Colours.palette.m3outlineVariant
 
-                        StyledRect {
-                            Layout.fillWidth: true
-                            Layout.preferredHeight: philosophyColumn.implicitHeight + (Appearance.padding.large * 2)
-                            color: Colours.palette.m3surfaceContainerLow
-                            radius: Appearance.rounding.normal
-                            border.color: Colours.palette.m3outlineVariant
+                        ColumnLayout {
+                            id: linuxPhilosophy
 
-                            ColumnLayout {
-                                id: philosophyColumn
-                                anchors.fill: parent
-                                anchors.margins: Appearance.padding.large
-                                spacing: Appearance.padding.medium
+                            anchors.fill: parent
+                            anchors.margins: Appearance.padding.large
+                            spacing: Appearance.spacing.larger
 
-                                StyledText {
-                                    text: qsTr("The Linux Philosophy")
-                                    font.bold: true
-                                    font.pointSize: Appearance.font.size.normal
-                                    color: Colours.palette.m3primary
-                                }
+                            StyledText {
+                                text: qsTr("The Linux Philosophy")
+                                font.bold: true
+                                font.pointSize: Appearance.font.size.normal
+                                color: Colours.palette.m3primary
+                            }
 
-                                StyledText {
-                                    Layout.fillWidth: true
-                                    text: qsTr("This isn't Windows. Linux and by extension Caelestia is a totally different way of experiencing your PC—without limits, bloat, or spyware. Your machine belongs to you.")
-                                    font.pointSize: Appearance.font.size.normal
-                                    color: Colours.palette.m3onSurface
-                                    wrapMode: Text.WordWrap
-                                }
+                            StyledText {
+                                Layout.fillWidth: true
+                                text: qsTr("Linux is an ecosystem built on the idea that \"small is beautiful\". Unlike other operating systems that rely on massive, all-in-one applications, Linux is a collection of specialized tools designed to do one thing and do it well. Linux gives you the power to combine these tools, building complex solutions from simple building blocks. It's a transparent, community driven world where you have total control over your machine.")
+                                font.pointSize: Appearance.font.size.normal
+                                color: Colours.palette.m3onSurface
+                                wrapMode: Text.WordWrap
                             }
                         }
+                    }
 
-                        StyledRect {
-                            Layout.fillWidth: true
-                            Layout.preferredHeight: learningColumn.implicitHeight + (Appearance.padding.large * 2)
-                            color: Colours.palette.m3surfaceContainerLow
-                            radius: Appearance.rounding.normal
-                            border.color: Colours.palette.m3outlineVariant
+                    // An Aptitude for Learning
+                    StyledRect {
+                        Layout.fillWidth: true
+                        Layout.preferredHeight: aptitudeForLearning.implicitHeight + Appearance.padding.large * 2
+                        color: Colours.palette.m3surfaceContainerLow
+                        radius: Appearance.rounding.normal
+                        border.color: Colours.palette.m3outlineVariant
 
-                            ColumnLayout {
-                                id: learningColumn
-                                anchors.fill: parent
-                                anchors.margins: Appearance.padding.large
-                                spacing: Appearance.padding.medium
+                        ColumnLayout {
+                            id: aptitudeForLearning
 
-                                RowLayout {
-                                    spacing: 8
+                            anchors.fill: parent
+                            anchors.margins: Appearance.padding.large
+                            spacing: Appearance.spacing.larger
 
-                                    StyledText {
-                                        text: qsTr("An Aptitude for Learning")
-                                        font.bold: true
-                                        font.pointSize: Appearance.font.size.normal
-                                        color: Colours.palette.m3primary
-                                    }
-                                }
+                            StyledText {
+                                text: qsTr("An Aptitude for Learning")
+                                font.bold: true
+                                font.pointSize: Appearance.font.size.normal
+                                color: Colours.palette.m3primary
+                            }
 
-                                StyledText {
-                                    Layout.fillWidth: true
-                                    text: qsTr("We expect you to learn and grow. While our community is here to help, Caelestia is about your unique journey. Never stop learning!")
-                                    font.pointSize: Appearance.font.size.normal
-                                    color: Colours.palette.m3onSurface
-                                    wrapMode: Text.WordWrap
-                                }
+                            StyledText {
+                                Layout.fillWidth: true
+                                text: qsTr("While our community is here to help, Caelestia is about your personal journey. Everyone has their own unique needs and tastes, and every install of Caelestia is tailored to its user. We do our best to support our users, but it's always possible that you'll come up with a question we don't have an immediate answer to. Our hope is that you continually learn and eventually share your knowledge with the community, improving the community as a whole in the process.")
+                                font.pointSize: Appearance.font.size.normal
+                                color: Colours.palette.m3onSurface
+                                wrapMode: Text.WordWrap
+                            }
 
-                                StyledText {
-                                    Layout.fillWidth: true
-                                    text: qsTr("I am always doing that which I cannot do, in order that I may learn how to do it. — Pablo Picasso")
-                                    font.pointSize: Appearance.font.size.small
-                                    color: Colours.palette.m3onSurfaceVariant
-                                    horizontalAlignment: Text.AlignRight
-                                    wrapMode: Text.WordWrap
-                                    opacity: 0.8
-                                }
+                            StyledText {
+                                Layout.fillWidth: true
+                                text: qsTr("\"I am always doing that which I cannot do, in order that I may learn how to do it.\" — Pablo Picasso")
+                                font.pointSize: Appearance.font.size.small
+                                color: Colours.palette.m3onSurfaceVariant
+                                horizontalAlignment: Text.AlignRight
+                                wrapMode: Text.WordWrap
+                                opacity: 0.8
                             }
                         }
                     }
@@ -292,6 +298,7 @@ Item {
                     }
                 }
 
+                // Installation
                 ColumnLayout {
                     id: installationSection
 
@@ -299,37 +306,35 @@ Item {
                     Layout.minimumHeight: contentFlickable.height
                     Layout.leftMargin: Appearance.padding.larger
                     Layout.rightMargin: Appearance.padding.larger
-                    spacing: Appearance.padding.large
+                    spacing: Appearance.spacing.large
 
-                    StyledText {
-                        text: "Installation"
-                        font.pointSize: Appearance.font.size.extraLarge
-                        font.bold: true
-                        color: Colours.palette.m3onBackground
+                    WelcomeSectionHeader {
+                        title: qsTr("Installation")
+                        subtitle: qsTr("Taking your computer from raw to riced!")
                     }
 
-                    StyledText {
-                        Layout.fillWidth: true
-                        text: "Taking your computer from raw to riced!"
-                        font.pointSize: Appearance.font.size.normal
-                        color: Colours.palette.m3onSurfaceVariant
-                        wrapMode: Text.WordWrap
-                    }
-
+                    // Coming soon
                     StyledRect {
                         Layout.fillWidth: true
-                        Layout.preferredHeight: installationSection1.height + Appearance.padding.large * 2
-                        Layout.topMargin: Appearance.padding.normal
+                        Layout.preferredHeight: installationColumn.implicitHeight + Appearance.padding.large * 2
                         color: Colours.layer(Colours.palette.m3surfaceContainer, 1)
                         radius: Appearance.rounding.normal
+                        border.color: Colours.palette.m3outlineVariant
 
-                        StyledText {
-                            id: installationSection1
-                            anchors.centerIn: parent
-                            text: "Content coming soon:\n• Configuration files\n• CLI usage\n• Theme customization"
-                            font.pointSize: Appearance.font.size.normal
-                            color: Colours.palette.m3onSurfaceVariant
-                            horizontalAlignment: Text.AlignHCenter
+                        ColumnLayout {
+                            id: installationColumn
+
+                            anchors.fill: parent
+                            anchors.margins: Appearance.padding.large
+                            spacing: Appearance.spacing.larger
+
+                            StyledText {
+                                Layout.fillWidth: true
+                                text: "Content coming soon"
+                                font.pointSize: Appearance.font.size.normal
+                                color: Colours.palette.m3onSurfaceVariant
+                                wrapMode: Text.WordWrap
+                            }
                         }
                     }
 
@@ -338,6 +343,7 @@ Item {
                     }
                 }
 
+                // First Steps
                 ColumnLayout {
                     id: firstStepsSection
 
@@ -345,96 +351,77 @@ Item {
                     Layout.minimumHeight: contentFlickable.height
                     Layout.leftMargin: Appearance.padding.larger
                     Layout.rightMargin: Appearance.padding.larger
-                    spacing: Appearance.padding.large
+                    spacing: Appearance.spacing.large
 
-                    ColumnLayout {
-                        id: firstStepsSection1
+                    WelcomeSectionHeader {
+                        title: qsTr("First Steps")
+                        subtitle: qsTr("Master the Caelestia shell with these essential hotkeys.")
+                    }
+
+                    // First Steps Keybindings
+                    StyledRect {
                         Layout.fillWidth: true
-                        Layout.leftMargin: Appearance.padding.larger
-                        Layout.rightMargin: Appearance.padding.larger
-                        Layout.topMargin: Appearance.padding.larger
-                        spacing: Appearance.padding.large
+                        Layout.preferredHeight: firstStepsKeybindings.implicitHeight + Appearance.padding.large * 2
+                        color: Colours.layer(Colours.palette.m3surfaceContainer, 1)
+                        radius: Appearance.rounding.normal
+                        border.color: Colours.palette.m3outlineVariant
 
                         ColumnLayout {
-                            spacing: 4
+                            id: firstStepsKeybindings
 
-                            StyledText {
-                                text: "First Steps"
-                                font.pointSize: Appearance.font.size.extraLarge
-                                font.bold: true
-                                color: Colours.palette.m3onBackground
-                            }
+                            anchors.fill: parent
+                            anchors.margins: Appearance.padding.large
+                            spacing: Appearance.spacing.larger
 
-                            StyledText {
-                                text: "Master the Caelestia shell with these essential hotkeys."
-                                font.pointSize: Appearance.font.size.normal
-                                color: Colours.palette.m3onSurfaceVariant
-                            }
-                        }
+                            StyledGridView {
+                                Layout.fillWidth: true
+                                Layout.preferredHeight: implicitHeight
 
-                        StyledRect {
-                            Layout.fillWidth: true
-                            Layout.preferredHeight: firstStepsKeybindingsGrid.implicitHeight + Appearance.padding.large * 2
-                            color: Colours.palette.m3surfaceContainerLow
-                            radius: Appearance.rounding.normal
-                            border.color: Colours.palette.m3outlineVariant
+                                model: [
+                                    {
+                                        key: qsTr("Super"),
+                                        label: qsTr("Open app launcher")
+                                    },
+                                    {
+                                        key: qsTr("Super + T"),
+                                        label: qsTr("Open default terminal (Foot)"),
+                                    },
+                                    {
+                                        key: qsTr("Super + E"),
+                                        label: qsTr("Open file explorer (Thunar)")
+                                    },
+                                    {
+                                        key: qsTr("Super + W"),
+                                        label: qsTr("Open web browser (Zen)")
+                                    },
+                                    {
+                                        key: qsTr("Ctrl + Shift + Escape"),
+                                        label: qsTr("Open system monitor (bTop)"),
+                                    },
+                                    {
+                                        key: qsTr("Super + Q"),
+                                        label: qsTr("Close active window")
+                                    }
+                                ]
 
-                            ListModel {
-                                id: firstStepsKeybindingsList
+                                spacing: 12
+                                paddingX: 16
 
-                                ListElement {
-                                    key: "SUPER"
-                                    desc: "Open App Launcher"
-                                }
-                                ListElement {
-                                    key: "SUPER + T"
-                                    desc: "Terminal (Foot)"
-                                }
-                                ListElement {
-                                    key: "SUPER + E"
-                                    desc: "File Explorer (Thunar)"
-                                }
-                                ListElement {
-                                    key: "SUPER + W"
-                                    desc: "Web Browser (Zen)"
-                                }
-                                ListElement {
-                                    key: "SUPER + Q"
-                                    desc: "Close Active Window"
-                                }
-                                ListElement {
-                                    key: "CTRL + SHIFT + ESC"
-                                    desc: "System Monitor (Btop)"
-                                }
-                            }
+                                cellContent: Component {
+                                    Item {
+                                        property var modelData
+                                        property real gridMeasureWidth: firstStepsKeybinding.implicitWidth
 
-                            GridLayout {
-                                id: firstStepsKeybindingsGrid
+                                        ColumnLayout {
+                                            anchors.fill: parent
+                                            spacing: Appearance.spacing.small
 
-                                anchors.fill: parent
+                                            Keybinding {
+                                                id: firstStepsKeybinding
 
-                                columns: 2
-                                uniformCellWidths: true
-                                uniformCellHeights: true
-                                Layout.margins: Appearance.padding.large
-
-                                Repeater {
-                                    id: firstStepsKeybindings
-
-                                    model: firstStepsKeybindingsList
-
-                                    delegate: StyledRect {
-                                        id: firstStepsKeybinding
-
-                                        required property var modelData
-
-                                        Layout.fillWidth: true
-                                        Layout.fillHeight: true
-                                        Layout.margins: Appearance.padding.large
-
-                                        Keybinding {
-                                            key: modelData.key
-                                            label: modelData.desc
+                                                key: modelData.key
+                                                label: modelData.label
+                                            }
                                         }
                                     }
                                 }
@@ -442,87 +429,91 @@ Item {
                         }
                     }
 
-                    ColumnLayout {
-                        id: firstStepsSection2
+                    WelcomeSectionHeader {
+                        title: qsTr("Applications")
+                        subtitle: qsTr("Learn about the default applications.")
+                    }
 
+                    // Default Applications
+                    StyledRect {
                         Layout.fillWidth: true
-                        Layout.leftMargin: Appearance.padding.larger
-                        Layout.rightMargin: Appearance.padding.larger
-                        Layout.topMargin: Appearance.padding.larger
-                        spacing: Appearance.padding.large
+                        Layout.preferredHeight: defaultApplications.implicitHeight + Appearance.padding.large * 2
+                        color: Colours.layer(Colours.palette.m3surfaceContainer, 1)
+                        radius: Appearance.rounding.normal
+                        border.color: Colours.palette.m3outlineVariant
 
                         ColumnLayout {
-                            spacing: 4
+                            id: defaultApplications
 
-                            StyledText {
-                                text: "Applications"
-                                font.pointSize: Appearance.font.size.extraLarge
-                                font.bold: true
-                                color: Colours.palette.m3onBackground
-                            }
+                            anchors.fill: parent
+                            anchors.margins: Appearance.padding.large
+                            spacing: Appearance.spacing.large
 
-                            StyledText {
-                                text: "Lets take a look at your default applications."
-                                font.pointSize: Appearance.font.size.normal
-                                color: Colours.palette.m3onSurfaceVariant
-                            }
-                        }
+                            StyledGridView {
+                                Layout.fillWidth: true
+                                Layout.preferredHeight: implicitHeight
 
-                        StyledRect {
-                            Layout.fillWidth: true
-                            Layout.preferredHeight: bindsGrid.implicitHeight + 115
-                            color: Colours.palette.m3surfaceContainerLow
-                            radius: Appearance.rounding.normal
-                            border.color: Colours.palette.m3outlineVariant
+                                model: [
+                                    {
+                                        title: qsTr("File Manager"),
+                                        desc: qsTr("Thunar")
+                                    },
+                                    {
+                                        title: qsTr("Terminal"),
+                                        desc: qsTr("Foot")
+                                    },
+                                    {
+                                        title: qsTr("System Monitor"),
+                                        desc: qsTr("bTop")
+                                    },
+                                    {
+                                        title: qsTr("Music Player"),
+                                        desc: qsTr("Spotify")
+                                    },
+                                    {
+                                        title: qsTr("Web Browser"),
+                                        desc: qsTr("Zen")
+                                    },
+                                    {
+                                        title: qsTr("Chat"),
+                                        desc: qsTr("Discord")
+                                    },
+                                    {
+                                        title: qsTr("Code Editor"),
+                                        desc: qsTr("VSCodium")
+                                    },
+                                ]
 
-                            GridLayout {
-                                id: appsGrid
+                                spacing: 12
+                                paddingX: 16
 
-                                anchors.fill: parent
-                                anchors.margins: 30
-                                columns: 2
-                                columnSpacing: 20
-                                rowSpacing: 20
+                                cellContent: Component {
+                                    Item {
+                                        property var modelData
+                                        property real gridMeasureWidth: Math.max(defaultApplicationTitle.implicitWidth, defaultApplicationDesc.implicitWidth)
 
-                                Repeater {
-                                    model: [
-                                        { keys: "Thunar", desc: "File Manager" },
-                                        { keys: "Zen", desc: "Web Browser" },
-                                        { keys: "Foot", desc: "Terminal" },
-                                        { keys: "Arch-Update", desc: "Update Notifications" },
-                                        { keys: "Btop", desc: "System Monitor" },
-                                        { keys: "Discord", desc: "Communication Hub" },
-                                        { keys: "Spotify", desc: "Music Player"},
-                                        { keys: "Code -OSS", desc: "Code Editor"}
-                                    ]
-
-                                    delegate: RowLayout {
-                                        spacing: 15
-                                        Layout.fillWidth: true
-
-                                        StyledRect {
-                                            width: keyText.implicitWidth + 20
-                                            height: 32
-                                            radius: 6
-                                            color: Colours.palette.m3surfaceContainerHigh
-                                            border.color: Colours.palette.m3outline
+                                        ColumnLayout {
+                                            anchors.fill: parent
+                                            spacing: Appearance.spacing.larger
 
                                             StyledText {
-                                                id: keyText
+                                                id: defaultApplicationTitle
 
-                                                anchors.centerIn: parent
-                                                text: modelData.keys
-                                                font.bold: true
-                                                font.pointSize: 9
-                                                color: Colours.palette.m3primary
+                                                text: modelData.title
+                                                font.pointSize: Appearance.font.size.normal
+                                                font.weight: 600
                                             }
-                                        }
 
-                                        StyledText {
-                                            text: modelData.desc
-                                            font.pointSize: 10
-                                            color: Colours.palette.m3onSurface
-                                            Layout.fillWidth: true
+                                            StyledText {
+                                                id: defaultApplicationDesc
+
+                                                text: modelData.desc
+                                                font.pointSize: Appearance.font.size.small
+                                                color: Colours.palette.m3outline
+                                                wrapMode: Text.WordWrap
+                                                Layout.fillWidth: true
+                                                Layout.fillHeight: true
+                                            }
                                         }
                                     }
                                 }
@@ -535,6 +526,7 @@ Item {
                     }
                 }
 
+                // Workspaces
                 ColumnLayout {
                     id: workspacesSection
 
@@ -542,85 +534,69 @@ Item {
                     Layout.minimumHeight: contentFlickable.height
                     Layout.leftMargin: Appearance.padding.larger
                     Layout.rightMargin: Appearance.padding.larger
-                    Layout.topMargin: Appearance.padding.larger
-                    spacing: Appearance.padding.large
+                    spacing: Appearance.spacing.large
 
-                    ColumnLayout {
-                        spacing: 4
-
-                        StyledText {
-                            text: "Workspaces"
-                            font.pointSize: Appearance.font.size.extraLarge
-                            font.bold: true
-                            color: Colours.palette.m3onBackground
-                        }
-
-                        StyledText {
-                            text: "Master the art of tiling and multitasking."
-                            font.pointSize: Appearance.font.size.normal
-                            color: Colours.palette.m3onSurfaceVariant
-                        }
+                    WelcomeSectionHeader {
+                        title: qsTr("Workspaces")
+                        subtitle: qsTr("Master the art of tiling and multitasking.")
                     }
 
+                    // Standard Workspaces
                     StyledRect {
                         Layout.fillWidth: true
-                        Layout.preferredHeight: normalWorkCol.implicitHeight + 60
+                        Layout.preferredHeight: standardWorkspaces.implicitHeight + Appearance.padding.large * 2
                         color: Colours.palette.m3surfaceContainerLow
                         radius: Appearance.rounding.normal
                         border.color: Colours.palette.m3outlineVariant
 
                         ColumnLayout {
-                            id: normalWorkCol
+                            id: standardWorkspaces
 
                             anchors.fill: parent
-                            anchors.margins: 30
-                            spacing: 20
+                            anchors.margins: Appearance.padding.large
+                            spacing: Appearance.spacing.large
 
-                            StyledText {
-                                text: "Window Management in standard workspaces"
-                                font.bold: true
-                                color: Colours.palette.m3primary
-                            }
-
-                            GridLayout {
-                                columns: 2
-                                columnSpacing: 20
-                                rowSpacing: 15
+                            StyledGridView {
                                 Layout.fillWidth: true
+                                Layout.preferredHeight: implicitHeight
 
-                                Repeater {
-                                    model: [
-                                        { keys: "SUPER + #", desc: "Switch to Workspace" },
-                                        { keys: "SUPER + ALT + #", desc: "Move Window to Workspace" },
-                                        { keys: "SUPER + ALT + Arrows", desc: "Move Window Directionally" },
-                                        { keys: "SUPER + F", desc: "Toggle Fullscreen" }
-                                    ]
+                                model: [
+                                    {
+                                        key: qsTr("Super + <#>"),
+                                        label: qsTr("Switch to workspace")
+                                    },
+                                    {
+                                        key: qsTr("Super + Alt + <#>"),
+                                        label: qsTr("Move window to workspace"),
+                                    },
+                                    {
+                                        key: qsTr("Super + Alt + <Up|Down|Left|Right>"),
+                                        label: qsTr("Move window directionally")
+                                    },
+                                    {
+                                        key: qsTr("Super + F"),
+                                        label: qsTr("Toggle fullscreen")
+                                    }
+                                ]
 
-                                    delegate: RowLayout {
-                                        spacing: 12
+                                spacing: 12
+                                paddingX: 16
 
-                                        StyledRect {
-                                            width: keyText.implicitWidth + 20
-                                            height: 32
-                                            radius: 6
-                                            color: Colours.palette.m3surfaceContainerHigh
-                                            border.color: Colours.palette.m3outline
+                                cellContent: Component {
+                                    Item {
+                                        property var modelData
+                                        property real gridMeasureWidth: firstStepsKeybinding.implicitWidth
 
-                                            StyledText {
-                                                id: keyText
+                                        ColumnLayout {
+                                            anchors.fill: parent
+                                            spacing: Appearance.spacing.small
 
-                                                anchors.centerIn: parent
-                                                text: modelData.keys
-                                                font.bold: true; font.pointSize: 8
-                                                color: Colours.palette.m3primary
+                                            Keybinding {
+                                                id: firstStepsKeybinding
+
+                                                key: modelData.key
+                                                label: modelData.label
                                             }
-                                        }
-
-                                        StyledText {
-                                            text: modelData.desc
-                                            font.pointSize: 10
-                                            font.bold: true
-                                            color: Colours.palette.m3onSurface
                                         }
                                     }
                                 }
@@ -628,91 +604,70 @@ Item {
                         }
                     }
 
-                    StyledText {
-                        text: "Special Workspaces"
-                        font.pointSize: Appearance.font.size.extraLarge
-                        font.bold: true
-                        color: Colours.palette.m3onBackground
+                    WelcomeSectionHeader {
+                        title: qsTr("Special Workspaces")
+                        subtitle: qsTr("Keep important things close, but out of the way.")
                     }
 
-                    StyledText {
-                        text: "Keeps Important things close and out of the way!"
-                        font.pointSize: Appearance.font.size.normal
-                        color: Colours.palette.m3onSurfaceVariant
-                    }
-
+                    // Standard Workspaces
                     StyledRect {
                         Layout.fillWidth: true
-                        Layout.preferredHeight: specialWorkCol.implicitHeight + 60
-                        color: "transparent"
+                        Layout.preferredHeight: specialWorkspaces.implicitHeight + Appearance.padding.large * 2
+                        color: Colours.palette.m3surfaceContainerLow
                         radius: Appearance.rounding.normal
-                        border.color: Colours.palette.m3outline
+                        border.color: Colours.palette.m3outlineVariant
 
                         ColumnLayout {
-                            id: specialWorkCol
+                            id: specialWorkspaces
 
                             anchors.fill: parent
-                            anchors.margins: 30
-                            spacing: 20
+                            anchors.margins: Appearance.padding.large
+                            spacing: Appearance.spacing.large
 
-                            StyledText {
-                                text: "Access Special Workspaces"
-                                font.bold: true
-                                color: Colours.palette.m3onSurface
-                            }
-
-                            GridLayout {
-                                id: specialGrid
-
-                                columns: 2
-                                columnSpacing: 30
-                                rowSpacing: 15
+                            StyledGridView {
                                 Layout.fillWidth: true
+                                Layout.preferredHeight: implicitHeight
 
-                                Repeater {
-                                    model: [
-                                        { key: "SUPER + D", label: "Discord & WhatsApp", desc: "Communication hub" },
-                                        { key: "SUPER + M", label: "Music & Media", desc: "Spotify / MPD" },
-                                        { key: "SUPER + S", label: "Special Scratchpad", desc: "Floating terminal / Notes" },
-                                        { key: "SUPER + A", label: "ToDo Lists", desc: "Task management" },
-                                        { key: "Ctrl + Shift + Esc", label: "System Monitor", desc: "Btop" }
-                                    ]
+                                model: [
+                                    {
+                                        key: qsTr("Super + D"),
+                                        label: qsTr("Communications Hub"),
+                                        desc: qsTr("Discord")
+                                    },
+                                    {
+                                        key: qsTr("Super + M"),
+                                        label: qsTr("Music & Media"),
+                                        desc: qsTr("Spotify")
+                                    },
+                                    {
+                                        key: qsTr("Super + A"),
+                                        label: qsTr("ToDo List"),
+                                        desc: qsTr("Todoist")
+                                    },
+                                    {
+                                        key: qsTr("Super + S"),
+                                        label: qsTr("Special"),
+                                        desc: qsTr("Scratchpad Workspace")
+                                    }
+                                ]
 
-                                    delegate: RowLayout {
-                                        spacing: 15
-                                        Layout.fillWidth: true
+                                spacing: 12
+                                paddingX: 16
 
-                                        StyledRect {
-                                            width: 100
-                                            height: 32
-                                            radius: 6
-                                            color: Colours.palette.m3surfaceContainerHigh
-                                            border.color: Colours.palette.m3outline
-
-                                            StyledText {
-                                                anchors.centerIn: parent
-                                                text: modelData.key
-                                                font.bold: true
-                                                font.pointSize: 8
-                                                color: Colours.palette.m3primary
-                                            }
-                                        }
+                                cellContent: Component {
+                                    Item {
+                                        property var modelData
+                                        property real gridMeasureWidth: firstStepsKeybinding.implicitWidth
 
                                         ColumnLayout {
-                                            spacing: 2
+                                            anchors.fill: parent
+                                            spacing: Appearance.spacing.small
 
-                                            StyledText {
-                                                text: modelData.label
-                                                font.pointSize: 10
-                                                font.bold: true
-                                                color: Colours.palette.m3onSurface
-                                            }
+                                            Keybinding {
+                                                id: firstStepsKeybinding
 
-                                            StyledText {
-                                                text: modelData.desc
-                                                font.pointSize: 9
-                                                color: Colours.palette.m3onSurfaceVariant
-                                                opacity: 0.7
+                                                key: modelData.key
+                                                label: modelData.label
                                             }
                                         }
                                     }
