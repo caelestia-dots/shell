@@ -54,12 +54,6 @@ StyledRect {
             icon: "people",
             component: communityComponent
         },
-        //{
-            //id: "install",
-            //name: "Install",
-            //icon: qsTr("install_desktop"),
-            //component: installComponent
-        //},
     ]
 
     readonly property var currentPageData: pages.find(p => p.id === currentPage) ?? pages[0]
@@ -158,6 +152,8 @@ StyledRect {
                             model: root.pages
 
                             delegate: Item {
+                                id: tabsItem
+
                                 required property var modelData
                                 required property int index
 
@@ -170,7 +166,7 @@ StyledRect {
                                     anchors.fill: parent
                                     radius: Appearance.rounding.small
                                     function onClicked(): void {
-                                        root.currentPage = modelData.id;
+                                        root.currentPage = tabsItem.modelData.id;
                                     }
                                 }
 
@@ -181,17 +177,17 @@ StyledRect {
 
                                     MaterialIcon {
                                         anchors.verticalCenter: parent.verticalCenter
-                                        text: modelData.icon
+                                        text: tabsItem.modelData.icon
                                         font.pointSize: Appearance.font.size.small
                                         fill: 1
-                                        color: isActive ? Colours.palette.m3surface : Colours.palette.m3onSurfaceVariant
+                                        color: tabsItem.isActive ? Colours.palette.m3surface : Colours.palette.m3onSurfaceVariant
                                     }
 
                                     StyledText {
                                         anchors.verticalCenter: parent.verticalCenter
-                                        text: modelData.name
+                                        text: tabsItem.modelData.name
                                         font.pointSize: Appearance.font.size.small
-                                        color: isActive ? Colours.palette.m3surface : Colours.palette.m3onSurfaceVariant
+                                        color: tabsItem.isActive ? Colours.palette.m3surface : Colours.palette.m3onSurfaceVariant
                                     }
                                 }
                             }
