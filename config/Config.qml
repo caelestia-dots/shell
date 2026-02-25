@@ -450,7 +450,12 @@ Singleton {
             maxVolume: services.maxVolume,
             smartScheme: services.smartScheme,
             defaultPlayer: services.defaultPlayer,
-            playerAliases: services.playerAliases
+            playerAliases: services.playerAliases,
+            sunsetService: {
+                manualEnabled: services.sunsetService.manualEnabled,
+                temperature: services.sunsetService.temperature,
+                preferredBackend: services.sunsetService.preferredBackend
+            }
         };
     }
 
