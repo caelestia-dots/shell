@@ -414,6 +414,7 @@ Item {
 
                                         ColumnLayout {
                                             anchors.fill: parent
+                                            anchors.margins: Appearance.padding.small
                                             spacing: Appearance.spacing.small
 
                                             Keybinding {
