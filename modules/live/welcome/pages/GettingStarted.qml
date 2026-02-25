@@ -485,8 +485,8 @@ Item {
                                     },
                                 ]
 
-                                spacing: 12
-                                paddingX: 16
+                                spacing: Appearance.spacing.small
+                                paddingX: Appearance.padding.larger
 
                                 cellContent: Component {
                                     Item {
@@ -495,6 +495,7 @@ Item {
 
                                         ColumnLayout {
                                             anchors.fill: parent
+                                            anchors.margins: Appearance.padding.small
                                             spacing: Appearance.spacing.larger
 
                                             StyledText {
@@ -590,6 +591,7 @@ Item {
 
                                         ColumnLayout {
                                             anchors.fill: parent
+                                            anchors.margins: Appearance.padding.small
                                             spacing: Appearance.spacing.small
 
                                             Keybinding {
@@ -662,6 +664,7 @@ Item {
 
                                         ColumnLayout {
                                             anchors.fill: parent
+                                            anchors.margins: Appearance.padding.small
                                             spacing: Appearance.spacing.small
 
                                             Keybinding {
