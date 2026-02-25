@@ -13,7 +13,11 @@ Item {
 
     anchors.fill: parent
 
+    implicitWidth: keybindingRow.implicitWidth
+
     RowLayout {
+        id: keybindingRow
+
         StyledRect {
             implicitWidth: keybindingKey.implicitWidth + Appearance.padding.normal * 2
             implicitHeight: keybindingKey.implicitHeight + Appearance.padding.normal * 2
