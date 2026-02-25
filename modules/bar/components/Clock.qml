@@ -10,7 +10,6 @@ StyledRect {
 
     readonly property color colour: Colours.palette.m3tertiary
     readonly property int padding: Config.bar.clock.background ? Appearance.padding.normal : Appearance.padding.small
-    readonly property real scale: Config.bar.clock.scale
 
     implicitWidth: Config.bar.sizes.innerWidth
     implicitHeight: layout.implicitHeight + root.padding * 2
@@ -39,7 +38,6 @@ StyledRect {
             anchors.horizontalCenter: parent.horizontalCenter
 
             visible: Config.bar.clock.showDate
-            height: visible ? implicitHeight : 0
 
             horizontalAlignment: StyledText.AlignHCenter
             text: Time.format("ddd\nd")
