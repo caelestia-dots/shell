@@ -7,8 +7,8 @@ Item {
 
     property var model
     property int cellHeight: 40
-    property int spacing: 8
-    property int paddingX: 12
+    property int spacing: Appearance.spacing.small
+    property int paddingX: Appearance.padding.larger
     property int minCellWidth: 0
     property int maxCellWidth: 0
     property int columns: 0
