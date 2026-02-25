@@ -485,18 +485,22 @@ Item {
                                     },
                                 ]
 
+                                cellHeight: 0
                                 spacing: Appearance.spacing.small
                                 paddingX: Appearance.padding.larger
+                                paddingY: Appearance.padding.small
 
                                 cellContent: Component {
                                     Item {
                                         property var modelData
                                         property real gridMeasureWidth: Math.max(defaultApplicationTitle.implicitWidth, defaultApplicationDesc.implicitWidth)
+                                        property real gridMeasureHeight: defaultApplicationColumn.implicitHeight
 
                                         ColumnLayout {
+                                            id: defaultApplicationColumn
                                             anchors.fill: parent
                                             anchors.margins: Appearance.padding.small
-                                            spacing: Appearance.spacing.larger
+                                            spacing: Appearance.spacing.smaller
 
                                             StyledText {
                                                 id: defaultApplicationTitle
@@ -514,7 +518,6 @@ Item {
                                                 color: Colours.palette.m3outline
                                                 wrapMode: Text.WordWrap
                                                 Layout.fillWidth: true
-                                                Layout.fillHeight: true
                                             }
                                         }
                                     }

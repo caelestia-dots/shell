@@ -9,8 +9,10 @@ Item {
     property int cellHeight: 40
     property int spacing: Appearance.spacing.small
     property int paddingX: Appearance.padding.larger
+    property int paddingY: Appearance.padding.larger
     property int minCellWidth: 0
     property int maxCellWidth: 0
+    property int minCellHeight: 0
     property int columns: 0
     property bool centerCells: false
 
@@ -31,7 +33,17 @@ Item {
             return 0;
         const cols = Math.max(1, Math.floor((width + spacing) / (cellWidth + spacing)));
         const rows = Math.ceil(modelCount / cols);
-        return rows * (cellHeight + spacing) - spacing;
+        const effectiveHeight = _effectiveCellHeight;
+        return rows * (effectiveHeight + spacing) - spacing;
+    }
+
+    readonly property int _effectiveCellHeight: {
+        // If cellHeight is explicitly set (non-zero), use it
+        if (cellHeight > 0)
+            return cellHeight;
+        // Otherwise use measured height (auto mode)
+        const measured = Math.max(minCellHeight, Math.ceil(_maxImplicitHeight + paddingY * 2));
+        return measured > 0 ? measured : 40; // Fallback to 40 if measurement incomplete
     }
 
     readonly property int _calculatedColumns: {
@@ -70,17 +82,20 @@ Item {
     }
 
     property real _maxImplicitWidth: 0
+    property real _maxImplicitHeight: 0
     property bool _measurementComplete: false
     property bool _recalcScheduled: false
 
     onModelChanged: {
         _measurementComplete = false;
         _maxImplicitWidth = 0;
+        _maxImplicitHeight = 0;
     }
 
     onCellContentChanged: {
         _measurementComplete = false;
         _maxImplicitWidth = 0;
+        _maxImplicitHeight = 0;
     }
 
     function _getMeasureWidth(item) {
@@ -91,6 +106,16 @@ Item {
         if (item.hasOwnProperty("measureWidth"))
             return item.measureWidth;
         return item.implicitWidth;
+    }
+
+    function _getMeasureHeight(item) {
+        if (!item)
+            return 0;
+        if (item.hasOwnProperty("gridMeasureHeight"))
+            return item.gridMeasureHeight;
+        if (item.hasOwnProperty("measureHeight"))
+            return item.measureHeight;
+        return item.implicitHeight;
     }
 
     function _scheduleRecalc() {
@@ -104,18 +129,21 @@ Item {
     }
 
     function _recalcMax() {
-        let m = 0;
+        let maxW = 0;
+        let maxH = 0;
         let loadedCount = 0;
         for (let i = 0; i < measurer.count; i++) {
             const o = measurer.objectAt(i);
             if (o) {
                 if (o.loaded) {
                     loadedCount++;
-                    m = Math.max(m, o.measuredWidth);
+                    maxW = Math.max(maxW, o.measuredWidth);
+                    maxH = Math.max(maxH, o.measuredHeight);
                 }
             }
         }
-        _maxImplicitWidth = m;
+        _maxImplicitWidth = maxW;
+        _maxImplicitHeight = maxH;
 
         _measurementComplete = (loadedCount === modelCount && modelCount > 0);
     }
@@ -147,14 +175,14 @@ Item {
                     model: root.model
 
                     cellWidth: root.cellWidth + root.spacing
-                    cellHeight: root.cellHeight + root.spacing
+                    cellHeight: root._effectiveCellHeight + root.spacing
 
                     delegate: Item {
                         required property var modelData
                         required property int index
 
                         width: root.cellWidth
-                        height: root.cellHeight
+                        height: root._effectiveCellHeight
 
                         Loader {
                             id: loader
@@ -199,6 +227,7 @@ Item {
             parent: measureHost
 
             property real measuredWidth: 0
+            property real measuredHeight: 0
             property bool loaded: false
 
             Loader {
@@ -214,9 +243,11 @@ Item {
                             }
                             probeLoader.item.anchors.fill = probeLoader;
                             probe.measuredWidth = root._getMeasureWidth(probeLoader.item);
+                            probe.measuredHeight = root._getMeasureHeight(probeLoader.item);
                         } else {
                             // Component failed to load - mark as loaded anyway to avoid blocking
                             probe.measuredWidth = 0;
+                            probe.measuredHeight = 0;
                         }
                         probe.loaded = true;
                         root._scheduleRecalc();
@@ -233,13 +264,28 @@ Item {
                     root._scheduleRecalc();
                 }
 
+                function onImplicitHeightChanged() {
+                    probe.measuredHeight = root._getMeasureHeight(probeLoader.item);
+                    root._scheduleRecalc();
+                }
+
                 function onGridMeasureWidthChanged() {
                     probe.measuredWidth = root._getMeasureWidth(probeLoader.item);
                     root._scheduleRecalc();
                 }
 
+                function onGridMeasureHeightChanged() {
+                    probe.measuredHeight = root._getMeasureHeight(probeLoader.item);
+                    root._scheduleRecalc();
+                }
+
                 function onMeasureWidthChanged() {
                     probe.measuredWidth = root._getMeasureWidth(probeLoader.item);
+                    root._scheduleRecalc();
+                }
+
+                function onMeasureHeightChanged() {
+                    probe.measuredHeight = root._getMeasureHeight(probeLoader.item);
                     root._scheduleRecalc();
                 }
             }
