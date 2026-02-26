@@ -253,6 +253,7 @@ default, you must create it manually.
         }
     },
     "general": {
+        "logo": "caelestia",
         "apps": {
             "terminal": ["foot"],
             "audio": ["pavucontrol"],
