@@ -4,6 +4,7 @@ import QtQuick
 import QtQuick.Layouts
 import Quickshell
 import qs.components
+import qs.components.containers
 import qs.components.controls
 import qs.config
 import qs.services
@@ -97,97 +98,143 @@ StyledRect {
                     }
                 }
 
-                Item {
-                    Layout.fillWidth: true
+                IconButton {
+                    icon: "chevron_left"
+                    visible: tabsFlickable.contentWidth > tabsFlickable.width
+                    type: IconButton.Text
+                    radius: Appearance.rounding.small
+                    padding: Appearance.padding.small
+                    onClicked: {
+                        tabsFlickable.contentX = Math.max(0, tabsFlickable.contentX - 100);
+                    }
                 }
 
-                // Horizontal tab navigation
-                Item {
-                    Layout.preferredWidth: tabsRow.width
+                StyledFlickable {
+                    id: tabsFlickable
+                    Layout.fillWidth: true
                     Layout.preferredHeight: tabsRow.height
+                    flickableDirection: Flickable.HorizontalFlick
+                    contentWidth: tabsRow.width
+                    clip: true
 
-                    StyledRect {
-                        id: activeIndicator
-
-                        property Item activeTab: {
-                            for (let i = 0; i < tabsRepeater.count; i++) {
-                                const tab = tabsRepeater.itemAt(i);
-                                if (tab && tab.isActive) {
-                                    return tab;
-                                }
-                            }
-                            return null;
-                        }
-
-                        visible: activeTab !== null
-                        color: Colours.palette.m3primary
-                        radius: Appearance.rounding.small
-
-                        x: activeTab ? activeTab.x : 0
-                        y: activeTab ? activeTab.y : 0
-                        width: activeTab ? activeTab.width : 0
-                        height: activeTab ? activeTab.height : 0
-
-                        Behavior on x {
-                            Anim {
-                                duration: Appearance.anim.durations.normal
-                                easing.bezierCurve: Appearance.anim.curves.emphasized
-                            }
-                        }
-
-                        Behavior on width {
-                            Anim {
-                                duration: Appearance.anim.durations.normal
-                                easing.bezierCurve: Appearance.anim.curves.emphasized
-                            }
+                    Behavior on contentX {
+                        Anim {
+                            duration: Appearance.anim.durations.normal
+                            easing.bezierCurve: Appearance.anim.curves.emphasized
                         }
                     }
 
-                    Row {
-                        id: tabsRow
-                        spacing: Appearance.spacing.small
+                    MouseArea {
+                        anchors.fill: parent
+                        propagateComposedEvents: true
 
-                        Repeater {
-                            id: tabsRepeater
-                            model: root.pages
+                        onWheel: wheel => {
+                            const delta = wheel.angleDelta.y || wheel.angleDelta.x;
+                            tabsFlickable.contentX = Math.max(0, Math.min(tabsFlickable.contentWidth - tabsFlickable.width, tabsFlickable.contentX - delta));
+                            wheel.accepted = true;
+                        }
 
-                            delegate: Item {
-                                id: tabsItem
+                        onPressed: mouse => {
+                            mouse.accepted = false;
+                        }
+                    }
 
-                                required property var modelData
-                                required property int index
+                    Item {
+                        implicitWidth: tabsRow.width
+                        implicitHeight: tabsRow.height
 
-                                property bool isActive: root.currentPage === modelData.id
+                        StyledRect {
+                            id: activeIndicator
 
-                                implicitWidth: tabContent.width + Appearance.padding.normal * 2
-                                implicitHeight: tabContent.height + Appearance.padding.smaller * 2
-
-                                StateLayer {
-                                    anchors.fill: parent
-                                    radius: Appearance.rounding.small
-                                    function onClicked(): void {
-                                        root.currentPage = tabsItem.modelData.id;
+                            property Item activeTab: {
+                                for (let i = 0; i < tabsRepeater.count; i++) {
+                                    const tab = tabsRepeater.itemAt(i);
+                                    if (tab && tab.isActive) {
+                                        return tab;
                                     }
                                 }
+                                return null;
+                            }
 
-                                Row {
-                                    id: tabContent
-                                    anchors.centerIn: parent
-                                    spacing: Appearance.spacing.smaller
+                            visible: activeTab !== null
+                            color: Colours.palette.m3primary
+                            radius: Appearance.rounding.small
 
-                                    MaterialIcon {
-                                        anchors.verticalCenter: parent.verticalCenter
-                                        text: tabsItem.modelData.icon
-                                        font.pointSize: Appearance.font.size.small
-                                        fill: 1
-                                        color: tabsItem.isActive ? Colours.palette.m3surface : Colours.palette.m3onSurfaceVariant
+                            x: activeTab ? activeTab.x : 0
+                            y: activeTab ? activeTab.y : 0
+                            width: activeTab ? activeTab.width : 0
+                            height: activeTab ? activeTab.height : 0
+
+                            Behavior on x {
+                                Anim {
+                                    duration: Appearance.anim.durations.normal
+                                    easing.bezierCurve: Appearance.anim.curves.emphasized
+                                }
+                            }
+
+                            Behavior on width {
+                                Anim {
+                                    duration: Appearance.anim.durations.normal
+                                    easing.bezierCurve: Appearance.anim.curves.emphasized
+                                }
+                            }
+                        }
+
+                        Row {
+                            id: tabsRow
+                            spacing: Appearance.spacing.small
+
+                            Repeater {
+                                id: tabsRepeater
+                                model: root.pages
+
+                                delegate: Item {
+                                    id: tabsItem
+
+                                    required property var modelData
+                                    required property int index
+
+                                    property bool isActive: root.currentPage === modelData.id
+
+                                    implicitWidth: tabContent.width + Appearance.padding.normal * 2
+                                    implicitHeight: tabContent.height + Appearance.padding.smaller * 2
+
+                                    StateLayer {
+                                        anchors.fill: parent
+                                        radius: Appearance.rounding.small
+                                        function onClicked(): void {
+                                            root.currentPage = tabsItem.modelData.id;
+
+                                            const tabLeft = parent.x;
+                                            const tabRight = parent.x + parent.width;
+                                            const viewLeft = tabsFlickable.contentX;
+                                            const viewRight = tabsFlickable.contentX + tabsFlickable.width;
+
+                                            const targetX = tabLeft - (tabsFlickable.width - parent.width) / 2;
+
+                                            tabsFlickable.contentX = Math.max(0, Math.min(tabsFlickable.contentWidth - tabsFlickable.width, targetX));
+                                        }
                                     }
 
-                                    StyledText {
-                                        anchors.verticalCenter: parent.verticalCenter
-                                        text: tabsItem.modelData.name
-                                        font.pointSize: Appearance.font.size.small
-                                        color: tabsItem.isActive ? Colours.palette.m3surface : Colours.palette.m3onSurfaceVariant
+                                    Row {
+                                        id: tabContent
+                                        anchors.centerIn: parent
+                                        spacing: Appearance.spacing.smaller
+
+                                        MaterialIcon {
+                                            anchors.verticalCenter: parent.verticalCenter
+                                            text: tabsItem.modelData.icon
+                                            font.pointSize: Appearance.font.size.small
+                                            fill: 1
+                                            color: tabsItem.isActive ? Colours.palette.m3surface : Colours.palette.m3onSurfaceVariant
+                                        }
+
+                                        StyledText {
+                                            anchors.verticalCenter: parent.verticalCenter
+                                            text: tabsItem.modelData.name
+                                            font.pointSize: Appearance.font.size.small
+                                            color: tabsItem.isActive ? Colours.palette.m3surface : Colours.palette.m3onSurfaceVariant
+                                        }
                                     }
                                 }
                             }
@@ -195,8 +242,15 @@ StyledRect {
                     }
                 }
 
-                Item {
-                    Layout.fillWidth: true
+                IconButton {
+                    icon: "chevron_right"
+                    visible: tabsFlickable.contentWidth > tabsFlickable.width
+                    type: IconButton.Text
+                    radius: Appearance.rounding.small
+                    padding: Appearance.padding.small
+                    onClicked: {
+                        tabsFlickable.contentX = Math.min(tabsFlickable.contentWidth - tabsFlickable.width, tabsFlickable.contentX + 100);
+                    }
                 }
 
                 IconButton {
