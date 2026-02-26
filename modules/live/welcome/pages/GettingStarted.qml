@@ -104,7 +104,7 @@ Item {
                     spacing: Appearance.padding.large
 
                     WelcomeSectionHeader {
-                        title: qsTr("Before You Being")
+                        title: qsTr("Before You Begin")
                         subtitle: qsTr("Things to know before you start your journey.")
                     }
 
@@ -449,6 +449,10 @@ Item {
                             anchors.fill: parent
                             anchors.margins: Appearance.padding.large
                             spacing: Appearance.spacing.large
+
+                            PathView {
+                                Layout.fillWidth: true
+                            }
 
                             StyledGridView {
                                 Layout.fillWidth: true
