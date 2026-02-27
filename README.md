@@ -219,6 +219,8 @@ default, you must create it manually.
 ```json
 {
     "appearance": {
+        "mediaGifSpeedAdjustment": 300,
+        "sessionGifSpeed": 0.7,
         "anim": {
             "durations": {
                 "scale": 1
@@ -251,6 +253,7 @@ default, you must create it manually.
         }
     },
     "general": {
+        "logo": "caelestia",
         "apps": {
             "terminal": ["foot"],
             "audio": ["pavucontrol"],
@@ -560,6 +563,7 @@ default, you must create it manually.
             "wallpapers": false
         },
         "showOnHover": false,
+        "favouriteApps": [],
         "hiddenApps": []
     },
     "lock": {
@@ -593,6 +597,7 @@ default, you must create it manually.
         "playerAliases": [{ "from": "com.github.th_ch.youtube_music", "to": "YT Music" }],
         "weatherLocation": "",
         "useFahrenheit": false,
+        "useFahrenheitPerformance": false,
         "useTwelveHourClock": false,
         "smartScheme": true,
         "visualiserBars": 45
@@ -601,6 +606,12 @@ default, you must create it manually.
         "dragThreshold": 30,
         "enabled": true,
         "vimKeybinds": false,
+        "icons": {
+            "logout": "logout",
+            "shutdown": "power_settings_new",
+            "hibernate": "downloading",
+            "reboot": "cached"
+        },
         "commands": {
             "logout": ["loginctl", "terminate-user", ""],
             "shutdown": ["systemctl", "poweroff"],

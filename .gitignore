@@ -7,3 +7,4 @@ build/
 .github/
 .vscode/
 .vscode/settings.json
+logs
