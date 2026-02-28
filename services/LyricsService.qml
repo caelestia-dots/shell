@@ -16,7 +16,7 @@ Singleton {
     property int currentIndex: -1
     property bool loading: false
     property bool isManualSeeking: false
-    property bool lyricsVisible: true
+    property bool lyricsVisible: Config.services.showLyrics
     property string backend: "Local"
     property real currentSongId: 0
 
@@ -135,6 +135,11 @@ Singleton {
         root.lyricsMap = root.lyricsMap;
         saveLyricsMap.command = ["sh", "-c", `mkdir -p "${root.lyricsDir}" && echo '${JSON.stringify(root.lyricsMap).replace(/'/g, "'\\''")}' > "${root.lyricsMapFile}"`];
         saveLyricsMap.running = true;
+    }
+
+    function toggleVisibility() {
+        Config.services.showLyrics = !Config.services.showLyrics
+        Config.save()
     }
 
 

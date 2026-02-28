@@ -61,7 +61,7 @@ StyledRect {
 
                 StyledSwitch {
                     checked: LyricsService.lyricsVisible
-                    onToggled: LyricsService.lyricsVisible = !LyricsService.lyricsVisible
+                    onToggled: LyricsService.toggleVisibility()
                 }
             }
 

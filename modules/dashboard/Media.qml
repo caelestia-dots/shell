@@ -189,7 +189,7 @@ Item {
             MouseArea {
                 anchors.fill: parent
                 onClicked: {
-                    LyricsService.lyricsVisible = !LyricsService.lyricsVisible
+                    LyricsService.toggleVisibility()
                 }
             }
         }
