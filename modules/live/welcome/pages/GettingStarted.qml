@@ -441,7 +441,7 @@ Item {
 
                     WelcomeSectionHeader {
                         title: qsTr("Applications")
-                        subtitle: qsTr("Learn about the default applications.")
+                        subtitle: qsTr("CaelestiaLive includes a number of default applications to help you get started on your journey.")
                     }
 
                     // Default Applications
@@ -462,6 +462,7 @@ Item {
                             ColumnLayout {
                                 IconButton {
                                     icon: "chevron_left"
+                                    font.bold: true
                                     onClicked: {
                                         defaultApplicationsCarousel.decrementCurrentIndex();
                                     }
@@ -839,6 +840,7 @@ Item {
                             ColumnLayout {
                                 IconButton {
                                     icon: "chevron_right"
+                                    font.bold: true
                                     onClicked: {
                                         defaultApplicationsCarousel.incrementCurrentIndex();
                                     }
