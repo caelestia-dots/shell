@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+  xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:cc="http://creativecommons.org/ns#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns="http://www.w3.org/2000/svg" xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd" xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+  width="128" height="128"
+  inkscape:version="1.0 (4035a4fb49, 2020-05-01)">
+ <title>foot logo</title>
+ <sodipodi:namedview showgrid="true">
+  <inkscape:grid empspacing="4" />
+ </sodipodi:namedview>
+ <metadata>
+  <rdf:RDF>
+   <cc:Work>
+    <dc:format>image/svg+xml</dc:format>
+    <dc:type
+      rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+    <dc:creator>
+     <cc:Agent>
+      <dc:title>Lennard Hofmann</dc:title>
+     </cc:Agent>
+    </dc:creator>
+    <dc:source>https://freesvg.org/human-footprints</dc:source>
+    <cc:license
+      rdf:resource="http://creativecommons.org/licenses/by-sa/4.0/" />
+    <dc:title>foot logo</dc:title>
+    <dc:subject>
+     <rdf:Bag>
+      <rdf:li>terminal emulator</rdf:li>
+      <rdf:li>footprint</rdf:li>
+     </rdf:Bag>
+    </dc:subject>
+    <dc:date>2020-06-23</dc:date>
+    <dc:description>Black square representing a terminal showing a human footprint as a prompt symbol and an underscore as the cursor</dc:description>
+   </cc:Work>
+  </rdf:RDF>
+ </metadata>
+ <rect
+   id="terminal-border"
+   ry="7.9238095" rx="7.9238095"
+   y="12.495239" x="12.495239"
+   height="103.00952" width="103.00952"
+   style="fill:#c0bfbc" />
+ <rect
+   id="terminal-bg"
+   style="fill:#282828"
+   width="96" height="96"
+   x="16" y="16"
+   rx="7.3846154" ry="7.3846154" />
+ <g
+   transform="matrix(0.85714209,0,0,0.85714209,3.4285132,-145.99985)" id="foot">
+  <path
+    style="fill:#fbf1c7"
+    id="main"
+    d="m 37.0057,207.12866 c -0.9539,-0.24232 -1.8766,-0.41748 -2.7117,-0.49721 -4.1121,-0.39258 -5.433,-0.0326 -7.5067,2.04908 -2.8434,2.85385 -2.2667,6.90676 1.4644,10.38038 8.0896,7.53109 8.2202,12.581 0.4808,18.2752 -3.1863,2.34409 -5.492,7.85321 -4.4994,10.73911 1.2501,3.63469 6.0098,5.02447 10.1635,2.97341 3.8964,-1.92373 8.3104,-8.49971 11.3208,-16.36234 0.2509,-0.65526 0.4966,-1.31942 0.7268,-1.9912 0.6909,-2.01525 1.2796,-4.09527 1.7466,-6.17933 1.4109,-6.29466 1.0666,-11.19321 -0.9956,-14.13789 -1.287,-1.83788 -6.056,-4.19923 -10.1892,-5.24924 z" />
+  <g
+    transform="translate(-1890.6933,-335.56903)" id="toes" style="fill:#fbf1c7">
+   <ellipse
+     id="toe3"
+     style="fill:#fbf1c7"
+     cx="1934.6934" cy="540.29291"
+     rx="2" ry="2.2761035" />
+   <ellipse
+     id="toe4"
+     style="fill:#fbf1c7"
+     cx="1939.0691" cy="543.35553"
+     rx="1.6242591" ry="1.7864922" />
+   <ellipse
+     id="toe5"
+     style="fill:#fbf1c7"
+     cx="1941.3607" cy="547.06903"
+     rx="1.33263" ry="1.5" />
+   <ellipse
+     id="toe1"
+     style="fill:#fbf1c7"
+     cx="1921.8835" cy="536.06903"
+     rx="3.8097539" ry="4.5" />
+   <ellipse
+     id="toe2"
+     style="fill:#fbf1c7"
+     cx="1929.1934" cy="537.56903"
+     rx="2.5" ry="3" />
+  </g>
+ </g>
+ <rect
+   id="cursor"
+   y="64" x="48"
+   height="4" width="22"
+   style="fill:#fbf1c7" />
+</svg>

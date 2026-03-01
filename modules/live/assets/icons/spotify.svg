@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" version="1">
+ <path opacity=".2" d="M 4.1,32 C 4,32.3 4,32.7 4,33 4,48.5 16.5,61 32,61 47.5,61 60,48.5 60,33 60,32.7 60,32.3 59.9,32 59.4,47 47.1,59 31.9,59 16.8,59 4.6,47 4.1,32 Z"/>
+ <path fill="#1ed760" d="M 60,32 V 32 C 60,16.5 47.5,4 32,4 V 4 C 16.5,4 4,16.5 4,32 V 32 C 4,47.5 16.5,60 32,60 V 60 C 47.5,60 60,47.5 60,32 Z"/>
+ <path fill="#ffffff" opacity=".2" d="M 32,4 C 16.5,4 4,16.5 4,32 4,32.1 4,32.2 4,32.3 4.4,17.1 16.7,5 32,5 V 5 C 47.3,5 59.6,17.1 60,32.3 60,32.2 60,32.1 60,32 60,16.5 47.5,4 32,4 Z"/>
+ <path style="opacity:0.2;fill:none;stroke:#ffffff;stroke-width:5;stroke-linecap:round" d="M 15.5,24.5 C 23,21.5 39,21.5 49.5,27.5"/>
+ <path style="fill:none;stroke:#3f3f3f;stroke-width:5;stroke-linecap:round" d="M 15.5,23.5 C 23,20.5 39,20.5 49.5,26.5"/>
+ <path style="opacity:0.2;fill:none;stroke:#ffffff;stroke-width:4;stroke-linecap:round" d="M 17,33 C 24,31 40,32 46,36"/>
+ <path style="fill:none;stroke:#3f3f3f;stroke-width:4;stroke-linecap:round" d="M 17,32 C 24,30 40,31 46,35"/>
+ <path style="opacity:0.2;fill:none;stroke:#ffffff;stroke-width:4;stroke-linecap:round" d="M 18,42 C 24,40.5 36,40.5 43,44"/>
+ <path style="fill:none;stroke:#3f3f3f;stroke-width:4;stroke-linecap:round" d="M 18,41 C 24,39.5 36,39.5 43,43"/>
+</svg>
