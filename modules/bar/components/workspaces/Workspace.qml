@@ -31,9 +31,17 @@ ColumnLayout {
     StyledText {
         id: indicator
 
-        font.family: root.useNumberedWorkspaces ? Appearance.font.family.mono : undefined
         Layout.alignment: Qt.AlignHCenter | Qt.AlignTop
         Layout.preferredHeight: Config.bar.sizes.innerWidth - Appearance.padding.small * 2
+
+        Binding {
+            when: root.useNumberedWorkspaces
+
+            target: indicator
+            property: "font.family"
+            value: Appearance.font.family.mono
+            restoreMode: Binding.RestoreBindingOrValue
+        }
 
         animate: true
         text: {
