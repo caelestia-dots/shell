@@ -473,7 +473,8 @@ Item {
                                 id: defaultApplicationsCarousel
 
                                 Layout.fillWidth: true
-                                Layout.preferredHeight: 200
+                                Layout.preferredHeight: implicitHeight
+                                implicitHeight: currentItem ? currentItem.implicitHeight : 200
                                 clip: true
                                 orientation: ListView.Horizontal
                                 snapMode: ListView.SnapOneItem
@@ -482,6 +483,13 @@ Item {
                                 preferredHighlightEnd: width
                                 interactive: true
                                 boundsBehavior: Flickable.DragOverBounds
+                                
+                                Behavior on implicitHeight {
+                                    Anim {
+                                        duration: Appearance.anim.durations.normal
+                                        easing.bezierCurve: Appearance.anim.curves.emphasized
+                                    }
+                                }
                                 
                                 readonly property var sourceModel: [
                                         {
@@ -728,7 +736,7 @@ Item {
                                     required property int index
                                     
                                     width: defaultApplicationsCarousel.width
-                                    height: defaultApplicationsCarousel.height
+                                    implicitHeight: defaultApplicationRow.implicitHeight + Appearance.padding.large * 2
 
                                     RowLayout {
                                         id: defaultApplicationRow
