@@ -44,12 +44,6 @@ StyledRect {
             component: configurationComponent
         },
         {
-            id: "faqs",
-            name: qsTr("FAQs"),
-            icon: "help",
-            component: faqsComponent
-        },
-        {
             id: "community",
             name: qsTr("Community"),
             icon: "people",
