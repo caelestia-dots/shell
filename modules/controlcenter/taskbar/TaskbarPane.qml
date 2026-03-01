@@ -461,7 +461,7 @@ Item {
                                     }
 
                                     StyledSwitch {
-                                        checked: root.workspacesPerMonitor
+                                        checked: root.workspacesUseNumbered
                                         onToggled: {
                                             root.workspacesUseNumbered = checked;
                                             root.saveConfig();
