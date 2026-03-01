@@ -18,6 +18,10 @@ JsonObject {
         property bool showNetwork: true
     }
 
+    property bool enableMedia: true
+    property bool enablePerformance: true
+    property bool enableWeather: true
+
     component Sizes: JsonObject {
         readonly property int tabIndicatorHeight: 3
         readonly property int tabIndicatorSpacing: 5
