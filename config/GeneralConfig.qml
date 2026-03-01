@@ -5,6 +5,44 @@ JsonObject {
     property Apps apps: Apps {}
     property Idle idle: Idle {}
     property Battery battery: Battery {}
+    
+
+    component PowerActionSchema: JsonObject {
+        property string setPowerProfile: ""
+        property string setRefreshRate: ""
+        property string disableAnimations: ""
+        property string disableBlur: ""
+        property string disableRounding: ""
+        property string disableShadows: ""
+    }
+    
+    component ChargingBehavior: PowerActionSchema {
+        setPowerProfile: "restore"
+        setRefreshRate: "restore"
+    }
+    
+    component UnpluggedBehavior: PowerActionSchema {
+        setPowerProfile: "restore"
+        setRefreshRate: "restore"
+        property bool evaluateThresholds: true
+    }
+    
+    component ProfileBehavior: PowerActionSchema {
+    }
+    
+    component ProfileBehaviors: JsonObject {
+        property ProfileBehavior powerSaver: ProfileBehavior {}
+        property ProfileBehavior balanced: ProfileBehavior {}
+        property ProfileBehavior performance: ProfileBehavior {}
+    }
+    
+    component PowerManagement: JsonObject {
+        property bool enabled: false
+        property list<var> thresholds: []
+        property ChargingBehavior onCharging: ChargingBehavior {}
+        property UnpluggedBehavior onUnplugged: UnpluggedBehavior {}
+        property ProfileBehaviors profileBehaviors: ProfileBehaviors {}
+    }
 
     component Apps: JsonObject {
         property list<string> terminal: ["foot"]
@@ -56,5 +94,7 @@ JsonObject {
             },
         ]
         property int criticalLevel: 3
+        
+        property PowerManagement powerManagement: PowerManagement {}
     }
 }

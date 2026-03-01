@@ -152,7 +152,54 @@ Singleton {
             },
             battery: {
                 warnLevels: general.battery.warnLevels,
-                criticalLevel: general.battery.criticalLevel
+                criticalLevel: general.battery.criticalLevel,
+                powerManagement: {
+                    enabled: general.battery.powerManagement.enabled,
+                    thresholds: general.battery.powerManagement.thresholds,
+                    onCharging: {
+                        setPowerProfile: general.battery.powerManagement.onCharging.setPowerProfile,
+                        setRefreshRate: general.battery.powerManagement.onCharging.setRefreshRate,
+                        disableAnimations: general.battery.powerManagement.onCharging.disableAnimations,
+                        disableBlur: general.battery.powerManagement.onCharging.disableBlur,
+                        disableRounding: general.battery.powerManagement.onCharging.disableRounding,
+                        disableShadows: general.battery.powerManagement.onCharging.disableShadows
+                    },
+                    onUnplugged: {
+                        setPowerProfile: general.battery.powerManagement.onUnplugged.setPowerProfile,
+                        setRefreshRate: general.battery.powerManagement.onUnplugged.setRefreshRate,
+                        disableAnimations: general.battery.powerManagement.onUnplugged.disableAnimations,
+                        disableBlur: general.battery.powerManagement.onUnplugged.disableBlur,
+                        disableRounding: general.battery.powerManagement.onUnplugged.disableRounding,
+                        disableShadows: general.battery.powerManagement.onUnplugged.disableShadows,
+                        evaluateThresholds: general.battery.powerManagement.onUnplugged.evaluateThresholds
+                    },
+                    profileBehaviors: {
+                        powerSaver: {
+                            setPowerProfile: general.battery.powerManagement.profileBehaviors.powerSaver.setPowerProfile,
+                            setRefreshRate: general.battery.powerManagement.profileBehaviors.powerSaver.setRefreshRate,
+                            disableAnimations: general.battery.powerManagement.profileBehaviors.powerSaver.disableAnimations,
+                            disableBlur: general.battery.powerManagement.profileBehaviors.powerSaver.disableBlur,
+                            disableRounding: general.battery.powerManagement.profileBehaviors.powerSaver.disableRounding,
+                            disableShadows: general.battery.powerManagement.profileBehaviors.powerSaver.disableShadows
+                        },
+                        balanced: {
+                            setPowerProfile: general.battery.powerManagement.profileBehaviors.balanced.setPowerProfile,
+                            setRefreshRate: general.battery.powerManagement.profileBehaviors.balanced.setRefreshRate,
+                            disableAnimations: general.battery.powerManagement.profileBehaviors.balanced.disableAnimations,
+                            disableBlur: general.battery.powerManagement.profileBehaviors.balanced.disableBlur,
+                            disableRounding: general.battery.powerManagement.profileBehaviors.balanced.disableRounding,
+                            disableShadows: general.battery.powerManagement.profileBehaviors.balanced.disableShadows
+                        },
+                        performance: {
+                            setPowerProfile: general.battery.powerManagement.profileBehaviors.performance.setPowerProfile,
+                            setRefreshRate: general.battery.powerManagement.profileBehaviors.performance.setRefreshRate,
+                            disableAnimations: general.battery.powerManagement.profileBehaviors.performance.disableAnimations,
+                            disableBlur: general.battery.powerManagement.profileBehaviors.performance.disableBlur,
+                            disableRounding: general.battery.powerManagement.profileBehaviors.performance.disableRounding,
+                            disableShadows: general.battery.powerManagement.profileBehaviors.performance.disableShadows
+                        }
+                    }
+                }
             }
         };
     }
