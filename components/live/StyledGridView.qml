@@ -1,6 +1,7 @@
 pragma ComponentBehavior: Bound
 import ".."
 import QtQuick
+import qs.config
 
 Item {
     id: root
