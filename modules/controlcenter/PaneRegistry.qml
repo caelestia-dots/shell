@@ -61,7 +61,7 @@ QtObject {
             readonly property string label: "dashboard"
             readonly property string icon: "dashboard"
             readonly property string component: "dashboard/DashboardPane.qml"
-            readonly property bool visible: true
+            readonly property bool visible: false
         }
     ]
 
