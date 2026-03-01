@@ -461,8 +461,14 @@ Item {
                             spacing: Appearance.spacing.large
 
                             ColumnLayout {
-                                Text {
-                                    text: "left"
+                                IconButton {
+                                    icon: "chevron_left"
+                                    onClicked: {
+                                        if (defaultApplicationsCarousel.currentIndex === 0)
+                                            defaultApplicationsCarousel.setCurrentIndex(defaultApplicationsCarousel.count - 1)
+                                        else
+                                            defaultApplicationsCarousel.setCurrentIndex(defaultApplicationsCarousel.currentIndex - 1)
+                                    }
                                 }
                             }
 
@@ -666,8 +672,14 @@ Item {
                             }
 
                             ColumnLayout {
-                                Text {
-                                    text: "right"
+                                IconButton {
+                                    icon: "chevron_right"
+                                    onClicked: {
+                                        if (defaultApplicationsCarousel.currentIndex === defaultApplicationsCarousel.count - 1)
+                                            defaultApplicationsCarousel.setCurrentIndex(0)
+                                        else
+                                            defaultApplicationsCarousel.setCurrentIndex(defaultApplicationsCarousel.currentIndex + 1)
+                                    }
                                 }
                             }
                         }
