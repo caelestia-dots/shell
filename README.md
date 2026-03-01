@@ -331,6 +331,10 @@ default, you must create it manually.
         }
     },
     "bar": {
+        "activeWindow": {
+            "compact": false,
+            "inverted": false
+        },
         "clock": {
             "showIcon": true
         },

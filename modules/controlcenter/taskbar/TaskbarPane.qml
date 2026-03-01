@@ -19,6 +19,8 @@ Item {
 
     required property Session session
 
+    property bool activeWindowCompact: Config.bar.activeWindow.compact ?? false
+    property bool activeWindowInverted: Config.bar.activeWindow.inverted ?? false
     property bool clockShowIcon: Config.bar.clock.showIcon ?? true
     property bool persistent: Config.bar.persistent ?? true
     property bool showOnHover: Config.bar.showOnHover ?? true
@@ -62,6 +64,8 @@ Item {
     }
 
     function saveConfig(entryIndex, entryEnabled) {
+        Config.bar.activeWindow.compact = root.activeWindowCompact;
+        Config.bar.activeWindow.inverted = root.activeWindowInverted;
         Config.bar.clock.showIcon = root.clockShowIcon;
         Config.bar.persistent = root.persistent;
         Config.bar.showOnHover = root.showOnHover;
@@ -638,6 +642,33 @@ Item {
                                         }
                                     }
                                 ]
+                            }
+                        }
+                        SectionContainer {
+                            Layout.fillWidth: true
+                            alignTop: true
+
+                            StyledText {
+                                text: qsTr("Active window")
+                                font.pointSize: Appearance.font.size.normal
+                            }
+
+                            SwitchRow {
+                                label: qsTr("Compact")
+                                checked: root.activeWindowCompact
+                                onToggled: checked => {
+                                    root.activeWindowCompact = checked;
+                                    root.saveConfig();
+                                }
+                            }
+
+                            SwitchRow {
+                                label: qsTr("Inverted")
+                                checked: root.activeWindowInverted
+                                onToggled: checked => {
+                                    root.activeWindowInverted = checked;
+                                    root.saveConfig();
+                                }
                             }
                         }
                     }
