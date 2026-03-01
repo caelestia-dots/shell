@@ -834,9 +834,9 @@ Item {
                                             Keybinding {
                                                 id: specialWorkspacesKeybinding
 
-                                                key: specialWorkspacesItem.modelData.key
-                                                label: specialWorkspacesItem.modelData.label
-                                                desc: specialWorkspacesItem.modelData.desc
+                                                key: specialWorkspacesItem.modelData.key ? specialWorkspacesItem.modelData.key : ""
+                                                label: specialWorkspacesItem.modelData.label ? specialWorkspacesItem.modelData.label : ""
+                                                desc: specialWorkspacesItem.modelData.desc ? specialWorkspacesItem.modelData.desc : ""
                                             }
                                         }
                                     }
