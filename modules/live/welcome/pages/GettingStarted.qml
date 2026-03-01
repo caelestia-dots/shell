@@ -637,6 +637,28 @@ Item {
                                                     wrapMode: Text.WordWrap
                                                     text: defaultApplication.modelData.desc
                                                 }
+
+                                                RowLayout {
+                                                    Layout.topMargin: Appearance.padding.normal
+
+                                                    spacing: Appearance.spacing.normal
+                                                    visible: defaultApplication.modelData.links
+
+                                                    Repeater {
+                                                        model: defaultApplication.modelData.links
+
+                                                        TextButton {
+                                                            id: defaultApplicationLink
+
+                                                            required property var modelData
+
+                                                            text: defaultApplicationLink.modelData.title
+                                                            radius: Appearance.rounding.small
+
+                                                            onClicked: Qt.openUrlExternally(defaultApplicationLink.modelData.url)
+                                                        }
+                                                    }
+                                                }
                                             }
                                         }
                                     }
