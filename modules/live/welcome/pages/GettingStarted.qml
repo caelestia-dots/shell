@@ -464,22 +464,26 @@ Item {
                                 IconButton {
                                     icon: "chevron_left"
                                     onClicked: {
-                                        if (defaultApplicationsCarousel.currentIndex === 0)
-                                            defaultApplicationsCarousel.setCurrentIndex(defaultApplicationsCarousel.count - 1)
-                                        else
-                                            defaultApplicationsCarousel.setCurrentIndex(defaultApplicationsCarousel.currentIndex - 1)
+                                        defaultApplicationsCarousel.decrementCurrentIndex();
                                     }
                                 }
                             }
 
-                            SwipeView {
+                            ListView {
                                 id: defaultApplicationsCarousel
 
                                 Layout.fillWidth: true
+                                Layout.preferredHeight: 200
                                 clip: true
-
-                                Repeater {
-                                    model: [
+                                orientation: ListView.Horizontal
+                                snapMode: ListView.SnapOneItem
+                                highlightRangeMode: ListView.StrictlyEnforceRange
+                                preferredHighlightBegin: 0
+                                preferredHighlightEnd: width
+                                interactive: true
+                                boundsBehavior: Flickable.DragOverBounds
+                                
+                                readonly property var sourceModel: [
                                         {
                                             cat: qsTr("File Manager"),
                                             title: qsTr("Thunar"),
@@ -596,73 +600,195 @@ Item {
                                                 }
                                             ]
                                         },
-                                    ]
+                                ]
+                                
+                                property int realCurrentIndex: 0
+                                property bool isTeleporting: false
+                                property bool isAnimating: false
+                                
+                                Component.onCompleted: {
+                                    isTeleporting = true;
+                                    Qt.callLater(() => {
+                                        contentX = width;
+                                        isTeleporting = false;
+                                    });
+                                }
+                                
+                                function incrementCurrentIndex() {
+                                    if (isAnimating || isTeleporting) return;
+                                    
+                                    const currentViewIndex = indexAt(contentX + width / 2, height / 2);
+                                    const realCount = sourceModel.length;
+                                    
+                                    if (currentViewIndex === count - 1) {
+                                        isTeleporting = true;
+                                        positionViewAtIndex(1, ListView.SnapPosition);
+                                        realCurrentIndex = 0;
+                                        Qt.callLater(() => { isTeleporting = false; });
+                                        return;
+                                    }
+                                    
+                                    isAnimating = true;
+                                    contentX += width;
+                                }
+                                
+                                function decrementCurrentIndex() {
+                                    if (isAnimating || isTeleporting) return;
+                                    
+                                    const currentViewIndex = indexAt(contentX + width / 2, height / 2);
+                                    const realCount = sourceModel.length;
+                                    
+                                    if (currentViewIndex === 0) {
+                                        isTeleporting = true;
+                                        positionViewAtIndex(realCount, ListView.SnapPosition);
+                                        realCurrentIndex = realCount - 1;
+                                        Qt.callLater(() => { isTeleporting = false; });
+                                        return;
+                                    }
+                                    
+                                    isAnimating = true;
+                                    contentX -= width;
+                                }
+                                
+                                onMovementStarted: {
+                                    isAnimating = true;
+                                }
+                                
+                                onMovementEnded: {
+                                    isAnimating = false;
+                                    
+                                    if (isTeleporting) return;
+                                    
+                                    const viewIndex = indexAt(contentX + width / 2, height / 2);
+                                    if (viewIndex === -1) return;
+                                    
+                                    const realCount = sourceModel.length;
+                                    
+                                    if (viewIndex === 0) {
+                                        isTeleporting = true;
+                                        positionViewAtIndex(realCount, ListView.SnapPosition);
+                                        realCurrentIndex = realCount - 1;
+                                        Qt.callLater(() => { isTeleporting = false; });
+                                    } else if (viewIndex === count - 1) {
+                                        isTeleporting = true;
+                                        positionViewAtIndex(1, ListView.SnapPosition);
+                                        realCurrentIndex = 0;
+                                        Qt.callLater(() => { isTeleporting = false; });
+                                    } else {
+                                        realCurrentIndex = viewIndex - 1;
+                                    }
+                                }
+                                
+                                Behavior on contentX {
+                                    enabled: !isTeleporting
+                                    Anim {
+                                        duration: Appearance.anim.durations.normal
+                                        easing.bezierCurve: Appearance.anim.curves.emphasized
+                                        onRunningChanged: {
+                                            if (!running) {
+                                                defaultApplicationsCarousel.isAnimating = false;
+                                                
+                                                const viewIndex = defaultApplicationsCarousel.indexAt(
+                                                    defaultApplicationsCarousel.contentX + defaultApplicationsCarousel.width / 2, 
+                                                    defaultApplicationsCarousel.height / 2
+                                                );
+                                                const realCount = defaultApplicationsCarousel.sourceModel.length;
+                                                
+                                                if (viewIndex === 0) {
+                                                    defaultApplicationsCarousel.isTeleporting = true;
+                                                    defaultApplicationsCarousel.positionViewAtIndex(realCount, ListView.SnapPosition);
+                                                    defaultApplicationsCarousel.realCurrentIndex = realCount - 1;
+                                                    Qt.callLater(() => { defaultApplicationsCarousel.isTeleporting = false; });
+                                                } else if (viewIndex === defaultApplicationsCarousel.count - 1) {
+                                                    defaultApplicationsCarousel.isTeleporting = true;
+                                                    defaultApplicationsCarousel.positionViewAtIndex(1, ListView.SnapPosition);
+                                                    defaultApplicationsCarousel.realCurrentIndex = 0;
+                                                    Qt.callLater(() => { defaultApplicationsCarousel.isTeleporting = false; });
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                                
+                                model: {
+                                    if (!sourceModel || sourceModel.length === 0) return [];
+                                    const extended = [];
+                                    extended.push(sourceModel[sourceModel.length - 1]);
+                                    for (let i = 0; i < sourceModel.length; i++) {
+                                        extended.push(sourceModel[i]);
+                                    }
+                                    extended.push(sourceModel[0]);
+                                    return extended;
+                                }
 
-                                    Page {
-                                        id: defaultApplication
+                                delegate: Item {
+                                    id: defaultApplication
 
-                                        required property var modelData
+                                    required property var modelData
+                                    required property int index
+                                    
+                                    width: defaultApplicationsCarousel.width
+                                    height: defaultApplicationsCarousel.height
 
-                                        RowLayout {
-                                            id: defaultApplicationRow
+                                    RowLayout {
+                                        id: defaultApplicationRow
 
-                                            anchors.fill: parent
-                                            Layout.margins: Appearance.padding.large
+                                        anchors.fill: parent
+                                        anchors.margins: Appearance.padding.large
 
-                                            spacing: Appearance.spacing.large
+                                        spacing: Appearance.spacing.large
 
-                                            VectorImage {
-                                                id: defaultApplicationIcon
+                                        VectorImage {
+                                            id: defaultApplicationIcon
 
-                                                Layout.preferredWidth: 64
-                                                Layout.preferredHeight: 64
-                                                Layout.alignment: Qt.AlignTop
-                                                preferredRendererType: VectorImage.CurveRenderer
-                                                fillMode: VectorImage.PreserveAspectFit
-                                                source: defaultApplication.modelData.icon
+                                            Layout.preferredWidth: 64
+                                            Layout.preferredHeight: 64
+                                            Layout.alignment: Qt.AlignTop
+                                            preferredRendererType: VectorImage.CurveRenderer
+                                            fillMode: VectorImage.PreserveAspectFit
+                                            source: defaultApplication.modelData.icon
+                                        }
+
+                                        ColumnLayout {
+                                            id: defaultApplicationDesc
+
+                                            Layout.fillWidth: true
+                                            Layout.preferredWidth: parent.width
+                                            Layout.alignment: Qt.AlignTop
+
+                                            Text {
+                                                font.bold: true
+                                                font.pointSize: Appearance.font.size.larger
+                                                color: Colours.palette.m3onSurface
+                                                text: defaultApplication.modelData.cat + " - " + defaultApplication.modelData.title
                                             }
 
-                                            ColumnLayout {
-                                                id: defaultApplicationDesc
-
-                                                Layout.fillWidth: true
+                                            Text {
                                                 Layout.preferredWidth: parent.width
-                                                Layout.alignment: Qt.AlignTop
+                                                font.pointSize: Appearance.font.size.normal
+                                                color: Colours.palette.m3onSurface
+                                                wrapMode: Text.WordWrap
+                                                text: defaultApplication.modelData.desc
+                                            }
 
-                                                Text {
-                                                    font.bold: true
-                                                    font.pointSize: Appearance.font.size.larger
-                                                    color: Colours.palette.m3onSurface
-                                                    text: defaultApplication.modelData.cat + " - " + defaultApplication.modelData.title
-                                                }
+                                            RowLayout {
+                                                Layout.topMargin: Appearance.padding.normal
 
-                                                Text {
-                                                    Layout.preferredWidth: parent.width
-                                                    font.pointSize: Appearance.font.size.normal
-                                                    color: Colours.palette.m3onSurface
-                                                    wrapMode: Text.WordWrap
-                                                    text: defaultApplication.modelData.desc
-                                                }
+                                                spacing: Appearance.spacing.normal
+                                                visible: defaultApplication.modelData.links
 
-                                                RowLayout {
-                                                    Layout.topMargin: Appearance.padding.normal
+                                                Repeater {
+                                                    model: defaultApplication.modelData.links
 
-                                                    spacing: Appearance.spacing.normal
-                                                    visible: defaultApplication.modelData.links
+                                                    TextButton {
+                                                        id: defaultApplicationLink
 
-                                                    Repeater {
-                                                        model: defaultApplication.modelData.links
+                                                        required property var modelData
 
-                                                        TextButton {
-                                                            id: defaultApplicationLink
+                                                        text: defaultApplicationLink.modelData.title
+                                                        radius: Appearance.rounding.small
 
-                                                            required property var modelData
-
-                                                            text: defaultApplicationLink.modelData.title
-                                                            radius: Appearance.rounding.small
-
-                                                            onClicked: Qt.openUrlExternally(defaultApplicationLink.modelData.url)
-                                                        }
+                                                        onClicked: Qt.openUrlExternally(defaultApplicationLink.modelData.url)
                                                     }
                                                 }
                                             }
@@ -675,10 +801,7 @@ Item {
                                 IconButton {
                                     icon: "chevron_right"
                                     onClicked: {
-                                        if (defaultApplicationsCarousel.currentIndex === defaultApplicationsCarousel.count - 1)
-                                            defaultApplicationsCarousel.setCurrentIndex(0)
-                                        else
-                                            defaultApplicationsCarousel.setCurrentIndex(defaultApplicationsCarousel.currentIndex + 1)
+                                        defaultApplicationsCarousel.incrementCurrentIndex();
                                     }
                                 }
                             }
