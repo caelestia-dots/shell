@@ -69,6 +69,15 @@ Scope {
         onPressed: root.launcherInterrupted = true
     }
 
+    CustomShortcut {
+        name: "bar"
+        description: "Toggle Bar"
+        onPressed: {
+            if (root.hasFullscreen)
+                return;
+            Config.bar.persistent = !Config.bar.persistent;
+        }
+    }
 
     CustomShortcut {
         name: "sidebar"
