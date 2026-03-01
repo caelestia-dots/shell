@@ -18,6 +18,8 @@ Item {
     RowLayout {
         id: keybindingRow
 
+        spacing: Appearance.spacing.normal
+
         StyledRect {
             implicitWidth: keybindingKey.implicitWidth + Appearance.padding.normal * 2
             implicitHeight: keybindingKey.implicitHeight + Appearance.padding.normal * 2
