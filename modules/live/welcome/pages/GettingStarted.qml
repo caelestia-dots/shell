@@ -1,5 +1,9 @@
+pragma ComponentBehavior: Bound
+
 import QtQuick
+import QtQuick.Controls
 import QtQuick.Layouts
+import QtQuick.VectorImage
 import qs.services
 import qs.components
 import qs.components.live
@@ -167,6 +171,10 @@ Item {
                                     ]
 
                                     delegate: StyledRect {
+                                        id: requirementsWrapper
+
+                                        required property var modelData
+
                                         width: requirements.implicitWidth + Appearance.padding.larger * 2
                                         height: Appearance.font.size.small + Appearance.padding.larger * 2
                                         radius: Appearance.rounding.normal
@@ -180,14 +188,14 @@ Item {
                                             spacing: Appearance.spacing.small
 
                                             StyledText {
-                                                text: modelData.label + ":"
+                                                text: requirementsWrapper.modelData.label + ":"
                                                 font.bold: true
                                                 font.pointSize: Appearance.font.size.small
                                                 color: Colours.palette.m3primary
                                             }
 
                                             StyledText {
-                                                text: modelData.val
+                                                text: requirementsWrapper.modelData.val
                                                 font.pointSize: Appearance.font.size.small
                                                 color: Colours.palette.m3onSurface
                                             }
@@ -409,6 +417,8 @@ Item {
 
                                 cellContent: Component {
                                     Item {
+                                        id: firstStepsKeybindingWrapper
+
                                         property var modelData
                                         property real gridMeasureWidth: firstStepsKeybinding.implicitWidth
 
@@ -420,8 +430,8 @@ Item {
                                             Keybinding {
                                                 id: firstStepsKeybinding
 
-                                                key: modelData.key
-                                                label: modelData.label
+                                                key: firstStepsKeybindingWrapper.modelData.key
+                                                label: firstStepsKeybindingWrapper.modelData.label
                                             }
                                         }
                                     }
@@ -443,88 +453,199 @@ Item {
                         radius: Appearance.rounding.normal
                         border.color: Colours.palette.m3outlineVariant
 
-                        ColumnLayout {
+                        RowLayout {
                             id: defaultApplications
 
                             anchors.fill: parent
                             anchors.margins: Appearance.padding.large
                             spacing: Appearance.spacing.large
 
-                            PathView {
-                                Layout.fillWidth: true
+                            ColumnLayout {
+                                Text {
+                                    text: "left"
+                                }
                             }
 
-                            StyledGridView {
+                            SwipeView {
+                                id: defaultApplicationsCarousel
+
                                 Layout.fillWidth: true
-                                Layout.preferredHeight: implicitHeight
+                                clip: true
 
-                                model: [
-                                    {
-                                        title: qsTr("File Manager"),
-                                        desc: qsTr("Thunar")
-                                    },
-                                    {
-                                        title: qsTr("Terminal"),
-                                        desc: qsTr("Foot")
-                                    },
-                                    {
-                                        title: qsTr("System Monitor"),
-                                        desc: qsTr("bTop")
-                                    },
-                                    {
-                                        title: qsTr("Music Player"),
-                                        desc: qsTr("Spotify")
-                                    },
-                                    {
-                                        title: qsTr("Web Browser"),
-                                        desc: qsTr("Zen")
-                                    },
-                                    {
-                                        title: qsTr("Chat"),
-                                        desc: qsTr("Discord")
-                                    },
-                                    {
-                                        title: qsTr("Code Editor"),
-                                        desc: qsTr("VSCodium")
-                                    },
-                                ]
+                                Repeater {
+                                    model: [
+                                        {
+                                            cat: qsTr("File Manager"),
+                                            title: qsTr("Thunar"),
+                                            icon: "../../assets/icons/thunar.svg",
+                                            desc: qsTr("Thunar is a clean, modern file manager originally developed for Xfce. It is designed for speed and efficiency, and features a familiar, intuitive interface. Despite its simplicity, Thunar is extensible through plugins."),
+                                            links: [
+                                                {
+                                                    title: qsTr("Arch Wiki"),
+                                                    url: "https://wiki.archlinux.org/title/Thunar"
+                                                },
+                                                {
+                                                    title: qsTr("Website"),
+                                                    url: "https://docs.xfce.org/xfce/thunar/start"
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            cat: qsTr("Web Browser"),
+                                            title: qsTr("Zen"),
+                                            icon: "../../assets/icons/zen-browser.svg",
+                                            desc: qsTr("Zen is an experimental, performance-optimized fork of Firefox focused on flexibility and design with many new features added to the core Firefox feature set. It also removes the Firefox AI components and tracking."),
+                                            links: [
+                                                {
+                                                    title: qsTr("Website"),
+                                                    url: "https://www.zen-browser.app/"
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            cat: qsTr("Chat"),
+                                            title: qsTr("Discord"),
+                                            icon: "../../assets/icons/discord.svg",
+                                            desc: qsTr("Discord is a cross-platform voice and text chat application which can be used through a web browser or the official desktop application. Many open-source communities (including ours) have communities on Discord."),
+                                            links: [
+                                                {
+                                                    title: qsTr("Arch Wiki"),
+                                                    url: "https://wiki.archlinux.org/title/Discord"
+                                                },
+                                                {
+                                                    title: qsTr("Website"),
+                                                    url: "https://discord.com"
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            cat: qsTr("Terminal"),
+                                            title: qsTr("Foot"),
+                                            icon: "../../assets/icons/foot.svg",
+                                            desc: qsTr("Foot is a fast, lightweight terminal emulator specifically designed for use under Wayland. It supports features such as server/daemon mode, scrollback search, URL detection, color emojis, and true color."),
+                                            links: [
+                                                {
+                                                    title: qsTr("Arch Wiki"),
+                                                    url: "https://wiki.archlinux.org/title/Foot"
+                                                },
+                                                {
+                                                    title: qsTr("Codeberg"),
+                                                    url: "https://codeberg.org/dnkl/foot"
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            cat: qsTr("Music Player"),
+                                            title: qsTr("Spotify"),
+                                            icon: "../../assets/icons/spotify.svg",
+                                            desc: qsTr("Spotify is a digital music streaming service which supports both an online player through their website, and a semi-official Linux client. Spotify operates on a freemium business model."),
+                                            links: [
+                                                {
+                                                    title: qsTr("Arch Wiki"),
+                                                    url: "https://wiki.archlinux.org/title/Spotify"
+                                                },
+                                                {
+                                                    title: qsTr("Website"),
+                                                    url: "https://spotify.com"
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            cat: qsTr("Code Editor"),
+                                            title: qsTr("VSCodium"),
+                                            icon: "../../assets/icons/vscodium.svg",
+                                            desc: qsTr("VSCodium is a community-driven open-source text and code editor based on Visual Studio Code. It removes telemetry from VSCode and ships configuration with Open VSX."),
+                                            links: [
+                                                {
+                                                    title: qsTr("Arch Wiki"),
+                                                    url: "https://wiki.archlinux.org/title/Visual_Studio_Code"
+                                                },
+                                                {
+                                                    title: qsTr("Website"),
+                                                    url: "https://vscodium.com/"
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            cat: qsTr("Software Updater"),
+                                            title: qsTr("Arch Update"),
+                                            icon: "../../assets/icons/arch-update.svg",
+                                            desc: qsTr("Arch Update is an interactive update notifier and updater for Arch Linux that assists you with important pre- and post-update tasks. It runs on a timer, and provides a systray icon to make your life even easier."),
+                                            links: [
+                                                {
+                                                    title: qsTr("GitHub"),
+                                                    url: "https://github.com/Antiz96/arch-update"
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            cat: qsTr("System Monitor"),
+                                            title: qsTr("bTop"),
+                                            icon: "../../assets/icons/btop.svg",
+                                            desc: qsTr("Btop is a lightweight, CLI resource monitor and the successor to bpytop which shows usage and stats for your processor, memory, disks, network, and processes. It features full mouse support and a game-inspired interface."),
+                                            links: [
+                                                {
+                                                    title: qsTr("GitHub"),
+                                                    url: "https://github.com/aristocratos/btop"
+                                                }
+                                            ]
+                                        },
+                                    ]
 
-                                cellHeight: 0
-                                spacing: Appearance.spacing.small
-                                paddingX: Appearance.padding.larger
-                                paddingY: Appearance.padding.small
+                                    Page {
+                                        id: defaultApplication
 
-                                cellContent: Component {
-                                    Item {
-                                        property var modelData
-                                        property real gridMeasureWidth: Math.max(defaultApplicationTitle.implicitWidth, defaultApplicationDesc.implicitWidth)
-                                        property real gridMeasureHeight: defaultApplicationColumn.implicitHeight
+                                        required property var modelData
 
-                                        ColumnLayout {
-                                            id: defaultApplicationColumn
+                                        RowLayout {
+                                            id: defaultApplicationRow
+
                                             anchors.fill: parent
-                                            anchors.margins: Appearance.padding.small
-                                            spacing: Appearance.spacing.smaller
+                                            Layout.margins: Appearance.padding.large
 
-                                            StyledText {
-                                                id: defaultApplicationTitle
+                                            spacing: Appearance.spacing.large
 
-                                                text: modelData.title
-                                                font.pointSize: Appearance.font.size.normal
-                                                font.weight: 600
+                                            VectorImage {
+                                                id: defaultApplicationIcon
+
+                                                Layout.preferredWidth: 64
+                                                Layout.preferredHeight: 64
+                                                Layout.alignment: Qt.AlignTop
+                                                preferredRendererType: VectorImage.CurveRenderer
+                                                fillMode: VectorImage.PreserveAspectFit
+                                                source: defaultApplication.modelData.icon
                                             }
 
-                                            StyledText {
+                                            ColumnLayout {
                                                 id: defaultApplicationDesc
 
-                                                text: modelData.desc
-                                                font.pointSize: Appearance.font.size.small
-                                                color: Colours.palette.m3outline
-                                                wrapMode: Text.WordWrap
                                                 Layout.fillWidth: true
+                                                Layout.preferredWidth: parent.width
+                                                Layout.alignment: Qt.AlignTop
+
+                                                Text {
+                                                    font.bold: true
+                                                    font.pointSize: Appearance.font.size.larger
+                                                    color: Colours.palette.m3onSurface
+                                                    text: defaultApplication.modelData.cat + " - " + defaultApplication.modelData.title
+                                                }
+
+                                                Text {
+                                                    Layout.preferredWidth: parent.width
+                                                    font.pointSize: Appearance.font.size.normal
+                                                    color: Colours.palette.m3onSurface
+                                                    wrapMode: Text.WordWrap
+                                                    text: defaultApplication.modelData.desc
+                                                }
                                             }
                                         }
                                     }
+                                }
+                            }
+
+                            ColumnLayout {
+                                Text {
+                                    text: "right"
                                 }
                             }
                         }
@@ -666,8 +787,10 @@ Item {
 
                                 cellContent: Component {
                                     Item {
-                                        property var modelData
-                                        property real gridMeasureWidth: firstStepsKeybinding.implicitWidth
+                                        id: specialWorkspacesItem
+
+                                        required property var modelData
+                                        property real gridMeasureWidth: specialWorkspacesKeybinding.implicitWidth
 
                                         ColumnLayout {
                                             anchors.fill: parent
@@ -675,10 +798,11 @@ Item {
                                             spacing: Appearance.spacing.small
 
                                             Keybinding {
-                                                id: firstStepsKeybinding
+                                                id: specialWorkspacesKeybinding
 
-                                                key: modelData.key
-                                                label: modelData.label
+                                                key: specialWorkspacesItem.modelData.key
+                                                label: specialWorkspacesItem.modelData.label
+                                                desc: specialWorkspacesItem.modelData.desc
                                             }
                                         }
                                     }
