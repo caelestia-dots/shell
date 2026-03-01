@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" version="1.1">
+ <path style="opacity:0.2" d="M 18,5 H 38 L 54,21 V 53 C 54,57.432 50.432,61 46,61 H 18 C 13.568,61 10,57.432 10,53 V 13 C 10,8.568 13.568,5 18,5 Z"/>
+ <path style="fill:#4f4f4f" d="m 18,4 h 20 l 16,16 v 32 c 0,4.432 -3.568,8 -8,8 H 18 c -4.432,0 -8,-3.568 -8,-8 V 12 c 0,-4.432 3.568,-8 8,-8 z"/>
+ <path style="opacity:0.2" d="M 19 12 C 17.89 12 17 12.89 17 14 L 17 52 C 17 53.11 17.89 54 19 54 L 45 54 C 46.11 54 47 53.11 47 52 L 47 24 L 35 12 L 19 12 z"/>
+ <path style="fill:#5f5f5f" d="M 42,4 H 54 V 16 Z"/>
+ <path style="fill:#ededed" d="M 19,11 C 17.89,11 17,11.89 17,13 V 51 C 17,52.11 17.89,53 19,53 H 45 C 46.11,53 47,52.11 47,51 V 22 L 40,18 36,11 Z"/>
+ <path style="opacity:0.2" d="m 36,13 11,9 v 1 H 36 Z"/>
+ <path style="fill:#ababab" d="M 36,11 47,22 H 36 Z"/>
+ <path style="opacity:0.1;fill:#ffffff" d="M 42,4 43,5 H 54 V 4 Z"/>
+ <path style="opacity:0.1;fill:#ffffff" d="M 18 4 C 13.568 4 10 7.568 10 12 L 10 13 C 10 8.568 13.568 5 18 5 L 38 5 L 54 21 L 54 20 L 38 4 L 18 4 z"/>
+</svg>
