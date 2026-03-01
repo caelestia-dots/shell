@@ -39,6 +39,7 @@ Item {
     property bool workspacesOccupiedBg: Config.bar.workspaces.occupiedBg ?? false
     property bool workspacesShowWindows: Config.bar.workspaces.showWindows ?? false
     property bool workspacesPerMonitor: Config.bar.workspaces.perMonitorWorkspaces ?? true
+    property bool workspacesUseNumbered: Config.bar.workspaces.useNumberedWorkspaces ?? false
     property bool scrollWorkspaces: Config.bar.scrollActions.workspaces ?? true
     property bool scrollVolume: Config.bar.scrollActions.volume ?? true
     property bool scrollBrightness: Config.bar.scrollActions.brightness ?? true
@@ -82,6 +83,7 @@ Item {
         Config.bar.workspaces.occupiedBg = root.workspacesOccupiedBg;
         Config.bar.workspaces.showWindows = root.workspacesShowWindows;
         Config.bar.workspaces.perMonitorWorkspaces = root.workspacesPerMonitor;
+        Config.bar.workspaces.useNumberedWorkspaces = root.workspacesUseNumbered;
         Config.bar.scrollActions.workspaces = root.scrollWorkspaces;
         Config.bar.scrollActions.volume = root.scrollVolume;
         Config.bar.scrollActions.brightness = root.scrollBrightness;
@@ -429,6 +431,39 @@ Item {
                                         checked: root.workspacesPerMonitor
                                         onToggled: {
                                             root.workspacesPerMonitor = checked;
+                                            root.saveConfig();
+                                        }
+                                    }
+                                }
+                            }
+
+                            StyledRect {
+                                Layout.fillWidth: true
+                                implicitHeight: workspacesUseNumbered.implicitHeight + Appearance.padding.large * 2
+                                radius: Appearance.rounding.normal
+                                color: Colours.layer(Colours.palette.m3surfaceContainer, 2)
+
+                                Behavior on implicitHeight {
+                                    Anim {}
+                                }
+
+                                RowLayout {
+                                    id: workspacesUseNumbered
+                                    anchors.left: parent.left
+                                    anchors.right: parent.right
+                                    anchors.verticalCenter: parent.verticalCenter
+                                    anchors.margins: Appearance.padding.large
+                                    spacing: Appearance.spacing.normal
+
+                                    StyledText {
+                                        Layout.fillWidth: true
+                                        text: qsTr("Use numbered workspaces")
+                                    }
+
+                                    StyledSwitch {
+                                        checked: root.workspacesPerMonitor
+                                        onToggled: {
+                                            root.workspacesUseNumbered = checked;
                                             root.saveConfig();
                                         }
                                     }
