@@ -385,16 +385,7 @@ StyledRect {
     }
 
     Component {
-        id: faqsComponent
-        FAQs {}
-    }
-
-    Component {
         id: communityComponent
         Community {}
     }
-    //Component {
-        //id: installComponent
-        //Install {}
-    //}
 }
