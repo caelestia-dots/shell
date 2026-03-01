@@ -128,7 +128,11 @@ Item {
 
         Repeater {
             model: ScriptModel {
-                values: [...SystemTray.items.values]
+                values: {
+                    const allItems = [...SystemTray.items.values];
+                    const hiddenIds = Config.bar.tray.hiddenIcons || [];
+                    return allItems.filter(item => !hiddenIds.includes(item.id));
+                }
             }
 
             Popout {
