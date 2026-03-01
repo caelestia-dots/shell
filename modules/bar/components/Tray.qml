@@ -3,6 +3,7 @@ pragma ComponentBehavior: Bound
 import qs.components
 import qs.services
 import qs.config
+import Quickshell
 import Quickshell.Services.SystemTray
 import QtQuick
 
@@ -66,7 +67,13 @@ StyledRect {
         Repeater {
             id: items
 
-            model: SystemTray.items
+            model: ScriptModel {
+                values: {
+                    const allItems = [...SystemTray.items.values];
+                    const hiddenIds = Config.bar.tray.hiddenIcons || [];
+                    return allItems.filter(item => !hiddenIds.includes(item.id));
+                }
+            }
 
             TrayItem {}
         }

@@ -218,12 +218,4 @@ Singleton {
         }
         return icon;
     }
-
-    function getTrayIconVisibility(id: string): bool {
-        for (const sub of Config.bar.tray.iconSubs)
-            if (sub.id === id && ! sub.icon)
-                return false;
-
-        return true;
-    }
 }
