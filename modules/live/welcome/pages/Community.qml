@@ -45,9 +45,8 @@ Item {
 
         VerticalNav {
             id: verticalNav
+
             Layout.alignment: Qt.AlignTop
-            Layout.preferredHeight: 90
-            Layout.preferredWidth: 200
 
             sections: root.subsections
             activeSection: root.currentSubsection
