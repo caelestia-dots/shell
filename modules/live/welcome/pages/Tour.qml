@@ -29,6 +29,11 @@ Item {
             id: "dashboard",
             name: qsTr("Dashboard"),
             icon: "toolbar"
+        },
+        {
+            id: "workspaces",
+            name: qsTr("Workspaces"),
+            icon: "stack"
         }
 
     ]
@@ -394,6 +399,167 @@ ColumnLayout {
     }
 }
 //-----page break
+// Workspaces
+                ColumnLayout {
+                    id: workspacesSection
+
+                    Layout.fillWidth: true
+                    Layout.minimumHeight: contentFlickable.height
+                    Layout.leftMargin: Appearance.padding.larger
+                    Layout.rightMargin: Appearance.padding.larger
+                    spacing: Appearance.spacing.large
+
+                    WelcomeSectionHeader {
+                        title: qsTr("Workspaces")
+                        subtitle: qsTr("Master the art of tiling and multitasking.")
+                    }
+
+                    // Standard Workspaces
+                    StyledRect {
+                        Layout.fillWidth: true
+                        Layout.preferredHeight: standardWorkspaces.implicitHeight + Appearance.padding.large * 2
+                        color: Colours.palette.m3surfaceContainerLow
+                        radius: Appearance.rounding.normal
+                        border.color: Colours.palette.m3outlineVariant
+
+                        ColumnLayout {
+                            id: standardWorkspaces
+
+                            anchors.fill: parent
+                            anchors.margins: Appearance.padding.large
+                            spacing: Appearance.spacing.large
+
+                            StyledGridView {
+                                Layout.fillWidth: true
+                                Layout.preferredHeight: implicitHeight
+
+                                model: [
+                                    {
+                                        key: qsTr("Super + <#>"),
+                                        label: qsTr("Switch to workspace")
+                                    },
+                                    {
+                                        key: qsTr("Super + Alt + <#>"),
+                                        label: qsTr("Move window to workspace"),
+                                    },
+                                    {
+                                        key: qsTr("Super + Alt + <Up|Down|Left|Right>"),
+                                        label: qsTr("Move window directionally")
+                                    },
+                                    {
+                                        key: qsTr("Super + F"),
+                                        label: qsTr("Toggle fullscreen")
+                                    }
+                                ]
+
+                                spacing: 12
+                                paddingX: 16
+
+                                cellContent: Component {
+                                    Item {
+                                        id: standardWorkspacesItem
+
+                                        property var modelData
+                                        property real gridMeasureWidth: firstStepsKeybinding.implicitWidth
+
+                                        ColumnLayout {
+                                            anchors.fill: parent
+                                            anchors.margins: Appearance.padding.small
+                                            spacing: Appearance.spacing.small
+
+                                            Keybinding {
+                                                id: firstStepsKeybinding
+
+                                                key: standardWorkspacesItem.modelData.key
+                                                label: standardWorkspacesItem.modelData.label
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    WelcomeSectionHeader {
+                        title: qsTr("Special Workspaces")
+                        subtitle: qsTr("Keep important things close, but out of the way.")
+                    }
+
+                    // Special Workspaces
+                    StyledRect {
+                        Layout.fillWidth: true
+                        Layout.preferredHeight: specialWorkspaces.implicitHeight + Appearance.padding.large * 2
+                        color: Colours.palette.m3surfaceContainerLow
+                        radius: Appearance.rounding.normal
+                        border.color: Colours.palette.m3outlineVariant
+
+                        ColumnLayout {
+                            id: specialWorkspaces
+
+                            anchors.fill: parent
+                            anchors.margins: Appearance.padding.large
+                            spacing: Appearance.spacing.large
+
+                            StyledGridView {
+                                Layout.fillWidth: true
+                                Layout.preferredHeight: implicitHeight
+
+                                model: [
+                                    {
+                                        key: qsTr("Super + D"),
+                                        label: qsTr("Communications Hub"),
+                                        desc: qsTr("Discord")
+                                    },
+                                    {
+                                        key: qsTr("Super + M"),
+                                        label: qsTr("Music & Media"),
+                                        desc: qsTr("Spotify")
+                                    },
+                                    {
+                                        key: qsTr("Super + A"),
+                                        label: qsTr("ToDo List"),
+                                        desc: qsTr("Todoist")
+                                    },
+                                    {
+                                        key: qsTr("Super + S"),
+                                        label: qsTr("Special"),
+                                        desc: qsTr("Scratchpad Workspace")
+                                    }
+                                ]
+
+                                spacing: 12
+                                paddingX: 16
+
+                                cellContent: Component {
+                                    Item {
+                                        id: specialWorkspacesItem
+
+                                        property var modelData
+                                        property real gridMeasureWidth: specialWorkspacesKeybinding.implicitWidth
+
+                                        ColumnLayout {
+                                            anchors.fill: parent
+                                            anchors.margins: Appearance.padding.small
+                                            spacing: Appearance.spacing.small
+
+                                            Keybinding {
+                                                id: specialWorkspacesKeybinding
+
+                                                key: specialWorkspacesItem.modelData.key
+                                                label: specialWorkspacesItem.modelData.label
+                                                desc: specialWorkspacesItem.modelData.desc
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    Item {
+                        Layout.fillHeight: true
+                    }
+                }
             }
         }
     }
