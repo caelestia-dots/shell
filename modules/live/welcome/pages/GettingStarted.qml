@@ -97,7 +97,7 @@ Item {
                     Layout.minimumHeight: contentFlickable.height
                     Layout.leftMargin: Appearance.padding.larger
                     Layout.rightMargin: Appearance.padding.larger
-                    spacing: Appearance.padding.large
+                    spacing: Appearance.spacing.larger
 
                     WelcomeSectionHeader {
                         title: qsTr("Before You Begin")
@@ -306,7 +306,7 @@ Item {
                     Layout.minimumHeight: contentFlickable.height
                     Layout.leftMargin: Appearance.padding.larger
                     Layout.rightMargin: Appearance.padding.larger
-                    spacing: Appearance.spacing.large
+                    spacing: Appearance.spacing.larger
 
                     WelcomeSectionHeader {
                         title: qsTr("Installation")
@@ -351,7 +351,7 @@ Item {
                     Layout.minimumHeight: contentFlickable.height
                     Layout.leftMargin: Appearance.padding.larger
                     Layout.rightMargin: Appearance.padding.larger
-                    spacing: Appearance.spacing.large
+                    spacing: Appearance.spacing.larger
 
                     WelcomeSectionHeader {
                         title: qsTr("First Steps")
@@ -450,7 +450,7 @@ Item {
 
                             anchors.fill: parent
                             anchors.margins: Appearance.padding.large
-                            spacing: Appearance.spacing.large
+                            spacing: Appearance.spacing.larger
 
                             ColumnLayout {
                                 IconButton {
@@ -768,8 +768,7 @@ Item {
 
                                         anchors.fill: parent
                                         anchors.margins: Appearance.padding.large
-
-                                        spacing: Appearance.spacing.large
+                                        spacing: Appearance.spacing.larger
 
                                         VectorImage {
                                             id: defaultApplicationIcon
