@@ -1,3 +1,5 @@
+pragma ComponentBehavior: Bound
+
 import QtQuick
 import QtQuick.Layouts
 import qs.services
@@ -59,19 +61,21 @@ Item {
         spacing: Appearance.spacing.large
 
 
-        VerticalNav {
-            id: verticalNav
+        ColumnLayout {
+            VerticalNav {
+                id: verticalNav
 
-            Layout.alignment: Qt.AlignTop
+                Layout.alignment: Qt.AlignTop
 
-            sections: root.subsections
-            activeSection: root.currentSubsection
-            onSectionChanged: sectionId => root.currentSubsection = sectionId
+                sections: root.subsections
+                activeSection: root.currentSubsection
+                onSectionChanged: sectionId => root.currentSubsection = sectionId
+            }
+
+            Item {
+                Layout.fillHeight: true
+            }
         }
-        Item {
-                        Layout.fillHeight: true
-                    }
-
 
         StyledFlickable {
             id: contentFlickable
@@ -94,312 +98,394 @@ Item {
 
                 width: parent.width
                 spacing: 0
-//-----page break
-ColumnLayout {
-    id: taskbarSection
-    Layout.minimumHeight: contentFlickable.height
-    Layout.leftMargin: Appearance.padding.larger
-    Layout.rightMargin: Appearance.padding.larger
-    Layout.topMargin: Appearance.padding.larger
-    spacing: Appearance.padding.large
-    ColumnLayout {
-        spacing: 4
-        StyledText {
-            text: "Taskbar"
-            font.pointSize: Appearance.font.size.extraLarge
-            font.bold: true
-            color: Colours.palette.m3onBackground
-        }
-        StyledText {
-            text: qsTr("The central hub for system information, located on the left side of the shell.")
-            font.pointSize: Appearance.font.size.normal
-            color: Colours.palette.m3onSurfaceVariant
-        }
-    }
 
-    StyledRect {
-        Layout.fillWidth: true
-        Layout.preferredHeight: taskbarContent.implicitHeight + 60
-        color: Colours.palette.m3surfaceContainerLow
-        radius: Appearance.rounding.normal
-        border.color: Colours.palette.m3outlineVariant
+                // Taskbar
+                ColumnLayout {
+                    id: taskbarSection
 
-        ColumnLayout {
-            id: taskbarContent
-            anchors.fill: parent
-            anchors.margins: 30
-            spacing: 24
-
-            Repeater {
-                model: [
-                    { title: "OS Icon", desc: "A decorative brand icon that opens the launcher when clicked." },
-                    { title: "Workspaces", desc: "A modular monitor showing active spaces. Behavior can be modified in settings." },
-                    { title: "Active Window", desc: "Displays the current window title. Hovering provides a live preview pop-out." },
-                    { title: "System Tray", desc: "Interact with background applications and special workspace utilities." },
-                    { title: "Status Icons", desc: "Quick-look system health (WiFi, Battery) with expanded hover menus." },
-                    { title: "Power Menu", desc: "Access the power drawer for Logout, Restart, and Shutdown options." }
-                ]
-
-                delegate: ColumnLayout {
-                    spacing: 4
                     Layout.fillWidth: true
+                    Layout.minimumHeight: contentFlickable.height
+                    Layout.leftMargin: Appearance.padding.larger
+                    Layout.rightMargin: Appearance.padding.larger
+                    spacing: Appearance.spacing.larger
 
-                    StyledText {
-                        text: modelData.title
-                        font.bold: true
-                        font.pointSize: 11
-                        color: Colours.palette.m3primary
+                    WelcomeSectionHeader {
+                        title: qsTr("Taskbar")
+                        subtitle: qsTr("The central hub for system information, located on the left side of the shell.")
                     }
 
-                    StyledText {
+                    StyledRect {
                         Layout.fillWidth: true
-                        text: modelData.desc
-                        font.pointSize: 10
-                        color: Colours.palette.m3onSurface
-                        wrapMode: Text.WordWrap
-                        opacity: 0.8
+                        Layout.preferredHeight: taskbarContent.implicitHeight + Appearance.padding.large * 2
+                        color: Colours.palette.m3surfaceContainerLow
+                        radius: Appearance.rounding.normal
+                        border.color: Colours.palette.m3outlineVariant
+
+                        ColumnLayout {
+                            id: taskbarContent
+
+                            anchors.fill: parent
+                            anchors.margins: Appearance.padding.large
+                            spacing: Appearance.spacing.larger
+
+                            Repeater {
+                                id: taskbarItems
+
+                                model: [
+                                    {
+                                        title: qsTr("OS Icon"),
+                                        desc: qsTr("A decorative brand icon that opens the launcher when clicked.")
+                                    },
+                                    {
+                                        title: qsTr("Workspaces"),
+                                        desc: qsTr("A modular monitor showing active spaces. Behavior can be modified in settings.")
+                                    },
+                                    {
+                                        title: qsTr("Active Window"),
+                                        desc: qsTr("Displays the current window title. Hovering provides a live preview pop-out.")
+                                    },
+                                    {
+                                        title: qsTr("System Tray"),
+                                        desc: qsTr("Interact with background applications and special workspace utilities.")
+                                    },
+                                    {
+                                        title: qsTr("Status Icons"),
+                                        desc: qsTr("Quick-look system health (WiFi, Battery) with expanded hover menus.")
+                                    },
+                                    {
+                                        title: qsTr("Power Menu"),
+                                        desc: qsTr("Access the power drawer for Logout, Restart, and Shutdown options.")
+                                    }
+                                ]
+
+                                delegate: ColumnLayout {
+                                    id: taskbarItem
+
+                                    required property var modelData
+                                    required property int index
+
+                                    Layout.fillWidth: true
+
+                                    spacing: Appearance.spacing.small
+
+                                    StyledText {
+                                        font.bold: true
+                                        font.pointSize: Appearance.font.size.small
+                                        color: Colours.palette.m3primary
+                                        text: taskbarItem.modelData.title
+                                    }
+
+                                    StyledText {
+                                        Layout.fillWidth: true
+
+                                        font.pointSize: Appearance.font.size.small
+                                        color: Colours.palette.m3onSurface
+                                        wrapMode: Text.WordWrap
+                                        opacity: 0.8
+                                        text: taskbarItem.modelData.desc
+                                    }
+
+                                    Rectangle {
+                                        Layout.fillWidth: true
+                                        Layout.preferredHeight: 1
+                                        color: Colours.palette.m3outlineVariant
+                                        opacity: 0.3
+                                        visible: taskbarItem.index < taskbarItems.count - 1
+                                    }
+                                }
+                            }
+                        }
                     }
-                    Rectangle {
-                        Layout.fillWidth: true
-                        height: 1
-                        color: Colours.palette.m3outlineVariant
-                        opacity: 0.3
-                        visible: index < 5
-                    }
-                }
-            }
-        }
-    }
-    Item {
-        Layout.fillHeight: true
-
-    }
-}
-//-----page break
-ColumnLayout {
-    id: launcherSection
-
-    Layout.fillWidth: true
-    Layout.minimumHeight: contentFlickable.height
-    Layout.leftMargin: Appearance.padding.larger
-    Layout.rightMargin: Appearance.padding.larger
-    Layout.topMargin: Appearance.padding.larger
-    spacing: Appearance.padding.large
-
-
-    ColumnLayout {
-        spacing: 4
-        StyledText {
-            text: "Launcher"
-            font.pointSize: Appearance.font.size.extraLarge
-            font.bold: true
-            color: Colours.palette.m3onBackground
-        }
-        StyledText {
-            text: qsTr("Caelestia's primary gateway to your applications and tools.")
-            font.pointSize: Appearance.font.size.normal
-            color: Colours.palette.m3onSurfaceVariant
-        }
-    StyledRect {
-        Layout.fillWidth: true
-        Layout.preferredHeight: launcherContent.implicitHeight + 60
-        color: Colours.palette.m3surfaceContainerLow
-        radius: Appearance.rounding.normal
-        border.color: Colours.palette.m3outlineVariant
-
-        ColumnLayout {
-            id: launcherContent
-            anchors.fill: parent
-            anchors.margins: 30
-            spacing: 24
-
-            Repeater {
-                model: [
-                    { title: "Fuzzy Search", desc: "Start typing to find apps instantly. No need for perfect spelling." },
-                    { title: "Configuration", desc: "Modify look and feel directly via Caelestia's config files." },
-                    { title: "Keyboard Centric", desc: "Designed to be triggered and navigated entirely with the keyboard." },
-                    { title: "Theme Integration", desc: "Automatically matches your system color scheme and transparency settings." }
-                ]
-
-                delegate: ColumnLayout {
-                    spacing: 4
-                    Layout.fillWidth: true
-
-                    StyledText {
-                        text: modelData.title
-                        font.bold: true
-                        font.pointSize: 11
-                        color: Colours.palette.m3primary
-                    }
-
-                    StyledText {
-                        Layout.fillWidth: true
-                        text: modelData.desc
-                        font.pointSize: 10
-                        color: Colours.palette.m3onSurface
-                        wrapMode: Text.WordWrap
-                        opacity: 0.8
-                    }
-
-                    Rectangle {
-                        Layout.fillWidth: true
-                        height: 1
-                        color: Colours.palette.m3outlineVariant
-                        opacity: 0.3
-                        visible: index < 3
-                    }
-                }
-            }
-        }
-    }
-}
 
                     Item {
                         Layout.fillHeight: true
                     }
                 }
-//-----page break
-ColumnLayout {
-    id: sidebarSection
-    Layout.fillWidth: true
-    Layout.minimumHeight: contentFlickable.height
-    Layout.leftMargin: Appearance.padding.larger
-    Layout.rightMargin: Appearance.padding.larger
-    Layout.topMargin: Appearance.padding.larger
-    spacing: Appearance.padding.large
 
-    ColumnLayout {
-        spacing: 4
-        StyledText {
-            text: "SideBar"
-            font.pointSize: Appearance.font.size.extraLarge
-            font.bold: true
-            color: Colours.palette.m3onBackground
-        }
-        StyledText {
-            text: qsTr("Access notifications, system toggles, and tools via the right-side panel.")
-            font.pointSize: Appearance.font.size.normal
-            color: Colours.palette.m3onSurfaceVariant
-        }
-    }
+                // Launcher
+                ColumnLayout {
+                    id: launcherSection
 
-    StyledRect {
-        Layout.fillWidth: true
-        Layout.preferredHeight: sidebarContent.implicitHeight + 60
-        color: Colours.palette.m3surfaceContainerLow
-        radius: Appearance.rounding.normal
-        border.color: Colours.palette.m3outlineVariant
-
-        ColumnLayout {
-            id: sidebarContent
-            anchors.fill: parent
-            anchors.margins: 30
-            spacing: 24
-
-            Repeater {
-                model: [
-                    { title: "Notifications", desc: "A dedicated hub for all application and system alerts." },
-                    { title: "Keep Awake", desc: "An integrated idle inhibitor to prevent the system from locking." },
-                    { title: "Screen Recorder", desc: "Capture regions, windows, or the full screen with instant file access." },
-                    { title: "Quick Toggles", desc: "Fast access to Game Mode, system settings, and hardware controls." }
-                ]
-                delegate: ColumnLayout {
-                    spacing: 4
                     Layout.fillWidth: true
+                    Layout.minimumHeight: contentFlickable.height
+                    Layout.leftMargin: Appearance.padding.larger
+                    Layout.rightMargin: Appearance.padding.larger
+                    spacing: Appearance.padding.larger
 
-                    StyledText {
-                        text: modelData.title
-                        font.bold: true
-                        font.pointSize: 11
-                        color: Colours.palette.m3primary
+                    WelcomeSectionHeader {
+                        title: qsTr("Launcher")
+                        subtitle: qsTr("Caelestia's primary gateway to your applications and tools.")
                     }
-                    StyledText {
+
+                    StyledRect {
                         Layout.fillWidth: true
-                        text: modelData.desc
-                        font.pointSize: 10
-                        color: Colours.palette.m3onSurface
-                        wrapMode: Text.WordWrap
-                        opacity: 0.8
+                        Layout.preferredHeight: launcherContent.implicitHeight + Appearance.padding.large * 2
+                        color: Colours.palette.m3surfaceContainerLow
+                        radius: Appearance.rounding.normal
+                        border.color: Colours.palette.m3outlineVariant
+
+                        ColumnLayout {
+                            id: launcherContent
+
+                            anchors.fill: parent
+                            anchors.margins: Appearance.padding.large
+                            spacing: Appearance.spacing.larger
+
+                            Repeater {
+                                id: launcherItems
+
+                                model: [
+                                    {
+                                        title: qsTr("Fuzzy Search"),
+                                        desc: qsTr("Start typing to find apps instantly. No need for perfect spelling.")
+                                    },
+                                    {
+                                        title: qsTr("Configuration"),
+                                        desc: qsTr("Modify look and feel directly via Caelestia's config files.")
+                                    },
+                                    {
+                                        title: qsTr("Keyboard Centric"),
+                                        desc: qsTr("Designed to be triggered and navigated entirely with the keyboard.")
+                                    },
+                                    {
+                                        title: qsTr("Theme Integration"),
+                                        desc: qsTr("Automatically matches your system color scheme and transparency settings.")
+                                    }
+                                ]
+
+                                delegate: ColumnLayout {
+                                    id: launcherItem
+
+                                    required property var modelData
+                                    required property int index
+
+                                    Layout.fillWidth: true
+
+                                    spacing: Appearance.spacing.small
+
+                                    StyledText {
+                                        font.bold: true
+                                        font.pointSize: Appearance.font.size.small
+                                        color: Colours.palette.m3primary
+                                        text: launcherItem.modelData.title
+                                    }
+
+                                    StyledText {
+                                        Layout.fillWidth: true
+
+                                        font.pointSize: Appearance.font.size.small
+                                        color: Colours.palette.m3onSurface
+                                        wrapMode: Text.WordWrap
+                                        opacity: 0.8
+                                        text: launcherItem.modelData.desc
+                                    }
+
+                                    Rectangle {
+                                        Layout.fillWidth: true
+                                        Layout.preferredHeight: 1
+                                        color: Colours.palette.m3outlineVariant
+                                        opacity: 0.3
+                                        visible: launcherItem.index < launcherItems.count - 1
+                                    }
+                                }
+                            }
+                        }
                     }
-                    Rectangle {
-                        Layout.fillWidth: true
-                        height: 1
-                        color: Colours.palette.m3outlineVariant
-                        opacity: 0.3
-                        visible: index < 3
+
+                    Item {
+                        Layout.fillHeight: true
                     }
                 }
-            }
-        }
-    }
-    Item {
-        Layout.fillHeight: true
 
-    }
-}
-//-----page break
-ColumnLayout {
-    id: dashboardSection
-    Layout.fillWidth: true
-    Layout.minimumHeight: contentFlickable.height
-    Layout.leftMargin: Appearance.padding.larger
-    Layout.rightMargin: Appearance.padding.larger
-    Layout.topMargin: Appearance.padding.larger
-    spacing: Appearance.padding.large
+                // Sidebar
+                ColumnLayout {
+                    id: sidebarSection
 
-
-    ColumnLayout {
-        spacing: 4
-        StyledText {
-            text: "Dashboard"
-            font.pointSize: Appearance.font.size.extraLarge
-            font.bold: true
-            color: Colours.palette.m3onBackground
-        }
-        StyledText {
-            text: qsTr("An overview of system performance, media, and local environment.")
-            font.pointSize: Appearance.font.size.normal
-            color: Colours.palette.m3onSurfaceVariant
-        }
-    }
-
-    StyledRect {
-        Layout.fillWidth: true
-        Layout.preferredHeight: dashboardContent.implicitHeight + 60
-        color: Colours.palette.m3surfaceContainerLow
-        radius: Appearance.rounding.normal
-        border.color: Colours.palette.m3outlineVariant
-
-        ColumnLayout {
-            id: dashboardContent
-            anchors.fill: parent
-            anchors.margins: 30
-            spacing: 24
-
-            Repeater {
-                model: [
-                    { title: "Media Control", desc: "Switch players and control playback for all active media." },
-                    { title: "Performance", desc: "Monitor real-time CPU/GPU temperatures and system usage." },
-                    { title: "Weather", desc: "Detailed local conditions with a comprehensive seven-day forecast." },
-                    { title: "System Info", desc: "A quick snapshot of your hardware and session details." }
-                ]
-                delegate: ColumnLayout {
-                    spacing: 4
                     Layout.fillWidth: true
-                    StyledText { text: modelData.title; font.bold: true; font.pointSize: 11; color: Colours.palette.m3primary }
-                    StyledText { text: modelData.desc; Layout.fillWidth: true; font.pointSize: 10; wrapMode: Text.WordWrap; opacity: 0.8 }
-                    Rectangle { Layout.fillWidth: true; height: 1; color: Colours.palette.m3outlineVariant; opacity: 0.3; visible: index < 3 }
-                }
-            }
-        }
-    }
-    Item {
-        Layout.fillHeight: true
+                    Layout.minimumHeight: contentFlickable.height
+                    Layout.leftMargin: Appearance.padding.larger
+                    Layout.rightMargin: Appearance.padding.larger
+                    spacing: Appearance.padding.larger
 
-    }
-}
-//-----page break
-// Workspaces
+                    WelcomeSectionHeader {
+                        title: qsTr("Sidebar")
+                        subtitle: qsTr("Access notifications, system toggles, and tools via the right-side panel.")
+                    }
+
+                    StyledRect {
+                        Layout.fillWidth: true
+                        Layout.preferredHeight: sidebarContent.implicitHeight + Appearance.padding.large * 2
+                        color: Colours.palette.m3surfaceContainerLow
+                        radius: Appearance.rounding.normal
+                        border.color: Colours.palette.m3outlineVariant
+
+                        ColumnLayout {
+                            id: sidebarContent
+
+                            anchors.fill: parent
+                            anchors.margins: Appearance.padding.large
+                            spacing: Appearance.spacing.larger
+
+                            Repeater {
+                                id: sidebarItems
+
+                                model: [
+                                    {
+                                        title: qsTr("Notifications"),
+                                        desc: qsTr("A dedicated hub for all application and system alerts.")
+                                    },
+                                    {
+                                        title: qsTr("Keep Awake"),
+                                        desc: qsTr("An integrated idle inhibitor to prevent the system from locking.")
+                                    },
+                                    {
+                                        title: qsTr("Screen Recorder"),
+                                        desc: qsTr("Capture regions, windows, or the full screen with instant file access.")
+                                    },
+                                    {
+                                        title: qsTr("Quick Toggles"),
+                                        desc: qsTr("Fast access to Game Mode, system settings, and hardware controls.")
+                                    }
+                                ]
+
+                                delegate: ColumnLayout {
+                                    id: sidebarItem
+
+                                    required property var modelData
+                                    required property int index
+
+                                    Layout.fillWidth: true
+
+                                    spacing: Appearance.spacing.small
+
+                                    StyledText {
+                                        font.bold: true
+                                        font.pointSize: Appearance.font.size.small
+                                        color: Colours.palette.m3primary
+                                        text: sidebarItem.modelData.title
+                                    }
+
+                                    StyledText {
+                                        Layout.fillWidth: true
+
+                                        font.pointSize: Appearance.font.size.small
+                                        color: Colours.palette.m3onSurface
+                                        wrapMode: Text.WordWrap
+                                        opacity: 0.8
+                                        text: sidebarItem.modelData.desc
+                                    }
+
+                                    Rectangle {
+                                        Layout.fillWidth: true
+                                        Layout.preferredHeight: 1
+                                        color: Colours.palette.m3outlineVariant
+                                        opacity: 0.3
+                                        visible: sidebarItem.index < sidebarItems.count - 1
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    Item {
+                        Layout.fillHeight: true
+                    }
+                }
+
+                // Dashboard
+                ColumnLayout {
+                    id: dashboardSection
+
+                    Layout.fillWidth: true
+                    Layout.minimumHeight: contentFlickable.height
+                    Layout.leftMargin: Appearance.padding.larger
+                    Layout.rightMargin: Appearance.padding.larger
+                    spacing: Appearance.padding.larger
+
+                    WelcomeSectionHeader {
+                        title: qsTr("Dashboard")
+                        subtitle: qsTr("An overview of system performance, media, and local environment.")
+                    }
+
+                    StyledRect {
+                        Layout.fillWidth: true
+                        Layout.preferredHeight: dashboardContent.implicitHeight + Appearance.padding.large * 2
+                        color: Colours.palette.m3surfaceContainerLow
+                        radius: Appearance.rounding.normal
+                        border.color: Colours.palette.m3outlineVariant
+
+                        ColumnLayout {
+                            id: dashboardContent
+
+                            anchors.fill: parent
+                            anchors.margins: Appearance.padding.large
+                            spacing: Appearance.spacing.larger
+
+                            Repeater {
+                                id: dashboardItems
+
+                                model: [
+                                    {
+                                        title: qsTr("Media Control"),
+                                        desc: qsTr("Switch players and control playback for all active media.")
+                                    },
+                                    {
+                                        title: qsTr("Performance"),
+                                        desc: qsTr("Monitor real-time CPU/GPU temperatures and system usage.")
+                                    },
+                                    {
+                                        title: qsTr("Weather"),
+                                        desc: qsTr("Detailed local conditions with a comprehensive seven-day forecast.")
+                                    },
+                                    {
+                                        title: qsTr("System Info"),
+                                        desc: qsTr("A quick snapshot of your hardware and session details.")
+                                    }
+                                ]
+
+                                delegate: ColumnLayout {
+                                    id: dashboardItem
+
+                                    required property var modelData
+                                    required property int index
+
+                                    Layout.fillWidth: true
+
+                                    spacing: Appearance.spacing.small
+
+                                    StyledText {
+                                        font.bold: true
+                                        font.pointSize: Appearance.font.size.small
+                                        color: Colours.palette.m3primary
+                                        text: dashboardItem.modelData.title
+                                    }
+
+                                    StyledText {
+                                        Layout.fillWidth: true
+                                        font.pointSize: Appearance.font.size.small
+                                        wrapMode: Text.WordWrap
+                                        opacity: 0.8
+                                        text: dashboardItem.modelData.desc
+                                    }
+
+                                    Rectangle {
+                                        Layout.fillWidth: true
+                                        Layout.preferredHeight: 1
+                                        color: Colours.palette.m3outlineVariant
+                                        opacity: 0.3
+                                        visible: dashboardItem.index < dashboardItems.count - 1
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    Item {
+                        Layout.fillHeight: true
+                    }
+                }
+
+                // Workspaces
                 ColumnLayout {
                     id: workspacesSection
 
@@ -563,5 +649,4 @@ ColumnLayout {
             }
         }
     }
-
 }
