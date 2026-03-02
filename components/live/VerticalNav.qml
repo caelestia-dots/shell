@@ -19,6 +19,7 @@ StyledRect {
     radius: Appearance.rounding.normal
 
     implicitWidth: 200
+    implicitHeight: tabsColumn.height + Appearance.padding.normal * 2
 
     ColumnLayout {
         anchors.fill: parent
