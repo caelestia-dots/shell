@@ -581,7 +581,7 @@ Item {
                                         cat: qsTr("Office Suite"),
                                         title: qsTr("LibreOffice"),
                                         icon: "../../assets/icons/libreoffice.svg",
-                                        desc: qsTr("LibreOffice is a powerful, flexible office suite that is compatible with Microsoft Office (365) and is backed by the non-profit The Document Foundation."),
+                                        desc: qsTr("LibreOffice is a powerful, flexible office suite that is compatible with Microsoft Office (365) and is backed by the non-profit The Document Foundation. The LibreOffice suite consists of Writer (word processing), Calc (spreadsheets), Impress (presentations), Draw (vector graphics and flowcharts), Base (databases), and Math (formula editing)."),
                                         links: [
                                             {
                                                 title: qsTr("Arch Wiki"),
