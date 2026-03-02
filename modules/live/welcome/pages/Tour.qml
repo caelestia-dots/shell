@@ -60,7 +60,6 @@ Item {
         anchors.fill: parent
         spacing: Appearance.spacing.large
 
-
         ColumnLayout {
             VerticalNav {
                 id: verticalNav
