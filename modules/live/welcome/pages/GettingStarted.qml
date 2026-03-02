@@ -105,190 +105,139 @@ Item {
                     }
 
                     // System requirements
-                    StyledRect {
-                        Layout.fillWidth: true
-                        Layout.preferredHeight: systemRequirements.implicitHeight + Appearance.padding.large * 2
-                        color: Colours.palette.m3surfaceContainerLow
-                        radius: Appearance.rounding.normal
-                        border.color: Colours.palette.m3outlineVariant
+                    WelcomeSectionContentArea {
+                        title: qsTr("System Requirements")
+                        subtitle: qsTr("Caelestia is built on Hyprland and Quickshell. This combination is lightweight, but for best results, the following minimum requirements are advised.")
 
-                        ColumnLayout {
-                            id: systemRequirements
-
-                            anchors.fill: parent
-                            anchors.margins: Appearance.padding.large
-                            spacing: Appearance.spacing.larger
-
-                            StyledText {
-                                text: qsTr("System Requirements")
-                                font.pointSize: Appearance.font.size.normal
-                                font.bold: true
-                                color: Colours.palette.m3primary
-                            }
-
-                            StyledText {
+                        content: Component {
+                            ColumnLayout {
                                 Layout.fillWidth: true
-                                text: qsTr("Caelestia is built on Hyprland and Quickshell. This combination is lightweight, but for best results, the following minimum requirements are advised.")
-                                font.pointSize: Appearance.font.size.small
-                                color: Colours.palette.m3onSurfaceVariant
-                                wrapMode: Text.WordWrap
-                            }
 
-                            Flow {
-                                Layout.fillWidth: true
-                                spacing: Appearance.spacing.smaller
+                                Flow {
+                                    Layout.fillWidth: true
+                                    spacing: Appearance.spacing.smaller
 
-                                Repeater {
-                                    model: [
-                                        {
-                                            label: qsTr("CPU"),
-                                            val: qsTr("x86_64 Dual Core")
-                                        },
-                                        {
-                                            label: qsTr("RAM"),
-                                            val: qsTr("4GB")
-                                        },
-                                        {
-                                            label: qsTr("Disk"),
-                                            val: qsTr("256GB")
-                                        },
-                                        {
-                                            label: qsTr("GPU"),
-                                            val: qsTr("Modern iGPU (Iris Xe or Radeon) or better")
-                                        },
-                                        {
-                                            label: qsTr("Display"),
-                                            val: qsTr("1366x768 or higher")
-                                        }
-                                    ]
-
-                                    delegate: StyledRect {
-                                        id: requirementsWrapper
-
-                                        required property var modelData
-
-                                        width: requirements.implicitWidth + Appearance.padding.larger * 2
-                                        height: Appearance.font.size.small + Appearance.padding.larger * 2
-                                        radius: Appearance.rounding.normal
-                                        color: Colours.palette.m3surfaceContainerHigh
-                                        border.color: Colours.palette.m3outlineVariant
-
-                                        RowLayout {
-                                            id: requirements
-
-                                            anchors.centerIn: parent
-                                            spacing: Appearance.spacing.small
-
-                                            StyledText {
-                                                text: requirementsWrapper.modelData.label + ":"
-                                                font.bold: true
-                                                font.pointSize: Appearance.font.size.small
-                                                color: Colours.palette.m3primary
+                                    Repeater {
+                                        model: [
+                                            {
+                                                label: qsTr("CPU"),
+                                                val: qsTr("x86_64 Dual Core")
+                                            },
+                                            {
+                                                label: qsTr("RAM"),
+                                                val: qsTr("4GB")
+                                            },
+                                            {
+                                                label: qsTr("Disk"),
+                                                val: qsTr("256GB")
+                                            },
+                                            {
+                                                label: qsTr("GPU"),
+                                                val: qsTr("Modern iGPU (Iris Xe or Radeon) or better")
+                                            },
+                                            {
+                                                label: qsTr("Display"),
+                                                val: qsTr("1366x768 or higher")
                                             }
+                                        ]
 
-                                            StyledText {
-                                                text: requirementsWrapper.modelData.val
-                                                font.pointSize: Appearance.font.size.small
-                                                color: Colours.palette.m3onSurface
+                                        delegate: StyledRect {
+                                            id: requirementsWrapper
+
+                                            required property var modelData
+
+                                            width: requirements.implicitWidth + Appearance.padding.larger * 2
+                                            height: requirements.implicitHeight + Appearance.padding.larger * 2
+                                            radius: Appearance.rounding.normal
+                                            color: Colours.palette.m3surfaceContainerHigh
+                                            border.color: Colours.palette.m3outlineVariant
+
+                                            RowLayout {
+                                                id: requirements
+
+                                                anchors.centerIn: parent
+                                                spacing: Appearance.spacing.small
+
+                                                StyledText {
+                                                    text: requirementsWrapper.modelData.label + ":"
+                                                    font.bold: true
+                                                    font.pointSize: Appearance.font.size.small
+                                                    color: Colours.palette.m3primary
+                                                }
+
+                                                StyledText {
+                                                    text: requirementsWrapper.modelData.val
+                                                    font.pointSize: Appearance.font.size.small
+                                                    color: Colours.palette.m3onSurface
+                                                }
                                             }
                                         }
                                     }
                                 }
-                            }
 
-                            StyledRect {
-                                Layout.fillWidth: true
-                                Layout.preferredHeight: requirementsNote.implicitHeight + Appearance.padding.larger * 2
-                                color: Colours.layer(Colours.palette.m3surfaceContainerHigh, 1)
-                                radius: Appearance.rounding.small
-                                Layout.topMargin: Appearance.padding.small
+                                StyledRect {
+                                    Layout.fillWidth: true
+                                    Layout.preferredHeight: requirementsNote.implicitHeight + Appearance.padding.larger * 2
+                                    color: Colours.layer(Colours.palette.m3surfaceContainerHigh, 1)
+                                    radius: Appearance.rounding.small
+                                    Layout.topMargin: Appearance.padding.small
 
-                                StyledText {
-                                    id: requirementsNote
+                                    StyledText {
+                                        id: requirementsNote
 
-                                    anchors.centerIn: parent
-                                    width: parent.width - 24
-                                    text: qsTr("Note: ARM processors (SnapDragon) are not officially supported.")
-                                    font.pointSize: Appearance.font.size.small
-                                    font.italic: true
-                                    color: Colours.palette.m3error
-                                    horizontalAlignment: Text.AlignHCenter
-                                    wrapMode: Text.WordWrap
+                                        anchors.centerIn: parent
+                                        width: parent.width - 24
+                                        text: qsTr("Note: ARM processors (SnapDragon) are not officially supported.")
+                                        font.pointSize: Appearance.font.size.small
+                                        font.italic: true
+                                        color: Colours.palette.m3error
+                                        horizontalAlignment: Text.AlignHCenter
+                                        wrapMode: Text.WordWrap
+                                    }
                                 }
                             }
                         }
                     }
 
                     // The Linux Philosophy
-                    StyledRect {
-                        Layout.fillWidth: true
-                        Layout.preferredHeight: linuxPhilosophy.implicitHeight + Appearance.padding.large * 2
-                        color: Colours.palette.m3surfaceContainerLow
-                        radius: Appearance.rounding.normal
-                        border.color: Colours.palette.m3outlineVariant
-
-                        ColumnLayout {
-                            id: linuxPhilosophy
-
-                            anchors.fill: parent
-                            anchors.margins: Appearance.padding.large
-                            spacing: Appearance.spacing.larger
-
-                            StyledText {
-                                text: qsTr("The Linux Philosophy")
-                                font.bold: true
-                                font.pointSize: Appearance.font.size.normal
-                                color: Colours.palette.m3primary
-                            }
-
-                            StyledText {
-                                Layout.fillWidth: true
-                                text: qsTr("Linux is an ecosystem built on the idea that \"small is beautiful\". Unlike other operating systems that rely on massive, all-in-one applications, Linux is a collection of specialized tools designed to do one thing and do it well. Linux gives you the power to combine these tools, building complex solutions from simple building blocks. It's a transparent, community driven world where you have total control over your machine.")
-                                font.pointSize: Appearance.font.size.normal
-                                color: Colours.palette.m3onSurface
-                                wrapMode: Text.WordWrap
+                    WelcomeSectionContentArea {
+                        title: qsTr("The Linux Philosophy")
+                        content: Component {
+                            ColumnLayout {
+                                StyledText {
+                                    Layout.fillWidth: true
+                                    text: qsTr("Linux is an ecosystem built on the idea that \"small is beautiful\". Unlike other operating systems that rely on massive, all-in-one applications, Linux is a collection of specialized tools designed to do one thing and do it well. Linux gives you the power to combine these tools, building complex solutions from simple building blocks. It's a transparent, community driven world where you have total control over your machine.")
+                                    font.pointSize: Appearance.font.size.normal
+                                    color: Colours.palette.m3onSurface
+                                    wrapMode: Text.WordWrap
+                                }
                             }
                         }
                     }
 
                     // An Aptitude for Learning
-                    StyledRect {
-                        Layout.fillWidth: true
-                        Layout.preferredHeight: aptitudeForLearning.implicitHeight + Appearance.padding.large * 2
-                        color: Colours.palette.m3surfaceContainerLow
-                        radius: Appearance.rounding.normal
-                        border.color: Colours.palette.m3outlineVariant
+                    WelcomeSectionContentArea {
+                        title: qsTr("An Aptitude for Learning")
 
-                        ColumnLayout {
-                            id: aptitudeForLearning
+                        content: Component {
+                            ColumnLayout {
+                                StyledText {
+                                    Layout.fillWidth: true
+                                    text: qsTr("While our community is here to help, Caelestia is about your personal journey. Everyone has their own unique needs and tastes, and every install of Caelestia is tailored to its user. We do our best to support our users, but it's always possible that you'll come up with a question we don't have an immediate answer to. Our hope is that you continually learn and eventually share your knowledge with the community, improving the community as a whole in the process.")
+                                    font.pointSize: Appearance.font.size.normal
+                                    color: Colours.palette.m3onSurface
+                                    wrapMode: Text.WordWrap
+                                }
 
-                            anchors.fill: parent
-                            anchors.margins: Appearance.padding.large
-                            spacing: Appearance.spacing.larger
-
-                            StyledText {
-                                text: qsTr("An Aptitude for Learning")
-                                font.bold: true
-                                font.pointSize: Appearance.font.size.normal
-                                color: Colours.palette.m3primary
-                            }
-
-                            StyledText {
-                                Layout.fillWidth: true
-                                text: qsTr("While our community is here to help, Caelestia is about your personal journey. Everyone has their own unique needs and tastes, and every install of Caelestia is tailored to its user. We do our best to support our users, but it's always possible that you'll come up with a question we don't have an immediate answer to. Our hope is that you continually learn and eventually share your knowledge with the community, improving the community as a whole in the process.")
-                                font.pointSize: Appearance.font.size.normal
-                                color: Colours.palette.m3onSurface
-                                wrapMode: Text.WordWrap
-                            }
-
-                            StyledText {
-                                Layout.fillWidth: true
-                                text: qsTr("\"I am always doing that which I cannot do, in order that I may learn how to do it.\" — Pablo Picasso")
-                                font.pointSize: Appearance.font.size.small
-                                color: Colours.palette.m3onSurfaceVariant
-                                horizontalAlignment: Text.AlignRight
-                                wrapMode: Text.WordWrap
-                                opacity: 0.8
+                                StyledText {
+                                    Layout.fillWidth: true
+                                    text: qsTr("\"I am always doing that which I cannot do, in order that I may learn how to do it.\" — Pablo Picasso")
+                                    font.pointSize: Appearance.font.size.small
+                                    color: Colours.palette.m3onSurfaceVariant
+                                    horizontalAlignment: Text.AlignRight
+                                    wrapMode: Text.WordWrap
+                                    opacity: 0.8
+                                }
                             }
                         }
                     }
@@ -313,27 +262,18 @@ Item {
                         subtitle: qsTr("Taking your computer from raw to riced!")
                     }
 
-                    // Coming soon
-                    StyledRect {
-                        Layout.fillWidth: true
-                        Layout.preferredHeight: installationColumn.implicitHeight + Appearance.padding.large * 2
-                        color: Colours.layer(Colours.palette.m3surfaceContainer, 1)
-                        radius: Appearance.rounding.normal
-                        border.color: Colours.palette.m3outlineVariant
+                    WelcomeSectionContentArea {
+                        title: qsTr("Installing Caelestia")
 
-                        ColumnLayout {
-                            id: installationColumn
-
-                            anchors.fill: parent
-                            anchors.margins: Appearance.padding.large
-                            spacing: Appearance.spacing.larger
-
-                            StyledText {
-                                Layout.fillWidth: true
-                                text: "Content coming soon"
-                                font.pointSize: Appearance.font.size.normal
-                                color: Colours.palette.m3onSurfaceVariant
-                                wrapMode: Text.WordWrap
+                        content: Component {
+                            ColumnLayout {
+                                StyledText {
+                                    Layout.fillWidth: true
+                                    font.pointSize: Appearance.font.size.normal
+                                    color: Colours.palette.m3onSurfaceVariant
+                                    wrapMode: Text.WordWrap
+                                    text: qsTr("Content coming soon.")
+                                }
                             }
                         }
                     }
@@ -359,71 +299,61 @@ Item {
                     }
 
                     // First Steps Keybindings
-                    StyledRect {
-                        Layout.fillWidth: true
-                        Layout.preferredHeight: firstStepsKeybindings.implicitHeight + Appearance.padding.large * 2
-                        color: Colours.layer(Colours.palette.m3surfaceContainer, 1)
-                        radius: Appearance.rounding.normal
-                        border.color: Colours.palette.m3outlineVariant
+                    WelcomeSectionContentArea {
+                        content: Component {
+                            ColumnLayout {
+                                StyledGridView {
+                                    Layout.fillWidth: true
+                                    Layout.preferredHeight: implicitHeight
 
-                        ColumnLayout {
-                            id: firstStepsKeybindings
+                                    model: [
+                                        {
+                                            key: qsTr("Super"),
+                                            label: qsTr("Open app launcher")
+                                        },
+                                        {
+                                            key: qsTr("Super + T"),
+                                            label: qsTr("Open default terminal (Foot)"),
+                                        },
+                                        {
+                                            key: qsTr("Super + E"),
+                                            label: qsTr("Open file explorer (Thunar)")
+                                        },
+                                        {
+                                            key: qsTr("Super + W"),
+                                            label: qsTr("Open web browser (Zen)")
+                                        },
+                                        {
+                                            key: qsTr("Ctrl + Shift + Escape"),
+                                            label: qsTr("Open system monitor (bTop)"),
+                                        },
+                                        {
+                                            key: qsTr("Super + Q"),
+                                            label: qsTr("Close active window")
+                                        }
+                                    ]
 
-                            anchors.fill: parent
-                            anchors.margins: Appearance.padding.large
-                            spacing: Appearance.spacing.larger
+                                    spacing: Appearance.spacing.normal
+                                    paddingX: Appearance.padding.large
 
-                            StyledGridView {
-                                Layout.fillWidth: true
-                                Layout.preferredHeight: implicitHeight
+                                    cellContent: Component {
+                                        Item {
+                                            id: firstStepsKeybindingWrapper
 
-                                model: [
-                                    {
-                                        key: qsTr("Super"),
-                                        label: qsTr("Open app launcher")
-                                    },
-                                    {
-                                        key: qsTr("Super + T"),
-                                        label: qsTr("Open default terminal (Foot)"),
-                                    },
-                                    {
-                                        key: qsTr("Super + E"),
-                                        label: qsTr("Open file explorer (Thunar)")
-                                    },
-                                    {
-                                        key: qsTr("Super + W"),
-                                        label: qsTr("Open web browser (Zen)")
-                                    },
-                                    {
-                                        key: qsTr("Ctrl + Shift + Escape"),
-                                        label: qsTr("Open system monitor (bTop)"),
-                                    },
-                                    {
-                                        key: qsTr("Super + Q"),
-                                        label: qsTr("Close active window")
-                                    }
-                                ]
+                                            property var modelData
+                                            property real gridMeasureWidth: firstStepsKeybinding.implicitWidth
 
-                                spacing: 12
-                                paddingX: 16
+                                            ColumnLayout {
+                                                anchors.fill: parent
+                                                anchors.margins: Appearance.padding.small
+                                                spacing: Appearance.spacing.small
 
-                                cellContent: Component {
-                                    Item {
-                                        id: firstStepsKeybindingWrapper
+                                                Keybinding {
+                                                    id: firstStepsKeybinding
 
-                                        property var modelData
-                                        property real gridMeasureWidth: firstStepsKeybinding.implicitWidth
-
-                                        ColumnLayout {
-                                            anchors.fill: parent
-                                            anchors.margins: Appearance.padding.small
-                                            spacing: Appearance.spacing.small
-
-                                            Keybinding {
-                                                id: firstStepsKeybinding
-
-                                                key: firstStepsKeybindingWrapper.modelData.key
-                                                label: firstStepsKeybindingWrapper.modelData.label
+                                                    key: firstStepsKeybindingWrapper.modelData.key
+                                                    label: firstStepsKeybindingWrapper.modelData.label
+                                                }
                                             }
                                         }
                                     }
@@ -438,403 +368,397 @@ Item {
                     }
 
                     // Default Applications
-                    StyledRect {
-                        Layout.fillWidth: true
-                        Layout.preferredHeight: defaultApplications.implicitHeight + Appearance.padding.large * 2
-                        color: Colours.layer(Colours.palette.m3surfaceContainer, 1)
-                        radius: Appearance.rounding.normal
-                        border.color: Colours.palette.m3outlineVariant
-
-                        RowLayout {
-                            id: defaultApplications
-
-                            anchors.fill: parent
-                            anchors.margins: Appearance.padding.large
-                            spacing: Appearance.spacing.larger
-
+                    WelcomeSectionContentArea {
+                        content: Component {
                             ColumnLayout {
-                                IconButton {
-                                    icon: "chevron_left"
-                                    font.bold: true
-                                    onClicked: {
-                                        defaultApplicationsCarousel.decrementCurrentIndex();
-                                    }
-                                }
-                            }
+                                RowLayout {
+                                    spacing: Appearance.spacing.larger
 
-                            ListView {
-                                id: defaultApplicationsCarousel
-
-                                Layout.fillWidth: true
-                                Layout.preferredHeight: implicitHeight
-                                implicitHeight: currentItem ? currentItem.implicitHeight : 200
-                                clip: true
-                                orientation: ListView.Horizontal
-                                snapMode: ListView.SnapOneItem
-                                highlightRangeMode: ListView.StrictlyEnforceRange
-                                preferredHighlightBegin: 0
-                                preferredHighlightEnd: width
-                                interactive: true
-                                boundsBehavior: Flickable.DragOverBounds
-
-                                Behavior on implicitHeight {
-                                    Anim {
-                                        duration: Appearance.anim.durations.normal
-                                        easing.bezierCurve: Appearance.anim.curves.emphasized
-                                    }
-                                }
-
-                                readonly property var sourceModel: [
-                                    {
-                                        cat: qsTr("File Manager"),
-                                        title: qsTr("Thunar"),
-                                        icon: "../../assets/icons/thunar.svg",
-                                        desc: qsTr("Thunar is a clean, modern file manager originally developed for Xfce. It is designed for speed and efficiency, and features a familiar, intuitive interface. Despite its simplicity, Thunar is extensible through plugins."),
-                                        links: [
-                                            {
-                                                title: qsTr("Arch Wiki"),
-                                                url: "https://wiki.archlinux.org/title/Thunar"
-                                            },
-                                            {
-                                                title: qsTr("Website"),
-                                                url: "https://docs.xfce.org/xfce/thunar/start"
+                                    ColumnLayout {
+                                        IconButton {
+                                            icon: "chevron_left"
+                                            font.bold: true
+                                            onClicked: {
+                                                defaultApplicationsCarousel.decrementCurrentIndex();
                                             }
-                                        ]
-                                    },
-                                    {
-                                        cat: qsTr("Web Browser"),
-                                        title: qsTr("Zen"),
-                                        icon: "../../assets/icons/zen-browser.svg",
-                                        desc: qsTr("Zen is an experimental, performance-optimized fork of Firefox focused on flexibility and design with many new features added to the core Firefox feature set. It also removes the Firefox AI components and tracking."),
-                                        links: [
-                                            {
-                                                title: qsTr("Website"),
-                                                url: "https://www.zen-browser.app/"
-                                            }
-                                        ]
-                                    },
-                                    {
-                                        cat: qsTr("Chat"),
-                                        title: qsTr("Discord"),
-                                        icon: "../../assets/icons/discord.svg",
-                                        desc: qsTr("Discord is a cross-platform voice and text chat application which can be used through a web browser or the official desktop application. Many open-source communities (including ours) have communities on Discord."),
-                                        links: [
-                                            {
-                                                title: qsTr("Arch Wiki"),
-                                                url: "https://wiki.archlinux.org/title/Discord"
-                                            },
-                                            {
-                                                title: qsTr("Website"),
-                                                url: "https://discord.com"
-                                            }
-                                        ]
-                                    },
-                                    {
-                                        cat: qsTr("Terminal"),
-                                        title: qsTr("Foot"),
-                                        icon: "../../assets/icons/foot.svg",
-                                        desc: qsTr("Foot is a fast, lightweight terminal emulator specifically designed for use under Wayland. It supports features such as server/daemon mode, scrollback search, URL detection, color emojis, and true color."),
-                                        links: [
-                                            {
-                                                title: qsTr("Arch Wiki"),
-                                                url: "https://wiki.archlinux.org/title/Foot"
-                                            },
-                                            {
-                                                title: qsTr("Codeberg"),
-                                                url: "https://codeberg.org/dnkl/foot"
-                                            }
-                                        ]
-                                    },
-                                    {
-                                        cat: qsTr("Music Player"),
-                                        title: qsTr("Spotify"),
-                                        icon: "../../assets/icons/spotify.svg",
-                                        desc: qsTr("Spotify is a digital music streaming service which supports both an online player through their website, and a semi-official Linux client. Spotify operates on a freemium business model."),
-                                        links: [
-                                            {
-                                                title: qsTr("Arch Wiki"),
-                                                url: "https://wiki.archlinux.org/title/Spotify"
-                                            },
-                                            {
-                                                title: qsTr("Website"),
-                                                url: "https://spotify.com"
-                                            }
-                                        ]
-                                    },
-                                    {
-                                        cat: qsTr("Code Editor"),
-                                        title: qsTr("VSCodium"),
-                                        icon: "../../assets/icons/vscodium.svg",
-                                        desc: qsTr("VSCodium is a community-driven open-source text and code editor based on Visual Studio Code. It removes telemetry from VSCode and ships configuration with Open VSX."),
-                                        links: [
-                                            {
-                                                title: qsTr("Arch Wiki"),
-                                                url: "https://wiki.archlinux.org/title/Visual_Studio_Code"
-                                            },
-                                            {
-                                                title: qsTr("Website"),
-                                                url: "https://vscodium.com/"
-                                            }
-                                        ]
-                                    },
-                                    {
-                                        cat: qsTr("Office Suite"),
-                                        title: qsTr("LibreOffice"),
-                                        icon: "../../assets/icons/libreoffice.svg",
-                                        desc: qsTr("LibreOffice is a powerful, flexible office suite that is compatible with Microsoft Office (365) and is backed by the non-profit The Document Foundation. The LibreOffice suite consists of Writer (word processing), Calc (spreadsheets), Impress (presentations), Draw (vector graphics and flowcharts), Base (databases), and Math (formula editing)."),
-                                        links: [
-                                            {
-                                                title: qsTr("Arch Wiki"),
-                                                url: "https://wiki.archlinux.org/title/LibreOffice"
-                                            },
-                                            {
-                                                title: qsTr("Website"),
-                                                url: "https://www.libreoffice.org/"
-                                            }
-                                        ]
-                                    },
-                                    {
-                                        cat: qsTr("Software Updater"),
-                                        title: qsTr("Arch Update"),
-                                        icon: "../../assets/icons/arch-update.svg",
-                                        desc: qsTr("Arch Update is an interactive update notifier and updater for Arch Linux that assists you with important pre- and post-update tasks. It runs on a timer, and provides a systray icon to make your life even easier."),
-                                        links: [
-                                            {
-                                                title: qsTr("GitHub"),
-                                                url: "https://github.com/Antiz96/arch-update"
-                                            }
-                                        ]
-                                    },
-                                    {
-                                        cat: qsTr("System Monitor"),
-                                        title: qsTr("bTop"),
-                                        icon: "../../assets/icons/btop.svg",
-                                        desc: qsTr("Btop is a lightweight, CLI resource monitor and the successor to bpytop which shows usage and stats for your processor, memory, disks, network, and processes. It features full mouse support and a game-inspired interface."),
-                                        links: [
-                                            {
-                                                title: qsTr("GitHub"),
-                                                url: "https://github.com/aristocratos/btop"
-                                            }
-                                        ]
-                                    },
-                                    {
-                                        cat: qsTr("Arch Powered"),
-                                        title: qsTr("The options are endless!"),
-                                        icon: "../../assets/icons/archlinux.svg",
-                                        desc: qsTr("CaelestiaLive is built on ArchLinux, and users have access to all of the applications included in both the official Arch repositories and the AUR. We bundle yay by default for package management, but you're free to switch to paru or whatever other package manager you want!"),
-                                        links: [
-                                            {
-                                                title: qsTr("Arch Packages"),
-                                                url: "https://archlinux.org/packages/"
-                                            },
-                                            {
-                                                title: qsTr("Arch User Repository"),
-                                                url: "https://aur.archlinux.org"
-                                            }
-                                        ]
-                                    }
-                                ]
-
-                                property int realCurrentIndex: 0
-                                property bool isTeleporting: false
-                                property bool isAnimating: false
-
-                                Component.onCompleted: {
-                                    isTeleporting = true;
-                                    Qt.callLater(() => {
-                                        contentX = width;
-                                        isTeleporting = false;
-                                    });
-                                }
-
-                                function incrementCurrentIndex() {
-                                    if (isAnimating || isTeleporting) return;
-
-                                    const currentViewIndex = indexAt(contentX + width / 2, height / 2);
-                                    const realCount = sourceModel.length;
-
-                                    if (currentViewIndex === count - 1) {
-                                        isTeleporting = true;
-                                        positionViewAtIndex(1, ListView.SnapPosition);
-                                        realCurrentIndex = 0;
-                                        Qt.callLater(() => { isTeleporting = false; });
-                                        return;
+                                        }
                                     }
 
-                                    isAnimating = true;
-                                    contentX += width;
-                                }
+                                    ListView {
+                                        id: defaultApplicationsCarousel
 
-                                function decrementCurrentIndex() {
-                                    if (isAnimating || isTeleporting) return;
+                                        Layout.fillWidth: true
+                                        Layout.preferredHeight: implicitHeight
+                                        implicitHeight: currentItem ? currentItem.implicitHeight : 200
+                                        clip: true
+                                        orientation: ListView.Horizontal
+                                        snapMode: ListView.SnapOneItem
+                                        highlightRangeMode: ListView.StrictlyEnforceRange
+                                        preferredHighlightBegin: 0
+                                        preferredHighlightEnd: width
+                                        interactive: true
+                                        boundsBehavior: Flickable.DragOverBounds
 
-                                    const currentViewIndex = indexAt(contentX + width / 2, height / 2);
-                                    const realCount = sourceModel.length;
+                                        Behavior on implicitHeight {
+                                            Anim {
+                                                duration: Appearance.anim.durations.normal
+                                                easing.bezierCurve: Appearance.anim.curves.emphasized
+                                            }
+                                        }
 
-                                    if (currentViewIndex === 0) {
-                                        isTeleporting = true;
-                                        positionViewAtIndex(realCount, ListView.SnapPosition);
-                                        realCurrentIndex = realCount - 1;
-                                        Qt.callLater(() => { isTeleporting = false; });
-                                        return;
-                                    }
+                                        readonly property var sourceModel: [
+                                            {
+                                                cat: qsTr("File Manager"),
+                                                title: qsTr("Thunar"),
+                                                icon: "../../assets/icons/thunar.svg",
+                                                desc: qsTr("Thunar is a clean, modern file manager originally developed for Xfce. It is designed for speed and efficiency, and features a familiar, intuitive interface. Despite its simplicity, Thunar is extensible through plugins."),
+                                                links: [
+                                                    {
+                                                        title: qsTr("Arch Wiki"),
+                                                        url: "https://wiki.archlinux.org/title/Thunar"
+                                                    },
+                                                    {
+                                                        title: qsTr("Website"),
+                                                        url: "https://docs.xfce.org/xfce/thunar/start"
+                                                    }
+                                                ]
+                                            },
+                                            {
+                                                cat: qsTr("Web Browser"),
+                                                title: qsTr("Zen"),
+                                                icon: "../../assets/icons/zen-browser.svg",
+                                                desc: qsTr("Zen is an experimental, performance-optimized fork of Firefox focused on flexibility and design with many new features added to the core Firefox feature set. It also removes the Firefox AI components and tracking."),
+                                                links: [
+                                                    {
+                                                        title: qsTr("Website"),
+                                                        url: "https://www.zen-browser.app/"
+                                                    }
+                                                ]
+                                            },
+                                            {
+                                                cat: qsTr("Chat"),
+                                                title: qsTr("Discord"),
+                                                icon: "../../assets/icons/discord.svg",
+                                                desc: qsTr("Discord is a cross-platform voice and text chat application which can be used through a web browser or the official desktop application. Many open-source communities (including ours) have communities on Discord."),
+                                                links: [
+                                                    {
+                                                        title: qsTr("Arch Wiki"),
+                                                        url: "https://wiki.archlinux.org/title/Discord"
+                                                    },
+                                                    {
+                                                        title: qsTr("Website"),
+                                                        url: "https://discord.com"
+                                                    }
+                                                ]
+                                            },
+                                            {
+                                                cat: qsTr("Terminal"),
+                                                title: qsTr("Foot"),
+                                                icon: "../../assets/icons/foot.svg",
+                                                desc: qsTr("Foot is a fast, lightweight terminal emulator specifically designed for use under Wayland. It supports features such as server/daemon mode, scrollback search, URL detection, color emojis, and true color."),
+                                                links: [
+                                                    {
+                                                        title: qsTr("Arch Wiki"),
+                                                        url: "https://wiki.archlinux.org/title/Foot"
+                                                    },
+                                                    {
+                                                        title: qsTr("Codeberg"),
+                                                        url: "https://codeberg.org/dnkl/foot"
+                                                    }
+                                                ]
+                                            },
+                                            {
+                                                cat: qsTr("Music Player"),
+                                                title: qsTr("Spotify"),
+                                                icon: "../../assets/icons/spotify.svg",
+                                                desc: qsTr("Spotify is a digital music streaming service which supports both an online player through their website, and a semi-official Linux client. Spotify operates on a freemium business model."),
+                                                links: [
+                                                    {
+                                                        title: qsTr("Arch Wiki"),
+                                                        url: "https://wiki.archlinux.org/title/Spotify"
+                                                    },
+                                                    {
+                                                        title: qsTr("Website"),
+                                                        url: "https://spotify.com"
+                                                    }
+                                                ]
+                                            },
+                                            {
+                                                cat: qsTr("Code Editor"),
+                                                title: qsTr("VSCodium"),
+                                                icon: "../../assets/icons/vscodium.svg",
+                                                desc: qsTr("VSCodium is a community-driven open-source text and code editor based on Visual Studio Code. It removes telemetry from VSCode and ships configuration with Open VSX."),
+                                                links: [
+                                                    {
+                                                        title: qsTr("Arch Wiki"),
+                                                        url: "https://wiki.archlinux.org/title/Visual_Studio_Code"
+                                                    },
+                                                    {
+                                                        title: qsTr("Website"),
+                                                        url: "https://vscodium.com/"
+                                                    }
+                                                ]
+                                            },
+                                            {
+                                                cat: qsTr("Office Suite"),
+                                                title: qsTr("LibreOffice"),
+                                                icon: "../../assets/icons/libreoffice.svg",
+                                                desc: qsTr("LibreOffice is a powerful, flexible office suite that is compatible with Microsoft Office (365) and is backed by the non-profit The Document Foundation. The LibreOffice suite consists of Writer (word processing), Calc (spreadsheets), Impress (presentations), Draw (vector graphics and flowcharts), Base (databases), and Math (formula editing)."),
+                                                links: [
+                                                    {
+                                                        title: qsTr("Arch Wiki"),
+                                                        url: "https://wiki.archlinux.org/title/LibreOffice"
+                                                    },
+                                                    {
+                                                        title: qsTr("Website"),
+                                                        url: "https://www.libreoffice.org/"
+                                                    }
+                                                ]
+                                            },
+                                            {
+                                                cat: qsTr("Software Updater"),
+                                                title: qsTr("Arch Update"),
+                                                icon: "../../assets/icons/arch-update.svg",
+                                                desc: qsTr("Arch Update is an interactive update notifier and updater for Arch Linux that assists you with important pre- and post-update tasks. It runs on a timer, and provides a systray icon to make your life even easier."),
+                                                links: [
+                                                    {
+                                                        title: qsTr("GitHub"),
+                                                        url: "https://github.com/Antiz96/arch-update"
+                                                    }
+                                                ]
+                                            },
+                                            {
+                                                cat: qsTr("System Monitor"),
+                                                title: qsTr("bTop"),
+                                                icon: "../../assets/icons/btop.svg",
+                                                desc: qsTr("Btop is a lightweight, CLI resource monitor and the successor to bpytop which shows usage and stats for your processor, memory, disks, network, and processes. It features full mouse support and a game-inspired interface."),
+                                                links: [
+                                                    {
+                                                        title: qsTr("GitHub"),
+                                                        url: "https://github.com/aristocratos/btop"
+                                                    }
+                                                ]
+                                            },
+                                            {
+                                                cat: qsTr("Arch Powered"),
+                                                title: qsTr("The options are endless!"),
+                                                icon: "../../assets/icons/archlinux.svg",
+                                                desc: qsTr("CaelestiaLive is built on ArchLinux, and users have access to all of the applications included in both the official Arch repositories and the AUR. We bundle yay by default for package management, but you're free to switch to paru or whatever other package manager you want!"),
+                                                links: [
+                                                    {
+                                                        title: qsTr("Arch Packages"),
+                                                        url: "https://archlinux.org/packages/"
+                                                    },
+                                                    {
+                                                        title: qsTr("Arch User Repository"),
+                                                        url: "https://aur.archlinux.org"
+                                                    }
+                                                ]
+                                            }
+                                        ]
 
-                                    isAnimating = true;
-                                    contentX -= width;
-                                }
+                                        property int realCurrentIndex: 0
+                                        property bool isTeleporting: false
+                                        property bool isAnimating: false
 
-                                onMovementStarted: {
-                                    isAnimating = true;
-                                }
+                                        Component.onCompleted: {
+                                            isTeleporting = true;
+                                            Qt.callLater(() => {
+                                                contentX = width;
+                                                isTeleporting = false;
+                                            });
+                                        }
 
-                                onMovementEnded: {
-                                    isAnimating = false;
+                                        function incrementCurrentIndex() {
+                                            if (isAnimating || isTeleporting) return;
 
-                                    if (isTeleporting) return;
+                                            const currentViewIndex = indexAt(contentX + width / 2, height / 2);
+                                            const realCount = sourceModel.length;
 
-                                    const viewIndex = indexAt(contentX + width / 2, height / 2);
-                                    if (viewIndex === -1) return;
+                                            if (currentViewIndex === count - 1) {
+                                                isTeleporting = true;
+                                                positionViewAtIndex(1, ListView.SnapPosition);
+                                                realCurrentIndex = 0;
+                                                Qt.callLater(() => { isTeleporting = false; });
+                                                return;
+                                            }
 
-                                    const realCount = sourceModel.length;
+                                            isAnimating = true;
+                                            contentX += width;
+                                        }
 
-                                    if (viewIndex === 0) {
-                                        isTeleporting = true;
-                                        positionViewAtIndex(realCount, ListView.SnapPosition);
-                                        realCurrentIndex = realCount - 1;
-                                        Qt.callLater(() => { isTeleporting = false; });
-                                    } else if (viewIndex === count - 1) {
-                                        isTeleporting = true;
-                                        positionViewAtIndex(1, ListView.SnapPosition);
-                                        realCurrentIndex = 0;
-                                        Qt.callLater(() => { isTeleporting = false; });
-                                    } else {
-                                        realCurrentIndex = viewIndex - 1;
-                                    }
-                                }
+                                        function decrementCurrentIndex() {
+                                            if (isAnimating || isTeleporting) return;
 
-                                Behavior on contentX {
-                                    enabled: !defaultApplicationsCarousel.isTeleporting
-                                    Anim {
-                                        duration: Appearance.anim.durations.normal
-                                        easing.bezierCurve: Appearance.anim.curves.emphasized
-                                        onRunningChanged: {
-                                            if (!running) {
-                                                defaultApplicationsCarousel.isAnimating = false;
+                                            const currentViewIndex = indexAt(contentX + width / 2, height / 2);
+                                            const realCount = sourceModel.length;
 
-                                                const viewIndex = defaultApplicationsCarousel.indexAt(
-                                                    defaultApplicationsCarousel.contentX + defaultApplicationsCarousel.width / 2,
-                                                    defaultApplicationsCarousel.height / 2
-                                                );
-                                                const realCount = defaultApplicationsCarousel.sourceModel.length;
+                                            if (currentViewIndex === 0) {
+                                                isTeleporting = true;
+                                                positionViewAtIndex(realCount, ListView.SnapPosition);
+                                                realCurrentIndex = realCount - 1;
+                                                Qt.callLater(() => { isTeleporting = false; });
+                                                return;
+                                            }
 
-                                                if (viewIndex === 0) {
-                                                    defaultApplicationsCarousel.isTeleporting = true;
-                                                    defaultApplicationsCarousel.positionViewAtIndex(realCount, ListView.SnapPosition);
-                                                    defaultApplicationsCarousel.realCurrentIndex = realCount - 1;
-                                                    Qt.callLater(() => { defaultApplicationsCarousel.isTeleporting = false; });
-                                                } else if (viewIndex === defaultApplicationsCarousel.count - 1) {
-                                                    defaultApplicationsCarousel.isTeleporting = true;
-                                                    defaultApplicationsCarousel.positionViewAtIndex(1, ListView.SnapPosition);
-                                                    defaultApplicationsCarousel.realCurrentIndex = 0;
-                                                    Qt.callLater(() => { defaultApplicationsCarousel.isTeleporting = false; });
+                                            isAnimating = true;
+                                            contentX -= width;
+                                        }
+
+                                        onMovementStarted: {
+                                            isAnimating = true;
+                                        }
+
+                                        onMovementEnded: {
+                                            isAnimating = false;
+
+                                            if (isTeleporting) return;
+
+                                            const viewIndex = indexAt(contentX + width / 2, height / 2);
+                                            if (viewIndex === -1) return;
+
+                                            const realCount = sourceModel.length;
+
+                                            if (viewIndex === 0) {
+                                                isTeleporting = true;
+                                                positionViewAtIndex(realCount, ListView.SnapPosition);
+                                                realCurrentIndex = realCount - 1;
+                                                Qt.callLater(() => { isTeleporting = false; });
+                                            } else if (viewIndex === count - 1) {
+                                                isTeleporting = true;
+                                                positionViewAtIndex(1, ListView.SnapPosition);
+                                                realCurrentIndex = 0;
+                                                Qt.callLater(() => { isTeleporting = false; });
+                                            } else {
+                                                realCurrentIndex = viewIndex - 1;
+                                            }
+                                        }
+
+                                        Behavior on contentX {
+                                            enabled: !defaultApplicationsCarousel.isTeleporting
+                                            Anim {
+                                                duration: Appearance.anim.durations.normal
+                                                easing.bezierCurve: Appearance.anim.curves.emphasized
+                                                onRunningChanged: {
+                                                    if (!running) {
+                                                        defaultApplicationsCarousel.isAnimating = false;
+
+                                                        const viewIndex = defaultApplicationsCarousel.indexAt(
+                                                            defaultApplicationsCarousel.contentX + defaultApplicationsCarousel.width / 2,
+                                                            defaultApplicationsCarousel.height / 2
+                                                        );
+                                                        const realCount = defaultApplicationsCarousel.sourceModel.length;
+
+                                                        if (viewIndex === 0) {
+                                                            defaultApplicationsCarousel.isTeleporting = true;
+                                                            defaultApplicationsCarousel.positionViewAtIndex(realCount, ListView.SnapPosition);
+                                                            defaultApplicationsCarousel.realCurrentIndex = realCount - 1;
+                                                            Qt.callLater(() => { defaultApplicationsCarousel.isTeleporting = false; });
+                                                        } else if (viewIndex === defaultApplicationsCarousel.count - 1) {
+                                                            defaultApplicationsCarousel.isTeleporting = true;
+                                                            defaultApplicationsCarousel.positionViewAtIndex(1, ListView.SnapPosition);
+                                                            defaultApplicationsCarousel.realCurrentIndex = 0;
+                                                            Qt.callLater(() => { defaultApplicationsCarousel.isTeleporting = false; });
+                                                        }
+                                                    }
                                                 }
                                             }
                                         }
-                                    }
-                                }
 
-                                model: {
-                                    if (!sourceModel || sourceModel.length === 0) return [];
-                                    const extended = [];
-                                    extended.push(sourceModel[sourceModel.length - 1]);
-                                    for (let i = 0; i < sourceModel.length; i++) {
-                                        extended.push(sourceModel[i]);
-                                    }
-                                    extended.push(sourceModel[0]);
-                                    return extended;
-                                }
-
-                                delegate: Item {
-                                    id: defaultApplication
-
-                                    required property var modelData
-                                    required property int index
-
-                                    width: defaultApplicationsCarousel.width
-                                    implicitHeight: defaultApplicationRow.implicitHeight + Appearance.padding.large * 2
-
-                                    RowLayout {
-                                        id: defaultApplicationRow
-
-                                        anchors.fill: parent
-                                        anchors.margins: Appearance.padding.large
-                                        spacing: Appearance.spacing.larger
-
-                                        VectorImage {
-                                            id: defaultApplicationIcon
-
-                                            Layout.preferredWidth: 64
-                                            Layout.preferredHeight: 64
-                                            Layout.alignment: Qt.AlignTop
-                                            preferredRendererType: VectorImage.CurveRenderer
-                                            fillMode: VectorImage.PreserveAspectFit
-                                            source: defaultApplication.modelData.icon
+                                        model: {
+                                            if (!sourceModel || sourceModel.length === 0) return [];
+                                            const extended = [];
+                                            extended.push(sourceModel[sourceModel.length - 1]);
+                                            for (let i = 0; i < sourceModel.length; i++) {
+                                                extended.push(sourceModel[i]);
+                                            }
+                                            extended.push(sourceModel[0]);
+                                            return extended;
                                         }
 
-                                        ColumnLayout {
-                                            id: defaultApplicationDesc
+                                        delegate: Item {
+                                            id: defaultApplication
 
-                                            Layout.fillWidth: true
-                                            Layout.preferredWidth: parent.width
-                                            Layout.alignment: Qt.AlignTop
+                                            required property var modelData
+                                            required property int index
 
-                                            Text {
-                                                font.bold: true
-                                                font.pointSize: Appearance.font.size.larger
-                                                color: Colours.palette.m3onSurface
-                                                text: defaultApplication.modelData.cat + " - " + defaultApplication.modelData.title
-                                            }
-
-                                            Text {
-                                                Layout.preferredWidth: parent.width
-                                                font.pointSize: Appearance.font.size.normal
-                                                color: Colours.palette.m3onSurface
-                                                wrapMode: Text.WordWrap
-                                                text: defaultApplication.modelData.desc
-                                            }
+                                            width: defaultApplicationsCarousel.width
+                                            implicitHeight: defaultApplicationRow.implicitHeight + Appearance.padding.large * 2
 
                                             RowLayout {
-                                                Layout.topMargin: Appearance.padding.normal
+                                                id: defaultApplicationRow
 
-                                                spacing: Appearance.spacing.normal
-                                                visible: defaultApplication.modelData.links
+                                                anchors.fill: parent
+                                                anchors.margins: Appearance.padding.large
+                                                spacing: Appearance.spacing.larger
 
-                                                Repeater {
-                                                    model: defaultApplication.modelData.links
+                                                VectorImage {
+                                                    id: defaultApplicationIcon
 
-                                                    TextButton {
-                                                        id: defaultApplicationLink
+                                                    Layout.preferredWidth: 64
+                                                    Layout.preferredHeight: 64
+                                                    Layout.alignment: Qt.AlignTop
+                                                    preferredRendererType: VectorImage.CurveRenderer
+                                                    fillMode: VectorImage.PreserveAspectFit
+                                                    source: defaultApplication.modelData.icon
+                                                }
 
-                                                        required property var modelData
+                                                ColumnLayout {
+                                                    id: defaultApplicationDesc
 
-                                                        text: defaultApplicationLink.modelData.title
-                                                        radius: Appearance.rounding.small
+                                                    Layout.fillWidth: true
+                                                    Layout.preferredWidth: parent.width
+                                                    Layout.alignment: Qt.AlignTop
 
-                                                        onClicked: Qt.openUrlExternally(defaultApplicationLink.modelData.url)
+                                                    Text {
+                                                        font.bold: true
+                                                        font.pointSize: Appearance.font.size.larger
+                                                        color: Colours.palette.m3onSurface
+                                                        text: defaultApplication.modelData.cat + " - " + defaultApplication.modelData.title
+                                                    }
+
+                                                    Text {
+                                                        Layout.preferredWidth: parent.width
+                                                        font.pointSize: Appearance.font.size.normal
+                                                        color: Colours.palette.m3onSurface
+                                                        wrapMode: Text.WordWrap
+                                                        text: defaultApplication.modelData.desc
+                                                    }
+
+                                                    RowLayout {
+                                                        Layout.topMargin: Appearance.padding.normal
+
+                                                        spacing: Appearance.spacing.normal
+                                                        visible: defaultApplication.modelData.links
+
+                                                        Repeater {
+                                                            model: defaultApplication.modelData.links
+
+                                                            TextButton {
+                                                                id: defaultApplicationLink
+
+                                                                required property var modelData
+
+                                                                text: defaultApplicationLink.modelData.title
+                                                                radius: Appearance.rounding.small
+
+                                                                onClicked: Qt.openUrlExternally(defaultApplicationLink.modelData.url)
+                                                            }
+                                                        }
                                                     }
                                                 }
                                             }
                                         }
                                     }
-                                }
-                            }
 
-                            ColumnLayout {
-                                IconButton {
-                                    icon: "chevron_right"
-                                    font.bold: true
-                                    onClicked: {
-                                        defaultApplicationsCarousel.incrementCurrentIndex();
+                                    ColumnLayout {
+                                        IconButton {
+                                            icon: "chevron_right"
+                                            font.bold: true
+                                            onClicked: {
+                                                defaultApplicationsCarousel.incrementCurrentIndex();
+                                            }
+                                        }
                                     }
                                 }
                             }

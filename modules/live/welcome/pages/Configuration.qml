@@ -107,87 +107,79 @@ Item {
                         subtitle: qsTr("Quick configuration for the most common shell options.")
                     }
 
-                    StyledRect {
-                        Layout.fillWidth: true
-                        Layout.preferredHeight: settingsContent.implicitHeight + Appearance.padding.large * 2
-                        color: Colours.palette.m3surfaceContainerLow
-                        radius: Appearance.rounding.normal
-                        border.color: Colours.palette.m3outlineVariant
+                    WelcomeSectionContentArea {
+                        content: Component {
+                            ColumnLayout {
+                                spacing: Appearance.spacing.larger
 
-                        ColumnLayout {
-                            id: settingsContent
+                                Repeater {
+                                    id: settingsItems
 
-                            anchors.fill: parent
-                            anchors.margins: Appearance.padding.large
-                            spacing: Appearance.spacing.larger
+                                    model: [
+                                        {
+                                            title: qsTr("Network"),
+                                            desc: qsTr("This page is dedicated to setting up your network access and VPN.")
+                                        },
+                                        {
+                                            title: qsTr("Bluetooth"),
+                                            desc: qsTr("Configure and look for bluetooth devices here.")
+                                        },
+                                        {
+                                            title: qsTr("Audio"),
+                                            desc: qsTr("Plugged in speakers or headphones? set up app specific volume limits.")
+                                        },
+                                        {
+                                            title: qsTr("Appearance"),
+                                            desc: qsTr("Adjust transparency, fonts, and color variants.")
+                                        },
+                                        {
+                                            title: qsTr("Taskbar"),
+                                            desc: qsTr("Infinitely configurable system statuses (WiFi, Battery) with expanded hover menus, or hidden completely.")
+                                        },
+                                        {
+                                            title: qsTr("Launcher"),
+                                            desc: qsTr("Make sure your favorite apps stay at the top! Or hide apps you dont need visible.")
+                                        },
+                                        {
+                                            title: qsTr("Dashboard"),
+                                            desc: qsTr("Choose to disable or adjust sensitivity. Can also change what is displayed.")
+                                        }
+                                    ]
 
-                            Repeater {
-                                id: settingsItems
+                                    delegate: ColumnLayout {
+                                        id: settingsItem
 
-                                model: [
-                                    {
-                                        title: qsTr("Network"),
-                                        desc: qsTr("This page is dedicated to setting up your network access and VPN.")
-                                    },
-                                    {
-                                        title: qsTr("Bluetooth"),
-                                        desc: qsTr("Configure and look for bluetooth devices here.")
-                                    },
-                                    {
-                                        title: qsTr("Audio"),
-                                        desc: qsTr("Plugged in speakers or headphones? set up app specific volume limits.")
-                                    },
-                                    {
-                                        title: qsTr("Appearance"),
-                                        desc: qsTr("Adjust transparency, fonts, and color variants.")
-                                    },
-                                    {
-                                        title: qsTr("Taskbar"),
-                                        desc: qsTr("Infinitely configurable system statuses (WiFi, Battery) with expanded hover menus, or hidden completely.")
-                                    },
-                                    {
-                                        title: qsTr("Launcher"),
-                                        desc: qsTr("Make sure your favorite apps stay at the top! Or hide apps you dont need visible.")
-                                    },
-                                    {
-                                        title: qsTr("Dashboard"),
-                                        desc: qsTr("Choose to disable or adjust sensitivity. Can also change what is displayed.")
-                                    }
-                                ]
+                                        required property var modelData
+                                        required property int index
 
-                                delegate: ColumnLayout {
-                                    id: settingsItem
-
-                                    required property var modelData
-                                    required property int index
-
-                                    Layout.fillWidth: true
-
-                                    spacing: Appearance.spacing.small
-
-                                    StyledText {
-                                        font.bold: true
-                                        font.pointSize: Appearance.font.size.small
-                                        color: Colours.palette.m3primary
-                                        text: settingsItem.modelData.title
-                                    }
-
-                                    StyledText {
                                         Layout.fillWidth: true
 
-                                        font.pointSize: Appearance.font.size.small
-                                        color: Colours.palette.m3onSurface
-                                        wrapMode: Text.WordWrap
-                                        opacity: 0.8
-                                        text: settingsItem.modelData.desc
-                                    }
+                                        spacing: Appearance.spacing.small
 
-                                    Rectangle {
-                                        Layout.fillWidth: true
-                                        Layout.preferredHeight: 1
-                                        color: Colours.palette.m3outlineVariant
-                                        opacity: 0.3
-                                        visible: index < settingsItems.count - 1
+                                        StyledText {
+                                            font.bold: true
+                                            font.pointSize: Appearance.font.size.small
+                                            color: Colours.palette.m3primary
+                                            text: settingsItem.modelData.title
+                                        }
+
+                                        StyledText {
+                                            Layout.fillWidth: true
+
+                                            font.pointSize: Appearance.font.size.small
+                                            color: Colours.palette.m3onSurface
+                                            wrapMode: Text.WordWrap
+                                            opacity: 0.8
+                                            text: settingsItem.modelData.desc
+                                        }
+
+                                        Rectangle {
+                                            Layout.fillWidth: true
+                                            Layout.preferredHeight: 1
+                                            color: Colours.palette.m3outlineVariant
+                                            opacity: 0.3
+                                            visible: index < settingsItems.count - 1
+                                        }
                                     }
                                 }
                             }
@@ -214,21 +206,17 @@ Item {
                         subtitle: qsTr("Customize the behavior of the caelestia CLI app.")
                     }
 
-                    StyledRect {
-                        Layout.fillWidth: true
-                        Layout.preferredHeight: cliContent.implicitHeight + Appearance.padding.large * 2
-                        color: Colours.palette.m3surfaceContainerLow
-                        radius: Appearance.rounding.normal
-                        border.color: Colours.palette.m3outlineVariant
-
-                        StyledText {
-                            id: cliContent
-
-                            anchors.centerIn: parent
-                            font.pointSize: Appearance.font.size.normal
-                            color: Colours.palette.m3onSurfaceVariant
-                            horizontalAlignment: Text.AlignHCenter
-                            text: qsTr("Coming soon.")
+                    WelcomeSectionContentArea {
+                        content: Component {
+                            ColumnLayout {
+                                StyledText {
+                                    Layout.fillWidth: true
+                                    font.pointSize: Appearance.font.size.normal
+                                    color: Colours.palette.m3onSurfaceVariant
+                                    wrapMode: Text.WordWrap
+                                    text: qsTr("Content coming soon.")
+                                }
+                            }
                         }
                     }
 
@@ -251,21 +239,17 @@ Item {
                         subtitle: qsTr("Take your rice further with in-depth customization of the shell.")
                     }
 
-                    StyledRect {
-                        Layout.fillWidth: true
-                        Layout.preferredHeight: shellContent.implicitHeight + Appearance.padding.large * 2
-                        color: Colours.palette.m3surfaceContainerLow
-                        radius: Appearance.rounding.normal
-                        border.color: Colours.palette.m3outlineVariant
-
-                        StyledText {
-                            id: shellContent
-
-                            anchors.centerIn: parent
-                            font.pointSize: Appearance.font.size.normal
-                            color: Colours.palette.m3onSurfaceVariant
-                            horizontalAlignment: Text.AlignHCenter
-                            text: qsTr("Coming soon.")
+                    WelcomeSectionContentArea {
+                        content: Component {
+                            ColumnLayout {
+                                StyledText {
+                                    Layout.fillWidth: true
+                                    font.pointSize: Appearance.font.size.normal
+                                    color: Colours.palette.m3onSurfaceVariant
+                                    wrapMode: Text.WordWrap
+                                    text: qsTr("Content coming soon.")
+                                }
+                            }
                         }
                     }
 
@@ -289,21 +273,17 @@ Item {
                         subtitle: qsTr("Tweak the underlying Hyprland configuration to suit your needs.")
                     }
 
-                    StyledRect {
-                        Layout.fillWidth: true
-                        Layout.preferredHeight: hyprlandContent.implicitHeight + Appearance.padding.large * 2
-                        color: Colours.palette.m3surfaceContainerLow
-                        radius: Appearance.rounding.normal
-                        border.color: Colours.palette.m3outlineVariant
-
-                        StyledText {
-                            id: hyprlandContent
-
-                            anchors.centerIn: parent
-                            font.pointSize: Appearance.font.size.normal
-                            color: Colours.palette.m3onSurfaceVariant
-                            horizontalAlignment: Text.AlignHCenter
-                            text: qsTr("Coming soon.")
+                    WelcomeSectionContentArea {
+                        content: Component {
+                            ColumnLayout {
+                                StyledText {
+                                    Layout.fillWidth: true
+                                    font.pointSize: Appearance.font.size.normal
+                                    color: Colours.palette.m3onSurfaceVariant
+                                    wrapMode: Text.WordWrap
+                                    text: qsTr("Content coming soon.")
+                                }
+                            }
                         }
                     }
 
