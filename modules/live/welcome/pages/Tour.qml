@@ -113,83 +113,75 @@ Item {
                         subtitle: qsTr("The central hub for system information, located on the left side of the shell.")
                     }
 
-                    StyledRect {
-                        Layout.fillWidth: true
-                        Layout.preferredHeight: taskbarContent.implicitHeight + Appearance.padding.large * 2
-                        color: Colours.palette.m3surfaceContainerLow
-                        radius: Appearance.rounding.normal
-                        border.color: Colours.palette.m3outlineVariant
+                    WelcomeSectionContentArea {
+                        content: Component {
+                            ColumnLayout {
+                                spacing: Appearance.spacing.larger
 
-                        ColumnLayout {
-                            id: taskbarContent
+                                Repeater {
+                                    id: taskbarItems
 
-                            anchors.fill: parent
-                            anchors.margins: Appearance.padding.large
-                            spacing: Appearance.spacing.larger
+                                    model: [
+                                        {
+                                            title: qsTr("OS Icon"),
+                                            desc: qsTr("A decorative brand icon that opens the launcher when clicked.")
+                                        },
+                                        {
+                                            title: qsTr("Workspaces"),
+                                            desc: qsTr("A modular monitor showing active spaces. Behavior can be modified in settings.")
+                                        },
+                                        {
+                                            title: qsTr("Active Window"),
+                                            desc: qsTr("Displays the current window title. Hovering provides a live preview pop-out.")
+                                        },
+                                        {
+                                            title: qsTr("System Tray"),
+                                            desc: qsTr("Interact with background applications and special workspace utilities.")
+                                        },
+                                        {
+                                            title: qsTr("Status Icons"),
+                                            desc: qsTr("Quick-look system health (WiFi, Battery) with expanded hover menus.")
+                                        },
+                                        {
+                                            title: qsTr("Power Menu"),
+                                            desc: qsTr("Access the power drawer for Logout, Restart, and Shutdown options.")
+                                        }
+                                    ]
 
-                            Repeater {
-                                id: taskbarItems
+                                    delegate: ColumnLayout {
+                                        id: taskbarItem
 
-                                model: [
-                                    {
-                                        title: qsTr("OS Icon"),
-                                        desc: qsTr("A decorative brand icon that opens the launcher when clicked.")
-                                    },
-                                    {
-                                        title: qsTr("Workspaces"),
-                                        desc: qsTr("A modular monitor showing active spaces. Behavior can be modified in settings.")
-                                    },
-                                    {
-                                        title: qsTr("Active Window"),
-                                        desc: qsTr("Displays the current window title. Hovering provides a live preview pop-out.")
-                                    },
-                                    {
-                                        title: qsTr("System Tray"),
-                                        desc: qsTr("Interact with background applications and special workspace utilities.")
-                                    },
-                                    {
-                                        title: qsTr("Status Icons"),
-                                        desc: qsTr("Quick-look system health (WiFi, Battery) with expanded hover menus.")
-                                    },
-                                    {
-                                        title: qsTr("Power Menu"),
-                                        desc: qsTr("Access the power drawer for Logout, Restart, and Shutdown options.")
-                                    }
-                                ]
+                                        required property var modelData
+                                        required property int index
 
-                                delegate: ColumnLayout {
-                                    id: taskbarItem
-
-                                    required property var modelData
-                                    required property int index
-
-                                    Layout.fillWidth: true
-
-                                    spacing: Appearance.spacing.small
-
-                                    StyledText {
-                                        font.bold: true
-                                        font.pointSize: Appearance.font.size.small
-                                        color: Colours.palette.m3primary
-                                        text: taskbarItem.modelData.title
-                                    }
-
-                                    StyledText {
                                         Layout.fillWidth: true
 
-                                        font.pointSize: Appearance.font.size.small
-                                        color: Colours.palette.m3onSurface
-                                        wrapMode: Text.WordWrap
-                                        opacity: 0.8
-                                        text: taskbarItem.modelData.desc
-                                    }
+                                        spacing: Appearance.spacing.small
 
-                                    Rectangle {
-                                        Layout.fillWidth: true
-                                        Layout.preferredHeight: 1
-                                        color: Colours.palette.m3outlineVariant
-                                        opacity: 0.3
-                                        visible: taskbarItem.index < taskbarItems.count - 1
+                                        StyledText {
+                                            font.bold: true
+                                            font.pointSize: Appearance.font.size.small
+                                            color: Colours.palette.m3primary
+                                            text: taskbarItem.modelData.title
+                                        }
+
+                                        StyledText {
+                                            Layout.fillWidth: true
+
+                                            font.pointSize: Appearance.font.size.small
+                                            color: Colours.palette.m3onSurface
+                                            wrapMode: Text.WordWrap
+                                            opacity: 0.8
+                                            text: taskbarItem.modelData.desc
+                                        }
+
+                                        Rectangle {
+                                            Layout.fillWidth: true
+                                            Layout.preferredHeight: 1
+                                            color: Colours.palette.m3outlineVariant
+                                            opacity: 0.3
+                                            visible: taskbarItem.index < taskbarItems.count - 1
+                                        }
                                     }
                                 }
                             }
@@ -216,75 +208,67 @@ Item {
                         subtitle: qsTr("Caelestia's primary gateway to your applications and tools.")
                     }
 
-                    StyledRect {
-                        Layout.fillWidth: true
-                        Layout.preferredHeight: launcherContent.implicitHeight + Appearance.padding.large * 2
-                        color: Colours.palette.m3surfaceContainerLow
-                        radius: Appearance.rounding.normal
-                        border.color: Colours.palette.m3outlineVariant
+                    WelcomeSectionContentArea {
+                        content: Component {
+                            ColumnLayout {
+                                spacing: Appearance.spacing.larger
 
-                        ColumnLayout {
-                            id: launcherContent
+                                Repeater {
+                                    id: launcherItems
 
-                            anchors.fill: parent
-                            anchors.margins: Appearance.padding.large
-                            spacing: Appearance.spacing.larger
+                                    model: [
+                                        {
+                                            title: qsTr("Fuzzy Search"),
+                                            desc: qsTr("Start typing to find apps instantly. No need for perfect spelling.")
+                                        },
+                                        {
+                                            title: qsTr("Configuration"),
+                                            desc: qsTr("Modify look and feel directly via Caelestia's config files.")
+                                        },
+                                        {
+                                            title: qsTr("Keyboard Centric"),
+                                            desc: qsTr("Designed to be triggered and navigated entirely with the keyboard.")
+                                        },
+                                        {
+                                            title: qsTr("Theme Integration"),
+                                            desc: qsTr("Automatically matches your system color scheme and transparency settings.")
+                                        }
+                                    ]
 
-                            Repeater {
-                                id: launcherItems
+                                    delegate: ColumnLayout {
+                                        id: launcherItem
 
-                                model: [
-                                    {
-                                        title: qsTr("Fuzzy Search"),
-                                        desc: qsTr("Start typing to find apps instantly. No need for perfect spelling.")
-                                    },
-                                    {
-                                        title: qsTr("Configuration"),
-                                        desc: qsTr("Modify look and feel directly via Caelestia's config files.")
-                                    },
-                                    {
-                                        title: qsTr("Keyboard Centric"),
-                                        desc: qsTr("Designed to be triggered and navigated entirely with the keyboard.")
-                                    },
-                                    {
-                                        title: qsTr("Theme Integration"),
-                                        desc: qsTr("Automatically matches your system color scheme and transparency settings.")
-                                    }
-                                ]
+                                        required property var modelData
+                                        required property int index
 
-                                delegate: ColumnLayout {
-                                    id: launcherItem
-
-                                    required property var modelData
-                                    required property int index
-
-                                    Layout.fillWidth: true
-
-                                    spacing: Appearance.spacing.small
-
-                                    StyledText {
-                                        font.bold: true
-                                        font.pointSize: Appearance.font.size.small
-                                        color: Colours.palette.m3primary
-                                        text: launcherItem.modelData.title
-                                    }
-
-                                    StyledText {
                                         Layout.fillWidth: true
 
-                                        font.pointSize: Appearance.font.size.small
-                                        color: Colours.palette.m3onSurface
-                                        wrapMode: Text.WordWrap
-                                        opacity: 0.8
-                                        text: launcherItem.modelData.desc
-                                    }
+                                        spacing: Appearance.spacing.small
 
-                                    Rectangle {
-                                        Layout.fillWidth: true
-                                        Layout.preferredHeight: 1
-                                        color: Colours.palette.m3outlineVariant
-                                        opacity: 0.3
-                                        visible: launcherItem.index < launcherItems.count - 1
+                                        StyledText {
+                                            font.bold: true
+                                            font.pointSize: Appearance.font.size.small
+                                            color: Colours.palette.m3primary
+                                            text: launcherItem.modelData.title
+                                        }
+
+                                        StyledText {
+                                            Layout.fillWidth: true
+
+                                            font.pointSize: Appearance.font.size.small
+                                            color: Colours.palette.m3onSurface
+                                            wrapMode: Text.WordWrap
+                                            opacity: 0.8
+                                            text: launcherItem.modelData.desc
+                                        }
+
+                                        Rectangle {
+                                            Layout.fillWidth: true
+                                            Layout.preferredHeight: 1
+                                            color: Colours.palette.m3outlineVariant
+                                            opacity: 0.3
+                                            visible: launcherItem.index < launcherItems.count - 1
+                                        }
                                     }
                                 }
                             }
@@ -311,75 +295,67 @@ Item {
                         subtitle: qsTr("Access notifications, system toggles, and tools via the right-side panel.")
                     }
 
-                    StyledRect {
-                        Layout.fillWidth: true
-                        Layout.preferredHeight: sidebarContent.implicitHeight + Appearance.padding.large * 2
-                        color: Colours.palette.m3surfaceContainerLow
-                        radius: Appearance.rounding.normal
-                        border.color: Colours.palette.m3outlineVariant
+                    WelcomeSectionContentArea {
+                        content: Component {
+                            ColumnLayout {
+                                spacing: Appearance.spacing.larger
 
-                        ColumnLayout {
-                            id: sidebarContent
+                                Repeater {
+                                    id: sidebarItems
 
-                            anchors.fill: parent
-                            anchors.margins: Appearance.padding.large
-                            spacing: Appearance.spacing.larger
+                                    model: [
+                                        {
+                                            title: qsTr("Notifications"),
+                                            desc: qsTr("A dedicated hub for all application and system alerts.")
+                                        },
+                                        {
+                                            title: qsTr("Keep Awake"),
+                                            desc: qsTr("An integrated idle inhibitor to prevent the system from locking.")
+                                        },
+                                        {
+                                            title: qsTr("Screen Recorder"),
+                                            desc: qsTr("Capture regions, windows, or the full screen with instant file access.")
+                                        },
+                                        {
+                                            title: qsTr("Quick Toggles"),
+                                            desc: qsTr("Fast access to Game Mode, system settings, and hardware controls.")
+                                        }
+                                    ]
 
-                            Repeater {
-                                id: sidebarItems
+                                    delegate: ColumnLayout {
+                                        id: sidebarItem
 
-                                model: [
-                                    {
-                                        title: qsTr("Notifications"),
-                                        desc: qsTr("A dedicated hub for all application and system alerts.")
-                                    },
-                                    {
-                                        title: qsTr("Keep Awake"),
-                                        desc: qsTr("An integrated idle inhibitor to prevent the system from locking.")
-                                    },
-                                    {
-                                        title: qsTr("Screen Recorder"),
-                                        desc: qsTr("Capture regions, windows, or the full screen with instant file access.")
-                                    },
-                                    {
-                                        title: qsTr("Quick Toggles"),
-                                        desc: qsTr("Fast access to Game Mode, system settings, and hardware controls.")
-                                    }
-                                ]
+                                        required property var modelData
+                                        required property int index
 
-                                delegate: ColumnLayout {
-                                    id: sidebarItem
-
-                                    required property var modelData
-                                    required property int index
-
-                                    Layout.fillWidth: true
-
-                                    spacing: Appearance.spacing.small
-
-                                    StyledText {
-                                        font.bold: true
-                                        font.pointSize: Appearance.font.size.small
-                                        color: Colours.palette.m3primary
-                                        text: sidebarItem.modelData.title
-                                    }
-
-                                    StyledText {
                                         Layout.fillWidth: true
 
-                                        font.pointSize: Appearance.font.size.small
-                                        color: Colours.palette.m3onSurface
-                                        wrapMode: Text.WordWrap
-                                        opacity: 0.8
-                                        text: sidebarItem.modelData.desc
-                                    }
+                                        spacing: Appearance.spacing.small
 
-                                    Rectangle {
-                                        Layout.fillWidth: true
-                                        Layout.preferredHeight: 1
-                                        color: Colours.palette.m3outlineVariant
-                                        opacity: 0.3
-                                        visible: sidebarItem.index < sidebarItems.count - 1
+                                        StyledText {
+                                            font.bold: true
+                                            font.pointSize: Appearance.font.size.small
+                                            color: Colours.palette.m3primary
+                                            text: sidebarItem.modelData.title
+                                        }
+
+                                        StyledText {
+                                            Layout.fillWidth: true
+
+                                            font.pointSize: Appearance.font.size.small
+                                            color: Colours.palette.m3onSurface
+                                            wrapMode: Text.WordWrap
+                                            opacity: 0.8
+                                            text: sidebarItem.modelData.desc
+                                        }
+
+                                        Rectangle {
+                                            Layout.fillWidth: true
+                                            Layout.preferredHeight: 1
+                                            color: Colours.palette.m3outlineVariant
+                                            opacity: 0.3
+                                            visible: sidebarItem.index < sidebarItems.count - 1
+                                        }
                                     }
                                 }
                             }
@@ -406,73 +382,65 @@ Item {
                         subtitle: qsTr("An overview of system performance, media, and local environment.")
                     }
 
-                    StyledRect {
-                        Layout.fillWidth: true
-                        Layout.preferredHeight: dashboardContent.implicitHeight + Appearance.padding.large * 2
-                        color: Colours.palette.m3surfaceContainerLow
-                        radius: Appearance.rounding.normal
-                        border.color: Colours.palette.m3outlineVariant
+                    WelcomeSectionContentArea {
+                        content: Component {
+                            ColumnLayout {
+                                spacing: Appearance.spacing.larger
 
-                        ColumnLayout {
-                            id: dashboardContent
+                                Repeater {
+                                    id: dashboardItems
 
-                            anchors.fill: parent
-                            anchors.margins: Appearance.padding.large
-                            spacing: Appearance.spacing.larger
+                                    model: [
+                                        {
+                                            title: qsTr("Media Control"),
+                                            desc: qsTr("Switch players and control playback for all active media.")
+                                        },
+                                        {
+                                            title: qsTr("Performance"),
+                                            desc: qsTr("Monitor real-time CPU/GPU temperatures and system usage.")
+                                        },
+                                        {
+                                            title: qsTr("Weather"),
+                                            desc: qsTr("Detailed local conditions with a comprehensive seven-day forecast.")
+                                        },
+                                        {
+                                            title: qsTr("System Info"),
+                                            desc: qsTr("A quick snapshot of your hardware and session details.")
+                                        }
+                                    ]
 
-                            Repeater {
-                                id: dashboardItems
+                                    delegate: ColumnLayout {
+                                        id: dashboardItem
 
-                                model: [
-                                    {
-                                        title: qsTr("Media Control"),
-                                        desc: qsTr("Switch players and control playback for all active media.")
-                                    },
-                                    {
-                                        title: qsTr("Performance"),
-                                        desc: qsTr("Monitor real-time CPU/GPU temperatures and system usage.")
-                                    },
-                                    {
-                                        title: qsTr("Weather"),
-                                        desc: qsTr("Detailed local conditions with a comprehensive seven-day forecast.")
-                                    },
-                                    {
-                                        title: qsTr("System Info"),
-                                        desc: qsTr("A quick snapshot of your hardware and session details.")
-                                    }
-                                ]
+                                        required property var modelData
+                                        required property int index
 
-                                delegate: ColumnLayout {
-                                    id: dashboardItem
-
-                                    required property var modelData
-                                    required property int index
-
-                                    Layout.fillWidth: true
-
-                                    spacing: Appearance.spacing.small
-
-                                    StyledText {
-                                        font.bold: true
-                                        font.pointSize: Appearance.font.size.small
-                                        color: Colours.palette.m3primary
-                                        text: dashboardItem.modelData.title
-                                    }
-
-                                    StyledText {
                                         Layout.fillWidth: true
-                                        font.pointSize: Appearance.font.size.small
-                                        wrapMode: Text.WordWrap
-                                        opacity: 0.8
-                                        text: dashboardItem.modelData.desc
-                                    }
 
-                                    Rectangle {
-                                        Layout.fillWidth: true
-                                        Layout.preferredHeight: 1
-                                        color: Colours.palette.m3outlineVariant
-                                        opacity: 0.3
-                                        visible: dashboardItem.index < dashboardItems.count - 1
+                                        spacing: Appearance.spacing.small
+
+                                        StyledText {
+                                            font.bold: true
+                                            font.pointSize: Appearance.font.size.small
+                                            color: Colours.palette.m3primary
+                                            text: dashboardItem.modelData.title
+                                        }
+
+                                        StyledText {
+                                            Layout.fillWidth: true
+                                            font.pointSize: Appearance.font.size.small
+                                            wrapMode: Text.WordWrap
+                                            opacity: 0.8
+                                            text: dashboardItem.modelData.desc
+                                        }
+
+                                        Rectangle {
+                                            Layout.fillWidth: true
+                                            Layout.preferredHeight: 1
+                                            color: Colours.palette.m3outlineVariant
+                                            opacity: 0.3
+                                            visible: dashboardItem.index < dashboardItems.count - 1
+                                        }
                                     }
                                 }
                             }
@@ -500,63 +468,55 @@ Item {
                     }
 
                     // Standard Workspaces
-                    StyledRect {
-                        Layout.fillWidth: true
-                        Layout.preferredHeight: standardWorkspaces.implicitHeight + Appearance.padding.large * 2
-                        color: Colours.palette.m3surfaceContainerLow
-                        radius: Appearance.rounding.normal
-                        border.color: Colours.palette.m3outlineVariant
+                    WelcomeSectionContentArea {
+                        content: Component {
+                            ColumnLayout {
+                                spacing: Appearance.spacing.large
 
-                        ColumnLayout {
-                            id: standardWorkspaces
+                                StyledGridView {
+                                    Layout.fillWidth: true
+                                    Layout.preferredHeight: implicitHeight
 
-                            anchors.fill: parent
-                            anchors.margins: Appearance.padding.large
-                            spacing: Appearance.spacing.large
+                                    model: [
+                                        {
+                                            key: qsTr("Super + <#>"),
+                                            label: qsTr("Switch to workspace")
+                                        },
+                                        {
+                                            key: qsTr("Super + Alt + <#>"),
+                                            label: qsTr("Move window to workspace"),
+                                        },
+                                        {
+                                            key: qsTr("Super + Alt + <Up|Down|Left|Right>"),
+                                            label: qsTr("Move window directionally")
+                                        },
+                                        {
+                                            key: qsTr("Super + F"),
+                                            label: qsTr("Toggle fullscreen")
+                                        }
+                                    ]
 
-                            StyledGridView {
-                                Layout.fillWidth: true
-                                Layout.preferredHeight: implicitHeight
+                                    spacing: 12
+                                    paddingX: 16
 
-                                model: [
-                                    {
-                                        key: qsTr("Super + <#>"),
-                                        label: qsTr("Switch to workspace")
-                                    },
-                                    {
-                                        key: qsTr("Super + Alt + <#>"),
-                                        label: qsTr("Move window to workspace"),
-                                    },
-                                    {
-                                        key: qsTr("Super + Alt + <Up|Down|Left|Right>"),
-                                        label: qsTr("Move window directionally")
-                                    },
-                                    {
-                                        key: qsTr("Super + F"),
-                                        label: qsTr("Toggle fullscreen")
-                                    }
-                                ]
+                                    cellContent: Component {
+                                        Item {
+                                            id: standardWorkspacesItem
 
-                                spacing: 12
-                                paddingX: 16
+                                            property var modelData
+                                            property real gridMeasureWidth: firstStepsKeybinding.implicitWidth
 
-                                cellContent: Component {
-                                    Item {
-                                        id: standardWorkspacesItem
+                                            ColumnLayout {
+                                                anchors.fill: parent
+                                                anchors.margins: Appearance.padding.small
+                                                spacing: Appearance.spacing.small
 
-                                        property var modelData
-                                        property real gridMeasureWidth: firstStepsKeybinding.implicitWidth
+                                                Keybinding {
+                                                    id: firstStepsKeybinding
 
-                                        ColumnLayout {
-                                            anchors.fill: parent
-                                            anchors.margins: Appearance.padding.small
-                                            spacing: Appearance.spacing.small
-
-                                            Keybinding {
-                                                id: firstStepsKeybinding
-
-                                                key: standardWorkspacesItem.modelData.key
-                                                label: standardWorkspacesItem.modelData.label
+                                                    key: standardWorkspacesItem.modelData.key
+                                                    label: standardWorkspacesItem.modelData.label
+                                                }
                                             }
                                         }
                                     }
@@ -571,68 +531,60 @@ Item {
                     }
 
                     // Special Workspaces
-                    StyledRect {
-                        Layout.fillWidth: true
-                        Layout.preferredHeight: specialWorkspaces.implicitHeight + Appearance.padding.large * 2
-                        color: Colours.palette.m3surfaceContainerLow
-                        radius: Appearance.rounding.normal
-                        border.color: Colours.palette.m3outlineVariant
+                    WelcomeSectionContentArea {
+                        content: Component {
+                            ColumnLayout {
+                                spacing: Appearance.spacing.large
 
-                        ColumnLayout {
-                            id: specialWorkspaces
+                                StyledGridView {
+                                    Layout.fillWidth: true
+                                    Layout.preferredHeight: implicitHeight
 
-                            anchors.fill: parent
-                            anchors.margins: Appearance.padding.large
-                            spacing: Appearance.spacing.large
+                                    model: [
+                                        {
+                                            key: qsTr("Super + D"),
+                                            label: qsTr("Communications Hub"),
+                                            desc: qsTr("Discord")
+                                        },
+                                        {
+                                            key: qsTr("Super + M"),
+                                            label: qsTr("Music & Media"),
+                                            desc: qsTr("Spotify")
+                                        },
+                                        {
+                                            key: qsTr("Super + A"),
+                                            label: qsTr("ToDo List"),
+                                            desc: qsTr("Todoist")
+                                        },
+                                        {
+                                            key: qsTr("Super + S"),
+                                            label: qsTr("Special"),
+                                            desc: qsTr("Scratchpad Workspace")
+                                        }
+                                    ]
 
-                            StyledGridView {
-                                Layout.fillWidth: true
-                                Layout.preferredHeight: implicitHeight
+                                    spacing: 12
+                                    paddingX: 16
 
-                                model: [
-                                    {
-                                        key: qsTr("Super + D"),
-                                        label: qsTr("Communications Hub"),
-                                        desc: qsTr("Discord")
-                                    },
-                                    {
-                                        key: qsTr("Super + M"),
-                                        label: qsTr("Music & Media"),
-                                        desc: qsTr("Spotify")
-                                    },
-                                    {
-                                        key: qsTr("Super + A"),
-                                        label: qsTr("ToDo List"),
-                                        desc: qsTr("Todoist")
-                                    },
-                                    {
-                                        key: qsTr("Super + S"),
-                                        label: qsTr("Special"),
-                                        desc: qsTr("Scratchpad Workspace")
-                                    }
-                                ]
+                                    cellContent: Component {
+                                        Item {
+                                            id: specialWorkspacesItem
 
-                                spacing: 12
-                                paddingX: 16
+                                            property var modelData
+                                            property real gridMeasureWidth: specialWorkspacesKeybinding.implicitWidth
 
-                                cellContent: Component {
-                                    Item {
-                                        id: specialWorkspacesItem
+                                            ColumnLayout {
+                                                anchors.fill: parent
+                                                anchors.margins: Appearance.padding.small
+                                                spacing: Appearance.spacing.small
 
-                                        property var modelData
-                                        property real gridMeasureWidth: specialWorkspacesKeybinding.implicitWidth
+                                                Keybinding {
+                                                    id: specialWorkspacesKeybinding
 
-                                        ColumnLayout {
-                                            anchors.fill: parent
-                                            anchors.margins: Appearance.padding.small
-                                            spacing: Appearance.spacing.small
-
-                                            Keybinding {
-                                                id: specialWorkspacesKeybinding
-
-                                                key: specialWorkspacesItem.modelData.key
-                                                label: specialWorkspacesItem.modelData.label
-                                                desc: specialWorkspacesItem.modelData.desc
+                                                    key: specialWorkspacesItem.modelData.key
+                                                    label: specialWorkspacesItem.modelData.label
+                                                    desc: specialWorkspacesItem.modelData.desc
+                                                }
                                             }
                                         }
                                     }
