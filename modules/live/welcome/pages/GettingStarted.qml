@@ -516,6 +516,18 @@ Item {
                                                 ]
                                             },
                                             {
+                                                cat: qsTr("Productivity"),
+                                                title: qsTr("Todoist"),
+                                                icon: "../../assets/icons/todoist.svg",
+                                                desc: qsTr("Todoist is a cross-platform task management tool that helps you organize your personal and professional tasks in a simple and efficient way. It allows creation of todo lists and reminders, and tracks your productivity across various devices."),
+                                                links: [
+                                                    {
+                                                        title: qsTr("Website"),
+                                                        url: "https://www.todoist.com/"
+                                                    }
+                                                ]
+                                            },
+                                            {
                                                 cat: qsTr("Software Updater"),
                                                 title: qsTr("Arch Update"),
                                                 icon: "../../assets/icons/arch-update.svg",
