@@ -53,6 +53,60 @@ ScrollablePage {
                         }
                     }
                 }
+
+                // Guided Tours
+                ColumnLayout {
+                    id: guidedToursSection
+
+                    Layout.fillWidth: true
+                    Layout.minimumHeight: contentFlickable.height
+                    Layout.leftMargin: Appearance.padding.larger
+                    Layout.rightMargin: Appearance.padding.larger
+                    spacing: Appearance.spacing.large
+
+                    WelcomeSectionHeader {
+                        title: qsTr("Guided Tours")
+                        subtitle: qsTr("Interactive step-by-step tours to learn Caelestia features.")
+                    }
+
+                    WelcomeSectionContentArea {
+                        content: Component {
+                            ColumnLayout {
+                                spacing: Appearance.spacing.large
+
+                                StyledText {
+                                    Layout.fillWidth: true
+                                    text: qsTr("Start a guided tour to learn about specific features. Each tour will highlight elements and guide you through their functionality.")
+                                    font.pointSize: Appearance.font.size.normal
+                                    color: Colours.palette.m3onSurface
+                                    wrapMode: Text.WordWrap
+                                    opacity: 0.9
+                                }
+
+                                Flow {
+                                    Layout.fillWidth: true
+                                    spacing: Appearance.spacing.normal
+
+                                    TextButton {
+                                        text: qsTr("Bar Basics Tour")
+                                        radius: Appearance.rounding.small
+                                        onClicked: Tour.startTour("bar-basics")
+                                    }
+
+                                    TextButton {
+                                        text: qsTr("Utilities Drawer Tour")
+                                        radius: Appearance.rounding.small
+                                        onClicked: Tour.startTour("utilities-tour")
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    Item {
+                        Layout.fillHeight: true
+                    }
+                }
             }
         }
     }

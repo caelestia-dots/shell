@@ -4,6 +4,7 @@ import Quickshell
 
 Singleton {
     readonly property var tours: ({
+
         "bar-launcher": {
             id: "bar-launcher",
             steps: [
@@ -43,7 +44,6 @@ Singleton {
                 }
             ]
         },
-
         "utilities-tour": {
             id: "utilities-tour",
             title: "Utilities Drawer",
