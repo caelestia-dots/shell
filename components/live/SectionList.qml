@@ -46,6 +46,13 @@ ColumnLayout {
                         text: listItem.modelData.desc
                     }
                 }
+
+                TextButton {
+                    visible: listItem.modelData.tourId ? true : false
+                    text: qsTr("Show Me")
+                    radius: Appearance.rounding.small
+                    onClicked: Tour.startTour(listItem.modelData.tourId)
+                }
             }
 
             Rectangle {
