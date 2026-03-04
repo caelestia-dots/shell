@@ -109,79 +109,37 @@ Item {
 
                     SectionContentArea {
                         content: Component {
-                            ColumnLayout {
-                                spacing: Appearance.spacing.larger
-
-                                Repeater {
-                                    id: settingsItems
-
-                                    model: [
-                                        {
-                                            title: qsTr("Network"),
-                                            desc: qsTr("This page is dedicated to setting up your network access and VPN.")
-                                        },
-                                        {
-                                            title: qsTr("Bluetooth"),
-                                            desc: qsTr("Configure and look for bluetooth devices here.")
-                                        },
-                                        {
-                                            title: qsTr("Audio"),
-                                            desc: qsTr("Plugged in speakers or headphones? set up app specific volume limits.")
-                                        },
-                                        {
-                                            title: qsTr("Appearance"),
-                                            desc: qsTr("Adjust transparency, fonts, and color variants.")
-                                        },
-                                        {
-                                            title: qsTr("Taskbar"),
-                                            desc: qsTr("Infinitely configurable system statuses (WiFi, Battery) with expanded hover menus, or hidden completely.")
-                                        },
-                                        {
-                                            title: qsTr("Launcher"),
-                                            desc: qsTr("Make sure your favorite apps stay at the top! Or hide apps you dont need visible.")
-                                        },
-                                        {
-                                            title: qsTr("Dashboard"),
-                                            desc: qsTr("Choose to disable or adjust sensitivity. Can also change what is displayed.")
-                                        }
-                                    ]
-
-                                    delegate: ColumnLayout {
-                                        id: settingsItem
-
-                                        required property var modelData
-                                        required property int index
-
-                                        Layout.fillWidth: true
-
-                                        spacing: Appearance.spacing.small
-
-                                        StyledText {
-                                            font.bold: true
-                                            font.pointSize: Appearance.font.size.small
-                                            color: Colours.palette.m3primary
-                                            text: settingsItem.modelData.title
-                                        }
-
-                                        StyledText {
-                                            Layout.fillWidth: true
-
-                                            font.pointSize: Appearance.font.size.small
-                                            color: Colours.palette.m3onSurface
-                                            wrapMode: Text.WordWrap
-                                            opacity: 0.8
-                                            text: settingsItem.modelData.desc
-                                        }
-
-                                        Rectangle {
-                                            Layout.fillWidth: true
-                                            Layout.preferredHeight: 1
-                                            color: Colours.palette.m3outlineVariant
-                                            opacity: 0.3
-                                            visible: index < settingsItems.count - 1
-                                        }
+                            SectionList {
+                                items: [
+                                    {
+                                        title: qsTr("Network"),
+                                        desc: qsTr("This page is dedicated to setting up your network access and VPN.")
+                                    },
+                                    {
+                                        title: qsTr("Bluetooth"),
+                                        desc: qsTr("Configure and look for bluetooth devices here.")
+                                    },
+                                    {
+                                        title: qsTr("Audio"),
+                                        desc: qsTr("Plugged in speakers or headphones? set up app specific volume limits.")
+                                    },
+                                    {
+                                        title: qsTr("Appearance"),
+                                        desc: qsTr("Adjust transparency, fonts, and color variants.")
+                                    },
+                                    {
+                                        title: qsTr("Taskbar"),
+                                        desc: qsTr("Infinitely configurable system statuses (WiFi, Battery) with expanded hover menus, or hidden completely.")
+                                    },
+                                    {
+                                        title: qsTr("Launcher"),
+                                        desc: qsTr("Make sure your favorite apps stay at the top! Or hide apps you dont need visible.")
+                                    },
+                                    {
+                                        title: qsTr("Dashboard"),
+                                        desc: qsTr("Choose to disable or adjust sensitivity. Can also change what is displayed.")
                                     }
-                                }
+                                ]
                             }
                         }
                     }

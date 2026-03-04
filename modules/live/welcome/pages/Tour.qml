@@ -121,75 +121,33 @@ Item {
 
                     SectionContentArea {
                         content: Component {
-                            ColumnLayout {
-                                spacing: Appearance.spacing.larger
-
-                                Repeater {
-                                    id: taskbarItems
-
-                                    model: [
-                                        {
-                                            title: qsTr("OS Icon"),
-                                            desc: qsTr("A decorative brand icon that opens the launcher when clicked.")
-                                        },
-                                        {
-                                            title: qsTr("Workspaces"),
-                                            desc: qsTr("A modular monitor showing active spaces. Behavior can be modified in settings.")
-                                        },
-                                        {
-                                            title: qsTr("Active Window"),
-                                            desc: qsTr("Displays the current window title. Hovering provides a live preview pop-out.")
-                                        },
-                                        {
-                                            title: qsTr("System Tray"),
-                                            desc: qsTr("Interact with background applications and special workspace utilities.")
-                                        },
-                                        {
-                                            title: qsTr("Status Icons"),
-                                            desc: qsTr("Quick-look system health (WiFi, Battery) with expanded hover menus.")
-                                        },
-                                        {
-                                            title: qsTr("Power Menu"),
-                                            desc: qsTr("Access the power drawer for Logout, Restart, and Shutdown options.")
-                                        }
-                                    ]
-
-                                    delegate: ColumnLayout {
-                                        id: taskbarItem
-
-                                        required property var modelData
-                                        required property int index
-
-                                        Layout.fillWidth: true
-
-                                        spacing: Appearance.spacing.small
-
-                                        StyledText {
-                                            font.bold: true
-                                            font.pointSize: Appearance.font.size.small
-                                            color: Colours.palette.m3primary
-                                            text: taskbarItem.modelData.title
-                                        }
-
-                                        StyledText {
-                                            Layout.fillWidth: true
-
-                                            font.pointSize: Appearance.font.size.small
-                                            color: Colours.palette.m3onSurface
-                                            wrapMode: Text.WordWrap
-                                            opacity: 0.8
-                                            text: taskbarItem.modelData.desc
-                                        }
-
-                                        Rectangle {
-                                            Layout.fillWidth: true
-                                            Layout.preferredHeight: 1
-                                            color: Colours.palette.m3outlineVariant
-                                            opacity: 0.3
-                                            visible: taskbarItem.index < taskbarItems.count - 1
-                                        }
+                            SectionList {
+                                items: [
+                                    {
+                                        title: qsTr("OS Icon"),
+                                        desc: qsTr("A decorative brand icon that opens the launcher when clicked.")
+                                    },
+                                    {
+                                        title: qsTr("Workspaces"),
+                                        desc: qsTr("A modular monitor showing active spaces. Behavior can be modified in settings.")
+                                    },
+                                    {
+                                        title: qsTr("Active Window"),
+                                        desc: qsTr("Displays the current window title. Hovering provides a live preview pop-out.")
+                                    },
+                                    {
+                                        title: qsTr("System Tray"),
+                                        desc: qsTr("Interact with background applications and special workspace utilities.")
+                                    },
+                                    {
+                                        title: qsTr("Status Icons"),
+                                        desc: qsTr("Quick-look system health (WiFi, Battery) with expanded hover menus.")
+                                    },
+                                    {
+                                        title: qsTr("Power Menu"),
+                                        desc: qsTr("Access the power drawer for Logout, Restart, and Shutdown options.")
                                     }
-                                }
+                                ]
                             }
                         }
                     }
@@ -216,67 +174,25 @@ Item {
 
                     SectionContentArea {
                         content: Component {
-                            ColumnLayout {
-                                spacing: Appearance.spacing.larger
-
-                                Repeater {
-                                    id: launcherItems
-
-                                    model: [
-                                        {
-                                            title: qsTr("Fuzzy Search"),
-                                            desc: qsTr("Start typing to find apps instantly. No need for perfect spelling.")
-                                        },
-                                        {
-                                            title: qsTr("Configuration"),
-                                            desc: qsTr("Modify look and feel directly via Caelestia's config files.")
-                                        },
-                                        {
-                                            title: qsTr("Keyboard Centric"),
-                                            desc: qsTr("Designed to be triggered and navigated entirely with the keyboard.")
-                                        },
-                                        {
-                                            title: qsTr("Theme Integration"),
-                                            desc: qsTr("Automatically matches your system color scheme and transparency settings.")
-                                        }
-                                    ]
-
-                                    delegate: ColumnLayout {
-                                        id: launcherItem
-
-                                        required property var modelData
-                                        required property int index
-
-                                        Layout.fillWidth: true
-
-                                        spacing: Appearance.spacing.small
-
-                                        StyledText {
-                                            font.bold: true
-                                            font.pointSize: Appearance.font.size.small
-                                            color: Colours.palette.m3primary
-                                            text: launcherItem.modelData.title
-                                        }
-
-                                        StyledText {
-                                            Layout.fillWidth: true
-
-                                            font.pointSize: Appearance.font.size.small
-                                            color: Colours.palette.m3onSurface
-                                            wrapMode: Text.WordWrap
-                                            opacity: 0.8
-                                            text: launcherItem.modelData.desc
-                                        }
-
-                                        Rectangle {
-                                            Layout.fillWidth: true
-                                            Layout.preferredHeight: 1
-                                            color: Colours.palette.m3outlineVariant
-                                            opacity: 0.3
-                                            visible: launcherItem.index < launcherItems.count - 1
-                                        }
+                            SectionList {
+                                items: [
+                                    {
+                                        title: qsTr("Fuzzy Search"),
+                                        desc: qsTr("Start typing to find apps instantly. No need for perfect spelling.")
+                                    },
+                                    {
+                                        title: qsTr("Configuration"),
+                                        desc: qsTr("Modify look and feel directly via Caelestia's config files.")
+                                    },
+                                    {
+                                        title: qsTr("Keyboard Centric"),
+                                        desc: qsTr("Designed to be triggered and navigated entirely with the keyboard.")
+                                    },
+                                    {
+                                        title: qsTr("Theme Integration"),
+                                        desc: qsTr("Automatically matches your system color scheme and transparency settings.")
                                     }
-                                }
+                                ]
                             }
                         }
                     }
@@ -303,67 +219,25 @@ Item {
 
                     SectionContentArea {
                         content: Component {
-                            ColumnLayout {
-                                spacing: Appearance.spacing.larger
-
-                                Repeater {
-                                    id: sidebarItems
-
-                                    model: [
-                                        {
-                                            title: qsTr("Notifications"),
-                                            desc: qsTr("A dedicated hub for all application and system alerts.")
-                                        },
-                                        {
-                                            title: qsTr("Keep Awake"),
-                                            desc: qsTr("An integrated idle inhibitor to prevent the system from locking.")
-                                        },
-                                        {
-                                            title: qsTr("Screen Recorder"),
-                                            desc: qsTr("Capture regions, windows, or the full screen with instant file access.")
-                                        },
-                                        {
-                                            title: qsTr("Quick Toggles"),
-                                            desc: qsTr("Fast access to Game Mode, system settings, and hardware controls.")
-                                        }
-                                    ]
-
-                                    delegate: ColumnLayout {
-                                        id: sidebarItem
-
-                                        required property var modelData
-                                        required property int index
-
-                                        Layout.fillWidth: true
-
-                                        spacing: Appearance.spacing.small
-
-                                        StyledText {
-                                            font.bold: true
-                                            font.pointSize: Appearance.font.size.small
-                                            color: Colours.palette.m3primary
-                                            text: sidebarItem.modelData.title
-                                        }
-
-                                        StyledText {
-                                            Layout.fillWidth: true
-
-                                            font.pointSize: Appearance.font.size.small
-                                            color: Colours.palette.m3onSurface
-                                            wrapMode: Text.WordWrap
-                                            opacity: 0.8
-                                            text: sidebarItem.modelData.desc
-                                        }
-
-                                        Rectangle {
-                                            Layout.fillWidth: true
-                                            Layout.preferredHeight: 1
-                                            color: Colours.palette.m3outlineVariant
-                                            opacity: 0.3
-                                            visible: sidebarItem.index < sidebarItems.count - 1
-                                        }
+                            SectionList {
+                                items: [
+                                    {
+                                        title: qsTr("Notifications"),
+                                        desc: qsTr("A dedicated hub for all application and system alerts.")
+                                    },
+                                    {
+                                        title: qsTr("Keep Awake"),
+                                        desc: qsTr("An integrated idle inhibitor to prevent the system from locking.")
+                                    },
+                                    {
+                                        title: qsTr("Screen Recorder"),
+                                        desc: qsTr("Capture regions, windows, or the full screen with instant file access.")
+                                    },
+                                    {
+                                        title: qsTr("Quick Toggles"),
+                                        desc: qsTr("Fast access to Game Mode, system settings, and hardware controls.")
                                     }
-                                }
+                                ]
                             }
                         }
                     }
@@ -390,65 +264,25 @@ Item {
 
                     SectionContentArea {
                         content: Component {
-                            ColumnLayout {
-                                spacing: Appearance.spacing.larger
-
-                                Repeater {
-                                    id: dashboardItems
-
-                                    model: [
-                                        {
-                                            title: qsTr("Media Control"),
-                                            desc: qsTr("Switch players and control playback for all active media.")
-                                        },
-                                        {
-                                            title: qsTr("Performance"),
-                                            desc: qsTr("Monitor real-time CPU/GPU temperatures and system usage.")
-                                        },
-                                        {
-                                            title: qsTr("Weather"),
-                                            desc: qsTr("Detailed local conditions with a comprehensive seven-day forecast.")
-                                        },
-                                        {
-                                            title: qsTr("System Info"),
-                                            desc: qsTr("A quick snapshot of your hardware and session details.")
-                                        }
-                                    ]
-
-                                    delegate: ColumnLayout {
-                                        id: dashboardItem
-
-                                        required property var modelData
-                                        required property int index
-
-                                        Layout.fillWidth: true
-
-                                        spacing: Appearance.spacing.small
-
-                                        StyledText {
-                                            font.bold: true
-                                            font.pointSize: Appearance.font.size.small
-                                            color: Colours.palette.m3primary
-                                            text: dashboardItem.modelData.title
-                                        }
-
-                                        StyledText {
-                                            Layout.fillWidth: true
-                                            font.pointSize: Appearance.font.size.small
-                                            wrapMode: Text.WordWrap
-                                            opacity: 0.8
-                                            text: dashboardItem.modelData.desc
-                                        }
-
-                                        Rectangle {
-                                            Layout.fillWidth: true
-                                            Layout.preferredHeight: 1
-                                            color: Colours.palette.m3outlineVariant
-                                            opacity: 0.3
-                                            visible: dashboardItem.index < dashboardItems.count - 1
-                                        }
+                            SectionList {
+                                items: [
+                                    {
+                                        title: qsTr("Media Control"),
+                                        desc: qsTr("Switch players and control playback for all active media.")
+                                    },
+                                    {
+                                        title: qsTr("Performance"),
+                                        desc: qsTr("Monitor real-time CPU/GPU temperatures and system usage.")
+                                    },
+                                    {
+                                        title: qsTr("Weather"),
+                                        desc: qsTr("Detailed local conditions with a comprehensive seven-day forecast.")
+                                    },
+                                    {
+                                        title: qsTr("System Info"),
+                                        desc: qsTr("A quick snapshot of your hardware and session details.")
                                     }
-                                }
+                                ]
                             }
                         }
                     }
