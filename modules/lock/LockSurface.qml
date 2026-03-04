@@ -163,7 +163,10 @@ WlSessionLockSurface {
         id: background
 
         anchors.fill: parent
-        captureSource: root.screen
+	captureSource: root.screen
+	
+	live:false
+
         opacity: 0
 
         layer.enabled: true
