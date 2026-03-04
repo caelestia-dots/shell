@@ -116,7 +116,7 @@ Item {
 
                     SectionHeader {
                         title: qsTr("Taskbar")
-                        subtitle: qsTr("The central hub for system information, located on the left side of the shell.")
+                        subtitle: qsTr("Similar to the taskbar from other environments, the bar is the focal point for interacting with your desktop. It is located on the left side of the shell.")
                     }
 
                     SectionContentArea {
@@ -125,7 +125,8 @@ Item {
                                 items: [
                                     {
                                         title: qsTr("OS Icon"),
-                                        desc: qsTr("A decorative brand icon that opens the launcher when clicked.")
+                                        desc: qsTr("The OS icon shows the Caelestia logo by default in CaelestiaLive, and the distro logo by default on a normal install. The icon can be changed through your shell.json file, and acts as a trigger for the application launcher."),
+                                        tourId: "bar-launcher"
                                     },
                                     {
                                         title: qsTr("Workspaces"),
