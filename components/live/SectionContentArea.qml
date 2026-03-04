@@ -47,7 +47,7 @@ StyledRect {
             Layout.fillWidth: true
             Layout.topMargin: root.title || root.subtitle ? Appearance.padding.large : 0
 
-            sourceComponent: content
+            sourceComponent: root.content
         }
     }
 }
