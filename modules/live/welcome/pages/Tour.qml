@@ -114,12 +114,12 @@ Item {
                     Layout.rightMargin: Appearance.padding.larger
                     spacing: Appearance.spacing.larger
 
-                    WelcomeSectionHeader {
+                    SectionHeader {
                         title: qsTr("Taskbar")
                         subtitle: qsTr("The central hub for system information, located on the left side of the shell.")
                     }
 
-                    WelcomeSectionContentArea {
+                    SectionContentArea {
                         content: Component {
                             ColumnLayout {
                                 spacing: Appearance.spacing.larger
@@ -209,12 +209,12 @@ Item {
                     Layout.rightMargin: Appearance.padding.larger
                     spacing: Appearance.padding.larger
 
-                    WelcomeSectionHeader {
+                    SectionHeader {
                         title: qsTr("Launcher")
                         subtitle: qsTr("Caelestia's primary gateway to your applications and tools.")
                     }
 
-                    WelcomeSectionContentArea {
+                    SectionContentArea {
                         content: Component {
                             ColumnLayout {
                                 spacing: Appearance.spacing.larger
@@ -296,12 +296,12 @@ Item {
                     Layout.rightMargin: Appearance.padding.larger
                     spacing: Appearance.padding.larger
 
-                    WelcomeSectionHeader {
+                    SectionHeader {
                         title: qsTr("Sidebar")
                         subtitle: qsTr("Access notifications, system toggles, and tools via the right-side panel.")
                     }
 
-                    WelcomeSectionContentArea {
+                    SectionContentArea {
                         content: Component {
                             ColumnLayout {
                                 spacing: Appearance.spacing.larger
@@ -383,12 +383,12 @@ Item {
                     Layout.rightMargin: Appearance.padding.larger
                     spacing: Appearance.padding.larger
 
-                    WelcomeSectionHeader {
+                    SectionHeader {
                         title: qsTr("Dashboard")
                         subtitle: qsTr("An overview of system performance, media, and local environment.")
                     }
 
-                    WelcomeSectionContentArea {
+                    SectionContentArea {
                         content: Component {
                             ColumnLayout {
                                 spacing: Appearance.spacing.larger
@@ -468,13 +468,13 @@ Item {
                     Layout.rightMargin: Appearance.padding.larger
                     spacing: Appearance.spacing.large
 
-                    WelcomeSectionHeader {
+                    SectionHeader {
                         title: qsTr("Workspaces")
                         subtitle: qsTr("Master the art of tiling and multitasking.")
                     }
 
                     // Standard Workspaces
-                    WelcomeSectionContentArea {
+                    SectionContentArea {
                         content: Component {
                             ColumnLayout {
                                 spacing: Appearance.spacing.large
@@ -531,13 +531,13 @@ Item {
                         }
                     }
 
-                    WelcomeSectionHeader {
+                    SectionHeader {
                         title: qsTr("Special Workspaces")
                         subtitle: qsTr("Keep important things close, but out of the way.")
                     }
 
                     // Special Workspaces
-                    WelcomeSectionContentArea {
+                    SectionContentArea {
                         content: Component {
                             ColumnLayout {
                                 spacing: Appearance.spacing.large
@@ -603,27 +603,27 @@ Item {
                         Layout.fillHeight: true
                     }
                 }
-                
+
                 // Guided Tours
                 ColumnLayout {
                     id: guidedToursSection
-                    
+
                     Layout.fillWidth: true
                     Layout.minimumHeight: contentFlickable.height
                     Layout.leftMargin: Appearance.padding.larger
                     Layout.rightMargin: Appearance.padding.larger
                     spacing: Appearance.spacing.large
-                    
-                    WelcomeSectionHeader {
+
+                    SectionHeader {
                         title: qsTr("Guided Tours")
                         subtitle: qsTr("Interactive step-by-step tours to learn Caelestia features.")
                     }
-                    
-                    WelcomeSectionContentArea {
+
+                    SectionContentArea {
                         content: Component {
                             ColumnLayout {
                                 spacing: Appearance.spacing.large
-                                
+
                                 StyledText {
                                     Layout.fillWidth: true
                                     text: qsTr("Start a guided tour to learn about specific features. Each tour will highlight elements and guide you through their functionality.")
@@ -632,17 +632,17 @@ Item {
                                     wrapMode: Text.WordWrap
                                     opacity: 0.9
                                 }
-                                
+
                                 Flow {
                                     Layout.fillWidth: true
                                     spacing: Appearance.spacing.normal
-                                    
+
                                     TextButton {
                                         text: qsTr("Bar Basics Tour")
                                         radius: Appearance.rounding.small
                                         onClicked: Tour.startTour("bar-basics")
                                     }
-                                    
+
                                     TextButton {
                                         text: qsTr("Utilities Drawer Tour")
                                         radius: Appearance.rounding.small
@@ -652,7 +652,7 @@ Item {
                             }
                         }
                     }
-                    
+
                     Item {
                         Layout.fillHeight: true
                     }
