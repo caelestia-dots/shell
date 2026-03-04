@@ -28,6 +28,8 @@ ColumnLayout {
             spacing: Appearance.spacing.small
 
             RowLayout {
+                spacing: Appearance.spacing.normal
+
                 ColumnLayout {
                     StyledText {
                         font.bold: true
