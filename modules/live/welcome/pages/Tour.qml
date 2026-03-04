@@ -6,6 +6,7 @@ import qs.services
 import qs.components
 import qs.components.live
 import qs.components.containers
+import qs.components.controls
 import qs.config
 
 Item {
