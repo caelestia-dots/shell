@@ -57,7 +57,7 @@ Variants {
             WlrLayershell.keyboardFocus: visibilities.launcher || visibilities.session ? WlrKeyboardFocus.OnDemand : WlrKeyboardFocus.None
 
             mask: (Tour.tourActive || Tour.spotlightActive) ? null : maskRegion
-            
+
             Region {
                 id: maskRegion
                 x: bar.implicitWidth + win.dragMaskPadding
@@ -179,24 +179,24 @@ Variants {
                     Component.onCompleted: Visibilities.bars.set(scope.modelData, this)
                 }
             }
-            
+
             Loader {
                 id: tourOverlayLoader
-                
+
                 anchors.fill: parent
                 active: tourOverlayActive
                 z: 10000
-                source: "../tour/TourOverlayContent.qml"
-                
+                source: "../live/tour/TourOverlayContent.qml"
+
                 property bool tourOverlayActive: Tour.spotlightActive || Tour.tourActive
-                
+
                 Timer {
                     id: deactivateTimer
                     interval: 250
                     repeat: false
                     onTriggered: tourOverlayLoader.active = false
                 }
-                
+
                 onTourOverlayActiveChanged: {
                     if (tourOverlayActive) {
                         deactivateTimer.stop();
