@@ -102,14 +102,14 @@ Item {
 
         const scrollY = contentFlickable.contentY;
         const viewportCenter = scrollY + (contentFlickable.height / 3);
-        
+
         let currentSection = sections[0].id;
         let minDistance = Infinity;
 
         for (let i = 0; i < sections.length; i++) {
             const sectionY = sections[i].header.mapToItem(contentColumn, 0, 0).y;
             const distance = Math.abs(sectionY - scrollY);
-            
+
             if (sectionY <= viewportCenter && distance < minDistance) {
                 minDistance = distance;
                 currentSection = sections[i].id;
@@ -168,14 +168,12 @@ Item {
                     id: taskbarSection
 
                     Layout.fillWidth: true
-                    Layout.topMargin: Appearance.padding.larger
-                    Layout.bottomMargin: Appearance.padding.larger
-                    Layout.leftMargin: Appearance.padding.larger
-                    Layout.rightMargin: Appearance.padding.larger
+                    Layout.margins: Appearance.padding.larger
                     spacing: Appearance.spacing.larger
 
                     SectionHeader {
                         id: taskbarSectionHeader
+
                         title: qsTr("Taskbar")
                         subtitle: qsTr("Similar to the taskbar from other environments, the bar is the focal point for interacting with your desktop. It is located on the left side of the shell.")
                     }
@@ -224,14 +222,12 @@ Item {
                     id: launcherSection
 
                     Layout.fillWidth: true
-                    Layout.topMargin: Appearance.padding.larger
-                    Layout.bottomMargin: Appearance.padding.larger
-                    Layout.leftMargin: Appearance.padding.larger
-                    Layout.rightMargin: Appearance.padding.larger
+                    Layout.margins: Appearance.padding.larger
                     spacing: Appearance.padding.larger
 
                     SectionHeader {
                         id: launcherSectionHeader
+
                         title: qsTr("Launcher")
                         subtitle: qsTr("Your quick-access application menu, accessible via the OS icon or Super key.")
                     }
@@ -271,14 +267,12 @@ Item {
                     id: sidebarSection
 
                     Layout.fillWidth: true
-                    Layout.topMargin: Appearance.padding.larger
-                    Layout.bottomMargin: Appearance.padding.larger
-                    Layout.leftMargin: Appearance.padding.larger
-                    Layout.rightMargin: Appearance.padding.larger
+                    Layout.margins: Appearance.padding.larger
                     spacing: Appearance.padding.larger
 
                     SectionHeader {
                         id: sidebarSectionHeader
+
                         title: qsTr("Sidebar")
                         subtitle: qsTr("Access notifications, system toggles, and tools via the right-side panel.")
                     }
@@ -318,14 +312,12 @@ Item {
                     id: dashboardSection
 
                     Layout.fillWidth: true
-                    Layout.topMargin: Appearance.padding.larger
-                    Layout.bottomMargin: Appearance.padding.larger
-                    Layout.leftMargin: Appearance.padding.larger
-                    Layout.rightMargin: Appearance.padding.larger
+                    Layout.margins: Appearance.padding.larger
                     spacing: Appearance.padding.larger
 
                     SectionHeader {
                         id: dashboardSectionHeader
+
                         title: qsTr("Dashboard")
                         subtitle: qsTr("An overview of system performance, media, and local environment.")
                     }
@@ -365,14 +357,12 @@ Item {
                     id: workspacesSection
 
                     Layout.fillWidth: true
-                    Layout.topMargin: Appearance.padding.larger
-                    Layout.bottomMargin: Appearance.padding.larger
-                    Layout.leftMargin: Appearance.padding.larger
-                    Layout.rightMargin: Appearance.padding.larger
+                    Layout.margins: Appearance.padding.larger
                     spacing: Appearance.padding.larger
 
                     SectionHeader {
                         id: workspacesSectionHeader
+
                         title: qsTr("Workspaces")
                         subtitle: qsTr("Master the art of tiling and multitasking.")
                     }
@@ -471,14 +461,12 @@ Item {
                     id: guidedToursSection
 
                     Layout.fillWidth: true
-                    Layout.topMargin: Appearance.padding.larger
-                    Layout.bottomMargin: Appearance.padding.larger
-                    Layout.leftMargin: Appearance.padding.larger
-                    Layout.rightMargin: Appearance.padding.larger
+                    Layout.margins: Appearance.padding.larger
                     spacing: Appearance.spacing.large
 
                     SectionHeader {
                         id: guidedToursSectionHeader
+
                         title: qsTr("Guided Tours")
                         subtitle: qsTr("Interactive step-by-step tours to learn Caelestia features.")
                     }
