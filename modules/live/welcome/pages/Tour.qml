@@ -300,131 +300,93 @@ Item {
                     Layout.minimumHeight: contentFlickable.height
                     Layout.leftMargin: Appearance.padding.larger
                     Layout.rightMargin: Appearance.padding.larger
-                    spacing: Appearance.spacing.large
+                    spacing: Appearance.padding.larger
 
                     SectionHeader {
                         title: qsTr("Workspaces")
                         subtitle: qsTr("Master the art of tiling and multitasking.")
                     }
 
-                    // Standard Workspaces
                     SectionContentArea {
+                        color: "transparent"
+                        
                         content: Component {
-                            ColumnLayout {
-                                spacing: Appearance.spacing.large
+                            GridLayout {
+                                columns: parent.width > 800 ? 2 : 1
+                                columnSpacing: Appearance.spacing.large
+                                rowSpacing: Appearance.spacing.large
 
-                                StyledGridView {
+                                // Standard Workspaces
+                                SectionContentArea {
                                     Layout.fillWidth: true
-                                    Layout.preferredHeight: implicitHeight
+                                    Layout.fillHeight: true
+                                    Layout.alignment: Qt.AlignTop
+                                    title: qsTr("Standard Workspaces")
+                                    
+                                    content: Component {
+                                        ColumnLayout {
+                                            spacing: Appearance.spacing.normal
 
-                                    model: [
-                                        {
-                                            key: qsTr("Super + <#>"),
-                                            label: qsTr("Switch to workspace")
-                                        },
-                                        {
-                                            key: qsTr("Super + Alt + <#>"),
-                                            label: qsTr("Move window to workspace"),
-                                        },
-                                        {
-                                            key: qsTr("Super + Alt + <Up|Down|Left|Right>"),
-                                            label: qsTr("Move window directionally")
-                                        },
-                                        {
-                                            key: qsTr("Super + F"),
-                                            label: qsTr("Toggle fullscreen")
-                                        }
-                                    ]
+                                            KeybindingRow {
+                                                label: qsTr("Switch to workspace")
+                                                keys: ["Super", "#"]
+                                                desc: qsTr(" ")
+                                            }
 
-                                    spacing: 12
-                                    paddingX: 16
+                                            KeybindingRow {
+                                                label: qsTr("Move window to workspace")
+                                                keys: ["Super", "Alt", "#"]
+                                                desc: qsTr(" ")
+                                            }
 
-                                    cellContent: Component {
-                                        Item {
-                                            id: standardWorkspacesItem
+                                            KeybindingRow {
+                                                label: qsTr("Move window directionally")
+                                                keys: ["Super", "Alt", "← ↑ → ↓"]
+                                                desc: qsTr(" ")
+                                            }
 
-                                            property var modelData
-                                            property real gridMeasureWidth: firstStepsKeybinding.implicitWidth
-
-                                            ColumnLayout {
-                                                anchors.fill: parent
-                                                anchors.margins: Appearance.padding.small
-                                                spacing: Appearance.spacing.small
-
-                                                Keybinding {
-                                                    id: firstStepsKeybinding
-
-                                                    key: standardWorkspacesItem.modelData.key
-                                                    label: standardWorkspacesItem.modelData.label
-                                                }
+                                            KeybindingRow {
+                                                label: qsTr("Toggle fullscreen")
+                                                keys: ["Super", "F"]
+                                                desc: qsTr(" ")
                                             }
                                         }
                                     }
                                 }
-                            }
-                        }
-                    }
 
-                    SectionHeader {
-                        title: qsTr("Special Workspaces")
-                        subtitle: qsTr("Keep important things close, but out of the way.")
-                    }
-
-                    // Special Workspaces
-                    SectionContentArea {
-                        content: Component {
-                            ColumnLayout {
-                                spacing: Appearance.spacing.large
-
-                                StyledGridView {
+                                // Special Workspaces
+                                SectionContentArea {
                                     Layout.fillWidth: true
-                                    Layout.preferredHeight: implicitHeight
+                                    Layout.fillHeight: true
+                                    Layout.alignment: Qt.AlignTop
+                                    title: qsTr("Special Workspaces")
+                                    
+                                    content: Component {
+                                        ColumnLayout {
+                                            spacing: Appearance.spacing.normal
 
-                                    model: [
-                                        {
-                                            key: qsTr("Super + D"),
-                                            label: qsTr("Communications Hub"),
-                                            desc: qsTr("Discord")
-                                        },
-                                        {
-                                            key: qsTr("Super + M"),
-                                            label: qsTr("Music & Media"),
-                                            desc: qsTr("Spotify")
-                                        },
-                                        {
-                                            key: qsTr("Super + A"),
-                                            label: qsTr("ToDo List"),
-                                            desc: qsTr("Todoist")
-                                        },
-                                        {
-                                            key: qsTr("Super + S"),
-                                            label: qsTr("Special"),
-                                            desc: qsTr("Scratchpad Workspace")
-                                        }
-                                    ]
+                                            KeybindingRow {
+                                                label: qsTr("Communications Hub")
+                                                desc: qsTr("Discord")
+                                                keys: ["Super", "D"]
+                                            }
 
-                                    spacing: 12
-                                    paddingX: 16
+                                            KeybindingRow {
+                                                label: qsTr("Music & Media")
+                                                desc: qsTr("Spotify")
+                                                keys: ["Super", "M"]
+                                            }
 
-                                    cellContent: Component {
-                                        Item {
-                                            id: specialWorkspacesItem
+                                            KeybindingRow {
+                                                label: qsTr("ToDo List")
+                                                desc: qsTr("Todoist")
+                                                keys: ["Super", "A"]
+                                            }
 
-                                            property var modelData
-                                            property real gridMeasureWidth: specialWorkspacesKeybinding.implicitWidth
-
-                                            ColumnLayout {
-                                                anchors.fill: parent
-                                                anchors.margins: Appearance.padding.small
-                                                spacing: Appearance.spacing.small
-
-                                                Keybinding {
-                                                    id: specialWorkspacesKeybinding
-
-                                                    key: specialWorkspacesItem.modelData.key
-                                                    label: specialWorkspacesItem.modelData.label
-                                                    desc: specialWorkspacesItem.modelData.desc
-                                                }
+                                            KeybindingRow {
+                                                label: qsTr("Special")
+                                                desc: qsTr("Scratchpad Workspace")
+                                                keys: ["Super", "S"]
                                             }
                                         }
                                     }
