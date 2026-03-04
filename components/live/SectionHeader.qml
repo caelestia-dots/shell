@@ -9,6 +9,7 @@ Item {
 
     property string title: ""
     property string subtitle: ""
+    property int fontSize: Appearance.font.size.extraLarge
 
     Layout.fillWidth: true
     height: sectionHeader.implicitHeight
@@ -20,7 +21,7 @@ Item {
 
         StyledText {
             text: root.title
-            font.pointSize: Appearance.font.size.extraLarge
+            font.pointSize: root.fontSize
             font.bold: true
             color: Colours.palette.m3onBackground
         }
