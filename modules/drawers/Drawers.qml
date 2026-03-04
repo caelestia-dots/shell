@@ -56,7 +56,10 @@ Variants {
             WlrLayershell.exclusionMode: ExclusionMode.Ignore
             WlrLayershell.keyboardFocus: visibilities.launcher || visibilities.session ? WlrKeyboardFocus.OnDemand : WlrKeyboardFocus.None
 
-            mask: Region {
+            mask: (Tour.tourActive || Tour.spotlightActive) ? null : maskRegion
+            
+            Region {
+                id: maskRegion
                 x: bar.implicitWidth + win.dragMaskPadding
                 y: Config.border.thickness + win.dragMaskPadding
                 width: win.width - bar.implicitWidth - Config.border.thickness - win.dragMaskPadding * 2
@@ -176,32 +179,33 @@ Variants {
                     Component.onCompleted: Visibilities.bars.set(scope.modelData, this)
                 }
             }
-
+            
             Loader {
                 id: tourOverlayLoader
                 
                 anchors.fill: parent
-                active: false
-                z: 1000
+                active: tourOverlayActive
+                z: 10000
                 source: "../tour/TourOverlayContent.qml"
                 
-                Connections {
-                    target: Tour
-                    
-                    function onSpotlightActiveChanged() {
-                        if (Tour.spotlightActive) {
-                            tourOverlayLoader.active = true;
-                            if (tourOverlayLoader.item) {
-                                tourOverlayLoader.item.opacity = 1;
-                            }
-                        } else {
-                            if (tourOverlayLoader.item) {
-                                tourOverlayLoader.item.opacity = 0;
-                            }
-                            Qt.callLater(() => {
-                                tourOverlayLoader.active = false;
-                            });
-                        }
+                property bool tourOverlayActive: Tour.spotlightActive || Tour.tourActive
+                
+                Timer {
+                    id: deactivateTimer
+                    interval: 250
+                    repeat: false
+                    onTriggered: tourOverlayLoader.active = false
+                }
+                
+                onTourOverlayActiveChanged: {
+                    if (tourOverlayActive) {
+                        deactivateTimer.stop();
+                        active = true;
+                    } else if (item) {
+                        item.opacity = 0;
+                        deactivateTimer.restart();
+                    } else {
+                        active = false;
                     }
                 }
             }

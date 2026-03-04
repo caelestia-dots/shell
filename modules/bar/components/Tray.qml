@@ -9,6 +9,9 @@ import QtQuick
 
 StyledRect {
     id: root
+    
+    Component.onCompleted: Tour.register("bar-system-tray", root)
+    Component.onDestruction: Tour.unregister("bar-system-tray")
 
     readonly property alias layout: layout
     readonly property alias items: items

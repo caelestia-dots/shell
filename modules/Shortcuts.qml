@@ -113,6 +113,26 @@ Scope {
             }
         }
 
+        function open(drawer: string): void {
+            if (list().split("\n").includes(drawer)) {
+                if (root.hasFullscreen && ["launcher", "session", "dashboard"].includes(drawer))
+                    return;
+                const visibilities = Visibilities.getForActive();
+                visibilities[drawer] = true;
+            } else {
+                console.warn(`[IPC] Drawer "${drawer}" does not exist`);
+            }
+        }
+
+        function close(drawer: string): void {
+            if (list().split("\n").includes(drawer)) {
+                const visibilities = Visibilities.getForActive();
+                visibilities[drawer] = false;
+            } else {
+                console.warn(`[IPC] Drawer "${drawer}" does not exist`);
+            }
+        }
+
         function list(): string {
             const visibilities = Visibilities.getForActive();
             return Object.keys(visibilities).filter(k => typeof visibilities[k] === "boolean").join("\n");

@@ -7,9 +7,12 @@ import qs.components
 
 Item {
     id: root
-    
+
     implicitWidth: Appearance.font.size.large * 1.2
     implicitHeight: Appearance.font.size.large * 1.2
+
+    Component.onCompleted: Tour.register("bar-launcher", root)
+    Component.onDestruction: Tour.unregister("bar-launcher")
 
     MouseArea {
         anchors.fill: parent
