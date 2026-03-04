@@ -12,6 +12,9 @@ StyledClippingRect {
     id: root
 
     required property ShellScreen screen
+    
+    Component.onCompleted: Tour.register("bar-workspaces", root)
+    Component.onDestruction: Tour.unregister("bar-workspaces")
 
     readonly property bool onSpecial: (Config.bar.workspaces.perMonitorWorkspaces ? Hypr.monitorFor(screen) : Hypr.focusedMonitor)?.lastIpcObject?.specialWorkspace?.name !== ""
     readonly property int activeWsId: Config.bar.workspaces.perMonitorWorkspaces ? (Hypr.monitorFor(screen).activeWorkspace?.id ?? 1) : Hypr.activeWsId

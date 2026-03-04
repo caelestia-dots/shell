@@ -20,6 +20,9 @@ StyledRect {
     radius: Appearance.rounding.normal
     color: Colours.tPalette.m3surfaceContainer
 
+    Component.onCompleted: Tour.register("utilities-toggles", root)
+    Component.onDestruction: Tour.unregister("utilities-toggles")
+
     ColumnLayout {
         id: layout
 
