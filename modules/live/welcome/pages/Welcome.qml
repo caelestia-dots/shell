@@ -1,6 +1,5 @@
 import QtQuick
 import QtQuick.Layouts
-import QtQuick.VectorImage
 import qs.services
 import qs.components
 import qs.components.containers
@@ -27,10 +26,8 @@ Item {
                 Layout.fillWidth: true
                 Layout.alignment: Qt.AlignHCenter
 
-                VectorImage {
+                LogoIntro {
                     Layout.alignment: Qt.AlignHCenter
-                    preferredRendererType: VectorImage.CurveRenderer
-                    source: Colours.currentLight ? "../../assets/logo-light.svg" : "../../assets/logo-dark.svg"
                 }
 
                 StyledText {
