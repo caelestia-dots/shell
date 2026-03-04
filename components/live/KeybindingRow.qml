@@ -14,7 +14,7 @@ StyledRect {
     property string desc
 
     Layout.fillWidth: true
-    implicitHeight: row.implicitHeight + Appearance.padding.large * 2
+    implicitHeight: desc ? row.implicitHeight + Appearance.padding.large * 2 : row.implicitHeight + Appearance.padding.large * 2 + Appearance.font.size.small
     radius: Appearance.rounding.normal
     color: Colours.palette.m3surfaceContainerLow
 
