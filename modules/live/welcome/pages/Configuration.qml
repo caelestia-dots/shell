@@ -36,19 +36,80 @@ Item {
 
     property string currentSubsection: subsections[0].id
 
-    function scrollToSubsection(subsectionId: string): void {
-        const sectionIndex = subsections.findIndex(s => s.id === subsectionId);
+    property bool programmaticScroll: false
 
-        if (sectionIndex === -1) {
-            contentFlickable.contentY = 0;
-            return;
-        }
-
-        const targetY = sectionIndex * contentFlickable.height;
-        contentFlickable.contentY = targetY;
+    Timer {
+        id: scrollTimer
+        interval: Appearance.anim.durations.normal + 50
+        onTriggered: root.programmaticScroll = false
     }
 
-    onCurrentSubsectionChanged: scrollToSubsection(currentSubsection)
+    function scrollToSubsection(subsectionId: string): void {
+        let targetY = 0
+
+        switch(subsectionId) {
+            case "settings":
+                targetY = settingsSectionHeader.mapToItem(contentColumn, 0, 0).y
+                break
+            case "cli":
+                targetY = cliSectionHeader.mapToItem(contentColumn, 0, 0).y
+                break
+            case "shell":
+                targetY = shellSectionHeader.mapToItem(contentColumn, 0, 0).y
+                break
+            case "hyprland":
+                targetY = hyprlandSectionHeader.mapToItem(contentColumn, 0, 0).y
+            default:
+                targetY = 0
+        }
+
+        programmaticScroll = true
+        root.currentSubsection = subsectionId
+        contentFlickable.contentY = targetY
+        scrollTimer.restart()
+    }
+
+    function updateCurrentSection(): void {
+        if (programmaticScroll)
+            return
+
+        const sections = [
+            {
+                id: "settings",
+                header: settingsSectionHeader
+            },
+            {
+                id: "cli",
+                header: cliSectionHeader
+            },
+            {
+                id: "shell",
+                header: shellSectionHeader
+            },
+            {
+                id: "hyprland",
+                header: hyprlandSectionHeader
+            }
+        ]
+
+        const scrollY = contentFlickable.contentY
+        const viewportCenter = scrollY + (contentFlickable.height / 3)
+
+        let currentSection = sections[0].id
+        let minDistance = Infinity
+
+        for (let i = 0; i < sections.length; i++) {
+            const sectionY = sections[i].header.mapToItem(contentColumn, 0, 0).y
+            const distance = Math.abs(sectionY - scrollY)
+
+            if (sectionY <= viewportCenter && distance < minDistance) {
+                minDistance = distance
+                currentSection = sections[i].id
+            }
+        }
+
+        root.currentSubsection = currentSection
+    }
 
     RowLayout {
         anchors.fill: parent
@@ -62,7 +123,7 @@ Item {
 
                 sections: root.subsections
                 activeSection: root.currentSubsection
-                onSectionChanged: sectionId => root.currentSubsection = sectionId
+                onSectionChanged: sectionId => root.scrollToSubsection(sectionId)
             }
 
             Item {
@@ -79,6 +140,8 @@ Item {
             flickableDirection: Flickable.VerticalFlick
             clip: true
 
+            onContentYChanged: root.updateCurrentSection()
+
             Behavior on contentY {
                 Anim {
                     duration: Appearance.anim.durations.normal
@@ -86,23 +149,23 @@ Item {
                 }
             }
 
-            // Settings App
             ColumnLayout {
                 id: contentColumn
 
                 width: parent.width
                 spacing: 0
 
+                // Settings
                 ColumnLayout {
                     id: settingsSection
 
                     Layout.fillWidth: true
-                    Layout.minimumHeight: contentFlickable.height
-                    Layout.leftMargin: Appearance.padding.larger
-                    Layout.rightMargin: Appearance.padding.larger
+                    Layout.margins: Appearance.padding.larger
                     spacing: Appearance.padding.larger
 
                     SectionHeader {
+                        id: settingsSectionHeader
+
                         title: qsTr("Settings App")
                         subtitle: qsTr("Quick configuration for the most common shell options.")
                     }
@@ -145,7 +208,7 @@ Item {
                     }
 
                     Item {
-                        Layout.fillHeight: true
+                        Layout.preferredHeight: Appearance.padding.larger * 3
                     }
                 }
 
@@ -154,12 +217,12 @@ Item {
                     id: cliSection
 
                     Layout.fillWidth: true
-                    Layout.minimumHeight: contentFlickable.height
-                    Layout.leftMargin: Appearance.padding.larger
-                    Layout.rightMargin: Appearance.padding.larger
+                    Layout.margins: Appearance.padding.larger
                     spacing: Appearance.padding.larger
 
                     SectionHeader {
+                        id: cliSectionHeader
+
                         title: qsTr("CLI Configuration")
                         subtitle: qsTr("Customize the behavior of the caelestia CLI app.")
                     }
@@ -179,7 +242,7 @@ Item {
                     }
 
                     Item {
-                        Layout.fillHeight: true
+                        Layout.preferredHeight: Appearance.padding.larger * 3
                     }
                 }
 
@@ -187,12 +250,12 @@ Item {
                     id: shellSection
 
                     Layout.fillWidth: true
-                    Layout.minimumHeight: contentFlickable.height
-                    Layout.leftMargin: Appearance.padding.larger
-                    Layout.rightMargin: Appearance.padding.larger
+                    Layout.margins: Appearance.padding.larger
                     spacing: Appearance.padding.larger
 
                     SectionHeader {
+                        id: shellSectionHeader
+
                         title: qsTr("Shell Configuration")
                         subtitle: qsTr("Take your rice further with in-depth customization of the shell.")
                     }
@@ -212,7 +275,7 @@ Item {
                     }
 
                     Item {
-                        Layout.fillHeight: true
+                        Layout.preferredHeight: Appearance.padding.larger * 3
                     }
                 }
 
@@ -221,12 +284,12 @@ Item {
                     id: hyprlandSection
 
                     Layout.fillWidth: true
-                    Layout.minimumHeight: contentFlickable.height
-                    Layout.leftMargin: Appearance.padding.larger
-                    Layout.rightMargin: Appearance.padding.larger
+                    Layout.margins: Appearance.padding.larger
                     spacing: Appearance.padding.larger
 
                     SectionHeader {
+                        id: hyprlandSectionHeader
+
                         title: qsTr("Hyprland Configuration")
                         subtitle: qsTr("Tweak the underlying Hyprland configuration to suit your needs.")
                     }
@@ -246,7 +309,7 @@ Item {
                     }
 
                     Item {
-                        Layout.fillHeight: true
+                        Layout.preferredHeight: Appearance.padding.larger * 3
                     }
                 }
             }

@@ -33,19 +33,74 @@ Item {
 
     property string currentSubsection: subsections[0].id
 
-    function scrollToSubsection(subsectionId: string): void {
-        const sectionIndex = subsections.findIndex(s => s.id === subsectionId);
+    property bool programmaticScroll: false
 
-        if (sectionIndex === -1) {
-            contentFlickable.contentY = 0;
-            return;
-        }
-
-        const targetY = sectionIndex * contentFlickable.height;
-        contentFlickable.contentY = targetY;
+    Timer {
+        id: scrollTimer
+        interval: Appearance.anim.durations.normal + 50
+        onTriggered: root.programmaticScroll = false
     }
 
-    onCurrentSubsectionChanged: scrollToSubsection(currentSubsection)
+    function scrollToSubsection(subsectionId: string): void {
+        let targetY = 0
+
+        switch(subsectionId) {
+            case "before-you-begin":
+                targetY = beforeYouBeginSectionHeader.mapToItem(contentColumn, 0, 0).y
+                break
+            case "installation":
+                targetY = installationSectionHeader.mapToItem(contentColumn, 0, 0).y
+                break
+            case "first-steps":
+                targetY = firstStepsSectionHeader.mapToItem(contentColumn, 0, 0).y
+                break
+            default:
+                targetY = 0
+        }
+
+        programmaticScroll = true
+        root.currentSubsection = subsectionId
+        contentFlickable.contentY = targetY
+        scrollTimer.restart()
+    }
+
+    function updateCurrentSection(): void {
+        if (programmaticScroll)
+            return
+
+        const sections = [
+            {
+                id: "before-you-begin",
+                header: beforeYouBeginSectionHeader
+            },
+            {
+                id: "installation",
+                header: installationSectionHeader
+            },
+            {
+                id: "first-steps",
+                header: firstStepsSectionHeader
+            }
+        ]
+
+        const scrollY = contentFlickable.contentY
+        const viewportCenter = scrollY + (contentFlickable.height / 3)
+
+        let currentSection = sections[0].id
+        let minDistance = Infinity
+
+        for (let i = 0; i < sections.length; i++) {
+            const sectionY = sections[i].header.mapToItem(contentColumn, 0, 0).y
+            const distance = Math.abs(sectionY - scrollY)
+
+            if (sectionY <= viewportCenter && distance < minDistance) {
+                minDistance = distance
+                currentSection = sections[i].id
+            }
+        }
+
+        root.currentSubsection = currentSection
+    }
 
     RowLayout {
         anchors.fill: parent
@@ -59,7 +114,7 @@ Item {
 
                 sections: root.subsections
                 activeSection: root.currentSubsection
-                onSectionChanged: sectionId => root.currentSubsection = sectionId
+                onSectionChanged: sectionId => root.scrollToSubsection(sectionId)
             }
 
             Item {
@@ -75,6 +130,8 @@ Item {
             contentHeight: contentColumn.height
             flickableDirection: Flickable.VerticalFlick
             clip: true
+
+            onContentYChanged: root.updateCurrentSection()
 
             Behavior on contentY {
                 Anim {
@@ -94,12 +151,12 @@ Item {
                     id: beforeYouBeginSection
 
                     Layout.fillWidth: true
-                    Layout.minimumHeight: contentFlickable.height
-                    Layout.leftMargin: Appearance.padding.larger
-                    Layout.rightMargin: Appearance.padding.larger
+                    Layout.margins: Appearance.padding.larger
                     spacing: Appearance.spacing.larger
 
                     SectionHeader {
+                        id: beforeYouBeginSectionHeader
+
                         title: qsTr("Before You Begin")
                         subtitle: qsTr("Things to know before you start your journey.")
                     }
@@ -243,7 +300,7 @@ Item {
                     }
 
                     Item {
-                        Layout.fillHeight: true
+                        Layout.preferredHeight: Appearance.padding.larger * 3
                     }
                 }
 
@@ -252,12 +309,12 @@ Item {
                     id: installationSection
 
                     Layout.fillWidth: true
-                    Layout.minimumHeight: contentFlickable.height
-                    Layout.leftMargin: Appearance.padding.larger
-                    Layout.rightMargin: Appearance.padding.larger
+                    Layout.margins: Appearance.padding.larger
                     spacing: Appearance.spacing.larger
 
                     SectionHeader {
+                        id: installationSectionHeader
+
                         title: qsTr("Installation")
                         subtitle: qsTr("Taking your computer from raw to riced!")
                     }
@@ -279,7 +336,7 @@ Item {
                     }
 
                     Item {
-                        Layout.fillHeight: true
+                        Layout.preferredHeight: Appearance.padding.larger * 3
                     }
                 }
 
@@ -288,12 +345,12 @@ Item {
                     id: firstStepsSection
 
                     Layout.fillWidth: true
-                    Layout.minimumHeight: contentFlickable.height
-                    Layout.leftMargin: Appearance.padding.larger
-                    Layout.rightMargin: Appearance.padding.larger
+                    Layout.margins: Appearance.padding.larger
                     spacing: Appearance.spacing.larger
 
                     SectionHeader {
+                        id: firstStepsSectionHeader
+
                         title: qsTr("First Steps")
                         subtitle: qsTr("Master the Caelestia shell with these essential hotkeys.")
                     }
@@ -344,6 +401,7 @@ Item {
                     SectionHeader {
                         title: qsTr("Applications")
                         subtitle: qsTr("CaelestiaLive includes a number of default applications to help you get started on your journey.")
+                        fontSize: Appearance.font.size.large
                     }
 
                     // Default Applications
@@ -757,7 +815,7 @@ Item {
                     }
 
                     Item {
-                        Layout.fillHeight: true
+                        Layout.preferredHeight: Appearance.padding.larger * 3
                     }
                 }
             }

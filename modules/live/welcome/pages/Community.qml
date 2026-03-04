@@ -12,12 +12,12 @@ Item {
 
     readonly property list<var> subsections: [
         {
-            id: "joinUs",
+            id: "join-us",
             name: qsTr("Join Us"),
             icon: "forum"
         },
         {
-            id: "getInvolved",
+            id: "get-involved",
             name: qsTr("Get Involved"),
             icon: "code"
         },
@@ -25,19 +25,67 @@ Item {
 
     property string currentSubsection: subsections[0].id
 
-    function scrollToSubsection(subsectionId: string): void {
-        const sectionIndex = subsections.findIndex(s => s.id === subsectionId);
+    property bool programmaticScroll: false
 
-        if (sectionIndex === -1) {
-            contentFlickable.contentY = 0;
-            return;
-        }
-
-        const targetY = sectionIndex * contentFlickable.height;
-        contentFlickable.contentY = targetY;
+    Timer {
+        id: scrollTimer
+        interval: Appearance.anim.durations.normal + 50
+        onTriggered: root.programmaticScroll = false
     }
 
-    onCurrentSubsectionChanged: scrollToSubsection(currentSubsection)
+    function scrollToSubsection(subsectionId: string): void {
+        let targetY = 0
+
+        switch(subsectionId) {
+            case "join-us":
+                targetY = joinUsSectionHeader.mapToItem(contentColumn, 0, 0).y
+                break
+            case "get-involved":
+                targetY = getInvolvedSectionHeader.mapToItem(contentColumn, 0, 0).y
+                break
+            default:
+                targetY = 0
+        }
+
+        programmaticScroll = true
+        root.currentSubsection = subsectionId
+        contentFlickable.contentY = targetY
+        scrollTimer.restart()
+    }
+
+    function updateCurrentSection(): void {
+        if (programmaticScroll)
+            return
+
+        const sections = [
+            {
+                id: "join-us",
+                header: joinUsSectionHeader
+            },
+            {
+                id: "get-involved",
+                header: getInvolvedSectionHeader
+            }
+        ]
+
+        const scrollY = contentFlickable.contentY
+        const viewportCenter = scrollY + (contentFlickable.height / 3)
+
+        let currentSection = sections[0].id
+        let minDistance = Infinity
+
+        for (let i = 0; i < sections.length; i++) {
+            const sectionY = sections[i].header.mapToItem(contentColumn, 0, 0).y
+            const distance = Math.abs(sectionY - scrollY)
+
+            if (sectionY <= viewportCenter && distance < minDistance) {
+                minDistance = distance
+                currentSection = sections[i].id
+            }
+        }
+
+        root.currentSubsection = currentSection
+    }
 
     RowLayout {
         anchors.fill: parent
@@ -51,7 +99,7 @@ Item {
 
                 sections: root.subsections
                 activeSection: root.currentSubsection
-                onSectionChanged: sectionId => root.currentSubsection = sectionId
+                onSectionChanged: sectionId => root.scrollToSubsection(sectionId)
             }
 
             Item {
@@ -68,6 +116,8 @@ Item {
             contentHeight: contentColumn.height
             flickableDirection: Flickable.VerticalFlick
             clip: true
+
+            onContentYChanged: root.updateCurrentSection()
 
             Behavior on contentY {
                 Anim {
@@ -86,13 +136,12 @@ Item {
                     id: joinUsSection
 
                     Layout.fillWidth: true
-                    Layout.minimumHeight: contentFlickable.height
-                    Layout.leftMargin: Appearance.padding.larger
-                    Layout.rightMargin: Appearance.padding.larger
-                    Layout.topMargin: Appearance.padding.larger
+                    Layout.margins: Appearance.padding.larger
                     spacing: Appearance.padding.large
 
                     SectionHeader {
+                        id: joinUsSectionHeader
+
                         title: qsTr("Join Us")
                         subtitle: qsTr("Join our thriving community on Discord.")
                     }
@@ -130,7 +179,7 @@ Item {
                     }
 
                     Item {
-                        Layout.fillHeight: true
+                        Layout.preferredHeight: Appearance.padding.larger * 3
                     }
                 }
 
@@ -138,13 +187,12 @@ Item {
                     id: getInvolvedSection
 
                     Layout.fillWidth: true
-                    Layout.minimumHeight: contentFlickable.height
-                    Layout.leftMargin: Appearance.padding.larger
-                    Layout.rightMargin: Appearance.padding.larger
-                    Layout.topMargin: Appearance.padding.larger
+                    Layout.margins: Appearance.padding.larger
                     spacing: Appearance.padding.large
 
                     SectionHeader {
+                        id: getInvolvedSectionHeader
+
                         title: qsTr("Get Involved")
                         subtitle: qsTr("Become a contributor.")
                     }
@@ -264,7 +312,7 @@ Item {
                     }
 
                     Item {
-                        Layout.fillHeight: true
+                        Layout.preferredHeight: Appearance.padding.larger * 3
                     }
                 }
             }
