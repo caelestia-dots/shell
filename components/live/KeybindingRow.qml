@@ -1,7 +1,8 @@
+pragma ComponentBehavior: Bound
+
 import QtQuick
 import QtQuick.Layouts
 import qs.components
-import qs.components.effects
 import qs.services
 import qs.config
 
@@ -35,14 +36,19 @@ StyledRect {
                 model: root.keys
 
                 delegate: RowLayout {
+                    id: keysItem
+
+                    required property var modelData
+                    required property int index
+
                     spacing: Appearance.spacing.small
 
                     KeyChip {
-                        keyText: modelData
+                        keyText: keysItem.modelData
                     }
 
                     StyledText {
-                        visible: index < root.keys.length - 1
+                        visible: keysItem.index < root.keys.length - 1
                         text: "+"
                         font.pointSize: Appearance.font.size.small
                         color: Colours.palette.m3onSurfaceVariant
