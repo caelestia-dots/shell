@@ -1,18 +1,60 @@
 import qs.components
+import qs.components.controls
 import qs.config
 import qs.services
 import Quickshell
 import QtQuick
 import QtQuick.Shapes
+import QtQuick.Layouts
 
 Item {
     id: root
     
     property rect targetRect: Tour.targetRect
+    property bool isTourActive: Tour.tourActive
+    property var currentStep: Tour.currentStep
+    property int stepIndex: Tour.currentStepIndex
+    property int totalSteps: Tour.currentTour?.steps.length ?? 0
     
     opacity: 0
     
+    property bool initialAppearance: true
+    property bool hasValidRect: false
+    property bool tourJustStarted: false
+    
+    onIsTourActiveChanged: {
+        if (isTourActive && stepIndex === 0) {
+            tourJustStarted = true;
+            initialAppearance = true;
+            hasValidRect = false;
+        } else if (!isTourActive) {
+            initialAppearance = false;
+        }
+    }
+    
+    onTargetRectChanged: {
+        if (targetRect.width > 0 && targetRect.height > 0 && !hasValidRect && tourJustStarted) {
+            hasValidRect = true;
+            tourJustStarted = false;
+            Qt.callLater(() => {
+                initialAppearance = false;
+                opacity = 1;
+            });
+        }
+    }
+    
+    Component.onCompleted: {
+        if (targetRect.width > 0 && targetRect.height > 0) {
+            hasValidRect = true;
+            Qt.callLater(() => {
+                initialAppearance = false;
+                opacity = 1;
+            });
+        }
+    }
+    
     Behavior on opacity {
+        enabled: !initialAppearance
         NumberAnimation {
             duration: Appearance.anim.durations.normal
             easing.type: Easing.InOutQuad
@@ -68,10 +110,10 @@ Item {
         radius: Appearance.rounding.normal
         visible: root.targetRect.width > 0
 
-        Behavior on x { Anim { duration: Appearance.anim.durations.normal; easing.bezierCurve: Appearance.anim.curves.emphasized } }
-        Behavior on y { Anim { duration: Appearance.anim.durations.normal; easing.bezierCurve: Appearance.anim.curves.emphasized } }
-        Behavior on width { Anim { duration: Appearance.anim.durations.normal; easing.bezierCurve: Appearance.anim.curves.emphasized } }
-        Behavior on height { Anim { duration: Appearance.anim.durations.normal; easing.bezierCurve: Appearance.anim.curves.emphasized } }
+        Behavior on x { enabled: !root.initialAppearance; Anim { duration: Appearance.anim.durations.normal; easing.bezierCurve: Appearance.anim.curves.emphasized } }
+        Behavior on y { enabled: !root.initialAppearance; Anim { duration: Appearance.anim.durations.normal; easing.bezierCurve: Appearance.anim.curves.emphasized } }
+        Behavior on width { enabled: !root.initialAppearance; Anim { duration: Appearance.anim.durations.normal; easing.bezierCurve: Appearance.anim.curves.emphasized } }
+        Behavior on height { enabled: !root.initialAppearance; Anim { duration: Appearance.anim.durations.normal; easing.bezierCurve: Appearance.anim.curves.emphasized } }
 
         SequentialAnimation on opacity {
             running: highlightBorder.visible
@@ -92,10 +134,10 @@ Item {
             const rect = root.targetRect;
             const inTarget = mouse.x >= rect.x && mouse.x <= rect.x + rect.width &&
                            mouse.y >= rect.y && mouse.y <= rect.y + rect.height;
-            const inCloseButton = mouse.x >= closeButton.x && mouse.x <= closeButton.x + closeButton.width &&
-                                mouse.y >= closeButton.y && mouse.y <= closeButton.y + closeButton.height;
+            const inTooltip = tooltip.visible && mouse.x >= tooltip.x && mouse.x <= tooltip.x + tooltip.width &&
+                            mouse.y >= tooltip.y && mouse.y <= tooltip.y + tooltip.height;
             
-            if (!inTarget && !inCloseButton) {
+            if (!inTarget && !inTooltip) {
                 mouse.accepted = true;
             } else {
                 mouse.accepted = false;
@@ -104,36 +146,103 @@ Item {
     }
 
     Rectangle {
-        id: closeButton
+        id: tooltip
         
-        property real targetX: root.targetRect.x + root.targetRect.width + Appearance.padding.normal
-        property real targetY: root.targetRect.y - Appearance.padding.large
+        visible: root.isTourActive && root.currentStep && root.targetRect.width > 0
+        
+        readonly property string position: root.currentStep?.tooltipPosition ?? "bottom"
+        
+        property real targetX: {
+            if (position === "left") {
+                return root.targetRect.x - width - Appearance.padding.large * 2;
+            } else if (position === "right") {
+                return root.targetRect.x + root.targetRect.width + Appearance.padding.large * 2;
+            } else {
+                return root.targetRect.x;
+            }
+        }
+        
+        property real targetY: {
+            if (position === "top") {
+                return root.targetRect.y - height - Appearance.padding.large * 2;
+            } else if (position === "bottom") {
+                return root.targetRect.y + root.targetRect.height + Appearance.padding.large * 2;
+            } else {
+                return root.targetRect.y;
+            }
+        }
         
         x: Math.max(Appearance.padding.normal, Math.min(targetX, parent.width - width - Appearance.padding.normal))
         y: Math.max(Appearance.padding.normal, Math.min(targetY, parent.height - height - Appearance.padding.normal))
         
-        width: 40
-        height: 40
-        radius: Appearance.rounding.full
-        color: Colours.palette.m3errorContainer
-        visible: root.targetRect.width > 0
-        z: 2
+        width: Math.min(400, parent.width - Appearance.padding.normal * 2)
+        height: tooltipContent.implicitHeight + Appearance.padding.large * 2
         
-        Text {
-            anchors.centerIn: parent
-            text: "✕"
-            font.pixelSize: 20
-            font.bold: true
-            color: Colours.palette.m3onErrorContainer
-        }
-        
-        MouseArea {
-            anchors.fill: parent
-            cursorShape: Qt.PointingHandCursor
-            onClicked: Quickshell.execDetached(["quickshell", "ipc", "-c", "caelestia", "call", "tour", "clear"])
-        }
+        color: Colours.palette.m3surfaceContainer
+        radius: Appearance.rounding.normal
+        border.color: Colours.palette.m3primary
+        border.width: 2
+        z: 3
         
         Behavior on x { Anim { duration: Appearance.anim.durations.normal; easing.bezierCurve: Appearance.anim.curves.emphasized } }
         Behavior on y { Anim { duration: Appearance.anim.durations.normal; easing.bezierCurve: Appearance.anim.curves.emphasized } }
+        
+        ColumnLayout {
+            id: tooltipContent
+            anchors.fill: parent
+            anchors.margins: Appearance.padding.large
+            spacing: Appearance.spacing.normal
+            
+            StyledText {
+                text: qsTr("Step %1 of %2").arg(root.stepIndex + 1).arg(root.totalSteps)
+                font.pointSize: Appearance.font.size.small
+                color: Colours.palette.m3onSurface
+                opacity: 0.7
+            }
+            
+            StyledText {
+                text: root.currentStep?.title ?? ""
+                font.pointSize: Appearance.font.size.large
+                font.bold: true
+                color: Colours.palette.m3primary
+            }
+            
+            StyledText {
+                Layout.fillWidth: true
+                text: root.currentStep?.tooltip ?? ""
+                font.pointSize: Appearance.font.size.normal
+                color: Colours.palette.m3onSurface
+                wrapMode: Text.WordWrap
+            }
+            
+            Row {
+                Layout.fillWidth: true
+                spacing: Appearance.spacing.normal
+                
+                TextButton {
+                    text: qsTr("Previous")
+                    radius: Appearance.rounding.small
+                    visible: root.stepIndex > 0
+                    enabled: root.stepIndex > 0
+                    onClicked: Tour.previousStep()
+                }
+                
+                TextButton {
+                    text: root.stepIndex < root.totalSteps - 1 ? qsTr("Next") : qsTr("Complete")
+                    radius: Appearance.rounding.small
+                    onClicked: Tour.nextStep()
+                }
+                
+                Item { Layout.fillWidth: true }
+                
+                TextButton {
+                    text: qsTr("Skip Tour")
+                    radius: Appearance.rounding.small
+                    inactiveColour: Colours.palette.m3errorContainer
+                    inactiveOnColour: Colours.palette.m3onErrorContainer
+                    onClicked: Tour.skipTour()
+                }
+            }
+        }
     }
 }

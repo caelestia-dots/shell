@@ -6,6 +6,9 @@ import QtQuick
 
 Item {
     id: root
+    
+    Component.onCompleted: Tour.register("bar-launcher", root)
+    Component.onDestruction: Tour.unregister("bar-launcher")
 
     MouseArea {
         anchors.fill: parent
