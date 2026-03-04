@@ -41,8 +41,15 @@ function cleanDeviceName(name) {
     let n = name
     
     // Specific hardware rebranding
-    if (n.includes("Sony") && n.includes("DualShock 4")) return "PS4 DualShock 4"
+    if (n.includes("Sony") && n.includes("DualShock 4")) return "PlayStation DualShock 4"
     if (n.includes("BDA NSW")) return "Nintendo Switch Controller"
+    
+    // Xbox Rebranding
+    if (n.includes("Xbox")) {
+        if (n.includes("Series")) return "Xbox Series Controller"
+        if (n.includes("One")) return "Xbox One Controller"
+        return "Xbox Controller"
+    }
     
     // General naming cleanup
     if (n.includes("Wireless Controller")) return n.replace("Wireless Controller", "Gamepad")
