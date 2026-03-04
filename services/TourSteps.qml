@@ -4,6 +4,17 @@ import Quickshell
 
 Singleton {
     readonly property var tours: ({
+        "bar-launcher": {
+            id: "bar-launcher",
+            steps: [
+                {
+                    elementId: "bar-launcher",
+                    title: qsTr("OS Icon"),
+                    tooltip: qsTr("Clicking the OS icon opens the launcher, allowing you to quickly search and launch applications."),
+                    tooltipPosition: "right"
+                }
+            ]
+        },
         "bar-basics": {
             id: "bar-basics",
             title: "Bar Basics",
@@ -32,7 +43,7 @@ Singleton {
                 }
             ]
         },
-        
+
         "utilities-tour": {
             id: "utilities-tour",
             title: "Utilities Drawer",
@@ -62,11 +73,11 @@ Singleton {
             ]
         }
     })
-    
+
     function getTour(tourId: string): var {
         return tours[tourId] || null;
     }
-    
+
     function getTourStep(tourId: string, stepIndex: int): var {
         const tour = getTour(tourId);
         if (!tour || stepIndex < 0 || stepIndex >= tour.steps.length) {
@@ -74,7 +85,7 @@ Singleton {
         }
         return tour.steps[stepIndex];
     }
-    
+
     function getTourStepCount(tourId: string): int {
         const tour = getTour(tourId);
         return tour ? tour.steps.length : 0;
