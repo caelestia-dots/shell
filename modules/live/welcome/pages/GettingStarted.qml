@@ -302,61 +302,40 @@ Item {
                     SectionContentArea {
                         content: Component {
                             ColumnLayout {
-                                StyledGridView {
-                                    Layout.fillWidth: true
-                                    Layout.preferredHeight: implicitHeight
+                                spacing: Appearance.spacing.normal
 
-                                    model: [
-                                        {
-                                            key: qsTr("Super"),
-                                            label: qsTr("Open app launcher")
-                                        },
-                                        {
-                                            key: qsTr("Super + T"),
-                                            label: qsTr("Open default terminal (Foot)"),
-                                        },
-                                        {
-                                            key: qsTr("Super + E"),
-                                            label: qsTr("Open file explorer (Thunar)")
-                                        },
-                                        {
-                                            key: qsTr("Super + W"),
-                                            label: qsTr("Open web browser (Zen)")
-                                        },
-                                        {
-                                            key: qsTr("Ctrl + Shift + Escape"),
-                                            label: qsTr("Open system monitor (bTop)"),
-                                        },
-                                        {
-                                            key: qsTr("Super + Q"),
-                                            label: qsTr("Close active window")
-                                        }
-                                    ]
+                                KeybindingRow {
+                                    keys: [qsTr("Super")]
+                                    label: qsTr("Open app launcher")
+                                }
 
-                                    spacing: Appearance.spacing.normal
-                                    paddingX: Appearance.padding.large
+                                KeybindingRow {
+                                    keys: [qsTr("Super"), "T"]
+                                    label: qsTr("Open default terminal")
+                                    desc: qsTr("Foot")
+                                }
 
-                                    cellContent: Component {
-                                        Item {
-                                            id: firstStepsKeybindingWrapper
+                                KeybindingRow {
+                                    keys: [qsTr("Super"), "E"]
+                                    label: qsTr("Open file explorer")
+                                    desc: qsTr("Thunar")
+                                }
 
-                                            property var modelData
-                                            property real gridMeasureWidth: firstStepsKeybinding.implicitWidth
+                                KeybindingRow {
+                                    keys: [qsTr("Super"), "W"]
+                                    label: qsTr("Open web browser")
+                                    desc: qsTr("Zen")
+                                }
 
-                                            ColumnLayout {
-                                                anchors.fill: parent
-                                                anchors.margins: Appearance.padding.small
-                                                spacing: Appearance.spacing.small
+                                KeybindingRow {
+                                    keys: [qsTr("Ctrl"), qsTr("Shift"), qsTr("Escape")]
+                                    label: qsTr("Open system monitor")
+                                    desc: qsTr("btop")
+                                }
 
-                                                Keybinding {
-                                                    id: firstStepsKeybinding
-
-                                                    key: firstStepsKeybindingWrapper.modelData.key
-                                                    label: firstStepsKeybindingWrapper.modelData.label
-                                                }
-                                            }
-                                        }
-                                    }
+                                KeybindingRow {
+                                    keys: [qsTr("Super"), "Q"]
+                                    label: qsTr("Close active window")
                                 }
                             }
                         }

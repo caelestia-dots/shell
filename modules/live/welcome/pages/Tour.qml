@@ -309,7 +309,7 @@ Item {
 
                     SectionContentArea {
                         color: "transparent"
-                        
+
                         content: Component {
                             GridLayout {
                                 columns: parent.width > 800 ? 2 : 1
@@ -322,7 +322,7 @@ Item {
                                     Layout.fillHeight: true
                                     Layout.alignment: Qt.AlignTop
                                     title: qsTr("Standard Workspaces")
-                                    
+
                                     content: Component {
                                         ColumnLayout {
                                             spacing: Appearance.spacing.normal
@@ -330,25 +330,21 @@ Item {
                                             KeybindingRow {
                                                 label: qsTr("Switch to workspace")
                                                 keys: ["Super", "#"]
-                                                desc: qsTr(" ")
                                             }
 
                                             KeybindingRow {
                                                 label: qsTr("Move window to workspace")
                                                 keys: ["Super", "Alt", "#"]
-                                                desc: qsTr(" ")
                                             }
 
                                             KeybindingRow {
                                                 label: qsTr("Move window directionally")
                                                 keys: ["Super", "Alt", "← ↑ → ↓"]
-                                                desc: qsTr(" ")
                                             }
 
                                             KeybindingRow {
                                                 label: qsTr("Toggle fullscreen")
                                                 keys: ["Super", "F"]
-                                                desc: qsTr(" ")
                                             }
                                         }
                                     }
@@ -360,7 +356,7 @@ Item {
                                     Layout.fillHeight: true
                                     Layout.alignment: Qt.AlignTop
                                     title: qsTr("Special Workspaces")
-                                    
+
                                     content: Component {
                                         ColumnLayout {
                                             spacing: Appearance.spacing.normal
