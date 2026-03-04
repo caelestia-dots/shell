@@ -48,19 +48,76 @@ Item {
 
     property string currentSubsection: subsections[0].id
 
-    function scrollToSubsection(subsectionId: string): void {
-        const sectionIndex = subsections.findIndex(s => s.id === subsectionId);
+    property bool programmaticScroll: false
 
-        if (sectionIndex === -1) {
-            contentFlickable.contentY = 0;
-            return;
-        }
-
-        const targetY = sectionIndex * contentFlickable.height;
-        contentFlickable.contentY = targetY;
+    Timer {
+        id: scrollTimer
+        interval: Appearance.anim.durations.normal + 50
+        onTriggered: root.programmaticScroll = false
     }
 
-    onCurrentSubsectionChanged: scrollToSubsection(currentSubsection)
+    function scrollToSubsection(subsectionId: string): void {
+        let targetY = 0;
+
+        switch(subsectionId) {
+            case "taskbar":
+                targetY = taskbarSectionHeader.mapToItem(contentColumn, 0, 0).y;
+                break;
+            case "launcher":
+                targetY = launcherSectionHeader.mapToItem(contentColumn, 0, 0).y;
+                break;
+            case "side-bar":
+                targetY = sidebarSectionHeader.mapToItem(contentColumn, 0, 0).y;
+                break;
+            case "dashboard":
+                targetY = dashboardSectionHeader.mapToItem(contentColumn, 0, 0).y;
+                break;
+            case "workspaces":
+                targetY = workspacesSectionHeader.mapToItem(contentColumn, 0, 0).y;
+                break;
+            case "guided-tours":
+                targetY = guidedToursSectionHeader.mapToItem(contentColumn, 0, 0).y;
+                break;
+            default:
+                targetY = 0;
+        }
+
+        programmaticScroll = true;
+        root.currentSubsection = subsectionId;
+        contentFlickable.contentY = targetY;
+        scrollTimer.restart();
+    }
+
+    function updateCurrentSection(): void {
+        if (programmaticScroll) return;
+
+        const sections = [
+            { id: "taskbar", header: taskbarSectionHeader },
+            { id: "launcher", header: launcherSectionHeader },
+            { id: "side-bar", header: sidebarSectionHeader },
+            { id: "dashboard", header: dashboardSectionHeader },
+            { id: "workspaces", header: workspacesSectionHeader },
+            { id: "guided-tours", header: guidedToursSectionHeader }
+        ];
+
+        const scrollY = contentFlickable.contentY;
+        const viewportCenter = scrollY + (contentFlickable.height / 3);
+        
+        let currentSection = sections[0].id;
+        let minDistance = Infinity;
+
+        for (let i = 0; i < sections.length; i++) {
+            const sectionY = sections[i].header.mapToItem(contentColumn, 0, 0).y;
+            const distance = Math.abs(sectionY - scrollY);
+            
+            if (sectionY <= viewportCenter && distance < minDistance) {
+                minDistance = distance;
+                currentSection = sections[i].id;
+            }
+        }
+
+        root.currentSubsection = currentSection;
+    }
 
     RowLayout {
         anchors.fill: parent
@@ -74,7 +131,7 @@ Item {
 
                 sections: root.subsections
                 activeSection: root.currentSubsection
-                onSectionChanged: sectionId => root.currentSubsection = sectionId
+                onSectionChanged: sectionId => root.scrollToSubsection(sectionId)
             }
 
             Item {
@@ -90,6 +147,8 @@ Item {
             contentHeight: contentColumn.height
             flickableDirection: Flickable.VerticalFlick
             clip: true
+
+            onContentYChanged: root.updateCurrentSection()
 
             Behavior on contentY {
                 Anim {
@@ -109,12 +168,14 @@ Item {
                     id: taskbarSection
 
                     Layout.fillWidth: true
-                    Layout.minimumHeight: contentFlickable.height
+                    Layout.topMargin: Appearance.padding.larger
+                    Layout.bottomMargin: Appearance.padding.larger
                     Layout.leftMargin: Appearance.padding.larger
                     Layout.rightMargin: Appearance.padding.larger
                     spacing: Appearance.spacing.larger
 
                     SectionHeader {
+                        id: taskbarSectionHeader
                         title: qsTr("Taskbar")
                         subtitle: qsTr("Similar to the taskbar from other environments, the bar is the focal point for interacting with your desktop. It is located on the left side of the shell.")
                     }
@@ -154,7 +215,7 @@ Item {
                     }
 
                     Item {
-                        Layout.fillHeight: true
+                        Layout.preferredHeight: Appearance.padding.larger * 3
                     }
                 }
 
@@ -163,14 +224,16 @@ Item {
                     id: launcherSection
 
                     Layout.fillWidth: true
-                    Layout.minimumHeight: contentFlickable.height
+                    Layout.topMargin: Appearance.padding.larger
+                    Layout.bottomMargin: Appearance.padding.larger
                     Layout.leftMargin: Appearance.padding.larger
                     Layout.rightMargin: Appearance.padding.larger
                     spacing: Appearance.padding.larger
 
                     SectionHeader {
+                        id: launcherSectionHeader
                         title: qsTr("Launcher")
-                        subtitle: qsTr("Caelestia's primary gateway to your applications and tools.")
+                        subtitle: qsTr("Your quick-access application menu, accessible via the OS icon or Super key.")
                     }
 
                     SectionContentArea {
@@ -199,7 +262,7 @@ Item {
                     }
 
                     Item {
-                        Layout.fillHeight: true
+                        Layout.preferredHeight: Appearance.padding.larger * 3
                     }
                 }
 
@@ -208,12 +271,14 @@ Item {
                     id: sidebarSection
 
                     Layout.fillWidth: true
-                    Layout.minimumHeight: contentFlickable.height
+                    Layout.topMargin: Appearance.padding.larger
+                    Layout.bottomMargin: Appearance.padding.larger
                     Layout.leftMargin: Appearance.padding.larger
                     Layout.rightMargin: Appearance.padding.larger
                     spacing: Appearance.padding.larger
 
                     SectionHeader {
+                        id: sidebarSectionHeader
                         title: qsTr("Sidebar")
                         subtitle: qsTr("Access notifications, system toggles, and tools via the right-side panel.")
                     }
@@ -244,7 +309,7 @@ Item {
                     }
 
                     Item {
-                        Layout.fillHeight: true
+                        Layout.preferredHeight: Appearance.padding.larger * 3
                     }
                 }
 
@@ -253,12 +318,14 @@ Item {
                     id: dashboardSection
 
                     Layout.fillWidth: true
-                    Layout.minimumHeight: contentFlickable.height
+                    Layout.topMargin: Appearance.padding.larger
+                    Layout.bottomMargin: Appearance.padding.larger
                     Layout.leftMargin: Appearance.padding.larger
                     Layout.rightMargin: Appearance.padding.larger
                     spacing: Appearance.padding.larger
 
                     SectionHeader {
+                        id: dashboardSectionHeader
                         title: qsTr("Dashboard")
                         subtitle: qsTr("An overview of system performance, media, and local environment.")
                     }
@@ -289,7 +356,7 @@ Item {
                     }
 
                     Item {
-                        Layout.fillHeight: true
+                        Layout.preferredHeight: Appearance.padding.larger * 3
                     }
                 }
 
@@ -298,12 +365,14 @@ Item {
                     id: workspacesSection
 
                     Layout.fillWidth: true
-                    Layout.minimumHeight: contentFlickable.height
+                    Layout.topMargin: Appearance.padding.larger
+                    Layout.bottomMargin: Appearance.padding.larger
                     Layout.leftMargin: Appearance.padding.larger
                     Layout.rightMargin: Appearance.padding.larger
                     spacing: Appearance.padding.larger
 
                     SectionHeader {
+                        id: workspacesSectionHeader
                         title: qsTr("Workspaces")
                         subtitle: qsTr("Master the art of tiling and multitasking.")
                     }
@@ -393,7 +462,7 @@ Item {
                     }
 
                     Item {
-                        Layout.fillHeight: true
+                        Layout.preferredHeight: Appearance.padding.larger * 3
                     }
                 }
 
@@ -402,12 +471,14 @@ Item {
                     id: guidedToursSection
 
                     Layout.fillWidth: true
-                    Layout.minimumHeight: contentFlickable.height
+                    Layout.topMargin: Appearance.padding.larger
+                    Layout.bottomMargin: Appearance.padding.larger
                     Layout.leftMargin: Appearance.padding.larger
                     Layout.rightMargin: Appearance.padding.larger
                     spacing: Appearance.spacing.large
 
                     SectionHeader {
+                        id: guidedToursSectionHeader
                         title: qsTr("Guided Tours")
                         subtitle: qsTr("Interactive step-by-step tours to learn Caelestia features.")
                     }
@@ -449,6 +520,12 @@ Item {
                     Item {
                         Layout.fillHeight: true
                     }
+                }
+
+                // Bottom padding to allow last section to scroll into active range
+                Item {
+                    Layout.fillWidth: true
+                    Layout.preferredHeight: contentFlickable.height * 0.66
                 }
             }
         }
