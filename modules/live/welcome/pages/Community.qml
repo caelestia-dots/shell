@@ -92,12 +92,12 @@ Item {
                     Layout.topMargin: Appearance.padding.larger
                     spacing: Appearance.padding.large
 
-                    WelcomeSectionHeader {
+                    SectionHeader {
                         title: qsTr("Join Us")
                         subtitle: qsTr("Join our thriving community on Discord.")
                     }
 
-                    WelcomeSectionContentArea {
+                    SectionContentArea {
                         title: qsTr("Need help or support?")
                         subtitle: qsTr("Want to chat with other Caelestia users?")
 
@@ -144,12 +144,12 @@ Item {
                     Layout.topMargin: Appearance.padding.larger
                     spacing: Appearance.padding.large
 
-                    WelcomeSectionHeader {
+                    SectionHeader {
                         title: qsTr("Get Involved")
                         subtitle: qsTr("Become a contributor.")
                     }
 
-                    WelcomeSectionContentArea {
+                    SectionContentArea {
                         content: Component {
                             ColumnLayout {
                                 StyledText {
@@ -163,7 +163,7 @@ Item {
                         }
                     }
 
-                    WelcomeSectionContentArea {
+                    SectionContentArea {
                         title: qsTr("Caelestia CLI")
 
                         content: Component {
@@ -188,7 +188,7 @@ Item {
                         }
                     }
 
-                    WelcomeSectionContentArea {
+                    SectionContentArea {
                         title: qsTr("Caelestia Shell")
 
                         content: Component {
@@ -213,7 +213,7 @@ Item {
                         }
                     }
 
-                    WelcomeSectionContentArea {
+                    SectionContentArea {
                         title: qsTr("Caelestia Dots")
 
                         content: Component {
@@ -238,7 +238,7 @@ Item {
                         }
                     }
 
-                    WelcomeSectionContentArea {
+                    SectionContentArea {
                         title: qsTr("Caelestia Live")
 
                         content: Component {

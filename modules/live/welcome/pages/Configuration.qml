@@ -102,12 +102,12 @@ Item {
                     Layout.rightMargin: Appearance.padding.larger
                     spacing: Appearance.padding.larger
 
-                    WelcomeSectionHeader {
+                    SectionHeader {
                         title: qsTr("Settings App")
                         subtitle: qsTr("Quick configuration for the most common shell options.")
                     }
 
-                    WelcomeSectionContentArea {
+                    SectionContentArea {
                         content: Component {
                             ColumnLayout {
                                 spacing: Appearance.spacing.larger
@@ -201,12 +201,12 @@ Item {
                     Layout.rightMargin: Appearance.padding.larger
                     spacing: Appearance.padding.larger
 
-                    WelcomeSectionHeader {
+                    SectionHeader {
                         title: qsTr("CLI Configuration")
                         subtitle: qsTr("Customize the behavior of the caelestia CLI app.")
                     }
 
-                    WelcomeSectionContentArea {
+                    SectionContentArea {
                         content: Component {
                             ColumnLayout {
                                 StyledText {
@@ -234,12 +234,12 @@ Item {
                     Layout.rightMargin: Appearance.padding.larger
                     spacing: Appearance.padding.larger
 
-                    WelcomeSectionHeader {
+                    SectionHeader {
                         title: qsTr("Shell Configuration")
                         subtitle: qsTr("Take your rice further with in-depth customization of the shell.")
                     }
 
-                    WelcomeSectionContentArea {
+                    SectionContentArea {
                         content: Component {
                             ColumnLayout {
                                 StyledText {
@@ -268,12 +268,12 @@ Item {
                     Layout.rightMargin: Appearance.padding.larger
                     spacing: Appearance.padding.larger
 
-                    WelcomeSectionHeader {
+                    SectionHeader {
                         title: qsTr("Hyprland Configuration")
                         subtitle: qsTr("Tweak the underlying Hyprland configuration to suit your needs.")
                     }
 
-                    WelcomeSectionContentArea {
+                    SectionContentArea {
                         content: Component {
                             ColumnLayout {
                                 StyledText {

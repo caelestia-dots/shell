@@ -99,13 +99,13 @@ Item {
                     Layout.rightMargin: Appearance.padding.larger
                     spacing: Appearance.spacing.larger
 
-                    WelcomeSectionHeader {
+                    SectionHeader {
                         title: qsTr("Before You Begin")
                         subtitle: qsTr("Things to know before you start your journey.")
                     }
 
                     // System requirements
-                    WelcomeSectionContentArea {
+                    SectionContentArea {
                         title: qsTr("System Requirements")
                         subtitle: qsTr("Caelestia is built on Hyprland and Quickshell. This combination is lightweight, but for best results, the following minimum requirements are advised.")
 
@@ -200,7 +200,7 @@ Item {
                     }
 
                     // The Linux Philosophy
-                    WelcomeSectionContentArea {
+                    SectionContentArea {
                         title: qsTr("The Linux Philosophy")
                         content: Component {
                             ColumnLayout {
@@ -216,7 +216,7 @@ Item {
                     }
 
                     // An Aptitude for Learning
-                    WelcomeSectionContentArea {
+                    SectionContentArea {
                         title: qsTr("An Aptitude for Learning")
 
                         content: Component {
@@ -257,12 +257,12 @@ Item {
                     Layout.rightMargin: Appearance.padding.larger
                     spacing: Appearance.spacing.larger
 
-                    WelcomeSectionHeader {
+                    SectionHeader {
                         title: qsTr("Installation")
                         subtitle: qsTr("Taking your computer from raw to riced!")
                     }
 
-                    WelcomeSectionContentArea {
+                    SectionContentArea {
                         title: qsTr("Installing Caelestia")
 
                         content: Component {
@@ -293,13 +293,13 @@ Item {
                     Layout.rightMargin: Appearance.padding.larger
                     spacing: Appearance.spacing.larger
 
-                    WelcomeSectionHeader {
+                    SectionHeader {
                         title: qsTr("First Steps")
                         subtitle: qsTr("Master the Caelestia shell with these essential hotkeys.")
                     }
 
                     // First Steps Keybindings
-                    WelcomeSectionContentArea {
+                    SectionContentArea {
                         content: Component {
                             ColumnLayout {
                                 StyledGridView {
@@ -362,13 +362,13 @@ Item {
                         }
                     }
 
-                    WelcomeSectionHeader {
+                    SectionHeader {
                         title: qsTr("Applications")
                         subtitle: qsTr("CaelestiaLive includes a number of default applications to help you get started on your journey.")
                     }
 
                     // Default Applications
-                    WelcomeSectionContentArea {
+                    SectionContentArea {
                         content: Component {
                             ColumnLayout {
                                 RowLayout {
