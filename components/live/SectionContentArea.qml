@@ -14,15 +14,16 @@ StyledRect {
     required property var content
 
     Layout.fillWidth: true
-    Layout.preferredHeight: contentColumn.implicitHeight + Appearance.padding.large * 2
-    color: Colours.palette.m3surfaceContainerLow
+    implicitHeight: contentColumn.implicitHeight + Appearance.padding.large * 2
+    color: Colours.palette.m3surfaceContainer
     radius: Appearance.rounding.normal
-    border.color: Colours.palette.m3outlineVariant
 
     ColumnLayout {
         id: contentColumn
 
-        anchors.fill: parent
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.top: parent.top
         anchors.margins: Appearance.padding.large
         spacing: Appearance.spacing.small
 

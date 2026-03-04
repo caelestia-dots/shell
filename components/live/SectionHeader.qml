@@ -10,10 +10,13 @@ Item {
     property string title: ""
     property string subtitle: ""
 
+    Layout.fillWidth: true
     height: sectionHeader.implicitHeight
 
     ColumnLayout {
         id: sectionHeader
+
+        spacing: Appearance.spacing.small
 
         StyledText {
             text: root.title
