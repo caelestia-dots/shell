@@ -193,6 +193,7 @@ Item {
             spacing: Appearance.spacing.normal
 
             StyledText {
+                visible: root.totalSteps > 1
                 text: qsTr("Step %1 of %2").arg(root.stepIndex + 1).arg(root.totalSteps)
                 font.pointSize: Appearance.font.size.small
                 color: Colours.palette.m3onSurface
@@ -216,7 +217,19 @@ Item {
 
             Row {
                 Layout.fillWidth: true
+                visible: root.totalSteps === 1
+
+                TextButton {
+                    text: qsTr("Close")
+                    radius: Appearance.rounding.small
+                    onClicked: Tour.nextStep()
+                }
+            }
+
+            Row {
+                Layout.fillWidth: true
                 spacing: Appearance.spacing.normal
+                visible: root.totalSteps > 1
 
                 TextButton {
                     text: qsTr("Previous")
