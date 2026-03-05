@@ -9,6 +9,9 @@ import qs.config
 Item {
     id: root
 
+    property bool animationHasRun: false
+    signal animationCompleted()
+
     StyledFlickable {
         id: flickable
         anchors.fill: parent
@@ -29,6 +32,8 @@ Item {
 
                 LogoIntro {
                     Layout.alignment: Qt.AlignHCenter
+                    skipIntroAnimation: root.animationHasRun
+                    onAnimationCompleted: root.animationCompleted()
                 }
 
                 StyledText {
@@ -39,7 +44,7 @@ Item {
                     font.pointSize: Appearance.font.size.extraLarge
                     font.bold: true
                     color: Colours.palette.m3onBackground
-                    opacity: 0
+                    opacity: root.animationHasRun ? 1.0 : 0.0
                 }
 
                 StyledText {
@@ -49,11 +54,11 @@ Item {
                     text: qsTr("A modern, beautiful desktop shell for Wayland")
                     font.pointSize: Appearance.font.size.larger
                     color: Colours.palette.m3onSurfaceVariant
-                    opacity: 0
+                    opacity: root.animationHasRun ? 1.0 : 0.0
                 }
 
                 SequentialAnimation {
-                    running: true
+                    running: !root.animationHasRun
 
                     PauseAnimation { duration: 1500 }
 
@@ -69,6 +74,10 @@ Item {
                         property: "opacity"
                         from: 0.0; to: 1.0
                         duration: 700; easing.type: Easing.InOutQuad
+                    }
+
+                    onFinished: {
+                        root.animationCompleted()
                     }
                 }
             }

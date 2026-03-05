@@ -11,6 +11,9 @@ Item {
     implicitHeight: logo.implicitHeight
 
     property real blurAmount: 1.0
+    property bool skipIntroAnimation: false
+    
+    signal animationCompleted()
 
     Logo {
         id: logo
@@ -18,8 +21,8 @@ Item {
         lightTheme: Colours.currentLight
 
         transformOrigin: Item.Center
-        scale: 0.0
-        opacity: 0.0
+        scale: skipIntroAnimation ? 1.0 : 0.0
+        opacity: skipIntroAnimation ? 1.0 : 0.0
         rotation: 0.0
 
         layer.enabled: true
@@ -30,8 +33,20 @@ Item {
         }
     }
 
+    Component.onCompleted: {
+        if (skipIntroAnimation) {
+            logo.star1.opacity = 1.0
+            logo.star1.scale = 1.0
+            logo.star2.opacity = 1.0
+            logo.star2.scale = 1.0
+            logo.star3.opacity = 1.0
+            logo.star3.scale = 1.0
+            root.blurAmount = 0.0
+        }
+    }
+
     SequentialAnimation {
-        running: true
+        running: !root.skipIntroAnimation
 
         PauseAnimation { duration: 300 }
 
@@ -159,6 +174,10 @@ Item {
                     }
                 }
             }
+        }
+        
+        onFinished: {
+            root.animationCompleted()
         }
     }
 

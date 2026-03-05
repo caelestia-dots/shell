@@ -14,6 +14,7 @@ StyledRect {
     id: root
 
     property string currentPage: "welcome"
+    property bool welcomeAnimationHasRun: false
 
     function close(): void {
     }
@@ -383,7 +384,12 @@ StyledRect {
 
     Component {
         id: welcomeComponent
-        Welcome {}
+        Welcome {
+            animationHasRun: root.welcomeAnimationHasRun
+            onAnimationCompleted: {
+                root.welcomeAnimationHasRun = true
+            }
+        }
     }
 
     Component {
