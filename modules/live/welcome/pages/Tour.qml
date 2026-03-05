@@ -472,7 +472,7 @@ Item {
 
                                             KeybindingRow {
                                                 label: qsTr("Move window directionally")
-                                                keys: ["Super", "Alt", "← ↑ → ↓"]
+                                                keys: ["Super", "Alt", "icon:arrow_back icon:arrow_upward icon:arrow_forward icon:arrow_downward"]
                                             }
 
                                             KeybindingRow {
