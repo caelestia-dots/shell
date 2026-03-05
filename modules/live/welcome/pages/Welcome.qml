@@ -65,15 +65,19 @@ Item {
                     NumberAnimation {
                         target: title
                         property: "opacity"
-                        from: 0.0; to: 1.0
-                        duration: 700; easing.type: Easing.InOutQuad
+                        from: 0.0
+                        to: 1.0
+                        duration: 700
+                        easing.type: Easing.InOutQuad
                     }
 
                     NumberAnimation {
                         target: subtitle
                         property: "opacity"
-                        from: 0.0; to: 1.0
-                        duration: 700; easing.type: Easing.InOutQuad
+                        from: 0.0
+                        to: 1.0
+                        duration: 700
+                        easing.type: Easing.InOutQuad
                     }
 
                     onFinished: {
