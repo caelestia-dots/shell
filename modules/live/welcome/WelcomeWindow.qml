@@ -286,6 +286,7 @@ StyledRect {
                     const targetIndex = root.pages.findIndex(p => p.id === targetPage);
                     direction = targetIndex > currentIndex ? 1 : -1;
 
+                    nextPageContainer.anchors.left = undefined;
                     nextPageContainer.x = contentArea.width * direction;
                     nextPageLoader.sourceComponent = root.pages.find(p => p.id === targetPage)?.component;
                     transitioning = true;
@@ -305,6 +306,13 @@ StyledRect {
                 anchors.top: parent.top
                 anchors.bottom: parent.bottom
                 width: parent.width
+                z: 1
+
+                Rectangle {
+                    anchors.fill: parent
+                    color: Colours.palette.m3background
+                    z: -1
+                }
 
                 Loader {
                     id: currentPageLoader
@@ -314,10 +322,17 @@ StyledRect {
 
             Item {
                 id: nextPageContainer
-                x: contentArea.width
+                anchors.left: parent.right
                 anchors.top: parent.top
                 anchors.bottom: parent.bottom
                 width: parent.width
+                z: 0
+
+                Rectangle {
+                    anchors.fill: parent
+                    color: Colours.palette.m3background
+                    z: -1
+                }
 
                 Loader {
                     id: nextPageLoader
@@ -351,7 +366,7 @@ StyledRect {
                     script: {
                         currentPageLoader.sourceComponent = nextPageLoader.sourceComponent;
                         currentPageContainer.x = 0;
-                        nextPageContainer.x = contentArea.width;
+                        nextPageContainer.anchors.left = currentPageContainer.right;
                         contentArea.activePage = contentArea.targetPage;
                         contentArea.transitioning = false;
                     }
