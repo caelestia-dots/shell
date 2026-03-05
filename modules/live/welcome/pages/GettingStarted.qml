@@ -818,6 +818,12 @@ Item {
                         Layout.preferredHeight: Appearance.padding.larger * 3
                     }
                 }
+
+                // Bottom padding to allow last section to scroll into active range
+                Item {
+                    Layout.fillWidth: true
+                    Layout.preferredHeight: contentFlickable.height * 0.66
+                }
             }
         }
     }
