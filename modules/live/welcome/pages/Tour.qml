@@ -14,6 +14,11 @@ Item {
 
     readonly property list<var> subsections: [
         {
+            id: "guided-tours",
+            name: qsTr("Guided Tours"),
+            icon: "tour"
+        },
+        {
             id: "taskbar",
             name: qsTr("Taskbar"),
             icon: "dock_to_right"
@@ -24,7 +29,7 @@ Item {
             icon: "dock_to_bottom"
         },
         {
-            id: "side-bar",
+            id: "sidebar",
             name: qsTr("SideBar"),
             icon: "dock_to_left"
         },
@@ -37,11 +42,6 @@ Item {
             id: "workspaces",
             name: qsTr("Workspaces"),
             icon: "stack"
-        },
-        {
-            id: "guided-tours",
-            name: qsTr("Guided Tours"),
-            icon: "tour"
         }
 
     ]
@@ -60,63 +60,82 @@ Item {
         let targetY = 0;
 
         switch(subsectionId) {
-            case "taskbar":
-                targetY = taskbarSectionHeader.mapToItem(contentColumn, 0, 0).y;
-                break;
-            case "launcher":
-                targetY = launcherSectionHeader.mapToItem(contentColumn, 0, 0).y;
-                break;
-            case "side-bar":
-                targetY = sidebarSectionHeader.mapToItem(contentColumn, 0, 0).y;
-                break;
-            case "dashboard":
-                targetY = dashboardSectionHeader.mapToItem(contentColumn, 0, 0).y;
-                break;
-            case "workspaces":
-                targetY = workspacesSectionHeader.mapToItem(contentColumn, 0, 0).y;
-                break;
             case "guided-tours":
-                targetY = guidedToursSectionHeader.mapToItem(contentColumn, 0, 0).y;
-                break;
+                targetY = guidedToursSectionHeader.mapToItem(contentColumn, 0, 0).y
+                break
+            case "taskbar":
+                targetY = taskbarSectionHeader.mapToItem(contentColumn, 0, 0).y
+                break
+            case "launcher":
+                targetY = launcherSectionHeader.mapToItem(contentColumn, 0, 0).y
+                break
+            case "sidebar":
+                targetY = sidebarSectionHeader.mapToItem(contentColumn, 0, 0).y
+                break
+            case "dashboard":
+                targetY = dashboardSectionHeader.mapToItem(contentColumn, 0, 0).y
+                break
+            case "workspaces":
+                targetY = workspacesSectionHeader.mapToItem(contentColumn, 0, 0).y
+                break
             default:
-                targetY = 0;
+                targetY = 0
         }
 
-        programmaticScroll = true;
-        root.currentSubsection = subsectionId;
-        contentFlickable.contentY = targetY;
-        scrollTimer.restart();
+        programmaticScroll = true
+        root.currentSubsection = subsectionId
+        contentFlickable.contentY = targetY
+        scrollTimer.restart()
     }
 
     function updateCurrentSection(): void {
-        if (programmaticScroll) return;
+        if (programmaticScroll)
+            return
 
         const sections = [
-            { id: "taskbar", header: taskbarSectionHeader },
-            { id: "launcher", header: launcherSectionHeader },
-            { id: "side-bar", header: sidebarSectionHeader },
-            { id: "dashboard", header: dashboardSectionHeader },
-            { id: "workspaces", header: workspacesSectionHeader },
-            { id: "guided-tours", header: guidedToursSectionHeader }
-        ];
+            {
+                id: "guided-tours",
+                header: guidedToursSectionHeader
+            },
+            {
+                id: "taskbar",
+                header: taskbarSectionHeader
+            },
+            {
+                id: "launcher",
+                header: launcherSectionHeader
+            },
+            {
+                id: "sidebar",
+                header: sidebarSectionHeader
+            },
+            {
+                id: "dashboard",
+                header: dashboardSectionHeader
+            },
+            {
+                id: "workspaces",
+                header: workspacesSectionHeader
+            }
+        ]
 
-        const scrollY = contentFlickable.contentY;
-        const viewportCenter = scrollY + (contentFlickable.height / 3);
+        const scrollY = contentFlickable.contentY
+        const viewportCenter = scrollY + (contentFlickable.height / 3)
 
-        let currentSection = sections[0].id;
-        let minDistance = Infinity;
+        let currentSection = sections[0].id
+        let minDistance = Infinity
 
         for (let i = 0; i < sections.length; i++) {
-            const sectionY = sections[i].header.mapToItem(contentColumn, 0, 0).y;
-            const distance = Math.abs(sectionY - scrollY);
+            const sectionY = sections[i].header.mapToItem(contentColumn, 0, 0).y
+            const distance = Math.abs(sectionY - scrollY)
 
             if (sectionY <= viewportCenter && distance < minDistance) {
-                minDistance = distance;
-                currentSection = sections[i].id;
+                minDistance = distance
+                currentSection = sections[i].id
             }
         }
 
-        root.currentSubsection = currentSection;
+        root.currentSubsection = currentSection
     }
 
     RowLayout {
@@ -162,6 +181,60 @@ Item {
 
                 width: parent.width
                 spacing: 0
+
+                // Guided Tours
+                ColumnLayout {
+                    id: guidedToursSection
+
+                    Layout.fillWidth: true
+                    Layout.margins: Appearance.padding.larger
+                    spacing: Appearance.spacing.large
+
+                    SectionHeader {
+                        id: guidedToursSectionHeader
+
+                        title: qsTr("Guided Tours")
+                        subtitle: qsTr("Interactive step-by-step tours to learn Caelestia features.")
+                    }
+
+                    SectionContentArea {
+                        content: Component {
+                            ColumnLayout {
+                                spacing: Appearance.spacing.large
+
+                                StyledText {
+                                    Layout.fillWidth: true
+                                    text: qsTr("Start a guided tour to learn about specific features. Each tour will highlight elements and guide you through their functionality.")
+                                    font.pointSize: Appearance.font.size.normal
+                                    color: Colours.palette.m3onSurface
+                                    wrapMode: Text.WordWrap
+                                    opacity: 0.9
+                                }
+
+                                Flow {
+                                    Layout.fillWidth: true
+                                    spacing: Appearance.spacing.normal
+
+                                    TextButton {
+                                        text: qsTr("Bar Basics Tour")
+                                        radius: Appearance.rounding.small
+                                        onClicked: Tour.startTour("bar-basics")
+                                    }
+
+                                    TextButton {
+                                        text: qsTr("Utilities Drawer Tour")
+                                        radius: Appearance.rounding.small
+                                        onClicked: Tour.startTour("utilities-tour")
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    Item {
+                        Layout.preferredHeight: Appearance.padding.larger * 3
+                    }
+                }
 
                 // Taskbar
                 ColumnLayout {
@@ -453,60 +526,6 @@ Item {
 
                     Item {
                         Layout.preferredHeight: Appearance.padding.larger * 3
-                    }
-                }
-
-                // Guided Tours
-                ColumnLayout {
-                    id: guidedToursSection
-
-                    Layout.fillWidth: true
-                    Layout.margins: Appearance.padding.larger
-                    spacing: Appearance.spacing.large
-
-                    SectionHeader {
-                        id: guidedToursSectionHeader
-
-                        title: qsTr("Guided Tours")
-                        subtitle: qsTr("Interactive step-by-step tours to learn Caelestia features.")
-                    }
-
-                    SectionContentArea {
-                        content: Component {
-                            ColumnLayout {
-                                spacing: Appearance.spacing.large
-
-                                StyledText {
-                                    Layout.fillWidth: true
-                                    text: qsTr("Start a guided tour to learn about specific features. Each tour will highlight elements and guide you through their functionality.")
-                                    font.pointSize: Appearance.font.size.normal
-                                    color: Colours.palette.m3onSurface
-                                    wrapMode: Text.WordWrap
-                                    opacity: 0.9
-                                }
-
-                                Flow {
-                                    Layout.fillWidth: true
-                                    spacing: Appearance.spacing.normal
-
-                                    TextButton {
-                                        text: qsTr("Bar Basics Tour")
-                                        radius: Appearance.rounding.small
-                                        onClicked: Tour.startTour("bar-basics")
-                                    }
-
-                                    TextButton {
-                                        text: qsTr("Utilities Drawer Tour")
-                                        radius: Appearance.rounding.small
-                                        onClicked: Tour.startTour("utilities-tour")
-                                    }
-                                }
-                            }
-                        }
-                    }
-
-                    Item {
-                        Layout.fillHeight: true
                     }
                 }
 
