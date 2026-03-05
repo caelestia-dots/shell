@@ -30,6 +30,9 @@ ColumnLayout {
     }
 
     function checkPopout(y: real): void {
+        if (popouts.currentName === "activewindow" && popouts.hasCurrent) {
+            return;
+        }
         const ch = childAt(width / 2, y) as WrappedLoader;
 
         if (ch?.id !== "tray")
@@ -43,7 +46,6 @@ ColumnLayout {
         const id = ch.id;
         const top = ch.y;
         const item = ch.item;
-        const itemHeight = item.implicitHeight;
 
         if (id === "statusIcons" && Config.bar.popouts.statusIcons) {
             const items = item.items;
@@ -68,10 +70,6 @@ ColumnLayout {
                 popouts.hasCurrent = false;
                 item.expanded = true;
             }
-        } else if (id === "activeWindow" && Config.bar.popouts.activeWindow) {
-            popouts.currentName = id.toLowerCase();
-            popouts.currentCenter = item.mapToItem(root, 0, itemHeight / 2).y;
-            popouts.hasCurrent = true;
         }
     }
 
@@ -178,8 +176,7 @@ ColumnLayout {
             const count = repeater.count;
             for (let i = 0; i < count; i++) {
                 const item = repeater.itemAt(i);
-                if (item?.enabled)
-                    return item;
+                if (item?.enabled) return item;
             }
             return null;
         }
@@ -187,8 +184,7 @@ ColumnLayout {
         function findLastEnabled(): Item {
             for (let i = repeater.count - 1; i >= 0; i--) {
                 const item = repeater.itemAt(i);
-                if (item?.enabled)
-                    return item;
+                if (item?.enabled) return item;
             }
             return null;
         }

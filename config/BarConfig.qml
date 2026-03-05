@@ -82,6 +82,7 @@ JsonObject {
 
     component ActiveWindow: JsonObject {
         property bool inverted: false
+        property string popoutMode: "hover"
     }
 
     component Tray: JsonObject {
