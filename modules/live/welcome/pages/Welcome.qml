@@ -32,18 +32,44 @@ Item {
                 }
 
                 StyledText {
+                    id: title
+
                     Layout.alignment: Qt.AlignHCenter
                     text: qsTr("Welcome to Caelestia")
                     font.pointSize: Appearance.font.size.extraLarge
                     font.bold: true
                     color: Colours.palette.m3onBackground
+                    opacity: 0
                 }
 
                 StyledText {
+                    id: subtitle
+
                     Layout.alignment: Qt.AlignHCenter
                     text: qsTr("A modern, beautiful desktop shell for Wayland")
                     font.pointSize: Appearance.font.size.larger
                     color: Colours.palette.m3onSurfaceVariant
+                    opacity: 0
+                }
+
+                SequentialAnimation {
+                    running: true
+
+                    PauseAnimation { duration: 1500 }
+
+                    NumberAnimation {
+                        target: title
+                        property: "opacity"
+                        from: 0.0; to: 1.0
+                        duration: 700; easing.type: Easing.InOutQuad
+                    }
+
+                    NumberAnimation {
+                        target: subtitle
+                        property: "opacity"
+                        from: 0.0; to: 1.0
+                        duration: 700; easing.type: Easing.InOutQuad
+                    }
                 }
             }
 
