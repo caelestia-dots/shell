@@ -196,7 +196,7 @@ Item {
                                     },
                                     {
                                         title: qsTr("Launcher"),
-                                        desc: qsTr("Make sure your favorite apps stay at the top! Or hide apps you dont need visible.")
+                                        desc: qsTr("Make sure your favorite apps stay at the top! Or hide apps you don't need visible.")
                                     },
                                     {
                                         title: qsTr("Dashboard"),
