@@ -12,6 +12,7 @@ StyledRect {
 
     required property var sections
     required property string activeSection
+    property bool disableAnimations: false
 
     signal sectionChanged(string sectionId)
 
@@ -53,6 +54,7 @@ StyledRect {
                 height: activeTab ? activeTab.height : 0
 
                 Behavior on y {
+                    enabled: !root.disableAnimations
                     Anim {
                         duration: Appearance.anim.durations.normal
                         easing.bezierCurve: Appearance.anim.curves.emphasized
@@ -60,6 +62,7 @@ StyledRect {
                 }
 
                 Behavior on height {
+                    enabled: !root.disableAnimations
                     Anim {
                         duration: Appearance.anim.durations.normal
                         easing.bezierCurve: Appearance.anim.curves.emphasized
@@ -106,6 +109,13 @@ StyledRect {
                                 text: modelData.icon
                                 font.pointSize: Appearance.font.size.normal
                                 color: parent.parent.isActive ? Colours.palette.m3surface : Colours.palette.m3onSurfaceVariant
+                                
+                                Behavior on color {
+                                    enabled: !root.disableAnimations
+                                    ColorAnimation {
+                                        duration: Appearance.anim.durations.normal
+                                    }
+                                }
                             }
 
                             StyledText {
@@ -114,6 +124,13 @@ StyledRect {
                                 font.pointSize: Appearance.font.size.normal
                                 color: parent.parent.isActive ? Colours.palette.m3surface : Colours.palette.m3onSurfaceVariant
                                 elide: Text.ElideRight
+                                
+                                Behavior on color {
+                                    enabled: !root.disableAnimations
+                                    ColorAnimation {
+                                        duration: Appearance.anim.durations.normal
+                                    }
+                                }
                             }
                         }
                     }
