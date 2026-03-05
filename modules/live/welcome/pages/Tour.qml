@@ -197,7 +197,7 @@ ScrollablePage {
 
         KeybindingSection {
             targetColumns: 2
-            responsiveBreakpoint: 800
+            responsiveBreakpoint: 1000
 
             groups: [
                 {
