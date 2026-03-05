@@ -235,7 +235,7 @@ ScrollablePage {
                         {
                             label: qsTr("ToDo List"),
                             desc: qsTr("Todoist"),
-                            keys: ["Super", "A"]
+                            keys: ["Super", "R"]
                         },
                         {
                             label: qsTr("Special"),
