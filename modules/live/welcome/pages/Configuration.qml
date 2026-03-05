@@ -59,6 +59,7 @@ Item {
                 break
             case "hyprland":
                 targetY = hyprlandSectionHeader.mapToItem(contentColumn, 0, 0).y
+                break
             default:
                 targetY = 0
         }
