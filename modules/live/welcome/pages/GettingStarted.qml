@@ -2,17 +2,16 @@ pragma ComponentBehavior: Bound
 
 import QtQuick
 import QtQuick.Layouts
-import QtQuick.VectorImage
 import Quickshell
 import qs.services
 import qs.components
 import qs.components.live
-import qs.components.containers
-import qs.components.controls
 import qs.config
 
 ScrollablePage {
     id: root
+
+    readonly property string shellDir: Quickshell.shellDir
 
     // Before You Begin
     PageSection {
@@ -266,7 +265,7 @@ ScrollablePage {
                                 {
                                     cat: qsTr("File Manager"),
                                     title: qsTr("Thunar"),
-                                    icon: Qt.resolvedUrl(`${Quickshell.shellDir}/modules/live/assets/icons/thunar.svg`),
+                                    icon: Qt.resolvedUrl(`${shellDir}/modules/live/assets/icons/thunar.svg`),
                                     desc: qsTr("Thunar is a clean, modern file manager originally developed for Xfce. It is designed for speed and efficiency, and features a familiar, intuitive interface. Despite its simplicity, Thunar is extensible through plugins."),
                                     links: [
                                         {
@@ -282,7 +281,7 @@ ScrollablePage {
                                 {
                                     cat: qsTr("Web Browser"),
                                     title: qsTr("Zen"),
-                                    icon: Qt.resolvedUrl(`${Quickshell.shellDir}/modules/live/assets/icons/zen-browser.svg`),
+                                    icon: Qt.resolvedUrl(`${shellDir}/modules/live/assets/icons/zen-browser.svg`),
                                     desc: qsTr("Zen is an experimental, performance-optimized fork of Firefox focused on flexibility and design with many new features added to the core Firefox feature set. It also removes the Firefox AI components and tracking."),
                                     links: [
                                         {
@@ -294,7 +293,7 @@ ScrollablePage {
                                 {
                                     cat: qsTr("Chat"),
                                     title: qsTr("Discord"),
-                                    icon: Qt.resolvedUrl(`${Quickshell.shellDir}/modules/live/assets/icons/discord.svg`),
+                                    icon: Qt.resolvedUrl(`${shellDir}/modules/live/assets/icons/discord.svg`),
                                     desc: qsTr("Discord is a cross-platform voice and text chat application which can be used through a web browser or the official desktop application. Many open-source communities (including ours) have communities on Discord."),
                                     links: [
                                         {
@@ -310,7 +309,7 @@ ScrollablePage {
                                 {
                                     cat: qsTr("Terminal"),
                                     title: qsTr("Foot"),
-                                    icon: Qt.resolvedUrl(`${Quickshell.shellDir}/modules/live/assets/icons/foot.svg`),
+                                    icon: Qt.resolvedUrl(`${shellDir}/modules/live/assets/icons/foot.svg`),
                                     desc: qsTr("Foot is a fast, lightweight terminal emulator specifically designed for use under Wayland. It supports features such as server/daemon mode, scrollback search, URL detection, color emojis, and true color."),
                                     links: [
                                         {
@@ -326,7 +325,7 @@ ScrollablePage {
                                 {
                                     cat: qsTr("Music Player"),
                                     title: qsTr("Spotify"),
-                                    icon: Qt.resolvedUrl(`${Quickshell.shellDir}/modules/live/assets/icons/spotify.svg`),
+                                    icon: Qt.resolvedUrl(`${shellDir}/modules/live/assets/icons/spotify.svg`),
                                     desc: qsTr("Spotify is a digital music streaming service which supports both an online player through their website, and a semi-official Linux client. Spotify operates on a freemium business model."),
                                     links: [
                                         {
@@ -342,7 +341,7 @@ ScrollablePage {
                                 {
                                     cat: qsTr("Code Editor"),
                                     title: qsTr("VSCodium"),
-                                    icon: Qt.resolvedUrl(`${Quickshell.shellDir}/modules/live/assets/icons/vscodium.svg`),
+                                    icon: Qt.resolvedUrl(`${shellDir}/modules/live/assets/icons/vscodium.svg`),
                                     desc: qsTr("VSCodium is a community-driven open-source text and code editor based on Visual Studio Code. It removes telemetry from VSCode and ships configuration with Open VSX."),
                                     links: [
                                         {
@@ -358,7 +357,7 @@ ScrollablePage {
                                 {
                                     cat: qsTr("Office Suite"),
                                     title: qsTr("LibreOffice"),
-                                    icon: Qt.resolvedUrl(`${Quickshell.shellDir}/modules/live/assets/icons/libreoffice.svg`),
+                                    icon: Qt.resolvedUrl(`${shellDir}/modules/live/assets/icons/libreoffice.svg`),
                                     desc: qsTr("LibreOffice is a powerful, flexible office suite that is compatible with Microsoft Office (365) and is backed by the non-profit The Document Foundation. The LibreOffice suite consists of Writer (word processing), Calc (spreadsheets), Impress (presentations), Draw (vector graphics and flowcharts), Base (databases), and Math (formula editing)."),
                                     links: [
                                         {
@@ -374,7 +373,7 @@ ScrollablePage {
                                 {
                                     cat: qsTr("Productivity"),
                                     title: qsTr("Todoist"),
-                                    icon: Qt.resolvedUrl(`${Quickshell.shellDir}/modules/live/assets/icons/todoist.svg`),
+                                    icon: Qt.resolvedUrl(`${shellDir}/modules/live/assets/icons/todoist.svg`),
                                     desc: qsTr("Todoist is a cross-platform task management tool that helps you organize your personal and professional tasks in a simple and efficient way. It allows creation of todo lists and reminders, and tracks your productivity across various devices."),
                                     links: [
                                         {
@@ -386,7 +385,7 @@ ScrollablePage {
                                 {
                                     cat: qsTr("Software Updater"),
                                     title: qsTr("Arch Update"),
-                                    icon: Qt.resolvedUrl(`${Quickshell.shellDir}/modules/live/assets/icons/arch-update.svg`),
+                                    icon: Qt.resolvedUrl(`${shellDir}/modules/live/assets/icons/arch-update.svg`),
                                     desc: qsTr("Arch Update is an interactive update notifier and updater for Arch Linux that assists you with important pre- and post-update tasks. It runs on a timer, and provides a systray icon to make your life even easier."),
                                     links: [
                                         {
@@ -398,7 +397,7 @@ ScrollablePage {
                                 {
                                     cat: qsTr("System Monitor"),
                                     title: qsTr("bTop"),
-                                    icon: Qt.resolvedUrl(`${Quickshell.shellDir}/modules/live/assets/icons/btop.svg`),
+                                    icon: Qt.resolvedUrl(`${shellDir}/modules/live/assets/icons/btop.svg`),
                                     desc: qsTr("Btop is a lightweight, CLI resource monitor and the successor to bpytop which shows usage and stats for your processor, memory, disks, network, and processes. It features full mouse support and a game-inspired interface."),
                                     links: [
                                         {
@@ -410,7 +409,7 @@ ScrollablePage {
                                 {
                                     cat: qsTr("Arch Powered"),
                                     title: qsTr("The options are endless!"),
-                                    icon: Qt.resolvedUrl(`${Quickshell.shellDir}/modules/live/assets/icons/archlinux.svg`),
+                                    icon: Qt.resolvedUrl(`${shellDir}/modules/live/assets/icons/archlinux.svg`),
                                     desc: qsTr("CaelestiaLive is built on ArchLinux, and users have access to all of the applications included in both the official Arch repositories and the AUR. We bundle yay by default for package management, but you're free to switch to paru or whatever other package manager you want!"),
                                     links: [
                                         {
