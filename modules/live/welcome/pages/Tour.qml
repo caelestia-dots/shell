@@ -11,6 +11,52 @@ import qs.config
 ScrollablePage {
     id: root
 
+    // Guided Tours
+    PageSection {
+        id: guidedToursSection
+
+        sectionId: "guided-tours"
+        sectionName: qsTr("Guided Tours")
+        sectionIcon: "tour"
+
+        sectionHeader.title: qsTr("Guided Tours")
+        sectionHeader.subtitle: qsTr("Interactive step-by-step tours to learn Caelestia features.")
+
+        SectionContentArea {
+            content: Component {
+                ColumnLayout {
+                    spacing: Appearance.spacing.large
+
+                    StyledText {
+                        Layout.fillWidth: true
+                        text: qsTr("Start a guided tour to learn about specific features. Each tour will highlight elements and guide you through their functionality.")
+                        font.pointSize: Appearance.font.size.normal
+                        color: Colours.palette.m3onSurface
+                        wrapMode: Text.WordWrap
+                        opacity: 0.9
+                    }
+
+                    Flow {
+                        Layout.fillWidth: true
+                        spacing: Appearance.spacing.normal
+
+                        TextButton {
+                            text: qsTr("Bar Basics Tour")
+                            radius: Appearance.rounding.small
+                            onClicked: Tour.startTour("bar-basics")
+                        }
+
+                        TextButton {
+                            text: qsTr("Utilities Drawer Tour")
+                            radius: Appearance.rounding.small
+                            onClicked: Tour.startTour("utilities-tour")
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     // Taskbar
     PageSection {
         id: taskbarSection
@@ -247,51 +293,4 @@ ScrollablePage {
             ]
         }
     }
-
-      // Guided Tours
-    PageSection {
-        id: guidedToursSection
-
-        sectionId: "guided-tours"
-        sectionName: qsTr("Guided Tours")
-        sectionIcon: "tour"
-
-        sectionHeader.title: qsTr("Guided Tours")
-        sectionHeader.subtitle: qsTr("Interactive step-by-step tours to learn Caelestia features.")
-
-        SectionContentArea {
-            content: Component {
-                ColumnLayout {
-                    spacing: Appearance.spacing.large
-
-                    StyledText {
-                        Layout.fillWidth: true
-                        text: qsTr("Start a guided tour to learn about specific features. Each tour will highlight elements and guide you through their functionality.")
-                        font.pointSize: Appearance.font.size.normal
-                        color: Colours.palette.m3onSurface
-                        wrapMode: Text.WordWrap
-                        opacity: 0.9
-                    }
-
-                    Flow {
-                        Layout.fillWidth: true
-                        spacing: Appearance.spacing.normal
-
-                        TextButton {
-                            text: qsTr("Bar Basics Tour")
-                            radius: Appearance.rounding.small
-                            onClicked: Tour.startTour("bar-basics")
-                        }
-
-                        TextButton {
-                            text: qsTr("Utilities Drawer Tour")
-                            radius: Appearance.rounding.small
-                            onClicked: Tour.startTour("utilities-tour")
-                        }
-                    }
-                }
-            }
-        }
-    }
-
 }
