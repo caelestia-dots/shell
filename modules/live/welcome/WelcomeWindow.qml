@@ -302,8 +302,9 @@ StyledRect {
             Item {
                 id: currentPageContainer
                 x: 0
-                width: contentArea.width
-                height: contentArea.height
+                anchors.top: parent.top
+                anchors.bottom: parent.bottom
+                width: parent.width
 
                 Loader {
                     id: currentPageLoader
@@ -314,8 +315,9 @@ StyledRect {
             Item {
                 id: nextPageContainer
                 x: contentArea.width
-                width: contentArea.width
-                height: contentArea.height
+                anchors.top: parent.top
+                anchors.bottom: parent.bottom
+                width: parent.width
 
                 Loader {
                     id: nextPageLoader
