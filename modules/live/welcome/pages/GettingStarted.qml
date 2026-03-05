@@ -3,6 +3,7 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import QtQuick.Layouts
 import QtQuick.VectorImage
+import Quickshell
 import qs.services
 import qs.components
 import qs.components.live
@@ -260,407 +261,169 @@ ScrollablePage {
 
                 content: Component {
                     ColumnLayout {
-                        RowLayout {
-                            spacing: Appearance.spacing.larger
-
-                            ColumnLayout {
-                                IconButton {
-                                    icon: "chevron_left"
-                                    font.bold: true
-                                    onClicked: {
-                                        defaultApplicationsCarousel.decrementCurrentIndex();
-                                    }
-                                }
-                            }
-
-                            ListView {
-                                id: defaultApplicationsCarousel
-
-                                Layout.fillWidth: true
-                                Layout.preferredHeight: implicitHeight
-                                implicitHeight: currentItem ? currentItem.implicitHeight : 200
-                                clip: true
-                                orientation: ListView.Horizontal
-                                snapMode: ListView.SnapOneItem
-                                highlightRangeMode: ListView.StrictlyEnforceRange
-                                preferredHighlightBegin: 0
-                                preferredHighlightEnd: width
-                                interactive: true
-                                boundsBehavior: Flickable.DragOverBounds
-
-                                Behavior on implicitHeight {
-                                    Anim {
-                                        duration: Appearance.anim.durations.normal
-                                        easing.bezierCurve: Appearance.anim.curves.emphasized
-                                    }
-                                }
-
-                                readonly property var sourceModel: [
-                                    {
-                                        cat: qsTr("File Manager"),
-                                        title: qsTr("Thunar"),
-                                        icon: "../../assets/icons/thunar.svg",
-                                        desc: qsTr("Thunar is a clean, modern file manager originally developed for Xfce. It is designed for speed and efficiency, and features a familiar, intuitive interface. Despite its simplicity, Thunar is extensible through plugins."),
-                                        links: [
-                                            {
-                                                title: qsTr("Arch Wiki"),
-                                                url: "https://wiki.archlinux.org/title/Thunar"
-                                            },
-                                            {
-                                                title: qsTr("Website"),
-                                                url: "https://docs.xfce.org/xfce/thunar/start"
-                                            }
-                                        ]
-                                    },
-                                    {
-                                        cat: qsTr("Web Browser"),
-                                        title: qsTr("Zen"),
-                                        icon: "../../assets/icons/zen-browser.svg",
-                                        desc: qsTr("Zen is an experimental, performance-optimized fork of Firefox focused on flexibility and design with many new features added to the core Firefox feature set. It also removes the Firefox AI components and tracking."),
-                                        links: [
-                                            {
-                                                title: qsTr("Website"),
-                                                url: "https://www.zen-browser.app/"
-                                            }
-                                        ]
-                                    },
-                                    {
-                                        cat: qsTr("Chat"),
-                                        title: qsTr("Discord"),
-                                        icon: "../../assets/icons/discord.svg",
-                                        desc: qsTr("Discord is a cross-platform voice and text chat application which can be used through a web browser or the official desktop application. Many open-source communities (including ours) have communities on Discord."),
-                                        links: [
-                                            {
-                                                title: qsTr("Arch Wiki"),
-                                                url: "https://wiki.archlinux.org/title/Discord"
-                                            },
-                                            {
-                                                title: qsTr("Website"),
-                                                url: "https://discord.com"
-                                            }
-                                        ]
-                                    },
-                                    {
-                                        cat: qsTr("Terminal"),
-                                        title: qsTr("Foot"),
-                                        icon: "../../assets/icons/foot.svg",
-                                        desc: qsTr("Foot is a fast, lightweight terminal emulator specifically designed for use under Wayland. It supports features such as server/daemon mode, scrollback search, URL detection, color emojis, and true color."),
-                                        links: [
-                                            {
-                                                title: qsTr("Arch Wiki"),
-                                                url: "https://wiki.archlinux.org/title/Foot"
-                                            },
-                                            {
-                                                title: qsTr("Codeberg"),
-                                                url: "https://codeberg.org/dnkl/foot"
-                                            }
-                                        ]
-                                    },
-                                    {
-                                        cat: qsTr("Music Player"),
-                                        title: qsTr("Spotify"),
-                                        icon: "../../assets/icons/spotify.svg",
-                                        desc: qsTr("Spotify is a digital music streaming service which supports both an online player through their website, and a semi-official Linux client. Spotify operates on a freemium business model."),
-                                        links: [
-                                            {
-                                                title: qsTr("Arch Wiki"),
-                                                url: "https://wiki.archlinux.org/title/Spotify"
-                                            },
-                                            {
-                                                title: qsTr("Website"),
-                                                url: "https://spotify.com"
-                                            }
-                                        ]
-                                    },
-                                    {
-                                        cat: qsTr("Code Editor"),
-                                        title: qsTr("VSCodium"),
-                                        icon: "../../assets/icons/vscodium.svg",
-                                        desc: qsTr("VSCodium is a community-driven open-source text and code editor based on Visual Studio Code. It removes telemetry from VSCode and ships configuration with Open VSX."),
-                                        links: [
-                                            {
-                                                title: qsTr("Arch Wiki"),
-                                                url: "https://wiki.archlinux.org/title/Visual_Studio_Code"
-                                            },
-                                            {
-                                                title: qsTr("Website"),
-                                                url: "https://vscodium.com/"
-                                            }
-                                        ]
-                                    },
-                                    {
-                                        cat: qsTr("Office Suite"),
-                                        title: qsTr("LibreOffice"),
-                                        icon: "../../assets/icons/libreoffice.svg",
-                                        desc: qsTr("LibreOffice is a powerful, flexible office suite that is compatible with Microsoft Office (365) and is backed by the non-profit The Document Foundation. The LibreOffice suite consists of Writer (word processing), Calc (spreadsheets), Impress (presentations), Draw (vector graphics and flowcharts), Base (databases), and Math (formula editing)."),
-                                        links: [
-                                            {
-                                                title: qsTr("Arch Wiki"),
-                                                url: "https://wiki.archlinux.org/title/LibreOffice"
-                                            },
-                                            {
-                                                title: qsTr("Website"),
-                                                url: "https://www.libreoffice.org/"
-                                            }
-                                        ]
-                                    },
-                                    {
-                                        cat: qsTr("Productivity"),
-                                        title: qsTr("Todoist"),
-                                        icon: "../../assets/icons/todoist.svg",
-                                        desc: qsTr("Todoist is a cross-platform task management tool that helps you organize your personal and professional tasks in a simple and efficient way. It allows creation of todo lists and reminders, and tracks your productivity across various devices."),
-                                        links: [
-                                            {
-                                                title: qsTr("Website"),
-                                                url: "https://www.todoist.com/"
-                                            }
-                                        ]
-                                    },
-                                    {
-                                        cat: qsTr("Software Updater"),
-                                        title: qsTr("Arch Update"),
-                                        icon: "../../assets/icons/arch-update.svg",
-                                        desc: qsTr("Arch Update is an interactive update notifier and updater for Arch Linux that assists you with important pre- and post-update tasks. It runs on a timer, and provides a systray icon to make your life even easier."),
-                                        links: [
-                                            {
-                                                title: qsTr("GitHub"),
-                                                url: "https://github.com/Antiz96/arch-update"
-                                            }
-                                        ]
-                                    },
-                                    {
-                                        cat: qsTr("System Monitor"),
-                                        title: qsTr("bTop"),
-                                        icon: "../../assets/icons/btop.svg",
-                                        desc: qsTr("Btop is a lightweight, CLI resource monitor and the successor to bpytop which shows usage and stats for your processor, memory, disks, network, and processes. It features full mouse support and a game-inspired interface."),
-                                        links: [
-                                            {
-                                                title: qsTr("GitHub"),
-                                                url: "https://github.com/aristocratos/btop"
-                                            }
-                                        ]
-                                    },
-                                    {
-                                        cat: qsTr("Arch Powered"),
-                                        title: qsTr("The options are endless!"),
-                                        icon: "../../assets/icons/archlinux.svg",
-                                        desc: qsTr("CaelestiaLive is built on ArchLinux, and users have access to all of the applications included in both the official Arch repositories and the AUR. We bundle yay by default for package management, but you're free to switch to paru or whatever other package manager you want!"),
-                                        links: [
-                                            {
-                                                title: qsTr("Arch Packages"),
-                                                url: "https://archlinux.org/packages/"
-                                            },
-                                            {
-                                                title: qsTr("Arch User Repository"),
-                                                url: "https://aur.archlinux.org"
-                                            }
-                                        ]
-                                    }
-                                ]
-
-                                property int realCurrentIndex: 0
-                                property bool isTeleporting: false
-                                property bool isAnimating: false
-
-                                Component.onCompleted: {
-                                    isTeleporting = true;
-                                    Qt.callLater(() => {
-                                        contentX = width;
-                                        isTeleporting = false;
-                                    });
-                                }
-
-                                function incrementCurrentIndex() {
-                                    if (isAnimating || isTeleporting) return;
-
-                                    const currentViewIndex = indexAt(contentX + width / 2, height / 2);
-                                    const realCount = sourceModel.length;
-
-                                    if (currentViewIndex === count - 1) {
-                                        isTeleporting = true;
-                                        positionViewAtIndex(1, ListView.SnapPosition);
-                                        realCurrentIndex = 0;
-                                        Qt.callLater(() => { isTeleporting = false; });
-                                        return;
-                                    }
-
-                                    isAnimating = true;
-                                    contentX += width;
-                                }
-
-                                function decrementCurrentIndex() {
-                                    if (isAnimating || isTeleporting) return;
-
-                                    const currentViewIndex = indexAt(contentX + width / 2, height / 2);
-                                    const realCount = sourceModel.length;
-
-                                    if (currentViewIndex === 0) {
-                                        isTeleporting = true;
-                                        positionViewAtIndex(realCount, ListView.SnapPosition);
-                                        realCurrentIndex = realCount - 1;
-                                        Qt.callLater(() => { isTeleporting = false; });
-                                        return;
-                                    }
-
-                                    isAnimating = true;
-                                    contentX -= width;
-                                }
-
-                                onMovementStarted: {
-                                    isAnimating = true;
-                                }
-
-                                onMovementEnded: {
-                                    isAnimating = false;
-
-                                    if (isTeleporting) return;
-
-                                    const viewIndex = indexAt(contentX + width / 2, height / 2);
-                                    if (viewIndex === -1) return;
-
-                                    const realCount = sourceModel.length;
-
-                                    if (viewIndex === 0) {
-                                        isTeleporting = true;
-                                        positionViewAtIndex(realCount, ListView.SnapPosition);
-                                        realCurrentIndex = realCount - 1;
-                                        Qt.callLater(() => { isTeleporting = false; });
-                                    } else if (viewIndex === count - 1) {
-                                        isTeleporting = true;
-                                        positionViewAtIndex(1, ListView.SnapPosition);
-                                        realCurrentIndex = 0;
-                                        Qt.callLater(() => { isTeleporting = false; });
-                                    } else {
-                                        realCurrentIndex = viewIndex - 1;
-                                    }
-                                }
-
-                                Behavior on contentX {
-                                    enabled: !defaultApplicationsCarousel.isTeleporting
-                                    Anim {
-                                        duration: Appearance.anim.durations.normal
-                                        easing.bezierCurve: Appearance.anim.curves.emphasized
-                                        onRunningChanged: {
-                                            if (!running) {
-                                                defaultApplicationsCarousel.isAnimating = false;
-
-                                                const viewIndex = defaultApplicationsCarousel.indexAt(
-                                                    defaultApplicationsCarousel.contentX + defaultApplicationsCarousel.width / 2,
-                                                    defaultApplicationsCarousel.height / 2
-                                                );
-                                                const realCount = defaultApplicationsCarousel.sourceModel.length;
-
-                                                if (viewIndex === 0) {
-                                                    defaultApplicationsCarousel.isTeleporting = true;
-                                                    defaultApplicationsCarousel.positionViewAtIndex(realCount, ListView.SnapPosition);
-                                                    defaultApplicationsCarousel.realCurrentIndex = realCount - 1;
-                                                    Qt.callLater(() => { defaultApplicationsCarousel.isTeleporting = false; });
-                                                } else if (viewIndex === defaultApplicationsCarousel.count - 1) {
-                                                    defaultApplicationsCarousel.isTeleporting = true;
-                                                    defaultApplicationsCarousel.positionViewAtIndex(1, ListView.SnapPosition);
-                                                    defaultApplicationsCarousel.realCurrentIndex = 0;
-                                                    Qt.callLater(() => { defaultApplicationsCarousel.isTeleporting = false; });
-                                                }
-                                            }
+                        ApplicationCarousel {
+                            sourceModel: [
+                                {
+                                    cat: qsTr("File Manager"),
+                                    title: qsTr("Thunar"),
+                                    icon: Qt.resolvedUrl(`${Quickshell.shellDir}/modules/live/assets/icons/thunar.svg`),
+                                    desc: qsTr("Thunar is a clean, modern file manager originally developed for Xfce. It is designed for speed and efficiency, and features a familiar, intuitive interface. Despite its simplicity, Thunar is extensible through plugins."),
+                                    links: [
+                                        {
+                                            title: qsTr("Arch Wiki"),
+                                            url: "https://wiki.archlinux.org/title/Thunar"
+                                        },
+                                        {
+                                            title: qsTr("Website"),
+                                            url: "https://docs.xfce.org/xfce/thunar/start"
                                         }
-                                    }
-                                }
-
-                                model: {
-                                    if (!sourceModel || sourceModel.length === 0) return [];
-                                    const extended = [];
-                                    extended.push(sourceModel[sourceModel.length - 1]);
-                                    for (let i = 0; i < sourceModel.length; i++) {
-                                        extended.push(sourceModel[i]);
-                                    }
-                                    extended.push(sourceModel[0]);
-                                    return extended;
-                                }
-
-                                delegate: Item {
-                                    id: defaultApplication
-
-                                    required property var modelData
-                                    required property int index
-
-                                    width: defaultApplicationsCarousel.width
-                                    implicitHeight: defaultApplicationRow.implicitHeight + Appearance.padding.large * 2
-
-                                    RowLayout {
-                                        id: defaultApplicationRow
-
-                                        anchors.fill: parent
-                                        anchors.margins: Appearance.padding.large
-                                        spacing: Appearance.spacing.larger
-
-                                        VectorImage {
-                                            id: defaultApplicationIcon
-
-                                            Layout.preferredWidth: 64
-                                            Layout.preferredHeight: 64
-                                            Layout.alignment: Qt.AlignTop
-                                            preferredRendererType: VectorImage.CurveRenderer
-                                            fillMode: VectorImage.PreserveAspectFit
-                                            source: defaultApplication.modelData.icon
+                                    ]
+                                },
+                                {
+                                    cat: qsTr("Web Browser"),
+                                    title: qsTr("Zen"),
+                                    icon: Qt.resolvedUrl(`${Quickshell.shellDir}/modules/live/assets/icons/zen-browser.svg`),
+                                    desc: qsTr("Zen is an experimental, performance-optimized fork of Firefox focused on flexibility and design with many new features added to the core Firefox feature set. It also removes the Firefox AI components and tracking."),
+                                    links: [
+                                        {
+                                            title: qsTr("Website"),
+                                            url: "https://www.zen-browser.app/"
                                         }
-
-                                        ColumnLayout {
-                                            id: defaultApplicationDesc
-
-                                            Layout.fillWidth: true
-                                            Layout.preferredWidth: parent.width
-                                            Layout.alignment: Qt.AlignTop
-
-                                            Text {
-                                                font.bold: true
-                                                font.pointSize: Appearance.font.size.larger
-                                                color: Colours.palette.m3onSurface
-                                                text: defaultApplication.modelData.cat + " - " + defaultApplication.modelData.title
-                                            }
-
-                                            Text {
-                                                Layout.preferredWidth: parent.width
-                                                font.pointSize: Appearance.font.size.normal
-                                                color: Colours.palette.m3onSurface
-                                                wrapMode: Text.WordWrap
-                                                text: defaultApplication.modelData.desc
-                                            }
-
-                                            RowLayout {
-                                                Layout.topMargin: Appearance.padding.normal
-
-                                                spacing: Appearance.spacing.normal
-                                                visible: defaultApplication.modelData.links
-
-                                                Repeater {
-                                                    model: defaultApplication.modelData.links
-
-                                                    TextButton {
-                                                        id: defaultApplicationLink
-
-                                                        required property var modelData
-
-                                                        text: defaultApplicationLink.modelData.title
-                                                        radius: Appearance.rounding.small
-
-                                                        onClicked: Qt.openUrlExternally(defaultApplicationLink.modelData.url)
-                                                    }
-                                                }
-                                            }
+                                    ]
+                                },
+                                {
+                                    cat: qsTr("Chat"),
+                                    title: qsTr("Discord"),
+                                    icon: Qt.resolvedUrl(`${Quickshell.shellDir}/modules/live/assets/icons/discord.svg`),
+                                    desc: qsTr("Discord is a cross-platform voice and text chat application which can be used through a web browser or the official desktop application. Many open-source communities (including ours) have communities on Discord."),
+                                    links: [
+                                        {
+                                            title: qsTr("Arch Wiki"),
+                                            url: "https://wiki.archlinux.org/title/Discord"
+                                        },
+                                        {
+                                            title: qsTr("Website"),
+                                            url: "https://discord.com"
                                         }
-                                    }
+                                    ]
+                                },
+                                {
+                                    cat: qsTr("Terminal"),
+                                    title: qsTr("Foot"),
+                                    icon: Qt.resolvedUrl(`${Quickshell.shellDir}/modules/live/assets/icons/foot.svg`),
+                                    desc: qsTr("Foot is a fast, lightweight terminal emulator specifically designed for use under Wayland. It supports features such as server/daemon mode, scrollback search, URL detection, color emojis, and true color."),
+                                    links: [
+                                        {
+                                            title: qsTr("Arch Wiki"),
+                                            url: "https://wiki.archlinux.org/title/Foot"
+                                        },
+                                        {
+                                            title: qsTr("Codeberg"),
+                                            url: "https://codeberg.org/dnkl/foot"
+                                        }
+                                    ]
+                                },
+                                {
+                                    cat: qsTr("Music Player"),
+                                    title: qsTr("Spotify"),
+                                    icon: Qt.resolvedUrl(`${Quickshell.shellDir}/modules/live/assets/icons/spotify.svg`),
+                                    desc: qsTr("Spotify is a digital music streaming service which supports both an online player through their website, and a semi-official Linux client. Spotify operates on a freemium business model."),
+                                    links: [
+                                        {
+                                            title: qsTr("Arch Wiki"),
+                                            url: "https://wiki.archlinux.org/title/Spotify"
+                                        },
+                                        {
+                                            title: qsTr("Website"),
+                                            url: "https://spotify.com"
+                                        }
+                                    ]
+                                },
+                                {
+                                    cat: qsTr("Code Editor"),
+                                    title: qsTr("VSCodium"),
+                                    icon: Qt.resolvedUrl(`${Quickshell.shellDir}/modules/live/assets/icons/vscodium.svg`),
+                                    desc: qsTr("VSCodium is a community-driven open-source text and code editor based on Visual Studio Code. It removes telemetry from VSCode and ships configuration with Open VSX."),
+                                    links: [
+                                        {
+                                            title: qsTr("Arch Wiki"),
+                                            url: "https://wiki.archlinux.org/title/Visual_Studio_Code"
+                                        },
+                                        {
+                                            title: qsTr("Website"),
+                                            url: "https://vscodium.com/"
+                                        }
+                                    ]
+                                },
+                                {
+                                    cat: qsTr("Office Suite"),
+                                    title: qsTr("LibreOffice"),
+                                    icon: Qt.resolvedUrl(`${Quickshell.shellDir}/modules/live/assets/icons/libreoffice.svg`),
+                                    desc: qsTr("LibreOffice is a powerful, flexible office suite that is compatible with Microsoft Office (365) and is backed by the non-profit The Document Foundation. The LibreOffice suite consists of Writer (word processing), Calc (spreadsheets), Impress (presentations), Draw (vector graphics and flowcharts), Base (databases), and Math (formula editing)."),
+                                    links: [
+                                        {
+                                            title: qsTr("Arch Wiki"),
+                                            url: "https://wiki.archlinux.org/title/LibreOffice"
+                                        },
+                                        {
+                                            title: qsTr("Website"),
+                                            url: "https://www.libreoffice.org/"
+                                        }
+                                    ]
+                                },
+                                {
+                                    cat: qsTr("Productivity"),
+                                    title: qsTr("Todoist"),
+                                    icon: Qt.resolvedUrl(`${Quickshell.shellDir}/modules/live/assets/icons/todoist.svg`),
+                                    desc: qsTr("Todoist is a cross-platform task management tool that helps you organize your personal and professional tasks in a simple and efficient way. It allows creation of todo lists and reminders, and tracks your productivity across various devices."),
+                                    links: [
+                                        {
+                                            title: qsTr("Website"),
+                                            url: "https://www.todoist.com/"
+                                        }
+                                    ]
+                                },
+                                {
+                                    cat: qsTr("Software Updater"),
+                                    title: qsTr("Arch Update"),
+                                    icon: Qt.resolvedUrl(`${Quickshell.shellDir}/modules/live/assets/icons/arch-update.svg`),
+                                    desc: qsTr("Arch Update is an interactive update notifier and updater for Arch Linux that assists you with important pre- and post-update tasks. It runs on a timer, and provides a systray icon to make your life even easier."),
+                                    links: [
+                                        {
+                                            title: qsTr("GitHub"),
+                                            url: "https://github.com/Antiz96/arch-update"
+                                        }
+                                    ]
+                                },
+                                {
+                                    cat: qsTr("System Monitor"),
+                                    title: qsTr("bTop"),
+                                    icon: Qt.resolvedUrl(`${Quickshell.shellDir}/modules/live/assets/icons/btop.svg`),
+                                    desc: qsTr("Btop is a lightweight, CLI resource monitor and the successor to bpytop which shows usage and stats for your processor, memory, disks, network, and processes. It features full mouse support and a game-inspired interface."),
+                                    links: [
+                                        {
+                                            title: qsTr("GitHub"),
+                                            url: "https://github.com/aristocratos/btop"
+                                        }
+                                    ]
+                                },
+                                {
+                                    cat: qsTr("Arch Powered"),
+                                    title: qsTr("The options are endless!"),
+                                    icon: Qt.resolvedUrl(`${Quickshell.shellDir}/modules/live/assets/icons/archlinux.svg`),
+                                    desc: qsTr("CaelestiaLive is built on ArchLinux, and users have access to all of the applications included in both the official Arch repositories and the AUR. We bundle yay by default for package management, but you're free to switch to paru or whatever other package manager you want!"),
+                                    links: [
+                                        {
+                                            title: qsTr("Arch Packages"),
+                                            url: "https://archlinux.org/packages/"
+                                        },
+                                        {
+                                            title: qsTr("Arch User Repository"),
+                                            url: "https://aur.archlinux.org"
+                                        }
+                                    ]
                                 }
-                            }
-
-                            ColumnLayout {
-                                IconButton {
-                                    icon: "chevron_right"
-                                    font.bold: true
-                                    onClicked: {
-                                        defaultApplicationsCarousel.incrementCurrentIndex();
-                                    }
-                                }
-                            }
+                            ]
                         }
                     }
                 }
