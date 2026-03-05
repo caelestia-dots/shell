@@ -5,14 +5,12 @@ import QtQuick.Layouts
 import qs.services
 import qs.components
 import qs.components.live
-import qs.components.containers
 import qs.components.controls
 import qs.config
 
 ScrollablePage {
     id: root
 
-  
     // Taskbar
     PageSection {
         id: taskbarSection
@@ -80,7 +78,7 @@ ScrollablePage {
                 Layout.fillWidth: true
                 Layout.alignment: Qt.AlignTop
                 title: qsTr("Fuzzy Search")
-                
+
                 content: Component {
                     StyledText {
                         text: qsTr("Start typing to find apps instantly. No need for perfect spelling.")
@@ -93,7 +91,7 @@ ScrollablePage {
                 Layout.fillWidth: true
                 Layout.alignment: Qt.AlignTop
                 title: qsTr("Configuration")
-                
+
                 content: Component {
                     StyledText {
                         text: qsTr("Modify look and feel directly via Caelestia's config files.")
@@ -106,7 +104,7 @@ ScrollablePage {
                 Layout.fillWidth: true
                 Layout.alignment: Qt.AlignTop
                 title: qsTr("Keyboard Centric")
-                
+
                 content: Component {
                     StyledText {
                         text: qsTr("Designed to be triggered and navigated entirely with the keyboard.")
@@ -119,7 +117,7 @@ ScrollablePage {
                 Layout.fillWidth: true
                 Layout.alignment: Qt.AlignTop
                 title: qsTr("Theme Integration")
-                
+
                 content: Component {
                     StyledText {
                         text: qsTr("Automatically matches your system color scheme and transparency settings.")

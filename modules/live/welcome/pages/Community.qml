@@ -27,8 +27,6 @@ ScrollablePage {
             content: Component {
                 ColumnLayout {
                     RowLayout {
-                        anchors.fill: parent
-
                         StyledText {
                             id: joinUsContent
 
