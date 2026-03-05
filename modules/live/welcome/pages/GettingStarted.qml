@@ -243,6 +243,12 @@ ScrollablePage {
                             keys: [qsTr("Super"), "Q"]
                             label: qsTr("Close active window")
                         }
+
+                        KeybindingRow {
+                            keys: [qsTr("Ctrl"), qsTr("Alt"), qsTr("Delete")]
+                            label: qsTr("Open session menu")
+                            desc: qsTr("Logout/Shutdown/Hibernate/Reboot")
+                        }
                     }
                 }
             }
