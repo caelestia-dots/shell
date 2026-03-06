@@ -12,6 +12,16 @@
 
 https://github.com/user-attachments/assets/0840f496-575c-4ca6-83a8-87bb01a85c5f
 
+## Fork Changes
+
+This is a personal fork of [caelestia-dots/shell](https://github.com/caelestia-dots/shell) with the following modifications:
+
+### Smooth keyboard brightness transitions
+
+When adjusting screen brightness via keyboard shortcuts, the actual hardware brightness now transitions smoothly to the target value instead of jumping to it instantly. This works by animating an intermediate property that drives incremental `brightnessctl` calls as it interpolates — the same animation that the OSD slider already uses visually, now applied to the hardware value itself. The result is that the physical display brightness eases in and out rather than cutting abruptly.
+
+> Note: This only applies to internal/backlight displays (`brightnessctl`). DDC/CI external monitors and Apple Studio Displays are unaffected, as they use different brightness control mechanisms that don't support this approach.
+
 ## Components
 
 -   Widgets: [`Quickshell`](https://quickshell.outfoxxed.me)

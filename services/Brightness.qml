@@ -2,6 +2,7 @@ pragma Singleton
 pragma ComponentBehavior: Bound
 
 import qs.config
+import qs.components
 import qs.components.misc
 import Quickshell
 import Quickshell.Io
@@ -160,6 +161,24 @@ Singleton {
         readonly property bool isAppleDisplay: root.appleDisplayPresent && modelData.model.startsWith("StudioDisplay")
         property real brightness
         property real queuedBrightness: NaN
+        property real animatedHWBrightness: 0
+        property int lastAppliedRounded: -1
+        property bool hwBrightnessInitialized: false
+
+        Behavior on animatedHWBrightness {
+            enabled: monitor.hwBrightnessInitialized
+            Anim {}
+        }
+
+        onAnimatedHWBrightnessChanged: {
+            if (isDdc || isAppleDisplay)
+                return;
+            const rounded = Math.round(animatedHWBrightness * 100);
+            if (rounded === lastAppliedRounded)
+                return;
+            lastAppliedRounded = rounded;
+            Quickshell.execDetached(["brightnessctl", "s", `${rounded}%`]);
+        }
 
         readonly property Process initProc: Process {
             stdout: StdioCollector {
@@ -171,6 +190,9 @@ Singleton {
                         const [, , , cur, max] = text.split(" ");
                         monitor.brightness = parseInt(cur) / parseInt(max);
                     }
+                    monitor.animatedHWBrightness = monitor.brightness;
+                    monitor.lastAppliedRounded = Math.round(monitor.brightness * 100);
+                    monitor.hwBrightnessInitialized = true;
                 }
             }
         }
@@ -203,7 +225,7 @@ Singleton {
             else if (isDdc)
                 Quickshell.execDetached(["ddcutil", "-b", busNum, "setvcp", "10", rounded]);
             else
-                Quickshell.execDetached(["brightnessctl", "s", `${rounded}%`]);
+                animatedHWBrightness = value;
 
             if (isDdc)
                 timer.restart();
