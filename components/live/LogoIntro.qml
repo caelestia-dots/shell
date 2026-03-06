@@ -3,23 +3,37 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import qs.services
 import QtQuick.Effects
+import ".."
 
 Item {
     id: root
 
-    implicitWidth: logo.implicitWidth
-    implicitHeight: logo.implicitHeight
+    implicitWidth: 128
+    implicitHeight: 90.38
 
-    property real blurAmount: 1.0
+    property real blurAmount: skipIntroAnimation ? 0.0 : 1.0
     property bool skipIntroAnimation: false
 
     signal animationCompleted()
 
+    property real star1Opacity: skipIntroAnimation ? 1.0 : 0.0
+    property real star2Opacity: skipIntroAnimation ? 1.0 : 0.0
+    property real star3Opacity: skipIntroAnimation ? 1.0 : 0.0
+
+    property real star1Scale: skipIntroAnimation ? 1.0 : 0.0
+    property real star2Scale: skipIntroAnimation ? 1.0 : 0.0
+    property real star3Scale: skipIntroAnimation ? 1.0 : 0.0
+
+    property Item star1: null
+    property Item star2: null
+    property Item star3: null
+
     Logo {
         id: logo
 
-        anchors.centerIn: parent
+        anchors.fill: parent
         lightTheme: Colours.currentLight
+        accentColor: Colours.palette.m3primary
 
         transformOrigin: Item.Center
         scale: root.skipIntroAnimation ? 1.0 : 0.0
@@ -32,17 +46,21 @@ Item {
             blur: root.blurAmount
             blurMax: 60
         }
-    }
 
-    Component.onCompleted: {
-        if (skipIntroAnimation) {
-            logo.star1.opacity = 1.0
-            logo.star1.scale = 1.0
-            logo.star2.opacity = 1.0
-            logo.star2.scale = 1.0
-            logo.star3.opacity = 1.0
-            logo.star3.scale = 1.0
-            root.blurAmount = 0.0
+        Component.onCompleted: {
+            const content = logo.children[0]
+            root.star1 = content.children[2]
+            root.star2 = content.children[3]
+            root.star3 = content.children[4]
+
+            root.star1.opacity = Qt.binding(() => root.star1Opacity)
+            root.star1.scale = Qt.binding(() => root.star1Scale)
+
+            root.star2.opacity = Qt.binding(() => root.star2Opacity)
+            root.star2.scale = Qt.binding(() => root.star2Scale)
+
+            root.star3.opacity = Qt.binding(() => root.star3Opacity)
+            root.star3.scale = Qt.binding(() => root.star3Scale)
         }
     }
 
@@ -145,8 +163,8 @@ Item {
 
                 ParallelAnimation {
                     NumberAnimation {
-                        target: logo.star1
-                        property: "opacity"
+                        target: root
+                        property: "star1Opacity"
                         from: 0.0
                         to: 1.0
                         duration: 700
@@ -155,8 +173,8 @@ Item {
 
                     SequentialAnimation {
                         NumberAnimation {
-                            target: logo.star1
-                            property: "scale"
+                            target: root
+                            property: "star1Scale"
                             from: 0.0
                             to: 1.08
                             duration: 500
@@ -164,8 +182,8 @@ Item {
                         }
 
                         NumberAnimation {
-                            target: logo.star1
-                            property: "scale"
+                            target: root
+                            property: "star1Scale"
                             from: 1.08
                             to: 1.0
                             duration: 400
@@ -180,8 +198,8 @@ Item {
 
                 ParallelAnimation {
                     NumberAnimation {
-                        target: logo.star2
-                        property: "opacity"
+                        target: root
+                        property: "star2Opacity"
                         from: 0.0
                         to: 1.0
                         duration: 700
@@ -190,8 +208,8 @@ Item {
 
                     SequentialAnimation {
                         NumberAnimation {
-                            target: logo.star2
-                            property: "scale"
+                            target: root
+                            property: "star2Scale"
                             from: 0.0
                             to: 1.08
                             duration: 500
@@ -199,8 +217,8 @@ Item {
                         }
 
                         NumberAnimation {
-                            target: logo.star2
-                            property: "scale"
+                            target: root
+                            property: "star2Scale"
                             from: 1.08
                             to: 1.0
                             duration: 400
@@ -215,8 +233,8 @@ Item {
 
                 ParallelAnimation {
                     NumberAnimation {
-                        target: logo.star3
-                        property: "opacity"
+                        target: root
+                        property: "star3Opacity"
                         from: 0.0
                         to: 1.0
                         duration: 700
@@ -225,8 +243,8 @@ Item {
 
                     SequentialAnimation {
                         NumberAnimation {
-                            target: logo.star3
-                            property: "scale"
+                            target: root
+                            property: "star3Scale"
                             from: 0.0
                             to: 1.08
                             duration: 500
@@ -234,8 +252,8 @@ Item {
                         }
 
                         NumberAnimation {
-                            target: logo.star3
-                            property: "scale"
+                            target: root
+                            property: "star3Scale"
                             from: 1.08
                             to: 1.0
                             duration: 400
@@ -262,19 +280,19 @@ Item {
                 loops: Animation.Infinite
 
                 NumberAnimation {
-                    target: logo.star1
+                    target: root.star1
                     property: "y"
-                    from: logo.star1.y
-                    to: logo.star1.y - 5
+                    from: root.star1.y
+                    to: root.star1.y - 5
                     duration: 2500
                     easing.type: Easing.InOutQuad
                 }
 
                 NumberAnimation {
-                    target: logo.star1
+                    target: root.star1
                     property: "y"
-                    from: logo.star1.y - 5
-                    to: logo.star1.y
+                    from: root.star1.y - 5
+                    to: root.star1.y
                     duration: 2500
                     easing.type: Easing.InOutQuad
                 }
@@ -284,19 +302,19 @@ Item {
                 loops: Animation.Infinite
 
                 NumberAnimation {
-                    target: logo.star2
+                    target: root.star2
                     property: "y"
-                    from: logo.star2.y
-                    to: logo.star2.y + 5
+                    from: root.star2.y
+                    to: root.star2.y + 5
                     duration: 3000
                     easing.type: Easing.InOutQuad
                 }
 
                 NumberAnimation {
-                    target: logo.star2
+                    target: root.star2
                     property: "y"
-                    from: logo.star2.y + 5
-                    to: logo.star2.y
+                    from: root.star2.y + 5
+                    to: root.star2.y
                     duration: 3000
                     easing.type: Easing.InOutQuad
                 }
@@ -306,19 +324,19 @@ Item {
                 loops: Animation.Infinite
 
                 NumberAnimation {
-                    target: logo.star3
+                    target: root.star3
                     property: "y"
-                    from: logo.star3.y
-                    to: logo.star3.y - 5
+                    from: root.star3.y
+                    to: root.star3.y - 5
                     duration: 2800
                     easing.type: Easing.InOutQuad
                 }
 
                 NumberAnimation {
-                    target: logo.star3
+                    target: root.star3
                     property: "y"
-                    from: logo.star3.y - 5
-                    to: logo.star3.y
+                    from: root.star3.y - 5
+                    to: root.star3.y
                     duration: 2800
                     easing.type: Easing.InOutQuad
                 }
@@ -328,7 +346,7 @@ Item {
                 loops: Animation.Infinite
 
                 NumberAnimation {
-                    target: logo.star1
+                    target: root.star1
                     property: "scale"
                     from: 1.0
                     to: 1.08
@@ -337,7 +355,7 @@ Item {
                 }
 
                 NumberAnimation {
-                    target: logo.star1
+                    target: root.star1
                     property: "scale"
                     from: 1.08
                     to: 1.0
@@ -350,7 +368,7 @@ Item {
                 loops: Animation.Infinite
 
                 NumberAnimation {
-                    target: logo.star2
+                    target: root.star2
                     property: "scale"
                     from: 1.0
                     to: 1.12
@@ -359,7 +377,7 @@ Item {
                 }
 
                 NumberAnimation {
-                    target: logo.star2
+                    target: root.star2
                     property: "scale"
                     from: 1.12
                     to: 1.0
@@ -372,7 +390,7 @@ Item {
                 loops: Animation.Infinite
 
                 NumberAnimation {
-                    target: logo.star3
+                    target: root.star3
                     property: "scale"
                     from: 1.0
                     to: 1.08
@@ -381,7 +399,7 @@ Item {
                 }
 
                 NumberAnimation {
-                    target: logo.star3
+                    target: root.star3
                     property: "scale"
                     from: 1.08
                     to: 1.0
