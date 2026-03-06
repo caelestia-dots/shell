@@ -12,6 +12,11 @@ Item {
 
     required property Item wrapper
 
+    readonly property list<string> internalApps: [
+        qsTr("Caelestia Settings"),
+        qsTr("Welcome to Caelestia")
+    ]
+
     implicitWidth: Hypr.activeToplevel ? child.implicitWidth : -Appearance.padding.large * 2
     implicitHeight: child.implicitHeight
 
@@ -31,9 +36,20 @@ Item {
             IconImage {
                 id: icon
 
+                visible: !root.internalApps.includes(Hypr.activeToplevel?.title.split(" - ")[0])
                 Layout.alignment: Qt.AlignVCenter
                 implicitSize: details.implicitHeight
                 source: Icons.getAppIcon(Hypr.activeToplevel?.lastIpcObject.class ?? "", "image-missing")
+            }
+
+            Logo {
+                id: logo
+
+                visible: root.internalApps.includes(Hypr.activeToplevel?.title.split(" - ")[0])
+                Layout.preferredHeight: details.implicitHeight
+                Layout.preferredWidth: details.implicitHeight
+                lightTheme: Colours.currentLight
+                accentColor: Colours.palette.m3primary
             }
 
             ColumnLayout {
@@ -51,7 +67,7 @@ Item {
 
                 StyledText {
                     Layout.fillWidth: true
-                    text: Hypr.activeToplevel?.lastIpcObject.class ?? ""
+                    text: root.internalApps.includes(Hypr.activeToplevel?.title.split(" - ")[0]) ? qsTr("caelestia") : (Hypr.activeToplevel?.lastIpcObject.class ?? "")
                     color: Colours.palette.m3onSurfaceVariant
                     elide: Text.ElideRight
                 }
