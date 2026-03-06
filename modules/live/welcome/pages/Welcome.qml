@@ -32,6 +32,8 @@ Item {
 
                 LogoIntro {
                     Layout.alignment: Qt.AlignHCenter
+                    Layout.preferredWidth: 100 * (implicitWidth / implicitHeight)
+                    Layout.preferredHeight: 100
                     skipIntroAnimation: root.animationHasRun
                     onAnimationCompleted: root.animationCompleted()
                 }

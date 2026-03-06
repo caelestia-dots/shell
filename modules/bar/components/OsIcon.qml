@@ -14,6 +14,9 @@ Item {
     Component.onCompleted: Tour.register("bar-launcher", root)
     Component.onDestruction: Tour.unregister("bar-launcher")
 
+    implicitWidth: Appearance.font.size.large * 1.2
+    implicitHeight: Appearance.font.size.large * 1.2
+
     MouseArea {
         anchors.fill: parent
         cursorShape: Qt.PointingHandCursor
