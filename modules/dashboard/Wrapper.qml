@@ -83,7 +83,6 @@ Item {
         interval: Appearance.anim.durations.extraLarge
         onTriggered: {
             content.visible = true;
-            content.active = Qt.binding(() => (root.visibilities.dashboard && Config.dashboard.enabled) || root.visible);
         }
     }
 
@@ -95,6 +94,7 @@ Item {
 
         visible: false
         active: true
+        asynchronous: false
 
         sourceComponent: Content {
             visibilities: root.visibilities
