@@ -11,11 +11,29 @@ import Quickshell.Services.Mpris
 import QtQuick
 import QtQuick.Layouts
 import QtQuick.Shapes
+import QtQuick.Effects
+import "../../utils/scripts/lrcparser.js" as Lrc
 
 Item {
     id: root
 
     required property PersistentProperties visibilities
+    readonly property bool needsKeyboard: root.lyricMenuOpen
+    
+    readonly property real detailsHeightWithoutLyrics: details.implicitHeight - lyricsViewInDetails.implicitHeight
+
+    property bool lyricMenuOpen: false
+    property bool lyricsShowing: LyricsService.lyricsVisible && LyricsService.model.count != 0
+    property bool lyricsShowingDebounced: false
+
+    onLyricsShowingChanged: {
+        if (lyricsShowing) {
+            lyricsHideDelay.stop()
+            lyricsShowingDebounced = true
+        } else {
+            lyricsHideDelay.restart()
+        }
+    }
 
     property real playerProgress: {
         const active = Players.active;
@@ -36,7 +54,11 @@ Item {
     }
 
     implicitWidth: cover.implicitWidth + Config.dashboard.sizes.mediaVisualiserSize * 2 + details.implicitWidth + details.anchors.leftMargin + bongocat.implicitWidth + bongocat.anchors.leftMargin * 2 + Appearance.padding.large * 2
-    implicitHeight: Math.max(cover.implicitHeight + Config.dashboard.sizes.mediaVisualiserSize * 2, details.implicitHeight, bongocat.implicitHeight) + Appearance.padding.large * 2
+    implicitHeight: Math.max(
+        cover.implicitHeight + Config.dashboard.sizes.mediaVisualiserSize * 2,
+        lyricMenuOpen ? lyricMenu.implicitHeight : details.implicitHeight,
+        bongocat.implicitHeight
+    ) + Appearance.padding.large * 2
 
     Behavior on playerProgress {
         Anim {
@@ -49,8 +71,26 @@ Item {
         interval: Config.dashboard.mediaUpdateInterval
         triggeredOnStart: true
         repeat: true
-        onTriggered: Players.active?.positionChanged()
+        onTriggered: {
+            if (!Players.active) return;
+            LyricsService.updatePosition();
+            Players.active?.positionChanged();
+        }
     }
+
+    Timer {
+        id: lyricsHideDelay
+        interval: 300
+        repeat: false
+    }
+
+    Connections {
+        target: lyricsHideDelay
+        function onTriggered() {
+            root.lyricsShowingDebounced = false
+        }
+    }
+
 
     ServiceRef {
         service: Audio.cava
@@ -145,6 +185,13 @@ Item {
             fillMode: Image.PreserveAspectCrop
             sourceSize.width: width
             sourceSize.height: height
+
+            MouseArea {
+                anchors.fill: parent
+                onClicked: {
+                    LyricsService.toggleVisibility()
+                }
+            }
         }
     }
 
@@ -200,6 +247,12 @@ Item {
             wrapMode: Players.active ? Text.NoWrap : Text.WordWrap
         }
 
+        LyricsView {
+            id: lyricsViewInDetails
+            Layout.fillWidth: true
+            Layout.preferredHeight: 200
+        }
+
         RowLayout {
             id: controls
 
@@ -208,6 +261,14 @@ Item {
             Layout.bottomMargin: Appearance.spacing.smaller
 
             spacing: Appearance.spacing.small
+
+            PlayerControl {
+                type: IconButton.Text
+                icon: Players.active?.shuffle ? "shuffle_on" : "shuffle"
+                font.pointSize: Math.round(Appearance.font.size.large)
+                disabled: !Players.active?.shuffleSupported
+                onClicked: Players.active.shuffle = !Players.active?.shuffle
+            }
 
             PlayerControl {
                 type: IconButton.Text
@@ -234,6 +295,13 @@ Item {
                 font.pointSize: Math.round(Appearance.font.size.large * 1.5)
                 disabled: !Players.active?.canGoNext
                 onClicked: Players.active?.next()
+            }
+
+            PlayerControl {
+                type: IconButton.Text
+                icon: "lyrics"
+                font.pointSize: Math.round(Appearance.font.size.large)
+                onClicked: root.lyricMenuOpen = !root.lyricMenuOpen
             }
         }
 
@@ -299,83 +367,122 @@ Item {
                 font.pointSize: Appearance.font.size.small
             }
         }
+    }
 
-        RowLayout {
-            Layout.alignment: Qt.AlignHCenter
-            spacing: Appearance.spacing.small
+    ColumnLayout {
+        id: leftSection
 
-            PlayerControl {
-                type: IconButton.Text
-                icon: "move_up"
-                inactiveOnColour: Colours.palette.m3secondary
-                padding: Appearance.padding.small
-                font.pointSize: Appearance.font.size.large
-                disabled: !Players.active?.canRaise
-                onClicked: {
-                    Players.active?.raise();
-                    root.visibilities.dashboard = false;
-                }
+        anchors.verticalCenter: parent.verticalCenter
+        anchors.verticalCenterOffset: playerChanger.parent == leftSection ? -playerChanger.height : 0
+        anchors.left: details.right
+        anchors.leftMargin: Appearance.spacing.normal
+
+        visible: lyricMenu.height === 0 || opacity > 0
+        opacity: lyricMenu.height === 0 ? 1 : 0
+        Behavior on opacity {
+            NumberAnimation {
+                duration: Appearance.anim.durations.normal
+                easing.type: Easing.OutCubic
             }
+        }
 
-            SplitButton {
-                id: playerSelector
+        Item {
+            id: bongocat
 
-                disabled: !Players.list.length
-                active: menuItems.find(m => m.modelData === Players.active) ?? menuItems[0] ?? null
-                menu.onItemSelected: item => Players.manualActive = (item as PlayerItem).modelData
+            implicitWidth: visualiser.width
+            implicitHeight: visualiser.height
 
-                menuItems: playerList.instances
-                fallbackIcon: "music_off"
-                fallbackText: qsTr("No players")
+            AnimatedImage {
+                anchors.centerIn: parent
 
-                label.Layout.maximumWidth: slider.implicitWidth * 0.28
-                label.elide: Text.ElideRight
+                width: visualiser.width * 0.75
+                height: visualiser.height * 0.75
 
-                stateLayer.disabled: true
-                menuOnTop: true
-
-                Variants {
-                    id: playerList
-
-                    model: Players.list
-
-                    PlayerItem {}
-                }
-            }
-
-            PlayerControl {
-                type: IconButton.Text
-                icon: "delete"
-                inactiveOnColour: Colours.palette.m3error
-                padding: Appearance.padding.small
-                font.pointSize: Appearance.font.size.large
-                disabled: !Players.active?.canQuit
-                onClicked: Players.active?.quit()
+                playing: Players.active?.isPlaying ?? false
+                speed: Audio.beatTracker.bpm / Appearance.anim.mediaGifSpeedAdjustment // qmllint disable unresolved-type
+                source: Paths.absolutePath(Config.paths.mediaGif)
+                asynchronous: true
+                fillMode: AnimatedImage.PreserveAspectFit
             }
         }
     }
 
-    Item {
-        id: bongocat
+    LyricMenu {
+        id: lyricMenu
 
-        anchors.verticalCenter: parent.verticalCenter
+        anchors.top: parent.top
         anchors.left: details.right
+        anchors.right: parent.right
         anchors.leftMargin: Appearance.spacing.normal
 
-        implicitWidth: visualiser.width
-        implicitHeight: visualiser.height
+        contentHeight: !root.lyricsShowingDebounced
+        ? root.detailsHeightWithoutLyrics + Appearance.padding.large * 5
+        : root.detailsHeightWithoutLyrics + lyricsViewInDetails.implicitHeight
 
-        AnimatedImage {
-            anchors.centerIn: parent
+        visible: root.lyricMenuOpen || height > 0
+        height: root.lyricMenuOpen ? implicitHeight : 0
+        clip: true
+        Behavior on height {
+            NumberAnimation {
+                duration: Appearance.anim.durations.normal
+                easing.type: Easing.OutCubic
+            }
+        }
+    }
 
-            width: visualiser.width * 0.75
-            height: visualiser.height * 0.75
+    RowLayout {
+        parent: !root.lyricsShowingDebounced ? details : leftSection
+        id: playerChanger
+        Layout.alignment: Qt.AlignHCenter
+        spacing: Appearance.spacing.small
 
-            playing: Players.active?.isPlaying ?? false
-            speed: Audio.beatTracker.bpm / Appearance.anim.mediaGifSpeedAdjustment // qmllint disable unresolved-type
-            source: Paths.absolutePath(Config.paths.mediaGif)
-            asynchronous: true
-            fillMode: AnimatedImage.PreserveAspectFit
+        PlayerControl {
+            type: IconButton.Text
+            icon: "move_up"
+            inactiveOnColour: Colours.palette.m3secondary
+            padding: Appearance.padding.small
+            font.pointSize: Appearance.font.size.large
+            disabled: !Players.active?.canRaise
+            onClicked: {
+                Players.active?.raise();
+                root.visibilities.dashboard = false;
+            }
+        }
+
+        SplitButton {
+            id: playerSelector
+
+            disabled: !Players.list.length
+            active: menuItems.find(m => m.modelData === Players.active) ?? menuItems[0] ?? null
+            menu.onItemSelected: item => Players.manualActive = (item as PlayerItem).modelData
+
+            menuItems: playerList.instances
+            fallbackIcon: "music_off"
+            fallbackText: qsTr("No players")
+
+            label.Layout.maximumWidth: slider.implicitWidth * 0.28
+            label.elide: Text.ElideRight
+
+            stateLayer.disabled: true
+            menuOnTop: true
+
+            Variants {
+                id: playerList
+
+                model: Players.list
+
+                PlayerItem {}
+            }
+        }
+
+        PlayerControl {
+            type: IconButton.Text
+            icon: "delete"
+            inactiveOnColour: Colours.palette.m3error
+            padding: Appearance.padding.small
+            font.pointSize: Appearance.font.size.large
+            disabled: !Players.active?.canQuit
+            onClicked: Players.active?.quit()
         }
     }
 

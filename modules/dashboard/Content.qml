@@ -12,6 +12,7 @@ Item {
     id: root
 
     required property PersistentProperties visibilities
+    readonly property bool needsKeyboard: mediaPane.item?.needsKeyboard ?? false
     required property PersistentProperties state
     required property FileDialog facePicker
     readonly property real nonAnimWidth: view.implicitWidth + viewWrapper.anchors.margins * 2
@@ -96,6 +97,7 @@ Item {
                 }
 
                 Pane {
+                    id: mediaPane
                     index: 1
                     sourceComponent: Media {
                         visibilities: root.visibilities
