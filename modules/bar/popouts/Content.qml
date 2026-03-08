@@ -129,8 +129,8 @@ Item {
         Repeater {
             model: ScriptModel {
                 values: {
-                    const allItems = [...SystemTray.items.values];
-                    const hiddenIds = Config.bar.tray.hiddenIcons || [];
+                    const allItems = SystemTray.items.values;
+                    const hiddenIds = Config.bar.tray.hiddenIcons;
                     return allItems.filter(item => !hiddenIds.includes(item.id));
                 }
             }
