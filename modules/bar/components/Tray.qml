@@ -68,7 +68,7 @@ StyledRect {
             id: items
 
             model: ScriptModel {
-                values: SystemTray.items.values.filter(i => Config.bar.tray.hiddenIcons.includes(i.id))
+                values: SystemTray.items.values.filter(i => !Config.bar.tray.hiddenIcons.includes(i.id))
             }
 
             TrayItem {}
