@@ -97,6 +97,7 @@ ColumnLayout {
             text: "person"
             color: Colours.palette.m3onSurfaceVariant
             font.pointSize: Math.floor(root.centerWidth / 4)
+            visible: pfp.status !== Image.Ready
         }
 
         CachingImage {
