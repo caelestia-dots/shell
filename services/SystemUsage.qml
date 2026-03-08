@@ -246,7 +246,8 @@ Singleton {
                     root.gpuName = root.cleanGpuName(output);
                 } else {
                     // Parse lspci output: extract name from brackets or after colon
-                    const bracketMatch = output.match(/\[([^\]]+)\]/);
+                    //adjusted regex to handle cases like [AMD/ATI] Navi 21 [Radeon RX 6800/6800 XT / 6900 XT] (rev c0)
+                    const bracketMatch = output.match(/\[([^\]]+)\][^\[]*$/);
                     if (bracketMatch) {
                         root.gpuName = root.cleanGpuName(bracketMatch[1]);
                     } else {
