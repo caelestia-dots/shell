@@ -85,7 +85,7 @@ StyledRect {
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.bottom: parent.bottom
 
-        active: Config.bar.tray.compact && root.filteredItems.length > 0
+        active: Config.bar.tray.compact && items.count > 0
 
         sourceComponent: Item {
             implicitWidth: expandIconInner.implicitWidth
