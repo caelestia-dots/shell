@@ -45,6 +45,8 @@ Item {
     property bool popoutActiveWindow: Config.bar.popouts.activeWindow ?? true
     property bool popoutTray: Config.bar.popouts.tray ?? true
     property bool popoutStatusIcons: Config.bar.popouts.statusIcons ?? true
+    property list<string> monitorNames: Hypr.monitorNames()
+    property list<string> excludedScreens: Config.bar.excludedScreens ?? []
 
     anchors.fill: parent
 
@@ -88,6 +90,7 @@ Item {
         Config.bar.popouts.activeWindow = root.popoutActiveWindow;
         Config.bar.popouts.tray = root.popoutTray;
         Config.bar.popouts.statusIcons = root.popoutStatusIcons;
+        Config.bar.excludedScreens = root.excludedScreens;
 
         const entries = [];
         for (let i = 0; i < entriesModel.count; i++) {
@@ -638,6 +641,43 @@ Item {
                                         }
                                     }
                                 ]
+                            }
+                        }
+
+                        SectionContainer {
+                            Layout.fillWidth: true
+                            alignTop: true
+
+                            StyledText {
+                                text: qsTr("Monitors")
+                                font.pointSize: Appearance.font.size.normal
+                            }
+
+                            ConnectedButtonGroup {
+                                rootItem: root
+                                // max 3 options per line
+                                rows: Math.ceil(root.monitorNames.length / 3)
+
+                                options: root.monitorNames.map(e => ({
+                                    label: qsTr(e),
+                                    propertyName: `monitor${e}`,
+                                    onToggled: function (_) {
+                                        // if the given monitor is in the excluded list, it should be added back
+                                        let addedBack = excludedScreens.includes(e)
+                                        if (addedBack) {
+                                            const index = excludedScreens.indexOf(e);
+                                            if (index !== -1) {
+                                                excludedScreens.splice(index, 1);
+                                            }
+                                        } else {
+                                            if (!excludedScreens.includes(e)) {
+                                                excludedScreens.push(e);
+                                            }
+                                        }
+                                        root.saveConfig();
+                                    },
+                                    state: !Strings.testRegexList(root.excludedScreens, e)
+                                }))
                             }
                         }
                     }
