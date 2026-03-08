@@ -3,9 +3,13 @@ import qs.services
 import qs.config
 import qs.utils
 import QtQuick
+import qs.components
 
 Item {
     id: root
+    
+    implicitWidth: Appearance.font.size.large * 1.2
+    implicitHeight: Appearance.font.size.large * 1.2
 
     MouseArea {
         anchors.fill: parent
@@ -16,13 +20,27 @@ Item {
         }
     }
 
-    ColouredIcon {
+    Loader {
         anchors.centerIn: parent
-        source: SysInfo.osLogo
-        implicitSize: Appearance.font.size.large * 1.2
-        colour: Colours.palette.m3tertiary
+        sourceComponent: SysInfo.isDefaultLogo ? caelestiaLogo : distroIcon
     }
 
-    implicitWidth: Appearance.font.size.large * 1.2
-    implicitHeight: Appearance.font.size.large * 1.2
+    Component {
+        id: caelestiaLogo
+
+        Logo {
+            width: Appearance.font.size.large * 1.5
+            height: Appearance.font.size.large * 1.5
+        }
+    }
+
+    Component {
+        id: distroIcon
+
+        ColouredIcon {
+            source: SysInfo.osLogo
+            implicitSize: Appearance.font.size.large * 1.2
+            colour: Colours.palette.m3tertiary
+        }
+    }
 }
