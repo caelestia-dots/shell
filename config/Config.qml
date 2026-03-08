@@ -299,6 +299,7 @@ Singleton {
         return {
             enabled: launcher.enabled,
             showOnHover: launcher.showOnHover,
+            enableCategories: launcher.enableCategories ?? true,
             maxShown: launcher.maxShown,
             maxWallpapers: launcher.maxWallpapers,
             specialPrefix: launcher.specialPrefix,
@@ -308,6 +309,7 @@ Singleton {
             vimKeybinds: launcher.vimKeybinds,
             favouriteApps: launcher.favouriteApps,
             hiddenApps: launcher.hiddenApps,
+            categories: launcher.categories,
             useFuzzy: {
                 apps: launcher.useFuzzy.apps,
                 actions: launcher.useFuzzy.actions,
@@ -321,6 +323,8 @@ Singleton {
                 wallpaperWidth: launcher.sizes.wallpaperWidth,
                 wallpaperHeight: launcher.sizes.wallpaperHeight
             },
+            contextMenuMain: launcher.contextMenuMain,
+            contextMenuAdvanced: launcher.contextMenuAdvanced,
             actions: launcher.actions
         };
     }

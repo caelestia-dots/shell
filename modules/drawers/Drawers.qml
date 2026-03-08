@@ -56,6 +56,15 @@ Variants {
             WlrLayershell.exclusionMode: ExclusionMode.Ignore
             WlrLayershell.keyboardFocus: visibilities.launcher || visibilities.session ? WlrKeyboardFocus.OnDemand : WlrKeyboardFocus.None
 
+            Region {
+                id: contextMenuRegion
+                x: panels.contextMenuX + bar.implicitWidth
+                y: panels.contextMenuY + Config.border.thickness
+                width: panels.contextMenuWidth
+                height: panels.contextMenuHeight
+                intersection: Intersection.Subtract
+            }
+
             mask: Region {
                 x: bar.implicitWidth + win.dragMaskPadding
                 y: Config.border.thickness + win.dragMaskPadding
@@ -63,7 +72,7 @@ Variants {
                 height: win.height - Config.border.thickness * 2 - win.dragMaskPadding * 2
                 intersection: Intersection.Xor
 
-                regions: regions.instances
+                regions: panels.contextMenuOpen ? regions.instances.concat([contextMenuRegion]) : regions.instances
             }
 
             anchors.top: true
@@ -90,7 +99,7 @@ Variants {
             HyprlandFocusGrab {
                 id: focusGrab
 
-                active: (visibilities.launcher && Config.launcher.enabled) || (visibilities.session && Config.session.enabled) || (visibilities.sidebar && Config.sidebar.enabled) || (!Config.dashboard.showOnHover && visibilities.dashboard && Config.dashboard.enabled) || (panels.popouts.currentName.startsWith("traymenu") && panels.popouts.current?.depth > 1)
+                active: !panels.contextMenuOpen && ((visibilities.launcher && Config.launcher.enabled) || (visibilities.session && Config.session.enabled) || (visibilities.sidebar && Config.sidebar.enabled) || (!Config.dashboard.showOnHover && visibilities.dashboard && Config.dashboard.enabled) || (panels.popouts.currentName.startsWith("traymenu") && panels.popouts.current?.depth > 1))
                 windows: [win]
                 onCleared: {
                     visibilities.launcher = false;
@@ -159,6 +168,7 @@ Variants {
                     screen: scope.modelData
                     visibilities: visibilities
                     bar: bar
+                    windowRef: win
                 }
 
                 BarWrapper {
