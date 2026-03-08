@@ -8,8 +8,8 @@ Item {
     implicitWidth: 128
     implicitHeight: 90.38
 
-    property color accentColor: Colours.palette.m3primary
-    property color primaryColor: Colours.palette.m3onSurface
+    property color topColour: Colours.palette.m3primary
+    property color bottomColour: Colours.palette.m3onSurface
 
     readonly property real designWidth: 128
     readonly property real designHeight: 90.38
@@ -29,7 +29,7 @@ Item {
             preferredRendererType: Shape.CurveRenderer
 
             ShapePath {
-                fillColor: root.accentColor
+                fillColor: root.topColour
                 strokeColor: "transparent"
 
                 PathSvg {
@@ -44,7 +44,7 @@ Item {
             preferredRendererType: Shape.CurveRenderer
 
             ShapePath {
-                fillColor: root.primaryColor
+                fillColor: root.bottomColour
                 strokeColor: "transparent"
 
                 PathSvg {
@@ -59,7 +59,7 @@ Item {
             preferredRendererType: Shape.CurveRenderer
 
             ShapePath {
-                fillColor: root.accentColor
+                fillColor: root.topColour
                 strokeColor: "transparent"
 
                 PathSvg {
@@ -74,7 +74,7 @@ Item {
             preferredRendererType: Shape.CurveRenderer
 
             ShapePath {
-                fillColor: root.accentColor
+                fillColor: root.topColour
                 strokeColor: "transparent"
 
                 PathSvg {
@@ -89,7 +89,7 @@ Item {
             preferredRendererType: Shape.CurveRenderer
 
             ShapePath {
-                fillColor: root.accentColor
+                fillColor: root.topColour
                 strokeColor: "transparent"
 
                 PathSvg {
