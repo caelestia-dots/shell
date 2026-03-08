@@ -3,7 +3,7 @@ import qs.services
 import qs.config
 import qs.utils
 import QtQuick
-import "../../../components"
+import qs.components
 
 Item {
     id: root
