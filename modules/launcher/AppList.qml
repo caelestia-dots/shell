@@ -51,7 +51,11 @@ StyledListView {
     state: {
         const text = search.text;
         const prefix = Config.launcher.actionPrefix;
+
         if (text.startsWith(prefix)) {
+            if (text.startsWith(`${prefix}sub `))
+                return "subactions";
+
             for (const action of ["calc", "scheme", "variant"])
                 if (text.startsWith(`${prefix}${action} `))
                     return action;
@@ -68,6 +72,14 @@ StyledListView {
     }
 
     states: [
+        State {
+            name: "subactions"
+
+            PropertyChanges {
+                model.values: SubActions.query(search.text)
+                root.delegate: actionItem
+            }
+        },
         State {
             name: "apps"
 

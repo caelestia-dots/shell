@@ -40,6 +40,7 @@ ColumnLayout {
 
         Loader {
             anchors.centerIn: parent
+            asynchronous: true
             active: opacity > 0
             opacity: Notifs.list.length > 0 ? 0 : 1
 
