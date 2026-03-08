@@ -391,6 +391,7 @@ Singleton {
             recolourLogo: lock.recolourLogo,
             enableFprint: lock.enableFprint,
             maxFprintTries: lock.maxFprintTries,
+            hideNotifs: lock.hideNotifs,
             sizes: {
                 heightMult: lock.sizes.heightMult,
                 ratio: lock.sizes.ratio,

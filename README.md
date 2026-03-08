@@ -567,7 +567,8 @@ default, you must create it manually.
         "hiddenApps": []
     },
     "lock": {
-        "recolourLogo": false
+        "recolourLogo": false,
+        "hideNotifs": false
     },
     "notifs": {
         "actionOnClick": false,
