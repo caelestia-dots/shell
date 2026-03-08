@@ -586,6 +586,8 @@ default, you must create it manually.
     "paths": {
         "mediaGif": "root:/assets/bongocat.gif",
         "sessionGif": "root:/assets/kurukuru.gif",
+        "noNotifsPic": "root:/assets/dino.png",
+        "lockscreenNoNotifsPic": "root:/assets/dino.png",
         "wallpaperDir": "~/Pictures/Wallpapers"
     },
     "services": {

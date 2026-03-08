@@ -458,7 +458,9 @@ Singleton {
         return {
             wallpaperDir: paths.wallpaperDir,
             sessionGif: paths.sessionGif,
-            mediaGif: paths.mediaGif
+            mediaGif: paths.mediaGif,
+            noNotifsPic: paths.noNotifsPic,
+            lockscreenNoNotifsPic: paths.lockscreenNoNotifsPic
         };
     }
 
