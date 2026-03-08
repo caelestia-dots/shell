@@ -409,6 +409,7 @@ default, you must create it manually.
             "occupiedBg": false,
             "occupiedLabel": "󰮯",
             "perMonitorWorkspaces": true,
+            "useNumberedWorkspaces": false,
             "showWindows": true,
             "shown": 5,
             "specialWorkspaceIcons": [
