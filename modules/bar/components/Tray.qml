@@ -71,7 +71,9 @@ StyledRect {
         Repeater {
             id: items
 
-            model: root.filteredItems
+            model: ScriptModel {
+                values: SystemTray.items.values.filter(i => Config.bar.tray.hiddenIcons.includes(i.id))
+            }
 
             TrayItem {}
         }
