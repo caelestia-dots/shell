@@ -41,8 +41,8 @@ StyledRect {
 
             Toggle {
                 icon: "wifi"
-                checked: Network.wifiEnabled
-                onClicked: Network.toggleWifi()
+                checked: Nmcli.wifiEnabled
+                onClicked: Nmcli.toggleWifi()
             }
 
             Toggle {
