@@ -1,5 +1,6 @@
 import QtQuick
 import QtQuick.Shapes
+import qs.services
 
 Item {
     id: root
@@ -7,9 +8,8 @@ Item {
     implicitWidth: 128
     implicitHeight: 90.38
 
-    property bool lightTheme: true
-    property color accentColor: "#6ae5e1"
-    property color primaryColor: lightTheme ? "#3b4656" : "#ebf4ff"
+    property color accentColor: Colours.palette.m3primary
+    property color primaryColor: Colours.palette.m3onSurface
 
     readonly property real designWidth: 128
     readonly property real designHeight: 90.38

@@ -31,8 +31,6 @@ Item {
         Logo {
             width: Appearance.font.size.large * 1.5
             height: Appearance.font.size.large * 1.5
-            lightTheme: Colours.currentLight
-            accentColor: Colours.palette.m3primary
         }
     }
 
