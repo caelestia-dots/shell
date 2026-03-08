@@ -3,6 +3,12 @@ import Quickshell.Io
 JsonObject {
     property bool enabled: true
     property bool wallpaperEnabled: true
+    property string wallpaperTransition: "fade"
+    property int transitionDuration: 1000
+    property bool autoRandomWallpaper: false
+    property int autoRandomInterval: 300
+    property bool timeBasedWallpaper: false
+    property list<var> wallpaperSchedule
     property DesktopClock desktopClock: DesktopClock {}
     property Visualiser visualiser: Visualiser {}
 

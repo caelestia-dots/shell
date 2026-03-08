@@ -161,6 +161,12 @@ Singleton {
         return {
             enabled: background.enabled,
             wallpaperEnabled: background.wallpaperEnabled,
+            wallpaperTransition: background.wallpaperTransition,
+            transitionDuration: background.transitionDuration,
+            autoRandomWallpaper: background.autoRandomWallpaper,
+            autoRandomInterval: background.autoRandomInterval,
+            timeBasedWallpaper: background.timeBasedWallpaper,
+            wallpaperSchedule: background.wallpaperSchedule,
             desktopClock: {
                 enabled: background.desktopClock.enabled,
                 scale: background.desktopClock.scale,
