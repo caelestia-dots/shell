@@ -44,8 +44,8 @@ SectionContainer {
         SliderInput {
             Layout.fillWidth: true
             
-            label: qsTr("Update interval")
-            value: root.rootItem.updateInterval
+            label: qsTr("Resource update interval")
+            value: root.rootItem.resourceUpdateInterval
             from: 100
             to: 10000
             stepSize: 100
@@ -55,7 +55,7 @@ SectionContainer {
             parseValueFunction: (text) => parseInt(text)
             
             onValueModified: (newValue) => {
-                root.rootItem.updateInterval = Math.round(newValue);
+                root.rootItem.resourceUpdateInterval = Math.round(newValue);
                 root.rootItem.saveConfig();
             }
         }

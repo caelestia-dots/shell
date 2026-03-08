@@ -20,6 +20,12 @@ Item {
     implicitWidth: nonAnimWidth
     implicitHeight: nonAnimHeight
 
+    onImplicitWidthChanged: {
+        if (root.state.currentTab >= tabs.count) {
+            root.state.currentTab = 0;
+        }
+    }
+
     Tabs {
         id: tabs
 
@@ -86,31 +92,70 @@ Item {
             RowLayout {
                 id: row
 
-                Pane {
-                    index: 0
-                    sourceComponent: Dash {
-                        visibilities: root.visibilities
-                        state: root.state
-                        facePicker: root.facePicker
+                Repeater {
+                    model: {
+                        const allPanes = [
+                            { index: 0, component: "dash" },
+                            { index: 1, component: "media" },
+                            { index: 2, component: "performance", enabled: Config.dashboard.performance.showCpu || Config.dashboard.performance.showGpu || Config.dashboard.performance.showMemory || Config.dashboard.performance.showStorage || Config.dashboard.performance.showNetwork || Config.dashboard.performance.showBattery },
+                            { index: 3, component: "weather" }
+                        ];
+                        return allPanes.filter(pane => pane.enabled !== false);
+                    }
+
+                    delegate: Loader {
+                        id: paneLoader
+                        
+                        required property int index
+                        required property var modelData
+                        
+                        Layout.alignment: Qt.AlignTop
+                        
+                        sourceComponent: {
+                            switch (modelData.component) {
+                                case "dash": return dashComponent;
+                                case "media": return mediaComponent;
+                                case "performance": return performanceComponent;
+                                case "weather": return weatherComponent;
+                                default: return null;
+                            }
+                        }
+                        
+                        Component.onCompleted: active = Qt.binding(() => {
+                            if (index === view.currentIndex)
+                                return true;
+                            const vx = Math.floor(view.visibleArea.xPosition * view.contentWidth);
+                            const vex = Math.floor(vx + view.visibleArea.widthRatio * view.contentWidth);
+                            return (vx >= x && vx <= x + implicitWidth) || (vex >= x && vex <= x + implicitWidth);
+                        })
                     }
                 }
-
-                Pane {
-                    index: 1
-                    sourceComponent: Media {
-                        visibilities: root.visibilities
-                    }
+            }
+            
+            Component {
+                id: dashComponent
+                Dash {
+                    visibilities: root.visibilities
+                    state: root.state
+                    facePicker: root.facePicker
                 }
-
-                Pane {
-                    index: 2
-                    sourceComponent: Performance {}
+            }
+            
+            Component {
+                id: mediaComponent
+                Media {
+                    visibilities: root.visibilities
                 }
-
-                Pane {
-                    index: 3
-                    sourceComponent: Weather {}
-                }
+            }
+            
+            Component {
+                id: performanceComponent
+                Performance {}
+            }
+            
+            Component {
+                id: weatherComponent
+                Weather {}
             }
 
             Behavior on contentX {
@@ -131,22 +176,5 @@ Item {
             duration: Appearance.anim.durations.large
             easing.bezierCurve: Appearance.anim.curves.emphasized
         }
-    }
-
-    component Pane: Loader {
-        id: pane
-
-        required property int index
-
-        Layout.alignment: Qt.AlignTop
-
-        Component.onCompleted: active = Qt.binding(() => {
-            // Always keep current tab loaded
-            if (pane.index === view.currentIndex)
-                return true;
-            const vx = Math.floor(view.visibleArea.xPosition * view.contentWidth);
-            const vex = Math.floor(vx + view.visibleArea.widthRatio * view.contentWidth);
-            return (vx >= x && vx <= x + implicitWidth) || (vex >= x && vex <= x + implicitWidth);
-        })
     }
 }
