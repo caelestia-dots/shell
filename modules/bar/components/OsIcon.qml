@@ -29,8 +29,8 @@ Item {
         id: caelestiaLogo
 
         Logo {
-            width: Appearance.font.size.large * 1.5
-            height: Appearance.font.size.large * 1.5
+            implicitWidth: Appearance.font.size.large * 1.8
+            implicitHeight: Appearance.font.size.large * 1.8
         }
     }
 
