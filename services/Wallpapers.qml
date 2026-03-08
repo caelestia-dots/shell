@@ -19,6 +19,25 @@ Searcher {
     property string actualCurrent
     property bool previewColourLock
 
+    // Folder selection support
+    property int currentFolderIndex: 0
+    property int debouncedFolderIndex: 0
+    
+    readonly property var folders: {
+        const folderList = folderModel.entries.map(e => e.name);
+        folderList.sort((a, b) => a.localeCompare(b, undefined, {numeric: true, sensitivity: 'base'}));
+        return ["All", ...folderList];
+    }
+    readonly property string currentFolder: Config.launcher.folderSelection ? (folders[currentFolderIndex] ?? "All") : "All"
+    readonly property string debouncedCurrentFolder: Config.launcher.folderSelection ? (folders[debouncedFolderIndex] ?? "All") : "All"
+
+    Timer {
+        interval: 350
+        running: root.currentFolderIndex !== root.debouncedFolderIndex
+        repeat: false
+        onTriggered: root.debouncedFolderIndex = root.currentFolderIndex
+    }
+
     function setWallpaper(path: string): void {
         actualCurrent = path;
         Quickshell.execDetached(["caelestia", "wallpaper", "-f", path, ...smartArg]);
@@ -36,6 +55,14 @@ Searcher {
         showPreview = false;
         if (!previewColourLock)
             Colours.showPreview = false;
+    }
+
+    // Filter wallpapers by folder
+    function queryWithFolder(search: string, folder: string): list<var> {
+        const results = query(search);
+        if (folder === "All" || folder === "")
+            return results;
+        return results.filter(w => w.relativePath.startsWith(folder + "/"));
     }
 
     list: wallpapers.entries
@@ -69,6 +96,13 @@ Searcher {
             root.actualCurrent = text().trim();
             root.previewColourLock = false;
         }
+    }
+
+    FileSystemModel {
+        id: folderModel
+
+        path: Paths.wallsdir
+        filter: FileSystemModel.Dirs
     }
 
     FileSystemModel {
