@@ -19,6 +19,10 @@ public slots:
     void start();
     void stop();
 
+signals:
+    void activated();
+    void deactivated();
+
 protected:
     virtual void process() = 0;
 

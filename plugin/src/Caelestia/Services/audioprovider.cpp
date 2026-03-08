@@ -21,7 +21,7 @@ void AudioProcessor::init() {
 }
 
 void AudioProcessor::start() {
-    QMetaObject::invokeMethod(&AudioCollector::instance(), &AudioCollector::ref, Qt::QueuedConnection, this);
+    emit activated();
     if (m_timer) {
         m_timer->start();
     }
@@ -31,7 +31,7 @@ void AudioProcessor::stop() {
     if (m_timer) {
         m_timer->stop();
     }
-    QMetaObject::invokeMethod(&AudioCollector::instance(), &AudioCollector::unref, Qt::QueuedConnection, this);
+    emit deactivated();
 }
 
 AudioProvider::AudioProvider(QObject* parent)
@@ -58,6 +58,13 @@ void AudioProvider::init() {
     connect(m_thread, &QThread::started, m_processor, &AudioProcessor::init);
     connect(m_thread, &QThread::finished, m_processor, &AudioProcessor::deleteLater);
     connect(m_thread, &QThread::finished, m_thread, &QThread::deleteLater);
+
+    connect(m_processor, &AudioProcessor::activated, this, [this]() {
+        AudioCollector::instance().ref(this);
+    });
+    connect(m_processor, &AudioProcessor::deactivated, this, [this]() {
+        AudioCollector::instance().unref(this);
+    });
 
     m_thread->start();
 }
