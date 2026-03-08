@@ -20,12 +20,6 @@ Item {
     implicitWidth: nonAnimWidth
     implicitHeight: nonAnimHeight
 
-    onImplicitWidthChanged: {
-        if (root.state.currentTab >= tabs.count) {
-            root.state.currentTab = 0;
-        }
-    }
-
     Tabs {
         id: tabs
 
@@ -95,10 +89,10 @@ Item {
                 Repeater {
                     model: {
                         const allPanes = [
-                            { index: 0, component: "dash" },
-                            { index: 1, component: "media" },
-                            { index: 2, component: "performance", enabled: Config.dashboard.performance.showCpu || Config.dashboard.performance.showGpu || Config.dashboard.performance.showMemory || Config.dashboard.performance.showStorage || Config.dashboard.performance.showNetwork || Config.dashboard.performance.showBattery },
-                            { index: 3, component: "weather" }
+                            { component: "dash" },
+                            { component: "media" },
+                            { component: "performance", enabled: Config.dashboard.performance.showCpu || Config.dashboard.performance.showGpu || Config.dashboard.performance.showMemory || Config.dashboard.performance.showStorage || Config.dashboard.performance.showNetwork || Config.dashboard.performance.showBattery },
+                            { component: "weather" }
                         ];
                         return allPanes.filter(pane => pane.enabled !== false);
                     }
