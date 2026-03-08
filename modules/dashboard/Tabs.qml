@@ -30,30 +30,24 @@ Item {
 
         onCurrentIndexChanged: root.state.currentTab = currentIndex
 
-        Tab {
-            iconName: "dashboard"
-            text: qsTr("Dashboard")
-        }
+        Repeater {
+            model: {
+                const allTabs = [
+                    { iconName: "dashboard", text: qsTr("Dashboard"), enabled: true },
+                    { iconName: "queue_music", text: qsTr("Media"), enabled: true },
+                    { iconName: "speed", text: qsTr("Performance"), enabled: Config.dashboard.performance.showCpu || Config.dashboard.performance.showGpu || Config.dashboard.performance.showMemory || Config.dashboard.performance.showStorage || Config.dashboard.performance.showNetwork || Config.dashboard.performance.showBattery },
+                    { iconName: "cloud", text: qsTr("Weather"), enabled: true }
+                ];
+                return allTabs.filter(tab => tab.enabled);
+            }
 
-        Tab {
-            iconName: "queue_music"
-            text: qsTr("Media")
+            delegate: Tab {
+                required property var modelData
+                
+                iconName: modelData.iconName
+                text: modelData.text
+            }
         }
-
-        Tab {
-            iconName: "speed"
-            text: qsTr("Performance")
-        }
-
-        Tab {
-            iconName: "cloud"
-            text: qsTr("Weather")
-        }
-
-        // Tab {
-        //     iconName: "workspaces"
-        //     text: qsTr("Workspaces")
-        // }
     }
 
     Item {
@@ -62,11 +56,12 @@ Item {
         anchors.top: bar.bottom
         anchors.topMargin: 5
 
-        implicitWidth: bar.currentItem.implicitWidth
+        implicitWidth: bar.currentItem ? bar.currentItem.implicitWidth : 0
         implicitHeight: 3
 
         x: {
             const tab = bar.currentItem;
+            if (!tab) return 0;
             const width = (root.nonAnimWidth - bar.spacing * (bar.count - 1)) / bar.count;
             return width * tab.TabBar.index + (width - tab.implicitWidth) / 2;
         }
