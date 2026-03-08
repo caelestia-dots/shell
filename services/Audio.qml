@@ -4,6 +4,7 @@ import qs.config
 import Caelestia.Services
 import Caelestia
 import Quickshell
+import Quickshell.Io
 import Quickshell.Services.Pipewire
 import QtQuick
 
@@ -84,6 +85,15 @@ Singleton {
         Pipewire.preferredDefaultAudioSource = newSource;
     }
 
+    function cycleNextAudioOutput(): void {
+        if (sinks.length === 0)
+            return;
+
+        const currentIndex = sinks.findIndex(s => s === sink);
+        const nextIndex = (currentIndex + 1) % sinks.length;
+        setAudioSink(sinks[nextIndex]);
+    }
+
     function setStreamVolume(stream: PwNode, newVolume: real): void {
         if (stream?.ready && stream?.audio) {
             stream.audio.muted = false;
@@ -153,5 +163,13 @@ Singleton {
 
     BeatTracker {
         id: beatTracker
+    }
+
+    IpcHandler {
+        target: "audio"
+
+        function cycleOutput(): void {
+            root.cycleNextAudioOutput();
+        }
     }
 }
