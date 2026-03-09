@@ -94,7 +94,6 @@ Item {
 
         visible: false
         active: true
-        asynchronous: false
 
         sourceComponent: Content {
             visibilities: root.visibilities

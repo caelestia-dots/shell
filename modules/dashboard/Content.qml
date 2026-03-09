@@ -20,6 +20,38 @@ Item {
     implicitWidth: nonAnimWidth
     implicitHeight: nonAnimHeight
 
+    readonly property ScriptModel dashboardModel: ScriptModel {
+        values: {
+            const allTabs = [
+                {
+                    component: dashComponent,
+                    iconName: "dashboard",
+                    text: qsTr("Dashboard"),
+                    enabled: Config.dashboard.showDashboard
+                },
+                {
+                    component: mediaComponent,
+                    iconName: "queue_music",
+                    text: qsTr("Media"),
+                    enabled: Config.dashboard.showMedia
+                },
+                {
+                    component: performanceComponent,
+                    iconName: "speed",
+                    text: qsTr("Performance"),
+                    enabled: Config.dashboard.showPerformance && (Config.dashboard.performance.showCpu || Config.dashboard.performance.showGpu || Config.dashboard.performance.showMemory || Config.dashboard.performance.showStorage || Config.dashboard.performance.showNetwork || Config.dashboard.performance.showBattery)
+                },
+                {
+                    component: weatherComponent,
+                    iconName: "cloud",
+                    text: qsTr("Weather"),
+                    enabled: Config.dashboard.showWeather
+                }
+            ];
+            return allTabs.filter(tab => tab.enabled);
+        }
+    }
+
     Tabs {
         id: tabs
 
@@ -31,6 +63,7 @@ Item {
 
         nonAnimWidth: root.nonAnimWidth - anchors.margins * 2
         state: root.state
+        model: root.dashboardModel
     }
 
     ClippingRectangle {
@@ -87,34 +120,18 @@ Item {
                 id: row
 
                 Repeater {
-                    model: {
-                        const allPanes = [
-                            { component: "dash" },
-                            { component: "media" },
-                            { component: "performance", enabled: Config.dashboard.performance.showCpu || Config.dashboard.performance.showGpu || Config.dashboard.performance.showMemory || Config.dashboard.performance.showStorage || Config.dashboard.performance.showNetwork || Config.dashboard.performance.showBattery },
-                            { component: "weather" }
-                        ];
-                        return allPanes.filter(pane => pane.enabled !== false);
-                    }
+                    model: root.dashboardModel
 
                     delegate: Loader {
                         id: paneLoader
-                        
+
                         required property int index
                         required property var modelData
-                        
+
                         Layout.alignment: Qt.AlignTop
-                        
-                        sourceComponent: {
-                            switch (modelData.component) {
-                                case "dash": return dashComponent;
-                                case "media": return mediaComponent;
-                                case "performance": return performanceComponent;
-                                case "weather": return weatherComponent;
-                                default: return null;
-                            }
-                        }
-                        
+
+                        sourceComponent: modelData.component
+
                         Component.onCompleted: active = Qt.binding(() => {
                             if (index === view.currentIndex)
                                 return true;
@@ -125,7 +142,7 @@ Item {
                     }
                 }
             }
-            
+
             Component {
                 id: dashComponent
                 Dash {
@@ -134,19 +151,19 @@ Item {
                     facePicker: root.facePicker
                 }
             }
-            
+
             Component {
                 id: mediaComponent
                 Media {
                     visibilities: root.visibilities
                 }
             }
-            
+
             Component {
                 id: performanceComponent
                 Performance {}
             }
-            
+
             Component {
                 id: weatherComponent
                 Weather {}

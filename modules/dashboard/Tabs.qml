@@ -14,6 +14,7 @@ Item {
 
     required property real nonAnimWidth
     required property PersistentProperties state
+    required property ScriptModel model
     readonly property alias count: bar.count
 
     implicitHeight: bar.implicitHeight + indicator.implicitHeight + indicator.anchors.topMargin + separator.implicitHeight
@@ -31,19 +32,11 @@ Item {
         onCurrentIndexChanged: root.state.currentTab = currentIndex
 
         Repeater {
-            model: {
-                const allTabs = [
-                    { iconName: "dashboard", text: qsTr("Dashboard"), enabled: true },
-                    { iconName: "queue_music", text: qsTr("Media"), enabled: true },
-                    { iconName: "speed", text: qsTr("Performance"), enabled: Config.dashboard.performance.showCpu || Config.dashboard.performance.showGpu || Config.dashboard.performance.showMemory || Config.dashboard.performance.showStorage || Config.dashboard.performance.showNetwork || Config.dashboard.performance.showBattery },
-                    { iconName: "cloud", text: qsTr("Weather"), enabled: true }
-                ];
-                return allTabs.filter(tab => tab.enabled);
-            }
+            model: root.model
 
             delegate: Tab {
                 required property var modelData
-                
+
                 iconName: modelData.iconName
                 text: modelData.text
             }
@@ -56,12 +49,13 @@ Item {
         anchors.top: bar.bottom
         anchors.topMargin: 5
 
-        implicitWidth: bar.currentItem ? bar.currentItem.implicitWidth : 0
+        implicitWidth: bar.currentItem?.implicitWidth ?? 0
         implicitHeight: 3
 
         x: {
             const tab = bar.currentItem;
-            if (!tab) return 0;
+            if (!tab)
+                return 0;
             const width = (root.nonAnimWidth - bar.spacing * (bar.count - 1)) / bar.count;
             return width * tab.TabBar.index + (width - tab.implicitWidth) / 2;
         }
