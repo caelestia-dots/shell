@@ -54,6 +54,15 @@ Item {
             blurMax: 60
         }
 
+        Component.onCompleted: {
+            root.star1.opacity = Qt.binding(() => root.star1Opacity)
+            root.star1.scale = Qt.binding(() => root.star1Scale)
+            root.star2.opacity = Qt.binding(() => root.star2Opacity)
+            root.star2.scale = Qt.binding(() => root.star2Scale)
+            root.star3.opacity = Qt.binding(() => root.star3Opacity)
+            root.star3.scale = Qt.binding(() => root.star3Scale)
+        }
+
         Shape {
             id: topShape
 
@@ -93,6 +102,7 @@ Item {
             id: star1
             anchors.fill: parent
             preferredRendererType: Shape.CurveRenderer
+            opacity: 0.0
 
             ShapePath {
                 fillColor: logo.topColour
@@ -108,6 +118,7 @@ Item {
             id: star2
             anchors.fill: parent
             preferredRendererType: Shape.CurveRenderer
+            opacity: 0.0
 
             ShapePath {
                 fillColor: logo.topColour
@@ -123,6 +134,7 @@ Item {
             id: star3
             anchors.fill: parent
             preferredRendererType: Shape.CurveRenderer
+            opacity: 0.0
 
             ShapePath {
                 fillColor: logo.topColour
