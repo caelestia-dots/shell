@@ -27,16 +27,16 @@ StyledRect {
             component: welcomeComponent
         },
         {
-            id: "getting-started",
-            name: qsTr("Getting Started"),
-            icon: "rocket_launch",
-            component: gettingStartedComponent
-        },
-        {
             id: "tour",
             name: qsTr("Tour"),
             icon: "planet",
             component: tourComponent
+        },
+        {
+            id: "getting-started",
+            name: qsTr("Getting Started"),
+            icon: "rocket_launch",
+            component: gettingStartedComponent
         },
         {
             id: "configuration",
@@ -393,13 +393,13 @@ StyledRect {
     }
 
     Component {
-        id: gettingStartedComponent
-        GettingStarted {}
+        id:tourComponent
+        Tour{}
     }
 
     Component {
-        id:tourComponent
-        Tour{}
+        id: gettingStartedComponent
+        GettingStarted {}
     }
 
     Component {
