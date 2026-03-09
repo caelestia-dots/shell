@@ -49,7 +49,7 @@ Singleton {
     }
 
     function cleanGpuName(name: string): string {
-        return name.replace(/NVIDIA GeForce /gi, "").replace(/NVIDIA /gi, "").replace(/AMD Radeon /gi, "").replace(/AMD /gi, "").replace(/Intel /gi, "").replace(/\(R\)/gi, "").replace(/\(TM\)/gi, "").replace(/Graphics/gi, "").replace(/\s+/g, " ").trim();
+        return name.replace(/\(R\)/gi, "").replace(/\(TM\)/gi, "").replace(/Graphics/gi, "").replace(/\s+/g, " ").trim();
     }
 
     function formatKib(kib: real): var {
@@ -246,7 +246,7 @@ Singleton {
                     root.gpuName = root.cleanGpuName(output);
                 } else {
                     // Parse lspci output: extract name from brackets or after colon
-                    //adjusted regex to handle cases like [AMD/ATI] Navi 21 [Radeon RX 6800/6800 XT / 6900 XT] (rev c0)
+                    // Handles cases like [AMD/ATI] Navi 21 [Radeon RX 6800/6800 XT / 6900 XT] (rev c0)
                     const bracketMatch = output.match(/\[([^\]]+)\][^\[]*$/);
                     if (bracketMatch) {
                         root.gpuName = root.cleanGpuName(bracketMatch[1]);
