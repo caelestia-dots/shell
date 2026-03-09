@@ -232,7 +232,7 @@ Singleton {
         id: gpuNameDetect
 
         running: true
-        command: ["sh", "-c", "nvidia-smi --query-gpu=name --format=csv,noheader 2>/dev/null || glxinfo -B 2>/dev/null | grep 'Device:' | cut -d':' -f2 | cut -d'(' -f1 | xargs || lspci 2>/dev/null | grep -i 'vga\\|3d controller\\|display' | head -1"]
+        command: ["sh", "-c", "nvidia-smi --query-gpu=name --format=csv,noheader 2>/dev/null || glxinfo -B 2>/dev/null | grep 'Device:' | cut -d':' -f2 | cut -d'(' -f1 || lspci 2>/dev/null | grep -i 'vga\\|3d controller\\|display' | head -1"]
         stdout: StdioCollector {
             onStreamFinished: {
                 const output = text.trim();
