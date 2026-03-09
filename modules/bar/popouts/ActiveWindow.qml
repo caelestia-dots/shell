@@ -48,8 +48,6 @@ Item {
                 visible: root.internalApps.includes(Hypr.activeToplevel?.title.split(" - ")[0])
                 Layout.preferredHeight: details.implicitHeight
                 Layout.preferredWidth: details.implicitHeight
-                lightTheme: Colours.currentLight
-                accentColor: Colours.palette.m3primary
             }
 
             ColumnLayout {

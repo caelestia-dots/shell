@@ -32,8 +32,6 @@ Item {
         id: logo
 
         anchors.fill: parent
-        lightTheme: Colours.currentLight
-        accentColor: Colours.palette.m3primary
 
         transformOrigin: Item.Center
         scale: root.skipIntroAnimation ? 1.0 : 0.0
