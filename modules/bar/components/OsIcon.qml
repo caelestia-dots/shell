@@ -8,8 +8,8 @@ import qs.components
 Item {
     id: root
 
-    Component.onCompleted: Tour.register("bar-launcher", root)
-    Component.onDestruction: Tour.unregister("bar-launcher")
+    Component.onCompleted: Tour.register("taskbar-launcher", root)
+    Component.onDestruction: Tour.unregister("taskbar-launcher")
 
     implicitWidth: Appearance.font.size.large * 1.2
     implicitHeight: Appearance.font.size.large * 1.2

@@ -9,6 +9,9 @@ import QtQuick
 Item {
     id: root
 
+    Component.onCompleted: Tour.register("taskbar-active-window", root)
+    Component.onDestruction: Tour.unregister("taskbar-active-window")
+
     required property var bar
     required property Brightness.Monitor monitor
     property color colour: Colours.palette.m3primary

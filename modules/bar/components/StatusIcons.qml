@@ -13,6 +13,9 @@ import QtQuick.Layouts
 StyledRect {
     id: root
 
+    Component.onCompleted: Tour.register("taskbar-status-icons", root)
+    Component.onDestruction: Tour.unregister("taskbar-status-icons")
+
     property color colour: Colours.palette.m3secondary
     readonly property alias items: iconColumn
 

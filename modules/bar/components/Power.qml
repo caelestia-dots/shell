@@ -7,6 +7,9 @@ import QtQuick
 Item {
     id: root
 
+    Component.onCompleted: Tour.register("taskbar-power-button", root)
+    Component.onDestruction: Tour.unregister("taskbar-power-button")
+
     required property PersistentProperties visibilities
 
     implicitWidth: icon.implicitHeight + Appearance.padding.small * 2

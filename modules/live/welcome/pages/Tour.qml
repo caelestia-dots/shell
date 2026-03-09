@@ -20,7 +20,7 @@ ScrollablePage {
         sectionIcon: "tour"
 
         sectionHeader.title: qsTr("Guided Tours")
-        sectionHeader.subtitle: qsTr("Interactive step-by-step tours to learn Caelestia features.")
+        sectionHeader.subtitle: qsTr("Interactive step-by-step tours to introduce you to Caelestia.")
 
         SectionContentArea {
             content: Component {
@@ -41,9 +41,9 @@ ScrollablePage {
                         spacing: Appearance.spacing.normal
 
                         TextButton {
-                            text: qsTr("Bar Basics Tour")
+                            text: qsTr("Taskbar Tour")
                             radius: Appearance.rounding.small
-                            onClicked: Tour.startTour("bar-basics")
+                            onClicked: Tour.startTour("taskbar-tour")
                         }
 
                         TextButton {
@@ -75,27 +75,32 @@ ScrollablePage {
                         {
                             title: qsTr("OS Icon"),
                             desc: qsTr("The OS icon shows the Caelestia logo by default in CaelestiaLive, and the distro logo by default on a normal install. The icon can be changed through your shell.json file, and acts as a trigger for the application launcher."),
-                            tourId: "bar-launcher"
+                            tourId: "taskbar-launcher"
                         },
                         {
-                            title: qsTr("Workspaces"),
-                            desc: qsTr("A modular monitor showing active spaces. Behavior can be modified in settings.")
+                            title: qsTr("Workspace Indicator"),
+                            desc: qsTr("The workspace indicator shows your your current workspace and allows quick switching between workspaces and special workspaces. The appearance and behavior can be modified in settings."),
+                            tourId: "taskbar-workspaces"
                         },
                         {
-                            title: qsTr("Active Window"),
-                            desc: qsTr("Displays the current window title. Hovering provides a live preview pop-out.")
+                            title: qsTr("Active Window Indicator"),
+                            desc: qsTr("Displays the current window title. Hovering over the title displays a live preview pop-out, and clicking the arrow in the top right opens a dialog with further information about the current window. The pop-out can be set to either hover or click action in settings."),
+                            tourId: "taskbar-active-window"
                         },
                         {
                             title: qsTr("System Tray"),
-                            desc: qsTr("Interact with background applications and special workspace utilities.")
+                            desc: qsTr("The system tray provides easy access to background applications which support system tray icons. Individual icons can be overridden or hidden and system tray appearance can be modified through settings."),
+                            tourId: "taskbar-system-tray"
                         },
                         {
                             title: qsTr("Status Icons"),
-                            desc: qsTr("Quick-look system health (WiFi, Battery) with expanded hover menus.")
+                            desc: qsTr("The status icons component provides quick access to the system info you need at a glance, including network connectivity, volume, bluetooth devices, battery and more. Hovering over an icon provides further details and configurations."),
+                            tourId: "taskbar-status-icons"
                         },
                         {
-                            title: qsTr("Power Menu"),
-                            desc: qsTr("Access the power drawer for Logout, Restart, and Shutdown options.")
+                            title: qsTr("Power Button"),
+                            desc: qsTr("The power button acts as a trigger for the session drawer, which allows you to Logout, Shutdown, Hibernate, or Restart your PC. The session menu is also easily accessible by pressing Ctrl+Alt+Delete."),
+                            tourId: "taskbar-power-button"
                         }
                     ]
                 }

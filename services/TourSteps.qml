@@ -3,45 +3,84 @@ pragma Singleton
 import Quickshell
 
 Singleton {
-    readonly property var tours: ({
+    readonly property var taskbarLauncher: ({
+        elementId: "taskbar-launcher",
+        title: qsTr("OS Icon"),
+        tooltip: qsTr("Clicking the OS icon opens the launcher, allowing you to quickly search and launch applications."),
+        tooltipPosition: "right"
+    })
 
-        "bar-launcher": {
-            id: "bar-launcher",
-            steps: [
-                {
-                    elementId: "bar-launcher",
-                    title: qsTr("OS Icon"),
-                    tooltip: qsTr("Clicking the OS icon opens the launcher, allowing you to quickly search and launch applications."),
-                    tooltipPosition: "right"
-                }
-            ]
+    readonly property var taskbarWorkspaces: ({
+        elementId: "taskbar-workspaces",
+        title: qsTr("Workspace Indicator"),
+        tooltip: qsTr("The workspace indicator shows your current workspace and allows quick switching between workspaces."),
+        tooltipPosition: "right"
+    })
+
+    readonly property var taskbarActiveWindow: ({
+        elementId: "taskbar-active-window",
+        title: qsTr("Active Window Indicator"),
+        tooltip: qsTr("Displays the current window title. Hovering over the title displays a live preview pop-out."),
+        tooltipPosition: "right"
+    })
+
+    readonly property var taskbarSystemTray: ({
+        elementId: "taskbar-system-tray",
+        title: qsTr("System Tray"),
+        tooltip: qsTr("The system tray provides easy access to background applications which support system tray icons."),
+        tooltipPosition: "right"
+    })
+
+    readonly property var taskbarStatusIcons: ({
+        elementId: "taskbar-status-icons",
+        title: qsTr("Status Icons"),
+        tooltip: qsTr("The status icons component provides quick access to the system info you need at a glance, including network connectivity, volume, bluetooth devices, battery and more."),
+        tooltipPosition: "right"
+    })
+
+    readonly property var taskbarPowerButton: ({
+        elementId: "taskbar-power-button",
+        title: qsTr("Power Button"),
+        tooltip: qsTr("The power button acts as a trigger for the session drawer, which allows you to Logout, Shutdown, Hibernate, or Restart your PC."),
+        tooltipPosition: "right"
+    })
+
+    readonly property var tours: ({
+        "taskbar-launcher": {
+            id: "taskbar-launcher",
+            steps: [taskbarLauncher]
         },
-        "bar-basics": {
-            id: "bar-basics",
-            title: "Bar Basics",
-            description: "Learn about the workspace indicator and bar features",
+        "taskbar-workspaces": {
+            id: "taskbar-workspaces",
+            steps: [taskbarWorkspaces]
+        },
+        "taskbar-active-window": {
+            id: "taskbar-active-window",
+            steps: [taskbarActiveWindow]
+        },
+        "taskbar-system-tray": {
+            id: "taskbar-system-tray",
+            steps: [taskbarSystemTray]
+        },
+        "taskbar-status-icons": {
+            id: "taskbar-status-icons",
+            steps: [taskbarStatusIcons]
+        },
+        "taskbar-power-button": {
+            id: "taskbar-power-button",
+            steps: [taskbarPowerButton]
+        },
+        "taskbar-tour": {
+            id: "taskbar-tour",
+            title: qsTr("Taskbar Tour"),
+            description: qsTr("Learn about the Caelestia taskbar and its features."),
             steps: [
-                {
-                    elementId: "bar-launcher",
-                    drawer: null,
-                    title: "App Launcher",
-                    tooltip: "Click to search and launch applications quickly.",
-                    tooltipPosition: "right"
-                },
-                {
-                    elementId: "bar-workspaces",
-                    drawer: null,
-                    title: "Workspace Indicator",
-                    tooltip: "Shows your current workspace and allows quick switching between workspaces.",
-                    tooltipPosition: "right"
-                },
-                {
-                    elementId: "bar-system-tray",
-                    drawer: null,
-                    title: "System Tray",
-                    tooltip: "Access system indicators and background applications.",
-                    tooltipPosition: "right"
-                }
+                taskbarLauncher,
+                taskbarWorkspaces,
+                taskbarActiveWindow,
+                taskbarSystemTray,
+                taskbarStatusIcons,
+                taskbarPowerButton
             ]
         },
         "utilities-tour": {
