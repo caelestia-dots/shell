@@ -14,7 +14,8 @@ Item {
 
     required property real nonAnimWidth
     required property PersistentProperties state
-    required property ScriptModel model
+    required property var tabs
+
     readonly property alias count: bar.count
 
     implicitHeight: bar.implicitHeight + indicator.implicitHeight + indicator.anchors.topMargin + separator.implicitHeight
@@ -32,7 +33,9 @@ Item {
         onCurrentIndexChanged: root.state.currentTab = currentIndex
 
         Repeater {
-            model: root.model
+            model: ScriptModel {
+                values: root.tabs
+            }
 
             delegate: Tab {
                 required property var modelData

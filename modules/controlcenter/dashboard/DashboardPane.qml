@@ -22,6 +22,7 @@ Item {
     // General Settings
     property bool enabled: Config.dashboard.enabled ?? true
     property bool showOnHover: Config.dashboard.showOnHover ?? true
+    property int mediaUpdateInterval: Config.dashboard.mediaUpdateInterval ?? 1000
     property int resourceUpdateInterval: Config.dashboard.resourceUpdateInterval ?? 1000
     property int dragThreshold: Config.dashboard.dragThreshold ?? 50
 
@@ -44,6 +45,7 @@ Item {
     function saveConfig() {
         Config.dashboard.enabled = root.enabled;
         Config.dashboard.showOnHover = root.showOnHover;
+        Config.dashboard.mediaUpdateInterval = root.mediaUpdateInterval;
         Config.dashboard.resourceUpdateInterval = root.resourceUpdateInterval;
         Config.dashboard.dragThreshold = root.dragThreshold;
         Config.dashboard.showDashboard = root.showDashboard;

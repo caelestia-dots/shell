@@ -14,43 +14,42 @@ Item {
     required property PersistentProperties visibilities
     required property PersistentProperties state
     required property FileDialog facePicker
+
+    readonly property var dashboardTabs: {
+        const allTabs = [
+            {
+                component: dashComponent,
+                iconName: "dashboard",
+                text: qsTr("Dashboard"),
+                enabled: Config.dashboard.showDashboard
+            },
+            {
+                component: mediaComponent,
+                iconName: "queue_music",
+                text: qsTr("Media"),
+                enabled: Config.dashboard.showMedia
+            },
+            {
+                component: performanceComponent,
+                iconName: "speed",
+                text: qsTr("Performance"),
+                enabled: Config.dashboard.showPerformance && (Config.dashboard.performance.showCpu || Config.dashboard.performance.showGpu || Config.dashboard.performance.showMemory || Config.dashboard.performance.showStorage || Config.dashboard.performance.showNetwork || Config.dashboard.performance.showBattery)
+            },
+            {
+                component: weatherComponent,
+                iconName: "cloud",
+                text: qsTr("Weather"),
+                enabled: Config.dashboard.showWeather
+            }
+        ];
+        return allTabs.filter(tab => tab.enabled);
+    }
+
     readonly property real nonAnimWidth: view.implicitWidth + viewWrapper.anchors.margins * 2
     readonly property real nonAnimHeight: tabs.implicitHeight + tabs.anchors.topMargin + view.implicitHeight + viewWrapper.anchors.margins * 2
 
     implicitWidth: nonAnimWidth
     implicitHeight: nonAnimHeight
-
-    readonly property ScriptModel dashboardModel: ScriptModel {
-        values: {
-            const allTabs = [
-                {
-                    component: dashComponent,
-                    iconName: "dashboard",
-                    text: qsTr("Dashboard"),
-                    enabled: Config.dashboard.showDashboard
-                },
-                {
-                    component: mediaComponent,
-                    iconName: "queue_music",
-                    text: qsTr("Media"),
-                    enabled: Config.dashboard.showMedia
-                },
-                {
-                    component: performanceComponent,
-                    iconName: "speed",
-                    text: qsTr("Performance"),
-                    enabled: Config.dashboard.showPerformance && (Config.dashboard.performance.showCpu || Config.dashboard.performance.showGpu || Config.dashboard.performance.showMemory || Config.dashboard.performance.showStorage || Config.dashboard.performance.showNetwork || Config.dashboard.performance.showBattery)
-                },
-                {
-                    component: weatherComponent,
-                    iconName: "cloud",
-                    text: qsTr("Weather"),
-                    enabled: Config.dashboard.showWeather
-                }
-            ];
-            return allTabs.filter(tab => tab.enabled);
-        }
-    }
 
     Tabs {
         id: tabs
@@ -63,7 +62,7 @@ Item {
 
         nonAnimWidth: root.nonAnimWidth - anchors.margins * 2
         state: root.state
-        model: root.dashboardModel
+        tabs: root.dashboardTabs
     }
 
     ClippingRectangle {
@@ -120,7 +119,9 @@ Item {
                 id: row
 
                 Repeater {
-                    model: root.dashboardModel
+                    model: ScriptModel {
+                        values: root.dashboardTabs
+                    }
 
                     delegate: Loader {
                         id: paneLoader
