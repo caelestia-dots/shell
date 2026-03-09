@@ -22,17 +22,17 @@ Singleton {
             description: "Learn about the workspace indicator and bar features",
             steps: [
                 {
-                    elementId: "bar-workspaces",
-                    drawer: null,
-                    title: "Workspace Indicator",
-                    tooltip: "Shows your current workspace and allows quick switching between workspaces.",
-                    tooltipPosition: "right"
-                },
-                {
                     elementId: "bar-launcher",
                     drawer: null,
                     title: "App Launcher",
                     tooltip: "Click to search and launch applications quickly.",
+                    tooltipPosition: "right"
+                },
+                {
+                    elementId: "bar-workspaces",
+                    drawer: null,
+                    title: "Workspace Indicator",
+                    tooltip: "Shows your current workspace and allows quick switching between workspaces.",
                     tooltipPosition: "right"
                 },
                 {
