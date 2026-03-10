@@ -11,6 +11,7 @@ import QtQuick
 Item {
     id: root
 
+    required property ShellScreen screen
     required property PersistentProperties visibilities
     required property var panels
     required property real maxHeight
@@ -20,6 +21,10 @@ Item {
 
     implicitWidth: listWrapper.width + padding * 2
     implicitHeight: searchWrapper.height + listWrapper.height + padding * 2
+
+    Component.onCompleted: {
+        LauncherIpc.register(root.screen, root);
+    }
 
     Item {
         id: listWrapper

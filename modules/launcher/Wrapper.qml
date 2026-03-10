@@ -120,6 +120,7 @@ Item {
         Component.onCompleted: timer.start()
 
         sourceComponent: Content {
+            screen: root.screen
             visibilities: root.visibilities
             panels: root.panels
             maxHeight: root.maxHeight

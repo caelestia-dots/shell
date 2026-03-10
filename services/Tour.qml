@@ -3,6 +3,7 @@ pragma Singleton
 import Quickshell
 import Quickshell.Io
 import QtQuick
+import qs.services
 
 Singleton {
     id: root
@@ -17,6 +18,7 @@ Singleton {
     property int currentStepIndex: -1
     property var currentTour: null
     property var currentStep: null
+    property list<string> currentStepAction: []
     property bool tourActive: false
 
     property Timer highlightTimer: Timer {
@@ -101,11 +103,16 @@ Singleton {
 
         currentStep = currentTour.steps[currentStepIndex];
         const step = currentStep;
+        currentStepAction = step.action || [];
 
         if (step.drawer && step.drawer !== "null") {
             openDrawerAndHighlight(step.drawer, step.elementId);
         } else {
             highlightElement(step.elementId);
+        }
+
+        if (currentStepAction.length > 0) {
+            Quickshell.execDetached(currentStepAction);
         }
     }
 
@@ -176,6 +183,16 @@ Singleton {
             return root.spotlightActive
                 ? `Active - highlighting: ${root.currentTarget}`
                 : "Inactive";
+        }
+
+        function showCommands(): void {
+            const visibilities = Visibilities.getForActive();
+            visibilities.launcher = true;
+            const launcher = LauncherIpc.getForActive();
+            if (launcher) {
+                launcher.search.text = ">";
+                launcher.search.forceActiveFocus();
+            }
         }
     }
 }
