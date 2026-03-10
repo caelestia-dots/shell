@@ -249,15 +249,23 @@ ScrollablePage {
                             color: Colours.palette.m3onSurfaceVariant
                             wrapMode: Text.WordWrap
                         }
-                        TextButton {
-                            text: qsTr("Website 󰖟")
+                        IconTextButton {
+                            text: qsTr("Website")
+                            icon: "language"
                             radius: Appearance.rounding.small
+                            verticalPadding: Appearance.padding.small
+                            inactiveColour: Colours.palette.m3primary
+                            inactiveOnColour: Colours.palette.m3onPrimary
 
                             onClicked: Qt.openUrlExternally("https://quickshell.org")
                         }
-                        TextButton {
-                            text: qsTr("Github 󰊤")
+                        IconTextButton {
+                            text: qsTr("Github")
+                            icon: "code"
                             radius: Appearance.rounding.small
+                            verticalPadding: Appearance.padding.small
+                            inactiveColour: Colours.palette.m3primary
+                            inactiveOnColour: Colours.palette.m3onPrimary
 
                             onClicked: Qt.openUrlExternally("https://github.com/outfoxxed")
                         }
@@ -280,15 +288,23 @@ ScrollablePage {
                             color: Colours.palette.m3onSurfaceVariant
                             wrapMode: Text.WordWrap
                         }
-                        TextButton {
-                            text: qsTr("Buy Soramane a Coffee 󰅶")
+                        IconTextButton {
+                            text: qsTr("Buy Soramane a Coffee")
+                            icon: "local_cafe"
                             radius: Appearance.rounding.small
+                            verticalPadding: Appearance.padding.small
+                            inactiveColour: Colours.palette.m3primary
+                            inactiveOnColour: Colours.palette.m3onPrimary
 
                             onClicked: Qt.openUrlExternally("https://buymeacoffee.com/soramane")
                         }
-                        TextButton {
-                            text: qsTr("Github 󰊤")
+                        IconTextButton {
+                            text: qsTr("Github")
+                            icon: "code"
                             radius: Appearance.rounding.small
+                            verticalPadding: Appearance.padding.small
+                            inactiveColour: Colours.palette.m3primary
+                            inactiveOnColour: Colours.palette.m3onPrimary
 
                             onClicked: Qt.openUrlExternally("https://github.com/soramanew")
                         }
@@ -311,15 +327,23 @@ ScrollablePage {
                             color: Colours.palette.m3onSurfaceVariant
                             wrapMode: Text.WordWrap
                         }
-                        TextButton {
-                            text: qsTr("Website 󰖟")
+                        IconTextButton {
+                            text: qsTr("Website")
+                            icon: "language"
                             radius: Appearance.rounding.small
+                            verticalPadding: Appearance.padding.small
+                            inactiveColour: Colours.palette.m3primary
+                            inactiveOnColour: Colours.palette.m3onPrimary
 
                             onClicked: Qt.openUrlExternally("https://evertiro.com")
                         }
-                        TextButton {
-                            text: qsTr("Github 󰊤")
+                        IconTextButton {
+                            text: qsTr("Github")
+                            icon: "code"
                             radius: Appearance.rounding.small
+                            verticalPadding: Appearance.padding.small
+                            inactiveColour: Colours.palette.m3primary
+                            inactiveOnColour: Colours.palette.m3onPrimary
 
                             onClicked: Qt.openUrlExternally("https://github.com/evertiro")
                         }
