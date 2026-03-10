@@ -104,7 +104,7 @@ Item {
         width: root.targetRect.width + Appearance.padding.large * 2
         height: root.targetRect.height + Appearance.padding.large * 2
         color: "transparent"
-        border.color: Colours.palette.m3primary
+        border.color: Colours.palette.m3error
         border.width: 3
         radius: Appearance.rounding.normal
         visible: root.targetRect.width > 0
