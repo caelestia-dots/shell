@@ -220,7 +220,8 @@ Singleton {
                 background: bar.tray.background,
                 recolour: bar.tray.recolour,
                 compact: bar.tray.compact,
-                iconSubs: bar.tray.iconSubs
+                iconSubs: bar.tray.iconSubs,
+                hiddenIcons: bar.tray.hiddenIcons
             },
             status: {
                 showAudio: bar.status.showAudio,
