@@ -204,4 +204,191 @@ ScrollablePage {
             }
         }
     }
+    // Credit
+    PageSection {
+        id: creditsSection
+
+        sectionId: "credits"
+        sectionName: qsTr("Credits")
+        sectionIcon: "attribution"
+
+        sectionHeader.title: qsTr("Credits!")
+        sectionHeader.subtitle: qsTr("A Thanks to everyone who made this possible!")
+
+        SectionContentArea {
+            title: qsTr("On the shoulders of Giants.")
+
+            Layout.topMargin: Appearance.padding.large
+
+            content: Component {
+                ColumnLayout {
+                    RowLayout {
+                        StyledText {
+                            Layout.fillWidth: true
+                            text: qsTr("The world of Linux is full of storybook heros come to life. There is no way we can thank everybody from Bell Labs all the way to the smallest contibuters. But we have a few special people to note.")
+                            font.pointSize: Appearance.font.size.normal
+                            color: Colours.palette.m3onSurfaceVariant
+                            wrapMode: Text.WordWrap
+                        }
+                    }
+                }
+            }
+        }
+        SectionContentArea {
+            title: qsTr("Outfoxxed - Developer for Quickshell")
+
+            Layout.topMargin: Appearance.padding.large
+
+            content: Component {
+                ColumnLayout {
+                    RowLayout {
+                        StyledText {
+                            Layout.fillWidth: true
+                            text: qsTr("A huge thanks to Outfoxxed who developed the foundation that Caelestia Shell is built on.")
+                            font.pointSize: Appearance.font.size.normal
+                            color: Colours.palette.m3onSurfaceVariant
+                            wrapMode: Text.WordWrap
+                        }
+                        IconTextButton {
+                            text: qsTr("Website")
+                            icon: "language"
+                            radius: Appearance.rounding.small
+                            verticalPadding: Appearance.padding.small
+                            inactiveColour: Colours.palette.m3primary
+                            inactiveOnColour: Colours.palette.m3onPrimary
+
+                            onClicked: Qt.openUrlExternally("https://quickshell.org")
+                        }
+                        IconTextButton {
+                            text: qsTr("Github")
+                            icon: "code"
+                            radius: Appearance.rounding.small
+                            verticalPadding: Appearance.padding.small
+                            inactiveColour: Colours.palette.m3primary
+                            inactiveOnColour: Colours.palette.m3onPrimary
+
+                            onClicked: Qt.openUrlExternally("https://github.com/outfoxxed")
+                        }
+                    }
+                }
+            }
+        }
+        SectionContentArea {
+            title: qsTr("Soramane - Developer for Caelestia")
+
+            Layout.topMargin: Appearance.padding.large
+
+            content: Component {
+                ColumnLayout {
+                    RowLayout {
+                        StyledText {
+                            Layout.fillWidth: true
+                            text: qsTr("Soramane(Soramanew) is the Developer behind Caelestia. Every drawer, popout, bar, etc. He was directly involved with all of it!")
+                            font.pointSize: Appearance.font.size.normal
+                            color: Colours.palette.m3onSurfaceVariant
+                            wrapMode: Text.WordWrap
+                        }
+                        IconTextButton {
+                            text: qsTr("Buy Soramane a Coffee")
+                            icon: "local_cafe"
+                            radius: Appearance.rounding.small
+                            verticalPadding: Appearance.padding.small
+                            inactiveColour: Colours.palette.m3primary
+                            inactiveOnColour: Colours.palette.m3onPrimary
+
+                            onClicked: Qt.openUrlExternally("https://buymeacoffee.com/soramane")
+                        }
+                        IconTextButton {
+                            text: qsTr("Github")
+                            icon: "code"
+                            radius: Appearance.rounding.small
+                            verticalPadding: Appearance.padding.small
+                            inactiveColour: Colours.palette.m3primary
+                            inactiveOnColour: Colours.palette.m3onPrimary
+
+                            onClicked: Qt.openUrlExternally("https://github.com/soramanew")
+                        }
+                    }
+                }
+            }
+        }
+        SectionContentArea {
+            title: qsTr("Evertiro - Developer for Caelestia Live")
+
+            Layout.topMargin: Appearance.padding.large
+
+            content: Component {
+                ColumnLayout {
+                    RowLayout {
+                        StyledText {
+                            Layout.fillWidth: true
+                            text: qsTr("Evertiro is the man directly responsible for seeing this page at all! Relentlessly dedicated to making dreams come true!")
+                            font.pointSize: Appearance.font.size.normal
+                            color: Colours.palette.m3onSurfaceVariant
+                            wrapMode: Text.WordWrap
+                        }
+                        IconTextButton {
+                            text: qsTr("Website")
+                            icon: "language"
+                            radius: Appearance.rounding.small
+                            verticalPadding: Appearance.padding.small
+                            inactiveColour: Colours.palette.m3primary
+                            inactiveOnColour: Colours.palette.m3onPrimary
+
+                            onClicked: Qt.openUrlExternally("https://evertiro.com")
+                        }
+                        IconTextButton {
+                            text: qsTr("Github")
+                            icon: "code"
+                            radius: Appearance.rounding.small
+                            verticalPadding: Appearance.padding.small
+                            inactiveColour: Colours.palette.m3primary
+                            inactiveOnColour: Colours.palette.m3onPrimary
+
+                            onClicked: Qt.openUrlExternally("https://github.com/evertiro")
+                        }
+
+                    }
+                }
+            }
+        }
+        SectionContentArea {
+            title: qsTr("Contributers")
+
+            Layout.topMargin: Appearance.padding.large
+
+            content: Component {
+                ColumnLayout {
+                    RowLayout {
+                        StyledText {
+                            Layout.fillWidth: true
+                            text: qsTr("Dozens of us! Making Pull Requests on Github, brainstorming ideas in Discord, teaching one another and thiving in a pretty small community. Too many to name but too few to forget.")
+                            font.pointSize: Appearance.font.size.normal
+                            color: Colours.palette.m3onSurfaceVariant
+                            wrapMode: Text.WordWrap
+                        }
+                    }
+                }
+            }
+        }
+        SectionContentArea {
+            title: qsTr("Everyone else!")
+
+            Layout.topMargin: Appearance.padding.large
+
+            content: Component {
+                ColumnLayout {
+                    RowLayout {
+                        StyledText {
+                            Layout.fillWidth: true
+                            text: qsTr("So many people in so many places! Github commentors, Discord members, BuyMeACoffee subscribers. Thank you to every last one of you who will give Caelestia Live a shot!")
+                            font.pointSize: Appearance.font.size.normal
+                            color: Colours.palette.m3onSurfaceVariant
+                            wrapMode: Text.WordWrap
+                        }
+                    }
+                }
+            }
+        }
+    }
 }
