@@ -38,10 +38,14 @@ ScrollablePage {
                             wrapMode: Text.WordWrap
                         }
 
-                        TextButton {
+                        IconTextButton {
                             Layout.alignment: Qt.AlignVCenter
-                            text: qsTr("Join Discord ")
+                            text: qsTr("Join Discord")
+                            icon: "open_in_new"
                             radius: Appearance.rounding.small
+                            verticalPadding: Appearance.padding.small
+                            inactiveColour: Colours.palette.m3primary
+                            inactiveOnColour: Colours.palette.m3onPrimary
 
                             onClicked: Qt.openUrlExternally("https://discord.gg/BGDCFCmMBk")
                         }
@@ -92,9 +96,13 @@ ScrollablePage {
                             wrapMode: Text.WordWrap
                         }
 
-                        TextButton {
-                            text: qsTr("Caelestia CLI ")
+                        IconTextButton {
+                            text: qsTr("Caelestia CLI")
+                            icon: "open_in_new"
                             radius: Appearance.rounding.small
+                            verticalPadding: Appearance.padding.small
+                            inactiveColour: Colours.palette.m3primary
+                            inactiveOnColour: Colours.palette.m3onPrimary
 
                             onClicked: Qt.openUrlExternally("https://github.com/caelestia-dots/cli")
                         }
@@ -119,9 +127,13 @@ ScrollablePage {
                             wrapMode: Text.WordWrap
                         }
 
-                        TextButton {
-                            text: qsTr("Caelestia Shell ")
+                        IconTextButton {
+                            text: qsTr("Caelestia Shell")
+                            icon: "open_in_new"
                             radius: Appearance.rounding.small
+                            verticalPadding: Appearance.padding.small
+                            inactiveColour: Colours.palette.m3primary
+                            inactiveOnColour: Colours.palette.m3onPrimary
 
                             onClicked: Qt.openUrlExternally("https://github.com/caelestia-dots/shell")
                         }
@@ -146,9 +158,13 @@ ScrollablePage {
                             wrapMode: Text.WordWrap
                         }
 
-                        TextButton {
-                            text: qsTr("Caelestia Dots ")
+                        IconTextButton {
+                            text: qsTr("Caelestia Dots")
+                            icon: "open_in_new"
                             radius: Appearance.rounding.small
+                            verticalPadding: Appearance.padding.small
+                            inactiveColour: Colours.palette.m3primary
+                            inactiveOnColour: Colours.palette.m3onPrimary
 
                             onClicked: Qt.openUrlExternally("https://github.com/caelestia-dots/caelestia")
                         }
@@ -167,15 +183,19 @@ ScrollablePage {
                     RowLayout {
                         StyledText {
                             Layout.fillWidth: true
-                            text: qsTr("Caelestia Live is the unofficial community project to build a Caelestia-based live image. If you're reading this, congratulations! You're running Caelestia Live!")
+                            text: qsTr("Caelestia Live is the unofficial community project to build a Caelestia-based live image. If you're reading this, congratulations! You're running Caelestia Live! Caelestia Live was built by Evertiro, and at this time, he provides all live-image specific support.")
                             font.pointSize: Appearance.font.size.normal
                             color: Colours.palette.m3onSurfaceVariant
                             wrapMode: Text.WordWrap
                         }
 
-                        TextButton {
-                            text: qsTr("Caelestia Live ")
+                        IconTextButton {
+                            text: qsTr("Caelestia Live")
+                            icon: "open_in_new"
                             radius: Appearance.rounding.small
+                            verticalPadding: Appearance.padding.small
+                            inactiveColour: Colours.palette.m3primary
+                            inactiveOnColour: Colours.palette.m3onPrimary
 
                             onClicked: Qt.openUrlExternally("https://github.com/caelestia-community/live")
                         }
