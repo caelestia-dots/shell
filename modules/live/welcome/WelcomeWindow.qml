@@ -87,6 +87,7 @@ StyledRect {
 
                     StyledText {
                         text: "Caelestia"
+                        font.family: "Nunito"
                         font.pointSize: Appearance.font.size.large
                         font.bold: true
                         color: Colours.palette.m3onSurface
