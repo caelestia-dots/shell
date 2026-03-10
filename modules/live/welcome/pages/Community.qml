@@ -226,7 +226,7 @@ ScrollablePage {
 
         sectionId: "credits"
         sectionName: qsTr("Credits")
-        sectionIcon: "attribution"
+        sectionIcon: "person"
         sectionHeader.title: qsTr("Credits")
         sectionHeader.subtitle: qsTr("Thanks to everyone who made this possible!")
 
