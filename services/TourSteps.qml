@@ -45,6 +45,31 @@ Singleton {
         tooltipPosition: "right"
     })
 
+    readonly property var launcherApps: ({
+        elementId: "launcher-apps",
+        drawer: "launcher",
+        title: qsTr("App Launcher"),
+        tooltip: qsTr("The Caelestia launcher provides quick access to your applications and the Caelestia command palette. It is accessible through the OS icon in the taskbar, or the Super (Windows) key on your keyboard. Apps can be flagged as favorites or hidden through the settings."),
+        tooltipPosition: "left"
+    })
+
+    readonly property var launcherSearch: ({
+        elementId: "launcher-search",
+        drawer: "launcher",
+        title: qsTr("Launcher Search"),
+        tooltip: qsTr("The launcher includes a convenient search field allowing you to quickly filter your apps list. You can also switch the launcher to command mode by entering \">\" in the search field."),
+        tooltipPosition: "left"
+    })
+
+    readonly property var launcherCommands: ({
+        elementId: "launcher-apps",
+        drawer: "launcher",
+        action: ["quickshell", "ipc", "-c", "caelestia", "call", "tour", "showCommands"],
+        title: qsTr("Launcher Commands"),
+        tooltip: qsTr("In command mode, the launcher allows you to set your wallpaper and colorscheme, toggle dark mode, access the Settings panel, and interact with the session."),
+        tooltipPosition: "left"
+    })
+
     readonly property var tours: ({
         "taskbar-launcher": {
             id: "taskbar-launcher",
@@ -81,6 +106,16 @@ Singleton {
                 taskbarSystemTray,
                 taskbarStatusIcons,
                 taskbarPowerButton
+            ]
+        },
+        "launcher-tour": {
+            id: "launcher-tour",
+            title: qsTr("Launcher Tour"),
+            description: qsTr("Learn about the Caelestia launcher and its features."),
+            steps: [
+                launcherApps,
+                launcherSearch,
+                launcherCommands
             ]
         },
         "utilities-tour": {

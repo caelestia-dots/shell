@@ -52,6 +52,9 @@ Item {
     StyledRect {
         id: searchWrapper
 
+        Component.onCompleted: Tour.register("launcher-search", searchWrapper)
+        Component.onDestruction: Tour.unregister("launcher-search")
+
         color: Colours.layer(Colours.palette.m3surfaceContainer, 2)
         radius: Appearance.rounding.full
 

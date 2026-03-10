@@ -16,6 +16,9 @@ StyledListView {
     required property StyledTextField search
     required property PersistentProperties visibilities
 
+    Component.onCompleted: Tour.register("launcher-apps", root)
+    Component.onDestruction: Tour.unregister("launcher-apps")
+
     model: ScriptModel {
         id: model
 

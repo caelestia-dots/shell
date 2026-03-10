@@ -47,6 +47,12 @@ ScrollablePage {
                         }
 
                         TextButton {
+                            text: qsTr("Launcher Tour")
+                            radius: Appearance.rounding.small
+                            onClicked: Tour.startTour("launcher-tour")
+                        }
+
+                        TextButton {
                             text: qsTr("Utilities Drawer Tour")
                             radius: Appearance.rounding.small
                             onClicked: Tour.startTour("utilities-tour")
@@ -117,7 +123,7 @@ ScrollablePage {
         sectionIcon: "dock_to_bottom"
 
         sectionHeader.title: qsTr("Launcher")
-        sectionHeader.subtitle: qsTr("Your quick-access application menu, accessible via the OS icon or Super key.")
+        sectionHeader.subtitle: qsTr("Your quick-access application menu, accessible via the OS icon or Super (Windows) key.")
 
         SectionGrid {
             targetColumns: 3
@@ -141,11 +147,24 @@ ScrollablePage {
             SectionContentArea {
                 Layout.fillWidth: true
                 Layout.alignment: Qt.AlignTop
-                title: qsTr("Configuration")
+                title: qsTr("Favorite Apps")
 
                 content: Component {
                     StyledText {
-                        text: qsTr("Modify look and feel directly via Caelestia's config files.")
+                        text: qsTr("Apps are intelligently sorted by use, but apps can be marked as favorites to keep them always front and center.")
+                        wrapMode: Text.Wrap
+                    }
+                }
+            }
+
+            SectionContentArea {
+                Layout.fillWidth: true
+                Layout.alignment: Qt.AlignTop
+                title: qsTr("Hidden Apps")
+
+                content: Component {
+                    StyledText {
+                        text: qsTr("Sometimes apps add launcher icons for things that you'll just never need. Keep your launcher clean by hiding apps through the Settings panel.")
                         wrapMode: Text.Wrap
                     }
                 }
@@ -167,11 +186,24 @@ ScrollablePage {
             SectionContentArea {
                 Layout.fillWidth: true
                 Layout.alignment: Qt.AlignTop
+                title: qsTr("Configuration")
+
+                content: Component {
+                    StyledText {
+                        text: qsTr("Change wallpapers and colorschemes on the fly, or make more in-depth changes to the system through Caelestia's Settings app.")
+                        wrapMode: Text.Wrap
+                    }
+                }
+            }
+
+            SectionContentArea {
+                Layout.fillWidth: true
+                Layout.alignment: Qt.AlignTop
                 title: qsTr("Theme Integration")
 
                 content: Component {
                     StyledText {
-                        text: qsTr("Automatically matches your system color scheme and transparency settings.")
+                        text: qsTr("Automatically matches your system colorscheme and transparency settings.")
                         wrapMode: Text.Wrap
                     }
                 }
