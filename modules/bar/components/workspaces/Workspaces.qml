@@ -13,7 +13,7 @@ StyledClippingRect {
 
     required property ShellScreen screen
 
-    Component.onCompleted: Tour.register("taskbar-workspaces", root)
+    Component.onCompleted: Tour.register("taskbar-workspaces", layout)
     Component.onDestruction: Tour.unregister("taskbar-workspaces")
 
     readonly property bool onSpecial: (Config.bar.workspaces.perMonitorWorkspaces ? Hypr.monitorFor(screen) : Hypr.focusedMonitor)?.lastIpcObject?.specialWorkspace?.name !== ""

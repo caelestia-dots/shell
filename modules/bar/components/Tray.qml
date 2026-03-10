@@ -10,7 +10,7 @@ import QtQuick
 StyledRect {
     id: root
 
-    Component.onCompleted: Tour.register("taskbar-system-tray", root)
+    Component.onCompleted: Tour.register("taskbar-system-tray", layout)
     Component.onDestruction: Tour.unregister("taskbar-system-tray")
 
     readonly property alias layout: layout
