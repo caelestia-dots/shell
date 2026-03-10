@@ -136,96 +136,54 @@ Singleton {
         }
     }
 
-    Process {
-        id: storage
+Process {
+    id: storage
+    // Get physical disks with aggregrated usage from their partitions
+    // -J triggers JSON output. -b triggers bytes.
+    command: ["lsblk", "-J", "-b", "-o", "NAME,SIZE,TYPE,FSUSED,FSSIZE"]
+    
+    stdout: StdioCollector {
+        onStreamFinished: {
+            const data = JSON.parse(text);
+            const diskList = [];
 
-        // Get physical disks with aggregated usage from their partitions
-        // lsblk outputs: NAME SIZE TYPE FSUSED FSSIZE in bytes
-        command: ["lsblk", "-b", "-o", "NAME,SIZE,TYPE,FSUSED,FSSIZE", "-P"]
-        stdout: StdioCollector {
-            onStreamFinished: {
-                const diskMap = {};  // Map disk name -> { name, totalSize, used, fsTotal }
-                const lines = text.trim().split("\n");
+            // Helper to recursively sum usage from children (partitions, crypt, lvm)
+            const aggregateUsage = (dev) => {
+                let used = parseInt(dev.fsused) || 0;
+                let size = parseInt(dev.fssize) || 0;
 
-                for (const line of lines) {
-                    if (line.trim() === "")
-                        continue;
-
-                    // Parse KEY="VALUE" format
-                    const nameMatch = line.match(/NAME="([^"]+)"/);
-                    const sizeMatch = line.match(/SIZE="([^"]+)"/);
-                    const typeMatch = line.match(/TYPE="([^"]+)"/);
-                    const fsusedMatch = line.match(/FSUSED="([^"]*)"/);
-                    const fssizeMatch = line.match(/FSSIZE="([^"]*)"/);
-
-                    if (!nameMatch || !typeMatch)
-                        continue;
-
-                    const name = nameMatch[1];
-                    const type = typeMatch[1];
-                    const size = parseInt(sizeMatch?.[1] || "0", 10);
-                    const fsused = parseInt(fsusedMatch?.[1] || "0", 10);
-                    const fssize = parseInt(fssizeMatch?.[1] || "0", 10);
-
-                    if (type === "disk") {
-                        // Skip zram (swap) devices
-                        if (name.startsWith("zram"))
-                            continue;
-
-                        // Initialize disk entry
-                        if (!diskMap[name]) {
-                            diskMap[name] = {
-                                name: name,
-                                totalSize: size,
-                                used: 0,
-                                fsTotal: 0
-                            };
-                        }
-                    } else if (type === "part") {
-                        // Find parent disk (remove trailing numbers/p+numbers)
-                        let parentDisk = name.replace(/p?\d+$/, "");
-                        // For nvme devices like nvme0n1p1, parent is nvme0n1
-                        if (name.match(/nvme\d+n\d+p\d+/))
-                            parentDisk = name.replace(/p\d+$/, "");
-
-                        // Aggregate partition usage to parent disk
-                        if (diskMap[parentDisk]) {
-                            diskMap[parentDisk].used += fsused;
-                            diskMap[parentDisk].fsTotal += fssize;
-                        }
+                if (dev.children) {
+                    for (const child of dev.children) {
+                        const stats = aggregateUsage(child);
+                        used += stats.used;
+                        size += stats.size;
                     }
                 }
+                return { used, size };
+            };
 
-                // Convert map to sorted array
-                const diskList = [];
-                let totalUsed = 0;
-                let totalSize = 0;
-
-                for (const diskName of Object.keys(diskMap).sort()) {
-                    const disk = diskMap[diskName];
-                    // Use filesystem total if available, otherwise use disk size
-                    const total = disk.fsTotal > 0 ? disk.fsTotal : disk.totalSize;
-                    const used = disk.used;
-                    const perc = total > 0 ? used / total : 0;
-
-                    // Convert bytes to KiB for consistency with formatKib
+            for (const dev of data.blockdevices) {
+                // Only process physical disks at the top level
+                if (dev.type === "disk" && !dev.name.startsWith("zram")) {
+                    const stats = aggregateUsage(dev);
+                    
+                    const total = stats.size > 0 ? stats.size : parseInt(dev.size || 0);
+                    const used = stats.used;
+                    
                     diskList.push({
-                        mount: disk.name  // Using 'mount' property for compatibility
-                        ,
-                        used: used / 1024,
-                        total: total / 1024,
+                        mount: dev.name,
+                        used: used / 1024,      // KiB
+                        total: total / 1024,    // KiB
                         free: (total - used) / 1024,
-                        perc: perc
+                        perc: total > 0 ? used / total : 0
                     });
-
-                    totalUsed += used;
-                    totalSize += total;
                 }
-
-                root.disks = diskList;
             }
+
+            root.disks = diskList.sort((a, b) => a.mount.localeCompare(b.mount));
         }
     }
+}
 
     // GPU name detection (one-time)
     Process {
