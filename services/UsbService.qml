@@ -28,17 +28,19 @@ Item {
 
     if (l.includes("nsw") || l.includes("joy-con") || l.includes("dualshock") || 
         l.includes("xbox") || l.includes("playstation") || l.includes("gamepad") || 
-        l.includes("joystick") || l.includes("bda") || l.includes("controller")) return "Gamepad"
+        l.includes("joystick") || l.includes("bda")) return "Gamepad"
         
     if (l.includes("phone") || l.includes("mtp") || l.includes("android") || l.includes("iphone") || l.includes("midi")) return "Phone"
     
-    if (l.includes("input") || l.includes("hid")) return "HID"
+    if (l.includes("controller")) return "USB"
+    if (l.includes("input") || l.includes("hid")) return "USB"
     return "USB"
 }
 
 // Sanitize and format device display names
 function cleanDeviceName(name) {
     let n = name
+    let l = n.toLowerCase()
     
     // Specific hardware rebranding
     if (n.includes("Sony") && n.includes("DualShock 4")) return "PlayStation DualShock 4"
@@ -51,9 +53,15 @@ function cleanDeviceName(name) {
         return "Xbox Controller"
     }
     
-    // General naming cleanup
-    if (n.includes("Wireless Controller")) return n.replace("Wireless Controller", "Gamepad")
-    
+    if (l.includes("game controller") || 
+        l.includes("usb controller") || 
+        l.includes("usb gamepad") || 
+        l.includes("gamepad")) {
+        return "Gamepad"
+    }
+ 
+    if (l.includes("wireless controller")) return n.replace(/wireless controller/i, "Controller")
+
     return n.trim() || qsTr("USB Device")
 }
 

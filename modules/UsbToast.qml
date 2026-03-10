@@ -40,7 +40,7 @@ Item {
             "storage":  { on: "usb",      off: "usb_off" },
             "audio":    { on: "Media_Output",  off: "Media_Output_Off" },
             "video":    { on: "videocam", off: "videocam_off" },
-            "hid":      { on: "videogame_asset", off: "videogame_asset_off" },
+            "hid":      { on: "usb", off: "usb_off" },
             "gamepad":  { on: "videogame_asset",  off: "videogame_asset_off" }, // No suele haber _off para mandos, usamos el mismo o uno neutro
             "phone":    { on: "mobile_hand",      off: "mobile_hand_off" },
             "default":  { on: "usb",      off: "usb_off" }
