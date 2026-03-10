@@ -12,11 +12,14 @@ Item {
     property int fontSize: Appearance.font.size.extraLarge
 
     Layout.fillWidth: true
-    height: sectionHeader.implicitHeight
+    implicitHeight: sectionHeader.implicitHeight
 
     ColumnLayout {
         id: sectionHeader
 
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.top: parent.top
         spacing: Appearance.spacing.small
 
         StyledText {
