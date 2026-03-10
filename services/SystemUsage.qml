@@ -136,54 +136,74 @@ Singleton {
         }
     }
 
-Process {
-    id: storage
-    // Get physical disks with aggregrated usage from their partitions
-    // -J triggers JSON output. -b triggers bytes.
-    command: ["lsblk", "-J", "-b", "-o", "NAME,SIZE,TYPE,FSUSED,FSSIZE"]
-    
-    stdout: StdioCollector {
-        onStreamFinished: {
-            const data = JSON.parse(text);
-            const diskList = [];
+    Process {
+        id: storage
+        // Get physical disks with aggregated usage from their partitions
+        // -J triggers JSON output. -b triggers bytes.
+        command: ["lsblk", "-J", "-b", "-o", "NAME,SIZE,TYPE,FSUSED,FSSIZE,MOUNTPOINT"]
+        
+        stdout: StdioCollector {
+            onStreamFinished: {
+              const data = JSON.parse(text);
+              const diskList = [];
+              const seenDevices = new Set();
 
-            // Helper to recursively sum usage from children (partitions, crypt, lvm)
-            const aggregateUsage = (dev) => {
-                let used = parseInt(dev.fsused) || 0;
-                let size = parseInt(dev.fssize) || 0;
+              // Helper to recursively sum usage from children (partitions, crypt, lvm)
+              const aggregateUsage = (dev) => {
+                  let used = 0;
+                  let size = 0;
+                  let isRoot = dev.mountpoint === "/" || (dev.mountpoints && dev.mountpoints.includes("/"));
 
-                if (dev.children) {
-                    for (const child of dev.children) {
-                        const stats = aggregateUsage(child);
-                        used += stats.used;
-                        size += stats.size;
-                    }
-                }
-                return { used, size };
-            };
+                  if (!seenDevices.has(dev.name)) {
+                      // lsblk returns null for empty/unformatted partitions, which parses to 0 here
+                      used = parseInt(dev.fsused) || 0;
+                      size = parseInt(dev.fssize) || 0;
+                      seenDevices.add(dev.name);
+                  }
 
-            for (const dev of data.blockdevices) {
-                // Only process physical disks at the top level
-                if (dev.type === "disk" && !dev.name.startsWith("zram")) {
-                    const stats = aggregateUsage(dev);
-                    
-                    const total = stats.size > 0 ? stats.size : parseInt(dev.size || 0);
-                    const used = stats.used;
-                    
-                    diskList.push({
-                        mount: dev.name,
-                        used: used / 1024,      // KiB
-                        total: total / 1024,    // KiB
-                        free: (total - used) / 1024,
-                        perc: total > 0 ? used / total : 0
-                    });
-                }
-            }
+                  if (dev.children) {
+                      for (const child of dev.children) {
+                          const stats = aggregateUsage(child);
+                          used += stats.used;
+                          size += stats.size;
+                          if (stats.isRoot) isRoot = true;
+                      }
+                  }
+                  return { used, size, isRoot };
+              };
 
-            root.disks = diskList.sort((a, b) => a.mount.localeCompare(b.mount));
-        }
+              for (const dev of data.blockdevices) {
+                  // Only process physical disks at the top level
+                  if (dev.type === "disk" && !dev.name.startsWith("zram")) {
+                      const stats = aggregateUsage(dev);
+
+                      if (stats.size === 0) {
+                          continue;
+                      }
+                      
+                      const total = stats.size;
+                      const used = stats.used;
+                      
+                      diskList.push({
+                          mount: dev.name,
+                          used: used / 1024,      // KiB
+                          total: total / 1024,    // KiB
+                          free: (total - used) / 1024,
+                          perc: total > 0 ? used / total : 0,
+                          hasRoot: stats.isRoot
+                      });
+                  }
+              }
+
+              // Sort by putting the disk with root first, then sort the rest alphabetically
+              root.disks = diskList.sort((a, b) => {
+                  if (a.hasRoot && !b.hasRoot) return -1;
+                  if (!a.hasRoot && b.hasRoot) return 1;
+                  return a.mount.localeCompare(b.mount);
+              });
+          }
+      }
     }
-}
 
     // GPU name detection (one-time)
     Process {
