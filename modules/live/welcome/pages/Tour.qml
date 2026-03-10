@@ -53,9 +53,9 @@ ScrollablePage {
                         }
 
                         TextButton {
-                            text: qsTr("Utilities Drawer Tour")
+                            text: qsTr("Sidebar Tour")
                             radius: Appearance.rounding.small
-                            onClicked: Tour.startTour("utilities-tour")
+                            onClicked: Tour.startTour("sidebar-tour")
                         }
                     }
                 }
@@ -220,7 +220,7 @@ ScrollablePage {
         sectionIcon: "dock_to_left"
 
         sectionHeader.title: qsTr("Sidebar")
-        sectionHeader.subtitle: qsTr("Access notifications, system toggles, and tools via the right-side panel.")
+        sectionHeader.subtitle: qsTr("Access notifications, system toggles, and tools via the right-side panel. The full sidebar can be opened by dragging left from the right edge. Additionally, toggles and tools can be accessed by moving your cursor to the bottom-right corner of the screen.")
 
         SectionContentArea {
             content: Component {
@@ -228,11 +228,23 @@ ScrollablePage {
                     items: [
                         {
                             title: qsTr("Notifications"),
-                            desc: qsTr("View and manage system notifications in a clean, organized feed.")
+                            desc: qsTr("View and manage system notifications in a clean, organized feed."),
+                            tourId: "sidebar-notifications"
+                        },
+                        {
+                            title: qsTr("Keep Awake"),
+                            desc: qsTr("Prevent your system from going idle or sleeping while you're working."),
+                            tourId: "sidebar-keep-awake"
+                        },
+                        {
+                            title: qsTr("Screen Recorder"),
+                            desc: qsTr("Record your screen with options for fullscreen, window, or area capture."),
+                            tourId: "sidebar-screen-recorder"
                         },
                         {
                             title: qsTr("Quick Toggles"),
-                            desc: qsTr("Fast access to Game Mode, system settings, and hardware controls.")
+                            desc: qsTr("Fast access to Game Mode, system settings, and hardware controls."),
+                            tourId: "sidebar-quick-toggles"
                         }
                     ]
                 }

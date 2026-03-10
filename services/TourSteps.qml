@@ -70,6 +70,38 @@ Singleton {
         tooltipPosition: "left"
     })
 
+    readonly property var sidebarNotifications: ({
+        elementId: "sidebar-notifications",
+        drawer: "sidebar",
+        title: qsTr("Notifications"),
+        tooltip: qsTr("View and manage system notifications in a clean, organized feed. Press the button in the bottom right corner to clear all notifications."),
+        tooltipPosition: "left"
+    })
+
+    readonly property var sidebarKeepAwake: ({
+        elementId: "sidebar-keep-awake",
+        drawer: "sidebar",
+        title: qsTr("Keep Awake"),
+        tooltip: qsTr("Prevent your system from going idle or sleeping while you're working."),
+        tooltipPosition: "left"
+    })
+
+    readonly property var sidebarScreenRecorder: ({
+        elementId: "sidebar-screen-recorder",
+        drawer: "sidebar",
+        title: qsTr("Screen Recorder"),
+        tooltip: qsTr("Record your screen with options for fullscreen, window, or area capture."),
+        tooltipPosition: "left"
+    })
+
+    readonly property var sidebarQuickToggles: ({
+        elementId: "sidebar-quick-toggles",
+        drawer: "sidebar",
+        title: qsTr("Quick Toggles"),
+        tooltip: qsTr("Control WiFi, Bluetooth, Do Not Disturb, and other commonly-used system settings instantly."),
+        tooltipPosition: "left"
+    })
+
     readonly property var tours: ({
         "taskbar-launcher": {
             id: "taskbar-launcher",
@@ -118,34 +150,33 @@ Singleton {
                 launcherCommands
             ]
         },
-        "utilities-tour": {
-            id: "utilities-tour",
-            title: "Utilities Drawer",
-            description: "Explore the utilities drawer and its features",
+        "sidebar-notifications": {
+            id: "sidebar-notifications",
+            steps: [sidebarNotifications]
+        },
+        "sidebar-keep-awake": {
+            id: "sidebar-keep-awake",
+            steps: [sidebarKeepAwake]
+        },
+        "sidebar-screen-recorder": {
+            id: "sidebar-screen-recorder",
+            steps: [sidebarScreenRecorder]
+        },
+        "sidebar-quick-toggles": {
+            id: "sidebar-quick-toggles",
+            steps: [sidebarQuickToggles]
+        },
+        "sidebar-tour": {
+            id: "sidebar-tour",
+            title: qsTr("Sidebar Tour"),
+            description: qsTr("Learn about the sidebar and its features."),
             steps: [
-                {
-                    elementId: "utilities-idle-inhibit",
-                    drawer: "utilities",
-                    title: "Idle Inhibit",
-                    tooltip: "Prevent your system from going idle or sleeping while you're working.",
-                    tooltipPosition: "left"
-                },
-                {
-                    elementId: "utilities-recorder",
-                    drawer: "utilities",
-                    title: "Screen Recorder",
-                    tooltip: "Record your screen with options for fullscreen, window, or area capture.",
-                    tooltipPosition: "left"
-                },
-                {
-                    elementId: "utilities-toggles",
-                    drawer: null,
-                    title: "Quick Toggles",
-                    tooltip: "Control WiFi, Bluetooth, Do Not Disturb, and other system settings instantly.",
-                    tooltipPosition: "left"
-                }
+                sidebarNotifications,
+                sidebarKeepAwake,
+                sidebarScreenRecorder,
+                sidebarQuickToggles
             ]
-        }
+        },
     })
 
     function getTour(tourId: string): var {

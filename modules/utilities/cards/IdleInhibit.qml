@@ -7,9 +7,9 @@ import QtQuick.Layouts
 
 StyledRect {
     id: root
-    
-    Component.onCompleted: Tour.register("utilities-idle-inhibit", root)
-    Component.onDestruction: Tour.unregister("utilities-idle-inhibit")
+
+    Component.onCompleted: Tour.register("sidebar-keep-awake", layout)
+    Component.onDestruction: Tour.unregister("sidebar-keep-awake")
 
     Layout.fillWidth: true
     implicitHeight: layout.implicitHeight + (IdleInhibitor.enabled ? activeChip.implicitHeight + activeChip.anchors.topMargin : 0) + Appearance.padding.large * 2

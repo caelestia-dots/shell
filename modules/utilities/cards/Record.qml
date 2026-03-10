@@ -12,9 +12,9 @@ StyledRect {
 
     required property var props
     required property var visibilities
-    
-    Component.onCompleted: Tour.register("utilities-recorder", root)
-    Component.onDestruction: Tour.unregister("utilities-recorder")
+
+    Component.onCompleted: Tour.register("sidebar-screen-recorder", layout)
+    Component.onDestruction: Tour.unregister("sidebar-screen-recorder")
 
     Layout.fillWidth: true
     implicitHeight: layout.implicitHeight + layout.anchors.margins * 2
