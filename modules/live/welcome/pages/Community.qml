@@ -1,10 +1,10 @@
 import QtQuick
 import QtQuick.Layouts
-import qs.services
 import qs.components
-import qs.components.live
 import qs.components.controls
+import qs.components.live
 import qs.config
+import qs.services
 
 ScrollablePage {
     id: root
@@ -16,7 +16,6 @@ ScrollablePage {
         sectionId: "joinUs"
         sectionName: qsTr("Join Us")
         sectionIcon: "forum"
-
         sectionHeader.title: qsTr("Join Us")
         sectionHeader.subtitle: qsTr("Join our thriving community on Discord.")
 
@@ -46,13 +45,17 @@ ScrollablePage {
                             verticalPadding: Appearance.padding.small
                             inactiveColour: Colours.palette.m3primary
                             inactiveOnColour: Colours.palette.m3onPrimary
-
                             onClicked: Qt.openUrlExternally("https://discord.gg/BGDCFCmMBk")
                         }
+
                     }
+
                 }
+
             }
+
         }
+
     }
 
     // Get Involved
@@ -62,11 +65,11 @@ ScrollablePage {
         sectionId: "getInvolved"
         sectionName: qsTr("Get Involved")
         sectionIcon: "code"
-
         sectionHeader.title: qsTr("Get Involved")
         sectionHeader.subtitle: qsTr("Become a contributor.")
 
         SectionContentArea {
+
             content: Component {
                 ColumnLayout {
                     StyledText {
@@ -76,13 +79,15 @@ ScrollablePage {
                         color: Colours.palette.m3onSurfaceVariant
                         wrapMode: Text.WordWrap
                     }
+
                 }
+
             }
+
         }
 
         SectionContentArea {
             title: qsTr("Caelestia CLI")
-
             Layout.topMargin: Appearance.padding.large
 
             content: Component {
@@ -103,17 +108,19 @@ ScrollablePage {
                             verticalPadding: Appearance.padding.small
                             inactiveColour: Colours.palette.m3primary
                             inactiveOnColour: Colours.palette.m3onPrimary
-
                             onClicked: Qt.openUrlExternally("https://github.com/caelestia-dots/cli")
                         }
+
                     }
+
                 }
+
             }
+
         }
 
         SectionContentArea {
             title: qsTr("Caelestia Shell")
-
             Layout.topMargin: Appearance.padding.large
 
             content: Component {
@@ -134,17 +141,19 @@ ScrollablePage {
                             verticalPadding: Appearance.padding.small
                             inactiveColour: Colours.palette.m3primary
                             inactiveOnColour: Colours.palette.m3onPrimary
-
                             onClicked: Qt.openUrlExternally("https://github.com/caelestia-dots/shell")
                         }
+
                     }
+
                 }
+
             }
+
         }
 
         SectionContentArea {
             title: qsTr("Caelestia Dots")
-
             Layout.topMargin: Appearance.padding.large
 
             content: Component {
@@ -165,17 +174,19 @@ ScrollablePage {
                             verticalPadding: Appearance.padding.small
                             inactiveColour: Colours.palette.m3primary
                             inactiveOnColour: Colours.palette.m3onPrimary
-
                             onClicked: Qt.openUrlExternally("https://github.com/caelestia-dots/caelestia")
                         }
+
                     }
+
                 }
+
             }
+
         }
 
         SectionContentArea {
             title: qsTr("Caelestia Live")
-
             Layout.topMargin: Appearance.padding.large
 
             content: Component {
@@ -196,28 +207,31 @@ ScrollablePage {
                             verticalPadding: Appearance.padding.small
                             inactiveColour: Colours.palette.m3primary
                             inactiveOnColour: Colours.palette.m3onPrimary
-
                             onClicked: Qt.openUrlExternally("https://github.com/caelestia-community/live")
                         }
+
                     }
+
                 }
+
             }
+
         }
+
     }
-    // Credit
+
+    // Credits
     PageSection {
         id: creditsSection
 
         sectionId: "credits"
         sectionName: qsTr("Credits")
         sectionIcon: "attribution"
-
-        sectionHeader.title: qsTr("Credits!")
-        sectionHeader.subtitle: qsTr("A Thanks to everyone who made this possible!")
+        sectionHeader.title: qsTr("Credits")
+        sectionHeader.subtitle: qsTr("Thanks to everyone who made this possible!")
 
         SectionContentArea {
             title: qsTr("On the shoulders of Giants.")
-
             Layout.topMargin: Appearance.padding.large
 
             content: Component {
@@ -225,170 +239,202 @@ ScrollablePage {
                     RowLayout {
                         StyledText {
                             Layout.fillWidth: true
-                            text: qsTr("The world of Linux is full of storybook heros come to life. There is no way we can thank everybody from Bell Labs all the way to the smallest contibuters. But we have a few special people to note.")
+                            text: qsTr("The world of Linux is full of storybook heroes come to life. There is no way we can thank everybody from Bell Labs all the way to the smallest contributors, but we have a few special people to note.")
                             font.pointSize: Appearance.font.size.normal
                             color: Colours.palette.m3onSurfaceVariant
                             wrapMode: Text.WordWrap
                         }
-                    }
-                }
-            }
-        }
-        SectionContentArea {
-            title: qsTr("Outfoxxed - Developer for Quickshell")
 
+                    }
+
+                }
+
+            }
+
+        }
+
+        SectionGrid {
+            targetColumns: 2
+            minColumns: 1
+            maxColumns: 2
+            responsiveBreakpoint: 900
+            columnSpacing: Appearance.padding.large
+            rowSpacing: Appearance.padding.large
             Layout.topMargin: Appearance.padding.large
 
-            content: Component {
-                ColumnLayout {
-                    RowLayout {
+            SectionContentArea {
+                Layout.fillWidth: true
+                Layout.alignment: Qt.AlignTop
+                title: qsTr("Outfoxxed - Developer for Quickshell")
+
+                content: Component {
+                    ColumnLayout {
+                        spacing: Appearance.spacing.normal
+
+                        StyledRect {
+                            Layout.fillWidth: true
+                            Layout.fillHeight: true
+                            color: Colours.palette.m3primary
+                        }
+
                         StyledText {
                             Layout.fillWidth: true
-                            text: qsTr("A huge thanks to Outfoxxed who developed the foundation that Caelestia Shell is built on.")
+                            text: qsTr("A huge thanks to Outfoxxed, who developed the foundation that Caelestia Shell is built on.")
                             font.pointSize: Appearance.font.size.normal
                             color: Colours.palette.m3onSurfaceVariant
                             wrapMode: Text.WordWrap
                         }
-                        IconTextButton {
-                            text: qsTr("Website")
-                            icon: "language"
-                            radius: Appearance.rounding.small
-                            verticalPadding: Appearance.padding.small
-                            inactiveColour: Colours.palette.m3primary
-                            inactiveOnColour: Colours.palette.m3onPrimary
 
-                            onClicked: Qt.openUrlExternally("https://quickshell.org")
-                        }
-                        IconTextButton {
-                            text: qsTr("Github")
-                            icon: "code"
-                            radius: Appearance.rounding.small
-                            verticalPadding: Appearance.padding.small
-                            inactiveColour: Colours.palette.m3primary
-                            inactiveOnColour: Colours.palette.m3onPrimary
+                        RowLayout {
+                            spacing: Appearance.spacing.normal
 
-                            onClicked: Qt.openUrlExternally("https://github.com/outfoxxed")
+                            IconTextButton {
+                                text: qsTr("Website")
+                                icon: "language"
+                                radius: Appearance.rounding.small
+                                verticalPadding: Appearance.padding.small
+                                inactiveColour: Colours.palette.m3primary
+                                inactiveOnColour: Colours.palette.m3onPrimary
+                                onClicked: Qt.openUrlExternally("https://quickshell.org")
+                            }
+
+                            IconTextButton {
+                                text: qsTr("GitHub")
+                                icon: "code"
+                                radius: Appearance.rounding.small
+                                verticalPadding: Appearance.padding.small
+                                inactiveColour: Colours.palette.m3primary
+                                inactiveOnColour: Colours.palette.m3onPrimary
+                                onClicked: Qt.openUrlExternally("https://github.com/outfoxxed")
+                            }
+
                         }
+
                     }
+
                 }
+
             }
-        }
-        SectionContentArea {
-            title: qsTr("Soramane - Developer for Caelestia")
 
-            Layout.topMargin: Appearance.padding.large
+            SectionContentArea {
+                Layout.fillWidth: true
+                Layout.alignment: Qt.AlignTop
+                title: qsTr("Soramane - Developer for Caelestia")
 
-            content: Component {
-                ColumnLayout {
-                    RowLayout {
+                content: Component {
+                    ColumnLayout {
+                        spacing: Appearance.spacing.normal
+
                         StyledText {
                             Layout.fillWidth: true
-                            text: qsTr("Soramane(Soramanew) is the Developer behind Caelestia. Every drawer, popout, bar, etc. He was directly involved with all of it!")
+                            text: qsTr("Soramane (Soramanew) is the Developer behind Caelestia. Every drawer, popout, bar, etc. He was directly involved with all of it!")
                             font.pointSize: Appearance.font.size.normal
                             color: Colours.palette.m3onSurfaceVariant
                             wrapMode: Text.WordWrap
                         }
-                        IconTextButton {
-                            text: qsTr("Buy Soramane a Coffee")
-                            icon: "local_cafe"
-                            radius: Appearance.rounding.small
-                            verticalPadding: Appearance.padding.small
-                            inactiveColour: Colours.palette.m3primary
-                            inactiveOnColour: Colours.palette.m3onPrimary
 
-                            onClicked: Qt.openUrlExternally("https://buymeacoffee.com/soramane")
-                        }
-                        IconTextButton {
-                            text: qsTr("Github")
-                            icon: "code"
-                            radius: Appearance.rounding.small
-                            verticalPadding: Appearance.padding.small
-                            inactiveColour: Colours.palette.m3primary
-                            inactiveOnColour: Colours.palette.m3onPrimary
+                        RowLayout {
+                            spacing: Appearance.spacing.normal
 
-                            onClicked: Qt.openUrlExternally("https://github.com/soramanew")
+                            IconTextButton {
+                                text: qsTr("Buy Soramane a Coffee")
+                                icon: "local_cafe"
+                                radius: Appearance.rounding.small
+                                verticalPadding: Appearance.padding.small
+                                inactiveColour: Colours.palette.m3primary
+                                inactiveOnColour: Colours.palette.m3onPrimary
+                                onClicked: Qt.openUrlExternally("https://buymeacoffee.com/soramane")
+                            }
+
+                            IconTextButton {
+                                text: qsTr("GitHub")
+                                icon: "code"
+                                radius: Appearance.rounding.small
+                                verticalPadding: Appearance.padding.small
+                                inactiveColour: Colours.palette.m3primary
+                                inactiveOnColour: Colours.palette.m3onPrimary
+                                onClicked: Qt.openUrlExternally("https://github.com/soramanew")
+                            }
+
                         }
+
                     }
+
                 }
+
             }
-        }
-        SectionContentArea {
-            title: qsTr("Evertiro - Developer for Caelestia Live")
 
-            Layout.topMargin: Appearance.padding.large
+            SectionContentArea {
+                Layout.fillWidth: true
+                Layout.alignment: Qt.AlignTop
+                title: qsTr("Evertiro - Developer for Caelestia Live")
 
-            content: Component {
-                ColumnLayout {
-                    RowLayout {
+                content: Component {
+                    ColumnLayout {
+                        spacing: Appearance.spacing.normal
+
                         StyledText {
                             Layout.fillWidth: true
-                            text: qsTr("Evertiro is the man directly responsible for seeing this page at all! Relentlessly dedicated to making dreams come true!")
+                            text: qsTr("Evertiro is the man directly responsible for you seeing this page at all! Relentlessly dedicated to making dreams come true!")
                             font.pointSize: Appearance.font.size.normal
                             color: Colours.palette.m3onSurfaceVariant
                             wrapMode: Text.WordWrap
                         }
-                        IconTextButton {
-                            text: qsTr("Website")
-                            icon: "language"
-                            radius: Appearance.rounding.small
-                            verticalPadding: Appearance.padding.small
-                            inactiveColour: Colours.palette.m3primary
-                            inactiveOnColour: Colours.palette.m3onPrimary
 
-                            onClicked: Qt.openUrlExternally("https://evertiro.com")
-                        }
-                        IconTextButton {
-                            text: qsTr("Github")
-                            icon: "code"
-                            radius: Appearance.rounding.small
-                            verticalPadding: Appearance.padding.small
-                            inactiveColour: Colours.palette.m3primary
-                            inactiveOnColour: Colours.palette.m3onPrimary
+                        RowLayout {
+                            spacing: Appearance.spacing.normal
 
-                            onClicked: Qt.openUrlExternally("https://github.com/evertiro")
+                            IconTextButton {
+                                text: qsTr("Website")
+                                icon: "language"
+                                radius: Appearance.rounding.small
+                                verticalPadding: Appearance.padding.small
+                                inactiveColour: Colours.palette.m3primary
+                                inactiveOnColour: Colours.palette.m3onPrimary
+                                onClicked: Qt.openUrlExternally("https://evertiro.com")
+                            }
+
+                            IconTextButton {
+                                text: qsTr("GitHub")
+                                icon: "code"
+                                radius: Appearance.rounding.small
+                                verticalPadding: Appearance.padding.small
+                                inactiveColour: Colours.palette.m3primary
+                                inactiveOnColour: Colours.palette.m3onPrimary
+                                onClicked: Qt.openUrlExternally("https://github.com/evertiro")
+                            }
+
                         }
 
                     }
+
                 }
+
             }
-        }
-        SectionContentArea {
-            title: qsTr("Contributers")
 
-            Layout.topMargin: Appearance.padding.large
+            SectionContentArea {
+                Layout.fillWidth: true
+                Layout.alignment: Qt.AlignTop
+                title: qsTr("Everyone Else!")
 
-            content: Component {
-                ColumnLayout {
-                    RowLayout {
+                content: Component {
+                    ColumnLayout {
                         StyledText {
                             Layout.fillWidth: true
-                            text: qsTr("Dozens of us! Making Pull Requests on Github, brainstorming ideas in Discord, teaching one another and thiving in a pretty small community. Too many to name but too few to forget.")
+                            text: qsTr("So many people in so many places! Making pull requests on GitHub, brainstorming ideas on Discord, teaching one another and thriving in a pretty small community. Too many to name, but too few to forget. Thank you to every last one of you who will give Caelestia Live a shot!")
                             font.pointSize: Appearance.font.size.normal
                             color: Colours.palette.m3onSurfaceVariant
                             wrapMode: Text.WordWrap
                         }
-                    }
-                }
-            }
-        }
-        SectionContentArea {
-            title: qsTr("Everyone else!")
 
-            Layout.topMargin: Appearance.padding.large
-
-            content: Component {
-                ColumnLayout {
-                    RowLayout {
-                        StyledText {
-                            Layout.fillWidth: true
-                            text: qsTr("So many people in so many places! Github commentors, Discord members, BuyMeACoffee subscribers. Thank you to every last one of you who will give Caelestia Live a shot!")
-                            font.pointSize: Appearance.font.size.normal
-                            color: Colours.palette.m3onSurfaceVariant
-                            wrapMode: Text.WordWrap
-                        }
                     }
+
                 }
+
             }
+
         }
+
     }
+
 }
