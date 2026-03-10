@@ -174,7 +174,7 @@ ScrollablePage {
                         }
 
                         TextButton {
-                            text: qsTr("Caelestia Dots")
+                            text: qsTr("Caelestia Live")
                             radius: Appearance.rounding.small
 
                             onClicked: Qt.openUrlExternally("https://github.com/caelestia-community/live")
