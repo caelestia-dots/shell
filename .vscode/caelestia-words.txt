@@ -23,6 +23,7 @@ cava
 changefloatingmode
 closewindow
 Codeberg
+colorschemes
 Colour
 Colouriser
 Colours
