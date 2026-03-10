@@ -86,6 +86,7 @@ numlock
 opacitymask
 openwindow
 opsz
+Outfoxxed
 Pairable
 paru
 pavucontrol
