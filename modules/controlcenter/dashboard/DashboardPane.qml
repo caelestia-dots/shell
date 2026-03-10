@@ -22,15 +22,22 @@ Item {
     // General Settings
     property bool enabled: Config.dashboard.enabled ?? true
     property bool showOnHover: Config.dashboard.showOnHover ?? true
-    property int updateInterval: Config.dashboard.updateInterval ?? 1000
+    property int mediaUpdateInterval: Config.dashboard.mediaUpdateInterval ?? 1000
+    property int resourceUpdateInterval: Config.dashboard.resourceUpdateInterval ?? 1000
     property int dragThreshold: Config.dashboard.dragThreshold ?? 50
-    
+
+    // Dashboard Tabs
+    property bool showDashboard: Config.dashboard.showDashboard ?? true
+    property bool showMedia: Config.dashboard.showMedia ?? true
+    property bool showPerformance: Config.dashboard.showPerformance ?? true
+    property bool showWeather: Config.dashboard.showWeather ?? true
+
     // Performance Resources
     property bool showBattery: Config.dashboard.performance.showBattery ?? false
     property bool showGpu: Config.dashboard.performance.showGpu ?? true
     property bool showCpu: Config.dashboard.performance.showCpu ?? true
     property bool showMemory: Config.dashboard.performance.showMemory ?? true
-    property bool showStorage: Config.dashboard.performance.showStorage ?? true 
+    property bool showStorage: Config.dashboard.performance.showStorage ?? true
     property bool showNetwork: Config.dashboard.performance.showNetwork ?? true
 
     anchors.fill: parent
@@ -38,8 +45,13 @@ Item {
     function saveConfig() {
         Config.dashboard.enabled = root.enabled;
         Config.dashboard.showOnHover = root.showOnHover;
-        Config.dashboard.updateInterval = root.updateInterval;
+        Config.dashboard.mediaUpdateInterval = root.mediaUpdateInterval;
+        Config.dashboard.resourceUpdateInterval = root.resourceUpdateInterval;
         Config.dashboard.dragThreshold = root.dragThreshold;
+        Config.dashboard.showDashboard = root.showDashboard;
+        Config.dashboard.showMedia = root.showMedia;
+        Config.dashboard.showPerformance = root.showPerformance;
+        Config.dashboard.showWeather = root.showWeather;
         Config.dashboard.performance.showBattery = root.showBattery;
         Config.dashboard.performance.showGpu = root.showGpu;
         Config.dashboard.performance.showCpu = root.showCpu;

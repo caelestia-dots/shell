@@ -33,7 +33,7 @@ SectionContainer {
                 opts.push({
                     "label": qsTr("Battery"),
                     "propertyName": "showBattery",
-                    "onToggled": function(checked) {
+                    "onToggled": function (checked) {
                         root.rootItem.showBattery = checked;
                         root.rootItem.saveConfig();
                     }
@@ -41,39 +41,39 @@ SectionContainer {
 
             if (root.gpuAvailable)
                 opts.push({
-                "label": qsTr("GPU"),
-                "propertyName": "showGpu",
-                "onToggled": function(checked) {
-                    root.rootItem.showGpu = checked;
-                    root.rootItem.saveConfig();
-                }
-            });
+                    "label": qsTr("GPU"),
+                    "propertyName": "showGpu",
+                    "onToggled": function (checked) {
+                        root.rootItem.showGpu = checked;
+                        root.rootItem.saveConfig();
+                    }
+                });
 
             opts.push({
                 "label": qsTr("CPU"),
                 "propertyName": "showCpu",
-                "onToggled": function(checked) {
+                "onToggled": function (checked) {
                     root.rootItem.showCpu = checked;
                     root.rootItem.saveConfig();
                 }
             }, {
                 "label": qsTr("Memory"),
                 "propertyName": "showMemory",
-                "onToggled": function(checked) {
+                "onToggled": function (checked) {
                     root.rootItem.showMemory = checked;
                     root.rootItem.saveConfig();
                 }
             }, {
                 "label": qsTr("Storage"),
                 "propertyName": "showStorage",
-                "onToggled": function(checked) {
+                "onToggled": function (checked) {
                     root.rootItem.showStorage = checked;
                     root.rootItem.saveConfig();
                 }
             }, {
                 "label": qsTr("Network"),
                 "propertyName": "showNetwork",
-                "onToggled": function(checked) {
+                "onToggled": function (checked) {
                     root.rootItem.showNetwork = checked;
                     root.rootItem.saveConfig();
                 }
@@ -82,4 +82,25 @@ SectionContainer {
         }
     }
 
+    SliderInput {
+        Layout.fillWidth: true
+
+        label: qsTr("Resource update interval")
+        value: root.rootItem.resourceUpdateInterval
+        from: 100
+        to: 10000
+        stepSize: 100
+        suffix: "ms"
+        validator: IntValidator {
+            bottom: 100
+            top: 10000
+        }
+        formatValueFunction: val => Math.round(val).toString()
+        parseValueFunction: text => parseInt(text)
+
+        onValueModified: newValue => {
+            root.rootItem.resourceUpdateInterval = Math.round(newValue);
+            root.rootItem.saveConfig();
+        }
+    }
 }
