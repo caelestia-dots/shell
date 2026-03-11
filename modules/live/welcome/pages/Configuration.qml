@@ -4,6 +4,7 @@ import QtQuick
 import QtQuick.Layouts
 import qs.services
 import qs.components
+import qs.components.controls
 import qs.components.live
 import qs.config
 
@@ -103,7 +104,7 @@ ScrollablePage {
                         font.pointSize: Appearance.font.size.normal
                         color: Colours.palette.m3onSurfaceVariant
                         wrapMode: Text.WordWrap
-                        text: qsTr("Content coming soon.")
+                        text: qsTr("Caelestia has loads of user configurable shell options. These can be found in the shell.json file located in you ~/.config/caelestia directory.")
                     }
                 }
             }
@@ -129,10 +130,41 @@ ScrollablePage {
                         font.pointSize: Appearance.font.size.normal
                         color: Colours.palette.m3onSurfaceVariant
                         wrapMode: Text.WordWrap
-                        text: qsTr("Content coming soon.")
+                        text: qsTr("Caelestia provides you with two files to configure Hyprland. hypr-user.conf and hypr-vars.conf. these are also located in ~/.config/caelestia. hypr-user.conf is for general configuration changes like keybinds and window rules, while hypr-vars.conf is for overriding the default variables such as borders and window gaps.")
+                    }
+                    Item { Layout.fillHeight: true }
+                    StyledRect {
+                        Layout.fillWidth: true
+                        Layout.preferredHeight: requirementsNote.implicitHeight + Appearance.padding.larger * 2
+                        color: Colours.layer(Colours.palette.m3surfaceContainerHigh, 1)
+                        radius: Appearance.rounding.small
+                        Layout.topMargin: Appearance.padding.normal
+
+                        StyledText {
+                            id: hyprlandNote
+                            anchors.centerIn: parent
+                            height: parent.height -14
+                            width: parent.width - 24
+                            text: qsTr("Adjusting these files will take some knowledge, so use caution and visit the hyprland wiki to learn and understand what you are doing.")
+                            font.pointSize: Appearance.font.size.small
+                            font.italic: true
+                            color: Colours.palette.m3error
+                            horizontalAlignment: Text.AlignHCenter
+                            wrapMode: Text.WordWrap
+                        }
+                    }
+                    IconTextButton {
+                            text: qsTr("Hyprland Wiki")
+                            icon: "open_in_new"
+                            radius: Appearance.rounding.small
+                            verticalPadding: Appearance.padding.small
+                            inactiveColour: Colours.palette.m3primary
+                            inactiveOnColour: Colours.palette.m3onPrimary
+                            onClicked: Qt.openUrlExternally("https://wiki.hypr.land/")
+                        }
                     }
                 }
             }
         }
-    }
+
 }
