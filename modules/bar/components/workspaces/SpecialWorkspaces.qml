@@ -224,7 +224,11 @@ Item {
 
                     Repeater {
                         model: ScriptModel {
-                            values: Hypr.toplevels.values.filter(c => c.workspace?.id === ws.wsId)
+                            values: {
+                                const windows = Hypr.toplevels.values.filter(c => c.workspace?.id === ws.wsId);
+                                const maxIcons = Config.bar.workspaces.maxWindowIcons;
+                                return maxIcons > 0 ? windows.slice(0, maxIcons) : windows;
+                            }
                         }
 
                         MaterialIcon {

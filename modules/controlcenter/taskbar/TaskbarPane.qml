@@ -38,6 +38,7 @@ Item {
     property bool workspacesActiveIndicator: Config.bar.workspaces.activeIndicator ?? true
     property bool workspacesOccupiedBg: Config.bar.workspaces.occupiedBg ?? false
     property bool workspacesShowWindows: Config.bar.workspaces.showWindows ?? false
+    property int workspacesMaxWindowIcons: Config.bar.workspaces.maxWindowIcons ?? 0
     property bool workspacesPerMonitor: Config.bar.workspaces.perMonitorWorkspaces ?? true
     property bool scrollWorkspaces: Config.bar.scrollActions.workspaces ?? true
     property bool scrollVolume: Config.bar.scrollActions.volume ?? true
@@ -81,6 +82,7 @@ Item {
         Config.bar.workspaces.activeIndicator = root.workspacesActiveIndicator;
         Config.bar.workspaces.occupiedBg = root.workspacesOccupiedBg;
         Config.bar.workspaces.showWindows = root.workspacesShowWindows;
+        Config.bar.workspaces.maxWindowIcons = root.workspacesMaxWindowIcons;
         Config.bar.workspaces.perMonitorWorkspaces = root.workspacesPerMonitor;
         Config.bar.scrollActions.workspaces = root.scrollWorkspaces;
         Config.bar.scrollActions.volume = root.scrollVolume;
@@ -396,6 +398,41 @@ Item {
                                         checked: root.workspacesShowWindows
                                         onToggled: {
                                             root.workspacesShowWindows = checked;
+                                            root.saveConfig();
+                                        }
+                                    }
+                                }
+                            }
+
+                            StyledRect {
+                                Layout.fillWidth: true
+                                implicitHeight: workspacesMaxWindowIconsRow.implicitHeight + Appearance.padding.large * 2
+                                radius: Appearance.rounding.normal
+                                color: Colours.layer(Colours.palette.m3surfaceContainer, 2)
+
+                                Behavior on implicitHeight {
+                                    Anim {}
+                                }
+
+                                RowLayout {
+                                    id: workspacesMaxWindowIconsRow
+                                    anchors.left: parent.left
+                                    anchors.right: parent.right
+                                    anchors.verticalCenter: parent.verticalCenter
+                                    anchors.margins: Appearance.padding.large
+                                    spacing: Appearance.spacing.normal
+
+                                    StyledText {
+                                        Layout.fillWidth: true
+                                        text: qsTr("Max window icons")
+                                    }
+
+                                    CustomSpinBox {
+                                        min: 0
+                                        max: 20
+                                        value: root.workspacesMaxWindowIcons
+                                        onValueModified: value => {
+                                            root.workspacesMaxWindowIcons = value;
                                             root.saveConfig();
                                         }
                                     }
