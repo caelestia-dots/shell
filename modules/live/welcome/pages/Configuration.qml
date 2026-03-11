@@ -69,7 +69,7 @@ ScrollablePage {
         sectionHeader.subtitle: qsTr("Your ability to make make changes is only limited by your imagination!")
 
         SectionContentArea {
-            title: qsTr("Intro into config changes TITLE")
+            title: qsTr("Intro to config changes TITLE")
             Layout.topMargin: Appearance.padding.large
 
             content: Component {
@@ -83,15 +83,28 @@ ScrollablePage {
                             wrapMode: Text.WordWrap
                         }
                         Item { Layout.fillWidth: true }
+                        StyledRect {
+                        Layout.fillWidth: true
+                        Layout.preferredHeight: requirementsNote.implicitHeight + Appearance.padding.larger * 2
+                        color: Colours.layer(Colours.palette.m3surfaceContainerHigh, 1)
+                        radius: Appearance.rounding.small
+                        Layout.topMargin: Appearance.padding.small
+
                         StyledText {
-                            Layout.fillWidth: true
+                            id: requirementsNote
+
+                            anchors.centerIn: parent
+                            width: parent.width - 24
                             text: qsTr("Adjusting these files will take some knowledge. Please enjoy exploring and making changes but use caution!")
-                            font.pointSize: Appearance.font.size.normal
+                            font.pointSize: Appearance.font.size.small
                             font.italic: true
                             color: Colours.palette.m3error
                             horizontalAlignment: Text.AlignHCenter
                             wrapMode: Text.WordWrap
-                        }    
+                        }
+
+                    }
+
                 }
 
             }
