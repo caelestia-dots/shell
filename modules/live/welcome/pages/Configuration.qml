@@ -74,10 +74,17 @@ ScrollablePage {
 
             content: Component {
                 ColumnLayout {
-                    RowLayout {
+                        spacing: Appearance.spacing.normal
                         StyledText {
                             Layout.fillWidth: true
-                            anchors.centerIn: parent
+                            text: qsTr("Like anything open source, you can change everything. tailor this system to you however you need!")
+                            font.pointSize: Appearance.font.size.normal
+                            color: Colours.palette.m3onSurfaceVariant
+                            wrapMode: Text.WordWrap
+                        }
+                        Item { Layout.fillWidth: true }
+                        StyledText {
+                            Layout.fillWidth: true
                             text: qsTr("Adjusting these files will take some knowledge. Please enjoy exploring and making changes but use caution!")
                             font.pointSize: Appearance.font.size.normal
                             font.italic: true
@@ -85,9 +92,6 @@ ScrollablePage {
                             horizontalAlignment: Text.AlignHCenter
                             wrapMode: Text.WordWrap
                         }    
-
-                    }
-
                 }
 
             }
