@@ -58,113 +58,241 @@ ScrollablePage {
             }
         }
     }
-
-    // CLI
+    // Configuration
     PageSection {
-        id: cliSection
+        id: configSection
 
-        sectionId: "cli"
-        sectionName: qsTr("CLI")
-        sectionIcon: "terminal"
-
-        sectionHeader.title: qsTr("CLI Configuration")
-        sectionHeader.subtitle: qsTr("Customize the behavior of the caelestia CLI app.")
+        sectionId: "configuation"
+        sectionName: qsTr("Configuration")
+        sectionIcon: "handyman"
+        sectionHeader.title: qsTr("Configuration")
+        sectionHeader.subtitle: qsTr("Your ability to make make changes is only limited by your imagination!")
 
         SectionContentArea {
+            title: qsTr("Intro into config changes TITLE")
+            Layout.topMargin: Appearance.padding.large
+
             content: Component {
                 ColumnLayout {
-                    StyledText {
-                        Layout.fillWidth: true
-                        font.pointSize: Appearance.font.size.normal
-                        color: Colours.palette.m3onSurfaceVariant
-                        wrapMode: Text.WordWrap
-                        text: qsTr("Content coming soon.")
-                    }
-                }
-            }
-        }
-    }
-
-    // Shell
-    PageSection {
-        id: shellSection
-
-        sectionId: "shell"
-        sectionName: qsTr("Shell")
-        sectionIcon: "desktop_windows"
-
-        sectionHeader.title: qsTr("Shell Configuration")
-        sectionHeader.subtitle: qsTr("Take your rice further with in-depth customization of the shell.")
-
-        SectionContentArea {
-            content: Component {
-                ColumnLayout {
-                    StyledText {
-                        Layout.fillWidth: true
-                        font.pointSize: Appearance.font.size.normal
-                        color: Colours.palette.m3onSurfaceVariant
-                        wrapMode: Text.WordWrap
-                        text: qsTr("Caelestia has loads of user configurable shell options. These can be found in the shell.json file located in you ~/.config/caelestia directory.")
-                    }
-                }
-            }
-        }
-    }
-
-    // Hyprland
-    PageSection {
-        id: hyprlandSection
-
-        sectionId: "hyprland"
-        sectionName: qsTr("Hyprland")
-        sectionIcon: "select_window"
-
-        sectionHeader.title: qsTr("Hyprland Configuration")
-        sectionHeader.subtitle: qsTr("Tweak the underlying Hyprland configuration to suit your needs.")
-
-        SectionContentArea {
-            content: Component {
-                ColumnLayout {
-                    StyledText {
-                        Layout.fillWidth: true
-                        font.pointSize: Appearance.font.size.normal
-                        color: Colours.palette.m3onSurfaceVariant
-                        wrapMode: Text.WordWrap
-                        text: qsTr("Caelestia provides you with two files to configure Hyprland. hypr-user.conf and hypr-vars.conf. these are also located in ~/.config/caelestia. hypr-user.conf is for general configuration changes like keybinds and window rules, while hypr-vars.conf is for overriding the default variables such as borders and window gaps.")
-                    }
-                    Item { Layout.fillHeight: true }
-                    StyledRect {
-                        Layout.fillWidth: true
-                        Layout.preferredHeight: requirementsNote.implicitHeight + Appearance.padding.larger * 2
-                        color: Colours.layer(Colours.palette.m3surfaceContainerHigh, 1)
-                        radius: Appearance.rounding.small
-                        Layout.topMargin: Appearance.padding.normal
-
+                    RowLayout {
                         StyledText {
-                            id: hyprlandNote
+                            Layout.fillWidth: true
                             anchors.centerIn: parent
-                            height: parent.height -14
-                            width: parent.width - 24
-                            text: qsTr("Adjusting these files will take some knowledge, so use caution and visit the hyprland wiki to learn and understand what you are doing.")
-                            font.pointSize: Appearance.font.size.small
+                            text: qsTr("Adjusting these files will take some knowledge. Please enjoy exploring and making changes but use caution!")
+                            font.pointSize: Appearance.font.size.normal
                             font.italic: true
                             color: Colours.palette.m3error
                             horizontalAlignment: Text.AlignHCenter
                             wrapMode: Text.WordWrap
-                        }
+                        }    
+
                     }
-                    IconTextButton {
-                            text: qsTr("Hyprland Wiki")
-                            icon: "open_in_new"
-                            radius: Appearance.rounding.small
-                            verticalPadding: Appearance.padding.small
-                            inactiveColour: Colours.palette.m3primary
-                            inactiveOnColour: Colours.palette.m3onPrimary
-                            onClicked: Qt.openUrlExternally("https://wiki.hypr.land/")
-                        }
-                    }
+
                 }
+
             }
+
         }
+
+        SectionGrid {
+            targetColumns: 2
+            minColumns: 1
+            maxColumns: 2
+            responsiveBreakpoint: 900
+            columnSpacing: Appearance.padding.large
+            rowSpacing: Appearance.padding.large
+            Layout.topMargin: Appearance.padding.large
+
+            SectionContentArea {
+                Layout.fillWidth: true
+                Layout.alignment: Qt.AlignTop
+                title: qsTr("Caelestia CLI")
+
+                content: Component {
+                    ColumnLayout {
+                        spacing: Appearance.spacing.normal
+
+                        StyledRect {
+                            Layout.fillWidth: true
+                            Layout.fillHeight: true
+                            color: Colours.palette.m3primary
+                        }
+
+                        StyledText {
+                            Layout.fillWidth: true
+                            text: qsTr("Caelestia Command Line Inteface that allows direct commands")
+                            font.pointSize: Appearance.font.size.normal
+                            color: Colours.palette.m3onSurfaceVariant
+                            wrapMode: Text.WordWrap
+                        }
+
+                        RowLayout {
+                            spacing: Appearance.spacing.normal
+
+                            IconTextButton {
+                                text: qsTr("Button")
+                                icon: "info"
+                                radius: Appearance.rounding.small
+                                verticalPadding: Appearance.padding.small
+                                inactiveColour: Colours.palette.m3primary
+                                inactiveOnColour: Colours.palette.m3onPrimary
+                                onClicked: Qt.openUrlExternally("www.google.com")
+                            }
+
+                        }
+
+                    }
+
+                }
+
+            }
+
+            SectionContentArea {
+                Layout.fillWidth: true
+                Layout.alignment: Qt.AlignTop
+                title: qsTr("Caelestia Shell")
+
+                content: Component {
+                    ColumnLayout {
+                        spacing: Appearance.spacing.normal
+
+                        StyledText {
+                            Layout.fillWidth: true
+                            text: qsTr("Modules, drawers, .qml, Qt(Quick), etc")
+                            font.pointSize: Appearance.font.size.normal
+                            color: Colours.palette.m3onSurfaceVariant
+                            wrapMode: Text.WordWrap
+                        }
+
+                        RowLayout {
+                            spacing: Appearance.spacing.normal
+
+                            IconTextButton {
+                                text: qsTr("resource link?")
+                                icon: "info"
+                                radius: Appearance.rounding.small
+                                verticalPadding: Appearance.padding.small
+                                inactiveColour: Colours.palette.m3primary
+                                inactiveOnColour: Colours.palette.m3onPrimary
+                                onClicked: Qt.openUrlExternally("www.google.com")
+                            }
+
+                            IconTextButton {
+                                text: qsTr("qml or quickshell link maybe?")
+                                icon: "help"
+                                radius: Appearance.rounding.small
+                                verticalPadding: Appearance.padding.small
+                                inactiveColour: Colours.palette.m3primary
+                                inactiveOnColour: Colours.palette.m3onPrimary
+                                onClicked: Qt.openUrlExternally("www.google.com")
+                            }
+
+                        }
+
+                    }
+
+                }
+
+            }
+
+            SectionContentArea {
+                Layout.fillWidth: true
+                Layout.alignment: Qt.AlignTop
+                title: qsTr("Hyprland")
+
+                content: Component {
+                    ColumnLayout {
+                        spacing: Appearance.spacing.normal
+
+                        StyledText {
+                            Layout.fillWidth: true
+                            text: qsTr("window rules, workspaces, gaps, etc")
+                            font.pointSize: Appearance.font.size.normal
+                            color: Colours.palette.m3onSurfaceVariant
+                            wrapMode: Text.WordWrap
+                        }
+
+                        RowLayout {
+                            spacing: Appearance.spacing.normal
+
+                            IconTextButton {
+                                text: qsTr("resource link")
+                                icon: "info"
+                                radius: Appearance.rounding.small
+                                verticalPadding: Appearance.padding.small
+                                inactiveColour: Colours.palette.m3primary
+                                inactiveOnColour: Colours.palette.m3onPrimary
+                                onClicked: Qt.openUrlExternally("www.google.com")
+                            }
+
+                            IconTextButton {
+                                text: qsTr("another resource link")
+                                icon: "help"
+                                radius: Appearance.rounding.small
+                                verticalPadding: Appearance.padding.small
+                                inactiveColour: Colours.palette.m3primary
+                                inactiveOnColour: Colours.palette.m3onPrimary
+                                onClicked: Qt.openUrlExternally("www.google.com")
+                            }
+
+                        }
+
+                    }
+
+                }
+
+            }
+
+            SectionContentArea {
+                Layout.fillWidth: true
+                Layout.alignment: Qt.AlignTop
+                title: qsTr("Settings configurations")
+
+                content: Component {
+                    ColumnLayout {
+                        spacing: Appearance.spacing.normal
+
+                        StyledText {
+                            Layout.fillWidth: true
+                            text: qsTr("making changes in setting menu effects shell.json, but you can expand on that by going direct to that file and making changes...")
+                            font.pointSize: Appearance.font.size.normal
+                            color: Colours.palette.m3onSurfaceVariant
+                            wrapMode: Text.WordWrap
+                        }
+
+                        RowLayout {
+                            spacing: Appearance.spacing.normal
+
+                            IconTextButton {
+                                text: qsTr("shell.json in folder?")
+                                icon: "info"
+                                radius: Appearance.rounding.small
+                                verticalPadding: Appearance.padding.small
+                                inactiveColour: Colours.palette.m3primary
+                                inactiveOnColour: Colours.palette.m3onPrimary
+                                onClicked: Qt.openUrlExternally("www.google.com")
+                            }
+
+                            IconTextButton {
+                                text: qsTr("maybe link to example file?")
+                                icon: "help"
+                                radius: Appearance.rounding.small
+                                verticalPadding: Appearance.padding.small
+                                inactiveColour: Colours.palette.m3primary
+                                inactiveOnColour: Colours.palette.m3onPrimary
+                                onClicked: Qt.openUrlExternally("www.google.com")
+                            }
+
+                        }
+
+                    }
+
+                }
+
+            }
+
+        }
+
+    }
 
 }
