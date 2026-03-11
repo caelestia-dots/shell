@@ -208,6 +208,7 @@ Singleton {
                 occupiedBg: bar.workspaces.occupiedBg,
                 showWindows: bar.workspaces.showWindows,
                 showWindowsOnSpecialWorkspaces: bar.workspaces.showWindowsOnSpecialWorkspaces,
+                maxWindowIcons: bar.workspaces.maxWindowIcons,
                 activeTrail: bar.workspaces.activeTrail,
                 perMonitorWorkspaces: bar.workspaces.perMonitorWorkspaces,
                 label: bar.workspaces.label,
