@@ -5,6 +5,7 @@ import qs.services
 import qs.config
 import Caelestia
 import Quickshell
+import Quickshell.Io
 import Quickshell.Wayland
 import QtQuick
 import QtQuick.Effects
@@ -188,6 +189,17 @@ MouseArea {
             target: root.loader
             property: "activeAsync"
             value: false
+        }
+    }
+
+    Process {
+        running: true
+        command: ["hyprctl", "cursorpos", "-j"]
+        stdout: StdioCollector {
+            onStreamFinished: {
+                const pos = JSON.parse(text);
+                root.checkClientRects(pos.x - root.screen.x, pos.y - root.screen.y);
+            }
         }
     }
 

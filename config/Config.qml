@@ -139,6 +139,7 @@ Singleton {
     function serializeGeneral(): var {
         return {
             logo: general.logo,
+            excludedScreens: general.excludedScreens,
             apps: {
                 terminal: general.apps.terminal,
                 audio: general.apps.audio,
