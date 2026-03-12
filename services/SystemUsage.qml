@@ -45,11 +45,11 @@ Singleton {
     property int refCount
 
     function cleanCpuName(name: string): string {
-        return name.replace(/\(R\)/gi, "").replace(/\(TM\)/gi, "").replace(/CPU/gi, "").replace(/\d+th Gen /gi, "").replace(/\d+nd Gen /gi, "").replace(/\d+rd Gen /gi, "").replace(/\d+st Gen /gi, "").replace(/Core /gi, "").replace(/Processor/gi, "").replace(/\s+/g, " ").trim();
+        return name.replace(/\(R\)|\(TM\)|CPU|\d+(?:th|nd|rd|st) Gen |Core |Processor/gi, "").replace(/\s+/g, " ").trim();
     }
 
     function cleanGpuName(name: string): string {
-        return name.replace(/NVIDIA GeForce /gi, "").replace(/NVIDIA /gi, "").replace(/AMD Radeon /gi, "").replace(/AMD /gi, "").replace(/Intel /gi, "").replace(/\(R\)/gi, "").replace(/\(TM\)/gi, "").replace(/Graphics/gi, "").replace(/\s+/g, " ").trim();
+        return name.replace(/\(R\)|\(TM\)|Graphics/gi, "").replace(/\s+/g, " ").trim();
     }
 
     function formatKib(kib: real): var {
@@ -232,7 +232,7 @@ Singleton {
         id: gpuNameDetect
 
         running: true
-        command: ["sh", "-c", "nvidia-smi --query-gpu=name --format=csv,noheader 2>/dev/null || lspci 2>/dev/null | grep -i 'vga\\|3d\\|display' | head -1"]
+        command: ["sh", "-c", "nvidia-smi --query-gpu=name --format=csv,noheader 2>/dev/null || glxinfo -B 2>/dev/null | grep 'Device:' | cut -d':' -f2 | cut -d'(' -f1 || lspci 2>/dev/null | grep -i 'vga\\|3d controller\\|display' | head -1"]
         stdout: StdioCollector {
             onStreamFinished: {
                 const output = text.trim();
@@ -242,9 +242,12 @@ Singleton {
                 // Check if it's from nvidia-smi (clean GPU name)
                 if (output.toLowerCase().includes("nvidia") || output.toLowerCase().includes("geforce") || output.toLowerCase().includes("rtx") || output.toLowerCase().includes("gtx")) {
                     root.gpuName = root.cleanGpuName(output);
+                } else if (output.toLowerCase().includes("rx")) {
+                    root.gpuName = root.cleanGpuName(output);
                 } else {
                     // Parse lspci output: extract name from brackets or after colon
-                    const bracketMatch = output.match(/\[([^\]]+)\]/);
+                    // Handles cases like [AMD/ATI] Navi 21 [Radeon RX 6800/6800 XT / 6900 XT] (rev c0)
+                    const bracketMatch = output.match(/\[([^\]]+)\][^\[]*$/);
                     if (bracketMatch) {
                         root.gpuName = root.cleanGpuName(bracketMatch[1]);
                     } else {
