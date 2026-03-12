@@ -5,146 +5,106 @@ import qs.services
 import qs.config
 import Caelestia.Services
 import Quickshell
-import Quickshell.Widgets
 import QtQuick
 import QtQuick.Effects
+import Caelestia.Internal
 
 Item {
     id: root
+    anchors.fill: parent
 
     required property ShellScreen screen
     required property Item wallpaper
 
     readonly property bool shouldBeActive: Config.background.visualiser.enabled && (!Config.background.visualiser.autoHide || (Hypr.monitorFor(screen)?.activeWorkspace?.toplevels?.values.every(t => t.lastIpcObject?.floating) ?? true))
     property real offset: shouldBeActive ? 0 : screen.height * 0.2
-
     opacity: shouldBeActive ? 1 : 0
-
-    Loader {
-        anchors.fill: parent
-        active: root.opacity > 0 && Config.background.visualiser.blur
-
-        sourceComponent: MultiEffect {
-            source: root.wallpaper
-            maskSource: wrapper
-            maskEnabled: true
-            blurEnabled: true
-            blur: 1
-            blurMax: 32
-            autoPaddingEnabled: false
-        }
-    }
-
-    Item {
-        id: wrapper
-
-        anchors.fill: parent
-        layer.enabled: true
-
-        Loader {
-            anchors.fill: parent
-            anchors.topMargin: root.offset
-            anchors.bottomMargin: -root.offset
-
-            active: root.opacity > 0
-
-            sourceComponent: Item {
-                ServiceRef {
-                    service: Audio.cava
-                }
-
-                Item {
-                    id: content
-
-                    anchors.fill: parent
-                    anchors.margins: Config.border.thickness
-                    anchors.leftMargin: Visibilities.bars.get(root.screen).exclusiveZone + Appearance.spacing.small * Config.background.visualiser.spacing
-
-                    Side {
-                        content: content
-                    }
-                    Side {
-                        content: content
-                        isRight: true
-                    }
-
-                    Behavior on anchors.leftMargin {
-                        Anim {}
-                    }
-                }
-            }
-        }
-    }
-
-    Behavior on offset {
-        Anim {}
-    }
 
     Behavior on opacity {
         Anim {}
     }
 
-    component Side: Repeater {
-        id: side
+    readonly property bool shouldLoadBars: root.opacity > 0
 
-        required property Item content
-        property bool isRight
+    ServiceRef {
+        id: cavaRefVis
+        service: Audio.cava
+    }
 
-        model: Config.services.visualiserBars
+    ShaderEffectSource {
+        id: wallpaperSource
+        sourceItem: root.wallpaper
+        live: true
+    }
 
-        ClippingRectangle {
-            id: bar
+    ShaderEffectSource {
+        id: barsSource
+        sourceItem: barsLoader
+        live: true
+    }
 
-            required property int modelData
-            property real value: Math.max(0, Math.min(1, Audio.cava.values[side.isRight ? modelData : side.count - modelData - 1]))
+    property color barColorTop: Qt.alpha(Colours.palette.m3primary, 0.7)
+    property color barColorBottom: Qt.alpha(Colours.palette.m3inversePrimary, 0.7)
 
-            clip: true
+    Behavior on barColorTop {
+        CAnim {}
+    }
+    Behavior on barColorBottom {
+        CAnim {}
+    }
 
-            x: modelData * ((side.content.width * 0.4) / Config.services.visualiserBars) + (side.isRight ? side.content.width * 0.6 : 0)
-            implicitWidth: (side.content.width * 0.4) / Config.services.visualiserBars - Appearance.spacing.small * Config.background.visualiser.spacing
+    property real barRadius: Appearance.rounding.small * Config.background.visualiser.rounding
 
-            y: side.content.height - height
-            implicitHeight: bar.value * side.content.height * 0.4
+    Loader {
+        anchors.fill: parent
+        active: root.shouldLoadBars && Config.background.visualiser.blur && barsLoader.item
 
-            color: "transparent"
-            topLeftRadius: Appearance.rounding.small * Config.background.visualiser.rounding
-            topRightRadius: Appearance.rounding.small * Config.background.visualiser.rounding
+        sourceComponent: MultiEffect {
+            source: wallpaperSource
+            maskSource: barsSource
+            maskEnabled: true
+            maskSpreadAtMax: 0
+            maskSpreadAtMin: 0
+            maskThresholdMin: 0.67
+            blurEnabled: true
+            blur: 1
+            blurMax: 32
+            autoPaddingEnabled: false
+            shadowEnabled: false
+        }
+    }
 
-            Rectangle {
-                topLeftRadius: parent.topLeftRadius
-                topRightRadius: parent.topRightRadius
+    Loader {
+        id: barsLoader
+        anchors.fill: parent
+        active: root.shouldLoadBars
 
-                gradient: Gradient {
-                    orientation: Gradient.Vertical
+        sourceComponent: Item {
+            anchors.fill: parent
+            anchors.topMargin: Config.border.thickness + root.offset
+            anchors.bottomMargin: Config.border.thickness - root.offset
+            anchors.leftMargin: Visibilities.bars.get(root.screen).exclusiveZone + Appearance.spacing.small * Config.background.visualiser.spacing
+            anchors.margins: Config.border.thickness
 
-                    GradientStop {
-                        position: 0
-                        color: Qt.alpha(Colours.palette.m3primary, 0.7)
-
-                        Behavior on color {
-                            CAnim {}
-                        }
-                    }
-                    GradientStop {
-                        position: 1
-                        color: Qt.alpha(Colours.palette.m3inversePrimary, 0.7)
-
-                        Behavior on color {
-                            CAnim {}
-                        }
-                    }
-                }
-
-                anchors.left: parent.left
-                anchors.right: parent.right
-                y: parent.height - height
-                implicitHeight: side.content.height * 0.4
+            Behavior on anchors.topMargin {
+                Anim {}
+            }
+            Behavior on anchors.bottomMargin {
+                Anim {}
             }
 
-            Behavior on value {
-                Anim {
-                    duration: Appearance.anim.durations.small
-                }
+            VisualiserBars {
+
+                anchors.fill: parent
+                barCount: Config.services.visualiserBars
+                spacing: Appearance.spacing.small * Config.background.visualiser.spacing
+                smoothing: Config.background.visualiser.smoothing
+                curvature: Config.background.visualiser.curvature
+                barRadius: Appearance.rounding.small * Config.background.visualiser.rounding
+                barColorTop: root.barColorTop
+                barColorBottom: root.barColorBottom
+                animationDuration: Appearance.anim.durations.small
+                audioValues: Audio.cava.values
             }
         }
     }
