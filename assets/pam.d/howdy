@@ -1,0 +1,2 @@
+#%PAM-1.0
+auth    required    pam_howdy.so  max-tries=1
