@@ -84,9 +84,11 @@ void HyprExtras::applyOptions(const QVariantHash& options) {
         return;
     }
 
-    QString request = "[[BATCH]]";
+    QString request;
+    request.reserve(12 + options.size() * 40);
+    request += QLatin1String("[[BATCH]]");
     for (auto it = options.constBegin(); it != options.constEnd(); ++it) {
-        request += QString("keyword %1 %2;").arg(it.key(), it.value().toString());
+        request += QLatin1String("keyword ") + it.key() + QLatin1Char(' ') + it.value().toString() + QLatin1Char(';');
     }
 
     makeRequest(request, [this](bool success, const QByteArray& res) {
