@@ -14,6 +14,8 @@ Item {
 
     required property real nonAnimWidth
     required property PersistentProperties state
+    required property var tabs
+
     readonly property alias count: bar.count
 
     implicitHeight: bar.implicitHeight + indicator.implicitHeight + indicator.anchors.topMargin + separator.implicitHeight
@@ -30,30 +32,18 @@ Item {
 
         onCurrentIndexChanged: root.state.currentTab = currentIndex
 
-        Tab {
-            iconName: "dashboard"
-            text: qsTr("Dashboard")
-        }
+        Repeater {
+            model: ScriptModel {
+                values: root.tabs
+            }
 
-        Tab {
-            iconName: "queue_music"
-            text: qsTr("Media")
-        }
+            delegate: Tab {
+                required property var modelData
 
-        Tab {
-            iconName: "speed"
-            text: qsTr("Performance")
+                iconName: modelData.iconName
+                text: modelData.text
+            }
         }
-
-        Tab {
-            iconName: "cloud"
-            text: qsTr("Weather")
-        }
-
-        // Tab {
-        //     iconName: "workspaces"
-        //     text: qsTr("Workspaces")
-        // }
     }
 
     Item {
@@ -62,11 +52,13 @@ Item {
         anchors.top: bar.bottom
         anchors.topMargin: 5
 
-        implicitWidth: bar.currentItem.implicitWidth
+        implicitWidth: bar.currentItem?.implicitWidth ?? 0
         implicitHeight: 3
 
         x: {
             const tab = bar.currentItem;
+            if (!tab)
+                return 0;
             const width = (root.nonAnimWidth - bar.spacing * (bar.count - 1)) / bar.count;
             return width * tab.TabBar.index + (width - tab.implicitWidth) / 2;
         }

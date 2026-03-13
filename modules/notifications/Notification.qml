@@ -17,6 +17,7 @@ StyledRect {
     required property Notifs.Notif modelData
     readonly property bool hasImage: modelData.image.length > 0
     readonly property bool hasAppIcon: modelData.appIcon.length > 0
+    readonly property int bodyTextFormat: /[<*_`#\[\]]/.test(modelData.body) ? Text.MarkdownText : Text.PlainText
     readonly property int nonAnimHeight: summary.implicitHeight + (root.expanded ? appName.height + body.height + actions.height + actions.anchors.topMargin : bodyPreview.height) + inner.anchors.margins * 2
     property bool expanded: Config.notifs.openExpanded
 
@@ -124,6 +125,8 @@ StyledRect {
                         anchors.fill: parent
                         source: Qt.resolvedUrl(root.modelData.image)
                         fillMode: Image.PreserveAspectCrop
+                        sourceSize.width: Config.notifs.sizes.image
+                        sourceSize.height: Config.notifs.sizes.image
                         cache: false
                         asynchronous: true
                     }
@@ -345,7 +348,7 @@ StyledRect {
                 anchors.rightMargin: Appearance.spacing.small
 
                 animate: true
-                textFormat: Text.MarkdownText
+                textFormat: root.bodyTextFormat
                 text: bodyPreviewMetrics.elidedText
                 color: Colours.palette.m3onSurfaceVariant
                 font.pointSize: Appearance.font.size.small
@@ -376,7 +379,7 @@ StyledRect {
                 anchors.rightMargin: Appearance.spacing.small
 
                 animate: true
-                textFormat: Text.MarkdownText
+                textFormat: root.bodyTextFormat
                 text: root.modelData.body
                 color: Colours.palette.m3onSurfaceVariant
                 font.pointSize: Appearance.font.size.small
