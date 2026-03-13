@@ -17,6 +17,7 @@ Singleton {
     readonly property list<Notif> notClosed: list.filter(n => !n.closed)
     readonly property list<Notif> popups: list.filter(n => n.popup)
     property alias dnd: props.dnd
+    property bool caffeine: IdleInhibitor.enabled
 
     property bool loaded
 
@@ -28,6 +29,16 @@ Singleton {
             Toaster.toast(qsTr("Do not disturb enabled"), qsTr("Popup notifications are now disabled"), "do_not_disturb_on");
         else
             Toaster.toast(qsTr("Do not disturb disabled"), qsTr("Popup notifications are now enabled"), "do_not_disturb_off");
+    }
+
+    onCaffeineChanged: {
+        if (!Config.utilities.toasts.caffeineChanged)
+            return;
+        
+        if (caffeine)
+            Toaster.toast(qsTr("Caffeine mode enabled"), qsTr("Preventing sleep mode"), "emoji_food_beverage");
+        else
+            Toaster.toast(qsTr("Caffeine mode disabled"), qsTr("Normal power management"), "local_cafe");
     }
 
     onListChanged: {
