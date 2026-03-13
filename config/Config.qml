@@ -385,7 +385,15 @@ Singleton {
             defaultPlayer: services.defaultPlayer,
             playerAliases: services.playerAliases,
             showLyrics: services.showLyrics,
-            lyricsBackend: services.lyricsBackend
+            lyricsBackend: services.lyricsBackend,
+            calendar: {
+                enabled: services.calendar.enabled,
+                command: services.calendar.command,
+                agendaDays: services.calendar.agendaDays,
+                upcomingHours: services.calendar.upcomingHours,
+                reminderMinutes: services.calendar.reminderMinutes,
+                refreshInterval: services.calendar.refreshInterval
+            }
         };
     }
 
