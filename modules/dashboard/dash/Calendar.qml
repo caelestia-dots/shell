@@ -166,6 +166,8 @@ CustomMouseArea {
 
                     required property var model
 
+                    readonly property bool hasEvent: GCalendar.hasEvent(model.date)
+
                     implicitWidth: implicitHeight
                     implicitHeight: text.implicitHeight + Appearance.padding.small * 2
 
@@ -186,6 +188,18 @@ CustomMouseArea {
                         opacity: dayItem.model.today || dayItem.model.month === grid.month ? 1 : 0.4
                         font.pointSize: Appearance.font.size.normal
                         font.weight: 500
+                    }
+
+                    Rectangle {
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        anchors.bottom: parent.bottom
+                        anchors.bottomMargin: 1
+                        width: 4
+                        height: 4
+                        radius: 2
+                        color: Colours.palette.m3tertiary
+                        visible: dayItem.hasEvent
+                        opacity: dayItem.model.today || dayItem.model.month === grid.month ? 1 : 0.4
                     }
                 }
             }
