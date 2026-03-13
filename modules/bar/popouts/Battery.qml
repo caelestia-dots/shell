@@ -33,12 +33,16 @@ Column {
             return comps.join(", ") || fallback;
         }
 
-        text: UPower.displayDevice.isLaptopBattery ? qsTr("Time %1: %2").arg(UPower.onBattery ? "remaining" : "until charged").arg(UPower.onBattery ? formatSeconds(UPower.displayDevice.timeToEmpty, "Calculating...") : formatSeconds(UPower.displayDevice.timeToFull, "Fully charged!")) : qsTr("Power profile: %1").arg(PowerProfile.toString(PowerProfiles.profile))
+        // Capitalize the first letter of the generic profile string for UI display
+        property string displayProfile: Power.currentProfile.charAt(0).toUpperCase() + Power.currentProfile.slice(1)
+
+        text: UPower.displayDevice.isLaptopBattery ? qsTr("Time %1: %2").arg(UPower.onBattery ? "remaining" : "until charged").arg(UPower.onBattery ? formatSeconds(UPower.displayDevice.timeToEmpty, "Calculating...") : formatSeconds(UPower.displayDevice.timeToFull, "Fully charged!")) : qsTr("Power profile: %1").arg(displayProfile)
     }
 
     Loader {
         anchors.horizontalCenter: parent.horizontalCenter
 
+        // TODO: Change to use the abstraction (Power in qs.services)
         active: PowerProfiles.degradationReason !== PerformanceDegradationReason.None
 
         height: active ? (item?.implicitHeight ?? 0) : 0
@@ -98,10 +102,10 @@ Column {
         id: profiles
 
         property string current: {
-            const p = PowerProfiles.profile;
-            if (p === PowerProfile.PowerSaver)
+            const p = Power.currentProfile;
+            if (p === "saver")
                 return saver.icon;
-            if (p === PowerProfile.Performance)
+            if (p === "performance")
                 return perf.icon;
             return balance.icon;
         }
@@ -124,21 +128,18 @@ Column {
             states: [
                 State {
                     name: saver.icon
-
                     Fill {
                         item: saver
                     }
                 },
                 State {
                     name: balance.icon
-
                     Fill {
                         item: balance
                     }
                 },
                 State {
                     name: perf.icon
-
                     Fill {
                         item: perf
                     }
@@ -161,7 +162,7 @@ Column {
             anchors.left: parent.left
             anchors.leftMargin: Appearance.padding.small
 
-            profile: PowerProfile.PowerSaver
+            profile: "saver"
             icon: "energy_savings_leaf"
         }
 
@@ -170,7 +171,7 @@ Column {
 
             anchors.centerIn: parent
 
-            profile: PowerProfile.Balanced
+            profile: "balanced"
             icon: "balance"
         }
 
@@ -181,7 +182,7 @@ Column {
             anchors.right: parent.right
             anchors.rightMargin: Appearance.padding.small
 
-            profile: PowerProfile.Performance
+            profile: "performance"
             icon: "rocket_launch"
         }
     }
@@ -198,7 +199,7 @@ Column {
 
     component Profile: Item {
         required property string icon
-        required property int profile
+        required property string profile
 
         implicitWidth: icon.implicitHeight + Appearance.padding.small * 2
         implicitHeight: icon.implicitHeight + Appearance.padding.small * 2
@@ -208,7 +209,7 @@ Column {
             color: profiles.current === parent.icon ? Colours.palette.m3onPrimary : Colours.palette.m3onSurface
 
             function onClicked(): void {
-                PowerProfiles.profile = parent.profile;
+                Power.setProfile(parent.profile);
             }
         }
 
