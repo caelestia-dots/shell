@@ -7,7 +7,7 @@ import qs.components
 
 Item {
     id: root
-    
+
     implicitWidth: Appearance.font.size.large * 1.2
     implicitHeight: Appearance.font.size.large * 1.2
 
@@ -29,8 +29,8 @@ Item {
         id: caelestiaLogo
 
         Logo {
-            implicitWidth: Appearance.font.size.large * 1.8
-            implicitHeight: Appearance.font.size.large * 1.8
+            implicitWidth: Appearance.font.size.extraLarge
+            implicitHeight: Appearance.font.size.extraLarge
         }
     }
 
@@ -39,7 +39,7 @@ Item {
 
         ColouredIcon {
             source: SysInfo.osLogo
-            implicitSize: Appearance.font.size.large * 1.2
+            implicitSize: Appearance.font.size.extraLarge
             colour: Colours.palette.m3tertiary
         }
     }
