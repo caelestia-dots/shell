@@ -8,8 +8,8 @@ import qs.components
 Item {
     id: root
 
-    implicitWidth: Appearance.font.size.large * 1.2
-    implicitHeight: Appearance.font.size.large * 1.2
+    implicitWidth: Appearance.font.size.extraLarge
+    implicitHeight: Appearance.font.size.extraLarge
 
     MouseArea {
         anchors.fill: parent
