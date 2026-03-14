@@ -11,6 +11,12 @@ Singleton {
     id: root
 
     property list<var> ddcMonitors: []
+    readonly property var ddcMonitorMap: {
+        const map = {};
+        for (const m of ddcMonitors)
+            map[m.connector] = m;
+        return map;
+    }
     readonly property list<Monitor> monitors: variants.instances
     property bool appleDisplayPresent: false
 
@@ -61,7 +67,7 @@ Singleton {
     Variants {
         id: variants
 
-        model: Quickshell.screens
+        model: Quickshell.screens // Don't respect excluded screens cause ipc
 
         Monitor {}
     }
@@ -155,8 +161,9 @@ Singleton {
         id: monitor
 
         required property ShellScreen modelData
-        readonly property bool isDdc: root.ddcMonitors.some(m => m.connector === modelData.name)
-        readonly property string busNum: root.ddcMonitors.find(m => m.connector === modelData.name)?.busNum ?? ""
+        readonly property var ddcInfo: root.ddcMonitorMap[modelData.name] ?? null
+        readonly property bool isDdc: ddcInfo !== null
+        readonly property string busNum: ddcInfo?.busNum ?? ""
         readonly property bool isAppleDisplay: root.appleDisplayPresent && modelData.model.startsWith("StudioDisplay")
         property real brightness
         property real queuedBrightness: NaN

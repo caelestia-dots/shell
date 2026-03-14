@@ -16,10 +16,12 @@ StyledClippingRect {
     readonly property bool onSpecial: (Config.bar.workspaces.perMonitorWorkspaces ? Hypr.monitorFor(screen) : Hypr.focusedMonitor)?.lastIpcObject?.specialWorkspace?.name !== ""
     readonly property int activeWsId: Config.bar.workspaces.perMonitorWorkspaces ? (Hypr.monitorFor(screen).activeWorkspace?.id ?? 1) : Hypr.activeWsId
 
-    readonly property var occupied: Hypr.workspaces.values.reduce((acc, curr) => {
-        acc[curr.id] = curr.lastIpcObject.windows > 0;
-        return acc;
-    }, {})
+    readonly property var occupied: {
+        const occ = {};
+        for (const ws of Hypr.workspaces.values)
+            occ[ws.id] = ws.lastIpcObject.windows > 0;
+        return occ;
+    }
     readonly property int groupOffset: Math.floor((activeWsId - 1) / Config.bar.workspaces.shown) * Config.bar.workspaces.shown
 
     property real blur: onSpecial ? 1 : 0
