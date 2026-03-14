@@ -425,7 +425,8 @@ default, you must create it manually.
     },
     "border": {
         "rounding": 25,
-        "thickness": 10
+        "thickness": 10,
+        "minThickness" : 2
     },
     "dashboard": {
         "enabled": true,
