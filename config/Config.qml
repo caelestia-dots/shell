@@ -139,6 +139,7 @@ Singleton {
     function serializeGeneral(): var {
         return {
             logo: general.logo,
+            excludedScreens: general.excludedScreens,
             apps: {
                 terminal: general.apps.terminal,
                 audio: general.apps.audio,
@@ -258,7 +259,8 @@ Singleton {
         return {
             enabled: dashboard.enabled,
             showOnHover: dashboard.showOnHover,
-            updateInterval: dashboard.updateInterval,
+            mediaUpdateInterval: dashboard.mediaUpdateInterval,
+            resourceUpdateInterval: dashboard.resourceUpdateInterval,
             dragThreshold: dashboard.dragThreshold,
             performance: {
                 showBattery: dashboard.performance.showBattery,
