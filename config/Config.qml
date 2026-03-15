@@ -359,7 +359,15 @@ Singleton {
             maxVolume: services.maxVolume,
             smartScheme: services.smartScheme,
             defaultPlayer: services.defaultPlayer,
-            playerAliases: services.playerAliases
+            playerAliases: services.playerAliases,
+            calendar: {
+                enabled: services.calendar.enabled,
+                command: services.calendar.command,
+                agendaDays: services.calendar.agendaDays,
+                upcomingHours: services.calendar.upcomingHours,
+                reminderMinutes: services.calendar.reminderMinutes,
+                refreshInterval: services.calendar.refreshInterval
+            }
         };
     }
 
