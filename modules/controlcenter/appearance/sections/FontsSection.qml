@@ -18,29 +18,52 @@ CollapsibleSection {
     title: qsTr("Fonts")
     showBackground: true
 
+    StyledRect {
+        Layout.fillWidth: true
+        Layout.preferredHeight: label.implicitHeight + Appearance.padding.large * 2
+
+        color: Colours.palette.m3surfaceContainerHigh
+        radius: Appearance.rounding.normal
+
+        StyledText {
+            id: label
+
+            anchors.left: parent.left
+            anchors.right: parent.right
+            anchors.verticalCenter: parent.verticalCenter
+            anchors.margins: Appearance.padding.large
+
+            font.pointSize: Appearance.font.size.small
+            color: Colours.palette.m3error
+            textFormat: Text.RichText
+            wrapMode: Text.WordWrap
+
+            text: qsTr("<b>Warning:</b> The Material font family setting defines the icon font used for icons throughout the shell. If you set it to a normal font it will cause visual issues!")
+        }
+    }
+
     CollapsibleSection {
-        id: materialFontSection
-        title: qsTr("Material font family")
+        id: sansFontSection
+        title: qsTr("Sans-serif font family")
         expanded: true
         showBackground: true
         nested: true
 
         Loader {
-            id: materialFontLoader
             Layout.fillWidth: true
             Layout.preferredHeight: item ? Math.min(item.contentHeight, 300) : 0
-            active: materialFontSection.expanded
+            active: sansFontSection.expanded
 
             sourceComponent: StyledListView {
-                id: materialFontList
-                property alias contentHeight: materialFontList.contentHeight
+                id: sansFontList
+                property alias contentHeight: sansFontList.contentHeight
 
                 clip: true
                 spacing: Appearance.spacing.small / 2
                 model: Qt.fontFamilies()
 
                 StyledScrollBar.vertical: StyledScrollBar {
-                    flickable: materialFontList
+                    flickable: sansFontList
                 }
 
                 delegate: StyledRect {
@@ -49,7 +72,7 @@ CollapsibleSection {
 
                     width: ListView.view.width
 
-                    readonly property bool isCurrent: modelData === rootPane.fontFamilyMaterial
+                    readonly property bool isCurrent: modelData === rootPane.fontFamilySans
                     color: Qt.alpha(Colours.tPalette.m3surfaceContainer, isCurrent ? Colours.tPalette.m3surfaceContainer.a : 0)
                     radius: Appearance.rounding.normal
                     border.width: isCurrent ? 1 : 0
@@ -57,13 +80,13 @@ CollapsibleSection {
 
                     StateLayer {
                         function onClicked(): void {
-                            rootPane.fontFamilyMaterial = modelData;
+                            rootPane.fontFamilySans = modelData;
                             rootPane.saveConfig();
                         }
                     }
 
                     RowLayout {
-                        id: fontFamilyMaterialRow
+                        id: fontFamilySansRow
 
                         anchors.left: parent.left
                         anchors.right: parent.right
@@ -92,7 +115,7 @@ CollapsibleSection {
                         }
                     }
 
-                    implicitHeight: fontFamilyMaterialRow.implicitHeight + Appearance.padding.normal * 2
+                    implicitHeight: fontFamilySansRow.implicitHeight + Appearance.padding.normal * 2
                 }
             }
         }
@@ -178,27 +201,28 @@ CollapsibleSection {
     }
 
     CollapsibleSection {
-        id: sansFontSection
-        title: qsTr("Sans-serif font family")
+        id: materialFontSection
+        title: qsTr("Material font family")
         expanded: false
         showBackground: true
         nested: true
 
         Loader {
+            id: materialFontLoader
             Layout.fillWidth: true
             Layout.preferredHeight: item ? Math.min(item.contentHeight, 300) : 0
-            active: sansFontSection.expanded
+            active: materialFontSection.expanded
 
             sourceComponent: StyledListView {
-                id: sansFontList
-                property alias contentHeight: sansFontList.contentHeight
+                id: materialFontList
+                property alias contentHeight: materialFontList.contentHeight
 
                 clip: true
                 spacing: Appearance.spacing.small / 2
                 model: Qt.fontFamilies()
 
                 StyledScrollBar.vertical: StyledScrollBar {
-                    flickable: sansFontList
+                    flickable: materialFontList
                 }
 
                 delegate: StyledRect {
@@ -207,7 +231,7 @@ CollapsibleSection {
 
                     width: ListView.view.width
 
-                    readonly property bool isCurrent: modelData === rootPane.fontFamilySans
+                    readonly property bool isCurrent: modelData === rootPane.fontFamilyMaterial
                     color: Qt.alpha(Colours.tPalette.m3surfaceContainer, isCurrent ? Colours.tPalette.m3surfaceContainer.a : 0)
                     radius: Appearance.rounding.normal
                     border.width: isCurrent ? 1 : 0
@@ -215,13 +239,13 @@ CollapsibleSection {
 
                     StateLayer {
                         function onClicked(): void {
-                            rootPane.fontFamilySans = modelData;
+                            rootPane.fontFamilyMaterial = modelData;
                             rootPane.saveConfig();
                         }
                     }
 
                     RowLayout {
-                        id: fontFamilySansRow
+                        id: fontFamilyMaterialRow
 
                         anchors.left: parent.left
                         anchors.right: parent.right
@@ -250,7 +274,7 @@ CollapsibleSection {
                         }
                     }
 
-                    implicitHeight: fontFamilySansRow.implicitHeight + Appearance.padding.normal * 2
+                    implicitHeight: fontFamilyMaterialRow.implicitHeight + Appearance.padding.normal * 2
                 }
             }
         }
