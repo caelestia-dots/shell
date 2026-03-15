@@ -10,6 +10,7 @@ Scope {
 
     required property ShellScreen screen
     required property Item bar
+    required property real borderThickness
 
     ExclusionZone {
         anchors.left: true
@@ -31,7 +32,7 @@ Scope {
     component ExclusionZone: StyledWindow {
         screen: root.screen
         name: "border-exclusion"
-        exclusiveZone: Config.border.thickness
+        exclusiveZone: root.borderThickness
         mask: Region {}
         implicitWidth: 1
         implicitHeight: 1

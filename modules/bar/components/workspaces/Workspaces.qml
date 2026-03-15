@@ -12,6 +12,7 @@ StyledClippingRect {
     id: root
 
     required property ShellScreen screen
+    required property bool fullscreen
 
     readonly property bool onSpecial: (Config.bar.workspaces.perMonitorWorkspaces ? Hypr.monitorFor(screen) : Hypr.focusedMonitor)?.lastIpcObject?.specialWorkspace?.name !== ""
     readonly property int activeWsId: Config.bar.workspaces.perMonitorWorkspaces ? (Hypr.monitorFor(screen).activeWorkspace?.id ?? 1) : Hypr.activeWsId
@@ -84,6 +85,7 @@ StyledClippingRect {
                 activeWsId: root.activeWsId
                 workspaces: workspaces
                 mask: layout
+                fullscreen: root.fullscreen
             }
         }
 

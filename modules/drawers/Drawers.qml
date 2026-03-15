@@ -24,18 +24,23 @@ Variants {
         Exclusions {
             screen: scope.modelData
             bar: bar
+            borderThickness: Config.border.thickness
         }
 
         StyledWindow {
             id: win
 
-            readonly property bool hasFullscreen: Hypr.monitorFor(screen)?.activeWorkspace?.toplevels.values.some(t => t.lastIpcObject.fullscreen === 2) ?? false
+            readonly property var monitor: Hypr.monitorFor(screen)
+            readonly property bool hasSpecialWorkspace: (monitor?.lastIpcObject?.specialWorkspace?.name.length ?? 0) > 0
+            readonly property bool hasActualFullscreen: monitor?.activeWorkspace?.toplevels.values.some(t => t.lastIpcObject.fullscreen === 2) ?? false
+            readonly property bool hasFullscreen: hasActualFullscreen && !hasSpecialWorkspace
+            property real borderThickness: hasFullscreen ? 0 : Config.border.thickness
+            readonly property real borderLayoutThickness: hasFullscreen ? 0 : Config.border.thickness
             readonly property int dragMaskPadding: {
                 if (focusGrab.active || panels.popouts.isDetached)
                     return 0;
 
-                const mon = Hypr.monitorFor(screen);
-                if (mon?.lastIpcObject?.specialWorkspace?.name || mon?.activeWorkspace?.lastIpcObject?.windows > 0)
+                if (monitor?.lastIpcObject?.specialWorkspace?.name || monitor?.activeWorkspace?.lastIpcObject?.windows > 0)
                     return 0;
 
                 const thresholds = [];
@@ -54,13 +59,22 @@ Variants {
             screen: scope.modelData
             name: "drawers"
             WlrLayershell.exclusionMode: ExclusionMode.Ignore
+            WlrLayershell.layer: hasActualFullscreen ? WlrLayer.Overlay : WlrLayer.Top
             WlrLayershell.keyboardFocus: visibilities.launcher || visibilities.session ? WlrKeyboardFocus.OnDemand : WlrKeyboardFocus.None
+
+            Behavior on borderThickness {
+                NumberAnimation {
+                    duration: Appearance.anim.durations.expressiveDefaultSpatial
+                    easing.type: Easing.BezierSpline
+                    easing.bezierCurve: Appearance.anim.curves.expressiveDefaultSpatial
+                }
+            }
 
             mask: Region {
                 x: bar.implicitWidth + win.dragMaskPadding
-                y: Config.border.thickness + win.dragMaskPadding
-                width: win.width - bar.implicitWidth - Config.border.thickness - win.dragMaskPadding * 2
-                height: win.height - Config.border.thickness * 2 - win.dragMaskPadding * 2
+                y: win.borderLayoutThickness + win.dragMaskPadding
+                width: win.width - bar.implicitWidth - win.borderLayoutThickness - win.dragMaskPadding * 2
+                height: win.height - win.borderLayoutThickness * 2 - win.dragMaskPadding * 2
                 intersection: Intersection.Xor
 
                 regions: regions.instances
@@ -80,7 +94,7 @@ Variants {
                     required property Item modelData
 
                     x: modelData.x + bar.implicitWidth
-                    y: modelData.y + Config.border.thickness
+                    y: modelData.y + win.borderLayoutThickness
                     width: modelData.width
                     height: modelData.height
                     intersection: Intersection.Subtract
@@ -124,11 +138,13 @@ Variants {
 
                 Border {
                     bar: bar
+                    borderThickness: win.borderThickness
                 }
 
                 Backgrounds {
                     panels: panels
                     bar: bar
+                    borderThickness: win.borderThickness
                 }
             }
 
@@ -152,6 +168,8 @@ Variants {
                 visibilities: visibilities
                 panels: panels
                 bar: bar
+                borderThickness: win.borderLayoutThickness
+                fullscreen: win.hasFullscreen
 
                 Panels {
                     id: panels
@@ -159,6 +177,7 @@ Variants {
                     screen: scope.modelData
                     visibilities: visibilities
                     bar: bar
+                    borderThickness: win.borderLayoutThickness
                 }
 
                 BarWrapper {
@@ -172,6 +191,7 @@ Variants {
                     popouts: panels.popouts
 
                     disabled: scope.barDisabled
+                    fullscreen: win.hasFullscreen
 
                     Component.onCompleted: Visibilities.bars.set(scope.modelData, this)
                 }
