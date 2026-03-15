@@ -71,6 +71,7 @@ JsonObject {
         property bool occupiedBg: false
         property bool showWindows: true
         property bool showWindowsOnSpecialWorkspaces: showWindows
+        property int maxWindowIcons: 0 // 0 = unlimited
         property bool activeTrail: false
         property bool perMonitorWorkspaces: true
         property string label: "  " // if empty, will show workspace name's first letter
@@ -90,6 +91,7 @@ JsonObject {
         property bool recolour: false
         property bool compact: false
         property list<var> iconSubs: []
+        property list<string> hiddenIcons: []
     }
 
     component Status: JsonObject {

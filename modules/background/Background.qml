@@ -12,7 +12,7 @@ Loader {
     active: Config.background.enabled
 
     sourceComponent: Variants {
-        model: Quickshell.screens
+        model: Screens.screens
 
         StyledWindow {
             id: win

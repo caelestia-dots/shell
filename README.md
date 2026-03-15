@@ -253,6 +253,7 @@ default, you must create it manually.
         }
     },
     "general": {
+        "logo": "caelestia",
         "apps": {
             "terminal": ["foot"],
             "audio": ["pavucontrol"],
@@ -570,7 +571,8 @@ default, you must create it manually.
         "hiddenApps": []
     },
     "lock": {
-        "recolourLogo": false
+        "recolourLogo": false,
+        "hideNotifs": false
     },
     "notifs": {
         "actionOnClick": false,

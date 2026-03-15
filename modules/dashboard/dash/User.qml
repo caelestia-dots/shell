@@ -32,6 +32,7 @@ Row {
             fill: 1
             grade: 200
             font.pointSize: Math.floor(info.implicitHeight / 2) || 1
+            visible: pfp.status !== Image.Ready
         }
 
         CachingImage {
