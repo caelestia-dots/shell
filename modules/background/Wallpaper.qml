@@ -13,6 +13,11 @@ Item {
 
     property string source: Wallpapers.current
     property Image current: one
+    property bool ready: false
+
+    Component.onCompleted: {
+        if (source) Qt.callLater(() => one.update());
+    }
 
     onSourceChanged: {
         if (!source)
@@ -23,15 +28,16 @@ Item {
             one.update();
     }
 
-    Component.onCompleted: {
-        if (source)
-            Qt.callLater(() => one.update());
+    Timer {
+        running: true
+        interval: 0
+        onTriggered: root.ready = true
     }
 
     Loader {
         anchors.fill: parent
 
-        active: !root.source
+        active: root.ready && !root.source
 
         sourceComponent: StyledRect {
             color: Colours.palette.m3surfaceContainer
