@@ -170,7 +170,7 @@ Singleton {
         property string appIcon
         property string appName
         property string image
-        property variant hints
+        property var hints
         property real expireTimeout: Config.notifs.defaultExpireTimeout
         property int urgency: NotificationUrgency.Normal
         property bool resident
