@@ -1,10 +1,6 @@
 .direnv
 /result
 /.qmlls.ini
-builds/
 build/
 .cache/
-.github/
-.vscode/
-.vscode/settings.json
 logs
