@@ -15,6 +15,7 @@ ColumnLayout {
     required property ShellScreen screen
     required property PersistentProperties visibilities
     required property BarPopouts.Wrapper popouts
+    required property bool fullscreen
     readonly property int vPadding: Appearance.padding.large
 
     function closeTray(): void {
@@ -128,6 +129,7 @@ ColumnLayout {
                 delegate: WrappedLoader {
                     sourceComponent: Workspaces {
                         screen: root.screen
+                        fullscreen: root.fullscreen
                     }
                 }
             }

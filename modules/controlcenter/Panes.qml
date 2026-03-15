@@ -5,6 +5,7 @@ import "network"
 import "audio"
 import "appearance"
 import "taskbar"
+import "notifications"
 import "launcher"
 import "dashboard"
 import qs.components

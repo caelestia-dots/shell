@@ -12,6 +12,8 @@ CustomMouseArea {
     required property PersistentProperties visibilities
     required property Panels panels
     required property Item bar
+    required property real borderThickness
+    required property bool fullscreen
 
     property point dragStart
     property bool dashboardShortcutActive
@@ -19,7 +21,7 @@ CustomMouseArea {
     property bool utilitiesShortcutActive
 
     function withinPanelHeight(panel: Item, x: real, y: real): bool {
-        const panelY = Config.border.thickness + panel.y;
+        const panelY = root.borderThickness + panel.y;
         return y >= panelY - Config.border.rounding && y <= panelY + panel.height + Config.border.rounding;
     }
 
@@ -37,21 +39,24 @@ CustomMouseArea {
     }
 
     function inTopPanel(panel: Item, x: real, y: real): bool {
-        return y < Config.border.thickness + panel.y + panel.height && withinPanelWidth(panel, x, y);
+        return y < root.borderThickness + panel.y + panel.height && withinPanelWidth(panel, x, y);
     }
 
     function inBottomPanel(panel: Item, x: real, y: real): bool {
-        return y > root.height - Config.border.thickness - panel.height - Config.border.rounding && withinPanelWidth(panel, x, y);
+        return y > root.height - root.borderThickness - panel.height - Config.border.rounding && withinPanelWidth(panel, x, y);
     }
 
     function onWheel(event: WheelEvent): void {
+        if (fullscreen)
+            return;
         if (event.x < bar.implicitWidth) {
             bar.handleWheel(event.y, event.angleDelta);
         }
     }
 
     anchors.fill: parent
-    hoverEnabled: true
+    acceptedButtons: fullscreen ? Qt.NoButton : Qt.AllButtons
+    hoverEnabled: !fullscreen
 
     onPressed: event => dragStart = Qt.point(event.x, event.y)
     onContainsMouseChanged: {
