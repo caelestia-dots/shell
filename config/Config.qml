@@ -215,7 +215,7 @@ Singleton {
                 activeLabel: bar.workspaces.activeLabel,
                 capitalisation: bar.workspaces.capitalisation,
                 specialWorkspaceIcons: bar.workspaces.specialWorkspaceIcons,
-                workspaceIcons: bar.workspaces.workspaceIcons
+                windowIcons: bar.workspaces.windowIcons
             },
             tray: {
                 background: bar.tray.background,
