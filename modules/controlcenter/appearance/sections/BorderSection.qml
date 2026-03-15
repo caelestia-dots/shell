@@ -60,6 +60,7 @@ CollapsibleSection {
             }
 
             onValueModified: newValue => {
+                newValue = Math.max(newValue, Config.border.minThickness)
                 rootPane.borderThickness = newValue;
                 rootPane.saveConfig();
             }
