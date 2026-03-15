@@ -6,6 +6,7 @@ import qs.config
 import qs.utils
 import Caelestia
 import Quickshell
+import Quickshell.Hyprland
 import Quickshell.Io
 import Quickshell.Services.Notifications
 import QtQuick
@@ -19,6 +20,22 @@ Singleton {
     property alias dnd: props.dnd
 
     property bool loaded
+
+    function hasFullscreen(): bool {
+        for (const monitor of Hypr.monitors.values) {
+            if (monitor?.activeWorkspace?.toplevels.values.some(t => t.lastIpcObject.fullscreen === 2))
+                return true;
+        }
+        return false;
+    }
+
+    function shouldShowPopup(): bool {
+        if (props.dnd || [...Visibilities.screens.values()].some(v => v.sidebar))
+            return false;
+        if (Config.notifs.fullscreen === "off" && hasFullscreen())
+            return false;
+        return true;
+    }
 
     onDndChanged: {
         if (!Config.utilities.toasts.dndChanged)
@@ -78,7 +95,7 @@ Singleton {
             notif.tracked = true;
 
             const comp = notifComp.createObject(root, {
-                popup: !props.dnd && ![...Visibilities.screens.values()].some(v => v.sidebar),
+                popup: root.shouldShowPopup(),
                 notification: notif
             });
             root.list = [comp, ...root.list];
