@@ -74,6 +74,7 @@ JsonObject {
         property int maxWindowIcons: 0 // 0 = unlimited
         property bool activeTrail: false
         property bool perMonitorWorkspaces: true
+        property bool useNumberedWorkspaces: false
         property string label: "  " // if empty, will show workspace name's first letter
         property string occupiedLabel: "󰮯"
         property string activeLabel: "󰮯"
