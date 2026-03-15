@@ -185,17 +185,16 @@ StyledRect {
                 id: progressIndicator
 
                 anchors.centerIn: appIcon
-                width: appIcon.implicitWidth + Appearance.padding.small
-                height: appIcon.implicitHeight + Appearance.padding.small
+                width: appIcon.implicitWidth + progressShape.strokeWidth * 2
+                height: appIcon.implicitHeight + progressShape.strokeWidth * 2
                 preferredRendererType: Shape.CurveRenderer
-                antialiasing: true
 
                 ShapePath {
                     id: progressShape
 
                     capStyle: ShapePath.RoundCap
                     fillColor: "transparent"
-                    strokeWidth: Appearance.padding.small
+                    strokeWidth: 2
                     strokeColor: Colours.palette.m3primary
 
                     PathAngleArc {
@@ -207,7 +206,7 @@ StyledRect {
                         centerY: progressIndicator.height / 2
 
                         startAngle: -90
-                        sweepAngle: (root.modelData.hints["value"] / 100) * 360
+                        sweepAngle: ((root.modelData.hints.value ?? 0) / 100) * 360
 
                         Behavior on sweepAngle {
                             Anim {
