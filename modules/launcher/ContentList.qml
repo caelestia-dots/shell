@@ -47,9 +47,10 @@ Item {
             name: "wallpapers"
 
             PropertyChanges {
-                root.implicitWidth: Math.max(Config.launcher.sizes.itemWidth * 1.2, wallpaperList.implicitWidth)
-                root.implicitHeight: Config.launcher.sizes.wallpaperHeight
+                root.implicitWidth: Math.max(Config.launcher.sizes.itemWidth * 1.2, wallpaperList.implicitWidth, folderBar.implicitWidth)
+                root.implicitHeight: Config.launcher.sizes.wallpaperHeight + (folderBar.active ? folderBar.implicitHeight + Appearance.spacing.normal : 0)
                 wallpaperList.active: true
+                folderBar.active: Config.launcher.folderSelection
             }
         }
     ]
@@ -88,11 +89,24 @@ Item {
     }
 
     Loader {
-        id: wallpaperList
+        id: folderBar
 
         active: false
 
         anchors.top: parent.top
+        anchors.horizontalCenter: parent.horizontalCenter
+
+        sourceComponent: FolderBar {
+        }
+    }
+
+    Loader {
+        id: wallpaperList
+
+        active: false
+
+        anchors.top: folderBar.bottom
+        anchors.topMargin: Appearance.spacing.normal
         anchors.bottom: parent.bottom
         anchors.horizontalCenter: parent.horizontalCenter
 
