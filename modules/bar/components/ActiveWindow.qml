@@ -13,6 +13,18 @@ Item {
     required property Brightness.Monitor monitor
     property color colour: Colours.palette.m3primary
 
+    readonly property string windowTitle: Hypr.activeToplevel?.title ?? qsTr("Desktop")
+
+    function getCompactName() {
+        if (!root.windowTitle || root.windowTitle === qsTr("Desktop"))
+            return qsTr("Desktop");
+        // " - " (standard hyphen), " — " (em dash), " – " (en dash)
+        const parts = root.windowTitle.split(/\s+[\-\u2013\u2014]\s+/);
+        if (parts.length > 1)
+            return parts[parts.length - 1].trim();
+        return root.windowTitle;
+    }
+
     readonly property int maxHeight: {
         const otherModules = bar.children.filter(c => c.id && c.item !== this && c.id !== "spacer");
         const otherHeight = otherModules.reduce((acc, curr) => acc + (curr.item.nonAnimHeight ?? curr.height), 0);
@@ -46,7 +58,7 @@ Item {
     TextMetrics {
         id: metrics
 
-        text: Hypr.activeToplevel?.title ?? qsTr("Desktop")
+        text: Config.bar.activeWindow.compact ? root.getCompactName() : root.windowTitle
         font.pointSize: Appearance.font.size.smaller
         font.family: Appearance.font.family.mono
         elide: Qt.ElideRight

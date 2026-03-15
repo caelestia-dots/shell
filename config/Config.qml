@@ -27,53 +27,13 @@ Singleton {
     property alias services: adapter.services
     property alias paths: adapter.paths
 
+    property bool recentlySaved: false
+
     // Public save function - call this to persist config changes
     function save(): void {
         saveTimer.restart();
         recentlySaved = true;
         recentSaveCooldown.restart();
-    }
-
-    property bool recentlySaved: false
-
-    ElapsedTimer {
-        id: timer
-    }
-
-    Timer {
-        id: saveTimer
-
-        interval: 500
-        onTriggered: {
-            timer.restart();
-            try {
-                // Parse current config to preserve structure and comments if possible
-                let config = {};
-                try {
-                    config = JSON.parse(fileView.text());
-                } catch (e) {
-                    // If parsing fails, start with empty object
-                    config = {};
-                }
-
-                // Update config with current values
-                config = serializeConfig();
-
-                // Save to file with pretty printing
-                fileView.setText(JSON.stringify(config, null, 2));
-            } catch (e) {
-                Toaster.toast(qsTr("Failed to serialize config"), e.message, "settings_alert", Toast.Error);
-            }
-        }
-    }
-
-    Timer {
-        id: recentSaveCooldown
-
-        interval: 2000
-        onTriggered: {
-            recentlySaved = false;
-        }
     }
 
     // Helper function to serialize the config object
@@ -139,6 +99,7 @@ Singleton {
     function serializeGeneral(): var {
         return {
             logo: general.logo,
+            excludedScreens: general.excludedScreens,
             apps: {
                 terminal: general.apps.terminal,
                 audio: general.apps.audio,
@@ -208,19 +169,26 @@ Singleton {
                 occupiedBg: bar.workspaces.occupiedBg,
                 showWindows: bar.workspaces.showWindows,
                 showWindowsOnSpecialWorkspaces: bar.workspaces.showWindowsOnSpecialWorkspaces,
+                maxWindowIcons: bar.workspaces.maxWindowIcons,
                 activeTrail: bar.workspaces.activeTrail,
                 perMonitorWorkspaces: bar.workspaces.perMonitorWorkspaces,
                 label: bar.workspaces.label,
                 occupiedLabel: bar.workspaces.occupiedLabel,
                 activeLabel: bar.workspaces.activeLabel,
                 capitalisation: bar.workspaces.capitalisation,
-                specialWorkspaceIcons: bar.workspaces.specialWorkspaceIcons
+                specialWorkspaceIcons: bar.workspaces.specialWorkspaceIcons,
+                windowIcons: bar.workspaces.windowIcons
+            },
+            activeWindow: {
+                compact: bar.activeWindow.compact,
+                inverted: bar.activeWindow.inverted
             },
             tray: {
                 background: bar.tray.background,
                 recolour: bar.tray.recolour,
                 compact: bar.tray.compact,
-                iconSubs: bar.tray.iconSubs
+                iconSubs: bar.tray.iconSubs,
+                hiddenIcons: bar.tray.hiddenIcons
             },
             status: {
                 showAudio: bar.status.showAudio,
@@ -234,13 +202,6 @@ Singleton {
             },
             clock: {
                 showIcon: bar.clock.showIcon
-            },
-            sizes: {
-                innerWidth: bar.sizes.innerWidth,
-                windowPreviewSize: bar.sizes.windowPreviewSize,
-                trayMenuWidth: bar.sizes.trayMenuWidth,
-                batteryWidth: bar.sizes.batteryWidth,
-                networkWidth: bar.sizes.networkWidth
             },
             entries: bar.entries,
             excludedScreens: bar.excludedScreens
@@ -268,32 +229,12 @@ Singleton {
                 showMemory: dashboard.performance.showMemory,
                 showStorage: dashboard.performance.showStorage,
                 showNetwork: dashboard.performance.showNetwork
-            },
-            sizes: {
-                tabIndicatorHeight: dashboard.sizes.tabIndicatorHeight,
-                tabIndicatorSpacing: dashboard.sizes.tabIndicatorSpacing,
-                infoWidth: dashboard.sizes.infoWidth,
-                infoIconSize: dashboard.sizes.infoIconSize,
-                dateTimeWidth: dashboard.sizes.dateTimeWidth,
-                mediaWidth: dashboard.sizes.mediaWidth,
-                mediaProgressSweep: dashboard.sizes.mediaProgressSweep,
-                mediaProgressThickness: dashboard.sizes.mediaProgressThickness,
-                resourceProgessThickness: dashboard.sizes.resourceProgessThickness,
-                weatherWidth: dashboard.sizes.weatherWidth,
-                mediaCoverArtSize: dashboard.sizes.mediaCoverArtSize,
-                mediaVisualiserSize: dashboard.sizes.mediaVisualiserSize,
-                resourceSize: dashboard.sizes.resourceSize
             }
         };
     }
 
     function serializeControlCenter(): var {
-        return {
-            sizes: {
-                heightMult: controlCenter.sizes.heightMult,
-                ratio: controlCenter.sizes.ratio
-            }
-        };
+        return {};
     }
 
     function serializeLauncher(): var {
@@ -316,12 +257,6 @@ Singleton {
                 variants: launcher.useFuzzy.variants,
                 wallpapers: launcher.useFuzzy.wallpapers
             },
-            sizes: {
-                itemWidth: launcher.sizes.itemWidth,
-                itemHeight: launcher.sizes.itemHeight,
-                wallpaperWidth: launcher.sizes.wallpaperWidth,
-                wallpaperHeight: launcher.sizes.wallpaperHeight
-            },
             actions: launcher.actions
         };
     }
@@ -333,12 +268,7 @@ Singleton {
             clearThreshold: notifs.clearThreshold,
             expandThreshold: notifs.expandThreshold,
             actionOnClick: notifs.actionOnClick,
-            groupPreviewNum: notifs.groupPreviewNum,
-            sizes: {
-                width: notifs.sizes.width,
-                image: notifs.sizes.image,
-                badge: notifs.sizes.badge
-            }
+            groupPreviewNum: notifs.groupPreviewNum
         };
     }
 
@@ -347,11 +277,7 @@ Singleton {
             enabled: osd.enabled,
             hideDelay: osd.hideDelay,
             enableBrightness: osd.enableBrightness,
-            enableMicrophone: osd.enableMicrophone,
-            sizes: {
-                sliderWidth: osd.sizes.sliderWidth,
-                sliderHeight: osd.sizes.sliderHeight
-            }
+            enableMicrophone: osd.enableMicrophone
         };
     }
 
@@ -371,20 +297,12 @@ Singleton {
                 shutdown: session.commands.shutdown,
                 hibernate: session.commands.hibernate,
                 reboot: session.commands.reboot
-            },
-            sizes: {
-                button: session.sizes.button
             }
         };
     }
 
     function serializeWinfo(): var {
-        return {
-            sizes: {
-                heightMult: winfo.sizes.heightMult,
-                detailsWidth: winfo.sizes.detailsWidth
-            }
-        };
+        return {};
     }
 
     function serializeLock(): var {
@@ -392,11 +310,7 @@ Singleton {
             recolourLogo: lock.recolourLogo,
             enableFprint: lock.enableFprint,
             maxFprintTries: lock.maxFprintTries,
-            sizes: {
-                heightMult: lock.sizes.heightMult,
-                ratio: lock.sizes.ratio,
-                centerWidth: lock.sizes.centerWidth
-            }
+            hideNotifs: lock.hideNotifs
         };
     }
 
@@ -404,10 +318,6 @@ Singleton {
         return {
             enabled: utilities.enabled,
             maxToasts: utilities.maxToasts,
-            sizes: {
-                width: utilities.sizes.width,
-                toastWidth: utilities.sizes.toastWidth
-            },
             toasts: {
                 configLoaded: utilities.toasts.configLoaded,
                 chargingChanged: utilities.toasts.chargingChanged,
@@ -424,17 +334,15 @@ Singleton {
             vpn: {
                 enabled: utilities.vpn.enabled,
                 provider: utilities.vpn.provider
-            }
+            },
+            quickToggles: utilities.quickToggles
         };
     }
 
     function serializeSidebar(): var {
         return {
             enabled: sidebar.enabled,
-            dragThreshold: sidebar.dragThreshold,
-            sizes: {
-                width: sidebar.sizes.width
-            }
+            dragThreshold: sidebar.dragThreshold
         };
     }
 
@@ -468,6 +376,46 @@ Singleton {
         };
     }
 
+    ElapsedTimer {
+        id: timer
+    }
+
+    Timer {
+        id: saveTimer
+
+        interval: 500
+        onTriggered: {
+            timer.restart();
+            try {
+                // Parse current config to preserve structure and comments if possible
+                let config = {};
+                try {
+                    config = JSON.parse(fileView.text());
+                } catch (e) {
+                    // If parsing fails, start with empty object
+                    config = {};
+                }
+
+                // Update config with current values
+                config = root.serializeConfig();
+
+                // Save to file with pretty printing
+                fileView.setText(JSON.stringify(config, null, 2));
+            } catch (e) {
+                Toaster.toast(qsTr("Failed to serialize config"), e.message, "settings_alert", Toast.Error);
+            }
+        }
+    }
+
+    Timer {
+        id: recentSaveCooldown
+
+        interval: 2000
+        onTriggered: {
+            root.recentlySaved = false;
+        }
+    }
+
     FileView {
         id: fileView
 
@@ -475,7 +423,7 @@ Singleton {
         watchChanges: true
         onFileChanged: {
             // Prevent reload loop - don't reload if we just saved
-            if (!recentlySaved) {
+            if (!root.recentlySaved) {
                 timer.restart();
                 reload();
             } else {
@@ -488,9 +436,9 @@ Singleton {
                 JSON.parse(text());
                 const elapsed = timer.elapsedMs();
                 // Only show toast for external changes (not our own saves) and when elapsed time is meaningful
-                if (adapter.utilities.toasts.configLoaded && !recentlySaved && elapsed > 0) {
+                if (adapter.utilities.toasts.configLoaded && !root.recentlySaved && elapsed > 0) {
                     Toaster.toast(qsTr("Config loaded"), qsTr("Config loaded in %1ms").arg(elapsed), "rule_settings");
-                } else if (adapter.utilities.toasts.configLoaded && recentlySaved && elapsed > 0) {
+                } else if (adapter.utilities.toasts.configLoaded && root.recentlySaved && elapsed > 0) {
                     Toaster.toast(qsTr("Config saved"), qsTr("Config reloaded in %1ms").arg(elapsed), "rule_settings");
                 }
             } catch (e) {

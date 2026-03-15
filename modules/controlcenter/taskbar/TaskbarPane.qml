@@ -19,6 +19,8 @@ Item {
 
     required property Session session
 
+    property bool activeWindowCompact: Config.bar.activeWindow.compact ?? false
+    property bool activeWindowInverted: Config.bar.activeWindow.inverted ?? false
     property bool clockShowIcon: Config.bar.clock.showIcon ?? true
     property bool persistent: Config.bar.persistent ?? true
     property bool showOnHover: Config.bar.showOnHover ?? true
@@ -38,6 +40,7 @@ Item {
     property bool workspacesActiveIndicator: Config.bar.workspaces.activeIndicator ?? true
     property bool workspacesOccupiedBg: Config.bar.workspaces.occupiedBg ?? false
     property bool workspacesShowWindows: Config.bar.workspaces.showWindows ?? false
+    property int workspacesMaxWindowIcons: Config.bar.workspaces.maxWindowIcons ?? 0
     property bool workspacesPerMonitor: Config.bar.workspaces.perMonitorWorkspaces ?? true
     property bool scrollWorkspaces: Config.bar.scrollActions.workspaces ?? true
     property bool scrollVolume: Config.bar.scrollActions.volume ?? true
@@ -45,6 +48,8 @@ Item {
     property bool popoutActiveWindow: Config.bar.popouts.activeWindow ?? true
     property bool popoutTray: Config.bar.popouts.tray ?? true
     property bool popoutStatusIcons: Config.bar.popouts.statusIcons ?? true
+    property list<string> monitorNames: Hypr.monitorNames()
+    property list<string> excludedScreens: Config.bar.excludedScreens ?? []
 
     anchors.fill: parent
 
@@ -62,6 +67,8 @@ Item {
     }
 
     function saveConfig(entryIndex, entryEnabled) {
+        Config.bar.activeWindow.compact = root.activeWindowCompact;
+        Config.bar.activeWindow.inverted = root.activeWindowInverted;
         Config.bar.clock.showIcon = root.clockShowIcon;
         Config.bar.persistent = root.persistent;
         Config.bar.showOnHover = root.showOnHover;
@@ -81,6 +88,7 @@ Item {
         Config.bar.workspaces.activeIndicator = root.workspacesActiveIndicator;
         Config.bar.workspaces.occupiedBg = root.workspacesOccupiedBg;
         Config.bar.workspaces.showWindows = root.workspacesShowWindows;
+        Config.bar.workspaces.maxWindowIcons = root.workspacesMaxWindowIcons;
         Config.bar.workspaces.perMonitorWorkspaces = root.workspacesPerMonitor;
         Config.bar.scrollActions.workspaces = root.scrollWorkspaces;
         Config.bar.scrollActions.volume = root.scrollVolume;
@@ -88,6 +96,7 @@ Item {
         Config.bar.popouts.activeWindow = root.popoutActiveWindow;
         Config.bar.popouts.tray = root.popoutTray;
         Config.bar.popouts.statusIcons = root.popoutStatusIcons;
+        Config.bar.excludedScreens = root.excludedScreens;
 
         const entries = [];
         for (let i = 0; i < entriesModel.count; i++) {
@@ -404,6 +413,41 @@ Item {
 
                             StyledRect {
                                 Layout.fillWidth: true
+                                implicitHeight: workspacesMaxWindowIconsRow.implicitHeight + Appearance.padding.large * 2
+                                radius: Appearance.rounding.normal
+                                color: Colours.layer(Colours.palette.m3surfaceContainer, 2)
+
+                                Behavior on implicitHeight {
+                                    Anim {}
+                                }
+
+                                RowLayout {
+                                    id: workspacesMaxWindowIconsRow
+                                    anchors.left: parent.left
+                                    anchors.right: parent.right
+                                    anchors.verticalCenter: parent.verticalCenter
+                                    anchors.margins: Appearance.padding.large
+                                    spacing: Appearance.spacing.normal
+
+                                    StyledText {
+                                        Layout.fillWidth: true
+                                        text: qsTr("Max window icons")
+                                    }
+
+                                    CustomSpinBox {
+                                        min: 0
+                                        max: 20
+                                        value: root.workspacesMaxWindowIcons
+                                        onValueModified: value => {
+                                            root.workspacesMaxWindowIcons = value;
+                                            root.saveConfig();
+                                        }
+                                    }
+                                }
+                            }
+
+                            StyledRect {
+                                Layout.fillWidth: true
                                 implicitHeight: workspacesPerMonitorRow.implicitHeight + Appearance.padding.large * 2
                                 radius: Appearance.rounding.normal
                                 color: Colours.layer(Colours.palette.m3surfaceContainer, 2)
@@ -555,6 +599,34 @@ Item {
                                 }
                             }
                         }
+
+                        SectionContainer {
+                            Layout.fillWidth: true
+                            alignTop: true
+
+                            StyledText {
+                                text: qsTr("Active window")
+                                font.pointSize: Appearance.font.size.normal
+                            }
+
+                            SwitchRow {
+                                label: qsTr("Compact")
+                                checked: root.activeWindowCompact
+                                onToggled: checked => {
+                                    root.activeWindowCompact = checked;
+                                    root.saveConfig();
+                                }
+                            }
+
+                            SwitchRow {
+                                label: qsTr("Inverted")
+                                checked: root.activeWindowInverted
+                                onToggled: checked => {
+                                    root.activeWindowInverted = checked;
+                                    root.saveConfig();
+                                }
+                            }
+                        }
                     }
 
                     ColumnLayout {
@@ -638,6 +710,43 @@ Item {
                                         }
                                     }
                                 ]
+                            }
+                        }
+
+                        SectionContainer {
+                            Layout.fillWidth: true
+                            alignTop: true
+
+                            StyledText {
+                                text: qsTr("Monitors")
+                                font.pointSize: Appearance.font.size.normal
+                            }
+
+                            ConnectedButtonGroup {
+                                rootItem: root
+                                // max 3 options per line
+                                rows: Math.ceil(root.monitorNames.length / 3)
+
+                                options: root.monitorNames.map(e => ({
+                                            label: qsTr(e),
+                                            propertyName: `monitor${e}`,
+                                            onToggled: function (_) {
+                                                // if the given monitor is in the excluded list, it should be added back
+                                                let addedBack = excludedScreens.includes(e);
+                                                if (addedBack) {
+                                                    const index = excludedScreens.indexOf(e);
+                                                    if (index !== -1) {
+                                                        excludedScreens.splice(index, 1);
+                                                    }
+                                                } else {
+                                                    if (!excludedScreens.includes(e)) {
+                                                        excludedScreens.push(e);
+                                                    }
+                                                }
+                                                root.saveConfig();
+                                            },
+                                            state: !Strings.testRegexList(root.excludedScreens, e)
+                                        }))
                             }
                         }
                     }
