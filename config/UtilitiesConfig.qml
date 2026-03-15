@@ -61,10 +61,6 @@ JsonObject {
         {
             id: "vpn",
             enabled: false
-        },
-        {
-            id: "nightLight",
-            enabled: false
         }
     ]
 }
