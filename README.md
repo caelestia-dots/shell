@@ -611,7 +611,12 @@ default, you must create it manually.
         "useFahrenheitPerformance": false,
         "useTwelveHourClock": false,
         "smartScheme": true,
-        "visualiserBars": 45
+        "visualiserBars": 45,
+        "sunsetService": {
+            "manualEnabled": false,
+            "temperature": 4500,
+            "preferredBackend": ""
+        }
     },
     "session": {
         "dragThreshold": 30,
