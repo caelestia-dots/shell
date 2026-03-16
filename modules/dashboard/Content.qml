@@ -138,6 +138,13 @@ Item {
                             const arr = view.paneLoaders.slice();
                             arr[index] = paneLoader;
                             view.paneLoaders = arr;
+                            active = Qt.binding(() => {
+                                if (index === view.currentIndex)
+                                    return true;
+                                const vx = Math.floor(view.visibleArea.xPosition * view.contentWidth);
+                                const vex = Math.floor(vx + view.visibleArea.widthRatio * view.contentWidth);
+                                return (vx >= x && vx <= x + implicitWidth) || (vex >= x && vex <= x + implicitWidth);
+                            })
                         }
                     }
                 }
