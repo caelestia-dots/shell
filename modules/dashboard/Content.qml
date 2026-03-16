@@ -80,8 +80,9 @@ Item {
         Flickable {
             id: view
 
+            property var paneLoaders: []
             readonly property int currentIndex: root.state.currentTab
-            readonly property Item currentItem: row.children[currentIndex]
+            readonly property Item currentItem: paneLoaders[currentIndex]
 
             anchors.fill: parent
 
@@ -133,13 +134,11 @@ Item {
 
                         sourceComponent: modelData.component
 
-                        Component.onCompleted: active = Qt.binding(() => {
-                            if (index === view.currentIndex)
-                                return true;
-                            const vx = Math.floor(view.visibleArea.xPosition * view.contentWidth);
-                            const vex = Math.floor(vx + view.visibleArea.widthRatio * view.contentWidth);
-                            return (vx >= x && vx <= x + implicitWidth) || (vex >= x && vex <= x + implicitWidth);
-                        })
+                        Component.onCompleted: {
+                            const arr = view.paneLoaders.slice();
+                            arr[index] = paneLoader;
+                            view.paneLoaders = arr;
+                        }
                     }
                 }
             }
