@@ -6,6 +6,7 @@ import "audio"
 import "appearance"
 import "taskbar"
 import "launcher"
+import "dashboard"
 import qs.components
 import qs.services
 import qs.config

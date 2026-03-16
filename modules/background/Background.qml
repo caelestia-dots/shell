@@ -16,7 +16,7 @@ Loader {
     property var lock
 
     sourceComponent: Variants {
-        model: Quickshell.screens
+        model: Screens.screens
 
         StyledWindow {
             id: win
@@ -26,8 +26,9 @@ Loader {
             screen: modelData
             name: "background"
             WlrLayershell.exclusionMode: ExclusionMode.Ignore
-            WlrLayershell.layer: WlrLayer.Background
-            color: "black"
+            WlrLayershell.layer: Config.background.wallpaperEnabled ? WlrLayer.Background : WlrLayer.Bottom
+            color: Config.background.wallpaperEnabled ? "black" : "transparent"
+            surfaceFormat.opaque: false
 
             anchors.top: true
             anchors.bottom: true
@@ -39,10 +40,16 @@ Loader {
 
                 anchors.fill: parent
 
-                Wallpaper {
+                Loader {
                     id: wallpaper
-                    screen: win.modelData
-                    sessionLock: backgroundLoader.lock ? backgroundLoader.lock.lock : null
+
+                    anchors.fill: parent
+                    active: Config.background.wallpaperEnabled
+
+                    sourceComponent: Wallpaper {
+                        screen: win.modelData
+                        sessionLock: backgroundLoader.lock ? backgroundLoader.lock.lock : null
+                    }
                 }
 
                 Visualiser {

@@ -51,7 +51,7 @@ ColumnLayout {
             Layout.fillHeight: true
             active: !iconLoader.active
 
-            sourceComponent: OsLogo {}
+            sourceComponent: SysInfo.isDefaultLogo ? caelestiaLogo : distroIcon
         }
     }
 
@@ -66,7 +66,7 @@ ColumnLayout {
             Layout.fillHeight: true
             active: root.width > 320
 
-            sourceComponent: OsLogo {}
+            sourceComponent: SysInfo.isDefaultLogo ? caelestiaLogo : distroIcon
         }
 
         ColumnLayout {
@@ -142,15 +142,27 @@ ColumnLayout {
         }
     }
 
-    component WrappedLoader: Loader {
-        visible: active
+    Component {
+        id: caelestiaLogo
+
+        Logo {
+            width: height
+        }
     }
 
-    component OsLogo: ColouredIcon {
-        source: SysInfo.osLogo
-        implicitSize: height
-        colour: Colours.palette.m3primary
-        layer.enabled: Config.lock.recolourLogo || SysInfo.isDefaultLogo
+    Component {
+        id: distroIcon
+
+        ColouredIcon {
+            source: SysInfo.osLogo
+            implicitSize: height
+            colour: Colours.palette.m3primary
+            layer.enabled: Config.lock.recolourLogo
+        }
+    }
+
+    component WrappedLoader: Loader {
+        visible: active
     }
 
     component FetchText: MonoText {

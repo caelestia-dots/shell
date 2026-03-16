@@ -1,14 +1,12 @@
 pragma ComponentBehavior: Bound
 
 import qs.components
-import qs.components.effects
 import qs.components.controls
 import qs.services
 import qs.utils
 import qs.config
 import Caelestia.Services
 import Quickshell
-import Quickshell.Widgets
 import Quickshell.Services.Mpris
 import QtQuick
 import QtQuick.Layouts
@@ -142,7 +140,7 @@ Item {
 
             anchors.fill: parent
 
-            source: Players.active?.trackArtUrl ?? ""
+            source: Players.active?.trackArtUrl ?? "" // qmllint disable incompatible-type
             asynchronous: true
             fillMode: Image.PreserveAspectCrop
             sourceSize.width: width
@@ -324,7 +322,7 @@ Item {
 
                 disabled: !Players.list.length
                 active: menuItems.find(m => m.modelData === Players.active) ?? menuItems[0] ?? null
-                menu.onItemSelected: item => Players.manualActive = item.modelData
+                menu.onItemSelected: item => Players.manualActive = (item as PlayerItem).modelData
 
                 menuItems: playerList.instances
                 fallbackIcon: "music_off"
@@ -341,13 +339,7 @@ Item {
 
                     model: Players.list
 
-                    MenuItem {
-                        required property MprisPlayer modelData
-
-                        icon: modelData === Players.active ? "check" : ""
-                        text: Players.getIdentity(modelData)
-                        activeIcon: "animated_images"
-                    }
+                    PlayerItem {}
                 }
             }
 
@@ -380,11 +372,19 @@ Item {
             height: visualiser.height * 0.75
 
             playing: Players.active?.isPlaying ?? false
-            speed: Audio.beatTracker.bpm / 300
+            speed: Audio.beatTracker.bpm / Appearance.anim.mediaGifSpeedAdjustment // qmllint disable unresolved-type
             source: Paths.absolutePath(Config.paths.mediaGif)
             asynchronous: true
             fillMode: AnimatedImage.PreserveAspectFit
         }
+    }
+
+    component PlayerItem: MenuItem {
+        required property MprisPlayer modelData
+
+        icon: modelData === Players.active ? "check" : ""
+        text: Players.getIdentity(modelData)
+        activeIcon: "animated_images"
     }
 
     component PlayerControl: IconButton {

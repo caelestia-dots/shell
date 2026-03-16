@@ -162,6 +162,39 @@ void AppDb::setEntries(const QObjectList& entries) {
     m_timer->start();
 }
 
+QStringList AppDb::favouriteApps() const {
+    return m_favouriteApps;
+}
+
+void AppDb::setFavouriteApps(const QStringList& favApps) {
+    if (m_favouriteApps == favApps) {
+        return;
+    }
+
+    m_favouriteApps = favApps;
+    emit favouriteAppsChanged();
+    m_favouriteAppsRegex.clear();
+    m_favouriteAppsRegex.reserve(m_favouriteApps.size());
+    for (const QString& item : std::as_const(m_favouriteApps)) {
+        const QRegularExpression re(regexifyString(item));
+        if (re.isValid()) {
+            m_favouriteAppsRegex << re;
+        } else {
+            qWarning() << "AppDb::setFavouriteApps: Regular expression is not valid: " << re.pattern();
+        }
+    }
+
+    emit appsChanged();
+}
+
+QString AppDb::regexifyString(const QString& original) const {
+    if (original.startsWith('^') && original.endsWith('$'))
+        return original;
+
+    const QString escaped = QRegularExpression::escape(original);
+    return QStringLiteral("^%1$").arg(escaped);
+}
+
 QQmlListProperty<AppEntry> AppDb::apps() {
     return QQmlListProperty<AppEntry>(this, &getSortedApps());
 }
@@ -179,10 +212,9 @@ void AppDb::incrementFrequency(const QString& id) {
     auto* app = m_apps.value(id);
     if (app) {
         const auto before = getSortedApps();
-
         app->incrementFrequency();
-
-        if (before != getSortedApps()) {
+        getSortedApps();
+        if (before != m_sortedApps) {
             emit appsChanged();
         }
     } else {
@@ -192,13 +224,34 @@ void AppDb::incrementFrequency(const QString& id) {
 
 QList<AppEntry*>& AppDb::getSortedApps() const {
     m_sortedApps = m_apps.values();
-    std::sort(m_sortedApps.begin(), m_sortedApps.end(), [](AppEntry* a, AppEntry* b) {
-        if (a->frequency() != b->frequency()) {
+
+    // Pre-compute favourite status to avoid repeated regex matching during sort
+    QSet<QString> favSet;
+    favSet.reserve(m_sortedApps.size());
+    for (const auto* app : std::as_const(m_sortedApps)) {
+        if (isFavourite(app))
+            favSet.insert(app->id());
+    }
+
+    std::sort(m_sortedApps.begin(), m_sortedApps.end(), [&favSet](AppEntry* a, AppEntry* b) {
+        const bool aIsFav = favSet.contains(a->id());
+        const bool bIsFav = favSet.contains(b->id());
+        if (aIsFav != bIsFav)
+            return aIsFav;
+        if (a->frequency() != b->frequency())
             return a->frequency() > b->frequency();
-        }
         return a->name().localeAwareCompare(b->name()) < 0;
     });
     return m_sortedApps;
+}
+
+bool AppDb::isFavourite(const AppEntry* app) const {
+    for (const QRegularExpression& re : m_favouriteAppsRegex) {
+        if (re.match(app->id()).hasMatch()) {
+            return true;
+        }
+    }
+    return false;
 }
 
 quint32 AppDb::getFrequency(const QString& id) const {
@@ -222,7 +275,8 @@ void AppDb::updateAppFrequencies() {
         app->setFrequency(getFrequency(app->id()));
     }
 
-    if (before != getSortedApps()) {
+    getSortedApps();
+    if (before != m_sortedApps) {
         emit appsChanged();
     }
 }

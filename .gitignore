@@ -3,3 +3,4 @@
 /.qmlls.ini
 build/
 .cache/
+logs
