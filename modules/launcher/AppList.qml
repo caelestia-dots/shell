@@ -52,7 +52,7 @@ StyledListView {
         const text = search.text;
         const prefix = Config.launcher.actionPrefix;
         if (text.startsWith(prefix)) {
-            for (const action of ["calc", "scheme", "variant"])
+            for (const action of ["calc", "scheme", "variant", "clipboard"])
                 if (text.startsWith(`${prefix}${action} `))
                     return action;
 
@@ -65,6 +65,8 @@ StyledListView {
     onStateChanged: {
         if (state === "scheme" || state === "variant")
             Schemes.reload();
+        if (state === "clipboard")
+            Clipboard.reload();
     }
 
     states: [
@@ -106,6 +108,14 @@ StyledListView {
             PropertyChanges {
                 model.values: M3Variants.query(search.text)
                 root.delegate: variantItem
+            }
+        },
+        State {
+            name: "clipboard"
+
+            PropertyChanges {
+                model.values: Clipboard.query(search.text)
+                root.delegate: clipboardItem
             }
         }
     ]
@@ -251,6 +261,14 @@ StyledListView {
         id: variantItem
 
         VariantItem {
+            list: root
+        }
+    }
+
+    Component {
+        id: clipboardItem
+
+        ClipboardItem {
             list: root
         }
     }

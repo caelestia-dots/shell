@@ -1,3 +1,4 @@
+import "launcher/services"
 import qs.components.misc
 import qs.modules.controlcenter
 import qs.services
@@ -89,6 +90,18 @@ Scope {
                 return;
             const visibilities = Visibilities.getForActive();
             visibilities.utilities = !visibilities.utilities;
+        }
+    }
+
+    CustomShortcut {
+        name: "clipboardLauncher"
+        description: "Open launcher in clipboard mode"
+        onPressed: {
+            if (root.hasFullscreen)
+                return;
+            const visibilities = Visibilities.getForActive();
+            Clipboard.pendingOpen = true
+            visibilities.launcher = true
         }
     }
 

@@ -188,4 +188,23 @@ Item {
             }
         }
     }
+
+    Connections {
+        target: Clipboard
+
+        function onPendingOpenChanged(): void {
+            if (Clipboard.pendingOpen) {
+                root.visibilities.launcher = true
+                search.text = Config.launcher.actionPrefix + "clipboard "
+                Clipboard.pendingOpen = false
+            }
+        }
+    }
+
+    Component.onCompleted: {
+        if (Clipboard.pendingOpen) {
+            search.text = Config.launcher.actionPrefix + "clipboard "
+            Clipboard.pendingOpen = false
+        }
+    }
 }
