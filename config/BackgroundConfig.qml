@@ -5,6 +5,7 @@ JsonObject {
     property bool wallpaperEnabled: true
     property DesktopClock desktopClock: DesktopClock {}
     property Visualiser visualiser: Visualiser {}
+    property Wallpaper wallpaper: Wallpaper {}
 
     component DesktopClock: JsonObject {
         property bool enabled: false
@@ -33,5 +34,19 @@ JsonObject {
         property bool blur: false
         property real rounding: 1
         property real spacing: 1
+    }
+
+    component Wallpaper: JsonObject {
+        property WallpaperAudio audio: WallpaperAudio {}
+        property WallpaperVideo video: WallpaperVideo {}
+    }
+
+    component WallpaperAudio: JsonObject {
+        property bool muteAudio: true
+        property real volume: 1.0
+    }
+
+    component WallpaperVideo: JsonObject {
+        property bool autoPause: false
     }
 }

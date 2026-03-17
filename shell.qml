@@ -10,7 +10,9 @@ import "modules/lock"
 import Quickshell
 
 ShellRoot {
-    Background {}
+    Background {
+        lock: lock
+    }
     Drawers {}
     AreaPicker {}
     Lock {

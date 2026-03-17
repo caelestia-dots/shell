@@ -78,6 +78,8 @@ public:
     enum Filter {
         NoFilter,
         Images,
+        Videos,
+        ImagesAndVideos,
         Files,
         Dirs
     };

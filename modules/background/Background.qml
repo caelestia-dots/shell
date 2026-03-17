@@ -9,7 +9,11 @@ import Quickshell.Wayland
 import QtQuick
 
 Loader {
+    id: backgroundLoader
+
     active: Config.background.enabled
+
+    property var lock
 
     sourceComponent: Variants {
         model: Screens.screens
@@ -42,7 +46,10 @@ Loader {
                     anchors.fill: parent
                     active: Config.background.wallpaperEnabled
 
-                    sourceComponent: Wallpaper {}
+                    sourceComponent: Wallpaper {
+                        screen: win.modelData
+                        sessionLock: backgroundLoader.lock ? backgroundLoader.lock.lock : null
+                    }
                 }
 
                 Visualiser {
