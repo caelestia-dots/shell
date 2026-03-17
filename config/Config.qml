@@ -213,7 +213,7 @@ Singleton {
         return {
             thickness: border.thinkness,
             rounding: border.rounding,
-            borderHovers: border.borderHovers
+            borderHover: border.borderHover
         };
     }
 

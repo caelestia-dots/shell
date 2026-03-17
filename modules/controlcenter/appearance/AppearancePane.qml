@@ -36,7 +36,7 @@ Item {
     property real transparencyLayers: Config.appearance.transparency.layers ?? 0.4
     property real borderRounding: Config.border.rounding ?? 1
     property real borderThickness: Config.border.thinkness ?? 1
-    property real borderHovers: Config.border.borderHovers ?? true
+    property real borderHover: Config.border.borderHover ?? true
 
     property bool desktopClockEnabled: Config.background.desktopClock.enabled ?? false
     property real desktopClockScale: Config.background.desktopClock.scale ?? 1
@@ -94,7 +94,7 @@ Item {
 
         Config.border.rounding = root.borderRounding;
         Config.border.thinkness = root.borderThickness;
-        Config.border.borderHovers = root.borderHovers;
+        Config.border.borderHover = root.borderHover;
 
         Config.save();
     }
