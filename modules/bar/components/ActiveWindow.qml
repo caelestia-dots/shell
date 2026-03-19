@@ -13,6 +13,19 @@ Item {
     required property Brightness.Monitor monitor
     property color colour: Colours.palette.m3primary
 
+    readonly property string windowTitle: {
+        const title = Hypr.activeToplevel?.title;
+        if (!title)
+            return qsTr("Desktop");
+        if (Config.bar.activeWindow.compact) {
+            // " - " (standard hyphen), " — " (em dash), " – " (en dash)
+            const parts = root.windowTitle.split(/\s+[\-\u2013\u2014]\s+/);
+            if (parts.length > 1)
+                return parts[parts.length - 1].trim();
+        }
+        return title;
+    }
+
     readonly property int maxHeight: {
         const otherModules = bar.children.filter(c => c.id && c.item !== this && c.id !== "spacer");
         const otherHeight = otherModules.reduce((acc, curr) => acc + (curr.item.nonAnimHeight ?? curr.height), 0);
@@ -24,6 +37,31 @@ Item {
     clip: true
     implicitWidth: Math.max(icon.implicitWidth, current.implicitHeight)
     implicitHeight: icon.implicitHeight + current.implicitWidth + current.anchors.topMargin
+
+    Loader {
+        anchors.fill: parent
+        active: !Config.bar.activeWindow.showOnHover
+
+        sourceComponent: MouseArea {
+            cursorShape: Qt.PointingHandCursor
+            hoverEnabled: true
+            onPositionChanged: {
+                const popouts = root.bar.popouts;
+                if (popouts.hasCurrent && popouts.currentName !== "activewindow")
+                    popouts.hasCurrent = false;
+            }
+            onClicked: {
+                const popouts = root.bar.popouts;
+                if (popouts.hasCurrent) {
+                    popouts.hasCurrent = false;
+                } else {
+                    popouts.currentName = "activewindow";
+                    popouts.currentCenter = root.mapToItem(root.bar, 0, root.implicitHeight / 2).y;
+                    popouts.hasCurrent = true;
+                }
+            }
+        }
+    }
 
     MaterialIcon {
         id: icon
@@ -46,7 +84,7 @@ Item {
     TextMetrics {
         id: metrics
 
-        text: Hypr.activeToplevel?.title ?? qsTr("Desktop")
+        text: root.windowTitle
         font.pointSize: Appearance.font.size.smaller
         font.family: Appearance.font.family.mono
         elide: Qt.ElideRight
@@ -81,7 +119,7 @@ Item {
 
         transform: [
             Translate {
-                x: Config.bar.activeWindow.inverted ? -implicitWidth + text.implicitHeight : 0
+                x: Config.bar.activeWindow.inverted ? -text.implicitWidth + text.implicitHeight : 0
             },
             Rotation {
                 angle: Config.bar.activeWindow.inverted ? 270 : 90

@@ -13,7 +13,7 @@ import QtQuick
 import QtQuick.Effects
 
 Variants {
-    model: Quickshell.screens
+    model: Screens.screens
 
     Scope {
         id: scope

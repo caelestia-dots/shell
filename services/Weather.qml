@@ -54,18 +54,35 @@ Singleton {
             return;
         }
 
-        const [lat, lon] = coords.split(",");
-        const url = `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=geocodejson`;
-        Requests.get(url, text => {
+        const [lat, lon] = coords.split(",").map(s => s.trim());
+
+        const fallbackToBigDataCloud = () => {
+            const fallbackUrl = `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lon}&localityLanguage=en`;
+            Requests.get(fallbackUrl, text => {
+                const geo = JSON.parse(text);
+                const geoCity = geo.city || geo.locality;
+                if (geoCity) {
+                    city = geoCity;
+                    cachedCities.set(coords, geoCity);
+                } else {
+                    city = "Unknown City";
+                }
+            });
+        };
+
+        const nominatimUrl = `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=geocodejson`;
+        Requests.get(nominatimUrl, text => {
             const geo = JSON.parse(text).features?.[0]?.properties.geocoding;
             if (geo) {
                 const geoCity = geo.type === "city" ? geo.name : geo.city;
-                city = geoCity;
-                cachedCities.set(coords, geoCity);
-            } else {
-                city = "Unknown City";
+                if (geoCity) {
+                    city = geoCity;
+                    cachedCities.set(coords, geoCity);
+                    return;
+                }
             }
-        });
+            fallbackToBigDataCloud();
+        }, fallbackToBigDataCloud);
     }
 
     function fetchCoordsFromCity(cityName: string): void {
@@ -149,7 +166,7 @@ Singleton {
         if (!loc || loc.indexOf(",") === -1)
             return "";
 
-        const [lat, lon] = loc.split(",");
+        const [lat, lon] = loc.split(",").map(s => s.trim());
         const baseUrl = "https://api.open-meteo.com/v1/forecast";
         const params = ["latitude=" + lat, "longitude=" + lon, "hourly=weather_code,temperature_2m", "daily=weather_code,temperature_2m_max,temperature_2m_min,sunrise,sunset", "current=temperature_2m,relative_humidity_2m,apparent_temperature,is_day,weather_code,wind_speed_10m", "timezone=auto", "forecast_days=7"];
 
@@ -191,6 +208,13 @@ Singleton {
     }
 
     onLocChanged: fetchWeatherData()
+
+    Connections {
+        target: Config.services
+        function onWeatherLocationChanged(): void {
+            root.reload();
+        }
+    }
 
     // Refresh current location hourly
     Timer {
