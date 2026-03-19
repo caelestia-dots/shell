@@ -33,15 +33,15 @@ CustomMouseArea {
     }
 
     function inRightPanel(panel: Item, x: real, y: real): bool {
-        return x > bar.implicitWidth + panel.x && withinPanelHeight(panel, x, y);
+        return x > Math.min(width - Config.border.minThickness, bar.implicitWidth + panel.x) && withinPanelHeight(panel, x, y);
     }
 
     function inTopPanel(panel: Item, x: real, y: real): bool {
-        return y < Config.border.thickness + panel.y + panel.height && withinPanelWidth(panel, x, y);
+        return y < Math.max(Config.border.minThickness, Config.border.thickness + panel.height) + panel.y && withinPanelWidth(panel, x, y);
     }
 
-    function inBottomPanel(panel: Item, x: real, y: real): bool {
-        return y > root.height - Config.border.thickness - panel.height - Config.border.rounding && withinPanelWidth(panel, x, y);
+    function inBottomPanel(panel: Item, x: real, y: real, isCorner = false): bool {
+        return y > height - Math.max(Config.border.minThickness, Config.border.thickness + panel.height) - (isCorner ? Config.border.rounding : 0) && withinPanelWidth(panel, x, y);
     }
 
     function onWheel(event: WheelEvent): void {
@@ -88,11 +88,11 @@ CustomMouseArea {
         const dragY = y - dragStart.y;
 
         // Show bar in non-exclusive mode on hover
-        if (!visibilities.bar && Config.bar.showOnHover && x < bar.implicitWidth)
+        if (!visibilities.bar && Config.bar.showOnHover && x < bar.clampedWidth)
             bar.isHovered = true;
 
         // Show/hide bar on drag
-        if (pressed && dragStart.x < bar.implicitWidth) {
+        if (pressed && dragStart.x < bar.clampedWidth) {
             if (dragX > Config.bar.dragThreshold)
                 visibilities.bar = true;
             else if (dragX < -Config.bar.dragThreshold)
@@ -113,7 +113,7 @@ CustomMouseArea {
                 root.panels.osd.hovered = true;
             }
 
-            const showSidebar = pressed && dragStart.x > bar.implicitWidth + panels.sidebar.x;
+            const showSidebar = pressed && dragStart.x > Math.min(width - Config.border.minThickness, bar.implicitWidth + panels.sidebar.x);
 
             // Show/hide session on drag
             if (pressed && inRightPanel(panels.session, dragStart.x, dragStart.y) && withinPanelHeight(panels.session, x, y)) {
@@ -188,7 +188,7 @@ CustomMouseArea {
         }
 
         // Show utilities on hover
-        const showUtilities = inBottomPanel(panels.utilities, x, y);
+        const showUtilities = inBottomPanel(panels.utilities, x, y, true);
 
         // Always update visibility based on hover if not in shortcut mode
         if (!utilitiesShortcutActive) {

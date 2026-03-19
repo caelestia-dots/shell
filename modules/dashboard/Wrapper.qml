@@ -12,6 +12,7 @@ Item {
     id: root
 
     required property PersistentProperties visibilities
+    readonly property bool needsKeyboard: content.item?.needsKeyboard ?? false
     readonly property PersistentProperties dashState: PersistentProperties {
         property int currentTab
         property date currentDate: new Date()
@@ -82,6 +83,7 @@ Item {
         running: true
         interval: Appearance.anim.durations.extraLarge
         onTriggered: {
+            content.active = Qt.binding(() => (root.visibilities.dashboard && Config.dashboard.enabled) || root.visible);
             content.visible = true;
         }
     }

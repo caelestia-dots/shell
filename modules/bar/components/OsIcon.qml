@@ -1,15 +1,15 @@
+import qs.components
 import qs.components.effects
 import qs.services
 import qs.config
 import qs.utils
 import QtQuick
-import qs.components
 
 Item {
     id: root
-    
-    implicitWidth: Appearance.font.size.large * 1.2
-    implicitHeight: Appearance.font.size.large * 1.2
+
+    implicitWidth: Math.round(Appearance.font.size.large * 1.2)
+    implicitHeight: Math.round(Appearance.font.size.large * 1.2)
 
     MouseArea {
         anchors.fill: parent
@@ -29,8 +29,8 @@ Item {
         id: caelestiaLogo
 
         Logo {
-            implicitWidth: Appearance.font.size.large * 1.8
-            implicitHeight: Appearance.font.size.large * 1.8
+            implicitWidth: Math.round(Appearance.font.size.large * 1.6)
+            implicitHeight: Math.round(Appearance.font.size.large * 1.6)
         }
     }
 
@@ -39,7 +39,7 @@ Item {
 
         ColouredIcon {
             source: SysInfo.osLogo
-            implicitSize: Appearance.font.size.large * 1.2
+            implicitSize: Math.round(Appearance.font.size.large * 1.2)
             colour: Colours.palette.m3tertiary
         }
     }

@@ -50,7 +50,7 @@ CollapsibleSection {
 
             label: qsTr("Border thickness")
             value: rootPane.borderThickness
-            from: 0.1
+            from: 0
             to: 100
             decimals: 1
             suffix: "px"
