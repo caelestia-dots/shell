@@ -33,8 +33,12 @@ Singleton {
 
     property var lyricsMap: ({})
 
-    ListModel { id: lyricsModel }
-    ListModel { id: fetchedCandidatesModel }
+    ListModel {
+        id: lyricsModel
+    }
+    ListModel {
+        id: fetchedCandidatesModel
+    }
 
     Timer {
         id: seekTimer
@@ -63,6 +67,7 @@ Singleton {
     FileView {
         id: lyricsMapFileView
         path: root.lyricsMapFile
+        printErrors: false
         onLoaded: {
             try {
                 root.lyricsMap = JSON.parse(text());
@@ -74,11 +79,12 @@ Singleton {
 
     FileView {
         id: lrcFile
+        printErrors: false
         onLoaded: {
             fallbackTimer.stop();
             let parsed = Lrc.parseLrc(text());
             if (parsed.length > 0) {
-                root.backend = "Local"
+                root.backend = "Local";
                 updateModel(parsed);
                 loading = false;
             } else {
@@ -110,11 +116,16 @@ Singleton {
     }
 
     function getMetadata() {
-        if (!player || !player.metadata) return null;
+        if (!player || !player.metadata)
+            return null;
         let artist = player.metadata["xesam:artist"];
         const title = player.metadata["xesam:title"];
-        if (Array.isArray(artist)) artist = artist.join(", ");
-        return { artist: artist || "Unknown", title: title || "Unknown" };
+        if (Array.isArray(artist))
+            artist = artist.join(", ");
+        return {
+            artist: artist || "Unknown",
+            title: title || "Unknown"
+        };
     }
 
     function _metaKey(meta) {
@@ -123,7 +134,8 @@ Singleton {
 
     function savePrefs() {
         let meta = getMetadata();
-        if (!meta) return;
+        if (!meta)
+            return;
         let key = _metaKey(meta);
         let existing = root.lyricsMap[key] ?? {};
         root.lyricsMap[key] = {
@@ -138,10 +150,9 @@ Singleton {
     }
 
     function toggleVisibility() {
-        Config.services.showLyrics = !Config.services.showLyrics
-        Config.save()
+        Config.services.showLyrics = !Config.services.showLyrics;
+        Config.save();
     }
-
 
     function loadLyrics() {
         loadDebounce.restart();
@@ -149,7 +160,8 @@ Singleton {
 
     function _doLoadLyrics() {
         const meta = getMetadata();
-        if (!meta) return;
+        if (!meta)
+            return;
 
         loading = true;
         lyricsModel.clear();
@@ -185,20 +197,25 @@ Singleton {
         fetchNetEaseCandidates(meta.title, meta.artist, requestId); //to populate the list regardless
 
         // if the file is missing, FileView will not fire onLoaded, so we arm the fallback timer here as a safety net. It is cancelled in onLoaded if the file loads successfully.
-        if (saved?.backend !== "Local") fallbackTimer.restart();
+        if (saved?.backend !== "Local")
+            fallbackTimer.restart();
     }
 
     function updateModel(parsedArray) {
         root.currentIndex = -1;
         lyricsModel.clear();
         for (let line of parsedArray) {
-            lyricsModel.append({ time: line.time, lyricLine: line.text });
+            lyricsModel.append({
+                time: line.time,
+                lyricLine: line.text
+            });
         }
     }
 
     function fallbackToOnline() {
         let meta = getMetadata();
-        if (!meta) return;
+        if (!meta)
+            return;
         fetchNetEase(meta.title, meta.artist, root.currentRequestId);
     }
 
@@ -206,9 +223,9 @@ Singleton {
 
     // shared headers for all NetEase requests
     readonly property var _netEaseHeaders: ({
-        "User-Agent": "Mozilla/5.0 (X11; Linux x86_64; rv:120.0) Gecko/20100101 Firefox/120.0",
-                                            "Referer": "https://music.163.com/"
-    })
+            "User-Agent": "Mozilla/5.0 (X11; Linux x86_64; rv:120.0) Gecko/20100101 Firefox/120.0",
+            "Referer": "https://music.163.com/"
+        })
 
     // searches NetEase and populates the candidates model. returns the result array via the onResults callback
     function _searchNetEase(title, artist, reqId, onResults) {
@@ -217,7 +234,8 @@ Singleton {
         const url = `https://music.163.com/api/search/get?s=${query}&type=1&limit=5`;
 
         Requests.get(url, text => {
-            if (reqId !== root.currentRequestId) return;
+            if (reqId !== root.currentRequestId)
+                return;
             const res = JSON.parse(text);
             const songs = res.result?.songs || [];
 
@@ -267,7 +285,8 @@ Singleton {
     function fetchNetEaseLyrics(id, reqId) {
         const url = `https://music.163.com/api/song/lyric?id=${id}&lv=1&kv=1&tv=-1`;
         Requests.get(url, text => {
-            if (reqId !== root.currentRequestId) return;
+            if (reqId !== root.currentRequestId)
+                return;
             const res = JSON.parse(text);
             if (res.lrc?.lyric) {
                 updateModel(Lrc.parseLrc(res.lrc.lyric));
@@ -278,7 +297,8 @@ Singleton {
 
     function selectCandidate(songId) {
         let meta = getMetadata();
-        if (!meta) return;
+        if (!meta)
+            return;
         root.backend = "NetEase";
         root.currentSongId = songId;
         let key = _metaKey(meta);
@@ -291,7 +311,8 @@ Singleton {
     }
 
     function updatePosition() {
-        if (isManualSeeking || loading || !player || lyricsModel.count === 0) return;
+        if (isManualSeeking || loading || !player || lyricsModel.count === 0)
+            return;
 
         let pos = player.position - root.offset;
         let newIdx = -1;
