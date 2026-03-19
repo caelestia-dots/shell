@@ -6,7 +6,6 @@ import Caelestia
 import QtQuick
 import Quickshell
 import Quickshell.Io
-import Quickshell.Services.Mpris
 import "../utils/scripts/lrcparser.js" as Lrc
 
 Singleton {

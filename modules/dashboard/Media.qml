@@ -11,29 +11,19 @@ import Quickshell.Services.Mpris
 import QtQuick
 import QtQuick.Layouts
 import QtQuick.Shapes
-import QtQuick.Effects
-import "../../utils/scripts/lrcparser.js" as Lrc
 
 Item {
     id: root
 
     required property PersistentProperties visibilities
-    readonly property bool needsKeyboard: root.lyricMenuOpen
-    
+    readonly property bool needsKeyboard: lyricMenuOpen
+
+    readonly property real nonAnimHeight: Math.max(cover.implicitHeight + Config.dashboard.sizes.mediaVisualiserSize * 2, lyricMenuOpen ? lyricMenu.implicitHeight : details.implicitHeight, bongocat.implicitHeight) + Appearance.padding.large * 2
     readonly property real detailsHeightWithoutLyrics: details.implicitHeight - lyricsViewInDetails.implicitHeight
 
     property bool lyricMenuOpen: false
     property bool lyricsShowing: LyricsService.lyricsVisible && LyricsService.model.count != 0
     property bool lyricsShowingDebounced: false
-
-    onLyricsShowingChanged: {
-        if (lyricsShowing) {
-            lyricsHideDelay.stop()
-            lyricsShowingDebounced = true
-        } else {
-            lyricsHideDelay.restart()
-        }
-    }
 
     property real playerProgress: {
         const active = Players.active;
@@ -53,12 +43,21 @@ Item {
         return `${mins}:${secs}`;
     }
 
+    onLyricsShowingChanged: {
+        if (lyricsShowing) {
+            lyricsHideDelay.stop();
+            lyricsShowingDebounced = true;
+        } else {
+            lyricsHideDelay.restart();
+        }
+    }
+
     implicitWidth: cover.implicitWidth + Config.dashboard.sizes.mediaVisualiserSize * 2 + details.implicitWidth + details.anchors.leftMargin + bongocat.implicitWidth + bongocat.anchors.leftMargin * 2 + Appearance.padding.large * 2
-    implicitHeight: Math.max(
-        cover.implicitHeight + Config.dashboard.sizes.mediaVisualiserSize * 2,
-        lyricMenuOpen ? lyricMenu.implicitHeight : details.implicitHeight,
-        bongocat.implicitHeight
-    ) + Appearance.padding.large * 2
+    implicitHeight: nonAnimHeight
+
+    Behavior on implicitHeight {
+        Anim {}
+    }
 
     Behavior on playerProgress {
         Anim {
@@ -72,7 +71,8 @@ Item {
         triggeredOnStart: true
         repeat: true
         onTriggered: {
-            if (!Players.active) return;
+            if (!Players.active)
+                return;
             LyricsService.updatePosition();
             Players.active?.positionChanged();
         }
@@ -87,10 +87,9 @@ Item {
     Connections {
         target: lyricsHideDelay
         function onTriggered() {
-            root.lyricsShowingDebounced = false
+            root.lyricsShowingDebounced = false;
         }
     }
-
 
     ServiceRef {
         service: Audio.cava
@@ -189,7 +188,7 @@ Item {
             MouseArea {
                 anchors.fill: parent
                 onClicked: {
-                    LyricsService.toggleVisibility()
+                    LyricsService.toggleVisibility();
                 }
             }
         }
@@ -415,9 +414,7 @@ Item {
         anchors.right: parent.right
         anchors.leftMargin: Appearance.spacing.normal
 
-        contentHeight: !root.lyricsShowingDebounced
-        ? root.detailsHeightWithoutLyrics + Appearance.padding.large * 5
-        : root.detailsHeightWithoutLyrics + lyricsViewInDetails.implicitHeight
+        contentHeight: !root.lyricsShowingDebounced ? root.detailsHeightWithoutLyrics + Appearance.padding.large * 5 : root.detailsHeightWithoutLyrics + lyricsViewInDetails.implicitHeight
 
         visible: root.lyricMenuOpen || height > 0
         height: root.lyricMenuOpen ? implicitHeight : 0
@@ -431,8 +428,8 @@ Item {
     }
 
     RowLayout {
-        parent: !root.lyricsShowingDebounced ? details : leftSection
         id: playerChanger
+        parent: !root.lyricsShowingDebounced ? details : leftSection
         Layout.alignment: Qt.AlignHCenter
         spacing: Appearance.spacing.small
 
