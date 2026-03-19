@@ -2,6 +2,7 @@ pragma ComponentBehavior: Bound
 
 import qs.components.containers
 import qs.components.misc
+import qs.services
 import Quickshell
 import Quickshell.Wayland
 import Quickshell.Io
@@ -15,7 +16,7 @@ Scope {
         property bool clipboardOnly
 
         Variants {
-            model: Quickshell.screens
+            model: Screens.screens
 
             StyledWindow {
                 id: win

@@ -212,10 +212,9 @@ void AppDb::incrementFrequency(const QString& id) {
     auto* app = m_apps.value(id);
     if (app) {
         const auto before = getSortedApps();
-
         app->incrementFrequency();
-
-        if (before != getSortedApps()) {
+        getSortedApps();
+        if (before != m_sortedApps) {
             emit appsChanged();
         }
     } else {
@@ -225,15 +224,22 @@ void AppDb::incrementFrequency(const QString& id) {
 
 QList<AppEntry*>& AppDb::getSortedApps() const {
     m_sortedApps = m_apps.values();
-    std::sort(m_sortedApps.begin(), m_sortedApps.end(), [this](AppEntry* a, AppEntry* b) {
-        bool aIsFav = isFavourite(a);
-        bool bIsFav = isFavourite(b);
-        if (aIsFav != bIsFav) {
+
+    // Pre-compute favourite status to avoid repeated regex matching during sort
+    QSet<QString> favSet;
+    favSet.reserve(m_sortedApps.size());
+    for (const auto* app : std::as_const(m_sortedApps)) {
+        if (isFavourite(app))
+            favSet.insert(app->id());
+    }
+
+    std::sort(m_sortedApps.begin(), m_sortedApps.end(), [&favSet](AppEntry* a, AppEntry* b) {
+        const bool aIsFav = favSet.contains(a->id());
+        const bool bIsFav = favSet.contains(b->id());
+        if (aIsFav != bIsFav)
             return aIsFav;
-        }
-        if (a->frequency() != b->frequency()) {
+        if (a->frequency() != b->frequency())
             return a->frequency() > b->frequency();
-        }
         return a->name().localeAwareCompare(b->name()) < 0;
     });
     return m_sortedApps;
@@ -269,7 +275,8 @@ void AppDb::updateAppFrequencies() {
         app->setFrequency(getFrequency(app->id()));
     }
 
-    if (before != getSortedApps()) {
+    getSortedApps();
+    if (before != m_sortedApps) {
         emit appsChanged();
     }
 }

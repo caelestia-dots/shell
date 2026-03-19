@@ -38,44 +38,91 @@ SectionContainer {
         }
     }
 
-    SectionContainer {
-        contentSpacing: Appearance.spacing.normal
+    RowLayout {
+        Layout.fillWidth: true
+        spacing: Appearance.spacing.normal
 
-        SliderInput {
+        SwitchRow {
             Layout.fillWidth: true
-            
-            label: qsTr("Update interval")
-            value: root.rootItem.updateInterval
-            from: 100
-            to: 10000
-            stepSize: 100
-            suffix: "ms"
-            validator: IntValidator { bottom: 100; top: 10000 }
-            formatValueFunction: (val) => Math.round(val).toString()
-            parseValueFunction: (text) => parseInt(text)
-            
-            onValueModified: (newValue) => {
-                root.rootItem.updateInterval = Math.round(newValue);
+            label: qsTr("Show Dashboard tab")
+            checked: root.rootItem.showDashboard
+            onToggled: checked => {
+                root.rootItem.showDashboard = checked;
                 root.rootItem.saveConfig();
             }
         }
 
-        SliderInput {
+        SwitchRow {
             Layout.fillWidth: true
-            
-            label: qsTr("Drag threshold")
-            value: root.rootItem.dragThreshold
-            from: 0
-            to: 100
-            suffix: "px"
-            validator: IntValidator { bottom: 0; top: 100 }
-            formatValueFunction: (val) => Math.round(val).toString()
-            parseValueFunction: (text) => parseInt(text)
-            
-            onValueModified: (newValue) => {
-                root.rootItem.dragThreshold = Math.round(newValue);
+            label: qsTr("Show Media tab")
+            checked: root.rootItem.showMedia
+            onToggled: checked => {
+                root.rootItem.showMedia = checked;
                 root.rootItem.saveConfig();
             }
+        }
+
+        SwitchRow {
+            Layout.fillWidth: true
+            label: qsTr("Show Performance tab")
+            checked: root.rootItem.showPerformance
+            onToggled: checked => {
+                root.rootItem.showPerformance = checked;
+                root.rootItem.saveConfig();
+            }
+        }
+
+        SwitchRow {
+            Layout.fillWidth: true
+            label: qsTr("Show Weather tab")
+            checked: root.rootItem.showWeather
+            onToggled: checked => {
+                root.rootItem.showWeather = checked;
+                root.rootItem.saveConfig();
+            }
+        }
+    }
+
+    SliderInput {
+        Layout.fillWidth: true
+
+        label: qsTr("Media update interval")
+        value: root.rootItem.mediaUpdateInterval
+        from: 100
+        to: 10000
+        stepSize: 100
+        suffix: "ms"
+        validator: IntValidator {
+            bottom: 100
+            top: 10000
+        }
+        formatValueFunction: val => Math.round(val).toString()
+        parseValueFunction: text => parseInt(text)
+
+        onValueModified: newValue => {
+            root.rootItem.mediaUpdateInterval = Math.round(newValue);
+            root.rootItem.saveConfig();
+        }
+    }
+
+    SliderInput {
+        Layout.fillWidth: true
+
+        label: qsTr("Drag threshold")
+        value: root.rootItem.dragThreshold
+        from: 0
+        to: 100
+        suffix: "px"
+        validator: IntValidator {
+            bottom: 0
+            top: 100
+        }
+        formatValueFunction: val => Math.round(val).toString()
+        parseValueFunction: text => parseInt(text)
+
+        onValueModified: newValue => {
+            root.rootItem.dragThreshold = Math.round(newValue);
+            root.rootItem.saveConfig();
         }
     }
 }

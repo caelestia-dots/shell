@@ -13,7 +13,7 @@ import QtQuick
 import QtQuick.Effects
 
 Variants {
-    model: Quickshell.screens
+    model: Screens.screens
 
     Scope {
         id: scope
@@ -57,10 +57,10 @@ Variants {
             WlrLayershell.keyboardFocus: visibilities.launcher || visibilities.session || panels.dashboard.needsKeyboard ? WlrKeyboardFocus.OnDemand : WlrKeyboardFocus.None
 
             mask: Region {
-                x: bar.implicitWidth + win.dragMaskPadding
-                y: Config.border.thickness + win.dragMaskPadding
-                width: win.width - bar.implicitWidth - Config.border.thickness - win.dragMaskPadding * 2
-                height: win.height - Config.border.thickness * 2 - win.dragMaskPadding * 2
+                x: bar.clampedWidth + win.dragMaskPadding
+                y: Config.border.clampedThickness + win.dragMaskPadding
+                width: win.width - bar.clampedWidth - Config.border.clampedThickness - win.dragMaskPadding * 2
+                height: win.height - Config.border.clampedThickness * 2 - win.dragMaskPadding * 2
                 intersection: Intersection.Xor
 
                 regions: regions.instances

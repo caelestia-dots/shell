@@ -309,16 +309,23 @@ Singleton {
         return octets.join(".");
     }
 
+    Timer {
+        id: monitorDebounce
+
+        interval: 200
+        onTriggered: {
+            Nmcli.getNetworks(() => {
+                syncNetworksFromNmcli();
+            });
+            getEthernetDevices();
+        }
+    }
+
     Process {
         running: true
         command: ["nmcli", "m"]
         stdout: SplitParser {
-            onRead: {
-                Nmcli.getNetworks(() => {
-                    syncNetworksFromNmcli();
-                });
-                getEthernetDevices();
-            }
+            onRead: monitorDebounce.start()
         }
     }
 }

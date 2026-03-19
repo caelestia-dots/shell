@@ -15,6 +15,37 @@ Item {
     readonly property bool needsKeyboard: mediaPane.item?.needsKeyboard ?? false
     required property PersistentProperties state
     required property FileDialog facePicker
+
+    readonly property var dashboardTabs: {
+        const allTabs = [
+            {
+                component: dashComponent,
+                iconName: "dashboard",
+                text: qsTr("Dashboard"),
+                enabled: Config.dashboard.showDashboard
+            },
+            {
+                component: mediaComponent,
+                iconName: "queue_music",
+                text: qsTr("Media"),
+                enabled: Config.dashboard.showMedia
+            },
+            {
+                component: performanceComponent,
+                iconName: "speed",
+                text: qsTr("Performance"),
+                enabled: Config.dashboard.showPerformance && (Config.dashboard.performance.showCpu || Config.dashboard.performance.showGpu || Config.dashboard.performance.showMemory || Config.dashboard.performance.showStorage || Config.dashboard.performance.showNetwork || Config.dashboard.performance.showBattery)
+            },
+            {
+                component: weatherComponent,
+                iconName: "cloud",
+                text: qsTr("Weather"),
+                enabled: Config.dashboard.showWeather
+            }
+        ];
+        return allTabs.filter(tab => tab.enabled);
+    }
+
     readonly property real nonAnimWidth: view.implicitWidth + viewWrapper.anchors.margins * 2
     readonly property real nonAnimHeight: tabs.implicitHeight + tabs.anchors.topMargin + view.implicitHeight + viewWrapper.anchors.margins * 2
 
@@ -32,6 +63,7 @@ Item {
 
         nonAnimWidth: root.nonAnimWidth - anchors.margins * 2
         state: root.state
+        tabs: root.dashboardTabs
     }
 
     ClippingRectangle {
@@ -50,7 +82,10 @@ Item {
             id: view
 
             readonly property int currentIndex: root.state.currentTab
-            readonly property Item currentItem: row.children[currentIndex]
+            readonly property Item currentItem: {
+                repeater.count; // Trigger update on count change
+                return repeater.itemAt(currentIndex);
+            }
 
             anchors.fill: parent
 
@@ -87,32 +122,58 @@ Item {
             RowLayout {
                 id: row
 
-                Pane {
-                    index: 0
-                    sourceComponent: Dash {
-                        visibilities: root.visibilities
-                        state: root.state
-                        facePicker: root.facePicker
+                Repeater {
+                    id: repeater
+
+                    model: ScriptModel {
+                        values: root.dashboardTabs
+                    }
+
+                    delegate: Loader {
+                        id: paneLoader
+
+                        required property int index
+                        required property var modelData
+
+                        Layout.alignment: Qt.AlignTop
+
+                        sourceComponent: modelData.component
+
+                        Component.onCompleted: active = Qt.binding(() => {
+                            if (index === view.currentIndex)
+                                return true;
+                            const vx = Math.floor(view.visibleArea.xPosition * view.contentWidth);
+                            const vex = Math.floor(vx + view.visibleArea.widthRatio * view.contentWidth);
+                            return (vx >= x && vx <= x + implicitWidth) || (vex >= x && vex <= x + implicitWidth);
+                        })
                     }
                 }
+            }
 
-                Pane {
-                    id: mediaPane
-                    index: 1
-                    sourceComponent: Media {
-                        visibilities: root.visibilities
-                    }
+            Component {
+                id: dashComponent
+                Dash {
+                    visibilities: root.visibilities
+                    state: root.state
+                    facePicker: root.facePicker
                 }
+            }
 
-                Pane {
-                    index: 2
-                    sourceComponent: Performance {}
+            Component {
+                id: mediaComponent
+                Media {
+                    visibilities: root.visibilities
                 }
+            }
 
-                Pane {
-                    index: 3
-                    sourceComponent: Weather {}
-                }
+            Component {
+                id: performanceComponent
+                Performance {}
+            }
+
+            Component {
+                id: weatherComponent
+                Weather {}
             }
 
             Behavior on contentX {
@@ -133,22 +194,5 @@ Item {
             duration: Appearance.anim.durations.large
             easing.bezierCurve: Appearance.anim.curves.emphasized
         }
-    }
-
-    component Pane: Loader {
-        id: pane
-
-        required property int index
-
-        Layout.alignment: Qt.AlignTop
-
-        Component.onCompleted: active = Qt.binding(() => {
-            // Always keep current tab loaded
-            if (pane.index === view.currentIndex)
-                return true;
-            const vx = Math.floor(view.visibleArea.xPosition * view.contentWidth);
-            const vex = Math.floor(vx + view.visibleArea.widthRatio * view.contentWidth);
-            return (vx >= x && vx <= x + implicitWidth) || (vex >= x && vex <= x + implicitWidth);
-        })
     }
 }
