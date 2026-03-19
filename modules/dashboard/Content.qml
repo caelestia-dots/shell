@@ -12,6 +12,15 @@ Item {
     id: root
 
     required property PersistentProperties visibilities
+    readonly property bool needsKeyboard: {
+        const count = repeater.count;
+        for (let i = 0; i < count; i++) {
+            const item = repeater.itemAt(i) as Loader;
+            if (item?.sourceComponent === mediaComponent && (item?.item as MediaWrapper)?.needsKeyboard)
+                return true;
+        }
+        return false;
+    }
     required property PersistentProperties state
     required property FileDialog facePicker
 
@@ -81,7 +90,10 @@ Item {
             id: view
 
             readonly property int currentIndex: root.state.currentTab
-            readonly property Item currentItem: row.children[currentIndex]
+            readonly property Item currentItem: {
+                repeater.count; // Trigger update on count change
+                return repeater.itemAt(currentIndex);
+            }
 
             anchors.fill: parent
 
@@ -119,6 +131,8 @@ Item {
                 id: row
 
                 Repeater {
+                    id: repeater
+
                     model: ScriptModel {
                         values: root.dashboardTabs
                     }
@@ -155,7 +169,7 @@ Item {
 
             Component {
                 id: mediaComponent
-                Media {
+                MediaWrapper {
                     visibilities: root.visibilities
                 }
             }

@@ -52,15 +52,20 @@ Item {
         anchors.top: bar.bottom
         anchors.topMargin: 5
 
-        implicitWidth: bar.currentItem?.implicitWidth ?? 0
+        implicitWidth: {
+            const tab = bar.currentItem;
+            if (tab)
+                return tab.implicitWidth;
+            const width = (root.nonAnimWidth - bar.spacing * (bar.count - 1)) / bar.count;
+            return width;
+        }
         implicitHeight: 3
 
         x: {
             const tab = bar.currentItem;
-            if (!tab)
-                return 0;
             const width = (root.nonAnimWidth - bar.spacing * (bar.count - 1)) / bar.count;
-            return width * tab.TabBar.index + (width - tab.implicitWidth) / 2;
+            const tabWidth = tab?.implicitWidth ?? width;
+            return width * bar.currentIndex + (width - tabWidth) / 2;
         }
 
         clip: true

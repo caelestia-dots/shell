@@ -79,6 +79,26 @@ Singleton {
             Office: "content_paste"
         })
 
+    // Checks if a name matches an icon config. Icon configs can have the following keys:
+    // - name: The exact name of the icon
+    // - regex: A regex to match against the name (takes priority over name)
+    // - flags: The regex flags (only used if regex is set)
+    // - icon: The icon to use
+    function matchIconConfig(name: string, iconConfig: var): bool {
+        if (!iconConfig.icon)
+            return false;
+
+        if (iconConfig.regex) {
+            const re = new RegExp(iconConfig.regex, iconConfig.flags ?? "");
+            if (re.test(name))
+                return true;
+        } else if (iconConfig.name === name) {
+            return true;
+        }
+
+        return false;
+    }
+
     function getAppIcon(name: string, fallback: string): string {
         const icon = DesktopEntries.heuristicLookup(name)?.icon;
         if (fallback !== "undefined")
@@ -87,6 +107,10 @@ Singleton {
     }
 
     function getAppCategoryIcon(name: string, fallback: string): string {
+        for (const iconConfig of Config.bar.workspaces.windowIcons)
+            if (matchIconConfig(name, iconConfig))
+                return iconConfig.icon;
+
         const categories = DesktopEntries.heuristicLookup(name)?.categories;
 
         if (categories)
@@ -188,11 +212,9 @@ Singleton {
     function getSpecialWsIcon(name: string): string {
         name = name.toLowerCase().slice("special:".length);
 
-        for (const iconConfig of Config.bar.workspaces.specialWorkspaceIcons) {
-            if (iconConfig.name === name) {
+        for (const iconConfig of Config.bar.workspaces.specialWorkspaceIcons)
+            if (matchIconConfig(name, iconConfig))
                 return iconConfig.icon;
-            }
-        }
 
         if (name === "special")
             return "star";

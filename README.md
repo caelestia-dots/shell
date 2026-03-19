@@ -331,7 +331,14 @@ default, you must create it manually.
         }
     },
     "bar": {
+        "activeWindow": {
+            "compact": false,
+            "inverted": false,
+            "showOnHover": true
+        },
         "clock": {
+            "background": false,
+            "showDate": false,
             "showIcon": true
         },
         "dragThreshold": 20,
@@ -414,6 +421,12 @@ default, you must create it manually.
             "specialWorkspaceIcons": [
                 {
                     "name": "steam",
+                    "icon": "sports_esports"
+                }
+            ],
+            "windowIcons": [
+                {
+                    "regex": "steam(_app_(default|[0-9]+))?",
                     "icon": "sports_esports"
                 }
             ]
@@ -567,7 +580,8 @@ default, you must create it manually.
         "hiddenApps": []
     },
     "lock": {
-        "recolourLogo": false
+        "recolourLogo": false,
+        "hideNotifs": false
     },
     "notifs": {
         "actionOnClick": false,
@@ -586,7 +600,8 @@ default, you must create it manually.
     "paths": {
         "mediaGif": "root:/assets/bongocat.gif",
         "sessionGif": "root:/assets/kurukuru.gif",
-        "wallpaperDir": "~/Pictures/Wallpapers"
+        "wallpaperDir": "~/Pictures/Wallpapers",
+        "lyricsDir": "~/Music/lyrics"
     },
     "services": {
         "audioIncrement": 0.1,
@@ -650,7 +665,37 @@ default, you must create it manually.
                     "enabled": false
                 }
             ]
-        }
+        },
+        "quickToggles": [
+            {
+                "id": "wifi",
+                "enabled": true
+            },
+            {
+                "id": "bluetooth",
+                "enabled": true
+            },
+            {
+                "id": "mic",
+                "enabled": true
+            },
+            {
+                "enabled": true,
+                "id": "settings"
+            },
+            {
+                "id": "gameMode",
+                "enabled": true
+            },
+            {
+                "id": "dnd",
+                "enabled": true
+            },
+            {
+                "id": "vpn",
+                "enabled": true
+            }
+        ]
     }
 }
 ```

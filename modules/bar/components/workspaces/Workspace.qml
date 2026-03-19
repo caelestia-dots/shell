@@ -87,7 +87,11 @@ ColumnLayout {
 
             Repeater {
                 model: ScriptModel {
-                    values: Hypr.toplevels.values.filter(c => c.workspace?.id === root.ws)
+                    values: {
+                        const windows = Hypr.toplevels.values.filter(c => c.workspace?.id === root.ws);
+                        const maxIcons = Config.bar.workspaces.maxWindowIcons;
+                        return maxIcons > 0 ? windows.slice(0, maxIcons) : windows;
+                    }
                 }
 
                 MaterialIcon {
