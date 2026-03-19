@@ -1,5 +1,6 @@
 pragma ComponentBehavior: Bound
 
+import "items"
 import qs.components
 import qs.config
 import Quickshell
@@ -14,6 +15,7 @@ Item {
 
     readonly property bool shouldBeActive: visibilities.launcher && Config.launcher.enabled
     property int contentHeight
+    property bool animationComplete: false
 
     readonly property real maxHeight: {
         let max = screen.height - Config.border.thickness * 2 - Appearance.spacing.large;
@@ -32,9 +34,12 @@ Item {
         if (shouldBeActive) {
             timer.stop();
             hideAnim.stop();
+            root.animationComplete = false;
             showAnim.start();
         } else {
+            root.requestCloseContextMenu();
             showAnim.stop();
+            root.animationComplete = false;
             hideAnim.start();
         }
     }
@@ -50,7 +55,13 @@ Item {
             easing.bezierCurve: Appearance.anim.curves.expressiveDefaultSpatial
         }
         ScriptAction {
-            script: root.implicitHeight = Qt.binding(() => content.implicitHeight)
+            script: {
+                root.implicitHeight = Qt.binding(() => content.implicitHeight);
+                // Wait one more frame after animation to ensure layout is stable
+                Qt.callLater(() => {
+                    root.animationComplete = true;
+                });
+            }
         }
     }
 
@@ -123,8 +134,36 @@ Item {
             visibilities: root.visibilities
             panels: root.panels
             maxHeight: root.maxHeight
+            showContextMenuAt: root.showContextMenu
+            wrapperRoot: root
 
-            Component.onCompleted: root.contentHeight = implicitHeight
+            Component.onCompleted: {
+                root.contentHeight = implicitHeight;
+                Qt.callLater(() => {
+                    root.animationComplete = true;
+                });
+            }
         }
+    }
+
+    signal requestShowContextMenu(app: DesktopEntry, clickX: real, clickY: real)
+    signal requestCloseContextMenu
+
+    function restoreFocus(): void {
+        if (content.item && content.item.searchField) {
+            content.item.searchField.forceActiveFocus();
+        }
+    }
+
+    function showContextMenu(app: DesktopEntry, clickX: real, clickY: real): void {
+        if (!app || !root.animationComplete) {
+            return;
+        }
+
+        if (clickX < 0 || clickX > root.width || clickY < 0 || clickY > root.height) {
+            return;
+        }
+
+        root.requestShowContextMenu(app, clickX, clickY);
     }
 }

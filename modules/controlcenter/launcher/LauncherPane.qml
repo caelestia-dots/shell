@@ -2,7 +2,6 @@ pragma ComponentBehavior: Bound
 
 import ".."
 import "../components"
-import "../../launcher/services"
 import qs.components
 import qs.components.controls
 import qs.components.effects
@@ -88,22 +87,137 @@ Item {
 
     property string searchText: ""
 
-    function filterApps(search: string): list<var> {
-        if (!search || search.trim() === "") {
-            const apps = [];
-            for (let i = 0; i < allAppsDb.apps.length; i++) {
-                apps.push(allAppsDb.apps[i]);
+    // Helper function to get categories for an app (returns array)
+    function getAppCategories(appId: string): list<string> {
+        const cats = [];
+        if (!Config.launcher.categories)
+            return cats;
+
+        for (let i = 0; i < Config.launcher.categories.length; i++) {
+            const category = Config.launcher.categories[i];
+            if (!category || !category.apps)
+                continue;
+
+            // Check if this app is in this category's apps list
+            if (typeof category.apps === 'object' && category.apps.length !== undefined) {
+                for (let j = 0; j < category.apps.length; j++) {
+                    if (category.apps[j] === appId) {
+                        cats.push(category.name);
+                        break;
+                    }
+                }
             }
-            return apps;
+        }
+        return cats;
+    }
+
+    // Helper function to check if app has a specific category
+    function appHasCategory(appId: string, categoryName: string): bool {
+        if (!Config.launcher.categories)
+            return false;
+
+        for (let i = 0; i < Config.launcher.categories.length; i++) {
+            const category = Config.launcher.categories[i];
+            if (!category || category.name.toLowerCase() !== categoryName.toLowerCase())
+                continue;
+            if (!category.apps)
+                continue;
+
+            if (typeof category.apps === 'object' && category.apps.length !== undefined) {
+                for (let j = 0; j < category.apps.length; j++) {
+                    if (category.apps[j] === appId) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
+    // Helper function to toggle category for an app
+    function toggleAppCategory(appId: string, categoryName: string): void {
+        if (!Config.launcher.categories)
+            return;
+
+        const newCategories = [];
+
+        for (let i = 0; i < Config.launcher.categories.length; i++) {
+            const category = Config.launcher.categories[i];
+            if (!category)
+                continue;
+
+            const newCategory = {
+                name: category.name,
+                icon: category.icon,
+                apps: []
+            };
+
+            // Copy existing apps
+            if (category.apps && typeof category.apps === 'object' && category.apps.length !== undefined) {
+                for (let j = 0; j < category.apps.length; j++) {
+                    newCategory.apps.push(category.apps[j]);
+                }
+            }
+
+            // Toggle this app in this category
+            if (category.name.toLowerCase() === categoryName.toLowerCase()) {
+                const index = newCategory.apps.indexOf(appId);
+                if (index >= 0) {
+                    newCategory.apps.splice(index, 1);
+                } else {
+                    newCategory.apps.push(appId);
+                }
+            }
+
+            newCategories.push(newCategory);
         }
 
-        if (!allAppsDb.apps || allAppsDb.apps.length === 0) {
+        Config.launcher.categories = newCategories;
+        Config.save();
+    }
+
+    function filterApps(search: string): list<var> {
+        let baseApps = [];
+
+        // Filter by category first
+        if (root.activeCategory === "all") {
+            for (let i = 0; i < allAppsDb.apps.length; i++) {
+                baseApps.push(allAppsDb.apps[i]);
+            }
+        } else if (root.activeCategory === "favourites") {
+            for (let i = 0; i < allAppsDb.apps.length; i++) {
+                const app = allAppsDb.apps[i];
+                const appId = app.id || app.entry?.id;
+                if (Config.launcher.favouriteApps && Config.launcher.favouriteApps.includes(appId)) {
+                    baseApps.push(app);
+                }
+            }
+        } else {
+            // Custom category
+            console.log(`Filtering for category: ${root.activeCategory}`);
+            for (let i = 0; i < allAppsDb.apps.length; i++) {
+                const app = allAppsDb.apps[i];
+                const appId = app.id || app.entry?.id;
+                if (appHasCategory(appId, root.activeCategory)) {
+                    console.log(`Found app in category: ${appId}`);
+                    baseApps.push(app);
+                }
+            }
+            console.log(`Total apps in ${root.activeCategory}: ${baseApps.length}`);
+        }
+
+        // Then filter by search text
+        if (!search || search.trim() === "") {
+            return baseApps;
+        }
+
+        if (baseApps.length === 0) {
             return [];
         }
 
         const preparedApps = [];
-        for (let i = 0; i < allAppsDb.apps.length; i++) {
-            const app = allAppsDb.apps[i];
+        for (let i = 0; i < baseApps.length; i++) {
+            const app = baseApps[i];
             const name = app.name || app.entry?.name || "";
             preparedApps.push({
                 _item: app,
@@ -127,6 +241,12 @@ Item {
     }
 
     onSearchTextChanged: {
+        updateFilteredApps();
+    }
+
+    property string activeCategory: "all"
+
+    onActiveCategoryChanged: {
         updateFilteredApps();
     }
 
@@ -180,6 +300,86 @@ Item {
                             } else {
                                 if (root.filteredApps.length > 0) {
                                     root.session.launcher.active = root.filteredApps[0];
+                                }
+                            }
+                        }
+                    }
+                }
+
+                // Category tabs
+                StyledFlickable {
+                    Layout.fillWidth: true
+                    Layout.preferredHeight: categoryRow.height
+                    Layout.topMargin: Appearance.spacing.normal
+                    flickableDirection: Flickable.HorizontalFlick
+                    contentWidth: categoryRow.width
+                    clip: true
+
+                    Row {
+                        id: categoryRow
+                        spacing: Appearance.spacing.small
+
+                        Repeater {
+                            model: [
+                                {
+                                    id: "all",
+                                    name: qsTr("All"),
+                                    icon: "apps"
+                                },
+                                {
+                                    id: "favourites",
+                                    name: qsTr("Favourites"),
+                                    icon: "favorite"
+                                }
+                            ].concat(Config.launcher.categories.map(cat => ({
+                                        id: cat.name.toLowerCase(),
+                                        name: cat.name,
+                                        icon: cat.icon
+                                    })))
+
+                            delegate: StyledRect {
+                                required property var modelData
+
+                                property bool isActive: root.activeCategory === modelData.id
+
+                                implicitWidth: tabContent.width + Appearance.padding.normal * 2
+                                implicitHeight: tabContent.height + Appearance.padding.smaller * 2
+
+                                color: isActive ? Colours.palette.m3secondaryContainer : Colours.tPalette.m3surfaceContainerHigh
+                                radius: Appearance.rounding.full
+
+                                StateLayer {
+                                    radius: parent.radius
+                                    function onClicked(): void {
+                                        root.activeCategory = modelData.id;
+                                    }
+                                }
+
+                                Row {
+                                    id: tabContent
+                                    anchors.centerIn: parent
+                                    spacing: Appearance.spacing.smaller
+
+                                    MaterialIcon {
+                                        anchors.verticalCenter: parent.verticalCenter
+                                        text: modelData.icon
+                                        font.pointSize: Appearance.font.size.small
+                                        color: isActive ? Colours.palette.m3onSecondaryContainer : Colours.palette.m3onSurface
+                                    }
+
+                                    StyledText {
+                                        anchors.verticalCenter: parent.verticalCenter
+                                        text: modelData.name
+                                        font.pointSize: Appearance.font.size.small
+                                        font.weight: isActive ? 500 : 400
+                                        color: isActive ? Colours.palette.m3onSecondaryContainer : Colours.palette.m3onSurface
+                                    }
+                                }
+
+                                Behavior on color {
+                                    ColorAnimation {
+                                        duration: Appearance.anim.durations.small
+                                    }
                                 }
                             }
                         }
@@ -306,8 +506,8 @@ Item {
                         delegate: StyledRect {
                             required property var modelData
 
-                        width: parent ? parent.width : 0
-                        implicitHeight: 40
+                            width: parent ? parent.width : 0
+                            implicitHeight: 40
 
                             readonly property bool isSelected: root.selectedApp === modelData
 
@@ -647,6 +847,120 @@ Item {
                                     }
                                     Config.launcher.hiddenApps = hiddenApps;
                                     Config.save();
+                                }
+                            }
+                        }
+
+                        SectionHeader {
+                            Layout.topMargin: Appearance.spacing.large
+                            visible: appDetailsLayout.displayedApp !== null
+                            title: qsTr("Category")
+                            description: qsTr("Assign this app to a category")
+                        }
+
+                        SectionContainer {
+                            visible: appDetailsLayout.displayedApp !== null
+
+                            GridLayout {
+                                Layout.fillWidth: true
+                                columns: 2
+                                columnSpacing: Appearance.spacing.small
+                                rowSpacing: Appearance.spacing.small
+
+                                Repeater {
+                                    model: Config.launcher.categories
+
+                                    delegate: StyledRect {
+                                        required property var modelData
+                                        required property int index
+
+                                        Layout.fillWidth: true
+                                        implicitHeight: categoryContent.height + Appearance.padding.normal * 2
+
+                                        property string categoryName: modelData.name
+                                        property bool isAssigned: {
+                                            const app = appDetailsLayout.displayedApp;
+                                            if (!app)
+                                                return false;
+                                            const appId = app.id || app.entry?.id;
+                                            return root.appHasCategory(appId, categoryName);
+                                        }
+
+                                        color: isAssigned ? Colours.palette.m3secondaryContainer : Colours.tPalette.m3surfaceContainerHigh
+                                        radius: Appearance.rounding.normal
+
+                                        StateLayer {
+                                            radius: parent.radius
+                                            function onClicked(): void {
+                                                const app = appDetailsLayout.displayedApp;
+                                                if (!app)
+                                                    return;
+                                                const appId = app.id || app.entry?.id;
+                                                console.log(`Toggling category ${categoryName} for app ${appId}`);
+                                                root.toggleAppCategory(appId, categoryName);
+                                            }
+                                        }
+
+                                        Row {
+                                            id: categoryContent
+                                            anchors.centerIn: parent
+                                            spacing: Appearance.spacing.normal
+
+                                            MaterialIcon {
+                                                anchors.verticalCenter: parent.verticalCenter
+                                                text: modelData.icon
+                                                color: isAssigned ? Colours.palette.m3onSecondaryContainer : Colours.palette.m3onSurface
+                                            }
+
+                                            StyledText {
+                                                anchors.verticalCenter: parent.verticalCenter
+                                                text: modelData.name
+                                                font.weight: isAssigned ? 500 : 400
+                                                color: isAssigned ? Colours.palette.m3onSecondaryContainer : Colours.palette.m3onSurface
+                                            }
+
+                                            MaterialIcon {
+                                                anchors.verticalCenter: parent.verticalCenter
+                                                text: "check"
+                                                visible: isAssigned
+                                                color: Colours.palette.m3onSecondaryContainer
+                                            }
+                                        }
+                                    }
+                                }
+
+                                TextButton {
+                                    Layout.columnSpan: 2
+                                    Layout.fillWidth: true
+                                    Layout.topMargin: Appearance.spacing.small
+                                    text: qsTr("Clear Category")
+                                    inactiveColour: Colours.palette.m3errorContainer
+                                    inactiveOnColour: Colours.palette.m3onErrorContainer
+                                    visible: {
+                                        const app = appDetailsLayout.displayedApp;
+                                        if (!app)
+                                            return false;
+                                        const appId = app.id || app.entry?.id;
+                                        return root.getAppCategories(appId).length > 0;
+                                    }
+
+                                    onClicked: {
+                                        const app = appDetailsLayout.displayedApp;
+                                        if (!app)
+                                            return;
+                                        const appId = app.id || app.entry?.id;
+
+                                        // Remove all categories for this app
+                                        const newCategories = [];
+                                        for (let i = 0; i < Config.launcher.appCategories.length; i++) {
+                                            const item = Config.launcher.appCategories[i];
+                                            if (!item || item.appId !== appId) {
+                                                newCategories.push(item);
+                                            }
+                                        }
+                                        Config.launcher.appCategories = newCategories;
+                                        Config.save();
+                                    }
                                 }
                             }
                         }
