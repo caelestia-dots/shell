@@ -1,54 +1,79 @@
 pragma Singleton
 
 import QtQuick
+import Quickshell.Services.UPower
 
 QtObject {
     id: root
 
-    readonly property list<QtObject> panes: [
+    readonly property list<QtObject> allPanes: [
         QtObject {
             readonly property string id: "network"
             readonly property string label: "network"
             readonly property string icon: "router"
             readonly property string component: "network/NetworkingPane.qml"
+            readonly property bool visible: true
         },
         QtObject {
             readonly property string id: "bluetooth"
             readonly property string label: "bluetooth"
             readonly property string icon: "settings_bluetooth"
             readonly property string component: "bluetooth/BtPane.qml"
+            readonly property bool visible: true
         },
         QtObject {
             readonly property string id: "audio"
             readonly property string label: "audio"
             readonly property string icon: "volume_up"
             readonly property string component: "audio/AudioPane.qml"
+            readonly property bool visible: true
+        },
+        QtObject {
+            readonly property string id: "power"
+            readonly property string label: "power"
+            readonly property string icon: "battery_charging_full"
+            readonly property string component: "battery/BatteryPane.qml"
+            readonly property bool visible: UPower.displayDevice?.isLaptopBattery ?? false
         },
         QtObject {
             readonly property string id: "appearance"
             readonly property string label: "appearance"
             readonly property string icon: "palette"
             readonly property string component: "appearance/AppearancePane.qml"
+            readonly property bool visible: true
         },
         QtObject {
             readonly property string id: "taskbar"
             readonly property string label: "taskbar"
             readonly property string icon: "task_alt"
             readonly property string component: "taskbar/TaskbarPane.qml"
+            readonly property bool visible: true
         },
         QtObject {
             readonly property string id: "launcher"
             readonly property string label: "launcher"
             readonly property string icon: "apps"
             readonly property string component: "launcher/LauncherPane.qml"
+            readonly property bool visible: true
         },
         QtObject {
             readonly property string id: "dashboard"
             readonly property string label: "dashboard"
             readonly property string icon: "dashboard"
             readonly property string component: "dashboard/DashboardPane.qml"
+            readonly property bool visible: false
         }
     ]
+
+    readonly property var panes: {
+        const result = [];
+        for (let i = 0; i < allPanes.length; i++) {
+            if (allPanes[i].visible !== false) {
+                result.push(allPanes[i]);
+            }
+        }
+        return result;
+    }
 
     readonly property int count: panes.length
 
