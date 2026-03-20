@@ -225,6 +225,7 @@ Singleton {
             mediaUpdateInterval: dashboard.mediaUpdateInterval,
             resourceUpdateInterval: dashboard.resourceUpdateInterval,
             dragThreshold: dashboard.dragThreshold,
+            showUpcoming: dashboard.showUpcoming,
             performance: {
                 showBattery: dashboard.performance.showBattery,
                 showGpu: dashboard.performance.showGpu,
@@ -366,6 +367,7 @@ Singleton {
     function serializeSidebar(): var {
         return {
             enabled: sidebar.enabled,
+            showUpcoming: sidebar.showUpcoming,
             dragThreshold: sidebar.dragThreshold
         };
     }
@@ -390,7 +392,8 @@ Singleton {
                 enabled: services.calendar.enabled,
                 command: services.calendar.command,
                 agendaDays: services.calendar.agendaDays,
-                upcomingHours: services.calendar.upcomingHours,
+                dashUpcomingHours: services.calendar.dashUpcomingHours,
+                sidebarUpcomingHours: services.calendar.sidebarUpcomingHours,
                 reminderMinutes: services.calendar.reminderMinutes,
                 refreshInterval: services.calendar.refreshInterval
             }

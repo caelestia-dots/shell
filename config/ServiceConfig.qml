@@ -27,7 +27,8 @@ JsonObject {
         property bool enabled: false // Requires gws CLI in PATH
         property string command: "gws" // Path or name of the gws CLI binary
         property int agendaDays: 30 // How many days ahead to fetch events
-        property int upcomingHours: 24 // Hours ahead to show in upcoming list
+        property int dashUpcomingHours: 24 // Hours ahead to show in dashboard upcoming list
+        property int sidebarUpcomingHours: 120 // Hours ahead to show in sidebar upcoming list
         property int reminderMinutes: 10 // Minutes before event to send notification, 0 to disable
         property int refreshInterval: 900 // Refresh interval in seconds
     }

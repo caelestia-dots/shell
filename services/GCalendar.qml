@@ -18,9 +18,17 @@ Singleton {
             s.add(ev.dateKey);
         return s;
     }
-    readonly property list<var> upcoming: {
+    readonly property list<var> upcomingDash: {
         const now = Date.now();
-        const cutoff = now + Config.services.calendar.upcomingHours * 3600000;
+        const cutoff = now + Config.services.calendar.dashUpcomingHours * 3600000;
+        return events.filter(ev => {
+            const t = ev.startTime;
+            return t >= now && t < cutoff;
+        });
+    }
+    readonly property list<var> upcomingSidebar: {
+        const now = Date.now();
+        const cutoff = now + Config.services.calendar.sidebarUpcomingHours * 3600000;
         return events.filter(ev => {
             const t = ev.startTime;
             return t >= now && t < cutoff;
@@ -47,9 +55,9 @@ Singleton {
             : Qt.formatDateTime(d, "hh:mm");
     }
 
-    function formatEventTime(ev: var): string {
+    function formatEventTime(ev: var, upcomingHours: int): string {
         let parts = [];
-        if (Config.services.calendar.upcomingHours > 24) {
+        if (upcomingHours > 24) {
             const d = new Date(ev.start);
             const target = ev.isAllDay ? new Date(ev.start + "T00:00:00") : d;
             const now = new Date();

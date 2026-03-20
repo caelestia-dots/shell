@@ -88,7 +88,7 @@ GridLayout {
     Rect {
         Layout.row: 0
         Layout.column: 5
-        Layout.rowSpan: GCalendar.upcoming.length > 0 ? 3 : 2
+        Layout.rowSpan: Config.dashboard.showUpcoming && GCalendar.upcomingDash.length > 0 ? 3 : 2
         Layout.preferredWidth: media.implicitWidth
         Layout.fillHeight: true
 
@@ -107,7 +107,7 @@ GridLayout {
         Layout.fillWidth: true
         Layout.preferredHeight: eventsCol.implicitHeight
 
-        visible: GCalendar.upcoming.length > 0
+        visible: Config.dashboard.showUpcoming && GCalendar.upcomingDash.length > 0
         radius: Appearance.rounding.large
 
         ColumnLayout {
@@ -127,7 +127,7 @@ GridLayout {
             }
 
             Repeater {
-                model: GCalendar.upcoming
+                model: GCalendar.upcomingDash
 
                 RowLayout {
                     id: eventRow
@@ -160,7 +160,7 @@ GridLayout {
                         StyledText {
                             Layout.fillWidth: true
                             text: {
-                                let line = GCalendar.formatEventTime(eventRow.modelData);
+                                let line = GCalendar.formatEventTime(eventRow.modelData, Config.services.calendar.dashUpcomingHours);
                                 if (eventRow.modelData.location)
                                     line += ` · ${eventRow.modelData.location}`;
                                 return line;
