@@ -1,15 +1,16 @@
 pragma ComponentBehavior: Bound
 
+import QtQuick
+import Quickshell
 import qs.components.containers
 import qs.config
-import Quickshell
-import QtQuick
+import qs.modules.bar as Bar
 
 Scope {
     id: root
 
     required property ShellScreen screen
-    required property Item bar
+    required property Bar.BarWrapper bar
 
     ExclusionZone {
         anchors.left: true

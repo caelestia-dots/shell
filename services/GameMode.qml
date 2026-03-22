@@ -1,11 +1,11 @@
 pragma Singleton
 
-import qs.services
-import qs.config
-import Caelestia
+import QtQuick
 import Quickshell
 import Quickshell.Io
-import QtQuick
+import Caelestia
+import qs.services
+import qs.config
 
 Singleton {
     id: root
@@ -40,23 +40,21 @@ Singleton {
     PersistentProperties {
         id: props
 
-        property bool enabled: Hypr.options["animations:enabled"] === 0
+        property bool enabled: Hypr.options["animations:enabled"] === 0 // qmllint disable missing-property
 
         reloadableId: "gameMode"
     }
 
     Connections {
-        target: Hypr
-
         function onConfigReloaded(): void {
             if (props.enabled)
                 root.setDynamicConfs();
         }
+
+        target: Hypr
     }
 
     IpcHandler {
-        target: "gameMode"
-
         function isEnabled(): bool {
             return props.enabled;
         }
@@ -72,5 +70,7 @@ Singleton {
         function disable(): void {
             props.enabled = false;
         }
+
+        target: "gameMode"
     }
 }

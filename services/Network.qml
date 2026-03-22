@@ -1,44 +1,28 @@
 pragma Singleton
 
+import QtQuick
 import Quickshell
 import Quickshell.Io
-import QtQuick
 import qs.services
 
 Singleton {
     id: root
 
-    Component.onCompleted: {
-        // Trigger ethernet device detection after initialization
-        Qt.callLater(() => {
-            getEthernetDevices();
-        });
-        // Load saved connections on startup
-        Nmcli.loadSavedConnections(() => {
-            root.savedConnections = Nmcli.savedConnections;
-            root.savedConnectionSsids = Nmcli.savedConnectionSsids;
-        });
-        // Get initial WiFi status
-        Nmcli.getWifiStatus(enabled => {
-            root.wifiEnabled = enabled;
-        });
-        // Sync networks from Nmcli on startup
-        Qt.callLater(() => {
-            syncNetworksFromNmcli();
-        }, 100);
-    }
-
     readonly property list<AccessPoint> networks: []
     readonly property AccessPoint active: networks.find(n => n.active) ?? null
     property bool wifiEnabled: true
     readonly property bool scanning: Nmcli.scanning
-
     property list<var> ethernetDevices: []
     readonly property var activeEthernet: ethernetDevices.find(d => d.connected) ?? null
     property int ethernetDeviceCount: 0
     property bool ethernetProcessRunning: false
     property var ethernetDeviceDetails: null
     property var wirelessDeviceDetails: null
+    property var pendingConnection: null
+    property list<string> savedConnections: []
+    property list<string> savedConnectionSsids: []
+
+    signal connectionFailed(string ssid)
 
     function enableWifi(enabled: bool): void {
         Nmcli.enableWifi(enabled, result => {
@@ -65,9 +49,6 @@ Singleton {
     function rescanWifi(): void {
         Nmcli.rescanWifi();
     }
-
-    property var pendingConnection: null
-    signal connectionFailed(string ssid)
 
     function connectToNetwork(ssid: string, password: string, bssid: string, callback: var): void {
         // Set up pending connection tracking if callback provided
@@ -159,20 +140,6 @@ Singleton {
         });
     }
 
-    property list<string> savedConnections: []
-    property list<string> savedConnectionSsids: []
-
-    // Sync saved connections from Nmcli when they're updated
-    Connections {
-        target: Nmcli
-        function onSavedConnectionsChanged() {
-            root.savedConnections = Nmcli.savedConnections;
-        }
-        function onSavedConnectionSsidsChanged() {
-            root.savedConnectionSsids = Nmcli.savedConnectionSsids;
-        }
-    }
-
     function syncNetworksFromNmcli(): void {
         const rNetworks = root.networks;
         const nNetworks = Nmcli.networks;
@@ -215,22 +182,6 @@ Singleton {
                 }));
             }
         }
-    }
-
-    component AccessPoint: QtObject {
-        required property var lastIpcObject
-        readonly property string ssid: lastIpcObject.ssid
-        readonly property string bssid: lastIpcObject.bssid
-        readonly property int strength: lastIpcObject.strength
-        readonly property int frequency: lastIpcObject.frequency
-        readonly property bool active: lastIpcObject.active
-        readonly property string security: lastIpcObject.security
-        readonly property bool isSecure: security.length > 0
-    }
-
-    Component {
-        id: apComp
-        AccessPoint {}
     }
 
     function hasSavedProfile(ssid: string): bool {
@@ -309,6 +260,39 @@ Singleton {
         return octets.join(".");
     }
 
+    Component.onCompleted: {
+        // Trigger ethernet device detection after initialization
+        Qt.callLater(() => {
+            getEthernetDevices();
+        });
+        // Load saved connections on startup
+        Nmcli.loadSavedConnections(() => {
+            root.savedConnections = Nmcli.savedConnections;
+            root.savedConnectionSsids = Nmcli.savedConnectionSsids;
+        });
+        // Get initial WiFi status
+        Nmcli.getWifiStatus(enabled => {
+            root.wifiEnabled = enabled;
+        });
+        // Sync networks from Nmcli on startup
+        Qt.callLater(() => {
+            syncNetworksFromNmcli();
+        }, 100);
+    }
+
+    // Sync saved connections from Nmcli when they're updated
+    Connections {
+        function onSavedConnectionsChanged() {
+            root.savedConnections = Nmcli.savedConnections;
+        }
+
+        function onSavedConnectionSsidsChanged() {
+            root.savedConnectionSsids = Nmcli.savedConnectionSsids;
+        }
+
+        target: Nmcli
+    }
+
     Timer {
         id: monitorDebounce
 
@@ -327,5 +311,22 @@ Singleton {
         stdout: SplitParser {
             onRead: monitorDebounce.start()
         }
+    }
+
+    Component {
+        id: apComp
+
+        AccessPoint {}
+    }
+
+    component AccessPoint: QtObject {
+        required property var lastIpcObject
+        readonly property string ssid: lastIpcObject.ssid
+        readonly property string bssid: lastIpcObject.bssid
+        readonly property int strength: lastIpcObject.strength
+        readonly property int frequency: lastIpcObject.frequency
+        readonly property bool active: lastIpcObject.active
+        readonly property string security: lastIpcObject.security
+        readonly property bool isSecure: security.length > 0
     }
 }

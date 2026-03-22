@@ -1,11 +1,11 @@
 pragma ComponentBehavior: Bound
 
+import QtQuick
+import Quickshell
+import Quickshell.Services.SystemTray
 import qs.components
 import qs.services
 import qs.config
-import Quickshell
-import Quickshell.Services.SystemTray
-import QtQuick
 
 StyledRect {
     id: root
@@ -81,6 +81,8 @@ StyledRect {
 
     Loader {
         id: expandIcon
+
+        asynchronous: true
 
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.bottom: parent.bottom

@@ -191,14 +191,14 @@ void ImageAnalyser::analyse(QPromise<AnalyseResult>& promise, const QImage& imag
                 continue;
             }
 
-            const quint32 mr = static_cast<quint32>(pixel[0] & 0xF8);
+            const quint32 mr = static_cast<quint32>(pixel[2] & 0xF8);
             const quint32 mg = static_cast<quint32>(pixel[1] & 0xF8);
-            const quint32 mb = static_cast<quint32>(pixel[2] & 0xF8);
+            const quint32 mb = static_cast<quint32>(pixel[0] & 0xF8);
             ++colours[(mr << 16) | (mg << 8) | mb];
 
-            const qreal r = pixel[0] / 255.0;
+            const qreal r = pixel[2] / 255.0;
             const qreal g = pixel[1] / 255.0;
-            const qreal b = pixel[2] / 255.0;
+            const qreal b = pixel[0] / 255.0;
             totalLuminance += std::sqrt(0.299 * r * r + 0.587 * g * g + 0.114 * b * b);
             ++count;
         }

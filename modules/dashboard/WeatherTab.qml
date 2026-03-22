@@ -1,17 +1,16 @@
+import QtQuick
+import QtQuick.Layouts
 import qs.components
 import qs.services
 import qs.config
-import QtQuick
-import QtQuick.Layouts
 
 Item {
     id: root
 
-    implicitWidth: layout.implicitWidth > 800 ? layout.implicitWidth : 840
-    implicitHeight: layout.implicitHeight
-
     readonly property var today: Weather.forecast && Weather.forecast.length > 0 ? Weather.forecast[0] : null
 
+    implicitWidth: layout.implicitWidth > 800 ? layout.implicitWidth : 840
+    implicitHeight: layout.implicitHeight
     Component.onCompleted: Weather.reload()
 
     ColumnLayout {

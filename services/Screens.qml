@@ -1,8 +1,8 @@
 pragma Singleton
 
+import Quickshell
 import qs.config
 import qs.utils
-import Quickshell
 
 Singleton {
     id: root

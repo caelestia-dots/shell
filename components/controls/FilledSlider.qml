@@ -1,9 +1,9 @@
 import ".."
 import "../effects"
-import qs.services
-import qs.config
 import QtQuick
 import QtQuick.Templates
+import qs.services
+import qs.config
 
 Slider {
     id: root

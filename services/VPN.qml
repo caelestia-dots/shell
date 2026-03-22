@@ -1,10 +1,10 @@
 pragma Singleton
 
+import QtQuick
 import Quickshell
 import Quickshell.Io
-import QtQuick
-import qs.config
 import Caelestia
+import qs.config
 
 Singleton {
     id: root
@@ -128,7 +128,9 @@ Singleton {
         id: statusProc
 
         command: ["ip", "link", "show"]
+        // qmllint disable incompatible-type
         environment: ({
+                // qmllint enable incompatible-type
                 LANG: "C.UTF-8",
                 LC_ALL: "C.UTF-8"
             })
@@ -143,7 +145,7 @@ Singleton {
     Process {
         id: connectProc
 
-        onExited: statusCheckTimer.start()
+        onExited: statusCheckTimer.start() // qmllint disable signal-handler-parameters
         stderr: StdioCollector {
             onStreamFinished: {
                 const error = text.trim();
@@ -159,7 +161,7 @@ Singleton {
     Process {
         id: disconnectProc
 
-        onExited: statusCheckTimer.start()
+        onExited: statusCheckTimer.start() // qmllint disable signal-handler-parameters
         stderr: StdioCollector {
             onStreamFinished: {
                 const error = text.trim();

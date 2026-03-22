@@ -1,11 +1,11 @@
 pragma ComponentBehavior: Bound
 
+import QtQuick
+import QtQuick.Layouts
+import Quickshell
 import qs.components
 import qs.services
 import qs.config
-import Quickshell
-import QtQuick
-import QtQuick.Layouts
 
 Item {
     id: root
@@ -20,8 +20,6 @@ Item {
     clip: true
 
     Connections {
-        target: root.pam
-
         function onBufferChanged(): void {
             if (root.pam.buffer.length > root.buffer.length) {
                 charList.bindImWidth();
@@ -32,6 +30,8 @@ Item {
 
             root.buffer = root.pam.buffer;
         }
+
+        target: root.pam
     }
 
     StyledText {

@@ -1,10 +1,10 @@
 pragma Singleton
 
-import qs.utils
-import Caelestia
+import QtQuick
 import Quickshell
 import Quickshell.Io
-import QtQuick
+import Caelestia
+import qs.utils
 
 Singleton {
     id: root
@@ -436,9 +436,9 @@ Singleton {
                 JSON.parse(text());
                 const elapsed = timer.elapsedMs();
                 // Only show toast for external changes (not our own saves) and when elapsed time is meaningful
-                if (adapter.utilities.toasts.configLoaded && !root.recentlySaved && elapsed > 0) {
-                    Toaster.toast(qsTr("Config loaded"), qsTr("Config loaded in %1ms").arg(elapsed), "rule_settings");
-                } else if (adapter.utilities.toasts.configLoaded && root.recentlySaved && elapsed > 0) {
+                if (adapter.utilities.toasts.configLoaded && !root.recentlySaved && elapsed > 0) { // qmllint disable unresolved-type
+                    Toaster.toast(qsTr("Config loaded"), qsTr("Config loaded in %1ms").arg(elapsed), "rule_settings"); // qmllint disable unresolved-type
+                } else if (adapter.utilities.toasts.configLoaded && root.recentlySaved && elapsed > 0) { // qmllint disable unresolved-type
                     Toaster.toast(qsTr("Config saved"), qsTr("Config reloaded in %1ms").arg(elapsed), "rule_settings");
                 }
             } catch (e) {
@@ -451,7 +451,7 @@ Singleton {
         }
         onSaveFailed: err => Toaster.toast(qsTr("Failed to save config"), FileViewError.toString(err), "settings_alert", Toast.Error)
 
-        JsonAdapter {
+        JsonAdapter { // qmllint disable unresolved-type
             id: adapter
 
             property AppearanceConfig appearance: AppearanceConfig {}

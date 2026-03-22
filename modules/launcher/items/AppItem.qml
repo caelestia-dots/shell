@@ -1,17 +1,17 @@
-import "../services"
+import QtQuick
+import Quickshell
+import Quickshell.Widgets
 import qs.components
 import qs.services
 import qs.config
 import qs.utils
-import Quickshell
-import Quickshell.Widgets
-import QtQuick
+import qs.modules.launcher.services
 
 Item {
     id: root
 
     required property DesktopEntry modelData
-    required property PersistentProperties visibilities
+    required property DrawerVisibilities visibilities
 
     implicitHeight: Config.launcher.sizes.itemHeight
 
@@ -19,12 +19,12 @@ Item {
     anchors.right: parent?.right
 
     StateLayer {
-        radius: Appearance.rounding.normal
-
         function onClicked(): void {
             Apps.launch(root.modelData);
             root.visibilities.launcher = false;
         }
+
+        radius: Appearance.rounding.normal
     }
 
     Item {
@@ -36,6 +36,7 @@ Item {
         IconImage {
             id: icon
 
+            asynchronous: true
             source: Quickshell.iconPath(root.modelData?.icon, "image-missing")
             implicitSize: parent.height * 0.8
 
@@ -74,9 +75,10 @@ Item {
         Loader {
             id: favouriteIcon
 
+            asynchronous: true
             anchors.verticalCenter: parent.verticalCenter
             anchors.right: parent.right
-            active: modelData && Strings.testRegexList(Config.launcher.favouriteApps, modelData.id)
+            active: root.modelData && Strings.testRegexList(Config.launcher.favouriteApps, root.modelData.id)
 
             sourceComponent: MaterialIcon {
                 text: "favorite"

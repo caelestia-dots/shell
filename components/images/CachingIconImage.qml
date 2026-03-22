@@ -1,13 +1,14 @@
 pragma ComponentBehavior: Bound
 
-import qs.utils
-import Quickshell.Widgets
 import QtQuick
+import Quickshell.Widgets
+import qs.utils
 
 Item {
     id: root
 
-    readonly property int status: loader.item?.status ?? Image.Null
+    // Easier (and more efficient) to ignore it than to check type and cast
+    readonly property int status: loader.item?.status ?? Image.Null // qmllint disable missing-property
     readonly property real actualSize: Math.min(width, height)
     property real implicitSize
     property url source
@@ -18,6 +19,7 @@ Item {
     Loader {
         id: loader
 
+        asynchronous: true
         anchors.fill: parent
         sourceComponent: root.source ? root.source.toString().startsWith("image://icon/") ? iconImage : cachingImage : null
     }

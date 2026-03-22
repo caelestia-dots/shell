@@ -1,5 +1,5 @@
-import qs.utils
 import Quickshell.Io
+import qs.utils
 
 JsonObject {
     property string wallpaperDir: `${Paths.pictures}/Wallpapers`

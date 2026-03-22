@@ -1,21 +1,21 @@
 pragma ComponentBehavior: Bound
 
-import qs.components
-import qs.components.controls
-import qs.services
-import qs.utils
-import qs.config
-import Caelestia.Services
-import Quickshell
-import Quickshell.Services.Mpris
 import QtQuick
 import QtQuick.Layouts
 import QtQuick.Shapes
+import Quickshell
+import Quickshell.Services.Mpris
+import Caelestia.Services
+import qs.components
+import qs.components.controls
+import qs.services
+import qs.config
+import qs.utils
 
 Item {
     id: root
 
-    required property PersistentProperties visibilities
+    required property DrawerVisibilities visibilities
     readonly property bool needsKeyboard: lyricMenuOpen
 
     readonly property real nonAnimHeight: Math.max(cover.implicitHeight + Config.dashboard.sizes.mediaVisualiserSize * 2, lyricMenuOpen ? lyricMenu.implicitHeight : details.implicitHeight, bongocat.implicitHeight) + Appearance.padding.large * 2
@@ -80,15 +80,17 @@ Item {
 
     Timer {
         id: lyricsHideDelay
+
         interval: 300
         repeat: false
     }
 
     Connections {
-        target: lyricsHideDelay
         function onTriggered() {
             root.lyricsShowingDebounced = false;
         }
+
+        target: lyricsHideDelay
     }
 
     ServiceRef {
@@ -248,6 +250,7 @@ Item {
 
         LyricsView {
             id: lyricsViewInDetails
+
             Layout.fillWidth: true
             Layout.preferredHeight: 200
         }
@@ -325,9 +328,6 @@ Item {
             }
 
             CustomMouseArea {
-                anchors.fill: parent
-                acceptedButtons: Qt.NoButton
-
                 function onWheel(event: WheelEvent) {
                     const active = Players.active;
                     if (!active?.canSeek || !active?.positionSupported)
@@ -339,6 +339,9 @@ Item {
                         active.position = Math.max(0, Math.min(active.length, active.position + delta));
                     });
                 }
+
+                anchors.fill: parent
+                acceptedButtons: Qt.NoButton
             }
         }
 
@@ -378,6 +381,7 @@ Item {
 
         visible: lyricMenu.height === 0 || opacity > 0
         opacity: lyricMenu.height === 0 ? 1 : 0
+
         Behavior on opacity {
             NumberAnimation {
                 duration: Appearance.anim.durations.normal
@@ -419,6 +423,7 @@ Item {
         visible: root.lyricMenuOpen || height > 0
         height: root.lyricMenuOpen ? implicitHeight : 0
         clip: true
+
         Behavior on height {
             NumberAnimation {
                 duration: Appearance.anim.durations.normal
@@ -429,6 +434,7 @@ Item {
 
     RowLayout {
         id: playerChanger
+
         parent: !root.lyricsShowingDebounced ? details : leftSection
         Layout.alignment: Qt.AlignHCenter
         spacing: Appearance.spacing.small

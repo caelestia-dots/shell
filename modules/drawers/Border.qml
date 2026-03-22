@@ -1,10 +1,10 @@
 pragma ComponentBehavior: Bound
 
+import QtQuick
+import QtQuick.Effects
 import qs.components
 import qs.services
 import qs.config
-import QtQuick
-import QtQuick.Effects
 
 Item {
     id: root

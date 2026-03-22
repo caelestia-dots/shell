@@ -1,8 +1,8 @@
 pragma Singleton
 
-import qs.config
-import Quickshell
 import QtQuick
+import Quickshell
+import qs.config
 
 Singleton {
     property alias enabled: clock.enabled
@@ -23,6 +23,7 @@ Singleton {
 
     SystemClock {
         id: clock
+
         precision: SystemClock.Seconds
     }
 }

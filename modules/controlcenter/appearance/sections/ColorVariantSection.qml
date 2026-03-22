@@ -2,14 +2,14 @@ pragma ComponentBehavior: Bound
 
 import ".."
 import "../../../launcher/services"
-import qs.components
-import qs.components.controls
-import qs.components.containers
-import qs.services
-import qs.config
-import Quickshell
 import QtQuick
 import QtQuick.Layouts
+import Quickshell
+import qs.components
+import qs.components.containers
+import qs.components.controls
+import qs.services
+import qs.config
 
 CollapsibleSection {
     title: qsTr("Color variant")
@@ -32,6 +32,7 @@ CollapsibleSection {
                 radius: Appearance.rounding.normal
                 border.width: modelData.variant === Schemes.currentVariant ? 1 : 0
                 border.color: Colours.palette.m3primary
+                implicitHeight: variantRow.implicitHeight + Appearance.padding.normal * 2
 
                 StateLayer {
                     function onClicked(): void {
@@ -48,6 +49,7 @@ CollapsibleSection {
 
                 Timer {
                     id: reloadTimer
+
                     interval: 300
                     onTriggered: {
                         Schemes.reload();
@@ -83,8 +85,6 @@ CollapsibleSection {
                         font.pointSize: Appearance.font.size.large
                     }
                 }
-
-                implicitHeight: variantRow.implicitHeight + Appearance.padding.normal * 2
             }
         }
     }

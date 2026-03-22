@@ -1,15 +1,15 @@
 pragma ComponentBehavior: Bound
 
+import QtQuick
+import QtQuick.Layouts
+import Quickshell
+import Quickshell.Widgets
+import Quickshell.Services.Notifications
 import qs.components
 import qs.components.effects
 import qs.services
 import qs.config
 import qs.utils
-import Quickshell
-import Quickshell.Widgets
-import Quickshell.Services.Notifications
-import QtQuick
-import QtQuick.Layouts
 
 StyledRect {
     id: root
@@ -109,12 +109,14 @@ StyledRect {
                 radius: Appearance.rounding.full
 
                 Loader {
+                    asynchronous: true
                     anchors.centerIn: parent
                     sourceComponent: root.image ? imageComp : root.appIcon ? appIconComp : materialIconComp
                 }
             }
 
             Loader {
+                asynchronous: true
                 anchors.right: parent.right
                 anchors.bottom: parent.bottom
                 active: root.appIcon && root.image
@@ -174,11 +176,11 @@ StyledRect {
                     Layout.preferredWidth: root.notifs.length > Config.notifs.groupPreviewNum ? implicitWidth : 0
 
                     StateLayer {
-                        color: root.urgency === "critical" ? Colours.palette.m3onError : Colours.palette.m3onSurface
-
                         function onClicked(): void {
                             root.expanded = !root.expanded;
                         }
+
+                        color: root.urgency === "critical" ? Colours.palette.m3onError : Colours.palette.m3onSurface
                     }
 
                     RowLayout {
@@ -270,6 +272,7 @@ StyledRect {
             }
 
             Loader {
+                asynchronous: true
                 Layout.fillWidth: true
 
                 opacity: root.expanded ? 1 : 0
@@ -303,7 +306,7 @@ StyledRect {
     component NotifLine: StyledText {
         id: notifLine
 
-        required property Notifs.Notif modelData
+        required property NotifData modelData
 
         Layout.fillWidth: true
         textFormat: Text.MarkdownText

@@ -1,11 +1,11 @@
 pragma ComponentBehavior: Bound
 
 import "items"
+import QtQuick
+import Quickshell
 import qs.components.controls
 import qs.services
 import qs.config
-import Quickshell
-import QtQuick
 
 PathView {
     id: root
@@ -18,7 +18,7 @@ PathView {
     readonly property int itemWidth: Config.launcher.sizes.wallpaperWidth * 0.8 + Appearance.padding.larger * 2
 
     readonly property int numItems: {
-        const screen = QsWindow.window?.screen;
+        const screen = (QsWindow.window as QsWindow)?.screen;
         if (!screen)
             return 0;
 
@@ -58,7 +58,7 @@ PathView {
 
     onCurrentItemChanged: {
         if (currentItem)
-            Wallpapers.preview(currentItem.modelData.path);
+            Wallpapers.preview((currentItem as WallpaperItem).modelData.path);
     }
 
     implicitWidth: Math.min(numItems, count) * itemWidth

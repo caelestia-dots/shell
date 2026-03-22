@@ -1,11 +1,11 @@
 pragma ComponentBehavior: Bound
 
 import "lock"
-import qs.config
-import qs.services
-import Caelestia.Internal
 import Quickshell
 import Quickshell.Wayland
+import Caelestia.Internal
+import qs.services
+import qs.config
 
 Scope {
     id: root

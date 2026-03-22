@@ -1,28 +1,29 @@
 pragma ComponentBehavior: Bound
 
+import QtQuick
+import QtQuick.Layouts
 import qs.components
 import qs.components.controls
 import qs.services
 import qs.config
-import QtQuick
-import QtQuick.Layouts
 
 StyledRect {
     id: root
 
     required property real contentHeight
 
-    implicitHeight: contentHeight
-
-    radius: Appearance.rounding.large
-    color: Colours.tPalette.m3surfaceContainer
-
     function searchCandidates(title, artist) {
         LyricsService.currentRequestId++;
         LyricsService.fetchNetEaseCandidates(title, artist, LyricsService.currentRequestId);
     }
 
+    implicitHeight: contentHeight
+
+    radius: Appearance.rounding.large
+    color: Colours.tPalette.m3surfaceContainer
+
     Loader {
+        asynchronous: true
         anchors.fill: parent
         active: root.height > 0
 
@@ -90,18 +91,18 @@ StyledRect {
 
                 delegate: Item {
                     id: delegateRoot
-                    width: ListView.view.width * 0.98
-                    height: 70
-                    anchors.horizontalCenter: parent?.horizontalCenter
 
                     required property real id
                     required property string title
                     required property string artist
-
                     property bool hovered: false
                     property bool pressed: false
 
+                    width: ListView.view.width * 0.98
+                    height: 70
+                    anchors.horizontalCenter: parent?.horizontalCenter
                     scale: hovered ? 1.02 : 1.0
+
                     Behavior on scale {
                         NumberAnimation {
                             duration: Appearance.anim.durations.small
@@ -111,6 +112,7 @@ StyledRect {
 
                     Rectangle {
                         id: background
+
                         anchors.fill: parent
                         radius: Appearance.rounding.small
 
@@ -155,6 +157,7 @@ StyledRect {
                             radius: 2
                             anchors.verticalCenter: parent.verticalCenter
                             color: LyricsService.currentSongId === delegateRoot.id ? Colours.palette.m3primary : "transparent"
+
                             Behavior on color {
                                 ColorAnimation {
                                     duration: Appearance.anim.durations.small
@@ -174,6 +177,7 @@ StyledRect {
                                 color: delegateRoot.hovered ? Colours.palette.m3primary : Colours.palette.m3onSurface
                                 width: parent.width
                                 elide: Text.ElideRight
+
                                 Behavior on color {
                                     ColorAnimation {
                                         duration: Appearance.anim.durations.small
@@ -216,6 +220,7 @@ StyledRect {
 
                     StyledInputField {
                         id: searchTitle
+
                         Layout.fillWidth: true
                         horizontalAlignment: TextInput.AlignLeft
 
@@ -228,6 +233,7 @@ StyledRect {
 
                     StyledInputField {
                         id: searchArtist
+
                         Layout.fillWidth: true
                         horizontalAlignment: TextInput.AlignLeft
 
@@ -277,26 +283,12 @@ StyledRect {
 
                 TextInput {
                     id: offsetInput
+
                     horizontalAlignment: TextInput.AlignHCenter
                     color: Colours.palette.m3secondary
                     font.pointSize: Appearance.font.size.normal
                     selectByMouse: true
                     text: (LyricsService.offset >= 0 ? "+" : "") + LyricsService.offset.toFixed(1) + "s"
-
-                    Binding {
-                        target: offsetInput
-                        property: "text"
-                        value: (LyricsService.offset >= 0 ? "+" : "") + LyricsService.offset.toFixed(1) + "s"
-                        when: !offsetInput.activeFocus
-                    }
-
-                    Connections {
-                        target: LyricsService
-                        function onCurrentRequestIdChanged() {
-                            offsetInput.focus = false;
-                        }
-                    }
-
                     onEditingFinished: {
                         let cleaned = offsetInput.text.replace(/[+s]/g, "").trim();
                         let val = parseFloat(cleaned);
@@ -306,6 +298,21 @@ StyledRect {
                         } else {
                             offsetInput.text = (LyricsService.offset >= 0 ? "+" : "") + LyricsService.offset.toFixed(1) + "s";
                         }
+                    }
+
+                    Binding {
+                        target: offsetInput
+                        property: "text"
+                        value: (LyricsService.offset >= 0 ? "+" : "") + LyricsService.offset.toFixed(1) + "s"
+                        when: !offsetInput.activeFocus
+                    }
+
+                    Connections {
+                        function onCurrentRequestIdChanged() {
+                            offsetInput.focus = false;
+                        }
+
+                        target: LyricsService
                     }
                 }
 

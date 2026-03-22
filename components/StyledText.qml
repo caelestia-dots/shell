@@ -1,8 +1,8 @@
 pragma ComponentBehavior: Bound
 
+import QtQuick
 import qs.services
 import qs.config
-import QtQuick
 
 Text {
     id: root

@@ -1,19 +1,19 @@
 pragma ComponentBehavior: Bound
 
+import QtQuick
+import QtQuick.Controls
+import Quickshell
+import Quickshell.Widgets
 import qs.components
 import qs.components.controls
 import qs.services
 import qs.config
-import Quickshell
-import Quickshell.Widgets
-import QtQuick
-import QtQuick.Controls
 
 Item {
     id: root
 
     required property real nonAnimWidth
-    required property PersistentProperties state
+    required property DashboardState state
     required property var tabs
 
     readonly property alias count: bar.count
@@ -111,6 +111,13 @@ Item {
         contentItem: CustomMouseArea {
             id: mouse
 
+            function onWheel(event: WheelEvent): void {
+                if (event.angleDelta.y < 0)
+                    root.state.currentTab = Math.min(root.state.currentTab + 1, bar.count - 1);
+                else if (event.angleDelta.y > 0)
+                    root.state.currentTab = Math.max(root.state.currentTab - 1, 0);
+            }
+
             implicitWidth: Math.max(icon.width, label.width)
             implicitHeight: icon.height + label.height
 
@@ -127,13 +134,6 @@ Item {
                 rippleAnim.radius = Math.sqrt(Math.max(dist(event.x, event.y + stateY), dist(event.x, stateWrapper.height - event.y), dist(width - event.x, event.y + stateY), dist(width - event.x, stateWrapper.height - event.y)));
 
                 rippleAnim.restart();
-            }
-
-            function onWheel(event: WheelEvent): void {
-                if (event.angleDelta.y < 0)
-                    root.state.currentTab = Math.min(root.state.currentTab + 1, bar.count - 1);
-                else if (event.angleDelta.y > 0)
-                    root.state.currentTab = Math.max(root.state.currentTab - 1, 0);
             }
 
             SequentialAnimation {

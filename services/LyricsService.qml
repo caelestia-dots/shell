@@ -1,12 +1,12 @@
 pragma Singleton
 
-import qs.config
-import qs.utils
-import Caelestia
+import "../utils/scripts/lrcparser.js" as Lrc
 import QtQuick
 import Quickshell
 import Quickshell.Io
-import "../utils/scripts/lrcparser.js" as Lrc
+import Caelestia
+import qs.config
+import qs.utils
 
 Singleton {
     id: root
@@ -32,87 +32,11 @@ Singleton {
 
     property var lyricsMap: ({})
 
-    ListModel {
-        id: lyricsModel
-    }
-    ListModel {
-        id: fetchedCandidatesModel
-    }
-
-    Timer {
-        id: seekTimer
-        interval: 500
-        onTriggered: root.isManualSeeking = false
-    }
-
-    // If no local lyrics were loaded within the interval, fall back to NetEase
-    Timer {
-        id: fallbackTimer
-        interval: 200
-        onTriggered: {
-            if (lyricsModel.count === 0) {
-                root.backend = "NetEase";
-                fallbackToOnline();
-            }
-        }
-    }
-
-    Timer {
-        id: loadDebounce
-        interval: 50
-        onTriggered: root._doLoadLyrics()
-    }
-
-    FileView {
-        id: lyricsMapFileView
-        path: root.lyricsMapFile
-        printErrors: false
-        onLoaded: {
-            try {
-                root.lyricsMap = JSON.parse(text());
-            } catch (e) {
-                root.lyricsMap = {};
-            }
-        }
-    }
-
-    FileView {
-        id: lrcFile
-        printErrors: false
-        onLoaded: {
-            fallbackTimer.stop();
-            let parsed = Lrc.parseLrc(text());
-            if (parsed.length > 0) {
-                root.backend = "Local";
-                updateModel(parsed);
-                loading = false;
-            } else {
-                root.backend = "NetEase";
-                fallbackToOnline();
-            }
-        }
-    }
-
-    Connections {
-        target: Players
-        function onActiveChanged() {
-            root.player = Players.active;
-            loadLyrics();
-        }
-    }
-
-    Connections {
-        target: root.player
-        ignoreUnknownSignals: true
-        function onMetadataChanged() {
-            loadLyrics();
-        }
-    }
-
-    Process {
-        id: saveLyricsMap
-        command: ["sh", "-c", `mkdir -p "${root.lyricsDir}" && echo '${JSON.stringify(root.lyricsMap)}' > "${root.lyricsMapFile}"`]
-    }
+    // shared headers for all NetEase requests
+    readonly property var _netEaseHeaders: ({
+            "User-Agent": "Mozilla/5.0 (X11; Linux x86_64; rv:120.0) Gecko/20100101 Firefox/120.0",
+            "Referer": "https://music.163.com/"
+        })
 
     function getMetadata() {
         if (!player || !player.metadata)
@@ -219,12 +143,6 @@ Singleton {
     }
 
     // NetEase
-
-    // shared headers for all NetEase requests
-    readonly property var _netEaseHeaders: ({
-            "User-Agent": "Mozilla/5.0 (X11; Linux x86_64; rv:120.0) Gecko/20100101 Firefox/120.0",
-            "Referer": "https://music.163.com/"
-        })
 
     // searches NetEase and populates the candidates model. returns the result array via the onResults callback
     function _searchNetEase(title, artist, reqId, onResults) {
@@ -336,5 +254,96 @@ Singleton {
         }
 
         seekTimer.restart();
+    }
+
+    ListModel {
+        id: lyricsModel
+    }
+
+    ListModel {
+        id: fetchedCandidatesModel
+    }
+
+    Timer {
+        id: seekTimer
+
+        interval: 500
+        onTriggered: root.isManualSeeking = false
+    }
+
+    // If no local lyrics were loaded within the interval, fall back to NetEase
+    Timer {
+        id: fallbackTimer
+
+        interval: 200
+        onTriggered: {
+            if (lyricsModel.count === 0) {
+                root.backend = "NetEase";
+                fallbackToOnline();
+            }
+        }
+    }
+
+    Timer {
+        id: loadDebounce
+
+        interval: 50
+        onTriggered: root._doLoadLyrics()
+    }
+
+    FileView {
+        id: lyricsMapFileView
+
+        path: root.lyricsMapFile
+        printErrors: false
+        onLoaded: {
+            try {
+                root.lyricsMap = JSON.parse(text());
+            } catch (e) {
+                root.lyricsMap = {};
+            }
+        }
+    }
+
+    FileView {
+        id: lrcFile
+
+        printErrors: false
+        onLoaded: {
+            fallbackTimer.stop();
+            let parsed = Lrc.parseLrc(text());
+            if (parsed.length > 0) {
+                root.backend = "Local";
+                updateModel(parsed);
+                loading = false;
+            } else {
+                root.backend = "NetEase";
+                fallbackToOnline();
+            }
+        }
+    }
+
+    Connections {
+        function onActiveChanged() {
+            root.player = Players.active;
+            loadLyrics();
+        }
+
+        target: Players
+    }
+
+    Connections {
+        function onMetadataChanged() {
+            loadLyrics();
+        }
+
+        target: root.player
+        ignoreUnknownSignals: true
+    }
+
+    Process {
+        id: saveLyricsMap
+
+        command: ["sh", "-c", `mkdir -p "${root.lyricsDir}" && echo '${JSON.stringify(root.lyricsMap)}' > "${root.lyricsMapFile}"`]
     }
 }

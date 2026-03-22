@@ -1,18 +1,17 @@
+import QtQuick
 import qs.components
 import qs.components.effects
-import qs.components.images
 import qs.components.filedialog
+import qs.components.images
 import qs.services
 import qs.config
 import qs.utils
-import Quickshell
-import QtQuick
 
 Row {
     id: root
 
-    required property PersistentProperties visibilities
-    required property PersistentProperties state
+    required property DrawerVisibilities visibilities
+    required property DashboardState state
     required property FileDialog facePicker
 
     padding: Appearance.padding.large
@@ -71,12 +70,12 @@ Row {
                 opacity: parent.containsMouse ? 1 : 0
 
                 StateLayer {
-                    color: Colours.palette.m3onPrimary
-
                     function onClicked(): void {
                         root.visibilities.launcher = false;
                         root.facePicker.open();
                     }
+
+                    color: Colours.palette.m3onPrimary
                 }
 
                 MaterialIcon {

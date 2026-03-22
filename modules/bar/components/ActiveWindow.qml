@@ -1,10 +1,10 @@
 pragma ComponentBehavior: Bound
 
+import QtQuick
 import qs.components
 import qs.services
-import qs.utils
 import qs.config
-import QtQuick
+import qs.utils
 
 Item {
     id: root
@@ -39,6 +39,7 @@ Item {
     implicitHeight: icon.implicitHeight + current.implicitWidth + current.anchors.topMargin
 
     Loader {
+        asynchronous: true
         anchors.fill: parent
         active: !Config.bar.activeWindow.showOnHover
 

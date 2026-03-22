@@ -1,11 +1,11 @@
 pragma ComponentBehavior: Bound
 
+import QtQuick
+import QtQuick.Layouts
 import qs.components
 import qs.components.effects
 import qs.services
 import qs.config
-import QtQuick
-import QtQuick.Layouts
 
 Item {
     id: root
@@ -18,7 +18,7 @@ Item {
 
     Image {
         anchors.fill: parent
-        source: Players.active?.trackArtUrl ?? ""
+        source: Players.active?.trackArtUrl ?? "" // qmllint disable incompatible-type
 
         asynchronous: true
         fillMode: Image.PreserveAspectCrop
@@ -110,34 +110,34 @@ Item {
             spacing: Appearance.spacing.large
 
             PlayerControl {
-                icon: "skip_previous"
-
                 function onClicked(): void {
                     if (Players.active?.canGoPrevious)
                         Players.active.previous();
                 }
+
+                icon: "skip_previous"
             }
 
             PlayerControl {
+                function onClicked(): void {
+                    if (Players.active?.canTogglePlaying)
+                        Players.active.togglePlaying();
+                }
+
                 animate: true
                 icon: active ? "pause" : "play_arrow"
                 colour: "Primary"
                 level: active ? 2 : 1
                 active: Players.active?.isPlaying ?? false
-
-                function onClicked(): void {
-                    if (Players.active?.canTogglePlaying)
-                        Players.active.togglePlaying();
-                }
             }
 
             PlayerControl {
-                icon: "skip_next"
-
                 function onClicked(): void {
                     if (Players.active?.canGoNext)
                         Players.active.next();
                 }
+
+                icon: "skip_next"
             }
         }
     }
@@ -171,11 +171,11 @@ Item {
         StateLayer {
             id: controlState
 
-            color: control.active ? Colours.palette[`m3on${control.colour}`] : Colours.palette[`m3on${control.colour}Container`]
-
             function onClicked(): void {
                 control.onClicked();
             }
+
+            color: control.active ? Colours.palette[`m3on${control.colour}`] : Colours.palette[`m3on${control.colour}Container`]
         }
 
         MaterialIcon {

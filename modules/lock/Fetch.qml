@@ -1,13 +1,13 @@
 pragma ComponentBehavior: Bound
 
+import QtQuick
+import QtQuick.Layouts
+import Quickshell.Services.UPower
 import qs.components
 import qs.components.effects
 import qs.services
 import qs.config
 import qs.utils
-import Quickshell.Services.UPower
-import QtQuick
-import QtQuick.Layouts
 
 ColumnLayout {
     id: root
@@ -162,6 +162,7 @@ ColumnLayout {
     }
 
     component WrappedLoader: Loader {
+        asynchronous: true
         visible: active
     }
 

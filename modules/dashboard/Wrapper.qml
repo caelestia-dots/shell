@@ -1,22 +1,19 @@
 pragma ComponentBehavior: Bound
 
+import QtQuick
+import Quickshell
+import Caelestia
 import qs.components
 import qs.components.filedialog
 import qs.config
 import qs.utils
-import Caelestia
-import Quickshell
-import QtQuick
 
 Item {
     id: root
 
-    required property PersistentProperties visibilities
-    readonly property bool needsKeyboard: content.item?.needsKeyboard ?? false
-    readonly property PersistentProperties dashState: PersistentProperties {
-        property int currentTab
-        property date currentDate: new Date()
-
+    required property DrawerVisibilities visibilities
+    readonly property bool needsKeyboard: (content.item as Content)?.needsKeyboard ?? false
+    readonly property DashboardState dashState: DashboardState {
         reloadableId: "dashboardState"
     }
     readonly property FileDialog facePicker: FileDialog {
@@ -31,7 +28,7 @@ Item {
         }
     }
 
-    readonly property real nonAnimHeight: state === "visible" ? (content.item?.nonAnimHeight ?? 0) : 0
+    readonly property real nonAnimHeight: state === "visible" ? ((content.item as Content)?.nonAnimHeight ?? 0) : 0
 
     visible: height > 0
     implicitHeight: 0

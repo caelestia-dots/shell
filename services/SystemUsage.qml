@@ -1,9 +1,9 @@
 pragma Singleton
 
-import qs.config
+import QtQuick
 import Quickshell
 import Quickshell.Io
-import QtQuick
+import qs.config
 
 Singleton {
     id: root
@@ -138,6 +138,7 @@ Singleton {
 
     Process {
         id: storage
+
         // Get physical disks with aggregated usage from their partitions
         // -J triggers JSON output. -b triggers bytes.
         command: ["lsblk", "-J", "-b", "-o", "NAME,SIZE,TYPE,FSUSED,FSSIZE,MOUNTPOINT"]

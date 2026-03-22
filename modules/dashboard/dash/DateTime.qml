@@ -1,10 +1,10 @@
 pragma ComponentBehavior: Bound
 
+import QtQuick
+import QtQuick.Layouts
 import qs.components
 import qs.services
 import qs.config
-import QtQuick
-import QtQuick.Layouts
 
 Item {
     id: root
@@ -48,6 +48,7 @@ Item {
         }
 
         Loader {
+            asynchronous: true
             Layout.alignment: Qt.AlignHCenter
 
             active: Config.services.useTwelveHourClock

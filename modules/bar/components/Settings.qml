@@ -1,9 +1,8 @@
+import QtQuick
 import qs.components
-import qs.modules.controlcenter
 import qs.services
 import qs.config
-import Quickshell
-import QtQuick
+import qs.modules.controlcenter
 
 Item {
     id: root
@@ -13,18 +12,17 @@ Item {
 
     StateLayer {
         // Cursed workaround to make the height larger than the parent
-        anchors.fill: undefined
-        anchors.centerIn: parent
-        implicitWidth: implicitHeight
-        implicitHeight: icon.implicitHeight + Appearance.padding.small * 2
-
-        radius: Appearance.rounding.full
-
         function onClicked(): void {
             WindowFactory.create(null, {
                 active: "network"
             });
         }
+
+        anchors.fill: undefined
+        anchors.centerIn: parent
+        implicitWidth: implicitHeight
+        implicitHeight: icon.implicitHeight + Appearance.padding.small * 2
+        radius: Appearance.rounding.full
     }
 
     MaterialIcon {

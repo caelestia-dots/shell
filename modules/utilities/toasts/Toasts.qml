@@ -1,10 +1,10 @@
 pragma ComponentBehavior: Bound
 
+import QtQuick
+import Quickshell
+import Caelestia
 import qs.components
 import qs.config
-import Caelestia
-import Quickshell
-import QtQuick
 
 Item {
     id: root

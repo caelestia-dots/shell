@@ -1,14 +1,14 @@
 pragma ComponentBehavior: Bound
 
+import QtQuick
+import QtQuick.Layouts
+import Quickshell
+import Quickshell.Services.Notifications
 import qs.components
 import qs.components.effects
 import qs.services
 import qs.config
 import qs.utils
-import Quickshell
-import Quickshell.Services.Notifications
-import QtQuick
-import QtQuick.Layouts
 
 StyledRect {
     id: root
@@ -16,7 +16,7 @@ StyledRect {
     required property string modelData
     required property Props props
     required property Flickable container
-    required property var visibilities
+    required property DrawerVisibilities visibilities
 
     readonly property list<var> notifs: Notifs.list.filter(n => n.appName === modelData)
     readonly property var groupProps: {
@@ -136,12 +136,14 @@ StyledRect {
                 radius: Appearance.rounding.full
 
                 Loader {
+                    asynchronous: true
                     anchors.centerIn: parent
                     sourceComponent: root.image ? imageComp : root.appIcon ? appIconComp : materialIconComp
                 }
             }
 
             Loader {
+                asynchronous: true
                 anchors.right: parent.right
                 anchors.bottom: parent.bottom
                 active: root.appIcon && root.image
@@ -202,11 +204,11 @@ StyledRect {
                     radius: Appearance.rounding.full
 
                     StateLayer {
-                        color: root.urgency === NotificationUrgency.Critical ? Colours.palette.m3onError : Colours.palette.m3onSurface
-
                         function onClicked(): void {
                             root.toggleExpand(!root.expanded);
                         }
+
+                        color: root.urgency === NotificationUrgency.Critical ? Colours.palette.m3onError : Colours.palette.m3onSurface
                     }
 
                     RowLayout {

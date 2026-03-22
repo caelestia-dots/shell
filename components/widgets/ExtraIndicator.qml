@@ -1,8 +1,8 @@
 import ".."
 import "../effects"
+import QtQuick
 import qs.services
 import qs.config
-import QtQuick
 
 StyledRect {
     required property int extra

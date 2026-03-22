@@ -1,17 +1,17 @@
 pragma ComponentBehavior: Bound
 
+import QtQuick
+import QtQuick.Layouts
+import Quickshell
+import Quickshell.Widgets
 import qs.components
 import qs.components.filedialog
 import qs.config
-import Quickshell
-import Quickshell.Widgets
-import QtQuick
-import QtQuick.Layouts
 
 Item {
     id: root
 
-    required property PersistentProperties visibilities
+    required property DrawerVisibilities visibilities
     readonly property bool needsKeyboard: {
         const count = repeater.count;
         for (let i = 0; i < count; i++) {
@@ -21,7 +21,7 @@ Item {
         }
         return false;
     }
-    required property PersistentProperties state
+    required property DashboardState state
     required property FileDialog facePicker
 
     readonly property var dashboardTabs: {
@@ -99,15 +99,15 @@ Item {
 
             flickableDirection: Flickable.HorizontalFlick
 
-            implicitWidth: currentItem.implicitWidth
-            implicitHeight: currentItem.implicitHeight
+            implicitWidth: currentItem?.implicitWidth ?? 0
+            implicitHeight: currentItem?.implicitHeight ?? 0
 
-            contentX: currentItem.x
+            contentX: currentItem?.x ?? 0
             contentWidth: row.implicitWidth
             contentHeight: row.implicitHeight
 
             onContentXChanged: {
-                if (!moving)
+                if (!moving || !currentItem)
                     return;
 
                 const x = contentX - currentItem.x;
@@ -118,13 +118,16 @@ Item {
             }
 
             onDragEnded: {
+                if (!currentItem)
+                    return;
+
                 const x = contentX - currentItem.x;
                 if (x > currentItem.implicitWidth / 10)
                     root.state.currentTab = Math.min(root.state.currentTab + 1, tabs.count - 1);
                 else if (x < -currentItem.implicitWidth / 10)
                     root.state.currentTab = Math.max(root.state.currentTab - 1, 0);
                 else
-                    contentX = Qt.binding(() => currentItem.x);
+                    contentX = Qt.binding(() => currentItem?.x ?? 0);
             }
 
             RowLayout {
@@ -160,6 +163,7 @@ Item {
 
             Component {
                 id: dashComponent
+
                 Dash {
                     visibilities: root.visibilities
                     state: root.state
@@ -169,6 +173,7 @@ Item {
 
             Component {
                 id: mediaComponent
+
                 MediaWrapper {
                     visibilities: root.visibilities
                 }
@@ -176,12 +181,14 @@ Item {
 
             Component {
                 id: performanceComponent
+
                 Performance {}
             }
 
             Component {
                 id: weatherComponent
-                Weather {}
+
+                WeatherTab {}
             }
 
             Behavior on contentX {

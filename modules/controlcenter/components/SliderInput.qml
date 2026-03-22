@@ -1,12 +1,12 @@
 pragma ComponentBehavior: Bound
 
+import QtQuick
+import QtQuick.Layouts
 import qs.components
 import qs.components.controls
 import qs.components.effects
 import qs.services
 import qs.config
-import QtQuick
-import QtQuick.Layouts
 
 ColumnLayout {
     id: root
@@ -21,6 +21,9 @@ ColumnLayout {
     property int decimals: 1 // Number of decimal places to show (default: 1)
     property var formatValueFunction: null // Optional custom format function
     property var parseValueFunction: null // Optional custom parse function
+    property bool _initialized: false
+
+    signal valueModified(real newValue)
 
     function formatValue(val: real): string {
         if (formatValueFunction) {
@@ -49,10 +52,6 @@ ColumnLayout {
         return parseFloat(text);
     }
 
-    signal valueModified(real newValue)
-
-    property bool _initialized: false
-
     spacing: Appearance.spacing.small
 
     Component.onCompleted: {
@@ -60,6 +59,14 @@ ColumnLayout {
         Qt.callLater(() => {
             _initialized = true;
         });
+    }
+
+    // Update input field when value changes externally (slider is already bound)
+    onValueChanged: {
+        // Only update if component is initialized to avoid issues during creation
+        if (root._initialized && !inputField.hasFocus) {
+            inputField.text = root.formatValue(root.value);
+        }
     }
 
     RowLayout {
@@ -78,6 +85,7 @@ ColumnLayout {
 
         StyledInputField {
             id: inputField
+
             Layout.preferredWidth: 70
             validator: root.validator
 
@@ -144,14 +152,6 @@ ColumnLayout {
         to: root.to
         stepSize: root.stepSize
 
-        // Use Binding to allow slider to move freely during dragging
-        Binding {
-            target: slider
-            property: "value"
-            value: root.value
-            when: !slider.pressed
-        }
-
         onValueChanged: {
             // Update input field text in real-time as slider moves during dragging
             // Always update when slider value changes (during dragging or external updates)
@@ -168,13 +168,13 @@ ColumnLayout {
                 inputField.text = root.formatValue(newValue);
             }
         }
-    }
 
-    // Update input field when value changes externally (slider is already bound)
-    onValueChanged: {
-        // Only update if component is initialized to avoid issues during creation
-        if (root._initialized && !inputField.hasFocus) {
-            inputField.text = root.formatValue(root.value);
+        // Use Binding to allow slider to move freely during dragging
+        Binding {
+            target: slider
+            property: "value"
+            value: root.value
+            when: !slider.pressed
         }
     }
 }

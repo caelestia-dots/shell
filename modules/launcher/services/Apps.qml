@@ -1,9 +1,9 @@
 pragma Singleton
 
+import Quickshell
+import Caelestia
 import qs.config
 import qs.utils
-import Caelestia
-import Quickshell
 
 Searcher {
     id: root

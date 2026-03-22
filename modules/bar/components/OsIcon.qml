@@ -1,9 +1,9 @@
+import QtQuick
 import qs.components
 import qs.components.effects
 import qs.services
 import qs.config
 import qs.utils
-import QtQuick
 
 Item {
     id: root
@@ -21,6 +21,7 @@ Item {
     }
 
     Loader {
+        asynchronous: true
         anchors.centerIn: parent
         sourceComponent: SysInfo.isDefaultLogo ? caelestiaLogo : distroIcon
     }

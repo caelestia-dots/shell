@@ -1,16 +1,16 @@
 pragma ComponentBehavior: Bound
 
+import QtQuick
+import Quickshell
 import qs.components
 import qs.config
-import "popouts" as BarPopouts
-import Quickshell
-import QtQuick
+import qs.modules.bar.popouts as BarPopouts
 
 Item {
     id: root
 
     required property ShellScreen screen
-    required property PersistentProperties visibilities
+    required property DrawerVisibilities visibilities
     required property BarPopouts.Wrapper popouts
     required property bool disabled
 
@@ -22,15 +22,15 @@ Item {
     property bool isHovered
 
     function closeTray(): void {
-        content.item?.closeTray();
+        (content.item as Bar)?.closeTray();
     }
 
     function checkPopout(y: real): void {
-        content.item?.checkPopout(y);
+        (content.item as Bar)?.checkPopout(y);
     }
 
     function handleWheel(y: real, angleDelta: point): void {
-        content.item?.handleWheel(y, angleDelta);
+        (content.item as Bar)?.handleWheel(y, angleDelta);
     }
 
     visible: width > Config.border.thickness
@@ -82,7 +82,7 @@ Item {
             width: root.contentWidth
             screen: root.screen
             visibilities: root.visibilities
-            popouts: root.popouts
+            popouts: root.popouts // qmllint disable incompatible-type
         }
     }
 }

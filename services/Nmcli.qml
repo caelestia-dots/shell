@@ -1,9 +1,9 @@
 pragma Singleton
 pragma ComponentBehavior: Bound
 
+import QtQuick
 import Quickshell
 import Quickshell.Io
-import QtQuick
 
 Singleton {
     id: root
@@ -24,13 +24,14 @@ Singleton {
     property var wifiConnectionQueue: []
     property int currentSsidQueryIndex: 0
     property var pendingConnection: null
-    signal connectionFailed(string ssid)
     property var wirelessDeviceDetails: null
     property var ethernetDeviceDetails: null
     property list<var> ethernetDevices: []
     readonly property var activeEthernet: ethernetDevices.find(d => d.connected) ?? null
-
     property list<var> activeProcesses: []
+
+    readonly property alias connectionCheckTimer: connectionCheckTimer
+    readonly property alias immediateCheckTimer: immediateCheckTimer
 
     // Constants
     readonly property string deviceTypeWifi: "wifi"
@@ -54,6 +55,8 @@ Singleton {
     readonly property string connectionParamSsid: "ssid"
     readonly property string connectionParamPassword: "password"
     readonly property string connectionParamBssid: "802-11-wireless.bssid"
+
+    signal connectionFailed(string ssid)
 
     function detectPasswordRequired(error: string): bool {
         if (!error || error.length === 0) {
@@ -869,95 +872,228 @@ Singleton {
         return false;
     }
 
-    component CommandProcess: Process {
-        id: proc
+    function checkPendingConnection(): void {
+        if (root.pendingConnection) {
+            Qt.callLater(() => {
+                const connected = root.active && root.active.ssid === root.pendingConnection.ssid;
+                if (connected) {
+                    connectionCheckTimer.stop();
+                    immediateCheckTimer.stop();
+                    immediateCheckTimer.checkCount = 0;
+                    if (root.pendingConnection.callback) {
+                        root.pendingConnection.callback({
+                            success: true,
+                            output: "Connected",
+                            error: "",
+                            exitCode: 0
+                        });
+                    }
+                    root.pendingConnection = null;
+                } else {
+                    if (!immediateCheckTimer.running) {
+                        immediateCheckTimer.start();
+                    }
+                }
+            });
+        }
+    }
 
-        property var callback: null
-        property list<string> command: []
-        property bool callbackCalled: false
-        property int exitCode: 0
-
-        signal processFinished
-
-        environment: ({
-                LANG: "C.UTF-8",
-                LC_ALL: "C.UTF-8"
-            })
-
-        stdout: StdioCollector {
-            id: stdoutCollector
+    function cidrToSubnetMask(cidr: string): string {
+        const cidrNum = parseInt(cidr, 10);
+        if (isNaN(cidrNum) || cidrNum < 0 || cidrNum > 32) {
+            return "";
         }
 
-        stderr: StdioCollector {
-            id: stderrCollector
+        const mask = (0xffffffff << (32 - cidrNum)) >>> 0;
+        const octet1 = (mask >>> 24) & 0xff;
+        const octet2 = (mask >>> 16) & 0xff;
+        const octet3 = (mask >>> 8) & 0xff;
+        const octet4 = mask & 0xff;
 
-            onStreamFinished: {
-                const error = text.trim();
-                if (error && error.length > 0) {
-                    const output = (stdoutCollector && stdoutCollector.text) ? stdoutCollector.text : "";
-                    root.handlePasswordRequired(proc, error, output, -1);
+        return `${octet1}.${octet2}.${octet3}.${octet4}`;
+    }
+
+    function getWirelessDeviceDetails(interfaceName: string, callback: var): void {
+        if (!interfaceName || interfaceName.length === 0) {
+            const activeInterface = root.wirelessInterfaces.find(iface => {
+                return isConnectedState(iface.state);
+            });
+            if (activeInterface && activeInterface.device) {
+                interfaceName = activeInterface.device;
+            } else {
+                if (callback)
+                    callback(null);
+                return;
+            }
+        }
+
+        executeCommand(["device", "show", interfaceName], result => {
+            if (!result.success || !result.output) {
+                root.wirelessDeviceDetails = null;
+                if (callback)
+                    callback(null);
+                return;
+            }
+
+            const details = parseDeviceDetails(result.output, false);
+            root.wirelessDeviceDetails = details;
+            if (callback)
+                callback(details);
+        });
+    }
+
+    function getEthernetDeviceDetails(interfaceName: string, callback: var): void {
+        if (!interfaceName || interfaceName.length === 0) {
+            const activeInterface = root.ethernetInterfaces.find(iface => {
+                return isConnectedState(iface.state);
+            });
+            if (activeInterface && activeInterface.device) {
+                interfaceName = activeInterface.device;
+            } else {
+                if (callback)
+                    callback(null);
+                return;
+            }
+        }
+
+        executeCommand(["device", "show", interfaceName], result => {
+            if (!result.success || !result.output) {
+                root.ethernetDeviceDetails = null;
+                if (callback)
+                    callback(null);
+                return;
+            }
+
+            const details = parseDeviceDetails(result.output, true);
+            root.ethernetDeviceDetails = details;
+            if (callback)
+                callback(details);
+        });
+    }
+
+    function parseDeviceDetails(output: string, isEthernet: bool): var {
+        const details = {
+            ipAddress: "",
+            gateway: "",
+            dns: [],
+            subnet: "",
+            macAddress: "",
+            speed: ""
+        };
+
+        if (!output || output.length === 0) {
+            return details;
+        }
+
+        const lines = output.trim().split("\n");
+
+        for (let i = 0; i < lines.length; i++) {
+            const line = lines[i];
+            const parts = line.split(":");
+            if (parts.length >= 2) {
+                const key = parts[0].trim();
+                const value = parts.slice(1).join(":").trim();
+
+                if (key.startsWith("IP4.ADDRESS")) {
+                    const ipParts = value.split("/");
+                    details.ipAddress = ipParts[0] || "";
+                    if (ipParts[1]) {
+                        details.subnet = cidrToSubnetMask(ipParts[1]);
+                    } else {
+                        details.subnet = "";
+                    }
+                } else if (key === "IP4.GATEWAY") {
+                    if (value !== "--") {
+                        details.gateway = value;
+                    }
+                } else if (key.startsWith("IP4.DNS")) {
+                    if (value !== "--" && value.length > 0) {
+                        details.dns.push(value);
+                    }
+                } else if (isEthernet && key === "WIRED-PROPERTIES.MAC") {
+                    details.macAddress = value;
+                } else if (isEthernet && key === "WIRED-PROPERTIES.SPEED") {
+                    details.speed = value;
+                } else if (!isEthernet && key === "GENERAL.HWADDR") {
+                    details.macAddress = value;
                 }
             }
         }
 
-        onExited: code => {
-            exitCode = code;
+        return details;
+    }
 
-            Qt.callLater(() => {
-                if (callbackCalled) {
-                    processFinished();
-                    return;
-                }
+    function refreshOnConnectionChange(): void {
+        getNetworks(networks => {
+            const newActive = root.active;
 
-                if (proc.callback) {
-                    const output = (stdoutCollector && stdoutCollector.text) ? stdoutCollector.text : "";
-                    const error = (stderrCollector && stderrCollector.text) ? stderrCollector.text : "";
-                    const success = exitCode === 0;
-                    const cmdIsConnection = isConnectionCommand(proc.command);
-
-                    if (root.handlePasswordRequired(proc, error, output, exitCode)) {
-                        processFinished();
-                        return;
+            if (newActive && newActive.active) {
+                Qt.callLater(() => {
+                    if (root.wirelessInterfaces.length > 0) {
+                        const activeWireless = root.wirelessInterfaces.find(iface => {
+                            return isConnectedState(iface.state);
+                        });
+                        if (activeWireless && activeWireless.device) {
+                            getWirelessDeviceDetails(activeWireless.device, () => {});
+                        }
                     }
 
-                    const needsPassword = cmdIsConnection && root.detectPasswordRequired(error);
-
-                    if (!success && cmdIsConnection && root.pendingConnection) {
-                        const failedSsid = root.pendingConnection.ssid;
-                        root.connectionFailed(failedSsid);
+                    if (root.ethernetInterfaces.length > 0) {
+                        const activeEthernet = root.ethernetInterfaces.find(iface => {
+                            return isConnectedState(iface.state);
+                        });
+                        if (activeEthernet && activeEthernet.device) {
+                            getEthernetDeviceDetails(activeEthernet.device, () => {});
+                        }
                     }
+                }, 500);
+            } else {
+                root.wirelessDeviceDetails = null;
+                root.ethernetDeviceDetails = null;
+            }
 
-                    callbackCalled = true;
-                    callback({
-                        success: success,
-                        output: output,
-                        error: error,
-                        exitCode: proc.exitCode,
-                        needsPassword: needsPassword || false
-                    });
-                    processFinished();
-                } else {
-                    processFinished();
+            getWirelessInterfaces(() => {});
+            getEthernetInterfaces(() => {
+                if (root.activeEthernet && root.activeEthernet.connected) {
+                    Qt.callLater(() => {
+                        getEthernetDeviceDetails(root.activeEthernet.interface, () => {});
+                    }, 500);
                 }
             });
-        }
+        });
+    }
+
+    Component.onCompleted: {
+        getWifiStatus(() => {});
+        getNetworks(() => {});
+        loadSavedConnections(() => {});
+        getEthernetInterfaces(() => {});
+
+        Qt.callLater(() => {
+            if (root.wirelessInterfaces.length > 0) {
+                const activeWireless = root.wirelessInterfaces.find(iface => {
+                    return isConnectedState(iface.state);
+                });
+                if (activeWireless && activeWireless.device) {
+                    getWirelessDeviceDetails(activeWireless.device, () => {});
+                }
+            }
+
+            if (root.ethernetInterfaces.length > 0) {
+                const activeEthernet = root.ethernetInterfaces.find(iface => {
+                    return isConnectedState(iface.state);
+                });
+                if (activeEthernet && activeEthernet.device) {
+                    getEthernetDeviceDetails(activeEthernet.device, () => {});
+                }
+            }
+        }, 2000);
     }
 
     Component {
         id: commandProc
 
         CommandProcess {}
-    }
-
-    component AccessPoint: QtObject {
-        required property var lastIpcObject
-        readonly property string ssid: lastIpcObject.ssid
-        readonly property string bssid: lastIpcObject.bssid
-        readonly property int strength: lastIpcObject.strength
-        readonly property int frequency: lastIpcObject.frequency
-        readonly property bool active: lastIpcObject.active
-        readonly property string security: lastIpcObject.security
-        readonly property bool isSecure: security.length > 0
     }
 
     Component {
@@ -1110,162 +1246,11 @@ Singleton {
         }
     }
 
-    function checkPendingConnection(): void {
-        if (root.pendingConnection) {
-            Qt.callLater(() => {
-                const connected = root.active && root.active.ssid === root.pendingConnection.ssid;
-                if (connected) {
-                    connectionCheckTimer.stop();
-                    immediateCheckTimer.stop();
-                    immediateCheckTimer.checkCount = 0;
-                    if (root.pendingConnection.callback) {
-                        root.pendingConnection.callback({
-                            success: true,
-                            output: "Connected",
-                            error: "",
-                            exitCode: 0
-                        });
-                    }
-                    root.pendingConnection = null;
-                } else {
-                    if (!immediateCheckTimer.running) {
-                        immediateCheckTimer.start();
-                    }
-                }
-            });
-        }
-    }
-
-    function cidrToSubnetMask(cidr: string): string {
-        const cidrNum = parseInt(cidr, 10);
-        if (isNaN(cidrNum) || cidrNum < 0 || cidrNum > 32) {
-            return "";
-        }
-
-        const mask = (0xffffffff << (32 - cidrNum)) >>> 0;
-        const octet1 = (mask >>> 24) & 0xff;
-        const octet2 = (mask >>> 16) & 0xff;
-        const octet3 = (mask >>> 8) & 0xff;
-        const octet4 = mask & 0xff;
-
-        return `${octet1}.${octet2}.${octet3}.${octet4}`;
-    }
-
-    function getWirelessDeviceDetails(interfaceName: string, callback: var): void {
-        if (!interfaceName || interfaceName.length === 0) {
-            const activeInterface = root.wirelessInterfaces.find(iface => {
-                return isConnectedState(iface.state);
-            });
-            if (activeInterface && activeInterface.device) {
-                interfaceName = activeInterface.device;
-            } else {
-                if (callback)
-                    callback(null);
-                return;
-            }
-        }
-
-        executeCommand(["device", "show", interfaceName], result => {
-            if (!result.success || !result.output) {
-                root.wirelessDeviceDetails = null;
-                if (callback)
-                    callback(null);
-                return;
-            }
-
-            const details = parseDeviceDetails(result.output, false);
-            root.wirelessDeviceDetails = details;
-            if (callback)
-                callback(details);
-        });
-    }
-
-    function getEthernetDeviceDetails(interfaceName: string, callback: var): void {
-        if (!interfaceName || interfaceName.length === 0) {
-            const activeInterface = root.ethernetInterfaces.find(iface => {
-                return isConnectedState(iface.state);
-            });
-            if (activeInterface && activeInterface.device) {
-                interfaceName = activeInterface.device;
-            } else {
-                if (callback)
-                    callback(null);
-                return;
-            }
-        }
-
-        executeCommand(["device", "show", interfaceName], result => {
-            if (!result.success || !result.output) {
-                root.ethernetDeviceDetails = null;
-                if (callback)
-                    callback(null);
-                return;
-            }
-
-            const details = parseDeviceDetails(result.output, true);
-            root.ethernetDeviceDetails = details;
-            if (callback)
-                callback(details);
-        });
-    }
-
-    function parseDeviceDetails(output: string, isEthernet: bool): var {
-        const details = {
-            ipAddress: "",
-            gateway: "",
-            dns: [],
-            subnet: "",
-            macAddress: "",
-            speed: ""
-        };
-
-        if (!output || output.length === 0) {
-            return details;
-        }
-
-        const lines = output.trim().split("\n");
-
-        for (let i = 0; i < lines.length; i++) {
-            const line = lines[i];
-            const parts = line.split(":");
-            if (parts.length >= 2) {
-                const key = parts[0].trim();
-                const value = parts.slice(1).join(":").trim();
-
-                if (key.startsWith("IP4.ADDRESS")) {
-                    const ipParts = value.split("/");
-                    details.ipAddress = ipParts[0] || "";
-                    if (ipParts[1]) {
-                        details.subnet = cidrToSubnetMask(ipParts[1]);
-                    } else {
-                        details.subnet = "";
-                    }
-                } else if (key === "IP4.GATEWAY") {
-                    if (value !== "--") {
-                        details.gateway = value;
-                    }
-                } else if (key.startsWith("IP4.DNS")) {
-                    if (value !== "--" && value.length > 0) {
-                        details.dns.push(value);
-                    }
-                } else if (isEthernet && key === "WIRED-PROPERTIES.MAC") {
-                    details.macAddress = value;
-                } else if (isEthernet && key === "WIRED-PROPERTIES.SPEED") {
-                    details.speed = value;
-                } else if (!isEthernet && key === "GENERAL.HWADDR") {
-                    details.macAddress = value;
-                }
-            }
-        }
-
-        return details;
-    }
-
     Process {
         id: rescanProc
 
         command: ["nmcli", "dev", root.nmcliCommandWifi, "list", "--rescan", "yes"]
-        onExited: root.getNetworks()
+        onExited: root.getNetworks() // qmllint disable signal-handler-parameters
     }
 
     Process {
@@ -1280,81 +1265,100 @@ Singleton {
         stdout: SplitParser {
             onRead: root.refreshOnConnectionChange()
         }
-        onExited: monitorRestartTimer.start()
+        onExited: monitorRestartTimer.start() // qmllint disable signal-handler-parameters
     }
 
     Timer {
         id: monitorRestartTimer
+
         interval: 2000
         onTriggered: {
             monitorProc.running = true;
         }
     }
 
-    function refreshOnConnectionChange(): void {
-        getNetworks(networks => {
-            const newActive = root.active;
+    component CommandProcess: Process {
+        id: proc
 
-            if (newActive && newActive.active) {
-                Qt.callLater(() => {
-                    if (root.wirelessInterfaces.length > 0) {
-                        const activeWireless = root.wirelessInterfaces.find(iface => {
-                            return isConnectedState(iface.state);
-                        });
-                        if (activeWireless && activeWireless.device) {
-                            getWirelessDeviceDetails(activeWireless.device, () => {});
-                        }
-                    }
+        property var callback: null
+        property list<string> command: []
+        property bool callbackCalled: false
+        property int exitCode: 0
 
-                    if (root.ethernetInterfaces.length > 0) {
-                        const activeEthernet = root.ethernetInterfaces.find(iface => {
-                            return isConnectedState(iface.state);
-                        });
-                        if (activeEthernet && activeEthernet.device) {
-                            getEthernetDeviceDetails(activeEthernet.device, () => {});
-                        }
-                    }
-                }, 500);
-            } else {
-                root.wirelessDeviceDetails = null;
-                root.ethernetDeviceDetails = null;
+        signal processFinished
+
+        environment: ({
+                LANG: "C.UTF-8",
+                LC_ALL: "C.UTF-8"
+            })
+
+        stdout: StdioCollector {
+            id: stdoutCollector
+        }
+
+        stderr: StdioCollector {
+            id: stderrCollector
+
+            onStreamFinished: {
+                const error = text.trim();
+                if (error && error.length > 0) {
+                    const output = (stdoutCollector && stdoutCollector.text) ? stdoutCollector.text : "";
+                    root.handlePasswordRequired(proc, error, output, -1);
+                }
             }
+        }
 
-            getWirelessInterfaces(() => {});
-            getEthernetInterfaces(() => {
-                if (root.activeEthernet && root.activeEthernet.connected) {
-                    Qt.callLater(() => {
-                        getEthernetDeviceDetails(root.activeEthernet.interface, () => {});
-                    }, 500);
+        onExited: code => { // qmllint disable signal-handler-parameters
+            exitCode = code;
+
+            Qt.callLater(() => {
+                if (callbackCalled) {
+                    processFinished();
+                    return;
+                }
+
+                if (proc.callback) {
+                    const output = (stdoutCollector && stdoutCollector.text) ? stdoutCollector.text : "";
+                    const error = (stderrCollector && stderrCollector.text) ? stderrCollector.text : "";
+                    const success = exitCode === 0;
+                    const cmdIsConnection = isConnectionCommand(proc.command);
+
+                    if (root.handlePasswordRequired(proc, error, output, exitCode)) {
+                        processFinished();
+                        return;
+                    }
+
+                    const needsPassword = cmdIsConnection && root.detectPasswordRequired(error);
+
+                    if (!success && cmdIsConnection && root.pendingConnection) {
+                        const failedSsid = root.pendingConnection.ssid;
+                        root.connectionFailed(failedSsid);
+                    }
+
+                    callbackCalled = true;
+                    callback({
+                        success: success,
+                        output: output,
+                        error: error,
+                        exitCode: proc.exitCode,
+                        needsPassword: needsPassword || false
+                    });
+                    processFinished();
+                } else {
+                    processFinished();
                 }
             });
-        });
+        }
     }
 
-    Component.onCompleted: {
-        getWifiStatus(() => {});
-        getNetworks(() => {});
-        loadSavedConnections(() => {});
-        getEthernetInterfaces(() => {});
-
-        Qt.callLater(() => {
-            if (root.wirelessInterfaces.length > 0) {
-                const activeWireless = root.wirelessInterfaces.find(iface => {
-                    return isConnectedState(iface.state);
-                });
-                if (activeWireless && activeWireless.device) {
-                    getWirelessDeviceDetails(activeWireless.device, () => {});
-                }
-            }
-
-            if (root.ethernetInterfaces.length > 0) {
-                const activeEthernet = root.ethernetInterfaces.find(iface => {
-                    return isConnectedState(iface.state);
-                });
-                if (activeEthernet && activeEthernet.device) {
-                    getEthernetDeviceDetails(activeEthernet.device, () => {});
-                }
-            }
-        }, 2000);
+    component AccessPoint: QtObject {
+        required property var lastIpcObject
+        readonly property string ssid: lastIpcObject.ssid
+        readonly property string bssid: lastIpcObject.bssid
+        readonly property int strength: lastIpcObject.strength
+        readonly property int frequency: lastIpcObject.frequency
+        readonly property bool active: lastIpcObject.active
+        readonly property string security: lastIpcObject.security
+        readonly property bool isSecure: security.length > 0
     }
 }

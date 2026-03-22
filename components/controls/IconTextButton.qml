@@ -1,8 +1,8 @@
 import ".."
-import qs.services
-import qs.config
 import QtQuick
 import QtQuick.Layouts
+import qs.services
+import qs.config
 
 StyledRect {
     id: root
@@ -45,13 +45,13 @@ StyledRect {
     StateLayer {
         id: stateLayer
 
-        color: root.internalChecked ? root.activeOnColour : root.inactiveOnColour
-
         function onClicked(): void {
             if (root.toggle)
                 root.internalChecked = !root.internalChecked;
             root.clicked();
         }
+
+        color: root.internalChecked ? root.activeOnColour : root.inactiveOnColour
     }
 
     RowLayout {
