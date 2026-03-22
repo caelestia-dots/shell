@@ -95,7 +95,7 @@ ColumnLayout {
             }
 
             MaterialIcon {
-                visible: device.modelData.state === BluetoothDeviceState.Connected
+                visible: device.modelData.state === BluetoothDeviceState.Connected // qmllint disable unresolved-type
                 text: Icons.getBatteryIcon(device.modelData.batteryAvailable ? device.modelData.battery * 100 : -1)
                 color: device.modelData.battery < 0.2 ? Colours.palette.m3error : Colours.palette.m3onSurfaceVariant
             }
