@@ -140,8 +140,8 @@ Singleton {
     Component.onCompleted: {
         previousSinkName = sink?.description || sink?.name || qsTr("Unknown Device");
         previousSourceName = source?.description || source?.name || qsTr("Unknown Device");
-        syncSink()
-        syncSource()
+        syncSink();
+        syncSource();
     }
 
     onSinkAudioChanged: syncSink()
@@ -149,11 +149,11 @@ Singleton {
 
     Connections {
         function onVolumeChanged(): void {
-            root.syncSink()
+            root.syncSink();
         }
 
         function onMutedChanged(): void {
-            root.syncSink()
+            root.syncSink();
         }
 
         target: root.sinkAudio
@@ -161,11 +161,11 @@ Singleton {
 
     Connections {
         function onVolumeChanged(): void {
-            root.syncSource()
+            root.syncSource();
         }
 
         function onMutedChanged(): void {
-            root.syncSource()
+            root.syncSource();
         }
 
         target: root.sourceAudio
