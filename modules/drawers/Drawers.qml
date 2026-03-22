@@ -91,8 +91,20 @@ Variants {
             HyprlandFocusGrab {
                 id: focusGrab
 
+                property string previousWindowAddress: ""
+
                 active: (visibilities.launcher && Config.launcher.enabled) || (visibilities.session && Config.session.enabled) || (visibilities.sidebar && Config.sidebar.enabled) || (!Config.dashboard.showOnHover && visibilities.dashboard && Config.dashboard.enabled) || (panels.popouts.currentName.startsWith("traymenu") && (panels.popouts.current as StackView)?.depth > 1)
                 windows: [win]
+
+                onActiveChanged: {
+                    if (active) {
+                        previousWindowAddress = Hypr.activeToplevel?.lastIpcObject.address ?? "";
+                    } else if (previousWindowAddress) {
+                        Hypr.dispatch(`focuswindow address:0x${previousWindowAddress}`);
+                        previousWindowAddress = "";
+                    }
+                }
+
                 onCleared: {
                     visibilities.launcher = false;
                     visibilities.session = false;
