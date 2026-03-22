@@ -20,14 +20,32 @@ Singleton {
     readonly property PwNode sink: Pipewire.defaultAudioSink
     readonly property PwNode source: Pipewire.defaultAudioSource
 
-    readonly property bool muted: !!sink?.audio?.muted
-    readonly property real volume: sink?.audio?.volume ?? 0
+    property var sinkAudio: sink?.audio ?? null
+    property var sourceAudio: source?.audio ?? null
 
-    readonly property bool sourceMuted: !!source?.audio?.muted
-    readonly property real sourceVolume: source?.audio?.volume ?? 0
+    property real volume: 0
+    property bool muted: false
+    property real sourceVolume: 0
+    property bool sourceMuted: false
 
     readonly property alias cava: cava
     readonly property alias beatTracker: beatTracker
+
+    function syncSink(): void {
+        const v = sink?.audio?.volume;
+        if (sink?.audio && !isNaN(v)) {
+            root.volume = v;
+            root.muted = !!sink.audio.muted;
+        }
+    }
+
+    function syncSource(): void {
+        const v = source?.audio?.volume;
+        if (source?.audio && !isNaN(v)) {
+            root.sourceVolume = v;
+            root.sourceMuted = !!source.audio.muted;
+        }
+    }
 
     function setVolume(newVolume: real): void {
         if (sink?.ready && sink?.audio) {
@@ -122,6 +140,35 @@ Singleton {
     Component.onCompleted: {
         previousSinkName = sink?.description || sink?.name || qsTr("Unknown Device");
         previousSourceName = source?.description || source?.name || qsTr("Unknown Device");
+        syncSink()
+        syncSource()
+    }
+
+    onSinkAudioChanged: syncSink()
+    onSourceAudioChanged: syncSource()
+
+    Connections {
+        function onVolumeChanged(): void {
+            root.syncSink()
+        }
+
+        function onMutedChanged(): void {
+            root.syncSink()
+        }
+
+        target: root.sinkAudio
+    }
+
+    Connections {
+        function onVolumeChanged(): void {
+            root.syncSource()
+        }
+
+        function onMutedChanged(): void {
+            root.syncSource()
+        }
+
+        target: root.sourceAudio
     }
 
     Connections {
