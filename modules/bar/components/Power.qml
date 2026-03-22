@@ -1,29 +1,27 @@
+import QtQuick
 import qs.components
 import qs.services
 import qs.config
-import Quickshell
-import QtQuick
 
 Item {
     id: root
 
-    required property PersistentProperties visibilities
+    required property DrawerVisibilities visibilities
 
     implicitWidth: icon.implicitHeight + Appearance.padding.small * 2
     implicitHeight: icon.implicitHeight
 
     StateLayer {
         // Cursed workaround to make the height larger than the parent
+        function onClicked(): void {
+            root.visibilities.session = !root.visibilities.session;
+        }
+
         anchors.fill: undefined
         anchors.centerIn: parent
         implicitWidth: implicitHeight
         implicitHeight: icon.implicitHeight + Appearance.padding.small * 2
-
         radius: Appearance.rounding.full
-
-        function onClicked(): void {
-            root.visibilities.session = !root.visibilities.session;
-        }
     }
 
     MaterialIcon {

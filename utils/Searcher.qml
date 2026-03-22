@@ -1,8 +1,7 @@
-import Quickshell
-
 import "scripts/fzf.js" as Fzf
 import "scripts/fuzzysort.js" as Fuzzy
 import QtQuick
+import Quickshell
 
 Singleton {
     required property list<QtObject> list

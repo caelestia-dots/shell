@@ -1,11 +1,11 @@
 pragma Singleton
 
-import qs.config
-import Caelestia.Services
-import Caelestia
+import QtQuick
 import Quickshell
 import Quickshell.Services.Pipewire
-import QtQuick
+import Caelestia
+import Caelestia.Services
+import qs.config
 
 Singleton {
     id: root
@@ -13,26 +13,9 @@ Singleton {
     property string previousSinkName: ""
     property string previousSourceName: ""
 
-    readonly property var nodes: Pipewire.nodes.values.reduce((acc, node) => {
-        if (!node.isStream) {
-            if (node.isSink)
-                acc.sinks.push(node);
-            else if (node.audio)
-                acc.sources.push(node);
-        } else if (node.isStream && node.audio) {
-            // Application streams (output streams)
-            acc.streams.push(node);
-        }
-        return acc;
-    }, {
-        sources: [],
-        sinks: [],
-        streams: []
-    })
-
-    readonly property list<PwNode> sinks: nodes.sinks
-    readonly property list<PwNode> sources: nodes.sources
-    readonly property list<PwNode> streams: nodes.streams
+    property list<PwNode> sinks: []
+    property list<PwNode> sources: []
+    property list<PwNode> streams: []
 
     readonly property PwNode sink: Pipewire.defaultAudioSink
     readonly property PwNode source: Pipewire.defaultAudioSource
@@ -109,7 +92,7 @@ Singleton {
         if (!stream)
             return qsTr("Unknown");
         // Try application name first, then description, then name
-        return stream.applicationName || stream.description || stream.name || qsTr("Unknown Application");
+        return stream.properties["application.name"] || stream.description || stream.name || qsTr("Unknown Application");
     }
 
     onSinkChanged: {
@@ -139,6 +122,31 @@ Singleton {
     Component.onCompleted: {
         previousSinkName = sink?.description || sink?.name || qsTr("Unknown Device");
         previousSourceName = source?.description || source?.name || qsTr("Unknown Device");
+    }
+
+    Connections {
+        function onValuesChanged(): void {
+            const newSinks = [];
+            const newSources = [];
+            const newStreams = [];
+
+            for (const node of Pipewire.nodes.values) {
+                if (!node.isStream) {
+                    if (node.isSink)
+                        newSinks.push(node);
+                    else if (node.audio)
+                        newSources.push(node);
+                } else if (node.audio) {
+                    newStreams.push(node);
+                }
+            }
+
+            root.sinks = newSinks;
+            root.sources = newSources;
+            root.streams = newStreams;
+        }
+
+        target: Pipewire.nodes
     }
 
     PwObjectTracker {

@@ -1,5 +1,5 @@
-import qs.config
 import QtQuick
+import qs.config
 
 ColorAnimation {
     duration: Appearance.anim.durations.normal

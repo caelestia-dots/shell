@@ -2,14 +2,14 @@ pragma ComponentBehavior: Bound
 
 import ".."
 import "../components"
+import QtQuick
+import QtQuick.Layouts
+import Quickshell.Bluetooth
 import qs.components
 import qs.components.controls
 import qs.components.effects
 import qs.services
 import qs.config
-import Quickshell.Bluetooth
-import QtQuick
-import QtQuick.Layouts
 
 ColumnLayout {
     id: root
@@ -131,11 +131,11 @@ ColumnLayout {
                     implicitHeight: adapterPicker.implicitHeight + Appearance.padding.smaller * 2
 
                     StateLayer {
-                        radius: Appearance.rounding.small
-
                         function onClicked(): void {
                             adapterPickerButton.expanded = !adapterPickerButton.expanded;
                         }
+
+                        radius: Appearance.rounding.small
                     }
 
                     RowLayout {
@@ -210,12 +210,12 @@ ColumnLayout {
                                     implicitHeight: adapterInner.implicitHeight + Appearance.padding.normal * 2
 
                                     StateLayer {
-                                        disabled: !adapterPickerButton.expanded
-
                                         function onClicked(): void {
                                             adapterPickerButton.expanded = false;
                                             root.session.bt.currentAdapter = adapter.modelData;
                                         }
+
+                                        disabled: !adapterPickerButton.expanded
                                     }
 
                                     RowLayout {
@@ -381,13 +381,13 @@ ColumnLayout {
                     scale: root.session.bt.editingAdapterName ? 1 : 0.5
 
                     StateLayer {
-                        color: Colours.palette.m3onSecondaryContainer
-                        disabled: !root.session.bt.editingAdapterName
-
                         function onClicked(): void {
                             root.session.bt.editingAdapterName = false;
                             adapterNameEdit.text = Qt.binding(() => root.session.bt.currentAdapter?.name ?? "");
                         }
+
+                        color: Colours.palette.m3onSecondaryContainer
+                        disabled: !root.session.bt.editingAdapterName
                     }
 
                     MaterialIcon {
@@ -419,8 +419,6 @@ ColumnLayout {
                     color: Qt.alpha(Colours.palette.m3primary, root.session.bt.editingAdapterName ? 1 : 0)
 
                     StateLayer {
-                        color: root.session.bt.editingAdapterName ? Colours.palette.m3onPrimary : Colours.palette.m3onSurface
-
                         function onClicked(): void {
                             root.session.bt.editingAdapterName = !root.session.bt.editingAdapterName;
                             if (root.session.bt.editingAdapterName)
@@ -428,6 +426,8 @@ ColumnLayout {
                             else
                                 adapterNameEdit.accepted();
                         }
+
+                        color: root.session.bt.editingAdapterName ? Colours.palette.m3onPrimary : Colours.palette.m3onSurface
                     }
 
                     MaterialIcon {

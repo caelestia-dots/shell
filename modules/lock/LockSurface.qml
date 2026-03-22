@@ -1,11 +1,11 @@
 pragma ComponentBehavior: Bound
 
+import QtQuick
+import QtQuick.Effects
+import Quickshell.Wayland
 import qs.components
 import qs.services
 import qs.config
-import Quickshell.Wayland
-import QtQuick
-import QtQuick.Effects
 
 WlSessionLockSurface {
     id: root
@@ -18,11 +18,11 @@ WlSessionLockSurface {
     color: "transparent"
 
     Connections {
-        target: root.lock
-
         function onUnlock(): void {
             unlockAnim.start();
         }
+
+        target: root.lock
     }
 
     SequentialAnimation {

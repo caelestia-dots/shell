@@ -1,8 +1,8 @@
+import QtQuick
 import qs.components
 import qs.components.effects
 import qs.services
 import qs.config
-import QtQuick
 
 StyledRect {
     id: root
@@ -20,13 +20,12 @@ StyledRect {
 
     property real leading: workspaces.count > 0 ? workspaces.itemAt(currentWsIdx)?.y ?? 0 : 0
     property real trailing: workspaces.count > 0 ? workspaces.itemAt(currentWsIdx)?.y ?? 0 : 0
-    property real currentSize: workspaces.count > 0 ? workspaces.itemAt(currentWsIdx)?.size ?? 0 : 0
+    property real currentSize: workspaces.count > 0 ? (workspaces.itemAt(currentWsIdx) as Workspace)?.size ?? 0 : 0
     property real offset: Math.min(leading, trailing)
     property real size: {
         const s = Math.abs(leading - trailing) + currentSize;
         if (Config.bar.workspaces.activeTrail && lastWs > currentWsIdx) {
-            const ws = workspaces.itemAt(lastWs);
-            // console.log(ws, lastWs);
+            const ws = workspaces.itemAt(lastWs) as Workspace;
             return ws ? Math.min(ws.y + ws.size - offset, s) : 0;
         }
         return s;

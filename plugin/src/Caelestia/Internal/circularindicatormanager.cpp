@@ -153,8 +153,10 @@ void CircularIndicatorManager::updateRetreat(qreal progress) {
         spinRotation += m_curve.valueForProgress(getFractionInRange(playtime, spinDelay, DURATION_SPIN_IN_MS)) *
                         SPIN_ROTATION_DEGREES;
     }
+    const auto oldRotation = m_rotation;
     m_rotation = constantRotation + spinRotation;
-    emit rotationChanged();
+    if (!qFuzzyCompare(m_rotation + 1.0, oldRotation + 1.0))
+        emit rotationChanged();
 
     // Grow active indicator.
     qreal fraction =
@@ -182,6 +184,8 @@ void CircularIndicatorManager::updateRetreat(qreal progress) {
 void CircularIndicatorManager::updateAdvance(qreal progress) {
     using namespace advance;
     const auto playtime = progress * TOTAL_DURATION_IN_MS;
+    const auto oldStart = m_startFraction;
+    const auto oldEnd = m_endFraction;
 
     // Adds constant rotation to segment positions.
     m_startFraction = CONSTANT_ROTATION_DEGREES * progress + TAIL_DEGREES_OFFSET;
@@ -204,8 +208,10 @@ void CircularIndicatorManager::updateAdvance(qreal progress) {
     m_startFraction /= 360.0;
     m_endFraction /= 360.0;
 
-    emit startFractionChanged();
-    emit endFractionChanged();
+    if (!qFuzzyCompare(m_startFraction + 1.0, oldStart + 1.0))
+        emit startFractionChanged();
+    if (!qFuzzyCompare(m_endFraction + 1.0, oldEnd + 1.0))
+        emit endFractionChanged();
 }
 
 } // namespace caelestia::internal

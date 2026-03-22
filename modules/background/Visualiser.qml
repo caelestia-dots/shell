@@ -1,13 +1,13 @@
 pragma ComponentBehavior: Bound
 
+import QtQuick
+import QtQuick.Effects
+import Quickshell
+import Quickshell.Widgets
+import Caelestia.Services
 import qs.components
 import qs.services
 import qs.config
-import Caelestia.Services
-import Quickshell
-import Quickshell.Widgets
-import QtQuick
-import QtQuick.Effects
 
 Item {
     id: root
@@ -21,6 +21,7 @@ Item {
     opacity: shouldBeActive ? 1 : 0
 
     Loader {
+        asynchronous: true
         anchors.fill: parent
         active: root.opacity > 0 && Config.background.visualiser.blur
 
@@ -42,6 +43,7 @@ Item {
         layer.enabled: true
 
         Loader {
+            asynchronous: true
             anchors.fill: parent
             anchors.topMargin: root.offset
             anchors.bottomMargin: -root.offset

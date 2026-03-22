@@ -1,18 +1,18 @@
 pragma ComponentBehavior: Bound
 
+import QtQuick
+import QtQuick.Layouts
 import qs.components
 import qs.components.controls
 import qs.services
 import qs.config
 import qs.utils
-import QtQuick
-import QtQuick.Layouts
 
 Item {
     id: root
 
     required property Brightness.Monitor monitor
-    required property var visibilities
+    required property DrawerVisibilities visibilities
 
     required property real volume
     required property bool muted
@@ -31,15 +31,15 @@ Item {
 
         // Speaker volume
         CustomMouseArea {
-            implicitWidth: Config.osd.sizes.sliderWidth
-            implicitHeight: Config.osd.sizes.sliderHeight
-
             function onWheel(event: WheelEvent) {
                 if (event.angleDelta.y > 0)
                     Audio.incrementVolume();
                 else if (event.angleDelta.y < 0)
                     Audio.decrementVolume();
             }
+
+            implicitWidth: Config.osd.sizes.sliderWidth
+            implicitHeight: Config.osd.sizes.sliderHeight
 
             FilledSlider {
                 anchors.fill: parent
@@ -56,15 +56,15 @@ Item {
             shouldBeActive: Config.osd.enableMicrophone && (!Config.osd.enableBrightness || !root.visibilities.session)
 
             sourceComponent: CustomMouseArea {
-                implicitWidth: Config.osd.sizes.sliderWidth
-                implicitHeight: Config.osd.sizes.sliderHeight
-
                 function onWheel(event: WheelEvent) {
                     if (event.angleDelta.y > 0)
                         Audio.incrementSourceVolume();
                     else if (event.angleDelta.y < 0)
                         Audio.decrementSourceVolume();
                 }
+
+                implicitWidth: Config.osd.sizes.sliderWidth
+                implicitHeight: Config.osd.sizes.sliderHeight
 
                 FilledSlider {
                     anchors.fill: parent
@@ -82,9 +82,6 @@ Item {
             shouldBeActive: Config.osd.enableBrightness
 
             sourceComponent: CustomMouseArea {
-                implicitWidth: Config.osd.sizes.sliderWidth
-                implicitHeight: Config.osd.sizes.sliderHeight
-
                 function onWheel(event: WheelEvent) {
                     const monitor = root.monitor;
                     if (!monitor)
@@ -94,6 +91,9 @@ Item {
                     else if (event.angleDelta.y < 0)
                         monitor.setBrightness(monitor.brightness - Config.services.brightnessIncrement);
                 }
+
+                implicitWidth: Config.osd.sizes.sliderWidth
+                implicitHeight: Config.osd.sizes.sliderHeight
 
                 FilledSlider {
                     anchors.fill: parent
@@ -109,6 +109,7 @@ Item {
     component WrappedLoader: Loader {
         required property bool shouldBeActive
 
+        asynchronous: true
         Layout.preferredHeight: shouldBeActive ? Config.osd.sizes.sliderHeight : 0
         opacity: shouldBeActive ? 1 : 0
         active: opacity > 0

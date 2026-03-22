@@ -2,16 +2,16 @@ pragma ComponentBehavior: Bound
 
 import ".."
 import "."
+import QtQuick
+import QtQuick.Layouts
+import Quickshell
 import qs.components
+import qs.components.containers
 import qs.components.controls
 import qs.components.effects
-import qs.components.containers
 import qs.services
 import qs.config
 import qs.utils
-import Quickshell
-import QtQuick
-import QtQuick.Layouts
 
 Item {
     id: root
@@ -29,6 +29,47 @@ Item {
     }
 
     property bool isClosing: false
+
+    function checkConnectionStatus(): void {
+        if (!root.visible || !connectButton.connecting) {
+            return;
+        }
+
+        const isConnected = root.network && Nmcli.active && Nmcli.active.ssid && Nmcli.active.ssid.toLowerCase().trim() === root.network.ssid.toLowerCase().trim();
+
+        if (isConnected) {
+            connectionSuccessTimer.start();
+            return;
+        }
+
+        if (Nmcli.pendingConnection === null && connectButton.connecting) {
+            if (connectionMonitor.repeatCount > 10) {
+                connectionMonitor.stop();
+                connectButton.connecting = false;
+                connectButton.hasError = true;
+                connectButton.enabled = true;
+                connectButton.text = qsTr("Connect");
+                passwordContainer.passwordBuffer = "";
+                if (root.network && root.network.ssid) {
+                    Nmcli.forgetNetwork(root.network.ssid);
+                }
+            }
+        }
+    }
+
+    function closeDialog(): void {
+        if (isClosing) {
+            return;
+        }
+
+        isClosing = true;
+        passwordContainer.passwordBuffer = "";
+        connectButton.connecting = false;
+        connectButton.hasError = false;
+        connectButton.text = qsTr("Connect");
+        connectionMonitor.stop();
+    }
+
     visible: session.network.showPasswordDialog || isClosing
     enabled: session.network.showPasswordDialog && !isClosing
     focus: enabled
@@ -64,6 +105,7 @@ Item {
         color: Colours.tPalette.m3surface
         opacity: root.session.network.showPasswordDialog && !root.isClosing ? 1 : 0
         scale: root.session.network.showPasswordDialog && !root.isClosing ? 1 : 0.7
+        Keys.onEscapePressed: closeDialog()
 
         Behavior on opacity {
             Anim {}
@@ -93,8 +135,6 @@ Item {
                 to: 0.7
             }
         }
-
-        Keys.onEscapePressed: closeDialog()
 
         ColumnLayout {
             id: content
@@ -150,10 +190,12 @@ Item {
 
             Item {
                 id: passwordContainer
+
+                property string passwordBuffer: ""
+
                 Layout.topMargin: Appearance.spacing.large
                 Layout.fillWidth: true
                 implicitHeight: Math.max(48, charList.implicitHeight + Appearance.padding.normal * 2)
-
                 focus: true
                 Keys.onPressed: event => {
                     if (!activeFocus) {
@@ -182,10 +224,7 @@ Item {
                     }
                 }
 
-                property string passwordBuffer: ""
-
                 Connections {
-                    target: root.session.network
                     function onShowPasswordDialogChanged(): void {
                         if (root.session.network.showPasswordDialog) {
                             Qt.callLater(() => {
@@ -195,10 +234,11 @@ Item {
                             });
                         }
                     }
+
+                    target: root.session.network
                 }
 
                 Connections {
-                    target: root
                     function onVisibleChanged(): void {
                         if (root.visible) {
                             Qt.callLater(() => {
@@ -206,6 +246,8 @@ Item {
                             });
                         }
                     }
+
+                    target: root
                 }
 
                 StyledRect {
@@ -237,16 +279,17 @@ Item {
                 }
 
                 StateLayer {
-                    hoverEnabled: false
-                    cursorShape: Qt.IBeamCursor
-
                     function onClicked(): void {
                         passwordContainer.forceActiveFocus();
                     }
+
+                    hoverEnabled: false
+                    cursorShape: Qt.IBeamCursor
                 }
 
                 StyledText {
                     id: placeholder
+
                     anchors.centerIn: parent
                     text: qsTr("Password")
                     color: Colours.palette.m3outline
@@ -414,40 +457,14 @@ Item {
         }
     }
 
-    function checkConnectionStatus(): void {
-        if (!root.visible || !connectButton.connecting) {
-            return;
-        }
-
-        const isConnected = root.network && Nmcli.active && Nmcli.active.ssid && Nmcli.active.ssid.toLowerCase().trim() === root.network.ssid.toLowerCase().trim();
-
-        if (isConnected) {
-            connectionSuccessTimer.start();
-            return;
-        }
-
-        if (Nmcli.pendingConnection === null && connectButton.connecting) {
-            if (connectionMonitor.repeatCount > 10) {
-                connectionMonitor.stop();
-                connectButton.connecting = false;
-                connectButton.hasError = true;
-                connectButton.enabled = true;
-                connectButton.text = qsTr("Connect");
-                passwordContainer.passwordBuffer = "";
-                if (root.network && root.network.ssid) {
-                    Nmcli.forgetNetwork(root.network.ssid);
-                }
-            }
-        }
-    }
-
     Timer {
         id: connectionMonitor
+
+        property int repeatCount: 0
+
         interval: 1000
         repeat: true
         triggeredOnStart: false
-        property int repeatCount: 0
-
         onTriggered: {
             repeatCount++;
             checkConnectionStatus();
@@ -462,6 +479,7 @@ Item {
 
     Timer {
         id: connectionSuccessTimer
+
         interval: 500
         onTriggered: {
             if (root.visible && Nmcli.active && Nmcli.active.ssid) {
@@ -477,7 +495,6 @@ Item {
     }
 
     Connections {
-        target: Nmcli
         function onActiveChanged() {
             if (root.visible) {
                 checkConnectionStatus();
@@ -494,18 +511,7 @@ Item {
                 Nmcli.forgetNetwork(ssid);
             }
         }
-    }
 
-    function closeDialog(): void {
-        if (isClosing) {
-            return;
-        }
-
-        isClosing = true;
-        passwordContainer.passwordBuffer = "";
-        connectButton.connecting = false;
-        connectButton.hasError = false;
-        connectButton.text = qsTr("Connect");
-        connectionMonitor.stop();
+        target: Nmcli
     }
 }

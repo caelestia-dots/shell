@@ -1,10 +1,11 @@
 pragma ComponentBehavior: Bound
 
-import ".."
-import qs.services
-import qs.config
 import QtQuick
 import QtQuick.Layouts
+import qs.components
+import qs.components.filedialog
+import qs.services
+import qs.config
 
 StyledRect {
     id: root
@@ -51,14 +52,14 @@ StyledRect {
                 color: Qt.alpha(Colours.palette.m3secondaryContainer, selected ? 1 : 0)
 
                 StateLayer {
-                    color: place.selected ? Colours.palette.m3onSecondaryContainer : Colours.palette.m3onSurface
-
                     function onClicked(): void {
                         if (place.modelData === "Home")
                             root.dialog.cwd = ["Home"];
                         else
                             root.dialog.cwd = ["Home", place.modelData];
                     }
+
+                    color: place.selected ? Colours.palette.m3onSecondaryContainer : Colours.palette.m3onSurface
                 }
 
                 RowLayout {

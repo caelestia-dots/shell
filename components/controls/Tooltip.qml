@@ -1,10 +1,9 @@
 import ".."
+import QtQuick
+import QtQuick.Controls
 import qs.components.effects
 import qs.services
 import qs.config
-import QtQuick
-import QtQuick.Controls
-import QtQuick.Layouts
 
 Popup {
     id: root
@@ -22,55 +21,6 @@ Popup {
     property Timer hideTimer: Timer {
         interval: root.timeout
         onTriggered: root.tooltipVisible = false
-    }
-
-    // Popup properties - doesn't affect layout
-    parent: {
-        let p = target;
-        // Walk up to find the root Item (usually has anchors.fill: parent)
-        while (p && p.parent) {
-            const parentItem = p.parent;
-            // Check if this looks like a root pane Item
-            if (parentItem && parentItem.anchors && parentItem.anchors.fill !== undefined) {
-                return parentItem;
-            }
-            p = parentItem;
-        }
-        // Fallback
-        return target.parent?.parent?.parent ?? target.parent?.parent ?? target.parent ?? target;
-    }
-
-    visible: tooltipVisible
-    modal: false
-    closePolicy: Popup.NoAutoClose
-    padding: 0
-    margins: 0
-    background: Item {}
-
-    // Update position when target moves or tooltip becomes visible
-    onTooltipVisibleChanged: {
-        if (tooltipVisible) {
-            Qt.callLater(updatePosition);
-        }
-    }
-    Connections {
-        target: root.target
-        function onXChanged() {
-            if (root.tooltipVisible)
-                root.updatePosition();
-        }
-        function onYChanged() {
-            if (root.tooltipVisible)
-                root.updatePosition();
-        }
-        function onWidthChanged() {
-            if (root.tooltipVisible)
-                root.updatePosition();
-        }
-        function onHeightChanged() {
-            if (root.tooltipVisible)
-                root.updatePosition();
-        }
     }
 
     function updatePosition() {
@@ -110,6 +60,41 @@ Popup {
         });
     }
 
+    // Popup properties - doesn't affect layout
+    parent: {
+        let p = target;
+        // Walk up to find the root Item (usually has anchors.fill: parent)
+        while (p && p.parent) {
+            const parentItem = p.parent;
+            // Check if this looks like a root pane Item
+            if (parentItem && parentItem.anchors && parentItem.anchors.fill !== undefined) {
+                return parentItem;
+            }
+            p = parentItem;
+        }
+        // Fallback
+        return target.parent?.parent?.parent ?? target.parent?.parent ?? target.parent ?? target;
+    }
+
+    visible: tooltipVisible
+    modal: false
+    closePolicy: Popup.NoAutoClose
+    padding: 0
+    margins: 0
+    background: Item {}
+
+    // Update position when target moves or tooltip becomes visible
+    onTooltipVisibleChanged: {
+        if (tooltipVisible) {
+            Qt.callLater(updatePosition);
+        }
+    }
+    Component.onCompleted: {
+        if (tooltipVisible) {
+            updatePosition();
+        }
+    }
+
     enter: Transition {
         Anim {
             property: "opacity"
@@ -127,24 +112,6 @@ Popup {
             to: 0
             duration: Appearance.anim.durations.expressiveFastSpatial
             easing.bezierCurve: Appearance.anim.curves.expressiveFastSpatial
-        }
-    }
-
-    // Monitor hover state
-    Connections {
-        target: root.target
-        function onHoveredChanged() {
-            if (target.hovered) {
-                showTimer.start();
-                if (timeout > 0) {
-                    hideTimer.stop();
-                    hideTimer.start();
-                }
-            } else {
-                showTimer.stop();
-                hideTimer.stop();
-                tooltipVisible = false;
-            }
         }
     }
 
@@ -177,9 +144,43 @@ Popup {
         }
     }
 
-    Component.onCompleted: {
-        if (tooltipVisible) {
-            updatePosition();
+    Connections {
+        function onXChanged() {
+            if (root.tooltipVisible)
+                root.updatePosition();
         }
+        function onYChanged() {
+            if (root.tooltipVisible)
+                root.updatePosition();
+        }
+        function onWidthChanged() {
+            if (root.tooltipVisible)
+                root.updatePosition();
+        }
+        function onHeightChanged() {
+            if (root.tooltipVisible)
+                root.updatePosition();
+        }
+
+        target: root.target
+    }
+
+    // Monitor hover state
+    Connections {
+        function onHoveredChanged() {
+            if (target.hovered) {
+                showTimer.start();
+                if (timeout > 0) {
+                    hideTimer.stop();
+                    hideTimer.start();
+                }
+            } else {
+                showTimer.stop();
+                hideTimer.stop();
+                tooltipVisible = false;
+            }
+        }
+
+        target: root.target
     }
 }

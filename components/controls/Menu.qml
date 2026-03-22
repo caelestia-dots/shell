@@ -2,10 +2,10 @@ pragma ComponentBehavior: Bound
 
 import ".."
 import "../effects"
-import qs.services
-import qs.config
 import QtQuick
 import QtQuick.Layouts
+import qs.services
+import qs.config
 
 Elevation {
     id: root
@@ -52,14 +52,14 @@ Elevation {
                     color: Qt.alpha(Colours.palette.m3secondaryContainer, active ? 1 : 0)
 
                     StateLayer {
-                        color: item.active ? Colours.palette.m3onSecondaryContainer : Colours.palette.m3onSurface
-                        disabled: !root.expanded
-
                         function onClicked(): void {
                             root.itemSelected(item.modelData);
                             root.active = item.modelData;
                             root.expanded = false;
                         }
+
+                        color: item.active ? Colours.palette.m3onSecondaryContainer : Colours.palette.m3onSurface
+                        disabled: !root.expanded
                     }
 
                     RowLayout {
@@ -83,6 +83,7 @@ Elevation {
                         }
 
                         Loader {
+                            asynchronous: true
                             Layout.alignment: Qt.AlignVCenter
                             active: item.modelData.trailingIcon.length > 0
                             visible: active

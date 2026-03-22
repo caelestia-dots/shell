@@ -1,7 +1,7 @@
 import ".."
-import qs.services
 import QtQuick
 import QtQuick.Effects
+import qs.services
 
 RectangularShadow {
     property int level

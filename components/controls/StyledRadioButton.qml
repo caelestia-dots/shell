@@ -1,8 +1,8 @@
+import QtQuick
+import QtQuick.Templates
 import qs.components
 import qs.services
 import qs.config
-import QtQuick
-import QtQuick.Templates
 
 RadioButton {
     id: root
@@ -24,13 +24,13 @@ RadioButton {
         anchors.verticalCenter: parent.verticalCenter
 
         StateLayer {
-            anchors.margins: -Appearance.padding.smaller
-            color: root.checked ? Colours.palette.m3onSurface : Colours.palette.m3primary
-            z: -1
-
             function onClicked(): void {
                 root.click();
             }
+
+            anchors.margins: -Appearance.padding.smaller
+            color: root.checked ? Colours.palette.m3onSurface : Colours.palette.m3primary
+            z: -1
         }
 
         StyledRect {

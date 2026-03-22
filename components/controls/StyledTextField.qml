@@ -1,10 +1,10 @@
 pragma ComponentBehavior: Bound
 
 import ".."
-import qs.services
-import qs.config
 import QtQuick
 import QtQuick.Controls
+import qs.services
+import qs.config
 
 TextField {
     id: root
@@ -28,8 +28,6 @@ TextField {
         radius: Appearance.rounding.normal
 
         Connections {
-            target: root
-
             function onCursorPositionChanged(): void {
                 if (root.activeFocus && root.cursorVisible) {
                     cursor.opacity = 1;
@@ -37,6 +35,8 @@ TextField {
                     enableBlink.restart();
                 }
             }
+
+            target: root
         }
 
         Timer {

@@ -1,15 +1,15 @@
 pragma ComponentBehavior: Bound
 
 import ".."
+import QtQuick
+import QtQuick.Controls
+import QtQuick.Layouts
+import Quickshell
 import qs.components
 import qs.components.controls
 import qs.components.effects
 import qs.services
 import qs.config
-import Quickshell
-import QtQuick
-import QtQuick.Controls
-import QtQuick.Layouts
 
 ColumnLayout {
     id: root
@@ -21,7 +21,6 @@ ColumnLayout {
     spacing: Appearance.spacing.normal
 
     Connections {
-        target: VPN
         function onConnectedChanged() {
             if (!VPN.connected && root.pendingSwitchIndex >= 0) {
                 const targetIndex = root.pendingSwitchIndex;
@@ -50,6 +49,8 @@ ColumnLayout {
                 });
             }
         }
+
+        target: VPN
     }
 
     TextButton {
@@ -97,6 +98,7 @@ ColumnLayout {
                 required property int index
 
                 width: ListView.view ? ListView.view.width : undefined
+                implicitHeight: rowLayout.implicitHeight + Appearance.padding.normal * 2
 
                 color: Qt.alpha(Colours.tPalette.m3surfaceContainer, (root.session && root.session.vpn && root.session.vpn.active === modelData) ? Colours.tPalette.m3surfaceContainer.a : 0)
                 radius: Appearance.rounding.normal
@@ -181,7 +183,6 @@ ColumnLayout {
                         color: Qt.alpha(Colours.palette.m3primaryContainer, VPN.connected && modelData.enabled ? 1 : 0)
 
                         StateLayer {
-                            enabled: !VPN.connecting
                             function onClicked(): void {
                                 const clickedIndex = modelData.index;
 
@@ -216,6 +217,8 @@ ColumnLayout {
                                     }
                                 }
                             }
+
+                            enabled: !VPN.connecting
                         }
 
                         MaterialIcon {
@@ -256,8 +259,6 @@ ColumnLayout {
                         }
                     }
                 }
-
-                implicitHeight: rowLayout.implicitHeight + Appearance.padding.normal * 2
             }
         }
     }
@@ -270,6 +271,43 @@ ColumnLayout {
         property string providerName: ""
         property string displayName: ""
         property string interfaceName: ""
+
+        function showProviderSelection(): void {
+            currentState = "selection";
+            open();
+        }
+
+        function closeWithAnimation(): void {
+            close();
+        }
+
+        function showAddForm(providerType: string, defaultDisplayName: string): void {
+            editIndex = -1;
+            providerName = providerType;
+            displayName = defaultDisplayName;
+            interfaceName = "";
+
+            if (currentState === "selection") {
+                transitionToForm.start();
+            } else {
+                currentState = "form";
+                isClosing = false;
+                open();
+            }
+        }
+
+        function showEditForm(index: int): void {
+            const provider = Config.utilities.vpn.provider[index];
+            const isObject = typeof provider === "object";
+
+            editIndex = index;
+            providerName = isObject ? (provider.name || "custom") : String(provider);
+            displayName = isObject ? (provider.displayName || providerName) : providerName;
+            interfaceName = isObject ? (provider.interface || "") : "";
+
+            currentState = "form";
+            open();
+        }
 
         parent: Overlay.overlay
         x: Math.round((parent.width - width) / 2)
@@ -321,79 +359,12 @@ ColumnLayout {
             }
         }
 
-        function showProviderSelection(): void {
-            currentState = "selection";
-            open();
-        }
-
-        function closeWithAnimation(): void {
-            close();
-        }
-
-        function showAddForm(providerType: string, defaultDisplayName: string): void {
-            editIndex = -1;
-            providerName = providerType;
-            displayName = defaultDisplayName;
-            interfaceName = "";
-
-            if (currentState === "selection") {
-                transitionToForm.start();
-            } else {
-                currentState = "form";
-                isClosing = false;
-                open();
-            }
-        }
-
-        function showEditForm(index: int): void {
-            const provider = Config.utilities.vpn.provider[index];
-            const isObject = typeof provider === "object";
-
-            editIndex = index;
-            providerName = isObject ? (provider.name || "custom") : String(provider);
-            displayName = isObject ? (provider.displayName || providerName) : providerName;
-            interfaceName = isObject ? (provider.interface || "") : "";
-
-            currentState = "form";
-            open();
-        }
-
         Overlay.modal: Rectangle {
             color: Qt.rgba(0, 0, 0, 0.4 * vpnDialog.opacity)
         }
 
         onClosed: {
             currentState = "selection";
-        }
-
-        SequentialAnimation {
-            id: transitionToForm
-
-            ParallelAnimation {
-                Anim {
-                    target: selectionContent
-                    property: "opacity"
-                    to: 0
-                    duration: Appearance.anim.durations.small
-                    easing.bezierCurve: Appearance.anim.curves.emphasized
-                }
-            }
-
-            ScriptAction {
-                script: {
-                    vpnDialog.currentState = "form";
-                }
-            }
-
-            ParallelAnimation {
-                Anim {
-                    target: formContent
-                    property: "opacity"
-                    to: 1
-                    duration: Appearance.anim.durations.small
-                    easing.bezierCurve: Appearance.anim.curves.emphasized
-                }
-            }
         }
 
         background: StyledRect {
@@ -586,6 +557,7 @@ ColumnLayout {
 
                         StyledTextField {
                             id: displayNameField
+
                             anchors.centerIn: parent
                             width: parent.width - Appearance.padding.normal
                             horizontalAlignment: TextInput.AlignLeft
@@ -622,6 +594,7 @@ ColumnLayout {
 
                         StyledTextField {
                             id: interfaceNameField
+
                             anchors.centerIn: parent
                             width: parent.width - Appearance.padding.normal
                             horizontalAlignment: TextInput.AlignLeft
@@ -679,6 +652,36 @@ ColumnLayout {
                             vpnDialog.closeWithAnimation();
                         }
                     }
+                }
+            }
+        }
+
+        SequentialAnimation {
+            id: transitionToForm
+
+            ParallelAnimation {
+                Anim {
+                    target: selectionContent
+                    property: "opacity"
+                    to: 0
+                    duration: Appearance.anim.durations.small
+                    easing.bezierCurve: Appearance.anim.curves.emphasized
+                }
+            }
+
+            ScriptAction {
+                script: {
+                    vpnDialog.currentState = "form";
+                }
+            }
+
+            ParallelAnimation {
+                Anim {
+                    target: formContent
+                    property: "opacity"
+                    to: 1
+                    duration: Appearance.anim.durations.small
+                    easing.bezierCurve: Appearance.anim.curves.emphasized
                 }
             }
         }

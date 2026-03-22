@@ -1,0 +1,32 @@
+name: Check formatting
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  check-format:
+    runs-on: ubuntu-latest
+
+    container:
+      image: ghcr.io/${{ github.repository_owner }}/shell-arch-env:latest
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Check QML format
+        shell: fish {0}
+        run: |
+          for file in (string match -v 'build/*' **.qml)
+            /usr/lib/qt6/bin/qmlformat $file | diff -u $file - || exit 1
+          end
+          python3 scripts/qml-lint-conventions.py
+
+      - name: Check C++ format
+        shell: fish {0}
+        run: |
+          for file in (string match -v 'build/*' **.cpp **.hpp)
+            clang-format $file | diff -u $file - || exit 1
+          end

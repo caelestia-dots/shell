@@ -2,13 +2,13 @@ pragma ComponentBehavior: Bound
 
 import ".."
 import "../../components"
-import qs.components
-import qs.components.controls
-import qs.components.containers
-import qs.services
-import qs.config
 import QtQuick
 import QtQuick.Layouts
+import qs.components
+import qs.components.containers
+import qs.components.controls
+import qs.services
+import qs.config
 
 CollapsibleSection {
     id: root
@@ -50,7 +50,7 @@ CollapsibleSection {
 
             label: qsTr("Border thickness")
             value: rootPane.borderThickness
-            from: 0.1
+            from: 0
             to: 100
             decimals: 1
             suffix: "px"

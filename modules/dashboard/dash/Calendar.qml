@@ -1,13 +1,13 @@
 pragma ComponentBehavior: Bound
 
-import qs.components
-import qs.components.effects
-import qs.components.controls
-import qs.services
-import qs.config
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
+import qs.components
+import qs.components.controls
+import qs.components.effects
+import qs.services
+import qs.config
 
 CustomMouseArea {
     id: root
@@ -17,19 +17,19 @@ CustomMouseArea {
     readonly property int currMonth: state.currentDate.getMonth()
     readonly property int currYear: state.currentDate.getFullYear()
 
-    anchors.left: parent.left
-    anchors.right: parent.right
-    implicitHeight: inner.implicitHeight + inner.anchors.margins * 2
-
-    acceptedButtons: Qt.MiddleButton
-    onClicked: root.state.currentDate = new Date()
-
     function onWheel(event: WheelEvent): void {
         if (event.angleDelta.y > 0)
             root.state.currentDate = new Date(root.currYear, root.currMonth - 1, 1);
         else if (event.angleDelta.y < 0)
             root.state.currentDate = new Date(root.currYear, root.currMonth + 1, 1);
     }
+
+    anchors.left: parent.left
+    anchors.right: parent.right
+    implicitHeight: inner.implicitHeight + inner.anchors.margins * 2
+
+    acceptedButtons: Qt.MiddleButton
+    onClicked: root.state.currentDate = new Date()
 
     ColumnLayout {
         id: inner
@@ -51,11 +51,11 @@ CustomMouseArea {
                 StateLayer {
                     id: prevMonthStateLayer
 
-                    radius: Appearance.rounding.full
-
                     function onClicked(): void {
                         root.state.currentDate = new Date(root.currYear, root.currMonth - 1, 1);
                     }
+
+                    radius: Appearance.rounding.full
                 }
 
                 MaterialIcon {
@@ -76,6 +76,10 @@ CustomMouseArea {
                 implicitHeight: monthYearDisplay.implicitHeight + Appearance.padding.small * 2
 
                 StateLayer {
+                    function onClicked(): void {
+                        root.state.currentDate = new Date();
+                    }
+
                     anchors.fill: monthYearDisplay
                     anchors.margins: -Appearance.padding.small
                     anchors.leftMargin: -Appearance.padding.normal
@@ -85,10 +89,6 @@ CustomMouseArea {
                     disabled: {
                         const now = new Date();
                         return root.currMonth === now.getMonth() && root.currYear === now.getFullYear();
-                    }
-
-                    function onClicked(): void {
-                        root.state.currentDate = new Date();
                     }
                 }
 
@@ -111,11 +111,11 @@ CustomMouseArea {
                 StateLayer {
                     id: nextMonthStateLayer
 
-                    radius: Appearance.rounding.full
-
                     function onClicked(): void {
                         root.state.currentDate = new Date(root.currYear, root.currMonth + 1, 1);
                     }
+
+                    radius: Appearance.rounding.full
                 }
 
                 MaterialIcon {
