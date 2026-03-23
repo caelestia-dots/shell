@@ -221,7 +221,7 @@ AudioCollector::AudioCollector(QObject* parent)
     , m_writeBuffer(&m_buffer2) {}
 
 AudioCollector::~AudioCollector() {
-    stop();
+    AudioCollector::stop();
 }
 
 void AudioCollector::start() {

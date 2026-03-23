@@ -219,7 +219,7 @@ void FileSystemModel::watchDirIfRecursive(const QString& path) {
     if (m_recursive && m_watchChanges) {
         const auto currentDir = m_dir;
         const bool showHidden = m_showHidden;
-        const auto future = QtConcurrent::run([showHidden, path]() {
+        auto future = QtConcurrent::run([showHidden, path]() {
             QDir::Filters filters = QDir::Dirs | QDir::NoDotAndDotDot;
             if (showHidden) {
                 filters |= QDir::Hidden;
@@ -232,16 +232,12 @@ void FileSystemModel::watchDirIfRecursive(const QString& path) {
             }
             return dirs;
         });
-        const auto watcher = new QFutureWatcher<QStringList>(this);
-        connect(watcher, &QFutureWatcher<QStringList>::finished, this, [currentDir, showHidden, watcher, this]() {
-            const auto paths = watcher->result();
+        future.then(this, [currentDir, showHidden, this](const QStringList& paths) {
             if (currentDir == m_dir && showHidden == m_showHidden && !paths.isEmpty()) {
                 // Ignore if dir or showHidden has changed
                 m_watcher.addPaths(paths);
             }
-            watcher->deleteLater();
         });
-        watcher->setFuture(future);
     }
 }
 
@@ -295,7 +291,7 @@ void FileSystemModel::updateEntriesForDir(const QString& dir) {
         oldPaths << entry->path();
     }
 
-    const auto future = QtConcurrent::run([=](QPromise<QPair<QSet<QString>, QSet<QString>>>& promise) {
+    auto future = QtConcurrent::run([=](QPromise<QPair<QSet<QString>, QSet<QString>>>& promise) {
         const auto flags = recursive ? QDirIterator::Subdirectories : QDirIterator::NoIteratorFlags;
 
         std::optional<QDirIterator> iter;
@@ -353,7 +349,7 @@ void FileSystemModel::updateEntriesForDir(const QString& dir) {
             newPaths.insert(path);
         }
 
-        if (promise.isCanceled() || newPaths == oldPaths) {
+        if (promise.isCanceled()) {
             return;
         }
 
@@ -365,23 +361,17 @@ void FileSystemModel::updateEntriesForDir(const QString& dir) {
     }
     m_futures.insert(dir, future);
 
-    const auto watcher = new QFutureWatcher<QPair<QSet<QString>, QSet<QString>>>(this);
-
-    connect(watcher, &QFutureWatcher<QPair<QSet<QString>, QSet<QString>>>::finished, this, [dir, watcher, this]() {
-        m_futures.remove(dir);
-
-        if (!watcher->future().isResultReadyAt(0)) {
-            watcher->deleteLater();
-            return;
-        }
-
-        const auto result = watcher->result();
-        applyChanges(result.first, result.second);
-
-        watcher->deleteLater();
-    });
-
-    watcher->setFuture(future);
+    future
+        .then(this,
+            [dir, this](QPair<QSet<QString>, QSet<QString>> result) {
+                m_futures.remove(dir);
+                if (!result.first.isEmpty() || !result.second.isEmpty()) {
+                    applyChanges(result.first, result.second);
+                }
+            })
+        .onCanceled(this, [dir, this]() {
+            m_futures.remove(dir);
+        });
 }
 
 void FileSystemModel::applyChanges(const QSet<QString>& removedPaths, const QSet<QString>& addedPaths) {
