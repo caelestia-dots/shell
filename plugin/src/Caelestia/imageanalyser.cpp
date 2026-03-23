@@ -134,6 +134,11 @@ void ImageAnalyser::update() {
 
     if (m_sourceItem) {
         const QSharedPointer<const QQuickItemGrabResult> grabResult = m_sourceItem->grabToImage();
+        if (!grabResult) {
+            QObject::connect(m_sourceItem, &QQuickItem::windowChanged, this, &ImageAnalyser::requestUpdate,
+                Qt::SingleShotConnection);
+            return;
+        }
         QObject::connect(grabResult.data(), &QQuickItemGrabResult::ready, this, [grabResult, this]() {
             m_futureWatcher->setFuture(QtConcurrent::run(&ImageAnalyser::analyse, grabResult->image(), m_rescaleSize));
         });

@@ -1,7 +1,6 @@
 #include "qalculator.hpp"
 
 #include <libqalculate/qalculate.h>
-#include <qfuturewatcher.h>
 #include <qtconcurrentrun.h>
 
 namespace caelestia {
@@ -11,7 +10,10 @@ QMutex Qalculator::s_calculatorMutex;
 Qalculator::Qalculator(QObject* parent)
     : QObject(parent) {
     if (!CALCULATOR) {
-        new Calculator();
+        // Calculator constructor sets the global `calculator` pointer (CALCULATOR macro),
+        // but we need to assign it to a var so compiler doesn't flag it as a leak
+        static const auto* const instance = new Calculator();
+        Q_UNUSED(instance)
         CALCULATOR->loadExchangeRates();
         CALCULATOR->loadGlobalDefinitions();
         CALCULATOR->loadLocalDefinitions();
@@ -79,7 +81,7 @@ void Qalculator::evalAsync(const QString& expr) {
         emit busyChanged();
     }
 
-    const auto future = QtConcurrent::run([expr]() -> QPair<QString, QString> {
+    QtConcurrent::run([expr]() -> QPair<QString, QString> {
         QMutexLocker locker(&s_calculatorMutex);
 
         EvaluationOptions eo;
@@ -109,18 +111,12 @@ void Qalculator::evalAsync(const QString& expr) {
 
         const QString rawStr = QString::fromStdString(result);
         return { QString("%1 = %2").arg(parsed).arg(result), rawStr };
-    });
-
-    auto* watcher = new QFutureWatcher<QPair<QString, QString>>(this);
-
-    connect(watcher, &QFutureWatcher<QPair<QString, QString>>::finished, this, [this, watcher, gen]() {
-        watcher->deleteLater();
-
+    }).then(this, [this, gen](QPair<QString, QString> result) {
         if (gen != m_generation) {
             return;
         }
 
-        const auto [formatted, raw] = watcher->result();
+        const auto& [formatted, raw] = result;
 
         if (m_result != formatted) {
             m_result = formatted;
@@ -135,8 +131,6 @@ void Qalculator::evalAsync(const QString& expr) {
             emit busyChanged();
         }
     });
-
-    watcher->setFuture(future);
 }
 
 QString Qalculator::result() const {
