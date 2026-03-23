@@ -11,7 +11,7 @@ AppEntry::AppEntry(QObject* entry, unsigned int frequency, QObject* parent)
     , m_entry(entry)
     , m_frequency(frequency) {
     const auto mo = m_entry->metaObject();
-    const auto tmo = metaObject();
+    const auto tmo = &AppEntry::staticMetaObject;
 
     for (const auto& prop :
         { "name", "comment", "execString", "startupClass", "genericName", "categories", "keywords" }) {
@@ -303,11 +303,13 @@ void AppDb::updateApps() {
         newIds.insert(entry->property("id").toString());
     }
 
-    for (auto it = m_apps.keyBegin(); it != m_apps.keyEnd(); ++it) {
-        const auto& id = *it;
-        if (!newIds.contains(id)) {
+    for (auto it = m_apps.begin(); it != m_apps.end();) {
+        if (!newIds.contains(it.key())) {
             dirty = true;
-            m_apps.take(id)->deleteLater();
+            it.value()->deleteLater();
+            it = m_apps.erase(it);
+        } else {
+            ++it;
         }
     }
 
