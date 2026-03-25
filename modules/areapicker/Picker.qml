@@ -82,11 +82,9 @@ MouseArea {
             } else if (root.loader.saveAndClip) {
                 const date = new Date();
                 const filename = `Screenshot_${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}_${String(date.getHours()).padStart(2, '0')}-${String(date.getMinutes()).padStart(2, '0')}-${String(date.getSeconds()).padStart(2, '0')}.png`;
-                const home = Quickshell.home;
-                const savepath = home + "/Pictures/" + filename;
-                Quickshell.execDetached(["cp", path, savepath]);
+                Quickshell.execDetached(["sh", "-c", "mkdir -p ~/Pictures/Screenshots && cp " + path + " ~/Pictures/Screenshots/" + filename]);
                 Quickshell.execDetached(["sh", "-c", "wl-copy --type image/png < " + path]);
-                Quickshell.execDetached(["notify-send", "-a", "caelestia-cli", "-i", path, "Screenshot taken", "Saved to Pictures and copied to clipboard"]);
+                Quickshell.execDetached(["notify-send", "-a", "caelestia-cli", "-i", path, "Screenshot taken", "Saved to Pictures/Screenshots and copied to clipboard"]);
                 closeAnim.start();
             } else {
                 Quickshell.execDetached(["swappy", "-f", path]);
