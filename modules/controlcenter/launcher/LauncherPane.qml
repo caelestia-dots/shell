@@ -25,6 +25,7 @@ Item {
     property var selectedApp: root.session.launcher.active
     property bool hideFromLauncherChecked: false
     property bool favouriteChecked: false
+    property bool caffeineChecked: false
     property string searchText: ""
     property list<var> filteredApps: []
 
@@ -32,6 +33,7 @@ Item {
         if (!root.selectedApp) {
             root.hideFromLauncherChecked = false;
             root.favouriteChecked = false;
+            root.caffeineChecked = false;
             return;
         }
 
@@ -39,6 +41,7 @@ Item {
 
         root.hideFromLauncherChecked = Config.launcher.hiddenApps && Config.launcher.hiddenApps.length > 0 && Strings.testRegexList(Config.launcher.hiddenApps, appId);
         root.favouriteChecked = Config.launcher.favouriteApps && Config.launcher.favouriteApps.length > 0 && Strings.testRegexList(Config.launcher.favouriteApps, appId);
+        root.caffeineChecked = Config.launcher.caffeineApps && Config.launcher.caffeineApps.length > 0 && Config.launcher.caffeineApps.includes(appId);
     }
 
     function saveHiddenApps(isHidden) {
@@ -359,14 +362,28 @@ Item {
                                 }
 
                                 Loader {
-                                    readonly property bool isHidden: modelData ? Strings.testRegexList(Config.launcher.hiddenApps, modelData.id) : false
-                                    readonly property bool isFav: modelData ? Strings.testRegexList(Config.launcher.favouriteApps, modelData.id) : false
-
                                     Layout.alignment: Qt.AlignVCenter
                                     asynchronous: true
-                                    active: isHidden || isFav
+                                    active: modelData ? Strings.testRegexList(Config.launcher.hiddenApps, modelData.id) : false
+                                    visible: active
 
-                                    sourceComponent: isHidden ? hiddenIcon : (isFav ? favouriteIcon : null)
+                                    sourceComponent: hiddenIcon
+                                }
+                                Loader {
+                                    Layout.alignment: Qt.AlignVCenter
+                                    asynchronous: true
+                                    active: modelData ? Strings.testRegexList(Config.launcher.favouriteApps, modelData.id) : false
+                                    visible: active
+
+                                    sourceComponent: favouriteIcon
+                                }
+                                Loader {
+                                    Layout.alignment: Qt.AlignVCenter
+                                    asynchronous: true
+                                    active: modelData ? (Config.launcher.caffeineApps && Config.launcher.caffeineApps.includes(modelData.id)) : false
+                                    visible: active
+
+                                    sourceComponent: caffeineIcon
                                 }
 
                                 Component {
@@ -384,6 +401,16 @@ Item {
 
                                     MaterialIcon {
                                         text: "favorite"
+                                        fill: 1
+                                        color: Colours.palette.m3primary
+                                    }
+                                }
+
+                                Component {
+                                    id: caffeineIcon
+
+                                    MaterialIcon {
+                                        text: "emoji_food_beverage"
                                         fill: 1
                                         color: Colours.palette.m3primary
                                     }
@@ -425,9 +452,11 @@ Item {
                         const appId = displayedApp.id || displayedApp.entry?.id;
                         root.hideFromLauncherChecked = Config.launcher.hiddenApps && Config.launcher.hiddenApps.length > 0 && Strings.testRegexList(Config.launcher.hiddenApps, appId);
                         root.favouriteChecked = Config.launcher.favouriteApps && Config.launcher.favouriteApps.length > 0 && Strings.testRegexList(Config.launcher.favouriteApps, appId);
+                        root.caffeineChecked = Config.launcher.caffeineApps && Config.launcher.caffeineApps.length > 0 && Config.launcher.caffeineApps.includes(appId);
                     } else {
                         root.hideFromLauncherChecked = false;
                         root.favouriteChecked = false;
+                        root.caffeineChecked = false;
                     }
                 }
 
@@ -640,7 +669,7 @@ Item {
                             // * app isn't in hiddenApps array but marked as hidden anyway
                             // ^^^ This means that this app is hidden because of a regex check
                             //     this button can not toggle regexed apps
-                            enabled: appDetailsLayout.displayedApp !== null && !root.favouriteChecked && (Config.launcher.hiddenApps.indexOf(appDetailsLayout.displayedApp.id || appDetailsLayout.displayedApp.entry?.id) !== -1 || !root.hideFromLauncherChecked)
+                            enabled: appDetailsLayout.displayedApp !== null && !root.favouriteChecked && !(Config.launcher.caffeineApps.includes(appDetailsLayout.displayedApp.id || appDetailsLayout.displayedApp.entry?.id)) && (Config.launcher.hiddenApps.indexOf(appDetailsLayout.displayedApp.id || appDetailsLayout.displayedApp.entry?.id) !== -1 || !root.hideFromLauncherChecked)
                             opacity: enabled ? 1 : 0.6
                             onToggled: checked => {
                                 root.hideFromLauncherChecked = checked;
@@ -659,6 +688,34 @@ Item {
                                         }
                                     }
                                     Config.launcher.hiddenApps = hiddenApps;
+                                    Config.save();
+                                }
+                            }
+                        }
+                        SwitchRow {
+                            Layout.topMargin: Appearance.spacing.normal
+                            visible: appDetailsLayout.displayedApp !== null
+                            label: qsTr("Smart awake")
+                            checked: root.caffeineChecked
+                            enabled: appDetailsLayout.displayedApp !== null && !root.hideFromLauncherChecked
+                            opacity: enabled ? 1 : 0.6
+                            onToggled: checked => {
+                                const app = appDetailsLayout.displayedApp;
+                                if (app) {
+                                    const appId = app.id || app.entry?.id || "";
+                                    const apps = Config.launcher.caffeineApps ? [...Config.launcher.caffeineApps] : [];
+                                    if (checked) {
+                                        if (!apps.includes(appId)) {
+                                            apps.push(appId);
+                                        }
+                                    } else {
+                                        const index = apps.indexOf(appId);
+                                        if (index !== -1) {
+                                            apps.splice(index, 1);
+                                        }
+                                    }
+                                    root.caffeineChecked = checked;
+                                    Config.launcher.caffeineApps = apps;
                                     Config.save();
                                 }
                             }

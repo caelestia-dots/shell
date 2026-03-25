@@ -653,7 +653,8 @@ default, you must create it manually.
             "kbLimit": true,
             "numLockChanged": true,
             "vpnChanged": true,
-            "nowPlaying": false
+            "nowPlaying": false,
+            "caffeineChanged": false
         },
         "vpn": {
             "enabled": true,

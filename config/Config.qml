@@ -253,6 +253,7 @@ Singleton {
             vimKeybinds: launcher.vimKeybinds,
             favouriteApps: launcher.favouriteApps,
             hiddenApps: launcher.hiddenApps,
+            caffeineApps: launcher.caffeineApps,
             useFuzzy: {
                 apps: launcher.useFuzzy.apps,
                 actions: launcher.useFuzzy.actions,
@@ -332,7 +333,8 @@ Singleton {
                 numLockChanged: utilities.toasts.numLockChanged,
                 kbLayoutChanged: utilities.toasts.kbLayoutChanged,
                 vpnChanged: utilities.toasts.vpnChanged,
-                nowPlaying: utilities.toasts.nowPlaying
+                nowPlaying: utilities.toasts.nowPlaying,
+                caffeineChanged: utilities.toasts.caffeineChanged
             },
             vpn: {
                 enabled: utilities.vpn.enabled,

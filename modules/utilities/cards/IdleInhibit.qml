@@ -8,6 +8,8 @@ import qs.config
 StyledRect {
     id: root
 
+    readonly property bool smartCaffeineActive: CaffeineService.active
+
     Layout.fillWidth: true
     implicitHeight: layout.implicitHeight + (IdleInhibitor.enabled ? activeChip.implicitHeight + activeChip.anchors.topMargin : 0) + Appearance.padding.large * 2
 

@@ -86,5 +86,20 @@ Item {
                 color: Colours.palette.m3primary
             }
         }
+
+        Loader {
+            id: caffeineIcon
+
+            asynchronous: true
+            anchors.verticalCenter: parent.verticalCenter
+            anchors.right: favouriteIcon.active ? favouriteIcon.left : parent.right
+            anchors.rightMargin: favouriteIcon.active ? Appearance.spacing.smaller : 0
+            active: root.modelData && Config.launcher.caffeineApps.includes(root.modelData.id)
+            sourceComponent: MaterialIcon {
+                text: "emoji_food_beverage"
+                fill: 1
+                color: Colours.palette.m3primary
+            }
+        }
     }
 }
