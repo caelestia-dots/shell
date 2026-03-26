@@ -1,6 +1,7 @@
 pragma Singleton
 
 import QtQml
+import QtQuick
 import Quickshell
 import Quickshell.Io
 import Quickshell.Services.Mpris
@@ -25,12 +26,24 @@ Singleton {
             if (!Config.utilities.toasts.nowPlaying) {
                 return;
             }
-            if (root.active.trackArtist != "" && root.active.trackTitle != "") {
-                Toaster.toast(qsTr("Now Playing"), qsTr("%1 - %2").arg(root.active.trackArtist).arg(root.active.trackTitle), "music_note");
-            }
+            nowPlayingTimer.restart();
         }
 
         target: root.active
+    }
+
+    // Debounce the now playing toast to avoid showing stale metadata.
+    // Some players (e.g. Spotify) emit postTrackChanged as soon as the track
+    // ID changes, before the title/artist properties are updated in a follow-up
+    // D-Bus signal. Waiting a short time ensures the metadata has settled.
+    Timer {
+        id: nowPlayingTimer
+        interval: 300
+        onTriggered: {
+            if (root.active && root.active.trackArtist != "" && root.active.trackTitle != "") {
+                Toaster.toast(qsTr("Now Playing"), qsTr("%1 - %2").arg(root.active.trackArtist).arg(root.active.trackTitle), "music_note");
+            }
+        }
     }
 
     PersistentProperties {
