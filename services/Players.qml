@@ -1,7 +1,7 @@
 pragma Singleton
 
-import QtQml
 import QtQuick
+import QtQml
 import Quickshell
 import Quickshell.Io
 import Quickshell.Services.Mpris
@@ -38,6 +38,7 @@ Singleton {
     // D-Bus signal. Waiting a short time ensures the metadata has settled.
     Timer {
         id: nowPlayingTimer
+
         interval: 300
         onTriggered: {
             if (root.active && root.active.trackArtist != "" && root.active.trackTitle != "") {
