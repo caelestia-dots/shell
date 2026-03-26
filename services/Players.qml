@@ -41,6 +41,9 @@ Singleton {
 
         interval: 300
         onTriggered: {
+            if (!Config.utilities.toasts.nowPlaying) {
+                return;
+            }
             if (root.active && root.active.trackArtist != "" && root.active.trackTitle != "") {
                 Toaster.toast(qsTr("Now Playing"), qsTr("%1 - %2").arg(root.active.trackArtist).arg(root.active.trackTitle), "music_note");
             }
