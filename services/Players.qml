@@ -23,9 +23,7 @@ Singleton {
 
     Connections {
         function onPostTrackChanged() {
-            if (!Config.utilities.toasts.nowPlaying) {
-                return;
-            }
+            nowPlayingTimer.pendingPlayer = root.active;
             nowPlayingTimer.restart();
         }
 
@@ -36,17 +34,22 @@ Singleton {
     // Some players (e.g. Spotify) emit postTrackChanged as soon as the track
     // ID changes, before the title/artist properties are updated in a follow-up
     // D-Bus signal. Waiting a short time ensures the metadata has settled.
+    // The player is captured at signal time so that an active player switch
+    // during the debounce window does not show metadata from the wrong player.
     Timer {
         id: nowPlayingTimer
+
+        property MprisPlayer pendingPlayer: null
 
         interval: 300
         onTriggered: {
             if (!Config.utilities.toasts.nowPlaying) {
                 return;
             }
-            if (root.active && root.active.trackArtist != "" && root.active.trackTitle != "") {
-                Toaster.toast(qsTr("Now Playing"), qsTr("%1 - %2").arg(root.active.trackArtist).arg(root.active.trackTitle), "music_note");
+            if (pendingPlayer && pendingPlayer === root.active && pendingPlayer.trackArtist != "" && pendingPlayer.trackTitle != "") {
+                Toaster.toast(qsTr("Now Playing"), qsTr("%1 - %2").arg(pendingPlayer.trackArtist).arg(pendingPlayer.trackTitle), "music_note");
             }
+            pendingPlayer = null;
         }
     }
 
