@@ -174,10 +174,10 @@ Singleton {
     }
 
     IpcHandler {
-        target: "audio"
-
         function cycleOutput(): void {
             root.cycleNextAudioOutput();
         }
+
+        target: "audio"
     }
 }
