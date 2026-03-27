@@ -1,22 +1,23 @@
 pragma ComponentBehavior: Bound
 
-import ".."
-import "../controls"
-import "../images"
+import QtQuick
+import QtQuick.Effects
+import QtQuick.Layouts
+import Quickshell
+import Caelestia.Models
+import qs.components
+import qs.components.controls
+import qs.components.filedialog
+import qs.components.images
 import qs.services
 import qs.config
 import qs.utils
-import Caelestia.Models
-import Quickshell
-import QtQuick
-import QtQuick.Layouts
-import QtQuick.Effects
 
 Item {
     id: root
 
     required property var dialog
-    property alias currentItem: view.currentItem
+    readonly property FileEntry currentItem: view.currentItem as FileEntry
 
     StyledRect {
         anchors.fill: parent
@@ -47,6 +48,7 @@ Item {
     }
 
     Loader {
+        asynchronous: true
         anchors.centerIn: parent
 
         opacity: view.count === 0 ? 1 : 0
@@ -90,11 +92,11 @@ Item {
 
         Keys.onReturnPressed: {
             if (root.dialog.selectionValid)
-                root.dialog.accepted(currentItem.modelData.path);
+                root.dialog.accepted((currentItem as FileEntry).modelData.path);
         }
         Keys.onEnterPressed: {
             if (root.dialog.selectionValid)
-                root.dialog.accepted(currentItem.modelData.path);
+                root.dialog.accepted((currentItem as FileEntry).modelData.path);
         }
 
         StyledScrollBar.vertical: StyledScrollBar {
@@ -104,84 +106,14 @@ Item {
         model: FileSystemModel {
             path: {
                 if (root.dialog.cwd[0] === "Home")
-                    return `${Paths.home}/${root.dialog.cwd.slice(1).join("/")}`;
+                    return Paths.home + `/${root.dialog.cwd.slice(1).join("/")}`;
                 else
                     return root.dialog.cwd.join("/");
             }
             onPathChanged: view.currentIndex = -1
         }
 
-        delegate: StyledRect {
-            id: item
-
-            required property int index
-            required property FileSystemEntry modelData
-
-            readonly property real nonAnimHeight: icon.implicitHeight + name.anchors.topMargin + name.implicitHeight + Appearance.padding.normal * 2
-
-            implicitWidth: Sizes.itemWidth
-            implicitHeight: nonAnimHeight
-
-            radius: Appearance.rounding.normal
-            color: Qt.alpha(Colours.tPalette.m3surfaceContainerHighest, GridView.isCurrentItem ? Colours.tPalette.m3surfaceContainerHighest.a : 0)
-            z: GridView.isCurrentItem || implicitHeight !== nonAnimHeight ? 1 : 0
-            clip: true
-
-            StateLayer {
-                onDoubleClicked: {
-                    if (item.modelData.isDir)
-                        root.dialog.cwd.push(item.modelData.name);
-                    else if (root.dialog.selectionValid)
-                        root.dialog.accepted(item.modelData.path);
-                }
-
-                function onClicked(): void {
-                    view.currentIndex = item.index;
-                }
-            }
-
-            CachingIconImage {
-                id: icon
-
-                anchors.horizontalCenter: parent.horizontalCenter
-                anchors.top: parent.top
-                anchors.topMargin: Appearance.padding.normal
-
-                implicitSize: Sizes.itemWidth - Appearance.padding.normal * 2
-
-                Component.onCompleted: {
-                    const file = item.modelData;
-                    if (file.isImage)
-                        source = Qt.resolvedUrl(file.path);
-                    else if (!file.isDir)
-                        source = Quickshell.iconPath(file.mimeType.replace("/", "-"), "application-x-zerosize");
-                    else if (root.dialog.cwd.length === 1 && ["Desktop", "Documents", "Downloads", "Music", "Pictures", "Public", "Templates", "Videos"].includes(file.name))
-                        source = Quickshell.iconPath(`folder-${file.name.toLowerCase()}`);
-                    else
-                        source = Quickshell.iconPath("inode-directory");
-                }
-            }
-
-            StyledText {
-                id: name
-
-                anchors.left: parent.left
-                anchors.right: parent.right
-                anchors.top: icon.bottom
-                anchors.topMargin: Appearance.spacing.small
-                anchors.margins: Appearance.padding.normal
-
-                horizontalAlignment: Text.AlignHCenter
-                elide: item.GridView.isCurrentItem ? Text.ElideNone : Text.ElideRight
-                wrapMode: item.GridView.isCurrentItem ? Text.WrapAtWordBoundaryOrAnywhere : Text.NoWrap
-
-                Component.onCompleted: text = item.modelData.name
-            }
-
-            Behavior on implicitHeight {
-                Anim {}
-            }
-        }
+        delegate: FileEntry {}
 
         add: Transition {
             Anim {
@@ -224,5 +156,77 @@ Item {
         anchors.margins: Appearance.padding.small
 
         currentItem: view.currentItem
+    }
+
+    component FileEntry: StyledRect {
+        id: item
+
+        required property int index
+        required property FileSystemEntry modelData
+
+        readonly property real nonAnimHeight: icon.implicitHeight + name.anchors.topMargin + name.implicitHeight + Appearance.padding.normal * 2
+
+        implicitWidth: Sizes.itemWidth
+        implicitHeight: nonAnimHeight
+
+        radius: Appearance.rounding.normal
+        color: Qt.alpha(Colours.tPalette.m3surfaceContainerHighest, GridView.isCurrentItem ? Colours.tPalette.m3surfaceContainerHighest.a : 0)
+        z: GridView.isCurrentItem || implicitHeight !== nonAnimHeight ? 1 : 0
+        clip: true
+
+        StateLayer {
+            function onClicked(): void {
+                view.currentIndex = item.index;
+            }
+
+            onDoubleClicked: {
+                if (item.modelData.isDir)
+                    root.dialog.cwd.push(item.modelData.name);
+                else if (root.dialog.selectionValid)
+                    root.dialog.accepted(item.modelData.path);
+            }
+        }
+
+        CachingIconImage {
+            id: icon
+
+            anchors.horizontalCenter: parent.horizontalCenter
+            anchors.top: parent.top
+            anchors.topMargin: Appearance.padding.normal
+
+            implicitSize: Sizes.itemWidth - Appearance.padding.normal * 2
+
+            Component.onCompleted: {
+                const file = item.modelData;
+                if (file.isImage)
+                    source = Qt.resolvedUrl(file.path);
+                else if (!file.isDir)
+                    source = Quickshell.iconPath(file.mimeType.replace("/", "-"), "application-x-zerosize");
+                else if (root.dialog.cwd.length === 1 && ["Desktop", "Documents", "Downloads", "Music", "Pictures", "Public", "Templates", "Videos"].includes(file.name))
+                    source = Quickshell.iconPath(`folder-${file.name.toLowerCase()}`);
+                else
+                    source = Quickshell.iconPath("inode-directory");
+            }
+        }
+
+        StyledText {
+            id: name
+
+            anchors.left: parent.left
+            anchors.right: parent.right
+            anchors.top: icon.bottom
+            anchors.topMargin: Appearance.spacing.small
+            anchors.margins: Appearance.padding.normal
+
+            horizontalAlignment: Text.AlignHCenter
+            elide: item.GridView.isCurrentItem ? Text.ElideNone : Text.ElideRight
+            wrapMode: item.GridView.isCurrentItem ? Text.WrapAtWordBoundaryOrAnywhere : Text.NoWrap
+
+            Component.onCompleted: text = item.modelData.name
+        }
+
+        Behavior on implicitHeight {
+            Anim {}
+        }
     }
 }

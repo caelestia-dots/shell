@@ -1,44 +1,50 @@
 pragma Singleton
 pragma ComponentBehavior: Bound
 
-import qs.config
-import qs.components.misc
+import QtQuick
 import Quickshell
 import Quickshell.Io
-import QtQuick
+import qs.components.misc
+import qs.config
 
 Singleton {
     id: root
 
     property list<var> ddcMonitors: []
-    readonly property list<Monitor> monitors: variants.instances
+    readonly property var ddcMonitorMap: {
+        const map = {};
+        for (const m of ddcMonitors)
+            map[m.connector] = m;
+        return map;
+    }
+    readonly property list<Monitor> monitors: variants.instances // qmllint disable incompatible-type
     property bool appleDisplayPresent: false
 
     function getMonitorForScreen(screen: ShellScreen): var {
-        return monitors.find(m => m.modelData === screen);
+        return monitors.find(m => m.modelData === screen); // qmllint disable missing-property
     }
 
     function getMonitor(query: string): var {
         if (query === "active") {
-            return monitors.find(m => Hypr.monitorFor(m.modelData)?.focused);
+            return monitors.find(m => Hypr.monitorFor(m.modelData)?.focused); // qmllint disable missing-property
         }
 
         if (query.startsWith("model:")) {
             const model = query.slice(6);
-            return monitors.find(m => m.modelData.model === model);
+            return monitors.find(m => m.modelData.model === model); // qmllint disable missing-property
         }
 
         if (query.startsWith("serial:")) {
             const serial = query.slice(7);
-            return monitors.find(m => m.modelData.serialNumber === serial);
+            return monitors.find(m => m.modelData.serialNumber === serial); // qmllint disable missing-property
         }
 
         if (query.startsWith("id:")) {
             const id = parseInt(query.slice(3), 10);
-            return monitors.find(m => Hypr.monitorFor(m.modelData)?.id === id);
+            return monitors.find(m => Hypr.monitorFor(m.modelData)?.id === id); // qmllint disable missing-property
         }
 
-        return monitors.find(m => m.modelData.name === query);
+        return monitors.find(m => m.modelData.name === query); // qmllint disable missing-property
     }
 
     function increaseBrightness(): void {
@@ -61,7 +67,7 @@ Singleton {
     Variants {
         id: variants
 
-        model: Quickshell.screens
+        model: Quickshell.screens // Don't respect excluded screens cause ipc
 
         Monitor {}
     }
@@ -86,21 +92,23 @@ Singleton {
         }
     }
 
+    // qmllint disable unresolved-type
     CustomShortcut {
+        // qmllint enable unresolved-type
         name: "brightnessUp"
         description: "Increase brightness"
         onPressed: root.increaseBrightness()
     }
 
+    // qmllint disable unresolved-type
     CustomShortcut {
+        // qmllint enable unresolved-type
         name: "brightnessDown"
         description: "Decrease brightness"
         onPressed: root.decreaseBrightness()
     }
 
     IpcHandler {
-        target: "brightness"
-
         function get(): real {
             return getFor("active");
         }
@@ -149,14 +157,17 @@ Singleton {
 
             return `Set monitor ${monitor.modelData.name} brightness to ${+monitor.brightness.toFixed(2)}`;
         }
+
+        target: "brightness"
     }
 
     component Monitor: QtObject {
         id: monitor
 
         required property ShellScreen modelData
-        readonly property bool isDdc: root.ddcMonitors.some(m => m.connector === modelData.name)
-        readonly property string busNum: root.ddcMonitors.find(m => m.connector === modelData.name)?.busNum ?? ""
+        readonly property var ddcInfo: root.ddcMonitorMap[modelData.name] ?? null
+        readonly property bool isDdc: ddcInfo !== null
+        readonly property string busNum: ddcInfo?.busNum ?? ""
         readonly property bool isAppleDisplay: root.appleDisplayPresent && modelData.model.startsWith("StudioDisplay")
         property real brightness
         property real queuedBrightness: NaN

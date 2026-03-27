@@ -1,10 +1,10 @@
+import QtQuick
+import QtQuick.Layouts
+import Quickshell
+import Caelestia
 import qs.components
 import qs.services
 import qs.config
-import Caelestia
-import Quickshell
-import QtQuick
-import QtQuick.Layouts
 
 Item {
     id: root
@@ -13,8 +13,13 @@ Item {
     readonly property string math: list.search.text.slice(`${Config.launcher.actionPrefix}calc `.length)
 
     function onClicked(): void {
-        Quickshell.execDetached(["wl-copy", Qalculator.eval(math, false)]);
+        Quickshell.execDetached(["wl-copy", Qalculator.rawResult]);
         root.list.visibilities.launcher = false;
+    }
+
+    onMathChanged: {
+        if (math.length > 0)
+            Qalculator.evalAsync(math);
     }
 
     implicitHeight: Config.launcher.sizes.itemHeight
@@ -23,11 +28,11 @@ Item {
     anchors.right: parent?.right
 
     StateLayer {
-        radius: Appearance.rounding.normal
-
         function onClicked(): void {
             root.onClicked();
         }
+
+        radius: Appearance.rounding.normal
     }
 
     RowLayout {
@@ -55,7 +60,7 @@ Item {
                 return Colours.palette.m3onSurface;
             }
 
-            text: root.math.length > 0 ? Qalculator.eval(root.math) : qsTr("Type an expression to calculate")
+            text: root.math.length > 0 ? (Qalculator.result || qsTr("Calculating...")) : qsTr("Type an expression to calculate")
             elide: Text.ElideLeft
 
             Layout.fillWidth: true
@@ -75,12 +80,12 @@ Item {
             StateLayer {
                 id: stateLayer
 
-                color: Colours.palette.m3onTertiary
-
                 function onClicked(): void {
                     Quickshell.execDetached(["app2unit", "--", ...Config.general.apps.terminal, "fish", "-C", `exec qalc -i '${root.math}'`]);
                     root.list.visibilities.launcher = false;
                 }
+
+                color: Colours.palette.m3onTertiary
             }
 
             StyledText {

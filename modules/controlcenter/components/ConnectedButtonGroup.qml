@@ -1,18 +1,19 @@
 import ".."
+import QtQuick
+import QtQuick.Layouts
 import qs.components
 import qs.components.controls
 import qs.components.effects
 import qs.services
 import qs.config
-import QtQuick
-import QtQuick.Layouts
 
 StyledRect {
     id: root
 
-    property var options: [] // Array of {label: string, propertyName: string, onToggled: function}
+    property var options: [] // Array of {label: string, propertyName: string, onToggled: function, state: bool?}
     property var rootItem: null // The root item that contains the properties we want to bind to
     property string title: "" // Optional title text
+    property int rows: 1 // Number of rows
 
     Layout.fillWidth: true
     implicitHeight: layout.implicitHeight + Appearance.padding.large * 2
@@ -37,32 +38,39 @@ StyledRect {
             font.pointSize: Appearance.font.size.normal
         }
 
-        RowLayout {
-            id: buttonRow
+        GridLayout {
+            id: buttonGrid
+
             Layout.alignment: Qt.AlignHCenter
-            spacing: Appearance.spacing.small
+            rowSpacing: Appearance.spacing.small
+            columnSpacing: Appearance.spacing.small
+            rows: root.rows
+            columns: Math.ceil(root.options.length / root.rows)
 
             Repeater {
                 id: repeater
+
                 model: root.options
 
                 delegate: TextButton {
                     id: button
+
                     required property int index
                     required property var modelData
 
-                    Layout.fillWidth: true
-                    text: modelData.label
-
                     property bool _checked: false
 
+                    Layout.fillWidth: true
+                    text: modelData.label
                     checked: _checked
                     toggle: false
                     type: TextButton.Tonal
 
                     // Create binding in Component.onCompleted
                     Component.onCompleted: {
-                        if (root.rootItem && modelData.propertyName) {
+                        if (modelData.state !== undefined && modelData.state) {
+                            _checked = modelData.state;
+                        } else if (root.rootItem && modelData.propertyName) {
                             const propName = modelData.propertyName;
                             const rootItem = root.rootItem;
                             _checked = Qt.binding(function () {

@@ -2,11 +2,11 @@ pragma ComponentBehavior: Bound
 
 import ".."
 import "../components"
+import QtQuick
+import Quickshell.Widgets
 import qs.components
 import qs.components.containers
 import qs.config
-import Quickshell.Widgets
-import QtQuick
 
 SplitPaneWithDetails {
     id: root

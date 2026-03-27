@@ -1,10 +1,9 @@
 import ".."
-import qs.components
-import qs.components.effects
-import qs.services
-import qs.config
 import QtQuick
 import QtQuick.Layouts
+import qs.components
+import qs.services
+import qs.config
 
 StyledRect {
     id: root
@@ -41,7 +40,7 @@ StyledRect {
             checked: root.checked
             enabled: root.enabled
             onToggled: {
-                root.onToggled(checked);
+                root.onToggled(checked); // qmllint disable use-proper-function
             }
         }
     }

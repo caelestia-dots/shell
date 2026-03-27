@@ -1,14 +1,14 @@
 pragma ComponentBehavior: Bound
 
 import ".."
-import qs.components
-import qs.components.controls
-import qs.components.containers
-import qs.services
-import qs.config
-import Quickshell
 import QtQuick
 import QtQuick.Layouts
+import Quickshell
+import qs.components
+import qs.components.containers
+import qs.components.controls
+import qs.services
+import qs.config
 
 ColumnLayout {
     id: root
@@ -23,6 +23,7 @@ ColumnLayout {
     property Component headerComponent: null
     property Component titleSuffix: null
     property bool showHeader: true
+    property alias view: view
 
     signal itemSelected(var item)
 
@@ -32,6 +33,7 @@ ColumnLayout {
         id: headerLoader
 
         Layout.fillWidth: true
+        asynchronous: true
         sourceComponent: root.headerComponent
         visible: root.headerComponent !== null && root.showHeader
     }
@@ -50,6 +52,7 @@ ColumnLayout {
         }
 
         Loader {
+            asynchronous: true
             sourceComponent: root.titleSuffix
             visible: root.titleSuffix !== null
         }
@@ -58,8 +61,6 @@ ColumnLayout {
             Layout.fillWidth: true
         }
     }
-
-    property alias view: view
 
     StyledText {
         visible: root.description !== ""

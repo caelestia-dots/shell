@@ -1,5 +1,5 @@
-import QtQuick
 import "./state"
+import QtQuick
 import qs.modules.controlcenter
 
 QtObject {

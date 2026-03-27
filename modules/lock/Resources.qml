@@ -1,10 +1,10 @@
+import QtQuick
+import QtQuick.Layouts
 import qs.components
 import qs.components.controls
 import qs.components.misc
 import qs.services
 import qs.config
-import QtQuick
-import QtQuick.Layouts
 
 GridLayout {
     id: root

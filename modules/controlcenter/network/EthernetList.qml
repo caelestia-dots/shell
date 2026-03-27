@@ -2,13 +2,13 @@ pragma ComponentBehavior: Bound
 
 import ".."
 import "../components"
-import qs.components
-import qs.components.controls
-import qs.components.containers
-import qs.services
-import qs.config
 import QtQuick
 import QtQuick.Layouts
+import qs.components
+import qs.components.containers
+import qs.components.controls
+import qs.services
+import qs.config
 
 DeviceList {
     id: root
@@ -147,8 +147,6 @@ DeviceList {
                     color: Qt.alpha(Colours.palette.m3primaryContainer, modelData.connected ? 1 : 0)
 
                     StateLayer {
-                        color: modelData.connected ? Colours.palette.m3onPrimaryContainer : Colours.palette.m3onSurface
-
                         function onClicked(): void {
                             if (modelData.connected && modelData.connection) {
                                 Nmcli.disconnectEthernet(modelData.connection, () => {});
@@ -156,6 +154,8 @@ DeviceList {
                                 Nmcli.connectEthernet(modelData.connection || "", modelData.interface || "", () => {});
                             }
                         }
+
+                        color: modelData.connected ? Colours.palette.m3onPrimaryContainer : Colours.palette.m3onSurface
                     }
 
                     MaterialIcon {

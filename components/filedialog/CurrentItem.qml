@@ -1,8 +1,8 @@
 import ".."
-import qs.services
-import qs.config
 import QtQuick
 import QtQuick.Shapes
+import qs.services
+import qs.config
 
 Item {
     id: root
@@ -80,12 +80,12 @@ Item {
             anchors.bottomMargin: Appearance.padding.normal - Appearance.padding.small
 
             Connections {
-                target: root
-
                 function onCurrentItemChanged(): void {
                     if (root.currentItem)
                         content.text = qsTr(`"%1" selected`).arg(root.currentItem.modelData.name);
                 }
+
+                target: root
             }
         }
     }

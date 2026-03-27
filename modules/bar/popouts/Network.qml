@@ -1,18 +1,18 @@
 pragma ComponentBehavior: Bound
 
+import QtQuick
+import QtQuick.Layouts
+import Quickshell
 import qs.components
 import qs.components.controls
 import qs.services
 import qs.config
 import qs.utils
-import Quickshell
-import QtQuick
-import QtQuick.Layouts
 
 ColumnLayout {
     id: root
 
-    required property Item wrapper
+    required property PopoutState popouts
 
     property string connectingToSsid: ""
     property string view: "wireless" // "wireless" or "ethernet"
@@ -45,7 +45,7 @@ ColumnLayout {
         Layout.preferredHeight: visible ? implicitHeight : 0
         Layout.topMargin: visible ? Appearance.spacing.small : 0
         Layout.rightMargin: Appearance.padding.small
-        text: qsTr("%1 networks available").arg(Nmcli.networks.length)
+        text: qsTr("%1 networks available").arg(Nmcli.networks.length) // qmllint disable missing-property
         color: Colours.palette.m3onSurfaceVariant
         font.pointSize: Appearance.font.size.small
     }
@@ -123,9 +123,6 @@ ColumnLayout {
                 }
 
                 StateLayer {
-                    color: networkItem.modelData.active ? Colours.palette.m3onPrimary : Colours.palette.m3onSurface
-                    disabled: networkItem.loading || !Nmcli.wifiEnabled
-
                     function onClicked(): void {
                         if (networkItem.modelData.active) {
                             Nmcli.disconnectFromNetwork();
@@ -135,13 +132,16 @@ ColumnLayout {
                                 // Password is required - show password dialog
                                 root.passwordNetwork = network;
                                 root.showPasswordDialog = true;
-                                root.wrapper.currentName = "wirelesspassword";
+                                root.popouts.currentName = "wirelesspassword";
                             });
 
                             // Clear connecting state if connection succeeds immediately (saved profile)
                             // This is handled by the onActiveChanged connection below
                         }
                     }
+
+                    color: networkItem.modelData.active ? Colours.palette.m3onPrimary : Colours.palette.m3onSurface
+                    disabled: networkItem.loading || !Nmcli.wifiEnabled
                 }
 
                 MaterialIcon {
@@ -173,12 +173,12 @@ ColumnLayout {
         color: Colours.palette.m3primaryContainer
 
         StateLayer {
-            color: Colours.palette.m3onPrimaryContainer
-            disabled: Nmcli.scanning || !Nmcli.wifiEnabled
-
             function onClicked(): void {
                 Nmcli.rescanWifi();
             }
+
+            color: Colours.palette.m3onPrimaryContainer
+            disabled: Nmcli.scanning || !Nmcli.wifiEnabled
         }
 
         RowLayout {
@@ -303,9 +303,6 @@ ColumnLayout {
                 }
 
                 StateLayer {
-                    color: ethernetItem.modelData.connected ? Colours.palette.m3onPrimary : Colours.palette.m3onSurface
-                    disabled: ethernetItem.loading
-
                     function onClicked(): void {
                         if (ethernetItem.modelData.connected && ethernetItem.modelData.connection) {
                             Nmcli.disconnectEthernet(ethernetItem.modelData.connection, () => {});
@@ -313,6 +310,9 @@ ColumnLayout {
                             Nmcli.connectEthernet(ethernetItem.modelData.connection || "", ethernetItem.modelData.interface || "", () => {});
                         }
                     }
+
+                    color: ethernetItem.modelData.connected ? Colours.palette.m3onPrimary : Colours.palette.m3onSurface
+                    disabled: ethernetItem.loading
                 }
 
                 MaterialIcon {
@@ -334,8 +334,6 @@ ColumnLayout {
     }
 
     Connections {
-        target: Nmcli
-
         function onActiveChanged(): void {
             if (Nmcli.active && root.connectingToSsid === Nmcli.active.ssid) {
                 root.connectingToSsid = "";
@@ -343,8 +341,8 @@ ColumnLayout {
                 if (root.showPasswordDialog && root.passwordNetwork && Nmcli.active.ssid === root.passwordNetwork.ssid) {
                     root.showPasswordDialog = false;
                     root.passwordNetwork = null;
-                    if (root.wrapper.currentName === "wirelesspassword") {
-                        root.wrapper.currentName = "network";
+                    if (root.popouts.currentName === "wirelesspassword") {
+                        root.popouts.currentName = "network";
                     }
                 }
             }
@@ -354,17 +352,20 @@ ColumnLayout {
             if (!Nmcli.scanning)
                 scanIcon.rotation = 0;
         }
+
+        target: Nmcli
     }
 
     Connections {
-        target: root.wrapper
         function onCurrentNameChanged(): void {
             // Clear password network when leaving password dialog
-            if (root.wrapper.currentName !== "wirelesspassword" && root.showPasswordDialog) {
+            if (root.popouts.currentName !== "wirelesspassword" && root.showPasswordDialog) {
                 root.showPasswordDialog = false;
                 root.passwordNetwork = null;
             }
         }
+
+        target: root.popouts
     }
 
     component Toggle: RowLayout {

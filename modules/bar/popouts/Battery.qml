@@ -1,10 +1,10 @@
 pragma ComponentBehavior: Bound
 
+import QtQuick
+import Quickshell.Services.UPower
 import qs.components
 import qs.services
 import qs.config
-import Quickshell.Services.UPower
-import QtQuick
 
 Column {
     id: root
@@ -37,11 +37,12 @@ Column {
     }
 
     Loader {
+        asynchronous: true
         anchors.horizontalCenter: parent.horizontalCenter
 
         active: PowerProfiles.degradationReason !== PerformanceDegradationReason.None
 
-        height: active ? (item?.implicitHeight ?? 0) : 0
+        height: active ? ((item as Item)?.implicitHeight ?? 0) : 0
 
         sourceComponent: StyledRect {
             implicitWidth: child.implicitWidth + Appearance.padding.normal * 2
@@ -204,12 +205,12 @@ Column {
         implicitHeight: icon.implicitHeight + Appearance.padding.small * 2
 
         StateLayer {
-            radius: Appearance.rounding.full
-            color: profiles.current === parent.icon ? Colours.palette.m3onPrimary : Colours.palette.m3onSurface
-
             function onClicked(): void {
                 PowerProfiles.profile = parent.profile;
             }
+
+            radius: Appearance.rounding.full
+            color: profiles.current === parent.icon ? Colours.palette.m3onPrimary : Colours.palette.m3onSurface
         }
 
         MaterialIcon {

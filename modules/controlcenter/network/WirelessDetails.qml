@@ -3,21 +3,40 @@ pragma ComponentBehavior: Bound
 import ".."
 import "../components"
 import "."
+import QtQuick
+import QtQuick.Layouts
 import qs.components
+import qs.components.containers
 import qs.components.controls
 import qs.components.effects
-import qs.components.containers
 import qs.services
 import qs.config
 import qs.utils
-import QtQuick
-import QtQuick.Layouts
 
 DeviceDetails {
     id: root
 
     required property Session session
     readonly property var network: root.session.network.active
+
+    function checkSavedProfile(): void {
+        if (network && network.ssid) {
+            Nmcli.loadSavedConnections(() => {});
+        }
+    }
+
+    function updateDeviceDetails(): void {
+        if (network && network.ssid) {
+            const isActive = network.active || (Nmcli.active && Nmcli.active.ssid === network.ssid);
+            if (isActive) {
+                Nmcli.getWirelessDeviceDetails("");
+            } else {
+                Nmcli.wirelessDeviceDetails = null;
+            }
+        } else {
+            Nmcli.wirelessDeviceDetails = null;
+        }
+    }
 
     device: network
 
@@ -33,63 +52,6 @@ DeviceDetails {
         }
         updateDeviceDetails();
         checkSavedProfile();
-    }
-
-    function checkSavedProfile(): void {
-        if (network && network.ssid) {
-            Nmcli.loadSavedConnections(() => {});
-        }
-    }
-
-    Connections {
-        target: Nmcli
-        function onActiveChanged() {
-            updateDeviceDetails();
-        }
-        function onWirelessDeviceDetailsChanged() {
-            if (network && network.ssid) {
-                const isActive = network.active || (Nmcli.active && Nmcli.active.ssid === network.ssid);
-                if (isActive && Nmcli.wirelessDeviceDetails && Nmcli.wirelessDeviceDetails !== null) {
-                    connectionUpdateTimer.stop();
-                }
-            }
-        }
-    }
-
-    Timer {
-        id: connectionUpdateTimer
-        interval: 500
-        repeat: true
-        running: network && network.ssid
-        onTriggered: {
-            if (network) {
-                const isActive = network.active || (Nmcli.active && Nmcli.active.ssid === network.ssid);
-                if (isActive) {
-                    if (!Nmcli.wirelessDeviceDetails || Nmcli.wirelessDeviceDetails === null) {
-                        Nmcli.getWirelessDeviceDetails("", () => {});
-                    } else {
-                        connectionUpdateTimer.stop();
-                    }
-                } else {
-                    if (Nmcli.wirelessDeviceDetails !== null) {
-                        Nmcli.wirelessDeviceDetails = null;
-                    }
-                }
-            }
-        }
-    }
-
-    function updateDeviceDetails(): void {
-        if (network && network.ssid) {
-            const isActive = network.active || (Nmcli.active && Nmcli.active.ssid === network.ssid);
-            if (isActive) {
-                Nmcli.getWirelessDeviceDetails("");
-            } else {
-                Nmcli.wirelessDeviceDetails = null;
-            }
-        } else {
-            Nmcli.wirelessDeviceDetails = null;
-        }
     }
 
     headerComponent: Component {
@@ -208,4 +170,44 @@ DeviceDetails {
             }
         }
     ]
+
+    Connections {
+        function onActiveChanged() {
+            updateDeviceDetails();
+        }
+        function onWirelessDeviceDetailsChanged() {
+            if (network && network.ssid) {
+                const isActive = network.active || (Nmcli.active && Nmcli.active.ssid === network.ssid);
+                if (isActive && Nmcli.wirelessDeviceDetails && Nmcli.wirelessDeviceDetails !== null) {
+                    connectionUpdateTimer.stop();
+                }
+            }
+        }
+
+        target: Nmcli
+    }
+
+    Timer {
+        id: connectionUpdateTimer
+
+        interval: 500
+        repeat: true
+        running: network && network.ssid
+        onTriggered: {
+            if (network) {
+                const isActive = network.active || (Nmcli.active && Nmcli.active.ssid === network.ssid);
+                if (isActive) {
+                    if (!Nmcli.wirelessDeviceDetails || Nmcli.wirelessDeviceDetails === null) {
+                        Nmcli.getWirelessDeviceDetails("", () => {});
+                    } else {
+                        connectionUpdateTimer.stop();
+                    }
+                } else {
+                    if (Nmcli.wirelessDeviceDetails !== null) {
+                        Nmcli.wirelessDeviceDetails = null;
+                    }
+                }
+            }
+        }
+    }
 }

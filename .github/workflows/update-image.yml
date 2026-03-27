@@ -1,0 +1,46 @@
+name: Update Docker CI image
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 0 * * 0"
+
+permissions:
+  packages: write
+
+jobs:
+  build-image:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Write Dockerfile
+        run: |
+          cat > /tmp/Dockerfile <<EOF
+          FROM archlinux:latest
+          RUN pacman -Syu --needed --noconfirm sudo base-devel cmake ninja fish git clazy qt6-declarative python libpipewire aubio libqalculate && \
+              useradd -m builder && \
+              echo 'builder ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers && \
+              sudo -u builder git clone https://aur.archlinux.org/yay-bin.git /home/builder/yay-bin && \
+              cd /home/builder/yay-bin && \
+              sudo -u builder makepkg -si --noconfirm && \
+              sudo -u builder yay -S --noconfirm quickshell-git libcava && \
+              sudo -u builder yay -Yc --noconfirm && \
+              pacman -Rns --noconfirm yay-bin && \
+              sed -i '/builder ALL=(ALL) NOPASSWD:ALL/d' /etc/sudoers && \
+              userdel -r builder && \
+              pacman -Scc --noconfirm
+          EOF
+
+      - name: Build and push
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          file: /tmp/Dockerfile
+          push: true
+          tags: ghcr.io/${{ github.repository_owner }}/shell-arch-env:latest
