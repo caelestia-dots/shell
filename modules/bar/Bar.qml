@@ -171,7 +171,7 @@ ColumnLayout {
     }
 
     component WrappedLoader: Loader {
-        required property bool enabled
+        required enabled
         required property string id
         required property int index
 

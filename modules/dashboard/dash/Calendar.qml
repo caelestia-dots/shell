@@ -12,16 +12,16 @@ import qs.config
 CustomMouseArea {
     id: root
 
-    required property var state
+    required property DashboardState dashState
 
-    readonly property int currMonth: state.currentDate.getMonth()
-    readonly property int currYear: state.currentDate.getFullYear()
+    readonly property int currMonth: dashState.currentDate.getMonth()
+    readonly property int currYear: dashState.currentDate.getFullYear()
 
     function onWheel(event: WheelEvent): void {
         if (event.angleDelta.y > 0)
-            root.state.currentDate = new Date(root.currYear, root.currMonth - 1, 1);
+            root.dashState.currentDate = new Date(root.currYear, root.currMonth - 1, 1);
         else if (event.angleDelta.y < 0)
-            root.state.currentDate = new Date(root.currYear, root.currMonth + 1, 1);
+            root.dashState.currentDate = new Date(root.currYear, root.currMonth + 1, 1);
     }
 
     anchors.left: parent.left
@@ -29,7 +29,7 @@ CustomMouseArea {
     implicitHeight: inner.implicitHeight + inner.anchors.margins * 2
 
     acceptedButtons: Qt.MiddleButton
-    onClicked: root.state.currentDate = new Date()
+    onClicked: root.dashState.currentDate = new Date()
 
     ColumnLayout {
         id: inner
@@ -52,7 +52,7 @@ CustomMouseArea {
                     id: prevMonthStateLayer
 
                     function onClicked(): void {
-                        root.state.currentDate = new Date(root.currYear, root.currMonth - 1, 1);
+                        root.dashState.currentDate = new Date(root.currYear, root.currMonth - 1, 1);
                     }
 
                     radius: Appearance.rounding.full
@@ -77,7 +77,7 @@ CustomMouseArea {
 
                 StateLayer {
                     function onClicked(): void {
-                        root.state.currentDate = new Date();
+                        root.dashState.currentDate = new Date();
                     }
 
                     anchors.fill: monthYearDisplay
@@ -112,7 +112,7 @@ CustomMouseArea {
                     id: nextMonthStateLayer
 
                     function onClicked(): void {
-                        root.state.currentDate = new Date(root.currYear, root.currMonth + 1, 1);
+                        root.dashState.currentDate = new Date(root.currYear, root.currMonth + 1, 1);
                     }
 
                     radius: Appearance.rounding.full

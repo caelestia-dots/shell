@@ -19,5 +19,6 @@ JsonObject {
             "to": "YT Music"
         }
     ]
-    property bool showLyrics: true
+    property bool showLyrics: false
+    property string lyricsBackend: "Auto"
 }

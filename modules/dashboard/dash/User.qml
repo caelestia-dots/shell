@@ -11,7 +11,6 @@ Row {
     id: root
 
     required property DrawerVisibilities visibilities
-    required property DashboardState state
     required property FileDialog facePicker
 
     padding: Appearance.padding.large

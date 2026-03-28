@@ -9,7 +9,7 @@ GridLayout {
     id: root
 
     required property DrawerVisibilities visibilities
-    required property DashboardState state
+    required property DashboardState dashState
     required property FileDialog facePicker
 
     rowSpacing: Appearance.spacing.normal
@@ -27,7 +27,6 @@ GridLayout {
             id: user
 
             visibilities: root.visibilities
-            state: root.state
             facePicker: root.facePicker
         }
     }
@@ -67,7 +66,7 @@ GridLayout {
         Calendar {
             id: calendar
 
-            state: root.state
+            dashState: root.dashState
         }
     }
 

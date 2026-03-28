@@ -13,15 +13,15 @@ Item {
     property var validator: null
     property bool readOnly: false
     property int horizontalAlignment: TextInput.AlignHCenter
-    property int implicitWidth: 70
-    property bool enabled: true
 
     // Expose activeFocus through alias to avoid FINAL property override
     readonly property alias hasFocus: inputField.activeFocus
 
     signal textEdited(string text)
+
     signal editingFinished
 
+    implicitWidth: 70
     implicitHeight: inputField.implicitHeight + Appearance.padding.small * 2
 
     StyledRect {

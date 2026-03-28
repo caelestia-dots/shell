@@ -168,7 +168,7 @@ Singleton {
 
     function executeCommand(args: list<string>, callback: var): void {
         const proc = commandProc.createObject(root);
-        proc.command = ["nmcli", ...args];
+        proc.cmdArgs = ["nmcli", ...args];
         proc.callback = callback;
 
         activeProcesses.push(proc);
@@ -181,7 +181,7 @@ Singleton {
         });
 
         Qt.callLater(() => {
-            proc.exec(proc.command);
+            proc.exec(proc.cmdArgs);
         });
     }
 
@@ -840,7 +840,7 @@ Singleton {
             return false;
         }
 
-        if (!isConnectionCommand(proc.command) || !root.pendingConnection || !root.pendingConnection.callback) {
+        if (!isConnectionCommand(proc.cmdArgs) || !root.pendingConnection || !root.pendingConnection.callback) {
             return false;
         }
 
@@ -1117,7 +1117,7 @@ Singleton {
                         if (proc && proc.stderr && proc.stderr.text) {
                             const error = proc.stderr.text.trim();
                             if (error && error.length > 0) {
-                                if (root.isConnectionCommand(proc.command)) {
+                                if (root.isConnectionCommand(proc.cmdArgs)) {
                                     const needsPassword = root.detectPasswordRequired(error);
 
                                     if (needsPassword && !proc.callbackCalled && root.pendingConnection) {
@@ -1204,7 +1204,7 @@ Singleton {
                         if (proc && proc.stderr && proc.stderr.text) {
                             const error = proc.stderr.text.trim();
                             if (error && error.length > 0) {
-                                if (root.isConnectionCommand(proc.command)) {
+                                if (root.isConnectionCommand(proc.cmdArgs)) {
                                     const needsPassword = root.detectPasswordRequired(error);
 
                                     if (needsPassword && !proc.callbackCalled && root.pendingConnection && root.pendingConnection.callback) {
@@ -1281,7 +1281,7 @@ Singleton {
         id: proc
 
         property var callback: null
-        property list<string> command: []
+        property list<string> cmdArgs: []
         property bool callbackCalled: false
         property int exitCode: 0
 
@@ -1321,7 +1321,7 @@ Singleton {
                     const output = (stdoutCollector && stdoutCollector.text) ? stdoutCollector.text : "";
                     const error = (stderrCollector && stderrCollector.text) ? stderrCollector.text : "";
                     const success = exitCode === 0;
-                    const cmdIsConnection = isConnectionCommand(proc.command);
+                    const cmdIsConnection = isConnectionCommand(proc.cmdArgs);
 
                     if (root.handlePasswordRequired(proc, error, output, exitCode)) {
                         processFinished();

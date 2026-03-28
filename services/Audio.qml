@@ -2,6 +2,7 @@ pragma Singleton
 
 import QtQuick
 import Quickshell
+import Quickshell.Io
 import Quickshell.Services.Pipewire
 import Caelestia
 import Caelestia.Services
@@ -65,6 +66,15 @@ Singleton {
 
     function setAudioSource(newSource: PwNode): void {
         Pipewire.preferredDefaultAudioSource = newSource;
+    }
+
+    function cycleNextAudioOutput(): void {
+        if (sinks.length === 0)
+            return;
+
+        const currentIndex = sinks.findIndex(s => s === sink);
+        const nextIndex = (currentIndex + 1) % sinks.length;
+        setAudioSink(sinks[nextIndex]);
     }
 
     function setStreamVolume(stream: PwNode, newVolume: real): void {
@@ -161,5 +171,13 @@ Singleton {
 
     BeatTracker {
         id: beatTracker
+    }
+
+    IpcHandler {
+        function cycleOutput(): void {
+            root.cycleNextAudioOutput();
+        }
+
+        target: "audio"
     }
 }

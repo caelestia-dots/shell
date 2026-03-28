@@ -96,7 +96,7 @@ Item {
 
         sourceComponent: Content {
             visibilities: root.visibilities
-            state: root.dashState
+            dashState: root.dashState
             facePicker: root.facePicker
         }
     }
