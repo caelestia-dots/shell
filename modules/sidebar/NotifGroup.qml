@@ -18,37 +18,13 @@ StyledRect {
     required property Flickable container
     required property DrawerVisibilities visibilities
 
-    readonly property list<var> notifs: Notifs.list.filter(n => n.appName === modelData)
-    readonly property var groupProps: {
-        let count = 0;
-        let img = "";
-        let icon = "";
-        let hasCritical = false;
-        let hasNormal = false;
-        for (const n of notifs) {
-            if (!n.closed) {
-                count++;
-                if (!img && n.image.length > 0)
-                    img = n.image;
-                if (!icon && n.appIcon.length > 0)
-                    icon = n.appIcon;
-                if (n.urgency === NotificationUrgency.Critical)
-                    hasCritical = true;
-                else if (n.urgency === NotificationUrgency.Normal)
-                    hasNormal = true;
-            }
-        }
-        return {
-            count,
-            img,
-            icon,
-            urgency: hasCritical ? NotificationUrgency.Critical : hasNormal ? NotificationUrgency.Normal : NotificationUrgency.Low
-        };
-    }
-    readonly property int notifCount: groupProps.count
-    readonly property string image: groupProps.img
-    readonly property string appIcon: groupProps.icon
-    readonly property int urgency: groupProps.urgency
+    readonly property var groupData: Notifs.sidebarGroups[modelData] ?? null
+    readonly property list<var> notifs: groupData?.notifs ?? []
+    readonly property var latestNotif: groupData?.latestOpen ?? groupData?.latestAny ?? null
+    readonly property int notifCount: groupData?.count ?? 0
+    readonly property string image: groupData?.image ?? ""
+    readonly property string appIcon: groupData?.appIcon ?? ""
+    readonly property int urgency: groupData?.urgency ?? NotificationUrgency.Low
 
     readonly property int nonAnimHeight: {
         const headerHeight = header.implicitHeight + (root.expanded ? Math.round(Appearance.spacing.small / 2) : 0);
@@ -124,7 +100,7 @@ StyledRect {
                 id: materialIconComp
 
                 MaterialIcon {
-                    text: Icons.getNotifIcon(root.notifs[0]?.summary, root.urgency)
+                    text: Icons.getNotifIcon(root.latestNotif?.summary, root.urgency)
                     color: root.urgency === NotificationUrgency.Critical ? Colours.palette.m3onError : root.urgency === NotificationUrgency.Low ? Colours.palette.m3onSurface : Colours.palette.m3onSecondaryContainer
                     font.pointSize: Appearance.font.size.large
                 }
@@ -191,7 +167,7 @@ StyledRect {
 
                 StyledText {
                     animate: true
-                    text: root.notifs.find(n => !n.closed)?.timeStr ?? ""
+                    text: root.latestNotif?.timeStr ?? ""
                     color: Colours.palette.m3outline
                     font.pointSize: Appearance.font.size.small
                 }

@@ -15,31 +15,27 @@ Item {
 
     readonly property alias repeater: repeater
     readonly property int spacing: Appearance.spacing.small
-    property bool flag
 
     anchors.left: parent.left
     anchors.right: parent.right
-    implicitHeight: {
-        const item = repeater.itemAt(repeater.count - 1);
-        return item ? item.y + item.implicitHeight : 0;
-    }
+    implicitHeight: groups.implicitHeight
 
-    Repeater {
-        id: repeater
+    Column {
+        id: groups
 
-        model: ScriptModel {
-            values: {
-                const map = new Map();
-                for (const n of Notifs.notClosed)
-                    map.set(n.appName, null);
-                for (const n of Notifs.list)
-                    map.set(n.appName, null);
-                return [...map.keys()];
+        anchors.left: parent.left
+        anchors.right: parent.right
+        spacing: 0
+
+        Repeater {
+            id: repeater
+
+            model: ScriptModel {
+                values: [...Notifs.sidebarGroupKeys]
             }
-            onValuesChanged: root.flagChanged()
-        }
 
-        delegate: NotifGroupDelegate {}
+            delegate: NotifGroupDelegate {}
+        }
     }
 
     component NotifGroupDelegate: MouseArea {
@@ -49,23 +45,11 @@ Item {
         required property string modelData
 
         readonly property bool closed: notifInner.notifCount === 0
-        readonly property alias nonAnimHeight: notifInner.nonAnimHeight
+        readonly property int topSpacing: index > 0 ? root.spacing : 0
         property int startY
 
         function closeAll(): void {
-            for (const n of Notifs.notClosed.filter(n => n.appName === modelData))
-                n.close();
-        }
-
-        y: {
-            root.flag; // Force update
-            let y = 0;
-            for (let i = 0; i < index; i++) {
-                const item = repeater.itemAt(i) as NotifGroupDelegate;
-                if (item && !item.closed)
-                    y += item.nonAnimHeight + root.spacing;
-            }
-            return y;
+            Notifs.closeGroup(modelData);
         }
 
         containmentMask: QtObject {
@@ -76,8 +60,12 @@ Item {
             }
         }
 
-        implicitWidth: root.width
-        implicitHeight: notifInner.implicitHeight
+        width: root.width
+        height: closed ? 0 : notifInner.implicitHeight + topSpacing
+        implicitWidth: width
+        implicitHeight: height
+        opacity: closed ? 0 : 1
+        visible: !closed || opacity > 0
 
         hoverEnabled: true
         cursorShape: pressed ? Qt.ClosedHandCursor : undefined
@@ -109,57 +97,35 @@ Item {
                 closeAll();
         }
 
-        ParallelAnimation {
-            running: true
+        Item {
+            id: gap
 
-            Anim {
-                target: notif
-                property: "opacity"
-                from: 0
-                to: 1
-            }
-            Anim {
-                target: notif
-                property: "scale"
-                from: 0
-                to: 1
-                duration: Appearance.anim.durations.expressiveDefaultSpatial
-                easing.bezierCurve: Appearance.anim.curves.expressiveDefaultSpatial
-            }
-        }
-
-        ParallelAnimation {
-            running: notif.closed
-
-            Anim {
-                target: notif
-                property: "opacity"
-                to: 0
-            }
-            Anim {
-                target: notif
-                property: "scale"
-                to: 0.6
-            }
+            // Keep spacing inside the delegate so Column spacing does not leave holes while groups close.
+            anchors.left: notif.left
+            anchors.right: notif.right
+            anchors.top: notif.top
+            height: notif.topSpacing
         }
 
         NotifGroup {
             id: notifInner
 
+            anchors.left: notif.left
+            anchors.right: notif.right
+            anchors.top: gap.bottom
             modelData: notif.modelData
             props: root.props
             container: root.container
             visibilities: root.visibilities
         }
 
-        Behavior on x {
+        Behavior on opacity {
             Anim {
-                duration: Appearance.anim.durations.expressiveDefaultSpatial
-                easing.bezierCurve: Appearance.anim.curves.expressiveDefaultSpatial
+                duration: Appearance.anim.durations.large
             }
         }
 
-        Behavior on y {
+        Behavior on x {
             Anim {
                 duration: Appearance.anim.durations.expressiveDefaultSpatial
                 easing.bezierCurve: Appearance.anim.curves.expressiveDefaultSpatial

@@ -188,16 +188,24 @@ QtObject {
 
     function unlock(item: Item): void {
         locks.delete(item);
-        if (closed)
-            close();
+        if (closed) {
+            // qmllint disable missing-property
+            Notifs.scheduleCompactClosed();
+            // qmllint enable missing-property
+        }
     }
 
     function close(): void {
+        popup = false;
         closed = true;
-        if (locks.size === 0 && Notifs.list.includes(this)) {
-            Notifs.list = Notifs.list.filter(n => n !== this);
-            notification?.dismiss();
-            destroy();
+        // qmllint disable missing-property
+        Notifs.scheduleSave();
+        // qmllint enable missing-property
+
+        if (locks.size === 0) {
+            // qmllint disable missing-property
+            Notifs.scheduleCompactClosed();
+            // qmllint enable missing-property
         }
     }
 

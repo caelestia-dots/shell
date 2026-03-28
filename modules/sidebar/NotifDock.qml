@@ -16,7 +16,7 @@ Item {
 
     required property Props props
     required property DrawerVisibilities visibilities
-    readonly property int notifCount: Notifs.list.reduce((acc, n) => n.closed ? acc : acc + 1, 0)
+    readonly property int notifCount: Notifs.notClosed.length
 
     anchors.fill: parent
     anchors.margins: Appearance.padding.normal
@@ -155,9 +155,11 @@ Item {
         onTriggered: {
             let next = null;
             for (let i = 0; i < notifList.repeater.count; i++) {
-                next = notifList.repeater.itemAt(i);
-                if (!next?.closed) // qmllint disable missing-property
+                const item = notifList.repeater.itemAt(i);
+                if (!item?.closed) { // qmllint disable missing-property
+                    next = item;
                     break;
+                }
             }
             if (next) {
                 next.closeAll(); // qmllint disable missing-property

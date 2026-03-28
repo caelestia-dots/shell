@@ -13,6 +13,7 @@ StyledRect {
     required property NotifData modelData
     required property Props props
     required property bool expanded
+    required property bool animationsEnabled
     required property DrawerVisibilities visibilities
 
     readonly property StyledText body: (expandedContent.item as ExpandedBody)?.body ?? null
@@ -42,6 +43,8 @@ StyledRect {
     }
 
     transitions: Transition {
+        enabled: root.animationsEnabled
+
         Anim {
             properties: "margins,width,maximumLineCount"
         }
@@ -82,6 +85,7 @@ StyledRect {
         id: compactBody
 
         shouldBeActive: !root.expanded
+        loadAsynchronously: true
         anchors.top: parent.top
         anchors.left: dummySummary.right
         anchors.right: parent.right
@@ -98,6 +102,7 @@ StyledRect {
         id: timeStr
 
         shouldBeActive: root.expanded
+        loadAsynchronously: true
         anchors.top: parent.top
         anchors.right: parent.right
 
@@ -113,6 +118,9 @@ StyledRect {
         id: expandedContent
 
         shouldBeActive: root.expanded
+        // Load expanded content synchronously so group expansion can start immediately.
+        // Leaving this async makes the parent wait for the loader before its new height is measurable.
+        loadAsynchronously: false
         anchors.top: summary.bottom
         anchors.left: parent.left
         anchors.right: parent.right
@@ -122,6 +130,8 @@ StyledRect {
     }
 
     Behavior on implicitHeight {
+        enabled: root.animationsEnabled
+
         Anim {
             duration: Appearance.anim.durations.expressiveDefaultSpatial
             easing.bezierCurve: Appearance.anim.curves.expressiveDefaultSpatial
@@ -155,12 +165,15 @@ StyledRect {
 
     component WrappedLoader: Loader {
         required property bool shouldBeActive
+        required property bool loadAsynchronously
 
-        asynchronous: true
-        opacity: shouldBeActive ? 1 : 0
+        asynchronous: loadAsynchronously
         active: opacity > 0
+        opacity: shouldBeActive ? 1 : 0
 
         Behavior on opacity {
+            enabled: root.animationsEnabled
+
             Anim {}
         }
     }
