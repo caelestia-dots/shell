@@ -55,6 +55,7 @@ Elevation {
                         function onClicked(): void {
                             root.itemSelected(item.modelData);
                             root.active = item.modelData;
+                            item.modelData.clicked();
                             root.expanded = false;
                         }
 

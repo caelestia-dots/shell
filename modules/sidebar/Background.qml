@@ -2,15 +2,13 @@ import QtQuick
 import QtQuick.Shapes
 import qs.components
 import qs.services
-import qs.config
 
 ShapePath {
     id: root
 
     required property Wrapper wrapper
     required property var panels
-
-    readonly property real rounding: Config.border.rounding
+    required property real rounding
 
     readonly property real notifsWidthDiff: panels.notifications.width - wrapper.width
     readonly property real notifsRoundingX: panels.notifications.height > 0 && notifsWidthDiff < rounding * 2 ? notifsWidthDiff / 2 : rounding

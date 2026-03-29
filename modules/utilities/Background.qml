@@ -2,14 +2,13 @@ import QtQuick
 import QtQuick.Shapes
 import qs.components
 import qs.services
-import qs.config
 
 ShapePath {
     id: root
 
     required property Wrapper wrapper
     required property var sidebar
-    readonly property real rounding: Config.border.rounding
+    required property real rounding
     readonly property bool flatten: wrapper.height < rounding * 2
     readonly property real roundingY: flatten ? wrapper.height / 2 : rounding
 

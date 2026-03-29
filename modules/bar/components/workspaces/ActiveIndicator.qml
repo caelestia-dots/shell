@@ -10,6 +10,7 @@ StyledRect {
     required property int activeWsId
     required property Repeater workspaces
     required property Item mask
+    required property bool fullscreen
 
     readonly property int currentWsIdx: {
         let i = activeWsId - 1;
