@@ -1,17 +1,17 @@
 pragma ComponentBehavior: Bound
 
+import QtQuick
+import Quickshell
 import qs.components
 import qs.services
 import qs.config
-import Quickshell
-import QtQuick
 
 Item {
     id: root
 
     required property Props props
     required property Flickable container
-    required property var visibilities
+    required property DrawerVisibilities visibilities
 
     readonly property alias repeater: repeater
     readonly property int spacing: Appearance.spacing.small
@@ -39,128 +39,130 @@ Item {
             onValuesChanged: root.flagChanged()
         }
 
-        MouseArea {
-            id: notif
+        delegate: NotifGroupDelegate {}
+    }
 
-            required property int index
-            required property string modelData
+    component NotifGroupDelegate: MouseArea {
+        id: notif
 
-            readonly property bool closed: notifInner.notifCount === 0
-            readonly property alias nonAnimHeight: notifInner.nonAnimHeight
-            property int startY
+        required property int index
+        required property string modelData
 
-            function closeAll(): void {
-                for (const n of Notifs.notClosed.filter(n => n.appName === modelData))
-                    n.close();
+        readonly property bool closed: notifInner.notifCount === 0
+        readonly property alias nonAnimHeight: notifInner.nonAnimHeight
+        property int startY
+
+        function closeAll(): void {
+            for (const n of Notifs.notClosed.filter(n => n.appName === modelData))
+                n.close();
+        }
+
+        y: {
+            root.flag; // Force update
+            let y = 0;
+            for (let i = 0; i < index; i++) {
+                const item = repeater.itemAt(i) as NotifGroupDelegate;
+                if (item && !item.closed)
+                    y += item.nonAnimHeight + root.spacing;
             }
+            return y;
+        }
 
-            y: {
-                root.flag; // Force update
-                let y = 0;
-                for (let i = 0; i < index; i++) {
-                    const item = repeater.itemAt(i);
-                    if (!item.closed)
-                        y += item.nonAnimHeight + root.spacing;
-                }
-                return y;
+        containmentMask: QtObject {
+            function contains(p: point): bool {
+                if (!root.container.contains(notif.mapToItem(root.container, p)))
+                    return false;
+                return notifInner.contains(p);
             }
+        }
 
-            containmentMask: QtObject {
-                function contains(p: point): bool {
-                    if (!root.container.contains(notif.mapToItem(root.container, p)))
-                        return false;
-                    return notifInner.contains(p);
-                }
+        implicitWidth: root.width
+        implicitHeight: notifInner.implicitHeight
+
+        hoverEnabled: true
+        cursorShape: pressed ? Qt.ClosedHandCursor : undefined
+        acceptedButtons: Qt.LeftButton | Qt.RightButton | Qt.MiddleButton
+        preventStealing: true
+        enabled: !closed
+
+        drag.target: this
+        drag.axis: Drag.XAxis
+
+        onPressed: event => {
+            startY = event.y;
+            if (event.button === Qt.RightButton)
+                notifInner.toggleExpand(!notifInner.expanded);
+            else if (event.button === Qt.MiddleButton)
+                closeAll();
+        }
+        onPositionChanged: event => {
+            if (pressed) {
+                const diffY = event.y - startY;
+                if (Math.abs(diffY) > Config.notifs.expandThreshold)
+                    notifInner.toggleExpand(diffY > 0);
             }
+        }
+        onReleased: event => {
+            if (Math.abs(x) < width * Config.notifs.clearThreshold)
+                x = 0;
+            else
+                closeAll();
+        }
 
-            implicitWidth: root.width
-            implicitHeight: notifInner.implicitHeight
+        ParallelAnimation {
+            running: true
 
-            hoverEnabled: true
-            cursorShape: pressed ? Qt.ClosedHandCursor : undefined
-            acceptedButtons: Qt.LeftButton | Qt.RightButton | Qt.MiddleButton
-            preventStealing: true
-            enabled: !closed
-
-            drag.target: this
-            drag.axis: Drag.XAxis
-
-            onPressed: event => {
-                startY = event.y;
-                if (event.button === Qt.RightButton)
-                    notifInner.toggleExpand(!notifInner.expanded);
-                else if (event.button === Qt.MiddleButton)
-                    closeAll();
+            Anim {
+                target: notif
+                property: "opacity"
+                from: 0
+                to: 1
             }
-            onPositionChanged: event => {
-                if (pressed) {
-                    const diffY = event.y - startY;
-                    if (Math.abs(diffY) > Config.notifs.expandThreshold)
-                        notifInner.toggleExpand(diffY > 0);
-                }
+            Anim {
+                target: notif
+                property: "scale"
+                from: 0
+                to: 1
+                duration: Appearance.anim.durations.expressiveDefaultSpatial
+                easing.bezierCurve: Appearance.anim.curves.expressiveDefaultSpatial
             }
-            onReleased: event => {
-                if (Math.abs(x) < width * Config.notifs.clearThreshold)
-                    x = 0;
-                else
-                    closeAll();
+        }
+
+        ParallelAnimation {
+            running: notif.closed
+
+            Anim {
+                target: notif
+                property: "opacity"
+                to: 0
             }
-
-            ParallelAnimation {
-                running: true
-
-                Anim {
-                    target: notif
-                    property: "opacity"
-                    from: 0
-                    to: 1
-                }
-                Anim {
-                    target: notif
-                    property: "scale"
-                    from: 0
-                    to: 1
-                    duration: Appearance.anim.durations.expressiveDefaultSpatial
-                    easing.bezierCurve: Appearance.anim.curves.expressiveDefaultSpatial
-                }
+            Anim {
+                target: notif
+                property: "scale"
+                to: 0.6
             }
+        }
 
-            ParallelAnimation {
-                running: notif.closed
+        NotifGroup {
+            id: notifInner
 
-                Anim {
-                    target: notif
-                    property: "opacity"
-                    to: 0
-                }
-                Anim {
-                    target: notif
-                    property: "scale"
-                    to: 0.6
-                }
+            modelData: notif.modelData
+            props: root.props
+            container: root.container
+            visibilities: root.visibilities
+        }
+
+        Behavior on x {
+            Anim {
+                duration: Appearance.anim.durations.expressiveDefaultSpatial
+                easing.bezierCurve: Appearance.anim.curves.expressiveDefaultSpatial
             }
+        }
 
-            NotifGroup {
-                id: notifInner
-
-                modelData: notif.modelData
-                props: root.props
-                container: root.container
-                visibilities: root.visibilities
-            }
-
-            Behavior on x {
-                Anim {
-                    duration: Appearance.anim.durations.expressiveDefaultSpatial
-                    easing.bezierCurve: Appearance.anim.curves.expressiveDefaultSpatial
-                }
-            }
-
-            Behavior on y {
-                Anim {
-                    duration: Appearance.anim.durations.expressiveDefaultSpatial
-                    easing.bezierCurve: Appearance.anim.curves.expressiveDefaultSpatial
-                }
+        Behavior on y {
+            Anim {
+                duration: Appearance.anim.durations.expressiveDefaultSpatial
+                easing.bezierCurve: Appearance.anim.curves.expressiveDefaultSpatial
             }
         }
     }

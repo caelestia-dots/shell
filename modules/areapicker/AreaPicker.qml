@@ -1,10 +1,11 @@
 pragma ComponentBehavior: Bound
 
+import Quickshell
+import Quickshell.Io
+import Quickshell.Wayland
 import qs.components.containers
 import qs.components.misc
-import Quickshell
-import Quickshell.Wayland
-import Quickshell.Io
+import qs.services
 
 Scope {
     LazyLoader {
@@ -15,7 +16,7 @@ Scope {
         property bool clipboardOnly
 
         Variants {
-            model: Quickshell.screens
+            model: Screens.screens
 
             StyledWindow {
                 id: win
@@ -47,8 +48,6 @@ Scope {
     }
 
     IpcHandler {
-        target: "picker"
-
         function open(): void {
             root.freeze = false;
             root.closing = false;
@@ -76,9 +75,13 @@ Scope {
             root.clipboardOnly = true;
             root.activeAsync = true;
         }
+
+        target: "picker"
     }
 
+    // qmllint disable unresolved-type
     CustomShortcut {
+        // qmllint enable unresolved-type
         name: "screenshot"
         description: "Open screenshot tool"
         onPressed: {
@@ -89,7 +92,9 @@ Scope {
         }
     }
 
+    // qmllint disable unresolved-type
     CustomShortcut {
+        // qmllint enable unresolved-type
         name: "screenshotFreeze"
         description: "Open screenshot tool (freeze mode)"
         onPressed: {
@@ -100,7 +105,9 @@ Scope {
         }
     }
 
+    // qmllint disable unresolved-type
     CustomShortcut {
+        // qmllint enable unresolved-type
         name: "screenshotClip"
         description: "Open screenshot tool (clipboard)"
         onPressed: {
@@ -111,7 +118,9 @@ Scope {
         }
     }
 
+    // qmllint disable unresolved-type
     CustomShortcut {
+        // qmllint enable unresolved-type
         name: "screenshotFreezeClip"
         description: "Open screenshot tool (freeze mode, clipboard)"
         onPressed: {

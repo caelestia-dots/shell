@@ -1,0 +1,43 @@
+name: Lint code
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+
+    container:
+      image: ghcr.io/${{ github.repository_owner }}/shell-arch-env:latest
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Build
+        run: |
+          # Set version and git rev for CI build so we don't call git
+          cmake -B build -G Ninja -DCMAKE_CXX_COMPILER=clazy -DCMAKE_CXX_FLAGS=-Werror -DVERSION= -DGIT_REVISION=
+          cmake --build build
+
+      - name: Lint QML
+        shell: fish {0}
+        run: |
+          # Generate tooling
+          touch .qmlls.ini
+          QT_QPA_PLATFORM=offscreen QML2_IMPORT_PATH="$PWD/build/qml:$QML2_IMPORT_PATH" timeout 2 qs -p .
+
+          # Construct linter args
+          set -l build_dir (grep -oP "(?<=buildDir=\")(.*)(?=\")" .qmlls.ini)
+          set -l import_paths (grep -oP "(?<=importPaths=\")(.*)(?=\")" .qmlls.ini | string split :)
+          set -l args -I $build_dir
+          for path in $import_paths
+            set -a args -I $path
+          end
+          set -l qml_files (string match -vr '(build|modules/controlcenter)/.*' **.qml)
+
+          # Lint
+          set -l lint_out (/usr/lib/qt6/bin/qmllint --import disable $args $qml_files 2>&1 | tee /dev/stderr)
+          test -z "$lint_out" || exit 1

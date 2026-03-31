@@ -1,15 +1,15 @@
 pragma ComponentBehavior: Bound
 
 import ".."
+import QtQuick
+import QtQuick.Controls
+import QtQuick.Layouts
+import Quickshell
 import qs.components
 import qs.components.controls
 import qs.components.effects
 import qs.services
 import qs.config
-import Quickshell
-import QtQuick
-import QtQuick.Controls
-import QtQuick.Layouts
 
 ColumnLayout {
     id: root
@@ -21,7 +21,6 @@ ColumnLayout {
     spacing: Appearance.spacing.normal
 
     Connections {
-        target: VPN
         function onConnectedChanged() {
             if (!VPN.connected && root.pendingSwitchIndex >= 0) {
                 const targetIndex = root.pendingSwitchIndex;
@@ -50,6 +49,8 @@ ColumnLayout {
                 });
             }
         }
+
+        target: VPN
     }
 
     TextButton {
@@ -97,6 +98,7 @@ ColumnLayout {
                 required property int index
 
                 width: ListView.view ? ListView.view.width : undefined
+                implicitHeight: rowLayout.implicitHeight + Appearance.padding.normal * 2
 
                 color: Qt.alpha(Colours.tPalette.m3surfaceContainer, (root.session && root.session.vpn && root.session.vpn.active === modelData) ? Colours.tPalette.m3surfaceContainer.a : 0)
                 radius: Appearance.rounding.normal
@@ -157,15 +159,38 @@ ColumnLayout {
                             StyledText {
                                 Layout.fillWidth: true
                                 text: {
-                                    if (modelData.enabled && VPN.connected)
-                                        return qsTr("Connected");
-                                    if (modelData.enabled && VPN.connecting)
+                                    if (!modelData.enabled)
+                                        return qsTr("Disabled");
+
+                                    if (VPN.connecting)
                                         return qsTr("Connecting...");
-                                    if (modelData.enabled)
+
+                                    switch (VPN.status.state) {
+                                    case "connected":
+                                        return qsTr("Connected");
+                                    case "disconnected":
                                         return qsTr("Enabled");
-                                    return qsTr("Disabled");
+                                    case "connecting":
+                                        return qsTr("Connecting...");
+                                    case "needs-auth":
+                                        return qsTr("Auth required");
+                                    case "error":
+                                        return qsTr("Error");
+                                    default:
+                                        return qsTr("Enabled");
+                                    }
                                 }
-                                color: modelData.enabled ? (VPN.connected ? Colours.palette.m3primary : Colours.palette.m3onSurface) : Colours.palette.m3outline
+                                color: {
+                                    if (!modelData.enabled)
+                                        return Colours.palette.m3outline;
+                                    if (VPN.status.state === "connected")
+                                        return Colours.palette.m3primary;
+                                    if (VPN.status.state === "error")
+                                        return Colours.palette.m3error;
+                                    if (VPN.status.state === "needs-auth")
+                                        return Colours.palette.m3tertiary;
+                                    return Colours.palette.m3onSurface;
+                                }
                                 font.pointSize: Appearance.font.size.small
                                 font.weight: modelData.enabled && VPN.connected ? 500 : 400
                                 elide: Text.ElideRight
@@ -181,7 +206,6 @@ ColumnLayout {
                         color: Qt.alpha(Colours.palette.m3primaryContainer, VPN.connected && modelData.enabled ? 1 : 0)
 
                         StateLayer {
-                            enabled: !VPN.connecting
                             function onClicked(): void {
                                 const clickedIndex = modelData.index;
 
@@ -216,6 +240,8 @@ ColumnLayout {
                                     }
                                 }
                             }
+
+                            enabled: !VPN.connecting
                         }
 
                         MaterialIcon {
@@ -256,8 +282,6 @@ ColumnLayout {
                         }
                     }
                 }
-
-                implicitHeight: rowLayout.implicitHeight + Appearance.padding.normal * 2
             }
         }
     }
@@ -270,6 +294,49 @@ ColumnLayout {
         property string providerName: ""
         property string displayName: ""
         property string interfaceName: ""
+        property string connectCmd: ""
+        property string disconnectCmd: ""
+
+        function showProviderSelection(): void {
+            currentState = "selection";
+            open();
+        }
+
+        function closeWithAnimation(): void {
+            close();
+        }
+
+        function showAddForm(providerType: string, defaultDisplayName: string): void {
+            editIndex = -1;
+            providerName = providerType;
+            displayName = defaultDisplayName;
+            interfaceName = "";
+            connectCmd = "";
+            disconnectCmd = "";
+
+            if (currentState === "selection") {
+                transitionToForm.start();
+            } else {
+                currentState = "form";
+                isClosing = false;
+                open();
+            }
+        }
+
+        function showEditForm(index: int): void {
+            const provider = Config.utilities.vpn.provider[index];
+            const isObject = typeof provider === "object";
+
+            editIndex = index;
+            providerName = isObject ? (provider.name || "custom") : String(provider);
+            displayName = isObject ? (provider.displayName || providerName) : providerName;
+            interfaceName = isObject ? (provider.interface || "") : "";
+            connectCmd = isObject && provider.connectCmd ? provider.connectCmd.join(" ") : "";
+            disconnectCmd = isObject && provider.disconnectCmd ? provider.disconnectCmd.join(" ") : "";
+
+            currentState = "form";
+            open();
+        }
 
         parent: Overlay.overlay
         x: Math.round((parent.width - width) / 2)
@@ -321,79 +388,12 @@ ColumnLayout {
             }
         }
 
-        function showProviderSelection(): void {
-            currentState = "selection";
-            open();
-        }
-
-        function closeWithAnimation(): void {
-            close();
-        }
-
-        function showAddForm(providerType: string, defaultDisplayName: string): void {
-            editIndex = -1;
-            providerName = providerType;
-            displayName = defaultDisplayName;
-            interfaceName = "";
-
-            if (currentState === "selection") {
-                transitionToForm.start();
-            } else {
-                currentState = "form";
-                isClosing = false;
-                open();
-            }
-        }
-
-        function showEditForm(index: int): void {
-            const provider = Config.utilities.vpn.provider[index];
-            const isObject = typeof provider === "object";
-
-            editIndex = index;
-            providerName = isObject ? (provider.name || "custom") : String(provider);
-            displayName = isObject ? (provider.displayName || providerName) : providerName;
-            interfaceName = isObject ? (provider.interface || "") : "";
-
-            currentState = "form";
-            open();
-        }
-
         Overlay.modal: Rectangle {
             color: Qt.rgba(0, 0, 0, 0.4 * vpnDialog.opacity)
         }
 
         onClosed: {
             currentState = "selection";
-        }
-
-        SequentialAnimation {
-            id: transitionToForm
-
-            ParallelAnimation {
-                Anim {
-                    target: selectionContent
-                    property: "opacity"
-                    to: 0
-                    duration: Appearance.anim.durations.small
-                    easing.bezierCurve: Appearance.anim.curves.emphasized
-                }
-            }
-
-            ScriptAction {
-                script: {
-                    vpnDialog.currentState = "form";
-                }
-            }
-
-            ParallelAnimation {
-                Anim {
-                    target: formContent
-                    property: "opacity"
-                    to: 1
-                    duration: Appearance.anim.durations.small
-                    easing.bezierCurve: Appearance.anim.curves.emphasized
-                }
-            }
         }
 
         background: StyledRect {
@@ -520,11 +520,21 @@ ColumnLayout {
 
                 TextButton {
                     Layout.fillWidth: true
-                    text: qsTr("WireGuard (Custom)")
+                    text: qsTr("WireGuard")
                     inactiveColour: Colours.tPalette.m3surfaceContainerHigh
                     inactiveOnColour: Colours.palette.m3onSurface
                     onClicked: {
                         vpnDialog.showAddForm("wireguard", "WireGuard");
+                    }
+                }
+
+                TextButton {
+                    Layout.fillWidth: true
+                    text: qsTr("Custom")
+                    inactiveColour: Colours.tPalette.m3surfaceContainerHigh
+                    inactiveOnColour: Colours.palette.m3onSurface
+                    onClicked: {
+                        vpnDialog.showAddForm("custom", "Custom VPN");
                     }
                 }
 
@@ -586,6 +596,7 @@ ColumnLayout {
 
                         StyledTextField {
                             id: displayNameField
+
                             anchors.centerIn: parent
                             width: parent.width - Appearance.padding.normal
                             horizontalAlignment: TextInput.AlignLeft
@@ -622,11 +633,88 @@ ColumnLayout {
 
                         StyledTextField {
                             id: interfaceNameField
+
                             anchors.centerIn: parent
                             width: parent.width - Appearance.padding.normal
                             horizontalAlignment: TextInput.AlignLeft
                             text: vpnDialog.interfaceName
                             onTextChanged: vpnDialog.interfaceName = text
+                        }
+                    }
+                }
+
+                ColumnLayout {
+                    Layout.fillWidth: true
+                    spacing: Appearance.spacing.smaller / 2
+                    visible: vpnDialog.editIndex >= 0 ? (vpnDialog.connectCmd.length > 0) : (vpnDialog.providerName === "custom")
+
+                    StyledText {
+                        text: qsTr("Connect Command (e.g., wg-quick up wg0)")
+                        font.pointSize: Appearance.font.size.small
+                        color: Colours.palette.m3onSurfaceVariant
+                    }
+
+                    StyledRect {
+                        Layout.fillWidth: true
+                        implicitHeight: 40
+                        color: connectCmdField.activeFocus ? Colours.layer(Colours.palette.m3surfaceContainer, 3) : Colours.layer(Colours.palette.m3surfaceContainer, 2)
+                        radius: Appearance.rounding.small
+                        border.width: 1
+                        border.color: connectCmdField.activeFocus ? Colours.palette.m3primary : Qt.alpha(Colours.palette.m3outline, 0.3)
+
+                        Behavior on color {
+                            CAnim {}
+                        }
+                        Behavior on border.color {
+                            CAnim {}
+                        }
+
+                        StyledTextField {
+                            id: connectCmdField
+
+                            anchors.centerIn: parent
+                            width: parent.width - Appearance.padding.normal
+                            horizontalAlignment: TextInput.AlignLeft
+                            text: vpnDialog.connectCmd
+                            onTextChanged: vpnDialog.connectCmd = text
+                        }
+                    }
+                }
+
+                ColumnLayout {
+                    Layout.fillWidth: true
+                    spacing: Appearance.spacing.smaller / 2
+                    visible: vpnDialog.editIndex >= 0 ? (vpnDialog.connectCmd.length > 0) : (vpnDialog.providerName === "custom")
+
+                    StyledText {
+                        text: qsTr("Disconnect Command (e.g., wg-quick down wg0)")
+                        font.pointSize: Appearance.font.size.small
+                        color: Colours.palette.m3onSurfaceVariant
+                    }
+
+                    StyledRect {
+                        Layout.fillWidth: true
+                        implicitHeight: 40
+                        color: disconnectCmdField.activeFocus ? Colours.layer(Colours.palette.m3surfaceContainer, 3) : Colours.layer(Colours.palette.m3surfaceContainer, 2)
+                        radius: Appearance.rounding.small
+                        border.width: 1
+                        border.color: disconnectCmdField.activeFocus ? Colours.palette.m3primary : Qt.alpha(Colours.palette.m3outline, 0.3)
+
+                        Behavior on color {
+                            CAnim {}
+                        }
+                        Behavior on border.color {
+                            CAnim {}
+                        }
+
+                        StyledTextField {
+                            id: disconnectCmdField
+
+                            anchors.centerIn: parent
+                            width: parent.width - Appearance.padding.normal
+                            horizontalAlignment: TextInput.AlignLeft
+                            text: vpnDialog.disconnectCmd
+                            onTextChanged: vpnDialog.disconnectCmd = text
                         }
                     }
                 }
@@ -647,19 +735,37 @@ ColumnLayout {
                     TextButton {
                         Layout.fillWidth: true
                         text: qsTr("Save")
-                        enabled: vpnDialog.interfaceName.length > 0
+                        enabled: {
+                            const hasCommands = vpnDialog.connectCmd.length > 0 || vpnDialog.disconnectCmd.length > 0;
+                            if (hasCommands) {
+                                return vpnDialog.interfaceName.length > 0 && vpnDialog.connectCmd.length > 0 && vpnDialog.disconnectCmd.length > 0;
+                            }
+                            return vpnDialog.interfaceName.length > 0;
+                        }
                         inactiveColour: Colours.palette.m3primaryContainer
                         inactiveOnColour: Colours.palette.m3onPrimaryContainer
 
                         onClicked: {
                             const providers = [];
+                            const hasCommands = vpnDialog.connectCmd.length > 0 && vpnDialog.disconnectCmd.length > 0;
                             const newProvider = {
-                                name: vpnDialog.providerName,
                                 displayName: vpnDialog.displayName || vpnDialog.interfaceName,
-                                interface: vpnDialog.interfaceName
+                                enabled: false,
+                                interface: vpnDialog.interfaceName,
+                                name: vpnDialog.providerName
                             };
 
+                            if (hasCommands) {
+                                newProvider.connectCmd = vpnDialog.connectCmd.split(" ").filter(s => s.length > 0);
+                                newProvider.disconnectCmd = vpnDialog.disconnectCmd.split(" ").filter(s => s.length > 0);
+                            }
+
                             if (vpnDialog.editIndex >= 0) {
+                                const oldProvider = Config.utilities.vpn.provider[vpnDialog.editIndex];
+                                if (typeof oldProvider === "object" && oldProvider.enabled !== undefined) {
+                                    newProvider.enabled = oldProvider.enabled;
+                                }
+
                                 for (let i = 0; i < Config.utilities.vpn.provider.length; i++) {
                                     if (i === vpnDialog.editIndex) {
                                         providers.push(newProvider);
@@ -679,6 +785,36 @@ ColumnLayout {
                             vpnDialog.closeWithAnimation();
                         }
                     }
+                }
+            }
+        }
+
+        SequentialAnimation {
+            id: transitionToForm
+
+            ParallelAnimation {
+                Anim {
+                    target: selectionContent
+                    property: "opacity"
+                    to: 0
+                    duration: Appearance.anim.durations.small
+                    easing.bezierCurve: Appearance.anim.curves.emphasized
+                }
+            }
+
+            ScriptAction {
+                script: {
+                    vpnDialog.currentState = "form";
+                }
+            }
+
+            ParallelAnimation {
+                Anim {
+                    target: formContent
+                    property: "opacity"
+                    to: 1
+                    duration: Appearance.anim.durations.small
+                    easing.bezierCurve: Appearance.anim.curves.emphasized
                 }
             }
         }

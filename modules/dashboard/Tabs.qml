@@ -1,19 +1,21 @@
 pragma ComponentBehavior: Bound
 
+import QtQuick
+import QtQuick.Controls
+import Quickshell
+import Quickshell.Widgets
 import qs.components
 import qs.components.controls
 import qs.services
 import qs.config
-import Quickshell
-import Quickshell.Widgets
-import QtQuick
-import QtQuick.Controls
 
 Item {
     id: root
 
     required property real nonAnimWidth
-    required property PersistentProperties state
+    required property DashboardState dashState
+    required property var tabs
+
     readonly property alias count: bar.count
 
     implicitHeight: bar.implicitHeight + indicator.implicitHeight + indicator.anchors.topMargin + separator.implicitHeight
@@ -25,35 +27,23 @@ Item {
         anchors.right: parent.right
         anchors.top: parent.top
 
-        currentIndex: root.state.currentTab
+        currentIndex: root.dashState.currentTab
         background: null
 
-        onCurrentIndexChanged: root.state.currentTab = currentIndex
+        onCurrentIndexChanged: root.dashState.currentTab = currentIndex
 
-        Tab {
-            iconName: "dashboard"
-            text: qsTr("Dashboard")
+        Repeater {
+            model: ScriptModel {
+                values: root.tabs
+            }
+
+            delegate: Tab {
+                required property var modelData
+
+                iconName: modelData.iconName
+                text: modelData.text
+            }
         }
-
-        Tab {
-            iconName: "queue_music"
-            text: qsTr("Media")
-        }
-
-        Tab {
-            iconName: "speed"
-            text: qsTr("Performance")
-        }
-
-        Tab {
-            iconName: "cloud"
-            text: qsTr("Weather")
-        }
-
-        // Tab {
-        //     iconName: "workspaces"
-        //     text: qsTr("Workspaces")
-        // }
     }
 
     Item {
@@ -62,13 +52,20 @@ Item {
         anchors.top: bar.bottom
         anchors.topMargin: 5
 
-        implicitWidth: bar.currentItem.implicitWidth
+        implicitWidth: {
+            const tab = bar.currentItem;
+            if (tab)
+                return tab.implicitWidth;
+            const width = (root.nonAnimWidth - bar.spacing * (bar.count - 1)) / bar.count;
+            return width;
+        }
         implicitHeight: 3
 
         x: {
             const tab = bar.currentItem;
             const width = (root.nonAnimWidth - bar.spacing * (bar.count - 1)) / bar.count;
-            return width * tab.TabBar.index + (width - tab.implicitWidth) / 2;
+            const tabWidth = tab?.implicitWidth ?? width;
+            return width * bar.currentIndex + (width - tabWidth) / 2;
         }
 
         clip: true
@@ -114,13 +111,20 @@ Item {
         contentItem: CustomMouseArea {
             id: mouse
 
+            function onWheel(event: WheelEvent): void {
+                if (event.angleDelta.y < 0)
+                    root.dashState.currentTab = Math.min(root.dashState.currentTab + 1, bar.count - 1);
+                else if (event.angleDelta.y > 0)
+                    root.dashState.currentTab = Math.max(root.dashState.currentTab - 1, 0);
+            }
+
             implicitWidth: Math.max(icon.width, label.width)
             implicitHeight: icon.height + label.height
 
             cursorShape: Qt.PointingHandCursor
 
             onPressed: event => {
-                root.state.currentTab = tab.TabBar.index;
+                root.dashState.currentTab = tab.TabBar.index;
 
                 const stateY = stateWrapper.y;
                 rippleAnim.x = event.x;
@@ -130,13 +134,6 @@ Item {
                 rippleAnim.radius = Math.sqrt(Math.max(dist(event.x, event.y + stateY), dist(event.x, stateWrapper.height - event.y), dist(width - event.x, event.y + stateY), dist(width - event.x, stateWrapper.height - event.y)));
 
                 rippleAnim.restart();
-            }
-
-            function onWheel(event: WheelEvent): void {
-                if (event.angleDelta.y < 0)
-                    root.state.currentTab = Math.min(root.state.currentTab + 1, bar.count - 1);
-                else if (event.angleDelta.y > 0)
-                    root.state.currentTab = Math.max(root.state.currentTab - 1, 0);
             }
 
             SequentialAnimation {

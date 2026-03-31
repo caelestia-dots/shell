@@ -1,8 +1,8 @@
 pragma ComponentBehavior: Bound
 
-import Caelestia
-import Quickshell.Widgets
 import QtQuick
+import Quickshell.Widgets
+import Caelestia
 
 IconImage {
     id: root

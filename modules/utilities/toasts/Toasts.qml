@@ -1,16 +1,27 @@
 pragma ComponentBehavior: Bound
 
-import qs.components
-import qs.config
-import Caelestia
-import Quickshell
 import QtQuick
+import Quickshell
+import Caelestia
+import qs.components
+import qs.services
+import qs.config
 
 Item {
     id: root
 
     readonly property int spacing: Appearance.spacing.small
     property bool flag
+
+    function shouldShowToast(toast: Toast): bool {
+        if (!Notifs.hasFullscreen())
+            return true;
+        if (Config.utilities.toasts.fullscreen === "all")
+            return true;
+        if (Config.utilities.toasts.fullscreen === "important")
+            return toast.type === Toast.Warning || toast.type === Toast.Error;
+        return false;
+    }
 
     implicitWidth: Config.utilities.sizes.toastWidth - Appearance.padding.normal * 2
     implicitHeight: {
@@ -31,6 +42,8 @@ Item {
                 const toasts = [];
                 let count = 0;
                 for (const toast of Toaster.toasts) {
+                    if (!root.shouldShowToast(toast))
+                        continue;
                     toasts.push(toast);
                     if (!toast.closed) {
                         count++;

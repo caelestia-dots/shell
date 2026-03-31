@@ -35,8 +35,6 @@ Singleton {
     }
 
     IpcHandler {
-        target: "idleInhibitor"
-
         function isEnabled(): bool {
             return props.enabled;
         }
@@ -52,5 +50,7 @@ Singleton {
         function disable(): void {
             props.enabled = false;
         }
+
+        target: "idleInhibitor"
     }
 }

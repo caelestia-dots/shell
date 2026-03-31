@@ -1,10 +1,10 @@
 pragma Singleton
 
+import QtQuick
+import Quickshell
+import Caelestia
 import qs.config
 import qs.utils
-import Caelestia
-import Quickshell
-import QtQuick
 
 Singleton {
     id: root
@@ -54,18 +54,35 @@ Singleton {
             return;
         }
 
-        const [lat, lon] = coords.split(",");
-        const url = `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=geocodejson`;
-        Requests.get(url, text => {
+        const [lat, lon] = coords.split(",").map(s => s.trim());
+
+        const fallbackToBigDataCloud = () => {
+            const fallbackUrl = `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lon}&localityLanguage=en`;
+            Requests.get(fallbackUrl, text => {
+                const geo = JSON.parse(text);
+                const geoCity = geo.city || geo.locality;
+                if (geoCity) {
+                    city = geoCity;
+                    cachedCities.set(coords, geoCity);
+                } else {
+                    city = "Unknown City";
+                }
+            });
+        };
+
+        const nominatimUrl = `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=geocodejson`;
+        Requests.get(nominatimUrl, text => {
             const geo = JSON.parse(text).features?.[0]?.properties.geocoding;
             if (geo) {
                 const geoCity = geo.type === "city" ? geo.name : geo.city;
-                city = geoCity;
-                cachedCities.set(coords, geoCity);
-            } else {
-                city = "Unknown City";
+                if (geoCity) {
+                    city = geoCity;
+                    cachedCities.set(coords, geoCity);
+                    return;
+                }
             }
-        });
+            fallbackToBigDataCloud();
+        }, fallbackToBigDataCloud);
     }
 
     function fetchCoordsFromCity(cityName: string): void {
@@ -104,14 +121,14 @@ Singleton {
                 humidity: json.current.relative_humidity_2m,
                 windSpeed: json.current.wind_speed_10m,
                 isDay: json.current.is_day,
-                sunrise: json.daily.sunrise[0],
-                sunset: json.daily.sunset[0]
+                sunrise: json.daily.sunrise[0].replace("T", " "),
+                sunset: json.daily.sunset[0].replace("T", " ")
             };
 
             const forecastList = [];
             for (let i = 0; i < json.daily.time.length; i++)
                 forecastList.push({
-                    date: json.daily.time[i],
+                    date: json.daily.time[i].replace(/-/g, "/"),
                     maxTempC: Math.round(json.daily.temperature_2m_max[i]),
                     maxTempF: Math.round(toFahrenheit(json.daily.temperature_2m_max[i])),
                     minTempC: Math.round(json.daily.temperature_2m_min[i]),
@@ -124,7 +141,8 @@ Singleton {
             const hourlyList = [];
             const now = new Date();
             for (let i = 0; i < json.hourly.time.length; i++) {
-                const time = new Date(json.hourly.time[i]);
+                const time = new Date(json.hourly.time[i].replace("T", " "));
+
                 if (time < now)
                     continue;
 
@@ -149,7 +167,7 @@ Singleton {
         if (!loc || loc.indexOf(",") === -1)
             return "";
 
-        const [lat, lon] = loc.split(",");
+        const [lat, lon] = loc.split(",").map(s => s.trim());
         const baseUrl = "https://api.open-meteo.com/v1/forecast";
         const params = ["latitude=" + lat, "longitude=" + lon, "hourly=weather_code,temperature_2m", "daily=weather_code,temperature_2m_max,temperature_2m_min,sunrise,sunset", "current=temperature_2m,relative_humidity_2m,apparent_temperature,is_day,weather_code,wind_speed_10m", "timezone=auto", "forecast_days=7"];
 
@@ -192,7 +210,14 @@ Singleton {
 
     onLocChanged: fetchWeatherData()
 
-    // Refresh current location hourly
+    Connections {
+        function onWeatherLocationChanged(): void {
+            root.reload();
+        }
+
+        target: Config.services
+    }
+
     Timer {
         interval: 3600000 // 1 hour
         running: true

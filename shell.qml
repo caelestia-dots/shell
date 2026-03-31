@@ -10,6 +10,8 @@ import "modules/lock"
 import Quickshell
 
 ShellRoot {
+    settings.watchFiles: true
+
     Background {}
     Drawers {}
     AreaPicker {}

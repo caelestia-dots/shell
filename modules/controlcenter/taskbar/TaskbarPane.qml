@@ -2,24 +2,28 @@ pragma ComponentBehavior: Bound
 
 import ".."
 import "../components"
+import QtQuick
+import QtQuick.Layouts
+import Quickshell
+import Quickshell.Widgets
 import qs.components
+import qs.components.containers
 import qs.components.controls
 import qs.components.effects
-import qs.components.containers
 import qs.services
 import qs.config
 import qs.utils
-import Quickshell
-import Quickshell.Widgets
-import QtQuick
-import QtQuick.Layouts
 
 Item {
     id: root
 
     required property Session session
 
+    property bool activeWindowCompact: Config.bar.activeWindow.compact ?? false
+    property bool activeWindowInverted: Config.bar.activeWindow.inverted ?? false
     property bool clockShowIcon: Config.bar.clock.showIcon ?? true
+    property bool clockBackground: Config.bar.clock.background ?? false
+    property bool clockShowDate: Config.bar.clock.showDate ?? false
     property bool persistent: Config.bar.persistent ?? true
     property bool showOnHover: Config.bar.showOnHover ?? true
     property int dragThreshold: Config.bar.dragThreshold ?? 20
@@ -38,6 +42,7 @@ Item {
     property bool workspacesActiveIndicator: Config.bar.workspaces.activeIndicator ?? true
     property bool workspacesOccupiedBg: Config.bar.workspaces.occupiedBg ?? false
     property bool workspacesShowWindows: Config.bar.workspaces.showWindows ?? false
+    property int workspacesMaxWindowIcons: Config.bar.workspaces.maxWindowIcons ?? 0
     property bool workspacesPerMonitor: Config.bar.workspaces.perMonitorWorkspaces ?? true
     property bool scrollWorkspaces: Config.bar.scrollActions.workspaces ?? true
     property bool scrollVolume: Config.bar.scrollActions.volume ?? true
@@ -45,23 +50,14 @@ Item {
     property bool popoutActiveWindow: Config.bar.popouts.activeWindow ?? true
     property bool popoutTray: Config.bar.popouts.tray ?? true
     property bool popoutStatusIcons: Config.bar.popouts.statusIcons ?? true
-
-    anchors.fill: parent
-
-    Component.onCompleted: {
-        if (Config.bar.entries) {
-            entriesModel.clear();
-            for (let i = 0; i < Config.bar.entries.length; i++) {
-                const entry = Config.bar.entries[i];
-                entriesModel.append({
-                    id: entry.id,
-                    enabled: entry.enabled !== false
-                });
-            }
-        }
-    }
+    property list<string> monitorNames: Hypr.monitorNames()
+    property list<string> excludedScreens: Config.bar.excludedScreens ?? []
 
     function saveConfig(entryIndex, entryEnabled) {
+        Config.bar.activeWindow.compact = root.activeWindowCompact;
+        Config.bar.activeWindow.inverted = root.activeWindowInverted;
+        Config.bar.clock.background = root.clockBackground;
+        Config.bar.clock.showDate = root.clockShowDate;
         Config.bar.clock.showIcon = root.clockShowIcon;
         Config.bar.persistent = root.persistent;
         Config.bar.showOnHover = root.showOnHover;
@@ -81,6 +77,7 @@ Item {
         Config.bar.workspaces.activeIndicator = root.workspacesActiveIndicator;
         Config.bar.workspaces.occupiedBg = root.workspacesOccupiedBg;
         Config.bar.workspaces.showWindows = root.workspacesShowWindows;
+        Config.bar.workspaces.maxWindowIcons = root.workspacesMaxWindowIcons;
         Config.bar.workspaces.perMonitorWorkspaces = root.workspacesPerMonitor;
         Config.bar.scrollActions.workspaces = root.scrollWorkspaces;
         Config.bar.scrollActions.volume = root.scrollVolume;
@@ -88,6 +85,7 @@ Item {
         Config.bar.popouts.activeWindow = root.popoutActiveWindow;
         Config.bar.popouts.tray = root.popoutTray;
         Config.bar.popouts.statusIcons = root.popoutStatusIcons;
+        Config.bar.excludedScreens = root.excludedScreens;
 
         const entries = [];
         for (let i = 0; i < entriesModel.count; i++) {
@@ -105,12 +103,28 @@ Item {
         Config.save();
     }
 
+    anchors.fill: parent
+
+    Component.onCompleted: {
+        if (Config.bar.entries) {
+            entriesModel.clear();
+            for (let i = 0; i < Config.bar.entries.length; i++) {
+                const entry = Config.bar.entries[i];
+                entriesModel.append({
+                    id: entry.id,
+                    enabled: entry.enabled !== false
+                });
+            }
+        }
+    }
+
     ListModel {
         id: entriesModel
     }
 
     ClippingRectangle {
         id: taskbarClippingRect
+
         anchors.fill: parent
         anchors.margins: Appearance.padding.normal
         anchors.leftMargin: 0
@@ -127,12 +141,14 @@ Item {
             anchors.leftMargin: Appearance.padding.large
             anchors.rightMargin: Appearance.padding.large
 
+            asynchronous: true
             sourceComponent: taskbarContentComponent
         }
     }
 
     InnerBorder {
         id: taskbarBorder
+
         leftThickness: 0
         rightThickness: Appearance.padding.normal
     }
@@ -142,6 +158,7 @@ Item {
 
         StyledFlickable {
             id: sidebarFlickable
+
             flickableDirection: Flickable.VerticalFlick
             contentHeight: sidebarLayout.height
 
@@ -151,6 +168,7 @@ Item {
 
             ColumnLayout {
                 id: sidebarLayout
+
                 anchors.left: parent.left
                 anchors.right: parent.right
                 anchors.top: parent.top
@@ -250,11 +268,13 @@ Item {
 
                 RowLayout {
                     id: mainRowLayout
+
                     Layout.fillWidth: true
                     spacing: Appearance.spacing.normal
 
                     ColumnLayout {
                         id: leftColumnLayout
+
                         Layout.fillWidth: true
                         Layout.alignment: Qt.AlignTop
                         spacing: Appearance.spacing.normal
@@ -280,6 +300,7 @@ Item {
 
                                 RowLayout {
                                     id: workspacesShownRow
+
                                     anchors.left: parent.left
                                     anchors.right: parent.right
                                     anchors.verticalCenter: parent.verticalCenter
@@ -315,6 +336,7 @@ Item {
 
                                 RowLayout {
                                     id: workspacesActiveIndicatorRow
+
                                     anchors.left: parent.left
                                     anchors.right: parent.right
                                     anchors.verticalCenter: parent.verticalCenter
@@ -348,6 +370,7 @@ Item {
 
                                 RowLayout {
                                     id: workspacesOccupiedBgRow
+
                                     anchors.left: parent.left
                                     anchors.right: parent.right
                                     anchors.verticalCenter: parent.verticalCenter
@@ -381,6 +404,7 @@ Item {
 
                                 RowLayout {
                                     id: workspacesShowWindowsRow
+
                                     anchors.left: parent.left
                                     anchors.right: parent.right
                                     anchors.verticalCenter: parent.verticalCenter
@@ -404,6 +428,42 @@ Item {
 
                             StyledRect {
                                 Layout.fillWidth: true
+                                implicitHeight: workspacesMaxWindowIconsRow.implicitHeight + Appearance.padding.large * 2
+                                radius: Appearance.rounding.normal
+                                color: Colours.layer(Colours.palette.m3surfaceContainer, 2)
+
+                                Behavior on implicitHeight {
+                                    Anim {}
+                                }
+
+                                RowLayout {
+                                    id: workspacesMaxWindowIconsRow
+
+                                    anchors.left: parent.left
+                                    anchors.right: parent.right
+                                    anchors.verticalCenter: parent.verticalCenter
+                                    anchors.margins: Appearance.padding.large
+                                    spacing: Appearance.spacing.normal
+
+                                    StyledText {
+                                        Layout.fillWidth: true
+                                        text: qsTr("Max window icons")
+                                    }
+
+                                    CustomSpinBox {
+                                        min: 0
+                                        max: 20
+                                        value: root.workspacesMaxWindowIcons
+                                        onValueModified: value => {
+                                            root.workspacesMaxWindowIcons = value;
+                                            root.saveConfig();
+                                        }
+                                    }
+                                }
+                            }
+
+                            StyledRect {
+                                Layout.fillWidth: true
                                 implicitHeight: workspacesPerMonitorRow.implicitHeight + Appearance.padding.large * 2
                                 radius: Appearance.rounding.normal
                                 color: Colours.layer(Colours.palette.m3surfaceContainer, 2)
@@ -414,6 +474,7 @@ Item {
 
                                 RowLayout {
                                     id: workspacesPerMonitorRow
+
                                     anchors.left: parent.left
                                     anchors.right: parent.right
                                     anchors.verticalCenter: parent.verticalCenter
@@ -480,6 +541,7 @@ Item {
 
                     ColumnLayout {
                         id: middleColumnLayout
+
                         Layout.fillWidth: true
                         Layout.alignment: Qt.AlignTop
                         spacing: Appearance.spacing.normal
@@ -491,6 +553,24 @@ Item {
                             StyledText {
                                 text: qsTr("Clock")
                                 font.pointSize: Appearance.font.size.normal
+                            }
+
+                            SwitchRow {
+                                label: qsTr("Background")
+                                checked: root.clockBackground
+                                onToggled: checked => {
+                                    root.clockBackground = checked;
+                                    root.saveConfig();
+                                }
+                            }
+
+                            SwitchRow {
+                                label: qsTr("Show date")
+                                checked: root.clockShowDate
+                                onToggled: checked => {
+                                    root.clockShowDate = checked;
+                                    root.saveConfig();
+                                }
                             }
 
                             SwitchRow {
@@ -555,10 +635,39 @@ Item {
                                 }
                             }
                         }
+
+                        SectionContainer {
+                            Layout.fillWidth: true
+                            alignTop: true
+
+                            StyledText {
+                                text: qsTr("Active window")
+                                font.pointSize: Appearance.font.size.normal
+                            }
+
+                            SwitchRow {
+                                label: qsTr("Compact")
+                                checked: root.activeWindowCompact
+                                onToggled: checked => {
+                                    root.activeWindowCompact = checked;
+                                    root.saveConfig();
+                                }
+                            }
+
+                            SwitchRow {
+                                label: qsTr("Inverted")
+                                checked: root.activeWindowInverted
+                                onToggled: checked => {
+                                    root.activeWindowInverted = checked;
+                                    root.saveConfig();
+                                }
+                            }
+                        }
                     }
 
                     ColumnLayout {
                         id: rightColumnLayout
+
                         Layout.fillWidth: true
                         Layout.alignment: Qt.AlignTop
                         spacing: Appearance.spacing.normal
@@ -638,6 +747,43 @@ Item {
                                         }
                                     }
                                 ]
+                            }
+                        }
+
+                        SectionContainer {
+                            Layout.fillWidth: true
+                            alignTop: true
+
+                            StyledText {
+                                text: qsTr("Monitors")
+                                font.pointSize: Appearance.font.size.normal
+                            }
+
+                            ConnectedButtonGroup {
+                                rootItem: root
+                                // max 3 options per line
+                                rows: Math.ceil(root.monitorNames.length / 3)
+
+                                options: root.monitorNames.map(e => ({
+                                            label: qsTr(e),
+                                            propertyName: `monitor${e}`,
+                                            onToggled: function (_) {
+                                                // if the given monitor is in the excluded list, it should be added back
+                                                let addedBack = excludedScreens.includes(e);
+                                                if (addedBack) {
+                                                    const index = excludedScreens.indexOf(e);
+                                                    if (index !== -1) {
+                                                        excludedScreens.splice(index, 1);
+                                                    }
+                                                } else {
+                                                    if (!excludedScreens.includes(e)) {
+                                                        excludedScreens.push(e);
+                                                    }
+                                                }
+                                                root.saveConfig();
+                                            },
+                                            state: !Strings.testRegexList(root.excludedScreens, e)
+                                        }))
                             }
                         }
                     }

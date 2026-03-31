@@ -1,14 +1,14 @@
 pragma ComponentBehavior: Bound
 
 import ".."
+import QtQuick
+import Caelestia.Models
 import qs.components
 import qs.components.controls
 import qs.components.effects
 import qs.components.images
 import qs.services
 import qs.config
-import Caelestia.Models
-import QtQuick
 
 GridView {
     id: root
@@ -32,25 +32,24 @@ GridView {
     delegate: Item {
         required property var modelData
         required property int index
-
-        width: root.cellWidth
-        height: root.cellHeight
-
         readonly property bool isCurrent: modelData && modelData.path === Wallpapers.actualCurrent
         readonly property real itemMargin: Appearance.spacing.normal / 2
         readonly property real itemRadius: Appearance.rounding.normal
 
+        width: root.cellWidth
+        height: root.cellHeight
+
         StateLayer {
+            function onClicked(): void {
+                Wallpapers.setWallpaper(modelData.path);
+            }
+
             anchors.fill: parent
             anchors.leftMargin: itemMargin
             anchors.rightMargin: itemMargin
             anchors.topMargin: itemMargin
             anchors.bottomMargin: itemMargin
             radius: itemRadius
-
-            function onClicked(): void {
-                Wallpapers.setWallpaper(modelData.path);
-            }
         }
 
         StyledClippingRect {
@@ -117,6 +116,7 @@ GridView {
                 id: fallbackTimer
 
                 property bool triggered: false
+
                 interval: 800
                 running: cachingImage.status === Image.Loading || cachingImage.status === Image.Null
                 onTriggered: triggered = true
@@ -154,15 +154,15 @@ GridView {
 
                 opacity: 0
 
+                Component.onCompleted: {
+                    opacity = 1;
+                }
+
                 Behavior on opacity {
                     NumberAnimation {
                         duration: 1000
                         easing.type: Easing.OutCubic
                     }
-                }
-
-                Component.onCompleted: {
-                    opacity = 1;
                 }
             }
         }
@@ -201,6 +201,7 @@ GridView {
 
         StyledText {
             id: filenameText
+
             anchors.left: parent.left
             anchors.right: parent.right
             anchors.bottom: parent.bottom
@@ -218,15 +219,15 @@ GridView {
 
             opacity: 0
 
+            Component.onCompleted: {
+                opacity = 1;
+            }
+
             Behavior on opacity {
                 NumberAnimation {
                     duration: 1000
                     easing.type: Easing.OutCubic
                 }
-            }
-
-            Component.onCompleted: {
-                opacity = 1;
             }
         }
     }

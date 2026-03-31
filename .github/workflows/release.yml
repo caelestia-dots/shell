@@ -3,7 +3,7 @@ name: Create release
 on:
   push:
     tags:
-      - 'v*'
+      - "v*"
 
 jobs:
   build-and-release:
@@ -13,7 +13,7 @@ jobs:
       contents: write
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Create packages
         run: |

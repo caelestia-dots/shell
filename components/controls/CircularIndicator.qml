@@ -1,9 +1,9 @@
 import ".."
-import qs.services
-import qs.config
-import Caelestia.Internal
 import QtQuick
 import QtQuick.Templates
+import Caelestia.Internal
+import qs.services
+import qs.config
 
 BusyIndicator {
     id: root

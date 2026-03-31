@@ -1,10 +1,10 @@
 pragma ComponentBehavior: Bound
 
 import ".."
-import qs.services
-import qs.config
 import QtQuick
 import QtQuick.Effects
+import qs.services
+import qs.config
 
 StyledRect {
     property alias innerRadius: maskInner.radius

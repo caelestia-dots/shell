@@ -1,8 +1,8 @@
+import QtQuick
+import Quickshell
 import qs.components
 import qs.services
 import qs.config
-import Quickshell
-import QtQuick
 
 StyledRect {
     id: root
@@ -34,11 +34,11 @@ StyledRect {
         implicitHeight: closeIcon.implicitHeight + Appearance.padding.small
 
         StateLayer {
-            radius: Appearance.rounding.full
-
             function onClicked(): void {
                 QsWindow.window.destroy();
             }
+
+            radius: Appearance.rounding.full
         }
 
         MaterialIcon {

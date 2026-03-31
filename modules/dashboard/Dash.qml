@@ -1,16 +1,15 @@
+import "dash"
+import QtQuick.Layouts
 import qs.components
 import qs.components.filedialog
 import qs.services
 import qs.config
-import "dash"
-import Quickshell
-import QtQuick.Layouts
 
 GridLayout {
     id: root
 
-    required property PersistentProperties visibilities
-    required property PersistentProperties state
+    required property DrawerVisibilities visibilities
+    required property DashboardState dashState
     required property FileDialog facePicker
 
     rowSpacing: Appearance.spacing.normal
@@ -28,7 +27,6 @@ GridLayout {
             id: user
 
             visibilities: root.visibilities
-            state: root.state
             facePicker: root.facePicker
         }
     }
@@ -41,7 +39,7 @@ GridLayout {
 
         radius: Appearance.rounding.large * 1.5
 
-        Weather {}
+        SmallWeather {}
     }
 
     Rect {
@@ -68,7 +66,7 @@ GridLayout {
         Calendar {
             id: calendar
 
-            state: root.state
+            dashState: root.dashState
         }
     }
 

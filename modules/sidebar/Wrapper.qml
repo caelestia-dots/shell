@@ -1,13 +1,13 @@
 pragma ComponentBehavior: Bound
 
+import QtQuick
 import qs.components
 import qs.config
-import QtQuick
 
 Item {
     id: root
 
-    required property var visibilities
+    required property DrawerVisibilities visibilities
     required property var panels
     readonly property Props props: Props {}
 

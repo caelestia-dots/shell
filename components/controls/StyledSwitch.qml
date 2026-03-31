@@ -1,9 +1,9 @@
 import ".."
+import QtQuick
+import QtQuick.Shapes
+import QtQuick.Templates
 import qs.services
 import qs.config
-import QtQuick
-import QtQuick.Templates
-import QtQuick.Shapes
 
 Switch {
     id: root

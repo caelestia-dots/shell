@@ -1,10 +1,10 @@
 pragma ComponentBehavior: Bound
 
+import QtQuick
+import Quickshell
 import qs.components
 import qs.services
 import qs.config
-import Quickshell
-import QtQuick
 
 Item {
     id: root
@@ -52,8 +52,8 @@ Item {
 
             required property var modelData
 
-            readonly property Workspace start: root.workspaces.count > 0 ? root.workspaces.itemAt(getWsIdx(modelData.start)) ?? null : null
-            readonly property Workspace end: root.workspaces.count > 0 ? root.workspaces.itemAt(getWsIdx(modelData.end)) ?? null : null
+            readonly property Workspace start: root.workspaces.count > 0 ? root.workspaces.itemAt(getWsIdx(modelData.start)) ?? null : null // qmllint disable incompatible-type
+            readonly property Workspace end: root.workspaces.count > 0 ? root.workspaces.itemAt(getWsIdx(modelData.end)) ?? null : null // qmllint disable incompatible-type
 
             function getWsIdx(ws: int): int {
                 let i = ws - 1;
@@ -90,14 +90,14 @@ Item {
         }
     }
 
-    component Pill: QtObject {
-        property int start
-        property int end
-    }
-
     Component {
         id: pillComp
 
         Pill {}
+    }
+
+    component Pill: QtObject {
+        property int start
+        property int end
     }
 }

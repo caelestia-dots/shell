@@ -1,19 +1,17 @@
 pragma ComponentBehavior: Bound
 
 import ".."
-import qs.components
-import qs.components.effects
-import qs.services
-import qs.config
 import QtQuick
 import QtQuick.Layouts
+import qs.components
+import qs.services
+import qs.config
 
 StyledRect {
     id: root
 
     required property string label
     property int expandedZ: 100
-    property bool enabled: true
 
     property alias menuItems: splitButton.menuItems
     property alias active: splitButton.active
@@ -33,6 +31,7 @@ StyledRect {
 
     RowLayout {
         id: row
+
         anchors.fill: parent
         anchors.margins: Appearance.padding.large
         spacing: Appearance.spacing.normal
@@ -45,6 +44,7 @@ StyledRect {
 
         SplitButton {
             id: splitButton
+
             enabled: root.enabled
             type: SplitButton.Filled
 
