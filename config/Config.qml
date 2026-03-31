@@ -460,7 +460,7 @@ Singleton {
             sessionGif: paths.sessionGif,
             mediaGif: paths.mediaGif,
             noNotifsPic: paths.noNotifsPic,
-            lockscreenNoNotifsPic: paths.lockscreenNoNotifsPic
+            lockNoNotifsPic: paths.lockNoNotifsPic
         };
     }
 

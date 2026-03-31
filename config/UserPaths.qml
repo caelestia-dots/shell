@@ -6,5 +6,5 @@ JsonObject {
     property string sessionGif: "root:/assets/kurukuru.gif"
     property string mediaGif: "root:/assets/bongocat.gif"
     property string noNotifsPic: "root:/assets/dino.png"
-    property string lockscreenNoNotifsPic: "root:/assets/dino.png"
+    property string lockNoNotifsPic: "root:/assets/dino.png"
 }
