@@ -1,13 +1,13 @@
 pragma ComponentBehavior: Bound
 
+import QtQuick
+import QtQuick.Layouts
+import Quickshell
+import Quickshell.Hyprland
+import Quickshell.Wayland
 import qs.components
 import qs.services
 import qs.config
-import Quickshell
-import Quickshell.Wayland
-import Quickshell.Hyprland
-import QtQuick
-import QtQuick.Layouts
 
 Item {
     id: root
@@ -33,6 +33,7 @@ Item {
         radius: Appearance.rounding.small
 
         Loader {
+            asynchronous: true
             anchors.centerIn: parent
             active: !root.client
 
@@ -68,7 +69,7 @@ Item {
 
             anchors.centerIn: parent
 
-            captureSource: root.client?.wayland ?? null
+            captureSource: root.client?.wayland ?? null // qmllint disable unresolved-type
             live: true
 
             constraintSize.width: root.client ? parent.height * Math.min(root.screen.width / root.screen.height, root.client?.lastIpcObject.size[0] / root.client?.lastIpcObject.size[1]) : parent.height

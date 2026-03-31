@@ -1,15 +1,15 @@
 pragma ComponentBehavior: Bound
 
+import QtQuick
+import QtQuick.Layouts
+import Quickshell
+import Quickshell.Widgets
+import Quickshell.Services.Notifications
 import qs.components
 import qs.components.effects
 import qs.services
 import qs.config
 import qs.utils
-import Quickshell
-import Quickshell.Widgets
-import Quickshell.Services.Notifications
-import QtQuick
-import QtQuick.Layouts
 
 StyledRect {
     id: root
@@ -17,9 +17,30 @@ StyledRect {
     required property string modelData
 
     readonly property list<var> notifs: Notifs.list.filter(notif => notif.appName === modelData)
-    readonly property string image: notifs.find(n => n.image.length > 0)?.image ?? ""
-    readonly property string appIcon: notifs.find(n => n.appIcon.length > 0)?.appIcon ?? ""
-    readonly property string urgency: notifs.some(n => n.urgency === NotificationUrgency.Critical) ? "critical" : notifs.some(n => n.urgency === NotificationUrgency.Normal) ? "normal" : "low"
+    readonly property var props: {
+        let img = "";
+        let icon = "";
+        let hasCritical = false;
+        let hasNormal = false;
+        for (const n of notifs) {
+            if (!img && n.image.length > 0)
+                img = n.image;
+            if (!icon && n.appIcon.length > 0)
+                icon = n.appIcon;
+            if (n.urgency === NotificationUrgency.Critical)
+                hasCritical = true;
+            else if (n.urgency === NotificationUrgency.Normal)
+                hasNormal = true;
+        }
+        return {
+            img,
+            icon,
+            urgency: hasCritical ? "critical" : hasNormal ? "normal" : "low"
+        };
+    }
+    readonly property string image: props.img
+    readonly property string appIcon: props.icon
+    readonly property string urgency: props.urgency
 
     property bool expanded
 
@@ -52,6 +73,8 @@ StyledRect {
                 Image {
                     source: Qt.resolvedUrl(root.image)
                     fillMode: Image.PreserveAspectCrop
+                    sourceSize.width: Config.notifs.sizes.image
+                    sourceSize.height: Config.notifs.sizes.image
                     cache: false
                     asynchronous: true
                     width: Config.notifs.sizes.image
@@ -86,12 +109,14 @@ StyledRect {
                 radius: Appearance.rounding.full
 
                 Loader {
+                    asynchronous: true
                     anchors.centerIn: parent
                     sourceComponent: root.image ? imageComp : root.appIcon ? appIconComp : materialIconComp
                 }
             }
 
             Loader {
+                asynchronous: true
                 anchors.right: parent.right
                 anchors.bottom: parent.bottom
                 active: root.appIcon && root.image
@@ -151,11 +176,11 @@ StyledRect {
                     Layout.preferredWidth: root.notifs.length > Config.notifs.groupPreviewNum ? implicitWidth : 0
 
                     StateLayer {
-                        color: root.urgency === "critical" ? Colours.palette.m3onError : Colours.palette.m3onSurface
-
                         function onClicked(): void {
                             root.expanded = !root.expanded;
                         }
+
+                        color: root.urgency === "critical" ? Colours.palette.m3onError : Colours.palette.m3onSurface
                     }
 
                     RowLayout {
@@ -247,6 +272,7 @@ StyledRect {
             }
 
             Loader {
+                asynchronous: true
                 Layout.fillWidth: true
 
                 opacity: root.expanded ? 1 : 0
@@ -280,7 +306,7 @@ StyledRect {
     component NotifLine: StyledText {
         id: notifLine
 
-        required property Notifs.Notif modelData
+        required property NotifData modelData
 
         Layout.fillWidth: true
         textFormat: Text.MarkdownText

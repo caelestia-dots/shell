@@ -23,7 +23,7 @@ protected:
     virtual void process() = 0;
 
 private:
-    QTimer* m_timer;
+    QTimer* m_timer = nullptr;
 };
 
 class AudioProvider : public Service {

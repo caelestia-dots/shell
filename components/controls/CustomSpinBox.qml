@@ -1,10 +1,10 @@
 pragma ComponentBehavior: Bound
 
 import ".."
-import qs.services
-import qs.config
 import QtQuick
 import QtQuick.Layouts
+import qs.services
+import qs.config
 
 RowLayout {
     id: root
@@ -15,12 +15,12 @@ RowLayout {
     property real step: 1
     property alias repeatRate: timer.interval
 
+    property bool isEditing: false
+    property string displayText: root.value.toString()
+
     signal valueModified(value: real)
 
     spacing: Appearance.spacing.small
-
-    property bool isEditing: false
-    property string displayText: root.value.toString()
 
     onValueChanged: {
         if (!root.isEditing) {
@@ -94,11 +94,6 @@ RowLayout {
         StateLayer {
             id: upState
 
-            color: Colours.palette.m3onPrimary
-
-            onPressAndHold: timer.start()
-            onReleased: timer.stop()
-
             function onClicked(): void {
                 let newValue = Math.min(root.max, root.value + root.step);
                 // Round to avoid floating point precision errors
@@ -108,6 +103,11 @@ RowLayout {
                 root.displayText = newValue.toString();
                 root.valueModified(newValue);
             }
+
+            color: Colours.palette.m3onPrimary
+
+            onPressAndHold: timer.start()
+            onReleased: timer.stop()
         }
 
         MaterialIcon {
@@ -129,11 +129,6 @@ RowLayout {
         StateLayer {
             id: downState
 
-            color: Colours.palette.m3onPrimary
-
-            onPressAndHold: timer.start()
-            onReleased: timer.stop()
-
             function onClicked(): void {
                 let newValue = Math.max(root.min, root.value - root.step);
                 // Round to avoid floating point precision errors
@@ -143,6 +138,11 @@ RowLayout {
                 root.displayText = newValue.toString();
                 root.valueModified(newValue);
             }
+
+            color: Colours.palette.m3onPrimary
+
+            onPressAndHold: timer.start()
+            onReleased: timer.stop()
         }
 
         MaterialIcon {

@@ -19,7 +19,9 @@ BeatProcessor::~BeatProcessor() {
     if (m_in) {
         del_fvec(m_in);
     }
-    del_fvec(m_out);
+    if (m_out) {
+        del_fvec(m_out);
+    }
 }
 
 void BeatProcessor::process() {

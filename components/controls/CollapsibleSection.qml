@@ -1,10 +1,9 @@
 import ".."
-import qs.components
-import qs.components.effects
-import qs.services
-import qs.config
 import QtQuick
 import QtQuick.Layouts
+import qs.components
+import qs.services
+import qs.config
 
 ColumnLayout {
     id: root
@@ -15,6 +14,8 @@ ColumnLayout {
     property bool showBackground: false
     property bool nested: false
 
+    default property alias content: contentColumn.data
+
     signal toggleRequested
 
     spacing: Appearance.spacing.small
@@ -22,11 +23,13 @@ ColumnLayout {
 
     Item {
         id: sectionHeaderItem
+
         Layout.fillWidth: true
         Layout.preferredHeight: Math.max(titleRow.implicitHeight + Appearance.padding.normal * 2, 48)
 
         RowLayout {
             id: titleRow
+
             anchors.left: parent.left
             anchors.right: parent.right
             anchors.verticalCenter: parent.verticalCenter
@@ -49,6 +52,7 @@ ColumnLayout {
                 rotation: root.expanded ? 180 : 0
                 color: Colours.palette.m3onSurfaceVariant
                 font.pointSize: Appearance.font.size.normal
+
                 Behavior on rotation {
                     Anim {
                         duration: Appearance.anim.durations.small
@@ -59,21 +63,21 @@ ColumnLayout {
         }
 
         StateLayer {
-            anchors.fill: parent
-            color: Colours.palette.m3onSurface
-            radius: Appearance.rounding.normal
-            showHoverBackground: false
             function onClicked(): void {
                 root.toggleRequested();
                 root.expanded = !root.expanded;
             }
+
+            anchors.fill: parent
+            color: Colours.palette.m3onSurface
+            radius: Appearance.rounding.normal
+            showHoverBackground: false
         }
     }
 
-    default property alias content: contentColumn.data
-
     Item {
         id: contentWrapper
+
         Layout.fillWidth: true
         Layout.preferredHeight: root.expanded ? (contentColumn.implicitHeight + Appearance.spacing.small * 2) : 0
         clip: true
@@ -86,6 +90,7 @@ ColumnLayout {
 
         StyledRect {
             id: backgroundRect
+
             anchors.fill: parent
             radius: Appearance.rounding.normal
             color: Colours.transparency.enabled ? Colours.layer(Colours.palette.m3surfaceContainer, root.nested ? 3 : 2) : (root.nested ? Colours.palette.m3surfaceContainerHigh : Colours.palette.m3surfaceContainer)
@@ -101,6 +106,7 @@ ColumnLayout {
 
         ColumnLayout {
             id: contentColumn
+
             anchors.left: parent.left
             anchors.right: parent.right
             y: Appearance.spacing.small
@@ -118,6 +124,7 @@ ColumnLayout {
 
             StyledText {
                 id: descriptionText
+
                 Layout.fillWidth: true
                 Layout.topMargin: root.description !== "" ? Appearance.spacing.smaller : 0
                 Layout.bottomMargin: root.description !== "" ? Appearance.spacing.small : 0

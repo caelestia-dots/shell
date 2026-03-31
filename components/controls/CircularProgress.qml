@@ -1,8 +1,8 @@
 import ".."
-import qs.services
-import qs.config
 import QtQuick
 import QtQuick.Shapes
+import qs.services
+import qs.config
 
 Shape {
     id: root

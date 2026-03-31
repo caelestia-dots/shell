@@ -1,11 +1,11 @@
 pragma Singleton
 
 import ".."
+import QtQuick
+import Quickshell
 import qs.services
 import qs.config
 import qs.utils
-import Quickshell
-import QtQuick
 
 Searcher {
     id: root

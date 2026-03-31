@@ -2,10 +2,11 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 import Quickshell.Services.UPower
+import Caelestia.Internal
 import qs.components
 import qs.components.misc
-import qs.config
 import qs.services
+import qs.config
 
 Item {
     id: root
@@ -357,67 +358,60 @@ Item {
             anchors.left: parent.left
             anchors.top: parent.top
             anchors.bottom: parent.bottom
-            width: parent.width * heroCard.animatedUsage
+            implicitWidth: parent.width * heroCard.animatedUsage
             color: Qt.alpha(heroCard.accentColor, 0.15)
         }
 
-        ColumnLayout {
-            anchors.fill: parent
+        CardHeader {
+            anchors.left: parent.left
+            anchors.top: parent.top
             anchors.leftMargin: Appearance.padding.large
-            anchors.rightMargin: Appearance.padding.large
-            anchors.topMargin: Appearance.padding.normal
-            anchors.bottomMargin: Appearance.padding.normal
+            anchors.topMargin: Math.round(Appearance.padding.large * 1.2)
+
+            width: parent.width - anchors.leftMargin - usageColumn.anchors.rightMargin - usageLabel.width - Appearance.spacing.normal
+            icon: heroCard.icon
+            title: heroCard.title
+            accentColor: heroCard.accentColor
+        }
+
+        Column {
+            anchors.left: parent.left
+            anchors.right: parent.right
+            anchors.bottom: parent.bottom
+            anchors.margins: Math.round(Appearance.padding.large * 1.2)
+            anchors.bottomMargin: Math.round(Appearance.padding.large * 1.3)
+
             spacing: Appearance.spacing.small
 
-            CardHeader {
-                icon: heroCard.icon
-                title: heroCard.title
-                accentColor: heroCard.accentColor
+            Row {
+                spacing: Appearance.spacing.small
+
+                StyledText {
+                    text: heroCard.secondaryValue
+                    font.pointSize: Appearance.font.size.normal
+                    font.weight: Font.Medium
+                }
+
+                StyledText {
+                    text: heroCard.secondaryLabel
+                    font.pointSize: Appearance.font.size.small
+                    color: Colours.palette.m3onSurfaceVariant
+                    anchors.baseline: parent.children[0].baseline
+                }
             }
 
-            RowLayout {
-                Layout.fillWidth: true
-                Layout.fillHeight: true
-                spacing: Appearance.spacing.normal
-
-                Column {
-                    Layout.alignment: Qt.AlignBottom
-                    Layout.fillWidth: true
-                    spacing: Appearance.spacing.small
-
-                    Row {
-                        spacing: Appearance.spacing.small
-
-                        StyledText {
-                            text: heroCard.secondaryValue
-                            font.pointSize: Appearance.font.size.normal
-                            font.weight: Font.Medium
-                        }
-
-                        StyledText {
-                            text: heroCard.secondaryLabel
-                            font.pointSize: Appearance.font.size.small
-                            color: Colours.palette.m3onSurfaceVariant
-                            anchors.baseline: parent.children[0].baseline
-                        }
-                    }
-
-                    ProgressBar {
-                        width: parent.width * 0.5
-                        height: 6
-                        value: heroCard.tempProgress
-                        fgColor: heroCard.accentColor
-                        bgColor: Qt.alpha(heroCard.accentColor, 0.2)
-                    }
-                }
-
-                Item {
-                    Layout.fillWidth: true
-                }
+            ProgressBar {
+                implicitWidth: parent.width * 0.5
+                implicitHeight: 6
+                value: heroCard.tempProgress
+                fgColor: heroCard.accentColor
+                bgColor: Qt.alpha(heroCard.accentColor, 0.2)
             }
         }
 
         Column {
+            id: usageColumn
+
             anchors.right: parent.right
             anchors.verticalCenter: parent.verticalCenter
             anchors.margins: Appearance.padding.large
@@ -425,6 +419,8 @@ Item {
             spacing: 0
 
             StyledText {
+                id: usageLabel
+
                 anchors.right: parent.right
                 text: heroCard.mainLabel
                 font.pointSize: Appearance.font.size.normal
@@ -486,51 +482,15 @@ Item {
                 Layout.fillWidth: true
                 Layout.fillHeight: true
 
-                Canvas {
-                    id: gaugeCanvas
-
+                ArcGauge {
                     anchors.centerIn: parent
                     width: Math.min(parent.width, parent.height)
                     height: width
-                    onPaint: {
-                        const ctx = getContext("2d");
-                        ctx.reset();
-                        const cx = width / 2;
-                        const cy = height / 2;
-                        const radius = (Math.min(width, height) - 12) / 2;
-                        const lineWidth = 10;
-                        ctx.beginPath();
-                        ctx.arc(cx, cy, radius, gaugeCard.arcStartAngle, gaugeCard.arcStartAngle + gaugeCard.arcSweep);
-                        ctx.lineWidth = lineWidth;
-                        ctx.lineCap = "round";
-                        ctx.strokeStyle = Colours.layer(Colours.palette.m3surfaceContainerHigh, 2);
-                        ctx.stroke();
-                        if (gaugeCard.animatedPercentage > 0) {
-                            ctx.beginPath();
-                            ctx.arc(cx, cy, radius, gaugeCard.arcStartAngle, gaugeCard.arcStartAngle + gaugeCard.arcSweep * gaugeCard.animatedPercentage);
-                            ctx.lineWidth = lineWidth;
-                            ctx.lineCap = "round";
-                            ctx.strokeStyle = gaugeCard.accentColor;
-                            ctx.stroke();
-                        }
-                    }
-                    Component.onCompleted: requestPaint()
-
-                    Connections {
-                        function onAnimatedPercentageChanged() {
-                            gaugeCanvas.requestPaint();
-                        }
-
-                        target: gaugeCard
-                    }
-
-                    Connections {
-                        function onPaletteChanged() {
-                            gaugeCanvas.requestPaint();
-                        }
-
-                        target: Colours
-                    }
+                    percentage: gaugeCard.animatedPercentage
+                    accentColor: gaugeCard.accentColor
+                    trackColor: Colours.layer(Colours.palette.m3surfaceContainerHigh, 2)
+                    startAngle: gaugeCard.arcStartAngle
+                    sweepAngle: gaugeCard.arcSweep
                 }
 
                 StyledText {
@@ -642,51 +602,15 @@ Item {
                 Layout.fillWidth: true
                 Layout.fillHeight: true
 
-                Canvas {
-                    id: storageGaugeCanvas
-
+                ArcGauge {
                     anchors.centerIn: parent
                     width: Math.min(parent.width, parent.height)
                     height: width
-                    onPaint: {
-                        const ctx = getContext("2d");
-                        ctx.reset();
-                        const cx = width / 2;
-                        const cy = height / 2;
-                        const radius = (Math.min(width, height) - 12) / 2;
-                        const lineWidth = 10;
-                        ctx.beginPath();
-                        ctx.arc(cx, cy, radius, storageGaugeCard.arcStartAngle, storageGaugeCard.arcStartAngle + storageGaugeCard.arcSweep);
-                        ctx.lineWidth = lineWidth;
-                        ctx.lineCap = "round";
-                        ctx.strokeStyle = Colours.layer(Colours.palette.m3surfaceContainerHigh, 2);
-                        ctx.stroke();
-                        if (storageGaugeCard.animatedPercentage > 0) {
-                            ctx.beginPath();
-                            ctx.arc(cx, cy, radius, storageGaugeCard.arcStartAngle, storageGaugeCard.arcStartAngle + storageGaugeCard.arcSweep * storageGaugeCard.animatedPercentage);
-                            ctx.lineWidth = lineWidth;
-                            ctx.lineCap = "round";
-                            ctx.strokeStyle = storageGaugeCard.accentColor;
-                            ctx.stroke();
-                        }
-                    }
-                    Component.onCompleted: requestPaint()
-
-                    Connections {
-                        function onAnimatedPercentageChanged() {
-                            storageGaugeCanvas.requestPaint();
-                        }
-
-                        target: storageGaugeCard
-                    }
-
-                    Connections {
-                        function onPaletteChanged() {
-                            storageGaugeCanvas.requestPaint();
-                        }
-
-                        target: Colours
-                    }
+                    percentage: storageGaugeCard.animatedPercentage
+                    accentColor: storageGaugeCard.accentColor
+                    trackColor: Colours.layer(Colours.palette.m3surfaceContainerHigh, 2)
+                    startAngle: storageGaugeCard.arcStartAngle
+                    sweepAngle: storageGaugeCard.arcSweep
                 }
 
                 StyledText {
@@ -749,104 +673,39 @@ Item {
                 Layout.fillWidth: true
                 Layout.fillHeight: true
 
-                Canvas {
-                    id: sparklineCanvas
+                SparklineItem {
+                    id: sparkline
 
-                    property var downHistory: NetworkUsage.downloadHistory
-                    property var upHistory: NetworkUsage.uploadHistory
                     property real targetMax: 1024
                     property real smoothMax: targetMax
-                    property real slideProgress: 0
-                    property int _tickCount: 0
-                    property int _lastTickCount: -1
-
-                    function checkAndAnimate(): void {
-                        const currentLength = (downHistory || []).length;
-                        if (currentLength > 0 && _tickCount !== _lastTickCount) {
-                            _lastTickCount = _tickCount;
-                            updateMax();
-                        }
-                    }
-
-                    function updateMax(): void {
-                        const downHist = downHistory || [];
-                        const upHist = upHistory || [];
-                        const allValues = downHist.concat(upHist);
-                        targetMax = Math.max(...allValues, 1024);
-                        requestPaint();
-                    }
 
                     anchors.fill: parent
-                    onDownHistoryChanged: checkAndAnimate()
-                    onUpHistoryChanged: checkAndAnimate()
-                    onSmoothMaxChanged: requestPaint()
-                    onSlideProgressChanged: requestPaint()
-
-                    onPaint: {
-                        const ctx = getContext("2d");
-                        ctx.reset();
-                        const w = width;
-                        const h = height;
-                        const downHist = downHistory || [];
-                        const upHist = upHistory || [];
-                        if (downHist.length < 2 && upHist.length < 2)
-                            return;
-
-                        const maxVal = smoothMax;
-
-                        const drawLine = (history, color, fillAlpha) => {
-                            if (history.length < 2)
-                                return;
-
-                            const len = history.length;
-                            const stepX = w / (NetworkUsage.historyLength - 1);
-                            const startX = w - (len - 1) * stepX - stepX * slideProgress + stepX;
-                            ctx.beginPath();
-                            ctx.moveTo(startX, h - (history[0] / maxVal) * h);
-                            for (let i = 1; i < len; i++) {
-                                const x = startX + i * stepX;
-                                const y = h - (history[i] / maxVal) * h;
-                                ctx.lineTo(x, y);
-                            }
-                            ctx.strokeStyle = color;
-                            ctx.lineWidth = 2;
-                            ctx.lineCap = "round";
-                            ctx.lineJoin = "round";
-                            ctx.stroke();
-                            ctx.lineTo(startX + (len - 1) * stepX, h);
-                            ctx.lineTo(startX, h);
-                            ctx.closePath();
-                            ctx.fillStyle = Qt.rgba(Qt.color(color).r, Qt.color(color).g, Qt.color(color).b, fillAlpha);
-                            ctx.fill();
-                        };
-
-                        drawLine(upHist, Colours.palette.m3secondary.toString(), 0.15);
-                        drawLine(downHist, Colours.palette.m3tertiary.toString(), 0.2);
-                    }
-
-                    Component.onCompleted: updateMax()
+                    line1: NetworkUsage.uploadBuffer // qmllint disable missing-type
+                    line1Color: Colours.palette.m3secondary
+                    line1FillAlpha: 0.15
+                    line2: NetworkUsage.downloadBuffer // qmllint disable missing-type
+                    line2Color: Colours.palette.m3tertiary
+                    line2FillAlpha: 0.2
+                    maxValue: smoothMax
+                    historyLength: NetworkUsage.historyLength
 
                     Connections {
-                        function onPaletteChanged() {
-                            sparklineCanvas.requestPaint();
+                        function onValuesChanged(): void {
+                            sparkline.targetMax = Math.max(NetworkUsage.downloadBuffer.maximum, NetworkUsage.uploadBuffer.maximum, 1024);
+                            slideAnim.restart();
                         }
 
-                        target: Colours
+                        target: NetworkUsage.downloadBuffer
                     }
 
-                    Timer {
-                        interval: Config.dashboard.resourceUpdateInterval
-                        running: true
-                        repeat: true
-                        onTriggered: sparklineCanvas._tickCount++
-                    }
+                    NumberAnimation {
+                        id: slideAnim
 
-                    NumberAnimation on slideProgress {
+                        target: sparkline
+                        property: "slideProgress"
                         from: 0
                         to: 1
                         duration: Config.dashboard.resourceUpdateInterval
-                        loops: Animation.Infinite
-                        running: true
                     }
 
                     Behavior on smoothMax {
@@ -862,7 +721,7 @@ Item {
                     text: qsTr("Collecting data...")
                     font.pointSize: Appearance.font.size.small
                     color: Colours.palette.m3onSurfaceVariant
-                    visible: NetworkUsage.downloadHistory.length < 2
+                    visible: NetworkUsage.downloadBuffer.count < 2
                     opacity: 0.6
                 }
             }

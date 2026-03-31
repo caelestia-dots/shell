@@ -1,9 +1,9 @@
 pragma ComponentBehavior: Bound
 
-import qs.components
-import qs.config
 import QtQuick
 import QtQuick.Layouts
+import qs.components
+import qs.config
 
 Item {
     id: root

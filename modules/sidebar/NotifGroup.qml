@@ -1,14 +1,14 @@
 pragma ComponentBehavior: Bound
 
+import QtQuick
+import QtQuick.Layouts
+import Quickshell
+import Quickshell.Services.Notifications
 import qs.components
 import qs.components.effects
 import qs.services
 import qs.config
 import qs.utils
-import Quickshell
-import Quickshell.Services.Notifications
-import QtQuick
-import QtQuick.Layouts
 
 StyledRect {
     id: root
@@ -16,13 +16,39 @@ StyledRect {
     required property string modelData
     required property Props props
     required property Flickable container
-    required property var visibilities
+    required property DrawerVisibilities visibilities
 
     readonly property list<var> notifs: Notifs.list.filter(n => n.appName === modelData)
-    readonly property int notifCount: notifs.reduce((acc, n) => n.closed ? acc : acc + 1, 0)
-    readonly property string image: notifs.find(n => !n.closed && n.image.length > 0)?.image ?? ""
-    readonly property string appIcon: notifs.find(n => !n.closed && n.appIcon.length > 0)?.appIcon ?? ""
-    readonly property int urgency: notifs.some(n => !n.closed && n.urgency === NotificationUrgency.Critical) ? NotificationUrgency.Critical : notifs.some(n => n.urgency === NotificationUrgency.Normal) ? NotificationUrgency.Normal : NotificationUrgency.Low
+    readonly property var groupProps: {
+        let count = 0;
+        let img = "";
+        let icon = "";
+        let hasCritical = false;
+        let hasNormal = false;
+        for (const n of notifs) {
+            if (!n.closed) {
+                count++;
+                if (!img && n.image.length > 0)
+                    img = n.image;
+                if (!icon && n.appIcon.length > 0)
+                    icon = n.appIcon;
+                if (n.urgency === NotificationUrgency.Critical)
+                    hasCritical = true;
+                else if (n.urgency === NotificationUrgency.Normal)
+                    hasNormal = true;
+            }
+        }
+        return {
+            count,
+            img,
+            icon,
+            urgency: hasCritical ? NotificationUrgency.Critical : hasNormal ? NotificationUrgency.Normal : NotificationUrgency.Low
+        };
+    }
+    readonly property int notifCount: groupProps.count
+    readonly property string image: groupProps.img
+    readonly property string appIcon: groupProps.icon
+    readonly property int urgency: groupProps.urgency
 
     readonly property int nonAnimHeight: {
         const headerHeight = header.implicitHeight + (root.expanded ? Math.round(Appearance.spacing.small / 2) : 0);
@@ -74,6 +100,8 @@ StyledRect {
                 Image {
                     source: Qt.resolvedUrl(root.image)
                     fillMode: Image.PreserveAspectCrop
+                    sourceSize.width: Config.notifs.sizes.image
+                    sourceSize.height: Config.notifs.sizes.image
                     cache: false
                     asynchronous: true
                     width: Config.notifs.sizes.image
@@ -108,12 +136,14 @@ StyledRect {
                 radius: Appearance.rounding.full
 
                 Loader {
+                    asynchronous: true
                     anchors.centerIn: parent
                     sourceComponent: root.image ? imageComp : root.appIcon ? appIconComp : materialIconComp
                 }
             }
 
             Loader {
+                asynchronous: true
                 anchors.right: parent.right
                 anchors.bottom: parent.bottom
                 active: root.appIcon && root.image
@@ -174,11 +204,11 @@ StyledRect {
                     radius: Appearance.rounding.full
 
                     StateLayer {
-                        color: root.urgency === NotificationUrgency.Critical ? Colours.palette.m3onError : Colours.palette.m3onSurface
-
                         function onClicked(): void {
                             root.toggleExpand(!root.expanded);
                         }
+
+                        color: root.urgency === NotificationUrgency.Critical ? Colours.palette.m3onError : Colours.palette.m3onSurface
                     }
 
                     RowLayout {

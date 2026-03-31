@@ -1,15 +1,16 @@
 pragma ComponentBehavior: Bound
 
-import qs.components.containers
-import qs.config
-import Quickshell
 import QtQuick
+import Quickshell
+import qs.components.containers
+import qs.modules.bar as Bar
 
 Scope {
     id: root
 
     required property ShellScreen screen
-    required property Item bar
+    required property Bar.BarWrapper bar
+    required property real borderThickness
 
     ExclusionZone {
         anchors.left: true
@@ -31,7 +32,7 @@ Scope {
     component ExclusionZone: StyledWindow {
         screen: root.screen
         name: "border-exclusion"
-        exclusiveZone: Config.border.thickness
+        exclusiveZone: root.borderThickness
         mask: Region {}
         implicitWidth: 1
         implicitHeight: 1

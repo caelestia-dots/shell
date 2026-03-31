@@ -1,11 +1,12 @@
+pragma ComponentBehavior: Bound
+
 import ".."
-import qs.components
-import qs.components.controls
-import qs.components.effects
-import qs.services
-import qs.config
 import QtQuick
 import QtQuick.Layouts
+import qs.components
+import qs.components.controls
+import qs.services
+import qs.config
 
 StyledRect {
     id: root
@@ -18,39 +19,38 @@ StyledRect {
     property real horizontalPadding: Appearance.padding.large
     property real verticalPadding: Appearance.padding.normal
     property string tooltip: ""
-
     property bool hovered: false
+
     signal clicked
 
     Component.onCompleted: {
         hovered = toggleStateLayer.containsMouse;
     }
-
-    Connections {
-        target: toggleStateLayer
-        function onContainsMouseChanged() {
-            const newHovered = toggleStateLayer.containsMouse;
-            if (hovered !== newHovered) {
-                hovered = newHovered;
-            }
-        }
-    }
-
     Layout.preferredWidth: implicitWidth + (toggleStateLayer.pressed ? Appearance.padding.normal * 2 : toggled ? Appearance.padding.small * 2 : 0)
     implicitWidth: toggleBtnInner.implicitWidth + horizontalPadding * 2
     implicitHeight: toggleBtnIcon.implicitHeight + verticalPadding * 2
-
     radius: toggled || toggleStateLayer.pressed ? Appearance.rounding.small : Math.min(width, height) / 2 * Math.min(1, Appearance.rounding.scale)
     color: toggled ? Colours.palette[`m3${accent.toLowerCase()}`] : Colours.palette[`m3${accent.toLowerCase()}Container`]
+
+    Connections {
+        function onContainsMouseChanged() {
+            const newHovered = toggleStateLayer.containsMouse;
+            if (root.hovered !== newHovered) {
+                root.hovered = newHovered;
+            }
+        }
+
+        target: toggleStateLayer
+    }
 
     StateLayer {
         id: toggleStateLayer
 
-        color: root.toggled ? Colours.palette[`m3on${root.accent}`] : Colours.palette[`m3on${root.accent}Container`]
-
         function onClicked(): void {
             root.clicked();
         }
+
+        color: root.toggled ? Colours.palette[`m3on${root.accent}`] : Colours.palette[`m3on${root.accent}Container`]
     }
 
     RowLayout {
@@ -74,6 +74,7 @@ StyledRect {
         }
 
         Loader {
+            asynchronous: true
             active: !!root.label
             visible: active
 
@@ -101,6 +102,8 @@ StyledRect {
     // Tooltip - positioned absolutely, doesn't affect layout
     Loader {
         id: tooltipLoader
+
+        asynchronous: true
         active: root.tooltip !== ""
         z: 10000
         width: 0

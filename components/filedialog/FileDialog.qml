@@ -1,10 +1,10 @@
 pragma ComponentBehavior: Bound
 
-import qs.components
-import qs.services
-import Quickshell
 import QtQuick
 import QtQuick.Layouts
+import Quickshell
+import qs.components
+import qs.services
 
 LazyLoader {
     id: loader

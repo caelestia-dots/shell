@@ -1,25 +1,28 @@
 pragma ComponentBehavior: Bound
 
+import QtQuick
+import QtQuick.Effects
+import QtQuick.Layouts
+import Quickshell
+import qs.components
 import qs.services
 import qs.config
-import qs.components
-import Quickshell
-import QtQuick
-import QtQuick.Layouts
-import QtQuick.Effects
 
 StyledClippingRect {
     id: root
 
     required property ShellScreen screen
+    required property bool fullscreen
 
-    readonly property bool onSpecial: (Config.bar.workspaces.perMonitorWorkspaces ? Hypr.monitorFor(screen) : Hypr.focusedMonitor)?.lastIpcObject?.specialWorkspace?.name !== ""
+    readonly property bool onSpecial: (Config.bar.workspaces.perMonitorWorkspaces ? Hypr.monitorFor(screen) : Hypr.focusedMonitor)?.lastIpcObject.specialWorkspace?.name !== ""
     readonly property int activeWsId: Config.bar.workspaces.perMonitorWorkspaces ? (Hypr.monitorFor(screen).activeWorkspace?.id ?? 1) : Hypr.activeWsId
 
-    readonly property var occupied: Hypr.workspaces.values.reduce((acc, curr) => {
-        acc[curr.id] = curr.lastIpcObject.windows > 0;
-        return acc;
-    }, {})
+    readonly property var occupied: {
+        const occ = {};
+        for (const ws of Hypr.workspaces.values)
+            occ[ws.id] = ws.lastIpcObject.windows > 0;
+        return occ;
+    }
     readonly property int groupOffset: Math.floor((activeWsId - 1) / Config.bar.workspaces.shown) * Config.bar.workspaces.shown
 
     property real blur: onSpecial ? 1 : 0
@@ -34,6 +37,7 @@ StyledClippingRect {
         anchors.fill: parent
         scale: root.onSpecial ? 0.8 : 1
         opacity: root.onSpecial ? 0.5 : 1
+        visible: !root.fullscreen
 
         layer.enabled: root.blur > 0
         layer.effect: MultiEffect {
@@ -43,6 +47,7 @@ StyledClippingRect {
         }
 
         Loader {
+            asynchronous: true
             active: Config.bar.workspaces.occupiedBg
 
             anchors.fill: parent
@@ -75,6 +80,7 @@ StyledClippingRect {
         }
 
         Loader {
+            asynchronous: true
             anchors.horizontalCenter: parent.horizontalCenter
             active: Config.bar.workspaces.activeIndicator
 
@@ -82,13 +88,14 @@ StyledClippingRect {
                 activeWsId: root.activeWsId
                 workspaces: workspaces
                 mask: layout
+                fullscreen: root.fullscreen
             }
         }
 
         MouseArea {
             anchors.fill: layout
             onClicked: event => {
-                const ws = layout.childAt(event.x, event.y).ws;
+                const ws = (layout.childAt(event.x, event.y) as Workspace)?.ws;
                 if (Hypr.activeWsId !== ws)
                     Hypr.dispatch(`workspace ${ws}`);
                 else
@@ -107,6 +114,8 @@ StyledClippingRect {
 
     Loader {
         id: specialWs
+
+        asynchronous: true
 
         anchors.fill: parent
         anchors.margins: Appearance.padding.small

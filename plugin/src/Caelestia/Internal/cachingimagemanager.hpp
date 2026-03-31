@@ -2,6 +2,7 @@
 
 #include <QtQuick/qquickitem.h>
 #include <qobject.h>
+#include <qpointer.h>
 #include <qqmlintegration.h>
 
 namespace caelestia::internal {
@@ -18,8 +19,7 @@ class CachingImageManager : public QObject {
 
 public:
     explicit CachingImageManager(QObject* parent = nullptr)
-        : QObject(parent)
-        , m_item(nullptr) {}
+        : QObject(parent) {}
 
     [[nodiscard]] QQuickItem* item() const;
     void setItem(QQuickItem* item);
@@ -46,7 +46,7 @@ signals:
 private:
     QString m_shaPath;
 
-    QQuickItem* m_item;
+    QPointer<QQuickItem> m_item;
     QUrl m_cacheDir;
 
     QString m_path;

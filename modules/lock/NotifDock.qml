@@ -1,14 +1,15 @@
 pragma ComponentBehavior: Bound
 
+import QtQuick
+import QtQuick.Layouts
+import Quickshell
+import Quickshell.Widgets
 import qs.components
 import qs.components.containers
 import qs.components.effects
 import qs.services
 import qs.config
-import Quickshell
-import Quickshell.Widgets
-import QtQuick
-import QtQuick.Layouts
+import qs.utils
 
 ColumnLayout {
     id: root
@@ -39,16 +40,17 @@ ColumnLayout {
         color: "transparent"
 
         Loader {
+            asynchronous: true
             anchors.centerIn: parent
             active: opacity > 0
-            opacity: Notifs.list.length > 0 ? 0 : 1
+            opacity: Notifs.list.length > 0 && !Config.lock.hideNotifs ? 0 : 1
 
             sourceComponent: ColumnLayout {
                 spacing: Appearance.spacing.large
 
                 Image {
                     asynchronous: true
-                    source: Qt.resolvedUrl(`${Quickshell.shellDir}/assets/dino.png`)
+                    source: Paths.absolutePath(Config.paths.lockNoNotifsPic)
                     fillMode: Image.PreserveAspectFit
                     sourceSize.width: clipRect.width * 0.8
 
@@ -61,7 +63,7 @@ ColumnLayout {
 
                 StyledText {
                     Layout.alignment: Qt.AlignHCenter
-                    text: qsTr("No Notifications")
+                    text: Config.lock.hideNotifs ? qsTr("Unlock for Notifications") : qsTr("No Notifications")
                     color: Colours.palette.m3outlineVariant
                     font.pointSize: Appearance.font.size.large
                     font.family: Appearance.font.family.mono
@@ -78,7 +80,7 @@ ColumnLayout {
 
         StyledListView {
             anchors.fill: parent
-
+            visible: !Config.lock.hideNotifs
             spacing: Appearance.spacing.small
             clip: true
 

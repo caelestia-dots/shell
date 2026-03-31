@@ -1,8 +1,8 @@
-import qs.config
-import Caelestia
+import QtQuick
 import Quickshell
 import Quickshell.Services.UPower
-import QtQuick
+import Caelestia
+import qs.config
 
 Scope {
     id: root
@@ -10,8 +10,6 @@ Scope {
     readonly property list<var> warnLevels: [...Config.general.battery.warnLevels].sort((a, b) => b.level - a.level)
 
     Connections {
-        target: UPower
-
         function onOnBatteryChanged(): void {
             if (UPower.onBattery) {
                 if (Config.utilities.toasts.chargingChanged)
@@ -23,11 +21,11 @@ Scope {
                     level.warned = false;
             }
         }
+
+        target: UPower
     }
 
     Connections {
-        target: UPower.displayDevice
-
         function onPercentageChanged(): void {
             if (!UPower.onBattery)
                 return;
@@ -45,6 +43,8 @@ Scope {
                 hibernateTimer.start();
             }
         }
+
+        target: UPower.displayDevice
     }
 
     Timer {

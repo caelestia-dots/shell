@@ -105,34 +105,26 @@ void CachingImageManager::updateSource(const QString& path) {
 
     m_shaPath = path;
 
-    const auto future = QtConcurrent::run(&CachingImageManager::sha256sum, path);
-
-    const auto watcher = new QFutureWatcher<QString>(this);
-
-    connect(watcher, &QFutureWatcher<QString>::finished, this, [watcher, path, this]() {
+    QtConcurrent::run(&CachingImageManager::sha256sum, path).then(this, [path, this](const QString& sha) {
         if (m_path != path) {
-            // Object is destroyed or path has changed, ignore
-            watcher->deleteLater();
             return;
         }
 
         const QSize size = effectiveSize();
 
         if (!m_item || !size.width() || !size.height()) {
-            watcher->deleteLater();
             return;
         }
 
         const QString fillMode = m_item->property("fillMode").toString();
         // clang-format off
         const QString filename = QString("%1@%2x%3-%4.png")
-            .arg(watcher->result()).arg(size.width()).arg(size.height())
+            .arg(sha).arg(size.width()).arg(size.height())
             .arg(fillMode == "PreserveAspectCrop" ? "crop" : fillMode == "PreserveAspectFit" ? "fit" : "stretch");
         // clang-format on
 
         const QUrl cache = m_cacheDir.resolved(QUrl(filename));
         if (m_cachePath == cache) {
-            watcher->deleteLater();
             return;
         }
 
@@ -141,7 +133,6 @@ void CachingImageManager::updateSource(const QString& path) {
 
         if (!cache.isLocalFile()) {
             qWarning() << "CachingImageManager::updateSource: cachePath" << cache << "is not a local file";
-            watcher->deleteLater();
             return;
         }
 
@@ -157,11 +148,7 @@ void CachingImageManager::updateSource(const QString& path) {
         if (m_shaPath == path) {
             m_shaPath = QString();
         }
-
-        watcher->deleteLater();
     });
-
-    watcher->setFuture(future);
 }
 
 QUrl CachingImageManager::cachePath() const {

@@ -1,22 +1,24 @@
 pragma ComponentBehavior: Bound
 
+import QtQuick
+import QtQuick.Layouts
+import QtQuick.Shapes
+import Quickshell
+import Quickshell.Widgets
+import Quickshell.Services.Notifications
 import qs.components
 import qs.components.effects
 import qs.services
 import qs.config
 import qs.utils
-import Quickshell
-import Quickshell.Widgets
-import Quickshell.Services.Notifications
-import QtQuick
-import QtQuick.Layouts
 
 StyledRect {
     id: root
 
-    required property Notifs.Notif modelData
+    required property NotifData modelData
     readonly property bool hasImage: modelData.image.length > 0
     readonly property bool hasAppIcon: modelData.appIcon.length > 0
+    readonly property int bodyTextFormat: /[<*_`#\[\]]/.test(modelData.body) ? Text.MarkdownText : Text.PlainText
     readonly property int nonAnimHeight: summary.implicitHeight + (root.expanded ? appName.height + body.height + actions.height + actions.anchors.topMargin : bodyPreview.height) + inner.anchors.margins * 2
     property bool expanded: Config.notifs.openExpanded
 
@@ -83,7 +85,7 @@ StyledRect {
                 return;
 
             const actions = root.modelData.actions;
-            if (actions?.length === 1)
+            if (actions.length === 1)
                 actions[0].invoke();
         }
 
@@ -107,6 +109,7 @@ StyledRect {
             Loader {
                 id: image
 
+                asynchronous: true
                 active: root.hasImage
 
                 anchors.left: parent.left
@@ -124,6 +127,8 @@ StyledRect {
                         anchors.fill: parent
                         source: Qt.resolvedUrl(root.modelData.image)
                         fillMode: Image.PreserveAspectCrop
+                        sourceSize.width: Config.notifs.sizes.image
+                        sourceSize.height: Config.notifs.sizes.image
                         cache: false
                         asynchronous: true
                     }
@@ -133,6 +138,7 @@ StyledRect {
             Loader {
                 id: appIcon
 
+                asynchronous: true
                 active: root.hasAppIcon || !root.hasImage
 
                 anchors.horizontalCenter: root.hasImage ? undefined : image.horizontalCenter
@@ -149,6 +155,7 @@ StyledRect {
                     Loader {
                         id: icon
 
+                        asynchronous: true
                         active: root.hasAppIcon
 
                         anchors.centerIn: parent
@@ -165,6 +172,7 @@ StyledRect {
                     }
 
                     Loader {
+                        asynchronous: true
                         active: !root.hasAppIcon
                         anchors.centerIn: parent
                         anchors.horizontalCenterOffset: -Appearance.font.size.large * 0.02
@@ -175,6 +183,42 @@ StyledRect {
 
                             color: root.modelData.urgency === NotificationUrgency.Critical ? Colours.palette.m3onError : root.modelData.urgency === NotificationUrgency.Low ? Colours.palette.m3onSurface : Colours.palette.m3onSecondaryContainer
                             font.pointSize: Appearance.font.size.large
+                        }
+                    }
+                }
+            }
+
+            Shape {
+                id: progressIndicator
+
+                anchors.centerIn: appIcon
+                width: appIcon.implicitWidth + progressShape.strokeWidth * 2
+                height: appIcon.implicitHeight + progressShape.strokeWidth * 2
+                preferredRendererType: Shape.CurveRenderer
+
+                ShapePath {
+                    id: progressShape
+
+                    capStyle: ShapePath.RoundCap
+                    fillColor: "transparent"
+                    strokeWidth: 2
+                    strokeColor: Colours.palette.m3primary
+
+                    PathAngleArc {
+                        id: progressArc
+
+                        radiusX: progressIndicator.width / 2 - Appearance.padding.small / 2
+                        centerX: progressIndicator.width / 2
+                        radiusY: progressIndicator.height / 2 - Appearance.padding.small / 2
+                        centerY: progressIndicator.height / 2
+
+                        startAngle: -90
+                        sweepAngle: ((root.modelData.hints.value ?? 0) / 100) * 360
+
+                        Behavior on sweepAngle {
+                            Anim {
+                                easing.bezierCurve: Appearance.anim.curves.emphasizedDecel
+                            }
                         }
                     }
                 }
@@ -317,12 +361,12 @@ StyledRect {
                 implicitHeight: expandIcon.height
 
                 StateLayer {
-                    radius: Appearance.rounding.full
-                    color: root.modelData.urgency === NotificationUrgency.Critical ? Colours.palette.m3onSecondaryContainer : Colours.palette.m3onSurface
-
                     function onClicked() {
                         root.expanded = !root.expanded;
                     }
+
+                    radius: Appearance.rounding.full
+                    color: root.modelData.urgency === NotificationUrgency.Critical ? Colours.palette.m3onSecondaryContainer : Colours.palette.m3onSurface
                 }
 
                 MaterialIcon {
@@ -345,7 +389,7 @@ StyledRect {
                 anchors.rightMargin: Appearance.spacing.small
 
                 animate: true
-                textFormat: Text.MarkdownText
+                textFormat: root.bodyTextFormat
                 text: bodyPreviewMetrics.elidedText
                 color: Colours.palette.m3onSurfaceVariant
                 font.pointSize: Appearance.font.size.small
@@ -376,7 +420,7 @@ StyledRect {
                 anchors.rightMargin: Appearance.spacing.small
 
                 animate: true
-                textFormat: Text.MarkdownText
+                textFormat: root.bodyTextFormat
                 text: root.modelData.body
                 color: Colours.palette.m3onSurfaceVariant
                 font.pointSize: Appearance.font.size.small
@@ -416,6 +460,7 @@ StyledRect {
                 Action {
                     modelData: QtObject {
                         readonly property string text: qsTr("Close")
+
                         function invoke(): void {
                             root.modelData.close();
                         }
@@ -447,12 +492,12 @@ StyledRect {
         implicitHeight: actionText.height + Appearance.padding.small * 2
 
         StateLayer {
-            radius: Appearance.rounding.full
-            color: root.modelData.urgency === NotificationUrgency.Critical ? Colours.palette.m3onSecondary : Colours.palette.m3onSurface
-
             function onClicked(): void {
                 action.modelData.invoke();
             }
+
+            radius: Appearance.rounding.full
+            color: root.modelData.urgency === NotificationUrgency.Critical ? Colours.palette.m3onSecondary : Colours.palette.m3onSurface
         }
 
         StyledText {
