@@ -40,7 +40,7 @@ StyledRect {
         }
         return {
             count,
-            img: Quickshell.shellPath("assets/goon.jpg"),
+            img,
             icon,
             urgency: hasCritical ? NotificationUrgency.Critical : hasNormal ? NotificationUrgency.Normal : NotificationUrgency.Low
         };

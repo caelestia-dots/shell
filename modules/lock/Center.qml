@@ -2,7 +2,6 @@ pragma ComponentBehavior: Bound
 
 import QtQuick
 import QtQuick.Layouts
-import Quickshell
 import qs.components
 import qs.components.controls
 import qs.components.images
@@ -106,7 +105,7 @@ ColumnLayout {
             id: pfp
 
             anchors.fill: parent
-            path: Quickshell.shellPath("assets/goon.jpg")
+            path: `${Paths.home}/.face`
         }
     }
 

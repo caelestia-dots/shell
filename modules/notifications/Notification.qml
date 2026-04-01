@@ -16,7 +16,7 @@ StyledRect {
     id: root
 
     required property NotifData modelData
-    readonly property bool hasImage: true // modelData.image.length > 0
+    readonly property bool hasImage: modelData.image.length > 0
     readonly property bool hasAppIcon: modelData.appIcon.length > 0
     readonly property int bodyTextFormat: /[<*_`#\[\]]/.test(modelData.body) ? Text.MarkdownText : Text.PlainText
     readonly property int nonAnimHeight: summary.implicitHeight + (root.expanded ? appName.height + body.height + actions.height + actions.anchors.topMargin : bodyPreview.height) + inner.anchors.margins * 2
@@ -125,7 +125,7 @@ StyledRect {
 
                     Image {
                         anchors.fill: parent
-                        source: Quickshell.shellPath("assets/goon.jpg")
+                        source: Qt.resolvedUrl(root.modelData.image)
                         fillMode: Image.PreserveAspectCrop
                         sourceSize.width: Config.notifs.sizes.image
                         sourceSize.height: Config.notifs.sizes.image

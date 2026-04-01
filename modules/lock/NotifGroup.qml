@@ -38,7 +38,7 @@ StyledRect {
             urgency: hasCritical ? "critical" : hasNormal ? "normal" : "low"
         };
     }
-    readonly property string image: Quickshell.shellPath("assets/goon.jpg")
+    readonly property string image: props.img
     readonly property string appIcon: props.icon
     readonly property string urgency: props.urgency
 

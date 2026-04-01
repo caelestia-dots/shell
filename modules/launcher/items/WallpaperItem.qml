@@ -1,5 +1,4 @@
 import QtQuick
-import Quickshell
 import Caelestia.Models
 import qs.components
 import qs.components.effects
@@ -65,7 +64,7 @@ Item {
         }
 
         CachingImage {
-            path: Quickshell.shellPath("assets/goon.jpg")
+            path: root.modelData.path
             smooth: !root.PathView.view.moving
             cache: true
 

@@ -20,14 +20,7 @@ Searcher {
     Variants {
         id: variants
 
-        model: [
-            {
-                name: "Gacha",
-                description: "Play a fun gacha game",
-                icon: "casino",
-                command: ["gacha"]
-            },
-            ...Config.launcher.actions.filter(a => (a.enabled ?? true) && (Config.launcher.enableDangerousActions || !(a.dangerous ?? false))),]
+        model: Config.launcher.actions.filter(a => (a.enabled ?? true) && (Config.launcher.enableDangerousActions || !(a.dangerous ?? false)))
 
         Action {}
     }
@@ -45,10 +38,7 @@ Searcher {
             if (command.length === 0)
                 return;
 
-            if (command[0] === "gacha") {
-                const urls = ["danbooru.donmai.us", "pixiv.net", "nikke-en.com"];
-                Qt.openUrlExternally("https://" + urls[Math.floor(Math.random() * urls.length)]);
-            } else if (command[0] === "autocomplete" && command.length > 1) {
+            if (command[0] === "autocomplete" && command.length > 1) {
                 list.search.text = `${Config.launcher.actionPrefix}${command[1]} `;
             } else if (command[0] === "setMode" && command.length > 1) {
                 list.visibilities.launcher = false;
