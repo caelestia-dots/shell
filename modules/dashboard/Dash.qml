@@ -126,8 +126,8 @@ GridLayout {
                 font.weight: 600
             }
 
-            Repeater { // qmllint disable missing-property
-                model: GCalendar.upcomingDash
+            Repeater {
+                model: GCalendar.upcomingDash // qmllint disable missing-property
 
                 RowLayout { // qmllint disable missing-property
                     id: eventRow
@@ -140,8 +140,8 @@ GridLayout {
                     Rectangle {
                         Layout.preferredWidth: 3
                         Layout.fillHeight: true
-                        radius: 1.5
-                        color: Colours.palette.m3tertiary
+                        radius: 1.5 // qmllint disable missing-property
+                        color: Colours.palette.m3tertiary // qmllint disable missing-property
                     }
 
                     ColumnLayout {
