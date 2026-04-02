@@ -30,9 +30,9 @@ Singleton {
         running: true
         command: Config.bar.mail.fetchCommand
         environment: ({
-            LANG: "C.UTF-8",
-            LC_ALL: "C.UTF-8"
-        })
+                LANG: "C.UTF-8",
+                LC_ALL: "C.UTF-8"
+            })
         stdout: StdioCollector {
             onStreamFinished: {
                 try {
@@ -41,9 +41,10 @@ Singleton {
                     // WARN: render glyph failed err=9e face=0x7f989de17600, glyph=891
                     // WARN: QFontEngine: Glyph rendered in unknown pixel_mode=0
                     const stripEmoji = str => str.replace(/\p{Emoji_Presentation}/gu, '').trim();
-                    const unreadEmails = json
-                      .filter(m => m && m.authors && m.subject)
-                      .map(m => ({ author: m.authors, subject: stripEmoji(m.subject) }));
+                    const unreadEmails = json.filter(m => m && m.authors && m.subject).map(m => ({
+                                author: m.authors,
+                                subject: stripEmoji(m.subject)
+                            }));
                     root.unreadEmails = unreadEmails;
                 } catch (e) {
                     console.error("Failed to parse mail output:", e.message);
