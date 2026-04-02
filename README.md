@@ -341,6 +341,13 @@ default, you must create it manually.
             "showDate": false,
             "showIcon": true
         },
+        "mail": {
+            "enabled": false,
+            "showNumber": true,
+            "emailsNumber": 5,
+            "fetchCommand": ["notmuch", "search", "--format=json", "--output=summary", "tag:unread", "-tag:trash"],
+            "clickCommand": ["ghostty", "--title=NeomuttFloat", "-e", "neomutt"]
+        },
         "dragThreshold": 20,
         "entries": [
             {
@@ -365,6 +372,10 @@ default, you must create it manually.
             },
             {
                 "id": "tray",
+                "enabled": true
+            },
+            {
+                "id": "mail",
                 "enabled": true
             },
             {
