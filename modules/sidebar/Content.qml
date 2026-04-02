@@ -96,7 +96,7 @@ Item {
                             spacing: Appearance.spacing.small
 
                             Rectangle {
-                                width: 3
+                                Layout.preferredWidth: 3
                                 Layout.fillHeight: true
                                 radius: 1.5
                                 color: Colours.palette.m3tertiary

@@ -126,10 +126,10 @@ GridLayout {
                 font.weight: 600
             }
 
-            Repeater {
+            Repeater { // qmllint disable missing-property
                 model: GCalendar.upcomingDash
 
-                RowLayout {
+                RowLayout { // qmllint disable missing-property
                     id: eventRow
 
                     required property var modelData
@@ -138,7 +138,7 @@ GridLayout {
                     spacing: Appearance.spacing.small
 
                     Rectangle {
-                        width: 3
+                        Layout.preferredWidth: 3
                         Layout.fillHeight: true
                         radius: 1.5
                         color: Colours.palette.m3tertiary
@@ -154,7 +154,7 @@ GridLayout {
                             color: Colours.palette.m3onSurface
                             font.pointSize: Appearance.font.size.small
                             font.weight: 500
-                            elide: Text.ElideRight
+                            elide: Text.ElideRight // qmllint disable unqualified
                         }
 
                         StyledText {
@@ -167,7 +167,7 @@ GridLayout {
                             }
                             color: Colours.palette.m3onSurfaceVariant
                             font.pointSize: Appearance.font.size.small * 0.9
-                            elide: Text.ElideRight
+                            elide: Text.ElideRight // qmllint disable unqualified
                         }
                     }
                 }
