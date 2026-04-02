@@ -158,7 +158,7 @@ ColumnLayout {
             DelegateChoice {
                 roleValue: "mail"
                 delegate: WrappedLoader {
-                    visible: !root.fullscreen
+                    visible: !root.fullscreen && Config.bar.mail.enabled
                     sourceComponent: Mail {}
                 }
             }
