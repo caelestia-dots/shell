@@ -36,6 +36,12 @@ ColumnLayout {
                             interface: p.interface,
                             enabled: (i === targetIndex)
                         };
+                        if (p.connectCmd && p.connectCmd.length > 0) {
+                            newProvider.connectCmd = p.connectCmd;
+                        }
+                        if (p.disconnectCmd && p.disconnectCmd.length > 0) {
+                            newProvider.disconnectCmd = p.disconnectCmd;
+                        }
                         providers.push(newProvider);
                     } else {
                         providers.push(p);
@@ -226,6 +232,12 @@ ColumnLayout {
                                                     interface: p.interface,
                                                     enabled: (i === clickedIndex)
                                                 };
+                                                if (p.connectCmd && p.connectCmd.length > 0) {
+                                                    newProvider.connectCmd = p.connectCmd;
+                                                }
+                                                if (p.disconnectCmd && p.disconnectCmd.length > 0) {
+                                                    newProvider.disconnectCmd = p.disconnectCmd;
+                                                }
                                                 providers.push(newProvider);
                                             } else {
                                                 providers.push(p);
@@ -265,7 +277,20 @@ ColumnLayout {
                                 const providers = [];
                                 for (let i = 0; i < Config.utilities.vpn.provider.length; i++) {
                                     if (i !== modelData.index) {
-                                        providers.push(Config.utilities.vpn.provider[i]);
+                                        const p = Config.utilities.vpn.provider[i];
+                                        const reconstructed = {
+                                            name: p.name,
+                                            displayName: p.displayName,
+                                            interface: p.interface,
+                                            enabled: p.enabled
+                                        };
+                                        if (p.connectCmd && p.connectCmd.length > 0) {
+                                            reconstructed.connectCmd = p.connectCmd;
+                                        }
+                                        if (p.disconnectCmd && p.disconnectCmd.length > 0) {
+                                            reconstructed.disconnectCmd = p.disconnectCmd;
+                                        }
+                                        providers.push(reconstructed);
                                     }
                                 }
                                 Config.utilities.vpn.provider = providers;

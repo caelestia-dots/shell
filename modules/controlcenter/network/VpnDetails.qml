@@ -72,6 +72,13 @@ DeviceDetails {
                                         newProvider.enabled = (i === index) ? false : (p.enabled !== false);
                                     }
 
+                                    if (p.connectCmd && p.connectCmd.length > 0) {
+                                        newProvider.connectCmd = p.connectCmd;
+                                    }
+                                    if (p.disconnectCmd && p.disconnectCmd.length > 0) {
+                                        newProvider.disconnectCmd = p.disconnectCmd;
+                                    }
+
                                     providers.push(newProvider);
                                 } else {
                                     providers.push(p);
@@ -504,21 +511,31 @@ DeviceDetails {
                                 const newProvider = {
                                     displayName: editVpnDialog.displayName || editVpnDialog.interfaceName,
                                     enabled: wasEnabled,
-                                    iface: editVpnDialog.interfaceName,
-                                    name: editVpnDialog.providerName,
-                                    connectCmd: hasCommands ? editVpnDialog.connectCmd.split(" ").filter(s => s.length > 0) : undefined,
-                                    disconnectCmd: hasCommands ? editVpnDialog.disconnectCmd.split(" ").filter(s => s.length > 0) : undefined
+                                    interface: editVpnDialog.interfaceName,
+                                    name: editVpnDialog.providerName
                                 };
 
-                                // Remove undefined properties
-                                if (!hasCommands) {
-                                    delete newProvider.connectCmd;
-                                    delete newProvider.disconnectCmd;
+                                if (hasCommands) {
+                                    newProvider.connectCmd = editVpnDialog.connectCmd.split(" ").filter(s => s.length > 0);
+                                    newProvider.disconnectCmd = editVpnDialog.disconnectCmd.split(" ").filter(s => s.length > 0);
                                 }
 
                                 providers.push(newProvider);
                             } else {
-                                providers.push(Config.utilities.vpn.provider[i]);
+                                const p = Config.utilities.vpn.provider[i];
+                                const reconstructed = {
+                                    displayName: p.displayName,
+                                    enabled: p.enabled,
+                                    interface: p.interface,
+                                    name: p.name
+                                };
+                                if (p.connectCmd && p.connectCmd.length > 0) {
+                                    reconstructed.connectCmd = p.connectCmd;
+                                }
+                                if (p.disconnectCmd && p.disconnectCmd.length > 0) {
+                                    reconstructed.disconnectCmd = p.disconnectCmd;
+                                }
+                                providers.push(reconstructed);
                             }
                         }
 
