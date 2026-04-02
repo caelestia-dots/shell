@@ -34,8 +34,8 @@ Column {
             }
 
             StyledText {
-              text: emails.modelData?.author + ": " ?? ""
-              anchors.verticalCenter: parent.verticalCenter
+                text: emails.modelData?.author + ": " ?? ""
+                anchors.verticalCenter: parent.verticalCenter
             }
             StyledText {
                 text: emails.modelData?.subject ?? ""
