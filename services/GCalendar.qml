@@ -50,9 +50,7 @@ Singleton {
         if (!isoStr || isoStr.length === 10)
             return qsTr("All day");
         const d = new Date(isoStr);
-        return Config.services.useTwelveHourClock
-            ? Qt.formatDateTime(d, "h:mm AP")
-            : Qt.formatDateTime(d, "hh:mm");
+        return Config.services.useTwelveHourClock ? Qt.formatDateTime(d, "h:mm AP") : Qt.formatDateTime(d, "hh:mm");
     }
 
     function formatEventTime(ev: var, upcomingHours: int): string {
@@ -106,12 +104,12 @@ Singleton {
 
     function saveCache(): void {
         cache.setText(JSON.stringify(root.events.map(ev => ({
-            summary: ev.summary,
-            start: ev.start,
-            end: ev.end,
-            location: ev.location,
-            calendar: ev.calendar
-        }))));
+                    summary: ev.summary,
+                    start: ev.start,
+                    end: ev.end,
+                    location: ev.location,
+                    calendar: ev.calendar
+                }))));
     }
 
     function fetch(): void {
@@ -143,11 +141,7 @@ Singleton {
     Process {
         id: fetchProc
 
-        command: [
-            Config.services.calendar.command, "calendar", "+agenda",
-            "--days", String(Config.services.calendar.agendaDays),
-            "--format", "json"
-        ]
+        command: [Config.services.calendar.command, "calendar", "+agenda", "--days", String(Config.services.calendar.agendaDays), "--format", "json"]
         stdout: StdioCollector {
             onStreamFinished: {
                 try {
@@ -178,13 +172,7 @@ Singleton {
                     if (!root.notifiedSet.has(key)) {
                         root.notifiedSet.add(key);
                         const timeStr = root.formatTime(ev.start);
-                        Quickshell.execDetached([
-                            "notify-send", "-a", "caelestia-shell",
-                            "-u", "normal",
-                            "-i", "calendar",
-                            ev.summary,
-                            `Starts at ${timeStr}${ev.location ? " - " + ev.location : ""}`
-                        ]);
+                        Quickshell.execDetached(["notify-send", "-a", "caelestia-shell", "-u", "normal", "-i", "calendar", ev.summary, `Starts at ${timeStr}${ev.location ? " - " + ev.location : ""}`]);
                     }
                 }
             }
