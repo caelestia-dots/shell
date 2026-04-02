@@ -29,10 +29,12 @@ Singleton {
 
         running: true
         command: Config.bar.mail.fetchCommand
+        // qmllint disable incompatible-type
         environment: ({
                 LANG: "C.UTF-8",
                 LC_ALL: "C.UTF-8"
             })
+        // qmllint enable incompatible-type
         stdout: StdioCollector {
             onStreamFinished: {
                 try {
