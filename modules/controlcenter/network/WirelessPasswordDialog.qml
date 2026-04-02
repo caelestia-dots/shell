@@ -202,6 +202,11 @@ Item {
                         forceActiveFocus();
                     }
 
+                    if (event.key === Qt.Key_Escape) {
+                        event.accepted = false;
+                        closeDialog();
+                    }
+
                     if (connectButton.hasError && event.text && event.text.length > 0) {
                         connectButton.hasError = false;
                     }
@@ -219,6 +224,10 @@ Item {
                         }
                         event.accepted = true;
                     } else if (event.text && event.text.length > 0) {
+                        if (event.key === Qt.Key_Tab) {
+                            event.accepted = false;
+                            return;
+                        }
                         passwordBuffer += event.text;
                         event.accepted = true;
                     }

@@ -136,7 +136,7 @@ Item {
 
                     onStatusChanged: {
                         if (status === Loader.Error) {
-                            console.error("[AppearancePane] Wallpaper loader error!");
+                            console.error(lc, "Wallpaper loader error!");
                         }
                     }
 
@@ -258,5 +258,12 @@ Item {
         }
 
         rightContent: appearanceRightContentComponent
+    }
+
+    LoggingCategory {
+        id: lc
+
+        name: "caelestia.qml.controlcenter.appearance"
+        defaultLogLevel: LoggingCategory.Info
     }
 }

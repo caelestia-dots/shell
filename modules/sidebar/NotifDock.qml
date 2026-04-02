@@ -2,7 +2,6 @@ pragma ComponentBehavior: Bound
 
 import QtQuick
 import QtQuick.Layouts
-import Quickshell
 import Quickshell.Widgets
 import qs.components
 import qs.components.containers
@@ -10,6 +9,7 @@ import qs.components.controls
 import qs.components.effects
 import qs.services
 import qs.config
+import qs.utils
 
 Item {
     id: root
@@ -96,7 +96,7 @@ Item {
 
                 Image {
                     asynchronous: true
-                    source: Quickshell.shellPath("assets/dino.png")
+                    source: Paths.absolutePath(Config.paths.noNotifsPic)
                     fillMode: Image.PreserveAspectFit
                     sourceSize.width: clipRect.width * 0.8
 

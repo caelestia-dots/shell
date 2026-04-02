@@ -110,10 +110,10 @@ Item {
                     return;
 
                 if (event.modifiers & Qt.ControlModifier) {
-                    if (event.key === Qt.Key_J) {
+                    if (event.key === Qt.Key_J || event.key === Qt.Key_N) {
                         list.currentList?.incrementCurrentIndex();
                         event.accepted = true;
-                    } else if (event.key === Qt.Key_K) {
+                    } else if (event.key === Qt.Key_K || event.key === Qt.Key_P) {
                         list.currentList?.decrementCurrentIndex();
                         event.accepted = true;
                     }

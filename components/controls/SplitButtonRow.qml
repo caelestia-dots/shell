@@ -12,7 +12,6 @@ StyledRect {
 
     required property string label
     property int expandedZ: 100
-    property bool enabled: true
 
     property alias menuItems: splitButton.menuItems
     property alias active: splitButton.active

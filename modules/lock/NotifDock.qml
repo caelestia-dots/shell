@@ -9,6 +9,7 @@ import qs.components.containers
 import qs.components.effects
 import qs.services
 import qs.config
+import qs.utils
 
 ColumnLayout {
     id: root
@@ -49,7 +50,7 @@ ColumnLayout {
 
                 Image {
                     asynchronous: true
-                    source: Qt.resolvedUrl(`${Quickshell.shellDir}/assets/dino.png`)
+                    source: Paths.absolutePath(Config.paths.lockNoNotifsPic)
                     fillMode: Image.PreserveAspectFit
                     sourceSize.width: clipRect.width * 0.8
 

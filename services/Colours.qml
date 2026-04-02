@@ -79,6 +79,21 @@ Singleton {
         Quickshell.execDetached(["caelestia", "scheme", "set", "--notify", "-m", mode]);
     }
 
+    function reloadHyprRules(): void {
+        const str = "keyword layerrule %1 %2, match:namespace caelestia-drawers";
+        Hypr.extras.batchMessage([str.arg("blur").arg(transparency.enabled ? 1 : 0), str.arg("ignore_alpha").arg(transparency.base - 0.03)]);
+    }
+
+    Component.onCompleted: debounceTimer.triggered()
+
+    Connections {
+        function onConfigReloaded(): void {
+            root.reloadHyprRules();
+        }
+
+        target: Hypr
+    }
+
     FileView {
         path: `${Paths.state}/scheme.json`
         watchChanges: true
@@ -92,10 +107,20 @@ Singleton {
         source: Wallpapers.current
     }
 
+    Timer {
+        id: debounceTimer
+
+        interval: 300
+        onTriggered: root.reloadHyprRules()
+    }
+
     component Transparency: QtObject {
         readonly property bool enabled: Appearance.transparency.enabled
-        readonly property real base: Appearance.transparency.base - (root.light ? 0.1 : 0)
+        readonly property real base: Math.max(0, Math.min(1, Appearance.transparency.base - (root.light ? 0.1 : 0)))
         readonly property real layers: Appearance.transparency.layers
+
+        onEnabledChanged: debounceTimer.restart()
+        onBaseChanged: debounceTimer.restart()
     }
 
     component M3TPalette: QtObject {

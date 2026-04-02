@@ -141,8 +141,10 @@ StyledRect {
                     roleValue: "vpn"
                     delegate: Toggle {
                         icon: "vpn_key"
-                        checked: VPN.connected
+                        checked: VPN.connected && VPN.status.state !== "needs-auth" && VPN.status.state !== "error"
                         enabled: !VPN.connecting
+                        toggle: VPN.status.state !== "needs-auth" && VPN.status.state !== "error"
+                        inactiveOnColour: Colours.palette.m3onSurfaceVariant
                         onClicked: VPN.toggle()
                     }
                 }

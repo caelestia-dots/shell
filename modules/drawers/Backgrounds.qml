@@ -15,14 +15,17 @@ Shape {
 
     required property Panels panels
     required property Item bar
+    required property real borderThickness
+    required property real borderRounding
 
     anchors.fill: parent
-    anchors.margins: Config.border.thickness
+    anchors.margins: root.borderThickness
     anchors.leftMargin: bar.implicitWidth
     preferredRendererType: Shape.CurveRenderer
 
     Osd.Background {
         wrapper: root.panels.osd // qmllint disable incompatible-type
+        rounding: Config.border.rounding
 
         startX: root.width - root.panels.session.width - root.panels.sidebar.width
         startY: (root.height - wrapper.height) / 2 - rounding
@@ -31,6 +34,7 @@ Shape {
     Notifications.Background {
         wrapper: root.panels.notifications // qmllint disable incompatible-type
         sidebar: sidebar
+        rounding: Config.border.rounding
 
         startX: root.width
         startY: 0
@@ -68,6 +72,7 @@ Shape {
     Utilities.Background {
         wrapper: root.panels.utilities // qmllint disable incompatible-type
         sidebar: sidebar
+        rounding: root.borderRounding
 
         startX: root.width
         startY: root.height
@@ -78,6 +83,7 @@ Shape {
 
         wrapper: root.panels.sidebar // qmllint disable incompatible-type
         panels: root.panels
+        rounding: root.borderRounding
 
         startX: root.width
         startY: root.panels.notifications.height

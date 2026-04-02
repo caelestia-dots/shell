@@ -4,7 +4,10 @@
 #include <QtQuick/qquickitemgrabresult.h>
 #include <qfuturewatcher.h>
 #include <qimage.h>
+#include <qloggingcategory.h>
 #include <qquickwindow.h>
+
+Q_LOGGING_CATEGORY(lcImageAnalyser, "caelestia.imageanalyser", QtInfoMsg)
 
 namespace caelestia {
 
@@ -134,6 +137,11 @@ void ImageAnalyser::update() {
 
     if (m_sourceItem) {
         const QSharedPointer<const QQuickItemGrabResult> grabResult = m_sourceItem->grabToImage();
+        if (!grabResult) {
+            QObject::connect(m_sourceItem, &QQuickItem::windowChanged, this, &ImageAnalyser::requestUpdate,
+                Qt::SingleShotConnection);
+            return;
+        }
         QObject::connect(grabResult.data(), &QQuickItemGrabResult::ready, this, [grabResult, this]() {
             m_futureWatcher->setFuture(QtConcurrent::run(&ImageAnalyser::analyse, grabResult->image(), m_rescaleSize));
         });
@@ -147,7 +155,7 @@ void ImageAnalyser::update() {
 
 void ImageAnalyser::analyse(QPromise<AnalyseResult>& promise, const QImage& image, int rescaleSize) {
     if (image.isNull()) {
-        qWarning() << "ImageAnalyser::analyse: image is null";
+        qCWarning(lcImageAnalyser) << "analyse: image is null";
         return;
     }
 

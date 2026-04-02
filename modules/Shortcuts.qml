@@ -1,3 +1,4 @@
+import QtQuick
 import Quickshell
 import Quickshell.Io
 import Caelestia
@@ -9,7 +10,7 @@ Scope {
     id: root
 
     property bool launcherInterrupted
-    readonly property bool hasFullscreen: Hypr.focusedWorkspace?.toplevels.values.some(t => t.lastIpcObject.fullscreen === 2) ?? false
+    readonly property bool hasFullscreen: Hypr.focusedWorkspace?.toplevels.values.some(t => t.lastIpcObject.fullscreen > 1) ?? false
 
     // qmllint disable unresolved-type
     CustomShortcut {
@@ -115,7 +116,7 @@ Scope {
                 const visibilities = Visibilities.getForActive();
                 visibilities[drawer] = !visibilities[drawer];
             } else {
-                console.warn(`[IPC] Drawer "${drawer}" does not exist`);
+                console.warn(lc, `Drawer "${drawer}" does not exist`);
             }
         }
 
@@ -153,5 +154,12 @@ Scope {
         }
 
         target: "toaster"
+    }
+
+    LoggingCategory {
+        id: lc
+
+        name: "caelestia.qml.shortcuts"
+        defaultLogLevel: LoggingCategory.Info
     }
 }

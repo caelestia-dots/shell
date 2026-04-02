@@ -2,14 +2,13 @@ import QtQuick
 import QtQuick.Shapes
 import qs.components
 import qs.services
-import qs.config
 
 ShapePath {
     id: root
 
     required property Wrapper wrapper
     required property var sidebar
-    readonly property real rounding: Config.border.rounding
+    required property real rounding
     readonly property bool flatten: wrapper.height < rounding * 2
     readonly property real roundingY: flatten ? wrapper.height / 2 : rounding
 
@@ -31,14 +30,14 @@ ShapePath {
         relativeY: root.wrapper.height - root.roundingY * 2
     }
     PathArc {
-        relativeX: root.sidebar.notifsRoundingX
+        relativeX: root.rounding
         relativeY: root.roundingY
-        radiusX: root.sidebar.notifsRoundingX
+        radiusX: root.rounding
         radiusY: Math.min(root.rounding, root.wrapper.height)
         direction: PathArc.Counterclockwise
     }
     PathLine {
-        relativeX: root.wrapper.height > 0 ? root.wrapper.width - root.rounding - root.sidebar.notifsRoundingX : root.wrapper.width
+        relativeX: root.wrapper.height > 0 ? root.wrapper.width - root.rounding * 2 : root.wrapper.width
         relativeY: 0
     }
     PathArc {

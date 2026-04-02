@@ -4,7 +4,10 @@
 #include "audioprovider.hpp"
 #include <cava/cavacore.h>
 #include <cstddef>
-#include <qdebug.h>
+#include <qloggingcategory.h>
+
+Q_LOGGING_CATEGORY(lcCava, "caelestia.services.cava", QtInfoMsg)
+Q_LOGGING_CATEGORY(lcCavaProcessor, "caelestia.services.cava.processor", QtInfoMsg)
 
 namespace caelestia::services {
 
@@ -57,7 +60,7 @@ void CavaProcessor::process() {
 
 void CavaProcessor::setBars(int bars) {
     if (bars < 0) {
-        qWarning() << "CavaProcessor::setBars: bars must be greater than 0. Setting to 0.";
+        qCWarning(lcCavaProcessor) << "setBars: bars must be greater than 0. Setting to 0.";
         bars = 0;
     }
 
@@ -109,7 +112,7 @@ int CavaProvider::bars() const {
 
 void CavaProvider::setBars(int bars) {
     if (bars < 0) {
-        qWarning() << "CavaProvider::setBars: bars must be greater than 0. Setting to 0.";
+        qCWarning(lcCava) << "setBars: bars must be greater than 0. Setting to 0.";
         bars = 0;
     }
 

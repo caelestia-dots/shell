@@ -96,10 +96,10 @@ Column {
                 return;
 
             if (event.modifiers & Qt.ControlModifier) {
-                if (event.key === Qt.Key_J && KeyNavigation.down) {
+                if ((event.key === Qt.Key_J || event.key === Qt.Key_N) && KeyNavigation.down) {
                     KeyNavigation.down.focus = true;
                     event.accepted = true;
-                } else if (event.key === Qt.Key_K && KeyNavigation.up) {
+                } else if ((event.key === Qt.Key_K || event.key === Qt.Key_P) && KeyNavigation.up) {
                     KeyNavigation.up.focus = true;
                     event.accepted = true;
                 }

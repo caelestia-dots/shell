@@ -168,7 +168,7 @@ Singleton {
 
     function executeCommand(args: list<string>, callback: var): void {
         const proc = commandProc.createObject(root);
-        proc.command = ["nmcli", ...args];
+        proc.cmdArgs = ["nmcli", ...args];
         proc.callback = callback;
 
         activeProcesses.push(proc);
@@ -181,7 +181,7 @@ Singleton {
         });
 
         Qt.callLater(() => {
-            proc.exec(proc.command);
+            proc.exec(proc.cmdArgs);
         });
     }
 
@@ -391,7 +391,7 @@ Singleton {
             }
 
             if (!result.success && root.pendingConnection && retries < maxRetries) {
-                console.warn("[NMCLI] Connection failed, retrying... (attempt " + (retries + 1) + "/" + maxRetries + ")");
+                console.warn(lc, "Connection failed, retrying... (attempt " + (retries + 1) + "/" + maxRetries + ")");
                 Qt.callLater(() => {
                     connectWireless(ssid, password, bssid, callback, retries + 1);
                 }, 1000);
@@ -417,7 +417,7 @@ Singleton {
                         loadSavedConnections(() => {});
                         activateConnection(ssid, callback);
                     } else {
-                        console.warn("[NMCLI] Connection profile creation failed, trying fallback...");
+                        console.warn(lc, "Connection profile creation failed, trying fallback...");
                         let fallbackCmd = [root.nmcliCommandDevice, root.nmcliCommandWifi, "connect", ssid, root.connectionParamPassword, password];
                         executeCommand(fallbackCmd, fallbackResult => {
                             if (callback)
@@ -840,7 +840,7 @@ Singleton {
             return false;
         }
 
-        if (!isConnectionCommand(proc.command) || !root.pendingConnection || !root.pendingConnection.callback) {
+        if (!isConnectionCommand(proc.cmdArgs) || !root.pendingConnection || !root.pendingConnection.callback) {
             return false;
         }
 
@@ -1117,7 +1117,7 @@ Singleton {
                         if (proc && proc.stderr && proc.stderr.text) {
                             const error = proc.stderr.text.trim();
                             if (error && error.length > 0) {
-                                if (root.isConnectionCommand(proc.command)) {
+                                if (root.isConnectionCommand(proc.cmdArgs)) {
                                     const needsPassword = root.detectPasswordRequired(error);
 
                                     if (needsPassword && !proc.callbackCalled && root.pendingConnection) {
@@ -1204,7 +1204,7 @@ Singleton {
                         if (proc && proc.stderr && proc.stderr.text) {
                             const error = proc.stderr.text.trim();
                             if (error && error.length > 0) {
-                                if (root.isConnectionCommand(proc.command)) {
+                                if (root.isConnectionCommand(proc.cmdArgs)) {
                                     const needsPassword = root.detectPasswordRequired(error);
 
                                     if (needsPassword && !proc.callbackCalled && root.pendingConnection && root.pendingConnection.callback) {
@@ -1277,11 +1277,18 @@ Singleton {
         }
     }
 
+    LoggingCategory {
+        id: lc
+
+        name: "caelestia.qml.services.nmcli"
+        defaultLogLevel: LoggingCategory.Info
+    }
+
     component CommandProcess: Process {
         id: proc
 
         property var callback: null
-        property list<string> command: []
+        property list<string> cmdArgs: []
         property bool callbackCalled: false
         property int exitCode: 0
 
@@ -1321,7 +1328,7 @@ Singleton {
                     const output = (stdoutCollector && stdoutCollector.text) ? stdoutCollector.text : "";
                     const error = (stderrCollector && stderrCollector.text) ? stderrCollector.text : "";
                     const success = exitCode === 0;
-                    const cmdIsConnection = isConnectionCommand(proc.command);
+                    const cmdIsConnection = isConnectionCommand(proc.cmdArgs);
 
                     if (root.handlePasswordRequired(proc, error, output, exitCode)) {
                         processFinished();

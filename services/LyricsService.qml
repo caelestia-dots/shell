@@ -17,22 +17,17 @@ Singleton {
     property bool isManualSeeking: false
     property bool lyricsVisible: Config.services.showLyrics
     property string backend: "Local"
+    property string preferredBackend: Config.services.lyricsBackend
     property real currentSongId: 0
-
+    property string loadedLocalFile: ""
     property real offset
+    property int currentRequestId: 0
+    property var lyricsMap: ({})
 
     readonly property string lyricsDir: Paths.absolutePath(Config.paths.lyricsDir)
     readonly property string lyricsMapFile: Paths.absolutePath(Config.paths.lyricsDir) + "/lyrics_map.json"
-
-    property int currentRequestId: 0
-
-    // The data source for the UI
     readonly property alias model: lyricsModel
     readonly property alias candidatesModel: fetchedCandidatesModel
-
-    property var lyricsMap: ({})
-
-    // shared headers for all NetEase requests
     readonly property var _netEaseHeaders: ({
             "User-Agent": "Mozilla/5.0 (X11; Linux x86_64; rv:120.0) Gecko/20100101 Firefox/120.0",
             "Referer": "https://music.163.com/"
@@ -83,14 +78,16 @@ Singleton {
 
     function _doLoadLyrics() {
         const meta = getMetadata();
-        if (!meta)
+        if (!meta) {
+            lyricsModel.clear();
+            root.currentIndex = -1;
             return;
+        }
 
         loading = true;
         lyricsModel.clear();
         currentIndex = -1;
         root.currentSongId = 0;
-        root.backend = "Local";
 
         root.currentRequestId++;
         let requestId = root.currentRequestId;
@@ -99,29 +96,47 @@ Singleton {
         let saved = root.lyricsMap[key];
         root.offset = saved?.offset ?? 0.0;
 
-        if (saved?.neteaseId && saved?.backend === "NetEase") {
+        if (root.preferredBackend === "NetEase") {
             root.backend = "NetEase";
-            root.currentSongId = saved.neteaseId;
-            fetchNetEaseLyrics(saved.neteaseId, requestId);
-            fetchNetEaseCandidates(meta.title, meta.artist, requestId);
+            fetchNetEase(meta.title, meta.artist, requestId);
             return;
         }
 
-        if (saved?.backend === "NetEase") {
-            fallbackTimer.restart();
+        if (root.preferredBackend === "Local") {
+            root.backend = "Local";
+            let cleanDir = lyricsDir.replace(/\/$/, "");
+            let flatPath = `${cleanDir}/${meta.artist} - ${meta.title}.lrc`;
+
+            // Search for files matching "Artist - Title.lrc" pattern
+            const artistStr = Array.isArray(meta.artist) ? meta.artist.join(", ") : String(meta.artist || "");
+            const titleStr = Array.isArray(meta.title) ? meta.title.join(", ") : String(meta.title || "");
+            const escapedTitle = titleStr.replace(/'/g, "'\\''");
+            const escapedArtist = artistStr.replace(/'/g, "'\\''");
+            findLyricsInSubdirs.command = ["sh", "-c", `find "${cleanDir}" -type f -iname "*${escapedArtist}*${escapedTitle}*.lrc" | head -n 1`];
+            findLyricsInSubdirs.requestId = requestId;
+            findLyricsInSubdirs.running = true;
+
+            lrcFile.path = "";
+            lrcFile.path = flatPath;
             return;
         }
 
+        // Auto mode: try local first
+        root.backend = "Local";
         let cleanDir = lyricsDir.replace(/\/$/, "");
-        let fullPath = `${cleanDir}/${meta.artist} - ${meta.title}.lrc`;
+        let flatPath = `${cleanDir}/${meta.artist} - ${meta.title}.lrc`;
+
+        const artistStr = Array.isArray(meta.artist) ? meta.artist.join(", ") : String(meta.artist || "");
+        const titleStr = Array.isArray(meta.title) ? meta.title.join(", ") : String(meta.title || "");
+        const escapedTitle = titleStr.replace(/'/g, "'\\''");
+        const escapedArtist = artistStr.replace(/'/g, "'\\''");
+        findLyricsInSubdirs.command = ["sh", "-c", `find "${cleanDir}" -type f -iname "*${escapedArtist}*${escapedTitle}*.lrc" | head -n 1`];
+        findLyricsInSubdirs.requestId = requestId;
+        findLyricsInSubdirs.running = true;
 
         lrcFile.path = "";
-        lrcFile.path = fullPath;
-        fetchNetEaseCandidates(meta.title, meta.artist, requestId); //to populate the list regardless
-
-        // if the file is missing, FileView will not fire onLoaded, so we arm the fallback timer here as a safety net. It is cancelled in onLoaded if the file loads successfully.
-        if (saved?.backend !== "Local")
-            fallbackTimer.restart();
+        lrcFile.path = flatPath;
+        fetchNetEaseCandidates(meta.title, meta.artist, requestId);
     }
 
     function updateModel(parsedArray) {
@@ -256,6 +271,13 @@ Singleton {
         seekTimer.restart();
     }
 
+    onPreferredBackendChanged: {
+        if (Config.services.lyricsBackend !== preferredBackend) {
+            Config.services.lyricsBackend = preferredBackend;
+            Config.save();
+        }
+    }
+
     ListModel {
         id: lyricsModel
     }
@@ -314,12 +336,15 @@ Singleton {
             let parsed = Lrc.parseLrc(text());
             if (parsed.length > 0) {
                 root.backend = "Local";
+                root.loadedLocalFile = path;
                 updateModel(parsed);
                 loading = false;
-            } else {
+            } else if (root.preferredBackend === "Local") {
+                // Local mode only - fail immediately
                 root.backend = "NetEase";
                 fallbackToOnline();
             }
+            // In Auto mode, let the Process onExited handle fallback
         }
     }
 
@@ -345,5 +370,36 @@ Singleton {
         id: saveLyricsMap
 
         command: ["sh", "-c", `mkdir -p "${root.lyricsDir}" && echo '${JSON.stringify(root.lyricsMap)}' > "${root.lyricsMapFile}"`]
+    }
+
+    Process {
+        id: findLyricsInSubdirs
+
+        property int requestId: -1
+        property bool foundFile: false
+
+        stdout: SplitParser {
+            onRead: data => {
+                if (findLyricsInSubdirs.requestId === root.currentRequestId) {
+                    const foundPath = data.trim();
+                    if (foundPath && foundPath.length > 0) {
+                        findLyricsInSubdirs.foundFile = true;
+                        fallbackTimer.stop();
+                        root.loadedLocalFile = foundPath;
+                        lrcFile.path = "";
+                        lrcFile.path = foundPath;
+                    }
+                }
+            }
+        }
+
+        onExited: (exitCode, exitStatus) => { // qmllint disable signal-handler-parameters
+            if (requestId === root.currentRequestId && !foundFile && root.preferredBackend === "Auto") {
+                if (lyricsModel.count === 0) {
+                    fallbackTimer.restart();
+                }
+            }
+            foundFile = false;
+        }
     }
 }

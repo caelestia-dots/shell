@@ -4,12 +4,13 @@ import QtQuick
 import QtQuick.Effects
 import qs.components
 import qs.services
-import qs.config
 
 Item {
     id: root
 
     required property Item bar
+    required property real borderThickness
+    required property real borderRounding
 
     anchors.fill: parent
 
@@ -36,9 +37,9 @@ Item {
 
         Rectangle {
             anchors.fill: parent
-            anchors.margins: Config.border.thickness
+            anchors.margins: root.borderThickness
             anchors.leftMargin: root.bar.implicitWidth
-            radius: Config.border.rounding
+            radius: root.borderRounding
         }
     }
 }

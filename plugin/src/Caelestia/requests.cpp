@@ -1,10 +1,13 @@
 #include "requests.hpp"
 
 #include <qjsvalueiterator.h>
+#include <qloggingcategory.h>
 #include <qnetworkaccessmanager.h>
 #include <qnetworkcookiejar.h>
 #include <qnetworkreply.h>
 #include <qnetworkrequest.h>
+
+Q_LOGGING_CATEGORY(lcRequests, "caelestia.requests", QtInfoMsg)
 
 namespace caelestia {
 
@@ -14,7 +17,7 @@ Requests::Requests(QObject* parent)
 
 void Requests::get(const QUrl& url, QJSValue onSuccess, QJSValue onError, QJSValue headers) const {
     if (!onSuccess.isCallable()) {
-        qWarning() << "Requests::get: onSuccess is not callable";
+        qCWarning(lcRequests) << "get: onSuccess is not callable";
         return;
     }
 
@@ -41,7 +44,7 @@ void Requests::get(const QUrl& url, QJSValue onSuccess, QJSValue onError, QJSVal
         } else if (onError.isCallable()) {
             onError.call({ reply->errorString() });
         } else {
-            qWarning() << "Requests::get: request failed with error" << reply->errorString();
+            qCWarning(lcRequests) << "get: request failed with error" << reply->errorString();
         }
 
         reply->deleteLater();

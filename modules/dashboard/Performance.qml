@@ -358,67 +358,60 @@ Item {
             anchors.left: parent.left
             anchors.top: parent.top
             anchors.bottom: parent.bottom
-            width: parent.width * heroCard.animatedUsage
+            implicitWidth: parent.width * heroCard.animatedUsage
             color: Qt.alpha(heroCard.accentColor, 0.15)
         }
 
-        ColumnLayout {
-            anchors.fill: parent
+        CardHeader {
+            anchors.left: parent.left
+            anchors.top: parent.top
             anchors.leftMargin: Appearance.padding.large
-            anchors.rightMargin: Appearance.padding.large
-            anchors.topMargin: Appearance.padding.normal
-            anchors.bottomMargin: Appearance.padding.normal
+            anchors.topMargin: Math.round(Appearance.padding.large * 1.2)
+
+            width: parent.width - anchors.leftMargin - usageColumn.anchors.rightMargin - usageLabel.width - Appearance.spacing.normal
+            icon: heroCard.icon
+            title: heroCard.title
+            accentColor: heroCard.accentColor
+        }
+
+        Column {
+            anchors.left: parent.left
+            anchors.right: parent.right
+            anchors.bottom: parent.bottom
+            anchors.margins: Math.round(Appearance.padding.large * 1.2)
+            anchors.bottomMargin: Math.round(Appearance.padding.large * 1.3)
+
             spacing: Appearance.spacing.small
 
-            CardHeader {
-                icon: heroCard.icon
-                title: heroCard.title
-                accentColor: heroCard.accentColor
+            Row {
+                spacing: Appearance.spacing.small
+
+                StyledText {
+                    text: heroCard.secondaryValue
+                    font.pointSize: Appearance.font.size.normal
+                    font.weight: Font.Medium
+                }
+
+                StyledText {
+                    text: heroCard.secondaryLabel
+                    font.pointSize: Appearance.font.size.small
+                    color: Colours.palette.m3onSurfaceVariant
+                    anchors.baseline: parent.children[0].baseline
+                }
             }
 
-            RowLayout {
-                Layout.fillWidth: true
-                Layout.fillHeight: true
-                spacing: Appearance.spacing.normal
-
-                Column {
-                    Layout.alignment: Qt.AlignBottom
-                    Layout.fillWidth: true
-                    spacing: Appearance.spacing.small
-
-                    Row {
-                        spacing: Appearance.spacing.small
-
-                        StyledText {
-                            text: heroCard.secondaryValue
-                            font.pointSize: Appearance.font.size.normal
-                            font.weight: Font.Medium
-                        }
-
-                        StyledText {
-                            text: heroCard.secondaryLabel
-                            font.pointSize: Appearance.font.size.small
-                            color: Colours.palette.m3onSurfaceVariant
-                            anchors.baseline: parent.children[0].baseline
-                        }
-                    }
-
-                    ProgressBar {
-                        width: parent.width * 0.5
-                        height: 6
-                        value: heroCard.tempProgress
-                        fgColor: heroCard.accentColor
-                        bgColor: Qt.alpha(heroCard.accentColor, 0.2)
-                    }
-                }
-
-                Item {
-                    Layout.fillWidth: true
-                }
+            ProgressBar {
+                implicitWidth: parent.width * 0.5
+                implicitHeight: 6
+                value: heroCard.tempProgress
+                fgColor: heroCard.accentColor
+                bgColor: Qt.alpha(heroCard.accentColor, 0.2)
             }
         }
 
         Column {
+            id: usageColumn
+
             anchors.right: parent.right
             anchors.verticalCenter: parent.verticalCenter
             anchors.margins: Appearance.padding.large
@@ -426,6 +419,8 @@ Item {
             spacing: 0
 
             StyledText {
+                id: usageLabel
+
                 anchors.right: parent.right
                 text: heroCard.mainLabel
                 font.pointSize: Appearance.font.size.normal

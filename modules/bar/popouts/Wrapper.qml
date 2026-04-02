@@ -22,7 +22,7 @@ Item {
     property alias currentName: popoutState.currentName
     property real currentCenter
     property alias hasCurrent: popoutState.hasCurrent
-    readonly property PopoutState state: popoutState
+    readonly property PopoutState popState: popoutState
 
     property string detachedMode
     property string queuedMode

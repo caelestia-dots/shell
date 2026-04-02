@@ -46,6 +46,7 @@ JsonObject {
 
     component Toasts: JsonObject {
         property bool configLoaded: true
+        property string fullscreen: "off"
         property bool chargingChanged: true
         property bool gameModeChanged: true
         property bool dndChanged: true
@@ -61,6 +62,6 @@ JsonObject {
 
     component Vpn: JsonObject {
         property bool enabled: false
-        property list<var> provider: ["netbird"]
+        property list<var> provider: []
     }
 }

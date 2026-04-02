@@ -1,6 +1,5 @@
 #include "service.hpp"
 
-#include <qdebug.h>
 #include <qpointer.h>
 
 namespace caelestia::services {
