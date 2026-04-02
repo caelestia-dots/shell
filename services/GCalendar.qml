@@ -1,10 +1,10 @@
 pragma Singleton
 
-import qs.config
-import qs.utils
+import QtQuick
 import Quickshell
 import Quickshell.Io
-import QtQuick
+import qs.config
+import qs.utils
 
 Singleton {
     id: root
@@ -36,6 +36,9 @@ Singleton {
     }
 
     property var notifiedSet: new Set()
+
+    // Initial fetch (refreshes cache in background)
+    Component.onCompleted: fetch()
 
     function hasEvent(date: date): bool {
         if (!enabled)
@@ -186,7 +189,4 @@ Singleton {
         repeat: true
         onTriggered: root.fetch()
     }
-
-    // Initial fetch (refreshes cache in background)
-    Component.onCompleted: fetch()
 }
