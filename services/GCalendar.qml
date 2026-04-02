@@ -37,9 +37,6 @@ Singleton {
 
     property var notifiedSet: new Set()
 
-    // Initial fetch (refreshes cache in background)
-    Component.onCompleted: fetch()
-
     function hasEvent(date: date): bool {
         if (!enabled)
             return false;
@@ -120,6 +117,9 @@ Singleton {
             return;
         fetchProc.running = true;
     }
+
+    // Initial fetch (refreshes cache in background)
+    Component.onCompleted: fetch()
 
     // Load cached events on startup
     FileView {
