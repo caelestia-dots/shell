@@ -33,6 +33,10 @@ Item {
         }
 
         Popout {
+            name: "mail"
+            sourceComponent: Mail {}
+        }
+        Popout {
             id: networkPopout
 
             name: "network"

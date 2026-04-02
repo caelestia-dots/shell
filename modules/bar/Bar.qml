@@ -73,6 +73,10 @@ ColumnLayout {
             popouts.currentName = id.toLowerCase();
             popouts.currentCenter = (ch.item as Item).mapToItem(root, 0, (ch.item as Item).implicitHeight / 2).y ?? 0;
             popouts.hasCurrent = true;
+        } else if (id === "mail" && MailService.unreadEmails.length > 0) {
+            popouts.currentName = id.toLowerCase();
+            popouts.currentCenter = (ch.item as Item).mapToItem(root, 0, (ch.item as Item).implicitHeight / 2).y ?? 0;
+            popouts.hasCurrent = true;
         }
     }
 
@@ -149,6 +153,13 @@ ColumnLayout {
                 delegate: WrappedLoader {
                     visible: !root.fullscreen
                     sourceComponent: Tray {}
+                }
+            }
+            DelegateChoice {
+                roleValue: "mail"
+                delegate: WrappedLoader {
+                    visible: !root.fullscreen && Config.bar.mail.enabled
+                    sourceComponent: Mail {}
                 }
             }
             DelegateChoice {

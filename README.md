@@ -214,6 +214,11 @@ default, you must create it manually.
 > such as modifying the size of individual items or changing constants in the code, there are some other
 > options which can be found in the source files in the `config` directory.
 
+> [!NOTE]
+> The mail component's `fetchCommand` must return JSON with an array of objects containing `authors` and `subject`
+> properties (compatible with `notmuch` JSON output format). If using a different email system, you'll need to
+> write a wrapper script that converts your email system's output to this format.
+
 <details><summary>Example</summary>
 
 ```json
@@ -341,6 +346,13 @@ default, you must create it manually.
             "showDate": false,
             "showIcon": true
         },
+        "mail": {
+            "enabled": false,
+            "showNumber": true,
+            "emailsNumber": 5,
+            "fetchCommand": ["notmuch", "search", "--format=json", "--output=summary", "tag:unread", "-tag:trash"],
+            "clickCommand": ["ghostty", "--title=NeomuttFloat", "-e", "neomutt"]
+        },
         "dragThreshold": 20,
         "entries": [
             {
@@ -365,6 +377,10 @@ default, you must create it manually.
             },
             {
                 "id": "tray",
+                "enabled": true
+            },
+            {
+                "id": "mail",
                 "enabled": true
             },
             {
