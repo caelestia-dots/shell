@@ -34,11 +34,11 @@ Column {
             }
 
             StyledText {
-              text: modelData?.author + ": " ?? ""
+              text: emails.modelData?.author + ": " ?? ""
               anchors.verticalCenter: parent.verticalCenter
             }
             StyledText {
-                text: modelData?.subject ?? ""
+                text: emails.modelData?.subject ?? ""
                 font.italic: true
                 anchors.verticalCenter: parent.verticalCenter
             } 
