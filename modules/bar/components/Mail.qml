@@ -65,7 +65,7 @@ StyledRect {
         StyledText {
             id: mailText
 
-            visible: Config.bar.mail.showNumber
+            visible: Config.bar.mail.showNumber && MailService.unreadEmails.length > 0
 
             Layout.alignment: Qt.AlignHCenter
 
