@@ -30,13 +30,18 @@ Column {
 
                 text: "mail"
                 color: Colours.palette.m3onSurface
+                anchors.verticalCenter: parent.verticalCenter
             }
 
             StyledText {
-                id: text
-
-                text: qsTr("%1").arg(modelData ?? "None")
+              text: modelData?.author + ": " ?? ""
+              anchors.verticalCenter: parent.verticalCenter
             }
+            StyledText {
+                text: modelData?.subject ?? ""
+                font.italic: true
+                anchors.verticalCenter: parent.verticalCenter
+            } 
         }
     }
 }
