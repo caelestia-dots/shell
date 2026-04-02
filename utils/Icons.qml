@@ -241,7 +241,6 @@ Singleton {
         }
         return icon;
     }
- 
     function getMailIcon(emails: real): string {
             if (emails == 0)
                 return "mark_email_read";

@@ -41,7 +41,7 @@ Column {
                 text: emails.modelData?.subject ?? ""
                 font.italic: true
                 anchors.verticalCenter: parent.verticalCenter
-            } 
+            }
         }
     }
 }

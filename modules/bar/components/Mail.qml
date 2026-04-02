@@ -21,7 +21,6 @@ StyledRect {
     clip: true
     implicitWidth: Config.bar.sizes.innerWidth
     implicitHeight: mailColumn.implicitHeight + Appearance.padding.normal * 2
- 
     visible: Config.bar.mail.enabled
     enabled: Config.bar.mail.enabled
 
