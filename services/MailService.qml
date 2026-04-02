@@ -29,10 +29,10 @@ Singleton {
 
         running: true
         command: Config.bar.mail.fetchCommand
-        environment: {
-            "LANG": "C",
-            "LC_ALL": "C"
-        }
+        environment: ({
+            LANG: "C.UTF-8",
+            LC_ALL: "C.UTF-8"
+        })
         stdout: StdioCollector {
             onStreamFinished: {
                 try {
