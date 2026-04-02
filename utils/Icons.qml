@@ -76,8 +76,7 @@ Singleton {
             RasterGraphics: "photo_library",
             TV: "tv",
             System: "host",
-            Office: "content_paste",
-            Mail: "mail"
+            Office: "content_paste"
         })
 
     // Checks if a name matches an icon config. Icon configs can have the following keys:
