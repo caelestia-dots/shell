@@ -1,8 +1,8 @@
 pragma Singleton
 
+import QtQuick
 import Quickshell
 import Quickshell.Io
-import QtQuick
 import qs.config
 
 Singleton {
@@ -29,10 +29,10 @@ Singleton {
 
         running: true
         command: Config.bar.mail.fetchCommand
-        environment: ({
-                LANG: "C",
-                LC_ALL: "C"
-            })
+        environment: {
+            "LANG": "C",
+            "LC_ALL": "C"
+        }
         stdout: StdioCollector {
             onStreamFinished: {
                 try {
