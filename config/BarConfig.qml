@@ -11,6 +11,7 @@ JsonObject {
     property Tray tray: Tray {}
     property Status status: Status {}
     property Clock clock: Clock {}
+    property Mail mail: Mail {}
     property Sizes sizes: Sizes {}
     property list<string> excludedScreens: []
 
@@ -37,6 +38,10 @@ JsonObject {
         },
         {
             id: "tray",
+            enabled: true
+        },
+        {
+            id: "mail",
             enabled: true
         },
         {
@@ -116,6 +121,13 @@ JsonObject {
         property bool background: false
         property bool showDate: false
         property bool showIcon: true
+    }
+
+    component Mail: JsonObject {
+        property bool enabled: false
+        property bool showNumber: true
+        property list<string> fetchCommand: ["notmuch", "search", "--format=json", "--output=summary", "tag:unread", "-tag:trash"]
+        property list<string> clickCommand: ["ghostty", "--title=NeomuttFloat", "-e", "neomutt"]
     }
 
     component Sizes: JsonObject {

@@ -76,7 +76,8 @@ Singleton {
             RasterGraphics: "photo_library",
             TV: "tv",
             System: "host",
-            Office: "content_paste"
+            Office: "content_paste",
+            Mail: "mail"
         })
 
     // Checks if a name matches an icon config. Icon configs can have the following keys:
@@ -240,4 +241,14 @@ Singleton {
         }
         return icon;
     }
+ 
+    function getMailIcon(emails: real): string {
+            if (emails == 0)
+                return "mark_email_read";
+            if (emails == 1)
+                return "mail";
+            if (emails > 1)
+                return "stacked_email";
+            return "mail";
+        }
 }
