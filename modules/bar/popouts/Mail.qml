@@ -13,7 +13,7 @@ Column {
 
     Repeater {
         model: ScriptModel {
-            values: MailService.unreadEmails.slice(0,5)
+            values: MailService.unreadEmails.slice(0, Math.min(Config.bar.mail.emailsShown, 15))
         }
 
         Row {

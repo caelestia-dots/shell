@@ -126,6 +126,7 @@ JsonObject {
     component Mail: JsonObject {
         property bool enabled: false
         property bool showNumber: true
+        property int emailsShown: 5
         property list<string> fetchCommand: ["notmuch", "search", "--format=json", "--output=summary", "tag:unread", "-tag:trash"]
         property list<string> clickCommand: ["ghostty", "--title=NeomuttFloat", "-e", "neomutt"]
     }

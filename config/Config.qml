@@ -209,6 +209,7 @@ Singleton {
             mail: {
                 enabled: bar.mail.enabled,
                 showNumber: bar.email.showNumber,
+                emailsShown: bar.email.emailsShown,
                 fetchCommand: bar.mail.fetchCommand,
                 clickCommand: bar.mail.clickCommand
             },
