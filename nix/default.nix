@@ -34,7 +34,13 @@
   extraRuntimeDeps ? [],
 }: let
   version = "1.0.0";
-
+  material-symbols-fix = material-symbols.overrideAttrs (attrs: {
+    postInstall = ''
+      ln -sf "$out/share/fonts/TTF/MaterialSymbolsRounded.ttf" "$out/share/fonts/TTF/MaterialSymbolsRounded[FILL,GRAD,opsz,wght].ttf"
+      ln -sf "$out/share/fonts/TTF/MaterialSymbolsOutlined.ttf" "$out/share/fonts/TTF/MaterialSymbolsOutlined[FILL,GRAD,opsz,wght].ttf"
+      ln -sf "$out/share/fonts/TTF/MaterialSymbolsSharp.ttf" "$out/share/fonts/TTF/MaterialSymbolsSharp[FILL,GRAD,opsz,wght].ttf"
+    '';
+  });
   runtimeDeps =
     [
       fish
@@ -48,12 +54,13 @@
       libqalculate
       bash
       hyprland
+      material-symbols-fix
     ]
     ++ extraRuntimeDeps
     ++ lib.optional withCli caelestia-cli;
 
   fontconfig = makeFontsConf {
-    fontDirectories = [material-symbols rubik nerd-fonts.caskaydia-cove];
+    fontDirectories = [material-symbols-fix rubik nerd-fonts.caskaydia-cove];
   };
 
   cmakeBuildType =
