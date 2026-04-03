@@ -15,6 +15,7 @@ ColumnLayout {
 
     required property PopoutState popouts
 
+    width: 300
     spacing: Appearance.spacing.small
 
     StyledText {
@@ -94,17 +95,18 @@ ColumnLayout {
                 text: Icons.getBluetoothIcon(device.modelData.icon)
             }
 
-            MaterialIcon {
-                visible: device.modelData.state === BluetoothDeviceState.Connected // qmllint disable unresolved-type
-                text: Icons.getBatteryIcon(device.modelData.batteryAvailable ? device.modelData.battery * 100 : -1)
-                color: device.modelData.battery < 0.2 ? Colours.palette.m3error : Colours.palette.m3onSurfaceVariant
-            }
-
             StyledText {
                 Layout.leftMargin: Appearance.spacing.small / 2
                 Layout.rightMargin: Appearance.spacing.small / 2
                 Layout.fillWidth: true
                 text: device.modelData.name
+                elide: Text.ElideRight
+            }
+
+            MaterialIcon {
+                visible: device.modelData.state === BluetoothDeviceState.Connected  // qmllint disable unresolved-type
+                text: Icons.getBatteryIcon(device.modelData.batteryAvailable ? device.modelData.battery * 100 : -1)
+                color: device.modelData.battery < 0.2 ? Colours.palette.m3error : Colours.palette.m3onSurfaceVariant
             }
 
             StyledRect {
@@ -147,6 +149,7 @@ ColumnLayout {
             }
 
             Loader {
+                visible: status === Loader.Ready
                 asynchronous: true
                 active: device.modelData.bonded
                 sourceComponent: Item {
