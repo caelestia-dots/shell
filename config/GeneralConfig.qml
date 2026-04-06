@@ -29,7 +29,7 @@ JsonObject {
             },
             {
                 timeout: 600,
-                idleAction: ["systemctl", "hybrid-sleep"]
+                idleAction: ["systemctl", "suspend"]
             }
         ]
     }

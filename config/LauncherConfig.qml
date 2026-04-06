@@ -115,8 +115,8 @@ JsonObject {
         {
             name: "Sleep",
             icon: "bedtime",
-            description: "Hybrid sleep (suspend + save to disk)",
-            command: ["systemctl", "hybrid-sleep"],
+            description: "Suspend to RAM",
+            command: ["systemctl", "suspend"],
             enabled: true,
             dangerous: false
         },

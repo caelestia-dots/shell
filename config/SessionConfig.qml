@@ -22,7 +22,7 @@ JsonObject {
         property list<string> shutdown: ["systemctl", "poweroff"]
         property list<string> hibernate: ["systemctl", "hibernate"]
         property list<string> reboot: ["systemctl", "reboot"]
-        property list<string> sleep: ["systemctl", "hybrid-sleep"]
+        property list<string> sleep: ["systemctl", "suspend"]
     }
 
     component Sizes: JsonObject {
