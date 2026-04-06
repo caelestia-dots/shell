@@ -14,6 +14,7 @@ JsonObject {
         property string shutdown: "power_settings_new"
         property string hibernate: "downloading"
         property string reboot: "cached"
+        property string sleep: "bedtime"
     }
 
     component Commands: JsonObject {
@@ -21,6 +22,7 @@ JsonObject {
         property list<string> shutdown: ["systemctl", "poweroff"]
         property list<string> hibernate: ["systemctl", "hibernate"]
         property list<string> reboot: ["systemctl", "reboot"]
+        property list<string> sleep: ["systemctl", "hybrid-sleep"]
     }
 
     component Sizes: JsonObject {
