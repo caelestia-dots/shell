@@ -26,12 +26,12 @@ ColumnLayout {
             model: Weather.forecast
 
             DailyForecastItem {}
-
         }
-
     }
 
     component DailyForecastItem: StyledRect {
+        id: dailyForecastItem
+
         required property int index
         required property var modelData
 
@@ -55,7 +55,7 @@ ColumnLayout {
 
             StyledText {
                 Layout.alignment: Qt.AlignHCenter
-                text: index === 0 ? qsTr("Today") : new Date(date).toLocaleDateString(Qt.locale(), "ddd")
+                text: dailyForecastItem.index === 0 ? qsTr("Today") : new Date(dailyForecastItem.date).toLocaleDateString(Qt.locale(), "ddd")
                 font.pointSize: Appearance.font.size.normal
                 font.weight: 600
                 color: Colours.palette.m3primary
@@ -64,7 +64,7 @@ ColumnLayout {
             StyledText {
                 Layout.topMargin: -Appearance.spacing.small / 2
                 Layout.alignment: Qt.AlignHCenter
-                text: new Date(date).toLocaleDateString(Qt.locale(), "MMM d")
+                text: new Date(dailyForecastItem.date).toLocaleDateString(Qt.locale(), "MMM d")
                 font.pointSize: Appearance.font.size.small
                 opacity: 0.7
                 color: Colours.palette.m3onSurfaceVariant
@@ -72,7 +72,7 @@ ColumnLayout {
 
             MaterialIcon {
                 Layout.alignment: Qt.AlignHCenter
-                text: icon
+                text: dailyForecastItem.icon
                 font.pointSize: Appearance.font.size.extraLarge
                 color: Colours.palette.m3secondary
             }
@@ -83,23 +83,19 @@ ColumnLayout {
 
                 StyledText {
                     Layout.alignment: Qt.AlignHCenter
-                    text: `${Config.services.useFahrenheit ? maxTempF : maxTempC}°`
+                    text: `${Config.services.useFahrenheit ? dailyForecastItem.maxTempF : dailyForecastItem.maxTempC}°`
                     font.weight: 600
                     color: Colours.palette.m3tertiary
                 }
 
                 StyledText {
                     Layout.alignment: Qt.AlignHCenter
-                    text: `(${Config.services.useFahrenheit ? minTempF : minTempC}°)`
+                    text: `(${Config.services.useFahrenheit ? dailyForecastItem.minTempF : dailyForecastItem.minTempC}°)`
                     font.pointSize: Appearance.font.size.small
                     opacity: 0.7
                     color: Colours.palette.m3onSurfaceVariant
                 }
-
             }
-
         }
-
     }
-
 }

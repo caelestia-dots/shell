@@ -1,6 +1,5 @@
 import QtQuick
 import QtQuick.Layouts
-import qs.components
 import qs.config
 import qs.services
 import "weather"
@@ -18,14 +17,10 @@ Item {
         anchors.fill: parent
         spacing: Appearance.spacing.smaller
 
-        CityInfo{}
+        CityInfo {}
 
         BigInfo {}
 
         DailyForecast {}
-
-        HourlyForecast {}
-
     }
-
 }

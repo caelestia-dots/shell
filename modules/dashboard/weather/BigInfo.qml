@@ -4,84 +4,94 @@ import qs.components
 import qs.config
 import qs.services
 
-
 RowLayout {
     id: bigInfo
 
-    // anchors.centerIn: parent
-    spacing: Appearance.spacing.normal
-        implicitHeight: detailCardColumn + Appearance.padding.small * 2
+    spacing: Appearance.spacing.small
+    implicitHeight: hourlyForecast.implicitHeight
 
+    Layout.fillWidth: true
 
-    StyledRect {
+    // Main column
+    ColumnLayout {
+        spacing: Appearance.spacing.small
         Layout.fillWidth: true
-        height: detailCardColumn.implicitHeight
-        radius: Appearance.rounding.normal
-        color: Colours.tPalette.m3surfaceContainer
+        Layout.fillHeight: true
+        StyledRect {
+
+            radius: Appearance.rounding.normal
+            color: Colours.tPalette.m3surfaceContainer
+            Layout.fillWidth: true
+            Layout.fillHeight: true
+
+            RowLayout {
+                id: bigInfoRow
+
+                anchors.centerIn: parent
+                spacing: Appearance.spacing.large
+                Layout.fillWidth: true
+                Layout.fillHeight: true
+
+                MaterialIcon {
+                    Layout.alignment: Qt.AlignVCenter
+                    text: Weather.icon
+                    font.pointSize: Appearance.font.size.extraLarge * 3
+                    color: Colours.palette.m3secondary
+                    animate: true
+                }
+
+                ColumnLayout {
+                    Layout.alignment: Qt.AlignVCenter
+                    spacing: -Appearance.spacing.small
+
+                    StyledText {
+                        text: Weather.temp
+                        font.pointSize: Appearance.font.size.extraLarge * 2
+                        font.weight: 500
+                        color: Colours.palette.m3primary
+                    }
+
+                    StyledText {
+                        Layout.leftMargin: Appearance.padding.small
+                        text: Weather.description
+                        font.pointSize: Appearance.font.size.normal
+                        color: Colours.palette.m3onSurfaceVariant
+                    }
+                }
+            }
+        }
 
         RowLayout {
-            id: bigInfoRow
+            id: detailCardRow
 
-            anchors.centerIn: parent
-            spacing: Appearance.spacing.large
+            Layout.fillWidth: true
+            spacing: Appearance.spacing.smaller
 
-            MaterialIcon {
-                Layout.alignment: Qt.AlignVCenter
-                text: Weather.icon
-                font.pointSize: Appearance.font.size.extraLarge * 3
-                color: Colours.palette.m3secondary
-                animate: true
+            DetailCard {
+                icon: "water_drop"
+                label: "Humidity"
+                value: Weather.humidity + "%"
+                colour: Colours.palette.m3secondary
             }
 
-            ColumnLayout {
-                Layout.alignment: Qt.AlignVCenter
-                spacing: -Appearance.spacing.small
-
-                StyledText {
-                    text: Weather.temp
-                    font.pointSize: Appearance.font.size.extraLarge * 2
-                    font.weight: 500
-                    color: Colours.palette.m3primary
-                }
-
-                StyledText {
-                    Layout.leftMargin: Appearance.padding.small
-                    text: Weather.description
-                    font.pointSize: Appearance.font.size.normal
-                    color: Colours.palette.m3onSurfaceVariant
-                }
-
+            DetailCard {
+                icon: "thermostat"
+                label: "Feels Like"
+                value: Weather.feelsLike
+                colour: Colours.palette.m3primary
             }
 
+            DetailCard {
+                icon: "air"
+                label: "Wind"
+                value: Weather.windSpeed ? Weather.windSpeed + " km/h" : "--"
+                colour: Colours.palette.m3tertiary
+            }
         }
-
     }
 
-    ColumnLayout {
-        id: detailCardColumn
-        spacing: Appearance.spacing.smaller
-
-        DetailCard {
-            icon: "water_drop"
-            label: "Humidity"
-            value: Weather.humidity + "%"
-            colour: Colours.palette.m3secondary
-        }
-
-        DetailCard {
-            icon: "thermostat"
-            label: "Feels Like"
-            value: Weather.feelsLike
-            colour: Colours.palette.m3primary
-        }
-
-        DetailCard {
-            icon: "air"
-            label: "Wind"
-            value: Weather.windSpeed ? Weather.windSpeed + " km/h" : "--"
-            colour: Colours.palette.m3tertiary
-        }
-
+    HourlyForecast {
+        id: hourlyForecast
     }
 
     component DetailCard: StyledRect {
@@ -92,7 +102,7 @@ RowLayout {
         property string value
         property color colour
 
-        Layout.preferredWidth: 150
+        Layout.fillWidth: true
         Layout.preferredHeight: 60
         radius: Appearance.rounding.small
         color: Colours.tPalette.m3surfaceContainer
@@ -124,10 +134,7 @@ RowLayout {
                     font.weight: 600
                     horizontalAlignment: Text.AlignLeft
                 }
-
             }
-
         }
-
     }
 }
