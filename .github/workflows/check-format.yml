@@ -34,6 +34,5 @@ jobs:
       - name: Check C++ format
         shell: fish {0}
         run: |
-          for file in (string match -v 'build/*' **.cpp **.hpp)
-            clang-format $file | diff -u $file - || exit 1
-          end
+          find plugin extras -name '*.cpp' -o -name '*.hpp' \
+            | xargs clang-format --dry-run --Werror

@@ -1,11 +1,10 @@
 import QtQuick
 import QtQuick.Layouts
-import qs.config
 import qs.components
 import qs.services
+import qs.config
 
 ColumnLayout {
-
     StyledText {
         Layout.topMargin: Appearance.spacing.normal
         Layout.leftMargin: Appearance.padding.normal
@@ -18,11 +17,13 @@ ColumnLayout {
 
     RowLayout {
         id: dailyForecast
+
         Layout.fillWidth: true
         spacing: Appearance.spacing.smaller
 
         Repeater {
             id: dailyRepeater
+
             model: Weather.forecast
 
             DailyForecastItem {}

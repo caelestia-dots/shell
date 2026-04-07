@@ -1,8 +1,8 @@
 import QtQuick
 import QtQuick.Layouts
 import qs.components
-import qs.config
 import qs.services
+import qs.config
 
 RowLayout {
     id: bigInfo
@@ -17,8 +17,8 @@ RowLayout {
         spacing: Appearance.spacing.small
         Layout.fillWidth: true
         Layout.fillHeight: true
-        StyledRect {
 
+        StyledRect {
             radius: Appearance.rounding.normal
             color: Colours.tPalette.m3surfaceContainer
             Layout.fillWidth: true

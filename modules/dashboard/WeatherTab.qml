@@ -1,7 +1,7 @@
 import QtQuick
 import QtQuick.Layouts
-import qs.config
 import qs.services
+import qs.config
 import "weather"
 
 Item {

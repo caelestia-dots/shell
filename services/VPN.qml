@@ -25,7 +25,7 @@ Singleton {
     }
     readonly property bool isCustomProvider: typeof providerInput === "object"
     readonly property string providerName: isCustomProvider ? (providerInput.name || "custom") : String(providerInput)
-    readonly property string interfaceName: isCustomProvider ? (providerInput.iface || "") : ""
+    readonly property string interfaceName: isCustomProvider ? (providerInput.interface || "") : ""
     readonly property var currentConfig: {
         const name = providerName;
         const iface = interfaceName;
@@ -36,7 +36,7 @@ Singleton {
             return {
                 connectCmd: custom.connectCmd || defaults.connectCmd,
                 disconnectCmd: custom.disconnectCmd || defaults.disconnectCmd,
-                interface: custom.iface || defaults.interface,
+                interface: custom.interface || defaults.interface,
                 displayName: custom.displayName || defaults.displayName
             };
         }

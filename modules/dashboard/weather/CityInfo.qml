@@ -1,8 +1,8 @@
 import QtQuick
 import QtQuick.Layouts
 import qs.components
-import qs.config
 import qs.services
+import qs.config
 
 RowLayout {
     Layout.leftMargin: Appearance.padding.large
@@ -24,7 +24,6 @@ RowLayout {
             font.pointSize: Appearance.font.size.small
             color: Colours.palette.m3onSurfaceVariant
         }
-
     }
 
     Item {
@@ -47,7 +46,6 @@ RowLayout {
             value: Weather.sunset
             colour: Colours.palette.m3tertiary
         }
-
     }
 
     component WeatherStat: Row {
@@ -67,7 +65,6 @@ RowLayout {
         }
 
         Column {
-
             StyledText {
                 text: weatherStat.label
                 font.pointSize: Appearance.font.size.smaller
@@ -80,9 +77,6 @@ RowLayout {
                 font.weight: 600
                 color: Colours.palette.m3onSurface
             }
-
         }
-
     }
-
 }

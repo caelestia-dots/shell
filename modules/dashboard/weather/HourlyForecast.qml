@@ -6,6 +6,7 @@ import qs.config
 
 ListView {
     id: hourlyForecastList
+
     spacing: Appearance.spacing.small
     width: contentItem.childrenRect.width
     height: (contentItem.children[0]?.height ?? 60) * 3 + spacing * 2
@@ -16,6 +17,7 @@ ListView {
 
     component HourlyForecastItem: StyledRect {
         id: hourlyForecastItem
+
         required property var modelData
 
         property var timestamp: modelData?.timestamp
@@ -32,6 +34,7 @@ ListView {
 
         RowLayout {
             id: hourlyForecastItemRow
+
             anchors.centerIn: parent
             spacing: Appearance.spacing.small
 
