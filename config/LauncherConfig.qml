@@ -14,6 +14,8 @@ JsonObject {
     property list<string> hiddenApps: []
     property UseFuzzy useFuzzy: UseFuzzy {}
     property Sizes sizes: Sizes {}
+    property list<string> pinnedClipboardItems: []
+    property list<string> frequentEmojis: []
 
     property list<var> actions: [
         {

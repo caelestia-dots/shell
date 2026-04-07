@@ -178,6 +178,10 @@ target wallpaper
   function set(path: string): void
   function get(): string
   function list(): string
+target clipboard
+  function toggle(): void
+target emoji
+  function toggle(): void
 ```
 
 ### PFP/Wallpapers
@@ -482,6 +486,22 @@ default, you must create it manually.
                 "dangerous": false
             },
             {
+                "name": "Clipboard",
+                "icon": "content_paste",
+                "description": "Browse clipboard history",
+                "command": ["autocomplete", "clipboard"],
+                "enabled": true,
+                "dangerous": false
+            },
+            {
+                "name": "Emoji",
+                "icon": "sentiment_satisfied",
+                "description": "Pick an emoji",
+                "command": ["autocomplete", "emoji"],
+                "enabled": true,
+                "dangerous": false
+            },
+            {
                 "name": "Transparency",
                 "icon": "opacity",
                 "description": "Change shell transparency",
@@ -577,7 +597,9 @@ default, you must create it manually.
         },
         "showOnHover": false,
         "favouriteApps": [],
-        "hiddenApps": []
+        "hiddenApps": [],
+        "pinnedClipboardItems": [],
+        "frequentEmojis": []
     },
     "lock": {
         "recolourLogo": false,

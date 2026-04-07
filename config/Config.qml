@@ -253,6 +253,8 @@ Singleton {
             vimKeybinds: launcher.vimKeybinds,
             favouriteApps: launcher.favouriteApps,
             hiddenApps: launcher.hiddenApps,
+            pinnedClipboardItems: launcher.pinnedClipboardItems,
+            frequentEmojis: launcher.frequentEmojis,
             useFuzzy: {
                 apps: launcher.useFuzzy.apps,
                 actions: launcher.useFuzzy.actions,

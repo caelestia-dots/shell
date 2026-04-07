@@ -24,7 +24,12 @@ StyledListView {
 
     spacing: Appearance.spacing.small
     orientation: Qt.Vertical
-    implicitHeight: (Config.launcher.sizes.itemHeight + spacing) * Math.min(Config.launcher.maxShown, count) - spacing
+    implicitHeight: {
+        if (count === 0)
+            return 0;
+        const itemsToShow = Math.min(Config.launcher.maxShown, count);
+        return (Config.launcher.sizes.itemHeight + spacing) * itemsToShow - spacing;
+    }
 
     preferredHighlightBegin: 0
     preferredHighlightEnd: height
@@ -188,10 +193,6 @@ StyledListView {
         Anim {
             property: "y"
         }
-        Anim {
-            properties: "opacity,scale"
-            to: 1
-        }
     }
 
     addDisplaced: Transition {
@@ -199,19 +200,11 @@ StyledListView {
             property: "y"
             duration: Appearance.anim.durations.small
         }
-        Anim {
-            properties: "opacity,scale"
-            to: 1
-        }
     }
 
     displaced: Transition {
         Anim {
             property: "y"
-        }
-        Anim {
-            properties: "opacity,scale"
-            to: 1
         }
     }
 

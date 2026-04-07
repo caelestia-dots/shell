@@ -4,6 +4,7 @@ import Quickshell.Io
 import Caelestia
 import qs.components.misc
 import qs.services
+import qs.config
 import qs.modules.controlcenter
 
 Scope {
@@ -85,6 +86,22 @@ Scope {
     // qmllint disable unresolved-type
     CustomShortcut {
         // qmllint enable unresolved-type
+        name: "clipboard"
+        description: "Open clipboard manager"
+        onPressed: launcherHandler.action("clipboard")
+    }
+
+    // qmllint disable unresolved-type
+    CustomShortcut {
+        // qmllint enable unresolved-type
+        name: "emoji"
+        description: "Open emoji picker"
+        onPressed: launcherHandler.action("emoji")
+    }
+
+    // qmllint disable unresolved-type
+    CustomShortcut {
+        // qmllint enable unresolved-type
         name: "sidebar"
         description: "Toggle sidebar"
         onPressed: {
@@ -126,6 +143,49 @@ Scope {
         }
 
         target: "drawers"
+    }
+
+    IpcHandler {
+        id: launcherHandler
+
+        function open(searchText: string): void {
+            if (root.hasFullscreen)
+                return;
+
+            const visibilities = Visibilities.getForActive();
+            const launcher = LauncherIpc.getForActive();
+            const wrapper = LauncherWrappers.getForActive();
+
+            if (launcher?.search) {
+                launcher.search.text = searchText;
+                launcher.search.forceActiveFocus();
+            } else if (wrapper) {
+                wrapper.pendingSearchText = searchText;
+            }
+            visibilities.launcher = true;
+        }
+
+        function toggle(searchText: string): void {
+            if (root.hasFullscreen)
+                return;
+
+            const visibilities = Visibilities.getForActive();
+            const launcher = LauncherIpc.getForActive();
+
+            if (visibilities.launcher && launcher?.search.text === searchText) {
+                visibilities.launcher = false;
+                return;
+            }
+
+            open(searchText);
+        }
+
+        function action(actionName: string): void {
+            const searchText = Config.launcher.actionPrefix + actionName + " ";
+            toggle(searchText);
+        }
+
+        target: "launcher"
     }
 
     IpcHandler {

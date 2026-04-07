@@ -3,6 +3,7 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import Quickshell
 import qs.components
+import qs.services
 import qs.config
 
 Item {
@@ -13,7 +14,21 @@ Item {
     required property var panels
 
     readonly property bool shouldBeActive: visibilities.launcher && Config.launcher.enabled
-    property int contentHeight
+    property string pendingSearchText: ""
+    property bool _showHideTransition: false
+
+    readonly property var currentClipboardItem: {
+        const list = content.item?.list?.currentList; // qmllint disable missing-property
+        if (!list)
+            return null;
+
+        if (list.lastInteraction === "hover" && list.hoveredItem) {
+            return list.hoveredItem;
+        }
+        return list.currentItem;
+    }
+
+    readonly property bool showingClipboard: content.item?.list?.showClipboard ?? false // qmllint disable missing-property
 
     readonly property real maxHeight: {
         let max = screen.height - Config.border.thickness * 2 - Appearance.spacing.large;
@@ -22,49 +37,33 @@ Item {
         return max;
     }
 
+    Component.onCompleted: LauncherWrappers.register(root.screen, root)
+
     onMaxHeightChanged: timer.start()
 
     visible: height > 0
-    implicitHeight: 0
     implicitWidth: content.implicitWidth
+    implicitHeight: shouldBeActive ? content.implicitHeight : 0
 
     onShouldBeActiveChanged: {
+        _showHideTransition = true;
         if (shouldBeActive) {
             timer.stop();
-            hideAnim.stop();
-            showAnim.start();
-        } else {
-            showAnim.stop();
-            hideAnim.start();
+            content.active = Qt.binding(() => root.shouldBeActive || root.visible);
+            content.visible = true;
         }
     }
 
-    SequentialAnimation {
-        id: showAnim
+    Behavior on implicitHeight {
+        enabled: root._showHideTransition
 
         Anim {
-            target: root
-            property: "implicitHeight"
-            to: root.contentHeight
-            duration: Appearance.anim.durations.expressiveDefaultSpatial
-            easing.bezierCurve: Appearance.anim.curves.expressiveDefaultSpatial
-        }
-        ScriptAction {
-            script: root.implicitHeight = Qt.binding(() => content.implicitHeight)
-        }
-    }
-
-    SequentialAnimation {
-        id: hideAnim
-
-        ScriptAction {
-            script: root.implicitHeight = root.implicitHeight
-        }
-        Anim {
-            target: root
-            property: "implicitHeight"
-            to: 0
-            easing.bezierCurve: Appearance.anim.curves.emphasized
+            duration: root.shouldBeActive ? Appearance.anim.durations.expressiveDefaultSpatial : Appearance.anim.durations.normal
+            easing.bezierCurve: root.shouldBeActive ? Appearance.anim.curves.expressiveDefaultSpatial : Appearance.anim.curves.emphasized
+            onRunningChanged: {
+                if (!running)
+                    root._showHideTransition = false;
+            }
         }
     }
 
@@ -97,14 +96,9 @@ Item {
             if (running && !root.shouldBeActive) {
                 content.visible = false;
                 content.active = true;
-            } else {
-                root.contentHeight = Math.min(root.maxHeight, content.implicitHeight);
+            } else if (!running) {
                 content.active = Qt.binding(() => root.shouldBeActive || root.visible);
                 content.visible = true;
-                if (showAnim.running) {
-                    showAnim.stop();
-                    showAnim.start();
-                }
             }
         }
     }
@@ -120,11 +114,15 @@ Item {
         Component.onCompleted: timer.start()
 
         sourceComponent: Content {
+            screen: root.screen
             visibilities: root.visibilities
             panels: root.panels
             maxHeight: root.maxHeight
+            initialSearchText: root.pendingSearchText
 
-            Component.onCompleted: root.contentHeight = implicitHeight
+            Component.onCompleted: {
+                root.pendingSearchText = "";
+            }
         }
     }
 }

@@ -30,6 +30,7 @@ Item {
     readonly property alias utilities: utilities
     readonly property alias toasts: toasts
     readonly property alias sidebar: sidebar
+    readonly property alias clipboardPreview: clipboardPreview
 
     anchors.fill: parent
     anchors.margins: root.borderThickness
@@ -88,6 +89,17 @@ Item {
 
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.bottom: parent.bottom
+    }
+
+    Launcher.ClipboardPreview {
+        id: clipboardPreview
+
+        currentItem: launcher.currentClipboardItem
+        shouldShow: root.visibilities.launcher && launcher.showingClipboard && !root.visibilities.utilities && !root.visibilities.sidebar && clipboardPreview.hasImage
+
+        anchors.left: launcher.right
+        anchors.leftMargin: Appearance.spacing.large + 4
+        anchors.bottom: launcher.bottom
     }
 
     Dashboard.Wrapper {

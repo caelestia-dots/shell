@@ -1,6 +1,7 @@
 pragma ComponentBehavior: Bound
 
 import QtQuick
+import Quickshell
 import qs.components
 import qs.components.controls
 import qs.services
@@ -10,21 +11,38 @@ import qs.modules.launcher.services
 Item {
     id: root
 
+    required property ShellScreen screen
     required property DrawerVisibilities visibilities
     required property var panels
     required property real maxHeight
+    property string initialSearchText: ""
 
     readonly property int padding: Appearance.padding.large
     readonly property int rounding: Appearance.rounding.large
+    readonly property alias search: search
+    readonly property alias list: list
 
-    implicitWidth: listWrapper.width + padding * 2
-    implicitHeight: searchWrapper.height + listWrapper.height + padding * 2
+    property bool skipTransitions: false
+
+    implicitWidth: listWrapper.implicitWidth + padding * 2
+    implicitHeight: listWrapper.implicitHeight + searchWrapper.implicitHeight + padding * 3
+
+    Component.onCompleted: {
+        LauncherIpc.register(root.screen, root);
+        if (initialSearchText) {
+            skipTransitions = true;
+            search.text = initialSearchText;
+            Qt.callLater(() => {
+                skipTransitions = false;
+            });
+        }
+    }
 
     Item {
         id: listWrapper
 
-        implicitWidth: list.width
-        implicitHeight: list.height + root.padding
+        implicitWidth: list.implicitWidth
+        implicitHeight: list.implicitHeight
 
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.bottom: searchWrapper.top
@@ -88,6 +106,12 @@ Item {
                             Wallpapers.previewColourLock = true;
                         Wallpapers.setWallpaper(currentItem.modelData.path);
                         root.visibilities.launcher = false;
+                    } else if (list.showClipboard) {
+                        Clipboard.copyToClipboard(currentItem.modelData);
+                        root.visibilities.launcher = false;
+                    } else if (list.showEmoji) {
+                        Emojis.copyEmoji(currentItem.modelData);
+                        root.visibilities.launcher = false;
                     } else if (text.startsWith(Config.launcher.actionPrefix)) {
                         if (text.startsWith(`${Config.launcher.actionPrefix}calc `))
                             currentItem.onClicked();
@@ -102,6 +126,20 @@ Item {
 
             Keys.onUpPressed: list.currentList?.decrementCurrentIndex()
             Keys.onDownPressed: list.currentList?.incrementCurrentIndex()
+
+            Keys.onLeftPressed: event => {
+                if (list.showEmoji && list.currentList && list.currentList.moveLeft) {
+                    list.currentList.moveLeft();
+                    event.accepted = true;
+                }
+            }
+
+            Keys.onRightPressed: event => {
+                if (list.showEmoji && list.currentList && list.currentList.moveRight) {
+                    list.currentList.moveRight();
+                    event.accepted = true;
+                }
+            }
 
             Keys.onEscapePressed: root.visibilities.launcher = false
 
