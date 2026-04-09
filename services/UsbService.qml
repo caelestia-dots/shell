@@ -99,8 +99,8 @@ function cleanDeviceName(name) {
                     if (now - usbService.lastEventTime < usbService.debounceMs) return
                     usbService.lastEventTime = now
 
-                    pending.push({ path: devPath })
-                    if (!nameLookup.running && currentDev === null) processNextInQueue()
+                    usbService.pending.push({ path: devPath })
+                    if (!nameLookup.running && usbService.currentDev === null) usbService.processNextInQueue()
                 } 
                
                 else if (isRemove) {
@@ -108,19 +108,19 @@ function cleanDeviceName(name) {
 
                 // Exact path match
 
-                    if (known[devPath]) {
-                        usbService.deviceDisconnected(known[devPath]);
-                        delete known[devPath];
+                    if (usbService.known[devPath]) {
+                        usbService.deviceDisconnected(usbService.known[devPath]);
+                        delete usbService.known[devPath];
                         found = true;
                     } 
 
                     // Fuzzy matching for complex HID device paths
                     if (!found) {
-                        for (let savedPath in known) {
+                        for (let savedPath in usbService.known) {
                             if (devPath.includes(savedPath) || savedPath.includes(devPath)) {
-                                const info = known[savedPath];
+                                const info = usbService.known[savedPath];
                                 usbService.deviceDisconnected(info);
-                                delete known[savedPath];
+                                delete usbService.known[savedPath];
                                 found = true;
                                 break;
                             }
@@ -133,9 +133,9 @@ function cleanDeviceName(name) {
 
 // Sequential queue processing for device discovery
     function processNextInQueue() {
-        if (pending.length > 0) {
-            currentDev = pending.shift()
-            nameLookup.command = ["sh", "-c", "udevadm info --query=property -p '" + shEscape(currentDev.path) + "' | grep -E 'DEVTYPE=usb_device|ID_MODEL_FROM_DATABASE=|ID_MODEL=|ID_VENDOR_FROM_DATABASE=|ID_VENDOR=' || true"]
+        if (usbService.pending.length > 0) {
+            usbService.currentDev = usbService.pending.shift()
+            nameLookup.command = ["sh", "-c", "udevadm info --query=property -p '" + shEscape(usbService.currentDev.path) + "' | grep -E 'DEVTYPE=usb_device|ID_MODEL_FROM_DATABASE=|ID_MODEL=|ID_VENDOR_FROM_DATABASE=|ID_VENDOR=' || true"]
             nameLookup.running = true
         }
     }
@@ -155,8 +155,8 @@ function cleanDeviceName(name) {
 
 // Verify target is a physical USB device
     if (props["DEVTYPE"] !== "usb_device") {
-        currentDev = null
-        processNextInQueue()
+        usbService.currentDev = null
+        usbService.processNextInQueue()
         return
     }
 
@@ -165,17 +165,17 @@ function cleanDeviceName(name) {
     let rawName = (vendor + " " + model).trim()
     
     // Si udev no da nombre, usamos la ruta antes de limpiar
-    if (rawName === "") rawName = detectNameFromPath(currentDev.path)
+    if (rawName === "") rawName = usbService.detectNameFromPath(usbService.currentDev.path)
 
-    const finalName = cleanDeviceName(rawName)
-    const devPath = currentDev.path
-    const devType = detectType(out)
+    const finalName = usbService.cleanDeviceName(rawName)
+    const devPath = usbService.currentDev.path
+    const devType = usbService.detectType(out)
 
-    known[devPath] = { name: finalName, type: devType, path: devPath }
-    usbService.deviceConnected(known[devPath])
+    usbService.known[devPath] = { name: finalName, type: devType, path: devPath }
+    usbService.deviceConnected(usbService.known[devPath])
 
-    currentDev = null
-    processNextInQueue()
+    usbService.currentDev = null
+    usbService.processNextInQueue()
 }
         }
     }

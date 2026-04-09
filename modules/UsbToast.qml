@@ -25,8 +25,8 @@ Item {
      * ======================= */
     function canToast() {
         const now = Date.now()
-        if (now - lastToastTime < toastDebounceMs) return false
-        lastToastTime = now
+        if (now - root.lastToastTime < root.toastDebounceMs) return false
+        root.lastToastTime = now
         return true
     }
 
@@ -65,14 +65,14 @@ Item {
   // Formats string as "Device Name • Device Type"
     function deviceSubtitle(device) {
         // Example: "Logitech G502 • Mouse"
-        return deviceLabel(device) + " • " + deviceType(device)
+        return root.deviceLabel(device) + " • " + root.deviceType(device)
     }
 
     /* =======================
      * INITIALIZATION
      * ======================= */
     Component.onCompleted: {
-        if (!serviceToastEnabled) return
+        if (!root.serviceToastEnabled) return
         
         Qt.callLater(() => {
             Toaster.toast(
@@ -90,15 +90,15 @@ Item {
      * ======================= */
 
     Connections {
-        target: deviceToastEnabled ? usbService : null
+        target: root.deviceToastEnabled ? root.usbService : null
 
         function onDeviceConnected(device) {
-            if (!canToast()) return
+            if (!root.canToast()) return
 
             Toaster.toast(
                 qsTr("Device Connected"),
-                deviceSubtitle(device),
-                deviceIcon(device, true),
+                root.deviceSubtitle(device),
+                root.deviceIcon(device, true),
                 Toast.Info,
                 root.toastDuration
             )
@@ -108,8 +108,8 @@ Item {
             // Throttling skipped for disconnect events to ensure UI feedback
             Toaster.toast(
                 qsTr("Device Disconnected"),
-                deviceSubtitle(device),
-                deviceIcon(device, false),
+                root.deviceSubtitle(device),
+                root.deviceIcon(device, false),
                 Toast.Info,
                 root.toastDuration
             )
