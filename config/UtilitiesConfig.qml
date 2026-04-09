@@ -60,6 +60,7 @@ JsonObject {
         property bool usbServiceToast: false
         property bool usbConnectedToast: true
         property bool usbDisconnectedToast: true
+        property bool usbNotifications: true
     }
 
     component Vpn: JsonObject {
