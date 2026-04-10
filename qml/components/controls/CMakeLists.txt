@@ -1,0 +1,32 @@
+qs_qml_module(caelestia-qml-components-controls
+    URI Caelestia.Qml.Components.Controls
+    QML_FILES
+        CircularIndicator.qml
+        CircularProgress.qml
+        CollapsibleSection.qml
+        CustomMouseArea.qml
+        CustomSpinBox.qml
+        FilledSlider.qml
+        IconButton.qml
+        IconTextButton.qml
+        Menu.qml
+        MenuItem.qml
+        SpinBoxRow.qml
+        SplitButton.qml
+        SplitButtonRow.qml
+        StyledInputField.qml
+        StyledRadioButton.qml
+        StyledScrollBar.qml
+        StyledSlider.qml
+        StyledSwitch.qml
+        StyledTextField.qml
+        SwitchRow.qml
+        TextButton.qml
+        ToggleButton.qml
+        ToggleRow.qml
+        Tooltip.qml
+    DEPENDENCIES
+        QtQuick
+        QtQuick.Layouts
+        Quickshell
+)

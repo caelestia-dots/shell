@@ -1,0 +1,22 @@
+qs_qml_module(caelestia-qml-modules-controlcenter-network
+    URI Caelestia.Qml.Modules.Controlcenter.Network
+    QML_FILES
+        EthernetDetails.qml
+        EthernetList.qml
+        EthernetPane.qml
+        EthernetSettings.qml
+        NetworkingPane.qml
+        NetworkSettings.qml
+        VpnDetails.qml
+        VpnList.qml
+        VpnSettings.qml
+        WirelessDetails.qml
+        WirelessList.qml
+        WirelessPane.qml
+        WirelessPasswordDialog.qml
+        WirelessSettings.qml
+    DEPENDENCIES
+        QtQuick
+        QtQuick.Layouts
+        Quickshell
+)

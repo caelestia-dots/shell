@@ -1,0 +1,6 @@
+add_subdirectory(Caelestia)
+add_subdirectory(Caelestia/Components)
+add_subdirectory(Caelestia/Internal)
+add_subdirectory(Caelestia/Models)
+add_subdirectory(Caelestia/Services)
+add_subdirectory(Caelestia/Blobs)

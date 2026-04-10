@@ -1,0 +1,27 @@
+qs_qml_module(caelestia-qml-config
+    URI Caelestia.Qml.Config
+    QML_FILES
+        AppearanceConfig.qml
+        BackgroundConfig.qml
+        BarConfig.qml
+        BorderConfig.qml
+        ControlCenterConfig.qml
+        DashboardConfig.qml
+        GeneralConfig.qml
+        LauncherConfig.qml
+        LockConfig.qml
+        NotifsConfig.qml
+        OsdConfig.qml
+        ServiceConfig.qml
+        SessionConfig.qml
+        SidebarConfig.qml
+        UserPaths.qml
+        UtilitiesConfig.qml
+        WInfoConfig.qml
+    QML_SINGLETONS
+        Appearance.qml
+        Config.qml
+    DEPENDENCIES
+        QtQuick
+        Quickshell
+)

@@ -1,0 +1,21 @@
+qs_qml_module(caelestia-qml-modules-lock
+    URI Caelestia.Qml.Modules.Lock
+    QML_FILES
+        Center.qml
+        Content.qml
+        Fetch.qml
+        InputField.qml
+        Lock.qml
+        LockSurface.qml
+        Media.qml
+        NotifDock.qml
+        NotifGroup.qml
+        Pam.qml
+        Resources.qml
+        WeatherInfo.qml
+    DEPENDENCIES
+        QtQuick
+        QtQuick.Layouts
+        Quickshell
+        Quickshell.Services.Pam
+)

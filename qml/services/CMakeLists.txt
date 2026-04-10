@@ -1,0 +1,35 @@
+qs_qml_module(caelestia-qml-services
+    URI Caelestia.Qml.Services
+    QML_FILES
+        NotifData.qml
+    QML_SINGLETONS
+        Audio.qml
+        Brightness.qml
+        Colours.qml
+        GameMode.qml
+        Hypr.qml
+        IdleInhibitor.qml
+        LyricsService.qml
+        Network.qml
+        NetworkUsage.qml
+        Nmcli.qml
+        Notifs.qml
+        Players.qml
+        Recorder.qml
+        Screens.qml
+        SystemUsage.qml
+        Time.qml
+        Visibilities.qml
+        VPN.qml
+        Wallpapers.qml
+        Weather.qml
+    DEPENDENCIES
+        QtQuick
+        Quickshell
+        Quickshell.Hyprland
+        Quickshell.Io
+        Quickshell.Services.Mpris
+        Quickshell.Services.Notifications
+        Quickshell.Services.Pipewire
+        Quickshell.Services.UPower
+)
