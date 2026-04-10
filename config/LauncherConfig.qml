@@ -115,8 +115,8 @@ JsonObject {
         {
             name: "Sleep",
             icon: "bedtime",
-            description: "Suspend then hibernate",
-            command: ["systemctl", "suspend-then-hibernate"],
+            description: "Suspend to RAM",
+            command: ["systemctl", "suspend"],
             enabled: true,
             dangerous: false
         },

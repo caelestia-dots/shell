@@ -295,13 +295,15 @@ Singleton {
                 logout: session.icons.logout,
                 shutdown: session.icons.shutdown,
                 hibernate: session.icons.hibernate,
-                reboot: session.icons.reboot
+                reboot: session.icons.reboot,
+                sleep: session.icons.sleep
             },
             commands: {
                 logout: session.commands.logout,
                 shutdown: session.commands.shutdown,
                 hibernate: session.commands.hibernate,
-                reboot: session.commands.reboot
+                reboot: session.commands.reboot,
+                sleep: session.commands.sleep
             }
         };
     }
