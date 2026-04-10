@@ -48,8 +48,9 @@ PathView {
         id: scriptModel
 
         readonly property string search: root.search.text.split(" ").slice(1).join(" ")
+        readonly property string folder: Wallpapers.debouncedCurrentFolder
 
-        values: Wallpapers.query(search)
+        values: Wallpapers.queryWithFolder(search, folder)
         onValuesChanged: root.currentIndex = search ? 0 : values.findIndex(w => w.path === Wallpapers.actualCurrent)
     }
 
