@@ -11,6 +11,8 @@ import "services"
 import Quickshell
 
 ShellRoot {
+    settings.watchFiles: true
+
     Background {}
     Drawers {}
     AreaPicker {}
@@ -23,11 +25,12 @@ ShellRoot {
     IdleMonitors {
         lock: lock
     }
-    
+
     UsbService {
-    id: usbService
-}
-UsbToast {
-    usbService: usbService
-}
+        id: usbService
+    }
+
+    UsbToast {
+        usbService: usbService
+    }
 }

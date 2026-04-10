@@ -10,8 +10,7 @@ Item {
     property int debounceMs: 250
     property var pending: []
     property var currentDev: null
-    property var known: ({
-    })
+    property var known: ({})
 
     signal deviceConnected(var device)
     signal deviceDisconnected(var device)
@@ -111,7 +110,7 @@ Item {
         running: true
 
         stdout: SplitParser {
-            onRead: (data) => {
+            onRead: data => {
                 // Exact path match
 
                 const raw = data.trim();
@@ -136,7 +135,6 @@ Item {
                     });
                     if (!nameLookup.running && usbService.currentDev === null)
                         usbService.processNextInQueue();
-
                 } else if (isRemove) {
                     let found = false;
                     if (usbService.known[devPath]) {
@@ -159,7 +157,6 @@ Item {
                 }
             }
         }
-
     }
 
     // Hardware metadata discovery
@@ -171,13 +168,11 @@ Item {
         stdout: StdioCollector {
             onStreamFinished: {
                 const out = text.trim();
-                let props = {
-                };
-                out.split("\n").forEach((line) => {
+                let props = {};
+                out.split("\n").forEach(line => {
                     const parts = line.split("=");
                     if (parts.length === 2)
                         props[parts[0]] = parts[1].trim();
-
                 });
                 // Verify target is a physical USB device
                 if (props["DEVTYPE"] !== "usb_device") {
@@ -205,7 +200,5 @@ Item {
                 usbService.processNextInQueue();
             }
         }
-
     }
-
 }

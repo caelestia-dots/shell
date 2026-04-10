@@ -1,6 +1,6 @@
 import QtQuick
-import qs.config
 import Caelestia
+import qs.config
 
 Item {
     id: root
@@ -114,8 +114,6 @@ Item {
      * ======================= */
 
     Connections {
-        target: root.deviceToastEnabled ? root.usbService : null
-
         function onDeviceConnected(device) {
             if (!root.canToast())
                 return;
@@ -126,5 +124,7 @@ Item {
             // Throttling skipped for disconnect events to ensure UI feedback
             Toaster.toast(qsTr("Device Disconnected"), root.deviceSubtitle(device), root.deviceIcon(device, false), Toast.Info, root.toastDuration);
         }
+
+        target: root.deviceToastEnabled ? root.usbService : null
     }
 }
