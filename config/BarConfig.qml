@@ -116,6 +116,7 @@ JsonObject {
         property bool background: false
         property bool showDate: false
         property bool showIcon: true
+        property bool showSeconds: false
     }
 
     component Sizes: JsonObject {

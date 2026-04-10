@@ -204,7 +204,8 @@ Singleton {
             clock: {
                 background: bar.clock.background,
                 showDate: bar.clock.showDate,
-                showIcon: bar.clock.showIcon
+                showIcon: bar.clock.showIcon,
+                showSeconds: bar.clock.showSeconds
             },
             entries: bar.entries,
             excludedScreens: bar.excludedScreens
@@ -225,6 +226,7 @@ Singleton {
             mediaUpdateInterval: dashboard.mediaUpdateInterval,
             resourceUpdateInterval: dashboard.resourceUpdateInterval,
             dragThreshold: dashboard.dragThreshold,
+            showClockSeconds: dashboard.showClockSeconds,
             performance: {
                 showBattery: dashboard.performance.showBattery,
                 showGpu: dashboard.performance.showGpu,
