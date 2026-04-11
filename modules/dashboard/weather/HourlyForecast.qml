@@ -7,9 +7,11 @@ import qs.config
 ListView {
     id: hourlyForecastList
 
+    property var visibleItemsCount: 3
+
     spacing: Appearance.spacing.small
     width: contentItem.childrenRect.width
-    height: (contentItem.children[0]?.height ?? 60) * 3 + spacing * 2
+    height: (contentItem.children[0]?.height ?? 60) * visibleItemsCount + spacing * (visibleItemsCount - 1)
     clip: true
 
     model: Weather.hourlyForecast
