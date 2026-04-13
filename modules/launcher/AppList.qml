@@ -52,7 +52,7 @@ StyledListView {
         const text = search.text;
         const prefix = Config.launcher.actionPrefix;
         if (text.startsWith(prefix)) {
-            for (const action of ["calc", "scheme", "variant"])
+            for (const action of ["calc","gpt", "scheme", "variant"])
                 if (text.startsWith(`${prefix}${action} `))
                     return action;
 
@@ -82,6 +82,15 @@ StyledListView {
             PropertyChanges {
                 model.values: Actions.query(search.text)
                 root.delegate: actionItem
+            }
+        },
+
+        State {
+            name: "gpt"
+
+            PropertyChanges {
+                model.values: [1]
+                root.delegate: gptItem
             }
         },
         State {
@@ -230,6 +239,15 @@ StyledListView {
             list: root
         }
     }
+
+    Component {
+        id: gptItem
+
+        GptItem {
+            list: root
+        }
+    }
+
 
     Component {
         id: calcItem
