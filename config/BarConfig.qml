@@ -109,6 +109,8 @@ JsonObject {
         property bool showWifi: true
         property bool showBluetooth: true
         property bool showBattery: true
+        property bool showPeripheralBattery: false
+        property list<string> peripheralBatteryExcluded: [] // exclude by model name or native path
         property bool showLockStatus: true
     }
 
