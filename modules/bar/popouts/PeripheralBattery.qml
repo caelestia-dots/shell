@@ -4,6 +4,7 @@ import QtQuick
 import Quickshell
 import Quickshell.Services.UPower
 import qs.components
+import qs.services
 import qs.config
 
 Column {
@@ -15,6 +16,8 @@ Column {
         }
 
         Row {
+            id: peripheralRow
+
             required property UPowerDevice modelData
 
             spacing: Appearance.spacing.small
@@ -22,7 +25,7 @@ Column {
             MaterialIcon {
                 anchors.verticalCenter: parent.verticalCenter
                 text: {
-                    const t = modelData.type;
+                    const t = peripheralRow.modelData.type;
                     if (t === UPowerDeviceType.Mouse || t === UPowerDeviceType.Touchpad)
                         return "mouse";
                     if (t === UPowerDeviceType.Keyboard)
@@ -44,7 +47,7 @@ Column {
 
             StyledText {
                 anchors.verticalCenter: parent.verticalCenter
-                text: (modelData.model || "Device") + ": " + Math.round(modelData.percentage * 100) + "%"
+                text: (peripheralRow.modelData.model || "Device") + ": " + Math.round(peripheralRow.modelData.percentage * 100) + "%"
             }
         }
     }
