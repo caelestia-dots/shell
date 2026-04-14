@@ -19,7 +19,8 @@ RowLayout {
         Layout.fillHeight: true
 
         StyledRect {
-            radius: Appearance.rounding.normal
+            radius: Appearance.rounding.large * 2
+
             color: Colours.tPalette.m3surfaceContainer
             Layout.fillWidth: true
             Layout.fillHeight: true
