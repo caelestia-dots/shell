@@ -2,168 +2,164 @@ pragma ComponentBehavior: Bound
 
 import QtQuick
 import Quickshell
+import Caelestia.Components
+import Caelestia.Config
 import qs.components
 import qs.services
-import qs.config
 
-Item {
+LazyListView {
     id: root
 
     required property Props props
     required property Flickable container
     required property DrawerVisibilities visibilities
 
-    readonly property alias repeater: repeater
-    readonly property int spacing: Appearance.spacing.small
-    property bool flag
+    anchors.left: parent?.left
+    anchors.right: parent?.right
+    implicitHeight: contentHeight
 
-    anchors.left: parent.left
-    anchors.right: parent.right
-    implicitHeight: {
-        const item = repeater.itemAt(repeater.count - 1);
-        return item ? item.y + item.implicitHeight : 0;
+    spacing: Tokens.spacing.small
+    readyDelay: 1
+    cacheBuffer: 400
+    asynchronous: true
+
+    onViewportAdjustNeeded: d => {
+        if (contentYAnim.running)
+            contentYAnim.complete();
+        contentYAnim.to = Math.max(0, container.contentY + d);
+        contentYAnim.start();
     }
 
-    Repeater {
-        id: repeater
+    useCustomViewport: true
+    viewport: Qt.rect(0, container.contentY, width, container.height)
 
-        model: ScriptModel {
-            values: {
-                const map = new Map();
-                for (const n of Notifs.notClosed)
-                    map.set(n.appName, null);
-                for (const n of Notifs.list)
-                    map.set(n.appName, null);
-                return [...map.keys()];
-            }
-            onValuesChanged: root.flagChanged()
+    removeDuration: Tokens.anim.durations.normal
+
+    model: ScriptModel {
+        values: {
+            const map = new Map();
+            for (const n of Notifs.notClosed)
+                map.set(n.appName, null);
+            for (const n of Notifs.list)
+                map.set(n.appName, null);
+            return [...map.keys()];
         }
-
-        delegate: NotifGroupDelegate {}
     }
 
-    component NotifGroupDelegate: MouseArea {
-        id: notif
+    delegate: Component {
+        MouseArea {
+            id: notif
 
-        required property int index
-        required property string modelData
+            required property int index
+            required property string modelData
 
-        readonly property bool closed: notifInner.notifCount === 0
-        readonly property alias nonAnimHeight: notifInner.nonAnimHeight
-        property int startY
+            readonly property bool closed: notifInner.notifCount === 0
+            property int startY
 
-        function closeAll(): void {
-            for (const n of Notifs.notClosed.filter(n => n.appName === modelData))
-                n.close();
-        }
-
-        y: {
-            root.flag; // Force update
-            let y = 0;
-            for (let i = 0; i < index; i++) {
-                const item = repeater.itemAt(i) as NotifGroupDelegate;
-                if (item && !item.closed)
-                    y += item.nonAnimHeight + root.spacing;
+            function closeAll(): void {
+                clearTimer.start();
             }
-            return y;
-        }
 
-        containmentMask: QtObject {
-            function contains(p: point): bool {
-                if (!root.container.contains(notif.mapToItem(root.container, p)))
-                    return false;
-                return notifInner.contains(p);
+            LazyListView.trackViewport: !notifInner.expanded && notifInner.nonAnimHeight < notifInner.implicitHeight
+            LazyListView.preferredHeight: closed ? 0 : notifInner.nonAnimHeight
+            LazyListView.visibleHeight: notifInner.implicitHeight
+            implicitHeight: notifInner.implicitHeight
+
+            opacity: LazyListView.removing || closed || LazyListView.adding ? 0 : 1
+            scale: LazyListView.removing || closed ? 0.6 : LazyListView.adding ? 0 : 1
+
+            hoverEnabled: true
+            cursorShape: pressed ? Qt.ClosedHandCursor : undefined
+            acceptedButtons: Qt.LeftButton | Qt.RightButton | Qt.MiddleButton
+            preventStealing: true
+            enabled: !closed
+
+            drag.target: this
+            drag.axis: Drag.XAxis
+
+            onPressed: event => {
+                startY = event.y;
+                if (event.button === Qt.RightButton)
+                    notifInner.toggleExpand(!notifInner.expanded);
+                else if (event.button === Qt.MiddleButton)
+                    closeAll();
             }
-        }
-
-        implicitWidth: root.width
-        implicitHeight: notifInner.implicitHeight
-
-        hoverEnabled: true
-        cursorShape: pressed ? Qt.ClosedHandCursor : undefined
-        acceptedButtons: Qt.LeftButton | Qt.RightButton | Qt.MiddleButton
-        preventStealing: true
-        enabled: !closed
-
-        drag.target: this
-        drag.axis: Drag.XAxis
-
-        onPressed: event => {
-            startY = event.y;
-            if (event.button === Qt.RightButton)
-                notifInner.toggleExpand(!notifInner.expanded);
-            else if (event.button === Qt.MiddleButton)
-                closeAll();
-        }
-        onPositionChanged: event => {
-            if (pressed) {
-                const diffY = event.y - startY;
-                if (Math.abs(diffY) > Config.notifs.expandThreshold)
-                    notifInner.toggleExpand(diffY > 0);
+            onPositionChanged: event => {
+                if (pressed) {
+                    const diffY = event.y - startY;
+                    if (Math.abs(diffY) > Config.notifs.expandThreshold)
+                        notifInner.toggleExpand(diffY > 0);
+                }
             }
-        }
-        onReleased: event => {
-            if (Math.abs(x) < width * Config.notifs.clearThreshold)
-                x = 0;
-            else
-                closeAll();
-        }
-
-        ParallelAnimation {
-            running: true
-
-            Anim {
-                target: notif
-                property: "opacity"
-                from: 0
-                to: 1
+            onReleased: event => {
+                if (Math.abs(x) < width * Config.notifs.clearThreshold)
+                    x = 0;
+                else
+                    closeAll();
             }
-            Anim {
-                target: notif
-                property: "scale"
-                from: 0
-                to: 1
-                duration: Appearance.anim.durations.expressiveDefaultSpatial
-                easing.bezierCurve: Appearance.anim.curves.expressiveDefaultSpatial
+
+            Timer {
+                id: clearTimer
+
+                interval: 15
+                repeat: true
+                triggeredOnStart: true
+                onTriggered: {
+                    const notifs = Notifs.notClosed.filter(n => n.appName === notif.modelData);
+                    if (notifs.length === 0) {
+                        stop();
+                        return;
+                    }
+
+                    for (const n of notifs.slice(0, 30))
+                        n.close();
+                }
             }
-        }
 
-        ParallelAnimation {
-            running: notif.closed
+            NotifGroup {
+                id: notifInner
 
-            Anim {
-                target: notif
-                property: "opacity"
-                to: 0
+                modelData: notif.modelData
+                props: root.props
+                container: root.container
+                visibilities: root.visibilities
             }
-            Anim {
-                target: notif
-                property: "scale"
-                to: 0.6
+
+            Behavior on y {
+                enabled: notif.LazyListView.ready
+
+                Anim {
+                    duration: Tokens.anim.durations.expressiveDefaultSpatial
+                    easing: Tokens.anim.expressiveDefaultSpatial
+                }
             }
-        }
 
-        NotifGroup {
-            id: notifInner
+            Behavior on opacity {
+                Anim {}
+            }
 
-            modelData: notif.modelData
-            props: root.props
-            container: root.container
-            visibilities: root.visibilities
-        }
+            Behavior on scale {
+                Anim {
+                    duration: Tokens.anim.durations.expressiveDefaultSpatial
+                    easing: Tokens.anim.expressiveDefaultSpatial
+                }
+            }
 
-        Behavior on x {
-            Anim {
-                duration: Appearance.anim.durations.expressiveDefaultSpatial
-                easing.bezierCurve: Appearance.anim.curves.expressiveDefaultSpatial
+            Behavior on x {
+                Anim {
+                    duration: Tokens.anim.durations.expressiveDefaultSpatial
+                    easing: Tokens.anim.expressiveDefaultSpatial
+                }
             }
         }
+    }
 
-        Behavior on y {
-            Anim {
-                duration: Appearance.anim.durations.expressiveDefaultSpatial
-                easing.bezierCurve: Appearance.anim.curves.expressiveDefaultSpatial
-            }
-        }
+    Anim {
+        id: contentYAnim
+
+        target: root.container
+        property: "contentY"
+        duration: Tokens.anim.durations.expressiveDefaultSpatial
+        easing: Tokens.anim.expressiveDefaultSpatial
     }
 }

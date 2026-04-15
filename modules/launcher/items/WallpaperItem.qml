@@ -1,10 +1,10 @@
 import QtQuick
+import Caelestia.Config
 import Caelestia.Models
 import qs.components
 import qs.components.effects
 import qs.components.images
 import qs.services
-import qs.config
 
 Item {
     id: root
@@ -21,8 +21,8 @@ Item {
         opacity = Qt.binding(() => PathView.onPath ? 1 : 0);
     }
 
-    implicitWidth: image.width + Appearance.padding.larger * 2
-    implicitHeight: image.height + label.height + Appearance.spacing.small / 2 + Appearance.padding.large + Appearance.padding.normal
+    implicitWidth: image.width + Tokens.padding.larger * 2
+    implicitHeight: image.height + label.height + Tokens.spacing.small / 2 + Tokens.padding.large + Tokens.padding.normal
 
     StateLayer {
         function onClicked(): void {
@@ -30,7 +30,7 @@ Item {
             root.visibilities.launcher = false;
         }
 
-        radius: Appearance.rounding.normal
+        radius: Tokens.rounding.normal
     }
 
     Elevation {
@@ -48,18 +48,18 @@ Item {
         id: image
 
         anchors.horizontalCenter: parent.horizontalCenter
-        y: Appearance.padding.large
+        y: Tokens.padding.large
         color: Colours.tPalette.m3surfaceContainer
-        radius: Appearance.rounding.normal
+        radius: Tokens.rounding.normal
 
-        implicitWidth: Config.launcher.sizes.wallpaperWidth
+        implicitWidth: Tokens.sizes.launcher.wallpaperWidth
         implicitHeight: implicitWidth / 16 * 9
 
         MaterialIcon {
             anchors.centerIn: parent
             text: "image"
             color: Colours.tPalette.m3outline
-            font.pointSize: Appearance.font.size.extraLarge * 2
+            font.pointSize: Tokens.font.size.extraLarge * 2
             font.weight: 600
         }
 
@@ -76,15 +76,15 @@ Item {
         id: label
 
         anchors.top: image.bottom
-        anchors.topMargin: Appearance.spacing.small / 2
+        anchors.topMargin: Tokens.spacing.small / 2
         anchors.horizontalCenter: parent.horizontalCenter
 
-        width: image.width - Appearance.padding.normal * 2
+        width: image.width - Tokens.padding.normal * 2
         horizontalAlignment: Text.AlignHCenter
         elide: Text.ElideRight
         renderType: Text.QtRendering
         text: root.modelData.relativePath
-        font.pointSize: Appearance.font.size.normal
+        font.pointSize: Tokens.font.size.normal
     }
 
     Behavior on scale {

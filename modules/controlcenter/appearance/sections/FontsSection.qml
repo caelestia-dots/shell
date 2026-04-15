@@ -4,11 +4,11 @@ import ".."
 import "../../components"
 import QtQuick
 import QtQuick.Layouts
+import Caelestia.Config
 import qs.components
 import qs.components.containers
 import qs.components.controls
 import qs.services
-import qs.config
 
 CollapsibleSection {
     id: root
@@ -38,7 +38,7 @@ CollapsibleSection {
                 property alias contentHeight: sansFontList.contentHeight
 
                 clip: true
-                spacing: Appearance.spacing.small / 2
+                spacing: Tokens.spacing.small / 2
                 model: Qt.fontFamilies()
 
                 StyledScrollBar.vertical: StyledScrollBar {
@@ -52,10 +52,10 @@ CollapsibleSection {
 
                     width: ListView.view.width
                     color: Qt.alpha(Colours.tPalette.m3surfaceContainer, isCurrent ? Colours.tPalette.m3surfaceContainer.a : 0)
-                    radius: Appearance.rounding.normal
+                    radius: Tokens.rounding.normal
                     border.width: isCurrent ? 1 : 0
                     border.color: Colours.palette.m3primary
-                    implicitHeight: fontFamilySansRow.implicitHeight + Appearance.padding.normal * 2
+                    implicitHeight: fontFamilySansRow.implicitHeight + Tokens.padding.normal * 2
 
                     StateLayer {
                         function onClicked(): void {
@@ -70,13 +70,13 @@ CollapsibleSection {
                         anchors.left: parent.left
                         anchors.right: parent.right
                         anchors.verticalCenter: parent.verticalCenter
-                        anchors.margins: Appearance.padding.normal
+                        anchors.margins: Tokens.padding.normal
 
-                        spacing: Appearance.spacing.normal
+                        spacing: Tokens.spacing.normal
 
                         StyledText {
                             text: modelData
-                            font.pointSize: Appearance.font.size.normal
+                            font.pointSize: Tokens.font.size.normal
                         }
 
                         Item {
@@ -90,7 +90,7 @@ CollapsibleSection {
                             sourceComponent: MaterialIcon {
                                 text: "check"
                                 color: Colours.palette.m3onSurfaceVariant
-                                font.pointSize: Appearance.font.size.large
+                                font.pointSize: Tokens.font.size.large
                             }
                         }
                     }
@@ -119,7 +119,7 @@ CollapsibleSection {
                 property alias contentHeight: monoFontList.contentHeight
 
                 clip: true
-                spacing: Appearance.spacing.small / 2
+                spacing: Tokens.spacing.small / 2
                 model: Qt.fontFamilies()
 
                 StyledScrollBar.vertical: StyledScrollBar {
@@ -133,10 +133,10 @@ CollapsibleSection {
 
                     width: ListView.view.width
                     color: Qt.alpha(Colours.tPalette.m3surfaceContainer, isCurrent ? Colours.tPalette.m3surfaceContainer.a : 0)
-                    radius: Appearance.rounding.normal
+                    radius: Tokens.rounding.normal
                     border.width: isCurrent ? 1 : 0
                     border.color: Colours.palette.m3primary
-                    implicitHeight: fontFamilyMonoRow.implicitHeight + Appearance.padding.normal * 2
+                    implicitHeight: fontFamilyMonoRow.implicitHeight + Tokens.padding.normal * 2
 
                     StateLayer {
                         function onClicked(): void {
@@ -151,13 +151,13 @@ CollapsibleSection {
                         anchors.left: parent.left
                         anchors.right: parent.right
                         anchors.verticalCenter: parent.verticalCenter
-                        anchors.margins: Appearance.padding.normal
+                        anchors.margins: Tokens.padding.normal
 
-                        spacing: Appearance.spacing.normal
+                        spacing: Tokens.spacing.normal
 
                         StyledText {
                             text: modelData
-                            font.pointSize: Appearance.font.size.normal
+                            font.pointSize: Tokens.font.size.normal
                         }
 
                         Item {
@@ -171,7 +171,7 @@ CollapsibleSection {
                             sourceComponent: MaterialIcon {
                                 text: "check"
                                 color: Colours.palette.m3onSurfaceVariant
-                                font.pointSize: Appearance.font.size.large
+                                font.pointSize: Tokens.font.size.large
                             }
                         }
                     }
@@ -202,7 +202,7 @@ CollapsibleSection {
                 property alias contentHeight: materialFontList.contentHeight
 
                 clip: true
-                spacing: Appearance.spacing.small / 2
+                spacing: Tokens.spacing.small / 2
                 model: Qt.fontFamilies().filter(f => f.startsWith("Material Symbols"))
 
                 StyledScrollBar.vertical: StyledScrollBar {
@@ -216,10 +216,10 @@ CollapsibleSection {
 
                     width: ListView.view.width
                     color: Qt.alpha(Colours.tPalette.m3surfaceContainer, isCurrent ? Colours.tPalette.m3surfaceContainer.a : 0)
-                    radius: Appearance.rounding.normal
+                    radius: Tokens.rounding.normal
                     border.width: isCurrent ? 1 : 0
                     border.color: Colours.palette.m3primary
-                    implicitHeight: fontFamilyMaterialRow.implicitHeight + Appearance.padding.normal * 2
+                    implicitHeight: fontFamilyMaterialRow.implicitHeight + Tokens.padding.normal * 2
 
                     StateLayer {
                         function onClicked(): void {
@@ -234,13 +234,13 @@ CollapsibleSection {
                         anchors.left: parent.left
                         anchors.right: parent.right
                         anchors.verticalCenter: parent.verticalCenter
-                        anchors.margins: Appearance.padding.normal
+                        anchors.margins: Tokens.padding.normal
 
-                        spacing: Appearance.spacing.normal
+                        spacing: Tokens.spacing.normal
 
                         StyledText {
                             text: modelData
-                            font.pointSize: Appearance.font.size.normal
+                            font.pointSize: Tokens.font.size.normal
                         }
 
                         Item {
@@ -254,7 +254,7 @@ CollapsibleSection {
                             sourceComponent: MaterialIcon {
                                 text: "check"
                                 color: Colours.palette.m3onSurfaceVariant
-                                font.pointSize: Appearance.font.size.large
+                                font.pointSize: Tokens.font.size.large
                             }
                         }
                     }
@@ -264,7 +264,7 @@ CollapsibleSection {
     }
 
     SectionContainer {
-        contentSpacing: Appearance.spacing.normal
+        contentSpacing: Tokens.spacing.normal
 
         SliderInput {
             Layout.fillWidth: true

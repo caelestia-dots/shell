@@ -3,8 +3,8 @@ pragma ComponentBehavior: Bound
 import ".."
 import QtQuick
 import QtQuick.Layouts
+import Caelestia.Config
 import qs.services
-import qs.config
 
 RowLayout {
     id: root
@@ -20,7 +20,7 @@ RowLayout {
 
     signal valueModified(value: real)
 
-    spacing: Appearance.spacing.small
+    spacing: Tokens.spacing.small
 
     onValueChanged: {
         if (!root.isEditing) {
@@ -73,23 +73,23 @@ RowLayout {
             root.isEditing = false;
         }
 
-        padding: Appearance.padding.small
-        leftPadding: Appearance.padding.normal
-        rightPadding: Appearance.padding.normal
+        padding: Tokens.padding.small
+        leftPadding: Tokens.padding.normal
+        rightPadding: Tokens.padding.normal
 
         background: StyledRect {
             implicitWidth: 100
-            radius: Appearance.rounding.small
+            radius: Tokens.rounding.small
             color: Colours.tPalette.m3surfaceContainerHigh
         }
     }
 
     StyledRect {
-        radius: Appearance.rounding.small
+        radius: Tokens.rounding.small
         color: Colours.palette.m3primary
 
         implicitWidth: implicitHeight
-        implicitHeight: upIcon.implicitHeight + Appearance.padding.small * 2
+        implicitHeight: upIcon.implicitHeight + Tokens.padding.small * 2
 
         StateLayer {
             id: upState
@@ -120,11 +120,11 @@ RowLayout {
     }
 
     StyledRect {
-        radius: Appearance.rounding.small
+        radius: Tokens.rounding.small
         color: Colours.palette.m3primary
 
         implicitWidth: implicitHeight
-        implicitHeight: downIcon.implicitHeight + Appearance.padding.small * 2
+        implicitHeight: downIcon.implicitHeight + Tokens.padding.small * 2
 
         StateLayer {
             id: downState

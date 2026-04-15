@@ -5,7 +5,7 @@ import QtQuick
 import Quickshell
 import Quickshell.Io
 import Caelestia
-import qs.config
+import Caelestia.Config
 import qs.utils
 
 Singleton {
@@ -15,17 +15,17 @@ Singleton {
     property int currentIndex: -1
     property bool loading: false
     property bool isManualSeeking: false
-    property bool lyricsVisible: Config.services.showLyrics
+    property bool lyricsVisible: GlobalConfig.services.showLyrics
     property string backend: "Local"
-    property string preferredBackend: Config.services.lyricsBackend
+    property string preferredBackend: GlobalConfig.services.lyricsBackend
     property real currentSongId: 0
     property string loadedLocalFile: ""
     property real offset
     property int currentRequestId: 0
     property var lyricsMap: ({})
 
-    readonly property string lyricsDir: Paths.absolutePath(Config.paths.lyricsDir)
-    readonly property string lyricsMapFile: Paths.absolutePath(Config.paths.lyricsDir) + "/lyrics_map.json"
+    readonly property string lyricsDir: Paths.absolutePath(GlobalConfig.paths.lyricsDir)
+    readonly property string lyricsMapFile: lyricsDir + "/lyrics_map.json"
     readonly property alias model: lyricsModel
     readonly property alias candidatesModel: fetchedCandidatesModel
     readonly property var _netEaseHeaders: ({
@@ -68,8 +68,7 @@ Singleton {
     }
 
     function toggleVisibility() {
-        Config.services.showLyrics = !Config.services.showLyrics;
-        Config.save();
+        GlobalConfig.services.showLyrics = !GlobalConfig.services.showLyrics;
     }
 
     function loadLyrics() {
@@ -272,9 +271,8 @@ Singleton {
     }
 
     onPreferredBackendChanged: {
-        if (Config.services.lyricsBackend !== preferredBackend) {
-            Config.services.lyricsBackend = preferredBackend;
-            Config.save();
+        if (GlobalConfig.services.lyricsBackend !== preferredBackend) {
+            GlobalConfig.services.lyricsBackend = preferredBackend;
         }
     }
 

@@ -45,12 +45,9 @@ Singleton {
             ControlCenter {
                 id: cc
 
-                function close(): void {
-                    win.destroy();
-                }
-
                 anchors.fill: parent
                 screen: win.screen
+                onClose: win.destroy()
                 floating: true
             }
 

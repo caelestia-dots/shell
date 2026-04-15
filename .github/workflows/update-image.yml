@@ -23,7 +23,7 @@ jobs:
         run: |
           cat > /tmp/Dockerfile <<EOF
           FROM archlinux:latest
-          RUN pacman -Syu --needed --noconfirm sudo base-devel cmake ninja fish git clazy qt6-declarative python libpipewire aubio libqalculate && \
+          RUN pacman -Syu --needed --noconfirm sudo base-devel cmake ninja fish git clazy qt6-declarative qt6-shadertools python libpipewire aubio libqalculate && \
               useradd -m builder && \
               echo 'builder ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers && \
               sudo -u builder git clone https://aur.archlinux.org/yay-bin.git /home/builder/yay-bin && \

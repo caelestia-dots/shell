@@ -3,7 +3,7 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import Quickshell.Io
 import Caelestia
-import qs.config
+import Caelestia.Config
 
 // TODO: handle this better later
 
@@ -106,7 +106,7 @@ Item {
         arr = arr.filter(i => i.layoutIndex !== activeIndex);
         arr.forEach(i => _visibleModel.append(i));
 
-        if (!Config.utilities.toasts.kbLimit)
+        if (!GlobalConfig.utilities.toasts.kbLimit)
             return;
 
         if (_layoutsModel.count > 4) {

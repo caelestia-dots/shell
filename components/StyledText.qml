@@ -1,8 +1,8 @@
 pragma ComponentBehavior: Bound
 
 import QtQuick
+import Caelestia.Config
 import qs.services
-import qs.config
 
 Text {
     id: root
@@ -11,13 +11,13 @@ Text {
     property string animateProp: "scale"
     property real animateFrom: 0
     property real animateTo: 1
-    property int animateDuration: Appearance.anim.durations.normal
+    property int animateDuration: Tokens.anim.durations.normal
 
     renderType: Text.NativeRendering
     textFormat: Text.PlainText
     color: Colours.palette.m3onSurface
-    font.family: Appearance.font.family.sans
-    font.pointSize: Appearance.font.size.smaller
+    font.family: Tokens.font.family.sans
+    font.pointSize: Tokens.font.size.smaller
 
     Behavior on color {
         CAnim {}
@@ -29,12 +29,12 @@ Text {
         SequentialAnimation {
             Anim {
                 to: root.animateFrom
-                easing.bezierCurve: Appearance.anim.curves.standardAccel
+                easing: Tokens.anim.standardAccel
             }
             PropertyAction {}
             Anim {
                 to: root.animateTo
-                easing.bezierCurve: Appearance.anim.curves.standardDecel
+                easing: Tokens.anim.standardDecel
             }
         }
     }
@@ -43,6 +43,5 @@ Text {
         target: root
         property: root.animateProp
         duration: root.animateDuration / 2
-        easing.type: Easing.BezierSpline
     }
 }

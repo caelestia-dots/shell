@@ -1,14 +1,14 @@
 import QtQuick
+import Caelestia.Config
 import qs.components
 import qs.services
-import qs.config
 
 Item {
     id: root
 
     required property DrawerVisibilities visibilities
 
-    implicitWidth: icon.implicitHeight + Appearance.padding.small * 2
+    implicitWidth: icon.implicitHeight + Tokens.padding.small * 2
     implicitHeight: icon.implicitHeight
 
     StateLayer {
@@ -20,8 +20,8 @@ Item {
         anchors.fill: undefined
         anchors.centerIn: parent
         implicitWidth: implicitHeight
-        implicitHeight: icon.implicitHeight + Appearance.padding.small * 2
-        radius: Appearance.rounding.full
+        implicitHeight: icon.implicitHeight + Tokens.padding.small * 2
+        radius: Tokens.rounding.full
     }
 
     MaterialIcon {
@@ -33,6 +33,6 @@ Item {
         text: "power_settings_new"
         color: Colours.palette.m3error
         font.bold: true
-        font.pointSize: Appearance.font.size.normal
+        font.pointSize: Tokens.font.size.normal
     }
 }

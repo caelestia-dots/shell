@@ -2,9 +2,9 @@ pragma ComponentBehavior: Bound
 
 import ".."
 import QtQuick
+import Caelestia.Config
 import qs.components
 import qs.services
-import qs.config
 
 Item {
     id: root
@@ -22,14 +22,14 @@ Item {
     signal editingFinished
 
     implicitWidth: 70
-    implicitHeight: inputField.implicitHeight + Appearance.padding.small * 2
+    implicitHeight: inputField.implicitHeight + Tokens.padding.small * 2
 
     StyledRect {
         id: container
 
         anchors.fill: parent
         color: inputHover.containsMouse || inputField.activeFocus ? Colours.layer(Colours.palette.m3surfaceContainer, 3) : Colours.layer(Colours.palette.m3surfaceContainer, 2)
-        radius: Appearance.rounding.small
+        radius: Tokens.rounding.small
         border.width: 1
         border.color: inputField.activeFocus ? Colours.palette.m3primary : Qt.alpha(Colours.palette.m3outline, 0.3)
         opacity: root.enabled ? 1 : 0.5
@@ -55,7 +55,7 @@ Item {
             id: inputField
 
             anchors.centerIn: parent
-            width: parent.width - Appearance.padding.normal
+            width: parent.width - Tokens.padding.normal
             horizontalAlignment: root.horizontalAlignment
             validator: root.validator
             readOnly: root.readOnly

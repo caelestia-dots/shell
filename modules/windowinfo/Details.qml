@@ -1,9 +1,9 @@
 import QtQuick
 import QtQuick.Layouts
 import Quickshell.Hyprland
+import Caelestia.Config
 import qs.components
 import qs.services
-import qs.config
 
 ColumnLayout {
     id: root
@@ -11,15 +11,15 @@ ColumnLayout {
     required property HyprlandToplevel client
 
     anchors.fill: parent
-    spacing: Appearance.spacing.small
+    spacing: Tokens.spacing.small
 
     Label {
-        Layout.topMargin: Appearance.padding.large * 2
+        Layout.topMargin: Tokens.padding.large * 2
 
         text: root.client?.title ?? qsTr("No active client")
         wrapMode: Text.WrapAtWordBoundaryOrAnywhere
 
-        font.pointSize: Appearance.font.size.large
+        font.pointSize: Tokens.font.size.large
         font.weight: 500
     }
 
@@ -27,16 +27,16 @@ ColumnLayout {
         text: root.client?.lastIpcObject.class ?? qsTr("No active client")
         color: Colours.palette.m3tertiary
 
-        font.pointSize: Appearance.font.size.larger
+        font.pointSize: Tokens.font.size.larger
     }
 
     StyledRect {
         Layout.fillWidth: true
         Layout.preferredHeight: 1
-        Layout.leftMargin: Appearance.padding.large * 2
-        Layout.rightMargin: Appearance.padding.large * 2
-        Layout.topMargin: Appearance.spacing.normal
-        Layout.bottomMargin: Appearance.spacing.large
+        Layout.leftMargin: Tokens.padding.large * 2
+        Layout.rightMargin: Tokens.padding.large * 2
+        Layout.topMargin: Tokens.spacing.normal
+        Layout.bottomMargin: Tokens.spacing.large
 
         color: Colours.palette.m3secondary
     }
@@ -130,11 +130,11 @@ ColumnLayout {
         required property string text
         property alias color: icon.color
 
-        Layout.leftMargin: Appearance.padding.large
-        Layout.rightMargin: Appearance.padding.large
+        Layout.leftMargin: Tokens.padding.large
+        Layout.rightMargin: Tokens.padding.large
         Layout.fillWidth: true
 
-        spacing: Appearance.spacing.smaller
+        spacing: Tokens.spacing.smaller
 
         MaterialIcon {
             id: icon
@@ -149,13 +149,13 @@ ColumnLayout {
 
             text: detail.text
             elide: Text.ElideRight
-            font.pointSize: Appearance.font.size.normal
+            font.pointSize: Tokens.font.size.normal
         }
     }
 
     component Label: StyledText {
-        Layout.leftMargin: Appearance.padding.large
-        Layout.rightMargin: Appearance.padding.large
+        Layout.leftMargin: Tokens.padding.large
+        Layout.rightMargin: Tokens.padding.large
         Layout.fillWidth: true
         elide: Text.ElideRight
         horizontalAlignment: Text.AlignHCenter

@@ -1,13 +1,13 @@
 import QtQuick
+import Caelestia.Config
 import qs.components
 import qs.services
-import qs.config
 import qs.modules.controlcenter
 
 Item {
     id: root
 
-    implicitWidth: icon.implicitHeight + Appearance.padding.small * 2
+    implicitWidth: icon.implicitHeight + Tokens.padding.small * 2
     implicitHeight: icon.implicitHeight
 
     StateLayer {
@@ -21,8 +21,8 @@ Item {
         anchors.fill: undefined
         anchors.centerIn: parent
         implicitWidth: implicitHeight
-        implicitHeight: icon.implicitHeight + Appearance.padding.small * 2
-        radius: Appearance.rounding.full
+        implicitHeight: icon.implicitHeight + Tokens.padding.small * 2
+        radius: Tokens.rounding.full
     }
 
     MaterialIcon {
@@ -34,6 +34,6 @@ Item {
         text: "settings"
         color: Colours.palette.m3onSurface
         font.bold: true
-        font.pointSize: Appearance.font.size.normal
+        font.pointSize: Tokens.font.size.normal
     }
 }

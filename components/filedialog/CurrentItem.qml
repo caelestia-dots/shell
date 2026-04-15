@@ -1,16 +1,16 @@
 import ".."
 import QtQuick
 import QtQuick.Shapes
+import Caelestia.Config
 import qs.services
-import qs.config
 
 Item {
     id: root
 
     required property var currentItem
 
-    implicitWidth: content.implicitWidth + Appearance.padding.larger + content.anchors.rightMargin
-    implicitHeight: currentItem ? content.implicitHeight + Appearance.padding.normal + content.anchors.bottomMargin : 0
+    implicitWidth: content.implicitWidth + Tokens.padding.larger + content.anchors.rightMargin
+    implicitHeight: currentItem ? content.implicitHeight + Tokens.padding.normal + content.anchors.bottomMargin : 0
 
     Shape {
         preferredRendererType: Shape.CurveRenderer
@@ -18,7 +18,7 @@ Item {
         ShapePath {
             id: path
 
-            readonly property real rounding: Appearance.rounding.small
+            readonly property real rounding: Tokens.rounding.small
             readonly property bool flatten: root.implicitHeight < rounding * 2
             readonly property real roundingY: flatten ? root.implicitHeight / 2 : rounding
 
@@ -76,8 +76,8 @@ Item {
 
             anchors.right: parent.right
             anchors.bottom: parent.bottom
-            anchors.rightMargin: Appearance.padding.larger - Appearance.padding.small
-            anchors.bottomMargin: Appearance.padding.normal - Appearance.padding.small
+            anchors.rightMargin: Tokens.padding.larger - Tokens.padding.small
+            anchors.bottomMargin: Tokens.padding.normal - Tokens.padding.small
 
             Connections {
                 function onCurrentItemChanged(): void {

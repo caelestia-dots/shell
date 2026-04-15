@@ -3,8 +3,8 @@ pragma Singleton
 import QtQuick
 import Quickshell
 import Quickshell.Io
+import Caelestia.Config
 import Caelestia.Internal
-import qs.config
 
 Singleton {
     id: root
@@ -155,7 +155,7 @@ Singleton {
     }
 
     Timer {
-        interval: Config.dashboard.resourceUpdateInterval
+        interval: GlobalConfig.dashboard.resourceUpdateInterval
         running: root.refCount > 0
         repeat: true
         triggeredOnStart: true

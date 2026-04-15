@@ -4,10 +4,10 @@ import QtQuick
 import QtQuick.Controls
 import Quickshell
 import Quickshell.Widgets
+import Caelestia.Config
 import qs.components
 import qs.components.controls
 import qs.services
-import qs.config
 
 Item {
     id: root
@@ -77,7 +77,7 @@ Item {
             implicitHeight: parent.implicitHeight * 2
 
             color: Colours.palette.m3primary
-            radius: Appearance.rounding.full
+            radius: Tokens.rounding.full
         }
 
         Behavior on x {
@@ -163,16 +163,15 @@ Item {
                     properties: "implicitWidth,implicitHeight"
                     from: 0
                     to: rippleAnim.radius * 2
-                    duration: Appearance.anim.durations.normal
-                    easing.bezierCurve: Appearance.anim.curves.standardDecel
+                    duration: Tokens.anim.durations.normal
+                    easing: Tokens.anim.standardDecel
                 }
                 Anim {
                     target: ripple
                     property: "opacity"
                     to: 0
-                    duration: Appearance.anim.durations.normal
-                    easing.type: Easing.BezierSpline
-                    easing.bezierCurve: Appearance.anim.curves.standard
+                    duration: Tokens.anim.durations.normal
+                    easing: Tokens.anim.standard
                 }
             }
 
@@ -182,10 +181,10 @@ Item {
                 anchors.left: parent.left
                 anchors.right: parent.right
                 anchors.verticalCenter: parent.verticalCenter
-                implicitHeight: parent.height + Config.dashboard.sizes.tabIndicatorSpacing * 2
+                implicitHeight: parent.height + Tokens.sizes.dashboard.tabIndicatorSpacing * 2
 
                 color: "transparent"
-                radius: Appearance.rounding.small
+                radius: Tokens.rounding.small
 
                 StyledRect {
                     id: stateLayer
@@ -203,7 +202,7 @@ Item {
                 StyledRect {
                     id: ripple
 
-                    radius: Appearance.rounding.full
+                    radius: Tokens.rounding.full
                     color: tab.current ? Colours.palette.m3primary : Colours.palette.m3onSurface
                     opacity: 0
 
@@ -223,7 +222,7 @@ Item {
                 text: tab.iconName
                 color: tab.current ? Colours.palette.m3primary : Colours.palette.m3onSurfaceVariant
                 fill: tab.current ? 1 : 0
-                font.pointSize: Appearance.font.size.large
+                font.pointSize: Tokens.font.size.large
 
                 Behavior on fill {
                     Anim {}

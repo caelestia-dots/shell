@@ -4,11 +4,11 @@ import ".."
 import QtQuick
 import QtQuick.Layouts
 import Quickshell
+import Caelestia.Config
 import qs.components
 import qs.components.containers
 import qs.components.controls
 import qs.services
-import qs.config
 
 ColumnLayout {
     id: root
@@ -27,7 +27,7 @@ ColumnLayout {
 
     signal itemSelected(var item)
 
-    spacing: Appearance.spacing.small
+    spacing: Tokens.spacing.small
 
     Loader {
         id: headerLoader
@@ -41,13 +41,13 @@ ColumnLayout {
     RowLayout {
         Layout.fillWidth: true
         Layout.topMargin: root.headerComponent ? 0 : 0
-        spacing: Appearance.spacing.small
+        spacing: Tokens.spacing.small
         visible: root.title !== "" || root.description !== ""
 
         StyledText {
             visible: root.title !== ""
             text: root.title
-            font.pointSize: Appearance.font.size.large
+            font.pointSize: Tokens.font.size.large
             font.weight: 500
         }
 
@@ -78,7 +78,7 @@ ColumnLayout {
         model: root.model
         delegate: root.delegate
 
-        spacing: Appearance.spacing.small / 2
+        spacing: Tokens.spacing.small / 2
         interactive: false
         clip: false
     }

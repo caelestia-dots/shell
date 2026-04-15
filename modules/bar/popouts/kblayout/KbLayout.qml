@@ -3,9 +3,9 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
+import Caelestia.Config
 import qs.components
 import qs.services
-import qs.config
 
 ColumnLayout {
     id: root
@@ -14,8 +14,8 @@ ColumnLayout {
         kb.refresh();
     }
 
-    spacing: Appearance.spacing.small
-    width: Config.bar.sizes.kbLayoutWidth
+    spacing: Tokens.spacing.small
+    width: Tokens.sizes.bar.kbLayoutWidth
 
     Component.onCompleted: kb.start()
 
@@ -24,8 +24,8 @@ ColumnLayout {
     }
 
     StyledText {
-        Layout.topMargin: Appearance.padding.normal
-        Layout.rightMargin: Appearance.padding.small
+        Layout.topMargin: Tokens.padding.normal
+        Layout.rightMargin: Tokens.padding.small
         text: qsTr("Keyboard Layouts")
         font.weight: 500
     }
@@ -36,14 +36,14 @@ ColumnLayout {
         model: kb.visibleModel
 
         Layout.fillWidth: true
-        Layout.rightMargin: Appearance.padding.small
-        Layout.topMargin: Appearance.spacing.small
+        Layout.rightMargin: Tokens.padding.small
+        Layout.topMargin: Tokens.spacing.small
 
         clip: true
         interactive: true
         implicitHeight: Math.min(contentHeight, 320)
         visible: kb.visibleModel.count > 0
-        spacing: Appearance.spacing.small
+        spacing: Tokens.spacing.small
 
         add: Transition {
             NumberAnimation {
@@ -88,7 +88,7 @@ ColumnLayout {
             readonly property bool isDisabled: layoutIndex > 3
 
             width: list.width
-            height: Math.max(36, rowText.implicitHeight + Appearance.padding.small * 2)
+            height: Math.max(36, rowText.implicitHeight + Tokens.padding.small * 2)
             ToolTip.visible: isDisabled && layer.containsMouse
             ToolTip.text: "XKB limitation: maximum 4 layouts allowed"
 
@@ -104,7 +104,7 @@ ColumnLayout {
                 anchors.right: parent.right
                 anchors.verticalCenter: parent.verticalCenter
                 implicitHeight: parent.height - 4
-                radius: Appearance.rounding.full
+                radius: Tokens.rounding.full
                 enabled: !kbDelegate.isDisabled
             }
 
@@ -114,8 +114,8 @@ ColumnLayout {
                 anchors.verticalCenter: layer.verticalCenter
                 anchors.left: layer.left
                 anchors.right: layer.right
-                anchors.leftMargin: Appearance.padding.small
-                anchors.rightMargin: Appearance.padding.small
+                anchors.leftMargin: Tokens.padding.small
+                anchors.rightMargin: Tokens.padding.small
                 text: kbDelegate.label
                 elide: Text.ElideRight
                 opacity: kbDelegate.isDisabled ? 0.4 : 1.0
@@ -126,8 +126,8 @@ ColumnLayout {
     Rectangle {
         visible: kb.activeLabel.length > 0
         Layout.fillWidth: true
-        Layout.rightMargin: Appearance.padding.small
-        Layout.topMargin: Appearance.spacing.small
+        Layout.rightMargin: Tokens.padding.small
+        Layout.topMargin: Tokens.spacing.small
 
         implicitHeight: 1
         color: Colours.palette.m3onSurfaceVariant
@@ -139,9 +139,9 @@ ColumnLayout {
 
         visible: kb.activeLabel.length > 0
         Layout.fillWidth: true
-        Layout.rightMargin: Appearance.padding.small
-        Layout.topMargin: Appearance.spacing.small
-        spacing: Appearance.spacing.small
+        Layout.rightMargin: Tokens.padding.small
+        Layout.topMargin: Tokens.spacing.small
+        spacing: Tokens.spacing.small
 
         opacity: 1
         scale: 1

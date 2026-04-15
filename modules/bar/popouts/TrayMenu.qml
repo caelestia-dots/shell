@@ -4,9 +4,9 @@ import QtQuick
 import QtQuick.Controls
 import Quickshell
 import Quickshell.Widgets
+import Caelestia.Config
 import qs.components
 import qs.services
-import qs.config
 
 StackView {
     id: root
@@ -45,8 +45,8 @@ StackView {
         property bool isSubMenu
         property bool shown
 
-        padding: Appearance.padding.smaller
-        spacing: Appearance.spacing.small
+        padding: Tokens.padding.smaller
+        spacing: Tokens.spacing.small
 
         opacity: shown ? 1 : 0
         scale: shown ? 1 : 0.8
@@ -78,10 +78,10 @@ StackView {
 
                 required property QsMenuEntry modelData
 
-                implicitWidth: Config.bar.sizes.trayMenuWidth
+                implicitWidth: Tokens.sizes.bar.trayMenuWidth
                 implicitHeight: modelData.isSeparator ? 1 : children.implicitHeight
 
-                radius: Appearance.rounding.full
+                radius: Tokens.rounding.full
                 color: modelData.isSeparator ? Colours.palette.m3outlineVariant : "transparent"
 
                 Loader {
@@ -110,9 +110,9 @@ StackView {
                                 }
                             }
 
-                            anchors.margins: -Appearance.padding.small / 2
-                            anchors.leftMargin: -Appearance.padding.smaller
-                            anchors.rightMargin: -Appearance.padding.smaller
+                            anchors.margins: -Tokens.padding.small / 2
+                            anchors.leftMargin: -Tokens.padding.smaller
+                            anchors.rightMargin: -Tokens.padding.smaller
 
                             radius: item.radius
                             disabled: !item.modelData.enabled
@@ -138,7 +138,7 @@ StackView {
                             id: label
 
                             anchors.left: icon.right
-                            anchors.leftMargin: icon.active ? Appearance.spacing.smaller : 0
+                            anchors.leftMargin: icon.active ? Tokens.spacing.smaller : 0
 
                             text: labelMetrics.elidedText
                             color: item.modelData.enabled ? Colours.palette.m3onSurface : Colours.palette.m3outline
@@ -152,7 +152,7 @@ StackView {
                             font.family: label.font.family
 
                             elide: Text.ElideRight
-                            elideWidth: Config.bar.sizes.trayMenuWidth - (icon.active ? icon.implicitWidth + label.anchors.leftMargin : 0) - (expand.active ? expand.implicitWidth + Appearance.spacing.normal : 0)
+                            elideWidth: root.Tokens.sizes.bar.trayMenuWidth - (icon.active ? icon.implicitWidth + label.anchors.leftMargin : 0) - (expand.active ? expand.implicitWidth + root.Tokens.spacing.normal : 0)
                         }
 
                         Loader {
@@ -180,7 +180,7 @@ StackView {
 
             sourceComponent: Item {
                 implicitWidth: back.implicitWidth
-                implicitHeight: back.implicitHeight + Appearance.spacing.small / 2
+                implicitHeight: back.implicitHeight + Tokens.spacing.small / 2
 
                 Item {
                     anchors.bottom: parent.bottom
@@ -189,11 +189,11 @@ StackView {
 
                     StyledRect {
                         anchors.fill: parent
-                        anchors.margins: -Appearance.padding.small / 2
-                        anchors.leftMargin: -Appearance.padding.smaller
-                        anchors.rightMargin: -Appearance.padding.smaller * 2
+                        anchors.margins: -Tokens.padding.small / 2
+                        anchors.leftMargin: -Tokens.padding.smaller
+                        anchors.rightMargin: -Tokens.padding.smaller * 2
 
-                        radius: Appearance.rounding.full
+                        radius: Tokens.rounding.full
                         color: Colours.palette.m3secondaryContainer
 
                         StateLayer {

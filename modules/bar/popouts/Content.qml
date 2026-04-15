@@ -4,8 +4,8 @@ import "./kblayout"
 import QtQuick
 import Quickshell
 import Quickshell.Services.SystemTray
+import Caelestia.Config
 import qs.components
-import qs.config
 
 Item {
     id: root
@@ -14,16 +14,14 @@ Item {
     readonly property Popout currentPopout: content.children.find(c => c.shouldBeActive) ?? null
     readonly property Item current: currentPopout?.item ?? null
 
-    anchors.centerIn: parent
-
-    implicitWidth: (currentPopout?.implicitWidth ?? 0) + Appearance.padding.large * 2
-    implicitHeight: (currentPopout?.implicitHeight ?? 0) + Appearance.padding.large * 2
+    implicitWidth: (currentPopout?.implicitWidth ?? 0) + Tokens.padding.large * 2
+    implicitHeight: (currentPopout?.implicitHeight ?? 0) + Tokens.padding.large * 2
 
     Item {
         id: content
 
         anchors.fill: parent
-        anchors.margins: Appearance.padding.large
+        anchors.margins: Tokens.padding.large
 
         Popout {
             name: "activewindow"
@@ -130,7 +128,7 @@ Item {
 
         Repeater {
             model: ScriptModel {
-                values: SystemTray.items.values.filter(i => !Config.bar.tray.hiddenIcons.includes(i.id))
+                values: SystemTray.items.values.filter(i => !GlobalConfig.bar.tray.hiddenIcons.includes(i.id))
             }
 
             Popout {
@@ -171,8 +169,7 @@ Item {
         required property string name
         readonly property bool shouldBeActive: root.popouts.currentName === name
 
-        anchors.verticalCenter: parent.verticalCenter
-        anchors.right: parent.right
+        anchors.centerIn: parent
 
         opacity: 0
         scale: 0.8
@@ -197,7 +194,7 @@ Item {
                 SequentialAnimation {
                     Anim {
                         properties: "opacity,scale"
-                        duration: Appearance.anim.durations.small
+                        duration: Tokens.anim.durations.small
                     }
                     PropertyAction {
                         target: popout

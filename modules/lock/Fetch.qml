@@ -3,39 +3,39 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import QtQuick.Layouts
 import Quickshell.Services.UPower
+import Caelestia.Config
 import qs.components
 import qs.components.effects
 import qs.services
-import qs.config
 import qs.utils
 
 ColumnLayout {
     id: root
 
     anchors.fill: parent
-    anchors.margins: Appearance.padding.large * 2
-    anchors.topMargin: Appearance.padding.large
+    anchors.margins: Tokens.padding.large * 2
+    anchors.topMargin: Tokens.padding.large
 
-    spacing: Appearance.spacing.small
+    spacing: Tokens.spacing.small
 
     RowLayout {
         Layout.fillWidth: true
         Layout.fillHeight: false
-        spacing: Appearance.spacing.normal
+        spacing: Tokens.spacing.normal
 
         StyledRect {
-            implicitWidth: prompt.implicitWidth + Appearance.padding.normal * 2
-            implicitHeight: prompt.implicitHeight + Appearance.padding.normal * 2
+            implicitWidth: prompt.implicitWidth + Tokens.padding.normal * 2
+            implicitHeight: prompt.implicitHeight + Tokens.padding.normal * 2
 
             color: Colours.palette.m3primary
-            radius: Appearance.rounding.small
+            radius: Tokens.rounding.small
 
             MonoText {
                 id: prompt
 
                 anchors.centerIn: parent
                 text: ">"
-                font.pointSize: root.width > 400 ? Appearance.font.size.larger : Appearance.font.size.normal
+                font.pointSize: root.width > 400 ? Tokens.font.size.larger : Tokens.font.size.normal
                 color: Colours.palette.m3onPrimary
             }
         }
@@ -43,7 +43,7 @@ ColumnLayout {
         MonoText {
             Layout.fillWidth: true
             text: "caelestiafetch.sh"
-            font.pointSize: root.width > 400 ? Appearance.font.size.larger : Appearance.font.size.normal
+            font.pointSize: root.width > 400 ? Tokens.font.size.larger : Tokens.font.size.normal
             elide: Text.ElideRight
         }
 
@@ -71,10 +71,10 @@ ColumnLayout {
 
         ColumnLayout {
             Layout.fillWidth: true
-            Layout.topMargin: Appearance.padding.normal
-            Layout.bottomMargin: Appearance.padding.normal
+            Layout.topMargin: Tokens.padding.normal
+            Layout.bottomMargin: Tokens.padding.normal
             Layout.leftMargin: iconLoader.active ? 0 : width * 0.1
-            spacing: Appearance.spacing.normal
+            spacing: Tokens.spacing.normal
 
             WrappedLoader {
                 Layout.fillWidth: true
@@ -125,18 +125,18 @@ ColumnLayout {
         active: root.height > 180
 
         sourceComponent: RowLayout {
-            spacing: Appearance.spacing.large
+            spacing: Tokens.spacing.large
 
             Repeater {
-                model: Math.max(0, Math.min(8, root.width / (Appearance.font.size.larger * 2 + Appearance.spacing.large)))
+                model: Math.max(0, Math.min(8, root.width / (Tokens.font.size.larger * 2 + Tokens.spacing.large)))
 
                 StyledRect {
                     required property int index
 
                     implicitWidth: implicitHeight
-                    implicitHeight: Appearance.font.size.larger * 2
+                    implicitHeight: Tokens.font.size.larger * 2
                     color: Colours.palette[`term${index}`]
-                    radius: Appearance.rounding.small
+                    radius: Tokens.rounding.small
                 }
             }
         }
@@ -168,11 +168,11 @@ ColumnLayout {
 
     component FetchText: MonoText {
         Layout.fillWidth: true
-        font.pointSize: root.width > 400 ? Appearance.font.size.larger : Appearance.font.size.normal
+        font.pointSize: root.width > 400 ? Tokens.font.size.larger : Tokens.font.size.normal
         elide: Text.ElideRight
     }
 
     component MonoText: StyledText {
-        font.family: Appearance.font.family.mono
+        font.family: Tokens.font.family.mono
     }
 }

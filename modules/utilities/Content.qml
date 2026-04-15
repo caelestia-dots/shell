@@ -1,8 +1,8 @@
 import "cards"
 import QtQuick
 import QtQuick.Layouts
+import Caelestia.Config
 import qs.components
-import qs.config
 import qs.modules.bar.popouts as BarPopouts
 
 Item {
@@ -11,6 +11,7 @@ Item {
     required property var props
     required property DrawerVisibilities visibilities
     required property BarPopouts.Wrapper popouts
+    required property matrix4x4 deformMatrix
 
     implicitWidth: layout.implicitWidth
     implicitHeight: layout.implicitHeight
@@ -19,7 +20,7 @@ Item {
         id: layout
 
         anchors.fill: parent
-        spacing: Appearance.spacing.normal
+        spacing: Tokens.spacing.normal
 
         IdleInhibit {}
 
@@ -37,5 +38,6 @@ Item {
 
     RecordingDeleteModal {
         props: root.props
+        deformMatrix: root.deformMatrix
     }
 }

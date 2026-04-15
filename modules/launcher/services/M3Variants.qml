@@ -3,14 +3,14 @@ pragma Singleton
 import ".."
 import QtQuick
 import Quickshell
-import qs.config
+import Caelestia.Config
 import qs.utils
 
 Searcher {
     id: root
 
     function transformSearch(search: string): string {
-        return search.slice(`${Config.launcher.actionPrefix}variant `.length);
+        return search.slice(`${GlobalConfig.launcher.actionPrefix}variant `.length);
     }
 
     list: [
@@ -69,7 +69,7 @@ Searcher {
             description: qsTr("All colours are grayscale, no chroma.")
         }
     ]
-    useFuzzy: Config.launcher.useFuzzy.variants
+    useFuzzy: GlobalConfig.launcher.useFuzzy.variants
 
     component Variant: QtObject {
         required property string variant

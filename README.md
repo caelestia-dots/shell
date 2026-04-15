@@ -205,22 +205,65 @@ git pull
 ## Configuring
 
 All configuration options should be put in `~/.config/caelestia/shell.json`. This file is _not_ created by
-default, you must create it manually.
+default, you must create it manually. Options that you omit from the config file will use their default
+values.
+
+### Per-monitor configuration
+
+You can configure options per-monitor in `~/.config/caelestia/monitors/<screen-name>/shell.json`. Options
+set in this file will **override** the respective options in the global config. Otherwise, the options will
+use their values from the global config.
+
+For example, to disable the bar on DP-1:
+
+**`~/.config/caelestia/monitors/DP-1/shell.json`**
+
+```json
+{
+    "bar": {
+        "persistent": false
+    }
+}
+```
+
+> [!NOTE]
+> Not all options are respect per-monitor overrides. Most notably, the following options will only read
+> from the global config, and ignore the respective option in per-monitor config files.
+>
+> <details><summary>Ignored options</summary>
+>
+> - `appearance` (`anim`, `transparency`)
+> - `general` (`logo`, `apps`, `idle`, `battery`)
+> - `bar.workspaces` (`perMonitorWorkspaces`, `specialWorkspaceIcons`, `windowIcons`)
+> - `bar.tray` (`iconSubs`, `hiddenIcons`)
+> - `dashboard` (`mediaUpdateInterval`, `resourceUpdateInterval`)
+> - `launcher` (`specialPrefix`, `actionPrefix`, `enableDangerousActions`, `vimKeybinds`,
+>   `favouriteApps`, `hiddenApps`, `actions`)
+> - `launcher.useFuzzy` (`apps`, `actions`, `schemes`, `variants`, `wallpapers`)
+> - `notifs` (`expire`, `fullscreen`, `defaultExpireTimeout`, `actionOnClick`)
+> - `lock` (`enableFprint`, `maxFprintTries`)
+> - `utilities` (`toasts`, `vpn`)
+> - `services` (`weatherLocation`, `useFahrenheit`, `useFahrenheitPerformance`, `useTwelveHourClock`,
+>   `gpuType`, `visualiserBars`, `audioIncrement`, `brightnessIncrement`, `maxVolume`, `smartScheme`,
+>   `defaultPlayer`, `playerAliases`, `showLyrics`, `lyricsBackend`)
+> - `paths` (`wallpaperDir`, `lyricsDir`)
+>
+> </details>
 
 ### Example configuration
 
 > [!NOTE]
-> The example configuration only includes recommended configuration options. For more advanced customisation
-> such as modifying the size of individual items or changing constants in the code, there are some other
-> options which can be found in the source files in the `config` directory.
+> The example configuration includes ALL configuration options in `shell.json`. You are
+> **not** recommended to copy and paste this entire configuration into `shell.json`.
+> This is meant to serve as a reference of all the available options, and you should
+> only add the ones you want to change to `shell.json`.
 
 <details><summary>Example</summary>
 
 ```json
 {
+    "enabled": true,
     "appearance": {
-        "mediaGifSpeedAdjustment": 300,
-        "sessionGifSpeed": 0.7,
         "anim": {
             "durations": {
                 "scale": 1
@@ -254,6 +297,8 @@ default, you must create it manually.
     },
     "general": {
         "logo": "caelestia",
+        "mediaGifSpeedAdjustment": 300,
+        "sessionGifSpeed": 0.7,
         "apps": {
             "terminal": ["foot"],
             "audio": ["pavucontrol"],
@@ -438,13 +483,18 @@ default, you must create it manually.
     },
     "border": {
         "rounding": 25,
+        "smoothing": 32,
         "thickness": 10
     },
     "dashboard": {
         "enabled": true,
+        "showOnHover": true,
+        "showDashboard": true,
+        "showMedia": true,
+        "showPerformance": true,
+        "showWeather": true,
         "dragThreshold": 50,
-        "mediaUpdateInterval": 500,
-        "showOnHover": true
+        "mediaUpdateInterval": 500
     },
     "launcher": {
         "actionPrefix": ">",
@@ -703,6 +753,22 @@ default, you must create it manually.
 ```
 
 </details>
+
+### Advanced configuration
+
+> [!WARNING]
+> Do NOT change any of these options if you do not know what you are doing. These options control the
+> tokens used internally within the shell, and can cause visual issues if changed. The existence of
+> the options are also not guaranteed across versions, and may change or be removed without notice.
+
+A separate `~/.config/caelestia/shell-tokens.json` file allows editing the internal tokens without
+touching the source code of the shell. These tokens affect, for example, individual rounding,
+spacing, padding, font size, animation duration and easing curves tokens, and the sizes of certain
+components. The appearance scale values in `shell.json` are multiplied against these base
+token values to produce the final computed values.
+
+Per-monitor token overrides are also available at
+`~/.config/caelestia/monitors/<screen-name>/shell-tokens.json`.
 
 ### Home Manager Module
 

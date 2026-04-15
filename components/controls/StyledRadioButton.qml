@@ -1,13 +1,13 @@
 import QtQuick
 import QtQuick.Templates
+import Caelestia.Config
 import qs.components
 import qs.services
-import qs.config
 
 RadioButton {
     id: root
 
-    font.pointSize: Appearance.font.size.smaller
+    font.pointSize: Tokens.font.size.smaller
 
     implicitWidth: implicitIndicatorWidth + implicitContentWidth + contentItem.anchors.leftMargin
     implicitHeight: Math.max(implicitIndicatorHeight, implicitContentHeight)
@@ -17,7 +17,7 @@ RadioButton {
 
         implicitWidth: 20
         implicitHeight: 20
-        radius: Appearance.rounding.full
+        radius: Tokens.rounding.full
         color: "transparent"
         border.color: root.checked ? Colours.palette.m3primary : Colours.palette.m3onSurfaceVariant
         border.width: 2
@@ -28,7 +28,7 @@ RadioButton {
                 root.click();
             }
 
-            anchors.margins: -Appearance.padding.smaller
+            anchors.margins: -Tokens.padding.smaller
             color: root.checked ? Colours.palette.m3onSurface : Colours.palette.m3primary
             z: -1
         }
@@ -38,7 +38,7 @@ RadioButton {
             implicitWidth: 8
             implicitHeight: 8
 
-            radius: Appearance.rounding.full
+            radius: Tokens.rounding.full
             color: Qt.alpha(Colours.palette.m3primary, root.checked ? 1 : 0)
         }
 
@@ -52,6 +52,6 @@ RadioButton {
         font.pointSize: root.font.pointSize
         anchors.verticalCenter: parent.verticalCenter
         anchors.left: outerCircle.right
-        anchors.leftMargin: Appearance.spacing.smaller
+        anchors.leftMargin: Tokens.spacing.smaller
     }
 }

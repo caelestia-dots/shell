@@ -1,7 +1,7 @@
 import QtQuick
+import Caelestia.Config
 import qs.components
 import qs.services
-import qs.config
 
 Item {
     id: root
@@ -9,7 +9,7 @@ Item {
     required property var modelData
     required property var list
 
-    implicitHeight: Config.launcher.sizes.itemHeight
+    implicitHeight: Tokens.sizes.launcher.itemHeight
 
     anchors.left: parent?.left
     anchors.right: parent?.right
@@ -19,27 +19,27 @@ Item {
             root.modelData?.onClicked(root.list);
         }
 
-        radius: Appearance.rounding.normal
+        radius: Tokens.rounding.normal
     }
 
     Item {
         anchors.fill: parent
-        anchors.leftMargin: Appearance.padding.larger
-        anchors.rightMargin: Appearance.padding.larger
-        anchors.margins: Appearance.padding.smaller
+        anchors.leftMargin: Tokens.padding.larger
+        anchors.rightMargin: Tokens.padding.larger
+        anchors.margins: Tokens.padding.smaller
 
         MaterialIcon {
             id: icon
 
             text: root.modelData?.icon ?? ""
-            font.pointSize: Appearance.font.size.extraLarge
+            font.pointSize: Tokens.font.size.extraLarge
 
             anchors.verticalCenter: parent.verticalCenter
         }
 
         Item {
             anchors.left: icon.right
-            anchors.leftMargin: Appearance.spacing.normal
+            anchors.leftMargin: Tokens.spacing.normal
             anchors.verticalCenter: icon.verticalCenter
 
             implicitWidth: parent.width - icon.width
@@ -49,18 +49,18 @@ Item {
                 id: name
 
                 text: root.modelData?.name ?? ""
-                font.pointSize: Appearance.font.size.normal
+                font.pointSize: Tokens.font.size.normal
             }
 
             StyledText {
                 id: desc
 
                 text: root.modelData?.desc ?? ""
-                font.pointSize: Appearance.font.size.small
+                font.pointSize: Tokens.font.size.small
                 color: Colours.palette.m3outline
 
                 elide: Text.ElideRight
-                width: root.width - icon.width - Appearance.rounding.normal * 2
+                width: root.width - icon.width - Tokens.rounding.normal * 2
 
                 anchors.top: name.bottom
             }

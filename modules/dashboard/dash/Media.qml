@@ -1,9 +1,9 @@
 import QtQuick
 import QtQuick.Shapes
+import Caelestia.Config
 import Caelestia.Services
 import qs.components
 import qs.services
-import qs.config
 import qs.utils
 
 Item {
@@ -16,17 +16,17 @@ Item {
 
     anchors.top: parent.top
     anchors.bottom: parent.bottom
-    implicitWidth: Config.dashboard.sizes.mediaWidth
+    implicitWidth: Tokens.sizes.dashboard.mediaWidth
 
     Behavior on playerProgress {
         Anim {
-            duration: Appearance.anim.durations.large
+            duration: Tokens.anim.durations.large
         }
     }
 
     Timer {
         running: Players.active?.isPlaying ?? false
-        interval: Config.dashboard.mediaUpdateInterval
+        interval: GlobalConfig.dashboard.mediaUpdateInterval
         triggeredOnStart: true
         repeat: true
         onTriggered: Players.active?.positionChanged()
@@ -42,16 +42,16 @@ Item {
         ShapePath {
             fillColor: "transparent"
             strokeColor: Colours.layer(Colours.palette.m3surfaceContainerHigh, 2)
-            strokeWidth: Config.dashboard.sizes.mediaProgressThickness
-            capStyle: Appearance.rounding.scale === 0 ? ShapePath.SquareCap : ShapePath.RoundCap
+            strokeWidth: root.Tokens.sizes.dashboard.mediaProgressThickness
+            capStyle: root.Tokens.rounding.scale === 0 ? ShapePath.SquareCap : ShapePath.RoundCap
 
             PathAngleArc {
                 centerX: cover.x + cover.width / 2
                 centerY: cover.y + cover.height / 2
-                radiusX: (cover.width + Config.dashboard.sizes.mediaProgressThickness) / 2 + Appearance.spacing.small
-                radiusY: (cover.height + Config.dashboard.sizes.mediaProgressThickness) / 2 + Appearance.spacing.small
-                startAngle: -90 - Config.dashboard.sizes.mediaProgressSweep / 2
-                sweepAngle: Config.dashboard.sizes.mediaProgressSweep
+                radiusX: (cover.width + root.Tokens.sizes.dashboard.mediaProgressThickness) / 2 + root.Tokens.spacing.small
+                radiusY: (cover.height + root.Tokens.sizes.dashboard.mediaProgressThickness) / 2 + root.Tokens.spacing.small
+                startAngle: -90 - root.Tokens.sizes.dashboard.mediaProgressSweep / 2
+                sweepAngle: root.Tokens.sizes.dashboard.mediaProgressSweep
             }
 
             Behavior on strokeColor {
@@ -62,16 +62,16 @@ Item {
         ShapePath {
             fillColor: "transparent"
             strokeColor: Colours.palette.m3primary
-            strokeWidth: Config.dashboard.sizes.mediaProgressThickness
-            capStyle: Appearance.rounding.scale === 0 ? ShapePath.SquareCap : ShapePath.RoundCap
+            strokeWidth: root.Tokens.sizes.dashboard.mediaProgressThickness
+            capStyle: root.Tokens.rounding.scale === 0 ? ShapePath.SquareCap : ShapePath.RoundCap
 
             PathAngleArc {
                 centerX: cover.x + cover.width / 2
                 centerY: cover.y + cover.height / 2
-                radiusX: (cover.width + Config.dashboard.sizes.mediaProgressThickness) / 2 + Appearance.spacing.small
-                radiusY: (cover.height + Config.dashboard.sizes.mediaProgressThickness) / 2 + Appearance.spacing.small
-                startAngle: -90 - Config.dashboard.sizes.mediaProgressSweep / 2
-                sweepAngle: Config.dashboard.sizes.mediaProgressSweep * root.playerProgress
+                radiusX: (cover.width + root.Tokens.sizes.dashboard.mediaProgressThickness) / 2 + root.Tokens.spacing.small
+                radiusY: (cover.height + root.Tokens.sizes.dashboard.mediaProgressThickness) / 2 + root.Tokens.spacing.small
+                startAngle: -90 - root.Tokens.sizes.dashboard.mediaProgressSweep / 2
+                sweepAngle: root.Tokens.sizes.dashboard.mediaProgressSweep * root.playerProgress
             }
 
             Behavior on strokeColor {
@@ -86,7 +86,7 @@ Item {
         anchors.top: parent.top
         anchors.left: parent.left
         anchors.right: parent.right
-        anchors.margins: Appearance.padding.large + Config.dashboard.sizes.mediaProgressThickness + Appearance.spacing.small
+        anchors.margins: Tokens.padding.large + Tokens.sizes.dashboard.mediaProgressThickness + Tokens.spacing.small
 
         implicitHeight: width
         color: Colours.tPalette.m3surfaceContainerHigh
@@ -119,15 +119,15 @@ Item {
 
         anchors.top: cover.bottom
         anchors.horizontalCenter: parent.horizontalCenter
-        anchors.topMargin: Appearance.spacing.normal
+        anchors.topMargin: Tokens.spacing.normal
 
         animate: true
         horizontalAlignment: Text.AlignHCenter
         text: (Players.active?.trackTitle ?? qsTr("No media")) || qsTr("Unknown title")
         color: Colours.palette.m3primary
-        font.pointSize: Appearance.font.size.normal
+        font.pointSize: Tokens.font.size.normal
 
-        width: parent.implicitWidth - Appearance.padding.large * 2
+        width: parent.implicitWidth - Tokens.padding.large * 2
         elide: Text.ElideRight
     }
 
@@ -136,15 +136,15 @@ Item {
 
         anchors.top: title.bottom
         anchors.horizontalCenter: parent.horizontalCenter
-        anchors.topMargin: Appearance.spacing.small
+        anchors.topMargin: Tokens.spacing.small
 
         animate: true
         horizontalAlignment: Text.AlignHCenter
         text: (Players.active?.trackAlbum ?? qsTr("No media")) || qsTr("Unknown album")
         color: Colours.palette.m3outline
-        font.pointSize: Appearance.font.size.small
+        font.pointSize: Tokens.font.size.small
 
-        width: parent.implicitWidth - Appearance.padding.large * 2
+        width: parent.implicitWidth - Tokens.padding.large * 2
         elide: Text.ElideRight
     }
 
@@ -153,14 +153,14 @@ Item {
 
         anchors.top: album.bottom
         anchors.horizontalCenter: parent.horizontalCenter
-        anchors.topMargin: Appearance.spacing.small
+        anchors.topMargin: Tokens.spacing.small
 
         animate: true
         horizontalAlignment: Text.AlignHCenter
         text: (Players.active?.trackArtist ?? qsTr("No media")) || qsTr("Unknown artist")
         color: Colours.palette.m3secondary
 
-        width: parent.implicitWidth - Appearance.padding.large * 2
+        width: parent.implicitWidth - Tokens.padding.large * 2
         elide: Text.ElideRight
     }
 
@@ -169,9 +169,9 @@ Item {
 
         anchors.top: artist.bottom
         anchors.horizontalCenter: parent.horizontalCenter
-        anchors.topMargin: Appearance.spacing.smaller
+        anchors.topMargin: Tokens.spacing.smaller
 
-        spacing: Appearance.spacing.small
+        spacing: Tokens.spacing.small
 
         Control {
             function onClicked(): void {
@@ -208,12 +208,12 @@ Item {
         anchors.bottom: parent.bottom
         anchors.left: parent.left
         anchors.right: parent.right
-        anchors.topMargin: Appearance.spacing.small
-        anchors.bottomMargin: Appearance.padding.large
-        anchors.margins: Appearance.padding.large * 2
+        anchors.topMargin: Tokens.spacing.small
+        anchors.bottomMargin: Tokens.padding.large
+        anchors.margins: Tokens.padding.large * 2
 
         playing: Players.active?.isPlaying ?? false
-        speed: Audio.beatTracker.bpm / Appearance.anim.mediaGifSpeedAdjustment // qmllint disable unresolved-type
+        speed: Audio.beatTracker.bpm / Config.general.mediaGifSpeedAdjustment // qmllint disable unresolved-type
         source: Paths.absolutePath(Config.paths.mediaGif)
         asynchronous: true
         fillMode: AnimatedImage.PreserveAspectFit
@@ -228,7 +228,7 @@ Item {
         function onClicked(): void {
         }
 
-        implicitWidth: Math.max(icon.implicitHeight, icon.implicitHeight) + Appearance.padding.small
+        implicitWidth: Math.max(icon.implicitHeight, icon.implicitHeight) + Tokens.padding.small
         implicitHeight: implicitWidth
 
         StateLayer {
@@ -237,7 +237,7 @@ Item {
             }
 
             disabled: !control.canUse
-            radius: Appearance.rounding.full
+            radius: Tokens.rounding.full
         }
 
         MaterialIcon {
@@ -249,7 +249,7 @@ Item {
             animate: true
             text: control.icon
             color: control.canUse ? Colours.palette.m3onSurface : Colours.palette.m3outline
-            font.pointSize: Appearance.font.size.large
+            font.pointSize: Tokens.font.size.large
         }
     }
 }

@@ -8,6 +8,7 @@ import QtQuick
 import QtQuick.Layouts
 import Quickshell
 import Quickshell.Widgets
+import Caelestia.Config
 import Caelestia.Models
 import qs.components
 import qs.components.containers
@@ -15,7 +16,6 @@ import qs.components.controls
 import qs.components.effects
 import qs.components.images
 import qs.services
-import qs.config
 import qs.utils
 
 Item {
@@ -23,7 +23,7 @@ Item {
 
     required property Session session
 
-    property real animDurationsScale: Config.appearance.anim.durations.scale ?? 1
+    property real animDurationsScale: GlobalConfig.appearance.anim.durations.scale ?? 1
     property string fontFamilyMaterial: Config.appearance.font.family.material ?? "Material Symbols Rounded"
     property string fontFamilyMono: Config.appearance.font.family.mono ?? "CaskaydiaCove NF"
     property string fontFamilySans: Config.appearance.font.family.sans ?? "Rubik"
@@ -31,9 +31,9 @@ Item {
     property real paddingScale: Config.appearance.padding.scale ?? 1
     property real roundingScale: Config.appearance.rounding.scale ?? 1
     property real spacingScale: Config.appearance.spacing.scale ?? 1
-    property bool transparencyEnabled: Config.appearance.transparency.enabled ?? false
-    property real transparencyBase: Config.appearance.transparency.base ?? 0.85
-    property real transparencyLayers: Config.appearance.transparency.layers ?? 0.4
+    property bool transparencyEnabled: GlobalConfig.appearance.transparency.enabled ?? false
+    property real transparencyBase: GlobalConfig.appearance.transparency.base ?? 0.85
+    property real transparencyLayers: GlobalConfig.appearance.transparency.layers ?? 0.4
     property real borderRounding: Config.border.rounding ?? 1
     property real borderThickness: Config.border.thickness ?? 1
 
@@ -55,44 +55,42 @@ Item {
     property real visualiserSpacing: Config.background.visualiser.spacing ?? 1
 
     function saveConfig() {
-        Config.appearance.anim.durations.scale = root.animDurationsScale;
+        GlobalConfig.appearance.anim.durations.scale = root.animDurationsScale;
 
-        Config.appearance.font.family.material = root.fontFamilyMaterial;
-        Config.appearance.font.family.mono = root.fontFamilyMono;
-        Config.appearance.font.family.sans = root.fontFamilySans;
-        Config.appearance.font.size.scale = root.fontSizeScale;
+        GlobalConfig.appearance.font.family.material = root.fontFamilyMaterial;
+        GlobalConfig.appearance.font.family.mono = root.fontFamilyMono;
+        GlobalConfig.appearance.font.family.sans = root.fontFamilySans;
+        GlobalConfig.appearance.font.size.scale = root.fontSizeScale;
 
-        Config.appearance.padding.scale = root.paddingScale;
-        Config.appearance.rounding.scale = root.roundingScale;
-        Config.appearance.spacing.scale = root.spacingScale;
+        GlobalConfig.appearance.padding.scale = root.paddingScale;
+        GlobalConfig.appearance.rounding.scale = root.roundingScale;
+        GlobalConfig.appearance.spacing.scale = root.spacingScale;
 
-        Config.appearance.transparency.enabled = root.transparencyEnabled;
-        Config.appearance.transparency.base = root.transparencyBase;
-        Config.appearance.transparency.layers = root.transparencyLayers;
+        GlobalConfig.appearance.transparency.enabled = root.transparencyEnabled;
+        GlobalConfig.appearance.transparency.base = root.transparencyBase;
+        GlobalConfig.appearance.transparency.layers = root.transparencyLayers;
 
-        Config.background.desktopClock.enabled = root.desktopClockEnabled;
-        Config.background.enabled = root.backgroundEnabled;
-        Config.background.desktopClock.scale = root.desktopClockScale;
-        Config.background.desktopClock.position = root.desktopClockPosition;
-        Config.background.desktopClock.shadow.enabled = root.desktopClockShadowEnabled;
-        Config.background.desktopClock.shadow.opacity = root.desktopClockShadowOpacity;
-        Config.background.desktopClock.shadow.blur = root.desktopClockShadowBlur;
-        Config.background.desktopClock.background.enabled = root.desktopClockBackgroundEnabled;
-        Config.background.desktopClock.background.opacity = root.desktopClockBackgroundOpacity;
-        Config.background.desktopClock.background.blur = root.desktopClockBackgroundBlur;
-        Config.background.desktopClock.invertColors = root.desktopClockInvertColors;
+        GlobalConfig.background.desktopClock.enabled = root.desktopClockEnabled;
+        GlobalConfig.background.enabled = root.backgroundEnabled;
+        GlobalConfig.background.desktopClock.scale = root.desktopClockScale;
+        GlobalConfig.background.desktopClock.position = root.desktopClockPosition;
+        GlobalConfig.background.desktopClock.shadow.enabled = root.desktopClockShadowEnabled;
+        GlobalConfig.background.desktopClock.shadow.opacity = root.desktopClockShadowOpacity;
+        GlobalConfig.background.desktopClock.shadow.blur = root.desktopClockShadowBlur;
+        GlobalConfig.background.desktopClock.background.enabled = root.desktopClockBackgroundEnabled;
+        GlobalConfig.background.desktopClock.background.opacity = root.desktopClockBackgroundOpacity;
+        GlobalConfig.background.desktopClock.background.blur = root.desktopClockBackgroundBlur;
+        GlobalConfig.background.desktopClock.invertColors = root.desktopClockInvertColors;
 
-        Config.background.wallpaperEnabled = root.wallpaperEnabled;
+        GlobalConfig.background.wallpaperEnabled = root.wallpaperEnabled;
 
-        Config.background.visualiser.enabled = root.visualiserEnabled;
-        Config.background.visualiser.autoHide = root.visualiserAutoHide;
-        Config.background.visualiser.rounding = root.visualiserRounding;
-        Config.background.visualiser.spacing = root.visualiserSpacing;
+        GlobalConfig.background.visualiser.enabled = root.visualiserEnabled;
+        GlobalConfig.background.visualiser.autoHide = root.visualiserAutoHide;
+        GlobalConfig.background.visualiser.rounding = root.visualiserRounding;
+        GlobalConfig.background.visualiser.spacing = root.visualiserSpacing;
 
-        Config.border.rounding = root.borderRounding;
-        Config.border.thickness = root.borderThickness;
-
-        Config.save();
+        GlobalConfig.border.rounding = root.borderRounding;
+        GlobalConfig.border.thickness = root.borderThickness;
     }
 
     anchors.fill: parent
@@ -111,9 +109,9 @@ Item {
 
                 StyledText {
                     Layout.alignment: Qt.AlignHCenter
-                    Layout.bottomMargin: Appearance.spacing.normal
+                    Layout.bottomMargin: Tokens.spacing.normal
                     text: qsTr("Wallpaper")
-                    font.pointSize: Appearance.font.size.extraLarge
+                    font.pointSize: Tokens.font.size.extraLarge
                     font.weight: 600
                 }
 
@@ -122,7 +120,7 @@ Item {
 
                     Layout.fillWidth: true
                     Layout.fillHeight: true
-                    Layout.bottomMargin: -Appearance.padding.large * 2
+                    Layout.bottomMargin: -Tokens.padding.large * 2
 
                     asynchronous: true
                     active: {
@@ -172,14 +170,14 @@ Item {
 
                     anchors.left: parent.left
                     anchors.right: parent.right
-                    spacing: Appearance.spacing.small
+                    spacing: Tokens.spacing.small
 
                     RowLayout {
-                        spacing: Appearance.spacing.smaller
+                        spacing: Tokens.spacing.smaller
 
                         StyledText {
                             text: qsTr("Appearance")
-                            font.pointSize: Appearance.font.size.large
+                            font.pointSize: Tokens.font.size.large
                             font.weight: 500
                         }
 

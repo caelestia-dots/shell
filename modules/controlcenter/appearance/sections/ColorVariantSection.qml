@@ -5,11 +5,11 @@ import "../../../launcher/services"
 import QtQuick
 import QtQuick.Layouts
 import Quickshell
+import Caelestia.Config
 import qs.components
 import qs.components.containers
 import qs.components.controls
 import qs.services
-import qs.config
 
 CollapsibleSection {
     title: qsTr("Color variant")
@@ -18,7 +18,7 @@ CollapsibleSection {
 
     ColumnLayout {
         Layout.fillWidth: true
-        spacing: Appearance.spacing.small / 2
+        spacing: Tokens.spacing.small / 2
 
         Repeater {
             model: M3Variants.list
@@ -29,10 +29,10 @@ CollapsibleSection {
                 Layout.fillWidth: true
 
                 color: Qt.alpha(Colours.tPalette.m3surfaceContainer, modelData.variant === Schemes.currentVariant ? Colours.tPalette.m3surfaceContainer.a : 0)
-                radius: Appearance.rounding.normal
+                radius: Tokens.rounding.normal
                 border.width: modelData.variant === Schemes.currentVariant ? 1 : 0
                 border.color: Colours.palette.m3primary
-                implicitHeight: variantRow.implicitHeight + Appearance.padding.normal * 2
+                implicitHeight: variantRow.implicitHeight + Tokens.padding.normal * 2
 
                 StateLayer {
                     function onClicked(): void {
@@ -62,13 +62,13 @@ CollapsibleSection {
                     anchors.left: parent.left
                     anchors.right: parent.right
                     anchors.verticalCenter: parent.verticalCenter
-                    anchors.margins: Appearance.padding.normal
+                    anchors.margins: Tokens.padding.normal
 
-                    spacing: Appearance.spacing.normal
+                    spacing: Tokens.spacing.normal
 
                     MaterialIcon {
                         text: modelData.icon
-                        font.pointSize: Appearance.font.size.large
+                        font.pointSize: Tokens.font.size.large
                         fill: modelData.variant === Schemes.currentVariant ? 1 : 0
                     }
 
@@ -82,7 +82,7 @@ CollapsibleSection {
                         visible: modelData.variant === Schemes.currentVariant
                         text: "check"
                         color: Colours.palette.m3primary
-                        font.pointSize: Appearance.font.size.large
+                        font.pointSize: Tokens.font.size.large
                     }
                 }
             }

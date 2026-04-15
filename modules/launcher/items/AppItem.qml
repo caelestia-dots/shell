@@ -1,9 +1,9 @@
 import QtQuick
 import Quickshell
 import Quickshell.Widgets
+import Caelestia.Config
 import qs.components
 import qs.services
-import qs.config
 import qs.utils
 import qs.modules.launcher.services
 
@@ -13,7 +13,7 @@ Item {
     required property DesktopEntry modelData
     required property DrawerVisibilities visibilities
 
-    implicitHeight: Config.launcher.sizes.itemHeight
+    implicitHeight: Tokens.sizes.launcher.itemHeight
 
     anchors.left: parent?.left
     anchors.right: parent?.right
@@ -24,14 +24,14 @@ Item {
             root.visibilities.launcher = false;
         }
 
-        radius: Appearance.rounding.normal
+        radius: Tokens.rounding.normal
     }
 
     Item {
         anchors.fill: parent
-        anchors.leftMargin: Appearance.padding.larger
-        anchors.rightMargin: Appearance.padding.larger
-        anchors.margins: Appearance.padding.smaller
+        anchors.leftMargin: Tokens.padding.larger
+        anchors.rightMargin: Tokens.padding.larger
+        anchors.margins: Tokens.padding.smaller
 
         IconImage {
             id: icon
@@ -45,7 +45,7 @@ Item {
 
         Item {
             anchors.left: icon.right
-            anchors.leftMargin: Appearance.spacing.normal
+            anchors.leftMargin: Tokens.spacing.normal
             anchors.verticalCenter: icon.verticalCenter
 
             implicitWidth: parent.width - icon.width - favouriteIcon.width
@@ -55,18 +55,18 @@ Item {
                 id: name
 
                 text: root.modelData?.name ?? ""
-                font.pointSize: Appearance.font.size.normal
+                font.pointSize: Tokens.font.size.normal
             }
 
             StyledText {
                 id: comment
 
                 text: (root.modelData?.comment || root.modelData?.genericName || root.modelData?.name) ?? ""
-                font.pointSize: Appearance.font.size.small
+                font.pointSize: Tokens.font.size.small
                 color: Colours.palette.m3outline
 
                 elide: Text.ElideRight
-                width: root.width - icon.width - favouriteIcon.width - Appearance.rounding.normal * 2
+                width: root.width - icon.width - favouriteIcon.width - Tokens.rounding.normal * 2
 
                 anchors.top: name.bottom
             }
@@ -78,7 +78,7 @@ Item {
             asynchronous: true
             anchors.verticalCenter: parent.verticalCenter
             anchors.right: parent.right
-            active: root.modelData && Strings.testRegexList(Config.launcher.favouriteApps, root.modelData.id)
+            active: root.modelData && Strings.testRegexList(GlobalConfig.launcher.favouriteApps, root.modelData.id)
 
             sourceComponent: MaterialIcon {
                 text: "favorite"

@@ -6,10 +6,10 @@ import QtQuick.Shapes
 import Quickshell
 import Quickshell.Widgets
 import Quickshell.Services.Notifications
+import Caelestia.Config
 import qs.components
 import qs.components.effects
 import qs.services
-import qs.config
 import qs.utils
 
 StyledRect {
@@ -23,11 +23,11 @@ StyledRect {
     property bool expanded: Config.notifs.openExpanded
 
     color: root.modelData.urgency === NotificationUrgency.Critical ? Colours.palette.m3secondaryContainer : Colours.tPalette.m3surfaceContainer
-    radius: Appearance.rounding.normal
-    implicitWidth: Config.notifs.sizes.width
+    radius: Tokens.rounding.normal
+    implicitWidth: Tokens.sizes.notifs.width
     implicitHeight: inner.implicitHeight
 
-    x: Config.notifs.sizes.width
+    x: Tokens.sizes.notifs.width
     Component.onCompleted: {
         x = 0;
         modelData.lock(this);
@@ -36,7 +36,7 @@ StyledRect {
 
     Behavior on x {
         Anim {
-            easing.bezierCurve: Appearance.anim.curves.emphasizedDecel
+            easing: Tokens.anim.emphasizedDecel
         }
     }
 
@@ -68,7 +68,7 @@ StyledRect {
             if (!containsMouse)
                 root.modelData.timer.start();
 
-            if (Math.abs(root.x) < Config.notifs.sizes.width * Config.notifs.clearThreshold)
+            if (Math.abs(root.x) < Tokens.sizes.notifs.width * Config.notifs.clearThreshold)
                 root.x = 0;
             else
                 root.modelData.popup = false;
@@ -81,7 +81,7 @@ StyledRect {
             }
         }
         onClicked: event => {
-            if (!Config.notifs.actionOnClick || event.button !== Qt.LeftButton)
+            if (!GlobalConfig.notifs.actionOnClick || event.button !== Qt.LeftButton)
                 return;
 
             const actions = root.modelData.actions;
@@ -95,14 +95,14 @@ StyledRect {
             anchors.left: parent.left
             anchors.right: parent.right
             anchors.top: parent.top
-            anchors.margins: Appearance.padding.normal
+            anchors.margins: Tokens.padding.normal
 
             implicitHeight: root.nonAnimHeight
 
             Behavior on implicitHeight {
                 Anim {
-                    duration: Appearance.anim.durations.expressiveDefaultSpatial
-                    easing.bezierCurve: Appearance.anim.curves.expressiveDefaultSpatial
+                    duration: Tokens.anim.durations.expressiveDefaultSpatial
+                    easing: Tokens.anim.expressiveDefaultSpatial
                 }
             }
 
@@ -114,21 +114,21 @@ StyledRect {
 
                 anchors.left: parent.left
                 anchors.top: parent.top
-                width: Config.notifs.sizes.image
-                height: Config.notifs.sizes.image
+                width: TokenConfig.sizes.notifs.image
+                height: TokenConfig.sizes.notifs.image
                 visible: root.hasImage || root.hasAppIcon
 
                 sourceComponent: ClippingRectangle {
-                    radius: Appearance.rounding.full
-                    implicitWidth: Config.notifs.sizes.image
-                    implicitHeight: Config.notifs.sizes.image
+                    radius: Tokens.rounding.full
+                    implicitWidth: TokenConfig.sizes.notifs.image
+                    implicitHeight: TokenConfig.sizes.notifs.image
 
                     Image {
                         anchors.fill: parent
                         source: Qt.resolvedUrl(root.modelData.image)
                         fillMode: Image.PreserveAspectCrop
-                        sourceSize.width: Config.notifs.sizes.image
-                        sourceSize.height: Config.notifs.sizes.image
+                        sourceSize.width: TokenConfig.sizes.notifs.image
+                        sourceSize.height: TokenConfig.sizes.notifs.image
                         cache: false
                         asynchronous: true
                     }
@@ -147,10 +147,10 @@ StyledRect {
                 anchors.bottom: root.hasImage ? image.bottom : undefined
 
                 sourceComponent: StyledRect {
-                    radius: Appearance.rounding.full
+                    radius: Tokens.rounding.full
                     color: root.modelData.urgency === NotificationUrgency.Critical ? Colours.palette.m3error : root.modelData.urgency === NotificationUrgency.Low ? Colours.layer(Colours.palette.m3surfaceContainerHighest, 2) : Colours.palette.m3secondaryContainer
-                    implicitWidth: root.hasImage ? Config.notifs.sizes.badge : Config.notifs.sizes.image
-                    implicitHeight: root.hasImage ? Config.notifs.sizes.badge : Config.notifs.sizes.image
+                    implicitWidth: root.hasImage ? Tokens.sizes.notifs.badge : TokenConfig.sizes.notifs.image
+                    implicitHeight: root.hasImage ? Tokens.sizes.notifs.badge : TokenConfig.sizes.notifs.image
 
                     Loader {
                         id: icon
@@ -175,14 +175,14 @@ StyledRect {
                         asynchronous: true
                         active: !root.hasAppIcon
                         anchors.centerIn: parent
-                        anchors.horizontalCenterOffset: -Appearance.font.size.large * 0.02
-                        anchors.verticalCenterOffset: Appearance.font.size.large * 0.02
+                        anchors.horizontalCenterOffset: -Tokens.font.size.large * 0.02
+                        anchors.verticalCenterOffset: Tokens.font.size.large * 0.02
 
                         sourceComponent: MaterialIcon {
                             text: Icons.getNotifIcon(root.modelData.summary, root.modelData.urgency)
 
                             color: root.modelData.urgency === NotificationUrgency.Critical ? Colours.palette.m3onError : root.modelData.urgency === NotificationUrgency.Low ? Colours.palette.m3onSurface : Colours.palette.m3onSecondaryContainer
-                            font.pointSize: Appearance.font.size.large
+                            font.pointSize: Tokens.font.size.large
                         }
                     }
                 }
@@ -207,9 +207,9 @@ StyledRect {
                     PathAngleArc {
                         id: progressArc
 
-                        radiusX: progressIndicator.width / 2 - Appearance.padding.small / 2
+                        radiusX: progressIndicator.width / 2 - root.Tokens.padding.small / 2
                         centerX: progressIndicator.width / 2
-                        radiusY: progressIndicator.height / 2 - Appearance.padding.small / 2
+                        radiusY: progressIndicator.height / 2 - root.Tokens.padding.small / 2
                         centerY: progressIndicator.height / 2
 
                         startAngle: -90
@@ -217,7 +217,7 @@ StyledRect {
 
                         Behavior on sweepAngle {
                             Anim {
-                                easing.bezierCurve: Appearance.anim.curves.emphasizedDecel
+                                easing: Tokens.anim.emphasizedDecel
                             }
                         }
                     }
@@ -229,13 +229,13 @@ StyledRect {
 
                 anchors.top: parent.top
                 anchors.left: image.right
-                anchors.leftMargin: Appearance.spacing.smaller
+                anchors.leftMargin: Tokens.spacing.smaller
 
                 animate: true
                 text: appNameMetrics.elidedText
                 maximumLineCount: 1
                 color: Colours.palette.m3onSurfaceVariant
-                font.pointSize: Appearance.font.size.small
+                font.pointSize: Tokens.font.size.small
 
                 opacity: root.expanded ? 1 : 0
 
@@ -251,7 +251,7 @@ StyledRect {
                 font.family: appName.font.family
                 font.pointSize: appName.font.pointSize
                 elide: Text.ElideRight
-                elideWidth: expandBtn.x - time.width - timeSep.width - summary.x - Appearance.spacing.small * 3
+                elideWidth: expandBtn.x - time.width - timeSep.width - summary.x - root.Tokens.spacing.small * 3
             }
 
             StyledText {
@@ -259,7 +259,7 @@ StyledRect {
 
                 anchors.top: parent.top
                 anchors.left: image.right
-                anchors.leftMargin: Appearance.spacing.smaller
+                anchors.leftMargin: Tokens.spacing.smaller
 
                 animate: true
                 text: summaryMetrics.elidedText
@@ -286,9 +286,8 @@ StyledRect {
                         property: "maximumLineCount"
                     }
                     AnchorAnimation {
-                        duration: Appearance.anim.durations.normal
-                        easing.type: Easing.BezierSpline
-                        easing.bezierCurve: Appearance.anim.curves.standard
+                        duration: Tokens.anim.durations.normal
+                        easing: Tokens.anim.standard
                     }
                 }
 
@@ -304,7 +303,7 @@ StyledRect {
                 font.family: summary.font.family
                 font.pointSize: summary.font.pointSize
                 elide: Text.ElideRight
-                elideWidth: expandBtn.x - time.width - timeSep.width - summary.x - Appearance.spacing.small * 3
+                elideWidth: expandBtn.x - time.width - timeSep.width - summary.x - root.Tokens.spacing.small * 3
             }
 
             StyledText {
@@ -312,11 +311,11 @@ StyledRect {
 
                 anchors.top: parent.top
                 anchors.left: summary.right
-                anchors.leftMargin: Appearance.spacing.small
+                anchors.leftMargin: Tokens.spacing.small
 
                 text: "•"
                 color: Colours.palette.m3onSurfaceVariant
-                font.pointSize: Appearance.font.size.small
+                font.pointSize: Tokens.font.size.small
 
                 states: State {
                     name: "expanded"
@@ -330,9 +329,8 @@ StyledRect {
 
                 transitions: Transition {
                     AnchorAnimation {
-                        duration: Appearance.anim.durations.normal
-                        easing.type: Easing.BezierSpline
-                        easing.bezierCurve: Appearance.anim.curves.standard
+                        duration: Tokens.anim.durations.normal
+                        easing: Tokens.anim.standard
                     }
                 }
             }
@@ -342,13 +340,13 @@ StyledRect {
 
                 anchors.top: parent.top
                 anchors.left: timeSep.right
-                anchors.leftMargin: Appearance.spacing.small
+                anchors.leftMargin: Tokens.spacing.small
 
                 animate: true
                 horizontalAlignment: Text.AlignLeft
                 text: root.modelData.timeStr
                 color: Colours.palette.m3onSurfaceVariant
-                font.pointSize: Appearance.font.size.small
+                font.pointSize: Tokens.font.size.small
             }
 
             Item {
@@ -365,7 +363,7 @@ StyledRect {
                         root.expanded = !root.expanded;
                     }
 
-                    radius: Appearance.rounding.full
+                    radius: Tokens.rounding.full
                     color: root.modelData.urgency === NotificationUrgency.Critical ? Colours.palette.m3onSecondaryContainer : Colours.palette.m3onSurface
                 }
 
@@ -376,7 +374,7 @@ StyledRect {
 
                     animate: true
                     text: root.expanded ? "expand_less" : "expand_more"
-                    font.pointSize: Appearance.font.size.normal
+                    font.pointSize: Tokens.font.size.normal
                 }
             }
 
@@ -386,13 +384,13 @@ StyledRect {
                 anchors.left: summary.left
                 anchors.right: expandBtn.left
                 anchors.top: summary.bottom
-                anchors.rightMargin: Appearance.spacing.small
+                anchors.rightMargin: Tokens.spacing.small
 
                 animate: true
                 textFormat: root.bodyTextFormat
                 text: bodyPreviewMetrics.elidedText
                 color: Colours.palette.m3onSurfaceVariant
-                font.pointSize: Appearance.font.size.small
+                font.pointSize: Tokens.font.size.small
 
                 opacity: root.expanded ? 0 : 1
 
@@ -417,13 +415,13 @@ StyledRect {
                 anchors.left: summary.left
                 anchors.right: expandBtn.left
                 anchors.top: summary.bottom
-                anchors.rightMargin: Appearance.spacing.small
+                anchors.rightMargin: Tokens.spacing.small
 
                 animate: true
                 textFormat: root.bodyTextFormat
                 text: root.modelData.body
                 color: Colours.palette.m3onSurfaceVariant
-                font.pointSize: Appearance.font.size.small
+                font.pointSize: Tokens.font.size.small
                 wrapMode: Text.WrapAtWordBoundaryOrAnywhere
                 height: text ? implicitHeight : 0
 
@@ -447,9 +445,9 @@ StyledRect {
 
                 anchors.horizontalCenter: parent.horizontalCenter
                 anchors.top: body.bottom
-                anchors.topMargin: Appearance.spacing.small
+                anchors.topMargin: Tokens.spacing.small
 
-                spacing: Appearance.spacing.smaller
+                spacing: Tokens.spacing.smaller
 
                 opacity: root.expanded ? 1 : 0
 
@@ -483,20 +481,20 @@ StyledRect {
 
         required property var modelData
 
-        radius: Appearance.rounding.full
+        radius: Tokens.rounding.full
         color: root.modelData.urgency === NotificationUrgency.Critical ? Colours.palette.m3secondary : Colours.layer(Colours.palette.m3surfaceContainerHigh, 2)
 
-        Layout.preferredWidth: actionText.width + Appearance.padding.normal * 2
-        Layout.preferredHeight: actionText.height + Appearance.padding.small * 2
-        implicitWidth: actionText.width + Appearance.padding.normal * 2
-        implicitHeight: actionText.height + Appearance.padding.small * 2
+        Layout.preferredWidth: actionText.width + Tokens.padding.normal * 2
+        Layout.preferredHeight: actionText.height + Tokens.padding.small * 2
+        implicitWidth: actionText.width + Tokens.padding.normal * 2
+        implicitHeight: actionText.height + Tokens.padding.small * 2
 
         StateLayer {
             function onClicked(): void {
                 action.modelData.invoke();
             }
 
-            radius: Appearance.rounding.full
+            radius: Tokens.rounding.full
             color: root.modelData.urgency === NotificationUrgency.Critical ? Colours.palette.m3onSecondary : Colours.palette.m3onSurface
         }
 
@@ -506,7 +504,7 @@ StyledRect {
             anchors.centerIn: parent
             text: actionTextMetrics.elidedText
             color: root.modelData.urgency === NotificationUrgency.Critical ? Colours.palette.m3onSecondary : Colours.palette.m3onSurfaceVariant
-            font.pointSize: Appearance.font.size.small
+            font.pointSize: Tokens.font.size.small
         }
 
         TextMetrics {
@@ -518,7 +516,7 @@ StyledRect {
             elide: Text.ElideRight
             elideWidth: {
                 const numActions = root.modelData.actions.length + 1;
-                return (inner.width - actions.spacing * (numActions - 1)) / numActions - Appearance.padding.normal * 2;
+                return (inner.width - actions.spacing * (numActions - 1)) / numActions - root.Tokens.padding.normal * 2;
             }
         }
     }

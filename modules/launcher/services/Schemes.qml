@@ -4,7 +4,7 @@ import ".."
 import QtQuick
 import Quickshell
 import Quickshell.Io
-import qs.config
+import Caelestia.Config
 import qs.utils
 
 Searcher {
@@ -14,7 +14,7 @@ Searcher {
     property string currentVariant
 
     function transformSearch(search: string): string {
-        return search.slice(`${Config.launcher.actionPrefix}scheme `.length);
+        return search.slice(`${GlobalConfig.launcher.actionPrefix}scheme `.length);
     }
 
     function selector(item: var): string {
@@ -26,7 +26,7 @@ Searcher {
     }
 
     list: schemes.instances
-    useFuzzy: Config.launcher.useFuzzy.schemes
+    useFuzzy: GlobalConfig.launcher.useFuzzy.schemes
     keys: ["name", "flavour"]
     weights: [0.9, 0.1]
 

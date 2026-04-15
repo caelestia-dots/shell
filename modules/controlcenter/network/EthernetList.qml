@@ -4,11 +4,11 @@ import ".."
 import "../components"
 import QtQuick
 import QtQuick.Layouts
+import Caelestia.Config
 import qs.components
 import qs.components.containers
 import qs.components.controls
 import qs.services
-import qs.config
 
 DeviceList {
     id: root
@@ -23,11 +23,11 @@ DeviceList {
 
     headerComponent: Component {
         RowLayout {
-            spacing: Appearance.spacing.smaller
+            spacing: Tokens.spacing.smaller
 
             StyledText {
                 text: qsTr("Settings")
-                font.pointSize: Appearance.font.size.large
+                font.pointSize: Tokens.font.size.large
                 font.weight: 500
             }
 
@@ -39,9 +39,9 @@ DeviceList {
                 toggled: !root.session.ethernet.active
                 icon: "settings"
                 accent: "Primary"
-                iconSize: Appearance.font.size.normal
-                horizontalPadding: Appearance.padding.normal
-                verticalPadding: Appearance.padding.smaller
+                iconSize: Tokens.font.size.normal
+                horizontalPadding: Tokens.padding.normal
+                verticalPadding: Tokens.padding.smaller
 
                 onClicked: {
                     if (root.session.ethernet.active)
@@ -62,10 +62,10 @@ DeviceList {
             readonly property bool isActive: root.activeItem && modelData && root.activeItem.interface === modelData.interface
 
             width: ListView.view ? ListView.view.width : undefined
-            implicitHeight: rowLayout.implicitHeight + Appearance.padding.normal * 2
+            implicitHeight: rowLayout.implicitHeight + Tokens.padding.normal * 2
 
             color: Qt.alpha(Colours.tPalette.m3surfaceContainer, ethernetItem.isActive ? Colours.tPalette.m3surfaceContainer.a : 0)
-            radius: Appearance.rounding.normal
+            radius: Tokens.rounding.normal
 
             StateLayer {
                 id: stateLayer
@@ -79,15 +79,15 @@ DeviceList {
                 id: rowLayout
 
                 anchors.fill: parent
-                anchors.margins: Appearance.padding.normal
+                anchors.margins: Tokens.padding.normal
 
-                spacing: Appearance.spacing.normal
+                spacing: Tokens.spacing.normal
 
                 StyledRect {
                     implicitWidth: implicitHeight
-                    implicitHeight: icon.implicitHeight + Appearance.padding.normal * 2
+                    implicitHeight: icon.implicitHeight + Tokens.padding.normal * 2
 
-                    radius: Appearance.rounding.normal
+                    radius: Tokens.rounding.normal
                     color: modelData.connected ? Colours.palette.m3primaryContainer : Colours.tPalette.m3surfaceContainerHigh
 
                     StyledRect {
@@ -101,7 +101,7 @@ DeviceList {
 
                         anchors.centerIn: parent
                         text: "cable"
-                        font.pointSize: Appearance.font.size.large
+                        font.pointSize: Tokens.font.size.large
                         fill: modelData.connected ? 1 : 0
                         color: modelData.connected ? Colours.palette.m3onPrimaryContainer : Colours.palette.m3onSurface
 
@@ -124,13 +124,13 @@ DeviceList {
 
                     RowLayout {
                         Layout.fillWidth: true
-                        spacing: Appearance.spacing.smaller
+                        spacing: Tokens.spacing.smaller
 
                         StyledText {
                             Layout.fillWidth: true
                             text: modelData.connected ? qsTr("Connected") : qsTr("Disconnected")
                             color: modelData.connected ? Colours.palette.m3primary : Colours.palette.m3outline
-                            font.pointSize: Appearance.font.size.small
+                            font.pointSize: Tokens.font.size.small
                             font.weight: modelData.connected ? 500 : 400
                             elide: Text.ElideRight
                         }
@@ -141,9 +141,9 @@ DeviceList {
                     id: connectBtn
 
                     implicitWidth: implicitHeight
-                    implicitHeight: connectIcon.implicitHeight + Appearance.padding.smaller * 2
+                    implicitHeight: connectIcon.implicitHeight + Tokens.padding.smaller * 2
 
-                    radius: Appearance.rounding.full
+                    radius: Tokens.rounding.full
                     color: Qt.alpha(Colours.palette.m3primaryContainer, modelData.connected ? 1 : 0)
 
                     StateLayer {

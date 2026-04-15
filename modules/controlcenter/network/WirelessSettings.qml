@@ -4,18 +4,18 @@ import ".."
 import "../components"
 import QtQuick
 import QtQuick.Layouts
+import Caelestia.Config
 import qs.components
 import qs.components.controls
 import qs.components.effects
 import qs.services
-import qs.config
 
 ColumnLayout {
     id: root
 
     required property Session session
 
-    spacing: Appearance.spacing.normal
+    spacing: Tokens.spacing.normal
 
     SettingsHeader {
         icon: "wifi"
@@ -23,7 +23,7 @@ ColumnLayout {
     }
 
     SectionHeader {
-        Layout.topMargin: Appearance.spacing.large
+        Layout.topMargin: Tokens.spacing.large
         title: qsTr("WiFi status")
         description: qsTr("General WiFi settings")
     }
@@ -39,13 +39,13 @@ ColumnLayout {
     }
 
     SectionHeader {
-        Layout.topMargin: Appearance.spacing.large
+        Layout.topMargin: Tokens.spacing.large
         title: qsTr("Network information")
         description: qsTr("Current network connection")
     }
 
     SectionContainer {
-        contentSpacing: Appearance.spacing.small / 2
+        contentSpacing: Tokens.spacing.small / 2
 
         PropertyRow {
             label: qsTr("Connected network")

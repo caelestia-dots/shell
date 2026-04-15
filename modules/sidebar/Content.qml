@@ -1,8 +1,8 @@
 import QtQuick
 import QtQuick.Layouts
+import Caelestia.Config
 import qs.components
 import qs.services
-import qs.config
 
 Item {
     id: root
@@ -14,13 +14,13 @@ Item {
         id: layout
 
         anchors.fill: parent
-        spacing: Appearance.spacing.normal
+        spacing: Tokens.spacing.normal
 
         StyledRect {
             Layout.fillWidth: true
             Layout.fillHeight: true
 
-            radius: Appearance.rounding.normal
+            radius: Tokens.rounding.normal
             color: Colours.tPalette.m3surfaceContainerLow
 
             NotifDock {
@@ -30,7 +30,7 @@ Item {
         }
 
         StyledRect {
-            Layout.topMargin: Appearance.padding.large - layout.spacing
+            Layout.topMargin: Tokens.padding.large - layout.spacing
             Layout.fillWidth: true
             implicitHeight: 1
 

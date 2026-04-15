@@ -6,12 +6,12 @@ import "."
 import QtQuick
 import QtQuick.Layouts
 import Quickshell
+import Caelestia.Config
 import qs.components
 import qs.components.containers
 import qs.components.controls
 import qs.components.effects
 import qs.services
-import qs.config
 import qs.utils
 
 DeviceList {
@@ -34,7 +34,7 @@ DeviceList {
             visible: Nmcli.scanning
             text: qsTr("Scanning...")
             color: Colours.palette.m3primary
-            font.pointSize: Appearance.font.size.small
+            font.pointSize: Tokens.font.size.small
         }
     }
 
@@ -48,11 +48,11 @@ DeviceList {
 
     headerComponent: Component {
         RowLayout {
-            spacing: Appearance.spacing.smaller
+            spacing: Tokens.spacing.smaller
 
             StyledText {
                 text: qsTr("Settings")
-                font.pointSize: Appearance.font.size.large
+                font.pointSize: Tokens.font.size.large
                 font.weight: 500
             }
 
@@ -64,9 +64,9 @@ DeviceList {
                 toggled: Nmcli.wifiEnabled
                 icon: "wifi"
                 accent: "Tertiary"
-                iconSize: Appearance.font.size.normal
-                horizontalPadding: Appearance.padding.normal
-                verticalPadding: Appearance.padding.smaller
+                iconSize: Tokens.font.size.normal
+                horizontalPadding: Tokens.padding.normal
+                verticalPadding: Tokens.padding.smaller
 
                 onClicked: {
                     Nmcli.toggleWifi(null);
@@ -77,9 +77,9 @@ DeviceList {
                 toggled: Nmcli.scanning
                 icon: "wifi_find"
                 accent: "Secondary"
-                iconSize: Appearance.font.size.normal
-                horizontalPadding: Appearance.padding.normal
-                verticalPadding: Appearance.padding.smaller
+                iconSize: Tokens.font.size.normal
+                horizontalPadding: Tokens.padding.normal
+                verticalPadding: Tokens.padding.smaller
 
                 onClicked: {
                     Nmcli.rescanWifi();
@@ -90,9 +90,9 @@ DeviceList {
                 toggled: !root.session.network.active
                 icon: "settings"
                 accent: "Primary"
-                iconSize: Appearance.font.size.normal
-                horizontalPadding: Appearance.padding.normal
-                verticalPadding: Appearance.padding.smaller
+                iconSize: Tokens.font.size.normal
+                horizontalPadding: Tokens.padding.normal
+                verticalPadding: Tokens.padding.smaller
 
                 onClicked: {
                     if (root.session.network.active)
@@ -110,10 +110,10 @@ DeviceList {
             required property var modelData
 
             width: ListView.view ? ListView.view.width : undefined
-            implicitHeight: rowLayout.implicitHeight + Appearance.padding.normal * 2
+            implicitHeight: rowLayout.implicitHeight + Tokens.padding.normal * 2
 
             color: Qt.alpha(Colours.tPalette.m3surfaceContainer, root.activeItem === modelData ? Colours.tPalette.m3surfaceContainer.a : 0)
-            radius: Appearance.rounding.normal
+            radius: Tokens.rounding.normal
 
             StateLayer {
                 function onClicked(): void {
@@ -130,15 +130,15 @@ DeviceList {
                 anchors.left: parent.left
                 anchors.right: parent.right
                 anchors.verticalCenter: parent.verticalCenter
-                anchors.margins: Appearance.padding.normal
+                anchors.margins: Tokens.padding.normal
 
-                spacing: Appearance.spacing.normal
+                spacing: Tokens.spacing.normal
 
                 StyledRect {
                     implicitWidth: implicitHeight
-                    implicitHeight: icon.implicitHeight + Appearance.padding.normal * 2
+                    implicitHeight: icon.implicitHeight + Tokens.padding.normal * 2
 
-                    radius: Appearance.rounding.normal
+                    radius: Tokens.rounding.normal
                     color: modelData.active ? Colours.palette.m3primaryContainer : Colours.tPalette.m3surfaceContainerHigh
 
                     MaterialIcon {
@@ -146,7 +146,7 @@ DeviceList {
 
                         anchors.centerIn: parent
                         text: Icons.getNetworkIcon(modelData.strength, modelData.isSecure)
-                        font.pointSize: Appearance.font.size.large
+                        font.pointSize: Tokens.font.size.large
                         fill: modelData.active ? 1 : 0
                         color: modelData.active ? Colours.palette.m3onPrimaryContainer : Colours.palette.m3onSurface
                     }
@@ -167,7 +167,7 @@ DeviceList {
 
                     RowLayout {
                         Layout.fillWidth: true
-                        spacing: Appearance.spacing.smaller
+                        spacing: Tokens.spacing.smaller
 
                         StyledText {
                             Layout.fillWidth: true
@@ -182,7 +182,7 @@ DeviceList {
                                 return qsTr("Open");
                             }
                             color: modelData.active ? Colours.palette.m3primary : Colours.palette.m3outline
-                            font.pointSize: Appearance.font.size.small
+                            font.pointSize: Tokens.font.size.small
                             font.weight: modelData.active ? 500 : 400
                             elide: Text.ElideRight
                         }
@@ -191,9 +191,9 @@ DeviceList {
 
                 StyledRect {
                     implicitWidth: implicitHeight
-                    implicitHeight: connectIcon.implicitHeight + Appearance.padding.smaller * 2
+                    implicitHeight: connectIcon.implicitHeight + Tokens.padding.smaller * 2
 
-                    radius: Appearance.rounding.full
+                    radius: Tokens.rounding.full
                     color: Qt.alpha(Colours.palette.m3primaryContainer, modelData.active ? 1 : 0)
 
                     StateLayer {

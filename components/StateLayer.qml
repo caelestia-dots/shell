@@ -1,6 +1,6 @@
 import QtQuick
+import Caelestia.Config
 import qs.services
-import qs.config
 
 MouseArea {
     id: root
@@ -63,7 +63,7 @@ MouseArea {
             properties: "implicitWidth,implicitHeight"
             from: 0
             to: rippleAnim.radius * 2
-            easing.bezierCurve: Appearance.anim.curves.standardDecel
+            easing: Tokens.anim.standardDecel
         }
         Anim {
             target: ripple
@@ -83,7 +83,7 @@ MouseArea {
         StyledRect {
             id: ripple
 
-            radius: Appearance.rounding.full
+            radius: Tokens.rounding.full
             color: root.color
             opacity: 0
 

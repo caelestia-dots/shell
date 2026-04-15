@@ -2,7 +2,7 @@ pragma Singleton
 
 import Quickshell
 import Caelestia
-import qs.config
+import Caelestia.Config
 import qs.utils
 
 Searcher {
@@ -24,7 +24,7 @@ Searcher {
     }
 
     function search(search: string): list<var> {
-        const prefix = Config.launcher.specialPrefix;
+        const prefix = GlobalConfig.launcher.specialPrefix;
 
         if (search.startsWith(`${prefix}i `)) {
             keys = ["id", "name"];
@@ -66,13 +66,13 @@ Searcher {
     }
 
     list: appDb.apps
-    useFuzzy: Config.launcher.useFuzzy.apps
+    useFuzzy: GlobalConfig.launcher.useFuzzy.apps
 
     AppDb {
         id: appDb
 
         path: `${Paths.state}/apps.sqlite`
-        favouriteApps: Config.launcher.favouriteApps
-        entries: DesktopEntries.applications.values.filter(a => !Strings.testRegexList(Config.launcher.hiddenApps, a.id))
+        favouriteApps: GlobalConfig.launcher.favouriteApps
+        entries: DesktopEntries.applications.values.filter(a => !Strings.testRegexList(GlobalConfig.launcher.hiddenApps, a.id))
     }
 }

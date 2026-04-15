@@ -4,10 +4,10 @@ import QtQuick
 import QtQuick.Layouts
 import Quickshell
 import Quickshell.Bluetooth
+import Caelestia.Config
 import qs.components
 import qs.components.controls
 import qs.services
-import qs.config
 import qs.utils
 
 ColumnLayout {
@@ -16,11 +16,11 @@ ColumnLayout {
     required property PopoutState popouts
 
     width: 300
-    spacing: Appearance.spacing.small
+    spacing: Tokens.spacing.small
 
     StyledText {
-        Layout.topMargin: Appearance.padding.normal
-        Layout.rightMargin: Appearance.padding.small
+        Layout.topMargin: Tokens.padding.normal
+        Layout.rightMargin: Tokens.padding.small
         text: qsTr("Bluetooth")
         font.weight: 500
     }
@@ -46,8 +46,8 @@ ColumnLayout {
     }
 
     StyledText {
-        Layout.topMargin: Appearance.spacing.small
-        Layout.rightMargin: Appearance.padding.small
+        Layout.topMargin: Tokens.spacing.small
+        Layout.rightMargin: Tokens.padding.small
         text: {
             const devices = Bluetooth.devices.values; // qmllint disable unresolved-type
             let available = qsTr("%1 device%2 available").arg(devices.length).arg(devices.length === 1 ? "" : "s");
@@ -57,7 +57,7 @@ ColumnLayout {
             return available;
         }
         color: Colours.palette.m3onSurfaceVariant
-        font.pointSize: Appearance.font.size.small
+        font.pointSize: Tokens.font.size.small
     }
 
     Repeater {
@@ -72,8 +72,8 @@ ColumnLayout {
             readonly property bool loading: modelData.state === BluetoothDeviceState.Connecting || modelData.state === BluetoothDeviceState.Disconnecting // qmllint disable unresolved-type
 
             Layout.fillWidth: true
-            Layout.rightMargin: Appearance.padding.small
-            spacing: Appearance.spacing.small
+            Layout.rightMargin: Tokens.padding.small
+            spacing: Tokens.spacing.small
 
             opacity: 0
             scale: 0.7
@@ -96,8 +96,8 @@ ColumnLayout {
             }
 
             StyledText {
-                Layout.leftMargin: Appearance.spacing.small / 2
-                Layout.rightMargin: Appearance.spacing.small / 2
+                Layout.leftMargin: Tokens.spacing.small / 2
+                Layout.rightMargin: Tokens.spacing.small / 2
                 Layout.fillWidth: true
                 text: device.modelData.name
                 elide: Text.ElideRight
@@ -113,9 +113,9 @@ ColumnLayout {
                 id: connectBtn
 
                 implicitWidth: implicitHeight
-                implicitHeight: connectIcon.implicitHeight + Appearance.padding.small
+                implicitHeight: connectIcon.implicitHeight + Tokens.padding.small
 
-                radius: Appearance.rounding.full
+                radius: Tokens.rounding.full
                 color: Qt.alpha(Colours.palette.m3primary, device.modelData.state === BluetoothDeviceState.Connected ? 1 : 0) // qmllint disable unresolved-type
 
                 CircularIndicator {
@@ -161,7 +161,7 @@ ColumnLayout {
                             device.modelData.forget();
                         }
 
-                        radius: Appearance.rounding.full
+                        radius: Tokens.rounding.full
                     }
 
                     MaterialIcon {
@@ -175,10 +175,10 @@ ColumnLayout {
 
     IconTextButton {
         Layout.fillWidth: true
-        Layout.topMargin: Appearance.spacing.normal
+        Layout.topMargin: Tokens.spacing.normal
         inactiveColour: Colours.palette.m3primaryContainer
         inactiveOnColour: Colours.palette.m3onPrimaryContainer
-        verticalPadding: Appearance.padding.small
+        verticalPadding: Tokens.padding.small
         text: qsTr("Open settings")
         icon: "settings"
 
@@ -191,8 +191,8 @@ ColumnLayout {
         property alias toggle: toggle
 
         Layout.fillWidth: true
-        Layout.rightMargin: Appearance.padding.small
-        spacing: Appearance.spacing.normal
+        Layout.rightMargin: Tokens.padding.small
+        spacing: Tokens.spacing.normal
 
         StyledText {
             Layout.fillWidth: true

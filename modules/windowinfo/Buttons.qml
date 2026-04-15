@@ -3,9 +3,9 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import QtQuick.Layouts
 import Quickshell.Widgets
+import Caelestia.Config
 import qs.components
 import qs.services
-import qs.config
 
 ColumnLayout {
     id: root
@@ -14,14 +14,14 @@ ColumnLayout {
     property bool moveToWsExpanded
 
     anchors.fill: parent
-    spacing: Appearance.spacing.small
+    spacing: Tokens.spacing.small
 
     RowLayout {
-        Layout.topMargin: Appearance.padding.large
-        Layout.leftMargin: Appearance.padding.large
-        Layout.rightMargin: Appearance.padding.large
+        Layout.topMargin: Tokens.padding.large
+        Layout.leftMargin: Tokens.padding.large
+        Layout.rightMargin: Tokens.padding.large
 
-        spacing: Appearance.spacing.normal
+        spacing: Tokens.spacing.normal
 
         StyledText {
             Layout.fillWidth: true
@@ -31,10 +31,10 @@ ColumnLayout {
 
         StyledRect {
             color: Colours.palette.m3primary
-            radius: Appearance.rounding.small
+            radius: Tokens.rounding.small
 
-            implicitWidth: moveToWsIcon.implicitWidth + Appearance.padding.small * 2
-            implicitHeight: moveToWsIcon.implicitHeight + Appearance.padding.small
+            implicitWidth: moveToWsIcon.implicitWidth + Tokens.padding.small * 2
+            implicitHeight: moveToWsIcon.implicitHeight + Tokens.padding.small
 
             StateLayer {
                 function onClicked(): void {
@@ -52,27 +52,27 @@ ColumnLayout {
                 animate: true
                 text: root.moveToWsExpanded ? "expand_more" : "keyboard_arrow_right"
                 color: Colours.palette.m3onPrimary
-                font.pointSize: Appearance.font.size.large
+                font.pointSize: Tokens.font.size.large
             }
         }
     }
 
     WrapperItem {
         Layout.fillWidth: true
-        Layout.leftMargin: Appearance.padding.large * 2
-        Layout.rightMargin: Appearance.padding.large * 2
+        Layout.leftMargin: Tokens.padding.large * 2
+        Layout.rightMargin: Tokens.padding.large * 2
 
         Layout.preferredHeight: root.moveToWsExpanded ? implicitHeight : 0
         clip: true
 
-        topMargin: Appearance.spacing.normal
-        bottomMargin: Appearance.spacing.normal
+        topMargin: Tokens.spacing.normal
+        bottomMargin: Tokens.spacing.normal
 
         GridLayout {
             id: wsGrid
 
-            rowSpacing: Appearance.spacing.smaller
-            columnSpacing: Appearance.spacing.normal
+            rowSpacing: Tokens.spacing.smaller
+            columnSpacing: Tokens.spacing.normal
             columns: 5
 
             Repeater {
@@ -102,11 +102,11 @@ ColumnLayout {
 
     RowLayout {
         Layout.fillWidth: true
-        Layout.leftMargin: Appearance.padding.large
-        Layout.rightMargin: Appearance.padding.large
-        Layout.bottomMargin: Appearance.padding.large
+        Layout.leftMargin: Tokens.padding.large
+        Layout.rightMargin: Tokens.padding.large
+        Layout.bottomMargin: Tokens.padding.large
 
-        spacing: root.client?.lastIpcObject.floating ? Appearance.spacing.normal : Appearance.spacing.small
+        spacing: root.client?.lastIpcObject.floating ? Tokens.spacing.normal : Tokens.spacing.small
 
         Button {
             function onClicked(): void {
@@ -120,7 +120,7 @@ ColumnLayout {
 
         Loader {
             asynchronous: true
-            active: root.client?.lastIpcObject.floating
+            active: root.client?.lastIpcObject.floating ?? false
             Layout.fillWidth: active
             Layout.leftMargin: active ? 0 : -parent.spacing
             Layout.rightMargin: active ? 0 : -parent.spacing
@@ -155,10 +155,10 @@ ColumnLayout {
         function onClicked(): void {
         }
 
-        radius: Appearance.rounding.small
+        radius: Tokens.rounding.small
 
         Layout.fillWidth: true
-        implicitHeight: label.implicitHeight + Appearance.padding.small * 2
+        implicitHeight: label.implicitHeight + Tokens.padding.small * 2
 
         StateLayer {
             id: stateLayer
@@ -177,7 +177,7 @@ ColumnLayout {
 
             animate: true
             color: parent.onColor
-            font.pointSize: Appearance.font.size.normal
+            font.pointSize: Tokens.font.size.normal
         }
     }
 }

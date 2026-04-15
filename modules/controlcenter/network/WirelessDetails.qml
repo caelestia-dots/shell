@@ -5,12 +5,12 @@ import "../components"
 import "."
 import QtQuick
 import QtQuick.Layouts
+import Caelestia.Config
 import qs.components
 import qs.components.containers
 import qs.components.controls
 import qs.components.effects
 import qs.services
-import qs.config
 import qs.utils
 
 DeviceDetails {
@@ -64,7 +64,7 @@ DeviceDetails {
     sections: [
         Component {
             ColumnLayout {
-                spacing: Appearance.spacing.normal
+                spacing: Tokens.spacing.normal
 
                 SectionHeader {
                     title: qsTr("Connection status")
@@ -86,8 +86,8 @@ DeviceDetails {
 
                     TextButton {
                         Layout.fillWidth: true
-                        Layout.topMargin: Appearance.spacing.normal
-                        Layout.minimumHeight: Appearance.font.size.normal + Appearance.padding.normal * 2
+                        Layout.topMargin: Tokens.spacing.normal
+                        Layout.minimumHeight: Tokens.font.size.normal + Tokens.padding.normal * 2
                         visible: {
                             if (!root.network || !root.network.ssid) {
                                 return false;
@@ -112,7 +112,7 @@ DeviceDetails {
         },
         Component {
             ColumnLayout {
-                spacing: Appearance.spacing.normal
+                spacing: Tokens.spacing.normal
 
                 SectionHeader {
                     title: qsTr("Network properties")
@@ -120,7 +120,7 @@ DeviceDetails {
                 }
 
                 SectionContainer {
-                    contentSpacing: Appearance.spacing.small / 2
+                    contentSpacing: Tokens.spacing.small / 2
 
                     PropertyRow {
                         label: qsTr("SSID")
@@ -155,7 +155,7 @@ DeviceDetails {
         },
         Component {
             ColumnLayout {
-                spacing: Appearance.spacing.normal
+                spacing: Tokens.spacing.normal
 
                 SectionHeader {
                     title: qsTr("Connection information")
