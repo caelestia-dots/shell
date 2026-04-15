@@ -17,6 +17,9 @@ Column {
     }
 
     StyledText {
+        // Capitalize the first letter of the generic profile string for UI display
+        property string displayProfile: PowerManager.currentProfile.charAt(0).toUpperCase() + PowerManager.currentProfile.slice(1)
+
         function formatSeconds(s: int, fallback: string): string {
             const day = Math.floor(s / 86400);
             const hr = Math.floor(s / 3600) % 60;
@@ -33,13 +36,14 @@ Column {
             return comps.join(", ") || fallback;
         }
 
-        text: UPower.displayDevice.isLaptopBattery ? qsTr("Time %1: %2").arg(UPower.onBattery ? "remaining" : "until charged").arg(UPower.onBattery ? formatSeconds(UPower.displayDevice.timeToEmpty, "Calculating...") : formatSeconds(UPower.displayDevice.timeToFull, "Fully charged!")) : qsTr("Power profile: %1").arg(PowerProfile.toString(PowerProfiles.profile))
+        text: UPower.displayDevice.isLaptopBattery ? qsTr("Time %1: %2").arg(UPower.onBattery ? "remaining" : "until charged").arg(UPower.onBattery ? formatSeconds(UPower.displayDevice.timeToEmpty, "Calculating...") : formatSeconds(UPower.displayDevice.timeToFull, "Fully charged!")) : qsTr("Power profile: %1").arg(displayProfile)
     }
 
     Loader {
         asynchronous: true
         anchors.horizontalCenter: parent.horizontalCenter
 
+        // TODO: Change to use the abstraction (PowerManager in qs.services)
         active: PowerProfiles.degradationReason !== PerformanceDegradationReason.None
 
         height: active ? ((item as Item)?.implicitHeight ?? 0) : 0
@@ -99,10 +103,10 @@ Column {
         id: profiles
 
         property string current: {
-            const p = PowerProfiles.profile;
-            if (p === PowerProfile.PowerSaver)
+            const p = PowerManager.currentProfile;
+            if (p === "saver")
                 return saver.icon;
-            if (p === PowerProfile.Performance)
+            if (p === "performance")
                 return perf.icon;
             return balance.icon;
         }
@@ -161,7 +165,7 @@ Column {
             anchors.left: parent.left
             anchors.leftMargin: Tokens.padding.small
 
-            profile: PowerProfile.PowerSaver
+            profile: "saver"
             icon: "energy_savings_leaf"
         }
 
@@ -170,7 +174,7 @@ Column {
 
             anchors.centerIn: parent
 
-            profile: PowerProfile.Balanced
+            profile: "balanced"
             icon: "balance"
         }
 
@@ -181,7 +185,7 @@ Column {
             anchors.right: parent.right
             anchors.rightMargin: Tokens.padding.small
 
-            profile: PowerProfile.Performance
+            profile: "performance"
             icon: "rocket_launch"
         }
     }
@@ -198,14 +202,14 @@ Column {
 
     component Profile: Item {
         required property string icon
-        required property int profile
+        required property string profile
 
         implicitWidth: icon.implicitHeight + Tokens.padding.small * 2
         implicitHeight: icon.implicitHeight + Tokens.padding.small * 2
 
         StateLayer {
             function onClicked(): void {
-                PowerProfiles.profile = parent.profile;
+                PowerManager.setProfile(parent.profile);
             }
 
             radius: Tokens.rounding.full
