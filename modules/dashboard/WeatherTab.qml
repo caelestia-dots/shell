@@ -1,7 +1,7 @@
 import QtQuick
 import QtQuick.Layouts
+import Caelestia.Config
 import qs.services
-import qs.config
 import "weather"
 
 Item {
@@ -15,7 +15,7 @@ Item {
         id: layout
 
         anchors.fill: parent
-        spacing: Appearance.spacing.smaller
+        spacing: Tokens.spacing.smaller
 
         CityInfo {}
 

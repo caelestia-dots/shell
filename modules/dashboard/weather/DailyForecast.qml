@@ -1,16 +1,16 @@
 import QtQuick
 import QtQuick.Layouts
+import Caelestia.Config
 import qs.components
 import qs.services
-import qs.config
 
 ColumnLayout {
     StyledText {
-        Layout.topMargin: Appearance.spacing.normal
-        Layout.leftMargin: Appearance.padding.normal
+        Layout.topMargin: Tokens.spacing.normal
+        Layout.leftMargin: Tokens.padding.normal
         visible: dailyRepeater.count > 0
         text: qsTr("7-Day Forecast")
-        font.pointSize: Appearance.font.size.normal
+        font.pointSize: Tokens.font.size.normal
         font.weight: 600
         color: Colours.palette.m3onSurface
     }
@@ -19,7 +19,7 @@ ColumnLayout {
         id: dailyForecast
 
         Layout.fillWidth: true
-        spacing: Appearance.spacing.smaller
+        spacing: Tokens.spacing.smaller
 
         Repeater {
             id: dailyRepeater
@@ -38,35 +38,33 @@ ColumnLayout {
 
         property var date: modelData?.date
         property var icon: modelData?.icon ?? "cloud_alert"
-        property var maxTempF: modelData?.maxTempF ?? 0
-        property var maxTempC: modelData?.maxTempC ?? 0
-        property var minTempF: modelData?.minTempF ?? 0
-        property var minTempC: modelData?.minTempC ?? 0
+        property var maxTemp: modelData?.maxTemp ?? 0
+        property var minTemp: modelData?.minTemp ?? 0
 
         Layout.fillWidth: true
-        implicitHeight: forecastItemColumn.implicitHeight + Appearance.padding.normal * 2
-        radius: Appearance.rounding.normal
+        implicitHeight: forecastItemColumn.implicitHeight + Tokens.padding.normal * 2
+        radius: Tokens.rounding.normal
         color: Colours.tPalette.m3surfaceContainer
 
         ColumnLayout {
             id: forecastItemColumn
 
             anchors.centerIn: parent
-            spacing: Appearance.spacing.small
+            spacing: Tokens.spacing.small
 
             StyledText {
                 Layout.alignment: Qt.AlignHCenter
                 text: dailyForecastItem.index === 0 ? qsTr("Today") : new Date(dailyForecastItem.date).toLocaleDateString(Qt.locale(), "ddd")
-                font.pointSize: Appearance.font.size.normal
+                font.pointSize: Tokens.font.size.normal
                 font.weight: 600
                 color: Colours.palette.m3primary
             }
 
             StyledText {
-                Layout.topMargin: -Appearance.spacing.small / 2
+                Layout.topMargin: -Tokens.spacing.small / 2
                 Layout.alignment: Qt.AlignHCenter
                 text: new Date(dailyForecastItem.date).toLocaleDateString(Qt.locale(), "MMM d")
-                font.pointSize: Appearance.font.size.small
+                font.pointSize: Tokens.font.size.small
                 opacity: 0.7
                 color: Colours.palette.m3onSurfaceVariant
             }
@@ -74,25 +72,25 @@ ColumnLayout {
             MaterialIcon {
                 Layout.alignment: Qt.AlignHCenter
                 text: dailyForecastItem.icon
-                font.pointSize: Appearance.font.size.extraLarge
+                font.pointSize: Tokens.font.size.extraLarge
                 color: Colours.palette.m3secondary
             }
 
             Row {
                 Layout.alignment: Qt.AlignHCenter
-                spacing: Appearance.spacing.small / 2
+                spacing: Tokens.spacing.small / 2
 
                 StyledText {
                     Layout.alignment: Qt.AlignHCenter
-                    text: `${Config.services.useFahrenheit ? dailyForecastItem.maxTempF : dailyForecastItem.maxTempC}°`
+                    text: `${dailyForecastItem.maxTemp}°`
                     font.weight: 600
                     color: Colours.palette.m3tertiary
                 }
 
                 StyledText {
                     Layout.alignment: Qt.AlignHCenter
-                    text: `(${Config.services.useFahrenheit ? dailyForecastItem.minTempF : dailyForecastItem.minTempC}°)`
-                    font.pointSize: Appearance.font.size.small
+                    text: `(${dailyForecastItem.minTemp}°)`
+                    font.pointSize: Tokens.font.size.small
                     opacity: 0.7
                     color: Colours.palette.m3onSurfaceVariant
                 }

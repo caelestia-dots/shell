@@ -1,25 +1,25 @@
 import QtQuick
 import QtQuick.Layouts
+import Caelestia.Config
 import qs.components
 import qs.services
-import qs.config
 
 RowLayout {
     id: bigInfo
 
     property int visibleHourlyForecastItemsCount: 3
 
-    spacing: Appearance.spacing.small
+    spacing: Tokens.spacing.small
     implicitHeight: hourlyForecast.implicitHeight
     Layout.fillWidth: true
 
     ColumnLayout {
-        spacing: Appearance.spacing.small
+        spacing: Tokens.spacing.small
         Layout.fillWidth: true
         Layout.fillHeight: true
 
         StyledRect {
-            radius: Appearance.rounding.large * 2
+            radius: Tokens.rounding.large * 2
 
             color: Colours.tPalette.m3surfaceContainer
             Layout.fillWidth: true
@@ -29,33 +29,33 @@ RowLayout {
                 id: bigInfoRow
 
                 anchors.centerIn: parent
-                spacing: Appearance.spacing.large
+                spacing: Tokens.spacing.large
                 Layout.fillWidth: true
                 Layout.fillHeight: true
 
                 MaterialIcon {
                     Layout.alignment: Qt.AlignVCenter
                     text: Weather.icon
-                    font.pointSize: Appearance.font.size.extraLarge * 3
+                    font.pointSize: Tokens.font.size.extraLarge * 3
                     color: Colours.palette.m3secondary
                     animate: true
                 }
 
                 ColumnLayout {
                     Layout.alignment: Qt.AlignVCenter
-                    spacing: -Appearance.spacing.small
+                    spacing: -Tokens.spacing.small
 
                     StyledText {
                         text: Weather.temp
-                        font.pointSize: Appearance.font.size.extraLarge * 2
+                        font.pointSize: Tokens.font.size.extraLarge * 2
                         font.weight: 500
                         color: Colours.palette.m3primary
                     }
 
                     StyledText {
-                        Layout.leftMargin: Appearance.padding.small
+                        Layout.leftMargin: Tokens.padding.small
                         text: Weather.description
-                        font.pointSize: Appearance.font.size.normal
+                        font.pointSize: Tokens.font.size.normal
                         color: Colours.palette.m3onSurfaceVariant
                     }
                 }
@@ -70,10 +70,10 @@ RowLayout {
             Layout.preferredHeight: {
                 var totalHeight = bigInfo.implicitHeight;
                 var itemCount = bigInfo.visibleHourlyForecastItemsCount;
-                var totalSpacing = (itemCount - 1) * Appearance.spacing.small;
+                var totalSpacing = (itemCount - 1) * Tokens.spacing.small;
                 return (totalHeight - totalSpacing) / itemCount;
             }
-            spacing: Appearance.spacing.small
+            spacing: Tokens.spacing.small
 
             DetailCard {
                 icon: "water_drop"
@@ -114,17 +114,17 @@ RowLayout {
 
         Layout.fillWidth: true
         Layout.preferredHeight: parent.height
-        radius: Appearance.rounding.normal
+        radius: Tokens.rounding.normal
         color: Colours.tPalette.m3surfaceContainer
 
         Row {
             anchors.centerIn: parent
-            spacing: Appearance.spacing.normal
+            spacing: Tokens.spacing.normal
 
             MaterialIcon {
                 text: detailRoot.icon
                 color: detailRoot.colour
-                font.pointSize: Appearance.font.size.large
+                font.pointSize: Tokens.font.size.large
                 anchors.verticalCenter: parent.verticalCenter
             }
 
@@ -134,7 +134,7 @@ RowLayout {
 
                 StyledText {
                     text: detailRoot.label
-                    font.pointSize: Appearance.font.size.smaller
+                    font.pointSize: Tokens.font.size.smaller
                     opacity: 0.7
                     horizontalAlignment: Text.AlignLeft
                 }

@@ -1,27 +1,27 @@
 import QtQuick
 import QtQuick.Layouts
+import Caelestia.Config
 import qs.components
 import qs.services
-import qs.config
 
 RowLayout {
-    Layout.leftMargin: Appearance.padding.large
-    Layout.rightMargin: Appearance.padding.large
+    Layout.leftMargin: Tokens.padding.large
+    Layout.rightMargin: Tokens.padding.large
     Layout.fillWidth: true
 
     Column {
-        spacing: Appearance.spacing.small / 2
+        spacing: Tokens.spacing.small / 2
 
         StyledText {
             text: Weather.city || qsTr("Loading...")
-            font.pointSize: Appearance.font.size.extraLarge
+            font.pointSize: Tokens.font.size.extraLarge
             font.weight: 600
             color: Colours.palette.m3onSurface
         }
 
         StyledText {
             text: new Date().toLocaleDateString(Qt.locale(), "dddd, MMMM d")
-            font.pointSize: Appearance.font.size.small
+            font.pointSize: Tokens.font.size.small
             color: Colours.palette.m3onSurfaceVariant
         }
     }
@@ -31,7 +31,7 @@ RowLayout {
     }
 
     Row {
-        spacing: Appearance.spacing.large
+        spacing: Tokens.spacing.large
 
         WeatherStat {
             icon: "wb_twilight"
@@ -56,24 +56,24 @@ RowLayout {
         property string value
         property color colour
 
-        spacing: Appearance.spacing.small
+        spacing: Tokens.spacing.small
 
         MaterialIcon {
             text: weatherStat.icon
-            font.pointSize: Appearance.font.size.extraLarge
+            font.pointSize: Tokens.font.size.extraLarge
             color: weatherStat.colour
         }
 
         Column {
             StyledText {
                 text: weatherStat.label
-                font.pointSize: Appearance.font.size.smaller
+                font.pointSize: Tokens.font.size.smaller
                 color: Colours.palette.m3onSurfaceVariant
             }
 
             StyledText {
                 text: weatherStat.value
-                font.pointSize: Appearance.font.size.small
+                font.pointSize: Tokens.font.size.small
                 font.weight: 600
                 color: Colours.palette.m3onSurface
             }

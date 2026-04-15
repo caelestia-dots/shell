@@ -3,7 +3,7 @@ pragma Singleton
 import QtQuick
 import Quickshell
 import Caelestia
-import qs.config
+import Caelestia.Config
 import qs.utils
 
 Singleton {
@@ -15,19 +15,21 @@ Singleton {
     property list<var> forecast
     property list<var> hourlyForecast
 
+    readonly property string tempUnit: GlobalConfig.services.useFahrenheit ? "F" : "C"
+
     readonly property string icon: cc ? Icons.getWeatherIcon(cc.weatherCode) : "cloud_alert"
     readonly property string description: cc?.weatherDesc ?? qsTr("No weather")
-    readonly property string temp: Config.services.useFahrenheit ? `${cc?.tempF ?? 0}°F` : `${cc?.tempC ?? 0}°C`
-    readonly property string feelsLike: Config.services.useFahrenheit ? `${cc?.feelsLikeF ?? 0}°F` : `${cc?.feelsLikeC ?? 0}°C`
+    readonly property string temp: GlobalConfig.services.useFahrenheit ? `${cc?.tempF ?? 0}°F` : `${cc?.tempC ?? 0}°C`
+    readonly property string feelsLike: GlobalConfig.services.useFahrenheit ? `${cc?.feelsLikeF ?? 0}°F` : `${cc?.feelsLikeC ?? 0}°C`
     readonly property int humidity: cc?.humidity ?? 0
     readonly property real windSpeed: cc?.windSpeed ?? 0
-    readonly property string sunrise: cc ? Qt.formatDateTime(new Date(cc.sunrise), Config.services.useTwelveHourClock ? "h:mm A" : "h:mm") : "--:--"
-    readonly property string sunset: cc ? Qt.formatDateTime(new Date(cc.sunset), Config.services.useTwelveHourClock ? "h:mm A" : "h:mm") : "--:--"
+    readonly property string sunrise: cc ? Qt.formatDateTime(new Date(cc.sunrise), GlobalConfig.services.useTwelveHourClock ? "h:mm A" : "h:mm") : "--:--"
+    readonly property string sunset: cc ? Qt.formatDateTime(new Date(cc.sunset), GlobalConfig.services.useTwelveHourClock ? "h:mm A" : "h:mm") : "--:--"
 
     readonly property var cachedCities: new Map()
 
     function reload(): void {
-        const configLocation = Config.services.weatherLocation;
+        const configLocation = GlobalConfig.services.weatherLocation;
 
         if (configLocation) {
             if (configLocation.indexOf(",") !== -1 && !isNaN(parseFloat(configLocation.split(",")[0]))) {
@@ -126,17 +128,21 @@ Singleton {
             };
 
             const forecastList = [];
-            for (let i = 0; i < json.daily.time.length; i++)
+            for (let i = 0; i < json.daily.time.length; i++) {
+                const maxTempC = Math.round(json.daily.temperature_2m_max[i]);
+                const maxTempF = Math.round(toFahrenheit(json.daily.temperature_2m_max[i]));
+                const minTempC = Math.round(json.daily.temperature_2m_min[i]);
+                const minTempF = Math.round(toFahrenheit(json.daily.temperature_2m_min[i]));
+
                 forecastList.push({
                     date: json.daily.time[i].replace(/-/g, "/"),
-                    maxTempC: Math.round(json.daily.temperature_2m_max[i]),
-                    maxTempF: Math.round(toFahrenheit(json.daily.temperature_2m_max[i])),
-                    minTempC: Math.round(json.daily.temperature_2m_min[i]),
-                    minTempF: Math.round(toFahrenheit(json.daily.temperature_2m_min[i])),
+                    maxTemp: GlobalConfig.services.useFahrenheit ? maxTempF : maxTempC,
+                    minTemp: GlobalConfig.services.useFahrenheit ? minTempF : minTempC,
                     weatherCode: json.daily.weather_code[i],
                     icon: Icons.getWeatherIcon(json.daily.weather_code[i])
                 });
-            forecast = forecastList;
+                forecast = forecastList;
+            }
 
             const hourlyList = [];
             const now = new Date();
@@ -146,11 +152,13 @@ Singleton {
                 if (time < now)
                     continue;
 
+                const tempC = Math.round(json.hourly.temperature_2m[i]);
+                const tempF = Math.round(toFahrenheit(json.hourly.temperature_2m[i]));
+
                 hourlyList.push({
                     timestamp: json.hourly.time[i],
                     hour: time.getHours(),
-                    tempC: Math.round(json.hourly.temperature_2m[i]),
-                    tempF: Math.round(toFahrenheit(json.hourly.temperature_2m[i])),
+                    temp: GlobalConfig.services.useFahrenheit ? tempF : tempC,
                     weatherCode: json.hourly.weather_code[i],
                     icon: Icons.getWeatherIcon(json.hourly.weather_code[i]),
                     precipitationProbability: json.hourly.precipitation_probability[i]
@@ -216,7 +224,7 @@ Singleton {
             root.reload();
         }
 
-        target: Config.services
+        target: GlobalConfig.services
     }
 
     Timer {

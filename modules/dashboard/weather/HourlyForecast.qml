@@ -1,15 +1,15 @@
 import QtQuick
 import QtQuick.Layouts
+import Caelestia.Config
 import qs.components
 import qs.services
-import qs.config
 
 ListView {
     id: hourlyForecastList
 
     property var visibleItemsCount: 3
 
-    spacing: Appearance.spacing.small
+    spacing: Tokens.spacing.small
     width: contentItem.childrenRect.width
     height: (contentItem.children[0]?.height ?? 60) * visibleItemsCount + spacing * (visibleItemsCount - 1)
     clip: true
@@ -25,20 +25,19 @@ ListView {
         property var timestamp: modelData?.timestamp
         property var hour: modelData?.hour ?? 0
         property var icon: modelData?.icon ?? "cloud_alert"
-        property var tempF: modelData?.tempF ?? 0
-        property var tempC: modelData?.tempC ?? 0
+        property var temp: modelData?.temp ?? 0
         property var precipitationProbability: modelData?.precipitationProbability ?? "?"
 
-        implicitHeight: hourlyForecastItemRow.implicitHeight + Appearance.padding.normal * 2
-        implicitWidth: hourlyForecastItemRow.implicitWidth + Appearance.padding.normal * 2
-        radius: Appearance.rounding.normal
+        implicitHeight: hourlyForecastItemRow.implicitHeight + Tokens.padding.normal * 2
+        implicitWidth: hourlyForecastItemRow.implicitWidth + Tokens.padding.normal * 2
+        radius: Tokens.rounding.normal
         color: Colours.tPalette.m3surfaceContainer
 
         RowLayout {
             id: hourlyForecastItemRow
 
             anchors.centerIn: parent
-            spacing: Appearance.spacing.small
+            spacing: Tokens.spacing.small
 
             Column {
                 Layout.alignment: Qt.AlignCenter
@@ -46,7 +45,7 @@ ListView {
                 StyledText {
                     anchors.horizontalCenter: parent.horizontalCenter
                     text: hourlyForecastItem.hour > 12 ? `${(hourlyForecastItem.hour - 12).toString().padStart(2, "0")}PM` : `${hourlyForecastItem.hour.toString().padStart(2, "0")}AM`
-                    font.pointSize: Appearance.font.size.normal
+                    font.pointSize: Tokens.font.size.normal
                     font.weight: 600
                     color: Colours.palette.m3primary
                 }
@@ -54,7 +53,7 @@ ListView {
                 StyledText {
                     anchors.horizontalCenter: parent.horizontalCenter
                     text: new Date(hourlyForecastItem.timestamp).toLocaleDateString(Qt.locale(), "(ddd)")
-                    font.pointSize: Appearance.font.size.small
+                    font.pointSize: Tokens.font.size.small
                     opacity: 0.7
                     color: Colours.palette.m3onSurfaceVariant
                 }
@@ -63,7 +62,7 @@ ListView {
             MaterialIcon {
                 Layout.alignment: Qt.AlignVCenter
                 text: hourlyForecastItem.icon
-                font.pointSize: Appearance.font.size.extraLarge
+                font.pointSize: Tokens.font.size.extraLarge
                 color: Colours.palette.m3secondary
             }
 
@@ -72,7 +71,7 @@ ListView {
 
                 StyledText {
                     anchors.right: parent.right
-                    text: Config.services.useFahrenheit ? `${hourlyForecastItem.tempF}°F` : `${hourlyForecastItem.tempC}°C`
+                    text: `${hourlyForecastItem.temp}°${Weather.tempUnit}`
                     font.weight: 600
                     color: Colours.palette.m3tertiary
                 }
