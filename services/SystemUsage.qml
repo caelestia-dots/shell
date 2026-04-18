@@ -3,7 +3,7 @@ pragma Singleton
 import QtQuick
 import Quickshell
 import Quickshell.Io
-import Caelestia.Config
+import qs.config
 
 Singleton {
     id: root
@@ -14,7 +14,7 @@ Singleton {
     property real cpuTemp
 
     // GPU properties
-    readonly property string gpuType: GlobalConfig.services.gpuType.toUpperCase() || autoGpuType
+    readonly property string gpuType: Config.services.gpuType.toUpperCase() || autoGpuType
     property string autoGpuType: "NONE"
     property string gpuName: ""
     property real gpuPerc
@@ -80,7 +80,7 @@ Singleton {
 
     Timer {
         running: root.refCount > 0
-        interval: GlobalConfig.dashboard.resourceUpdateInterval
+        interval: Config.dashboard.resourceUpdateInterval
         repeat: true
         triggeredOnStart: true
         onTriggered: {
@@ -220,7 +220,7 @@ Singleton {
         id: gpuNameDetect
 
         running: true
-        command: ["sh", "-c", "nvidia-smi --query-gpu=name --format=csv,noheader 2>/dev/null || glxinfo -B 2>/dev/null | grep 'Device:' | cut -d':' -f2 | cut -d'(' -f1 || lspci 2>/dev/null | grep -i 'vga\\|3d controller\\|display' | head -1"]
+        command: ["sh", "-c", "if command -v nvidia-smi &>/dev/null && nvidia-smi -L &>/dev/null; then nvidia-smi --query-gpu=name --format=csv,noheader 2>/dev/null; else glxinfo -B 2>/dev/null | grep 'Device:' | cut -d':' -f2 | cut -d'(' -f1 || lspci 2>/dev/null | grep -i 'vga\\|3d controller\\|display' | head -1; fi"]
         stdout: StdioCollector {
             onStreamFinished: {
                 const output = text.trim();
@@ -251,7 +251,7 @@ Singleton {
     Process {
         id: gpuTypeCheck
 
-        running: !GlobalConfig.services.gpuType
+        running: !Config.services.gpuType
         command: ["sh", "-c", "if command -v nvidia-smi &>/dev/null && nvidia-smi -L &>/dev/null; then echo NVIDIA; elif ls /sys/class/drm/card*/device/gpu_busy_percent 2>/dev/null | grep -q .; then echo GENERIC; else echo NONE; fi"]
         stdout: StdioCollector {
             onStreamFinished: root.autoGpuType = text.trim()
