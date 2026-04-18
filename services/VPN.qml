@@ -4,7 +4,7 @@ import QtQuick
 import Quickshell
 import Quickshell.Io
 import Caelestia
-import qs.config
+import Caelestia.Config
 
 Singleton {
     id: root
@@ -18,9 +18,9 @@ Singleton {
         })
 
     readonly property bool connecting: connectProc.running || disconnectProc.running
-    readonly property bool enabled: Config.utilities.vpn.provider.some(p => typeof p === "object" ? (p.enabled === true) : false)
+    readonly property bool enabled: GlobalConfig.utilities.vpn.provider.some(p => typeof p === "object" ? (p.enabled === true) : false)
     readonly property var providerInput: {
-        const enabledProvider = Config.utilities.vpn.provider.find(p => typeof p === "object" ? (p.enabled === true) : false);
+        const enabledProvider = GlobalConfig.utilities.vpn.provider.find(p => typeof p === "object" ? (p.enabled === true) : false);
         return enabledProvider || "wireguard";
     }
     readonly property bool isCustomProvider: typeof providerInput === "object"
@@ -279,7 +279,7 @@ Singleton {
     }
 
     function emitStatusToast(statusObj: var): void {
-        if (!Config.utilities.toasts.vpnChanged)
+        if (!GlobalConfig.utilities.toasts.vpnChanged)
             return;
 
         const displayName = root.currentConfig ? (root.currentConfig.displayName || "VPN") : "VPN";

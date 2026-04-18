@@ -1,7 +1,7 @@
 import QtQuick
 import Quickshell
+import Caelestia.Config
 import qs.components
-import qs.config
 import qs.modules.bar as Bar
 import qs.modules.dashboard as Dashboard
 import qs.modules.launcher as Launcher
@@ -138,7 +138,7 @@ Item {
 
         anchors.bottom: sidebar.visible ? parent.bottom : utilities.top
         anchors.right: sidebar.left
-        anchors.margins: Appearance.padding.normal
+        anchors.margins: Tokens.padding.normal
     }
 
     Sidebar.Wrapper {

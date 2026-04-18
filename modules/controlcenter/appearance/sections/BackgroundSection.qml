@@ -4,11 +4,11 @@ import ".."
 import "../../components"
 import QtQuick
 import QtQuick.Layouts
+import Caelestia.Config
 import qs.components
 import qs.components.containers
 import qs.components.controls
 import qs.services
-import qs.config
 
 CollapsibleSection {
     id: root
@@ -37,9 +37,9 @@ CollapsibleSection {
     }
 
     StyledText {
-        Layout.topMargin: Appearance.spacing.normal
+        Layout.topMargin: Tokens.spacing.normal
         text: qsTr("Desktop Clock")
-        font.pointSize: Appearance.font.size.larger
+        font.pointSize: Tokens.font.size.larger
         font.weight: 500
     }
 
@@ -64,12 +64,12 @@ CollapsibleSection {
             rootPane.saveConfig();
         }
 
-        contentSpacing: Appearance.spacing.small
+        contentSpacing: Tokens.spacing.small
         z: 1
 
         StyledText {
             text: qsTr("Positioning")
-            font.pointSize: Appearance.font.size.larger
+            font.pointSize: Tokens.font.size.larger
             font.weight: 500
         }
 
@@ -156,11 +156,11 @@ CollapsibleSection {
     }
 
     SectionContainer {
-        contentSpacing: Appearance.spacing.small
+        contentSpacing: Tokens.spacing.small
 
         StyledText {
             text: qsTr("Shadow")
-            font.pointSize: Appearance.font.size.larger
+            font.pointSize: Tokens.font.size.larger
             font.weight: 500
         }
 
@@ -174,7 +174,7 @@ CollapsibleSection {
         }
 
         SectionContainer {
-            contentSpacing: Appearance.spacing.normal
+            contentSpacing: Tokens.spacing.normal
 
             SliderInput {
                 Layout.fillWidth: true
@@ -199,7 +199,7 @@ CollapsibleSection {
         }
 
         SectionContainer {
-            contentSpacing: Appearance.spacing.normal
+            contentSpacing: Tokens.spacing.normal
 
             SliderInput {
                 Layout.fillWidth: true
@@ -225,11 +225,11 @@ CollapsibleSection {
     }
 
     SectionContainer {
-        contentSpacing: Appearance.spacing.small
+        contentSpacing: Tokens.spacing.small
 
         StyledText {
             text: qsTr("Background")
-            font.pointSize: Appearance.font.size.larger
+            font.pointSize: Tokens.font.size.larger
             font.weight: 500
         }
 
@@ -252,7 +252,7 @@ CollapsibleSection {
         }
 
         SectionContainer {
-            contentSpacing: Appearance.spacing.normal
+            contentSpacing: Tokens.spacing.normal
 
             SliderInput {
                 Layout.fillWidth: true
@@ -278,9 +278,9 @@ CollapsibleSection {
     }
 
     StyledText {
-        Layout.topMargin: Appearance.spacing.normal
+        Layout.topMargin: Tokens.spacing.normal
         text: qsTr("Visualiser")
-        font.pointSize: Appearance.font.size.larger
+        font.pointSize: Tokens.font.size.larger
         font.weight: 500
     }
 
@@ -303,7 +303,7 @@ CollapsibleSection {
     }
 
     SectionContainer {
-        contentSpacing: Appearance.spacing.normal
+        contentSpacing: Tokens.spacing.normal
 
         SliderInput {
             Layout.fillWidth: true
@@ -328,7 +328,7 @@ CollapsibleSection {
     }
 
     SectionContainer {
-        contentSpacing: Appearance.spacing.normal
+        contentSpacing: Tokens.spacing.normal
 
         SliderInput {
             Layout.fillWidth: true

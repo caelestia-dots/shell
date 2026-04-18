@@ -5,8 +5,8 @@ import QtQuick
 import Quickshell
 import Quickshell.Io
 import Caelestia
+import Caelestia.Config
 import qs.services
-import qs.config
 import qs.utils
 
 Singleton {
@@ -115,9 +115,9 @@ Singleton {
     }
 
     component Transparency: QtObject {
-        readonly property bool enabled: Appearance.transparency.enabled
-        readonly property real base: Math.max(0, Math.min(1, Appearance.transparency.base - (root.light ? 0.1 : 0)))
-        readonly property real layers: Appearance.transparency.layers
+        readonly property bool enabled: Tokens.transparency.enabled
+        readonly property real base: Math.max(0, Math.min(1, Tokens.transparency.base - (root.light ? 0.1 : 0)))
+        readonly property real layers: Tokens.transparency.layers
 
         onEnabledChanged: debounceTimer.restart()
         onBaseChanged: debounceTimer.restart()

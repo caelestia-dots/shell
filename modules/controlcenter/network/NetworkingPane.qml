@@ -7,12 +7,12 @@ import QtQuick
 import QtQuick.Layouts
 import Quickshell
 import Quickshell.Widgets
+import Caelestia.Config
 import qs.components
 import qs.components.containers
 import qs.components.controls
 import qs.components.effects
 import qs.services
-import qs.config
 import qs.utils
 
 Item {
@@ -43,15 +43,15 @@ Item {
 
                     anchors.left: parent.left
                     anchors.right: parent.right
-                    spacing: Appearance.spacing.normal
+                    spacing: Tokens.spacing.normal
 
                     RowLayout {
                         Layout.fillWidth: true
-                        spacing: Appearance.spacing.smaller
+                        spacing: Tokens.spacing.smaller
 
                         StyledText {
                             text: qsTr("Network")
-                            font.pointSize: Appearance.font.size.large
+                            font.pointSize: Tokens.font.size.large
                             font.weight: 500
                         }
 
@@ -63,9 +63,9 @@ Item {
                             toggled: Nmcli.wifiEnabled
                             icon: "wifi"
                             accent: "Tertiary"
-                            iconSize: Appearance.font.size.normal
-                            horizontalPadding: Appearance.padding.normal
-                            verticalPadding: Appearance.padding.smaller
+                            iconSize: Tokens.font.size.normal
+                            horizontalPadding: Tokens.padding.normal
+                            verticalPadding: Tokens.padding.smaller
                             tooltip: qsTr("Toggle WiFi")
 
                             onClicked: {
@@ -77,9 +77,9 @@ Item {
                             toggled: Nmcli.scanning
                             icon: "wifi_find"
                             accent: "Secondary"
-                            iconSize: Appearance.font.size.normal
-                            horizontalPadding: Appearance.padding.normal
-                            verticalPadding: Appearance.padding.smaller
+                            iconSize: Tokens.font.size.normal
+                            horizontalPadding: Tokens.padding.normal
+                            verticalPadding: Tokens.padding.smaller
                             tooltip: qsTr("Scan for networks")
 
                             onClicked: {
@@ -91,9 +91,9 @@ Item {
                             toggled: !root.session.ethernet.active && !root.session.network.active
                             icon: "settings"
                             accent: "Primary"
-                            iconSize: Appearance.font.size.normal
-                            horizontalPadding: Appearance.padding.normal
-                            verticalPadding: Appearance.padding.smaller
+                            iconSize: Tokens.font.size.normal
+                            horizontalPadding: Tokens.padding.normal
+                            verticalPadding: Tokens.padding.smaller
                             tooltip: qsTr("Network settings")
 
                             onClicked: {

@@ -3,10 +3,10 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import QtQuick.Layouts
 import Quickshell.Bluetooth
+import Caelestia.Config
 import qs.components
 import qs.components.controls
 import qs.services
-import qs.config
 import qs.modules.bar.popouts as BarPopouts
 
 StyledRect {
@@ -19,7 +19,7 @@ StyledRect {
         const seenIds = new Set();
 
         return Config.utilities.quickToggles.filter(item => {
-            if (!item.enabled)
+            if (!(item.enabled ?? true))
                 return false;
 
             if (seenIds.has(item.id)) {
@@ -27,7 +27,7 @@ StyledRect {
             }
 
             if (item.id === "vpn") {
-                return Config.utilities.vpn.provider.some(p => typeof p === "object" ? (p.enabled === true) : false);
+                return GlobalConfig.utilities.vpn.provider.some(p => typeof p === "object" ? (p.enabled === true) : false);
             }
 
             seenIds.add(item.id);
@@ -38,21 +38,21 @@ StyledRect {
     readonly property bool needExtraRow: quickToggles.length > 6
 
     Layout.fillWidth: true
-    implicitHeight: layout.implicitHeight + Appearance.padding.large * 2
+    implicitHeight: layout.implicitHeight + Tokens.padding.large * 2
 
-    radius: Appearance.rounding.normal
+    radius: Tokens.rounding.normal
     color: Colours.tPalette.m3surfaceContainer
 
     ColumnLayout {
         id: layout
 
         anchors.fill: parent
-        anchors.margins: Appearance.padding.large
-        spacing: Appearance.spacing.normal
+        anchors.margins: Tokens.padding.large
+        spacing: Tokens.spacing.normal
 
         StyledText {
             text: qsTr("Quick Toggles")
-            font.pointSize: Appearance.font.size.normal
+            font.pointSize: Tokens.font.size.normal
         }
 
         QuickToggleRow {
@@ -69,7 +69,7 @@ StyledRect {
         property var rowModel: []
 
         Layout.fillWidth: true
-        spacing: Appearance.spacing.small
+        spacing: Tokens.spacing.small
 
         Repeater {
             model: parent.rowModel
@@ -154,17 +154,16 @@ StyledRect {
 
     component Toggle: IconButton {
         Layout.fillWidth: true
-        Layout.preferredWidth: implicitWidth + (stateLayer.pressed ? Appearance.padding.large : internalChecked ? Appearance.padding.smaller : 0)
-        radius: stateLayer.pressed ? Appearance.rounding.small / 2 : internalChecked ? Appearance.rounding.small : Appearance.rounding.normal
+        Layout.preferredWidth: implicitWidth + (stateLayer.pressed ? Tokens.padding.large : internalChecked ? Tokens.padding.smaller : 0)
+        radius: stateLayer.pressed ? Tokens.rounding.small / 2 : internalChecked ? Tokens.rounding.small : Tokens.rounding.normal
         inactiveColour: Colours.layer(Colours.palette.m3surfaceContainerHighest, 2)
         toggle: true
-        radiusAnim.duration: Appearance.anim.durations.expressiveFastSpatial
-        radiusAnim.easing.bezierCurve: Appearance.anim.curves.expressiveFastSpatial
+        radiusAnim.duration: Tokens.anim.durations.expressiveFastSpatial
+        radiusAnim.easing: Tokens.anim.expressiveFastSpatial
 
         Behavior on Layout.preferredWidth {
             Anim {
-                duration: Appearance.anim.durations.expressiveFastSpatial
-                easing.bezierCurve: Appearance.anim.curves.expressiveFastSpatial
+                type: Anim.FastSpatial
             }
         }
     }

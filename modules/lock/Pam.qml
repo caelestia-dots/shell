@@ -3,7 +3,7 @@ import Quickshell
 import Quickshell.Io
 import Quickshell.Wayland
 import Quickshell.Services.Pam
-import qs.config
+import Caelestia.Config
 
 Scope {
     id: root
@@ -82,7 +82,7 @@ Scope {
         property int errorTries
 
         function checkAvail(): void {
-            if (!available || !Config.lock.enableFprint || !root.lock.secure) {
+            if (!available || !GlobalConfig.lock.enableFprint || !root.lock.secure) {
                 abort();
                 return;
             }
@@ -113,7 +113,7 @@ Scope {
                 // Isn't actually the real max tries as pam only reports completed
                 // when max tries is reached.
                 tries++;
-                if (tries < Config.lock.maxFprintTries) {
+                if (tries < GlobalConfig.lock.maxFprintTries) {
                     // Restart if not actually real max tries
                     root.fprintState = "fail";
                     start();
@@ -188,6 +188,6 @@ Scope {
             fprint.checkAvail();
         }
 
-        target: Config.lock
+        target: GlobalConfig.lock
     }
 }

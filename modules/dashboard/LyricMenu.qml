@@ -2,10 +2,10 @@ pragma ComponentBehavior: Bound
 
 import QtQuick
 import QtQuick.Layouts
+import Caelestia.Config
 import qs.components
 import qs.components.controls
 import qs.services
-import qs.config
 
 StyledRect {
     id: root
@@ -19,7 +19,7 @@ StyledRect {
 
     implicitHeight: contentHeight
 
-    radius: Appearance.rounding.large
+    radius: Tokens.rounding.large
     color: Colours.tPalette.m3surfaceContainer
 
     Loader {
@@ -29,31 +29,31 @@ StyledRect {
 
         sourceComponent: ColumnLayout {
             anchors.fill: parent
-            anchors.margins: Appearance.padding.large
-            spacing: Appearance.spacing.normal
+            anchors.margins: Tokens.padding.large
+            spacing: Tokens.spacing.normal
 
             // Header: icon, backend selector, refresh, toggle
             RowLayout {
                 Layout.fillWidth: true
-                spacing: Appearance.padding.small
+                spacing: Tokens.padding.small
 
                 MaterialIcon {
                     text: "lyrics"
                     fill: 1
                     color: Colours.palette.m3primary
-                    font.pointSize: Appearance.spacing.large
+                    font.pointSize: Tokens.spacing.large
                 }
 
                 Rectangle {
                     Layout.preferredHeight: 24
                     Layout.preferredWidth: 80
-                    radius: Appearance.rounding.small
+                    radius: Tokens.rounding.small
                     color: Qt.rgba(Colours.palette.m3primary.r, Colours.palette.m3primary.g, Colours.palette.m3primary.b, 0.15)
 
                     StyledText {
                         anchors.centerIn: parent
                         text: LyricsService.preferredBackend
-                        font.pointSize: Appearance.font.size.small
+                        font.pointSize: Tokens.font.size.small
                         color: Colours.palette.m3primary
                     }
 
@@ -73,14 +73,14 @@ StyledRect {
                 Rectangle {
                     Layout.preferredHeight: 24
                     Layout.preferredWidth: 60
-                    radius: Appearance.rounding.small
+                    radius: Tokens.rounding.small
                     visible: LyricsService.preferredBackend === "Auto"
                     color: LyricsService.backend === "Local" ? Qt.rgba(Colours.palette.m3tertiary.r, Colours.palette.m3tertiary.g, Colours.palette.m3tertiary.b, 0.15) : Qt.rgba(Colours.palette.m3secondary.r, Colours.palette.m3secondary.g, Colours.palette.m3secondary.b, 0.15)
 
                     StyledText {
                         anchors.centerIn: parent
                         text: LyricsService.backend
-                        font.pointSize: Appearance.font.size.small
+                        font.pointSize: Tokens.font.size.small
                         color: LyricsService.backend === "Local" ? Colours.palette.m3tertiary : Colours.palette.m3secondary
                     }
                 }
@@ -105,7 +105,7 @@ StyledRect {
                 Layout.fillWidth: true
                 text: LyricsService.preferredBackend === "Local" ? "Loaded File:" : "Fetched Candidates:"
                 color: Colours.palette.m3outline
-                font.pointSize: Appearance.font.size.small
+                font.pointSize: Tokens.font.size.small
                 elide: Text.ElideRight
                 visible: LyricsService.preferredBackend === "Local" ? LyricsService.loadedLocalFile.length > 0 : LyricsService.candidatesModel.count > 0
             }
@@ -115,12 +115,12 @@ StyledRect {
                 Layout.fillWidth: true
                 Layout.preferredHeight: 48
                 visible: LyricsService.preferredBackend === "Local" && LyricsService.loadedLocalFile.length > 0
-                radius: Appearance.rounding.small
+                radius: Tokens.rounding.small
                 color: Qt.rgba(Colours.palette.m3tertiary.r, Colours.palette.m3tertiary.g, Colours.palette.m3tertiary.b, 0.1)
 
                 ColumnLayout {
                     anchors.fill: parent
-                    anchors.margins: Appearance.padding.small
+                    anchors.margins: Tokens.padding.small
                     spacing: 0
 
                     StyledText {
@@ -130,7 +130,7 @@ StyledRect {
                             const parts = path.split('/');
                             return parts[parts.length - 1];
                         }
-                        font.pointSize: Appearance.font.size.small
+                        font.pointSize: Tokens.font.size.small
                         color: Colours.palette.m3tertiary
                         elide: Text.ElideMiddle
                     }
@@ -145,7 +145,7 @@ StyledRect {
                             }
                             return "";
                         }
-                        font.pointSize: Appearance.font.size.small
+                        font.pointSize: Tokens.font.size.small
                         color: Colours.palette.m3outline
                         elide: Text.ElideMiddle
                     }
@@ -164,7 +164,7 @@ StyledRect {
 
                     model: LyricsService.candidatesModel
                     clip: true
-                    spacing: Appearance.spacing.small
+                    spacing: Tokens.spacing.small
                     visible: LyricsService.candidatesModel.count > 0
                     opacity: visible ? 1 : 0
 
@@ -186,7 +186,7 @@ StyledRect {
 
                         Behavior on scale {
                             NumberAnimation {
-                                duration: Appearance.anim.durations.small
+                                duration: Tokens.anim.durations.small
                                 easing.type: Easing.OutCubic
                             }
                         }
@@ -195,7 +195,7 @@ StyledRect {
                             id: background
 
                             anchors.fill: parent
-                            radius: Appearance.rounding.small
+                            radius: Tokens.rounding.small
 
                             color: delegateRoot.pressed ? Qt.rgba(Colours.palette.m3primary.r, Colours.palette.m3primary.g, Colours.palette.m3primary.b, 0.25) : delegateRoot.hovered ? Qt.rgba(Colours.palette.m3primary.r, Colours.palette.m3primary.g, Colours.palette.m3primary.b, 0.06) : Qt.rgba(Colours.palette.m3primary.r, Colours.palette.m3primary.g, Colours.palette.m3primary.b, 0.03)
 
@@ -204,12 +204,12 @@ StyledRect {
 
                             Behavior on color {
                                 ColorAnimation {
-                                    duration: Appearance.anim.durations.small
+                                    duration: Tokens.anim.durations.small
                                 }
                             }
                             Behavior on border.width {
                                 NumberAnimation {
-                                    duration: Appearance.anim.durations.small
+                                    duration: Tokens.anim.durations.small
                                 }
                             }
                         }
@@ -228,8 +228,8 @@ StyledRect {
 
                         Row {
                             anchors.fill: parent
-                            anchors.margins: Appearance.padding.normal
-                            spacing: Appearance.spacing.small
+                            anchors.margins: Tokens.padding.normal
+                            spacing: Tokens.spacing.small
 
                             // Active indicator bar
                             Rectangle {
@@ -241,7 +241,7 @@ StyledRect {
 
                                 Behavior on color {
                                     ColorAnimation {
-                                        duration: Appearance.anim.durations.small
+                                        duration: Tokens.anim.durations.small
                                     }
                                 }
                             }
@@ -253,7 +253,7 @@ StyledRect {
 
                                 Text {
                                     text: delegateRoot.title
-                                    font.pointSize: Appearance.font.size.normal
+                                    font.pointSize: Tokens.font.size.normal
                                     font.bold: true
                                     color: delegateRoot.hovered ? Colours.palette.m3primary : Colours.palette.m3onSurface
                                     width: parent.width
@@ -261,14 +261,14 @@ StyledRect {
 
                                     Behavior on color {
                                         ColorAnimation {
-                                            duration: Appearance.anim.durations.small
+                                            duration: Tokens.anim.durations.small
                                         }
                                     }
                                 }
 
                                 Text {
                                     text: delegateRoot.artist
-                                    font.pointSize: Appearance.font.size.small
+                                    font.pointSize: Tokens.font.size.small
                                     color: Colours.palette.m3onSurfaceVariant
                                     elide: Text.ElideRight
                                 }
@@ -286,19 +286,19 @@ StyledRect {
             // Manual search
             ColumnLayout {
                 Layout.fillWidth: true
-                spacing: Appearance.padding.small
+                spacing: Tokens.padding.small
 
                 StyledText {
                     Layout.fillWidth: true
                     text: "Manual Search"
-                    font.pointSize: Appearance.font.size.small
+                    font.pointSize: Tokens.font.size.small
                     color: Colours.palette.m3onSurfaceVariant
                     elide: Text.ElideRight
                 }
 
                 RowLayout {
                     Layout.fillWidth: true
-                    spacing: Appearance.padding.small
+                    spacing: Tokens.padding.small
 
                     StyledInputField {
                         id: searchTitle
@@ -336,18 +336,18 @@ StyledRect {
             // Offset controls
             RowLayout {
                 Layout.fillWidth: true
-                spacing: Appearance.padding.small
+                spacing: Tokens.padding.small
 
                 MaterialIcon {
                     text: "contrast_square"
-                    font.pointSize: Appearance.font.size.large
+                    font.pointSize: Tokens.font.size.large
                     color: Colours.palette.m3secondary
                 }
 
                 StyledText {
                     text: "Offset"
                     color: Colours.palette.m3outline
-                    font.pointSize: Appearance.font.size.normal
+                    font.pointSize: Tokens.font.size.normal
                 }
 
                 Item {
@@ -368,7 +368,7 @@ StyledRect {
 
                     horizontalAlignment: TextInput.AlignHCenter
                     color: Colours.palette.m3secondary
-                    font.pointSize: Appearance.font.size.normal
+                    font.pointSize: Tokens.font.size.normal
                     selectByMouse: true
                     text: (LyricsService.offset >= 0 ? "+" : "") + LyricsService.offset.toFixed(1) + "s"
                     onEditingFinished: {

@@ -6,10 +6,10 @@ import "."
 import QtQuick
 import Quickshell.Bluetooth
 import Quickshell.Widgets
+import Caelestia.Config
 import qs.components
 import qs.components.containers
 import qs.components.controls
-import qs.config
 
 SplitPaneWithDetails {
     id: root

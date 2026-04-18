@@ -1,8 +1,8 @@
 import QtQuick
 import QtQuick.Templates
+import Caelestia.Config
 import qs.components
 import qs.services
-import qs.config
 
 Slider {
     id: root
@@ -18,7 +18,7 @@ Slider {
             implicitWidth: root.handle.x - root.implicitHeight / 6
 
             color: Colours.palette.m3primary
-            radius: Appearance.rounding.full
+            radius: Tokens.rounding.full
             topRightRadius: root.implicitHeight / 15
             bottomRightRadius: root.implicitHeight / 15
         }
@@ -33,7 +33,7 @@ Slider {
             implicitWidth: parent.width - root.handle.x - root.handle.implicitWidth - root.implicitHeight / 6
 
             color: Colours.palette.m3surfaceContainerHighest
-            radius: Appearance.rounding.full
+            radius: Tokens.rounding.full
             topLeftRadius: root.implicitHeight / 15
             bottomLeftRadius: root.implicitHeight / 15
         }
@@ -46,7 +46,7 @@ Slider {
         implicitHeight: root.implicitHeight
 
         color: Colours.palette.m3primary
-        radius: Appearance.rounding.full
+        radius: Tokens.rounding.full
 
         MouseArea {
             anchors.fill: parent

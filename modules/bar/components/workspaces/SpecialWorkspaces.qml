@@ -4,10 +4,10 @@ import QtQuick
 import QtQuick.Layouts
 import Quickshell
 import Quickshell.Hyprland
+import Caelestia.Config
 import qs.components
 import qs.components.effects
 import qs.services
-import qs.config
 import qs.utils
 
 Item {
@@ -15,7 +15,7 @@ Item {
 
     required property ShellScreen screen
     readonly property HyprlandMonitor monitor: Hypr.monitorFor(screen)
-    readonly property string activeSpecial: (Config.bar.workspaces.perMonitorWorkspaces ? monitor : Hypr.focusedMonitor)?.lastIpcObject.specialWorkspace?.name ?? ""
+    readonly property string activeSpecial: (GlobalConfig.bar.workspaces.perMonitorWorkspaces ? monitor : Hypr.focusedMonitor)?.lastIpcObject.specialWorkspace?.name ?? ""
 
     layer.enabled: true
     layer.effect: OpacityMask {
@@ -31,7 +31,7 @@ Item {
 
         Rectangle {
             anchors.fill: parent
-            radius: Appearance.rounding.full
+            radius: Tokens.rounding.full
 
             gradient: Gradient {
                 orientation: Gradient.Vertical
@@ -60,7 +60,7 @@ Item {
             anchors.left: parent.left
             anchors.right: parent.right
 
-            radius: Appearance.rounding.full
+            radius: Tokens.rounding.full
             implicitHeight: parent.height / 2
             opacity: view.contentY > 0 ? 0 : 1
 
@@ -74,9 +74,9 @@ Item {
             anchors.left: parent.left
             anchors.right: parent.right
 
-            radius: Appearance.rounding.full
+            radius: Tokens.rounding.full
             implicitHeight: parent.height / 2
-            opacity: view.contentY < view.contentHeight - parent.height + Appearance.padding.small ? 0 : 1
+            opacity: view.contentY < view.contentHeight - parent.height + Tokens.padding.small ? 0 : 1
 
             Behavior on opacity {
                 Anim {}
@@ -88,14 +88,14 @@ Item {
         id: view
 
         anchors.fill: parent
-        spacing: Appearance.spacing.normal
+        spacing: Tokens.spacing.normal
         interactive: false
 
         currentIndex: model.values.findIndex(w => w.name === root.activeSpecial)
         onCurrentIndexChanged: currentIndex = Qt.binding(() => model.values.findIndex(w => w.name === root.activeSpecial))
 
         model: ScriptModel {
-            values: Hypr.workspaces.values.filter(w => w.name.startsWith("special:") && (!Config.bar.workspaces.perMonitorWorkspaces || w.monitor === root.monitor))
+            values: Hypr.workspaces.values.filter(w => w.name.startsWith("special:") && (!GlobalConfig.bar.workspaces.perMonitorWorkspaces || w.monitor === root.monitor))
         }
 
         preferredHighlightBegin: 0
@@ -119,7 +119,7 @@ Item {
                 properties: "scale"
                 from: 0
                 to: 1
-                easing.bezierCurve: Appearance.anim.curves.standardDecel
+                easing: Tokens.anim.standardDecel
             }
         }
 
@@ -127,12 +127,12 @@ Item {
             Anim {
                 property: "scale"
                 to: 0.5
-                duration: Appearance.anim.durations.small
+                type: Anim.StandardSmall
             }
             Anim {
                 property: "opacity"
                 to: 0
-                duration: Appearance.anim.durations.small
+                type: Anim.StandardSmall
             }
         }
 
@@ -140,7 +140,7 @@ Item {
             Anim {
                 properties: "scale"
                 to: 1
-                easing.bezierCurve: Appearance.anim.curves.standardDecel
+                easing: Tokens.anim.standardDecel
             }
             Anim {
                 properties: "x,y"
@@ -151,7 +151,7 @@ Item {
             Anim {
                 properties: "scale"
                 to: 1
-                easing.bezierCurve: Appearance.anim.curves.standardDecel
+                easing: Tokens.anim.standardDecel
             }
             Anim {
                 properties: "x,y"
@@ -175,7 +175,7 @@ Item {
                 implicitHeight: (view.currentItem as SpecialWsDelegate)?.size ?? 0
 
                 color: Colours.palette.m3tertiary
-                radius: Appearance.rounding.full
+                radius: Tokens.rounding.full
 
                 Colouriser {
                     source: view
@@ -192,13 +192,13 @@ Item {
 
                 Behavior on y {
                     Anim {
-                        easing.bezierCurve: Appearance.anim.curves.emphasized
+                        type: Anim.Emphasized
                     }
                 }
 
                 Behavior on implicitHeight {
                     Anim {
-                        easing.bezierCurve: Appearance.anim.curves.emphasized
+                        type: Anim.Emphasized
                     }
                 }
             }
@@ -213,7 +213,7 @@ Item {
         drag.target: view.contentItem
         drag.axis: Drag.YAxis
         drag.maximumY: 0
-        drag.minimumY: Math.min(0, view.height - view.contentHeight - Appearance.padding.small)
+        drag.minimumY: Math.min(0, view.height - view.contentHeight - Tokens.padding.small)
 
         onPressed: event => startY = event.y
 
@@ -233,7 +233,7 @@ Item {
         id: ws
 
         required property HyprlandWorkspace modelData
-        readonly property int size: label.Layout.preferredHeight + (hasWindows ? windows.implicitHeight + Appearance.padding.small : 0)
+        readonly property int size: label.Layout.preferredHeight + (hasWindows ? windows.implicitHeight + Tokens.padding.small : 0)
         property int wsId
         property string icon
         property bool hasWindows
@@ -263,7 +263,7 @@ Item {
 
             function onLastIpcObjectChanged(): void {
                 if (ws.modelData)
-                    ws.hasWindows = Config.bar.workspaces.showWindowsOnSpecialWorkspaces && ws.modelData.lastIpcObject.windows > 0;
+                    ws.hasWindows = root.Config.bar.workspaces.showWindowsOnSpecialWorkspaces && ws.modelData.lastIpcObject.windows > 0;
             }
 
             target: ws.modelData
@@ -272,10 +272,10 @@ Item {
         Connections {
             function onShowWindowsOnSpecialWorkspacesChanged(): void {
                 if (ws.modelData)
-                    ws.hasWindows = Config.bar.workspaces.showWindowsOnSpecialWorkspaces && ws.modelData.lastIpcObject.windows > 0;
+                    ws.hasWindows = root.Config.bar.workspaces.showWindowsOnSpecialWorkspaces && ws.modelData.lastIpcObject.windows > 0;
             }
 
-            target: Config.bar.workspaces
+            target: root.Config.bar.workspaces
         }
 
         Loader {
@@ -284,7 +284,7 @@ Item {
             asynchronous: true
 
             Layout.alignment: Qt.AlignHCenter | Qt.AlignTop
-            Layout.preferredHeight: Config.bar.sizes.innerWidth - Appearance.padding.small * 2
+            Layout.preferredHeight: Tokens.sizes.bar.innerWidth - Tokens.padding.small * 2
 
             sourceComponent: ws.icon.length === 1 ? letterComp : iconComp
 
@@ -328,7 +328,7 @@ Item {
                         properties: "scale"
                         from: 0
                         to: 1
-                        easing.bezierCurve: Appearance.anim.curves.standardDecel
+                        easing: Tokens.anim.standardDecel
                     }
                 }
 
@@ -336,7 +336,7 @@ Item {
                     Anim {
                         properties: "scale"
                         to: 1
-                        easing.bezierCurve: Appearance.anim.curves.standardDecel
+                        easing: Tokens.anim.standardDecel
                     }
                     Anim {
                         properties: "x,y"
@@ -347,7 +347,7 @@ Item {
                     model: ScriptModel {
                         values: {
                             const windows = Hypr.toplevels.values.filter(c => c.workspace?.id === ws.wsId);
-                            const maxIcons = Config.bar.workspaces.maxWindowIcons;
+                            const maxIcons = root.Config.bar.workspaces.maxWindowIcons;
                             return maxIcons > 0 ? windows.slice(0, maxIcons) : windows;
                         }
                     }

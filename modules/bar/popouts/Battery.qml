@@ -2,15 +2,15 @@ pragma ComponentBehavior: Bound
 
 import QtQuick
 import Quickshell.Services.UPower
+import Caelestia.Config
 import qs.components
 import qs.services
-import qs.config
 
 Column {
     id: root
 
-    spacing: Appearance.spacing.normal
-    width: Config.bar.sizes.batteryWidth
+    spacing: Tokens.spacing.normal
+    width: Tokens.sizes.bar.batteryWidth
 
     StyledText {
         text: UPower.displayDevice.isLaptopBattery ? qsTr("Remaining: %1%").arg(Math.round(UPower.displayDevice.percentage * 100)) : qsTr("No battery detected")
@@ -45,11 +45,11 @@ Column {
         height: active ? ((item as Item)?.implicitHeight ?? 0) : 0
 
         sourceComponent: StyledRect {
-            implicitWidth: child.implicitWidth + Appearance.padding.normal * 2
-            implicitHeight: child.implicitHeight + Appearance.padding.smaller * 2
+            implicitWidth: child.implicitWidth + Tokens.padding.normal * 2
+            implicitHeight: child.implicitHeight + Tokens.padding.smaller * 2
 
             color: Colours.palette.m3error
-            radius: Appearance.rounding.normal
+            radius: Tokens.rounding.normal
 
             Column {
                 id: child
@@ -58,7 +58,7 @@ Column {
 
                 Row {
                     anchors.horizontalCenter: parent.horizontalCenter
-                    spacing: Appearance.spacing.small
+                    spacing: Tokens.spacing.small
 
                     MaterialIcon {
                         anchors.verticalCenter: parent.verticalCenter
@@ -72,7 +72,7 @@ Column {
                         anchors.verticalCenter: parent.verticalCenter
                         text: qsTr("Performance Degraded")
                         color: Colours.palette.m3onError
-                        font.family: Appearance.font.family.mono
+                        font.family: Tokens.font.family.mono
                         font.weight: 500
                     }
 
@@ -109,17 +109,17 @@ Column {
 
         anchors.horizontalCenter: parent.horizontalCenter
 
-        implicitWidth: saver.implicitHeight + balance.implicitHeight + perf.implicitHeight + Appearance.padding.normal * 2 + Appearance.spacing.large * 2
-        implicitHeight: Math.max(saver.implicitHeight, balance.implicitHeight, perf.implicitHeight) + Appearance.padding.small * 2
+        implicitWidth: saver.implicitHeight + balance.implicitHeight + perf.implicitHeight + Tokens.padding.normal * 2 + Tokens.spacing.large * 2
+        implicitHeight: Math.max(saver.implicitHeight, balance.implicitHeight, perf.implicitHeight) + Tokens.padding.small * 2
 
         color: Colours.tPalette.m3surfaceContainer
-        radius: Appearance.rounding.full
+        radius: Tokens.rounding.full
 
         StyledRect {
             id: indicator
 
             color: Colours.palette.m3primary
-            radius: Appearance.rounding.full
+            radius: Tokens.rounding.full
             state: profiles.current
 
             states: [
@@ -147,10 +147,8 @@ Column {
             ]
 
             transitions: Transition {
-                AnchorAnimation {
-                    duration: Appearance.anim.durations.normal
-                    easing.type: Easing.BezierSpline
-                    easing.bezierCurve: Appearance.anim.curves.emphasized
+                AnchorAnim {
+                    type: AnchorAnim.Emphasized
                 }
             }
         }
@@ -160,7 +158,7 @@ Column {
 
             anchors.verticalCenter: parent.verticalCenter
             anchors.left: parent.left
-            anchors.leftMargin: Appearance.padding.small
+            anchors.leftMargin: Tokens.padding.small
 
             profile: PowerProfile.PowerSaver
             icon: "energy_savings_leaf"
@@ -180,7 +178,7 @@ Column {
 
             anchors.verticalCenter: parent.verticalCenter
             anchors.right: parent.right
-            anchors.rightMargin: Appearance.padding.small
+            anchors.rightMargin: Tokens.padding.small
 
             profile: PowerProfile.Performance
             icon: "rocket_launch"
@@ -201,16 +199,13 @@ Column {
         required property string icon
         required property int profile
 
-        implicitWidth: icon.implicitHeight + Appearance.padding.small * 2
-        implicitHeight: icon.implicitHeight + Appearance.padding.small * 2
+        implicitWidth: icon.implicitHeight + Tokens.padding.small * 2
+        implicitHeight: icon.implicitHeight + Tokens.padding.small * 2
 
         StateLayer {
-            function onClicked(): void {
-                PowerProfiles.profile = parent.profile;
-            }
-
-            radius: Appearance.rounding.full
+            radius: Tokens.rounding.full
             color: profiles.current === parent.icon ? Colours.palette.m3onPrimary : Colours.palette.m3onSurface
+            onClicked: PowerProfiles.profile = parent.profile
         }
 
         MaterialIcon {
@@ -219,7 +214,7 @@ Column {
             anchors.centerIn: parent
 
             text: parent.icon
-            font.pointSize: Appearance.font.size.large
+            font.pointSize: Tokens.font.size.large
             color: profiles.current === text ? Colours.palette.m3onPrimary : Colours.palette.m3onSurface
             fill: profiles.current === text ? 1 : 0
 

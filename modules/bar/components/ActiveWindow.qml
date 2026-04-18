@@ -1,9 +1,9 @@
 pragma ComponentBehavior: Bound
 
 import QtQuick
+import Caelestia.Config
 import qs.components
 import qs.services
-import qs.config
 import qs.utils
 
 Item {
@@ -86,8 +86,8 @@ Item {
         id: metrics
 
         text: root.windowTitle
-        font.pointSize: Appearance.font.size.smaller
-        font.family: Appearance.font.family.mono
+        font.pointSize: root.Tokens.font.size.smaller
+        font.family: root.Tokens.font.family.mono
         elide: Qt.ElideRight
         elideWidth: root.maxHeight - icon.height
 
@@ -101,8 +101,7 @@ Item {
 
     Behavior on implicitHeight {
         Anim {
-            duration: Appearance.anim.durations.expressiveDefaultSpatial
-            easing.bezierCurve: Appearance.anim.curves.expressiveDefaultSpatial
+            type: Anim.DefaultSpatial
         }
     }
 
@@ -111,7 +110,7 @@ Item {
 
         anchors.horizontalCenter: icon.horizontalCenter
         anchors.top: icon.bottom
-        anchors.topMargin: Appearance.spacing.small
+        anchors.topMargin: Tokens.spacing.small
 
         font.pointSize: metrics.font.pointSize
         font.family: metrics.font.family
@@ -120,10 +119,10 @@ Item {
 
         transform: [
             Translate {
-                x: Config.bar.activeWindow.inverted ? -text.implicitWidth + text.implicitHeight : 0
+                x: root.Config.bar.activeWindow.inverted ? -text.implicitWidth + text.implicitHeight : 0
             },
             Rotation {
-                angle: Config.bar.activeWindow.inverted ? 270 : 90
+                angle: root.Config.bar.activeWindow.inverted ? 270 : 90
                 origin.x: text.implicitHeight / 2
                 origin.y: text.implicitHeight / 2
             }

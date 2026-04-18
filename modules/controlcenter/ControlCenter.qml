@@ -3,16 +3,16 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import QtQuick.Layouts
 import Quickshell
+import Caelestia.Config
 import qs.components
 import qs.components.controls
 import qs.services
-import qs.config
 
 Item {
     id: root
 
     required property ShellScreen screen
-    readonly property int rounding: floating ? 0 : Appearance.rounding.normal
+    readonly property int rounding: floating ? 0 : Tokens.rounding.normal
 
     property alias floating: session.floating
     property alias active: session.active
@@ -27,8 +27,8 @@ Item {
 
     signal close
 
-    implicitWidth: implicitHeight * Config.controlCenter.sizes.ratio
-    implicitHeight: screen.height * Config.controlCenter.sizes.heightMult
+    implicitWidth: implicitHeight * Tokens.sizes.controlCenter.ratio
+    implicitHeight: screen.height * Tokens.sizes.controlCenter.heightMult
 
     GridLayout {
         anchors.fill: parent

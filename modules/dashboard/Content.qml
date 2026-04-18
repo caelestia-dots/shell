@@ -4,9 +4,9 @@ import QtQuick
 import QtQuick.Layouts
 import Quickshell
 import Quickshell.Widgets
+import Caelestia.Config
 import qs.components
 import qs.components.filedialog
-import qs.config
 
 Item {
     id: root
@@ -66,8 +66,8 @@ Item {
         anchors.top: parent.top
         anchors.left: parent.left
         anchors.right: parent.right
-        anchors.topMargin: Appearance.padding.normal
-        anchors.margins: Appearance.padding.large
+        anchors.topMargin: Tokens.padding.normal
+        anchors.margins: Tokens.padding.large
 
         nonAnimWidth: root.nonAnimWidth - anchors.margins * 2
         dashState: root.dashState
@@ -81,9 +81,9 @@ Item {
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.bottom: parent.bottom
-        anchors.margins: Appearance.padding.large
+        anchors.margins: Tokens.padding.large
 
-        radius: Appearance.rounding.normal
+        radius: Tokens.rounding.normal
         color: "transparent"
 
         Flickable {
@@ -199,15 +199,13 @@ Item {
 
     Behavior on implicitWidth {
         Anim {
-            duration: Appearance.anim.durations.large
-            easing.bezierCurve: Appearance.anim.curves.emphasized
+            type: Anim.EmphasizedLarge
         }
     }
 
     Behavior on implicitHeight {
         Anim {
-            duration: Appearance.anim.durations.large
-            easing.bezierCurve: Appearance.anim.curves.emphasized
+            type: Anim.EmphasizedLarge
         }
     }
 }

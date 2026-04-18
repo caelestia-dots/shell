@@ -4,11 +4,11 @@ import QtQuick
 import QtQuick.Layouts
 import Quickshell
 import Quickshell.Widgets
+import Caelestia.Config
 import qs.components
 import qs.components.containers
 import qs.components.effects
 import qs.services
-import qs.config
 
 Item {
     id: root
@@ -94,7 +94,7 @@ Item {
             id: actionList
 
             anchors.fill: parent
-            spacing: Appearance.spacing.small
+            spacing: Tokens.spacing.small
 
             Repeater {
                 model: [
@@ -114,11 +114,11 @@ Item {
 
                     Layout.fillWidth: true
                     Layout.fillHeight: true
-                    implicitWidth: actionInner.implicitWidth + Appearance.padding.normal * 2
-                    implicitHeight: actionInner.implicitHeight + Appearance.padding.small * 2
+                    implicitWidth: actionInner.implicitWidth + Tokens.padding.normal * 2
+                    implicitHeight: actionInner.implicitHeight + Tokens.padding.small * 2
 
-                    Layout.preferredWidth: implicitWidth + (actionStateLayer.pressed ? Appearance.padding.large : 0)
-                    radius: actionStateLayer.pressed ? Appearance.rounding.small / 2 : Appearance.rounding.small
+                    Layout.preferredWidth: implicitWidth + (actionStateLayer.pressed ? Tokens.padding.large : 0)
+                    radius: actionStateLayer.pressed ? Tokens.rounding.small / 2 : Tokens.rounding.small
                     color: Colours.layer(Colours.palette.m3surfaceContainerHighest, 4)
 
                     Timer {
@@ -131,7 +131,7 @@ Item {
                     StateLayer {
                         id: actionStateLayer
 
-                        function onClicked(): void {
+                        onClicked: {
                             if (action.modelData.isClose) {
                                 root.notif.close();
                             } else if (action.modelData.isCopy) {
@@ -183,15 +183,13 @@ Item {
 
                     Behavior on Layout.preferredWidth {
                         Anim {
-                            duration: Appearance.anim.durations.expressiveFastSpatial
-                            easing.bezierCurve: Appearance.anim.curves.expressiveFastSpatial
+                            type: Anim.FastSpatial
                         }
                     }
 
                     Behavior on radius {
                         Anim {
-                            duration: Appearance.anim.durations.expressiveFastSpatial
-                            easing.bezierCurve: Appearance.anim.curves.expressiveFastSpatial
+                            type: Anim.FastSpatial
                         }
                     }
                 }

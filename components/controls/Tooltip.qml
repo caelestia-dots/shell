@@ -1,9 +1,9 @@
-import ".."
 import QtQuick
 import QtQuick.Controls
+import Caelestia.Config
+import qs.components
 import qs.components.effects
 import qs.services
-import qs.config
 
 Popup {
     id: root
@@ -44,10 +44,10 @@ Popup {
             let newX = targetCenterX - tooltipWidth / 2;
 
             // Position tooltip above target
-            let newY = targetPos.y - tooltipHeight - Appearance.spacing.small;
+            let newY = targetPos.y - tooltipHeight - Tokens.spacing.small;
 
             // Keep within bounds
-            const padding = Appearance.padding.normal;
+            const padding = Tokens.padding.normal;
             if (newX < padding) {
                 newX = padding;
             } else if (newX + tooltipWidth > (parent.width - padding)) {
@@ -100,8 +100,7 @@ Popup {
             property: "opacity"
             from: 0
             to: 1
-            duration: Appearance.anim.durations.expressiveFastSpatial
-            easing.bezierCurve: Appearance.anim.curves.expressiveFastSpatial
+            type: Anim.FastSpatial
         }
     }
 
@@ -110,19 +109,18 @@ Popup {
             property: "opacity"
             from: 1
             to: 0
-            duration: Appearance.anim.durations.expressiveFastSpatial
-            easing.bezierCurve: Appearance.anim.curves.expressiveFastSpatial
+            type: Anim.FastSpatial
         }
     }
 
     contentItem: StyledRect {
         id: tooltipRect
 
-        implicitWidth: tooltipText.implicitWidth + Appearance.padding.normal * 2
-        implicitHeight: tooltipText.implicitHeight + Appearance.padding.smaller * 2
+        implicitWidth: tooltipText.implicitWidth + Tokens.padding.normal * 2
+        implicitHeight: tooltipText.implicitHeight + Tokens.padding.smaller * 2
 
         color: Colours.palette.m3surfaceContainerHighest
-        radius: Appearance.rounding.small
+        radius: Tokens.rounding.small
         antialiasing: true
 
         // Add elevation for depth
@@ -140,7 +138,7 @@ Popup {
 
             text: root.text
             color: Colours.palette.m3onSurface
-            font.pointSize: Appearance.font.size.small
+            font.pointSize: Tokens.font.size.small
         }
     }
 

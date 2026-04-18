@@ -1,10 +1,10 @@
 pragma ComponentBehavior: Bound
 
-import ".."
 import QtQuick
 import QtQuick.Layouts
+import Caelestia.Config
+import qs.components
 import qs.services
-import qs.config
 
 RowLayout {
     id: root
@@ -20,7 +20,7 @@ RowLayout {
 
     signal valueModified(value: real)
 
-    spacing: Appearance.spacing.small
+    spacing: Tokens.spacing.small
 
     onValueChanged: {
         if (!root.isEditing) {
@@ -73,28 +73,33 @@ RowLayout {
             root.isEditing = false;
         }
 
-        padding: Appearance.padding.small
-        leftPadding: Appearance.padding.normal
-        rightPadding: Appearance.padding.normal
+        padding: Tokens.padding.small
+        leftPadding: Tokens.padding.normal
+        rightPadding: Tokens.padding.normal
 
         background: StyledRect {
             implicitWidth: 100
-            radius: Appearance.rounding.small
+            radius: Tokens.rounding.small
             color: Colours.tPalette.m3surfaceContainerHigh
         }
     }
 
     StyledRect {
-        radius: Appearance.rounding.small
+        radius: Tokens.rounding.small
         color: Colours.palette.m3primary
 
         implicitWidth: implicitHeight
-        implicitHeight: upIcon.implicitHeight + Appearance.padding.small * 2
+        implicitHeight: upIcon.implicitHeight + Tokens.padding.small * 2
 
         StateLayer {
             id: upState
 
-            function onClicked(): void {
+            color: Colours.palette.m3onPrimary
+
+            onPressAndHold: timer.start()
+            onReleased: timer.stop()
+
+            onClicked: {
                 let newValue = Math.min(root.max, root.value + root.step);
                 // Round to avoid floating point precision errors
                 const decimals = root.step < 1 ? Math.max(1, Math.ceil(-Math.log10(root.step))) : 0;
@@ -103,11 +108,6 @@ RowLayout {
                 root.displayText = newValue.toString();
                 root.valueModified(newValue);
             }
-
-            color: Colours.palette.m3onPrimary
-
-            onPressAndHold: timer.start()
-            onReleased: timer.stop()
         }
 
         MaterialIcon {
@@ -120,16 +120,16 @@ RowLayout {
     }
 
     StyledRect {
-        radius: Appearance.rounding.small
+        radius: Tokens.rounding.small
         color: Colours.palette.m3primary
 
         implicitWidth: implicitHeight
-        implicitHeight: downIcon.implicitHeight + Appearance.padding.small * 2
+        implicitHeight: downIcon.implicitHeight + Tokens.padding.small * 2
 
         StateLayer {
             id: downState
 
-            function onClicked(): void {
+            onClicked: {
                 let newValue = Math.max(root.min, root.value - root.step);
                 // Round to avoid floating point precision errors
                 const decimals = root.step < 1 ? Math.max(1, Math.ceil(-Math.log10(root.step))) : 0;
@@ -162,9 +162,9 @@ RowLayout {
         triggeredOnStart: true
         onTriggered: {
             if (upState.pressed)
-                upState.onClicked();
+                upState.clicked();
             else if (downState.pressed)
-                downState.onClicked();
+                downState.clicked();
         }
     }
 }

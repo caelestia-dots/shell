@@ -1,5 +1,5 @@
-import ".."
 import QtQuick
+import qs.components
 
 ListView {
     id: root

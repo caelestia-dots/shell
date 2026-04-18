@@ -8,7 +8,6 @@ import Quickshell.Wayland
 import Caelestia
 import qs.components
 import qs.services
-import qs.config
 
 MouseArea {
     id: root
@@ -167,7 +166,7 @@ MouseArea {
                 target: root
                 property: "opacity"
                 to: 0
-                duration: Appearance.anim.durations.large
+                type: Anim.StandardLarge
             }
             ExAnim {
                 target: root
@@ -278,7 +277,7 @@ MouseArea {
 
     Behavior on opacity {
         Anim {
-            duration: Appearance.anim.durations.large
+            type: Anim.StandardLarge
         }
     }
 
@@ -307,7 +306,6 @@ MouseArea {
     }
 
     component ExAnim: Anim {
-        duration: Appearance.anim.durations.expressiveDefaultSpatial
-        easing.bezierCurve: Appearance.anim.curves.expressiveDefaultSpatial
+        type: Anim.DefaultSpatial
     }
 }

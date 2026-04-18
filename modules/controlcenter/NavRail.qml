@@ -3,9 +3,9 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import QtQuick.Layouts
 import Quickshell
+import Caelestia.Config
 import qs.components
 import qs.services
-import qs.config
 import qs.modules.controlcenter
 
 Item {
@@ -15,23 +15,23 @@ Item {
     required property Session session
     required property bool initialOpeningComplete
 
-    implicitWidth: layout.implicitWidth + Appearance.padding.larger * 4
-    implicitHeight: layout.implicitHeight + Appearance.padding.large * 2
+    implicitWidth: layout.implicitWidth + Tokens.padding.larger * 4
+    implicitHeight: layout.implicitHeight + Tokens.padding.large * 2
 
     ColumnLayout {
         id: layout
 
         anchors.left: parent.left
         anchors.verticalCenter: parent.verticalCenter
-        anchors.leftMargin: Appearance.padding.larger * 2
-        spacing: Appearance.spacing.normal
+        anchors.leftMargin: Tokens.padding.larger * 2
+        spacing: Tokens.spacing.normal
 
         states: State {
             name: "expanded"
             when: root.session.navExpanded
 
             PropertyChanges {
-                layout.spacing: Appearance.spacing.small
+                layout.spacing: root.Tokens.spacing.small
             }
         }
 
@@ -42,7 +42,7 @@ Item {
         }
 
         Loader {
-            Layout.topMargin: Appearance.spacing.large
+            Layout.topMargin: Tokens.spacing.large
             asynchronous: true
             active: !root.session.floating
             visible: active
@@ -51,15 +51,15 @@ Item {
                 readonly property int nonAnimWidth: normalWinIcon.implicitWidth + (root.session.navExpanded ? normalWinLabel.anchors.leftMargin + normalWinLabel.implicitWidth : 0) + normalWinIcon.anchors.leftMargin * 2
 
                 implicitWidth: nonAnimWidth
-                implicitHeight: root.session.navExpanded ? normalWinIcon.implicitHeight + Appearance.padding.normal * 2 : nonAnimWidth
+                implicitHeight: root.session.navExpanded ? normalWinIcon.implicitHeight + Tokens.padding.normal * 2 : nonAnimWidth
 
                 color: Colours.palette.m3primaryContainer
-                radius: Appearance.rounding.small
+                radius: Tokens.rounding.small
 
                 StateLayer {
                     id: normalWinState
 
-                    function onClicked(): void {
+                    onClicked: {
                         root.session.root.close();
                         WindowFactory.create(null, {
                             active: root.session.active,
@@ -75,11 +75,11 @@ Item {
 
                     anchors.left: parent.left
                     anchors.verticalCenter: parent.verticalCenter
-                    anchors.leftMargin: Appearance.padding.large
+                    anchors.leftMargin: Tokens.padding.large
 
                     text: "select_window"
                     color: Colours.palette.m3onPrimaryContainer
-                    font.pointSize: Appearance.font.size.large
+                    font.pointSize: Tokens.font.size.large
                     fill: 1
                 }
 
@@ -88,7 +88,7 @@ Item {
 
                     anchors.left: normalWinIcon.right
                     anchors.verticalCenter: parent.verticalCenter
-                    anchors.leftMargin: Appearance.spacing.normal
+                    anchors.leftMargin: Tokens.spacing.normal
 
                     text: qsTr("Float window")
                     color: Colours.palette.m3onPrimaryContainer
@@ -96,22 +96,20 @@ Item {
 
                     Behavior on opacity {
                         Anim {
-                            duration: Appearance.anim.durations.small
+                            type: Anim.StandardSmall
                         }
                     }
                 }
 
                 Behavior on implicitWidth {
                     Anim {
-                        duration: Appearance.anim.durations.expressiveDefaultSpatial
-                        easing.bezierCurve: Appearance.anim.curves.expressiveDefaultSpatial
+                        type: Anim.DefaultSpatial
                     }
                 }
 
                 Behavior on implicitHeight {
                     Anim {
-                        duration: Appearance.anim.durations.expressiveDefaultSpatial
-                        easing.bezierCurve: Appearance.anim.curves.expressiveDefaultSpatial
+                        type: Anim.DefaultSpatial
                     }
                 }
             }
@@ -123,7 +121,7 @@ Item {
             NavItem {
                 required property int index
 
-                Layout.topMargin: index === 0 ? Appearance.spacing.large * 2 : 0
+                Layout.topMargin: index === 0 ? Tokens.spacing.large * 2 : 0
                 icon: PaneRegistry.getByIndex(index).icon
                 label: PaneRegistry.getByIndex(index).label
             }
@@ -148,7 +146,7 @@ Item {
                 expandedLabel.opacity: 1
                 smallLabel.opacity: 0
                 background.implicitWidth: icon.implicitWidth + icon.anchors.leftMargin * 2 + expandedLabel.anchors.leftMargin + expandedLabel.implicitWidth
-                background.implicitHeight: icon.implicitHeight + Appearance.padding.normal * 2
+                background.implicitHeight: icon.implicitHeight + root.Tokens.padding.normal * 2
                 item.implicitHeight: background.implicitHeight
             }
         }
@@ -156,27 +154,26 @@ Item {
         transitions: Transition {
             Anim {
                 property: "opacity"
-                duration: Appearance.anim.durations.small
+                type: Anim.StandardSmall
             }
 
             Anim {
                 properties: "implicitWidth,implicitHeight"
-                duration: Appearance.anim.durations.expressiveDefaultSpatial
-                easing.bezierCurve: Appearance.anim.curves.expressiveDefaultSpatial
+                type: Anim.DefaultSpatial
             }
         }
 
         StyledRect {
             id: background
 
-            radius: Appearance.rounding.full
+            radius: Tokens.rounding.full
             color: Qt.alpha(Colours.palette.m3secondaryContainer, item.active ? 1 : 0)
 
             implicitWidth: icon.implicitWidth + icon.anchors.leftMargin * 2
-            implicitHeight: icon.implicitHeight + Appearance.padding.small
+            implicitHeight: icon.implicitHeight + Tokens.padding.small
 
             StateLayer {
-                function onClicked(): void {
+                onClicked: {
                     // Prevent tab switching during initial opening animation to avoid blank pages
                     if (!root.initialOpeningComplete) {
                         return;
@@ -192,11 +189,11 @@ Item {
 
                 anchors.left: parent.left
                 anchors.verticalCenter: parent.verticalCenter
-                anchors.leftMargin: Appearance.padding.large
+                anchors.leftMargin: Tokens.padding.large
 
                 text: item.icon
                 color: item.active ? Colours.palette.m3onSecondaryContainer : Colours.palette.m3onSurface
-                font.pointSize: Appearance.font.size.large
+                font.pointSize: Tokens.font.size.large
                 fill: item.active ? 1 : 0
 
                 Behavior on fill {
@@ -209,7 +206,7 @@ Item {
 
                 anchors.left: icon.right
                 anchors.verticalCenter: parent.verticalCenter
-                anchors.leftMargin: Appearance.spacing.normal
+                anchors.leftMargin: Tokens.spacing.normal
 
                 opacity: 0
                 text: item.label
@@ -222,10 +219,10 @@ Item {
 
                 anchors.horizontalCenter: icon.horizontalCenter
                 anchors.top: icon.bottom
-                anchors.topMargin: Appearance.spacing.small / 2
+                anchors.topMargin: Tokens.spacing.small / 2
 
                 text: item.label
-                font.pointSize: Appearance.font.size.small
+                font.pointSize: Tokens.font.size.small
                 font.capitalization: Font.Capitalize
             }
         }

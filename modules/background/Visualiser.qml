@@ -3,11 +3,11 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import QtQuick.Effects
 import Quickshell
+import Caelestia.Config
 import Caelestia.Internal
 import Caelestia.Services
 import qs.components
 import qs.services
-import qs.config
 
 Item {
     id: root
@@ -60,14 +60,14 @@ Item {
 
                     anchors.fill: parent
                     anchors.margins: Config.border.thickness
-                    anchors.leftMargin: Visibilities.bars.get(root.screen).exclusiveZone + Appearance.spacing.small * Config.background.visualiser.spacing
+                    anchors.leftMargin: Visibilities.bars.get(root.screen).exclusiveZone + Tokens.spacing.small * Config.background.visualiser.spacing
 
                     values: Audio.cava.values
                     primaryColor: Qt.alpha(Colours.palette.m3primary, 0.7)
                     secondaryColor: Qt.alpha(Colours.palette.m3inversePrimary, 0.7)
-                    rounding: Appearance.rounding.small * Config.background.visualiser.rounding
-                    spacing: Appearance.spacing.small * Config.background.visualiser.spacing
-                    animationDuration: Appearance.anim.durations.normal
+                    rounding: Tokens.rounding.small * Config.background.visualiser.rounding
+                    spacing: Tokens.spacing.small * Config.background.visualiser.spacing
+                    animationDuration: Tokens.anim.durations.normal
 
                     Behavior on anchors.leftMargin {
                         Anim {}

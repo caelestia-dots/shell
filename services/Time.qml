@@ -2,7 +2,7 @@ pragma Singleton
 
 import QtQuick
 import Quickshell
-import qs.config
+import Caelestia.Config
 
 Singleton {
     property alias enabled: clock.enabled
@@ -11,7 +11,7 @@ Singleton {
     readonly property int minutes: clock.minutes
     readonly property int seconds: clock.seconds
 
-    readonly property string timeStr: format(Config.services.useTwelveHourClock ? "hh:mm:A" : "hh:mm")
+    readonly property string timeStr: format(GlobalConfig.services.useTwelveHourClock ? "hh:mm:A" : "hh:mm")
     readonly property list<string> timeComponents: timeStr.split(":")
     readonly property string hourStr: timeComponents[0] ?? ""
     readonly property string minuteStr: timeComponents[1] ?? ""

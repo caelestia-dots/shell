@@ -3,7 +3,6 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import Quickshell
 import qs.services
-import qs.config
 
 Variants {
     model: Screens.screens
@@ -16,7 +15,6 @@ Variants {
         Exclusions {
             screen: scope.modelData
             bar: content.bar
-            borderThickness: Config.border.thickness
         }
 
         ContentWindow {

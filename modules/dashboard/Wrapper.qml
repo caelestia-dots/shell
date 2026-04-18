@@ -3,9 +3,9 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import Quickshell
 import Caelestia
+import Caelestia.Config
 import qs.components
 import qs.components.filedialog
-import qs.config
 import qs.utils
 
 Item {
@@ -40,8 +40,7 @@ Item {
 
     Behavior on offsetScale {
         Anim {
-            duration: Appearance.anim.durations.expressiveDefaultSpatial
-            easing.bezierCurve: Appearance.anim.curves.expressiveDefaultSpatial
+            type: Anim.DefaultSpatial
         }
     }
 

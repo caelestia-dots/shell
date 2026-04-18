@@ -6,9 +6,9 @@ import Quickshell
 import Quickshell.Io
 import Quickshell.Services.Notifications
 import Caelestia
+import Caelestia.Config
 import qs.components.misc
 import qs.services
-import qs.config
 import qs.utils
 
 Singleton {
@@ -32,13 +32,13 @@ Singleton {
     function shouldShowPopup(): bool {
         if (props.dnd || [...Visibilities.screens.values()].some(v => v.sidebar))
             return false;
-        if (Config.notifs.fullscreen === "off" && hasFullscreen())
+        if (GlobalConfig.notifs.fullscreen === "off" && hasFullscreen())
             return false;
         return true;
     }
 
     onDndChanged: {
-        if (!Config.utilities.toasts.dndChanged)
+        if (!GlobalConfig.utilities.toasts.dndChanged)
             return;
 
         if (dnd)

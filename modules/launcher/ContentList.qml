@@ -1,10 +1,10 @@
 pragma ComponentBehavior: Bound
 
 import QtQuick
+import Caelestia.Config
 import qs.components
 import qs.components.controls
 import qs.services
-import qs.config
 import qs.utils
 
 Item {
@@ -18,7 +18,7 @@ Item {
     required property int padding
     required property int rounding
 
-    readonly property bool showWallpapers: search.text.startsWith(`${Config.launcher.actionPrefix}wallpaper `)
+    readonly property bool showWallpapers: search.text.startsWith(`${GlobalConfig.launcher.actionPrefix}wallpaper `)
     readonly property var currentList: showWallpapers ? wallpaperList.item : appList.item // Can be either ListView or PathView, so can't type properly
 
     anchors.horizontalCenter: parent.horizontalCenter
@@ -32,7 +32,7 @@ Item {
             name: "apps"
 
             PropertyChanges {
-                root.implicitWidth: Config.launcher.sizes.itemWidth
+                root.implicitWidth: root.Tokens.sizes.launcher.itemWidth
                 root.implicitHeight: Math.min(root.maxHeight, appList.implicitHeight > 0 ? appList.implicitHeight : empty.implicitHeight)
                 appList.active: true
             }
@@ -46,8 +46,8 @@ Item {
             name: "wallpapers"
 
             PropertyChanges {
-                root.implicitWidth: Math.max(Config.launcher.sizes.itemWidth * 1.2, wallpaperList.implicitWidth)
-                root.implicitHeight: Config.launcher.sizes.wallpaperHeight
+                root.implicitWidth: Math.max(root.Tokens.sizes.launcher.itemWidth * 1.2, wallpaperList.implicitWidth)
+                root.implicitHeight: root.Tokens.sizes.launcher.wallpaperHeight
                 wallpaperList.active: true
             }
         }
@@ -60,7 +60,7 @@ Item {
                 property: "opacity"
                 from: 1
                 to: 0
-                duration: Appearance.anim.durations.small
+                type: Anim.StandardSmall
             }
             PropertyAction {}
             Anim {
@@ -68,7 +68,7 @@ Item {
                 property: "opacity"
                 from: 0
                 to: 1
-                duration: Appearance.anim.durations.small
+                type: Anim.StandardSmall
             }
         }
     }
@@ -110,8 +110,8 @@ Item {
         opacity: root.currentList?.count === 0 ? 1 : 0
         scale: root.currentList?.count === 0 ? 1 : 0.5
 
-        spacing: Appearance.spacing.normal
-        padding: Appearance.padding.large
+        spacing: Tokens.spacing.normal
+        padding: Tokens.padding.large
 
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.verticalCenter: parent.verticalCenter
@@ -119,7 +119,7 @@ Item {
         MaterialIcon {
             text: root.state === "wallpapers" ? "wallpaper_slideshow" : "manage_search"
             color: Colours.palette.m3onSurfaceVariant
-            font.pointSize: Appearance.font.size.extraLarge
+            font.pointSize: Tokens.font.size.extraLarge
 
             anchors.verticalCenter: parent.verticalCenter
         }
@@ -130,14 +130,14 @@ Item {
             StyledText {
                 text: root.state === "wallpapers" ? qsTr("No wallpapers found") : qsTr("No results")
                 color: Colours.palette.m3onSurfaceVariant
-                font.pointSize: Appearance.font.size.larger
+                font.pointSize: Tokens.font.size.larger
                 font.weight: 500
             }
 
             StyledText {
                 text: root.state === "wallpapers" && Wallpapers.list.length === 0 ? qsTr("Try putting some wallpapers in %1").arg(Paths.shortenHome(Paths.wallsdir)) : qsTr("Try searching for something else")
                 color: Colours.palette.m3onSurfaceVariant
-                font.pointSize: Appearance.font.size.normal
+                font.pointSize: Tokens.font.size.normal
             }
         }
 
@@ -154,8 +154,8 @@ Item {
         enabled: root.visibilities.launcher
 
         Anim {
-            duration: Appearance.anim.durations.large
-            easing.bezierCurve: Appearance.anim.curves.emphasizedDecel
+            duration: Tokens.anim.durations.large
+            easing: Tokens.anim.emphasizedDecel
         }
     }
 
@@ -163,8 +163,8 @@ Item {
         enabled: root.visibilities.launcher
 
         Anim {
-            duration: Appearance.anim.durations.large
-            easing.bezierCurve: Appearance.anim.curves.emphasizedDecel
+            duration: Tokens.anim.durations.large
+            easing: Tokens.anim.emphasizedDecel
         }
     }
 }

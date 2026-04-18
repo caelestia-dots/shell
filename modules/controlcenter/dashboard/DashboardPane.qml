@@ -6,12 +6,12 @@ import QtQuick
 import QtQuick.Layouts
 import Quickshell
 import Quickshell.Widgets
+import Caelestia.Config
 import qs.components
 import qs.components.containers
 import qs.components.controls
 import qs.components.effects
 import qs.services
-import qs.config
 import qs.utils
 
 Item {
@@ -22,8 +22,8 @@ Item {
     // General Settings
     property bool enabled: Config.dashboard.enabled ?? true
     property bool showOnHover: Config.dashboard.showOnHover ?? true
-    property int mediaUpdateInterval: Config.dashboard.mediaUpdateInterval ?? 1000
-    property int resourceUpdateInterval: Config.dashboard.resourceUpdateInterval ?? 1000
+    property int mediaUpdateInterval: GlobalConfig.dashboard.mediaUpdateInterval ?? 1000
+    property int resourceUpdateInterval: GlobalConfig.dashboard.resourceUpdateInterval ?? 1000
     property int dragThreshold: Config.dashboard.dragThreshold ?? 50
 
     // Dashboard Tabs
@@ -41,23 +41,22 @@ Item {
     property bool showNetwork: Config.dashboard.performance.showNetwork ?? true
 
     function saveConfig() {
-        Config.dashboard.enabled = root.enabled;
-        Config.dashboard.showOnHover = root.showOnHover;
-        Config.dashboard.mediaUpdateInterval = root.mediaUpdateInterval;
-        Config.dashboard.resourceUpdateInterval = root.resourceUpdateInterval;
-        Config.dashboard.dragThreshold = root.dragThreshold;
-        Config.dashboard.showDashboard = root.showDashboard;
-        Config.dashboard.showMedia = root.showMedia;
-        Config.dashboard.showPerformance = root.showPerformance;
-        Config.dashboard.showWeather = root.showWeather;
-        Config.dashboard.performance.showBattery = root.showBattery;
-        Config.dashboard.performance.showGpu = root.showGpu;
-        Config.dashboard.performance.showCpu = root.showCpu;
-        Config.dashboard.performance.showMemory = root.showMemory;
-        Config.dashboard.performance.showStorage = root.showStorage;
-        Config.dashboard.performance.showNetwork = root.showNetwork;
+        GlobalConfig.dashboard.enabled = root.enabled;
+        GlobalConfig.dashboard.showOnHover = root.showOnHover;
+        GlobalConfig.dashboard.mediaUpdateInterval = root.mediaUpdateInterval;
+        GlobalConfig.dashboard.resourceUpdateInterval = root.resourceUpdateInterval;
+        GlobalConfig.dashboard.dragThreshold = root.dragThreshold;
+        GlobalConfig.dashboard.showDashboard = root.showDashboard;
+        GlobalConfig.dashboard.showMedia = root.showMedia;
+        GlobalConfig.dashboard.showPerformance = root.showPerformance;
+        GlobalConfig.dashboard.showWeather = root.showWeather;
+        GlobalConfig.dashboard.performance.showBattery = root.showBattery;
+        GlobalConfig.dashboard.performance.showGpu = root.showGpu;
+        GlobalConfig.dashboard.performance.showCpu = root.showCpu;
+        GlobalConfig.dashboard.performance.showMemory = root.showMemory;
+        GlobalConfig.dashboard.performance.showStorage = root.showStorage;
+        GlobalConfig.dashboard.performance.showNetwork = root.showNetwork;
         // Note: sizes properties are readonly and cannot be modified
-        Config.save();
     }
 
     anchors.fill: parent
@@ -66,9 +65,9 @@ Item {
         id: dashboardClippingRect
 
         anchors.fill: parent
-        anchors.margins: Appearance.padding.normal
+        anchors.margins: Tokens.padding.normal
         anchors.leftMargin: 0
-        anchors.rightMargin: Appearance.padding.normal
+        anchors.rightMargin: Tokens.padding.normal
 
         radius: dashboardBorder.innerRadius
         color: "transparent"
@@ -77,9 +76,9 @@ Item {
             id: dashboardLoader
 
             anchors.fill: parent
-            anchors.margins: Appearance.padding.large + Appearance.padding.normal
-            anchors.leftMargin: Appearance.padding.large
-            anchors.rightMargin: Appearance.padding.large
+            anchors.margins: Tokens.padding.large + Tokens.padding.normal
+            anchors.leftMargin: Tokens.padding.large
+            anchors.rightMargin: Tokens.padding.large
 
             asynchronous: true
             sourceComponent: dashboardContentComponent
@@ -90,7 +89,7 @@ Item {
         id: dashboardBorder
 
         leftThickness: 0
-        rightThickness: Appearance.padding.normal
+        rightThickness: Tokens.padding.normal
     }
 
     Component {
@@ -113,14 +112,14 @@ Item {
                 anchors.right: parent.right
                 anchors.top: parent.top
 
-                spacing: Appearance.spacing.normal
+                spacing: Tokens.spacing.normal
 
                 RowLayout {
-                    spacing: Appearance.spacing.smaller
+                    spacing: Tokens.spacing.smaller
 
                     StyledText {
                         text: qsTr("Dashboard")
-                        font.pointSize: Appearance.font.size.large
+                        font.pointSize: Tokens.font.size.large
                         font.weight: 500
                     }
                 }

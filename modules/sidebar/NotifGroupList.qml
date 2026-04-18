@@ -4,9 +4,9 @@ import QtQuick
 import QtQuick.Layouts
 import Quickshell
 import Caelestia.Components
+import Caelestia.Config
 import qs.components
 import qs.services
-import qs.config
 
 LazyListView {
     id: root
@@ -22,12 +22,12 @@ LazyListView {
     Layout.fillWidth: true
     implicitHeight: contentHeight
 
-    spacing: Math.round(Appearance.spacing.small / 2)
+    spacing: Math.round(Tokens.spacing.small / 2)
     asynchronous: true
 
     readyDelay: 1
     cacheBuffer: 400
-    removeDuration: Appearance.anim.durations.normal
+    removeDuration: Tokens.anim.durations.normal
 
     useCustomViewport: true
     viewport: {
@@ -42,7 +42,7 @@ LazyListView {
 
             let count = 0;
             let i = 0;
-            const previewNum = Config.notifs.groupPreviewNum;
+            const previewNum = root.Config.notifs.groupPreviewNum;
             while (i < root.notifs.length && count < previewNum) {
                 if (!(root.notifs[i]?.closed ?? true))
                     count++;
@@ -132,8 +132,7 @@ LazyListView {
                 enabled: notif.LazyListView.ready
 
                 Anim {
-                    duration: Appearance.anim.durations.expressiveDefaultSpatial
-                    easing.bezierCurve: Appearance.anim.curves.expressiveDefaultSpatial
+                    type: Anim.DefaultSpatial
                 }
             }
 
@@ -147,8 +146,7 @@ LazyListView {
 
             Behavior on x {
                 Anim {
-                    duration: Appearance.anim.durations.expressiveDefaultSpatial
-                    easing.bezierCurve: Appearance.anim.curves.expressiveDefaultSpatial
+                    type: Anim.DefaultSpatial
                 }
             }
         }

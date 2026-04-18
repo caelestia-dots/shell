@@ -2,9 +2,9 @@ import QtQuick
 import QtQuick.Layouts
 import Quickshell
 import Quickshell.Hyprland
+import Caelestia.Config
 import qs.components
 import qs.services
-import qs.config
 
 Item {
     id: root
@@ -13,15 +13,15 @@ Item {
     required property HyprlandToplevel client
 
     implicitWidth: child.implicitWidth
-    implicitHeight: screen.height * Config.winfo.sizes.heightMult
+    implicitHeight: screen.height * Tokens.sizes.winfo.heightMult
 
     RowLayout {
         id: child
 
         anchors.fill: parent
-        anchors.margins: Appearance.padding.large
+        anchors.margins: Tokens.padding.large
 
-        spacing: Appearance.spacing.normal
+        spacing: Tokens.spacing.normal
 
         Preview {
             screen: root.screen
@@ -29,9 +29,9 @@ Item {
         }
 
         ColumnLayout {
-            spacing: Appearance.spacing.normal
+            spacing: Tokens.spacing.normal
 
-            Layout.preferredWidth: Config.winfo.sizes.detailsWidth
+            Layout.preferredWidth: Tokens.sizes.winfo.detailsWidth
             Layout.fillHeight: true
 
             StyledRect {
@@ -39,7 +39,7 @@ Item {
                 Layout.fillHeight: true
 
                 color: Colours.tPalette.m3surfaceContainer
-                radius: Appearance.rounding.normal
+                radius: Tokens.rounding.normal
 
                 Details {
                     client: root.client
@@ -51,7 +51,7 @@ Item {
                 Layout.preferredHeight: buttons.implicitHeight
 
                 color: Colours.tPalette.m3surfaceContainer
-                radius: Appearance.rounding.normal
+                radius: Tokens.rounding.normal
 
                 Buttons {
                     id: buttons

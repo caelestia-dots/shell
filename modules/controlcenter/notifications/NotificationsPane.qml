@@ -6,58 +6,56 @@ import QtQuick
 import QtQuick.Layouts
 import Quickshell
 import Quickshell.Widgets
+import Caelestia.Config
 import qs.components
 import qs.components.containers
 import qs.components.controls
 import qs.components.effects
 import qs.services
-import qs.config
 
 Item {
     id: root
 
     required property Session session
 
-    property bool notificationsExpire: Config.notifs.expire ?? true
-    property string notificationsFullscreen: Config.notifs.fullscreen ?? "on"
+    property bool notificationsExpire: GlobalConfig.notifs.expire ?? true
+    property string notificationsFullscreen: GlobalConfig.notifs.fullscreen ?? "on"
     property bool notificationsOpenExpanded: Config.notifs.openExpanded ?? false
-    property int notificationsDefaultExpireTimeout: Config.notifs.defaultExpireTimeout ?? 5000
+    property int notificationsDefaultExpireTimeout: GlobalConfig.notifs.defaultExpireTimeout ?? 5000
     property int notificationsGroupPreviewNum: Config.notifs.groupPreviewNum ?? 3
 
     property int maxToasts: Config.utilities.maxToasts ?? 4
     property string toastsFullscreen: Config.utilities.toasts.fullscreen ?? "off"
-    property bool chargingChanged: Config.utilities.toasts.chargingChanged ?? true
-    property bool gameModeChanged: Config.utilities.toasts.gameModeChanged ?? true
-    property bool dndChanged: Config.utilities.toasts.dndChanged ?? true
-    property bool audioOutputChanged: Config.utilities.toasts.audioOutputChanged ?? true
-    property bool audioInputChanged: Config.utilities.toasts.audioInputChanged ?? true
-    property bool capsLockChanged: Config.utilities.toasts.capsLockChanged ?? true
-    property bool numLockChanged: Config.utilities.toasts.numLockChanged ?? true
-    property bool kbLayoutChanged: Config.utilities.toasts.kbLayoutChanged ?? true
-    property bool vpnChanged: Config.utilities.toasts.vpnChanged ?? true
-    property bool nowPlaying: Config.utilities.toasts.nowPlaying ?? false
+    property bool chargingChanged: GlobalConfig.utilities.toasts.chargingChanged ?? true
+    property bool gameModeChanged: GlobalConfig.utilities.toasts.gameModeChanged ?? true
+    property bool dndChanged: GlobalConfig.utilities.toasts.dndChanged ?? true
+    property bool audioOutputChanged: GlobalConfig.utilities.toasts.audioOutputChanged ?? true
+    property bool audioInputChanged: GlobalConfig.utilities.toasts.audioInputChanged ?? true
+    property bool capsLockChanged: GlobalConfig.utilities.toasts.capsLockChanged ?? true
+    property bool numLockChanged: GlobalConfig.utilities.toasts.numLockChanged ?? true
+    property bool kbLayoutChanged: GlobalConfig.utilities.toasts.kbLayoutChanged ?? true
+    property bool vpnChanged: GlobalConfig.utilities.toasts.vpnChanged ?? true
+    property bool nowPlaying: GlobalConfig.utilities.toasts.nowPlaying ?? false
 
     function saveConfig(): void {
-        Config.notifs.expire = root.notificationsExpire;
-        Config.notifs.fullscreen = root.notificationsFullscreen;
-        Config.notifs.openExpanded = root.notificationsOpenExpanded;
-        Config.notifs.defaultExpireTimeout = root.notificationsDefaultExpireTimeout;
-        Config.notifs.groupPreviewNum = root.notificationsGroupPreviewNum;
+        GlobalConfig.notifs.expire = root.notificationsExpire;
+        GlobalConfig.notifs.fullscreen = root.notificationsFullscreen;
+        GlobalConfig.notifs.openExpanded = root.notificationsOpenExpanded;
+        GlobalConfig.notifs.defaultExpireTimeout = root.notificationsDefaultExpireTimeout;
+        GlobalConfig.notifs.groupPreviewNum = root.notificationsGroupPreviewNum;
 
-        Config.utilities.maxToasts = root.maxToasts;
-        Config.utilities.toasts.fullscreen = root.toastsFullscreen;
-        Config.utilities.toasts.chargingChanged = root.chargingChanged;
-        Config.utilities.toasts.gameModeChanged = root.gameModeChanged;
-        Config.utilities.toasts.dndChanged = root.dndChanged;
-        Config.utilities.toasts.audioOutputChanged = root.audioOutputChanged;
-        Config.utilities.toasts.audioInputChanged = root.audioInputChanged;
-        Config.utilities.toasts.capsLockChanged = root.capsLockChanged;
-        Config.utilities.toasts.numLockChanged = root.numLockChanged;
-        Config.utilities.toasts.kbLayoutChanged = root.kbLayoutChanged;
-        Config.utilities.toasts.vpnChanged = root.vpnChanged;
-        Config.utilities.toasts.nowPlaying = root.nowPlaying;
-
-        Config.save();
+        GlobalConfig.utilities.maxToasts = root.maxToasts;
+        GlobalConfig.utilities.toasts.fullscreen = root.toastsFullscreen;
+        GlobalConfig.utilities.toasts.chargingChanged = root.chargingChanged;
+        GlobalConfig.utilities.toasts.gameModeChanged = root.gameModeChanged;
+        GlobalConfig.utilities.toasts.dndChanged = root.dndChanged;
+        GlobalConfig.utilities.toasts.audioOutputChanged = root.audioOutputChanged;
+        GlobalConfig.utilities.toasts.audioInputChanged = root.audioInputChanged;
+        GlobalConfig.utilities.toasts.capsLockChanged = root.capsLockChanged;
+        GlobalConfig.utilities.toasts.numLockChanged = root.numLockChanged;
+        GlobalConfig.utilities.toasts.kbLayoutChanged = root.kbLayoutChanged;
+        GlobalConfig.utilities.toasts.vpnChanged = root.vpnChanged;
+        GlobalConfig.utilities.toasts.nowPlaying = root.nowPlaying;
     }
 
     anchors.fill: parent
@@ -66,9 +64,9 @@ Item {
         id: notificationsClippingRect
 
         anchors.fill: parent
-        anchors.margins: Appearance.padding.normal
+        anchors.margins: Tokens.padding.normal
         anchors.leftMargin: 0
-        anchors.rightMargin: Appearance.padding.normal
+        anchors.rightMargin: Tokens.padding.normal
 
         color: "transparent"
         radius: notificationsBorder.innerRadius
@@ -77,9 +75,9 @@ Item {
             id: notificationsLoader
 
             anchors.fill: parent
-            anchors.margins: Appearance.padding.large + Appearance.padding.normal
-            anchors.leftMargin: Appearance.padding.large
-            anchors.rightMargin: Appearance.padding.large
+            anchors.margins: Tokens.padding.large + Tokens.padding.normal
+            anchors.leftMargin: Tokens.padding.large
+            anchors.rightMargin: Tokens.padding.large
 
             sourceComponent: notificationsContentComponent
         }
@@ -89,7 +87,7 @@ Item {
         id: notificationsBorder
 
         leftThickness: 0
-        rightThickness: Appearance.padding.normal
+        rightThickness: Tokens.padding.normal
     }
 
     Component {
@@ -111,13 +109,13 @@ Item {
                 anchors.left: parent.left
                 anchors.right: parent.right
                 anchors.top: parent.top
-                spacing: Appearance.spacing.normal
+                spacing: Tokens.spacing.normal
 
                 ColumnLayout {
                     Layout.fillWidth: true
                     Layout.maximumWidth: 500
                     Layout.alignment: Qt.AlignTop
-                    spacing: Appearance.spacing.normal
+                    spacing: Tokens.spacing.normal
 
                     SectionContainer {
                         Layout.fillWidth: true
@@ -125,7 +123,7 @@ Item {
 
                         StyledText {
                             text: qsTr("Notifications")
-                            font.pointSize: Appearance.font.size.normal
+                            font.pointSize: Tokens.font.size.normal
                         }
 
                         SplitButtonRow {
@@ -220,7 +218,7 @@ Item {
                 ColumnLayout {
                     Layout.fillWidth: true
                     Layout.alignment: Qt.AlignTop
-                    spacing: Appearance.spacing.normal
+                    spacing: Tokens.spacing.normal
 
                     SectionContainer {
                         Layout.fillWidth: true
@@ -228,7 +226,7 @@ Item {
 
                         StyledText {
                             text: qsTr("Toast settings")
-                            font.pointSize: Appearance.font.size.normal
+                            font.pointSize: Tokens.font.size.normal
                         }
 
                         SplitButtonRow {
@@ -316,8 +314,8 @@ Item {
                         GridLayout {
                             Layout.fillWidth: true
                             columns: 2
-                            columnSpacing: Appearance.spacing.normal
-                            rowSpacing: Appearance.spacing.normal
+                            columnSpacing: Tokens.spacing.normal
+                            rowSpacing: Tokens.spacing.normal
 
                             SwitchRow {
                                 Layout.fillWidth: true

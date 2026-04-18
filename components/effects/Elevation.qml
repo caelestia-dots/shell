@@ -1,6 +1,6 @@
-import ".."
 import QtQuick
 import QtQuick.Effects
+import qs.components
 import qs.services
 
 RectangularShadow {

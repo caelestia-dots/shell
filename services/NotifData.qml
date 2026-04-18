@@ -4,8 +4,8 @@ import QtQuick
 import Quickshell
 import Quickshell.Services.Notifications
 import Caelestia
+import Caelestia.Config
 import qs.services
-import qs.config
 import qs.utils
 
 QtObject {
@@ -33,7 +33,7 @@ QtObject {
     property string appName
     property string image
     property var hints // Hints are not persisted across restarts
-    property real expireTimeout: Config.notifs.defaultExpireTimeout
+    property real expireTimeout: GlobalConfig.notifs.defaultExpireTimeout
     property int urgency: NotificationUrgency.Normal
     property bool resident
     property bool hasActionIcons
@@ -41,9 +41,9 @@ QtObject {
 
     readonly property Timer timer: Timer {
         running: true
-        interval: notif.expireTimeout > 0 ? notif.expireTimeout : Config.notifs.defaultExpireTimeout
+        interval: notif.expireTimeout > 0 ? notif.expireTimeout : GlobalConfig.notifs.defaultExpireTimeout
         onTriggered: {
-            if (Config.notifs.expire)
+            if (GlobalConfig.notifs.expire)
                 notif.popup = false;
         }
     }
@@ -54,14 +54,14 @@ QtObject {
         // qmllint disable uncreatable-type
         PanelWindow {
             // qmllint enable uncreatable-type
-            implicitWidth: Config.notifs.sizes.image
-            implicitHeight: Config.notifs.sizes.image
+            implicitWidth: TokenConfig.sizes.notifs.image
+            implicitHeight: TokenConfig.sizes.notifs.image
             color: "transparent"
             mask: Region {}
 
             Image {
                 function tryCache(): void {
-                    if (status !== Image.Ready || width != Config.notifs.sizes.image || height != Config.notifs.sizes.image)
+                    if (status !== Image.Ready || width != TokenConfig.sizes.notifs.image || height != TokenConfig.sizes.notifs.image)
                         return;
 
                     const cacheKey = notif.appName + notif.summary + notif.id;

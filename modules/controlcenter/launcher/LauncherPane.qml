@@ -9,12 +9,12 @@ import QtQuick.Layouts
 import Quickshell
 import Quickshell.Widgets
 import Caelestia
+import Caelestia.Config
 import qs.components
 import qs.components.containers
 import qs.components.controls
 import qs.components.effects
 import qs.services
-import qs.config
 import qs.utils
 
 Item {
@@ -37,8 +37,8 @@ Item {
 
         const appId = root.selectedApp.id || root.selectedApp.entry?.id;
 
-        root.hideFromLauncherChecked = Config.launcher.hiddenApps && Config.launcher.hiddenApps.length > 0 && Strings.testRegexList(Config.launcher.hiddenApps, appId);
-        root.favouriteChecked = Config.launcher.favouriteApps && Config.launcher.favouriteApps.length > 0 && Strings.testRegexList(Config.launcher.favouriteApps, appId);
+        root.hideFromLauncherChecked = GlobalConfig.launcher.hiddenApps && GlobalConfig.launcher.hiddenApps.length > 0 && Strings.testRegexList(GlobalConfig.launcher.hiddenApps, appId);
+        root.favouriteChecked = GlobalConfig.launcher.favouriteApps && GlobalConfig.launcher.favouriteApps.length > 0 && Strings.testRegexList(GlobalConfig.launcher.favouriteApps, appId);
     }
 
     function saveHiddenApps(isHidden) {
@@ -48,7 +48,7 @@ Item {
 
         const appId = root.selectedApp.id || root.selectedApp.entry?.id;
 
-        const hiddenApps = Config.launcher.hiddenApps ? [...Config.launcher.hiddenApps] : [];
+        const hiddenApps = GlobalConfig.launcher.hiddenApps ? [...GlobalConfig.launcher.hiddenApps] : [];
 
         if (isHidden) {
             if (!hiddenApps.includes(appId)) {
@@ -61,8 +61,7 @@ Item {
             }
         }
 
-        Config.launcher.hiddenApps = hiddenApps;
-        Config.save();
+        GlobalConfig.launcher.hiddenApps = hiddenApps;
     }
 
     function filterApps(search: string): list<var> {
@@ -129,7 +128,7 @@ Item {
         id: allAppsDb
 
         path: `${Paths.state}/apps.sqlite`
-        favouriteApps: Config.launcher.favouriteApps
+        favouriteApps: GlobalConfig.launcher.favouriteApps
         entries: DesktopEntries.applications.values
     }
 
@@ -150,14 +149,14 @@ Item {
 
                 anchors.fill: parent
 
-                spacing: Appearance.spacing.small
+                spacing: Tokens.spacing.small
 
                 RowLayout {
-                    spacing: Appearance.spacing.smaller
+                    spacing: Tokens.spacing.smaller
 
                     StyledText {
                         text: qsTr("Launcher")
-                        font.pointSize: Appearance.font.size.large
+                        font.pointSize: Tokens.font.size.large
                         font.weight: 500
                     }
 
@@ -169,9 +168,9 @@ Item {
                         toggled: !root.session.launcher.active
                         icon: "settings"
                         accent: "Primary"
-                        iconSize: Appearance.font.size.normal
-                        horizontalPadding: Appearance.padding.normal
-                        verticalPadding: Appearance.padding.smaller
+                        iconSize: Tokens.font.size.normal
+                        horizontalPadding: Tokens.padding.normal
+                        verticalPadding: Tokens.padding.smaller
                         tooltip: qsTr("Launcher settings")
 
                         onClicked: {
@@ -187,9 +186,9 @@ Item {
                 }
 
                 StyledText {
-                    Layout.topMargin: Appearance.spacing.large
+                    Layout.topMargin: Tokens.spacing.large
                     text: qsTr("Applications (%1)").arg(root.searchText ? root.filteredApps.length : allAppsDb.apps.length)
-                    font.pointSize: Appearance.font.size.normal
+                    font.pointSize: Tokens.font.size.normal
                     font.weight: 500
                 }
 
@@ -200,11 +199,11 @@ Item {
 
                 StyledRect {
                     Layout.fillWidth: true
-                    Layout.topMargin: Appearance.spacing.normal
-                    Layout.bottomMargin: Appearance.spacing.small
+                    Layout.topMargin: Tokens.spacing.normal
+                    Layout.bottomMargin: Tokens.spacing.small
 
                     color: Colours.layer(Colours.palette.m3surfaceContainer, 2)
-                    radius: Appearance.rounding.full
+                    radius: Tokens.rounding.full
 
                     implicitHeight: Math.max(searchIcon.implicitHeight, searchField.implicitHeight, clearIcon.implicitHeight)
 
@@ -213,7 +212,7 @@ Item {
 
                         anchors.verticalCenter: parent.verticalCenter
                         anchors.left: parent.left
-                        anchors.leftMargin: Appearance.padding.normal
+                        anchors.leftMargin: Tokens.padding.normal
 
                         text: "search"
                         color: Colours.palette.m3onSurfaceVariant
@@ -224,11 +223,11 @@ Item {
 
                         anchors.left: searchIcon.right
                         anchors.right: clearIcon.left
-                        anchors.leftMargin: Appearance.spacing.small
-                        anchors.rightMargin: Appearance.spacing.small
+                        anchors.leftMargin: Tokens.spacing.small
+                        anchors.rightMargin: Tokens.spacing.small
 
-                        topPadding: Appearance.padding.normal
-                        bottomPadding: Appearance.padding.normal
+                        topPadding: Tokens.padding.normal
+                        bottomPadding: Tokens.padding.normal
 
                         placeholderText: qsTr("Search applications...")
 
@@ -242,7 +241,7 @@ Item {
 
                         anchors.verticalCenter: parent.verticalCenter
                         anchors.right: parent.right
-                        anchors.rightMargin: Appearance.padding.normal
+                        anchors.rightMargin: Tokens.padding.normal
 
                         width: searchField.text ? implicitWidth : implicitWidth / 2
                         opacity: {
@@ -270,13 +269,13 @@ Item {
 
                         Behavior on width {
                             Anim {
-                                duration: Appearance.anim.durations.small
+                                type: Anim.StandardSmall
                             }
                         }
 
                         Behavior on opacity {
                             Anim {
-                                duration: Appearance.anim.durations.small
+                                type: Anim.StandardSmall
                             }
                         }
                     }
@@ -297,7 +296,7 @@ Item {
                         Layout.fillHeight: true
 
                         model: root.filteredApps
-                        spacing: Appearance.spacing.small / 2
+                        spacing: Tokens.spacing.small / 2
                         clip: true
 
                         StyledScrollBar.vertical: StyledScrollBar {
@@ -313,7 +312,7 @@ Item {
                             implicitHeight: 40
 
                             color: isSelected ? Colours.layer(Colours.palette.m3surfaceContainer, 2) : "transparent"
-                            radius: Appearance.rounding.normal
+                            radius: Tokens.rounding.normal
 
                             opacity: 0
 
@@ -329,7 +328,7 @@ Item {
                             }
 
                             StateLayer {
-                                function onClicked(): void {
+                                onClicked: {
                                     root.session.launcher.active = modelData;
                                 }
                             }
@@ -338,9 +337,9 @@ Item {
                                 anchors.left: parent.left
                                 anchors.right: parent.right
                                 anchors.verticalCenter: parent.verticalCenter
-                                anchors.margins: Appearance.padding.normal
+                                anchors.margins: Tokens.padding.normal
 
-                                spacing: Appearance.spacing.normal
+                                spacing: Tokens.spacing.normal
 
                                 IconImage {
                                     asynchronous: true
@@ -355,12 +354,12 @@ Item {
                                 StyledText {
                                     Layout.fillWidth: true
                                     text: modelData.name || modelData.entry?.name || qsTr("Unknown")
-                                    font.pointSize: Appearance.font.size.normal
+                                    font.pointSize: Tokens.font.size.normal
                                 }
 
                                 Loader {
-                                    readonly property bool isHidden: modelData ? Strings.testRegexList(Config.launcher.hiddenApps, modelData.id) : false
-                                    readonly property bool isFav: modelData ? Strings.testRegexList(Config.launcher.favouriteApps, modelData.id) : false
+                                    readonly property bool isHidden: modelData ? Strings.testRegexList(GlobalConfig.launcher.hiddenApps, modelData.id) : false
+                                    readonly property bool isFav: modelData ? Strings.testRegexList(GlobalConfig.launcher.favouriteApps, modelData.id) : false
 
                                     Layout.alignment: Qt.AlignVCenter
                                     asynchronous: true
@@ -423,8 +422,8 @@ Item {
                 onDisplayedAppChanged: {
                     if (displayedApp) {
                         const appId = displayedApp.id || displayedApp.entry?.id;
-                        root.hideFromLauncherChecked = Config.launcher.hiddenApps && Config.launcher.hiddenApps.length > 0 && Strings.testRegexList(Config.launcher.hiddenApps, appId);
-                        root.favouriteChecked = Config.launcher.favouriteApps && Config.launcher.favouriteApps.length > 0 && Strings.testRegexList(Config.launcher.favouriteApps, appId);
+                        root.hideFromLauncherChecked = GlobalConfig.launcher.hiddenApps && GlobalConfig.launcher.hiddenApps.length > 0 && Strings.testRegexList(GlobalConfig.launcher.hiddenApps, appId);
+                        root.favouriteChecked = GlobalConfig.launcher.favouriteApps && GlobalConfig.launcher.favouriteApps.length > 0 && Strings.testRegexList(GlobalConfig.launcher.favouriteApps, appId);
                     } else {
                         root.hideFromLauncherChecked = false;
                         root.favouriteChecked = false;
@@ -518,12 +517,12 @@ Item {
             readonly property var displayedApp: parent && parent.displayedApp !== undefined ? parent.displayedApp : null
 
             anchors.fill: parent
-            spacing: Appearance.spacing.normal
+            spacing: Tokens.spacing.normal
 
             SettingsHeader {
-                Layout.leftMargin: Appearance.padding.large * 2
-                Layout.rightMargin: Appearance.padding.large * 2
-                Layout.topMargin: Appearance.padding.large * 2
+                Layout.leftMargin: Tokens.padding.large * 2
+                Layout.rightMargin: Tokens.padding.large * 2
+                Layout.topMargin: Tokens.padding.large * 2
                 visible: displayedApp === null
                 icon: "apps"
                 title: qsTr("Launcher Applications")
@@ -531,23 +530,23 @@ Item {
 
             Item {
                 Layout.alignment: Qt.AlignHCenter
-                Layout.leftMargin: Appearance.padding.large * 2
-                Layout.rightMargin: Appearance.padding.large * 2
-                Layout.topMargin: Appearance.padding.large * 2
+                Layout.leftMargin: Tokens.padding.large * 2
+                Layout.rightMargin: Tokens.padding.large * 2
+                Layout.topMargin: Tokens.padding.large * 2
                 visible: displayedApp !== null
                 implicitWidth: Math.max(appIconImage.implicitWidth, appTitleText.implicitWidth)
-                implicitHeight: appIconImage.implicitHeight + Appearance.spacing.normal + appTitleText.implicitHeight
+                implicitHeight: appIconImage.implicitHeight + Tokens.spacing.normal + appTitleText.implicitHeight
 
                 ColumnLayout {
                     anchors.centerIn: parent
-                    spacing: Appearance.spacing.normal
+                    spacing: Tokens.spacing.normal
 
                     IconImage {
                         id: appIconImage
 
                         asynchronous: true
                         Layout.alignment: Qt.AlignHCenter
-                        implicitSize: Appearance.font.size.extraLarge * 3 * 2
+                        implicitSize: Tokens.font.size.extraLarge * 3 * 2
                         source: {
                             const app = appDetailsLayout.displayedApp;
                             if (!app)
@@ -565,7 +564,7 @@ Item {
 
                         Layout.alignment: Qt.AlignHCenter
                         text: displayedApp ? (displayedApp.name || displayedApp.entry?.name || qsTr("Application Details")) : ""
-                        font.pointSize: Appearance.font.size.large
+                        font.pointSize: Tokens.font.size.large
                         font.bold: true
                     }
                 }
@@ -574,9 +573,9 @@ Item {
             Item {
                 Layout.fillWidth: true
                 Layout.fillHeight: true
-                Layout.topMargin: Appearance.spacing.large
-                Layout.leftMargin: Appearance.padding.large * 2
-                Layout.rightMargin: Appearance.padding.large * 2
+                Layout.topMargin: Tokens.spacing.large
+                Layout.leftMargin: Tokens.padding.large * 2
+                Layout.rightMargin: Tokens.padding.large * 2
 
                 StyledFlickable {
                     id: detailsFlickable
@@ -595,10 +594,10 @@ Item {
                         anchors.left: parent.left
                         anchors.right: parent.right
                         anchors.top: parent.top
-                        spacing: Appearance.spacing.normal
+                        spacing: Tokens.spacing.normal
 
                         SwitchRow {
-                            Layout.topMargin: Appearance.spacing.normal
+                            Layout.topMargin: Tokens.spacing.normal
                             visible: appDetailsLayout.displayedApp !== null
                             label: qsTr("Mark as favourite")
                             checked: root.favouriteChecked
@@ -607,14 +606,14 @@ Item {
                             // * app isn't in favouriteApps array but marked as favourite anyway
                             // ^^^ This means that this app is favourited because of a regex check
                             //     this button can not toggle regexed apps
-                            enabled: appDetailsLayout.displayedApp !== null && !root.hideFromLauncherChecked && (Config.launcher.favouriteApps.indexOf(appDetailsLayout.displayedApp.id || appDetailsLayout.displayedApp.entry?.id) !== -1 || !root.favouriteChecked)
+                            enabled: appDetailsLayout.displayedApp !== null && !root.hideFromLauncherChecked && (GlobalConfig.launcher.favouriteApps.indexOf(appDetailsLayout.displayedApp.id || appDetailsLayout.displayedApp.entry?.id) !== -1 || !root.favouriteChecked)
                             opacity: enabled ? 1 : 0.6
                             onToggled: checked => {
                                 root.favouriteChecked = checked;
                                 const app = appDetailsLayout.displayedApp;
                                 if (app) {
                                     const appId = app.id || app.entry?.id;
-                                    const favouriteApps = Config.launcher.favouriteApps ? [...Config.launcher.favouriteApps] : [];
+                                    const favouriteApps = GlobalConfig.launcher.favouriteApps ? [...GlobalConfig.launcher.favouriteApps] : [];
                                     if (checked) {
                                         if (!favouriteApps.includes(appId)) {
                                             favouriteApps.push(appId);
@@ -625,13 +624,12 @@ Item {
                                             favouriteApps.splice(index, 1);
                                         }
                                     }
-                                    Config.launcher.favouriteApps = favouriteApps;
-                                    Config.save();
+                                    GlobalConfig.launcher.favouriteApps = favouriteApps;
                                 }
                             }
                         }
                         SwitchRow {
-                            Layout.topMargin: Appearance.spacing.normal
+                            Layout.topMargin: Tokens.spacing.normal
                             visible: appDetailsLayout.displayedApp !== null
                             label: qsTr("Hide from launcher")
                             checked: root.hideFromLauncherChecked
@@ -640,14 +638,14 @@ Item {
                             // * app isn't in hiddenApps array but marked as hidden anyway
                             // ^^^ This means that this app is hidden because of a regex check
                             //     this button can not toggle regexed apps
-                            enabled: appDetailsLayout.displayedApp !== null && !root.favouriteChecked && (Config.launcher.hiddenApps.indexOf(appDetailsLayout.displayedApp.id || appDetailsLayout.displayedApp.entry?.id) !== -1 || !root.hideFromLauncherChecked)
+                            enabled: appDetailsLayout.displayedApp !== null && !root.favouriteChecked && (GlobalConfig.launcher.hiddenApps.indexOf(appDetailsLayout.displayedApp.id || appDetailsLayout.displayedApp.entry?.id) !== -1 || !root.hideFromLauncherChecked)
                             opacity: enabled ? 1 : 0.6
                             onToggled: checked => {
                                 root.hideFromLauncherChecked = checked;
                                 const app = appDetailsLayout.displayedApp;
                                 if (app) {
                                     const appId = app.id || app.entry?.id;
-                                    const hiddenApps = Config.launcher.hiddenApps ? [...Config.launcher.hiddenApps] : [];
+                                    const hiddenApps = GlobalConfig.launcher.hiddenApps ? [...GlobalConfig.launcher.hiddenApps] : [];
                                     if (checked) {
                                         if (!hiddenApps.includes(appId)) {
                                             hiddenApps.push(appId);
@@ -658,8 +656,7 @@ Item {
                                             hiddenApps.splice(index, 1);
                                         }
                                     }
-                                    Config.launcher.hiddenApps = hiddenApps;
-                                    Config.save();
+                                    GlobalConfig.launcher.hiddenApps = hiddenApps;
                                 }
                             }
                         }

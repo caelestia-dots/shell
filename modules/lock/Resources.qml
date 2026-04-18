@@ -1,20 +1,20 @@
 import QtQuick
 import QtQuick.Layouts
+import Caelestia.Config
 import qs.components
 import qs.components.controls
 import qs.components.misc
 import qs.services
-import qs.config
 
 GridLayout {
     id: root
 
     anchors.left: parent.left
     anchors.right: parent.right
-    anchors.margins: Appearance.padding.large
+    anchors.margins: Tokens.padding.large
 
-    rowSpacing: Appearance.spacing.large
-    columnSpacing: Appearance.spacing.large
+    rowSpacing: Tokens.spacing.large
+    columnSpacing: Tokens.spacing.large
     rows: 2
     columns: 2
 
@@ -23,28 +23,28 @@ GridLayout {
     }
 
     Resource {
-        Layout.topMargin: Appearance.padding.large
+        Layout.topMargin: Tokens.padding.large
         icon: "memory"
         value: SystemUsage.cpuPerc
         colour: Colours.palette.m3primary
     }
 
     Resource {
-        Layout.topMargin: Appearance.padding.large
+        Layout.topMargin: Tokens.padding.large
         icon: "thermostat"
         value: Math.min(1, SystemUsage.cpuTemp / 90)
         colour: Colours.palette.m3secondary
     }
 
     Resource {
-        Layout.bottomMargin: Appearance.padding.large
+        Layout.bottomMargin: Tokens.padding.large
         icon: "memory_alt"
         value: SystemUsage.memPerc
         colour: Colours.palette.m3secondary
     }
 
     Resource {
-        Layout.bottomMargin: Appearance.padding.large
+        Layout.bottomMargin: Tokens.padding.large
         icon: "hard_disk"
         value: SystemUsage.storagePerc
         colour: Colours.palette.m3tertiary
@@ -61,17 +61,17 @@ GridLayout {
         implicitHeight: width
 
         color: Colours.layer(Colours.palette.m3surfaceContainerHigh, 2)
-        radius: Appearance.rounding.large
+        radius: Tokens.rounding.large
 
         CircularProgress {
             id: circ
 
             anchors.fill: parent
             value: res.value
-            padding: Appearance.padding.large * 3
+            padding: Tokens.padding.large * 3
             fgColour: res.colour
             bgColour: Colours.layer(Colours.palette.m3surfaceContainerHighest, 3)
-            strokeWidth: width < 200 ? Appearance.padding.smaller : Appearance.padding.normal
+            strokeWidth: width < 200 ? Tokens.padding.smaller : Tokens.padding.normal
         }
 
         MaterialIcon {
@@ -86,7 +86,7 @@ GridLayout {
 
         Behavior on value {
             Anim {
-                duration: Appearance.anim.durations.large
+                type: Anim.StandardLarge
             }
         }
     }

@@ -1,10 +1,10 @@
 import QtQuick
 import QtQuick.Effects
 import Quickshell
+import Caelestia.Config
 import qs.components
 import qs.components.containers
 import qs.services
-import qs.config
 
 StyledListView {
     id: root
@@ -19,7 +19,7 @@ StyledListView {
     preferredHighlightEnd: height / 2 + 30
     highlightRangeMode: ListView.ApplyRange
     highlightFollowsCurrentItem: true
-    highlightMoveDuration: LyricsService.isManualSeeking ? 0 : Appearance.anim.durations.normal
+    highlightMoveDuration: LyricsService.isManualSeeking ? 0 : Tokens.anim.durations.normal
     layer.enabled: true
     layer.effect: ShaderEffect {
         required property Item source
@@ -46,7 +46,7 @@ StyledListView {
         property bool isCurrent: ListView.isCurrentItem
 
         width: ListView.view.width
-        height: hasContent ? (lyricText.contentHeight + Appearance.spacing.large) : 0
+        height: hasContent ? (lyricText.contentHeight + Tokens.spacing.large) : 0
 
         MultiEffect {
             id: effect
@@ -84,19 +84,19 @@ StyledListView {
             anchors.centerIn: parent
             horizontalAlignment: Text.AlignHCenter
             wrapMode: Text.WordWrap
-            font.pointSize: Appearance.font.size.normal
+            font.pointSize: Tokens.font.size.normal
             color: delegateRoot.isCurrent ? Colours.palette.m3primary : Colours.palette.m3onSurfaceVariant
             font.bold: delegateRoot.isCurrent
             scale: delegateRoot.isCurrent ? 1.15 : 1.0
 
             Behavior on color {
                 CAnim {
-                    duration: Appearance.anim.durations.small
+                    duration: Tokens.anim.durations.small
                 }
             }
             Behavior on scale {
                 Anim {
-                    duration: Appearance.anim.durations.small
+                    type: Anim.StandardSmall
                 }
             }
         }

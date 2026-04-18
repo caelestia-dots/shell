@@ -3,14 +3,14 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import Quickshell
 import Caelestia
+import Caelestia.Config
 import qs.components
 import qs.services
-import qs.config
 
 Item {
     id: root
 
-    readonly property int spacing: Appearance.spacing.small
+    readonly property int spacing: Tokens.spacing.small
     property bool flag
 
     function shouldShowToast(toast: Toast): bool {
@@ -23,7 +23,7 @@ Item {
         return false;
     }
 
-    implicitWidth: Config.utilities.sizes.toastWidth - Appearance.padding.normal * 2
+    implicitWidth: Tokens.sizes.utilities.toastWidth - Tokens.padding.normal * 2
     implicitHeight: {
         let h = -spacing;
         for (let i = 0; i < repeater.count; i++) {
@@ -47,7 +47,7 @@ Item {
                     toasts.push(toast);
                     if (!toast.closed) {
                         count++;
-                        if (count > Config.utilities.maxToasts)
+                        if (count > root.Config.utilities.maxToasts)
                             break;
                     }
                 }
@@ -111,8 +111,7 @@ Item {
             properties: "opacity,scale"
             from: 0
             to: 1
-            duration: Appearance.anim.durations.expressiveDefaultSpatial
-            easing.bezierCurve: Appearance.anim.curves.expressiveDefaultSpatial
+            type: Anim.DefaultSpatial
         }
 
         ParallelAnimation {
@@ -148,8 +147,7 @@ Item {
 
         Behavior on anchors.bottomMargin {
             Anim {
-                duration: Appearance.anim.durations.expressiveDefaultSpatial
-                easing.bezierCurve: Appearance.anim.curves.expressiveDefaultSpatial
+                type: Anim.DefaultSpatial
             }
         }
     }

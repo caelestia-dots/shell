@@ -4,11 +4,11 @@ import QtQuick
 import QtQuick.Layouts
 import Quickshell
 import Quickshell.Widgets
+import Caelestia.Config
 import qs.components
 import qs.components.containers
 import qs.components.effects
 import qs.services
-import qs.config
 import qs.utils
 
 ColumnLayout {
@@ -17,15 +17,15 @@ ColumnLayout {
     required property var lock
 
     anchors.fill: parent
-    anchors.margins: Appearance.padding.large
+    anchors.margins: Tokens.padding.large
 
-    spacing: Appearance.spacing.smaller
+    spacing: Tokens.spacing.smaller
 
     StyledText {
         Layout.fillWidth: true
         text: Notifs.list.length > 0 ? qsTr("%1 notification%2").arg(Notifs.list.length).arg(Notifs.list.length === 1 ? "" : "s") : qsTr("Notifications")
         color: Colours.palette.m3outline
-        font.family: Appearance.font.family.mono
+        font.family: Tokens.font.family.mono
         font.weight: 500
         elide: Text.ElideRight
     }
@@ -36,7 +36,7 @@ ColumnLayout {
         Layout.fillWidth: true
         Layout.fillHeight: true
 
-        radius: Appearance.rounding.small
+        radius: Tokens.rounding.small
         color: "transparent"
 
         Loader {
@@ -46,7 +46,7 @@ ColumnLayout {
             opacity: Notifs.list.length > 0 && !Config.lock.hideNotifs ? 0 : 1
 
             sourceComponent: ColumnLayout {
-                spacing: Appearance.spacing.large
+                spacing: Tokens.spacing.large
 
                 Image {
                     asynchronous: true
@@ -65,15 +65,15 @@ ColumnLayout {
                     Layout.alignment: Qt.AlignHCenter
                     text: Config.lock.hideNotifs ? qsTr("Unlock for Notifications") : qsTr("No Notifications")
                     color: Colours.palette.m3outlineVariant
-                    font.pointSize: Appearance.font.size.large
-                    font.family: Appearance.font.family.mono
+                    font.pointSize: Tokens.font.size.large
+                    font.family: Tokens.font.family.mono
                     font.weight: 500
                 }
             }
 
             Behavior on opacity {
                 Anim {
-                    duration: Appearance.anim.durations.extraLarge
+                    type: Anim.StandardExtraLarge
                 }
             }
         }
@@ -81,7 +81,7 @@ ColumnLayout {
         StyledListView {
             anchors.fill: parent
             visible: !Config.lock.hideNotifs
-            spacing: Appearance.spacing.small
+            spacing: Tokens.spacing.small
             clip: true
 
             model: ScriptModel {
@@ -103,8 +103,7 @@ ColumnLayout {
                     property: "scale"
                     from: 0
                     to: 1
-                    duration: Appearance.anim.durations.expressiveDefaultSpatial
-                    easing.bezierCurve: Appearance.anim.curves.expressiveDefaultSpatial
+                    type: Anim.DefaultSpatial
                 }
             }
 
@@ -126,8 +125,7 @@ ColumnLayout {
                 }
                 Anim {
                     property: "y"
-                    duration: Appearance.anim.durations.expressiveDefaultSpatial
-                    easing.bezierCurve: Appearance.anim.curves.expressiveDefaultSpatial
+                    type: Anim.DefaultSpatial
                 }
             }
 
@@ -138,8 +136,7 @@ ColumnLayout {
                 }
                 Anim {
                     property: "y"
-                    duration: Appearance.anim.durations.expressiveDefaultSpatial
-                    easing.bezierCurve: Appearance.anim.curves.expressiveDefaultSpatial
+                    type: Anim.DefaultSpatial
                 }
             }
         }

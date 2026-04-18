@@ -3,16 +3,20 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import Quickshell
 import Quickshell.Services.UPower
+import Caelestia.Config
 import qs.components
 import qs.services
-import qs.config
 
 Column {
-    spacing: Appearance.spacing.small
+    id: root
+
+    readonly property var excluded: Config.bar.status.peripheralBatteryExcluded
+
+    spacing: Tokens.spacing.small
 
     Repeater {
         model: ScriptModel {
-            values: UPower.devices.values.filter(d => !d.isLaptopBattery && d.type !== UPowerDeviceType.LinePower && d.isPresent && !Config.bar.status.peripheralBatteryExcluded.some(e => e === d.model || e === d.nativePath))
+            values: UPower.devices.values.filter(d => !d.isLaptopBattery && d.type !== UPowerDeviceType.LinePower && d.isPresent && !root.excluded.some(e => e === d.model || e === d.nativePath))
         }
 
         Row {
@@ -20,7 +24,7 @@ Column {
 
             required property UPowerDevice modelData
 
-            spacing: Appearance.spacing.small
+            spacing: Tokens.spacing.small
 
             MaterialIcon {
                 anchors.verticalCenter: parent.verticalCenter

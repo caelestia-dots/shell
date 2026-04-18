@@ -2,8 +2,8 @@ pragma ComponentBehavior: Bound
 
 import QtQuick
 import Quickshell
+import Caelestia.Config
 import qs.components
-import qs.config
 import qs.modules.sidebar as Sidebar
 import qs.modules.bar.popouts as BarPopouts
 
@@ -14,6 +14,7 @@ Item {
     required property Sidebar.Wrapper sidebar
     required property BarPopouts.Wrapper popouts
     property real horizontalStretch
+    property matrix4x4 deformMatrix
 
     readonly property PersistentProperties props: PersistentProperties {
         property bool recordingListExpanded: false
@@ -29,7 +30,7 @@ Item {
     visible: offsetScale < 1
     anchors.bottomMargin: (-implicitHeight - 5) * offsetScale
     implicitHeight: content.implicitHeight + content.anchors.margins * 2
-    implicitWidth: sidebar.width * (1 - sidebar.offsetScale) * horizontalStretch * sidebarLerp + Config.utilities.sizes.width * (1 - sidebarLerp)
+    implicitWidth: sidebar.width * (1 - sidebar.offsetScale) * horizontalStretch * sidebarLerp + Tokens.sizes.utilities.width * (1 - sidebarLerp)
     opacity: 1 - offsetScale
 
     states: State {
@@ -47,8 +48,8 @@ Item {
 
             Anim {
                 property: "sidebarLerp"
-                duration: Appearance.anim.durations.expressiveDefaultSpatial / 2
-                easing.bezierCurve: Appearance.anim.curves.standardAccel
+                duration: Tokens.anim.durations.expressiveDefaultSpatial / 2
+                easing: Tokens.anim.standardAccel
             }
         },
         Transition {
@@ -56,16 +57,15 @@ Item {
 
             Anim {
                 property: "sidebarLerp"
-                duration: Appearance.anim.durations.expressiveDefaultSpatial / 2
-                easing.bezierCurve: Appearance.anim.curves.standardDecel
+                duration: Tokens.anim.durations.expressiveDefaultSpatial / 2
+                easing: Tokens.anim.standardDecel
             }
         }
     ]
 
     Behavior on offsetScale {
         Anim {
-            duration: Appearance.anim.durations.expressiveDefaultSpatial
-            easing.bezierCurve: Appearance.anim.curves.expressiveDefaultSpatial
+            type: Anim.DefaultSpatial
         }
     }
 
@@ -74,7 +74,7 @@ Item {
 
         anchors.top: parent.top
         anchors.left: parent.left
-        anchors.margins: Appearance.padding.large
+        anchors.margins: Tokens.padding.large
 
         asynchronous: true
         active: root.shouldBeActive || root.visible
@@ -84,6 +84,7 @@ Item {
             props: root.props
             visibilities: root.visibilities
             popouts: root.popouts
+            deformMatrix: root.deformMatrix
         }
     }
 }

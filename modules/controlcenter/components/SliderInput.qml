@@ -2,11 +2,11 @@ pragma ComponentBehavior: Bound
 
 import QtQuick
 import QtQuick.Layouts
+import Caelestia.Config
 import qs.components
 import qs.components.controls
 import qs.components.effects
 import qs.services
-import qs.config
 
 ColumnLayout {
     id: root
@@ -52,7 +52,7 @@ ColumnLayout {
         return parseFloat(text);
     }
 
-    spacing: Appearance.spacing.small
+    spacing: Tokens.spacing.small
 
     Component.onCompleted: {
         // Set initialized flag after a brief delay to allow component to fully load
@@ -71,12 +71,12 @@ ColumnLayout {
 
     RowLayout {
         Layout.fillWidth: true
-        spacing: Appearance.spacing.normal
+        spacing: Tokens.spacing.normal
 
         StyledText {
             visible: root.label !== ""
             text: root.label
-            font.pointSize: Appearance.font.size.normal
+            font.pointSize: Tokens.font.size.normal
         }
 
         Item {
@@ -138,7 +138,7 @@ ColumnLayout {
             visible: root.suffix !== ""
             text: root.suffix
             color: Colours.palette.m3outline
-            font.pointSize: Appearance.font.size.normal
+            font.pointSize: Tokens.font.size.normal
         }
     }
 
@@ -146,7 +146,7 @@ ColumnLayout {
         id: slider
 
         Layout.fillWidth: true
-        implicitHeight: Appearance.padding.normal * 3
+        implicitHeight: Tokens.padding.normal * 3
 
         from: root.from
         to: root.to

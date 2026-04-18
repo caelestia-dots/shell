@@ -5,10 +5,10 @@ import QtQuick.Layouts
 import Quickshell
 import Quickshell.Widgets
 import Quickshell.Services.Notifications
+import Caelestia.Config
 import qs.components
 import qs.components.effects
 import qs.services
-import qs.config
 import qs.utils
 
 StyledRect {
@@ -46,10 +46,10 @@ StyledRect {
 
     anchors.left: parent?.left
     anchors.right: parent?.right
-    implicitHeight: content.implicitHeight + Appearance.padding.normal * 2
+    implicitHeight: content.implicitHeight + Tokens.padding.normal * 2
 
     clip: true
-    radius: Appearance.rounding.normal
+    radius: Tokens.rounding.normal
     color: root.urgency === "critical" ? Colours.palette.m3secondaryContainer : Colours.layer(Colours.palette.m3surfaceContainerHigh, 2)
 
     RowLayout {
@@ -58,14 +58,14 @@ StyledRect {
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.top: parent.top
-        anchors.margins: Appearance.padding.normal
+        anchors.margins: Tokens.padding.normal
 
-        spacing: Appearance.spacing.normal
+        spacing: Tokens.spacing.normal
 
         Item {
             Layout.alignment: Qt.AlignLeft | Qt.AlignTop
-            implicitWidth: Config.notifs.sizes.image
-            implicitHeight: Config.notifs.sizes.image
+            implicitWidth: TokenConfig.sizes.notifs.image
+            implicitHeight: TokenConfig.sizes.notifs.image
 
             Component {
                 id: imageComp
@@ -73,12 +73,12 @@ StyledRect {
                 Image {
                     source: Qt.resolvedUrl(root.image)
                     fillMode: Image.PreserveAspectCrop
-                    sourceSize.width: Config.notifs.sizes.image
-                    sourceSize.height: Config.notifs.sizes.image
+                    sourceSize.width: TokenConfig.sizes.notifs.image
+                    sourceSize.height: TokenConfig.sizes.notifs.image
                     cache: false
                     asynchronous: true
-                    width: Config.notifs.sizes.image
-                    height: Config.notifs.sizes.image
+                    width: TokenConfig.sizes.notifs.image
+                    height: TokenConfig.sizes.notifs.image
                 }
             }
 
@@ -86,7 +86,7 @@ StyledRect {
                 id: appIconComp
 
                 ColouredIcon {
-                    implicitSize: Math.round(Config.notifs.sizes.image * 0.6)
+                    implicitSize: Math.round(TokenConfig.sizes.notifs.image * 0.6)
                     source: Quickshell.iconPath(root.appIcon)
                     colour: root.urgency === "critical" ? Colours.palette.m3onError : root.urgency === "low" ? Colours.palette.m3onSurface : Colours.palette.m3onSecondaryContainer
                     layer.enabled: root.appIcon.endsWith("symbolic")
@@ -99,14 +99,14 @@ StyledRect {
                 MaterialIcon {
                     text: Icons.getNotifIcon(root.notifs[0]?.summary, root.urgency)
                     color: root.urgency === "critical" ? Colours.palette.m3onError : root.urgency === "low" ? Colours.palette.m3onSurface : Colours.palette.m3onSecondaryContainer
-                    font.pointSize: Appearance.font.size.large
+                    font.pointSize: Tokens.font.size.large
                 }
             }
 
             ClippingRectangle {
                 anchors.fill: parent
                 color: root.urgency === "critical" ? Colours.palette.m3error : root.urgency === "low" ? Colours.layer(Colours.palette.m3surfaceContainerHighest, 3) : Colours.palette.m3secondaryContainer
-                radius: Appearance.rounding.full
+                radius: Tokens.rounding.full
 
                 Loader {
                     asynchronous: true
@@ -122,15 +122,15 @@ StyledRect {
                 active: root.appIcon && root.image
 
                 sourceComponent: StyledRect {
-                    implicitWidth: Config.notifs.sizes.badge
-                    implicitHeight: Config.notifs.sizes.badge
+                    implicitWidth: Tokens.sizes.notifs.badge
+                    implicitHeight: Tokens.sizes.notifs.badge
 
                     color: root.urgency === "critical" ? Colours.palette.m3error : root.urgency === "low" ? Colours.palette.m3surfaceContainerHighest : Colours.palette.m3secondaryContainer
-                    radius: Appearance.rounding.full
+                    radius: Tokens.rounding.full
 
                     ColouredIcon {
                         anchors.centerIn: parent
-                        implicitSize: Math.round(Config.notifs.sizes.badge * 0.6)
+                        implicitSize: Math.round(Tokens.sizes.notifs.badge * 0.6)
                         source: Quickshell.iconPath(root.appIcon)
                         colour: root.urgency === "critical" ? Colours.palette.m3onError : root.urgency === "low" ? Colours.palette.m3onSurface : Colours.palette.m3onSecondaryContainer
                         layer.enabled: root.appIcon.endsWith("symbolic")
@@ -140,21 +140,21 @@ StyledRect {
         }
 
         ColumnLayout {
-            Layout.topMargin: -Appearance.padding.small
-            Layout.bottomMargin: -Appearance.padding.small / 2 - (root.expanded ? 0 : spacing)
+            Layout.topMargin: -Tokens.padding.small
+            Layout.bottomMargin: -Tokens.padding.small / 2 - (root.expanded ? 0 : spacing)
             Layout.fillWidth: true
-            spacing: Math.round(Appearance.spacing.small / 2)
+            spacing: Math.round(Tokens.spacing.small / 2)
 
             RowLayout {
                 Layout.bottomMargin: -parent.spacing
                 Layout.fillWidth: true
-                spacing: Appearance.spacing.smaller
+                spacing: Tokens.spacing.smaller
 
                 StyledText {
                     Layout.fillWidth: true
                     text: root.modelData
                     color: Colours.palette.m3onSurfaceVariant
-                    font.pointSize: Appearance.font.size.small
+                    font.pointSize: Tokens.font.size.small
                     elide: Text.ElideRight
                 }
 
@@ -162,45 +162,42 @@ StyledRect {
                     animate: true
                     text: root.notifs[0]?.timeStr ?? ""
                     color: Colours.palette.m3outline
-                    font.pointSize: Appearance.font.size.small
+                    font.pointSize: Tokens.font.size.small
                 }
 
                 StyledRect {
-                    implicitWidth: expandBtn.implicitWidth + Appearance.padding.smaller * 2
-                    implicitHeight: groupCount.implicitHeight + Appearance.padding.small
+                    implicitWidth: expandBtn.implicitWidth + Tokens.padding.smaller * 2
+                    implicitHeight: groupCount.implicitHeight + Tokens.padding.small
 
                     color: root.urgency === "critical" ? Colours.palette.m3error : Colours.layer(Colours.palette.m3surfaceContainerHighest, 2)
-                    radius: Appearance.rounding.full
+                    radius: Tokens.rounding.full
 
                     opacity: root.notifs.length > Config.notifs.groupPreviewNum ? 1 : 0
                     Layout.preferredWidth: root.notifs.length > Config.notifs.groupPreviewNum ? implicitWidth : 0
 
                     StateLayer {
-                        function onClicked(): void {
-                            root.expanded = !root.expanded;
-                        }
-
                         color: root.urgency === "critical" ? Colours.palette.m3onError : Colours.palette.m3onSurface
+                        onClicked: root.expanded = !root.expanded
                     }
 
                     RowLayout {
                         id: expandBtn
 
                         anchors.centerIn: parent
-                        spacing: Appearance.spacing.small / 2
+                        spacing: Tokens.spacing.small / 2
 
                         StyledText {
                             id: groupCount
 
-                            Layout.leftMargin: Appearance.padding.small / 2
+                            Layout.leftMargin: Tokens.padding.small / 2
                             animate: true
                             text: root.notifs.length
                             color: root.urgency === "critical" ? Colours.palette.m3onError : Colours.palette.m3onSurface
-                            font.pointSize: Appearance.font.size.small
+                            font.pointSize: Tokens.font.size.small
                         }
 
                         MaterialIcon {
-                            Layout.rightMargin: -Appearance.padding.small / 2
+                            Layout.rightMargin: -Tokens.padding.small / 2
                             animate: true
                             text: root.expanded ? "expand_less" : "expand_more"
                             color: root.urgency === "critical" ? Colours.palette.m3onError : Colours.palette.m3onSurface
@@ -219,7 +216,7 @@ StyledRect {
 
             Repeater {
                 model: ScriptModel {
-                    values: root.notifs.slice(0, Config.notifs.groupPreviewNum)
+                    values: root.notifs.slice(0, root.Config.notifs.groupPreviewNum)
                 }
 
                 NotifLine {
@@ -282,7 +279,7 @@ StyledRect {
                 sourceComponent: ColumnLayout {
                     Repeater {
                         model: ScriptModel {
-                            values: root.notifs.slice(Config.notifs.groupPreviewNum)
+                            values: root.notifs.slice(root.Config.notifs.groupPreviewNum)
                         }
 
                         NotifLine {}
@@ -298,8 +295,7 @@ StyledRect {
 
     Behavior on implicitHeight {
         Anim {
-            duration: Appearance.anim.durations.expressiveDefaultSpatial
-            easing.bezierCurve: Appearance.anim.curves.expressiveDefaultSpatial
+            type: Anim.DefaultSpatial
         }
     }
 

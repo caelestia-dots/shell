@@ -1,8 +1,8 @@
 import QtQuick
+import Caelestia.Config
 import qs.components
 import qs.components.misc
 import qs.services
-import qs.config
 
 Row {
     id: root
@@ -10,8 +10,8 @@ Row {
     anchors.top: parent.top
     anchors.bottom: parent.bottom
 
-    padding: Appearance.padding.large
-    spacing: Appearance.spacing.normal
+    padding: Tokens.padding.large
+    spacing: Tokens.spacing.normal
 
     Ref {
         service: SystemUsage
@@ -44,19 +44,19 @@ Row {
 
         anchors.top: parent.top
         anchors.bottom: parent.bottom
-        anchors.margins: Appearance.padding.large
+        anchors.margins: Tokens.padding.large
         implicitWidth: icon.implicitWidth
 
         StyledRect {
             anchors.horizontalCenter: parent.horizontalCenter
             anchors.top: parent.top
             anchors.bottom: icon.top
-            anchors.bottomMargin: Appearance.spacing.small
+            anchors.bottomMargin: Tokens.spacing.small
 
-            implicitWidth: Config.dashboard.sizes.resourceProgessThickness
+            implicitWidth: Tokens.sizes.dashboard.resourceProgressThickness
 
             color: Colours.layer(Colours.palette.m3surfaceContainerHigh, 2)
-            radius: Appearance.rounding.full
+            radius: Tokens.rounding.full
 
             StyledRect {
                 anchors.left: parent.left
@@ -65,7 +65,7 @@ Row {
                 implicitHeight: res.value * parent.height
 
                 color: res.colour
-                radius: Appearance.rounding.full
+                radius: Tokens.rounding.full
             }
         }
 
@@ -80,7 +80,7 @@ Row {
 
         Behavior on value {
             Anim {
-                duration: Appearance.anim.durations.large
+                type: Anim.StandardLarge
             }
         }
     }

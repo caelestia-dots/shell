@@ -1,8 +1,8 @@
 import QtQuick
 import QtQuick.Layouts
+import Caelestia.Config
 import qs.components
 import qs.services
-import qs.config
 
 Item {
     id: root
@@ -17,26 +17,26 @@ Item {
         id: layout
 
         anchors.fill: parent
-        spacing: Appearance.spacing.smaller
+        spacing: Tokens.spacing.smaller
 
         RowLayout {
-            Layout.leftMargin: Appearance.padding.large
-            Layout.rightMargin: Appearance.padding.large
+            Layout.leftMargin: Tokens.padding.large
+            Layout.rightMargin: Tokens.padding.large
             Layout.fillWidth: true
 
             Column {
-                spacing: Appearance.spacing.small / 2
+                spacing: Tokens.spacing.small / 2
 
                 StyledText {
                     text: Weather.city || qsTr("Loading...")
-                    font.pointSize: Appearance.font.size.extraLarge
+                    font.pointSize: Tokens.font.size.extraLarge
                     font.weight: 600
                     color: Colours.palette.m3onSurface
                 }
 
                 StyledText {
                     text: new Date().toLocaleDateString(Qt.locale(), "dddd, MMMM d")
-                    font.pointSize: Appearance.font.size.small
+                    font.pointSize: Tokens.font.size.small
                     color: Colours.palette.m3onSurfaceVariant
                 }
             }
@@ -46,7 +46,7 @@ Item {
             }
 
             Row {
-                spacing: Appearance.spacing.large
+                spacing: Tokens.spacing.large
 
                 WeatherStat {
                     icon: "wb_twilight"
@@ -66,40 +66,40 @@ Item {
 
         StyledRect {
             Layout.fillWidth: true
-            implicitHeight: bigInfoRow.implicitHeight + Appearance.padding.small * 2
+            implicitHeight: bigInfoRow.implicitHeight + Tokens.padding.small * 2
 
-            radius: Appearance.rounding.large * 2
+            radius: Tokens.rounding.large * 2
             color: Colours.tPalette.m3surfaceContainer
 
             RowLayout {
                 id: bigInfoRow
 
                 anchors.centerIn: parent
-                spacing: Appearance.spacing.large
+                spacing: Tokens.spacing.large
 
                 MaterialIcon {
                     Layout.alignment: Qt.AlignVCenter
                     text: Weather.icon
-                    font.pointSize: Appearance.font.size.extraLarge * 3
+                    font.pointSize: Tokens.font.size.extraLarge * 3
                     color: Colours.palette.m3secondary
                     animate: true
                 }
 
                 ColumnLayout {
                     Layout.alignment: Qt.AlignVCenter
-                    spacing: -Appearance.spacing.small
+                    spacing: -Tokens.spacing.small
 
                     StyledText {
                         text: Weather.temp
-                        font.pointSize: Appearance.font.size.extraLarge * 2
+                        font.pointSize: Tokens.font.size.extraLarge * 2
                         font.weight: 500
                         color: Colours.palette.m3primary
                     }
 
                     StyledText {
-                        Layout.leftMargin: Appearance.padding.small
+                        Layout.leftMargin: Tokens.padding.small
                         text: Weather.description
-                        font.pointSize: Appearance.font.size.normal
+                        font.pointSize: Tokens.font.size.normal
                         color: Colours.palette.m3onSurfaceVariant
                     }
                 }
@@ -108,7 +108,7 @@ Item {
 
         RowLayout {
             Layout.fillWidth: true
-            spacing: Appearance.spacing.smaller
+            spacing: Tokens.spacing.smaller
 
             DetailCard {
                 icon: "water_drop"
@@ -131,18 +131,18 @@ Item {
         }
 
         StyledText {
-            Layout.topMargin: Appearance.spacing.normal
-            Layout.leftMargin: Appearance.padding.normal
+            Layout.topMargin: Tokens.spacing.normal
+            Layout.leftMargin: Tokens.padding.normal
             visible: forecastRepeater.count > 0
             text: qsTr("7-Day Forecast")
-            font.pointSize: Appearance.font.size.normal
+            font.pointSize: Tokens.font.size.normal
             font.weight: 600
             color: Colours.palette.m3onSurface
         }
 
         RowLayout {
             Layout.fillWidth: true
-            spacing: Appearance.spacing.smaller
+            spacing: Tokens.spacing.smaller
 
             Repeater {
                 id: forecastRepeater
@@ -156,30 +156,30 @@ Item {
                     required property var modelData
 
                     Layout.fillWidth: true
-                    implicitHeight: forecastItemColumn.implicitHeight + Appearance.padding.normal * 2
+                    implicitHeight: forecastItemColumn.implicitHeight + Tokens.padding.normal * 2
 
-                    radius: Appearance.rounding.normal
+                    radius: Tokens.rounding.normal
                     color: Colours.tPalette.m3surfaceContainer
 
                     ColumnLayout {
                         id: forecastItemColumn
 
                         anchors.centerIn: parent
-                        spacing: Appearance.spacing.small
+                        spacing: Tokens.spacing.small
 
                         StyledText {
                             Layout.alignment: Qt.AlignHCenter
                             text: forecastItem.index === 0 ? qsTr("Today") : new Date(forecastItem.modelData.date).toLocaleDateString(Qt.locale(), "ddd")
-                            font.pointSize: Appearance.font.size.normal
+                            font.pointSize: Tokens.font.size.normal
                             font.weight: 600
                             color: Colours.palette.m3primary
                         }
 
                         StyledText {
-                            Layout.topMargin: -Appearance.spacing.small / 2
+                            Layout.topMargin: -Tokens.spacing.small / 2
                             Layout.alignment: Qt.AlignHCenter
                             text: new Date(forecastItem.modelData.date).toLocaleDateString(Qt.locale(), "MMM d")
-                            font.pointSize: Appearance.font.size.small
+                            font.pointSize: Tokens.font.size.small
                             opacity: 0.7
                             color: Colours.palette.m3onSurfaceVariant
                         }
@@ -187,13 +187,13 @@ Item {
                         MaterialIcon {
                             Layout.alignment: Qt.AlignHCenter
                             text: forecastItem.modelData.icon
-                            font.pointSize: Appearance.font.size.extraLarge
+                            font.pointSize: Tokens.font.size.extraLarge
                             color: Colours.palette.m3secondary
                         }
 
                         StyledText {
                             Layout.alignment: Qt.AlignHCenter
-                            text: Config.services.useFahrenheit ? forecastItem.modelData.maxTempF + "°" + " / " + forecastItem.modelData.minTempF + "°" : forecastItem.modelData.maxTempC + "°" + " / " + forecastItem.modelData.minTempC + "°"
+                            text: GlobalConfig.services.useFahrenheit ? forecastItem.modelData.maxTempF + "°" + " / " + forecastItem.modelData.minTempF + "°" : forecastItem.modelData.maxTempC + "°" + " / " + forecastItem.modelData.minTempC + "°"
                             font.weight: 600
                             color: Colours.palette.m3tertiary
                         }
@@ -213,17 +213,17 @@ Item {
 
         Layout.fillWidth: true
         Layout.preferredHeight: 60
-        radius: Appearance.rounding.small
+        radius: Tokens.rounding.small
         color: Colours.tPalette.m3surfaceContainer
 
         Row {
             anchors.centerIn: parent
-            spacing: Appearance.spacing.normal
+            spacing: Tokens.spacing.normal
 
             MaterialIcon {
                 text: detailRoot.icon
                 color: detailRoot.colour
-                font.pointSize: Appearance.font.size.large
+                font.pointSize: Tokens.font.size.large
                 anchors.verticalCenter: parent.verticalCenter
             }
 
@@ -233,7 +233,7 @@ Item {
 
                 StyledText {
                     text: detailRoot.label
-                    font.pointSize: Appearance.font.size.smaller
+                    font.pointSize: Tokens.font.size.smaller
                     opacity: 0.7
                     horizontalAlignment: Text.AlignLeft
                 }
@@ -254,23 +254,23 @@ Item {
         property string value
         property color colour
 
-        spacing: Appearance.spacing.small
+        spacing: Tokens.spacing.small
 
         MaterialIcon {
             text: weatherStat.icon
-            font.pointSize: Appearance.font.size.extraLarge
+            font.pointSize: Tokens.font.size.extraLarge
             color: weatherStat.colour
         }
 
         Column {
             StyledText {
                 text: weatherStat.label
-                font.pointSize: Appearance.font.size.smaller
+                font.pointSize: Tokens.font.size.smaller
                 color: Colours.palette.m3onSurfaceVariant
             }
             StyledText {
                 text: weatherStat.value
-                font.pointSize: Appearance.font.size.small
+                font.pointSize: Tokens.font.size.small
                 font.weight: 600
                 color: Colours.palette.m3onSurface
             }

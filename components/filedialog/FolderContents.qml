@@ -4,13 +4,13 @@ import QtQuick
 import QtQuick.Effects
 import QtQuick.Layouts
 import Quickshell
+import Caelestia.Config
 import Caelestia.Models
 import qs.components
 import qs.components.controls
 import qs.components.filedialog
 import qs.components.images
 import qs.services
-import qs.config
 import qs.utils
 
 Item {
@@ -42,8 +42,8 @@ Item {
 
         Rectangle {
             anchors.fill: parent
-            anchors.margins: Appearance.padding.small
-            radius: Appearance.rounding.small
+            anchors.margins: Tokens.padding.small
+            radius: Tokens.rounding.small
         }
     }
 
@@ -59,14 +59,14 @@ Item {
                 Layout.alignment: Qt.AlignHCenter
                 text: "scan_delete"
                 color: Colours.palette.m3outline
-                font.pointSize: Appearance.font.size.extraLarge * 2
+                font.pointSize: Tokens.font.size.extraLarge * 2
                 font.weight: 500
             }
 
             StyledText {
                 text: qsTr("This folder is empty")
                 color: Colours.palette.m3outline
-                font.pointSize: Appearance.font.size.large
+                font.pointSize: Tokens.font.size.large
                 font.weight: 500
             }
         }
@@ -80,10 +80,10 @@ Item {
         id: view
 
         anchors.fill: parent
-        anchors.margins: Appearance.padding.small + Appearance.padding.normal
+        anchors.margins: Tokens.padding.small + Tokens.padding.normal
 
-        cellWidth: Sizes.itemWidth + Appearance.spacing.small
-        cellHeight: Sizes.itemWidth + Appearance.spacing.small * 2 + Appearance.padding.normal * 2 + 1
+        cellWidth: Sizes.itemWidth + Tokens.spacing.small
+        cellHeight: Sizes.itemWidth + Tokens.spacing.small * 2 + Tokens.padding.normal * 2 + 1
 
         clip: true
         focus: true
@@ -120,8 +120,7 @@ Item {
                 properties: "opacity,scale"
                 from: 0
                 to: 1
-                duration: Appearance.anim.durations.expressiveDefaultSpatial
-                easing.bezierCurve: Appearance.anim.curves.expressiveDefaultSpatial
+                type: Anim.DefaultSpatial
             }
         }
 
@@ -140,12 +139,11 @@ Item {
             Anim {
                 properties: "opacity,scale"
                 to: 1
-                easing.bezierCurve: Appearance.anim.curves.standardDecel
+                easing: Tokens.anim.standardDecel
             }
             Anim {
                 properties: "x,y"
-                duration: Appearance.anim.durations.expressiveDefaultSpatial
-                easing.bezierCurve: Appearance.anim.curves.expressiveDefaultSpatial
+                type: Anim.DefaultSpatial
             }
         }
     }
@@ -153,7 +151,7 @@ Item {
     CurrentItem {
         anchors.right: parent.right
         anchors.bottom: parent.bottom
-        anchors.margins: Appearance.padding.small
+        anchors.margins: Tokens.padding.small
 
         currentItem: view.currentItem
     }
@@ -164,21 +162,18 @@ Item {
         required property int index
         required property FileSystemEntry modelData
 
-        readonly property real nonAnimHeight: icon.implicitHeight + name.anchors.topMargin + name.implicitHeight + Appearance.padding.normal * 2
+        readonly property real nonAnimHeight: icon.implicitHeight + name.anchors.topMargin + name.implicitHeight + Tokens.padding.normal * 2
 
         implicitWidth: Sizes.itemWidth
         implicitHeight: nonAnimHeight
 
-        radius: Appearance.rounding.normal
+        radius: Tokens.rounding.normal
         color: Qt.alpha(Colours.tPalette.m3surfaceContainerHighest, GridView.isCurrentItem ? Colours.tPalette.m3surfaceContainerHighest.a : 0)
         z: GridView.isCurrentItem || implicitHeight !== nonAnimHeight ? 1 : 0
         clip: true
 
         StateLayer {
-            function onClicked(): void {
-                view.currentIndex = item.index;
-            }
-
+            onClicked: view.currentIndex = item.index
             onDoubleClicked: {
                 if (item.modelData.isDir)
                     root.dialog.cwd.push(item.modelData.name);
@@ -192,9 +187,9 @@ Item {
 
             anchors.horizontalCenter: parent.horizontalCenter
             anchors.top: parent.top
-            anchors.topMargin: Appearance.padding.normal
+            anchors.topMargin: Tokens.padding.normal
 
-            implicitSize: Sizes.itemWidth - Appearance.padding.normal * 2
+            implicitSize: Sizes.itemWidth - Tokens.padding.normal * 2
 
             Component.onCompleted: {
                 const file = item.modelData;
@@ -215,8 +210,8 @@ Item {
             anchors.left: parent.left
             anchors.right: parent.right
             anchors.top: icon.bottom
-            anchors.topMargin: Appearance.spacing.small
-            anchors.margins: Appearance.padding.normal
+            anchors.topMargin: Tokens.spacing.small
+            anchors.margins: Tokens.padding.normal
 
             horizontalAlignment: Text.AlignHCenter
             elide: item.GridView.isCurrentItem ? Text.ElideNone : Text.ElideRight

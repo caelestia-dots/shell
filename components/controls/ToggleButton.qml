@@ -1,12 +1,11 @@
 pragma ComponentBehavior: Bound
 
-import ".."
 import QtQuick
 import QtQuick.Layouts
+import Caelestia.Config
 import qs.components
 import qs.components.controls
 import qs.services
-import qs.config
 
 StyledRect {
     id: root
@@ -15,21 +14,20 @@ StyledRect {
     property string icon
     property string label
     property string accent: "Secondary"
-    property real iconSize: Appearance.font.size.large
-    property real horizontalPadding: Appearance.padding.large
-    property real verticalPadding: Appearance.padding.normal
+    property real iconSize: Tokens.font.size.large
+    property real horizontalPadding: Tokens.padding.large
+    property real verticalPadding: Tokens.padding.normal
     property string tooltip: ""
     property bool hovered: false
 
     signal clicked
 
-    Component.onCompleted: {
-        hovered = toggleStateLayer.containsMouse;
-    }
-    Layout.preferredWidth: implicitWidth + (toggleStateLayer.pressed ? Appearance.padding.normal * 2 : toggled ? Appearance.padding.small * 2 : 0)
+    Component.onCompleted: hovered = toggleStateLayer.containsMouse
+
+    Layout.preferredWidth: implicitWidth + (toggleStateLayer.pressed ? Tokens.padding.normal * 2 : toggled ? Tokens.padding.small * 2 : 0)
     implicitWidth: toggleBtnInner.implicitWidth + horizontalPadding * 2
     implicitHeight: toggleBtnIcon.implicitHeight + verticalPadding * 2
-    radius: toggled || toggleStateLayer.pressed ? Appearance.rounding.small : Math.min(width, height) / 2 * Math.min(1, Appearance.rounding.scale)
+    radius: toggled || toggleStateLayer.pressed ? Tokens.rounding.small : Math.min(width, height) / 2 * Math.min(1, Tokens.rounding.scale)
     color: toggled ? Colours.palette[`m3${accent.toLowerCase()}`] : Colours.palette[`m3${accent.toLowerCase()}Container`]
 
     Connections {
@@ -46,18 +44,15 @@ StyledRect {
     StateLayer {
         id: toggleStateLayer
 
-        function onClicked(): void {
-            root.clicked();
-        }
-
         color: root.toggled ? Colours.palette[`m3on${root.accent}`] : Colours.palette[`m3on${root.accent}Container`]
+        onClicked: root.clicked()
     }
 
     RowLayout {
         id: toggleBtnInner
 
         anchors.centerIn: parent
-        spacing: Appearance.spacing.normal
+        spacing: Tokens.spacing.normal
 
         MaterialIcon {
             id: toggleBtnIcon
@@ -87,15 +82,13 @@ StyledRect {
 
     Behavior on radius {
         Anim {
-            duration: Appearance.anim.durations.expressiveFastSpatial
-            easing.bezierCurve: Appearance.anim.curves.expressiveFastSpatial
+            type: Anim.FastSpatial
         }
     }
 
     Behavior on Layout.preferredWidth {
         Anim {
-            duration: Appearance.anim.durations.expressiveFastSpatial
-            easing.bezierCurve: Appearance.anim.curves.expressiveFastSpatial
+            type: Anim.FastSpatial
         }
     }
 

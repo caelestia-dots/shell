@@ -3,24 +3,24 @@ pragma Singleton
 import ".."
 import QtQuick
 import Quickshell
+import Caelestia.Config
 import qs.services
-import qs.config
 import qs.utils
 
 Searcher {
     id: root
 
     function transformSearch(search: string): string {
-        return search.slice(Config.launcher.actionPrefix.length);
+        return search.slice(GlobalConfig.launcher.actionPrefix.length);
     }
 
     list: variants.instances
-    useFuzzy: Config.launcher.useFuzzy.actions
+    useFuzzy: GlobalConfig.launcher.useFuzzy.actions
 
     Variants {
         id: variants
 
-        model: Config.launcher.actions.filter(a => (a.enabled ?? true) && (Config.launcher.enableDangerousActions || !(a.dangerous ?? false)))
+        model: GlobalConfig.launcher.actions.filter(a => (a.enabled ?? true) && (GlobalConfig.launcher.enableDangerousActions || !(a.dangerous ?? false)))
 
         Action {}
     }
@@ -39,7 +39,7 @@ Searcher {
                 return;
 
             if (command[0] === "autocomplete" && command.length > 1) {
-                list.search.text = `${Config.launcher.actionPrefix}${command[1]} `;
+                list.search.text = `${GlobalConfig.launcher.actionPrefix}${command[1]} `;
             } else if (command[0] === "setMode" && command.length > 1) {
                 list.visibilities.launcher = false;
                 Colours.setMode(command[1]);

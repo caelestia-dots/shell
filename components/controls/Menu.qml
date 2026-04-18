@@ -1,11 +1,11 @@
 pragma ComponentBehavior: Bound
 
-import ".."
 import "../effects"
 import QtQuick
 import QtQuick.Layouts
+import Caelestia.Config
+import qs.components
 import qs.services
-import qs.config
 
 Elevation {
     id: root
@@ -16,7 +16,7 @@ Elevation {
 
     signal itemSelected(item: MenuItem)
 
-    radius: Appearance.rounding.small / 2
+    radius: Tokens.rounding.small / 2
     level: 2
 
     implicitWidth: Math.max(200, column.implicitWidth)
@@ -46,29 +46,28 @@ Elevation {
                     readonly property bool active: modelData === root.active
 
                     Layout.fillWidth: true
-                    implicitWidth: menuOptionRow.implicitWidth + Appearance.padding.normal * 2
-                    implicitHeight: menuOptionRow.implicitHeight + Appearance.padding.normal * 2
+                    implicitWidth: menuOptionRow.implicitWidth + Tokens.padding.normal * 2
+                    implicitHeight: menuOptionRow.implicitHeight + Tokens.padding.normal * 2
 
                     color: Qt.alpha(Colours.palette.m3secondaryContainer, active ? 1 : 0)
 
                     StateLayer {
-                        function onClicked(): void {
+                        color: item.active ? Colours.palette.m3onSecondaryContainer : Colours.palette.m3onSurface
+                        disabled: !root.expanded
+                        onClicked: {
                             root.itemSelected(item.modelData);
                             root.active = item.modelData;
                             item.modelData.clicked();
                             root.expanded = false;
                         }
-
-                        color: item.active ? Colours.palette.m3onSecondaryContainer : Colours.palette.m3onSurface
-                        disabled: !root.expanded
                     }
 
                     RowLayout {
                         id: menuOptionRow
 
                         anchors.fill: parent
-                        anchors.margins: Appearance.padding.normal
-                        spacing: Appearance.spacing.small
+                        anchors.margins: Tokens.padding.normal
+                        spacing: Tokens.spacing.small
 
                         MaterialIcon {
                             Layout.alignment: Qt.AlignVCenter
@@ -102,14 +101,13 @@ Elevation {
 
     Behavior on opacity {
         Anim {
-            duration: Appearance.anim.durations.expressiveDefaultSpatial
+            duration: Tokens.anim.durations.expressiveDefaultSpatial
         }
     }
 
     Behavior on implicitHeight {
         Anim {
-            duration: Appearance.anim.durations.expressiveDefaultSpatial
-            easing.bezierCurve: Appearance.anim.curves.expressiveDefaultSpatial
+            type: Anim.DefaultSpatial
         }
     }
 }

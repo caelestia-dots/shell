@@ -4,9 +4,9 @@ import QtQuick
 import Quickshell
 import Quickshell.Hyprland
 import Quickshell.Wayland
+import Caelestia.Config
 import qs.components
 import qs.services
-import qs.config
 import qs.modules.controlcenter
 import qs.modules.windowinfo
 
@@ -32,13 +32,16 @@ Item {
     property string detachedMode
     property string queuedMode
 
-    property int animLength: Appearance.anim.durations.expressiveDefaultSpatial
-    property list<real> animCurve: Appearance.anim.curves.expressiveDefaultSpatial
+    // Dummy object so Tokens attached prop resolves to global config
+    // Anim configs are not per-monitor
+    readonly property QtObject dummy: QtObject {}
+    property int animLength: dummy.Tokens.anim.durations.expressiveDefaultSpatial
+    property easingCurve animCurve: dummy.Tokens.anim.expressiveDefaultSpatial
 
     function setAnims(detach: bool): void {
         const type = `expressive${detach ? "Slow" : "Default"}Spatial`;
-        animLength = Appearance.anim.durations[type];
-        animCurve = Appearance.anim.curves[type];
+        animLength = dummy.Tokens.anim.durations[type];
+        animCurve = dummy.Tokens.anim[type];
     }
 
     function detach(mode: string): void {
@@ -140,7 +143,7 @@ Item {
     Behavior on implicitWidth {
         Anim {
             duration: root.animLength
-            easing.bezierCurve: root.animCurve
+            easing: root.animCurve
         }
     }
 
@@ -149,7 +152,7 @@ Item {
 
         Anim {
             duration: root.animLength
-            easing.bezierCurve: root.animCurve
+            easing: root.animCurve
         }
     }
 
