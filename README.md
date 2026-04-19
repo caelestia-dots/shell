@@ -484,7 +484,8 @@ For example, to disable the bar on DP-1:
     "border": {
         "rounding": 25,
         "smoothing": 32,
-        "thickness": 10
+        "thickness": 10,
+        "blobDeformation": true
     },
     "dashboard": {
         "enabled": true,
