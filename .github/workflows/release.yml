@@ -36,7 +36,7 @@ jobs:
             caelestia-shell-latest.tar.gz
           generate_release_notes: true
       
-      - name: Move stable branch to this release
+      - name: Update stable branch
         run: |
           git branch -f stable "$GITHUB_SHA"
           git push origin stable --force
