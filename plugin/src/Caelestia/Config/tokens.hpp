@@ -39,6 +39,7 @@ class RoundingTokens : public ConfigObject {
     Q_OBJECT
     QML_ANONYMOUS
 
+    CONFIG_PROPERTY(int, extraSmall, 4)
     CONFIG_PROPERTY(int, small, 12)
     CONFIG_PROPERTY(int, normal, 17)
     CONFIG_PROPERTY(int, large, 25)

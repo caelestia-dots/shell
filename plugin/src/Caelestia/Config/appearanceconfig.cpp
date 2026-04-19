@@ -28,6 +28,10 @@ void AppearanceRounding::bindTokens(RoundingTokens* tokens) {
     connectTokenSignals(tokens, this);
 }
 
+int AppearanceRounding::extraSmall() const {
+    return m_tokens ? static_cast<int>(m_tokens->extraSmall() * m_scale) : 0;
+}
+
 int AppearanceRounding::small() const {
     return m_tokens ? static_cast<int>(m_tokens->small() * m_scale) : 0;
 }

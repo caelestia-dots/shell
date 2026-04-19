@@ -17,6 +17,7 @@ StyledWindow {
     id: root
 
     readonly property alias bar: bar
+    readonly property alias interactionWrapper: interactions
 
     readonly property HyprlandMonitor monitor: Hypr.monitorFor(screen)
     readonly property bool hasSpecialWorkspace: (monitor?.lastIpcObject.specialWorkspace?.name.length ?? 0) > 0
@@ -229,6 +230,8 @@ StyledWindow {
     }
 
     Interactions {
+        id: interactions
+
         screen: root.screen
         popouts: panels.popouts
         visibilities: visibilities

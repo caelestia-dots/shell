@@ -106,14 +106,11 @@ Row {
         StateLayer {
             id: expandStateLayer
 
-            onClicked: {
-                root.expanded = !root.expanded;
-            }
-
             rect.topLeftRadius: parent.topLeftRadius
             rect.bottomLeftRadius: parent.bottomLeftRadius
             color: root.textColour
             disabled: root.disabled
+            onClicked: root.expanded = !root.expanded
         }
 
         MaterialIcon {
@@ -138,24 +135,14 @@ Row {
         Behavior on rad {
             Anim {}
         }
+    }
 
-        Menu {
-            id: menu
+    Menu {
+        id: menu
 
-            states: State {
-                when: root.menuOnTop
-
-                AnchorChanges {
-                    target: menu
-                    anchors.top: undefined
-                    anchors.bottom: expandBtn.top
-                }
-            }
-
-            anchors.top: parent.bottom
-            anchors.right: parent.right
-            anchors.topMargin: Tokens.spacing.small
-            anchors.bottomMargin: Tokens.spacing.small
-        }
+        attachTo: expandBtn
+        attachSideY: root.menuOnTop ? Menu.Top : Menu.Bottom
+        thisSideY: root.menuOnTop ? Menu.Bottom : Menu.Top
+        marginY: Tokens.spacing.small * (root.menuOnTop ? -1 : 1)
     }
 }

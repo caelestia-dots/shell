@@ -19,6 +19,7 @@ class AppearanceRounding : public ConfigObject {
 
     CONFIG_PROPERTY(qreal, scale, 1)
 
+    Q_PROPERTY(int extraSmall READ extraSmall NOTIFY valuesChanged)
     Q_PROPERTY(int small READ small NOTIFY valuesChanged)
     Q_PROPERTY(int normal READ normal NOTIFY valuesChanged)
     Q_PROPERTY(int large READ large NOTIFY valuesChanged)
@@ -30,6 +31,7 @@ public:
 
     void bindTokens(RoundingTokens* tokens);
 
+    [[nodiscard]] int extraSmall() const;
     [[nodiscard]] int small() const;
     [[nodiscard]] int normal() const;
     [[nodiscard]] int large() const;
