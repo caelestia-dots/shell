@@ -11,7 +11,7 @@ Item {
 
     property real playerProgress: {
         const active = Players.active;
-        return active?.length ? active.position / active.length : 0;
+        return active?.length ? (active.position % active.length) / active.length : 0;
     }
 
     anchors.top: parent.top

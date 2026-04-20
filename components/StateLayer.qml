@@ -37,6 +37,10 @@ MouseArea {
         return (pressX - x) ** 2 + (pressY - y) ** 2;
     }
 
+    function clamp(r: real): real {
+        return Math.max(0, Math.min(r, width / 2, height / 2));
+    }
+
     function press(x: real, y: real): void {
         pressX = x;
         pressY = y;
@@ -51,6 +55,8 @@ MouseArea {
     enabled: !disabled
     cursorShape: disabled ? undefined : Qt.PointingHandCursor
     hoverEnabled: true
+
+    onPressed: e => press(e.x, e.y)
 
     onPressedChanged: {
         if (!pressed && !rippleAnim.running && circle.opacity > 0)
@@ -69,8 +75,8 @@ MouseArea {
         target: root
         property: "circleRadius"
         to: root.endRadius
-        easing: Tokens.anim.standardDecel
-        duration: Tokens.anim.durations.normal * 2
+        easing: Tokens.anim.expressiveSlowEffects
+        duration: Tokens.anim.durations.expressiveSlowEffects * 2
     }
 
     Anim {
@@ -79,6 +85,8 @@ MouseArea {
         target: circle
         property: "opacity"
         to: 0
+        easing: Tokens.anim.expressiveSlowEffects
+        duration: Tokens.anim.durations.expressiveSlowEffects
     }
 
     StyledRect {
@@ -123,53 +131,56 @@ MouseArea {
                 }
             }
 
-            startX: base.topLeftRadius
+            startX: root.clamp(base.topLeftRadius)
             startY: 0
 
             PathLine {
-                x: root.width - base.topLeftRadius
+                x: root.width - root.clamp(base.topLeftRadius)
                 y: 0
             }
             PathArc {
-                relativeX: base.topLeftRadius
-                relativeY: base.topLeftRadius
-                radiusX: base.topLeftRadius
-                radiusY: base.topLeftRadius
+                relativeX: root.clamp(base.topLeftRadius)
+                relativeY: root.clamp(base.topLeftRadius)
+                radiusX: root.clamp(base.topLeftRadius)
+                radiusY: root.clamp(base.topLeftRadius)
             }
             PathLine {
                 x: root.width
-                y: root.height - base.bottomRightRadius
+                y: root.height - root.clamp(base.bottomRightRadius)
             }
             PathArc {
-                relativeX: -base.bottomRightRadius
-                relativeY: base.bottomRightRadius
-                radiusX: base.bottomRightRadius
-                radiusY: base.bottomRightRadius
+                relativeX: -root.clamp(base.bottomRightRadius)
+                relativeY: root.clamp(base.bottomRightRadius)
+                radiusX: root.clamp(base.bottomRightRadius)
+                radiusY: root.clamp(base.bottomRightRadius)
             }
             PathLine {
-                x: base.bottomLeftRadius
+                x: root.clamp(base.bottomLeftRadius)
                 y: root.height
             }
             PathArc {
-                relativeX: -base.bottomLeftRadius
-                relativeY: -base.bottomLeftRadius
-                radiusX: base.bottomLeftRadius
-                radiusY: base.bottomLeftRadius
+                relativeX: -root.clamp(base.bottomLeftRadius)
+                relativeY: -root.clamp(base.bottomLeftRadius)
+                radiusX: root.clamp(base.bottomLeftRadius)
+                radiusY: root.clamp(base.bottomLeftRadius)
             }
             PathLine {
                 x: 0
-                y: base.topLeftRadius
+                y: root.clamp(base.topLeftRadius)
             }
             PathArc {
-                x: base.topLeftRadius
+                x: root.clamp(base.topLeftRadius)
                 y: 0
-                radiusX: base.topLeftRadius
-                radiusY: base.topLeftRadius
+                radiusX: root.clamp(base.topLeftRadius)
+                radiusY: root.clamp(base.topLeftRadius)
             }
         }
     }
 
     Behavior on stateOpacity {
-        Anim {}
+        Anim {
+            easing: Tokens.anim.expressiveDefaultEffects
+            duration: Tokens.anim.durations.expressiveDefaultEffects
+        }
     }
 }

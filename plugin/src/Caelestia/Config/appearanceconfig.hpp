@@ -180,6 +180,9 @@ class AnimDurations : public ConfigObject {
     Q_PROPERTY(int expressiveFastSpatial READ expressiveFastSpatial NOTIFY valuesChanged)
     Q_PROPERTY(int expressiveDefaultSpatial READ expressiveDefaultSpatial NOTIFY valuesChanged)
     Q_PROPERTY(int expressiveSlowSpatial READ expressiveSlowSpatial NOTIFY valuesChanged)
+    Q_PROPERTY(int expressiveFastEffects READ expressiveFastEffects NOTIFY valuesChanged)
+    Q_PROPERTY(int expressiveDefaultEffects READ expressiveDefaultEffects NOTIFY valuesChanged)
+    Q_PROPERTY(int expressiveSlowEffects READ expressiveSlowEffects NOTIFY valuesChanged)
 
 public:
     explicit AnimDurations(QObject* parent = nullptr)
@@ -194,6 +197,9 @@ public:
     [[nodiscard]] int expressiveFastSpatial() const;
     [[nodiscard]] int expressiveDefaultSpatial() const;
     [[nodiscard]] int expressiveSlowSpatial() const;
+    [[nodiscard]] int expressiveFastEffects() const;
+    [[nodiscard]] int expressiveDefaultEffects() const;
+    [[nodiscard]] int expressiveSlowEffects() const;
 
 signals:
     void valuesChanged();
@@ -231,6 +237,7 @@ class AppearanceConfig : public ConfigObject {
     Q_OBJECT
     QML_ANONYMOUS
 
+    CONFIG_PROPERTY(qreal, deformScale, 1)
     CONFIG_SUBOBJECT(AppearanceRounding, rounding)
     CONFIG_SUBOBJECT(AppearanceSpacing, spacing)
     CONFIG_SUBOBJECT(AppearancePadding, padding)

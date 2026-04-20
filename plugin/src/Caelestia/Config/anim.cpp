@@ -45,6 +45,18 @@ QEasingCurve AnimTokens::expressiveSlowSpatial() const {
     return m_expressiveSlowSpatial;
 }
 
+QEasingCurve AnimTokens::expressiveFastEffects() const {
+    return m_expressiveFastEffects;
+}
+
+QEasingCurve AnimTokens::expressiveDefaultEffects() const {
+    return m_expressiveDefaultEffects;
+}
+
+QEasingCurve AnimTokens::expressiveSlowEffects() const {
+    return m_expressiveSlowEffects;
+}
+
 AnimDurations* AnimTokens::durations() const {
     return m_durations;
 }
@@ -78,6 +90,9 @@ void AnimTokens::rebuildCurves() {
     m_expressiveFastSpatial = buildCurve(m_curves->expressiveFastSpatial());
     m_expressiveDefaultSpatial = buildCurve(m_curves->expressiveDefaultSpatial());
     m_expressiveSlowSpatial = buildCurve(m_curves->expressiveSlowSpatial());
+    m_expressiveFastEffects = buildCurve(m_curves->expressiveFastEffects());
+    m_expressiveDefaultEffects = buildCurve(m_curves->expressiveDefaultEffects());
+    m_expressiveSlowEffects = buildCurve(m_curves->expressiveSlowEffects());
 
     emit curvesChanged();
 }

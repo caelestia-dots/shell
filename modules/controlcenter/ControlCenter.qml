@@ -12,7 +12,7 @@ Item {
     id: root
 
     required property ShellScreen screen
-    readonly property int rounding: floating ? 0 : Tokens.rounding.normal
+    readonly property int rounding: floating ? 0 : Tokens.rounding.large
 
     property alias floating: session.floating
     property alias active: session.active

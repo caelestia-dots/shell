@@ -1,7 +1,6 @@
 pragma ComponentBehavior: Bound
 
 import QtQuick
-import QtQuick.Layouts
 import Quickshell
 import Caelestia.Components
 import Caelestia.Config
@@ -19,7 +18,8 @@ LazyListView {
 
     signal requestToggleExpand(expand: bool)
 
-    Layout.fillWidth: true
+    anchors.left: parent.left
+    anchors.right: parent.right
     implicitHeight: contentHeight
 
     spacing: Math.round(Tokens.spacing.small / 2)
