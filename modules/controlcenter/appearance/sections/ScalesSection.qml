@@ -89,4 +89,28 @@ CollapsibleSection {
             }
         }
     }
+
+    SectionContainer {
+        contentSpacing: Tokens.spacing.normal
+
+        SliderInput {
+            Layout.fillWidth: true
+
+            label: qsTr("deform scale")
+            value: rootPane.deformScale
+            from: 0
+            to: 10.0
+            decimals: 1
+            suffix: "×"
+            validator: DoubleValidator {
+                bottom: 0
+                top: 10.0
+            }
+
+            onValueModified: newValue => {
+                rootPane.deformScale = newValue;
+                rootPane.saveConfig();
+            }
+        }
+    }
 }
