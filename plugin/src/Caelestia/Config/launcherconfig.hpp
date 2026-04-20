@@ -115,8 +115,8 @@ class LauncherConfig : public ConfigObject {
             vmap({
                 { u"name"_s, u"Sleep"_s },
                 { u"icon"_s, u"bedtime"_s },
-                { u"description"_s, u"Suspend then hibernate"_s },
-                { u"command"_s, QStringList{ u"systemctl"_s, u"suspend-then-hibernate"_s } },
+                { u"description"_s, u"Suspend to RAM"_s },
+                { u"command"_s, QStringList{ u"systemctl"_s, u"suspend"_s } },
             }),
             vmap({
                 { u"name"_s, u"Settings"_s },

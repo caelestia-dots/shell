@@ -43,7 +43,7 @@ class GeneralIdle : public ConfigObject {
             }),
             vmap({
                 { u"timeout"_s, 600 },
-                { u"idleAction"_s, QStringList{ u"systemctl"_s, u"suspend-then-hibernate"_s } },
+                { u"idleAction"_s, QStringList{ u"systemctl"_s, u"suspend"_s } },
             }),
         })
 
