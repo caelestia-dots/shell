@@ -1,7 +1,7 @@
 import QtQuick
 import Caelestia.Config
 
-NumberAnimation {
+AnchorAnimation {
     enum Type {
         StandardSmall = 0,
         Standard,
@@ -16,17 +16,17 @@ NumberAnimation {
         SlowSpatial
     }
 
-    property int type: Anim.Standard
+    property int type: AnchorAnim.DefaultSpatial
 
     duration: {
-        if (type < Anim.StandardSmall || type > Anim.SlowSpatial)
-            return Tokens.anim.durations.normal;
-
-        if (type == Anim.FastSpatial)
-            return Tokens.anim.durations.expressiveFastSpatial;
-        if (type == Anim.DefaultSpatial)
+        if (type < AnchorAnim.StandardSmall || type > AnchorAnim.SlowSpatial)
             return Tokens.anim.durations.expressiveDefaultSpatial;
-        if (type == Anim.SlowSpatial)
+
+        if (type == AnchorAnim.FastSpatial)
+            return Tokens.anim.durations.expressiveFastSpatial;
+        if (type == AnchorAnim.DefaultSpatial)
+            return Tokens.anim.durations.expressiveDefaultSpatial;
+        if (type == AnchorAnim.SlowSpatial)
             return Tokens.anim.durations.expressiveSlowSpatial;
 
         const types = ["small", "normal", "large", "extraLarge"];
@@ -34,15 +34,18 @@ NumberAnimation {
         return Tokens.anim.durations[types[idx]];
     }
     easing: {
-        if (type == Anim.FastSpatial)
+        if (type == AnchorAnim.FastSpatial)
             return Tokens.anim.expressiveFastSpatial;
-        if (type == Anim.DefaultSpatial)
+        if (type == AnchorAnim.DefaultSpatial)
             return Tokens.anim.expressiveDefaultSpatial;
-        if (type == Anim.SlowSpatial)
+        if (type == AnchorAnim.SlowSpatial)
             return Tokens.anim.expressiveSlowSpatial;
 
-        if (type >= Anim.EmphasizedSmall && type <= Anim.EmphasizedExtraLarge)
+        if (type >= AnchorAnim.StandardSmall && type <= AnchorAnim.StandardExtraLarge)
+            return Tokens.anim.standard;
+        if (type >= AnchorAnim.EmphasizedSmall && type <= AnchorAnim.EmphasizedExtraLarge)
             return Tokens.anim.emphasized;
-        return Tokens.anim.standard;
+
+        return Tokens.anim.expressiveDefaultSpatial;
     }
 }

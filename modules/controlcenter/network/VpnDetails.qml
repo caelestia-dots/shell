@@ -274,15 +274,13 @@ DeviceDetails {
                 property: "opacity"
                 from: 0
                 to: 1
-                duration: Tokens.anim.durations.expressiveFastSpatial
-                easing: Tokens.anim.expressiveFastSpatial
+                type: Anim.FastSpatial
             }
             Anim {
                 property: "scale"
                 from: 0.7
                 to: 1
-                duration: Tokens.anim.durations.expressiveFastSpatial
-                easing: Tokens.anim.expressiveFastSpatial
+                type: Anim.FastSpatial
             }
         }
 
@@ -291,15 +289,13 @@ DeviceDetails {
                 property: "opacity"
                 from: 1
                 to: 0
-                duration: Tokens.anim.durations.expressiveFastSpatial
-                easing: Tokens.anim.expressiveFastSpatial
+                type: Anim.FastSpatial
             }
             Anim {
                 property: "scale"
                 from: 1
                 to: 0.7
-                duration: Tokens.anim.durations.expressiveFastSpatial
-                easing: Tokens.anim.expressiveFastSpatial
+                type: Anim.FastSpatial
             }
         }
 

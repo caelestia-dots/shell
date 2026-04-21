@@ -37,11 +37,8 @@ ColumnLayout {
             implicitHeight: moveToWsIcon.implicitHeight + Tokens.padding.small
 
             StateLayer {
-                function onClicked(): void {
-                    root.moveToWsExpanded = !root.moveToWsExpanded;
-                }
-
                 color: Colours.palette.m3onPrimary
+                onClicked: root.moveToWsExpanded = !root.moveToWsExpanded
             }
 
             MaterialIcon {
@@ -83,7 +80,7 @@ ColumnLayout {
                     readonly property int wsId: Math.floor((Hypr.activeWsId - 1) / 10) * 10 + index + 1
                     readonly property bool isCurrent: root.client?.workspace.id === wsId
 
-                    function onClicked(): void {
+                    onClicked: {
                         Hypr.dispatch(`movetoworkspace ${wsId},address:0x${root.client?.address}`);
                     }
 
@@ -109,13 +106,10 @@ ColumnLayout {
         spacing: root.client?.lastIpcObject.floating ? Tokens.spacing.normal : Tokens.spacing.small
 
         Button {
-            function onClicked(): void {
-                Hypr.dispatch(`togglefloating address:0x${root.client?.address}`);
-            }
-
             color: Colours.palette.m3secondaryContainer
             onColor: Colours.palette.m3onSecondaryContainer
             text: root.client?.lastIpcObject.floating ? qsTr("Tile") : qsTr("Float")
+            onClicked: Hypr.dispatch(`togglefloating address:0x${root.client?.address}`)
         }
 
         Loader {
@@ -126,24 +120,18 @@ ColumnLayout {
             Layout.rightMargin: active ? 0 : -parent.spacing
 
             sourceComponent: Button {
-                function onClicked(): void {
-                    Hypr.dispatch(`pin address:0x${root.client?.address}`);
-                }
-
                 color: Colours.palette.m3secondaryContainer
                 onColor: Colours.palette.m3onSecondaryContainer
                 text: root.client?.lastIpcObject.pinned ? qsTr("Unpin") : qsTr("Pin")
+                onClicked: Hypr.dispatch(`pin address:0x${root.client?.address}`)
             }
         }
 
         Button {
-            function onClicked(): void {
-                Hypr.dispatch(`killwindow address:0x${root.client?.address}`);
-            }
-
             color: Colours.palette.m3errorContainer
             onColor: Colours.palette.m3onErrorContainer
             text: qsTr("Kill")
+            onClicked: Hypr.dispatch(`killwindow address:0x${root.client?.address}`)
         }
     }
 
@@ -152,8 +140,7 @@ ColumnLayout {
         property alias disabled: stateLayer.disabled
         property alias text: label.text
 
-        function onClicked(): void {
-        }
+        signal clicked
 
         radius: Tokens.rounding.small
 
@@ -163,11 +150,8 @@ ColumnLayout {
         StateLayer {
             id: stateLayer
 
-            function onClicked(): void {
-                parent.onClicked();
-            }
-
             color: parent.onColor
+            onClicked: parent.clicked()
         }
 
         StyledText {

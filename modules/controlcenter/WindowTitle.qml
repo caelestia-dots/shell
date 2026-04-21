@@ -34,7 +34,7 @@ StyledRect {
         implicitHeight: closeIcon.implicitHeight + Tokens.padding.small
 
         StateLayer {
-            function onClicked(): void {
+            onClicked: {
                 QsWindow.window.destroy();
             }
 

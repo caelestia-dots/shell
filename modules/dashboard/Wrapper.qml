@@ -40,8 +40,7 @@ Item {
 
     Behavior on offsetScale {
         Anim {
-            duration: Tokens.anim.durations.expressiveDefaultSpatial
-            easing: Tokens.anim.expressiveDefaultSpatial
+            type: Anim.DefaultSpatial
         }
     }
 

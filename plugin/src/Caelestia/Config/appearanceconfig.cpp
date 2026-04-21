@@ -28,6 +28,10 @@ void AppearanceRounding::bindTokens(RoundingTokens* tokens) {
     connectTokenSignals(tokens, this);
 }
 
+int AppearanceRounding::extraSmall() const {
+    return m_tokens ? static_cast<int>(m_tokens->extraSmall() * m_scale) : 0;
+}
+
 int AppearanceRounding::small() const {
     return m_tokens ? static_cast<int>(m_tokens->small() * m_scale) : 0;
 }
@@ -162,6 +166,18 @@ int AnimDurations::expressiveDefaultSpatial() const {
 
 int AnimDurations::expressiveSlowSpatial() const {
     return m_tokens ? static_cast<int>(m_tokens->expressiveSlowSpatial() * m_scale) : 0;
+}
+
+int AnimDurations::expressiveFastEffects() const {
+    return m_tokens ? static_cast<int>(m_tokens->expressiveFastEffects() * m_scale) : 0;
+}
+
+int AnimDurations::expressiveDefaultEffects() const {
+    return m_tokens ? static_cast<int>(m_tokens->expressiveDefaultEffects() * m_scale) : 0;
+}
+
+int AnimDurations::expressiveSlowEffects() const {
+    return m_tokens ? static_cast<int>(m_tokens->expressiveSlowEffects() * m_scale) : 0;
 }
 
 } // namespace caelestia::config

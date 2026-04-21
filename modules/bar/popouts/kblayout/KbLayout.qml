@@ -95,7 +95,7 @@ ColumnLayout {
             StateLayer {
                 id: layer
 
-                function onClicked(): void {
+                onClicked: {
                     if (!kbDelegate.isDisabled)
                         kb.switchTo(kbDelegate.layoutIndex);
                 }

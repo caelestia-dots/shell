@@ -24,13 +24,10 @@ RadioButton {
         anchors.verticalCenter: parent.verticalCenter
 
         StateLayer {
-            function onClicked(): void {
-                root.click();
-            }
-
             anchors.margins: -Tokens.padding.smaller
             color: root.checked ? Colours.palette.m3onSurface : Colours.palette.m3primary
             z: -1
+            onClicked: root.click()
         }
 
         StyledRect {

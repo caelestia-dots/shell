@@ -1,9 +1,9 @@
 pragma ComponentBehavior: Bound
 
-import ".."
 import QtQuick
 import QtQuick.Controls
 import Caelestia.Config
+import qs.components
 import qs.services
 
 TextField {
@@ -61,7 +61,7 @@ TextField {
 
         Behavior on opacity {
             Anim {
-                duration: Tokens.anim.durations.small
+                type: Anim.StandardSmall
             }
         }
     }

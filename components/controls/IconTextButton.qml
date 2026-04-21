@@ -1,7 +1,7 @@
-import ".."
 import QtQuick
 import QtQuick.Layouts
 import Caelestia.Config
+import qs.components
 import qs.services
 
 StyledRect {
@@ -45,13 +45,12 @@ StyledRect {
     StateLayer {
         id: stateLayer
 
-        function onClicked(): void {
+        color: root.internalChecked ? root.activeOnColour : root.inactiveOnColour
+        onClicked: {
             if (root.toggle)
                 root.internalChecked = !root.internalChecked;
             root.clicked();
         }
-
-        color: root.internalChecked ? root.activeOnColour : root.inactiveOnColour
     }
 
     RowLayout {

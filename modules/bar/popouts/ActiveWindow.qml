@@ -65,11 +65,8 @@ Item {
                 Layout.alignment: Qt.AlignVCenter
 
                 StateLayer {
-                    function onClicked(): void {
-                        root.popouts.detachRequested("winfo");
-                    }
-
                     radius: Tokens.rounding.normal
+                    onClicked: root.popouts.detachRequested("winfo")
                 }
 
                 MaterialIcon {

@@ -97,7 +97,7 @@ Item {
                                     implicitHeight: outputRowLayout.implicitHeight + Tokens.padding.normal * 2
 
                                     StateLayer {
-                                        function onClicked(): void {
+                                        onClicked: {
                                             Audio.setAudioSink(modelData);
                                         }
                                     }
@@ -174,7 +174,7 @@ Item {
                                     implicitHeight: inputRowLayout.implicitHeight + Tokens.padding.normal * 2
 
                                     StateLayer {
-                                        function onClicked(): void {
+                                        onClicked: {
                                             Audio.setAudioSource(modelData);
                                         }
                                     }
@@ -318,7 +318,7 @@ Item {
                                     color: Audio.muted ? Colours.palette.m3secondary : Colours.palette.m3secondaryContainer
 
                                     StateLayer {
-                                        function onClicked(): void {
+                                        onClicked: {
                                             if (Audio.sink?.audio) {
                                                 Audio.sink.audio.muted = !Audio.sink.audio.muted;
                                             }
@@ -436,7 +436,7 @@ Item {
                                     color: Audio.sourceMuted ? Colours.palette.m3secondary : Colours.palette.m3secondaryContainer
 
                                     StateLayer {
-                                        function onClicked(): void {
+                                        onClicked: {
                                             if (Audio.source?.audio) {
                                                 Audio.source.audio.muted = !Audio.source.audio.muted;
                                             }
@@ -570,7 +570,7 @@ Item {
                                             color: Audio.getStreamMuted(modelData) ? Colours.palette.m3secondary : Colours.palette.m3secondaryContainer
 
                                             StateLayer {
-                                                function onClicked(): void {
+                                                onClicked: {
                                                     Audio.setStreamMuted(modelData, !Audio.getStreamMuted(modelData));
                                                 }
                                             }

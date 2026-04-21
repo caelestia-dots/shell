@@ -59,7 +59,7 @@ Item {
                 StateLayer {
                     id: normalWinState
 
-                    function onClicked(): void {
+                    onClicked: {
                         root.session.root.close();
                         WindowFactory.create(null, {
                             active: root.session.active,
@@ -96,22 +96,20 @@ Item {
 
                     Behavior on opacity {
                         Anim {
-                            duration: Tokens.anim.durations.small
+                            type: Anim.StandardSmall
                         }
                     }
                 }
 
                 Behavior on implicitWidth {
                     Anim {
-                        duration: Tokens.anim.durations.expressiveDefaultSpatial
-                        easing: Tokens.anim.expressiveDefaultSpatial
+                        type: Anim.DefaultSpatial
                     }
                 }
 
                 Behavior on implicitHeight {
                     Anim {
-                        duration: Tokens.anim.durations.expressiveDefaultSpatial
-                        easing: Tokens.anim.expressiveDefaultSpatial
+                        type: Anim.DefaultSpatial
                     }
                 }
             }
@@ -156,13 +154,12 @@ Item {
         transitions: Transition {
             Anim {
                 property: "opacity"
-                duration: Tokens.anim.durations.small
+                type: Anim.StandardSmall
             }
 
             Anim {
                 properties: "implicitWidth,implicitHeight"
-                duration: Tokens.anim.durations.expressiveDefaultSpatial
-                easing: Tokens.anim.expressiveDefaultSpatial
+                type: Anim.DefaultSpatial
             }
         }
 
@@ -176,7 +173,7 @@ Item {
             implicitHeight: icon.implicitHeight + Tokens.padding.small
 
             StateLayer {
-                function onClicked(): void {
+                onClicked: {
                     // Prevent tab switching during initial opening animation to avoid blank pages
                     if (!root.initialOpeningComplete) {
                         return;

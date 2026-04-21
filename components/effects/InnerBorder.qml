@@ -1,9 +1,9 @@
 pragma ComponentBehavior: Bound
 
-import ".."
 import QtQuick
 import QtQuick.Effects
 import Caelestia.Config
+import qs.components
 import qs.services
 
 StyledRect {
@@ -38,7 +38,7 @@ StyledRect {
 
             anchors.fill: parent
             anchors.margins: Tokens.padding.normal
-            radius: Tokens.rounding.small
+            radius: Tokens.rounding.normal
         }
     }
 }

@@ -1,13 +1,20 @@
 #pragma once
 
-#include "anim.hpp"
-#include "appearanceconfig.hpp"
-#include "config.hpp"
-#include "tokens.hpp"
-
+#include <qqmlintegration.h>
+#include <qqmlparserstatus.h>
 #include <qquickattachedpropertypropagator.h>
 
 namespace caelestia::config {
+
+class AnimTokens;
+class AppearanceFont;
+class AppearancePadding;
+class AppearanceRounding;
+class AppearanceSpacing;
+class AppearanceTransparency;
+class GlobalConfig;
+class SizeTokens;
+class TokenConfig;
 
 class Tokens : public QQuickAttachedPropertyPropagator, public QQmlParserStatus {
     Q_OBJECT
@@ -15,6 +22,9 @@ class Tokens : public QQuickAttachedPropertyPropagator, public QQmlParserStatus 
     QML_ELEMENT
     QML_UNCREATABLE("")
     QML_ATTACHED(Tokens)
+    Q_MOC_INCLUDE("anim.hpp")
+    Q_MOC_INCLUDE("appearanceconfig.hpp")
+    Q_MOC_INCLUDE("tokens.hpp")
 
     Q_PROPERTY(QString screen READ screen WRITE inheritScreen NOTIFY sourceChanged)
     Q_PROPERTY(const caelestia::config::AppearanceRounding* rounding READ rounding NOTIFY sourceChanged)

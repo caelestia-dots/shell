@@ -52,14 +52,13 @@ StyledRect {
                 color: Qt.alpha(Colours.palette.m3secondaryContainer, selected ? 1 : 0)
 
                 StateLayer {
-                    function onClicked(): void {
+                    color: place.selected ? Colours.palette.m3onSecondaryContainer : Colours.palette.m3onSurface
+                    onClicked: {
                         if (place.modelData === "Home")
                             root.dialog.cwd = ["Home"];
                         else
                             root.dialog.cwd = ["Home", place.modelData];
                     }
-
-                    color: place.selected ? Colours.palette.m3onSecondaryContainer : Colours.palette.m3onSurface
                 }
 
                 RowLayout {

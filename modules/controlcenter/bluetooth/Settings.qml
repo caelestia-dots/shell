@@ -131,7 +131,7 @@ ColumnLayout {
                     implicitHeight: adapterPicker.implicitHeight + Tokens.padding.smaller * 2
 
                     StateLayer {
-                        function onClicked(): void {
+                        onClicked: {
                             adapterPickerButton.expanded = !adapterPickerButton.expanded;
                         }
 
@@ -170,8 +170,7 @@ ColumnLayout {
 
                         Behavior on scale {
                             Anim {
-                                duration: Tokens.anim.durations.expressiveFastSpatial
-                                easing: Tokens.anim.expressiveFastSpatial
+                                type: Anim.FastSpatial
                             }
                         }
                     }
@@ -210,7 +209,7 @@ ColumnLayout {
                                     implicitHeight: adapterInner.implicitHeight + Tokens.padding.normal * 2
 
                                     StateLayer {
-                                        function onClicked(): void {
+                                        onClicked: {
                                             adapterPickerButton.expanded = false;
                                             root.session.bt.currentAdapter = adapter.modelData;
                                         }
@@ -250,15 +249,13 @@ ColumnLayout {
 
                         Behavior on scale {
                             Anim {
-                                duration: Tokens.anim.durations.expressiveFastSpatial
-                                easing: Tokens.anim.expressiveFastSpatial
+                                type: Anim.FastSpatial
                             }
                         }
 
                         Behavior on implicitHeight {
                             Anim {
-                                duration: Tokens.anim.durations.expressiveDefaultSpatial
-                                easing: Tokens.anim.expressiveDefaultSpatial
+                                type: Anim.DefaultSpatial
                             }
                         }
                     }
@@ -313,9 +310,8 @@ ColumnLayout {
                     }
 
                     transitions: Transition {
-                        AnchorAnimation {
-                            duration: Tokens.anim.durations.normal
-                            easing: Tokens.anim.standard
+                        AnchorAnim {
+                            type: AnchorAnim.Standard
                         }
                         Anim {
                             properties: "implicitHeight,opacity,padding"
@@ -380,7 +376,7 @@ ColumnLayout {
                     scale: root.session.bt.editingAdapterName ? 1 : 0.5
 
                     StateLayer {
-                        function onClicked(): void {
+                        onClicked: {
                             root.session.bt.editingAdapterName = false;
                             adapterNameEdit.text = Qt.binding(() => root.session.bt.currentAdapter?.name ?? "");
                         }
@@ -404,8 +400,7 @@ ColumnLayout {
 
                     Behavior on scale {
                         Anim {
-                            duration: Tokens.anim.durations.expressiveFastSpatial
-                            easing: Tokens.anim.expressiveFastSpatial
+                            type: Anim.FastSpatial
                         }
                     }
                 }
@@ -418,7 +413,7 @@ ColumnLayout {
                     color: Qt.alpha(Colours.palette.m3primary, root.session.bt.editingAdapterName ? 1 : 0)
 
                     StateLayer {
-                        function onClicked(): void {
+                        onClicked: {
                             root.session.bt.editingAdapterName = !root.session.bt.editingAdapterName;
                             if (root.session.bt.editingAdapterName)
                                 adapterNameEdit.forceActiveFocus();

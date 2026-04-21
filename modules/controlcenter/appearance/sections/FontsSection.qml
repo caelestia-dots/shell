@@ -58,7 +58,7 @@ CollapsibleSection {
                     implicitHeight: fontFamilySansRow.implicitHeight + Tokens.padding.normal * 2
 
                     StateLayer {
-                        function onClicked(): void {
+                        onClicked: {
                             rootPane.fontFamilySans = modelData;
                             rootPane.saveConfig();
                         }
@@ -139,7 +139,7 @@ CollapsibleSection {
                     implicitHeight: fontFamilyMonoRow.implicitHeight + Tokens.padding.normal * 2
 
                     StateLayer {
-                        function onClicked(): void {
+                        onClicked: {
                             rootPane.fontFamilyMono = modelData;
                             rootPane.saveConfig();
                         }
@@ -222,7 +222,7 @@ CollapsibleSection {
                     implicitHeight: fontFamilyMaterialRow.implicitHeight + Tokens.padding.normal * 2
 
                     StateLayer {
-                        function onClicked(): void {
+                        onClicked: {
                             rootPane.fontFamilyMaterial = modelData;
                             rootPane.saveConfig();
                         }

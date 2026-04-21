@@ -28,11 +28,8 @@ Item {
     anchors.right: parent?.right
 
     StateLayer {
-        function onClicked(): void {
-            root.onClicked();
-        }
-
         radius: Tokens.rounding.normal
+        onClicked: root.onClicked()
     }
 
     RowLayout {
@@ -80,7 +77,7 @@ Item {
             StateLayer {
                 id: stateLayer
 
-                function onClicked(): void {
+                onClicked: {
                     Quickshell.execDetached(["app2unit", "--", ...Config.general.apps.terminal, "fish", "-C", `exec qalc -i '${root.math}'`]);
                     root.list.visibilities.launcher = false;
                 }
@@ -120,7 +117,7 @@ Item {
 
             Behavior on implicitWidth {
                 Anim {
-                    easing: Tokens.anim.emphasized
+                    type: Anim.Emphasized
                 }
             }
         }

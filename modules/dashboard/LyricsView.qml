@@ -96,7 +96,7 @@ StyledListView {
             }
             Behavior on scale {
                 Anim {
-                    duration: Tokens.anim.durations.small
+                    type: Anim.StandardSmall
                 }
             }
         }

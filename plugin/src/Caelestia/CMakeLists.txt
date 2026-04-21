@@ -38,8 +38,23 @@ function(qml_module arg_TARGET)
     install(FILES "${module_qmldir}" DESTINATION "${module_dir}")
     install(FILES "${module_typeinfo}" DESTINATION "${module_dir}")
 
-    target_link_libraries(${arg_TARGET} PRIVATE Qt::Core Qt::Qml ${arg_LIBRARIES})
+    target_link_libraries(${arg_TARGET} PRIVATE caelestia-pch Qt::Core Qt::Qml ${arg_LIBRARIES})
 endfunction()
+
+add_library(caelestia-pch INTERFACE)
+target_precompile_headers(caelestia-pch INTERFACE
+    <qobject.h>
+    <qqmlintegration.h>
+    <qstring.h>
+    <qqmlengine.h>
+    <qloggingcategory.h>
+    <qvariant.h>
+    <qtimer.h>
+    <qdir.h>
+    <qlist.h>
+    <qstringlist.h>
+    <qpointer.h>
+)
 
 qml_module(caelestia
     URI Caelestia

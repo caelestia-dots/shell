@@ -1,4 +1,3 @@
-import ".."
 import QtQuick
 import QtQuick.Layouts
 import Caelestia.Config

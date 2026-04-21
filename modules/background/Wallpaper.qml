@@ -79,12 +79,9 @@ Item {
                         }
 
                         StateLayer {
-                            function onClicked(): void {
-                                dialog.open();
-                            }
-
                             radius: parent.radius
                             color: Colours.palette.m3onPrimary
+                            onClicked: dialog.open()
                         }
 
                         StyledText {

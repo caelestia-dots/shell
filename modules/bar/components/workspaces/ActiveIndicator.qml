@@ -95,6 +95,6 @@ StyledRect {
     }
 
     component EAnim: Anim {
-        easing: Tokens.anim.emphasized
+        type: Anim.Emphasized
     }
 }

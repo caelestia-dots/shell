@@ -25,12 +25,11 @@ Item {
     implicitHeight: image.height + label.height + Tokens.spacing.small / 2 + Tokens.padding.large + Tokens.padding.normal
 
     StateLayer {
-        function onClicked(): void {
+        radius: Tokens.rounding.normal
+        onClicked: {
             Wallpapers.setWallpaper(root.modelData.path);
             root.visibilities.launcher = false;
         }
-
-        radius: Tokens.rounding.normal
     }
 
     Elevation {

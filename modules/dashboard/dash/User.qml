@@ -69,12 +69,11 @@ Row {
                 opacity: parent.containsMouse ? 1 : 0
 
                 StateLayer {
-                    function onClicked(): void {
+                    color: Colours.palette.m3onPrimary
+                    onClicked: {
                         root.visibilities.launcher = false;
                         root.facePicker.open();
                     }
-
-                    color: Colours.palette.m3onPrimary
                 }
 
                 MaterialIcon {
@@ -90,8 +89,7 @@ Row {
 
                 Behavior on scale {
                     Anim {
-                        duration: Tokens.anim.durations.expressiveFastSpatial
-                        easing: Tokens.anim.expressiveFastSpatial
+                        type: Anim.FastSpatial
                     }
                 }
 

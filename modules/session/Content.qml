@@ -49,12 +49,12 @@ Column {
         width: Tokens.sizes.session.button
         height: Tokens.sizes.session.button
         sourceSize.width: width
-        sourceSize.height: height
 
         playing: visible
         asynchronous: true
         speed: Config.general.sessionGifSpeed
         source: Paths.absolutePath(Config.paths.sessionGif)
+        fillMode: AnimatedImage.PreserveAspectFit
     }
 
     SessionButton {
@@ -115,12 +115,9 @@ Column {
         }
 
         StateLayer {
-            function onClicked(): void {
-                Quickshell.execDetached(button.command);
-            }
-
             radius: parent.radius
             color: button.activeFocus ? Colours.palette.m3onSecondaryContainer : Colours.palette.m3onSurface
+            onClicked: Quickshell.execDetached(button.command)
         }
 
         MaterialIcon {

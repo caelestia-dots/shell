@@ -1,7 +1,7 @@
-import ".."
 import "../effects"
 import QtQuick
 import Caelestia.Config
+import qs.components
 import qs.services
 
 StyledRect {
@@ -44,8 +44,7 @@ StyledRect {
 
     Behavior on scale {
         Anim {
-            duration: Tokens.anim.durations.expressiveFastSpatial
-            easing: Tokens.anim.expressiveFastSpatial
+            type: Anim.FastSpatial
         }
     }
 }

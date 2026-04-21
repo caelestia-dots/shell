@@ -1,8 +1,8 @@
-import ".."
 import QtQuick
 import QtQuick.Templates
 import Caelestia.Config
 import Caelestia.Internal
+import qs.components
 import qs.services
 
 BusyIndicator {

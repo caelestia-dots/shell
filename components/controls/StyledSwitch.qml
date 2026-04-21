@@ -1,8 +1,8 @@
-import ".."
 import QtQuick
 import QtQuick.Shapes
 import QtQuick.Templates
 import Caelestia.Config
+import qs.components
 import qs.services
 
 Switch {

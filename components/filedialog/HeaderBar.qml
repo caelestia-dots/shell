@@ -1,9 +1,9 @@
 pragma ComponentBehavior: Bound
 
-import ".."
 import QtQuick
 import QtQuick.Layouts
 import Caelestia.Config
+import qs.components
 import qs.services
 
 StyledRect {
@@ -28,12 +28,9 @@ StyledRect {
             implicitHeight: upIcon.implicitHeight + Tokens.padding.small * 2
 
             StateLayer {
-                function onClicked(): void {
-                    root.dialog.cwd.pop();
-                }
-
                 radius: Tokens.rounding.small
                 disabled: root.dialog.cwd.length === 1
+                onClicked: root.dialog.cwd.pop()
             }
 
             MaterialIcon {
@@ -94,7 +91,7 @@ StyledRect {
                                 anchors.fill: parent
                                 active: folder.index < root.dialog.cwd.length - 1
                                 sourceComponent: StateLayer {
-                                    function onClicked(): void {
+                                    onClicked: {
                                         root.dialog.cwd = root.dialog.cwd.slice(0, folder.index + 1);
                                     }
 

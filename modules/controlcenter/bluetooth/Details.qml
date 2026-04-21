@@ -172,9 +172,8 @@ StyledFlickable {
                                         }
 
                                         transitions: Transition {
-                                            AnchorAnimation {
-                                                duration: Tokens.anim.durations.normal
-                                                easing: Tokens.anim.standard
+                                            AnchorAnim {
+                                                type: AnchorAnim.Standard
                                             }
                                             Anim {
                                                 properties: "implicitHeight,opacity,padding"
@@ -240,7 +239,7 @@ StyledFlickable {
                                         scale: root.session.bt.editingDeviceName ? 1 : 0.5
 
                                         StateLayer {
-                                            function onClicked(): void {
+                                            onClicked: {
                                                 root.session.bt.editingDeviceName = false;
                                                 deviceNameEdit.text = Qt.binding(() => root.device?.name ?? "");
                                             }
@@ -264,8 +263,7 @@ StyledFlickable {
 
                                         Behavior on scale {
                                             Anim {
-                                                duration: Tokens.anim.durations.expressiveFastSpatial
-                                                easing: Tokens.anim.expressiveFastSpatial
+                                                type: Anim.FastSpatial
                                             }
                                         }
                                     }
@@ -278,7 +276,7 @@ StyledFlickable {
                                         color: Qt.alpha(Colours.palette.m3primary, root.session.bt.editingDeviceName ? 1 : 0)
 
                                         StateLayer {
-                                            function onClicked(): void {
+                                            onClicked: {
                                                 root.session.bt.editingDeviceName = !root.session.bt.editingDeviceName;
                                                 if (root.session.bt.editingDeviceName)
                                                     deviceNameEdit.forceActiveFocus();
@@ -498,12 +496,11 @@ StyledFlickable {
                             ParallelAnimation {
                                 Anim {
                                     property: "implicitWidth"
-                                    duration: Tokens.anim.durations.expressiveFastSpatial
-                                    easing: Tokens.anim.expressiveFastSpatial
+                                    type: Anim.FastSpatial
                                 }
                                 Anim {
                                     property: "opacity"
-                                    duration: Tokens.anim.durations.small
+                                    type: Anim.StandardSmall
                                 }
                             }
                         }
@@ -518,12 +515,11 @@ StyledFlickable {
                             ParallelAnimation {
                                 Anim {
                                     property: "implicitWidth"
-                                    duration: Tokens.anim.durations.expressiveFastSpatial
-                                    easing: Tokens.anim.expressiveFastSpatial
+                                    type: Anim.FastSpatial
                                 }
                                 Anim {
                                     property: "opacity"
-                                    duration: Tokens.anim.durations.small
+                                    type: Anim.StandardSmall
                                 }
                             }
                         }
@@ -531,7 +527,7 @@ StyledFlickable {
                 ]
 
                 StateLayer {
-                    function onClicked(): void {
+                    onClicked: {
                         root.session.bt.fabMenuOpen = false;
 
                         const name = fabMenuItem.modelData.name;
@@ -566,7 +562,7 @@ StyledFlickable {
 
                         Behavior on Layout.preferredWidth {
                             Anim {
-                                duration: Tokens.anim.durations.small
+                                type: Anim.StandardSmall
                             }
                         }
                     }
@@ -611,8 +607,7 @@ StyledFlickable {
             transitions: Transition {
                 Anim {
                     properties: "implicitWidth,implicitHeight"
-                    duration: Tokens.anim.durations.expressiveFastSpatial
-                    easing: Tokens.anim.expressiveFastSpatial
+                    type: Anim.FastSpatial
                 }
                 Anim {
                     properties: "radius,font.pointSize"
@@ -629,7 +624,7 @@ StyledFlickable {
             StateLayer {
                 id: fabState
 
-                function onClicked(): void {
+                onClicked: {
                     root.session.bt.fabMenuOpen = !root.session.bt.fabMenuOpen;
                 }
 

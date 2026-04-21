@@ -1,32 +1,50 @@
 #pragma once
 
+#include "rootconfig.hpp"
+
 #include <qqmlengine.h>
 
-#include "appearanceconfig.hpp"
-#include "backgroundconfig.hpp"
-#include "barconfig.hpp"
-#include "borderconfig.hpp"
-#include "controlcenterconfig.hpp"
-#include "dashboardconfig.hpp"
-#include "generalconfig.hpp"
-#include "launcherconfig.hpp"
-#include "lockconfig.hpp"
-#include "notifsconfig.hpp"
-#include "osdconfig.hpp"
-#include "rootconfig.hpp"
-#include "serviceconfig.hpp"
-#include "sessionconfig.hpp"
-#include "sidebarconfig.hpp"
-#include "userpaths.hpp"
-#include "utilitiesconfig.hpp"
-#include "winfoconfig.hpp"
-
 namespace caelestia::config {
+
+class AppearanceConfig;
+class BackgroundConfig;
+class BarConfig;
+class BorderConfig;
+class ControlCenterConfig;
+class DashboardConfig;
+class GeneralConfig;
+class LauncherConfig;
+class LockConfig;
+class NotifsConfig;
+class OsdConfig;
+class ServiceConfig;
+class SessionConfig;
+class SidebarConfig;
+class UserPaths;
+class UtilitiesConfig;
+class WInfoConfig;
 
 class GlobalConfig : public RootConfig {
     Q_OBJECT
     QML_ELEMENT
     QML_SINGLETON
+    Q_MOC_INCLUDE("appearanceconfig.hpp")
+    Q_MOC_INCLUDE("backgroundconfig.hpp")
+    Q_MOC_INCLUDE("barconfig.hpp")
+    Q_MOC_INCLUDE("borderconfig.hpp")
+    Q_MOC_INCLUDE("controlcenterconfig.hpp")
+    Q_MOC_INCLUDE("dashboardconfig.hpp")
+    Q_MOC_INCLUDE("generalconfig.hpp")
+    Q_MOC_INCLUDE("launcherconfig.hpp")
+    Q_MOC_INCLUDE("lockconfig.hpp")
+    Q_MOC_INCLUDE("notifsconfig.hpp")
+    Q_MOC_INCLUDE("osdconfig.hpp")
+    Q_MOC_INCLUDE("serviceconfig.hpp")
+    Q_MOC_INCLUDE("sessionconfig.hpp")
+    Q_MOC_INCLUDE("sidebarconfig.hpp")
+    Q_MOC_INCLUDE("userpaths.hpp")
+    Q_MOC_INCLUDE("utilitiesconfig.hpp")
+    Q_MOC_INCLUDE("winfoconfig.hpp")
 
     CONFIG_PROPERTY(bool, enabled, true)
     CONFIG_SUBOBJECT(AppearanceConfig, appearance)

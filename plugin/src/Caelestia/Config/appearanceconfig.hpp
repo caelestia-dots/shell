@@ -19,6 +19,7 @@ class AppearanceRounding : public ConfigObject {
 
     CONFIG_PROPERTY(qreal, scale, 1)
 
+    Q_PROPERTY(int extraSmall READ extraSmall NOTIFY valuesChanged)
     Q_PROPERTY(int small READ small NOTIFY valuesChanged)
     Q_PROPERTY(int normal READ normal NOTIFY valuesChanged)
     Q_PROPERTY(int large READ large NOTIFY valuesChanged)
@@ -30,6 +31,7 @@ public:
 
     void bindTokens(RoundingTokens* tokens);
 
+    [[nodiscard]] int extraSmall() const;
     [[nodiscard]] int small() const;
     [[nodiscard]] int normal() const;
     [[nodiscard]] int large() const;
@@ -178,6 +180,9 @@ class AnimDurations : public ConfigObject {
     Q_PROPERTY(int expressiveFastSpatial READ expressiveFastSpatial NOTIFY valuesChanged)
     Q_PROPERTY(int expressiveDefaultSpatial READ expressiveDefaultSpatial NOTIFY valuesChanged)
     Q_PROPERTY(int expressiveSlowSpatial READ expressiveSlowSpatial NOTIFY valuesChanged)
+    Q_PROPERTY(int expressiveFastEffects READ expressiveFastEffects NOTIFY valuesChanged)
+    Q_PROPERTY(int expressiveDefaultEffects READ expressiveDefaultEffects NOTIFY valuesChanged)
+    Q_PROPERTY(int expressiveSlowEffects READ expressiveSlowEffects NOTIFY valuesChanged)
 
 public:
     explicit AnimDurations(QObject* parent = nullptr)
@@ -192,6 +197,9 @@ public:
     [[nodiscard]] int expressiveFastSpatial() const;
     [[nodiscard]] int expressiveDefaultSpatial() const;
     [[nodiscard]] int expressiveSlowSpatial() const;
+    [[nodiscard]] int expressiveFastEffects() const;
+    [[nodiscard]] int expressiveDefaultEffects() const;
+    [[nodiscard]] int expressiveSlowEffects() const;
 
 signals:
     void valuesChanged();
@@ -229,6 +237,7 @@ class AppearanceConfig : public ConfigObject {
     Q_OBJECT
     QML_ANONYMOUS
 
+    CONFIG_PROPERTY(qreal, deformScale, 1)
     CONFIG_SUBOBJECT(AppearanceRounding, rounding)
     CONFIG_SUBOBJECT(AppearanceSpacing, spacing)
     CONFIG_SUBOBJECT(AppearancePadding, padding)

@@ -271,7 +271,7 @@ Item {
 
         Behavior on animatedPercentage {
             Anim {
-                duration: Tokens.anim.durations.large
+                type: Anim.StandardLarge
             }
         }
     }
@@ -323,7 +323,7 @@ Item {
 
         Behavior on animatedValue {
             Anim {
-                duration: Tokens.anim.durations.large
+                type: Anim.StandardLarge
             }
         }
     }
@@ -438,13 +438,13 @@ Item {
 
         Behavior on animatedUsage {
             Anim {
-                duration: Tokens.anim.durations.large
+                type: Anim.StandardLarge
             }
         }
 
         Behavior on animatedTemp {
             Anim {
-                duration: Tokens.anim.durations.large
+                type: Anim.StandardLarge
             }
         }
     }
@@ -512,7 +512,7 @@ Item {
 
         Behavior on animatedPercentage {
             Anim {
-                duration: Tokens.anim.durations.large
+                type: Anim.StandardLarge
             }
         }
     }
@@ -639,7 +639,7 @@ Item {
 
         Behavior on animatedPercentage {
             Anim {
-                duration: Tokens.anim.durations.large
+                type: Anim.StandardLarge
             }
         }
     }
@@ -710,7 +710,7 @@ Item {
 
                     Behavior on smoothMax {
                         Anim {
-                            duration: Tokens.anim.durations.large
+                            type: Anim.StandardLarge
                         }
                     }
                 }

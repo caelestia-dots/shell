@@ -1,5 +1,6 @@
 #include "tokensattached.hpp"
 #include "anim.hpp"
+#include "appearanceconfig.hpp"
 #include "config.hpp"
 #include "monitorconfigmanager.hpp"
 #include "tokens.hpp"

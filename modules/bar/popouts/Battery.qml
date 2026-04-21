@@ -147,9 +147,8 @@ Column {
             ]
 
             transitions: Transition {
-                AnchorAnimation {
-                    duration: Tokens.anim.durations.normal
-                    easing: Tokens.anim.emphasized
+                AnchorAnim {
+                    type: AnchorAnim.Emphasized
                 }
             }
         }
@@ -204,12 +203,9 @@ Column {
         implicitHeight: icon.implicitHeight + Tokens.padding.small * 2
 
         StateLayer {
-            function onClicked(): void {
-                PowerProfiles.profile = parent.profile;
-            }
-
             radius: Tokens.rounding.full
             color: profiles.current === parent.icon ? Colours.palette.m3onPrimary : Colours.palette.m3onSurface
+            onClicked: PowerProfiles.profile = parent.profile
         }
 
         MaterialIcon {

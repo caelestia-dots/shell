@@ -121,6 +121,7 @@ Item {
             implicitWidth: Math.max(icon.width, label.width)
             implicitHeight: icon.height + label.height
 
+            hoverEnabled: true
             cursorShape: Qt.PointingHandCursor
 
             onPressed: event => {
@@ -170,8 +171,6 @@ Item {
                     target: ripple
                     property: "opacity"
                     to: 0
-                    duration: Tokens.anim.durations.normal
-                    easing: Tokens.anim.standard
                 }
             }
 
@@ -192,7 +191,7 @@ Item {
                     anchors.fill: parent
 
                     color: tab.current ? Colours.palette.m3primary : Colours.palette.m3onSurface
-                    opacity: mouse.pressed ? 0.1 : tab.hovered ? 0.08 : 0
+                    opacity: mouse.pressed ? 0.1 : mouse.containsMouse ? 0.08 : 0
 
                     Behavior on opacity {
                         Anim {}

@@ -16,11 +16,8 @@ Item {
     anchors.right: parent?.right
 
     StateLayer {
-        function onClicked(): void {
-            root.modelData?.onClicked(root.list);
-        }
-
         radius: Tokens.rounding.normal
+        onClicked: root.modelData?.onClicked(root.list)
     }
 
     Item {

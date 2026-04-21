@@ -176,13 +176,13 @@ Item {
 
             Behavior on width {
                 Anim {
-                    duration: Tokens.anim.durations.small
+                    type: Anim.StandardSmall
                 }
             }
 
             Behavior on opacity {
                 Anim {
-                    duration: Tokens.anim.durations.small
+                    type: Anim.StandardSmall
                 }
             }
         }

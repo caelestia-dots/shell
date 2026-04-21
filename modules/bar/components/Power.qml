@@ -13,15 +13,12 @@ Item {
 
     StateLayer {
         // Cursed workaround to make the height larger than the parent
-        function onClicked(): void {
-            root.visibilities.session = !root.visibilities.session;
-        }
-
         anchors.fill: undefined
         anchors.centerIn: parent
         implicitWidth: implicitHeight
         implicitHeight: icon.implicitHeight + Tokens.padding.small * 2
         radius: Tokens.rounding.full
+        onClicked: root.visibilities.session = !root.visibilities.session
     }
 
     MaterialIcon {

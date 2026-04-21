@@ -101,14 +101,13 @@ StyledRect {
 
         Behavior on anchors.bottomMargin {
             Anim {
-                duration: Tokens.anim.durations.expressiveDefaultSpatial
-                easing: Tokens.anim.expressiveDefaultSpatial
+                type: Anim.DefaultSpatial
             }
         }
 
         Behavior on opacity {
             Anim {
-                duration: Tokens.anim.durations.small
+                type: Anim.StandardSmall
             }
         }
 
@@ -119,8 +118,7 @@ StyledRect {
 
     Behavior on implicitHeight {
         Anim {
-            duration: Tokens.anim.durations.expressiveDefaultSpatial
-            easing: Tokens.anim.expressiveDefaultSpatial
+            type: Anim.DefaultSpatial
         }
     }
 }

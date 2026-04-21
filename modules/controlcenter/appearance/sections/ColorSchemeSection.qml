@@ -38,7 +38,7 @@ CollapsibleSection {
                 implicitHeight: schemeRow.implicitHeight + Tokens.padding.normal * 2
 
                 StateLayer {
-                    function onClicked(): void {
+                    onClicked: {
                         const name = modelData.name;
                         const flavour = modelData.flavour;
                         const schemeKey = `${name} ${flavour}`;

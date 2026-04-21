@@ -1,8 +1,8 @@
-import ".."
 import "../effects"
 import QtQuick
 import QtQuick.Templates
 import Caelestia.Config
+import qs.components
 import qs.services
 
 Slider {
@@ -140,7 +140,7 @@ Slider {
 
     Behavior on value {
         Anim {
-            duration: Tokens.anim.durations.large
+            type: Anim.StandardLarge
         }
     }
 }

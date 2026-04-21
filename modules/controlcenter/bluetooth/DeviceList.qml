@@ -145,7 +145,7 @@ DeviceList {
             StateLayer {
                 id: stateLayer
 
-                function onClicked(): void {
+                onClicked: {
                     if (device.modelData)
                         root.session.bt.active = device.modelData;
                 }
@@ -222,7 +222,7 @@ DeviceList {
                     }
 
                     StateLayer {
-                        function onClicked(): void {
+                        onClicked: {
                             if (device.loading)
                                 return;
 

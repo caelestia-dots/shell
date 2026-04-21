@@ -116,7 +116,7 @@ DeviceList {
             radius: Tokens.rounding.normal
 
             StateLayer {
-                function onClicked(): void {
+                onClicked: {
                     root.session.network.active = modelData;
                     if (modelData && modelData.ssid) {
                         root.checkSavedProfileForNetwork(modelData.ssid);
@@ -197,7 +197,7 @@ DeviceList {
                     color: Qt.alpha(Colours.palette.m3primaryContainer, modelData.active ? 1 : 0)
 
                     StateLayer {
-                        function onClicked(): void {
+                        onClicked: {
                             if (modelData.active) {
                                 Nmcli.disconnectFromNetwork();
                             } else {

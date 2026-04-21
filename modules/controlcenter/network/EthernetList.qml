@@ -70,7 +70,7 @@ DeviceList {
             StateLayer {
                 id: stateLayer
 
-                function onClicked(): void {
+                onClicked: {
                     root.session.ethernet.active = modelData;
                 }
             }
@@ -147,7 +147,7 @@ DeviceList {
                     color: Qt.alpha(Colours.palette.m3primaryContainer, modelData.connected ? 1 : 0)
 
                     StateLayer {
-                        function onClicked(): void {
+                        onClicked: {
                             if (modelData.connected && modelData.connection) {
                                 Nmcli.disconnectEthernet(modelData.connection, () => {});
                             } else {

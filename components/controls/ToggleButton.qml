@@ -1,6 +1,5 @@
 pragma ComponentBehavior: Bound
 
-import ".."
 import QtQuick
 import QtQuick.Layouts
 import Caelestia.Config
@@ -23,9 +22,8 @@ StyledRect {
 
     signal clicked
 
-    Component.onCompleted: {
-        hovered = toggleStateLayer.containsMouse;
-    }
+    Component.onCompleted: hovered = toggleStateLayer.containsMouse
+
     Layout.preferredWidth: implicitWidth + (toggleStateLayer.pressed ? Tokens.padding.normal * 2 : toggled ? Tokens.padding.small * 2 : 0)
     implicitWidth: toggleBtnInner.implicitWidth + horizontalPadding * 2
     implicitHeight: toggleBtnIcon.implicitHeight + verticalPadding * 2
@@ -46,11 +44,8 @@ StyledRect {
     StateLayer {
         id: toggleStateLayer
 
-        function onClicked(): void {
-            root.clicked();
-        }
-
         color: root.toggled ? Colours.palette[`m3on${root.accent}`] : Colours.palette[`m3on${root.accent}Container`]
+        onClicked: root.clicked()
     }
 
     RowLayout {
@@ -87,15 +82,13 @@ StyledRect {
 
     Behavior on radius {
         Anim {
-            duration: Tokens.anim.durations.expressiveFastSpatial
-            easing: Tokens.anim.expressiveFastSpatial
+            type: Anim.FastSpatial
         }
     }
 
     Behavior on Layout.preferredWidth {
         Anim {
-            duration: Tokens.anim.durations.expressiveFastSpatial
-            easing: Tokens.anim.expressiveFastSpatial
+            type: Anim.FastSpatial
         }
     }
 

@@ -42,8 +42,7 @@ StyledListView {
 
         Behavior on y {
             Anim {
-                duration: Tokens.anim.durations.expressiveDefaultSpatial
-                easing: Tokens.anim.expressiveDefaultSpatial
+                type: Anim.DefaultSpatial
             }
         }
     }
@@ -197,7 +196,7 @@ StyledListView {
     addDisplaced: Transition {
         Anim {
             property: "y"
-            duration: Tokens.anim.durations.small
+            type: Anim.StandardSmall
         }
         Anim {
             properties: "opacity,scale"

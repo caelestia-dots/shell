@@ -73,7 +73,7 @@ ColumnLayout {
 
             Behavior on opacity {
                 Anim {
-                    duration: Tokens.anim.durations.extraLarge
+                    type: Anim.StandardExtraLarge
                 }
             }
         }
@@ -103,8 +103,7 @@ ColumnLayout {
                     property: "scale"
                     from: 0
                     to: 1
-                    duration: Tokens.anim.durations.expressiveDefaultSpatial
-                    easing: Tokens.anim.expressiveDefaultSpatial
+                    type: Anim.DefaultSpatial
                 }
             }
 
@@ -126,8 +125,7 @@ ColumnLayout {
                 }
                 Anim {
                     property: "y"
-                    duration: Tokens.anim.durations.expressiveDefaultSpatial
-                    easing: Tokens.anim.expressiveDefaultSpatial
+                    type: Anim.DefaultSpatial
                 }
             }
 
@@ -138,8 +136,7 @@ ColumnLayout {
                 }
                 Anim {
                     property: "y"
-                    duration: Tokens.anim.durations.expressiveDefaultSpatial
-                    easing: Tokens.anim.expressiveDefaultSpatial
+                    type: Anim.DefaultSpatial
                 }
             }
         }

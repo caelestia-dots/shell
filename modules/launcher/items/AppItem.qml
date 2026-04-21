@@ -19,12 +19,11 @@ Item {
     anchors.right: parent?.right
 
     StateLayer {
-        function onClicked(): void {
+        radius: Tokens.rounding.normal
+        onClicked: {
             Apps.launch(root.modelData);
             root.visibilities.launcher = false;
         }
-
-        radius: Tokens.rounding.normal
     }
 
     Item {

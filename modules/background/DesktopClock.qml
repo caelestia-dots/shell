@@ -158,14 +158,13 @@ Item {
 
     Behavior on clockScale {
         Anim {
-            duration: Tokens.anim.durations.expressiveDefaultSpatial
-            easing: Tokens.anim.expressiveDefaultSpatial
+            type: Anim.DefaultSpatial
         }
     }
 
     Behavior on implicitWidth {
         Anim {
-            duration: Tokens.anim.durations.small
+            type: Anim.StandardSmall
         }
     }
 }

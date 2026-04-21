@@ -1,4 +1,5 @@
 #include "sparklineitem.hpp"
+#include "circularbuffer.hpp"
 
 #include <qpainter.h>
 #include <qpainterpath.h>

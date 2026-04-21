@@ -135,7 +135,7 @@ ColumnLayout {
         }
 
         StateLayer {
-            function onClicked(): void {
+            onClicked: {
                 parent.forceActiveFocus();
             }
 
@@ -194,11 +194,8 @@ ColumnLayout {
                 radius: Tokens.rounding.full
 
                 StateLayer {
-                    function onClicked(): void {
-                        root.lock.pam.passwd.start();
-                    }
-
                     color: root.lock.pam.buffer ? Colours.palette.m3onPrimary : Colours.palette.m3onSurface
+                    onClicked: root.lock.pam.passwd.start()
                 }
 
                 MaterialIcon {
@@ -397,13 +394,13 @@ ColumnLayout {
                     target: message
                     property: "scale"
                     to: 0.7
-                    duration: Tokens.anim.durations.large
+                    type: Anim.StandardLarge
                 }
                 Anim {
                     target: message
                     property: "opacity"
                     to: 0
-                    duration: Tokens.anim.durations.large
+                    type: Anim.StandardLarge
                 }
             }
         }

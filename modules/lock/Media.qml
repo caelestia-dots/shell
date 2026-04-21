@@ -34,7 +34,7 @@ Item {
 
         Behavior on opacity {
             Anim {
-                duration: Tokens.anim.durations.extraLarge
+                type: Anim.StandardExtraLarge
             }
         }
     }
@@ -110,34 +110,31 @@ Item {
             spacing: Tokens.spacing.large
 
             PlayerControl {
-                function onClicked(): void {
+                icon: "skip_previous"
+                onClicked: {
                     if (Players.active?.canGoPrevious)
                         Players.active.previous();
                 }
-
-                icon: "skip_previous"
             }
 
             PlayerControl {
-                function onClicked(): void {
-                    if (Players.active?.canTogglePlaying)
-                        Players.active.togglePlaying();
-                }
-
                 animate: true
                 icon: active ? "pause" : "play_arrow"
                 colour: "Primary"
                 level: active ? 2 : 1
                 active: Players.active?.isPlaying ?? false
+                onClicked: {
+                    if (Players.active?.canTogglePlaying)
+                        Players.active.togglePlaying();
+                }
             }
 
             PlayerControl {
-                function onClicked(): void {
+                icon: "skip_next"
+                onClicked: {
                     if (Players.active?.canGoNext)
                         Players.active.next();
                 }
-
-                icon: "skip_next"
             }
         }
     }
@@ -151,8 +148,7 @@ Item {
         property string colour: "Secondary"
         property int level: 1
 
-        function onClicked(): void {
-        }
+        signal clicked
 
         Layout.preferredWidth: implicitWidth + (controlState.pressed ? Tokens.padding.normal * 2 : active ? Tokens.padding.small * 2 : 0)
         implicitWidth: controlIcon.implicitWidth + Tokens.padding.large * 2
@@ -171,11 +167,8 @@ Item {
         StateLayer {
             id: controlState
 
-            function onClicked(): void {
-                control.onClicked();
-            }
-
             color: control.active ? Colours.palette[`m3on${control.colour}`] : Colours.palette[`m3on${control.colour}Container`]
+            onClicked: control.clicked()
         }
 
         MaterialIcon {
@@ -193,15 +186,13 @@ Item {
 
         Behavior on Layout.preferredWidth {
             Anim {
-                duration: Tokens.anim.durations.expressiveFastSpatial
-                easing: Tokens.anim.expressiveFastSpatial
+                type: Anim.FastSpatial
             }
         }
 
         Behavior on radius {
             Anim {
-                duration: Tokens.anim.durations.expressiveFastSpatial
-                easing: Tokens.anim.expressiveFastSpatial
+                type: Anim.FastSpatial
             }
         }
     }

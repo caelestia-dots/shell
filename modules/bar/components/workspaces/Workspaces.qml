@@ -140,7 +140,7 @@ StyledClippingRect {
 
     Behavior on blur {
         Anim {
-            duration: Tokens.anim.durations.small
+            type: Anim.StandardSmall
         }
     }
 }

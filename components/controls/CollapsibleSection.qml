@@ -1,4 +1,3 @@
-import ".."
 import QtQuick
 import QtQuick.Layouts
 import Caelestia.Config
@@ -55,23 +54,21 @@ ColumnLayout {
 
                 Behavior on rotation {
                     Anim {
-                        duration: Tokens.anim.durations.small
-                        easing: Tokens.anim.standard
+                        type: Anim.StandardSmall
                     }
                 }
             }
         }
 
         StateLayer {
-            function onClicked(): void {
-                root.toggleRequested();
-                root.expanded = !root.expanded;
-            }
-
             anchors.fill: parent
             color: Colours.palette.m3onSurface
             radius: Tokens.rounding.normal
             showHoverBackground: false
+            onClicked: {
+                root.toggleRequested();
+                root.expanded = !root.expanded;
+            }
         }
     }
 
@@ -83,9 +80,7 @@ ColumnLayout {
         clip: true
 
         Behavior on Layout.preferredHeight {
-            Anim {
-                easing: Tokens.anim.standard
-            }
+            Anim {}
         }
 
         StyledRect {
@@ -98,9 +93,7 @@ ColumnLayout {
             visible: root.showBackground
 
             Behavior on opacity {
-                Anim {
-                    easing: Tokens.anim.standard
-                }
+                Anim {}
             }
         }
 
@@ -117,9 +110,7 @@ ColumnLayout {
             opacity: root.expanded ? 1.0 : 0.0
 
             Behavior on opacity {
-                Anim {
-                    easing: Tokens.anim.standard
-                }
+                Anim {}
             }
 
             StyledText {

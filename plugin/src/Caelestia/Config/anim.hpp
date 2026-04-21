@@ -24,6 +24,9 @@ class AnimTokens : public QObject {
     Q_PROPERTY(QEasingCurve expressiveFastSpatial READ expressiveFastSpatial NOTIFY curvesChanged)
     Q_PROPERTY(QEasingCurve expressiveDefaultSpatial READ expressiveDefaultSpatial NOTIFY curvesChanged)
     Q_PROPERTY(QEasingCurve expressiveSlowSpatial READ expressiveSlowSpatial NOTIFY curvesChanged)
+    Q_PROPERTY(QEasingCurve expressiveFastEffects READ expressiveFastEffects NOTIFY curvesChanged)
+    Q_PROPERTY(QEasingCurve expressiveDefaultEffects READ expressiveDefaultEffects NOTIFY curvesChanged)
+    Q_PROPERTY(QEasingCurve expressiveSlowEffects READ expressiveSlowEffects NOTIFY curvesChanged)
 
     Q_PROPERTY(caelestia::config::AnimDurations* durations READ durations NOTIFY durationsChanged)
 
@@ -42,6 +45,9 @@ public:
     [[nodiscard]] QEasingCurve expressiveFastSpatial() const;
     [[nodiscard]] QEasingCurve expressiveDefaultSpatial() const;
     [[nodiscard]] QEasingCurve expressiveSlowSpatial() const;
+    [[nodiscard]] QEasingCurve expressiveFastEffects() const;
+    [[nodiscard]] QEasingCurve expressiveDefaultEffects() const;
+    [[nodiscard]] QEasingCurve expressiveSlowEffects() const;
     [[nodiscard]] AnimDurations* durations() const;
 
 signals:
@@ -64,6 +70,9 @@ private:
     QEasingCurve m_expressiveFastSpatial;
     QEasingCurve m_expressiveDefaultSpatial;
     QEasingCurve m_expressiveSlowSpatial;
+    QEasingCurve m_expressiveFastEffects;
+    QEasingCurve m_expressiveDefaultEffects;
+    QEasingCurve m_expressiveSlowEffects;
 };
 
 } // namespace caelestia::config

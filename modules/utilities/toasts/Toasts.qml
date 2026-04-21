@@ -111,8 +111,7 @@ Item {
             properties: "opacity,scale"
             from: 0
             to: 1
-            duration: Tokens.anim.durations.expressiveDefaultSpatial
-            easing: Tokens.anim.expressiveDefaultSpatial
+            type: Anim.DefaultSpatial
         }
 
         ParallelAnimation {
@@ -148,8 +147,7 @@ Item {
 
         Behavior on anchors.bottomMargin {
             Anim {
-                duration: Tokens.anim.durations.expressiveDefaultSpatial
-                easing: Tokens.anim.expressiveDefaultSpatial
+                type: Anim.DefaultSpatial
             }
         }
     }

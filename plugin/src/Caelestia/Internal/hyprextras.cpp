@@ -1,4 +1,5 @@
 #include "hyprextras.hpp"
+#include "hyprdevices.hpp"
 
 #include <qdir.h>
 #include <qjsonarray.h>

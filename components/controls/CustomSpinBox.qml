@@ -1,9 +1,9 @@
 pragma ComponentBehavior: Bound
 
-import ".."
 import QtQuick
 import QtQuick.Layouts
 import Caelestia.Config
+import qs.components
 import qs.services
 
 RowLayout {
@@ -94,7 +94,12 @@ RowLayout {
         StateLayer {
             id: upState
 
-            function onClicked(): void {
+            color: Colours.palette.m3onPrimary
+
+            onPressAndHold: timer.start()
+            onReleased: timer.stop()
+
+            onClicked: {
                 let newValue = Math.min(root.max, root.value + root.step);
                 // Round to avoid floating point precision errors
                 const decimals = root.step < 1 ? Math.max(1, Math.ceil(-Math.log10(root.step))) : 0;
@@ -103,11 +108,6 @@ RowLayout {
                 root.displayText = newValue.toString();
                 root.valueModified(newValue);
             }
-
-            color: Colours.palette.m3onPrimary
-
-            onPressAndHold: timer.start()
-            onReleased: timer.stop()
         }
 
         MaterialIcon {
@@ -129,7 +129,7 @@ RowLayout {
         StateLayer {
             id: downState
 
-            function onClicked(): void {
+            onClicked: {
                 let newValue = Math.max(root.min, root.value - root.step);
                 // Round to avoid floating point precision errors
                 const decimals = root.step < 1 ? Math.max(1, Math.ceil(-Math.log10(root.step))) : 0;
@@ -162,9 +162,9 @@ RowLayout {
         triggeredOnStart: true
         onTriggered: {
             if (upState.pressed)
-                upState.onClicked();
+                upState.clicked();
             else if (downState.pressed)
-                downState.onClicked();
+                downState.clicked();
         }
     }
 }

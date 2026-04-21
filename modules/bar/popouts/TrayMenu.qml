@@ -97,7 +97,14 @@ StackView {
                         implicitHeight: label.implicitHeight
 
                         StateLayer {
-                            function onClicked(): void {
+                            anchors.margins: -Tokens.padding.small / 2
+                            anchors.leftMargin: -Tokens.padding.smaller
+                            anchors.rightMargin: -Tokens.padding.smaller
+
+                            radius: item.radius
+                            disabled: !item.modelData.enabled
+
+                            onClicked: {
                                 const entry = item.modelData;
                                 if (entry.hasChildren)
                                     root.push(subMenuComp.createObject(null, {
@@ -109,13 +116,6 @@ StackView {
                                     root.popouts.hasCurrent = false;
                                 }
                             }
-
-                            anchors.margins: -Tokens.padding.small / 2
-                            anchors.leftMargin: -Tokens.padding.smaller
-                            anchors.rightMargin: -Tokens.padding.smaller
-
-                            radius: item.radius
-                            disabled: !item.modelData.enabled
                         }
 
                         Loader {
@@ -197,12 +197,9 @@ StackView {
                         color: Colours.palette.m3secondaryContainer
 
                         StateLayer {
-                            function onClicked(): void {
-                                root.pop();
-                            }
-
                             radius: parent.radius
                             color: Colours.palette.m3onSecondaryContainer
+                            onClicked: root.pop()
                         }
                     }
 

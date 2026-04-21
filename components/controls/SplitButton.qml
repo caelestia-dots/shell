@@ -1,7 +1,7 @@
-import ".."
 import QtQuick
 import QtQuick.Layouts
 import Caelestia.Config
+import qs.components
 import qs.services
 
 Row {
@@ -47,14 +47,11 @@ Row {
         StateLayer {
             id: stateLayer
 
-            function onClicked(): void {
-                root.active?.clicked();
-            }
-
             rect.topRightRadius: parent.topRightRadius
             rect.bottomRightRadius: parent.bottomRightRadius
             color: root.textColour
             disabled: root.disabled
+            onClicked: root.active?.clicked()
         }
 
         RowLayout {
@@ -86,7 +83,7 @@ Row {
 
                 Behavior on Layout.preferredWidth {
                     Anim {
-                        easing: Tokens.anim.emphasized
+                        type: Anim.Emphasized
                     }
                 }
             }
@@ -109,14 +106,11 @@ Row {
         StateLayer {
             id: expandStateLayer
 
-            function onClicked(): void {
-                root.expanded = !root.expanded;
-            }
-
             rect.topLeftRadius: parent.topLeftRadius
             rect.bottomLeftRadius: parent.bottomLeftRadius
             color: root.textColour
             disabled: root.disabled
+            onClicked: root.expanded = !root.expanded
         }
 
         MaterialIcon {
@@ -141,24 +135,14 @@ Row {
         Behavior on rad {
             Anim {}
         }
+    }
 
-        Menu {
-            id: menu
+    Menu {
+        id: menu
 
-            states: State {
-                when: root.menuOnTop
-
-                AnchorChanges {
-                    target: menu
-                    anchors.top: undefined
-                    anchors.bottom: expandBtn.top
-                }
-            }
-
-            anchors.top: parent.bottom
-            anchors.right: parent.right
-            anchors.topMargin: Tokens.spacing.small
-            anchors.bottomMargin: Tokens.spacing.small
-        }
+        attachTo: expandBtn
+        attachSideY: root.menuOnTop ? Menu.Top : Menu.Bottom
+        thisSideY: root.menuOnTop ? Menu.Bottom : Menu.Top
+        marginY: Tokens.spacing.small * (root.menuOnTop ? -1 : 1)
     }
 }

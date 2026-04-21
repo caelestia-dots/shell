@@ -134,8 +134,7 @@ Item {
 
             Behavior on scale {
                 Anim {
-                    duration: Tokens.anim.durations.expressiveFastSpatial
-                    easing: Tokens.anim.expressiveFastSpatial
+                    type: Anim.FastSpatial
                 }
             }
         }

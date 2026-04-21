@@ -60,7 +60,7 @@ Item {
                 property: "opacity"
                 from: 1
                 to: 0
-                duration: Tokens.anim.durations.small
+                type: Anim.StandardSmall
             }
             PropertyAction {}
             Anim {
@@ -68,7 +68,7 @@ Item {
                 property: "opacity"
                 from: 0
                 to: 1
-                duration: Tokens.anim.durations.small
+                type: Anim.StandardSmall
             }
         }
     }

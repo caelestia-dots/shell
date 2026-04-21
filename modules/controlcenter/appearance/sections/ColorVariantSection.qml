@@ -35,7 +35,7 @@ CollapsibleSection {
                 implicitHeight: variantRow.implicitHeight + Tokens.padding.normal * 2
 
                 StateLayer {
-                    function onClicked(): void {
+                    onClicked: {
                         const variant = modelData.variant;
 
                         Schemes.currentVariant = variant;

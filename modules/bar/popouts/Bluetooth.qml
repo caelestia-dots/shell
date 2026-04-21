@@ -124,12 +124,9 @@ ColumnLayout {
                 }
 
                 StateLayer {
-                    function onClicked(): void {
-                        device.modelData.connected = !device.modelData.connected;
-                    }
-
                     color: device.modelData.state === BluetoothDeviceState.Connected ? Colours.palette.m3onPrimary : Colours.palette.m3onSurface // qmllint disable unresolved-type
                     disabled: device.loading
+                    onClicked: device.modelData.connected = !device.modelData.connected
                 }
 
                 MaterialIcon {
@@ -157,11 +154,8 @@ ColumnLayout {
                     implicitHeight: connectBtn.implicitHeight
 
                     StateLayer {
-                        function onClicked(): void {
-                            device.modelData.forget();
-                        }
-
                         radius: Tokens.rounding.full
+                        onClicked: device.modelData.forget()
                     }
 
                     MaterialIcon {

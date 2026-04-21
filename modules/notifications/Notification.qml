@@ -4,7 +4,6 @@ import QtQuick
 import QtQuick.Layouts
 import QtQuick.Shapes
 import Quickshell
-import Quickshell.Widgets
 import Quickshell.Services.Notifications
 import Caelestia.Config
 import qs.components
@@ -101,8 +100,7 @@ StyledRect {
 
             Behavior on implicitHeight {
                 Anim {
-                    duration: Tokens.anim.durations.expressiveDefaultSpatial
-                    easing: Tokens.anim.expressiveDefaultSpatial
+                    type: Anim.DefaultSpatial
                 }
             }
 
@@ -118,8 +116,9 @@ StyledRect {
                 height: TokenConfig.sizes.notifs.image
                 visible: root.hasImage || root.hasAppIcon
 
-                sourceComponent: ClippingRectangle {
+                sourceComponent: StyledClippingRect {
                     radius: Tokens.rounding.full
+                    color: root.modelData.urgency === NotificationUrgency.Critical ? Colours.palette.m3error : root.modelData.urgency === NotificationUrgency.Low ? Colours.layer(Colours.palette.m3surfaceContainerHighest, 2) : Colours.palette.m3secondaryContainer
                     implicitWidth: TokenConfig.sizes.notifs.image
                     implicitHeight: TokenConfig.sizes.notifs.image
 
@@ -285,9 +284,8 @@ StyledRect {
                         target: summary
                         property: "maximumLineCount"
                     }
-                    AnchorAnimation {
-                        duration: Tokens.anim.durations.normal
-                        easing: Tokens.anim.standard
+                    AnchorAnim {
+                        type: AnchorAnim.Standard
                     }
                 }
 
@@ -328,9 +326,8 @@ StyledRect {
                 }
 
                 transitions: Transition {
-                    AnchorAnimation {
-                        duration: Tokens.anim.durations.normal
-                        easing: Tokens.anim.standard
+                    AnchorAnim {
+                        type: AnchorAnim.Standard
                     }
                 }
             }
@@ -359,12 +356,9 @@ StyledRect {
                 implicitHeight: expandIcon.height
 
                 StateLayer {
-                    function onClicked() {
-                        root.expanded = !root.expanded;
-                    }
-
                     radius: Tokens.rounding.full
                     color: root.modelData.urgency === NotificationUrgency.Critical ? Colours.palette.m3onSecondaryContainer : Colours.palette.m3onSurface
+                    onClicked: root.expanded = !root.expanded
                 }
 
                 MaterialIcon {
@@ -490,12 +484,9 @@ StyledRect {
         implicitHeight: actionText.height + Tokens.padding.small * 2
 
         StateLayer {
-            function onClicked(): void {
-                action.modelData.invoke();
-            }
-
             radius: Tokens.rounding.full
             color: root.modelData.urgency === NotificationUrgency.Critical ? Colours.palette.m3onSecondary : Colours.palette.m3onSurface
+            onClicked: action.modelData.invoke()
         }
 
         StyledText {

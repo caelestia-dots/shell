@@ -131,7 +131,7 @@ Item {
                     StateLayer {
                         id: actionStateLayer
 
-                        function onClicked(): void {
+                        onClicked: {
                             if (action.modelData.isClose) {
                                 root.notif.close();
                             } else if (action.modelData.isCopy) {
@@ -183,15 +183,13 @@ Item {
 
                     Behavior on Layout.preferredWidth {
                         Anim {
-                            duration: Tokens.anim.durations.expressiveFastSpatial
-                            easing: Tokens.anim.expressiveFastSpatial
+                            type: Anim.FastSpatial
                         }
                     }
 
                     Behavior on radius {
                         Anim {
-                            duration: Tokens.anim.durations.expressiveFastSpatial
-                            easing: Tokens.anim.expressiveFastSpatial
+                            type: Anim.FastSpatial
                         }
                     }
                 }

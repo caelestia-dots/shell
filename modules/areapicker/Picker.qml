@@ -6,7 +6,6 @@ import Quickshell
 import Quickshell.Io
 import Quickshell.Wayland
 import Caelestia
-import Caelestia.Config
 import qs.components
 import qs.services
 
@@ -167,7 +166,7 @@ MouseArea {
                 target: root
                 property: "opacity"
                 to: 0
-                duration: Tokens.anim.durations.large
+                type: Anim.StandardLarge
             }
             ExAnim {
                 target: root
@@ -278,7 +277,7 @@ MouseArea {
 
     Behavior on opacity {
         Anim {
-            duration: Tokens.anim.durations.large
+            type: Anim.StandardLarge
         }
     }
 
@@ -307,7 +306,6 @@ MouseArea {
     }
 
     component ExAnim: Anim {
-        duration: Tokens.anim.durations.expressiveDefaultSpatial
-        easing: Tokens.anim.expressiveDefaultSpatial
+        type: Anim.DefaultSpatial
     }
 }

@@ -1,5 +1,4 @@
 #include "tokens.hpp"
-#include "config.hpp"
 #include "monitorconfigmanager.hpp"
 
 #include <qqmlengine.h>

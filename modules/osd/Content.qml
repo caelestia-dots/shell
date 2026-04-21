@@ -117,7 +117,7 @@ Item {
 
         Behavior on Layout.preferredHeight {
             Anim {
-                easing: Tokens.anim.emphasized
+                type: Anim.Emphasized
             }
         }
 

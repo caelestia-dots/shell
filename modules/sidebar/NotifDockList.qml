@@ -129,8 +129,7 @@ LazyListView {
                 enabled: notif.LazyListView.ready
 
                 Anim {
-                    duration: Tokens.anim.durations.expressiveDefaultSpatial
-                    easing: Tokens.anim.expressiveDefaultSpatial
+                    type: Anim.DefaultSpatial
                 }
             }
 
@@ -140,15 +139,13 @@ LazyListView {
 
             Behavior on scale {
                 Anim {
-                    duration: Tokens.anim.durations.expressiveDefaultSpatial
-                    easing: Tokens.anim.expressiveDefaultSpatial
+                    type: Anim.DefaultSpatial
                 }
             }
 
             Behavior on x {
                 Anim {
-                    duration: Tokens.anim.durations.expressiveDefaultSpatial
-                    easing: Tokens.anim.expressiveDefaultSpatial
+                    type: Anim.DefaultSpatial
                 }
             }
         }
@@ -159,7 +156,6 @@ LazyListView {
 
         target: root.container
         property: "contentY"
-        duration: Tokens.anim.durations.expressiveDefaultSpatial
-        easing: Tokens.anim.expressiveDefaultSpatial
+        type: Anim.DefaultSpatial
     }
 }

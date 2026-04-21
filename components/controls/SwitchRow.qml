@@ -1,4 +1,3 @@
-import ".."
 import QtQuick
 import QtQuick.Layouts
 import Caelestia.Config
@@ -10,7 +9,8 @@ StyledRect {
 
     required property string label
     required property bool checked
-    property var onToggled: function (checked) {}
+
+    signal toggled(checked: bool)
 
     Layout.fillWidth: true
     implicitHeight: row.implicitHeight + Tokens.padding.large * 2
@@ -38,9 +38,7 @@ StyledRect {
         StyledSwitch {
             checked: root.checked
             enabled: root.enabled
-            onToggled: {
-                root.onToggled(checked); // qmllint disable use-proper-function
-            }
+            onToggled: root.toggled(checked)
         }
     }
 }

@@ -288,7 +288,7 @@ Item {
                 }
 
                 StateLayer {
-                    function onClicked(): void {
+                    onClicked: {
                         passwordContainer.forceActiveFocus();
                     }
 
@@ -378,8 +378,7 @@ Item {
 
                         Behavior on scale {
                             Anim {
-                                duration: Tokens.anim.durations.expressiveFastSpatial
-                                easing: Tokens.anim.expressiveFastSpatial
+                                type: Anim.FastSpatial
                             }
                         }
                     }

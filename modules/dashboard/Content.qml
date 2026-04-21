@@ -199,15 +199,13 @@ Item {
 
     Behavior on implicitWidth {
         Anim {
-            duration: Tokens.anim.durations.large
-            easing: Tokens.anim.emphasized
+            type: Anim.EmphasizedLarge
         }
     }
 
     Behavior on implicitHeight {
         Anim {
-            duration: Tokens.anim.durations.large
-            easing: Tokens.anim.emphasized
+            type: Anim.EmphasizedLarge
         }
     }
 }

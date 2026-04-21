@@ -40,7 +40,7 @@ GridView {
         height: root.cellHeight
 
         StateLayer {
-            function onClicked(): void {
+            onClicked: {
                 Wallpapers.setWallpaper(modelData.path);
             }
 
