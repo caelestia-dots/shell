@@ -157,11 +157,12 @@ void BlobRect::setBottomRightRadius(qreal r) {
 }
 
 void BlobRect::cornerRadii(float out[4]) const {
-    const auto base = static_cast<float>(m_radius);
-    out[0] = m_topRightRadius >= 0 ? static_cast<float>(m_topRightRadius) : base;
-    out[1] = m_bottomRightRadius >= 0 ? static_cast<float>(m_bottomRightRadius) : base;
-    out[2] = m_bottomLeftRadius >= 0 ? static_cast<float>(m_bottomLeftRadius) : base;
-    out[3] = m_topLeftRadius >= 0 ? static_cast<float>(m_topLeftRadius) : base;
+    const auto maxR = static_cast<float>(std::min(width(), height())) * 0.5f;
+    const auto base = std::min(static_cast<float>(m_radius), maxR);
+    out[0] = std::min(m_topRightRadius >= 0 ? static_cast<float>(m_topRightRadius) : base, maxR);
+    out[1] = std::min(m_bottomRightRadius >= 0 ? static_cast<float>(m_bottomRightRadius) : base, maxR);
+    out[2] = std::min(m_bottomLeftRadius >= 0 ? static_cast<float>(m_bottomLeftRadius) : base, maxR);
+    out[3] = std::min(m_topLeftRadius >= 0 ? static_cast<float>(m_topLeftRadius) : base, maxR);
 }
 
 bool BlobRect::isExcluded(const BlobShape* other) const {

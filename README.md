@@ -264,6 +264,7 @@ For example, to disable the bar on DP-1:
 {
     "enabled": true,
     "appearance": {
+        "deformScale": 1,
         "anim": {
             "durations": {
                 "scale": 1

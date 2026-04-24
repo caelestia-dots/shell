@@ -96,7 +96,8 @@ void BlobShape::updateCenteredDeformMatrix() {
 }
 
 void BlobShape::cornerRadii(float out[4]) const {
-    const auto r = static_cast<float>(m_radius);
+    const auto maxR = static_cast<float>(std::min(width(), height())) * 0.5f;
+    const auto r = std::min(static_cast<float>(m_radius), maxR);
     out[0] = r;
     out[1] = r;
     out[2] = r;
