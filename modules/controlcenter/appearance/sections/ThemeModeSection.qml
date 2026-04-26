@@ -25,16 +25,18 @@ CollapsibleSection {
         category: "appearance"
         property real savedHue: 180
         property bool savedDarkMode: true
+        property string savedScheme: "monochromatic"
     }
 
     // State variable - load from settings on creation
     property real currentHue: themeSettings.savedHue
     property bool currentDarkMode: themeSettings.savedDarkMode
+    property string currentScheme: themeSettings.savedScheme
     
     // Debounce timer
     Timer {
         id: debounceTimer
-        interval: 1000
+        interval: 500
         repeat: false
         onTriggered: executeThemeUpdate()
     }
@@ -47,9 +49,10 @@ CollapsibleSection {
         // Save to settings
         themeSettings.savedHue = hueValue;
         themeSettings.savedDarkMode = currentDarkMode;
+        themeSettings.savedScheme = currentScheme;
         
         // Execute the python script
-        const command = ["sh", "-c", `python ~/.config/hypr/scheme/caelestia_hue_theme.py --hue ${hueValue} --mode ${mode}`];
+        const command = ["sh", "-c", `python ~/.config/hypr/scheme/caelestia_hue_theme.py --hue ${hueValue} --mode ${mode} --scheme ${currentScheme}`];
         Quickshell.execDetached(command);
         
         console.log(`Theme updated: hue=${hueValue}, mode=${mode}`);
@@ -69,9 +72,9 @@ CollapsibleSection {
             Layout.fillWidth: true
             spacing: 8
             
-            Text {
+            StyledText {
                 text: qsTr("Theme Hue: %1°").arg(Math.round(root.currentHue))
-                color: root.palette.text
+                font.weight: 800
             }
             
             Slider {
@@ -142,12 +145,70 @@ CollapsibleSection {
         }
         
         // Status indicator
-        Text {
+        StyledText {
             Layout.fillWidth: true
             text: debounceTimer.running ? qsTr("Updating theme...") : qsTr("Ready")
-            color: debounceTimer.running ? "#FFA500" : "#808080"
+            color: debounceTimer.running ? Colours.palette.m3tertiary : Colours.palette.m3outlineVariant
             font.pointSize: 9
             opacity: 0.7
+        }
+    }
+    
+    ColumnLayout {
+        Layout.fillWidth: true
+        spacing: Tokens.spacing.small / 2
+
+        StyledText {
+            text: qsTr("Color Scheme")
+            font.weight: 800
+        }
+
+        Repeater {
+            model: ["Monochromatic", "Complementary"]
+
+            delegate: StyledRect {
+                required property var modelData
+                required property int index
+
+                Layout.fillWidth: true
+
+                color: Qt.alpha(Colours.tPalette.m3surfaceContainer, root.currentScheme === (index === 0 ? "monochromatic" : "complementary") ? Colours.tPalette.m3surfaceContainer.a : 0)
+                radius: Tokens.rounding.normal
+                border.width: root.currentScheme === (index === 0 ? "monochromatic" : "complementary") ? 1 : 0
+                border.color: Colours.palette.m3primary
+                implicitHeight: schemeRow.implicitHeight + Tokens.padding.normal * 2
+
+                StateLayer {
+                    onClicked: {
+                        root.currentScheme = index === 0 ? "monochromatic" : "complementary";
+                        root.updateThemeDebounced();
+                    }
+                }
+
+                RowLayout {
+                    id: schemeRow
+
+                    anchors.left: parent.left
+                    anchors.right: parent.right
+                    anchors.verticalCenter: parent.verticalCenter
+                    anchors.margins: Tokens.padding.normal
+
+                    spacing: Tokens.spacing.normal
+
+                    StyledText {
+                        Layout.fillWidth: true
+                        text: modelData
+                        font.weight: root.currentScheme === (index === 0 ? "monochromatic" : "complementary") ? 500 : 400
+                    }
+
+                    MaterialIcon {
+                        visible: root.currentScheme === (index === 0 ? "monochromatic" : "complementary")
+                        text: "check"
+                        color: Colours.palette.m3primary
+                        font.pointSize: Tokens.font.size.large
+                    }
+                }
+            }
         }
     }
 }
