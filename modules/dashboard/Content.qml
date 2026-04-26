@@ -45,6 +45,12 @@ Item {
                 enabled: Config.dashboard.showPerformance && (Config.dashboard.performance.showCpu || Config.dashboard.performance.showGpu || Config.dashboard.performance.showMemory || Config.dashboard.performance.showStorage || Config.dashboard.performance.showNetwork || Config.dashboard.performance.showBattery)
             },
             {
+                component: tasksComponent,
+                iconName: "format_list_bulleted",
+                text: qsTr("Tasks"),
+                enabled: Config.dashboard.showTasks
+            },
+            {
                 component: weatherComponent,
                 iconName: "cloud",
                 text: qsTr("Weather"),
@@ -183,6 +189,12 @@ Item {
                 id: performanceComponent
 
                 Performance {}
+            }
+
+            Component {
+                id: tasksComponent
+
+                Tasks {}
             }
 
             Component {

@@ -74,6 +74,16 @@ SectionContainer {
 
         SwitchRow {
             Layout.fillWidth: true
+            label: qsTr("Show Tasks tab")
+            checked: root.rootItem.showTasks
+            onToggled: checked => {
+                root.rootItem.showTasks = checked;
+                root.rootItem.saveConfig();
+            }
+        }
+
+        SwitchRow {
+            Layout.fillWidth: true
             label: qsTr("Show Weather tab")
             checked: root.rootItem.showWeather
             onToggled: checked => {

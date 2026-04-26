@@ -30,6 +30,7 @@ Item {
     property bool showDashboard: Config.dashboard.showDashboard ?? true
     property bool showMedia: Config.dashboard.showMedia ?? true
     property bool showPerformance: Config.dashboard.showPerformance ?? true
+    property bool showTasks: Config.dashboard.showTasks ?? true
     property bool showWeather: Config.dashboard.showWeather ?? true
 
     // Performance Resources
@@ -49,6 +50,7 @@ Item {
         GlobalConfig.dashboard.showDashboard = root.showDashboard;
         GlobalConfig.dashboard.showMedia = root.showMedia;
         GlobalConfig.dashboard.showPerformance = root.showPerformance;
+        GlobalConfig.dashboard.showTasks = root.showTasks;
         GlobalConfig.dashboard.showWeather = root.showWeather;
         GlobalConfig.dashboard.performance.showBattery = root.showBattery;
         GlobalConfig.dashboard.performance.showGpu = root.showGpu;
