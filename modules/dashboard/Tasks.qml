@@ -13,11 +13,66 @@ Item {
     id: root
 
     readonly property int minWidth: 400 + 400 + Tokens.spacing.normal + 120 + Tokens.padding.large * 2
+    readonly property int listRowHeight: 36
+    readonly property int sectionRowHeight: 30
+    readonly property int visibleRows: 10
+    readonly property int headerRowHeight: 24
     implicitWidth: Math.max(minWidth, content.implicitWidth)
-    implicitHeight: 400
+    implicitHeight: Tokens.padding.large * 2
+                  + headerRowHeight
+                  + Tokens.spacing.normal
+                  + 1
+                  + Tokens.spacing.normal
+                  + (listRowHeight * visibleRows)
+                  + sectionRowHeight
 
     property string sortField: "-%cpu"
     property var processData: []
+    property var pendingProcessData: null
+    property bool updatesPaused: false
+
+    function isUserScrolling() {
+        return updatesPaused || listView.moving || listView.flicking || vScrollBar.pressed;
+    }
+
+    function pauseUpdates() {
+        updatesPaused = true;
+        resumeUpdatesTimer.restart();
+    }
+
+    function applyProcessData(newData) {
+        if (isUserScrolling()) {
+            pendingProcessData = newData;
+            return;
+        }
+
+        const previousY = listView.contentY;
+        const previousRange = Math.max(0, listView.contentHeight - listView.height);
+
+        root.processData = newData;
+
+        Qt.callLater(() => {
+            const newRange = Math.max(0, listView.contentHeight - listView.height);
+            listView.contentY = Math.max(0, Math.min(newRange, previousY));
+        });
+    }
+
+    function flushPendingProcessData() {
+        if (pendingProcessData === null || isUserScrolling()) return;
+        const data = pendingProcessData;
+        pendingProcessData = null;
+        applyProcessData(data);
+    }
+
+    Timer {
+        id: resumeUpdatesTimer
+        interval: 450
+        repeat: false
+        onTriggered: {
+            updatesPaused = false;
+            root.flushPendingProcessData();
+        }
+    }
 
     Timer {
         id: procTimer
@@ -26,33 +81,38 @@ Item {
         repeat: true
         triggeredOnStart: true
         onTriggered: {
+            if (root.isUserScrolling()) return;
             processLoader.running = true;
         }
     }
 
+    function formatBytes(bytes) {
+        if (bytes === 0) return '0 B';
+        const k = 1024;
+        const sizes = ['B', 'KiB', 'MiB', 'GiB', 'TiB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(i === 0 ? 0 : 2)) + ' ' + sizes[i];
+    }
+
     Process {
         id: processLoader
-        command: ["sh", "-c", `ps axo pid,comm,%cpu,%mem --sort=${root.sortField} | head -n 16 | tail -n +2`]
+        command: ["sh", "-c", "python3 ~/.config/quickshell/caelestia/utils/scripts/tasks.py " + root.sortField]
         stdout: StdioCollector {
             onStreamFinished: {
-                const lines = text.trim().split("\n");
-                let newData = [];
-                for (let i = 0; i < lines.length; i++) {
-                    const line = lines[i].trim();
-                    if (line.length === 0) continue;
+                if (text.trim() === "") return;
+                try {
+                    let parsed = JSON.parse(text);
+                    let apps = parsed.apps || [];
+                    let procs = parsed.processes || [];
                     
-                    // Matches format from ps output
-                    const parts = line.match(/^(\d+)\s+(.+?)\s+([0-9.]+)\s+([0-9.]+)$/);
-                    if (parts && parts.length === 5) {
-                        newData.push({
-                            pid: parts[1],
-                            name: parts[2],
-                            cpu: parts[3],
-                            mem: parts[4]
-                        });
-                    }
+                    let newData = [];
+                    for (let app of apps) { app.section = "Apps"; newData.push(app); }
+                    for (let p of procs) { p.section = "Processes"; newData.push(p); }
+
+                    root.applyProcessData(newData);
+                } catch (e) {
+                    console.error("Tasks parse error:", e);
                 }
-                root.processData = newData;
             }
         }
     }
@@ -72,8 +132,7 @@ Item {
 
         RowLayout {
             Layout.fillWidth: true
-            spacing: Tokens.spacing.small
-
+            spacing: Tokens.spacing.small  
             StyledText {
                 text: qsTr("Process Name")
                 Layout.fillWidth: true
@@ -82,8 +141,8 @@ Item {
             }
             
             HeaderButton {
-                text: "CPU % " + (root.sortField === "-%cpu" ? "↓" : (root.sortField === "%cpu" ? "↑" : ""))
-                Layout.preferredWidth: 60
+                text: "CPU " + (root.sortField === "-%cpu" ? "↓" : (root.sortField === "%cpu" ? "↑" : ""))
+                Layout.preferredWidth: 100
                 onClicked: {
                     root.sortField = root.sortField === "-%cpu" ? "%cpu" : "-%cpu";
                     processLoader.running = true;
@@ -91,10 +150,28 @@ Item {
             }
 
             HeaderButton {
-                text: "MEM % " + (root.sortField === "-%mem" ? "↓" : (root.sortField === "%mem" ? "↑" : ""))
-                Layout.preferredWidth: 60
+                text: "RAM " + (root.sortField === "-%mem" ? "↓" : (root.sortField === "%mem" ? "↑" : ""))
+                Layout.preferredWidth: 140
                 onClicked: {
                     root.sortField = root.sortField === "-%mem" ? "%mem" : "-%mem";
+                    processLoader.running = true;
+                }
+            }
+
+            HeaderButton {
+                text: "DISK " + (root.sortField === "-%io" ? "↓" : (root.sortField === "%io" ? "↑" : ""))
+                Layout.preferredWidth: 100
+                onClicked: {
+                    root.sortField = root.sortField === "-%io" ? "%io" : "-%io";
+                    processLoader.running = true;
+                }
+            }
+
+            HeaderButton {
+                text: "GPU " + (root.sortField === "-%gpu" ? "↓" : (root.sortField === "%gpu" ? "↑" : ""))
+                Layout.preferredWidth: 100
+                onClicked: {
+                    root.sortField = root.sortField === "-%gpu" ? "%gpu" : "-%gpu";
                     processLoader.running = true;
                 }
             }
@@ -111,13 +188,32 @@ Item {
         ListView {
             id: listView
             Layout.fillWidth: true
-            Layout.fillHeight: true
+            Layout.preferredHeight: root.listRowHeight * root.visibleRows + root.sectionRowHeight
             clip: true
+            interactive: true
             model: root.processData
+            QQC.ScrollBar.vertical: QQC.ScrollBar {
+                id: vScrollBar
+                policy: QQC.ScrollBar.AsNeeded
+            }
+
+            section.property: "section"
+            section.delegate: Item {
+                width: ListView.view.width
+                height: 30
+                StyledText {
+                    anchors.fill: parent
+                    anchors.leftMargin: Tokens.padding.small
+                    verticalAlignment: Text.AlignVCenter
+                    text: section
+                    font.bold: true
+                    color: Colours.palette.m3primary
+                }
+            }
 
             delegate: Item {
                 width: ListView.view.width
-                height: 36
+                height: root.listRowHeight
 
                 StyledRect {
                     anchors.fill: parent
@@ -131,23 +227,37 @@ Item {
                         spacing: Tokens.spacing.small
 
                         StyledText {
-                            text: modelData.name
+                            text: modelData.name + (modelData.count > 1 ? (" (" + modelData.count + ")") : "")
                             Layout.fillWidth: true
                             color: Colours.palette.m3onSurface
                             elide: Text.ElideRight
                         }
 
                         StyledText {
-                            text: modelData.cpu
-                            Layout.preferredWidth: 60
-                            horizontalAlignment: Text.AlignRight
+                            text: modelData.cpu.toFixed(1) + "%"
+                            Layout.preferredWidth: 100
+                            horizontalAlignment: Text.AlignHCenter
                             color: Colours.palette.m3onSurfaceVariant
                         }
 
                         StyledText {
-                            text: modelData.mem
-                            Layout.preferredWidth: 60
-                            horizontalAlignment: Text.AlignRight
+                            text: root.formatBytes(modelData.rss)
+                            Layout.preferredWidth: 140
+                            horizontalAlignment: Text.AlignHCenter
+                            color: Colours.palette.m3onSurfaceVariant
+                        }
+
+                        StyledText {
+                            text: modelData.io > 0 ? root.formatBytes(modelData.io) + "/s" : "0 B/s"
+                            Layout.preferredWidth: 100
+                            horizontalAlignment: Text.AlignHCenter
+                            color: Colours.palette.m3onSurfaceVariant
+                        }
+
+                        StyledText {
+                            text: modelData.gpu > 0 ? root.formatBytes(modelData.gpu) : "-"
+                            Layout.preferredWidth: 100
+                            horizontalAlignment: Text.AlignHCenter
                             color: Colours.palette.m3onSurfaceVariant
                         }
 
@@ -155,7 +265,7 @@ Item {
                             Layout.preferredWidth: 40
                             Layout.preferredHeight: parent.height
 
-                            CustomMouseArea {
+                            MouseArea {
                                 anchors.centerIn: parent
                                 width: 24
                                 height: 24
@@ -176,7 +286,7 @@ Item {
                         }
                     }
                     
-                    CustomMouseArea {
+                    MouseArea {
                         id: itemMouseArea
                         anchors.fill: parent
                         hoverEnabled: true
@@ -191,6 +301,20 @@ Item {
                     }
                 }
             }
+
+            onMovementStarted: root.pauseUpdates()
+            onMovingChanged: root.flushPendingProcessData()
+            onFlickingChanged: root.flushPendingProcessData()
+        }
+    }
+
+    Connections {
+        target: vScrollBar
+        function onPressedChanged() {
+            if (vScrollBar.pressed) {
+                root.pauseUpdates();
+            }
+            root.flushPendingProcessData();
         }
     }
 
