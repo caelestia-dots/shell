@@ -164,7 +164,7 @@ CollapsibleSection {
         }
 
         Repeater {
-            model: ["Monochromatic", "Complementary"]
+            model: ["Monochromatic", "Complementary", "Analogous", "Triadic", "Split-Complementary", "Tetradic"]
 
             delegate: StyledRect {
                 required property var modelData
@@ -172,15 +172,16 @@ CollapsibleSection {
 
                 Layout.fillWidth: true
 
-                color: Qt.alpha(Colours.tPalette.m3surfaceContainer, root.currentScheme === (index === 0 ? "monochromatic" : "complementary") ? Colours.tPalette.m3surfaceContainer.a : 0)
+                property var schemeNames: ["monochromatic", "complementary", "analogous", "triadic", "split-complementary", "tetradic"]
+                color: Qt.alpha(Colours.tPalette.m3surfaceContainer, root.currentScheme === schemeNames[index] ? Colours.tPalette.m3surfaceContainer.a : 0)
                 radius: Tokens.rounding.normal
-                border.width: root.currentScheme === (index === 0 ? "monochromatic" : "complementary") ? 1 : 0
+                border.width: root.currentScheme === schemeNames[index] ? 1 : 0
                 border.color: Colours.palette.m3primary
                 implicitHeight: schemeRow.implicitHeight + Tokens.padding.normal * 2
 
                 StateLayer {
                     onClicked: {
-                        root.currentScheme = index === 0 ? "monochromatic" : "complementary";
+                        root.currentScheme = schemeNames[index];
                         root.updateThemeDebounced();
                     }
                 }
@@ -202,7 +203,7 @@ CollapsibleSection {
                     }
 
                     MaterialIcon {
-                        visible: root.currentScheme === (index === 0 ? "monochromatic" : "complementary")
+                        visible: root.currentScheme === schemeNames[index]
                         text: "check"
                         color: Colours.palette.m3primary
                         font.pointSize: Tokens.font.size.large
