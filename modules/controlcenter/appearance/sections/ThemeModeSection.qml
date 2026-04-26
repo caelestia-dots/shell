@@ -4,6 +4,8 @@ import ".."
 import "../../components"
 import QtQuick
 import QtQuick.Layouts
+import QtQuick.Controls
+import Qt.labs.settings
 import Quickshell
 import Caelestia.Config
 import qs.components
@@ -17,48 +19,135 @@ CollapsibleSection {
     description: qsTr("Custom hue & Light/Dark theme")
     showBackground: true
 
-    // State variable to track the hue value
-    property real currentHue: 180
+    // Persistent settings
+    Settings {
+        id: themeSettings
+        category: "appearance"
+        property real savedHue: 180
+        property bool savedDarkMode: true
+    }
 
-    // Reusable function to execute your script
-    function updateTheme() {
-        // Caelestia handles mode globally via Colours.currentLight
-        const mode = Colours.currentLight ? "light" : "dark";
+    // State variable - load from settings on creation
+    property real currentHue: themeSettings.savedHue
+    property bool currentDarkMode: themeSettings.savedDarkMode
+    
+    // Debounce timer
+    Timer {
+        id: debounceTimer
+        interval: 1000
+        repeat: false
+        onTriggered: executeThemeUpdate()
+    }
+
+    // Execute the actual theme update
+    function executeThemeUpdate() {
+        const mode = currentDarkMode ? "dark" : "light";
         const hueValue = Math.round(currentHue);
         
-        // Execute the python script in a shell cleanly resolving '~'
+        // Save to settings
+        themeSettings.savedHue = hueValue;
+        themeSettings.savedDarkMode = currentDarkMode;
+        
+        // Execute the python script
         const command = ["sh", "-c", `python ~/.config/hypr/scheme/caelestia_hue_theme.py --hue ${hueValue} --mode ${mode}`];
         Quickshell.execDetached(command);
+        
+        console.log(`Theme updated: hue=${hueValue}, mode=${mode}`);
+    }
+
+    // Debounced update - restart timer on value change
+    function updateThemeDebounced() {
+        debounceTimer.restart();
     }
 
     ColumnLayout {
         Layout.fillWidth: true
         spacing: Tokens.spacing.normal
         
-        SliderInput {
+        // Custom slider with rainbow gradient
+        ColumnLayout {
             Layout.fillWidth: true
-            label: qsTr("Theme Hue")
-            value: root.currentHue
-            from: 0
-            to: 360
-            stepSize: 1
-            decimals: 0
-            onValueModified: (newValue) => {
-                root.currentHue = newValue;
-                updateTheme();
+            spacing: 8
+            
+            Text {
+                text: qsTr("Theme Hue: %1°").arg(Math.round(root.currentHue))
+                color: root.palette.text
+            }
+            
+            Slider {
+                id: hueSlider
+                Layout.fillWidth: true
+                from: 0
+                to: 360
+                stepSize: 1
+                value: root.currentHue
+                
+                onMoved: {
+                    root.currentHue = value;
+                    root.updateThemeDebounced();
+                }
+                
+                background: Rectangle {
+                    x: hueSlider.leftPadding
+                    y: hueSlider.topPadding + hueSlider.availableHeight / 2 - height / 2
+                    implicitWidth: 200
+                    implicitHeight: 8
+                    width: hueSlider.availableWidth
+                    height: implicitHeight
+                    radius: 4
+                    
+                    // Rainbow gradient background
+                    gradient: Gradient {
+                        orientation: Gradient.Horizontal
+                        GradientStop { position: 0.0; color: "#FF0000" }     // Red
+                        GradientStop { position: 0.167; color: "#FFFF00" }   // Yellow
+                        GradientStop { position: 0.333; color: "#00FF00" }   // Green
+                        GradientStop { position: 0.5; color: "#00FFFF" }     // Cyan
+                        GradientStop { position: 0.667; color: "#0000FF" }   // Blue
+                        GradientStop { position: 0.833; color: "#FF00FF" }   // Magenta
+                        GradientStop { position: 1.0; color: "#FF0000" }     // Red
+                    }
+                }
+                
+                handle: Rectangle {
+                    x: hueSlider.leftPadding + hueSlider.visualPosition * (hueSlider.availableWidth - width)
+                    y: hueSlider.topPadding + hueSlider.availableHeight / 2 - height / 2
+                    implicitWidth: 20
+                    implicitHeight: 20
+                    radius: 10
+                    color: "white"
+                    border.color: "#333333"
+                    border.width: 2
+                    
+                    // Hue indicator preview
+                    Rectangle {
+                        anchors.centerIn: parent
+                        width: 12
+                        height: 12
+                        radius: 6
+                        color: Qt.hsla(root.currentHue / 360, 0.8, 0.5, 1.0)
+                    }
+                }
             }
         }
 
         SwitchRow {
             Layout.fillWidth: true
             label: qsTr("Dark mode")
-            checked: !Colours.currentLight
-            onToggled: checked => {
-                // Change internal caelestia colors
-                Colours.setMode(checked ? "dark" : "light");
-                // Trigger the python script
-                updateTheme();
+            checked: root.currentDarkMode
+            onToggled: (checked) => {
+                root.currentDarkMode = checked;
+                root.updateThemeDebounced();
             }
+        }
+        
+        // Status indicator
+        Text {
+            Layout.fillWidth: true
+            text: debounceTimer.running ? qsTr("Updating theme...") : qsTr("Ready")
+            color: debounceTimer.running ? "#FFA500" : "#808080"
+            font.pointSize: 9
+            opacity: 0.7
         }
     }
 }
