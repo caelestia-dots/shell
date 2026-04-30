@@ -126,8 +126,10 @@ StyledRect {
                         anchors.fill: parent
                         source: Qt.resolvedUrl(root.modelData.image)
                         fillMode: Image.PreserveAspectCrop
-                        sourceSize.width: TokenConfig.sizes.notifs.image
-                        sourceSize.height: TokenConfig.sizes.notifs.image
+                        sourceSize: {
+                            const size = TokenConfig.sizes.notifs.image * ((QsWindow.window as QsWindow)?.devicePixelRatio ?? 1);
+                            return Qt.size(size, size);
+                        }
                         cache: false
                         asynchronous: true
                     }

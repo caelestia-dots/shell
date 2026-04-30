@@ -298,6 +298,7 @@ For example, to disable the bar on DP-1:
     },
     "general": {
         "logo": "caelestia",
+        "showOverFullscreen": false,
         "mediaGifSpeedAdjustment": 300,
         "sessionGifSpeed": 0.7,
         "apps": {

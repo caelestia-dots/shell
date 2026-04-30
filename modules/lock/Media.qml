@@ -2,6 +2,7 @@ pragma ComponentBehavior: Bound
 
 import QtQuick
 import QtQuick.Layouts
+import Quickshell
 import Caelestia.Config
 import qs.components
 import qs.components.effects
@@ -22,8 +23,10 @@ Item {
 
         asynchronous: true
         fillMode: Image.PreserveAspectCrop
-        sourceSize.width: width
-        sourceSize.height: height
+        sourceSize: {
+            const dpr = (QsWindow.window as QsWindow)?.devicePixelRatio ?? 1;
+            return Qt.size(width * dpr, height * dpr);
+        }
 
         layer.enabled: true
         layer.effect: OpacityMask {

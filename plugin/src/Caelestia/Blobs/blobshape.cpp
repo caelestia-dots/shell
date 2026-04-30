@@ -149,6 +149,10 @@ void BlobShape::updatePolish() {
     const QRectF myPadded(static_cast<double>(m_cachedPaddedX), static_cast<double>(m_cachedPaddedY),
         static_cast<double>(m_cachedPaddedW), static_cast<double>(m_cachedPaddedH));
 
+    // Track shape pointers parallel to m_cachedRects for pairwise exclusion lookups
+    QVector<BlobShape*> rectShapes;
+    rectShapes.reserve(m_group->shapes().size());
+
     for (BlobShape* other : m_group->shapes()) {
         if (other->isInvertedRect())
             continue;
@@ -210,11 +214,28 @@ void BlobShape::updatePolish() {
             r.screenHalfY = std::abs(b) * r.hw + std::abs(d) * r.hh;
 
             m_cachedRects.append(r);
+            rectShapes.append(other);
         }
     }
 
     if (isInvertedRect())
         m_cachedMyIndex = -1;
+
+    // Compute pairwise exclude masks. Bit j in entry i is set iff rect i excludes rect j
+    // or rect j excludes rect i. The shader uses this to avoid smin between excluded pairs.
+    const auto cachedCount = m_cachedRects.size();
+    for (qsizetype i = 0; i < cachedCount; ++i) {
+        int mask = 0;
+        BlobShape* si = rectShapes[i];
+        for (qsizetype j = 0; j < cachedCount; ++j) {
+            if (j == i)
+                continue;
+            BlobShape* sj = rectShapes[j];
+            if (si->isExcluded(sj) || sj->isExcluded(si))
+                mask |= (1 << j);
+        }
+        m_cachedRects[i].excludeMask = mask;
+    }
 
     // Cache inverted rect data
     m_cachedHasInverted = false;
@@ -270,6 +291,7 @@ void BlobShape::updatePolish() {
     const auto rectCount = m_cachedRects.size();
     for (qsizetype i = 0; i < rectCount; ++i) {
         auto& ri = m_cachedRects[i];
+        const int riExcludeMask = ri.excludeMask;
         float fTr = 1.0f, fBr = 1.0f, fBl = 1.0f, fTl = 1.0f;
 
         const float cTrX = ri.cx + ri.hw, cTrY = ri.cy - ri.hh;
@@ -279,6 +301,8 @@ void BlobShape::updatePolish() {
 
         for (qsizetype j = 0; j < rectCount; ++j) {
             if (j == i)
+                continue;
+            if (riExcludeMask & (1 << j))
                 continue;
             const auto& rj = m_cachedRects[j];
             fTr = std::min(fTr, cpuSmoothstep(0.0f, smoothFactor, cpuSdBox(cTrX, cTrY, rj.cx, rj.cy, rj.hw, rj.hh)));
