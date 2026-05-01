@@ -136,7 +136,6 @@ RowLayout {
             DelegateChoice {
                 roleValue: "activeWindow"
                 delegate: WrappedLoader {
-                    Layout.fillHeight: true
                     visible: !root.fullscreen
                     sourceComponent: ActiveWindow {
                         bar: root
