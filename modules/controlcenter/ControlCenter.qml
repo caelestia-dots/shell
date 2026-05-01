@@ -31,6 +31,7 @@ Item {
     implicitHeight: screen.height * Tokens.sizes.controlCenter.heightMult
 
     GridLayout {
+        anchors.topMargin: Tokens.sizes.bar.innerHeight + Math.max(Tokens.padding.smaller, Config.border.thickness)
         anchors.fill: parent
 
         rowSpacing: 0

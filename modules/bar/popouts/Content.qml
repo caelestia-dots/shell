@@ -22,6 +22,7 @@ Item {
 
         anchors.fill: parent
         anchors.margins: Tokens.padding.large
+        anchors.topMargin: Tokens.sizes.bar.innerHeight + Math.max(Tokens.padding.smaller, Config.border.thickness) + Tokens.padding.large
 
         Popout {
             name: "activewindow"
