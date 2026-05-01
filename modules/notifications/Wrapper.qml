@@ -10,7 +10,7 @@ Item {
     property alias sessionPanel: content.sessionPanel
 
     visible: height > 0
-    anchors.topMargin: -5
+    anchors.topMargin: 1000
     implicitWidth: Math.max(sidebarPanel.width, content.implicitWidth)
     implicitHeight: content.implicitHeight
 

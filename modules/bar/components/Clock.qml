@@ -11,13 +11,13 @@ StyledRect {
     readonly property color colour: Colours.palette.m3tertiary
     readonly property int padding: Config.bar.clock.background ? Tokens.padding.normal : Tokens.padding.small
 
-    implicitWidth: Tokens.sizes.bar.innerWidth
-    implicitHeight: layout.implicitHeight + root.padding * 2
+    implicitWidth: layout.implicitWidth + root.padding * 2
+    implicitHeight: Tokens.sizes.bar.innerHeight
 
     color: Qt.alpha(Colours.tPalette.m3surfaceContainer, Config.bar.clock.background ? Colours.tPalette.m3surfaceContainer.a : 0)
     radius: Tokens.rounding.full
 
-    Column {
+    Row {
         id: layout
 
         anchors.centerIn: parent
@@ -25,7 +25,7 @@ StyledRect {
 
         Loader {
             asynchronous: true
-            anchors.horizontalCenter: parent.horizontalCenter
+            anchors.verticalCenter: parent.verticalCenter
 
             active: Config.bar.clock.showIcon
             visible: active
@@ -37,32 +37,21 @@ StyledRect {
         }
 
         StyledText {
-            anchors.horizontalCenter: parent.horizontalCenter
-
+            anchors.verticalCenter: parent.verticalCenter
             visible: Config.bar.clock.showDate
 
-            horizontalAlignment: StyledText.AlignHCenter
-            text: Time.format("ddd\nd")
+            verticalAlignment: StyledText.AlignVCenter
+            text: Time.format("ddd d") + ","
             font.pointSize: Tokens.font.size.smaller
             font.family: Tokens.font.family.sans
             color: root.colour
         }
 
-        Rectangle {
-            anchors.horizontalCenter: parent.horizontalCenter
-            visible: Config.bar.clock.showDate
-            height: visible ? 1 : 0
-
-            width: parent.width * 0.8
-            color: root.colour
-            opacity: 0.2
-        }
-
         StyledText {
-            anchors.horizontalCenter: parent.horizontalCenter
+            anchors.verticalCenter: parent.verticalCenter
 
-            horizontalAlignment: StyledText.AlignHCenter
-            text: Time.format(GlobalConfig.services.useTwelveHourClock ? "hh\nmm\nA" : "hh\nmm")
+            verticalAlignment: StyledText.AlignVCenter
+            text: Time.format(GlobalConfig.services.useTwelveHourClock ? "hh:mm:ss A" : "hh:mm:ss")
             font.pointSize: Tokens.font.size.smaller
             font.family: Tokens.font.family.mono
             color: root.colour

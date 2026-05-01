@@ -12,8 +12,8 @@ Item {
 
     required property PopoutState popouts
 
-    implicitWidth: Hypr.activeToplevel ? child.implicitWidth : -Tokens.padding.large * 2
-    implicitHeight: child.implicitHeight
+    implicitWidth: child.implicitWidth
+    implicitHeight: Hypr.activeToplevel ? child.implicitHeight : -Tokens.padding.large * 2
 
     Column {
         id: child
