@@ -2,6 +2,9 @@
 
 #include <cstring>
 
+static_assert(sizeof(decltype(BlobRectData::excludeMask)) == sizeof(float),
+    "BlobMaterial packs excludeMask into a float slot via memcpy");
+
 QSGMaterialType* BlobMaterial::type() const {
     static QSGMaterialType s_type;
     return &s_type;
@@ -82,8 +85,11 @@ bool BlobMaterialShader::updateUniformData(RenderState& state, QSGMaterial* newM
     for (int i = 0; i < count; ++i) {
         const auto& r = mat->m_rects[i];
         const int base = 160 + i * 80;
+        // Pack excludeMask into props.x via bit-cast (read in shader with floatBitsToInt)
+        float maskAsFloat;
+        memcpy(&maskAsFloat, &r.excludeMask, sizeof(float));
         const float d0[4] = { r.cx, r.cy, r.hw, r.hh };
-        const float d1[4] = { 0.0f, r.offsetX, r.offsetY, r.minEig };
+        const float d1[4] = { maskAsFloat, r.offsetX, r.offsetY, r.minEig };
         const float d3[4] = { r.screenHalfX, r.screenHalfY, 0.0f, 0.0f };
         memcpy(buf->data() + base, d0, 16);
         memcpy(buf->data() + base + 16, d1, 16);
