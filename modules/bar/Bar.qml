@@ -47,10 +47,10 @@ RowLayout {
 
         if (id === "statusIcons" && Config.bar.popouts.statusIcons) {
             const items = (ch.item as StatusIcons).items;
-            const icon = items.childAt(mapToItem(items, 0, x).x, items.height / 2);
+            const icon = items.childAt(mapToItem(items, x, 0).x, items.height / 2);
             if (icon) {
                 popouts.currentName = icon.name;
-                popouts.currentCenter = Qt.binding(() => icon.mapToItem(root, icon.implicitWidth / 2).x, 0);
+                popouts.currentCenter = Qt.binding(() => icon.mapToItem(root, icon.implicitWidth / 2, 0).x);
                 popouts.hasCurrent = true;
             }
         } else if (id === "tray" && Config.bar.popouts.tray) {
