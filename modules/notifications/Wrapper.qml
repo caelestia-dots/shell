@@ -11,7 +11,7 @@ Item {
     property alias sessionPanel: content.sessionPanel
 
     visible: height > 0
-    anchors.topMargin: Tokens.sizes.bar.innerHeight + Math.max(Tokens.padding.smaller, Config.border.thickness) * 2
+    anchors.topMargin: Tokens.sizes.bar.innerHeight + Math.max(Tokens.padding.smaller, Config.border.thickness)
     implicitWidth: Math.max(sidebarPanel.width, content.implicitWidth)
     implicitHeight: content.implicitHeight
 
