@@ -139,9 +139,9 @@ Singleton {
     Process {
         id: storage
 
-        // Get physical disks with aggregated usage from their partitions
-        // -J triggers JSON output. -b triggers bytes.
-        command: ["lsblk", "-J", "-b", "-o", "NAME,SIZE,TYPE,FSUSED,FSSIZE,MOUNTPOINT"]
+        // The '-only local' argument of duf does not filter out other disks
+        // if the output format is json, it is of no use here
+        command: ["duf", "-json"]
 
         stdout: StdioCollector {
             onStreamFinished: {
@@ -149,56 +149,22 @@ Singleton {
                 const diskList = [];
                 const seenDevices = new Set();
 
-                // Helper to recursively sum usage from children (partitions, crypt, lvm)
-                const aggregateUsage = dev => {
-                    let used = 0;
-                    let size = 0;
-                    let isRoot = dev.mountpoint === "/" || (dev.mountpoints && dev.mountpoints.includes("/"));
+                for (const dev of data) {
+                    if (dev.device_type === "local" && dev.fs_type !== "ramfs" && !seenDevices.has(dev.device)) {
+                        seenDevices.add(dev.device);
 
-                    if (!seenDevices.has(dev.name)) {
-                        // lsblk returns null for empty/unformatted partitions, which parses to 0 here
-                        used = parseInt(dev.fsused) || 0;
-                        size = parseInt(dev.fssize) || 0;
-                        seenDevices.add(dev.name);
-                    }
-
-                    if (dev.children) {
-                        for (const child of dev.children) {
-                            const stats = aggregateUsage(child);
-                            used += stats.used;
-                            size += stats.size;
-                            if (stats.isRoot)
-                                isRoot = true;
-                        }
-                    }
-                    return {
-                        used,
-                        size,
-                        isRoot
-                    };
-                };
-
-                for (const dev of data.blockdevices) {
-                    // Only process physical disks at the top level
-                    if (dev.type === "disk" && !dev.name.startsWith("zram")) {
-                        const stats = aggregateUsage(dev);
-
-                        if (stats.size === 0) {
-                            continue;
-                        }
-
-                        const total = stats.size;
-                        const used = stats.used;
+                        // dev.used returns a value lower than the acutal value because
+                        // it does not consider reserved space not usable by a regular
+                        // user as used space, hence the recalculation
+                        let used = dev.total - dev.free;
 
                         diskList.push({
-                            mount: dev.name,
-                            used: used / 1024      // KiB
-                            ,
-                            total: total / 1024    // KiB
-                            ,
-                            free: (total - used) / 1024,
-                            perc: total > 0 ? used / total : 0,
-                            hasRoot: stats.isRoot
+                            mount: dev.mount_point,
+                            used: used / 1024,
+                            total: dev.total / 1024,
+                            free: dev.free / 1024,
+                            perc: dev.total > 0 ? used / dev.total : 0,
+                            hasRoot: dev.mount_point === "/"
                         });
                     }
                 }
