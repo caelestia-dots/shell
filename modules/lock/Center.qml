@@ -312,7 +312,7 @@ ColumnLayout {
                     return qsTr("Incorrect password. Please try again.");
                 }
                 if (pam.fprintState === "fail")
-                    return qsTr("Fingerprint not recognized (%1/%2). Please try again or use password.").arg(pam.fprint.tries).arg(Config.lock.maxFprintTries);
+                    return qsTr("Fingerprint not recognized (%1/%2). Please try again or use password.").arg(pam.fprint.tries).arg(GlobalConfig.lock.maxFprintTries);
 
                 return "";
             }
