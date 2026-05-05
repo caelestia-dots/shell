@@ -96,7 +96,8 @@ Item {
             }
             entries.push({
                 id: entry.id,
-                enabled: enabled
+                enabled: enabled,
+                source: entry.source || undefined
             });
         }
         GlobalConfig.bar.entries = entries;
@@ -111,7 +112,8 @@ Item {
                 const entry = Config.bar.entries[i];
                 entriesModel.append({
                     id: entry.id,
-                    enabled: entry.enabled !== false
+                    enabled: entry.enabled !== false,
+                    source: entry.source || ""
                 });
             }
         }
