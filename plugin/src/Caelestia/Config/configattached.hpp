@@ -20,7 +20,6 @@ class Config : public QQuickAttachedPropertyPropagator, public QQmlParserStatus 
     Q_MOC_INCLUDE("dashboardconfig.hpp")
     Q_MOC_INCLUDE("generalconfig.hpp")
     Q_MOC_INCLUDE("launcherconfig.hpp")
-    Q_MOC_INCLUDE("lockconfig.hpp")
     Q_MOC_INCLUDE("notifsconfig.hpp")
     Q_MOC_INCLUDE("osdconfig.hpp")
     Q_MOC_INCLUDE("serviceconfig.hpp")
@@ -43,7 +42,6 @@ class Config : public QQuickAttachedPropertyPropagator, public QQmlParserStatus 
     Q_PROPERTY(const caelestia::config::OsdConfig* osd READ osd NOTIFY sourceChanged)
     Q_PROPERTY(const caelestia::config::SessionConfig* session READ session NOTIFY sourceChanged)
     Q_PROPERTY(const caelestia::config::WInfoConfig* winfo READ winfo NOTIFY sourceChanged)
-    Q_PROPERTY(const caelestia::config::LockConfig* lock READ lock NOTIFY sourceChanged)
     Q_PROPERTY(const caelestia::config::UtilitiesConfig* utilities READ utilities NOTIFY sourceChanged)
     Q_PROPERTY(const caelestia::config::SidebarConfig* sidebar READ sidebar NOTIFY sourceChanged)
     Q_PROPERTY(const caelestia::config::ServiceConfig* services READ services NOTIFY sourceChanged)
@@ -67,7 +65,6 @@ public:
     [[nodiscard]] const OsdConfig* osd() const;
     [[nodiscard]] const SessionConfig* session() const;
     [[nodiscard]] const WInfoConfig* winfo() const;
-    [[nodiscard]] const LockConfig* lock() const;
     [[nodiscard]] const UtilitiesConfig* utilities() const;
     [[nodiscard]] const SidebarConfig* sidebar() const;
     [[nodiscard]] const ServiceConfig* services() const;

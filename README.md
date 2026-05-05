@@ -158,10 +158,6 @@ target drawers
   function list(): string
 target notifs
   function clear(): void
-target lock
-  function lock(): void
-  function unlock(): void
-  function isLocked(): bool
 target mpris
   function playPause(): void
   function getActive(prop: string): string
@@ -241,7 +237,6 @@ For example, to disable the bar on DP-1:
 >   `favouriteApps`, `hiddenApps`, `actions`)
 > - `launcher.useFuzzy` (`apps`, `actions`, `schemes`, `variants`, `wallpapers`)
 > - `notifs` (`expire`, `fullscreen`, `defaultExpireTimeout`, `actionOnClick`)
-> - `lock` (`enableFprint`, `maxFprintTries`)
 > - `utilities` (`toasts`, `vpn`)
 > - `services` (`weatherLocation`, `useFahrenheit`, `useFahrenheitPerformance`, `useTwelveHourClock`,
 >   `gpuType`, `visualiserBars`, `audioIncrement`, `brightnessIncrement`, `maxVolume`, `smartScheme`,
@@ -630,10 +625,6 @@ For example, to disable the bar on DP-1:
         "showOnHover": false,
         "favouriteApps": [],
         "hiddenApps": []
-    },
-    "lock": {
-        "recolourLogo": false,
-        "hideNotifs": false
     },
     "notifs": {
         "actionOnClick": false,

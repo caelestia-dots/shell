@@ -7,7 +7,6 @@
 #include "dashboardconfig.hpp"
 #include "generalconfig.hpp"
 #include "launcherconfig.hpp"
-#include "lockconfig.hpp"
 #include "monitorconfigmanager.hpp"
 #include "notifsconfig.hpp"
 #include "osdconfig.hpp"
@@ -46,7 +45,6 @@ GlobalConfig::GlobalConfig(QObject* parent)
     , m_osd(new OsdConfig(this))
     , m_session(new SessionConfig(this))
     , m_winfo(new WInfoConfig(this))
-    , m_lock(new LockConfig(this))
     , m_utilities(new UtilitiesConfig(this))
     , m_sidebar(new SidebarConfig(this))
     , m_services(new ServiceConfig(this))
@@ -68,7 +66,6 @@ GlobalConfig::GlobalConfig(GlobalConfig* fallback, const QString& filePath, cons
     , m_osd(new OsdConfig(this))
     , m_session(new SessionConfig(this))
     , m_winfo(new WInfoConfig(this))
-    , m_lock(new LockConfig(this))
     , m_utilities(new UtilitiesConfig(this))
     , m_sidebar(new SidebarConfig(this))
     , m_services(new ServiceConfig(this))
