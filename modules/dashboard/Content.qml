@@ -39,6 +39,12 @@ Item {
                 enabled: Config.dashboard.showMedia
             },
             {
+                component: pomodoroComponent,
+                iconName: "timer",
+                text: qsTr("Pomodoro"),
+                enabled: true
+            },
+            {
                 component: performanceComponent,
                 iconName: "speed",
                 text: qsTr("Performance"),
@@ -177,6 +183,12 @@ Item {
                 MediaWrapper {
                     visibilities: root.visibilities
                 }
+            }
+
+            Component {
+                id: pomodoroComponent
+
+                Pomodoro {}
             }
 
             Component {
