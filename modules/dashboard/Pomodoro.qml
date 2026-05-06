@@ -14,17 +14,23 @@ Item {
 
     // ── Colors ────────────────────────────────────────────────────────────
     readonly property color phaseColor: {
-        if (root.svc.idleMode)                           return Colours.palette.m3onSurfaceVariant
-        if (root.svc.currentPhase.type === "work")       return Colours.palette.m3primary
-        if (root.svc.phaseIndex === 5 && root.svc.useLongBreak) return Colours.palette.m3secondary
-        return Colours.palette.m3tertiary
+        if (root.svc.idleMode)
+            return Colours.palette.m3onSurfaceVariant;
+        if (root.svc.currentPhase.type === "work")
+            return Colours.palette.m3primary;
+        if (root.svc.phaseIndex === 5 && root.svc.useLongBreak)
+            return Colours.palette.m3secondary;
+        return Colours.palette.m3tertiary;
     }
 
     readonly property color onPhaseColor: {
-        if (root.svc.idleMode)                           return Colours.palette.m3onSurface
-        if (root.svc.currentPhase.type === "work")       return Colours.palette.m3onPrimary
-        if (root.svc.phaseIndex === 5 && root.svc.useLongBreak) return Colours.palette.m3onSecondary
-        return Colours.palette.m3onTertiary
+        if (root.svc.idleMode)
+            return Colours.palette.m3onSurface;
+        if (root.svc.currentPhase.type === "work")
+            return Colours.palette.m3onPrimary;
+        if (root.svc.phaseIndex === 5 && root.svc.useLongBreak)
+            return Colours.palette.m3onSecondary;
+        return Colours.palette.m3onTertiary;
     }
 
     readonly property bool needsKeyboard: settingsSection.expanded
@@ -57,7 +63,11 @@ Item {
                     text: "timer"
                     font.pointSize: Tokens.font.size.large
                     color: root.phaseColor
-                    Behavior on color { CAnim { duration: Tokens.anim.durations.normal } }
+                    Behavior on color {
+                        CAnim {
+                            duration: Tokens.anim.durations.normal
+                        }
+                    }
                 }
 
                 StyledText {
@@ -67,7 +77,9 @@ Item {
                     color: Colours.palette.m3onSurface
                 }
 
-                Item { Layout.fillWidth: true }
+                Item {
+                    Layout.fillWidth: true
+                }
 
                 // Stats + reset cluster
                 RowLayout {
@@ -132,19 +144,24 @@ Item {
                         implicitHeight: 8
 
                         readonly property bool isCurrent: dotItem.index === root.svc.phaseIndex && !root.svc.idleMode
-                        readonly property bool isDone: dotItem.index < root.svc.phaseIndex
-                            || (root.svc.idleMode && dotItem.index <= root.svc.phaseIndex)
+                        readonly property bool isDone: dotItem.index < root.svc.phaseIndex || (root.svc.idleMode && dotItem.index <= root.svc.phaseIndex)
                         readonly property color dotColor: {
-                            if (dotItem.isCurrent) return root.phaseColor
-                            if (dotItem.isDone) return Qt.alpha(root.phaseColor, 0.35)
-                            return Qt.alpha(Colours.palette.m3onSurfaceVariant, 0.18)
+                            if (dotItem.isCurrent)
+                                return root.phaseColor;
+                            if (dotItem.isDone)
+                                return Qt.alpha(root.phaseColor, 0.35);
+                            return Qt.alpha(Colours.palette.m3onSurfaceVariant, 0.18);
                         }
 
                         StyledRect {
                             anchors.fill: parent
                             radius: Tokens.rounding.full
                             color: dotItem.dotColor
-                            Behavior on color { CAnim { duration: Tokens.anim.durations.normal } }
+                            Behavior on color {
+                                CAnim {
+                                    duration: Tokens.anim.durations.normal
+                                }
+                            }
                         }
                     }
                 }
@@ -172,12 +189,14 @@ Item {
                     value: root.svc.idleMode ? 1.0 : root.svc.animatedProgress
                     startAngle: -90
                     strokeWidth: 12
-                    fgColour: root.svc.idleMode
-                        ? Qt.alpha(root.phaseColor, 0.22)
-                        : root.phaseColor
+                    fgColour: root.svc.idleMode ? Qt.alpha(root.phaseColor, 0.22) : root.phaseColor
                     bgColour: Qt.alpha(Colours.palette.m3onSurfaceVariant, 0.12)
 
-                    Behavior on fgColour { CAnim { duration: Tokens.anim.durations.normal } }
+                    Behavior on fgColour {
+                        CAnim {
+                            duration: Tokens.anim.durations.normal
+                        }
+                    }
                 }
 
                 ColumnLayout {
@@ -186,15 +205,15 @@ Item {
 
                     StyledText {
                         Layout.alignment: Qt.AlignHCenter
-                        text: root.svc.idleMode
-                            ? `+${root.svc.formatTime(root.svc.idleElapsed)}`
-                            : root.svc.formatTime(root.svc.timeRemaining)
+                        text: root.svc.idleMode ? `+${root.svc.formatTime(root.svc.idleElapsed)}` : root.svc.formatTime(root.svc.timeRemaining)
                         font.pointSize: Tokens.font.size.extraLarge * 1.35
                         font.weight: Font.Medium
-                        color: root.svc.idleMode
-                            ? Colours.palette.m3onSurfaceVariant
-                            : root.phaseColor
-                        Behavior on color { CAnim { duration: Tokens.anim.durations.normal } }
+                        color: root.svc.idleMode ? Colours.palette.m3onSurfaceVariant : root.phaseColor
+                        Behavior on color {
+                            CAnim {
+                                duration: Tokens.anim.durations.normal
+                            }
+                        }
                     }
 
                     StyledText {
@@ -212,10 +231,12 @@ Item {
                         StyledRect {
                             anchors.fill: parent
                             radius: Tokens.rounding.full
-                            color: (root.svc.isRunning && !root.svc.idleMode)
-                                ? root.phaseColor
-                                : Qt.alpha(Colours.palette.m3onSurfaceVariant, 0.25)
-                            Behavior on color { CAnim { duration: Tokens.anim.durations.normal } }
+                            color: (root.svc.isRunning && !root.svc.idleMode) ? root.phaseColor : Qt.alpha(Colours.palette.m3onSurfaceVariant, 0.25)
+                            Behavior on color {
+                                CAnim {
+                                    duration: Tokens.anim.durations.normal
+                                }
+                            }
                         }
                     }
                 }
@@ -229,46 +250,50 @@ Item {
                     property bool dragging: false
 
                     function distFromCenter(mx, my) {
-                        const dx = mx - width / 2
-                        const dy = my - height / 2
-                        return Math.sqrt(dx * dx + dy * dy)
+                        const dx = mx - width / 2;
+                        const dy = my - height / 2;
+                        return Math.sqrt(dx * dx + dy * dy);
                     }
 
                     function onRing(mx, my) {
-                        const d = distFromCenter(mx, my)
-                        return d >= ringItem.innerHitRadius && d <= ringItem.outerHitRadius
+                        const d = distFromCenter(mx, my);
+                        return d >= ringItem.innerHitRadius && d <= ringItem.outerHitRadius;
                     }
 
                     function angleToProgress(mx, my) {
-                        const cx = width / 2
-                        const cy = height / 2
-                        return (((Math.atan2(my - cy, mx - cx) * 180 / Math.PI) + 90) + 360) % 360 / 360
+                        const cx = width / 2;
+                        const cy = height / 2;
+                        return (((Math.atan2(my - cy, mx - cx) * 180 / Math.PI) + 90) + 360) % 360 / 360;
                     }
 
                     cursorShape: {
-                        if (root.svc.idleMode) return Qt.ArrowCursor
-                        return onRing(mouseX, mouseY) ? Qt.SizeAllCursor : Qt.ArrowCursor
+                        if (root.svc.idleMode)
+                            return Qt.ArrowCursor;
+                        return onRing(mouseX, mouseY) ? Qt.SizeAllCursor : Qt.ArrowCursor;
                     }
 
                     onPressed: mouse => {
                         if (root.svc.idleMode || !onRing(mouse.x, mouse.y)) {
-                            mouse.accepted = false
-                            return
+                            mouse.accepted = false;
+                            return;
                         }
-                        dragging = true
-                        root.svc.smoothProgress = false
-                        root.svc.elapsed = Math.round(angleToProgress(mouse.x, mouse.y) * root.svc.currentPhase.duration)
+                        dragging = true;
+                        root.svc.smoothProgress = false;
+                        root.svc.elapsed = Math.round(angleToProgress(mouse.x, mouse.y) * root.svc.currentPhase.duration);
                     }
 
                     onPositionChanged: mouse => {
-                        if (!dragging) return
-                        root.svc.elapsed = Math.round(angleToProgress(mouse.x, mouse.y) * root.svc.currentPhase.duration)
+                        if (!dragging)
+                            return;
+                        root.svc.elapsed = Math.round(angleToProgress(mouse.x, mouse.y) * root.svc.currentPhase.duration);
                     }
 
                     onReleased: {
                         if (dragging) {
-                            dragging = false
-                            Qt.callLater(function() { root.svc.smoothProgress = true })
+                            dragging = false;
+                            Qt.callLater(function () {
+                                root.svc.smoothProgress = true;
+                            });
                         }
                     }
                 }
@@ -347,7 +372,11 @@ Item {
                         anchors.fill: parent
                         radius: width / 2
                         color: root.phaseColor
-                        Behavior on color { CAnim { duration: Tokens.anim.durations.normal } }
+                        Behavior on color {
+                            CAnim {
+                                duration: Tokens.anim.durations.normal
+                            }
+                        }
                     }
 
                     MaterialIcon {
@@ -356,7 +385,11 @@ Item {
                         text: root.svc.isRunning ? "pause" : "play_arrow"
                         color: root.onPhaseColor
                         font.pointSize: Math.round(Tokens.font.size.extraLarge * 1.3)
-                        Behavior on color { CAnim { duration: Tokens.anim.durations.normal } }
+                        Behavior on color {
+                            CAnim {
+                                duration: Tokens.anim.durations.normal
+                            }
+                        }
                     }
 
                     StateLayer {
