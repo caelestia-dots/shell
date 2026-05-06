@@ -15,7 +15,8 @@ Scope {
     property bool lockTriggered: false
 
     function doLock(): void {
-        if (lock.locked || root.lockTriggered) return;
+        if (lock.locked || root.lockTriggered)
+            return;
         root.lockTriggered = true;
         lock.locked = true;
     }
@@ -25,7 +26,8 @@ Scope {
 
         signal unlock
 
-        onLockedChanged: if (!locked) root.lockTriggered = false
+        onLockedChanged: if (!locked)
+            root.lockTriggered = false
 
         LockSurface {
             lock: lock
@@ -35,6 +37,7 @@ Scope {
 
     Pam {
         id: pam
+
         lock: lock
     }
 
