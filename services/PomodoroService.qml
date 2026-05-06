@@ -17,11 +17,31 @@ Singleton {
 
     // ── Phases ────────────────────────────────────────────────────────────
     readonly property var phases: [
-        { name: "Work",       duration: workDuration * 60,       type: "work"  },
-        { name: "Break",      duration: shortBreakDuration * 60, type: "break" },
-        { name: "Work",       duration: workDuration * 60,       type: "work"  },
-        { name: "Break",      duration: shortBreakDuration * 60, type: "break" },
-        { name: "Work",       duration: workDuration * 60,       type: "work"  },
+        {
+            name: "Work",
+            duration: workDuration * 60,
+            type: "work"
+        },
+        {
+            name: "Break",
+            duration: shortBreakDuration * 60,
+            type: "break"
+        },
+        {
+            name: "Work",
+            duration: workDuration * 60,
+            type: "work"
+        },
+        {
+            name: "Break",
+            duration: shortBreakDuration * 60,
+            type: "break"
+        },
+        {
+            name: "Work",
+            duration: workDuration * 60,
+            type: "work"
+        },
         {
             name: useLongBreak ? "Long Break" : "Break",
             duration: (useLongBreak ? longBreakDuration : shortBreakDuration) * 60,
@@ -48,9 +68,9 @@ Singleton {
     readonly property int timeRemaining: currentPhase.duration - elapsed
 
     onPhasesChanged: {
-        const newDuration = phases[phaseIndex].duration
+        const newDuration = phases[phaseIndex].duration;
         if (elapsed >= newDuration)
-            elapsed = Math.max(0, newDuration - 1)
+            elapsed = Math.max(0, newDuration - 1);
     }
 
     Behavior on animatedProgress {
@@ -72,104 +92,107 @@ Singleton {
 
         onTriggered: {
             if (root.idleMode) {
-                root.idleElapsed++
-                return
+                root.idleElapsed++;
+                return;
             }
-            root.elapsed++
+            root.elapsed++;
             if (root.elapsed >= root.currentPhase.duration)
-                root.phaseCompleted()
+                root.phaseCompleted();
         }
     }
 
     // ── Sound ──────────────────────────────────────────────────────────────
     Process {
         id: soundProcess
-        command: ["mpv", "--no-video", "--really-quiet", "--no-terminal",
-                  "--volume=" + root.soundVolume,
-                  "/usr/share/sounds/freedesktop/stereo/complete.oga"]
+        command: ["mpv", "--no-video", "--really-quiet", "--no-terminal", "--volume=" + root.soundVolume, "/usr/share/sounds/freedesktop/stereo/complete.oga"]
     }
 
     // ── Logic ─────────────────────────────────────────────────────────────
     function playSound() {
-        if (!soundEnabled) return
-        soundProcess.running = false
-        Qt.callLater(function() { soundProcess.running = true })
+        if (!soundEnabled)
+            return;
+        soundProcess.running = false;
+        Qt.callLater(function () {
+            soundProcess.running = true;
+        });
     }
 
     function snapRingToZero() {
-        smoothProgress = false
-        animatedProgress = 0
-        Qt.callLater(function() { root.smoothProgress = true })
+        smoothProgress = false;
+        animatedProgress = 0;
+        Qt.callLater(function () {
+            root.smoothProgress = true;
+        });
     }
 
     function phaseCompleted() {
-        playSound()
+        playSound();
         if (currentPhase.type === "work") {
-            pomodoroCount++
-            snapRingToZero()
-            elapsed = 0
-            phaseIndex = (phaseIndex + 1) % phases.length
-            idleMode = false
-            isRunning = true
+            pomodoroCount++;
+            snapRingToZero();
+            elapsed = 0;
+            phaseIndex = (phaseIndex + 1) % phases.length;
+            idleMode = false;
+            isRunning = true;
         } else {
             if (phaseIndex === phases.length - 1)
-                cycleCount++
-            isRunning = false
-            idleMode = true
-            idleElapsed = 0
+                cycleCount++;
+            isRunning = false;
+            idleMode = true;
+            idleElapsed = 0;
         }
     }
 
     function goToPrev() {
         if (idleMode) {
-            idleMode = false
-            idleElapsed = 0
-            elapsed = 0
-            return
+            idleMode = false;
+            idleElapsed = 0;
+            elapsed = 0;
+            return;
         }
-        snapRingToZero()
+        snapRingToZero();
         if (elapsed > 5) {
-            elapsed = 0
+            elapsed = 0;
         } else {
-            phaseIndex = (phaseIndex - 1 + phases.length) % phases.length
-            elapsed = 0
+            phaseIndex = (phaseIndex - 1 + phases.length) % phases.length;
+            elapsed = 0;
         }
     }
 
     function skipToNext() {
-        const wasActive = isRunning || idleMode
-        snapRingToZero()
-        elapsed = 0
-        phaseIndex = (phaseIndex + 1) % phases.length
-        idleMode = false
-        idleElapsed = 0
-        isRunning = wasActive
+        const wasActive = isRunning || idleMode;
+        snapRingToZero();
+        elapsed = 0;
+        phaseIndex = (phaseIndex + 1) % phases.length;
+        idleMode = false;
+        idleElapsed = 0;
+        isRunning = wasActive;
     }
 
     function togglePlayPause() {
         if (idleMode) {
-            snapRingToZero()
-            elapsed = 0
-            phaseIndex = (phaseIndex + 1) % phases.length
-            idleMode = false
-            idleElapsed = 0
-            isRunning = true
+            snapRingToZero();
+            elapsed = 0;
+            phaseIndex = (phaseIndex + 1) % phases.length;
+            idleMode = false;
+            idleElapsed = 0;
+            isRunning = true;
         } else {
-            isRunning = !isRunning
+            isRunning = !isRunning;
         }
     }
 
     function resetCurrent() {
         if (idleMode) {
-            idleMode = false
-            idleElapsed = 0
+            idleMode = false;
+            idleElapsed = 0;
         }
-        snapRingToZero()
-        elapsed = 0
+        snapRingToZero();
+        elapsed = 0;
     }
 
     function formatTime(secs) {
-        const s = Math.max(0, Math.floor(secs))
-        return `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`
+        const s = Math.max(0, Math.floor(secs));
+        return `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`;
     }
 }
