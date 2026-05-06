@@ -67,46 +67,6 @@ Singleton {
     readonly property real progress: currentPhase.duration > 0 ? elapsed / currentPhase.duration : 0
     readonly property int timeRemaining: currentPhase.duration - elapsed
 
-    onPhasesChanged: {
-        const newDuration = phases[phaseIndex].duration;
-        if (elapsed >= newDuration)
-            elapsed = Math.max(0, newDuration - 1);
-    }
-
-    Behavior on animatedProgress {
-        enabled: root.smoothProgress
-        NumberAnimation {
-            duration: 950
-            easing.type: Easing.Linear
-        }
-    }
-
-    onProgressChanged: animatedProgress = progress
-
-    // ── Tick ──────────────────────────────────────────────────────────────
-    Timer {
-        id: ticker
-        interval: 1000
-        repeat: true
-        running: root.isRunning || root.idleMode
-
-        onTriggered: {
-            if (root.idleMode) {
-                root.idleElapsed++;
-                return;
-            }
-            root.elapsed++;
-            if (root.elapsed >= root.currentPhase.duration)
-                root.phaseCompleted();
-        }
-    }
-
-    // ── Sound ──────────────────────────────────────────────────────────────
-    Process {
-        id: soundProcess
-        command: ["mpv", "--no-video", "--really-quiet", "--no-terminal", "--volume=" + root.soundVolume, "/usr/share/sounds/freedesktop/stereo/complete.oga"]
-    }
-
     // ── Logic ─────────────────────────────────────────────────────────────
     function playSound() {
         if (!soundEnabled)
@@ -194,5 +154,48 @@ Singleton {
     function formatTime(secs) {
         const s = Math.max(0, Math.floor(secs));
         return `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`;
+    }
+
+    onPhasesChanged: {
+        const newDuration = phases[phaseIndex].duration;
+        if (elapsed >= newDuration)
+            elapsed = Math.max(0, newDuration - 1);
+    }
+
+    onProgressChanged: animatedProgress = progress
+
+    Behavior on animatedProgress {
+        enabled: root.smoothProgress
+
+        NumberAnimation {
+            duration: 950
+            easing.type: Easing.Linear
+        }
+    }
+
+    // ── Tick ──────────────────────────────────────────────────────────────
+    Timer {
+        id: ticker
+
+        interval: 1000
+        repeat: true
+        running: root.isRunning || root.idleMode
+
+        onTriggered: {
+            if (root.idleMode) {
+                root.idleElapsed++;
+                return;
+            }
+            root.elapsed++;
+            if (root.elapsed >= root.currentPhase.duration)
+                root.phaseCompleted();
+        }
+    }
+
+    // ── Sound ──────────────────────────────────────────────────────────────
+    Process {
+        id: soundProcess
+
+        command: ["mpv", "--no-video", "--really-quiet", "--no-terminal", "--volume=" + root.soundVolume, "/usr/share/sounds/freedesktop/stereo/complete.oga"]
     }
 }

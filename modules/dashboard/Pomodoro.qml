@@ -2,10 +2,10 @@ pragma ComponentBehavior: Bound
 
 import QtQuick
 import QtQuick.Layouts
+import Caelestia.Config
 import qs.components
 import qs.components.controls
 import qs.services
-import Caelestia.Config
 
 Item {
     id: root
@@ -63,6 +63,7 @@ Item {
                     text: "timer"
                     font.pointSize: Tokens.font.size.large
                     color: root.phaseColor
+
                     Behavior on color {
                         CAnim {
                             duration: Tokens.anim.durations.normal
@@ -140,11 +141,10 @@ Item {
 
                         required property int index
 
-                        Layout.fillWidth: true
-                        implicitHeight: 8
-
                         readonly property bool isCurrent: dotItem.index === root.svc.phaseIndex && !root.svc.idleMode
+
                         readonly property bool isDone: dotItem.index < root.svc.phaseIndex || (root.svc.idleMode && dotItem.index <= root.svc.phaseIndex)
+
                         readonly property color dotColor: {
                             if (dotItem.isCurrent)
                                 return root.phaseColor;
@@ -153,10 +153,14 @@ Item {
                             return Qt.alpha(Colours.palette.m3onSurfaceVariant, 0.18);
                         }
 
+                        Layout.fillWidth: true
+                        implicitHeight: 8
+
                         StyledRect {
                             anchors.fill: parent
                             radius: Tokens.rounding.full
                             color: dotItem.dotColor
+
                             Behavior on color {
                                 CAnim {
                                     duration: Tokens.anim.durations.normal
@@ -171,16 +175,16 @@ Item {
             Item {
                 id: ringItem
 
-                Layout.alignment: Qt.AlignHCenter
-                implicitWidth: 220
-                implicitHeight: 220
-
                 // Geometry for annular hit-test (matches CircularProgress internals)
                 // arcRadius = (size - strokeWidth) / 2 = (220 - 12) / 2 = 104
                 readonly property real ringRadius: 104
                 readonly property real ringStroke: 12
                 readonly property real innerHitRadius: ringRadius - ringStroke * 3
                 readonly property real outerHitRadius: ringRadius + ringStroke * 2.5
+
+                Layout.alignment: Qt.AlignHCenter
+                implicitWidth: 220
+                implicitHeight: 220
 
                 CircularProgress {
                     id: timerRing
@@ -209,6 +213,7 @@ Item {
                         font.pointSize: Tokens.font.size.extraLarge * 1.35
                         font.weight: Font.Medium
                         color: root.svc.idleMode ? Colours.palette.m3onSurfaceVariant : root.phaseColor
+
                         Behavior on color {
                             CAnim {
                                 duration: Tokens.anim.durations.normal
@@ -232,6 +237,7 @@ Item {
                             anchors.fill: parent
                             radius: Tokens.rounding.full
                             color: (root.svc.isRunning && !root.svc.idleMode) ? root.phaseColor : Qt.alpha(Colours.palette.m3onSurfaceVariant, 0.25)
+
                             Behavior on color {
                                 CAnim {
                                     duration: Tokens.anim.durations.normal
@@ -244,8 +250,6 @@ Item {
                 // ── Ring drag-to-seek (annular zone only) ─────────────────
                 MouseArea {
                     id: ringDrag
-                    anchors.fill: parent
-                    hoverEnabled: true
 
                     property bool dragging: false
 
@@ -265,6 +269,9 @@ Item {
                         const cy = height / 2;
                         return (((Math.atan2(my - cy, mx - cx) * 180 / Math.PI) + 90) + 360) % 360 / 360;
                     }
+
+                    anchors.fill: parent
+                    hoverEnabled: true
 
                     cursorShape: {
                         if (root.svc.idleMode)
@@ -348,6 +355,7 @@ Item {
 
                     MaterialIcon {
                         id: prevIcon
+
                         anchors.centerIn: parent
                         text: "skip_previous"
                         font.pointSize: Math.round(Tokens.font.size.extraLarge * 1.1)
@@ -365,6 +373,7 @@ Item {
                     id: playBtnItem
 
                     readonly property real btnSize: playBtnIcon.implicitHeight + Tokens.padding.small * 2
+
                     implicitWidth: btnSize
                     implicitHeight: btnSize
 
@@ -372,6 +381,7 @@ Item {
                         anchors.fill: parent
                         radius: width / 2
                         color: root.phaseColor
+
                         Behavior on color {
                             CAnim {
                                 duration: Tokens.anim.durations.normal
@@ -381,10 +391,12 @@ Item {
 
                     MaterialIcon {
                         id: playBtnIcon
+
                         anchors.centerIn: parent
                         text: root.svc.isRunning ? "pause" : "play_arrow"
                         color: root.onPhaseColor
                         font.pointSize: Math.round(Tokens.font.size.extraLarge * 1.3)
+
                         Behavior on color {
                             CAnim {
                                 duration: Tokens.anim.durations.normal
@@ -406,6 +418,7 @@ Item {
 
                     MaterialIcon {
                         id: nextIcon
+
                         anchors.centerIn: parent
                         text: "skip_next"
                         font.pointSize: Math.round(Tokens.font.size.extraLarge * 1.1)
@@ -423,6 +436,7 @@ Item {
             CollapsibleSection {
                 id: settingsSection
                 Layout.fillWidth: true
+
                 title: qsTr("Settings")
                 showBackground: true
 
