@@ -18,6 +18,8 @@ Item {
             const item = repeater.itemAt(i) as Loader;
             if (item?.sourceComponent === mediaComponent && (item?.item as MediaWrapper)?.needsKeyboard)
                 return true;
+            if (item?.sourceComponent === pomodoroComponent && (item?.item as Pomodoro)?.needsKeyboard)
+                return true;
         }
         return false;
     }

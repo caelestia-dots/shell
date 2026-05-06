@@ -25,6 +25,8 @@ Item {
         return Colours.palette.m3onTertiary
     }
 
+    readonly property bool needsKeyboard: settingsSection.expanded
+
     implicitWidth: 480
     implicitHeight: outerCol.implicitHeight + Tokens.padding.large * 2
 
@@ -384,6 +386,7 @@ Item {
 
             // ── Settings ──────────────────────────────────────────────────
             CollapsibleSection {
+                id: settingsSection
                 Layout.fillWidth: true
                 title: qsTr("Settings")
                 showBackground: true
