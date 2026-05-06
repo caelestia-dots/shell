@@ -1,3 +1,5 @@
+pragma ComponentBehavior: Bound
+
 import QtQuick
 import QtQuick.Layouts
 import qs.components
@@ -12,16 +14,16 @@ Item {
 
     // ── Colors ────────────────────────────────────────────────────────────
     readonly property color phaseColor: {
-        if (svc.idleMode)                           return Colours.palette.m3onSurfaceVariant
-        if (svc.currentPhase.type === "work")       return Colours.palette.m3primary
-        if (svc.phaseIndex === 5 && svc.useLongBreak) return Colours.palette.m3secondary
+        if (root.svc.idleMode)                           return Colours.palette.m3onSurfaceVariant
+        if (root.svc.currentPhase.type === "work")       return Colours.palette.m3primary
+        if (root.svc.phaseIndex === 5 && root.svc.useLongBreak) return Colours.palette.m3secondary
         return Colours.palette.m3tertiary
     }
 
     readonly property color onPhaseColor: {
-        if (svc.idleMode)                           return Colours.palette.m3onSurface
-        if (svc.currentPhase.type === "work")       return Colours.palette.m3onPrimary
-        if (svc.phaseIndex === 5 && svc.useLongBreak) return Colours.palette.m3onSecondary
+        if (root.svc.idleMode)                           return Colours.palette.m3onSurface
+        if (root.svc.currentPhase.type === "work")       return Colours.palette.m3onPrimary
+        if (root.svc.phaseIndex === 5 && root.svc.useLongBreak) return Colours.palette.m3onSecondary
         return Colours.palette.m3onTertiary
     }
 
@@ -81,7 +83,7 @@ Item {
                         }
 
                         StyledText {
-                            text: svc.pomodoroCount
+                            text: root.svc.pomodoroCount
                             font.pointSize: Tokens.font.size.normal
                             color: Colours.palette.m3onSurfaceVariant
                         }
@@ -97,7 +99,7 @@ Item {
                         }
 
                         StyledText {
-                            text: svc.cycleCount
+                            text: root.svc.cycleCount
                             font.pointSize: Tokens.font.size.normal
                             color: Colours.palette.m3onSurfaceVariant
                         }
@@ -108,7 +110,7 @@ Item {
                         type: IconButton.Text
                         icon: "restart_alt"
                         font.pointSize: Tokens.font.size.normal
-                        onClicked: svc.resetCurrent()
+                        onClicked: root.svc.resetCurrent()
                     }
                 }
             }
@@ -119,7 +121,7 @@ Item {
                 spacing: Tokens.spacing.small
 
                 Repeater {
-                    model: svc.phases.length
+                    model: root.svc.phases.length
 
                     Item {
                         id: dotItem
@@ -129,9 +131,9 @@ Item {
                         Layout.fillWidth: true
                         implicitHeight: 8
 
-                        readonly property bool isCurrent: dotItem.index === svc.phaseIndex && !svc.idleMode
-                        readonly property bool isDone: dotItem.index < svc.phaseIndex
-                            || (svc.idleMode && dotItem.index <= svc.phaseIndex)
+                        readonly property bool isCurrent: dotItem.index === root.svc.phaseIndex && !root.svc.idleMode
+                        readonly property bool isDone: dotItem.index < root.svc.phaseIndex
+                            || (root.svc.idleMode && dotItem.index <= root.svc.phaseIndex)
                         readonly property color dotColor: {
                             if (dotItem.isCurrent) return root.phaseColor
                             if (dotItem.isDone) return Qt.alpha(root.phaseColor, 0.35)
@@ -167,10 +169,10 @@ Item {
                     id: timerRing
 
                     anchors.fill: parent
-                    value: svc.idleMode ? 1.0 : svc.animatedProgress
+                    value: root.svc.idleMode ? 1.0 : root.svc.animatedProgress
                     startAngle: -90
                     strokeWidth: 12
-                    fgColour: svc.idleMode
+                    fgColour: root.svc.idleMode
                         ? Qt.alpha(root.phaseColor, 0.22)
                         : root.phaseColor
                     bgColour: Qt.alpha(Colours.palette.m3onSurfaceVariant, 0.12)
@@ -184,12 +186,12 @@ Item {
 
                     StyledText {
                         Layout.alignment: Qt.AlignHCenter
-                        text: svc.idleMode
-                            ? `+${svc.formatTime(svc.idleElapsed)}`
-                            : svc.formatTime(svc.timeRemaining)
+                        text: root.svc.idleMode
+                            ? `+${root.svc.formatTime(root.svc.idleElapsed)}`
+                            : root.svc.formatTime(root.svc.timeRemaining)
                         font.pointSize: Tokens.font.size.extraLarge * 1.35
                         font.weight: Font.Medium
-                        color: svc.idleMode
+                        color: root.svc.idleMode
                             ? Colours.palette.m3onSurfaceVariant
                             : root.phaseColor
                         Behavior on color { CAnim { duration: Tokens.anim.durations.normal } }
@@ -197,7 +199,7 @@ Item {
 
                     StyledText {
                         Layout.alignment: Qt.AlignHCenter
-                        text: svc.idleMode ? qsTr("Rest ended") : svc.currentPhase.name
+                        text: root.svc.idleMode ? qsTr("Rest ended") : root.svc.currentPhase.name
                         font.pointSize: Tokens.font.size.small
                         color: Colours.palette.m3onSurfaceVariant
                     }
@@ -210,7 +212,7 @@ Item {
                         StyledRect {
                             anchors.fill: parent
                             radius: Tokens.rounding.full
-                            color: (svc.isRunning && !svc.idleMode)
+                            color: (root.svc.isRunning && !root.svc.idleMode)
                                 ? root.phaseColor
                                 : Qt.alpha(Colours.palette.m3onSurfaceVariant, 0.25)
                             Behavior on color { CAnim { duration: Tokens.anim.durations.normal } }
@@ -244,29 +246,29 @@ Item {
                     }
 
                     cursorShape: {
-                        if (svc.idleMode) return Qt.ArrowCursor
+                        if (root.svc.idleMode) return Qt.ArrowCursor
                         return onRing(mouseX, mouseY) ? Qt.SizeAllCursor : Qt.ArrowCursor
                     }
 
                     onPressed: mouse => {
-                        if (svc.idleMode || !onRing(mouse.x, mouse.y)) {
+                        if (root.svc.idleMode || !onRing(mouse.x, mouse.y)) {
                             mouse.accepted = false
                             return
                         }
                         dragging = true
-                        svc.smoothProgress = false
-                        svc.elapsed = Math.round(angleToProgress(mouse.x, mouse.y) * svc.currentPhase.duration)
+                        root.svc.smoothProgress = false
+                        root.svc.elapsed = Math.round(angleToProgress(mouse.x, mouse.y) * root.svc.currentPhase.duration)
                     }
 
                     onPositionChanged: mouse => {
                         if (!dragging) return
-                        svc.elapsed = Math.round(angleToProgress(mouse.x, mouse.y) * svc.currentPhase.duration)
+                        root.svc.elapsed = Math.round(angleToProgress(mouse.x, mouse.y) * root.svc.currentPhase.duration)
                     }
 
                     onReleased: {
                         if (dragging) {
                             dragging = false
-                            Qt.callLater(function() { svc.smoothProgress = true })
+                            Qt.callLater(function() { root.svc.smoothProgress = true })
                         }
                     }
                 }
@@ -278,7 +280,7 @@ Item {
                 implicitHeight: idleRow.implicitHeight + Tokens.padding.normal * 2
                 radius: Tokens.rounding.normal
                 color: Qt.alpha(Colours.palette.m3tertiary, 0.1)
-                visible: svc.idleMode
+                visible: root.svc.idleMode
 
                 RowLayout {
                     id: idleRow
@@ -329,7 +331,7 @@ Item {
 
                     StateLayer {
                         color: Colours.palette.m3onSurfaceVariant
-                        onClicked: svc.goToPrev()
+                        onClicked: root.svc.goToPrev()
                     }
                 }
 
@@ -351,7 +353,7 @@ Item {
                     MaterialIcon {
                         id: playBtnIcon
                         anchors.centerIn: parent
-                        text: svc.isRunning ? "pause" : "play_arrow"
+                        text: root.svc.isRunning ? "pause" : "play_arrow"
                         color: root.onPhaseColor
                         font.pointSize: Math.round(Tokens.font.size.extraLarge * 1.3)
                         Behavior on color { CAnim { duration: Tokens.anim.durations.normal } }
@@ -360,7 +362,7 @@ Item {
                     StateLayer {
                         radius: width / 2
                         color: root.onPhaseColor
-                        onClicked: svc.togglePlayPause()
+                        onClicked: root.svc.togglePlayPause()
                     }
                 }
 
@@ -379,7 +381,7 @@ Item {
 
                     StateLayer {
                         color: Colours.palette.m3onSurfaceVariant
-                        onClicked: svc.skipToNext()
+                        onClicked: root.svc.skipToNext()
                     }
                 }
             }
@@ -396,7 +398,9 @@ Item {
                     value: PomodoroService.workDuration
                     min: 1
                     max: 120
-                    onValueModified: value => { PomodoroService.workDuration = value }
+                    onValueModified: value => {
+                        PomodoroService.workDuration = value;
+                    }
                 }
 
                 SpinBoxRow {
@@ -404,7 +408,9 @@ Item {
                     value: PomodoroService.shortBreakDuration
                     min: 1
                     max: 60
-                    onValueModified: value => { PomodoroService.shortBreakDuration = value }
+                    onValueModified: value => {
+                        PomodoroService.shortBreakDuration = value;
+                    }
                 }
 
                 SpinBoxRow {
@@ -412,13 +418,17 @@ Item {
                     value: PomodoroService.longBreakDuration
                     min: 1
                     max: 120
-                    onValueModified: value => { PomodoroService.longBreakDuration = value }
+                    onValueModified: value => {
+                        PomodoroService.longBreakDuration = value;
+                    }
                 }
 
                 SwitchRow {
                     label: qsTr("Long break after cycle")
                     checked: PomodoroService.useLongBreak
-                    onToggled: checked => { PomodoroService.useLongBreak = checked }
+                    onToggled: checked => {
+                        PomodoroService.useLongBreak = checked;
+                    }
                 }
 
                 StyledRect {
@@ -448,9 +458,13 @@ Item {
                             value: PomodoroService.soundVolume
                             enabled: PomodoroService.soundEnabled
                             opacity: PomodoroService.soundEnabled ? 1.0 : 0.4
-                            onValueModified: value => { PomodoroService.soundVolume = value }
+                            onValueModified: value => {
+                                PomodoroService.soundVolume = value;
+                            }
 
-                            Behavior on opacity { CAnim {} }
+                            Behavior on opacity {
+                                CAnim {}
+                            }
                         }
 
                         StyledSwitch {
