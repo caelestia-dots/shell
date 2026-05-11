@@ -1,0 +1,2 @@
+auth sufficient pam_howdy.so
+auth required pam_unix.so try_first_pass nullok

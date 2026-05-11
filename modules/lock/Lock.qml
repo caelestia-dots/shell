@@ -28,7 +28,7 @@ Scope {
 
     Loader {
         asynchronous: true
-        active: true
+        active: Quickshell.screens.length > 0
         onLoaded: active = false
 
         // Force a load of a screencopy so the one in the lock works
