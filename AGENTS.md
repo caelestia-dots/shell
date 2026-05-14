@@ -84,6 +84,21 @@ import qs.services
 - QML exposure: `QML_ELEMENT` macro, registered via `qml_module()` in CMake
 - Config macros: `CONFIG_PROPERTY(type, name, default)`, `CONFIG_SUBOBJECT(Type, name)`
 
+## Git workflow
+
+This is a **personal fork** of `caelestia-dots/shell`. All PRs must target this fork — never the upstream.
+
+```
+origin    git@github.com:golgor/shell.git      ← PRs go here
+upstream  git@github.com:caelestia-dots/shell.git  ← NEVER open PRs here
+```
+
+When creating a PR always pass `--repo golgor/shell` explicitly:
+
+```bash
+gh pr create --repo golgor/shell --base main --head <branch> ...
+```
+
 ## Commit convention
 
 ```
