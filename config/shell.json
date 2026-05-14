@@ -1,0 +1,11 @@
+{
+    "bar": {
+        "status": {
+            "showAudio": false,
+            "showMicrophone": false
+        }
+    },
+    "services": {
+        "useTwelveHourClock": false
+    }
+}
