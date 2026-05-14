@@ -107,3 +107,32 @@ The custom picker is used in one place: the dashboard face/profile picture picke
 - [ ] Implement portal-based file picker
 - [ ] Replace `components/filedialog/` usage in `User.qml` (and any other consumers)
 - [ ] Consider keeping custom picker as fallback if portal is unavailable
+
+---
+
+## 7. Workspace preview popout
+**Effort**: Medium
+
+Replace or supplement the active window preview (bar popout that shows a live mirror of the focused window) with a **workspace preview** on the workspace selector. When hovering a workspace indicator, a popout shows live thumbnails of all windows in that workspace.
+
+This is feasible using the existing `ScreencopyView` component which accepts `HyprlandToplevel.wayland` as a capture source. The workspace component already queries `Hypr.toplevels.values.filter(c => c.workspace?.id === ws)` for window counts.
+
+**Implementation approach**:
+- Create a `WorkspacePreview.qml` popout component
+- For each toplevel in the hovered workspace, render a `ScreencopyView` with `live: true` in a grid layout
+- Wire it into the bar popout system (`PopoutState.currentName` matching workspace hover)
+- Show window title/class labels below each thumbnail
+- Consider performance: `ScreencopyView` with `live: true` per window could be expensive for workspaces with many windows — may want to limit to 4-6 thumbnails or use `live: false` with periodic `captureFrame()`
+
+**Key files**:
+- `modules/bar/components/workspaces/Workspace.qml` — workspace indicator (hover source)
+- `modules/bar/popouts/ActiveWindow.qml` — existing window preview (pattern to follow)
+- `modules/windowinfo/Preview.qml` — full window preview with ScreencopyView
+- `modules/bar/popouts/Content.qml` — popout registry (add new popout here)
+- `modules/bar/popouts/PopoutState.qml` — popout state machine
+
+- [ ] Create `modules/bar/popouts/WorkspacePreview.qml` with grid of ScreencopyView thumbnails
+- [ ] Register it in `modules/bar/popouts/Content.qml` as a Popout
+- [ ] Wire workspace hover in `modules/bar/components/workspaces/Workspace.qml` to trigger the popout
+- [ ] Add performance safeguards (thumbnail limit, lazy loading, live vs static capture)
+- [ ] Consider disabling or making the active window popout configurable
