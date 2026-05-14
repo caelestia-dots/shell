@@ -3,6 +3,7 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import QtQuick.Layouts
 import Quickshell
+import Caelestia.Config
 import qs.components
 import qs.services
 
@@ -30,6 +31,9 @@ LazyLoader {
 
     FloatingWindow {
         id: root
+
+        contentItem.Config.screen: screen.name
+        contentItem.Tokens.screen: screen.name
 
         property list<string> cwd: loader.cwd
         property string filterLabel: loader.filterLabel

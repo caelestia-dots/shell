@@ -2,6 +2,7 @@ pragma Singleton
 
 import QtQuick
 import Quickshell
+import Caelestia.Config
 import qs.components
 import qs.services
 
@@ -21,6 +22,9 @@ Singleton {
 
         FloatingWindow {
             id: win
+
+            contentItem.Config.screen: screen.name
+            contentItem.Tokens.screen: screen.name
 
             property alias active: cc.active
             property alias navExpanded: cc.navExpanded
