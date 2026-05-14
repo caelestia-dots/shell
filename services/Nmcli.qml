@@ -11,6 +11,8 @@ Singleton {
     property var deviceStatus: null
     property var wirelessInterfaces: []
     property var ethernetInterfaces: []
+    property bool available: false
+    property bool availabilityChecked: false
     property bool isConnected: false
     property string activeInterface: ""
     property string activeConnection: ""
@@ -167,6 +169,18 @@ Singleton {
     }
 
     function executeCommand(args: list<string>, callback: var): void {
+        if (root.availabilityChecked && !root.available) {
+            if (callback) {
+                callback({
+                    success: false,
+                    output: "",
+                    error: "nmcli not available",
+                    exitCode: -1
+                });
+            }
+            return;
+        }
+
         const proc = commandProc.createObject(root);
         proc.cmdArgs = ["nmcli", ...args];
         proc.callback = callback;
@@ -704,6 +718,8 @@ Singleton {
     }
 
     function rescanWifi(): void {
+        if (!root.available)
+            return;
         rescanProc.running = true;
     }
 
@@ -1063,7 +1079,10 @@ Singleton {
         });
     }
 
-    Component.onCompleted: {
+    function initializeIfAvailable(): void {
+        if (!root.available)
+            return;
+
         getWifiStatus(() => {});
         getNetworks(() => {});
         loadSavedConnections(() => {});
@@ -1088,6 +1107,10 @@ Singleton {
                 }
             }
         }, 2000);
+    }
+
+    Component.onCompleted: {
+        checkNmcliProc.running = true;
     }
 
     Component {
@@ -1254,9 +1277,24 @@ Singleton {
     }
 
     Process {
+        id: checkNmcliProc
+
+        command: ["sh", "-lc", "command -v nmcli >/dev/null 2>&1"]
+        stdout: StdioCollector {}
+        stderr: StdioCollector {}
+        onExited: code => { // qmllint disable signal-handler-parameters
+            root.availabilityChecked = true;
+            root.available = code === 0;
+            if (root.available) {
+                root.initializeIfAvailable();
+            }
+        }
+    }
+
+    Process {
         id: monitorProc
 
-        running: true
+        running: root.available
         command: ["nmcli", "monitor"]
         environment: ({
                 LANG: "C.UTF-8",
@@ -1273,7 +1311,7 @@ Singleton {
 
         interval: 2000
         onTriggered: {
-            monitorProc.running = true;
+            monitorProc.running = root.available;
         }
     }
 

@@ -43,7 +43,7 @@ Singleton {
 | `Brightness` | Screen brightness | `brightnessctl` / `ddcutil` via Process |
 | `Colours` | Material 3 color palette, transparency | `Caelestia` image analyser + scheme JSON files |
 | `Hypr` | Hyprland state (workspaces, monitors, toplevels) | `Quickshell.Hyprland` singleton wrapper |
-| `Network` / `Nmcli` | Network state, wifi scanning | `nmcli` via Process |
+| `NetworkBackend` / `Iwctl` / `Nmcli` | Network state, wifi scanning, backend switching | `iwctl` + `networkctl` (preferred), `nmcli` fallback |
 | `Notifs` / `NotifData` | Notification server + history | `Quickshell.Services.Notifications` |
 | `Players` | MPRIS media players | `Quickshell.Services.Mpris` |
 | `Screens` | Screen list with config-driven filtering | `Quickshell.screens` + `Caelestia.Config` |
