@@ -22,16 +22,16 @@
 Omarchy uses **systemd-networkd + iwd**, not NetworkManager. `nmcli` is not installed and the entire network UI is non-functional (WiFi scanning, connecting, status icons, VPN monitoring).
 
 **Options**:
-1. **Install NetworkManager** — Risky. Would conflict with systemd-networkd unless carefully configured (NM must use iwd backend, systemd-networkd must be disabled or scoped). High risk of breaking existing connectivity.
-2. **Rewrite backend for iwd/iwctl** — Large effort. `Nmcli.qml` is 1371 lines, 15 UI files reference it directly. Would need a new `Iwd.qml` service + updates to `Network.qml` facade + all UI files.
-3. **Disable network UI** — Simplest. Hide network-related UI elements via config and accept that network management happens outside the shell.
+1. **Install NetworkManager** — Fastest path to make current code work, but risky on Omarchy. Must be explicitly configured to avoid conflict with systemd-networkd and to use iwd backend.
+2. **Build iwd/iwctl backend with compatibility migration** — Preferred long-term. Create `services/Iwctl.qml` that initially mirrors `Nmcli.qml`'s public API so consumers can migrate incrementally (one location at a time) via a facade.
 
-**Decision**: TBD
+**Decision**: Option 2 — build iwd compatibility backend
 
-- [ ] Decide on approach (install NM, rewrite for iwd, or disable)
-- [ ] If NM: test coexistence with systemd-networkd + iwd, document safe config
-- [ ] If iwd: create `Iwd.qml` service, update `Network.qml` facade, update 15 UI files
-- [ ] If disable: set config to hide network UI elements
+- [x] Decide on approach (install NM or build iwd compatibility backend)
+- [ ] If NM: test coexistence with systemd-networkd + iwd, document safe config + rollback
+- [x] If iwd: create `services/Iwctl.qml` with `Nmcli`-compatible API surface for phased migration
+- [x] If iwd: introduce a single facade switch (e.g. `NetworkBackend.qml`) so UI migration can be incremental
+- [x] If iwd: migrate consumers in batches (bar, control center, utilities, VPN) and remove `Nmcli` dependency
 
 ---
 
@@ -136,3 +136,29 @@ This is feasible using the existing `ScreencopyView` component which accepts `Hy
 - [ ] Wire workspace hover in `modules/bar/components/workspaces/Workspace.qml` to trigger the popout
 - [ ] Add performance safeguards (thumbnail limit, lazy loading, live vs static capture)
 - [ ] Consider disabling or making the active window popout configurable
+
+---
+
+## 8. Capslock detection not working
+**Effort**: Small–Medium (diagnosis done)
+
+Capslock/numlock state is always reported as off. The shell reads lock state from the keyboard marked `main` in Hyprland's device list (`Hypr.keyboard?.capsLock`). The problem: `main: true` is set on `hl-virtual-keyboard-fcitx5` (an input method virtual keyboard), not the physical keyboard (`logitech-ergo-k860`). The virtual keyboard always reports `capsLock: false`.
+
+The detection mechanism works via:
+1. Hyprland binds `Caps_Lock`/`Num_Lock` keys to a global shortcut (`caelestia:refreshDevices`)
+2. On key press, `HyprExtras.refreshDevices()` re-queries `hyprctl devices -j`
+3. `HyprKeyboard.capsLock` is read from the JSON for the keyboard where `main: true`
+
+**Options**:
+1. **Fix keyboard selection** — Instead of `keyboards.find(kb => kb.main)`, find the physical keyboard by filtering out virtual/hotkey keyboards. Could match by name pattern or check multiple keyboards.
+2. **Aggregate lock state** — OR the capsLock state across all keyboards: `keyboards.some(kb => kb.capsLock)`
+3. **Hyprland config** — Investigate if Hyprland can be configured to set `main` on the correct device.
+
+**Key files**:
+- `services/Hypr.qml:27` — `keyboards.find(kb => kb.main)` — keyboard selection
+- `plugin/src/Caelestia/Internal/hyprdevices.hpp` — `HyprKeyboard` class, reads from `hyprctl devices`
+- `plugin/src/Caelestia/Internal/hyprdevices.cpp` — IPC JSON parsing
+
+- [ ] Decide on approach (fix selection, aggregate, or Hyprland config)
+- [ ] Implement fix
+- [ ] Test with physical keyboard capslock toggle
