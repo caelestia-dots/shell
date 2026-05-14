@@ -7,15 +7,11 @@
 
 ---
 
-## 1. Fix Tokens "accessed without a screen set" warnings
+## ~~1. Fix Tokens "accessed without a screen set" warnings~~ ✅
 **Effort**: Small (2 file changes fix ~74 files worth of warnings)
 
-The `Tokens` attached property requires a screen context to resolve per-monitor config. Two window types don't propagate it:
-
-**Root cause**: `FloatingWindow` used in `WindowFactory.qml` and `FileDialog.qml` doesn't set `contentItem.Tokens.screen`. The fix is identical to what `StyledWindow.qml` already does.
-
-- [ ] Add `contentItem.Tokens.screen: screen.name` and `contentItem.Config.screen: screen.name` to `modules/controlcenter/WindowFactory.qml`
-- [ ] Add the same to `components/filedialog/FileDialog.qml`
+- [x] Add `contentItem.Tokens.screen: screen.name` and `contentItem.Config.screen: screen.name` to `modules/controlcenter/WindowFactory.qml`
+- [x] Add the same to `components/filedialog/FileDialog.qml`
 - [ ] Verify Tooltip popup warnings (lower priority — Popups render in overlay layer outside the propagation chain)
 
 ---
