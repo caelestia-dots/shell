@@ -2,6 +2,10 @@
 
 Personal fork of [caelestia-shell](https://github.com/caelestia-dots/shell). A Quickshell (QML) desktop shell for Hyprland on Arch Linux with Omarchy.
 
+## Pending work
+
+See `TODO.md` for investigated and prioritized tasks with effort estimates, root cause analysis, and implementation guidance.
+
 ## Architecture
 
 Four layers, from high to low:
