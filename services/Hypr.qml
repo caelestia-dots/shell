@@ -57,11 +57,11 @@ Singleton {
             if (lastSpecialWorkspace) {
                 const workspace = workspaces.values.find(w => w.name === lastSpecialWorkspace);
                 if (workspace && workspace.lastIpcObject.windows > 0) {
-                    dispatch(`workspace ${lastSpecialWorkspace}`);
+                    dispatch(`hl.dsp.focus({ workspace = "${lastSpecialWorkspace}"})`);
                     return;
                 }
             }
-            dispatch(`workspace ${openSpecials[0].name}`);
+            dispatch(`hl.dsp.focus({ workspace = "${openSpecials[0].name}" })`);
             return;
         }
 
@@ -75,7 +75,7 @@ Singleton {
                 nextIndex = (currentIndex - 1 + openSpecials.length) % openSpecials.length;
         }
 
-        dispatch(`workspace ${openSpecials[nextIndex].name}`);
+        dispatch(`hl.dsp.focus({ workspace = "${openSpecials[nextIndex].name}"})`);
     }
 
     function monitorNames(): list<string> {

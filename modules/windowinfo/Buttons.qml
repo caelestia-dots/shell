@@ -81,7 +81,7 @@ ColumnLayout {
                     readonly property bool isCurrent: root.client?.workspace.id === wsId
 
                     onClicked: {
-                        Hypr.dispatch(`movetoworkspace ${wsId},address:0x${root.client?.address}`);
+                        Hypr.dispatch(`hl.dsp.window.move({ workspace = "${wsId}" , follow = "address:0x${root.client?.address}"})`);
                     }
 
                     color: isCurrent ? Colours.tPalette.m3surfaceContainerHighest : Colours.palette.m3tertiaryContainer
@@ -109,7 +109,7 @@ ColumnLayout {
             color: Colours.palette.m3secondaryContainer
             onColor: Colours.palette.m3onSecondaryContainer
             text: root.client?.lastIpcObject.floating ? qsTr("Tile") : qsTr("Float")
-            onClicked: Hypr.dispatch(`togglefloating address:0x${root.client?.address}`)
+            onClicked: Hypr.dispatch(`hl.dsp.window.float({ window = "address:0x${root.client?.address}" })`)
         }
 
         Loader {
@@ -123,7 +123,7 @@ ColumnLayout {
                 color: Colours.palette.m3secondaryContainer
                 onColor: Colours.palette.m3onSecondaryContainer
                 text: root.client?.lastIpcObject.pinned ? qsTr("Unpin") : qsTr("Pin")
-                onClicked: Hypr.dispatch(`pin address:0x${root.client?.address}`)
+                onClicked: Hypr.dispatch(`hl.dsp.window.pin({ window = "address:0x${root.client?.address}" })`)
             }
         }
 
