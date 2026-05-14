@@ -24,7 +24,7 @@ ColumnLayout {
         }
 
         // Check if we're connected to the target network (case-insensitive SSID comparison)
-        const isConnected = root.network && Nmcli.active && Nmcli.active.ssid && Nmcli.active.ssid.toLowerCase().trim() === root.network.ssid.toLowerCase().trim();
+        const isConnected = root.network && NetworkBackend.active && NetworkBackend.active.ssid && NetworkBackend.active.ssid.toLowerCase().trim() === root.network.ssid.toLowerCase().trim();
 
         if (isConnected) {
             // Successfully connected - give it a moment for network list to update
@@ -34,7 +34,7 @@ ColumnLayout {
         }
 
         // Check for connection failures - if pending connection was cleared but we're not connected
-        if (Nmcli.pendingConnection === null && connectButton.connecting) {
+        if (NetworkBackend.pendingConnection === null && connectButton.connecting) {
             // Wait a bit more before giving up (allow time for connection to establish)
             if (connectionMonitor.repeatCount > 10) {
                 connectionMonitor.stop();
@@ -45,7 +45,7 @@ ColumnLayout {
                 passwordContainer.passwordBuffer = "";
                 // Delete the failed connection
                 if (root.network && root.network.ssid) {
-                    Nmcli.forgetNetwork(root.network.ssid);
+                    NetworkBackend.forgetNetwork(root.network.ssid);
                 }
             }
         }
@@ -524,7 +524,7 @@ ColumnLayout {
                                 passwordContainer.passwordBuffer = "";
                                 // Delete the failed connection
                                 if (root.network && root.network.ssid) {
-                                    Nmcli.forgetNetwork(root.network.ssid);
+                                    NetworkBackend.forgetNetwork(root.network.ssid);
                                 }
                             } else {
                                 // Connection failed immediately - show error
@@ -536,7 +536,7 @@ ColumnLayout {
                                 passwordContainer.passwordBuffer = "";
                                 // Delete the failed connection
                                 if (root.network && root.network.ssid) {
-                                    Nmcli.forgetNetwork(root.network.ssid);
+                                    NetworkBackend.forgetNetwork(root.network.ssid);
                                 }
                             }
                         });
@@ -576,8 +576,8 @@ ColumnLayout {
         interval: 500
         onTriggered: {
             // Double-check connection is still active
-            if (root.shouldBeVisible && Nmcli.active && Nmcli.active.ssid) {
-                const stillConnected = Nmcli.active.ssid.toLowerCase().trim() === root.network.ssid.toLowerCase().trim();
+            if (root.shouldBeVisible && NetworkBackend.active && NetworkBackend.active.ssid) {
+                const stillConnected = NetworkBackend.active.ssid.toLowerCase().trim() === root.network.ssid.toLowerCase().trim();
                 if (stillConnected) {
                     connectionMonitor.stop();
                     connectButton.connecting = false;
@@ -608,10 +608,10 @@ ColumnLayout {
                 connectButton.text = qsTr("Connect");
                 passwordContainer.passwordBuffer = "";
                 // Delete the failed connection
-                Nmcli.forgetNetwork(ssid);
+                NetworkBackend.forgetNetwork(ssid);
             }
         }
 
-        target: Nmcli
+        target: NetworkBackend
     }
 }

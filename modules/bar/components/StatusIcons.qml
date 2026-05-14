@@ -4,6 +4,7 @@ import QtQuick
 import QtQuick.Layouts
 import Quickshell
 import Quickshell.Bluetooth
+import Quickshell.Io
 import Quickshell.Services.UPower
 import Caelestia.Config
 import qs.components
@@ -140,22 +141,33 @@ StyledRect {
             }
         }
 
-        // Network icon
+        // Network icon — hover shows status popout, click launches Impala TUI
         WrappedLoader {
             name: "network"
-            active: Config.bar.status.showNetwork && (!Nmcli.activeEthernet || Config.bar.status.showWifi)
+            active: Config.bar.status.showNetwork && (!NetworkBackend.activeEthernet || Config.bar.status.showWifi)
 
-            sourceComponent: MaterialIcon {
-                animate: true
-                text: Nmcli.active ? Icons.getNetworkIcon(Nmcli.active.strength ?? 0) : "wifi_off"
-                color: root.colour
+            sourceComponent: Item {
+                implicitWidth: netIcon.implicitWidth
+                implicitHeight: netIcon.implicitHeight
+
+                MaterialIcon {
+                    id: netIcon
+
+                    animate: true
+                    text: NetworkBackend.active ? Icons.getNetworkIcon(NetworkBackend.active.strength ?? 0) : "wifi_off"
+                    color: root.colour
+                }
+
+                TapHandler {
+                    onTapped: wifiLaunchProc.running = true
+                }
             }
         }
 
         // Ethernet icon
         WrappedLoader {
             name: "ethernet"
-            active: Config.bar.status.showNetwork && Nmcli.activeEthernet
+            active: Config.bar.status.showNetwork && NetworkBackend.activeEthernet
 
             sourceComponent: MaterialIcon {
                 animate: true
@@ -259,6 +271,13 @@ StyledRect {
                 fill: 1
             }
         }
+    }
+
+    // Launches the Impala WiFi TUI via omarchy when the network icon is clicked
+    Process {
+        id: wifiLaunchProc
+
+        command: ["sh", "-lc", "omarchy launch wifi"]
     }
 
     component WrappedLoader: Loader {

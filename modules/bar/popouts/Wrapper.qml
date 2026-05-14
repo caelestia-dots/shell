@@ -65,24 +65,7 @@ Item {
     implicitHeight: nonAnimHeight
 
     focus: hasCurrent
-    Keys.onEscapePressed: {
-        // Forward escape to password popout if active, otherwise close
-        if (currentName === "wirelesspassword" && content.item) {
-            const passwordPopout = (content.item as Content)?.children.find(c => c.name === "wirelesspassword");
-            if (passwordPopout && passwordPopout.item) {
-                passwordPopout.item.closeDialog();
-                return;
-            }
-        }
-        close();
-    }
-
-    Keys.onPressed: event => {
-        // Don't intercept keys when password popout is active - let it handle them
-        if (currentName === "wirelesspassword") {
-            event.accepted = false;
-        }
-    }
+    Keys.onEscapePressed: close()
 
     PopoutState {
         id: popoutState
@@ -97,7 +80,7 @@ Item {
     }
 
     Binding {
-        when: root.isDetached || (root.hasCurrent && root.currentName === "wirelesspassword")
+        when: root.isDetached
 
         target: QsWindow.window
         property: "WlrLayershell.keyboardFocus"
