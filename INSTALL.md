@@ -124,13 +124,19 @@ This installs:
 - Generated `shell.qml` entry point into the symlinked config dir
 - Library files to `/usr/lib/caelestia/`
 
-### 6. Create user config directory
+### 6. Symlink user config
+
+The repo tracks user config in `config/`:
 
 ```bash
-mkdir -p ~/.config/caelestia
+# Remove any existing config directory
+rm -rf ~/.config/caelestia
+
+# Symlink to repo
+ln -s ~/Code/Personal/shell/config ~/.config/caelestia
 ```
 
-Customizations go in `~/.config/caelestia/shell.json`. See upstream [README](https://github.com/caelestia-dots/shell#configuring) for all options.
+Customizations go in `config/shell.json` (version tracked). Per-monitor overrides go in `config/monitors/<screen-name>/shell.json`. See upstream [README](https://github.com/caelestia-dots/shell#configuring) for all options.
 
 ### 7. Launch
 
@@ -142,9 +148,12 @@ quickshell -c caelestia
 
 ```
 ~/Code/Personal/shell/                 ← fork repo (origin: golgor/shell)
-    ↓ symlink
-~/.config/quickshell/caelestia/        ← quickshell reads config from here
-~/.config/caelestia/shell.json         ← user customization (optional)
+├── config/                            ← user config (version tracked)
+│   ├── shell.json
+│   └── monitors/DP-1/shell.json
+    ↓ symlinks
+~/.config/quickshell/caelestia/        ← quickshell reads shell from here
+~/.config/caelestia/                   ← quickshell reads user config from here
 ```
 
 ## Rebuilding after changes
