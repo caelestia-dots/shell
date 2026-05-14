@@ -9,7 +9,7 @@ Scope {
 
     readonly property list<var> warnLevels: [...GlobalConfig.general.battery.warnLevels].sort((a, b) => b.level - a.level)
 
-    function nearestWarnLevelAbove(p: number): var {
+    function nearestWarnLevelAbove(p: real): var {
         const ordered = [...root.warnLevels].sort((a, b) => a.level - b.level);
         for (const level of ordered) {
             if (p < level.level)
