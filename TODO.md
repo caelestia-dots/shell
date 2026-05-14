@@ -65,27 +65,15 @@ Omarchy theme change → theme-set hook → ThemeGenerator.sh
 
 ---
 
-## 4. Clock format + dashboard trigger tab
-**Effort**: Small (24h) + Medium (trigger tab)
+## 4. Dashboard trigger tab
+**Effort**: Medium
 
-### 24h clock
-**No code change needed.** The config system auto-detects from locale. If locale is already 24h (e.g. `sv_SE`), it works out of the box. Otherwise, set in user config:
-
-```json
-// ~/.config/caelestia/shell.json
-{
-    "services": {
-        "useTwelveHourClock": false
-    }
-}
-```
-
-All 7 consumers (Time.qml, Clock.qml, DateTime.qml, DesktopClock.qml, Center.qml, Weather.qml, IdleInhibit.qml) react automatically.
+~~24h clock~~ ✅ Fixed via `shell.json` config.
 
 ### Top-edge trigger tab
-Currently the dashboard is invisible until triggered by hover at the top edge, drag, or keyboard shortcut. Adding a visible tab requires:
+Currently the dashboard is invisible until triggered by hover at the top edge, drag, or keyboard shortcut. Adding a visible tab/handle at the top center showing date/time would provide a persistent affordance and orientation info.
 
-- [ ] Verify 24h format — check if locale already defaults to 24h, create `shell.json` if override needed
+- [x] Verify 24h format — fixed via config
 - [ ] Create `DashboardTab.qml` — small visible handle at top-center showing date/time
 - [ ] Modify `modules/dashboard/Wrapper.qml` — render tab outside the `offsetScale`-gated visibility
 - [ ] Update `modules/drawers/Regions.qml` — ensure tab is in the Wayland input region
