@@ -60,7 +60,7 @@ Item {
                         }
 
                         ToggleButton {
-                            toggled: Nmcli.wifiEnabled
+                            toggled: NetworkBackend.wifiEnabled
                             icon: "wifi"
                             accent: "Tertiary"
                             iconSize: Tokens.font.size.normal
@@ -69,12 +69,12 @@ Item {
                             tooltip: qsTr("Toggle WiFi")
 
                             onClicked: {
-                                Nmcli.toggleWifi(null);
+                                NetworkBackend.toggleWifi(null);
                             }
                         }
 
                         ToggleButton {
-                            toggled: Nmcli.scanning
+                            toggled: NetworkBackend.scanning
                             icon: "wifi_find"
                             accent: "Secondary"
                             iconSize: Tokens.font.size.normal
@@ -83,7 +83,7 @@ Item {
                             tooltip: qsTr("Scan for networks")
 
                             onClicked: {
-                                Nmcli.rescanWifi();
+                                NetworkBackend.rescanWifi();
                             }
                         }
 
@@ -101,10 +101,10 @@ Item {
                                     root.session.ethernet.active = null;
                                     root.session.network.active = null;
                                 } else {
-                                    if (Nmcli.ethernetDevices.length > 0) {
-                                        root.session.ethernet.active = Nmcli.ethernetDevices[0];
-                                    } else if (Nmcli.networks.length > 0) {
-                                        root.session.network.active = Nmcli.networks[0];
+                                    if (NetworkBackend.ethernetDevices.length > 0) {
+                                        root.session.ethernet.active = NetworkBackend.ethernetDevices[0];
+                                    } else if (NetworkBackend.networks.length > 0) {
+                                        root.session.network.active = NetworkBackend.networks[0];
                                     }
                                 }
                             }

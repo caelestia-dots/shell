@@ -31,9 +31,9 @@ ColumnLayout {
     SectionContainer {
         ToggleRow {
             label: qsTr("WiFi enabled")
-            checked: Nmcli.wifiEnabled
+            checked: NetworkBackend.wifiEnabled
             toggle.onToggled: {
-                Nmcli.enableWifi(checked);
+                NetworkBackend.enableWifi(checked);
             }
         }
     }
@@ -49,25 +49,25 @@ ColumnLayout {
 
         PropertyRow {
             label: qsTr("Connected network")
-            value: Nmcli.active ? Nmcli.active.ssid : qsTr("Not connected")
+            value: NetworkBackend.active ? NetworkBackend.active.ssid : qsTr("Not connected")
         }
 
         PropertyRow {
             showTopMargin: true
             label: qsTr("Signal strength")
-            value: Nmcli.active ? qsTr("%1%").arg(Nmcli.active.strength) : qsTr("N/A")
+            value: NetworkBackend.active ? qsTr("%1%").arg(NetworkBackend.active.strength) : qsTr("N/A")
         }
 
         PropertyRow {
             showTopMargin: true
             label: qsTr("Security")
-            value: Nmcli.active ? (Nmcli.active.isSecure ? qsTr("Secured") : qsTr("Open")) : qsTr("N/A")
+            value: NetworkBackend.active ? (NetworkBackend.active.isSecure ? qsTr("Secured") : qsTr("Open")) : qsTr("N/A")
         }
 
         PropertyRow {
             showTopMargin: true
             label: qsTr("Frequency")
-            value: Nmcli.active ? qsTr("%1 MHz").arg(Nmcli.active.frequency) : qsTr("N/A")
+            value: NetworkBackend.active ? qsTr("%1 MHz").arg(NetworkBackend.active.frequency) : qsTr("N/A")
         }
     }
 }

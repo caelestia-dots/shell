@@ -35,13 +35,13 @@ ColumnLayout {
 
         PropertyRow {
             label: qsTr("Total devices")
-            value: qsTr("%1").arg(Nmcli.ethernetDevices.length)
+            value: qsTr("%1").arg(NetworkBackend.ethernetDevices.length)
         }
 
         PropertyRow {
             showTopMargin: true
             label: qsTr("Connected devices")
-            value: qsTr("%1").arg(Nmcli.ethernetDevices.filter(d => d.connected).length)
+            value: qsTr("%1").arg(NetworkBackend.ethernetDevices.filter(d => d.connected).length)
         }
     }
 
@@ -54,9 +54,9 @@ ColumnLayout {
     SectionContainer {
         ToggleRow {
             label: qsTr("WiFi enabled")
-            checked: Nmcli.wifiEnabled
+            checked: NetworkBackend.wifiEnabled
             toggle.onToggled: {
-                Nmcli.enableWifi(checked);
+                NetworkBackend.enableWifi(checked);
             }
         }
     }
@@ -110,28 +110,28 @@ ColumnLayout {
 
         PropertyRow {
             label: qsTr("Network")
-            value: Nmcli.active ? Nmcli.active.ssid : (Nmcli.activeEthernet ? Nmcli.activeEthernet.interface : qsTr("Not connected"))
+            value: NetworkBackend.active ? NetworkBackend.active.ssid : (NetworkBackend.activeEthernet ? NetworkBackend.activeEthernet.interface : qsTr("Not connected"))
         }
 
         PropertyRow {
             showTopMargin: true
-            visible: Nmcli.active !== null
+            visible: NetworkBackend.active !== null
             label: qsTr("Signal strength")
-            value: Nmcli.active ? qsTr("%1%").arg(Nmcli.active.strength) : qsTr("N/A")
+            value: NetworkBackend.active ? qsTr("%1%").arg(NetworkBackend.active.strength) : qsTr("N/A")
         }
 
         PropertyRow {
             showTopMargin: true
-            visible: Nmcli.active !== null
+            visible: NetworkBackend.active !== null
             label: qsTr("Security")
-            value: Nmcli.active ? (Nmcli.active.isSecure ? qsTr("Secured") : qsTr("Open")) : qsTr("N/A")
+            value: NetworkBackend.active ? (NetworkBackend.active.isSecure ? qsTr("Secured") : qsTr("Open")) : qsTr("N/A")
         }
 
         PropertyRow {
             showTopMargin: true
-            visible: Nmcli.active !== null
+            visible: NetworkBackend.active !== null
             label: qsTr("Frequency")
-            value: Nmcli.active ? qsTr("%1 MHz").arg(Nmcli.active.frequency) : qsTr("N/A")
+            value: NetworkBackend.active ? qsTr("%1 MHz").arg(NetworkBackend.active.frequency) : qsTr("N/A")
         }
     }
 

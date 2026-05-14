@@ -15,11 +15,11 @@ DeviceList {
 
     required property Session session
 
-    title: qsTr("Devices (%1)").arg(Nmcli.ethernetDevices.length)
+    title: qsTr("Devices (%1)").arg(NetworkBackend.ethernetDevices.length)
     description: qsTr("All available ethernet devices")
     activeItem: session.ethernet.active
 
-    model: Nmcli.ethernetDevices
+    model: NetworkBackend.ethernetDevices
 
     headerComponent: Component {
         RowLayout {
@@ -149,9 +149,9 @@ DeviceList {
                     StateLayer {
                         onClicked: {
                             if (modelData.connected && modelData.connection) {
-                                Nmcli.disconnectEthernet(modelData.connection, () => {});
+                                NetworkBackend.disconnectEthernet(modelData.connection, () => {});
                             } else {
-                                Nmcli.connectEthernet(modelData.connection || "", modelData.interface || "", () => {});
+                                NetworkBackend.connectEthernet(modelData.connection || "", modelData.interface || "", () => {});
                             }
                         }
 

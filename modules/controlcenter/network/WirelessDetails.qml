@@ -21,20 +21,20 @@ DeviceDetails {
 
     function checkSavedProfile(): void {
         if (network && network.ssid) {
-            Nmcli.loadSavedConnections(() => {});
+            NetworkBackend.loadSavedConnections(() => {});
         }
     }
 
     function updateDeviceDetails(): void {
         if (network && network.ssid) {
-            const isActive = network.active || (Nmcli.active && Nmcli.active.ssid === network.ssid);
+            const isActive = network.active || (NetworkBackend.active && NetworkBackend.active.ssid === network.ssid);
             if (isActive) {
-                Nmcli.getWirelessDeviceDetails("");
+                NetworkBackend.getWirelessDeviceDetails("");
             } else {
-                Nmcli.wirelessDeviceDetails = null;
+                NetworkBackend.wirelessDeviceDetails = null;
             }
         } else {
-            Nmcli.wirelessDeviceDetails = null;
+            NetworkBackend.wirelessDeviceDetails = null;
         }
     }
 
@@ -79,7 +79,7 @@ DeviceDetails {
                             if (checked) {
                                 NetworkConnection.handleConnect(root.network, root.session, null);
                             } else {
-                                Nmcli.disconnectFromNetwork();
+                                NetworkBackend.disconnectFromNetwork();
                             }
                         }
                     }
@@ -92,7 +92,7 @@ DeviceDetails {
                             if (!root.network || !root.network.ssid) {
                                 return false;
                             }
-                            return Nmcli.hasSavedProfile(root.network.ssid);
+                            return NetworkBackend.hasSavedProfile(root.network.ssid);
                         }
                         inactiveColour: Colours.palette.m3secondaryContainer
                         inactiveOnColour: Colours.palette.m3onSecondaryContainer
@@ -101,9 +101,9 @@ DeviceDetails {
                         onClicked: {
                             if (root.network && root.network.ssid) {
                                 if (root.network.active) {
-                                    Nmcli.disconnectFromNetwork();
+                                    NetworkBackend.disconnectFromNetwork();
                                 }
-                                Nmcli.forgetNetwork(root.network.ssid);
+                                NetworkBackend.forgetNetwork(root.network.ssid);
                             }
                         }
                     }
@@ -164,7 +164,7 @@ DeviceDetails {
 
                 SectionContainer {
                     ConnectionInfoSection {
-                        deviceDetails: Nmcli.wirelessDeviceDetails
+                        deviceDetails: NetworkBackend.wirelessDeviceDetails
                     }
                 }
             }
@@ -177,14 +177,14 @@ DeviceDetails {
         }
         function onWirelessDeviceDetailsChanged() {
             if (network && network.ssid) {
-                const isActive = network.active || (Nmcli.active && Nmcli.active.ssid === network.ssid);
-                if (isActive && Nmcli.wirelessDeviceDetails && Nmcli.wirelessDeviceDetails !== null) {
+                const isActive = network.active || (NetworkBackend.active && NetworkBackend.active.ssid === network.ssid);
+                if (isActive && NetworkBackend.wirelessDeviceDetails && NetworkBackend.wirelessDeviceDetails !== null) {
                     connectionUpdateTimer.stop();
                 }
             }
         }
 
-        target: Nmcli
+        target: NetworkBackend
     }
 
     Timer {
@@ -195,16 +195,16 @@ DeviceDetails {
         running: network && network.ssid
         onTriggered: {
             if (network) {
-                const isActive = network.active || (Nmcli.active && Nmcli.active.ssid === network.ssid);
+                const isActive = network.active || (NetworkBackend.active && NetworkBackend.active.ssid === network.ssid);
                 if (isActive) {
-                    if (!Nmcli.wirelessDeviceDetails || Nmcli.wirelessDeviceDetails === null) {
-                        Nmcli.getWirelessDeviceDetails("", () => {});
+                    if (!NetworkBackend.wirelessDeviceDetails || NetworkBackend.wirelessDeviceDetails === null) {
+                        NetworkBackend.getWirelessDeviceDetails("", () => {});
                     } else {
                         connectionUpdateTimer.stop();
                     }
                 } else {
-                    if (Nmcli.wirelessDeviceDetails !== null) {
-                        Nmcli.wirelessDeviceDetails = null;
+                    if (NetworkBackend.wirelessDeviceDetails !== null) {
+                        NetworkBackend.wirelessDeviceDetails = null;
                     }
                 }
             }

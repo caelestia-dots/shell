@@ -42,8 +42,8 @@ QtObject {
             return;
         }
 
-        if (Nmcli.active && Nmcli.active.ssid !== network.ssid) {
-            Nmcli.disconnectFromNetwork();
+        if (NetworkBackend.active && NetworkBackend.active.ssid !== network.ssid) {
+            NetworkBackend.disconnectFromNetwork();
             Qt.callLater(() => {
                 root.connectToNetwork(network, session, onPasswordNeeded);
             });
@@ -67,22 +67,23 @@ QtObject {
         }
 
         if (network.isSecure) {
-            const hasSavedProfile = Nmcli.hasSavedProfile(network.ssid);
+            const hasSavedProfile = NetworkBackend.hasSavedProfile(network.ssid);
 
             if (hasSavedProfile) {
-                Nmcli.connectToNetwork(network.ssid, "", network.bssid, null);
+                NetworkBackend.connectToNetwork(network.ssid, "", network.bssid, result => {
+                    if (result && result.needsPassword) {
+                        if (session && session.network) {
+                            session.network.showPasswordDialog = true;
+                            session.network.pendingNetwork = network;
+                        } else if (onPasswordNeeded) {
+                            onPasswordNeeded(network);
+                        }
+                    }
+                });
             } else {
                 // Use password check with callback
-                Nmcli.connectToNetworkWithPasswordCheck(network.ssid, network.isSecure, result => {
+                NetworkBackend.connectToNetworkWithPasswordCheck(network.ssid, network.isSecure, result => {
                     if (result.needsPassword) {
-                        // Clear pending connection if exists
-                        if (Nmcli.pendingConnection) {
-                            Nmcli.connectionCheckTimer.stop();
-                            Nmcli.immediateCheckTimer.stop();
-                            Nmcli.immediateCheckTimer.checkCount = 0;
-                            Nmcli.pendingConnection = null;
-                        }
-
                         // Handle password dialog - use session if available, otherwise use callback
                         if (session && session.network) {
                             session.network.showPasswordDialog = true;
@@ -94,7 +95,7 @@ QtObject {
                 }, network.bssid);
             }
         } else {
-            Nmcli.connectToNetwork(network.ssid, "", network.bssid, null);
+            NetworkBackend.connectToNetwork(network.ssid, "", network.bssid, null);
         }
     }
 
@@ -111,6 +112,6 @@ QtObject {
             return;
         }
 
-        Nmcli.connectToNetwork(network.ssid, password || "", network.bssid || "", onResult || null);
+        NetworkBackend.connectToNetwork(network.ssid, password || "", network.bssid || "", onResult || null);
     }
 }

@@ -35,14 +35,14 @@ Item {
             return;
         }
 
-        const isConnected = root.network && Nmcli.active && Nmcli.active.ssid && Nmcli.active.ssid.toLowerCase().trim() === root.network.ssid.toLowerCase().trim();
+        const isConnected = root.network && NetworkBackend.active && NetworkBackend.active.ssid && NetworkBackend.active.ssid.toLowerCase().trim() === root.network.ssid.toLowerCase().trim();
 
         if (isConnected) {
             connectionSuccessTimer.start();
             return;
         }
 
-        if (Nmcli.pendingConnection === null && connectButton.connecting) {
+        if (NetworkBackend.pendingConnection === null && connectButton.connecting) {
             if (connectionMonitor.repeatCount > 10) {
                 connectionMonitor.stop();
                 connectButton.connecting = false;
@@ -51,7 +51,7 @@ Item {
                 connectButton.text = qsTr("Connect");
                 passwordContainer.passwordBuffer = "";
                 if (root.network && root.network.ssid) {
-                    Nmcli.forgetNetwork(root.network.ssid);
+                    NetworkBackend.forgetNetwork(root.network.ssid);
                 }
             }
         }
@@ -443,7 +443,7 @@ Item {
                                 text = qsTr("Connect");
                                 passwordContainer.passwordBuffer = "";
                                 if (root.network && root.network.ssid) {
-                                    Nmcli.forgetNetwork(root.network.ssid);
+                                    NetworkBackend.forgetNetwork(root.network.ssid);
                                 }
                             } else {
                                 connectionMonitor.stop();
@@ -453,7 +453,7 @@ Item {
                                 text = qsTr("Connect");
                                 passwordContainer.passwordBuffer = "";
                                 if (root.network && root.network.ssid) {
-                                    Nmcli.forgetNetwork(root.network.ssid);
+                                    NetworkBackend.forgetNetwork(root.network.ssid);
                                 }
                             }
                         });
@@ -490,8 +490,8 @@ Item {
 
         interval: 500
         onTriggered: {
-            if (root.visible && Nmcli.active && Nmcli.active.ssid) {
-                const stillConnected = Nmcli.active.ssid.toLowerCase().trim() === root.network.ssid.toLowerCase().trim();
+            if (root.visible && NetworkBackend.active && NetworkBackend.active.ssid) {
+                const stillConnected = NetworkBackend.active.ssid.toLowerCase().trim() === root.network.ssid.toLowerCase().trim();
                 if (stillConnected) {
                     connectionMonitor.stop();
                     connectButton.connecting = false;
@@ -516,10 +516,10 @@ Item {
                 connectButton.enabled = true;
                 connectButton.text = qsTr("Connect");
                 passwordContainer.passwordBuffer = "";
-                Nmcli.forgetNetwork(ssid);
+                NetworkBackend.forgetNetwork(ssid);
             }
         }
 
-        target: Nmcli
+        target: NetworkBackend
     }
 }
