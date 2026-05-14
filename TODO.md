@@ -17,21 +17,26 @@
 ---
 
 ## 2. Network management backend
-**Effort**: Large (decision required first)
+**Effort**: Large
 
-Omarchy uses **systemd-networkd + iwd**, not NetworkManager. `nmcli` is not installed and the entire network UI is non-functional (WiFi scanning, connecting, status icons, VPN monitoring).
+Omarchy uses **systemd-networkd + iwd**, not NetworkManager. `nmcli` is not installed.
 
-**Options**:
-1. **Install NetworkManager** — Fastest path to make current code work, but risky on Omarchy. Must be explicitly configured to avoid conflict with systemd-networkd and to use iwd backend.
-2. **Build iwd/iwctl backend with compatibility migration** — Preferred long-term. Create `services/Iwctl.qml` that initially mirrors `Nmcli.qml`'s public API so consumers can migrate incrementally (one location at a time) via a facade.
-
-**Decision**: Option 2 — build iwd compatibility backend
+**Architecture decision**: iwd backend + watch-only bar UI
+- `services/Iwctl.qml` — reads network state via `iwctl` + `networkctl`
+- `services/NetworkBackend.qml` — facade that prefers Iwctl, falls back to Nmcli
+- Bar popout is **read-only** (status display only); clicking the WiFi icon launches Impala TUI via `omarchy launch wifi`
+- Control center retains full management UI (connect/disconnect/forget/password) — scoped for later if watch-only is wanted there too
 
 - [x] Decide on approach (install NM or build iwd compatibility backend)
 - [ ] If NM: test coexistence with systemd-networkd + iwd, document safe config + rollback
 - [x] If iwd: create `services/Iwctl.qml` with `Nmcli`-compatible API surface for phased migration
-- [x] If iwd: introduce a single facade switch (e.g. `NetworkBackend.qml`) so UI migration can be incremental
+- [x] If iwd: introduce a single facade switch (`NetworkBackend.qml`) so UI migration can be incremental
 - [x] If iwd: migrate consumers in batches (bar, control center, utilities, VPN) and remove `Nmcli` dependency
+- [x] Bar popout: replace interactive network list with read-only connection status (SSID, signal, security)
+- [x] Bar WiFi icon click: launch `omarchy launch wifi` (Impala TUI) via `Process` + `TapHandler`
+- [x] Bar ethernet icon: hover-only status (no click action — no TUI equivalent)
+- [ ] Run `IWD_TEST_PLAN.md` against live system to validate Iwctl.qml parsing
+- [ ] Consider making control center network pane watch-only too (scoped out for now)
 
 ---
 
