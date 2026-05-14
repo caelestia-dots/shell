@@ -92,3 +92,22 @@ Currently the dashboard is invisible until triggered by hover at the top edge, d
 
 - [ ] Create `~/.face` placeholder image, OR
 - [ ] Change `qCWarning` → `qCDebug` in `plugin/src/Caelestia/Images/cachingimageprovider.cpp` line 45
+
+---
+
+## 6. Replace custom file picker with system portal
+**Effort**: Medium
+
+Caelestia ships a custom QML file picker (`components/filedialog/`). The system already has `xdg-desktop-portal` + `xdg-desktop-portal-gtk` + `xdg-desktop-portal-hyprland` running, which provides a native file dialog (Nautilus-based).
+
+The custom picker is used in one place: the dashboard face/profile picture picker (`modules/dashboard/dash/User.qml`).
+
+**Options**:
+1. **Qt QFileDialog wrapper** — Qt6 supports the portal natively. Expose a small C++ helper via `QML_ELEMENT` that calls `QFileDialog::getOpenFileName()`. It routes through the portal automatically.
+2. **D-Bus portal call** — Call `org.freedesktop.portal.FileChooser.OpenFile()` directly. More work but pure QML/JS.
+3. **Shell out** — `zenity --file-selection` or similar. Hacky but quick.
+
+- [ ] Decide on approach
+- [ ] Implement portal-based file picker
+- [ ] Replace `components/filedialog/` usage in `User.qml` (and any other consumers)
+- [ ] Consider keeping custom picker as fallback if portal is unavailable
