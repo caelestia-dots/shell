@@ -223,9 +223,9 @@ Item {
 
             const ws = view.itemAt(event.x, event.y) as SpecialWsDelegate;
             if (ws?.modelData)
-                Hypr.dispatch(`hl.dsp.workspace.toggle_special({ "${ws.modelData.name.slice(8)}" })`);
+                Hypr.dispatch(Hyprland.usingLua ? `hl.dsp.workspace.toggle_special( "${ws.modelData.name.slice(8)}" )` : `togglespecialworkspace ${ws.modelData.name.slice(8)}`);
             else
-                Hypr.dispatch('hl.dsp.workspace.toggle_special("special")');
+                Hypr.dispatch(Hyprland.usingLua ? `hl.dsp.workspace.toggle_special( "special" )` : `togglespecialworkspace special`);
         }
     }
 
