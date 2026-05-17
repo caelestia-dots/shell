@@ -8,6 +8,7 @@ import Caelestia
 import Caelestia.Config
 import qs.services
 import qs.utils
+import Quickshell.Hyprland
 
 Singleton {
     id: root
@@ -80,7 +81,7 @@ Singleton {
     }
 
     function reloadHyprRules(): void {
-        const str = "keyword layerrule %1 %2, match:namespace caelestia-drawers";
+        const str = Hyprland.usingLua ? `eval 'hl.layer_rule({ match = { namespace = "caelestia-drawers" }, %1 = true, %2 = true })'` : "keyword layerrule %1 %2, match:namespace caelestia-drawers";
         Hypr.extras.batchMessage([str.arg("blur").arg(transparency.enabled ? 1 : 0), str.arg("ignore_alpha").arg(transparency.base - 0.03)]);
     }
 

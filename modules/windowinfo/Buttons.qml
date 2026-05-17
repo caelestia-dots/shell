@@ -6,6 +6,7 @@ import Quickshell.Widgets
 import Caelestia.Config
 import qs.components
 import qs.services
+import Quickshell.Hyprland
 
 ColumnLayout {
     id: root
@@ -80,9 +81,7 @@ ColumnLayout {
                     readonly property int wsId: Math.floor((Hypr.activeWsId - 1) / 10) * 10 + index + 1
                     readonly property bool isCurrent: root.client?.workspace.id === wsId
 
-                    onClicked: {
-                        Hypr.dispatch(`movetoworkspace ${wsId},address:0x${root.client?.address}`);
-                    }
+                    onClicked: Hypr.dispatch(Hyprland.usingLua ? `hl.dsp.window.move({ workspace = "${wsId}" , follow = "address:0x${root.client?.address}" })` : `movetoworkspace ${wsId}, address:0x${root.client?.address}`);
 
                     color: isCurrent ? Colours.tPalette.m3surfaceContainerHighest : Colours.palette.m3tertiaryContainer
                     onColor: isCurrent ? Colours.palette.m3onSurface : Colours.palette.m3onTertiaryContainer
@@ -109,7 +108,7 @@ ColumnLayout {
             color: Colours.palette.m3secondaryContainer
             onColor: Colours.palette.m3onSecondaryContainer
             text: root.client?.lastIpcObject.floating ? qsTr("Tile") : qsTr("Float")
-            onClicked: Hypr.dispatch(`togglefloating address:0x${root.client?.address}`)
+            onClicked: Hypr.dispatch(Hyprland.usingLua ? `hl.dsp.window.float({ window = "address:0x${root.client?.address}" })` : `togglefloating address:0x${root.client?.address}`);
         }
 
         Loader {
@@ -123,7 +122,7 @@ ColumnLayout {
                 color: Colours.palette.m3secondaryContainer
                 onColor: Colours.palette.m3onSecondaryContainer
                 text: root.client?.lastIpcObject.pinned ? qsTr("Unpin") : qsTr("Pin")
-                onClicked: Hypr.dispatch(`pin address:0x${root.client?.address}`)
+                onClicked:  Hypr.dispatch(Hyprland.usingLua ? `hl.dsp.window.pin({ window = "address:0x${root.client?.address}" })` : `pin address:0x${root.client?.address}`);
             }
         }
 
@@ -131,7 +130,7 @@ ColumnLayout {
             color: Colours.palette.m3errorContainer
             onColor: Colours.palette.m3onErrorContainer
             text: qsTr("Kill")
-            onClicked: Hypr.dispatch(`killwindow address:0x${root.client?.address}`)
+            onClicked:  Hypr.dispatch(Hyprland.usingLua ? `hl.dsp.window.kill({ window = "address:0x${root.client?.address}" })` : `killwindow address:0x${root.client?.address}`);
         }
     }
 

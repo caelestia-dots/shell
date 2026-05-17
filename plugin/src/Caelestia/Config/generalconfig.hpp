@@ -38,8 +38,8 @@ class GeneralIdle : public ConfigObject {
             }),
             vmap({
                 { u"timeout"_s, 300 },
-                { u"idleAction"_s, u"dpms off"_s },
-                { u"returnAction"_s, u"dpms on"_s },
+                { u"idleAction"_s, u"hl.dsp.dpms({ action = off })"_s },
+                { u"returnAction"_s, u"hl.dsp.dpms({ action = on })"_s },
             }),
             vmap({
                 { u"timeout"_s, 600 },
