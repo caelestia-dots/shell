@@ -18,7 +18,9 @@ Item {
     readonly property bool bgEnabled: Config.background.desktopClock.background.enabled
     readonly property bool blurEnabled: bgEnabled && Config.background.desktopClock.background.blur && !GameMode.enabled
     readonly property bool invertColors: Config.background.desktopClock.invertColors
-    readonly property bool useLightSet: Colours.light ? !invertColors : invertColors
+    readonly property bool invertLightOnly: Config.background.desktopClock.invertLightOnly
+    readonly property bool effectiveInvert: invertColors && (invertLightOnly ? Colours.light : true)
+    readonly property bool useLightSet: Colours.light ? !effectiveInvert : effectiveInvert
     readonly property color safePrimary: useLightSet ? Colours.palette.m3primaryContainer : Colours.palette.m3primary
     readonly property color safeSecondary: useLightSet ? Colours.palette.m3secondaryContainer : Colours.palette.m3secondary
     readonly property color safeTertiary: useLightSet ? Colours.palette.m3tertiaryContainer : Colours.palette.m3tertiary

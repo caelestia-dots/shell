@@ -366,7 +366,8 @@ For example, to disable the bar on DP-1:
                 "opacity": 0.7,
                 "blur": true
             },
-            "invertColors": false
+            "invertColors": false,
+            "invertLightOnly": false
         },
         "enabled": true,
         "visualiser": {
