@@ -18,6 +18,8 @@ Item {
             const item = repeater.itemAt(i) as Loader;
             if (item?.sourceComponent === mediaComponent && (item?.item as MediaWrapper)?.needsKeyboard)
                 return true;
+            if (item?.sourceComponent === pomodoroComponent && (item?.item as Pomodoro)?.needsKeyboard)
+                return true;
         }
         return false;
     }
@@ -37,6 +39,12 @@ Item {
                 iconName: "queue_music",
                 text: qsTr("Media"),
                 enabled: Config.dashboard.showMedia
+            },
+            {
+                component: pomodoroComponent,
+                iconName: "timer",
+                text: qsTr("Pomodoro"),
+                enabled: true
             },
             {
                 component: performanceComponent,
@@ -177,6 +185,12 @@ Item {
                 MediaWrapper {
                     visibilities: root.visibilities
                 }
+            }
+
+            Component {
+                id: pomodoroComponent
+
+                Pomodoro {}
             }
 
             Component {
