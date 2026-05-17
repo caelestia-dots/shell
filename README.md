@@ -346,7 +346,7 @@ For example, to disable the bar on DP-1:
                 },
                 {
                     "timeout": 600,
-                    "idleAction": ["systemctl", "suspend-then-hibernate"]
+                    "idleAction": ["systemctl", "suspend"]
                 }
             ]
         }
@@ -600,8 +600,8 @@ For example, to disable the bar on DP-1:
             {
                 "name": "Sleep",
                 "icon": "bedtime",
-                "description": "Suspend then hibernate",
-                "command": ["systemctl", "suspend-then-hibernate"],
+                "description": "Suspend to RAM",
+                "command": ["systemctl", "suspend"],
                 "enabled": true,
                 "dangerous": false
             },
