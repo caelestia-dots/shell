@@ -30,6 +30,8 @@ Item {
             z: 1
         }
 
+        Displays {}
+
         Toggles {
             visibilities: root.visibilities
             popouts: root.popouts
