@@ -33,7 +33,7 @@ Row {
             visible: pfp.status !== Image.Ready
         }
 
-        CachingImage {
+        ProfileImage {
             id: pfp
 
             anchors.fill: parent
@@ -99,6 +99,14 @@ Row {
                     }
                 }
             }
+        }
+
+        Connections {
+            function onAccepted(): void {
+                Qt.callLater(pfp.reload);
+            }
+
+            target: root.facePicker
         }
     }
 
