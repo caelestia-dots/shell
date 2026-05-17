@@ -26,6 +26,7 @@ class UtilitiesToasts : public ConfigObject {
     CONFIG_GLOBAL_PROPERTY(bool, kbLimit, true)
     CONFIG_GLOBAL_PROPERTY(bool, vpnChanged, true)
     CONFIG_GLOBAL_PROPERTY(bool, nowPlaying, false)
+    CONFIG_GLOBAL_PROPERTY(bool, lowPowerModeChanged, true)
 
 public:
     explicit UtilitiesToasts(QObject* parent = nullptr)

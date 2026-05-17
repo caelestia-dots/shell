@@ -246,6 +246,6 @@ void main() {
         discard;
 
     float fw = fwidth(mergedSdf);
-    float alpha = 1.0 - smoothstep(-fw, fw, mergedSdf);
+    float alpha = (1.0 - smoothstep(-fw, fw, mergedSdf)) * color.a;
     fragColor = vec4(color.rgb * alpha, alpha) * qt_Opacity;
 }

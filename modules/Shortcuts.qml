@@ -5,6 +5,7 @@ import Caelestia
 import qs.components.misc
 import qs.services
 import qs.modules.controlcenter
+import qs.modules.nexus
 
 Scope {
     id: root
@@ -18,6 +19,14 @@ Scope {
         name: "controlCenter"
         description: "Open control center"
         onPressed: WindowFactory.create()
+    }
+
+    // qmllint disable unresolved-type
+    CustomShortcut {
+        // qmllint enable unresolved-type
+        name: "nexus"
+        description: "Open Nexus settings"
+        onPressed: NexusWindowFactory.create()
     }
 
     // qmllint disable unresolved-type
@@ -134,6 +143,14 @@ Scope {
         }
 
         target: "controlCenter"
+    }
+
+    IpcHandler {
+        function open(): void {
+            NexusWindowFactory.create();
+        }
+
+        target: "nexus"
     }
 
     IpcHandler {

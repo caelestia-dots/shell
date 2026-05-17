@@ -79,6 +79,51 @@ class GeneralBattery : public ConfigObject {
             }),
         })
     CONFIG_GLOBAL_PROPERTY(int, criticalLevel, 3)
+    CONFIG_GLOBAL_PROPERTY(QVariantMap, powerManagement,
+        vmap({
+            { u"enabled"_s, false },
+            { u"thresholds"_s, QVariantList{} },
+            { u"onCharging"_s, vmap({
+                                   { u"setPowerProfile"_s, u"restore"_s },
+                                   { u"setRefreshRate"_s, u"restore"_s },
+                                   { u"disableAnimations"_s, u""_s },
+                                   { u"disableBlur"_s, u""_s },
+                                   { u"disableRounding"_s, u""_s },
+                                   { u"disableShadows"_s, u""_s },
+                               }) },
+            { u"onUnplugged"_s, vmap({
+                                    { u"setPowerProfile"_s, u""_s },
+                                    { u"setRefreshRate"_s, u""_s },
+                                    { u"disableAnimations"_s, u""_s },
+                                    { u"disableBlur"_s, u""_s },
+                                    { u"disableRounding"_s, u""_s },
+                                    { u"disableShadows"_s, u""_s },
+                                    { u"evaluateThresholds"_s, true },
+                                }) },
+            { u"profileBehaviors"_s, vmap({
+                                         { u"powerSaver"_s, vmap({
+                                                                { u"setRefreshRate"_s, u""_s },
+                                                                { u"disableAnimations"_s, u""_s },
+                                                                { u"disableBlur"_s, u""_s },
+                                                                { u"disableRounding"_s, u""_s },
+                                                                { u"disableShadows"_s, u""_s },
+                                                            }) },
+                                         { u"balanced"_s, vmap({
+                                                              { u"setRefreshRate"_s, u""_s },
+                                                              { u"disableAnimations"_s, u""_s },
+                                                              { u"disableBlur"_s, u""_s },
+                                                              { u"disableRounding"_s, u""_s },
+                                                              { u"disableShadows"_s, u""_s },
+                                                          }) },
+                                         { u"performance"_s, vmap({
+                                                                 { u"setRefreshRate"_s, u""_s },
+                                                                 { u"disableAnimations"_s, u""_s },
+                                                                 { u"disableBlur"_s, u""_s },
+                                                                 { u"disableRounding"_s, u""_s },
+                                                                 { u"disableShadows"_s, u""_s },
+                                                             }) },
+                                     }) },
+        }))
 
 public:
     explicit GeneralBattery(QObject* parent = nullptr)
