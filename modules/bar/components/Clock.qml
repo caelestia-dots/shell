@@ -42,7 +42,7 @@ StyledRect {
             visible: Config.bar.clock.showDate
 
             horizontalAlignment: StyledText.AlignHCenter
-            text: Time.format("ddd\nd")
+            text: Time.format("ddd\ndd MMM")
             font.pointSize: Tokens.font.size.smaller
             font.family: Tokens.font.family.sans
             color: root.colour
