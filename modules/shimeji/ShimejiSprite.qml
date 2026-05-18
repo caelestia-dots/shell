@@ -22,6 +22,10 @@ Item {
     property bool onGround: false
     property bool dragging: false
     property point dragOffset
+    property real lastX: 0
+    property real lastY: 0
+    property real dragVx: 0
+    property real dragVy: 0
     property int walkTarget: -1
 
     property string currentAnim: "idle"
@@ -38,6 +42,8 @@ Item {
         x = margin + Math.random() * (screenSize.width - 128 - margin * 2);
         y = floorY;
         onGround = true;
+        vx = 0;
+        vy = 0;
         pickIdle();
     }
 
@@ -64,14 +70,14 @@ Item {
 
     function animFrame(anim, index) {
         const frames = {
-            idle: ["shime11.png"],
+            idle: ["shime1.png"],
             lookUp: ["shime26.png"],
             dangle: ["shime31.png", "shime32.png", "shime31.png", "shime33.png"],
             layDown: ["shime21.png"],
-            sleep: ["shime20.png"],
+            sleep: ["shime20.png", "shime21.png"],
             walk: ["shime1.png", "shime2.png", "shime1.png", "shime3.png"],
             stand: ["shime1.png"],
-            fall: ["shime4.png"],
+            eat: ["shime26.png", "shime15.png", "shime27.png", "shime16.png", "shime28.png", "shime17.png", "shime29.png", "shime11.png"],
         };
         const list = frames[anim];
         return list ? list[index % list.length] : "";
@@ -84,9 +90,8 @@ Item {
             vy += gravity;
             vx *= 0.98;
         } else if (Math.abs(vx) > 0.1) {
-            vx *= friction;
-            if (Math.abs(vx) < 0.5)
-                vx = 0;
+            vx *= 0.3;
+            if (Math.abs(vx) < 0.5) vx = 0;
         }
 
         if (walkTarget >= 0) {
@@ -107,27 +112,29 @@ Item {
 
         if (root.x < minX) {
             root.x = minX;
-            vx = Math.abs(vx) * 0.5;
-            onGround = true;
+            vx = Math.abs(vx) * 0.9;
         } else if (root.x > maxX) {
             root.x = maxX;
-            vx = -Math.abs(vx) * 0.5;
-            onGround = true;
+            vx = -Math.abs(vx) * 0.9;
         }
 
         if (root.y > floorY) {
             root.y = floorY;
-            vy = -vy * 0.35;
-            if (Math.abs(vy) < 1) {
+            vy = -vy * 0.6;
+            if (vy >= 0 && Math.abs(vy) < 2) {
                 vy = 0;
                 onGround = true;
-                if (walkTarget < 0 && Math.random() < 0.02) {
+                vx = 0;
+                currentAnim = "idle";
+                if (walkTarget < 0 && Math.random() < 0.1) {
                     walkRandom();
                 }
+            } else if (vy < 0) {
+                onGround = false;
             }
         } else if (root.y < 0) {
             root.y = 0;
-            vy = Math.abs(vy) * 0.5;
+            vy = Math.abs(vy) * 0.6;
         }
     }
 
@@ -145,15 +152,26 @@ Item {
         onPressed: mouse => {
             dragging = true;
             currentAnim = "idle";
+            walkTarget = -1;
             dragOffset = Qt.point(mouse.x, mouse.y);
+            lastX = root.x;
+            lastY = root.y;
+            dragVx = 0;
+            dragVy = 0;
             vx = 0;
             vy = 0;
         }
 
         onPositionChanged: mouse => {
             if (dragging) {
-                root.x = Math.max(minX, Math.min(maxX, root.x + mouse.x - dragOffset.x));
-                root.y = Math.max(0, Math.min(maxY, root.y + mouse.y - dragOffset.y));
+                const newX = Math.max(minX, Math.min(maxX, root.x + mouse.x - dragOffset.x));
+                const newY = Math.max(0, Math.min(maxY, root.y + mouse.y - dragOffset.y));
+                dragVx = newX - lastX;
+                dragVy = newY - lastY;
+                lastX = newX;
+                lastY = newY;
+                root.x = newX;
+                root.y = newY;
             }
         }
 
@@ -161,6 +179,7 @@ Item {
     }
 
     Image {
+        id: spriteImage
         anchors.fill: parent
         source: {
             const fn = root.animFrame(currentAnim, frameIndex);
@@ -169,6 +188,7 @@ Item {
         sourceSize.width: 128
         sourceSize.height: 128
         fillMode: Image.PreserveAspectFit
+
         mirror: facingRight
     }
 
@@ -197,18 +217,20 @@ Item {
         running: true
         triggeredOnStart: true
         onTriggered: {
-            if (!dragging && onGround && Math.abs(vx) < 0.5 && walkTarget < 0) {
-                const roll = Math.random();
-                if (roll < 0.3) {
-                    pickIdle();
-                } else if (roll < 0.55) {
-                    walkRandom();
-                } else if (roll < 0.75) {
-                    currentAnim = "dangle";
-                    frameIndex = 0;
-                } else {
-                    currentAnim = "layDown";
-                    frameIndex = 0;
+            if (!dragging && onGround && walkTarget < 0 && currentAnim !== "ground") {
+                if (Math.abs(vx) < 0.5) {
+                    const roll = Math.random();
+                    if (roll < 0.3) {
+                        pickIdle();
+                    } else if (roll < 0.55) {
+                        walkRandom();
+                    } else if (roll < 0.75) {
+                        currentAnim = "dangle";
+                        frameIndex = 0;
+                    } else {
+                        currentAnim = "layDown";
+                        frameIndex = 0;
+                    }
                 }
             }
         }
@@ -216,7 +238,10 @@ Item {
 
     onDraggingChanged: {
         if (!dragging) {
-            vy = 5;
+            vx = dragVx * 2;
+            vy = dragVy > 0 ? dragVy * 2 : dragVy * 2;
+            if (Math.abs(vx) < 1) vx = 0;
+            if (Math.abs(vy) < 1) vy = 0;
             onGround = false;
             pickIdle();
         }
