@@ -365,30 +365,6 @@ onValueModified: newValue => {
         }
     }
 
-    StyledText {
-        Layout.topMargin: Tokens.spacing.normal
-        text: qsTr("Shimeji")
-        font.pointSize: Tokens.font.size.larger
-        font.weight: 500
     }
-
-    SwitchRow {
-        label: qsTr("Shimeji enabled")
-        checked: rootPane.shimejiEnabled
-        onToggled: checked => {
-            rootPane.shimejiEnabled = checked;
-            rootPane.saveConfig();
-        }
-    }
-
-    SwitchRow {
-        label: qsTr("Shimeji auto hide")
-        checked: rootPane.shimejiAutoHide
-        onToggled: checked => {
-            rootPane.shimejiAutoHide = checked;
-            rootPane.saveConfig();
-        }
-    }
-}
 
     
