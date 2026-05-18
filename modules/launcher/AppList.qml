@@ -133,7 +133,7 @@ StyledListView {
                 model.values: {
                     const prefix = GlobalConfig.launcher.actionPrefix;
                     const text = root.search.text.slice((prefix + "clipboard ").length).toLowerCase();
-                    if (!text) return Clipboard.items;
+                    if (!text) return Clipboard.getSortedItems();
                     return Clipboard.items.filter(function(item) {
                         return item.preview.toLowerCase().includes(text);
                     });

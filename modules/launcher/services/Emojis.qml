@@ -3,6 +3,7 @@ pragma Singleton
 import QtQuick
 import Quickshell
 import Quickshell.Io
+import Caelestia.Config
 
 QtObject {
     id: root
@@ -33,10 +34,16 @@ QtObject {
 
     function getSortedItems(): var {
         if (!items.length) return [];
+        const favEmojis = GlobalConfig.launcher.favouriteEmojis || [];
+        const favSet = new Set(favEmojis);
         return [...items].sort((a, b) => {
+            const aIsFav = favSet.has(a.char);
+            const bIsFav = favSet.has(b.char);
+            if (aIsFav !== bIsFav) return aIsFav ? -1 : 1;
             const freqA = frequencies[a.char] || 0;
             const freqB = frequencies[b.char] || 0;
-            return freqB - freqA;
+            if (freqA !== freqB) return freqB - freqA;
+            return 0;
         });
     }
 

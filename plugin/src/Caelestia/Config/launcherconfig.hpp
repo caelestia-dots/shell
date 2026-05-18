@@ -42,6 +42,8 @@ class LauncherConfig : public ConfigObject {
     CONFIG_GLOBAL_PROPERTY(bool, vimKeybinds, false)
     CONFIG_GLOBAL_PROPERTY(QStringList, favouriteApps)
     CONFIG_GLOBAL_PROPERTY(QStringList, hiddenApps)
+    CONFIG_GLOBAL_PROPERTY(QStringList, favouriteEmojis)
+    CONFIG_GLOBAL_PROPERTY(QStringList, favouriteClips)
     CONFIG_SUBOBJECT(LauncherUseFuzzy, useFuzzy)
     CONFIG_GLOBAL_PROPERTY(QVariantList, actions,
         {

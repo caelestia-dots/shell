@@ -50,11 +50,40 @@ Item {
             anchors.left: icon.right
             anchors.leftMargin: Tokens.spacing.normal
             anchors.right: parent.right
+            anchors.rightMargin: 80
             anchors.verticalCenter: icon.verticalCenter
 
             text: root.modelData?.preview ?? ""
             font.pointSize: Tokens.font.size.normal
             elide: Text.ElideRight
+        }
+
+        MouseArea {
+            id: favIcon
+            width: 32
+            height: 32
+            anchors.verticalCenter: parent.verticalCenter
+            anchors.right: parent.right
+            hoverEnabled: true
+            onClicked: {
+                const clipId = String(root.modelData?.id);
+                if (!clipId) return;
+                const favClips = GlobalConfig.launcher.favouriteClips ? [...GlobalConfig.launcher.favouriteClips] : [];
+                if (favClips.includes(clipId)) {
+                    const idx = favClips.indexOf(clipId);
+                    if (idx !== -1) favClips.splice(idx, 1);
+                } else {
+                    favClips.push(clipId);
+                }
+                GlobalConfig.launcher.favouriteClips = favClips;
+            }
+
+            MaterialIcon {
+                anchors.centerIn: parent
+                text: GlobalConfig.launcher.favouriteClips && GlobalConfig.launcher.favouriteClips.includes(String(root.modelData?.id)) ? "favorite" : "favorite_border"
+                fill: GlobalConfig.launcher.favouriteClips && GlobalConfig.launcher.favouriteClips.includes(String(root.modelData?.id)) ? 1 : 0
+                color: favIcon.containsMouse ? Colours.palette.m3primary : Colours.palette.m3onSurfaceVariant
+            }
         }
     }
 }

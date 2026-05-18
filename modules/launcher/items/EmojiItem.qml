@@ -51,11 +51,40 @@ Item {
             anchors.left: emojiChar.right
             anchors.leftMargin: Tokens.spacing.normal
             anchors.right: parent.right
+            anchors.rightMargin: 80
             anchors.verticalCenter: emojiChar.verticalCenter
 
             text: root.modelData?.name ?? ""
             font.pointSize: Tokens.font.size.normal
             elide: Text.ElideRight
+        }
+
+        MouseArea {
+            id: favIcon
+            width: 32
+            height: 32
+            anchors.verticalCenter: parent.verticalCenter
+            anchors.right: parent.right
+            hoverEnabled: true
+            onClicked: {
+                const emojiChar = root.modelData?.char;
+                if (!emojiChar) return;
+                const favEmojis = GlobalConfig.launcher.favouriteEmojis ? [...GlobalConfig.launcher.favouriteEmojis] : [];
+                if (favEmojis.includes(emojiChar)) {
+                    const idx = favEmojis.indexOf(emojiChar);
+                    if (idx !== -1) favEmojis.splice(idx, 1);
+                } else {
+                    favEmojis.push(emojiChar);
+                }
+                GlobalConfig.launcher.favouriteEmojis = favEmojis;
+            }
+
+            MaterialIcon {
+                anchors.centerIn: parent
+                text: GlobalConfig.launcher.favouriteEmojis && GlobalConfig.launcher.favouriteEmojis.includes(root.modelData?.char) ? "favorite" : "favorite_border"
+                fill: GlobalConfig.launcher.favouriteEmojis && GlobalConfig.launcher.favouriteEmojis.includes(root.modelData?.char) ? 1 : 0
+                color: favIcon.containsMouse ? Colours.palette.m3primary : Colours.palette.m3onSurfaceVariant
+            }
         }
     }
 }
