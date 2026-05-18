@@ -118,7 +118,7 @@ StyledListView {
                 model.values: {
                     const prefix = GlobalConfig.launcher.actionPrefix;
                     const text = root.search.text.slice((prefix + "emoji ").length).toLowerCase();
-                    if (!text) return Emojis.items;
+                    if (!text) return Emojis.getSortedItems();
                     return Emojis.items.filter(function(item) {
                         return item.name.toLowerCase().includes(text);
                     });

@@ -8,11 +8,36 @@ QtObject {
     id: root
 
     property var items: []
+    property var frequencies: ({})
     property bool _loaded: false
 
     function reload(): void {
         if (_loaded) return;
         reader.running = true;
+        loadFrequencies();
+    }
+
+    function loadFrequencies(): void {
+        freqReader.running = true;
+    }
+
+    function saveFrequencies(): void {
+        freqWriter.arguments = ["-echo", JSON.stringify(frequencies), ">", Paths.config + "emoji-frequencies.json"];
+        freqWriter.running = true;
+    }
+
+    function recordUsage(char: string): void {
+        frequencies[char] = (frequencies[char] || 0) + 1;
+        saveFrequencies();
+    }
+
+    function getSortedItems(): var {
+        if (!items.length) return [];
+        return [...items].sort((a, b) => {
+            const freqA = frequencies[a.char] || 0;
+            const freqB = frequencies[b.char] || 0;
+            return freqB - freqA;
+        });
     }
 
     property Process reader: Process {
@@ -40,5 +65,23 @@ QtObject {
                 root._loaded = true;
             }
         }
+    }
+
+    property Process freqReader: Process {
+        running: false
+        command: ["test", "-f", Paths.config + "emoji-frequencies.json", "&&", "cat", Paths.config + "emoji-frequencies.json", "||", "echo", "{}"]
+        stdout: StdioCollector {
+            onStreamFinished: {
+                try {
+                    root.frequencies = JSON.parse(text) || {};
+                } catch (e) {
+                    root.frequencies = {};
+                }
+            }
+        }
+    }
+
+    property Process freqWriter: Process {
+        running: false
     }
 }

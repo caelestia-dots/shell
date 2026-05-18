@@ -22,6 +22,8 @@ Item {
     readonly property color safePrimary: useLightSet ? Colours.palette.m3primaryContainer : Colours.palette.m3primary
     readonly property color safeSecondary: useLightSet ? Colours.palette.m3secondaryContainer : Colours.palette.m3secondary
     readonly property color safeTertiary: useLightSet ? Colours.palette.m3tertiaryContainer : Colours.palette.m3tertiary
+    readonly property string clockFont: GlobalConfig.appearance.font.family.clock || "Sans Serif"
+    readonly property string sansFont: GlobalConfig.appearance.font.family.sans || "Sans Serif"
 
     implicitWidth: layout.implicitWidth + (Tokens.padding.large * 4 * root.clockScale)
     implicitHeight: layout.implicitHeight + (Tokens.padding.large * 2 * root.clockScale)
@@ -81,6 +83,7 @@ Item {
 
                 StyledText {
                     text: Time.hourStr
+                    font.family: root.clockFont
                     font.pointSize: Tokens.font.size.extraLarge * 3 * root.clockScale
                     font.weight: Font.Bold
                     color: root.safePrimary
@@ -88,6 +91,7 @@ Item {
 
                 StyledText {
                     text: ":"
+                    font.family: root.clockFont
                     font.pointSize: Tokens.font.size.extraLarge * 3 * root.clockScale
                     color: root.safeTertiary
                     opacity: 0.8
@@ -96,6 +100,7 @@ Item {
 
                 StyledText {
                     text: Time.minuteStr
+                    font.family: root.clockFont
                     font.pointSize: Tokens.font.size.extraLarge * 3 * root.clockScale
                     font.weight: Font.Bold
                     color: root.safeSecondary
@@ -111,6 +116,7 @@ Item {
 
                     sourceComponent: StyledText {
                         text: Time.amPmStr
+                        font.family: root.sansFont
                         font.pointSize: Tokens.font.size.large * root.clockScale
                         color: root.safeSecondary
                     }
@@ -132,6 +138,7 @@ Item {
 
                 StyledText {
                     text: Time.format("MMMM").toUpperCase()
+                    font.family: root.sansFont
                     font.pointSize: Tokens.font.size.large * root.clockScale
                     font.letterSpacing: 4
                     font.weight: Font.Bold
@@ -140,6 +147,7 @@ Item {
 
                 StyledText {
                     text: Time.format("dd")
+                    font.family: root.sansFont
                     font.pointSize: Tokens.font.size.extraLarge * root.clockScale
                     font.letterSpacing: 2
                     font.weight: Font.Medium
@@ -148,6 +156,7 @@ Item {
 
                 StyledText {
                     text: Time.format("dddd")
+                    font.family: root.sansFont
                     font.pointSize: Tokens.font.size.larger * root.clockScale
                     font.letterSpacing: 2
                     color: root.safeSecondary
