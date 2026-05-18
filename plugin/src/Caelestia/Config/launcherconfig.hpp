@@ -140,6 +140,13 @@ class LauncherConfig : public ConfigObject {
                 { u"description"_s, u"View clipboard history"_s },
                 { u"command"_s, QStringList{ u"autocomplete"_s, u"clipboard"_s } },
             }),
+            vmap({
+                { u"name"_s, u"Windows"_s },
+                { u"icon"_s, u"apps"_s },
+                { u"description"_s, u"Switch to another window"_s },
+                { u"command"_s, QStringList{ u"autocomplete"_s, u"windows"_s } },
+                { u"enabled"_s, true },
+            }),
         })
 
 public:

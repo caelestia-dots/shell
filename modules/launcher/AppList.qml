@@ -51,7 +51,8 @@ StyledListView {
         const text = search.text;
         const prefix = GlobalConfig.launcher.actionPrefix;
         if (text.startsWith(prefix)) {
-            for (const action of ["calc", "scheme", "variant", "emoji", "clipboard"])
+            const actionPrefixes = ["calc", "scheme", "variant", "emoji", "clipboard", "windows"];
+            for (const action of actionPrefixes)
                 if (text.startsWith(`${prefix}${action} `))
                     return action;
 
@@ -139,6 +140,14 @@ StyledListView {
                     });
                 }
                 root.delegate: clipItem
+            }
+        },
+        State {
+            name: "windows"
+
+            PropertyChanges {
+                model.values: Windows.items
+                root.delegate: windowsItem
             }
         }
     ]
@@ -300,6 +309,14 @@ StyledListView {
         id: clipItem
 
         ClipItem {
+            list: root
+        }
+    }
+
+    Component {
+        id: windowsItem
+
+        WindowSwitcherItem {
             list: root
         }
     }

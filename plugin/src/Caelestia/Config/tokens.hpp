@@ -191,6 +191,8 @@ class LauncherTokens : public ConfigObject {
     CONFIG_PROPERTY(int, itemHeight, 57)
     CONFIG_PROPERTY(int, wallpaperWidth, 280)
     CONFIG_PROPERTY(int, wallpaperHeight, 200)
+    CONFIG_PROPERTY(int, windowSwitcherWidth, 300)
+    CONFIG_PROPERTY(int, windowSwitcherHeight, 220)
 
 public:
     explicit LauncherTokens(QObject* parent = nullptr)

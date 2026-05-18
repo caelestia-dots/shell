@@ -19,13 +19,14 @@ Item {
     required property int rounding
 
     readonly property bool showWallpapers: search.text.startsWith(`${GlobalConfig.launcher.actionPrefix}wallpaper `)
-    readonly property var currentList: showWallpapers ? wallpaperList.item : appList.item // Can be either ListView or PathView, so can't type properly
+    readonly property bool showWindowSwitcher: search.text.startsWith(`${GlobalConfig.launcher.actionPrefix}windows `)
+    readonly property var currentList: showWallpapers ? wallpaperList.item : (showWindowSwitcher ? windowSwitcherList.item : appList.item)
 
     anchors.horizontalCenter: parent.horizontalCenter
     anchors.bottom: parent.bottom
 
     clip: true
-    state: showWallpapers ? "wallpapers" : "apps"
+    state: showWindowSwitcher ? "windowSwitcher" : (showWallpapers ? "wallpapers" : "apps")
 
     states: [
         State {
@@ -49,6 +50,15 @@ Item {
                 root.implicitWidth: Math.max(root.Tokens.sizes.launcher.itemWidth * 1.2, wallpaperList.implicitWidth)
                 root.implicitHeight: root.Tokens.sizes.launcher.wallpaperHeight
                 wallpaperList.active: true
+            }
+        },
+        State {
+            name: "windowSwitcher"
+
+            PropertyChanges {
+                root.implicitWidth: Math.max(root.Tokens.sizes.launcher.itemWidth * 1.2, windowSwitcherList.implicitWidth)
+                root.implicitHeight: root.Tokens.sizes.launcher.windowSwitcherHeight
+                windowSwitcherList.active: true
             }
         }
     ]
@@ -97,6 +107,24 @@ Item {
         anchors.horizontalCenter: parent.horizontalCenter
 
         sourceComponent: WallpaperList {
+            search: root.search
+            visibilities: root.visibilities
+            panels: root.panels
+            content: root.content
+        }
+    }
+
+    Loader {
+        id: windowSwitcherList
+
+        asynchronous: true
+        active: false
+
+        anchors.top: parent.top
+        anchors.bottom: parent.bottom
+        anchors.horizontalCenter: parent.horizontalCenter
+
+        sourceComponent: WindowSwitcherList {
             search: root.search
             visibilities: root.visibilities
             panels: root.panels
