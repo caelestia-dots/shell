@@ -29,6 +29,7 @@ Item {
 
     StateLayer {
         radius: Tokens.rounding.normal
+        onClicked: root.clicked()
     }
 
     function clicked(): void {

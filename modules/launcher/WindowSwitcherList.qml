@@ -58,7 +58,6 @@ PathView {
 
     onCurrentItemChanged: {
         if (currentItem) {
-            // Could preview the window here if needed
         }
     }
 
@@ -73,6 +72,18 @@ PathView {
 
     delegate: WindowSwitcherItem {
         list: root
+    }
+
+    MouseArea {
+        anchors.fill: parent
+        propagateComposedEvents: true
+        onWheel: wheel => {
+            if (wheel.angleDelta.y > 0)
+                root.decrementCurrentIndex();
+            else
+                root.incrementCurrentIndex();
+            wheel.accepted = true;
+        }
     }
 
     path: Path {
