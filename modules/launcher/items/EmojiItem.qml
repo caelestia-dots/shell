@@ -1,5 +1,6 @@
 import QtQuick
 import Quickshell
+import Caelestia
 import Caelestia.Config
 import qs.components
 import qs.services
@@ -17,11 +18,14 @@ Item {
 
     StateLayer {
         radius: Tokens.rounding.normal
-        onClicked: {
-            if (!root.modelData) return;
-            root.list.visibilities.launcher = false;
-            Quickshell.execDetached(["wl-copy", root.modelData.char]);
-        }
+        onClicked: root.clicked()
+    }
+
+    function clicked() {
+        if (!root.modelData) return;
+        root.list.visibilities.launcher = false;
+        Quickshell.execDetached(["wl-copy", root.modelData.char]);
+        Toaster.toast(qsTr("Copied to clipboard"), root.modelData.char + " " + root.modelData.name, "emoji_emotions");
     }
 
     Item {

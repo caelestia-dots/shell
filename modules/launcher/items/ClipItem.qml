@@ -1,5 +1,6 @@
 import QtQuick
 import Quickshell
+import Caelestia
 import Caelestia.Config
 import qs.components
 import qs.services
@@ -17,11 +18,15 @@ Item {
 
     StateLayer {
         radius: Tokens.rounding.normal
-        onClicked: {
-            if (!root.modelData) return;
-            root.list.visibilities.launcher = false;
-            Quickshell.execDetached(["sh", "-c", "cliphist decode " + root.modelData.id + " | wl-copy"]);
-        }
+        onClicked: root.clicked()
+    }
+
+    function clicked() {
+        if (!root.modelData) return;
+        root.list.visibilities.launcher = false;
+        const preview = root.modelData.preview.length > 30 ? root.modelData.preview.slice(0, 30) + "..." : root.modelData.preview;
+        Quickshell.execDetached(["sh", "-c", "cliphist decode " + root.modelData.id + " | wl-copy"]);
+        Toaster.toast(qsTr("Copied to clipboard"), preview, "content_paste");
     }
 
     Item {
