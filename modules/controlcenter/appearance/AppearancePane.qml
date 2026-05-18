@@ -50,6 +50,7 @@ Item {
     property bool backgroundEnabled: Config.background.enabled ?? true
     property bool shimejiEnabled: GlobalConfig.shimeji.enabled ?? false
     property bool shimejiAutoHide: GlobalConfig.shimeji.autoHide ?? true
+    property list<string> shimejiExcludedScreens: GlobalConfig.shimeji.excludedScreens ?? []
     property bool wallpaperEnabled: Config.background.wallpaperEnabled ?? true
     property bool visualiserEnabled: Config.background.visualiser.enabled ?? false
     property bool visualiserAutoHide: Config.background.visualiser.autoHide ?? true
@@ -76,6 +77,7 @@ Item {
         GlobalConfig.background.enabled = root.backgroundEnabled;
         GlobalConfig.shimeji.enabled = root.shimejiEnabled;
         GlobalConfig.shimeji.autoHide = root.shimejiAutoHide;
+        GlobalConfig.shimeji.excludedScreens = root.shimejiExcludedScreens;
         GlobalConfig.shimeji.path = GlobalConfig.shimeji.path;
         GlobalConfig.background.desktopClock.scale = root.desktopClockScale;
         GlobalConfig.background.desktopClock.position = root.desktopClockPosition;

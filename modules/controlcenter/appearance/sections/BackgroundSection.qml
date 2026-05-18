@@ -9,6 +9,7 @@ import qs.components
 import qs.components.containers
 import qs.components.controls
 import qs.services
+import qs.utils
 
 CollapsibleSection {
     id: root
@@ -50,6 +51,31 @@ CollapsibleSection {
             rootPane.shimejiAutoHide = checked;
             rootPane.saveConfig();
 }
+    }
+
+    ConnectedButtonGroup {
+        rootItem: root
+        rows: Math.ceil(Hypr.monitorNames().length / 3)
+
+        options: Hypr.monitorNames().map(e => ({
+            label: qsTr(e),
+            propertyName: `shimejiScreen${e}`,
+            onToggled: function (_) {
+                let addedBack = rootPane.shimejiExcludedScreens.includes(e);
+                if (addedBack) {
+                    const index = rootPane.shimejiExcludedScreens.indexOf(e);
+                    if (index !== -1) {
+                        rootPane.shimejiExcludedScreens.splice(index, 1);
+                    }
+                } else {
+                    if (!rootPane.shimejiExcludedScreens.includes(e)) {
+                        rootPane.shimejiExcludedScreens.push(e);
+                    }
+                }
+                rootPane.saveConfig();
+            },
+            state: !Strings.testRegexList(rootPane.shimejiExcludedScreens, e)
+        }))
     }
 
 StyledText {

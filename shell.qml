@@ -13,6 +13,7 @@ import "modules/shimeji"
 import "modules/areapicker"
 import "modules/lock"
 import qs.components.containers
+import qs.utils
 import Caelestia.Config
 import Quickshell
 
@@ -27,7 +28,7 @@ ShellRoot {
     }
 
     Variants {
-        model: Quickshell.screens.filter(s => GlobalConfig.forScreen(s.name).shimeji.enabled && GlobalConfig.forScreen(s.name).shimeji.path.length > 0)
+        model: Quickshell.screens.filter(s => GlobalConfig.shimeji.enabled && GlobalConfig.shimeji.path.length > 0 && !Strings.testRegexList(GlobalConfig.shimeji.excludedScreens, s.name))
 
         Shimeji {}
     }

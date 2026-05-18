@@ -13,6 +13,7 @@ class ShimejiConfig : public ConfigObject {
     CONFIG_PROPERTY(bool, enabled, true)
     CONFIG_PROPERTY(bool, autoHide, true)
     CONFIG_PROPERTY(QString, path, QString())
+    CONFIG_PROPERTY(QStringList, excludedScreens)
 
 public:
     explicit ShimejiConfig(QObject* parent = nullptr)
