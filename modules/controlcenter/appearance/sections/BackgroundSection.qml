@@ -24,19 +24,35 @@ CollapsibleSection {
         onToggled: checked => {
             rootPane.backgroundEnabled = checked;
             rootPane.saveConfig();
-        }
+}
+    }
+
+    StyledText {
+        Layout.topMargin: Tokens.spacing.normal
+        text: qsTr("Shimeji")
+        font.pointSize: Tokens.font.size.larger
+        font.weight: 500
     }
 
     SwitchRow {
-        label: qsTr("Wallpaper enabled")
-        checked: rootPane.wallpaperEnabled
+        label: qsTr("Shimeji enabled")
+        checked: rootPane.shimejiEnabled
         onToggled: checked => {
-            rootPane.wallpaperEnabled = checked;
+            rootPane.shimejiEnabled = checked;
             rootPane.saveConfig();
         }
     }
 
-    StyledText {
+    SwitchRow {
+        label: qsTr("Shimeji auto hide")
+        checked: rootPane.shimejiAutoHide
+        onToggled: checked => {
+            rootPane.shimejiAutoHide = checked;
+            rootPane.saveConfig();
+}
+    }
+
+StyledText {
         Layout.topMargin: Tokens.spacing.normal
         text: qsTr("Desktop Clock")
         font.pointSize: Tokens.font.size.larger
@@ -342,10 +358,37 @@ CollapsibleSection {
                 top: 2
             }
 
-            onValueModified: newValue => {
+onValueModified: newValue => {
                 rootPane.visualiserSpacing = newValue;
                 rootPane.saveConfig();
             }
         }
     }
+
+    StyledText {
+        Layout.topMargin: Tokens.spacing.normal
+        text: qsTr("Shimeji")
+        font.pointSize: Tokens.font.size.larger
+        font.weight: 500
+    }
+
+    SwitchRow {
+        label: qsTr("Shimeji enabled")
+        checked: rootPane.shimejiEnabled
+        onToggled: checked => {
+            rootPane.shimejiEnabled = checked;
+            rootPane.saveConfig();
+        }
+    }
+
+    SwitchRow {
+        label: qsTr("Shimeji auto hide")
+        checked: rootPane.shimejiAutoHide
+        onToggled: checked => {
+            rootPane.shimejiAutoHide = checked;
+            rootPane.saveConfig();
+        }
+    }
 }
+
+    

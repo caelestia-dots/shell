@@ -1,3 +1,5 @@
+pragma ComponentBehavior: Bound
+
 //@ pragma Env QS_CRASHREPORT_URL=https://github.com/caelestia-dots/shell/issues/new?template=crash.yml
 //@ pragma DefaultEnv QS_NO_RELOAD_POPUP=1
 //@ pragma DefaultEnv QS_DROP_EXPENSIVE_FONTS=1
@@ -7,8 +9,11 @@
 import "modules"
 import "modules/drawers"
 import "modules/background"
+import "modules/shimeji"
 import "modules/areapicker"
 import "modules/lock"
+import qs.components.containers
+import Caelestia.Config
 import Quickshell
 
 ShellRoot {
@@ -19,6 +24,12 @@ ShellRoot {
     AreaPicker {}
     Lock {
         id: lock
+    }
+
+    Variants {
+        model: Quickshell.screens.filter(s => GlobalConfig.forScreen(s.name).shimeji.enabled && GlobalConfig.forScreen(s.name).shimeji.path.length > 0)
+
+        Shimeji {}
     }
 
     ConfigToasts {}

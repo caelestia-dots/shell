@@ -48,6 +48,8 @@ Item {
     property bool desktopClockBackgroundBlur: Config.background.desktopClock.background.blur ?? false
     property bool desktopClockInvertColors: Config.background.desktopClock.invertColors ?? false
     property bool backgroundEnabled: Config.background.enabled ?? true
+    property bool shimejiEnabled: GlobalConfig.shimeji.enabled ?? false
+    property bool shimejiAutoHide: GlobalConfig.shimeji.autoHide ?? true
     property bool wallpaperEnabled: Config.background.wallpaperEnabled ?? true
     property bool visualiserEnabled: Config.background.visualiser.enabled ?? false
     property bool visualiserAutoHide: Config.background.visualiser.autoHide ?? true
@@ -72,6 +74,9 @@ Item {
 
         GlobalConfig.background.desktopClock.enabled = root.desktopClockEnabled;
         GlobalConfig.background.enabled = root.backgroundEnabled;
+        GlobalConfig.shimeji.enabled = root.shimejiEnabled;
+        GlobalConfig.shimeji.autoHide = root.shimejiAutoHide;
+        GlobalConfig.shimeji.path = GlobalConfig.shimeji.path;
         GlobalConfig.background.desktopClock.scale = root.desktopClockScale;
         GlobalConfig.background.desktopClock.position = root.desktopClockPosition;
         GlobalConfig.background.desktopClock.shadow.enabled = root.desktopClockShadowEnabled;

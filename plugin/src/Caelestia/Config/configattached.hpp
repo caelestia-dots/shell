@@ -25,6 +25,7 @@ class Config : public QQuickAttachedPropertyPropagator, public QQmlParserStatus 
     Q_MOC_INCLUDE("osdconfig.hpp")
     Q_MOC_INCLUDE("serviceconfig.hpp")
     Q_MOC_INCLUDE("sessionconfig.hpp")
+    Q_MOC_INCLUDE("shimejiconfig.hpp")
     Q_MOC_INCLUDE("sidebarconfig.hpp")
     Q_MOC_INCLUDE("userpaths.hpp")
     Q_MOC_INCLUDE("utilitiesconfig.hpp")
@@ -47,6 +48,7 @@ class Config : public QQuickAttachedPropertyPropagator, public QQmlParserStatus 
     Q_PROPERTY(const caelestia::config::UtilitiesConfig* utilities READ utilities NOTIFY sourceChanged)
     Q_PROPERTY(const caelestia::config::SidebarConfig* sidebar READ sidebar NOTIFY sourceChanged)
     Q_PROPERTY(const caelestia::config::ServiceConfig* services READ services NOTIFY sourceChanged)
+    Q_PROPERTY(const caelestia::config::ShimejiConfig* shimeji READ shimeji NOTIFY sourceChanged)
     Q_PROPERTY(const caelestia::config::UserPaths* paths READ paths NOTIFY sourceChanged)
 
 public:
@@ -71,6 +73,7 @@ public:
     [[nodiscard]] const UtilitiesConfig* utilities() const;
     [[nodiscard]] const SidebarConfig* sidebar() const;
     [[nodiscard]] const ServiceConfig* services() const;
+    [[nodiscard]] const ShimejiConfig* shimeji() const;
     [[nodiscard]] const UserPaths* paths() const;
 
     [[nodiscard]] Q_INVOKABLE static GlobalConfig* forScreen(const QString& screen);
