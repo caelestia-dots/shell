@@ -6,6 +6,7 @@
   makeFontsConf,
   fish,
   ddcutil,
+  duf,
   brightnessctl,
   app2unit,
   networkmanager,
@@ -39,6 +40,7 @@
     [
       fish
       ddcutil
+      duf
       brightnessctl
       app2unit
       networkmanager
