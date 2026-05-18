@@ -51,6 +51,9 @@ Item {
     property bool shimejiEnabled: GlobalConfig.shimeji.enabled ?? false
     property bool shimejiAutoHide: GlobalConfig.shimeji.autoHide ?? true
     property list<string> shimejiExcludedScreens: GlobalConfig.shimeji.excludedScreens ?? []
+    property int shimejiCount: GlobalConfig.shimeji.count ?? 1
+    property var shimejiScreenCounts: (GlobalConfig.shimeji.screenCounts || {})
+    property list<string> monitorNames: Hypr.monitorNames()
     property bool wallpaperEnabled: Config.background.wallpaperEnabled ?? true
     property bool visualiserEnabled: Config.background.visualiser.enabled ?? false
     property bool visualiserAutoHide: Config.background.visualiser.autoHide ?? true
@@ -78,6 +81,8 @@ Item {
         GlobalConfig.shimeji.enabled = root.shimejiEnabled;
         GlobalConfig.shimeji.autoHide = root.shimejiAutoHide;
         GlobalConfig.shimeji.excludedScreens = root.shimejiExcludedScreens;
+        GlobalConfig.shimeji.count = root.shimejiCount;
+        GlobalConfig.shimeji.screenCounts = root.shimejiScreenCounts;
         GlobalConfig.shimeji.path = GlobalConfig.shimeji.path;
         GlobalConfig.background.desktopClock.scale = root.desktopClockScale;
         GlobalConfig.background.desktopClock.position = root.desktopClockPosition;

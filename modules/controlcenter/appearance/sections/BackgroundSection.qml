@@ -55,9 +55,9 @@ CollapsibleSection {
 
     ConnectedButtonGroup {
         rootItem: root
-        rows: Math.ceil(Hypr.monitorNames().length / 3)
+        rows: Math.ceil(rootPane.monitorNames.length / 3)
 
-        options: Hypr.monitorNames().map(e => ({
+        options: rootPane.monitorNames.map(e => ({
             label: qsTr(e),
             propertyName: `shimejiScreen${e}`,
             onToggled: function (_) {
@@ -76,6 +76,27 @@ CollapsibleSection {
             },
             state: !Strings.testRegexList(rootPane.shimejiExcludedScreens, e)
         }))
+    }
+
+    SliderInput {
+        Layout.fillWidth: true
+
+        label: qsTr("Shimeji count")
+        value: rootPane.shimejiCount
+        from: 1
+        to: 50
+        suffix: ""
+        validator: IntValidator {
+            bottom: 1
+            top: 50
+        }
+        formatValueFunction: val => Math.round(val).toString()
+        parseValueFunction: text => parseInt(text)
+
+        onValueModified: newValue => {
+            rootPane.shimejiCount = newValue;
+            rootPane.saveConfig();
+        }
     }
 
 StyledText {
