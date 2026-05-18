@@ -19,6 +19,8 @@ class LauncherUseFuzzy : public ConfigObject {
     CONFIG_GLOBAL_PROPERTY(bool, schemes, false)
     CONFIG_GLOBAL_PROPERTY(bool, variants, false)
     CONFIG_GLOBAL_PROPERTY(bool, wallpapers, false)
+    CONFIG_GLOBAL_PROPERTY(bool, emoji, false)
+    CONFIG_GLOBAL_PROPERTY(bool, clipboard, false)
 
 public:
     explicit LauncherUseFuzzy(QObject* parent = nullptr)
@@ -123,6 +125,18 @@ class LauncherConfig : public ConfigObject {
                 { u"icon"_s, u"settings"_s },
                 { u"description"_s, u"Configure the shell"_s },
                 { u"command"_s, QStringList{ u"caelestia"_s, u"shell"_s, u"controlCenter"_s, u"open"_s } },
+            }),
+            vmap({
+                { u"name"_s, u"Emoji"_s },
+                { u"icon"_s, u"emoji_emotions"_s },
+                { u"description"_s, u"Pick an emoji to copy"_s },
+                { u"command"_s, QStringList{ u"autocomplete"_s, u"emoji"_s } },
+            }),
+            vmap({
+                { u"name"_s, u"Clipboard"_s },
+                { u"icon"_s, u"content_paste"_s },
+                { u"description"_s, u"View clipboard history"_s },
+                { u"command"_s, QStringList{ u"autocomplete"_s, u"clipboard"_s } },
             }),
         })
 

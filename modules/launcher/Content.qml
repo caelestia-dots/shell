@@ -126,12 +126,24 @@ Item {
                 }
             }
 
-            Component.onCompleted: forceActiveFocus()
+            Component.onCompleted: {
+                if (Visibilities.launcherInitialSearch) {
+                    text = Visibilities.launcherInitialSearch;
+                    Visibilities.launcherInitialSearch = "";
+                }
+                forceActiveFocus();
+            }
 
             Connections {
                 function onLauncherChanged(): void {
-                    if (!root.visibilities.launcher)
+                    if (root.visibilities.launcher) {
+                        if (Visibilities.launcherInitialSearch) {
+                            search.text = Visibilities.launcherInitialSearch;
+                            Visibilities.launcherInitialSearch = "";
+                        }
+                    } else {
                         search.text = "";
+                    }
                 }
 
                 function onSessionChanged(): void {
