@@ -2,7 +2,19 @@
 
 #include "cachingimageprovider.hpp"
 
+#include <qfileinfo.h>
+
 namespace caelestia::images {
+
+namespace {
+
+IUtils* s_instance = nullptr;
+
+} // namespace
+
+IUtils* IUtils::getInstance() {
+    return s_instance;
+}
 
 IUtils* IUtils::create(QQmlEngine* engine, QJSEngine* jsEngine) {
     Q_UNUSED(jsEngine);
@@ -12,7 +24,8 @@ IUtils* IUtils::create(QQmlEngine* engine, QJSEngine* jsEngine) {
     engine->addImageProvider(
         QStringLiteral("scache"), new CachingImageProvider(CachingImageProvider::FillMode::Stretch));
 
-    return new IUtils(engine);
+    s_instance = new IUtils(engine);
+    return s_instance;
 }
 
 QUrl IUtils::urlForPath(const QString& path, int fillMode) {
@@ -37,6 +50,10 @@ QUrl IUtils::urlForPath(const QString& path, int fillMode) {
     url.setHost(prefix);
     url.setPath(path.startsWith(QLatin1Char('/')) ? path : QLatin1Char('/') + path);
     return url;
+}
+
+bool IUtils::fileExists(const QString& path) const {
+    return QFileInfo::exists(path);
 }
 
 } // namespace caelestia::images
