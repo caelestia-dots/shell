@@ -44,6 +44,11 @@ Variants {
                 sourceComponent: Wallpaper {}
             }
 
+            VideoBackground {
+                anchors.fill: parent
+                screen: win.modelData
+            }
+
             Visualiser {
                 anchors.fill: parent
                 screen: win.modelData
