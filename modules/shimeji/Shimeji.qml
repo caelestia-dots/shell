@@ -6,6 +6,7 @@ import Caelestia.Config
 import Caelestia.Internal
 import qs.components.containers
 import qs.services
+import qs.utils
 
 StyledWindow {
     id: root
@@ -22,7 +23,7 @@ StyledWindow {
 
     function getImgPath(): string {
         if (!modelData) return "";
-        let path = String(contentItem.Config.shimeji.path);
+        let path = Paths.absolutePath(String(contentItem.Config.shimeji.path));
         if (!path) return "";
 
         if (path.endsWith(".zip")) {
