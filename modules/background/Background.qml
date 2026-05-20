@@ -44,11 +44,21 @@ Variants {
                 sourceComponent: Wallpaper {}
             }
 
+            BadAppleVideo {
+                id: badappleVid
+                anchors.fill: parent
+                z: 1
+                property var screenModel: win.modelData
+            }
+
             Visualiser {
                 anchors.fill: parent
                 screen: win.modelData
                 wallpaper: wallpaper
+                z: 2
             }
+
+            
         }
 
         Loader {

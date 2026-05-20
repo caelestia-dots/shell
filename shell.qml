@@ -21,6 +21,7 @@ ShellRoot {
     settings.watchFiles: true
 
     Background {}
+
     Drawers {}
     AreaPicker {}
     Lock {
