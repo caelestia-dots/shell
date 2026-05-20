@@ -12,7 +12,7 @@ Item {
     id: root
 
     property string source: Wallpapers.current
-    property Image current: one
+    property AnimatedImage current: one
     property bool completed
 
     onSourceChanged: {
@@ -107,7 +107,7 @@ Item {
         id: two
     }
 
-    component Img: CachingImage {
+    component Img: CachingAnimatedImage {
         id: img
 
         function update(): void {
