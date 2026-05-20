@@ -32,6 +32,9 @@ Singleton {
             "User-Agent": "Mozilla/5.0 (X11; Linux x86_64; rv:120.0) Gecko/20100101 Firefox/120.0",
             "Referer": "https://music.163.com/"
         })
+    readonly property var _lrclibHeaders: ({
+            "User-Agent": "caelestia-shell (https://github.com/caelestia-dots/shell)"
+        })
 
     function getMetadata() {
         if (!player || !player.metadata)
@@ -42,12 +45,37 @@ Singleton {
             artist = artist.join(", ");
         return {
             artist: artist || "Unknown",
-            title: title || "Unknown"
+            title: title || "Unknown",
+            album: player.metadata["xesam:album"] || "",
+            duration: player.length || 0
         };
     }
 
     function _metaKey(meta) {
         return `${meta.artist} - ${meta.title}`;
+    }
+
+    function _loadLyricsText(text) {
+        const parsed = Lrc.parseLrc(text);
+        if (parsed.length > 0) {
+            updateModel(parsed);
+            root.updatePosition();
+            loading = false;
+            return true;
+        }
+
+        const lines = String(text || "").split("\n").map(line => line.trim()).filter(line => line.length > 0);
+        if (lines.length > 0) {
+            updateModel(lines.map((line, index) => ({
+                        time: index,
+                        text: line
+                    })));
+            root.updatePosition();
+            loading = false;
+            return true;
+        }
+
+        return false;
     }
 
     function savePrefs() {
@@ -59,7 +87,8 @@ Singleton {
         root.lyricsMap[key] = {
             offset: root.offset,
             backend: root.backend,
-            neteaseId: existing.neteaseId ?? null
+            lrclibId: root.backend === "LRCLIB" ? root.currentSongId : (existing.lrclibId ?? null),
+            neteaseId: root.backend === "NetEase" ? root.currentSongId : (existing.neteaseId ?? null)
         };
         // reassign to notify QML bindings of the map change
         root.lyricsMap = root.lyricsMap;
@@ -85,6 +114,7 @@ Singleton {
 
         loading = true;
         lyricsModel.clear();
+        fetchedCandidatesModel.clear();
         currentIndex = -1;
         root.currentSongId = 0;
 
@@ -98,6 +128,12 @@ Singleton {
         if (root.preferredBackend === "NetEase") {
             root.backend = "NetEase";
             fetchNetEase(meta.title, meta.artist, requestId);
+            return;
+        }
+
+        if (root.preferredBackend === "LRCLIB") {
+            root.backend = "LRCLIB";
+            fetchLrcLibLyrics(meta.title, meta.artist, meta.album ?? "", meta.duration ?? 0, requestId);
             return;
         }
 
@@ -135,7 +171,6 @@ Singleton {
 
         lrcFile.path = "";
         lrcFile.path = flatPath;
-        fetchNetEaseCandidates(meta.title, meta.artist, requestId);
     }
 
     function updateModel(parsedArray) {
@@ -153,7 +188,135 @@ Singleton {
         let meta = getMetadata();
         if (!meta)
             return;
-        fetchNetEase(meta.title, meta.artist, root.currentRequestId);
+        fetchLrcLibLyrics(meta.title, meta.artist, meta.album ?? "", meta.duration ?? 0, root.currentRequestId);
+    }
+
+    // LRCLIB
+
+    function _parseLrcLibLyrics(payload) {
+        const synced = String(payload?.syncedLyrics || "").trim();
+        const plain = String(payload?.plainLyrics || "").trim();
+        return synced || plain;
+    }
+
+    function _normaliseText(text) {
+        return String(text || "").toLowerCase().replace(/\s+/g, " ").trim();
+    }
+
+    function _pickLrcLibCandidate(songs, title, artist) {
+        const cleanTitle = _normaliseText(title);
+        const cleanArtist = _normaliseText(artist);
+
+        return songs.find(song => {
+            const songTitle = _normaliseText(song.trackName);
+            const songArtist = _normaliseText(song.artistName);
+            const artistMatches = !cleanArtist || cleanArtist.includes(songArtist) || songArtist.includes(cleanArtist);
+            return songTitle === cleanTitle && artistMatches && _parseLrcLibLyrics(song);
+        }) || null;
+    }
+
+    function _appendLrcLibCandidate(song, index, fallbackTitle, fallbackArtist) {
+        fetchedCandidatesModel.append({
+            provider: "LRCLIB",
+            id: index,
+            trackId: song.id ?? index,
+            title: song.trackName || fallbackTitle || "Unknown Title",
+            artist: song.artistName || fallbackArtist || "Unknown Artist",
+            album: song.albumName || "Unknown Album",
+            duration: song.duration || 0,
+            syncedLyrics: song.syncedLyrics || "",
+            plainLyrics: song.plainLyrics || ""
+        });
+    }
+
+    function _loadLrcLibResult(result, fallbackId) {
+        const lyricsText = _parseLrcLibLyrics(result);
+        if (!lyricsText)
+            return false;
+
+        root.backend = "LRCLIB";
+        root.currentSongId = result.trackId ?? result.id ?? fallbackId ?? 0;
+        if (_loadLyricsText(lyricsText)) {
+            savePrefs();
+            return true;
+        }
+
+        loading = false;
+        return false;
+    }
+
+    function _normaliseDuration(duration) {
+        const parsed = Number(duration || 0);
+        if (!isFinite(parsed) || parsed <= 0)
+            return 0;
+        if (parsed > 100000)
+            return Math.round(parsed / 1000000);
+        if (parsed > 1000)
+            return Math.round(parsed / 1000);
+        return Math.round(parsed);
+    }
+
+    function fetchLrcLibCandidates(title, artist, reqId, autoSelect) {
+        const params = [`track_name=${encodeURIComponent(title)}`];
+        if (artist)
+            params.push(`artist_name=${encodeURIComponent(artist)}`);
+
+        const url = `https://lrclib.net/api/search?${params.join("&")}`;
+
+        Requests.get(url, text => {
+            if (reqId !== root.currentRequestId)
+                return;
+
+            const songs = JSON.parse(text) || [];
+            fetchedCandidatesModel.clear();
+
+            for (let i = 0; i < songs.length; i++) {
+                const song = songs[i];
+                _appendLrcLibCandidate(song, i, title, artist);
+            }
+
+            if (autoSelect) {
+                const bestMatch = _pickLrcLibCandidate(songs, title, artist);
+                if (bestMatch && _loadLrcLibResult(bestMatch, 0))
+                    return;
+            }
+
+            loading = false;
+        }, err => {}, root._lrclibHeaders);
+    }
+
+    function fetchLrcLibLyrics(title, artist, album, duration, reqId) {
+        const roundedDuration = _normaliseDuration(duration);
+        if (!title || !artist || !album || roundedDuration <= 0) {
+            fetchLrcLibCandidates(title, artist, reqId, true);
+            return;
+        }
+
+        const params = [`track_name=${encodeURIComponent(title)}`];
+        params.push(`artist_name=${encodeURIComponent(artist)}`);
+        params.push(`album_name=${encodeURIComponent(album)}`);
+        params.push(`duration=${encodeURIComponent(roundedDuration)}`);
+
+        const url = `https://lrclib.net/api/get?${params.join("&")}`;
+
+        Requests.get(url, text => {
+            if (reqId !== root.currentRequestId)
+                return;
+
+            const result = JSON.parse(text);
+            if (!_parseLrcLibLyrics(result)) {
+                fetchLrcLibCandidates(title, artist, reqId, true);
+                return;
+            }
+
+            fetchedCandidatesModel.clear();
+            _appendLrcLibCandidate(result, 0, title, artist);
+            _loadLrcLibResult(result, 0);
+        }, _err => {
+            if (reqId !== root.currentRequestId)
+                return;
+            fetchLrcLibCandidates(title, artist, reqId, true);
+        }, root._lrclibHeaders);
     }
 
     // NetEase
@@ -173,7 +336,9 @@ Singleton {
             fetchedCandidatesModel.clear();
             for (let s of songs) {
                 fetchedCandidatesModel.append({
+                    provider: "NetEase",
                     id: s.id,
+                    trackId: s.id,
                     title: s.name || "Unknown Title",
                     artist: s.artists?.map(a => a.name).join(", ") || "Unknown Artist"
                 });
@@ -220,8 +385,8 @@ Singleton {
                 return;
             const res = JSON.parse(text);
             if (res.lrc?.lyric) {
-                updateModel(Lrc.parseLrc(res.lrc.lyric));
-                loading = false;
+                if (!_loadLyricsText(res.lrc.lyric))
+                    loading = false;
             }
         });
     }
@@ -230,6 +395,21 @@ Singleton {
         let meta = getMetadata();
         if (!meta)
             return;
+
+        const candidate = songId >= 0 && songId < fetchedCandidatesModel.count ? fetchedCandidatesModel.get(songId) : null;
+        const isLrcLibCandidate = candidate && candidate.provider === "LRCLIB";
+
+        if (isLrcLibCandidate) {
+            const lyricsText = _parseLrcLibLyrics(candidate);
+            if (!lyricsText)
+                return;
+
+            root.backend = "LRCLIB";
+            root.currentSongId = candidate.trackId ?? songId;
+            _loadLrcLibResult(candidate, songId);
+            return;
+        }
+
         root.backend = "NetEase";
         root.currentSongId = songId;
         let key = _metaKey(meta);
@@ -291,14 +471,14 @@ Singleton {
         onTriggered: root.isManualSeeking = false
     }
 
-    // If no local lyrics were loaded within the interval, fall back to NetEase
+    // If no local lyrics were loaded within the interval, fall back to online lyrics
     Timer {
         id: fallbackTimer
 
         interval: 200
         onTriggered: {
             if (lyricsModel.count === 0) {
-                root.backend = "NetEase";
+                root.backend = "LRCLIB";
                 fallbackToOnline();
             }
         }
@@ -339,7 +519,7 @@ Singleton {
                 loading = false;
             } else if (root.preferredBackend === "Local") {
                 // Local mode only - fail immediately
-                root.backend = "NetEase";
+                root.backend = "LRCLIB";
                 fallbackToOnline();
             }
             // In Auto mode, let the Process onExited handle fallback

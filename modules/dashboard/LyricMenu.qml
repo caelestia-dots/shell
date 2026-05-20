@@ -14,7 +14,10 @@ StyledRect {
 
     function searchCandidates(title, artist) {
         LyricsService.currentRequestId++;
-        LyricsService.fetchNetEaseCandidates(title, artist, LyricsService.currentRequestId);
+        if (LyricsService.preferredBackend === "NetEase")
+            LyricsService.fetchNetEaseCandidates(title, artist, LyricsService.currentRequestId);
+        else
+            LyricsService.fetchLrcLibCandidates(title, artist, LyricsService.currentRequestId);
     }
 
     implicitHeight: contentHeight
@@ -61,7 +64,7 @@ StyledRect {
                         anchors.fill: parent
                         cursorShape: Qt.PointingHandCursor
                         onClicked: {
-                            const backends = ["Auto", "Local", "NetEase"];
+                            const backends = ["Auto", "Local", "LRCLIB", "NetEase"];
                             const currentIndex = backends.indexOf(LyricsService.preferredBackend);
                             const nextIndex = (currentIndex + 1) % backends.length;
                             LyricsService.preferredBackend = backends[nextIndex];
@@ -172,6 +175,7 @@ StyledRect {
                         id: delegateRoot
 
                         required property real id
+                        required property real trackId
                         required property string title
                         required property string artist
 
@@ -237,7 +241,7 @@ StyledRect {
                                 height: parent.height * 0.6
                                 radius: 2
                                 anchors.verticalCenter: parent.verticalCenter
-                                color: LyricsService.currentSongId === delegateRoot.id ? Colours.palette.m3primary : "transparent"
+                                color: LyricsService.currentSongId === delegateRoot.trackId ? Colours.palette.m3primary : "transparent"
 
                                 Behavior on color {
                                     ColorAnimation {
