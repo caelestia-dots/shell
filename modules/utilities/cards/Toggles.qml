@@ -166,6 +166,19 @@ StyledRect {
                     }
                     }
                 }
+                DelegateChoice {
+                    roleValue: "wallpaper"
+                    delegate: Toggle {
+                        icon: "wallpaper"
+                        toggle: false
+                        inactiveOnColour: Colours.palette.m3onSurfaceVariant
+                        onClicked: {
+                            Visibilities.launcherInitialSearch = `${GlobalConfig.launcher.actionPrefix}wallpaper `;
+                            const visibilities = Visibilities.getForActive();
+                            visibilities.launcher = true;
+                        }
+                    }
+                }
             }
         }
     }

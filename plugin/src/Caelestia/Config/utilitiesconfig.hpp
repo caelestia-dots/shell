@@ -61,6 +61,7 @@ class UtilitiesConfig : public ConfigObject {
             vmap({ { u"id"_s, u"gameMode"_s }, { u"enabled"_s, true } }),
             vmap({ { u"id"_s, u"dnd"_s }, { u"enabled"_s, true } }),
             vmap({ { u"id"_s, u"vpn"_s }, { u"enabled"_s, false } }),
+            vmap({ { u"id"_s, u"wallpaper"_s }, { u"enabled"_s, true } }),
             vmap({ { u"id"_s, u"badapple"_s }, { u"enabled"_s, true } }),
         })
 
