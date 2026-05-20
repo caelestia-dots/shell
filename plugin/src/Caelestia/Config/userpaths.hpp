@@ -16,6 +16,7 @@ class UserPaths : public ConfigObject {
 
     CONFIG_GLOBAL_PROPERTY(
         QString, wallpaperDir, QStandardPaths::writableLocation(QStandardPaths::PicturesLocation) + u"/Wallpapers"_s)
+    CONFIG_PROPERTY(QString, cacheDir, QStandardPaths::writableLocation(QStandardPaths::GenericCacheLocation) + u"/caelestia"_s)
     CONFIG_GLOBAL_PROPERTY(QString, lyricsDir, QDir::homePath() + u"/Music/lyrics/"_s)
     CONFIG_PROPERTY(QString, sessionGif, u"root:/assets/kurukuru.gif"_s)
     CONFIG_PROPERTY(QString, mediaGif, u"root:/assets/bongocat.gif"_s)

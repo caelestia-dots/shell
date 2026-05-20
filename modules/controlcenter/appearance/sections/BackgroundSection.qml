@@ -19,13 +19,23 @@ CollapsibleSection {
     title: qsTr("Background")
     showBackground: true
 
-    SwitchRow {
+SwitchRow {
         label: qsTr("Background enabled")
         checked: rootPane.backgroundEnabled
         onToggled: checked => {
             rootPane.backgroundEnabled = checked;
             rootPane.saveConfig();
-}
+        }
+    }
+
+    SwitchRow {
+        label: qsTr("Video wallpaper sound")
+        checked: rootPane.videoWallpaperSoundEnabled
+        enabled: rootPane.backgroundEnabled
+        onToggled: checked => {
+            rootPane.videoWallpaperSoundEnabled = checked;
+            rootPane.saveConfig();
+        }
     }
 
     StyledText {

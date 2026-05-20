@@ -24,6 +24,7 @@ public:
     Q_INVOKABLE bool copyFile(const QUrl& source, const QUrl& target, bool overwrite = true) const;
     Q_INVOKABLE bool deleteFile(const QUrl& path) const;
     Q_INVOKABLE QString toLocalFile(const QUrl& url) const;
+    Q_INVOKABLE QString sha256(const QString& path) const;
 };
 
 } // namespace caelestia

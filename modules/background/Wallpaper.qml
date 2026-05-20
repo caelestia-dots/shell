@@ -1,6 +1,7 @@
 pragma ComponentBehavior: Bound
 
 import QtQuick
+import QtMultimedia
 import Caelestia.Config
 import qs.components
 import qs.components.filedialog
@@ -12,8 +13,15 @@ Item {
     id: root
 
     property string source: Wallpapers.current
-    property AnimatedImage current: one
+    property Item current: one
     property bool completed
+
+    function isVideo(path: string): bool {
+        if (!path)
+            return false;
+        const ext = path.split('.').pop().toLowerCase();
+        return ["mp4", "webm", "mkv", "avi", "mov", "wmv", "flv"].includes(ext);
+    }
 
     onSourceChanged: {
         if (!source)
@@ -73,8 +81,8 @@ Item {
                             id: dialog
 
                             title: qsTr("Select a wallpaper")
-                            filterLabel: qsTr("Image files")
-                            filters: Images.validImageExtensions
+                            filterLabel: qsTr("Media files")
+                            filters: Images.validImageExtensions.concat(Images.validVideoExtensions)
                             onAccepted: path => Wallpapers.setWallpaper(path)
                         }
 
@@ -107,14 +115,41 @@ Item {
         id: two
     }
 
-    component Img: CachingAnimatedImage {
+    component Img: Item {
         id: img
 
+        property string imagePath: ""
+        property string videoPath: ""
+        property bool isVideoImage: root.isVideo(root.source)
+
+        onIsVideoImageChanged: updateContent()
+
         function update(): void {
-            if (path === root.source)
-                root.current = this;
-            else
-                path = root.source;
+            if (isVideoImage) {
+                if (videoPath === root.source)
+                    root.current = this;
+                else {
+                    imagePath = "";
+                    videoPath = root.source;
+                }
+            } else {
+                if (imagePath === root.source)
+                    root.current = this;
+                else {
+                    videoPath = "";
+                    imagePath = root.source;
+                }
+            }
+        }
+
+        function updateContent(): void {
+            if (isVideoImage) {
+                imagePath = "";
+                videoPath = root.source;
+            } else {
+                videoPath = "";
+                imagePath = root.source;
+            }
         }
 
         anchors.fill: parent
@@ -122,9 +157,30 @@ Item {
         opacity: 0
         scale: Wallpapers.showPreview ? 1 : 0.8
 
-        onStatusChanged: {
-            if (status === Image.Ready)
-                root.current = this;
+        CachingAnimatedImage {
+            anchors.fill: parent
+            path: img.imagePath
+            visible: !img.isVideoImage && img.imagePath !== ""
+            asynchronous: true
+            fillMode: AnimatedImage.PreserveAspectCrop
+            source: img.imagePath || ""
+            playing: true
+
+            onStatusChanged: {
+                if (status === Image.Ready && !img.isVideoImage)
+                    root.current = img;
+            }
+        }
+
+        CachingVideo {
+            anchors.fill: parent
+            path: img.videoPath
+            visible: img.isVideoImage && img.videoPath !== ""
+
+            onPlayingChanged: {
+                if (playing && img.isVideoImage)
+                    root.current = img;
+            }
         }
 
         states: State {

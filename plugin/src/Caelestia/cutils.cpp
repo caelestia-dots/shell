@@ -1,9 +1,11 @@
 #include "cutils.hpp"
 
 #include <QtConcurrent/qtconcurrentrun.h>
+#include <qcryptographichash.h>
 #include <QtQuick/qquickitemgrabresult.h>
 #include <QtQuick/qquickwindow.h>
 #include <qdir.h>
+#include <qfile.h>
 #include <qfileinfo.h>
 #include <qfuturewatcher.h>
 #include <qloggingcategory.h>
@@ -136,6 +138,20 @@ QString CUtils::toLocalFile(const QUrl& url) const {
     }
 
     return url.toLocalFile();
+}
+
+QString CUtils::sha256(const QString& path) const {
+    QFile file(path);
+    if (!file.open(QIODevice::ReadOnly)) {
+        qCWarning(lcCUtils) << "sha256: failed to open" << path;
+        return QString();
+    }
+
+    QCryptographicHash hash(QCryptographicHash::Sha256);
+    hash.addData(&file);
+    file.close();
+
+    return hash.result().toHex();
 }
 
 } // namespace caelestia
