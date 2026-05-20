@@ -56,4 +56,12 @@ bool IUtils::fileExists(const QString& path) const {
     return QFileInfo::exists(path);
 }
 
+bool IUtils::isGif(const QString& path) {
+    if (path.isEmpty())
+        return false;
+    
+    const QString suffix = QFileInfo(path).suffix().toLower();
+    return suffix == QStringLiteral("gif");
+}
+
 } // namespace caelestia::images
