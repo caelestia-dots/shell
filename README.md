@@ -23,8 +23,9 @@ This fork adds the following features on top of the official caelestia shell:
 - **Window Switcher** - Quickly switch between windows with live previews. Trigger with `>windows ` or the global shortcut.
 - **Shimeji Desktop Characters** - Animated desktop characters (like Pusheen) with per-screen configuration.
 - **GIF Wallpaper Support** - Use animated images as wallpapers with configurable playback speed.
-- **Video Wallpaper Support** - Use video files (like Bad Apple) as animated wallpapers.
+- **Video Wallpaper Support** - Use video files (like Bad Apple) as animated wallpapers with configurable pause options.
 - **Wallpaper Quick Toggle** - Quick toggle for wallpaper cycling between current and a default.
+- **Pause Video Wallpapers Toggle** - Quick toggle to pause all video wallpapers with configurable auto-pause on fullscreen/tiled windows.
 
 ## Global Shortcuts
 
@@ -84,6 +85,21 @@ If you're migrating from the official caelestia shell to this fork, you may need
     "autoHide": true,
     "excludedScreens": [],
     "screenCounts": {}
+},
+"background": {
+    "videoWallpaperPaused": false,
+    "videoWallpaperSoundEnabled": false,
+    "videoWallpaperPauseOnFullscreen": false,
+    "videoWallpaperPauseOnTiled": false,
+    "videoWallpaperPauseOnAllDisplays": false,
+    "videoWallpaperMuteOnMedia": false
+},
+"utilities": {
+    "quickToggles": [
+        { "id": "wallpaper", "enabled": true },
+        { "id": "badapple", "enabled": true },
+        { "id": "pauseWallpaper", "enabled": true }
+    ]
 }
 ```
 
@@ -439,11 +455,23 @@ For example, to disable the bar on DP-1:
                 "opacity": 0.7,
                 "blur": 0.4
             },
-            "background": {
-                "enabled": false,
-                "opacity": 0.7,
-                "blur": true
-            },
+"background": {
+        "enabled": true,
+        "wallpaperEnabled": true,
+        "videoWallpaperPaused": false,
+        "videoWallpaperSoundEnabled": false,
+        "videoWallpaperPauseOnFullscreen": false,
+        "videoWallpaperPauseOnTiled": false,
+        "videoWallpaperPauseOnAllDisplays": false,
+        "videoWallpaperMuteOnMedia": false,
+        "visualiser": {
+            "blur": false,
+            "enabled": false,
+            "autoHide": true,
+            "rounding": 1,
+            "spacing": 1
+        }
+    },
             "invertColors": false
         },
         "enabled": true,
@@ -835,6 +863,18 @@ For example, to disable the bar on DP-1:
             },
             {
                 "id": "vpn",
+                "enabled": true
+            },
+            {
+                "id": "wallpaper",
+                "enabled": true
+            },
+            {
+                "id": "badapple",
+                "enabled": true
+            },
+            {
+                "id": "pauseWallpaper",
                 "enabled": true
             }
         ]
