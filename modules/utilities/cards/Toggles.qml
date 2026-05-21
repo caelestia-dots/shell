@@ -20,7 +20,7 @@ StyledRect {
 
     readonly property var quickToggles: {
         const seenIds = new Set();
-        const allToggles = [...Config.utilities.quickToggles, { id: "badapple", enabled: true }, { id: "pauseWallpaper", enabled: true }];
+        const allToggles = [...Config.utilities.quickToggles, { id: "badapple", enabled: true }, { id: "pauseWallpaper" }];
 
         return allToggles.filter(item => {
             if (!(item.enabled ?? true))
