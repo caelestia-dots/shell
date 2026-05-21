@@ -72,7 +72,7 @@ Item {
     function checkMuteState() {
         const muteOnMedia = GlobalConfig.background.videoWallpaperMuteOnMedia;
         const soundEnabled = GlobalConfig.background.videoWallpaperSoundEnabled;
-        const isPlaying = Players.active?.playbackStatus === 1;
+        const isPlaying = Players.active?.isPlaying ?? false;
         
         audioOutput.muted = !root.isFirstInstance || !soundEnabled || (muteOnMedia && isPlaying);
     }
@@ -90,7 +90,10 @@ Item {
         interval: 100
         running: true
         repeat: true
-        onTriggered: checkPauseState()
+        onTriggered: {
+            checkPauseState();
+            checkMuteState();
+        }
     }
 
     Connections {
