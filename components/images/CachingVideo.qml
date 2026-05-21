@@ -42,26 +42,36 @@ Item {
 
     function checkPauseState() {
         if (!root.screen) return;
-        
-        const monitor = Hypr.monitorFor(root.screen);
-        if (!monitor) return;
-        
-        const toplevels = monitor.activeWorkspace?.toplevels?.values || [];
+
+        const pauseOnAllDisplays = GlobalConfig.background.videoWallpaperPauseOnFullscreenAll;
         const pauseOnFullscreen = GlobalConfig.background.videoWallpaperPauseOnFullscreen;
         const pauseOnTiled = GlobalConfig.background.videoWallpaperPauseOnTiled;
-        
+
         let shouldPause = false;
-        
-        if (pauseOnFullscreen) {
-            const hasFullscreen = toplevels.some(t => t.lastIpcObject?.fullscreen > 1);
-            if (hasFullscreen) shouldPause = true;
+
+        if (pauseOnAllDisplays) {
+            let anyFullscreen = false;
+            let anyTiled = false;
+            for (const monitor of Hypr.monitors.values) {
+                const toplevels = monitor?.activeWorkspace?.toplevels?.values || [];
+                if (pauseOnFullscreen && toplevels.some(t => t?.lastIpcObject?.fullscreen > 1))
+                    anyFullscreen = true;
+                if (pauseOnTiled && toplevels.some(t => !t?.lastIpcObject?.floating && !t?.lastIpcObject?.fullscreen))
+                    anyTiled = true;
+            }
+            shouldPause = anyFullscreen || anyTiled;
+        } else {
+            const monitor = Hypr.monitorFor(root.screen);
+            if (!monitor) return;
+
+            const toplevels = monitor.activeWorkspace?.toplevels?.values || [];
+
+            if (pauseOnFullscreen && toplevels.some(t => t?.lastIpcObject?.fullscreen > 1))
+                shouldPause = true;
+            if (pauseOnTiled && toplevels.some(t => !t?.lastIpcObject?.floating && !t?.lastIpcObject?.fullscreen))
+                shouldPause = true;
         }
-        
-        if (pauseOnTiled) {
-            const hasTiled = toplevels.some(t => !t.lastIpcObject?.floating && !t.lastIpcObject?.fullscreen);
-            if (hasTiled) shouldPause = true;
-        }
-        
+
         if (shouldPause && mediaPlayer.playing) {
             mediaPlayer.pause();
         } else if (!shouldPause && !mediaPlayer.playing && root.path) {
@@ -98,6 +108,7 @@ Item {
 
     Connections {
         target: GlobalConfig.background
+        function onVideoWallpaperPauseOnFullscreenAllChanged() { checkPauseState(); }
         function onVideoWallpaperPauseOnFullscreenChanged() { checkPauseState(); }
         function onVideoWallpaperPauseOnTiledChanged() { checkPauseState(); }
         function onVideoWallpaperMuteOnMediaChanged() { checkMuteState(); }

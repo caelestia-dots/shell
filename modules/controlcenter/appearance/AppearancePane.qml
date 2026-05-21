@@ -56,6 +56,7 @@ Item {
     property list<string> monitorNames: Hypr.monitorNames()
     property bool wallpaperEnabled: Config.background.wallpaperEnabled ?? true
     property bool videoWallpaperSoundEnabled: Config.background.videoWallpaperSoundEnabled ?? false
+    property bool videoWallpaperPauseOnFullscreenAll: Config.background.videoWallpaperPauseOnFullscreenAll ?? false
     property bool videoWallpaperPauseOnFullscreen: Config.background.videoWallpaperPauseOnFullscreen ?? false
     property bool videoWallpaperPauseOnTiled: Config.background.videoWallpaperPauseOnTiled ?? false
     property bool videoWallpaperMuteOnMedia: Config.background.videoWallpaperMuteOnMedia ?? false
@@ -100,6 +101,7 @@ Item {
 
         GlobalConfig.background.wallpaperEnabled = root.wallpaperEnabled;
         GlobalConfig.background.videoWallpaperSoundEnabled = root.videoWallpaperSoundEnabled;
+        GlobalConfig.background.videoWallpaperPauseOnFullscreenAll = root.videoWallpaperPauseOnFullscreenAll;
         GlobalConfig.background.videoWallpaperPauseOnFullscreen = root.videoWallpaperPauseOnFullscreen;
         GlobalConfig.background.videoWallpaperPauseOnTiled = root.videoWallpaperPauseOnTiled;
         GlobalConfig.background.videoWallpaperMuteOnMedia = root.videoWallpaperMuteOnMedia;
