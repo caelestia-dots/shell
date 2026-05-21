@@ -2,15 +2,92 @@
 
 <div align=center>
 
-![GitHub last commit](https://img.shields.io/github/last-commit/caelestia-dots/shell?style=for-the-badge&labelColor=101418&color=9ccbfb)
-![GitHub Repo stars](https://img.shields.io/github/stars/caelestia-dots/shell?style=for-the-badge&labelColor=101418&color=b9c8da)
-![GitHub repo size](https://img.shields.io/github/repo-size/caelestia-dots/shell?style=for-the-badge&labelColor=101418&color=d3bfe6)
-[![Ko-Fi donate](https://img.shields.io/badge/donate-kofi?style=for-the-badge&logo=ko-fi&logoColor=ffffff&label=ko-fi&labelColor=101418&color=f16061&link=https%3A%2F%2Fko-fi.com%2Fsoramane)](https://ko-fi.com/soramane)
+![GitHub last commit](https://img.shields.io/github/last-commit/dim-ghub/shell?style=for-the-badge&labelColor=101418&color=9ccbfb)
+![GitHub Repo stars](https://img.shields.io/github/stars/dim-ghub/shell?style=for-the-badge&labelColor=101418&color=b9c8da)
+![GitHub repo size](https://img.shields.io/github/repo-size/dim-ghub/shell?style=for-the-badge&labelColor=101418&color=d3bfe6)
 [![Discord invite](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fdiscordapp.com%2Fapi%2Finvites%2FBGDCFCmMBk%3Fwith_counts%3Dtrue&query=approximate_member_count&style=for-the-badge&logo=discord&logoColor=ffffff&label=discord&labelColor=101418&color=96f1f1&link=https%3A%2F%2Fdiscord.gg%2FBGDCFCmMBk)](https://discord.gg/BGDCFCmMBk)
 
 </div>
 
+> [!NOTE]
+> This is a fork of the official [caelestia-shell](https://github.com/caelestia-dots/shell) with additional features. All new features are listed below.
+
 https://github.com/user-attachments/assets/0840f496-575c-4ca6-83a8-87bb01a85c5f
+
+## Fork Features
+
+This fork adds the following features on top of the official caelestia shell:
+
+- **Emoji Picker** - Browse and search emojis, with usage frequency tracking and favorites support. Trigger with `>emoji ` or the global shortcut.
+- **Clipboard History** - Access clipboard history with image preview support and favorites. Trigger with `>clipboard ` or the global shortcut.
+- **Window Switcher** - Quickly switch between windows with live previews. Trigger with `>windows ` or the global shortcut.
+- **Shimeji Desktop Characters** - Animated desktop characters (like Pusheen) with per-screen configuration.
+- **GIF Wallpaper Support** - Use animated images as wallpapers with configurable playback speed.
+- **Video Wallpaper Support** - Use video files (like Bad Apple) as animated wallpapers.
+- **Wallpaper Quick Toggle** - Quick toggle for wallpaper cycling between current and a default.
+
+## Global Shortcuts
+
+All keybinds are accessible via Hyprland [global shortcuts](https://wiki.hyprland.org/Configuring/Binds/#dbus-global-shortcuts).
+
+### Available Shortcuts
+
+| Shortcut Name | Description |
+|---------------|-------------|
+| `caelestia:controlCenter` | Open control center |
+| `caelestia:launcher` | Toggle launcher |
+| `caelestia:dashboard` | Toggle dashboard |
+| `caelestia:session` | Toggle session menu |
+| `caelestia:sidebar` | Toggle sidebar |
+| `caelestia:utilities` | Toggle utilities panel |
+| `caelestia:emoji` | Open emoji picker |
+| `caelestia:clipboard` | Open clipboard history |
+| `caelestia:windowSwitcher` | Open window switcher |
+| `caelestia:wallpaper` | Open wallpaper picker |
+| `caelestia:showall` | Toggle all UI elements |
+
+### Hyprland Keybind Examples
+
+To bind these shortcuts in Hyprland, add to your config:
+
+```conf
+# Launcher and UI elements
+bind = SUPER, SPACE, global, caelestia:launcher
+bind = SUPER, RETURN, global, caelestia:launcher
+bind = SUPER, S, global, caelestia:controlCenter
+
+# New features in this fork
+bind = SUPER, E, global, caelestia:emoji
+bind = SUPER, V, global, caelestia:clipboard
+bind = SUPER, W, global, caelestia:windowSwitcher
+bind = SUPER, B, global, caelestia:wallpaper
+
+# Other toggles
+bind = SUPER, D, global, caelestia:dashboard
+bind = SUPER, N, global, caelestia:sidebar
+bind = SUPER, M, global, caelestia:utilities
+```
+
+## Migration from Official Caelestia
+
+If you're migrating from the official caelestia shell to this fork, you may need to update your `shell.json` to include the new configuration options:
+
+```json
+"launcher": {
+    "favouriteEmojis": [],
+    "favouriteClips": []
+},
+"shimeji": {
+    "enabled": false,
+    "path": "root:/assets/shimeji/pusheen/",
+    "count": 1,
+    "autoHide": true,
+    "excludedScreens": [],
+    "screenCounts": {}
+}
+```
+
+The emoji and clipboard features require `caelestia-cli` commands `cliphist` and access to `emojis.txt` at `/usr/lib/python3.14/site-packages/caelestia/data/emojis.txt`.
 
 ## Components
 
@@ -23,6 +100,7 @@ https://github.com/user-attachments/assets/0840f496-575c-4ca6-83a8-87bb01a85c5f
 > [!NOTE]
 > This repo is for the desktop shell of the caelestia dots. If you want installation instructions
 > for the entire dots, head to [the main repo](https://github.com/caelestia-dots/caelestia) instead.
+> This fork is available at [dim-ghub/shell](https://github.com/dim-ghub/shell).
 
 ### Arch linux
 
@@ -629,7 +707,17 @@ For example, to disable the bar on DP-1:
         },
         "showOnHover": false,
         "favouriteApps": [],
+        "favouriteEmojis": [],
+        "favouriteClips": [],
         "hiddenApps": []
+    },
+    "shimeji": {
+        "enabled": false,
+        "path": "root:/assets/shimeji/pusheen/",
+        "count": 1,
+        "autoHide": true,
+        "excludedScreens": [],
+        "screenCounts": {}
     },
     "lock": {
         "recolourLogo": false,
