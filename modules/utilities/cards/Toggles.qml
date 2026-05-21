@@ -20,15 +20,16 @@ StyledRect {
 
     readonly property var quickToggles: {
         const seenIds = new Set();
-        const allToggles = [...Config.utilities.quickToggles, { id: "badapple", enabled: true }, { id: "pauseWallpaper" }];
+        const configToggles = Config.utilities.quickToggles || [];
+        const allToggles = [...configToggles, { id: "badapple", enabled: true }, { id: "pauseWallpaper" }];
 
         return allToggles.filter(item => {
-            if (!(item.enabled ?? true))
-                return false;
-
             if (seenIds.has(item.id)) {
                 return false;
             }
+
+            if (!(item.enabled ?? true))
+                return false;
 
             if (item.id === "vpn") {
                 return GlobalConfig.utilities.vpn.provider.some(p => typeof p === "object" ? (p.enabled === true) : false);
