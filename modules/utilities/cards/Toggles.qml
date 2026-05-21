@@ -182,9 +182,14 @@ StyledRect {
                 DelegateChoice {
                     roleValue: "pauseWallpaper"
                     delegate: Toggle {
+                        id: pauseWallpaperToggle
                         icon: "pause"
-                        checked: GlobalConfig.background.videoWallpaperPaused
-                        onClicked: GlobalConfig.background.videoWallpaperPaused = checked
+                        toggle: true
+                        Component.onCompleted: checked = Qt.binding(() => GlobalConfig.background.videoWallpaperPaused)
+                        onClicked: {
+                            const newVal = !GlobalConfig.background.videoWallpaperPaused;
+                            GlobalConfig.background.videoWallpaperPaused = newVal;
+                        }
                     }
                 }
             }
