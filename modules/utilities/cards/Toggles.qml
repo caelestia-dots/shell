@@ -19,23 +19,28 @@ StyledRect {
     required property BarPopouts.Wrapper popouts
 
     readonly property var quickToggles: {
-        const seenIds = new Set();
         const configToggles = Config.utilities.quickToggles || [];
-        const allToggles = [...configToggles, { id: "badapple", enabled: true }, { id: "pauseWallpaper" }];
+        const disabledIds = new Set(
+            configToggles.filter(t => t.enabled === false).map(t => t.id)
+        );
+
+        const builtIn = [
+            { id: "badapple" },
+            { id: "pauseWallpaper" }
+        ].filter(t => !disabledIds.has(t.id));
+
+        const allToggles = [...configToggles.filter(t => !disabledIds.has(t.id)), ...builtIn];
+        const seenIds = new Set();
 
         return allToggles.filter(item => {
-            if (seenIds.has(item.id)) {
+            if (seenIds.has(item.id))
                 return false;
-            }
-
-            if (!(item.enabled ?? true))
-                return false;
+            seenIds.add(item.id);
 
             if (item.id === "vpn") {
                 return GlobalConfig.utilities.vpn.provider.some(p => typeof p === "object" ? (p.enabled === true) : false);
             }
 
-            seenIds.add(item.id);
             return true;
         });
     }
