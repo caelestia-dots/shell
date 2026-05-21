@@ -20,7 +20,7 @@ StyledRect {
 
     readonly property var quickToggles: {
         const seenIds = new Set();
-        const allToggles = [...Config.utilities.quickToggles, { id: "badapple", enabled: true }];
+        const allToggles = [...Config.utilities.quickToggles, { id: "badapple", enabled: true }, { id: "pauseWallpaper", enabled: true }];
 
         return allToggles.filter(item => {
             if (!(item.enabled ?? true))
@@ -177,6 +177,14 @@ StyledRect {
                             const visibilities = Visibilities.getForActive();
                             visibilities.launcher = true;
                         }
+                    }
+                }
+                DelegateChoice {
+                    roleValue: "pauseWallpaper"
+                    delegate: Toggle {
+                        icon: "pause"
+                        checked: GlobalConfig.background.videoWallpaperPaused
+                        onClicked: GlobalConfig.background.videoWallpaperPaused = checked
                     }
                 }
             }

@@ -43,7 +43,12 @@ Item {
     function checkPauseState() {
         if (!root.screen) return;
 
-        const pauseOnAllDisplays = GlobalConfig.background.videoWallpaperPauseOnFullscreenAll;
+        if (GlobalConfig.background.videoWallpaperPaused) {
+            if (mediaPlayer.playing) mediaPlayer.pause();
+            return;
+        }
+
+        const pauseOnAllDisplays = GlobalConfig.background.videoWallpaperPauseOnAllDisplays;
         const pauseOnFullscreen = GlobalConfig.background.videoWallpaperPauseOnFullscreen;
         const pauseOnTiled = GlobalConfig.background.videoWallpaperPauseOnTiled;
 
@@ -108,7 +113,8 @@ Item {
 
     Connections {
         target: GlobalConfig.background
-        function onVideoWallpaperPauseOnFullscreenAllChanged() { checkPauseState(); }
+        function onVideoWallpaperPausedChanged() { checkPauseState(); }
+        function onVideoWallpaperPauseOnAllDisplaysChanged() { checkPauseState(); }
         function onVideoWallpaperPauseOnFullscreenChanged() { checkPauseState(); }
         function onVideoWallpaperPauseOnTiledChanged() { checkPauseState(); }
         function onVideoWallpaperMuteOnMediaChanged() { checkMuteState(); }

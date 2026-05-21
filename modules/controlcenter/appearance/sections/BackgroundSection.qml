@@ -40,10 +40,10 @@ SwitchRow {
 
     SwitchRow {
         label: qsTr("Pause on all displays")
-        checked: rootPane.videoWallpaperPauseOnFullscreenAll
+        checked: rootPane.videoWallpaperPauseOnAllDisplays
         enabled: rootPane.backgroundEnabled
         onToggled: checked => {
-            rootPane.videoWallpaperPauseOnFullscreenAll = checked;
+            rootPane.videoWallpaperPauseOnAllDisplays = checked;
             rootPane.saveConfig();
         }
     }
