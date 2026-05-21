@@ -41,7 +41,10 @@ Variants {
                 anchors.fill: parent
                 active: Config.background.wallpaperEnabled
 
-                sourceComponent: Wallpaper {}
+                sourceComponent: Wallpaper {
+                    screen: win.modelData
+                    Component.onCompleted: console.log("Wallpaper instance created, screen:", screen)
+                }
             }
 
             BadAppleVideo {

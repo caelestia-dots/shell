@@ -15,6 +15,7 @@ Item {
     property string source: Wallpapers.current
     property Item current: one
     property bool completed
+    property var screen: null
 
     function isVideo(path: string): bool {
         if (!path)
@@ -26,16 +27,21 @@ Item {
     onSourceChanged: {
         if (!source)
             current = null;
-        else if (current === one)
+        else if (current !== one) {
+            two.screen = screen;
             two.update();
-        else
+        }
+        else {
+            one.screen = screen;
             one.update();
+        }
     }
 
     Component.onCompleted: {
         if (source)
             Qt.callLater(() => {
-                one.update();
+                one.screen = screen;
+                Qt.callLater(() => one.update());
                 completed = true;
             });
     }
@@ -109,10 +115,14 @@ Item {
 
     Img {
         id: one
+
+        property var screen: null
     }
 
     Img {
         id: two
+
+        property var screen: null
     }
 
     component Img: Item {
@@ -121,10 +131,12 @@ Item {
         property string imagePath: ""
         property string videoPath: ""
         property bool isVideoImage: root.isVideo(root.source)
+        property var screen: null
 
         onIsVideoImageChanged: updateContent()
-
+        
         function update(): void {
+            this.screen = root.screen;
             if (isVideoImage) {
                 if (videoPath === root.source)
                     root.current = this;
@@ -175,6 +187,7 @@ Item {
         CachingVideo {
             anchors.fill: parent
             path: img.videoPath
+            screen: root.screen
             visible: img.isVideoImage && img.videoPath !== ""
 
             onPlayingChanged: {

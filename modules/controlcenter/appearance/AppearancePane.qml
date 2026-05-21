@@ -56,6 +56,9 @@ Item {
     property list<string> monitorNames: Hypr.monitorNames()
     property bool wallpaperEnabled: Config.background.wallpaperEnabled ?? true
     property bool videoWallpaperSoundEnabled: Config.background.videoWallpaperSoundEnabled ?? false
+    property bool videoWallpaperPauseOnFullscreen: Config.background.videoWallpaperPauseOnFullscreen ?? false
+    property bool videoWallpaperPauseOnTiled: Config.background.videoWallpaperPauseOnTiled ?? false
+    property bool videoWallpaperMuteOnMedia: Config.background.videoWallpaperMuteOnMedia ?? false
     property bool visualiserEnabled: Config.background.visualiser.enabled ?? false
     property bool visualiserAutoHide: Config.background.visualiser.autoHide ?? true
     property real visualiserRounding: Config.background.visualiser.rounding ?? 1
@@ -97,6 +100,9 @@ Item {
 
         GlobalConfig.background.wallpaperEnabled = root.wallpaperEnabled;
         GlobalConfig.background.videoWallpaperSoundEnabled = root.videoWallpaperSoundEnabled;
+        GlobalConfig.background.videoWallpaperPauseOnFullscreen = root.videoWallpaperPauseOnFullscreen;
+        GlobalConfig.background.videoWallpaperPauseOnTiled = root.videoWallpaperPauseOnTiled;
+        GlobalConfig.background.videoWallpaperMuteOnMedia = root.videoWallpaperMuteOnMedia;
 
         GlobalConfig.background.visualiser.enabled = root.visualiserEnabled;
         GlobalConfig.background.visualiser.autoHide = root.visualiserAutoHide;
