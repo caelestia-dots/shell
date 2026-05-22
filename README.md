@@ -21,6 +21,7 @@ This fork adds the following features on top of the official caelestia shell:
 - **Emoji Picker** - Browse and search emojis, with usage frequency tracking and favorites support. Trigger with `>emoji ` or the global shortcut.
 - **Clipboard History** - Access clipboard history with image preview support and favorites. Trigger with `>clipboard ` or the global shortcut.
 - **Window Switcher** - Quickly switch between windows with live previews. Trigger with `>windows ` or the global shortcut.
+- **Keybinds** - Browse and search your Hyprland keybinds. Trigger with `>keybinds ` or the global shortcut.
 - **Shimeji Desktop Characters** - Animated desktop characters (like Pusheen) with per-screen configuration.
 - **GIF Wallpaper Support** - Use animated images as wallpapers with configurable playback speed.
 - **Video Wallpaper Support** - Use video files (like Bad Apple) as animated wallpapers with configurable pause options.
@@ -44,6 +45,7 @@ All keybinds are accessible via Hyprland [global shortcuts](https://wiki.hyprlan
 | `caelestia:emoji` | Open emoji picker |
 | `caelestia:clipboard` | Open clipboard history |
 | `caelestia:windowSwitcher` | Open window switcher |
+| `caelestia:keybinds` | Open keybinds list |
 | `caelestia:wallpaper` | Open wallpaper picker |
 | `caelestia:showall` | Toggle all UI elements |
 
@@ -61,6 +63,7 @@ bind = SUPER, S, global, caelestia:controlCenter
 bind = SUPER, E, global, caelestia:emoji
 bind = SUPER, V, global, caelestia:clipboard
 bind = SUPER, W, global, caelestia:windowSwitcher
+bind = SUPER, K, global, caelestia:keybinds
 bind = SUPER, B, global, caelestia:wallpaper
 
 # Other toggles
@@ -628,6 +631,14 @@ For example, to disable the bar on DP-1:
                 "icon": "image",
                 "description": "Change the current wallpaper",
                 "command": ["autocomplete", "wallpaper"],
+                "enabled": true,
+                "dangerous": false
+            },
+            {
+                "name": "Keybinds",
+                "icon": "keyboard",
+                "description": "Browse and search Hyprland keybinds",
+                "command": ["autocomplete", "keybinds"],
                 "enabled": true,
                 "dangerous": false
             },

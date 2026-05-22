@@ -165,6 +165,20 @@ Scope {
         }
     }
 
+    // qmllint disable unresolved-type
+    CustomShortcut {
+        // qmllint enable unresolved-type
+        name: "keybinds"
+        description: "Open keybinds list"
+        onPressed: {
+            if (root.hasFullscreen)
+                return;
+            Visibilities.launcherInitialSearch = `${GlobalConfig.launcher.actionPrefix}keybinds `;
+            const visibilities = Visibilities.getForActive();
+            visibilities.launcher = true;
+        }
+    }
+
     IpcHandler {
         function toggle(drawer: string): void {
             if (list().split("\n").includes(drawer)) {
