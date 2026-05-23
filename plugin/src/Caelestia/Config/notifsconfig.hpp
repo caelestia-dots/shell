@@ -13,6 +13,7 @@ class NotifsConfig : public ConfigObject {
     CONFIG_GLOBAL_PROPERTY(bool, expire, true)
     CONFIG_GLOBAL_PROPERTY(QString, fullscreen, QStringLiteral("on"))
     CONFIG_GLOBAL_PROPERTY(int, defaultExpireTimeout, 5000)
+    CONFIG_GLOBAL_PROPERTY(int, fullscreenExpireTimeout, 2000)
     CONFIG_PROPERTY(qreal, clearThreshold, 0.3)
     CONFIG_PROPERTY(int, expandThreshold, 20)
     CONFIG_GLOBAL_PROPERTY(bool, actionOnClick, false)

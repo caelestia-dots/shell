@@ -63,13 +63,15 @@ float smaxSharpA(float a, float b, float k) {
 void main() {
     vec2 pixel = vec2(paddedX, paddedY) + qt_TexCoord0 * vec2(paddedW, paddedH);
 
-    float mergedSdf = 1e10;
+    // Phase 1: compute per-rect SDF, track owner. We can't smin yet because excluded
+    // pairs need to skip the smooth blend, which requires pairwise pass below.
+    float dArr[16];
     int owner = -2;
     float minDist = 1e10;
 
     for (int i = 0; i < rectCount; i++) {
         vec4 rect = rectData[i * 5];         // cx, cy, hw, hh
-        vec4 props = rectData[i * 5 + 1];    // radius, offsetX, offsetY, minEig
+        vec4 props = rectData[i * 5 + 1];    // excludeMask(int bits), offsetX, offsetY, minEig
         vec4 invDm = rectData[i * 5 + 2];    // inverse deform matrix
         vec4 sh = rectData[i * 5 + 3];       // screenHalfX, screenHalfY, 0, 0
         vec4 radii = rectData[i * 5 + 4];    // effective per-corner radii (tr, br, bl, tl)
@@ -79,8 +81,10 @@ void main() {
 
         // AABB early-out: skip rects far from this pixel
         vec2 extent = sh.xy + vec2(smoothFactor * 1.5);
-        if (abs(pixel.x - center.x) > extent.x || abs(pixel.y - center.y) > extent.y)
+        if (abs(pixel.x - center.x) > extent.x || abs(pixel.y - center.y) > extent.y) {
+            dArr[i] = 1e10;
             continue;
+        }
 
         // Apply pre-computed inverse deformation to the evaluation point
         mat2 invDeform = mat2(invDm.xy, invDm.zw);
@@ -135,10 +139,34 @@ void main() {
             d *= scale;
         }
 
-        mergedSdf = smin(mergedSdf, d, smoothFactor);
+        dArr[i] = d;
         if (d < smoothFactor && d < minDist) {
             minDist = d;
             owner = i;
+        }
+    }
+
+    // Phase 2: hard-min baseline over all rects.
+    float mergedSdf = 1e10;
+    for (int i = 0; i < rectCount; i++) {
+        mergedSdf = min(mergedSdf, dArr[i]);
+    }
+
+    // Phase 3: pair-wise smin contributions, skipping excluded pairs. Pair smin <= min,
+    // so taking the min over all non-excluded pair smins gives the smoothly-merged SDF.
+    for (int i = 0; i < rectCount; i++) {
+        if (dArr[i] >= 1e9)
+            continue;
+        int excludeMask = floatBitsToInt(rectData[i * 5 + 1].x);
+        for (int j = i + 1; j < rectCount; j++) {
+            if (dArr[j] >= 1e9)
+                continue;
+            if ((excludeMask & (1 << j)) != 0)
+                continue;
+            // smin only deviates from min within smoothFactor
+            if (abs(dArr[i] - dArr[j]) >= smoothFactor)
+                continue;
+            mergedSdf = min(mergedSdf, smin(dArr[i], dArr[j], smoothFactor));
         }
     }
 
