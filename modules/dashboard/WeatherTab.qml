@@ -2,22 +2,82 @@ import QtQuick
 import QtQuick.Layouts
 import Caelestia.Config
 import qs.components
+import qs.components.controls
 import qs.services
 
-Item {
+FocusScope {
     id: root
 
     readonly property var today: Weather.forecast && Weather.forecast.length > 0 ? Weather.forecast[0] : null
 
     implicitWidth: layout.implicitWidth > 800 ? layout.implicitWidth : 840
     implicitHeight: layout.implicitHeight
-    Component.onCompleted: Weather.reload()
+    focus: true
+    activeFocusOnTab: true
+
+    Component.onCompleted: {
+        Weather.reload();
+        Qt.callLater(() => locationInput.forceActiveFocus());
+    }
 
     ColumnLayout {
         id: layout
 
         anchors.fill: parent
         spacing: Tokens.spacing.smaller
+
+        StyledRect {
+            Layout.leftMargin: Tokens.padding.large
+            Layout.rightMargin: Tokens.padding.large
+            Layout.fillWidth: true
+
+            MouseArea {
+                anchors.fill: parent
+                hoverEnabled: true
+                cursorShape: Qt.IBeamCursor
+                onClicked: locationInput.forceActiveFocus()
+            }
+
+            radius: Tokens.rounding.large
+            color: Colours.layer(Colours.palette.m3surfaceContainer, 2)
+            implicitHeight: locationRow.implicitHeight + Tokens.padding.normal * 2
+
+            RowLayout {
+                id: locationRow
+
+                anchors.left: parent.left
+                anchors.right: parent.right
+                anchors.verticalCenter: parent.verticalCenter
+                anchors.leftMargin: Tokens.padding.normal
+                anchors.rightMargin: Tokens.padding.normal
+                spacing: Tokens.spacing.small
+
+                MaterialIcon {
+                    text: "location_on"
+                    color: Colours.palette.m3onSurfaceVariant
+                    font.pointSize: Tokens.font.size.large
+                }
+
+                StyledTextField {
+                    id: locationInput
+
+                    Layout.fillWidth: true
+                    horizontalAlignment: TextInput.AlignLeft
+                    placeholderText: qsTr("Search for a city")
+
+                    Component.onCompleted: forceActiveFocus()
+
+                    Binding {
+                        target: locationInput
+                        property: "text"
+                        value: GlobalConfig.services.weatherLocation ?? ""
+                        when: !locationInput.hasFocus
+                    }
+
+                    onAccepted: Weather.setLocation(text)
+                }
+            }
+        }
 
         RowLayout {
             Layout.leftMargin: Tokens.padding.large

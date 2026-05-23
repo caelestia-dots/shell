@@ -26,8 +26,18 @@ Singleton {
 
     readonly property var cachedCities: new Map()
 
+    function setLocation(locationName: string): void {
+        const trimmedLocation = locationName.trim();
+        const currentLocation = GlobalConfig.services.weatherLocation ?? "";
+
+        GlobalConfig.services.weatherLocation = trimmedLocation;
+
+        if (trimmedLocation === currentLocation)
+            reload();
+    }
+
     function reload(): void {
-        const configLocation = GlobalConfig.services.weatherLocation;
+        const configLocation = (GlobalConfig.services.weatherLocation ?? "").trim();
 
         if (configLocation) {
             if (configLocation.indexOf(",") !== -1 && !isNaN(parseFloat(configLocation.split(",")[0]))) {

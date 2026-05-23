@@ -19,6 +19,9 @@ Item {
             if (item?.sourceComponent === mediaComponent && (item?.item as MediaWrapper)?.needsKeyboard)
                 return true;
         }
+        const currentItem = repeater.itemAt(dashState.currentTab) as Loader;
+        if (currentItem?.sourceComponent === weatherComponent)
+            return true;
         return false;
     }
     required property DashboardState dashState
