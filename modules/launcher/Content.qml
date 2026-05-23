@@ -106,6 +106,15 @@ Item {
             Keys.onEscapePressed: root.visibilities.launcher = false
 
             Keys.onPressed: event => {
+                // Tab cycles monitors when wallpaper picker is open (any keybind mode)
+                if (list.showWallpapers && Wallpapers.screenNames.length > 1) {
+                    if (event.key === Qt.Key_Tab && !(event.modifiers & Qt.ShiftModifier)) {
+                        Wallpapers.cycleSelectedScreen();
+                        event.accepted = true;
+                        return;
+                    }
+                }
+
                 if (!GlobalConfig.launcher.vimKeybinds)
                     return;
 
@@ -127,6 +136,16 @@ Item {
             }
 
             Component.onCompleted: forceActiveFocus()
+
+            // When Tab cycles to a different screen, immediately preview that screen's wallpaper
+            Connections {
+                target: Wallpapers
+                function onSelectedScreenChanged() {
+                    const item = list.currentList?.currentItem;
+                    if (item && list.showWallpapers)
+                        Wallpapers.preview(item.modelData.path);
+                }
+            }
 
             Connections {
                 function onLauncherChanged(): void {

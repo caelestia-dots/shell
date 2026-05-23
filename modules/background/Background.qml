@@ -41,7 +41,10 @@ Variants {
                 anchors.fill: parent
                 active: Config.background.wallpaperEnabled
 
-                sourceComponent: Wallpaper {}
+                sourceComponent: Wallpaper {
+                    // Wire the screen name so each monitor loads its own wallpaper
+                    screenName: win.modelData.name
+                }
             }
 
             Visualiser {

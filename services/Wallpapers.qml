@@ -12,7 +12,13 @@ Searcher {
     id: root
 
     readonly property string currentNamePath: `${Paths.state}/wallpaper/path.txt`
+    readonly property string screenWallpapersPath: `${Paths.state}/wallpaper/screens.json`
     readonly property list<string> smartArg: GlobalConfig.services.smartScheme ? [] : ["--no-smart"]
+
+    readonly property string primaryScreen: "eDP-1"
+
+    property string selectedScreen: primaryScreen
+    readonly property var screenNames: Screens.screens.map(s => s.name)
 
     property bool showPreview: false
     readonly property string current: showPreview ? previewPath : actualCurrent
@@ -20,17 +26,59 @@ Searcher {
     property string actualCurrent
     property bool previewColourLock
 
-    function setWallpaper(path: string): void {
-        actualCurrent = path;
-        Quickshell.execDetached(["caelestia", "wallpaper", "-f", path, ...smartArg]);
+    property var screenWallpapers: ({})
+
+    signal screenWallpaperUpdated(string screenName, string path)
+
+    function wallpaperForScreen(screenName: string): string {
+        if (screenName && screenWallpapers[screenName])
+            return screenWallpapers[screenName];
+        return actualCurrent;
+    }
+
+    // Cycle to the next screen in the list
+    function cycleSelectedScreen(): void {
+        const names = screenNames;
+        if (names.length <= 1) return;
+        const idx = names.indexOf(selectedScreen);
+        selectedScreen = names[(idx + 1) % names.length];
+    }
+
+    function setWallpaper(path: string, screenName: string): void {
+        const target = (screenName && screenName !== "undefined") ? screenName : selectedScreen;
+        const resolved = (target && target !== "undefined") ? target : primaryScreen;
+
+        if (resolved !== primaryScreen) {
+            const updated = Object.assign({}, screenWallpapers);
+            updated[resolved] = path;
+            screenWallpapers = updated;
+            saveScreensProc.running = true;
+            screenWallpaperUpdated(resolved, path);
+            previewColourLock = false;
+            stopPreview();
+        } else {
+            actualCurrent = path;
+            const updated = Object.assign({}, screenWallpapers);
+            updated[resolved] = path;
+            screenWallpapers = updated;
+            saveScreensProc.running = true;
+            screenWallpaperUpdated(resolved, path);
+            Quickshell.execDetached(["caelestia", "wallpaper", "-f", path, ...smartArg]);
+        }
     }
 
     function preview(path: string): void {
-        previewPath = path;
-        showPreview = true;
-
-        if (Colours.scheme === "dynamic")
-            getPreviewColoursProc.running = true;
+        if (selectedScreen !== primaryScreen) {
+            // For non-primary screens: show wallpaper preview without changing colours
+            previewPath = path;
+            showPreview = true;
+        } else {
+            // Primary screen: full preview including colour scheme
+            previewPath = path;
+            showPreview = true;
+            if (Colours.scheme === "dynamic")
+                getPreviewColoursProc.running = true;
+        }
     }
 
     function stopPreview(): void {
@@ -52,7 +100,7 @@ Searcher {
         }
 
         function set(path: string): void {
-            root.setWallpaper(path);
+            root.setWallpaper(path, root.primaryScreen);
         }
 
         function list(): string {
@@ -70,6 +118,40 @@ Searcher {
             root.actualCurrent = text().trim();
             root.previewColourLock = false;
         }
+    }
+
+    FileView {
+        id: screensFileView
+
+        path: root.screenWallpapersPath
+        watchChanges: true
+        onFileChanged: reload()
+        onLoaded: {
+            try {
+                const parsed = JSON.parse(text().trim());
+                root.screenWallpapers = parsed;
+                for (const [screen, path] of Object.entries(parsed))
+                    root.screenWallpaperUpdated(screen, path);
+            } catch (e) {
+                root.screenWallpapers = ({});
+            }
+        }
+    }
+
+    Component.onCompleted: {
+        Qt.callLater(() => {
+            for (const [screen, path] of Object.entries(root.screenWallpapers))
+                root.screenWallpaperUpdated(screen, path);
+        });
+    }
+
+    Process {
+        id: saveScreensProc
+
+        command: [
+            "sh", "-c",
+            `mkdir -p "$(dirname '${root.screenWallpapersPath}')" && printf '%s' '${JSON.stringify(root.screenWallpapers)}' > '${root.screenWallpapersPath}'`
+        ]
     }
 
     FileSystemModel {

@@ -11,9 +11,29 @@ import qs.utils
 Item {
     id: root
 
-    property string source: Wallpapers.current
+    property string screenName: ""
+
+    // Source is: signal-driven preview path (if previewing this screen) or saved wallpaper
+    property string source: Wallpapers.wallpaperForScreen(screenName)
+
     property Image current: one
     property bool completed
+
+    Connections {
+        target: Wallpapers
+
+        // Fired for both live scroll preview and confirmed set — covers all screens
+        function onScreenWallpaperUpdated(screen: string, path: string) {
+            if (screen === root.screenName)
+                root.source = path;
+        }
+
+        // Primary screen: when global wallpaper changes (e.g. CLI or startup)
+        function onActualCurrentChanged() {
+            if (!Wallpapers.screenWallpapers[root.screenName])
+                root.source = Wallpapers.actualCurrent;
+        }
+    }
 
     onSourceChanged: {
         if (!source)
@@ -35,7 +55,6 @@ Item {
     Loader {
         asynchronous: true
         anchors.fill: parent
-
         active: root.completed && !root.source
 
         sourceComponent: StyledRect {
@@ -65,17 +84,15 @@ Item {
                     StyledRect {
                         implicitWidth: selectWallText.implicitWidth + Tokens.padding.large * 2
                         implicitHeight: selectWallText.implicitHeight + Tokens.padding.small * 2
-
                         radius: Tokens.rounding.full
                         color: Colours.palette.m3primary
 
                         FileDialog {
                             id: dialog
-
                             title: qsTr("Select a wallpaper")
                             filterLabel: qsTr("Image files")
                             filters: Images.validImageExtensions
-                            onAccepted: path => Wallpapers.setWallpaper(path)
+                            onAccepted: path => Wallpapers.setWallpaper(path, root.screenName)
                         }
 
                         StateLayer {
@@ -86,9 +103,7 @@ Item {
 
                         StyledText {
                             id: selectWallText
-
                             anchors.centerIn: parent
-
                             text: qsTr("Set it now!")
                             color: Colours.palette.m3onPrimary
                             font.pointSize: Tokens.font.size.large
@@ -99,13 +114,8 @@ Item {
         }
     }
 
-    Img {
-        id: one
-    }
-
-    Img {
-        id: two
-    }
+    Img { id: one }
+    Img { id: two }
 
     component Img: CachingImage {
         id: img
@@ -118,7 +128,6 @@ Item {
         }
 
         anchors.fill: parent
-
         opacity: 0
         scale: Wallpapers.showPreview ? 1 : 0.8
 
@@ -130,7 +139,6 @@ Item {
         states: State {
             name: "visible"
             when: root.current === img
-
             PropertyChanges {
                 img.opacity: 1
                 img.scale: 1

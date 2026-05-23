@@ -22,7 +22,6 @@ PathView {
         if (!screen)
             return 0;
 
-        // Screen width - 4x outer rounding - 2x max side thickness (cause centered)
         const barMargins = Math.max(Config.border.thickness, panels.bar.implicitWidth);
         let outerMargins = 0;
         if (panels.popouts.hasCurrent && panels.popouts.currentCenter + panels.popouts.nonAnimHeight / 2 > screen.height - content.implicitHeight - Config.border.thickness * 2)
@@ -54,11 +53,23 @@ PathView {
     }
 
     Component.onCompleted: currentIndex = Wallpapers.list.findIndex(w => w.path === Wallpapers.actualCurrent)
-    Component.onDestruction: Wallpapers.stopPreview()
+    Component.onDestruction: {
+        // Restore the actual saved wallpaper for the selected screen on close
+        Wallpapers.screenWallpaperUpdated(
+            Wallpapers.selectedScreen,
+            Wallpapers.wallpaperForScreen(Wallpapers.selectedScreen)
+        );
+        Wallpapers.stopPreview();
+    }
 
     onCurrentItemChanged: {
-        if (currentItem)
-            Wallpapers.preview((currentItem as WallpaperItem).modelData.path);
+        if (!currentItem) return;
+        const path = (currentItem as WallpaperItem).modelData.path;
+        // Always emit the signal so Wallpaper.qml shows live preview on the correct screen
+        Wallpapers.screenWallpaperUpdated(Wallpapers.selectedScreen, path);
+        // Also run colour preview if this is the primary screen
+        if (Wallpapers.selectedScreen === Wallpapers.primaryScreen)
+            Wallpapers.preview(path);
     }
 
     implicitWidth: Math.min(numItems, count) * itemWidth

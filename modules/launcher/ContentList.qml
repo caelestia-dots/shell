@@ -19,7 +19,7 @@ Item {
     required property int rounding
 
     readonly property bool showWallpapers: search.text.startsWith(`${GlobalConfig.launcher.actionPrefix}wallpaper `)
-    readonly property var currentList: showWallpapers ? wallpaperList.item : appList.item // Can be either ListView or PathView, so can't type properly
+    readonly property var currentList: showWallpapers ? wallpaperList.item : appList.item
 
     anchors.horizontalCenter: parent.horizontalCenter
     anchors.bottom: parent.bottom
@@ -47,7 +47,7 @@ Item {
 
             PropertyChanges {
                 root.implicitWidth: Math.max(root.Tokens.sizes.launcher.itemWidth * 1.2, wallpaperList.implicitWidth)
-                root.implicitHeight: root.Tokens.sizes.launcher.wallpaperHeight
+                root.implicitHeight: root.Tokens.sizes.launcher.wallpaperHeight + screenSelector.implicitHeight + root.Tokens.spacing.small
                 wallpaperList.active: true
             }
         }
@@ -77,12 +77,52 @@ Item {
         id: appList
 
         active: false
-
         anchors.fill: parent
 
         sourceComponent: AppList {
             search: root.search
             visibilities: root.visibilities
+        }
+    }
+
+    // Screen selector — sits above the wallpaper list, only when wallpapers are shown
+    Row {
+        id: screenSelector
+
+        visible: root.showWallpapers && Wallpapers.screenNames.length > 1
+        anchors.top: parent.top
+        anchors.horizontalCenter: parent.horizontalCenter
+        spacing: Tokens.spacing.small
+
+        Repeater {
+            model: Wallpapers.screenNames
+
+            delegate: StyledRect {
+                required property string modelData
+
+                readonly property bool selected: Wallpapers.selectedScreen === modelData
+
+                implicitWidth: screenLabel.implicitWidth + Tokens.padding.large * 2
+                implicitHeight: screenLabel.implicitHeight + Tokens.padding.small * 2
+                radius: Tokens.rounding.full
+                color: selected ? Colours.palette.m3primary : Colours.palette.m3surfaceContainerHigh
+
+                StateLayer {
+                    radius: parent.radius
+                    color: parent.selected ? Colours.palette.m3onPrimary : Colours.palette.m3onSurface
+                    onClicked: Wallpapers.selectedScreen = modelData
+                }
+
+                StyledText {
+                    id: screenLabel
+
+                    anchors.centerIn: parent
+                    text: modelData
+                    color: parent.selected ? Colours.palette.m3onPrimary : Colours.palette.m3onSurface
+                    font.pointSize: Tokens.font.size.small
+                    font.bold: parent.selected
+                }
+            }
         }
     }
 
@@ -92,7 +132,8 @@ Item {
         asynchronous: true
         active: false
 
-        anchors.top: parent.top
+        anchors.top: screenSelector.visible ? screenSelector.bottom : parent.top
+        anchors.topMargin: screenSelector.visible ? Tokens.spacing.small : 0
         anchors.bottom: parent.bottom
         anchors.horizontalCenter: parent.horizontalCenter
 
