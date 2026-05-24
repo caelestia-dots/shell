@@ -234,11 +234,41 @@ Singleton {
             if (sub.id === id)
                 return sub.image ? Qt.resolvedUrl(sub.image) : Quickshell.iconPath(sub.icon);
 
-        if (icon.includes("?path=")) {
-            const [name, path] = icon.split("?path=");
-            icon = Qt.resolvedUrl(`${path}/${name.slice(name.lastIndexOf("/") + 1)}`);
-        }
+        // For `name?path=/theme/root` (e.g. Dropbox), the consumer must walk
+        // freedesktop subdirs to find the actual file. Return the original
+        // string so TrayItem can iterate candidates via getTrayIconCandidates.
         return icon;
+    }
+
+    function getTrayIconCandidates(id: string, icon: string): var {
+        for (const sub of GlobalConfig.bar.tray.iconSubs)
+            if (sub.id === id)
+                return [sub.image ? Qt.resolvedUrl(sub.image) : Quickshell.iconPath(sub.icon)];
+
+        if (!icon.includes("?path="))
+            return [icon];
+
+        const [rawName, path] = icon.split("?path=");
+        const name = rawName.slice(rawName.lastIndexOf("/") + 1);
+        const sizes = ["scalable", "symbolic", "48x48", "32x32", "24x24", "22x22", "16x16"];
+        const cats = ["status", "apps", "actions", "devices", "categories", "places", "panel"];
+        const exts = [".png", ".svg"];
+        const out = [];
+
+        // 1. directly in path (legacy behaviour)
+        for (const ext of exts)
+            out.push(Qt.resolvedUrl(`${path}/${name}${ext}`));
+
+        // 2. proper freedesktop layout. The advertised path is the theme root,
+        // so try `hicolor` subtheme plus path itself as a theme dir.
+        for (const theme of ["hicolor", ""]) {
+            const base = theme ? `${path}/${theme}` : path;
+            for (const size of sizes)
+                for (const cat of cats)
+                    for (const ext of exts)
+                        out.push(Qt.resolvedUrl(`${base}/${size}/${cat}/${name}${ext}`));
+        }
+        return out;
     }
 
     function getBatteryIcon(charge: int): string {

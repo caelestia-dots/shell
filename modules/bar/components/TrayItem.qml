@@ -26,9 +26,18 @@ MouseArea {
     ColouredIcon {
         id: icon
 
+        readonly property var candidates: Icons.getTrayIconCandidates(root.modelData.id, root.modelData.icon)
+        property int candidateIndex: 0
+
         anchors.fill: parent
-        source: Icons.getTrayIcon(root.modelData.id, root.modelData.icon)
+        source: candidates[candidateIndex] ?? ""
         colour: Colours.palette.m3secondary
         layer.enabled: Config.bar.tray.recolour
+
+        onCandidatesChanged: candidateIndex = 0
+        onStatusChanged: {
+            if (status === Image.Error && candidateIndex < candidates.length - 1)
+                candidateIndex++;
+        }
     }
 }
