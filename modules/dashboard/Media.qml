@@ -312,21 +312,33 @@ Item {
         StyledSlider {
             id: slider
 
+            property bool isSeeking: false
+
             enabled: !!Players.active
             implicitWidth: 280
             implicitHeight: Tokens.padding.normal * 3
 
             onMoved: {
                 const active = Players.active;
-                if (active?.canSeek && active?.positionSupported)
+                if (active?.canSeek && active?.positionSupported) {
+                    isSeeking = true;
                     active.position = value * active.length;
+                    seekCooldown.restart();
+                }
+            }
+
+            Timer {
+                id: seekCooldown
+
+                interval: 500
+                onTriggered: slider.isSeeking = false;
             }
 
             Binding {
                 target: slider
                 property: "value"
                 value: root.playerProgress
-                when: !slider.pressed
+                when: !slider.pressed && !slider.isSeeking
             }
 
             CustomMouseArea {
