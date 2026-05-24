@@ -152,9 +152,6 @@ void ConfigObject::syncFromGlobal(ConfigObject* global) {
         auto prop = meta->property(i);
         const auto key = QString::fromUtf8(prop.name());
 
-        if (isGlobalOnly(key))
-            continue;
-
         auto current = prop.read(this);
         auto* subObj = current.value<ConfigObject*>();
 
@@ -188,9 +185,6 @@ void ConfigObject::resyncFromGlobal() {
     for (int i = meta->propertyOffset(); i < meta->propertyCount(); ++i) {
         auto prop = meta->property(i);
         const auto key = QString::fromUtf8(prop.name());
-
-        if (isGlobalOnly(key))
-            continue;
 
         auto current = prop.read(this);
         auto* subObj = current.value<ConfigObject*>();
@@ -274,7 +268,7 @@ void ConfigObject::resetOption(const QString& name) {
 
 void ConfigObject::onGlobalPropertiesChanged(const QMap<QString, QVariant>& changed) {
     for (auto it = changed.begin(); it != changed.end(); ++it) {
-        if (m_loadedKeys.contains(it.key()) || isGlobalOnly(it.key()))
+        if (m_loadedKeys.contains(it.key()))
             continue;
 
         int idx = metaObject()->indexOfProperty(it.key().toUtf8().constData());
