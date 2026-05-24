@@ -31,6 +31,12 @@ QtObject {
             readonly property string component: "appearance/AppearancePane.qml"
         },
         QtObject {
+            readonly property string id: "videowallpaper"
+            readonly property string label: "\u00A0\u00A0\u00A0video\nWallpaper"
+            readonly property string icon: "movie"
+            readonly property string component: "videowallpaper/VideoWallpaperPane.qml"
+        },
+        QtObject {
             readonly property string id: "taskbar"
             readonly property string label: "taskbar"
             readonly property string icon: "task_alt"
