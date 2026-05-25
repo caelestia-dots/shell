@@ -58,9 +58,8 @@ private:                                                                        
                                                                                                                        \
 public:                                                                                                                \
     [[nodiscard]] Type name() const {                                                                                  \
-        if (isOverlay())                                                                                               \
-            qCWarning(caelestia::config::lcConfig, "Reading global-only option '%s' on per-monitor overlay",           \
-                qUtf8Printable(propertyPath(QStringLiteral(#name))));                                                  \
+        if (isOverlay() && globalObject())                                                                             \
+            return qvariant_cast<Type>(globalObject()->property(#name));                                              \
         return m_##name;                                                                                               \
     }                                                                                                                  \
     void set_##name(const Type& val) {                                                                                 \
@@ -127,6 +126,7 @@ protected:
     void markPropertyLoaded(const QString& name);
     void markGlobalOnly(const QString& name);
     void notifyPropertyChanged(const QString& name, const QVariant& value);
+    [[nodiscard]] ConfigObject* globalObject() const { return m_global; }
 
 private:
     void onGlobalPropertiesChanged(const QMap<QString, QVariant>& changed);
