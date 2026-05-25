@@ -274,12 +274,20 @@ void ConfigObject::resetOption(const QString& name) {
 
 void ConfigObject::onGlobalPropertiesChanged(const QMap<QString, QVariant>& changed) {
     for (auto it = changed.begin(); it != changed.end(); ++it) {
-        if (m_loadedKeys.contains(it.key()) || isGlobalOnly(it.key()))
+        if (m_loadedKeys.contains(it.key()))
             continue;
 
         int idx = metaObject()->indexOfProperty(it.key().toUtf8().constData());
-        if (idx >= 0) {
-            metaObject()->property(idx).write(this, it.value());
+        if (idx < 0)
+            continue;
+
+        const auto prop = metaObject()->property(idx);
+
+        if (isGlobalOnly(it.key())) {
+            // Getter delegates to global, so just notify bindings to re-read
+            prop.notifySignal().invoke(this);
+        } else {
+            prop.write(this, it.value());
             m_loadedKeys.remove(it.key()); // setter added it — remove since this is a synced value
             qCDebug(lcConfig) << metaObject()->className() << "synced" << it.key() << "=" << it.value()
                               << "from global change";
