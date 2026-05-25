@@ -25,7 +25,7 @@ ColumnLayout {
 
         for (let i = 0; i < repeater.count; i++) {
             const loader = repeater.itemAt(i) as WrappedLoader;
-            if (loader?.enabled && loader.id === "tray") {
+            if (loader?.enabled && loader.barId === "tray") {
                 (loader.item as Tray).expanded = false;
             }
         }
@@ -34,7 +34,7 @@ ColumnLayout {
     function checkPopout(y: real): void {
         const ch = childAt(width / 2, y) as WrappedLoader;
 
-        if (ch?.id !== "tray")
+        if (ch?.barId !== "tray")
             closeTray();
 
         if (!ch) {
@@ -42,7 +42,7 @@ ColumnLayout {
             return;
         }
 
-        const id = ch.id;
+        const id = ch.barId;
         const top = ch.y;
 
         if (id === "statusIcons" && Config.bar.popouts.statusIcons) {
@@ -78,7 +78,7 @@ ColumnLayout {
 
     function handleWheel(y: real, angleDelta: point): void {
         const ch = childAt(width / 2, y) as WrappedLoader;
-        if (ch?.id === "workspaces" && Config.bar.scrollActions.workspaces) {
+        if (ch?.barId === "workspaces" && Config.bar.scrollActions.workspaces) {
             // Workspace scroll
             const mon = (GlobalConfig.bar.workspaces.perMonitorWorkspaces ? Hypr.monitorFor(screen) : Hypr.focusedMonitor);
             const specialWs = mon?.lastIpcObject.specialWorkspace.name;
@@ -178,8 +178,9 @@ ColumnLayout {
 
     component WrappedLoader: Loader {
         required enabled
-        required property string id
+        required property var model
         required property int index
+        readonly property string barId: model.id
 
         function findFirstEnabled(): Item {
             const count = repeater.count;

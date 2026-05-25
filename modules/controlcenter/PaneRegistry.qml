@@ -7,49 +7,49 @@ QtObject {
 
     readonly property list<QtObject> panes: [
         QtObject {
-            readonly property string id: "network"
+            readonly property string paneId: "network"
             readonly property string label: "network"
             readonly property string icon: "router"
             readonly property string component: "network/NetworkingPane.qml"
         },
         QtObject {
-            readonly property string id: "bluetooth"
+            readonly property string paneId: "bluetooth"
             readonly property string label: "bluetooth"
             readonly property string icon: "settings_bluetooth"
             readonly property string component: "bluetooth/BtPane.qml"
         },
         QtObject {
-            readonly property string id: "audio"
+            readonly property string paneId: "audio"
             readonly property string label: "audio"
             readonly property string icon: "volume_up"
             readonly property string component: "audio/AudioPane.qml"
         },
         QtObject {
-            readonly property string id: "appearance"
+            readonly property string paneId: "appearance"
             readonly property string label: "appearance"
             readonly property string icon: "palette"
             readonly property string component: "appearance/AppearancePane.qml"
         },
         QtObject {
-            readonly property string id: "taskbar"
+            readonly property string paneId: "taskbar"
             readonly property string label: "taskbar"
             readonly property string icon: "task_alt"
             readonly property string component: "taskbar/TaskbarPane.qml"
         },
         QtObject {
-            readonly property string id: "notifications"
+            readonly property string paneId: "notifications"
             readonly property string label: "notifications"
             readonly property string icon: "notifications"
             readonly property string component: "notifications/NotificationsPane.qml"
         },
         QtObject {
-            readonly property string id: "launcher"
+            readonly property string paneId: "launcher"
             readonly property string label: "launcher"
             readonly property string icon: "apps"
             readonly property string component: "launcher/LauncherPane.qml"
         },
         QtObject {
-            readonly property string id: "dashboard"
+            readonly property string paneId: "dashboard"
             readonly property string label: "dashboard"
             readonly property string icon: "dashboard"
             readonly property string component: "dashboard/DashboardPane.qml"
@@ -89,7 +89,7 @@ QtObject {
 
     function getById(id: string): var {
         for (let i = 0; i < panes.length; i++) {
-            if (panes[i].id === id) {
+            if (panes[i].paneId === id) {
                 return panes[i];
             }
         }

@@ -171,9 +171,10 @@ StyledRect {
                     delegate: Item {
                         id: delegateRoot
 
-                        required property real id
+                        required property var model
                         required property string title
                         required property string artist
+                        readonly property real songId: model.id
 
                         property bool hovered: false
                         property bool pressed: false
@@ -223,7 +224,7 @@ StyledRect {
                             onExited: delegateRoot.hovered = false
                             onPressed: delegateRoot.pressed = true
                             onReleased: delegateRoot.pressed = false
-                            onClicked: LyricsService.selectCandidate(delegateRoot.id)
+                            onClicked: LyricsService.selectCandidate(delegateRoot.songId)
                         }
 
                         Row {
