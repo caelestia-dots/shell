@@ -238,7 +238,7 @@ StyledRect {
                                 height: parent.height * 0.6
                                 radius: 2
                                 anchors.verticalCenter: parent.verticalCenter
-                                color: LyricsService.currentSongId === delegateRoot.id ? Colours.palette.m3primary : "transparent"
+                                color: LyricsService.currentSongId === delegateRoot.songId ? Colours.palette.m3primary : "transparent"
 
                                 Behavior on color {
                                     ColorAnimation {
