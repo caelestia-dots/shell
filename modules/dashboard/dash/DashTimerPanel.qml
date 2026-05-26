@@ -11,9 +11,7 @@ import qs.utils
 Item {
     id: root
 
-    required property PopoutState popouts
-
-    property int popoutTab: 0
+    required property DashboardState dashState
 
     property int timerHours: 0
     property int timerMinutes: 0
@@ -22,119 +20,45 @@ Item {
     property int alarmHours: AlarmService.alarmHour
     property int alarmMinutes: AlarmService.alarmMinute
 
-    implicitWidth: layout.implicitWidth
-    implicitHeight: layout.implicitHeight
-
-    ColumnLayout {
-        id: layout
-
+    StackLayout {
         anchors.fill: parent
-        spacing: Tokens.spacing.small
+        anchors.margins: Tokens.padding.normal
+        currentIndex: root.dashState.timerPanelTab
 
-        // Tab row
-        RowLayout {
-            Layout.topMargin: Tokens.padding.small
-            Layout.alignment: Qt.AlignHCenter
-            spacing: Tokens.spacing.smaller
-
-            component TabChip: StyledRect {
-                id: chip
-
-                property bool chipActive: false
-                property string chipText: ""
-                property string chipIcon: ""
-                signal clicked()
-
-                implicitWidth: chipRow.implicitWidth + Tokens.padding.normal * 2
-                implicitHeight: chipRow.implicitHeight + Tokens.padding.small * 2
-
-                color: chipActive ? Colours.palette.m3primaryContainer : Colours.tPalette.m3surfaceContainerHigh
-                radius: Tokens.rounding.full
-
-                StateLayer {
-                    radius: parent.radius
-                    onClicked: chip.clicked()
-                }
-
-                RowLayout {
-                    id: chipRow
-                    anchors.centerIn: parent
-                    spacing: Tokens.spacing.smaller
-
-                    MaterialIcon {
-                        text: chip.chipIcon
-                        font.pointSize: Tokens.font.size.small
-                        color: chip.chipActive ? Colours.palette.m3onPrimaryContainer : Colours.palette.m3onSurfaceVariant
-                    }
-
-                    StyledText {
-                        id: chipLabel
-                        text: chip.chipText
-                        font.pointSize: Tokens.font.size.small
-                        color: chip.chipActive ? Colours.palette.m3onPrimaryContainer : Colours.palette.m3onSurfaceVariant
-                    }
-                }
-            }
-
-            TabChip {
-                chipText: qsTr("Timer")
-                chipIcon: "timer"
-                chipActive: root.popoutTab === 0
-                onClicked: root.popoutTab = 0
-            }
-
-            TabChip {
-                chipText: qsTr("Alarm")
-                chipIcon: "alarm"
-                chipActive: root.popoutTab === 1
-                onClicked: root.popoutTab = 1
-            }
-        }
-
-        StackLayout {
-            currentIndex: root.popoutTab
-
-            // --- Timer tab ---
+        // Tab 0: Timer
+        Item {
             ColumnLayout {
+                anchors.centerIn: parent
+                width: parent.width
                 spacing: Tokens.spacing.small
 
-                // Timer done: Bongo Cat
                 ColumnLayout {
                     visible: TimerService.timerDone
-                    Layout.fillWidth: true
+                    Layout.alignment: Qt.AlignHCenter
                     spacing: Tokens.spacing.small
 
-                    AnimatedImage {
+                    StyledText {
                         Layout.alignment: Qt.AlignHCenter
-                        Layout.preferredWidth: 180
-                        Layout.preferredHeight: 140
-
-                        source: Paths.absolutePath(GlobalConfig.paths.mediaGif)
-                        speed: 2.0
-                        playing: TimerService.timerDone
-                        fillMode: AnimatedImage.PreserveAspectFit
-                        asynchronous: true
+                        text: qsTr("Your time is up!")
+                        font.pointSize: Tokens.font.size.large
+                        font.weight: 600
+                        color: Colours.palette.m3onSurface
                     }
 
                     IconTextButton {
                         Layout.fillWidth: true
-                        Layout.topMargin: Tokens.spacing.small
-                        Layout.alignment: Qt.AlignHCenter
                         inactiveColour: Colours.palette.m3primaryContainer
                         inactiveOnColour: Colours.palette.m3onPrimaryContainer
                         verticalPadding: Tokens.padding.small
                         text: qsTr("Dismiss")
                         icon: "close"
-                        onClicked: {
-                            TimerService.timerDone = false;
-                        }
+                        onClicked: TimerService.timerDone = false
                     }
                 }
 
-                // Idle: set timer
                 ColumnLayout {
                     visible: !TimerService.active && !TimerService.timerDone
-                    Layout.fillWidth: true
+                    Layout.alignment: Qt.AlignHCenter
                     spacing: Tokens.spacing.small
 
                     RowLayout {
@@ -145,9 +69,7 @@ Item {
                             label: qsTr("H")
                             max: 23
                             value: root.timerHours
-                            onValueModified: v => {
-                                root.timerHours = v;
-                            }
+                            onValueModified: v => root.timerHours = v
                         }
 
                         StyledText {
@@ -162,9 +84,7 @@ Item {
                             label: qsTr("M")
                             max: 59
                             value: root.timerMinutes
-                            onValueModified: v => {
-                                root.timerMinutes = v;
-                            }
+                            onValueModified: v => root.timerMinutes = v
                         }
 
                         StyledText {
@@ -179,16 +99,12 @@ Item {
                             label: qsTr("S")
                             max: 59
                             value: root.timerSeconds
-                            onValueModified: v => {
-                                root.timerSeconds = v;
-                            }
+                            onValueModified: v => root.timerSeconds = v
                         }
                     }
 
                     IconTextButton {
                         Layout.fillWidth: true
-                        Layout.topMargin: Tokens.spacing.small
-                        Layout.alignment: Qt.AlignHCenter
                         inactiveColour: Colours.palette.m3primaryContainer
                         inactiveOnColour: Colours.palette.m3onPrimaryContainer
                         verticalPadding: Tokens.padding.small
@@ -198,15 +114,13 @@ Item {
                     }
                 }
 
-                // Active: running/paused
                 ColumnLayout {
                     visible: TimerService.active && !TimerService.timerDone
-                    Layout.fillWidth: true
+                    Layout.alignment: Qt.AlignHCenter
                     spacing: Tokens.spacing.small
 
                     StyledText {
                         Layout.alignment: Qt.AlignHCenter
-                        Layout.topMargin: Tokens.padding.small
                         text: TimerService.remainingFormatted
                         font.pointSize: Tokens.font.size.extraLarge
                         font.family: Tokens.font.family.mono
@@ -216,7 +130,6 @@ Item {
 
                     Item {
                         Layout.fillWidth: true
-                        Layout.alignment: Qt.AlignHCenter
                         implicitHeight: 4
 
                         StyledRect {
@@ -231,17 +144,12 @@ Item {
                             height: parent.height
                             radius: 2
                             color: Colours.palette.m3primary
-
-                            Behavior on width {
-                                Anim {}
-                            }
+                            Behavior on width { Anim {} }
                         }
                     }
 
                     RowLayout {
                         Layout.fillWidth: true
-                        Layout.alignment: Qt.AlignHCenter
-                        Layout.topMargin: Tokens.spacing.small
                         spacing: Tokens.spacing.small
 
                         IconTextButton {
@@ -251,12 +159,7 @@ Item {
                             verticalPadding: Tokens.padding.small
                             text: TimerService.running ? qsTr("Pause") : qsTr("Resume")
                             icon: TimerService.running ? "pause" : "play_arrow"
-                            onClicked: {
-                                if (TimerService.running)
-                                    TimerService.pause();
-                                else
-                                    TimerService.resume();
-                            }
+                            onClicked: TimerService.running ? TimerService.pause() : TimerService.resume()
                         }
 
                         IconTextButton {
@@ -270,15 +173,18 @@ Item {
                     }
                 }
             }
+        }
 
-            // --- Alarm tab ---
+        // Tab 1: Alarm
+        Item {
             ColumnLayout {
+                anchors.centerIn: parent
+                width: parent.width
                 spacing: Tokens.spacing.small
 
-                // Active alarm indicator
                 ColumnLayout {
                     visible: AlarmService.active
-                    Layout.fillWidth: true
+                    Layout.alignment: Qt.AlignHCenter
                     spacing: Tokens.spacing.small
 
                     StyledText {
@@ -292,7 +198,6 @@ Item {
 
                     IconTextButton {
                         Layout.fillWidth: true
-                        Layout.alignment: Qt.AlignHCenter
                         inactiveColour: Colours.palette.m3errorContainer
                         inactiveOnColour: Colours.palette.m3onErrorContainer
                         verticalPadding: Tokens.padding.small
@@ -302,10 +207,9 @@ Item {
                     }
                 }
 
-                // Set alarm
                 ColumnLayout {
                     visible: !AlarmService.active
-                    Layout.fillWidth: true
+                    Layout.alignment: Qt.AlignHCenter
                     spacing: Tokens.spacing.small
 
                     RowLayout {
@@ -316,9 +220,7 @@ Item {
                             label: qsTr("H")
                             max: 23
                             value: root.alarmHours
-                            onValueModified: v => {
-                                root.alarmHours = v;
-                            }
+                            onValueModified: v => root.alarmHours = v
                         }
 
                         StyledText {
@@ -333,16 +235,12 @@ Item {
                             label: qsTr("M")
                             max: 59
                             value: root.alarmMinutes
-                            onValueModified: v => {
-                                root.alarmMinutes = v;
-                            }
+                            onValueModified: v => root.alarmMinutes = v
                         }
                     }
 
                     IconTextButton {
                         Layout.fillWidth: true
-                        Layout.topMargin: Tokens.spacing.small
-                        Layout.alignment: Qt.AlignHCenter
                         inactiveColour: Colours.palette.m3primaryContainer
                         inactiveOnColour: Colours.palette.m3onPrimaryContainer
                         verticalPadding: Tokens.padding.small
@@ -351,6 +249,15 @@ Item {
                         onClicked: AlarmService.setAlarm(root.alarmHours, root.alarmMinutes)
                     }
                 }
+            }
+        }
+
+        // Tab 2: Reminder - embedded calendar
+        Item {
+            clip: true
+            Calendar {
+                anchors.fill: parent
+                dashState: root.dashState
             }
         }
     }
@@ -384,7 +291,7 @@ Item {
             color: "transparent"
             radius: Tokens.rounding.small
             implicitWidth: numBox.implicitWidth
-            implicitHeight: arrowIcon.implicitHeight + Tokens.padding.small * 2
+            implicitHeight: upArrow.implicitHeight + Tokens.padding.small * 2
 
             StateLayer {
                 radius: parent.radius
@@ -398,7 +305,7 @@ Item {
             }
 
             MaterialIcon {
-                id: arrowIcon
+                id: upArrow
                 anchors.centerIn: parent
                 text: "keyboard_arrow_up"
                 color: Colours.palette.m3onSurfaceVariant
@@ -411,11 +318,11 @@ Item {
             Layout.alignment: Qt.AlignHCenter
             color: Colours.tPalette.m3surfaceContainerHigh
             radius: Tokens.rounding.small
-            implicitWidth: numText.implicitWidth + Tokens.padding.normal * 2
-            implicitHeight: numText.implicitHeight + Tokens.padding.small * 2
+            implicitWidth: numSizer.implicitWidth + Tokens.padding.normal * 2
+            implicitHeight: numSizer.implicitHeight + Tokens.padding.small * 2
 
             StyledText {
-                id: numText
+                id: numSizer
                 visible: false
                 text: "00"
                 font.pointSize: Tokens.font.size.larger
@@ -425,7 +332,7 @@ Item {
             TextInput {
                 id: numInput
                 anchors.centerIn: parent
-                width: numText.implicitWidth
+                width: numSizer.implicitWidth
 
                 Component.onCompleted: text = String(spinGroup.value).padStart(2, "0")
                 font.pointSize: Tokens.font.size.larger
@@ -464,7 +371,7 @@ Item {
             color: "transparent"
             radius: Tokens.rounding.small
             implicitWidth: numBox.implicitWidth
-            implicitHeight: arrowIcon.implicitHeight + Tokens.padding.small * 2
+            implicitHeight: upArrow.implicitHeight + Tokens.padding.small * 2
 
             StateLayer {
                 radius: parent.radius

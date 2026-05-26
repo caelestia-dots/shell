@@ -69,7 +69,7 @@ StyledRect {
         }
 
         Loader {
-            active: TimerService.active && !(Config.bar.status.showTimer ?? false)
+            active: TimerService.active && (Config.bar.clock.timer?.enabled ?? true)
             visible: active
             anchors.horizontalCenter: parent.horizontalCenter
 

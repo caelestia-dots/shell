@@ -15,7 +15,6 @@ StyledRect {
 
     property color colour: Colours.palette.m3secondary
     readonly property alias items: iconColumn
-    readonly property alias timerItem: timerLoader
 
     color: Colours.tPalette.m3surfaceContainer
     radius: Tokens.rounding.full
@@ -33,59 +32,6 @@ StyledRect {
         anchors.bottomMargin: Tokens.padding.normal
 
         spacing: Tokens.spacing.smaller / 2
-
-        // Timer status icon
-        WrappedLoader {
-            id: timerLoader
-            name: "timer"
-            active: Config.bar.status.showTimer
-
-            sourceComponent: Item {
-                implicitWidth: Tokens.sizes.bar.innerWidth
-                implicitHeight: TimerService.active ? timerText.implicitHeight : timerIcon.implicitHeight
-
-                MaterialIcon {
-                    id: timerIcon
-                    anchors.horizontalCenter: parent.horizontalCenter
-                    anchors.verticalCenter: parent.verticalCenter
-                    text: "timer"
-                    color: root.colour
-                    opacity: TimerService.active ? 0 : 1
-
-                    Behavior on opacity {
-                        Anim {}
-                    }
-                }
-
-                StyledText {
-                    id: timerText
-                    anchors.horizontalCenter: parent.horizontalCenter
-                    anchors.verticalCenter: parent.verticalCenter
-                    text: {
-                        const s = TimerService.remainingSeconds;
-                        const h = Math.floor(s / 3600);
-                        const m = Math.floor((s % 3600) / 60);
-                        const sec = s % 60;
-                        if (h > 0)
-                            return h + "\n" + String(m).padStart(2, "0") + "\n" + String(sec).padStart(2, "0");
-                        return String(m).padStart(2, "0") + "\n" + String(sec).padStart(2, "0");
-                    }
-                    font.pointSize: Tokens.font.size.smaller
-                    font.family: Tokens.font.family.mono
-                    color: TimerService.running ? root.colour : Qt.alpha(root.colour, 0.5)
-                    horizontalAlignment: Text.AlignHCenter
-                    opacity: TimerService.active ? 1 : 0
-
-                    Behavior on opacity {
-                        Anim {}
-                    }
-                }
-
-                Behavior on implicitHeight {
-                    Anim {}
-                }
-            }
-        }
 
         // Lock keys status
         WrappedLoader {

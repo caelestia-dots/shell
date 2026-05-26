@@ -104,7 +104,6 @@ class BarStatus : public ConfigObject {
     CONFIG_PROPERTY(bool, showBluetooth, true)
     CONFIG_PROPERTY(bool, showBattery, true)
     CONFIG_PROPERTY(bool, showLockStatus, true)
-    CONFIG_PROPERTY(bool, showTimer, false)
 
 public:
     explicit BarStatus(QObject* parent = nullptr)
@@ -117,6 +116,7 @@ class BarTimerConfig : public ConfigObject {
 
     CONFIG_PROPERTY(bool, enabled, true)
     CONFIG_GLOBAL_PROPERTY(QString, soundFile, u"/etc/xdg/quickshell/caelestia/assets/timer-done.wav"_s)
+    CONFIG_GLOBAL_PROPERTY(int, reminderLeadMinutes, 15)
 
 public:
     explicit BarTimerConfig(QObject* parent = nullptr)
