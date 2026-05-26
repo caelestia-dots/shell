@@ -1,5 +1,9 @@
 <h1 align=center>caelestia-shell</h1>
 
+> [!NOTE]
+> This is a fork adding a timer and alarm panel to the dashboard (`feat/timer-v3` branch).
+> The PR to upstream will be rebased after caelestia 2.0 is released.
+
 <div align=center>
 
 ![GitHub last commit](https://img.shields.io/github/last-commit/caelestia-dots/shell?style=for-the-badge&labelColor=101418&color=9ccbfb)
