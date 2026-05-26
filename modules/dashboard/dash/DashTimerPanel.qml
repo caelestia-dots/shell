@@ -70,145 +70,113 @@ Item {
                 width: parent.width - Tokens.sizes.dashboard.dateTimeWidth - Tokens.spacing.normal
                 spacing: Tokens.spacing.small
 
-                ColumnLayout {
-                    visible: TimerService.timerDone
+                RowLayout {
                     Layout.alignment: Qt.AlignHCenter
                     spacing: Tokens.spacing.small
+
+                    SpinGroup {
+                        readOnly: TimerService.active
+                        max: 23
+                        value: TimerService.active
+                            ? Math.floor(TimerService.remainingSeconds / 3600)
+                            : root.timerHours
+                        onValueModified: v => root.timerHours = v
+                    }
 
                     StyledText {
-                        Layout.alignment: Qt.AlignHCenter
-                        text: qsTr("Your time is up!")
-                        font.pointSize: Tokens.font.size.large
-                        font.weight: 600
-                        color: Colours.palette.m3onSurface
-                    }
-
-                    IconTextButton {
-                        Layout.fillWidth: true
-                        inactiveColour: Colours.palette.m3primaryContainer
-                        inactiveOnColour: Colours.palette.m3onPrimaryContainer
-                        verticalPadding: Tokens.padding.small
-                        text: qsTr("Dismiss")
-                        icon: "close"
-                        onClicked: TimerService.timerDone = false
-                    }
-                }
-
-                ColumnLayout {
-                    visible: !TimerService.active && !TimerService.timerDone
-                    Layout.alignment: Qt.AlignHCenter
-                    spacing: Tokens.spacing.small
-
-                    RowLayout {
-                        Layout.alignment: Qt.AlignHCenter
-                        spacing: Tokens.spacing.small
-
-                        SpinGroup {
-                            label: qsTr("H")
-                            max: 23
-                            value: root.timerHours
-                            onValueModified: v => root.timerHours = v
-                        }
-
-                        StyledText {
-                            Layout.alignment: Qt.AlignVCenter
-                            text: ":"
-                            font.pointSize: Tokens.font.size.larger
-                            font.family: Tokens.font.family.mono
-                            color: Colours.palette.m3onSurfaceVariant
-                        }
-
-                        SpinGroup {
-                            label: qsTr("M")
-                            max: 59
-                            value: root.timerMinutes
-                            onValueModified: v => root.timerMinutes = v
-                        }
-
-                        StyledText {
-                            Layout.alignment: Qt.AlignVCenter
-                            text: ":"
-                            font.pointSize: Tokens.font.size.larger
-                            font.family: Tokens.font.family.mono
-                            color: Colours.palette.m3onSurfaceVariant
-                        }
-
-                        SpinGroup {
-                            label: qsTr("S")
-                            max: 59
-                            value: root.timerSeconds
-                            onValueModified: v => root.timerSeconds = v
-                        }
-                    }
-
-                    IconTextButton {
-                        Layout.fillWidth: true
-                        inactiveColour: Colours.palette.m3primaryContainer
-                        inactiveOnColour: Colours.palette.m3onPrimaryContainer
-                        verticalPadding: Tokens.padding.small
-                        text: qsTr("Start")
-                        icon: "play_arrow"
-                        onClicked: TimerService.start(root.timerHours, root.timerMinutes, root.timerSeconds)
-                    }
-                }
-
-                ColumnLayout {
-                    visible: TimerService.active && !TimerService.timerDone
-                    Layout.alignment: Qt.AlignHCenter
-                    spacing: Tokens.spacing.small
-
-                    StyledText {
-                        Layout.alignment: Qt.AlignHCenter
-                        text: TimerService.remainingFormatted
-                        font.pointSize: Tokens.font.size.extraLarge
+                        Layout.alignment: Qt.AlignVCenter
+                        text: ":"
+                        font.pointSize: Tokens.font.size.larger
                         font.family: Tokens.font.family.mono
-                        font.weight: 500
-                        horizontalAlignment: Text.AlignHCenter
+                        color: Colours.palette.m3onSurfaceVariant
                     }
 
-                    Item {
-                        Layout.fillWidth: true
-                        implicitHeight: 4
-
-                        StyledRect {
-                            width: parent.width
-                            height: parent.height
-                            radius: 2
-                            color: Colours.tPalette.m3surfaceContainerHigh
-                        }
-
-                        StyledRect {
-                            width: Math.max(radius * 2, TimerService.progress * parent.width)
-                            height: parent.height
-                            radius: 2
-                            color: Colours.palette.m3primary
-                            Behavior on width { Anim {} }
-                        }
+                    SpinGroup {
+                        readOnly: TimerService.active
+                        max: 59
+                        value: TimerService.active
+                            ? Math.floor((TimerService.remainingSeconds % 3600) / 60)
+                            : root.timerMinutes
+                        onValueModified: v => root.timerMinutes = v
                     }
 
-                    RowLayout {
-                        Layout.fillWidth: true
-                        spacing: Tokens.spacing.small
-
-                        IconTextButton {
-                            Layout.fillWidth: true
-                            inactiveColour: Colours.palette.m3secondaryContainer
-                            inactiveOnColour: Colours.palette.m3onSecondaryContainer
-                            verticalPadding: Tokens.padding.small
-                            text: TimerService.running ? qsTr("Pause") : qsTr("Resume")
-                            icon: TimerService.running ? "pause" : "play_arrow"
-                            onClicked: TimerService.running ? TimerService.pause() : TimerService.resume()
-                        }
-
-                        IconTextButton {
-                            inactiveColour: Colours.palette.m3errorContainer
-                            inactiveOnColour: Colours.palette.m3onErrorContainer
-                            verticalPadding: Tokens.padding.small
-                            text: qsTr("Cancel")
-                            icon: "close"
-                            onClicked: TimerService.cancel()
-                        }
+                    StyledText {
+                        Layout.alignment: Qt.AlignVCenter
+                        text: ":"
+                        font.pointSize: Tokens.font.size.larger
+                        font.family: Tokens.font.family.mono
+                        color: Colours.palette.m3onSurfaceVariant
                     }
+
+                    SpinGroup {
+                        readOnly: TimerService.active
+                        max: 59
+                        value: TimerService.active
+                            ? (TimerService.remainingSeconds % 60)
+                            : root.timerSeconds
+                        onValueModified: v => root.timerSeconds = v
+                    }
+                }
+
+                Item {
+                    Layout.fillWidth: true
+                    implicitHeight: 4
+                    opacity: TimerService.active ? 1 : 0
+                    Behavior on opacity { Anim {} }
+
+                    StyledRect {
+                        width: parent.width
+                        height: parent.height
+                        radius: 2
+                        color: Colours.tPalette.m3surfaceContainerHigh
+                    }
+
+                    StyledRect {
+                        width: Math.max(radius * 2, TimerService.progress * parent.width)
+                        height: parent.height
+                        radius: 2
+                        color: Colours.palette.m3primary
+                        Behavior on width { Anim {} }
+                    }
+                }
+            }
+
+            ActionBtn {
+                visible: !TimerService.active
+                x: (parent.width - tabCol.width - width) / 2
+                width: parent.width - Tokens.sizes.dashboard.dateTimeWidth - Tokens.spacing.normal
+                anchors.bottom: parent.bottom
+                anchors.bottomMargin: Tokens.padding.normal
+                inactiveColour: Colours.palette.m3primaryContainer
+                inactiveOnColour: Colours.palette.m3onPrimaryContainer
+                text: qsTr("Start")
+                icon: "play_arrow"
+                onClicked: TimerService.start(root.timerHours, root.timerMinutes, root.timerSeconds)
+            }
+
+            RowLayout {
+                visible: TimerService.active
+                x: (parent.width - tabCol.width - width) / 2
+                width: parent.width - Tokens.sizes.dashboard.dateTimeWidth - Tokens.spacing.normal
+                anchors.bottom: parent.bottom
+                anchors.bottomMargin: Tokens.padding.normal
+                spacing: Tokens.spacing.small
+
+                ActionBtn {
+                    Layout.fillWidth: true
+                    inactiveColour: Colours.palette.m3secondaryContainer
+                    inactiveOnColour: Colours.palette.m3onSecondaryContainer
+                    text: TimerService.running ? qsTr("Pause") : qsTr("Resume")
+                    icon: TimerService.running ? "pause" : "play_arrow"
+                    onClicked: TimerService.running ? TimerService.pause() : TimerService.resume()
+                }
+
+                ActionBtn {
+                    inactiveColour: Colours.palette.m3errorContainer
+                    inactiveOnColour: Colours.palette.m3onErrorContainer
+                    text: qsTr("Cancel")
+                    icon: "close"
+                    onClicked: TimerService.cancel()
                 }
             }
         }
@@ -228,73 +196,58 @@ Item {
                 width: parent.width - Tokens.sizes.dashboard.dateTimeWidth - Tokens.spacing.normal
                 spacing: Tokens.spacing.small
 
-                ColumnLayout {
-                    visible: AlarmService.active
+                RowLayout {
                     Layout.alignment: Qt.AlignHCenter
                     spacing: Tokens.spacing.small
+
+                    SpinGroup {
+                        readOnly: AlarmService.active
+                        max: 23
+                        value: AlarmService.active ? AlarmService.alarmHour : root.alarmHours
+                        onValueModified: v => root.alarmHours = v
+                    }
 
                     StyledText {
-                        Layout.alignment: Qt.AlignHCenter
-                        text: AlarmService.alarmTimeFormatted
-                        font.pointSize: Tokens.font.size.extraLarge
+                        Layout.alignment: Qt.AlignVCenter
+                        text: ":"
+                        font.pointSize: Tokens.font.size.larger
                         font.family: Tokens.font.family.mono
-                        font.weight: 500
-                        color: Colours.palette.m3primary
+                        color: Colours.palette.m3onSurfaceVariant
                     }
 
-                    IconTextButton {
-                        Layout.fillWidth: true
-                        inactiveColour: Colours.palette.m3errorContainer
-                        inactiveOnColour: Colours.palette.m3onErrorContainer
-                        verticalPadding: Tokens.padding.small
-                        text: qsTr("Cancel alarm")
-                        icon: "close"
-                        onClicked: AlarmService.cancelAlarm()
+                    SpinGroup {
+                        readOnly: AlarmService.active
+                        max: 59
+                        value: AlarmService.active ? AlarmService.alarmMinute : root.alarmMinutes
+                        onValueModified: v => root.alarmMinutes = v
                     }
                 }
+            }
 
-                ColumnLayout {
-                    visible: !AlarmService.active
-                    Layout.alignment: Qt.AlignHCenter
-                    spacing: Tokens.spacing.small
+            ActionBtn {
+                visible: !AlarmService.active
+                x: (parent.width - tabCol.width - width) / 2
+                width: parent.width - Tokens.sizes.dashboard.dateTimeWidth - Tokens.spacing.normal
+                anchors.bottom: parent.bottom
+                anchors.bottomMargin: Tokens.padding.normal
+                inactiveColour: Colours.palette.m3primaryContainer
+                inactiveOnColour: Colours.palette.m3onPrimaryContainer
+                text: qsTr("Set alarm")
+                icon: "alarm"
+                onClicked: AlarmService.setAlarm(root.alarmHours, root.alarmMinutes)
+            }
 
-                    RowLayout {
-                        Layout.alignment: Qt.AlignHCenter
-                        spacing: Tokens.spacing.small
-
-                        SpinGroup {
-                            label: qsTr("H")
-                            max: 23
-                            value: root.alarmHours
-                            onValueModified: v => root.alarmHours = v
-                        }
-
-                        StyledText {
-                            Layout.alignment: Qt.AlignVCenter
-                            text: ":"
-                            font.pointSize: Tokens.font.size.larger
-                            font.family: Tokens.font.family.mono
-                            color: Colours.palette.m3onSurfaceVariant
-                        }
-
-                        SpinGroup {
-                            label: qsTr("M")
-                            max: 59
-                            value: root.alarmMinutes
-                            onValueModified: v => root.alarmMinutes = v
-                        }
-                    }
-
-                    IconTextButton {
-                        Layout.fillWidth: true
-                        inactiveColour: Colours.palette.m3primaryContainer
-                        inactiveOnColour: Colours.palette.m3onPrimaryContainer
-                        verticalPadding: Tokens.padding.small
-                        text: qsTr("Set alarm")
-                        icon: "alarm"
-                        onClicked: AlarmService.setAlarm(root.alarmHours, root.alarmMinutes)
-                    }
-                }
+            ActionBtn {
+                visible: AlarmService.active
+                x: (parent.width - tabCol.width - width) / 2
+                width: parent.width - Tokens.sizes.dashboard.dateTimeWidth - Tokens.spacing.normal
+                anchors.bottom: parent.bottom
+                anchors.bottomMargin: Tokens.padding.normal
+                inactiveColour: Colours.palette.m3errorContainer
+                inactiveOnColour: Colours.palette.m3onErrorContainer
+                text: qsTr("Cancel alarm")
+                icon: "close"
+                onClicked: AlarmService.cancelAlarm()
             }
         }
 
@@ -395,134 +348,124 @@ Item {
         }
     }
 
-    component SpinGroup: ColumnLayout {
+    component SpinGroup: StyledRect {
         id: spinGroup
 
         property int value: 0
         property int min: 0
         property int max: 99
-        property string label: ""
+        property bool readOnly: false
 
         signal valueModified(int v)
 
         onValueChanged: {
-            if (!numInput.activeFocus)
+            if (!readOnly && !numInput.activeFocus)
                 numInput.text = String(value).padStart(2, "0");
         }
 
-        spacing: 2
+        color: readOnly ? "transparent" : Colours.tPalette.m3surfaceContainerHigh
+        radius: Tokens.rounding.normal
+        implicitWidth: numSizer.implicitWidth + Tokens.padding.large * 2
+        implicitHeight: numSizer.implicitHeight + Tokens.padding.large * 2
+
+        Behavior on color { ColorAnimation { duration: 150 } }
 
         StyledText {
-            Layout.alignment: Qt.AlignHCenter
-            text: spinGroup.label
-            font.pointSize: Tokens.font.size.small
-            color: Colours.palette.m3onSurfaceVariant
+            id: numSizer
+            visible: false
+            text: "00"
+            font.pointSize: Tokens.font.size.extraLarge
+            font.family: Tokens.font.family.mono
         }
 
-        StyledRect {
-            Layout.alignment: Qt.AlignHCenter
-            color: "transparent"
-            radius: Tokens.rounding.small
-            implicitWidth: numBox.implicitWidth
-            implicitHeight: upArrow.implicitHeight + Tokens.padding.small * 2
-
-            StateLayer {
-                radius: parent.radius
-                color: Colours.palette.m3onSurface
-                onClicked: {
-                    const v = Math.min(spinGroup.max, spinGroup.value + 1);
-                    spinGroup.value = v;
-                    spinGroup.valueModified(v);
-                    numInput.text = String(v).padStart(2, "0");
+        MouseArea {
+            id: spinMouse
+            anchors.fill: parent
+            enabled: !spinGroup.readOnly
+            hoverEnabled: true
+            cursorShape: Qt.SizeVerCursor
+            onClicked: numInput.forceActiveFocus()
+            onWheel: wheel => {
+                if (wheel.angleDelta.y > 0) {
+                    spinGroup.valueModified(Math.min(spinGroup.max, spinGroup.value + 1));
+                } else if (wheel.angleDelta.y < 0) {
+                    spinGroup.valueModified(Math.max(spinGroup.min, spinGroup.value - 1));
                 }
-            }
-
-            MaterialIcon {
-                id: upArrow
-                anchors.centerIn: parent
-                text: "keyboard_arrow_up"
-                color: Colours.palette.m3onSurfaceVariant
-                font.pointSize: Tokens.font.size.normal
+                wheel.accepted = true;
             }
         }
 
-        StyledRect {
-            id: numBox
-            Layout.alignment: Qt.AlignHCenter
-            color: Colours.tPalette.m3surfaceContainerHigh
-            radius: Tokens.rounding.small
-            implicitWidth: numSizer.implicitWidth + Tokens.padding.normal * 2
-            implicitHeight: numSizer.implicitHeight + Tokens.padding.small * 2
+        Rectangle {
+            anchors.fill: parent
+            radius: spinGroup.radius
+            color: Colours.palette.m3onSurface
+            opacity: !spinGroup.readOnly && spinMouse.containsMouse ? 0.08 : 0
+            Behavior on opacity { NumberAnimation { duration: 150 } }
+        }
 
-            StyledText {
-                id: numSizer
-                visible: false
-                text: "00"
-                font.pointSize: Tokens.font.size.larger
-                font.family: Tokens.font.family.mono
+        TextInput {
+            id: numInput
+            anchors.centerIn: parent
+            width: numSizer.implicitWidth
+            visible: !spinGroup.readOnly
+
+            Component.onCompleted: text = String(spinGroup.value).padStart(2, "0")
+            font.pointSize: Tokens.font.size.extraLarge
+            font.family: Tokens.font.family.mono
+            color: Colours.palette.m3onSurface
+            selectionColor: Colours.palette.m3primary
+            selectedTextColor: Colours.palette.m3onPrimary
+            horizontalAlignment: TextInput.AlignHCenter
+            inputMethodHints: Qt.ImhDigitsOnly
+            maximumLength: 2
+            selectByMouse: true
+
+            function commit(): void {
+                const v = Math.min(spinGroup.max, Math.max(spinGroup.min, parseInt(text) || 0));
+                spinGroup.valueModified(v);
+                text = String(v).padStart(2, "0");
             }
 
-            TextInput {
-                id: numInput
-                anchors.centerIn: parent
-                width: numSizer.implicitWidth
-
-                Component.onCompleted: text = String(spinGroup.value).padStart(2, "0")
-                font.pointSize: Tokens.font.size.larger
-                font.family: Tokens.font.family.mono
-                color: Colours.palette.m3onSurface
-                selectionColor: Colours.palette.m3primary
-                selectedTextColor: Colours.palette.m3onPrimary
-                horizontalAlignment: TextInput.AlignHCenter
-                inputMethodHints: Qt.ImhDigitsOnly
-                maximumLength: 2
-                selectByMouse: true
-
-                function commit(): void {
-                    const v = Math.min(spinGroup.max, Math.max(spinGroup.min, parseInt(text) || 0));
-                    spinGroup.value = v;
-                    spinGroup.valueModified(v);
-                    text = String(v).padStart(2, "0");
-                }
-
-                onEditingFinished: commit()
-                onActiveFocusChanged: {
-                    if (activeFocus)
-                        selectAll();
-                    else
-                        commit();
-                }
-                Keys.onEscapePressed: {
-                    text = String(spinGroup.value).padStart(2, "0");
-                    focus = false;
-                }
+            onTextEdited: {
+                const v = Math.min(spinGroup.max, Math.max(spinGroup.min, parseInt(text) || 0));
+                spinGroup.valueModified(v);
+            }
+            onEditingFinished: commit()
+            onActiveFocusChanged: {
+                if (activeFocus)
+                    selectAll();
+                else
+                    commit();
+            }
+            Keys.onEscapePressed: {
+                text = String(spinGroup.value).padStart(2, "0");
+                focus = false;
             }
         }
 
-        StyledRect {
-            Layout.alignment: Qt.AlignHCenter
-            color: "transparent"
-            radius: Tokens.rounding.small
-            implicitWidth: numBox.implicitWidth
-            implicitHeight: upArrow.implicitHeight + Tokens.padding.small * 2
+        StyledText {
+            anchors.centerIn: parent
+            visible: spinGroup.readOnly
+            text: String(spinGroup.value).padStart(2, "0")
+            font.pointSize: Tokens.font.size.extraLarge
+            font.family: Tokens.font.family.mono
+            color: Colours.palette.m3onSurface
+            horizontalAlignment: Text.AlignHCenter
+        }
+    }
 
-            StateLayer {
-                radius: parent.radius
-                color: Colours.palette.m3onSurface
-                onClicked: {
-                    const v = Math.max(spinGroup.min, spinGroup.value - 1);
-                    spinGroup.value = v;
-                    spinGroup.valueModified(v);
-                    numInput.text = String(v).padStart(2, "0");
-                }
-            }
+    component ActionBtn: IconTextButton {
+        verticalPadding: Tokens.padding.small
+        radius: stateLayer.pressed
+            ? Tokens.rounding.small / 2
+            : implicitHeight / 2 * Math.min(1, Tokens.rounding.scale)
+        scale: stateLayer.pressed ? 1.06 : 1.0
 
-            MaterialIcon {
-                anchors.centerIn: parent
-                text: "keyboard_arrow_down"
-                color: Colours.palette.m3onSurfaceVariant
-                font.pointSize: Tokens.font.size.normal
-            }
+        Behavior on radius {
+            Anim { type: Anim.FastSpatial }
+        }
+        Behavior on scale {
+            Anim { type: Anim.FastSpatial }
         }
     }
 }
