@@ -20,6 +20,41 @@ Item {
     property int alarmHours: AlarmService.alarmHour
     property int alarmMinutes: AlarmService.alarmMinute
 
+    // Tab column: square buttons (width = each button's height = total height / 3)
+    ColumnLayout {
+        id: tabCol
+        anchors.top: parent.top
+        anchors.bottom: parent.bottom
+        anchors.right: parent.right
+        width: height / 3
+        spacing: 0
+        z: 1
+
+        TabBtn {
+            btnIcon: "timer"
+            btnText: qsTr("Timer")
+            btnActive: root.dashState.timerPanelTab === 0
+            topRightR: Tokens.rounding.normal
+            onClicked: root.dashState.timerPanelTab = 0
+        }
+
+        TabBtn {
+            btnIcon: "alarm"
+            btnText: qsTr("Alarm")
+            btnActive: root.dashState.timerPanelTab === 1
+            onClicked: root.dashState.timerPanelTab = 1
+        }
+
+        TabBtn {
+            btnIcon: "calendar_month"
+            btnText: qsTr("Reminder")
+            btnActive: root.dashState.timerPanelTab === 2
+            bottomRightR: Tokens.rounding.normal
+            onClicked: root.dashState.timerPanelTab = 2
+        }
+    }
+
+    // Content centered between left edge and start of tab column
     StackLayout {
         anchors.fill: parent
         anchors.margins: Tokens.padding.normal
@@ -28,8 +63,9 @@ Item {
         // Tab 0: Timer
         Item {
             ColumnLayout {
-                anchors.centerIn: parent
-                width: parent.width
+                anchors.verticalCenter: parent.verticalCenter
+                x: (parent.width - tabCol.width - width) / 2
+                width: parent.width - Tokens.sizes.dashboard.dateTimeWidth - Tokens.spacing.normal
                 spacing: Tokens.spacing.small
 
                 ColumnLayout {
@@ -178,8 +214,9 @@ Item {
         // Tab 1: Alarm
         Item {
             ColumnLayout {
-                anchors.centerIn: parent
-                width: parent.width
+                anchors.verticalCenter: parent.verticalCenter
+                x: (parent.width - tabCol.width - width) / 2
+                width: parent.width - Tokens.sizes.dashboard.dateTimeWidth - Tokens.spacing.normal
                 spacing: Tokens.spacing.small
 
                 ColumnLayout {
@@ -252,12 +289,70 @@ Item {
             }
         }
 
-        // Tab 2: Reminder - embedded calendar
+        // Tab 2: Calendar centered with limited width
         Item {
             clip: true
-            Calendar {
-                anchors.fill: parent
-                dashState: root.dashState
+            Item {
+                anchors.verticalCenter: parent.verticalCenter
+                x: (parent.width - tabCol.width - width) / 2
+                width: parent.width - Tokens.sizes.dashboard.dateTimeWidth - Tokens.spacing.normal
+                height: parent.height
+
+                Calendar {
+                    anchors.fill: parent
+                    dashState: root.dashState
+                }
+            }
+        }
+    }
+
+    component TabBtn: StyledRect {
+        id: btn
+
+        property bool btnActive: false
+        property string btnIcon: ""
+        property string btnText: ""
+        property real topRightR: 0
+        property real bottomRightR: 0
+
+        signal clicked()
+
+        Layout.fillHeight: true
+        Layout.fillWidth: true
+
+        radius: 0
+        topRightRadius: topRightR
+        bottomRightRadius: bottomRightR
+
+        color: btnActive
+            ? Colours.palette.m3primaryContainer
+            : Colours.tPalette.m3surfaceContainerHigh
+
+        StateLayer {
+            anchors.fill: parent
+            onClicked: btn.clicked()
+        }
+
+        ColumnLayout {
+            anchors.centerIn: parent
+            spacing: Tokens.spacing.smaller
+
+            MaterialIcon {
+                Layout.alignment: Qt.AlignHCenter
+                text: btn.btnIcon
+                font.pointSize: Tokens.font.size.normal
+                color: btn.btnActive
+                    ? Colours.palette.m3onPrimaryContainer
+                    : Colours.palette.m3onSurfaceVariant
+            }
+
+            StyledText {
+                Layout.alignment: Qt.AlignHCenter
+                text: btn.btnText
+                font.pointSize: Tokens.font.size.small
+                color: btn.btnActive
+                    ? Colours.palette.m3onPrimaryContainer
+                    : Colours.palette.m3onSurfaceVariant
             }
         }
     }

@@ -15,68 +15,21 @@ Item {
 
     required property DashboardState dashState
 
-    // Vertical tabs above the clock - only when timer panel is open
-    ColumnLayout {
-        anchors.top: parent.top
-        anchors.topMargin: Tokens.padding.normal
-        anchors.left: parent.left
-        anchors.right: parent.right
-        spacing: Tokens.spacing.smaller
-        visible: root.dashState.timerPanelOpen
-
-        component TabChip: StyledRect {
-            id: chip
-
-            property bool chipActive: false
-            property string chipText: ""
-            signal clicked()
-
-            Layout.alignment: Qt.AlignHCenter
-            implicitWidth: chipLabel.implicitWidth + Tokens.padding.small * 4
-            implicitHeight: chipLabel.implicitHeight + Tokens.padding.small
-
-            color: chipActive ? Colours.palette.m3primaryContainer : Colours.tPalette.m3surfaceContainerHigh
-            radius: Tokens.rounding.full
-
-            StateLayer {
-                radius: parent.radius
-                onClicked: chip.clicked()
-            }
-
-            StyledText {
-                id: chipLabel
-                anchors.centerIn: parent
-                text: chip.chipText
-                font.pointSize: Tokens.font.size.small
-                color: chip.chipActive ? Colours.palette.m3onPrimaryContainer : Colours.palette.m3onSurfaceVariant
-            }
-        }
-
-        TabChip {
-            chipText: qsTr("Timer")
-            chipActive: root.dashState.timerPanelTab === 0
-            onClicked: root.dashState.timerPanelTab = 0
-        }
-
-        TabChip {
-            chipText: qsTr("Alarm")
-            chipActive: root.dashState.timerPanelTab === 1
-            onClicked: root.dashState.timerPanelTab = 1
-        }
-
-        TabChip {
-            chipText: qsTr("Reminder")
-            chipActive: root.dashState.timerPanelTab === 2
-            onClicked: root.dashState.timerPanelTab = 2
-        }
+    // Only clickable when panel is closed - opens the timer panel
+    StateLayer {
+        anchors.fill: parent
+        radius: Tokens.rounding.normal
+        enabled: !root.dashState.timerPanelOpen
+        onClicked: root.dashState.timerPanelOpen = true
     }
 
-    // Clock centered in the block
+    // Clock - visible when panel is closed
     ColumnLayout {
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.verticalCenter: parent.verticalCenter
         spacing: 0
+        visible: !root.dashState.timerPanelOpen
 
         StyledText {
             Layout.bottomMargin: -(font.pointSize * 0.4)
@@ -123,34 +76,32 @@ Item {
         }
     }
 
-    // Button at bottom: alarm_add or arrow_back
+    // Back button at top-left - visible when panel is open
     StyledRect {
-        anchors.horizontalCenter: parent.horizontalCenter
-        anchors.bottom: parent.bottom
-        anchors.bottomMargin: Tokens.padding.large * 2
+        visible: root.dashState.timerPanelOpen
+        anchors.top: parent.top
+        anchors.left: parent.left
+        anchors.topMargin: Tokens.padding.normal
+        anchors.leftMargin: Tokens.padding.normal
         implicitWidth: implicitHeight
-        implicitHeight: actionIcon.implicitHeight + Tokens.padding.normal * 2
+        implicitHeight: backIcon.implicitHeight + Tokens.padding.small * 2
         radius: Tokens.rounding.full
-        color: "#e464d6"
+        color: Colours.tPalette.m3surfaceContainerHigh
 
         StateLayer {
             radius: parent.radius
             onClicked: {
-                if (root.dashState.timerPanelOpen) {
-                    root.dashState.timerPanelOpen = false;
-                    root.dashState.timerPanelTab = 0;
-                    root.dashState.reminderPickedDate = "";
-                } else {
-                    root.dashState.timerPanelOpen = true;
-                }
+                root.dashState.timerPanelOpen = false;
+                root.dashState.timerPanelTab = 0;
+                root.dashState.reminderPickedDate = "";
             }
         }
 
         MaterialIcon {
-            id: actionIcon
+            id: backIcon
             anchors.centerIn: parent
-            text: root.dashState.timerPanelOpen ? "arrow_back" : "alarm_add"
-            color: Colours.palette.m3onPrimary
+            text: "arrow_back"
+            color: Colours.palette.m3onSurfaceVariant
             font.pointSize: Tokens.font.size.normal
         }
     }

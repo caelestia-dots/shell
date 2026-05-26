@@ -50,33 +50,62 @@ Item {
             SmallWeather {}
         }
 
-        Rect {
-            id: dateTimeRect
+        // Clock + calendar merged zone. Clock rect expands rightward - no stacking.
+        Item {
+            id: clockCalendarZone
             Layout.row: 1
-            Layout.preferredWidth: dateTime.implicitWidth
-            Layout.fillHeight: true
-            radius: Tokens.rounding.normal
-
-            DateTime {
-                id: dateTime
-                dashState: root.dashState
-            }
-        }
-
-        Rect {
-            id: calendarRect
-            Layout.row: 1
-            Layout.column: 1
-            Layout.columnSpan: 3
+            Layout.column: 0
+            Layout.columnSpan: 4
             Layout.fillWidth: true
             Layout.preferredHeight: calendarLoader.implicitHeight
-            radius: Tokens.rounding.large
-            opacity: root.dashState.timerPanelOpen ? 0 : 1
 
-            Loader {
-                id: calendarLoader
-                anchors.fill: parent
-                sourceComponent: Calendar {
+            // Calendar background - disappears instantly when timer opens
+            StyledRect {
+                id: calBg
+                color: Colours.tPalette.m3surfaceContainer
+                radius: Tokens.rounding.large
+                x: Tokens.sizes.dashboard.dateTimeWidth + Tokens.spacing.normal
+                y: 0
+                width: parent.width - x
+                height: parent.height
+                opacity: root.dashState.timerPanelOpen ? 0 : 1
+
+                Loader {
+                    id: calendarLoader
+                    anchors.fill: parent
+                    sourceComponent: Calendar {
+                        dashState: root.dashState
+                    }
+                }
+            }
+
+            // Clock rect - single rect, expands its right edge to fill the calendar area
+            StyledRect {
+                id: clockBg
+                color: Colours.tPalette.m3surfaceContainer
+                radius: Tokens.rounding.normal
+                x: 0
+                y: 0
+                height: parent.height
+                clip: true
+
+                width: root.dashState.timerPanelOpen
+                    ? parent.width
+                    : Tokens.sizes.dashboard.dateTimeWidth
+
+                Behavior on width { Anim { type: Anim.DefaultSpatial } }
+
+                // Panel fills the full clockBg so content centers in the whole menu
+                DashTimerPanel {
+                    anchors.fill: parent
+                    visible: root.dashState.timerPanelOpen
+                    dashState: root.dashState
+                }
+
+                // DateTime on top (z:1) so the back button stays visible over the panel
+                DateTime {
+                    id: dateTime
+                    z: 1
                     dashState: root.dashState
                 }
             }
@@ -111,29 +140,6 @@ Item {
 
         component Rect: StyledRect {
             color: Colours.tPalette.m3surfaceContainer
-        }
-    }
-
-    // Overlay: expands rightward starting from the RIGHT edge of the clock block.
-    // Only covers the calendar area - clock stays fully visible.
-    StyledRect {
-        id: timerOverlay
-        color: Colours.tPalette.m3surfaceContainer
-        radius: Tokens.rounding.large
-        z: 1
-        clip: true
-
-        x: calendarRect.x
-        y: calendarRect.y
-        height: calendarRect.height
-
-        width: root.dashState.timerPanelOpen ? calendarRect.width : 0
-
-        Behavior on width { Anim { type: Anim.DefaultSpatial } }
-
-        DashTimerPanel {
-            anchors.fill: parent
-            dashState: root.dashState
         }
     }
 }
