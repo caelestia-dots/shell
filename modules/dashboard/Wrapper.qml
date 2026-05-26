@@ -29,7 +29,7 @@ Item {
         }
     }
 
-    readonly property bool fireActive: TimerService.timerDone || AlarmService.alarmFired || ReminderService.reminderFired
+    readonly property bool fireActive: TimerService.timerDone || AlarmService.alarmFired
     property bool _wasOpenBeforeFire: false
 
     onFireActiveChanged: {

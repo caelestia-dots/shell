@@ -43,16 +43,9 @@ Item {
             btnIcon: "alarm"
             btnText: qsTr("Alarm")
             btnActive: root.dashState.timerPanelTab === 1
-            onClicked: root.dashState.timerPanelTab = 1
-        }
-
-        TabBtn {
-            btnIcon: "calendar_month"
-            btnText: qsTr("Reminder")
-            btnActive: root.dashState.timerPanelTab === 2
             bottomLeftR: Tokens.rounding.normal
             bottomRightR: Tokens.rounding.normal
-            onClicked: root.dashState.timerPanelTab = 2
+            onClicked: root.dashState.timerPanelTab = 1
         }
     }
 
@@ -305,28 +298,6 @@ Item {
             }
         }
 
-        // Tab 2: Calendar centered with limited width
-        Item {
-            y: (2 - root.dashState.timerPanelTab) * parent.height
-            width: parent.width
-            height: parent.height
-            clip: true
-            Behavior on y { Anim { type: Anim.DefaultSpatial } }
-
-            BackBtn { dashState: root.dashState }
-
-            Item {
-                anchors.verticalCenter: parent.verticalCenter
-                x: (parent.width - tabCol.width - width) / 2
-                width: parent.width - Tokens.sizes.dashboard.dateTimeWidth - Tokens.spacing.normal
-                height: parent.height
-
-                Calendar {
-                    anchors.fill: parent
-                    dashState: root.dashState
-                }
-            }
-        }
     }
 
     component TabBtn: StyledRect {
@@ -412,7 +383,6 @@ Item {
             onClicked: {
                 dashState.timerPanelOpen = false;
                 dashState.timerPanelTab = 0;
-                dashState.reminderPickedDate = "";
             }
         }
 

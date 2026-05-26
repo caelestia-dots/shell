@@ -13,12 +13,9 @@ Item {
 
     required property DrawerVisibilities visibilities
 
-    readonly property bool isReminder: ReminderService.reminderFired && !TimerService.timerDone && !AlarmService.alarmFired
-
     function dismiss(): void {
         TimerService.timerDone = false;
         AlarmService.alarmFired = false;
-        ReminderService.dismissCurrent();
         root.visibilities.fireOverlay = false;
         root.visibilities.dashboard = false;
     }
@@ -41,7 +38,7 @@ Item {
 
         StyledText {
             Layout.alignment: Qt.AlignHCenter
-            text: root.isReminder ? ReminderService.currentReminderText : qsTr("Your time is up!")
+            text: qsTr("Your time is up!")
             font.pointSize: Tokens.font.size.extraLarge
             font.weight: 600
             horizontalAlignment: Text.AlignHCenter

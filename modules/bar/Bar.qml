@@ -125,13 +125,6 @@ ColumnLayout {
         }
     }
 
-    Connections {
-        target: ReminderService
-        function onFired(text: string): void {
-            root.visibilities.dashboard = true;
-        }
-    }
-
     Repeater {
         id: repeater
 
