@@ -35,6 +35,7 @@ Item {
     property bool showBluetooth: Config.bar.status.showBluetooth ?? true
     property bool showBattery: Config.bar.status.showBattery ?? true
     property bool showLockStatus: Config.bar.status.showLockStatus ?? true
+    property bool showTimer: Config.bar.status.showTimer ?? false
     property bool trayBackground: Config.bar.tray.background ?? false
     property bool trayCompact: Config.bar.tray.compact ?? false
     property bool trayRecolour: Config.bar.tray.recolour ?? false
@@ -70,6 +71,7 @@ Item {
         GlobalConfig.bar.status.showBluetooth = root.showBluetooth;
         GlobalConfig.bar.status.showBattery = root.showBattery;
         GlobalConfig.bar.status.showLockStatus = root.showLockStatus;
+        GlobalConfig.bar.status.showTimer = root.showTimer;
         GlobalConfig.bar.tray.background = root.trayBackground;
         GlobalConfig.bar.tray.compact = root.trayCompact;
         GlobalConfig.bar.tray.recolour = root.trayRecolour;
@@ -258,6 +260,14 @@ Item {
                                 propertyName: "showLockStatus",
                                 onToggled: function (checked) {
                                     root.showLockStatus = checked;
+                                    root.saveConfig();
+                                }
+                            },
+                            {
+                                label: qsTr("Timer"),
+                                propertyName: "showTimer",
+                                onToggled: function (checked) {
+                                    root.showTimer = checked;
                                     root.saveConfig();
                                 }
                             }

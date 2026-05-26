@@ -34,6 +34,9 @@ ColumnLayout {
     function checkPopout(y: real): void {
         const ch = childAt(width / 2, y) as WrappedLoader;
 
+        if (popouts.locked && ch?.id !== "clock")
+            popouts.locked = false;
+
         if (ch?.id !== "tray")
             closeTray();
 
@@ -73,6 +76,10 @@ ColumnLayout {
             popouts.currentName = id.toLowerCase();
             popouts.currentCenter = (ch.item as Item).mapToItem(root, 0, (ch.item as Item).implicitHeight / 2).y ?? 0;
             popouts.hasCurrent = true;
+        } else if (id === "clock" && (Config.bar.clock.timer?.enabled ?? true) && !(Config.bar.status.showTimer ?? false)) {
+            popouts.currentName = "timer";
+            popouts.currentCenter = ch.y + ch.height / 2;
+            popouts.hasCurrent = true;
         }
     }
 
@@ -103,6 +110,47 @@ ColumnLayout {
     }
 
     spacing: Tokens.spacing.normal
+
+    Connections {
+        target: TimerService
+
+        function onFinished(): void {
+            if (Config.bar.status.showTimer ?? false) {
+                for (let i = 0; i < repeater.count; i++) {
+                    const loader = repeater.itemAt(i) as WrappedLoader;
+                    if (loader?.enabled && loader.id === "statusIcons") {
+                        const si = loader.item as StatusIcons;
+                        const ti = si?.timerItem;
+                        if (ti) {
+                            root.popouts.currentName = "timer";
+                            root.popouts.currentCenter = Qt.binding(() => ti.mapToItem(root, 0, ti.implicitHeight / 2).y);
+                            root.popouts.hasCurrent = true;
+                            root.popouts.locked = true;
+                        }
+                        break;
+                    }
+                }
+            } else {
+                for (let i = 0; i < repeater.count; i++) {
+                    const loader = repeater.itemAt(i) as WrappedLoader;
+                    if (loader?.enabled && loader.id === "clock") {
+                        root.popouts.currentName = "timer";
+                        root.popouts.currentCenter = loader.y + loader.height / 2;
+                        root.popouts.hasCurrent = true;
+                        root.popouts.locked = true;
+                        break;
+                    }
+                }
+            }
+        }
+
+        function onTimerDoneChanged(): void {
+            if (!TimerService.timerDone) {
+                root.popouts.locked = false;
+                root.popouts.hasCurrent = false;
+            }
+        }
+    }
 
     Repeater {
         id: repeater
