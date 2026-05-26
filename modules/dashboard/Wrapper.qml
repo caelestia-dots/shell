@@ -33,9 +33,18 @@ Item {
     property bool _wasOpenBeforeFire: false
 
     onFireActiveChanged: {
-        if (fireActive && !_wasOpenBeforeFire) {
+        if (fireActive && !_wasOpenBeforeFire && !LockState.locked) {
             _wasOpenBeforeFire = visibilities.dashboard;
             visibilities.dashboard = true;
+        }
+    }
+
+    Connections {
+        target: LockState
+        function onLockedChanged(): void {
+            if (!LockState.locked && root.fireActive && !root.visibilities.dashboard) {
+                root.visibilities.dashboard = true;
+            }
         }
     }
 

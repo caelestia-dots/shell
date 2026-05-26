@@ -5,12 +5,15 @@ import Quickshell
 import Quickshell.Io
 import Quickshell.Wayland
 import qs.components.misc
+import qs.services
 
 Scope {
     property alias lock: lock
 
     WlSessionLock {
         id: lock
+
+        onLockedChanged: LockState.locked = locked
 
         signal unlock
 
