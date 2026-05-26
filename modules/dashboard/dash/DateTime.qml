@@ -76,33 +76,5 @@ Item {
         }
     }
 
-    // Back button at top-left - visible when panel is open
-    StyledRect {
-        visible: root.dashState.timerPanelOpen
-        anchors.top: parent.top
-        anchors.left: parent.left
-        anchors.topMargin: Tokens.padding.normal
-        anchors.leftMargin: Tokens.padding.normal
-        implicitWidth: implicitHeight
-        implicitHeight: backIcon.implicitHeight + Tokens.padding.small * 2
-        radius: Tokens.rounding.full
-        color: Colours.tPalette.m3surfaceContainerHigh
 
-        StateLayer {
-            radius: parent.radius
-            onClicked: {
-                root.dashState.timerPanelOpen = false;
-                root.dashState.timerPanelTab = 0;
-                root.dashState.reminderPickedDate = "";
-            }
-        }
-
-        MaterialIcon {
-            id: backIcon
-            anchors.centerIn: parent
-            text: "arrow_back"
-            color: Colours.palette.m3onSurfaceVariant
-            font.pointSize: Tokens.font.size.normal
-        }
-    }
 }

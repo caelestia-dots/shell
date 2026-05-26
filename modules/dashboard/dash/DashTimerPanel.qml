@@ -26,7 +26,7 @@ Item {
         anchors.top: parent.top
         anchors.bottom: parent.bottom
         anchors.right: parent.right
-        width: height / 3
+        width: height / 3 * 0.8
         spacing: 0
         z: 1
 
@@ -34,6 +34,7 @@ Item {
             btnIcon: "timer"
             btnText: qsTr("Timer")
             btnActive: root.dashState.timerPanelTab === 0
+            topLeftR: Tokens.rounding.normal
             topRightR: Tokens.rounding.normal
             onClicked: root.dashState.timerPanelTab = 0
         }
@@ -49,19 +50,27 @@ Item {
             btnIcon: "calendar_month"
             btnText: qsTr("Reminder")
             btnActive: root.dashState.timerPanelTab === 2
+            bottomLeftR: Tokens.rounding.normal
             bottomRightR: Tokens.rounding.normal
             onClicked: root.dashState.timerPanelTab = 2
         }
     }
 
-    // Content centered between left edge and start of tab column
-    StackLayout {
+    // Content with vertical slide animation between tabs
+    Item {
         anchors.fill: parent
         anchors.margins: Tokens.padding.normal
-        currentIndex: root.dashState.timerPanelTab
+        clip: true
 
         // Tab 0: Timer
         Item {
+            y: (0 - root.dashState.timerPanelTab) * parent.height
+            width: parent.width
+            height: parent.height
+            Behavior on y { Anim { type: Anim.DefaultSpatial } }
+
+            BackBtn { dashState: root.dashState }
+
             ColumnLayout {
                 anchors.verticalCenter: parent.verticalCenter
                 x: (parent.width - tabCol.width - width) / 2
@@ -213,6 +222,13 @@ Item {
 
         // Tab 1: Alarm
         Item {
+            y: (1 - root.dashState.timerPanelTab) * parent.height
+            width: parent.width
+            height: parent.height
+            Behavior on y { Anim { type: Anim.DefaultSpatial } }
+
+            BackBtn { dashState: root.dashState }
+
             ColumnLayout {
                 anchors.verticalCenter: parent.verticalCenter
                 x: (parent.width - tabCol.width - width) / 2
@@ -291,7 +307,14 @@ Item {
 
         // Tab 2: Calendar centered with limited width
         Item {
+            y: (2 - root.dashState.timerPanelTab) * parent.height
+            width: parent.width
+            height: parent.height
             clip: true
+            Behavior on y { Anim { type: Anim.DefaultSpatial } }
+
+            BackBtn { dashState: root.dashState }
+
             Item {
                 anchors.verticalCenter: parent.verticalCenter
                 x: (parent.width - tabCol.width - width) / 2
@@ -312,7 +335,9 @@ Item {
         property bool btnActive: false
         property string btnIcon: ""
         property string btnText: ""
+        property real topLeftR: 0
         property real topRightR: 0
+        property real bottomLeftR: 0
         property real bottomRightR: 0
 
         signal clicked()
@@ -321,16 +346,33 @@ Item {
         Layout.fillWidth: true
 
         radius: 0
+        topLeftRadius: topLeftR
         topRightRadius: topRightR
+        bottomLeftRadius: bottomLeftR
         bottomRightRadius: bottomRightR
 
         color: btnActive
             ? Colours.palette.m3primaryContainer
             : Colours.tPalette.m3surfaceContainerHigh
 
-        StateLayer {
+        Rectangle {
             anchors.fill: parent
-            onClicked: btn.clicked()
+            radius: 0
+            topLeftRadius: btn.topLeftR
+            topRightRadius: btn.topRightR
+            bottomLeftRadius: btn.bottomLeftR
+            bottomRightRadius: btn.bottomRightR
+            color: Colours.palette.m3onSurface
+            opacity: btnMouse.containsPress ? 0.15 : btnMouse.containsMouse ? 0.08 : 0
+            Behavior on opacity { NumberAnimation { duration: 150 } }
+
+            MouseArea {
+                id: btnMouse
+                anchors.fill: parent
+                hoverEnabled: true
+                cursorShape: Qt.PointingHandCursor
+                onClicked: btn.clicked()
+            }
         }
 
         ColumnLayout {
@@ -354,6 +396,32 @@ Item {
                     ? Colours.palette.m3onPrimaryContainer
                     : Colours.palette.m3onSurfaceVariant
             }
+        }
+    }
+
+    component BackBtn: StyledRect {
+        required property DashboardState dashState
+
+        implicitWidth: implicitHeight
+        implicitHeight: _backIcon.implicitHeight + Tokens.padding.small * 2
+        radius: Tokens.rounding.full
+        color: Colours.tPalette.m3surfaceContainerHigh
+
+        StateLayer {
+            radius: parent.radius
+            onClicked: {
+                dashState.timerPanelOpen = false;
+                dashState.timerPanelTab = 0;
+                dashState.reminderPickedDate = "";
+            }
+        }
+
+        MaterialIcon {
+            id: _backIcon
+            anchors.centerIn: parent
+            text: "arrow_back"
+            color: Colours.palette.m3onSurfaceVariant
+            font.pointSize: Tokens.font.size.normal
         }
     }
 

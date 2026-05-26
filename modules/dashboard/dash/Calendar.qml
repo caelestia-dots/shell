@@ -142,7 +142,7 @@ CustomMouseArea {
         ColumnLayout {
             visible: root.dateSetMode
             Layout.fillWidth: true
-            spacing: Tokens.spacing.small
+            spacing: Tokens.spacing.normal
             opacity: root.dateSetMode ? 1 : 0
 
             Behavior on opacity { Anim {} }
@@ -217,6 +217,7 @@ CustomMouseArea {
 
             RowLayout {
                 Layout.fillWidth: true
+                Layout.topMargin: Tokens.spacing.small
                 spacing: Tokens.spacing.small
 
                 IconTextButton {
