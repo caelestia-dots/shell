@@ -70,10 +70,10 @@ Singleton {
             if (!root.active || root.alarmFired)
                 return;
             const now = Date.now();
-            if (now >= root._store.targetMs) {
+            if (now >= _store.targetMs) {
                 root.alarmFired = true;
                 root.active = false;
-                root._store.targetMs = 0;
+                _store.targetMs = 0;
                 root.finished();
             }
         }
