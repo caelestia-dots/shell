@@ -98,6 +98,8 @@ Item {
             ColumnLayout {
                 spacing: Tokens.spacing.small
 
+                Item { Layout.fillHeight: true }
+
                 // Timer done: Bongo Cat
                 ColumnLayout {
                     visible: TimerService.timerDone
@@ -206,7 +208,6 @@ Item {
 
                     StyledText {
                         Layout.alignment: Qt.AlignHCenter
-                        Layout.topMargin: Tokens.padding.small
                         text: TimerService.remainingFormatted
                         font.pointSize: Tokens.font.size.extraLarge
                         font.family: Tokens.font.family.mono
@@ -269,11 +270,15 @@ Item {
                         }
                     }
                 }
+
+                Item { Layout.fillHeight: true }
             }
 
             // --- Alarm tab ---
             ColumnLayout {
                 spacing: Tokens.spacing.small
+
+                Item { Layout.fillHeight: true }
 
                 // Active alarm indicator
                 ColumnLayout {
@@ -351,6 +356,8 @@ Item {
                         onClicked: AlarmService.setAlarm(root.alarmHours, root.alarmMinutes)
                     }
                 }
+
+                Item { Layout.fillHeight: true }
             }
         }
     }
