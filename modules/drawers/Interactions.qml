@@ -22,6 +22,7 @@ CustomMouseArea {
     property bool dashboardShortcutActive
     property bool osdShortcutActive
     property bool utilitiesShortcutActive
+    property bool sidebarShortcutActive
 
     function withinPanelHeight(panel: Item, x: real, y: real): bool {
         const panelY = root.borderThickness + panel.y;
@@ -85,6 +86,9 @@ CustomMouseArea {
 
             if (Config.bar.showOnHover)
                 bar.isHovered = false;
+
+            if (Config.sidebar.showOnHover && !sidebarShortcutActive)
+                visibilities.sidebar = false;
         }
     }
 
@@ -130,6 +134,16 @@ CustomMouseArea {
 
             const showSidebar = pressed && dragStart.x > Math.min(width - Config.border.minThickness, bar.implicitWidth + panels.sidebar.x);
 
+            // Show sidebar on hover (top-right corner, bounded by notification panel height)
+            const sidebarTriggerY = panels.notifications.y + panels.notifications.height + borderThickness;
+            const showSidebarHover = Config.sidebar.showOnHover && x >= width - Config.border.minThickness && y <= sidebarTriggerY;
+            if (!sidebarShortcutActive) {
+                if (showSidebarHover && !visibilities.sidebar)
+                    visibilities.sidebar = true;
+            } else if (showSidebarHover) {
+                sidebarShortcutActive = false;
+            }
+
             // Show/hide session on drag
             if (pressed && inRightPanel(panels.sessionWrapper, dragStart.x, dragStart.y) && withinPanelHeight(panels.sessionWrapper, x, y)) {
                 if (dragX < -Config.session.dragThreshold)
@@ -165,6 +179,13 @@ CustomMouseArea {
                     visibilities.session = true;
                 else if (dragX > Config.session.dragThreshold)
                     visibilities.session = false;
+            }
+
+            // Hide sidebar when cursor leaves sidebar area (hover mode)
+            if (Config.sidebar.showOnHover && !pressed) {
+                const inSidebarArea = inRightPanel(panels.sidebar, x, y) || inRightPanel(panels.sessionWrapper, x, y);
+                if (!inSidebarArea)
+                    visibilities.sidebar = false;
             }
 
             // Hide sidebar on drag
