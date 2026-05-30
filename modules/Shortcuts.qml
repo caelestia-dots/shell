@@ -127,7 +127,8 @@ Scope {
 
         function isOpen(drawer: string): string {
             const visibilities = Visibilities.getForActive();
-            if (typeof visibilities[drawer] !== "boolean") return "unknown";
+            if (typeof visibilities[drawer] !== "boolean")
+                return "unknown";
             return visibilities[drawer] ? "1" : "0";
         }
 
