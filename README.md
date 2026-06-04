@@ -95,6 +95,8 @@ Dependencies:
 -   [`bash`](https://www.gnu.org/software/bash)
 -   `qt6-base`
 -   `qt6-declarative`
+-   `qt6-multimedia` (optional - video wallpapers)
+-   [`ffmpeg`](https://ffmpeg.org) (optional - video wallpapers)
 
 Build dependencies:
 

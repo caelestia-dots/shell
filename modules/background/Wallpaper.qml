@@ -4,7 +4,6 @@ import QtQuick
 import Caelestia.Config
 import qs.components
 import qs.components.filedialog
-import qs.components.images
 import qs.services
 import qs.utils
 
@@ -12,7 +11,7 @@ Item {
     id: root
 
     property string source: Wallpapers.current
-    property Image current: one
+    property Item current: one
     property bool completed
 
     onSourceChanged: {
@@ -73,8 +72,8 @@ Item {
                             id: dialog
 
                             title: qsTr("Select a wallpaper")
-                            filterLabel: qsTr("Image files")
-                            filters: Images.validImageExtensions
+                            filterLabel: qsTr("Image/video files")
+                            filters: Images.validWallpaperExtensions
                             onAccepted: path => Wallpapers.setWallpaper(path)
                         }
 
@@ -99,20 +98,22 @@ Item {
         }
     }
 
-    Img {
+    Slot {
         id: one
     }
 
-    Img {
+    Slot {
         id: two
     }
 
-    component Img: CachingImage {
-        id: img
+    component Slot: Item {
+        id: slot
+
+        property string path
 
         function update(): void {
             if (path === root.source)
-                root.current = this;
+                root.current = slot;
             else
                 path = root.source;
         }
@@ -122,26 +123,69 @@ Item {
         opacity: 0
         scale: Wallpapers.showPreview ? 1 : 0.8
 
-        onStatusChanged: {
-            if (status === Image.Ready)
-                root.current = this;
+        onPathChanged: {
+            if (!path)
+                loader.setSource("");
+            else if (Images.isValidVideoByName(path))
+                loader.setSource("WallpaperVideo.qml", {
+                    path
+                });
+            else if (Images.isAnimatedImageByName(path))
+                loader.setSource("WallpaperAnimated.qml", {
+                    path
+                });
+            else
+                loader.setSource("WallpaperImage.qml", {
+                    path
+                });
+        }
+
+        // Unload the hidden slot once faded out so videos/gifs stop decoding
+        onOpacityChanged: {
+            if (opacity === 0 && root.current !== slot)
+                path = "";
         }
 
         states: State {
             name: "visible"
-            when: root.current === img
+            when: root.current === slot
 
             PropertyChanges {
-                img.opacity: 1
-                img.scale: 1
+                slot.opacity: 1
+                slot.scale: 1
             }
         }
 
         transitions: Transition {
             Anim {
-                target: img
+                target: slot
                 properties: "opacity,scale"
             }
+        }
+
+        Loader {
+            id: loader
+
+            anchors.fill: parent
+            asynchronous: true
+
+            onStatusChanged: {
+                if (status === Loader.Error && Images.isValidVideoByName(slot.path)) {
+                    console.warn("Wallpaper: failed to load video player (is QtMultimedia installed?), falling back to a static frame");
+                    setSource("WallpaperImage.qml", {
+                        path: Wallpapers.videoFramePath(slot.path)
+                    });
+                }
+            }
+        }
+
+        Connections {
+            function onReadyChanged(): void {
+                if (loader.item.ready) // qmllint disable missing-property
+                    root.current = slot;
+            }
+
+            target: loader.item
         }
     }
 }
