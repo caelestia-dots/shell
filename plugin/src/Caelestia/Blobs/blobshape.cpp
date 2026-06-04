@@ -39,8 +39,8 @@ static float cornerFillFactor(float sd, float smoothFactor) {
     // squaring would only crease the interior). C0-continuous across sd = 0 — unlike the
     // old `if (sd >= 0)` branch, which snapped the radius full<->square (factor 1<->0) on
     // sub-pixel motion as a corner crossed the edge, flickering the fill bridge in/out.
-    const float outside = cpuSmoothstep(0.0f, smoothFactor, sd);  // 0 at edge, ->1 far outside
-    const float inside = cpuSmoothstep(0.0f, -smoothFactor, sd);  // 0 at edge, ->1 deep inside
+    const float outside = cpuSmoothstep(0.0f, smoothFactor, sd); // 0 at edge, ->1 far outside
+    const float inside = cpuSmoothstep(0.0f, -smoothFactor, sd); // 0 at edge, ->1 deep inside
     return std::max(outside, inside);
 }
 
