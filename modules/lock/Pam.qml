@@ -11,8 +11,8 @@ Scope {
     required property WlSessionLock lock
 
     readonly property alias passwd: passwd
+    readonly property alias fprint: fprint
     readonly property alias howdy: howdy
-    readonly property alias fprint: dummyFprint
 
     property string lockMessage
     property string state
@@ -77,6 +77,55 @@ Scope {
     }
 
     PamContext {
+        id: fprint
+
+        property bool available: false
+        property int tries: 0
+        property int errorTries: 0
+
+        function checkAvail(): void {
+            if (!available || !GlobalConfig.lock.enableFprint || !root.lock.secure) {
+                abort();
+                return;
+            }
+
+            tries = 0;
+            errorTries = 0;
+            start();
+        }
+
+        config: "fprint"
+        configDirectory: Quickshell.shellDir + "/assets/pam.d"
+
+        onCompleted: res => {
+            if (!available) return;
+
+            if (res === PamResult.Success) return root.lock.unlock();
+
+            if (res === PamResult.Error) {
+                root.fprintState = "error";
+                errorTries++;
+                if (errorTries < 5) {
+                    abort();
+                    errorRetry.restart();
+                }
+            } else if (res === PamResult.MaxTries) {
+                tries++;
+                if (tries < GlobalConfig.lock.maxFprintTries) {
+                    root.fprintState = "fail";
+                    start();
+                } else {
+                    root.fprintState = "max";
+                    abort();
+                }
+            }
+
+            root.flashMsg();
+            fprintStateReset.start();
+        }
+    }
+
+    PamContext {
         id: howdy
         property bool available: false
 
@@ -94,13 +143,13 @@ Scope {
         }
     }
 
-    QtObject {
-        id: dummyFprint
-        property bool available: false
-        property bool active: false
-        property int tries: 0
-        property string message: ""
-        function abort() {}
+    Process {
+        id: fprintAvailProc
+        command: ["sh", "-c", "fprintd-list $USER"]
+        onExited: code => { 
+            fprint.available = code === 0;
+            fprint.checkAvail();
+        }
     }
 
     Process {
@@ -112,10 +161,25 @@ Scope {
     }
 
     Timer {
+        id: errorRetry
+        interval: 800
+        onTriggered: fprint.start()
+    }
+
+    Timer {
         id: stateReset
         interval: 4000
         onTriggered: {
             if (root.state !== "max") root.state = "";
+        }
+    }
+
+    Timer {
+        id: fprintStateReset
+        interval: 4000
+        onTriggered: {
+            root.fprintState = "";
+            fprint.errorTries = 0;
         }
     }
 
@@ -124,16 +188,26 @@ Scope {
         
         function onSecureChanged(): void {
             if (root.lock.secure) {
+                fprintAvailProc.running = true;
                 howdyAvailProc.running = true; 
                 root.buffer = "";
                 root.state = "";
+                root.fprintState = "";
                 root.lockMessage = "";
             }
         }
 
         function onUnlock(): void {
+            fprint.abort();
             howdy.abort();
             passwd.abort();
+        }
+    }
+
+    Connections {
+        target: GlobalConfig.lock
+        function onEnableFprintChanged(): void {
+            fprint.checkAvail();
         }
     }
 }

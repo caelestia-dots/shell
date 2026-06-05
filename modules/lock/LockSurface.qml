@@ -11,7 +11,7 @@ WlSessionLockSurface {
     id: root
 
     required property WlSessionLock lock
-    required property var pam
+    required property Pam pam
 
     readonly property alias unlocking: unlockAnim.running
 

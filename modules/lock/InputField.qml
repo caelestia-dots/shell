@@ -10,7 +10,7 @@ import qs.services
 Item {
     id: root
 
-    required property var pam
+    required property Pam pam
     readonly property alias placeholder: placeholder
     property string buffer
 
