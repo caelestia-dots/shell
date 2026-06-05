@@ -10,7 +10,7 @@ import qs.services
 Item {
     id: root
 
-    required property Pam pam
+    required property var pam
     readonly property alias placeholder: placeholder
     property string buffer
 
@@ -42,6 +42,8 @@ Item {
         text: {
             if (root.pam.passwd.active)
                 return qsTr("Loading...");
+            if (root.pam.howdy.active)
+                return qsTr("Scanning face...");
             if (root.pam.state === "max")
                 return qsTr("You have reached the maximum number of tries");
             return qsTr("Enter your password");

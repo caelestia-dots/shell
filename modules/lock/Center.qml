@@ -160,14 +160,16 @@ ColumnLayout {
                     anchors.centerIn: parent
                     animate: true
                     text: {
+                        if (root.lock.pam.howdy.active)
+                            return "face";
                         if (root.lock.pam.fprint.tries >= GlobalConfig.lock.maxFprintTries)
                             return "fingerprint_off";
                         if (root.lock.pam.fprint.active)
                             return "fingerprint";
                         return "lock";
                     }
-                    color: root.lock.pam.fprint.tries >= GlobalConfig.lock.maxFprintTries ? Colours.palette.m3error : Colours.palette.m3onSurface
-                    opacity: root.lock.pam.passwd.active ? 0 : 1
+                    color: (root.lock.pam.fprint.tries >= GlobalConfig.lock.maxFprintTries) ? Colours.palette.m3error : Colours.palette.m3onSurface
+                    opacity: (root.lock.pam.passwd.active || root.lock.pam.howdy.active) ? 0 : 1
 
                     Behavior on opacity {
                         Anim {}
@@ -176,7 +178,7 @@ ColumnLayout {
 
                 CircularIndicator {
                     anchors.fill: parent
-                    running: root.lock.pam.passwd.active
+                    running: root.lock.pam.passwd.active || root.lock.pam.howdy.active
                 }
             }
 
