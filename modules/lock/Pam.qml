@@ -31,9 +31,11 @@ Scope {
 
         if (event.key === Qt.Key_Enter || event.key === Qt.Key_Return) {
             if (buffer.length === 0) {
-                if (howdy.available) howdy.trigger();
+                if (howdy.available)
+                    howdy.trigger();
             } else {
-                if (howdy.active) howdy.abort();
+                if (howdy.active)
+                    howdy.abort();
                 passwd.start();
             }
         } else if (event.key === Qt.Key_Backspace) {
@@ -61,16 +63,21 @@ Scope {
         }
 
         onResponseRequiredChanged: {
-            if (!responseRequired) return;
+            if (!responseRequired)
+                return;
             respond(root.buffer);
             root.buffer = "";
         }
 
         onCompleted: res => {
-            if (res === PamResult.Success) return root.lock.unlock();
-            if (res === PamResult.Error) root.state = "error";
-            else if (res === PamResult.MaxTries) root.state = "max";
-            else if (res === PamResult.Failed) root.state = "fail";
+            if (res === PamResult.Success)
+                return root.lock.unlock();
+            if (res === PamResult.Error)
+                root.state = "error";
+            else if (res === PamResult.MaxTries)
+                root.state = "max";
+            else if (res === PamResult.Failed)
+                root.state = "fail";
 
             root.flashMsg();
             stateReset.restart();
@@ -84,6 +91,9 @@ Scope {
         property int tries: 0
         property int errorTries: 0
 
+        config: "fprint"
+        configDirectory: Quickshell.shellDir + "/assets/pam.d"
+
         function checkAvail(): void {
             if (!available || !GlobalConfig.lock.enableFprint || !root.lock.secure) {
                 abort();
@@ -95,13 +105,12 @@ Scope {
             start();
         }
 
-        config: "fprint"
-        configDirectory: Quickshell.shellDir + "/assets/pam.d"
-
         onCompleted: res => {
-            if (!available) return;
+            if (!available)
+                return;
 
-            if (res === PamResult.Success) return root.lock.unlock();
+            if (res === PamResult.Success)
+                return root.lock.unlock();
 
             if (res === PamResult.Error) {
                 root.fprintState = "error";
@@ -131,17 +140,20 @@ Scope {
 
         property bool available: false
 
-        function trigger(): void {
-            if (!available || !root.lock.secure) return;
-            start();
-        }
-
         config: "howdy"
         configDirectory: Quickshell.shellDir + "/assets/pam.d"
 
+        function trigger(): void {
+            if (!available || !root.lock.secure)
+                return;
+            start();
+        }
+
         onCompleted: res => {
-            if (res === PamResult.Success) return root.lock.unlock();
-            else abort(); 
+            if (res === PamResult.Success)
+                return root.lock.unlock();
+            else
+                abort();
         }
     }
 
@@ -150,7 +162,7 @@ Scope {
 
         command: ["sh", "-c", "fprintd-list $USER"]
 
-        onExited: code => { // qmllint disable signal-handler-parameters
+        onExited: (code, exitStatus) => { // qmllint disable signal-handler-parameters
             fprint.available = code === 0;
             fprint.checkAvail();
         }
@@ -161,7 +173,7 @@ Scope {
 
         command: ["sh", "-c", "command -v howdy"]
 
-        onExited: code => { 
+        onExited: (code, exitStatus) => { // qmllint disable signal-handler-parameters
             howdy.available = code === 0;
         }
     }
@@ -180,7 +192,8 @@ Scope {
         interval: 4000
 
         onTriggered: {
-            if (root.state !== "max") root.state = "";
+            if (root.state !== "max")
+                root.state = "";
         }
     }
 
@@ -199,7 +212,7 @@ Scope {
         function onSecureChanged(): void {
             if (root.lock.secure) {
                 fprintAvailProc.running = true;
-                howdyAvailProc.running = true; 
+                howdyAvailProc.running = true;
                 root.buffer = "";
                 root.state = "";
                 root.fprintState = "";
