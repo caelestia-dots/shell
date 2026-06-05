@@ -49,6 +49,7 @@ Scope {
 
     PamContext {
         id: passwd
+
         config: "passwd"
         configDirectory: Quickshell.shellDir + "/assets/pam.d"
 
@@ -127,6 +128,7 @@ Scope {
 
     PamContext {
         id: howdy
+
         property bool available: false
 
         function trigger(): void {
@@ -134,7 +136,7 @@ Scope {
             start();
         }
 
-        config: "howdy" 
+        config: "howdy"
         configDirectory: Quickshell.shellDir + "/assets/pam.d"
 
         onCompleted: res => {
@@ -145,7 +147,9 @@ Scope {
 
     Process {
         id: fprintAvailProc
+
         command: ["sh", "-c", "fprintd-list $USER"]
+
         onExited: code => { 
             fprint.available = code === 0;
             fprint.checkAvail();
@@ -154,7 +158,9 @@ Scope {
 
     Process {
         id: howdyAvailProc
+
         command: ["sh", "-c", "command -v howdy"]
+
         onExited: code => { 
             howdy.available = code === 0;
         }
@@ -162,13 +168,17 @@ Scope {
 
     Timer {
         id: errorRetry
+
         interval: 800
+
         onTriggered: fprint.start()
     }
 
     Timer {
         id: stateReset
+
         interval: 4000
+
         onTriggered: {
             if (root.state !== "max") root.state = "";
         }
@@ -176,7 +186,9 @@ Scope {
 
     Timer {
         id: fprintStateReset
+
         interval: 4000
+
         onTriggered: {
             root.fprintState = "";
             fprint.errorTries = 0;
@@ -184,8 +196,6 @@ Scope {
     }
 
     Connections {
-        target: root.lock
-        
         function onSecureChanged(): void {
             if (root.lock.secure) {
                 fprintAvailProc.running = true;
@@ -202,12 +212,15 @@ Scope {
             howdy.abort();
             passwd.abort();
         }
+
+        target: root.lock
     }
 
     Connections {
-        target: GlobalConfig.lock
         function onEnableFprintChanged(): void {
             fprint.checkAvail();
         }
+
+        target: GlobalConfig.lock
     }
 }
