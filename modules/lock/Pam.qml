@@ -91,9 +91,6 @@ Scope {
         property int tries: 0
         property int errorTries: 0
 
-        config: "fprint"
-        configDirectory: Quickshell.shellDir + "/assets/pam.d"
-
         function checkAvail(): void {
             if (!available || !GlobalConfig.lock.enableFprint || !root.lock.secure) {
                 abort();
@@ -104,6 +101,9 @@ Scope {
             errorTries = 0;
             start();
         }
+
+        config: "fprint"
+        configDirectory: Quickshell.shellDir + "/assets/pam.d"
 
         onCompleted: res => {
             if (!available)
@@ -140,14 +140,14 @@ Scope {
 
         property bool available: false
 
-        config: "howdy"
-        configDirectory: Quickshell.shellDir + "/assets/pam.d"
-
         function trigger(): void {
             if (!available || !root.lock.secure)
                 return;
             start();
         }
+
+        config: "howdy"
+        configDirectory: Quickshell.shellDir + "/assets/pam.d"
 
         onCompleted: res => {
             if (res === PamResult.Success)
