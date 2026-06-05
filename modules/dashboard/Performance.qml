@@ -630,7 +630,7 @@ Item {
 
                     const usedFmt = SystemUsage.formatKib(storageGaugeCard.currentDisk.used);
                     const totalFmt = SystemUsage.formatKib(storageGaugeCard.currentDisk.total);
-                    return `${usedFmt.value.toFixed(1)} / ${Math.floor(totalFmt.value)} ${totalFmt.unit}`;
+                    return `${usedFmt.value.toFixed(1)} / ${Number(totalFmt.value.toFixed(1))} ${totalFmt.unit}`;
                 }
                 font.pointSize: Tokens.font.size.smaller
                 color: Colours.palette.m3onSurfaceVariant
