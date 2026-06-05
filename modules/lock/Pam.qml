@@ -150,7 +150,7 @@ Scope {
 
         command: ["sh", "-c", "fprintd-list $USER"]
 
-        onExited: code => { 
+        onExited: code => { // qmllint disable signal-handler-parameters
             fprint.available = code === 0;
             fprint.checkAvail();
         }
