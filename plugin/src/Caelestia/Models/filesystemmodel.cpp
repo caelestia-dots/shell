@@ -339,7 +339,8 @@ void FileSystemModel::updateEntriesForDir(const QString& dir) {
 
             QString path = iter->next();
 
-            if (filter == Images) {
+            if (filter == Images && !QDir::match(nameFilters, QFileInfo(path).fileName())) {
+                // Explicit name filters are authoritative; everything else must be a readable image
                 QImageReader reader(path);
                 if (!reader.canRead()) {
                     continue;

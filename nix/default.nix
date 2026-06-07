@@ -15,6 +15,7 @@
   libqalculate,
   bash,
   hyprland,
+  ffmpeg,
   material-symbols,
   rubik,
   nerd-fonts,
@@ -48,6 +49,7 @@
       libqalculate
       bash
       hyprland
+      ffmpeg
     ]
     ++ extraRuntimeDeps
     ++ lib.optional withCli caelestia-cli;
@@ -111,7 +113,7 @@ in
     src = ./..;
 
     nativeBuildInputs = [cmake ninja makeWrapper qt6.wrapQtAppsHook];
-    buildInputs = [quickshell extras plugin xkeyboard-config qt6.qtbase];
+    buildInputs = [quickshell extras plugin xkeyboard-config qt6.qtbase qt6.qtmultimedia];
     propagatedBuildInputs = runtimeDeps;
 
     cmakeFlags =

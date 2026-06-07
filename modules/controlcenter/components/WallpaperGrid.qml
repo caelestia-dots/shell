@@ -36,6 +36,8 @@ GridView {
         readonly property real itemMargin: Tokens.spacing.normal / 2
         readonly property real itemRadius: Tokens.rounding.normal
 
+        Component.onCompleted: Wallpapers.ensureVideoFrame(modelData.path)
+
         width: root.cellWidth
         height: root.cellHeight
 
@@ -69,7 +71,7 @@ GridView {
             CachingImage {
                 id: cachingImage
 
-                path: modelData.path
+                path: Wallpapers.thumbnailFor(modelData.path)
                 anchors.fill: parent
                 fillMode: Image.PreserveAspectCrop
                 cache: true
@@ -93,7 +95,7 @@ GridView {
                 id: fallbackImage
 
                 anchors.fill: parent
-                source: fallbackTimer.triggered && cachingImage.status !== Image.Ready ? modelData.path : ""
+                source: fallbackTimer.triggered && cachingImage.status !== Image.Ready ? Wallpapers.thumbnailFor(modelData.path) : ""
                 asynchronous: true
                 fillMode: Image.PreserveAspectCrop
                 cache: true
