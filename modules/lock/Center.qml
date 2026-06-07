@@ -192,11 +192,11 @@ ColumnLayout {
                 implicitWidth: implicitHeight
                 implicitHeight: enterIcon.implicitHeight + Tokens.padding.small * 2
 
-                color: root.lock.pam.buffer ? Colours.palette.m3primary : Colours.layer(Colours.palette.m3surfaceContainerHigh, 2)
+                color: (root.lock.pam.buffer) ? Colours.palette.m3primary : Colours.layer(Colours.palette.m3surfaceContainerHigh, 2)
                 radius: Tokens.rounding.full
 
                 StateLayer {
-                    color: root.lock.pam.buffer ? Colours.palette.m3onPrimary : Colours.palette.m3onSurface
+                    color: (root.lock.pam.buffer) ? Colours.palette.m3onPrimary : Colours.palette.m3onSurface
                     onClicked: root.lock.pam.passwd.start()
                 }
 
@@ -205,7 +205,7 @@ ColumnLayout {
 
                     anchors.centerIn: parent
                     text: "arrow_forward"
-                    color: root.lock.pam.buffer ? Colours.palette.m3onPrimary : Colours.palette.m3onSurface
+                    color: (root.lock.pam.buffer) ? Colours.palette.m3onPrimary : Colours.palette.m3onSurface
                     font.weight: 500
                 }
             }
@@ -266,8 +266,8 @@ ColumnLayout {
             anchors.left: parent.left
             anchors.right: parent.right
 
-            scale: shouldBeVisible && !message.msg ? 1 : 0.7
-            opacity: shouldBeVisible && !message.msg ? 1 : 0
+            scale: (shouldBeVisible && !message.msg) ? 1 : 0.7
+            opacity: (shouldBeVisible && !message.msg) ? 1 : 0
             color: Colours.palette.m3onSurfaceVariant
             animateProp: "opacity"
 
