@@ -31,6 +31,7 @@ Item {
     property real paddingScale: Config.appearance.padding.scale ?? 1
     property real roundingScale: Config.appearance.rounding.scale ?? 1
     property real spacingScale: Config.appearance.spacing.scale ?? 1
+    property real deformScale: Config.appearance.deformScale ?? 1
     property bool transparencyEnabled: GlobalConfig.appearance.transparency.enabled ?? false
     property real transparencyBase: GlobalConfig.appearance.transparency.base ?? 0.85
     property real transparencyLayers: GlobalConfig.appearance.transparency.layers ?? 0.4
@@ -65,6 +66,7 @@ Item {
         GlobalConfig.appearance.padding.scale = root.paddingScale;
         GlobalConfig.appearance.rounding.scale = root.roundingScale;
         GlobalConfig.appearance.spacing.scale = root.spacingScale;
+        GlobalConfig.appearance.deformScale = root.deformScale;
 
         GlobalConfig.appearance.transparency.enabled = root.transparencyEnabled;
         GlobalConfig.appearance.transparency.base = root.transparencyBase;
