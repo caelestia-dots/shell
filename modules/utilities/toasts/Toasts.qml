@@ -1,18 +1,29 @@
 pragma ComponentBehavior: Bound
 
-import qs.components
-import qs.config
-import Caelestia
-import Quickshell
 import QtQuick
+import Quickshell
+import Caelestia
+import Caelestia.Config
+import qs.components
+import qs.services
 
 Item {
     id: root
 
-    readonly property int spacing: Appearance.spacing.small
+    readonly property int spacing: Tokens.spacing.small
     property bool flag
 
-    implicitWidth: Config.utilities.sizes.toastWidth - Appearance.padding.normal * 2
+    function shouldShowToast(toast: Toast): bool {
+        if (!Notifs.hasFullscreen())
+            return true;
+        if (Config.utilities.toasts.fullscreen === "all")
+            return true;
+        if (Config.utilities.toasts.fullscreen === "important")
+            return toast.type === Toast.Warning || toast.type === Toast.Error;
+        return false;
+    }
+
+    implicitWidth: Tokens.sizes.utilities.toastWidth - Tokens.padding.medium * 2
     implicitHeight: {
         let h = -spacing;
         for (let i = 0; i < repeater.count; i++) {
@@ -31,10 +42,12 @@ Item {
                 const toasts = [];
                 let count = 0;
                 for (const toast of Toaster.toasts) {
+                    if (!root.shouldShowToast(toast))
+                        continue;
                     toasts.push(toast);
                     if (!toast.closed) {
                         count++;
-                        if (count > Config.utilities.maxToasts)
+                        if (count > root.Config.utilities.maxToasts)
                             break;
                     }
                 }
@@ -98,8 +111,6 @@ Item {
             properties: "opacity,scale"
             from: 0
             to: 1
-            duration: Appearance.anim.durations.expressiveDefaultSpatial
-            easing.bezierCurve: Appearance.anim.curves.expressiveDefaultSpatial
         }
 
         ParallelAnimation {
@@ -108,6 +119,7 @@ Item {
             onFinished: toast.modelData.unlock(toast)
 
             Anim {
+                type: Anim.DefaultEffects
                 target: toast
                 property: "opacity"
                 to: 0
@@ -126,7 +138,9 @@ Item {
         }
 
         Behavior on opacity {
-            Anim {}
+            Anim {
+                type: Anim.DefaultEffects
+            }
         }
 
         Behavior on scale {
@@ -134,10 +148,7 @@ Item {
         }
 
         Behavior on anchors.bottomMargin {
-            Anim {
-                duration: Appearance.anim.durations.expressiveDefaultSpatial
-                easing.bezierCurve: Appearance.anim.curves.expressiveDefaultSpatial
-            }
+            Anim {}
         }
     }
 }

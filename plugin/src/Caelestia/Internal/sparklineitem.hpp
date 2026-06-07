@@ -5,13 +5,14 @@
 #include <qqmlintegration.h>
 #include <qquickpainteditem.h>
 
-#include "circularbuffer.hpp"
-
 namespace caelestia::internal {
+
+class CircularBuffer;
 
 class SparklineItem : public QQuickPaintedItem {
     Q_OBJECT
     QML_ELEMENT
+    Q_MOC_INCLUDE("circularbuffer.hpp")
 
     Q_PROPERTY(CircularBuffer* line1 READ line1 WRITE setLine1 NOTIFY line1Changed)
     Q_PROPERTY(CircularBuffer* line2 READ line2 WRITE setLine2 NOTIFY line2Changed)

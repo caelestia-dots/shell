@@ -1,10 +1,10 @@
 pragma Singleton
 
-import qs.config
-import qs.utils
+import QtQuick
 import Quickshell
 import Quickshell.Io
-import QtQuick
+import Caelestia.Config
+import qs.utils
 
 Singleton {
     id: root
@@ -21,6 +21,28 @@ Singleton {
     readonly property string wm: Quickshell.env("XDG_CURRENT_DESKTOP") || Quickshell.env("XDG_SESSION_DESKTOP")
     readonly property string shell: Quickshell.env("SHELL").split("/").pop()
 
+    property string kernel
+    property string hostname
+    property string firmware
+
+    // DMI vendor/model, combined into a single human-readable device name
+    property string boardVendor
+    property string boardName
+    readonly property string device: {
+        if (!boardName)
+            return boardVendor;
+        if (!boardVendor || boardName.toLowerCase().startsWith(boardVendor.toLowerCase()))
+            return boardName;
+        return `${boardVendor} ${boardName}`;
+    }
+
+    // Strips the placeholder strings OEMs commonly leave in DMI fields
+    function sanitiseDmi(s: string): string {
+        const t = s.trim();
+        const junk = ["to be filled by o.e.m.", "system product name", "system manufacturer", "system version", "default string", "o.e.m.", "not specified", "not applicable", "unknown", "none", ""];
+        return junk.includes(t.toLowerCase()) ? "" : t;
+    }
+
     FileView {
         id: osRelease
 
@@ -36,11 +58,11 @@ Singleton {
             root.osIdLike = fd("ID_LIKE").split(" ");
 
             const logo = Quickshell.iconPath(fd("LOGO"), true);
-            if (Config.general.logo === "caelestia") {
+            if (GlobalConfig.general.logo === "caelestia") {
                 root.osLogo = Qt.resolvedUrl(`${Quickshell.shellDir}/assets/logo.svg`);
                 root.isDefaultLogo = true;
-            } else if (Config.general.logo) {
-                root.osLogo = Quickshell.iconPath(Config.general.logo, true) || "file://" + Paths.absolutePath(Config.general.logo);
+            } else if (GlobalConfig.general.logo) {
+                root.osLogo = Quickshell.iconPath(GlobalConfig.general.logo, true) || "file://" + Paths.absolutePath(GlobalConfig.general.logo);
                 root.isDefaultLogo = false;
             } else if (logo) {
                 root.osLogo = logo;
@@ -50,11 +72,39 @@ Singleton {
     }
 
     Connections {
-        target: Config.general
-
         function onLogoChanged(): void {
             osRelease.reload();
         }
+
+        target: GlobalConfig.general
+    }
+
+    FileView {
+        path: "/proc/sys/kernel/osrelease"
+        onLoaded: root.kernel = text().trim()
+    }
+
+    FileView {
+        path: "/proc/sys/kernel/hostname"
+        onLoaded: root.hostname = text().trim()
+    }
+
+    FileView {
+        path: "/sys/class/dmi/id/sys_vendor"
+        printErrors: false
+        onLoaded: root.boardVendor = root.sanitiseDmi(text())
+    }
+
+    FileView {
+        path: "/sys/class/dmi/id/product_name"
+        printErrors: false
+        onLoaded: root.boardName = root.sanitiseDmi(text())
+    }
+
+    FileView {
+        path: "/sys/class/dmi/id/bios_version"
+        printErrors: false
+        onLoaded: root.firmware = root.sanitiseDmi(text())
     }
 
     Timer {

@@ -1,9 +1,8 @@
-import qs.components
-import qs.components.controls
-import qs.services
-import qs.config
 import QtQuick
 import QtQuick.Layouts
+import Caelestia.Config
+import qs.components
+import qs.components.controls
 
 RowLayout {
     id: root
@@ -13,7 +12,7 @@ RowLayout {
     property alias toggle: toggle
 
     Layout.fillWidth: true
-    spacing: Appearance.spacing.normal
+    spacing: Tokens.spacing.medium
 
     StyledText {
         Layout.fillWidth: true

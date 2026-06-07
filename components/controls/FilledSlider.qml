@@ -1,9 +1,9 @@
-import ".."
 import "../effects"
-import qs.services
-import qs.config
 import QtQuick
 import QtQuick.Templates
+import Caelestia.Config
+import qs.components
+import qs.services
 
 Slider {
     id: root
@@ -16,7 +16,7 @@ Slider {
 
     background: StyledRect {
         color: Colours.layer(Colours.palette.m3surfaceContainer, 2)
-        radius: Appearance.rounding.full
+        radius: Tokens.rounding.full
 
         StyledRect {
             anchors.left: parent.left
@@ -51,7 +51,7 @@ Slider {
             anchors.fill: parent
 
             color: Colours.palette.m3inverseSurface
-            radius: Appearance.rounding.full
+            radius: Tokens.rounding.full
 
             MouseArea {
                 id: handleInteraction
@@ -67,47 +67,29 @@ Slider {
 
                 property bool moving
 
-                function update(): void {
-                    animate = !moving;
-                    binding.when = moving;
-                    font.pointSize = moving ? Appearance.font.size.small : Appearance.font.size.larger;
-                    font.family = moving ? Appearance.font.family.sans : Appearance.font.family.material;
-                }
-
-                text: root.icon
-                color: Colours.palette.m3inverseOnSurface
                 anchors.centerIn: parent
+                anchors.verticalCenterOffset: 1
+                text: moving ? Math.round(root.value * 100) : root.icon
+                color: Colours.palette.m3inverseOnSurface
+                font: moving ? Tokens.font.body.small : Tokens.font.icon.medium
 
-                onMovingChanged: anim.restart()
-
-                Binding {
-                    id: binding
-
-                    target: icon
-                    property: "text"
-                    value: Math.round(root.value * 100)
-                    when: false
-                }
-
-                SequentialAnimation {
-                    id: anim
-
-                    Anim {
-                        target: icon
-                        property: "scale"
-                        to: 0
-                        duration: Appearance.anim.durations.normal / 2
-                        easing.bezierCurve: Appearance.anim.curves.standardAccel
-                    }
-                    ScriptAction {
-                        script: icon.update()
-                    }
-                    Anim {
-                        target: icon
-                        property: "scale"
-                        to: 1
-                        duration: Appearance.anim.durations.normal / 2
-                        easing.bezierCurve: Appearance.anim.curves.standardDecel
+                Behavior on moving {
+                    SequentialAnimation {
+                        Anim {
+                            target: icon
+                            property: "scale"
+                            to: 0.3
+                            duration: Tokens.anim.durations.small / 2
+                            easing: Tokens.anim.standardAccel
+                        }
+                        PropertyAction {}
+                        Anim {
+                            target: icon
+                            property: "scale"
+                            to: 1
+                            duration: Tokens.anim.durations.normal / 2
+                            easing: Tokens.anim.standardDecel
+                        }
                     }
                 }
             }
@@ -140,7 +122,7 @@ Slider {
 
     Behavior on value {
         Anim {
-            duration: Appearance.anim.durations.large
+            type: Anim.StandardLarge
         }
     }
 }

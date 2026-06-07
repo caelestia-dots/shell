@@ -1,6 +1,5 @@
 #include "toaster.hpp"
 
-#include <qdebug.h>
 #include <qlogging.h>
 #include <qtimer.h>
 

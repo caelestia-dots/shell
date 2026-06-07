@@ -1,22 +1,20 @@
-import ".."
-import qs.components
-import qs.components.effects
-import qs.services
-import qs.config
 import QtQuick
 import QtQuick.Layouts
+import Caelestia.Config
+import qs.components
+import qs.services
 
 StyledRect {
     id: root
 
     required property string label
     required property bool checked
-    property bool enabled: true
-    property var onToggled: function (checked) {}
+
+    signal toggled(checked: bool)
 
     Layout.fillWidth: true
-    implicitHeight: row.implicitHeight + Appearance.padding.large * 2
-    radius: Appearance.rounding.normal
+    implicitHeight: row.implicitHeight + Tokens.padding.extraLargeIncreased
+    radius: Tokens.rounding.large
     color: Colours.layer(Colours.palette.m3surfaceContainer, 2)
 
     Behavior on implicitHeight {
@@ -29,8 +27,8 @@ StyledRect {
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.verticalCenter: parent.verticalCenter
-        anchors.margins: Appearance.padding.large
-        spacing: Appearance.spacing.normal
+        anchors.margins: Tokens.padding.large
+        spacing: Tokens.spacing.medium
 
         StyledText {
             Layout.fillWidth: true
@@ -40,9 +38,7 @@ StyledRect {
         StyledSwitch {
             checked: root.checked
             enabled: root.enabled
-            onToggled: {
-                root.onToggled(checked);
-            }
+            onToggled: root.toggled(checked)
         }
     }
 }

@@ -1,52 +1,29 @@
 pragma ComponentBehavior: Bound
 
-import qs.components
-import qs.config
-import Quickshell
 import QtQuick
+import Caelestia.Config
+import qs.components
 
 Item {
     id: root
 
-    required property PersistentProperties visibilities
-    required property var panels
+    required property DrawerVisibilities visibilities
+    required property bool sidebarVisible
     readonly property real nonAnimWidth: content.implicitWidth
 
-    visible: width > 0
-    implicitWidth: 0
-    implicitHeight: content.implicitHeight
+    readonly property bool shouldBeActive: visibilities.session && Config.session.enabled
+    property real offsetScale: shouldBeActive ? 0 : 1
+    property real sidebarOffset: sidebarVisible ? 14 : 0
 
-    states: State {
-        name: "visible"
-        when: root.visibilities.session && Config.session.enabled
+    visible: offsetScale < 1
+    anchors.rightMargin: (-implicitWidth - 5 - sidebarOffset) * offsetScale
+    implicitWidth: content.implicitWidth
+    implicitHeight: content.implicitHeight || 510 // Hard coded fallback for first open
+    opacity: 1 - offsetScale
 
-        PropertyChanges {
-            root.implicitWidth: root.nonAnimWidth
-        }
+    Behavior on offsetScale {
+        Anim {}
     }
-
-    transitions: [
-        Transition {
-            from: ""
-            to: "visible"
-
-            Anim {
-                target: root
-                property: "implicitWidth"
-                easing.bezierCurve: Appearance.anim.curves.expressiveDefaultSpatial
-            }
-        },
-        Transition {
-            from: "visible"
-            to: ""
-
-            Anim {
-                target: root
-                property: "implicitWidth"
-                easing.bezierCurve: root.panels.osd.width > 0 ? Appearance.anim.curves.expressiveDefaultSpatial : Appearance.anim.curves.emphasized
-            }
-        }
-    ]
 
     Loader {
         id: content
@@ -54,7 +31,7 @@ Item {
         anchors.verticalCenter: parent.verticalCenter
         anchors.left: parent.left
 
-        Component.onCompleted: active = Qt.binding(() => (root.visibilities.session && Config.session.enabled) || root.visible)
+        active: root.shouldBeActive || root.visible
 
         sourceComponent: Content {
             visibilities: root.visibilities

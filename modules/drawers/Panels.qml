@@ -1,69 +1,99 @@
-import qs.config
-import qs.modules.osd as Osd
-import qs.modules.notifications as Notifications
-import qs.modules.session as Session
-import qs.modules.launcher as Launcher
-import qs.modules.dashboard as Dashboard
-import qs.modules.bar.popouts as BarPopouts
-import qs.modules.utilities as Utilities
-import qs.modules.utilities.toasts as Toasts
-import qs.modules.sidebar as Sidebar
-import Quickshell
 import QtQuick
+import Quickshell
+import Caelestia.Config
+import qs.components
+import qs.modules.bar as Bar
+import qs.modules.dashboard as Dashboard
+import qs.modules.launcher as Launcher
+import qs.modules.notifications as Notifications
+import qs.modules.osd as Osd
+import qs.modules.session as Session
+import qs.modules.sidebar as Sidebar
+import qs.modules.utilities as Utilities
+import qs.modules.bar.popouts as BarPopouts
+import qs.modules.utilities.toasts as Toasts
 
 Item {
     id: root
 
     required property ShellScreen screen
-    required property PersistentProperties visibilities
-    required property Item bar
+    required property DrawerVisibilities visibilities
+    required property Bar.BarWrapper bar
+    required property real borderThickness
 
     readonly property alias osd: osd
+    readonly property alias osdWrapper: osdWrapper
     readonly property alias notifications: notifications
     readonly property alias session: session
+    readonly property alias sessionWrapper: sessionWrapper
     readonly property alias launcher: launcher
     readonly property alias dashboard: dashboard
-    readonly property alias popouts: popouts
+    readonly property alias popouts: popoutsWrapper.content
+    readonly property alias popoutsWrapper: popoutsWrapper
     readonly property alias utilities: utilities
     readonly property alias toasts: toasts
     readonly property alias sidebar: sidebar
 
     anchors.fill: parent
-    anchors.margins: Config.border.thickness
+    anchors.margins: borderThickness
     anchors.leftMargin: bar.implicitWidth
 
-    Osd.Wrapper {
-        id: osd
-
-        clip: session.width > 0 || sidebar.width > 0
-        screen: root.screen
-        visibilities: root.visibilities
+    Item {
+        id: osdWrapper
 
         anchors.verticalCenter: parent.verticalCenter
         anchors.right: parent.right
-        anchors.rightMargin: session.width + sidebar.width
+        anchors.rightMargin: sessionWrapper.anchors.rightMargin + session.width * (1 - session.offsetScale)
+        clip: sidebar.visible || session.visible
+
+        implicitWidth: osd.implicitWidth * (1 - osd.offsetScale)
+        implicitHeight: osd.implicitHeight
+
+        Osd.Wrapper {
+            id: osd
+
+            screen: root.screen
+            visibilities: root.visibilities
+            sidebarOrSessionVisible: sidebar.visible || session.visible
+
+            anchors.verticalCenter: parent.verticalCenter
+            anchors.right: parent.right
+        }
     }
 
     Notifications.Wrapper {
         id: notifications
 
         visibilities: root.visibilities
-        panels: root
+        sidebarPanel: sidebar
+        osdPanel: osdWrapper
+        sessionPanel: sessionWrapper
+        utilitiesPanel: utilities
 
         anchors.top: parent.top
         anchors.right: parent.right
     }
 
-    Session.Wrapper {
-        id: session
-
-        clip: sidebar.width > 0
-        visibilities: root.visibilities
-        panels: root
+    Item {
+        id: sessionWrapper
 
         anchors.verticalCenter: parent.verticalCenter
         anchors.right: parent.right
-        anchors.rightMargin: sidebar.width
+        anchors.rightMargin: sidebar.width * (1 - sidebar.offsetScale)
+        clip: sidebar.visible
+
+        implicitWidth: session.implicitWidth * (1 - session.offsetScale)
+        implicitHeight: session.implicitHeight
+
+        Session.Wrapper {
+            id: session
+
+            visibilities: root.visibilities
+            sidebarVisible: sidebar.visible
+
+            anchors.verticalCenter: parent.verticalCenter
+            anchors.right: parent.right
+        }
     }
 
     Launcher.Wrapper {
@@ -86,22 +116,11 @@ Item {
         anchors.top: parent.top
     }
 
-    BarPopouts.Wrapper {
-        id: popouts
+    BarPopouts.ClipWrapper {
+        id: popoutsWrapper
 
         screen: root.screen
-
-        x: isDetached ? (root.width - nonAnimWidth) / 2 : 0
-        y: {
-            if (isDetached)
-                return (root.height - nonAnimHeight) / 2;
-
-            const off = currentCenter - Config.border.thickness - nonAnimHeight / 2;
-            const diff = root.height - Math.floor(off + nonAnimHeight);
-            if (diff < 0)
-                return off + diff;
-            return Math.max(off, 0);
-        }
+        borderThickness: root.borderThickness
     }
 
     Utilities.Wrapper {
@@ -109,7 +128,7 @@ Item {
 
         visibilities: root.visibilities
         sidebar: sidebar
-        popouts: popouts
+        popouts: popoutsWrapper.content
 
         anchors.bottom: parent.bottom
         anchors.right: parent.right
@@ -120,17 +139,17 @@ Item {
 
         anchors.bottom: sidebar.visible ? parent.bottom : utilities.top
         anchors.right: sidebar.left
-        anchors.margins: Appearance.padding.normal
+        anchors.margins: Tokens.padding.medium
     }
 
     Sidebar.Wrapper {
         id: sidebar
 
         visibilities: root.visibilities
-        panels: root
 
         anchors.top: notifications.bottom
         anchors.bottom: utilities.top
         anchors.right: parent.right
+        anchors.topMargin: -notifications.anchors.topMargin
     }
 }

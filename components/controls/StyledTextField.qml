@@ -1,18 +1,17 @@
 pragma ComponentBehavior: Bound
 
-import ".."
-import qs.services
-import qs.config
 import QtQuick
 import QtQuick.Controls
+import Caelestia.Config
+import qs.components
+import qs.services
 
 TextField {
     id: root
 
     color: Colours.palette.m3onSurface
     placeholderTextColor: Colours.palette.m3outline
-    font.family: Appearance.font.family.sans
-    font.pointSize: Appearance.font.size.smaller
+    font: Tokens.font.body.small
     renderType: echoMode === TextField.Password ? TextField.QtRendering : TextField.NativeRendering
     cursorVisible: !readOnly
 
@@ -25,11 +24,9 @@ TextField {
 
         implicitWidth: 2
         color: Colours.palette.m3primary
-        radius: Appearance.rounding.normal
+        radius: Tokens.rounding.large
 
         Connections {
-            target: root
-
             function onCursorPositionChanged(): void {
                 if (root.activeFocus && root.cursorVisible) {
                     cursor.opacity = 1;
@@ -37,6 +34,8 @@ TextField {
                     enableBlink.restart();
                 }
             }
+
+            target: root
         }
 
         Timer {
@@ -61,7 +60,7 @@ TextField {
 
         Behavior on opacity {
             Anim {
-                duration: Appearance.anim.durations.small
+                type: Anim.StandardSmall
             }
         }
     }

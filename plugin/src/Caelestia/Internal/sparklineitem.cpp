@@ -1,4 +1,5 @@
 #include "sparklineitem.hpp"
+#include "circularbuffer.hpp"
 
 #include <qpainter.h>
 #include <qpainterpath.h>
@@ -27,6 +28,9 @@ void SparklineItem::paint(QPainter* painter) {
 }
 
 void SparklineItem::drawLine(QPainter* painter, CircularBuffer* buffer, const QColor& color, qreal fillAlpha) {
+    if (m_historyLength < 2)
+        return;
+
     const qreal w = width();
     const qreal h = height();
     const int len = buffer->count();

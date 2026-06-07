@@ -1,19 +1,16 @@
 pragma ComponentBehavior: Bound
 
-import ".."
-import qs.components
-import qs.components.effects
-import qs.services
-import qs.config
 import QtQuick
 import QtQuick.Layouts
+import Caelestia.Config
+import qs.components
+import qs.services
 
 StyledRect {
     id: root
 
     required property string label
     property int expandedZ: 100
-    property bool enabled: true
 
     property alias menuItems: splitButton.menuItems
     property alias active: splitButton.active
@@ -23,8 +20,8 @@ StyledRect {
     signal selected(item: MenuItem)
 
     Layout.fillWidth: true
-    implicitHeight: row.implicitHeight + Appearance.padding.large * 2
-    radius: Appearance.rounding.normal
+    implicitHeight: row.implicitHeight + Tokens.padding.extraLargeIncreased
+    radius: Tokens.rounding.large
     color: Colours.layer(Colours.palette.m3surfaceContainer, 2)
 
     clip: false
@@ -33,9 +30,10 @@ StyledRect {
 
     RowLayout {
         id: row
+
         anchors.fill: parent
-        anchors.margins: Appearance.padding.large
-        spacing: Appearance.spacing.normal
+        anchors.margins: Tokens.padding.large
+        spacing: Tokens.spacing.medium
 
         StyledText {
             Layout.fillWidth: true
@@ -45,6 +43,7 @@ StyledRect {
 
         SplitButton {
             id: splitButton
+
             enabled: root.enabled
             type: SplitButton.Filled
 

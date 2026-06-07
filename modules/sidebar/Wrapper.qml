@@ -1,51 +1,27 @@
 pragma ComponentBehavior: Bound
 
-import qs.components
-import qs.config
 import QtQuick
+import Caelestia
+import Caelestia.Config
+import qs.components
 
 Item {
     id: root
 
-    required property var visibilities
-    required property var panels
+    required property DrawerVisibilities visibilities
     readonly property Props props: Props {}
 
-    visible: width > 0
-    implicitWidth: 0
+    readonly property bool shouldBeActive: visibilities.sidebar && Config.sidebar.enabled
+    property real offsetScale: shouldBeActive ? 0 : 1
 
-    states: State {
-        name: "visible"
-        when: root.visibilities.sidebar && Config.sidebar.enabled
+    visible: offsetScale < 1
+    anchors.rightMargin: (-implicitWidth - 5) * offsetScale
+    implicitWidth: Tokens.sizes.sidebar.width
+    opacity: 1 - offsetScale
 
-        PropertyChanges {
-            root.implicitWidth: Config.sidebar.sizes.width
-        }
+    Behavior on offsetScale {
+        Anim {}
     }
-
-    transitions: [
-        Transition {
-            from: ""
-            to: "visible"
-
-            Anim {
-                target: root
-                property: "implicitWidth"
-                duration: Appearance.anim.durations.expressiveDefaultSpatial
-                easing.bezierCurve: Appearance.anim.curves.expressiveDefaultSpatial
-            }
-        },
-        Transition {
-            from: "visible"
-            to: ""
-
-            Anim {
-                target: root
-                property: "implicitWidth"
-                easing.bezierCurve: root.panels.osd.width > 0 || root.panels.session.width > 0 ? Appearance.anim.curves.expressiveDefaultSpatial : Appearance.anim.curves.emphasized
-            }
-        }
-    ]
 
     Loader {
         id: content
@@ -53,14 +29,14 @@ Item {
         anchors.top: parent.top
         anchors.bottom: parent.bottom
         anchors.left: parent.left
-        anchors.margins: Appearance.padding.large
+        anchors.leftMargin: Tokens.padding.large
+        anchors.margins: CUtils.clamp(anchors.leftMargin - Config.border.thickness, 0, anchors.leftMargin)
         anchors.bottomMargin: 0
 
-        active: true
-        Component.onCompleted: active = Qt.binding(() => (root.visibilities.sidebar && Config.sidebar.enabled) || root.visible)
+        active: root.shouldBeActive || root.visible
 
         sourceComponent: Content {
-            implicitWidth: Config.sidebar.sizes.width - Appearance.padding.large * 2
+            implicitWidth: Tokens.sizes.sidebar.width - content.anchors.leftMargin - content.anchors.margins
             props: root.props
             visibilities: root.visibilities
         }

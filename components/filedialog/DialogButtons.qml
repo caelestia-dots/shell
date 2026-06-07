@@ -1,7 +1,7 @@
-import ".."
-import qs.services
-import qs.config
 import QtQuick.Layouts
+import Caelestia.Config
+import qs.components
+import qs.services
 
 StyledRect {
     id: root
@@ -9,7 +9,7 @@ StyledRect {
     required property var dialog
     required property FolderContents folder
 
-    implicitHeight: inner.implicitHeight + Appearance.padding.normal * 2
+    implicitHeight: inner.implicitHeight + Tokens.padding.medium * 2
 
     color: Colours.tPalette.m3surfaceContainer
 
@@ -17,9 +17,9 @@ StyledRect {
         id: inner
 
         anchors.fill: parent
-        anchors.margins: Appearance.padding.normal
+        anchors.margins: Tokens.padding.medium
 
-        spacing: Appearance.spacing.small
+        spacing: Tokens.spacing.small
 
         StyledText {
             text: qsTr("Filter:")
@@ -28,14 +28,14 @@ StyledRect {
         StyledRect {
             Layout.fillWidth: true
             Layout.fillHeight: true
-            Layout.rightMargin: Appearance.spacing.normal
+            Layout.rightMargin: Tokens.spacing.medium
 
             color: Colours.tPalette.m3surfaceContainerHigh
-            radius: Appearance.rounding.small
+            radius: Tokens.rounding.medium
 
             StyledText {
                 anchors.fill: parent
-                anchors.margins: Appearance.padding.normal
+                anchors.margins: Tokens.padding.medium
 
                 text: `${root.dialog.filterLabel} (${root.dialog.filters.map(f => `*.${f}`).join(", ")})`
             }
@@ -43,24 +43,21 @@ StyledRect {
 
         StyledRect {
             color: Colours.tPalette.m3surfaceContainerHigh
-            radius: Appearance.rounding.small
+            radius: Tokens.rounding.medium
 
-            implicitWidth: cancelText.implicitWidth + Appearance.padding.normal * 2
-            implicitHeight: cancelText.implicitHeight + Appearance.padding.normal * 2
+            implicitWidth: cancelText.implicitWidth + Tokens.padding.medium * 2
+            implicitHeight: cancelText.implicitHeight + Tokens.padding.medium * 2
 
             StateLayer {
                 disabled: !root.dialog.selectionValid
-
-                function onClicked(): void {
-                    root.dialog.accepted(root.folder.currentItem.modelData.path);
-                }
+                onClicked: root.dialog.accepted(root.folder.currentItem.modelData.path)
             }
 
             StyledText {
                 id: selectText
 
                 anchors.centerIn: parent
-                anchors.margins: Appearance.padding.normal
+                anchors.margins: Tokens.padding.medium
 
                 text: qsTr("Select")
                 color: root.dialog.selectionValid ? Colours.palette.m3onSurface : Colours.palette.m3outline
@@ -69,13 +66,13 @@ StyledRect {
 
         StyledRect {
             color: Colours.tPalette.m3surfaceContainerHigh
-            radius: Appearance.rounding.small
+            radius: Tokens.rounding.medium
 
-            implicitWidth: cancelText.implicitWidth + Appearance.padding.normal * 2
-            implicitHeight: cancelText.implicitHeight + Appearance.padding.normal * 2
+            implicitWidth: cancelText.implicitWidth + Tokens.padding.medium * 2
+            implicitHeight: cancelText.implicitHeight + Tokens.padding.medium * 2
 
             StateLayer {
-                function onClicked(): void {
+                onClicked: {
                     root.dialog.rejected();
                 }
             }
@@ -84,7 +81,7 @@ StyledRect {
                 id: cancelText
 
                 anchors.centerIn: parent
-                anchors.margins: Appearance.padding.normal
+                anchors.margins: Tokens.padding.medium
 
                 text: qsTr("Cancel")
             }

@@ -1,14 +1,13 @@
 pragma ComponentBehavior: Bound
 
-import qs.components
-import qs.services
-import qs.config
-import Caelestia
+import QtQuick
 import Quickshell
 import Quickshell.Io
 import Quickshell.Wayland
-import QtQuick
-import QtQuick.Effects
+import Caelestia
+import qs.components
+import qs.components.effects
+import qs.services
 
 MouseArea {
     id: root
@@ -167,19 +166,19 @@ MouseArea {
                 target: root
                 property: "opacity"
                 to: 0
-                duration: Appearance.anim.durations.large
+                type: Anim.StandardLarge
             }
-            ExAnim {
+            Anim {
                 target: root
                 properties: "rsx,rsy"
                 to: 0
             }
-            ExAnim {
+            Anim {
                 target: root
                 property: "sw"
                 to: root.screen.width
             }
-            ExAnim {
+            Anim {
                 target: root
                 property: "sh"
                 to: root.screen.height
@@ -206,6 +205,7 @@ MouseArea {
     Loader {
         id: screencopy
 
+        asynchronous: true
         anchors.fill: parent
 
         active: root.loader.freeze
@@ -230,12 +230,9 @@ MouseArea {
         opacity: 0.3
 
         layer.enabled: true
-        layer.effect: MultiEffect {
+        layer.effect: Mask {
             maskSource: selectionWrapper
-            maskEnabled: true
             maskInverted: true
-            maskSpreadAtMin: 1
-            maskThresholdMin: 0.5
         }
     }
 
@@ -277,36 +274,31 @@ MouseArea {
 
     Behavior on opacity {
         Anim {
-            duration: Appearance.anim.durations.large
+            type: Anim.StandardLarge
         }
     }
 
     Behavior on rsx {
         enabled: !root.pressed
 
-        ExAnim {}
+        Anim {}
     }
 
     Behavior on rsy {
         enabled: !root.pressed
 
-        ExAnim {}
+        Anim {}
     }
 
     Behavior on sw {
         enabled: !root.pressed
 
-        ExAnim {}
+        Anim {}
     }
 
     Behavior on sh {
         enabled: !root.pressed
 
-        ExAnim {}
-    }
-
-    component ExAnim: Anim {
-        duration: Appearance.anim.durations.expressiveDefaultSpatial
-        easing.bezierCurve: Appearance.anim.curves.expressiveDefaultSpatial
+        Anim {}
     }
 }

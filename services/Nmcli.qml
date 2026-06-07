@@ -1,9 +1,9 @@
 pragma Singleton
 pragma ComponentBehavior: Bound
 
+import QtQuick
 import Quickshell
 import Quickshell.Io
-import QtQuick
 
 Singleton {
     id: root
@@ -12,6 +12,7 @@ Singleton {
     property var wirelessInterfaces: []
     property var ethernetInterfaces: []
     property bool isConnected: false
+    readonly property bool connecting: wirelessInterfaces.some(i => isConnectingState(i.state))
     property string activeInterface: ""
     property string activeConnection: ""
     property bool wifiEnabled: true
@@ -24,13 +25,14 @@ Singleton {
     property var wifiConnectionQueue: []
     property int currentSsidQueryIndex: 0
     property var pendingConnection: null
-    signal connectionFailed(string ssid)
     property var wirelessDeviceDetails: null
     property var ethernetDeviceDetails: null
     property list<var> ethernetDevices: []
     readonly property var activeEthernet: ethernetDevices.find(d => d.connected) ?? null
-
     property list<var> activeProcesses: []
+
+    readonly property alias connectionCheckTimer: connectionCheckTimer
+    readonly property alias immediateCheckTimer: immediateCheckTimer
 
     // Constants
     readonly property string deviceTypeWifi: "wifi"
@@ -54,6 +56,8 @@ Singleton {
     readonly property string connectionParamSsid: "ssid"
     readonly property string connectionParamPassword: "password"
     readonly property string connectionParamBssid: "802-11-wireless.bssid"
+
+    signal connectionFailed(string ssid)
 
     function detectPasswordRequired(error: string): bool {
         if (!error || error.length === 0) {
@@ -163,9 +167,18 @@ Singleton {
         return state === "100 (connected)" || state === "connected" || state.startsWith("connected");
     }
 
+    function isConnectingState(state: string): bool {
+        return !!state && state.startsWith("connecting");
+    }
+
+    function connectingSsid(): string {
+        const iface = root.wirelessInterfaces.find(i => isConnectingState(i.state));
+        return iface ? iface.connection : "";
+    }
+
     function executeCommand(args: list<string>, callback: var): void {
         const proc = commandProc.createObject(root);
-        proc.command = ["nmcli", ...args];
+        proc.cmdArgs = ["nmcli", ...args];
         proc.callback = callback;
 
         activeProcesses.push(proc);
@@ -178,7 +191,7 @@ Singleton {
         });
 
         Qt.callLater(() => {
-            proc.exec(proc.command);
+            proc.exec(proc.cmdArgs);
         });
     }
 
@@ -388,7 +401,7 @@ Singleton {
             }
 
             if (!result.success && root.pendingConnection && retries < maxRetries) {
-                console.warn("[NMCLI] Connection failed, retrying... (attempt " + (retries + 1) + "/" + maxRetries + ")");
+                console.warn(lc, "Connection failed, retrying... (attempt " + (retries + 1) + "/" + maxRetries + ")");
                 Qt.callLater(() => {
                     connectWireless(ssid, password, bssid, callback, retries + 1);
                 }, 1000);
@@ -414,7 +427,7 @@ Singleton {
                         loadSavedConnections(() => {});
                         activateConnection(ssid, callback);
                     } else {
-                        console.warn("[NMCLI] Connection profile creation failed, trying fallback...");
+                        console.warn(lc, "Connection profile creation failed, trying fallback...");
                         let fallbackCmd = [root.nmcliCommandDevice, root.nmcliCommandWifi, "connect", ssid, root.connectionParamPassword, password];
                         executeCommand(fallbackCmd, fallbackResult => {
                             if (callback)
@@ -837,7 +850,7 @@ Singleton {
             return false;
         }
 
-        if (!isConnectionCommand(proc.command) || !root.pendingConnection || !root.pendingConnection.callback) {
+        if (!isConnectionCommand(proc.cmdArgs) || !root.pendingConnection || !root.pendingConnection.callback) {
             return false;
         }
 
@@ -867,247 +880,6 @@ Singleton {
         }
 
         return false;
-    }
-
-    component CommandProcess: Process {
-        id: proc
-
-        property var callback: null
-        property list<string> command: []
-        property bool callbackCalled: false
-        property int exitCode: 0
-
-        signal processFinished
-
-        environment: ({
-                LANG: "C.UTF-8",
-                LC_ALL: "C.UTF-8"
-            })
-
-        stdout: StdioCollector {
-            id: stdoutCollector
-        }
-
-        stderr: StdioCollector {
-            id: stderrCollector
-
-            onStreamFinished: {
-                const error = text.trim();
-                if (error && error.length > 0) {
-                    const output = (stdoutCollector && stdoutCollector.text) ? stdoutCollector.text : "";
-                    root.handlePasswordRequired(proc, error, output, -1);
-                }
-            }
-        }
-
-        onExited: code => {
-            exitCode = code;
-
-            Qt.callLater(() => {
-                if (callbackCalled) {
-                    processFinished();
-                    return;
-                }
-
-                if (proc.callback) {
-                    const output = (stdoutCollector && stdoutCollector.text) ? stdoutCollector.text : "";
-                    const error = (stderrCollector && stderrCollector.text) ? stderrCollector.text : "";
-                    const success = exitCode === 0;
-                    const cmdIsConnection = isConnectionCommand(proc.command);
-
-                    if (root.handlePasswordRequired(proc, error, output, exitCode)) {
-                        processFinished();
-                        return;
-                    }
-
-                    const needsPassword = cmdIsConnection && root.detectPasswordRequired(error);
-
-                    if (!success && cmdIsConnection && root.pendingConnection) {
-                        const failedSsid = root.pendingConnection.ssid;
-                        root.connectionFailed(failedSsid);
-                    }
-
-                    callbackCalled = true;
-                    callback({
-                        success: success,
-                        output: output,
-                        error: error,
-                        exitCode: proc.exitCode,
-                        needsPassword: needsPassword || false
-                    });
-                    processFinished();
-                } else {
-                    processFinished();
-                }
-            });
-        }
-    }
-
-    Component {
-        id: commandProc
-
-        CommandProcess {}
-    }
-
-    component AccessPoint: QtObject {
-        required property var lastIpcObject
-        readonly property string ssid: lastIpcObject.ssid
-        readonly property string bssid: lastIpcObject.bssid
-        readonly property int strength: lastIpcObject.strength
-        readonly property int frequency: lastIpcObject.frequency
-        readonly property bool active: lastIpcObject.active
-        readonly property string security: lastIpcObject.security
-        readonly property bool isSecure: security.length > 0
-    }
-
-    Component {
-        id: apComp
-
-        AccessPoint {}
-    }
-
-    Timer {
-        id: connectionCheckTimer
-
-        interval: 4000
-        onTriggered: {
-            if (root.pendingConnection) {
-                const connected = root.active && root.active.ssid === root.pendingConnection.ssid;
-
-                if (!connected && root.pendingConnection.callback) {
-                    let foundPasswordError = false;
-                    for (let i = 0; i < root.activeProcesses.length; i++) {
-                        const proc = root.activeProcesses[i];
-                        if (proc && proc.stderr && proc.stderr.text) {
-                            const error = proc.stderr.text.trim();
-                            if (error && error.length > 0) {
-                                if (root.isConnectionCommand(proc.command)) {
-                                    const needsPassword = root.detectPasswordRequired(error);
-
-                                    if (needsPassword && !proc.callbackCalled && root.pendingConnection) {
-                                        const pending = root.pendingConnection;
-                                        root.pendingConnection = null;
-                                        immediateCheckTimer.stop();
-                                        immediateCheckTimer.checkCount = 0;
-                                        proc.callbackCalled = true;
-                                        const result = {
-                                            success: false,
-                                            output: (proc.stdout && proc.stdout.text) ? proc.stdout.text : "",
-                                            error: error,
-                                            exitCode: -1,
-                                            needsPassword: true
-                                        };
-                                        if (pending.callback) {
-                                            pending.callback(result);
-                                        }
-                                        if (proc.callback && proc.callback !== pending.callback) {
-                                            proc.callback(result);
-                                        }
-                                        foundPasswordError = true;
-                                        break;
-                                    }
-                                }
-                            }
-                        }
-                    }
-
-                    if (!foundPasswordError) {
-                        const pending = root.pendingConnection;
-                        const failedSsid = pending.ssid;
-                        root.pendingConnection = null;
-                        immediateCheckTimer.stop();
-                        immediateCheckTimer.checkCount = 0;
-                        root.connectionFailed(failedSsid);
-                        pending.callback({
-                            success: false,
-                            output: "",
-                            error: "Connection timeout",
-                            exitCode: -1,
-                            needsPassword: false
-                        });
-                    }
-                } else if (connected) {
-                    root.pendingConnection = null;
-                    immediateCheckTimer.stop();
-                    immediateCheckTimer.checkCount = 0;
-                }
-            }
-        }
-    }
-
-    Timer {
-        id: immediateCheckTimer
-
-        property int checkCount: 0
-
-        interval: 500
-        repeat: true
-        triggeredOnStart: false
-
-        onTriggered: {
-            if (root.pendingConnection) {
-                checkCount++;
-                const connected = root.active && root.active.ssid === root.pendingConnection.ssid;
-
-                if (connected) {
-                    connectionCheckTimer.stop();
-                    immediateCheckTimer.stop();
-                    immediateCheckTimer.checkCount = 0;
-                    if (root.pendingConnection.callback) {
-                        root.pendingConnection.callback({
-                            success: true,
-                            output: "Connected",
-                            error: "",
-                            exitCode: 0
-                        });
-                    }
-                    root.pendingConnection = null;
-                } else {
-                    for (let i = 0; i < root.activeProcesses.length; i++) {
-                        const proc = root.activeProcesses[i];
-                        if (proc && proc.stderr && proc.stderr.text) {
-                            const error = proc.stderr.text.trim();
-                            if (error && error.length > 0) {
-                                if (root.isConnectionCommand(proc.command)) {
-                                    const needsPassword = root.detectPasswordRequired(error);
-
-                                    if (needsPassword && !proc.callbackCalled && root.pendingConnection && root.pendingConnection.callback) {
-                                        connectionCheckTimer.stop();
-                                        immediateCheckTimer.stop();
-                                        immediateCheckTimer.checkCount = 0;
-                                        const pending = root.pendingConnection;
-                                        root.pendingConnection = null;
-                                        proc.callbackCalled = true;
-                                        const result = {
-                                            success: false,
-                                            output: (proc.stdout && proc.stdout.text) ? proc.stdout.text : "",
-                                            error: error,
-                                            exitCode: -1,
-                                            needsPassword: true
-                                        };
-                                        if (pending.callback) {
-                                            pending.callback(result);
-                                        }
-                                        if (proc.callback && proc.callback !== pending.callback) {
-                                            proc.callback(result);
-                                        }
-                                        return;
-                                    }
-                                }
-                            }
-                        }
-                    }
-
-                    if (checkCount >= 6) {
-                        immediateCheckTimer.stop();
-                        immediateCheckTimer.checkCount = 0;
-                    }
-                }
-            } else {
-                immediateCheckTimer.stop();
-                immediateCheckTimer.checkCount = 0;
-            }
-        }
     }
 
     function checkPendingConnection(): void {
@@ -1261,36 +1033,6 @@ Singleton {
         return details;
     }
 
-    Process {
-        id: rescanProc
-
-        command: ["nmcli", "dev", root.nmcliCommandWifi, "list", "--rescan", "yes"]
-        onExited: root.getNetworks()
-    }
-
-    Process {
-        id: monitorProc
-
-        running: true
-        command: ["nmcli", "monitor"]
-        environment: ({
-                LANG: "C.UTF-8",
-                LC_ALL: "C.UTF-8"
-            })
-        stdout: SplitParser {
-            onRead: root.refreshOnConnectionChange()
-        }
-        onExited: monitorRestartTimer.start()
-    }
-
-    Timer {
-        id: monitorRestartTimer
-        interval: 2000
-        onTriggered: {
-            monitorProc.running = true;
-        }
-    }
-
     function refreshOnConnectionChange(): void {
         getNetworks(networks => {
             const newActive = root.active;
@@ -1356,5 +1098,284 @@ Singleton {
                 }
             }
         }, 2000);
+    }
+
+    Component {
+        id: commandProc
+
+        CommandProcess {}
+    }
+
+    Component {
+        id: apComp
+
+        AccessPoint {}
+    }
+
+    Timer {
+        id: connectionCheckTimer
+
+        interval: 4000
+        onTriggered: {
+            if (root.pendingConnection) {
+                const connected = root.active && root.active.ssid === root.pendingConnection.ssid;
+
+                if (!connected && root.pendingConnection.callback) {
+                    let foundPasswordError = false;
+                    for (let i = 0; i < root.activeProcesses.length; i++) {
+                        const proc = root.activeProcesses[i];
+                        if (proc && proc.stderr && proc.stderr.text) {
+                            const error = proc.stderr.text.trim();
+                            if (error && error.length > 0) {
+                                if (root.isConnectionCommand(proc.cmdArgs)) {
+                                    const needsPassword = root.detectPasswordRequired(error);
+
+                                    if (needsPassword && !proc.callbackCalled && root.pendingConnection) {
+                                        const pending = root.pendingConnection;
+                                        root.pendingConnection = null;
+                                        immediateCheckTimer.stop();
+                                        immediateCheckTimer.checkCount = 0;
+                                        proc.callbackCalled = true;
+                                        const result = {
+                                            success: false,
+                                            output: (proc.stdout && proc.stdout.text) ? proc.stdout.text : "",
+                                            error: error,
+                                            exitCode: -1,
+                                            needsPassword: true
+                                        };
+                                        if (pending.callback) {
+                                            pending.callback(result);
+                                        }
+                                        if (proc.callback && proc.callback !== pending.callback) {
+                                            proc.callback(result);
+                                        }
+                                        foundPasswordError = true;
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    if (!foundPasswordError) {
+                        const pending = root.pendingConnection;
+                        const failedSsid = pending.ssid;
+                        root.pendingConnection = null;
+                        immediateCheckTimer.stop();
+                        immediateCheckTimer.checkCount = 0;
+                        root.connectionFailed(failedSsid);
+                        pending.callback({
+                            success: false,
+                            output: "",
+                            error: "Connection timeout",
+                            exitCode: -1,
+                            needsPassword: false
+                        });
+                    }
+                } else if (connected) {
+                    root.pendingConnection = null;
+                    immediateCheckTimer.stop();
+                    immediateCheckTimer.checkCount = 0;
+                }
+            }
+        }
+    }
+
+    Timer {
+        id: immediateCheckTimer
+
+        property int checkCount: 0
+
+        interval: 500
+        repeat: true
+        triggeredOnStart: false
+
+        onTriggered: {
+            if (root.pendingConnection) {
+                checkCount++;
+                const connected = root.active && root.active.ssid === root.pendingConnection.ssid;
+
+                if (connected) {
+                    connectionCheckTimer.stop();
+                    immediateCheckTimer.stop();
+                    immediateCheckTimer.checkCount = 0;
+                    if (root.pendingConnection.callback) {
+                        root.pendingConnection.callback({
+                            success: true,
+                            output: "Connected",
+                            error: "",
+                            exitCode: 0
+                        });
+                    }
+                    root.pendingConnection = null;
+                } else {
+                    for (let i = 0; i < root.activeProcesses.length; i++) {
+                        const proc = root.activeProcesses[i];
+                        if (proc && proc.stderr && proc.stderr.text) {
+                            const error = proc.stderr.text.trim();
+                            if (error && error.length > 0) {
+                                if (root.isConnectionCommand(proc.cmdArgs)) {
+                                    const needsPassword = root.detectPasswordRequired(error);
+
+                                    if (needsPassword && !proc.callbackCalled && root.pendingConnection && root.pendingConnection.callback) {
+                                        connectionCheckTimer.stop();
+                                        immediateCheckTimer.stop();
+                                        immediateCheckTimer.checkCount = 0;
+                                        const pending = root.pendingConnection;
+                                        root.pendingConnection = null;
+                                        proc.callbackCalled = true;
+                                        const result = {
+                                            success: false,
+                                            output: (proc.stdout && proc.stdout.text) ? proc.stdout.text : "",
+                                            error: error,
+                                            exitCode: -1,
+                                            needsPassword: true
+                                        };
+                                        if (pending.callback) {
+                                            pending.callback(result);
+                                        }
+                                        if (proc.callback && proc.callback !== pending.callback) {
+                                            proc.callback(result);
+                                        }
+                                        return;
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    if (checkCount >= 6) {
+                        immediateCheckTimer.stop();
+                        immediateCheckTimer.checkCount = 0;
+                    }
+                }
+            } else {
+                immediateCheckTimer.stop();
+                immediateCheckTimer.checkCount = 0;
+            }
+        }
+    }
+
+    Process {
+        id: rescanProc
+
+        command: ["nmcli", "dev", root.nmcliCommandWifi, "list", "--rescan", "yes"]
+        onExited: root.getNetworks() // qmllint disable signal-handler-parameters
+    }
+
+    Process {
+        id: monitorProc
+
+        running: true
+        command: ["nmcli", "monitor"]
+        environment: ({
+                LANG: "C.UTF-8",
+                LC_ALL: "C.UTF-8"
+            })
+        stdout: SplitParser {
+            onRead: root.refreshOnConnectionChange()
+        }
+        onExited: monitorRestartTimer.start() // qmllint disable signal-handler-parameters
+    }
+
+    Timer {
+        id: monitorRestartTimer
+
+        interval: 2000
+        onTriggered: {
+            monitorProc.running = true;
+        }
+    }
+
+    LoggingCategory {
+        id: lc
+
+        name: "caelestia.qml.services.nmcli"
+        defaultLogLevel: LoggingCategory.Info
+    }
+
+    component CommandProcess: Process {
+        id: proc
+
+        property var callback: null
+        property list<string> cmdArgs: []
+        property bool callbackCalled: false
+        property int exitCode: 0
+
+        signal processFinished
+
+        environment: ({
+                LANG: "C.UTF-8",
+                LC_ALL: "C.UTF-8"
+            })
+
+        stdout: StdioCollector {
+            id: stdoutCollector
+        }
+
+        stderr: StdioCollector {
+            id: stderrCollector
+
+            onStreamFinished: {
+                const error = text.trim();
+                if (error && error.length > 0) {
+                    const output = (stdoutCollector && stdoutCollector.text) ? stdoutCollector.text : "";
+                    root.handlePasswordRequired(proc, error, output, -1);
+                }
+            }
+        }
+
+        onExited: code => { // qmllint disable signal-handler-parameters
+            exitCode = code;
+
+            Qt.callLater(() => {
+                if (callbackCalled) {
+                    processFinished();
+                    return;
+                }
+
+                if (proc.callback) {
+                    const output = (stdoutCollector && stdoutCollector.text) ? stdoutCollector.text : "";
+                    const error = (stderrCollector && stderrCollector.text) ? stderrCollector.text : "";
+                    const success = exitCode === 0;
+                    const cmdIsConnection = isConnectionCommand(proc.cmdArgs);
+
+                    if (root.handlePasswordRequired(proc, error, output, exitCode)) {
+                        processFinished();
+                        return;
+                    }
+
+                    const needsPassword = cmdIsConnection && root.detectPasswordRequired(error);
+
+                    if (!success && cmdIsConnection && root.pendingConnection) {
+                        const failedSsid = root.pendingConnection.ssid;
+                        root.connectionFailed(failedSsid);
+                    }
+
+                    callbackCalled = true;
+                    callback({
+                        success: success,
+                        output: output,
+                        error: error,
+                        exitCode: proc.exitCode,
+                        needsPassword: needsPassword || false
+                    });
+                    processFinished();
+                } else {
+                    processFinished();
+                }
+            });
+        }
+    }
+
+    component AccessPoint: QtObject {
+        required property var lastIpcObject
+        readonly property string ssid: lastIpcObject.ssid
+        readonly property string bssid: lastIpcObject.bssid
+        readonly property int strength: lastIpcObject.strength
+        readonly property int frequency: lastIpcObject.frequency
+        readonly property bool active: lastIpcObject.active
+        readonly property string security: lastIpcObject.security
+        readonly property bool isSecure: security.length > 0
     }
 }

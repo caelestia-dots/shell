@@ -1,58 +1,34 @@
-import qs.components
-import qs.services
-import qs.config
 import QtQuick
 import QtQuick.Layouts
+import Caelestia.Config
+import qs.components
+import qs.services
 
 RowLayout {
     id: root
 
     required property var lock
 
-    spacing: Appearance.spacing.large * 2
+    spacing: Tokens.spacing.largeIncreased * 2
 
     ColumnLayout {
         Layout.fillWidth: true
-        spacing: Appearance.spacing.normal
+        spacing: Tokens.spacing.medium
 
-        StyledRect {
+        WeatherInfo {
             Layout.fillWidth: true
-            implicitHeight: weather.implicitHeight
-
-            topLeftRadius: Appearance.rounding.large
-            radius: Appearance.rounding.small
-            color: Colours.tPalette.m3surfaceContainer
-
-            WeatherInfo {
-                id: weather
-
-                rootHeight: root.height
-            }
+            rootHeight: root.height
         }
 
-        StyledRect {
+        Fetch {
+            Layout.fillWidth: true
+            rootHeight: root.height
+        }
+
+        Media {
             Layout.fillWidth: true
             Layout.fillHeight: true
-
-            radius: Appearance.rounding.small
-            color: Colours.tPalette.m3surfaceContainer
-
-            Fetch {}
-        }
-
-        StyledClippingRect {
-            Layout.fillWidth: true
-            implicitHeight: media.implicitHeight
-
-            bottomLeftRadius: Appearance.rounding.large
-            radius: Appearance.rounding.small
-            color: Colours.tPalette.m3surfaceContainer
-
-            Media {
-                id: media
-
-                lock: root.lock
-            }
+            lock: root.lock
         }
     }
 
@@ -62,27 +38,18 @@ RowLayout {
 
     ColumnLayout {
         Layout.fillWidth: true
-        spacing: Appearance.spacing.normal
+        spacing: Tokens.spacing.medium
 
-        StyledRect {
+        Resources {
             Layout.fillWidth: true
-            implicitHeight: resources.implicitHeight
-
-            topRightRadius: Appearance.rounding.large
-            radius: Appearance.rounding.small
-            color: Colours.tPalette.m3surfaceContainer
-
-            Resources {
-                id: resources
-            }
         }
 
         StyledRect {
             Layout.fillWidth: true
             Layout.fillHeight: true
 
-            bottomRightRadius: Appearance.rounding.large
-            radius: Appearance.rounding.small
+            bottomRightRadius: Tokens.rounding.extraLarge
+            radius: Tokens.rounding.medium
             color: Colours.tPalette.m3surfaceContainer
 
             NotifDock {

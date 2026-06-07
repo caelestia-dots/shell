@@ -1,10 +1,9 @@
-import ".."
-import qs.components.effects
-import qs.services
-import qs.config
 import QtQuick
 import QtQuick.Controls
-import QtQuick.Layouts
+import Caelestia.Config
+import qs.components
+import qs.components.effects
+import qs.services
 
 Popup {
     id: root
@@ -22,6 +21,43 @@ Popup {
     property Timer hideTimer: Timer {
         interval: root.timeout
         onTriggered: root.tooltipVisible = false
+    }
+
+    function updatePosition() {
+        if (!target || !parent)
+            return;
+
+        // Wait for tooltipRect to have its size calculated
+        Qt.callLater(() => {
+            if (!target || !parent || !tooltipRect)
+                return;
+
+            // Get target position in parent's coordinate system
+            const targetPos = target.mapToItem(parent, 0, 0);
+            const targetCenterX = targetPos.x + target.width / 2;
+
+            // Get tooltip size (use width/height if available, otherwise implicit)
+            const tooltipWidth = tooltipRect.width > 0 ? tooltipRect.width : tooltipRect.implicitWidth;
+            const tooltipHeight = tooltipRect.height > 0 ? tooltipRect.height : tooltipRect.implicitHeight;
+
+            // Center tooltip horizontally on target
+            let newX = targetCenterX - tooltipWidth / 2;
+
+            // Position tooltip above target
+            let newY = targetPos.y - tooltipHeight - Tokens.spacing.small;
+
+            // Keep within bounds
+            const padding = Tokens.padding.medium;
+            if (newX < padding) {
+                newX = padding;
+            } else if (newX + tooltipWidth > (parent.width - padding)) {
+                newX = parent.width - tooltipWidth - padding;
+            }
+
+            // Update popup position
+            x = newX;
+            y = newY;
+        });
     }
 
     // Popup properties - doesn't affect layout
@@ -53,61 +89,10 @@ Popup {
             Qt.callLater(updatePosition);
         }
     }
-    Connections {
-        target: root.target
-        function onXChanged() {
-            if (root.tooltipVisible)
-                root.updatePosition();
+    Component.onCompleted: {
+        if (tooltipVisible) {
+            updatePosition();
         }
-        function onYChanged() {
-            if (root.tooltipVisible)
-                root.updatePosition();
-        }
-        function onWidthChanged() {
-            if (root.tooltipVisible)
-                root.updatePosition();
-        }
-        function onHeightChanged() {
-            if (root.tooltipVisible)
-                root.updatePosition();
-        }
-    }
-
-    function updatePosition() {
-        if (!target || !parent)
-            return;
-
-        // Wait for tooltipRect to have its size calculated
-        Qt.callLater(() => {
-            if (!target || !parent || !tooltipRect)
-                return;
-
-            // Get target position in parent's coordinate system
-            const targetPos = target.mapToItem(parent, 0, 0);
-            const targetCenterX = targetPos.x + target.width / 2;
-
-            // Get tooltip size (use width/height if available, otherwise implicit)
-            const tooltipWidth = tooltipRect.width > 0 ? tooltipRect.width : tooltipRect.implicitWidth;
-            const tooltipHeight = tooltipRect.height > 0 ? tooltipRect.height : tooltipRect.implicitHeight;
-
-            // Center tooltip horizontally on target
-            let newX = targetCenterX - tooltipWidth / 2;
-
-            // Position tooltip above target
-            let newY = targetPos.y - tooltipHeight - Appearance.spacing.small;
-
-            // Keep within bounds
-            const padding = Appearance.padding.normal;
-            if (newX < padding) {
-                newX = padding;
-            } else if (newX + tooltipWidth > (parent.width - padding)) {
-                newX = parent.width - tooltipWidth - padding;
-            }
-
-            // Update popup position
-            x = newX;
-            y = newY;
-        });
     }
 
     enter: Transition {
@@ -115,8 +100,7 @@ Popup {
             property: "opacity"
             from: 0
             to: 1
-            duration: Appearance.anim.durations.expressiveFastSpatial
-            easing.bezierCurve: Appearance.anim.curves.expressiveFastSpatial
+            type: Anim.FastSpatial
         }
     }
 
@@ -125,37 +109,18 @@ Popup {
             property: "opacity"
             from: 1
             to: 0
-            duration: Appearance.anim.durations.expressiveFastSpatial
-            easing.bezierCurve: Appearance.anim.curves.expressiveFastSpatial
-        }
-    }
-
-    // Monitor hover state
-    Connections {
-        target: root.target
-        function onHoveredChanged() {
-            if (target.hovered) {
-                showTimer.start();
-                if (timeout > 0) {
-                    hideTimer.stop();
-                    hideTimer.start();
-                }
-            } else {
-                showTimer.stop();
-                hideTimer.stop();
-                tooltipVisible = false;
-            }
+            type: Anim.FastSpatial
         }
     }
 
     contentItem: StyledRect {
         id: tooltipRect
 
-        implicitWidth: tooltipText.implicitWidth + Appearance.padding.normal * 2
-        implicitHeight: tooltipText.implicitHeight + Appearance.padding.smaller * 2
+        implicitWidth: tooltipText.implicitWidth + Tokens.padding.medium * 2
+        implicitHeight: tooltipText.implicitHeight + Tokens.padding.large
 
         color: Colours.palette.m3surfaceContainerHighest
-        radius: Appearance.rounding.small
+        radius: Tokens.rounding.medium
         antialiasing: true
 
         // Add elevation for depth
@@ -173,13 +138,47 @@ Popup {
 
             text: root.text
             color: Colours.palette.m3onSurface
-            font.pointSize: Appearance.font.size.small
+            font: Tokens.font.body.small
         }
     }
 
-    Component.onCompleted: {
-        if (tooltipVisible) {
-            updatePosition();
+    Connections {
+        function onXChanged() {
+            if (root.tooltipVisible)
+                root.updatePosition();
         }
+        function onYChanged() {
+            if (root.tooltipVisible)
+                root.updatePosition();
+        }
+        function onWidthChanged() {
+            if (root.tooltipVisible)
+                root.updatePosition();
+        }
+        function onHeightChanged() {
+            if (root.tooltipVisible)
+                root.updatePosition();
+        }
+
+        target: root.target
+    }
+
+    // Monitor hover state
+    Connections {
+        function onHoveredChanged() {
+            if (target.hovered) {
+                showTimer.start();
+                if (timeout > 0) {
+                    hideTimer.stop();
+                    hideTimer.start();
+                }
+            } else {
+                showTimer.stop();
+                hideTimer.stop();
+                tooltipVisible = false;
+            }
+        }
+
+        target: root.target
     }
 }

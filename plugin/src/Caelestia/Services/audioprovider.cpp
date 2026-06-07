@@ -2,8 +2,11 @@
 
 #include "audiocollector.hpp"
 #include "service.hpp"
-#include <qdebug.h>
+#include <qloggingcategory.h>
 #include <qthread.h>
+
+Q_LOGGING_CATEGORY(lcAp, "caelestia.services.ap", QtInfoMsg)
+Q_LOGGING_CATEGORY(lcApProcessor, "caelestia.services.ap.processor", QtInfoMsg)
 
 namespace caelestia::services {
 
@@ -48,7 +51,7 @@ AudioProvider::~AudioProvider() {
 
 void AudioProvider::init() {
     if (!m_processor) {
-        qWarning() << "AudioProvider::init: attempted to init with no processor set";
+        qCWarning(lcAp) << "init: attempted to init with no processor set";
         return;
     }
 

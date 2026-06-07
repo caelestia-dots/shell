@@ -205,46 +205,122 @@ git pull
 ## Configuring
 
 All configuration options should be put in `~/.config/caelestia/shell.json`. This file is _not_ created by
-default, you must create it manually.
+default, you must create it manually. Options that you omit from the config file will use their default
+values.
+
+### Per-monitor configuration
+
+You can configure options per-monitor in `~/.config/caelestia/monitors/<screen-name>/shell.json`. Options
+set in this file will **override** the respective options in the global config. Otherwise, the options will
+use their values from the global config.
+
+For example, to disable the bar on DP-1:
+
+**`~/.config/caelestia/monitors/DP-1/shell.json`**
+
+```json
+{
+    "bar": {
+        "persistent": false
+    }
+}
+```
+
+> [!NOTE]
+> Not all options are respect per-monitor overrides. Most notably, the following options will only read
+> from the global config, and ignore the respective option in per-monitor config files.
+>
+> <details><summary>Ignored options</summary>
+>
+> - `appearance` (`anim`, `transparency`)
+> - `general` (`logo`, `apps`, `idle`, `battery`)
+> - `bar.workspaces` (`perMonitorWorkspaces`, `specialWorkspaceIcons`, `windowIcons`)
+> - `bar.tray` (`iconSubs`, `hiddenIcons`)
+> - `dashboard` (`mediaUpdateInterval`, `resourceUpdateInterval`)
+> - `launcher` (`specialPrefix`, `actionPrefix`, `enableDangerousActions`, `vimKeybinds`,
+>   `favouriteApps`, `hiddenApps`, `actions`)
+> - `launcher.useFuzzy` (`apps`, `actions`, `schemes`, `variants`, `wallpapers`)
+> - `notifs` (`expire`, `fullscreen`, `defaultExpireTimeout`, `fullscreenExpireTimeout`, `actionOnClick`)
+> - `lock` (`enableFprint`, `maxFprintTries`)
+> - `nexus` (`networkRescanInterval`)
+> - `utilities.toasts` (all except `fullscreen`)
+> - `utilities.vpn` (`enabled`, `provider`)
+> - `services` (`weatherLocation`, `useFahrenheit`, `useFahrenheitPerformance`, `useTwelveHourClock`,
+>   `gpuType`, `visualiserBars`, `audioIncrement`, `brightnessIncrement`, `maxVolume`, `smartScheme`,
+>   `defaultPlayer`, `playerAliases`, `lyricsBackend`)
+> - `paths` (`wallpaperDir`, `lyricsDir`)
+>
+> </details>
 
 ### Example configuration
 
 > [!NOTE]
-> The example configuration only includes recommended configuration options. For more advanced customisation
-> such as modifying the size of individual items or changing constants in the code, there are some other
-> options which can be found in the source files in the `config` directory.
+> The example configuration includes ALL configuration options in `shell.json`. You are
+> **not** recommended to copy and paste this entire configuration into `shell.json`.
+> This is meant to serve as a reference of all the available options, and you should
+> only add the ones you want to change to `shell.json`.
 
 <details><summary>Example</summary>
 
 ```json
 {
+    "enabled": true,
     "appearance": {
-        "mediaGifSpeedAdjustment": 300,
-        "sessionGifSpeed": 0.7,
-        "anim": {
-            "durations": {
-                "scale": 1
-            }
-        },
-        "font": {
-            "family": {
-                "clock": "Rubik",
-                "material": "Material Symbols Rounded",
-                "mono": "CaskaydiaCove NF",
-                "sans": "Rubik"
-            },
-            "size": {
-                "scale": 1
-            }
-        },
-        "padding": {
-            "scale": 1
-        },
+        "deformScale": 1,
         "rounding": {
             "scale": 1
         },
         "spacing": {
             "scale": 1
+        },
+        "padding": {
+            "scale": 1
+        },
+        "font": {
+            "scale": 1,
+            "clock": "Rubik",
+            "headline": {
+                "family": "GoogleSansFlex",
+                "large": { "size": 32, "weight": 500, "italic": false, "vaxes": { "ROND": 25 } },
+                "medium": { "size": 28, "weight": 500, "italic": false, "vaxes": { "ROND": 25 } },
+                "small": { "size": 24, "weight": 500, "italic": false, "vaxes": { "ROND": 25 } }
+            },
+            "title": {
+                "family": "GoogleSansFlex",
+                "large": { "size": 22, "weight": 500, "italic": false, "vaxes": { "ROND": 25 } },
+                "medium": { "size": 16, "weight": 500, "italic": false, "vaxes": { "ROND": 25 } },
+                "small": { "size": 14, "weight": 500, "italic": false, "vaxes": { "ROND": 25 } }
+            },
+            "body": {
+                "family": "GoogleSansFlex",
+                "large": { "size": 16, "weight": 400, "italic": false, "vaxes": { "ROND": 25 } },
+                "medium": { "size": 14, "weight": 400, "italic": false, "vaxes": { "ROND": 25 } },
+                "small": { "size": 12, "weight": 400, "italic": false, "vaxes": { "ROND": 25 } }
+            },
+            "label": {
+                "family": "GoogleSansFlex",
+                "large": { "size": 14, "weight": 500, "italic": false, "vaxes": { "ROND": 25 } },
+                "medium": { "size": 12, "weight": 500, "italic": false, "vaxes": { "ROND": 25 } },
+                "small": { "size": 11, "weight": 400, "italic": false, "vaxes": { "ROND": 25 } }
+            },
+            "mono": {
+                "family": "CaskaydiaCove NF",
+                "large": { "size": 16, "weight": 400, "italic": false, "vaxes": {} },
+                "medium": { "size": 14, "weight": 400, "italic": false, "vaxes": {} },
+                "small": { "size": 12, "weight": 400, "italic": false, "vaxes": {} }
+            },
+            "icon": {
+                "family": "Material Symbols Rounded",
+                "extraLarge": { "size": 36, "weight": 400, "italic": false, "vaxes": {} },
+                "large": { "size": 24, "weight": 400, "italic": false, "vaxes": {} },
+                "medium": { "size": 18, "weight": 400, "italic": false, "vaxes": {} },
+                "small": { "size": 15, "weight": 400, "italic": false, "vaxes": {} }
+            }
+        },
+        "anim": {
+            "durations": {
+                "scale": 1
+            }
         },
         "transparency": {
             "enabled": false,
@@ -253,12 +329,34 @@ default, you must create it manually.
         }
     },
     "general": {
-        "logo": "caelestia",
+        "logo": "",
+        "showOverFullscreen": false,
+        "mediaGifSpeedAdjustment": 300,
+        "sessionGifSpeed": 0.7,
         "apps": {
             "terminal": ["foot"],
             "audio": ["pavucontrol"],
             "playback": ["mpv"],
             "explorer": ["thunar"]
+        },
+        "idle": {
+            "lockBeforeSleep": true,
+            "inhibitWhenAudio": true,
+            "timeouts": [
+                {
+                    "timeout": 180,
+                    "idleAction": "lock"
+                },
+                {
+                    "timeout": 300,
+                    "idleAction": "dpms off",
+                    "returnAction": "dpms on"
+                },
+                {
+                    "timeout": 600,
+                    "idleAction": ["systemctl", "suspend-then-hibernate"]
+                }
+            ]
         },
         "battery": {
             "warnLevels": [
@@ -283,58 +381,102 @@ default, you must create it manually.
                 }
             ],
             "criticalLevel": 3
-        },
-        "idle": {
-            "lockBeforeSleep": true,
-            "inhibitWhenAudio": true,
-            "timeouts": [
-                {
-                    "timeout": 180,
-                    "idleAction": "lock"
-                },
-                {
-                    "timeout": 300,
-                    "idleAction": "dpms off",
-                    "returnAction": "dpms on"
-                },
-                {
-                    "timeout": 600,
-                    "idleAction": ["systemctl", "suspend-then-hibernate"]
-                }
-            ]
         }
     },
     "background": {
+        "enabled": true,
+        "wallpaperEnabled": true,
         "desktopClock": {
             "enabled": false,
             "scale": 1.0,
             "position": "bottom-right",
-            "shadow": {
-                "enabled": true,
-                "opacity": 0.7,
-                "blur": 0.4
-            },
+            "invertColors": false,
             "background": {
                 "enabled": false,
                 "opacity": 0.7,
                 "blur": true
             },
-            "invertColors": false
+            "shadow": {
+                "enabled": true,
+                "opacity": 0.7,
+                "blur": 0.4
+            }
         },
-        "enabled": true,
         "visualiser": {
-            "blur": false,
             "enabled": false,
             "autoHide": true,
+            "blur": false,
             "rounding": 1,
             "spacing": 1
         }
     },
     "bar": {
+        "persistent": true,
+        "showOnHover": true,
+        "dragThreshold": 20,
+        "scrollActions": {
+            "workspaces": true,
+            "volume": true,
+            "brightness": true
+        },
+        "popouts": {
+            "activeWindow": true,
+            "tray": true,
+            "statusIcons": true
+        },
+        "workspaces": {
+            "shown": 5,
+            "activeIndicator": true,
+            "occupiedBg": false,
+            "showWindows": true,
+            "showWindowsOnSpecialWorkspaces": true,
+            "maxWindowIcons": 5,
+            "activeTrail": false,
+            "perMonitorWorkspaces": true,
+            "label": "  ",
+            "occupiedLabel": "󰮯",
+            "activeLabel": "󰮯",
+            "capitalisation": "preserve",
+            "specialWorkspaceIcons": [
+                {
+                    "name": "steam",
+                    "icon": "sports_esports"
+                }
+            ],
+            "windowIcons": [
+                {
+                    "regex": "steam(_app_(default|[0-9]+))?",
+                    "icon": "sports_esports"
+                }
+            ]
+        },
+        "activeWindow": {
+            "compact": false,
+            "inverted": false,
+            "showOnHover": true
+        },
+        "tray": {
+            "background": false,
+            "recolour": false,
+            "compact": false,
+            "iconSubs": [],
+            "hiddenIcons": []
+        },
+        "status": {
+            "showAudio": false,
+            "showMicrophone": false,
+            "showKbLayout": false,
+            "showNetwork": true,
+            "showWifi": true,
+            "showBluetooth": true,
+            "showBattery": true,
+            "showLockStatus": true
+        },
         "clock": {
+            "background": false,
+            "showDate": false,
             "showIcon": true
         },
-        "dragThreshold": 20,
         "entries": [
             {
                 "id": "logo",
@@ -373,68 +515,51 @@ default, you must create it manually.
                 "enabled": true
             }
         ],
-        "persistent": true,
-        "popouts": {
-            "activeWindow": true,
-            "statusIcons": true,
-            "tray": true
-        },
-        "scrollActions": {
-            "brightness": true,
-            "workspaces": true,
-            "volume": true
-        },
-        "showOnHover": true,
-        "status": {
-            "showAudio": false,
-            "showBattery": true,
-            "showBluetooth": true,
-            "showKbLayout": false,
-            "showMicrophone": false,
-            "showNetwork": true,
-            "showWifi": true,
-            "showLockStatus": true
-        },
-        "tray": {
-            "background": false,
-            "compact": false,
-            "iconSubs": [],
-            "recolour": false
-        },
-        "workspaces": {
-            "activeIndicator": true,
-            "activeLabel": "󰮯",
-            "activeTrail": false,
-            "label": "  ",
-            "occupiedBg": false,
-            "occupiedLabel": "󰮯",
-            "perMonitorWorkspaces": true,
-            "showWindows": true,
-            "shown": 5,
-            "specialWorkspaceIcons": [
-                {
-                    "name": "steam",
-                    "icon": "sports_esports"
-                }
-            ]
-        },
-        "excludedScreens": [""],
-        "activeWindow": {
-            "inverted": false
-        }
+        "excludedScreens": []
     },
     "border": {
+        "thickness": 10,
         "rounding": 25,
-        "thickness": 10
+        "smoothing": 20
     },
     "dashboard": {
         "enabled": true,
-        "dragThreshold": 50,
+        "showOnHover": true,
+        "showDashboard": true,
+        "showMedia": true,
+        "showPerformance": true,
+        "showWeather": true,
         "mediaUpdateInterval": 500,
-        "showOnHover": true
+        "resourceUpdateInterval": 1000,
+        "dragThreshold": 50,
+        "performance": {
+            "showBattery": true,
+            "showGpu": true,
+            "showCpu": true,
+            "showMemory": true,
+            "showStorage": true,
+            "showNetwork": true
+        }
     },
     "launcher": {
+        "enabled": true,
+        "showOnHover": false,
+        "maxShown": 7,
+        "maxWallpapers": 9,
+        "specialPrefix": "@",
         "actionPrefix": ">",
+        "enableDangerousActions": false,
+        "dragThreshold": 50,
+        "vimKeybinds": false,
+        "favouriteApps": [],
+        "hiddenApps": [],
+        "useFuzzy": {
+            "apps": false,
+            "actions": false,
+            "schemes": false,
+            "variants": false,
+            "wallpapers": false
+        },
         "actions": [
             {
                 "name": "Calculator",
@@ -466,14 +591,6 @@ default, you must create it manually.
                 "description": "Change the current scheme variant",
                 "command": ["autocomplete", "variant"],
                 "enabled": true,
-                "dangerous": false
-            },
-            {
-                "name": "Transparency",
-                "icon": "opacity",
-                "description": "Change shell transparency",
-                "command": ["autocomplete", "transparency"],
-                "enabled": false,
                 "dangerous": false
             },
             {
@@ -544,67 +661,57 @@ default, you must create it manually.
                 "name": "Settings",
                 "icon": "settings",
                 "description": "Configure the shell",
-                "command": ["caelestia", "shell", "controlCenter", "open"],
+                "command": ["caelestia", "shell", "nexus", "open"],
                 "enabled": true,
                 "dangerous": false
             }
-        ],
-        "dragThreshold": 50,
-        "vimKeybinds": false,
-        "enableDangerousActions": false,
-        "maxShown": 7,
-        "maxWallpapers": 9,
-        "specialPrefix": "@",
-        "useFuzzy": {
-            "apps": false,
-            "actions": false,
-            "schemes": false,
-            "variants": false,
-            "wallpapers": false
-        },
-        "showOnHover": false,
-        "favouriteApps": [],
-        "hiddenApps": []
+        ]
     },
     "lock": {
-        "recolourLogo": false
+        "recolourLogo": true,
+        "enableFprint": true,
+        "maxFprintTries": 3,
+        "hideNotifs": false
+    },
+    "nexus": {
+        "wallpapersPerRow": 4,
+        "networkRescanInterval": 15000
     },
     "notifs": {
-        "actionOnClick": false,
-        "clearThreshold": 0.3,
+        "expire": true,
+        "fullscreen": "on",
         "defaultExpireTimeout": 5000,
+        "fullscreenExpireTimeout": 2000,
+        "clearThreshold": 0.3,
         "expandThreshold": 20,
-        "openExpanded": false,
-        "expire": false
+        "actionOnClick": false,
+        "groupPreviewNum": 3,
+        "openExpanded": false
     },
     "osd": {
         "enabled": true,
+        "hideDelay": 2000,
         "enableBrightness": true,
-        "enableMicrophone": false,
-        "hideDelay": 2000
-    },
-    "paths": {
-        "mediaGif": "root:/assets/bongocat.gif",
-        "sessionGif": "root:/assets/kurukuru.gif",
-        "wallpaperDir": "~/Pictures/Wallpapers"
+        "enableMicrophone": false
     },
     "services": {
-        "audioIncrement": 0.1,
-        "brightnessIncrement": 0.1,
-        "maxVolume": 1.0,
-        "defaultPlayer": "Spotify",
-        "gpuType": "",
-        "playerAliases": [{ "from": "com.github.th_ch.youtube_music", "to": "YT Music" }],
         "weatherLocation": "",
         "useFahrenheit": false,
         "useFahrenheitPerformance": false,
         "useTwelveHourClock": false,
+        "gpuType": "",
+        "visualiserBars": 60,
+        "audioIncrement": 0.1,
+        "brightnessIncrement": 0.1,
+        "maxVolume": 1.0,
         "smartScheme": true,
-        "visualiserBars": 45
+        "defaultPlayer": "Spotify",
+        "playerAliases": [{ "from": "com.github.th_ch.youtube_music", "to": "YT Music" }],
+        "lyricsBackend": "Auto"
     },
     "session": {
-        "dragThreshold": 30,
         "enabled": true,
+        "dragThreshold": 30,
         "vimKeybinds": false,
         "icons": {
             "logout": "logout",
@@ -620,28 +727,29 @@ default, you must create it manually.
         }
     },
     "sidebar": {
-        "dragThreshold": 80,
-        "enabled": true
+        "enabled": true,
+        "dragThreshold": 80
     },
     "utilities": {
         "enabled": true,
         "maxToasts": 4,
         "toasts": {
-            "audioInputChanged": true,
-            "audioOutputChanged": true,
-            "capsLockChanged": true,
-            "chargingChanged": true,
+            "fullscreen": "off",
             "configLoaded": true,
-            "dndChanged": true,
+            "chargingChanged": true,
             "gameModeChanged": true,
+            "dndChanged": true,
+            "audioOutputChanged": true,
+            "audioInputChanged": true,
+            "capsLockChanged": true,
+            "numLockChanged": true,
             "kbLayoutChanged": true,
             "kbLimit": true,
-            "numLockChanged": true,
             "vpnChanged": true,
             "nowPlaying": false
         },
         "vpn": {
-            "enabled": true,
+            "enabled": false,
             "provider": [
                 {
                     "name": "wireguard",
@@ -650,12 +758,66 @@ default, you must create it manually.
                     "enabled": false
                 }
             ]
-        }
+        },
+        "quickToggles": [
+            {
+                "id": "wifi",
+                "enabled": true
+            },
+            {
+                "id": "bluetooth",
+                "enabled": true
+            },
+            {
+                "id": "mic",
+                "enabled": true
+            },
+            {
+                "id": "settings",
+                "enabled": true
+            },
+            {
+                "id": "gameMode",
+                "enabled": true
+            },
+            {
+                "id": "dnd",
+                "enabled": true
+            },
+            {
+                "id": "vpn",
+                "enabled": false
+            }
+        ]
+    },
+    "paths": {
+        "wallpaperDir": "~/Pictures/Wallpapers",
+        "lyricsDir": "~/Music/lyrics/",
+        "sessionGif": "root:/assets/kurukuru.gif",
+        "mediaGif": "root:/assets/bongocat.gif",
+        "noNotifsPic": "root:/assets/dino.png",
+        "lockNoNotifsPic": "root:/assets/dino.png"
     }
 }
 ```
 
 </details>
+
+### Advanced configuration
+
+> [!WARNING]
+> Do NOT change any of these options if you do not know what you are doing. These options control the
+> tokens used internally within the shell, and can cause visual issues if changed. The existence of
+> the options are also not guaranteed across versions, and may change or be removed without notice.
+
+A separate `~/.config/caelestia/shell-tokens.json` file allows editing the internal tokens without
+touching the source code of the shell. These tokens affect, for example, individual rounding,
+spacing, padding, font size, animation duration and easing curves tokens, and the sizes of certain
+components. The appearance scale values in `shell.json` are multiplied against these base
+token values to produce the final computed values.
+
+Per-monitor token overrides are also available at
+`~/.config/caelestia/monitors/<screen-name>/shell-tokens.json`.
 
 ### Home Manager Module
 

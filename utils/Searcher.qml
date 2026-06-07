@@ -1,8 +1,7 @@
-import Quickshell
-
 import "scripts/fzf.js" as Fzf
 import "scripts/fuzzysort.js" as Fuzzy
 import QtQuick
+import Quickshell
 
 Singleton {
     required property list<QtObject> list
@@ -36,7 +35,7 @@ Singleton {
     }
 
     function query(search: string): list<var> {
-        search = transformSearch(search);
+        search = transformSearch(search.trim().replace(/\s+/g, " "));
         if (!search)
             return [...list];
 

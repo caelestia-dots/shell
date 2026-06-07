@@ -1,11 +1,11 @@
 pragma ComponentBehavior: Bound
 
-import qs.components
-import qs.services
-import qs.config
+import QtQuick
 import Quickshell
 import Quickshell.Services.SystemTray
-import QtQuick
+import Caelestia.Config
+import qs.components
+import qs.services
 
 StyledRect {
     id: root
@@ -14,8 +14,8 @@ StyledRect {
     readonly property alias items: items
     readonly property alias expandIcon: expandIcon
 
-    readonly property int padding: Config.bar.tray.background ? Appearance.padding.normal : Appearance.padding.small
-    readonly property int spacing: Config.bar.tray.background ? Appearance.spacing.small : 0
+    readonly property int padding: Config.bar.tray.background ? Tokens.padding.medium : Tokens.padding.extraSmall
+    readonly property int spacing: Config.bar.tray.background ? Tokens.spacing.small : 0
 
     property bool expanded
 
@@ -28,11 +28,11 @@ StyledRect {
     clip: true
     visible: height > 0
 
-    implicitWidth: Config.bar.sizes.innerWidth
+    implicitWidth: Tokens.sizes.bar.innerWidth
     implicitHeight: nonAnimHeight
 
     color: Qt.alpha(Colours.tPalette.m3surfaceContainer, (Config.bar.tray.background && items.count > 0) ? Colours.tPalette.m3surfaceContainer.a : 0)
-    radius: Appearance.rounding.full
+    radius: Tokens.rounding.full
 
     Column {
         id: layout
@@ -40,7 +40,7 @@ StyledRect {
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.top: parent.top
         anchors.topMargin: root.padding
-        spacing: Appearance.spacing.small
+        spacing: Tokens.spacing.small
 
         opacity: root.expanded || !Config.bar.tray.compact ? 1 : 0
 
@@ -49,7 +49,7 @@ StyledRect {
                 properties: "scale"
                 from: 0
                 to: 1
-                easing.bezierCurve: Appearance.anim.curves.standardDecel
+                easing: Tokens.anim.standardDecel
             }
         }
 
@@ -57,7 +57,7 @@ StyledRect {
             Anim {
                 properties: "scale"
                 to: 1
-                easing.bezierCurve: Appearance.anim.curves.standardDecel
+                easing: Tokens.anim.standardDecel
             }
             Anim {
                 properties: "x,y"
@@ -68,19 +68,23 @@ StyledRect {
             id: items
 
             model: ScriptModel {
-                values: SystemTray.items.values.filter(i => !Config.bar.tray.hiddenIcons.includes(i.id))
+                values: SystemTray.items.values.filter(i => !GlobalConfig.bar.tray.hiddenIcons.includes(i.id))
             }
 
             TrayItem {}
         }
 
         Behavior on opacity {
-            Anim {}
+            Anim {
+                type: Anim.DefaultEffects
+            }
         }
     }
 
     Loader {
         id: expandIcon
+
+        asynchronous: true
 
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.bottom: parent.bottom
@@ -89,16 +93,16 @@ StyledRect {
 
         sourceComponent: Item {
             implicitWidth: expandIconInner.implicitWidth
-            implicitHeight: expandIconInner.implicitHeight - Appearance.padding.small * 2
+            implicitHeight: expandIconInner.implicitHeight - Tokens.padding.small
 
             MaterialIcon {
                 id: expandIconInner
 
                 anchors.horizontalCenter: parent.horizontalCenter
                 anchors.bottom: parent.bottom
-                anchors.bottomMargin: Config.bar.tray.background ? Appearance.padding.small : -Appearance.padding.small
+                anchors.bottomMargin: Config.bar.tray.background ? Tokens.padding.extraSmall : -Tokens.padding.extraSmall
                 text: "expand_less"
-                font.pointSize: Appearance.font.size.large
+                fontStyle: Tokens.font.icon.large
                 rotation: root.expanded ? 180 : 0
 
                 Behavior on rotation {
@@ -113,9 +117,6 @@ StyledRect {
     }
 
     Behavior on implicitHeight {
-        Anim {
-            duration: Appearance.anim.durations.expressiveDefaultSpatial
-            easing.bezierCurve: Appearance.anim.curves.expressiveDefaultSpatial
-        }
+        Anim {}
     }
 }

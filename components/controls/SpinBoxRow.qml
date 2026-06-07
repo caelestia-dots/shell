@@ -1,10 +1,8 @@
-import ".."
-import qs.components
-import qs.components.effects
-import qs.services
-import qs.config
 import QtQuick
 import QtQuick.Layouts
+import Caelestia.Config
+import qs.components
+import qs.services
 
 StyledRect {
     id: root
@@ -17,8 +15,8 @@ StyledRect {
     property var onValueModified: function (value) {}
 
     Layout.fillWidth: true
-    implicitHeight: row.implicitHeight + Appearance.padding.large * 2
-    radius: Appearance.rounding.normal
+    implicitHeight: row.implicitHeight + Tokens.padding.extraLargeIncreased
+    radius: Tokens.rounding.large
     color: Colours.layer(Colours.palette.m3surfaceContainer, 2)
 
     Behavior on implicitHeight {
@@ -31,8 +29,8 @@ StyledRect {
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.verticalCenter: parent.verticalCenter
-        anchors.margins: Appearance.padding.large
-        spacing: Appearance.spacing.normal
+        anchors.margins: Tokens.padding.large
+        spacing: Tokens.spacing.medium
 
         StyledText {
             Layout.fillWidth: true
@@ -45,7 +43,7 @@ StyledRect {
             step: root.step
             value: root.value
             onValueModified: value => {
-                root.onValueModified(value);
+                root.onValueModified(value); // qmllint disable use-proper-function
             }
         }
     }

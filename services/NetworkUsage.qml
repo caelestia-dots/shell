@@ -1,13 +1,10 @@
 pragma Singleton
 
-import qs.config
-
+import QtQuick
 import Quickshell
 import Quickshell.Io
-
+import Caelestia.Config
 import Caelestia.Internal
-
-import QtQuick
 
 Singleton {
     id: root
@@ -23,8 +20,8 @@ Singleton {
     readonly property real uploadTotal: _uploadTotal
 
     // History buffers for sparkline
-    readonly property CircularBuffer downloadBuffer: _downloadBuffer
-    readonly property CircularBuffer uploadBuffer: _uploadBuffer
+    readonly property alias downloadBuffer: downloadHistory
+    readonly property alias uploadBuffer: uploadHistory
     readonly property int historyLength: 30
 
     // Private properties
@@ -140,22 +137,25 @@ Singleton {
     }
 
     CircularBuffer {
-        id: _downloadBuffer
+        id: downloadHistory
+
         capacity: root.historyLength + 1
     }
 
     CircularBuffer {
-        id: _uploadBuffer
+        id: uploadHistory
+
         capacity: root.historyLength + 1
     }
 
     FileView {
         id: netDevFile
+
         path: "/proc/net/dev"
     }
 
     Timer {
-        interval: Config.dashboard.resourceUpdateInterval
+        interval: GlobalConfig.dashboard.resourceUpdateInterval
         running: root.refCount > 0
         repeat: true
         triggeredOnStart: true
@@ -200,10 +200,10 @@ Singleton {
                 root._uploadSpeed = txDelta / timeDelta;
 
                 if (root._downloadSpeed >= 0 && isFinite(root._downloadSpeed))
-                    _downloadBuffer.push(root._downloadSpeed);
+                    downloadHistory.push(root._downloadSpeed);
 
                 if (root._uploadSpeed >= 0 && isFinite(root._uploadSpeed))
-                    _uploadBuffer.push(root._uploadSpeed);
+                    uploadHistory.push(root._uploadSpeed);
             }
 
             // Calculate totals with overflow handling

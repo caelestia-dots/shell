@@ -1,11 +1,11 @@
 pragma ComponentBehavior: Bound
 
+import QtQuick
+import Quickshell.Services.SystemTray
+import Caelestia.Config
 import qs.components.effects
 import qs.services
-import qs.config
 import qs.utils
-import Quickshell.Services.SystemTray
-import QtQuick
 
 MouseArea {
     id: root
@@ -13,8 +13,8 @@ MouseArea {
     required property SystemTrayItem modelData
 
     acceptedButtons: Qt.LeftButton | Qt.RightButton
-    implicitWidth: Appearance.font.size.small * 2
-    implicitHeight: Appearance.font.size.small * 2
+    implicitWidth: Tokens.font.body.small.pointSize * 2
+    implicitHeight: Tokens.font.body.small.pointSize * 2
 
     onClicked: event => {
         if (event.button === Qt.LeftButton)

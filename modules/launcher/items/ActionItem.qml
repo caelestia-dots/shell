@@ -1,8 +1,7 @@
-import "../services"
+import QtQuick
+import Caelestia.Config
 import qs.components
 import qs.services
-import qs.config
-import QtQuick
 
 Item {
     id: root
@@ -10,37 +9,34 @@ Item {
     required property var modelData
     required property var list
 
-    implicitHeight: Config.launcher.sizes.itemHeight
+    implicitHeight: Tokens.sizes.launcher.itemHeight
 
     anchors.left: parent?.left
     anchors.right: parent?.right
 
     StateLayer {
-        radius: Appearance.rounding.normal
-
-        function onClicked(): void {
-            root.modelData?.onClicked(root.list);
-        }
+        radius: Tokens.rounding.large
+        onClicked: root.modelData?.onClicked(root.list)
     }
 
     Item {
         anchors.fill: parent
-        anchors.leftMargin: Appearance.padding.larger
-        anchors.rightMargin: Appearance.padding.larger
-        anchors.margins: Appearance.padding.smaller
+        anchors.leftMargin: Tokens.padding.medium
+        anchors.rightMargin: Tokens.padding.medium
+        anchors.margins: Tokens.padding.small
 
         MaterialIcon {
             id: icon
 
-            text: root.modelData?.icon ?? ""
-            font.pointSize: Appearance.font.size.extraLarge
-
             anchors.verticalCenter: parent.verticalCenter
+            text: root.modelData?.icon ?? ""
+            color: Colours.palette.m3onSurfaceVariant
+            fontStyle: Tokens.font.icon.builders.large.scale(1.3).build()
         }
 
         Item {
             anchors.left: icon.right
-            anchors.leftMargin: Appearance.spacing.normal
+            anchors.leftMargin: Tokens.spacing.medium
             anchors.verticalCenter: icon.verticalCenter
 
             implicitWidth: parent.width - icon.width
@@ -50,18 +46,18 @@ Item {
                 id: name
 
                 text: root.modelData?.name ?? ""
-                font.pointSize: Appearance.font.size.normal
+                font: Tokens.font.body.medium
             }
 
             StyledText {
                 id: desc
 
                 text: root.modelData?.desc ?? ""
-                font.pointSize: Appearance.font.size.small
+                font: Tokens.font.body.small
                 color: Colours.palette.m3outline
 
                 elide: Text.ElideRight
-                width: root.width - icon.width - Appearance.rounding.normal * 2
+                width: root.width - icon.width - Tokens.rounding.extraLargeIncreased
 
                 anchors.top: name.bottom
             }

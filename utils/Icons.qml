@@ -1,9 +1,9 @@
 pragma Singleton
 
-import qs.config
+import QtQuick
 import Quickshell
 import Quickshell.Services.Notifications
-import QtQuick
+import Caelestia.Config
 
 Singleton {
     id: root
@@ -79,6 +79,26 @@ Singleton {
             Office: "content_paste"
         })
 
+    // Checks if a name matches an icon config. Icon configs can have the following keys:
+    // - name: The exact name of the icon
+    // - regex: A regex to match against the name (takes priority over name)
+    // - flags: The regex flags (only used if regex is set)
+    // - icon: The icon to use
+    function matchIconConfig(name: string, iconConfig: var): bool {
+        if (!iconConfig.icon)
+            return false;
+
+        if (iconConfig.regex) {
+            const re = new RegExp(iconConfig.regex, iconConfig.flags ?? "");
+            if (re.test(name))
+                return true;
+        } else if (iconConfig.name === name) {
+            return true;
+        }
+
+        return false;
+    }
+
     function getAppIcon(name: string, fallback: string): string {
         const icon = DesktopEntries.heuristicLookup(name)?.icon;
         if (fallback !== "undefined")
@@ -87,6 +107,10 @@ Singleton {
     }
 
     function getAppCategoryIcon(name: string, fallback: string): string {
+        for (const iconConfig of GlobalConfig.bar.workspaces.windowIcons)
+            if (matchIconConfig(name, iconConfig))
+                return iconConfig.icon;
+
         const categories = DesktopEntries.heuristicLookup(name)?.categories;
 
         if (categories)
@@ -188,11 +212,9 @@ Singleton {
     function getSpecialWsIcon(name: string): string {
         name = name.toLowerCase().slice("special:".length);
 
-        for (const iconConfig of Config.bar.workspaces.specialWorkspaceIcons) {
-            if (iconConfig.name === name) {
+        for (const iconConfig of GlobalConfig.bar.workspaces.specialWorkspaceIcons)
+            if (matchIconConfig(name, iconConfig))
                 return iconConfig.icon;
-            }
-        }
 
         if (name === "special")
             return "star";
@@ -208,7 +230,7 @@ Singleton {
     }
 
     function getTrayIcon(id: string, icon: string): string {
-        for (const sub of Config.bar.tray.iconSubs)
+        for (const sub of GlobalConfig.bar.tray.iconSubs)
             if (sub.id === id)
                 return sub.image ? Qt.resolvedUrl(sub.image) : Quickshell.iconPath(sub.icon);
 
@@ -217,5 +239,14 @@ Singleton {
             icon = Qt.resolvedUrl(`${path}/${name.slice(name.lastIndexOf("/") + 1)}`);
         }
         return icon;
+    }
+
+    function getBatteryIcon(percentage: real, charging = false): string {
+        if (percentage === 1)
+            return charging ? "battery_charging_full" : "battery_full";
+        let level = Math.floor(percentage * 7);
+        if (charging && (level === 4 || level === 1))
+            level--;
+        return charging ? `battery_charging_${(level + 3) * 10}` : `battery_${level}_bar`;
     }
 }

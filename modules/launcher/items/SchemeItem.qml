@@ -1,8 +1,8 @@
-import "../services"
+import QtQuick
+import Caelestia.Config
 import qs.components
 import qs.services
-import qs.config
-import QtQuick
+import qs.modules.launcher.services
 
 Item {
     id: root
@@ -10,24 +10,21 @@ Item {
     required property Schemes.Scheme modelData
     required property var list
 
-    implicitHeight: Config.launcher.sizes.itemHeight
+    implicitHeight: Tokens.sizes.launcher.itemHeight
 
     anchors.left: parent?.left
     anchors.right: parent?.right
 
     StateLayer {
-        radius: Appearance.rounding.normal
-
-        function onClicked(): void {
-            root.modelData?.onClicked(root.list);
-        }
+        radius: Tokens.rounding.large
+        onClicked: root.modelData?.onClicked(root.list)
     }
 
     Item {
         anchors.fill: parent
-        anchors.leftMargin: Appearance.padding.larger
-        anchors.rightMargin: Appearance.padding.larger
-        anchors.margins: Appearance.padding.smaller
+        anchors.leftMargin: Tokens.padding.medium
+        anchors.rightMargin: Tokens.padding.medium
+        anchors.margins: Tokens.padding.small
 
         StyledRect {
             id: preview
@@ -38,7 +35,7 @@ Item {
             border.color: Qt.alpha(`#${root.modelData?.colours?.outline}`, 0.5)
 
             color: `#${root.modelData?.colours?.surface}`
-            radius: Appearance.rounding.full
+            radius: Tokens.rounding.full
             implicitWidth: parent.height * 0.8
             implicitHeight: parent.height * 0.8
 
@@ -57,27 +54,27 @@ Item {
 
                     implicitWidth: preview.implicitWidth
                     color: `#${root.modelData?.colours?.primary}`
-                    radius: Appearance.rounding.full
+                    radius: Tokens.rounding.full
                 }
             }
         }
 
         Column {
             anchors.left: preview.right
-            anchors.leftMargin: Appearance.spacing.normal
+            anchors.leftMargin: Tokens.spacing.medium
             anchors.verticalCenter: parent.verticalCenter
 
-            width: parent.width - preview.width - anchors.leftMargin - (current.active ? current.width + Appearance.spacing.normal : 0)
+            width: parent.width - preview.width - anchors.leftMargin - (current.active ? current.width + Tokens.spacing.medium : 0)
             spacing: 0
 
             StyledText {
                 text: root.modelData?.flavour ?? ""
-                font.pointSize: Appearance.font.size.normal
+                font: Tokens.font.body.medium
             }
 
             StyledText {
                 text: root.modelData?.name ?? ""
-                font.pointSize: Appearance.font.size.small
+                font: Tokens.font.body.small
                 color: Colours.palette.m3outline
 
                 elide: Text.ElideRight
@@ -89,6 +86,7 @@ Item {
         Loader {
             id: current
 
+            asynchronous: true
             anchors.right: parent.right
             anchors.verticalCenter: parent.verticalCenter
 
@@ -97,7 +95,7 @@ Item {
             sourceComponent: MaterialIcon {
                 text: "check"
                 color: Colours.palette.m3onSurfaceVariant
-                font.pointSize: Appearance.font.size.large
+                fontStyle: Tokens.font.icon.large
             }
         }
     }

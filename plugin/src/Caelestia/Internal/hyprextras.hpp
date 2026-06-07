@@ -1,15 +1,19 @@
 #pragma once
 
-#include "hyprdevices.hpp"
 #include <qlocalsocket.h>
 #include <qobject.h>
 #include <qqmlintegration.h>
+#include <qsharedpointer.h>
+#include <qvariant.h>
 
 namespace caelestia::internal::hypr {
+
+class HyprDevices;
 
 class HyprExtras : public QObject {
     Q_OBJECT
     QML_ELEMENT
+    Q_MOC_INCLUDE("hyprdevices.hpp")
 
     Q_PROPERTY(QVariantHash options READ options NOTIFY optionsChanged)
     Q_PROPERTY(caelestia::internal::hypr::HyprDevices* devices READ devices CONSTANT)

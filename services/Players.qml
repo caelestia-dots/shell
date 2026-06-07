@@ -1,36 +1,53 @@
 pragma Singleton
 
-import qs.components.misc
-import qs.config
+import QtQml
 import Quickshell
 import Quickshell.Io
 import Quickshell.Services.Mpris
-import QtQml
 import Caelestia
+import Caelestia.Config
+import qs.components.misc
 
 Singleton {
     id: root
 
     readonly property list<MprisPlayer> list: Mpris.players.values
-    readonly property MprisPlayer active: props.manualActive ?? list.find(p => getIdentity(p) === Config.services.defaultPlayer) ?? list[0] ?? null
+    readonly property MprisPlayer active: props.manualActive ?? list.find(p => getIdentity(p) === GlobalConfig.services.defaultPlayer) ?? list[0] ?? null
     property alias manualActive: props.manualActive
 
     function getIdentity(player: MprisPlayer): string {
-        const alias = Config.services.playerAliases.find(a => a.from === player.identity);
+        if (!player)
+            return "";
+        const alias = GlobalConfig.services.playerAliases.find(a => a.from === player.identity);
         return alias?.to ?? player.identity;
     }
 
-    Connections {
-        target: active
+    function getArtUrl(player: MprisPlayer): string {
+        if (!player)
+            return "";
+        if (player.trackArtUrl)
+            return player.trackArtUrl;
 
+        const url = player.metadata["xesam:url"] ?? "";
+        if (url.startsWith("https://www.youtube.com/watch")) {
+            // Fallback for youtube
+            const id = url.match(/[?&]v=([\w-]{11})/)?.[1];
+            return id ? `https://img.youtube.com/vi/${id}/hqdefault.jpg` : "";
+        }
+        return "";
+    }
+
+    Connections {
         function onPostTrackChanged() {
-            if (!Config.utilities.toasts.nowPlaying) {
+            if (!GlobalConfig.utilities.toasts.nowPlaying) {
                 return;
             }
-            if (active.trackArtist != "" && active.trackTitle != "") {
-                Toaster.toast(qsTr("Now Playing"), qsTr("%1 - %2").arg(active.trackArtist).arg(active.trackTitle), "music_note");
+            if (root.active.trackArtist != "" && root.active.trackTitle != "") {
+                Toaster.toast(qsTr("Now Playing"), qsTr("%1 - %2").arg(root.active.trackArtist).arg(root.active.trackTitle), "music_note");
             }
         }
+
+        target: root.active
     }
 
     PersistentProperties {
@@ -41,7 +58,9 @@ Singleton {
         reloadableId: "players"
     }
 
+    // qmllint disable unresolved-type
     CustomShortcut {
+        // qmllint enable unresolved-type
         name: "mediaToggle"
         description: "Toggle media playback"
         onPressed: {
@@ -51,7 +70,9 @@ Singleton {
         }
     }
 
+    // qmllint disable unresolved-type
     CustomShortcut {
+        // qmllint enable unresolved-type
         name: "mediaPrev"
         description: "Previous track"
         onPressed: {
@@ -61,7 +82,9 @@ Singleton {
         }
     }
 
+    // qmllint disable unresolved-type
     CustomShortcut {
+        // qmllint enable unresolved-type
         name: "mediaNext"
         description: "Next track"
         onPressed: {
@@ -71,15 +94,15 @@ Singleton {
         }
     }
 
+    // qmllint disable unresolved-type
     CustomShortcut {
+        // qmllint enable unresolved-type
         name: "mediaStop"
         description: "Stop media playback"
         onPressed: root.active?.stop()
     }
 
     IpcHandler {
-        target: "mpris"
-
         function getActive(prop: string): string {
             const active = root.active;
             return active ? active[prop] ?? "Invalid property" : "No active player";
@@ -122,5 +145,7 @@ Singleton {
         function stop(): void {
             root.active?.stop();
         }
+
+        target: "mpris"
     }
 }

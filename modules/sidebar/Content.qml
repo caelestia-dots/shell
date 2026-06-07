@@ -1,26 +1,26 @@
-import qs.components
-import qs.services
-import qs.config
 import QtQuick
 import QtQuick.Layouts
+import Caelestia.Config
+import qs.components
+import qs.services
 
 Item {
     id: root
 
     required property Props props
-    required property var visibilities
+    required property DrawerVisibilities visibilities
 
     ColumnLayout {
         id: layout
 
         anchors.fill: parent
-        spacing: Appearance.spacing.normal
+        spacing: Tokens.spacing.medium
 
         StyledRect {
             Layout.fillWidth: true
             Layout.fillHeight: true
 
-            radius: Appearance.rounding.normal
+            radius: Tokens.rounding.large
             color: Colours.tPalette.m3surfaceContainerLow
 
             NotifDock {
@@ -30,7 +30,7 @@ Item {
         }
 
         StyledRect {
-            Layout.topMargin: Appearance.padding.large - layout.spacing
+            Layout.topMargin: Tokens.padding.large - layout.spacing
             Layout.fillWidth: true
             implicitHeight: 1
 

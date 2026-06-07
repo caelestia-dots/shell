@@ -1,20 +1,20 @@
 pragma ComponentBehavior: Bound
 
-import "items"
-import "services"
-import qs.components
-import qs.components.controls
-import qs.components.containers
-import qs.services
-import qs.config
-import Quickshell
 import QtQuick
+import Quickshell
+import Caelestia.Config
+import qs.components
+import qs.components.containers
+import qs.components.controls
+import qs.services
+import qs.modules.launcher.items
+import qs.modules.launcher.services
 
 StyledListView {
     id: root
 
     required property StyledTextField search
-    required property PersistentProperties visibilities
+    required property DrawerVisibilities visibilities
 
     model: ScriptModel {
         id: model
@@ -22,9 +22,9 @@ StyledListView {
         onValuesChanged: root.currentIndex = 0
     }
 
-    spacing: Appearance.spacing.small
+    spacing: Tokens.spacing.small
     orientation: Qt.Vertical
-    implicitHeight: (Config.launcher.sizes.itemHeight + spacing) * Math.min(Config.launcher.maxShown, count) - spacing
+    implicitHeight: (Tokens.sizes.launcher.itemHeight + spacing) * Math.min(Config.launcher.maxShown, count) - spacing
 
     preferredHighlightBegin: 0
     preferredHighlightEnd: height
@@ -32,7 +32,7 @@ StyledListView {
 
     highlightFollowsCurrentItem: false
     highlight: StyledRect {
-        radius: Appearance.rounding.normal
+        radius: Tokens.rounding.large
         color: Colours.palette.m3onSurface
         opacity: 0.08
 
@@ -41,16 +41,13 @@ StyledListView {
         implicitHeight: root.currentItem?.implicitHeight ?? 0
 
         Behavior on y {
-            Anim {
-                duration: Appearance.anim.durations.expressiveDefaultSpatial
-                easing.bezierCurve: Appearance.anim.curves.expressiveDefaultSpatial
-            }
+            Anim {}
         }
     }
 
     state: {
         const text = search.text;
-        const prefix = Config.launcher.actionPrefix;
+        const prefix = GlobalConfig.launcher.actionPrefix;
         if (text.startsWith(prefix)) {
             for (const action of ["calc", "scheme", "variant"])
                 if (text.startsWith(`${prefix}${action} `))
@@ -118,16 +115,16 @@ StyledListView {
                     property: "opacity"
                     from: 1
                     to: 0
-                    duration: Appearance.anim.durations.small
-                    easing.bezierCurve: Appearance.anim.curves.standardAccel
+                    duration: Tokens.anim.durations.small
+                    easing: Tokens.anim.standardAccel
                 }
                 Anim {
                     target: root
                     property: "scale"
                     from: 1
                     to: 0.9
-                    duration: Appearance.anim.durations.small
-                    easing.bezierCurve: Appearance.anim.curves.standardAccel
+                    duration: Tokens.anim.durations.small
+                    easing: Tokens.anim.standardAccel
                 }
             }
             PropertyAction {
@@ -140,16 +137,16 @@ StyledListView {
                     property: "opacity"
                     from: 0
                     to: 1
-                    duration: Appearance.anim.durations.small
-                    easing.bezierCurve: Appearance.anim.curves.standardDecel
+                    duration: Tokens.anim.durations.small
+                    easing: Tokens.anim.standardDecel
                 }
                 Anim {
                     target: root
                     property: "scale"
                     from: 0.9
                     to: 1
-                    duration: Appearance.anim.durations.small
-                    easing.bezierCurve: Appearance.anim.curves.standardDecel
+                    duration: Tokens.anim.durations.small
+                    easing: Tokens.anim.standardDecel
                 }
             }
             PropertyAction {
@@ -168,7 +165,8 @@ StyledListView {
         enabled: !root.state
 
         Anim {
-            properties: "opacity,scale"
+            type: Anim.DefaultEffects
+            property: "opacity"
             from: 0
             to: 1
         }
@@ -178,7 +176,8 @@ StyledListView {
         enabled: !root.state
 
         Anim {
-            properties: "opacity,scale"
+            type: Anim.DefaultEffects
+            property: "opacity"
             from: 1
             to: 0
         }
@@ -189,7 +188,8 @@ StyledListView {
             property: "y"
         }
         Anim {
-            properties: "opacity,scale"
+            type: Anim.DefaultEffects
+            property: "opacity"
             to: 1
         }
     }
@@ -197,10 +197,11 @@ StyledListView {
     addDisplaced: Transition {
         Anim {
             property: "y"
-            duration: Appearance.anim.durations.small
+            type: Anim.StandardSmall
         }
         Anim {
-            properties: "opacity,scale"
+            type: Anim.DefaultEffects
+            property: "opacity"
             to: 1
         }
     }
@@ -210,7 +211,8 @@ StyledListView {
             property: "y"
         }
         Anim {
-            properties: "opacity,scale"
+            type: Anim.DefaultEffects
+            property: "opacity"
             to: 1
         }
     }

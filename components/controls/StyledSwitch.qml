@@ -1,9 +1,9 @@
-import ".."
-import qs.services
-import qs.config
 import QtQuick
-import QtQuick.Templates
 import QtQuick.Shapes
+import QtQuick.Templates
+import Caelestia.Config
+import qs.components
+import qs.services
 
 Switch {
     id: root
@@ -14,21 +14,21 @@ Switch {
     implicitHeight: implicitIndicatorHeight
 
     indicator: StyledRect {
-        radius: Appearance.rounding.full
+        radius: Tokens.rounding.full
         color: root.checked ? Colours.palette.m3primary : Colours.layer(Colours.palette.m3surfaceContainerHighest, root.cLayer)
 
         implicitWidth: implicitHeight * 1.7
-        implicitHeight: Appearance.font.size.normal + Appearance.padding.smaller * 2
+        implicitHeight: Tokens.font.body.medium.pointSize + Tokens.padding.small * 2
 
         StyledRect {
-            readonly property real nonAnimWidth: root.pressed ? implicitHeight * 1.3 : implicitHeight
+            readonly property real nonAnimWidth: root.pressed ? implicitHeight * 1.2 : implicitHeight
 
-            radius: Appearance.rounding.full
+            radius: Tokens.rounding.full
             color: root.checked ? Colours.palette.m3onPrimary : Colours.layer(Colours.palette.m3outline, root.cLayer + 1)
 
-            x: root.checked ? parent.implicitWidth - nonAnimWidth - Appearance.padding.small / 2 : Appearance.padding.small / 2
+            x: root.checked ? parent.implicitWidth - nonAnimWidth - Tokens.padding.extraSmall / 2 : Tokens.padding.extraSmall / 2
             implicitWidth: nonAnimWidth
-            implicitHeight: parent.implicitHeight - Appearance.padding.small
+            implicitHeight: parent.implicitHeight - Tokens.padding.extraSmall
             anchors.verticalCenter: parent.verticalCenter
 
             StyledRect {
@@ -39,7 +39,9 @@ Switch {
                 opacity: root.pressed ? 0.1 : root.hovered ? 0.08 : 0
 
                 Behavior on opacity {
-                    Anim {}
+                    Anim {
+                        type: Anim.DefaultEffects
+                    }
                 }
             }
 
@@ -83,15 +85,15 @@ Switch {
 
                 anchors.centerIn: parent
                 width: height
-                height: parent.implicitHeight - Appearance.padding.small * 2
+                height: parent.implicitHeight - Tokens.padding.medium
                 preferredRendererType: Shape.CurveRenderer
                 asynchronous: true
 
                 ShapePath {
-                    strokeWidth: Appearance.font.size.larger * 0.15
+                    strokeWidth: root.Tokens.font.body.large.pointSize * 0.15
                     strokeColor: root.checked ? Colours.palette.m3primary : Colours.palette.m3surfaceContainerHighest
                     fillColor: "transparent"
-                    capStyle: Appearance.rounding.scale === 0 ? ShapePath.SquareCap : ShapePath.RoundCap
+                    capStyle: root.Tokens.rounding.scale === 0 ? ShapePath.SquareCap : ShapePath.RoundCap
 
                     startX: icon.start1.x
                     startY: icon.start1.y
@@ -129,11 +131,15 @@ Switch {
             }
 
             Behavior on x {
-                Anim {}
+                Anim {
+                    type: Anim.FastSpatial
+                }
             }
 
             Behavior on implicitWidth {
-                Anim {}
+                Anim {
+                    type: Anim.FastSpatial
+                }
             }
         }
     }
@@ -145,8 +151,7 @@ Switch {
     }
 
     component PropAnim: PropertyAnimation {
-        duration: Appearance.anim.durations.normal
-        easing.type: Easing.BezierSpline
-        easing.bezierCurve: Appearance.anim.curves.standard
+        duration: Tokens.anim.durations.expressiveFastSpatial
+        easing: Tokens.anim.expressiveFastSpatial
     }
 }

@@ -1,114 +1,82 @@
 pragma ComponentBehavior: Bound
 
+import QtQuick
+import Quickshell
+import Caelestia.Components
+import Caelestia.Config
 import qs.components
 import qs.services
-import qs.config
-import Quickshell
-import QtQuick
-import QtQuick.Layouts
 
-Item {
+LazyListView {
     id: root
 
     required property Props props
     required property list<var> notifs
     required property bool expanded
     required property Flickable container
-    required property var visibilities
-
-    readonly property real nonAnimHeight: {
-        let h = -root.spacing;
-        for (let i = 0; i < repeater.count; i++) {
-            const item = repeater.itemAt(i);
-            if (!item.modelData.closed && !item.previewHidden)
-                h += item.nonAnimHeight + root.spacing;
-        }
-        return h;
-    }
-
-    readonly property int spacing: Math.round(Appearance.spacing.small / 2)
-    property bool showAllNotifs
-    property bool flag
+    required property DrawerVisibilities visibilities
 
     signal requestToggleExpand(expand: bool)
 
-    onExpandedChanged: {
-        if (expanded) {
-            clearTimer.stop();
-            showAllNotifs = true;
-        } else {
-            clearTimer.start();
+    anchors.left: parent.left
+    anchors.right: parent.right
+    implicitHeight: contentHeight
+
+    spacing: Math.round(Tokens.spacing.extraSmall)
+    asynchronous: true
+
+    readyDelay: 1
+    cacheBuffer: 400
+    removeDuration: Tokens.anim.durations.normal
+
+    useCustomViewport: true
+    viewport: {
+        tWatcher.transform; // mapToItem is not reactive so use this to trigger updates
+        return Qt.rect(0, container.contentY - mapToItem(container.contentItem, 0, 0).y, width, container.height);
+    }
+
+    model: ScriptModel {
+        values: {
+            if (root.expanded)
+                return root.notifs;
+
+            let count = 0;
+            let i = 0;
+            const previewNum = root.Config.notifs.groupPreviewNum;
+            while (i < root.notifs.length && count < previewNum) {
+                if (!(root.notifs[i]?.closed ?? true))
+                    count++;
+                i++;
+            }
+
+            return root.notifs.slice(0, i);
         }
     }
 
-    Layout.fillWidth: true
-    implicitHeight: nonAnimHeight
-
-    Timer {
-        id: clearTimer
-
-        interval: Appearance.anim.durations.normal
-        onTriggered: root.showAllNotifs = false
-    }
-
-    Repeater {
-        id: repeater
-
-        model: ScriptModel {
-            values: root.showAllNotifs ? root.notifs : root.notifs.slice(0, Config.notifs.groupPreviewNum + 1)
-            onValuesChanged: root.flagChanged()
-        }
-
+    delegate: Component {
         MouseArea {
             id: notif
 
             required property int index
-            required property Notifs.Notif modelData
+            required property NotifData modelData
 
-            readonly property alias nonAnimHeight: notifInner.nonAnimHeight
-            readonly property bool previewHidden: {
-                if (root.expanded)
-                    return false;
-
-                let extraHidden = 0;
-                for (let i = 0; i < index; i++)
-                    if (root.notifs[i].closed)
-                        extraHidden++;
-
-                return index >= Config.notifs.groupPreviewNum + extraHidden;
-            }
             property int startY
 
-            y: {
-                root.flag; // Force update
-                let y = 0;
-                for (let i = 0; i < index; i++) {
-                    const item = repeater.itemAt(i);
-                    if (!item.modelData.closed && !item.previewHidden)
-                        y += item.nonAnimHeight + root.spacing;
-                }
-                return y;
-            }
+            Component.onCompleted: modelData?.lock(this)
+            Component.onDestruction: modelData?.unlock(this)
 
-            containmentMask: QtObject {
-                function contains(p: point): bool {
-                    if (!root.container.contains(notif.mapToItem(root.container, p)))
-                        return false;
-                    return notifInner.contains(p);
-                }
-            }
-
-            opacity: previewHidden ? 0 : 1
-            scale: previewHidden ? 0.7 : 1
-
-            implicitWidth: root.width
+            LazyListView.preferredHeight: modelData?.closed || LazyListView.removing ? 0 : notifInner.nonAnimHeight
+            LazyListView.visibleHeight: modelData?.closed || LazyListView.removing ? 0 : notifInner.implicitHeight
             implicitHeight: notifInner.implicitHeight
+
+            opacity: LazyListView.removing || LazyListView.adding ? 0 : 1
+            scale: LazyListView.removing || LazyListView.adding ? 0.7 : 1
 
             hoverEnabled: true
             cursorShape: notifInner.body?.hoveredLink ? Qt.PointingHandCursor : pressed ? Qt.ClosedHandCursor : undefined
             acceptedButtons: Qt.LeftButton | Qt.RightButton | Qt.MiddleButton
             preventStealing: !root.expanded
-            enabled: !modelData.closed
+            enabled: !(modelData?.closed ?? true)
 
             drag.target: this
             drag.axis: Drag.XAxis
@@ -118,7 +86,7 @@ Item {
                 if (event.button === Qt.RightButton)
                     root.requestToggleExpand(!root.expanded);
                 else if (event.button === Qt.MiddleButton)
-                    modelData.close();
+                    modelData?.close();
             }
             onPositionChanged: event => {
                 if (pressed && !root.expanded) {
@@ -131,34 +99,15 @@ Item {
                 if (Math.abs(x) < width * Config.notifs.clearThreshold)
                     x = 0;
                 else
-                    modelData.close();
-            }
-
-            Component.onCompleted: modelData.lock(this)
-            Component.onDestruction: modelData.unlock(this)
-
-            ParallelAnimation {
-                Component.onCompleted: running = !notif.previewHidden
-
-                Anim {
-                    target: notif
-                    property: "opacity"
-                    from: 0
-                    to: 1
-                }
-                Anim {
-                    target: notif
-                    property: "scale"
-                    from: 0.7
-                    to: 1
-                }
+                    modelData?.close();
             }
 
             ParallelAnimation {
-                running: notif.modelData.closed
-                onFinished: notif.modelData.unlock(notif)
+                running: notif.modelData?.closed ?? false
+                onFinished: notif.modelData?.unlock(notif)
 
                 Anim {
+                    type: Anim.DefaultEffects
                     target: notif
                     property: "opacity"
                     to: 0
@@ -180,8 +129,16 @@ Item {
                 visibilities: root.visibilities
             }
 
-            Behavior on opacity {
+            Behavior on y {
+                enabled: notif.LazyListView.ready
+
                 Anim {}
+            }
+
+            Behavior on opacity {
+                Anim {
+                    type: Anim.DefaultEffects
+                }
             }
 
             Behavior on scale {
@@ -189,25 +146,15 @@ Item {
             }
 
             Behavior on x {
-                Anim {
-                    duration: Appearance.anim.durations.expressiveDefaultSpatial
-                    easing.bezierCurve: Appearance.anim.curves.expressiveDefaultSpatial
-                }
-            }
-
-            Behavior on y {
-                Anim {
-                    duration: Appearance.anim.durations.expressiveDefaultSpatial
-                    easing.bezierCurve: Appearance.anim.curves.expressiveDefaultSpatial
-                }
+                Anim {}
             }
         }
     }
 
-    Behavior on implicitHeight {
-        Anim {
-            duration: Appearance.anim.durations.expressiveDefaultSpatial
-            easing.bezierCurve: Appearance.anim.curves.expressiveDefaultSpatial
-        }
+    TransformWatcher {
+        id: tWatcher
+
+        a: root.container.contentItem
+        b: root
     }
 }

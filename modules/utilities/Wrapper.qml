@@ -1,16 +1,21 @@
 pragma ComponentBehavior: Bound
 
-import qs.components
-import qs.config
-import Quickshell
 import QtQuick
+import Quickshell
+import Caelestia
+import Caelestia.Config
+import qs.components
+import qs.modules.sidebar as Sidebar
+import qs.modules.bar.popouts as BarPopouts
 
 Item {
     id: root
 
-    required property var visibilities
-    required property Item sidebar
-    required property Item popouts
+    required property DrawerVisibilities visibilities
+    required property Sidebar.Wrapper sidebar
+    required property BarPopouts.Wrapper popouts
+    property real horizontalStretch
+    property matrix4x4 deformMatrix
 
     readonly property PersistentProperties props: PersistentProperties {
         property bool recordingListExpanded: false
@@ -20,60 +25,49 @@ Item {
         reloadableId: "utilities"
     }
     readonly property bool shouldBeActive: visibilities.sidebar || (visibilities.utilities && Config.utilities.enabled && !(visibilities.session && Config.session.enabled))
+    readonly property real totalPadding: content.anchors.margins + CUtils.clamp(content.anchors.margins - Config.border.thickness, 0, content.anchors.margins)
+    readonly property real nonAnimHeight: ((content.item as Content)?.nonAnimHeight ?? 0) + totalPadding
+    property real offsetScale: shouldBeActive ? 0 : 1
+    property real sidebarLerp
 
-    visible: height > 0
-    implicitHeight: 0
-    implicitWidth: sidebar.visible ? sidebar.width : Config.utilities.sizes.width
-
-    onStateChanged: {
-        if (state === "visible" && timer.running) {
-            timer.triggered();
-            timer.stop();
-        }
-    }
+    visible: offsetScale < 1
+    anchors.bottomMargin: (-implicitHeight - 5) * offsetScale
+    implicitHeight: content.implicitHeight + totalPadding
+    implicitWidth: sidebar.width * (1 - sidebar.offsetScale) * horizontalStretch * sidebarLerp + Tokens.sizes.utilities.width * (1 - sidebarLerp)
+    opacity: 1 - offsetScale
 
     states: State {
-        name: "visible"
-        when: root.shouldBeActive
+        name: "attachedToSidebar"
+        when: root.visibilities.sidebar
 
         PropertyChanges {
-            root.implicitHeight: content.implicitHeight + Appearance.padding.large * 2
+            root.sidebarLerp: 1
         }
     }
 
     transitions: [
         Transition {
             from: ""
-            to: "visible"
 
             Anim {
-                target: root
-                property: "implicitHeight"
-                duration: Appearance.anim.durations.expressiveDefaultSpatial
-                easing.bezierCurve: Appearance.anim.curves.expressiveDefaultSpatial
+                property: "sidebarLerp"
+                duration: Tokens.anim.durations.expressiveDefaultSpatial / 2
+                easing: Tokens.anim.standardAccel
             }
         },
         Transition {
-            from: "visible"
             to: ""
 
             Anim {
-                target: root
-                property: "implicitHeight"
-                easing.bezierCurve: Appearance.anim.curves.emphasized
+                property: "sidebarLerp"
+                duration: Tokens.anim.durations.expressiveDefaultSpatial / 2
+                easing: Tokens.anim.standardDecel
             }
         }
     ]
 
-    Timer {
-        id: timer
-
-        running: true
-        interval: Appearance.anim.durations.extraLarge
-        onTriggered: {
-            content.active = Qt.binding(() => root.shouldBeActive || root.visible);
-            content.visible = true;
-        }
+    Behavior on offsetScale {
+        Anim {}
     }
 
     Loader {
@@ -81,16 +75,17 @@ Item {
 
         anchors.top: parent.top
         anchors.left: parent.left
-        anchors.margins: Appearance.padding.large
+        anchors.margins: Tokens.padding.large
 
-        visible: false
-        active: true
+        asynchronous: true
+        active: root.shouldBeActive || root.visible
 
         sourceComponent: Content {
-            implicitWidth: root.implicitWidth - Appearance.padding.large * 2
+            implicitWidth: root.implicitWidth - root.totalPadding
             props: root.props
             visibilities: root.visibilities
             popouts: root.popouts
+            deformMatrix: root.deformMatrix
         }
     }
 }

@@ -1,7 +1,7 @@
-import ".."
-import qs.services
 import QtQuick
 import QtQuick.Effects
+import qs.components
+import qs.services
 
 RectangularShadow {
     property int level
@@ -13,6 +13,8 @@ RectangularShadow {
     offset.y: dp / 2
 
     Behavior on dp {
-        Anim {}
+        Anim {
+            type: Anim.SlowEffects
+        }
     }
 }

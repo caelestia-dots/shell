@@ -1,8 +1,8 @@
-import ".."
-import qs.services
-import qs.config
 import QtQuick
 import QtQuick.Templates
+import Caelestia.Config
+import qs.components
+import qs.services
 
 ScrollBar {
     id: root
@@ -11,6 +11,8 @@ ScrollBar {
     property bool shouldBeActive
     property real nonAnimPosition
     property bool animating
+    property bool _updatingFromFlickable: false
+    property bool _updatingFromUser: false
 
     onHoveredChanged: {
         if (hovered)
@@ -18,9 +20,6 @@ ScrollBar {
         else
             shouldBeActive = flickable.moving;
     }
-
-    property bool _updatingFromFlickable: false
-    property bool _updatingFromUser: false
 
     // Sync nonAnimPosition with Qt's automatic position binding
     onPositionChanged: {
@@ -37,24 +36,6 @@ ScrollBar {
         }
     }
 
-    // Sync nonAnimPosition with flickable when not animating
-    Connections {
-        target: flickable
-        function onContentYChanged() {
-            if (!animating && !fullMouse.pressed) {
-                _updatingFromFlickable = true;
-                const contentHeight = flickable.contentHeight;
-                const height = flickable.height;
-                if (contentHeight > height) {
-                    nonAnimPosition = Math.max(0, Math.min(1, flickable.contentY / (contentHeight - height)));
-                } else {
-                    nonAnimPosition = 0;
-                }
-                _updatingFromFlickable = false;
-            }
-        }
-    }
-
     Component.onCompleted: {
         if (flickable) {
             const contentHeight = flickable.contentHeight;
@@ -64,7 +45,7 @@ ScrollBar {
             }
         }
     }
-    implicitWidth: Appearance.padding.small
+    implicitWidth: Tokens.padding.extraSmall
 
     contentItem: StyledRect {
         anchors.left: parent.left
@@ -80,7 +61,7 @@ ScrollBar {
                 return 0.6;
             return 0;
         }
-        radius: Appearance.rounding.full
+        radius: Tokens.rounding.full
         color: Colours.palette.m3secondary
 
         MouseArea {
@@ -93,19 +74,40 @@ ScrollBar {
         }
 
         Behavior on opacity {
-            Anim {}
+            Anim {
+                type: Anim.DefaultEffects
+            }
         }
     }
 
+    // Sync nonAnimPosition with flickable when not animating
     Connections {
-        target: root.flickable
+        function onContentYChanged() {
+            if (!root.animating && !fullMouse.pressed) {
+                root._updatingFromFlickable = true;
+                const contentHeight = root.flickable.contentHeight;
+                const height = root.flickable.height;
+                if (contentHeight > height) {
+                    root.nonAnimPosition = Math.max(0, Math.min(1, root.flickable.contentY / (contentHeight - height)));
+                } else {
+                    root.nonAnimPosition = 0;
+                }
+                root._updatingFromFlickable = false;
+            }
+        }
 
+        target: root.flickable
+    }
+
+    Connections {
         function onMovingChanged(): void {
             if (root.flickable.moving)
                 root.shouldBeActive = true;
             else
                 hideDelay.restart();
         }
+
+        target: root.flickable
     }
 
     Timer {
@@ -117,6 +119,29 @@ ScrollBar {
 
     CustomMouseArea {
         id: fullMouse
+
+        function onWheel(event: WheelEvent): void {
+            root.animating = true;
+            root._updatingFromUser = true;
+            let newPos = root.nonAnimPosition;
+            if (event.angleDelta.y > 0)
+                newPos = Math.max(0, root.nonAnimPosition - 0.1);
+            else if (event.angleDelta.y < 0)
+                newPos = Math.min(1 - root.size, root.nonAnimPosition + 0.1);
+            root.nonAnimPosition = newPos;
+            // Update flickable position
+            // Map scrollbar position [0, 1-size] to contentY [0, maxContentY]
+            if (root.flickable) {
+                const contentHeight = root.flickable.contentHeight;
+                const height = root.flickable.height;
+                if (contentHeight > height) {
+                    const maxContentY = contentHeight - height;
+                    const maxPos = 1 - root.size;
+                    const contentY = maxPos > 0 ? (newPos / maxPos) * maxContentY : 0;
+                    root.flickable.contentY = Math.max(0, Math.min(maxContentY, contentY));
+                }
+            }
+        }
 
         anchors.fill: parent
         preventStealing: true
@@ -143,29 +168,6 @@ ScrollBar {
         onPositionChanged: event => {
             root._updatingFromUser = true;
             const newPos = Math.max(0, Math.min(1 - root.size, event.y / root.height - root.size / 2));
-            root.nonAnimPosition = newPos;
-            // Update flickable position
-            // Map scrollbar position [0, 1-size] to contentY [0, maxContentY]
-            if (root.flickable) {
-                const contentHeight = root.flickable.contentHeight;
-                const height = root.flickable.height;
-                if (contentHeight > height) {
-                    const maxContentY = contentHeight - height;
-                    const maxPos = 1 - root.size;
-                    const contentY = maxPos > 0 ? (newPos / maxPos) * maxContentY : 0;
-                    root.flickable.contentY = Math.max(0, Math.min(maxContentY, contentY));
-                }
-            }
-        }
-
-        function onWheel(event: WheelEvent): void {
-            root.animating = true;
-            root._updatingFromUser = true;
-            let newPos = root.nonAnimPosition;
-            if (event.angleDelta.y > 0)
-                newPos = Math.max(0, root.nonAnimPosition - 0.1);
-            else if (event.angleDelta.y < 0)
-                newPos = Math.min(1 - root.size, root.nonAnimPosition + 0.1);
             root.nonAnimPosition = newPos;
             // Update flickable position
             // Map scrollbar position [0, 1-size] to contentY [0, maxContentY]

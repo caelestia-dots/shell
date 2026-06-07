@@ -3,51 +3,47 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
+import Caelestia.Config
 import qs.components
-import qs.components.controls
 import qs.services
-import qs.config
-import qs.utils
-
-import "."
 
 ColumnLayout {
     id: root
 
-    required property Item wrapper
+    function refresh() {
+        kb.refresh();
+    }
 
-    spacing: Appearance.spacing.small
-    width: Config.bar.sizes.kbLayoutWidth
+    spacing: Tokens.spacing.small
+    width: Tokens.sizes.bar.kbLayoutWidth
+
+    Component.onCompleted: kb.start()
 
     KbLayoutModel {
         id: kb
     }
 
-    function refresh() {
-        kb.refresh();
-    }
-    Component.onCompleted: kb.start()
-
     StyledText {
-        Layout.topMargin: Appearance.padding.normal
-        Layout.rightMargin: Appearance.padding.small
+        Layout.topMargin: Tokens.padding.medium
+        Layout.rightMargin: Tokens.padding.extraSmall
         text: qsTr("Keyboard Layouts")
-        font.weight: 500
+        font: Tokens.font.body.builders.medium.weight(Font.Medium).build()
     }
 
     ListView {
         id: list
+
         model: kb.visibleModel
 
         Layout.fillWidth: true
-        Layout.rightMargin: Appearance.padding.small
-        Layout.topMargin: Appearance.spacing.small
+        Layout.rightMargin: Tokens.padding.extraSmall
+        Layout.topMargin: Tokens.spacing.small
 
         clip: true
         interactive: true
         implicitHeight: Math.min(contentHeight, 320)
         visible: kb.visibleModel.count > 0
-        spacing: Appearance.spacing.small
+        spacing: Tokens.spacing.small
 
         add: Transition {
             NumberAnimation {
@@ -85,54 +81,55 @@ ColumnLayout {
         }
 
         delegate: Item {
+            id: kbDelegate
+
             required property int layoutIndex
             required property string label
+            readonly property bool isDisabled: layoutIndex > 3
 
             width: list.width
-            height: Math.max(36, rowText.implicitHeight + Appearance.padding.small * 2)
-
-            readonly property bool isDisabled: layoutIndex > 3
+            height: Math.max(36, rowText.implicitHeight + Tokens.padding.small)
+            ToolTip.visible: isDisabled && layer.containsMouse
+            ToolTip.text: "XKB limitation: maximum 4 layouts allowed"
 
             StateLayer {
                 id: layer
+
+                onClicked: {
+                    if (!kbDelegate.isDisabled)
+                        kb.switchTo(kbDelegate.layoutIndex);
+                }
+
                 anchors.left: parent.left
                 anchors.right: parent.right
                 anchors.verticalCenter: parent.verticalCenter
                 implicitHeight: parent.height - 4
-
-                radius: Appearance.rounding.full
-                enabled: !isDisabled
-
-                function onClicked(): void {
-                    if (!isDisabled)
-                        kb.switchTo(layoutIndex);
-                }
+                radius: Tokens.rounding.full
+                enabled: !kbDelegate.isDisabled
             }
 
             StyledText {
                 id: rowText
+
                 anchors.verticalCenter: layer.verticalCenter
                 anchors.left: layer.left
                 anchors.right: layer.right
-                anchors.leftMargin: Appearance.padding.small
-                anchors.rightMargin: Appearance.padding.small
-                text: label
+                anchors.leftMargin: Tokens.padding.extraSmall
+                anchors.rightMargin: Tokens.padding.extraSmall
+                text: kbDelegate.label
                 elide: Text.ElideRight
-                opacity: isDisabled ? 0.4 : 1.0
+                opacity: kbDelegate.isDisabled ? 0.4 : 1.0
             }
-
-            ToolTip.visible: isDisabled && layer.containsMouse
-            ToolTip.text: "XKB limitation: maximum 4 layouts allowed"
         }
     }
 
     Rectangle {
         visible: kb.activeLabel.length > 0
         Layout.fillWidth: true
-        Layout.rightMargin: Appearance.padding.small
-        Layout.topMargin: Appearance.spacing.small
+        Layout.rightMargin: Tokens.padding.extraSmall
+        Layout.topMargin: Tokens.spacing.small
 
-        height: 1
+        implicitHeight: 1
         color: Colours.palette.m3onSurfaceVariant
         opacity: 0.35
     }
@@ -142,9 +139,9 @@ ColumnLayout {
 
         visible: kb.activeLabel.length > 0
         Layout.fillWidth: true
-        Layout.rightMargin: Appearance.padding.small
-        Layout.topMargin: Appearance.spacing.small
-        spacing: Appearance.spacing.small
+        Layout.rightMargin: Tokens.padding.extraSmall
+        Layout.topMargin: Tokens.spacing.small
+        spacing: Tokens.spacing.small
 
         opacity: 1
         scale: 1
@@ -158,21 +155,23 @@ ColumnLayout {
             Layout.fillWidth: true
             text: kb.activeLabel
             elide: Text.ElideRight
-            font.weight: 500
+            font: Tokens.font.body.builders.medium.weight(Font.Medium).build()
             color: Colours.palette.m3primary
         }
 
         Connections {
-            target: kb
             function onActiveLabelChanged() {
                 if (!activeRow.visible)
                     return;
                 popIn.restart();
             }
+
+            target: kb
         }
 
         SequentialAnimation {
             id: popIn
+
             running: false
 
             ParallelAnimation {

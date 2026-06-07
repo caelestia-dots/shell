@@ -1,23 +1,18 @@
 pragma ComponentBehavior: Bound
 
-import qs.services
-import qs.config
 import QtQuick
+import Caelestia.Config
+import qs.services
 
 Text {
     id: root
 
     property bool animate: false
-    property string animateProp: "scale"
-    property real animateFrom: 0
-    property real animateTo: 1
-    property int animateDuration: Appearance.anim.durations.normal
 
     renderType: Text.NativeRendering
     textFormat: Text.PlainText
     color: Colours.palette.m3onSurface
-    font.family: Appearance.font.family.sans
-    font.pointSize: Appearance.font.size.smaller
+    font: Tokens.font.body.small
 
     Behavior on color {
         CAnim {}
@@ -28,21 +23,18 @@ Text {
 
         SequentialAnimation {
             Anim {
-                to: root.animateFrom
-                easing.bezierCurve: Appearance.anim.curves.standardAccel
+                target: root
+                property: "opacity"
+                to: 0
+                type: Anim.FastEffects
             }
             PropertyAction {}
             Anim {
-                to: root.animateTo
-                easing.bezierCurve: Appearance.anim.curves.standardDecel
+                target: root
+                property: "opacity"
+                to: 1
+                type: Anim.DefaultEffects
             }
         }
-    }
-
-    component Anim: NumberAnimation {
-        target: root
-        property: root.animateProp
-        duration: root.animateDuration / 2
-        easing.type: Easing.BezierSpline
     }
 }

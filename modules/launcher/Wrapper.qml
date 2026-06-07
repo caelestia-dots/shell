@@ -1,112 +1,46 @@
 pragma ComponentBehavior: Bound
 
-import qs.components
-import qs.config
-import Quickshell
 import QtQuick
+import Quickshell
+import Caelestia.Config
+import qs.components
+import qs.modules.launcher.services
 
 Item {
     id: root
 
     required property ShellScreen screen
-    required property PersistentProperties visibilities
+    required property DrawerVisibilities visibilities
     required property var panels
 
     readonly property bool shouldBeActive: visibilities.launcher && Config.launcher.enabled
-    property int contentHeight
 
     readonly property real maxHeight: {
-        let max = screen.height - Config.border.thickness * 2 - Appearance.spacing.large;
+        let max = screen.height - Config.border.thickness * 2 + Tokens.padding.extraLarge;
         if (visibilities.dashboard)
             max -= panels.dashboard.nonAnimHeight;
         return max;
     }
 
-    onMaxHeightChanged: timer.start()
-
-    visible: height > 0
-    implicitHeight: 0
-    implicitWidth: content.implicitWidth
+    property real offsetScale: shouldBeActive ? 0 : 1
 
     onShouldBeActiveChanged: {
-        if (shouldBeActive) {
-            timer.stop();
-            hideAnim.stop();
-            showAnim.start();
-        } else {
-            showAnim.stop();
-            hideAnim.start();
-        }
+        if (shouldBeActive)
+            implicitHeight = Qt.binding(() => content.implicitHeight);
+        else
+            implicitHeight = implicitHeight; // Break binding during close anim
     }
 
-    SequentialAnimation {
-        id: showAnim
+    visible: offsetScale < 1
+    anchors.bottomMargin: (-implicitHeight - 5) * offsetScale
+    implicitHeight: content.implicitHeight
+    implicitWidth: content.implicitWidth || 630 // Hard coded fallback for first open
+    opacity: 1 - offsetScale
 
-        Anim {
-            target: root
-            property: "implicitHeight"
-            to: root.contentHeight
-            duration: Appearance.anim.durations.expressiveDefaultSpatial
-            easing.bezierCurve: Appearance.anim.curves.expressiveDefaultSpatial
-        }
-        ScriptAction {
-            script: root.implicitHeight = Qt.binding(() => content.implicitHeight)
-        }
-    }
+    Component.onCompleted: Qt.callLater(() => Apps) // Load apps on init
 
-    SequentialAnimation {
-        id: hideAnim
-
-        ScriptAction {
-            script: root.implicitHeight = root.implicitHeight
-        }
-        Anim {
-            target: root
-            property: "implicitHeight"
-            to: 0
-            easing.bezierCurve: Appearance.anim.curves.emphasized
-        }
-    }
-
-    Connections {
-        target: Config.launcher
-
-        function onEnabledChanged(): void {
-            timer.start();
-        }
-
-        function onMaxShownChanged(): void {
-            timer.start();
-        }
-    }
-
-    Connections {
-        target: DesktopEntries.applications
-
-        function onValuesChanged(): void {
-            if (DesktopEntries.applications.values.length < Config.launcher.maxShown)
-                timer.start();
-        }
-    }
-
-    Timer {
-        id: timer
-
-        interval: Appearance.anim.durations.extraLarge
-        onRunningChanged: {
-            if (running && !root.shouldBeActive) {
-                content.visible = false;
-                content.active = true;
-            } else {
-                root.contentHeight = Math.min(root.maxHeight, content.implicitHeight);
-                content.active = Qt.binding(() => root.shouldBeActive || root.visible);
-                content.visible = true;
-                if (showAnim.running) {
-                    showAnim.stop();
-                    showAnim.start();
-                }
-            }
-        }
+    Behavior on offsetScale {
+        Anim {}
     }
 
     Loader {
@@ -115,16 +49,12 @@ Item {
         anchors.top: parent.top
         anchors.horizontalCenter: parent.horizontalCenter
 
-        visible: false
-        active: false
-        Component.onCompleted: timer.start()
+        active: root.shouldBeActive || root.visible
 
         sourceComponent: Content {
             visibilities: root.visibilities
             panels: root.panels
             maxHeight: root.maxHeight
-
-            Component.onCompleted: root.contentHeight = implicitHeight
         }
     }
 }

@@ -1,8 +1,8 @@
-import ".."
-import qs.services
-import qs.config
 import QtQuick
 import QtQuick.Layouts
+import Caelestia.Config
+import qs.components
+import qs.services
 
 Row {
     id: root
@@ -12,49 +12,49 @@ Row {
         Tonal
     }
 
-    property real horizontalPadding: Appearance.padding.normal
-    property real verticalPadding: Appearance.padding.smaller
+    property real horizontalPadding: Tokens.padding.medium
+    property real verticalPadding: Tokens.padding.small
     property int type: SplitButton.Filled
     property bool disabled
     property bool menuOnTop
     property string fallbackIcon
     property string fallbackText
+    property real minLeftWidth
 
     property alias menuItems: menu.items
     property alias active: menu.active
     property alias expanded: menu.expanded
-    property alias menu: menu
-    property alias iconLabel: iconLabel
-    property alias label: label
-    property alias stateLayer: stateLayer
+    readonly property alias menu: menu
+    readonly property alias iconLabel: iconLabel
+    readonly property alias label: label
+    readonly property alias stateLayer: stateLayer
+    readonly property alias textRow: textRow
+    readonly property alias expandBtn: expandBtn
 
     property color colour: type == SplitButton.Filled ? Colours.palette.m3primary : Colours.palette.m3secondaryContainer
     property color textColour: type == SplitButton.Filled ? Colours.palette.m3onPrimary : Colours.palette.m3onSecondaryContainer
     property color disabledColour: Qt.alpha(Colours.palette.m3onSurface, 0.1)
     property color disabledTextColour: Qt.alpha(Colours.palette.m3onSurface, 0.38)
 
-    spacing: Math.floor(Appearance.spacing.small / 2)
+    spacing: Math.floor(Tokens.spacing.extraSmall)
 
     StyledRect {
-        radius: implicitHeight / 2 * Math.min(1, Appearance.rounding.scale)
-        topRightRadius: Appearance.rounding.small / 2
-        bottomRightRadius: Appearance.rounding.small / 2
+        radius: implicitHeight / 2 * Math.min(1, Tokens.rounding.scale)
+        topRightRadius: Tokens.rounding.medium / 2
+        bottomRightRadius: Tokens.rounding.medium / 2
         color: root.disabled ? root.disabledColour : root.colour
 
-        implicitWidth: textRow.implicitWidth + root.horizontalPadding * 2
+        implicitWidth: Math.max(root.minLeftWidth, textRow.implicitWidth + root.horizontalPadding * 2)
         implicitHeight: expandBtn.implicitHeight
 
         StateLayer {
             id: stateLayer
 
-            rect.topRightRadius: parent.topRightRadius
-            rect.bottomRightRadius: parent.bottomRightRadius
+            topRightRadius: parent.topRightRadius
+            bottomRightRadius: parent.bottomRightRadius
             color: root.textColour
             disabled: root.disabled
-
-            function onClicked(): void {
-                root.active?.clicked();
-            }
+            onClicked: root.active?.clicked()
         }
 
         RowLayout {
@@ -62,7 +62,7 @@ Row {
 
             anchors.centerIn: parent
             anchors.horizontalCenterOffset: Math.floor(root.verticalPadding / 4)
-            spacing: Appearance.spacing.small
+            spacing: Tokens.spacing.small
 
             MaterialIcon {
                 id: iconLabel
@@ -86,7 +86,7 @@ Row {
 
                 Behavior on Layout.preferredWidth {
                     Anim {
-                        easing.bezierCurve: Appearance.anim.curves.emphasized
+                        type: Anim.Emphasized
                     }
                 }
             }
@@ -96,9 +96,9 @@ Row {
     StyledRect {
         id: expandBtn
 
-        property real rad: root.expanded ? implicitHeight / 2 * Math.min(1, Appearance.rounding.scale) : Appearance.rounding.small / 2
+        property real rad: root.expanded ? implicitHeight / 2 * Math.min(1, Tokens.rounding.scale) : Tokens.rounding.medium / 2
 
-        radius: implicitHeight / 2 * Math.min(1, Appearance.rounding.scale)
+        radius: implicitHeight / 2 * Math.min(1, Tokens.rounding.scale)
         topLeftRadius: rad
         bottomLeftRadius: rad
         color: root.disabled ? root.disabledColour : root.colour
@@ -113,10 +113,7 @@ Row {
             rect.bottomLeftRadius: parent.bottomLeftRadius
             color: root.textColour
             disabled: root.disabled
-
-            function onClicked(): void {
-                root.expanded = !root.expanded;
-            }
+            onClicked: root.expanded = !root.expanded
         }
 
         MaterialIcon {
@@ -141,24 +138,14 @@ Row {
         Behavior on rad {
             Anim {}
         }
+    }
 
-        Menu {
-            id: menu
+    Menu {
+        id: menu
 
-            states: State {
-                when: root.menuOnTop
-
-                AnchorChanges {
-                    target: menu
-                    anchors.top: undefined
-                    anchors.bottom: expandBtn.top
-                }
-            }
-
-            anchors.top: parent.bottom
-            anchors.right: parent.right
-            anchors.topMargin: Appearance.spacing.small
-            anchors.bottomMargin: Appearance.spacing.small
-        }
+        attachTo: expandBtn
+        attachSideY: root.menuOnTop ? Menu.Top : Menu.Bottom
+        thisSideY: root.menuOnTop ? Menu.Bottom : Menu.Top
+        marginY: Tokens.spacing.small * (root.menuOnTop ? -1 : 1)
     }
 }

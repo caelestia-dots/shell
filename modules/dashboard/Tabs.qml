@@ -1,24 +1,24 @@
 pragma ComponentBehavior: Bound
 
+import QtQuick
+import QtQuick.Layouts
+import QtQuick.Templates
+import Quickshell
+import Caelestia.Config
 import qs.components
 import qs.components.controls
 import qs.services
-import qs.config
-import Quickshell
-import Quickshell.Widgets
-import QtQuick
-import QtQuick.Controls
 
 Item {
     id: root
 
     required property real nonAnimWidth
-    required property PersistentProperties state
+    required property DashboardState dashState
     required property var tabs
 
     readonly property alias count: bar.count
 
-    implicitHeight: bar.implicitHeight + indicator.implicitHeight + indicator.anchors.topMargin + separator.implicitHeight
+    implicitHeight: bar.implicitHeight + bar.anchors.topMargin + indicator.implicitHeight + indicator.anchors.topMargin + separator.implicitHeight
 
     TabBar {
         id: bar
@@ -26,11 +26,20 @@ Item {
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.top: parent.top
+        anchors.topMargin: Tokens.sizes.dashboard.tabIndicatorSpacing
 
-        currentIndex: root.state.currentTab
+        currentIndex: root.dashState.currentTab
+        onCurrentIndexChanged: root.dashState.currentTab = currentIndex
+
+        implicitHeight: contentHeight
         background: null
+        contentItem: RowLayout {
+            spacing: 0
 
-        onCurrentIndexChanged: root.state.currentTab = currentIndex
+            Repeater {
+                model: bar.contentModel
+            }
+        }
 
         Repeater {
             model: ScriptModel {
@@ -52,15 +61,20 @@ Item {
         anchors.top: bar.bottom
         anchors.topMargin: 5
 
-        implicitWidth: bar.currentItem?.implicitWidth ?? 0
+        implicitWidth: {
+            const tab = bar.currentItem;
+            if (tab)
+                return tab.implicitWidth;
+            const width = (root.nonAnimWidth - bar.spacing * (bar.count - 1)) / bar.count;
+            return width;
+        }
         implicitHeight: 3
 
         x: {
             const tab = bar.currentItem;
-            if (!tab)
-                return 0;
             const width = (root.nonAnimWidth - bar.spacing * (bar.count - 1)) / bar.count;
-            return width * tab.TabBar.index + (width - tab.implicitWidth) / 2;
+            const tabWidth = tab?.implicitWidth ?? width;
+            return width * bar.currentIndex + (width - tabWidth) / 2;
         }
 
         clip: true
@@ -72,7 +86,7 @@ Item {
             implicitHeight: parent.implicitHeight * 2
 
             color: Colours.palette.m3primary
-            radius: Appearance.rounding.full
+            radius: Tokens.rounding.full
         }
 
         Behavior on x {
@@ -101,112 +115,42 @@ Item {
         required property string iconName
         readonly property bool current: TabBar.tabBar.currentItem === this
 
+        Layout.fillWidth: true
+        Layout.preferredWidth: 1 // Uniform width across all tabs
+        implicitWidth: implicitContentWidth
+        implicitHeight: implicitContentHeight
         background: null
 
         contentItem: CustomMouseArea {
             id: mouse
 
+            function onWheel(event: WheelEvent): void {
+                if (event.angleDelta.y < 0)
+                    root.dashState.currentTab = Math.min(root.dashState.currentTab + 1, bar.count - 1);
+                else if (event.angleDelta.y > 0)
+                    root.dashState.currentTab = Math.max(root.dashState.currentTab - 1, 0);
+            }
+
             implicitWidth: Math.max(icon.width, label.width)
             implicitHeight: icon.height + label.height
 
+            hoverEnabled: true
             cursorShape: Qt.PointingHandCursor
 
-            onPressed: event => {
-                root.state.currentTab = tab.TabBar.index;
+            onPressed: root.dashState.currentTab = tab.TabBar.index
 
-                const stateY = stateWrapper.y;
-                rippleAnim.x = event.x;
-                rippleAnim.y = event.y - stateY;
+            StateLayer {
+                id: stateLayer
 
-                const dist = (ox, oy) => ox * ox + oy * oy;
-                rippleAnim.radius = Math.sqrt(Math.max(dist(event.x, event.y + stateY), dist(event.x, stateWrapper.height - event.y), dist(width - event.x, event.y + stateY), dist(width - event.x, stateWrapper.height - event.y)));
-
-                rippleAnim.restart();
-            }
-
-            function onWheel(event: WheelEvent): void {
-                if (event.angleDelta.y < 0)
-                    root.state.currentTab = Math.min(root.state.currentTab + 1, bar.count - 1);
-                else if (event.angleDelta.y > 0)
-                    root.state.currentTab = Math.max(root.state.currentTab - 1, 0);
-            }
-
-            SequentialAnimation {
-                id: rippleAnim
-
-                property real x
-                property real y
-                property real radius
-
-                PropertyAction {
-                    target: ripple
-                    property: "x"
-                    value: rippleAnim.x
-                }
-                PropertyAction {
-                    target: ripple
-                    property: "y"
-                    value: rippleAnim.y
-                }
-                PropertyAction {
-                    target: ripple
-                    property: "opacity"
-                    value: 0.08
-                }
-                Anim {
-                    target: ripple
-                    properties: "implicitWidth,implicitHeight"
-                    from: 0
-                    to: rippleAnim.radius * 2
-                    duration: Appearance.anim.durations.normal
-                    easing.bezierCurve: Appearance.anim.curves.standardDecel
-                }
-                Anim {
-                    target: ripple
-                    property: "opacity"
-                    to: 0
-                    duration: Appearance.anim.durations.normal
-                    easing.type: Easing.BezierSpline
-                    easing.bezierCurve: Appearance.anim.curves.standard
-                }
-            }
-
-            ClippingRectangle {
-                id: stateWrapper
-
+                anchors.fill: undefined
                 anchors.left: parent.left
                 anchors.right: parent.right
                 anchors.verticalCenter: parent.verticalCenter
-                implicitHeight: parent.height + Config.dashboard.sizes.tabIndicatorSpacing * 2
+                implicitHeight: parent.height + Tokens.sizes.dashboard.tabIndicatorSpacing * 2
 
-                color: "transparent"
-                radius: Appearance.rounding.small
-
-                StyledRect {
-                    id: stateLayer
-
-                    anchors.fill: parent
-
-                    color: tab.current ? Colours.palette.m3primary : Colours.palette.m3onSurface
-                    opacity: mouse.pressed ? 0.1 : tab.hovered ? 0.08 : 0
-
-                    Behavior on opacity {
-                        Anim {}
-                    }
-                }
-
-                StyledRect {
-                    id: ripple
-
-                    radius: Appearance.rounding.full
-                    color: tab.current ? Colours.palette.m3primary : Colours.palette.m3onSurface
-                    opacity: 0
-
-                    transform: Translate {
-                        x: -ripple.width / 2
-                        y: -ripple.height / 2
-                    }
-                }
+                radius: Tokens.rounding.medium
+                color: tab.current ? Colours.palette.m3primary : Colours.palette.m3onSurface
+                onClicked: root.dashState.currentTab = tab.TabBar.index
             }
 
             MaterialIcon {
@@ -218,10 +162,12 @@ Item {
                 text: tab.iconName
                 color: tab.current ? Colours.palette.m3primary : Colours.palette.m3onSurfaceVariant
                 fill: tab.current ? 1 : 0
-                font.pointSize: Appearance.font.size.large
+                fontStyle: Tokens.font.icon.medium
 
                 Behavior on fill {
-                    Anim {}
+                    Anim {
+                        type: Anim.DefaultEffects
+                    }
                 }
             }
 

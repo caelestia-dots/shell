@@ -1,26 +1,26 @@
 pragma ComponentBehavior: Bound
 
+import QtQuick
+import QtQuick.Layouts
+import Quickshell
+import Quickshell.Widgets
+import Caelestia.Config
 import qs.components
 import qs.components.containers
 import qs.components.effects
 import qs.services
-import qs.config
-import Quickshell
-import Quickshell.Widgets
-import QtQuick
-import QtQuick.Layouts
 
 Item {
     id: root
 
-    required property Notifs.Notif notif
+    required property NotifData notif
 
     Layout.fillWidth: true
     implicitHeight: flickable.contentHeight
 
     layer.enabled: true
     layer.smooth: true
-    layer.effect: OpacityMask {
+    layer.effect: Mask {
         maskSource: gradientMask
     }
 
@@ -65,7 +65,9 @@ Item {
             opacity: flickable.contentX > 0 ? 0 : 1
 
             Behavior on opacity {
-                Anim {}
+                Anim {
+                    type: Anim.DefaultEffects
+                }
             }
         }
 
@@ -78,7 +80,9 @@ Item {
             opacity: flickable.contentX < flickable.contentWidth - parent.width ? 0 : 1
 
             Behavior on opacity {
-                Anim {}
+                Anim {
+                    type: Anim.DefaultEffects
+                }
             }
         }
     }
@@ -94,14 +98,14 @@ Item {
             id: actionList
 
             anchors.fill: parent
-            spacing: Appearance.spacing.small
+            spacing: Tokens.spacing.small
 
             Repeater {
                 model: [
                     {
                         isClose: true
                     },
-                    ...root.notif.actions,
+                    ...(root.notif?.actions ?? []),
                     {
                         isCopy: true
                     }
@@ -114,11 +118,11 @@ Item {
 
                     Layout.fillWidth: true
                     Layout.fillHeight: true
-                    implicitWidth: actionInner.implicitWidth + Appearance.padding.normal * 2
-                    implicitHeight: actionInner.implicitHeight + Appearance.padding.small * 2
+                    implicitWidth: actionInner.implicitWidth + Tokens.padding.medium * 2
+                    implicitHeight: actionInner.implicitHeight + Tokens.padding.small
 
-                    Layout.preferredWidth: implicitWidth + (actionStateLayer.pressed ? Appearance.padding.large : 0)
-                    radius: actionStateLayer.pressed ? Appearance.rounding.small / 2 : Appearance.rounding.small
+                    Layout.preferredWidth: implicitWidth + (actionStateLayer.pressed ? Tokens.padding.large : 0)
+                    radius: actionStateLayer.pressed ? Tokens.rounding.medium / 2 : Tokens.rounding.medium
                     color: Colours.layer(Colours.palette.m3surfaceContainerHighest, 4)
 
                     Timer {
@@ -131,7 +135,7 @@ Item {
                     StateLayer {
                         id: actionStateLayer
 
-                        function onClicked(): void {
+                        onClicked: {
                             if (action.modelData.isClose) {
                                 root.notif.close();
                             } else if (action.modelData.isCopy) {
@@ -150,7 +154,7 @@ Item {
                         id: actionInner
 
                         anchors.centerIn: parent
-                        sourceComponent: action.modelData.isClose || action.modelData.isCopy ? iconBtn : root.notif.hasActionIcons ? iconComp : textComp
+                        sourceComponent: action.modelData.isClose || action.modelData.isCopy ? iconBtn : root.notif?.hasActionIcons ? iconComp : textComp
                     }
 
                     Component {
@@ -167,6 +171,7 @@ Item {
                         id: iconComp
 
                         IconImage {
+                            asynchronous: true
                             source: Quickshell.iconPath(action.modelData.identifier)
                         }
                     }
@@ -182,15 +187,13 @@ Item {
 
                     Behavior on Layout.preferredWidth {
                         Anim {
-                            duration: Appearance.anim.durations.expressiveFastSpatial
-                            easing.bezierCurve: Appearance.anim.curves.expressiveFastSpatial
+                            type: Anim.FastSpatial
                         }
                     }
 
                     Behavior on radius {
                         Anim {
-                            duration: Appearance.anim.durations.expressiveFastSpatial
-                            easing.bezierCurve: Appearance.anim.curves.expressiveFastSpatial
+                            type: Anim.FastSpatial
                         }
                     }
                 }

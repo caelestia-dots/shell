@@ -1,10 +1,10 @@
 pragma ComponentBehavior: Bound
 
+import QtQuick
+import Quickshell
+import Caelestia.Config
 import qs.components
 import qs.services
-import qs.config
-import Quickshell
-import QtQuick
 
 Item {
     id: root
@@ -52,8 +52,8 @@ Item {
 
             required property var modelData
 
-            readonly property Workspace start: root.workspaces.count > 0 ? root.workspaces.itemAt(getWsIdx(modelData.start)) ?? null : null
-            readonly property Workspace end: root.workspaces.count > 0 ? root.workspaces.itemAt(getWsIdx(modelData.end)) ?? null : null
+            readonly property Workspace start: root.workspaces.count > 0 ? root.workspaces.itemAt(getWsIdx(modelData.start)) ?? null : null // qmllint disable incompatible-type
+            readonly property Workspace end: root.workspaces.count > 0 ? root.workspaces.itemAt(getWsIdx(modelData.end)) ?? null : null // qmllint disable incompatible-type
 
             function getWsIdx(ws: int): int {
                 let i = ws - 1;
@@ -65,18 +65,18 @@ Item {
             anchors.horizontalCenter: root.horizontalCenter
 
             y: (start?.y ?? 0) - 1
-            implicitWidth: Config.bar.sizes.innerWidth - Appearance.padding.small * 2 + 2
+            implicitWidth: Tokens.sizes.bar.innerWidth - Tokens.padding.small + 2
             implicitHeight: start && end ? end.y + end.size - start.y + 2 : 0
 
             color: Colours.layer(Colours.palette.m3surfaceContainerHigh, 2)
-            radius: Appearance.rounding.full
+            radius: Tokens.rounding.full
 
             scale: 0
             Component.onCompleted: scale = 1
 
             Behavior on scale {
                 Anim {
-                    easing.bezierCurve: Appearance.anim.curves.standardDecel
+                    easing: Tokens.anim.standardDecel
                 }
             }
 
@@ -90,14 +90,14 @@ Item {
         }
     }
 
-    component Pill: QtObject {
-        property int start
-        property int end
-    }
-
     Component {
         id: pillComp
 
         Pill {}
+    }
+
+    component Pill: QtObject {
+        property int start
+        property int end
     }
 }

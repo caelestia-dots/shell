@@ -1,44 +1,52 @@
 pragma ComponentBehavior: Bound
 
+import QtQuick
+import Quickshell
+import Caelestia.Components
+import Caelestia.Config
 import qs.components
 import qs.services
-import qs.config
-import Quickshell
-import QtQuick
 
-Item {
+LazyListView {
     id: root
 
     required property Props props
     required property Flickable container
-    required property var visibilities
+    required property DrawerVisibilities visibilities
 
-    readonly property alias repeater: repeater
-    readonly property int spacing: Appearance.spacing.small
-    property bool flag
+    anchors.left: parent?.left
+    anchors.right: parent?.right
+    implicitHeight: contentHeight
 
-    anchors.left: parent.left
-    anchors.right: parent.right
-    implicitHeight: {
-        const item = repeater.itemAt(repeater.count - 1);
-        return item ? item.y + item.implicitHeight : 0;
+    spacing: Tokens.spacing.small
+    readyDelay: 1
+    cacheBuffer: 400
+    asynchronous: true
+
+    onViewportAdjustNeeded: d => {
+        if (contentYAnim.running)
+            contentYAnim.complete();
+        contentYAnim.to = Math.max(0, container.contentY + d);
+        contentYAnim.start();
     }
 
-    Repeater {
-        id: repeater
+    useCustomViewport: true
+    viewport: Qt.rect(0, container.contentY, width, container.height)
 
-        model: ScriptModel {
-            values: {
-                const map = new Map();
-                for (const n of Notifs.notClosed)
-                    map.set(n.appName, null);
-                for (const n of Notifs.list)
-                    map.set(n.appName, null);
-                return [...map.keys()];
-            }
-            onValuesChanged: root.flagChanged()
+    removeDuration: Tokens.anim.durations.normal
+
+    model: ScriptModel {
+        values: {
+            const map = new Map();
+            for (const n of Notifs.notClosed)
+                map.set(n.appName, null);
+            for (const n of Notifs.list)
+                map.set(n.appName, null);
+            return [...map.keys()];
         }
+    }
 
+    delegate: Component {
         MouseArea {
             id: notif
 
@@ -46,35 +54,19 @@ Item {
             required property string modelData
 
             readonly property bool closed: notifInner.notifCount === 0
-            readonly property alias nonAnimHeight: notifInner.nonAnimHeight
             property int startY
 
             function closeAll(): void {
-                for (const n of Notifs.notClosed.filter(n => n.appName === modelData))
-                    n.close();
+                clearTimer.start();
             }
 
-            y: {
-                root.flag; // Force update
-                let y = 0;
-                for (let i = 0; i < index; i++) {
-                    const item = repeater.itemAt(i);
-                    if (!item.closed)
-                        y += item.nonAnimHeight + root.spacing;
-                }
-                return y;
-            }
-
-            containmentMask: QtObject {
-                function contains(p: point): bool {
-                    if (!root.container.contains(notif.mapToItem(root.container, p)))
-                        return false;
-                    return notifInner.contains(p);
-                }
-            }
-
-            implicitWidth: root.width
+            LazyListView.trackViewport: !notifInner.expanded && notifInner.nonAnimHeight < notifInner.implicitHeight
+            LazyListView.preferredHeight: closed ? 0 : notifInner.nonAnimHeight
+            LazyListView.visibleHeight: notifInner.implicitHeight
             implicitHeight: notifInner.implicitHeight
+
+            opacity: LazyListView.removing || closed || LazyListView.adding ? 0 : 1
+            scale: LazyListView.removing || closed ? 0.6 : LazyListView.adding ? 0 : 1
 
             hoverEnabled: true
             cursorShape: pressed ? Qt.ClosedHandCursor : undefined
@@ -106,37 +98,21 @@ Item {
                     closeAll();
             }
 
-            ParallelAnimation {
-                running: true
+            Timer {
+                id: clearTimer
 
-                Anim {
-                    target: notif
-                    property: "opacity"
-                    from: 0
-                    to: 1
-                }
-                Anim {
-                    target: notif
-                    property: "scale"
-                    from: 0
-                    to: 1
-                    duration: Appearance.anim.durations.expressiveDefaultSpatial
-                    easing.bezierCurve: Appearance.anim.curves.expressiveDefaultSpatial
-                }
-            }
+                interval: 15
+                repeat: true
+                triggeredOnStart: true
+                onTriggered: {
+                    const notifs = Notifs.notClosed.filter(n => n.appName === notif.modelData);
+                    if (notifs.length === 0) {
+                        stop();
+                        return;
+                    }
 
-            ParallelAnimation {
-                running: notif.closed
-
-                Anim {
-                    target: notif
-                    property: "opacity"
-                    to: 0
-                }
-                Anim {
-                    target: notif
-                    property: "scale"
-                    to: 0.6
+                    for (const n of notifs.slice(0, 30))
+                        n.close();
                 }
             }
 
@@ -149,19 +125,32 @@ Item {
                 visibilities: root.visibilities
             }
 
-            Behavior on x {
+            Behavior on y {
+                enabled: notif.LazyListView.ready
+
+                Anim {}
+            }
+
+            Behavior on opacity {
                 Anim {
-                    duration: Appearance.anim.durations.expressiveDefaultSpatial
-                    easing.bezierCurve: Appearance.anim.curves.expressiveDefaultSpatial
+                    type: Anim.DefaultEffects
                 }
             }
 
-            Behavior on y {
-                Anim {
-                    duration: Appearance.anim.durations.expressiveDefaultSpatial
-                    easing.bezierCurve: Appearance.anim.curves.expressiveDefaultSpatial
-                }
+            Behavior on scale {
+                Anim {}
+            }
+
+            Behavior on x {
+                Anim {}
             }
         }
+    }
+
+    Anim {
+        id: contentYAnim
+
+        target: root.container
+        property: "contentY"
     }
 }

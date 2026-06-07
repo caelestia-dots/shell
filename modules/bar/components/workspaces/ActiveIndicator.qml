@@ -1,8 +1,10 @@
+pragma ComponentBehavior: Bound
+
+import QtQuick
+import Caelestia.Config
 import qs.components
 import qs.components.effects
 import qs.services
-import qs.config
-import QtQuick
 
 StyledRect {
     id: root
@@ -10,6 +12,7 @@ StyledRect {
     required property int activeWsId
     required property Repeater workspaces
     required property Item mask
+    required property bool fullscreen
 
     readonly property int currentWsIdx: {
         let i = activeWsId - 1;
@@ -20,13 +23,12 @@ StyledRect {
 
     property real leading: workspaces.count > 0 ? workspaces.itemAt(currentWsIdx)?.y ?? 0 : 0
     property real trailing: workspaces.count > 0 ? workspaces.itemAt(currentWsIdx)?.y ?? 0 : 0
-    property real currentSize: workspaces.count > 0 ? workspaces.itemAt(currentWsIdx)?.size ?? 0 : 0
+    property real currentSize: workspaces.count > 0 ? (workspaces.itemAt(currentWsIdx) as Workspace)?.size ?? 0 : 0
     property real offset: Math.min(leading, trailing)
     property real size: {
         const s = Math.abs(leading - trailing) + currentSize;
         if (Config.bar.workspaces.activeTrail && lastWs > currentWsIdx) {
-            const ws = workspaces.itemAt(lastWs);
-            // console.log(ws, lastWs);
+            const ws = workspaces.itemAt(lastWs) as Workspace;
             return ws ? Math.min(ws.y + ws.size - offset, s) : 0;
         }
         return s;
@@ -42,9 +44,9 @@ StyledRect {
 
     clip: true
     y: offset + mask.y
-    implicitWidth: Config.bar.sizes.innerWidth - Appearance.padding.small * 2
+    implicitWidth: Tokens.sizes.bar.innerWidth - Tokens.padding.small
     implicitHeight: size
-    radius: Appearance.rounding.full
+    radius: Tokens.rounding.full
     color: Colours.palette.m3primary
 
     Colouriser {
@@ -61,38 +63,38 @@ StyledRect {
     }
 
     Behavior on leading {
-        enabled: Config.bar.workspaces.activeTrail
+        enabled: root.Config.bar.workspaces.activeTrail
 
         EAnim {}
     }
 
     Behavior on trailing {
-        enabled: Config.bar.workspaces.activeTrail
+        enabled: root.Config.bar.workspaces.activeTrail
 
         EAnim {
-            duration: Appearance.anim.durations.normal * 2
+            duration: Tokens.anim.durations.normal * 2
         }
     }
 
     Behavior on currentSize {
-        enabled: Config.bar.workspaces.activeTrail
+        enabled: root.Config.bar.workspaces.activeTrail
 
         EAnim {}
     }
 
     Behavior on offset {
-        enabled: !Config.bar.workspaces.activeTrail
+        enabled: !root.Config.bar.workspaces.activeTrail
 
         EAnim {}
     }
 
     Behavior on size {
-        enabled: !Config.bar.workspaces.activeTrail
+        enabled: !root.Config.bar.workspaces.activeTrail
 
         EAnim {}
     }
 
     component EAnim: Anim {
-        easing.bezierCurve: Appearance.anim.curves.emphasized
+        type: Anim.Emphasized
     }
 }
