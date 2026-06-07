@@ -87,10 +87,12 @@ Searcher {
             }
             root.actualCurrent = wall;
             root.previewColourLock = false;
+            Colours.showPreview = false;
         }
         onLoadFailed: {
             root.actualCurrent = root.fallback;
             root.previewColourLock = false;
+            Colours.showPreview = false;
             Quickshell.execDetached(["caelestia", "wallpaper", "-f", root.fallback, ...root.smartArg]);
         }
     }
