@@ -151,6 +151,18 @@ CollapsibleSection {
         checked: rootPane.desktopClockInvertColors
         onToggled: checked => {
             rootPane.desktopClockInvertColors = checked;
+            if (!checked)
+                rootPane.desktopClockInvertLightOnly = false;
+            rootPane.saveConfig();
+        }
+    }
+
+    SwitchRow {
+        label: qsTr("Invert light only")
+        enabled: rootPane.desktopClockInvertColors
+        checked: rootPane.desktopClockInvertLightOnly
+        onToggled: checked => {
+            rootPane.desktopClockInvertLightOnly = checked;
             rootPane.saveConfig();
         }
     }
