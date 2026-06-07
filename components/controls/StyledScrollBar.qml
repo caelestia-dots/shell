@@ -45,7 +45,7 @@ ScrollBar {
             }
         }
     }
-    implicitWidth: Tokens.padding.small
+    implicitWidth: Tokens.padding.extraSmall
 
     contentItem: StyledRect {
         anchors.left: parent.left
@@ -74,7 +74,9 @@ ScrollBar {
         }
 
         Behavior on opacity {
-            Anim {}
+            Anim {
+                type: Anim.DefaultEffects
+            }
         }
     }
 

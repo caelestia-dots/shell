@@ -27,19 +27,19 @@ ColumnLayout {
         onClicked: root.props.recordingListExpanded = !root.props.recordingListExpanded
 
         RowLayout {
-            spacing: Tokens.spacing.smaller
+            spacing: Tokens.spacing.medium
 
             MaterialIcon {
                 Layout.alignment: Qt.AlignVCenter
                 text: "list"
-                font.pointSize: Tokens.font.size.large
+                fontStyle: Tokens.font.icon.large
             }
 
             StyledText {
                 Layout.alignment: Qt.AlignVCenter
                 Layout.fillWidth: true
                 text: qsTr("Recordings")
-                font.pointSize: Tokens.font.size.normal
+                font: Tokens.font.body.medium
             }
 
             IconButton {
@@ -62,7 +62,7 @@ ColumnLayout {
 
         Layout.fillWidth: true
         Layout.rightMargin: -Tokens.spacing.small
-        implicitHeight: (Tokens.font.size.larger + Tokens.padding.small) * (root.props.recordingListExpanded ? 10 : 3)
+        implicitHeight: (Tokens.font.body.large.pointSize + Tokens.padding.small) * (root.props.recordingListExpanded ? 10 : 3)
         clip: true
 
         StyledScrollBar.vertical: StyledScrollBar {
@@ -78,13 +78,13 @@ ColumnLayout {
             anchors.left: list.contentItem.left
             anchors.right: list.contentItem.right
             anchors.rightMargin: Tokens.spacing.small
-            spacing: Tokens.spacing.small / 2
+            spacing: Tokens.spacing.extraSmall
 
             Component.onCompleted: baseName = modelData.baseName
 
             StyledText {
                 Layout.fillWidth: true
-                Layout.rightMargin: Tokens.spacing.small / 2
+                Layout.rightMargin: Tokens.spacing.extraSmall
                 text: {
                     const time = recording.baseName;
                     const matches = time.match(/^recording_(\d{4})(\d{2})(\d{2})_(\d{2})-(\d{2})-(\d{2})/);
@@ -129,31 +129,25 @@ ColumnLayout {
 
         add: Transition {
             Anim {
+                type: Anim.DefaultEffects
                 property: "opacity"
                 from: 0
-                to: 1
-            }
-            Anim {
-                property: "scale"
-                from: 0.5
                 to: 1
             }
         }
 
         remove: Transition {
             Anim {
+                type: Anim.DefaultEffects
                 property: "opacity"
                 to: 0
-            }
-            Anim {
-                property: "scale"
-                to: 0.5
             }
         }
 
         displaced: Transition {
             Anim {
-                properties: "opacity,scale"
+                type: Anim.DefaultEffects
+                property: "opacity"
                 to: 1
             }
             Anim {
@@ -175,14 +169,16 @@ ColumnLayout {
                     Layout.alignment: Qt.AlignHCenter
                     text: "scan_delete"
                     color: Colours.palette.m3outline
-                    font.pointSize: Tokens.font.size.extraLarge
+                    fontStyle: Tokens.font.icon.extraLarge
 
                     opacity: root.props.recordingListExpanded ? 1 : 0
                     scale: root.props.recordingListExpanded ? 1 : 0
                     Layout.preferredHeight: root.props.recordingListExpanded ? implicitHeight : 0
 
                     Behavior on opacity {
-                        Anim {}
+                        Anim {
+                            type: Anim.DefaultEffects
+                        }
                     }
 
                     Behavior on scale {
@@ -195,7 +191,7 @@ ColumnLayout {
                 }
 
                 RowLayout {
-                    spacing: Tokens.spacing.smaller
+                    spacing: Tokens.spacing.medium
 
                     MaterialIcon {
                         Layout.alignment: Qt.AlignHCenter
@@ -207,7 +203,9 @@ ColumnLayout {
                         Layout.preferredWidth: !root.props.recordingListExpanded ? implicitWidth : 0
 
                         Behavior on opacity {
-                            Anim {}
+                            Anim {
+                                type: Anim.DefaultEffects
+                            }
                         }
 
                         Behavior on scale {
@@ -227,14 +225,14 @@ ColumnLayout {
             }
 
             Behavior on opacity {
-                Anim {}
+                Anim {
+                    type: Anim.DefaultEffects
+                }
             }
         }
 
         Behavior on implicitHeight {
-            Anim {
-                type: Anim.DefaultSpatial
-            }
+            Anim {}
         }
     }
 }

@@ -9,7 +9,7 @@ import qs.services
 Column {
     id: root
 
-    spacing: Tokens.spacing.normal
+    spacing: Tokens.spacing.medium
     width: Tokens.sizes.bar.batteryWidth
 
     StyledText {
@@ -45,11 +45,11 @@ Column {
         height: active ? ((item as Item)?.implicitHeight ?? 0) : 0
 
         sourceComponent: StyledRect {
-            implicitWidth: child.implicitWidth + Tokens.padding.normal * 2
-            implicitHeight: child.implicitHeight + Tokens.padding.smaller * 2
+            implicitWidth: child.implicitWidth + Tokens.padding.medium * 2
+            implicitHeight: child.implicitHeight + Tokens.padding.large
 
             color: Colours.palette.m3error
-            radius: Tokens.rounding.normal
+            radius: Tokens.rounding.large
 
             Column {
                 id: child
@@ -72,8 +72,7 @@ Column {
                         anchors.verticalCenter: parent.verticalCenter
                         text: qsTr("Performance Degraded")
                         color: Colours.palette.m3onError
-                        font.family: Tokens.font.family.mono
-                        font.weight: 500
+                        font: Tokens.font.mono.builders.medium.weight(Font.Medium).build()
                     }
 
                     MaterialIcon {
@@ -109,8 +108,8 @@ Column {
 
         anchors.horizontalCenter: parent.horizontalCenter
 
-        implicitWidth: saver.implicitHeight + balance.implicitHeight + perf.implicitHeight + Tokens.padding.normal * 2 + Tokens.spacing.large * 2
-        implicitHeight: Math.max(saver.implicitHeight, balance.implicitHeight, perf.implicitHeight) + Tokens.padding.small * 2
+        implicitWidth: saver.implicitHeight + balance.implicitHeight + perf.implicitHeight + Tokens.padding.medium * 2 + Tokens.spacing.largeIncreased * 2
+        implicitHeight: Math.max(saver.implicitHeight, balance.implicitHeight, perf.implicitHeight) + Tokens.padding.small
 
         color: Colours.tPalette.m3surfaceContainer
         radius: Tokens.rounding.full
@@ -147,9 +146,7 @@ Column {
             ]
 
             transitions: Transition {
-                AnchorAnim {
-                    type: AnchorAnim.Emphasized
-                }
+                AnchorAnim {}
             }
         }
 
@@ -158,7 +155,7 @@ Column {
 
             anchors.verticalCenter: parent.verticalCenter
             anchors.left: parent.left
-            anchors.leftMargin: Tokens.padding.small
+            anchors.leftMargin: Tokens.padding.extraSmall
 
             profile: PowerProfile.PowerSaver
             icon: "energy_savings_leaf"
@@ -178,7 +175,7 @@ Column {
 
             anchors.verticalCenter: parent.verticalCenter
             anchors.right: parent.right
-            anchors.rightMargin: Tokens.padding.small
+            anchors.rightMargin: Tokens.padding.extraSmall
 
             profile: PowerProfile.Performance
             icon: "rocket_launch"
@@ -199,8 +196,8 @@ Column {
         required property string icon
         required property int profile
 
-        implicitWidth: icon.implicitHeight + Tokens.padding.small * 2
-        implicitHeight: icon.implicitHeight + Tokens.padding.small * 2
+        implicitWidth: icon.implicitHeight + Tokens.padding.small
+        implicitHeight: icon.implicitHeight + Tokens.padding.small
 
         StateLayer {
             radius: Tokens.rounding.full
@@ -214,12 +211,14 @@ Column {
             anchors.centerIn: parent
 
             text: parent.icon
-            font.pointSize: Tokens.font.size.large
-            color: profiles.current === text ? Colours.palette.m3onPrimary : Colours.palette.m3onSurface
+            fontStyle: Tokens.font.icon.large
+            color: profiles.current === text ? Colours.palette.m3onPrimary : Colours.palette.m3onSurfaceVariant
             fill: profiles.current === text ? 1 : 0
 
             Behavior on fill {
-                Anim {}
+                Anim {
+                    type: Anim.DefaultEffects
+                }
             }
         }
     }

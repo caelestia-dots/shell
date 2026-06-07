@@ -3,140 +3,147 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import QtQuick.Layouts
 import Quickshell.Services.UPower
+import Caelestia
 import Caelestia.Config
 import qs.components
 import qs.components.effects
 import qs.services
 import qs.utils
 
-ColumnLayout {
+StyledRect {
     id: root
 
-    anchors.fill: parent
-    anchors.margins: Tokens.padding.large * 2
-    anchors.topMargin: Tokens.padding.large
+    required property real rootHeight
+    readonly property int cBoxSize: Tokens.font.body.medium.pointSize * 2
 
-    spacing: Tokens.spacing.small
+    implicitHeight: layout.implicitHeight + layout.anchors.topMargin + layout.anchors.margins
+    radius: Tokens.rounding.medium
+    color: Colours.tPalette.m3surfaceContainer
 
-    RowLayout {
-        Layout.fillWidth: true
-        Layout.fillHeight: false
-        spacing: Tokens.spacing.normal
+    ColumnLayout {
+        id: layout
 
-        StyledRect {
-            implicitWidth: prompt.implicitWidth + Tokens.padding.normal * 2
-            implicitHeight: prompt.implicitHeight + Tokens.padding.normal * 2
+        anchors.fill: parent
+        anchors.margins: Tokens.padding.extraLarge
+        anchors.topMargin: Tokens.padding.extraLarge
+        anchors.bottomMargin: Tokens.padding.extraLarge
 
-            color: Colours.palette.m3primary
-            radius: Tokens.rounding.small
+        spacing: Tokens.spacing.small
+
+        RowLayout {
+            Layout.fillWidth: true
+            Layout.fillHeight: false
+            spacing: Tokens.spacing.medium
+
+            StyledRect {
+                implicitWidth: prompt.implicitWidth + Tokens.padding.medium * 2
+                implicitHeight: prompt.implicitHeight + Tokens.padding.small * 2
+
+                color: Colours.palette.m3primary
+                radius: Tokens.rounding.medium
+
+                MonoText {
+                    id: prompt
+
+                    anchors.centerIn: parent
+                    text: ">"
+                    color: Colours.palette.m3onPrimary
+                }
+            }
 
             MonoText {
-                id: prompt
+                Layout.fillWidth: true
+                text: "caelestiafetch.sh"
+                elide: Text.ElideRight
+            }
 
-                anchors.centerIn: parent
-                text: ">"
-                font.pointSize: root.width > 400 ? Tokens.font.size.larger : Tokens.font.size.normal
-                color: Colours.palette.m3onPrimary
+            WrappedLoader {
+                Layout.fillHeight: true
+                Layout.preferredWidth: height
+                Layout.preferredHeight: 0
+                active: !iconLoader.active
+
+                sourceComponent: SysInfo.isDefaultLogo ? caelestiaLogo : distroIcon
             }
         }
 
-        MonoText {
+        RowLayout {
             Layout.fillWidth: true
-            text: "caelestiafetch.sh"
-            font.pointSize: root.width > 400 ? Tokens.font.size.larger : Tokens.font.size.normal
-            elide: Text.ElideRight
+            Layout.fillHeight: true
+            spacing: Tokens.spacing.extraLarge
+
+            WrappedLoader {
+                id: iconLoader
+
+                Layout.fillHeight: true
+                active: root.width > Tokens.sizes.lock.largeLogoWidth
+
+                sourceComponent: SysInfo.isDefaultLogo ? caelestiaLogo : distroIcon
+            }
+
+            ColumnLayout {
+                Layout.fillWidth: true
+                Layout.topMargin: Tokens.padding.medium
+                Layout.bottomMargin: iconLoader.active || colourRowLoader.active ? Tokens.padding.medium : 0
+                spacing: Tokens.spacing.medium
+
+                Repeater {
+                    model: {
+                        const items = [];
+                        const hasBatt = UPower.displayDevice.isLaptopBattery;
+                        const rHeight = root.rootHeight;
+
+                        if (!hasBatt && rHeight > Tokens.sizes.lock.fetch4LinesHeight)
+                            items.push(`OS  : ${SysInfo.osPrettyName || SysInfo.osName}`);
+
+                        if (rHeight > (hasBatt ? Tokens.sizes.lock.fetch4LinesHeight : Tokens.sizes.lock.fetch3LinesHeight))
+                            items.push(`WM  : ${SysInfo.wm}`);
+
+                        if (!hasBatt || rHeight > Tokens.sizes.lock.fetch3LinesHeight)
+                            items.push(`USER: ${SysInfo.user}`);
+
+                        items.push(`UP  : ${SysInfo.uptime}`);
+
+                        if (hasBatt)
+                            items.push(`BATT: ${[UPowerDeviceState.Charging, UPowerDeviceState.FullyCharged, UPowerDeviceState.PendingCharge].includes(UPower.displayDevice.state) ? "(+) " : ""}${Math.round(UPower.displayDevice.percentage * 100)}%`);
+
+                        return items;
+                    }
+
+                    MonoText {
+                        required property string modelData
+
+                        Layout.fillWidth: true
+                        text: modelData
+                        elide: Text.ElideRight
+                    }
+                }
+            }
         }
 
         WrappedLoader {
-            Layout.fillHeight: true
-            active: !iconLoader.active
+            id: colourRowLoader
 
-            sourceComponent: SysInfo.isDefaultLogo ? caelestiaLogo : distroIcon
-        }
-    }
+            Layout.topMargin: iconLoader.active ? Tokens.spacing.small : 0
+            Layout.alignment: Qt.AlignHCenter
+            active: root.rootHeight > Tokens.sizes.lock.showColourBoxRowHeight
 
-    RowLayout {
-        Layout.fillWidth: true
-        Layout.fillHeight: false
-        spacing: height * 0.15
+            sourceComponent: RowLayout {
+                id: coloursRow
 
-        WrappedLoader {
-            id: iconLoader
+                spacing: Tokens.spacing.largeIncreased
 
-            Layout.fillHeight: true
-            active: root.width > 320
+                Repeater {
+                    model: CUtils.clamp(Math.floor((layout.width + coloursRow.spacing) / (root.cBoxSize + coloursRow.spacing)), 0, 8)
 
-            sourceComponent: SysInfo.isDefaultLogo ? caelestiaLogo : distroIcon
-        }
+                    StyledRect {
+                        required property int index
 
-        ColumnLayout {
-            Layout.fillWidth: true
-            Layout.topMargin: Tokens.padding.normal
-            Layout.bottomMargin: Tokens.padding.normal
-            Layout.leftMargin: iconLoader.active ? 0 : width * 0.1
-            spacing: Tokens.spacing.normal
-
-            WrappedLoader {
-                Layout.fillWidth: true
-                active: !batLoader.active && root.height > 200
-
-                sourceComponent: FetchText {
-                    text: `OS  : ${SysInfo.osPrettyName || SysInfo.osName}`
-                }
-            }
-
-            WrappedLoader {
-                Layout.fillWidth: true
-                active: root.height > (batLoader.active ? 200 : 110)
-
-                sourceComponent: FetchText {
-                    text: `WM  : ${SysInfo.wm}`
-                }
-            }
-
-            WrappedLoader {
-                Layout.fillWidth: true
-                active: !batLoader.active || root.height > 110
-
-                sourceComponent: FetchText {
-                    text: `USER: ${SysInfo.user}`
-                }
-            }
-
-            FetchText {
-                text: `UP  : ${SysInfo.uptime}`
-            }
-
-            WrappedLoader {
-                id: batLoader
-
-                Layout.fillWidth: true
-                active: UPower.displayDevice.isLaptopBattery
-
-                sourceComponent: FetchText {
-                    text: `BATT: ${[UPowerDeviceState.Charging, UPowerDeviceState.FullyCharged, UPowerDeviceState.PendingCharge].includes(UPower.displayDevice.state) ? "(+) " : ""}${Math.round(UPower.displayDevice.percentage * 100)}%`
-                }
-            }
-        }
-    }
-
-    WrappedLoader {
-        Layout.alignment: Qt.AlignHCenter
-        active: root.height > 180
-
-        sourceComponent: RowLayout {
-            spacing: Tokens.spacing.large
-
-            Repeater {
-                model: Math.max(0, Math.min(8, root.width / (Tokens.font.size.larger * 2 + Tokens.spacing.large)))
-
-                StyledRect {
-                    required property int index
-
-                    implicitWidth: implicitHeight
-                    implicitHeight: Tokens.font.size.larger * 2
-                    color: Colours.palette[`term${index}`]
-                    radius: Tokens.rounding.small
+                        implicitWidth: implicitHeight
+                        implicitHeight: root.cBoxSize
+                        color: Colours.palette[`term${index}`]
+                        radius: Tokens.rounding.medium
+                    }
                 }
             }
         }
@@ -166,13 +173,7 @@ ColumnLayout {
         visible: active
     }
 
-    component FetchText: MonoText {
-        Layout.fillWidth: true
-        font.pointSize: root.width > 400 ? Tokens.font.size.larger : Tokens.font.size.normal
-        elide: Text.ElideRight
-    }
-
     component MonoText: StyledText {
-        font.family: Tokens.font.family.mono
+        font: root.width > Tokens.sizes.lock.largeFontWidth ? Tokens.font.mono.medium : Tokens.font.mono.small
     }
 }

@@ -37,8 +37,8 @@ StyledRect {
             id: maskInner
 
             anchors.fill: parent
-            anchors.margins: Tokens.padding.normal
-            radius: Tokens.rounding.normal
+            anchors.margins: Tokens.padding.medium
+            radius: Tokens.rounding.large
         }
     }
 }

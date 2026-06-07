@@ -86,8 +86,7 @@ Item {
         id: metrics
 
         text: root.windowTitle
-        font.pointSize: root.Tokens.font.size.smaller
-        font.family: root.Tokens.font.family.mono
+        font: root.Tokens.font.body.builders.small.letterSpacing(1.4).build()
         elide: Qt.ElideRight
         elideWidth: root.maxHeight - icon.height
 
@@ -100,9 +99,7 @@ Item {
     }
 
     Behavior on implicitHeight {
-        Anim {
-            type: Anim.DefaultSpatial
-        }
+        Anim {}
     }
 
     component Title: StyledText {
@@ -112,8 +109,7 @@ Item {
         anchors.top: icon.bottom
         anchors.topMargin: Tokens.spacing.small
 
-        font.pointSize: metrics.font.pointSize
-        font.family: metrics.font.family
+        font: metrics.font
         color: root.colour
         opacity: root.current === this ? 1 : 0
 
@@ -132,7 +128,9 @@ Item {
         height: implicitWidth
 
         Behavior on opacity {
-            Anim {}
+            Anim {
+                type: Anim.DefaultEffects
+            }
         }
     }
 }

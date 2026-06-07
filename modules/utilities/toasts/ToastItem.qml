@@ -13,9 +13,9 @@ StyledRect {
 
     anchors.left: parent.left
     anchors.right: parent.right
-    implicitHeight: layout.implicitHeight + Tokens.padding.smaller * 2
+    implicitHeight: layout.implicitHeight + Tokens.padding.large
 
-    radius: Tokens.rounding.normal
+    radius: Tokens.rounding.large
     color: {
         if (root.modelData.type === Toast.Success)
             return Colours.palette.m3successContainer;
@@ -50,13 +50,13 @@ StyledRect {
         id: layout
 
         anchors.fill: parent
-        anchors.margins: Tokens.padding.smaller
-        anchors.leftMargin: Tokens.padding.normal
-        anchors.rightMargin: Tokens.padding.normal
-        spacing: Tokens.spacing.normal
+        anchors.margins: Tokens.padding.small
+        anchors.leftMargin: Tokens.padding.medium
+        anchors.rightMargin: Tokens.padding.medium
+        spacing: Tokens.spacing.medium
 
         StyledRect {
-            radius: Tokens.rounding.normal
+            radius: Tokens.rounding.large
             color: {
                 if (root.modelData.type === Toast.Success)
                     return Colours.palette.m3success;
@@ -68,7 +68,7 @@ StyledRect {
             }
 
             implicitWidth: implicitHeight
-            implicitHeight: icon.implicitHeight + Tokens.padding.smaller * 2
+            implicitHeight: icon.implicitHeight + Tokens.padding.large
 
             MaterialIcon {
                 id: icon
@@ -84,7 +84,7 @@ StyledRect {
                         return Colours.palette.m3onError;
                     return Colours.palette.m3onSurfaceVariant;
                 }
-                font.pointSize: Math.round(Tokens.font.size.large * 1.2)
+                fontStyle: Tokens.font.icon.builders.large.scale(1.2).build()
             }
         }
 
@@ -106,7 +106,7 @@ StyledRect {
                         return Colours.palette.m3onErrorContainer;
                     return Colours.palette.m3onSurface;
                 }
-                font.pointSize: Tokens.font.size.normal
+                font: Tokens.font.title.small
                 elide: Text.ElideRight
             }
 

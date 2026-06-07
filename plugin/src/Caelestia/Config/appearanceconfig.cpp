@@ -36,12 +36,28 @@ int AppearanceRounding::small() const {
     return m_tokens ? static_cast<int>(m_tokens->small() * m_scale) : 0;
 }
 
-int AppearanceRounding::normal() const {
-    return m_tokens ? static_cast<int>(m_tokens->normal() * m_scale) : 0;
+int AppearanceRounding::medium() const {
+    return m_tokens ? static_cast<int>(m_tokens->medium() * m_scale) : 0;
 }
 
 int AppearanceRounding::large() const {
     return m_tokens ? static_cast<int>(m_tokens->large() * m_scale) : 0;
+}
+
+int AppearanceRounding::largeIncreased() const {
+    return m_tokens ? static_cast<int>(m_tokens->largeIncreased() * m_scale) : 0;
+}
+
+int AppearanceRounding::extraLarge() const {
+    return m_tokens ? static_cast<int>(m_tokens->extraLarge() * m_scale) : 0;
+}
+
+int AppearanceRounding::extraLargeIncreased() const {
+    return m_tokens ? static_cast<int>(m_tokens->extraLargeIncreased() * m_scale) : 0;
+}
+
+int AppearanceRounding::extraExtraLarge() const {
+    return m_tokens ? static_cast<int>(m_tokens->extraExtraLarge() * m_scale) : 0;
 }
 
 int AppearanceRounding::full() const {
@@ -55,24 +71,36 @@ void AppearanceSpacing::bindTokens(SpacingTokens* tokens) {
     connectTokenSignals(tokens, this);
 }
 
+int AppearanceSpacing::extraSmall() const {
+    return m_tokens ? static_cast<int>(m_tokens->extraSmall() * m_scale) : 0;
+}
+
 int AppearanceSpacing::small() const {
     return m_tokens ? static_cast<int>(m_tokens->small() * m_scale) : 0;
 }
 
-int AppearanceSpacing::smaller() const {
-    return m_tokens ? static_cast<int>(m_tokens->smaller() * m_scale) : 0;
-}
-
-int AppearanceSpacing::normal() const {
-    return m_tokens ? static_cast<int>(m_tokens->normal() * m_scale) : 0;
-}
-
-int AppearanceSpacing::larger() const {
-    return m_tokens ? static_cast<int>(m_tokens->larger() * m_scale) : 0;
+int AppearanceSpacing::medium() const {
+    return m_tokens ? static_cast<int>(m_tokens->medium() * m_scale) : 0;
 }
 
 int AppearanceSpacing::large() const {
     return m_tokens ? static_cast<int>(m_tokens->large() * m_scale) : 0;
+}
+
+int AppearanceSpacing::largeIncreased() const {
+    return m_tokens ? static_cast<int>(m_tokens->largeIncreased() * m_scale) : 0;
+}
+
+int AppearanceSpacing::extraLarge() const {
+    return m_tokens ? static_cast<int>(m_tokens->extraLarge() * m_scale) : 0;
+}
+
+int AppearanceSpacing::extraLargeIncreased() const {
+    return m_tokens ? static_cast<int>(m_tokens->extraLargeIncreased() * m_scale) : 0;
+}
+
+int AppearanceSpacing::extraExtraLarge() const {
+    return m_tokens ? static_cast<int>(m_tokens->extraExtraLarge() * m_scale) : 0;
 }
 
 // AppearancePadding
@@ -82,55 +110,50 @@ void AppearancePadding::bindTokens(PaddingTokens* tokens) {
     connectTokenSignals(tokens, this);
 }
 
+int AppearancePadding::extraSmall() const {
+    return m_tokens ? static_cast<int>(m_tokens->extraSmall() * m_scale) : 0;
+}
+
 int AppearancePadding::small() const {
     return m_tokens ? static_cast<int>(m_tokens->small() * m_scale) : 0;
 }
 
-int AppearancePadding::smaller() const {
-    return m_tokens ? static_cast<int>(m_tokens->smaller() * m_scale) : 0;
-}
-
-int AppearancePadding::normal() const {
-    return m_tokens ? static_cast<int>(m_tokens->normal() * m_scale) : 0;
-}
-
-int AppearancePadding::larger() const {
-    return m_tokens ? static_cast<int>(m_tokens->larger() * m_scale) : 0;
+int AppearancePadding::medium() const {
+    return m_tokens ? static_cast<int>(m_tokens->medium() * m_scale) : 0;
 }
 
 int AppearancePadding::large() const {
     return m_tokens ? static_cast<int>(m_tokens->large() * m_scale) : 0;
 }
 
-// FontSize
-
-void FontSize::bindTokens(FontSizeTokens* tokens) {
-    m_tokens = tokens;
-    connectTokenSignals(tokens, this);
+int AppearancePadding::largeIncreased() const {
+    return m_tokens ? static_cast<int>(m_tokens->largeIncreased() * m_scale) : 0;
 }
 
-int FontSize::small() const {
-    return m_tokens ? static_cast<int>(m_tokens->small() * m_scale) : 0;
-}
-
-int FontSize::smaller() const {
-    return m_tokens ? static_cast<int>(m_tokens->smaller() * m_scale) : 0;
-}
-
-int FontSize::normal() const {
-    return m_tokens ? static_cast<int>(m_tokens->normal() * m_scale) : 0;
-}
-
-int FontSize::larger() const {
-    return m_tokens ? static_cast<int>(m_tokens->larger() * m_scale) : 0;
-}
-
-int FontSize::large() const {
-    return m_tokens ? static_cast<int>(m_tokens->large() * m_scale) : 0;
-}
-
-int FontSize::extraLarge() const {
+int AppearancePadding::extraLarge() const {
     return m_tokens ? static_cast<int>(m_tokens->extraLarge() * m_scale) : 0;
+}
+
+int AppearancePadding::extraLargeIncreased() const {
+    return m_tokens ? static_cast<int>(m_tokens->extraLargeIncreased() * m_scale) : 0;
+}
+
+int AppearancePadding::extraExtraLarge() const {
+    return m_tokens ? static_cast<int>(m_tokens->extraExtraLarge() * m_scale) : 0;
+}
+
+// FontConfig
+
+void FontConfig::setDefaults(int size, int weight, const QVariantMap& vaxes) {
+    m_size = size;
+    m_weight = weight;
+    m_vaxes = vaxes;
+}
+
+// FontStyleConfig
+
+void FontStyleConfig::setDefaultFamily(const QString& family) {
+    m_family = family;
 }
 
 // AnimDurations

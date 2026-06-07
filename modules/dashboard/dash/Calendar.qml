@@ -3,6 +3,7 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
+import M3Shapes
 import Caelestia.Config
 import qs.components
 import qs.components.controls
@@ -36,56 +37,42 @@ CustomMouseArea {
 
         anchors.fill: parent
         anchors.margins: Tokens.padding.large
-        spacing: Tokens.spacing.small
+        spacing: Tokens.spacing.extraSmall
 
         RowLayout {
             id: monthNavigationRow
 
             Layout.fillWidth: true
-            spacing: Tokens.spacing.small
+            spacing: Tokens.spacing.extraSmall
 
-            Item {
-                implicitWidth: implicitHeight
-                implicitHeight: prevMonthText.implicitHeight + Tokens.padding.small * 2
-
-                StateLayer {
-                    id: prevMonthStateLayer
-
-                    radius: Tokens.rounding.full
-                    onClicked: root.dashState.currentDate = new Date(root.currYear, root.currMonth - 1, 1)
-                }
-
-                MaterialIcon {
-                    id: prevMonthText
-
-                    anchors.centerIn: parent
-                    text: "chevron_left"
-                    color: Colours.palette.m3tertiary
-                    font.pointSize: Tokens.font.size.normal
-                    font.weight: 700
-                }
+            IconButton {
+                icon: "chevron_left"
+                type: IconButton.Text
+                font: Tokens.font.icon.builders.small.weight(Font.Bold).build()
+                padding: Tokens.padding.small
+                onClicked: root.dashState.currentDate = new Date(root.currYear, root.currMonth - 1, 1)
             }
 
             Item {
                 Layout.fillWidth: true
+                Layout.fillHeight: true
 
-                implicitWidth: monthYearDisplay.implicitWidth + Tokens.padding.small * 2
-                implicitHeight: monthYearDisplay.implicitHeight + Tokens.padding.small * 2
+                implicitWidth: monthYearDisplay.implicitWidth + Tokens.padding.large * 2
+                implicitHeight: monthYearDisplay.implicitHeight + Tokens.padding.extraSmall * 2
 
                 StateLayer {
-                    onClicked: {
-                        root.dashState.currentDate = new Date();
-                    }
-
-                    anchors.fill: monthYearDisplay
-                    anchors.margins: -Tokens.padding.small
-                    anchors.leftMargin: -Tokens.padding.normal
-                    anchors.rightMargin: -Tokens.padding.normal
-
-                    radius: Tokens.rounding.full
+                    color: Colours.palette.m3primary
+                    radius: pressed ? Tokens.rounding.small : Tokens.rounding.large
                     disabled: {
                         const now = new Date();
                         return root.currMonth === now.getMonth() && root.currYear === now.getFullYear();
+                    }
+                    onClicked: root.dashState.currentDate = new Date()
+
+                    Behavior on radius {
+                        Anim {
+                            type: Anim.DefaultEffects
+                        }
                     }
                 }
 
@@ -95,35 +82,16 @@ CustomMouseArea {
                     anchors.centerIn: parent
                     text: grid.title
                     color: Colours.palette.m3primary
-                    font.pointSize: Tokens.font.size.normal
-                    font.weight: 500
-                    font.capitalization: Font.Capitalize
+                    font: Tokens.font.title.builders.small.capitalisation(Font.Capitalize).build()
                 }
             }
 
-            Item {
-                implicitWidth: implicitHeight
-                implicitHeight: nextMonthText.implicitHeight + Tokens.padding.small * 2
-
-                StateLayer {
-                    id: nextMonthStateLayer
-
-                    onClicked: {
-                        root.dashState.currentDate = new Date(root.currYear, root.currMonth + 1, 1);
-                    }
-
-                    radius: Tokens.rounding.full
-                }
-
-                MaterialIcon {
-                    id: nextMonthText
-
-                    anchors.centerIn: parent
-                    text: "chevron_right"
-                    color: Colours.palette.m3tertiary
-                    font.pointSize: Tokens.font.size.normal
-                    font.weight: 700
-                }
+            IconButton {
+                icon: "chevron_right"
+                type: IconButton.Text
+                font: Tokens.font.icon.builders.small.weight(Font.Bold).build()
+                padding: Tokens.padding.small
+                onClicked: root.dashState.currentDate = new Date(root.currYear, root.currMonth + 1, 1)
             }
         }
 
@@ -138,8 +106,8 @@ CustomMouseArea {
 
                 horizontalAlignment: Text.AlignHCenter
                 text: model.shortName
-                font.weight: 500
-                color: (model.day === 0 || model.day === 6) ? Colours.palette.m3secondary : Colours.palette.m3onSurfaceVariant
+                font: Tokens.font.body.builders.small.weight(Font.Medium).build()
+                color: (model.day === 0 || model.day === 6) ? Colours.palette.m3tertiary : Colours.palette.m3onSurface
             }
         }
 
@@ -164,7 +132,7 @@ CustomMouseArea {
                     required property var model
 
                     implicitWidth: implicitHeight
-                    implicitHeight: text.implicitHeight + Tokens.padding.small * 2
+                    implicitHeight: text.implicitHeight + Tokens.padding.small
 
                     StyledText {
                         id: text
@@ -174,20 +142,19 @@ CustomMouseArea {
                         horizontalAlignment: Text.AlignHCenter
                         text: grid.locale.toString(dayItem.model.day)
                         color: {
-                            const dayOfWeek = dayItem.model.date.getUTCDay();
+                            const dayOfWeek = dayItem.model.date.getDay();
                             if (dayOfWeek === 0 || dayOfWeek === 6)
-                                return Colours.palette.m3secondary;
+                                return Colours.palette.m3tertiary;
 
                             return Colours.palette.m3onSurfaceVariant;
                         }
                         opacity: dayItem.model.today || dayItem.model.month === grid.month ? 1 : 0.4
-                        font.pointSize: Tokens.font.size.normal
-                        font.weight: 500
+                        font: Tokens.font.body.small
                     }
                 }
             }
 
-            StyledRect {
+            MaterialShape {
                 id: todayIndicator
 
                 readonly property Item todayItem: grid.contentItem.children.find(c => c.model.today) ?? null
@@ -199,13 +166,12 @@ CustomMouseArea {
                 }
 
                 x: today ? today.x + (today.width - implicitWidth) / 2 : 0
-                y: today?.y ?? 0
+                y: today ? today.y - Tokens.padding.extraSmall - 1 : 0
 
-                implicitWidth: today?.implicitWidth ?? 0
-                implicitHeight: today?.implicitHeight ?? 0
+                implicitSize: today ? Math.max(today.implicitWidth, today.implicitHeight) + Tokens.padding.extraSmall * 2 : 0
+                shape: MaterialShape.Sunny
 
                 clip: true
-                radius: Tokens.rounding.full
                 color: Colours.palette.m3primary
 
                 opacity: todayItem ? 1 : 0
@@ -224,23 +190,23 @@ CustomMouseArea {
                 }
 
                 Behavior on opacity {
-                    Anim {}
+                    Anim {
+                        type: Anim.DefaultEffects
+                    }
                 }
 
                 Behavior on scale {
-                    Anim {}
+                    Anim {
+                        type: Anim.FastSpatial
+                    }
                 }
 
                 Behavior on x {
-                    Anim {
-                        type: Anim.DefaultSpatial
-                    }
+                    Anim {}
                 }
 
                 Behavior on y {
-                    Anim {
-                        type: Anim.DefaultSpatial
-                    }
+                    Anim {}
                 }
             }
         }

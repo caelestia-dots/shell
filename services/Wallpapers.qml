@@ -20,6 +20,17 @@ Searcher {
     property string actualCurrent
     property bool previewColourLock
 
+    function getCategoryFor(w: FileSystemEntry): string {
+        let category = w.parentDir.slice(Paths.wallsdir.length + 1);
+        if (category.includes("/"))
+            category = category.slice(0, category.indexOf("/"));
+        return category;
+    }
+
+    function setRandom(): void {
+        Quickshell.execDetached(["caelestia", "wallpaper", "-r", ...smartArg]);
+    }
+
     function setWallpaper(path: string): void {
         actualCurrent = path;
         Quickshell.execDetached(["caelestia", "wallpaper", "-f", path, ...smartArg]);

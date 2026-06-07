@@ -32,9 +32,9 @@ StyledRect {
     }
 
     readonly property int nonAnimHeight: {
-        const headerHeight = header.implicitHeight + (root.expanded ? Math.round(Tokens.spacing.small / 2) : 0);
+        const headerHeight = header.implicitHeight + (root.expanded ? Math.round(Tokens.spacing.extraSmall) : 0);
         const columnHeight = headerHeight + notifList.layoutHeight;
-        return Math.round(Math.max(TokenConfig.sizes.notifs.image, columnHeight) + Tokens.padding.normal * 2);
+        return Math.round(Math.max(TokenConfig.sizes.notifs.image, columnHeight) + Tokens.padding.medium * 2);
     }
     readonly property bool expanded: props.expandedNotifs.includes(modelData)
 
@@ -57,13 +57,11 @@ StyledRect {
     implicitHeight: nonAnimHeight
 
     clip: true
-    radius: Tokens.rounding.normal
+    radius: Tokens.rounding.large
     color: Colours.layer(Colours.palette.m3surfaceContainer, 2)
 
     Behavior on implicitHeight {
-        Anim {
-            type: Anim.DefaultSpatial
-        }
+        Anim {}
     }
 
     RowLayout {
@@ -72,9 +70,9 @@ StyledRect {
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.top: parent.top
-        anchors.margins: Tokens.padding.normal
+        anchors.margins: Tokens.padding.medium
 
-        spacing: Tokens.spacing.normal
+        spacing: Tokens.spacing.medium
 
         Item {
             Layout.alignment: Qt.AlignLeft | Qt.AlignTop
@@ -115,7 +113,7 @@ StyledRect {
                 MaterialIcon {
                     text: Icons.getNotifIcon(root.activeNotifs[0]?.summary, root.urgency)
                     color: root.urgency === NotificationUrgency.Critical ? Colours.palette.m3onError : root.urgency === NotificationUrgency.Low ? Colours.palette.m3onSurface : Colours.palette.m3onSecondaryContainer
-                    font.pointSize: Tokens.font.size.large
+                    fontStyle: Tokens.font.icon.medium
                 }
             }
 
@@ -127,6 +125,7 @@ StyledRect {
                 Loader {
                     asynchronous: true
                     anchors.centerIn: parent
+                    anchors.verticalCenterOffset: sourceComponent === materialIconComp ? 1 : 0
                     sourceComponent: root.image ? imageComp : root.appIcon ? appIconComp : materialIconComp
                 }
             }
@@ -159,7 +158,7 @@ StyledRect {
             id: column
 
             Layout.fillWidth: true
-            spacing: root.expanded ? Math.round(Tokens.spacing.small / 2) : 0
+            spacing: root.expanded ? Math.round(Tokens.spacing.extraSmall) : 0
 
             Behavior on spacing {
                 Anim {}
@@ -170,13 +169,13 @@ StyledRect {
 
                 anchors.left: parent.left
                 anchors.right: parent.right
-                spacing: Tokens.spacing.smaller
+                spacing: Tokens.spacing.small
 
                 StyledText {
                     Layout.fillWidth: true
                     text: root.modelData
                     color: Colours.palette.m3onSurfaceVariant
-                    font.pointSize: Tokens.font.size.small
+                    font: Tokens.font.body.small
                     elide: Text.ElideRight
                 }
 
@@ -184,12 +183,12 @@ StyledRect {
                     animate: true
                     text: root.activeNotifs[0]?.timeStr ?? ""
                     color: Colours.palette.m3outline
-                    font.pointSize: Tokens.font.size.small
+                    font: Tokens.font.body.small
                 }
 
                 StyledRect {
-                    implicitWidth: expandBtn.implicitWidth + Tokens.padding.smaller * 2
-                    implicitHeight: groupCount.implicitHeight + Tokens.padding.small
+                    implicitWidth: expandBtn.implicitWidth + Tokens.padding.large
+                    implicitHeight: groupCount.implicitHeight + Tokens.padding.extraSmall
 
                     color: root.urgency === NotificationUrgency.Critical ? Colours.palette.m3error : Colours.layer(Colours.palette.m3surfaceContainerHigh, 3)
                     radius: Tokens.rounding.full
@@ -203,35 +202,31 @@ StyledRect {
                         id: expandBtn
 
                         anchors.centerIn: parent
-                        spacing: Tokens.spacing.small / 2
+                        spacing: Tokens.spacing.extraSmall
 
                         StyledText {
                             id: groupCount
 
-                            Layout.leftMargin: Tokens.padding.small / 2
+                            Layout.leftMargin: Tokens.padding.extraSmall / 2
                             animate: true
                             text: root.notifCount
-                            color: root.urgency === NotificationUrgency.Critical ? Colours.palette.m3onError : Colours.palette.m3onSurface
-                            font.pointSize: Tokens.font.size.small
+                            color: root.urgency === NotificationUrgency.Critical ? Colours.palette.m3onError : Colours.palette.m3onSurfaceVariant
+                            font: Tokens.font.body.small
                         }
 
                         MaterialIcon {
-                            Layout.rightMargin: -Tokens.padding.small / 2
+                            Layout.rightMargin: -Tokens.padding.extraSmall / 2
                             text: "expand_more"
-                            color: root.urgency === NotificationUrgency.Critical ? Colours.palette.m3onError : Colours.palette.m3onSurface
+                            color: root.urgency === NotificationUrgency.Critical ? Colours.palette.m3onError : Colours.palette.m3onSurfaceVariant
                             rotation: root.expanded ? 180 : 0
-                            Layout.topMargin: root.expanded ? -Math.floor(Tokens.padding.smaller / 2) : 0
+                            Layout.topMargin: root.expanded ? -Math.floor(Tokens.padding.extraSmall) : 0
 
                             Behavior on rotation {
-                                Anim {
-                                    type: Anim.DefaultSpatial
-                                }
+                                Anim {}
                             }
 
                             Behavior on Layout.topMargin {
-                                Anim {
-                                    type: Anim.DefaultSpatial
-                                }
+                                Anim {}
                             }
                         }
                     }

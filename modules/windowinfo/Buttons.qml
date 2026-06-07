@@ -21,7 +21,7 @@ ColumnLayout {
         Layout.leftMargin: Tokens.padding.large
         Layout.rightMargin: Tokens.padding.large
 
-        spacing: Tokens.spacing.normal
+        spacing: Tokens.spacing.medium
 
         StyledText {
             Layout.fillWidth: true
@@ -31,10 +31,10 @@ ColumnLayout {
 
         StyledRect {
             color: Colours.palette.m3primary
-            radius: Tokens.rounding.small
+            radius: Tokens.rounding.medium
 
-            implicitWidth: moveToWsIcon.implicitWidth + Tokens.padding.small * 2
-            implicitHeight: moveToWsIcon.implicitHeight + Tokens.padding.small
+            implicitWidth: moveToWsIcon.implicitWidth + Tokens.padding.small
+            implicitHeight: moveToWsIcon.implicitHeight + Tokens.padding.extraSmall
 
             StateLayer {
                 color: Colours.palette.m3onPrimary
@@ -49,27 +49,27 @@ ColumnLayout {
                 animate: true
                 text: root.moveToWsExpanded ? "expand_more" : "keyboard_arrow_right"
                 color: Colours.palette.m3onPrimary
-                font.pointSize: Tokens.font.size.large
+                fontStyle: Tokens.font.icon.large
             }
         }
     }
 
     WrapperItem {
         Layout.fillWidth: true
-        Layout.leftMargin: Tokens.padding.large * 2
-        Layout.rightMargin: Tokens.padding.large * 2
+        Layout.leftMargin: Tokens.padding.extraLargeIncreased
+        Layout.rightMargin: Tokens.padding.extraLargeIncreased
 
         Layout.preferredHeight: root.moveToWsExpanded ? implicitHeight : 0
         clip: true
 
-        topMargin: Tokens.spacing.normal
-        bottomMargin: Tokens.spacing.normal
+        topMargin: Tokens.spacing.medium
+        bottomMargin: Tokens.spacing.medium
 
         GridLayout {
             id: wsGrid
 
-            rowSpacing: Tokens.spacing.smaller
-            columnSpacing: Tokens.spacing.normal
+            rowSpacing: Tokens.spacing.medium
+            columnSpacing: Tokens.spacing.medium
             columns: 5
 
             Repeater {
@@ -103,7 +103,7 @@ ColumnLayout {
         Layout.rightMargin: Tokens.padding.large
         Layout.bottomMargin: Tokens.padding.large
 
-        spacing: root.client?.lastIpcObject.floating ? Tokens.spacing.normal : Tokens.spacing.small
+        spacing: root.client?.lastIpcObject.floating ? Tokens.spacing.medium : Tokens.spacing.small
 
         Button {
             color: Colours.palette.m3secondaryContainer
@@ -142,10 +142,10 @@ ColumnLayout {
 
         signal clicked
 
-        radius: Tokens.rounding.small
+        radius: Tokens.rounding.medium
 
         Layout.fillWidth: true
-        implicitHeight: label.implicitHeight + Tokens.padding.small * 2
+        implicitHeight: label.implicitHeight + Tokens.padding.small
 
         StateLayer {
             id: stateLayer
@@ -161,7 +161,7 @@ ColumnLayout {
 
             animate: true
             color: parent.onColor
-            font.pointSize: Tokens.font.size.normal
+            font: Tokens.font.body.medium
         }
     }
 }
