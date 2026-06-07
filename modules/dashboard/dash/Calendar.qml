@@ -26,10 +26,16 @@ CustomMouseArea {
 
     anchors.left: parent.left
     anchors.right: parent.right
-    implicitHeight: inner.implicitHeight + inner.anchors.margins * 2
+    clip: true
+    implicitHeight: inner.anchors.margins * 2 +
+        monthNavigationRow.implicitHeight + inner.spacing +
+        daysRow.implicitHeight + inner.spacing +
+        calGridItem.implicitHeight
 
     acceptedButtons: Qt.MiddleButton
-    onClicked: root.dashState.currentDate = new Date()
+    onClicked: {
+        root.dashState.currentDate = new Date();
+    }
 
     ColumnLayout {
         id: inner
@@ -38,6 +44,7 @@ CustomMouseArea {
         anchors.margins: Tokens.padding.large
         spacing: Tokens.spacing.small
 
+        // Month navigation row
         RowLayout {
             id: monthNavigationRow
 
@@ -49,15 +56,12 @@ CustomMouseArea {
                 implicitHeight: prevMonthText.implicitHeight + Tokens.padding.small * 2
 
                 StateLayer {
-                    id: prevMonthStateLayer
-
                     radius: Tokens.rounding.full
                     onClicked: root.dashState.currentDate = new Date(root.currYear, root.currMonth - 1, 1)
                 }
 
                 MaterialIcon {
                     id: prevMonthText
-
                     anchors.centerIn: parent
                     text: "chevron_left"
                     color: Colours.palette.m3tertiary
@@ -68,30 +72,21 @@ CustomMouseArea {
 
             Item {
                 Layout.fillWidth: true
-
                 implicitWidth: monthYearDisplay.implicitWidth + Tokens.padding.small * 2
                 implicitHeight: monthYearDisplay.implicitHeight + Tokens.padding.small * 2
 
                 StateLayer {
-                    onClicked: {
-                        root.dashState.currentDate = new Date();
-                    }
-
+                    onClicked: root.dashState.currentDate = new Date()
                     anchors.fill: monthYearDisplay
                     anchors.margins: -Tokens.padding.small
                     anchors.leftMargin: -Tokens.padding.normal
                     anchors.rightMargin: -Tokens.padding.normal
-
                     radius: Tokens.rounding.full
-                    disabled: {
-                        const now = new Date();
-                        return root.currMonth === now.getMonth() && root.currYear === now.getFullYear();
-                    }
+                    disabled: root.currMonth === new Date().getMonth() && root.currYear === new Date().getFullYear()
                 }
 
                 StyledText {
                     id: monthYearDisplay
-
                     anchors.centerIn: parent
                     text: grid.title
                     color: Colours.palette.m3primary
@@ -106,18 +101,12 @@ CustomMouseArea {
                 implicitHeight: nextMonthText.implicitHeight + Tokens.padding.small * 2
 
                 StateLayer {
-                    id: nextMonthStateLayer
-
-                    onClicked: {
-                        root.dashState.currentDate = new Date(root.currYear, root.currMonth + 1, 1);
-                    }
-
+                    onClicked: root.dashState.currentDate = new Date(root.currYear, root.currMonth + 1, 1)
                     radius: Tokens.rounding.full
                 }
 
                 MaterialIcon {
                     id: nextMonthText
-
                     anchors.centerIn: parent
                     text: "chevron_right"
                     color: Colours.palette.m3tertiary
@@ -125,8 +114,10 @@ CustomMouseArea {
                     font.weight: 700
                 }
             }
+
         }
 
+        // Day-of-week header
         DayOfWeekRow {
             id: daysRow
 
@@ -135,7 +126,6 @@ CustomMouseArea {
 
             delegate: StyledText {
                 required property var model
-
                 horizontalAlignment: Text.AlignHCenter
                 text: model.shortName
                 font.weight: 500
@@ -143,7 +133,9 @@ CustomMouseArea {
             }
         }
 
+        // Calendar grid
         Item {
+            id: calGridItem
             Layout.fillWidth: true
             implicitHeight: grid.implicitHeight
 
@@ -164,10 +156,10 @@ CustomMouseArea {
                     required property var model
 
                     implicitWidth: implicitHeight
-                    implicitHeight: text.implicitHeight + Tokens.padding.small * 2
+                    implicitHeight: dayText.implicitHeight + Tokens.padding.small * 2
 
                     StyledText {
-                        id: text
+                        id: dayText
 
                         anchors.centerIn: parent
 
@@ -177,13 +169,13 @@ CustomMouseArea {
                             const dayOfWeek = dayItem.model.date.getUTCDay();
                             if (dayOfWeek === 0 || dayOfWeek === 6)
                                 return Colours.palette.m3secondary;
-
                             return Colours.palette.m3onSurfaceVariant;
                         }
                         opacity: dayItem.model.today || dayItem.model.month === grid.month ? 1 : 0.4
                         font.pointSize: Tokens.font.size.normal
                         font.weight: 500
                     }
+
                 }
             }
 
@@ -223,26 +215,18 @@ CustomMouseArea {
                     colorizationColor: Colours.palette.m3onPrimary
                 }
 
-                Behavior on opacity {
-                    Anim {}
-                }
-
-                Behavior on scale {
-                    Anim {}
-                }
+                Behavior on opacity { Anim {} }
+                Behavior on scale { Anim {} }
 
                 Behavior on x {
-                    Anim {
-                        type: Anim.DefaultSpatial
-                    }
+                    Anim { type: Anim.DefaultSpatial }
                 }
 
                 Behavior on y {
-                    Anim {
-                        type: Anim.DefaultSpatial
-                    }
+                    Anim { type: Anim.DefaultSpatial }
                 }
             }
         }
     }
+
 }

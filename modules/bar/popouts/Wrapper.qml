@@ -27,6 +27,7 @@ Item {
 
     property alias currentName: popoutState.currentName
     property alias hasCurrent: popoutState.hasCurrent
+    property alias locked: popoutState.locked
     property real currentCenter
 
     property string detachedMode
@@ -78,8 +79,8 @@ Item {
     }
 
     Keys.onPressed: event => {
-        // Don't intercept keys when password popout is active - let it handle them
-        if (currentName === "wirelesspassword") {
+        // Don't intercept keys when these popouts are active - let them handle input
+        if (currentName === "wirelesspassword" || currentName === "timer") {
             event.accepted = false;
         }
     }
@@ -97,7 +98,7 @@ Item {
     }
 
     Binding {
-        when: root.isDetached || (root.hasCurrent && root.currentName === "wirelesspassword")
+        when: root.isDetached || (root.hasCurrent && (root.currentName === "wirelesspassword" || root.currentName === "timer"))
 
         target: QsWindow.window
         property: "WlrLayershell.keyboardFocus"

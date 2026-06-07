@@ -67,5 +67,47 @@ StyledRect {
             font.family: Tokens.font.family.mono
             color: root.colour
         }
+
+        Loader {
+            active: TimerService.active && (Config.bar.clock.timer?.enabled ?? true)
+            visible: active
+            anchors.horizontalCenter: parent.horizontalCenter
+
+            sourceComponent: Column {
+                spacing: Tokens.spacing.small
+
+                Rectangle {
+                    width: 30
+                    height: 1
+                    color: root.colour
+                    opacity: 0.2
+                    anchors.horizontalCenter: parent.horizontalCenter
+                }
+
+                MaterialIcon {
+                    text: "timer"
+                    font.pointSize: Tokens.font.size.small
+                    color: TimerService.running ? root.colour : Qt.alpha(root.colour, 0.5)
+                    anchors.horizontalCenter: parent.horizontalCenter
+                }
+
+                StyledText {
+                    horizontalAlignment: StyledText.AlignHCenter
+                    text: {
+                        const s = TimerService.remainingSeconds;
+                        const h = Math.floor(s / 3600);
+                        const m = Math.floor((s % 3600) / 60);
+                        const sec = s % 60;
+                        if (h > 0)
+                            return h + "\n" + String(m).padStart(2, "0") + "\n" + String(sec).padStart(2, "0");
+                        return String(m).padStart(2, "0") + "\n" + String(sec).padStart(2, "0");
+                    }
+                    font.pointSize: Tokens.font.size.smaller
+                    font.family: Tokens.font.family.mono
+                    color: root.colour
+                    anchors.horizontalCenter: parent.horizontalCenter
+                }
+            }
+        }
     }
 }

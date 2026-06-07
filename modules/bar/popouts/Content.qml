@@ -122,6 +122,13 @@ Item {
         }
 
         Popout {
+            name: "timer"
+            sourceComponent: TimerPopout {
+                popouts: root.popouts
+            }
+        }
+
+        Popout {
             name: "lockstatus"
             sourceComponent: LockStatus {}
         }

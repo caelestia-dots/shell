@@ -6,13 +6,14 @@ import Caelestia
 import Caelestia.Config
 import qs.components
 import qs.components.filedialog
+import qs.services
 import qs.utils
 
 Item {
     id: root
 
     required property DrawerVisibilities visibilities
-    readonly property bool needsKeyboard: (content.item as Content)?.needsKeyboard ?? false
+    readonly property bool needsKeyboard: !fireActive && (dashState.timerPanelOpen || ((content.item as Content)?.needsKeyboard ?? false))
     readonly property DashboardState dashState: DashboardState {
         reloadableId: "dashboardState"
     }
@@ -28,14 +29,33 @@ Item {
         }
     }
 
-    readonly property real nonAnimHeight: state === "visible" ? ((content.item as Content)?.nonAnimHeight ?? 0) : 0
-    readonly property bool shouldBeActive: visibilities.dashboard && Config.dashboard.enabled
+    readonly property bool fireActive: TimerService.timerDone || AlarmService.alarmFired
+    property bool _wasOpenBeforeFire: false
+
+    onFireActiveChanged: {
+        if (fireActive && !_wasOpenBeforeFire && !LockState.locked) {
+            _wasOpenBeforeFire = visibilities.dashboard;
+            visibilities.dashboard = true;
+        }
+    }
+
+    Connections {
+        target: LockState
+        function onLockedChanged(): void {
+            if (!LockState.locked && root.fireActive && !root.visibilities.dashboard) {
+                root.visibilities.dashboard = true;
+            }
+        }
+    }
+
+    readonly property real nonAnimHeight: !fireActive ? ((content.item as Content)?.nonAnimHeight ?? 0) : 0
+    readonly property bool shouldBeActive: (visibilities.dashboard && Config.dashboard.enabled) || fireActive
     property real offsetScale: shouldBeActive ? 0 : 1
 
     visible: offsetScale < 1
     anchors.topMargin: (-implicitHeight - 5) * offsetScale
-    implicitHeight: content.implicitHeight
-    implicitWidth: content.implicitWidth || 854 // Hard coded fallback for first open
+    implicitHeight: fireActive ? (fireContent.implicitHeight || 400) : (content.implicitHeight)
+    implicitWidth: fireActive ? (fireContent.implicitWidth || 800) : (content.implicitWidth || 854)
     opacity: 1 - offsetScale
 
     Behavior on offsetScale {
@@ -50,12 +70,24 @@ Item {
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.bottom: parent.bottom
 
-        active: root.shouldBeActive || root.visible
+        active: root.shouldBeActive && !root.fireActive
 
         sourceComponent: Content {
             visibilities: root.visibilities
             dashState: root.dashState
             facePicker: root.facePicker
+        }
+    }
+
+    Loader {
+        id: fireContent
+
+        anchors.fill: parent
+
+        active: root.fireActive
+
+        sourceComponent: FiringOverlay {
+            visibilities: root.visibilities
         }
     }
 }

@@ -34,6 +34,9 @@ ColumnLayout {
     function checkPopout(y: real): void {
         const ch = childAt(width / 2, y) as WrappedLoader;
 
+        if (popouts.locked && ch?.id !== "clock")
+            popouts.locked = false;
+
         if (ch?.id !== "tray")
             closeTray();
 
@@ -73,6 +76,10 @@ ColumnLayout {
             popouts.currentName = id.toLowerCase();
             popouts.currentCenter = (ch.item as Item).mapToItem(root, 0, (ch.item as Item).implicitHeight / 2).y ?? 0;
             popouts.hasCurrent = true;
+        } else if (id === "clock" && (Config.bar.clock.timer?.enabled ?? true)) {
+            popouts.currentName = "timer";
+            popouts.currentCenter = ch.y + ch.height / 2;
+            popouts.hasCurrent = true;
         }
     }
 
@@ -103,6 +110,20 @@ ColumnLayout {
     }
 
     spacing: Tokens.spacing.normal
+
+    Connections {
+        target: TimerService
+        function onFinished(): void {
+            root.visibilities.dashboard = true;
+        }
+    }
+
+    Connections {
+        target: AlarmService
+        function onFinished(): void {
+            root.visibilities.dashboard = true;
+        }
+    }
 
     Repeater {
         id: repeater
