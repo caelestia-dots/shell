@@ -51,8 +51,8 @@ PageBase {
 
         ToggleRow {
             Layout.fillWidth: true
-            text: qsTr("State icons")
-            subtext: qsTr("Show icons for occupied and active workspaces")
+            text: qsTr("State icons in occupied workspaces")
+            subtext: qsTr("Show state icons in workspaces that have open windows")
             checked: Config.bar.workspaces.showOccupiedIcon
             onToggled: GlobalConfig.bar.workspaces.showOccupiedIcon = checked
         }
