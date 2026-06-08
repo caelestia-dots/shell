@@ -133,7 +133,7 @@ PageBase {
                     MaterialIcon {
                         text: Icons.getNetworkIcon(network.modelData.strength)
                         color: network.modelData.active ? Colours.palette.m3primary : Colours.palette.m3onSurfaceVariant
-                        font: Tokens.font.icon.medium
+                        fontStyle: Tokens.font.icon.medium
                         opacity: network.textOpacity
                     }
 
@@ -167,7 +167,7 @@ PageBase {
                             MaterialIcon {
                                 text: network.modelData.active ? "settings" : "lock"
                                 color: network.modelData.active ? Colours.palette.m3primary : Colours.palette.m3onSurfaceVariant
-                                font: Tokens.font.icon.medium
+                                fontStyle: Tokens.font.icon.medium
                                 opacity: network.textOpacity
                             }
                         }
@@ -219,7 +219,7 @@ PageBase {
 
                 MaterialIcon {
                     text: "add"
-                    font: Tokens.font.icon.medium
+                    fontStyle: Tokens.font.icon.medium
                 }
 
                 StyledText {

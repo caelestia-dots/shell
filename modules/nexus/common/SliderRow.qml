@@ -33,7 +33,7 @@ ConnectedRect {
             id: icon
 
             color: Colours.palette.m3onSurfaceVariant
-            font: Tokens.font.icon.medium
+            fontStyle: Tokens.font.icon.medium
         }
 
         ColumnLayout {

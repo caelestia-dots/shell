@@ -76,7 +76,7 @@ PageBase {
                         Layout.alignment: Qt.AlignHCenter
                         text: "delete"
                         color: forgetBtn.onColour
-                        font: Tokens.font.icon.medium
+                        fontStyle: Tokens.font.icon.medium
                     }
 
                     StyledText {
@@ -130,7 +130,7 @@ PageBase {
                             Layout.alignment: Qt.AlignHCenter
                             text: root.connected ? "close" : "add"
                             color: connectBtn.inactiveOnColour
-                            font: Tokens.font.icon.medium
+                            fontStyle: Tokens.font.icon.medium
                             animate: true
                         }
 

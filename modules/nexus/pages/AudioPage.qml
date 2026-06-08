@@ -95,7 +95,7 @@ PageBase {
 
                 MaterialIcon {
                     text: "tune"
-                    font: Tokens.font.icon.medium
+                    fontStyle: Tokens.font.icon.medium
                 }
 
                 ColumnLayout {
@@ -122,7 +122,7 @@ PageBase {
                 MaterialIcon {
                     text: "chevron_right"
                     color: Colours.palette.m3onSurfaceVariant
-                    font: Tokens.font.icon.medium
+                    fontStyle: Tokens.font.icon.medium
                 }
             }
         }

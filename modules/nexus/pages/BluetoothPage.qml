@@ -98,7 +98,7 @@ PageBase {
                             anchors.centerIn: parent
                             text: Icons.getBluetoothIcon(device.modelData?.icon ?? "")
                             color: device.connected ? Colours.palette.m3onPrimary : Colours.palette.m3onSecondaryContainer
-                            font: Tokens.font.icon.medium
+                            fontStyle: Tokens.font.icon.medium
                             fill: device.connected ? 1 : 0
                             opacity: device.textOpacity
 
@@ -194,7 +194,7 @@ PageBase {
 
                 MaterialIcon {
                     text: "add"
-                    font: Tokens.font.icon.medium
+                    fontStyle: Tokens.font.icon.medium
                 }
 
                 StyledText {
