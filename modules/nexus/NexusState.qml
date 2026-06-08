@@ -12,6 +12,7 @@ QtObject {
 
     property string selectedWallpaperCategory
     property BluetoothDevice selectedBtDevice
+    property DesktopEntry selectedApp
 
     signal close
     signal subPageOpened(idx: int)

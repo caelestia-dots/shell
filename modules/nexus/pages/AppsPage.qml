@@ -70,7 +70,7 @@ PageBase {
             icon: "apps"
             label: qsTr("All apps")
             status: qsTr("Browse installed apps, set favourites and hidden")
-            onClicked: ; // TODO
+            onClicked: root.nState.openSubPage(1)
         }
     }
 
