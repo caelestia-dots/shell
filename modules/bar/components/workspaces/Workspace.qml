@@ -46,6 +46,8 @@ ColumnLayout {
                 displayName = displayName.toLowerCase();
             }
             const label = Config.bar.workspaces.label || displayName;
+            if (!Config.bar.workspaces.showOccupiedIcon)
+                return label;
             const occupiedLabel = Config.bar.workspaces.occupiedLabel || label;
             const activeLabel = Config.bar.workspaces.activeLabel || (root.isOccupied ? occupiedLabel : label);
             return root.activeWsId === root.ws ? activeLabel : root.isOccupied ? occupiedLabel : label;
