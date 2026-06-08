@@ -1,9 +1,9 @@
 pragma ComponentBehavior: Bound
 
 import QtQuick
-import QtQuick.Controls
+import QtQuick.Layouts
+import QtQuick.Templates
 import Quickshell
-import Quickshell.Widgets
 import Caelestia.Config
 import qs.components
 import qs.components.controls
@@ -18,7 +18,7 @@ Item {
 
     readonly property alias count: bar.count
 
-    implicitHeight: bar.implicitHeight + indicator.implicitHeight + indicator.anchors.topMargin + separator.implicitHeight
+    implicitHeight: bar.implicitHeight + bar.anchors.topMargin + indicator.implicitHeight + indicator.anchors.topMargin + separator.implicitHeight
 
     TabBar {
         id: bar
@@ -26,11 +26,20 @@ Item {
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.top: parent.top
+        anchors.topMargin: Tokens.sizes.dashboard.tabIndicatorSpacing
 
         currentIndex: root.dashState.currentTab
-        background: null
-
         onCurrentIndexChanged: root.dashState.currentTab = currentIndex
+
+        implicitHeight: contentHeight
+        background: null
+        contentItem: RowLayout {
+            spacing: 0
+
+            Repeater {
+                model: bar.contentModel
+            }
+        }
 
         Repeater {
             model: ScriptModel {
@@ -106,6 +115,10 @@ Item {
         required property string iconName
         readonly property bool current: TabBar.tabBar.currentItem === this
 
+        Layout.fillWidth: true
+        Layout.preferredWidth: 1 // Uniform width across all tabs
+        implicitWidth: implicitContentWidth
+        implicitHeight: implicitContentHeight
         background: null
 
         contentItem: CustomMouseArea {
@@ -124,92 +137,20 @@ Item {
             hoverEnabled: true
             cursorShape: Qt.PointingHandCursor
 
-            onPressed: event => {
-                root.dashState.currentTab = tab.TabBar.index;
+            onPressed: root.dashState.currentTab = tab.TabBar.index
 
-                const stateY = stateWrapper.y;
-                rippleAnim.x = event.x;
-                rippleAnim.y = event.y - stateY;
+            StateLayer {
+                id: stateLayer
 
-                const dist = (ox, oy) => ox * ox + oy * oy;
-                rippleAnim.radius = Math.sqrt(Math.max(dist(event.x, event.y + stateY), dist(event.x, stateWrapper.height - event.y), dist(width - event.x, event.y + stateY), dist(width - event.x, stateWrapper.height - event.y)));
-
-                rippleAnim.restart();
-            }
-
-            SequentialAnimation {
-                id: rippleAnim
-
-                property real x
-                property real y
-                property real radius
-
-                PropertyAction {
-                    target: ripple
-                    property: "x"
-                    value: rippleAnim.x
-                }
-                PropertyAction {
-                    target: ripple
-                    property: "y"
-                    value: rippleAnim.y
-                }
-                PropertyAction {
-                    target: ripple
-                    property: "opacity"
-                    value: 0.08
-                }
-                Anim {
-                    target: ripple
-                    properties: "implicitWidth,implicitHeight"
-                    from: 0
-                    to: rippleAnim.radius * 2
-                    duration: Tokens.anim.durations.normal
-                    easing: Tokens.anim.standardDecel
-                }
-                Anim {
-                    target: ripple
-                    property: "opacity"
-                    to: 0
-                }
-            }
-
-            ClippingRectangle {
-                id: stateWrapper
-
+                anchors.fill: undefined
                 anchors.left: parent.left
                 anchors.right: parent.right
                 anchors.verticalCenter: parent.verticalCenter
                 implicitHeight: parent.height + Tokens.sizes.dashboard.tabIndicatorSpacing * 2
 
-                color: "transparent"
-                radius: Tokens.rounding.small
-
-                StyledRect {
-                    id: stateLayer
-
-                    anchors.fill: parent
-
-                    color: tab.current ? Colours.palette.m3primary : Colours.palette.m3onSurface
-                    opacity: mouse.pressed ? 0.1 : mouse.containsMouse ? 0.08 : 0
-
-                    Behavior on opacity {
-                        Anim {}
-                    }
-                }
-
-                StyledRect {
-                    id: ripple
-
-                    radius: Tokens.rounding.full
-                    color: tab.current ? Colours.palette.m3primary : Colours.palette.m3onSurface
-                    opacity: 0
-
-                    transform: Translate {
-                        x: -ripple.width / 2
-                        y: -ripple.height / 2
-                    }
-                }
+                radius: Tokens.rounding.medium
+                color: tab.current ? Colours.palette.m3primary : Colours.palette.m3onSurface
+                onClicked: root.dashState.currentTab = tab.TabBar.index
             }
 
             MaterialIcon {
@@ -221,10 +162,12 @@ Item {
                 text: tab.iconName
                 color: tab.current ? Colours.palette.m3primary : Colours.palette.m3onSurfaceVariant
                 fill: tab.current ? 1 : 0
-                font.pointSize: Tokens.font.size.large
+                fontStyle: Tokens.font.icon.medium
 
                 Behavior on fill {
-                    Anim {}
+                    Anim {
+                        type: Anim.DefaultEffects
+                    }
                 }
             }
 

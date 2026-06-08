@@ -48,7 +48,7 @@ MouseArea {
 
     Behavior on opacity {
         Anim {
-            duration: Tokens.anim.durations.small
+            type: Anim.DefaultEffects
         }
     }
 
@@ -79,7 +79,7 @@ MouseArea {
             return item.mapToItem(root.parent, 0, off).y + root.marginY;
         }
 
-        radius: Tokens.rounding.normal
+        radius: Tokens.rounding.large
         level: 2
 
         implicitWidth: Math.max(200, column.implicitWidth + column.anchors.margins * 2)
@@ -90,9 +90,7 @@ MouseArea {
             origin.y: root.thisSideY === Menu.Bottom ? menu.height : 0
 
             Behavior on yScale {
-                Anim {
-                    type: Anim.DefaultSpatial
-                }
+                Anim {}
             }
         }
 
@@ -105,7 +103,7 @@ MouseArea {
                 id: column
 
                 anchors.fill: parent
-                anchors.margins: Tokens.padding.small
+                anchors.margins: Tokens.padding.extraSmall
                 spacing: 0
 
                 Repeater {
@@ -118,17 +116,17 @@ MouseArea {
 
                         required property int index
                         required property MenuItem modelData
-                        readonly property bool active: modelData === root.active
+                        readonly property bool active: modelData === root?.active
 
                         Layout.fillWidth: true
-                        implicitWidth: menuOptionRow.implicitWidth + Tokens.padding.normal * 2
-                        implicitHeight: menuOptionRow.implicitHeight + Tokens.padding.normal * 2
+                        implicitWidth: menuOptionRow.implicitWidth + Tokens.padding.medium * 2
+                        implicitHeight: menuOptionRow.implicitHeight + Tokens.padding.medium * 2
 
-                        radius: active ? 12 : Tokens.rounding.extraSmall // This should use a token, but tokens are currently extremely scuffed
-                        topLeftRadius: index === 0 ? Tokens.rounding.small : radius
-                        topRightRadius: index === 0 ? Tokens.rounding.small : radius
-                        bottomLeftRadius: index === repeater.count - 1 ? Tokens.rounding.small : radius
-                        bottomRightRadius: index === repeater.count - 1 ? Tokens.rounding.small : radius
+                        radius: active ? Tokens.rounding.medium : Tokens.rounding.extraSmall
+                        topLeftRadius: index === 0 ? Tokens.rounding.medium : radius
+                        topRightRadius: index === 0 ? Tokens.rounding.medium : radius
+                        bottomLeftRadius: index === repeater?.count - 1 ? Tokens.rounding.medium : radius
+                        bottomRightRadius: index === repeater?.count - 1 ? Tokens.rounding.medium : radius
 
                         color: Qt.alpha(Colours.palette.m3tertiaryContainer, active ? 1 : 0)
 
@@ -156,26 +154,26 @@ MouseArea {
                             id: menuOptionRow
 
                             anchors.fill: parent
-                            anchors.margins: Tokens.padding.normal
+                            anchors.margins: Tokens.padding.medium
                             spacing: Tokens.spacing.small
 
                             MaterialIcon {
                                 Layout.alignment: Qt.AlignVCenter
-                                text: item.modelData.icon
+                                text: item.modelData?.icon ?? ""
                                 color: item.active ? Colours.palette.m3onTertiaryContainer : Colours.palette.m3onSurfaceVariant
                             }
 
                             StyledText {
                                 Layout.alignment: Qt.AlignVCenter
                                 Layout.fillWidth: true
-                                text: item.modelData.text
+                                text: item.modelData?.text ?? ""
                                 color: item.active ? Colours.palette.m3onTertiaryContainer : Colours.palette.m3onSurface
                             }
 
                             Loader {
                                 asynchronous: true
                                 Layout.alignment: Qt.AlignVCenter
-                                active: item.modelData.trailingIcon.length > 0
+                                active: item.modelData?.trailingIcon.length > 0
                                 visible: active
 
                                 sourceComponent: MaterialIcon {

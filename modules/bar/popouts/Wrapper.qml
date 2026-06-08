@@ -7,7 +7,7 @@ import Quickshell.Wayland
 import Caelestia.Config
 import qs.components
 import qs.services
-import qs.modules.controlcenter
+import qs.modules.nexus
 import qs.modules.windowinfo
 
 Item {
@@ -18,7 +18,7 @@ Item {
 
     readonly property alias content: content
     readonly property alias winfo: winfo
-    readonly property alias controlCenter: controlCenter
+    readonly property alias nexus: nexus
 
     readonly property real nonAnimWidth: children.find(c => c.shouldBeActive)?.implicitWidth ?? content.implicitWidth
     readonly property real nonAnimHeight: children.find(c => c.shouldBeActive)?.implicitHeight ?? content.implicitHeight
@@ -128,15 +128,24 @@ Item {
     }
 
     Comp {
-        id: controlCenter
+        id: nexus
 
         shouldBeActive: root.detachedMode === "any"
         anchors.centerIn: parent
 
-        sourceComponent: ControlCenter {
-            screen: root.screen
-            active: root.queuedMode
-            onClose: root.close()
+        sourceComponent: StyledClippingRect {
+            radius: Tokens.rounding.extraLarge
+            implicitWidth: nexusInner.implicitWidth
+            implicitHeight: nexusInner.implicitHeight
+
+            Nexus {
+                id: nexusInner
+
+                anchors.fill: parent
+                nState.screen: root.screen
+                nState.currentPageIdx: ["appearance", "network", "bluetooth", "audio"].indexOf(root.queuedMode)
+                onClose: root.close()
+            }
         }
     }
 
@@ -185,6 +194,7 @@ Item {
                         property: "active"
                     }
                     Anim {
+                        type: Anim.DefaultEffects
                         property: "opacity"
                     }
                 }
@@ -195,6 +205,7 @@ Item {
 
                 SequentialAnimation {
                     Anim {
+                        type: Anim.DefaultEffects
                         property: "opacity"
                     }
                     PropertyAction {

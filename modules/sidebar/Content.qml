@@ -14,13 +14,13 @@ Item {
         id: layout
 
         anchors.fill: parent
-        spacing: Tokens.spacing.normal
+        spacing: Tokens.spacing.medium
 
         StyledRect {
             Layout.fillWidth: true
             Layout.fillHeight: true
 
-            radius: Tokens.rounding.normal
+            radius: Tokens.rounding.large
             color: Colours.tPalette.m3surfaceContainerLow
 
             NotifDock {

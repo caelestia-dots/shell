@@ -14,29 +14,28 @@ ColumnLayout {
     spacing: Tokens.spacing.small
 
     Label {
-        Layout.topMargin: Tokens.padding.large * 2
+        Layout.topMargin: Tokens.padding.extraLargeIncreased
 
         text: root.client?.title ?? qsTr("No active client")
         wrapMode: Text.WrapAtWordBoundaryOrAnywhere
 
-        font.pointSize: Tokens.font.size.large
-        font.weight: 500
+        font: Tokens.font.body.builders.large.weight(Font.Medium).build()
     }
 
     Label {
         text: root.client?.lastIpcObject.class ?? qsTr("No active client")
         color: Colours.palette.m3tertiary
 
-        font.pointSize: Tokens.font.size.larger
+        font: Tokens.font.body.large
     }
 
     StyledRect {
         Layout.fillWidth: true
         Layout.preferredHeight: 1
-        Layout.leftMargin: Tokens.padding.large * 2
-        Layout.rightMargin: Tokens.padding.large * 2
-        Layout.topMargin: Tokens.spacing.normal
-        Layout.bottomMargin: Tokens.spacing.large
+        Layout.leftMargin: Tokens.padding.extraLargeIncreased
+        Layout.rightMargin: Tokens.padding.extraLargeIncreased
+        Layout.topMargin: Tokens.spacing.medium
+        Layout.bottomMargin: Tokens.spacing.largeIncreased
 
         color: Colours.palette.m3secondary
     }
@@ -134,7 +133,7 @@ ColumnLayout {
         Layout.rightMargin: Tokens.padding.large
         Layout.fillWidth: true
 
-        spacing: Tokens.spacing.smaller
+        spacing: Tokens.spacing.medium
 
         MaterialIcon {
             id: icon
@@ -149,7 +148,7 @@ ColumnLayout {
 
             text: detail.text
             elide: Text.ElideRight
-            font.pointSize: Tokens.font.size.normal
+            font: Tokens.font.body.medium
         }
     }
 

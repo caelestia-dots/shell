@@ -28,7 +28,7 @@ Item {
     anchors.right: parent?.right
 
     StateLayer {
-        radius: Tokens.rounding.normal
+        radius: Tokens.rounding.large
         onClicked: root.onClicked()
     }
 
@@ -36,13 +36,13 @@ Item {
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.verticalCenter: parent.verticalCenter
-        anchors.margins: Tokens.padding.larger
+        anchors.margins: Tokens.padding.medium
 
-        spacing: Tokens.spacing.normal
+        spacing: Tokens.spacing.medium
 
         MaterialIcon {
             text: "function"
-            font.pointSize: Tokens.font.size.extraLarge
+            fontStyle: Tokens.font.icon.extraLarge
             Layout.alignment: Qt.AlignVCenter
         }
 
@@ -66,11 +66,11 @@ Item {
 
         StyledRect {
             color: Colours.palette.m3tertiary
-            radius: Tokens.rounding.normal
+            radius: Tokens.rounding.large
             clip: true
 
-            implicitWidth: (stateLayer.containsMouse ? label.implicitWidth + label.anchors.rightMargin : 0) + icon.implicitWidth + Tokens.padding.normal * 2
-            implicitHeight: Math.max(label.implicitHeight, icon.implicitHeight) + Tokens.padding.small * 2
+            implicitWidth: (stateLayer.containsMouse ? label.implicitWidth + label.anchors.rightMargin : 0) + icon.implicitWidth + Tokens.padding.medium * 2
+            implicitHeight: Math.max(label.implicitHeight, icon.implicitHeight) + Tokens.padding.small
 
             Layout.alignment: Qt.AlignVCenter
 
@@ -94,12 +94,14 @@ Item {
 
                 text: qsTr("Open in calculator")
                 color: Colours.palette.m3onTertiary
-                font.pointSize: Tokens.font.size.normal
+                font: Tokens.font.label.medium
 
                 opacity: stateLayer.containsMouse ? 1 : 0
 
                 Behavior on opacity {
-                    Anim {}
+                    Anim {
+                        type: Anim.DefaultEffects
+                    }
                 }
             }
 
@@ -108,11 +110,11 @@ Item {
 
                 anchors.verticalCenter: parent.verticalCenter
                 anchors.right: parent.right
-                anchors.rightMargin: Tokens.padding.normal
+                anchors.rightMargin: Tokens.padding.medium
 
                 text: "open_in_new"
                 color: Colours.palette.m3onTertiary
-                font.pointSize: Tokens.font.size.large
+                fontStyle: Tokens.font.icon.large
             }
 
             Behavior on implicitWidth {

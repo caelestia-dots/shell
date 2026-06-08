@@ -1,11 +1,15 @@
+pragma ComponentBehavior: Bound
+
 import QtQuick
 import Quickshell
 import Quickshell.Widgets
+import Caelestia
 import Caelestia.Config
 import qs.components
 import qs.components.containers
 import qs.components.widgets
 import qs.services
+import qs.modules.utilities as Utilities
 
 Item {
     id: root
@@ -13,43 +17,53 @@ Item {
     required property DrawerVisibilities visibilities
     required property Item osdPanel
     required property Item sessionPanel
+    required property Item utilitiesPanel
     readonly property int padding: Tokens.padding.large
+    readonly property int clampedPadding: CUtils.clamp(padding - Config.border.thickness, 0, padding)
 
     anchors.top: parent.top
     anchors.bottom: parent.bottom
     anchors.right: parent.right
 
-    implicitWidth: Tokens.sizes.notifs.width + padding * 2
+    implicitWidth: Tokens.sizes.notifs.width
     implicitHeight: {
         const count = list.count;
         if (count === 0)
             return 0;
 
-        let height = (count - 1) * Tokens.spacing.smaller;
+        let height = (count - 1) * Tokens.spacing.medium;
         for (let i = 0; i < count; i++)
             height += (list.itemAtIndex(i) as NotifWrapper)?.nonAnimHeight ?? 0;
 
         if (visibilities.osd) {
-            const h = osdPanel.y - Config.border.rounding * 2 - padding * 2;
+            const h = osdPanel.y - clampedPadding;
             if (height > h)
                 height = h;
         }
 
         if (visibilities.session) {
-            const h = sessionPanel.y - Config.border.rounding * 2 - padding * 2;
+            const h = sessionPanel.y - clampedPadding;
             if (height > h)
                 height = h;
         }
 
-        return Math.min(((QsWindow.window as QsWindow)?.screen?.height ?? 0) - Config.border.thickness * 2, height + padding * 2);
+        if (visibilities.utilities) {
+            const h = ((QsWindow.window as QsWindow)?.screen.height ?? 0) - (utilitiesPanel as Utilities.Wrapper).nonAnimHeight - Config.border.thickness * 2 - padding * 2 - Tokens.spacing.extraLarge;
+            if (height > h)
+                height = h;
+        }
+
+        return Math.min(((QsWindow.window as QsWindow)?.screen?.height ?? 0) + padding - clampedPadding * 2 - Config.border.thickness, height + padding + clampedPadding);
     }
 
     ClippingWrapperRectangle {
         anchors.fill: parent
         anchors.margins: root.padding
+        anchors.topMargin: root.clampedPadding
+        anchors.rightMargin: root.clampedPadding
 
         color: "transparent"
-        radius: Tokens.rounding.normal
+        radius: Tokens.rounding.large
 
         StyledListView {
             id: list
@@ -89,9 +103,9 @@ Item {
 
                     let height = 0;
                     for (let i = 0; i < count; i++) {
-                        height += ((list.itemAtIndex(i) as NotifWrapper)?.nonAnimHeight ?? 0) + Tokens.spacing.smaller;
+                        height += ((list.itemAtIndex(i) as NotifWrapper)?.nonAnimHeight ?? 0) + Tokens.spacing.medium;
 
-                        if (height - Tokens.spacing.smaller >= scrollY)
+                        if (height - Tokens.spacing.medium >= scrollY)
                             return i;
                     }
 
@@ -110,9 +124,9 @@ Item {
 
                     let height = 0;
                     for (let i = count - 1; i >= 0; i--) {
-                        height += ((list.itemAtIndex(i) as NotifWrapper)?.nonAnimHeight ?? 0) + Tokens.spacing.smaller;
+                        height += ((list.itemAtIndex(i) as NotifWrapper)?.nonAnimHeight ?? 0) + Tokens.spacing.medium;
 
-                        if (height - Tokens.spacing.smaller >= scrollY)
+                        if (height - Tokens.spacing.medium >= scrollY)
                             return count - i - 1;
                     }
 
@@ -140,7 +154,7 @@ Item {
         }
 
         implicitWidth: notif.implicitWidth
-        implicitHeight: notif.implicitHeight + (idx === 0 ? 0 : Tokens.spacing.smaller)
+        implicitHeight: notif.implicitHeight + (idx === 0 ? 0 : Tokens.spacing.medium)
 
         ListView.onRemove: removeAnim.start()
 
@@ -170,7 +184,7 @@ Item {
             Anim {
                 target: notif
                 property: "x"
-                to: (notif.x >= 0 ? wrapper.Tokens.sizes.notifs.width : -wrapper.Tokens.sizes.notifs.width) * 2
+                to: (notif.x >= 0 ? root.implicitWidth : -root.implicitWidth) * 2
                 duration: Tokens.anim.durations.normal
                 easing: Tokens.anim.emphasized
             }
@@ -183,7 +197,7 @@ Item {
 
         ClippingRectangle {
             anchors.top: parent.top
-            anchors.topMargin: wrapper.idx === 0 ? 0 : Tokens.spacing.smaller
+            anchors.topMargin: wrapper.idx === 0 ? 0 : Tokens.spacing.medium
 
             color: "transparent"
             radius: notif.radius
@@ -194,6 +208,7 @@ Item {
                 id: notif
 
                 modelData: wrapper.modelData
+                implicitWidth: root.implicitWidth - root.padding - root.clampedPadding
             }
         }
     }
