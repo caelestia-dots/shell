@@ -12,11 +12,12 @@ StyledRect {
 
     required property var props
     required property DrawerVisibilities visibilities
+    readonly property real nonAnimHeight: btnLayout.implicitHeight + listOrControls.implicitHeight + layout.spacing + layout.anchors.margins * 2
 
     Layout.fillWidth: true
     implicitHeight: layout.implicitHeight + layout.anchors.margins * 2
 
-    radius: Tokens.rounding.normal
+    radius: Tokens.rounding.large
     color: Colours.tPalette.m3surfaceContainer
 
     ColumnLayout {
@@ -24,16 +25,17 @@ StyledRect {
 
         anchors.fill: parent
         anchors.margins: Tokens.padding.large
-        spacing: Tokens.spacing.normal
+        spacing: Tokens.spacing.medium
 
         RowLayout {
-            spacing: Tokens.spacing.normal
-            z: 1
+            id: btnLayout
+
+            spacing: Tokens.spacing.medium
 
             StyledRect {
                 implicitWidth: implicitHeight
                 implicitHeight: {
-                    const h = icon.implicitHeight + Tokens.padding.smaller * 2;
+                    const h = icon.implicitHeight + Tokens.padding.large;
                     return h - (h % 2);
                 }
 
@@ -48,7 +50,7 @@ StyledRect {
                     anchors.verticalCenterOffset: 1.5
                     text: "screen_record"
                     color: Recorder.running ? Colours.palette.m3onSecondary : Colours.palette.m3onSecondaryContainer
-                    font.pointSize: Tokens.font.size.large
+                    fontStyle: Tokens.font.icon.large
                 }
             }
 
@@ -59,7 +61,7 @@ StyledRect {
                 StyledText {
                     Layout.fillWidth: true
                     text: qsTr("Screen Recorder")
-                    font.pointSize: Tokens.font.size.normal
+                    font: Tokens.font.body.medium
                     elide: Text.ElideRight
                 }
 
@@ -67,7 +69,7 @@ StyledRect {
                     Layout.fillWidth: true
                     text: Recorder.paused ? qsTr("Recording paused") : Recorder.running ? qsTr("Recording running") : qsTr("Recording off")
                     color: Colours.palette.m3onSurfaceVariant
-                    font.pointSize: Tokens.font.size.small
+                    font: Tokens.font.body.small
                     elide: Text.ElideRight
                 }
             }
@@ -187,14 +189,14 @@ StyledRect {
         id: recordingControls
 
         RowLayout {
-            spacing: Tokens.spacing.normal
+            spacing: Tokens.spacing.medium
 
             StyledRect {
                 radius: Tokens.rounding.full
                 color: Recorder.paused ? Colours.palette.m3tertiary : Colours.palette.m3error
 
-                implicitWidth: recText.implicitWidth + Tokens.padding.normal * 2
-                implicitHeight: recText.implicitHeight + Tokens.padding.smaller * 2
+                implicitWidth: recText.implicitWidth + Tokens.padding.medium * 2
+                implicitHeight: recText.implicitHeight + Tokens.padding.large
 
                 StyledText {
                     id: recText
@@ -203,7 +205,7 @@ StyledRect {
                     animate: true
                     text: Recorder.paused ? "PAUSED" : "REC"
                     color: Recorder.paused ? Colours.palette.m3onTertiary : Colours.palette.m3onError
-                    font.family: Tokens.font.family.mono
+                    font: Tokens.font.mono.medium
                 }
 
                 Behavior on implicitWidth {
@@ -246,7 +248,7 @@ StyledRect {
 
                     return qsTr("Recording for %1").arg(time);
                 }
-                font.pointSize: Tokens.font.size.normal
+                font: Tokens.font.body.medium
             }
 
             Item {
@@ -256,10 +258,10 @@ StyledRect {
             IconButton {
                 label.animate: true
                 icon: Recorder.paused ? "play_arrow" : "pause"
-                toggle: true
+                isToggle: true
                 checked: Recorder.paused
                 type: IconButton.Tonal
-                font.pointSize: Tokens.font.size.large
+                font: Tokens.font.icon.large
                 onClicked: {
                     Recorder.togglePause();
                     internalChecked = Recorder.paused;
@@ -270,7 +272,7 @@ StyledRect {
                 icon: "stop"
                 inactiveColour: Colours.palette.m3error
                 inactiveOnColour: Colours.palette.m3onError
-                font.pointSize: Tokens.font.size.large
+                font: Tokens.font.icon.large
                 onClicked: Recorder.stop()
             }
         }

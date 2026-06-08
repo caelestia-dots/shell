@@ -36,7 +36,7 @@ RowLayout {
                 MaterialIcon {
                     Layout.alignment: Qt.AlignVCenter
                     text: Weather.icon
-                    font.pointSize: Tokens.font.size.extraLarge * 3
+                    font: Tokens.font.icon.builders.extraLarge.scale(3).weight(500).build()
                     color: Colours.palette.m3secondary
                     animate: true
                 }
@@ -47,15 +47,14 @@ RowLayout {
 
                     StyledText {
                         text: Weather.temp
-                        font.pointSize: Tokens.font.size.extraLarge * 2
-                        font.weight: 500
+                        font: Tokens.font.body.builders.large.scale(2).weight(500).build()
                         color: Colours.palette.m3primary
                     }
 
                     StyledText {
                         Layout.leftMargin: Tokens.padding.small
                         text: Weather.description
-                        font.pointSize: Tokens.font.size.normal
+                        font: Tokens.font.body.medium
                         color: Colours.palette.m3onSurfaceVariant
                     }
                 }
@@ -114,17 +113,17 @@ RowLayout {
 
         Layout.fillWidth: true
         Layout.preferredHeight: parent.height
-        radius: Tokens.rounding.normal
+        radius: Tokens.rounding.medium
         color: Colours.tPalette.m3surfaceContainer
 
         Row {
             anchors.centerIn: parent
-            spacing: Tokens.spacing.normal
+            spacing: Tokens.spacing.medium
 
             MaterialIcon {
                 text: detailRoot.icon
                 color: detailRoot.colour
-                font.pointSize: Tokens.font.size.large
+                font: Tokens.font.icon.large
                 anchors.verticalCenter: parent.verticalCenter
             }
 
@@ -134,7 +133,7 @@ RowLayout {
 
                 StyledText {
                     text: detailRoot.label
-                    font.pointSize: Tokens.font.size.smaller
+                    font: Tokens.font.body.small
                     opacity: 0.7
                     horizontalAlignment: Text.AlignLeft
                 }

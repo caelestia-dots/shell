@@ -14,6 +14,9 @@ struct BlobRectData {
     float screenHalfX = 0, screenHalfY = 0;
     // Effective per-corner radii (tr, br, bl, tl), pre-computed on CPU
     float radius[4] = { 0, 0, 0, 0 };
+    // Bitmask of indices in this rect's m_cachedRects that mutually exclude (or are excluded by) this rect.
+    // Used by the shader to skip smin between excluded pairs.
+    int excludeMask = 0;
 };
 
 class BlobMaterial : public QSGMaterial {

@@ -19,14 +19,18 @@ Singleton {
 
     readonly property string icon: cc ? Icons.getWeatherIcon(cc.weatherCode) : "cloud_alert"
     readonly property string description: cc?.weatherDesc ?? qsTr("No weather")
-    readonly property string temp: GlobalConfig.services.useFahrenheit ? `${cc?.tempF ?? 0}°F` : `${cc?.tempC ?? 0}°C`
-    readonly property string feelsLike: GlobalConfig.services.useFahrenheit ? `${cc?.feelsLikeF ?? 0}°F` : `${cc?.feelsLikeC ?? 0}°C`
+    readonly property string temp: formatTemp(cc?.tempC)
+    readonly property string feelsLike: formatTemp(cc?.feelsLikeC)
     readonly property int humidity: cc?.humidity ?? 0
     readonly property real windSpeed: cc?.windSpeed ?? 0
     readonly property string sunrise: cc ? Qt.formatDateTime(new Date(cc.sunrise), GlobalConfig.services.useTwelveHourClock ? "h:mm A" : "h:mm") : "--:--"
     readonly property string sunset: cc ? Qt.formatDateTime(new Date(cc.sunset), GlobalConfig.services.useTwelveHourClock ? "h:mm A" : "h:mm") : "--:--"
 
     readonly property var cachedCities: new Map()
+
+    function formatTemp(temp: var): string {
+        return GlobalConfig.services.useFahrenheit ? `${temp !== undefined ? Math.round(toFahrenheit(temp)) : "--"}°F` : `${temp !== undefined ? Math.round(temp) : "--"}°C`;
+    }
 
     function reload(): void {
         const configLocation = GlobalConfig.services.weatherLocation;
@@ -116,10 +120,8 @@ Singleton {
             cc = {
                 weatherCode: json.current.weather_code,
                 weatherDesc: getWeatherCondition(json.current.weather_code),
-                tempC: Math.round(json.current.temperature_2m),
-                tempF: Math.round(toFahrenheit(json.current.temperature_2m)),
-                feelsLikeC: Math.round(json.current.apparent_temperature),
-                feelsLikeF: Math.round(toFahrenheit(json.current.apparent_temperature)),
+                tempC: json.current.temperature_2m,
+                feelsLikeC: json.current.apparent_temperature,
                 humidity: json.current.relative_humidity_2m,
                 windSpeed: json.current.wind_speed_10m,
                 isDay: json.current.is_day,

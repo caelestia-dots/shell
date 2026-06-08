@@ -11,16 +11,16 @@ ColumnLayout {
     required property string value
     property bool showTopMargin: false
 
-    spacing: Tokens.spacing.small / 2
+    spacing: Tokens.spacing.extraSmall
 
     StyledText {
-        Layout.topMargin: root.showTopMargin ? Tokens.spacing.normal : 0
+        Layout.topMargin: root.showTopMargin ? Tokens.spacing.medium : 0
         text: root.label
     }
 
     StyledText {
         text: root.value
         color: Colours.palette.m3outline
-        font.pointSize: Tokens.font.size.small
+        font: Tokens.font.body.small
     }
 }

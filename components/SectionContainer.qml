@@ -8,13 +8,13 @@ StyledRect {
     id: root
 
     default property alias content: contentColumn.data
-    property real contentSpacing: Tokens.spacing.larger
+    property real contentSpacing: Tokens.spacing.large
     property bool alignTop: false
 
     Layout.fillWidth: true
-    implicitHeight: contentColumn.implicitHeight + Tokens.padding.large * 2
+    implicitHeight: contentColumn.implicitHeight + Tokens.padding.extraLargeIncreased
 
-    radius: Tokens.rounding.normal
+    radius: Tokens.rounding.large
     color: Colours.transparency.enabled ? Colours.layer(Colours.palette.m3surfaceContainer, 2) : Colours.palette.m3surfaceContainerHigh
 
     ColumnLayout {

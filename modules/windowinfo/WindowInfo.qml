@@ -21,7 +21,7 @@ Item {
         anchors.fill: parent
         anchors.margins: Tokens.padding.large
 
-        spacing: Tokens.spacing.normal
+        spacing: Tokens.spacing.medium
 
         Preview {
             screen: root.screen
@@ -29,7 +29,7 @@ Item {
         }
 
         ColumnLayout {
-            spacing: Tokens.spacing.normal
+            spacing: Tokens.spacing.medium
 
             Layout.preferredWidth: Tokens.sizes.winfo.detailsWidth
             Layout.fillHeight: true
@@ -39,7 +39,7 @@ Item {
                 Layout.fillHeight: true
 
                 color: Colours.tPalette.m3surfaceContainer
-                radius: Tokens.rounding.normal
+                radius: Tokens.rounding.large
 
                 Details {
                     client: root.client
@@ -51,7 +51,7 @@ Item {
                 Layout.preferredHeight: buttons.implicitHeight
 
                 color: Colours.tPalette.m3surfaceContainer
-                radius: Tokens.rounding.normal
+                radius: Tokens.rounding.large
 
                 Buttons {
                     id: buttons

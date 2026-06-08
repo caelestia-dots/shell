@@ -28,9 +28,9 @@ ListView {
         property var temp: modelData?.temp ?? 0
         property var precipitationProbability: modelData?.precipitationProbability ?? "?"
 
-        implicitHeight: hourlyForecastItemRow.implicitHeight + Tokens.padding.normal * 2
-        implicitWidth: hourlyForecastItemRow.implicitWidth + Tokens.padding.normal * 2
-        radius: Tokens.rounding.normal
+        implicitHeight: hourlyForecastItemRow.implicitHeight + Tokens.padding.medium * 2
+        implicitWidth: hourlyForecastItemRow.implicitWidth + Tokens.padding.medium * 2
+        radius: Tokens.rounding.medium
         color: Colours.tPalette.m3surfaceContainer
 
         RowLayout {
@@ -45,15 +45,14 @@ ListView {
                 StyledText {
                     anchors.horizontalCenter: parent.horizontalCenter
                     text: hourlyForecastItem.hour > 12 ? `${(hourlyForecastItem.hour - 12).toString().padStart(2, "0")}PM` : `${hourlyForecastItem.hour.toString().padStart(2, "0")}AM`
-                    font.pointSize: Tokens.font.size.normal
-                    font.weight: 600
+                    font: Tokens.font.body.builders.medium.weight(600).build()
                     color: Colours.palette.m3primary
                 }
 
                 StyledText {
                     anchors.horizontalCenter: parent.horizontalCenter
                     text: new Date(hourlyForecastItem.timestamp).toLocaleDateString(Qt.locale(), "(ddd)")
-                    font.pointSize: Tokens.font.size.small
+                    font: Tokens.font.body.small
                     opacity: 0.7
                     color: Colours.palette.m3onSurfaceVariant
                 }
@@ -62,7 +61,7 @@ ListView {
             MaterialIcon {
                 Layout.alignment: Qt.AlignVCenter
                 text: hourlyForecastItem.icon
-                font.pointSize: Tokens.font.size.extraLarge
+                font: Tokens.font.icon.extraLarge
                 color: Colours.palette.m3secondary
             }
 

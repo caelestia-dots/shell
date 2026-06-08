@@ -15,7 +15,7 @@ Item {
         id: layout
 
         anchors.fill: parent
-        spacing: Tokens.spacing.smaller
+        spacing: Tokens.spacing.medium
 
         CityInfo {}
 

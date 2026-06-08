@@ -14,14 +14,13 @@ RowLayout {
 
         StyledText {
             text: Weather.city || qsTr("Loading...")
-            font.pointSize: Tokens.font.size.extraLarge
-            font.weight: 600
+            font: Tokens.font.title.large
             color: Colours.palette.m3onSurface
         }
 
         StyledText {
             text: new Date().toLocaleDateString(Qt.locale(), "dddd, MMMM d")
-            font.pointSize: Tokens.font.size.small
+            font: Tokens.font.body.small
             color: Colours.palette.m3onSurfaceVariant
         }
     }
@@ -60,21 +59,20 @@ RowLayout {
 
         MaterialIcon {
             text: weatherStat.icon
-            font.pointSize: Tokens.font.size.extraLarge
+            font: Tokens.font.icon.extraLarge
             color: weatherStat.colour
         }
 
         Column {
             StyledText {
                 text: weatherStat.label
-                font.pointSize: Tokens.font.size.smaller
+                font: Tokens.font.body.builders.small.scale(.8).build()
                 color: Colours.palette.m3onSurfaceVariant
             }
 
             StyledText {
                 text: weatherStat.value
-                font.pointSize: Tokens.font.size.small
-                font.weight: 600
+                font: Tokens.font.body.builders.small.weight(600).build()
                 color: Colours.palette.m3onSurface
             }
         }

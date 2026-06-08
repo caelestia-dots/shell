@@ -6,12 +6,11 @@ import qs.services
 
 ColumnLayout {
     StyledText {
-        Layout.topMargin: Tokens.spacing.normal
-        Layout.leftMargin: Tokens.padding.normal
+        Layout.topMargin: Tokens.spacing.medium
+        Layout.leftMargin: Tokens.padding.medium
         visible: dailyRepeater.count > 0
         text: qsTr("7-Day Forecast")
-        font.pointSize: Tokens.font.size.normal
-        font.weight: 600
+        font: Tokens.font.body.builders.medium.weight(600).build()
         color: Colours.palette.m3onSurface
     }
 
@@ -19,7 +18,7 @@ ColumnLayout {
         id: dailyForecast
 
         Layout.fillWidth: true
-        spacing: Tokens.spacing.smaller
+        spacing: Tokens.spacing.small
 
         Repeater {
             id: dailyRepeater
@@ -42,8 +41,8 @@ ColumnLayout {
         property var minTemp: modelData?.minTemp ?? 0
 
         Layout.fillWidth: true
-        implicitHeight: forecastItemColumn.implicitHeight + Tokens.padding.normal * 2
-        radius: Tokens.rounding.normal
+        implicitHeight: forecastItemColumn.implicitHeight + Tokens.padding.medium * 2
+        radius: Tokens.rounding.medium
         color: Colours.tPalette.m3surfaceContainer
 
         ColumnLayout {
@@ -55,8 +54,7 @@ ColumnLayout {
             StyledText {
                 Layout.alignment: Qt.AlignHCenter
                 text: dailyForecastItem.index === 0 ? qsTr("Today") : new Date(dailyForecastItem.date).toLocaleDateString(Qt.locale(), "ddd")
-                font.pointSize: Tokens.font.size.normal
-                font.weight: 600
+                font: Tokens.font.body.builders.medium.weight(600).build()
                 color: Colours.palette.m3primary
             }
 
@@ -64,7 +62,7 @@ ColumnLayout {
                 Layout.topMargin: -Tokens.spacing.small / 2
                 Layout.alignment: Qt.AlignHCenter
                 text: new Date(dailyForecastItem.date).toLocaleDateString(Qt.locale(), "MMM d")
-                font.pointSize: Tokens.font.size.small
+                font: Tokens.font.body.small
                 opacity: 0.7
                 color: Colours.palette.m3onSurfaceVariant
             }
@@ -72,7 +70,7 @@ ColumnLayout {
             MaterialIcon {
                 Layout.alignment: Qt.AlignHCenter
                 text: dailyForecastItem.icon
-                font.pointSize: Tokens.font.size.extraLarge
+                font: Tokens.font.icon.extraLarge
                 color: Colours.palette.m3secondary
             }
 
@@ -83,14 +81,14 @@ ColumnLayout {
                 StyledText {
                     Layout.alignment: Qt.AlignHCenter
                     text: `${dailyForecastItem.maxTemp}°`
-                    font.weight: 600
+                    font: Tokens.font.body.builders.small.weight(600).build()
                     color: Colours.palette.m3tertiary
                 }
 
                 StyledText {
                     Layout.alignment: Qt.AlignHCenter
                     text: `(${dailyForecastItem.minTemp}°)`
-                    font.pointSize: Tokens.font.size.small
+                    font: Tokens.font.body.small
                     opacity: 0.7
                     color: Colours.palette.m3onSurfaceVariant
                 }
