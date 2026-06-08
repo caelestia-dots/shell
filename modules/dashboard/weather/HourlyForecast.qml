@@ -41,6 +41,7 @@ ListView {
 
             Column {
                 Layout.alignment: Qt.AlignCenter
+                Layout.preferredWidth: Tokens.font.body.medium.pointSize * 4
 
                 StyledText {
                     anchors.horizontalCenter: parent.horizontalCenter
@@ -67,11 +68,12 @@ ListView {
 
             Column {
                 Layout.alignment: Qt.AlignCenter
+                Layout.preferredWidth: Tokens.font.body.small.pointSize * 3.75
 
                 StyledText {
                     anchors.right: parent.right
                     text: `${hourlyForecastItem.temp}°${Weather.tempUnit}`
-                    font.weight: 600
+                    font: Tokens.font.body.builders.small.weight(600).build()
                     color: Colours.palette.m3tertiary
                 }
 
@@ -79,7 +81,7 @@ ListView {
                     anchors.right: parent.right
                     Layout.alignment: Qt.AlignHCenter
                     text: `${hourlyForecastItem.precipitationProbability}%`
-                    font.weight: 600
+                    font: Tokens.font.body.builders.small.weight(600).build()
                     color: Colours.palette.m3tertiary
                 }
             }
