@@ -5,6 +5,7 @@ import Quickshell.Bluetooth
 QtObject {
     property ShellScreen screen
     property bool isWindow
+    property bool animatingContainer
     property int currentPageIdx
     property list<int> subPageIdxStack
     property bool searchOpen

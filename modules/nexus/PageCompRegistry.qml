@@ -119,6 +119,14 @@ QtObject {
             }
         },
         Component {
+            // Apps
+            StackPage {
+                Component {
+                    AppsPage {}
+                }
+            }
+        },
+        Component {
             // Services
             StackPage {
                 Component {
