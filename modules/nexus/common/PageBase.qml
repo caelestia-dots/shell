@@ -15,7 +15,7 @@ ColumnLayout {
     required property string title
     required property NexusState nState
     property bool isSubPage
-    readonly property int cappedWidth: Math.min(800, width)
+    readonly property int cappedWidth: Math.min(Tokens.sizes.nexus.maxContentWidth, width)
 
     default property Item contentChild
 
