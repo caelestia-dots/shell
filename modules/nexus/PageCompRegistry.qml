@@ -10,6 +10,7 @@ import qs.modules.nexus.pages
 import qs.modules.nexus.pages.audio
 import qs.modules.nexus.pages.bluetooth
 import qs.modules.nexus.pages.panels
+import qs.modules.nexus.pages.services
 import qs.modules.nexus.pages.wallandstyle
 import qs.modules.nexus.pages.panels.taskbar
 
@@ -122,6 +123,9 @@ QtObject {
             StackPage {
                 Component {
                     ServicesPage {}
+                }
+                Component {
+                    NotificationsPage {}
                 }
             }
         },
