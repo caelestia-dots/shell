@@ -171,8 +171,6 @@ PageBase {
         }
 
         ToggleRow {
-            Layout.fillWidth: true
-
             first: true
             text: qsTr("Display wallpaper")
             checked: Config.background.wallpaperEnabled
@@ -181,7 +179,6 @@ PageBase {
 
         ToggleRow {
             Layout.topMargin: Tokens.spacing.extraSmall / 2 - parent.spacing
-            Layout.fillWidth: true
 
             text: qsTr("Transparency")
             subtext: qsTr("Base %1, layers %2").arg(Colours.transparency.base).arg(Colours.transparency.layers)
@@ -191,7 +188,6 @@ PageBase {
 
         ToggleRow {
             Layout.topMargin: Tokens.spacing.extraSmall / 2 - parent.spacing
-            Layout.fillWidth: true
 
             last: true
             text: qsTr("Dark theme")

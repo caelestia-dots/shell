@@ -48,7 +48,6 @@ PageBase {
         }
 
         ToggleRow {
-            Layout.fillWidth: true
             first: true
             text: qsTr("Wi-Fi")
             font: Tokens.font.body.medium

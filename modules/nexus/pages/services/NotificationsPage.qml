@@ -53,7 +53,6 @@ PageBase {
         }
 
         SelectRow {
-            Layout.fillWidth: true
             first: true
             label: qsTr("Show in fullscreen")
             subtext: qsTr("Whether notifications appear over fullscreen apps")
@@ -63,7 +62,6 @@ PageBase {
         }
 
         ToggleRow {
-            Layout.fillWidth: true
             text: qsTr("Expire automatically")
             subtext: qsTr("Dismiss notifications after their timeout")
             checked: GlobalConfig.notifs.expire
@@ -71,7 +69,6 @@ PageBase {
         }
 
         ToggleRow {
-            Layout.fillWidth: true
             text: qsTr("Open expanded")
             subtext: qsTr("Show notifications expanded by default")
             checked: GlobalConfig.notifs.openExpanded
@@ -79,7 +76,6 @@ PageBase {
         }
 
         StepperRow {
-            Layout.fillWidth: true
             label: qsTr("Default timeout")
             subtext: qsTr("Time before a notification dismisses (ms)")
             value: GlobalConfig.notifs.defaultExpireTimeout
@@ -90,7 +86,6 @@ PageBase {
         }
 
         StepperRow {
-            Layout.fillWidth: true
             last: true
             label: qsTr("Group preview count")
             subtext: qsTr("Notifications shown per group before collapsing")
@@ -107,7 +102,6 @@ PageBase {
         }
 
         SelectRow {
-            Layout.fillWidth: true
             first: true
             label: qsTr("Show in fullscreen")
             subtext: qsTr("Whether toasts appear over fullscreen apps")
@@ -117,7 +111,6 @@ PageBase {
         }
 
         StepperRow {
-            Layout.fillWidth: true
             last: true
             label: qsTr("Visible toasts")
             subtext: qsTr("Maximum number of toasts shown at once")
@@ -134,7 +127,6 @@ PageBase {
         }
 
         ToggleRow {
-            Layout.fillWidth: true
             first: true
             text: qsTr("Charging changes")
             checked: GlobalConfig.utilities.toasts.chargingChanged
@@ -142,63 +134,54 @@ PageBase {
         }
 
         ToggleRow {
-            Layout.fillWidth: true
             text: qsTr("Game mode changes")
             checked: GlobalConfig.utilities.toasts.gameModeChanged
             onToggled: GlobalConfig.utilities.toasts.gameModeChanged = checked
         }
 
         ToggleRow {
-            Layout.fillWidth: true
             text: qsTr("Do not disturb changes")
             checked: GlobalConfig.utilities.toasts.dndChanged
             onToggled: GlobalConfig.utilities.toasts.dndChanged = checked
         }
 
         ToggleRow {
-            Layout.fillWidth: true
             text: qsTr("Audio output changes")
             checked: GlobalConfig.utilities.toasts.audioOutputChanged
             onToggled: GlobalConfig.utilities.toasts.audioOutputChanged = checked
         }
 
         ToggleRow {
-            Layout.fillWidth: true
             text: qsTr("Audio input changes")
             checked: GlobalConfig.utilities.toasts.audioInputChanged
             onToggled: GlobalConfig.utilities.toasts.audioInputChanged = checked
         }
 
         ToggleRow {
-            Layout.fillWidth: true
             text: qsTr("Caps lock changes")
             checked: GlobalConfig.utilities.toasts.capsLockChanged
             onToggled: GlobalConfig.utilities.toasts.capsLockChanged = checked
         }
 
         ToggleRow {
-            Layout.fillWidth: true
             text: qsTr("Num lock changes")
             checked: GlobalConfig.utilities.toasts.numLockChanged
             onToggled: GlobalConfig.utilities.toasts.numLockChanged = checked
         }
 
         ToggleRow {
-            Layout.fillWidth: true
             text: qsTr("Keyboard layout changes")
             checked: GlobalConfig.utilities.toasts.kbLayoutChanged
             onToggled: GlobalConfig.utilities.toasts.kbLayoutChanged = checked
         }
 
         ToggleRow {
-            Layout.fillWidth: true
             text: qsTr("VPN changes")
             checked: GlobalConfig.utilities.toasts.vpnChanged
             onToggled: GlobalConfig.utilities.toasts.vpnChanged = checked
         }
 
         ToggleRow {
-            Layout.fillWidth: true
             last: true
             text: qsTr("Now playing")
             checked: GlobalConfig.utilities.toasts.nowPlaying

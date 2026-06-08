@@ -21,7 +21,6 @@ PageBase {
 
         // Output
         SliderRow {
-            Layout.fillWidth: true
             first: true
             icon: Icons.getVolumeIcon(Audio.volume, Audio.muted)
             label: qsTr("Output")
@@ -32,7 +31,6 @@ PageBase {
         }
 
         ToggleRow {
-            Layout.fillWidth: true
             text: qsTr("Muted")
             checked: Audio.muted
             onToggled: Audio.setStreamMuted(Audio.sink, checked)
@@ -49,7 +47,6 @@ PageBase {
 
         // Input
         SliderRow {
-            Layout.fillWidth: true
             Layout.topMargin: Tokens.spacing.large - parent.spacing
             first: true
             icon: Icons.getMicVolumeIcon(Audio.sourceVolume, Audio.sourceMuted)
@@ -61,7 +58,6 @@ PageBase {
         }
 
         ToggleRow {
-            Layout.fillWidth: true
             text: qsTr("Muted")
             checked: Audio.sourceMuted
             onToggled: Audio.setStreamMuted(Audio.source, checked)
