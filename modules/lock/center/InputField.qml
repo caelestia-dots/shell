@@ -6,6 +6,7 @@ import Caelestia.Config
 import qs.components
 import qs.services
 import qs.modules.lock
+import M3Shapes
 
 Item {
     id: root
@@ -75,67 +76,108 @@ Item {
         implicitHeight: Tokens.font.body.medium.pointSize
 
         orientation: Qt.Horizontal
-        spacing: Tokens.spacing.extraSmall
+        spacing: Tokens.spacing.small
         interactive: false
 
         model: ScriptModel {
             values: root.buffer.split("")
         }
 
-        delegate: StyledRect {
-            id: ch
-
-            implicitWidth: implicitHeight
+        delegate: Item {
+            id: delegateRoot
+            implicitWidth: charList.implicitHeight
             implicitHeight: charList.implicitHeight
-
-            color: Colours.palette.m3onSurface
-            radius: Tokens.rounding.medium / 2
-
-            opacity: 0
-            scale: 0
-            Component.onCompleted: {
-                opacity = 1;
-                scale = 1;
-            }
+            
             ListView.onRemove: removeAnim.start()
 
             SequentialAnimation {
                 id: removeAnim
 
                 PropertyAction {
-                    target: ch
+                    target: delegateRoot
                     property: "ListView.delayRemove"
                     value: true
                 }
                 ParallelAnimation {
                     Anim {
                         type: Anim.DefaultEffects
-                        target: ch
+                        target: delegateRoot
                         property: "opacity"
                         to: 0
                     }
                     Anim {
                         target: ch
-                        property: "scale"
-                        to: 0.5
+                        property: "implicitSize"
+                        to: 0
                     }
                 }
                 PropertyAction {
-                    target: ch
+                    target: delegateRoot
                     property: "ListView.delayRemove"
                     value: false
                 }
             }
 
-            Behavior on opacity {
-                Anim {
-                    type: Anim.DefaultEffects
-                }
-            }
+            MaterialShape {
+                id: ch
 
-            Behavior on scale {
-                Anim {
-                    type: Anim.FastSpatial
+                anchors.centerIn: parent
+
+                color: Colours.palette.m3onSurface
+
+                property int initialShape: {
+                    const shapes = [
+                        MaterialShape.Square, MaterialShape.Slanted, MaterialShape.Arch,
+                        MaterialShape.Fan, MaterialShape.Arrow, MaterialShape.SemiCircle,
+                        MaterialShape.Triangle, MaterialShape.Diamond, MaterialShape.ClamShell,
+                        MaterialShape.Pentagon, MaterialShape.Gem, MaterialShape.Sunny,
+                        MaterialShape.VerySunny, MaterialShape.Cookie4Sided, MaterialShape.Cookie6Sided,
+                        MaterialShape.Cookie7Sided, MaterialShape.Cookie9Sided, MaterialShape.Cookie12Sided,
+                        MaterialShape.Ghostish, MaterialShape.Clover4Leaf, MaterialShape.Clover8Leaf,
+                        MaterialShape.Burst, MaterialShape.SoftBurst, MaterialShape.Boom,
+                        MaterialShape.SoftBoom, MaterialShape.Flower, MaterialShape.Puffy,
+                        MaterialShape.PuffyDiamond, MaterialShape.PixelCircle, MaterialShape.PixelTriangle,
+                        MaterialShape.Bun, MaterialShape.Heart
+                    ];
+                    return shapes[Math.floor(Math.random() * shapes.length)];
+                }
+
+                shape: initialShape
+                animationDuration: 200
+
+                opacity: 0
+                implicitSize: 0
+                
+                Component.onCompleted: {
+                    spawnAnim.start();
+                }
+
+                SequentialAnimation {
+                    id: spawnAnim
+
+                    ParallelAnimation {
+                        NumberAnimation { 
+                            target: ch; property: "implicitSize"
+                            from: 0; to: delegateRoot.implicitHeight * 1.5; duration: 250; easing.type: Easing.OutBack 
+                        }
+                        NumberAnimation { 
+                            target: ch; property: "opacity"
+                            from: 0; to: 1; duration: 100 
+                        }
+                    }
+
+                    PauseAnimation { duration: 180 }
+
+                    ScriptAction {
+                        script: ch.shape = MaterialShape.Circle
+                    }
+
+                    ParallelAnimation {
+                        NumberAnimation { 
+                            target: ch; property: "implicitSize"
+                            to: delegateRoot.implicitHeight; duration: 200; easing.type: Easing.InOutQuad 
+                        }
+                    }
                 }
             }
         }
