@@ -133,6 +133,8 @@ Singleton {
                     date: json.daily.time[i].replace(/-/g, "/"),
                     maxTempC: json.daily.temperature_2m_max[i],
                     minTempC: json.daily.temperature_2m_min[i],
+                    maxTempF: Math.round(json.daily.temperature_2m_max[i] * 9 / 5 + 32),
+                    minTempF: Math.round(json.daily.temperature_2m_min[i] * 9 / 5 + 32),
                     weatherCode: json.daily.weather_code[i],
                     icon: Icons.getWeatherIcon(json.daily.weather_code[i])
                 });
