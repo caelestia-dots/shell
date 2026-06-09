@@ -2,6 +2,7 @@ pragma ComponentBehavior: Bound
 
 import QtQuick
 import Quickshell
+import M3Shapes
 import Caelestia.Config
 import qs.components
 import qs.services
@@ -60,7 +61,12 @@ Item {
     ListView {
         id: charList
 
-        readonly property int fullWidth: count * (implicitHeight + spacing) - spacing
+        readonly property int fullWidth: {
+            let w = (count - 1) * spacing;
+            for (let i = 0; i < count; i++)
+                w += ((itemAtIndex(i) as CharItem)?.nonAnimWidthScale ?? 1) * implicitHeight;
+            return w + implicitHeight; // Extra padding at ends
+        }
 
         function bindImWidth(): void {
             imWidthBehavior.enabled = false;
@@ -82,68 +88,131 @@ Item {
             values: root.buffer.split("")
         }
 
-        delegate: StyledRect {
-            id: ch
+        delegate: CharItem {}
 
-            implicitWidth: implicitHeight
-            implicitHeight: charList.implicitHeight
+        Behavior on implicitWidth {
+            id: imWidthBehavior
 
-            color: Colours.palette.m3onSurface
-            radius: Tokens.rounding.medium / 2
+            Anim {}
+        }
+    }
 
-            opacity: 0
-            scale: 0
-            Component.onCompleted: {
-                opacity = 1;
-                scale = 1;
+    component CharItem: Item {
+        id: char
+
+        property real nonAnimWidthScale: 1
+
+        implicitHeight: charList.implicitHeight
+
+        ListView.onRemove: {
+            initAnim.stop();
+            removeAnim.start();
+        }
+
+        MaterialShape {
+            id: charShape
+
+            anchors.centerIn: parent
+            implicitSize: charList.implicitHeight * 1.5
+            shape: {
+                const shapes = [MaterialShape.Slanted, MaterialShape.Arch, MaterialShape.Fan, MaterialShape.Arrow, MaterialShape.SemiCircle, MaterialShape.Triangle, MaterialShape.Diamond, MaterialShape.ClamShell, MaterialShape.Pentagon, MaterialShape.Gem, MaterialShape.Sunny, MaterialShape.VerySunny, MaterialShape.Cookie4Sided, MaterialShape.Ghostish, MaterialShape.SoftBurst];
+                return shapes[Math.floor(Math.random() * shapes.length)];
             }
-            ListView.onRemove: removeAnim.start()
+            color: Colours.palette.m3onSurface
+
+            Behavior on color {
+                CAnim {}
+            }
+
+            SequentialAnimation {
+                id: initAnim
+
+                running: true
+
+                ParallelAnimation {
+                    Anim {
+                        target: charShape
+                        property: "opacity"
+                        from: 0
+                        to: 1
+                        type: Anim.DefaultEffects
+                    }
+                    Anim {
+                        target: charShape
+                        property: "scale"
+                        from: 0
+                        to: 1
+                        type: Anim.FastSpatial
+                    }
+                    Anim {
+                        target: char
+                        property: "implicitWidth"
+                        from: charList.implicitHeight
+                        to: charList.implicitHeight * 1.3
+                        type: Anim.DefaultEffects
+                    }
+                    PropertyAction {
+                        target: char
+                        property: "nonAnimWidthScale"
+                        value: 1.5
+                    }
+                }
+                PauseAnimation {
+                    duration: 180 * Tokens.anim.durations.scale
+                }
+                PropertyAction {
+                    target: charShape
+                    property: "shape"
+                    value: MaterialShape.Circle
+                }
+                ParallelAnimation {
+                    Anim {
+                        target: charShape
+                        property: "scale"
+                        to: 2 / 3
+                        type: Anim.FastSpatial
+                    }
+                    Anim {
+                        target: char
+                        property: "implicitWidth"
+                        to: charList.implicitHeight
+                        type: Anim.DefaultEffects
+                    }
+                    PropertyAction {
+                        target: char
+                        property: "nonAnimWidthScale"
+                        value: 1
+                    }
+                }
+            }
 
             SequentialAnimation {
                 id: removeAnim
 
                 PropertyAction {
-                    target: ch
+                    target: char
                     property: "ListView.delayRemove"
                     value: true
                 }
                 ParallelAnimation {
                     Anim {
                         type: Anim.DefaultEffects
-                        target: ch
+                        target: charShape
                         property: "opacity"
                         to: 0
                     }
                     Anim {
-                        target: ch
+                        target: charShape
                         property: "scale"
                         to: 0.5
                     }
                 }
                 PropertyAction {
-                    target: ch
+                    target: char
                     property: "ListView.delayRemove"
                     value: false
                 }
             }
-
-            Behavior on opacity {
-                Anim {
-                    type: Anim.DefaultEffects
-                }
-            }
-
-            Behavior on scale {
-                Anim {
-                    type: Anim.FastSpatial
-                }
-            }
-        }
-
-        Behavior on implicitWidth {
-            id: imWidthBehavior
-
-            Anim {}
         }
     }
 }
