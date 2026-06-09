@@ -1,12 +1,12 @@
-pragma ComponentBehavior: Bound
+// pragma ComponentBehavior: Bound
 
 import QtQuick
 import Quickshell
 import Caelestia.Config
-import qs.components
-import qs.services
-import qs.modules.lock
 import M3Shapes
+import qs.components
+import qs.modules.lock
+import qs.services
 
 Item {
     id: root
@@ -18,7 +18,7 @@ Item {
     clip: true
 
     Connections {
-        function onBufferChanged(): void {
+        function onBufferChanged() {
             if (root.pam.buffer.length > root.buffer.length) {
                 charList.bindImWidth();
             } else if (root.pam.buffer.length === 0) {
@@ -63,7 +63,7 @@ Item {
 
         readonly property int fullWidth: count * (implicitHeight + spacing) - spacing
 
-        function bindImWidth(): void {
+        function bindImWidth() {
             imWidthBehavior.enabled = false;
             implicitWidth = Qt.binding(() => fullWidth);
             imWidthBehavior.enabled = true;
@@ -85,6 +85,7 @@ Item {
 
         delegate: Item {
             id: delegateRoot
+
             implicitWidth: charList.implicitHeight
             implicitHeight: charList.implicitHeight
 
@@ -121,14 +122,14 @@ Item {
             MaterialShape {
                 id: ch
 
-                anchors.centerIn: parent
-
-                color: Colours.palette.m3onSurface
-
                 property int initialShape: {
                     const shapes = [MaterialShape.Square, MaterialShape.Slanted, MaterialShape.Arch, MaterialShape.Fan, MaterialShape.Arrow, MaterialShape.SemiCircle, MaterialShape.Triangle, MaterialShape.Diamond, MaterialShape.ClamShell, MaterialShape.Pentagon, MaterialShape.Gem, MaterialShape.Sunny, MaterialShape.VerySunny, MaterialShape.Cookie4Sided, MaterialShape.Cookie6Sided, MaterialShape.Cookie7Sided, MaterialShape.Cookie9Sided, MaterialShape.Cookie12Sided, MaterialShape.Ghostish, MaterialShape.Clover4Leaf, MaterialShape.Clover8Leaf, MaterialShape.Burst, MaterialShape.SoftBurst, MaterialShape.Boom, MaterialShape.SoftBoom, MaterialShape.Flower, MaterialShape.Puffy, MaterialShape.PuffyDiamond, MaterialShape.Bun, MaterialShape.Heart];
                     return shapes[Math.floor(Math.random() * shapes.length)];
                 }
+
+                anchors.centerIn: parent
+
+                color: Colours.palette.m3onSurface
 
                 shape: initialShape
                 animationDuration: 200
