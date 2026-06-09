@@ -37,6 +37,7 @@
           withI3 = false;
         };
         caelestia-cli = inputs.caelestia-cli.packages.${pkgs.stdenv.hostPlatform.system}.default;
+        qt6 = pkgs.qt6;
       };
       with-cli = caelestia-shell.override {withCli = true;};
       debug = caelestia-shell.override {debug = true;};
@@ -44,15 +45,22 @@
     });
 
     devShells = forAllSystems (pkgs: {
-      default = let
-        shell = self.packages.${pkgs.stdenv.hostPlatform.system}.caelestia-shell;
-      in
-        pkgs.mkShell.override {stdenv = shell.stdenv;} {
-          inputsFrom = [shell shell.plugin shell.extras];
-          packages = with pkgs; [clazy material-symbols rubik nerd-fonts.caskaydia-cove];
-          CAELESTIA_XKB_RULES_PATH = "${pkgs.xkeyboard-config}/share/xkeyboard-config-2/rules/base.lst";
-        };
-    });
+  default = let
+    shell = self.packages.${pkgs.stdenv.hostPlatform.system}.caelestia-shell;
+  in
+    pkgs.mkShell.override {stdenv = shell.stdenv;} {
+      inputsFrom = [shell shell.plugin shell.extras];
+      packages = with pkgs; [
+        clazy material-symbols rubik nerd-fonts.caskaydia-cove
+        qt6.qtmultimedia
+        gst_all_1.gstreamer
+        gst_all_1.gst-plugins-base
+        gst_all_1.gst-plugins-good
+        gst_all_1.gst-libav
+      ];
+      CAELESTIA_XKB_RULES_PATH = "${pkgs.xkeyboard-config}/share/xkeyboard-config-2/rules/base.lst";
+    };
+});
 
     homeManagerModules.default = import ./nix/hm-module.nix self;
   };
