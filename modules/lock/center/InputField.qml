@@ -2,6 +2,7 @@ pragma ComponentBehavior: Bound
 
 import QtQuick
 import Quickshell
+import M3Shapes
 import Caelestia.Config
 import qs.components
 import qs.services
@@ -10,9 +11,19 @@ import qs.modules.lock
 Item {
     id: root
 
+    required property real centerScale
     required property Pam pam
     readonly property alias placeholder: placeholder
+    readonly property alias placeholderWidth: nonAnimPlaceholder.width
     property string buffer
+    readonly property list<int> shapeQueue: {
+        const shapes = [MaterialShape.Slanted, MaterialShape.Arch, MaterialShape.Fan, MaterialShape.Arrow, MaterialShape.SemiCircle, MaterialShape.Triangle, MaterialShape.Diamond, MaterialShape.ClamShell, MaterialShape.Pentagon, MaterialShape.Gem, MaterialShape.Sunny, MaterialShape.VerySunny, MaterialShape.Cookie4Sided, MaterialShape.Ghostish, MaterialShape.SoftBurst];
+        for (let i = shapes.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [shapes[i], shapes[j]] = [shapes[j], shapes[i]];
+        }
+        return shapes;
+    }
 
     clip: true
 
@@ -31,22 +42,30 @@ Item {
         target: root.pam
     }
 
-    StyledText {
-        id: placeholder
-
-        anchors.centerIn: parent
+    TextMetrics {
+        id: nonAnimPlaceholder
 
         text: {
             if (root.pam.passwd.active)
                 return qsTr("Loading...");
             if (root.pam.state === "max")
-                return qsTr("You have reached the maximum number of tries");
+                return qsTr("Max tries reached");
             return qsTr("Enter your password");
         }
+        font: placeholder.font
+    }
+
+    StyledText {
+        id: placeholder
+
+        anchors.centerIn: parent
+        anchors.verticalCenterOffset: 1
+
+        text: nonAnimPlaceholder.text
 
         animate: true
         color: root.pam.passwd.active ? Colours.palette.m3secondary : Colours.palette.m3outline
-        font: Tokens.font.mono.medium
+        font: Tokens.font.body.builders.medium.scale(root.centerScale).width(110).build()
 
         opacity: root.buffer ? 0 : 1
 
@@ -60,7 +79,12 @@ Item {
     ListView {
         id: charList
 
-        readonly property int fullWidth: count * (implicitHeight + spacing) - spacing
+        readonly property int fullWidth: {
+            let w = (count - 1) * spacing;
+            for (let i = 0; i < count; i++)
+                w += ((itemAtIndex(i) as CharItem)?.nonAnimWidthScale ?? 1) * implicitHeight;
+            return w + implicitHeight; // Extra padding at ends
+        }
 
         function bindImWidth(): void {
             imWidthBehavior.enabled = false;
@@ -82,68 +106,129 @@ Item {
             values: root.buffer.split("")
         }
 
-        delegate: StyledRect {
-            id: ch
+        delegate: CharItem {}
 
-            implicitWidth: implicitHeight
-            implicitHeight: charList.implicitHeight
+        Behavior on implicitWidth {
+            id: imWidthBehavior
 
+            Anim {}
+        }
+    }
+
+    component CharItem: Item {
+        id: char
+
+        required property int index
+        property real nonAnimWidthScale: 1
+
+        implicitHeight: charList.implicitHeight
+
+        ListView.onRemove: {
+            initAnim.stop();
+            removeAnim.start();
+        }
+
+        MaterialShape {
+            id: charShape
+
+            anchors.centerIn: parent
+            implicitSize: charList.implicitHeight * 1.5
+            shape: root.shapeQueue[char.index % root.shapeQueue.length] ?? MaterialShape.Circle
             color: Colours.palette.m3onSurface
-            radius: Tokens.rounding.medium / 2
 
-            opacity: 0
-            scale: 0
-            Component.onCompleted: {
-                opacity = 1;
-                scale = 1;
+            Behavior on color {
+                CAnim {}
             }
-            ListView.onRemove: removeAnim.start()
+
+            SequentialAnimation {
+                id: initAnim
+
+                running: true
+
+                ParallelAnimation {
+                    Anim {
+                        target: charShape
+                        property: "opacity"
+                        from: 0
+                        to: 1
+                        type: Anim.DefaultEffects
+                    }
+                    Anim {
+                        target: charShape
+                        property: "scale"
+                        from: 0
+                        to: 1
+                        type: Anim.FastSpatial
+                    }
+                    Anim {
+                        target: char
+                        property: "implicitWidth"
+                        from: charList.implicitHeight
+                        to: charList.implicitHeight * 1.3
+                        type: Anim.DefaultEffects
+                    }
+                    PropertyAction {
+                        target: char
+                        property: "nonAnimWidthScale"
+                        value: 1.5
+                    }
+                }
+                PauseAnimation {
+                    duration: 180 * Tokens.anim.durations.scale
+                }
+                PropertyAction {
+                    target: charShape
+                    property: "shape"
+                    value: MaterialShape.Circle
+                }
+                ParallelAnimation {
+                    Anim {
+                        target: charShape
+                        property: "scale"
+                        to: 2 / 3
+                        type: Anim.FastSpatial
+                    }
+                    Anim {
+                        target: char
+                        property: "implicitWidth"
+                        to: charList.implicitHeight
+                        type: Anim.DefaultEffects
+                    }
+                    PropertyAction {
+                        target: char
+                        property: "nonAnimWidthScale"
+                        value: 1
+                    }
+                }
+            }
 
             SequentialAnimation {
                 id: removeAnim
 
                 PropertyAction {
-                    target: ch
+                    target: char
                     property: "ListView.delayRemove"
                     value: true
                 }
                 ParallelAnimation {
                     Anim {
                         type: Anim.DefaultEffects
-                        target: ch
+                        target: charShape
                         property: "opacity"
                         to: 0
                     }
                     Anim {
-                        target: ch
+                        target: charShape
                         property: "scale"
                         to: 0.5
                     }
                 }
                 PropertyAction {
-                    target: ch
+                    target: char
                     property: "ListView.delayRemove"
                     value: false
                 }
             }
-
-            Behavior on opacity {
-                Anim {
-                    type: Anim.DefaultEffects
-                }
-            }
-
-            Behavior on scale {
-                Anim {
-                    type: Anim.FastSpatial
-                }
-            }
-        }
-
-        Behavior on implicitWidth {
-            id: imWidthBehavior
-
-            Anim {}
         }
     }
 }

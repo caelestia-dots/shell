@@ -209,6 +209,10 @@ FontBuilder FontTokens::clock() const {
     return FontBuilder(m_clock);
 }
 
+QString FontTokens::workspaces() const {
+    return m_font ? m_font->workspaces() : QString();
+}
+
 void FontTokens::bindFont(AppearanceFont* font) {
     if (m_font == font)
         return;
@@ -229,6 +233,7 @@ void FontTokens::bindFont(AppearanceFont* font) {
 
         connect(font, &AppearanceFont::clockChanged, this, &FontTokens::rebuildClock);
         connect(font, &AppearanceFont::scaleChanged, this, &FontTokens::rebuildScale);
+        connect(font, &AppearanceFont::workspacesChanged, this, &FontTokens::workspacesChanged);
     } else {
         rebuildScale();
         m_headline->bind(nullptr);
@@ -240,6 +245,7 @@ void FontTokens::bindFont(AppearanceFont* font) {
     }
 
     rebuildClock();
+    emit workspacesChanged();
 }
 
 void FontTokens::rebuildScale() {

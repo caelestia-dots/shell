@@ -48,12 +48,11 @@ ButtonBase {
             id: iconLabel
 
             Layout.alignment: Qt.AlignVCenter
-            Layout.topMargin: Math.round(fontInfo.pointSize * 0.0575)
             color: root.onColour
             fill: root.internalChecked ? 1 : 0
             fontStyle: {
                 const f = Qt.font(root.font);
-                f.pointSize = Math.round(root.font.pointSize * 1.1);
+                f.pointSize = Math.round(root.font.pointSize * 1.2);
                 return f;
             }
 
@@ -68,7 +67,7 @@ ButtonBase {
             id: label
 
             Layout.alignment: Qt.AlignVCenter
-            Layout.topMargin: -Math.round(iconLabel.fontInfo.pointSize * 0.0575)
+            Layout.topMargin: 1
             color: root.onColour
             font: root.font
         }

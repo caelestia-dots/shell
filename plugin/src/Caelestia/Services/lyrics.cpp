@@ -855,6 +855,11 @@ QString Lyrics::lyricsDir() const {
     if (dir.isEmpty()) {
         return {};
     }
+    if (dir == u"~"_s) {
+        dir = QDir::homePath();
+    } else if (dir.startsWith(u"~/"_s)) {
+        dir.replace(0, 1, QDir::homePath());
+    }
     while (dir.endsWith(QLatin1Char('/')) && dir.size() > 1) {
         dir.chop(1);
     }

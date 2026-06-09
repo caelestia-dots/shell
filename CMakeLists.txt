@@ -75,10 +75,12 @@ endif()
 if("m3shapes" IN_LIST ENABLE_MODULES)
     message(STATUS "Fetching M3Shapes module")
     include(FetchContent)
+    set(M3SHAPES_REV eb93964ab8583ae21c3a0bb9897f96ef9a1b5377)
     FetchContent_Declare(
         m3shapes_external
         GIT_REPOSITORY https://github.com/soramanew/m3shapes.git
-        GIT_TAG        356825d31f16052a782735cce264331cba0cb71b
+        GIT_TAG        ${M3SHAPES_REV}
+        SOURCE_DIR     "${CMAKE_BINARY_DIR}/_deps/m3shapes-${M3SHAPES_REV}"
     )
     FetchContent_MakeAvailable(m3shapes_external)
     message(STATUS "Done fetching M3Shapes module")

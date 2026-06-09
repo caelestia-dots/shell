@@ -24,16 +24,17 @@
     "m3shapes": {
       "flake": false,
       "locked": {
-        "lastModified": 1777812556,
-        "narHash": "sha256-E5nqOucRQBWKuT31AMekmfgMywRdHgSbU86R7t4BKKA=",
+        "lastModified": 1781001698,
+        "narHash": "sha256-yJ7IFqIbFBhSB5iXQK1/z/l1V8SRhiK2CK+hTVvwW2o=",
         "owner": "soramanew",
         "repo": "m3shapes",
-        "rev": "356825d31f16052a782735cce264331cba0cb71b",
+        "rev": "eb93964ab8583ae21c3a0bb9897f96ef9a1b5377",
         "type": "github"
       },
       "original": {
         "owner": "soramanew",
         "repo": "m3shapes",
+        "rev": "eb93964ab8583ae21c3a0bb9897f96ef9a1b5377",
         "type": "github"
       }
     },

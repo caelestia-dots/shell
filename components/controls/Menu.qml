@@ -94,6 +94,12 @@ MouseArea {
             }
         }
 
+        MouseArea {
+            anchors.fill: parent
+            hoverEnabled: true
+            onWheel: e => e.accepted = true
+        }
+
         StyledRect {
             anchors.fill: parent
             radius: parent.radius
