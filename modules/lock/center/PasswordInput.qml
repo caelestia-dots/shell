@@ -17,7 +17,7 @@ StyledRect {
 
     implicitWidth: {
         const w = centerWidth * 0.8;
-        return lock.pam.buffer ? w : Math.min(w, inputField.placeholder.implicitWidth + iconWrapper.implicitWidth + enterButton.implicitWidth + input.spacing * 2 + Tokens.padding.medium * 2);
+        return lock.pam.buffer ? w : Math.min(w, inputField.placeholderWidth + iconWrapper.implicitWidth + enterButton.implicitWidth + input.spacing * 2 + Tokens.padding.medium * 2);
     }
     implicitHeight: input.implicitHeight + Tokens.padding.small
 

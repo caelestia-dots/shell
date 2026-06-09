@@ -14,6 +14,7 @@ Item {
     required property real centerScale
     required property Pam pam
     readonly property alias placeholder: placeholder
+    readonly property alias placeholderWidth: nonAnimPlaceholder.width
     property string buffer
 
     clip: true
@@ -33,19 +34,26 @@ Item {
         target: root.pam
     }
 
+    TextMetrics {
+        id: nonAnimPlaceholder
+
+        text: {
+            if (root.pam.passwd.active)
+                return qsTr("Loading...");
+            if (root.pam.state === "max")
+                return qsTr("Max tries reached");
+            return qsTr("Enter your password");
+        }
+        font: placeholder.font
+    }
+
     StyledText {
         id: placeholder
 
         anchors.centerIn: parent
         anchors.verticalCenterOffset: 1
 
-        text: {
-            if (root.pam.passwd.active)
-                return qsTr("Loading...");
-            if (root.pam.state === "max")
-                return qsTr("You have reached the maximum number of tries");
-            return qsTr("Enter your password");
-        }
+        text: nonAnimPlaceholder.text
 
         animate: true
         color: root.pam.passwd.active ? Colours.palette.m3secondary : Colours.palette.m3outline
