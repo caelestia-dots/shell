@@ -16,6 +16,14 @@ Item {
     readonly property alias placeholder: placeholder
     readonly property alias placeholderWidth: nonAnimPlaceholder.width
     property string buffer
+    readonly property list<int> shapeQueue: {
+        const shapes = [MaterialShape.Slanted, MaterialShape.Arch, MaterialShape.Fan, MaterialShape.Arrow, MaterialShape.SemiCircle, MaterialShape.Triangle, MaterialShape.Diamond, MaterialShape.ClamShell, MaterialShape.Pentagon, MaterialShape.Gem, MaterialShape.Sunny, MaterialShape.VerySunny, MaterialShape.Cookie4Sided, MaterialShape.Ghostish, MaterialShape.SoftBurst];
+        for (let i = shapes.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [shapes[i], shapes[j]] = [shapes[j], shapes[i]];
+        }
+        return shapes;
+    }
 
     clip: true
 
@@ -110,6 +118,7 @@ Item {
     component CharItem: Item {
         id: char
 
+        required property int index
         property real nonAnimWidthScale: 1
 
         implicitHeight: charList.implicitHeight
@@ -124,10 +133,7 @@ Item {
 
             anchors.centerIn: parent
             implicitSize: charList.implicitHeight * 1.5
-            shape: {
-                const shapes = [MaterialShape.Slanted, MaterialShape.Arch, MaterialShape.Fan, MaterialShape.Arrow, MaterialShape.SemiCircle, MaterialShape.Triangle, MaterialShape.Diamond, MaterialShape.ClamShell, MaterialShape.Pentagon, MaterialShape.Gem, MaterialShape.Sunny, MaterialShape.VerySunny, MaterialShape.Cookie4Sided, MaterialShape.Ghostish, MaterialShape.SoftBurst];
-                return shapes[Math.floor(Math.random() * shapes.length)];
-            }
+            shape: root.shapeQueue[char.index % root.shapeQueue.length] ?? MaterialShape.Circle
             color: Colours.palette.m3onSurface
 
             Behavior on color {
