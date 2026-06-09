@@ -79,7 +79,8 @@ public:
         NoFilter,
         Images,
         Files,
-        Dirs
+        Dirs,
+        Video
     };
     Q_ENUM(Filter)
 

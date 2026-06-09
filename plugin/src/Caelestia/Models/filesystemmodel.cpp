@@ -309,6 +309,13 @@ void FileSystemModel::updateEntriesForDir(const QString& dir) {
             }
 
             iter.emplace(dir, extraNameFilters, filters, flags);
+        } else if (filter == Video) {
+            const QStringList videoExtensions = {"*.mp4", "*.mkv", "*.webm", "*.avi", "*.mov"};
+
+            QDir::Filters filters = QDir::Files;
+            if (showHidden) filters |= QDir::Hidden;
+
+            iter.emplace(dir, videoExtensions, filters, flags);
         } else {
             QDir::Filters filters;
 
