@@ -52,7 +52,7 @@ StyledRect {
 
     ColumnLayout {
         anchors.left: tempProg.right
-        anchors.right: parent.right
+        anchors.right: usageShape.left
         anchors.verticalCenter: tempProg.verticalCenter
         anchors.margins: Tokens.spacing.large
         spacing: Tokens.spacing.extraSmall

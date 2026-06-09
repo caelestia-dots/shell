@@ -2,7 +2,6 @@ pragma ComponentBehavior: Bound
 
 import QtQuick
 import QtQuick.Layouts
-import Quickshell.Widgets
 import Caelestia.Config
 import qs.components
 import qs.services
@@ -54,46 +53,56 @@ ColumnLayout {
         }
     }
 
-    WrapperItem {
-        Layout.fillWidth: true
-        Layout.leftMargin: Tokens.padding.extraLargeIncreased
-        Layout.rightMargin: Tokens.padding.extraLargeIncreased
+    GridLayout {
+        id: wsGrid
 
+        Layout.fillWidth: true
+        Layout.leftMargin: Tokens.padding.large
+        Layout.rightMargin: Tokens.padding.large
+        Layout.bottomMargin: root.moveToWsExpanded ? Tokens.spacing.medium : 0
         Layout.preferredHeight: root.moveToWsExpanded ? implicitHeight : 0
+        opacity: root.moveToWsExpanded ? 1 : 0
         clip: true
 
-        topMargin: Tokens.spacing.medium
-        bottomMargin: Tokens.spacing.medium
+        rowSpacing: Tokens.spacing.small
+        columnSpacing: Tokens.spacing.small
+        columns: 5
 
-        GridLayout {
-            id: wsGrid
-
-            rowSpacing: Tokens.spacing.medium
-            columnSpacing: Tokens.spacing.medium
-            columns: 5
-
-            Repeater {
-                model: 10
-
-                Button {
-                    required property int index
-                    readonly property int wsId: Math.floor((Hypr.activeWsId - 1) / 10) * 10 + index + 1
-                    readonly property bool isCurrent: root.client?.workspace.id === wsId
-
-                    onClicked: {
-                        Hypr.dispatch(`movetoworkspace ${wsId},address:0x${root.client?.address}`);
-                    }
-
-                    color: isCurrent ? Colours.tPalette.m3surfaceContainerHighest : Colours.palette.m3tertiaryContainer
-                    onColor: isCurrent ? Colours.palette.m3onSurface : Colours.palette.m3onTertiaryContainer
-                    text: wsId
-                    disabled: isCurrent
-                }
+        Behavior on Layout.bottomMargin {
+            Anim {
+                type: Anim.DefaultEffects
             }
         }
 
         Behavior on Layout.preferredHeight {
-            Anim {}
+            Anim {
+                type: Anim.DefaultEffects
+            }
+        }
+
+        Behavior on opacity {
+            Anim {
+                type: Anim.DefaultEffects
+            }
+        }
+
+        Repeater {
+            model: 10
+
+            Button {
+                required property int index
+                readonly property int wsId: Math.floor((Hypr.activeWsId - 1) / 10) * 10 + index + 1
+                readonly property bool isCurrent: root.client?.workspace.id === wsId
+
+                onClicked: {
+                    Hypr.dispatch(`movetoworkspace ${wsId},address:0x${root.client?.address}`);
+                }
+
+                color: isCurrent ? Colours.tPalette.m3surfaceContainerHighest : Colours.palette.m3tertiaryContainer
+                onColor: isCurrent ? Colours.palette.m3onSurface : Colours.palette.m3onTertiaryContainer
+                text: wsId
+                disabled: isCurrent
+            }
         }
     }
 

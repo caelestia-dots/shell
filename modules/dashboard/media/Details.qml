@@ -72,6 +72,8 @@ ColumnLayout {
         }
 
         StyledText {
+            id: positionLabel
+
             Layout.preferredWidth: timeMetrics.width
             text: root.lengthStr(Players.active?.position ?? -1)
             color: Colours.palette.m3onSurfaceVariant
@@ -80,6 +82,8 @@ ColumnLayout {
         }
 
         StyledSlider {
+            id: positionSlider
+
             Layout.fillWidth: true
             value: Players.active ? Players.active.position / (Players.active.length || 1) : 0
             enabled: Players.active?.canSeek ?? false
@@ -87,10 +91,18 @@ ColumnLayout {
             animateWave: Players.active?.isPlaying ?? false
             waveFrequency: 5
             waveDuration: 2000
+            interactionOnMove: false
             onInteraction: value => {
                 const active = Players.active;
                 if (active?.canSeek && active?.positionSupported)
                     active.position = value * active.length;
+            }
+
+            Binding {
+                target: positionLabel
+                property: "text"
+                value: root.lengthStr(positionSlider.pos * (Players.active?.length ?? 0))
+                when: positionSlider.dragging
             }
         }
 

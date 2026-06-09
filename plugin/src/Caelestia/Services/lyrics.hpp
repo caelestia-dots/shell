@@ -51,6 +51,7 @@ public:
     [[nodiscard]] QString trackTitle() const;
 
     [[nodiscard]] Q_INVOKABLE int indexForTime(qreal time) const;
+    [[nodiscard]] Q_INVOKABLE qreal timeForIndex(int index) const;
     Q_INVOKABLE void setTrack(
         const QString& artist, const QString& title, const QString& album = {}, qreal duration = 0.0);
     Q_INVOKABLE void clearTrack();

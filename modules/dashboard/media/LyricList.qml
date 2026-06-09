@@ -260,13 +260,14 @@ Item {
             id: lyric
 
             required property string modelData
+            required property int index
             property real effectScale: ListView.isCurrentItem ? 1 : 0
 
-            anchors.left: ListView.view?.contentItem.left
-            anchors.right: ListView.view?.contentItem.right
+            anchors.left: lyrics.contentItem.left
+            anchors.right: lyrics.contentItem.right
 
             text: modelData || ". . ."
-            color: ListView.isCurrentItem ? Colours.palette.m3primary : Colours.palette.m3outline
+            color: ListView.isCurrentItem ? Colours.palette.m3primary : mouse.containsMouse ? Colours.palette.m3onSurface : Colours.palette.m3outline
             font: Tokens.font.body.medium
             wrapMode: Text.WrapAtWordBoundaryOrAnywhere
 
@@ -282,6 +283,19 @@ Item {
             Behavior on effectScale {
                 Anim {
                     type: Anim.SlowEffects
+                }
+            }
+
+            MouseArea {
+                id: mouse
+
+                anchors.fill: parent
+                cursorShape: Qt.PointingHandCursor
+                hoverEnabled: true
+                onClicked: {
+                    const p = Players.active;
+                    if (p)
+                        p.position = Lyrics.timeForIndex(lyric.index);
                 }
             }
         }

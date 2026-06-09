@@ -21,7 +21,7 @@ StyledRect {
     property alias shapeMorph: stateLayer.shapeMorph
     property bool fillWidth // For ButtonRow
 
-    property font font
+    property font font: Tokens.font.body.small
     property int type: ButtonBase.Filled
 
     property real padding

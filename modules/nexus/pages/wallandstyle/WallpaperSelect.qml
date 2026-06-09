@@ -102,17 +102,21 @@ PageBase {
                     const walls = Wallpapers.list;
                     const baseDir = Paths.wallsdir;
                     const categories = {};
+                    const list = [];
                     for (const w of walls) {
                         if (w.parentDir !== baseDir) {
                             const category = Wallpapers.getCategoryFor(w);
                             if (category && (!(category in categories) || categories[category].name.localeCompare(w.name) > 0))
                                 categories[category] = w;
+                        } else {
+                            list.push(w);
                         }
                     }
-                    const cats = Object.values(categories);
-                    while (cats.length < Config.nexus.wallpapersPerRow)
-                        cats.push(null);
-                    return cats;
+                    list.push(...Object.values(categories));
+                    list.sort((a, b) => ((a.parentDir === baseDir) - (b.parentDir === baseDir)) || a.name.localeCompare(b.name));
+                    while (list.length < Config.nexus.wallpapersPerRow)
+                        list.push(null);
+                    return list;
                 }
 
                 WallItem {

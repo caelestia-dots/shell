@@ -223,6 +223,13 @@ int Lyrics::indexForTime(qreal time) const {
     return static_cast<int>(lo - 1);
 }
 
+qreal Lyrics::timeForIndex(int index) const {
+    if (index < 0 || index >= m_lines.size()) {
+        return -1.0;
+    }
+    return m_lines.at(index).time + m_offset;
+}
+
 void Lyrics::setTrack(const QString& artist, const QString& title, const QString& album, qreal duration) {
     const QString a = artist.trimmed();
     const QString t = title.trimmed();
@@ -847,6 +854,11 @@ QString Lyrics::lyricsDir() const {
     QString dir = config::GlobalConfig::instance()->paths()->lyricsDir();
     if (dir.isEmpty()) {
         return {};
+    }
+    if (dir == u"~"_s) {
+        dir = QDir::homePath();
+    } else if (dir.startsWith(u"~/"_s)) {
+        dir.replace(0, 1, QDir::homePath());
     }
     while (dir.endsWith(QLatin1Char('/')) && dir.size() > 1) {
         dir.chop(1);

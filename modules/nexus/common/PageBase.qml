@@ -21,27 +21,38 @@ ColumnLayout {
 
     spacing: Tokens.spacing.extraLargeIncreased
 
-    RowLayout {
-        spacing: Tokens.spacing.largeIncreased
+    MouseArea { // Prevent clicks from reaching flickable
+        z: 1
+        implicitWidth: header.implicitWidth
+        implicitHeight: header.implicitHeight - Layout.bottomMargin
+        Layout.bottomMargin: -flickable.topMargin // Extra height to block clicks on flickable top margin
 
-        Loader {
-            visible: active
-            active: root.isSubPage
-            asynchronous: true
-            sourceComponent: IconButton {
-                icon: "arrow_back"
-                font: Tokens.font.icon.medium
-                type: IconButton.Tonal
-                isRound: true
-                inactiveColour: Colours.tPalette.m3surfaceContainerHigh
-                inactiveOnColour: Colours.palette.m3onSurfaceVariant
-                onClicked: root.nState.closeSubPage()
+        RowLayout {
+            id: header
+
+            spacing: Tokens.spacing.largeIncreased
+
+            Loader {
+                visible: active
+                active: root.isSubPage
+                asynchronous: true
+                sourceComponent: IconButton {
+                    icon: "arrow_back"
+                    font: Tokens.font.icon.medium
+                    type: IconButton.Tonal
+                    isRound: true
+                    inactiveColour: Colours.tPalette.m3surfaceContainerHigh
+                    inactiveOnColour: Colours.palette.m3onSurfaceVariant
+                    onClicked: root.nState.closeSubPage()
+                }
             }
-        }
 
-        StyledText {
-            text: root.title
-            font: Tokens.font.title.large
+            StyledText {
+                Layout.fillWidth: true
+                text: root.title
+                font: Tokens.font.title.large
+                elide: Text.ElideRight
+            }
         }
     }
 

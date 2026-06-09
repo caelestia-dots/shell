@@ -131,6 +131,7 @@ class FontTokens : public QObject {
     Q_PROPERTY(caelestia::config::FontStyle* mono READ mono CONSTANT FINAL)
     Q_PROPERTY(caelestia::config::IconFontStyle* icon READ icon CONSTANT FINAL)
     Q_PROPERTY(caelestia::config::FontBuilder clock READ clock NOTIFY clockChanged FINAL)
+    Q_PROPERTY(QString workspaces READ workspaces NOTIFY workspacesChanged FINAL)
 
 public:
     explicit FontTokens(QObject* parent = nullptr);
@@ -144,9 +145,11 @@ public:
     [[nodiscard]] FontStyle* mono() const;
     [[nodiscard]] IconFontStyle* icon() const;
     [[nodiscard]] FontBuilder clock() const;
+    [[nodiscard]] QString workspaces() const;
 
 signals:
     void clockChanged();
+    void workspacesChanged();
 
 private:
     void rebuildClock();

@@ -34,7 +34,7 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib")
 
 set(DISTRIBUTOR "Unset" CACHE STRING "Distributor")
-set(ENABLE_MODULES "extras;plugin;shell" CACHE STRING "Modules to build/install")
+set(ENABLE_MODULES "extras;plugin;shell;m3shapes" CACHE STRING "Modules to build/install")
 set(INSTALL_LIBDIR "usr/lib/caelestia" CACHE STRING "Library install dir")
 set(INSTALL_QMLDIR "usr/lib/qt6/qml" CACHE STRING "QML install dir")
 set(INSTALL_QSCONFDIR "etc/xdg/quickshell/caelestia" CACHE STRING "Quickshell config install dir")
@@ -72,13 +72,15 @@ if("shell" IN_LIST ENABLE_MODULES)
     install(FILES LICENSE DESTINATION "${INSTALL_QSCONFDIR}")
 endif()
 
-if("plugin" IN_LIST ENABLE_MODULES OR "shell" IN_LIST ENABLE_MODULES)
+if("m3shapes" IN_LIST ENABLE_MODULES)
     message(STATUS "Fetching M3Shapes module")
     include(FetchContent)
+    set(M3SHAPES_REV eb93964ab8583ae21c3a0bb9897f96ef9a1b5377)
     FetchContent_Declare(
         m3shapes_external
         GIT_REPOSITORY https://github.com/soramanew/m3shapes.git
-        GIT_TAG        main
+        GIT_TAG        ${M3SHAPES_REV}
+        SOURCE_DIR     "${CMAKE_BINARY_DIR}/_deps/m3shapes-${M3SHAPES_REV}"
     )
     FetchContent_MakeAvailable(m3shapes_external)
     message(STATUS "Done fetching M3Shapes module")

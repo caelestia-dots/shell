@@ -29,7 +29,7 @@ QStringList RootConfig::collectUnknownKeys(const ConfigObject* obj, const QJsonO
     const auto* meta = obj->metaObject();
 
     QSet<QString> known;
-    for (int i = meta->propertyOffset(); i < meta->propertyCount(); ++i)
+    for (int i = ConfigObject::basePropertyOffset(); i < meta->propertyCount(); ++i)
         known.insert(QString::fromUtf8(meta->property(i).name()));
 
     for (auto it = json.begin(); it != json.end(); ++it) {
@@ -126,7 +126,7 @@ void RootConfig::connectAutoSave(ConfigObject* obj) {
 
     // Recurse into sub-objects
     const auto* meta = obj->metaObject();
-    for (int i = meta->propertyOffset(); i < meta->propertyCount(); ++i) {
+    for (int i = ConfigObject::basePropertyOffset(); i < meta->propertyCount(); ++i) {
         auto prop = meta->property(i);
         auto value = prop.read(obj);
         auto* subObj = value.value<ConfigObject*>();

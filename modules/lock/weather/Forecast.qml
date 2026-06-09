@@ -95,7 +95,7 @@ StyledRect {
                 StyledText {
                     Layout.topMargin: Tokens.spacing.extraSmall
                     Layout.alignment: Qt.AlignHCenter
-                    text: hour.index === 0 ? qsTr("Now") : Qt.formatDateTime(new Date(hour.cond.timestamp.replace("T", " ")), GlobalConfig.services.useTwelveHourClock ? "ha" : "hh00")
+                    text: hour.index === 0 ? qsTr("Now") : Qt.formatDateTime(new Date(hour.cond.timestamp.replace("T", " ")), GlobalConfig.services.useTwelveHourClock ? "ha" : "hh:00")
                     color: Colours.palette.m3onSurfaceVariant
                     font: Tokens.font.body.medium
                 }

@@ -279,6 +279,7 @@ For example, to disable the bar on DP-1:
         "font": {
             "scale": 1,
             "clock": "Rubik",
+            "workspaces": "Rubik",
             "headline": {
                 "family": "GoogleSansFlex",
                 "large": { "size": 32, "weight": 500, "italic": false, "vaxes": { "ROND": 25 } },
@@ -433,7 +434,7 @@ For example, to disable the bar on DP-1:
             "maxWindowIcons": 5,
             "activeTrail": false,
             "perMonitorWorkspaces": true,
-            "label": "  ",
+            "label": "  ",
             "occupiedLabel": "󰮯",
             "activeLabel": "󰮯",
             "capitalisation": "preserve",
