@@ -87,7 +87,7 @@ Item {
             id: delegateRoot
             implicitWidth: charList.implicitHeight
             implicitHeight: charList.implicitHeight
-            
+
             ListView.onRemove: removeAnim.start()
 
             SequentialAnimation {
@@ -126,18 +126,7 @@ Item {
                 color: Colours.palette.m3onSurface
 
                 property int initialShape: {
-                    const shapes = [
-                        MaterialShape.Square, MaterialShape.Slanted, MaterialShape.Arch,
-                        MaterialShape.Fan, MaterialShape.Arrow, MaterialShape.SemiCircle,
-                        MaterialShape.Triangle, MaterialShape.Diamond, MaterialShape.ClamShell,
-                        MaterialShape.Pentagon, MaterialShape.Gem, MaterialShape.Sunny,
-                        MaterialShape.VerySunny, MaterialShape.Cookie4Sided, MaterialShape.Cookie6Sided,
-                        MaterialShape.Cookie7Sided, MaterialShape.Cookie9Sided, MaterialShape.Cookie12Sided,
-                        MaterialShape.Ghostish, MaterialShape.Clover4Leaf, MaterialShape.Clover8Leaf,
-                        MaterialShape.Burst, MaterialShape.SoftBurst, MaterialShape.Boom,
-                        MaterialShape.SoftBoom, MaterialShape.Flower, MaterialShape.Puffy,
-                        MaterialShape.PuffyDiamond, MaterialShape.Bun, MaterialShape.Heart
-                    ];
+                    const shapes = [MaterialShape.Square, MaterialShape.Slanted, MaterialShape.Arch, MaterialShape.Fan, MaterialShape.Arrow, MaterialShape.SemiCircle, MaterialShape.Triangle, MaterialShape.Diamond, MaterialShape.ClamShell, MaterialShape.Pentagon, MaterialShape.Gem, MaterialShape.Sunny, MaterialShape.VerySunny, MaterialShape.Cookie4Sided, MaterialShape.Cookie6Sided, MaterialShape.Cookie7Sided, MaterialShape.Cookie9Sided, MaterialShape.Cookie12Sided, MaterialShape.Ghostish, MaterialShape.Clover4Leaf, MaterialShape.Clover8Leaf, MaterialShape.Burst, MaterialShape.SoftBurst, MaterialShape.Boom, MaterialShape.SoftBoom, MaterialShape.Flower, MaterialShape.Puffy, MaterialShape.PuffyDiamond, MaterialShape.Bun, MaterialShape.Heart];
                     return shapes[Math.floor(Math.random() * shapes.length)];
                 }
 
@@ -146,35 +135,47 @@ Item {
 
                 opacity: 0
                 implicitSize: 0
-                
+
                 Component.onCompleted: {
                     spawnAnim.start();
                 }
 
                 SequentialAnimation {
                     id: spawnAnim
-                    
+
                     ParallelAnimation {
-                        NumberAnimation { 
-                            target: ch; property: "implicitSize"
-                            from: 0; to: delegateRoot.implicitHeight * 1.5; duration: 250; easing.type: Easing.OutBack 
+                        NumberAnimation {
+                            target: ch
+                            property: "implicitSize"
+                            from: 0
+                            to: delegateRoot.implicitHeight * 1.5
+                            duration: 250
+                            easing.type: Easing.OutBack
                         }
-                        NumberAnimation { 
-                            target: ch; property: "opacity"
-                            from: 0; to: 1; duration: 100 
+                        NumberAnimation {
+                            target: ch
+                            property: "opacity"
+                            from: 0
+                            to: 1
+                            duration: 100
                         }
                     }
 
-                    PauseAnimation { duration: 180 }
+                    PauseAnimation {
+                        duration: 180
+                    }
 
                     ScriptAction {
                         script: ch.shape = MaterialShape.Circle
                     }
 
                     ParallelAnimation {
-                        NumberAnimation { 
-                            target: ch; property: "implicitSize"
-                            to: delegateRoot.implicitHeight; duration: 200; easing.type: Easing.InOutQuad 
+                        NumberAnimation {
+                            target: ch
+                            property: "implicitSize"
+                            to: delegateRoot.implicitHeight
+                            duration: 200
+                            easing.type: Easing.InOutQuad
                         }
                     }
                 }
