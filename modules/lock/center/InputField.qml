@@ -2,11 +2,11 @@ pragma ComponentBehavior: Bound
 
 import QtQuick
 import Quickshell
-import Caelestia.Config
 import M3Shapes
+import Caelestia.Config
 import qs.components
-import qs.modules.lock
 import qs.services
+import qs.modules.lock
 
 Item {
     id: root
