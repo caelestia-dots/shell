@@ -119,7 +119,7 @@ StyledRect {
 
                 color: root.lock.pam.buffer ? Colours.palette.m3primary : Colours.layer(Colours.palette.m3surfaceContainerHigh, 2)
                 shape: root.lock.pam.buffer ? MaterialShape.Arrow : MaterialShape.Circle
-                scale: root.lock.pam.buffer ? 0.7 : 1
+                scale: mouse.pressed ? 0.6 : mouse.containsMouse ? 0.8 : root.lock.pam.buffer ? 0.7 : 1
                 rotation: 90
 
                 Behavior on scale {
@@ -132,11 +132,13 @@ StyledRect {
                     CAnim {}
                 }
 
-                StateLayer {
-                    disabled: !root.lock.pam.buffer
-                    radius: Tokens.rounding.full
-                    color: Colours.palette.m3onPrimary
-                    onClicked: root.lock.pam.passwd.start()
+                MouseArea {
+                    id: mouse
+
+                    anchors.fill: parent
+                    hoverEnabled: root.lock.pam.buffer
+                    cursorShape: root.lock.pam.buffer ? Qt.PointingHandCursor : Qt.ArrowCursor
+                    onClicked: root.lock.pam.buffer && root.lock.pam.passwd.start()
                 }
             }
 
