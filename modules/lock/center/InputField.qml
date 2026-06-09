@@ -136,8 +136,7 @@ Item {
                         MaterialShape.Ghostish, MaterialShape.Clover4Leaf, MaterialShape.Clover8Leaf,
                         MaterialShape.Burst, MaterialShape.SoftBurst, MaterialShape.Boom,
                         MaterialShape.SoftBoom, MaterialShape.Flower, MaterialShape.Puffy,
-                        MaterialShape.PuffyDiamond, MaterialShape.PixelCircle, MaterialShape.PixelTriangle,
-                        MaterialShape.Bun, MaterialShape.Heart
+                        MaterialShape.PuffyDiamond, MaterialShape.Bun, MaterialShape.Heart
                     ];
                     return shapes[Math.floor(Math.random() * shapes.length)];
                 }
