@@ -154,7 +154,7 @@ Item {
 
                 SequentialAnimation {
                     id: spawnAnim
-
+                    
                     ParallelAnimation {
                         NumberAnimation { 
                             target: ch; property: "implicitSize"
