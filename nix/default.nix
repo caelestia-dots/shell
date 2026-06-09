@@ -94,7 +94,7 @@
     };
 
     nativeBuildInputs = [cmake ninja pkg-config];
-    buildInputs = [qt6.qtbase qt6.qtdeclarative libqalculate pipewire aubio libcava fftw];
+    buildInputs = [qt6.qtbase qt6.qtdeclarative qt6.qtmultimedia libqalculate pipewire aubio libcava fftw];
 
     dontWrapQtApps = true;
     cmakeFlags =
@@ -111,7 +111,7 @@ in
     src = ./..;
 
     nativeBuildInputs = [cmake ninja makeWrapper qt6.wrapQtAppsHook];
-    buildInputs = [quickshell extras plugin xkeyboard-config qt6.qtbase];
+    buildInputs = [quickshell extras plugin xkeyboard-config qt6.qtbase qt6.qtmultimedia];
     propagatedBuildInputs = runtimeDeps;
 
     cmakeFlags =
