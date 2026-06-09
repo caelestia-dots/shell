@@ -6,9 +6,12 @@ import qs.components
 import qs.components.controls
 import qs.services
 import qs.utils
+import Quickshell.Io
 
 Item {
     id: root
+
+    property string activeTab: "static"
 
     required property var content
     required property DrawerVisibilities visibilities
@@ -21,11 +24,13 @@ Item {
     readonly property bool showWallpapers: search.text.startsWith(`${GlobalConfig.launcher.actionPrefix}wallpaper `)
     readonly property var currentList: showWallpapers ? wallpaperList.item : appList.item // Can be either ListView or PathView, so can't type properly
 
+    readonly property int textBarHeight: Tokens.font.size.normal + Tokens.spacing.normal * 2
+
     anchors.horizontalCenter: parent.horizontalCenter
     anchors.bottom: parent.bottom
 
     clip: true
-    state: showWallpapers ? "wallpapers" : "apps"
+    state: (root.visibilities?.launcher && showWallpapers) ? "wallpapers" : "apps"
 
     states: [
         State {
@@ -47,7 +52,7 @@ Item {
 
             PropertyChanges {
                 root.implicitWidth: Math.max(root.Tokens.sizes.launcher.itemWidth * 1.2, wallpaperList.implicitWidth)
-                root.implicitHeight: root.Tokens.sizes.launcher.wallpaperHeight
+                root.implicitHeight: root.Tokens.sizes.launcher.wallpaperHeight + root.textBarHeight
                 wallpaperList.active: true
             }
         }
@@ -73,6 +78,8 @@ Item {
         }
     }
 
+    
+
     Loader {
         id: appList
 
@@ -87,23 +94,101 @@ Item {
     }
 
     Loader {
-        id: wallpaperList
+    id: wallpaperList
 
-        asynchronous: true
-        active: false
+    asynchronous: true
+    active: false
 
-        anchors.top: parent.top
-        anchors.bottom: parent.bottom
+    anchors.top: parent.top
+    anchors.topMargin: root.textBarHeight
+    anchors.bottom: parent.bottom
+
+    sourceComponent: WallpaperList {
+        search: root.search
+        visibilities: root.visibilities
+        panels: root.panels
+        content: root.content
+        activeTab: root.activeTab  // ← ajoute
+    }
+}
+
+    Row {
         anchors.horizontalCenter: parent.horizontalCenter
+        anchors.top: parent.top
+        anchors.topMargin: Tokens.spacing.normal
+        spacing: Tokens.spacing.normal
 
-        sourceComponent: WallpaperList {
-            search: root.search
-            visibilities: root.visibilities
-            panels: root.panels
-            content: root.content
+        StyledRect {
+            implicitWidth: btn1Text.implicitWidth + Tokens.padding.large * 2
+            implicitHeight: btn1Text.implicitHeight + Tokens.padding.small * 2
+            radius: Tokens.rounding.full
+            color: Colours.palette.m3primary
+            visible: root.state == "wallpapers"
+            StateLayer {
+                radius: parent.radius
+                color: Colours.palette.m3onPrimary
+                onClicked: root.activeTab = "static"
+            }
+
+            StyledText {
+                id: btn1Text
+                anchors.centerIn: parent
+                text: "Static"
+                color: Colours.palette.m3onPrimary
+                font.pointSize: Tokens.font.size.normal
+            }
+        }
+
+        StyledRect {
+            implicitWidth: btn2Text.implicitWidth + Tokens.padding.large * 2
+            implicitHeight: btn2Text.implicitHeight + Tokens.padding.small * 2
+            radius: Tokens.rounding.full
+            color: Colours.palette.m3primary
+            visible: root.state == "wallpapers"
+
+            Process {
+                id: mpvpaper
+                command: ["mpvpaper", "-o", "loop", "ALL", "../../Pictures/Wallpapers/rei_video.mp4"]
+                running: false
+            }
+
+            StateLayer {
+                radius: parent.radius
+                color: Colours.palette.m3onPrimary
+                onClicked: root.activeTab = "animated"
+            }
+
+            StyledText {
+                id: btn2Text
+                anchors.centerIn: parent
+                text: "Animated"
+                color: Colours.palette.m3onPrimary
+                font.pointSize: Tokens.font.size.normal
+            }
+        }
+
+        StyledRect {
+            implicitWidth: btn3Text.implicitWidth + Tokens.padding.large * 2
+            implicitHeight: btn3Text.implicitHeight + Tokens.padding.small * 2
+            radius: Tokens.rounding.full
+            color: Colours.palette.m3primary
+            visible: root.state == "wallpapers"
+            StateLayer {
+                radius: parent.radius
+                color: Colours.palette.m3onPrimary
+                onClicked: root.activeTab = "all"
+            }
+
+            StyledText {
+                id: btn3Text
+                anchors.centerIn: parent
+                text: "All"
+                color: Colours.palette.m3onPrimary
+                font.pointSize: Tokens.font.size.normal
+            }
         }
     }
-
+ 
     Row {
         id: empty
 

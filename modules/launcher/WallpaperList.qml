@@ -11,6 +11,9 @@ PathView {
     id: root
 
     required property StyledTextField search
+
+    required property string activeTab
+
     required property var visibilities
     required property var panels
     required property var content
@@ -45,13 +48,17 @@ PathView {
     }
 
     model: ScriptModel {
-        id: scriptModel
-
-        readonly property string search: root.search.text.split(" ").slice(1).join(" ")
-
-        values: Wallpapers.query(search)
-        onValuesChanged: root.currentIndex = search ? 0 : values.findIndex(w => w.path === Wallpapers.actualCurrent)
+    id: scriptModel
+    readonly property string search: root.search.text.split(" ").slice(1).join(" ")
+    values: {
+        const list = root.activeTab === "static" ? Wallpapers.listStatic
+                   : root.activeTab === "animated" ? Wallpapers.listAnimated
+                   : Wallpapers.listAll;
+        if (!search) return list;
+        return list.filter(w => w.relativePath.toLowerCase().includes(search.toLowerCase()));
     }
+    onValuesChanged: root.currentIndex = 0
+}
 
     Component.onCompleted: currentIndex = Wallpapers.list.findIndex(w => w.path === Wallpapers.actualCurrent)
     Component.onDestruction: Wallpapers.stopPreview()
