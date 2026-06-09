@@ -56,9 +56,8 @@ Column {
         playing: visible
         asynchronous: true
         speed: Config.general.sessionGifSpeed
-        source: Config.paths.sessionGif !== "" ? Paths.absolutePath(Config.paths.sessionGif) : ""
+        source: Paths.absolutePath(Config.paths.sessionGif)
         fillMode: AnimatedImage.PreserveAspectFit
-        visible: Config.paths.sessionGif !== ""
     }
 
     SessionButton {
