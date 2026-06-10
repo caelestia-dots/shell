@@ -84,7 +84,7 @@ Item {
                 }
             }
 
-            CachingImage {
+            ProfileImage {
                 id: pfp
 
                 anchors.fill: parent
@@ -128,6 +128,14 @@ Item {
                     }
                 }
             }
+        }
+
+        Connections {
+            function onAccepted(): void {
+                Qt.callLater(pfp.reload);
+            }
+
+            target: root.facePicker
         }
     }
 

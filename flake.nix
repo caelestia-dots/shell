@@ -30,13 +30,23 @@
       nixpkgs.lib.genAttrs nixpkgs.lib.platforms.linux (
         system: fn nixpkgs.legacyPackages.${system}
       );
+    sourceRev =
+      if self ? rev
+      then self.rev
+      else if self ? dirtyRev
+      then self.dirtyRev
+      else if self ? shortRev
+      then self.shortRev
+      else if self ? lastModifiedDate
+      then self.lastModifiedDate
+      else "unknown";
   in {
     formatter = forAllSystems (pkgs: pkgs.alejandra);
 
     packages = forAllSystems (pkgs: rec {
       caelestia-shell = pkgs.callPackage ./nix {
         inherit (inputs) m3shapes;
-        rev = self.rev or self.dirtyRev;
+        rev = sourceRev;
         stdenv = pkgs.clangStdenv;
         quickshell = inputs.quickshell.packages.${pkgs.stdenv.hostPlatform.system}.default.override {
           withX11 = false;
