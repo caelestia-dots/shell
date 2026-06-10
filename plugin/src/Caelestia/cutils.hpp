@@ -27,6 +27,8 @@ public:
     Q_INVOKABLE static bool copyFile(const QUrl& source, const QUrl& target, bool overwrite = true);
     Q_INVOKABLE static bool deleteFile(const QUrl& path);
     Q_INVOKABLE static QString toLocalFile(const QUrl& url);
+    Q_INVOKABLE static QString imageFormat(const QUrl& url);
+    Q_INVOKABLE static QString imageFormat(const QString& path);
 
     Q_INVOKABLE static qreal clamp(qreal value, qreal min, qreal max);
 
