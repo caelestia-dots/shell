@@ -13,6 +13,7 @@ Item {
 
     StateLayer {
         id: stateLayer
+
         // Cursed workaround to make the height larger than the parent
         anchors.fill: undefined
         anchors.centerIn: parent
