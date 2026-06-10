@@ -12,6 +12,7 @@ Item {
     implicitHeight: icon.implicitHeight
 
     StateLayer {
+        id: stateLayer
         // Cursed workaround to make the height larger than the parent
         anchors.fill: undefined
         anchors.centerIn: parent
@@ -24,8 +25,7 @@ Item {
     MaterialIcon {
         id: icon
 
-        anchors.centerIn: parent
-        anchors.horizontalCenterOffset: -1
+        anchors.centerIn: stateLayer
 
         text: "power_settings_new"
         color: Colours.palette.m3error
