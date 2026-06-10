@@ -9,7 +9,7 @@ import qs.modules.nexus
 Scope {
     id: root
 
-    property bool launcherInterrupted
+    property int launcherInterruptCount
     readonly property bool hasFullscreen: Hypr.focusedWorkspace?.toplevels.values.some(t => t.lastIpcObject.fullscreen > 1) ?? false
 
     // qmllint disable unresolved-type
@@ -64,13 +64,15 @@ Scope {
         // qmllint enable unresolved-type
         name: "launcher"
         description: "Toggle launcher"
-        onPressed: root.launcherInterrupted = false
+        onPressed: root.launcherInterruptCount = 0
         onReleased: {
-            if (!root.launcherInterrupted && !root.hasFullscreen) {
+            // Only toggle if no more than one interrupt fired (Super_L itself via catchall).
+            // Two or more interrupts means another key was pressed while holding Super.
+            if (root.launcherInterruptCount <= 1 && !root.hasFullscreen) {
                 const visibilities = Visibilities.getForActive();
                 visibilities.launcher = !visibilities.launcher;
             }
-            root.launcherInterrupted = false;
+            root.launcherInterruptCount = 0;
         }
     }
 
@@ -79,7 +81,7 @@ Scope {
         // qmllint enable unresolved-type
         name: "launcherInterrupt"
         description: "Interrupt launcher keybind"
-        onPressed: root.launcherInterrupted = true
+        onPressed: root.launcherInterruptCount++
     }
 
     // qmllint disable unresolved-type
