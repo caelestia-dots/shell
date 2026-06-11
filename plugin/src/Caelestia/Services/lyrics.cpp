@@ -788,7 +788,6 @@ void Lyrics::onPreferredBackendConfigChanged() {
 }
 
 void Lyrics::onLyricsDirChanged() {
-    loadLyricsMap();
     scheduleLoad();
 }
 
@@ -828,11 +827,7 @@ void Lyrics::persistTrackPrefs() {
     }
     m_lyricsMap.insert(key, entry);
 
-    const QString dir = lyricsDir();
-    if (dir.isEmpty()) {
-        return;
-    }
-    QDir().mkpath(dir);
+    QDir().mkpath(stateDir());
 
     QSaveFile out(lyricsMapPath());
     if (!out.open(QIODevice::WriteOnly | QIODevice::Truncate)) {
@@ -867,8 +862,7 @@ QString Lyrics::lyricsDir() const {
 }
 
 QString Lyrics::lyricsMapPath() const {
-    const QString dir = lyricsDir();
-    return dir.isEmpty() ? QString() : dir + u"/lyrics_map.json"_s;
+    return stateDir() + u"/lyrics_map.json"_s;
 }
 
 QString Lyrics::trackKey() const {
@@ -881,28 +875,39 @@ QString Lyrics::trackKey() const {
 QString Lyrics::backendKey(LyricsBackend::Backend value) {
     switch (value) {
     case LyricsBackend::Local:
-        return u"LyricsBackend::Local"_s;
+        return u"Local"_s;
     case LyricsBackend::LRCLIB:
-        return u"LyricsBackend::LRCLIB"_s;
+        return u"LRCLIB"_s;
     case LyricsBackend::NetEase:
-        return u"LyricsBackend::NetEase"_s;
+        return u"NetEase"_s;
     case LyricsBackend::Auto:
     default:
-        return u"LyricsBackend::Auto"_s;
+        return u"Auto"_s;
     }
 }
 
 LyricsBackend::Backend Lyrics::backendFromKey(const QString& key) {
-    if (key.compare(u"LyricsBackend::Local"_s, Qt::CaseInsensitive) == 0) {
+    if (key.compare(u"Local"_s, Qt::CaseInsensitive) == 0) {
         return LyricsBackend::Local;
     }
-    if (key.compare(u"LyricsBackend::LRCLIB"_s, Qt::CaseInsensitive) == 0) {
+    if (key.compare(u"LRCLIB"_s, Qt::CaseInsensitive) == 0) {
         return LyricsBackend::LRCLIB;
     }
-    if (key.compare(u"LyricsBackend::NetEase"_s, Qt::CaseInsensitive) == 0) {
+    if (key.compare(u"NetEase"_s, Qt::CaseInsensitive) == 0) {
         return LyricsBackend::NetEase;
     }
     return LyricsBackend::Auto;
+}
+
+const QString& Lyrics::stateDir() {
+    static const QString s_dir = [] {
+        QString state = qEnvironmentVariable("XDG_STATE_HOME");
+        if (state.isEmpty()) {
+            state = QDir::homePath() + u"/.local/state"_s;
+        }
+        return state + u"/caelestia/lyrics"_s;
+    }();
+    return s_dir;
 }
 
 const QString& Lyrics::cacheDir() {
