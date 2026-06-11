@@ -58,11 +58,11 @@ Singleton {
             if (lastSpecialWorkspace) {
                 const workspace = workspaces.values.find(w => w.name === lastSpecialWorkspace);
                 if (workspace && workspace.lastIpcObject.windows > 0) {
-                    dispatch(Hyprland.usingLua ? `hl.dsp.focus({ workspace = "${lastSpecialWorkspace}" })` : `workspace ${lastSpecialWorkspace}`);
+                    dispatch(usingLua ? `hl.dsp.focus({ workspace = "${lastSpecialWorkspace}" })` : `workspace ${lastSpecialWorkspace}`);
                     return;
                 }
             }
-            dispatch(Hyprland.usingLua ? `hl.dsp.focus({ workspace = "${openSpecials[0].name}" })` : `workspace ${openSpecials[0].name}`);
+            dispatch(usingLua ? `hl.dsp.focus({ workspace = "${openSpecials[0].name}" })` : `workspace ${openSpecials[0].name}`);
             return;
         }
 
@@ -76,7 +76,7 @@ Singleton {
                 nextIndex = (currentIndex - 1 + openSpecials.length) % openSpecials.length;
         }
 
-        dispatch(Hyprland.usingLua ? `hl.dsp.focus({ workspace = "${openSpecials[nextIndex].name}" })` : `workspace ${openSpecials[nextIndex].name}`);
+        dispatch(usingLua ? `hl.dsp.focus({ workspace = "${openSpecials[nextIndex].name}" })` : `workspace ${openSpecials[nextIndex].name}`);
     }
 
     function monitorNames(): list<string> {
@@ -88,7 +88,7 @@ Singleton {
     }
 
     function reloadDynamicConfs(): void {
-        if (Hyprland.usingLua) {
+        if (usingLua) {
             extras.batchMessage([`eval hl.bind("Caps_Lock", hl.dsp.global("caelestia:refreshDevices"), { locked = true, non_consuming = true, ignore_mods = true, release = true})`, `eval hl.bind("Num_Lock", hl.dsp.global("caelestia:refreshDevices"), { locked = true, non_consuming = true, ignore_mods = true, release = true})`]);
         } else {
             extras.batchMessage(["keyword bindlni ,Caps_Lock,global,caelestia:refreshDevices", "keyword bindlni ,Num_Lock,global,caelestia:refreshDevices"]);
