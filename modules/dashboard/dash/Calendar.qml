@@ -92,25 +92,25 @@ CustomMouseArea {
             Anim {
                 target: titleTranslate1
                 property: "x"
-                to: activeGrid === 1 ? 0 : monthChangeAnim.direction * titleClip.width
+                to: root.activeGrid === 1 ? 0 : monthChangeAnim.direction * titleClip.width
                 type: Anim.DefaultSpatial
             }
             Anim {
                 target: grid1Translate
                 property: "x"
-                to: activeGrid === 1 ? 0 : monthChangeAnim.direction * gridClip.width
+                to: root.activeGrid === 1 ? 0 : monthChangeAnim.direction * gridClip.width
                 type: Anim.DefaultSpatial
             }
             Anim {
                 target: titleTranslate2
                 property: "x"
-                to: activeGrid === 2 ? 0 : monthChangeAnim.direction * titleClip.width
+                to: root.activeGrid === 2 ? 0 : monthChangeAnim.direction * titleClip.width
                 type: Anim.DefaultSpatial
             }
             Anim {
                 target: grid2Translate
                 property: "x"
-                to: activeGrid === 2 ? 0 : monthChangeAnim.direction * gridClip.width
+                to: root.activeGrid === 2 ? 0 : monthChangeAnim.direction * gridClip.width
                 type: Anim.DefaultSpatial
             }
         }
@@ -175,7 +175,9 @@ CustomMouseArea {
 
                         anchors.centerIn: parent
 
+                        // qmllint disable missing-property
                         text: grid1.item ? grid1.item.title : ""
+                        // qmllint enable missing-property
                         color: Colours.palette.m3primary
                         font: Tokens.font.title.builders.small.capitalisation(Font.Capitalize).build()
                         visible: root.activeGrid === 1 || monthChangeAnim.running
@@ -190,7 +192,9 @@ CustomMouseArea {
 
                         anchors.centerIn: parent
 
+                        // qmllint disable missing-property
                         text: grid2.item ? grid2.item.title : ""
+                        // qmllint enable missing-property
                         color: Colours.palette.m3primary
                         font: Tokens.font.title.builders.small.capitalisation(Font.Capitalize).build()
                         visible: root.activeGrid === 2 || monthChangeAnim.running
