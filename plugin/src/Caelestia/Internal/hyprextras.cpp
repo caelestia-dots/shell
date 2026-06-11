@@ -76,7 +76,10 @@ bool HyprExtras::usingLua() const {
 
 void HyprExtras::detectConfigProvider() {
     makeRequest("systeminfo", [this](bool success, const QByteArray& res) {
-        if (!success) return;
+        if (!success) {
+            return;
+        }
+
         const bool lua = QString::fromUtf8(res).contains("configProvider: lua");
         if (m_usingLua != lua) {
             m_usingLua = lua;

@@ -15,28 +15,28 @@ Item {
     anchors.right: parent?.right
 
     StateLayer {
-        radius: Tokens.rounding.normal
+        radius: Tokens.rounding.large
         onClicked: root.modelData?.onClicked(root.list)
     }
 
     Item {
         anchors.fill: parent
-        anchors.leftMargin: Tokens.padding.larger
-        anchors.rightMargin: Tokens.padding.larger
-        anchors.margins: Tokens.padding.smaller
+        anchors.leftMargin: Tokens.padding.medium
+        anchors.rightMargin: Tokens.padding.medium
+        anchors.margins: Tokens.padding.small
 
         MaterialIcon {
             id: icon
 
-            text: root.modelData?.icon ?? ""
-            font.pointSize: Tokens.font.size.extraLarge
-
             anchors.verticalCenter: parent.verticalCenter
+            text: root.modelData?.icon ?? ""
+            color: Colours.palette.m3onSurfaceVariant
+            fontStyle: Tokens.font.icon.builders.large.scale(1.3).build()
         }
 
         Item {
             anchors.left: icon.right
-            anchors.leftMargin: Tokens.spacing.normal
+            anchors.leftMargin: Tokens.spacing.medium
             anchors.verticalCenter: icon.verticalCenter
 
             implicitWidth: parent.width - icon.width
@@ -46,18 +46,18 @@ Item {
                 id: name
 
                 text: root.modelData?.name ?? ""
-                font.pointSize: Tokens.font.size.normal
+                font: Tokens.font.body.medium
             }
 
             StyledText {
                 id: desc
 
                 text: root.modelData?.desc ?? ""
-                font.pointSize: Tokens.font.size.small
+                font: Tokens.font.body.small
                 color: Colours.palette.m3outline
 
                 elide: Text.ElideRight
-                width: root.width - icon.width - Tokens.rounding.normal * 2
+                width: root.width - icon.width - Tokens.rounding.extraLargeIncreased
 
                 anchors.top: name.bottom
             }

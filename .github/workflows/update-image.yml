@@ -23,7 +23,13 @@ jobs:
         run: |
           cat > /tmp/Dockerfile <<EOF
           FROM archlinux:latest
-          RUN pacman -Syu --needed --noconfirm sudo base-devel cmake ninja fish git clazy qt6-declarative qt6-shadertools python libpipewire aubio libqalculate && \
+          # TEMPORARY (remove once the upstream qmlformat regression is fixed): pin to the
+          # 2026-05-13 Arch archive snapshot to hold qmlformat at qt6-declarative 6.11.0.
+          # qt6-declarative 6.11.1 silently crashes qmlformat (exit 1, empty output) on QML files
+          # that declare a property named 'id'. To unpin: delete the mirrorlist line below and
+          # change 'pacman -Syyuu' back to 'pacman -Syu'.
+          RUN echo 'Server = https://archive.archlinux.org/repos/2026/05/13/\$repo/os/\$arch' > /etc/pacman.d/mirrorlist && \
+              pacman -Syyuu --needed --noconfirm sudo base-devel cmake ninja fish git clazy qt6-declarative qt6-shadertools python libpipewire aubio libqalculate && \
               useradd -m builder && \
               echo 'builder ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers && \
               sudo -u builder git clone https://aur.archlinux.org/yay-bin.git /home/builder/yay-bin && \

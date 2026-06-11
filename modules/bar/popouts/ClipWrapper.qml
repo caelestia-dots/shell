@@ -33,9 +33,7 @@ Item {
     }
 
     Behavior on offsetScale {
-        Anim {
-            type: Anim.DefaultSpatial
-        }
+        Anim {}
     }
 
     Behavior on x {

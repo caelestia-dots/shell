@@ -12,7 +12,6 @@ Item {
     id: root
 
     required property DrawerVisibilities visibilities
-    readonly property bool needsKeyboard: (content.item as Content)?.needsKeyboard ?? false
     readonly property DashboardState dashState: DashboardState {
         reloadableId: "dashboardState"
     }
@@ -28,7 +27,7 @@ Item {
         }
     }
 
-    readonly property real nonAnimHeight: state === "visible" ? ((content.item as Content)?.nonAnimHeight ?? 0) : 0
+    readonly property real nonAnimHeight: (content.item as Content)?.nonAnimHeight ?? 0
     readonly property bool shouldBeActive: visibilities.dashboard && Config.dashboard.enabled
     property real offsetScale: shouldBeActive ? 0 : 1
 
@@ -39,9 +38,7 @@ Item {
     opacity: 1 - offsetScale
 
     Behavior on offsetScale {
-        Anim {
-            type: Anim.DefaultSpatial
-        }
+        Anim {}
     }
 
     Loader {

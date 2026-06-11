@@ -9,6 +9,7 @@ Item {
     anchors.centerIn: parent
 
     implicitWidth: icon.implicitWidth + info.implicitWidth + info.anchors.leftMargin
+    implicitHeight: Math.max(icon.implicitHeight, info.implicitHeight) + Tokens.padding.largeIncreased * 2
 
     Component.onCompleted: Weather.reload()
 
@@ -21,7 +22,7 @@ Item {
         animate: true
         text: Weather.icon
         color: Colours.palette.m3secondary
-        font.pointSize: Tokens.font.size.extraLarge * 2
+        fontStyle: Tokens.font.icon.builders.extraLarge.scale(1.6).build()
     }
 
     Column {
@@ -29,9 +30,9 @@ Item {
 
         anchors.verticalCenter: parent.verticalCenter
         anchors.left: icon.right
-        anchors.leftMargin: Tokens.spacing.large
+        anchors.leftMargin: Tokens.spacing.largeIncreased
 
-        spacing: Tokens.spacing.small
+        spacing: Tokens.spacing.extraSmall
 
         StyledText {
             anchors.horizontalCenter: parent.horizontalCenter
@@ -39,8 +40,7 @@ Item {
             animate: true
             text: Weather.temp
             color: Colours.palette.m3primary
-            font.pointSize: Tokens.font.size.extraLarge
-            font.weight: 500
+            font: Tokens.font.headline.builders.medium.width(110).weight(Font.DemiBold).build()
         }
 
         StyledText {
@@ -48,9 +48,10 @@ Item {
 
             animate: true
             text: Weather.description
+            font: Tokens.font.body.small
 
             elide: Text.ElideRight
-            width: Math.min(implicitWidth, root.parent.width - icon.implicitWidth - info.anchors.leftMargin - Tokens.padding.large * 2)
+            width: Math.min(implicitWidth, root.parent.width - icon.implicitWidth - info.anchors.leftMargin - Tokens.padding.extraLargeIncreased)
         }
     }
 }

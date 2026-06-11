@@ -12,43 +12,46 @@ Row {
         Tonal
     }
 
-    property real horizontalPadding: Tokens.padding.normal
-    property real verticalPadding: Tokens.padding.smaller
+    property real horizontalPadding: Tokens.padding.medium
+    property real verticalPadding: Tokens.padding.small
     property int type: SplitButton.Filled
     property bool disabled
     property bool menuOnTop
     property string fallbackIcon
     property string fallbackText
+    property real minLeftWidth
 
     property alias menuItems: menu.items
     property alias active: menu.active
     property alias expanded: menu.expanded
-    property alias menu: menu
-    property alias iconLabel: iconLabel
-    property alias label: label
-    property alias stateLayer: stateLayer
+    readonly property alias menu: menu
+    readonly property alias iconLabel: iconLabel
+    readonly property alias label: label
+    readonly property alias stateLayer: stateLayer
+    readonly property alias textRow: textRow
+    readonly property alias expandBtn: expandBtn
 
     property color colour: type == SplitButton.Filled ? Colours.palette.m3primary : Colours.palette.m3secondaryContainer
     property color textColour: type == SplitButton.Filled ? Colours.palette.m3onPrimary : Colours.palette.m3onSecondaryContainer
     property color disabledColour: Qt.alpha(Colours.palette.m3onSurface, 0.1)
     property color disabledTextColour: Qt.alpha(Colours.palette.m3onSurface, 0.38)
 
-    spacing: Math.floor(Tokens.spacing.small / 2)
+    spacing: Math.floor(Tokens.spacing.extraSmall)
 
     StyledRect {
         radius: implicitHeight / 2 * Math.min(1, Tokens.rounding.scale)
-        topRightRadius: Tokens.rounding.small / 2
-        bottomRightRadius: Tokens.rounding.small / 2
+        topRightRadius: Tokens.rounding.medium / 2
+        bottomRightRadius: Tokens.rounding.medium / 2
         color: root.disabled ? root.disabledColour : root.colour
 
-        implicitWidth: textRow.implicitWidth + root.horizontalPadding * 2
+        implicitWidth: Math.max(root.minLeftWidth, textRow.implicitWidth + root.horizontalPadding * 2)
         implicitHeight: expandBtn.implicitHeight
 
         StateLayer {
             id: stateLayer
 
-            rect.topRightRadius: parent.topRightRadius
-            rect.bottomRightRadius: parent.bottomRightRadius
+            topRightRadius: parent.topRightRadius
+            bottomRightRadius: parent.bottomRightRadius
             color: root.textColour
             disabled: root.disabled
             onClicked: root.active?.clicked()
@@ -93,7 +96,7 @@ Row {
     StyledRect {
         id: expandBtn
 
-        property real rad: root.expanded ? implicitHeight / 2 * Math.min(1, Tokens.rounding.scale) : Tokens.rounding.small / 2
+        property real rad: root.expanded ? implicitHeight / 2 * Math.min(1, Tokens.rounding.scale) : Tokens.rounding.medium / 2
 
         radius: implicitHeight / 2 * Math.min(1, Tokens.rounding.scale)
         topLeftRadius: rad
