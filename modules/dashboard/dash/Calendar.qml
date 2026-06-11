@@ -29,7 +29,7 @@ CustomMouseArea {
         const currY = activeGrid === 1 ? year1 : year2;
         if (realCurrMonth !== currM || realCurrYear !== currY) {
             monthChangeAnim.direction = (realCurrYear > currY || (realCurrYear === currY && realCurrMonth > currM)) ? -1 : 1;
-            
+
             if (activeGrid === 1) {
                 month2 = realCurrMonth;
                 year2 = realCurrYear;
@@ -180,7 +180,9 @@ CustomMouseArea {
                         font: Tokens.font.title.builders.small.capitalisation(Font.Capitalize).build()
                         visible: root.activeGrid === 1 || monthChangeAnim.running
 
-                        transform: Translate { id: titleTranslate1 }
+                        transform: Translate {
+                            id: titleTranslate1
+                        }
                     }
 
                     StyledText {
@@ -193,7 +195,9 @@ CustomMouseArea {
                         font: Tokens.font.title.builders.small.capitalisation(Font.Capitalize).build()
                         visible: root.activeGrid === 2 || monthChangeAnim.running
 
-                        transform: Translate { id: titleTranslate2 }
+                        transform: Translate {
+                            id: titleTranslate2
+                        }
                     }
                 }
             }
@@ -232,10 +236,10 @@ CustomMouseArea {
             implicitHeight: grid1.implicitHeight
 
             clip: true
-            
+
             Component {
                 id: gridComp
-                
+
                 Item {
                     id: internalGridContainer
 
@@ -348,12 +352,22 @@ CustomMouseArea {
                 sourceComponent: gridComp
                 visible: root.activeGrid === 1 || monthChangeAnim.running
 
-                transform: Translate { id: grid1Translate }
+                transform: Translate {
+                    id: grid1Translate
+                }
 
-                Binding { target: grid1.item; property: "month"; value: root.month1 }
-                Binding { target: grid1.item; property: "year"; value: root.year1 }
+                Binding {
+                    target: grid1.item
+                    property: "month"
+                    value: root.month1
+                }
+                Binding {
+                    target: grid1.item
+                    property: "year"
+                    value: root.year1
+                }
             }
-            
+
             Loader {
                 id: grid2
 
@@ -362,10 +376,20 @@ CustomMouseArea {
                 sourceComponent: gridComp
                 visible: root.activeGrid === 2 || monthChangeAnim.running
 
-                transform: Translate { id: grid2Translate }
+                transform: Translate {
+                    id: grid2Translate
+                }
 
-                Binding { target: grid2.item; property: "month"; value: root.month2 }
-                Binding { target: grid2.item; property: "year"; value: root.year2 }
+                Binding {
+                    target: grid2.item
+                    property: "month"
+                    value: root.month2
+                }
+                Binding {
+                    target: grid2.item
+                    property: "year"
+                    value: root.year2
+                }
             }
         }
     }
