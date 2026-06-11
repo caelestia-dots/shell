@@ -4,7 +4,6 @@ import QtQuick
 import QtQuick.Effects
 import QtQuick.Layouts
 import Quickshell
-import Quickshell.Hyprland
 import Caelestia.Config
 import qs.components
 import qs.services
@@ -98,9 +97,9 @@ StyledClippingRect {
             onClicked: event => {
                 const ws = (layout.childAt(event.x, event.y) as Workspace)?.ws;
                 if (Hypr.activeWsId !== ws)
-                    Hyprland.dispatch(Hyprland.usingLua ? `hl.dsp.focus({ workspace= "${ws}"})` : `workspace ${ws}`);
+                    Hypr.dispatch(Hypr.usingLua ? `hl.dsp.focus({ workspace= "${ws}"})` : `workspace ${ws}`);
                 else
-                    Hyprland.dispatch(Hyprland.usingLua ? `hl.dsp.workspace.toggle_special({ "special" })` : `togglespecialworkspace special`);
+                    Hypr.dispatch(Hypr.usingLua ? `hl.dsp.workspace.toggle_special({ "special" })` : `togglespecialworkspace special`);
             }
         }
 

@@ -39,7 +39,6 @@ HyprExtras::HyprExtras(QObject* parent)
 
     refreshOptions();
     refreshDevices();
-    detectConfigProvider();
 
     m_socket = new QLocalSocket(this);
 
@@ -66,24 +65,6 @@ void HyprExtras::message(const QString& message) {
     makeRequest(message, [](bool success, const QByteArray& res) {
         if (!success) {
             qCWarning(lcHypr) << "message: request error:" << QString::fromUtf8(res);
-        }
-    });
-}
-
-bool HyprExtras::usingLua() const {
-    return m_usingLua;
-}
-
-void HyprExtras::detectConfigProvider() {
-    makeRequest("systeminfo", [this](bool success, const QByteArray& res) {
-        if (!success) {
-            return;
-        }
-
-        const bool lua = QString::fromUtf8(res).contains("configProvider: lua");
-        if (m_usingLua != lua) {
-            m_usingLua = lua;
-            emit usingLuaChanged();
         }
     });
 }
@@ -195,7 +176,6 @@ void HyprExtras::readEvent() {
 void HyprExtras::handleEvent(const QString& event) {
     if (event == "configreloaded") {
         refreshOptions();
-        detectConfigProvider();
     } else if (event == "activelayout") {
         refreshDevices();
     }

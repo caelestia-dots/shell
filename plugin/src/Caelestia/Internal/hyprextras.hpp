@@ -17,14 +17,13 @@ class HyprExtras : public QObject {
 
     Q_PROPERTY(QVariantHash options READ options NOTIFY optionsChanged)
     Q_PROPERTY(caelestia::internal::hypr::HyprDevices* devices READ devices CONSTANT)
-    Q_PROPERTY(bool usingLua READ usingLua NOTIFY usingLuaChanged)
+    Q_PROPERTY(bool usingLua MEMBER m_usingLua NOTIFY usingLuaChanged)
 
 public:
     explicit HyprExtras(QObject* parent = nullptr);
 
     [[nodiscard]] QVariantHash options() const;
     [[nodiscard]] HyprDevices* devices() const;
-    [[nodiscard]] bool usingLua() const;
 
     Q_INVOKABLE void message(const QString& message);
     Q_INVOKABLE void batchMessage(const QStringList& messages);
@@ -56,7 +55,6 @@ private:
     void socketStateChanged(QLocalSocket::LocalSocketState state);
     void readEvent();
     void handleEvent(const QString& event);
-    void detectConfigProvider();
 
     SocketPtr makeRequestJson(const QString& request, const std::function<void(bool, QJsonDocument)>& callback);
     SocketPtr makeRequest(const QString& request, const std::function<void(bool, QByteArray)>& callback);

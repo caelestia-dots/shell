@@ -3,7 +3,6 @@ pragma ComponentBehavior: Bound
 
 import QtQuick
 import Quickshell
-import Quickshell.Hyprland
 import Quickshell.Io
 import Caelestia
 import Caelestia.Config
@@ -84,7 +83,7 @@ Singleton {
     }
 
     function reloadHyprRules(): void {
-        const str = Hyprland.usingLua ? `eval 'hl.layer_rule({ match = { namespace = "caelestia-drawers" }, %1 = true, %2 = true })'` : "keyword layerrule %1 %2, match:namespace caelestia-drawers";
+        const str = Hypr.usingLua ? `eval 'hl.layer_rule({ match = { namespace = "caelestia-drawers" }, %1 = true, %2 = true })'` : "keyword layerrule %1 %2, match:namespace caelestia-drawers";
         Hypr.extras.batchMessage([str.arg("blur").arg(transparency.enabled ? 1 : 0), str.arg("ignore_alpha").arg(transparency.base - 0.03)]);
     }
 

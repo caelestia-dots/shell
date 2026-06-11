@@ -15,6 +15,7 @@ Singleton {
     readonly property var toplevels: Hyprland.toplevels
     readonly property var workspaces: Hyprland.workspaces
     readonly property var monitors: Hyprland.monitors
+    readonly property bool usingLua: Hyprland.usingLua
 
     readonly property HyprlandToplevel activeToplevel: {
         const t = Hyprland.activeToplevel;
@@ -222,5 +223,7 @@ Singleton {
 
     HyprExtras {
         id: extras
+
+        usingLua: Hyprland.usingLua
     }
 }
