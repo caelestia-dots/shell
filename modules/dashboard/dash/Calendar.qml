@@ -15,14 +15,39 @@ CustomMouseArea {
 
     required property DashboardState dashState
 
-    readonly property int currMonth: dashState.currentDate.getMonth()
-    readonly property int currYear: dashState.currentDate.getFullYear()
+    readonly property int realCurrMonth: dashState.currentDate.getMonth()
+    readonly property int realCurrYear: dashState.currentDate.getFullYear()
+
+    property int activeGrid: 1
+    property int month1
+    property int year1
+    property int month2
+    property int year2
+
+    function handleDateChange() {
+        const currM = activeGrid === 1 ? month1 : month2;
+        const currY = activeGrid === 1 ? year1 : year2;
+        if (realCurrMonth !== currM || realCurrYear !== currY) {
+            monthChangeAnim.direction = (realCurrYear > currY || (realCurrYear === currY && realCurrMonth > currM)) ? -1 : 1;
+            
+            if (activeGrid === 1) {
+                month2 = realCurrMonth;
+                year2 = realCurrYear;
+                activeGrid = 2;
+            } else {
+                month1 = realCurrMonth;
+                year1 = realCurrYear;
+                activeGrid = 1;
+            }
+            monthChangeAnim.restart();
+        }
+    }
 
     function onWheel(event: WheelEvent): void {
         if (event.angleDelta.y > 0)
-            root.dashState.currentDate = new Date(root.currYear, root.currMonth - 1, 1);
+            root.dashState.currentDate = new Date(root.realCurrYear, root.realCurrMonth - 1, 1);
         else if (event.angleDelta.y < 0)
-            root.dashState.currentDate = new Date(root.currYear, root.currMonth + 1, 1);
+            root.dashState.currentDate = new Date(root.realCurrYear, root.realCurrMonth + 1, 1);
     }
 
     anchors.left: parent.left
@@ -30,19 +55,80 @@ CustomMouseArea {
     implicitHeight: inner.implicitHeight + inner.anchors.margins * 2
 
     acceptedButtons: Qt.MiddleButton
+
+    Component.onCompleted: {
+        month1 = realCurrMonth;
+        year1 = realCurrYear;
+        month2 = realCurrMonth;
+        year2 = realCurrYear;
+    }
+
+    onRealCurrMonthChanged: handleDateChange()
+    onRealCurrYearChanged: handleDateChange()
+
     onClicked: root.dashState.currentDate = new Date()
+
+    SequentialAnimation {
+        id: monthChangeAnim
+
+        property int direction: 0
+
+        ScriptAction {
+            script: {
+                if (activeGrid === 1) {
+                    titleTranslate1.x = -monthChangeAnim.direction * titleClip.width;
+                    grid1Translate.x = -monthChangeAnim.direction * gridClip.width;
+                    titleTranslate2.x = 0;
+                    grid2Translate.x = 0;
+                } else {
+                    titleTranslate2.x = -monthChangeAnim.direction * titleClip.width;
+                    grid2Translate.x = -monthChangeAnim.direction * gridClip.width;
+                    titleTranslate1.x = 0;
+                    grid1Translate.x = 0;
+                }
+            }
+        }
+        ParallelAnimation {
+            Anim {
+                target: titleTranslate1
+                property: "x"
+                to: activeGrid === 1 ? 0 : monthChangeAnim.direction * titleClip.width
+                type: Anim.DefaultSpatial
+            }
+            Anim {
+                target: grid1Translate
+                property: "x"
+                to: activeGrid === 1 ? 0 : monthChangeAnim.direction * gridClip.width
+                type: Anim.DefaultSpatial
+            }
+            Anim {
+                target: titleTranslate2
+                property: "x"
+                to: activeGrid === 2 ? 0 : monthChangeAnim.direction * titleClip.width
+                type: Anim.DefaultSpatial
+            }
+            Anim {
+                target: grid2Translate
+                property: "x"
+                to: activeGrid === 2 ? 0 : monthChangeAnim.direction * gridClip.width
+                type: Anim.DefaultSpatial
+            }
+        }
+    }
 
     ColumnLayout {
         id: inner
 
         anchors.fill: parent
         anchors.margins: Tokens.padding.large
+
         spacing: Tokens.spacing.extraSmall
 
         RowLayout {
             id: monthNavigationRow
 
             Layout.fillWidth: true
+
             spacing: Tokens.spacing.extraSmall
 
             IconButton {
@@ -50,23 +136,24 @@ CustomMouseArea {
                 type: IconButton.Text
                 font: Tokens.font.icon.builders.small.weight(Font.Bold).build()
                 padding: Tokens.padding.small
-                onClicked: root.dashState.currentDate = new Date(root.currYear, root.currMonth - 1, 1)
+
+                onClicked: root.dashState.currentDate = new Date(root.realCurrYear, root.realCurrMonth - 1, 1)
             }
 
             Item {
                 Layout.fillWidth: true
                 Layout.fillHeight: true
-
-                implicitWidth: monthYearDisplay.implicitWidth + Tokens.padding.large * 2
-                implicitHeight: monthYearDisplay.implicitHeight + Tokens.padding.extraSmall * 2
+                implicitWidth: monthYearDisplay1.implicitWidth + Tokens.padding.large * 2
+                implicitHeight: monthYearDisplay1.implicitHeight + Tokens.padding.extraSmall * 2
 
                 StateLayer {
                     color: Colours.palette.m3primary
                     radius: pressed ? Tokens.rounding.small : Tokens.rounding.large
                     disabled: {
                         const now = new Date();
-                        return root.currMonth === now.getMonth() && root.currYear === now.getFullYear();
+                        return root.realCurrMonth === now.getMonth() && root.realCurrYear === now.getFullYear();
                     }
+
                     onClicked: root.dashState.currentDate = new Date()
 
                     Behavior on radius {
@@ -76,13 +163,38 @@ CustomMouseArea {
                     }
                 }
 
-                StyledText {
-                    id: monthYearDisplay
+                Item {
+                    id: titleClip
 
-                    anchors.centerIn: parent
-                    text: grid.title
-                    color: Colours.palette.m3primary
-                    font: Tokens.font.title.builders.small.capitalisation(Font.Capitalize).build()
+                    anchors.fill: parent
+
+                    clip: true
+
+                    StyledText {
+                        id: monthYearDisplay1
+
+                        anchors.centerIn: parent
+
+                        text: grid1.item ? grid1.item.title : ""
+                        color: Colours.palette.m3primary
+                        font: Tokens.font.title.builders.small.capitalisation(Font.Capitalize).build()
+                        visible: root.activeGrid === 1 || monthChangeAnim.running
+
+                        transform: Translate { id: titleTranslate1 }
+                    }
+
+                    StyledText {
+                        id: monthYearDisplay2
+
+                        anchors.centerIn: parent
+
+                        text: grid2.item ? grid2.item.title : ""
+                        color: Colours.palette.m3primary
+                        font: Tokens.font.title.builders.small.capitalisation(Font.Capitalize).build()
+                        visible: root.activeGrid === 2 || monthChangeAnim.running
+
+                        transform: Translate { id: titleTranslate2 }
+                    }
                 }
             }
 
@@ -91,7 +203,8 @@ CustomMouseArea {
                 type: IconButton.Text
                 font: Tokens.font.icon.builders.small.weight(Font.Bold).build()
                 padding: Tokens.padding.small
-                onClicked: root.dashState.currentDate = new Date(root.currYear, root.currMonth + 1, 1)
+
+                onClicked: root.dashState.currentDate = new Date(root.realCurrYear, root.realCurrMonth + 1, 1)
             }
         }
 
@@ -99,7 +212,8 @@ CustomMouseArea {
             id: daysRow
 
             Layout.fillWidth: true
-            locale: grid.locale
+
+            locale: Qt.locale()
 
             delegate: StyledText {
                 required property var model
@@ -112,102 +226,146 @@ CustomMouseArea {
         }
 
         Item {
+            id: gridClip
+
             Layout.fillWidth: true
-            implicitHeight: grid.implicitHeight
+            implicitHeight: grid1.implicitHeight
 
-            MonthGrid {
-                id: grid
+            clip: true
+            
+            Component {
+                id: gridComp
+                
+                Item {
+                    id: internalGridContainer
 
-                month: root.currMonth
-                year: root.currYear
+                    property alias title: internalGrid.title
+                    property int month
+                    property int year
 
-                anchors.fill: parent
+                    implicitHeight: internalGrid.implicitHeight
 
-                spacing: 3
-                locale: Qt.locale()
+                    MonthGrid {
+                        id: internalGrid
 
-                delegate: Item {
-                    id: dayItem
+                        anchors.fill: parent
 
-                    required property var model
+                        month: internalGridContainer.month
+                        year: internalGridContainer.year
+                        spacing: 3
+                        locale: Qt.locale()
 
-                    implicitWidth: implicitHeight
-                    implicitHeight: text.implicitHeight + Tokens.padding.small
+                        delegate: Item {
+                            id: dayItem
 
-                    StyledText {
-                        id: text
+                            required property var model
 
-                        anchors.centerIn: parent
+                            implicitWidth: implicitHeight
+                            implicitHeight: text.implicitHeight + Tokens.padding.small
 
-                        horizontalAlignment: Text.AlignHCenter
-                        text: grid.locale.toString(dayItem.model.day)
-                        color: {
-                            const dayOfWeek = dayItem.model.date.getDay();
-                            if (dayOfWeek === 0 || dayOfWeek === 6)
-                                return Colours.palette.m3tertiary;
+                            StyledText {
+                                id: text
 
-                            return Colours.palette.m3onSurfaceVariant;
+                                anchors.centerIn: parent
+
+                                horizontalAlignment: Text.AlignHCenter
+                                text: internalGrid.locale.toString(dayItem.model.day)
+                                color: {
+                                    const dayOfWeek = dayItem.model.date.getDay();
+                                    if (dayOfWeek === 0 || dayOfWeek === 6)
+                                        return Colours.palette.m3tertiary;
+
+                                    return Colours.palette.m3onSurfaceVariant;
+                                }
+                                opacity: dayItem.model.today || dayItem.model.month === internalGrid.month ? 1 : 0.4
+                                font: Tokens.font.body.small
+                            }
                         }
-                        opacity: dayItem.model.today || dayItem.model.month === grid.month ? 1 : 0.4
-                        font: Tokens.font.body.small
+                    }
+
+                    MaterialShape {
+                        id: todayIndicator
+
+                        readonly property Item todayItem: internalGrid.contentItem.children.find(c => c.model.today) ?? null
+                        property Item today
+
+                        x: today ? today.x + (today.width - implicitWidth) / 2 : 0
+                        y: today ? today.y - Tokens.padding.extraSmall - 1 : 0
+
+                        implicitSize: today ? Math.max(today.implicitWidth, today.implicitHeight) + Tokens.padding.extraSmall * 2 : 0
+                        shape: MaterialShape.Sunny
+
+                        clip: true
+                        color: Colours.palette.m3primary
+                        opacity: todayItem ? 1 : 0
+                        scale: todayItem ? 1 : 0.7
+
+                        onTodayItemChanged: {
+                            if (todayItem)
+                                today = todayItem;
+                        }
+
+                        Colouriser {
+                            x: -todayIndicator.x
+                            y: -todayIndicator.y
+
+                            implicitWidth: internalGrid.width
+                            implicitHeight: internalGrid.height
+
+                            source: internalGrid
+                            sourceColor: Colours.palette.m3onSurface
+                            colorizationColor: Colours.palette.m3onPrimary
+                        }
+
+                        Behavior on opacity {
+                            Anim {
+                                type: Anim.DefaultEffects
+                            }
+                        }
+
+                        Behavior on scale {
+                            Anim {
+                                type: Anim.FastSpatial
+                            }
+                        }
+
+                        Behavior on x {
+                            Anim {}
+                        }
+
+                        Behavior on y {
+                            Anim {}
+                        }
                     }
                 }
             }
 
-            MaterialShape {
-                id: todayIndicator
+            Loader {
+                id: grid1
 
-                readonly property Item todayItem: grid.contentItem.children.find(c => c.model.today) ?? null
-                property Item today
+                anchors.fill: parent
 
-                onTodayItemChanged: {
-                    if (todayItem)
-                        today = todayItem;
-                }
+                sourceComponent: gridComp
+                visible: root.activeGrid === 1 || monthChangeAnim.running
 
-                x: today ? today.x + (today.width - implicitWidth) / 2 : 0
-                y: today ? today.y - Tokens.padding.extraSmall - 1 : 0
+                transform: Translate { id: grid1Translate }
 
-                implicitSize: today ? Math.max(today.implicitWidth, today.implicitHeight) + Tokens.padding.extraSmall * 2 : 0
-                shape: MaterialShape.Sunny
+                Binding { target: grid1.item; property: "month"; value: root.month1 }
+                Binding { target: grid1.item; property: "year"; value: root.year1 }
+            }
+            
+            Loader {
+                id: grid2
 
-                clip: true
-                color: Colours.palette.m3primary
+                anchors.fill: parent
 
-                opacity: todayItem ? 1 : 0
-                scale: todayItem ? 1 : 0.7
+                sourceComponent: gridComp
+                visible: root.activeGrid === 2 || monthChangeAnim.running
 
-                Colouriser {
-                    x: -todayIndicator.x
-                    y: -todayIndicator.y
+                transform: Translate { id: grid2Translate }
 
-                    implicitWidth: grid.width
-                    implicitHeight: grid.height
-
-                    source: grid
-                    sourceColor: Colours.palette.m3onSurface
-                    colorizationColor: Colours.palette.m3onPrimary
-                }
-
-                Behavior on opacity {
-                    Anim {
-                        type: Anim.DefaultEffects
-                    }
-                }
-
-                Behavior on scale {
-                    Anim {
-                        type: Anim.FastSpatial
-                    }
-                }
-
-                Behavior on x {
-                    Anim {}
-                }
-
-                Behavior on y {
-                    Anim {}
-                }
+                Binding { target: grid2.item; property: "month"; value: root.month2 }
+                Binding { target: grid2.item; property: "year"; value: root.year2 }
             }
         }
     }
