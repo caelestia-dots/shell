@@ -97,7 +97,7 @@ StyledClippingRect {
             onClicked: event => {
                 const ws = (layout.childAt(event.x, event.y) as Workspace)?.ws;
                 if (Hypr.activeWsId !== ws)
-                    Hypr.dispatch(Hypr.usingLua ? `hl.dsp.focus({ workspace= "${ws}"})` : `workspace ${ws}`);
+                    Hypr.dispatch(Hypr.usingLua ? `hl.dsp.focus({ workspace= "${ws?.id ?? ws}"})` : `workspace ${ws}`);
                 else
                     Hypr.dispatch(Hypr.usingLua ? `hl.dsp.workspace.toggle_special({ "special" })` : `togglespecialworkspace special`);
             }
