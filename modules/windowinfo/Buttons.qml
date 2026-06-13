@@ -95,7 +95,7 @@ ColumnLayout {
                 readonly property bool isCurrent: root.client?.workspace.id === wsId
 
                 onClicked: {
-                    Hypr.dispatch(Hypr.usingLua ? `hl.dsp.window.move({ workspace = "${wsId}", follow = true })` : `movetoworkspace ${wsId},address:0x${root.client?.address}`);
+                    Hypr.dispatch(Hypr.usingLua ? `hl.dsp.window.move({ window = "address:0x${root.client?.address}", workspace = "${wsId}", follow = true })` : `movetoworkspace ${wsId},address:0x${root.client?.address}`);
                 }
 
                 color: isCurrent ? Colours.tPalette.m3surfaceContainerHighest : Colours.palette.m3tertiaryContainer
