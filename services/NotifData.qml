@@ -75,7 +75,7 @@ QtObject {
                     if (status !== Image.Ready || width != TokenConfig.sizes.notifs.image || height != TokenConfig.sizes.notifs.image)
                         return;
 
-                    const cacheKey = notif.appName + notif.summary + notif.id + notif.image;
+                    const cacheKey = notif.appName + notif.summary + notif.notificationId + notif.image;
                     let h1 = 0xdeadbeef, h2 = 0x41c6ce57, ch;
                     for (let i = 0; i < cacheKey.length; i++) {
                         ch = cacheKey.charCodeAt(i);
