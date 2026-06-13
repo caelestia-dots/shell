@@ -26,7 +26,7 @@ QtObject {
     }
 
     property Notification notification
-    property string id
+    property string notificationId
     property string summary
     property string body
     property string appIcon
@@ -220,7 +220,7 @@ QtObject {
         if (!notification)
             return;
 
-        id = notification.id;
+        notificationId = notification.id;
         summary = notification.summary;
         body = notification.body;
         appIcon = notification.appIcon;

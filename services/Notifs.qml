@@ -109,8 +109,16 @@ Singleton {
         path: `${Paths.state}/notifs.json`
         onLoaded: {
             const data = JSON.parse(text());
-            for (const notif of data)
-                root.list.push(notifComp.createObject(root, notif));
+            for (const notif of data) {
+                const properties = Object.assign({}, notif);
+
+                // Backwards compatibility for old notifications
+                if (properties.notificationId === undefined && properties.id !== undefined)
+                    properties.notificationId = properties.id;
+
+                delete properties.id;
+                root.list.push(notifComp.createObject(root, properties));
+            }
             root.list.sort((a, b) => b.time - a.time);
             root.loaded = true;
         }
