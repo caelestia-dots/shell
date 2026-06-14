@@ -84,7 +84,7 @@ Singleton {
 
     function reloadHyprRules(): void {
         if (Hypr.usingLua) {
-            const rule = `eval 'hl.layer_rule({ match = { namespace = "caelestia-drawers" }, %1 })'`;
+            const rule = `eval hl.layer_rule({ match = { namespace = "caelestia-drawers" }, %1 })`;
             Hypr.extras.batchMessage([rule.arg(`blur = ${transparency.enabled}`), rule.arg(`ignore_alpha = ${transparency.base - 0.03}`)]);
         } else {
             const str = "keyword layerrule %1 %2, match:namespace caelestia-drawers";
