@@ -9,22 +9,20 @@ ColumnLayout {
     required property string icon
     required property string title
 
-    spacing: Tokens.spacing.normal
+    spacing: Tokens.spacing.medium
     Layout.alignment: Qt.AlignHCenter
 
     MaterialIcon {
         Layout.alignment: Qt.AlignHCenter
         animate: true
         text: root.icon
-        font.pointSize: Tokens.font.size.extraLarge * 3
-        font.bold: true
+        fontStyle: Tokens.font.icon.builders.extraLarge.scale(3).weight(Font.Bold).build()
     }
 
     StyledText {
         Layout.alignment: Qt.AlignHCenter
         animate: true
         text: root.title
-        font.pointSize: Tokens.font.size.large
-        font.bold: true
+        font: Tokens.font.title.builders.medium.weight(Font.Bold).build()
     }
 }

@@ -25,6 +25,9 @@ Singleton {
     readonly property Transparency transparency: Transparency {}
     readonly property alias wallLuminance: analyser.luminance
 
+    property bool cooldownPending
+    property real lastBaseTransparency
+
     function getLuminance(c: color): real {
         if (c.r == 0 && c.g == 0 && c.b == 0)
             return 0;
@@ -80,11 +83,25 @@ Singleton {
     }
 
     function reloadHyprRules(): void {
-        const str = "keyword layerrule %1 %2, match:namespace caelestia-drawers";
-        Hypr.extras.batchMessage([str.arg("blur").arg(transparency.enabled ? 1 : 0), str.arg("ignore_alpha").arg(transparency.base - 0.03)]);
+        if (Hypr.usingLua) {
+            const rule = `eval hl.layer_rule({ match = { namespace = "caelestia-drawers" }, %1 })`;
+            Hypr.extras.batchMessage([rule.arg(`blur = ${transparency.enabled}`), rule.arg(`ignore_alpha = ${transparency.base - 0.03}`)]);
+        } else {
+            const str = "keyword layerrule %1 %2, match:namespace caelestia-drawers";
+            Hypr.extras.batchMessage([str.arg("blur").arg(transparency.enabled ? 1 : 0), str.arg("ignore_alpha").arg(transparency.base - 0.03)]);
+        }
     }
 
-    Component.onCompleted: debounceTimer.triggered()
+    function requestReloadHyprRules(): void {
+        if (cooldownTimer.running) {
+            root.cooldownPending = true;
+        } else {
+            root.reloadHyprRules();
+            cooldownTimer.restart();
+        }
+    }
+
+    Component.onCompleted: root.requestReloadHyprRules()
 
     Connections {
         function onConfigReloaded(): void {
@@ -108,10 +125,23 @@ Singleton {
     }
 
     Timer {
-        id: debounceTimer
+        id: cooldownTimer
 
-        interval: 300
-        onTriggered: root.reloadHyprRules()
+        interval: 30
+        onTriggered: {
+            if (root.cooldownPending) {
+                root.cooldownPending = false;
+                root.reloadHyprRules();
+                restart();
+            }
+        }
+    }
+
+    Timer {
+        id: cAnimCompleteTimer
+
+        interval: Tokens.anim.durations.expressiveSlowEffects
+        onTriggered: root.requestReloadHyprRules()
     }
 
     component Transparency: QtObject {
@@ -119,8 +149,19 @@ Singleton {
         readonly property real base: Math.max(0, Math.min(1, Tokens.transparency.base - (root.light ? 0.1 : 0)))
         readonly property real layers: Tokens.transparency.layers
 
-        onEnabledChanged: debounceTimer.restart()
-        onBaseChanged: debounceTimer.restart()
+        onEnabledChanged: {
+            if (enabled)
+                root.requestReloadHyprRules();
+            else
+                cAnimCompleteTimer.start();
+        }
+        onBaseChanged: {
+            if (root.lastBaseTransparency > base)
+                root.requestReloadHyprRules();
+            else
+                cAnimCompleteTimer.start();
+            root.lastBaseTransparency = base;
+        }
     }
 
     component M3TPalette: QtObject {

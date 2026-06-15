@@ -13,8 +13,8 @@ StyledRect {
     signal toggled(checked: bool)
 
     Layout.fillWidth: true
-    implicitHeight: row.implicitHeight + Tokens.padding.large * 2
-    radius: Tokens.rounding.normal
+    implicitHeight: row.implicitHeight + Tokens.padding.extraLargeIncreased
+    radius: Tokens.rounding.large
     color: Colours.layer(Colours.palette.m3surfaceContainer, 2)
 
     Behavior on implicitHeight {
@@ -28,7 +28,7 @@ StyledRect {
         anchors.right: parent.right
         anchors.verticalCenter: parent.verticalCenter
         anchors.margins: Tokens.padding.large
-        spacing: Tokens.spacing.normal
+        spacing: Tokens.spacing.medium
 
         StyledText {
             Layout.fillWidth: true

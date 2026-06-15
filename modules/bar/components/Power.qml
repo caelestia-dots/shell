@@ -8,7 +8,7 @@ Item {
 
     required property DrawerVisibilities visibilities
 
-    implicitWidth: icon.implicitHeight + Tokens.padding.small * 2
+    implicitWidth: icon.implicitHeight + Tokens.padding.small
     implicitHeight: icon.implicitHeight
 
     StateLayer {
@@ -16,7 +16,7 @@ Item {
         anchors.fill: undefined
         anchors.centerIn: parent
         implicitWidth: implicitHeight
-        implicitHeight: icon.implicitHeight + Tokens.padding.small * 2
+        implicitHeight: icon.implicitHeight + Tokens.padding.small
         radius: Tokens.rounding.full
         onClicked: root.visibilities.session = !root.visibilities.session
     }
@@ -29,7 +29,6 @@ Item {
 
         text: "power_settings_new"
         color: Colours.palette.m3error
-        font.bold: true
-        font.pointSize: Tokens.font.size.normal
+        fontStyle: Tokens.font.icon.builders.small.weight(Font.Bold).build()
     }
 }

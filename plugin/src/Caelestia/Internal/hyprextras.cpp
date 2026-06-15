@@ -90,7 +90,14 @@ void HyprExtras::applyOptions(const QVariantHash& options) {
     request.reserve(12 + options.size() * 40);
     request += QLatin1String("[[BATCH]]");
     for (auto it = options.constBegin(); it != options.constEnd(); ++it) {
-        request += QLatin1String("keyword ") + it.key() + QLatin1Char(' ') + it.value().toString() + QLatin1Char(';');
+        if (!m_usingLua) {
+            request +=
+                QLatin1String("keyword ") + it.key() + QLatin1Char(' ') + it.value().toString() + QLatin1Char(';');
+        } else {
+            auto parts = it.key().split(':');
+            request += "eval hl.config({ " + parts.join(" = { ") + " = " + it.value().toString() +
+                       QString(" }").repeated(parts.size() - 1) + " });";
+        }
     }
 
     makeRequest(request, [this](bool success, const QByteArray& res) {

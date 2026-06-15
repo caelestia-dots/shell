@@ -32,6 +32,18 @@ static float cpuSmoothstep(float edge0, float edge1, float x) {
     return t * t * (3.0f - 2.0f * t);
 }
 
+static float cornerFillFactor(float sd, float smoothFactor) {
+    // Continuous two-sided window. The corner is squared (factor -> 0) only within
+    // ±smoothFactor of the neighbour's edge (the visible junction); it keeps its full
+    // radius both far outside the neighbour and deep inside it (where it is buried and
+    // squaring would only crease the interior). C0-continuous across sd = 0 — unlike the
+    // old `if (sd >= 0)` branch, which snapped the radius full<->square (factor 1<->0) on
+    // sub-pixel motion as a corner crossed the edge, flickering the fill bridge in/out.
+    const float outside = cpuSmoothstep(0.0f, smoothFactor, sd); // 0 at edge, ->1 far outside
+    const float inside = cpuSmoothstep(0.0f, -smoothFactor, sd); // 0 at edge, ->1 deep inside
+    return std::max(outside, inside);
+}
+
 BlobShape::BlobShape(QQuickItem* parent)
     : QQuickItem(parent) {
     setFlag(ItemHasContents);
@@ -288,10 +300,12 @@ void BlobShape::updatePolish() {
     // Pre-compute effective per-corner radii (moves O(N²) work from GPU to CPU)
     const float smoothFactor = pad;
     constexpr float minR = 2.0f;
+    const bool cornerFill = m_group->cornerFill();
     const auto rectCount = m_cachedRects.size();
     for (qsizetype i = 0; i < rectCount; ++i) {
         auto& ri = m_cachedRects[i];
         const int riExcludeMask = ri.excludeMask;
+        BlobShape* const si = rectShapes[i];
         float fTr = 1.0f, fBr = 1.0f, fBl = 1.0f, fTl = 1.0f;
 
         const float cTrX = ri.cx + ri.hw, cTrY = ri.cy - ri.hh;
@@ -299,19 +313,28 @@ void BlobShape::updatePolish() {
         const float cBlX = ri.cx - ri.hw, cBlY = ri.cy + ri.hh;
         const float cTlX = ri.cx - ri.hw, cTlY = ri.cy - ri.hh;
 
-        for (qsizetype j = 0; j < rectCount; ++j) {
+        for (qsizetype j = 0; cornerFill && j < rectCount; ++j) {
             if (j == i)
                 continue;
             if (riExcludeMask & (1 << j))
                 continue;
+            BlobShape* const sj = rectShapes[j];
+            if (si->isCornerExcluded(sj) || sj->isCornerExcluded(si))
+                continue;
             const auto& rj = m_cachedRects[j];
-            fTr = std::min(fTr, cpuSmoothstep(0.0f, smoothFactor, cpuSdBox(cTrX, cTrY, rj.cx, rj.cy, rj.hw, rj.hh)));
-            fBr = std::min(fBr, cpuSmoothstep(0.0f, smoothFactor, cpuSdBox(cBrX, cBrY, rj.cx, rj.cy, rj.hw, rj.hh)));
-            fBl = std::min(fBl, cpuSmoothstep(0.0f, smoothFactor, cpuSdBox(cBlX, cBlY, rj.cx, rj.cy, rj.hw, rj.hh)));
-            fTl = std::min(fTl, cpuSmoothstep(0.0f, smoothFactor, cpuSdBox(cTlX, cTlY, rj.cx, rj.cy, rj.hw, rj.hh)));
+            // Square each corner only near rj's edge; keep full radius far outside AND
+            // deep inside rj (buried, so it can't crease the visible junction).
+            const float sdTr = cpuSdBox(cTrX, cTrY, rj.cx, rj.cy, rj.hw, rj.hh);
+            const float sdBr = cpuSdBox(cBrX, cBrY, rj.cx, rj.cy, rj.hw, rj.hh);
+            const float sdBl = cpuSdBox(cBlX, cBlY, rj.cx, rj.cy, rj.hw, rj.hh);
+            const float sdTl = cpuSdBox(cTlX, cTlY, rj.cx, rj.cy, rj.hw, rj.hh);
+            fTr = std::min(fTr, cornerFillFactor(sdTr, smoothFactor));
+            fBr = std::min(fBr, cornerFillFactor(sdBr, smoothFactor));
+            fBl = std::min(fBl, cornerFillFactor(sdBl, smoothFactor));
+            fTl = std::min(fTl, cornerFillFactor(sdTl, smoothFactor));
         }
 
-        if (m_cachedHasInverted) {
+        if (cornerFill && m_cachedHasInverted) {
             const float icx = m_cachedInvertedInner[0];
             const float icy = m_cachedInvertedInner[1];
             const float ihw = m_cachedInvertedInner[2];
