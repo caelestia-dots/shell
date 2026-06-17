@@ -28,12 +28,16 @@ Scope {
 
     Connections {
         function onPercentageChanged(): void {
-            if (!UPower.onBattery)
-                return;
+            // if (!UPower.onBattery)
+            //     return;
 
             const p = UPower.displayDevice.percentage * 100;
             for (const level of root.warnLevels) {
-                if (p <= level.level && !level.warned) {
+                if (p >= level.level && !level.warned && level.chargeWarning){
+                    level.warned = true;
+                    Toaster.toast(level.title ?? qsTr("Charge warning"), level.message ?? qsTr("Battery level is high"), level.icon ?? 'battery_android_alert', level.critical ? Toast.Error : Toast.Warning);
+                }
+                if (p <= level.level && !level.warned && !level.chargeWarning) {
                     level.warned = true;
                     Toaster.toast(level.title ?? qsTr("Battery warning"), level.message ?? qsTr("Battery level is low"), level.icon ?? "battery_android_alert", level.critical ? Toast.Error : Toast.Warning);
                 }
