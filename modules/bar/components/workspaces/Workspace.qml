@@ -35,6 +35,7 @@ ColumnLayout {
         Layout.alignment: Qt.AlignHCenter | Qt.AlignTop
         Layout.preferredHeight: Tokens.sizes.bar.innerWidth - Tokens.padding.small
 
+        visible: Config.bar.workspaces.showOccupiedIcon || !root.isOccupied
         animate: true
         text: {
             const ws = Hypr.workspaces.values.find(w => w.id === root.ws);
@@ -62,7 +63,7 @@ ColumnLayout {
 
         Layout.alignment: Qt.AlignHCenter
         Layout.fillHeight: true
-        Layout.topMargin: -Tokens.sizes.bar.innerWidth / 10
+        Layout.topMargin: Config.bar.workspaces.showOccupiedIcon || !root.isOccupied ? -Tokens.sizes.bar.innerWidth / 10 : Tokens.padding.extraSmall
 
         visible: active
         active: root.hasWindows

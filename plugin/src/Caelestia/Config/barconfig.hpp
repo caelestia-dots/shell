@@ -47,6 +47,7 @@ class BarWorkspaces : public ConfigObject {
     CONFIG_PROPERTY(bool, showWindowsOnSpecialWorkspaces, true)
     CONFIG_PROPERTY(int, maxWindowIcons, 5)
     CONFIG_PROPERTY(bool, activeTrail, false)
+    CONFIG_PROPERTY(bool, showOccupiedIcon, true)
     CONFIG_GLOBAL_PROPERTY(bool, perMonitorWorkspaces, true)
     CONFIG_PROPERTY(QString, label, u"  "_s)
     CONFIG_PROPERTY(QString, occupiedLabel, u"󰮯"_s)
