@@ -75,7 +75,7 @@ endif()
 if("m3shapes" IN_LIST ENABLE_MODULES)
     message(STATUS "Fetching M3Shapes module")
     include(FetchContent)
-    set(M3SHAPES_REV eb93964ab8583ae21c3a0bb9897f96ef9a1b5377)
+    set(M3SHAPES_REV bdc327b29f95394a732baf3c9b19658ba23755b6)
     FetchContent_Declare(
         m3shapes_external
         GIT_REPOSITORY https://github.com/soramanew/m3shapes.git

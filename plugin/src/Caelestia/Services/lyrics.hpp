@@ -107,6 +107,7 @@ private:
     [[nodiscard]] static QString backendKey(LyricsBackend::Backend value);
     [[nodiscard]] static LyricsBackend::Backend backendFromKey(const QString& key);
 
+    [[nodiscard]] static const QString& stateDir();
     [[nodiscard]] static const QString& cacheDir();
     [[nodiscard]] static QString cachePathFor(LyricsBackend::Backend backend, const QString& id);
     [[nodiscard]] static QString readCachedLrc(LyricsBackend::Backend backend, const QString& id);
