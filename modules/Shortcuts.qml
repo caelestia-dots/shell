@@ -64,8 +64,7 @@ Scope {
         // qmllint enable unresolved-type
         name: "launcher"
         description: "Toggle launcher"
-        onPressed: root.launcherInterrupted = false
-        onReleased: {
+        onPressed: {
             if (!root.launcherInterrupted && !root.hasFullscreen) {
                 const visibilities = Visibilities.getForActive();
                 visibilities.launcher = !visibilities.launcher;
