@@ -78,7 +78,6 @@ Dependencies:
 -   [`quickshell-git`](https://quickshell.outfoxxed.me) - this has to be the git version, not the latest tagged version
 -   [`ddcutil`](https://github.com/rockowitz/ddcutil)
 -   [`brightnessctl`](https://github.com/Hummer12007/brightnessctl)
--   [`app2unit`](https://github.com/Vladimir-csp/app2unit)
 -   [`libcava`](https://github.com/LukashonakV/cava)
 -   [`networkmanager`](https://networkmanager.dev)
 -   [`lm-sensors`](https://github.com/lm-sensors/lm-sensors)

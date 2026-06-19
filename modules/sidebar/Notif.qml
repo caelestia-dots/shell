@@ -2,7 +2,6 @@ pragma ComponentBehavior: Bound
 
 import QtQuick
 import QtQuick.Layouts
-import Quickshell
 import Caelestia.Config
 import qs.components
 import qs.services
@@ -141,7 +140,7 @@ StyledRect {
             wrapMode: Text.WordWrap
 
             onLinkActivated: link => {
-                Quickshell.execDetached(["app2unit", "-O", "--", link]);
+                Qt.openUrlExternally(link);
                 root.visibilities.sidebar = false;
             }
         }
