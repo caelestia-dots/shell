@@ -320,6 +320,10 @@ class NexusTokens : public ConfigObject {
     CONFIG_PROPERTY(int, minWidth, 800)
     CONFIG_PROPERTY(int, minHeight, 500)
     CONFIG_PROPERTY(int, maxNavWidth, 600)
+    CONFIG_PROPERTY(int, maxContentWidth, 800)
+    CONFIG_PROPERTY(int, popupWidth, 300)
+    CONFIG_PROPERTY(int, minPopupHeight, 200)
+    CONFIG_PROPERTY(int, maxPopupHeight, 800)
 
 public:
     explicit NexusTokens(QObject* parent = nullptr)

@@ -78,14 +78,27 @@ PageBase {
             }
         }
 
-        // Polling
+        // Notifications
         SectionHeader {
             first: true
+            text: qsTr("Notifications")
+        }
+
+        NavRow {
+            first: true
+            last: true
+            icon: "notifications"
+            label: qsTr("Notifications")
+            status: qsTr("Notifications, toasts, timeouts")
+            onClicked: root.nState.openSubPage(1)
+        }
+
+        // Polling
+        SectionHeader {
             text: qsTr("Polling")
         }
 
         StepperRow {
-            Layout.fillWidth: true
             first: true
             label: qsTr("Media refresh")
             subtext: qsTr("How often the media position updates (ms)")
@@ -97,7 +110,6 @@ PageBase {
         }
 
         StepperRow {
-            Layout.fillWidth: true
             label: qsTr("System stats refresh")
             subtext: qsTr("CPU, memory and GPU update interval (seconds)")
             value: GlobalConfig.dashboard.resourceUpdateInterval / 1000
@@ -108,7 +120,6 @@ PageBase {
         }
 
         StepperRow {
-            Layout.fillWidth: true
             last: true
             label: qsTr("Wi-Fi rescan")
             subtext: qsTr("How often available networks are rescanned (seconds)")
@@ -125,7 +136,6 @@ PageBase {
         }
 
         SelectRow {
-            Layout.fillWidth: true
             first: true
             label: qsTr("Lyrics backend")
             subtext: qsTr("Source used to fetch synced lyrics")
@@ -135,7 +145,6 @@ PageBase {
         }
 
         SelectRow {
-            Layout.fillWidth: true
             last: true
             label: qsTr("Default player")
             subtext: qsTr("Preferred media player when several are open")
@@ -152,7 +161,6 @@ PageBase {
         }
 
         StepperRow {
-            Layout.fillWidth: true
             first: true
             label: qsTr("Volume step")
             subtext: qsTr("Amount the volume changes per scroll (%)")
@@ -164,7 +172,6 @@ PageBase {
         }
 
         StepperRow {
-            Layout.fillWidth: true
             label: qsTr("Brightness step")
             subtext: qsTr("Amount the brightness changes per scroll (%)")
             value: Math.round(GlobalConfig.services.brightnessIncrement * 100)
@@ -175,7 +182,6 @@ PageBase {
         }
 
         StepperRow {
-            Layout.fillWidth: true
             last: true
             label: qsTr("Max volume")
             subtext: qsTr("Upper limit for output volume (%)")
@@ -192,7 +198,6 @@ PageBase {
         }
 
         StepperRow {
-            Layout.fillWidth: true
             first: true
             label: qsTr("Visualiser bars")
             subtext: qsTr("Number of bars in the audio visualisers")
@@ -204,7 +209,6 @@ PageBase {
         }
 
         ToggleRow {
-            Layout.fillWidth: true
             text: qsTr("Smart colour scheme")
             subtext: qsTr("Derive theme mode and variant from the wallpaper")
             checked: GlobalConfig.services.smartScheme
@@ -212,7 +216,6 @@ PageBase {
         }
 
         SelectRow {
-            Layout.fillWidth: true
             last: true
             label: qsTr("GPU")
             subtext: Gpu.name ? qsTr("Monitoring: %1").arg(Gpu.name) : qsTr("Override for GPU type")

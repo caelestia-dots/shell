@@ -48,7 +48,6 @@ PageBase {
         }
 
         ToggleRow {
-            Layout.fillWidth: true
             first: true
             text: qsTr("Wi-Fi")
             font: Tokens.font.body.medium
@@ -134,7 +133,7 @@ PageBase {
                     MaterialIcon {
                         text: Icons.getNetworkIcon(network.modelData.strength)
                         color: network.modelData.active ? Colours.palette.m3primary : Colours.palette.m3onSurfaceVariant
-                        font: Tokens.font.icon.medium
+                        fontStyle: Tokens.font.icon.medium
                         opacity: network.textOpacity
                     }
 
@@ -152,7 +151,7 @@ PageBase {
 
                         StyledText {
                             Layout.fillWidth: true
-                            text: qsTr("Security: %1%2").arg(network.modelData.security).arg(Nmcli.hasSavedProfile(network.modelData.ssid) ? qsTr(" • Saved") : "")
+                            text: qsTr("Security: %1%2").arg(network.modelData.security).arg(network.modelData.active ? qsTr(" • Connected") : Nmcli.hasSavedProfile(network.modelData.ssid) ? qsTr(" • Saved") : "")
                             color: Colours.palette.m3outline
                             font: Tokens.font.label.small
                             elide: Text.ElideRight
@@ -168,7 +167,7 @@ PageBase {
                             MaterialIcon {
                                 text: network.modelData.active ? "settings" : "lock"
                                 color: network.modelData.active ? Colours.palette.m3primary : Colours.palette.m3onSurfaceVariant
-                                font: Tokens.font.icon.medium
+                                fontStyle: Tokens.font.icon.medium
                                 opacity: network.textOpacity
                             }
                         }
@@ -220,7 +219,7 @@ PageBase {
 
                 MaterialIcon {
                     text: "add"
-                    font: Tokens.font.icon.medium
+                    fontStyle: Tokens.font.icon.medium
                 }
 
                 StyledText {

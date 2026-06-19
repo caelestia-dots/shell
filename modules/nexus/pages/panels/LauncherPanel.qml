@@ -25,7 +25,6 @@ PageBase {
         }
 
         ToggleRow {
-            Layout.fillWidth: true
             first: true
             text: qsTr("Enabled")
             checked: Config.launcher.enabled
@@ -33,7 +32,6 @@ PageBase {
         }
 
         ToggleRow {
-            Layout.fillWidth: true
             last: true
             text: qsTr("Show on hover")
             subtext: qsTr("Reveal when the cursor reaches the screen edge")
@@ -47,7 +45,6 @@ PageBase {
         }
 
         StepperRow {
-            Layout.fillWidth: true
             first: true
             label: qsTr("Max items shown")
             value: Config.launcher.maxShown
@@ -58,7 +55,6 @@ PageBase {
         }
 
         StepperRow {
-            Layout.fillWidth: true
             label: qsTr("Max wallpapers")
             value: Config.launcher.maxWallpapers
             from: 1
@@ -68,7 +64,6 @@ PageBase {
         }
 
         StepperRow {
-            Layout.fillWidth: true
             last: true
             label: qsTr("Drag threshold")
             subtext: qsTr("Pixels dragged before the launcher opens")
@@ -85,7 +80,6 @@ PageBase {
         }
 
         ToggleRow {
-            Layout.fillWidth: true
             first: true
             text: qsTr("Vim keybinds")
             subtext: qsTr("Navigate results with Ctrl+hjkl")
@@ -94,7 +88,6 @@ PageBase {
         }
 
         ToggleRow {
-            Layout.fillWidth: true
             last: true
             text: qsTr("Enable dangerous actions")
             subtext: qsTr("Allow actions that shut down or log out")
@@ -108,7 +101,6 @@ PageBase {
         }
 
         ToggleRow {
-            Layout.fillWidth: true
             first: true
             text: qsTr("Apps")
             checked: GlobalConfig.launcher.useFuzzy.apps
@@ -116,28 +108,24 @@ PageBase {
         }
 
         ToggleRow {
-            Layout.fillWidth: true
             text: qsTr("Actions")
             checked: GlobalConfig.launcher.useFuzzy.actions
             onToggled: GlobalConfig.launcher.useFuzzy.actions = checked
         }
 
         ToggleRow {
-            Layout.fillWidth: true
             text: qsTr("Schemes")
             checked: GlobalConfig.launcher.useFuzzy.schemes
             onToggled: GlobalConfig.launcher.useFuzzy.schemes = checked
         }
 
         ToggleRow {
-            Layout.fillWidth: true
             text: qsTr("Variants")
             checked: GlobalConfig.launcher.useFuzzy.variants
             onToggled: GlobalConfig.launcher.useFuzzy.variants = checked
         }
 
         ToggleRow {
-            Layout.fillWidth: true
             last: true
             text: qsTr("Wallpapers")
             checked: GlobalConfig.launcher.useFuzzy.wallpapers
