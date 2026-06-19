@@ -56,6 +56,7 @@ Singleton {
     readonly property string connectionParamSsid: "ssid"
     readonly property string connectionParamPassword: "password"
     readonly property string connectionParamBssid: "802-11-wireless.bssid"
+    readonly property string connectionParamHidden: "802-11-wireless.hidden"
 
     signal connectionFailed(string ssid)
 
@@ -570,6 +571,220 @@ Singleton {
         return hasConnectionName;
     }
 
+    // Adds and connects to a hidden SSID (one that doesn't broadcast). The
+    // profile is created with 802-11-wireless.hidden=yes so NetworkManager
+    // actively probes for it.
+    function addHiddenNetwork(ssid: string, password: string, security: string, callback: var): void {
+        if (!ssid || ssid.length === 0) {
+            if (callback)
+                callback({
+                    success: false,
+                    output: "",
+                    error: "No SSID specified",
+                    exitCode: -1
+                });
+            return;
+        }
+
+        const isSecure = security && security !== "none";
+
+        // Remove any stale profile with the same name first so we don't collide.
+        checkAndDeleteConnection(ssid, () => {
+            let cmd = [root.nmcliCommandConnection, "add", root.connectionParamType, root.deviceTypeWifi, root.connectionParamConName, ssid, root.connectionParamIfname, "*", root.connectionParamSsid, ssid, root.connectionParamHidden, "yes"];
+
+            if (isSecure) {
+                cmd.push(root.securityKeyMgmt, root.keyMgmtWpaPsk, root.securityPsk, password);
+            }
+
+            executeCommand(cmd, result => {
+                if (result.success) {
+                    loadSavedConnections(() => {});
+                    activateConnection(ssid, callback);
+                } else {
+                    const hasDuplicateWarning = result.error && (result.error.includes("another connection with the name") || result.error.includes("Reference the connection by its uuid"));
+
+                    if (hasDuplicateWarning) {
+                        loadSavedConnections(() => {});
+                        activateConnection(ssid, callback);
+                    } else if (callback) {
+                        callback(result);
+                    }
+                }
+            });
+        });
+    }
+
+    // Reads whether a saved connection auto-connects.
+    function getAutoconnect(connectionName: string, callback: var): void {
+        if (!connectionName || connectionName.length === 0) {
+            if (callback)
+                callback(true);
+            return;
+        }
+        executeCommand(["-t", "-f", "connection.autoconnect", root.nmcliCommandConnection, "show", connectionName], result => {
+            let auto = true;
+            if (result.success) {
+                const line = result.output.trim();
+                const idx = line.indexOf(":");
+                if (idx >= 0)
+                    auto = line.slice(idx + 1).trim() !== "no";
+            }
+            if (callback)
+                callback(auto);
+        });
+    }
+
+    // Toggles auto-connect for a saved connection. When turned OFF, also makes
+    // NetworkManager ask for the password on the next manual connect instead of
+    // silently reusing the stored one (psk-flags 2 = "not saved, always ask");
+    // turning it back ON restores psk-flags 0 so the next password is saved.
+    function setAutoconnect(connectionName: string, enabled: bool, callback: var): void {
+        if (!connectionName || connectionName.length === 0) {
+            if (callback)
+                callback({
+                    success: false,
+                    output: "",
+                    error: "No connection specified",
+                    exitCode: -1
+                });
+            return;
+        }
+
+        let cmd = [root.nmcliCommandConnection, "modify", connectionName, "connection.autoconnect", enabled ? "yes" : "no"];
+
+        if (enabled) {
+            cmd.push("802-11-wireless-security.psk-flags", "0");
+        } else {
+            cmd.push("802-11-wireless-security.psk-flags", "2");
+            cmd.push("802-11-wireless-security.psk", "");
+        }
+
+        executeCommand(cmd, result => {
+            // For open networks the security fields don't exist; nmcli then
+            // errors. Retry with just the autoconnect change so it still works.
+            if (!result.success && result.error && (result.error.includes("802-11-wireless-security") || result.error.includes("is not a valid property") || result.error.includes("Error: invalid"))) {
+                executeCommand([root.nmcliCommandConnection, "modify", connectionName, "connection.autoconnect", enabled ? "yes" : "no"], retryResult => {
+                    if (callback)
+                        callback(retryResult);
+                });
+                return;
+            }
+            if (callback)
+                callback(result);
+        });
+    }
+
+    // Reads the IPv4 configuration (method, address, gateway, DNS, autoconnect)
+    // of a connection profile.
+    function getIpv4Config(connectionName: string, callback: var): void {
+        if (!connectionName || connectionName.length === 0) {
+            if (callback)
+                callback(null);
+            return;
+        }
+
+        executeCommand(["-t", "-f", "ipv4.method,ipv4.addresses,ipv4.gateway,ipv4.dns,ipv4.ignore-auto-dns,connection.autoconnect", root.nmcliCommandConnection, "show", connectionName], result => {
+            if (!result.success) {
+                if (callback)
+                    callback(null);
+                return;
+            }
+
+            const cfg = {
+                method: "auto",
+                address: "",
+                gateway: "",
+                dns: "",
+                ignoreAutoDns: false,
+                autoconnect: true
+            };
+
+            const lines = result.output.trim().split("\n");
+            for (const line of lines) {
+                const idx = line.indexOf(":");
+                if (idx < 0)
+                    continue;
+                const key = line.slice(0, idx).trim();
+                const value = line.slice(idx + 1).trim();
+
+                if (key === "ipv4.ignore-auto-dns")
+                    cfg.ignoreAutoDns = value === "yes";
+                else if (key === "connection.autoconnect")
+                    cfg.autoconnect = value !== "no";
+
+                if (value === "" || value === "--")
+                    continue;
+
+                if (key === "ipv4.method")
+                    cfg.method = value;
+                else if (key === "ipv4.addresses")
+                    cfg.address = value.split(",")[0].trim();
+                else if (key === "ipv4.gateway")
+                    cfg.gateway = value;
+                else if (key === "ipv4.dns")
+                    cfg.dns = value.replace(/;\s*$/, "").split(/[;,]/).map(d => d.trim()).filter(d => d.length > 0).join(", ");
+            }
+
+            if (cfg.method === "auto" && cfg.ignoreAutoDns)
+                cfg.method = "auto-dns";
+
+            if (callback)
+                callback(cfg);
+        });
+    }
+
+    // Writes an IPv4 configuration to a connection profile and reactivates it.
+    function setIpv4Config(connectionName: string, config: var, callback: var): void {
+        if (!connectionName || connectionName.length === 0) {
+            if (callback)
+                callback({
+                    success: false,
+                    output: "",
+                    error: "No connection specified",
+                    exitCode: -1
+                });
+            return;
+        }
+
+        const dnsList = (config.dns ?? "").split(",").map(d => d.trim()).filter(d => d.length > 0).join(" ");
+        let cmd = [root.nmcliCommandConnection, "modify", connectionName];
+
+        if (config.method === "manual") {
+            cmd.push("ipv4.method", "manual");
+            cmd.push("ipv4.addresses", config.address ?? "");
+            cmd.push("ipv4.gateway", config.gateway ?? "");
+            cmd.push("ipv4.dns", dnsList);
+            cmd.push("ipv4.ignore-auto-dns", "yes");
+        } else if (config.method === "auto-dns") {
+            cmd.push("ipv4.method", "auto");
+            cmd.push("ipv4.addresses", "");
+            cmd.push("ipv4.gateway", "");
+            cmd.push("ipv4.dns", dnsList);
+            cmd.push("ipv4.ignore-auto-dns", "yes");
+        } else {
+            cmd.push("ipv4.method", "auto");
+            cmd.push("ipv4.addresses", "");
+            cmd.push("ipv4.gateway", "");
+            cmd.push("ipv4.dns", "");
+            cmd.push("ipv4.ignore-auto-dns", "no");
+        }
+
+        executeCommand(cmd, result => {
+            if (!result.success) {
+                if (callback)
+                    callback(result);
+                return;
+            }
+            executeCommand([root.nmcliCommandConnection, "up", connectionName], upResult => {
+                Qt.callLater(() => {
+                    refreshOnConnectionChange();
+                });
+                if (callback)
+                    callback(upResult);
+            });
+        });
+    }
+
     function forgetNetwork(ssid: string, callback: var): void {
         if (!ssid || ssid.length === 0) {
             if (callback)
@@ -750,6 +965,10 @@ Singleton {
                     callback(root.wifiEnabled);
             }
         });
+    }
+
+    function findNetwork(ssid: string): var {
+        return networks.find(n => n.ssid === ssid) ?? null;
     }
 
     function getNetworks(callback: var): void {
