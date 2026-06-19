@@ -59,6 +59,10 @@ PageBase {
         ItemList {
             id: networkList
 
+            // Two columns on wide panels, but only when there's more than one
+            // network to show — a lone SSID stays full-width.
+            columns: width > 620 && Nmcli.networks.length > 1 ? 2 : 1 // qmllint disable missing-property
+
             showList: Nmcli.wifiEnabled
             placeholderIcon: Nmcli.wifiEnabled ? "wifi_find" : "signal_wifi_off"
             placeholderText: Nmcli.wifiEnabled ? qsTr("No networks found") : qsTr("Wi-Fi disabled")
@@ -80,11 +84,15 @@ PageBase {
                 required property Nmcli.AccessPoint modelData
                 property bool currentSelected
                 property real textOpacity: disabled ? 0.5 : 1
+                readonly property bool gridMode: networkList.columns > 1
 
                 disabled: currentSelected || Nmcli.connectingSsid() === modelData.ssid
 
-                anchors.left: networkList.list.contentItem.left
-                anchors.right: networkList.list.contentItem.right
+                // Size to the view's cell (grid) or full width (list) instead of
+                // anchoring to the ListView contentItem, which isn't a sibling in
+                // grid mode and triggers an anchor warning.
+                width: gridMode ? (GridView.view?.cellWidth ?? 0) : (ListView.view?.width ?? 0)
+                height: gridMode ? (GridView.view?.cellHeight ?? 0) : implicitHeight
                 implicitHeight: networkLayout.implicitHeight + networkLayout.anchors.margins * 2
                 radius: Tokens.rounding.extraSmall
                 anchors.fill: undefined
@@ -156,6 +164,17 @@ PageBase {
                             font: Tokens.font.label.small
                             elide: Text.ElideRight
                         }
+                    }
+
+                    // Thin vertical separator before the trailing icon, shown
+                    // only for the connected network.
+                    StyledRect {
+                        Layout.alignment: Qt.AlignVCenter
+                        visible: network.modelData.active
+                        implicitWidth: 1
+                        implicitHeight: Math.round(Tokens.font.icon.medium.pointSize * 1.4)
+                        color: Colours.palette.m3outlineVariant
+                        opacity: network.textOpacity * 0.6
                     }
 
                     AnimLoader {

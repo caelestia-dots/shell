@@ -13,13 +13,21 @@ ConnectedRect {
     property string placeholderIcon
     property string placeholderText
     property int extraHeight
+    // Number of columns. 1 (default) keeps the original single-column ListView
+    // so existing usages are unaffected. >1 switches to a grid.
+    property int columns: 1
+    // Fixed row height used in grid (multi-column) mode.
+    property int gridCellHeight: Math.round(Tokens.font.body.medium.pointSize * 2 + Tokens.font.label.small.pointSize * 2 + Tokens.padding.medium * 2)
 
     property alias model: list.model
     property alias delegate: list.delegate
     readonly property alias list: list
 
+    readonly property int contentCount: root.columns > 1 ? grid.count : list.count
+    readonly property real activeContentHeight: root.columns > 1 ? grid.contentHeight : list.contentHeight
+
     Layout.fillWidth: true
-    implicitHeight: (showList && list.count > 0 ? list.contentHeight : placeholder.implicitHeight + Tokens.padding.extraLarge * 2) + extraHeight
+    implicitHeight: (showList && contentCount > 0 ? activeContentHeight : placeholder.implicitHeight + Tokens.padding.extraLarge * 2) + extraHeight
     color: Colours.tPalette.m3surfaceContainer
     clip: true
 
@@ -32,7 +40,7 @@ ConnectedRect {
 
         anchors.centerIn: parent
         active: opacity > 0
-        opacity: root.showList && list.count > 0 ? 0 : 1
+        opacity: root.showList && root.contentCount > 0 ? 0 : 1
 
         sourceComponent: ColumnLayout {
             spacing: Tokens.spacing.extraSmall
@@ -69,9 +77,10 @@ ConnectedRect {
         anchors.top: parent.top
         anchors.bottom: parent.bottom
 
+        visible: root.columns <= 1
         spacing: 0
         interactive: false
-        opacity: root.showList ? 1 : 0
+        opacity: root.showList && root.columns <= 1 ? 1 : 0
 
         add: Transition {
             Anim {
@@ -111,6 +120,30 @@ ConnectedRect {
                 property: "y"
             }
         }
+
+        Behavior on opacity {
+            Anim {
+                type: Anim.DefaultEffects
+            }
+        }
+    }
+
+    GridView {
+        id: grid
+
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.top: parent.top
+        anchors.bottom: parent.bottom
+
+        visible: root.columns > 1
+        interactive: false
+        opacity: root.showList && root.columns > 1 ? 1 : 0
+
+        cellWidth: width / Math.max(1, root.columns)
+        cellHeight: root.gridCellHeight
+        model: root.columns > 1 ? list.model : null
+        delegate: list.delegate
 
         Behavior on opacity {
             Anim {
