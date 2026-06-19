@@ -13,6 +13,17 @@ Item {
     id: root
 
     required property DrawerVisibilities visibilities
+    readonly property bool needsKeyboard: {
+        const count = repeater.count;
+        for (let i = 0; i < count; i++) {
+            const item = repeater.itemAt(i) as Loader;
+            if (item?.sourceComponent === mediaComponent && (item?.item as MediaWrapper)?.needsKeyboard)
+                return true;
+            if (item?.sourceComponent === pomodoroComponent && (item?.item as Pomodoro)?.needsKeyboard)
+                return true;
+        }
+        return false;
+    }
     required property DashboardState dashState
     required property FileDialog facePicker
 
@@ -29,6 +40,12 @@ Item {
                 iconName: "queue_music",
                 text: qsTr("Media"),
                 enabled: Config.dashboard.showMedia
+            },
+            {
+                component: pomodoroComponent,
+                iconName: "timer",
+                text: qsTr("Pomodoro"),
+                enabled: true
             },
             {
                 component: performanceComponent,
@@ -169,6 +186,12 @@ Item {
                 Media {
                     visibilities: root.visibilities
                 }
+            }
+
+            Component {
+                id: pomodoroComponent
+
+                Pomodoro {}
             }
 
             Component {
