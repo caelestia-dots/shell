@@ -27,6 +27,7 @@ Singleton {
     property var pendingConnection: null
     property var wirelessDeviceDetails: null
     property var ethernetDeviceDetails: null
+    property string ethernetDataUsage: ""
     property list<var> ethernetDevices: []
     readonly property var activeEthernet: ethernetDevices.find(d => d.connected) ?? null
     property list<var> activeProcesses: []
@@ -235,10 +236,25 @@ Singleton {
             }
 
             root.ethernetInterfaces = interfaces;
-            root.ethernetDevices = devices;
+            // Only reassign when the device list actually changed; reassigning an
+            // equal array forces the Repeater to rebuild and flashes the section.
+            if (!root._sameEthernetDevices(root.ethernetDevices, devices))
+                root.ethernetDevices = devices;
             if (callback)
                 callback(interfaces);
         });
+    }
+
+    // True when two ethernet device lists are equivalent for the UI (same
+    // interfaces in the same state), so a redundant reassignment can be skipped.
+    function _sameEthernetDevices(a: var, b: var): bool {
+        if (!a || !b || a.length !== b.length)
+            return false;
+        for (let i = 0; i < a.length; i++) {
+            if (a[i].interface !== b[i].interface || a[i].state !== b[i].state || a[i].connected !== b[i].connected || a[i].connection !== b[i].connection)
+                return false;
+        }
+        return true;
     }
 
     function connectEthernet(connectionName: string, interfaceName: string, callback: var): void {
@@ -952,6 +968,149 @@ Singleton {
         });
     }
 
+    // Reads the IPv4 configuration (method, address, gateway, DNS, autoconnect)
+    // of a connection profile for the ethernet detail page.
+    function getIpv4Config(connectionName: string, callback: var): void {
+        if (!connectionName || connectionName.length === 0) {
+            if (callback)
+                callback(null);
+            return;
+        }
+
+        executeCommand(["-t", "-f", "ipv4.method,ipv4.addresses,ipv4.gateway,ipv4.dns,ipv4.ignore-auto-dns,connection.autoconnect", root.nmcliCommandConnection, "show", connectionName], result => {
+            if (!result.success) {
+                if (callback)
+                    callback(null);
+                return;
+            }
+
+            const cfg = {
+                method: "auto",
+                address: "",
+                gateway: "",
+                dns: "",
+                ignoreAutoDns: false,
+                autoconnect: true
+            };
+
+            const lines = result.output.trim().split("\n");
+            for (const line of lines) {
+                const idx = line.indexOf(":");
+                if (idx < 0)
+                    continue;
+                const key = line.slice(0, idx).trim();
+                const value = line.slice(idx + 1).trim();
+
+                if (key === "ipv4.ignore-auto-dns")
+                    cfg.ignoreAutoDns = value === "yes";
+                else if (key === "connection.autoconnect")
+                    cfg.autoconnect = value !== "no";
+
+                if (value === "" || value === "--")
+                    continue;
+
+                if (key === "ipv4.method")
+                    cfg.method = value;
+                else if (key === "ipv4.addresses")
+                    cfg.address = value.split(",")[0].trim(); // first addr (CIDR)
+                else if (key === "ipv4.gateway")
+                    cfg.gateway = value;
+                else if (key === "ipv4.dns")
+                    cfg.dns = value.replace(/;\s*$/, "").split(/[;,]/).map(d => d.trim()).filter(d => d.length > 0).join(", ");
+            }
+
+            // Distinguish "automatic + custom DNS only" from plain DHCP.
+            if (cfg.method === "auto" && cfg.ignoreAutoDns)
+                cfg.method = "auto-dns";
+
+            if (callback)
+                callback(cfg);
+        });
+    }
+
+    // Writes an IPv4 configuration to a connection profile and reactivates it so
+    // the change takes effect immediately.
+    function setIpv4Config(connectionName: string, config: var, callback: var): void {
+        if (!connectionName || connectionName.length === 0) {
+            if (callback)
+                callback({
+                    success: false,
+                    output: "",
+                    error: "No connection specified",
+                    exitCode: -1
+                });
+            return;
+        }
+
+        const dnsList = (config.dns ?? "").split(",").map(d => d.trim()).filter(d => d.length > 0).join(" ");
+        let cmd = [root.nmcliCommandConnection, "modify", connectionName];
+
+        if (config.method === "manual") {
+            cmd.push("ipv4.method", "manual");
+            cmd.push("ipv4.addresses", config.address ?? "");
+            cmd.push("ipv4.gateway", config.gateway ?? "");
+            cmd.push("ipv4.dns", dnsList);
+            cmd.push("ipv4.ignore-auto-dns", "yes");
+        } else if (config.method === "auto-dns") {
+            // DHCP addressing, custom DNS only.
+            cmd.push("ipv4.method", "auto");
+            cmd.push("ipv4.addresses", "");
+            cmd.push("ipv4.gateway", "");
+            cmd.push("ipv4.dns", dnsList);
+            cmd.push("ipv4.ignore-auto-dns", "yes");
+        } else {
+            // Full DHCP: clear manual fields and re-enable auto DNS.
+            cmd.push("ipv4.method", "auto");
+            cmd.push("ipv4.addresses", "");
+            cmd.push("ipv4.gateway", "");
+            cmd.push("ipv4.dns", "");
+            cmd.push("ipv4.ignore-auto-dns", "no");
+        }
+
+        executeCommand(cmd, result => {
+            if (!result.success) {
+                if (callback)
+                    callback(result);
+                return;
+            }
+            // Reactivate so changes take effect immediately.
+            executeCommand([root.nmcliCommandConnection, "up", connectionName], upResult => {
+                Qt.callLater(() => {
+                    refreshOnConnectionChange();
+                });
+                if (callback)
+                    callback(upResult);
+            });
+        });
+    }
+
+    // Reads cumulative since-boot byte counters from sysfs for an interface and
+    // returns a human-readable total via the callback.
+    function getEthernetDataUsage(interfaceName: string, callback: var): void {
+        if (!interfaceName || interfaceName.length === 0) {
+            if (callback)
+                callback("");
+            return;
+        }
+        dataUsageProc.iface = interfaceName;
+        dataUsageProc.cb = callback;
+        dataUsageProc.command = ["sh", "-c", `cat /sys/class/net/${interfaceName}/statistics/rx_bytes /sys/class/net/${interfaceName}/statistics/tx_bytes 2>/dev/null`];
+        dataUsageProc.running = true;
+    }
+
+    function formatBytes(bytes: var): string {
+        if (!bytes || bytes <= 0)
+            return "0 B";
+        const units = ["B", "KB", "MB", "GB", "TB"];
+        let i = 0;
+        let v = bytes;
+        while (v >= 1024 && i < units.length - 1) {
+            v /= 1024;
+            i++;
+        }
+        return `${v.toFixed(v < 10 && i > 0 ? 1 : 0)} ${units[i]}`;
+    }
+
     function getEthernetDeviceDetails(interfaceName: string, callback: var): void {
         if (!interfaceName || interfaceName.length === 0) {
             const activeInterface = root.ethernetInterfaces.find(iface => {
@@ -968,9 +1127,11 @@ Singleton {
 
         executeCommand(["device", "show", interfaceName], result => {
             if (!result.success || !result.output) {
-                root.ethernetDeviceDetails = null;
+                // Transient failure (e.g. nmcli busy during a toggle). Keep the
+                // previous details so dependent UI (gateway, IP/DNS) doesn't
+                // blink out and back.
                 if (callback)
-                    callback(null);
+                    callback(root.ethernetDeviceDetails);
                 return;
             }
 
@@ -1252,6 +1413,28 @@ Singleton {
             } else {
                 immediateCheckTimer.stop();
                 immediateCheckTimer.checkCount = 0;
+            }
+        }
+    }
+
+    Process {
+        id: dataUsageProc
+
+        property string iface
+        property var cb
+
+        stdout: StdioCollector {
+            onStreamFinished: {
+                const nums = text.trim().split("\n").map(n => parseInt(n.trim(), 10)).filter(n => !isNaN(n));
+                if (nums.length < 2) {
+                    if (dataUsageProc.cb)
+                        dataUsageProc.cb("");
+                    return;
+                }
+                const human = root.formatBytes(nums[0] + nums[1]);
+                root.ethernetDataUsage = human;
+                if (dataUsageProc.cb)
+                    dataUsageProc.cb(human);
             }
         }
     }
