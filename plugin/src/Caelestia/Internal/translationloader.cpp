@@ -9,6 +9,7 @@
 namespace caelestia::internal {
 
 namespace {
+
 Q_LOGGING_CATEGORY(lcI18n, "caelestia.internal.i18n", QtInfoMsg)
 
 // Candidate directories to search for compiled translations, in priority order.
@@ -29,6 +30,7 @@ QStringList translationDirs() {
 
     return dirs;
 }
+
 } // namespace
 
 TranslationLoader::TranslationLoader(QObject* parent)
@@ -36,8 +38,9 @@ TranslationLoader::TranslationLoader(QObject* parent)
 
 void TranslationLoader::load(QQmlEngine* engine) {
     const QLocale locale = QLocale::system();
+    const QStringList dirs = translationDirs();
 
-    for (const QString& dir : translationDirs()) {
+    for (const QString& dir : dirs) {
         // QTranslator::load picks the best match across locale.uiLanguages().
         if (m_translator.load(locale, QStringLiteral("caelestia"), QStringLiteral("_"), dir)) {
             if (QCoreApplication::installTranslator(&m_translator)) {

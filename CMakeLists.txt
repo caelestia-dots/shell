@@ -27,7 +27,7 @@ endif()
 string(REGEX REPLACE "^v" "" VERSION "${VERSION}")
 
 project(caelestia-shell VERSION ${VERSION} LANGUAGES CXX)
-find_package(Qt6 REQUIRED COMPONENTS LinguistTools)
+find_package(Qt6 QUIET COMPONENTS LinguistTools)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -72,25 +72,30 @@ if("shell" IN_LIST ENABLE_MODULES)
 
     # Compile translations (.ts -> .qm) with lrelease and install where
     # TranslationLoader looks. Done via a direct custom command because the shell
-    # has no build target for qt_add_translations to attach to.
-    file(GLOB TS_FILES "${CMAKE_SOURCE_DIR}/translations/*.ts")
-    set(QM_FILES "")
-    foreach(ts_file ${TS_FILES})
-        get_filename_component(ts_name "${ts_file}" NAME_WE)
-        set(qm_file "${CMAKE_BINARY_DIR}/translations/${ts_name}.qm")
-        add_custom_command(
-            OUTPUT "${qm_file}"
-            COMMAND ${CMAKE_COMMAND} -E make_directory "${CMAKE_BINARY_DIR}/translations"
-            COMMAND Qt6::lrelease "${ts_file}" -qm "${qm_file}"
-            DEPENDS "${ts_file}"
-            COMMENT "Compiling translation ${ts_name}.qm"
-            VERBATIM
-        )
-        list(APPEND QM_FILES "${qm_file}")
-    endforeach()
-    if(QM_FILES)
-        add_custom_target(caelestia-translations ALL DEPENDS ${QM_FILES})
-        install(FILES ${QM_FILES} DESTINATION "${INSTALL_QSCONFDIR}/translations")
+    # has no build target for qt_add_translations to attach to. Skipped when
+    # LinguistTools is unavailable, so translations are an optional extra.
+    if(TARGET Qt6::lrelease)
+        file(GLOB TS_FILES "${CMAKE_SOURCE_DIR}/translations/*.ts")
+        set(QM_FILES "")
+        foreach(ts_file ${TS_FILES})
+            get_filename_component(ts_name "${ts_file}" NAME_WE)
+            set(qm_file "${CMAKE_BINARY_DIR}/translations/${ts_name}.qm")
+            add_custom_command(
+                OUTPUT "${qm_file}"
+                COMMAND ${CMAKE_COMMAND} -E make_directory "${CMAKE_BINARY_DIR}/translations"
+                COMMAND Qt6::lrelease "${ts_file}" -qm "${qm_file}"
+                DEPENDS "${ts_file}"
+                COMMENT "Compiling translation ${ts_name}.qm"
+                VERBATIM
+            )
+            list(APPEND QM_FILES "${qm_file}")
+        endforeach()
+        if(QM_FILES)
+            add_custom_target(caelestia-translations ALL DEPENDS ${QM_FILES})
+            install(FILES ${QM_FILES} DESTINATION "${INSTALL_QSCONFDIR}/translations")
+        endif()
+    else()
+        message(STATUS "Qt LinguistTools not found - skipping translation compilation")
     endif()
 
     install(FILES LICENSE DESTINATION "${INSTALL_QSCONFDIR}")
