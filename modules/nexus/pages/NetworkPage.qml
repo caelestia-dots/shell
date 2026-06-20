@@ -22,6 +22,7 @@ PageBase {
         if (Nmcli.activeEthernet) {
             Nmcli.getEthernetDeviceDetails("", () => {});
             Nmcli.getEthernetDataUsage(Nmcli.activeEthernet.interface, () => {});
+            Nmcli.getEthernetSpeed(Nmcli.activeEthernet.interface);
         }
     }
 
@@ -57,6 +58,7 @@ PageBase {
                 if (Nmcli.activeEthernet) {
                     Nmcli.getEthernetDeviceDetails(Nmcli.activeEthernet.interface, () => {});
                     Nmcli.getEthernetDataUsage(Nmcli.activeEthernet.interface, () => {});
+                    Nmcli.getEthernetSpeed(Nmcli.activeEthernet.interface);
                 }
             }
         }

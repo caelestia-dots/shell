@@ -28,6 +28,8 @@ Singleton {
     property var wirelessDeviceDetails: null
     property var ethernetDeviceDetails: null
     property string ethernetDataUsage: ""
+    // Link speed of the active ethernet interface (from sysfs), e.g. "1 Gbps".
+    property string ethernetSpeed: ""
     property list<var> ethernetDevices: []
     readonly property var activeEthernet: ethernetDevices.find(d => d.connected) ?? null
     property list<var> activeProcesses: []
@@ -1086,6 +1088,18 @@ Singleton {
 
     // Reads cumulative since-boot byte counters from sysfs for an interface and
     // returns a human-readable total via the callback.
+    // Reads the negotiated link speed (Mbit/s) from sysfs and stores a
+    // human-readable form in ethernetSpeed. nmcli `device show` doesn't expose
+    // link speed, so sysfs is the root-free source.
+    function getEthernetSpeed(interfaceName: string): void {
+        if (!interfaceName || interfaceName.length === 0) {
+            root.ethernetSpeed = "";
+            return;
+        }
+        speedProc.command = ["sh", "-c", `cat /sys/class/net/${interfaceName}/speed 2>/dev/null`];
+        speedProc.running = true;
+    }
+
     function getEthernetDataUsage(interfaceName: string, callback: var): void {
         if (!interfaceName || interfaceName.length === 0) {
             if (callback)
@@ -1181,11 +1195,7 @@ Singleton {
                     if (value !== "--" && value.length > 0) {
                         details.dns.push(value);
                     }
-                } else if (isEthernet && key === "WIRED-PROPERTIES.MAC") {
-                    details.macAddress = value;
-                } else if (isEthernet && key === "WIRED-PROPERTIES.SPEED") {
-                    details.speed = value;
-                } else if (!isEthernet && key === "GENERAL.HWADDR") {
+                } else if (key === "GENERAL.HWADDR") {
                     details.macAddress = value;
                 }
             }
@@ -1435,6 +1445,25 @@ Singleton {
                 root.ethernetDataUsage = human;
                 if (dataUsageProc.cb)
                     dataUsageProc.cb(human);
+            }
+        }
+    }
+
+    Process {
+        id: speedProc
+
+        stdout: StdioCollector {
+            onStreamFinished: {
+                const mbit = parseInt(text.trim(), 10);
+                // Disconnected/virtual interfaces report -1 or nothing.
+                if (isNaN(mbit) || mbit <= 0) {
+                    root.ethernetSpeed = "";
+                } else if (mbit >= 1000) {
+                    const gbps = mbit / 1000;
+                    root.ethernetSpeed = `${Number.isInteger(gbps) ? gbps : gbps.toFixed(1)} Gbps`;
+                } else {
+                    root.ethernetSpeed = `${mbit} Mbps`;
+                }
             }
         }
     }

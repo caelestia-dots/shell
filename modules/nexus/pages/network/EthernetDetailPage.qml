@@ -25,6 +25,14 @@ PageBase {
     property bool ipLoaded: false
     property bool savingIp: false
 
+    // Original loaded values, so the Apply button only shows on a real change.
+    property string _origMethod: "auto"
+    property string _origAddress: ""
+    property string _origGateway: ""
+    property string _origDns: ""
+
+    readonly property bool hasChanges: root.ipLoaded && (root.ipMethod !== root._origMethod || (root.ipMethod === "manual" && (addressField.text.trim() !== root._origAddress || gatewayField.text.trim() !== root._origGateway)) || ((root.ipMethod === "manual" || root.ipMethod === "auto-dns") && dnsField.text.trim() !== root._origDns))
+
     function loadIpConfig(): void {
         if (!root.connectionName)
             return;
@@ -36,6 +44,10 @@ PageBase {
             addressField.text = cfg.address;
             gatewayField.text = cfg.gateway;
             dnsField.text = cfg.dns;
+            root._origMethod = cfg.method;
+            root._origAddress = cfg.address;
+            root._origGateway = cfg.gateway;
+            root._origDns = cfg.dns;
             root.ipLoaded = true;
         });
     }
@@ -56,6 +68,13 @@ PageBase {
                     addressField.isError = true;
                 else
                     dnsField.isError = true;
+            } else {
+                // Persisted — make the current values the new baseline so the
+                // Apply button hides again until something else changes.
+                root._origMethod = root.ipMethod;
+                root._origAddress = addressField.text.trim();
+                root._origGateway = gatewayField.text.trim();
+                root._origDns = dnsField.text.trim();
             }
         });
     }
@@ -65,6 +84,7 @@ PageBase {
 
     Component.onCompleted: {
         Nmcli.getEthernetDeviceDetails(root.ifaceName, () => {});
+        Nmcli.getEthernetSpeed(root.ifaceName);
         loadIpConfig();
     }
 
@@ -144,7 +164,8 @@ PageBase {
         InfoRow {
             icon: "speed"
             label: qsTr("Speed")
-            value: root.details?.speed || qsTr("—")
+            visible: Nmcli.ethernetSpeed.length > 0
+            value: Nmcli.ethernetSpeed
         }
 
         InfoRow {
@@ -256,11 +277,13 @@ PageBase {
             }
         }
 
-        // Apply button — swaps to a loading spinner while applying.
+        // Apply button — swaps to a loading spinner while applying. Shown only
+        // when the IP assignment has unsaved changes.
         RowLayout {
             Layout.fillWidth: true
             Layout.topMargin: Tokens.spacing.large
             spacing: Tokens.spacing.medium
+            visible: root.hasChanges || root.savingIp
 
             Item {
                 Layout.fillWidth: true
