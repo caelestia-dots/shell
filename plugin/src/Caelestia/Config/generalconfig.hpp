@@ -88,7 +88,8 @@ class GeneralBattery : public settings::ObjectNode {
                     { u"level"_s, 95 },
                     { u"title"_s, u"Critical battery level"_s },
                     { u"message"_s, u"UNPLUG THE CHARGER RIGHT NOW!!"_s },
-                    { u"icon"_s, u"battery_android_frame_alert"_s }
+                    { u"icon"_s, u"battery_android_frame_alert"_s },
+                    { u"critical"_s, true },
             }),
             
             
