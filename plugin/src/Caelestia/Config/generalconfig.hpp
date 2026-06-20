@@ -74,29 +74,52 @@ CONFIG_LIST_TYPE(GeneralBatteryWarnLevel, GeneralBatteryWarnList)
 class GeneralBattery : public settings::ObjectNode {
     CONFIG_NODE(GeneralBattery, settings::ObjectNode)
 
-    CONFIG_LIST(GeneralBatteryWarnList, warnLevels,
-        DEFAULT_ARG({
+    CONFIG_LIST(GeneralBatteryWarnLevelList, lowBatteryWarnLevels,
+        {
             vmap({
                 { u"level"_s, 20 },
-                { u"title"_s, mark(u"Low battery"_s) },
-                { u"message"_s, mark(u"You might want to plug in a charger"_s) },
+                { u"title"_s, u"Low battery"_s },
+                { u"message"_s, u"You might want to plug in a charger"_s },
                 { u"icon"_s, u"battery_android_frame_2"_s },
             }),
             vmap({
                 { u"level"_s, 10 },
-                { u"title"_s, mark(u"Did you see the previous message?"_s) },
-                { u"message"_s, mark(u"You should probably plug in a charger <b>now</b>"_s) },
+                { u"title"_s, u"Did you see the previous message?"_s },
+                { u"message"_s, u"You should probably plug in a charger <b>now</b>"_s },
                 { u"icon"_s, u"battery_android_frame_1"_s },
             }),
             vmap({
                 { u"level"_s, 5 },
-                { u"title"_s, mark(u"Critical battery level"_s) },
-                { u"message"_s, mark(u"PLUG THE CHARGER RIGHT NOW!!"_s) },
+                { u"title"_s, u"Critical battery level"_s },
+                { u"message"_s, u"PLUG THE CHARGER RIGHT NOW!!"_s },
                 { u"icon"_s, u"battery_android_alert"_s },
                 { u"critical"_s, true },
             }),
-        }))
-    CONFIG_PROPERTY(int, criticalLevel, 3)
+        })
+
+    CONFIG_LIST(GeneralBatteryWarnLevelList, chargingWarnLevels, {
+            vmap({
+                    { u"level"_s, 80 },
+                    { u"title"_s, u"High battery"_s },
+                    { u"message"_s, u"You might want to unplug the charger"_s },
+                    { u"icon"_s, u"battery_android_frame_5"_s }
+            }),
+            vmap({
+                    { u"level"_s, 90 },
+                    { u"title"_s, u"Did you see the previous message?"_s },
+                    { u"message"_s, u"You should probably unplug the charger <b>now</b>"_s },
+                    { u"icon"_s, u"battery_android_frame_6"_s }
+            }),
+            vmap({
+                    { u"level"_s, 95 },
+                    { u"title"_s, u"Critical battery level"_s },
+                    { u"message"_s, u"UNPLUG THE CHARGER RIGHT NOW!!"_s },
+                    { u"icon"_s, u"battery_android_frame_alert"_s }
+            }),
+            
+            
+    })
+    CONFIG_GLOBAL_PROPERTY(int, criticalLevel, 3)
 };
 
 class GeneralConfig : public settings::ObjectNode {
