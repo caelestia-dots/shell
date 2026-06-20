@@ -8,20 +8,25 @@ import Caelestia.Services
 Scope {
     id: root
 
-    readonly property list<var> warnLevels: [...GlobalConfig.general.battery.warnLevels].sort((a, b) => a.level - b.level)
+    readonly property list<var> lowWarnLevels: [...GlobalConfig.general.battery.lowBatteryWarnLevels].sort((a, b) => a.level - b.level)
+    readonly property list<var> chargeWarnLevels: [...GlobalConfig.general.battery.chargingWarnLevels].sort((a, b) => a.level - b.level)
     property real lastPercentage: 100
 
     function handleBatteryWarnings(): void {
         const p = UPower.displayDevice.percentage * 100;
 
-        if (!UPower.onBattery) {
-            root.lastPercentage = p;
-            return;
+        if (root.lastPercentage >= 0 && UPower.onBattery) {
+            for (const level of root.lowWarnLevels) {
+                if (p <= level.level && level.level < root.lastPercentage) {
+                    Toaster.toast(level.title ?? qsTr("Battery warning"), level.message ?? qsTr("Battery level is low"), level.icon ?? "battery_android_alert", level.critical ? Toast.Error : Toast.Warning);
+                    break;
+                }
+            }
         }
 
-        if (root.lastPercentage >= 0) {
-            for (const level of root.warnLevels) {
-                if (p <= level.level && root.lastPercentage > level.level) {
+        if (root.lastPercentage >= 0 && !UPower.onBattery) {
+            for (const level of root.chargeWarnLevels) {
+                if (p >= level.level && level > root.lastPercentage) {
                     Toaster.toast(level.title ?? qsTr("Battery warning"), level.message ?? qsTr("Battery level is low"), level.icon ?? "battery_android_alert", level.critical ? Toast.Error : Toast.Warning);
                     break;
                 }
