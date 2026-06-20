@@ -8,17 +8,20 @@ import Caelestia.Services
 Scope {
     id: root
 
-    readonly property list<var> warnLevels: [...GlobalConfig.general.battery.warnLevels].sort((a, b) => b.level - a.level)
+    readonly property list<var> lowWarnLevels: [...GlobalConfig.general.battery.lowBatteryWarnLevels].sort((a, b) => b.level - a.level)
+    readonly property list<var> chargeWarnLevels: [...GlobalConfig.general.battery.chargingWarnLevels].sort((a, b) => a.level - b.level)
 
     Connections {
         function onOnBatteryChanged(): void {
             if (UPower.onBattery) {
                 if (GlobalConfig.utilities.toasts.chargingChanged)
                     Toaster.toast(qsTr("Charger unplugged"), qsTr("Battery is discharging"), "power_off");
+                for (const level of root.chargeWarnLevels)
+                    level.warned = false;
             } else {
                 if (GlobalConfig.utilities.toasts.chargingChanged)
                     Toaster.toast(qsTr("Charger plugged in"), qsTr("Battery is charging"), "power");
-                for (const level of root.warnLevels)
+                for (const level of root.lowWarnLevels)
                     level.warned = false;
             }
         }
@@ -32,14 +35,22 @@ Scope {
             //     return;
 
             const p = UPower.displayDevice.percentage * 100;
-            for (const level of root.warnLevels) {
-                if (p >= level.level && !level.warned && level.chargeWarning){
-                    level.warned = true;
-                    Toaster.toast(level.title ?? qsTr("Charge warning"), level.message ?? qsTr("Battery level is high"), level.icon ?? 'battery_android_alert', level.critical ? Toast.Error : Toast.Warning);
+            // If charging check the chargeWarnLevels
+            if (!UPower.onBattery){
+                for (const level of root.lowWarnLevels){
+                    if (p >= level.level && !level.warned) {
+                        level.warned = true;
+                        Toaster.toast(level.title ?? qsTr("Charge warning"), level.message ?? qsTr("Battery level is high"), level.icon ?? 'battery_android_alert', level.critical ? Toast.Error : Toast.Warning);                   
+                    }
                 }
-                if (p <= level.level && !level.warned && !level.chargeWarning) {
-                    level.warned = true;
-                    Toaster.toast(level.title ?? qsTr("Battery warning"), level.message ?? qsTr("Battery level is low"), level.icon ?? "battery_android_alert", level.critical ? Toast.Error : Toast.Warning);
+            }
+            // If discharging check the lowWarnLevels
+            else {
+                for (const level of root.chargeWarnLevels) {
+                    if (p <= level.level && !level.warned) {
+                        level.warned = true;
+                        Toaster.toast(level.title ?? qsTr("Battery warning"), level.message ?? qsTr("Battery level is low"), level.icon ?? "battery_android_alert", level.critical ? Toast.Error : Toast.Warning);
+                    }
                 }
             }
 
