@@ -37,7 +37,7 @@ Scope {
             const p = UPower.displayDevice.percentage * 100;
             // If charging check the chargeWarnLevels
             if (!UPower.onBattery){
-                for (const level of root.lowWarnLevels){
+                for (const level of root.chargeWarnLevels){
                     if (p >= level.level && !level.warned) {
                         level.warned = true;
                         Toaster.toast(level.title ?? qsTr("Charge warning"), level.message ?? qsTr("Battery level is high"), level.icon ?? 'battery_android_alert', level.critical ? Toast.Error : Toast.Warning);                   
@@ -46,7 +46,7 @@ Scope {
             }
             // If discharging check the lowWarnLevels
             else {
-                for (const level of root.chargeWarnLevels) {
+                for (const level of root.lowWarnLevels) {
                     if (p <= level.level && !level.warned) {
                         level.warned = true;
                         Toaster.toast(level.title ?? qsTr("Battery warning"), level.message ?? qsTr("Battery level is low"), level.icon ?? "battery_android_alert", level.critical ? Toast.Error : Toast.Warning);
