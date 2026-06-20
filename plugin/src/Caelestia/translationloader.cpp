@@ -6,11 +6,11 @@
 #include <qloggingcategory.h>
 #include <qstandardpaths.h>
 
-namespace caelestia::internal {
+namespace caelestia {
 
 namespace {
 
-Q_LOGGING_CATEGORY(lcI18n, "caelestia.internal.i18n", QtInfoMsg)
+Q_LOGGING_CATEGORY(lcI18n, "caelestia.i18n", QtInfoMsg)
 
 // Candidate directories to search for compiled translations, in priority order.
 // User overrides win over the system-installed location.
@@ -56,4 +56,4 @@ void TranslationLoader::load(QQmlEngine* engine) {
     qCDebug(lcI18n) << "No translation found for locale" << locale.name() << "- using source strings";
 }
 
-} // namespace caelestia::internal
+} // namespace caelestia

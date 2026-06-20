@@ -4,7 +4,7 @@
 #include <qqmlengine.h>
 #include <qtranslator.h>
 
-namespace caelestia::internal {
+namespace caelestia {
 
 // Loads compiled Qt translations (.qm) into the QML engine at startup.
 //
@@ -26,4 +26,4 @@ private:
     QTranslator m_translator;
 };
 
-} // namespace caelestia::internal
+} // namespace caelestia
