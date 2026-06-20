@@ -127,15 +127,15 @@ PageBase {
                 required property var modelData
                 required property int index
 
-                Layout.fillWidth: true
-                last: index === Nmcli.ethernetDevices.length - 1
-                visible: Nmcli.ethernetDevices.length > 0
-                implicitHeight: ethLayout.implicitHeight + Tokens.padding.medium * 2
-
                 readonly property bool isConnected: modelData.connected
                 // IP/MAC/DNS come from the parsed device details, not the basic
                 // device list (which leaves those fields blank).
                 readonly property var details: ethRow.isConnected ? Nmcli.ethernetDeviceDetails : null
+
+                Layout.fillWidth: true
+                last: index === Nmcli.ethernetDevices.length - 1
+                visible: Nmcli.ethernetDevices.length > 0
+                implicitHeight: ethLayout.implicitHeight + Tokens.padding.medium * 2
 
                 // Tap opens the detail page for this interface.
                 StateLayer {
@@ -201,34 +201,6 @@ PageBase {
                         Layout.rightMargin: Tokens.spacing.small
                         visible: ethRow.isConnected && root.cappedWidth > 620
                         spacing: Tokens.spacing.large
-
-                        component EthDetail: ColumnLayout {
-                            id: ethDetail
-
-                            required property string label
-                            required property string value
-
-                            visible: value.length > 0
-                            spacing: 0
-
-                            StyledText {
-                                Layout.alignment: Qt.AlignRight
-                                text: ethDetail.label
-                                color: Colours.palette.m3onSurfaceVariant
-                                font: Tokens.font.label.small
-                                elide: Text.ElideRight
-                                horizontalAlignment: Text.AlignRight
-                            }
-
-                            StyledText {
-                                Layout.alignment: Qt.AlignRight
-                                text: ethDetail.value
-                                color: Colours.palette.m3outline
-                                font: Tokens.font.label.small
-                                elide: Text.ElideRight
-                                horizontalAlignment: Text.AlignRight
-                            }
-                        }
 
                         Item {
                             Layout.fillWidth: true
@@ -456,6 +428,34 @@ PageBase {
                     elide: Text.ElideRight
                 }
             }
+        }
+    }
+
+    component EthDetail: ColumnLayout {
+        id: ethDetail
+
+        required property string label
+        required property string value
+
+        visible: value.length > 0
+        spacing: 0
+
+        StyledText {
+            Layout.alignment: Qt.AlignRight
+            text: ethDetail.label
+            color: Colours.palette.m3onSurfaceVariant
+            font: Tokens.font.label.small
+            elide: Text.ElideRight
+            horizontalAlignment: Text.AlignRight
+        }
+
+        StyledText {
+            Layout.alignment: Qt.AlignRight
+            text: ethDetail.value
+            color: Colours.palette.m3outline
+            font: Tokens.font.label.small
+            elide: Text.ElideRight
+            horizontalAlignment: Text.AlignRight
         }
     }
 }

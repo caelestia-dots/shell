@@ -1,7 +1,6 @@
 pragma ComponentBehavior: Bound
 
 import QtQuick
-import QtQuick.Controls
 import Caelestia.Config
 import qs.components
 import qs.components.controls
@@ -14,8 +13,7 @@ import qs.services
 // icon, prefix/suffix, optional character counter, hover/focus state layer, and
 // the M3 disabled treatment (all elements onSurface @ 38%).
 //
-// Variant defaults to the global config (nexus.m3TextFieldStyle) and can be
-// overridden per-instance via `variant`.
+// Variant defaults to Outlined and can be overridden per-instance via `variant`.
 Item {
     id: root
 
@@ -24,7 +22,7 @@ Item {
         Filled
     }
 
-    property int variant: GlobalConfig.nexus.m3TextFieldStyle === "filled" ? M3TextField.Variant.Filled : M3TextField.Variant.Outlined
+    property int variant: M3TextField.Variant.Outlined
 
     property alias text: field.text
     property string label: ""

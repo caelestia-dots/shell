@@ -1014,7 +1014,7 @@ Singleton {
                 if (key === "ipv4.method")
                     cfg.method = value;
                 else if (key === "ipv4.addresses")
-                    cfg.address = value.split(",")[0].trim(); // first addr (CIDR)
+                    cfg.address = value.split(",")[0].trim();
                 else if (key === "ipv4.gateway")
                     cfg.gateway = value;
                 else if (key === "ipv4.dns")

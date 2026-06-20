@@ -7,7 +7,6 @@ import Caelestia.Config
 import qs.components
 import qs.components.controls
 import qs.services
-import qs.utils
 import qs.modules.nexus.common
 
 // Detail / settings sub-page for an ethernet device. Reached by tapping an
@@ -202,11 +201,7 @@ PageBase {
             fallbackText: qsTr("Automatic (DHCP)")
             fallbackIcon: "lan"
 
-            menuItems: [
-                autoItem,
-                autoDnsItem,
-                manualItem
-            ]
+            menuItems: [autoItem, autoDnsItem, manualItem]
 
             onSelected: item => {
                 root.ipMethod = item === manualItem ? "manual" : (item === autoDnsItem ? "auto-dns" : "auto");
