@@ -2,6 +2,65 @@
 <!DOCTYPE TS>
 <TS version="2.1" language="ko_KR">
 <context>
+    <name>AboutPage</name>
+    <message>
+        <source>About</source>
+        <translation>정보</translation>
+    </message>
+    <message>
+        <source>System</source>
+        <translation>시스템</translation>
+    </message>
+    <message>
+        <source>Hostname</source>
+        <translation>호스트 이름</translation>
+    </message>
+    <message>
+        <source>Device</source>
+        <translation>장치</translation>
+    </message>
+    <message>
+        <source>Distro</source>
+        <translation>배포판</translation>
+    </message>
+    <message>
+        <source>Kernel</source>
+        <translation>커널</translation>
+    </message>
+    <message>
+        <source>Firmware</source>
+        <translation>펌웨어</translation>
+    </message>
+    <message>
+        <source>Software</source>
+        <translation>소프트웨어</translation>
+    </message>
+    <message>
+        <source>Shell</source>
+        <translation>셸</translation>
+    </message>
+    <message>
+        <source>CLI</source>
+        <translation>CLI</translation>
+    </message>
+    <message>
+        <source>Quickshell</source>
+        <translation>Quickshell</translation>
+    </message>
+    <message>
+        <source>Qt</source>
+        <translation>Qt</translation>
+    </message>
+    <message>
+        <source>Plugins</source>
+        <translation>플러그인</translation>
+    </message>
+    <message>
+        <source>Loaded plugins</source>
+        <translation>불러온 플러그인</translation>
+    </message>
+</context>
+<context>
     <name>Actions</name>
     <message>
         <source>Unnamed</source>
@@ -20,25 +79,111 @@
     </message>
 </context>
 <context>
-    <name>AnimationsSection</name>
+    <name>AllApps</name>
     <message>
-        <source>Animations</source>
-        <translation>애니메이션</translation>
-    </message>
-    <message>
-        <source>Animation duration scale</source>
-        <translation>애니메이션 지속 시간 배율</translation>
+        <source>All apps</source>
+        <translation>모든 앱</translation>
     </message>
 </context>
 <context>
-    <name>AppearancePane</name>
+    <name>AppInfo</name>
     <message>
-        <source>Wallpaper</source>
-        <translation>배경화면</translation>
+        <source>App info</source>
+        <translation>앱 정보</translation>
     </message>
     <message>
-        <source>Appearance</source>
-        <translation>모양</translation>
+        <source>Launcher</source>
+        <translation>런처</translation>
+    </message>
+    <message>
+        <source>Favourite</source>
+        <translation>즐겨찾기</translation>
+    </message>
+    <message>
+        <source>Matched by a regex in favouriteApps — edit the config file to change</source>
+        <translation>favouriteApps의 정규식과 일치함 — 변경하려면 설정 파일을 편집하세요</translation>
+    </message>
+    <message>
+        <source>Pin to the top of the launcher</source>
+        <translation>런처 상단에 고정</translation>
+    </message>
+    <message>
+        <source>Hidden</source>
+        <translation>숨김</translation>
+    </message>
+    <message>
+        <source>Matched by a regex in hiddenApps — edit the config file to change</source>
+        <translation>hiddenApps의 정규식과 일치함 — 변경하려면 설정 파일을 편집하세요</translation>
+    </message>
+    <message>
+        <source>Hide from the launcher</source>
+        <translation>런처에서 숨기기</translation>
+    </message>
+    <message>
+        <source>Details</source>
+        <translation>세부 정보</translation>
+    </message>
+    <message>
+        <source>App ID</source>
+        <translation>앱 ID</translation>
+    </message>
+    <message>
+        <source>Command</source>
+        <translation>명령</translation>
+    </message>
+</context>
+<context>
+    <name>AppVolumes</name>
+    <message>
+        <source>App volumes</source>
+        <translation>앱 볼륨</translation>
+    </message>
+    <message>
+        <source>Adjust the volume of individual apps currently playing audio.</source>
+        <translation>현재 오디오를 재생 중인 개별 앱의 볼륨을 조정합니다.</translation>
+    </message>
+    <message>
+        <source>No apps playing audio</source>
+        <translation>오디오를 재생 중인 앱 없음</translation>
+    </message>
+</context>
+<context>
+    <name>AppsPage</name>
+    <message>
+        <source>Apps</source>
+        <translation>앱</translation>
+    </message>
+    <message>
+        <source>Default applications</source>
+        <translation>기본 애플리케이션</translation>
+    </message>
+    <message>
+        <source>Terminal</source>
+        <translation>터미널</translation>
+    </message>
+    <message>
+        <source>Audio</source>
+        <translation>오디오</translation>
+    </message>
+    <message>
+        <source>Media playback</source>
+        <translation>미디어 재생</translation>
+    </message>
+    <message>
+        <source>File manager</source>
+        <translation>파일 관리자</translation>
+    </message>
+    <message>
+        <source>Library</source>
+        <translation>라이브러리</translation>
+    </message>
+    <message>
+        <source>All apps</source>
+        <translation>모든 앱</translation>
+    </message>
+    <message>
+        <source>Browse installed apps, set favourites and hidden</source>
+        <translation>설치된 앱을 탐색하고 즐겨찾기 및 숨김을 설정합니다</translation>
     </message>
 </context>
 <context>
@@ -65,173 +210,236 @@
     </message>
 </context>
 <context>
-    <name>AudioPane</name>
+    <name>AudioDeviceList</name>
+    <message>
+        <source>Unknown</source>
+        <translation>알 수 없음</translation>
+    </message>
+</context>
+<context>
+    <name>AudioPage</name>
     <message>
         <source>Audio</source>
         <translation>오디오</translation>
     </message>
     <message>
-        <source>Output devices</source>
-        <translation>출력 장치</translation>
+        <source>Output</source>
+        <translation>출력</translation>
     </message>
     <message>
-        <source>Devices (%1)</source>
-        <translation>장치 (%1)</translation>
+        <source>Muted</source>
+        <translation>음소거</translation>
     </message>
     <message>
-        <source>All available output devices</source>
-        <translation>사용 가능한 모든 출력 장치</translation>
+        <source>No output devices</source>
+        <translation>출력 장치 없음</translation>
     </message>
     <message>
-        <source>Unknown</source>
-        <translation>알 수 없음</translation>
+        <source>Input</source>
+        <translation>입력</translation>
     </message>
     <message>
-        <source>Input devices</source>
-        <translation>입력 장치</translation>
+        <source>No input devices</source>
+        <translation>입력 장치 없음</translation>
     </message>
     <message>
-        <source>All available input devices</source>
-        <translation>사용 가능한 모든 입력 장치</translation>
+        <source>App volumes</source>
+        <translation>앱 볼륨</translation>
     </message>
     <message>
-        <source>Audio Settings</source>
-        <translation>오디오 설정</translation>
+        <source>No apps playing audio</source>
+        <translation>오디오를 재생 중인 앱 없음</translation>
     </message>
     <message>
-        <source>Output volume</source>
-        <translation>출력 볼륨</translation>
+        <source>1 app playing audio</source>
+        <translation>1개 앱이 오디오 재생 중</translation>
     </message>
     <message>
-        <source>Control the volume of your output device</source>
-        <translation>출력 장치의 볼륨을 조절합니다</translation>
-    </message>
-    <message>
-        <source>Volume</source>
-        <translation>볼륨</translation>
-    </message>
-    <message>
-        <source>Input volume</source>
-        <translation>입력 볼륨</translation>
-    </message>
-    <message>
-        <source>Control the volume of your input device</source>
-        <translation>입력 장치의 볼륨을 조절합니다</translation>
-    </message>
-    <message>
-        <source>Applications</source>
-        <translation>애플리케이션</translation>
-    </message>
-    <message>
-        <source>Control volume for individual applications</source>
-        <translation>개별 애플리케이션의 볼륨을 조절합니다</translation>
-    </message>
-    <message>
-        <source>No applications currently playing audio</source>
-        <translation>현재 오디오를 재생 중인 애플리케이션이 없습니다</translation>
+        <source>%1 apps playing audio</source>
+        <translation>%1개 앱이 오디오 재생 중</translation>
     </message>
 </context>
 <context>
-    <name>BackgroundSection</name>
+    <name>BarActiveWindow</name>
+    <message>
+        <source>Active window</source>
+        <translation>활성 창</translation>
+    </message>
+    <message>
+        <source>Compact</source>
+        <translation>간결</translation>
+    </message>
+    <message>
+        <source>Inverted</source>
+        <translation>반전</translation>
+    </message>
+    <message>
+        <source>Show on hover</source>
+        <translation>마우스를 올리면 표시</translation>
+    </message>
+    <message>
+        <source>Only show the active window title while hovering</source>
+        <translation>마우스를 올렸을 때만 활성 창 제목 표시</translation>
+    </message>
+    <message>
+        <source>Popout on hover</source>
+        <translation>마우스를 올리면 팝아웃</translation>
+    </message>
+    <message>
+        <source>Show a window details popout when hovering</source>
+        <translation>마우스를 올리면 창 세부 정보 팝아웃 표시</translation>
+    </message>
+</context>
+<context>
+    <name>BarClock</name>
+    <message>
+        <source>Clock</source>
+        <translation>시계</translation>
+    </message>
     <message>
         <source>Background</source>
         <translation>배경</translation>
     </message>
     <message>
-        <source>Background enabled</source>
-        <translation>배경 활성화</translation>
+        <source>Show date</source>
+        <translation>날짜 표시</translation>
     </message>
     <message>
-        <source>Wallpaper enabled</source>
-        <translation>배경화면 활성화</translation>
+        <source>Show icon</source>
+        <translation>아이콘 표시</translation>
+    </message>
+</context>
+<context>
+    <name>BarStatusIcons</name>
+    <message>
+        <source>Status icons</source>
+        <translation>상태 아이콘</translation>
     </message>
     <message>
-        <source>Desktop Clock</source>
-        <translation>데스크탑 시계</translation>
+        <source>Visible icons</source>
+        <translation>표시되는 아이콘</translation>
     </message>
     <message>
-        <source>Desktop Clock enabled</source>
-        <translation>데스크탑 시계 활성화</translation>
+        <source>Speakers</source>
+        <translation>스피커</translation>
     </message>
     <message>
-        <source>Positioning</source>
-        <translation>위치 지정</translation>
+        <source>Microphone</source>
+        <translation>마이크</translation>
     </message>
     <message>
-        <source>Vertical Position</source>
-        <translation>세로 위치</translation>
+        <source>Keyboard layout</source>
+        <translation>키보드 레이아웃</translation>
     </message>
     <message>
-        <source>Top</source>
-        <translation>위</translation>
+        <source>Network</source>
+        <translation>네트워크</translation>
     </message>
     <message>
-        <source>Middle</source>
-        <translation>가운데</translation>
+        <source>Wi-Fi</source>
+        <translation>Wi-Fi</translation>
     </message>
     <message>
-        <source>Bottom</source>
-        <translation>아래</translation>
+        <source>Bluetooth</source>
+        <translation>블루투스</translation>
     </message>
     <message>
-        <source>Horizontal Position</source>
-        <translation>가로 위치</translation>
+        <source>Battery</source>
+        <translation>배터리</translation>
     </message>
     <message>
-        <source>Left</source>
-        <translation>왼쪽</translation>
+        <source>Caps lock</source>
+        <translation>Caps Lock</translation>
     </message>
     <message>
-        <source>Center</source>
-        <translation>가운데</translation>
+        <source>Behaviour</source>
+        <translation>동작</translation>
     </message>
     <message>
-        <source>Right</source>
-        <translation>오른쪽</translation>
+        <source>Popout on hover</source>
+        <translation>마우스를 올리면 팝아웃</translation>
     </message>
     <message>
-        <source>Invert colors</source>
-        <translation>색상 반전</translation>
+        <source>Show a details popout when hovering the status icons</source>
+        <translation>상태 아이콘에 마우스를 올리면 세부 정보 팝아웃 표시</translation>
+    </message>
+</context>
+<context>
+    <name>BarTray</name>
+    <message>
+        <source>Tray</source>
+        <translation>트레이</translation>
     </message>
     <message>
-        <source>Shadow</source>
-        <translation>그림자</translation>
+        <source>Background</source>
+        <translation>배경</translation>
     </message>
     <message>
-        <source>Enabled</source>
-        <translation>활성화됨</translation>
+        <source>Recolour icons</source>
+        <translation>아이콘 색상 변경</translation>
     </message>
     <message>
-        <source>Opacity</source>
-        <translation>불투명도</translation>
+        <source>Compact</source>
+        <translation>간결</translation>
     </message>
     <message>
-        <source>Blur</source>
-        <translation>흐림</translation>
+        <source>Popout on hover</source>
+        <translation>마우스를 올리면 팝아웃</translation>
     </message>
     <message>
-        <source>Blur enabled</source>
-        <translation>흐림 활성화</translation>
+        <source>Show the tray menu popout when hovering</source>
+        <translation>마우스를 올리면 트레이 메뉴 팝아웃 표시</translation>
+    </message>
+</context>
+<context>
+    <name>BarWorkspaces</name>
+    <message>
+        <source>Workspaces</source>
+        <translation>작업 공간</translation>
     </message>
     <message>
-        <source>Visualiser</source>
-        <translation>비주얼라이저</translation>
+        <source>Shown</source>
+        <translation>표시됨</translation>
     </message>
     <message>
-        <source>Visualiser enabled</source>
-        <translation>비주얼라이저 활성화</translation>
+        <source>Number of workspaces displayed</source>
+        <translation>표시되는 작업 공간 수</translation>
     </message>
     <message>
-        <source>Visualiser auto hide</source>
-        <translation>비주얼라이저 자동 숨김</translation>
+        <source>Active indicator</source>
+        <translation>활성 표시기</translation>
     </message>
     <message>
-        <source>Visualiser rounding</source>
-        <translation>비주얼라이저 둥글기</translation>
+        <source>Active trail</source>
+        <translation>활성 자취</translation>
     </message>
     <message>
-        <source>Visualiser spacing</source>
-        <translation>비주얼라이저 간격</translation>
+        <source>Occupied background</source>
+        <translation>사용 중 배경</translation>
+    </message>
+    <message>
+        <source>Show windows</source>
+        <translation>창 표시</translation>
+    </message>
+    <message>
+        <source>Show icons of open windows on each workspace</source>
+        <translation>각 작업 공간에서 열린 창의 아이콘 표시</translation>
+    </message>
+    <message>
+        <source>Windows on special workspaces</source>
+        <translation>특수 작업 공간의 창</translation>
+    </message>
+    <message>
+        <source>Max window icons</source>
+        <translation>최대 창 아이콘 수</translation>
+    </message>
+    <message>
+        <source>Per-monitor workspaces</source>
+        <translation>모니터별 작업 공간</translation>
+    </message>
+    <message>
+        <source>Show each monitor&apos;s workspaces independently</source>
+        <translation>각 모니터의 작업 공간을 독립적으로 표시</translation>
     </message>
 </context>
 <context>
@@ -297,6 +505,25 @@
     </message>
 </context>
 <context>
+    <name>BatteryTank</name>
+    <message>
+        <source>Battery</source>
+        <translation>배터리</translation>
+    </message>
+    <message>
+        <source>Full</source>
+        <translation>완충</translation>
+    </message>
+    <message>
+        <source>Charging</source>
+        <translation>충전 중</translation>
+    </message>
+    <message>
+        <source>...</source>
+        <translation>...</translation>
+    </message>
+</context>
+<context>
     <name>Bluetooth</name>
     <message>
         <source>Bluetooth</source>
@@ -324,18 +551,155 @@
     </message>
 </context>
 <context>
-    <name>BorderSection</name>
+    <name>BluetoothPage</name>
     <message>
-        <source>Border</source>
-        <translation>테두리</translation>
+        <source>Connected devices</source>
+        <translation>연결된 장치</translation>
     </message>
     <message>
-        <source>Border rounding</source>
-        <translation>테두리 둥글기</translation>
+        <source>Bluetooth</source>
+        <translation>블루투스</translation>
     </message>
     <message>
-        <source>Border thickness</source>
-        <translation>테두리 두께</translation>
+        <source>No saved devices</source>
+        <translation>저장된 장치 없음</translation>
+    </message>
+    <message>
+        <source>Bluetooth disabled</source>
+        <translation>블루투스 사용 안 함</translation>
+    </message>
+    <message>
+        <source>Unknown</source>
+        <translation>알 수 없음</translation>
+    </message>
+    <message>
+        <source>Connected%1</source>
+        <translation>연결됨%1</translation>
+    </message>
+    <message>
+        <source>Saved</source>
+        <translation>저장됨</translation>
+    </message>
+    <message>
+        <source>Pair new device</source>
+        <translation>새 장치 페어링</translation>
+    </message>
+    <message>
+        <source>Discoverable</source>
+        <translation>검색 가능</translation>
+    </message>
+    <message>
+        <source>Allow nearby devices to find this one</source>
+        <translation>주변 장치가 이 장치를 찾도록 허용</translation>
+    </message>
+    <message>
+        <source>Pairable</source>
+        <translation>페어링 가능</translation>
+    </message>
+    <message>
+        <source>Allow nearby devices to pair with this one</source>
+        <translation>주변 장치가 이 장치와 페어링하도록 허용</translation>
+    </message>
+</context>
+<context>
+    <name>BluetoothPairing</name>
+    <message>
+        <source>Pair new device</source>
+        <translation>새 장치 페어링</translation>
+    </message>
+    <message>
+        <source>Available devices</source>
+        <translation>사용 가능한 장치</translation>
+    </message>
+    <message>
+        <source>Searching for devices…</source>
+        <translation>장치 검색 중…</translation>
+    </message>
+    <message>
+        <source>Unknown device</source>
+        <translation>알 수 없는 장치</translation>
+    </message>
+    <message>
+        <source>Pairing...</source>
+        <translation>페어링 중...</translation>
+    </message>
+</context>
+<context>
+    <name>BriefInfo</name>
+    <message>
+        <source>Feels like %1</source>
+        <translation>체감 %1</translation>
+    </message>
+    <message>
+        <source>High %1 • Low %2</source>
+        <translation>최고 %1 • 최저 %2</translation>
+    </message>
+</context>
+<context>
+    <name>BtDeviceInfo</name>
+    <message>
+        <source>Connected</source>
+        <translation>연결됨</translation>
+    </message>
+    <message>
+        <source>Paired</source>
+        <translation>페어링됨</translation>
+    </message>
+    <message>
+        <source>Not paired</source>
+        <translation>페어링 안 됨</translation>
+    </message>
+    <message>
+        <source>Device</source>
+        <translation>장치</translation>
+    </message>
+    <message>
+        <source>Forget</source>
+        <translation>잊기</translation>
+    </message>
+    <message>
+        <source>Disconnect</source>
+        <translation>연결 끊기</translation>
+    </message>
+    <message>
+        <source>Connect</source>
+        <translation>연결</translation>
+    </message>
+    <message>
+        <source>Trusted</source>
+        <translation>신뢰됨</translation>
+    </message>
+    <message>
+        <source>Allow this device to connect automatically</source>
+        <translation>이 장치가 자동으로 연결되도록 허용</translation>
+    </message>
+    <message>
+        <source>Blocked</source>
+        <translation>차단됨</translation>
+    </message>
+    <message>
+        <source>Prevent this device from connecting</source>
+        <translation>이 장치의 연결 차단</translation>
+    </message>
+    <message>
+        <source>Wake allowed</source>
+        <translation>깨우기 허용</translation>
+    </message>
+    <message>
+        <source>Allow this device to wake the system</source>
+        <translation>이 장치가 시스템을 깨우도록 허용</translation>
+    </message>
+    <message>
+        <source>Battery</source>
+        <translation>배터리</translation>
+    </message>
+    <message>
+        <source>Unavailable</source>
+        <translation>사용 불가</translation>
+    </message>
+    <message>
+        <source>Address</source>
+        <translation>주소</translation>
     </message>
 </context>
 <context>
@@ -381,94 +745,18 @@
     </message>
 </context>
 <context>
-    <name>Center</name>
+    <name>ColourSelect</name>
     <message>
-        <source>Caps lock and Num lock are ON.
-Keyboard layout: %1</source>
-        <translation>Caps Lock과 Num Lock이 켜져 있습니다.
-키보드 레이아웃: %1</translation>
+        <source>Colours</source>
+        <translation>색상</translation>
     </message>
     <message>
-        <source>Caps lock is ON. Kb layout: %1</source>
-        <translation>Caps Lock이 켜져 있습니다. 키보드 레이아웃: %1</translation>
+        <source>Page under construction</source>
+        <translation>페이지 준비 중</translation>
     </message>
     <message>
-        <source>Num lock is ON. Kb layout: %1</source>
-        <translation>Num Lock이 켜져 있습니다. 키보드 레이아웃: %1</translation>
-    </message>
-    <message>
-        <source>Keyboard layout: %1</source>
-        <translation>키보드 레이아웃: %1</translation>
-    </message>
-    <message>
-        <source>Caps lock and Num lock are ON.</source>
-        <translation>Caps Lock과 Num Lock이 켜져 있습니다.</translation>
-    </message>
-    <message>
-        <source>Caps lock is ON.</source>
-        <translation>Caps Lock이 켜져 있습니다.</translation>
-    </message>
-    <message>
-        <source>Num lock is ON.</source>
-        <translation>Num Lock이 켜져 있습니다.</translation>
-    </message>
-    <message>
-        <source>FP ERROR: %1</source>
-        <translation>지문 오류: %1</translation>
-    </message>
-    <message>
-        <source>PW ERROR: %1</source>
-        <translation>비밀번호 오류: %1</translation>
-    </message>
-    <message>
-        <source>Maximum password and fingerprint attempts reached.</source>
-        <translation>비밀번호와 지문 시도 횟수가 최대에 도달했습니다.</translation>
-    </message>
-    <message>
-        <source>Maximum password attempts reached. Please use fingerprint.</source>
-        <translation>비밀번호 시도 횟수가 최대에 도달했습니다. 지문을 사용하세요.</translation>
-    </message>
-    <message>
-        <source>Maximum password attempts reached.</source>
-        <translation>비밀번호 시도 횟수가 최대에 도달했습니다.</translation>
-    </message>
-    <message>
-        <source>Maximum fingerprint attempts reached. Please use password.</source>
-        <translation>지문 시도 횟수가 최대에 도달했습니다. 비밀번호를 사용하세요.</translation>
-    </message>
-    <message>
-        <source>Incorrect password. Please try again or use fingerprint.</source>
-        <translation>비밀번호가 올바르지 않습니다. 다시 시도하거나 지문을 사용하세요.</translation>
-    </message>
-    <message>
-        <source>Incorrect password. Please try again.</source>
-        <translation>비밀번호가 올바르지 않습니다. 다시 시도하세요.</translation>
-    </message>
-    <message>
-        <source>Fingerprint not recognized (%1/%2). Please try again or use password.</source>
-        <translation>지문이 인식되지 않았습니다 (%1/%2). 다시 시도하거나 비밀번호를 사용하세요.</translation>
-    </message>
-</context>
-<context>
-    <name>ColorSchemeSection</name>
-    <message>
-        <source>Color scheme</source>
-        <translation>색 구성표</translation>
-    </message>
-    <message>
-        <source>Available color schemes</source>
-        <translation>사용 가능한 색 구성표</translation>
-    </message>
-</context>
-<context>
-    <name>ColorVariantSection</name>
-    <message>
-        <source>Color variant</source>
-        <translation>색상 변형</translation>
-    </message>
-    <message>
-        <source>Material theme variant</source>
-        <translation>Material 테마 변형</translation>
+        <source>This page will be available in a future update.</source>
+        <translation>이 페이지는 향후 업데이트에서 제공될 예정입니다.</translation>
     </message>
 </context>
 <context>
@@ -575,94 +863,86 @@ Keyboard layout: %1</source>
     </message>
 </context>
 <context>
-    <name>DashboardPane</name>
+    <name>DashboardPanel</name>
     <message>
         <source>Dashboard</source>
         <translation>대시보드</translation>
     </message>
+    <message>
+        <source>General</source>
+        <translation>일반</translation>
+    </message>
+    <message>
+        <source>Enabled</source>
+        <translation>활성화됨</translation>
+    </message>
+    <message>
+        <source>Show on hover</source>
+        <translation>마우스를 올리면 표시</translation>
+    </message>
+    <message>
+        <source>Reveal when the cursor reaches the screen edge</source>
+        <translation>커서가 화면 가장자리에 닿으면 표시</translation>
+    </message>
+    <message>
+        <source>Tabs</source>
+        <translation>탭</translation>
+    </message>
+    <message>
+        <source>Media</source>
+        <translation>미디어</translation>
+    </message>
+    <message>
+        <source>Performance</source>
+        <translation>성능</translation>
+    </message>
+    <message>
+        <source>Weather</source>
+        <translation>날씨</translation>
+    </message>
+    <message>
+        <source>Performance widgets</source>
+        <translation>성능 위젯</translation>
+    </message>
+    <message>
+        <source>Battery</source>
+        <translation>배터리</translation>
+    </message>
+    <message>
+        <source>GPU</source>
+        <translation>GPU</translation>
+    </message>
+    <message>
+        <source>CPU</source>
+        <translation>CPU</translation>
+    </message>
+    <message>
+        <source>Memory</source>
+        <translation>메모리</translation>
+    </message>
+    <message>
+        <source>Storage</source>
+        <translation>저장 공간</translation>
+    </message>
+    <message>
+        <source>Network</source>
+        <translation>네트워크</translation>
+    </message>
+    <message>
+        <source>Behaviour</source>
+        <translation>동작</translation>
+    </message>
+    <message>
+        <source>Drag threshold</source>
+        <translation>드래그 임계값</translation>
+    </message>
+    <message>
+        <source>Pixels dragged before the dashboard opens</source>
+        <translation>대시보드가 열리기 전 드래그할 픽셀 수</translation>
+    </message>
 </context>
 <context>
     <name>Details</name>
-    <message>
-        <source>Connection status</source>
-        <translation>연결 상태</translation>
-    </message>
-    <message>
-        <source>Connection settings for this device</source>
-        <translation>이 장치의 연결 설정</translation>
-    </message>
-    <message>
-        <source>Connected</source>
-        <translation>연결됨</translation>
-    </message>
-    <message>
-        <source>Paired</source>
-        <translation>페어링됨</translation>
-    </message>
-    <message>
-        <source>Blocked</source>
-        <translation>차단됨</translation>
-    </message>
-    <message>
-        <source>Device properties</source>
-        <translation>장치 속성</translation>
-    </message>
-    <message>
-        <source>Additional settings</source>
-        <translation>추가 설정</translation>
-    </message>
-    <message>
-        <source>Device name</source>
-        <translation>장치 이름</translation>
-    </message>
-    <message>
-        <source>Trusted</source>
-        <translation>신뢰됨</translation>
-    </message>
-    <message>
-        <source>Wake allowed</source>
-        <translation>깨우기 허용</translation>
-    </message>
-    <message>
-        <source>Device information</source>
-        <translation>장치 정보</translation>
-    </message>
-    <message>
-        <source>Information about this device</source>
-        <translation>이 장치에 대한 정보</translation>
-    </message>
-    <message>
-        <source>Device battery (%1%)</source>
-        <translation>장치 배터리 (%1%)</translation>
-    </message>
-    <message>
-        <source>Battery unavailable</source>
-        <translation>배터리 정보 없음</translation>
-    </message>
-    <message>
-        <source>Dbus path</source>
-        <translation>Dbus 경로</translation>
-    </message>
-    <message>
-        <source>MAC address</source>
-        <translation>MAC 주소</translation>
-    </message>
-    <message>
-        <source>Bonded</source>
-        <translation>본딩됨</translation>
-    </message>
-    <message>
-        <source>Yes</source>
-        <translation>예</translation>
-    </message>
-    <message>
-        <source>No</source>
-        <translation>아니요</translation>
-    </message>
-    <message>
-        <source>System name</source>
-        <translation>시스템 이름</translation>
-    </message>
     <message>
         <source>No active client</source>
         <translation>활성 클라이언트 없음</translation>
@@ -723,60 +1003,13 @@ Keyboard layout: %1</source>
         <source>Fullscreen state: unknown</source>
         <translation>전체 화면 상태: 알 수 없음</translation>
     </message>
-</context>
-<context>
-    <name>DeviceList</name>
     <message>
-        <source>Devices (%1)</source>
-        <translation>장치 (%1)</translation>
+        <source>Unknown artist</source>
+        <translation>아티스트 정보 없음</translation>
     </message>
     <message>
-        <source>All available bluetooth devices</source>
-        <translation>사용 가능한 모든 블루투스 장치</translation>
-    </message>
-    <message>
-        <source>Bluetooth</source>
-        <translation>블루투스</translation>
-    </message>
-    <message>
-        <source>Toggle Bluetooth</source>
-        <translation>블루투스 전환</translation>
-    </message>
-    <message>
-        <source>Discoverable</source>
-        <translation>검색 가능</translation>
-    </message>
-    <message>
-        <source>Make discoverable</source>
-        <translation>검색 가능하게 설정</translation>
-    </message>
-    <message>
-        <source>Pairable</source>
-        <translation>페어링 가능</translation>
-    </message>
-    <message>
-        <source>Make pairable</source>
-        <translation>페어링 가능하게 설정</translation>
-    </message>
-    <message>
-        <source>Scan for devices</source>
-        <translation>장치 검색</translation>
-    </message>
-    <message>
-        <source>Bluetooth settings</source>
-        <translation>블루투스 설정</translation>
-    </message>
-    <message>
-        <source>Unknown</source>
-        <translation>알 수 없음</translation>
-    </message>
-    <message>
-        <source> (Connected)</source>
-        <translation> (연결됨)</translation>
-    </message>
-    <message>
-        <source> (Paired)</source>
-        <translation> (페어링됨)</translation>
+        <source>Unknown album</source>
+        <translation>알 수 없는 앨범</translation>
     </message>
 </context>
 <context>
@@ -792,111 +1025,6 @@ Keyboard layout: %1</source>
     <message>
         <source>Cancel</source>
         <translation>취소</translation>
-    </message>
-</context>
-<context>
-    <name>EthernetDetails</name>
-    <message>
-        <source>Unknown</source>
-        <translation>알 수 없음</translation>
-    </message>
-    <message>
-        <source>Connection status</source>
-        <translation>연결 상태</translation>
-    </message>
-    <message>
-        <source>Connection settings for this device</source>
-        <translation>이 장치의 연결 설정</translation>
-    </message>
-    <message>
-        <source>Connected</source>
-        <translation>연결됨</translation>
-    </message>
-    <message>
-        <source>Device properties</source>
-        <translation>장치 속성</translation>
-    </message>
-    <message>
-        <source>Additional information</source>
-        <translation>추가 정보</translation>
-    </message>
-    <message>
-        <source>Interface</source>
-        <translation>인터페이스</translation>
-    </message>
-    <message>
-        <source>Connection</source>
-        <translation>연결</translation>
-    </message>
-    <message>
-        <source>Not connected</source>
-        <translation>연결되지 않음</translation>
-    </message>
-    <message>
-        <source>State</source>
-        <translation>상태</translation>
-    </message>
-    <message>
-        <source>Connection information</source>
-        <translation>연결 정보</translation>
-    </message>
-    <message>
-        <source>Network connection details</source>
-        <translation>네트워크 연결 세부 정보</translation>
-    </message>
-</context>
-<context>
-    <name>EthernetList</name>
-    <message>
-        <source>Devices (%1)</source>
-        <translation>장치 (%1)</translation>
-    </message>
-    <message>
-        <source>All available ethernet devices</source>
-        <translation>사용 가능한 모든 이더넷 장치</translation>
-    </message>
-    <message>
-        <source>Settings</source>
-        <translation>설정</translation>
-    </message>
-    <message>
-        <source>Unknown</source>
-        <translation>알 수 없음</translation>
-    </message>
-    <message>
-        <source>Connected</source>
-        <translation>연결됨</translation>
-    </message>
-    <message>
-        <source>Disconnected</source>
-        <translation>연결 끊김</translation>
-    </message>
-</context>
-<context>
-    <name>EthernetSettings</name>
-    <message>
-        <source>Ethernet settings</source>
-        <translation>이더넷 설정</translation>
-    </message>
-    <message>
-        <source>Ethernet devices</source>
-        <translation>이더넷 장치</translation>
-    </message>
-    <message>
-        <source>Available ethernet devices</source>
-        <translation>사용 가능한 이더넷 장치</translation>
-    </message>
-    <message>
-        <source>Total devices</source>
-        <translation>전체 장치</translation>
-    </message>
-    <message>
-        <source>%1</source>
-        <translation>%1</translation>
-    </message>
-    <message>
-        <source>Connected devices</source>
-        <translation>연결된 장치</translation>
     </message>
 </context>
 <context>
@@ -921,65 +1049,21 @@ Keyboard layout: %1</source>
     </message>
 </context>
 <context>
-    <name>FontsSection</name>
+    <name>Forecast</name>
     <message>
-        <source>Fonts</source>
-        <translation>글꼴</translation>
+        <source>Hourly forecast</source>
+        <translation>시간별 예보</translation>
     </message>
     <message>
-        <source>Sans-serif font family</source>
-        <translation>Sans-serif 글꼴 패밀리</translation>
-    </message>
-    <message>
-        <source>Monospace font family</source>
-        <translation>Monospace 글꼴 패밀리</translation>
-    </message>
-    <message>
-        <source>Material font family</source>
-        <translation>Material 글꼴 패밀리</translation>
-    </message>
-    <message>
-        <source>Font size scale</source>
-        <translation>글꼴 크기 배율</translation>
+        <source>Now</source>
+        <translation>지금</translation>
     </message>
 </context>
 <context>
-    <name>GeneralSection</name>
+    <name>HeroCard</name>
     <message>
-        <source>General Settings</source>
-        <translation>일반 설정</translation>
-    </message>
-    <message>
-        <source>Enabled</source>
-        <translation>활성화됨</translation>
-    </message>
-    <message>
-        <source>Show on hover</source>
-        <translation>마우스를 올리면 표시</translation>
-    </message>
-    <message>
-        <source>Show Dashboard tab</source>
-        <translation>대시보드 탭 표시</translation>
-    </message>
-    <message>
-        <source>Show Media tab</source>
-        <translation>미디어 탭 표시</translation>
-    </message>
-    <message>
-        <source>Show Performance tab</source>
-        <translation>성능 탭 표시</translation>
-    </message>
-    <message>
-        <source>Show Weather tab</source>
-        <translation>날씨 탭 표시</translation>
-    </message>
-    <message>
-        <source>Media update interval</source>
-        <translation>미디어 업데이트 간격</translation>
-    </message>
-    <message>
-        <source>Drag threshold</source>
-        <translation>드래그 임계값</translation>
+        <source>Usage</source>
+        <translation>사용량</translation>
     </message>
 </context>
 <context>
@@ -1008,8 +1092,8 @@ Keyboard layout: %1</source>
         <translation>불러오는 중...</translation>
     </message>
     <message>
-        <source>You have reached the maximum number of tries</source>
-        <translation>최대 시도 횟수에 도달했습니다</translation>
+        <source>Max tries reached</source>
+        <translation>최대 시도 횟수 도달</translation>
     </message>
     <message>
         <source>Enter your password</source>
@@ -1039,46 +1123,161 @@ Keyboard layout: %1</source>
     </message>
 </context>
 <context>
-    <name>LauncherPane</name>
+    <name>LanguageAndRegion</name>
+    <message>
+        <source>24-hour</source>
+        <translation>24시간</translation>
+    </message>
+    <message>
+        <source>12-hour</source>
+        <translation>12시간</translation>
+    </message>
+    <message>
+        <source>Language &amp; region</source>
+        <translation>언어 및 지역</translation>
+    </message>
+    <message>
+        <source>Language</source>
+        <translation>언어</translation>
+    </message>
+    <message>
+        <source>System language</source>
+        <translation>시스템 언어</translation>
+    </message>
+    <message>
+        <source>Follows your system locale (%1)</source>
+        <translation>시스템 로캘을 따릅니다 (%1)</translation>
+    </message>
+    <message>
+        <source>Weather</source>
+        <translation>날씨</translation>
+    </message>
+    <message>
+        <source>Location picker coming soon</source>
+        <translation>위치 선택기 곧 제공 예정</translation>
+    </message>
+    <message>
+        <source>Choose your weather location on a map in a future update</source>
+        <translation>향후 업데이트에서 지도에서 날씨 위치를 선택할 수 있습니다</translation>
+    </message>
+    <message>
+        <source>Units</source>
+        <translation>단위</translation>
+    </message>
+    <message>
+        <source>Temperature</source>
+        <translation>온도</translation>
+    </message>
+    <message>
+        <source>Units for weather temperatures</source>
+        <translation>날씨 온도의 단위</translation>
+    </message>
+    <message>
+        <source>System temperatures</source>
+        <translation>시스템 온도</translation>
+    </message>
+    <message>
+        <source>Units for CPU and GPU temperatures</source>
+        <translation>CPU 및 GPU 온도의 단위</translation>
+    </message>
+    <message>
+        <source>Time &amp; date</source>
+        <translation>시간 및 날짜</translation>
+    </message>
+    <message>
+        <source>Clock format</source>
+        <translation>시계 형식</translation>
+    </message>
+    <message>
+        <source>How times are shown across the shell</source>
+        <translation>셸 전체에서 시간이 표시되는 방식</translation>
+    </message>
+</context>
+<context>
+    <name>LauncherPanel</name>
     <message>
         <source>Launcher</source>
         <translation>런처</translation>
     </message>
     <message>
-        <source>Launcher settings</source>
-        <translation>런처 설정</translation>
+        <source>General</source>
+        <translation>일반</translation>
     </message>
     <message>
-        <source>Applications (%1)</source>
-        <translation>애플리케이션 (%1)</translation>
+        <source>Enabled</source>
+        <translation>활성화됨</translation>
     </message>
     <message>
-        <source>All applications available in the launcher</source>
-        <translation>런처에서 사용 가능한 모든 애플리케이션</translation>
+        <source>Show on hover</source>
+        <translation>마우스를 올리면 표시</translation>
     </message>
     <message>
-        <source>Search applications...</source>
-        <translation>애플리케이션 검색...</translation>
+        <source>Reveal when the cursor reaches the screen edge</source>
+        <translation>커서가 화면 가장자리에 닿으면 표시</translation>
     </message>
     <message>
-        <source>Unknown</source>
-        <translation>알 수 없음</translation>
+        <source>Display</source>
+        <translation>디스플레이</translation>
     </message>
     <message>
-        <source>Launcher Applications</source>
-        <translation>런처 애플리케이션</translation>
+        <source>Max items shown</source>
+        <translation>표시되는 최대 항목 수</translation>
     </message>
     <message>
-        <source>Application Details</source>
-        <translation>애플리케이션 세부 정보</translation>
+        <source>Max wallpapers</source>
+        <translation>최대 배경화면 수</translation>
     </message>
     <message>
-        <source>Mark as favourite</source>
-        <translation>즐겨찾기에 추가</translation>
+        <source>Drag threshold</source>
+        <translation>드래그 임계값</translation>
     </message>
     <message>
-        <source>Hide from launcher</source>
-        <translation>런처에서 숨기기</translation>
+        <source>Pixels dragged before the launcher opens</source>
+        <translation>런처가 열리기 전 드래그할 픽셀 수</translation>
+    </message>
+    <message>
+        <source>Behaviour</source>
+        <translation>동작</translation>
+    </message>
+    <message>
+        <source>Vim keybinds</source>
+        <translation>Vim 키 바인딩</translation>
+    </message>
+    <message>
+        <source>Navigate results with Ctrl+hjkl</source>
+        <translation>Ctrl+hjkl로 결과 탐색</translation>
+    </message>
+    <message>
+        <source>Enable dangerous actions</source>
+        <translation>위험한 작업 활성화</translation>
+    </message>
+    <message>
+        <source>Allow actions that shut down or log out</source>
+        <translation>시스템 종료 또는 로그아웃하는 작업 허용</translation>
+    </message>
+    <message>
+        <source>Fuzzy search</source>
+        <translation>퍼지 검색</translation>
+    </message>
+    <message>
+        <source>Apps</source>
+        <translation>앱</translation>
+    </message>
+    <message>
+        <source>Actions</source>
+        <translation>작업</translation>
+    </message>
+    <message>
+        <source>Schemes</source>
+        <translation>구성표</translation>
+    </message>
+    <message>
+        <source>Variants</source>
+        <translation>변형</translation>
+    </message>
+    <message>
+        <source>Wallpapers</source>
+        <translation>배경화면</translation>
     </message>
 </context>
 <context>
@@ -1093,22 +1292,48 @@ Keyboard layout: %1</source>
     </message>
 </context>
 <context>
-    <name>LyricMenu</name>
+    <name>LyricList</name>
     <message>
-        <source>Manual Search</source>
-        <translation>수동 검색</translation>
+        <source>Loading lyrics...</source>
+        <translation>가사 불러오는 중...</translation>
     </message>
     <message>
-        <source>title</source>
-        <translation>제목</translation>
+        <source>No lyrics found</source>
+        <translation>가사를 찾을 수 없음</translation>
+    </message>
+</context>
+<context>
+    <name>LyricsAndSelector</name>
+    <message>
+        <source>Lyrics</source>
+        <translation>가사</translation>
     </message>
     <message>
-        <source>artist</source>
-        <translation>아티스트</translation>
+        <source>No players</source>
+        <translation>플레이어 없음</translation>
+    </message>
+</context>
+<context>
+    <name>LyricsInfo</name>
+    <message>
+        <source>Backend: %1</source>
+        <translation>백엔드: %1</translation>
     </message>
     <message>
-        <source>Offset</source>
-        <translation>오프셋</translation>
+        <source>Selected candidate: %1 | %2 | %3</source>
+        <translation>선택된 후보: %1 | %2 | %3</translation>
+    </message>
+    <message>
+        <source>Offset: %1 ms</source>
+        <translation>오프셋: %1 ms</translation>
+    </message>
+    <message>
+        <source>Loading...</source>
+        <translation>불러오는 중...</translation>
+    </message>
+    <message>
+        <source>No lyrics found</source>
+        <translation>가사를 찾을 수 없음</translation>
     </message>
 </context>
 <context>
@@ -1201,23 +1426,31 @@ Keyboard layout: %1</source>
         <translation>아티스트 정보 없음</translation>
     </message>
     <message>
-        <source>Play some music for stuff to show up here!</source>
-        <translation>음악을 재생하면 정보가 표시됩니다!</translation>
+        <source>Nothing playing</source>
+        <translation>재생 중인 항목 없음</translation>
     </message>
     <message>
-        <source>No players</source>
-        <translation>플레이어 없음</translation>
+        <source>Play something for it to show up here!</source>
+        <translation>여기에 표시되려면 무언가를 재생하세요!</translation>
     </message>
     <message>
-        <source>Now playing</source>
-        <translation>재생 중</translation>
+        <source>Unknown track</source>
+        <translation>알 수 없는 트랙</translation>
+    </message>
+    <message>
+        <source>Try playing some music!</source>
+        <translation>음악을 재생해 보세요!</translation>
     </message>
 </context>
 <context>
-    <name>NavRail</name>
+    <name>MemoryCard</name>
     <message>
-        <source>Float window</source>
-        <translation>창 띄우기</translation>
+        <source>Memory</source>
+        <translation>메모리</translation>
+    </message>
+    <message>
+        <source>Used</source>
+        <translation>사용됨</translation>
     </message>
 </context>
 <context>
@@ -1252,141 +1485,61 @@ Keyboard layout: %1</source>
     </message>
 </context>
 <context>
-    <name>NetworkSettings</name>
-    <message>
-        <source>Network Settings</source>
-        <translation>네트워크 설정</translation>
-    </message>
-    <message>
-        <source>Ethernet</source>
-        <translation>이더넷</translation>
-    </message>
-    <message>
-        <source>Ethernet device information</source>
-        <translation>이더넷 장치 정보</translation>
-    </message>
-    <message>
-        <source>Total devices</source>
-        <translation>전체 장치</translation>
-    </message>
-    <message>
-        <source>%1</source>
-        <translation>%1</translation>
-    </message>
-    <message>
-        <source>Connected devices</source>
-        <translation>연결된 장치</translation>
-    </message>
-    <message>
-        <source>Wireless</source>
-        <translation>무선</translation>
-    </message>
-    <message>
-        <source>WiFi network settings</source>
-        <translation>Wi-Fi 네트워크 설정</translation>
-    </message>
-    <message>
-        <source>WiFi enabled</source>
-        <translation>Wi-Fi 활성화</translation>
-    </message>
-    <message>
-        <source>VPN</source>
-        <translation>VPN</translation>
-    </message>
-    <message>
-        <source>VPN provider settings</source>
-        <translation>VPN 공급자 설정</translation>
-    </message>
-    <message>
-        <source>VPN enabled</source>
-        <translation>VPN 활성화</translation>
-    </message>
-    <message>
-        <source>Providers</source>
-        <translation>공급자</translation>
-    </message>
-    <message>
-        <source>⚙ Manage VPN Providers</source>
-        <translation>⚙ VPN 공급자 관리</translation>
-    </message>
-    <message>
-        <source>Current connection</source>
-        <translation>현재 연결</translation>
-    </message>
-    <message>
-        <source>Active network connection information</source>
-        <translation>활성 네트워크 연결 정보</translation>
-    </message>
+    <name>NetworkCard</name>
     <message>
         <source>Network</source>
         <translation>네트워크</translation>
     </message>
     <message>
-        <source>Not connected</source>
-        <translation>연결되지 않음</translation>
+        <source>Collecting data...</source>
+        <translation>데이터 수집 중...</translation>
     </message>
     <message>
-        <source>Signal strength</source>
-        <translation>신호 강도</translation>
+        <source>Download</source>
+        <translation>다운로드</translation>
     </message>
     <message>
-        <source>%1%</source>
-        <translation>%1%</translation>
+        <source>Upload</source>
+        <translation>업로드</translation>
     </message>
     <message>
-        <source>N/A</source>
-        <translation>해당 없음</translation>
-    </message>
-    <message>
-        <source>Security</source>
-        <translation>보안</translation>
-    </message>
-    <message>
-        <source>Secured</source>
-        <translation>보안됨</translation>
-    </message>
-    <message>
-        <source>Open</source>
-        <translation>개방형</translation>
-    </message>
-    <message>
-        <source>Frequency</source>
-        <translation>주파수</translation>
-    </message>
-    <message>
-        <source>%1 MHz</source>
-        <translation>%1 MHz</translation>
+        <source>Total</source>
+        <translation>합계</translation>
     </message>
 </context>
 <context>
-    <name>NetworkingPane</name>
+    <name>NetworkPage</name>
     <message>
         <source>Network</source>
         <translation>네트워크</translation>
     </message>
     <message>
-        <source>Toggle WiFi</source>
-        <translation>Wi-Fi 전환</translation>
+        <source>Wi-Fi</source>
+        <translation>Wi-Fi</translation>
     </message>
     <message>
-        <source>Scan for networks</source>
-        <translation>네트워크 검색</translation>
+        <source>No networks found</source>
+        <translation>네트워크를 찾을 수 없음</translation>
     </message>
     <message>
-        <source>Network settings</source>
-        <translation>네트워크 설정</translation>
+        <source>Wi-Fi disabled</source>
+        <translation>Wi-Fi 사용 안 함</translation>
     </message>
     <message>
-        <source>VPN</source>
-        <translation>VPN</translation>
+        <source>Security: %1%2</source>
+        <translation>보안: %1%2</translation>
     </message>
     <message>
-        <source>Ethernet</source>
-        <translation>이더넷</translation>
+        <source> • Connected</source>
+        <translation> • 연결됨</translation>
     </message>
     <message>
-        <source>Wireless</source>
-        <translation>무선</translation>
+        <source> • Saved</source>
+        <translation> • 저장됨</translation>
+    </message>
+    <message>
+        <source>Add network</source>
+        <translation>네트워크 추가</translation>
     </message>
 </context>
 <context>
@@ -1418,24 +1571,13 @@ Keyboard layout: %1</source>
         <source>notification%1</source>
         <translation>알림%1</translation>
     </message>
-</context>
-<context>
-    <name>Notification</name>
     <message>
-        <source>Close</source>
-        <translation>닫기</translation>
+        <source>All up to date!</source>
+        <translation>모두 최신 상태입니다!</translation>
     </message>
 </context>
 <context>
-    <name>NotificationsPane</name>
-    <message>
-        <source>Notifications</source>
-        <translation>알림</translation>
-    </message>
-    <message>
-        <source>Show in fullscreen</source>
-        <translation>전체 화면으로 표시</translation>
-    </message>
+    <name>NotificationsPage</name>
     <message>
         <source>Off</source>
         <translation>꺼짐</translation>
@@ -1445,32 +1587,72 @@ Keyboard layout: %1</source>
         <translation>켜짐</translation>
     </message>
     <message>
+        <source>Important</source>
+        <translation>중요</translation>
+    </message>
+    <message>
+        <source>Notifications</source>
+        <translation>알림</translation>
+    </message>
+    <message>
+        <source>Show in fullscreen</source>
+        <translation>전체 화면으로 표시</translation>
+    </message>
+    <message>
+        <source>Whether notifications appear over fullscreen apps</source>
+        <translation>전체 화면 앱 위에 알림 표시 여부</translation>
+    </message>
+    <message>
         <source>Expire automatically</source>
         <translation>자동 만료</translation>
+    </message>
+    <message>
+        <source>Dismiss notifications after their timeout</source>
+        <translation>시간 초과 후 알림 해제</translation>
     </message>
     <message>
         <source>Open expanded</source>
         <translation>확장하여 열기</translation>
     </message>
     <message>
+        <source>Show notifications expanded by default</source>
+        <translation>기본적으로 알림을 확장하여 표시</translation>
+    </message>
+    <message>
         <source>Default timeout</source>
         <translation>기본 시간 제한</translation>
+    </message>
+    <message>
+        <source>Time before a notification dismisses (ms)</source>
+        <translation>알림이 해제되기까지의 시간 (ms)</translation>
     </message>
     <message>
         <source>Group preview count</source>
         <translation>그룹 미리보기 개수</translation>
     </message>
     <message>
-        <source>Toast settings</source>
-        <translation>토스트 설정</translation>
+        <source>Notifications shown per group before collapsing</source>
+        <translation>접기 전에 그룹별로 표시되는 알림 수</translation>
     </message>
     <message>
-        <source>Important</source>
-        <translation>중요</translation>
+        <source>Toasts</source>
+        <translation>토스트</translation>
+    </message>
+    <message>
+        <source>Whether toasts appear over fullscreen apps</source>
+        <translation>전체 화면 앱 위에 토스트 표시 여부</translation>
     </message>
     <message>
         <source>Visible toasts</source>
         <translation>표시되는 토스트</translation>
+    </message>
+    <message>
+        <source>Maximum number of toasts shown at once</source>
+        <translation>한 번에 표시되는 최대 토스트 수</translation>
+    </message>
+    <message>
+        <source>Toast events</source>
+        <translation>토스트 이벤트</translation>
     </message>
     <message>
         <source>Charging changes</source>
@@ -1481,8 +1663,8 @@ Keyboard layout: %1</source>
         <translation>게임 모드 변경</translation>
     </message>
     <message>
-        <source>Do not disturb</source>
-        <translation>방해 금지</translation>
+        <source>Do not disturb changes</source>
+        <translation>방해 금지 변경</translation>
     </message>
     <message>
         <source>Audio output changes</source>
@@ -1514,113 +1696,167 @@ Keyboard layout: %1</source>
     </message>
 </context>
 <context>
+    <name>PageCompRegistry</name>
+    <message>
+        <source>Page under construction</source>
+        <translation>페이지 준비 중</translation>
+    </message>
+    <message>
+        <source>This page will be available in a future update.</source>
+        <translation>이 페이지는 향후 업데이트에서 제공될 예정입니다.</translation>
+    </message>
+</context>
+<context>
+    <name>PageRegistry</name>
+    <message>
+        <source>Wallpaper &amp; style</source>
+        <translation>배경화면 및 스타일</translation>
+    </message>
+    <message>
+        <source>Wallpaper, fonts, colours</source>
+        <translation>배경화면, 글꼴, 색상</translation>
+    </message>
+    <message>
+        <source>Network</source>
+        <translation>네트워크</translation>
+    </message>
+    <message>
+        <source>Wi-Fi, ethernet</source>
+        <translation>Wi-Fi, 이더넷</translation>
+    </message>
+    <message>
+        <source>Connected devices</source>
+        <translation>연결된 장치</translation>
+    </message>
+    <message>
+        <source>Bluetooth, pairing</source>
+        <translation>블루투스, 페어링</translation>
+    </message>
+    <message>
+        <source>Audio</source>
+        <translation>오디오</translation>
+    </message>
+    <message>
+        <source>App volumes, sound devices</source>
+        <translation>앱 볼륨, 사운드 장치</translation>
+    </message>
+    <message>
+        <source>Updates</source>
+        <translation>업데이트</translation>
+    </message>
+    <message>
+        <source>System updates</source>
+        <translation>시스템 업데이트</translation>
+    </message>
+    <message>
+        <source>Plugins</source>
+        <translation>플러그인</translation>
+    </message>
+    <message>
+        <source>Manage plugins</source>
+        <translation>플러그인 관리</translation>
+    </message>
+    <message>
+        <source>Panels</source>
+        <translation>패널</translation>
+    </message>
+    <message>
+        <source>Dashboard, taskbar, launcher, sidebar</source>
+        <translation>대시보드, 작업 표시줄, 런처, 사이드바</translation>
+    </message>
+    <message>
+        <source>Apps</source>
+        <translation>앱</translation>
+    </message>
+    <message>
+        <source>Default apps, favourites, hidden apps</source>
+        <translation>기본 앱, 즐겨찾기, 숨긴 앱</translation>
+    </message>
+    <message>
+        <source>Services</source>
+        <translation>서비스</translation>
+    </message>
+    <message>
+        <source>Poll intervals, lyrics backend</source>
+        <translation>폴링 간격, 가사 백엔드</translation>
+    </message>
+    <message>
+        <source>Language &amp; region</source>
+        <translation>언어 및 지역</translation>
+    </message>
+    <message>
+        <source>UI language, weather location, display units</source>
+        <translation>UI 언어, 날씨 위치, 표시 단위</translation>
+    </message>
+    <message>
+        <source>About</source>
+        <translation>정보</translation>
+    </message>
+    <message>
+        <source>System information, credits</source>
+        <translation>시스템 정보, 크레딧</translation>
+    </message>
+</context>
+<context>
+    <name>PanelsPage</name>
+    <message>
+        <source>Panels</source>
+        <translation>패널</translation>
+    </message>
+    <message>
+        <source>Dashboard</source>
+        <translation>대시보드</translation>
+    </message>
+    <message>
+        <source>Enabled</source>
+        <translation>활성화됨</translation>
+    </message>
+    <message>
+        <source>Disabled</source>
+        <translation>비활성화됨</translation>
+    </message>
+    <message>
+        <source>Taskbar</source>
+        <translation>작업 표시줄</translation>
+    </message>
+    <message>
+        <source>Always visible</source>
+        <translation>항상 표시</translation>
+    </message>
+    <message>
+        <source>Reveal on hover</source>
+        <translation>마우스를 올리면 표시</translation>
+    </message>
+    <message>
+        <source>Reveal on drag</source>
+        <translation>드래그하면 표시</translation>
+    </message>
+    <message>
+        <source>Launcher</source>
+        <translation>런처</translation>
+    </message>
+    <message>
+        <source>Sidebar</source>
+        <translation>사이드바</translation>
+    </message>
+</context>
+<context>
     <name>Performance</name>
     <message>
         <source>No widgets enabled</source>
         <translation>활성화된 위젯 없음</translation>
     </message>
     <message>
-        <source>Enable widgets in dashboard settings</source>
-        <translation>대시보드 설정에서 위젯을 활성화하세요</translation>
+        <source>Enable widgets in the dashboard settings</source>
+        <translation>대시보드 설정에서 위젯 활성화</translation>
     </message>
     <message>
         <source>CPU</source>
         <translation>CPU</translation>
     </message>
     <message>
-        <source>Usage</source>
-        <translation>사용량</translation>
-    </message>
-    <message>
-        <source>Temp</source>
-        <translation>온도</translation>
-    </message>
-    <message>
         <source>GPU</source>
         <translation>GPU</translation>
-    </message>
-    <message>
-        <source>Memory</source>
-        <translation>메모리</translation>
-    </message>
-    <message>
-        <source>Battery</source>
-        <translation>배터리</translation>
-    </message>
-    <message>
-        <source>Full</source>
-        <translation>완충</translation>
-    </message>
-    <message>
-        <source>Charging</source>
-        <translation>충전 중</translation>
-    </message>
-    <message>
-        <source>...</source>
-        <translation>...</translation>
-    </message>
-    <message>
-        <source>Storage</source>
-        <translation>저장 공간</translation>
-    </message>
-    <message>
-        <source>Scroll to switch disks</source>
-        <translation>스크롤하여 디스크 전환</translation>
-    </message>
-    <message>
-        <source>Network</source>
-        <translation>네트워크</translation>
-    </message>
-    <message>
-        <source>Collecting data...</source>
-        <translation>데이터 수집 중...</translation>
-    </message>
-    <message>
-        <source>Download</source>
-        <translation>다운로드</translation>
-    </message>
-    <message>
-        <source>Upload</source>
-        <translation>업로드</translation>
-    </message>
-    <message>
-        <source>Total</source>
-        <translation>합계</translation>
-    </message>
-</context>
-<context>
-    <name>PerformanceSection</name>
-    <message>
-        <source>Performance Resources</source>
-        <translation>성능 리소스</translation>
-    </message>
-    <message>
-        <source>Battery</source>
-        <translation>배터리</translation>
-    </message>
-    <message>
-        <source>GPU</source>
-        <translation>GPU</translation>
-    </message>
-    <message>
-        <source>CPU</source>
-        <translation>CPU</translation>
-    </message>
-    <message>
-        <source>Memory</source>
-        <translation>메모리</translation>
-    </message>
-    <message>
-        <source>Storage</source>
-        <translation>저장 공간</translation>
-    </message>
-    <message>
-        <source>Network</source>
-        <translation>네트워크</translation>
-    </message>
-    <message>
-        <source>Resource update interval</source>
-        <translation>리소스 업데이트 간격</translation>
     </message>
 </context>
 <context>
@@ -1645,16 +1881,16 @@ Keyboard layout: %1</source>
         <translation>화면 녹화기</translation>
     </message>
     <message>
-        <source>Recording paused</source>
-        <translation>녹화 일시 정지됨</translation>
+        <source>Paused</source>
+        <translation>일시 정지됨</translation>
     </message>
     <message>
-        <source>Recording running</source>
-        <translation>녹화 진행 중</translation>
+        <source>Running...</source>
+        <translation>실행 중...</translation>
     </message>
     <message>
-        <source>Recording off</source>
-        <translation>녹화 꺼짐</translation>
+        <source>Ready</source>
+        <translation>준비됨</translation>
     </message>
     <message>
         <source>Record fullscreen</source>
@@ -1720,233 +1956,145 @@ Keyboard layout: %1</source>
     </message>
 </context>
 <context>
-    <name>ScalesSection</name>
+    <name>SearchBar</name>
     <message>
-        <source>Scales</source>
-        <translation>배율</translation>
-    </message>
-    <message>
-        <source>Padding scale</source>
-        <translation>여백 배율</translation>
-    </message>
-    <message>
-        <source>Rounding scale</source>
-        <translation>둥글기 배율</translation>
-    </message>
-    <message>
-        <source>Spacing scale</source>
-        <translation>간격 배율</translation>
+        <source>Search settings</source>
+        <translation>설정 검색</translation>
     </message>
 </context>
 <context>
-    <name>Settings</name>
+    <name>ServicesPage</name>
     <message>
-        <source>Bluetooth Settings</source>
-        <translation>블루투스 설정</translation>
+        <source>Auto</source>
+        <translation>자동</translation>
     </message>
     <message>
-        <source>Adapter status</source>
-        <translation>어댑터 상태</translation>
-    </message>
-    <message>
-        <source>General adapter settings</source>
-        <translation>일반 어댑터 설정</translation>
-    </message>
-    <message>
-        <source>Powered</source>
-        <translation>전원 켜짐</translation>
-    </message>
-    <message>
-        <source>Discoverable</source>
-        <translation>검색 가능</translation>
-    </message>
-    <message>
-        <source>Pairable</source>
-        <translation>페어링 가능</translation>
-    </message>
-    <message>
-        <source>Adapter properties</source>
-        <translation>어댑터 속성</translation>
-    </message>
-    <message>
-        <source>Per-adapter settings</source>
-        <translation>어댑터별 설정</translation>
-    </message>
-    <message>
-        <source>Current adapter</source>
-        <translation>현재 어댑터</translation>
+        <source>Generic</source>
+        <translation>일반</translation>
     </message>
     <message>
         <source>None</source>
         <translation>없음</translation>
     </message>
     <message>
-        <source>Discoverable timeout</source>
-        <translation>검색 가능 시간 제한</translation>
+        <source>Services</source>
+        <translation>서비스</translation>
     </message>
     <message>
-        <source>Rename adapter (currently does not work)</source>
-        <translation>어댑터 이름 변경 (현재 작동하지 않음)</translation>
+        <source>Notifications</source>
+        <translation>알림</translation>
     </message>
     <message>
-        <source>Adapter information</source>
-        <translation>어댑터 정보</translation>
+        <source>Notifications, toasts, timeouts</source>
+        <translation>알림, 토스트, 시간 제한</translation>
     </message>
     <message>
-        <source>Information about the default adapter</source>
-        <translation>기본 어댑터에 대한 정보</translation>
+        <source>Polling</source>
+        <translation>폴링</translation>
     </message>
     <message>
-        <source>Adapter state</source>
-        <translation>어댑터 상태</translation>
+        <source>Media refresh</source>
+        <translation>미디어 새로 고침</translation>
     </message>
     <message>
-        <source>Unknown</source>
-        <translation>알 수 없음</translation>
+        <source>How often the media position updates (ms)</source>
+        <translation>미디어 위치가 업데이트되는 빈도 (ms)</translation>
     </message>
     <message>
-        <source>Dbus path</source>
-        <translation>Dbus 경로</translation>
+        <source>System stats refresh</source>
+        <translation>시스템 통계 새로 고침</translation>
     </message>
     <message>
-        <source>Adapter id</source>
-        <translation>어댑터 ID</translation>
+        <source>CPU, memory and GPU update interval (seconds)</source>
+        <translation>CPU, 메모리 및 GPU 업데이트 간격 (초)</translation>
     </message>
     <message>
-        <source>Launcher Settings</source>
-        <translation>런처 설정</translation>
+        <source>Wi-Fi rescan</source>
+        <translation>Wi-Fi 재검색</translation>
     </message>
     <message>
-        <source>General</source>
-        <translation>일반</translation>
+        <source>How often available networks are rescanned (seconds)</source>
+        <translation>사용 가능한 네트워크를 재검색하는 빈도 (초)</translation>
     </message>
     <message>
-        <source>General launcher settings</source>
-        <translation>일반 런처 설정</translation>
+        <source>Media &amp; lyrics</source>
+        <translation>미디어 및 가사</translation>
     </message>
     <message>
-        <source>Enabled</source>
-        <translation>활성화됨</translation>
+        <source>Lyrics backend</source>
+        <translation>가사 백엔드</translation>
     </message>
     <message>
-        <source>Show on hover</source>
-        <translation>마우스를 올리면 표시</translation>
+        <source>Source used to fetch synced lyrics</source>
+        <translation>동기화된 가사를 가져오는 데 사용되는 소스</translation>
     </message>
     <message>
-        <source>Vim keybinds</source>
-        <translation>Vim 키 바인딩</translation>
+        <source>Default player</source>
+        <translation>기본 플레이어</translation>
     </message>
     <message>
-        <source>Enable dangerous actions</source>
-        <translation>위험한 작업 활성화</translation>
+        <source>Preferred media player when several are open</source>
+        <translation>여러 개가 열려 있을 때 선호하는 미디어 플레이어</translation>
     </message>
     <message>
-        <source>Display</source>
-        <translation>디스플레이</translation>
+        <source>Input increments</source>
+        <translation>입력 증가량</translation>
     </message>
     <message>
-        <source>Display and appearance settings</source>
-        <translation>디스플레이 및 모양 설정</translation>
+        <source>Volume step</source>
+        <translation>볼륨 단계</translation>
     </message>
     <message>
-        <source>Max shown items</source>
-        <translation>최대 표시 항목 수</translation>
+        <source>Amount the volume changes per scroll (%)</source>
+        <translation>스크롤당 볼륨 변경량 (%)</translation>
     </message>
     <message>
-        <source>%1</source>
-        <translation>%1</translation>
+        <source>Brightness step</source>
+        <translation>밝기 단계</translation>
     </message>
     <message>
-        <source>Max wallpapers</source>
-        <translation>최대 배경화면 수</translation>
+        <source>Amount the brightness changes per scroll (%)</source>
+        <translation>스크롤당 밝기 변경량 (%)</translation>
     </message>
     <message>
-        <source>Drag threshold</source>
-        <translation>드래그 임계값</translation>
+        <source>Max volume</source>
+        <translation>최대 볼륨</translation>
     </message>
     <message>
-        <source>%1 px</source>
-        <translation>%1 px</translation>
+        <source>Upper limit for output volume (%)</source>
+        <translation>출력 볼륨의 상한 (%)</translation>
     </message>
     <message>
-        <source>Prefixes</source>
-        <translation>접두사</translation>
+        <source>Service tuning</source>
+        <translation>서비스 튜닝</translation>
     </message>
     <message>
-        <source>Command prefix settings</source>
-        <translation>명령어 접두사 설정</translation>
+        <source>Visualiser bars</source>
+        <translation>시각화 막대</translation>
     </message>
     <message>
-        <source>Special prefix</source>
-        <translation>특수 접두사</translation>
+        <source>Number of bars in the audio visualisers</source>
+        <translation>오디오 시각화의 막대 수</translation>
     </message>
     <message>
-        <source>Action prefix</source>
-        <translation>작업 접두사</translation>
+        <source>Smart colour scheme</source>
+        <translation>스마트 색 구성표</translation>
     </message>
     <message>
-        <source>Fuzzy search</source>
-        <translation>퍼지 검색</translation>
+        <source>Derive theme mode and variant from the wallpaper</source>
+        <translation>배경화면에서 테마 모드와 변형을 도출</translation>
     </message>
     <message>
-        <source>Fuzzy search settings</source>
-        <translation>퍼지 검색 설정</translation>
+        <source>GPU</source>
+        <translation>GPU</translation>
     </message>
     <message>
-        <source>Apps</source>
-        <translation>앱</translation>
+        <source>Monitoring: %1</source>
+        <translation>모니터링: %1</translation>
     </message>
     <message>
-        <source>Actions</source>
-        <translation>작업</translation>
-    </message>
-    <message>
-        <source>Schemes</source>
-        <translation>구성표</translation>
-    </message>
-    <message>
-        <source>Variants</source>
-        <translation>변형</translation>
-    </message>
-    <message>
-        <source>Wallpapers</source>
-        <translation>배경화면</translation>
-    </message>
-    <message>
-        <source>Sizes</source>
-        <translation>크기</translation>
-    </message>
-    <message>
-        <source>Size settings for launcher items</source>
-        <translation>런처 항목의 크기 설정</translation>
-    </message>
-    <message>
-        <source>Item width</source>
-        <translation>항목 너비</translation>
-    </message>
-    <message>
-        <source>Item height</source>
-        <translation>항목 높이</translation>
-    </message>
-    <message>
-        <source>Wallpaper width</source>
-        <translation>배경화면 너비</translation>
-    </message>
-    <message>
-        <source>Wallpaper height</source>
-        <translation>배경화면 높이</translation>
-    </message>
-    <message>
-        <source>Hidden apps</source>
-        <translation>숨겨진 앱</translation>
-    </message>
-    <message>
-        <source>Applications hidden from launcher</source>
-        <translation>런처에서 숨겨진 애플리케이션</translation>
-    </message>
-    <message>
-        <source>Total hidden</source>
-        <translation>전체 숨김</translation>
+        <source>Override for GPU type</source>
+        <translation>GPU 유형 재정의</translation>
     </message>
 </context>
 <context>
@@ -1957,169 +2105,217 @@ Keyboard layout: %1</source>
     </message>
 </context>
 <context>
-    <name>TaskbarPane</name>
+    <name>SidebarPanel</name>
     <message>
-        <source>Taskbar</source>
-        <translation>작업 표시줄</translation>
+        <source>Sidebar</source>
+        <translation>사이드바</translation>
     </message>
     <message>
-        <source>Status Icons</source>
-        <translation>상태 아이콘</translation>
+        <source>General</source>
+        <translation>일반</translation>
     </message>
     <message>
-        <source>Speakers</source>
-        <translation>스피커</translation>
-    </message>
-    <message>
-        <source>Microphone</source>
-        <translation>마이크</translation>
-    </message>
-    <message>
-        <source>Keyboard</source>
-        <translation>키보드</translation>
-    </message>
-    <message>
-        <source>Network</source>
-        <translation>네트워크</translation>
-    </message>
-    <message>
-        <source>Wifi</source>
-        <translation>Wi-Fi</translation>
-    </message>
-    <message>
-        <source>Bluetooth</source>
-        <translation>블루투스</translation>
-    </message>
-    <message>
-        <source>Battery</source>
-        <translation>배터리</translation>
-    </message>
-    <message>
-        <source>Capslock</source>
-        <translation>Caps Lock</translation>
-    </message>
-    <message>
-        <source>Workspaces</source>
-        <translation>작업 공간</translation>
-    </message>
-    <message>
-        <source>Shown</source>
-        <translation>표시됨</translation>
-    </message>
-    <message>
-        <source>Active indicator</source>
-        <translation>활성 표시기</translation>
-    </message>
-    <message>
-        <source>Occupied background</source>
-        <translation>사용 중 배경</translation>
-    </message>
-    <message>
-        <source>Show windows</source>
-        <translation>창 표시</translation>
-    </message>
-    <message>
-        <source>Max window icons</source>
-        <translation>최대 창 아이콘 수</translation>
-    </message>
-    <message>
-        <source>Per monitor workspaces</source>
-        <translation>모니터별 작업 공간</translation>
-    </message>
-    <message>
-        <source>Scroll Actions</source>
-        <translation>스크롤 작업</translation>
-    </message>
-    <message>
-        <source>Volume</source>
-        <translation>볼륨</translation>
-    </message>
-    <message>
-        <source>Brightness</source>
-        <translation>밝기</translation>
-    </message>
-    <message>
-        <source>Clock</source>
-        <translation>시계</translation>
-    </message>
-    <message>
-        <source>Background</source>
-        <translation>배경</translation>
-    </message>
-    <message>
-        <source>Show date</source>
-        <translation>날짜 표시</translation>
-    </message>
-    <message>
-        <source>Show clock icon</source>
-        <translation>시계 아이콘 표시</translation>
-    </message>
-    <message>
-        <source>Bar Behavior</source>
-        <translation>바 동작</translation>
-    </message>
-    <message>
-        <source>Persistent</source>
-        <translation>항상 표시</translation>
-    </message>
-    <message>
-        <source>Show on hover</source>
-        <translation>마우스를 올리면 표시</translation>
+        <source>Enabled</source>
+        <translation>활성화됨</translation>
     </message>
     <message>
         <source>Drag threshold</source>
         <translation>드래그 임계값</translation>
     </message>
     <message>
+        <source>Pixels dragged before the sidebar opens</source>
+        <translation>사이드바가 열리기 전 드래그할 픽셀 수</translation>
+    </message>
+</context>
+<context>
+    <name>StateMessage</name>
+    <message>
+        <source>FP ERROR: %1</source>
+        <translation>지문 오류: %1</translation>
+    </message>
+    <message>
+        <source>PW ERROR: %1</source>
+        <translation>비밀번호 오류: %1</translation>
+    </message>
+    <message>
+        <source>Maximum password and fingerprint attempts reached.</source>
+        <translation>비밀번호와 지문 시도 횟수가 최대에 도달했습니다.</translation>
+    </message>
+    <message>
+        <source>Maximum password attempts reached. Please use fingerprint.</source>
+        <translation>비밀번호 시도 횟수가 최대에 도달했습니다. 지문을 사용하세요.</translation>
+    </message>
+    <message>
+        <source>Maximum password attempts reached.</source>
+        <translation>비밀번호 시도 횟수가 최대에 도달했습니다.</translation>
+    </message>
+    <message>
+        <source>Maximum fingerprint attempts reached. Please use password.</source>
+        <translation>지문 시도 횟수가 최대에 도달했습니다. 비밀번호를 사용하세요.</translation>
+    </message>
+    <message>
+        <source>Incorrect password. Please try again or use fingerprint.</source>
+        <translation>비밀번호가 올바르지 않습니다. 다시 시도하거나 지문을 사용하세요.</translation>
+    </message>
+    <message>
+        <source>Incorrect password. Please try again.</source>
+        <translation>비밀번호가 올바르지 않습니다. 다시 시도하세요.</translation>
+    </message>
+    <message>
+        <source>Fingerprint not recognized (%1/%2). Please try again or use password.</source>
+        <translation>지문이 인식되지 않았습니다 (%1/%2). 다시 시도하거나 비밀번호를 사용하세요.</translation>
+    </message>
+    <message>
+        <source>Caps lock and Num lock are ON.
+Keyboard layout: %1</source>
+        <translation>Caps Lock과 Num Lock이 켜져 있습니다.
+키보드 레이아웃: %1</translation>
+    </message>
+    <message>
+        <source>Caps lock is ON. Kb layout: %1</source>
+        <translation>Caps Lock이 켜져 있습니다. 키보드 레이아웃: %1</translation>
+    </message>
+    <message>
+        <source>Num lock is ON. Kb layout: %1</source>
+        <translation>Num Lock이 켜져 있습니다. 키보드 레이아웃: %1</translation>
+    </message>
+    <message>
+        <source>Keyboard layout: %1</source>
+        <translation>키보드 레이아웃: %1</translation>
+    </message>
+    <message>
+        <source>Caps lock and Num lock are ON.</source>
+        <translation>Caps Lock과 Num Lock이 켜져 있습니다.</translation>
+    </message>
+    <message>
+        <source>Caps lock is ON.</source>
+        <translation>Caps Lock이 켜져 있습니다.</translation>
+    </message>
+    <message>
+        <source>Num lock is ON.</source>
+        <translation>Num Lock이 켜져 있습니다.</translation>
+    </message>
+</context>
+<context>
+    <name>StorageCard</name>
+    <message>
+        <source>Used</source>
+        <translation>사용됨</translation>
+    </message>
+    <message>
+        <source>Storage</source>
+        <translation>저장 공간</translation>
+    </message>
+    <message>
+        <source>No disks detected</source>
+        <translation>디스크가 감지되지 않음</translation>
+    </message>
+    <message>
+        <source>No disks</source>
+        <translation>디스크 없음</translation>
+    </message>
+</context>
+<context>
+    <name>TaskbarPanel</name>
+    <message>
+        <source>Taskbar</source>
+        <translation>작업 표시줄</translation>
+    </message>
+    <message>
+        <source>Behaviour</source>
+        <translation>동작</translation>
+    </message>
+    <message>
+        <source>Persistent</source>
+        <translation>항상 표시</translation>
+    </message>
+    <message>
+        <source>Keep the bar visible at all times</source>
+        <translation>바를 항상 표시 상태로 유지</translation>
+    </message>
+    <message>
+        <source>Show on hover</source>
+        <translation>마우스를 올리면 표시</translation>
+    </message>
+    <message>
+        <source>Reveal the bar when the cursor reaches the screen edge</source>
+        <translation>커서가 화면 가장자리에 닿으면 바 표시</translation>
+    </message>
+    <message>
+        <source>Drag threshold</source>
+        <translation>드래그 임계값</translation>
+    </message>
+    <message>
+        <source>Pixels dragged before the bar reveals</source>
+        <translation>바가 표시되기 전 드래그할 픽셀 수</translation>
+    </message>
+    <message>
+        <source>Components</source>
+        <translation>구성 요소</translation>
+    </message>
+    <message>
+        <source>Workspaces</source>
+        <translation>작업 공간</translation>
+    </message>
+    <message>
+        <source>Indicators, window icons</source>
+        <translation>표시기, 창 아이콘</translation>
+    </message>
+    <message>
         <source>Active window</source>
         <translation>활성 창</translation>
     </message>
     <message>
-        <source>Compact</source>
-        <translation>간결</translation>
-    </message>
-    <message>
-        <source>Inverted</source>
-        <translation>반전</translation>
-    </message>
-    <message>
-        <source>Popouts</source>
-        <translation>팝아웃</translation>
+        <source>Title display, popout</source>
+        <translation>제목 표시, 팝아웃</translation>
     </message>
     <message>
         <source>Tray</source>
         <translation>트레이</translation>
     </message>
     <message>
+        <source>System tray icons</source>
+        <translation>시스템 트레이 아이콘</translation>
+    </message>
+    <message>
         <source>Status icons</source>
         <translation>상태 아이콘</translation>
     </message>
     <message>
-        <source>Tray Settings</source>
-        <translation>트레이 설정</translation>
+        <source>Visible indicators</source>
+        <translation>표시되는 표시기</translation>
     </message>
     <message>
-        <source>Recolour</source>
-        <translation>색상 다시 입히기</translation>
+        <source>Clock</source>
+        <translation>시계</translation>
     </message>
     <message>
-        <source>Monitors</source>
-        <translation>모니터</translation>
-    </message>
-</context>
-<context>
-    <name>ThemeModeSection</name>
-    <message>
-        <source>Theme mode</source>
-        <translation>테마 모드</translation>
+        <source>Date, icon, background</source>
+        <translation>날짜, 아이콘, 배경</translation>
     </message>
     <message>
-        <source>Light or dark theme</source>
-        <translation>밝은 테마 또는 어두운 테마</translation>
+        <source>Scroll actions</source>
+        <translation>스크롤 작업</translation>
     </message>
     <message>
-        <source>Dark mode</source>
-        <translation>다크 모드</translation>
+        <source>Scroll over the workspace indicator to switch workspaces</source>
+        <translation>작업 공간 표시기 위에서 스크롤하여 작업 공간 전환</translation>
+    </message>
+    <message>
+        <source>Volume</source>
+        <translation>볼륨</translation>
+    </message>
+    <message>
+        <source>Scroll on the top half of the bar to adjust volume</source>
+        <translation>바의 위쪽 절반에서 스크롤하여 볼륨 조정</translation>
+    </message>
+    <message>
+        <source>Brightness</source>
+        <translation>밝기</translation>
+    </message>
+    <message>
+        <source>Scroll on the bottom half of the bar to adjust brightness</source>
+        <translation>바의 아래쪽 절반에서 스크롤하여 밝기 조정</translation>
     </message>
 </context>
 <context>
@@ -2130,329 +2326,10 @@ Keyboard layout: %1</source>
     </message>
 </context>
 <context>
-    <name>TransparencySection</name>
-    <message>
-        <source>Transparency</source>
-        <translation>투명도</translation>
-    </message>
-    <message>
-        <source>Transparency enabled</source>
-        <translation>투명도 활성화</translation>
-    </message>
-    <message>
-        <source>Transparency base</source>
-        <translation>투명도 기준</translation>
-    </message>
-    <message>
-        <source>Transparency layers</source>
-        <translation>투명도 레이어</translation>
-    </message>
-</context>
-<context>
     <name>TrayMenu</name>
     <message>
         <source>Back</source>
         <translation>뒤로</translation>
-    </message>
-</context>
-<context>
-    <name>User</name>
-    <message>
-        <source>up %1</source>
-        <translation>가동 시간 %1</translation>
-    </message>
-</context>
-<context>
-    <name>VpnDetails</name>
-    <message>
-        <source>Unknown</source>
-        <translation>알 수 없음</translation>
-    </message>
-    <message>
-        <source>Connection status</source>
-        <translation>연결 상태</translation>
-    </message>
-    <message>
-        <source>VPN connection settings</source>
-        <translation>VPN 연결 설정</translation>
-    </message>
-    <message>
-        <source>Enable this provider</source>
-        <translation>이 공급자 활성화</translation>
-    </message>
-    <message>
-        <source>Disconnect</source>
-        <translation>연결 끊기</translation>
-    </message>
-    <message>
-        <source>Connect</source>
-        <translation>연결</translation>
-    </message>
-    <message>
-        <source>Edit Provider</source>
-        <translation>공급자 편집</translation>
-    </message>
-    <message>
-        <source>Delete Provider</source>
-        <translation>공급자 삭제</translation>
-    </message>
-    <message>
-        <source>Open Login Page</source>
-        <translation>로그인 페이지 열기</translation>
-    </message>
-    <message>
-        <source>Click &apos;Connect&apos; to generate authentication URL</source>
-        <translation>&apos;연결&apos;을 클릭하여 인증 URL을 생성하세요</translation>
-    </message>
-    <message>
-        <source>Provider details</source>
-        <translation>공급자 세부 정보</translation>
-    </message>
-    <message>
-        <source>VPN provider information</source>
-        <translation>VPN 공급자 정보</translation>
-    </message>
-    <message>
-        <source>Provider</source>
-        <translation>공급자</translation>
-    </message>
-    <message>
-        <source>Display name</source>
-        <translation>표시 이름</translation>
-    </message>
-    <message>
-        <source>Interface</source>
-        <translation>인터페이스</translation>
-    </message>
-    <message>
-        <source>N/A</source>
-        <translation>해당 없음</translation>
-    </message>
-    <message>
-        <source>Status</source>
-        <translation>상태</translation>
-    </message>
-    <message>
-        <source>Disabled</source>
-        <translation>비활성화됨</translation>
-    </message>
-    <message>
-        <source>Connecting...</source>
-        <translation>연결 중...</translation>
-    </message>
-    <message>
-        <source>Connected</source>
-        <translation>연결됨</translation>
-    </message>
-    <message>
-        <source>Disconnected</source>
-        <translation>연결 끊김</translation>
-    </message>
-    <message>
-        <source>Authentication required</source>
-        <translation>인증 필요</translation>
-    </message>
-    <message>
-        <source>Error</source>
-        <translation>오류</translation>
-    </message>
-    <message>
-        <source>Details</source>
-        <translation>세부 정보</translation>
-    </message>
-    <message>
-        <source>Enabled</source>
-        <translation>활성화됨</translation>
-    </message>
-    <message>
-        <source>Yes</source>
-        <translation>예</translation>
-    </message>
-    <message>
-        <source>No</source>
-        <translation>아니요</translation>
-    </message>
-    <message>
-        <source>Edit VPN Provider</source>
-        <translation>VPN 공급자 편집</translation>
-    </message>
-    <message>
-        <source>Display Name</source>
-        <translation>표시 이름</translation>
-    </message>
-    <message>
-        <source>Interface (e.g., wg0, torguard)</source>
-        <translation>인터페이스 (예: wg0, torguard)</translation>
-    </message>
-    <message>
-        <source>Connect Command</source>
-        <translation>연결 명령어</translation>
-    </message>
-    <message>
-        <source>Disconnect Command</source>
-        <translation>연결 끊기 명령어</translation>
-    </message>
-    <message>
-        <source>Cancel</source>
-        <translation>취소</translation>
-    </message>
-    <message>
-        <source>Save</source>
-        <translation>저장</translation>
-    </message>
-</context>
-<context>
-    <name>VpnList</name>
-    <message>
-        <source>+ Add VPN Provider</source>
-        <translation>+ VPN 공급자 추가</translation>
-    </message>
-    <message>
-        <source>Unknown</source>
-        <translation>알 수 없음</translation>
-    </message>
-    <message>
-        <source>Disabled</source>
-        <translation>비활성화됨</translation>
-    </message>
-    <message>
-        <source>Connecting...</source>
-        <translation>연결 중...</translation>
-    </message>
-    <message>
-        <source>Connected</source>
-        <translation>연결됨</translation>
-    </message>
-    <message>
-        <source>Enabled</source>
-        <translation>활성화됨</translation>
-    </message>
-    <message>
-        <source>Auth required</source>
-        <translation>인증 필요</translation>
-    </message>
-    <message>
-        <source>Error</source>
-        <translation>오류</translation>
-    </message>
-    <message>
-        <source>Add VPN Provider</source>
-        <translation>VPN 공급자 추가</translation>
-    </message>
-    <message>
-        <source>Choose a provider to add</source>
-        <translation>추가할 공급자를 선택하세요</translation>
-    </message>
-    <message>
-        <source>NetBird</source>
-        <translation>NetBird</translation>
-    </message>
-    <message>
-        <source>Tailscale</source>
-        <translation>Tailscale</translation>
-    </message>
-    <message>
-        <source>Cloudflare WARP</source>
-        <translation>Cloudflare WARP</translation>
-    </message>
-    <message>
-        <source>WireGuard</source>
-        <translation>WireGuard</translation>
-    </message>
-    <message>
-        <source>Custom</source>
-        <translation>사용자 지정</translation>
-    </message>
-    <message>
-        <source>Cancel</source>
-        <translation>취소</translation>
-    </message>
-    <message>
-        <source>Edit VPN Provider</source>
-        <translation>VPN 공급자 편집</translation>
-    </message>
-    <message>
-        <source>Add %1 VPN</source>
-        <translation>%1 VPN 추가</translation>
-    </message>
-    <message>
-        <source>Display Name</source>
-        <translation>표시 이름</translation>
-    </message>
-    <message>
-        <source>Interface (e.g., wg0, torguard)</source>
-        <translation>인터페이스 (예: wg0, torguard)</translation>
-    </message>
-    <message>
-        <source>Connect Command (e.g., wg-quick up wg0)</source>
-        <translation>연결 명령어 (예: wg-quick up wg0)</translation>
-    </message>
-    <message>
-        <source>Disconnect Command (e.g., wg-quick down wg0)</source>
-        <translation>연결 끊기 명령어 (예: wg-quick down wg0)</translation>
-    </message>
-    <message>
-        <source>Save</source>
-        <translation>저장</translation>
-    </message>
-</context>
-<context>
-    <name>VpnSettings</name>
-    <message>
-        <source>VPN Settings</source>
-        <translation>VPN 설정</translation>
-    </message>
-    <message>
-        <source>General</source>
-        <translation>일반</translation>
-    </message>
-    <message>
-        <source>VPN configuration</source>
-        <translation>VPN 구성</translation>
-    </message>
-    <message>
-        <source>VPN enabled</source>
-        <translation>VPN 활성화</translation>
-    </message>
-    <message>
-        <source>Providers</source>
-        <translation>공급자</translation>
-    </message>
-    <message>
-        <source>Manage VPN providers</source>
-        <translation>VPN 공급자 관리</translation>
-    </message>
-    <message>
-        <source>%1 • %2</source>
-        <translation>%1 • %2</translation>
-    </message>
-    <message>
-        <source>No interface</source>
-        <translation>인터페이스 없음</translation>
-    </message>
-    <message>
-        <source>+ Add Provider</source>
-        <translation>+ 공급자 추가</translation>
-    </message>
-    <message>
-        <source>Quick Add</source>
-        <translation>빠른 추가</translation>
-    </message>
-    <message>
-        <source>Add common VPN providers</source>
-        <translation>일반적인 VPN 공급자 추가</translation>
-    </message>
-    <message>
-        <source>+ Add NetBird</source>
-        <translation>+ NetBird 추가</translation>
-    </message>
-    <message>
-        <source>+ Add Tailscale</source>
-        <translation>+ Tailscale 추가</translation>
-    </message>
-    <message>
-        <source>+ Add Cloudflare WARP</source>
-        <translation>+ Cloudflare WARP 추가</translation>
     </message>
 </context>
 <context>
@@ -2475,18 +2352,73 @@ Keyboard layout: %1</source>
     </message>
 </context>
 <context>
-    <name>WeatherInfo</name>
+    <name>WallpaperAndStyle</name>
     <message>
-        <source>Weather</source>
-        <translation>날씨</translation>
+        <source>Wallpaper &amp; style</source>
+        <translation>배경화면 및 스타일</translation>
     </message>
     <message>
-        <source>Humidity: %1%</source>
-        <translation>습도: %1%</translation>
+        <source>Wallpaper disabled</source>
+        <translation>배경화면 사용 안 함</translation>
     </message>
     <message>
-        <source>Feels like: %1</source>
-        <translation>체감 온도: %1</translation>
+        <source>Wallpapers</source>
+        <translation>배경화면</translation>
+    </message>
+    <message>
+        <source>Colours</source>
+        <translation>색상</translation>
+    </message>
+    <message>
+        <source>Display wallpaper</source>
+        <translation>배경화면 표시</translation>
+    </message>
+    <message>
+        <source>Transparency</source>
+        <translation>투명도</translation>
+    </message>
+    <message>
+        <source>Base %1, layers %2</source>
+        <translation>기본 %1, 레이어 %2</translation>
+    </message>
+    <message>
+        <source>Dark theme</source>
+        <translation>어두운 테마</translation>
+    </message>
+</context>
+<context>
+    <name>WallpaperSelect</name>
+    <message>
+        <source>Wallpapers</source>
+        <translation>배경화면</translation>
+    </message>
+    <message>
+        <source>Browse</source>
+        <translation>찾아보기</translation>
+    </message>
+    <message>
+        <source>Select an image</source>
+        <translation>이미지 선택</translation>
+    </message>
+    <message>
+        <source>Image files</source>
+        <translation>이미지 파일</translation>
+    </message>
+    <message>
+        <source>Random</source>
+        <translation>무작위</translation>
+    </message>
+    <message>
+        <source>Featured wallpaper</source>
+        <translation>추천 배경화면</translation>
+    </message>
+    <message>
+        <source>Local wallpapers</source>
+        <translation>로컬 배경화면</translation>
+    </message>
+    <message>
+        <source>No local wallpapers found</source>
+        <translation>로컬 배경화면을 찾을 수 없음</translation>
     </message>
 </context>
 <context>
@@ -2527,125 +2459,8 @@ Keyboard layout: %1</source>
 <context>
     <name>WindowFactory</name>
     <message>
-        <source>Caelestia Settings - %1</source>
-        <translation>Caelestia 설정 - %1</translation>
-    </message>
-</context>
-<context>
-    <name>WindowTitle</name>
-    <message>
-        <source>Caelestia Settings - %1</source>
-        <translation>Caelestia 설정 - %1</translation>
-    </message>
-</context>
-<context>
-    <name>WirelessDetails</name>
-    <message>
-        <source>Unknown</source>
-        <translation>알 수 없음</translation>
-    </message>
-    <message>
-        <source>Connection status</source>
-        <translation>연결 상태</translation>
-    </message>
-    <message>
-        <source>Connection settings for this network</source>
-        <translation>이 네트워크의 연결 설정</translation>
-    </message>
-    <message>
-        <source>Connected</source>
-        <translation>연결됨</translation>
-    </message>
-    <message>
-        <source>Forget Network</source>
-        <translation>네트워크 잊기</translation>
-    </message>
-    <message>
-        <source>Network properties</source>
-        <translation>네트워크 속성</translation>
-    </message>
-    <message>
-        <source>Additional information</source>
-        <translation>추가 정보</translation>
-    </message>
-    <message>
-        <source>SSID</source>
-        <translation>SSID</translation>
-    </message>
-    <message>
-        <source>BSSID</source>
-        <translation>BSSID</translation>
-    </message>
-    <message>
-        <source>Signal strength</source>
-        <translation>신호 강도</translation>
-    </message>
-    <message>
-        <source>%1%</source>
-        <translation>%1%</translation>
-    </message>
-    <message>
-        <source>N/A</source>
-        <translation>해당 없음</translation>
-    </message>
-    <message>
-        <source>Frequency</source>
-        <translation>주파수</translation>
-    </message>
-    <message>
-        <source>%1 MHz</source>
-        <translation>%1 MHz</translation>
-    </message>
-    <message>
-        <source>Security</source>
-        <translation>보안</translation>
-    </message>
-    <message>
-        <source>Open</source>
-        <translation>개방형</translation>
-    </message>
-    <message>
-        <source>Connection information</source>
-        <translation>연결 정보</translation>
-    </message>
-    <message>
-        <source>Network connection details</source>
-        <translation>네트워크 연결 세부 정보</translation>
-    </message>
-</context>
-<context>
-    <name>WirelessList</name>
-    <message>
-        <source>Networks (%1)</source>
-        <translation>네트워크 (%1)</translation>
-    </message>
-    <message>
-        <source>All available WiFi networks</source>
-        <translation>사용 가능한 모든 Wi-Fi 네트워크</translation>
-    </message>
-    <message>
-        <source>Scanning...</source>
-        <translation>검색 중...</translation>
-    </message>
-    <message>
-        <source>Settings</source>
-        <translation>설정</translation>
-    </message>
-    <message>
-        <source>Unknown</source>
-        <translation>알 수 없음</translation>
-    </message>
-    <message>
-        <source>Connected</source>
-        <translation>연결됨</translation>
-    </message>
-    <message>
-        <source>Secured</source>
-        <translation>보안됨</translation>
-    </message>
-    <message>
-        <source>Open</source>
-        <translation>개방형</translation>
+        <source>Nexus — %1</source>
+        <translation>Nexus — %1</translation>
     </message>
 </context>
 <context>
@@ -2681,104 +2496,6 @@ Keyboard layout: %1</source>
     <message>
         <source>Cancel</source>
         <translation>취소</translation>
-    </message>
-</context>
-<context>
-    <name>WirelessPasswordDialog</name>
-    <message>
-        <source>Connect</source>
-        <translation>연결</translation>
-    </message>
-    <message>
-        <source>Enter password</source>
-        <translation>비밀번호 입력</translation>
-    </message>
-    <message>
-        <source>Network: %1</source>
-        <translation>네트워크: %1</translation>
-    </message>
-    <message>
-        <source>Connection failed. Please check your password and try again.</source>
-        <translation>연결에 실패했습니다. 비밀번호를 확인하고 다시 시도하세요.</translation>
-    </message>
-    <message>
-        <source>Connecting...</source>
-        <translation>연결 중...</translation>
-    </message>
-    <message>
-        <source>Password</source>
-        <translation>비밀번호</translation>
-    </message>
-    <message>
-        <source>Cancel</source>
-        <translation>취소</translation>
-    </message>
-</context>
-<context>
-    <name>WirelessSettings</name>
-    <message>
-        <source>Network settings</source>
-        <translation>네트워크 설정</translation>
-    </message>
-    <message>
-        <source>WiFi status</source>
-        <translation>Wi-Fi 상태</translation>
-    </message>
-    <message>
-        <source>General WiFi settings</source>
-        <translation>일반 Wi-Fi 설정</translation>
-    </message>
-    <message>
-        <source>WiFi enabled</source>
-        <translation>Wi-Fi 활성화</translation>
-    </message>
-    <message>
-        <source>Network information</source>
-        <translation>네트워크 정보</translation>
-    </message>
-    <message>
-        <source>Current network connection</source>
-        <translation>현재 네트워크 연결</translation>
-    </message>
-    <message>
-        <source>Connected network</source>
-        <translation>연결된 네트워크</translation>
-    </message>
-    <message>
-        <source>Not connected</source>
-        <translation>연결되지 않음</translation>
-    </message>
-    <message>
-        <source>Signal strength</source>
-        <translation>신호 강도</translation>
-    </message>
-    <message>
-        <source>%1%</source>
-        <translation>%1%</translation>
-    </message>
-    <message>
-        <source>N/A</source>
-        <translation>해당 없음</translation>
-    </message>
-    <message>
-        <source>Security</source>
-        <translation>보안</translation>
-    </message>
-    <message>
-        <source>Secured</source>
-        <translation>보안됨</translation>
-    </message>
-    <message>
-        <source>Open</source>
-        <translation>개방형</translation>
-    </message>
-    <message>
-        <source>Frequency</source>
-        <translation>주파수</translation>
-    </message>
-    <message>
-        <source>%1 MHz</source>
-        <translation>%1 MHz</translation>
     </message>
 </context>
 <context>

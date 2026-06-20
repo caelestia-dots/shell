@@ -2,6 +2,65 @@
 <!DOCTYPE TS>
 <TS version="2.1" language="zh_CN">
 <context>
+    <name>AboutPage</name>
+    <message>
+        <source>About</source>
+        <translation>关于</translation>
+    </message>
+    <message>
+        <source>System</source>
+        <translation>系统</translation>
+    </message>
+    <message>
+        <source>Hostname</source>
+        <translation>主机名</translation>
+    </message>
+    <message>
+        <source>Device</source>
+        <translation>设备</translation>
+    </message>
+    <message>
+        <source>Distro</source>
+        <translation>发行版</translation>
+    </message>
+    <message>
+        <source>Kernel</source>
+        <translation>内核</translation>
+    </message>
+    <message>
+        <source>Firmware</source>
+        <translation>固件</translation>
+    </message>
+    <message>
+        <source>Software</source>
+        <translation>软件</translation>
+    </message>
+    <message>
+        <source>Shell</source>
+        <translation>Shell</translation>
+    </message>
+    <message>
+        <source>CLI</source>
+        <translation>CLI</translation>
+    </message>
+    <message>
+        <source>Quickshell</source>
+        <translation>Quickshell</translation>
+    </message>
+    <message>
+        <source>Qt</source>
+        <translation>Qt</translation>
+    </message>
+    <message>
+        <source>Plugins</source>
+        <translation>插件</translation>
+    </message>
+    <message>
+        <source>Loaded plugins</source>
+        <translation>已加载插件</translation>
+    </message>
+</context>
+<context>
     <name>Actions</name>
     <message>
         <source>Unnamed</source>
@@ -20,25 +79,111 @@
     </message>
 </context>
 <context>
-    <name>AnimationsSection</name>
+    <name>AllApps</name>
     <message>
-        <source>Animations</source>
-        <translation>动画</translation>
-    </message>
-    <message>
-        <source>Animation duration scale</source>
-        <translation>动画时长缩放</translation>
+        <source>All apps</source>
+        <translation>全部应用</translation>
     </message>
 </context>
 <context>
-    <name>AppearancePane</name>
+    <name>AppInfo</name>
     <message>
-        <source>Wallpaper</source>
-        <translation>壁纸</translation>
+        <source>App info</source>
+        <translation>应用信息</translation>
     </message>
     <message>
-        <source>Appearance</source>
-        <translation>外观</translation>
+        <source>Launcher</source>
+        <translation>启动器</translation>
+    </message>
+    <message>
+        <source>Favourite</source>
+        <translation>收藏</translation>
+    </message>
+    <message>
+        <source>Matched by a regex in favouriteApps — edit the config file to change</source>
+        <translation>由 favouriteApps 中的正则表达式匹配——请编辑配置文件以更改</translation>
+    </message>
+    <message>
+        <source>Pin to the top of the launcher</source>
+        <translation>固定到启动器顶部</translation>
+    </message>
+    <message>
+        <source>Hidden</source>
+        <translation>隐藏</translation>
+    </message>
+    <message>
+        <source>Matched by a regex in hiddenApps — edit the config file to change</source>
+        <translation>由 hiddenApps 中的正则表达式匹配——请编辑配置文件以更改</translation>
+    </message>
+    <message>
+        <source>Hide from the launcher</source>
+        <translation>从启动器中隐藏</translation>
+    </message>
+    <message>
+        <source>Details</source>
+        <translation>详情</translation>
+    </message>
+    <message>
+        <source>App ID</source>
+        <translation>应用 ID</translation>
+    </message>
+    <message>
+        <source>Command</source>
+        <translation>命令</translation>
+    </message>
+</context>
+<context>
+    <name>AppVolumes</name>
+    <message>
+        <source>App volumes</source>
+        <translation>应用音量</translation>
+    </message>
+    <message>
+        <source>Adjust the volume of individual apps currently playing audio.</source>
+        <translation>调整当前正在播放音频的各个应用的音量。</translation>
+    </message>
+    <message>
+        <source>No apps playing audio</source>
+        <translation>没有应用正在播放音频</translation>
+    </message>
+</context>
+<context>
+    <name>AppsPage</name>
+    <message>
+        <source>Apps</source>
+        <translation>应用</translation>
+    </message>
+    <message>
+        <source>Default applications</source>
+        <translation>默认应用</translation>
+    </message>
+    <message>
+        <source>Terminal</source>
+        <translation>终端</translation>
+    </message>
+    <message>
+        <source>Audio</source>
+        <translation>音频</translation>
+    </message>
+    <message>
+        <source>Media playback</source>
+        <translation>媒体播放</translation>
+    </message>
+    <message>
+        <source>File manager</source>
+        <translation>文件管理器</translation>
+    </message>
+    <message>
+        <source>Library</source>
+        <translation>库</translation>
+    </message>
+    <message>
+        <source>All apps</source>
+        <translation>全部应用</translation>
+    </message>
+    <message>
+        <source>Browse installed apps, set favourites and hidden</source>
+        <translation>浏览已安装应用，设置收藏与隐藏</translation>
     </message>
 </context>
 <context>
@@ -65,173 +210,236 @@
     </message>
 </context>
 <context>
-    <name>AudioPane</name>
+    <name>AudioDeviceList</name>
+    <message>
+        <source>Unknown</source>
+        <translation>未知</translation>
+    </message>
+</context>
+<context>
+    <name>AudioPage</name>
     <message>
         <source>Audio</source>
         <translation>音频</translation>
     </message>
     <message>
-        <source>Output devices</source>
-        <translation>输出设备</translation>
+        <source>Output</source>
+        <translation>输出</translation>
     </message>
     <message>
-        <source>Devices (%1)</source>
-        <translation>设备 (%1)</translation>
+        <source>Muted</source>
+        <translation>已静音</translation>
     </message>
     <message>
-        <source>All available output devices</source>
-        <translation>所有可用的输出设备</translation>
+        <source>No output devices</source>
+        <translation>无输出设备</translation>
     </message>
     <message>
-        <source>Unknown</source>
-        <translation>未知</translation>
+        <source>Input</source>
+        <translation>输入</translation>
     </message>
     <message>
-        <source>Input devices</source>
-        <translation>输入设备</translation>
+        <source>No input devices</source>
+        <translation>无输入设备</translation>
     </message>
     <message>
-        <source>All available input devices</source>
-        <translation>所有可用的输入设备</translation>
+        <source>App volumes</source>
+        <translation>应用音量</translation>
     </message>
     <message>
-        <source>Audio Settings</source>
-        <translation>音频设置</translation>
+        <source>No apps playing audio</source>
+        <translation>没有应用正在播放音频</translation>
     </message>
     <message>
-        <source>Output volume</source>
-        <translation>输出音量</translation>
+        <source>1 app playing audio</source>
+        <translation>1 个应用正在播放音频</translation>
     </message>
     <message>
-        <source>Control the volume of your output device</source>
-        <translation>控制输出设备的音量</translation>
-    </message>
-    <message>
-        <source>Volume</source>
-        <translation>音量</translation>
-    </message>
-    <message>
-        <source>Input volume</source>
-        <translation>输入音量</translation>
-    </message>
-    <message>
-        <source>Control the volume of your input device</source>
-        <translation>控制输入设备的音量</translation>
-    </message>
-    <message>
-        <source>Applications</source>
-        <translation>应用程序</translation>
-    </message>
-    <message>
-        <source>Control volume for individual applications</source>
-        <translation>控制各个应用程序的音量</translation>
-    </message>
-    <message>
-        <source>No applications currently playing audio</source>
-        <translation>当前没有应用程序在播放音频</translation>
+        <source>%1 apps playing audio</source>
+        <translation>%1 个应用正在播放音频</translation>
     </message>
 </context>
 <context>
-    <name>BackgroundSection</name>
+    <name>BarActiveWindow</name>
+    <message>
+        <source>Active window</source>
+        <translation>活动窗口</translation>
+    </message>
+    <message>
+        <source>Compact</source>
+        <translation>紧凑</translation>
+    </message>
+    <message>
+        <source>Inverted</source>
+        <translation>反转</translation>
+    </message>
+    <message>
+        <source>Show on hover</source>
+        <translation>悬停时显示</translation>
+    </message>
+    <message>
+        <source>Only show the active window title while hovering</source>
+        <translation>仅在悬停时显示活动窗口标题</translation>
+    </message>
+    <message>
+        <source>Popout on hover</source>
+        <translation>悬停时弹出</translation>
+    </message>
+    <message>
+        <source>Show a window details popout when hovering</source>
+        <translation>悬停时显示窗口详情弹出框</translation>
+    </message>
+</context>
+<context>
+    <name>BarClock</name>
+    <message>
+        <source>Clock</source>
+        <translation>时钟</translation>
+    </message>
     <message>
         <source>Background</source>
         <translation>背景</translation>
     </message>
     <message>
-        <source>Background enabled</source>
-        <translation>启用背景</translation>
+        <source>Show date</source>
+        <translation>显示日期</translation>
     </message>
     <message>
-        <source>Wallpaper enabled</source>
-        <translation>启用壁纸</translation>
+        <source>Show icon</source>
+        <translation>显示图标</translation>
+    </message>
+</context>
+<context>
+    <name>BarStatusIcons</name>
+    <message>
+        <source>Status icons</source>
+        <translation>状态图标</translation>
     </message>
     <message>
-        <source>Desktop Clock</source>
-        <translation>桌面时钟</translation>
+        <source>Visible icons</source>
+        <translation>可见图标</translation>
     </message>
     <message>
-        <source>Desktop Clock enabled</source>
-        <translation>启用桌面时钟</translation>
+        <source>Speakers</source>
+        <translation>扬声器</translation>
     </message>
     <message>
-        <source>Positioning</source>
-        <translation>位置</translation>
+        <source>Microphone</source>
+        <translation>麦克风</translation>
     </message>
     <message>
-        <source>Vertical Position</source>
-        <translation>垂直位置</translation>
+        <source>Keyboard layout</source>
+        <translation>键盘布局</translation>
     </message>
     <message>
-        <source>Top</source>
-        <translation>顶部</translation>
+        <source>Network</source>
+        <translation>网络</translation>
     </message>
     <message>
-        <source>Middle</source>
-        <translation>中间</translation>
+        <source>Wi-Fi</source>
+        <translation>Wi-Fi</translation>
     </message>
     <message>
-        <source>Bottom</source>
-        <translation>底部</translation>
+        <source>Bluetooth</source>
+        <translation>蓝牙</translation>
     </message>
     <message>
-        <source>Horizontal Position</source>
-        <translation>水平位置</translation>
+        <source>Battery</source>
+        <translation>电池</translation>
     </message>
     <message>
-        <source>Left</source>
-        <translation>左侧</translation>
+        <source>Caps lock</source>
+        <translation>大写锁定</translation>
     </message>
     <message>
-        <source>Center</source>
-        <translation>居中</translation>
+        <source>Behaviour</source>
+        <translation>行为</translation>
     </message>
     <message>
-        <source>Right</source>
-        <translation>右侧</translation>
+        <source>Popout on hover</source>
+        <translation>悬停时弹出</translation>
     </message>
     <message>
-        <source>Invert colors</source>
-        <translation>反转颜色</translation>
+        <source>Show a details popout when hovering the status icons</source>
+        <translation>悬停状态图标时显示详情弹出框</translation>
+    </message>
+</context>
+<context>
+    <name>BarTray</name>
+    <message>
+        <source>Tray</source>
+        <translation>托盘</translation>
     </message>
     <message>
-        <source>Shadow</source>
-        <translation>阴影</translation>
+        <source>Background</source>
+        <translation>背景</translation>
     </message>
     <message>
-        <source>Enabled</source>
-        <translation>已启用</translation>
+        <source>Recolour icons</source>
+        <translation>重新着色图标</translation>
     </message>
     <message>
-        <source>Opacity</source>
-        <translation>不透明度</translation>
+        <source>Compact</source>
+        <translation>紧凑</translation>
     </message>
     <message>
-        <source>Blur</source>
-        <translation>模糊</translation>
+        <source>Popout on hover</source>
+        <translation>悬停时弹出</translation>
     </message>
     <message>
-        <source>Blur enabled</source>
-        <translation>启用模糊</translation>
+        <source>Show the tray menu popout when hovering</source>
+        <translation>悬停时显示托盘菜单弹出框</translation>
+    </message>
+</context>
+<context>
+    <name>BarWorkspaces</name>
+    <message>
+        <source>Workspaces</source>
+        <translation>工作区</translation>
     </message>
     <message>
-        <source>Visualiser</source>
-        <translation>可视化效果</translation>
+        <source>Shown</source>
+        <translation>显示</translation>
     </message>
     <message>
-        <source>Visualiser enabled</source>
-        <translation>启用可视化效果</translation>
+        <source>Number of workspaces displayed</source>
+        <translation>显示的工作区数量</translation>
     </message>
     <message>
-        <source>Visualiser auto hide</source>
-        <translation>可视化效果自动隐藏</translation>
+        <source>Active indicator</source>
+        <translation>活动指示器</translation>
     </message>
     <message>
-        <source>Visualiser rounding</source>
-        <translation>可视化效果圆角</translation>
+        <source>Active trail</source>
+        <translation>活动轨迹</translation>
     </message>
     <message>
-        <source>Visualiser spacing</source>
-        <translation>可视化效果间距</translation>
+        <source>Occupied background</source>
+        <translation>占用背景</translation>
+    </message>
+    <message>
+        <source>Show windows</source>
+        <translation>显示窗口</translation>
+    </message>
+    <message>
+        <source>Show icons of open windows on each workspace</source>
+        <translation>在每个工作区上显示已打开窗口的图标</translation>
+    </message>
+    <message>
+        <source>Windows on special workspaces</source>
+        <translation>特殊工作区上的窗口</translation>
+    </message>
+    <message>
+        <source>Max window icons</source>
+        <translation>最大窗口图标数</translation>
+    </message>
+    <message>
+        <source>Per-monitor workspaces</source>
+        <translation>每显示器工作区</translation>
+    </message>
+    <message>
+        <source>Show each monitor&apos;s workspaces independently</source>
+        <translation>独立显示每个显示器的工作区</translation>
     </message>
 </context>
 <context>
@@ -297,6 +505,25 @@
     </message>
 </context>
 <context>
+    <name>BatteryTank</name>
+    <message>
+        <source>Battery</source>
+        <translation>电池</translation>
+    </message>
+    <message>
+        <source>Full</source>
+        <translation>已充满</translation>
+    </message>
+    <message>
+        <source>Charging</source>
+        <translation>充电中</translation>
+    </message>
+    <message>
+        <source>...</source>
+        <translation>...</translation>
+    </message>
+</context>
+<context>
     <name>Bluetooth</name>
     <message>
         <source>Bluetooth</source>
@@ -324,18 +551,155 @@
     </message>
 </context>
 <context>
-    <name>BorderSection</name>
+    <name>BluetoothPage</name>
     <message>
-        <source>Border</source>
-        <translation>边框</translation>
+        <source>Connected devices</source>
+        <translation>已连接设备</translation>
     </message>
     <message>
-        <source>Border rounding</source>
-        <translation>边框圆角</translation>
+        <source>Bluetooth</source>
+        <translation>蓝牙</translation>
     </message>
     <message>
-        <source>Border thickness</source>
-        <translation>边框粗细</translation>
+        <source>No saved devices</source>
+        <translation>无已保存设备</translation>
+    </message>
+    <message>
+        <source>Bluetooth disabled</source>
+        <translation>蓝牙已禁用</translation>
+    </message>
+    <message>
+        <source>Unknown</source>
+        <translation>未知</translation>
+    </message>
+    <message>
+        <source>Connected%1</source>
+        <translation>已连接%1</translation>
+    </message>
+    <message>
+        <source>Saved</source>
+        <translation>已保存</translation>
+    </message>
+    <message>
+        <source>Pair new device</source>
+        <translation>配对新设备</translation>
+    </message>
+    <message>
+        <source>Discoverable</source>
+        <translation>可被发现</translation>
+    </message>
+    <message>
+        <source>Allow nearby devices to find this one</source>
+        <translation>允许附近设备发现此设备</translation>
+    </message>
+    <message>
+        <source>Pairable</source>
+        <translation>可配对</translation>
+    </message>
+    <message>
+        <source>Allow nearby devices to pair with this one</source>
+        <translation>允许附近设备与此设备配对</translation>
+    </message>
+</context>
+<context>
+    <name>BluetoothPairing</name>
+    <message>
+        <source>Pair new device</source>
+        <translation>配对新设备</translation>
+    </message>
+    <message>
+        <source>Available devices</source>
+        <translation>可用设备</translation>
+    </message>
+    <message>
+        <source>Searching for devices…</source>
+        <translation>正在搜索设备…</translation>
+    </message>
+    <message>
+        <source>Unknown device</source>
+        <translation>未知设备</translation>
+    </message>
+    <message>
+        <source>Pairing...</source>
+        <translation>正在配对...</translation>
+    </message>
+</context>
+<context>
+    <name>BriefInfo</name>
+    <message>
+        <source>Feels like %1</source>
+        <translation>体感温度 %1</translation>
+    </message>
+    <message>
+        <source>High %1 • Low %2</source>
+        <translation>最高 %1 • 最低 %2</translation>
+    </message>
+</context>
+<context>
+    <name>BtDeviceInfo</name>
+    <message>
+        <source>Connected</source>
+        <translation>已连接</translation>
+    </message>
+    <message>
+        <source>Paired</source>
+        <translation>已配对</translation>
+    </message>
+    <message>
+        <source>Not paired</source>
+        <translation>未配对</translation>
+    </message>
+    <message>
+        <source>Device</source>
+        <translation>设备</translation>
+    </message>
+    <message>
+        <source>Forget</source>
+        <translation>忘记</translation>
+    </message>
+    <message>
+        <source>Disconnect</source>
+        <translation>断开连接</translation>
+    </message>
+    <message>
+        <source>Connect</source>
+        <translation>连接</translation>
+    </message>
+    <message>
+        <source>Trusted</source>
+        <translation>受信任</translation>
+    </message>
+    <message>
+        <source>Allow this device to connect automatically</source>
+        <translation>允许此设备自动连接</translation>
+    </message>
+    <message>
+        <source>Blocked</source>
+        <translation>已屏蔽</translation>
+    </message>
+    <message>
+        <source>Prevent this device from connecting</source>
+        <translation>阻止此设备连接</translation>
+    </message>
+    <message>
+        <source>Wake allowed</source>
+        <translation>允许唤醒</translation>
+    </message>
+    <message>
+        <source>Allow this device to wake the system</source>
+        <translation>允许此设备唤醒系统</translation>
+    </message>
+    <message>
+        <source>Battery</source>
+        <translation>电池</translation>
+    </message>
+    <message>
+        <source>Unavailable</source>
+        <translation>不可用</translation>
+    </message>
+    <message>
+        <source>Address</source>
+        <translation>地址</translation>
     </message>
 </context>
 <context>
@@ -381,94 +745,18 @@
     </message>
 </context>
 <context>
-    <name>Center</name>
+    <name>ColourSelect</name>
     <message>
-        <source>Caps lock and Num lock are ON.
-Keyboard layout: %1</source>
-        <translation>大写锁定和数字锁定已开启。
-键盘布局: %1</translation>
+        <source>Colours</source>
+        <translation>颜色</translation>
     </message>
     <message>
-        <source>Caps lock is ON. Kb layout: %1</source>
-        <translation>大写锁定已开启。键盘布局: %1</translation>
+        <source>Page under construction</source>
+        <translation>页面建设中</translation>
     </message>
     <message>
-        <source>Num lock is ON. Kb layout: %1</source>
-        <translation>数字锁定已开启。键盘布局: %1</translation>
-    </message>
-    <message>
-        <source>Keyboard layout: %1</source>
-        <translation>键盘布局: %1</translation>
-    </message>
-    <message>
-        <source>Caps lock and Num lock are ON.</source>
-        <translation>大写锁定和数字锁定已开启。</translation>
-    </message>
-    <message>
-        <source>Caps lock is ON.</source>
-        <translation>大写锁定已开启。</translation>
-    </message>
-    <message>
-        <source>Num lock is ON.</source>
-        <translation>数字锁定已开启。</translation>
-    </message>
-    <message>
-        <source>FP ERROR: %1</source>
-        <translation>指纹错误: %1</translation>
-    </message>
-    <message>
-        <source>PW ERROR: %1</source>
-        <translation>密码错误: %1</translation>
-    </message>
-    <message>
-        <source>Maximum password and fingerprint attempts reached.</source>
-        <translation>已达到密码和指纹的最大尝试次数。</translation>
-    </message>
-    <message>
-        <source>Maximum password attempts reached. Please use fingerprint.</source>
-        <translation>已达到密码最大尝试次数。请使用指纹。</translation>
-    </message>
-    <message>
-        <source>Maximum password attempts reached.</source>
-        <translation>已达到密码最大尝试次数。</translation>
-    </message>
-    <message>
-        <source>Maximum fingerprint attempts reached. Please use password.</source>
-        <translation>已达到指纹最大尝试次数。请使用密码。</translation>
-    </message>
-    <message>
-        <source>Incorrect password. Please try again or use fingerprint.</source>
-        <translation>密码错误。请重试或使用指纹。</translation>
-    </message>
-    <message>
-        <source>Incorrect password. Please try again.</source>
-        <translation>密码错误。请重试。</translation>
-    </message>
-    <message>
-        <source>Fingerprint not recognized (%1/%2). Please try again or use password.</source>
-        <translation>无法识别指纹 (%1/%2)。请重试或使用密码。</translation>
-    </message>
-</context>
-<context>
-    <name>ColorSchemeSection</name>
-    <message>
-        <source>Color scheme</source>
-        <translation>配色方案</translation>
-    </message>
-    <message>
-        <source>Available color schemes</source>
-        <translation>可用的配色方案</translation>
-    </message>
-</context>
-<context>
-    <name>ColorVariantSection</name>
-    <message>
-        <source>Color variant</source>
-        <translation>颜色变体</translation>
-    </message>
-    <message>
-        <source>Material theme variant</source>
-        <translation>Material 主题变体</translation>
+        <source>This page will be available in a future update.</source>
+        <translation>此页面将在未来更新中提供。</translation>
     </message>
 </context>
 <context>
@@ -575,94 +863,86 @@ Keyboard layout: %1</source>
     </message>
 </context>
 <context>
-    <name>DashboardPane</name>
+    <name>DashboardPanel</name>
     <message>
         <source>Dashboard</source>
         <translation>仪表盘</translation>
     </message>
+    <message>
+        <source>General</source>
+        <translation>常规</translation>
+    </message>
+    <message>
+        <source>Enabled</source>
+        <translation>已启用</translation>
+    </message>
+    <message>
+        <source>Show on hover</source>
+        <translation>悬停时显示</translation>
+    </message>
+    <message>
+        <source>Reveal when the cursor reaches the screen edge</source>
+        <translation>当光标到达屏幕边缘时显示</translation>
+    </message>
+    <message>
+        <source>Tabs</source>
+        <translation>标签页</translation>
+    </message>
+    <message>
+        <source>Media</source>
+        <translation>媒体</translation>
+    </message>
+    <message>
+        <source>Performance</source>
+        <translation>性能</translation>
+    </message>
+    <message>
+        <source>Weather</source>
+        <translation>天气</translation>
+    </message>
+    <message>
+        <source>Performance widgets</source>
+        <translation>性能小部件</translation>
+    </message>
+    <message>
+        <source>Battery</source>
+        <translation>电池</translation>
+    </message>
+    <message>
+        <source>GPU</source>
+        <translation>GPU</translation>
+    </message>
+    <message>
+        <source>CPU</source>
+        <translation>CPU</translation>
+    </message>
+    <message>
+        <source>Memory</source>
+        <translation>内存</translation>
+    </message>
+    <message>
+        <source>Storage</source>
+        <translation>存储</translation>
+    </message>
+    <message>
+        <source>Network</source>
+        <translation>网络</translation>
+    </message>
+    <message>
+        <source>Behaviour</source>
+        <translation>行为</translation>
+    </message>
+    <message>
+        <source>Drag threshold</source>
+        <translation>拖动阈值</translation>
+    </message>
+    <message>
+        <source>Pixels dragged before the dashboard opens</source>
+        <translation>仪表盘打开前需拖动的像素数</translation>
+    </message>
 </context>
 <context>
     <name>Details</name>
-    <message>
-        <source>Connection status</source>
-        <translation>连接状态</translation>
-    </message>
-    <message>
-        <source>Connection settings for this device</source>
-        <translation>此设备的连接设置</translation>
-    </message>
-    <message>
-        <source>Connected</source>
-        <translation>已连接</translation>
-    </message>
-    <message>
-        <source>Paired</source>
-        <translation>已配对</translation>
-    </message>
-    <message>
-        <source>Blocked</source>
-        <translation>已屏蔽</translation>
-    </message>
-    <message>
-        <source>Device properties</source>
-        <translation>设备属性</translation>
-    </message>
-    <message>
-        <source>Additional settings</source>
-        <translation>其他设置</translation>
-    </message>
-    <message>
-        <source>Device name</source>
-        <translation>设备名称</translation>
-    </message>
-    <message>
-        <source>Trusted</source>
-        <translation>受信任</translation>
-    </message>
-    <message>
-        <source>Wake allowed</source>
-        <translation>允许唤醒</translation>
-    </message>
-    <message>
-        <source>Device information</source>
-        <translation>设备信息</translation>
-    </message>
-    <message>
-        <source>Information about this device</source>
-        <translation>关于此设备的信息</translation>
-    </message>
-    <message>
-        <source>Device battery (%1%)</source>
-        <translation>设备电量 (%1%)</translation>
-    </message>
-    <message>
-        <source>Battery unavailable</source>
-        <translation>电量不可用</translation>
-    </message>
-    <message>
-        <source>Dbus path</source>
-        <translation>Dbus 路径</translation>
-    </message>
-    <message>
-        <source>MAC address</source>
-        <translation>MAC 地址</translation>
-    </message>
-    <message>
-        <source>Bonded</source>
-        <translation>已绑定</translation>
-    </message>
-    <message>
-        <source>Yes</source>
-        <translation>是</translation>
-    </message>
-    <message>
-        <source>No</source>
-        <translation>否</translation>
-    </message>
-    <message>
-        <source>System name</source>
-        <translation>系统名称</translation>
-    </message>
     <message>
         <source>No active client</source>
         <translation>无活动客户端</translation>
@@ -723,60 +1003,13 @@ Keyboard layout: %1</source>
         <source>Fullscreen state: unknown</source>
         <translation>全屏状态: 未知</translation>
     </message>
-</context>
-<context>
-    <name>DeviceList</name>
     <message>
-        <source>Devices (%1)</source>
-        <translation>设备 (%1)</translation>
+        <source>Unknown artist</source>
+        <translation>未知艺术家</translation>
     </message>
     <message>
-        <source>All available bluetooth devices</source>
-        <translation>所有可用的蓝牙设备</translation>
-    </message>
-    <message>
-        <source>Bluetooth</source>
-        <translation>蓝牙</translation>
-    </message>
-    <message>
-        <source>Toggle Bluetooth</source>
-        <translation>切换蓝牙</translation>
-    </message>
-    <message>
-        <source>Discoverable</source>
-        <translation>可被发现</translation>
-    </message>
-    <message>
-        <source>Make discoverable</source>
-        <translation>设为可被发现</translation>
-    </message>
-    <message>
-        <source>Pairable</source>
-        <translation>可配对</translation>
-    </message>
-    <message>
-        <source>Make pairable</source>
-        <translation>设为可配对</translation>
-    </message>
-    <message>
-        <source>Scan for devices</source>
-        <translation>扫描设备</translation>
-    </message>
-    <message>
-        <source>Bluetooth settings</source>
-        <translation>蓝牙设置</translation>
-    </message>
-    <message>
-        <source>Unknown</source>
-        <translation>未知</translation>
-    </message>
-    <message>
-        <source> (Connected)</source>
-        <translation> (已连接)</translation>
-    </message>
-    <message>
-        <source> (Paired)</source>
-        <translation> (已配对)</translation>
+        <source>Unknown album</source>
+        <translation>未知专辑</translation>
     </message>
 </context>
 <context>
@@ -792,111 +1025,6 @@ Keyboard layout: %1</source>
     <message>
         <source>Cancel</source>
         <translation>取消</translation>
-    </message>
-</context>
-<context>
-    <name>EthernetDetails</name>
-    <message>
-        <source>Unknown</source>
-        <translation>未知</translation>
-    </message>
-    <message>
-        <source>Connection status</source>
-        <translation>连接状态</translation>
-    </message>
-    <message>
-        <source>Connection settings for this device</source>
-        <translation>此设备的连接设置</translation>
-    </message>
-    <message>
-        <source>Connected</source>
-        <translation>已连接</translation>
-    </message>
-    <message>
-        <source>Device properties</source>
-        <translation>设备属性</translation>
-    </message>
-    <message>
-        <source>Additional information</source>
-        <translation>其他信息</translation>
-    </message>
-    <message>
-        <source>Interface</source>
-        <translation>接口</translation>
-    </message>
-    <message>
-        <source>Connection</source>
-        <translation>连接</translation>
-    </message>
-    <message>
-        <source>Not connected</source>
-        <translation>未连接</translation>
-    </message>
-    <message>
-        <source>State</source>
-        <translation>状态</translation>
-    </message>
-    <message>
-        <source>Connection information</source>
-        <translation>连接信息</translation>
-    </message>
-    <message>
-        <source>Network connection details</source>
-        <translation>网络连接详情</translation>
-    </message>
-</context>
-<context>
-    <name>EthernetList</name>
-    <message>
-        <source>Devices (%1)</source>
-        <translation>设备 (%1)</translation>
-    </message>
-    <message>
-        <source>All available ethernet devices</source>
-        <translation>所有可用的以太网设备</translation>
-    </message>
-    <message>
-        <source>Settings</source>
-        <translation>设置</translation>
-    </message>
-    <message>
-        <source>Unknown</source>
-        <translation>未知</translation>
-    </message>
-    <message>
-        <source>Connected</source>
-        <translation>已连接</translation>
-    </message>
-    <message>
-        <source>Disconnected</source>
-        <translation>已断开</translation>
-    </message>
-</context>
-<context>
-    <name>EthernetSettings</name>
-    <message>
-        <source>Ethernet settings</source>
-        <translation>以太网设置</translation>
-    </message>
-    <message>
-        <source>Ethernet devices</source>
-        <translation>以太网设备</translation>
-    </message>
-    <message>
-        <source>Available ethernet devices</source>
-        <translation>可用的以太网设备</translation>
-    </message>
-    <message>
-        <source>Total devices</source>
-        <translation>设备总数</translation>
-    </message>
-    <message>
-        <source>%1</source>
-        <translation>%1</translation>
-    </message>
-    <message>
-        <source>Connected devices</source>
-        <translation>已连接设备</translation>
     </message>
 </context>
 <context>
@@ -921,65 +1049,21 @@ Keyboard layout: %1</source>
     </message>
 </context>
 <context>
-    <name>FontsSection</name>
+    <name>Forecast</name>
     <message>
-        <source>Fonts</source>
-        <translation>字体</translation>
+        <source>Hourly forecast</source>
+        <translation>逐小时预报</translation>
     </message>
     <message>
-        <source>Sans-serif font family</source>
-        <translation>无衬线字体系列</translation>
-    </message>
-    <message>
-        <source>Monospace font family</source>
-        <translation>等宽字体系列</translation>
-    </message>
-    <message>
-        <source>Material font family</source>
-        <translation>Material 字体系列</translation>
-    </message>
-    <message>
-        <source>Font size scale</source>
-        <translation>字体大小缩放</translation>
+        <source>Now</source>
+        <translation>现在</translation>
     </message>
 </context>
 <context>
-    <name>GeneralSection</name>
+    <name>HeroCard</name>
     <message>
-        <source>General Settings</source>
-        <translation>常规设置</translation>
-    </message>
-    <message>
-        <source>Enabled</source>
-        <translation>已启用</translation>
-    </message>
-    <message>
-        <source>Show on hover</source>
-        <translation>悬停时显示</translation>
-    </message>
-    <message>
-        <source>Show Dashboard tab</source>
-        <translation>显示仪表盘标签页</translation>
-    </message>
-    <message>
-        <source>Show Media tab</source>
-        <translation>显示媒体标签页</translation>
-    </message>
-    <message>
-        <source>Show Performance tab</source>
-        <translation>显示性能标签页</translation>
-    </message>
-    <message>
-        <source>Show Weather tab</source>
-        <translation>显示天气标签页</translation>
-    </message>
-    <message>
-        <source>Media update interval</source>
-        <translation>媒体更新间隔</translation>
-    </message>
-    <message>
-        <source>Drag threshold</source>
-        <translation>拖动阈值</translation>
+        <source>Usage</source>
+        <translation>使用率</translation>
     </message>
 </context>
 <context>
@@ -1008,8 +1092,8 @@ Keyboard layout: %1</source>
         <translation>正在加载...</translation>
     </message>
     <message>
-        <source>You have reached the maximum number of tries</source>
-        <translation>您已达到最大尝试次数</translation>
+        <source>Max tries reached</source>
+        <translation>已达到最大尝试次数</translation>
     </message>
     <message>
         <source>Enter your password</source>
@@ -1039,46 +1123,161 @@ Keyboard layout: %1</source>
     </message>
 </context>
 <context>
-    <name>LauncherPane</name>
+    <name>LanguageAndRegion</name>
+    <message>
+        <source>24-hour</source>
+        <translation>24 小时制</translation>
+    </message>
+    <message>
+        <source>12-hour</source>
+        <translation>12 小时制</translation>
+    </message>
+    <message>
+        <source>Language &amp; region</source>
+        <translation>语言与地区</translation>
+    </message>
+    <message>
+        <source>Language</source>
+        <translation>语言</translation>
+    </message>
+    <message>
+        <source>System language</source>
+        <translation>系统语言</translation>
+    </message>
+    <message>
+        <source>Follows your system locale (%1)</source>
+        <translation>跟随您的系统区域设置 (%1)</translation>
+    </message>
+    <message>
+        <source>Weather</source>
+        <translation>天气</translation>
+    </message>
+    <message>
+        <source>Location picker coming soon</source>
+        <translation>位置选择器即将推出</translation>
+    </message>
+    <message>
+        <source>Choose your weather location on a map in a future update</source>
+        <translation>在未来更新中可在地图上选择您的天气位置</translation>
+    </message>
+    <message>
+        <source>Units</source>
+        <translation>单位</translation>
+    </message>
+    <message>
+        <source>Temperature</source>
+        <translation>温度</translation>
+    </message>
+    <message>
+        <source>Units for weather temperatures</source>
+        <translation>天气温度的单位</translation>
+    </message>
+    <message>
+        <source>System temperatures</source>
+        <translation>系统温度</translation>
+    </message>
+    <message>
+        <source>Units for CPU and GPU temperatures</source>
+        <translation>CPU 和 GPU 温度的单位</translation>
+    </message>
+    <message>
+        <source>Time &amp; date</source>
+        <translation>时间与日期</translation>
+    </message>
+    <message>
+        <source>Clock format</source>
+        <translation>时钟格式</translation>
+    </message>
+    <message>
+        <source>How times are shown across the shell</source>
+        <translation>时间在 shell 中的显示方式</translation>
+    </message>
+</context>
+<context>
+    <name>LauncherPanel</name>
     <message>
         <source>Launcher</source>
         <translation>启动器</translation>
     </message>
     <message>
-        <source>Launcher settings</source>
-        <translation>启动器设置</translation>
+        <source>General</source>
+        <translation>常规</translation>
     </message>
     <message>
-        <source>Applications (%1)</source>
-        <translation>应用程序 (%1)</translation>
+        <source>Enabled</source>
+        <translation>已启用</translation>
     </message>
     <message>
-        <source>All applications available in the launcher</source>
-        <translation>启动器中所有可用的应用程序</translation>
+        <source>Show on hover</source>
+        <translation>悬停时显示</translation>
     </message>
     <message>
-        <source>Search applications...</source>
-        <translation>搜索应用程序...</translation>
+        <source>Reveal when the cursor reaches the screen edge</source>
+        <translation>当光标到达屏幕边缘时显示</translation>
     </message>
     <message>
-        <source>Unknown</source>
-        <translation>未知</translation>
+        <source>Display</source>
+        <translation>显示</translation>
     </message>
     <message>
-        <source>Launcher Applications</source>
-        <translation>启动器应用程序</translation>
+        <source>Max items shown</source>
+        <translation>最大显示项数</translation>
     </message>
     <message>
-        <source>Application Details</source>
-        <translation>应用程序详情</translation>
+        <source>Max wallpapers</source>
+        <translation>最大壁纸数</translation>
     </message>
     <message>
-        <source>Mark as favourite</source>
-        <translation>标记为收藏</translation>
+        <source>Drag threshold</source>
+        <translation>拖动阈值</translation>
     </message>
     <message>
-        <source>Hide from launcher</source>
-        <translation>从启动器中隐藏</translation>
+        <source>Pixels dragged before the launcher opens</source>
+        <translation>启动器打开前需拖动的像素数</translation>
+    </message>
+    <message>
+        <source>Behaviour</source>
+        <translation>行为</translation>
+    </message>
+    <message>
+        <source>Vim keybinds</source>
+        <translation>Vim 快捷键</translation>
+    </message>
+    <message>
+        <source>Navigate results with Ctrl+hjkl</source>
+        <translation>使用 Ctrl+hjkl 浏览结果</translation>
+    </message>
+    <message>
+        <source>Enable dangerous actions</source>
+        <translation>启用危险操作</translation>
+    </message>
+    <message>
+        <source>Allow actions that shut down or log out</source>
+        <translation>允许关机或注销操作</translation>
+    </message>
+    <message>
+        <source>Fuzzy search</source>
+        <translation>模糊搜索</translation>
+    </message>
+    <message>
+        <source>Apps</source>
+        <translation>应用</translation>
+    </message>
+    <message>
+        <source>Actions</source>
+        <translation>操作</translation>
+    </message>
+    <message>
+        <source>Schemes</source>
+        <translation>方案</translation>
+    </message>
+    <message>
+        <source>Variants</source>
+        <translation>变体</translation>
+    </message>
+    <message>
+        <source>Wallpapers</source>
+        <translation>壁纸</translation>
     </message>
 </context>
 <context>
@@ -1093,22 +1292,48 @@ Keyboard layout: %1</source>
     </message>
 </context>
 <context>
-    <name>LyricMenu</name>
+    <name>LyricList</name>
     <message>
-        <source>Manual Search</source>
-        <translation>手动搜索</translation>
+        <source>Loading lyrics...</source>
+        <translation>正在加载歌词...</translation>
     </message>
     <message>
-        <source>title</source>
-        <translation>标题</translation>
+        <source>No lyrics found</source>
+        <translation>未找到歌词</translation>
+    </message>
+</context>
+<context>
+    <name>LyricsAndSelector</name>
+    <message>
+        <source>Lyrics</source>
+        <translation>歌词</translation>
     </message>
     <message>
-        <source>artist</source>
-        <translation>艺术家</translation>
+        <source>No players</source>
+        <translation>无播放器</translation>
+    </message>
+</context>
+<context>
+    <name>LyricsInfo</name>
+    <message>
+        <source>Backend: %1</source>
+        <translation>后端: %1</translation>
     </message>
     <message>
-        <source>Offset</source>
-        <translation>偏移</translation>
+        <source>Selected candidate: %1 | %2 | %3</source>
+        <translation>已选候选: %1 | %2 | %3</translation>
+    </message>
+    <message>
+        <source>Offset: %1 ms</source>
+        <translation>偏移: %1 毫秒</translation>
+    </message>
+    <message>
+        <source>Loading...</source>
+        <translation>正在加载...</translation>
+    </message>
+    <message>
+        <source>No lyrics found</source>
+        <translation>未找到歌词</translation>
     </message>
 </context>
 <context>
@@ -1201,23 +1426,31 @@ Keyboard layout: %1</source>
         <translation>未知艺术家</translation>
     </message>
     <message>
-        <source>Play some music for stuff to show up here!</source>
-        <translation>播放一些音乐，内容将显示在这里!</translation>
+        <source>Nothing playing</source>
+        <translation>没有正在播放的内容</translation>
     </message>
     <message>
-        <source>No players</source>
-        <translation>无播放器</translation>
+        <source>Play something for it to show up here!</source>
+        <translation>播放一些内容即可在此显示!</translation>
     </message>
     <message>
-        <source>Now playing</source>
-        <translation>正在播放</translation>
+        <source>Unknown track</source>
+        <translation>未知曲目</translation>
+    </message>
+    <message>
+        <source>Try playing some music!</source>
+        <translation>尝试播放一些音乐!</translation>
     </message>
 </context>
 <context>
-    <name>NavRail</name>
+    <name>MemoryCard</name>
     <message>
-        <source>Float window</source>
-        <translation>浮动窗口</translation>
+        <source>Memory</source>
+        <translation>内存</translation>
+    </message>
+    <message>
+        <source>Used</source>
+        <translation>已用</translation>
     </message>
 </context>
 <context>
@@ -1252,141 +1485,61 @@ Keyboard layout: %1</source>
     </message>
 </context>
 <context>
-    <name>NetworkSettings</name>
-    <message>
-        <source>Network Settings</source>
-        <translation>网络设置</translation>
-    </message>
-    <message>
-        <source>Ethernet</source>
-        <translation>以太网</translation>
-    </message>
-    <message>
-        <source>Ethernet device information</source>
-        <translation>以太网设备信息</translation>
-    </message>
-    <message>
-        <source>Total devices</source>
-        <translation>设备总数</translation>
-    </message>
-    <message>
-        <source>%1</source>
-        <translation>%1</translation>
-    </message>
-    <message>
-        <source>Connected devices</source>
-        <translation>已连接设备</translation>
-    </message>
-    <message>
-        <source>Wireless</source>
-        <translation>无线</translation>
-    </message>
-    <message>
-        <source>WiFi network settings</source>
-        <translation>Wi-Fi 网络设置</translation>
-    </message>
-    <message>
-        <source>WiFi enabled</source>
-        <translation>启用 Wi-Fi</translation>
-    </message>
-    <message>
-        <source>VPN</source>
-        <translation>VPN</translation>
-    </message>
-    <message>
-        <source>VPN provider settings</source>
-        <translation>VPN 提供商设置</translation>
-    </message>
-    <message>
-        <source>VPN enabled</source>
-        <translation>启用 VPN</translation>
-    </message>
-    <message>
-        <source>Providers</source>
-        <translation>提供商</translation>
-    </message>
-    <message>
-        <source>⚙ Manage VPN Providers</source>
-        <translation>⚙ 管理 VPN 提供商</translation>
-    </message>
-    <message>
-        <source>Current connection</source>
-        <translation>当前连接</translation>
-    </message>
-    <message>
-        <source>Active network connection information</source>
-        <translation>活动网络连接信息</translation>
-    </message>
+    <name>NetworkCard</name>
     <message>
         <source>Network</source>
         <translation>网络</translation>
     </message>
     <message>
-        <source>Not connected</source>
-        <translation>未连接</translation>
+        <source>Collecting data...</source>
+        <translation>正在收集数据...</translation>
     </message>
     <message>
-        <source>Signal strength</source>
-        <translation>信号强度</translation>
+        <source>Download</source>
+        <translation>下载</translation>
     </message>
     <message>
-        <source>%1%</source>
-        <translation>%1%</translation>
+        <source>Upload</source>
+        <translation>上传</translation>
     </message>
     <message>
-        <source>N/A</source>
-        <translation>不适用</translation>
-    </message>
-    <message>
-        <source>Security</source>
-        <translation>安全性</translation>
-    </message>
-    <message>
-        <source>Secured</source>
-        <translation>加密</translation>
-    </message>
-    <message>
-        <source>Open</source>
-        <translation>开放</translation>
-    </message>
-    <message>
-        <source>Frequency</source>
-        <translation>频率</translation>
-    </message>
-    <message>
-        <source>%1 MHz</source>
-        <translation>%1 MHz</translation>
+        <source>Total</source>
+        <translation>总计</translation>
     </message>
 </context>
 <context>
-    <name>NetworkingPane</name>
+    <name>NetworkPage</name>
     <message>
         <source>Network</source>
         <translation>网络</translation>
     </message>
     <message>
-        <source>Toggle WiFi</source>
-        <translation>切换 Wi-Fi</translation>
+        <source>Wi-Fi</source>
+        <translation>Wi-Fi</translation>
     </message>
     <message>
-        <source>Scan for networks</source>
-        <translation>扫描网络</translation>
+        <source>No networks found</source>
+        <translation>未找到网络</translation>
     </message>
     <message>
-        <source>Network settings</source>
-        <translation>网络设置</translation>
+        <source>Wi-Fi disabled</source>
+        <translation>Wi-Fi 已禁用</translation>
     </message>
     <message>
-        <source>VPN</source>
-        <translation>VPN</translation>
+        <source>Security: %1%2</source>
+        <translation>安全性: %1%2</translation>
     </message>
     <message>
-        <source>Ethernet</source>
-        <translation>以太网</translation>
+        <source> • Connected</source>
+        <translation> • 已连接</translation>
     </message>
     <message>
-        <source>Wireless</source>
-        <translation>无线</translation>
+        <source> • Saved</source>
+        <translation> • 已保存</translation>
+    </message>
+    <message>
+        <source>Add network</source>
+        <translation>添加网络</translation>
     </message>
 </context>
 <context>
@@ -1418,24 +1571,13 @@ Keyboard layout: %1</source>
         <source>notification%1</source>
         <translation>条通知%1</translation>
     </message>
-</context>
-<context>
-    <name>Notification</name>
     <message>
-        <source>Close</source>
-        <translation>关闭</translation>
+        <source>All up to date!</source>
+        <translation>全部已更新!</translation>
     </message>
 </context>
 <context>
-    <name>NotificationsPane</name>
-    <message>
-        <source>Notifications</source>
-        <translation>通知</translation>
-    </message>
-    <message>
-        <source>Show in fullscreen</source>
-        <translation>全屏显示</translation>
-    </message>
+    <name>NotificationsPage</name>
     <message>
         <source>Off</source>
         <translation>关闭</translation>
@@ -1445,32 +1587,72 @@ Keyboard layout: %1</source>
         <translation>开启</translation>
     </message>
     <message>
+        <source>Important</source>
+        <translation>重要</translation>
+    </message>
+    <message>
+        <source>Notifications</source>
+        <translation>通知</translation>
+    </message>
+    <message>
+        <source>Show in fullscreen</source>
+        <translation>全屏显示</translation>
+    </message>
+    <message>
+        <source>Whether notifications appear over fullscreen apps</source>
+        <translation>通知是否显示在全屏应用之上</translation>
+    </message>
+    <message>
         <source>Expire automatically</source>
         <translation>自动过期</translation>
+    </message>
+    <message>
+        <source>Dismiss notifications after their timeout</source>
+        <translation>通知超时后将其关闭</translation>
     </message>
     <message>
         <source>Open expanded</source>
         <translation>展开显示</translation>
     </message>
     <message>
+        <source>Show notifications expanded by default</source>
+        <translation>默认以展开方式显示通知</translation>
+    </message>
+    <message>
         <source>Default timeout</source>
         <translation>默认超时</translation>
+    </message>
+    <message>
+        <source>Time before a notification dismisses (ms)</source>
+        <translation>通知关闭前的时间（毫秒）</translation>
     </message>
     <message>
         <source>Group preview count</source>
         <translation>分组预览数量</translation>
     </message>
     <message>
-        <source>Toast settings</source>
-        <translation>通知弹窗设置</translation>
+        <source>Notifications shown per group before collapsing</source>
+        <translation>每组折叠前显示的通知数量</translation>
     </message>
     <message>
-        <source>Important</source>
-        <translation>重要</translation>
+        <source>Toasts</source>
+        <translation>通知弹窗</translation>
+    </message>
+    <message>
+        <source>Whether toasts appear over fullscreen apps</source>
+        <translation>通知弹窗是否显示在全屏应用之上</translation>
     </message>
     <message>
         <source>Visible toasts</source>
         <translation>可见通知弹窗</translation>
+    </message>
+    <message>
+        <source>Maximum number of toasts shown at once</source>
+        <translation>同时显示的最大通知弹窗数量</translation>
+    </message>
+    <message>
+        <source>Toast events</source>
+        <translation>通知弹窗事件</translation>
     </message>
     <message>
         <source>Charging changes</source>
@@ -1481,8 +1663,8 @@ Keyboard layout: %1</source>
         <translation>游戏模式变化</translation>
     </message>
     <message>
-        <source>Do not disturb</source>
-        <translation>勿扰</translation>
+        <source>Do not disturb changes</source>
+        <translation>勿扰模式变化</translation>
     </message>
     <message>
         <source>Audio output changes</source>
@@ -1514,13 +1696,158 @@ Keyboard layout: %1</source>
     </message>
 </context>
 <context>
+    <name>PageCompRegistry</name>
+    <message>
+        <source>Page under construction</source>
+        <translation>页面建设中</translation>
+    </message>
+    <message>
+        <source>This page will be available in a future update.</source>
+        <translation>此页面将在未来更新中提供。</translation>
+    </message>
+</context>
+<context>
+    <name>PageRegistry</name>
+    <message>
+        <source>Wallpaper &amp; style</source>
+        <translation>壁纸与样式</translation>
+    </message>
+    <message>
+        <source>Wallpaper, fonts, colours</source>
+        <translation>壁纸、字体、颜色</translation>
+    </message>
+    <message>
+        <source>Network</source>
+        <translation>网络</translation>
+    </message>
+    <message>
+        <source>Wi-Fi, ethernet</source>
+        <translation>Wi-Fi、以太网</translation>
+    </message>
+    <message>
+        <source>Connected devices</source>
+        <translation>已连接设备</translation>
+    </message>
+    <message>
+        <source>Bluetooth, pairing</source>
+        <translation>蓝牙、配对</translation>
+    </message>
+    <message>
+        <source>Audio</source>
+        <translation>音频</translation>
+    </message>
+    <message>
+        <source>App volumes, sound devices</source>
+        <translation>应用音量、声音设备</translation>
+    </message>
+    <message>
+        <source>Updates</source>
+        <translation>更新</translation>
+    </message>
+    <message>
+        <source>System updates</source>
+        <translation>系统更新</translation>
+    </message>
+    <message>
+        <source>Plugins</source>
+        <translation>插件</translation>
+    </message>
+    <message>
+        <source>Manage plugins</source>
+        <translation>管理插件</translation>
+    </message>
+    <message>
+        <source>Panels</source>
+        <translation>面板</translation>
+    </message>
+    <message>
+        <source>Dashboard, taskbar, launcher, sidebar</source>
+        <translation>仪表盘、任务栏、启动器、侧边栏</translation>
+    </message>
+    <message>
+        <source>Apps</source>
+        <translation>应用</translation>
+    </message>
+    <message>
+        <source>Default apps, favourites, hidden apps</source>
+        <translation>默认应用、收藏、隐藏应用</translation>
+    </message>
+    <message>
+        <source>Services</source>
+        <translation>服务</translation>
+    </message>
+    <message>
+        <source>Poll intervals, lyrics backend</source>
+        <translation>轮询间隔、歌词后端</translation>
+    </message>
+    <message>
+        <source>Language &amp; region</source>
+        <translation>语言与地区</translation>
+    </message>
+    <message>
+        <source>UI language, weather location, display units</source>
+        <translation>界面语言、天气位置、显示单位</translation>
+    </message>
+    <message>
+        <source>About</source>
+        <translation>关于</translation>
+    </message>
+    <message>
+        <source>System information, credits</source>
+        <translation>系统信息、致谢</translation>
+    </message>
+</context>
+<context>
+    <name>PanelsPage</name>
+    <message>
+        <source>Panels</source>
+        <translation>面板</translation>
+    </message>
+    <message>
+        <source>Dashboard</source>
+        <translation>仪表盘</translation>
+    </message>
+    <message>
+        <source>Enabled</source>
+        <translation>已启用</translation>
+    </message>
+    <message>
+        <source>Disabled</source>
+        <translation>已禁用</translation>
+    </message>
+    <message>
+        <source>Taskbar</source>
+        <translation>任务栏</translation>
+    </message>
+    <message>
+        <source>Always visible</source>
+        <translation>始终可见</translation>
+    </message>
+    <message>
+        <source>Reveal on hover</source>
+        <translation>悬停时显示</translation>
+    </message>
+    <message>
+        <source>Reveal on drag</source>
+        <translation>拖动时显示</translation>
+    </message>
+    <message>
+        <source>Launcher</source>
+        <translation>启动器</translation>
+    </message>
+    <message>
+        <source>Sidebar</source>
+        <translation>侧边栏</translation>
+    </message>
+</context>
+<context>
     <name>Performance</name>
     <message>
         <source>No widgets enabled</source>
         <translation>未启用任何小部件</translation>
     </message>
     <message>
-        <source>Enable widgets in dashboard settings</source>
+        <source>Enable widgets in the dashboard settings</source>
         <translation>在仪表盘设置中启用小部件</translation>
     </message>
     <message>
@@ -1528,99 +1855,8 @@ Keyboard layout: %1</source>
         <translation>CPU</translation>
     </message>
     <message>
-        <source>Usage</source>
-        <translation>使用率</translation>
-    </message>
-    <message>
-        <source>Temp</source>
-        <translation>温度</translation>
-    </message>
-    <message>
         <source>GPU</source>
         <translation>GPU</translation>
-    </message>
-    <message>
-        <source>Memory</source>
-        <translation>内存</translation>
-    </message>
-    <message>
-        <source>Battery</source>
-        <translation>电池</translation>
-    </message>
-    <message>
-        <source>Full</source>
-        <translation>已充满</translation>
-    </message>
-    <message>
-        <source>Charging</source>
-        <translation>充电中</translation>
-    </message>
-    <message>
-        <source>...</source>
-        <translation>...</translation>
-    </message>
-    <message>
-        <source>Storage</source>
-        <translation>存储</translation>
-    </message>
-    <message>
-        <source>Scroll to switch disks</source>
-        <translation>滚动以切换磁盘</translation>
-    </message>
-    <message>
-        <source>Network</source>
-        <translation>网络</translation>
-    </message>
-    <message>
-        <source>Collecting data...</source>
-        <translation>正在收集数据...</translation>
-    </message>
-    <message>
-        <source>Download</source>
-        <translation>下载</translation>
-    </message>
-    <message>
-        <source>Upload</source>
-        <translation>上传</translation>
-    </message>
-    <message>
-        <source>Total</source>
-        <translation>总计</translation>
-    </message>
-</context>
-<context>
-    <name>PerformanceSection</name>
-    <message>
-        <source>Performance Resources</source>
-        <translation>性能资源</translation>
-    </message>
-    <message>
-        <source>Battery</source>
-        <translation>电池</translation>
-    </message>
-    <message>
-        <source>GPU</source>
-        <translation>GPU</translation>
-    </message>
-    <message>
-        <source>CPU</source>
-        <translation>CPU</translation>
-    </message>
-    <message>
-        <source>Memory</source>
-        <translation>内存</translation>
-    </message>
-    <message>
-        <source>Storage</source>
-        <translation>存储</translation>
-    </message>
-    <message>
-        <source>Network</source>
-        <translation>网络</translation>
-    </message>
-    <message>
-        <source>Resource update interval</source>
-        <translation>资源更新间隔</translation>
     </message>
 </context>
 <context>
@@ -1645,16 +1881,16 @@ Keyboard layout: %1</source>
         <translation>屏幕录制</translation>
     </message>
     <message>
-        <source>Recording paused</source>
-        <translation>录制已暂停</translation>
+        <source>Paused</source>
+        <translation>已暂停</translation>
     </message>
     <message>
-        <source>Recording running</source>
-        <translation>正在录制</translation>
+        <source>Running...</source>
+        <translation>正在录制...</translation>
     </message>
     <message>
-        <source>Recording off</source>
-        <translation>录制已关闭</translation>
+        <source>Ready</source>
+        <translation>就绪</translation>
     </message>
     <message>
         <source>Record fullscreen</source>
@@ -1720,233 +1956,145 @@ Keyboard layout: %1</source>
     </message>
 </context>
 <context>
-    <name>ScalesSection</name>
+    <name>SearchBar</name>
     <message>
-        <source>Scales</source>
-        <translation>缩放</translation>
-    </message>
-    <message>
-        <source>Padding scale</source>
-        <translation>内边距缩放</translation>
-    </message>
-    <message>
-        <source>Rounding scale</source>
-        <translation>圆角缩放</translation>
-    </message>
-    <message>
-        <source>Spacing scale</source>
-        <translation>间距缩放</translation>
+        <source>Search settings</source>
+        <translation>搜索设置</translation>
     </message>
 </context>
 <context>
-    <name>Settings</name>
+    <name>ServicesPage</name>
     <message>
-        <source>Bluetooth Settings</source>
-        <translation>蓝牙设置</translation>
+        <source>Auto</source>
+        <translation>自动</translation>
     </message>
     <message>
-        <source>Adapter status</source>
-        <translation>适配器状态</translation>
-    </message>
-    <message>
-        <source>General adapter settings</source>
-        <translation>常规适配器设置</translation>
-    </message>
-    <message>
-        <source>Powered</source>
-        <translation>已开启</translation>
-    </message>
-    <message>
-        <source>Discoverable</source>
-        <translation>可被发现</translation>
-    </message>
-    <message>
-        <source>Pairable</source>
-        <translation>可配对</translation>
-    </message>
-    <message>
-        <source>Adapter properties</source>
-        <translation>适配器属性</translation>
-    </message>
-    <message>
-        <source>Per-adapter settings</source>
-        <translation>各适配器设置</translation>
-    </message>
-    <message>
-        <source>Current adapter</source>
-        <translation>当前适配器</translation>
+        <source>Generic</source>
+        <translation>通用</translation>
     </message>
     <message>
         <source>None</source>
         <translation>无</translation>
     </message>
     <message>
-        <source>Discoverable timeout</source>
-        <translation>可被发现超时</translation>
+        <source>Services</source>
+        <translation>服务</translation>
     </message>
     <message>
-        <source>Rename adapter (currently does not work)</source>
-        <translation>重命名适配器（当前不可用）</translation>
+        <source>Notifications</source>
+        <translation>通知</translation>
     </message>
     <message>
-        <source>Adapter information</source>
-        <translation>适配器信息</translation>
+        <source>Notifications, toasts, timeouts</source>
+        <translation>通知、通知弹窗、超时</translation>
     </message>
     <message>
-        <source>Information about the default adapter</source>
-        <translation>关于默认适配器的信息</translation>
+        <source>Polling</source>
+        <translation>轮询</translation>
     </message>
     <message>
-        <source>Adapter state</source>
-        <translation>适配器状态</translation>
+        <source>Media refresh</source>
+        <translation>媒体刷新</translation>
     </message>
     <message>
-        <source>Unknown</source>
-        <translation>未知</translation>
+        <source>How often the media position updates (ms)</source>
+        <translation>媒体播放位置的更新频率（毫秒）</translation>
     </message>
     <message>
-        <source>Dbus path</source>
-        <translation>Dbus 路径</translation>
+        <source>System stats refresh</source>
+        <translation>系统状态刷新</translation>
     </message>
     <message>
-        <source>Adapter id</source>
-        <translation>适配器 ID</translation>
+        <source>CPU, memory and GPU update interval (seconds)</source>
+        <translation>CPU、内存和 GPU 的更新间隔（秒）</translation>
     </message>
     <message>
-        <source>Launcher Settings</source>
-        <translation>启动器设置</translation>
+        <source>Wi-Fi rescan</source>
+        <translation>Wi-Fi 重新扫描</translation>
     </message>
     <message>
-        <source>General</source>
-        <translation>常规</translation>
+        <source>How often available networks are rescanned (seconds)</source>
+        <translation>可用网络的重新扫描频率（秒）</translation>
     </message>
     <message>
-        <source>General launcher settings</source>
-        <translation>常规启动器设置</translation>
+        <source>Media &amp; lyrics</source>
+        <translation>媒体与歌词</translation>
     </message>
     <message>
-        <source>Enabled</source>
-        <translation>已启用</translation>
+        <source>Lyrics backend</source>
+        <translation>歌词后端</translation>
     </message>
     <message>
-        <source>Show on hover</source>
-        <translation>悬停时显示</translation>
+        <source>Source used to fetch synced lyrics</source>
+        <translation>用于获取同步歌词的来源</translation>
     </message>
     <message>
-        <source>Vim keybinds</source>
-        <translation>Vim 快捷键</translation>
+        <source>Default player</source>
+        <translation>默认播放器</translation>
     </message>
     <message>
-        <source>Enable dangerous actions</source>
-        <translation>启用危险操作</translation>
+        <source>Preferred media player when several are open</source>
+        <translation>打开多个播放器时优先使用的媒体播放器</translation>
     </message>
     <message>
-        <source>Display</source>
-        <translation>显示</translation>
+        <source>Input increments</source>
+        <translation>输入步进</translation>
     </message>
     <message>
-        <source>Display and appearance settings</source>
-        <translation>显示与外观设置</translation>
+        <source>Volume step</source>
+        <translation>音量步进</translation>
     </message>
     <message>
-        <source>Max shown items</source>
-        <translation>最大显示项目数</translation>
+        <source>Amount the volume changes per scroll (%)</source>
+        <translation>每次滚动改变的音量大小（%）</translation>
     </message>
     <message>
-        <source>%1</source>
-        <translation>%1</translation>
+        <source>Brightness step</source>
+        <translation>亮度步进</translation>
     </message>
     <message>
-        <source>Max wallpapers</source>
-        <translation>最大壁纸数</translation>
+        <source>Amount the brightness changes per scroll (%)</source>
+        <translation>每次滚动改变的亮度大小（%）</translation>
     </message>
     <message>
-        <source>Drag threshold</source>
-        <translation>拖动阈值</translation>
+        <source>Max volume</source>
+        <translation>最大音量</translation>
     </message>
     <message>
-        <source>%1 px</source>
-        <translation>%1 px</translation>
+        <source>Upper limit for output volume (%)</source>
+        <translation>输出音量的上限（%）</translation>
     </message>
     <message>
-        <source>Prefixes</source>
-        <translation>前缀</translation>
+        <source>Service tuning</source>
+        <translation>服务调优</translation>
     </message>
     <message>
-        <source>Command prefix settings</source>
-        <translation>命令前缀设置</translation>
+        <source>Visualiser bars</source>
+        <translation>可视化条数</translation>
     </message>
     <message>
-        <source>Special prefix</source>
-        <translation>特殊前缀</translation>
+        <source>Number of bars in the audio visualisers</source>
+        <translation>音频可视化器中的条数</translation>
     </message>
     <message>
-        <source>Action prefix</source>
-        <translation>操作前缀</translation>
+        <source>Smart colour scheme</source>
+        <translation>智能配色方案</translation>
     </message>
     <message>
-        <source>Fuzzy search</source>
-        <translation>模糊搜索</translation>
+        <source>Derive theme mode and variant from the wallpaper</source>
+        <translation>根据壁纸推导主题模式和变体</translation>
     </message>
     <message>
-        <source>Fuzzy search settings</source>
-        <translation>模糊搜索设置</translation>
+        <source>GPU</source>
+        <translation>GPU</translation>
     </message>
     <message>
-        <source>Apps</source>
-        <translation>应用</translation>
+        <source>Monitoring: %1</source>
+        <translation>正在监控: %1</translation>
     </message>
     <message>
-        <source>Actions</source>
-        <translation>操作</translation>
-    </message>
-    <message>
-        <source>Schemes</source>
-        <translation>方案</translation>
-    </message>
-    <message>
-        <source>Variants</source>
-        <translation>变体</translation>
-    </message>
-    <message>
-        <source>Wallpapers</source>
-        <translation>壁纸</translation>
-    </message>
-    <message>
-        <source>Sizes</source>
-        <translation>尺寸</translation>
-    </message>
-    <message>
-        <source>Size settings for launcher items</source>
-        <translation>启动器项目的尺寸设置</translation>
-    </message>
-    <message>
-        <source>Item width</source>
-        <translation>项目宽度</translation>
-    </message>
-    <message>
-        <source>Item height</source>
-        <translation>项目高度</translation>
-    </message>
-    <message>
-        <source>Wallpaper width</source>
-        <translation>壁纸宽度</translation>
-    </message>
-    <message>
-        <source>Wallpaper height</source>
-        <translation>壁纸高度</translation>
-    </message>
-    <message>
-        <source>Hidden apps</source>
-        <translation>隐藏的应用</translation>
-    </message>
-    <message>
-        <source>Applications hidden from launcher</source>
-        <translation>从启动器中隐藏的应用程序</translation>
-    </message>
-    <message>
-        <source>Total hidden</source>
-        <translation>隐藏总数</translation>
+        <source>Override for GPU type</source>
+        <translation>覆盖 GPU 类型</translation>
     </message>
 </context>
 <context>
@@ -1957,169 +2105,217 @@ Keyboard layout: %1</source>
     </message>
 </context>
 <context>
-    <name>TaskbarPane</name>
+    <name>SidebarPanel</name>
     <message>
-        <source>Taskbar</source>
-        <translation>任务栏</translation>
+        <source>Sidebar</source>
+        <translation>侧边栏</translation>
     </message>
     <message>
-        <source>Status Icons</source>
-        <translation>状态图标</translation>
+        <source>General</source>
+        <translation>常规</translation>
     </message>
     <message>
-        <source>Speakers</source>
-        <translation>扬声器</translation>
-    </message>
-    <message>
-        <source>Microphone</source>
-        <translation>麦克风</translation>
-    </message>
-    <message>
-        <source>Keyboard</source>
-        <translation>键盘</translation>
-    </message>
-    <message>
-        <source>Network</source>
-        <translation>网络</translation>
-    </message>
-    <message>
-        <source>Wifi</source>
-        <translation>Wi-Fi</translation>
-    </message>
-    <message>
-        <source>Bluetooth</source>
-        <translation>蓝牙</translation>
-    </message>
-    <message>
-        <source>Battery</source>
-        <translation>电池</translation>
-    </message>
-    <message>
-        <source>Capslock</source>
-        <translation>大写锁定</translation>
-    </message>
-    <message>
-        <source>Workspaces</source>
-        <translation>工作区</translation>
-    </message>
-    <message>
-        <source>Shown</source>
-        <translation>显示</translation>
-    </message>
-    <message>
-        <source>Active indicator</source>
-        <translation>活动指示器</translation>
-    </message>
-    <message>
-        <source>Occupied background</source>
-        <translation>占用背景</translation>
-    </message>
-    <message>
-        <source>Show windows</source>
-        <translation>显示窗口</translation>
-    </message>
-    <message>
-        <source>Max window icons</source>
-        <translation>最大窗口图标数</translation>
-    </message>
-    <message>
-        <source>Per monitor workspaces</source>
-        <translation>各显示器工作区</translation>
-    </message>
-    <message>
-        <source>Scroll Actions</source>
-        <translation>滚动操作</translation>
-    </message>
-    <message>
-        <source>Volume</source>
-        <translation>音量</translation>
-    </message>
-    <message>
-        <source>Brightness</source>
-        <translation>亮度</translation>
-    </message>
-    <message>
-        <source>Clock</source>
-        <translation>时钟</translation>
-    </message>
-    <message>
-        <source>Background</source>
-        <translation>背景</translation>
-    </message>
-    <message>
-        <source>Show date</source>
-        <translation>显示日期</translation>
-    </message>
-    <message>
-        <source>Show clock icon</source>
-        <translation>显示时钟图标</translation>
-    </message>
-    <message>
-        <source>Bar Behavior</source>
-        <translation>栏行为</translation>
-    </message>
-    <message>
-        <source>Persistent</source>
-        <translation>持久显示</translation>
-    </message>
-    <message>
-        <source>Show on hover</source>
-        <translation>悬停时显示</translation>
+        <source>Enabled</source>
+        <translation>已启用</translation>
     </message>
     <message>
         <source>Drag threshold</source>
         <translation>拖动阈值</translation>
     </message>
     <message>
+        <source>Pixels dragged before the sidebar opens</source>
+        <translation>侧边栏打开前需拖动的像素数</translation>
+    </message>
+</context>
+<context>
+    <name>StateMessage</name>
+    <message>
+        <source>FP ERROR: %1</source>
+        <translation>指纹错误: %1</translation>
+    </message>
+    <message>
+        <source>PW ERROR: %1</source>
+        <translation>密码错误: %1</translation>
+    </message>
+    <message>
+        <source>Maximum password and fingerprint attempts reached.</source>
+        <translation>已达到密码和指纹的最大尝试次数。</translation>
+    </message>
+    <message>
+        <source>Maximum password attempts reached. Please use fingerprint.</source>
+        <translation>已达到密码最大尝试次数。请使用指纹。</translation>
+    </message>
+    <message>
+        <source>Maximum password attempts reached.</source>
+        <translation>已达到密码最大尝试次数。</translation>
+    </message>
+    <message>
+        <source>Maximum fingerprint attempts reached. Please use password.</source>
+        <translation>已达到指纹最大尝试次数。请使用密码。</translation>
+    </message>
+    <message>
+        <source>Incorrect password. Please try again or use fingerprint.</source>
+        <translation>密码错误。请重试或使用指纹。</translation>
+    </message>
+    <message>
+        <source>Incorrect password. Please try again.</source>
+        <translation>密码错误。请重试。</translation>
+    </message>
+    <message>
+        <source>Fingerprint not recognized (%1/%2). Please try again or use password.</source>
+        <translation>无法识别指纹 (%1/%2)。请重试或使用密码。</translation>
+    </message>
+    <message>
+        <source>Caps lock and Num lock are ON.
+Keyboard layout: %1</source>
+        <translation>大写锁定和数字锁定已开启。
+键盘布局: %1</translation>
+    </message>
+    <message>
+        <source>Caps lock is ON. Kb layout: %1</source>
+        <translation>大写锁定已开启。键盘布局: %1</translation>
+    </message>
+    <message>
+        <source>Num lock is ON. Kb layout: %1</source>
+        <translation>数字锁定已开启。键盘布局: %1</translation>
+    </message>
+    <message>
+        <source>Keyboard layout: %1</source>
+        <translation>键盘布局: %1</translation>
+    </message>
+    <message>
+        <source>Caps lock and Num lock are ON.</source>
+        <translation>大写锁定和数字锁定已开启。</translation>
+    </message>
+    <message>
+        <source>Caps lock is ON.</source>
+        <translation>大写锁定已开启。</translation>
+    </message>
+    <message>
+        <source>Num lock is ON.</source>
+        <translation>数字锁定已开启。</translation>
+    </message>
+</context>
+<context>
+    <name>StorageCard</name>
+    <message>
+        <source>Used</source>
+        <translation>已用</translation>
+    </message>
+    <message>
+        <source>Storage</source>
+        <translation>存储</translation>
+    </message>
+    <message>
+        <source>No disks detected</source>
+        <translation>未检测到磁盘</translation>
+    </message>
+    <message>
+        <source>No disks</source>
+        <translation>无磁盘</translation>
+    </message>
+</context>
+<context>
+    <name>TaskbarPanel</name>
+    <message>
+        <source>Taskbar</source>
+        <translation>任务栏</translation>
+    </message>
+    <message>
+        <source>Behaviour</source>
+        <translation>行为</translation>
+    </message>
+    <message>
+        <source>Persistent</source>
+        <translation>持久显示</translation>
+    </message>
+    <message>
+        <source>Keep the bar visible at all times</source>
+        <translation>始终保持任务栏可见</translation>
+    </message>
+    <message>
+        <source>Show on hover</source>
+        <translation>悬停时显示</translation>
+    </message>
+    <message>
+        <source>Reveal the bar when the cursor reaches the screen edge</source>
+        <translation>当光标到达屏幕边缘时显示任务栏</translation>
+    </message>
+    <message>
+        <source>Drag threshold</source>
+        <translation>拖动阈值</translation>
+    </message>
+    <message>
+        <source>Pixels dragged before the bar reveals</source>
+        <translation>任务栏显示前需拖动的像素数</translation>
+    </message>
+    <message>
+        <source>Components</source>
+        <translation>组件</translation>
+    </message>
+    <message>
+        <source>Workspaces</source>
+        <translation>工作区</translation>
+    </message>
+    <message>
+        <source>Indicators, window icons</source>
+        <translation>指示器、窗口图标</translation>
+    </message>
+    <message>
         <source>Active window</source>
         <translation>活动窗口</translation>
     </message>
     <message>
-        <source>Compact</source>
-        <translation>紧凑</translation>
-    </message>
-    <message>
-        <source>Inverted</source>
-        <translation>反转</translation>
-    </message>
-    <message>
-        <source>Popouts</source>
-        <translation>弹出</translation>
+        <source>Title display, popout</source>
+        <translation>标题显示、弹出框</translation>
     </message>
     <message>
         <source>Tray</source>
         <translation>托盘</translation>
     </message>
     <message>
+        <source>System tray icons</source>
+        <translation>系统托盘图标</translation>
+    </message>
+    <message>
         <source>Status icons</source>
         <translation>状态图标</translation>
     </message>
     <message>
-        <source>Tray Settings</source>
-        <translation>托盘设置</translation>
+        <source>Visible indicators</source>
+        <translation>可见指示器</translation>
     </message>
     <message>
-        <source>Recolour</source>
-        <translation>重新着色</translation>
+        <source>Clock</source>
+        <translation>时钟</translation>
     </message>
     <message>
-        <source>Monitors</source>
-        <translation>显示器</translation>
-    </message>
-</context>
-<context>
-    <name>ThemeModeSection</name>
-    <message>
-        <source>Theme mode</source>
-        <translation>主题模式</translation>
+        <source>Date, icon, background</source>
+        <translation>日期、图标、背景</translation>
     </message>
     <message>
-        <source>Light or dark theme</source>
-        <translation>浅色或深色主题</translation>
+        <source>Scroll actions</source>
+        <translation>滚动操作</translation>
     </message>
     <message>
-        <source>Dark mode</source>
-        <translation>深色模式</translation>
+        <source>Scroll over the workspace indicator to switch workspaces</source>
+        <translation>在工作区指示器上滚动以切换工作区</translation>
+    </message>
+    <message>
+        <source>Volume</source>
+        <translation>音量</translation>
+    </message>
+    <message>
+        <source>Scroll on the top half of the bar to adjust volume</source>
+        <translation>在任务栏上半部分滚动以调整音量</translation>
+    </message>
+    <message>
+        <source>Brightness</source>
+        <translation>亮度</translation>
+    </message>
+    <message>
+        <source>Scroll on the bottom half of the bar to adjust brightness</source>
+        <translation>在任务栏下半部分滚动以调整亮度</translation>
     </message>
 </context>
 <context>
@@ -2130,329 +2326,10 @@ Keyboard layout: %1</source>
     </message>
 </context>
 <context>
-    <name>TransparencySection</name>
-    <message>
-        <source>Transparency</source>
-        <translation>透明度</translation>
-    </message>
-    <message>
-        <source>Transparency enabled</source>
-        <translation>启用透明度</translation>
-    </message>
-    <message>
-        <source>Transparency base</source>
-        <translation>透明度基准</translation>
-    </message>
-    <message>
-        <source>Transparency layers</source>
-        <translation>透明度层级</translation>
-    </message>
-</context>
-<context>
     <name>TrayMenu</name>
     <message>
         <source>Back</source>
         <translation>返回</translation>
-    </message>
-</context>
-<context>
-    <name>User</name>
-    <message>
-        <source>up %1</source>
-        <translation>已运行 %1</translation>
-    </message>
-</context>
-<context>
-    <name>VpnDetails</name>
-    <message>
-        <source>Unknown</source>
-        <translation>未知</translation>
-    </message>
-    <message>
-        <source>Connection status</source>
-        <translation>连接状态</translation>
-    </message>
-    <message>
-        <source>VPN connection settings</source>
-        <translation>VPN 连接设置</translation>
-    </message>
-    <message>
-        <source>Enable this provider</source>
-        <translation>启用此提供商</translation>
-    </message>
-    <message>
-        <source>Disconnect</source>
-        <translation>断开连接</translation>
-    </message>
-    <message>
-        <source>Connect</source>
-        <translation>连接</translation>
-    </message>
-    <message>
-        <source>Edit Provider</source>
-        <translation>编辑提供商</translation>
-    </message>
-    <message>
-        <source>Delete Provider</source>
-        <translation>删除提供商</translation>
-    </message>
-    <message>
-        <source>Open Login Page</source>
-        <translation>打开登录页面</translation>
-    </message>
-    <message>
-        <source>Click &apos;Connect&apos; to generate authentication URL</source>
-        <translation>点击 &apos;连接&apos; 以生成认证 URL</translation>
-    </message>
-    <message>
-        <source>Provider details</source>
-        <translation>提供商详情</translation>
-    </message>
-    <message>
-        <source>VPN provider information</source>
-        <translation>VPN 提供商信息</translation>
-    </message>
-    <message>
-        <source>Provider</source>
-        <translation>提供商</translation>
-    </message>
-    <message>
-        <source>Display name</source>
-        <translation>显示名称</translation>
-    </message>
-    <message>
-        <source>Interface</source>
-        <translation>接口</translation>
-    </message>
-    <message>
-        <source>N/A</source>
-        <translation>不适用</translation>
-    </message>
-    <message>
-        <source>Status</source>
-        <translation>状态</translation>
-    </message>
-    <message>
-        <source>Disabled</source>
-        <translation>已禁用</translation>
-    </message>
-    <message>
-        <source>Connecting...</source>
-        <translation>正在连接...</translation>
-    </message>
-    <message>
-        <source>Connected</source>
-        <translation>已连接</translation>
-    </message>
-    <message>
-        <source>Disconnected</source>
-        <translation>已断开</translation>
-    </message>
-    <message>
-        <source>Authentication required</source>
-        <translation>需要认证</translation>
-    </message>
-    <message>
-        <source>Error</source>
-        <translation>错误</translation>
-    </message>
-    <message>
-        <source>Details</source>
-        <translation>详情</translation>
-    </message>
-    <message>
-        <source>Enabled</source>
-        <translation>已启用</translation>
-    </message>
-    <message>
-        <source>Yes</source>
-        <translation>是</translation>
-    </message>
-    <message>
-        <source>No</source>
-        <translation>否</translation>
-    </message>
-    <message>
-        <source>Edit VPN Provider</source>
-        <translation>编辑 VPN 提供商</translation>
-    </message>
-    <message>
-        <source>Display Name</source>
-        <translation>显示名称</translation>
-    </message>
-    <message>
-        <source>Interface (e.g., wg0, torguard)</source>
-        <translation>接口（例如 wg0、torguard）</translation>
-    </message>
-    <message>
-        <source>Connect Command</source>
-        <translation>连接命令</translation>
-    </message>
-    <message>
-        <source>Disconnect Command</source>
-        <translation>断开命令</translation>
-    </message>
-    <message>
-        <source>Cancel</source>
-        <translation>取消</translation>
-    </message>
-    <message>
-        <source>Save</source>
-        <translation>保存</translation>
-    </message>
-</context>
-<context>
-    <name>VpnList</name>
-    <message>
-        <source>+ Add VPN Provider</source>
-        <translation>+ 添加 VPN 提供商</translation>
-    </message>
-    <message>
-        <source>Unknown</source>
-        <translation>未知</translation>
-    </message>
-    <message>
-        <source>Disabled</source>
-        <translation>已禁用</translation>
-    </message>
-    <message>
-        <source>Connecting...</source>
-        <translation>正在连接...</translation>
-    </message>
-    <message>
-        <source>Connected</source>
-        <translation>已连接</translation>
-    </message>
-    <message>
-        <source>Enabled</source>
-        <translation>已启用</translation>
-    </message>
-    <message>
-        <source>Auth required</source>
-        <translation>需要认证</translation>
-    </message>
-    <message>
-        <source>Error</source>
-        <translation>错误</translation>
-    </message>
-    <message>
-        <source>Add VPN Provider</source>
-        <translation>添加 VPN 提供商</translation>
-    </message>
-    <message>
-        <source>Choose a provider to add</source>
-        <translation>选择要添加的提供商</translation>
-    </message>
-    <message>
-        <source>NetBird</source>
-        <translation>NetBird</translation>
-    </message>
-    <message>
-        <source>Tailscale</source>
-        <translation>Tailscale</translation>
-    </message>
-    <message>
-        <source>Cloudflare WARP</source>
-        <translation>Cloudflare WARP</translation>
-    </message>
-    <message>
-        <source>WireGuard</source>
-        <translation>WireGuard</translation>
-    </message>
-    <message>
-        <source>Custom</source>
-        <translation>自定义</translation>
-    </message>
-    <message>
-        <source>Cancel</source>
-        <translation>取消</translation>
-    </message>
-    <message>
-        <source>Edit VPN Provider</source>
-        <translation>编辑 VPN 提供商</translation>
-    </message>
-    <message>
-        <source>Add %1 VPN</source>
-        <translation>添加 %1VPN</translation>
-    </message>
-    <message>
-        <source>Display Name</source>
-        <translation>显示名称</translation>
-    </message>
-    <message>
-        <source>Interface (e.g., wg0, torguard)</source>
-        <translation>接口（例如 wg0、torguard）</translation>
-    </message>
-    <message>
-        <source>Connect Command (e.g., wg-quick up wg0)</source>
-        <translation>连接命令（例如 wg-quick up wg0）</translation>
-    </message>
-    <message>
-        <source>Disconnect Command (e.g., wg-quick down wg0)</source>
-        <translation>断开命令（例如 wg-quick down wg0）</translation>
-    </message>
-    <message>
-        <source>Save</source>
-        <translation>保存</translation>
-    </message>
-</context>
-<context>
-    <name>VpnSettings</name>
-    <message>
-        <source>VPN Settings</source>
-        <translation>VPN 设置</translation>
-    </message>
-    <message>
-        <source>General</source>
-        <translation>常规</translation>
-    </message>
-    <message>
-        <source>VPN configuration</source>
-        <translation>VPN 配置</translation>
-    </message>
-    <message>
-        <source>VPN enabled</source>
-        <translation>启用 VPN</translation>
-    </message>
-    <message>
-        <source>Providers</source>
-        <translation>提供商</translation>
-    </message>
-    <message>
-        <source>Manage VPN providers</source>
-        <translation>管理 VPN 提供商</translation>
-    </message>
-    <message>
-        <source>%1 • %2</source>
-        <translation>%1 • %2</translation>
-    </message>
-    <message>
-        <source>No interface</source>
-        <translation>无接口</translation>
-    </message>
-    <message>
-        <source>+ Add Provider</source>
-        <translation>+ 添加提供商</translation>
-    </message>
-    <message>
-        <source>Quick Add</source>
-        <translation>快速添加</translation>
-    </message>
-    <message>
-        <source>Add common VPN providers</source>
-        <translation>添加常用 VPN 提供商</translation>
-    </message>
-    <message>
-        <source>+ Add NetBird</source>
-        <translation>+ 添加 NetBird</translation>
-    </message>
-    <message>
-        <source>+ Add Tailscale</source>
-        <translation>+ 添加 Tailscale</translation>
-    </message>
-    <message>
-        <source>+ Add Cloudflare WARP</source>
-        <translation>+ 添加 Cloudflare WARP</translation>
     </message>
 </context>
 <context>
@@ -2475,18 +2352,73 @@ Keyboard layout: %1</source>
     </message>
 </context>
 <context>
-    <name>WeatherInfo</name>
+    <name>WallpaperAndStyle</name>
     <message>
-        <source>Weather</source>
-        <translation>天气</translation>
+        <source>Wallpaper &amp; style</source>
+        <translation>壁纸与样式</translation>
     </message>
     <message>
-        <source>Humidity: %1%</source>
-        <translation>湿度: %1%</translation>
+        <source>Wallpaper disabled</source>
+        <translation>壁纸已禁用</translation>
     </message>
     <message>
-        <source>Feels like: %1</source>
-        <translation>体感温度: %1</translation>
+        <source>Wallpapers</source>
+        <translation>壁纸</translation>
+    </message>
+    <message>
+        <source>Colours</source>
+        <translation>颜色</translation>
+    </message>
+    <message>
+        <source>Display wallpaper</source>
+        <translation>显示壁纸</translation>
+    </message>
+    <message>
+        <source>Transparency</source>
+        <translation>透明度</translation>
+    </message>
+    <message>
+        <source>Base %1, layers %2</source>
+        <translation>基础 %1，图层 %2</translation>
+    </message>
+    <message>
+        <source>Dark theme</source>
+        <translation>深色主题</translation>
+    </message>
+</context>
+<context>
+    <name>WallpaperSelect</name>
+    <message>
+        <source>Wallpapers</source>
+        <translation>壁纸</translation>
+    </message>
+    <message>
+        <source>Browse</source>
+        <translation>浏览</translation>
+    </message>
+    <message>
+        <source>Select an image</source>
+        <translation>选择图像</translation>
+    </message>
+    <message>
+        <source>Image files</source>
+        <translation>图像文件</translation>
+    </message>
+    <message>
+        <source>Random</source>
+        <translation>随机</translation>
+    </message>
+    <message>
+        <source>Featured wallpaper</source>
+        <translation>精选壁纸</translation>
+    </message>
+    <message>
+        <source>Local wallpapers</source>
+        <translation>本地壁纸</translation>
+    </message>
+    <message>
+        <source>No local wallpapers found</source>
+        <translation>未找到本地壁纸</translation>
     </message>
 </context>
 <context>
@@ -2527,125 +2459,8 @@ Keyboard layout: %1</source>
 <context>
     <name>WindowFactory</name>
     <message>
-        <source>Caelestia Settings - %1</source>
-        <translation>Caelestia 设置 - %1</translation>
-    </message>
-</context>
-<context>
-    <name>WindowTitle</name>
-    <message>
-        <source>Caelestia Settings - %1</source>
-        <translation>Caelestia 设置 - %1</translation>
-    </message>
-</context>
-<context>
-    <name>WirelessDetails</name>
-    <message>
-        <source>Unknown</source>
-        <translation>未知</translation>
-    </message>
-    <message>
-        <source>Connection status</source>
-        <translation>连接状态</translation>
-    </message>
-    <message>
-        <source>Connection settings for this network</source>
-        <translation>此网络的连接设置</translation>
-    </message>
-    <message>
-        <source>Connected</source>
-        <translation>已连接</translation>
-    </message>
-    <message>
-        <source>Forget Network</source>
-        <translation>忘记网络</translation>
-    </message>
-    <message>
-        <source>Network properties</source>
-        <translation>网络属性</translation>
-    </message>
-    <message>
-        <source>Additional information</source>
-        <translation>其他信息</translation>
-    </message>
-    <message>
-        <source>SSID</source>
-        <translation>SSID</translation>
-    </message>
-    <message>
-        <source>BSSID</source>
-        <translation>BSSID</translation>
-    </message>
-    <message>
-        <source>Signal strength</source>
-        <translation>信号强度</translation>
-    </message>
-    <message>
-        <source>%1%</source>
-        <translation>%1%</translation>
-    </message>
-    <message>
-        <source>N/A</source>
-        <translation>不适用</translation>
-    </message>
-    <message>
-        <source>Frequency</source>
-        <translation>频率</translation>
-    </message>
-    <message>
-        <source>%1 MHz</source>
-        <translation>%1 MHz</translation>
-    </message>
-    <message>
-        <source>Security</source>
-        <translation>安全性</translation>
-    </message>
-    <message>
-        <source>Open</source>
-        <translation>开放</translation>
-    </message>
-    <message>
-        <source>Connection information</source>
-        <translation>连接信息</translation>
-    </message>
-    <message>
-        <source>Network connection details</source>
-        <translation>网络连接详情</translation>
-    </message>
-</context>
-<context>
-    <name>WirelessList</name>
-    <message>
-        <source>Networks (%1)</source>
-        <translation>网络 (%1)</translation>
-    </message>
-    <message>
-        <source>All available WiFi networks</source>
-        <translation>所有可用的 Wi-Fi 网络</translation>
-    </message>
-    <message>
-        <source>Scanning...</source>
-        <translation>正在扫描...</translation>
-    </message>
-    <message>
-        <source>Settings</source>
-        <translation>设置</translation>
-    </message>
-    <message>
-        <source>Unknown</source>
-        <translation>未知</translation>
-    </message>
-    <message>
-        <source>Connected</source>
-        <translation>已连接</translation>
-    </message>
-    <message>
-        <source>Secured</source>
-        <translation>加密</translation>
-    </message>
-    <message>
-        <source>Open</source>
-        <translation>开放</translation>
+        <source>Nexus — %1</source>
+        <translation>Nexus — %1</translation>
     </message>
 </context>
 <context>
@@ -2681,104 +2496,6 @@ Keyboard layout: %1</source>
     <message>
         <source>Cancel</source>
         <translation>取消</translation>
-    </message>
-</context>
-<context>
-    <name>WirelessPasswordDialog</name>
-    <message>
-        <source>Connect</source>
-        <translation>连接</translation>
-    </message>
-    <message>
-        <source>Enter password</source>
-        <translation>输入密码</translation>
-    </message>
-    <message>
-        <source>Network: %1</source>
-        <translation>网络: %1</translation>
-    </message>
-    <message>
-        <source>Connection failed. Please check your password and try again.</source>
-        <translation>连接失败。请检查您的密码后重试。</translation>
-    </message>
-    <message>
-        <source>Connecting...</source>
-        <translation>正在连接...</translation>
-    </message>
-    <message>
-        <source>Password</source>
-        <translation>密码</translation>
-    </message>
-    <message>
-        <source>Cancel</source>
-        <translation>取消</translation>
-    </message>
-</context>
-<context>
-    <name>WirelessSettings</name>
-    <message>
-        <source>Network settings</source>
-        <translation>网络设置</translation>
-    </message>
-    <message>
-        <source>WiFi status</source>
-        <translation>Wi-Fi 状态</translation>
-    </message>
-    <message>
-        <source>General WiFi settings</source>
-        <translation>常规 Wi-Fi 设置</translation>
-    </message>
-    <message>
-        <source>WiFi enabled</source>
-        <translation>启用 Wi-Fi</translation>
-    </message>
-    <message>
-        <source>Network information</source>
-        <translation>网络信息</translation>
-    </message>
-    <message>
-        <source>Current network connection</source>
-        <translation>当前网络连接</translation>
-    </message>
-    <message>
-        <source>Connected network</source>
-        <translation>已连接的网络</translation>
-    </message>
-    <message>
-        <source>Not connected</source>
-        <translation>未连接</translation>
-    </message>
-    <message>
-        <source>Signal strength</source>
-        <translation>信号强度</translation>
-    </message>
-    <message>
-        <source>%1%</source>
-        <translation>%1%</translation>
-    </message>
-    <message>
-        <source>N/A</source>
-        <translation>不适用</translation>
-    </message>
-    <message>
-        <source>Security</source>
-        <translation>安全性</translation>
-    </message>
-    <message>
-        <source>Secured</source>
-        <translation>加密</translation>
-    </message>
-    <message>
-        <source>Open</source>
-        <translation>开放</translation>
-    </message>
-    <message>
-        <source>Frequency</source>
-        <translation>频率</translation>
-    </message>
-    <message>
-        <source>%1 MHz</source>
-        <translation>%1 MHz</translation>
     </message>
 </context>
 <context>
