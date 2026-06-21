@@ -4,12 +4,19 @@ import Quickshell.Services.UPower
 import Caelestia
 import Caelestia.Config
 import Caelestia.Services
+import QtMultimedia
 
 Scope {
     id: root
 
     readonly property list<var> lowWarnLevels: [...GlobalConfig.general.battery.lowBatteryWarnLevels].sort((a, b) => b.level - a.level)
     readonly property list<var> chargeWarnLevels: [...GlobalConfig.general.battery.chargingWarnLevels].sort((a, b) => a.level - b.level)
+
+    MediaPlayer {
+        id: notifyLowBattery
+        source: "root:///assets/LowBattery.ogg"
+        audioOutput: AudioOutput { }
+    }
 
     Connections {
         function onOnBatteryChanged(): void {
@@ -50,6 +57,7 @@ Scope {
                     if (p <= level.level && !level.warned) {
                         level.warned = true;
                         Toaster.toast(level.title ?? qsTr("Battery warning"), level.message ?? qsTr("Battery level is low"), level.icon ?? "battery_android_alert", level.critical ? Toast.Error : Toast.Warning);
+                        notifyLowBattery.play();
                     }
                 }
             }
