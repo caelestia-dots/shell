@@ -4,12 +4,19 @@ import Quickshell.Services.UPower
 import Caelestia
 import Caelestia.Config
 import Caelestia.Services
+import QtMultimedia
 
 Scope {
     id: root
 
     readonly property list<var> lowWarnLevels: [...GlobalConfig.general.battery.lowBatteryWarnLevels].sort((a, b) => a.level - b.level)
     readonly property list<var> chargeWarnLevels: [...GlobalConfig.general.battery.chargingWarnLevels].sort((a, b) => a.level - b.level)
+
+    MediaPlayer {
+        id: notifyLowBattery
+        source: "root:///assets/LowBattery.ogg"
+        audioOutput: AudioOutput { }
+    }
     property real lastPercentage: 100
 
     function handleBatteryWarnings(): void {
