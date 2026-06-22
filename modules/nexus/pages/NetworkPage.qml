@@ -336,12 +336,24 @@ PageBase {
                     visible: root.cappedWidth > 620 && (Nmcli.isp.length > 0 || Nmcli.publicIp.length > 0)
                     spacing: 0
 
-                    StyledText {
+                    RowLayout {
                         Layout.alignment: Qt.AlignRight
-                        text: Nmcli.isp.length > 0 ? qsTr("ISP: %1").arg(Nmcli.isp) : qsTr("Public IP")
-                        font: Tokens.font.body.medium
-                        horizontalAlignment: Text.AlignRight
-                        elide: Text.ElideRight
+                        spacing: Tokens.spacing.extraSmall
+
+                        MaterialIcon {
+                            Layout.alignment: Qt.AlignVCenter
+                            visible: Nmcli.isp.length > 0
+                            text: "language"
+                            fontStyle: Tokens.font.icon.small
+                        }
+
+                        StyledText {
+                            Layout.alignment: Qt.AlignVCenter
+                            text: Nmcli.isp.length > 0 ? Nmcli.isp : qsTr("Public IP")
+                            font: Tokens.font.body.medium
+                            horizontalAlignment: Text.AlignRight
+                            elide: Text.ElideRight
+                        }
                     }
 
                     // Public IP row: a label and the value itself, which is
