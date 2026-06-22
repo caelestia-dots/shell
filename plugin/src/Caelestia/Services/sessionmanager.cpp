@@ -7,7 +7,6 @@
 #include <QtDBus/qdbuspendingcall.h>
 #include <QtDBus/qdbuspendingreply.h>
 #include <QtDBus/qdbusreply.h>
-#include <qelapsedtimer.h>
 #include <qloggingcategory.h>
 
 #include "../toaster.hpp"
