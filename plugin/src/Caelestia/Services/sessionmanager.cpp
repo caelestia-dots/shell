@@ -79,24 +79,28 @@ bool SessionManager::exec(const QStringList& command) {
         return false;
     }
 
-    const auto cmd = command.first();
-    if (cmd == "logout") {
-        logout();
-    } else if (cmd == "suspend") {
-        suspend();
-    } else if (cmd == "suspendThenHibernate") {
-        suspendThenHibernate();
-    } else if (cmd == "hibernate") {
-        hibernate();
-    } else if (cmd == "poweroff") {
-        poweroff();
-    } else if (cmd == "reboot") {
-        reboot();
-    } else {
-        return false;
+    using Qt::StringLiterals::operator""_s;
+    static const QHash<QString, void (SessionManager::*)()> cmds = {
+        { u"logout"_s, &SessionManager::logout },
+        { u"suspend"_s, &SessionManager::suspend },
+        { u"suspendThenHibernate"_s, &SessionManager::suspendThenHibernate },
+        { u"hibernate"_s, &SessionManager::hibernate },
+        { u"poweroff"_s, &SessionManager::poweroff },
+        { u"reboot"_s, &SessionManager::reboot },
+    };
+
+    auto cmd = command.first();
+    // Alias systemctl and loginctl to raw dbus calls (only match exact command)
+    if ((cmd == u"systemctl"_s || cmd == u"loginctl"_s) && command.size() == 2)
+        cmd = command.at(1);
+
+    const auto methodPtr = cmds.value(cmd, nullptr);
+    if (methodPtr) {
+        (this->*methodPtr)();
+        return true;
     }
 
-    return true;
+    return false;
 }
 
 void SessionManager::logout() {
