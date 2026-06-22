@@ -32,6 +32,10 @@ Singleton {
     property string ethernetSpeed: ""
     property list<var> ethernetDevices: []
     readonly property var activeEthernet: ethernetDevices.find(d => d.connected) ?? null
+    // True when at least one wired device has a carrier (cable plugged in).
+    // nmcli reports "unavailable" for ethernet NICs with no link, so we treat
+    // anything other than that as a usable connection.
+    readonly property bool hasAvailableEthernet: ethernetDevices.some(d => d.state !== "unavailable")
     property list<var> activeProcesses: []
 
     readonly property alias connectionCheckTimer: connectionCheckTimer

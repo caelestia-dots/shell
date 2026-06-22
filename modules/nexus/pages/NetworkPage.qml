@@ -77,7 +77,7 @@ PageBase {
         // carrying the "Ethernet" label, then one row per wired device.
         ConnectedRect {
             Layout.fillWidth: true
-            visible: Nmcli.ethernetDevices.length > 0
+            visible: Nmcli.hasAvailableEthernet
             first: true
             implicitHeight: ethHeaderLayout.implicitHeight + Tokens.padding.medium * 2
 
@@ -134,7 +134,7 @@ PageBase {
 
                 Layout.fillWidth: true
                 last: index === Nmcli.ethernetDevices.length - 1
-                visible: Nmcli.ethernetDevices.length > 0
+                visible: modelData.state !== "unavailable"
                 implicitHeight: ethLayout.implicitHeight + Tokens.padding.medium * 2
 
                 // Tap opens the detail page for this interface.
@@ -246,7 +246,7 @@ PageBase {
         }
 
         ToggleRow {
-            Layout.topMargin: Nmcli.ethernetDevices.length > 0 ? Tokens.spacing.large : 0
+            Layout.topMargin: Nmcli.hasAvailableEthernet ? Tokens.spacing.large : 0
             first: true
             text: qsTr("Wi-Fi")
             font: Tokens.font.body.medium
