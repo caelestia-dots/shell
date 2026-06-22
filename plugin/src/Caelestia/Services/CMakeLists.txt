@@ -24,6 +24,7 @@ qml_module(caelestia-services
         PkgConfig::Aubio
         PkgConfig::Cava
         Sensors::Sensors
+        caelestia-core
         caelestia-config
         caelestia-internal
 )

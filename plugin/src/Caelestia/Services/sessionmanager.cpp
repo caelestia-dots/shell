@@ -10,6 +10,8 @@
 #include <qelapsedtimer.h>
 #include <qloggingcategory.h>
 
+#include "../toaster.hpp"
+
 Q_LOGGING_CATEGORY(lcSessionManager, "caelestia.services.sessionmanager", QtInfoMsg)
 
 namespace caelestia::services {
@@ -112,12 +114,30 @@ void SessionManager::suspend() {
 }
 
 void SessionManager::suspendThenHibernate() {
-    // Fall back to suspend when no hibernate
-    callManager(m_hibernateAvailable ? "SuspendThenHibernate" : "Suspend");
+    if (m_hibernateAvailable) {
+        callManager("SuspendThenHibernate");
+    } else {
+        // Fall back to suspend when no hibernate
+        qCInfo(lcSessionManager) << "SuspendThenHibernate unavailable, falling back to suspend";
+        callManager("Suspend");
+    }
 }
 
 void SessionManager::hibernate() {
-    callManager("Hibernate");
+    if (m_hibernateAvailable) {
+        callManager("Hibernate");
+    } else {
+        qCWarning(lcSessionManager) << "Hibernate unavailable, ignoring hibernate request";
+
+        auto* const engine = qmlEngine(this);
+        if (!engine)
+            return;
+        auto* const toaster = engine->singletonInstance<Toaster*>("Caelestia", "Toaster");
+        if (!toaster)
+            return;
+        toaster->toast(
+            tr("Hibernate failed"), tr("Enable hibernation to use this feature."), "warning", Toast::Type::Warning);
+    }
 }
 
 void SessionManager::poweroff() {
