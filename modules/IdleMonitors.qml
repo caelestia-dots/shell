@@ -1,10 +1,11 @@
 pragma ComponentBehavior: Bound
 
 import "lock"
+import QtQuick
 import Quickshell
 import Quickshell.Wayland
 import Caelestia.Config
-import Caelestia.Internal
+import Caelestia.Services
 import qs.services
 
 Scope {
@@ -23,17 +24,25 @@ Scope {
             lock.lock.locked = false;
         else if (typeof action === "string")
             Hypr.dispatch(Hypr.usingLua && ["dpms off", "dpms on"].includes(action) ? `hl.dsp.dpms({ action = "${action === "dpms off" ? "disable" : "enable"}" })` : action);
-        else
+        else if (!SessionManager.exec(action))
             Quickshell.execDetached(action);
     }
 
-    LogindManager {
-        onAboutToSleep: {
+    Connections {
+        function onAboutToSleep(): void {
             if (GlobalConfig.general.idle.lockBeforeSleep)
                 root.lock.lock.locked = true;
         }
-        onLockRequested: root.lock.lock.locked = true
-        onUnlockRequested: root.lock.lock.unlock()
+
+        function onLockRequested(): void {
+            root.lock.lock.locked = true;
+        }
+
+        function onUnlockRequested(): void {
+            root.lock.lock.unlock();
+        }
+
+        target: SessionManager
     }
 
     Variants {
