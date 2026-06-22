@@ -110,7 +110,7 @@ PageBase {
                     Layout.alignment: Qt.AlignHCenter
                     text: "map"
                     color: Colours.palette.m3outlineVariant
-                    font: Tokens.font.icon.extraLarge
+                    fontStyle: Tokens.font.icon.extraLarge
                 }
 
                 StyledText {
@@ -137,7 +137,6 @@ PageBase {
         }
 
         SelectRow {
-            Layout.fillWidth: true
             first: true
             label: qsTr("Temperature")
             subtext: qsTr("Units for weather temperatures")
@@ -147,7 +146,6 @@ PageBase {
         }
 
         SelectRow {
-            Layout.fillWidth: true
             last: true
             label: qsTr("System temperatures")
             subtext: qsTr("Units for CPU and GPU temperatures")
@@ -162,7 +160,6 @@ PageBase {
         }
 
         SelectRow {
-            Layout.fillWidth: true
             first: true
             last: true
             label: qsTr("Clock format")

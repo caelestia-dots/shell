@@ -64,6 +64,12 @@ QtObject {
             category: "shell"
         },
         {
+            label: qsTr("Apps"),
+            icon: "apps",
+            description: qsTr("Default apps, favourites, hidden apps"),
+            category: "shell"
+        },
+        {
             label: qsTr("Services"),
             icon: "build",
             description: qsTr("Poll intervals, lyrics backend"),
