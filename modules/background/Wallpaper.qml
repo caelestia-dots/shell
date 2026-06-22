@@ -12,26 +12,86 @@ Item {
     id: root
 
     property string source: Wallpapers.current
-    property CachingImage current
+    property Image current: one
     property bool completed
+    readonly property var validVideoExtensions: ["mp4", "webm", "mkv"]
+    readonly property bool sourceIsVideo: isVideoFile(source)
+    readonly property url videoSource: sourceIsVideo ? toFileUrl(source) : ""
+
+    function fileExtension(path) {
+        const clean = String(path || "").split(/[?#]/)[0].toLowerCase();
+        const index = clean.lastIndexOf(".");
+        return index >= 0 ? clean.slice(index + 1) : "";
+    }
+
+    function isVideoFile(path) {
+        return validVideoExtensions.indexOf(fileExtension(path)) !== -1;
+    }
+
+    function toFileUrl(path) {
+        const clean = String(path || "").trim();
+
+        if (!clean)
+            return "";
+        if (clean.indexOf("file://") === 0)
+            return clean;
+        if (clean[0] === "/")
+            return "file://" + clean;
+
+        return Qt.resolvedUrl(clean);
+    }
+
+    Timer {
+        id: videoUpdateTimer
+        interval: 50
+        repeat: false
+        onTriggered: {
+            if (videoLoader.item && root.sourceIsVideo) {
+                videoLoader.item.videoSource = root.videoSource;
+                videoLoader.item.autoStart = !WallpaperPauser.paused;
+            }
+        }
+    }
+
+    // Listens to WallpaperPauser singleton to physically halt video playback.
+    Connections {
+        target: WallpaperPauser
+        ignoreUnknownSignals: true
+        function onPausedChanged() {
+            if (videoLoader.item && root.sourceIsVideo) {
+                videoLoader.item.autoStart = !WallpaperPauser.paused;
+                if (WallpaperPauser.paused) {
+                    videoLoader.item.pause();
+                } else {
+                    videoLoader.item.play();
+                }
+            }
+        }
+    }
 
     onSourceChanged: {
-        if (!source)
+        if (sourceIsVideo) {
             current = null;
-        else
-            current = imgComp.createObject(this, {
-                path: source
-            });
+            videoUpdateTimer.restart();
+            if (current === one) two.update(); else one.update();
+        } else if (!source) {
+            current = null;
+        } else if (current === one) {
+            two.update();
+        } else {
+            one.update();
+        }
     }
 
     Component.onCompleted: {
-        if (source)
+        if (sourceIsVideo) {
+            completed = true;
+        } else if (source) {
             Qt.callLater(() => {
-                current = imgComp.createObject(this, {
-                    path: source
-                });
+                one.update();
                 completed = true;
             });
+        }
     }
 
     Loader {
@@ -45,12 +105,12 @@ Item {
 
             Row {
                 anchors.centerIn: parent
-                spacing: Tokens.spacing.largeIncreased
+                spacing: Tokens.spacing.large
 
                 MaterialIcon {
                     text: "sentiment_stressed"
                     color: Colours.palette.m3onSurfaceVariant
-                    fontStyle: Tokens.font.icon.builders.extraLarge.scale(5).build()
+                    font.pointSize: Tokens.font.size.extraLarge * 5
                 }
 
                 Column {
@@ -60,12 +120,13 @@ Item {
                     StyledText {
                         text: qsTr("Wallpaper missing?")
                         color: Colours.palette.m3onSurfaceVariant
-                        font: Tokens.font.body.builders.large.size(28 * 2).weight(Font.Bold).build()
+                        font.pointSize: Tokens.font.size.extraLarge * 2
+                        font.bold: true
                     }
 
                     StyledRect {
-                        implicitWidth: selectWallText.implicitWidth + Tokens.padding.extraLargeIncreased
-                        implicitHeight: selectWallText.implicitHeight + Tokens.padding.small
+                        implicitWidth: selectWallText.implicitWidth + Tokens.padding.large * 2
+                        implicitHeight: selectWallText.implicitHeight + Tokens.padding.small * 2
 
                         radius: Tokens.rounding.full
                         color: Colours.palette.m3primary
@@ -92,7 +153,7 @@ Item {
 
                             text: qsTr("Set it now!")
                             color: Colours.palette.m3onPrimary
-                            font: Tokens.font.body.large
+                            font.pointSize: Tokens.font.size.large
                         }
                     }
                 }
@@ -100,34 +161,69 @@ Item {
         }
     }
 
-    Component {
-        id: imgComp
+    Img {
+        id: one
+    }
 
-        CachingImage {
-            id: img
+    Img {
+        id: two
+    }
 
-            anchors.fill: parent
+    // Asynchronous Loader that injects the QtMultimedia video player into the background layer only when a video is selected.
+    Loader {
+        id: videoLoader
 
-            opacity: 0
+        anchors.fill: parent
 
-            onStatusChanged: {
-                if (status === Image.Ready)
-                    anim.start();
+        active: root.sourceIsVideo
+        source: "VideoWallpaper.qml"
+
+        onLoaded: {
+            item.autoStart = true;
+            item.videoSource = root.videoSource;
+        }
+    }
+
+    component Img: CachingImage {
+        id: img
+
+        function update(): void {
+            const newPath = root.sourceIsVideo ? Wallpapers.getWallpaperThumb(root.source, Wallpapers.cacheBuster) : root.source;
+            if (path === newPath && source === newPath)
+                root.current = this;
+            else {
+                path = root.source; // Keep IUtils happy for static images
+                source = newPath;   // Override source directly
             }
+        }
 
-            Anim on opacity {
-                id: anim
+        anchors.fill: parent
 
-                type: Anim.SlowEffects
-                running: false
-                from: 0
-                to: 1
+        // Keep thumbnail visible until the video has actual frames to render,
+        // OR whenever the video is paused (to prevent black blank screens).
+        visible: !root.sourceIsVideo || WallpaperPauser.paused || (videoLoader.item && videoLoader.item.mediaStatus < 2)
+        opacity: 0
+        scale: Wallpapers.showPreview ? 1 : 0.8
+
+        onStatusChanged: {
+            if (status === Image.Ready)
+                root.current = this;
+        }
+
+        states: State {
+            name: "visible"
+            when: root.current === img
+
+            PropertyChanges {
+                img.opacity: 1
+                img.scale: 1
             }
+        }
 
-            Timer {
-                running: root.current !== img && root.current?.status === Image.Ready
-                interval: anim.duration
-                onTriggered: img.destroy()
+        transitions: Transition {
+            Anim {
+                target: img
+                properties: "opacity,scale"
             }
         }
     }

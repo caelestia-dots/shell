@@ -1,6 +1,7 @@
 import QtQuick
 import Quickshell
 import Caelestia.Config
+import Caelestia.Images
 import Caelestia.Models
 import qs.components
 import qs.components.effects
@@ -25,69 +26,106 @@ Item {
     implicitWidth: image.width + Tokens.padding.medium * 2
     implicitHeight: image.height + label.height + Tokens.spacing.extraSmall + Tokens.padding.large + Tokens.padding.medium
 
-    StateLayer {
-        radius: Tokens.rounding.large
-        onClicked: {
-            Wallpapers.setWallpaper(root.modelData.path);
-            root.visibilities.launcher = false;
+    Item {
+        id: popContainer
+        anchors.fill: parent
+        scale: 0.5
+        opacity: 0.3
+
+        NumberAnimation on scale {
+            to: 1
+            duration: 800
+            easing.type: Easing.OutBack
+            running: true
         }
-    }
-
-    Elevation {
-        anchors.fill: image
-        radius: image.radius
-        opacity: root.PathView.isCurrentItem ? 1 : 0
-        level: 4
-
-        Behavior on opacity {
-            Anim {
-                type: Anim.DefaultEffects
-            }
-        }
-    }
-
-    StyledClippingRect {
-        id: image
-
-        anchors.horizontalCenter: parent.horizontalCenter
-        y: Tokens.padding.large
-        color: Colours.tPalette.m3surfaceContainer
-        radius: Tokens.rounding.large
-
-        implicitWidth: Tokens.sizes.launcher.wallpaperWidth
-        implicitHeight: implicitWidth / 16 * 9
-
-        MaterialIcon {
-            anchors.centerIn: parent
-            text: "image"
-            color: Colours.tPalette.m3outline
-            fontStyle: Tokens.font.icon.builders.extraLarge.scale(2).weight(Font.DemiBold).build()
+        NumberAnimation on opacity {
+            to: 1
+            duration: 800
+            easing.type: Easing.OutCubic
+            running: true
         }
 
-        CachingImage {
+        StateLayer {
+            radius: Tokens.rounding.large
             anchors.fill: parent
-            path: root.modelData.path
-            smooth: !root.PathView.view.moving
-            sourceSize: {
-                const dpr = (QsWindow.window as QsWindow)?.devicePixelRatio ?? 1;
-                return Qt.size(image.implicitWidth * dpr, image.implicitHeight * dpr);
+            onClicked: {
+                Wallpapers.setWallpaper(root.modelData.path);
+                root.visibilities.launcher = false;
             }
         }
-    }
 
-    StyledText {
-        id: label
+        Elevation {
+            anchors.fill: image
+            radius: image.radius
+            opacity: root.PathView.isCurrentItem ? 1 : 0
+            level: 4
 
-        anchors.top: image.bottom
-        anchors.topMargin: Tokens.spacing.extraSmall
-        anchors.horizontalCenter: parent.horizontalCenter
+            Behavior on opacity {
+                Anim {
+                    type: Anim.DefaultEffects
+                }
+            }
+        }
 
-        width: image.width - Tokens.padding.medium * 2
-        horizontalAlignment: Text.AlignHCenter
-        elide: Text.ElideRight
-        renderType: Text.QtRendering
-        text: root.modelData.relativePath
-        font: Tokens.font.label.medium
+        StyledClippingRect {
+            id: image
+
+            anchors.horizontalCenter: parent.horizontalCenter
+            y: Tokens.padding.large
+            color: Colours.tPalette.m3surfaceContainer
+            radius: Tokens.rounding.large
+
+            implicitWidth: Tokens.sizes.launcher.wallpaperWidth
+            implicitHeight: implicitWidth / 16 * 9
+
+            MaterialIcon {
+                anchors.centerIn: parent
+                text: "image"
+                color: Colours.tPalette.m3outline
+                fontStyle: Tokens.font.icon.builders.extraLarge.scale(2).weight(Font.DemiBold).build()
+            }
+
+            CachingImage {
+                id: thumbImg
+                anchors.fill: parent
+                path: root.modelData.path
+                // routes the QML image source: static files load directly, while videos are routed to their locally extracted, cached JPG thumbnails.
+                source: Wallpapers.isVideo(root.modelData.path) ? Wallpapers.getWallpaperThumb(root.modelData.path, Wallpapers.itemBusters[root.modelData.path] || Wallpapers.cacheBuster) : IUtils.urlForPath(root.modelData.path, fillMode)
+                smooth: !root.PathView.view.moving
+                sourceSize: {
+                    const dpr = (QsWindow.window as QsWindow)?.devicePixelRatio ?? 1;
+                    return Qt.size(image.implicitWidth * dpr, image.implicitHeight * dpr);
+                }
+                
+                property bool isThumbReady: !Wallpapers._refreshing || Wallpapers.itemBusters[root.modelData.path] !== undefined
+                
+                // fade-in and scale animation when loaded
+                opacity: isThumbReady && status === Image.Ready ? 1 : 0
+                scale: isThumbReady && status === Image.Ready ? 1 : 0.7
+                
+                Behavior on opacity {
+                    NumberAnimation { duration: 800; easing.type: Easing.OutCubic }
+                }
+                Behavior on scale {
+                    NumberAnimation { duration: 800; easing.type: Easing.OutBack }
+                }
+            }
+        }
+
+        StyledText {
+            id: label
+
+            anchors.top: image.bottom
+            anchors.topMargin: Tokens.spacing.extraSmall
+            anchors.horizontalCenter: parent.horizontalCenter
+
+            width: image.width - Tokens.padding.medium * 2
+            horizontalAlignment: Text.AlignHCenter
+            elide: Text.ElideRight
+            renderType: Text.QtRendering
+            text: root.modelData.relativePath
+            font: Tokens.font.label.medium
+        }
     }
 
     Behavior on scale {
