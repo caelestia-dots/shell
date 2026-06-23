@@ -26,33 +26,16 @@ constexpr const char* SESSION_IFACE = "org.freedesktop.login1.Session";
 
 SessionManager::SessionManager(QObject* parent)
     : QObject(parent) {
-    auto bus = QDBusConnection::systemBus();
-    if (!bus.isConnected()) {
-        qCWarning(lcSessionManager) << "Failed to connect to system bus:" << bus.lastError().message();
+    auto bus = getSystemBus();
+    if (!bus)
         return;
-    }
 
-    bool ok =
-        bus.connect(LOGIN_SERVICE, LOGIN_PATH, LOGIN_IFACE, "PrepareForSleep", this, SLOT(handlePrepareForSleep(bool)));
+    bool ok = bus->connect(
+        LOGIN_SERVICE, LOGIN_PATH, LOGIN_IFACE, "PrepareForSleep", this, SLOT(handlePrepareForSleep(bool)));
+    if (!ok)
+        qCWarning(lcSessionManager) << "Failed to connect to PrepareForSleep signal:" << bus->lastError().message();
 
-    if (!ok) {
-        qCWarning(lcSessionManager) << "Failed to connect to PrepareForSleep signal:" << bus.lastError().message();
-    }
-
-    QDBusInterface login1(LOGIN_SERVICE, LOGIN_PATH, LOGIN_IFACE, bus);
-
-    const QDBusReply<QString> hibernateReply = login1.call("CanHibernate");
-    if (!hibernateReply.isValid()) {
-        qCWarning(lcSessionManager) << "Failed to query hibernate support:" << hibernateReply.error().message();
-    } else {
-        const auto state = hibernateReply.value();
-        const bool available = state == "yes" || state == "challenge";
-        if (m_hibernateAvailable != available) {
-            m_hibernateAvailable = available;
-            emit hibernateAvailableChanged();
-        }
-    }
-
+    QDBusInterface login1(LOGIN_SERVICE, LOGIN_PATH, LOGIN_IFACE, *bus);
     const QDBusReply<QDBusObjectPath> sessionReply = login1.call("GetSession", "auto");
     if (!sessionReply.isValid()) {
         qCWarning(lcSessionManager) << "Failed to get session path";
@@ -60,19 +43,13 @@ SessionManager::SessionManager(QObject* parent)
     }
     m_sessionPath = sessionReply.value().path();
 
-    ok = bus.connect(LOGIN_SERVICE, m_sessionPath, SESSION_IFACE, "Lock", this, SLOT(handleLockRequested()));
-    if (!ok) {
-        qCWarning(lcSessionManager) << "Failed to connect to Lock signal:" << bus.lastError().message();
-    }
+    ok = bus->connect(LOGIN_SERVICE, m_sessionPath, SESSION_IFACE, "Lock", this, SLOT(handleLockRequested()));
+    if (!ok)
+        qCWarning(lcSessionManager) << "Failed to connect to Lock signal:" << bus->lastError().message();
 
-    ok = bus.connect(LOGIN_SERVICE, m_sessionPath, SESSION_IFACE, "Unlock", this, SLOT(handleUnlockRequested()));
-    if (!ok) {
-        qCWarning(lcSessionManager) << "Failed to connect to Unlock signal:" << bus.lastError().message();
-    }
-}
-
-bool SessionManager::hibernateAvailable() const {
-    return m_hibernateAvailable;
+    ok = bus->connect(LOGIN_SERVICE, m_sessionPath, SESSION_IFACE, "Unlock", this, SLOT(handleUnlockRequested()));
+    if (!ok)
+        qCWarning(lcSessionManager) << "Failed to connect to Unlock signal:" << bus->lastError().message();
 }
 
 bool SessionManager::exec(const QStringList& command) {
@@ -118,7 +95,7 @@ void SessionManager::suspend() {
 }
 
 void SessionManager::suspendThenHibernate() {
-    if (m_hibernateAvailable) {
+    if (queryHibernateAvailable()) {
         callManager("SuspendThenHibernate");
     } else {
         // Fall back to suspend when no hibernate
@@ -128,7 +105,7 @@ void SessionManager::suspendThenHibernate() {
 }
 
 void SessionManager::hibernate() {
-    if (m_hibernateAvailable) {
+    if (queryHibernateAvailable()) {
         callManager("Hibernate");
     } else {
         qCWarning(lcSessionManager) << "Hibernate unavailable, ignoring hibernate request";
@@ -152,22 +129,45 @@ void SessionManager::reboot() {
     callManager("Reboot");
 }
 
-void SessionManager::call(const QString& path, const QString& iface, const QString& method, const QVariantList& args) {
+std::optional<QDBusConnection> SessionManager::getSystemBus() const {
     auto bus = QDBusConnection::systemBus();
     if (!bus.isConnected()) {
-        qCWarning(lcSessionManager) << "Cannot call" << method << "- not connected to system bus";
-        return;
+        qCWarning(lcSessionManager) << "Failed to connect to system bus:" << bus.lastError().message();
+        return std::nullopt;
     }
+    return bus;
+}
+
+bool SessionManager::queryHibernateAvailable() const {
+    auto bus = getSystemBus();
+    if (!bus)
+        return false;
+
+    QDBusInterface login1(LOGIN_SERVICE, LOGIN_PATH, LOGIN_IFACE, *bus);
+    const QDBusReply<QString> hibernateReply = login1.call("CanHibernate");
+    if (!hibernateReply.isValid()) {
+        qCWarning(lcSessionManager) << "Failed to query hibernate support:" << hibernateReply.error().message();
+    } else {
+        const auto state = hibernateReply.value();
+        return state == "yes" || state == "challenge";
+    }
+
+    return false;
+}
+
+void SessionManager::call(const QString& path, const QString& iface, const QString& method, const QVariantList& args) {
+    auto bus = getSystemBus();
+    if (!bus)
+        return;
 
     QDBusMessage msg = QDBusMessage::createMethodCall(LOGIN_SERVICE, path, iface, method);
     msg.setArguments(args);
 
-    auto* watcher = new QDBusPendingCallWatcher(bus.asyncCall(msg), this);
+    auto* watcher = new QDBusPendingCallWatcher(bus->asyncCall(msg), this);
     connect(watcher, &QDBusPendingCallWatcher::finished, this, [method](QDBusPendingCallWatcher* self) {
         const QDBusPendingReply<> reply = *self;
-        if (reply.isError()) {
+        if (reply.isError())
             qCWarning(lcSessionManager) << "Call to" << method << "failed:" << reply.error().message();
-        }
         self->deleteLater();
     });
 }

@@ -1,10 +1,13 @@
 #pragma once
 
+#include <qdbusconnection.h>
 #include <qobject.h>
 #include <qqmlintegration.h>
 #include <qstring.h>
 #include <qstringlist.h>
 #include <qvariant.h>
+
+#include <optional>
 
 namespace caelestia::services {
 
@@ -13,12 +16,8 @@ class SessionManager : public QObject {
     QML_ELEMENT
     QML_SINGLETON
 
-    Q_PROPERTY(bool hibernateAvailable READ hibernateAvailable NOTIFY hibernateAvailableChanged)
-
 public:
     explicit SessionManager(QObject* parent = nullptr);
-
-    [[nodiscard]] bool hibernateAvailable() const;
 
     Q_INVOKABLE void logout();
     Q_INVOKABLE void suspend();
@@ -30,7 +29,6 @@ public:
     Q_INVOKABLE bool exec(const QStringList& command);
 
 signals:
-    void hibernateAvailableChanged();
     void aboutToSleep();
     void resumed();
     void lockRequested();
@@ -42,12 +40,13 @@ private slots:
     void handleUnlockRequested();
 
 private:
+    [[nodiscard]] std::optional<QDBusConnection> getSystemBus() const;
+    [[nodiscard]] bool queryHibernateAvailable() const;
     void call(const QString& path, const QString& iface, const QString& method, const QVariantList& args = {});
     void callManager(const QString& method);
     void callSession(const QString& method);
 
     QString m_sessionPath;
-    bool m_hibernateAvailable = false;
 };
 
 } // namespace caelestia::services
