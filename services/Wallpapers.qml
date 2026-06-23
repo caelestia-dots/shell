@@ -14,10 +14,7 @@ Searcher {
     readonly property string currentNamePath: `${Paths.state}/wallpaper/path.txt`
     readonly property list<string> smartArg: GlobalConfig.services.smartScheme ? [] : ["--no-smart"]
     readonly property list<string> validVideoExtensions: ["mp4", "webm", "mkv"]
-    readonly property list<string> validWallpaperExtensions: [
-        "*.jpg", "*.jpeg", "*.png", "*.webp", "*.tif", "*.tiff", "*.svg", "*.gif",
-        "*.mp4", "*.webm", "*.mkv"
-    ]
+    readonly property list<string> validWallpaperExtensions: ["*.jpg", "*.jpeg", "*.png", "*.webp", "*.tif", "*.tiff", "*.svg", "*.gif", "*.mp4", "*.webm", "*.mkv"]
 
     property bool showPreview: false
     readonly property string current: showPreview ? previewPath : actualCurrent
@@ -37,7 +34,8 @@ Searcher {
 
     function getWallpaperThumb(path, buster) {
         let clean = String(path || "").split(/[?#]/)[0];
-        if (clean.indexOf("file://") === 0) clean = clean.substring(7);
+        if (clean.indexOf("file://") === 0)
+            clean = clean.substring(7);
         let b = buster !== undefined ? buster : cacheBuster;
         return "file://" + Paths.cache + "/videothumbs/" + djb2_hash(clean) + ".jpg" + (b ? "?v=" + b : "");
     }
@@ -55,7 +53,8 @@ Searcher {
 
     function setWallpaper(path: string): void {
         let clean = String(path || "").split(/[?#]/)[0];
-        if (clean.indexOf("file://") === 0) clean = clean.substring(7);
+        if (clean.indexOf("file://") === 0)
+            clean = clean.substring(7);
         actualCurrent = clean;
         if (isVideo(clean)) {
             previewColourLock = false;
@@ -66,7 +65,8 @@ Searcher {
 
     function preview(path: string): void {
         let clean = String(path || "").split(/[?#]/)[0];
-        if (clean.indexOf("file://") === 0) clean = clean.substring(7);
+        if (clean.indexOf("file://") === 0)
+            clean = clean.substring(7);
         previewPath = clean;
         showPreview = true;
 
@@ -82,7 +82,8 @@ Searcher {
 
     // Removes duplicates
     function getDedupedEntries(entries) {
-        if (!entries) return [];
+        if (!entries)
+            return [];
         let seen = {};
         let result = [];
         for (let i = 0; i < entries.length; i++) {
@@ -199,7 +200,8 @@ Searcher {
     }
 
     function refreshAnimatedThumbs() {
-        if (_refreshing) return;
+        if (_refreshing)
+            return;
         itemBusters = {};
         _refreshing = true;
         _extractThumbsProc.running = true;
