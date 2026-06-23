@@ -6,7 +6,7 @@ qml_module(caelestia-internal
         linearindicatormanager.hpp linearindicatormanager.cpp
         hyprdevices.hpp hyprdevices.cpp
         hyprextras.hpp hyprextras.cpp
-        logindmanager.hpp logindmanager.cpp
+        logindmanager.cpp
         sparklineitem.hpp sparklineitem.cpp
         visualiserbars.hpp visualiserbars.cpp
     LIBRARIES
