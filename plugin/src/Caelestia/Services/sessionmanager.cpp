@@ -2,7 +2,6 @@
 
 #include <QtDBus/qdbusconnection.h>
 #include <QtDBus/qdbuserror.h>
-#include <QtDBus/qdbusinterface.h>
 #include <QtDBus/qdbusmessage.h>
 #include <QtDBus/qdbuspendingcall.h>
 #include <QtDBus/qdbuspendingreply.h>
@@ -35,10 +34,11 @@ SessionManager::SessionManager(QObject* parent)
     if (!ok)
         qCWarning(lcSessionManager) << "Failed to connect to PrepareForSleep signal:" << bus->lastError().message();
 
-    QDBusInterface login1(LOGIN_SERVICE, LOGIN_PATH, LOGIN_IFACE, *bus);
-    const QDBusReply<QDBusObjectPath> sessionReply = login1.call("GetSession", "auto");
+    auto sessionMsg = QDBusMessage::createMethodCall(LOGIN_SERVICE, LOGIN_PATH, LOGIN_IFACE, "GetSession");
+    sessionMsg.setArguments({ "auto" });
+    const QDBusReply<QDBusObjectPath> sessionReply = bus->call(sessionMsg);
     if (!sessionReply.isValid()) {
-        qCWarning(lcSessionManager) << "Failed to get session path";
+        qCWarning(lcSessionManager) << "Failed to get session path:" << sessionReply.error().message();
         return;
     }
     m_sessionPath = sessionReply.value().path();
@@ -143,8 +143,8 @@ bool SessionManager::queryHibernateAvailable() const {
     if (!bus)
         return false;
 
-    QDBusInterface login1(LOGIN_SERVICE, LOGIN_PATH, LOGIN_IFACE, *bus);
-    const QDBusReply<QString> hibernateReply = login1.call("CanHibernate");
+    auto hibernateMsg = QDBusMessage::createMethodCall(LOGIN_SERVICE, LOGIN_PATH, LOGIN_IFACE, "CanHibernate");
+    const QDBusReply<QString> hibernateReply = bus->call(hibernateMsg);
     if (!hibernateReply.isValid()) {
         qCWarning(lcSessionManager) << "Failed to query hibernate support:" << hibernateReply.error().message();
     } else {
@@ -160,7 +160,7 @@ void SessionManager::call(const QString& path, const QString& iface, const QStri
     if (!bus)
         return;
 
-    QDBusMessage msg = QDBusMessage::createMethodCall(LOGIN_SERVICE, path, iface, method);
+    auto msg = QDBusMessage::createMethodCall(LOGIN_SERVICE, path, iface, method);
     msg.setArguments(args);
 
     auto* watcher = new QDBusPendingCallWatcher(bus->asyncCall(msg), this);
