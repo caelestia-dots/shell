@@ -94,6 +94,8 @@ bool SessionManager::exec(const QStringList& command) {
     // Alias systemctl and loginctl to raw dbus calls (only match exact command)
     if ((cmd == u"systemctl"_s || cmd == u"loginctl"_s) && command.size() == 2)
         cmd = command.at(1);
+    if (cmd == u"loginctl"_s && command.size() == 3 && command.at(1) == u"terminate-user"_s && command.at(2).isEmpty())
+        cmd = u"logout"_s; // Manual alias `loginctl terminate-user ''` -> logout
 
     const auto methodPtr = cmds.value(cmd, nullptr);
     if (methodPtr) {
