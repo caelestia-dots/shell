@@ -13,5 +13,4 @@ qml_module(caelestia-internal
         Qt::Gui
         Qt::Quick
         Qt::Network
-        Qt::DBus
 )
