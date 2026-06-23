@@ -11,6 +11,8 @@ import qs.utils
 Searcher {
     id: root
 
+    // qmllint disable missing-property signal-handler-parameters unqualified incompatible-type
+
     property bool _refreshing: false
     property string actualCurrent
     property string cacheBuster: ""
@@ -32,6 +34,12 @@ Searcher {
             h = (h * 33 + s.charCodeAt(i)) >>> 0;
         }
         return h.toString(16);
+    }
+    function getCategoryFor(w: var): string {
+        let category = w.parentDir.slice(Paths.wallsdir.length + 1);
+        if (category.includes("/"))
+            category = category.slice(0, category.indexOf("/"));
+        return category;
     }
 
     // Removes duplicates
@@ -78,6 +86,9 @@ Searcher {
         itemBusters = {};
         _refreshing = true;
         extractThumbsProc.running = true;
+    }
+    function setRandom(): void {
+        Quickshell.execDetached(["caelestia", "wallpaper", "-r", ...smartArg]);
     }
     function setWallpaper(path: string): void {
         let clean = String(path || "").split(/[?#]/)[0];
@@ -199,7 +210,7 @@ Searcher {
 
         command: ["caelestia", "wallpaper", "--extract-thumbs"]
 
-        onExited: (exitCode, exitStatus) => {
+        onExited: {
             root._refreshing = false;
             root.cacheBuster = Date.now().toString();
             root.restoreWallpaperMode = true;
