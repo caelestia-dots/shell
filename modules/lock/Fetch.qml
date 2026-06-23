@@ -76,6 +76,7 @@ StyledRect {
                 id: iconLoader
 
                 Layout.fillHeight: true
+                Layout.maximumWidth: root.width * 0.32
                 active: root.width > Tokens.sizes.lock.largeLogoWidth
 
                 sourceComponent: SysInfo.isDefaultLogo ? caelestiaLogo : distroIcon
