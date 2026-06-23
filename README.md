@@ -354,7 +354,7 @@ For example, to disable the bar on DP-1:
                 },
                 {
                     "timeout": 600,
-                    "idleAction": ["systemctl", "suspend-then-hibernate"]
+                    "idleAction": ["suspendThenHibernate"]
                 }
             ]
         },
@@ -621,7 +621,7 @@ For example, to disable the bar on DP-1:
                 "name": "Shutdown",
                 "icon": "power_settings_new",
                 "description": "Shutdown the system",
-                "command": ["systemctl", "poweroff"],
+                "command": ["poweroff"],
                 "enabled": true,
                 "dangerous": true
             },
@@ -629,7 +629,7 @@ For example, to disable the bar on DP-1:
                 "name": "Reboot",
                 "icon": "cached",
                 "description": "Reboot the system",
-                "command": ["systemctl", "reboot"],
+                "command": ["reboot"],
                 "enabled": true,
                 "dangerous": true
             },
@@ -637,7 +637,7 @@ For example, to disable the bar on DP-1:
                 "name": "Logout",
                 "icon": "exit_to_app",
                 "description": "Log out of the current session",
-                "command": ["loginctl", "terminate-user", ""],
+                "command": ["logout"],
                 "enabled": true,
                 "dangerous": true
             },
@@ -653,7 +653,7 @@ For example, to disable the bar on DP-1:
                 "name": "Sleep",
                 "icon": "bedtime",
                 "description": "Suspend then hibernate",
-                "command": ["systemctl", "suspend-then-hibernate"],
+                "command": ["suspendThenHibernate"],
                 "enabled": true,
                 "dangerous": false
             },
@@ -720,10 +720,10 @@ For example, to disable the bar on DP-1:
             "reboot": "cached"
         },
         "commands": {
-            "logout": ["loginctl", "terminate-user", ""],
-            "shutdown": ["systemctl", "poweroff"],
-            "hibernate": ["systemctl", "hibernate"],
-            "reboot": ["systemctl", "reboot"]
+            "logout": ["logout"],
+            "shutdown": ["poweroff"],
+            "hibernate": ["hibernate"],
+            "reboot": ["reboot"]
         }
     },
     "sidebar": {
