@@ -84,7 +84,7 @@ bool SessionManager::exec(const QStringList& command) {
     static const QHash<QString, void (SessionManager::*)()> cmds = {
         { u"logout"_s, &SessionManager::logout },
         { u"suspend"_s, &SessionManager::suspend },
-        { u"suspendThenHibernate"_s, &SessionManager::suspendThenHibernate },
+        { u"suspendthenhibernate"_s, &SessionManager::suspendThenHibernate },
         { u"hibernate"_s, &SessionManager::hibernate },
         { u"poweroff"_s, &SessionManager::poweroff },
         { u"reboot"_s, &SessionManager::reboot },
@@ -96,6 +96,9 @@ bool SessionManager::exec(const QStringList& command) {
         cmd = command.at(1);
     if (cmd == u"loginctl"_s && command.size() == 3 && command.at(1) == u"terminate-user"_s && command.at(2).isEmpty())
         cmd = u"logout"_s; // Manual alias `loginctl terminate-user ''` -> logout
+
+    // Normalise command
+    cmd = cmd.remove("-").remove("_").toLower();
 
     const auto methodPtr = cmds.value(cmd, nullptr);
     if (methodPtr) {
