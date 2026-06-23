@@ -24,6 +24,11 @@ Searcher {
     property string wallpaperMode: "static"
     property string cacheBuster: ""
 
+    property bool _refreshing: false
+    property bool restoreWallpaperMode: false
+    property var itemBusters: ({})
+
+
     function djb2_hash(s) {
         let h = 5381;
         for (let i = 0; i < s.length; i++) {
@@ -94,6 +99,19 @@ Searcher {
             }
         }
         return result;
+    }
+
+    function updateWallpapers() {
+        staticWallpapers.update();
+        animatedWallpapers.update();
+    }
+
+    function refreshAnimatedThumbs() {
+        if (_refreshing)
+            return;
+        itemBusters = {};
+        _refreshing = true;
+        _extractThumbsProc.running = true;
     }
 
     list: getDedupedEntries(wallpaperMode === "animated" ? animatedWallpapers.entries : staticWallpapers.entries)
@@ -167,10 +185,6 @@ Searcher {
         }
     }
 
-    property bool _refreshing: false
-    property bool restoreWallpaperMode: false
-    property var itemBusters: ({})
-
     //  Watches for extracted thumbnails via a background text file
     FileView {
         path: "/tmp/caelestia_thumb_ready.txt"
@@ -192,19 +206,6 @@ Searcher {
                 root.itemBusters = newBusters;
             }
         }
-    }
-
-    function updateWallpapers() {
-        staticWallpapers.update();
-        animatedWallpapers.update();
-    }
-
-    function refreshAnimatedThumbs() {
-        if (_refreshing)
-            return;
-        itemBusters = {};
-        _refreshing = true;
-        _extractThumbsProc.running = true;
     }
 
     Process {

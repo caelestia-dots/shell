@@ -9,14 +9,9 @@ import qs.services
 Singleton {
     id: root
 
+    property bool _loaded: false
     property bool pauseOnBattery: false
     property bool paused: false
-    property bool _loaded: false
-
-    function saveSetting() {
-        saveProcess.command = ["sh", "-c", "echo '" + root.pauseOnBattery + "' > ~/.cache/caelestia/pauseOnBattery.txt"];
-        saveProcess.running = true;
-    }
 
     function recalculate() {
         if (!_loaded)
@@ -69,6 +64,10 @@ Singleton {
         paused = newPaused;
         console.log("[DEBUG] WallpaperPauser recalculated. Final paused state:", paused, "Reason:", reason);
     }
+    function saveSetting() {
+        saveProcess.command = ["sh", "-c", "echo '" + root.pauseOnBattery + "' > ~/.cache/caelestia/pauseOnBattery.txt"];
+        saveProcess.running = true;
+    }
 
     onPauseOnBatteryChanged: {
         if (_loaded) {
@@ -82,23 +81,22 @@ Singleton {
 
         path: Quickshell.env("HOME") + "/.cache/caelestia/pauseOnBattery.txt"
         printErrors: false
-        onLoaded: {
-            root.pauseOnBattery = (text().trim() === "true");
-            root._loaded = true;
-            root.recalculate();
-        }
+
         onLoadFailed: {
             if (!root._loaded) {
                 root._loaded = true;
                 root.recalculate();
             }
         }
+        onLoaded: {
+            root.pauseOnBattery = (text().trim() === "true");
+            root._loaded = true;
+            root.recalculate();
+        }
     }
-
     Process {
         id: saveProcess
     }
-
     Connections {
         function onOnBatteryChanged() {
             root.recalculate();
@@ -106,16 +104,13 @@ Singleton {
 
         target: UPower
     }
-
     Connections {
-        function onFocusedWorkspaceChanged() {
-            root.recalculate();
-        }
-
         function onFocusedMonitorChanged() {
             root.recalculate();
         }
-
+        function onFocusedWorkspaceChanged() {
+            root.recalculate();
+        }
         function onRawEvent(event) {
             const n = event.name;
             if (n.endsWith("v2"))
@@ -127,11 +122,11 @@ Singleton {
 
         target: Hyprland
     }
-
     Timer {
         id: recalcTimer
 
         interval: 16
+
         onTriggered: root.recalculate()
     }
 }
