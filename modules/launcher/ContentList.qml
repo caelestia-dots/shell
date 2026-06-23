@@ -1,16 +1,15 @@
 pragma ComponentBehavior: Bound
-import Caelestia.Config
 
 import QtQuick
 import QtQuick.Layouts
-import Quickshell
-import Quickshell.Io
+import Caelestia.Config
 import qs.components
 import qs.components.controls
 import qs.services
 import qs.utils
 
 Item {
+    // qmllint disable missing-property unqualified unresolved-type
     id: root
 
     required property var content
@@ -29,6 +28,30 @@ Item {
     clip: true
     state: showWallpapers ? "wallpapers" : "apps"
 
+    states: [
+        State {
+            name: "apps"
+
+            PropertyChanges {
+                appList.active: true
+                root.implicitHeight: Math.min(root.maxHeight, appList.implicitHeight > 0 ? appList.implicitHeight : empty.implicitHeight)
+                root.implicitWidth: root.Tokens.sizes.launcher.itemWidth
+            }
+            AnchorChanges {
+                anchors.left: root.parent.left
+                anchors.right: root.parent.right
+            }
+        },
+        State {
+            name: "wallpapers"
+
+            PropertyChanges {
+                root.implicitHeight: root.Tokens.sizes.launcher.wallpaperHeight + 56
+                root.implicitWidth: Math.max(root.Tokens.sizes.launcher.itemWidth * 1.2, wallpaperList.implicitWidth)
+                wallpaperList.active: true
+            }
+        }
+    ]
     Behavior on implicitHeight {
         enabled: root.visibilities.launcher
 
@@ -54,8 +77,7 @@ Item {
                 to: 0
                 type: Anim.StandardSmall
             }
-            PropertyAction {
-            }
+            PropertyAction {}
             Anim {
                 from: 0
                 property: "opacity"
@@ -65,30 +87,6 @@ Item {
             }
         }
     }
-    states: [
-        State {
-            name: "apps"
-
-            PropertyChanges {
-                appList.active: true
-                root.implicitHeight: Math.min(root.maxHeight, appList.implicitHeight > 0 ? appList.implicitHeight : empty.implicitHeight)
-                root.implicitWidth: root.Tokens.sizes.launcher.itemWidth
-            }
-            AnchorChanges {
-                anchors.left: root.parent.left
-                anchors.right: root.parent.right
-            }
-        },
-        State {
-            name: "wallpapers"
-
-            PropertyChanges {
-                root.implicitHeight: root.Tokens.sizes.launcher.wallpaperHeight + 56
-                root.implicitWidth: Math.max(root.Tokens.sizes.launcher.itemWidth * 1.2, wallpaperList.implicitWidth)
-                wallpaperList.active: true
-            }
-        }
-    ]
 
     Loader {
         id: appList
@@ -201,12 +199,10 @@ Item {
         spacing: Tokens.spacing.normal
 
         Behavior on opacity {
-            Anim {
-            }
+            Anim {}
         }
         Behavior on scale {
-            Anim {
-            }
+            Anim {}
         }
 
         MaterialIcon {

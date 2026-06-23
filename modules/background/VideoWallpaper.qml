@@ -1,7 +1,8 @@
-import QtMultimedia
 import QtQuick
+import QtMultimedia
 
 Item {
+    // qmllint disable unresolved-alias missing-property unqualified unresolved-type
     id: root
 
     property bool autoStart: true

@@ -1,8 +1,8 @@
+import QtQuick
+import Quickshell
 import Caelestia.Config
 import Caelestia.Images
 import Caelestia.Models
-import QtQuick
-import Quickshell
 import qs.components
 import qs.components.effects
 import qs.components.images
@@ -20,19 +20,18 @@ Item {
     scale: 0.5
     z: PathView.z ?? 0 // qmllint disable missing-property
 
+    Component.onCompleted: {
+        scale = Qt.binding(() => PathView.isCurrentItem ? 1 : PathView.onPath ? 0.8 : 0);
+        opacity = Qt.binding(() => PathView.onPath ? 1 : 0);
+    }
+
     Behavior on opacity {
         Anim {
             type: Anim.DefaultEffects
         }
     }
     Behavior on scale {
-        Anim {
-        }
-    }
-
-    Component.onCompleted: {
-        scale = Qt.binding(() => PathView.isCurrentItem ? 1 : PathView.onPath ? 0.8 : 0);
-        opacity = Qt.binding(() => PathView.onPath ? 1 : 0);
+        Anim {}
     }
 
     Item {
