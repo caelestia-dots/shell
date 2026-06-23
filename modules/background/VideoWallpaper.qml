@@ -1,5 +1,5 @@
-import QtQuick
 import QtMultimedia
+import QtQuick
 
 Item {
     id: root
@@ -7,7 +7,6 @@ Item {
     property url videoSource
     property bool autoStart: true
     readonly property var validVideoExtensions: ["mp4", "webm", "mkv"]
-
     // Expose active player state
     property alias playbackState: player.playbackState
     property alias mediaStatus: player.mediaStatus
@@ -28,15 +27,28 @@ Item {
     }
 
     anchors.fill: parent
+    onVideoSourceChanged: {
+        if (!videoSource.toString()) {
+            player.source = "";
+            return;
+        }
+        player.source = videoSource;
+    }
+    Component.onCompleted: {
+        if (videoSource.toString())
+            player.source = videoSource;
+    }
 
     VideoOutput {
         id: output
+
         anchors.fill: parent
         fillMode: VideoOutput.PreserveAspectCrop
     }
 
     AudioOutput {
         id: mutedOutput
+
         muted: true
         volume: 0
     }
@@ -48,33 +60,16 @@ Item {
         audioOutput: mutedOutput
         loops: MediaPlayer.Infinite
         autoPlay: false
-
         onErrorOccurred: (error, errorString) => {
             if (error !== MediaPlayer.NoError)
                 console.warn("VideoPlayer: error:", errorString);
         }
-
         onMediaStatusChanged: {
             if (mediaStatus === MediaPlayer.InvalidMedia)
                 console.warn("VideoPlayer: invalid media:", player.source, player.errorString);
 
-            if (mediaStatus === MediaPlayer.LoadedMedia && root.autoStart) {
+            if (mediaStatus === MediaPlayer.LoadedMedia && root.autoStart)
                 player.play();
-            }
-        }
-    }
-
-    onVideoSourceChanged: {
-        if (!videoSource.toString()) {
-            player.source = "";
-            return;
-        }
-        player.source = videoSource;
-    }
-
-    Component.onCompleted: {
-        if (videoSource.toString()) {
-            player.source = videoSource;
         }
     }
 }

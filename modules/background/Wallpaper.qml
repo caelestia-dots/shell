@@ -73,7 +73,10 @@ Item {
         if (sourceIsVideo) {
             current = null;
             videoUpdateTimer.restart();
-            if (current === one) two.update(); else one.update();
+            if (current === one)
+                two.update();
+            else
+                one.update();
         } else if (!source) {
             current = null;
         } else if (current === one) {

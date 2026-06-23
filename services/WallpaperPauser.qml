@@ -1,11 +1,9 @@
 pragma Singleton
-
 import QtQuick
 import Quickshell
 import Quickshell.Hyprland
-import Quickshell.Services.UPower
 import Quickshell.Io
-
+import Quickshell.Services.UPower
 import qs.services
 
 Singleton {
@@ -15,38 +13,17 @@ Singleton {
     property bool paused: false
     property bool _loaded: false
 
-    FileView {
-        id: loadView
-        path: Quickshell.env("HOME") + "/.cache/caelestia/pauseOnBattery.txt"
-        printErrors: false
-        onLoaded: {
-            root.pauseOnBattery = (text().trim() === "true");
-            root._loaded = true;
-            root.recalculate();
-        }
-        onLoadFailed: {
-            if (!root._loaded) {
-                root._loaded = true;
-                root.recalculate();
-            }
-        }
-    }
-
-    Process {
-        id: saveProcess
-    }
-
     function saveSetting() {
         saveProcess.command = ["sh", "-c", "echo '" + root.pauseOnBattery + "' > ~/.cache/caelestia/pauseOnBattery.txt"];
         saveProcess.running = true;
     }
 
     function recalculate() {
-        if (!_loaded) return;
+        if (!_loaded)
+            return;
 
         let newPaused = false;
         let reason = "None";
-        
         // Rule #1, Battery
         if (pauseOnBattery && UPower.onBattery) {
             newPaused = true;
@@ -59,7 +36,6 @@ Singleton {
                     const obj = t.lastIpcObject;
                     return obj && obj.workspace && obj.workspace.id === ws.id;
                 });
-                
                 // Rule #2, 2+ visible windows
                 if (toplevels.length >= 2) {
                     newPaused = true;
@@ -68,7 +44,9 @@ Singleton {
                     // Rule #3, 70% of monitor area
                     const monitor = Hyprland.focusedMonitor;
                     if (monitor) {
-                        const screen = Quickshell.screens.find(s => s.name === monitor.name);
+                        const screen = Quickshell.screens.find(s => {
+                            return s.name === monitor.name;
+                        });
                         if (screen) {
                             const screenArea = screen.width * screen.height;
                             if (screenArea > 0) {
@@ -88,35 +66,8 @@ Singleton {
                 }
             }
         }
-        
         paused = newPaused;
         console.log("[DEBUG] WallpaperPauser recalculated. Final paused state:", paused, "Reason:", reason);
-    }
-
-    Connections {
-        target: UPower
-        function onOnBatteryChanged() { root.recalculate(); }
-    }
-
-    Connections {
-        target: Hyprland
-        function onFocusedWorkspaceChanged() { root.recalculate(); }
-        function onFocusedMonitorChanged() { root.recalculate(); }
-        function onRawEvent(event) {
-            const n = event.name;
-            if (n.endsWith("v2")) return;
-            if (["fullscreen", "activewindow", "changefloatingmode",
-                 "minimize", "movewindow", "openwindow", "closewindow",
-                 "workspace", "moveworkspace", "focusedmon"].includes(n)) {
-                recalcTimer.restart();
-            }
-        }
-    }
-
-    Timer {
-        id: recalcTimer
-        interval: 16
-        onTriggered: root.recalculate()
     }
 
     onPauseOnBatteryChanged: {
@@ -124,5 +75,63 @@ Singleton {
             saveSetting();
             recalculate();
         }
+    }
+
+    FileView {
+        id: loadView
+
+        path: Quickshell.env("HOME") + "/.cache/caelestia/pauseOnBattery.txt"
+        printErrors: false
+        onLoaded: {
+            root.pauseOnBattery = (text().trim() === "true");
+            root._loaded = true;
+            root.recalculate();
+        }
+        onLoadFailed: {
+            if (!root._loaded) {
+                root._loaded = true;
+                root.recalculate();
+            }
+        }
+    }
+
+    Process {
+        id: saveProcess
+    }
+
+    Connections {
+        function onOnBatteryChanged() {
+            root.recalculate();
+        }
+
+        target: UPower
+    }
+
+    Connections {
+        function onFocusedWorkspaceChanged() {
+            root.recalculate();
+        }
+
+        function onFocusedMonitorChanged() {
+            root.recalculate();
+        }
+
+        function onRawEvent(event) {
+            const n = event.name;
+            if (n.endsWith("v2"))
+                return;
+
+            if (["fullscreen", "activewindow", "changefloatingmode", "minimize", "movewindow", "openwindow", "closewindow", "workspace", "moveworkspace", "focusedmon"].includes(n))
+                recalcTimer.restart();
+        }
+
+        target: Hyprland
+    }
+
+    Timer {
+        id: recalcTimer
+
+        interval: 16
+        onTriggered: root.recalculate()
     }
 }

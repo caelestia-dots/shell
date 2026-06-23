@@ -96,18 +96,24 @@ Item {
                     const dpr = (QsWindow.window as QsWindow)?.devicePixelRatio ?? 1;
                     return Qt.size(image.implicitWidth * dpr, image.implicitHeight * dpr);
                 }
-                
+
                 property bool isThumbReady: !Wallpapers._refreshing || Wallpapers.itemBusters[root.modelData.path] !== undefined
-                
+
                 // fade-in and scale animation when loaded
                 opacity: isThumbReady && status === Image.Ready ? 1 : 0
                 scale: isThumbReady && status === Image.Ready ? 1 : 0.7
-                
+
                 Behavior on opacity {
-                    NumberAnimation { duration: 800; easing.type: Easing.OutCubic }
+                    NumberAnimation {
+                        duration: 800
+                        easing.type: Easing.OutCubic
+                    }
                 }
                 Behavior on scale {
-                    NumberAnimation { duration: 800; easing.type: Easing.OutBack }
+                    NumberAnimation {
+                        duration: 800
+                        easing.type: Easing.OutBack
+                    }
                 }
             }
         }
