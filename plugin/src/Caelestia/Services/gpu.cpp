@@ -19,7 +19,7 @@ constexpr const char* kTypeDetectScript =
     " else echo NONE; fi";
 
 constexpr const char* kNameDetectScript = "nvidia-smi --query-gpu=name --format=csv,noheader 2>/dev/null"
-                                          " || glxinfo -B 2>/dev/null | grep 'Device:' | cut -d':' -f2 | cut -d'(' -f1 | grep ."
+                                          " || glxinfo -B 2>/dev/null | grep 'Device:' | cut -d':' -f2 | cut -d'(' -f1 | grep -E '[^[:space:]]'"
                                           " || lspci 2>/dev/null | grep -i 'vga\\|3d controller\\|display' | head -1";
 
 } // namespace
