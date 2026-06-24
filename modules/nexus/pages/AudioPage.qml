@@ -22,6 +22,7 @@ PageBase {
         // Output
         SliderRow {
             first: true
+            settingAnchor: "audio-output"
             icon: Icons.getVolumeIcon(Audio.volume, Audio.muted)
             label: qsTr("Output")
             valueLabel: Math.round(value * 100) + "%"
@@ -49,6 +50,7 @@ PageBase {
         SliderRow {
             Layout.topMargin: Tokens.spacing.large - parent.spacing
             first: true
+            settingAnchor: "audio-input"
             icon: Icons.getMicVolumeIcon(Audio.sourceVolume, Audio.sourceMuted)
             label: qsTr("Input")
             valueLabel: Math.round(value * 100) + "%"

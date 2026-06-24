@@ -6,6 +6,8 @@ import qs.services
 StyledRect {
     property bool first
     property bool last
+    // Identifier used by the settings search to scroll to this row.
+    property string settingAnchor
 
     color: Colours.tPalette.m3surfaceContainer
     topLeftRadius: first ? Tokens.rounding.extraLarge : Tokens.rounding.extraSmall
