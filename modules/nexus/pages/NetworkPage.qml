@@ -62,6 +62,7 @@ PageBase {
         ToggleRow {
             Layout.topMargin: Nmcli.hasAvailableEthernet ? Tokens.spacing.large : 0
             first: true
+            settingAnchor: "network-wifi"
             text: qsTr("Wi-Fi")
             font: Tokens.font.body.medium
             horizontalPadding: Tokens.padding.largeIncreased

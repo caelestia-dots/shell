@@ -16,6 +16,7 @@ PageBase {
         NavRow {
             first: true
             icon: "dashboard"
+            settingAnchor: "panels-dashboard"
             label: qsTr("Dashboard")
             status: Config.dashboard.enabled ? qsTr("Enabled") : qsTr("Disabled")
             onClicked: root.nState.openSubPage(1)
@@ -23,6 +24,7 @@ PageBase {
 
         NavRow {
             icon: "dock_to_bottom"
+            settingAnchor: "panels-taskbar"
             label: qsTr("Taskbar")
             status: Config.bar.persistent ? qsTr("Always visible") : Config.bar.showOnHover ? qsTr("Reveal on hover") : qsTr("Reveal on drag")
             onClicked: root.nState.openSubPage(2)
@@ -30,6 +32,7 @@ PageBase {
 
         NavRow {
             icon: "apps"
+            settingAnchor: "panels-launcher"
             label: qsTr("Launcher")
             status: Config.launcher.enabled ? qsTr("Enabled") : qsTr("Disabled")
             onClicked: root.nState.openSubPage(3)
@@ -38,6 +41,7 @@ PageBase {
         NavRow {
             last: true
             icon: "dock_to_right"
+            settingAnchor: "panels-sidebar"
             label: qsTr("Sidebar")
             status: Config.sidebar.enabled ? qsTr("Enabled") : qsTr("Disabled")
             onClicked: root.nState.openSubPage(4)

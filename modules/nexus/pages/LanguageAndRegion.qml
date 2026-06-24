@@ -138,6 +138,7 @@ PageBase {
 
         SelectRow {
             first: true
+            settingAnchor: "lang-temperature"
             label: qsTr("Temperature")
             subtext: qsTr("Units for weather temperatures")
             menuItems: root.tempItems
@@ -147,6 +148,7 @@ PageBase {
 
         SelectRow {
             last: true
+            settingAnchor: "lang-system-temperature"
             label: qsTr("System temperatures")
             subtext: qsTr("Units for CPU and GPU temperatures")
             menuItems: root.tempItems
@@ -162,6 +164,7 @@ PageBase {
         SelectRow {
             first: true
             last: true
+            settingAnchor: "lang-clock-format"
             label: qsTr("Clock format")
             subtext: qsTr("How times are shown across the shell")
             menuItems: root.clockItems

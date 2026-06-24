@@ -81,6 +81,7 @@ PageBase {
             implicitHeight: appLayout.implicitHeight + appLayout.anchors.margins * 2
             first: true
             last: true
+            settingAnchor: "audio-app-volumes"
 
             StateLayer {
                 onClicked: root.nState.openSubPage(1)

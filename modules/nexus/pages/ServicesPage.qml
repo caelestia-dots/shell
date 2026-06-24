@@ -87,6 +87,7 @@ PageBase {
             first: true
             last: true
             icon: "notifications"
+            settingAnchor: "services-notifications"
             label: qsTr("Notifications")
             status: qsTr("Notifications, toasts, timeouts")
             onClicked: root.nState.openSubPage(1)
@@ -206,6 +207,7 @@ PageBase {
 
         StepperRow {
             first: true
+            settingAnchor: "services-visualiser-bars"
             label: qsTr("Visualiser bars")
             subtext: qsTr("Number of bars in the audio visualisers")
             value: GlobalConfig.services.visualiserBars
@@ -216,6 +218,7 @@ PageBase {
         }
 
         ToggleRow {
+            settingAnchor: "services-smart-scheme"
             text: qsTr("Smart colour scheme")
             subtext: qsTr("Derive theme mode and variant from the wallpaper")
             checked: GlobalConfig.services.smartScheme
@@ -224,6 +227,7 @@ PageBase {
 
         SelectRow {
             last: true
+            settingAnchor: "services-gpu"
             label: qsTr("GPU")
             subtext: Gpu.name ? qsTr("Monitoring: %1").arg(Gpu.name) : qsTr("Override for GPU type")
             menuOnTop: true
