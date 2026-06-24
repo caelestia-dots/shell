@@ -13,6 +13,10 @@ VerticalFadeFlickable {
 
     required property NexusState nState
 
+    readonly property string search: nState.searchText
+    readonly property bool searching: search.length > 0
+    readonly property var results: searching ? SettingsSearcher.query(search) : []
+
     topMargin: Tokens.padding.large
     bottomMargin: Tokens.padding.large
     contentHeight: content.implicitHeight
@@ -27,7 +31,7 @@ VerticalFadeFlickable {
         Repeater {
             id: list
 
-            model: PageRegistry.pages
+            model: root.searching ? [] : PageRegistry.pages
 
             StyledRect {
                 id: item
@@ -36,8 +40,8 @@ VerticalFadeFlickable {
                 required property int index
 
                 readonly property bool isCurrentPage: index === root.nState.currentPageIdx
-                readonly property bool isCategoryStart: index === 0 || PageRegistry.pages[index - 1].category !== modelData.category
-                readonly property bool isCategoryEnd: index === list.model.length - 1 || PageRegistry.pages[index + 1].category !== modelData.category
+                readonly property bool isCategoryStart: index === 0 || PageRegistry.pages[index - 1]?.category !== modelData.category
+                readonly property bool isCategoryEnd: index === list.model.length - 1 || PageRegistry.pages[index + 1]?.category !== modelData.category
 
                 Layout.fillWidth: true
                 Layout.topMargin: index !== 0 && isCategoryStart ? Tokens.spacing.medium : 0
@@ -119,6 +123,84 @@ VerticalFadeFlickable {
                     }
                 }
             }
+        }
+
+        Repeater {
+            id: resultList
+
+            model: root.results
+
+            StyledRect {
+                id: result
+
+                required property var modelData
+                required property int index
+
+                Layout.fillWidth: true
+                implicitHeight: {
+                    const h = resultLayout.implicitHeight + resultLayout.anchors.margins * 2;
+                    return h % 2 === 0 ? h : h + 1;
+                }
+
+                radius: Tokens.rounding.medium
+                color: Colours.layer(Colours.palette.m3surfaceContainerHigh, 2)
+
+                StateLayer {
+                    anchors.fill: parent
+                    radius: parent.radius
+
+                    onClicked: {
+                        root.nState.currentPageIdx = result.modelData.pageIdx;
+                        root.nState.searchAnchor = result.modelData.anchor;
+                    }
+                }
+
+                RowLayout {
+                    id: resultLayout
+
+                    anchors.fill: parent
+                    anchors.margins: Tokens.padding.large
+                    spacing: Tokens.spacing.medium
+
+                    MaterialIcon {
+                        Layout.alignment: Qt.AlignVCenter
+                        text: "search"
+                        color: Colours.palette.m3onSurfaceVariant
+                        fontStyle: Tokens.font.icon.medium
+                    }
+
+                    ColumnLayout {
+                        Layout.fillWidth: true
+                        spacing: 0
+
+                        StyledText {
+                            Layout.fillWidth: true
+                            text: result.modelData.title
+                            font: Tokens.font.body.medium
+                            elide: Text.ElideRight
+                        }
+
+                        StyledText {
+                            Layout.fillWidth: true
+                            text: `${result.modelData.page} • ${result.modelData.description}`
+                            color: Colours.palette.m3onSurfaceVariant
+                            font: Tokens.font.label.small
+                            elide: Text.ElideRight
+                        }
+                    }
+                }
+            }
+        }
+
+        StyledText {
+            Layout.fillWidth: true
+            Layout.topMargin: Tokens.padding.large
+            visible: root.searching && root.results.length === 0
+
+            text: qsTr("No matching settings")
+            color: Colours.palette.m3onSurfaceVariant
+            font: Tokens.font.body.medium
+            horizontalAlignment: Text.AlignHCenter
         }
     }
 

@@ -59,6 +59,12 @@ StyledRect {
                 property: "searchOpen"
                 value: searchField.text.length > 0
             }
+
+            Binding {
+                target: root.nState
+                property: "searchText"
+                value: searchField.text
+            }
         }
 
         IconButton {
