@@ -89,21 +89,21 @@ class LauncherConfig : public ConfigObject {
                 { u"name"_s, u"Shutdown"_s },
                 { u"icon"_s, u"power_settings_new"_s },
                 { u"description"_s, u"Shutdown the system"_s },
-                { u"command"_s, QStringList{ u"systemctl"_s, u"poweroff"_s } },
+                { u"command"_s, QStringList{ u"poweroff"_s } },
                 { u"dangerous"_s, true },
             }),
             vmap({
                 { u"name"_s, u"Reboot"_s },
                 { u"icon"_s, u"cached"_s },
                 { u"description"_s, u"Reboot the system"_s },
-                { u"command"_s, QStringList{ u"systemctl"_s, u"reboot"_s } },
+                { u"command"_s, QStringList{ u"reboot"_s } },
                 { u"dangerous"_s, true },
             }),
             vmap({
                 { u"name"_s, u"Logout"_s },
                 { u"icon"_s, u"exit_to_app"_s },
                 { u"description"_s, u"Log out of the current session"_s },
-                { u"command"_s, QStringList{ u"loginctl"_s, u"terminate-user"_s, u""_s } },
+                { u"command"_s, QStringList{ u"logout"_s } },
                 { u"dangerous"_s, true },
             }),
             vmap({
@@ -116,7 +116,7 @@ class LauncherConfig : public ConfigObject {
                 { u"name"_s, u"Sleep"_s },
                 { u"icon"_s, u"bedtime"_s },
                 { u"description"_s, u"Suspend then hibernate"_s },
-                { u"command"_s, QStringList{ u"systemctl"_s, u"suspend-then-hibernate"_s } },
+                { u"command"_s, QStringList{ u"suspendThenHibernate"_s } },
             }),
             vmap({
                 { u"name"_s, u"Settings"_s },
