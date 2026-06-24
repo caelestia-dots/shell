@@ -15,6 +15,11 @@ StyledSwitch {
     property string settingAnchor
     readonly property alias bg: bg
 
+    // Briefly flash the row, used when the settings search jumps to it.
+    function flashHighlight(): void {
+        bg.flashHighlight();
+    }
+
     Layout.fillWidth: true
 
     horizontalPadding: Tokens.padding.largeIncreased

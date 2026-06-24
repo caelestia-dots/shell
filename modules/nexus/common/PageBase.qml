@@ -30,6 +30,8 @@ ColumnLayout {
         const pos = row.mapToItem(flickable.contentItem, 0, 0);
         const target = Math.max(0, Math.min(pos.y - Tokens.padding.large, flickable.contentHeight - flickable.height));
         flickable.contentY = target;
+        if (row.flashHighlight !== undefined) // qmllint disable missing-property
+            row.flashHighlight();
     }
 
     function findAnchor(item: Item, anchor: string): Item {
