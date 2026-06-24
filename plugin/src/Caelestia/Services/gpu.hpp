@@ -4,6 +4,7 @@
 
 #include <qprocess.h>
 #include <qqmlintegration.h>
+#include <qstringlist.h>
 
 namespace caelestia::services {
 
@@ -51,18 +52,22 @@ protected:
     void tick() override;
 
 private:
-    void detectTypeOnce();
-    void detectNameOnce();
+    void detectGpu();
+    void tryNameSource(int index);
+    void finishNameSource(int index, QString name);
     void readGenericUsage();
     void startNvidiaUsage();
     void readGpuTemperature();
+
+    // Runs a one-shot process, delivering its stdout to callback exactly once
+    // (empty output if it crashes or never starts), then tears the process down.
+    void runProcess(const QString& program, const QStringList& args, std::function<void(const QByteArray&)> callback);
 
     void setUserType(Type value);
     void setAutoType(Type value);
     void setName(QString value);
 
     [[nodiscard]] static Type parseType(const QString& s);
-    [[nodiscard]] static QString cleanName(QString s);
 
     Type m_userType = Auto;
     Type m_autoType = None;
@@ -70,9 +75,11 @@ private:
     qreal m_percentage = 0.0;
     qreal m_temperature = 0.0;
 
-    QProcess* m_typeProc = nullptr;
-    QProcess* m_nameProc = nullptr;
-    QProcess* m_nvidiaProc = nullptr;
+    // /sys/class/drm card busy files, enumerated once at construction (the card
+    // set is static at runtime) and reused by detection and the tick path.
+    QStringList m_busyFiles;
+    bool m_detecting = false;
+    bool m_nvidiaQuerying = false;
 };
 
 } // namespace caelestia::services
