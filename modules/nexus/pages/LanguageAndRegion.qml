@@ -148,7 +148,7 @@ PageBase {
 
         SelectRow {
             last: true
-            settingAnchor: "lang-system-temperature"
+            settingAnchor: "lang-system-temperatures"
             label: qsTr("System temperatures")
             subtext: qsTr("Units for CPU and GPU temperatures")
             menuItems: root.tempItems

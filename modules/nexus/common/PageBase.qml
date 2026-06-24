@@ -21,17 +21,18 @@ ColumnLayout {
     default property Item contentChild
 
     // When the settings search jumps to this page, scroll to the matching row.
-    function scrollToAnchor(anchor: string): void {
+    function scrollToAnchor(anchor: string): bool {
         if (!anchor || !contentChild)
-            return;
+            return false;
         const row = findAnchor(contentChild, anchor);
         if (!row)
-            return;
+            return false;
         const pos = row.mapToItem(flickable.contentItem, 0, 0);
         const target = Math.max(0, Math.min(pos.y - Tokens.padding.large, flickable.contentHeight - flickable.height));
         flickable.contentY = target;
         if (row.flashHighlight !== undefined) // qmllint disable missing-property
             row.flashHighlight();
+        return true;
     }
 
     function findAnchor(item: Item, anchor: string): Item {
@@ -48,13 +49,26 @@ ColumnLayout {
         return null;
     }
 
-    Component.onCompleted: if (nState.searchAnchor)
+    function applySearchAnchor(): void {
+        if (!nState.searchAnchor)
+            return;
         Qt.callLater(() => {
-            root.scrollToAnchor(nState.searchAnchor);
-            nState.searchAnchor = "";
-        })
+            if (root.scrollToAnchor(nState.searchAnchor))
+                nState.searchAnchor = "";
+        });
+    }
 
     spacing: Tokens.spacing.extraLargeIncreased
+
+    Component.onCompleted: applySearchAnchor()
+
+    Connections {
+        function onSearchAnchorChanged(): void {
+            root.applySearchAnchor();
+        }
+
+        target: root.nState
+    }
 
     MouseArea { // Prevent clicks from reaching flickable
         z: 1

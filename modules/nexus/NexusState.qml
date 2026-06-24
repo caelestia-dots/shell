@@ -8,6 +8,7 @@ QtObject {
     property bool animatingContainer
     property int currentPageIdx
     property list<int> subPageIdxStack
+    property list<int> _pendingSubPath
     property bool searchOpen
     property string searchText
     property string searchAnchor
@@ -31,5 +32,27 @@ QtObject {
         subPageIdxStack.pop();
     }
 
-    onCurrentPageIdxChanged: subPageIdxStack.length = 0
+    // Jump straight to a setting from search: open the page, then any sub-pages
+    // along subPath, then let the page scroll to the anchor. subPageIdxStack is
+    // filled directly so a freshly loaded StackPage opens the whole chain at
+    // once (see StackPage.Component.onCompleted), which avoids the half-open
+    // state that firing openSubPage signals one by one would cause.
+    function jumpToSetting(pageIdx: int, subPath: var, anchor: string): void {
+        searchAnchor = anchor;
+        if (currentPageIdx === pageIdx) {
+            // Already on the page: reset and re-open the sub-page chain live.
+            while (subPageIdxStack.length > 0)
+                closeSubPage();
+            for (let i = 0; i < subPath.length; i++)
+                openSubPage(subPath[i]);
+        } else {
+            _pendingSubPath = subPath.slice();
+            currentPageIdx = pageIdx;
+        }
+    }
+
+    onCurrentPageIdxChanged: {
+        subPageIdxStack = _pendingSubPath;
+        _pendingSubPath = [];
+    }
 }

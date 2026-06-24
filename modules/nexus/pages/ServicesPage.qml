@@ -111,7 +111,7 @@ PageBase {
         }
 
         StepperRow {
-            settingAnchor: "services-stats-refresh"
+            settingAnchor: "services-system-stats-refresh"
             label: qsTr("System stats refresh")
             subtext: qsTr("CPU, memory and GPU update interval (seconds)")
             value: GlobalConfig.dashboard.resourceUpdateInterval / 1000
@@ -123,7 +123,7 @@ PageBase {
 
         StepperRow {
             last: true
-            settingAnchor: "services-wifi-rescan"
+            settingAnchor: "services-wi-fi-rescan"
             label: qsTr("Wi-Fi rescan")
             subtext: qsTr("How often available networks are rescanned (seconds)")
             value: GlobalConfig.nexus.networkRescanInterval / 1000
@@ -218,7 +218,7 @@ PageBase {
         }
 
         ToggleRow {
-            settingAnchor: "services-smart-scheme"
+            settingAnchor: "services-smart-colour-scheme"
             text: qsTr("Smart colour scheme")
             subtext: qsTr("Derive theme mode and variant from the wallpaper")
             checked: GlobalConfig.services.smartScheme

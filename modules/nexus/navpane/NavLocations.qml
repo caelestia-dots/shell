@@ -149,42 +149,70 @@ VerticalFadeFlickable {
                     anchors.fill: parent
                     radius: parent.radius
 
-                    onClicked: {
-                        root.nState.currentPageIdx = result.modelData.pageIdx;
-                        root.nState.searchAnchor = result.modelData.anchor;
-                    }
+                    onClicked: root.nState.jumpToSetting(result.modelData.pageIdx, result.modelData.subPath, result.modelData.anchor)
                 }
 
-                RowLayout {
+                ColumnLayout {
                     id: resultLayout
 
                     anchors.fill: parent
                     anchors.margins: Tokens.padding.large
-                    spacing: Tokens.spacing.medium
+                    spacing: Tokens.spacing.extraSmall
 
-                    MaterialIcon {
-                        Layout.alignment: Qt.AlignVCenter
-                        text: "search"
-                        color: Colours.palette.m3onSurfaceVariant
-                        fontStyle: Tokens.font.icon.medium
+                    Repeater {
+                        model: result.modelData.crumbLabels
+
+                        RowLayout {
+                            id: crumb
+
+                            required property var modelData
+                            required property int index
+
+                            Layout.leftMargin: index * Tokens.padding.large
+                            spacing: Tokens.spacing.small
+
+                            MaterialIcon {
+                                Layout.alignment: Qt.AlignVCenter
+                                text: crumb.index > 0 ? "subdirectory_arrow_right" : ""
+                                visible: crumb.index > 0
+                                color: Colours.palette.m3onSurfaceVariant
+                                fontStyle: Tokens.font.icon.small
+                            }
+
+                            MaterialIcon {
+                                Layout.alignment: Qt.AlignVCenter
+                                text: result.modelData.crumbIcons[crumb.index]
+                                color: Colours.palette.m3onSurfaceVariant
+                                fontStyle: Tokens.font.icon.small
+                            }
+
+                            StyledText {
+                                text: crumb.modelData
+                                color: Colours.palette.m3onSurfaceVariant
+                                font: Tokens.font.label.small
+                                elide: Text.ElideRight
+                            }
+                        }
                     }
 
-                    ColumnLayout {
+                    RowLayout {
                         Layout.fillWidth: true
-                        spacing: 0
+                        Layout.leftMargin: result.modelData.crumbLabels.length * Tokens.padding.large
+                        Layout.topMargin: Tokens.spacing.extraSmall
+                        spacing: Tokens.spacing.small
 
-                        StyledText {
-                            Layout.fillWidth: true
-                            text: result.modelData.title
-                            font: Tokens.font.body.medium
-                            elide: Text.ElideRight
+                        MaterialIcon {
+                            Layout.alignment: Qt.AlignVCenter
+                            text: "subdirectory_arrow_right"
+                            color: Colours.palette.m3primary
+                            fontStyle: Tokens.font.icon.small
                         }
 
                         StyledText {
                             Layout.fillWidth: true
-                            text: `${result.modelData.page} • ${result.modelData.description}`
-                            color: Colours.palette.m3onSurfaceVariant
-                            font: Tokens.font.label.small
+                            text: result.modelData.title
+                            color: Colours.palette.m3primary
+                            font: Tokens.font.body.medium
                             elide: Text.ElideRight
                         }
                     }

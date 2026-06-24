@@ -27,7 +27,7 @@ PageBase {
 
         ToggleRow {
             first: true
-            settingAnchor: "bluetooth-enabled"
+            settingAnchor: "bluetooth-bluetooth"
             text: qsTr("Bluetooth")
             font: Tokens.font.body.medium
             horizontalPadding: Tokens.padding.largeIncreased

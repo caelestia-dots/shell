@@ -22,8 +22,8 @@ PageBase {
         // Output
         SliderRow {
             first: true
-            settingAnchor: "audio-output"
             icon: Icons.getVolumeIcon(Audio.volume, Audio.muted)
+            settingAnchor: "audio-output"
             label: qsTr("Output")
             valueLabel: Math.round(value * 100) + "%"
             value: Audio.volume
@@ -50,8 +50,8 @@ PageBase {
         SliderRow {
             Layout.topMargin: Tokens.spacing.large - parent.spacing
             first: true
-            settingAnchor: "audio-input"
             icon: Icons.getMicVolumeIcon(Audio.sourceVolume, Audio.sourceMuted)
+            settingAnchor: "audio-input"
             label: qsTr("Input")
             valueLabel: Math.round(value * 100) + "%"
             value: Audio.sourceVolume
@@ -81,7 +81,6 @@ PageBase {
             implicitHeight: appLayout.implicitHeight + appLayout.anchors.margins * 2
             first: true
             last: true
-            settingAnchor: "audio-app-volumes"
 
             StateLayer {
                 onClicked: root.nState.openSubPage(1)
