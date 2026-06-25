@@ -3,4 +3,4 @@
 /.qmlls.ini
 build/
 .cache/
-logs
+logs__pycache__/

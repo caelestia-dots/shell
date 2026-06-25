@@ -174,6 +174,10 @@ def tokenize(text: str) -> list[str]:
     return toks
 
 
+SUBTEXT_RE = re.compile(r'^\s*subtext:\s*qsTr\("([^"]+)"\)')
+SECTION_RE = re.compile(r'^\s*SectionHeader\s*\{')
+
+
 def extract_settings(files: dict[str, Path], nav: dict[str, dict]) -> list[dict]:
     entries: list[dict] = []
     for comp, meta in nav.items():
@@ -181,11 +185,19 @@ def extract_settings(files: dict[str, Path], nav: dict[str, dict]) -> list[dict]
         if not pf:
             continue
         lines = pf.read_text().splitlines()
+        section = ""  # text of the most recent SectionHeader
         i = 0
         while i < len(lines):
+            # Track the current section header so its words are searchable too.
+            if SECTION_RE.match(lines[i]):
+                for j in range(i + 1, min(i + 4, len(lines))):
+                    m = LABEL_RE.match(lines[j])
+                    if m:
+                        section = m.group(1)
+                        break
             if ROW_RE.match(lines[i]):
-                label = anchor = None
-                for j in range(i + 1, min(i + 10, len(lines))):
+                label = anchor = subtext = None
+                for j in range(i + 1, min(i + 12, len(lines))):
                     if label is None:
                         m = LABEL_RE.match(lines[j])
                         if m:
@@ -194,15 +206,19 @@ def extract_settings(files: dict[str, Path], nav: dict[str, dict]) -> list[dict]
                         a = ANCHOR_RE.match(lines[j])
                         if a:
                             anchor = a.group(1)
+                    if subtext is None:
+                        st = SUBTEXT_RE.match(lines[j])
+                        if st:
+                            subtext = st.group(1)
                 if label and label not in SKIP_LABELS and anchor:
-                    crumb_words = " ".join(meta["crumbLabels"])
-                    keywords = crumb_words
+                    # keyword sources: breadcrumb path, section header, subtext.
+                    extra = " ".join(meta["crumbLabels"]) + " " + section + " " + (subtext or "")
                     entries.append({
                         "pageIdx": meta["pageIdx"], "subPath": meta["subPath"],
                         "crumbIcons": meta["crumbIcons"],
                         "crumbLabels": meta["crumbLabels"],
                         "title": label, "anchor": anchor,
-                        "keywords": " ".join(sorted(set(tokenize(label + " " + keywords)))),
+                        "keywords": " ".join(sorted(set(tokenize(label + " " + extra)))),
                     })
             i += 1
     return entries
