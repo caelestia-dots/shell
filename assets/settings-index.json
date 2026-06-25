@@ -1,0 +1,1877 @@
+{
+  "version": 1,
+  "entries": [
+    {
+      "pageIdx": 0,
+      "subPath": [],
+      "crumbIcons": [
+        "palette"
+      ],
+      "crumbLabels": [
+        "Wallpaper & style"
+      ],
+      "title": "Display wallpaper",
+      "anchor": "style-display-wallpaper",
+      "keywords": "display style wallpaper"
+    },
+    {
+      "pageIdx": 0,
+      "subPath": [],
+      "crumbIcons": [
+        "palette"
+      ],
+      "crumbLabels": [
+        "Wallpaper & style"
+      ],
+      "title": "Transparency",
+      "anchor": "style-transparency",
+      "keywords": "style transparency wallpaper"
+    },
+    {
+      "pageIdx": 0,
+      "subPath": [],
+      "crumbIcons": [
+        "palette"
+      ],
+      "crumbLabels": [
+        "Wallpaper & style"
+      ],
+      "title": "Dark theme",
+      "anchor": "style-dark-theme",
+      "keywords": "dark style theme wallpaper"
+    },
+    {
+      "pageIdx": 1,
+      "subPath": [],
+      "crumbIcons": [
+        "wifi"
+      ],
+      "crumbLabels": [
+        "Network"
+      ],
+      "title": "Wi-Fi",
+      "anchor": "network-wi-fi",
+      "keywords": "network wi-fi"
+    },
+    {
+      "pageIdx": 2,
+      "subPath": [],
+      "crumbIcons": [
+        "devices_other"
+      ],
+      "crumbLabels": [
+        "Bluetooth"
+      ],
+      "title": "Bluetooth",
+      "anchor": "bluetooth-bluetooth",
+      "keywords": "bluetooth"
+    },
+    {
+      "pageIdx": 2,
+      "subPath": [],
+      "crumbIcons": [
+        "devices_other"
+      ],
+      "crumbLabels": [
+        "Bluetooth"
+      ],
+      "title": "Discoverable",
+      "anchor": "bluetooth-discoverable",
+      "keywords": "bluetooth discoverable"
+    },
+    {
+      "pageIdx": 2,
+      "subPath": [],
+      "crumbIcons": [
+        "devices_other"
+      ],
+      "crumbLabels": [
+        "Bluetooth"
+      ],
+      "title": "Pairable",
+      "anchor": "bluetooth-pairable",
+      "keywords": "bluetooth pairable"
+    },
+    {
+      "pageIdx": 3,
+      "subPath": [],
+      "crumbIcons": [
+        "volume_up"
+      ],
+      "crumbLabels": [
+        "Audio"
+      ],
+      "title": "Output",
+      "anchor": "audio-output",
+      "keywords": "audio output"
+    },
+    {
+      "pageIdx": 3,
+      "subPath": [],
+      "crumbIcons": [
+        "volume_up"
+      ],
+      "crumbLabels": [
+        "Audio"
+      ],
+      "title": "Input",
+      "anchor": "audio-input",
+      "keywords": "audio input"
+    },
+    {
+      "pageIdx": 6,
+      "subPath": [],
+      "crumbIcons": [
+        "dock_to_bottom"
+      ],
+      "crumbLabels": [
+        "Panels"
+      ],
+      "title": "Dashboard",
+      "anchor": "panels-dashboard",
+      "keywords": "dashboard panels"
+    },
+    {
+      "pageIdx": 6,
+      "subPath": [],
+      "crumbIcons": [
+        "dock_to_bottom"
+      ],
+      "crumbLabels": [
+        "Panels"
+      ],
+      "title": "Taskbar",
+      "anchor": "panels-taskbar",
+      "keywords": "panels taskbar"
+    },
+    {
+      "pageIdx": 6,
+      "subPath": [],
+      "crumbIcons": [
+        "dock_to_bottom"
+      ],
+      "crumbLabels": [
+        "Panels"
+      ],
+      "title": "Launcher",
+      "anchor": "panels-launcher",
+      "keywords": "launcher panels"
+    },
+    {
+      "pageIdx": 6,
+      "subPath": [],
+      "crumbIcons": [
+        "dock_to_bottom"
+      ],
+      "crumbLabels": [
+        "Panels"
+      ],
+      "title": "Sidebar",
+      "anchor": "panels-sidebar",
+      "keywords": "panels sidebar"
+    },
+    {
+      "pageIdx": 6,
+      "subPath": [
+        1
+      ],
+      "crumbIcons": [
+        "dock_to_bottom",
+        "dashboard"
+      ],
+      "crumbLabels": [
+        "Panels",
+        "Dashboard"
+      ],
+      "title": "Enabled",
+      "anchor": "dash-enabled",
+      "keywords": "dashboard enabled panels"
+    },
+    {
+      "pageIdx": 6,
+      "subPath": [
+        1
+      ],
+      "crumbIcons": [
+        "dock_to_bottom",
+        "dashboard"
+      ],
+      "crumbLabels": [
+        "Panels",
+        "Dashboard"
+      ],
+      "title": "Show on hover",
+      "anchor": "dash-show-on-hover",
+      "keywords": "dashboard hover on panels show"
+    },
+    {
+      "pageIdx": 6,
+      "subPath": [
+        1
+      ],
+      "crumbIcons": [
+        "dock_to_bottom",
+        "dashboard"
+      ],
+      "crumbLabels": [
+        "Panels",
+        "Dashboard"
+      ],
+      "title": "Dashboard",
+      "anchor": "dash-dashboard",
+      "keywords": "dashboard panels"
+    },
+    {
+      "pageIdx": 6,
+      "subPath": [
+        1
+      ],
+      "crumbIcons": [
+        "dock_to_bottom",
+        "dashboard"
+      ],
+      "crumbLabels": [
+        "Panels",
+        "Dashboard"
+      ],
+      "title": "Media",
+      "anchor": "dash-media",
+      "keywords": "dashboard media panels"
+    },
+    {
+      "pageIdx": 6,
+      "subPath": [
+        1
+      ],
+      "crumbIcons": [
+        "dock_to_bottom",
+        "dashboard"
+      ],
+      "crumbLabels": [
+        "Panels",
+        "Dashboard"
+      ],
+      "title": "Performance",
+      "anchor": "dash-performance",
+      "keywords": "dashboard panels performance"
+    },
+    {
+      "pageIdx": 6,
+      "subPath": [
+        1
+      ],
+      "crumbIcons": [
+        "dock_to_bottom",
+        "dashboard"
+      ],
+      "crumbLabels": [
+        "Panels",
+        "Dashboard"
+      ],
+      "title": "Weather",
+      "anchor": "dash-weather",
+      "keywords": "dashboard panels weather"
+    },
+    {
+      "pageIdx": 6,
+      "subPath": [
+        1
+      ],
+      "crumbIcons": [
+        "dock_to_bottom",
+        "dashboard"
+      ],
+      "crumbLabels": [
+        "Panels",
+        "Dashboard"
+      ],
+      "title": "Battery",
+      "anchor": "dash-battery",
+      "keywords": "battery dashboard panels"
+    },
+    {
+      "pageIdx": 6,
+      "subPath": [
+        1
+      ],
+      "crumbIcons": [
+        "dock_to_bottom",
+        "dashboard"
+      ],
+      "crumbLabels": [
+        "Panels",
+        "Dashboard"
+      ],
+      "title": "GPU",
+      "anchor": "dash-gpu",
+      "keywords": "dashboard gpu panels"
+    },
+    {
+      "pageIdx": 6,
+      "subPath": [
+        1
+      ],
+      "crumbIcons": [
+        "dock_to_bottom",
+        "dashboard"
+      ],
+      "crumbLabels": [
+        "Panels",
+        "Dashboard"
+      ],
+      "title": "CPU",
+      "anchor": "dash-cpu",
+      "keywords": "cpu dashboard panels"
+    },
+    {
+      "pageIdx": 6,
+      "subPath": [
+        1
+      ],
+      "crumbIcons": [
+        "dock_to_bottom",
+        "dashboard"
+      ],
+      "crumbLabels": [
+        "Panels",
+        "Dashboard"
+      ],
+      "title": "Memory",
+      "anchor": "dash-memory",
+      "keywords": "dashboard memory panels"
+    },
+    {
+      "pageIdx": 6,
+      "subPath": [
+        1
+      ],
+      "crumbIcons": [
+        "dock_to_bottom",
+        "dashboard"
+      ],
+      "crumbLabels": [
+        "Panels",
+        "Dashboard"
+      ],
+      "title": "Storage",
+      "anchor": "dash-storage",
+      "keywords": "dashboard panels storage"
+    },
+    {
+      "pageIdx": 6,
+      "subPath": [
+        1
+      ],
+      "crumbIcons": [
+        "dock_to_bottom",
+        "dashboard"
+      ],
+      "crumbLabels": [
+        "Panels",
+        "Dashboard"
+      ],
+      "title": "Network",
+      "anchor": "dash-network",
+      "keywords": "dashboard network panels"
+    },
+    {
+      "pageIdx": 6,
+      "subPath": [
+        1
+      ],
+      "crumbIcons": [
+        "dock_to_bottom",
+        "dashboard"
+      ],
+      "crumbLabels": [
+        "Panels",
+        "Dashboard"
+      ],
+      "title": "Drag threshold",
+      "anchor": "dash-drag-threshold",
+      "keywords": "dashboard drag panels threshold"
+    },
+    {
+      "pageIdx": 6,
+      "subPath": [
+        2
+      ],
+      "crumbIcons": [
+        "dock_to_bottom",
+        "dock_to_bottom"
+      ],
+      "crumbLabels": [
+        "Panels",
+        "Taskbar"
+      ],
+      "title": "Persistent",
+      "anchor": "taskbar-persistent",
+      "keywords": "panels persistent taskbar"
+    },
+    {
+      "pageIdx": 6,
+      "subPath": [
+        2
+      ],
+      "crumbIcons": [
+        "dock_to_bottom",
+        "dock_to_bottom"
+      ],
+      "crumbLabels": [
+        "Panels",
+        "Taskbar"
+      ],
+      "title": "Show on hover",
+      "anchor": "taskbar-show-on-hover",
+      "keywords": "hover on panels show taskbar"
+    },
+    {
+      "pageIdx": 6,
+      "subPath": [
+        2
+      ],
+      "crumbIcons": [
+        "dock_to_bottom",
+        "dock_to_bottom"
+      ],
+      "crumbLabels": [
+        "Panels",
+        "Taskbar"
+      ],
+      "title": "Drag threshold",
+      "anchor": "taskbar-drag-threshold",
+      "keywords": "drag panels taskbar threshold"
+    },
+    {
+      "pageIdx": 6,
+      "subPath": [
+        2
+      ],
+      "crumbIcons": [
+        "dock_to_bottom",
+        "dock_to_bottom"
+      ],
+      "crumbLabels": [
+        "Panels",
+        "Taskbar"
+      ],
+      "title": "Workspaces",
+      "anchor": "taskbar-workspaces",
+      "keywords": "panels taskbar workspaces"
+    },
+    {
+      "pageIdx": 6,
+      "subPath": [
+        2
+      ],
+      "crumbIcons": [
+        "dock_to_bottom",
+        "dock_to_bottom"
+      ],
+      "crumbLabels": [
+        "Panels",
+        "Taskbar"
+      ],
+      "title": "Active window",
+      "anchor": "taskbar-active-window",
+      "keywords": "active panels taskbar window"
+    },
+    {
+      "pageIdx": 6,
+      "subPath": [
+        2
+      ],
+      "crumbIcons": [
+        "dock_to_bottom",
+        "dock_to_bottom"
+      ],
+      "crumbLabels": [
+        "Panels",
+        "Taskbar"
+      ],
+      "title": "Tray",
+      "anchor": "taskbar-tray",
+      "keywords": "panels taskbar tray"
+    },
+    {
+      "pageIdx": 6,
+      "subPath": [
+        2
+      ],
+      "crumbIcons": [
+        "dock_to_bottom",
+        "dock_to_bottom"
+      ],
+      "crumbLabels": [
+        "Panels",
+        "Taskbar"
+      ],
+      "title": "Status icons",
+      "anchor": "taskbar-status-icons",
+      "keywords": "icons panels status taskbar"
+    },
+    {
+      "pageIdx": 6,
+      "subPath": [
+        2
+      ],
+      "crumbIcons": [
+        "dock_to_bottom",
+        "dock_to_bottom"
+      ],
+      "crumbLabels": [
+        "Panels",
+        "Taskbar"
+      ],
+      "title": "Clock",
+      "anchor": "taskbar-clock",
+      "keywords": "clock panels taskbar"
+    },
+    {
+      "pageIdx": 6,
+      "subPath": [
+        2
+      ],
+      "crumbIcons": [
+        "dock_to_bottom",
+        "dock_to_bottom"
+      ],
+      "crumbLabels": [
+        "Panels",
+        "Taskbar"
+      ],
+      "title": "Workspaces",
+      "anchor": "taskbar-workspaces-2",
+      "keywords": "panels taskbar workspaces"
+    },
+    {
+      "pageIdx": 6,
+      "subPath": [
+        2
+      ],
+      "crumbIcons": [
+        "dock_to_bottom",
+        "dock_to_bottom"
+      ],
+      "crumbLabels": [
+        "Panels",
+        "Taskbar"
+      ],
+      "title": "Volume",
+      "anchor": "taskbar-volume",
+      "keywords": "panels taskbar volume"
+    },
+    {
+      "pageIdx": 6,
+      "subPath": [
+        2
+      ],
+      "crumbIcons": [
+        "dock_to_bottom",
+        "dock_to_bottom"
+      ],
+      "crumbLabels": [
+        "Panels",
+        "Taskbar"
+      ],
+      "title": "Brightness",
+      "anchor": "taskbar-brightness",
+      "keywords": "brightness panels taskbar"
+    },
+    {
+      "pageIdx": 6,
+      "subPath": [
+        2,
+        5
+      ],
+      "crumbIcons": [
+        "dock_to_bottom",
+        "dock_to_bottom",
+        "workspaces"
+      ],
+      "crumbLabels": [
+        "Panels",
+        "Taskbar",
+        "Workspaces"
+      ],
+      "title": "Shown",
+      "anchor": "bar-ws-shown",
+      "keywords": "panels shown taskbar workspaces"
+    },
+    {
+      "pageIdx": 6,
+      "subPath": [
+        2,
+        5
+      ],
+      "crumbIcons": [
+        "dock_to_bottom",
+        "dock_to_bottom",
+        "workspaces"
+      ],
+      "crumbLabels": [
+        "Panels",
+        "Taskbar",
+        "Workspaces"
+      ],
+      "title": "Active indicator",
+      "anchor": "bar-ws-active-indicator",
+      "keywords": "active indicator panels taskbar workspaces"
+    },
+    {
+      "pageIdx": 6,
+      "subPath": [
+        2,
+        5
+      ],
+      "crumbIcons": [
+        "dock_to_bottom",
+        "dock_to_bottom",
+        "workspaces"
+      ],
+      "crumbLabels": [
+        "Panels",
+        "Taskbar",
+        "Workspaces"
+      ],
+      "title": "Active trail",
+      "anchor": "bar-ws-active-trail",
+      "keywords": "active panels taskbar trail workspaces"
+    },
+    {
+      "pageIdx": 6,
+      "subPath": [
+        2,
+        5
+      ],
+      "crumbIcons": [
+        "dock_to_bottom",
+        "dock_to_bottom",
+        "workspaces"
+      ],
+      "crumbLabels": [
+        "Panels",
+        "Taskbar",
+        "Workspaces"
+      ],
+      "title": "Occupied background",
+      "anchor": "bar-ws-occupied-background",
+      "keywords": "background occupied panels taskbar workspaces"
+    },
+    {
+      "pageIdx": 6,
+      "subPath": [
+        2,
+        5
+      ],
+      "crumbIcons": [
+        "dock_to_bottom",
+        "dock_to_bottom",
+        "workspaces"
+      ],
+      "crumbLabels": [
+        "Panels",
+        "Taskbar",
+        "Workspaces"
+      ],
+      "title": "Show windows",
+      "anchor": "bar-ws-show-windows",
+      "keywords": "panels show taskbar windows workspaces"
+    },
+    {
+      "pageIdx": 6,
+      "subPath": [
+        2,
+        5
+      ],
+      "crumbIcons": [
+        "dock_to_bottom",
+        "dock_to_bottom",
+        "workspaces"
+      ],
+      "crumbLabels": [
+        "Panels",
+        "Taskbar",
+        "Workspaces"
+      ],
+      "title": "Windows on special workspaces",
+      "anchor": "bar-ws-windows-on-special-workspaces",
+      "keywords": "on panels special taskbar windows workspaces"
+    },
+    {
+      "pageIdx": 6,
+      "subPath": [
+        2,
+        5
+      ],
+      "crumbIcons": [
+        "dock_to_bottom",
+        "dock_to_bottom",
+        "workspaces"
+      ],
+      "crumbLabels": [
+        "Panels",
+        "Taskbar",
+        "Workspaces"
+      ],
+      "title": "Max window icons",
+      "anchor": "bar-ws-max-window-icons",
+      "keywords": "icons max panels taskbar window workspaces"
+    },
+    {
+      "pageIdx": 6,
+      "subPath": [
+        2,
+        5
+      ],
+      "crumbIcons": [
+        "dock_to_bottom",
+        "dock_to_bottom",
+        "workspaces"
+      ],
+      "crumbLabels": [
+        "Panels",
+        "Taskbar",
+        "Workspaces"
+      ],
+      "title": "Per-monitor workspaces",
+      "anchor": "bar-ws-per-monitor-workspaces",
+      "keywords": "panels per-monitor taskbar workspaces"
+    },
+    {
+      "pageIdx": 6,
+      "subPath": [
+        2,
+        6
+      ],
+      "crumbIcons": [
+        "dock_to_bottom",
+        "dock_to_bottom",
+        "web_asset"
+      ],
+      "crumbLabels": [
+        "Panels",
+        "Taskbar",
+        "Active window"
+      ],
+      "title": "Compact",
+      "anchor": "bar-aw-compact",
+      "keywords": "active compact panels taskbar window"
+    },
+    {
+      "pageIdx": 6,
+      "subPath": [
+        2,
+        6
+      ],
+      "crumbIcons": [
+        "dock_to_bottom",
+        "dock_to_bottom",
+        "web_asset"
+      ],
+      "crumbLabels": [
+        "Panels",
+        "Taskbar",
+        "Active window"
+      ],
+      "title": "Inverted",
+      "anchor": "bar-aw-inverted",
+      "keywords": "active inverted panels taskbar window"
+    },
+    {
+      "pageIdx": 6,
+      "subPath": [
+        2,
+        6
+      ],
+      "crumbIcons": [
+        "dock_to_bottom",
+        "dock_to_bottom",
+        "web_asset"
+      ],
+      "crumbLabels": [
+        "Panels",
+        "Taskbar",
+        "Active window"
+      ],
+      "title": "Show on hover",
+      "anchor": "bar-aw-show-on-hover",
+      "keywords": "active hover on panels show taskbar window"
+    },
+    {
+      "pageIdx": 6,
+      "subPath": [
+        2,
+        6
+      ],
+      "crumbIcons": [
+        "dock_to_bottom",
+        "dock_to_bottom",
+        "web_asset"
+      ],
+      "crumbLabels": [
+        "Panels",
+        "Taskbar",
+        "Active window"
+      ],
+      "title": "Popout on hover",
+      "anchor": "bar-aw-popout-on-hover",
+      "keywords": "active hover on panels popout taskbar window"
+    },
+    {
+      "pageIdx": 6,
+      "subPath": [
+        2,
+        7
+      ],
+      "crumbIcons": [
+        "dock_to_bottom",
+        "dock_to_bottom",
+        "widgets"
+      ],
+      "crumbLabels": [
+        "Panels",
+        "Taskbar",
+        "Tray"
+      ],
+      "title": "Background",
+      "anchor": "bar-tray-background",
+      "keywords": "background panels taskbar tray"
+    },
+    {
+      "pageIdx": 6,
+      "subPath": [
+        2,
+        7
+      ],
+      "crumbIcons": [
+        "dock_to_bottom",
+        "dock_to_bottom",
+        "widgets"
+      ],
+      "crumbLabels": [
+        "Panels",
+        "Taskbar",
+        "Tray"
+      ],
+      "title": "Recolour icons",
+      "anchor": "bar-tray-recolour-icons",
+      "keywords": "icons panels recolour taskbar tray"
+    },
+    {
+      "pageIdx": 6,
+      "subPath": [
+        2,
+        7
+      ],
+      "crumbIcons": [
+        "dock_to_bottom",
+        "dock_to_bottom",
+        "widgets"
+      ],
+      "crumbLabels": [
+        "Panels",
+        "Taskbar",
+        "Tray"
+      ],
+      "title": "Compact",
+      "anchor": "bar-tray-compact",
+      "keywords": "compact panels taskbar tray"
+    },
+    {
+      "pageIdx": 6,
+      "subPath": [
+        2,
+        7
+      ],
+      "crumbIcons": [
+        "dock_to_bottom",
+        "dock_to_bottom",
+        "widgets"
+      ],
+      "crumbLabels": [
+        "Panels",
+        "Taskbar",
+        "Tray"
+      ],
+      "title": "Popout on hover",
+      "anchor": "bar-tray-popout-on-hover",
+      "keywords": "hover on panels popout taskbar tray"
+    },
+    {
+      "pageIdx": 6,
+      "subPath": [
+        2,
+        8
+      ],
+      "crumbIcons": [
+        "dock_to_bottom",
+        "dock_to_bottom",
+        "signal_cellular_alt"
+      ],
+      "crumbLabels": [
+        "Panels",
+        "Taskbar",
+        "Status icons"
+      ],
+      "title": "Speakers",
+      "anchor": "bar-si-speakers",
+      "keywords": "icons panels speakers status taskbar"
+    },
+    {
+      "pageIdx": 6,
+      "subPath": [
+        2,
+        8
+      ],
+      "crumbIcons": [
+        "dock_to_bottom",
+        "dock_to_bottom",
+        "signal_cellular_alt"
+      ],
+      "crumbLabels": [
+        "Panels",
+        "Taskbar",
+        "Status icons"
+      ],
+      "title": "Microphone",
+      "anchor": "bar-si-microphone",
+      "keywords": "icons microphone panels status taskbar"
+    },
+    {
+      "pageIdx": 6,
+      "subPath": [
+        2,
+        8
+      ],
+      "crumbIcons": [
+        "dock_to_bottom",
+        "dock_to_bottom",
+        "signal_cellular_alt"
+      ],
+      "crumbLabels": [
+        "Panels",
+        "Taskbar",
+        "Status icons"
+      ],
+      "title": "Keyboard layout",
+      "anchor": "bar-si-keyboard-layout",
+      "keywords": "icons keyboard layout panels status taskbar"
+    },
+    {
+      "pageIdx": 6,
+      "subPath": [
+        2,
+        8
+      ],
+      "crumbIcons": [
+        "dock_to_bottom",
+        "dock_to_bottom",
+        "signal_cellular_alt"
+      ],
+      "crumbLabels": [
+        "Panels",
+        "Taskbar",
+        "Status icons"
+      ],
+      "title": "Network",
+      "anchor": "bar-si-network",
+      "keywords": "icons network panels status taskbar"
+    },
+    {
+      "pageIdx": 6,
+      "subPath": [
+        2,
+        8
+      ],
+      "crumbIcons": [
+        "dock_to_bottom",
+        "dock_to_bottom",
+        "signal_cellular_alt"
+      ],
+      "crumbLabels": [
+        "Panels",
+        "Taskbar",
+        "Status icons"
+      ],
+      "title": "Wi-Fi",
+      "anchor": "bar-si-wi-fi",
+      "keywords": "icons panels status taskbar wi-fi"
+    },
+    {
+      "pageIdx": 6,
+      "subPath": [
+        2,
+        8
+      ],
+      "crumbIcons": [
+        "dock_to_bottom",
+        "dock_to_bottom",
+        "signal_cellular_alt"
+      ],
+      "crumbLabels": [
+        "Panels",
+        "Taskbar",
+        "Status icons"
+      ],
+      "title": "Bluetooth",
+      "anchor": "bar-si-bluetooth",
+      "keywords": "bluetooth icons panels status taskbar"
+    },
+    {
+      "pageIdx": 6,
+      "subPath": [
+        2,
+        8
+      ],
+      "crumbIcons": [
+        "dock_to_bottom",
+        "dock_to_bottom",
+        "signal_cellular_alt"
+      ],
+      "crumbLabels": [
+        "Panels",
+        "Taskbar",
+        "Status icons"
+      ],
+      "title": "Battery",
+      "anchor": "bar-si-battery",
+      "keywords": "battery icons panels status taskbar"
+    },
+    {
+      "pageIdx": 6,
+      "subPath": [
+        2,
+        8
+      ],
+      "crumbIcons": [
+        "dock_to_bottom",
+        "dock_to_bottom",
+        "signal_cellular_alt"
+      ],
+      "crumbLabels": [
+        "Panels",
+        "Taskbar",
+        "Status icons"
+      ],
+      "title": "Caps lock",
+      "anchor": "bar-si-caps-lock",
+      "keywords": "caps icons lock panels status taskbar"
+    },
+    {
+      "pageIdx": 6,
+      "subPath": [
+        2,
+        8
+      ],
+      "crumbIcons": [
+        "dock_to_bottom",
+        "dock_to_bottom",
+        "signal_cellular_alt"
+      ],
+      "crumbLabels": [
+        "Panels",
+        "Taskbar",
+        "Status icons"
+      ],
+      "title": "Popout on hover",
+      "anchor": "bar-si-popout-on-hover",
+      "keywords": "hover icons on panels popout status taskbar"
+    },
+    {
+      "pageIdx": 6,
+      "subPath": [
+        2,
+        9
+      ],
+      "crumbIcons": [
+        "dock_to_bottom",
+        "dock_to_bottom",
+        "schedule"
+      ],
+      "crumbLabels": [
+        "Panels",
+        "Taskbar",
+        "Clock"
+      ],
+      "title": "Background",
+      "anchor": "bar-clock-background",
+      "keywords": "background clock panels taskbar"
+    },
+    {
+      "pageIdx": 6,
+      "subPath": [
+        2,
+        9
+      ],
+      "crumbIcons": [
+        "dock_to_bottom",
+        "dock_to_bottom",
+        "schedule"
+      ],
+      "crumbLabels": [
+        "Panels",
+        "Taskbar",
+        "Clock"
+      ],
+      "title": "Show date",
+      "anchor": "bar-clock-show-date",
+      "keywords": "clock date panels show taskbar"
+    },
+    {
+      "pageIdx": 6,
+      "subPath": [
+        2,
+        9
+      ],
+      "crumbIcons": [
+        "dock_to_bottom",
+        "dock_to_bottom",
+        "schedule"
+      ],
+      "crumbLabels": [
+        "Panels",
+        "Taskbar",
+        "Clock"
+      ],
+      "title": "Show icon",
+      "anchor": "bar-clock-show-icon",
+      "keywords": "clock icon panels show taskbar"
+    },
+    {
+      "pageIdx": 6,
+      "subPath": [
+        3
+      ],
+      "crumbIcons": [
+        "dock_to_bottom",
+        "apps"
+      ],
+      "crumbLabels": [
+        "Panels",
+        "Launcher"
+      ],
+      "title": "Enabled",
+      "anchor": "launcher-enabled",
+      "keywords": "enabled launcher panels"
+    },
+    {
+      "pageIdx": 6,
+      "subPath": [
+        3
+      ],
+      "crumbIcons": [
+        "dock_to_bottom",
+        "apps"
+      ],
+      "crumbLabels": [
+        "Panels",
+        "Launcher"
+      ],
+      "title": "Show on hover",
+      "anchor": "launcher-show-on-hover",
+      "keywords": "hover launcher on panels show"
+    },
+    {
+      "pageIdx": 6,
+      "subPath": [
+        3
+      ],
+      "crumbIcons": [
+        "dock_to_bottom",
+        "apps"
+      ],
+      "crumbLabels": [
+        "Panels",
+        "Launcher"
+      ],
+      "title": "Max items shown",
+      "anchor": "launcher-max-items-shown",
+      "keywords": "items launcher max panels shown"
+    },
+    {
+      "pageIdx": 6,
+      "subPath": [
+        3
+      ],
+      "crumbIcons": [
+        "dock_to_bottom",
+        "apps"
+      ],
+      "crumbLabels": [
+        "Panels",
+        "Launcher"
+      ],
+      "title": "Max wallpapers",
+      "anchor": "launcher-max-wallpapers",
+      "keywords": "launcher max panels wallpapers"
+    },
+    {
+      "pageIdx": 6,
+      "subPath": [
+        3
+      ],
+      "crumbIcons": [
+        "dock_to_bottom",
+        "apps"
+      ],
+      "crumbLabels": [
+        "Panels",
+        "Launcher"
+      ],
+      "title": "Drag threshold",
+      "anchor": "launcher-drag-threshold",
+      "keywords": "drag launcher panels threshold"
+    },
+    {
+      "pageIdx": 6,
+      "subPath": [
+        3
+      ],
+      "crumbIcons": [
+        "dock_to_bottom",
+        "apps"
+      ],
+      "crumbLabels": [
+        "Panels",
+        "Launcher"
+      ],
+      "title": "Vim keybinds",
+      "anchor": "launcher-vim-keybinds",
+      "keywords": "keybinds launcher panels vim"
+    },
+    {
+      "pageIdx": 6,
+      "subPath": [
+        3
+      ],
+      "crumbIcons": [
+        "dock_to_bottom",
+        "apps"
+      ],
+      "crumbLabels": [
+        "Panels",
+        "Launcher"
+      ],
+      "title": "Enable dangerous actions",
+      "anchor": "launcher-enable-dangerous-actions",
+      "keywords": "actions dangerous enable launcher panels"
+    },
+    {
+      "pageIdx": 6,
+      "subPath": [
+        3
+      ],
+      "crumbIcons": [
+        "dock_to_bottom",
+        "apps"
+      ],
+      "crumbLabels": [
+        "Panels",
+        "Launcher"
+      ],
+      "title": "Apps",
+      "anchor": "launcher-apps",
+      "keywords": "apps launcher panels"
+    },
+    {
+      "pageIdx": 6,
+      "subPath": [
+        3
+      ],
+      "crumbIcons": [
+        "dock_to_bottom",
+        "apps"
+      ],
+      "crumbLabels": [
+        "Panels",
+        "Launcher"
+      ],
+      "title": "Actions",
+      "anchor": "launcher-actions",
+      "keywords": "actions launcher panels"
+    },
+    {
+      "pageIdx": 6,
+      "subPath": [
+        3
+      ],
+      "crumbIcons": [
+        "dock_to_bottom",
+        "apps"
+      ],
+      "crumbLabels": [
+        "Panels",
+        "Launcher"
+      ],
+      "title": "Schemes",
+      "anchor": "launcher-schemes",
+      "keywords": "launcher panels schemes"
+    },
+    {
+      "pageIdx": 6,
+      "subPath": [
+        3
+      ],
+      "crumbIcons": [
+        "dock_to_bottom",
+        "apps"
+      ],
+      "crumbLabels": [
+        "Panels",
+        "Launcher"
+      ],
+      "title": "Variants",
+      "anchor": "launcher-variants",
+      "keywords": "launcher panels variants"
+    },
+    {
+      "pageIdx": 6,
+      "subPath": [
+        3
+      ],
+      "crumbIcons": [
+        "dock_to_bottom",
+        "apps"
+      ],
+      "crumbLabels": [
+        "Panels",
+        "Launcher"
+      ],
+      "title": "Wallpapers",
+      "anchor": "launcher-wallpapers",
+      "keywords": "launcher panels wallpapers"
+    },
+    {
+      "pageIdx": 6,
+      "subPath": [
+        4
+      ],
+      "crumbIcons": [
+        "dock_to_bottom",
+        "dock_to_right"
+      ],
+      "crumbLabels": [
+        "Panels",
+        "Sidebar"
+      ],
+      "title": "Enabled",
+      "anchor": "sidebar-enabled",
+      "keywords": "enabled panels sidebar"
+    },
+    {
+      "pageIdx": 6,
+      "subPath": [
+        4
+      ],
+      "crumbIcons": [
+        "dock_to_bottom",
+        "dock_to_right"
+      ],
+      "crumbLabels": [
+        "Panels",
+        "Sidebar"
+      ],
+      "title": "Drag threshold",
+      "anchor": "sidebar-drag-threshold",
+      "keywords": "drag panels sidebar threshold"
+    },
+    {
+      "pageIdx": 7,
+      "subPath": [],
+      "crumbIcons": [
+        "apps"
+      ],
+      "crumbLabels": [
+        "Apps"
+      ],
+      "title": "All apps",
+      "anchor": "apps-all-apps",
+      "keywords": "all apps"
+    },
+    {
+      "pageIdx": 8,
+      "subPath": [],
+      "crumbIcons": [
+        "build"
+      ],
+      "crumbLabels": [
+        "Services"
+      ],
+      "title": "Notifications",
+      "anchor": "services-notifications",
+      "keywords": "notifications services"
+    },
+    {
+      "pageIdx": 8,
+      "subPath": [],
+      "crumbIcons": [
+        "build"
+      ],
+      "crumbLabels": [
+        "Services"
+      ],
+      "title": "Media refresh",
+      "anchor": "services-media-refresh",
+      "keywords": "media refresh services"
+    },
+    {
+      "pageIdx": 8,
+      "subPath": [],
+      "crumbIcons": [
+        "build"
+      ],
+      "crumbLabels": [
+        "Services"
+      ],
+      "title": "System stats refresh",
+      "anchor": "services-system-stats-refresh",
+      "keywords": "refresh services stats system"
+    },
+    {
+      "pageIdx": 8,
+      "subPath": [],
+      "crumbIcons": [
+        "build"
+      ],
+      "crumbLabels": [
+        "Services"
+      ],
+      "title": "Wi-Fi rescan",
+      "anchor": "services-wi-fi-rescan",
+      "keywords": "rescan services wi-fi"
+    },
+    {
+      "pageIdx": 8,
+      "subPath": [],
+      "crumbIcons": [
+        "build"
+      ],
+      "crumbLabels": [
+        "Services"
+      ],
+      "title": "Lyrics backend",
+      "anchor": "services-lyrics-backend",
+      "keywords": "backend lyrics services"
+    },
+    {
+      "pageIdx": 8,
+      "subPath": [],
+      "crumbIcons": [
+        "build"
+      ],
+      "crumbLabels": [
+        "Services"
+      ],
+      "title": "Default player",
+      "anchor": "services-default-player",
+      "keywords": "default player services"
+    },
+    {
+      "pageIdx": 8,
+      "subPath": [],
+      "crumbIcons": [
+        "build"
+      ],
+      "crumbLabels": [
+        "Services"
+      ],
+      "title": "Volume step",
+      "anchor": "services-volume-step",
+      "keywords": "services step volume"
+    },
+    {
+      "pageIdx": 8,
+      "subPath": [],
+      "crumbIcons": [
+        "build"
+      ],
+      "crumbLabels": [
+        "Services"
+      ],
+      "title": "Brightness step",
+      "anchor": "services-brightness-step",
+      "keywords": "brightness services step"
+    },
+    {
+      "pageIdx": 8,
+      "subPath": [],
+      "crumbIcons": [
+        "build"
+      ],
+      "crumbLabels": [
+        "Services"
+      ],
+      "title": "Max volume",
+      "anchor": "services-max-volume",
+      "keywords": "max services volume"
+    },
+    {
+      "pageIdx": 8,
+      "subPath": [],
+      "crumbIcons": [
+        "build"
+      ],
+      "crumbLabels": [
+        "Services"
+      ],
+      "title": "Visualiser bars",
+      "anchor": "services-visualiser-bars",
+      "keywords": "bars services visualiser"
+    },
+    {
+      "pageIdx": 8,
+      "subPath": [],
+      "crumbIcons": [
+        "build"
+      ],
+      "crumbLabels": [
+        "Services"
+      ],
+      "title": "Smart colour scheme",
+      "anchor": "services-smart-colour-scheme",
+      "keywords": "colour scheme services smart"
+    },
+    {
+      "pageIdx": 8,
+      "subPath": [],
+      "crumbIcons": [
+        "build"
+      ],
+      "crumbLabels": [
+        "Services"
+      ],
+      "title": "GPU",
+      "anchor": "services-gpu",
+      "keywords": "gpu services"
+    },
+    {
+      "pageIdx": 8,
+      "subPath": [
+        1
+      ],
+      "crumbIcons": [
+        "build",
+        "notifications"
+      ],
+      "crumbLabels": [
+        "Services",
+        "Notifications"
+      ],
+      "title": "Show in fullscreen",
+      "anchor": "notif-show-in-fullscreen",
+      "keywords": "fullscreen in notifications services show"
+    },
+    {
+      "pageIdx": 8,
+      "subPath": [
+        1
+      ],
+      "crumbIcons": [
+        "build",
+        "notifications"
+      ],
+      "crumbLabels": [
+        "Services",
+        "Notifications"
+      ],
+      "title": "Expire automatically",
+      "anchor": "notif-expire-automatically",
+      "keywords": "automatically expire notifications services"
+    },
+    {
+      "pageIdx": 8,
+      "subPath": [
+        1
+      ],
+      "crumbIcons": [
+        "build",
+        "notifications"
+      ],
+      "crumbLabels": [
+        "Services",
+        "Notifications"
+      ],
+      "title": "Open expanded",
+      "anchor": "notif-open-expanded",
+      "keywords": "expanded notifications open services"
+    },
+    {
+      "pageIdx": 8,
+      "subPath": [
+        1
+      ],
+      "crumbIcons": [
+        "build",
+        "notifications"
+      ],
+      "crumbLabels": [
+        "Services",
+        "Notifications"
+      ],
+      "title": "Default timeout",
+      "anchor": "notif-default-timeout",
+      "keywords": "default notifications services timeout"
+    },
+    {
+      "pageIdx": 8,
+      "subPath": [
+        1
+      ],
+      "crumbIcons": [
+        "build",
+        "notifications"
+      ],
+      "crumbLabels": [
+        "Services",
+        "Notifications"
+      ],
+      "title": "Group preview count",
+      "anchor": "notif-group-preview-count",
+      "keywords": "count group notifications preview services"
+    },
+    {
+      "pageIdx": 8,
+      "subPath": [
+        1
+      ],
+      "crumbIcons": [
+        "build",
+        "notifications"
+      ],
+      "crumbLabels": [
+        "Services",
+        "Notifications"
+      ],
+      "title": "Show in fullscreen",
+      "anchor": "notif-show-in-fullscreen-2",
+      "keywords": "fullscreen in notifications services show"
+    },
+    {
+      "pageIdx": 8,
+      "subPath": [
+        1
+      ],
+      "crumbIcons": [
+        "build",
+        "notifications"
+      ],
+      "crumbLabels": [
+        "Services",
+        "Notifications"
+      ],
+      "title": "Visible toasts",
+      "anchor": "notif-visible-toasts",
+      "keywords": "notifications services toasts visible"
+    },
+    {
+      "pageIdx": 8,
+      "subPath": [
+        1
+      ],
+      "crumbIcons": [
+        "build",
+        "notifications"
+      ],
+      "crumbLabels": [
+        "Services",
+        "Notifications"
+      ],
+      "title": "Charging changes",
+      "anchor": "notif-charging-changes",
+      "keywords": "changes charging notifications services"
+    },
+    {
+      "pageIdx": 8,
+      "subPath": [
+        1
+      ],
+      "crumbIcons": [
+        "build",
+        "notifications"
+      ],
+      "crumbLabels": [
+        "Services",
+        "Notifications"
+      ],
+      "title": "Game mode changes",
+      "anchor": "notif-game-mode-changes",
+      "keywords": "changes game mode notifications services"
+    },
+    {
+      "pageIdx": 8,
+      "subPath": [
+        1
+      ],
+      "crumbIcons": [
+        "build",
+        "notifications"
+      ],
+      "crumbLabels": [
+        "Services",
+        "Notifications"
+      ],
+      "title": "Do not disturb changes",
+      "anchor": "notif-do-not-disturb-changes",
+      "keywords": "changes disturb do not notifications services"
+    },
+    {
+      "pageIdx": 8,
+      "subPath": [
+        1
+      ],
+      "crumbIcons": [
+        "build",
+        "notifications"
+      ],
+      "crumbLabels": [
+        "Services",
+        "Notifications"
+      ],
+      "title": "Audio output changes",
+      "anchor": "notif-audio-output-changes",
+      "keywords": "audio changes notifications output services"
+    },
+    {
+      "pageIdx": 8,
+      "subPath": [
+        1
+      ],
+      "crumbIcons": [
+        "build",
+        "notifications"
+      ],
+      "crumbLabels": [
+        "Services",
+        "Notifications"
+      ],
+      "title": "Audio input changes",
+      "anchor": "notif-audio-input-changes",
+      "keywords": "audio changes input notifications services"
+    },
+    {
+      "pageIdx": 8,
+      "subPath": [
+        1
+      ],
+      "crumbIcons": [
+        "build",
+        "notifications"
+      ],
+      "crumbLabels": [
+        "Services",
+        "Notifications"
+      ],
+      "title": "Caps lock changes",
+      "anchor": "notif-caps-lock-changes",
+      "keywords": "caps changes lock notifications services"
+    },
+    {
+      "pageIdx": 8,
+      "subPath": [
+        1
+      ],
+      "crumbIcons": [
+        "build",
+        "notifications"
+      ],
+      "crumbLabels": [
+        "Services",
+        "Notifications"
+      ],
+      "title": "Num lock changes",
+      "anchor": "notif-num-lock-changes",
+      "keywords": "changes lock notifications num services"
+    },
+    {
+      "pageIdx": 8,
+      "subPath": [
+        1
+      ],
+      "crumbIcons": [
+        "build",
+        "notifications"
+      ],
+      "crumbLabels": [
+        "Services",
+        "Notifications"
+      ],
+      "title": "Keyboard layout changes",
+      "anchor": "notif-keyboard-layout-changes",
+      "keywords": "changes keyboard layout notifications services"
+    },
+    {
+      "pageIdx": 8,
+      "subPath": [
+        1
+      ],
+      "crumbIcons": [
+        "build",
+        "notifications"
+      ],
+      "crumbLabels": [
+        "Services",
+        "Notifications"
+      ],
+      "title": "VPN changes",
+      "anchor": "notif-vpn-changes",
+      "keywords": "changes notifications services vpn"
+    },
+    {
+      "pageIdx": 8,
+      "subPath": [
+        1
+      ],
+      "crumbIcons": [
+        "build",
+        "notifications"
+      ],
+      "crumbLabels": [
+        "Services",
+        "Notifications"
+      ],
+      "title": "Now playing",
+      "anchor": "notif-now-playing",
+      "keywords": "notifications now playing services"
+    },
+    {
+      "pageIdx": 9,
+      "subPath": [],
+      "crumbIcons": [
+        "globe"
+      ],
+      "crumbLabels": [
+        "Language & region"
+      ],
+      "title": "Temperature",
+      "anchor": "lang-temperature",
+      "keywords": "language region temperature"
+    },
+    {
+      "pageIdx": 9,
+      "subPath": [],
+      "crumbIcons": [
+        "globe"
+      ],
+      "crumbLabels": [
+        "Language & region"
+      ],
+      "title": "System temperatures",
+      "anchor": "lang-system-temperatures",
+      "keywords": "language region system temperatures"
+    },
+    {
+      "pageIdx": 9,
+      "subPath": [],
+      "crumbIcons": [
+        "globe"
+      ],
+      "crumbLabels": [
+        "Language & region"
+      ],
+      "title": "Clock format",
+      "anchor": "lang-clock-format",
+      "keywords": "clock format language region"
+    }
+  ]
+}

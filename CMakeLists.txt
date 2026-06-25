@@ -60,6 +60,23 @@ if("plugin" IN_LIST ENABLE_MODULES)
 endif()
 
 if("shell" IN_LIST ENABLE_MODULES)
+    # Generate the settings search index from the page QML at build time so it
+    # always matches the UI (see scripts/build-settings-index.py).
+    find_package(Python3 COMPONENTS Interpreter REQUIRED)
+    file(MAKE_DIRECTORY "${CMAKE_BINARY_DIR}/assets")
+    execute_process(
+        COMMAND ${Python3_EXECUTABLE}
+            "${CMAKE_SOURCE_DIR}/scripts/build-settings-index.py"
+            "${CMAKE_SOURCE_DIR}/modules/nexus"
+            "${CMAKE_BINARY_DIR}/assets/settings-index.json"
+        RESULT_VARIABLE SETTINGS_INDEX_RESULT
+    )
+    if(NOT SETTINGS_INDEX_RESULT EQUAL 0)
+        message(FATAL_ERROR "Failed to build settings search index")
+    endif()
+    install(FILES "${CMAKE_BINARY_DIR}/assets/settings-index.json"
+        DESTINATION "${INSTALL_QSCONFDIR}/assets")
+
     foreach(dir assets components modules services utils)
         install(DIRECTORY ${dir} DESTINATION "${INSTALL_QSCONFDIR}")
     endforeach()
