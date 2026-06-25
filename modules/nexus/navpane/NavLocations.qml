@@ -2,6 +2,7 @@ pragma ComponentBehavior: Bound
 
 import QtQuick
 import QtQuick.Layouts
+import Quickshell
 import Caelestia.Config
 import qs.components
 import qs.components.containers
@@ -15,7 +16,7 @@ VerticalFadeFlickable {
 
     readonly property string search: nState.searchText
     readonly property bool searching: search.length > 0
-    readonly property var results: searching ? SettingsSearcher.query(search).slice(0, 12) : []
+    readonly property var results: searching ? SettingsSearcher.query(search) : []
 
     topMargin: Tokens.padding.large
     bottomMargin: Tokens.padding.large
@@ -125,18 +126,72 @@ VerticalFadeFlickable {
             }
         }
 
-        Repeater {
+        ListView {
             id: resultList
 
-            model: root.results
+            // A ListView fed by a ScriptModel (same approach as the launcher):
+            // when the query changes the model diffs the result list, so only
+            // entries that actually appear/disappear/move are animated. The
+            // rest stay put, which avoids re-animating the whole list on every
+            // keystroke. Scrolling is delegated to the outer flickable.
+            Layout.fillWidth: true
+            implicitHeight: contentHeight
+            interactive: false
+            spacing: Tokens.spacing.extraSmall
 
-            StyledRect {
+            model: ScriptModel {
+                values: root.results
+            }
+
+            add: Transition {
+                Anim {
+                    type: Anim.DefaultEffects
+                    property: "opacity"
+                    from: 0
+                    to: 1
+                }
+            }
+
+            remove: Transition {
+                Anim {
+                    type: Anim.DefaultEffects
+                    property: "opacity"
+                    from: 1
+                    to: 0
+                }
+            }
+
+            displaced: Transition {
+                Anim {
+                    type: Anim.StandardSmall
+                    property: "y"
+                }
+                Anim {
+                    type: Anim.DefaultEffects
+                    property: "opacity"
+                    to: 1
+                }
+            }
+
+            addDisplaced: Transition {
+                Anim {
+                    type: Anim.StandardSmall
+                    property: "y"
+                }
+                Anim {
+                    type: Anim.DefaultEffects
+                    property: "opacity"
+                    to: 1
+                }
+            }
+
+            delegate: StyledRect {
                 id: result
 
                 required property var modelData
                 required property int index
 
-                Layout.fillWidth: true
+                width: resultList.width
                 implicitHeight: {
                     const h = resultLayout.implicitHeight + resultLayout.anchors.margins * 2;
                     return h % 2 === 0 ? h : h + 1;
@@ -159,7 +214,7 @@ VerticalFadeFlickable {
                     anchors.margins: Tokens.padding.large
                     spacing: Tokens.spacing.small / 2
 
-                    // Location line: page icon + "Page › Section", faint.
+                    // Location line: page icon + "Page \u203a Section", faint.
                     RowLayout {
                         Layout.fillWidth: true
                         spacing: Tokens.spacing.small
@@ -174,9 +229,9 @@ VerticalFadeFlickable {
                         StyledText {
                             Layout.fillWidth: true
                             text: {
-                                const crumbs = result.modelData.crumbLabels.join("  ›  ");
+                                const crumbs = result.modelData.crumbLabels.join("  \u203a  ");
                                 const section = result.modelData.section;
-                                return section ? `${crumbs}  ›  ${section}` : crumbs;
+                                return section ? `${crumbs}  \u203a  ${section}` : crumbs;
                             }
                             color: Colours.palette.m3onSurfaceVariant
                             font: Tokens.font.label.small
