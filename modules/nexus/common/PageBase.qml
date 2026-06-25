@@ -62,10 +62,8 @@ ColumnLayout {
     function applySearchAnchor(): void {
         if (!nState.searchAnchor)
             return;
-        Qt.callLater(() => {
-            if (root.scrollToAnchor(nState.searchAnchor))
-                nState.searchAnchor = "";
-        });
+        scrollRetry.tries = 0;
+        scrollRetry.restart();
     }
 
     // Flash a row without scrolling (used when re-selecting the current setting).
@@ -78,6 +76,27 @@ ColumnLayout {
     spacing: Tokens.spacing.extraLargeIncreased
 
     Component.onCompleted: applySearchAnchor()
+
+    Timer {
+        id: scrollRetry
+
+        property int tries: 0
+
+        interval: 16
+        repeat: true
+        onTriggered: {
+            // Wait for the page layout to settle (content taller than the
+            // viewport, or a few frames elapsed) before scrolling, otherwise a
+            // freshly loaded page reports stale positions and overshoots.
+            const ready = flickable.contentHeight > flickable.height || tries >= 8;
+            if (ready) {
+                if (root.scrollToAnchor(root.nState.searchAnchor))
+                    root.nState.searchAnchor = "";
+                stop();
+            }
+            tries++;
+        }
+    }
 
     Connections {
         function onSearchAnchorChanged(): void {
