@@ -38,9 +38,17 @@ QtObject {
     // once (see StackPage.Component.onCompleted), which avoids the half-open
     // state that firing openSubPage signals one by one would cause.
     function jumpToSetting(pageIdx: int, subPath: var, anchor: string): void {
+        const samePage = currentPageIdx === pageIdx;
+        const sameSub = subPageIdxStack.length === subPath.length && subPath.every((v, i) => subPageIdxStack[i] === v);
+        if (samePage && sameSub) {
+            // Already exactly here: just re-trigger the scroll/highlight.
+            searchAnchor = "";
+            searchAnchor = anchor;
+            return;
+        }
         searchAnchor = anchor;
-        if (currentPageIdx === pageIdx) {
-            // Already on the page: reset and re-open the sub-page chain live.
+        if (samePage) {
+            // Same page, different sub-page: rebuild the sub-page chain live.
             while (subPageIdxStack.length > 0)
                 closeSubPage();
             for (let i = 0; i < subPath.length; i++)
