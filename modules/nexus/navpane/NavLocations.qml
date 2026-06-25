@@ -15,7 +15,7 @@ VerticalFadeFlickable {
 
     readonly property string search: nState.searchText
     readonly property bool searching: search.length > 0
-    readonly property var results: searching ? SettingsSearcher.query(search) : []
+    readonly property var results: searching ? SettingsSearcher.query(search).slice(0, 12) : []
 
     topMargin: Tokens.padding.large
     bottomMargin: Tokens.padding.large

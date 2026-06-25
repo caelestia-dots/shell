@@ -19,6 +19,10 @@ Searcher {
     useFuzzy: true
     keys: ["title", "keywords"]
     weights: [0.7, 0.3]
+    extraOpts: ({
+            all: false,
+            limit: 12
+        })
 
     Variants {
         id: entries
