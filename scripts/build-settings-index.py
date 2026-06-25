@@ -218,6 +218,8 @@ def extract_settings(files: dict[str, Path], nav: dict[str, dict]) -> list[dict]
                         "crumbIcons": meta["crumbIcons"],
                         "crumbLabels": meta["crumbLabels"],
                         "title": label, "anchor": anchor,
+                        "section": section,
+                        "subtext": subtext or "",
                         "keywords": " ".join(sorted(set(tokenize(label + " " + extra)))),
                     })
             i += 1

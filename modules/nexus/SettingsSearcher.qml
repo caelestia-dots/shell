@@ -100,6 +100,8 @@ Singleton {
         readonly property var crumbIcons: modelData.crumbIcons
         readonly property var crumbLabels: modelData.crumbLabels
         readonly property string title: modelData.title
+        readonly property string section: modelData.section ?? ""
+        readonly property string subtext: modelData.subtext ?? ""
         readonly property string keywords: modelData.keywords ?? ""
         readonly property string anchor: modelData.anchor ?? ""
     }

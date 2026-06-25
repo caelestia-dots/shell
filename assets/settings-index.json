@@ -12,6 +12,8 @@
       ],
       "title": "Display wallpaper",
       "anchor": "style-display-wallpaper",
+      "section": "",
+      "subtext": "",
       "keywords": "display style wallpaper"
     },
     {
@@ -25,6 +27,8 @@
       ],
       "title": "Transparency",
       "anchor": "style-transparency",
+      "section": "",
+      "subtext": "Base %1, layers %2",
       "keywords": "1 2 base layers style transparency wallpaper"
     },
     {
@@ -38,6 +42,8 @@
       ],
       "title": "Dark theme",
       "anchor": "style-dark-theme",
+      "section": "",
+      "subtext": "",
       "keywords": "dark style theme wallpaper"
     },
     {
@@ -51,6 +57,8 @@
       ],
       "title": "Wi-Fi",
       "anchor": "network-wi-fi",
+      "section": "",
+      "subtext": "",
       "keywords": "fi network wi wifi"
     },
     {
@@ -64,6 +72,8 @@
       ],
       "title": "Bluetooth",
       "anchor": "bluetooth-bluetooth",
+      "section": "",
+      "subtext": "",
       "keywords": "bluetooth connected devices"
     },
     {
@@ -77,6 +87,8 @@
       ],
       "title": "Discoverable",
       "anchor": "bluetooth-discoverable",
+      "section": "",
+      "subtext": "Allow nearby devices to find this one",
       "keywords": "allow connected devices discoverable find nearby one this"
     },
     {
@@ -90,6 +102,8 @@
       ],
       "title": "Pairable",
       "anchor": "bluetooth-pairable",
+      "section": "",
+      "subtext": "Allow nearby devices to pair with this one",
       "keywords": "allow connected devices nearby one pair pairable this with"
     },
     {
@@ -103,6 +117,8 @@
       ],
       "title": "Output",
       "anchor": "audio-output",
+      "section": "",
+      "subtext": "",
       "keywords": "audio output"
     },
     {
@@ -116,6 +132,8 @@
       ],
       "title": "Input",
       "anchor": "audio-input",
+      "section": "",
+      "subtext": "",
       "keywords": "audio input"
     },
     {
@@ -129,6 +147,8 @@
       ],
       "title": "Dashboard",
       "anchor": "panels-dashboard",
+      "section": "",
+      "subtext": "",
       "keywords": "dashboard panels"
     },
     {
@@ -142,6 +162,8 @@
       ],
       "title": "Taskbar",
       "anchor": "panels-taskbar",
+      "section": "",
+      "subtext": "",
       "keywords": "panels taskbar"
     },
     {
@@ -155,6 +177,8 @@
       ],
       "title": "Launcher",
       "anchor": "panels-launcher",
+      "section": "",
+      "subtext": "",
       "keywords": "launcher panels"
     },
     {
@@ -168,6 +192,8 @@
       ],
       "title": "Sidebar",
       "anchor": "panels-sidebar",
+      "section": "",
+      "subtext": "",
       "keywords": "panels sidebar"
     },
     {
@@ -185,6 +211,8 @@
       ],
       "title": "Enabled",
       "anchor": "dash-enabled",
+      "section": "General",
+      "subtext": "",
       "keywords": "dashboard enabled general panels"
     },
     {
@@ -202,6 +230,8 @@
       ],
       "title": "Show on hover",
       "anchor": "dash-show-on-hover",
+      "section": "General",
+      "subtext": "Reveal when the cursor reaches the screen edge",
       "keywords": "cursor dashboard edge general hover panels reaches reveal screen show when"
     },
     {
@@ -219,6 +249,8 @@
       ],
       "title": "Dashboard",
       "anchor": "dash-dashboard",
+      "section": "Tabs",
+      "subtext": "",
       "keywords": "dashboard panels tabs"
     },
     {
@@ -236,6 +268,8 @@
       ],
       "title": "Media",
       "anchor": "dash-media",
+      "section": "Tabs",
+      "subtext": "",
       "keywords": "dashboard media panels tabs"
     },
     {
@@ -253,6 +287,8 @@
       ],
       "title": "Performance",
       "anchor": "dash-performance",
+      "section": "Tabs",
+      "subtext": "",
       "keywords": "dashboard panels performance tabs"
     },
     {
@@ -270,6 +306,8 @@
       ],
       "title": "Weather",
       "anchor": "dash-weather",
+      "section": "Tabs",
+      "subtext": "",
       "keywords": "dashboard panels tabs weather"
     },
     {
@@ -287,6 +325,8 @@
       ],
       "title": "Battery",
       "anchor": "dash-battery",
+      "section": "Performance widgets",
+      "subtext": "",
       "keywords": "battery dashboard panels performance widgets"
     },
     {
@@ -304,6 +344,8 @@
       ],
       "title": "GPU",
       "anchor": "dash-gpu",
+      "section": "Performance widgets",
+      "subtext": "",
       "keywords": "dashboard gpu panels performance widgets"
     },
     {
@@ -321,6 +363,8 @@
       ],
       "title": "CPU",
       "anchor": "dash-cpu",
+      "section": "Performance widgets",
+      "subtext": "",
       "keywords": "cpu dashboard panels performance widgets"
     },
     {
@@ -338,6 +382,8 @@
       ],
       "title": "Memory",
       "anchor": "dash-memory",
+      "section": "Performance widgets",
+      "subtext": "",
       "keywords": "dashboard memory panels performance widgets"
     },
     {
@@ -355,6 +401,8 @@
       ],
       "title": "Storage",
       "anchor": "dash-storage",
+      "section": "Performance widgets",
+      "subtext": "",
       "keywords": "dashboard panels performance storage widgets"
     },
     {
@@ -372,6 +420,8 @@
       ],
       "title": "Network",
       "anchor": "dash-network",
+      "section": "Performance widgets",
+      "subtext": "",
       "keywords": "dashboard network panels performance widgets"
     },
     {
@@ -389,6 +439,8 @@
       ],
       "title": "Drag threshold",
       "anchor": "dash-drag-threshold",
+      "section": "Behaviour",
+      "subtext": "Pixels dragged before the dashboard opens",
       "keywords": "before behaviour dashboard drag dragged opens panels pixels threshold"
     },
     {
@@ -406,6 +458,8 @@
       ],
       "title": "Persistent",
       "anchor": "taskbar-persistent",
+      "section": "Behaviour",
+      "subtext": "Keep the bar visible at all times",
       "keywords": "all at bar behaviour keep panels persistent taskbar times visible"
     },
     {
@@ -423,6 +477,8 @@
       ],
       "title": "Show on hover",
       "anchor": "taskbar-show-on-hover",
+      "section": "Behaviour",
+      "subtext": "Reveal the bar when the cursor reaches the screen edge",
       "keywords": "bar behaviour cursor edge hover panels reaches reveal screen show taskbar when"
     },
     {
@@ -440,6 +496,8 @@
       ],
       "title": "Drag threshold",
       "anchor": "taskbar-drag-threshold",
+      "section": "Behaviour",
+      "subtext": "Pixels dragged before the bar reveals",
       "keywords": "bar before behaviour drag dragged panels pixels reveals taskbar threshold"
     },
     {
@@ -457,6 +515,8 @@
       ],
       "title": "Workspaces",
       "anchor": "taskbar-workspaces",
+      "section": "Components",
+      "subtext": "",
       "keywords": "components panels taskbar workspaces"
     },
     {
@@ -474,6 +534,8 @@
       ],
       "title": "Active window",
       "anchor": "taskbar-active-window",
+      "section": "Components",
+      "subtext": "",
       "keywords": "active components panels taskbar window"
     },
     {
@@ -491,6 +553,8 @@
       ],
       "title": "Tray",
       "anchor": "taskbar-tray",
+      "section": "Components",
+      "subtext": "",
       "keywords": "components panels taskbar tray"
     },
     {
@@ -508,6 +572,8 @@
       ],
       "title": "Status icons",
       "anchor": "taskbar-status-icons",
+      "section": "Components",
+      "subtext": "",
       "keywords": "components icons panels status taskbar"
     },
     {
@@ -525,6 +591,8 @@
       ],
       "title": "Clock",
       "anchor": "taskbar-clock",
+      "section": "Components",
+      "subtext": "",
       "keywords": "clock components panels taskbar"
     },
     {
@@ -542,6 +610,8 @@
       ],
       "title": "Workspaces",
       "anchor": "taskbar-workspaces-2",
+      "section": "Scroll actions",
+      "subtext": "Scroll over the workspace indicator to switch workspaces",
       "keywords": "actions indicator over panels scroll switch taskbar workspace workspaces"
     },
     {
@@ -559,6 +629,8 @@
       ],
       "title": "Volume",
       "anchor": "taskbar-volume",
+      "section": "Scroll actions",
+      "subtext": "Scroll on the top half of the bar to adjust volume",
       "keywords": "actions adjust bar half panels scroll taskbar top volume"
     },
     {
@@ -576,6 +648,8 @@
       ],
       "title": "Brightness",
       "anchor": "taskbar-brightness",
+      "section": "Scroll actions",
+      "subtext": "Scroll on the bottom half of the bar to adjust brightness",
       "keywords": "actions adjust bar bottom brightness half panels scroll taskbar"
     },
     {
@@ -596,6 +670,8 @@
       ],
       "title": "Shown",
       "anchor": "bar-ws-shown",
+      "section": "",
+      "subtext": "Number of workspaces displayed",
       "keywords": "displayed number panels shown taskbar workspaces"
     },
     {
@@ -616,6 +692,8 @@
       ],
       "title": "Active indicator",
       "anchor": "bar-ws-active-indicator",
+      "section": "",
+      "subtext": "",
       "keywords": "active indicator panels taskbar workspaces"
     },
     {
@@ -636,6 +714,8 @@
       ],
       "title": "Active trail",
       "anchor": "bar-ws-active-trail",
+      "section": "",
+      "subtext": "",
       "keywords": "active panels taskbar trail workspaces"
     },
     {
@@ -656,6 +736,8 @@
       ],
       "title": "Occupied background",
       "anchor": "bar-ws-occupied-background",
+      "section": "",
+      "subtext": "Show icons of open windows on each workspace",
       "keywords": "background each icons occupied open panels show taskbar windows workspace workspaces"
     },
     {
@@ -676,6 +758,8 @@
       ],
       "title": "Show windows",
       "anchor": "bar-ws-show-windows",
+      "section": "",
+      "subtext": "Show icons of open windows on each workspace",
       "keywords": "each icons open panels show taskbar windows workspace workspaces"
     },
     {
@@ -696,6 +780,8 @@
       ],
       "title": "Windows on special workspaces",
       "anchor": "bar-ws-windows-on-special-workspaces",
+      "section": "",
+      "subtext": "",
       "keywords": "panels special taskbar windows workspaces"
     },
     {
@@ -716,6 +802,8 @@
       ],
       "title": "Max window icons",
       "anchor": "bar-ws-max-window-icons",
+      "section": "",
+      "subtext": "",
       "keywords": "icons max panels taskbar window workspaces"
     },
     {
@@ -736,6 +824,8 @@
       ],
       "title": "Per-monitor workspaces",
       "anchor": "bar-ws-per-monitor-workspaces",
+      "section": "",
+      "subtext": "Show each monitor's workspaces independently",
       "keywords": "each independently monitor monitors panels per permonitor s show taskbar workspaces"
     },
     {
@@ -756,6 +846,8 @@
       ],
       "title": "Compact",
       "anchor": "bar-aw-compact",
+      "section": "",
+      "subtext": "",
       "keywords": "active compact panels taskbar window"
     },
     {
@@ -776,6 +868,8 @@
       ],
       "title": "Inverted",
       "anchor": "bar-aw-inverted",
+      "section": "",
+      "subtext": "Only show the active window title while hovering",
       "keywords": "active hovering inverted only panels show taskbar title while window"
     },
     {
@@ -796,6 +890,8 @@
       ],
       "title": "Show on hover",
       "anchor": "bar-aw-show-on-hover",
+      "section": "",
+      "subtext": "Only show the active window title while hovering",
       "keywords": "active hover hovering only panels show taskbar title while window"
     },
     {
@@ -816,6 +912,8 @@
       ],
       "title": "Popout on hover",
       "anchor": "bar-aw-popout-on-hover",
+      "section": "",
+      "subtext": "Show a window details popout when hovering",
       "keywords": "active details hover hovering panels popout show taskbar when window"
     },
     {
@@ -836,6 +934,8 @@
       ],
       "title": "Background",
       "anchor": "bar-tray-background",
+      "section": "",
+      "subtext": "",
       "keywords": "background panels taskbar tray"
     },
     {
@@ -856,6 +956,8 @@
       ],
       "title": "Recolour icons",
       "anchor": "bar-tray-recolour-icons",
+      "section": "",
+      "subtext": "",
       "keywords": "icons panels recolour taskbar tray"
     },
     {
@@ -876,6 +978,8 @@
       ],
       "title": "Compact",
       "anchor": "bar-tray-compact",
+      "section": "",
+      "subtext": "Show the tray menu popout when hovering",
       "keywords": "compact hovering menu panels popout show taskbar tray when"
     },
     {
@@ -896,6 +1000,8 @@
       ],
       "title": "Popout on hover",
       "anchor": "bar-tray-popout-on-hover",
+      "section": "",
+      "subtext": "Show the tray menu popout when hovering",
       "keywords": "hover hovering menu panels popout show taskbar tray when"
     },
     {
@@ -916,6 +1022,8 @@
       ],
       "title": "Speakers",
       "anchor": "bar-si-speakers",
+      "section": "Visible icons",
+      "subtext": "",
       "keywords": "icons panels speakers status taskbar visible"
     },
     {
@@ -936,6 +1044,8 @@
       ],
       "title": "Microphone",
       "anchor": "bar-si-microphone",
+      "section": "Visible icons",
+      "subtext": "",
       "keywords": "icons microphone panels status taskbar visible"
     },
     {
@@ -956,6 +1066,8 @@
       ],
       "title": "Keyboard layout",
       "anchor": "bar-si-keyboard-layout",
+      "section": "Visible icons",
+      "subtext": "",
       "keywords": "icons keyboard layout panels status taskbar visible"
     },
     {
@@ -976,6 +1088,8 @@
       ],
       "title": "Network",
       "anchor": "bar-si-network",
+      "section": "Visible icons",
+      "subtext": "",
       "keywords": "icons network panels status taskbar visible"
     },
     {
@@ -996,6 +1110,8 @@
       ],
       "title": "Wi-Fi",
       "anchor": "bar-si-wi-fi",
+      "section": "Visible icons",
+      "subtext": "",
       "keywords": "fi icons panels status taskbar visible wi wifi"
     },
     {
@@ -1016,6 +1132,8 @@
       ],
       "title": "Bluetooth",
       "anchor": "bar-si-bluetooth",
+      "section": "Visible icons",
+      "subtext": "",
       "keywords": "bluetooth icons panels status taskbar visible"
     },
     {
@@ -1036,6 +1154,8 @@
       ],
       "title": "Battery",
       "anchor": "bar-si-battery",
+      "section": "Visible icons",
+      "subtext": "",
       "keywords": "battery icons panels status taskbar visible"
     },
     {
@@ -1056,6 +1176,8 @@
       ],
       "title": "Caps lock",
       "anchor": "bar-si-caps-lock",
+      "section": "Visible icons",
+      "subtext": "",
       "keywords": "caps icons lock panels status taskbar visible"
     },
     {
@@ -1076,6 +1198,8 @@
       ],
       "title": "Popout on hover",
       "anchor": "bar-si-popout-on-hover",
+      "section": "Behaviour",
+      "subtext": "Show a details popout when hovering the status icons",
       "keywords": "behaviour details hover hovering icons panels popout show status taskbar when"
     },
     {
@@ -1096,6 +1220,8 @@
       ],
       "title": "Background",
       "anchor": "bar-clock-background",
+      "section": "",
+      "subtext": "",
       "keywords": "background clock panels taskbar"
     },
     {
@@ -1116,6 +1242,8 @@
       ],
       "title": "Show date",
       "anchor": "bar-clock-show-date",
+      "section": "",
+      "subtext": "",
       "keywords": "clock date panels show taskbar"
     },
     {
@@ -1136,6 +1264,8 @@
       ],
       "title": "Show icon",
       "anchor": "bar-clock-show-icon",
+      "section": "",
+      "subtext": "",
       "keywords": "clock icon panels show taskbar"
     },
     {
@@ -1153,6 +1283,8 @@
       ],
       "title": "Enabled",
       "anchor": "launcher-enabled",
+      "section": "General",
+      "subtext": "",
       "keywords": "enabled general launcher panels"
     },
     {
@@ -1170,6 +1302,8 @@
       ],
       "title": "Show on hover",
       "anchor": "launcher-show-on-hover",
+      "section": "General",
+      "subtext": "Reveal when the cursor reaches the screen edge",
       "keywords": "cursor edge general hover launcher panels reaches reveal screen show when"
     },
     {
@@ -1187,6 +1321,8 @@
       ],
       "title": "Max items shown",
       "anchor": "launcher-max-items-shown",
+      "section": "Display",
+      "subtext": "",
       "keywords": "display items launcher max panels shown"
     },
     {
@@ -1204,6 +1340,8 @@
       ],
       "title": "Max wallpapers",
       "anchor": "launcher-max-wallpapers",
+      "section": "Display",
+      "subtext": "",
       "keywords": "display launcher max panels wallpapers"
     },
     {
@@ -1221,6 +1359,8 @@
       ],
       "title": "Drag threshold",
       "anchor": "launcher-drag-threshold",
+      "section": "Display",
+      "subtext": "Pixels dragged before the launcher opens",
       "keywords": "before display drag dragged launcher opens panels pixels threshold"
     },
     {
@@ -1238,6 +1378,8 @@
       ],
       "title": "Vim keybinds",
       "anchor": "launcher-vim-keybinds",
+      "section": "Behaviour",
+      "subtext": "Navigate results with Ctrl+hjkl",
       "keywords": "behaviour ctrl ctrlhjkl hjkl keybinds launcher navigate panels results vim with"
     },
     {
@@ -1255,6 +1397,8 @@
       ],
       "title": "Enable dangerous actions",
       "anchor": "launcher-enable-dangerous-actions",
+      "section": "Behaviour",
+      "subtext": "Allow actions that shut down or log out",
       "keywords": "actions allow behaviour dangerous down enable launcher log out panels shut that"
     },
     {
@@ -1272,6 +1416,8 @@
       ],
       "title": "Apps",
       "anchor": "launcher-apps",
+      "section": "Fuzzy search",
+      "subtext": "",
       "keywords": "apps fuzzy launcher panels search"
     },
     {
@@ -1289,6 +1435,8 @@
       ],
       "title": "Actions",
       "anchor": "launcher-actions",
+      "section": "Fuzzy search",
+      "subtext": "",
       "keywords": "actions fuzzy launcher panels search"
     },
     {
@@ -1306,6 +1454,8 @@
       ],
       "title": "Schemes",
       "anchor": "launcher-schemes",
+      "section": "Fuzzy search",
+      "subtext": "",
       "keywords": "fuzzy launcher panels schemes search"
     },
     {
@@ -1323,6 +1473,8 @@
       ],
       "title": "Variants",
       "anchor": "launcher-variants",
+      "section": "Fuzzy search",
+      "subtext": "",
       "keywords": "fuzzy launcher panels search variants"
     },
     {
@@ -1340,6 +1492,8 @@
       ],
       "title": "Wallpapers",
       "anchor": "launcher-wallpapers",
+      "section": "Fuzzy search",
+      "subtext": "",
       "keywords": "fuzzy launcher panels search wallpapers"
     },
     {
@@ -1357,6 +1511,8 @@
       ],
       "title": "Enabled",
       "anchor": "sidebar-enabled",
+      "section": "General",
+      "subtext": "",
       "keywords": "enabled general panels sidebar"
     },
     {
@@ -1374,6 +1530,8 @@
       ],
       "title": "Drag threshold",
       "anchor": "sidebar-drag-threshold",
+      "section": "General",
+      "subtext": "Pixels dragged before the sidebar opens",
       "keywords": "before drag dragged general opens panels pixels sidebar threshold"
     },
     {
@@ -1387,6 +1545,8 @@
       ],
       "title": "All apps",
       "anchor": "apps-all-apps",
+      "section": "Library",
+      "subtext": "",
       "keywords": "all apps library"
     },
     {
@@ -1400,6 +1560,8 @@
       ],
       "title": "Notifications",
       "anchor": "services-notifications",
+      "section": "Notifications",
+      "subtext": "",
       "keywords": "notifications services"
     },
     {
@@ -1413,6 +1575,8 @@
       ],
       "title": "Media refresh",
       "anchor": "services-media-refresh",
+      "section": "Polling",
+      "subtext": "How often the media position updates (ms)",
       "keywords": "how media ms often polling position refresh services updates"
     },
     {
@@ -1426,6 +1590,8 @@
       ],
       "title": "System stats refresh",
       "anchor": "services-system-stats-refresh",
+      "section": "Polling",
+      "subtext": "CPU, memory and GPU update interval (seconds)",
       "keywords": "cpu gpu interval memory polling refresh seconds services stats system update"
     },
     {
@@ -1439,6 +1605,8 @@
       ],
       "title": "Wi-Fi rescan",
       "anchor": "services-wi-fi-rescan",
+      "section": "Polling",
+      "subtext": "How often available networks are rescanned (seconds)",
       "keywords": "are available fi how networks often polling rescan rescanned seconds services wi wifi"
     },
     {
@@ -1452,6 +1620,8 @@
       ],
       "title": "Lyrics backend",
       "anchor": "services-lyrics-backend",
+      "section": "Media & lyrics",
+      "subtext": "Source used to fetch synced lyrics",
       "keywords": "backend fetch lyrics media services source synced used"
     },
     {
@@ -1465,6 +1635,8 @@
       ],
       "title": "Default player",
       "anchor": "services-default-player",
+      "section": "Media & lyrics",
+      "subtext": "Preferred media player when several are open",
       "keywords": "are default lyrics media open player preferred services several when"
     },
     {
@@ -1478,6 +1650,8 @@
       ],
       "title": "Volume step",
       "anchor": "services-volume-step",
+      "section": "Input increments",
+      "subtext": "Amount the volume changes per scroll (%)",
       "keywords": "amount changes increments input per scroll services step volume"
     },
     {
@@ -1491,6 +1665,8 @@
       ],
       "title": "Brightness step",
       "anchor": "services-brightness-step",
+      "section": "Input increments",
+      "subtext": "Amount the brightness changes per scroll (%)",
       "keywords": "amount brightness changes increments input per scroll services step"
     },
     {
@@ -1504,6 +1680,8 @@
       ],
       "title": "Max volume",
       "anchor": "services-max-volume",
+      "section": "Input increments",
+      "subtext": "Upper limit for output volume (%)",
       "keywords": "increments input limit max output services upper volume"
     },
     {
@@ -1517,6 +1695,8 @@
       ],
       "title": "Visualiser bars",
       "anchor": "services-visualiser-bars",
+      "section": "Service tuning",
+      "subtext": "Number of bars in the audio visualisers",
       "keywords": "audio bars number service services tuning visualiser visualisers"
     },
     {
@@ -1530,6 +1710,8 @@
       ],
       "title": "Smart colour scheme",
       "anchor": "services-smart-colour-scheme",
+      "section": "Service tuning",
+      "subtext": "Derive theme mode and variant from the wallpaper",
       "keywords": "colour derive from mode scheme service services smart theme tuning variant wallpaper"
     },
     {
@@ -1543,6 +1725,8 @@
       ],
       "title": "GPU",
       "anchor": "services-gpu",
+      "section": "Service tuning",
+      "subtext": "",
       "keywords": "gpu service services tuning"
     },
     {
@@ -1560,6 +1744,8 @@
       ],
       "title": "Show in fullscreen",
       "anchor": "notif-show-in-fullscreen",
+      "section": "Notifications",
+      "subtext": "Whether notifications appear over fullscreen apps",
       "keywords": "appear apps fullscreen notifications over services show whether"
     },
     {
@@ -1577,6 +1763,8 @@
       ],
       "title": "Expire automatically",
       "anchor": "notif-expire-automatically",
+      "section": "Notifications",
+      "subtext": "Dismiss notifications after their timeout",
       "keywords": "after automatically dismiss expire notifications services their timeout"
     },
     {
@@ -1594,6 +1782,8 @@
       ],
       "title": "Open expanded",
       "anchor": "notif-open-expanded",
+      "section": "Notifications",
+      "subtext": "Show notifications expanded by default",
       "keywords": "by default expanded notifications open services show"
     },
     {
@@ -1611,6 +1801,8 @@
       ],
       "title": "Default timeout",
       "anchor": "notif-default-timeout",
+      "section": "Notifications",
+      "subtext": "Time before a notification dismisses (ms)",
       "keywords": "before default dismisses ms notification notifications services time timeout"
     },
     {
@@ -1628,6 +1820,8 @@
       ],
       "title": "Group preview count",
       "anchor": "notif-group-preview-count",
+      "section": "Notifications",
+      "subtext": "Notifications shown per group before collapsing",
       "keywords": "before collapsing count group notifications per preview services shown"
     },
     {
@@ -1645,6 +1839,8 @@
       ],
       "title": "Show in fullscreen",
       "anchor": "notif-show-in-fullscreen-2",
+      "section": "Toasts",
+      "subtext": "Whether toasts appear over fullscreen apps",
       "keywords": "appear apps fullscreen notifications over services show toasts whether"
     },
     {
@@ -1662,6 +1858,8 @@
       ],
       "title": "Visible toasts",
       "anchor": "notif-visible-toasts",
+      "section": "Toasts",
+      "subtext": "Maximum number of toasts shown at once",
       "keywords": "at maximum notifications number once services shown toasts visible"
     },
     {
@@ -1679,6 +1877,8 @@
       ],
       "title": "Charging changes",
       "anchor": "notif-charging-changes",
+      "section": "Toast events",
+      "subtext": "",
       "keywords": "changes charging events notifications services toast"
     },
     {
@@ -1696,6 +1896,8 @@
       ],
       "title": "Game mode changes",
       "anchor": "notif-game-mode-changes",
+      "section": "Toast events",
+      "subtext": "",
       "keywords": "changes events game mode notifications services toast"
     },
     {
@@ -1713,6 +1915,8 @@
       ],
       "title": "Do not disturb changes",
       "anchor": "notif-do-not-disturb-changes",
+      "section": "Toast events",
+      "subtext": "",
       "keywords": "changes disturb do events not notifications services toast"
     },
     {
@@ -1730,6 +1934,8 @@
       ],
       "title": "Audio output changes",
       "anchor": "notif-audio-output-changes",
+      "section": "Toast events",
+      "subtext": "",
       "keywords": "audio changes events notifications output services toast"
     },
     {
@@ -1747,6 +1953,8 @@
       ],
       "title": "Audio input changes",
       "anchor": "notif-audio-input-changes",
+      "section": "Toast events",
+      "subtext": "",
       "keywords": "audio changes events input notifications services toast"
     },
     {
@@ -1764,6 +1972,8 @@
       ],
       "title": "Caps lock changes",
       "anchor": "notif-caps-lock-changes",
+      "section": "Toast events",
+      "subtext": "",
       "keywords": "caps changes events lock notifications services toast"
     },
     {
@@ -1781,6 +1991,8 @@
       ],
       "title": "Num lock changes",
       "anchor": "notif-num-lock-changes",
+      "section": "Toast events",
+      "subtext": "",
       "keywords": "changes events lock notifications num services toast"
     },
     {
@@ -1798,6 +2010,8 @@
       ],
       "title": "Keyboard layout changes",
       "anchor": "notif-keyboard-layout-changes",
+      "section": "Toast events",
+      "subtext": "",
       "keywords": "changes events keyboard layout notifications services toast"
     },
     {
@@ -1815,6 +2029,8 @@
       ],
       "title": "VPN changes",
       "anchor": "notif-vpn-changes",
+      "section": "Toast events",
+      "subtext": "",
       "keywords": "changes events notifications services toast vpn"
     },
     {
@@ -1832,6 +2048,8 @@
       ],
       "title": "Now playing",
       "anchor": "notif-now-playing",
+      "section": "Toast events",
+      "subtext": "",
       "keywords": "events notifications now playing services toast"
     },
     {
@@ -1845,6 +2063,8 @@
       ],
       "title": "Temperature",
       "anchor": "lang-temperature",
+      "section": "Units",
+      "subtext": "Units for weather temperatures",
       "keywords": "language region temperature temperatures units weather"
     },
     {
@@ -1858,6 +2078,8 @@
       ],
       "title": "System temperatures",
       "anchor": "lang-system-temperatures",
+      "section": "Units",
+      "subtext": "Units for CPU and GPU temperatures",
       "keywords": "cpu gpu language region system temperatures units"
     },
     {
@@ -1871,6 +2093,8 @@
       ],
       "title": "Clock format",
       "anchor": "lang-clock-format",
+      "section": "Time & date",
+      "subtext": "How times are shown across the shell",
       "keywords": "across are clock date format how language region shell shown time times"
     }
   ],
