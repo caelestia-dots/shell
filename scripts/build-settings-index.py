@@ -23,7 +23,14 @@ import json
 import re
 import sys
 from collections import defaultdict
+from functools import lru_cache
 from pathlib import Path
+
+
+@lru_cache(maxsize=None)
+def read_lines(path: Path) -> tuple[str, ...]:
+    """Read a file's lines, cached so each page file is only read once."""
+    return tuple(path.read_text().splitlines())
 
 ROW_RE = re.compile(r'^\s*(ToggleRow|SliderRow|SelectRow|StepperRow|NavRow)\s*\{')
 LABEL_RE = re.compile(r'^\s*(?:label|text):\s*qsTr\("([^"]+)"\)')
@@ -119,7 +126,7 @@ def build_nav_map(nexus: Path, files: dict[str, Path]) -> dict[str, dict]:
             if not pf:
                 continue
             pending_icon = pending_label = None
-            for ln in pf.read_text().splitlines():
+            for ln in read_lines(pf):
                 mi = ICON_RE.match(ln)
                 if mi:
                     pending_icon = mi.group(1)
@@ -184,7 +191,7 @@ def extract_settings(files: dict[str, Path], nav: dict[str, dict]) -> list[dict]
         pf = files.get(comp)
         if not pf:
             continue
-        lines = pf.read_text().splitlines()
+        lines = read_lines(pf)
         section = ""  # text of the most recent SectionHeader
         i = 0
         while i < len(lines):
@@ -257,6 +264,10 @@ def main() -> int:
     nav = build_nav_map(nexus, files)
     entries = extract_settings(files, nav)
     inverted, ranking = build_inverted_and_ranking(entries)
+    # keywords were only needed to build the inverted index; the runtime reads
+    # the index, not the per-entry keyword blob, so drop it to shrink the JSON.
+    for e in entries:
+        e.pop("keywords", None)
     out.write_text(json.dumps({
         "version": 2,
         "entries": entries,
