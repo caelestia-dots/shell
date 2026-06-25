@@ -1,100 +1,125 @@
 #!/usr/bin/env python3
 """Build-time settings index extractor for the nexus settings search.
 
-Parses the nexus page QML files and PageCompRegistry.qml to produce a flat
-settings index as JSON. Run at build time (see CMakeLists.txt); the shell loads
-the result at runtime via SettingsIndex.qml.
+Parses the nexus page QML files, PageRegistry.qml (page icons/labels) and
+PageCompRegistry.qml (page ordering and sub-page nesting) to produce a search
+index as JSON. Run at build time (see CMakeLists.txt); the shell loads the
+result at runtime via SettingsSearcher.qml.
+
+The output contains three parts:
+  - entries:  forward index, one record per setting (title, anchor, nav path)
+  - inverted: token -> list of entry indices (classic inverted index)
+  - ranking:  token -> {entry index: weight} precomputed match weights
+
+Nothing here is hand-maintained per page: page metadata comes from
+PageRegistry, the page tree from PageCompRegistry, and the directory layout is
+discovered by walking the pages folder.
 
 Usage: build-settings-index.py <nexus-dir> <output-json>
-  nexus-dir   path to modules/nexus
-  output-json where to write settings-index.json
 """
 from __future__ import annotations
 
 import json
 import re
 import sys
+from collections import defaultdict
 from pathlib import Path
 
-# Rows that carry a searchable setting and the label property they expose.
 ROW_RE = re.compile(r'^\s*(ToggleRow|SliderRow|SelectRow|StepperRow|NavRow)\s*\{')
 LABEL_RE = re.compile(r'^\s*(?:label|text):\s*qsTr\("([^"]+)"\)')
 ANCHOR_RE = re.compile(r'^\s*settingAnchor:\s*"([^"]+)"')
 ICON_RE = re.compile(r'^\s*icon:\s*"([^"]+)"')
-# Labels that are too generic to index on their own.
 SKIP_LABELS = {"Muted", "None"}
-
-# Page metadata: maps a page component name to its top-level pageComps index,
-# icon, and human label. Pulled from PageRegistry; sub-pages add their own icon.
-PAGE_META = {
-    "WallpaperAndStyle": ("palette", "Wallpaper & style"),
-    "NetworkPage": ("wifi", "Network"),
-    "BluetoothPage": ("devices_other", "Bluetooth"),
-    "AudioPage": ("volume_up", "Audio"),
-    "PanelsPage": ("dock_to_bottom", "Panels"),
-    "AppsPage": ("apps", "Apps"),
-    "ServicesPage": ("build", "Services"),
-    "LanguageAndRegion": ("globe", "Language & region"),
-}
+# Field weights for ranking: a token matching the title counts more than one
+# matching the keywords blob.
+FIELD_WEIGHT = {"title": 1.0, "keywords": 0.4}
+STOPWORDS = {"the", "a", "an", "of", "and", "or", "to", "on", "in", "for"}
 
 
-def parse_page_comps(path: Path) -> list[list[str]]:
-    """Return, per top-level pageComps entry, the ordered list of page
-    component names inside it (index 0 is the main page, rest are sub-pages)."""
-    text = path.read_text()
-    # Grab the pageComps array body.
-    start = text.index("pageComps:")
-    body = text[start:]
-    comps: list[list[str]] = []
+def find_pages_dir(nexus: Path) -> Path:
+    return nexus / "pages"
+
+
+def discover_files(nexus: Path) -> dict[str, Path]:
+    """component name -> file path, discovered by walking pages/."""
+    files: dict[str, Path] = {}
+    for p in find_pages_dir(nexus).rglob("*.qml"):
+        files[p.stem] = p
+    return files
+
+
+def parse_page_registry(nexus: Path) -> list[tuple[str, str]]:
+    """Ordered (icon, label) for each *active* page entry in PageRegistry.
+    Commented-out entries are ignored, matching pageComps ordering."""
+    text = (nexus / "PageRegistry.qml").read_text()
+    out: list[tuple[str, str]] = []
+    # Each entry is a { ... } block with label/icon; commented lines start //.
+    # Walk brace blocks at the array level.
+    in_array = False
     depth = 0
+    label = icon = None
+    for line in text.splitlines():
+        s = line.strip()
+        if "pages:" in s and "[" in s:
+            in_array = True
+            continue
+        if not in_array:
+            continue
+        if s.startswith("//"):
+            continue
+        if s.startswith("{"):
+            depth += 1
+            label = icon = None
+            continue
+        if s.startswith("}"):
+            if label is not None:
+                out.append((icon or "tune", label))
+            depth -= 1
+            continue
+        if depth >= 1:
+            m = LABEL_RE.match(line)
+            if m and label is None:
+                label = m.group(1)
+            mi = ICON_RE.match(line)
+            if mi and icon is None:
+                icon = mi.group(1)
+    return out
+
+
+def parse_page_comps(nexus: Path) -> list[list[str]]:
+    """Per top-level pageComps entry, ordered component names inside it."""
+    text = (nexus / "PageCompRegistry.qml").read_text()
+    body = text[text.index("pageComps:"):]
+    comps: list[list[str]] = []
     current: list[str] | None = None
-    # Walk lines tracking the top-level Component blocks (8-space indent).
     for line in body.splitlines():
         if re.match(r"^        Component \{", line):
             current = []
             comps.append(current)
         m = re.search(r"([A-Z][A-Za-z]+)\s*\{\}", line)
         if m and current is not None:
-            current.append(m.group(1))
+            comps.append(current) if False else current.append(m.group(1))
     return comps
 
 
-def build_nav_map(nexus: Path) -> dict[str, dict]:
-    """Map each page component name -> {pageIdx, subPath, crumbIcons,
-    crumbLabels}. Sub-page paths are derived from openSubPage() calls in their
-    parent pages plus the pageComps ordering."""
-    comps = parse_page_comps(nexus / "PageCompRegistry.qml")
+def build_nav_map(nexus: Path, files: dict[str, Path]) -> dict[str, dict]:
+    comps = parse_page_comps(nexus)
+    registry = parse_page_registry(nexus)
 
-    # Component name -> (top index, position within its StackPage)
-    location: dict[str, tuple[int, int]] = {}
-    for top_idx, names in enumerate(comps):
-        for pos, name in enumerate(names):
-            location.setdefault(name, (top_idx, pos))
+    # Top-level index -> (icon, label) from PageRegistry (same order as pageComps).
+    top_meta: dict[int, tuple[str, str]] = {}
+    for i, (icon, label) in enumerate(registry):
+        top_meta[i] = (icon, label)
 
-    # For the main page of each top entry, find openSubPage(N) -> which child,
-    # and the NavRow icon/label that triggers it, to build breadcrumbs.
-    # Parent page file -> list of (childPos, icon, label)
-    def page_file(name: str) -> Path | None:
-        for sub in ("", "panels", "panels/taskbar", "services", "apps",
-                    "bluetooth", "audio", "wallandstyle"):
-            p = nexus / "pages" / sub / f"{name}.qml" if sub else nexus / "pages" / f"{name}.qml"
-            if p.exists():
-                return p
-        return None
-
-    # Build child nav info: parentName -> {childPos: (icon, label)}
-    # Scan every page file (main and sub-pages) for openSubPage() calls so deep
-    # chains like Taskbar -> Workspaces are captured.
+    # parentName -> {childPos: (icon, label)} from openSubPage() + nearby NavRow.
     nav_children: dict[str, dict[int, tuple[str, str]]] = {}
     for names in comps:
         for name in names:
-            pf = page_file(name)
+            pf = files.get(name)
             if not pf:
                 continue
-            lines = pf.read_text().splitlines()
-            pending_icon = None
-            pending_label = None
-            for ln in lines:
+            pending_icon = pending_label = None
+            for ln in pf.read_text().splitlines():
                 mi = ICON_RE.match(ln)
                 if mi:
                     pending_icon = mi.group(1)
@@ -108,55 +133,51 @@ def build_nav_map(nexus: Path) -> dict[str, dict]:
                         pending_icon or "tune", pending_label or "")
                     pending_icon = pending_label = None
 
-    # Now assemble nav map per component.
     nav: dict[str, dict] = {}
     for top_idx, names in enumerate(comps):
         if not names:
             continue
         main = names[0]
-        main_icon, main_label = PAGE_META.get(main, ("tune", main))
-        # main page
-        nav[main] = {
-            "pageIdx": top_idx, "subPath": [],
-            "crumbIcons": [main_icon], "crumbLabels": [main_label],
-        }
-        # direct children reachable from main via openSubPage
+        main_icon, main_label = top_meta.get(top_idx, ("tune", main))
+        nav[main] = {"pageIdx": top_idx, "subPath": [],
+                     "crumbIcons": [main_icon], "crumbLabels": [main_label]}
         for pos, (icon, label) in nav_children.get(main, {}).items():
             if pos >= len(names):
                 continue
             child = names[pos]
-            nav[child] = {
-                "pageIdx": top_idx, "subPath": [pos],
-                "crumbIcons": [main_icon, icon], "crumbLabels": [main_label, label],
-            }
-            # grandchildren: children of this child (e.g. Taskbar -> Bar*)
+            nav[child] = {"pageIdx": top_idx, "subPath": [pos],
+                          "crumbIcons": [main_icon, icon],
+                          "crumbLabels": [main_label, label]}
             for gpos, (gicon, glabel) in nav_children.get(child, {}).items():
                 if gpos >= len(names):
                     continue
-                gchild = names[gpos]
-                nav[gchild] = {
+                nav[names[gpos]] = {
                     "pageIdx": top_idx, "subPath": [pos, gpos],
                     "crumbIcons": [main_icon, icon, gicon],
-                    "crumbLabels": [main_label, label, glabel],
-                }
+                    "crumbLabels": [main_label, label, glabel]}
     return nav
 
 
-def slug(s: str) -> str:
-    return re.sub(r"[^a-z0-9]+", "-", s.lower()).strip("-")
+def tokenize(text: str) -> list[str]:
+    toks: list[str] = []
+    # Process word by word (split on whitespace) so we only collapse separators
+    # inside a single word like "Wi-Fi" -> "wifi", not across a whole phrase.
+    for word in text.lower().split():
+        parts = [p for p in re.split(r"[^a-z0-9]+", word) if p]
+        for p in parts:
+            if p not in STOPWORDS and p not in toks:
+                toks.append(p)
+        if len(parts) > 1:
+            joined = "".join(parts)
+            if joined not in toks:
+                toks.append(joined)
+    return toks
 
 
-def extract_settings(nexus: Path, nav: dict[str, dict]) -> list[dict]:
+def extract_settings(files: dict[str, Path], nav: dict[str, dict]) -> list[dict]:
     entries: list[dict] = []
     for comp, meta in nav.items():
-        # find the file for this component
-        pf = None
-        for sub in ("", "panels", "panels/taskbar", "services", "apps",
-                    "bluetooth", "audio", "wallandstyle"):
-            p = (nexus / "pages" / sub / f"{comp}.qml") if sub else (nexus / "pages" / f"{comp}.qml")
-            if p.exists():
-                pf = p
-                break
+        pf = files.get(comp)
         if not pf:
             continue
         lines = pf.read_text().splitlines()
@@ -174,20 +195,38 @@ def extract_settings(nexus: Path, nav: dict[str, dict]) -> list[dict]:
                         if a:
                             anchor = a.group(1)
                 if label and label not in SKIP_LABELS and anchor:
-                    kw = set(label.lower().split())
-                    for cl in meta["crumbLabels"]:
-                        kw |= set(cl.lower().replace("&", "").split())
+                    crumb_words = " ".join(meta["crumbLabels"])
+                    keywords = crumb_words
                     entries.append({
-                        "pageIdx": meta["pageIdx"],
-                        "subPath": meta["subPath"],
+                        "pageIdx": meta["pageIdx"], "subPath": meta["subPath"],
                         "crumbIcons": meta["crumbIcons"],
                         "crumbLabels": meta["crumbLabels"],
-                        "title": label,
-                        "anchor": anchor,
-                        "keywords": " ".join(sorted(w for w in kw if w)),
+                        "title": label, "anchor": anchor,
+                        "keywords": " ".join(sorted(set(tokenize(label + " " + keywords)))),
                     })
             i += 1
     return entries
+
+
+def build_inverted_and_ranking(entries: list[dict]):
+    """Classic inverted index + precomputed per-token ranking weights."""
+    inverted: dict[str, list[int]] = defaultdict(list)
+    ranking: dict[str, dict[int, float]] = defaultdict(dict)
+    for idx, e in enumerate(entries):
+        fields = {"title": e["title"], "keywords": e["keywords"]}
+        seen: set[str] = set()
+        for field, text in fields.items():
+            weight = FIELD_WEIGHT.get(field, 0.2)
+            for tok in tokenize(text):
+                if idx not in inverted[tok]:
+                    inverted[tok].append(idx)
+                # accumulate the strongest field weight for this token/entry
+                ranking[tok][idx] = max(ranking[tok].get(idx, 0.0), weight)
+                seen.add(tok)
+    # sort each posting list by descending rank so runtime can stop early
+    for tok, ids in inverted.items():
+        ids.sort(key=lambda i: ranking[tok][i], reverse=True)
+    return inverted, {t: {str(k): v for k, v in d.items()} for t, d in ranking.items()}
 
 
 def main() -> int:
@@ -196,10 +235,18 @@ def main() -> int:
         return 1
     nexus = Path(sys.argv[1])
     out = Path(sys.argv[2])
-    nav = build_nav_map(nexus)
-    entries = extract_settings(nexus, nav)
-    out.write_text(json.dumps({"version": 1, "entries": entries}, ensure_ascii=False, indent=2))
-    print(f"settings index: {len(entries)} entries -> {out}")
+    files = discover_files(nexus)
+    nav = build_nav_map(nexus, files)
+    entries = extract_settings(files, nav)
+    inverted, ranking = build_inverted_and_ranking(entries)
+    out.write_text(json.dumps({
+        "version": 2,
+        "entries": entries,
+        "inverted": inverted,
+        "ranking": ranking,
+    }, ensure_ascii=False, indent=2))
+    print(f"settings index: {len(entries)} entries, "
+          f"{len(inverted)} tokens -> {out}")
     return 0
 
 

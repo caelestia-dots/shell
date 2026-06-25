@@ -1,5 +1,5 @@
 {
-  "version": 1,
+  "version": 2,
   "entries": [
     {
       "pageIdx": 0,
@@ -51,7 +51,7 @@
       ],
       "title": "Wi-Fi",
       "anchor": "network-wi-fi",
-      "keywords": "network wi-fi"
+      "keywords": "fi network wi wifi"
     },
     {
       "pageIdx": 2,
@@ -60,11 +60,11 @@
         "devices_other"
       ],
       "crumbLabels": [
-        "Bluetooth"
+        "Connected devices"
       ],
       "title": "Bluetooth",
       "anchor": "bluetooth-bluetooth",
-      "keywords": "bluetooth"
+      "keywords": "bluetooth connected devices"
     },
     {
       "pageIdx": 2,
@@ -73,11 +73,11 @@
         "devices_other"
       ],
       "crumbLabels": [
-        "Bluetooth"
+        "Connected devices"
       ],
       "title": "Discoverable",
       "anchor": "bluetooth-discoverable",
-      "keywords": "bluetooth discoverable"
+      "keywords": "connected devices discoverable"
     },
     {
       "pageIdx": 2,
@@ -86,11 +86,11 @@
         "devices_other"
       ],
       "crumbLabels": [
-        "Bluetooth"
+        "Connected devices"
       ],
       "title": "Pairable",
       "anchor": "bluetooth-pairable",
-      "keywords": "bluetooth pairable"
+      "keywords": "connected devices pairable"
     },
     {
       "pageIdx": 3,
@@ -202,7 +202,7 @@
       ],
       "title": "Show on hover",
       "anchor": "dash-show-on-hover",
-      "keywords": "dashboard hover on panels show"
+      "keywords": "dashboard hover panels show"
     },
     {
       "pageIdx": 6,
@@ -423,7 +423,7 @@
       ],
       "title": "Show on hover",
       "anchor": "taskbar-show-on-hover",
-      "keywords": "hover on panels show taskbar"
+      "keywords": "hover panels show taskbar"
     },
     {
       "pageIdx": 6,
@@ -696,7 +696,7 @@
       ],
       "title": "Windows on special workspaces",
       "anchor": "bar-ws-windows-on-special-workspaces",
-      "keywords": "on panels special taskbar windows workspaces"
+      "keywords": "panels special taskbar windows workspaces"
     },
     {
       "pageIdx": 6,
@@ -736,7 +736,7 @@
       ],
       "title": "Per-monitor workspaces",
       "anchor": "bar-ws-per-monitor-workspaces",
-      "keywords": "panels per-monitor taskbar workspaces"
+      "keywords": "monitor panels per permonitor taskbar workspaces"
     },
     {
       "pageIdx": 6,
@@ -796,7 +796,7 @@
       ],
       "title": "Show on hover",
       "anchor": "bar-aw-show-on-hover",
-      "keywords": "active hover on panels show taskbar window"
+      "keywords": "active hover panels show taskbar window"
     },
     {
       "pageIdx": 6,
@@ -816,7 +816,7 @@
       ],
       "title": "Popout on hover",
       "anchor": "bar-aw-popout-on-hover",
-      "keywords": "active hover on panels popout taskbar window"
+      "keywords": "active hover panels popout taskbar window"
     },
     {
       "pageIdx": 6,
@@ -896,7 +896,7 @@
       ],
       "title": "Popout on hover",
       "anchor": "bar-tray-popout-on-hover",
-      "keywords": "hover on panels popout taskbar tray"
+      "keywords": "hover panels popout taskbar tray"
     },
     {
       "pageIdx": 6,
@@ -996,7 +996,7 @@
       ],
       "title": "Wi-Fi",
       "anchor": "bar-si-wi-fi",
-      "keywords": "icons panels status taskbar wi-fi"
+      "keywords": "fi icons panels status taskbar wi wifi"
     },
     {
       "pageIdx": 6,
@@ -1076,7 +1076,7 @@
       ],
       "title": "Popout on hover",
       "anchor": "bar-si-popout-on-hover",
-      "keywords": "hover icons on panels popout status taskbar"
+      "keywords": "hover icons panels popout status taskbar"
     },
     {
       "pageIdx": 6,
@@ -1170,7 +1170,7 @@
       ],
       "title": "Show on hover",
       "anchor": "launcher-show-on-hover",
-      "keywords": "hover launcher on panels show"
+      "keywords": "hover launcher panels show"
     },
     {
       "pageIdx": 6,
@@ -1439,7 +1439,7 @@
       ],
       "title": "Wi-Fi rescan",
       "anchor": "services-wi-fi-rescan",
-      "keywords": "rescan services wi-fi"
+      "keywords": "fi rescan services wi wifi"
     },
     {
       "pageIdx": 8,
@@ -1560,7 +1560,7 @@
       ],
       "title": "Show in fullscreen",
       "anchor": "notif-show-in-fullscreen",
-      "keywords": "fullscreen in notifications services show"
+      "keywords": "fullscreen notifications services show"
     },
     {
       "pageIdx": 8,
@@ -1645,7 +1645,7 @@
       ],
       "title": "Show in fullscreen",
       "anchor": "notif-show-in-fullscreen-2",
-      "keywords": "fullscreen in notifications services show"
+      "keywords": "fullscreen notifications services show"
     },
     {
       "pageIdx": 8,
@@ -1873,5 +1873,1373 @@
       "anchor": "lang-clock-format",
       "keywords": "clock format language region"
     }
-  ]
+  ],
+  "inverted": {
+    "display": [
+      0
+    ],
+    "wallpaper": [
+      0,
+      1,
+      2
+    ],
+    "style": [
+      0,
+      1,
+      2
+    ],
+    "transparency": [
+      1
+    ],
+    "dark": [
+      2
+    ],
+    "theme": [
+      2
+    ],
+    "wi": [
+      3,
+      57,
+      83
+    ],
+    "fi": [
+      3,
+      57,
+      83
+    ],
+    "wifi": [
+      3,
+      57,
+      83
+    ],
+    "network": [
+      24,
+      56,
+      3
+    ],
+    "bluetooth": [
+      4,
+      58
+    ],
+    "connected": [
+      4,
+      5,
+      6
+    ],
+    "devices": [
+      4,
+      5,
+      6
+    ],
+    "discoverable": [
+      5
+    ],
+    "pairable": [
+      6
+    ],
+    "output": [
+      7,
+      102
+    ],
+    "audio": [
+      102,
+      103,
+      7,
+      8
+    ],
+    "input": [
+      8,
+      103
+    ],
+    "dashboard": [
+      9,
+      15,
+      13,
+      14,
+      16,
+      17,
+      18,
+      19,
+      20,
+      21,
+      22,
+      23,
+      24,
+      25
+    ],
+    "panels": [
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      19,
+      20,
+      21,
+      22,
+      23,
+      24,
+      25,
+      26,
+      27,
+      28,
+      29,
+      30,
+      31,
+      32,
+      33,
+      34,
+      35,
+      36,
+      37,
+      38,
+      39,
+      40,
+      41,
+      42,
+      43,
+      44,
+      45,
+      46,
+      47,
+      48,
+      49,
+      50,
+      51,
+      52,
+      53,
+      54,
+      55,
+      56,
+      57,
+      58,
+      59,
+      60,
+      61,
+      62,
+      63,
+      64,
+      65,
+      66,
+      67,
+      68,
+      69,
+      70,
+      71,
+      72,
+      73,
+      74,
+      75,
+      76,
+      77,
+      78
+    ],
+    "taskbar": [
+      10,
+      26,
+      27,
+      28,
+      29,
+      30,
+      31,
+      32,
+      33,
+      34,
+      35,
+      36,
+      37,
+      38,
+      39,
+      40,
+      41,
+      42,
+      43,
+      44,
+      45,
+      46,
+      47,
+      48,
+      49,
+      50,
+      51,
+      52,
+      53,
+      54,
+      55,
+      56,
+      57,
+      58,
+      59,
+      60,
+      61,
+      62,
+      63,
+      64
+    ],
+    "launcher": [
+      11,
+      65,
+      66,
+      67,
+      68,
+      69,
+      70,
+      71,
+      72,
+      73,
+      74,
+      75,
+      76
+    ],
+    "sidebar": [
+      12,
+      77,
+      78
+    ],
+    "enabled": [
+      13,
+      65,
+      77
+    ],
+    "show": [
+      14,
+      27,
+      41,
+      47,
+      63,
+      64,
+      66,
+      92,
+      97
+    ],
+    "hover": [
+      14,
+      27,
+      47,
+      48,
+      52,
+      61,
+      66
+    ],
+    "media": [
+      16,
+      81
+    ],
+    "performance": [
+      17
+    ],
+    "weather": [
+      18
+    ],
+    "battery": [
+      19,
+      59
+    ],
+    "gpu": [
+      20,
+      91
+    ],
+    "cpu": [
+      21
+    ],
+    "memory": [
+      22
+    ],
+    "storage": [
+      23
+    ],
+    "drag": [
+      25,
+      28,
+      69,
+      78
+    ],
+    "threshold": [
+      25,
+      28,
+      69,
+      78
+    ],
+    "persistent": [
+      26
+    ],
+    "workspaces": [
+      29,
+      34,
+      42,
+      44,
+      37,
+      38,
+      39,
+      40,
+      41,
+      43
+    ],
+    "active": [
+      30,
+      38,
+      39,
+      45,
+      46,
+      47,
+      48
+    ],
+    "window": [
+      30,
+      43,
+      45,
+      46,
+      47,
+      48
+    ],
+    "tray": [
+      31,
+      49,
+      50,
+      51,
+      52
+    ],
+    "status": [
+      32,
+      53,
+      54,
+      55,
+      56,
+      57,
+      58,
+      59,
+      60,
+      61
+    ],
+    "icons": [
+      32,
+      43,
+      50,
+      53,
+      54,
+      55,
+      56,
+      57,
+      58,
+      59,
+      60,
+      61
+    ],
+    "clock": [
+      33,
+      111,
+      62,
+      63,
+      64
+    ],
+    "volume": [
+      35,
+      86,
+      88
+    ],
+    "brightness": [
+      36,
+      87
+    ],
+    "shown": [
+      37,
+      67
+    ],
+    "indicator": [
+      38
+    ],
+    "trail": [
+      39
+    ],
+    "occupied": [
+      40
+    ],
+    "background": [
+      40,
+      49,
+      62
+    ],
+    "windows": [
+      41,
+      42
+    ],
+    "special": [
+      42
+    ],
+    "max": [
+      43,
+      67,
+      68,
+      88
+    ],
+    "per": [
+      44
+    ],
+    "monitor": [
+      44
+    ],
+    "permonitor": [
+      44
+    ],
+    "compact": [
+      45,
+      51
+    ],
+    "inverted": [
+      46
+    ],
+    "popout": [
+      48,
+      52,
+      61
+    ],
+    "recolour": [
+      50
+    ],
+    "speakers": [
+      53
+    ],
+    "microphone": [
+      54
+    ],
+    "keyboard": [
+      55,
+      106
+    ],
+    "layout": [
+      55,
+      106
+    ],
+    "caps": [
+      60,
+      104
+    ],
+    "lock": [
+      60,
+      104,
+      105
+    ],
+    "date": [
+      63
+    ],
+    "icon": [
+      64
+    ],
+    "items": [
+      67
+    ],
+    "wallpapers": [
+      68,
+      76
+    ],
+    "vim": [
+      70
+    ],
+    "keybinds": [
+      70
+    ],
+    "enable": [
+      71
+    ],
+    "dangerous": [
+      71
+    ],
+    "actions": [
+      71,
+      73
+    ],
+    "apps": [
+      72,
+      79
+    ],
+    "schemes": [
+      74
+    ],
+    "variants": [
+      75
+    ],
+    "all": [
+      79
+    ],
+    "notifications": [
+      80,
+      92,
+      93,
+      94,
+      95,
+      96,
+      97,
+      98,
+      99,
+      100,
+      101,
+      102,
+      103,
+      104,
+      105,
+      106,
+      107,
+      108
+    ],
+    "services": [
+      80,
+      81,
+      82,
+      83,
+      84,
+      85,
+      86,
+      87,
+      88,
+      89,
+      90,
+      91,
+      92,
+      93,
+      94,
+      95,
+      96,
+      97,
+      98,
+      99,
+      100,
+      101,
+      102,
+      103,
+      104,
+      105,
+      106,
+      107,
+      108
+    ],
+    "refresh": [
+      81,
+      82
+    ],
+    "system": [
+      82,
+      110
+    ],
+    "stats": [
+      82
+    ],
+    "rescan": [
+      83
+    ],
+    "lyrics": [
+      84
+    ],
+    "backend": [
+      84
+    ],
+    "default": [
+      85,
+      95
+    ],
+    "player": [
+      85
+    ],
+    "step": [
+      86,
+      87
+    ],
+    "visualiser": [
+      89
+    ],
+    "bars": [
+      89
+    ],
+    "smart": [
+      90
+    ],
+    "colour": [
+      90
+    ],
+    "scheme": [
+      90
+    ],
+    "fullscreen": [
+      92,
+      97
+    ],
+    "expire": [
+      93
+    ],
+    "automatically": [
+      93
+    ],
+    "open": [
+      94
+    ],
+    "expanded": [
+      94
+    ],
+    "timeout": [
+      95
+    ],
+    "group": [
+      96
+    ],
+    "preview": [
+      96
+    ],
+    "count": [
+      96
+    ],
+    "visible": [
+      98
+    ],
+    "toasts": [
+      98
+    ],
+    "charging": [
+      99
+    ],
+    "changes": [
+      99,
+      100,
+      101,
+      102,
+      103,
+      104,
+      105,
+      106,
+      107
+    ],
+    "game": [
+      100
+    ],
+    "mode": [
+      100
+    ],
+    "do": [
+      101
+    ],
+    "not": [
+      101
+    ],
+    "disturb": [
+      101
+    ],
+    "num": [
+      105
+    ],
+    "vpn": [
+      107
+    ],
+    "now": [
+      108
+    ],
+    "playing": [
+      108
+    ],
+    "temperature": [
+      109
+    ],
+    "language": [
+      109,
+      110,
+      111
+    ],
+    "region": [
+      109,
+      110,
+      111
+    ],
+    "temperatures": [
+      110
+    ],
+    "format": [
+      111
+    ]
+  },
+  "ranking": {
+    "display": {
+      "0": 1.0
+    },
+    "wallpaper": {
+      "0": 1.0,
+      "1": 0.4,
+      "2": 0.4
+    },
+    "style": {
+      "0": 0.4,
+      "1": 0.4,
+      "2": 0.4
+    },
+    "transparency": {
+      "1": 1.0
+    },
+    "dark": {
+      "2": 1.0
+    },
+    "theme": {
+      "2": 1.0
+    },
+    "wi": {
+      "3": 1.0,
+      "57": 1.0,
+      "83": 1.0
+    },
+    "fi": {
+      "3": 1.0,
+      "57": 1.0,
+      "83": 1.0
+    },
+    "wifi": {
+      "3": 1.0,
+      "57": 1.0,
+      "83": 1.0
+    },
+    "network": {
+      "3": 0.4,
+      "24": 1.0,
+      "56": 1.0
+    },
+    "bluetooth": {
+      "4": 1.0,
+      "58": 1.0
+    },
+    "connected": {
+      "4": 0.4,
+      "5": 0.4,
+      "6": 0.4
+    },
+    "devices": {
+      "4": 0.4,
+      "5": 0.4,
+      "6": 0.4
+    },
+    "discoverable": {
+      "5": 1.0
+    },
+    "pairable": {
+      "6": 1.0
+    },
+    "output": {
+      "7": 1.0,
+      "102": 1.0
+    },
+    "audio": {
+      "7": 0.4,
+      "8": 0.4,
+      "102": 1.0,
+      "103": 1.0
+    },
+    "input": {
+      "8": 1.0,
+      "103": 1.0
+    },
+    "dashboard": {
+      "9": 1.0,
+      "13": 0.4,
+      "14": 0.4,
+      "15": 1.0,
+      "16": 0.4,
+      "17": 0.4,
+      "18": 0.4,
+      "19": 0.4,
+      "20": 0.4,
+      "21": 0.4,
+      "22": 0.4,
+      "23": 0.4,
+      "24": 0.4,
+      "25": 0.4
+    },
+    "panels": {
+      "9": 0.4,
+      "10": 0.4,
+      "11": 0.4,
+      "12": 0.4,
+      "13": 0.4,
+      "14": 0.4,
+      "15": 0.4,
+      "16": 0.4,
+      "17": 0.4,
+      "18": 0.4,
+      "19": 0.4,
+      "20": 0.4,
+      "21": 0.4,
+      "22": 0.4,
+      "23": 0.4,
+      "24": 0.4,
+      "25": 0.4,
+      "26": 0.4,
+      "27": 0.4,
+      "28": 0.4,
+      "29": 0.4,
+      "30": 0.4,
+      "31": 0.4,
+      "32": 0.4,
+      "33": 0.4,
+      "34": 0.4,
+      "35": 0.4,
+      "36": 0.4,
+      "37": 0.4,
+      "38": 0.4,
+      "39": 0.4,
+      "40": 0.4,
+      "41": 0.4,
+      "42": 0.4,
+      "43": 0.4,
+      "44": 0.4,
+      "45": 0.4,
+      "46": 0.4,
+      "47": 0.4,
+      "48": 0.4,
+      "49": 0.4,
+      "50": 0.4,
+      "51": 0.4,
+      "52": 0.4,
+      "53": 0.4,
+      "54": 0.4,
+      "55": 0.4,
+      "56": 0.4,
+      "57": 0.4,
+      "58": 0.4,
+      "59": 0.4,
+      "60": 0.4,
+      "61": 0.4,
+      "62": 0.4,
+      "63": 0.4,
+      "64": 0.4,
+      "65": 0.4,
+      "66": 0.4,
+      "67": 0.4,
+      "68": 0.4,
+      "69": 0.4,
+      "70": 0.4,
+      "71": 0.4,
+      "72": 0.4,
+      "73": 0.4,
+      "74": 0.4,
+      "75": 0.4,
+      "76": 0.4,
+      "77": 0.4,
+      "78": 0.4
+    },
+    "taskbar": {
+      "10": 1.0,
+      "26": 0.4,
+      "27": 0.4,
+      "28": 0.4,
+      "29": 0.4,
+      "30": 0.4,
+      "31": 0.4,
+      "32": 0.4,
+      "33": 0.4,
+      "34": 0.4,
+      "35": 0.4,
+      "36": 0.4,
+      "37": 0.4,
+      "38": 0.4,
+      "39": 0.4,
+      "40": 0.4,
+      "41": 0.4,
+      "42": 0.4,
+      "43": 0.4,
+      "44": 0.4,
+      "45": 0.4,
+      "46": 0.4,
+      "47": 0.4,
+      "48": 0.4,
+      "49": 0.4,
+      "50": 0.4,
+      "51": 0.4,
+      "52": 0.4,
+      "53": 0.4,
+      "54": 0.4,
+      "55": 0.4,
+      "56": 0.4,
+      "57": 0.4,
+      "58": 0.4,
+      "59": 0.4,
+      "60": 0.4,
+      "61": 0.4,
+      "62": 0.4,
+      "63": 0.4,
+      "64": 0.4
+    },
+    "launcher": {
+      "11": 1.0,
+      "65": 0.4,
+      "66": 0.4,
+      "67": 0.4,
+      "68": 0.4,
+      "69": 0.4,
+      "70": 0.4,
+      "71": 0.4,
+      "72": 0.4,
+      "73": 0.4,
+      "74": 0.4,
+      "75": 0.4,
+      "76": 0.4
+    },
+    "sidebar": {
+      "12": 1.0,
+      "77": 0.4,
+      "78": 0.4
+    },
+    "enabled": {
+      "13": 1.0,
+      "65": 1.0,
+      "77": 1.0
+    },
+    "show": {
+      "14": 1.0,
+      "27": 1.0,
+      "41": 1.0,
+      "47": 1.0,
+      "63": 1.0,
+      "64": 1.0,
+      "66": 1.0,
+      "92": 1.0,
+      "97": 1.0
+    },
+    "hover": {
+      "14": 1.0,
+      "27": 1.0,
+      "47": 1.0,
+      "48": 1.0,
+      "52": 1.0,
+      "61": 1.0,
+      "66": 1.0
+    },
+    "media": {
+      "16": 1.0,
+      "81": 1.0
+    },
+    "performance": {
+      "17": 1.0
+    },
+    "weather": {
+      "18": 1.0
+    },
+    "battery": {
+      "19": 1.0,
+      "59": 1.0
+    },
+    "gpu": {
+      "20": 1.0,
+      "91": 1.0
+    },
+    "cpu": {
+      "21": 1.0
+    },
+    "memory": {
+      "22": 1.0
+    },
+    "storage": {
+      "23": 1.0
+    },
+    "drag": {
+      "25": 1.0,
+      "28": 1.0,
+      "69": 1.0,
+      "78": 1.0
+    },
+    "threshold": {
+      "25": 1.0,
+      "28": 1.0,
+      "69": 1.0,
+      "78": 1.0
+    },
+    "persistent": {
+      "26": 1.0
+    },
+    "workspaces": {
+      "29": 1.0,
+      "34": 1.0,
+      "37": 0.4,
+      "38": 0.4,
+      "39": 0.4,
+      "40": 0.4,
+      "41": 0.4,
+      "42": 1.0,
+      "43": 0.4,
+      "44": 1.0
+    },
+    "active": {
+      "30": 1.0,
+      "38": 1.0,
+      "39": 1.0,
+      "45": 0.4,
+      "46": 0.4,
+      "47": 0.4,
+      "48": 0.4
+    },
+    "window": {
+      "30": 1.0,
+      "43": 1.0,
+      "45": 0.4,
+      "46": 0.4,
+      "47": 0.4,
+      "48": 0.4
+    },
+    "tray": {
+      "31": 1.0,
+      "49": 0.4,
+      "50": 0.4,
+      "51": 0.4,
+      "52": 0.4
+    },
+    "status": {
+      "32": 1.0,
+      "53": 0.4,
+      "54": 0.4,
+      "55": 0.4,
+      "56": 0.4,
+      "57": 0.4,
+      "58": 0.4,
+      "59": 0.4,
+      "60": 0.4,
+      "61": 0.4
+    },
+    "icons": {
+      "32": 1.0,
+      "43": 1.0,
+      "50": 1.0,
+      "53": 0.4,
+      "54": 0.4,
+      "55": 0.4,
+      "56": 0.4,
+      "57": 0.4,
+      "58": 0.4,
+      "59": 0.4,
+      "60": 0.4,
+      "61": 0.4
+    },
+    "clock": {
+      "33": 1.0,
+      "62": 0.4,
+      "63": 0.4,
+      "64": 0.4,
+      "111": 1.0
+    },
+    "volume": {
+      "35": 1.0,
+      "86": 1.0,
+      "88": 1.0
+    },
+    "brightness": {
+      "36": 1.0,
+      "87": 1.0
+    },
+    "shown": {
+      "37": 1.0,
+      "67": 1.0
+    },
+    "indicator": {
+      "38": 1.0
+    },
+    "trail": {
+      "39": 1.0
+    },
+    "occupied": {
+      "40": 1.0
+    },
+    "background": {
+      "40": 1.0,
+      "49": 1.0,
+      "62": 1.0
+    },
+    "windows": {
+      "41": 1.0,
+      "42": 1.0
+    },
+    "special": {
+      "42": 1.0
+    },
+    "max": {
+      "43": 1.0,
+      "67": 1.0,
+      "68": 1.0,
+      "88": 1.0
+    },
+    "per": {
+      "44": 1.0
+    },
+    "monitor": {
+      "44": 1.0
+    },
+    "permonitor": {
+      "44": 1.0
+    },
+    "compact": {
+      "45": 1.0,
+      "51": 1.0
+    },
+    "inverted": {
+      "46": 1.0
+    },
+    "popout": {
+      "48": 1.0,
+      "52": 1.0,
+      "61": 1.0
+    },
+    "recolour": {
+      "50": 1.0
+    },
+    "speakers": {
+      "53": 1.0
+    },
+    "microphone": {
+      "54": 1.0
+    },
+    "keyboard": {
+      "55": 1.0,
+      "106": 1.0
+    },
+    "layout": {
+      "55": 1.0,
+      "106": 1.0
+    },
+    "caps": {
+      "60": 1.0,
+      "104": 1.0
+    },
+    "lock": {
+      "60": 1.0,
+      "104": 1.0,
+      "105": 1.0
+    },
+    "date": {
+      "63": 1.0
+    },
+    "icon": {
+      "64": 1.0
+    },
+    "items": {
+      "67": 1.0
+    },
+    "wallpapers": {
+      "68": 1.0,
+      "76": 1.0
+    },
+    "vim": {
+      "70": 1.0
+    },
+    "keybinds": {
+      "70": 1.0
+    },
+    "enable": {
+      "71": 1.0
+    },
+    "dangerous": {
+      "71": 1.0
+    },
+    "actions": {
+      "71": 1.0,
+      "73": 1.0
+    },
+    "apps": {
+      "72": 1.0,
+      "79": 1.0
+    },
+    "schemes": {
+      "74": 1.0
+    },
+    "variants": {
+      "75": 1.0
+    },
+    "all": {
+      "79": 1.0
+    },
+    "notifications": {
+      "80": 1.0,
+      "92": 0.4,
+      "93": 0.4,
+      "94": 0.4,
+      "95": 0.4,
+      "96": 0.4,
+      "97": 0.4,
+      "98": 0.4,
+      "99": 0.4,
+      "100": 0.4,
+      "101": 0.4,
+      "102": 0.4,
+      "103": 0.4,
+      "104": 0.4,
+      "105": 0.4,
+      "106": 0.4,
+      "107": 0.4,
+      "108": 0.4
+    },
+    "services": {
+      "80": 0.4,
+      "81": 0.4,
+      "82": 0.4,
+      "83": 0.4,
+      "84": 0.4,
+      "85": 0.4,
+      "86": 0.4,
+      "87": 0.4,
+      "88": 0.4,
+      "89": 0.4,
+      "90": 0.4,
+      "91": 0.4,
+      "92": 0.4,
+      "93": 0.4,
+      "94": 0.4,
+      "95": 0.4,
+      "96": 0.4,
+      "97": 0.4,
+      "98": 0.4,
+      "99": 0.4,
+      "100": 0.4,
+      "101": 0.4,
+      "102": 0.4,
+      "103": 0.4,
+      "104": 0.4,
+      "105": 0.4,
+      "106": 0.4,
+      "107": 0.4,
+      "108": 0.4
+    },
+    "refresh": {
+      "81": 1.0,
+      "82": 1.0
+    },
+    "system": {
+      "82": 1.0,
+      "110": 1.0
+    },
+    "stats": {
+      "82": 1.0
+    },
+    "rescan": {
+      "83": 1.0
+    },
+    "lyrics": {
+      "84": 1.0
+    },
+    "backend": {
+      "84": 1.0
+    },
+    "default": {
+      "85": 1.0,
+      "95": 1.0
+    },
+    "player": {
+      "85": 1.0
+    },
+    "step": {
+      "86": 1.0,
+      "87": 1.0
+    },
+    "visualiser": {
+      "89": 1.0
+    },
+    "bars": {
+      "89": 1.0
+    },
+    "smart": {
+      "90": 1.0
+    },
+    "colour": {
+      "90": 1.0
+    },
+    "scheme": {
+      "90": 1.0
+    },
+    "fullscreen": {
+      "92": 1.0,
+      "97": 1.0
+    },
+    "expire": {
+      "93": 1.0
+    },
+    "automatically": {
+      "93": 1.0
+    },
+    "open": {
+      "94": 1.0
+    },
+    "expanded": {
+      "94": 1.0
+    },
+    "timeout": {
+      "95": 1.0
+    },
+    "group": {
+      "96": 1.0
+    },
+    "preview": {
+      "96": 1.0
+    },
+    "count": {
+      "96": 1.0
+    },
+    "visible": {
+      "98": 1.0
+    },
+    "toasts": {
+      "98": 1.0
+    },
+    "charging": {
+      "99": 1.0
+    },
+    "changes": {
+      "99": 1.0,
+      "100": 1.0,
+      "101": 1.0,
+      "102": 1.0,
+      "103": 1.0,
+      "104": 1.0,
+      "105": 1.0,
+      "106": 1.0,
+      "107": 1.0
+    },
+    "game": {
+      "100": 1.0
+    },
+    "mode": {
+      "100": 1.0
+    },
+    "do": {
+      "101": 1.0
+    },
+    "not": {
+      "101": 1.0
+    },
+    "disturb": {
+      "101": 1.0
+    },
+    "num": {
+      "105": 1.0
+    },
+    "vpn": {
+      "107": 1.0
+    },
+    "now": {
+      "108": 1.0
+    },
+    "playing": {
+      "108": 1.0
+    },
+    "temperature": {
+      "109": 1.0
+    },
+    "language": {
+      "109": 0.4,
+      "110": 0.4,
+      "111": 0.4
+    },
+    "region": {
+      "109": 0.4,
+      "110": 0.4,
+      "111": 0.4
+    },
+    "temperatures": {
+      "110": 1.0
+    },
+    "format": {
+      "111": 1.0
+    }
+  }
 }
