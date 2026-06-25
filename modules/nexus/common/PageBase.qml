@@ -19,6 +19,9 @@ ColumnLayout {
     readonly property alias flickable: flickable
 
     default property Item contentChild
+    // Enables a smooth scroll animation only for search jumps, so normal
+    // flicking stays instant.
+    property bool animateScroll: false
 
     // When the settings search jumps to this page, scroll to the matching row.
     function scrollToAnchor(anchor: string): bool {
@@ -34,7 +37,9 @@ ColumnLayout {
         const minY = -flickable.topMargin;
         const maxY = Math.max(minY, flickable.contentHeight + flickable.bottomMargin - flickable.height);
         const target = Math.max(minY, Math.min(pos.y - inset, maxY));
+        root.animateScroll = true;
         flickable.contentY = target;
+        Qt.callLater(() => root.animateScroll = false);
         if (row.flashHighlight !== undefined) // qmllint disable missing-property
             row.flashHighlight();
         return true;
@@ -133,5 +138,13 @@ ColumnLayout {
 
         contentHeight: root.contentChild?.implicitHeight ?? 0
         contentItem.children: [root.contentChild]
+
+        Behavior on contentY {
+            enabled: root.animateScroll
+
+            Anim {
+                type: Anim.DefaultSpatial
+            }
+        }
     }
 }

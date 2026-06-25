@@ -41,14 +41,26 @@ StyledRect {
             Anim {
                 target: highlight
                 property: "opacity"
-                to: 0.12
+                to: 0.2
+                duration: Tokens.anim.durations.small
+            }
+            Anim {
+                target: highlight
+                property: "opacity"
+                to: 0.08
                 duration: Tokens.anim.durations.normal
             }
             Anim {
                 target: highlight
                 property: "opacity"
+                to: 0.2
+                duration: Tokens.anim.durations.small
+            }
+            Anim {
+                target: highlight
+                property: "opacity"
                 to: 0
-                duration: Tokens.anim.durations.large
+                duration: Tokens.anim.durations.extraLarge
             }
         }
     }
