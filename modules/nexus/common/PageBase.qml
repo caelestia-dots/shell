@@ -28,9 +28,12 @@ ColumnLayout {
         if (!row)
             return false;
         const pos = row.mapToItem(flickable.contentItem, 0, 0);
-        // Land the row below the top fade so it isn't dimmed by the edge effect.
+        // Land the row below the top fade so it isn't dimmed by the edge effect,
+        // clamped to the flickable's real scroll range (which includes margins).
         const inset = flickable.height * flickable.fadeAmount + Tokens.padding.large;
-        const target = Math.max(0, Math.min(pos.y - inset, flickable.contentHeight - flickable.height));
+        const minY = -flickable.topMargin;
+        const maxY = Math.max(minY, flickable.contentHeight + flickable.bottomMargin - flickable.height);
+        const target = Math.max(minY, Math.min(pos.y - inset, maxY));
         flickable.contentY = target;
         if (row.flashHighlight !== undefined) // qmllint disable missing-property
             row.flashHighlight();
@@ -60,6 +63,13 @@ ColumnLayout {
         });
     }
 
+    // Flash a row without scrolling (used when re-selecting the current setting).
+    function highlightAnchor(anchor: string): void {
+        const row = findAnchor(contentChild, anchor);
+        if (row && row.flashHighlight !== undefined) // qmllint disable missing-property
+            row.flashHighlight();
+    }
+
     spacing: Tokens.spacing.extraLargeIncreased
 
     Component.onCompleted: applySearchAnchor()
@@ -67,6 +77,10 @@ ColumnLayout {
     Connections {
         function onSearchAnchorChanged(): void {
             root.applySearchAnchor();
+        }
+
+        function onHighlightSetting(anchor: string): void {
+            root.highlightAnchor(anchor);
         }
 
         target: root.nState

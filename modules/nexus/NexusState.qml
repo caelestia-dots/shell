@@ -21,6 +21,7 @@ QtObject {
     signal close
     signal subPageOpened(idx: int)
     signal subPageClosed
+    signal highlightSetting(anchor: string)
 
     function openSubPage(idx: int): void {
         subPageIdxStack.push(idx);
@@ -41,9 +42,8 @@ QtObject {
         const samePage = currentPageIdx === pageIdx;
         const sameSub = subPageIdxStack.length === subPath.length && subPath.every((v, i) => subPageIdxStack[i] === v);
         if (samePage && sameSub) {
-            // Already exactly here: just re-trigger the scroll/highlight.
-            searchAnchor = "";
-            searchAnchor = anchor;
+            // Already exactly here: just flash the row again, don't scroll.
+            highlightSetting(anchor);
             return;
         }
         searchAnchor = anchor;
