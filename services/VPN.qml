@@ -44,6 +44,22 @@ Singleton {
         return defaults;
     }
 
+    // Tracks an in-flight provider switch that must wait for disconnect.
+    property int pendingSwitchIndex: -1
+    // Tracks whether the previous status read was empty, so we tolerate a single
+    // starved read but still report persistent empties (e.g. no connectivity).
+    property bool _sawEmptyStatus: false
+    // Epoch ms when the VPN connection was established (0 = not connected).
+    property double connectedSince: 0
+    // Live counters for the active VPN interface (cumulative bytes since the
+    // interface came up). "In" = received, "Out" = transmitted.
+    property string bytesIn: ""
+    property string bytesOut: ""
+    // Round-trip latency over the VPN tunnel, in ms (-1 = unknown/not measured).
+    property int pingMs: -1
+    // Best-effort server/exit location (currently only resolvable for WARP).
+    property string serverLocation: ""
+
     function getBuiltinDefaults(name, iface) {
         const builtins = {
             "wireguard": {
@@ -100,10 +116,143 @@ Singleton {
         connected ? disconnect() : connect();
     }
 
+    // ---- Provider management -------------------------------------------------
+    // Normalised view of the configured providers, one entry per provider with
+    // a stable index. Used by the VPN management UI.
+    function providers(): var {
+        const list = GlobalConfig.utilities.vpn.provider;
+        const out = [];
+        for (let i = 0; i < list.length; i++) {
+            const p = list[i];
+            const isObject = typeof p === "object";
+            out.push({
+                index: i,
+                name: isObject ? (p.name || "custom") : String(p),
+                displayName: isObject ? (p.displayName || p.name || String(p)) : String(p),
+                interface: isObject ? (p.interface || "") : "",
+                connectCmd: isObject && p.connectCmd ? p.connectCmd : [],
+                disconnectCmd: isObject && p.disconnectCmd ? p.disconnectCmd : [],
+                enabled: isObject ? (p.enabled === true) : false,
+                isObject: isObject
+            });
+        }
+        return out;
+    }
+
+    // Rebuild a provider object for persistence, preserving optional commands.
+    function buildProviderObject(data: var, enabled: bool): var {
+        const obj = {
+            name: data.name,
+            displayName: data.displayName,
+            interface: data.interface,
+            enabled: enabled
+        };
+        if (data.connectCmd && data.connectCmd.length > 0)
+            obj.connectCmd = data.connectCmd;
+        if (data.disconnectCmd && data.disconnectCmd.length > 0)
+            obj.disconnectCmd = data.disconnectCmd;
+        return obj;
+    }
+
+    // Persist the whole provider list back to config (file-backed).
+    function writeProviders(providers: var): void {
+        GlobalConfig.utilities.vpn.provider = providers;
+    }
+
+    // Add a new provider. data: { name, displayName, interface, connectCmd[],
+    // disconnectCmd[] }. Newly added providers are disabled by default.
+    function addProvider(data: var): void {
+        const current = GlobalConfig.utilities.vpn.provider.slice();
+        current.push(buildProviderObject(data, false));
+        writeProviders(current);
+    }
+
+    // Update an existing provider (by index), keeping its enabled state.
+    function updateProvider(index: int, data: var): void {
+        const current = GlobalConfig.utilities.vpn.provider;
+        const result = [];
+        for (let i = 0; i < current.length; i++) {
+            const p = current[i];
+            if (i === index) {
+                const wasEnabled = typeof p === "object" ? (p.enabled === true) : false;
+                result.push(buildProviderObject(data, wasEnabled));
+            } else {
+                result.push(p);
+            }
+        }
+        writeProviders(result);
+    }
+
+    // Delete a provider by index.
+    function deleteProvider(index: int): void {
+        const current = GlobalConfig.utilities.vpn.provider;
+        const result = [];
+        for (let i = 0; i < current.length; i++)
+            if (i !== index)
+                result.push(current[i]);
+        writeProviders(result);
+    }
+
+    // Make the provider at `index` the active (enabled) one, disabling others.
+    // If a VPN is currently connected, disconnect first, switch, then reconnect.
+    function setActiveProvider(index: int): void {
+        const apply = () => {
+            const current = GlobalConfig.utilities.vpn.provider;
+            const result = [];
+            for (let i = 0; i < current.length; i++) {
+                const p = current[i];
+                if (typeof p === "object")
+                    result.push(buildProviderObject(p, i === index));
+                else
+                    result.push(p);
+            }
+            writeProviders(result);
+        };
+
+        if (root.connected) {
+            root.pendingSwitchIndex = index;
+            root.disconnect();
+        } else {
+            apply();
+        }
+    }
+
     function checkStatus(): void {
         if (root.enabled) {
             statusProc.running = true;
         }
+    }
+
+    function formatBytes(bytes: var): string {
+        if (!bytes || bytes <= 0)
+            return "0 B";
+        const units = ["B", "KB", "MB", "GB", "TB"];
+        let i = 0;
+        let v = bytes;
+        while (v >= 1024 && i < units.length - 1) {
+            v /= 1024;
+            i++;
+        }
+        return `${v.toFixed(v < 10 && i > 0 ? 1 : 0)} ${units[i]}`;
+    }
+
+    // Refresh live In/Out byte counters and (for WARP) the server location.
+    function refreshStats(): void {
+        if (!connected)
+            return;
+        const iface = root.currentConfig?.interface || "";
+        if (iface.length > 0) {
+            statsProc.command = ["sh", "-c", `cat /sys/class/net/${iface}/statistics/rx_bytes /sys/class/net/${iface}/statistics/tx_bytes 2>/dev/null`];
+            statsProc.running = true;
+            // Measure latency over the tunnel by binding the ping to the VPN
+            // interface (-I), so the result reflects the VPN path, not the LAN.
+            if (!pingProc.running) {
+                pingProc.command = ["sh", "-c", `ping -c1 -W2 -I ${iface} 1.1.1.1 2>/dev/null || ping -c1 -W2 1.1.1.1 2>/dev/null`];
+                pingProc.running = true;
+            }
+        }
+        if (providerName === "warp" && serverLocation.length === 0)
+            warpServerProc.running = true;
     }
 
     function getStatusCommand(): var {
@@ -126,7 +275,8 @@ Singleton {
             connected: false,
             state: "disconnected",
             reason: "",
-            authUrl: ""
+            authUrl: "",
+            server: ""
         };
 
         // Handle empty or whitespace-only output
@@ -148,6 +298,18 @@ Singleton {
             if (backendState === "Running") {
                 status.connected = true;
                 status.state = "connected";
+
+                // Exit node, if one is in use, is the most meaningful "server".
+                try {
+                    const peers = data.Peer || {};
+                    for (const key in peers) {
+                        const p = peers[key];
+                        if (p && p.ExitNode) {
+                            status.server = (p.DNSName || p.HostName || "").replace(/\.$/, "");
+                            break;
+                        }
+                    }
+                } catch (e2) {}
             } else if (backendState === "Starting") {
                 status.state = "connecting";
             } else if (backendState === "NeedsLogin" || backendState === "NeedsMachineAuth") {
@@ -172,7 +334,8 @@ Singleton {
             connected: false,
             state: "disconnected",
             reason: "",
-            authUrl: ""
+            authUrl: "",
+            server: ""
         };
         try {
             const data = JSON.parse(output);
@@ -182,6 +345,10 @@ Singleton {
             if (mgmtConnected && signalConnected) {
                 status.connected = true;
                 status.state = "connected";
+                // The management server URL is the most stable "server" value.
+                const url = data.management?.url || data.management?.URL || "";
+                if (url)
+                    status.server = url.replace(/^https?:\/\//, "").replace(/:\d+$/, "");
             } else if (data.management?.error) {
                 const error = data.management.error;
                 if (error.includes("auth") || error.includes("login")) {
@@ -203,18 +370,25 @@ Singleton {
             connected: false,
             state: "disconnected",
             reason: "",
-            authUrl: ""
+            authUrl: "",
+            server: ""
         };
 
-        if (output.includes("Connected")) {
-            status.connected = true;
-            status.state = "connected";
-        } else if (output.includes("Connecting")) {
-            status.state = "connecting";
-        } else if (output.includes("Unable") || output.includes("Registration Missing") || output.includes("registration") || output.includes("register")) {
+        // Order matters: "Disconnected" contains the substring "Connected",
+        // so the disconnected/registration cases must be checked first. Recent
+        // warp-cli prints lines like "Status update: Connected" /
+        // "Status update: Disconnected\nReason: ...".
+        if (output.includes("Registration Missing") || output.includes("registration") || output.includes("register") || output.includes("Unable to connect")) {
             status.state = "needs-auth";
             status.reason = "WARP registration required";
-        } else if (!output.includes("Disconnected")) {
+        } else if (output.includes("Disconnected")) {
+            status.state = "disconnected";
+        } else if (output.includes("Connecting")) {
+            status.state = "connecting";
+        } else if (output.includes("Connected")) {
+            status.connected = true;
+            status.state = "connected";
+        } else {
             status.state = "error";
             status.reason = "Unknown WARP status";
         }
@@ -226,7 +400,8 @@ Singleton {
             connected: false,
             state: "disconnected",
             reason: "",
-            authUrl: ""
+            authUrl: "",
+            server: ""
         };
         const iface = root.currentConfig?.interface || "";
 
@@ -270,8 +445,14 @@ Singleton {
         if (newStatus.state === "needs-auth" && !newStatus.authUrl && status.authUrl) {
             newStatus.authUrl = status.authUrl;
         }
+
         status = newStatus;
         root.connected = newStatus.connected;
+
+        // Surface a parsed server/exit-node (Tailscale, NetBird, WireGuard).
+        // WARP is handled separately via warpServerProc.
+        if (newStatus.connected && providerName !== "warp" && newStatus.server)
+            root.serverLocation = newStatus.server;
 
         if (oldState !== newStatus.state) {
             emitStatusToast(newStatus);
@@ -304,6 +485,38 @@ Singleton {
         }
     }
 
+    onConnectedChanged: {
+        // Stamp / clear the connection start time.
+        if (connected) {
+            if (connectedSince === 0)
+                connectedSince = Date.now();
+        } else {
+            connectedSince = 0;
+            bytesIn = "";
+            bytesOut = "";
+            serverLocation = "";
+            pingMs = -1;
+        }
+
+        if (!connected && pendingSwitchIndex >= 0) {
+            const idx = pendingSwitchIndex;
+            pendingSwitchIndex = -1;
+
+            const current = GlobalConfig.utilities.vpn.provider;
+            const result = [];
+            for (let i = 0; i < current.length; i++) {
+                const p = current[i];
+                if (typeof p === "object")
+                    result.push(buildProviderObject(p, i === idx));
+                else
+                    result.push(p);
+            }
+            GlobalConfig.utilities.vpn.provider = result;
+
+            Qt.callLater(() => root.connect());
+        }
+    }
+
     onStatusChanged: {
         if (providerName === "warp" && status.state === "needs-auth" && status.reason.includes("registration")) {
             warpRegisterProc.exec(["warp-cli", "registration", "new"]);
@@ -315,13 +528,73 @@ Singleton {
             connected: false,
             state: "disconnected",
             reason: "",
-            authUrl: ""
+            authUrl: "",
+            server: ""
         };
         root.connected = false;
+        root.serverLocation = "";
+        root.bytesIn = "";
+        root.bytesOut = "";
+        root.pingMs = -1;
         statusCheckTimer.start();
     }
 
     Component.onCompleted: root.enabled && statusCheckTimer.start()
+
+    // Reads cumulative rx/tx bytes for the active VPN interface from sysfs.
+    Process {
+        id: statsProc
+
+        stdout: StdioCollector {
+            onStreamFinished: {
+                const nums = text.trim().split("\n").map(n => parseInt(n.trim(), 10)).filter(n => !isNaN(n));
+                if (nums.length >= 2) {
+                    root.bytesIn = root.formatBytes(nums[0]);
+                    root.bytesOut = root.formatBytes(nums[1]);
+                }
+            }
+        }
+    }
+
+    // Measures tunnel latency. Parses "time=21.3 ms" from ping output.
+    Process {
+        id: pingProc
+
+        stdout: StdioCollector {
+            onStreamFinished: {
+                const m = text.match(/time[=<]\s*([\d.]+)\s*ms/i);
+                if (m) {
+                    root.pingMs = Math.round(parseFloat(m[1]));
+                } else if (root.connected) {
+                    // Reachable interface but no reply parsed → mark unknown.
+                    root.pingMs = -1;
+                }
+            }
+        }
+        stderr: StdioCollector {}
+    }
+
+    // Best-effort WARP server/endpoint location from warp-cli.
+    Process {
+        id: warpServerProc
+
+        command: ["warp-cli", "tunnel", "stats"]
+        stdout: StdioCollector {
+            onStreamFinished: {
+                // Look for an endpoint/colo hint in the stats output. WARP shows
+                // an "Endpoint" line with an IP; some versions include a colo.
+                const lines = text.split("\n");
+                for (const line of lines) {
+                    const m = line.match(/Endpoint[^\d]*([\d.]+)/i);
+                    if (m) {
+                        root.serverLocation = m[1];
+                        break;
+                    }
+                }
+            }
+        }
+        stderr: StdioCollector {}
+    }
 
     Process {
         id: nmMonitor
@@ -345,6 +618,18 @@ Singleton {
             })
         stdout: StdioCollector {
             onStreamFinished: {
+                // A single empty read can mean the status command was briefly
+                // starved (e.g. by a concurrent ping sweep). Ignore one, but if
+                // empties persist it's a real condition (e.g. no connectivity),
+                // so fall through and let the parser report it.
+                if (text.trim().length === 0) {
+                    if (!root._sawEmptyStatus) {
+                        root._sawEmptyStatus = true;
+                        return;
+                    }
+                } else {
+                    root._sawEmptyStatus = false;
+                }
                 const newStatus = root.parseStatusOutput(text);
                 root.updateStatus(newStatus);
             }
