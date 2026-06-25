@@ -12,6 +12,7 @@ QtObject {
     property bool searchOpen
     property string searchText
     property string searchAnchor
+    property string _lastAnchor
 
     property string selectedWallpaperCategory
     property BluetoothDevice selectedBtDevice
@@ -41,9 +42,16 @@ QtObject {
     function jumpToSetting(pageIdx: int, subPath: var, anchor: string): void {
         const samePage = currentPageIdx === pageIdx;
         const sameSub = subPageIdxStack.length === subPath.length && subPath.every((v, i) => subPageIdxStack[i] === v);
-        if (samePage && sameSub) {
-            // Already exactly here: just flash the row again, don't scroll.
+        if (samePage && sameSub && anchor === _lastAnchor) {
+            // Re-clicking the exact same setting: flash it again, don't scroll.
             highlightSetting(anchor);
+            return;
+        }
+        _lastAnchor = anchor;
+        if (samePage && sameSub) {
+            // Same page, different setting: just scroll to it.
+            searchAnchor = "";
+            searchAnchor = anchor;
             return;
         }
         searchAnchor = anchor;
