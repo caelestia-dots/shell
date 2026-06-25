@@ -62,13 +62,13 @@ class GeneralBattery : public ConfigObject {
                 { u"level"_s, 20 },
                 { u"title"_s, u"Low battery"_s },
                 { u"message"_s, u"You might want to plug in a charger"_s },
-                { u"icon"_s, u"battery_android_frame_2"_s },
+                { u"icon"_s, u"battery_android_2"_s },
             }),
             vmap({
                 { u"level"_s, 10 },
                 { u"title"_s, u"Did you see the previous message?"_s },
                 { u"message"_s, u"You should probably plug in a charger <b>now</b>"_s },
-                { u"icon"_s, u"battery_android_frame_1"_s },
+                { u"icon"_s, u"battery_android_1"_s },
             }),
             vmap({
                 { u"level"_s, 5 },
@@ -84,13 +84,13 @@ class GeneralBattery : public ConfigObject {
                     { u"level"_s, 80 },
                     { u"title"_s, u"High battery"_s },
                     { u"message"_s, u"You might want to unplug the charger"_s },
-                    { u"icon"_s, u"battery_android_frame_5"_s }
+                    { u"icon"_s, u"battery_android_5"_s }
             }),
             vmap({
                     { u"level"_s, 90 },
                     { u"title"_s, u"Did you see the previous message?"_s },
                     { u"message"_s, u"You should probably unplug the charger <b>now</b>"_s },
-                    { u"icon"_s, u"battery_android_frame_6"_s }
+                    { u"icon"_s, u"battery_android_6"_s }
             }),
             vmap({
                     { u"level"_s, 95 },
