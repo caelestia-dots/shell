@@ -28,7 +28,9 @@ ColumnLayout {
         if (!row)
             return false;
         const pos = row.mapToItem(flickable.contentItem, 0, 0);
-        const target = Math.max(0, Math.min(pos.y - Tokens.padding.large, flickable.contentHeight - flickable.height));
+        // Land the row below the top fade so it isn't dimmed by the edge effect.
+        const inset = flickable.height * flickable.fadeAmount + Tokens.padding.large;
+        const target = Math.max(0, Math.min(pos.y - inset, flickable.contentHeight - flickable.height));
         flickable.contentY = target;
         if (row.flashHighlight !== undefined) // qmllint disable missing-property
             row.flashHighlight();
