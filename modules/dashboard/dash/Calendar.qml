@@ -15,14 +15,21 @@ CustomMouseArea {
 
     required property DashboardState dashState
 
-    readonly property int currMonth: dashState.currentDate.getMonth()
-    readonly property int currYear: dashState.currentDate.getFullYear()
+    property date currentDate: dashState.currentDate
+    readonly property int currMonth: currentDate.getMonth()
+    readonly property int currYear: currentDate.getFullYear()
+    readonly property int nonAnimCurrMonth: dashState.currentDate.getMonth()
+    readonly property int nonAnimCurrYear: dashState.currentDate.getFullYear()
+
+    readonly property int animDirection: dashState.currentDate > currentDate ? -1 : 1
+    property real animTranslate
+    property real animOpacity: 1
 
     function onWheel(event: WheelEvent): void {
         if (event.angleDelta.y > 0)
-            root.dashState.currentDate = new Date(root.currYear, root.currMonth - 1, 1);
+            dashState.currentDate = new Date(nonAnimCurrYear, nonAnimCurrMonth - 1, 1);
         else if (event.angleDelta.y < 0)
-            root.dashState.currentDate = new Date(root.currYear, root.currMonth + 1, 1);
+            dashState.currentDate = new Date(nonAnimCurrYear, nonAnimCurrMonth + 1, 1);
     }
 
     anchors.left: parent.left
@@ -31,6 +38,53 @@ CustomMouseArea {
 
     acceptedButtons: Qt.MiddleButton
     onClicked: root.dashState.currentDate = new Date()
+
+    Anim {
+        id: trOutAnim
+
+        running: false
+        target: root
+        property: "animTranslate"
+        to: root.Tokens.padding.extraLarge * root.animDirection
+        type: Anim.FastSpatial
+    }
+
+    Behavior on currentDate {
+        SequentialAnimation {
+            ParallelAnimation {
+                ScriptAction {
+                    script: Qt.callLater(() => trOutAnim.start())
+                }
+                Anim {
+                    target: root
+                    property: "animOpacity"
+                    to: 0
+                    type: Anim.FastEffects
+                }
+            }
+            ScriptAction {
+                script: {
+                    trOutAnim.complete();
+                    root.animTranslate = root.Tokens.padding.extraLarge * -root.animDirection;
+                }
+            }
+            PropertyAction {}
+            ParallelAnimation {
+                Anim {
+                    target: root
+                    property: "animTranslate"
+                    to: 0
+                    type: Anim.DefaultSpatial
+                }
+                Anim {
+                    target: root
+                    property: "animOpacity"
+                    to: 1
+                    type: Anim.DefaultEffects
+                }
+            }
+        }
+    }
 
     ColumnLayout {
         id: inner
@@ -46,11 +100,12 @@ CustomMouseArea {
             spacing: Tokens.spacing.extraSmall
 
             IconButton {
+                isRound: true
                 icon: "chevron_left"
                 type: IconButton.Text
                 font: Tokens.font.icon.builders.small.weight(Font.Bold).build()
                 padding: Tokens.padding.small
-                onClicked: root.dashState.currentDate = new Date(root.currYear, root.currMonth - 1, 1)
+                onClicked: root.dashState.currentDate = new Date(root.nonAnimCurrYear, root.nonAnimCurrMonth - 1, 1)
             }
 
             Item {
@@ -62,10 +117,10 @@ CustomMouseArea {
 
                 StateLayer {
                     color: Colours.palette.m3primary
-                    radius: pressed ? Tokens.rounding.small : Tokens.rounding.large
+                    radius: pressed ? Tokens.rounding.small : height / 2
                     disabled: {
                         const now = new Date();
-                        return root.currMonth === now.getMonth() && root.currYear === now.getFullYear();
+                        return root.nonAnimCurrMonth === now.getMonth() && root.nonAnimCurrYear === now.getFullYear();
                     }
                     onClicked: root.dashState.currentDate = new Date()
 
@@ -79,6 +134,11 @@ CustomMouseArea {
                 StyledText {
                     id: monthYearDisplay
 
+                    opacity: root.animOpacity
+                    transform: Translate {
+                        x: root.animTranslate
+                    }
+
                     anchors.centerIn: parent
                     text: grid.title
                     color: Colours.palette.m3primary
@@ -87,11 +147,12 @@ CustomMouseArea {
             }
 
             IconButton {
+                isRound: true
                 icon: "chevron_right"
                 type: IconButton.Text
                 font: Tokens.font.icon.builders.small.weight(Font.Bold).build()
                 padding: Tokens.padding.small
-                onClicked: root.dashState.currentDate = new Date(root.currYear, root.currMonth + 1, 1)
+                onClicked: root.dashState.currentDate = new Date(root.nonAnimCurrYear, root.nonAnimCurrMonth + 1, 1)
             }
         }
 
@@ -114,6 +175,11 @@ CustomMouseArea {
         Item {
             Layout.fillWidth: true
             implicitHeight: grid.implicitHeight
+
+            opacity: root.animOpacity
+            transform: Translate {
+                x: root.animTranslate
+            }
 
             MonthGrid {
                 id: grid
@@ -175,7 +241,6 @@ CustomMouseArea {
                 color: Colours.palette.m3primary
 
                 opacity: todayItem ? 1 : 0
-                scale: todayItem ? 1 : 0.7
 
                 Colouriser {
                     x: -todayIndicator.x
@@ -187,18 +252,6 @@ CustomMouseArea {
                     source: grid
                     sourceColor: Colours.palette.m3onSurface
                     colorizationColor: Colours.palette.m3onPrimary
-                }
-
-                Behavior on opacity {
-                    Anim {
-                        type: Anim.DefaultEffects
-                    }
-                }
-
-                Behavior on scale {
-                    Anim {
-                        type: Anim.FastSpatial
-                    }
                 }
 
                 Behavior on x {
