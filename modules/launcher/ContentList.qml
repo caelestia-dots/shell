@@ -20,12 +20,13 @@ Item {
 
     readonly property bool showWallpapers: search.text.startsWith(`${GlobalConfig.launcher.actionPrefix}wallpaper `)
     readonly property var currentList: showWallpapers ? wallpaperList.item : appList.item // Can be either ListView or PathView, so can't type properly
+    property string animState: showWallpapers ? "wallpapers" : "apps"
 
     anchors.horizontalCenter: parent.horizontalCenter
     anchors.bottom: parent.bottom
 
     clip: true
-    state: showWallpapers ? "wallpapers" : "apps"
+    state: animState
 
     states: [
         State {
@@ -53,7 +54,7 @@ Item {
         }
     ]
 
-    Behavior on state {
+    Behavior on animState {
         SequentialAnimation {
             Anim {
                 target: root
