@@ -125,15 +125,10 @@ ColumnLayout {
 
                         anchors.centerIn: parent
                         text: ethRow.isConnected ? "lan" : "settings_ethernet"
-                        fill: ethRow.isConnected ? 1 : 0
+                        fill: text === "lan" ? 1 : 0
                         color: ethRow.isConnected ? Colours.palette.m3onPrimaryContainer : Colours.palette.m3onSurfaceVariant
                         fontStyle: Tokens.font.icon.medium
-
-                        Behavior on fill {
-                            Anim {
-                                type: Anim.DefaultEffects
-                            }
-                        }
+                        animate: true
                     }
                 }
 
@@ -147,6 +142,7 @@ ColumnLayout {
                         text: ethRow.modelData.connection || ethRow.modelData.interface || qsTr("Wired connection")
                         font: Tokens.font.body.medium
                         elide: Text.ElideRight
+                        animate: true
                     }
 
                     StyledText {
@@ -155,6 +151,7 @@ ColumnLayout {
                         color: ethRow.isConnected ? Colours.palette.m3primary : Colours.palette.m3onSurfaceVariant
                         font: Tokens.font.label.small
                         elide: Text.ElideRight
+                        animate: true
                     }
                 }
 
@@ -165,6 +162,19 @@ ColumnLayout {
 
                     implicitWidth: ethRow.isConnected && root?.cappedWidth > Tokens.sizes.nexus.networkShowEthDetailWidth ? ethDetailRow.implicitWidth : 0
                     implicitHeight: ethDetailRow.implicitHeight
+
+                    onVisibleChanged: {
+                        if (visible) {
+                            ethIpAddr.value = ethRow.details?.ipAddress ?? "";
+                            ethDns.value = ethRow.details?.dns[0] ?? "";
+                        }
+                    }
+                    Component.onCompleted: {
+                        if (visible) {
+                            ethIpAddr.value = ethRow.details?.ipAddress ?? "";
+                            ethDns.value = ethRow.details?.dns[0] ?? "";
+                        }
+                    }
 
                     Behavior on opacity {
                         Anim {
@@ -179,13 +189,15 @@ ColumnLayout {
                         spacing: Tokens.spacing.large
 
                         EthDetail {
+                            id: ethIpAddr
+
                             label: qsTr("Local IP Address")
-                            value: ethRow.details?.ipAddress ?? ""
                         }
 
                         EthDetail {
+                            id: ethDns
+
                             label: qsTr("Primary DNS")
-                            value: ethRow.details?.dns[0] ?? ""
                         }
                     }
                 }
@@ -218,7 +230,7 @@ ColumnLayout {
         id: ethDetail
 
         required property string label
-        required property string value
+        property string value
 
         visible: value.length > 0
         spacing: 0
