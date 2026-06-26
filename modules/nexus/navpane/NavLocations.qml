@@ -16,7 +16,17 @@ VerticalFadeFlickable {
 
     readonly property string search: nState.searchText
     readonly property bool searching: search.length > 0
-    readonly property var results: searching ? SettingsSearcher.query(search) : []
+    readonly property var results: {
+        if (!searching)
+            return [];
+        const all = SettingsSearcher.query(search);
+        // The ethernet section hides itself when no ethernet device is available
+        // (e.g. the cable is unplugged), so drop its settings from the results
+        // too, otherwise the search would link to a page that isn't reachable.
+        if (Nmcli.hasAvailableEthernet)
+            return all;
+        return all.filter(e => !e.anchor.startsWith("ethernet-"));
+    }
 
     topMargin: Tokens.padding.large
     bottomMargin: Tokens.padding.large
