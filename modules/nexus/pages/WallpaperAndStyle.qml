@@ -50,7 +50,7 @@ PageBase {
                         Layout.alignment: Qt.AlignHCenter
                         text: "hide_image"
                         color: Colours.palette.m3onSurfaceVariant
-                        fontStyle: Tokens.font.icon.extraLarge
+                        font: Tokens.font.icon.extraLarge
                     }
 
                     StyledText {
@@ -171,14 +171,27 @@ PageBase {
         }
 
         ToggleRow {
+            Layout.fillWidth: true
+
             first: true
             text: qsTr("Display wallpaper")
             checked: Config.background.wallpaperEnabled
             onToggled: GlobalConfig.background.wallpaperEnabled = checked
         }
 
+        // Settings UI switch that connects directly to WallpaperPauser.qml to apply playback pausing on battery power.
         ToggleRow {
             Layout.topMargin: Tokens.spacing.extraSmall / 2 - parent.spacing
+            Layout.fillWidth: true
+
+            text: qsTr("Pause animated wallpapers on battery")
+            checked: WallpaperPauser.pauseOnBattery
+            onToggled: WallpaperPauser.pauseOnBattery = checked
+        }
+
+        ToggleRow {
+            Layout.topMargin: Tokens.spacing.extraSmall / 2 - parent.spacing
+            Layout.fillWidth: true
 
             text: qsTr("Transparency")
             subtext: qsTr("Base %1, layers %2").arg(Colours.transparency.base).arg(Colours.transparency.layers)
@@ -188,6 +201,7 @@ PageBase {
 
         ToggleRow {
             Layout.topMargin: Tokens.spacing.extraSmall / 2 - parent.spacing
+            Layout.fillWidth: true
 
             last: true
             text: qsTr("Dark theme")
