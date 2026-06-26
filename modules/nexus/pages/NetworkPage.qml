@@ -21,8 +21,8 @@ PageBase {
     onVisibleChanged: if (visible) {
         if (Nmcli.activeEthernet) {
             Nmcli.getEthernetDeviceDetails("", () => {});
-            Nmcli.getEthernetDataUsage(Nmcli.activeEthernet.interface, () => {});
-            Nmcli.getEthernetSpeed(Nmcli.activeEthernet.interface);
+            Nmcli.getEthernetDataUsage(Nmcli.activeEthernet.iface, () => {});
+            Nmcli.getEthernetSpeed(Nmcli.activeEthernet.iface);
         }
     }
 
@@ -56,9 +56,9 @@ PageBase {
             onTriggered: {
                 Nmcli.getEthernetInterfaces(() => {});
                 if (Nmcli.activeEthernet) {
-                    Nmcli.getEthernetDeviceDetails(Nmcli.activeEthernet.interface, () => {});
-                    Nmcli.getEthernetDataUsage(Nmcli.activeEthernet.interface, () => {});
-                    Nmcli.getEthernetSpeed(Nmcli.activeEthernet.interface);
+                    Nmcli.getEthernetDeviceDetails(Nmcli.activeEthernet.iface, () => {});
+                    Nmcli.getEthernetDataUsage(Nmcli.activeEthernet.iface, () => {});
+                    Nmcli.getEthernetSpeed(Nmcli.activeEthernet.iface);
                 }
             }
         }

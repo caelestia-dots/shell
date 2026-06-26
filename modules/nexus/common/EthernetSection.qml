@@ -28,9 +28,9 @@ ColumnLayout {
         onTriggered: {
             Nmcli.getEthernetInterfaces(() => {});
             if (Nmcli.activeEthernet) {
-                Nmcli.getEthernetDeviceDetails(Nmcli.activeEthernet.interface, () => {});
-                Nmcli.getEthernetDataUsage(Nmcli.activeEthernet.interface, () => {});
-                Nmcli.getEthernetSpeed(Nmcli.activeEthernet.interface);
+                Nmcli.getEthernetDeviceDetails(Nmcli.activeEthernet.iface, () => {});
+                Nmcli.getEthernetDataUsage(Nmcli.activeEthernet.iface, () => {});
+                Nmcli.getEthernetSpeed(Nmcli.activeEthernet.iface);
             }
         }
     }
@@ -85,7 +85,7 @@ ColumnLayout {
         delegate: ConnectedRect {
             id: ethRow
 
-            required property var modelData
+            required property Nmcli.EthernetDevice modelData
             required property int index
 
             readonly property bool isConnected: modelData.connected
@@ -100,7 +100,7 @@ ColumnLayout {
             // Tap opens the detail page for this interface.
             StateLayer {
                 onClicked: {
-                    root.nState.selectedEthernetInterface = ethRow.modelData.interface;
+                    root.nState.selectedEthernetInterface = ethRow.modelData.iface;
                     root.nState.openSubPage(1);
                 }
             }
@@ -139,7 +139,7 @@ ColumnLayout {
 
                     StyledText {
                         Layout.fillWidth: true
-                        text: ethRow.modelData.connection || ethRow.modelData.interface || qsTr("Wired connection")
+                        text: ethRow.modelData.connection || ethRow.modelData.iface || qsTr("Wired connection")
                         font: Tokens.font.body.medium
                         elide: Text.ElideRight
                         animate: true
@@ -147,7 +147,7 @@ ColumnLayout {
 
                     StyledText {
                         Layout.fillWidth: true
-                        text: ethRow.isConnected ? ethRow.modelData.interface : qsTr("Not connected • %1").arg(ethRow.modelData.interface)
+                        text: ethRow.isConnected ? ethRow.modelData.iface : qsTr("Not connected • %1").arg(ethRow.modelData.iface)
                         color: ethRow.isConnected ? Colours.palette.m3primary : Colours.palette.m3onSurfaceVariant
                         font: Tokens.font.label.small
                         elide: Text.ElideRight
@@ -213,7 +213,7 @@ ColumnLayout {
                         if (ethRow.isConnected)
                             Nmcli.disconnectEthernet(ethRow.modelData.connection);
                         else
-                            Nmcli.connectEthernet(ethRow.modelData.connection, ethRow.modelData.interface);
+                            Nmcli.connectEthernet(ethRow.modelData.connection, ethRow.modelData.iface);
                     }
                 }
 

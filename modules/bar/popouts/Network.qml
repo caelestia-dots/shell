@@ -246,7 +246,7 @@ ColumnLayout {
             values: [...Nmcli.ethernetDevices].sort((a, b) => {
                 if (a.connected !== b.connected)
                     return b.connected - a.connected;
-                return (a.interface || "").localeCompare(b.interface || "");
+                return (a.iface || "").localeCompare(b.iface || "");
             }).slice(0, 8)
         }
 
@@ -289,7 +289,7 @@ ColumnLayout {
                 Layout.leftMargin: Tokens.spacing.extraSmall
                 Layout.rightMargin: Tokens.spacing.extraSmall
                 Layout.fillWidth: true
-                text: ethernetItem.modelData.interface || qsTr("Unknown")
+                text: ethernetItem.modelData.iface || qsTr("Unknown")
                 elide: Text.ElideRight
                 font: Tokens.font.body.builders.medium.weight(ethernetItem.modelData.connected ? Font.Medium : Font.Normal).build()
                 color: ethernetItem.modelData.connected ? Colours.palette.m3primary : Colours.palette.m3onSurface
@@ -315,7 +315,7 @@ ColumnLayout {
                         if (ethernetItem.modelData.connected && ethernetItem.modelData.connection) {
                             Nmcli.disconnectEthernet(ethernetItem.modelData.connection, () => {});
                         } else {
-                            Nmcli.connectEthernet(ethernetItem.modelData.connection || "", ethernetItem.modelData.interface || "", () => {});
+                            Nmcli.connectEthernet(ethernetItem.modelData.connection || "", ethernetItem.modelData.iface || "", () => {});
                         }
                     }
                 }

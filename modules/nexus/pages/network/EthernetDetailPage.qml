@@ -15,7 +15,7 @@ PageBase {
     id: root
 
     readonly property string ifaceName: nState.selectedEthernetInterface
-    readonly property var device: Nmcli.ethernetDevices.find(d => d.interface === root.ifaceName) ?? null
+    readonly property Nmcli.EthernetDevice device: Nmcli.ethernetDevices.find(d => d.iface === root.ifaceName) ?? null
     readonly property var details: Nmcli.ethernetDeviceDetails
     readonly property string connectionName: root.device?.connection ?? ""
 

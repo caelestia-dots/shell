@@ -30,8 +30,8 @@ Singleton {
     property string ethernetDataUsage: ""
     // Link speed of the active ethernet interface (from sysfs), e.g. "1 Gbps".
     property string ethernetSpeed: ""
-    property list<var> ethernetDevices: []
-    readonly property var activeEthernet: ethernetDevices.find(d => d.connected) ?? null
+    readonly property list<EthernetDevice> ethernetDevices: []
+    readonly property EthernetDevice activeEthernet: ethernetDevices.find(d => d.connected) ?? null
     // True when at least one wired device has a carrier (cable plugged in).
     // nmcli reports "unavailable" for ethernet NICs with no link, so we treat
     // anything other than that as a usable connection.
@@ -221,46 +221,55 @@ Singleton {
     function getEthernetInterfaces(callback: var): void {
         executeCommand(["-t", "-f", root.deviceStatusFields, root.nmcliCommandDevice, "status"], result => {
             const interfaces = parseDeviceStatusOutput(result.output, root.deviceTypeEthernet);
-            const devices = [];
-
-            for (const iface of interfaces) {
-                const connected = isConnectedState(iface.state);
-
-                devices.push({
-                    interface: iface.device,
-                    type: iface.type,
-                    state: iface.state,
-                    connection: iface.connection,
-                    connected: connected,
-                    ipAddress: "",
-                    gateway: "",
-                    dns: [],
-                    subnet: "",
-                    macAddress: "",
-                    speed: ""
-                });
-            }
+            const devices = interfaces.map(iface => ({
+                        interface: iface.device,
+                        type: iface.type,
+                        state: iface.state,
+                        connection: iface.connection,
+                        connected: isConnectedState(iface.state),
+                        ipAddress: "",
+                        gateway: "",
+                        dns: [],
+                        subnet: "",
+                        macAddress: "",
+                        speed: ""
+                    }));
 
             root.ethernetInterfaces = interfaces;
-            // Only reassign when the device list actually changed; reassigning an
-            // equal array forces the Repeater to rebuild and flashes the section.
-            if (!root._sameEthernetDevices(root.ethernetDevices, devices))
-                root.ethernetDevices = devices;
+            syncEthernetDevices(devices);
             if (callback)
                 callback(interfaces);
         });
     }
 
-    // True when two ethernet device lists are equivalent for the UI (same
-    // interfaces in the same state), so a redundant reassignment can be skipped.
-    function _sameEthernetDevices(a: var, b: var): bool {
-        if (!a || !b || a.length !== b.length)
-            return false;
-        for (let i = 0; i < a.length; i++) {
-            if (a[i].interface !== b[i].interface || a[i].state !== b[i].state || a[i].connected !== b[i].connected || a[i].connection !== b[i].connection)
-                return false;
+    // Sync a list of ethernet devices to the existing device list. Same logic as getNetworks
+    function syncEthernetDevices(devices: list<var>): void {
+        const rDevices = root.ethernetDevices;
+
+        const newMap = new Map();
+        for (const d of devices)
+            newMap.set(d.interface, d);
+
+        for (let i = rDevices.length - 1; i >= 0; i--) {
+            if (!newMap.has(rDevices[i].iface)) {
+                const removed = rDevices.splice(i, 1)[0];
+                removed.destroy();
+            }
         }
-        return true;
+
+        const existingMap = new Map();
+        for (const rd of rDevices)
+            existingMap.set(rd.iface, rd);
+
+        for (const [iface, data] of newMap) {
+            const match = existingMap.get(iface);
+            if (match)
+                match.lastIpcObject = data;
+            else
+                rDevices.push(ethComp.createObject(root, {
+                    lastIpcObject: data
+                }));
+        }
     }
 
     function connectEthernet(connectionName: string, interfaceName: string, callback: var): void {
@@ -1241,7 +1250,7 @@ Singleton {
             getEthernetInterfaces(() => {
                 if (root.activeEthernet && root.activeEthernet.connected) {
                     Qt.callLater(() => {
-                        getEthernetDeviceDetails(root.activeEthernet.interface, () => {});
+                        getEthernetDeviceDetails(root.activeEthernet.iface, () => {});
                     }, 500);
                 }
             });
@@ -1285,6 +1294,12 @@ Singleton {
         id: apComp
 
         AccessPoint {}
+    }
+
+    Component {
+        id: ethComp
+
+        EthernetDevice {}
     }
 
     Timer {
@@ -1593,5 +1608,20 @@ Singleton {
         readonly property bool active: lastIpcObject.active
         readonly property string security: lastIpcObject.security
         readonly property bool isSecure: security.length > 0
+    }
+
+    component EthernetDevice: QtObject {
+        required property var lastIpcObject
+        readonly property string iface: lastIpcObject.interface
+        readonly property string type: lastIpcObject.type
+        readonly property string state: lastIpcObject.state
+        readonly property string connection: lastIpcObject.connection
+        readonly property bool connected: lastIpcObject.connected
+        readonly property string ipAddress: lastIpcObject.ipAddress ?? ""
+        readonly property string gateway: lastIpcObject.gateway ?? ""
+        readonly property var dns: lastIpcObject.dns ?? []
+        readonly property string subnet: lastIpcObject.subnet ?? ""
+        readonly property string macAddress: lastIpcObject.macAddress ?? ""
+        readonly property string speed: lastIpcObject.speed ?? ""
     }
 }
