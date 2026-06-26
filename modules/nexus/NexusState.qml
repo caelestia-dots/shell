@@ -14,6 +14,7 @@ QtObject {
     property BluetoothDevice selectedBtDevice
     property DesktopEntry selectedApp
     property string selectedEthernetInterface
+    property var selectedMonitor
 
     signal close
     signal subPageOpened(idx: int)
