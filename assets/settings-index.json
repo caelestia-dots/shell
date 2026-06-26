@@ -624,11 +624,13 @@
       "crumbIcons": [
         "dock_to_bottom",
         "dock_to_bottom",
+        "workspaces",
         "workspaces"
       ],
       "crumbLabels": [
         "Panels",
         "Taskbar",
+        "Components",
         "Workspaces"
       ],
       "title": "Shown",
@@ -645,11 +647,13 @@
       "crumbIcons": [
         "dock_to_bottom",
         "dock_to_bottom",
+        "workspaces",
         "workspaces"
       ],
       "crumbLabels": [
         "Panels",
         "Taskbar",
+        "Components",
         "Workspaces"
       ],
       "title": "Active indicator",
@@ -666,11 +670,13 @@
       "crumbIcons": [
         "dock_to_bottom",
         "dock_to_bottom",
+        "workspaces",
         "workspaces"
       ],
       "crumbLabels": [
         "Panels",
         "Taskbar",
+        "Components",
         "Workspaces"
       ],
       "title": "Active trail",
@@ -687,11 +693,13 @@
       "crumbIcons": [
         "dock_to_bottom",
         "dock_to_bottom",
+        "workspaces",
         "workspaces"
       ],
       "crumbLabels": [
         "Panels",
         "Taskbar",
+        "Components",
         "Workspaces"
       ],
       "title": "Occupied background",
@@ -708,11 +716,13 @@
       "crumbIcons": [
         "dock_to_bottom",
         "dock_to_bottom",
+        "workspaces",
         "workspaces"
       ],
       "crumbLabels": [
         "Panels",
         "Taskbar",
+        "Components",
         "Workspaces"
       ],
       "title": "Show windows",
@@ -729,11 +739,13 @@
       "crumbIcons": [
         "dock_to_bottom",
         "dock_to_bottom",
+        "workspaces",
         "workspaces"
       ],
       "crumbLabels": [
         "Panels",
         "Taskbar",
+        "Components",
         "Workspaces"
       ],
       "title": "Windows on special workspaces",
@@ -750,11 +762,13 @@
       "crumbIcons": [
         "dock_to_bottom",
         "dock_to_bottom",
+        "workspaces",
         "workspaces"
       ],
       "crumbLabels": [
         "Panels",
         "Taskbar",
+        "Components",
         "Workspaces"
       ],
       "title": "Max window icons",
@@ -771,11 +785,13 @@
       "crumbIcons": [
         "dock_to_bottom",
         "dock_to_bottom",
+        "workspaces",
         "workspaces"
       ],
       "crumbLabels": [
         "Panels",
         "Taskbar",
+        "Components",
         "Workspaces"
       ],
       "title": "Per-monitor workspaces",
@@ -792,11 +808,13 @@
       "crumbIcons": [
         "dock_to_bottom",
         "dock_to_bottom",
+        "web_asset",
         "web_asset"
       ],
       "crumbLabels": [
         "Panels",
         "Taskbar",
+        "Components",
         "Active window"
       ],
       "title": "Compact",
@@ -813,11 +831,13 @@
       "crumbIcons": [
         "dock_to_bottom",
         "dock_to_bottom",
+        "web_asset",
         "web_asset"
       ],
       "crumbLabels": [
         "Panels",
         "Taskbar",
+        "Components",
         "Active window"
       ],
       "title": "Inverted",
@@ -834,11 +854,13 @@
       "crumbIcons": [
         "dock_to_bottom",
         "dock_to_bottom",
+        "web_asset",
         "web_asset"
       ],
       "crumbLabels": [
         "Panels",
         "Taskbar",
+        "Components",
         "Active window"
       ],
       "title": "Show on hover",
@@ -855,11 +877,13 @@
       "crumbIcons": [
         "dock_to_bottom",
         "dock_to_bottom",
+        "web_asset",
         "web_asset"
       ],
       "crumbLabels": [
         "Panels",
         "Taskbar",
+        "Components",
         "Active window"
       ],
       "title": "Popout on hover",
@@ -876,11 +900,13 @@
       "crumbIcons": [
         "dock_to_bottom",
         "dock_to_bottom",
+        "widgets",
         "widgets"
       ],
       "crumbLabels": [
         "Panels",
         "Taskbar",
+        "Components",
         "Tray"
       ],
       "title": "Background",
@@ -897,11 +923,13 @@
       "crumbIcons": [
         "dock_to_bottom",
         "dock_to_bottom",
+        "widgets",
         "widgets"
       ],
       "crumbLabels": [
         "Panels",
         "Taskbar",
+        "Components",
         "Tray"
       ],
       "title": "Recolour icons",
@@ -918,11 +946,13 @@
       "crumbIcons": [
         "dock_to_bottom",
         "dock_to_bottom",
+        "widgets",
         "widgets"
       ],
       "crumbLabels": [
         "Panels",
         "Taskbar",
+        "Components",
         "Tray"
       ],
       "title": "Compact",
@@ -939,11 +969,13 @@
       "crumbIcons": [
         "dock_to_bottom",
         "dock_to_bottom",
+        "widgets",
         "widgets"
       ],
       "crumbLabels": [
         "Panels",
         "Taskbar",
+        "Components",
         "Tray"
       ],
       "title": "Popout on hover",
@@ -960,11 +992,13 @@
       "crumbIcons": [
         "dock_to_bottom",
         "dock_to_bottom",
+        "signal_cellular_alt",
         "signal_cellular_alt"
       ],
       "crumbLabels": [
         "Panels",
         "Taskbar",
+        "Components",
         "Status icons"
       ],
       "title": "Speakers",
@@ -981,11 +1015,13 @@
       "crumbIcons": [
         "dock_to_bottom",
         "dock_to_bottom",
+        "signal_cellular_alt",
         "signal_cellular_alt"
       ],
       "crumbLabels": [
         "Panels",
         "Taskbar",
+        "Components",
         "Status icons"
       ],
       "title": "Microphone",
@@ -1002,11 +1038,13 @@
       "crumbIcons": [
         "dock_to_bottom",
         "dock_to_bottom",
+        "signal_cellular_alt",
         "signal_cellular_alt"
       ],
       "crumbLabels": [
         "Panels",
         "Taskbar",
+        "Components",
         "Status icons"
       ],
       "title": "Keyboard layout",
@@ -1023,11 +1061,13 @@
       "crumbIcons": [
         "dock_to_bottom",
         "dock_to_bottom",
+        "signal_cellular_alt",
         "signal_cellular_alt"
       ],
       "crumbLabels": [
         "Panels",
         "Taskbar",
+        "Components",
         "Status icons"
       ],
       "title": "Network",
@@ -1044,11 +1084,13 @@
       "crumbIcons": [
         "dock_to_bottom",
         "dock_to_bottom",
+        "signal_cellular_alt",
         "signal_cellular_alt"
       ],
       "crumbLabels": [
         "Panels",
         "Taskbar",
+        "Components",
         "Status icons"
       ],
       "title": "Wi-Fi",
@@ -1065,11 +1107,13 @@
       "crumbIcons": [
         "dock_to_bottom",
         "dock_to_bottom",
+        "signal_cellular_alt",
         "signal_cellular_alt"
       ],
       "crumbLabels": [
         "Panels",
         "Taskbar",
+        "Components",
         "Status icons"
       ],
       "title": "Bluetooth",
@@ -1086,11 +1130,13 @@
       "crumbIcons": [
         "dock_to_bottom",
         "dock_to_bottom",
+        "signal_cellular_alt",
         "signal_cellular_alt"
       ],
       "crumbLabels": [
         "Panels",
         "Taskbar",
+        "Components",
         "Status icons"
       ],
       "title": "Battery",
@@ -1107,11 +1153,13 @@
       "crumbIcons": [
         "dock_to_bottom",
         "dock_to_bottom",
+        "signal_cellular_alt",
         "signal_cellular_alt"
       ],
       "crumbLabels": [
         "Panels",
         "Taskbar",
+        "Components",
         "Status icons"
       ],
       "title": "Caps lock",
@@ -1128,11 +1176,13 @@
       "crumbIcons": [
         "dock_to_bottom",
         "dock_to_bottom",
+        "signal_cellular_alt",
         "signal_cellular_alt"
       ],
       "crumbLabels": [
         "Panels",
         "Taskbar",
+        "Components",
         "Status icons"
       ],
       "title": "Popout on hover",
@@ -1149,11 +1199,13 @@
       "crumbIcons": [
         "dock_to_bottom",
         "dock_to_bottom",
+        "schedule",
         "schedule"
       ],
       "crumbLabels": [
         "Panels",
         "Taskbar",
+        "Components",
         "Clock"
       ],
       "title": "Background",
@@ -1170,11 +1222,13 @@
       "crumbIcons": [
         "dock_to_bottom",
         "dock_to_bottom",
+        "schedule",
         "schedule"
       ],
       "crumbLabels": [
         "Panels",
         "Taskbar",
+        "Components",
         "Clock"
       ],
       "title": "Show date",
@@ -1191,11 +1245,13 @@
       "crumbIcons": [
         "dock_to_bottom",
         "dock_to_bottom",
+        "schedule",
         "schedule"
       ],
       "crumbLabels": [
         "Panels",
         "Taskbar",
+        "Components",
         "Clock"
       ],
       "title": "Show icon",
@@ -1644,10 +1700,12 @@
       ],
       "crumbIcons": [
         "build",
+        "notifications",
         "notifications"
       ],
       "crumbLabels": [
         "Services",
+        "Notifications",
         "Notifications"
       ],
       "title": "Show in fullscreen",
@@ -1662,10 +1720,12 @@
       ],
       "crumbIcons": [
         "build",
+        "notifications",
         "notifications"
       ],
       "crumbLabels": [
         "Services",
+        "Notifications",
         "Notifications"
       ],
       "title": "Expire automatically",
@@ -1680,10 +1740,12 @@
       ],
       "crumbIcons": [
         "build",
+        "notifications",
         "notifications"
       ],
       "crumbLabels": [
         "Services",
+        "Notifications",
         "Notifications"
       ],
       "title": "Open expanded",
@@ -1698,10 +1760,12 @@
       ],
       "crumbIcons": [
         "build",
+        "notifications",
         "notifications"
       ],
       "crumbLabels": [
         "Services",
+        "Notifications",
         "Notifications"
       ],
       "title": "Default timeout",
@@ -1716,10 +1780,12 @@
       ],
       "crumbIcons": [
         "build",
+        "notifications",
         "notifications"
       ],
       "crumbLabels": [
         "Services",
+        "Notifications",
         "Notifications"
       ],
       "title": "Group preview count",
@@ -1734,10 +1800,12 @@
       ],
       "crumbIcons": [
         "build",
+        "notifications",
         "notifications"
       ],
       "crumbLabels": [
         "Services",
+        "Notifications",
         "Notifications"
       ],
       "title": "Show in fullscreen",
@@ -1752,10 +1820,12 @@
       ],
       "crumbIcons": [
         "build",
+        "notifications",
         "notifications"
       ],
       "crumbLabels": [
         "Services",
+        "Notifications",
         "Notifications"
       ],
       "title": "Visible toasts",
@@ -1770,10 +1840,12 @@
       ],
       "crumbIcons": [
         "build",
+        "notifications",
         "notifications"
       ],
       "crumbLabels": [
         "Services",
+        "Notifications",
         "Notifications"
       ],
       "title": "Charging changes",
@@ -1788,10 +1860,12 @@
       ],
       "crumbIcons": [
         "build",
+        "notifications",
         "notifications"
       ],
       "crumbLabels": [
         "Services",
+        "Notifications",
         "Notifications"
       ],
       "title": "Game mode changes",
@@ -1806,10 +1880,12 @@
       ],
       "crumbIcons": [
         "build",
+        "notifications",
         "notifications"
       ],
       "crumbLabels": [
         "Services",
+        "Notifications",
         "Notifications"
       ],
       "title": "Do not disturb changes",
@@ -1824,10 +1900,12 @@
       ],
       "crumbIcons": [
         "build",
+        "notifications",
         "notifications"
       ],
       "crumbLabels": [
         "Services",
+        "Notifications",
         "Notifications"
       ],
       "title": "Audio output changes",
@@ -1842,10 +1920,12 @@
       ],
       "crumbIcons": [
         "build",
+        "notifications",
         "notifications"
       ],
       "crumbLabels": [
         "Services",
+        "Notifications",
         "Notifications"
       ],
       "title": "Audio input changes",
@@ -1860,10 +1940,12 @@
       ],
       "crumbIcons": [
         "build",
+        "notifications",
         "notifications"
       ],
       "crumbLabels": [
         "Services",
+        "Notifications",
         "Notifications"
       ],
       "title": "Caps lock changes",
@@ -1878,10 +1960,12 @@
       ],
       "crumbIcons": [
         "build",
+        "notifications",
         "notifications"
       ],
       "crumbLabels": [
         "Services",
+        "Notifications",
         "Notifications"
       ],
       "title": "Num lock changes",
@@ -1896,10 +1980,12 @@
       ],
       "crumbIcons": [
         "build",
+        "notifications",
         "notifications"
       ],
       "crumbLabels": [
         "Services",
+        "Notifications",
         "Notifications"
       ],
       "title": "Keyboard layout changes",
@@ -1914,10 +2000,12 @@
       ],
       "crumbIcons": [
         "build",
+        "notifications",
         "notifications"
       ],
       "crumbLabels": [
         "Services",
+        "Notifications",
         "Notifications"
       ],
       "title": "VPN changes",
@@ -1932,10 +2020,12 @@
       ],
       "crumbIcons": [
         "build",
+        "notifications",
         "notifications"
       ],
       "crumbLabels": [
         "Services",
+        "Notifications",
         "Notifications"
       ],
       "title": "Now playing",
@@ -2496,7 +2586,35 @@
       30,
       31,
       32,
-      33
+      33,
+      37,
+      38,
+      39,
+      40,
+      41,
+      42,
+      43,
+      44,
+      45,
+      46,
+      47,
+      48,
+      49,
+      50,
+      51,
+      52,
+      53,
+      54,
+      55,
+      56,
+      57,
+      58,
+      59,
+      60,
+      61,
+      62,
+      63,
+      64
     ],
     "active": [
       30,
@@ -3715,7 +3833,35 @@
       "30": 0.4,
       "31": 0.4,
       "32": 0.4,
-      "33": 0.4
+      "33": 0.4,
+      "37": 0.4,
+      "38": 0.4,
+      "39": 0.4,
+      "40": 0.4,
+      "41": 0.4,
+      "42": 0.4,
+      "43": 0.4,
+      "44": 0.4,
+      "45": 0.4,
+      "46": 0.4,
+      "47": 0.4,
+      "48": 0.4,
+      "49": 0.4,
+      "50": 0.4,
+      "51": 0.4,
+      "52": 0.4,
+      "53": 0.4,
+      "54": 0.4,
+      "55": 0.4,
+      "56": 0.4,
+      "57": 0.4,
+      "58": 0.4,
+      "59": 0.4,
+      "60": 0.4,
+      "61": 0.4,
+      "62": 0.4,
+      "63": 0.4,
+      "64": 0.4
     },
     "active": {
       "30": 1.0,

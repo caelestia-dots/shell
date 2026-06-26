@@ -118,26 +118,37 @@ def build_nav_map(nexus: Path, files: dict[str, Path]) -> dict[str, dict]:
     for i, (icon, label) in enumerate(registry):
         top_meta[i] = (icon, label)
 
-    # parentName -> {childPos: (icon, label)} from openSubPage() + nearby NavRow.
-    nav_children: dict[str, dict[int, tuple[str, str]]] = {}
+    # parentName -> {childPos: (icon, label, section)} from openSubPage() +
+    # nearby NavRow, remembering the section header the NavRow sits under.
+    nav_children: dict[str, dict[int, tuple[str, str, str]]] = {}
     for names in comps:
         for name in names:
             pf = files.get(name)
             if not pf:
                 continue
             pending_icon = pending_label = None
+            section = ""  # text of the most recent SectionHeader
+            expect_section = False  # next label line is that header's text
             for ln in read_lines(pf):
+                if SECTION_RE.match(ln):
+                    expect_section = True
+                    continue
+                ml = LABEL_RE.match(ln)
+                if ml:
+                    if expect_section:
+                        section = ml.group(1)
+                        expect_section = False
+                    else:
+                        pending_label = ml.group(1)
+                    continue
                 mi = ICON_RE.match(ln)
                 if mi:
                     pending_icon = mi.group(1)
-                ml = LABEL_RE.match(ln)
-                if ml:
-                    pending_label = ml.group(1)
                 mo = re.search(r"openSubPage\((\d+)\)", ln)
                 if mo:
                     pos = int(mo.group(1))
                     nav_children.setdefault(name, {})[pos] = (
-                        pending_icon or "tune", pending_label or "")
+                        pending_icon or "tune", pending_label or "", section)
                     pending_icon = pending_label = None
 
     nav: dict[str, dict] = {}
@@ -148,20 +159,26 @@ def build_nav_map(nexus: Path, files: dict[str, Path]) -> dict[str, dict]:
         main_icon, main_label = top_meta.get(top_idx, ("tune", main))
         nav[main] = {"pageIdx": top_idx, "subPath": [],
                      "crumbIcons": [main_icon], "crumbLabels": [main_label]}
-        for pos, (icon, label) in nav_children.get(main, {}).items():
+        for pos, (icon, label, section) in nav_children.get(main, {}).items():
             if pos >= len(names):
                 continue
             child = names[pos]
+            # Insert the section header (e.g. "Components") as a breadcrumb step
+            # between the parent page and the sub-page, when present.
+            labels = [main_label] + ([section] if section else []) + [label]
+            icons = [main_icon] + ([icon] if section else []) + [icon]
             nav[child] = {"pageIdx": top_idx, "subPath": [pos],
-                          "crumbIcons": [main_icon, icon],
-                          "crumbLabels": [main_label, label]}
-            for gpos, (gicon, glabel) in nav_children.get(child, {}).items():
+                          "crumbIcons": icons,
+                          "crumbLabels": labels}
+            for gpos, (gicon, glabel, gsection) in nav_children.get(child, {}).items():
                 if gpos >= len(names):
                     continue
+                glabels = labels + ([gsection] if gsection else []) + [glabel]
+                gicons = icons + ([gicon] if gsection else []) + [gicon]
                 nav[names[gpos]] = {
                     "pageIdx": top_idx, "subPath": [pos, gpos],
-                    "crumbIcons": [main_icon, icon, gicon],
-                    "crumbLabels": [main_label, label, glabel]}
+                    "crumbIcons": gicons,
+                    "crumbLabels": glabels}
     return nav
 
 
