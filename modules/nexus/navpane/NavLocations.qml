@@ -147,6 +147,7 @@ VerticalFadeFlickable {
             Layout.fillWidth: true
             implicitHeight: contentHeight
             interactive: false
+            cacheBuffer: 10000
             spacing: Tokens.spacing.extraSmall
 
             model: ScriptModel {
@@ -168,6 +169,18 @@ VerticalFadeFlickable {
                     property: "opacity"
                     from: 1
                     to: 0
+                }
+            }
+
+            move: Transition {
+                Anim {
+                    property: "y"
+                    type: Anim.StandardSmall
+                }
+                Anim {
+                    type: Anim.DefaultEffects
+                    property: "opacity"
+                    to: 1
                 }
             }
 
