@@ -27,6 +27,9 @@ Singleton {
     property var pendingConnection: null
     property var wirelessDeviceDetails: null
     property var ethernetDeviceDetails: null
+    // Public IP and ISP from an external lookup (for the router row).
+    property string publicIp: ""
+    property string isp: ""
     property list<var> ethernetDevices: []
     readonly property var activeEthernet: ethernetDevices.find(d => d.connected) ?? null
     property list<var> activeProcesses: []
@@ -952,6 +955,13 @@ Singleton {
         });
     }
 
+    // Looks up the public IP and ISP via ip-api.com (free, no token). Results
+    // populate publicIp / isp; failures (offline, blocked) leave them empty.
+    function getPublicIpInfo(): void {
+        publicIpProc.command = ["sh", "-c", "curl -s --max-time 5 http://ip-api.com/json/?fields=query,isp 2>/dev/null"];
+        publicIpProc.running = true;
+    }
+
     function getEthernetDeviceDetails(interfaceName: string, callback: var): void {
         if (!interfaceName || interfaceName.length === 0) {
             const activeInterface = root.ethernetInterfaces.find(iface => {
@@ -1254,6 +1264,23 @@ Singleton {
                 immediateCheckTimer.checkCount = 0;
             }
         }
+    }
+
+    Process {
+        id: publicIpProc
+
+        stdout: StdioCollector {
+            onStreamFinished: {
+                try {
+                    const data = JSON.parse(text.trim());
+                    root.publicIp = data.query || "";
+                    root.isp = data.isp || "";
+                } catch (e) {
+                    // Lookup failed (offline, blocked) — leave values empty.
+                }
+            }
+        }
+        stderr: StdioCollector {}
     }
 
     Process {
