@@ -17,15 +17,6 @@ PageBase {
 
     title: qsTr("Network")
 
-    // Load ethernet details (IP/DNS/gateway) and data usage when shown.
-    onVisibleChanged: if (visible) {
-        if (Nmcli.activeEthernet) {
-            Nmcli.getEthernetDeviceDetails("", () => {});
-            Nmcli.getEthernetDataUsage(Nmcli.activeEthernet.iface, () => {});
-            Nmcli.getEthernetSpeed(Nmcli.activeEthernet.iface);
-        }
-    }
-
     ColumnLayout {
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.top: parent.top
@@ -45,22 +36,6 @@ PageBase {
 
             interval: 100
             onTriggered: Nmcli.rescanWifi()
-        }
-
-        // Keep ethernet state fresh while the page is visible.
-        Timer {
-            running: root.visible
-            repeat: true
-            triggeredOnStart: true
-            interval: 5000
-            onTriggered: {
-                Nmcli.getEthernetInterfaces(() => {});
-                if (Nmcli.activeEthernet) {
-                    Nmcli.getEthernetDeviceDetails(Nmcli.activeEthernet.iface, () => {});
-                    Nmcli.getEthernetDataUsage(Nmcli.activeEthernet.iface, () => {});
-                    Nmcli.getEthernetSpeed(Nmcli.activeEthernet.iface);
-                }
-            }
         }
 
         Connections {
@@ -267,34 +242,6 @@ PageBase {
                     elide: Text.ElideRight
                 }
             }
-        }
-    }
-
-    component EthDetail: ColumnLayout {
-        id: ethDetail
-
-        required property string label
-        required property string value
-
-        visible: value.length > 0
-        spacing: 0
-
-        StyledText {
-            Layout.alignment: Qt.AlignRight
-            text: ethDetail.label
-            color: Colours.palette.m3onSurfaceVariant
-            font: Tokens.font.label.small
-            elide: Text.ElideRight
-            horizontalAlignment: Text.AlignRight
-        }
-
-        StyledText {
-            Layout.alignment: Qt.AlignRight
-            text: ethDetail.value
-            color: Colours.palette.m3outline
-            font: Tokens.font.label.small
-            elide: Text.ElideRight
-            horizontalAlignment: Text.AlignRight
         }
     }
 }
