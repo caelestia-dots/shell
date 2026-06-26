@@ -168,9 +168,9 @@ void Gpu::setUserType(Type value) {
     }
     const Type prevDerived = type();
     m_userType = value;
-    Q_EMIT userTypeChanged();
+    emit userTypeChanged();
     if (type() != prevDerived) {
-        Q_EMIT typeChanged();
+        emit typeChanged();
     }
 
     // Probe again when switching back to auto
@@ -185,9 +185,9 @@ void Gpu::setAutoType(Type value) {
     }
     const Type prevDerived = type();
     m_autoType = value;
-    Q_EMIT autoTypeChanged();
+    emit autoTypeChanged();
     if (type() != prevDerived) {
-        Q_EMIT typeChanged();
+        emit typeChanged();
     }
 }
 
@@ -196,7 +196,7 @@ void Gpu::setName(QString value) {
         return;
     }
     m_name = std::move(value);
-    Q_EMIT nameChanged();
+    emit nameChanged();
 }
 
 void Gpu::tick() {
@@ -209,11 +209,11 @@ void Gpu::tick() {
     } else {
         if (std::abs(m_percentage) > 0.0001) {
             m_percentage = 0.0;
-            Q_EMIT percentageChanged();
+            emit percentageChanged();
         }
         if (std::abs(m_temperature) > 0.05) {
             m_temperature = 0.0;
-            Q_EMIT temperatureChanged();
+            emit temperatureChanged();
         }
     }
 }
@@ -300,7 +300,7 @@ void Gpu::readGenericUsage() {
     const qreal newPerc = count > 0 ? sum / count / 100.0 : 0.0;
     if (std::abs(newPerc - m_percentage) > 0.0001) {
         m_percentage = newPerc;
-        Q_EMIT percentageChanged();
+        emit percentageChanged();
     }
 }
 
@@ -325,11 +325,11 @@ void Gpu::startNvidiaUsage() {
             const qreal temp = parts.at(1).trimmed().toDouble(&ok2);
             if (ok1 && std::abs(usage - m_percentage) > 0.0001) {
                 m_percentage = usage;
-                Q_EMIT percentageChanged();
+                emit percentageChanged();
             }
             if (ok2 && std::abs(temp - m_temperature) > 0.05) {
                 m_temperature = temp;
-                Q_EMIT temperatureChanged();
+                emit temperatureChanged();
             }
         });
 }
@@ -339,7 +339,7 @@ void Gpu::readGpuTemperature() {
     const qreal newTemp = t.value_or(0.0);
     if (std::abs(newTemp - m_temperature) > 0.05) {
         m_temperature = newTemp;
-        Q_EMIT temperatureChanged();
+        emit temperatureChanged();
     }
 }
 
