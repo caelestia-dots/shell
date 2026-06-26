@@ -32,7 +32,7 @@ def read_lines(path: Path) -> tuple[str, ...]:
     """Read a file's lines, cached so each page file is only read once."""
     return tuple(path.read_text().splitlines())
 
-ROW_RE = re.compile(r'^\s*(ToggleRow|SliderRow|SelectRow|StepperRow|NavRow)\s*\{')
+ROW_RE = re.compile(r'^\s*(ToggleRow|SliderRow|SelectRow|StepperRow|NavRow|InfoRow)\s*\{')
 LABEL_RE = re.compile(r'^\s*(?:label|text):\s*qsTr\("([^"]+)"\)')
 ANCHOR_RE = re.compile(r'^\s*settingAnchor:\s*"([^"]+)"')
 ICON_RE = re.compile(r'^\s*icon:\s*"([^"]+)"')
@@ -172,7 +172,17 @@ def build_nav_map(nexus: Path, files: dict[str, Path]) -> dict[str, dict]:
         main_icon, main_label = top_meta.get(top_idx, ("tune", main))
         nav[main] = {"pageIdx": top_idx, "subPath": [],
                      "crumbIcons": [main_icon], "crumbLabels": [main_label]}
-        for pos, (icon, label, section) in nav_children.get(main, {}).items():
+        children = dict(nav_children.get(main, {}))
+        # Fallback: a StackPage may list sub-pages (pos > 0) whose openSubPage()
+        # call lives in a separate component file we don't scan (e.g. the
+        # Ethernet detail page is opened from EthernetSection.qml). Link any such
+        # sub-page by its position, deriving a label from its component name.
+        for pos in range(1, len(names)):
+            if pos not in children:
+                label = re.sub(r"(Detail)?Page$", "", names[pos])
+                label = re.sub(r"(?<!^)(?=[A-Z])", " ", label)
+                children[pos] = (main_icon, label, "")
+        for pos, (icon, label, section) in children.items():
             if pos >= len(names):
                 continue
             child = names[pos]
