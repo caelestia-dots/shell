@@ -86,7 +86,7 @@ ColumnLayout {
 
     Detail {
         icon: "account_tree"
-        text: qsTr("Process id: %1").arg(root.client?.lastIpcObject.pid ?? -1)
+        text: qsTr("Process id: %1").arg(String(root.client?.lastIpcObject.pid ?? -1))
         color: Colours.palette.m3primary
     }
 
