@@ -66,14 +66,14 @@ Scope {
         onResponseRequiredChanged: {
             if (!responseRequired)
                 return;
-            
+
             respond(root.buffer);
             root.buffer = "";
         }
 
         onCompleted: res => {
             if (res === PamResult.Success)
-            return root.lock.unlock();
+                return root.lock.unlock();
 
             if (res === PamResult.Error)
                 root.state = "error";
@@ -122,7 +122,7 @@ Scope {
                     abort();
                     errorRetry.restart();
                 }
-              } else if (res === PamResult.MaxTries) {
+            } else if (res === PamResult.MaxTries) {
                 // Isn't actually the real max tries as pam only reports completed
                 // when max tries is reached.
                 tries++;
