@@ -42,7 +42,9 @@ Singleton {
             }
         }
 
-        const ranked = Object.keys(scores).filter(id => hitCounts[id] === tokens.length).sort((a, b) => scores[b] - scores[a]).slice(0, 12);
+        // Sort by score, breaking ties by id so the order is stable (otherwise
+        // entries with equal scores can be dropped arbitrarily by the limit).
+        const ranked = Object.keys(scores).filter(id => hitCounts[id] === tokens.length).sort((a, b) => scores[b] - scores[a] || (parseInt(a) - parseInt(b))).slice(0, 25);
 
         const all = entries.instances;
         return ranked.map(id => all[parseInt(id)]).filter(e => e !== undefined);
