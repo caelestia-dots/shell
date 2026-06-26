@@ -63,6 +63,8 @@ ColumnLayout {
         if (!nState.searchAnchor)
             return;
         scrollRetry.tries = 0;
+        scrollRetry.lastHeight = -1;
+        scrollRetry.stableFrames = 0;
         scrollRetry.restart();
     }
 
@@ -81,14 +83,24 @@ ColumnLayout {
         id: scrollRetry
 
         property int tries: 0
+        property real lastHeight: -1
+        property int stableFrames: 0
 
         interval: 16
         repeat: true
         onTriggered: {
-            // Wait for the page layout to settle (content taller than the
-            // viewport, or a few frames elapsed) before scrolling, otherwise a
-            // freshly loaded page reports stale positions and overshoots.
-            const ready = flickable.contentHeight > flickable.height || tries >= 8;
+            // Pages like the ethernet detail load their content asynchronously
+            // (device info, IP config), so the layout keeps growing for a while.
+            // Wait until contentHeight has held steady for a few frames (or we've
+            // waited long enough) before scrolling, so the target doesn't drift.
+            const h = flickable.contentHeight;
+            if (h === lastHeight && h > flickable.height)
+                stableFrames++;
+            else
+                stableFrames = 0;
+            lastHeight = h;
+
+            const ready = stableFrames >= 3 || tries >= 30;
             if (ready) {
                 if (root.scrollToAnchor(root.nState.searchAnchor))
                     root.nState.searchAnchor = "";
