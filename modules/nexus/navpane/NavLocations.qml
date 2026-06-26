@@ -204,7 +204,17 @@ VerticalFadeFlickable {
                     anchors.fill: parent
                     radius: parent.radius
 
-                    onClicked: root.nState.jumpToSetting(result.modelData.pageIdx, result.modelData.subPath, result.modelData.anchor)
+                    onClicked: {
+                        // Ethernet detail settings need a selected interface to
+                        // show the right device; a search deep-link has none, so
+                        // point it at the connected (or first) ethernet device.
+                        if (result.modelData.anchor.startsWith("ethernet-")) {
+                            const active = Nmcli.activeEthernet ?? Nmcli.ethernetDevices[0] ?? null;
+                            if (active)
+                                root.nState.selectedEthernetInterface = active.iface;
+                        }
+                        root.nState.jumpToSetting(result.modelData.pageIdx, result.modelData.subPath, result.modelData.anchor);
+                    }
                 }
 
                 ColumnLayout {
