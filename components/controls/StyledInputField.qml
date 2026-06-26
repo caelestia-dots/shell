@@ -21,14 +21,14 @@ Item {
     signal editingFinished
 
     implicitWidth: 70
-    implicitHeight: inputField.implicitHeight + Tokens.padding.small * 2
+    implicitHeight: inputField.implicitHeight + Tokens.padding.small
 
     StyledRect {
         id: container
 
         anchors.fill: parent
         color: inputHover.containsMouse || inputField.activeFocus ? Colours.layer(Colours.palette.m3surfaceContainer, 3) : Colours.layer(Colours.palette.m3surfaceContainer, 2)
-        radius: Tokens.rounding.small
+        radius: Tokens.rounding.medium
         border.width: 1
         border.color: inputField.activeFocus ? Colours.palette.m3primary : Qt.alpha(Colours.palette.m3outline, 0.3)
         opacity: root.enabled ? 1 : 0.5
@@ -54,7 +54,7 @@ Item {
             id: inputField
 
             anchors.centerIn: parent
-            width: parent.width - Tokens.padding.normal
+            width: parent.width - Tokens.padding.medium
             horizontalAlignment: root.horizontalAlignment
             validator: root.validator
             readOnly: root.readOnly

@@ -17,14 +17,18 @@ Singleton {
 
     readonly property string icon: cc ? Icons.getWeatherIcon(cc.weatherCode) : "cloud_alert"
     readonly property string description: cc?.weatherDesc ?? qsTr("No weather")
-    readonly property string temp: GlobalConfig.services.useFahrenheit ? `${cc?.tempF ?? 0}°F` : `${cc?.tempC ?? 0}°C`
-    readonly property string feelsLike: GlobalConfig.services.useFahrenheit ? `${cc?.feelsLikeF ?? 0}°F` : `${cc?.feelsLikeC ?? 0}°C`
+    readonly property string temp: formatTemp(cc?.tempC)
+    readonly property string feelsLike: formatTemp(cc?.feelsLikeC)
     readonly property int humidity: cc?.humidity ?? 0
     readonly property real windSpeed: cc?.windSpeed ?? 0
     readonly property string sunrise: cc ? Qt.formatDateTime(new Date(cc.sunrise), GlobalConfig.services.useTwelveHourClock ? "h:mm A" : "h:mm") : "--:--"
     readonly property string sunset: cc ? Qt.formatDateTime(new Date(cc.sunset), GlobalConfig.services.useTwelveHourClock ? "h:mm A" : "h:mm") : "--:--"
 
     readonly property var cachedCities: new Map()
+
+    function formatTemp(temp: var): string {
+        return GlobalConfig.services.useFahrenheit ? `${temp !== undefined ? Math.round(toFahrenheit(temp)) : "--"}°F` : `${temp !== undefined ? Math.round(temp) : "--"}°C`;
+    }
 
     function reload(): void {
         const configLocation = GlobalConfig.services.weatherLocation;
@@ -48,6 +52,55 @@ Singleton {
         }
     }
 
+    function fixCityName(cityName: string): string {
+        if (!cityName)
+            return "";
+        const mapping = {
+            // Polish
+            "Poznan": "Poznań",
+            "Wroclaw": "Wrocław",
+            "Krakow": "Kraków",
+            "Gdansk": "Gdańsk",
+            "Lodz": "Łódź",
+            "Rzeszow": "Rzeszów",
+            "Torun": "Toruń",
+            "Bialystok": "Białystok",
+            "Czestochowa": "Częstochowa",
+            "Plock": "Płock",
+            "Ruda Slaska": "Ruda Śląska",
+            "Dabrowa Gornicza": "Dąbrowa Górnicza",
+            "Elblag": "Elbląg",
+            "Gorzow Wielkopolski": "Gorzów Wielkopolski",
+            "Zielona Gora": "Zielona Góra",
+            "Slupsk": "Słupsk",
+
+            // German
+            "Munchen": "München",
+            "Koln": "Köln",
+            "Dusseldorf": "Düsseldorf",
+            "Nurnberg": "Nürnberg",
+
+            // French & Spanish & Portuguese
+            "Sao Paulo": "São Paulo",
+            "Montreal": "Montréal",
+            "Quebec": "Québec",
+            "Bogota": "Bogotá",
+            "Medellin": "Medellín",
+            "Cordoba": "Córdoba",
+
+            // Turkish
+            "Istanbul": "İstanbul",
+            "Izmir": "İzmir",
+
+            // Scandinavian & others
+            "Malmo": "Malmö",
+            "Goteborg": "Göteborg",
+            "Zurich": "Zürich",
+            "Geneve": "Genève"
+        };
+        return mapping[cityName] || cityName;
+    }
+
     function fetchCityFromCoords(coords: string): void {
         if (cachedCities.has(coords)) {
             city = cachedCities.get(coords);
@@ -55,29 +108,30 @@ Singleton {
         }
 
         const [lat, lon] = coords.split(",").map(s => s.trim());
+        const lang = Qt.locale().name.split("_")[0] || "en";
 
         const fallbackToBigDataCloud = () => {
-            const fallbackUrl = `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lon}&localityLanguage=en`;
+            const fallbackUrl = `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lon}&localityLanguage=${lang}`;
             Requests.get(fallbackUrl, text => {
                 const geo = JSON.parse(text);
                 const geoCity = geo.city || geo.locality;
                 if (geoCity) {
-                    city = geoCity;
-                    cachedCities.set(coords, geoCity);
+                    city = fixCityName(geoCity);
+                    cachedCities.set(coords, city);
                 } else {
                     city = "Unknown City";
                 }
             });
         };
 
-        const nominatimUrl = `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=geocodejson`;
+        const nominatimUrl = `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=geocodejson&accept-language=${lang}`;
         Requests.get(nominatimUrl, text => {
             const geo = JSON.parse(text).features?.[0]?.properties.geocoding;
             if (geo) {
                 const geoCity = geo.type === "city" ? geo.name : geo.city;
                 if (geoCity) {
-                    city = geoCity;
-                    cachedCities.set(coords, geoCity);
+                    city = fixCityName(geoCity);
+                    cachedCities.set(coords, city);
                     return;
                 }
             }
@@ -86,14 +140,15 @@ Singleton {
     }
 
     function fetchCoordsFromCity(cityName: string): void {
-        const url = `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(cityName)}&count=1&language=en&format=json`;
+        const lang = Qt.locale().name.split("_")[0] || "en";
+        const url = `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(cityName)}&count=1&language=${lang}&format=json`;
 
         Requests.get(url, text => {
             const json = JSON.parse(text);
             if (json.results && json.results.length > 0) {
                 const result = json.results[0];
                 loc = result.latitude + "," + result.longitude;
-                city = result.name;
+                city = fixCityName(result.name);
             } else {
                 loc = "";
                 reload();
@@ -114,10 +169,8 @@ Singleton {
             cc = {
                 weatherCode: json.current.weather_code,
                 weatherDesc: getWeatherCondition(json.current.weather_code),
-                tempC: Math.round(json.current.temperature_2m),
-                tempF: Math.round(toFahrenheit(json.current.temperature_2m)),
-                feelsLikeC: Math.round(json.current.apparent_temperature),
-                feelsLikeF: Math.round(toFahrenheit(json.current.apparent_temperature)),
+                tempC: json.current.temperature_2m,
+                feelsLikeC: json.current.apparent_temperature,
                 humidity: json.current.relative_humidity_2m,
                 windSpeed: json.current.wind_speed_10m,
                 isDay: json.current.is_day,
@@ -129,10 +182,8 @@ Singleton {
             for (let i = 0; i < json.daily.time.length; i++)
                 forecastList.push({
                     date: json.daily.time[i].replace(/-/g, "/"),
-                    maxTempC: Math.round(json.daily.temperature_2m_max[i]),
-                    maxTempF: Math.round(toFahrenheit(json.daily.temperature_2m_max[i])),
-                    minTempC: Math.round(json.daily.temperature_2m_min[i]),
-                    minTempF: Math.round(toFahrenheit(json.daily.temperature_2m_min[i])),
+                    maxTempC: json.daily.temperature_2m_max[i],
+                    minTempC: json.daily.temperature_2m_min[i],
                     weatherCode: json.daily.weather_code[i],
                     icon: Icons.getWeatherIcon(json.daily.weather_code[i])
                 });
@@ -150,7 +201,7 @@ Singleton {
                     timestamp: json.hourly.time[i],
                     hour: time.getHours(),
                     tempC: Math.round(json.hourly.temperature_2m[i]),
-                    tempF: Math.round(toFahrenheit(json.hourly.temperature_2m[i])),
+                    precipChance: json.hourly.precipitation_probability[i],
                     weatherCode: json.hourly.weather_code[i],
                     icon: Icons.getWeatherIcon(json.hourly.weather_code[i])
                 });
@@ -169,7 +220,7 @@ Singleton {
 
         const [lat, lon] = loc.split(",").map(s => s.trim());
         const baseUrl = "https://api.open-meteo.com/v1/forecast";
-        const params = ["latitude=" + lat, "longitude=" + lon, "hourly=weather_code,temperature_2m", "daily=weather_code,temperature_2m_max,temperature_2m_min,sunrise,sunset", "current=temperature_2m,relative_humidity_2m,apparent_temperature,is_day,weather_code,wind_speed_10m", "timezone=auto", "forecast_days=7"];
+        const params = ["latitude=" + lat, "longitude=" + lon, "hourly=weather_code,temperature_2m,precipitation_probability", "daily=weather_code,temperature_2m_max,temperature_2m_min,sunrise,sunset", "current=temperature_2m,relative_humidity_2m,apparent_temperature,is_day,weather_code,wind_speed_10m", "timezone=auto", "forecast_days=7"];
 
         return baseUrl + "?" + params.join("&");
     }

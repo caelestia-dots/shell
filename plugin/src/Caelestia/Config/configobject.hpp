@@ -102,6 +102,12 @@ public:
 
     [[nodiscard]] bool isPropertyLoaded(const QString& name) const;
     [[nodiscard]] QString propertyPath(const QString& name) const;
+
+    // First property index past QObject's own (objectName). ConfigObject declares no
+    // properties, so this is where every subclass's config properties begin — including
+    // ones inherited from an intermediate config class (e.g. IconFontStyleConfig). Use
+    // this instead of metaObject()->propertyOffset(), which excludes inherited properties.
+    [[nodiscard]] static int basePropertyOffset();
     [[nodiscard]] bool isOverlay() const;
     // Returns true only on overlays — global singleton always returns false.
     [[nodiscard]] bool isGlobalOnly(const QString& name) const;

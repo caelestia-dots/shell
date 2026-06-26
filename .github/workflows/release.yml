@@ -25,6 +25,7 @@ jobs:
             --exclude='flake.lock' \
             --exclude='flake.nix' \
             . release
+          echo "$GITHUB_SHA" > release/REVISION
           tar -czf caelestia-shell-${{ github.ref_name }}.tar.gz release
           cp caelestia-shell-${{ github.ref_name }}.tar.gz caelestia-shell-latest.tar.gz
 
