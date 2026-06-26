@@ -109,6 +109,19 @@ def parse_page_comps(nexus: Path) -> list[list[str]]:
     return comps
 
 
+def dedup_crumbs(labels: list[str], icons: list[str]) -> tuple[list[str], list[str]]:
+    """Drop consecutive duplicate labels (e.g. a section header that repeats the
+    page name), keeping icons aligned."""
+    out_labels: list[str] = []
+    out_icons: list[str] = []
+    for lbl, ico in zip(labels, icons):
+        if out_labels and out_labels[-1] == lbl:
+            continue
+        out_labels.append(lbl)
+        out_icons.append(ico)
+    return out_labels, out_icons
+
+
 def build_nav_map(nexus: Path, files: dict[str, Path]) -> dict[str, dict]:
     comps = parse_page_comps(nexus)
     registry = parse_page_registry(nexus)
@@ -167,6 +180,7 @@ def build_nav_map(nexus: Path, files: dict[str, Path]) -> dict[str, dict]:
             # between the parent page and the sub-page, when present.
             labels = [main_label] + ([section] if section else []) + [label]
             icons = [main_icon] + ([icon] if section else []) + [icon]
+            labels, icons = dedup_crumbs(labels, icons)
             nav[child] = {"pageIdx": top_idx, "subPath": [pos],
                           "crumbIcons": icons,
                           "crumbLabels": labels}
@@ -175,6 +189,7 @@ def build_nav_map(nexus: Path, files: dict[str, Path]) -> dict[str, dict]:
                     continue
                 glabels = labels + ([gsection] if gsection else []) + [glabel]
                 gicons = icons + ([gicon] if gsection else []) + [gicon]
+                glabels, gicons = dedup_crumbs(glabels, gicons)
                 nav[names[gpos]] = {
                     "pageIdx": top_idx, "subPath": [pos, gpos],
                     "crumbIcons": gicons,

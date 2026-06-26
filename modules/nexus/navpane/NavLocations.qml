@@ -229,9 +229,12 @@ VerticalFadeFlickable {
                         StyledText {
                             Layout.fillWidth: true
                             text: {
-                                const crumbs = result.modelData.crumbLabels.join("  \u203a  ");
+                                const labels = result.modelData.crumbLabels;
                                 const section = result.modelData.section;
-                                return section ? `${crumbs}  \u203a  ${section}` : crumbs;
+                                // Skip the section if it just repeats the last
+                                // breadcrumb label (e.g. page and section share a name).
+                                const parts = section && section !== labels[labels.length - 1] ? labels.concat(section) : labels;
+                                return parts.join("  \u203a  ");
                             }
                             color: Colours.palette.m3onSurfaceVariant
                             font: Tokens.font.label.small
