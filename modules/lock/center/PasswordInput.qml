@@ -65,7 +65,7 @@ StyledRect {
 
             AnimLoader {
                 anchors.centerIn: parent
-                anchors.verticalCenterOffset: sourceComp === iconComp ? 1 : 0
+                anchors.verticalCenterOffset: sourceComponent === iconComp ? 1 : 0
                 sourceComp: (root.lock.pam.passwd.active || root.lock.pam.howdy.active) ? loadingComp : iconComp
             }
 

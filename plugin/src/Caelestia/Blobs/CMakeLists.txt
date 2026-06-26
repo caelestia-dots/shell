@@ -1,11 +1,11 @@
 qml_module(caelestia-blobs
     URI Caelestia.Blobs
     SOURCES
-        blobgroup.hpp blobgroup.cpp
-        blobshape.hpp blobshape.cpp
-        blobrect.hpp blobrect.cpp
-        blobinvertedrect.hpp blobinvertedrect.cpp
-        blobmaterial.hpp blobmaterial.cpp
+        blobgroup.cpp
+        blobshape.cpp
+        blobrect.cpp
+        blobinvertedrect.cpp
+        blobmaterial.cpp
     LIBRARIES
         Qt::Quick
 )
