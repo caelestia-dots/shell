@@ -30,9 +30,8 @@ Scope {
         }
 
         if (event.key === Qt.Key_Enter || event.key === Qt.Key_Return) {
-            if (buffer.length === 0) {
-                if (howdy.available)
-                    howdy.trigger();
+            if (buffer.length === 0 && howdy.available && !howdy.active) {
+                howdy.start();
             } else {
                 if (howdy.active)
                     howdy.abort();
@@ -73,7 +72,7 @@ Scope {
 
         onCompleted: res => {
             if (res === PamResult.Success)
-                return root.lock.unlock();
+                root.lock.unlock();
 
             if (res === PamResult.Error)
                 root.state = "error";
@@ -113,7 +112,7 @@ Scope {
                 return;
 
             if (res === PamResult.Success)
-                return root.lock.unlock();
+                root.lock.unlock();
 
             if (res === PamResult.Error) {
                 root.fprintState = "error";
@@ -146,18 +145,12 @@ Scope {
 
         property bool available: false
 
-        function trigger(): void {
-            if (!available || !root.lock.secure)
-                return;
-            start();
-        }
-
         config: "howdy"
         configDirectory: Quickshell.shellDir + "/assets/pam.d"
 
         onCompleted: res => {
             if (res === PamResult.Success)
-                return root.lock.unlock();
+                root.lock.unlock();
             else
                 abort();
         }
@@ -168,7 +161,7 @@ Scope {
 
         command: ["sh", "-c", "fprintd-list $USER"]
 
-        onExited: (code, exitStatus) => { // qmllint disable signal-handler-parameters
+        onExited: code => { // qmllint disable signal-handler-parameters
             fprint.available = code === 0;
             fprint.checkAvail();
         }
@@ -179,7 +172,7 @@ Scope {
 
         command: ["sh", "-c", "command -v howdy"]
 
-        onExited: (code, exitStatus) => { // qmllint disable signal-handler-parameters
+        onExited: code => { // qmllint disable signal-handler-parameters
             howdy.available = code === 0;
         }
     }

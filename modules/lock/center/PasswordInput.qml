@@ -75,8 +75,6 @@ StyledRect {
                 MaterialIcon {
                     animate: true
                     text: {
-                        if (root.lock.pam.howdy.active)
-                            return "face";
                         if (root.lock.pam.fprint.tries >= GlobalConfig.lock.maxFprintTries)
                             return "fingerprint_off";
                         if (root.lock.pam.fprint.active)
