@@ -3,7 +3,6 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import QtQuick.Layouts
 import Caelestia.Config
-import qs.components
 import qs.modules.nexus.common
 
 PageBase {
@@ -24,7 +23,6 @@ PageBase {
         }
 
         ToggleRow {
-            Layout.fillWidth: true
             first: true
             text: qsTr("Enabled")
             checked: Config.sidebar.enabled
@@ -32,7 +30,6 @@ PageBase {
         }
 
         StepperRow {
-            Layout.fillWidth: true
             last: true
             label: qsTr("Drag threshold")
             subtext: qsTr("Pixels dragged before the sidebar opens")

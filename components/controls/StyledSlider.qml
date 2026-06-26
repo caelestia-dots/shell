@@ -177,7 +177,9 @@ Slider {
                 root.interaction(posBinding.value);
         }
         onReleased: e => {
-            root.interaction(posBinding.value);
+            const clickPos = e.x / width;
+            const finalPos = mouse.dragMovement !== 0 ? posBinding.value : CUtils.clamp(clickPos, 0, 1);
+            root.interaction(finalPos);
             widthBehavior.enabled = true;
             dragMovement = 0;
         }

@@ -16,7 +16,7 @@
     };
 
     m3shapes = {
-      url = "github:soramanew/m3shapes/356825d31f16052a782735cce264331cba0cb71b";
+      url = "github:soramanew/m3shapes/bdc327b29f95394a732baf3c9b19658ba23755b6";
       flake = false;
     };
   };

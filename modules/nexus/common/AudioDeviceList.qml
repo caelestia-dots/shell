@@ -64,7 +64,7 @@ ItemList {
                     anchors.centerIn: parent
                     text: root.iconName
                     color: device.active ? Colours.palette.m3onPrimary : Colours.palette.m3onSecondaryContainer
-                    font: Tokens.font.icon.medium
+                    fontStyle: Tokens.font.icon.medium
                     fill: device.active ? 1 : 0
 
                     Behavior on fill {
@@ -83,7 +83,7 @@ ItemList {
             MaterialIcon {
                 text: "check"
                 color: Colours.palette.m3primary
-                font: Tokens.font.icon.medium
+                fontStyle: Tokens.font.icon.medium
                 opacity: device.active ? 1 : 0
 
                 Behavior on opacity {

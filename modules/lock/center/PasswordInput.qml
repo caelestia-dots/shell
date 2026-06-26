@@ -1,5 +1,8 @@
+pragma ComponentBehavior: Bound
+
 import QtQuick
 import QtQuick.Layouts
+import M3Shapes
 import Caelestia.Config
 import qs.components
 import qs.components.controls
@@ -8,10 +11,14 @@ import qs.services
 StyledRect {
     id: root
 
+    required property real centerScale
     required property int centerWidth
     required property var lock
 
-    implicitWidth: centerWidth * 0.8
+    implicitWidth: {
+        const w = centerWidth * 0.8;
+        return lock.pam.buffer ? w : Math.min(w, inputField.placeholderWidth + iconWrapper.implicitWidth + enterButton.implicitWidth + input.spacing * 2 + Tokens.padding.medium * 2);
+    }
     implicitHeight: input.implicitHeight + Tokens.padding.small
 
     color: Colours.tPalette.m3surfaceContainer
@@ -33,6 +40,10 @@ StyledRect {
         root.lock.pam.handleKey(event);
     }
 
+    Behavior on implicitWidth {
+        Anim {}
+    }
+
     StateLayer {
         hoverEnabled: false
         cursorShape: Qt.IBeamCursor
@@ -47,44 +58,39 @@ StyledRect {
         spacing: Tokens.spacing.medium
 
         Item {
+            id: iconWrapper
+
             Layout.fillHeight: true
             implicitWidth: height
 
-            MaterialIcon {
-                id: fprintIcon
-
+            AnimLoader {
                 anchors.centerIn: parent
-                animate: true
-                text: {
-                    if (root.lock.pam.fprint.tries >= GlobalConfig.lock.maxFprintTries)
-                        return "fingerprint_off";
-                    if (root.lock.pam.fprint.active)
-                        return "fingerprint";
-                    return "lock";
-                }
-                color: root.lock.pam.fprint.tries >= GlobalConfig.lock.maxFprintTries ? Colours.palette.m3error : Colours.palette.m3onSurface
-                opacity: root.lock.pam.passwd.active ? 0 : 1
+                anchors.verticalCenterOffset: sourceComponent === iconComp ? 1 : 0
+                sourceComp: root.lock.pam.passwd.active ? loadingComp : iconComp
+            }
 
-                Behavior on opacity {
-                    Anim {
-                        type: Anim.DefaultEffects
+            Component {
+                id: iconComp
+
+                MaterialIcon {
+                    animate: true
+                    text: {
+                        if (root.lock.pam.fprint.tries >= GlobalConfig.lock.maxFprintTries)
+                            return "fingerprint_off";
+                        if (root.lock.pam.fprint.active)
+                            return "fingerprint";
+                        return "lock";
                     }
+                    color: root.lock.pam.fprint.tries >= GlobalConfig.lock.maxFprintTries ? Colours.palette.m3error : Colours.palette.m3onSurfaceVariant
+                    fontStyle: Tokens.font.icon.builders.medium.scale(root.centerScale).build()
                 }
             }
 
-            Loader {
-                anchors.fill: parent
-                anchors.margins: Tokens.padding.small
+            Component {
+                id: loadingComp
 
-                active: opacity > 0
-                opacity: root.lock.pam.passwd.active ? 1 : 0
-
-                sourceComponent: LoadingIndicator {}
-
-                Behavior on opacity {
-                    Anim {
-                        type: Anim.DefaultEffects
-                    }
+                LoadingIndicator {
+                    implicitSize: iconWrapper.height - Tokens.padding.small * 2
                 }
             }
         }
@@ -95,19 +101,45 @@ StyledRect {
             Layout.fillWidth: true
             Layout.fillHeight: true
 
+            centerScale: root.centerScale
             pam: root.lock.pam
         }
 
-        StyledRect {
+        Item {
+            id: enterButton
+
             implicitWidth: implicitHeight
-            implicitHeight: enterIcon.implicitHeight + Tokens.padding.small
+            implicitHeight: {
+                const h = enterIcon.implicitHeight + Tokens.padding.extraSmall * 2;
+                return h % 2 === 0 ? h : h + 1;
+            }
 
-            color: root.lock.pam.buffer ? Colours.palette.m3primary : Colours.layer(Colours.palette.m3surfaceContainerHigh, 2)
-            radius: Tokens.rounding.full
+            MaterialShape {
+                anchors.fill: parent
 
-            StateLayer {
-                color: root.lock.pam.buffer ? Colours.palette.m3onPrimary : Colours.palette.m3onSurface
-                onClicked: root.lock.pam.passwd.start()
+                color: root.lock.pam.buffer ? Colours.palette.m3primary : Colours.layer(Colours.palette.m3surfaceContainerHigh, 2)
+                shape: root.lock.pam.buffer ? MaterialShape.Arrow : MaterialShape.Circle
+                scale: !root.lock.pam.buffer ? 1 : mouse.pressed ? 0.6 : mouse.containsMouse ? 0.8 : 0.7
+                rotation: 90
+
+                Behavior on scale {
+                    Anim {
+                        type: Anim.FastSpatial
+                    }
+                }
+
+                Behavior on color {
+                    CAnim {}
+                }
+
+                MouseArea {
+                    id: mouse
+
+                    anchors.fill: parent
+                    hoverEnabled: true
+                    cursorShape: root.lock.pam.buffer ? Qt.PointingHandCursor : Qt.ArrowCursor
+                    onClicked: root.lock.pam.buffer && root.lock.pam.passwd.start()
+                }
             }
 
             MaterialIcon {
@@ -115,8 +147,15 @@ StyledRect {
 
                 anchors.centerIn: parent
                 text: "arrow_forward"
-                color: root.lock.pam.buffer ? Colours.palette.m3onPrimary : Colours.palette.m3onSurface
-                fontStyle: Tokens.font.icon.size(Tokens.font.icon.large.pointSize).weight(Font.Medium).build()
+                color: Colours.palette.m3onSurfaceVariant
+                fontStyle: Tokens.font.icon.builders.medium.scale(root.centerScale * 1.2).build()
+                opacity: root.lock.pam.buffer ? 0 : 1
+
+                Behavior on opacity {
+                    Anim {
+                        type: Anim.DefaultEffects
+                    }
+                }
             }
         }
     }

@@ -17,7 +17,6 @@ PageBase {
         spacing: Tokens.spacing.extraSmall / 2
 
         StepperRow {
-            Layout.fillWidth: true
             first: true
             label: qsTr("Shown")
             subtext: qsTr("Number of workspaces displayed")
@@ -29,28 +28,24 @@ PageBase {
         }
 
         ToggleRow {
-            Layout.fillWidth: true
             text: qsTr("Active indicator")
             checked: Config.bar.workspaces.activeIndicator
             onToggled: GlobalConfig.bar.workspaces.activeIndicator = checked
         }
 
         ToggleRow {
-            Layout.fillWidth: true
             text: qsTr("Active trail")
             checked: Config.bar.workspaces.activeTrail
             onToggled: GlobalConfig.bar.workspaces.activeTrail = checked
         }
 
         ToggleRow {
-            Layout.fillWidth: true
             text: qsTr("Occupied background")
             checked: Config.bar.workspaces.occupiedBg
             onToggled: GlobalConfig.bar.workspaces.occupiedBg = checked
         }
 
         ToggleRow {
-            Layout.fillWidth: true
             text: qsTr("Show windows")
             subtext: qsTr("Show icons of open windows on each workspace")
             checked: Config.bar.workspaces.showWindows
@@ -58,14 +53,12 @@ PageBase {
         }
 
         ToggleRow {
-            Layout.fillWidth: true
             text: qsTr("Windows on special workspaces")
             checked: Config.bar.workspaces.showWindowsOnSpecialWorkspaces
             onToggled: GlobalConfig.bar.workspaces.showWindowsOnSpecialWorkspaces = checked
         }
 
         StepperRow {
-            Layout.fillWidth: true
             label: qsTr("Max window icons")
             value: Config.bar.workspaces.maxWindowIcons
             from: 0
@@ -75,7 +68,6 @@ PageBase {
         }
 
         ToggleRow {
-            Layout.fillWidth: true
             last: true
             text: qsTr("Per-monitor workspaces")
             subtext: qsTr("Show each monitor's workspaces independently")

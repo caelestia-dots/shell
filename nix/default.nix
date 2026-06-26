@@ -7,7 +7,6 @@
   fish,
   ddcutil,
   brightnessctl,
-  app2unit,
   networkmanager,
   lm_sensors,
   swappy,
@@ -41,7 +40,6 @@
       fish
       ddcutil
       brightnessctl
-      app2unit
       networkmanager
       lm_sensors
       swappy

@@ -17,7 +17,6 @@ PageBase {
         spacing: Tokens.spacing.extraSmall / 2
 
         ToggleRow {
-            Layout.fillWidth: true
             first: true
             text: qsTr("Background")
             checked: Config.bar.clock.background
@@ -25,14 +24,12 @@ PageBase {
         }
 
         ToggleRow {
-            Layout.fillWidth: true
             text: qsTr("Show date")
             checked: Config.bar.clock.showDate
             onToggled: GlobalConfig.bar.clock.showDate = checked
         }
 
         ToggleRow {
-            Layout.fillWidth: true
             last: true
             text: qsTr("Show icon")
             checked: Config.bar.clock.showIcon

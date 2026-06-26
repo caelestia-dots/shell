@@ -52,7 +52,7 @@ ColumnLayout {
         }
         color: Config.bar.workspaces.occupiedBg || root.isOccupied || root.activeWsId === root.ws ? Colours.palette.m3onSurface : Colours.layer(Colours.palette.m3outlineVariant, 2)
         verticalAlignment: Qt.AlignVCenter
-        font.family: "Rubik" // Hard code rubik for now since google sans doesn't play well with certain unicode symbols apparently
+        font.family: Tokens.font.workspaces
     }
 
     Loader {
