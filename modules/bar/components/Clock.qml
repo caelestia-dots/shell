@@ -59,17 +59,17 @@ StyledRect {
                     font: root.font.scale(1.1).build()
                     color: root.colour
                 }
-            }
-        }
 
-        Rectangle {
-            Layout.fillWidth: true
-            Layout.leftMargin: -Tokens.padding.extraSmall
-            Layout.rightMargin: -Tokens.padding.extraSmall
-            Layout.bottomMargin: 1
-            visible: Config.bar.clock.showDate
-            implicitHeight: 1
-            color: Colours.palette.m3outlineVariant
+                StyledRect {
+                    Layout.fillWidth: true
+                    Layout.leftMargin: -Tokens.padding.extraSmall
+                    Layout.rightMargin: -Tokens.padding.extraSmall
+                    Layout.topMargin: 4
+                    Layout.bottomMargin: Tokens.padding.extraSmall / 2
+                    implicitHeight: 1
+                    color: Colours.palette.m3outlineVariant
+                }
+            }
         }
 
         StyledText {
