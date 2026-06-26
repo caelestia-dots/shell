@@ -727,9 +727,10 @@ For example, to disable the bar on DP-1:
         }
     },
     "sidebar": {
+        "enabled": true,
         "showOnHover": false,
-        "dragThreshold": 80,
-        "enabled": true
+        "minHoverThreshold": 200,
+        "dragThreshold": 80
     },
     "utilities": {
         "enabled": true,
