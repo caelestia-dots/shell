@@ -37,18 +37,36 @@ StyledRect {
             }
         }
 
-        StyledText {
+        Loader {
             Layout.alignment: Qt.AlignHCenter
-            visible: Config.bar.clock.showDate
+            asynchronous: true
+            active: Config.bar.clock.showDate
+            visible: active
 
-            horizontalAlignment: StyledText.AlignHCenter
-            text: Time.format("ddd\nd")
-            font: Tokens.font.body.small
-            color: root.colour
+            sourceComponent: ColumnLayout {
+                spacing: layout.spacing - 4
+
+                StyledText {
+                    Layout.alignment: Qt.AlignHCenter
+                    text: Time.format("ddd")
+                    font: Tokens.font.body.builders.small.scale(0.9).build()
+                    color: root.colour
+                }
+
+                StyledText {
+                    Layout.alignment: Qt.AlignHCenter
+                    text: Time.format("d")
+                    font: root.font.scale(1.1).build()
+                    color: root.colour
+                }
+            }
         }
 
         Rectangle {
             Layout.fillWidth: true
+            Layout.leftMargin: -Tokens.padding.extraSmall
+            Layout.rightMargin: -Tokens.padding.extraSmall
+            Layout.bottomMargin: 1
             visible: Config.bar.clock.showDate
             implicitHeight: 1
             color: Colours.palette.m3outlineVariant
