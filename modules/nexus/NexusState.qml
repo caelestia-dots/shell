@@ -54,14 +54,17 @@ QtObject {
             searchAnchor = anchor;
             return;
         }
-        searchAnchor = anchor;
         if (samePage) {
-            // Same page, different sub-page: rebuild the sub-page chain live.
+            // Same page, different sub-page: rebuild the sub-page chain first,
+            // then set the anchor so the now-current page picks it up.
             while (subPageIdxStack.length > 0)
                 closeSubPage();
             for (let i = 0; i < subPath.length; i++)
                 openSubPage(subPath[i]);
+            searchAnchor = "";
+            searchAnchor = anchor;
         } else {
+            searchAnchor = anchor;
             _pendingSubPath = subPath.slice();
             currentPageIdx = pageIdx;
         }
