@@ -25,12 +25,12 @@ PageBase {
     property bool savingIp: false
 
     // Original loaded values, so the Apply button only shows on a real change.
-    property string _origMethod: "auto"
-    property string _origAddress: ""
-    property string _origGateway: ""
-    property string _origDns: ""
+    property string origMethod: "auto"
+    property string origAddress: ""
+    property string origGateway: ""
+    property string origDns: ""
 
-    readonly property bool hasChanges: root.ipLoaded && (root.ipMethod !== root._origMethod || (root.ipMethod === "manual" && (addressField.text.trim() !== root._origAddress || gatewayField.text.trim() !== root._origGateway)) || ((root.ipMethod === "manual" || root.ipMethod === "auto-dns") && dnsField.text.trim() !== root._origDns))
+    readonly property bool hasChanges: root.ipLoaded && (root.ipMethod !== root.origMethod || (root.ipMethod === "manual" && (addressField.text.trim() !== root.origAddress || gatewayField.text.trim() !== root.origGateway)) || ((root.ipMethod === "manual" || root.ipMethod === "auto-dns") && dnsField.text.trim() !== root.origDns))
 
     function loadIpConfig(): void {
         if (!root.connectionName)
@@ -43,10 +43,10 @@ PageBase {
             addressField.text = cfg.address;
             gatewayField.text = cfg.gateway;
             dnsField.text = cfg.dns;
-            root._origMethod = cfg.method;
-            root._origAddress = cfg.address;
-            root._origGateway = cfg.gateway;
-            root._origDns = cfg.dns;
+            root.origMethod = cfg.method;
+            root.origAddress = cfg.address;
+            root.origGateway = cfg.gateway;
+            root.origDns = cfg.dns;
             root.ipLoaded = true;
         });
     }
@@ -70,10 +70,10 @@ PageBase {
             } else {
                 // Persisted — make the current values the new baseline so the
                 // Apply button hides again until something else changes.
-                root._origMethod = root.ipMethod;
-                root._origAddress = addressField.text.trim();
-                root._origGateway = gatewayField.text.trim();
-                root._origDns = dnsField.text.trim();
+                root.origMethod = root.ipMethod;
+                root.origAddress = addressField.text.trim();
+                root.origGateway = gatewayField.text.trim();
+                root.origDns = dnsField.text.trim();
             }
         });
     }
@@ -149,7 +149,7 @@ PageBase {
 
         InfoRow {
             first: true
-            icon: root.device?.connected ? "link" : "link_off"
+            icon: "link"
             label: qsTr("Status")
             value: root.device?.connected ? qsTr("Connected") : qsTr("Not connected")
         }
@@ -203,9 +203,7 @@ PageBase {
 
             menuItems: [autoItem, autoDnsItem, manualItem]
 
-            onSelected: item => {
-                root.ipMethod = item === manualItem ? "manual" : (item === autoDnsItem ? "auto-dns" : "auto");
-            }
+            onSelected: item => root.ipMethod = item === manualItem ? "manual" : (item === autoDnsItem ? "auto-dns" : "auto")
 
             MenuItem {
                 id: autoItem
