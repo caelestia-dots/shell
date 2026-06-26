@@ -223,7 +223,7 @@ def tokenize(text: str) -> list[str]:
     return toks
 
 
-SUBTEXT_RE = re.compile(r'^\s*subtext:\s*qsTr\("([^"]+)"\)')
+SUBTEXT_RE = re.compile(r'^\s*(?:subtext|status):\s*qsTr\("([^"]+)"\)')
 SECTION_RE = re.compile(r'^\s*SectionHeader\s*\{')
 
 
