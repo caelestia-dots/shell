@@ -279,6 +279,4 @@ Singleton {
     ElapsedTimer {
         id: timer
     }
-
-    Component.onCompleted: reload()
 }
