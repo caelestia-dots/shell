@@ -17,10 +17,12 @@ ItemList {
     required property bool isToggled
     required property bool isLowWarning
     required property NexusState nState
+    property string text: isLowWarning ? "low battery" : "high battery"
+
 
     showList: isToggled
     placeholderIcon: isToggled ? "plug_connect" : "power_off"
-    placeholderText: isToggled ? qsTr("No low battery warning found") : qsTr("Low battery warning disabled")
+    placeholderText: isToggled ? qsTr("No %1 warning found").arg(text) : qsTr("%1 warning disabled").arg(text.charAt(0).toUpperCase() + text.slice(1))
 
     model: ScriptModel {
         values: {
