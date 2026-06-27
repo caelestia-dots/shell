@@ -172,40 +172,16 @@ VerticalFadeFlickable {
             cacheBuffer: 10000
             spacing: Tokens.padding.large
 
+            // The list's implicitHeight tracks contentHeight; while items animate
+            // their position the reported height fluctuates, which left gaps in
+            // the surrounding layout on fast typing. So additions, removals and
+            // reordering are all instant - no transitions - keeping the height
+            // correct at every frame.
             model: ScriptModel {
-                // Match groups by their page so that when result ranking changes
-                // the group order, the model emits a move (which animates
-                // smoothly) instead of a remove+add (which flickered). Group
-                // contents updating in place becomes a dataChanged, not a
-                // rebuild. This keeps the One UI-style reordering behaviour.
+                // Match groups by their page so content updates in place rather
+                // than rebuilding the delegate when ranking shifts the order.
                 objectProp: "pageIdx"
                 values: root.groups
-            }
-
-            // No add/remove fade: the list's implicitHeight tracks contentHeight,
-            // and fading items still occupy space while animating, which made the
-            // list flicker and leave gaps on fast typing. Additions and removals
-            // are instant; only reordering animates (via objectProp + move), which
-            // keeps the One UI-style smooth shuffle without the layout jitter.
-            move: Transition {
-                Anim {
-                    property: "y"
-                    type: Anim.StandardSmall
-                }
-            }
-
-            displaced: Transition {
-                Anim {
-                    type: Anim.StandardSmall
-                    property: "y"
-                }
-            }
-
-            addDisplaced: Transition {
-                Anim {
-                    type: Anim.StandardSmall
-                    property: "y"
-                }
             }
 
             delegate: ColumnLayout {
