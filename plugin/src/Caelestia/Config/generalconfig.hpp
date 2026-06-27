@@ -99,11 +99,12 @@ class GeneralBattery : public ConfigObject {
                     { u"message"_s, u"UNPLUG THE CHARGER RIGHT NOW!!"_s },
                     { u"icon"_s, u"battery_android_frame_alert"_s },
                     { u"critical"_s, true },
-            }),
-            
-            
+            })
     })
+    
     CONFIG_GLOBAL_PROPERTY(int, criticalLevel, 3)
+    CONFIG_GLOBAL_PROPERTY(bool, enableLowBatteryWarning, true)
+    CONFIG_GLOBAL_PROPERTY(bool, enableHighBatteryWarning, false)
 
 public:
     explicit GeneralBattery(QObject* parent = nullptr)
