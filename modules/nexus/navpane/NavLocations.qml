@@ -37,6 +37,7 @@ VerticalFadeFlickable {
             const key = e.pageIdx;
             if (byPage[key] === undefined) {
                 byPage[key] = {
+                    "pageIdx": e.pageIdx,
                     "page": e.crumbLabels[0],
                     "icon": e.crumbIcons[0],
                     "entries": []
@@ -172,6 +173,12 @@ VerticalFadeFlickable {
             spacing: Tokens.padding.large
 
             model: ScriptModel {
+                // Match groups by their page so that when result ranking changes
+                // the group order, the model emits a move (which animates
+                // smoothly) instead of a remove+add (which flickered). Group
+                // contents updating in place becomes a dataChanged, not a
+                // rebuild. This keeps the One UI-style reordering behaviour.
+                objectProp: "pageIdx"
                 values: root.groups
             }
 
@@ -190,6 +197,13 @@ VerticalFadeFlickable {
                     property: "opacity"
                     from: 1
                     to: 0
+                }
+            }
+
+            move: Transition {
+                Anim {
+                    property: "y"
+                    type: Anim.StandardSmall
                 }
             }
 
