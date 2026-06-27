@@ -62,12 +62,13 @@ PageBase {
 
                 anchors.left: lowWarnList.list.contentItem.left
                 anchors.right: lowWarnList.list.contentItem.right
-                implicitHeight: lowWarnList.implicitHeight + lowWarnList.anchors.margins * 2
+                implicitHeight: lowWarnLayout.implicitHeight + lowWarnLayout.anchors.margins * 2
                 radius: Tokens.rounding.extraSmall
                 anchors.fill: undefined
 
+
                 RowLayout {
-                    id: lowLayout
+                    id: lowWarnLayout
 
                     anchors.fill: parent
                     anchors.margins: Tokens.padding.large
@@ -75,36 +76,34 @@ PageBase {
                     anchors.rightMargin: Tokens.padding.extraLarge
                     spacing: Tokens.spacing.medium
 
-                    // MaterialIcon {
-                    //     text: lowWarning.modelData.icon
-                    //     color: network.modelData.active ? Colours.palette.m3primary : Colours.palette.m3onSurfaceVariant
-                    //     fontStyle: Tokens.font.icon.medium
-                    //     // opacity: network.textOpacity
-                    // }
+                    MaterialIcon {
+                        text: lowWarning.modelData.icon
+                        color: lowWarning.modelData.critical ? Colours.palette.m3error : Colours.palette.m3primary 
+                        fontStyle: Tokens.font.icon.medium
+                    }
 
-                    // ColumnLayout {
-                    //     Layout.fillWidth: true
-                    //     spacing: 0
-                    //     // opacity: network.textOpacity
+                    ColumnLayout {
+                        Layout.fillWidth: true
+                        spacing: 0
 
-                    //     StyledText {
-                    //         Layout.fillWidth: true
-                    //         text: qsTr("%1\%").arg(lowWarning.modelData.level)
-                    //         font: Tokens.font.body.small
-                    //         elide: Text.ElideRight
-                    //     }
+                        StyledText {
+                            Layout.fillWidth: true
+                            text: qsTr("%1 % Battery").arg(lowWarning.modelData.level)
+                            font: Tokens.font.body.small
+                            elide: Text.ElideRight
+                        } 
 
-                    //     StyledText {
-                    //         Layout.fillWidth: true
-                    //         text: qsTr("")
-                    //         // text: qsTr("Security: %1%2").arg(network.modelData.security).arg(network.modelData.active ? qsTr(" • Connected") : Nmcli.hasSavedProfile(network.modelData.ssid) ? qsTr(" • Saved") : "")
-                    //         color: Colours.palette.m3outline
-                    //         font: Tokens.font.label.small
-                    //         elide: Text.ElideRight
-                    //     }
-                    // }
+                        StyledText {
+                            Layout.fillWidth: true
+                            text: qsTr("%1 • %2").arg(lowWarning.modelData.title).arg(lowWarning.modelData.message)
+                            color: Colours.palette.m3outline
+                            font: Tokens.font.label.small
+                            elide: Text.ElideRight
+                        }
+                    }
                 }
             }
+
         }
 
         ToggleRow {
