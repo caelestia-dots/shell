@@ -42,6 +42,12 @@ QtObject {
             description: Tr.tr("App volumes, sound devices"),
             category: "connectivity"
         },
+        {
+            label: qsTr("Power"),
+            icon: "battery_android_4",
+            description: qsTr("Battery and power management"),
+            category: "connectivity"
+        },
 
         // System
         {
