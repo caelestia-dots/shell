@@ -4,6 +4,8 @@ import Quickshell.Bluetooth
 import qs.services
 
 QtObject {
+    id: state
+
     property ShellScreen screen
     property bool isWindow
     property bool animatingContainer
@@ -18,14 +20,14 @@ QtObject {
     property var selectedMonitor
     property Connections monitorsConnection: Connections {
         function onMonitorsChanged(): void {
-            if (selectedMonitor) {
+            if (state.selectedMonitor) {
                 for (let i = 0; i < Hyprctl.monitors.length; i++) {
-                    if (Hyprctl.monitors[i].name === selectedMonitor.name) {
-                        selectedMonitor = Hyprctl.monitors[i];
+                    if (Hyprctl.monitors[i].name === state.selectedMonitor.name) {
+                        state.selectedMonitor = Hyprctl.monitors[i];
                         return;
                     }
                 }
-                selectedMonitor = null;
+                state.selectedMonitor = null;
             }
         }
 

@@ -29,7 +29,7 @@ Singleton {
     }
 
     // Run immediately at startup
-    Component.onCompleted: proc.running = true
+    Component.onCompleted: root.proc.running = true
 
     Timer {
         id: debounce
@@ -37,7 +37,7 @@ Singleton {
         interval: 200
         repeat: false
         onTriggered: {
-            proc.running = true;
+            root.proc.running = true;
             // Schedule recovery pass to handle Wayland geometry changes
             recovery.restart();
         }
@@ -48,7 +48,7 @@ Singleton {
 
         interval: 600
         repeat: false
-        onTriggered: proc.running = true
+        onTriggered: root.proc.running = true
     }
 
     // Periodic polling fallback
