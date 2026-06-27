@@ -8,6 +8,7 @@ import qs.components
 import qs.components.containers
 import qs.services
 import qs.modules.nexus
+import qs.modules.nexus.common
 
 VerticalFadeFlickable {
     id: root
@@ -26,6 +27,26 @@ VerticalFadeFlickable {
         if (Nmcli.hasAvailableEthernet)
             return all;
         return all.filter(e => !e.anchor.startsWith("ethernet-"));
+    }
+    // Results grouped by their top-level page, so the list can show one heading
+    // per page with the matching settings joined underneath it (like the
+    // Android settings search). Each group: { page, entries: [...] }.
+    readonly property var groups: {
+        const out = [];
+        const byPage = ({});
+        for (const e of results) {
+            const key = e.pageIdx;
+            if (byPage[key] === undefined) {
+                byPage[key] = {
+                    "page": e.crumbLabels[0],
+                    "icon": e.crumbIcons[0],
+                    "entries": []
+                };
+                out.push(byPage[key]);
+            }
+            byPage[key].entries.push(e);
+        }
+        return out;
     }
 
     topMargin: Tokens.padding.large
@@ -139,19 +160,20 @@ VerticalFadeFlickable {
         ListView {
             id: resultList
 
-            // A ListView fed by a ScriptModel (same approach as the launcher):
-            // when the query changes the model diffs the result list, so only
-            // entries that actually appear/disappear/move are animated. The
-            // rest stay put, which avoids re-animating the whole list on every
-            // keystroke. Scrolling is delegated to the outer flickable.
+            // Grouped results: the model is one entry per top-level page, and
+            // each delegate renders that page's heading plus the matching
+            // settings joined into a single rounded card (first/last rounded,
+            // middles square, thin dividers between them), like the Android
+            // settings search. A ScriptModel diffs the groups so only changed
+            // ones animate. Scrolling is delegated to the outer flickable.
             Layout.fillWidth: true
             implicitHeight: contentHeight
             interactive: false
             cacheBuffer: 10000
-            spacing: Tokens.spacing.extraSmall
+            spacing: Tokens.spacing.larger
 
             model: ScriptModel {
-                values: root.results
+                values: root.groups
             }
 
             add: Transition {
@@ -169,18 +191,6 @@ VerticalFadeFlickable {
                     property: "opacity"
                     from: 1
                     to: 0
-                }
-            }
-
-            move: Transition {
-                Anim {
-                    property: "y"
-                    type: Anim.StandardSmall
-                }
-                Anim {
-                    type: Anim.DefaultEffects
-                    property: "opacity"
-                    to: 1
                 }
             }
 
@@ -208,91 +218,133 @@ VerticalFadeFlickable {
                 }
             }
 
-            delegate: StyledRect {
-                id: result
+            delegate: ColumnLayout {
+                id: group
 
                 required property var modelData
                 required property int index
 
                 width: resultList.width
-                implicitHeight: {
-                    const h = resultLayout.implicitHeight + resultLayout.anchors.margins * 2;
-                    return h % 2 === 0 ? h : h + 1;
-                }
+                spacing: Tokens.spacing.small
 
-                radius: Tokens.rounding.medium
-                color: Colours.layer(Colours.palette.m3surfaceContainerHigh, 2)
+                // Group heading: the top-level page name, shown once.
+                RowLayout {
+                    Layout.fillWidth: true
+                    Layout.leftMargin: Tokens.padding.small
+                    spacing: Tokens.spacing.small
 
-                StateLayer {
-                    anchors.fill: parent
-                    radius: parent.radius
-
-                    onClicked: {
-                        // Ethernet detail settings need a selected interface to
-                        // show the right device; a search deep-link has none, so
-                        // point it at the connected (or first) ethernet device.
-                        if (result.modelData.anchor.startsWith("ethernet-")) {
-                            const active = Nmcli.activeEthernet ?? Nmcli.ethernetDevices[0] ?? null;
-                            if (active)
-                                root.nState.selectedEthernetInterface = active.iface;
-                        }
-                        root.nState.jumpToSetting(result.modelData.pageIdx, result.modelData.subPath, result.modelData.anchor);
-                    }
-                }
-
-                ColumnLayout {
-                    id: resultLayout
-
-                    anchors.fill: parent
-                    anchors.margins: Tokens.padding.large
-                    spacing: Tokens.spacing.small / 2
-
-                    // Location line: page icon + "Page \u203a Section", faint.
-                    RowLayout {
-                        Layout.fillWidth: true
-                        spacing: Tokens.spacing.small
-
-                        MaterialIcon {
-                            Layout.alignment: Qt.AlignVCenter
-                            text: result.modelData.crumbIcons[result.modelData.crumbIcons.length - 1]
-                            color: Colours.palette.m3onSurfaceVariant
-                            fontStyle: Tokens.font.icon.small
-                        }
-
-                        StyledText {
-                            Layout.fillWidth: true
-                            text: {
-                                const labels = result.modelData.crumbLabels;
-                                const section = result.modelData.section;
-                                // Skip the section if it just repeats the last
-                                // breadcrumb label (e.g. page and section share a name).
-                                const parts = section && section !== labels[labels.length - 1] ? labels.concat(section) : labels;
-                                return parts.join("  \u203a  ");
-                            }
-                            color: Colours.palette.m3onSurfaceVariant
-                            font: Tokens.font.label.small
-                            elide: Text.ElideRight
-                        }
-                    }
-
-                    // The setting itself, most prominent.
-                    StyledText {
-                        Layout.fillWidth: true
-                        Layout.topMargin: Tokens.spacing.small / 2
-                        text: result.modelData.title
+                    MaterialIcon {
+                        text: group.modelData.icon
                         color: Colours.palette.m3primary
-                        font: Tokens.font.body.medium
-                        elide: Text.ElideRight
+                        fontStyle: Tokens.font.icon.small
                     }
 
-                    // Optional description, faintest and smallest.
                     StyledText {
                         Layout.fillWidth: true
-                        visible: result.modelData.subtext.length > 0
-                        text: result.modelData.subtext
-                        color: Colours.palette.m3outline
-                        font: Tokens.font.label.small
+                        text: group.modelData.page
+                        color: Colours.palette.m3primary
+                        font: Tokens.font.label.large
                         elide: Text.ElideRight
+                    }
+                }
+
+                // The matching settings, joined into one card.
+                ColumnLayout {
+                    Layout.fillWidth: true
+                    spacing: 0
+
+                    Repeater {
+                        model: group.modelData.entries
+
+                        ConnectedRect {
+                            id: result
+
+                            required property var modelData
+                            required property int index
+
+                            readonly property bool isFirst: index === 0
+                            readonly property bool isLast: index === group.modelData.entries.length - 1
+
+                            Layout.fillWidth: true
+                            implicitHeight: {
+                                const h = resultLayout.implicitHeight + resultLayout.anchors.margins * 2;
+                                return h % 2 === 0 ? h : h + 1;
+                            }
+                            first: isFirst
+                            last: isLast
+                            color: Colours.layer(Colours.palette.m3surfaceContainerHigh, 2)
+
+                            StateLayer {
+                                anchors.fill: parent
+                                radius: 0
+
+                                onClicked: {
+                                    // Ethernet detail settings need a selected interface
+                                    // to show the right device; a search deep-link has
+                                    // none, so point it at the connected (or first) one.
+                                    if (result.modelData.anchor.startsWith("ethernet-")) {
+                                        const active = Nmcli.activeEthernet ?? Nmcli.ethernetDevices[0] ?? null;
+                                        if (active)
+                                            root.nState.selectedEthernetInterface = active.iface;
+                                    }
+                                    root.nState.jumpToSetting(result.modelData.pageIdx, result.modelData.subPath, result.modelData.anchor);
+                                }
+                            }
+
+                            // Thin divider between joined rows (not under the last one).
+                            StyledRect {
+                                anchors.bottom: parent.bottom
+                                anchors.left: parent.left
+                                anchors.right: parent.right
+                                anchors.leftMargin: Tokens.padding.large
+                                anchors.rightMargin: Tokens.padding.large
+                                implicitHeight: 1
+                                visible: !result.isLast
+                                color: Colours.palette.m3outlineVariant
+                            }
+
+                            ColumnLayout {
+                                id: resultLayout
+
+                                anchors.fill: parent
+                                anchors.margins: Tokens.padding.large
+                                spacing: Tokens.spacing.small / 2
+
+                                // Location line: deepest icon + "Section > sub", faint.
+                                StyledText {
+                                    Layout.fillWidth: true
+                                    text: {
+                                        const labels = result.modelData.crumbLabels.slice(1);
+                                        const section = result.modelData.section;
+                                        const parts = section && section !== labels[labels.length - 1] ? labels.concat(section) : labels;
+                                        return parts.join("  \u203a  ");
+                                    }
+                                    visible: text.length > 0
+                                    color: Colours.palette.m3onSurfaceVariant
+                                    font: Tokens.font.label.small
+                                    elide: Text.ElideRight
+                                }
+
+                                // The setting itself, most prominent.
+                                StyledText {
+                                    Layout.fillWidth: true
+                                    text: result.modelData.title
+                                    color: Colours.palette.m3onSurface
+                                    font: Tokens.font.body.medium
+                                    elide: Text.ElideRight
+                                }
+
+                                // Optional description, faintest and smallest.
+                                StyledText {
+                                    Layout.fillWidth: true
+                                    visible: result.modelData.subtext.length > 0
+                                    text: result.modelData.subtext
+                                    color: Colours.palette.m3outline
+                                    font: Tokens.font.label.small
+                                    elide: Text.ElideRight
+                                }
+                            }
+                        }
                     }
                 }
             }
