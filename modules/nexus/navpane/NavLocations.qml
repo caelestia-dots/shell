@@ -182,24 +182,11 @@ VerticalFadeFlickable {
                 values: root.groups
             }
 
-            add: Transition {
-                Anim {
-                    type: Anim.DefaultEffects
-                    property: "opacity"
-                    from: 0
-                    to: 1
-                }
-            }
-
-            remove: Transition {
-                Anim {
-                    type: Anim.DefaultEffects
-                    property: "opacity"
-                    from: 1
-                    to: 0
-                }
-            }
-
+            // No add/remove fade: the list's implicitHeight tracks contentHeight,
+            // and fading items still occupy space while animating, which made the
+            // list flicker and leave gaps on fast typing. Additions and removals
+            // are instant; only reordering animates (via objectProp + move), which
+            // keeps the One UI-style smooth shuffle without the layout jitter.
             move: Transition {
                 Anim {
                     property: "y"
@@ -212,22 +199,12 @@ VerticalFadeFlickable {
                     type: Anim.StandardSmall
                     property: "y"
                 }
-                Anim {
-                    type: Anim.DefaultEffects
-                    property: "opacity"
-                    to: 1
-                }
             }
 
             addDisplaced: Transition {
                 Anim {
                     type: Anim.StandardSmall
                     property: "y"
-                }
-                Anim {
-                    type: Anim.DefaultEffects
-                    property: "opacity"
-                    to: 1
                 }
             }
 
