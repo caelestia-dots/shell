@@ -91,6 +91,13 @@ QtObject {
                 }
             }
         },
+        Component {
+            StackPage {
+                Component {
+                    BatteryPage {}
+                }
+            }
+        },
 
         // System
         Component {
