@@ -169,7 +169,7 @@ VerticalFadeFlickable {
             implicitHeight: contentHeight
             interactive: false
             cacheBuffer: 10000
-            spacing: Tokens.spacing.extraLargeIncreased
+            spacing: Tokens.padding.large
 
             model: ScriptModel {
                 values: root.groups
