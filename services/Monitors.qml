@@ -28,7 +28,7 @@ Singleton {
         return Hypr.monitors.values ?? [];
     }
 
-    // Safely iterate monitor data — .find() doesn't work on UntypedObjectModel
+    // Find monitor by name
     function findMonitorByName(name: string): var {
         const monitors = sourceMonitors();
         for (let i = 0; i < monitors.length; i++) {
@@ -41,7 +41,7 @@ Singleton {
     function findMonitorById(id: int): var {
         const monitors = sourceMonitors();
         for (let i = 0; i < monitors.length; i++) {
-            if (monitors[i].id === id)
+            if (monitors[i].id == id)
                 return monitors[i];
         }
         return null;
@@ -60,11 +60,18 @@ Singleton {
         return s;
     }
 
-    // Use batchMessage (hyprctl keyword), NOT dispatch (hyprctl dispatch)
-    // "keyword" is a config command, not a dispatcher action.
+    // Use batchMessage (hyprctl keyword) to configure monitor settings
     function sendKeyword(monStr: string): void {
         Hypr.extras.batchMessage([`keyword monitor ${monStr}`]);
         Hyprctl.update();
+    }
+
+    // Re-send settled monitor keyword to trigger a Wayland configure cycle
+    function refresh(monitorName: string): void {
+        const mon = findMonitorByName(monitorName);
+        if (!mon)
+            return;
+        sendKeyword(monitorStr(mon, mon.scale || 1, mon.transform || 0, mon.refreshRate || 60, ""));
     }
 
     function arrange(monitorName: string, pos: string, relativeToId: int): void {
@@ -73,8 +80,8 @@ Singleton {
         if (!target || !moving)
             return;
 
-        let x = target.x;
-        let y = target.y;
+        let x = target.x ?? 0;
+        let y = target.y ?? 0;
 
         const targetW = Math.round(target.width / (target.scale || 1));
         const targetH = Math.round(target.height / (target.scale || 1));

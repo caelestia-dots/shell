@@ -1,6 +1,7 @@
 import QtQuick
 import Quickshell
 import Quickshell.Bluetooth
+import qs.services
 
 QtObject {
     property ShellScreen screen
@@ -15,6 +16,21 @@ QtObject {
     property DesktopEntry selectedApp
     property string selectedEthernetInterface
     property var selectedMonitor
+    property Connections monitorsConnection: Connections {
+        function onMonitorsChanged(): void {
+            if (selectedMonitor) {
+                for (let i = 0; i < Hyprctl.monitors.length; i++) {
+                    if (Hyprctl.monitors[i].name === selectedMonitor.name) {
+                        selectedMonitor = Hyprctl.monitors[i];
+                        return;
+                    }
+                }
+                selectedMonitor = null;
+            }
+        }
+
+        target: Hyprctl
+    }
 
     signal close
     signal subPageOpened(idx: int)

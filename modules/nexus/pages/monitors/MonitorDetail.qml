@@ -94,7 +94,9 @@ PageBase {
     }
 
     function getRefreshItem(): var {
-        if (!root.mon)
+        if (!root.mon || !root.availableRefreshRates || root.availableRefreshRates.length === 0)
+            return null;
+        if (!refreshItemsInstantiator.objects || refreshItemsInstantiator.objects.length === 0)
             return null;
         const rate = root.mon.refreshRate ?? 60;
         let minDiff = 999999;
@@ -110,7 +112,9 @@ PageBase {
     }
 
     function getResolutionItem(): var {
-        if (!root.mon)
+        if (!root.mon || !root.availableResolutions || root.availableResolutions.length === 0)
+            return null;
+        if (!resolutionItemsInstantiator.objects || resolutionItemsInstantiator.objects.length === 0)
             return null;
         const currentRes = `${root.mon.width}x${root.mon.height}`;
         const idx = root.availableResolutions.indexOf(currentRes);
@@ -141,6 +145,9 @@ PageBase {
 
             model: root.availableRefreshRates
             delegate: MenuItem {
+                required property var modelData
+                required property int index
+
                 text: modelData + " Hz"
                 onClicked: {
                     if (root.mon)
@@ -153,6 +160,9 @@ PageBase {
 
             model: root.availableResolutions
             delegate: MenuItem {
+                required property var modelData
+                required property int index
+
                 text: modelData
                 onClicked: {
                     if (root.mon)
@@ -236,7 +246,7 @@ PageBase {
             first: root.brightnessMon === null || root.brightnessMon === undefined
             label: qsTr("Resolution")
             subtext: qsTr("Display resolution")
-            menuItems: resolutionItemsInstantiator.objects
+            menuItems: resolutionItemsInstantiator.objects || []
             active: root.getResolutionItem()
             fallbackText: root.mon ? qsTr("%1×%2").arg(root.mon.width).arg(root.mon.height) : qsTr("Unknown")
             fallbackIcon: "aspect_ratio"
@@ -252,7 +262,7 @@ PageBase {
             first: false
             label: qsTr("Refresh rate")
             subtext: qsTr("Maximum refresh rate")
-            menuItems: refreshItemsInstantiator.objects
+            menuItems: refreshItemsInstantiator.objects || []
             active: root.getRefreshItem()
             fallbackText: root.mon?.refreshRate ? qsTr("%1 Hz").arg((root.mon.refreshRate).toFixed(0)) : qsTr("Unknown")
             fallbackIcon: "speed"
@@ -295,117 +305,6 @@ PageBase {
             }
         }
 
-        // ── Arrangement ──────────────────────────────────────
-        ColumnLayout {
-            id: arrangementLayout
-
-            readonly property var otherMons: {
-                if (!root.mon || !Hyprctl.monitors)
-                    return [];
-                const res = [];
-                for (let i = 0; i < Hyprctl.monitors.length; i++) {
-                    if (Hyprctl.monitors[i].id !== root.mon.id)
-                        res.push(Hyprctl.monitors[i]);
-                }
-                return res;
-            }
-
-            Layout.fillWidth: true
-            visible: otherMons.length > 0
-            spacing: Tokens.spacing.extraSmall / 2
-
-            SectionHeader {
-                text: qsTr("Arrangement")
-            }
-
-            Repeater {
-                model: arrangementLayout.otherMons
-
-                delegate: ConnectedRect {
-                    id: targetSection
-
-                    required property var modelData
-                    required property int index
-
-                    Layout.fillWidth: true
-                    first: index === 0
-                    last: index === arrangementLayout.otherMons.length - 1
-                    implicitHeight: arrangeLayout.implicitHeight + arrangeLayout.anchors.margins * 2
-
-                    ColumnLayout {
-                        id: arrangeLayout
-
-                        anchors.fill: parent
-                        anchors.margins: Tokens.padding.medium
-                        anchors.leftMargin: Tokens.padding.largeIncreased
-                        anchors.rightMargin: Tokens.padding.largeIncreased
-                        spacing: Tokens.spacing.small
-
-                        RowLayout {
-                            Layout.fillWidth: true
-                            spacing: Tokens.spacing.small
-
-                            MaterialIcon {
-                                text: "tv"
-                                fontStyle: Tokens.font.icon.medium
-                                color: Colours.palette.m3onSurfaceVariant
-                            }
-                            StyledText {
-                                Layout.fillWidth: true
-                                text: qsTr("Relative to Monitor %1 (%2)").arg(targetSection.modelData.id ?? 0).arg(targetSection.modelData.name ?? "")
-                                font: Tokens.font.body.medium
-                            }
-                        }
-
-                        GridLayout {
-                            Layout.fillWidth: true
-                            columns: 4
-                            columnSpacing: Tokens.spacing.small
-                            rowSpacing: Tokens.spacing.small
-
-                            Repeater {
-                                model: [
-                                    {
-                                        label: qsTr("Left"),
-                                        pos: "left",
-                                        icon: "arrow_back"
-                                    },
-                                    {
-                                        label: qsTr("Right"),
-                                        pos: "right",
-                                        icon: "arrow_forward"
-                                    },
-                                    {
-                                        label: qsTr("Above"),
-                                        pos: "top",
-                                        icon: "arrow_upward"
-                                    },
-                                    {
-                                        label: qsTr("Below"),
-                                        pos: "bottom",
-                                        icon: "arrow_downward"
-                                    }
-                                ]
-
-                                delegate: ArrangeButton {
-                                    required property var modelData
-                                    required property int index
-                                    Layout.fillWidth: true
-
-                                    btnIcon: modelData.icon
-                                    btnLabel: modelData.label
-                                    onClicked: {
-                                        if (root.mon)
-                                            Monitors.arrange(root.mon.name, modelData.pos, targetSection.modelData.id);
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
         // ── Display information ───────────────────────────────
         SectionHeader {
             text: qsTr("Display information")
@@ -440,102 +339,6 @@ PageBase {
             last: true
             label: qsTr("Focused")
             value: (root.mon?.focused ?? false) ? qsTr("Yes") : qsTr("No")
-        }
-    }
-
-    // ── Reusable sub-components ───────────────────────────────────────
-
-    component RotationChip: StyledRect {
-        id: chip
-
-        required property string chipLabel
-        required property int chipAngle
-        required property bool isActive
-
-        signal clicked
-
-        implicitHeight: 72
-        radius: Tokens.rounding.large
-        color: chip.isActive ? Colours.palette.m3secondaryContainer : Qt.alpha(Colours.palette.m3surfaceVariant, 0.5)
-
-        StateLayer {
-            function onClicked(): void {
-                chip.clicked();
-            }
-
-            color: chip.isActive ? Colours.palette.m3onSecondaryContainer : Colours.palette.m3onSurfaceVariant
-        }
-
-        ColumnLayout {
-            id: chipContent
-
-            anchors.centerIn: parent
-            spacing: 2
-
-            MaterialIcon {
-                Layout.alignment: Qt.AlignHCenter
-                text: "screen_rotation"
-                rotation: chip.chipAngle
-                fontStyle: Tokens.font.icon.medium
-                color: chip.isActive ? Colours.palette.m3onSecondaryContainer : Colours.palette.m3onSurfaceVariant
-
-                Behavior on rotation {
-                    Anim {}
-                }
-            }
-
-            StyledText {
-                Layout.alignment: Qt.AlignHCenter
-                text: chip.chipLabel
-                font: Tokens.font.body.small
-                color: chip.isActive ? Colours.palette.m3onSecondaryContainer : Colours.palette.m3onSurfaceVariant
-            }
-        }
-
-        Behavior on color {
-            CAnim {}
-        }
-    }
-
-    component ArrangeButton: StyledRect {
-        id: arrangeBtn
-
-        required property string btnIcon
-        required property string btnLabel
-
-        signal clicked
-
-        implicitHeight: 64
-        radius: Tokens.rounding.medium
-        color: Qt.alpha(Colours.palette.m3surfaceVariant, 0.5)
-
-        StateLayer {
-            function onClicked(): void {
-                arrangeBtn.clicked();
-            }
-
-            color: Colours.palette.m3onSurfaceVariant
-        }
-
-        ColumnLayout {
-            id: btnContent
-
-            anchors.centerIn: parent
-            spacing: 2
-
-            MaterialIcon {
-                Layout.alignment: Qt.AlignHCenter
-                text: arrangeBtn.btnIcon
-                fontStyle: Tokens.font.icon.medium
-                color: Colours.palette.m3onSurfaceVariant
-            }
-
-            StyledText {
-                Layout.alignment: Qt.AlignHCenter
-                text: arrangeBtn.btnLabel
-                font: Tokens.font.body.small
-                color: Colours.palette.m3onSurfaceVariant
-            }
         }
     }
 }

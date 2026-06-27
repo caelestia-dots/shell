@@ -23,12 +23,35 @@ Singleton {
         }
     }
 
+    // Debounce updates to prevent rapid IPC events or commands from causing render issues.
     function update(): void {
-        proc.running = true;
+        debounce.restart();
     }
 
-    Component.onCompleted: update()
+    // Run immediately at startup
+    Component.onCompleted: proc.running = true
 
+    Timer {
+        id: debounce
+
+        interval: 200
+        repeat: false
+        onTriggered: {
+            proc.running = true;
+            // Schedule recovery pass to handle Wayland geometry changes
+            recovery.restart();
+        }
+    }
+
+    Timer {
+        id: recovery
+
+        interval: 600
+        repeat: false
+        onTriggered: proc.running = true
+    }
+
+    // Periodic polling fallback
     Timer {
         interval: 2000
         running: true
@@ -36,7 +59,7 @@ Singleton {
         onTriggered: root.update()
     }
 
-    // Refresh when Hyprland reports changes
+    // Listen for Hyprland monitor events
     Connections {
         function onRawEvent(event: HyprlandEvent): void {
             if (event.name.includes("mon")) {
