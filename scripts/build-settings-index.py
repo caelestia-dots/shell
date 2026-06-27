@@ -173,12 +173,26 @@ def build_nav_map(nexus: Path, files: dict[str, Path]) -> dict[str, dict]:
         nav[main] = {"pageIdx": top_idx, "subPath": [],
                      "crumbIcons": [main_icon], "crumbLabels": [main_label]}
         children = dict(nav_children.get(main, {}))
+        # Components that some other page opens via openSubPage. Those are reached
+        # through that page (e.g. the bar pages are opened from inside Taskbar's
+        # "Components" section), so they must not be linked directly here, which
+        # would give them a wrong, shorter breadcrumb and navigation path.
+        opened_via_subpage = set()
+        for owner, kids in nav_children.items():
+            # Find the group this owner component belongs to.
+            owner_group = next((ns for ns in comps if owner in ns), None)
+            if not owner_group:
+                continue
+            for kpos in kids:
+                if kpos < len(owner_group):
+                    opened_via_subpage.add(owner_group[kpos])
         # Fallback: a StackPage may list sub-pages (pos > 0) whose openSubPage()
         # call lives in a separate component file we don't scan (e.g. the
         # Ethernet detail page is opened from EthernetSection.qml). Link any such
-        # sub-page by its position, deriving a label from its component name.
+        # sub-page by its position, deriving a label from its component name -
+        # but skip ones already reached through another page.
         for pos in range(1, len(names)):
-            if pos not in children:
+            if pos not in children and names[pos] not in opened_via_subpage:
                 label = re.sub(r"(Detail)?Page$", "", names[pos])
                 label = re.sub(r"(?<!^)(?=[A-Z])", " ", label)
                 children[pos] = (main_icon, label, "")

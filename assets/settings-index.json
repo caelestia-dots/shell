@@ -744,15 +744,20 @@
     {
       "pageIdx": 6,
       "subPath": [
+        2,
         5
       ],
       "crumbIcons": [
         "dock_to_bottom",
-        "dock_to_bottom"
+        "dock_to_bottom",
+        "workspaces",
+        "workspaces"
       ],
       "crumbLabels": [
         "Panels",
-        "Bar Workspaces"
+        "Taskbar",
+        "Components",
+        "Workspaces"
       ],
       "title": "Shown",
       "anchor": "bar-ws-shown",
@@ -762,15 +767,20 @@
     {
       "pageIdx": 6,
       "subPath": [
+        2,
         5
       ],
       "crumbIcons": [
         "dock_to_bottom",
-        "dock_to_bottom"
+        "dock_to_bottom",
+        "workspaces",
+        "workspaces"
       ],
       "crumbLabels": [
         "Panels",
-        "Bar Workspaces"
+        "Taskbar",
+        "Components",
+        "Workspaces"
       ],
       "title": "Active indicator",
       "anchor": "bar-ws-active-indicator",
@@ -780,15 +790,20 @@
     {
       "pageIdx": 6,
       "subPath": [
+        2,
         5
       ],
       "crumbIcons": [
         "dock_to_bottom",
-        "dock_to_bottom"
+        "dock_to_bottom",
+        "workspaces",
+        "workspaces"
       ],
       "crumbLabels": [
         "Panels",
-        "Bar Workspaces"
+        "Taskbar",
+        "Components",
+        "Workspaces"
       ],
       "title": "Active trail",
       "anchor": "bar-ws-active-trail",
@@ -798,15 +813,20 @@
     {
       "pageIdx": 6,
       "subPath": [
+        2,
         5
       ],
       "crumbIcons": [
         "dock_to_bottom",
-        "dock_to_bottom"
+        "dock_to_bottom",
+        "workspaces",
+        "workspaces"
       ],
       "crumbLabels": [
         "Panels",
-        "Bar Workspaces"
+        "Taskbar",
+        "Components",
+        "Workspaces"
       ],
       "title": "Occupied background",
       "anchor": "bar-ws-occupied-background",
@@ -816,15 +836,20 @@
     {
       "pageIdx": 6,
       "subPath": [
+        2,
         5
       ],
       "crumbIcons": [
         "dock_to_bottom",
-        "dock_to_bottom"
+        "dock_to_bottom",
+        "workspaces",
+        "workspaces"
       ],
       "crumbLabels": [
         "Panels",
-        "Bar Workspaces"
+        "Taskbar",
+        "Components",
+        "Workspaces"
       ],
       "title": "Show windows",
       "anchor": "bar-ws-show-windows",
@@ -834,15 +859,20 @@
     {
       "pageIdx": 6,
       "subPath": [
+        2,
         5
       ],
       "crumbIcons": [
         "dock_to_bottom",
-        "dock_to_bottom"
+        "dock_to_bottom",
+        "workspaces",
+        "workspaces"
       ],
       "crumbLabels": [
         "Panels",
-        "Bar Workspaces"
+        "Taskbar",
+        "Components",
+        "Workspaces"
       ],
       "title": "Windows on special workspaces",
       "anchor": "bar-ws-windows-on-special-workspaces",
@@ -852,15 +882,20 @@
     {
       "pageIdx": 6,
       "subPath": [
+        2,
         5
       ],
       "crumbIcons": [
         "dock_to_bottom",
-        "dock_to_bottom"
+        "dock_to_bottom",
+        "workspaces",
+        "workspaces"
       ],
       "crumbLabels": [
         "Panels",
-        "Bar Workspaces"
+        "Taskbar",
+        "Components",
+        "Workspaces"
       ],
       "title": "Max window icons",
       "anchor": "bar-ws-max-window-icons",
@@ -870,15 +905,20 @@
     {
       "pageIdx": 6,
       "subPath": [
+        2,
         5
       ],
       "crumbIcons": [
         "dock_to_bottom",
-        "dock_to_bottom"
+        "dock_to_bottom",
+        "workspaces",
+        "workspaces"
       ],
       "crumbLabels": [
         "Panels",
-        "Bar Workspaces"
+        "Taskbar",
+        "Components",
+        "Workspaces"
       ],
       "title": "Per-monitor workspaces",
       "anchor": "bar-ws-per-monitor-workspaces",
@@ -888,15 +928,20 @@
     {
       "pageIdx": 6,
       "subPath": [
+        2,
         6
       ],
       "crumbIcons": [
         "dock_to_bottom",
-        "dock_to_bottom"
+        "dock_to_bottom",
+        "web_asset",
+        "web_asset"
       ],
       "crumbLabels": [
         "Panels",
-        "Bar Active Window"
+        "Taskbar",
+        "Components",
+        "Active window"
       ],
       "title": "Compact",
       "anchor": "bar-aw-compact",
@@ -906,15 +951,20 @@
     {
       "pageIdx": 6,
       "subPath": [
+        2,
         6
       ],
       "crumbIcons": [
         "dock_to_bottom",
-        "dock_to_bottom"
+        "dock_to_bottom",
+        "web_asset",
+        "web_asset"
       ],
       "crumbLabels": [
         "Panels",
-        "Bar Active Window"
+        "Taskbar",
+        "Components",
+        "Active window"
       ],
       "title": "Inverted",
       "anchor": "bar-aw-inverted",
@@ -924,15 +974,20 @@
     {
       "pageIdx": 6,
       "subPath": [
+        2,
         6
       ],
       "crumbIcons": [
         "dock_to_bottom",
-        "dock_to_bottom"
+        "dock_to_bottom",
+        "web_asset",
+        "web_asset"
       ],
       "crumbLabels": [
         "Panels",
-        "Bar Active Window"
+        "Taskbar",
+        "Components",
+        "Active window"
       ],
       "title": "Show on hover",
       "anchor": "bar-aw-show-on-hover",
@@ -942,15 +997,20 @@
     {
       "pageIdx": 6,
       "subPath": [
+        2,
         6
       ],
       "crumbIcons": [
         "dock_to_bottom",
-        "dock_to_bottom"
+        "dock_to_bottom",
+        "web_asset",
+        "web_asset"
       ],
       "crumbLabels": [
         "Panels",
-        "Bar Active Window"
+        "Taskbar",
+        "Components",
+        "Active window"
       ],
       "title": "Popout on hover",
       "anchor": "bar-aw-popout-on-hover",
@@ -960,15 +1020,20 @@
     {
       "pageIdx": 6,
       "subPath": [
+        2,
         7
       ],
       "crumbIcons": [
         "dock_to_bottom",
-        "dock_to_bottom"
+        "dock_to_bottom",
+        "widgets",
+        "widgets"
       ],
       "crumbLabels": [
         "Panels",
-        "Bar Tray"
+        "Taskbar",
+        "Components",
+        "Tray"
       ],
       "title": "Background",
       "anchor": "bar-tray-background",
@@ -978,15 +1043,20 @@
     {
       "pageIdx": 6,
       "subPath": [
+        2,
         7
       ],
       "crumbIcons": [
         "dock_to_bottom",
-        "dock_to_bottom"
+        "dock_to_bottom",
+        "widgets",
+        "widgets"
       ],
       "crumbLabels": [
         "Panels",
-        "Bar Tray"
+        "Taskbar",
+        "Components",
+        "Tray"
       ],
       "title": "Recolour icons",
       "anchor": "bar-tray-recolour-icons",
@@ -996,15 +1066,20 @@
     {
       "pageIdx": 6,
       "subPath": [
+        2,
         7
       ],
       "crumbIcons": [
         "dock_to_bottom",
-        "dock_to_bottom"
+        "dock_to_bottom",
+        "widgets",
+        "widgets"
       ],
       "crumbLabels": [
         "Panels",
-        "Bar Tray"
+        "Taskbar",
+        "Components",
+        "Tray"
       ],
       "title": "Compact",
       "anchor": "bar-tray-compact",
@@ -1014,15 +1089,20 @@
     {
       "pageIdx": 6,
       "subPath": [
+        2,
         7
       ],
       "crumbIcons": [
         "dock_to_bottom",
-        "dock_to_bottom"
+        "dock_to_bottom",
+        "widgets",
+        "widgets"
       ],
       "crumbLabels": [
         "Panels",
-        "Bar Tray"
+        "Taskbar",
+        "Components",
+        "Tray"
       ],
       "title": "Popout on hover",
       "anchor": "bar-tray-popout-on-hover",
@@ -1032,15 +1112,20 @@
     {
       "pageIdx": 6,
       "subPath": [
+        2,
         8
       ],
       "crumbIcons": [
         "dock_to_bottom",
-        "dock_to_bottom"
+        "dock_to_bottom",
+        "signal_cellular_alt",
+        "signal_cellular_alt"
       ],
       "crumbLabels": [
         "Panels",
-        "Bar Status Icons"
+        "Taskbar",
+        "Components",
+        "Status icons"
       ],
       "title": "Speakers",
       "anchor": "bar-si-speakers",
@@ -1050,15 +1135,20 @@
     {
       "pageIdx": 6,
       "subPath": [
+        2,
         8
       ],
       "crumbIcons": [
         "dock_to_bottom",
-        "dock_to_bottom"
+        "dock_to_bottom",
+        "signal_cellular_alt",
+        "signal_cellular_alt"
       ],
       "crumbLabels": [
         "Panels",
-        "Bar Status Icons"
+        "Taskbar",
+        "Components",
+        "Status icons"
       ],
       "title": "Microphone",
       "anchor": "bar-si-microphone",
@@ -1068,15 +1158,20 @@
     {
       "pageIdx": 6,
       "subPath": [
+        2,
         8
       ],
       "crumbIcons": [
         "dock_to_bottom",
-        "dock_to_bottom"
+        "dock_to_bottom",
+        "signal_cellular_alt",
+        "signal_cellular_alt"
       ],
       "crumbLabels": [
         "Panels",
-        "Bar Status Icons"
+        "Taskbar",
+        "Components",
+        "Status icons"
       ],
       "title": "Keyboard layout",
       "anchor": "bar-si-keyboard-layout",
@@ -1086,15 +1181,20 @@
     {
       "pageIdx": 6,
       "subPath": [
+        2,
         8
       ],
       "crumbIcons": [
         "dock_to_bottom",
-        "dock_to_bottom"
+        "dock_to_bottom",
+        "signal_cellular_alt",
+        "signal_cellular_alt"
       ],
       "crumbLabels": [
         "Panels",
-        "Bar Status Icons"
+        "Taskbar",
+        "Components",
+        "Status icons"
       ],
       "title": "Network",
       "anchor": "bar-si-network",
@@ -1104,15 +1204,20 @@
     {
       "pageIdx": 6,
       "subPath": [
+        2,
         8
       ],
       "crumbIcons": [
         "dock_to_bottom",
-        "dock_to_bottom"
+        "dock_to_bottom",
+        "signal_cellular_alt",
+        "signal_cellular_alt"
       ],
       "crumbLabels": [
         "Panels",
-        "Bar Status Icons"
+        "Taskbar",
+        "Components",
+        "Status icons"
       ],
       "title": "Wi-Fi",
       "anchor": "bar-si-wi-fi",
@@ -1122,15 +1227,20 @@
     {
       "pageIdx": 6,
       "subPath": [
+        2,
         8
       ],
       "crumbIcons": [
         "dock_to_bottom",
-        "dock_to_bottom"
+        "dock_to_bottom",
+        "signal_cellular_alt",
+        "signal_cellular_alt"
       ],
       "crumbLabels": [
         "Panels",
-        "Bar Status Icons"
+        "Taskbar",
+        "Components",
+        "Status icons"
       ],
       "title": "Bluetooth",
       "anchor": "bar-si-bluetooth",
@@ -1140,15 +1250,20 @@
     {
       "pageIdx": 6,
       "subPath": [
+        2,
         8
       ],
       "crumbIcons": [
         "dock_to_bottom",
-        "dock_to_bottom"
+        "dock_to_bottom",
+        "signal_cellular_alt",
+        "signal_cellular_alt"
       ],
       "crumbLabels": [
         "Panels",
-        "Bar Status Icons"
+        "Taskbar",
+        "Components",
+        "Status icons"
       ],
       "title": "Battery",
       "anchor": "bar-si-battery",
@@ -1158,15 +1273,20 @@
     {
       "pageIdx": 6,
       "subPath": [
+        2,
         8
       ],
       "crumbIcons": [
         "dock_to_bottom",
-        "dock_to_bottom"
+        "dock_to_bottom",
+        "signal_cellular_alt",
+        "signal_cellular_alt"
       ],
       "crumbLabels": [
         "Panels",
-        "Bar Status Icons"
+        "Taskbar",
+        "Components",
+        "Status icons"
       ],
       "title": "Caps lock",
       "anchor": "bar-si-caps-lock",
@@ -1176,15 +1296,20 @@
     {
       "pageIdx": 6,
       "subPath": [
+        2,
         8
       ],
       "crumbIcons": [
         "dock_to_bottom",
-        "dock_to_bottom"
+        "dock_to_bottom",
+        "signal_cellular_alt",
+        "signal_cellular_alt"
       ],
       "crumbLabels": [
         "Panels",
-        "Bar Status Icons"
+        "Taskbar",
+        "Components",
+        "Status icons"
       ],
       "title": "Popout on hover",
       "anchor": "bar-si-popout-on-hover",
@@ -1194,15 +1319,20 @@
     {
       "pageIdx": 6,
       "subPath": [
+        2,
         9
       ],
       "crumbIcons": [
         "dock_to_bottom",
-        "dock_to_bottom"
+        "dock_to_bottom",
+        "schedule",
+        "schedule"
       ],
       "crumbLabels": [
         "Panels",
-        "Bar Clock"
+        "Taskbar",
+        "Components",
+        "Clock"
       ],
       "title": "Background",
       "anchor": "bar-clock-background",
@@ -1212,15 +1342,20 @@
     {
       "pageIdx": 6,
       "subPath": [
+        2,
         9
       ],
       "crumbIcons": [
         "dock_to_bottom",
-        "dock_to_bottom"
+        "dock_to_bottom",
+        "schedule",
+        "schedule"
       ],
       "crumbLabels": [
         "Panels",
-        "Bar Clock"
+        "Taskbar",
+        "Components",
+        "Clock"
       ],
       "title": "Show date",
       "anchor": "bar-clock-show-date",
@@ -1230,15 +1365,20 @@
     {
       "pageIdx": 6,
       "subPath": [
+        2,
         9
       ],
       "crumbIcons": [
         "dock_to_bottom",
-        "dock_to_bottom"
+        "dock_to_bottom",
+        "schedule",
+        "schedule"
       ],
       "crumbLabels": [
         "Panels",
-        "Bar Clock"
+        "Taskbar",
+        "Components",
+        "Clock"
       ],
       "title": "Show icon",
       "anchor": "bar-clock-show-icon",
@@ -2318,7 +2458,35 @@
       40,
       41,
       42,
-      43
+      43,
+      44,
+      45,
+      46,
+      47,
+      48,
+      49,
+      50,
+      51,
+      52,
+      53,
+      54,
+      55,
+      56,
+      57,
+      58,
+      59,
+      60,
+      61,
+      62,
+      63,
+      64,
+      65,
+      66,
+      67,
+      68,
+      69,
+      70,
+      71
     ],
     "launcher": [
       18,
@@ -2533,35 +2701,7 @@
       34,
       35,
       42,
-      43,
-      44,
-      45,
-      46,
-      47,
-      48,
-      49,
-      50,
-      51,
-      52,
-      53,
-      54,
-      55,
-      56,
-      57,
-      58,
-      59,
-      60,
-      61,
-      62,
-      63,
-      64,
-      65,
-      66,
-      67,
-      68,
-      69,
-      70,
-      71
+      43
     ],
     "keep": [
       33
@@ -2603,7 +2743,35 @@
       37,
       38,
       39,
-      40
+      40,
+      44,
+      45,
+      46,
+      47,
+      48,
+      49,
+      50,
+      51,
+      52,
+      53,
+      54,
+      55,
+      56,
+      57,
+      58,
+      59,
+      60,
+      61,
+      62,
+      63,
+      64,
+      65,
+      66,
+      67,
+      68,
+      69,
+      70,
+      71
     ],
     "icons": [
       39,
@@ -3622,7 +3790,35 @@
       "40": 0.4,
       "41": 0.4,
       "42": 0.4,
-      "43": 0.4
+      "43": 0.4,
+      "44": 0.4,
+      "45": 0.4,
+      "46": 0.4,
+      "47": 0.4,
+      "48": 0.4,
+      "49": 0.4,
+      "50": 0.4,
+      "51": 0.4,
+      "52": 0.4,
+      "53": 0.4,
+      "54": 0.4,
+      "55": 0.4,
+      "56": 0.4,
+      "57": 0.4,
+      "58": 0.4,
+      "59": 0.4,
+      "60": 0.4,
+      "61": 0.4,
+      "62": 0.4,
+      "63": 0.4,
+      "64": 0.4,
+      "65": 0.4,
+      "66": 0.4,
+      "67": 0.4,
+      "68": 0.4,
+      "69": 0.4,
+      "70": 0.4,
+      "71": 0.4
     },
     "launcher": {
       "18": 1.0,
@@ -3837,35 +4033,7 @@
       "34": 0.4,
       "35": 0.4,
       "42": 0.4,
-      "43": 0.4,
-      "44": 0.4,
-      "45": 0.4,
-      "46": 0.4,
-      "47": 0.4,
-      "48": 0.4,
-      "49": 0.4,
-      "50": 0.4,
-      "51": 0.4,
-      "52": 0.4,
-      "53": 0.4,
-      "54": 0.4,
-      "55": 0.4,
-      "56": 0.4,
-      "57": 0.4,
-      "58": 0.4,
-      "59": 0.4,
-      "60": 0.4,
-      "61": 0.4,
-      "62": 0.4,
-      "63": 0.4,
-      "64": 0.4,
-      "65": 0.4,
-      "66": 0.4,
-      "67": 0.4,
-      "68": 0.4,
-      "69": 0.4,
-      "70": 0.4,
-      "71": 0.4
+      "43": 0.4
     },
     "keep": {
       "33": 0.4
@@ -3907,7 +4075,35 @@
       "37": 0.4,
       "38": 0.4,
       "39": 0.4,
-      "40": 0.4
+      "40": 0.4,
+      "44": 0.4,
+      "45": 0.4,
+      "46": 0.4,
+      "47": 0.4,
+      "48": 0.4,
+      "49": 0.4,
+      "50": 0.4,
+      "51": 0.4,
+      "52": 0.4,
+      "53": 0.4,
+      "54": 0.4,
+      "55": 0.4,
+      "56": 0.4,
+      "57": 0.4,
+      "58": 0.4,
+      "59": 0.4,
+      "60": 0.4,
+      "61": 0.4,
+      "62": 0.4,
+      "63": 0.4,
+      "64": 0.4,
+      "65": 0.4,
+      "66": 0.4,
+      "67": 0.4,
+      "68": 0.4,
+      "69": 0.4,
+      "70": 0.4,
+      "71": 0.4
     },
     "icons": {
       "36": 0.4,
