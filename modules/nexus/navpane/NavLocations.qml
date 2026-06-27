@@ -8,7 +8,6 @@ import qs.components
 import qs.components.containers
 import qs.services
 import qs.modules.nexus
-import qs.modules.nexus.common
 
 VerticalFadeFlickable {
     id: root
@@ -170,7 +169,7 @@ VerticalFadeFlickable {
             implicitHeight: contentHeight
             interactive: false
             cacheBuffer: 10000
-            spacing: Tokens.spacing.larger
+            spacing: Tokens.spacing.extraLargeIncreased
 
             model: ScriptModel {
                 values: root.groups
@@ -256,7 +255,7 @@ VerticalFadeFlickable {
                     Repeater {
                         model: group.modelData.entries
 
-                        ConnectedRect {
+                        StyledRect {
                             id: result
 
                             required property var modelData
@@ -270,8 +269,12 @@ VerticalFadeFlickable {
                                 const h = resultLayout.implicitHeight + resultLayout.anchors.margins * 2;
                                 return h % 2 === 0 ? h : h + 1;
                             }
-                            first: isFirst
-                            last: isLast
+                            // Joined card: round only the outer corners so the
+                            // rows read as one block (square where they meet).
+                            topLeftRadius: isFirst ? Tokens.rounding.large : 0
+                            topRightRadius: isFirst ? Tokens.rounding.large : 0
+                            bottomLeftRadius: isLast ? Tokens.rounding.large : 0
+                            bottomRightRadius: isLast ? Tokens.rounding.large : 0
                             color: Colours.layer(Colours.palette.m3surfaceContainerHigh, 2)
 
                             StateLayer {
