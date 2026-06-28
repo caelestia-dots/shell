@@ -901,6 +901,214 @@ The launcher pulls wallpapers from `~/Pictures/Wallpapers` by default. You can c
 the launcher only shows an odd number of wallpapers at one time. If you only have 2 wallpapers, consider getting more
 (or just putting one).
 
+## Settings search
+
+The settings panel (nexus) has a full-text search that lets users jump straight to any setting by name, description, or
+the section/page it lives under. The index is generated from the page QML at build time and baked into the plugin binary,
+so it always matches the UI and ships with the compiled module rather than as a user-editable file.
+
+<details><summary>Developer guide: how it works, and how to add or remove settings</summary>
+
+### How it works at a glance
+
+```
+  page QML files                build-settings-index.py            plugin binary
+  (ToggleRow, NavRow, …)  ──►   (parses QML, builds index)   ──►   (JSON embedded
+   + settingAnchor                                                   as a qrc resource)
+                                                                         │
+                                                                         ▼
+                                                        SettingsSearcher.qml reads it
+                                                        via CUtils.settingsIndex()
+                                                                         │
+                                                                         ▼
+                                                        query() → grouped results →
+                                                        NexusState.jumpToSetting()
+```
+
+The index is **generated, not hand-written**. The build script reads the page QML, finds every indexable row, and emits a
+JSON file. CMake bakes that JSON into the plugin binary so it ships with the compiled module rather than as a
+user-editable file. At runtime the search service reads it back out and serves queries from an inverted index.
+
+### Adding a setting to the search
+
+A row is indexed when two things are true:
+
+1. It is one of the indexable row types listed in `ROW_RE` in `scripts/build-settings-index.py` — currently `ToggleRow`,
+   `SliderRow`, `SelectRow`, `StepperRow`, `NavRow`, `InfoRow`, `PopupRow` (and its `DefaultRow` alias). These all derive
+   from `ConnectedRect`, which is what makes the deep-link scroll/flash work.
+2. It has a `settingAnchor` property set to a unique kebab-case id.
+
+So to make a setting searchable, add a `settingAnchor` to its row:
+
+```qml
+ToggleRow {
+    icon: "notifications"
+    label: qsTr("Show in fullscreen")
+    status: qsTr("Keep showing notifications over fullscreen apps")
+    settingAnchor: "notif-show-in-fullscreen"   // ← add this
+    // …
+}
+```
+
+Then regenerate the index (see "Regenerating the index" below) and commit. That's it — everything else is automatic:
+
+- **Page, sub-pages, breadcrumbs** are discovered from the page tree (`PageRegistry.qml` for icons/labels,
+  `PageCompRegistry.qml` for the hierarchy), so you don't list them anywhere.
+- **The title** comes from the row's `label`.
+- **The description** comes from the row's `subtext` or `status`.
+- **The section** comes from the nearest `SectionHeader` above the row.
+- **Search tokens** (the inverted index) are built from all of the above.
+
+#### Choosing a good anchor
+
+The anchor is a stable id used for deep-linking, not shown to the user. Keep it kebab-case and prefix it with the page so
+ids stay unique and readable, e.g. `notif-default-timeout`, `apps-all-apps`, `ethernet-ip-address`. Once an anchor ships,
+avoid renaming it gratuitously — it's the durable handle for that setting.
+
+#### Indexing a new or different row type
+
+The generator only looks at the row types listed in `ROW_RE`. If a setting uses a component that isn't in that list,
+**it won't be indexed even if you add a `settingAnchor`** — the generator simply never sees it. This is an easy thing to
+miss: the setting works fine in the UI but never shows up in search.
+
+This is exactly what happened with the "Default applications" rows (Terminal, Audio, Media playback, File manager) on the
+Apps page. They use a `PopupRow` (via its `DefaultRow` alias) rather than a `ToggleRow`/`NavRow`, so they were invisible to
+search until `PopupRow`/`DefaultRow` were added to `ROW_RE`.
+
+To make a new row type indexable:
+
+1. **Confirm it derives from `ConnectedRect`.** This is required — the deep-link scroll-and-flash relies on
+   `ConnectedRect`'s `settingAnchor` and `flashHighlight()`. A component that isn't a `ConnectedRect` (e.g. a bare
+   `M3TextField`) can't be deep-linked and shouldn't be added.
+2. **Add the component name to `ROW_RE`** in `scripts/build-settings-index.py`. The generator matches on the literal name
+   as written in the QML, so if a page uses a local alias (like `DefaultRow` for `PopupRow`), add the alias too — or
+   better, add the underlying type and prefer using it directly.
+3. **Make sure its title/description come from the expected properties.** The generator reads the title from `label` or
+   `text`, and the description from `subtext` or `status` (see `LABEL_RE` and `SUBTEXT_RE`). If your component exposes
+   those under different names, either alias them or extend the regexes.
+4. Add `settingAnchor`s, regenerate, and commit.
+
+If you find yourself adding lots of one-off aliases, that's a sign the underlying row type (e.g. `PopupRow`) should be in
+`ROW_RE` directly so future pages using it are indexed automatically.
+
+### Removing a setting from the search
+
+There are four ways, depending on how broadly you want to exclude:
+
+1. **One setting** — delete its `settingAnchor`. The row stays in the UI but drops out of search. This is the usual case.
+2. **A title everywhere** — add the title to `SKIP_LABELS` in `scripts/build-settings-index.py`. Useful for generic labels
+   like `Muted` or `None` that would otherwise produce noise.
+3. **A whole page** — remove the `settingAnchor` from every row on that page.
+4. **Conditionally / at runtime** — filter in `NavLocations.qml`. This is how ethernet settings are hidden when no ethernet
+   is available: the results list drops entries whose anchor starts with `ethernet-` unless a wired connection exists. Use
+   this when "should it be searchable" depends on runtime state, not on the source.
+
+After options 1–3, regenerate the index and commit. Option 4 is pure QML and needs no regeneration.
+
+### Regenerating the index
+
+The build runs the generator automatically, so a normal `cmake --build` produces a fresh index. But `qs -c caelestia`
+(used for quick iteration) does **not** run CMake, so after any change that affects the index you must regenerate it
+manually before testing:
+
+```sh
+python3 scripts/build-settings-index.py modules/nexus <output.json>
+```
+
+During development the simplest flow is to point it at a temporary file and rebuild the plugin once, or just run a full
+`cmake --build`. The committed source of truth is the generator and the page QML — there is no checked-in JSON to keep in
+sync (the index lives inside the plugin binary, see below).
+
+> **Note:** changes that affect the index — adding/removing a `settingAnchor`, editing a `label`/`subtext`/`status`/
+> `SectionHeader`, or restructuring pages — only show up after the index is regenerated. Pure styling or behaviour changes
+> to the search UI (`NavLocations.qml`, `SettingsSearcher.qml`) take effect with a plain `qs -c caelestia`.
+
+### Where the index lives
+
+The generated JSON is **embedded into the plugin binary as a Qt resource**, not installed as a config file. This keeps it
+out of the user-editable config tree (it can't be accidentally edited or deleted), and means it ships wherever the module
+is installed — manual build, AUR, Nix, all the same.
+
+The flow in CMake:
+
+1. `CMakeLists.txt` runs `build-settings-index.py` at configure time, before the plugin subdirectory, writing to
+   `${CMAKE_BINARY_DIR}/settings-index.json` (the `SETTINGS_INDEX_JSON` variable).
+2. `plugin/src/Caelestia/CMakeLists.txt` adds that file to the `caelestia-core` module as a `RESOURCES` entry, with
+   `QT_RESOURCE_ALIAS` mapping it to the stable path `settings-index.json` regardless of the build-dir layout.
+3. At runtime it is available at the qrc path `:/qt/qml/Caelestia/settings-index.json` (Qt's `qt_add_qml_module` prefixes
+   resources with `:/qt/qml/<URI>/`).
+
+`CUtils::settingsIndex()` (in `plugin/src/Caelestia/cutils.{hpp,cpp}`) reads that resource and returns it as a string to
+QML.
+
+> Because `rcc` compresses embedded resources, you won't see the JSON text with `strings` on the `.so` — that's expected,
+> the data is there but zlib-compressed. To verify, log `CUtils.settingsIndex().length` from QML instead.
+
+### The generated JSON
+
+Schema (version 2):
+
+```jsonc
+{
+  "version": 2,
+  "entries": [
+    {
+      "pageIdx":     0,                    // index of the owning top-level page
+      "subPath":     [2, 9],               // sub-page navigation path (empty = main page)
+      "crumbIcons":  ["palette", "…"],     // breadcrumb icons, page → setting
+      "crumbLabels": ["Wallpaper", "…"],   // breadcrumb labels
+      "title":       "Display wallpaper",  // the setting label
+      "section":     "Wallpaper",          // nearest SectionHeader, if any
+      "subtext":     "…",                  // description (subtext/status)
+      "anchor":      "wallpaper-display"   // settingAnchor, used for deep-linking
+    }
+    // …
+  ],
+  "inverted": { "token": [entryIdx, …] }, // inverted index: token → matching entries
+  "ranking":  { "token": { "entryIdx": weight } } // per-token relevance weights
+}
+```
+
+`title` weighs more than keyword tokens in ranking, so a query that hits a setting's name ranks above one that only hits
+its description.
+
+### Runtime pieces
+
+| File | Role |
+| --- | --- |
+| `scripts/build-settings-index.py` | Parses page QML, builds the index JSON. |
+| `SettingsSearcher.qml` | Singleton search service. Loads the index via `CUtils.settingsIndex()`, exposes `query(search)` over the inverted index, plus `highlight()` for match emphasis. |
+| `NavLocations.qml` | Renders grouped result cards, runtime filtering (e.g. ethernet), click-to-navigate. |
+| `NexusState.qml` | `jumpToSetting(pageIdx, subPath, anchor)` drives navigation + deferred scroll target. |
+| `common/PageBase.qml` | `scrollToAnchor()` scrolls to and flashes the target row once the page is ready (handles async-loaded content). |
+| `common/ConnectedRect.qml` | Base of the indexable rows; provides `settingAnchor` and the flash highlight. |
+| `plugin/src/Caelestia/cutils.{hpp,cpp}` | `settingsIndex()` returns the embedded JSON to QML. |
+
+#### Search internals
+
+`query(search)` tokenizes the input, looks up each token in the inverted index (exact match first, then prefix — so `wall`
+matches `wallpaper`), keeps only entries that match **all** tokens (AND semantics), sorts by summed relevance weight (ties
+broken by entry id for stability), and caps the result count. Each result is exposed as a `SettingEntry` QObject so the UI
+can bind to its fields.
+
+`highlight(text, search, colour)` wraps query-matched prefixes in a `<font color>` tag for display with `Text.StyledText`.
+(StyledText supports `<font color>` but not CSS `<span style>`, which is a common gotcha.)
+
+### Gotchas
+
+- **`qs -c` won't regenerate the index.** Always rerun the generator after index-affecting edits, or do a full build.
+- **Only `ConnectedRect`-derived rows can take a `settingAnchor`.** Plain `M3TextField`s and other non-`ConnectedRect`
+  components can't be deep-linked, so they can't be indexed this way.
+- **A `settingAnchor` does nothing if the row type isn't in `ROW_RE`.** The generator only sees the row types it's told
+  about, so a new component (or a page-local alias) needs adding to `ROW_RE` first — otherwise the setting works in the UI
+  but silently never appears in search. See "Indexing a new or different row type" above.
+- **Tokenization splits on non-alphanumerics.** A single query word won't match across a hyphen boundary in a hyphenated
+  name (e.g. `wifi` vs `Wi-Fi`): the result still appears via the index, but that exact word may not be highlighted.
+- **Anchors are forever-ish.** They're the deep-link handle; renaming one is a breaking change for anything that linked to
+  it.
+
+</details>
+
 ## Credits
 
 Thanks to the Hyprland discord community (especially the homies in #rice-discussion) for all the help and suggestions

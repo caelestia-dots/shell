@@ -41,7 +41,7 @@ ColumnLayout {
         flickable.contentY = target;
         Qt.callLater(() => root.animateScroll = false);
         if (row.flashHighlight !== undefined) // qmllint disable missing-property
-            row.flashHighlight();
+            row.flashHighlight(); // qmllint disable missing-property
         return true;
     }
 
@@ -72,7 +72,7 @@ ColumnLayout {
     function highlightAnchor(anchor: string): void {
         const row = findAnchor(contentChild, anchor);
         if (row && row.flashHighlight !== undefined) // qmllint disable missing-property
-            row.flashHighlight();
+            row.flashHighlight(); // qmllint disable missing-property
     }
 
     spacing: Tokens.spacing.extraLargeIncreased
