@@ -299,7 +299,8 @@ VerticalFadeFlickable {
                                 // The setting itself, most prominent.
                                 StyledText {
                                     Layout.fillWidth: true
-                                    text: result.modelData.title
+                                    text: SettingsSearcher.highlight(result.modelData.title, root.search)
+                                    textFormat: Text.StyledText
                                     color: Colours.palette.m3onSurface
                                     font: Tokens.font.body.medium
                                     elide: Text.ElideRight
@@ -309,7 +310,8 @@ VerticalFadeFlickable {
                                 StyledText {
                                     Layout.fillWidth: true
                                     visible: result.modelData.subtext.length > 0
-                                    text: result.modelData.subtext
+                                    text: SettingsSearcher.highlight(result.modelData.subtext, root.search)
+                                    textFormat: Text.StyledText
                                     color: Colours.palette.m3outline
                                     font: Tokens.font.label.small
                                     elide: Text.ElideRight
