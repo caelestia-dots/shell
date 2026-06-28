@@ -30,6 +30,11 @@ public:
 
     Q_INVOKABLE static qreal clamp(qreal value, qreal min, qreal max);
 
+    // Returns the settings search index JSON, baked into the plugin binary at
+    // build time so it lives with the compiled module rather than in a
+    // user-editable config file.
+    Q_INVOKABLE static QString settingsIndex();
+
     [[nodiscard]] QString version() const;
     [[nodiscard]] QString qtVersion() const;
 };

@@ -4,6 +4,7 @@
 #include <QtQuick/qquickitemgrabresult.h>
 #include <QtQuick/qquickwindow.h>
 #include <qdir.h>
+#include <qfile.h>
 #include <qfileinfo.h>
 #include <qfuturewatcher.h>
 #include <qloggingcategory.h>
@@ -140,6 +141,15 @@ QString CUtils::toLocalFile(const QUrl& url) {
 
 qreal CUtils::clamp(qreal value, qreal min, qreal max) {
     return qBound(min, value, max);
+}
+
+QString CUtils::settingsIndex() {
+    QFile file(QStringLiteral(":/qt/qml/Caelestia/settings-index.json"));
+    if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        qCWarning(lcCUtils) << "Failed to open embedded settings index";
+        return QString();
+    }
+    return QString::fromUtf8(file.readAll());
 }
 
 #ifndef CAELESTIA_VERSION

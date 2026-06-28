@@ -1,13 +1,12 @@
 pragma Singleton
 
 import QtQuick
-import Quickshell
-import Quickshell.Io
+import Caelestia
 
 // Search service over the settings index. The index is generated at build time
-// from the page QML files by scripts/build-settings-index.py and shipped as
-// assets/settings-index.json (version 2), so it stays in sync with the UI
-// without any hand-maintained entries.
+// from the page QML files by scripts/build-settings-index.py and baked into the
+// plugin binary (read via CUtils.settingsIndex), so it stays in sync with the UI
+// without any hand-maintained entries and without a user-editable data file.
 //
 // Unlike the launcher's fuzzy searcher, this uses the real inverted index +
 // ranking baked into the JSON: a query is tokenised, each token is looked up in
@@ -88,26 +87,23 @@ Singleton {
         return escaped.replace(pattern, `<font color="${colour}">$1</font>`);
     }
 
+    Component.onCompleted: {
+        try {
+            const data = JSON.parse(CUtils.settingsIndex());
+            entries.model = data.entries;
+            root.inverted = data.inverted ?? {};
+            root.ranking = data.ranking ?? {};
+        } catch (e) {
+            entries.model = [];
+            root.inverted = {};
+            root.ranking = {};
+        }
+    }
+
     Variants {
         id: entries
 
         SettingEntry {}
-    }
-
-    FileView {
-        path: Quickshell.shellPath("assets/settings-index.json")
-        onLoaded: {
-            try {
-                const data = JSON.parse(text());
-                entries.model = data.entries;
-                root.inverted = data.inverted ?? {};
-                root.ranking = data.ranking ?? {};
-            } catch (e) {
-                entries.model = [];
-                root.inverted = {};
-                root.ranking = {};
-            }
-        }
     }
 
     component SettingEntry: QtObject {
