@@ -245,23 +245,6 @@ VerticalFadeFlickable {
                             bottomRightRadius: isLast ? Tokens.rounding.extraLarge : 0
                             color: Colours.layer(Colours.palette.m3surfaceContainerHigh, 2)
 
-                            StateLayer {
-                                anchors.fill: parent
-                                radius: 0
-
-                                onClicked: {
-                                    // Ethernet detail settings need a selected interface
-                                    // to show the right device; a search deep-link has
-                                    // none, so point it at the connected (or first) one.
-                                    if (result.modelData.anchor.startsWith("ethernet-")) {
-                                        const active = Nmcli.activeEthernet ?? Nmcli.ethernetDevices[0] ?? null;
-                                        if (active)
-                                            root.nState.selectedEthernetInterface = active.iface;
-                                    }
-                                    root.nState.jumpToSetting(result.modelData.pageIdx, result.modelData.subPath, result.modelData.anchor);
-                                }
-                            }
-
                             // Thin divider between joined rows (not under the last one).
                             StyledRect {
                                 anchors.bottom: parent.bottom
@@ -315,6 +298,29 @@ VerticalFadeFlickable {
                                     color: Colours.palette.m3outline
                                     font: Tokens.font.label.small
                                     elide: Text.ElideRight
+                                }
+                            }
+
+                            // Hover/click layer on top of the content so the
+                            // rich-text labels underneath can't intercept pointer
+                            // events (which made the hover flicker as the mouse
+                            // moved over them). It's transparent apart from the
+                            // hover tint, so the text still shows through.
+                            StateLayer {
+                                anchors.fill: parent
+                                z: 1
+                                radius: 0
+
+                                onClicked: {
+                                    // Ethernet detail settings need a selected interface
+                                    // to show the right device; a search deep-link has
+                                    // none, so point it at the connected (or first) one.
+                                    if (result.modelData.anchor.startsWith("ethernet-")) {
+                                        const active = Nmcli.activeEthernet ?? Nmcli.ethernetDevices[0] ?? null;
+                                        if (active)
+                                            root.nState.selectedEthernetInterface = active.iface;
+                                    }
+                                    root.nState.jumpToSetting(result.modelData.pageIdx, result.modelData.subPath, result.modelData.anchor);
                                 }
                             }
                         }
