@@ -5,6 +5,7 @@ import QtQuick.Layouts
 import Quickshell
 import Caelestia.Config
 import qs.components
+import qs.components.containers
 import qs.components.effects
 import qs.services
 import qs.modules.drawers
@@ -27,15 +28,67 @@ MouseArea {
     property real marginX
     property real marginY
 
+    property real maxHeight: 320
+    property real minHeight: 160
+    property real edgeMargin: Tokens.spacing.small
+
+    property real _attachTopY: 0
+    property real _attachBottomY: 0
+
+    readonly property real spaceAbove: Math.max(0, _attachTopY - edgeMargin)
+    readonly property real spaceBelow: Math.max(0, root.height - _attachBottomY - edgeMargin)
+
+    readonly property bool _preferBottom: attachSideY === Menu.Bottom
+    readonly property bool _flipToBottom: !_preferBottom && spaceAbove < minHeight && spaceBelow > spaceAbove
+    readonly property bool _flipToTop: _preferBottom && spaceBelow < minHeight && spaceAbove > spaceBelow
+    readonly property bool effectiveBottom: _preferBottom ? !_flipToTop : _flipToBottom
+
+    readonly property int effAttachSideY: effectiveBottom ? Menu.Bottom : Menu.Top
+    readonly property int effThisSideY: effectiveBottom ? Menu.Top : Menu.Bottom
+
+    readonly property real availableSpace: effectiveBottom ? spaceBelow : spaceAbove
+
     property list<MenuItem> items
     property MenuItem active: items[0] ?? null
     property bool expanded
 
     signal itemSelected(item: MenuItem)
 
+    function _updateAttachY() {
+        if (!root.attachTo || !root.parent)
+            return;
+        root._attachTopY = root.attachTo.mapToItem(root.parent, 0, 0).y;
+        root._attachBottomY = root.attachTo.mapToItem(root.parent, 0, root.attachTo.height).y;
+    }
+
+    function scrollToActive() {
+        if (!root.active)
+            return;
+
+        const idx = root.items.indexOf(root.active);
+        if (idx < 0)
+            return;
+
+        const delegate = repeater.itemAt(idx);
+        if (!delegate)
+            return;
+
+        const target = delegate.y + delegate.height / 2 - flick.height / 2;
+        const maxContentY = Math.max(0, flick.contentHeight - flick.height);
+        flick.contentY = Math.max(0, Math.min(target, maxContentY));
+    }
+
+    onExpandedChanged: {
+        if (expanded)
+            Qt.callLater(scrollToActive);
+    }
+
+    onParentChanged: _updateAttachY()
+    Component.onCompleted: _updateAttachY()
+
     parent: {
         const win = QsWindow.window;
-        const contentWin = win as ContentWindow; // If inside the drawer content window, put it inside the interaction wrapper so hover works
+        const contentWin = win as ContentWindow;
         return contentWin ? contentWin.interactionWrapper : (win as QsWindow).contentItem;
     }
     anchors.fill: parent
@@ -59,11 +112,29 @@ MouseArea {
         b: root.attachTo
     }
 
+    Connections {
+        function onTransformChanged() {
+            root._updateAttachY();
+        }
+
+        target: watcher
+    }
+
+    Connections {
+        function onHeightChanged() {
+            root._updateAttachY();
+        }
+
+        target: root.attachTo
+    }
+
     Elevation {
         id: menu
 
+        readonly property real _pad: Tokens.padding.extraSmall
+
         x: {
-            watcher.transform; // mapToItem is not reactive so this forces updates
+            watcher.transform;
             const item = root.attachTo;
             let off = root.attachSideX === Menu.Left ? 0 : item.width;
             if (root.thisSideX === Menu.Right)
@@ -71,27 +142,32 @@ MouseArea {
             return item.mapToItem(root.parent, off, 0).x + root.marginX;
         }
         y: {
-            watcher.transform; // mapToItem is not reactive so this forces updates
-            const item = root.attachTo;
-            let off = root.attachSideY === Menu.Top ? 0 : item.height;
-            if (root.thisSideY === Menu.Bottom)
-                off -= height;
-            return item.mapToItem(root.parent, 0, off).y + root.marginY;
+            const attachY = root.effAttachSideY === Menu.Top ? root._attachTopY : root._attachBottomY;
+            return (root.effThisSideY === Menu.Bottom ? attachY - height : attachY) + root.marginY;
         }
 
         radius: Tokens.rounding.large
         level: 2
 
-        implicitWidth: Math.max(200, column.implicitWidth + column.anchors.margins * 2)
-        implicitHeight: column.implicitHeight + column.anchors.margins * 2
+        implicitWidth: Math.max(200, column.implicitWidth + menu._pad * 2 + scrollBar.implicitWidth + Tokens.spacing.extraSmall)
 
         transform: Scale {
             yScale: root.expanded ? 1 : 0.1
-            origin.y: root.thisSideY === Menu.Bottom ? menu.height : 0
+            origin.y: root.effThisSideY === Menu.Bottom ? menu.height : 0
 
             Behavior on yScale {
                 Anim {}
             }
+        }
+
+        Binding {
+            target: menu
+            property: "implicitHeight"
+            value: {
+                const cap = Math.max(root.minHeight, Math.min(root.maxHeight, root.availableSpace));
+                return Math.min(column.implicitHeight + menu._pad * 2, cap);
+            }
+            delayed: true
         }
 
         MouseArea {
@@ -105,91 +181,113 @@ MouseArea {
             radius: parent.radius
             color: Colours.palette.m3surfaceContainerLow
 
-            ColumnLayout {
-                id: column
+            VerticalFadeFlickable {
+                id: flick
 
                 anchors.fill: parent
-                anchors.margins: Tokens.padding.extraSmall
-                spacing: 0
+                anchors.margins: menu._pad
+                anchors.rightMargin: menu._pad + scrollBar.implicitWidth + Tokens.spacing.extraSmall
 
-                Repeater {
-                    id: repeater
+                contentWidth: width
+                contentHeight: column.implicitHeight
+                clip: true
 
-                    model: root.items
+                ColumnLayout {
+                    id: column
 
-                    StyledRect {
-                        id: item
+                    width: flick.width
+                    spacing: 0
 
-                        required property int index
-                        required property MenuItem modelData
-                        readonly property bool active: modelData === root?.active
+                    Repeater {
+                        id: repeater
 
-                        Layout.fillWidth: true
-                        implicitWidth: menuOptionRow.implicitWidth + Tokens.padding.medium * 2
-                        implicitHeight: menuOptionRow.implicitHeight + Tokens.padding.medium * 2
+                        model: root.items
 
-                        radius: active ? Tokens.rounding.medium : Tokens.rounding.extraSmall
-                        topLeftRadius: index === 0 ? Tokens.rounding.medium : radius
-                        topRightRadius: index === 0 ? Tokens.rounding.medium : radius
-                        bottomLeftRadius: index === repeater?.count - 1 ? Tokens.rounding.medium : radius
-                        bottomRightRadius: index === repeater?.count - 1 ? Tokens.rounding.medium : radius
+                        StyledRect {
+                            id: item
 
-                        color: Qt.alpha(Colours.palette.m3tertiaryContainer, active ? 1 : 0)
+                            required property int index
+                            required property MenuItem modelData
+                            readonly property bool active: modelData === root?.active
 
-                        Behavior on radius {
-                            Anim {}
-                        }
+                            Layout.fillWidth: true
+                            implicitWidth: menuOptionRow.implicitWidth + Tokens.padding.medium * 2
+                            implicitHeight: menuOptionRow.implicitHeight + Tokens.padding.medium * 2
 
-                        StateLayer {
-                            topLeftRadius: parent.topLeftRadius
-                            topRightRadius: parent.topRightRadius
-                            bottomLeftRadius: parent.bottomLeftRadius
-                            bottomRightRadius: parent.bottomRightRadius
+                            radius: active ? Tokens.rounding.medium : Tokens.rounding.extraSmall
+                            topLeftRadius: index === 0 ? Tokens.rounding.medium : radius
+                            topRightRadius: index === 0 ? Tokens.rounding.medium : radius
+                            bottomLeftRadius: index === repeater?.count - 1 ? Tokens.rounding.medium : radius
+                            bottomRightRadius: index === repeater?.count - 1 ? Tokens.rounding.medium : radius
 
-                            color: item.active ? Colours.palette.m3onTertiaryContainer : Colours.palette.m3onSurface
-                            disabled: !root.expanded
-                            onClicked: {
-                                root.itemSelected(item.modelData);
-                                root.active = item.modelData;
-                                item.modelData.clicked();
-                                root.expanded = false;
-                            }
-                        }
+                            color: Qt.alpha(Colours.palette.m3tertiaryContainer, active ? 1 : 0)
 
-                        RowLayout {
-                            id: menuOptionRow
-
-                            anchors.fill: parent
-                            anchors.margins: Tokens.padding.medium
-                            spacing: Tokens.spacing.small
-
-                            MaterialIcon {
-                                Layout.alignment: Qt.AlignVCenter
-                                text: item.modelData?.icon ?? ""
-                                color: item.active ? Colours.palette.m3onTertiaryContainer : Colours.palette.m3onSurfaceVariant
+                            Behavior on radius {
+                                Anim {}
                             }
 
-                            StyledText {
-                                Layout.alignment: Qt.AlignVCenter
-                                Layout.fillWidth: true
-                                text: item.modelData?.text ?? ""
+                            StateLayer {
+                                topLeftRadius: parent.topLeftRadius
+                                topRightRadius: parent.topRightRadius
+                                bottomLeftRadius: parent.bottomLeftRadius
+                                bottomRightRadius: parent.bottomRightRadius
+
                                 color: item.active ? Colours.palette.m3onTertiaryContainer : Colours.palette.m3onSurface
+                                disabled: !root.expanded
+                                onClicked: {
+                                    root.itemSelected(item.modelData);
+                                    root.active = item.modelData;
+                                    item.modelData.clicked();
+                                    root.expanded = false;
+                                }
                             }
 
-                            Loader {
-                                asynchronous: true
-                                Layout.alignment: Qt.AlignVCenter
-                                active: item.modelData?.trailingIcon.length > 0
-                                visible: active
+                            RowLayout {
+                                id: menuOptionRow
 
-                                sourceComponent: MaterialIcon {
-                                    text: item.modelData.trailingIcon
+                                anchors.fill: parent
+                                anchors.margins: Tokens.padding.medium
+                                spacing: Tokens.spacing.small
+
+                                MaterialIcon {
+                                    Layout.alignment: Qt.AlignVCenter
+                                    text: item.modelData?.icon ?? ""
                                     color: item.active ? Colours.palette.m3onTertiaryContainer : Colours.palette.m3onSurfaceVariant
+                                }
+
+                                StyledText {
+                                    Layout.alignment: Qt.AlignVCenter
+                                    Layout.fillWidth: true
+                                    text: item.modelData?.text ?? ""
+                                    color: item.active ? Colours.palette.m3onTertiaryContainer : Colours.palette.m3onSurface
+                                }
+
+                                Loader {
+                                    asynchronous: true
+                                    Layout.alignment: Qt.AlignVCenter
+                                    active: item.modelData?.trailingIcon.length > 0
+                                    visible: active
+
+                                    sourceComponent: MaterialIcon {
+                                        text: item.modelData.trailingIcon
+                                        color: item.active ? Colours.palette.m3onTertiaryContainer : Colours.palette.m3onSurfaceVariant
+                                    }
                                 }
                             }
                         }
                     }
                 }
+            }
+
+            StyledScrollBar {
+                id: scrollBar
+
+                anchors.top: parent.top
+                anchors.right: parent.right
+                anchors.bottom: parent.bottom
+                anchors.margins: menu._pad
+
+                flickable: flick
             }
         }
     }
