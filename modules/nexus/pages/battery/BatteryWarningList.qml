@@ -28,7 +28,6 @@ ItemList {
         values: {
             const data = isLowWarning ? GlobalConfig.general.battery.lowBatteryWarnLevels : GlobalConfig.general.battery.chargingWarnLevels
             const values = [...data].sort((a, b) => isLowWarning ? b.level - a.level : a.level - b.level);
-            console.log(values);
             return values;
         }
     }
@@ -37,6 +36,7 @@ ItemList {
         id: warningLayer
 
         required property var modelData
+        property real textOpacity: modelData.enabled ? 1 : 0.5        
 
         anchors.left: root.list.contentItem.left
         anchors.right: root.list.contentItem.right
@@ -56,13 +56,15 @@ ItemList {
 
             MaterialIcon {
                 text: warningLayer.modelData.icon
-                color: warningLayer.modelData.critical ? Colours.palette.m3error : Colours.palette.m3primary 
+                color: warningLayer.modelData.enabled ? (warningLayer.modelData.critical ? Colours.palette.m3error : Colours.palette.m3primary) : Colours.palette.m3onSurfaceVariant
                 fontStyle: Tokens.font.icon.medium
+                opacity: warningLayer.textOpacity
             }
 
             ColumnLayout {
                 Layout.fillWidth: true 
                 spacing: 0
+                opacity: warningLayer.textOpacity
 
                 StyledText {
                     Layout.fillWidth: true
@@ -96,8 +98,10 @@ ItemList {
                             padding: Tokens.padding.small
                             inactiveOnColour: Colours.palette.m3onSurfaceVariant
                             label.fill: 0
+                            opacity: warningLayer.textOpacity
 
                             onClicked: {
+                                root.nState.lowWarningSelected = isLowWarning;
                                 root.nState.selectedBatteryLevel = warningLayer.modelData;
                                 root.nState.openSubPage(1);
                             }
