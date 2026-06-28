@@ -1,6 +1,7 @@
 pragma Singleton
 
 import QtQuick
+import Quickshell
 import Caelestia
 
 // Search service over the settings index. The index is generated at build time
