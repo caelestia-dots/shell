@@ -9,8 +9,10 @@ import QtMultimedia
 Scope {
     id: root
 
-    readonly property list<var> lowWarnLevels: [...GlobalConfig.general.battery.lowBatteryWarnLevels].sort((a, b) => a.level - b.level)
-    readonly property list<var> chargeWarnLevels: [...GlobalConfig.general.battery.chargingWarnLevels].sort((a, b) => a.level - b.level)
+    readonly property var lowWarnLevels: [...GlobalConfig.general.battery.lowBatteryWarnLevels].sort((a, b) => a.level - b.level)
+    readonly property bool lowWarningEnabled: GlobalConfig.general.battery.enableLowBatteryWarning
+    readonly property var chargeWarnLevels: [...GlobalConfig.general.battery.chargingWarnLevels].sort((a, b) => a.level - b.level)
+    readonly property bool chargeWarningEnabled: GlobalConfig.general.battery.enableHighBatteryWarning
 
     MediaPlayer {
         id: notifyLowBattery
@@ -22,7 +24,7 @@ Scope {
     function handleBatteryWarnings(): void {
         const p = UPower.displayDevice.percentage * 100;
 
-        if (root.lastPercentage >= 0 && UPower.onBattery) {
+        if (root.lastPercentage >= 0 && UPower.onBattery && lowWarningEnabled) {
             for (const level of root.lowWarnLevels) {
                 if (p <= level.level && level.level < root.lastPercentage) {
                     Toaster.toast(level.title ?? qsTr("Battery warning"), level.message ?? qsTr("Battery level is low"), level.icon ?? "battery_android_alert", level.critical ? Toast.Error : Toast.Warning);
@@ -31,7 +33,7 @@ Scope {
             }
         }
 
-        if (root.lastPercentage >= 0 && !UPower.onBattery) {
+        if (root.lastPercentage >= 0 && !UPower.onBattery && chargeWarningEnabled) {
             for (const level of root.chargeWarnLevels) {
                 if (p >= level.level && level > root.lastPercentage) {
                     Toaster.toast(level.title ?? qsTr("Battery warning"), level.message ?? qsTr("Battery level is low"), level.icon ?? "battery_android_alert", level.critical ? Toast.Error : Toast.Warning);
