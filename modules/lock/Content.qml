@@ -24,6 +24,8 @@ Item {
 
         Center {
             Layout.fillWidth: true
+            Layout.topMargin: Tokens.spacing.extraLargeIncreased
+            Layout.bottomMargin: Tokens.spacing.large
             isPortrait: true
             lock: root.lock
             lockHeight: root.lockHeight

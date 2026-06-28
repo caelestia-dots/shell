@@ -26,7 +26,7 @@ ColumnLayout {
         Layout.alignment: Qt.AlignHCenter
         Layout.topMargin: Tokens.padding.large
         visible: root.isPortrait
-        spacing: Tokens.spacing.largeIncreased
+        spacing: Tokens.spacing.extraExtraLarge
 
         ProfilePic {
             Layout.alignment: Qt.AlignVCenter
