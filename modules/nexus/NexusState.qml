@@ -18,6 +18,7 @@ QtObject {
     property string selectedEthernetInterface
     property bool networkDetailsFromSaved
     property var selectedBatteryLevel
+    property bool lowWarningSelected
 
     signal close
     signal subPageOpened(idx: int)
