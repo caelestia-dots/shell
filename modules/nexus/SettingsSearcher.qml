@@ -75,8 +75,9 @@ Singleton {
     // Wrap the parts of `text` that match the search in the given colour, for use
     // with a StyledText in Text.StyledText format. Matches each query token as a
     // prefix at a word boundary (mirroring how _lookup matches), so "wall"
-    // highlights the start of "wallpaper". HTML-significant characters are escaped
-    // first so the rich-text parser doesn't choke on names with & < or >.
+    // highlights the start of "wallpaper". StyledText supports <font color> but
+    // not CSS <span style>. HTML-significant characters are escaped first so the
+    // rich-text parser doesn't choke on names with & < or >.
     function highlight(text: string, search: string, colour: color): string {
         const escaped = text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
         const tokens = _tokenize(search);
@@ -84,7 +85,7 @@ Singleton {
             return escaped;
         const escapedTokens = tokens.map(t => t.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"));
         const pattern = new RegExp("\\b(" + escapedTokens.join("|") + ")", "gi");
-        return escaped.replace(pattern, `<span style='color:${colour}'>$1</span>`);
+        return escaped.replace(pattern, `<font color="${colour}">$1</font>`);
     }
 
     Variants {
