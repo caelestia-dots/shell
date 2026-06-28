@@ -48,12 +48,50 @@ PageBase {
             nState: root.nState
         }
 
+        ConnectedRect {
+            Layout.fillWidth: true
+            implicitHeight: addLayout.implicitHeight + addLayout.anchors.margins * 2
+            last: true
+
+            StateLayer {
+                // This is for the add new level.
+                onClicked: root.nState.openSubPage(2)
+            }                       
+
+            RowLayout {
+                id: addLayout
+
+                anchors.fill: parent
+                anchors.margins: Tokens.padding.medium
+                anchors.leftMargin: Tokens.padding.largeIncreased
+                anchors.rightMargin: Tokens.padding.largeIncreased
+                spacing: Tokens.spacing.medium
+                opacity: lowWarnToggle.checked ? 1 : 0.5
+
+                Behavior on opacity {
+                    Anim {}
+                }
+
+                MaterialIcon {
+                    text: "add"
+                    fontStyle: Tokens.font.icon.medium
+                }
+
+                StyledText {
+                    Layout.fillWidth: true
+                    text: qsTr("Add new warning")
+                    font: Tokens.font.body.small
+                    elide: Text.ElideRight
+                }
+            } 
+        }
+
         ToggleRow {
             id: highWarnToggle
 
             Layout.topMargin: Tokens.spacing.large
             first: true
-            text: qsTr("High Battery Warnings")
+            text: qsTr("Overcharge Battery Warnings")
             font: Tokens.font.body.medium
             horizontalPadding: Tokens.padding.largeIncreased
             checked: GlobalConfig.general.battery.enableHighBatteryWarning
