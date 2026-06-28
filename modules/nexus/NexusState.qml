@@ -8,11 +8,11 @@ QtObject {
     property bool animatingContainer
     property int currentPageIdx
     property list<int> subPageIdxStack
-    property list<int> _pendingSubPath
+    property list<int> pendingSubPath
     property bool searchOpen
     property string searchText
     property string searchAnchor
-    property string _lastAnchor
+    property string lastAnchor
 
     property string selectedWallpaperCategory
     property BluetoothDevice selectedBtDevice
@@ -42,12 +42,12 @@ QtObject {
     function jumpToSetting(pageIdx: int, subPath: var, anchor: string): void {
         const samePage = currentPageIdx === pageIdx;
         const sameSub = subPageIdxStack.length === subPath.length && subPath.every((v, i) => subPageIdxStack[i] === v);
-        if (samePage && sameSub && anchor === _lastAnchor) {
+        if (samePage && sameSub && anchor === lastAnchor) {
             // Re-clicking the exact same setting: flash it again, don't scroll.
             highlightSetting(anchor);
             return;
         }
-        _lastAnchor = anchor;
+        lastAnchor = anchor;
         if (samePage && sameSub) {
             // Same page, different setting: just scroll to it.
             searchAnchor = "";
@@ -59,7 +59,7 @@ QtObject {
         // the anchor once it's ready.
         searchAnchor = anchor;
         if (!samePage) {
-            _pendingSubPath = subPath.slice();
+            pendingSubPath = subPath.slice();
             currentPageIdx = pageIdx;
         } else {
             // Same page: close back to the page root, then open the chain.
@@ -71,7 +71,7 @@ QtObject {
     }
 
     onCurrentPageIdxChanged: {
-        subPageIdxStack = _pendingSubPath;
-        _pendingSubPath = [];
+        subPageIdxStack = pendingSubPath;
+        pendingSubPath = [];
     }
 }

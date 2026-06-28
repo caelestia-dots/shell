@@ -25,7 +25,7 @@ Singleton {
     property var ranking: ({})
 
     function query(search: string): list<QtObject> {
-        const tokens = root._tokenize(search);
+        const tokens = root.tokenize(search);
         if (tokens.length === 0)
             return [];
 
@@ -35,7 +35,7 @@ Singleton {
         const scores = ({});
         const hitCounts = ({});
         for (const token of tokens) {
-            const matches = root._lookup(token); // { id: weight }
+            const matches = root.lookup(token); // { id: weight }
             for (const id in matches) {
                 scores[id] = (scores[id] ?? 0) + matches[id];
                 hitCounts[id] = (hitCounts[id] ?? 0) + 1;
@@ -53,7 +53,7 @@ Singleton {
     // Look up a query token in the inverted index: exact match first, then any
     // indexed token that starts with it (prefix search, so "wif" finds "wifi").
     // Returns a map of entry id -> best ranking weight for that id.
-    function _lookup(token: string): var {
+    function lookup(token: string): var {
         const result = ({});
         const exact = root.inverted[token] !== undefined;
         const keys = exact ? [token] : Object.keys(root.inverted).filter(k => k.startsWith(token));
@@ -68,19 +68,19 @@ Singleton {
         return result;
     }
 
-    function _tokenize(text: string): var {
+    function tokenize(text: string): var {
         return text.toLowerCase().split(/[^a-z0-9]+/).filter(t => t.length > 0);
     }
 
     // Wrap the parts of `text` that match the search in the given colour, for use
     // with a StyledText in Text.StyledText format. Matches each query token as a
-    // prefix at a word boundary (mirroring how _lookup matches), so "wall"
+    // prefix at a word boundary (mirroring how lookup matches), so "wall"
     // highlights the start of "wallpaper". StyledText supports <font color> but
     // not CSS <span style>. HTML-significant characters are escaped first so the
     // rich-text parser doesn't choke on names with & < or >.
     function highlight(text: string, search: string, colour: color): string {
         const escaped = text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-        const tokens = _tokenize(search);
+        const tokens = tokenize(search);
         if (tokens.length === 0)
             return escaped;
         const escapedTokens = tokens.map(t => t.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"));
