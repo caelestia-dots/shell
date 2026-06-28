@@ -16,7 +16,7 @@ PageBase {
     readonly property var batteryLevel: nState.selectedBatteryLevel
     readonly property var lowWarning: nState.lowWarningSelected
 
-    title: qsTr("%1 % Battery").arg(batteryLevel?.level)
+    title: qsTr("%1 warning").arg(lowWarning ? "Low battery" : "Overcharge battery")
     isSubPage: true
 
     function toggleProperty(propName) {
@@ -46,11 +46,8 @@ PageBase {
         width: root.cappedWidth
         spacing: Tokens.spacing.extraSmall / 2
 
-        SectionHeader {
-            text: qsTr("General options")
-        }
-
         ColumnLayout{
+            Layout.topMargin: Tokens.spacing.medium
             Layout.preferredHeight: implicitHeight
             width: root.cappedWidth
             spacing: Tokens.spacing.large
