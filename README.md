@@ -342,10 +342,14 @@ For example, to disable the bar on DP-1:
         "idle": {
             "lockBeforeSleep": true,
             "inhibitWhenAudio": true,
+            "inhibitWhenCharging": false,
             "timeouts": [
                 {
                     "timeout": 180,
-                    "idleAction": "lock"
+                    "idleAction": "lock",
+                    "inhibitWhenAudio": false,
+                    "inhibitWhenCharging": false,
+                    "respectInhibitors": true
                 },
                 {
                     "timeout": 300,
@@ -668,6 +672,7 @@ For example, to disable the bar on DP-1:
         ]
     },
     "lock": {
+        "enabled": true,
         "recolourLogo": true,
         "enableFprint": true,
         "maxFprintTries": 3,
