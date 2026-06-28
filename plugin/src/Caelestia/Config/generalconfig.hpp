@@ -57,12 +57,14 @@ class GeneralBattery : public settings::ObjectNode {
                 { u"title"_s, u"Low battery"_s },
                 { u"message"_s, u"You might want to plug in a charger"_s },
                 { u"icon"_s, u"battery_android_2"_s },
+                { u"enabled"_s, true },
             }),
             vmap({
                 { u"level"_s, 10 },
                 { u"title"_s, u"Did you see the previous message?"_s },
                 { u"message"_s, u"You should probably plug in a charger <b>now</b>"_s },
                 { u"icon"_s, u"battery_android_1"_s },
+                { u"enabled"_s, true },
             }),
             vmap({
                 { u"level"_s, 5 },
@@ -70,6 +72,7 @@ class GeneralBattery : public settings::ObjectNode {
                 { u"message"_s, u"PLUG THE CHARGER RIGHT NOW!!"_s },
                 { u"icon"_s, u"battery_android_alert"_s },
                 { u"critical"_s, true },
+                { u"enabled"_s, true },
             }),
         })
 
@@ -79,12 +82,14 @@ class GeneralBattery : public settings::ObjectNode {
                     { u"title"_s, u"High battery"_s },
                     { u"message"_s, u"You might want to unplug the charger"_s },
                     { u"icon"_s, u"battery_android_5"_s }
+                    { u"enabled"_s, true },
             }),
             vmap({
                     { u"level"_s, 90 },
                     { u"title"_s, u"Did you see the previous message?"_s },
                     { u"message"_s, u"You should probably unplug the charger <b>now</b>"_s },
                     { u"icon"_s, u"battery_android_6"_s }
+                    { u"enabled"_s, true },
             }),
             vmap({
                     { u"level"_s, 95 },
@@ -92,6 +97,7 @@ class GeneralBattery : public settings::ObjectNode {
                     { u"message"_s, u"UNPLUG THE CHARGER RIGHT NOW!!"_s },
                     { u"icon"_s, u"battery_android_alert"_s },
                     { u"critical"_s, true },
+                    { u"enabled"_s, true },
             })
     })
     
