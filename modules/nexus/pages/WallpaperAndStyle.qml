@@ -124,6 +124,7 @@ PageBase {
             property int size: 24
 
             interval: 300
+
             onTriggered: {
                 root.applyVisual(themeName, size);
             }
@@ -158,6 +159,7 @@ PageBase {
             stdout: SplitParser {
                 onRead: data => console.log("[cursor] persistProc stdout:", data)
             }
+
             stderr: SplitParser {
                 onRead: data => console.log("[cursor] persistProc stderr:", data)
             }
@@ -173,6 +175,7 @@ PageBase {
             id: themeVariants
 
             model: root.themeNames
+
             delegate: MenuItem {
                 required property string modelData
 
@@ -200,6 +203,7 @@ PageBase {
                 const cWidth = root.cappedWidth;
                 return Math.min(Math.round(cWidth * 0.4), cWidth / screen.width * screen.height);
             }
+
             Layout.alignment: Qt.AlignHCenter
             color: Colours.tPalette.m3surfaceContainer
             radius: Tokens.rounding.large
@@ -277,6 +281,7 @@ PageBase {
                     id: wallLoadDebounceTimer
 
                     interval: 100
+
                     onTriggered: {
                         if (wallImg.status !== Image.Ready)
                             wallIndicatorLoader.opacity = 1;
@@ -291,7 +296,9 @@ PageBase {
                     preventInit: wallIndicatorLoader.opacity > 0
                     fadeOutAnim: Anim.DefaultEffects
                     fadeInAnim: Anim.SlowEffects
+
                     onSourceChanged: wallLoadDebounceTimer.restart()
+
                     onStatusChanged: {
                         if (status === Image.Ready) {
                             wallLoadDebounceTimer.stop();
@@ -364,6 +371,7 @@ PageBase {
             label: qsTr("Cursor theme")
             menuItems: themeVariants.instances
             active: menuItems.find(i => i.text === root.currentCursorTheme) ?? null
+
             onSelected: item => root.applyCursor(item.text, root.currentCursorSize, false)
         }
 
@@ -395,6 +403,7 @@ PageBase {
                         return String(root.cursorSizes[idx]) + " px";
                     return String(root.currentCursorSize) + " px";
                 }
+
                 onMoved: v => {
                     var idx = Math.round(v * (root.cursorSizes.length - 1));
                     if (idx >= 0 && idx < root.cursorSizes.length) {
@@ -411,9 +420,11 @@ PageBase {
                 onPressed: mouse => {
                     mouse.accepted = false;
                 }
+
                 onPositionChanged: mouse => {
                     mouse.accepted = false;
                 }
+
                 onReleased: mouse => {
                     mouse.accepted = false;
                 }
