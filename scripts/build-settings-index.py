@@ -32,7 +32,7 @@ def read_lines(path: Path) -> tuple[str, ...]:
     """Read a file's lines, cached so each page file is only read once."""
     return tuple(path.read_text().splitlines())
 
-ROW_RE = re.compile(r'^\s*(ToggleRow|SliderRow|SelectRow|StepperRow|NavRow|InfoRow)\s*\{')
+ROW_RE = re.compile(r'^\s*(ToggleRow|SliderRow|SelectRow|StepperRow|NavRow|InfoRow|PopupRow|DefaultRow)\s*\{')
 LABEL_RE = re.compile(r'^\s*(?:label|text):\s*qsTr\("([^"]+)"\)')
 ANCHOR_RE = re.compile(r'^\s*settingAnchor:\s*"([^"]+)"')
 ICON_RE = re.compile(r'^\s*icon:\s*"([^"]+)"')
