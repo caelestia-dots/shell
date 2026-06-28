@@ -50,16 +50,17 @@ PageBase {
 
         ConnectedRect {
             Layout.fillWidth: true
-            implicitHeight: addLayout.implicitHeight + addLayout.anchors.margins * 2
+            implicitHeight: addLowWarnLayout.implicitHeight + addLowWarnLayout.anchors.margins * 2
             last: true
 
             StateLayer {
                 // This is for the add new level.
+                disabled: !lowWarnToggle.checked
                 onClicked: root.nState.openSubPage(2)
             }                       
 
             RowLayout {
-                id: addLayout
+                id: addLowWarnLayout
 
                 anchors.fill: parent
                 anchors.margins: Tokens.padding.medium
@@ -103,5 +104,44 @@ PageBase {
             isLowWarning: false
             nState: root.nState
         } 
+
+        ConnectedRect {
+            Layout.fillWidth: true
+            implicitHeight: addHighWarnLayout.implicitHeight + addHighWarnLayout.anchors.margins * 2
+            last: true
+
+            StateLayer {
+                // This is for the add new level.
+                disabled: !highWarnToggle.checked
+                onClicked: root.nState.openSubPage(2)
+            }                       
+
+            RowLayout {
+                id: addHighWarnLayout
+
+                anchors.fill: parent
+                anchors.margins: Tokens.padding.medium
+                anchors.leftMargin: Tokens.padding.largeIncreased
+                anchors.rightMargin: Tokens.padding.largeIncreased
+                spacing: Tokens.spacing.medium
+                opacity: highWarnToggle.checked ? 1 : 0.5
+
+                Behavior on opacity {
+                    Anim {}
+                }
+
+                MaterialIcon {
+                    text: "add"
+                    fontStyle: Tokens.font.icon.medium
+                }
+
+                StyledText {
+                    Layout.fillWidth: true
+                    text: qsTr("Add new warning")
+                    font: Tokens.font.body.small
+                    elide: Text.ElideRight
+                }
+            } 
+        }
     }
 }
