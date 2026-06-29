@@ -19,6 +19,22 @@ ColumnLayout {
     required property bool fullscreen
     readonly property int vPadding: Tokens.padding.large
 
+    function entryAt(index: int): var {
+        const entries = Config.bar.entries;
+        if (!entries || index < 0 || index >= entries.length)
+            return null;
+
+        return entries[index];
+    }
+
+    function customEntrySource(index: int): var {
+        const source = entryAt(index)?.source;
+        if (typeof source !== "string" || source.length === 0)
+            return "";
+
+        return Qt.resolvedUrl(source);
+    }
+
     function closeTray(): void {
         if (!Config.bar.tray.compact)
             return;
@@ -171,6 +187,12 @@ ColumnLayout {
                     sourceComponent: Power {
                         visibilities: root.visibilities
                     }
+                }
+            }
+            DelegateChoice {
+                roleValue: "custom"
+                delegate: WrappedLoader {
+                    source: root.customEntrySource(index)
                 }
             }
         }
