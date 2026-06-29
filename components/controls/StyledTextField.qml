@@ -17,7 +17,7 @@ TextFieldBase {
     readonly property int clampedRadius: Math.min(horizontalPadding, Math.min(width, height) / 2, radius)
 
     readonly property real outlineGap: placeholder.width * root.smallFontScale + root.Tokens.spacing.extraSmall * 2
-    property real outlineGapScale: activeFocus ? 1 : 0
+    property real outlineGapScale: activeFocus || text ? 1 : 0
 
     property string leadingIcon
     property string trailingIcon
@@ -115,11 +115,11 @@ TextFieldBase {
         renderType: Text.QtRendering
 
         text: root.placeholderText
-        color: root.activeFocus ? Colours.palette.m3primary : root.placeholderTextColor
+        color: root.activeFocus ? Colours.palette.m3primary : root.text ? Colours.palette.m3outline : root.placeholderTextColor
 
         states: State {
             name: "small"
-            when: root.activeFocus
+            when: root.activeFocus || root.text
 
             PropertyChanges {
                 placeholder.scale: root.smallFontScale
