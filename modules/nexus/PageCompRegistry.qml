@@ -99,7 +99,14 @@ QtObject {
                     BatteryPage {}
                 }
                 Component {
-                    BatteryLevelPage {}
+                    BatteryLevelPage {
+                        newLevelPage: false
+                    }
+                }
+                Component {
+                    BatteryLevelPage {
+                        newLevelPage: true
+                    }
                 }
             }
         },
