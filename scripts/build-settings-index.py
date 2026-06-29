@@ -35,6 +35,13 @@ def read_lines(path: Path) -> tuple[str, ...]:
 ROW_RE = re.compile(r'^\s*(ToggleRow|SliderRow|SelectRow|StepperRow|NavRow|InfoRow|PopupRow|DefaultRow)\s*\{')
 LABEL_RE = re.compile(r'^\s*(?:label|text):\s*qsTr\("([^"]+)"\)')
 ANCHOR_RE = re.compile(r'^\s*settingAnchor:\s*"([^"]+)"')
+# A ToggleRow whose value is a plain config property can be flipped straight from
+# the search results. We capture the property path from `checked:` and require
+# `onToggled:` to write the same path back (a symmetric binding), so reading and
+# writing go through one path. Toggles bound to functions or multi-line handlers
+# are left without a path and just deep-link as usual.
+CHECKED_RE = re.compile(r'^\s*checked:\s*(?:GlobalConfig|Config)\.([\w.]+)\s*$')
+ONTOGGLED_RE = re.compile(r'^\s*onToggled:\s*(?:GlobalConfig|Config)\.([\w.]+)\s*=\s*checked\s*$')
 ICON_RE = re.compile(r'^\s*icon:\s*"([^"]+)"')
 SKIP_LABELS = {"Muted", "None"}
 # Field weights for ranking: a token matching the title counts more than one
@@ -258,8 +265,11 @@ def extract_settings(files: dict[str, Path], nav: dict[str, dict]) -> list[dict]
                     if m:
                         section = m.group(1)
                         break
-            if ROW_RE.match(lines[i]):
+            row_match = ROW_RE.match(lines[i])
+            if row_match:
+                row_type = row_match.group(1)
                 label = anchor = subtext = None
+                checked_path = toggled_path = None
                 for j in range(i + 1, min(i + 12, len(lines))):
                     if label is None:
                         m = LABEL_RE.match(lines[j])
@@ -273,6 +283,21 @@ def extract_settings(files: dict[str, Path], nav: dict[str, dict]) -> list[dict]
                         st = SUBTEXT_RE.match(lines[j])
                         if st:
                             subtext = st.group(1)
+                    if checked_path is None:
+                        ch = CHECKED_RE.match(lines[j])
+                        if ch:
+                            checked_path = ch.group(1)
+                    if toggled_path is None:
+                        tg = ONTOGGLED_RE.match(lines[j])
+                        if tg:
+                            toggled_path = tg.group(1)
+                # Only expose a toggle path when read and write target the same
+                # property (symmetric), so flipping from search is safe.
+                toggle_path = (
+                    checked_path
+                    if row_type == "ToggleRow" and checked_path and checked_path == toggled_path
+                    else ""
+                )
                 if label and label not in SKIP_LABELS and anchor:
                     # keyword sources: breadcrumb path, section header, subtext.
                     extra = " ".join(meta["crumbLabels"]) + " " + section + " " + (subtext or "")
@@ -283,6 +308,7 @@ def extract_settings(files: dict[str, Path], nav: dict[str, dict]) -> list[dict]
                         "title": label, "anchor": anchor,
                         "section": section,
                         "subtext": subtext or "",
+                        "togglePath": toggle_path,
                         "keywords": " ".join(sorted(set(tokenize(label + " " + extra)))),
                     })
             i += 1

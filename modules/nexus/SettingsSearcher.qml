@@ -3,6 +3,7 @@ pragma Singleton
 import QtQuick
 import Quickshell
 import Caelestia
+import Caelestia.Config
 
 // Search service over the settings index. The index is generated at build time
 // from the page QML files by scripts/build-settings-index.py and baked into the
@@ -118,5 +119,39 @@ Singleton {
         readonly property string section: modelData.section ?? ""
         readonly property string subtext: modelData.subtext ?? ""
         readonly property string anchor: modelData.anchor ?? ""
+
+        // A non-empty togglePath means this is a plain on/off setting that can be
+        // flipped straight from the results (e.g. "background.wallpaperEnabled").
+        readonly property string togglePath: modelData.togglePath ?? ""
+        readonly property bool isToggle: togglePath.length > 0
+        // Live value of the config property, read by walking the path on
+        // GlobalConfig. Re-evaluates when that property changes.
+        readonly property bool toggleValue: {
+            if (!isToggle)
+                return false;
+            let obj = GlobalConfig;
+            const parts = togglePath.split(".");
+            for (const part of parts) {
+                if (obj === undefined || obj === null)
+                    return false;
+                obj = obj[part];
+            }
+            return obj ?? false;
+        }
+
+        // Write `value` back to the config property the path points at.
+        function setToggle(value: bool): void {
+            if (!isToggle)
+                return;
+            const parts = togglePath.split(".");
+            let obj = GlobalConfig;
+            for (let k = 0; k < parts.length - 1; k++) {
+                if (obj === undefined || obj === null)
+                    return;
+                obj = obj[parts[k]];
+            }
+            if (obj !== undefined && obj !== null)
+                obj[parts[parts.length - 1]] = value;
+        }
     }
 }

@@ -6,6 +6,7 @@ import Quickshell
 import Caelestia.Config
 import qs.components
 import qs.components.containers
+import qs.components.controls
 import qs.services
 import qs.modules.nexus
 
@@ -262,6 +263,8 @@ VerticalFadeFlickable {
 
                                 anchors.fill: parent
                                 anchors.margins: Tokens.padding.large
+                                // Leave room on the right for the toggle switch.
+                                anchors.rightMargin: result.modelData.togglePath ? toggle.width + Tokens.padding.large * 2 : Tokens.padding.large
                                 spacing: Tokens.spacing.small / 2
 
                                 // Location line: deepest icon + "Section > sub", faint.
@@ -322,6 +325,29 @@ VerticalFadeFlickable {
                                     }
                                     root.nState.jumpToSetting(result.modelData.pageIdx, result.modelData.subPath, result.modelData.anchor);
                                 }
+                            }
+
+                            // For plain on/off settings, a switch on the right
+                            // flips the value straight from the results (One UI
+                            // style). It sits above the click layer (higher z) so
+                            // tapping it toggles without also opening the page;
+                            // tapping anywhere else still deep-links.
+                            StyledSwitch {
+                                id: toggle
+
+                                anchors.right: parent.right
+                                anchors.rightMargin: Tokens.padding.large
+                                anchors.verticalCenter: parent.verticalCenter
+                                z: 2
+                                visible: result.modelData.togglePath
+                                checked: result.modelData.toggleValue
+                                cLayer: 3
+                                // A touch smaller than the in-page switches since
+                                // the result rows are denser.
+                                scale: 0.85
+                                transformOrigin: Item.Right
+
+                                onToggled: result.modelData.setToggle(checked)
                             }
                         }
                     }
