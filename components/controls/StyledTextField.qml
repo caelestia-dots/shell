@@ -1,3 +1,5 @@
+pragma ComponentBehavior: Bound
+
 import QtQuick
 import QtQuick.Shapes
 import Caelestia.Config
@@ -17,8 +19,13 @@ TextFieldBase {
     readonly property real outlineGap: placeholder.width * root.smallFontScale + root.Tokens.spacing.extraSmall * 2
     property real outlineGapScale: activeFocus ? 1 : 0
 
-    leftPadding: horizontalPadding
-    rightPadding: horizontalPadding
+    property string leadingIcon
+    property string trailingIcon
+    readonly property int leadingOffset: leadingIcon ? leadingIconLoader.width + leadingIconLoader.anchors.leftMargin : 0
+    readonly property int trailingOffset: trailingIcon ? trailingIconLoader.width + trailingIconLoader.anchors.rightMargin : 0
+
+    leftPadding: horizontalPadding + leadingOffset
+    rightPadding: horizontalPadding + trailingOffset
 
     background: Shape {
         id: bg
@@ -33,7 +40,7 @@ TextFieldBase {
             fillColor: "transparent"
             capStyle: ShapePath.RoundCap
 
-            startX: 16 - root.clampedRadius + root.outlineGap * (1 - root.outlineGapScale) / 2 + root.outlineGap * root.outlineGapScale
+            startX: root.horizontalPadding - root.clampedRadius + root.outlineGap * (1 - root.outlineGapScale) / 2 + root.outlineGap * root.outlineGapScale
 
             PathLine {
                 x: bg.width - root.clampedRadius
@@ -75,7 +82,7 @@ TextFieldBase {
                 radiusY: root.clampedRadius
             }
             PathLine {
-                x: 16 - root.clampedRadius + root.outlineGap * (1 - root.outlineGapScale) / 2
+                x: root.horizontalPadding - root.clampedRadius + root.outlineGap * (1 - root.outlineGapScale) / 2
             }
 
             Behavior on strokeWidth {
@@ -104,7 +111,7 @@ TextFieldBase {
 
         anchors.left: parent.left
         anchors.verticalCenter: parent.verticalCenter
-        anchors.leftMargin: root.horizontalPadding
+        anchors.leftMargin: root.leftPadding
         renderType: Text.QtRendering
 
         text: root.placeholderText
@@ -133,6 +140,34 @@ TextFieldBase {
                 duration: Tokens.anim.durations.expressiveDefaultEffects
                 easing: Tokens.anim.expressiveDefaultEffects
             }
+        }
+    }
+
+    Loader {
+        id: leadingIconLoader
+
+        anchors.left: parent.left
+        anchors.verticalCenter: parent.verticalCenter
+        anchors.leftMargin: Tokens.padding.medium
+
+        sourceComponent: MaterialIcon {
+            text: root.leadingIcon
+            color: Colours.palette.m3onSurfaceVariant
+            fontStyle: Tokens.font.icon.builders.medium.scale(0.9).build()
+        }
+    }
+
+    Loader {
+        id: trailingIconLoader
+
+        anchors.right: parent.right
+        anchors.verticalCenter: parent.verticalCenter
+        anchors.rightMargin: Tokens.padding.medium
+
+        sourceComponent: MaterialIcon {
+            text: root.trailingIcon
+            color: Colours.palette.m3onSurfaceVariant
+            fontStyle: Tokens.font.icon.builders.medium.scale(0.9).build()
         }
     }
 }
