@@ -24,13 +24,24 @@ TextFieldBase {
     readonly property int leadingOffset: leadingIcon ? leadingIconLoader.width + leadingIconLoader.anchors.leftMargin : 0
     readonly property int trailingOffset: trailingIcon ? trailingIconLoader.width + trailingIconLoader.anchors.rightMargin : 0
 
+    property string supportingText
+    readonly property int supportingTextOffset: supportingText ? supportingTextLoader.height + Tokens.spacing.extraSmall : 0
+
     leftPadding: horizontalPadding + leadingOffset
     rightPadding: horizontalPadding + trailingOffset
+    topPadding: Tokens.padding.large
+    bottomPadding: Tokens.padding.large + supportingTextOffset
+
+    onPressed: {
+        if (!stateLayer.disabled)
+            stateLayer.press(stateLayer.mouseX, stateLayer.mouseY);
+    }
 
     background: Shape {
         id: bg
 
         anchors.fill: parent
+        anchors.bottomMargin: root.supportingTextOffset
         preferredRendererType: Shape.CurveRenderer
         asynchronous: true
 
@@ -93,6 +104,15 @@ TextFieldBase {
                 CAnim {}
             }
         }
+
+        StateLayer {
+            id: stateLayer
+
+            cursorShape: Qt.IBeamCursor
+            disabled: root.activeFocus
+            manualPressOverride: tapHandler.pressed
+            onClicked: root.focus = true
+        }
     }
 
     Behavior on outlineGapScale {
@@ -101,73 +121,101 @@ TextFieldBase {
         }
     }
 
-    StyledText {
-        id: placeholder
+    Item {
+        id: contentWrapper
 
-        font.family: root.font.family
-        font.variableAxes: root.font.variableAxes
-        font.pointSize: root.font.pointSize
-        font.weight: root.font.weight
+        anchors.fill: parent
+        anchors.bottomMargin: root.supportingTextOffset
 
-        anchors.left: parent.left
-        anchors.verticalCenter: parent.verticalCenter
-        anchors.leftMargin: root.leftPadding
-        renderType: Text.QtRendering
+        StyledText {
+            id: placeholder
 
-        text: root.placeholderText
-        color: root.activeFocus ? Colours.palette.m3primary : root.text ? Colours.palette.m3outline : root.placeholderTextColor
+            font.family: root.font.family
+            font.variableAxes: root.font.variableAxes
+            font.pointSize: root.font.pointSize
+            font.weight: root.font.weight
 
-        states: State {
-            name: "small"
-            when: root.activeFocus || root.text
+            anchors.left: parent.left
+            anchors.verticalCenter: parent.verticalCenter
+            anchors.leftMargin: root.leftPadding
+            renderType: Text.QtRendering
 
-            PropertyChanges {
-                placeholder.scale: root.smallFontScale
-                placeholder.anchors.leftMargin: -(1 - root.smallFontScale) * placeholder.width / 2 + root.horizontalPadding - root.Tokens.spacing.extraSmall
+            text: root.placeholderText
+            color: root.activeFocus ? Colours.palette.m3primary : root.text ? Colours.palette.m3outline : root.placeholderTextColor
+
+            states: State {
+                name: "small"
+                when: root.activeFocus || root.text
+
+                PropertyChanges {
+                    placeholder.scale: root.smallFontScale
+                    placeholder.anchors.leftMargin: -(1 - root.smallFontScale) * placeholder.width / 2 + root.horizontalPadding - root.Tokens.spacing.extraSmall
+                }
+                AnchorChanges {
+                    target: placeholder
+                    anchors.verticalCenter: contentWrapper.top
+                }
             }
-            AnchorChanges {
-                target: placeholder
-                anchors.verticalCenter: root.top
+
+            transitions: Transition {
+                Anim {
+                    properties: "scale,leftMargin"
+                    type: Anim.DefaultEffects
+                }
+                AnchorAnim {
+                    duration: Tokens.anim.durations.expressiveDefaultEffects
+                    easing: Tokens.anim.expressiveDefaultEffects
+                }
             }
         }
 
-        transitions: Transition {
-            Anim {
-                properties: "scale,leftMargin"
-                type: Anim.DefaultEffects
+        Loader {
+            id: leadingIconLoader
+
+            anchors.left: parent.left
+            anchors.verticalCenter: parent.verticalCenter
+            anchors.leftMargin: Tokens.padding.medium
+            active: root.leadingIcon
+
+            sourceComponent: MaterialIcon {
+                text: root.leadingIcon
+                color: Colours.palette.m3onSurfaceVariant
+                fontStyle: Tokens.font.icon.builders.medium.scale(0.9).build()
             }
-            AnchorAnim {
-                duration: Tokens.anim.durations.expressiveDefaultEffects
-                easing: Tokens.anim.expressiveDefaultEffects
+        }
+
+        Loader {
+            id: trailingIconLoader
+
+            anchors.right: parent.right
+            anchors.verticalCenter: parent.verticalCenter
+            anchors.rightMargin: Tokens.padding.medium
+            active: root.trailingIcon
+
+            sourceComponent: MaterialIcon {
+                text: root.trailingIcon
+                color: Colours.palette.m3onSurfaceVariant
+                fontStyle: Tokens.font.icon.builders.medium.scale(0.9).build()
             }
         }
     }
 
     Loader {
-        id: leadingIconLoader
+        id: supportingTextLoader
 
+        anchors.bottom: parent.bottom
         anchors.left: parent.left
-        anchors.verticalCenter: parent.verticalCenter
-        anchors.leftMargin: Tokens.padding.medium
+        anchors.leftMargin: root.horizontalPadding
+        active: root.supportingText
 
-        sourceComponent: MaterialIcon {
-            text: root.leadingIcon
+        sourceComponent: StyledText {
+            text: root.supportingText
             color: Colours.palette.m3onSurfaceVariant
-            fontStyle: Tokens.font.icon.builders.medium.scale(0.9).build()
+            font: Tokens.font.label.small
         }
     }
 
-    Loader {
-        id: trailingIconLoader
-
-        anchors.right: parent.right
-        anchors.verticalCenter: parent.verticalCenter
-        anchors.rightMargin: Tokens.padding.medium
-
-        sourceComponent: MaterialIcon {
-            text: root.trailingIcon
-            color: Colours.palette.m3onSurfaceVariant
-            fontStyle: Tokens.font.icon.builders.medium.scale(0.9).build()
-        }
+    TapHandler {
+        id: tapHandler
     }
 }
