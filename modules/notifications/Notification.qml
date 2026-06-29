@@ -1,6 +1,7 @@
 pragma ComponentBehavior: Bound
 
 import QtQuick
+import QtQuick.Layouts
 import QtQuick.Shapes
 import Quickshell
 import Quickshell.Services.Notifications
@@ -24,8 +25,8 @@ StyledRect {
 
     color: root.modelData.urgency === NotificationUrgency.Critical ? Colours.palette.m3secondaryContainer : Colours.tPalette.m3surfaceContainer
     radius: Tokens.rounding.large
-
-    implicitHeight: inner.implicitHeight
+    implicitWidth: Tokens.sizes.notifs.width
+    implicitHeight: inner.implicitHeight + progressBar.implicitHeight
 
     x: implicitWidth
     Component.onCompleted: {
@@ -347,12 +348,79 @@ StyledRect {
                 font: Tokens.font.body.small
             }
 
+            Loader {
+                active: Config.notifs.timeoutCircle
+                asynchronous: true
+                anchors.centerIn: closeBtn
+
+                sourceComponent: Shape {
+                    id: progressCircle
+
+                    width: closeBtn.implicitWidth + Tokens.padding.small
+                    height: closeBtn.implicitHeight + Tokens.padding.small
+                    preferredRendererType: Shape.CurveRenderer
+
+                    ShapePath {
+                        capStyle: ShapePath.FlatCap
+                        fillColor: "transparent"
+                        strokeWidth: Tokens.padding.small
+                        strokeColor: Colours.palette.m3tertiary
+
+                        PathAngleArc {
+                            centerX: progressCircle.width / 2
+                            centerY: progressCircle.height / 2
+                            radiusX: progressCircle.width / 2 - Tokens.padding.small / 2
+                            radiusY: progressCircle.height / 2 - Tokens.padding.small / 2
+
+                            startAngle: -90
+
+                            NumberAnimation on sweepAngle {
+                                from: 360
+                                to: 0
+                                duration: Config.notifs.defaultExpireTimeout
+                                running: root.modelData.timer.running
+                            }
+                        }
+                    }
+                }
+            }
+
             Item {
-                id: expandBtn
+                id: closeBtn
 
                 anchors.right: parent.right
                 anchors.top: parent.top
                 anchors.topMargin: -Tokens.padding.extraSmall
+
+                implicitWidth: closeIcon.implicitHeight
+                implicitHeight: closeIcon.implicitHeight
+
+                StateLayer {
+                    function onClicked() {
+                        root.modelData.notification.dismiss();
+                    }
+
+                    radius: Tokens.rounding.full
+                    color: Colours.palette.m3onSurface
+                }
+
+                MaterialIcon {
+                    id: closeIcon
+
+                    anchors.centerIn: parent
+
+                    animate: true
+                    text: "close"
+                    font.pointSize: Tokens.font.icon.medium
+                }
+            }
+
+            Item {
+                id: expandBtn
+
+                anchors.right: closeBtn.left
+                anchors.top: parent.top
+                anchors.rightMargin: Tokens.spacing.small
 
                 implicitWidth: expandIcon.implicitHeight
                 implicitHeight: expandIcon.implicitHeight
@@ -519,6 +587,73 @@ StyledRect {
                         interval: 3000
                     }
                 }
+            }
+        }
+    }
+
+    Loader {
+        id: progressBar
+
+        active: Config.notifs.timeoutBar
+        asynchronous: true
+
+        anchors.right: parent.right
+        anchors.bottom: parent.bottom
+
+        sourceComponent: StyledRect {
+            anchors.topMargin: Tokens.padding.small
+
+            implicitHeight: Tokens.padding.small
+
+            color: Colours.palette.m3tertiary
+
+            NumberAnimation on implicitWidth {
+                from: root.width
+                to: 0
+                duration: Config.notifs.defaultExpireTimeout
+                running: root.modelData.timer.running
+            }
+        }
+    }
+
+    component Action: StyledRect {
+        id: action
+
+        required property var modelData
+
+        radius: Tokens.rounding.full
+        color: root.modelData.urgency === NotificationUrgency.Critical ? Colours.palette.m3secondary : Colours.layer(Colours.palette.m3surfaceContainerHigh, 2)
+
+        Layout.preferredWidth: actionText.width + Tokens.padding.medium * 2
+        Layout.preferredHeight: actionText.height + Tokens.padding.small * 2
+        implicitWidth: actionText.width + Tokens.padding.medium * 2
+        implicitHeight: actionText.height + Tokens.padding.small * 2
+
+        StateLayer {
+            radius: Tokens.rounding.full
+            color: root.modelData.urgency === NotificationUrgency.Critical ? Colours.palette.m3onSecondary : Colours.palette.m3onSurface
+            onClicked: action.modelData.invoke()
+        }
+
+        StyledText {
+            id: actionText
+
+            anchors.centerIn: parent
+            text: actionTextMetrics.elidedText
+            color: root.modelData.urgency === NotificationUrgency.Critical ? Colours.palette.m3onSecondary : Colours.palette.m3onSurfaceVariant
+            font.pointSize: Tokens.font.body.small
+        }
+
+        TextMetrics {
+            id: actionTextMetrics
+
+            text: action.modelData.text
+            font.family: actionText.font.family
+            font.pointSize: actionText.font.pointSize
+            elide: Text.ElideRight
+            elideWidth: {
+                const numActions = root.modelData.actions.length + 1;
+                return (inner.width - actions.spacing * (numActions - 1)) / numActions - root.Tokens.padding.medium * 2;
             }
         }
     }
