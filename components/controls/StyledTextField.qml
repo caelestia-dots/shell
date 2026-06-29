@@ -1,7 +1,5 @@
-pragma ComponentBehavior: Bound
-
 import QtQuick
-import QtQuick.Controls
+import QtQuick.Templates
 import Caelestia.Config
 import qs.components
 import qs.services
@@ -9,20 +7,43 @@ import qs.services
 TextField {
     id: root
 
+    implicitWidth: Math.max(implicitBackgroundWidth + leftInset + rightInset, contentWidth + leftPadding + rightPadding)
+    implicitHeight: Math.max(implicitBackgroundHeight + topInset + bottomInset, contentHeight + topPadding + bottomPadding)
+
     color: Colours.palette.m3onSurface
     placeholderTextColor: Colours.palette.m3outline
+    selectionColor: Qt.alpha(Colours.palette.m3primary, 0.4)
+    selectedTextColor: color
+
     font: Tokens.font.body.small
     renderType: echoMode === TextField.Password ? TextField.QtRendering : TextField.NativeRendering
     cursorVisible: !readOnly
+    verticalAlignment: TextInput.AlignVCenter
 
-    background: null
+    cursorDelegate: Item {}
 
-    cursorDelegate: StyledRect {
+    Behavior on color {
+        CAnim {}
+    }
+
+    Behavior on placeholderTextColor {
+        CAnim {}
+    }
+
+    Behavior on selectionColor {
+        CAnim {}
+    }
+
+    StyledRect {
         id: cursor
 
         property bool disableBlink
 
+        x: root.cursorRectangle.x
+        y: root.cursorRectangle.y
         implicitWidth: 2
+        implicitHeight: root.cursorRectangle.height
+
         color: Colours.palette.m3primary
         radius: Tokens.rounding.large
 
@@ -41,7 +62,7 @@ TextField {
         Timer {
             id: enableBlink
 
-            interval: 100
+            interval: 500
             onTriggered: cursor.disableBlink = false
         }
 
@@ -58,18 +79,17 @@ TextField {
             cursor.opacity: 0
         }
 
+        Behavior on x {
+            Anim {
+                easing.bezierCurve: [0.2, 1, 0.21, 1, 1, 1] // Damped variant of fast spatial curve
+                duration: Tokens.anim.durations.expressiveFastEffects
+            }
+        }
+
         Behavior on opacity {
             Anim {
                 type: Anim.StandardSmall
             }
         }
-    }
-
-    Behavior on color {
-        CAnim {}
-    }
-
-    Behavior on placeholderTextColor {
-        CAnim {}
     }
 }
