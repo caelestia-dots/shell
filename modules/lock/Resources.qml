@@ -2,8 +2,8 @@ pragma ComponentBehavior: Bound
 
 import QtQuick
 import QtQuick.Layouts
-import M3Shapes
 import Quickshell
+import M3Shapes
 import Caelestia.Config
 import Caelestia.Services
 import qs.components
@@ -54,52 +54,54 @@ StyledRect {
 
             transform: Translate {
                 y: hover.hovered ? root.height : 0
+
                 Behavior on y { Anim {} }
             }
             opacity: hover.hovered ? 0 : 1
+
             Behavior on opacity { Anim {} }
 
             Resource {
-            id: cpu
+                id: cpu
 
-            icon: "memory"
-            value: Math.round(Cpu.percentage * 100) + "%"
-            fillValue: Cpu.percentage
-            colour: Colours.palette.m3primary
-            shapeColour: Colours.palette.m3primaryContainer
-            fillColour: Qt.alpha(Colours.palette.m3secondary, 0.3)
-            shape: MaterialShape.Pentagon
+                icon: "memory"
+                value: Math.round(Cpu.percentage * 100) + "%"
+                fillValue: Cpu.percentage
+                colour: Colours.palette.m3primary
+                shapeColour: Colours.palette.m3primaryContainer
+                fillColour: Qt.alpha(Colours.palette.m3secondary, 0.3)
+                shape: MaterialShape.Pentagon
 
-            MaterialShape {
-                x: cpu.mShape.pointAtAngle(45).x - implicitSize / 2 + Tokens.padding.medium
-                y: cpu.mShape.pointAtAngle(45).y - implicitSize / 2
+                MaterialShape {
+                    x: cpu.mShape.pointAtAngle(45).x - implicitSize / 2 + Tokens.padding.medium
+                    y: cpu.mShape.pointAtAngle(45).y - implicitSize / 2
 
-                shape: Cpu.temperature > 90 ? MaterialShape.SoftBurst : MaterialShape.Circle
-                color: Cpu.temperature > 90 ? Colours.palette.m3errorContainer : Colours.palette.m3secondaryContainer
-                implicitSize: {
-                    const size = Math.round(tempLabel.implicitHeight * 2);
-                    return size % 2 === 0 ? size : size + 1; // Ensure even size so center works properly
-                }
-
-                Behavior on color {
-                    CAnim {}
-                }
-
-                StyledText {
-                    id: tempLabel
-
-                    anchors.centerIn: parent
-                    anchors.verticalCenterOffset: Math.round(fontInfo.pointSize * 0.04)
-
-                    text: {
-                        const temp = Cpu.temperature;
-                        const useF = GlobalConfig.services.useFahrenheitPerformance;
-                        return `${Math.ceil(useF ? temp * 1.8 + 32 : temp)}°${useF ? "F" : "C"}`;
+                    shape: Cpu.temperature > 90 ? MaterialShape.SoftBurst : MaterialShape.Circle
+                    color: Cpu.temperature > 90 ? Colours.palette.m3errorContainer : Colours.palette.m3secondaryContainer
+                    implicitSize: {
+                        const size = Math.round(tempLabel.implicitHeight * 2);
+                        return size % 2 === 0 ? size : size + 1; // Ensure even size so center works properly
                     }
-                    color: Cpu.temperature > 90 ? Colours.palette.m3onErrorContainer : Colours.palette.m3secondary
-                    font: Tokens.font.title.builders.medium.scale(cpu.width / 112).width(50).build()
+
+                    Behavior on color {
+                        CAnim {}
+                    }
+
+                    StyledText {
+                        id: tempLabel
+
+                        anchors.centerIn: parent
+                        anchors.verticalCenterOffset: Math.round(fontInfo.pointSize * 0.04)
+
+                        text: {
+                            const temp = Cpu.temperature;
+                            const useF = GlobalConfig.services.useFahrenheitPerformance;
+                            return `${Math.ceil(useF ? temp * 1.8 + 32 : temp)}°${useF ? "F" : "C"}`;
+                        }
+                        color: Cpu.temperature > 90 ? Colours.palette.m3onErrorContainer : Colours.palette.m3secondary
+                        font: Tokens.font.title.builders.medium.scale(cpu.width / 112).width(50).build()
+                    }
                 }
-            }
         }
 
         Resource {
@@ -134,9 +136,11 @@ StyledRect {
 
         transform: Translate {
             y: hover.hovered ? 0 : -root.height
+
             Behavior on y { Anim {} }
         }
         opacity: hover.hovered ? 1 : 0
+
         Behavior on opacity { Anim {} }
 
         SessionButton {
