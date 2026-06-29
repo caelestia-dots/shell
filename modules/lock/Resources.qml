@@ -45,6 +45,26 @@ StyledRect {
         anchors.margins: Tokens.padding.large
         clip: true
 
+        Translate {
+            id: resourcesTranslate
+
+            y: hover.hovered ? root.height : 0
+
+            Behavior on y {
+                Anim {}
+            }
+        }
+
+        Translate {
+            id: buttonsTranslate
+
+            y: hover.hovered ? 0 : -root.height
+
+            Behavior on y {
+                Anim {}
+            }
+        }
+
         RowLayout {
             id: layout
 
@@ -52,13 +72,7 @@ StyledRect {
             anchors.right: parent.right
             spacing: Tokens.spacing.large
 
-            transform: Translate {
-                y: hover.hovered ? root.height : 0
-
-                Behavior on y {
-                    Anim {}
-                }
-            }
+            transform: resourcesTranslate
             opacity: hover.hovered ? 0 : 1
 
             Behavior on opacity {
@@ -138,13 +152,7 @@ StyledRect {
             anchors.margins: Tokens.padding.large
             spacing: Tokens.spacing.large
 
-            transform: Translate {
-                y: hover.hovered ? 0 : -root.height
-
-                Behavior on y {
-                    Anim {}
-                }
-            }
+            transform: buttonsTranslate
             opacity: hover.hovered ? 1 : 0
 
             Behavior on opacity {
