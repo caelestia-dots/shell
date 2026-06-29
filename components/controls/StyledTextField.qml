@@ -25,7 +25,13 @@ TextFieldBase {
     readonly property int trailingOffset: trailingIcon ? trailingIconLoader.width + trailingIconLoader.anchors.rightMargin : 0
 
     property string supportingText
-    readonly property int supportingTextOffset: supportingText ? supportingTextLoader.height + Tokens.spacing.extraSmall : 0
+    property string errorText
+    property bool isError
+    property bool emptyIsValid: true
+    property var validate // Regex or function
+    readonly property bool valid: !validate || (!text && emptyIsValid) || (validate instanceof RegExp ? validate.test(text) : !!validate(text))
+    readonly property string effectiveSupportingText: isError && errorText ? errorText : supportingText
+    readonly property int supportingTextOffset: effectiveSupportingText ? supportingTextLoader.height + Tokens.spacing.extraSmall : 0
 
     leftPadding: horizontalPadding + leadingOffset
     rightPadding: horizontalPadding + trailingOffset
@@ -35,6 +41,18 @@ TextFieldBase {
     onPressed: {
         if (!stateLayer.disabled)
             stateLayer.press(stateLayer.mouseX, stateLayer.mouseY);
+    }
+    onTextEdited: {
+        if (isError)
+            isError = false;
+    }
+    onAccepted: {
+        if (!valid)
+            isError = true;
+    }
+    onFocusChanged: {
+        if (!focus && !valid)
+            isError = true;
     }
 
     background: Shape {
@@ -47,7 +65,7 @@ TextFieldBase {
 
         ShapePath {
             strokeWidth: root.activeFocus ? 2 : 1
-            strokeColor: root.activeFocus ? Colours.palette.m3primary : Colours.palette.m3outline
+            strokeColor: root.isError ? Colours.palette.m3error : (root.activeFocus ? Colours.palette.m3primary : Colours.palette.m3outline)
             fillColor: "transparent"
             capStyle: ShapePath.RoundCap
 
@@ -141,7 +159,7 @@ TextFieldBase {
             renderType: Text.QtRendering
 
             text: root.placeholderText
-            color: root.activeFocus ? Colours.palette.m3primary : root.text ? Colours.palette.m3outline : root.placeholderTextColor
+            color: root.isError ? Colours.palette.m3error : (root.activeFocus ? Colours.palette.m3primary : root.text ? Colours.palette.m3outline : root.placeholderTextColor)
 
             states: State {
                 name: "small"
@@ -206,11 +224,11 @@ TextFieldBase {
         anchors.bottom: parent.bottom
         anchors.left: parent.left
         anchors.leftMargin: root.horizontalPadding
-        active: root.supportingText
+        active: root.effectiveSupportingText
 
         sourceComponent: StyledText {
-            text: root.supportingText
-            color: Colours.palette.m3onSurfaceVariant
+            text: root.effectiveSupportingText
+            color: root.isError ? Colours.palette.m3error : Colours.palette.m3onSurfaceVariant
             font: Tokens.font.label.small
         }
     }
