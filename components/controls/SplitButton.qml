@@ -36,7 +36,7 @@ Row {
     property color disabledColour: Qt.alpha(Colours.palette.m3onSurface, 0.1)
     property color disabledTextColour: Qt.alpha(Colours.palette.m3onSurface, 0.38)
 
-    spacing: Math.floor(Tokens.spacing.extraSmall)
+    spacing: Math.floor(Tokens.spacing.extraSmall / 2)
 
     StyledRect {
         radius: implicitHeight / 2 * Math.min(1, Tokens.rounding.scale)
