@@ -13,6 +13,8 @@ import qs.utils
 PageBase {
     id: root
 
+    required property bool newLevelPage
+
     readonly property var batteryLevel: nState.selectedBatteryLevel
     readonly property var lowWarning: nState.lowWarningSelected
 
@@ -24,8 +26,10 @@ PageBase {
     }
 
     function setValueProperty(propName, propValue) {
-        let configCopy = lowWarning ? GlobalConfig.general.battery.lowBatteryWarnLevels : GlobalConfig.general.battery.chargingBatteryWarnLevels;
-        configCopy = Array.from(configCopy);
+        let originalConfig = lowWarning 
+            ? GlobalConfig.general.battery.lowBatteryWarnLevels 
+            : GlobalConfig.general.battery.chargingBatteryWarnLevels;
+        let configCopy = Array.from(originalConfig);
         let targetItem = configCopy.find(item => (item.level === batteryLevel.level) & (item.title === batteryLevel.title));
 
         if (targetItem) {
@@ -37,6 +41,21 @@ PageBase {
 
             nState.selectedBatteryLevel = targetItem;
         }
+    }
+
+    function deleteLevel() {
+        let originalConfig = lowWarning 
+            ? GlobalConfig.general.battery.lowBatteryWarnLevels 
+            : GlobalConfig.general.battery.chargingBatteryWarnLevels;
+        let configCopy = Array.from(originalConfig);
+        let filteredConfig = configCopy.filter(item => 
+            !(item.level === batteryLevel.level && item.title === batteryLevel.title)
+        );
+
+        if (lowWarning)
+            GlobalConfig.general.battery.lowBatteryWarnLevels = filteredConfig;
+        else
+            GlobalConfig.general.battery.chargingBatteryWarnLevels = filteredConfig;
     }
 
     // So we need the following information
@@ -144,6 +163,88 @@ PageBase {
             onToggled: {
                 if (root.batteryLevel)
                     toggleProperty("critical");
+            }
+        }
+
+        ButtonRow {
+            Layout.topMargin: Tokens.spacing.large - parent.spacing
+            Layout.alignment: Qt.AlignHCenter
+            Layout.minimumWidth: Math.round(root.cappedWidth * newLevelPage ? 0.7 : 0.5)
+            spacing: Tokens.spacing.small
+
+            ButtonBase {
+                id: deleteBtn
+
+                fillWidth: true
+                shapeMorph: true
+                isRound: true
+
+                inactiveColour: Colours.palette.m3errorContainer
+                inactiveOnColour: Colours.palette.m3onErrorContainer
+
+                implicitWidth: deleteBtnLayout.implicitWidth + Tokens.padding.extraLarge * 2
+                implicitHeight: deleteBtnLayout.implicitHeight + Tokens.padding.medium * 2
+
+                onClicked: {
+                    root.nState.closeSubPage();
+                }
+
+                ColumnLayout {
+                    id: deleteBtnLayout
+
+                    anchors.centerIn: parent
+                    spacing: 0
+
+                    MaterialIcon {
+                        Layout.alignment: Qt.AlignHCenter
+                        text: "delete"
+                        color: deleteBtn.onColour
+                        fontStyle: Tokens.font.icon.medium
+                    }
+                    StyledText {
+                        Layout.alignment: Qt.AlignHCenter
+                        text: qsTr("Delete")
+                        color: deleteBtn.onColour
+                    }
+                }
+            }
+
+            ButtonBase {
+                id: addBtn
+                visible: newLevelPage
+
+                fillWidth: true
+                shapeMorph: true
+                isRound: true
+
+                inactiveColour: Colours.palette.m3primaryContainer
+                inactiveOnColour: Colours.palette.m3onPrimaryContainer
+
+                implicitWidth: addBtnLayout.implicitWidth + Tokens.padding.extraLarge * 2
+                implicitHeight: addBtnLayout.implicitHeight + Tokens.padding.medium * 2
+
+                onClicked: {
+                    root.nState.closeSubPage();
+                }
+
+                ColumnLayout {
+                    id: addBtnLayout
+
+                    anchors.centerIn: parent
+                    spacing: 0
+
+                    MaterialIcon {
+                        Layout.alignment: Qt.AlignHCenter
+                        text: "delete"
+                        color: addBtn.onColour
+                        fontStyle: Tokens.font.icon.medium
+                    }
+                    StyledText {
+                        Layout.alignment: Qt.AlignHCenter
+                        text: qsTr("Delete")
+                        color: addBtn.onColour
+                    }
+                }
             }
         }
     }
