@@ -55,12 +55,8 @@ TextFieldBase {
         if (isError)
             isError = false;
     }
-    onAccepted: {
+    onEditingFinished: {
         if (!valid)
-            isError = true;
-    }
-    onFocusChanged: {
-        if (!focus && !valid)
             isError = true;
     }
 
