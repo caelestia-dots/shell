@@ -55,11 +55,15 @@ StyledRect {
             transform: Translate {
                 y: hover.hovered ? root.height : 0
 
-                Behavior on y { Anim {} }
+                Behavior on y {
+                    Anim {}
+                }
             }
             opacity: hover.hovered ? 0 : 1
 
-            Behavior on opacity { Anim {} }
+            Behavior on opacity {
+                Anim {}
+            }
 
             Resource {
                 id: cpu
@@ -102,67 +106,71 @@ StyledRect {
                         font: Tokens.font.title.builders.medium.scale(cpu.width / 112).width(50).build()
                     }
                 }
+            }
+
+            Resource {
+                icon: "memory_alt"
+                value: Math.round(Memory.percentage * 100) + "%"
+                fillValue: Memory.percentage
+                colour: Colours.palette.m3tertiary
+                shapeColour: Colours.palette.m3onTertiary
+                fillColour: Qt.alpha(Colours.palette.m3tertiary, 0.3)
+                shape: MaterialShape.Slanted
+            }
+
+            Resource {
+                icon: "hard_disk"
+                value: Math.round(Storage.percentage * 100) + "%"
+                fillValue: Storage.percentage
+                colour: Colours.palette.m3secondary
+                shapeColour: Colours.palette.m3secondaryContainer
+                fillColour: Qt.alpha(Colours.palette.m3secondary, 0.4)
+                shape: MaterialShape.Gem
+            }
         }
 
-        Resource {
-            icon: "memory_alt"
-            value: Math.round(Memory.percentage * 100) + "%"
-            fillValue: Memory.percentage
-            colour: Colours.palette.m3tertiary
-            shapeColour: Colours.palette.m3onTertiary
-            fillColour: Qt.alpha(Colours.palette.m3tertiary, 0.3)
-            shape: MaterialShape.Slanted
-        }
+        RowLayout {
+            id: buttonsLayout
 
-        Resource {
-            icon: "hard_disk"
-            value: Math.round(Storage.percentage * 100) + "%"
-            fillValue: Storage.percentage
-            colour: Colours.palette.m3secondary
-            shapeColour: Colours.palette.m3secondaryContainer
-            fillColour: Qt.alpha(Colours.palette.m3secondary, 0.4)
-            shape: MaterialShape.Gem
+            anchors.left: parent.left
+            anchors.right: parent.right
+            anchors.verticalCenter: parent.verticalCenter
+            anchors.margins: Tokens.padding.large
+            spacing: Tokens.spacing.large
+
+            transform: Translate {
+                y: hover.hovered ? 0 : -root.height
+
+                Behavior on y {
+                    Anim {}
+                }
+            }
+            opacity: hover.hovered ? 1 : 0
+
+            Behavior on opacity {
+                Anim {}
+            }
+
+            SessionButton {
+                icon: Config.session.icons.logout
+                command: Config.session.commands.logout
+            }
+            SessionButton {
+                icon: Config.session.icons.shutdown
+                command: Config.session.commands.shutdown
+            }
+            SessionButton {
+                icon: Config.session.icons.hibernate
+                command: Config.session.commands.hibernate
+            }
+            SessionButton {
+                icon: Config.session.icons.reboot
+                command: Config.session.commands.reboot
+            }
         }
     }
 
-    RowLayout {
-        id: buttonsLayout
-
-        anchors.left: parent.left
-        anchors.right: parent.right
-        anchors.verticalCenter: parent.verticalCenter
-        anchors.margins: Tokens.padding.large
-        spacing: Tokens.spacing.large
-
-        transform: Translate {
-            y: hover.hovered ? 0 : -root.height
-
-            Behavior on y { Anim {} }
-        }
-        opacity: hover.hovered ? 1 : 0
-
-        Behavior on opacity { Anim {} }
-
-        SessionButton {
-            icon: Config.session.icons.logout
-            command: Config.session.commands.logout
-        }
-        SessionButton {
-            icon: Config.session.icons.shutdown
-            command: Config.session.commands.shutdown
-        }
-        SessionButton {
-            icon: Config.session.icons.hibernate
-            command: Config.session.commands.hibernate
-        }
-        SessionButton {
-            icon: Config.session.icons.reboot
-            command: Config.session.commands.reboot
-        }
-    }
-}
-
-component SessionButton: IconButton {
+    component SessionButton: IconButton {
         id: button
 
         required property list<string> command
