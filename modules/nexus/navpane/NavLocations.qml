@@ -246,7 +246,6 @@ VerticalFadeFlickable {
                             bottomRightRadius: isLast ? Tokens.rounding.extraLarge : 0
                             color: Colours.layer(Colours.palette.m3surfaceContainerHigh, 2)
 
-                            // Thin divider between joined rows (not under the last one).
                             StyledRect {
                                 anchors.bottom: parent.bottom
                                 anchors.left: parent.left
@@ -255,7 +254,7 @@ VerticalFadeFlickable {
                                 anchors.rightMargin: Tokens.padding.large
                                 implicitHeight: 1
                                 visible: !result.isLast
-                                color: Colours.palette.m3outlineVariant
+                                color: Qt.alpha(Colours.palette.m3outlineVariant, 0.5)
                             }
 
                             ColumnLayout {

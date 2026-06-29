@@ -1,5 +1,6 @@
 pragma Singleton
 
+import "../../utils/scripts/fzf.js" as Fzf
 import QtQuick
 import Quickshell
 import Caelestia
@@ -24,6 +25,10 @@ Singleton {
     // ranking:  token -> { entry id (string): weight }
     property var inverted: ({})
     property var ranking: ({})
+    // fzf finder over the entries (title + keywords), used as a fuzzy fallback
+    // when the exact/prefix index lookup comes up short. fzf is the same matcher
+    // the launcher uses, so typo and mid-word matching behave consistently.
+    property var fzfFinder: null
 
     function query(search: string): list<QtObject> {
         const tokens = root.tokenize(search);
@@ -48,7 +53,32 @@ Singleton {
         const ranked = Object.keys(scores).filter(id => hitCounts[id] === tokens.length).sort((a, b) => scores[b] - scores[a] || (parseInt(a) - parseInt(b))).slice(0, 25);
 
         const all = entries.instances;
-        return ranked.map(id => all[parseInt(id)]).filter(e => e !== undefined);
+        const out = ranked.map(id => all[parseInt(id)]).filter(e => e !== undefined);
+
+        // The inverted index only does exact/prefix matches. When it finds little
+        // or nothing - a typo ("trasparency") or a mid-word query ("paper") - fall
+        // back to fzf over the same entries. fzf hits that the index already
+        // returned are skipped, and the rest are appended after the (stronger)
+        // index results, so precise matches always lead.
+        if (out.length < 5 && root.fzfFinder) {
+            const seen = ({});
+            for (const id of ranked)
+                seen[id] = true;
+            const fuzzy = root.fzfFinder.find(search);
+            for (const r of fuzzy) {
+                const idx = r.item.idx;
+                if (seen[idx])
+                    continue;
+                seen[idx] = true;
+                const entry = all[idx];
+                if (entry !== undefined)
+                    out.push(entry);
+                if (out.length >= 25)
+                    break;
+            }
+        }
+
+        return out;
     }
 
     // Look up a query token in the inverted index: exact match first, then any
@@ -66,6 +96,7 @@ Singleton {
                     result[id] = w;
             }
         }
+
         return result;
     }
 
@@ -95,10 +126,22 @@ Singleton {
             entries.model = data.entries;
             root.inverted = data.inverted ?? {};
             root.ranking = data.ranking ?? {};
+            // One searchable string per entry: the title. fzf provides typo and
+            // mid-word matching over titles as a fallback when the exact/prefix
+            // index lookup comes up short.
+            const docs = data.entries.map((e, i) => ({
+                        idx: i,
+                        text: e.title
+                    }));
+            root.fzfFinder = new Fzf.Finder(docs, {
+                selector: d => d.text,
+                limit: 25
+            });
         } catch (e) {
             entries.model = [];
             root.inverted = {};
             root.ranking = {};
+            root.fzfFinder = null;
         }
     }
 

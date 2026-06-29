@@ -901,7 +901,7 @@ The launcher pulls wallpapers from `~/Pictures/Wallpapers` by default. You can c
 the launcher only shows an odd number of wallpapers at one time. If you only have 2 wallpapers, consider getting more
 (or just putting one).
 
-## Settings search
+## Indexing settings
 
 The settings panel (nexus) has a full-text search that lets users jump straight to any setting by name, description, or
 the section/page it lives under. The index is generated from the page QML at build time and baked into the plugin binary,
