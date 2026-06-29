@@ -37,7 +37,7 @@ TextField {
 
         x: root.cursorRectangle.x
         y: root.cursorRectangle.y
-        implicitWidth: 2
+        implicitWidth: 1.5
         implicitHeight: root.cursorRectangle.height
 
         color: Colours.palette.m3primary
