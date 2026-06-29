@@ -9,6 +9,13 @@ import qs.services
 TextFieldBase {
     id: root
 
+    enum TextFieldType {
+        Outlined,
+        Filled
+    }
+
+    property int type: StyledTextField.Outlined
+
     property int smallFontSize: Tokens.font.label.small.pointSize
     readonly property real smallFontScale: smallFontSize / font.pointSize
 
@@ -33,10 +40,12 @@ TextFieldBase {
     readonly property string effectiveSupportingText: isError && errorText ? errorText : supportingText
     readonly property int supportingTextOffset: effectiveSupportingText ? supportingTextLoader.height + Tokens.spacing.extraSmall : 0
 
+    readonly property int filledOffset: type === StyledTextField.Filled ? Tokens.spacing.small : 0
+
     leftPadding: horizontalPadding + leadingOffset
     rightPadding: horizontalPadding + trailingOffset
-    topPadding: Tokens.padding.large
-    bottomPadding: Tokens.padding.large + supportingTextOffset
+    topPadding: Tokens.padding.large + filledOffset
+    bottomPadding: Tokens.padding.large + supportingTextOffset - filledOffset
 
     onPressed: {
         if (!stateLayer.disabled)
@@ -55,76 +64,18 @@ TextFieldBase {
             isError = true;
     }
 
-    background: Shape {
-        id: bg
-
+    background: Loader {
         anchors.fill: parent
         anchors.bottomMargin: root.supportingTextOffset
-        preferredRendererType: Shape.CurveRenderer
-        asynchronous: true
 
-        ShapePath {
-            strokeWidth: root.activeFocus ? 2 : 1
-            strokeColor: root.isError ? Colours.palette.m3error : (root.activeFocus ? Colours.palette.m3primary : Colours.palette.m3outline)
-            fillColor: "transparent"
-            capStyle: ShapePath.RoundCap
-
-            startX: root.horizontalPadding - root.clampedRadius + root.outlineGap * (1 - root.outlineGapScale) / 2 + root.outlineGap * root.outlineGapScale
-
-            PathLine {
-                x: bg.width - root.clampedRadius
-            }
-            PathArc {
-                x: bg.width
-                y: root.clampedRadius
-                radiusX: root.clampedRadius
-                radiusY: root.clampedRadius
-            }
-            PathLine {
-                x: bg.width
-                y: bg.height - root.clampedRadius
-            }
-            PathArc {
-                x: bg.width - root.clampedRadius
-                y: bg.height
-                radiusX: root.clampedRadius
-                radiusY: root.clampedRadius
-            }
-            PathLine {
-                x: root.clampedRadius
-                y: bg.height
-            }
-            PathArc {
-                x: 0
-                y: bg.height - root.clampedRadius
-                radiusX: root.clampedRadius
-                radiusY: root.clampedRadius
-            }
-            PathLine {
-                x: 0
-                y: root.clampedRadius
-            }
-            PathArc {
-                x: root.clampedRadius
-                y: 0
-                radiusX: root.clampedRadius
-                radiusY: root.clampedRadius
-            }
-            PathLine {
-                x: root.horizontalPadding - root.clampedRadius + root.outlineGap * (1 - root.outlineGapScale) / 2
-            }
-
-            Behavior on strokeWidth {
-                Anim {}
-            }
-
-            Behavior on strokeColor {
-                CAnim {}
-            }
-        }
+        sourceComponent: root.type === StyledTextField.Filled ? filledComp : outlineComp
 
         StateLayer {
             id: stateLayer
+
+            topLeftRadius: root.clampedRadius
+            topRightRadius: root.clampedRadius
+            radius: root.type === StyledTextField.Outlined ? root.clampedRadius : 0
 
             cursorShape: Qt.IBeamCursor
             disabled: root.activeFocus
@@ -156,24 +107,41 @@ TextFieldBase {
             anchors.left: parent.left
             anchors.verticalCenter: parent.verticalCenter
             anchors.leftMargin: root.leftPadding
+            anchors.topMargin: Tokens.padding.extraSmall
             renderType: Text.QtRendering
 
             text: root.placeholderText
             color: root.isError ? Colours.palette.m3error : (root.activeFocus ? Colours.palette.m3primary : root.text ? Colours.palette.m3outline : root.placeholderTextColor)
 
-            states: State {
-                name: "small"
-                when: root.activeFocus || root.text
+            states: [
+                State {
+                    name: "smallOutlined"
+                    when: root.type === StyledTextField.Outlined && (root.activeFocus || root.text)
 
-                PropertyChanges {
-                    placeholder.scale: root.smallFontScale
-                    placeholder.anchors.leftMargin: -(1 - root.smallFontScale) * placeholder.width / 2 + root.horizontalPadding - root.Tokens.spacing.extraSmall
+                    PropertyChanges {
+                        placeholder.scale: root.smallFontScale
+                        placeholder.anchors.leftMargin: -(1 - root.smallFontScale) * placeholder.width / 2 + root.horizontalPadding + -root.Tokens.spacing.extraSmall
+                    }
+                    AnchorChanges {
+                        target: placeholder
+                        anchors.verticalCenter: contentWrapper.top
+                    }
+                },
+                State {
+                    name: "smallFilled"
+                    when: root.type === StyledTextField.Filled && (root.activeFocus || root.text)
+
+                    PropertyChanges {
+                        placeholder.scale: root.smallFontScale
+                        placeholder.anchors.leftMargin: -(1 - root.smallFontScale) * placeholder.width / 2 + root.horizontalPadding + root.leadingOffset
+                    }
+                    AnchorChanges {
+                        target: placeholder
+                        anchors.top: contentWrapper.top
+                        anchors.verticalCenter: undefined
+                    }
                 }
-                AnchorChanges {
-                    target: placeholder
-                    anchors.verticalCenter: contentWrapper.top
-                }
-            }
+            ]
 
             transitions: Transition {
                 Anim {
@@ -235,5 +203,98 @@ TextFieldBase {
 
     TapHandler {
         id: tapHandler
+    }
+
+    Component {
+        id: outlineComp
+
+        Shape {
+            id: bg
+
+            preferredRendererType: Shape.CurveRenderer
+            asynchronous: true
+
+            ShapePath {
+                strokeWidth: root.activeFocus ? 2 : 1
+                strokeColor: root.isError ? Colours.palette.m3error : (root.activeFocus ? Colours.palette.m3primary : Colours.palette.m3outline)
+                fillColor: "transparent"
+                capStyle: ShapePath.RoundCap
+
+                startX: root.horizontalPadding - root.clampedRadius + root.outlineGap * (1 - root.outlineGapScale) / 2 + root.outlineGap * root.outlineGapScale
+
+                PathLine {
+                    x: bg.width - root.clampedRadius
+                }
+                PathArc {
+                    x: bg.width
+                    y: root.clampedRadius
+                    radiusX: root.clampedRadius
+                    radiusY: root.clampedRadius
+                }
+                PathLine {
+                    x: bg.width
+                    y: bg.height - root.clampedRadius
+                }
+                PathArc {
+                    x: bg.width - root.clampedRadius
+                    y: bg.height
+                    radiusX: root.clampedRadius
+                    radiusY: root.clampedRadius
+                }
+                PathLine {
+                    x: root.clampedRadius
+                    y: bg.height
+                }
+                PathArc {
+                    x: 0
+                    y: bg.height - root.clampedRadius
+                    radiusX: root.clampedRadius
+                    radiusY: root.clampedRadius
+                }
+                PathLine {
+                    x: 0
+                    y: root.clampedRadius
+                }
+                PathArc {
+                    x: root.clampedRadius
+                    y: 0
+                    radiusX: root.clampedRadius
+                    radiusY: root.clampedRadius
+                }
+                PathLine {
+                    x: root.horizontalPadding - root.clampedRadius + root.outlineGap * (1 - root.outlineGapScale) / 2
+                }
+
+                Behavior on strokeWidth {
+                    Anim {}
+                }
+
+                Behavior on strokeColor {
+                    CAnim {}
+                }
+            }
+        }
+    }
+
+    Component {
+        id: filledComp
+
+        StyledRect {
+            topLeftRadius: root.clampedRadius
+            topRightRadius: root.clampedRadius
+            color: root.activeFocus ? Colours.tPalette.m3surfaceContainerHighest : Colours.tPalette.m3surfaceContainerHigh
+
+            StyledRect {
+                anchors.left: parent.left
+                anchors.right: parent.right
+                anchors.bottom: parent.bottom
+                implicitHeight: root.activeFocus ? 2 : 1
+                color: root.isError ? Colours.palette.m3error : (root.activeFocus ? Colours.palette.m3primary : Colours.palette.m3outline)
+
+                Behavior on implicitHeight {
+                    Anim {}
+                }
+            }
+        }
     }
 }
