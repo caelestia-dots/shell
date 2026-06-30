@@ -46,13 +46,13 @@ Item {
         }
 
         // Maxed out
-        if (pam.state === Pam.MaxTries && pam.fprint.state === Pam.MaxTries && pam.howdy.state === Pam.MaxTries)
-            return qsTr("Maximum attempts for all authentication methods reached.");
         if (pam.state === Pam.MaxTries) {
             if (pam.fprint.available && pam.fprint.state !== Pam.MaxTries)
                 return qsTr("Maximum password attempts reached. Please use fingerprint.");
             if (pam.howdy.available && pam.howdy.state !== Pam.MaxTries)
                 return qsTr("Maximum password attempts reached. Please use face.");
+            if (pam.fprint.available || pam.howdy.available)
+                return qsTr("Maximum attempts for all authentication methods reached.");
             return qsTr("Maximum password attempts reached.");
         }
         if (pam.fprint.state === Pam.MaxTries)
