@@ -58,13 +58,13 @@ DoubleSpinBox {
         }
     }
 
-    up.indicator: IconButton {
-        id: upButton
+    down.indicator: IconButton {
+        id: downButton
 
         topRightRadius: pressed ? Tokens.rounding.small : Tokens.rounding.extraSmall
         bottomRightRadius: pressed ? Tokens.rounding.small : Tokens.rounding.extraSmall
 
-        icon: "keyboard_arrow_up"
+        icon: "keyboard_arrow_down"
         color: Colours.layer(Colours.palette.m3surfaceContainerHighest, root.cLayer)
         type: IconButton.Text
         padding: Tokens.padding.extraSmall
@@ -84,15 +84,15 @@ DoubleSpinBox {
         }
     }
 
-    down.indicator: IconButton {
-        id: downButton
+    up.indicator: IconButton {
+        id: upButton
 
         anchors.right: parent.right
 
         topLeftRadius: pressed ? Tokens.rounding.small : Tokens.rounding.extraSmall
         bottomLeftRadius: pressed ? Tokens.rounding.small : Tokens.rounding.extraSmall
 
-        icon: "keyboard_arrow_down"
+        icon: "keyboard_arrow_up"
         color: Colours.layer(Colours.palette.m3surfaceContainerHighest, root.cLayer)
         type: IconButton.Text
         padding: Tokens.padding.extraSmall
