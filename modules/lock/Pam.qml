@@ -160,7 +160,6 @@ Scope {
         id: fprintAvailProc
 
         command: ["sh", "-c", "fprintd-list $USER"]
-
         onExited: code => { // qmllint disable signal-handler-parameters
             fprint.available = code === 0;
             fprint.checkAvail();
@@ -171,10 +170,7 @@ Scope {
         id: howdyAvailProc
 
         command: ["sh", "-c", "command -v howdy"]
-
-        onExited: code => { // qmllint disable signal-handler-parameters
-            howdy.available = code === 0;
-        }
+        onExited: code => howdy.available = code === 0 // qmllint disable signal-handler-parameters
     }
 
     Timer {
