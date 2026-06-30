@@ -64,6 +64,12 @@ Scope {
             fprint.abort();
     }
 
+    function clearTransientState(): void {
+        for (const obj of [root, fprint, howdy])
+            if (obj.state !== Pam.MaxTries)
+                obj.state = Pam.None;
+    }
+
     PamContext {
         id: passwd
 
@@ -88,6 +94,8 @@ Scope {
         onCompleted: res => {
             if (res === PamResult.Success)
                 return root.lock.unlock();
+
+            root.clearTransientState();
 
             if (res === PamResult.Error)
                 root.state = Pam.Error;
@@ -213,6 +221,8 @@ Scope {
 
                 if (res === PamResult.Success)
                     return root.lock.unlock();
+
+                root.clearTransientState(ctx);
 
                 if (res === PamResult.Error) {
                     ctx.state = Pam.Error;
