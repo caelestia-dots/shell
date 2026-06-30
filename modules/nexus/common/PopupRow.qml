@@ -92,8 +92,9 @@ ConnectedRect {
                     return contentWin ? contentWin.interactionWrapper : (win as QsWindow).contentItem;
                 }
                 anchors.fill: parent
-                hoverEnabled: true
                 enabled: popup.open
+                hoverEnabled: popup.open
+                cursorShape: popup.open ? Qt.ArrowCursor : undefined
                 z: popup.animDriver > 0 ? 1 : 0
 
                 onClicked: popup.open = false
