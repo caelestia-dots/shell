@@ -144,7 +144,7 @@ Scope {
 
     Connections {
         function onResumed(): void {
-            if (howdy.canAttempt && GlobalConfig.lock.triggerHowdyOnWake)
+            if (howdy.canAttempt && !howdy.active && GlobalConfig.lock.triggerHowdyOnWake)
                 howdy.start();
         }
 
