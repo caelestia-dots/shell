@@ -6,6 +6,7 @@ import Quickshell.Io
 import Quickshell.Wayland
 import Quickshell.Services.Pam
 import Caelestia.Config
+import Caelestia.Services
 
 Scope {
     id: root
@@ -137,6 +138,15 @@ Scope {
         availCommand: ["sh", "-c", "command -v howdy"]
         enabled: GlobalConfig.lock.enableHowdy
         maxTries: GlobalConfig.lock.maxHowdyTries
+    }
+
+    Connections {
+        function onResumed(): void {
+            if (howdy.canAttempt && GlobalConfig.lock.triggerHowdyOnWake)
+                howdy.start();
+        }
+
+        target: SessionManager
     }
 
     Connections {
