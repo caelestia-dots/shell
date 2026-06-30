@@ -47,7 +47,7 @@ SKIP_LABELS = {"Muted", "None"}
 # Field weights for ranking: a token matching the title counts more than one
 # matching the keywords blob.
 FIELD_WEIGHT = {"title": 1.0, "keywords": 0.4}
-STOPWORDS = {"the", "a", "an", "of", "and", "or", "to", "on", "in", "for"}
+STOPWORDS = {"the", "a", "an", "of", "notification", "are", "not", "out", "and", "or", "to", "on", "in", "for"}
 
 
 def find_pages_dir(nexus: Path) -> Path:
