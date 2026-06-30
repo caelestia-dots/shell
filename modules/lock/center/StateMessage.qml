@@ -12,36 +12,36 @@ Item {
     required property Pam pam
 
     readonly property string msg: {
-        if (pam.fprint.state === "error")
+        if (pam.fprint.state === Pam.Error)
             return qsTr("FP ERROR: %1").arg(pam.fprint.message);
-        if (pam.howdy.state === "error")
+        if (pam.howdy.state === Pam.Error)
             return qsTr("FACE ERROR: %1").arg(pam.howdy.message);
-        if (pam.state === "error")
+        if (pam.state === Pam.Error)
             return qsTr("PW ERROR: %1").arg(pam.passwd.message);
 
         if (pam.lockMessage)
             return pam.lockMessage;
 
-        if (pam.state === "max" && pam.fprint.state === "max")
+        if (pam.state === Pam.MaxTries && pam.fprint.state === Pam.MaxTries)
             return qsTr("Maximum password and fingerprint attempts reached.");
-        if (pam.state === "max") {
+        if (pam.state === Pam.MaxTries) {
             if (pam.fprint.available)
                 return qsTr("Maximum password attempts reached. Please use fingerprint.");
             return qsTr("Maximum password attempts reached.");
         }
-        if (pam.fprint.state === "max")
+        if (pam.fprint.state === Pam.MaxTries)
             return qsTr("Maximum fingerprint attempts reached. Please use password.");
-        if (pam.howdy.state === "max")
+        if (pam.howdy.state === Pam.MaxTries)
             return qsTr("Maximum face attempts reached. Please use password.");
 
-        if (pam.state === "fail") {
+        if (pam.state === Pam.Failed) {
             if (pam.fprint.available)
                 return qsTr("Incorrect password. Please try again or use fingerprint.");
             return qsTr("Incorrect password. Please try again.");
         }
-        if (pam.fprint.state === "fail")
+        if (pam.fprint.state === Pam.Failed)
             return qsTr("Fingerprint not recognized (%1/%2). Please try again or use password.").arg(pam.fprint.tries).arg(GlobalConfig.lock.maxFprintTries);
-        if (pam.howdy.state === "fail")
+        if (pam.howdy.state === Pam.Failed)
             return qsTr("Face not recognized (%1/%2). Please try again or use password.").arg(pam.howdy.tries).arg(GlobalConfig.lock.maxHowdyTries);
 
         return "";

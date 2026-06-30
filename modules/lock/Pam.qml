@@ -10,6 +10,13 @@ import Caelestia.Config
 Scope {
     id: root
 
+    enum PamState {
+        None,
+        Error,
+        MaxTries,
+        Failed
+    }
+
     required property WlSessionLock lock
 
     readonly property alias passwd: passwd
@@ -17,13 +24,13 @@ Scope {
     readonly property alias howdy: howdy
 
     property string lockMessage
-    property string state
+    property int state
     property string buffer
 
     signal flashMsg
 
     function handleKey(event: KeyEvent): void {
-        if (passwd.active || state === "max")
+        if (passwd.active || state === Pam.MaxTries)
             return;
 
         if (howdy.active && event.key !== Qt.Key_Enter && event.key !== Qt.Key_Return) {
@@ -84,11 +91,11 @@ Scope {
                 return root.lock.unlock();
 
             if (res === PamResult.Error)
-                root.state = "error";
+                root.state = Pam.Error;
             else if (res === PamResult.MaxTries)
-                root.state = "max";
+                root.state = Pam.MaxTries;
             else if (res === PamResult.Failed)
-                root.state = "fail";
+                root.state = Pam.Failed;
 
             root.flashMsg();
             pwdStateReset.restart();
@@ -100,8 +107,8 @@ Scope {
 
         interval: 4000
         onTriggered: {
-            if (root.state !== "max")
-                root.state = "";
+            if (root.state !== Pam.MaxTries)
+                root.state = Pam.None;
         }
     }
 
@@ -132,7 +139,7 @@ Scope {
                 fprint.reset();
                 howdy.reset();
                 root.buffer = "";
-                root.state = "";
+                root.state = Pam.None;
                 root.lockMessage = "";
             }
         }
@@ -170,7 +177,7 @@ Scope {
         property bool available
         property int tries
         property int errorTries
-        property string state
+        property int state
         readonly property bool canAttempt: available && enabled && root.lock.secure && tries < maxTries
 
         readonly property alias active: pam.active
@@ -193,7 +200,7 @@ Scope {
         function reset(): void {
             tries = 0;
             errorTries = 0;
-            state = "";
+            state = Pam.None;
         }
 
         PamContext {
@@ -209,7 +216,7 @@ Scope {
                     return root.lock.unlock();
 
                 if (res === PamResult.Error) {
-                    ctx.state = "error";
+                    ctx.state = Pam.Error;
                     ctx.errorTries++;
                     if (ctx.errorTries < 5) {
                         abort();
@@ -218,10 +225,10 @@ Scope {
                 } else if (res === PamResult.MaxTries || res === PamResult.Failed) {
                     ctx.tries++;
                     if (ctx.tries < ctx.maxTries) {
-                        ctx.state = "fail";
+                        ctx.state = Pam.Failed;
                         start();
                     } else {
-                        ctx.state = "max";
+                        ctx.state = Pam.MaxTries;
                         abort();
                     }
                 }
@@ -243,8 +250,8 @@ Scope {
 
             interval: 4000
             onTriggered: {
-                if (ctx.state !== "max")
-                    ctx.state = "";
+                if (ctx.state !== Pam.MaxTries)
+                    ctx.state = Pam.None;
                 ctx.errorTries = 0;
             }
         }
