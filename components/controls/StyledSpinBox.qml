@@ -64,7 +64,7 @@ DoubleSpinBox {
         topRightRadius: pressed ? Tokens.rounding.small : Tokens.rounding.extraSmall
         bottomRightRadius: pressed ? Tokens.rounding.small : Tokens.rounding.extraSmall
 
-        icon: "keyboard_arrow_down"
+        icon: "remove"
         disabledColour: Qt.alpha(Colours.palette.m3surfaceContainerHighest, 0.4)
         color: disabled ? disabledColour : Colours.layer(Colours.palette.m3surfaceContainerHighest, root.cLayer)
         type: IconButton.Text
@@ -100,7 +100,7 @@ DoubleSpinBox {
         topLeftRadius: pressed ? Tokens.rounding.small : Tokens.rounding.extraSmall
         bottomLeftRadius: pressed ? Tokens.rounding.small : Tokens.rounding.extraSmall
 
-        icon: "keyboard_arrow_up"
+        icon: "add"
         disabledColour: Qt.alpha(Colours.palette.m3surfaceContainerHighest, 0.4)
         color: disabled ? disabledColour : Colours.layer(Colours.palette.m3surfaceContainerHighest, root.cLayer)
         type: IconButton.Text
