@@ -33,12 +33,11 @@ Scope {
         if (passwd.active || state === Pam.MaxTries)
             return;
 
-        if (howdy.active && event.key !== Qt.Key_Enter && event.key !== Qt.Key_Return) {
+        if (howdy.active && event.key !== Qt.Key_Enter && event.key !== Qt.Key_Return)
             howdy.abort();
-        }
 
         if (event.key === Qt.Key_Enter || event.key === Qt.Key_Return) {
-            if (buffer.length === 0 && howdy.canAttempt && !howdy.active) {
+            if (buffer.length === 0 && howdy.canAttempt && !howdy.active) { // Double enter for empty password
                 howdy.start();
             } else {
                 if (howdy.active)
