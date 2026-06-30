@@ -12,31 +12,37 @@ Item {
     required property Pam pam
 
     readonly property string msg: {
-        if (pam.fprintState === "error")
+        if (pam.fprint.state === "error")
             return qsTr("FP ERROR: %1").arg(pam.fprint.message);
+        if (pam.howdy.state === "error")
+            return qsTr("FACE ERROR: %1").arg(pam.howdy.message);
         if (pam.state === "error")
             return qsTr("PW ERROR: %1").arg(pam.passwd.message);
 
         if (pam.lockMessage)
             return pam.lockMessage;
 
-        if (pam.state === "max" && pam.fprintState === "max")
+        if (pam.state === "max" && pam.fprint.state === "max")
             return qsTr("Maximum password and fingerprint attempts reached.");
         if (pam.state === "max") {
             if (pam.fprint.available)
                 return qsTr("Maximum password attempts reached. Please use fingerprint.");
             return qsTr("Maximum password attempts reached.");
         }
-        if (pam.fprintState === "max")
+        if (pam.fprint.state === "max")
             return qsTr("Maximum fingerprint attempts reached. Please use password.");
+        if (pam.howdy.state === "max")
+            return qsTr("Maximum face attempts reached. Please use password.");
 
         if (pam.state === "fail") {
             if (pam.fprint.available)
                 return qsTr("Incorrect password. Please try again or use fingerprint.");
             return qsTr("Incorrect password. Please try again.");
         }
-        if (pam.fprintState === "fail")
+        if (pam.fprint.state === "fail")
             return qsTr("Fingerprint not recognized (%1/%2). Please try again or use password.").arg(pam.fprint.tries).arg(GlobalConfig.lock.maxFprintTries);
+        if (pam.howdy.state === "fail")
+            return qsTr("Face not recognized (%1/%2). Please try again or use password.").arg(pam.howdy.tries).arg(GlobalConfig.lock.maxHowdyTries);
 
         return "";
     }

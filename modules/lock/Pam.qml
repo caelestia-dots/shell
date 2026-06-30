@@ -1,3 +1,5 @@
+pragma ComponentBehavior: Bound
+
 import QtQuick
 import Quickshell
 import Quickshell.Io
@@ -16,7 +18,6 @@ Scope {
 
     property string lockMessage
     property string state
-    property string fprintState
     property string buffer
 
     signal flashMsg
@@ -30,7 +31,7 @@ Scope {
         }
 
         if (event.key === Qt.Key_Enter || event.key === Qt.Key_Return) {
-            if (buffer.length === 0 && howdy.available && !howdy.active) {
+            if (buffer.length === 0 && howdy.canAttempt && !howdy.active) {
                 howdy.start();
             } else {
                 if (howdy.active)
@@ -49,11 +50,19 @@ Scope {
         }
     }
 
+    function restartFprint(): void {
+        fprint.reset();
+        if (fprint.canAttempt)
+            fprint.start();
+        else
+            fprint.abort();
+    }
+
     PamContext {
         id: passwd
 
         config: "passwd"
-        configDirectory: Quickshell.shellDir + "/assets/pam.d"
+        configDirectory: Quickshell.shellPath("assets/pam.d")
 
         onMessageChanged: {
             if (message.startsWith("The account is locked"))
@@ -82,106 +91,12 @@ Scope {
                 root.state = "fail";
 
             root.flashMsg();
-            stateReset.restart();
+            pwdStateReset.restart();
         }
-    }
-
-    PamContext {
-        id: fprint
-
-        property bool available
-        property int tries
-        property int errorTries
-
-        function checkAvail(): void {
-            if (!available || !GlobalConfig.lock.enableFprint || !root.lock.secure) {
-                abort();
-                return;
-            }
-
-            tries = 0;
-            errorTries = 0;
-            start();
-        }
-
-        config: "fprint"
-        configDirectory: Quickshell.shellDir + "/assets/pam.d"
-
-        onCompleted: res => {
-            if (!available)
-                return;
-
-            if (res === PamResult.Success)
-                return root.lock.unlock();
-
-            if (res === PamResult.Error) {
-                root.fprintState = "error";
-                errorTries++;
-                if (errorTries < 5) {
-                    abort();
-                    errorRetry.restart();
-                }
-            } else if (res === PamResult.MaxTries) {
-                // Isn't actually the real max tries as pam only reports completed
-                // when max tries is reached.
-                tries++;
-                if (tries < GlobalConfig.lock.maxFprintTries) {
-                    // Restart if not actually real max tries
-                    root.fprintState = "fail";
-                    start();
-                } else {
-                    root.fprintState = "max";
-                    abort();
-                }
-            }
-
-            root.flashMsg();
-            fprintStateReset.start();
-        }
-    }
-
-    PamContext {
-        id: howdy
-
-        property bool available: false
-
-        config: "howdy"
-        configDirectory: Quickshell.shellDir + "/assets/pam.d"
-
-        onCompleted: res => {
-            if (res === PamResult.Success)
-                root.lock.unlock();
-            else
-                abort();
-        }
-    }
-
-    Process {
-        id: fprintAvailProc
-
-        command: ["sh", "-c", "fprintd-list $USER"]
-        onExited: code => { // qmllint disable signal-handler-parameters
-            fprint.available = code === 0;
-            fprint.checkAvail();
-        }
-    }
-
-    Process {
-        id: howdyAvailProc
-
-        command: ["sh", "-c", "command -v howdy"]
-        onExited: code => howdy.available = code === 0 // qmllint disable signal-handler-parameters
     }
 
     Timer {
-        id: errorRetry
-
-        interval: 800
-        onTriggered: fprint.start()
-    }
-
-    Timer {
-        id: stateReset
+        id: pwdStateReset
 
         interval: 4000
         onTriggered: {
@@ -190,24 +105,34 @@ Scope {
         }
     }
 
-    Timer {
-        id: fprintStateReset
+    ManualPamContext {
+        id: fprint
 
-        interval: 4000
-        onTriggered: {
-            root.fprintState = "";
-            fprint.errorTries = 0;
-        }
+        config: "fprint"
+        availCommand: ["sh", "-c", "fprintd-list $USER"]
+        enabled: GlobalConfig.lock.enableFprint
+        maxTries: GlobalConfig.lock.maxFprintTries
+        onAvailProcExited: root.restartFprint()
+    }
+
+    ManualPamContext {
+        id: howdy
+
+        config: "howdy"
+        availCommand: ["sh", "-c", "command -v howdy"]
+        enabled: GlobalConfig.lock.enableHowdy
+        maxTries: GlobalConfig.lock.maxHowdyTries
     }
 
     Connections {
         function onSecureChanged(): void {
             if (root.lock.secure) {
-                fprintAvailProc.running = true;
-                howdyAvailProc.running = true;
+                fprint.checkAvailable();
+                howdy.checkAvailable();
+                fprint.reset();
+                howdy.reset();
                 root.buffer = "";
                 root.state = "";
-                root.fprintState = "";
                 root.lockMessage = "";
             }
         }
@@ -223,9 +148,114 @@ Scope {
 
     Connections {
         function onEnableFprintChanged(): void {
-            fprint.checkAvail();
+            root.restartFprint();
+        }
+
+        function onEnableHowdyChanged(): void {
+            if (!GlobalConfig.lock.enableHowdy && howdy.active)
+                howdy.abort();
         }
 
         target: GlobalConfig.lock
+    }
+
+    component ManualPamContext: Scope {
+        id: ctx
+
+        required property bool enabled
+        required property int maxTries
+        property alias config: pam.config
+        property alias availCommand: availProc.command
+
+        property bool available
+        property int tries
+        property int errorTries
+        property string state
+        readonly property bool canAttempt: available && enabled && root.lock.secure && tries < maxTries
+
+        readonly property alias active: pam.active
+        readonly property alias message: pam.message
+
+        signal availProcExited(code: int)
+
+        function checkAvailable(): void {
+            availProc.running = true;
+        }
+
+        function start(): void {
+            pam.start();
+        }
+
+        function abort(): void {
+            pam.abort();
+        }
+
+        function reset(): void {
+            tries = 0;
+            errorTries = 0;
+            state = "";
+        }
+
+        PamContext {
+            id: pam
+
+            configDirectory: Quickshell.shellPath("assets/pam.d")
+
+            onCompleted: res => {
+                if (!ctx.available)
+                    return;
+
+                if (res === PamResult.Success)
+                    return root.lock.unlock();
+
+                if (res === PamResult.Error) {
+                    ctx.state = "error";
+                    ctx.errorTries++;
+                    if (ctx.errorTries < 5) {
+                        abort();
+                        errorRetry.restart();
+                    }
+                } else if (res === PamResult.MaxTries || res === PamResult.Failed) {
+                    ctx.tries++;
+                    if (ctx.tries < ctx.maxTries) {
+                        ctx.state = "fail";
+                        start();
+                    } else {
+                        ctx.state = "max";
+                        abort();
+                    }
+                }
+
+                root.flashMsg();
+                stateReset.restart();
+            }
+        }
+
+        Timer {
+            id: errorRetry
+
+            interval: 800
+            onTriggered: pam.start()
+        }
+
+        Timer {
+            id: stateReset
+
+            interval: 4000
+            onTriggered: {
+                if (ctx.state !== "max")
+                    ctx.state = "";
+                ctx.errorTries = 0;
+            }
+        }
+
+        Process {
+            id: availProc
+
+            onExited: code => { // qmllint disable signal-handler-parameters
+                ctx.available = code === 0;
+                ctx.availProcExited(code);
+            }
+        }
     }
 }
