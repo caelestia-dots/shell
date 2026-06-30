@@ -72,7 +72,7 @@ Scope {
 
         onCompleted: res => {
             if (res === PamResult.Success)
-                root.lock.unlock();
+                return root.lock.unlock();
 
             if (res === PamResult.Error)
                 root.state = "error";
@@ -112,7 +112,7 @@ Scope {
                 return;
 
             if (res === PamResult.Success)
-                root.lock.unlock();
+                return root.lock.unlock();
 
             if (res === PamResult.Error) {
                 root.fprintState = "error";
