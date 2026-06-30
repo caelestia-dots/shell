@@ -236,7 +236,7 @@ Scope {
                 if (res === PamResult.Success)
                     return root.lock.unlock();
 
-                root.clearTransientState(ctx);
+                root.clearTransientState();
 
                 if (res === PamResult.Error) {
                     ctx.state = Pam.Error;
