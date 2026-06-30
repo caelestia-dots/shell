@@ -1,1 +1,3 @@
-auth required pam_howdy.so
+#%PAM-1.0
+
+auth    required    pam_howdy.so
