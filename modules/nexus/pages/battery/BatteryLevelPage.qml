@@ -72,10 +72,10 @@ PageBase {
             spacing: Tokens.spacing.large
 
             // Title
-            M3TextField {
+            StyledTextField {
                 id: warningTitleField
                 Layout.fillWidth: true 
-                label: "Warning title"
+                placeholderText: "Warning title"
                 // supportingText: "First line of text displayed during the battery toast"
                 leadingIcon: "label"
 
@@ -99,10 +99,10 @@ PageBase {
             }
 
             // Message
-            M3TextField {
+            StyledTextField {
                 id: warningMessageField
                 Layout.fillWidth: true 
-                label: "Warning message"
+                placeholderText: "Warning message"
                 leadingIcon: "text_fields"
 
                 text: root.batteryLevel?.message
