@@ -54,12 +54,13 @@ ConnectedRect {
             }
         }
 
-        CustomSpinBox {
-            min: root.from
-            max: root.to
-            step: root.stepSize
+        StyledSpinBox {
+            from: root.from
+            to: root.to
+            stepSize: root.stepSize
             value: root.value
-            onValueModified: v => root.moved(v)
+            cLayer: 2
+            onValueModified: root.moved(value)
         }
     }
 }

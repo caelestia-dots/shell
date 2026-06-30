@@ -13,7 +13,7 @@ import qs.modules.launcher.services
 StyledListView {
     id: root
 
-    required property StyledTextField search
+    required property SearchBar search
     required property DrawerVisibilities visibilities
 
     model: ScriptModel {

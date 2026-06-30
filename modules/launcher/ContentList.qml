@@ -14,7 +14,7 @@ Item {
     required property DrawerVisibilities visibilities
     required property var panels
     required property real maxHeight
-    required property StyledTextField search
+    required property SearchBar search
     required property int padding
     required property int rounding
 
