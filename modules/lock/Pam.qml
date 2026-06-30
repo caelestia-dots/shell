@@ -31,20 +31,22 @@ Scope {
     signal flashMsg
 
     function handleKey(event: KeyEvent): void {
-        if (passwd.active || state === Pam.MaxTries)
+        if (passwd.active)
             return;
 
-        if (howdy.active && event.key !== Qt.Key_Enter && event.key !== Qt.Key_Return)
+        // Trigger howdy on enter while empty buffer
+        if (howdy.canAttempt && !howdy.active && (event.key === Qt.Key_Enter || event.key === Qt.Key_Return) && buffer.length === 0)
+            return howdy.start(); // Gate on active so double enter still allows empty password
+
+        if (state === Pam.MaxTries)
+            return;
+
+        // Abort howdy on pwd input
+        if (howdy.active)
             howdy.abort();
 
         if (event.key === Qt.Key_Enter || event.key === Qt.Key_Return) {
-            if (buffer.length === 0 && howdy.canAttempt && !howdy.active) { // Double enter for empty password
-                howdy.start();
-            } else {
-                if (howdy.active)
-                    howdy.abort();
-                passwd.start();
-            }
+            passwd.start();
         } else if (event.key === Qt.Key_Backspace) {
             if (event.modifiers & Qt.ControlModifier) {
                 buffer = "";
