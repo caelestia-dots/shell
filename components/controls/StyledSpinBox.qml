@@ -65,11 +65,13 @@ DoubleSpinBox {
         bottomRightRadius: pressed ? Tokens.rounding.small : Tokens.rounding.extraSmall
 
         icon: "keyboard_arrow_down"
-        color: Colours.layer(Colours.palette.m3surfaceContainerHighest, root.cLayer)
+        disabledColour: Qt.alpha(Colours.palette.m3surfaceContainerHighest, 0.4)
+        color: disabled ? disabledColour : Colours.layer(Colours.palette.m3surfaceContainerHighest, root.cLayer)
         type: IconButton.Text
         padding: Tokens.padding.extraSmall
         isRound: true
         label.anchors.horizontalCenterOffset: pressed ? 0 : 2
+        disabled: !enabled
 
         Behavior on topRightRadius {
             Anim {
@@ -99,11 +101,13 @@ DoubleSpinBox {
         bottomLeftRadius: pressed ? Tokens.rounding.small : Tokens.rounding.extraSmall
 
         icon: "keyboard_arrow_up"
-        color: Colours.layer(Colours.palette.m3surfaceContainerHighest, root.cLayer)
+        disabledColour: Qt.alpha(Colours.palette.m3surfaceContainerHighest, 0.4)
+        color: disabled ? disabledColour : Colours.layer(Colours.palette.m3surfaceContainerHighest, root.cLayer)
         type: IconButton.Text
         padding: Tokens.padding.extraSmall
         isRound: true
         label.anchors.horizontalCenterOffset: pressed ? 0 : -2
+        disabled: !enabled
 
         Behavior on topLeftRadius {
             Anim {
