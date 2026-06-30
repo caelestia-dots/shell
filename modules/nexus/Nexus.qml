@@ -20,8 +20,8 @@ Item {
 
     signal close
 
-    implicitWidth: implicitHeight * Tokens.sizes.nexus.ratio
-    implicitHeight: nState.screen.height * Tokens.sizes.nexus.heightMult
+    implicitHeight: Math.min(nState.screen.width, nState.screen.height) * Tokens.sizes.nexus.heightMult
+    implicitWidth: Math.min(implicitHeight * Tokens.sizes.nexus.ratio, nState.screen.width * 0.90)
 
     Behavior on blobColour {
         CAnim {}
