@@ -95,7 +95,7 @@ class GeneralBattery : public ConfigObject {
                     { u"level"_s, 90 },
                     { u"title"_s, u"Did you see the previous message?"_s },
                     { u"message"_s, u"You should probably unplug the charger <b>now</b>"_s },
-                    { u"icon"_s, u"battery_android_6"_s }
+                    { u"icon"_s, u"battery_android_6"_s },
                     { u"enabled"_s, true },
             }),
             vmap({
