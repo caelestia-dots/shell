@@ -124,6 +124,7 @@ Scope {
 
         config: "fprint"
         availCommand: ["sh", "-c", "fprintd-list $USER"]
+        retryOnFail: true
         enabled: GlobalConfig.lock.enableFprint
         maxTries: GlobalConfig.lock.maxFprintTries
         onAvailProcExited: root.restartFprint()
@@ -180,6 +181,7 @@ Scope {
         required property int maxTries
         property alias config: pam.config
         property alias availCommand: availProc.command
+        property bool retryOnFail
 
         property bool available
         property int tries
@@ -235,7 +237,8 @@ Scope {
                     ctx.tries++;
                     if (ctx.tries < ctx.maxTries) {
                         ctx.state = Pam.Failed;
-                        start();
+                        if (ctx.retryOnFail)
+                            start();
                     } else {
                         ctx.state = Pam.MaxTries;
                         abort();
