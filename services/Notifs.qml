@@ -141,15 +141,15 @@ Singleton {
         }
     }
 
-    // qmllint disable unresolved-type
-    CustomShortcut {
-        // qmllint enable unresolved-type
-        name: "dnd"
-        description: "Toggle Do Not Disturb"
-        onPressed: {
-            props.dnd = !props.dnd
-        }
-    }
+	// qmllint disable unresolved-type
+	CustomShortcut {
+		// qmllint enable unresolved-type
+		name: "dnd"
+		description: "Toggle Do Not Disturb"
+		onPressed: {
+			props.dnd = !props.dnd;
+		}
+	}
 
     IpcHandler {
         function clear(): void {
