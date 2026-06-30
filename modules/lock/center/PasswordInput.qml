@@ -88,6 +88,7 @@ StyledRect {
                     }
                     color: !root.lock.pam.howdy.canAttempt && root.lock.pam.fprint.tries >= GlobalConfig.lock.maxFprintTries ? Colours.palette.m3error : Colours.palette.m3onSurfaceVariant
                     fontStyle: Tokens.font.icon.builders.medium.scale(root.centerScale).build()
+                    fill: text === "face"
                 }
             }
 
