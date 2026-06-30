@@ -23,9 +23,6 @@ TextFieldBase {
     property int radius: Tokens.rounding.small
     readonly property int clampedRadius: Math.min(horizontalPadding, Math.min(width, height) / 2, radius)
 
-    readonly property real outlineGap: placeholder.width * root.smallFontScale + root.Tokens.spacing.extraSmall * 2
-    property real outlineGapScale: activeFocus || text ? 1 : 0
-
     property string leadingIcon
     property string trailingIcon
     readonly property int leadingOffset: leadingIcon ? leadingIconLoader.width + leadingIconLoader.anchors.leftMargin : 0
@@ -77,12 +74,6 @@ TextFieldBase {
             disabled: root.activeFocus
             manualPressOverride: tapHandler.pressed
             onClicked: root.focus = true
-        }
-    }
-
-    Behavior on outlineGapScale {
-        Anim {
-            type: Anim.DefaultEffects
         }
     }
 
@@ -211,54 +202,66 @@ TextFieldBase {
             asynchronous: true
 
             ShapePath {
+                id: path
+
+                readonly property real outlineGap: placeholder.width * root.smallFontScale + root.Tokens.spacing.extraSmall * 2
+                property real outlineGapScale: root.activeFocus || root.text ? 1 : 0
+                readonly property real inset: strokeWidth / 2
+
                 strokeWidth: root.activeFocus ? 2 : 1
                 strokeColor: root.isError ? Colours.palette.m3error : (root.activeFocus ? Colours.palette.m3primary : Colours.palette.m3outline)
                 fillColor: "transparent"
                 capStyle: ShapePath.RoundCap
 
-                startX: root.horizontalPadding - root.clampedRadius + root.outlineGap * (1 - root.outlineGapScale) / 2 + root.outlineGap * root.outlineGapScale
+                startX: path.inset + root.horizontalPadding - root.clampedRadius + path.outlineGap * (1 - path.outlineGapScale) / 2 + path.outlineGap * path.outlineGapScale
 
                 PathLine {
-                    x: bg.width - root.clampedRadius
+                    x: bg.width - path.inset - root.clampedRadius
                 }
                 PathArc {
-                    x: bg.width
-                    y: root.clampedRadius
+                    x: bg.width - path.inset
+                    y: path.inset + root.clampedRadius
                     radiusX: root.clampedRadius
                     radiusY: root.clampedRadius
                 }
                 PathLine {
-                    x: bg.width
-                    y: bg.height - root.clampedRadius
+                    x: bg.width - path.inset
+                    y: bg.height - path.inset - root.clampedRadius
                 }
                 PathArc {
-                    x: bg.width - root.clampedRadius
-                    y: bg.height
+                    x: bg.width - path.inset - root.clampedRadius
+                    y: bg.height - path.inset
                     radiusX: root.clampedRadius
                     radiusY: root.clampedRadius
                 }
                 PathLine {
-                    x: root.clampedRadius
-                    y: bg.height
+                    x: path.inset + root.clampedRadius
+                    y: bg.height - path.inset
                 }
                 PathArc {
-                    x: 0
-                    y: bg.height - root.clampedRadius
+                    x: path.inset
+                    y: bg.height - path.inset - root.clampedRadius
                     radiusX: root.clampedRadius
                     radiusY: root.clampedRadius
                 }
                 PathLine {
-                    x: 0
-                    y: root.clampedRadius
+                    x: path.inset
+                    y: path.inset + root.clampedRadius
                 }
                 PathArc {
-                    x: root.clampedRadius
-                    y: 0
+                    x: path.inset + root.clampedRadius
+                    y: path.inset
                     radiusX: root.clampedRadius
                     radiusY: root.clampedRadius
                 }
                 PathLine {
-                    x: root.horizontalPadding - root.clampedRadius + root.outlineGap * (1 - root.outlineGapScale) / 2
+                    x: path.inset + root.horizontalPadding - root.clampedRadius + path.outlineGap * (1 - path.outlineGapScale) / 2
+                }
+
+                Behavior on outlineGapScale {
+                    Anim {
+                        type: Anim.DefaultEffects
+                    }
                 }
 
                 Behavior on strokeWidth {
