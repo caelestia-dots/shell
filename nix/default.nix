@@ -149,6 +149,8 @@ in
     prePatch = ''
       substituteInPlace assets/pam.d/fprint \
         --replace-fail pam_fprintd.so /run/current-system/sw/lib/security/pam_fprintd.so
+      substituteInPlace assets/pam.d/howdy \
+        --replace-fail pam_howdy.so /run/current-system/sw/lib/security/pam_howdy.so
     '';
 
     postInstall = ''
