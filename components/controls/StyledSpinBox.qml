@@ -69,7 +69,7 @@ DoubleSpinBox {
         type: IconButton.Text
         padding: Tokens.padding.extraSmall
         isRound: true
-        label.anchors.horizontalCenterOffset: 2
+        label.anchors.horizontalCenterOffset: pressed ? 0 : 2
 
         Behavior on topRightRadius {
             Anim {
@@ -78,6 +78,12 @@ DoubleSpinBox {
         }
 
         Behavior on bottomRightRadius {
+            Anim {
+                type: Anim.DefaultEffects
+            }
+        }
+
+        Behavior on label.anchors.horizontalCenterOffset {
             Anim {
                 type: Anim.DefaultEffects
             }
@@ -97,7 +103,7 @@ DoubleSpinBox {
         type: IconButton.Text
         padding: Tokens.padding.extraSmall
         isRound: true
-        label.anchors.horizontalCenterOffset: -2
+        label.anchors.horizontalCenterOffset: pressed ? 0 : -2
 
         Behavior on topLeftRadius {
             Anim {
@@ -106,6 +112,12 @@ DoubleSpinBox {
         }
 
         Behavior on bottomLeftRadius {
+            Anim {
+                type: Anim.DefaultEffects
+            }
+        }
+
+        Behavior on label.anchors.horizontalCenterOffset {
             Anim {
                 type: Anim.DefaultEffects
             }
