@@ -24,6 +24,7 @@ PageBase {
 
         ToggleRow {
             first: true
+            settingAnchor: "taskbar-persistent"
             text: qsTr("Persistent")
             subtext: qsTr("Keep the bar visible at all times")
             checked: Config.bar.persistent
@@ -31,6 +32,7 @@ PageBase {
         }
 
         ToggleRow {
+            settingAnchor: "taskbar-show-on-hover"
             text: qsTr("Show on hover")
             subtext: qsTr("Reveal the bar when the cursor reaches the screen edge")
             checked: Config.bar.showOnHover
@@ -39,6 +41,7 @@ PageBase {
 
         StepperRow {
             last: true
+            settingAnchor: "taskbar-drag-threshold"
             label: qsTr("Drag threshold")
             subtext: qsTr("Pixels dragged before the bar reveals")
             value: Config.bar.dragThreshold
@@ -56,6 +59,7 @@ PageBase {
         NavRow {
             first: true
             icon: "workspaces"
+            settingAnchor: "taskbar-workspaces"
             label: qsTr("Workspaces")
             status: qsTr("Indicators, window icons")
             onClicked: root.nState.openSubPage(5)
@@ -63,6 +67,7 @@ PageBase {
 
         NavRow {
             icon: "web_asset"
+            settingAnchor: "taskbar-active-window"
             label: qsTr("Active window")
             status: qsTr("Title display, popout")
             onClicked: root.nState.openSubPage(6)
@@ -70,6 +75,7 @@ PageBase {
 
         NavRow {
             icon: "widgets"
+            settingAnchor: "taskbar-tray"
             label: qsTr("Tray")
             status: qsTr("System tray icons")
             onClicked: root.nState.openSubPage(7)
@@ -77,6 +83,7 @@ PageBase {
 
         NavRow {
             icon: "signal_cellular_alt"
+            settingAnchor: "taskbar-status-icons"
             label: qsTr("Status icons")
             status: qsTr("Visible indicators")
             onClicked: root.nState.openSubPage(8)
@@ -85,6 +92,7 @@ PageBase {
         NavRow {
             last: true
             icon: "schedule"
+            settingAnchor: "taskbar-clock"
             label: qsTr("Clock")
             status: qsTr("Date, icon, background")
             onClicked: root.nState.openSubPage(9)
@@ -97,6 +105,7 @@ PageBase {
 
         ToggleRow {
             first: true
+            settingAnchor: "taskbar-workspaces-2"
             text: qsTr("Workspaces")
             subtext: qsTr("Scroll over the workspace indicator to switch workspaces")
             checked: Config.bar.scrollActions.workspaces
@@ -104,6 +113,7 @@ PageBase {
         }
 
         ToggleRow {
+            settingAnchor: "taskbar-volume"
             text: qsTr("Volume")
             subtext: qsTr("Scroll on the top half of the bar to adjust volume")
             checked: Config.bar.scrollActions.volume
@@ -112,6 +122,7 @@ PageBase {
 
         ToggleRow {
             last: true
+            settingAnchor: "taskbar-brightness"
             text: qsTr("Brightness")
             subtext: qsTr("Scroll on the bottom half of the bar to adjust brightness")
             checked: Config.bar.scrollActions.brightness

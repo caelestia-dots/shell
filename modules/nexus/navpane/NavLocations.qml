@@ -2,9 +2,11 @@ pragma ComponentBehavior: Bound
 
 import QtQuick
 import QtQuick.Layouts
+import Quickshell
 import Caelestia.Config
 import qs.components
 import qs.components.containers
+import qs.components.controls
 import qs.services
 import qs.modules.nexus
 
@@ -12,6 +14,41 @@ VerticalFadeFlickable {
     id: root
 
     required property NexusState nState
+
+    readonly property string search: nState.searchText
+    readonly property bool searching: search.length > 0
+    readonly property var results: {
+        if (!searching)
+            return [];
+        const all = SettingsSearcher.query(search);
+        // The ethernet section hides itself when no ethernet device is available
+        // (e.g. the cable is unplugged), so drop its settings from the results
+        // too, otherwise the search would link to a page that isn't reachable.
+        if (Nmcli.hasAvailableEthernet)
+            return all;
+        return all.filter(e => !e.anchor.startsWith("ethernet-"));
+    }
+    // Results grouped by their top-level page, so the list can show one heading
+    // per page with the matching settings joined underneath it (like the
+    // Android settings search). Each group: { page, entries: [...] }.
+    readonly property var groups: {
+        const out = [];
+        const byPage = ({});
+        for (const e of results) {
+            const key = e.pageIdx;
+            if (byPage[key] === undefined) {
+                byPage[key] = {
+                    "pageIdx": e.pageIdx,
+                    "page": e.crumbLabels[0],
+                    "icon": e.crumbIcons[0],
+                    "entries": []
+                };
+                out.push(byPage[key]);
+            }
+            byPage[key].entries.push(e);
+        }
+        return out;
+    }
 
     topMargin: Tokens.padding.large
     bottomMargin: Tokens.padding.large
@@ -31,7 +68,7 @@ VerticalFadeFlickable {
         Repeater {
             id: list
 
-            model: PageRegistry.pages
+            model: root.searching ? [] : PageRegistry.pages
 
             StyledRect {
                 id: item
@@ -40,8 +77,8 @@ VerticalFadeFlickable {
                 required property int index
 
                 readonly property bool isCurrentPage: index === root.nState.currentPageIdx
-                readonly property bool isCategoryStart: index === 0 || PageRegistry.pages[index - 1].category !== modelData.category
-                readonly property bool isCategoryEnd: index === list.model.length - 1 || PageRegistry.pages[index + 1].category !== modelData.category
+                readonly property bool isCategoryStart: index === 0 || PageRegistry.pages[index - 1]?.category !== modelData.category
+                readonly property bool isCategoryEnd: index === list.model.length - 1 || PageRegistry.pages[index + 1]?.category !== modelData.category
 
                 Layout.fillWidth: true
                 Layout.topMargin: index !== 0 && isCategoryStart ? Tokens.spacing.medium : 0
@@ -123,6 +160,213 @@ VerticalFadeFlickable {
                     }
                 }
             }
+        }
+
+        ListView {
+            id: resultList
+
+            // Grouped results: the model is one entry per top-level page, and
+            // each delegate renders that page's heading plus the matching
+            // settings joined into a single rounded card (first/last rounded,
+            // middles square, thin dividers between them), like the Android
+            // settings search. A ScriptModel diffs the groups so only changed
+            // ones animate. Scrolling is delegated to the outer flickable.
+            Layout.fillWidth: true
+            implicitHeight: contentHeight
+            interactive: false
+            cacheBuffer: 10000
+            spacing: Tokens.padding.large
+
+            // The list's implicitHeight tracks contentHeight; while items animate
+            // their position the reported height fluctuates, which left gaps in
+            // the surrounding layout on fast typing. So additions, removals and
+            // reordering are all instant - no transitions - keeping the height
+            // correct at every frame.
+            model: ScriptModel {
+                // Match groups by their page so content updates in place rather
+                // than rebuilding the delegate when ranking shifts the order.
+                objectProp: "pageIdx"
+                values: root.groups
+            }
+
+            delegate: ColumnLayout {
+                id: group
+
+                required property var modelData
+                required property int index
+
+                width: resultList.width
+                spacing: Tokens.spacing.small
+
+                // Group heading: the top-level page name, shown once.
+                RowLayout {
+                    Layout.fillWidth: true
+                    Layout.leftMargin: Tokens.padding.small
+                    spacing: Tokens.spacing.small
+
+                    MaterialIcon {
+                        text: group.modelData.icon
+                        color: Colours.palette.m3primary
+                        fontStyle: Tokens.font.icon.small
+                    }
+
+                    StyledText {
+                        Layout.fillWidth: true
+                        text: group.modelData.page
+                        color: Colours.palette.m3primary
+                        font: Tokens.font.label.large
+                        elide: Text.ElideRight
+                    }
+                }
+
+                // The matching settings, joined into one card.
+                ColumnLayout {
+                    Layout.fillWidth: true
+                    spacing: 0
+
+                    Repeater {
+                        model: group.modelData.entries
+
+                        StyledRect {
+                            id: result
+
+                            required property var modelData
+                            required property int index
+
+                            readonly property bool isFirst: index === 0
+                            readonly property bool isLast: index === group.modelData.entries.length - 1
+
+                            Layout.fillWidth: true
+                            implicitHeight: {
+                                const h = resultLayout.implicitHeight + resultLayout.anchors.margins * 2;
+                                return h % 2 === 0 ? h : h + 1;
+                            }
+                            // Joined card: round only the outer corners so the
+                            // rows read as one block (square where they meet),
+                            // matching the page tabs' corner radius.
+                            topLeftRadius: isFirst ? Tokens.rounding.extraLarge : 0
+                            topRightRadius: isFirst ? Tokens.rounding.extraLarge : 0
+                            bottomLeftRadius: isLast ? Tokens.rounding.extraLarge : 0
+                            bottomRightRadius: isLast ? Tokens.rounding.extraLarge : 0
+                            color: Colours.layer(Colours.palette.m3surfaceContainerHigh, 2)
+
+                            StyledRect {
+                                anchors.bottom: parent.bottom
+                                anchors.left: parent.left
+                                anchors.right: parent.right
+                                anchors.leftMargin: Tokens.padding.large
+                                anchors.rightMargin: Tokens.padding.large
+                                implicitHeight: 1
+                                visible: !result.isLast
+                                color: Qt.alpha(Colours.palette.m3outlineVariant, 0.5)
+                            }
+
+                            ColumnLayout {
+                                id: resultLayout
+
+                                anchors.fill: parent
+                                anchors.margins: Tokens.padding.large
+                                // Leave room on the right for the toggle switch.
+                                anchors.rightMargin: result.modelData.togglePath ? toggle.width + Tokens.padding.large * 2 : Tokens.padding.large
+                                spacing: Tokens.spacing.small / 2
+
+                                // Location line: deepest icon + "Section > sub", faint.
+                                StyledText {
+                                    Layout.fillWidth: true
+                                    text: {
+                                        const labels = result.modelData.crumbLabels.slice(1);
+                                        const section = result.modelData.section;
+                                        const parts = section && section !== labels[labels.length - 1] ? labels.concat(section) : labels;
+                                        return parts.join("  \u203a  ");
+                                    }
+                                    visible: text.length > 0
+                                    color: Colours.palette.m3onSurfaceVariant
+                                    font: Tokens.font.label.small
+                                    elide: Text.ElideRight
+                                }
+
+                                // The setting itself, most prominent.
+                                StyledText {
+                                    Layout.fillWidth: true
+                                    text: SettingsSearcher.highlight(result.modelData.title, root.search, Colours.palette.m3primary)
+                                    textFormat: Text.StyledText
+                                    color: Colours.palette.m3onSurface
+                                    font: Tokens.font.body.medium
+                                    elide: Text.ElideRight
+                                }
+
+                                // Optional description, faintest and smallest.
+                                StyledText {
+                                    Layout.fillWidth: true
+                                    visible: result.modelData.subtext.length > 0
+                                    text: SettingsSearcher.highlight(result.modelData.subtext, root.search, Colours.palette.m3primary)
+                                    textFormat: Text.StyledText
+                                    color: Colours.palette.m3outline
+                                    font: Tokens.font.label.small
+                                    elide: Text.ElideRight
+                                }
+                            }
+
+                            // Hover/click layer on top of the content so the
+                            // rich-text labels underneath can't intercept pointer
+                            // events (which made the hover flicker as the mouse
+                            // moved over them). It's transparent apart from the
+                            // hover tint, so the text still shows through.
+                            StateLayer {
+                                anchors.fill: parent
+                                z: 1
+                                radius: 0
+
+                                onClicked: {
+                                    // Ethernet detail settings need a selected interface
+                                    // to show the right device; a search deep-link has
+                                    // none, so point it at the connected (or first) one.
+                                    if (result.modelData.anchor.startsWith("ethernet-")) {
+                                        const active = Nmcli.activeEthernet ?? Nmcli.ethernetDevices[0] ?? null;
+                                        if (active)
+                                            root.nState.selectedEthernetInterface = active.iface;
+                                    }
+                                    root.nState.jumpToSetting(result.modelData.pageIdx, result.modelData.subPath, result.modelData.anchor);
+                                }
+                            }
+
+                            // For plain on/off settings, a switch on the right
+                            // flips the value straight from the results (One UI
+                            // style). It sits above the click layer (higher z) so
+                            // tapping it toggles without also opening the page;
+                            // tapping anywhere else still deep-links.
+                            StyledSwitch {
+                                id: toggle
+
+                                anchors.right: parent.right
+                                anchors.rightMargin: Tokens.padding.large
+                                anchors.verticalCenter: parent.verticalCenter
+                                z: 2
+                                visible: result.modelData.togglePath
+                                checked: result.modelData.toggleValue
+                                cLayer: 3
+                                // A touch smaller than the in-page switches since
+                                // the result rows are denser.
+                                scale: 0.85
+                                transformOrigin: Item.Right
+
+                                onToggled: result.modelData.setToggle(checked)
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        StyledText {
+            Layout.fillWidth: true
+            Layout.topMargin: Tokens.padding.large
+            visible: root.searching && root.results.length === 0
+
+            text: qsTr("No matching settings")
+            color: Colours.palette.m3onSurfaceVariant
+            font: Tokens.font.body.medium
+            horizontalAlignment: Text.AlignHCenter
         }
     }
 

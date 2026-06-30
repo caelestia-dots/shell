@@ -18,18 +18,21 @@ PageBase {
 
         ToggleRow {
             first: true
+            settingAnchor: "bar-aw-compact"
             text: qsTr("Compact")
             checked: Config.bar.activeWindow.compact
             onToggled: GlobalConfig.bar.activeWindow.compact = checked
         }
 
         ToggleRow {
+            settingAnchor: "bar-aw-inverted"
             text: qsTr("Inverted")
             checked: Config.bar.activeWindow.inverted
             onToggled: GlobalConfig.bar.activeWindow.inverted = checked
         }
 
         ToggleRow {
+            settingAnchor: "bar-aw-show-on-hover"
             text: qsTr("Show on hover")
             subtext: qsTr("Only show the active window title while hovering")
             checked: Config.bar.activeWindow.showOnHover
@@ -38,6 +41,7 @@ PageBase {
 
         ToggleRow {
             last: true
+            settingAnchor: "bar-aw-popout-on-hover"
             text: qsTr("Popout on hover")
             subtext: qsTr("Show a window details popout when hovering")
             checked: Config.bar.popouts.activeWindow

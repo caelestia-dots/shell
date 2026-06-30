@@ -18,12 +18,14 @@ PageBase {
 
         ToggleRow {
             first: true
+            settingAnchor: "bar-clock-background"
             text: qsTr("Background")
             checked: Config.bar.clock.background
             onToggled: GlobalConfig.bar.clock.background = checked
         }
 
         ToggleRow {
+            settingAnchor: "bar-clock-show-date"
             text: qsTr("Show date")
             checked: Config.bar.clock.showDate
             onToggled: GlobalConfig.bar.clock.showDate = checked
@@ -31,6 +33,7 @@ PageBase {
 
         ToggleRow {
             last: true
+            settingAnchor: "bar-clock-show-icon"
             text: qsTr("Show icon")
             checked: Config.bar.clock.showIcon
             onToggled: GlobalConfig.bar.clock.showIcon = checked

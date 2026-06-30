@@ -18,18 +18,21 @@ PageBase {
 
         ToggleRow {
             first: true
+            settingAnchor: "bar-tray-background"
             text: qsTr("Background")
             checked: Config.bar.tray.background
             onToggled: GlobalConfig.bar.tray.background = checked
         }
 
         ToggleRow {
+            settingAnchor: "bar-tray-recolour-icons"
             text: qsTr("Recolour icons")
             checked: Config.bar.tray.recolour
             onToggled: GlobalConfig.bar.tray.recolour = checked
         }
 
         ToggleRow {
+            settingAnchor: "bar-tray-compact"
             text: qsTr("Compact")
             checked: Config.bar.tray.compact
             onToggled: GlobalConfig.bar.tray.compact = checked
@@ -37,6 +40,7 @@ PageBase {
 
         ToggleRow {
             last: true
+            settingAnchor: "bar-tray-popout-on-hover"
             text: qsTr("Popout on hover")
             subtext: qsTr("Show the tray menu popout when hovering")
             checked: Config.bar.popouts.tray

@@ -1,3 +1,8 @@
+# The settings index is generated into the build dir; map it to a stable resource
+# path (qrc:/qt/qml/Caelestia/settings-index.json) regardless of its source path.
+set_source_files_properties("${SETTINGS_INDEX_JSON}" PROPERTIES
+    QT_RESOURCE_ALIAS "settings-index.json")
+
 qml_module(caelestia-core
     URI Caelestia
     SOURCES
@@ -7,6 +12,8 @@ qml_module(caelestia-core
         requests.cpp
         toaster.cpp
         imageanalyser.cpp
+    RESOURCES
+        "${SETTINGS_INDEX_JSON}"
     LIBRARIES
         Qt::Gui
         Qt::Quick
