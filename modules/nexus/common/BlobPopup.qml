@@ -63,10 +63,8 @@ Item {
 
         anchors.right: parent.right
         anchors.top: parent.top
-
         implicitWidth: parent.width
         implicitHeight: parent.height
-
         group: blobGroup
         radius: Tokens.rounding.large
         deformScale: 0.00001
@@ -119,7 +117,6 @@ Item {
             id: icon
 
             anchors.centerIn: parent
-            text: "view_apps"
             color: Colours.palette.m3onSurfaceVariant
             fontStyle: Tokens.font.icon.medium
         }
