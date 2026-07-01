@@ -35,7 +35,7 @@ Item {
             Layout.fillWidth: true
             Layout.fillHeight: true
 
-            spacing: Tokens.spacing.largeIncreased
+            spacing: Tokens.spacing.large
 
             Fetch {
                 Layout.fillWidth: true
@@ -61,7 +61,7 @@ Item {
             Layout.fillWidth: true
             Layout.fillHeight: true
 
-            spacing: Tokens.spacing.largeIncreased
+            spacing: Tokens.spacing.large
 
             Media {
                 Layout.fillWidth: true
