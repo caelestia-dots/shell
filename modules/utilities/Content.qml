@@ -36,6 +36,8 @@ Item {
             z: 1
         }
 
+        Displays {}
+
         Toggles {
             id: toggles
 
