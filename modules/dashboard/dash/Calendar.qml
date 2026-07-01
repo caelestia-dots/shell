@@ -253,14 +253,6 @@ CustomMouseArea {
                     sourceColor: Colours.palette.m3onSurface
                     colorizationColor: Colours.palette.m3onPrimary
                 }
-
-                Behavior on x {
-                    Anim {}
-                }
-
-                Behavior on y {
-                    Anim {}
-                }
             }
         }
     }
