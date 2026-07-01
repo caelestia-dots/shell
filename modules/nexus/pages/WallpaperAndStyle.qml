@@ -2,14 +2,14 @@ pragma ComponentBehavior: Bound
 
 import QtQuick
 import QtQuick.Layouts
-import QtQuick.Controls
-import Quickshell
 import Quickshell.Io
+import Caelestia
 import Caelestia.Components
 import Caelestia.Config
 import qs.components
-import qs.components.controls
+import qs.components.containers
 import qs.components.images
+import qs.components.controls
 import qs.services
 import qs.modules.nexus.common
 
@@ -43,21 +43,14 @@ PageBase {
             persistProc.pendingRun = true;
     }
 
-    function applyCursor(name, size, isScroll = false) {
+    function applyCursor(name, size) {
         const safe = sanitizeCursor(name);
         if (safe.length === 0)
             return;
 
         root.currentCursorTheme = safe;
         root.currentCursorSize = size;
-
-        if (isScroll) {
-            applyDebounceTimer.themeName = safe;
-            applyDebounceTimer.size = size;
-            applyDebounceTimer.restart();
-        } else {
-            applyVisual(safe, size);
-        }
+        applyVisual(safe, size);
     }
 
     title: qsTr("Wallpaper & style")
@@ -117,18 +110,6 @@ PageBase {
                     root.cursorLoaded = true;
             }
         },
-        Timer {
-            id: applyDebounceTimer
-
-            property string themeName: ""
-            property int size: 24
-
-            interval: 300
-
-            onTriggered: {
-                root.applyVisual(themeName, size);
-            }
-        },
         Process {
             id: visualProc
 
@@ -169,18 +150,6 @@ PageBase {
                     pendingRun = false;
                     running = true;
                 }
-            }
-        },
-        Variants {
-            id: themeVariants
-
-            model: root.themeNames
-
-            delegate: MenuItem {
-                required property string modelData
-
-                text: modelData
-                icon: modelData === root.currentCursorTheme ? "check" : ""
             }
         }
     ]
@@ -362,92 +331,209 @@ PageBase {
             onToggled: Colours.setMode(checked ? "dark" : "light")
         }
 
-        SelectRow {
-            id: cursorThemeSelect
-
-            Layout.fillWidth: true
-            Layout.topMargin: Tokens.spacing.large - parent.spacing
+        CursorThemeRow {
             first: true
+            icon: "mouse"
+            popupIcon: "palette"
             label: qsTr("Cursor theme")
-            menuItems: themeVariants.instances
-            active: menuItems.find(i => i.text === root.currentCursorTheme) ?? null
-
-            onSelected: item => root.applyCursor(item.text, root.currentCursorSize, false)
+            status: root.cursorLoaded ? root.currentCursorTheme : qsTr("Loading…")
         }
 
-        Item {
-            Layout.fillWidth: true
+        CursorSizeRow {
             Layout.topMargin: Tokens.spacing.extraSmall / 2 - parent.spacing
-            implicitHeight: sliderRowComponent.implicitHeight
+            last: true
+            icon: "mouse"
+            popupIcon: "straighten"
+            label: qsTr("Cursor size")
+            status: root.cursorLoaded ? root.currentCursorSize + " px" : qsTr("Loading…")
+        }
+    }
 
-            SliderRow {
-                id: sliderRowComponent
+    component CursorThemeRow: PopupRow {
+        id: cursorRow
 
-                anchors.fill: parent
-                last: true
-                icon: "mouse"
-                label: qsTr("Size")
-                value: {
-                    if (!root.cursorLoaded)
-                        return 0;
-                    var idx = root.cursorSizes.indexOf(root.currentCursorSize);
-                    if (idx < 0)
-                        return 0;
-                    return idx / (root.cursorSizes.length - 1);
-                }
-                valueLabel: {
-                    if (!root.cursorLoaded)
-                        return qsTr("Loading…");
-                    var idx = Math.round(value * (root.cursorSizes.length - 1));
-                    if (idx >= 0 && idx < root.cursorSizes.length)
-                        return String(root.cursorSizes[idx]) + " px";
-                    return String(root.currentCursorSize) + " px";
-                }
+        readonly property int popupHeight: root.flickable.height - y + root.flickable.contentY - Tokens.padding.large - Tokens.padding.extraExtraLarge
 
-                onMoved: v => {
-                    var idx = Math.round(v * (root.cursorSizes.length - 1));
-                    if (idx >= 0 && idx < root.cursorSizes.length) {
-                        var newSize = root.cursorSizes[idx];
-                        root.applyCursor(root.currentCursorTheme, newSize, true);
-                    }
-                }
+        keepPopupAsChild: {
+            if (root.nState.animatingContainer || root.opacity < 1)
+                return true;
+
+            let p = root.parent;
+            while (p && p.objectName !== "PageContainer")
+                p = p.parent;
+            return p?.opacity < 1;
+        }
+        popup.topMovement: Math.max(Tokens.sizes.nexus.minPopupHeight - popupHeight, Tokens.padding.large)
+
+        content: Loader {
+            id: themeLoader
+
+            active: cursorRow.popup.animDriver > 0
+
+            onLoaded: {
+                Qt.callLater(() => {
+                    const view = item as VerticalFadeListView;
+                    if (view)
+                        view.positionViewAtIndex(root.themeNames.indexOf(root.currentCursorTheme), ListView.Center);
+                });
             }
 
-            MouseArea {
-                anchors.fill: parent
-                propagateComposedEvents: true
+            sourceComponent: VerticalFadeListView {
+                implicitWidth: Tokens.sizes.nexus.popupWidth
+                implicitHeight: CUtils.clamp(cursorRow.popupHeight, Tokens.sizes.nexus.minPopupHeight, Tokens.sizes.nexus.maxPopupHeight)
 
-                onPressed: mouse => {
-                    mouse.accepted = false;
-                }
+                model: root.themeNames
 
-                onPositionChanged: mouse => {
-                    mouse.accepted = false;
-                }
+                delegate: StateLayer {
+                    id: themeItem
 
-                onReleased: mouse => {
-                    mouse.accepted = false;
-                }
+                    required property string modelData
+                    required property int index
 
-                onWheel: wheel => {
-                    wheel.accepted = true;
+                    anchors.fill: undefined
+                    anchors.left: parent?.left
+                    anchors.right: parent?.right
+                    implicitHeight: itemLayout.implicitHeight + itemLayout.anchors.margins * 2
+                    radius: Tokens.rounding.small
 
-                    if (!root.cursorLoaded)
-                        return;
+                    onClicked: {
+                        cursorRow.popup.open = false;
+                        root.applyCursor(modelData, root.currentCursorSize);
+                    }
 
-                    let step = wheel.angleDelta.y > 0 ? 1 : -1;
-                    let currentIndex = root.cursorSizes.indexOf(root.currentCursorSize);
+                    RowLayout {
+                        id: itemLayout
 
-                    if (currentIndex < 0)
-                        currentIndex = 2;
+                        anchors.fill: parent
+                        anchors.margins: Tokens.padding.medium
+                        spacing: Tokens.spacing.medium
 
-                    let newIndex = Math.max(0, Math.min(root.cursorSizes.length - 1, currentIndex + step));
+                        StyledText {
+                            Layout.fillWidth: true
+                            text: themeItem.modelData
+                            font: Tokens.font.body.small
+                            color: themeItem.modelData === root.currentCursorTheme ? Colours.palette.m3primary : Colours.palette.m3onSurface
+                            elide: Text.ElideRight
+                        }
 
-                    if (newIndex !== currentIndex) {
-                        root.applyCursor(root.currentCursorTheme, root.cursorSizes[newIndex], true);
+                        MaterialIcon {
+                            visible: themeItem.modelData === root.currentCursorTheme
+                            text: "check"
+                            color: Colours.palette.m3primary
+                            fontStyle: Tokens.font.icon.small
+                        }
                     }
                 }
             }
         }
+
+        data: [
+            Connections {
+                function onOpenChanged() {
+                    if (cursorRow.popup.open)
+                        Qt.callLater(() => {
+                            const view = themeLoader.item as VerticalFadeListView;
+                            if (view)
+                                view.positionViewAtIndex(root.themeNames.indexOf(root.currentCursorTheme), ListView.Center);
+                        });
+                }
+
+                target: cursorRow.popup
+            }
+        ]
+    }
+
+    component CursorSizeRow: PopupRow {
+        id: cursorSizeRow
+
+        readonly property int popupHeight: root.flickable.height - y + root.flickable.contentY - Tokens.padding.large - Tokens.padding.extraExtraLarge
+
+        keepPopupAsChild: {
+            if (root.nState.animatingContainer || root.opacity < 1)
+                return true;
+
+            let p = root.parent;
+            while (p && p.objectName !== "PageContainer")
+                p = p.parent;
+            return p?.opacity < 1;
+        }
+        popup.topMovement: Math.max(Tokens.sizes.nexus.minPopupHeight - popupHeight, Tokens.padding.large)
+
+        content: Loader {
+            id: sizeLoader
+
+            active: cursorSizeRow.popup.animDriver > 0
+
+            onLoaded: {
+                Qt.callLater(() => {
+                    const view = item as VerticalFadeListView;
+                    if (view)
+                        view.positionViewAtIndex(root.cursorSizes.indexOf(root.currentCursorSize), ListView.Center);
+                });
+            }
+
+            sourceComponent: VerticalFadeListView {
+                implicitWidth: Tokens.sizes.nexus.popupWidth
+                implicitHeight: CUtils.clamp(cursorSizeRow.popupHeight, Tokens.sizes.nexus.minPopupHeight, Tokens.sizes.nexus.maxPopupHeight)
+
+                model: root.cursorSizes
+
+                delegate: StateLayer {
+                    id: sizeItem
+
+                    required property int modelData
+                    required property int index
+
+                    anchors.fill: undefined
+                    anchors.left: parent?.left
+                    anchors.right: parent?.right
+                    implicitHeight: sizeLayout.implicitHeight + sizeLayout.anchors.margins * 2
+                    radius: Tokens.rounding.small
+
+                    onClicked: {
+                        cursorSizeRow.popup.open = false;
+                        root.applyCursor(root.currentCursorTheme, modelData);
+                    }
+
+                    RowLayout {
+                        id: sizeLayout
+
+                        anchors.fill: parent
+                        anchors.margins: Tokens.padding.medium
+                        spacing: Tokens.spacing.medium
+
+                        StyledText {
+                            Layout.fillWidth: true
+                            text: sizeItem.modelData + " px"
+                            font: Tokens.font.body.small
+                            color: sizeItem.modelData === root.currentCursorSize ? Colours.palette.m3primary : Colours.palette.m3onSurface
+                            elide: Text.ElideRight
+                        }
+
+                        MaterialIcon {
+                            visible: sizeItem.modelData === root.currentCursorSize
+                            text: "check"
+                            color: Colours.palette.m3primary
+                            fontStyle: Tokens.font.icon.small
+                        }
+                    }
+                }
+            }
+        }
+
+        data: [
+            Connections {
+                function onOpenChanged() {
+                    if (cursorSizeRow.popup.open)
+                        Qt.callLater(() => {
+                            const view = sizeLoader.item as VerticalFadeListView;
+                            if (view)
+                                view.positionViewAtIndex(root.cursorSizes.indexOf(root.currentCursorSize), ListView.Center);
+                        });
+                }
+
+                target: cursorSizeRow.popup
+            }
+        ]
     }
 }
