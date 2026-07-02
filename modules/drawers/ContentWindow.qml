@@ -302,9 +302,31 @@ StyledWindow {
             popouts: panels.popouts
 
             fullscreen: root.hasFullscreen
-
-            Component.onCompleted: ShellState.bars.set(root.screen, this)
         }
+    }
+
+    ShellState.ComponentRef {
+        screen: root.screen
+        slot: "rootWindow"
+        component: root
+    }
+
+    ShellState.ComponentRef {
+        screen: root.screen
+        slot: "interactionWrapper"
+        component: interactions
+    }
+
+    ShellState.ComponentRef {
+        screen: root.screen
+        slot: "bar"
+        component: bar
+    }
+
+    ShellState.ComponentRef {
+        screen: root.screen
+        slot: "panels"
+        component: panels
     }
 
     component PanelBg: BlobRect {
