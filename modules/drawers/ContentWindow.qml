@@ -19,6 +19,8 @@ StyledWindow {
     readonly property alias bar: bar
     readonly property alias interactionWrapper: interactions
 
+    readonly property ScreenState screenState: ShellState.forScreen(screen)
+
     readonly property HyprlandMonitor monitor: Hypr.monitorFor(screen)
     readonly property bool hasSpecialWorkspace: (monitor?.lastIpcObject.specialWorkspace?.name.length ?? 0) > 0
     readonly property bool hasFullscreenOnNormalWs: monitor?.activeWorkspace?.toplevels.values.some(t => t.lastIpcObject.fullscreen > 1) ?? false
@@ -110,13 +112,23 @@ StyledWindow {
     HyprlandFocusGrab {
         id: focusGrab
 
-        active: (screenState.launcher && root.contentItem.Config.launcher.enabled) || (screenState.session && root.contentItem.Config.session.enabled) || (screenState.sidebar && root.contentItem.Config.sidebar.enabled) || (!root.contentItem.Config.dashboard.showOnHover && screenState.dashboard && root.contentItem.Config.dashboard.enabled) || (panels.popouts.currentName.startsWith("traymenu") && (panels.popouts.current as StackView)?.depth > 1)
+        active: {
+            const s = root.screenState;
+            const conf = root.contentItem.Config;
+            if ((s.launcher && conf.launcher.enabled) || (s.session && conf.session.enabled) || (s.sidebar && conf.sidebar.enabled))
+                return true;
+            if (!conf.dashboard.showOnHover && s.dashboard && conf.dashboard.enabled)
+                return true;
+            if (panels.popouts.currentName.startsWith("traymenu") && (panels.popouts.current as StackView)?.depth > 1)
+                return true;
+            return false;
+        }
         windows: [root]
         onCleared: {
-            screenState.launcher = false;
-            screenState.session = false;
-            screenState.sidebar = false;
-            screenState.dashboard = false;
+            root.screenState.launcher = false;
+            root.screenState.session = false;
+            root.screenState.sidebar = false;
+            root.screenState.dashboard = false;
             panels.popouts.hasCurrent = false;
             bar.closeTray();
         }
@@ -124,7 +136,7 @@ StyledWindow {
 
     StyledRect {
         anchors.fill: parent
-        opacity: (screenState.session && Config.session.enabled) || panels.popouts.detachedMode !== "" ? 0.5 : 0
+        opacity: (root.screenState.session && Config.session.enabled) || panels.popouts.detachedMode !== "" ? 0.5 : 0
         color: Colours.palette.m3scrim
 
         Behavior on opacity {
@@ -236,19 +248,12 @@ StyledWindow {
         }
     }
 
-    ScreenState {
-        id: screenState
-
-        reloadableId: `screenState-${root.screen.name}`
-        Component.onCompleted: ShellState.register(root.screen, this)
-    }
-
     Interactions {
         id: interactions
 
         screen: root.screen
         popouts: panels.popouts
-        screenState: screenState
+        screenState: root.screenState
         panels: panels
         bar: bar
         borderThickness: root.borderLayoutThickness
@@ -258,7 +263,7 @@ StyledWindow {
             id: panels
 
             screen: root.screen
-            screenState: screenState
+            screenState: root.screenState
             bar: bar
             borderThickness: root.borderThickness
 
@@ -298,7 +303,7 @@ StyledWindow {
             anchors.bottom: parent.bottom
 
             screen: root.screen
-            screenState: screenState
+            screenState: root.screenState
             popouts: panels.popouts
 
             fullscreen: root.hasFullscreen

@@ -6,22 +6,23 @@ import qs.components
 import qs.services
 
 Singleton {
-    property var states: new Map()
-
     function anySidebarOpen(): bool {
-        return [...states.values()].some(s => s.sidebar);
-    }
-
-    function register(screen: ShellScreen, state: ScreenState): void {
-        states.set(Hypr.monitorFor(screen), state);
+        return states.instances.some(s => s.sidebar);
     }
 
     function forScreen(screen: ShellScreen): ScreenState {
-        return states.get(Hypr.monitorFor(screen));
+        for (const s of states.instances)
+            if (s.modelData === screen)
+                return s;
+        return null;
     }
 
     function forActive(): ScreenState {
-        return states.get(Hypr.focusedMonitor);
+        const mon = Hypr.focusedMonitor;
+        for (const s of states.instances)
+            if (Hypr.monitorFor(s.modelData) === mon)
+                return s;
+        return null;
     }
 
     function componentsFor(screen: ShellScreen): Components {
@@ -37,6 +38,14 @@ Singleton {
             if (Hypr.monitorFor(c.modelData) === mon)
                 return c;
         return null;
+    }
+
+    Variants {
+        id: states
+
+        model: Screens.screens
+
+        ScreenState {}
     }
 
     Variants {

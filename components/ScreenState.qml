@@ -1,6 +1,8 @@
 import Quickshell
 
 PersistentProperties {
+    required property ShellScreen modelData
+
     // Drawer visibilities
     property bool bar
     property bool osd
