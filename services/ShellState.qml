@@ -2,6 +2,7 @@ pragma Singleton
 
 import QtQuick
 import Quickshell
+import Caelestia
 import qs.components
 import qs.services
 
@@ -66,6 +67,18 @@ Singleton {
         property var interactionWrapper
         property var bar
         property var panels
+
+        function find(name: string): var {
+            return CUtils.findChild(rootWindow?.contentItem, name);
+        }
+
+        function findAll(name: string): var {
+            return CUtils.findChildren(rootWindow?.contentItem, name);
+        }
+
+        function findMatching(pattern: string): var {
+            return CUtils.findChildrenMatching(rootWindow?.contentItem, pattern);
+        }
     }
 
     component ComponentRef: QtObject {

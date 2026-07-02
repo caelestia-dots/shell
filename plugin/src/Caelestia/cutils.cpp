@@ -8,6 +8,7 @@
 #include <qfuturewatcher.h>
 #include <qloggingcategory.h>
 #include <qqmlengine.h>
+#include <qregularexpression.h>
 
 Q_LOGGING_CATEGORY(lcCUtils, "caelestia.cutils", QtInfoMsg)
 
@@ -140,6 +141,19 @@ QString CUtils::toLocalFile(const QUrl& url) {
 
 qreal CUtils::clamp(qreal value, qreal min, qreal max) {
     return qBound(min, value, max);
+}
+
+QQuickItem* CUtils::findChild(QQuickItem* root, const QString& name) {
+    return root ? root->findChild<QQuickItem*>(name, Qt::FindChildrenRecursively) : nullptr;
+}
+
+QList<QQuickItem*> CUtils::findChildren(QQuickItem* root, const QString& name) {
+    return root ? root->findChildren<QQuickItem*>(name, Qt::FindChildrenRecursively) : QList<QQuickItem*>();
+}
+
+QList<QQuickItem*> CUtils::findChildrenMatching(QQuickItem* root, const QString& pattern) {
+    return root ? root->findChildren<QQuickItem*>(QRegularExpression(pattern), Qt::FindChildrenRecursively)
+                : QList<QQuickItem*>();
 }
 
 #ifndef CAELESTIA_VERSION
