@@ -8,7 +8,7 @@ Item {
     id: root
 
     required property Props props
-    required property DrawerVisibilities visibilities
+    required property ScreenState screenState
 
     ColumnLayout {
         id: layout
@@ -25,7 +25,7 @@ Item {
 
             NotifDock {
                 props: root.props
-                visibilities: root.visibilities
+                screenState: root.screenState
             }
         }
 

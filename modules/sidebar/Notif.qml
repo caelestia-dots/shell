@@ -12,7 +12,7 @@ StyledRect {
     required property NotifData modelData
     required property Props props
     required property bool expanded
-    required property DrawerVisibilities visibilities
+    required property ScreenState screenState
 
     readonly property StyledText body: (expandedContent.item as ExpandedBody)?.body ?? null
     readonly property real nonAnimHeight: expanded ? summary.implicitHeight + expandedContent.implicitHeight + expandedContent.anchors.topMargin + Tokens.padding.medium * 2 : summaryHeightMetrics.height
@@ -141,7 +141,7 @@ StyledRect {
 
             onLinkActivated: link => {
                 Qt.openUrlExternally(link);
-                root.visibilities.sidebar = false;
+                root.screenState.sidebar = false;
             }
         }
 

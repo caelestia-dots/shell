@@ -14,7 +14,7 @@ ColumnLayout {
     id: root
 
     required property ShellScreen screen
-    required property DrawerVisibilities visibilities
+    required property ScreenState screenState
     required property BarPopouts.Wrapper popouts
     required property bool fullscreen
     readonly property int vPadding: Tokens.padding.large
@@ -169,7 +169,7 @@ ColumnLayout {
                 roleValue: "power"
                 delegate: WrappedLoader {
                     sourceComponent: Power {
-                        visibilities: root.visibilities
+                        screenState: root.screenState
                     }
                 }
             }

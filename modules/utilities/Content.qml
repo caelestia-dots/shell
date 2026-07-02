@@ -9,7 +9,7 @@ Item {
     id: root
 
     required property var props
-    required property DrawerVisibilities visibilities
+    required property ScreenState screenState
     required property BarPopouts.Wrapper popouts
     required property matrix4x4 deformMatrix
 
@@ -32,14 +32,14 @@ Item {
             id: record
 
             props: root.props
-            visibilities: root.visibilities
+            screenState: root.screenState
             z: 1
         }
 
         Toggles {
             id: toggles
 
-            visibilities: root.visibilities
+            screenState: root.screenState
             popouts: root.popouts
         }
     }

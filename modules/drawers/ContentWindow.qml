@@ -57,16 +57,16 @@ StyledWindow {
     }
 
     onHasFullscreenChanged: {
-        visibilities.launcher = false;
-        visibilities.session = false;
-        visibilities.dashboard = false;
+        screenState.launcher = false;
+        screenState.session = false;
+        screenState.dashboard = false;
         panels.popouts.close();
     }
 
     name: "drawers"
     WlrLayershell.exclusionMode: ExclusionMode.Ignore
     WlrLayershell.layer: (fsTransitionProg > 0 && contentItem.Config.general.showOverFullscreen) || (hasSpecialWorkspace && hasFullscreenOnNormalWs) ? WlrLayer.Overlay : WlrLayer.Top
-    WlrLayershell.keyboardFocus: visibilities.launcher || visibilities.session ? WlrKeyboardFocus.OnDemand : WlrKeyboardFocus.None
+    WlrLayershell.keyboardFocus: screenState.launcher || screenState.session ? WlrKeyboardFocus.OnDemand : WlrKeyboardFocus.None
 
     mask: hasFullscreen ? emptyRegion : regions
 
@@ -110,13 +110,13 @@ StyledWindow {
     HyprlandFocusGrab {
         id: focusGrab
 
-        active: (visibilities.launcher && root.contentItem.Config.launcher.enabled) || (visibilities.session && root.contentItem.Config.session.enabled) || (visibilities.sidebar && root.contentItem.Config.sidebar.enabled) || (!root.contentItem.Config.dashboard.showOnHover && visibilities.dashboard && root.contentItem.Config.dashboard.enabled) || (panels.popouts.currentName.startsWith("traymenu") && (panels.popouts.current as StackView)?.depth > 1)
+        active: (screenState.launcher && root.contentItem.Config.launcher.enabled) || (screenState.session && root.contentItem.Config.session.enabled) || (screenState.sidebar && root.contentItem.Config.sidebar.enabled) || (!root.contentItem.Config.dashboard.showOnHover && screenState.dashboard && root.contentItem.Config.dashboard.enabled) || (panels.popouts.currentName.startsWith("traymenu") && (panels.popouts.current as StackView)?.depth > 1)
         windows: [root]
         onCleared: {
-            visibilities.launcher = false;
-            visibilities.session = false;
-            visibilities.sidebar = false;
-            visibilities.dashboard = false;
+            screenState.launcher = false;
+            screenState.session = false;
+            screenState.sidebar = false;
+            screenState.dashboard = false;
             panels.popouts.hasCurrent = false;
             bar.closeTray();
         }
@@ -124,7 +124,7 @@ StyledWindow {
 
     StyledRect {
         anchors.fill: parent
-        opacity: (visibilities.session && Config.session.enabled) || panels.popouts.detachedMode !== "" ? 0.5 : 0
+        opacity: (screenState.session && Config.session.enabled) || panels.popouts.detachedMode !== "" ? 0.5 : 0
         color: Colours.palette.m3scrim
 
         Behavior on opacity {
@@ -236,10 +236,11 @@ StyledWindow {
         }
     }
 
-    DrawerVisibilities {
-        id: visibilities
+    ScreenState {
+        id: screenState
 
-        Component.onCompleted: Visibilities.load(root.screen, this)
+        reloadableId: `screenState-${root.screen.name}`
+        Component.onCompleted: ShellState.register(root.screen, this)
     }
 
     Interactions {
@@ -247,7 +248,7 @@ StyledWindow {
 
         screen: root.screen
         popouts: panels.popouts
-        visibilities: visibilities
+        screenState: screenState
         panels: panels
         bar: bar
         borderThickness: root.borderLayoutThickness
@@ -257,7 +258,7 @@ StyledWindow {
             id: panels
 
             screen: root.screen
-            visibilities: visibilities
+            screenState: screenState
             bar: bar
             borderThickness: root.borderThickness
 
@@ -297,12 +298,12 @@ StyledWindow {
             anchors.bottom: parent.bottom
 
             screen: root.screen
-            visibilities: visibilities
+            screenState: screenState
             popouts: panels.popouts
 
             fullscreen: root.hasFullscreen
 
-            Component.onCompleted: Visibilities.bars.set(root.screen, this)
+            Component.onCompleted: ShellState.bars.set(root.screen, this)
         }
     }
 
