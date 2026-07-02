@@ -59,6 +59,7 @@ Singleton {
     component Components: QtObject {
         required property ShellScreen modelData
 
+        property var background
         property var rootWindow
         property var interactionWrapper
         property var bar
