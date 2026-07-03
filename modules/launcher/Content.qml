@@ -47,6 +47,8 @@ Item {
     SearchBar {
         id: search
 
+        objectName: "launcher-search"
+
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.bottom: parent.bottom

@@ -82,6 +82,8 @@ Item {
         anchors.fill: parent
 
         sourceComponent: AppList {
+            objectName: "launcher-app-list"
+
             search: root.search
             screenState: root.screenState
         }
@@ -98,6 +100,8 @@ Item {
         anchors.horizontalCenter: parent.horizontalCenter
 
         sourceComponent: WallpaperList {
+            objectName: "launcher-wallpaper-list"
+
             search: root.search
             screenState: root.screenState
             panels: root.panels

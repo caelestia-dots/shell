@@ -121,13 +121,17 @@ ColumnLayout {
             DelegateChoice {
                 roleValue: "logo"
                 delegate: WrappedLoader {
-                    sourceComponent: OsIcon {}
+                    sourceComponent: OsIcon {
+                        objectName: "taskbar-logo"
+                    }
                 }
             }
             DelegateChoice {
                 roleValue: "workspaces"
                 delegate: WrappedLoader {
                     sourceComponent: Workspaces {
+                        objectName: "taskbar-workspaces"
+
                         screen: root.screen
                         fullscreen: root.fullscreen
                     }
@@ -139,6 +143,8 @@ ColumnLayout {
                     Layout.fillWidth: true
                     visible: !root.fullscreen
                     sourceComponent: ActiveWindow {
+                        objectName: "taskbar-active-window"
+
                         bar: root
                         monitor: Brightness.getMonitorForScreen(root.screen)
                     }
@@ -148,27 +154,35 @@ ColumnLayout {
                 roleValue: "tray"
                 delegate: WrappedLoader {
                     visible: !root.fullscreen
-                    sourceComponent: Tray {}
+                    sourceComponent: Tray {
+                        objectName: "taskbar-tray"
+                    }
                 }
             }
             DelegateChoice {
                 roleValue: "clock"
                 delegate: WrappedLoader {
                     visible: !root.fullscreen
-                    sourceComponent: Clock {}
+                    sourceComponent: Clock {
+                        objectName: "taskbar-clock"
+                    }
                 }
             }
             DelegateChoice {
                 roleValue: "statusIcons"
                 delegate: WrappedLoader {
                     visible: !root.fullscreen
-                    sourceComponent: StatusIcons {}
+                    sourceComponent: StatusIcons {
+                        objectName: "taskbar-status-icons"
+                    }
                 }
             }
             DelegateChoice {
                 roleValue: "power"
                 delegate: WrappedLoader {
                     sourceComponent: Power {
+                        objectName: "taskbar-power-button"
+
                         screenState: root.screenState
                     }
                 }
