@@ -24,15 +24,14 @@ ColumnLayout {
             return;
 
         for (let i = 0; i < repeater.count; i++) {
-            const loader = repeater.itemAt(i) as WrappedLoader;
-            if (loader?.enabled && loader.entryId === "tray") {
-                (loader.item as Tray).expanded = false;
-            }
+            const tray = (repeater.itemAt(i) as EntryWrapper).item as Tray;
+            if (tray)
+                tray.expanded = false;
         }
     }
 
     function checkPopout(y: real): void {
-        const ch = childAt(width / 2, y) as WrappedLoader;
+        const ch = childAt(width / 2, y) as EntryWrapper;
 
         if (ch?.entryId !== "tray")
             closeTray();
@@ -77,7 +76,7 @@ ColumnLayout {
     }
 
     function handleWheel(y: real, angleDelta: point): void {
-        const ch = childAt(width / 2, y) as WrappedLoader;
+        const ch = childAt(width / 2, y) as EntryWrapper;
         if (ch?.entryId === "workspaces" && Config.bar.scrollActions.workspaces) {
             // Workspace scroll
             const mon = (GlobalConfig.bar.workspaces.perMonitorWorkspaces ? Hypr.monitorFor(screen) : Hypr.focusedMonitor);
@@ -107,31 +106,32 @@ ColumnLayout {
     Repeater {
         id: repeater
 
-        model: Config.bar.entries
+        model: ScriptModel {
+            values: root.Config.bar.entries.filter(e => e.enabled ?? true)
+        }
 
         DelegateChooser {
             role: "id"
 
             DelegateChoice {
                 roleValue: "spacer"
-                delegate: WrappedLoader {
-                    Layout.fillHeight: enabled
+                delegate: EntryWrapper {
+                    Layout.fillHeight: true
                 }
             }
             DelegateChoice {
                 roleValue: "logo"
-                delegate: WrappedLoader {
-                    sourceComponent: OsIcon {
+                delegate: EntryWrapper {
+                    OsIcon {
                         objectName: "taskbarLogo"
                     }
                 }
             }
             DelegateChoice {
                 roleValue: "workspaces"
-                delegate: WrappedLoader {
-                    sourceComponent: Workspaces {
+                delegate: EntryWrapper {
+                    Workspaces {
                         objectName: "taskbarWorkspaces"
-
                         screen: root.screen
                         fullscreen: root.fullscreen
                     }
@@ -139,12 +139,9 @@ ColumnLayout {
             }
             DelegateChoice {
                 roleValue: "activeWindow"
-                delegate: WrappedLoader {
-                    Layout.fillWidth: true
-                    visible: !root.fullscreen
-                    sourceComponent: ActiveWindow {
+                delegate: EntryWrapper {
+                    ActiveWindow {
                         objectName: "taskbarActiveWindow"
-
                         bar: root
                         monitor: Brightness.getMonitorForScreen(root.screen)
                     }
@@ -152,37 +149,33 @@ ColumnLayout {
             }
             DelegateChoice {
                 roleValue: "tray"
-                delegate: WrappedLoader {
-                    visible: !root.fullscreen
-                    sourceComponent: Tray {
+                delegate: EntryWrapper {
+                    Tray {
                         objectName: "taskbarTray"
                     }
                 }
             }
             DelegateChoice {
                 roleValue: "clock"
-                delegate: WrappedLoader {
-                    visible: !root.fullscreen
-                    sourceComponent: Clock {
+                delegate: EntryWrapper {
+                    Clock {
                         objectName: "taskbarClock"
                     }
                 }
             }
             DelegateChoice {
                 roleValue: "statusIcons"
-                delegate: WrappedLoader {
-                    visible: !root.fullscreen
-                    sourceComponent: StatusIcons {
+                delegate: EntryWrapper {
+                    StatusIcons {
                         objectName: "taskbarStatusIcons"
                     }
                 }
             }
             DelegateChoice {
                 roleValue: "power"
-                delegate: WrappedLoader {
-                    sourceComponent: Power {
+                delegate: EntryWrapper {
+                    Power {
                         objectName: "taskbarPowerButton"
-
                         screenState: root.screenState
                     }
                 }
@@ -190,39 +183,19 @@ ColumnLayout {
         }
     }
 
-    component WrappedLoader: Loader {
-        required enabled
+    component EntryWrapper: Item {
         required property var modelData
-        readonly property string entryId: modelData.id
         required property int index
+        default property Item item
+        readonly property string entryId: modelData.id
 
-        function findFirstEnabled(): Item {
-            const count = repeater.count;
-            for (let i = 0; i < count; i++) {
-                const item = repeater.itemAt(i);
-                if (item?.enabled)
-                    return item;
-            }
-            return null;
-        }
-
-        function findLastEnabled(): Item {
-            for (let i = repeater.count - 1; i >= 0; i--) {
-                const item = repeater.itemAt(i);
-                if (item?.enabled)
-                    return item;
-            }
-            return null;
-        }
-
-        asynchronous: true
+        Layout.topMargin: index === 0 ? root.vPadding : 0
+        Layout.bottomMargin: index === repeater.count - 1 ? root.vPadding : 0
         Layout.alignment: Qt.AlignHCenter
 
-        // Cursed ahh thing to add padding to first and last enabled components
-        Layout.topMargin: findFirstEnabled() === this ? root.vPadding : 0
-        Layout.bottomMargin: findLastEnabled() === this ? root.vPadding : 0
+        implicitWidth: item?.implicitWidth ?? 0
+        implicitHeight: item?.implicitHeight ?? 0
 
-        visible: enabled
-        active: enabled
+        children: item
     }
 }
