@@ -24,7 +24,7 @@ Item {
             color: Colours.tPalette.m3surfaceContainerLow
 
             NotifDock {
-                objectName: "sidebar-notifications"
+                objectName: "sidebarNotifications"
 
                 props: root.props
                 screenState: root.screenState

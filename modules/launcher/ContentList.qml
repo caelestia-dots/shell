@@ -82,7 +82,7 @@ Item {
         anchors.fill: parent
 
         sourceComponent: AppList {
-            objectName: "launcher-app-list"
+            objectName: "launcherAppList"
 
             search: root.search
             screenState: root.screenState
@@ -100,7 +100,7 @@ Item {
         anchors.horizontalCenter: parent.horizontalCenter
 
         sourceComponent: WallpaperList {
-            objectName: "launcher-wallpaper-list"
+            objectName: "launcherWallpaperList"
 
             search: root.search
             screenState: root.screenState

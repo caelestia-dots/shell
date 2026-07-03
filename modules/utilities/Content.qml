@@ -27,13 +27,13 @@ Item {
         IdleInhibit {
             id: idleInhibit
 
-            objectName: "utilities-keep-awake"
+            objectName: "utilitiesKeepAwake"
         }
 
         Record {
             id: record
 
-            objectName: "utilities-screen-recorder"
+            objectName: "utilitiesScreenRecorder"
 
             props: root.props
             screenState: root.screenState
@@ -43,7 +43,7 @@ Item {
         Toggles {
             id: toggles
 
-            objectName: "utilities-quick-toggles"
+            objectName: "utilitiesQuickToggles"
 
             screenState: root.screenState
             popouts: root.popouts

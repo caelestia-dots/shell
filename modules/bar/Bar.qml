@@ -122,7 +122,7 @@ ColumnLayout {
                 roleValue: "logo"
                 delegate: WrappedLoader {
                     sourceComponent: OsIcon {
-                        objectName: "taskbar-logo"
+                        objectName: "taskbarLogo"
                     }
                 }
             }
@@ -130,7 +130,7 @@ ColumnLayout {
                 roleValue: "workspaces"
                 delegate: WrappedLoader {
                     sourceComponent: Workspaces {
-                        objectName: "taskbar-workspaces"
+                        objectName: "taskbarWorkspaces"
 
                         screen: root.screen
                         fullscreen: root.fullscreen
@@ -143,7 +143,7 @@ ColumnLayout {
                     Layout.fillWidth: true
                     visible: !root.fullscreen
                     sourceComponent: ActiveWindow {
-                        objectName: "taskbar-active-window"
+                        objectName: "taskbarActiveWindow"
 
                         bar: root
                         monitor: Brightness.getMonitorForScreen(root.screen)
@@ -155,7 +155,7 @@ ColumnLayout {
                 delegate: WrappedLoader {
                     visible: !root.fullscreen
                     sourceComponent: Tray {
-                        objectName: "taskbar-tray"
+                        objectName: "taskbarTray"
                     }
                 }
             }
@@ -164,7 +164,7 @@ ColumnLayout {
                 delegate: WrappedLoader {
                     visible: !root.fullscreen
                     sourceComponent: Clock {
-                        objectName: "taskbar-clock"
+                        objectName: "taskbarClock"
                     }
                 }
             }
@@ -173,7 +173,7 @@ ColumnLayout {
                 delegate: WrappedLoader {
                     visible: !root.fullscreen
                     sourceComponent: StatusIcons {
-                        objectName: "taskbar-status-icons"
+                        objectName: "taskbarStatusIcons"
                     }
                 }
             }
@@ -181,7 +181,7 @@ ColumnLayout {
                 roleValue: "power"
                 delegate: WrappedLoader {
                     sourceComponent: Power {
-                        objectName: "taskbar-power-button"
+                        objectName: "taskbarPowerButton"
 
                         screenState: root.screenState
                     }
