@@ -35,7 +35,7 @@ Singleton {
         return null;
     }
 
-    function componentForActive(): Components {
+    function componentsForActive(): Components {
         const mon = Hypr.focusedMonitor;
         for (const c of components.instances)
             if (Hypr.monitorFor(c.modelData) === mon)
@@ -68,16 +68,16 @@ Singleton {
         property var bar
         property var panels
 
-        function find(name: string): var {
-            return CUtils.findChild(rootWindow?.contentItem, name);
+        function find(name: string, rootItem: Item): var {
+            return CUtils.findChild(rootItem ?? rootWindow?.contentItem, name);
         }
 
-        function findAll(name: string): var {
-            return CUtils.findChildren(rootWindow?.contentItem, name);
+        function findAll(name: string, rootItem: Item): var {
+            return CUtils.findChildren(rootItem ?? rootWindow?.contentItem, name);
         }
 
-        function findMatching(pattern: string): var {
-            return CUtils.findChildrenMatching(rootWindow?.contentItem, pattern);
+        function findMatching(pattern: string, rootItem: Item): var {
+            return CUtils.findChildrenMatching(rootItem ?? rootWindow?.contentItem, pattern);
         }
     }
 
