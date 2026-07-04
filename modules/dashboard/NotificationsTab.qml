@@ -9,7 +9,6 @@ import Caelestia.Config
 import qs.components
 import qs.components.containers
 import qs.components.controls
-import qs.components.images
 import qs.services
 import qs.utils
 
@@ -184,8 +183,15 @@ Item {
                 Component {
                     id: imageComp
 
-                    CachingImage {
-                        path: card.modelData?.image ?? ""
+                    Image {
+                        source: Qt.resolvedUrl(card.modelData?.image ?? "")
+                        fillMode: Image.PreserveAspectCrop
+                        sourceSize: {
+                            const size = Tokens.sizes.notifs.badge * 2 * ((QsWindow.window as QsWindow)?.devicePixelRatio ?? 1);
+                            return Qt.size(size, size);
+                        }
+                        cache: false
+                        asynchronous: true
                     }
                 }
 
