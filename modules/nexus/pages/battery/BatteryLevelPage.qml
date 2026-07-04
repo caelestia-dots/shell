@@ -26,35 +26,59 @@ PageBase {
     }
 
     function setValueProperty(propName, propValue) {
-        let originalConfig = lowWarning ? GlobalConfig.general.battery.lowBatteryWarnLevels : GlobalConfig.general.battery.chargingBatteryWarnLevels;
+        let originalConfig = lowWarning ? GlobalConfig.general.battery.lowBatteryWarnLevels : GlobalConfig.general.battery.chargingWarnLevels;
         let configCopy = Array.from(originalConfig);
         let targetItem = configCopy.find(item => (item.level === batteryLevel.level) & (item.title === batteryLevel.title));
 
-        if (targetItem) {
+        if (targetItem && !newLevelPage) {
             targetItem[propName] = propValue;
             if (lowWarning)
                 GlobalConfig.general.battery.lowBatteryWarnLevels = configCopy;
             else
-                GlobalConfig.general.battery.chargingBatteryWarnLevels = configCopy;
+                GlobalConfig.general.battery.chargingWarnLevels = configCopy;
 
             nState.selectedBatteryLevel = targetItem;
+        } else {
+            let temporaryLevel = Object.assign({}, batteryLevel);
+            temporaryLevel[propName] = propValue;
+            nState.selectedBatteryLevel = temporaryLevel;
         }
     }
 
     function deleteLevel() {
-        let originalConfig = lowWarning ? GlobalConfig.general.battery.lowBatteryWarnLevels : GlobalConfig.general.battery.chargingBatteryWarnLevels;
+        if (newLevelPage)
+            return;
+        let originalConfig = lowWarning ? GlobalConfig.general.battery.lowBatteryWarnLevels : GlobalConfig.general.battery.chargingWarnLevels;
         let configCopy = Array.from(originalConfig);
         let filteredConfig = configCopy.filter(item => !(item.level === batteryLevel.level && item.title === batteryLevel.title));
 
         if (lowWarning)
             GlobalConfig.general.battery.lowBatteryWarnLevels = filteredConfig;
         else
-            GlobalConfig.general.battery.chargingBatteryWarnLevels = filteredConfig;
+            GlobalConfig.general.battery.chargingWarnLevels = filteredConfig;
     }
 
-    function addLevel(batteryValue, title, message) {
-        let originalConfig = lowWarning ? GlobalConfig.general.battery.lowBatteryWarnLevels : GlobalConfig.general.battery.chargingBatteryWarnLevels;
+    function addLevel(levelToAdd) {
+        let originalConfig = lowWarning ? GlobalConfig.general.battery.lowBatteryWarnLevels : GlobalConfig.general.battery.chargingWarnLevels;
         let configCopy = Array.from(originalConfig);
+
+        if (!levelToAdd){
+            return;
+        }
+    
+        configCopy.push({
+            level: levelToAdd.level,
+            title: levelToAdd.title,
+            message: levelToAdd.message,
+            icon: levelToAdd.icon,
+            enabled: levelToAdd.enabled,
+            critical: levelToAdd.critical
+        });
+
+        if (lowWarning)
+            GlobalConfig.general.battery.lowBatteryWarnLevels = configCopy;
+        else
+            GlobalConfig.general.battery.chargingWarnLevels = configCopy;
     }
 
     // So we need the following information
@@ -187,7 +211,6 @@ PageBase {
         // Icon auto picked from slider
         ToggleRow {
             verticalPadding: Tokens.padding.large
-            first: true
             text: qsTr("Automatic Toast Icon")
             subtext: qsTr("Let the icon be automatically picked from the slider's value")
             checked: root.batteryLevel?.autopick ?? false
@@ -218,7 +241,7 @@ PageBase {
 
             ButtonBase {
                 id: deleteBtn
-                // visible:
+                visible: !newLevelPage
 
                 fillWidth: true
                 shapeMorph: true
@@ -231,6 +254,7 @@ PageBase {
                 implicitHeight: deleteBtnLayout.implicitHeight + Tokens.padding.medium * 2
 
                 onClicked: {
+                    deleteLevel();
                     root.nState.closeSubPage();
                 }
 
@@ -269,6 +293,7 @@ PageBase {
                 implicitHeight: addBtnLayout.implicitHeight + Tokens.padding.medium * 2
 
                 onClicked: {
+                    addLevel(batteryLevel);
                     root.nState.closeSubPage();
                 }
 

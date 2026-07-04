@@ -16,16 +16,16 @@ PageBase {
 
     title: qsTr("Power")
 
-    function toggleLowWarns(){
-        GlobalConfig.general.battery.enableLowBatteryWarning = !GlobalConfig.general.battery.enableLowBatteryWarning; 
+    function toggleLowWarns() {
+        GlobalConfig.general.battery.enableLowBatteryWarning = !GlobalConfig.general.battery.enableLowBatteryWarning;
     }
 
-    function toggleHighWarns(){
-        GlobalConfig.general.battery.enableHighBatteryWarning = !GlobalConfig.general.battery.enableHighBatteryWarning; 
+    function toggleHighWarns() {
+        GlobalConfig.general.battery.enableHighBatteryWarning = !GlobalConfig.general.battery.enableHighBatteryWarning;
     }
 
-    function toggleFrame(iconName, wantFramed, critical) {
-        if (critical)
+    function toggleFrame(iconName, wantFramed) {
+        if (iconName.includes("alert"))
             return iconName;
         let isFramed = iconName.includes("android_frame_");
         if (wantFramed && !isFramed)
@@ -35,11 +35,13 @@ PageBase {
         return iconName; // already in the desired state
     }
 
-    function changeToastIconVariant(){
+    function changeToastIconVariant() {
         let framed = GlobalConfig.general.battery.framedMaterialIcons;
         let lowWarnConfig = Array.from(GlobalConfig.general.battery.lowBatteryWarnLevels);
         let highWarnConfig = Array.from(GlobalConfig.general.battery.chargingWarnLevels);
-        const changeIcon = (level) => {level.icon = toggleFrame(level.icon, framed, level.critical);}
+        const changeIcon = level => {
+            level.icon = toggleFrame(level.icon, framed);
+        };
         lowWarnConfig.forEach(changeIcon);
         highWarnConfig.forEach(changeIcon);
     }
@@ -76,8 +78,20 @@ PageBase {
             StateLayer {
                 // This is for the add new level.
                 disabled: !lowWarnToggle.checked
-                onClicked: root.nState.openSubPage(2)
-            }                       
+                onClicked: {
+                    root.nState.lowWarningSelected = true;
+                    root.nState.selectedBatteryLevel = {
+                        level: 0,
+                        title: "",
+                        message: "",
+                        icon: "",
+                        enabled: true,
+                        critical: false,
+                        autopick: true
+                    };
+                    root.nState.openSubPage(2);
+                }
+            }
 
             RowLayout {
                 id: addLowWarnLayout
@@ -104,7 +118,7 @@ PageBase {
                     font: Tokens.font.body.small
                     elide: Text.ElideRight
                 }
-            } 
+            }
         }
 
         ToggleRow {
@@ -123,7 +137,7 @@ PageBase {
             isToggled: highWarnToggle.checked
             isLowWarning: false
             nState: root.nState
-        } 
+        }
 
         ConnectedRect {
             Layout.fillWidth: true
@@ -133,8 +147,20 @@ PageBase {
             StateLayer {
                 // This is for the add new level.
                 disabled: !highWarnToggle.checked
-                onClicked: root.nState.openSubPage(2)
-            }                       
+                onClicked: {
+                    root.nState.lowWarningSelected = false;
+                    root.nState.selectedBatteryLevel = {
+                        level: 0,
+                        title: "",
+                        message: "",
+                        icon: "",
+                        enabled: true,
+                        critical: false,
+                        autopick: true
+                    };
+                    root.nState.openSubPage(2);
+                }
+            }
 
             RowLayout {
                 id: addHighWarnLayout
@@ -161,7 +187,7 @@ PageBase {
                     font: Tokens.font.body.small
                     elide: Text.ElideRight
                 }
-            } 
+            }
         }
 
         // Framed Icons
