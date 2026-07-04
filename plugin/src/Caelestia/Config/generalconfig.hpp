@@ -102,6 +102,7 @@ class GeneralBattery : public settings::ObjectNode {
     CONFIG_GLOBAL_PROPERTY(int, criticalLevel, 3)
     CONFIG_GLOBAL_PROPERTY(bool, enableLowBatteryWarning, true)
     CONFIG_GLOBAL_PROPERTY(bool, enableHighBatteryWarning, false)
+    CONFIG_GLOBAL_PROPERTY(bool, framedMaterialIcons, false)
 
 public:
     explicit GeneralBattery(QObject* parent = nullptr)
