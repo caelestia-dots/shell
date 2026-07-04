@@ -34,7 +34,7 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib")
 
 set(DISTRIBUTOR "Unset" CACHE STRING "Distributor")
-set(ENABLE_MODULES "extras;plugin;shell;m3shapes" CACHE STRING "Modules to build/install")
+set(ENABLE_MODULES "extras;plugin;shell;m3shapes;translations" CACHE STRING "Modules to build/install")
 set(INSTALL_LIBDIR "usr/lib/caelestia" CACHE STRING "Library install dir")
 set(INSTALL_QMLDIR "usr/lib/qt6/qml" CACHE STRING "QML install dir")
 set(INSTALL_QSCONFDIR "etc/xdg/quickshell/caelestia" CACHE STRING "Quickshell config install dir")
@@ -57,6 +57,10 @@ endif()
 
 if("plugin" IN_LIST ENABLE_MODULES)
     add_subdirectory(plugin)
+endif()
+
+if("translations" IN_LIST ENABLE_MODULES)
+    add_subdirectory(translations)
 endif()
 
 if("shell" IN_LIST ENABLE_MODULES)

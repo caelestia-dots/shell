@@ -3,14 +3,44 @@
 #include <QtConcurrent/qtconcurrentrun.h>
 #include <QtQuick/qquickitemgrabresult.h>
 #include <QtQuick/qquickwindow.h>
+#include <qcoreapplication.h>
 #include <qdir.h>
 #include <qfileinfo.h>
 #include <qfuturewatcher.h>
 #include <qloggingcategory.h>
+#include <qlocale.h>
 #include <qqmlengine.h>
 #include <qregularexpression.h>
+#include <qtranslator.h>
 
 Q_LOGGING_CATEGORY(lcCUtils, "caelestia.cutils", QtInfoMsg)
+
+namespace {
+
+struct TranslatorLoader {
+    TranslatorLoader() {
+        if (!qApp) return;
+
+        const QString locale = QLocale::system().name();
+        auto* translator = new QTranslator(qApp);
+
+        const QStringList searchPaths = {
+            QStringLiteral(CAELESTIA_TRANSLATIONS_DIR),
+        };
+
+        for (const auto& path : searchPaths) {
+            if (translator->load(QLocale(locale), QStringLiteral("caelestia-shell"), QStringLiteral("_"), path)) {
+                qApp->installTranslator(translator);
+                qCDebug(lcCUtils).noquote() << "Loaded translations for" << locale << "from" << path;
+                return;
+            }
+        }
+
+        qCWarning(lcCUtils).noquote() << "No translations found for" << locale;
+    }
+} s_translatorLoader;
+
+}
 
 namespace caelestia {
 
