@@ -24,6 +24,26 @@ PageBase {
         GlobalConfig.general.battery.enableHighBatteryWarning = !GlobalConfig.general.battery.enableHighBatteryWarning; 
     }
 
+    function toggleFrame(iconName, wantFramed, critical) {
+        if (critical)
+            return iconName;
+        let isFramed = iconName.includes("android_frame_");
+        if (wantFramed && !isFramed)
+            return iconName.replace("android_", "android_frame_");
+        if (!wantFramed && isFramed)
+            return iconName.replace("android_frame_", "android_");
+        return iconName; // already in the desired state
+    }
+
+    function changeToastIconVariant(){
+        let framed = GlobalConfig.general.battery.framedMaterialIcons;
+        let lowWarnConfig = Array.from(GlobalConfig.general.battery.lowBatteryWarnLevels);
+        let highWarnConfig = Array.from(GlobalConfig.general.battery.chargingWarnLevels);
+        const changeIcon = (level) => {level.icon = toggleFrame(level.icon, framed, level.critical);}
+        lowWarnConfig.forEach(changeIcon);
+        highWarnConfig.forEach(changeIcon);
+    }
+
     ColumnLayout {
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.top: parent.top
@@ -142,6 +162,19 @@ PageBase {
                     elide: Text.ElideRight
                 }
             } 
+        }
+
+        // Framed Icons
+        ToggleRow {
+            verticalPadding: Tokens.padding.large
+            first: true
+            text: qsTr("Framed Toast Icon")
+            subtext: qsTr("Enables the framed variant of Material battery icons")
+            checked: GlobalConfig.general.battery.framedMaterialIcons ?? false
+            onToggled: {
+                GlobalConfig.general.battery.framedMaterialIcons = !GlobalConfig.general.battery.framedMaterialIcons;
+                changeToastIconVariant();
+            }
         }
     }
 }
