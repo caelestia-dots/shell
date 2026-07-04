@@ -245,4 +245,17 @@ Singleton {
             level--;
         return charging ? `battery_charging_${(level + 3) * 10}` : `battery_${level}_bar`;
     }
+
+    function getBatteryHorizontalIcon(percentage: real, charging = false, critical = false, framed = false): string {
+        let framedIconStr = framed ? "frame_" : "";
+        if (critical)
+            return percentage > 0.5 ? "battery_android_frame_alert" : "battery_android_alert";
+        if (charging)
+            return `battery_android_${framedIconStr}bolt`;
+
+        let level = Math.min(7, Math.floor(percentage * 7) + 1);
+        if (level === 7)
+            return `battery_android_${framedIconStr}full`;
+        return `battery_android_${framedIconStr}${level}`;
+    }
 }
