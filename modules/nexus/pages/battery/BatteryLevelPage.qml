@@ -26,9 +26,7 @@ PageBase {
     }
 
     function setValueProperty(propName, propValue) {
-        let originalConfig = lowWarning 
-            ? GlobalConfig.general.battery.lowBatteryWarnLevels 
-            : GlobalConfig.general.battery.chargingBatteryWarnLevels;
+        let originalConfig = lowWarning ? GlobalConfig.general.battery.lowBatteryWarnLevels : GlobalConfig.general.battery.chargingBatteryWarnLevels;
         let configCopy = Array.from(originalConfig);
         let targetItem = configCopy.find(item => (item.level === batteryLevel.level) & (item.title === batteryLevel.title));
 
@@ -44,18 +42,19 @@ PageBase {
     }
 
     function deleteLevel() {
-        let originalConfig = lowWarning 
-            ? GlobalConfig.general.battery.lowBatteryWarnLevels 
-            : GlobalConfig.general.battery.chargingBatteryWarnLevels;
+        let originalConfig = lowWarning ? GlobalConfig.general.battery.lowBatteryWarnLevels : GlobalConfig.general.battery.chargingBatteryWarnLevels;
         let configCopy = Array.from(originalConfig);
-        let filteredConfig = configCopy.filter(item => 
-            !(item.level === batteryLevel.level && item.title === batteryLevel.title)
-        );
+        let filteredConfig = configCopy.filter(item => !(item.level === batteryLevel.level && item.title === batteryLevel.title));
 
         if (lowWarning)
             GlobalConfig.general.battery.lowBatteryWarnLevels = filteredConfig;
         else
             GlobalConfig.general.battery.chargingBatteryWarnLevels = filteredConfig;
+    }
+
+    function addLevel(batteryValue, title, message) {
+        let originalConfig = lowWarning ? GlobalConfig.general.battery.lowBatteryWarnLevels : GlobalConfig.general.battery.chargingBatteryWarnLevels;
+        let configCopy = Array.from(originalConfig);
     }
 
     // So we need the following information
@@ -65,7 +64,7 @@ PageBase {
         width: root.cappedWidth
         spacing: Tokens.spacing.extraSmall / 2
 
-        ColumnLayout{
+        ColumnLayout {
             Layout.topMargin: Tokens.spacing.medium
             Layout.preferredHeight: implicitHeight
             width: root.cappedWidth
@@ -74,19 +73,19 @@ PageBase {
             // Title
             StyledTextField {
                 id: warningTitleField
-                Layout.fillWidth: true 
+                Layout.fillWidth: true
                 placeholderText: "Warning title"
                 // supportingText: "First line of text displayed during the battery toast"
                 leadingIcon: "label"
 
-                text: root.batteryLevel?.title
-                enabled: root.batteryLevel?.enabled
+                text: root.batteryLevel?.title ?? ""
+                enabled: root.batteryLevel?.enabled ?? false
 
-                property bool isSaved: false 
+                property bool isSaved: false
                 onAccepted: {
                     setValueProperty("title", text);
                     isSaved = true;
-                    saveTimerTitle.restart()
+                    saveTimerTitle.restart();
                 }
 
                 supportingText: isSaved ? "✓ Settings saved successfully!" : "First line of text displayed during the battery toast"
@@ -101,18 +100,18 @@ PageBase {
             // Message
             StyledTextField {
                 id: warningMessageField
-                Layout.fillWidth: true 
+                Layout.fillWidth: true
                 placeholderText: "Warning message"
                 leadingIcon: "text_fields"
 
-                text: root.batteryLevel?.message
-                enabled: root.batteryLevel?.enabled
+                text: root.batteryLevel?.message ?? ""
+                enabled: root.batteryLevel?.enabled ?? false
 
-                property bool isSaved: false 
+                property bool isSaved: false
                 onAccepted: {
                     setValueProperty("message", text);
                     isSaved = true;
-                    saveTimerMessage.restart()
+                    saveTimerMessage.restart();
                 }
 
                 supportingText: isSaved ? "✓ Settings saved successfully!" : "Second line of text displayed during the battery toast. Can be HTML formatted"
@@ -131,10 +130,42 @@ PageBase {
             last: true
             icon: Icons.getBatteryIcon(value, false)
             label: qsTr("Battery Percentage")
-            valueLabel: root.batteryLevel.level + "%"
-            value: root.batteryLevel.level / 100
-            enabled: root.batteryLevel.enabled
-            onMoved: v => setValueProperty("level", Math.round(v * 100));
+            valueLabel: root.batteryLevel?.level + "%"
+            value: root.batteryLevel?.level / 100
+            enabled: root.batteryLevel?.enabled ?? false
+            onMoved: v => {
+                setValueProperty("level", Math.round(v * 100));
+                if (root.batteryLevel?.autopick ?? false){
+                    setValueProperty("icon", Icons.getBatteryHorizontalIcon(v, false, root.batteryLevel?.critical ?? false, GlobalConfig.general.battery.framedMaterialIcons));
+                }
+            }
+        }
+
+        StyledTextField {
+            id: batteryIconField
+
+            Layout.fillWidth: true
+            placeholderText: "Warning icon"
+
+            text: root.batteryLevel?.icon ?? ""
+            enabled: (root.batteryLevel?.enabled ?? false) && (!root.batteryLevel?.autopick ?? false)
+
+            trailingIcon: text
+            property bool isSaved: false
+
+            onAccepted: {
+                setValueProperty("icon", text);
+                isSaved = true;
+                saveTimerIcon.restart();
+            }
+
+            supportingText: isSaved ? "✓ Settings saved successfully!" : "Icon for the battery toast. Required to be a valid Material Icon from Google."
+
+            Timer {
+                id: saveTimerIcon
+                interval: 1500 // Flash for 1.5 seconds
+                onTriggered: warningMessageField.isSaved = false
+            }
         }
 
         SectionHeader {
@@ -153,8 +184,21 @@ PageBase {
                     toggleProperty("enabled");
             }
         }
+        // Icon auto picked from slider
+        ToggleRow {
+            verticalPadding: Tokens.padding.large
+            first: true
+            text: qsTr("Automatic Toast Icon")
+            subtext: qsTr("Let the icon be automatically picked from the slider's value")
+            checked: root.batteryLevel?.autopick ?? false
+            onToggled: {
+                if (root.batteryLevel)
+                    toggleProperty("autopick");
+            }
+        }
         // Criticality
         ToggleRow {
+            enabled: root.batteryLevel?.enabled ?? false
             verticalPadding: Tokens.padding.large
             last: true
             text: qsTr("Critical")
@@ -169,11 +213,12 @@ PageBase {
         ButtonRow {
             Layout.topMargin: Tokens.spacing.large - parent.spacing
             Layout.alignment: Qt.AlignHCenter
-            Layout.minimumWidth: Math.round(root.cappedWidth * newLevelPage ? 0.7 : 0.5)
+            Layout.minimumWidth: Math.round(newLevelPage ? root.cappedWidth * 0.7 : root.cappedWidth * 0.5)
             spacing: Tokens.spacing.small
 
             ButtonBase {
                 id: deleteBtn
+                // visible:
 
                 fillWidth: true
                 shapeMorph: true
@@ -235,13 +280,13 @@ PageBase {
 
                     MaterialIcon {
                         Layout.alignment: Qt.AlignHCenter
-                        text: "delete"
+                        text: "add"
                         color: addBtn.onColour
                         fontStyle: Tokens.font.icon.medium
                     }
                     StyledText {
                         Layout.alignment: Qt.AlignHCenter
-                        text: qsTr("Delete")
+                        text: qsTr("Add")
                         color: addBtn.onColour
                     }
                 }
