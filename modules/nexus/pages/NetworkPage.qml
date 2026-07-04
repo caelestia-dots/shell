@@ -47,7 +47,20 @@ PageBase {
             target: Nmcli
         }
 
+        Loader {
+            Layout.fillWidth: true
+            active: Nmcli.hasAvailableEthernet
+            visible: active
+            asynchronous: true
+
+            sourceComponent: EthernetSection {
+                nState: root.nState
+                cappedWidth: root.cappedWidth
+            }
+        }
+
         ToggleRow {
+            Layout.topMargin: Nmcli.hasAvailableEthernet ? Tokens.spacing.large : 0
             first: true
             text: qsTr("Wi-Fi")
             font: Tokens.font.body.medium

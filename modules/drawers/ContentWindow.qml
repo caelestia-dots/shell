@@ -19,6 +19,8 @@ StyledWindow {
     readonly property alias bar: bar
     readonly property alias interactionWrapper: interactions
 
+    readonly property ScreenState screenState: ShellState.forScreen(screen)
+
     readonly property HyprlandMonitor monitor: Hypr.monitorFor(screen)
     readonly property bool hasSpecialWorkspace: (monitor?.lastIpcObject.specialWorkspace?.name.length ?? 0) > 0
     readonly property bool hasFullscreenOnNormalWs: monitor?.activeWorkspace?.toplevels.values.some(t => t.lastIpcObject.fullscreen > 1) ?? false
@@ -46,7 +48,7 @@ StyledWindow {
         if (focusGrab.active || panels.popouts.isDetached)
             return 0;
 
-        if (monitor?.lastIpcObject.specialWorkspace?.name || monitor?.activeWorkspace.lastIpcObject.windows > 0)
+        if (monitor?.lastIpcObject.specialWorkspace?.name || monitor?.activeWorkspace?.lastIpcObject.windows > 0)
             return 0;
 
         const thresholds = [];
@@ -57,16 +59,16 @@ StyledWindow {
     }
 
     onHasFullscreenChanged: {
-        visibilities.launcher = false;
-        visibilities.session = false;
-        visibilities.dashboard = false;
+        screenState.launcher = false;
+        screenState.session = false;
+        screenState.dashboard = false;
         panels.popouts.close();
     }
 
     name: "drawers"
     WlrLayershell.exclusionMode: ExclusionMode.Ignore
     WlrLayershell.layer: (fsTransitionProg > 0 && contentItem.Config.general.showOverFullscreen) || (hasSpecialWorkspace && hasFullscreenOnNormalWs) ? WlrLayer.Overlay : WlrLayer.Top
-    WlrLayershell.keyboardFocus: visibilities.launcher || visibilities.session ? WlrKeyboardFocus.OnDemand : WlrKeyboardFocus.None
+    WlrLayershell.keyboardFocus: screenState.launcher || screenState.session ? WlrKeyboardFocus.OnDemand : WlrKeyboardFocus.None
 
     mask: hasFullscreen ? emptyRegion : regions
 
@@ -110,13 +112,23 @@ StyledWindow {
     HyprlandFocusGrab {
         id: focusGrab
 
-        active: (visibilities.launcher && root.contentItem.Config.launcher.enabled) || (visibilities.session && root.contentItem.Config.session.enabled) || (visibilities.sidebar && root.contentItem.Config.sidebar.enabled) || (!root.contentItem.Config.dashboard.showOnHover && visibilities.dashboard && root.contentItem.Config.dashboard.enabled) || (panels.popouts.currentName.startsWith("traymenu") && (panels.popouts.current as StackView)?.depth > 1)
+        active: {
+            const s = root.screenState;
+            const conf = root.contentItem.Config;
+            if ((s.launcher && conf.launcher.enabled) || (s.session && conf.session.enabled) || (s.sidebar && conf.sidebar.enabled))
+                return true;
+            if (!conf.dashboard.showOnHover && s.dashboard && conf.dashboard.enabled)
+                return true;
+            if (panels.popouts.currentName.startsWith("traymenu") && (panels.popouts.current as StackView)?.depth > 1)
+                return true;
+            return false;
+        }
         windows: [root]
         onCleared: {
-            visibilities.launcher = false;
-            visibilities.session = false;
-            visibilities.sidebar = false;
-            visibilities.dashboard = false;
+            root.screenState.launcher = false;
+            root.screenState.session = false;
+            root.screenState.sidebar = false;
+            root.screenState.dashboard = false;
             panels.popouts.hasCurrent = false;
             bar.closeTray();
         }
@@ -124,7 +136,7 @@ StyledWindow {
 
     StyledRect {
         anchors.fill: parent
-        opacity: (visibilities.session && Config.session.enabled) || panels.popouts.detachedMode !== "" ? 0.5 : 0
+        opacity: (root.screenState.session && Config.session.enabled) || panels.popouts.detachedMode !== "" ? 0.5 : 0
         color: Colours.palette.m3scrim
 
         Behavior on opacity {
@@ -236,18 +248,12 @@ StyledWindow {
         }
     }
 
-    DrawerVisibilities {
-        id: visibilities
-
-        Component.onCompleted: Visibilities.load(root.screen, this)
-    }
-
     Interactions {
         id: interactions
 
         screen: root.screen
         popouts: panels.popouts
-        visibilities: visibilities
+        screenState: root.screenState
         panels: panels
         bar: bar
         borderThickness: root.borderLayoutThickness
@@ -257,7 +263,7 @@ StyledWindow {
             id: panels
 
             screen: root.screen
-            visibilities: visibilities
+            screenState: root.screenState
             bar: bar
             borderThickness: root.borderThickness
 
@@ -297,13 +303,35 @@ StyledWindow {
             anchors.bottom: parent.bottom
 
             screen: root.screen
-            visibilities: visibilities
+            screenState: root.screenState
             popouts: panels.popouts
 
             fullscreen: root.hasFullscreen
-
-            Component.onCompleted: Visibilities.bars.set(root.screen, this)
         }
+    }
+
+    ShellState.ComponentRef {
+        screen: root.screen
+        slot: "rootWindow"
+        component: root
+    }
+
+    ShellState.ComponentRef {
+        screen: root.screen
+        slot: "interactionWrapper"
+        component: interactions
+    }
+
+    ShellState.ComponentRef {
+        screen: root.screen
+        slot: "bar"
+        component: bar
+    }
+
+    ShellState.ComponentRef {
+        screen: root.screen
+        slot: "panels"
+        component: panels
     }
 
     component PanelBg: BlobRect {

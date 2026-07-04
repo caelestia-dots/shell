@@ -13,7 +13,7 @@ Item {
     id: root
 
     required property Brightness.Monitor monitor
-    required property DrawerVisibilities visibilities
+    required property ScreenState screenState
 
     required property real volume
     required property bool muted
@@ -55,7 +55,7 @@ Item {
 
         // Microphone volume
         WrappedLoader {
-            shouldBeActive: Config.osd.enableMicrophone && (!Config.osd.enableBrightness || !root.visibilities.session)
+            shouldBeActive: Config.osd.enableMicrophone && (!Config.osd.enableBrightness || !root.screenState.session)
 
             sourceComponent: CustomMouseArea {
                 function onWheel(event: WheelEvent) {

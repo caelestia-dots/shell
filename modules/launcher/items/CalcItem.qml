@@ -14,7 +14,7 @@ Item {
 
     function onClicked(): void {
         Quickshell.execDetached(["wl-copy", Qalculator.rawResult]);
-        root.list.visibilities.launcher = false;
+        root.list.screenState.launcher = false;
     }
 
     onMathChanged: {
@@ -79,7 +79,7 @@ Item {
 
                 onClicked: {
                     Quickshell.execDetached([...GlobalConfig.general.apps.terminal, "fish", "-C", `exec qalc -i '${root.math}'`]);
-                    root.list.visibilities.launcher = false;
+                    root.list.screenState.launcher = false;
                 }
 
                 color: Colours.palette.m3onTertiary

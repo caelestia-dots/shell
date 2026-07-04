@@ -1,3 +1,5 @@
+pragma ComponentBehavior: Bound
+
 import QtQuick
 import QtQuick.Layouts
 import Caelestia.Config
@@ -11,9 +13,22 @@ ConnectedRect {
     property alias label: label.text
     property string subtext
     property alias value: value.text
+    property string icon
+    property color iconColour: Colours.palette.m3onSurfaceVariant
+    property Component leadingComponent: icon ? iconComp : null
 
     Layout.fillWidth: true
     implicitHeight: rowLayout.implicitHeight + rowLayout.anchors.margins * 2
+
+    Component {
+        id: iconComp
+
+        MaterialIcon {
+            text: root.icon
+            color: root.iconColour
+            fontStyle: Tokens.font.icon.small
+        }
+    }
 
     RowLayout {
         id: rowLayout
@@ -23,6 +38,12 @@ ConnectedRect {
         anchors.leftMargin: Tokens.padding.largeIncreased
         anchors.rightMargin: Tokens.padding.largeIncreased
         spacing: Tokens.spacing.medium
+
+        Loader {
+            visible: root.leadingComponent
+            active: root.leadingComponent
+            sourceComponent: root.leadingComponent
+        }
 
         ColumnLayout {
             Layout.fillWidth: true

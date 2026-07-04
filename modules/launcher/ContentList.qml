@@ -2,6 +2,8 @@ pragma ComponentBehavior: Bound
 
 import QtQuick
 import QtQuick.Layouts
+import Quickshell
+import Quickshell.Io
 import Caelestia.Config
 import qs.components
 import qs.components.controls
@@ -9,34 +11,36 @@ import qs.services
 import qs.utils
 
 Item {
-    // qmllint disable missing-property unqualified unresolved-type
     id: root
 
     required property var content
-    readonly property var currentList: showWallpapers ? wallpaperList.item : appList.item // Can be either ListView or PathView, so can't type properly
-
-    required property real maxHeight
-    required property int padding
+    required property ScreenState screenState
     required property var panels
+    required property real maxHeight
+    required property SearchBar search
+    required property int padding
     required property int rounding
-    required property StyledTextField search
-    readonly property bool showWallpapers: search.text.startsWith(`${GlobalConfig.launcher.actionPrefix}wallpaper `)
-    required property DrawerVisibilities visibilities
 
-    anchors.bottom: parent.bottom
+    readonly property bool showWallpapers: search.text.startsWith(`${GlobalConfig.launcher.actionPrefix}wallpaper `)
+    readonly property var currentList: showWallpapers ? wallpaperList.item : appList.item // Can be either ListView or PathView, so can't type properly
+    property string animState: showWallpapers ? "wallpapers" : "apps"
+
     anchors.horizontalCenter: parent.horizontalCenter
+    anchors.bottom: parent.bottom
+
     clip: true
-    state: showWallpapers ? "wallpapers" : "apps"
+    state: animState
 
     states: [
         State {
             name: "apps"
 
             PropertyChanges {
-                appList.active: true
-                root.implicitHeight: Math.min(root.maxHeight, appList.implicitHeight > 0 ? appList.implicitHeight : empty.implicitHeight)
                 root.implicitWidth: root.Tokens.sizes.launcher.itemWidth
+                root.implicitHeight: Math.min(root.maxHeight, appList.implicitHeight > 0 ? appList.implicitHeight : empty.implicitHeight)
+                appList.active: true
             }
+
             AnchorChanges {
                 anchors.left: root.parent.left
                 anchors.right: root.parent.right
@@ -46,42 +50,27 @@ Item {
             name: "wallpapers"
 
             PropertyChanges {
-                root.implicitHeight: root.Tokens.sizes.launcher.wallpaperHeight + 56
                 root.implicitWidth: Math.max(root.Tokens.sizes.launcher.itemWidth * 1.2, wallpaperList.implicitWidth)
+                root.implicitHeight: root.Tokens.sizes.launcher.wallpaperHeight + 56
                 wallpaperList.active: true
             }
         }
     ]
-    Behavior on implicitHeight {
-        enabled: root.visibilities.launcher
 
-        Anim {
-            duration: Tokens.anim.durations.large
-            easing: Tokens.anim.emphasizedDecel
-        }
-    }
-    Behavior on implicitWidth {
-        enabled: root.visibilities.launcher
-
-        Anim {
-            duration: Tokens.anim.durations.large
-            easing: Tokens.anim.emphasizedDecel
-        }
-    }
-    Behavior on state {
+    Behavior on animState {
         SequentialAnimation {
             Anim {
-                from: 1
-                property: "opacity"
                 target: root
+                property: "opacity"
+                from: 1
                 to: 0
                 type: Anim.StandardSmall
             }
             PropertyAction {}
             Anim {
-                from: 0
-                property: "opacity"
                 target: root
+                property: "opacity"
+                from: 0
                 to: 1
                 type: Anim.StandardSmall
             }
@@ -92,139 +81,167 @@ Item {
         id: appList
 
         active: false
+
         anchors.fill: parent
 
         sourceComponent: AppList {
+            objectName: "launcherAppList"
+
             search: root.search
-            visibilities: root.visibilities
+            screenState: root.screenState
         }
     }
+
     Loader {
         id: wallpaperList
 
+        asynchronous: true
         active: false
+
+        anchors.top: parent.top
         anchors.bottom: parent.bottom
         anchors.horizontalCenter: parent.horizontalCenter
-        anchors.top: parent.top
-        asynchronous: true
 
         sourceComponent: ColumnLayout {
-            implicitWidth: listComp.implicitWidth
             spacing: Tokens.spacing.normal
+            implicitWidth: listComp.implicitWidth
 
             RowLayout {
                 Layout.alignment: Qt.AlignHCenter
                 spacing: Tokens.spacing.normal * 1.06
 
-                // Dedicated IconTextButtons to independently filter views between static images and animated videos within the picker UI.
                 IconTextButton {
-                    font.pointSize: Tokens.font.size.small
-                    horizontalPadding: Tokens.padding.medium
                     icon: "image"
-                    isRound: true
                     text: qsTr("Static")
-                    type: Wallpapers.wallpaperMode === "static" ? IconTextButton.Filled : IconTextButton.Tonal
+                    font.pointSize: Tokens.font.size.small
+                    isRound: true
+                    horizontalPadding: Tokens.padding.medium
                     verticalPadding: Tokens.padding.extraSmall
-
+                    type: Wallpapers.wallpaperMode === "static" ? IconTextButton.Filled : IconTextButton.Tonal
                     onClicked: Wallpapers.setWallpaperMode("static")
                 }
-                IconTextButton {
-                    font.pointSize: Tokens.font.size.small
-                    horizontalPadding: Tokens.padding.medium
-                    icon: "movie"
-                    isRound: true
-                    text: qsTr("Animated")
-                    type: Wallpapers.wallpaperMode === "animated" ? IconTextButton.Filled : IconTextButton.Tonal
-                    verticalPadding: Tokens.padding.extraSmall
 
+                IconTextButton {
+                    icon: "movie"
+                    text: qsTr("Animated")
+                    font.pointSize: Tokens.font.size.small
+                    isRound: true
+                    horizontalPadding: Tokens.padding.medium
+                    verticalPadding: Tokens.padding.extraSmall
+                    type: Wallpapers.wallpaperMode === "animated" ? IconTextButton.Filled : IconTextButton.Tonal
                     onClicked: Wallpapers.setWallpaperMode("animated")
                 }
+
                 IconTextButton {
-                    font.pointSize: Tokens.font.size.small
-                    horizontalPadding: Tokens.padding.medium
                     icon: "refresh"
-                    isRound: true
-                    scale: 0.9
                     text: qsTr("Refresh")
-                    type: IconTextButton.Tonal
+                    font.pointSize: Tokens.font.size.small
+                    scale: 0.9
+                    isRound: true
+                    horizontalPadding: Tokens.padding.medium
                     verticalPadding: Tokens.padding.extraSmall
                     visible: Wallpapers.wallpaperMode === "animated"
-
+                    type: IconTextButton.Tonal
                     onClicked: {
                         Wallpapers.refreshAnimatedThumbs();
                     }
                 }
+
                 Text {
                     id: processingText
+                    font.pointSize: Tokens.font.size.small
+                    color: Colours.palette.m3secondary
+                    visible: Wallpapers._refreshing && Wallpapers.wallpaperMode === "animated"
+                    Layout.alignment: Qt.AlignVCenter
 
                     property int dotCount: 1
-
-                    Layout.alignment: Qt.AlignVCenter
-                    color: Colours.palette.m3secondary
-                    font.pointSize: Tokens.font.size.small
                     text: "Processing" + ".".repeat(dotCount)
-                    visible: Wallpapers._refreshing && Wallpapers.wallpaperMode === "animated"
 
                     Timer {
-                        interval: 400
-                        repeat: true
                         running: processingText.visible
-
+                        repeat: true
+                        interval: 400
                         onTriggered: {
                             processingText.dotCount = (processingText.dotCount % 3) + 1;
                         }
                     }
                 }
             }
+
             WallpaperList {
                 id: listComp
-
-                Layout.fillHeight: true
+                objectName: "launcherWallpaperList"
                 Layout.fillWidth: true
-                content: root.content
-                panels: root.panels
+                Layout.fillHeight: true
                 search: root.search
-                visibilities: root.visibilities
+                screenState: root.screenState
+                panels: root.panels
+                content: root.content
             }
         }
     }
+
     Row {
         id: empty
 
+        opacity: root.currentList?.count === 0 ? 1 : 0
+        scale: root.currentList?.count === 0 ? 1 : 0.5
+
+        spacing: Tokens.spacing.normal
+        padding: Tokens.padding.large
+
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.verticalCenter: parent.verticalCenter
-        opacity: root.currentList?.count === 0 ? 1 : 0
-        padding: Tokens.padding.large
-        scale: root.currentList?.count === 0 ? 1 : 0.5
-        spacing: Tokens.spacing.normal
-
-        Behavior on opacity {
-            Anim {}
-        }
-        Behavior on scale {
-            Anim {}
-        }
 
         MaterialIcon {
-            anchors.verticalCenter: parent.verticalCenter
+            text: root.state === "wallpapers" ? "wallpaper_slideshow" : "manage_search"
             color: Colours.palette.m3onSurfaceVariant
             font.pointSize: Tokens.font.size.extraLarge
-            text: root.state === "wallpapers" ? "wallpaper_slideshow" : "manage_search"
+
+            anchors.verticalCenter: parent.verticalCenter
         }
+
         Column {
             anchors.verticalCenter: parent.verticalCenter
 
             StyledText {
+                text: root.state === "wallpapers" ? qsTr("No wallpapers found") : qsTr("No results")
                 color: Colours.palette.m3onSurfaceVariant
                 font.pointSize: Tokens.font.size.larger
                 font.weight: 500
-                text: root.state === "wallpapers" ? qsTr("No wallpapers found") : qsTr("No results")
             }
+
             StyledText {
+                text: root.state === "wallpapers" && Wallpapers.list.length === 0 ? qsTr("Try putting some wallpapers in %1").arg(Paths.shortenHome(Paths.wallsdir)) : qsTr("Try searching for something else")
                 color: Colours.palette.m3onSurfaceVariant
                 font.pointSize: Tokens.font.size.normal
-                text: root.state === "wallpapers" && Wallpapers.list.length === 0 ? qsTr("Try putting some wallpapers in %1").arg(Paths.shortenHome(Paths.wallsdir)) : qsTr("Try searching for something else")
             }
+        }
+
+        Behavior on opacity {
+            Anim {}
+        }
+
+        Behavior on scale {
+            Anim {}
+        }
+    }
+
+    Behavior on implicitWidth {
+        enabled: root.screenState.launcher
+
+        Anim {
+            duration: Tokens.anim.durations.large
+            easing: Tokens.anim.emphasizedDecel
+        }
+    }
+
+    Behavior on implicitHeight {
+        enabled: root.screenState.launcher
+
+        Anim {
+            duration: Tokens.anim.durations.large
+            easing: Tokens.anim.emphasizedDecel
         }
     }
 }

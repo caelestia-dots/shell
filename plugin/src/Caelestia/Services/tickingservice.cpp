@@ -45,7 +45,7 @@ void TickingService::applyInterval(int ms) {
     if (m_running) {
         m_timer->start(m_interval);
     }
-    Q_EMIT updateIntervalChanged();
+    emit updateIntervalChanged();
 }
 
 } // namespace caelestia::services

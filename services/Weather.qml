@@ -52,6 +52,55 @@ Singleton {
         }
     }
 
+    function fixCityName(cityName: string): string {
+        if (!cityName)
+            return "";
+        const mapping = {
+            // Polish
+            "Poznan": "Poznań",
+            "Wroclaw": "Wrocław",
+            "Krakow": "Kraków",
+            "Gdansk": "Gdańsk",
+            "Lodz": "Łódź",
+            "Rzeszow": "Rzeszów",
+            "Torun": "Toruń",
+            "Bialystok": "Białystok",
+            "Czestochowa": "Częstochowa",
+            "Plock": "Płock",
+            "Ruda Slaska": "Ruda Śląska",
+            "Dabrowa Gornicza": "Dąbrowa Górnicza",
+            "Elblag": "Elbląg",
+            "Gorzow Wielkopolski": "Gorzów Wielkopolski",
+            "Zielona Gora": "Zielona Góra",
+            "Slupsk": "Słupsk",
+
+            // German
+            "Munchen": "München",
+            "Koln": "Köln",
+            "Dusseldorf": "Düsseldorf",
+            "Nurnberg": "Nürnberg",
+
+            // French & Spanish & Portuguese
+            "Sao Paulo": "São Paulo",
+            "Montreal": "Montréal",
+            "Quebec": "Québec",
+            "Bogota": "Bogotá",
+            "Medellin": "Medellín",
+            "Cordoba": "Córdoba",
+
+            // Turkish
+            "Istanbul": "İstanbul",
+            "Izmir": "İzmir",
+
+            // Scandinavian & others
+            "Malmo": "Malmö",
+            "Goteborg": "Göteborg",
+            "Zurich": "Zürich",
+            "Geneve": "Genève"
+        };
+        return mapping[cityName] || cityName;
+    }
+
     function fetchCityFromCoords(coords: string): void {
         if (cachedCities.has(coords)) {
             city = cachedCities.get(coords);
@@ -59,29 +108,30 @@ Singleton {
         }
 
         const [lat, lon] = coords.split(",").map(s => s.trim());
+        const lang = Qt.locale().name.split("_")[0] || "en";
 
         const fallbackToBigDataCloud = () => {
-            const fallbackUrl = `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lon}&localityLanguage=en`;
+            const fallbackUrl = `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lon}&localityLanguage=${lang}`;
             Requests.get(fallbackUrl, text => {
                 const geo = JSON.parse(text);
                 const geoCity = geo.city || geo.locality;
                 if (geoCity) {
-                    city = geoCity;
-                    cachedCities.set(coords, geoCity);
+                    city = fixCityName(geoCity);
+                    cachedCities.set(coords, city);
                 } else {
                     city = "Unknown City";
                 }
             });
         };
 
-        const nominatimUrl = `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=geocodejson`;
+        const nominatimUrl = `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=geocodejson&accept-language=${lang}`;
         Requests.get(nominatimUrl, text => {
             const geo = JSON.parse(text).features?.[0]?.properties.geocoding;
             if (geo) {
                 const geoCity = geo.type === "city" ? geo.name : geo.city;
                 if (geoCity) {
-                    city = geoCity;
-                    cachedCities.set(coords, geoCity);
+                    city = fixCityName(geoCity);
+                    cachedCities.set(coords, city);
                     return;
                 }
             }
@@ -90,14 +140,15 @@ Singleton {
     }
 
     function fetchCoordsFromCity(cityName: string): void {
-        const url = `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(cityName)}&count=1&language=en&format=json`;
+        const lang = Qt.locale().name.split("_")[0] || "en";
+        const url = `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(cityName)}&count=1&language=${lang}&format=json`;
 
         Requests.get(url, text => {
             const json = JSON.parse(text);
             if (json.results && json.results.length > 0) {
                 const result = json.results[0];
                 loc = result.latitude + "," + result.longitude;
-                city = result.name;
+                city = fixCityName(result.name);
             } else {
                 loc = "";
                 reload();

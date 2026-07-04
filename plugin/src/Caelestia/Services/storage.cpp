@@ -143,8 +143,8 @@ void Storage::setManualPrimaryDisk(DiskInfo* disk) {
         return;
     }
     m_manualPrimaryDisk = disk;
-    Q_EMIT manualPrimaryDiskChanged();
-    Q_EMIT primaryDiskChanged();
+    emit manualPrimaryDiskChanged();
+    emit primaryDiskChanged();
 }
 
 DiskInfo* Storage::primaryDisk() const {
@@ -296,16 +296,16 @@ void Storage::tick() {
     m_disks = next;
 
     if (listChanged) {
-        Q_EMIT disksChanged();
+        emit disksChanged();
     }
     if (std::abs(percentage() - prevPercentage) > 0.0001) {
-        Q_EMIT percentageChanged();
+        emit percentageChanged();
     }
     if (manualCleared) {
-        Q_EMIT manualPrimaryDiskChanged();
+        emit manualPrimaryDiskChanged();
     }
     if (primaryDisk() != prevPrimary) {
-        Q_EMIT primaryDiskChanged();
+        emit primaryDiskChanged();
     }
 }
 
