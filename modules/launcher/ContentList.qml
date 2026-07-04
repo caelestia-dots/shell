@@ -11,7 +11,7 @@ Item {
     id: root
 
     required property var content
-    required property DrawerVisibilities visibilities
+    required property ScreenState screenState
     required property var panels
     required property real maxHeight
     required property SearchBar search
@@ -82,8 +82,10 @@ Item {
         anchors.fill: parent
 
         sourceComponent: AppList {
+            objectName: "launcherAppList"
+
             search: root.search
-            visibilities: root.visibilities
+            screenState: root.screenState
         }
     }
 
@@ -98,8 +100,10 @@ Item {
         anchors.horizontalCenter: parent.horizontalCenter
 
         sourceComponent: WallpaperList {
+            objectName: "launcherWallpaperList"
+
             search: root.search
-            visibilities: root.visibilities
+            screenState: root.screenState
             panels: root.panels
             content: root.content
         }
@@ -153,13 +157,13 @@ Item {
     }
 
     Behavior on implicitWidth {
-        enabled: root.visibilities.launcher
+        enabled: root.screenState.launcher
 
         Anim {}
     }
 
     Behavior on implicitHeight {
-        enabled: root.visibilities.launcher
+        enabled: root.screenState.launcher
 
         Anim {}
     }

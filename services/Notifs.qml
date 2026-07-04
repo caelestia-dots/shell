@@ -30,7 +30,7 @@ Singleton {
     }
 
     function shouldShowPopup(): bool {
-        if (props.dnd || [...Visibilities.screens.values()].some(v => v.sidebar))
+        if (props.dnd || ShellState.anySidebarOpen())
             return false;
         if (GlobalConfig.notifs.fullscreen === "off" && hasFullscreen())
             return false;

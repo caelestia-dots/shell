@@ -11,7 +11,7 @@ PathView {
     id: root
 
     required property SearchBar search
-    required property var visibilities
+    required property var screenState
     required property var panels
     required property var content
 
@@ -27,7 +27,7 @@ PathView {
         let outerMargins = 0;
         if (panels.popouts.hasCurrent && panels.popouts.currentCenter + panels.popouts.nonAnimHeight / 2 > screen.height - content.implicitHeight - Config.border.thickness * 2)
             outerMargins = panels.popouts.nonAnimWidth;
-        if ((visibilities.utilities || visibilities.sidebar) && panels.utilities.implicitWidth > outerMargins)
+        if ((screenState.utilities || screenState.sidebar) && panels.utilities.implicitWidth > outerMargins)
             outerMargins = panels.utilities.implicitWidth;
         const maxWidth = screen.width - Config.border.rounding * 4 - (barMargins + outerMargins) * 2;
 
@@ -71,7 +71,7 @@ PathView {
     highlightRangeMode: PathView.StrictlyEnforceRange
 
     delegate: WallpaperItem {
-        visibilities: root.visibilities
+        screenState: root.screenState
     }
 
     path: Path {
