@@ -191,9 +191,26 @@ PageBase {
         }
 
         // Framed Icons
+        SectionHeader {
+            text: qsTr("Other power options")
+        }
+
+        SliderRow {
+            first: true
+            icon: "battery_android_alert"
+
+            label: qsTr("Critical Battery Level")
+            valueLabel: GlobalConfig.general.battery.criticalLevel + "%"
+            value: GlobalConfig.general.battery.criticalLevel / 100
+
+            onMoved: v => {
+                GlobalConfig.general.battery.criticalLevel = Math.round(v * 100);
+            }
+        }
+
         ToggleRow {
             verticalPadding: Tokens.padding.large
-            first: true
+            last: true
             text: qsTr("Framed Toast Icon")
             subtext: qsTr("Enables the framed variant of Material battery icons")
             checked: GlobalConfig.general.battery.framedMaterialIcons ?? false
