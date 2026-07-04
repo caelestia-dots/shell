@@ -248,8 +248,13 @@ Singleton {
 
     function getBatteryHorizontalIcon(percentage: real, charging = false, critical = false, framed = false): string {
         let framedIconStr = framed ? "frame_" : "";
-        if (critical)
-            return percentage > 0.5 ? "battery_android_frame_alert" : "battery_android_alert";
+        if (critical) {
+            if (percentage > 0.90)
+                return "battery_android_frame_alert";
+            if (percentage <= 0.1)
+                return "battery_android_alert";
+        }
+            // return percentage > 0.5 ? "battery_android_frame_alert" : "battery_android_alert";
         if (charging)
             return `battery_android_${framedIconStr}bolt`;
 
