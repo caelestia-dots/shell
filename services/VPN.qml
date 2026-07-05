@@ -37,7 +37,9 @@ Singleton {
                 connectCmd: custom.connectCmd || defaults.connectCmd,
                 disconnectCmd: custom.disconnectCmd || defaults.disconnectCmd,
                 interface: custom.interface || defaults.interface,
-                displayName: custom.displayName || defaults.displayName
+                displayName: custom.displayName || defaults.displayName,
+                daemonName: custom.daemonName || defaults.daemonName || "",
+                startDaemonCmd: custom.startDaemonCmd || defaults.startDaemonCmd || []
             };
         }
 
@@ -56,19 +58,22 @@ Singleton {
                 connectCmd: ["warp-cli", "connect"],
                 disconnectCmd: ["warp-cli", "disconnect"],
                 interface: "CloudflareWARP",
-                displayName: "Warp"
+                displayName: "Warp",
+                daemonName: "warp-svc"
             },
             "netbird": {
                 connectCmd: ["netbird", "up", "--no-browser"],
                 disconnectCmd: ["netbird", "down"],
                 interface: "wt0",
-                displayName: "NetBird"
+                displayName: "NetBird",
+                daemonName: "netbird"
             },
             "tailscale": {
                 connectCmd: ["tailscale", "up"],
                 disconnectCmd: ["tailscale", "down"],
                 interface: "tailscale0",
-                displayName: "Tailscale"
+                displayName: "Tailscale",
+                daemonName: "tailscaled"
             }
         };
 
@@ -104,6 +109,27 @@ Singleton {
         if (root.enabled) {
             statusProc.running = true;
         }
+    }
+
+    function commandToString(cmd: var): string {
+        return Array.isArray(cmd) ? cmd.join(" ") : String(cmd || "");
+    }
+
+    function isDaemonNotRunningError(text: string): bool {
+        return text.includes("doesn't appear to be running") || text.includes("failed to connect to local tailscaled") || text.includes("daemon is not running") || (text.includes("not running") && (text.includes("netbird") || text.includes("warp")));
+    }
+
+    function daemonNotRunningStatus(): var {
+        const cfg = root.currentConfig || {};
+        const daemon = cfg.daemonName || `${root.providerName} daemon`;
+        const startCmd = commandToString(cfg.startDaemonCmd || []);
+
+        return {
+            connected: false,
+            state: "disconnected",
+            reason: startCmd ? `Service not running (${daemon}; run: ${startCmd})` : `Service not running (${daemon}; start it with your service manager)`,
+            authUrl: ""
+        };
     }
 
     function getStatusCommand(): var {
@@ -351,32 +377,10 @@ Singleton {
         }
         stderr: StdioCollector {
             onStreamFinished: {
-                if (text.trim().length > 0) {
-                    if (text.includes("doesn't appear to be running") || text.includes("failed to connect to local tailscaled") || text.includes("daemon is not running") || text.includes("not running") && (text.includes("netbird") || text.includes("warp"))) {
-                        let cmd = "sudo systemctl start ";
-                        switch (root.providerName) {
-                        case "tailscale":
-                            cmd += "tailscaled";
-                            break;
-                        case "netbird":
-                            cmd += "netbird";
-                            break;
-                        case "warp":
-                            cmd += "warp-svc";
-                            break;
-                        default:
-                            cmd += root.providerName + "d";
-                            break;
-                        }
-                        const errorStatus = {
-                            connected: false,
-                            state: "disconnected",
-                            reason: `Service not running (run: ${cmd})`,
-                            authUrl: ""
-                        };
-                        root.updateStatus(errorStatus);
-                    }
-                }
+                const error = text.trim();
+
+                if (error.length > 0 && root.isDaemonNotRunningError(error))
+                    root.updateStatus(root.daemonNotRunningStatus());
             }
         }
     }
