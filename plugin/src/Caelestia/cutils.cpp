@@ -7,8 +7,8 @@
 #include <qdir.h>
 #include <qfileinfo.h>
 #include <qfuturewatcher.h>
-#include <qloggingcategory.h>
 #include <qlocale.h>
+#include <qloggingcategory.h>
 #include <qqmlengine.h>
 #include <qregularexpression.h>
 #include <qtranslator.h>
@@ -19,7 +19,8 @@ namespace {
 
 struct TranslatorLoader {
     TranslatorLoader() {
-        if (!qApp) return;
+        if (!qApp)
+            return;
 
         const QString locale = QLocale::system().name();
         auto* translator = new QTranslator(qApp);
@@ -40,7 +41,7 @@ struct TranslatorLoader {
     }
 } s_translatorLoader;
 
-}
+} // namespace
 
 namespace caelestia {
 
