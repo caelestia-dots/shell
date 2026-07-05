@@ -7,8 +7,8 @@ import Caelestia.Config
 import qs.components
 import qs.components.controls
 import qs.services
-import qs.modules.nexus.common
 import qs.utils
+import qs.modules.nexus.common
 
 PageBase {
     id: root
@@ -17,9 +17,6 @@ PageBase {
 
     readonly property var batteryLevel: nState.selectedBatteryLevel
     readonly property var lowWarning: nState.lowWarningSelected
-
-    title: qsTr("%1 warning").arg(lowWarning ? "Low battery" : "Overcharge battery")
-    isSubPage: true
 
     function toggleProperty(propName) {
         setValueProperty(propName, !batteryLevel[propName]);
@@ -62,10 +59,10 @@ PageBase {
         let originalConfig = lowWarning ? GlobalConfig.general.battery.lowBatteryWarnLevels : GlobalConfig.general.battery.chargingWarnLevels;
         let configCopy = Array.from(originalConfig);
 
-        if (!levelToAdd){
+        if (!levelToAdd) {
             return;
         }
-    
+
         configCopy.push({
             level: levelToAdd.level,
             title: levelToAdd.title,
@@ -80,6 +77,9 @@ PageBase {
         else
             GlobalConfig.general.battery.chargingWarnLevels = configCopy;
     }
+
+    title: qsTr("%1 warning").arg(lowWarning ? "Low battery" : "Overcharge battery")
+    isSubPage: true
 
     // So we need the following information
     ColumnLayout {
@@ -97,6 +97,9 @@ PageBase {
             // Title
             StyledTextField {
                 id: warningTitleField
+
+                property bool isSaved: false
+
                 Layout.fillWidth: true
                 placeholderText: "Warning title"
                 // supportingText: "First line of text displayed during the battery toast"
@@ -105,7 +108,6 @@ PageBase {
                 text: root.batteryLevel?.title ?? ""
                 enabled: root.batteryLevel?.enabled ?? false
 
-                property bool isSaved: false
                 onAccepted: {
                     setValueProperty("title", text);
                     isSaved = true;
@@ -116,6 +118,7 @@ PageBase {
 
                 Timer {
                     id: saveTimerTitle
+
                     interval: 1500 // Flash for 1.5 seconds
                     onTriggered: warningTitleField.isSaved = false
                 }
@@ -124,6 +127,9 @@ PageBase {
             // Message
             StyledTextField {
                 id: warningMessageField
+
+                property bool isSaved: false
+
                 Layout.fillWidth: true
                 placeholderText: "Warning message"
                 leadingIcon: "text_fields"
@@ -131,7 +137,6 @@ PageBase {
                 text: root.batteryLevel?.message ?? ""
                 enabled: root.batteryLevel?.enabled ?? false
 
-                property bool isSaved: false
                 onAccepted: {
                     setValueProperty("message", text);
                     isSaved = true;
@@ -142,6 +147,7 @@ PageBase {
 
                 Timer {
                     id: saveTimerMessage
+
                     interval: 1500 // Flash for 1.5 seconds
                     onTriggered: warningMessageField.isSaved = false
                 }
@@ -159,7 +165,7 @@ PageBase {
             enabled: root.batteryLevel?.enabled ?? false
             onMoved: v => {
                 setValueProperty("level", Math.round(v * 100));
-                if (root.batteryLevel?.autopick ?? false){
+                if (root.batteryLevel?.autopick ?? false) {
                     setValueProperty("icon", Icons.getBatteryHorizontalIcon(v, false, root.batteryLevel?.critical ?? false, GlobalConfig.general.battery.framedMaterialIcons));
                 }
             }
@@ -168,6 +174,8 @@ PageBase {
         StyledTextField {
             id: batteryIconField
 
+            property bool isSaved: false
+
             Layout.fillWidth: true
             placeholderText: "Warning icon"
 
@@ -175,7 +183,6 @@ PageBase {
             enabled: (root.batteryLevel?.enabled ?? false) && (!root.batteryLevel?.autopick ?? false)
 
             trailingIcon: text
-            property bool isSaved: false
 
             onAccepted: {
                 setValueProperty("icon", text);
@@ -187,6 +194,7 @@ PageBase {
 
             Timer {
                 id: saveTimerIcon
+
                 interval: 1500 // Flash for 1.5 seconds
                 onTriggered: warningMessageField.isSaved = false
             }
@@ -241,6 +249,7 @@ PageBase {
 
             ButtonBase {
                 id: deleteBtn
+
                 visible: !newLevelPage
 
                 fillWidth: true
@@ -280,6 +289,7 @@ PageBase {
 
             ButtonBase {
                 id: addBtn
+
                 visible: newLevelPage
 
                 fillWidth: true
