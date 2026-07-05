@@ -19,14 +19,13 @@ ItemList {
     required property NexusState nState
     property string text: isLowWarning ? "low battery" : "high battery"
 
-
     showList: isToggled
     placeholderIcon: isToggled ? "plug_connect" : "power_off"
     placeholderText: isToggled ? qsTr("No %1 warning found").arg(text) : qsTr("%1 warning disabled").arg(text.charAt(0).toUpperCase() + text.slice(1))
 
     model: ScriptModel {
         values: {
-            const data = isLowWarning ? GlobalConfig.general.battery.lowBatteryWarnLevels : GlobalConfig.general.battery.chargingWarnLevels
+            const data = isLowWarning ? GlobalConfig.general.battery.lowBatteryWarnLevels : GlobalConfig.general.battery.chargingWarnLevels;
             const values = [...data].sort((a, b) => isLowWarning ? b.level - a.level : a.level - b.level);
             return values;
         }
@@ -36,14 +35,13 @@ ItemList {
         id: warningLayer
 
         required property var modelData
-        property real textOpacity: modelData.enabled ? 1 : 0.5        
+        property real textOpacity: modelData.enabled ? 1 : 0.5
 
         anchors.left: root.list.contentItem.left
         anchors.right: root.list.contentItem.right
         implicitHeight: lowWarnLayout.implicitHeight + lowWarnLayout.anchors.margins * 2
         radius: Tokens.rounding.extraSmall
         anchors.fill: undefined
-
 
         RowLayout {
             id: lowWarnLayout
@@ -62,7 +60,7 @@ ItemList {
             }
 
             ColumnLayout {
-                Layout.fillWidth: true 
+                Layout.fillWidth: true
                 spacing: 0
                 opacity: warningLayer.textOpacity
 
@@ -71,7 +69,7 @@ ItemList {
                     text: qsTr("%1 % Battery").arg(warningLayer.modelData.level)
                     font: Tokens.font.body.small
                     elide: Text.ElideRight
-                } 
+                }
 
                 StyledText {
                     Layout.fillWidth: true
@@ -92,6 +90,7 @@ ItemList {
 
                     Component {
                         id: btnComp
+
                         IconButton {
                             icon: "settings"
                             type: IconButton.Text
@@ -108,7 +107,6 @@ ItemList {
                         }
                     }
                 }
-                
             }
         }
     }

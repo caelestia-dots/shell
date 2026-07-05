@@ -14,8 +14,6 @@ import qs.modules.nexus.pages.battery
 PageBase {
     id: root
 
-    title: qsTr("Power")
-
     function toggleLowWarns() {
         GlobalConfig.general.battery.enableLowBatteryWarning = !GlobalConfig.general.battery.enableLowBatteryWarning;
     }
@@ -45,6 +43,8 @@ PageBase {
         lowWarnConfig.forEach(changeIcon);
         highWarnConfig.forEach(changeIcon);
     }
+
+    title: qsTr("Power")
 
     ColumnLayout {
         anchors.horizontalCenter: parent.horizontalCenter
