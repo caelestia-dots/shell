@@ -254,7 +254,7 @@ Singleton {
             if (percentage <= 0.1)
                 return "battery_android_alert";
         }
-            // return percentage > 0.5 ? "battery_android_frame_alert" : "battery_android_alert";
+        // return percentage > 0.5 ? "battery_android_frame_alert" : "battery_android_alert";
         if (charging)
             return `battery_android_${framedIconStr}bolt`;
 
