@@ -766,6 +766,16 @@ For example, to disable the bar on DP-1:
                     "interface": "your-connection-name",
                     "displayName": "Wireguard (Your VPN)",
                     "enabled": false
+                },
+                {
+                    "name": "myvpn",
+                    "interface": "myvpn0", 
+                    "displayName": "My VPN",
+                    "enabled": false,
+                    "connectCmd": ["myvpn", "up"],
+                    "disconnectCmd": ["myvpn", "down"],
+                    "daemonName": "myvpn-daemon",
+                    "startDaemonCmd": ["sudo", "rc-service", "myvpn-daemon", "start"]
                 }
             ]
         },
