@@ -19,7 +19,7 @@ qml_module(caelestia-core
 target_compile_definitions(caelestia-core PRIVATE CAELESTIA_VERSION="${VERSION}")
 
 # Translations install path for the translator loader
-get_filename_component(_caelestia_translations_dir "${CMAKE_INSTALL_PREFIX}/${INSTALL_QSCONFDIR}/translations" ABSOLUTE)
+get_filename_component(_caelestia_translations_dir "${CMAKE_INSTALL_PREFIX}/${INSTALL_TRANSLATIONSDIR}" ABSOLUTE)
 target_compile_definitions(caelestia-core PRIVATE CAELESTIA_TRANSLATIONS_DIR="${_caelestia_translations_dir}")
 
 add_subdirectory(Components)

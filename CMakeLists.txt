@@ -38,6 +38,7 @@ set(ENABLE_MODULES "extras;plugin;shell;m3shapes;translations" CACHE STRING "Mod
 set(INSTALL_LIBDIR "usr/lib/caelestia" CACHE STRING "Library install dir")
 set(INSTALL_QMLDIR "usr/lib/qt6/qml" CACHE STRING "QML install dir")
 set(INSTALL_QSCONFDIR "etc/xdg/quickshell/caelestia" CACHE STRING "Quickshell config install dir")
+set(INSTALL_TRANSLATIONSDIR "${INSTALL_QSCONFDIR}/translations" CACHE STRING "Translations install dir")
 
 add_compile_options(
     -Wall -Wextra -Wpedantic -Wshadow -Wconversion
