@@ -142,7 +142,7 @@ Item {
         radius: Tokens.rounding.medium
         color: modelData?.urgency === NotificationUrgency.Critical ? Colours.palette.m3secondaryContainer : Colours.tPalette.m3surfaceContainer
 
-        CustomMouseArea {
+        MouseArea {
             anchors.fill: parent
 
             cursorShape: Qt.PointingHandCursor
@@ -207,7 +207,8 @@ Item {
                     id: fallbackIconComp
 
                     MaterialIcon {
-                        anchors.centerIn: parent
+                        horizontalAlignment: Text.AlignHCenter
+                        verticalAlignment: Text.AlignVCenter
                         text: Icons.getNotifIcon(card.modelData?.summary ?? "", card.modelData?.urgency ?? NotificationUrgency.Normal)
                         color: card.modelData?.urgency === NotificationUrgency.Critical ? Colours.palette.m3onError : Colours.palette.m3onSecondaryContainer
                         fontStyle: Tokens.font.icon.large
