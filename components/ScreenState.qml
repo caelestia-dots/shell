@@ -1,6 +1,9 @@
 import Quickshell
 
 PersistentProperties {
+    required property ShellScreen modelData
+
+    // Drawer visibilities
     property bool bar
     property bool osd
     property bool session
@@ -8,4 +11,8 @@ PersistentProperties {
     property bool dashboard
     property bool utilities
     property bool sidebar
+
+    // Dashboard state
+    property int dashboardTab
+    property date dashboardDate: new Date()
 }

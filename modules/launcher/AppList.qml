@@ -13,8 +13,8 @@ import qs.modules.launcher.services
 StyledListView {
     id: root
 
-    required property StyledTextField search
-    required property DrawerVisibilities visibilities
+    required property SearchBar search
+    required property ScreenState screenState
 
     model: ScriptModel {
         id: model
@@ -221,7 +221,7 @@ StyledListView {
         id: appItem
 
         AppItem {
-            visibilities: root.visibilities
+            screenState: root.screenState
         }
     }
 
