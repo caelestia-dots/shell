@@ -267,6 +267,7 @@ Item {
 
         readonly property bool hasImage: modelData?.image.length > 0
         readonly property bool hasAppIcon: modelData?.appIcon.length > 0
+        readonly property var defaultAction: modelData?.actions.find(a => a.identifier === "default") ?? null
 
         implicitHeight: content.implicitHeight + Tokens.padding.medium * 2
 
@@ -282,6 +283,8 @@ Item {
             onClicked: event => {
                 if (event.button === Qt.MiddleButton)
                     card.modelData?.close();
+                else if (card.defaultAction?.invoke)
+                    card.defaultAction.invoke();
                 else
                     card.expanded = !card.expanded;
             }
@@ -394,11 +397,11 @@ Item {
 
                 RowLayout {
                     Layout.topMargin: Tokens.spacing.extraSmall
-                    visible: (card.modelData?.actions.length ?? 0) > 0
+                    visible: (card.modelData?.actions.some(a => a.identifier !== "default") ?? false)
                     spacing: Tokens.spacing.small
 
                     Repeater {
-                        model: card.modelData?.actions ?? []
+                        model: card.modelData?.actions.filter(a => a.identifier !== "default") ?? []
 
                         TextButton {
                             required property var modelData
