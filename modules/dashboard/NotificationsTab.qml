@@ -16,6 +16,12 @@ Item {
     id: root
 
     readonly property list<NotifData> notifs: Notifs.notClosed
+    readonly property list<string> groups: {
+        const map = new Map();
+        for (const n of notifs)
+            map.set(n.appName, null);
+        return [...map.keys()];
+    }
 
     implicitWidth: 840
     implicitHeight: layout.implicitHeight
@@ -111,20 +117,145 @@ Item {
             spacing: Tokens.spacing.small
 
             model: ScriptModel {
-                values: [...root.notifs]
+                values: [...root.groups]
             }
 
             StyledScrollBar.vertical: StyledScrollBar {
                 flickable: list
             }
 
-            delegate: NotifCard {
+            delegate: NotifGroupCard {
                 width: list.width
             }
 
             Behavior on implicitHeight {
                 Anim {}
             }
+        }
+    }
+
+    component NotifGroupCard: StyledRect {
+        id: group
+
+        required property string modelData
+        property bool expanded
+
+        readonly property list<NotifData> groupNotifs: root.notifs.filter(n => n.appName === group.modelData)
+        readonly property int previewNum: Config.notifs.groupPreviewNum
+        readonly property bool expandable: groupNotifs.length > previewNum
+        readonly property list<NotifData> visibleNotifs: expanded ? groupNotifs : groupNotifs.slice(0, previewNum)
+        readonly property bool critical: groupNotifs.some(n => n.urgency === NotificationUrgency.Critical)
+
+        implicitHeight: groupContent.implicitHeight + Tokens.padding.medium * 2
+
+        radius: Tokens.rounding.large
+        color: Colours.tPalette.m3surfaceContainer
+
+        ColumnLayout {
+            id: groupContent
+
+            anchors.left: parent.left
+            anchors.right: parent.right
+            anchors.top: parent.top
+            anchors.margins: Tokens.padding.medium
+
+            spacing: Tokens.spacing.small
+
+            RowLayout {
+                Layout.fillWidth: true
+                Layout.leftMargin: Tokens.padding.small
+                spacing: Tokens.spacing.small
+
+                StyledText {
+                    text: group.modelData || qsTr("Unknown")
+                    font: Tokens.font.body.builders.medium.weight(Font.DemiBold).build()
+                    color: Colours.palette.m3onSurface
+                    elide: Text.ElideRight
+                }
+
+                StyledText {
+                    Layout.fillWidth: true
+                    animate: true
+                    text: group.groupNotifs[0]?.timeStr ?? ""
+                    font: Tokens.font.body.small
+                    color: Colours.palette.m3outline
+                    elide: Text.ElideRight
+                }
+
+                StyledRect {
+                    implicitWidth: expandBtn.implicitWidth + Tokens.padding.large
+                    implicitHeight: groupCount.implicitHeight + Tokens.padding.extraSmall
+
+                    color: group.critical ? Colours.palette.m3error : Colours.tPalette.m3surfaceContainerHigh
+                    radius: Tokens.rounding.full
+
+                    StateLayer {
+                        disabled: !group.expandable
+                        color: group.critical ? Colours.palette.m3onError : Colours.palette.m3onSurface
+                        onClicked: group.expanded = !group.expanded
+                    }
+
+                    RowLayout {
+                        id: expandBtn
+
+                        anchors.centerIn: parent
+                        spacing: Tokens.spacing.extraSmall
+
+                        StyledText {
+                            id: groupCount
+
+                            Layout.leftMargin: Tokens.padding.extraSmall / 2
+                            animate: true
+                            text: group.groupNotifs.length
+                            color: group.critical ? Colours.palette.m3onError : Colours.palette.m3onSurfaceVariant
+                            font: Tokens.font.body.small
+                        }
+
+                        MaterialIcon {
+                            Layout.rightMargin: -Tokens.padding.extraSmall / 2
+                            visible: group.expandable
+                            text: "expand_more"
+                            color: group.critical ? Colours.palette.m3onError : Colours.palette.m3onSurfaceVariant
+                            rotation: group.expanded ? 180 : 0
+
+                            Behavior on rotation {
+                                Anim {}
+                            }
+                        }
+                    }
+                }
+
+                IconButton {
+                    icon: "close"
+                    type: IconButton.Text
+                    onClicked: {
+                        for (const notif of group.groupNotifs.slice())
+                            notif.close();
+                    }
+                }
+            }
+
+            Repeater {
+                model: ScriptModel {
+                    values: [...group.visibleNotifs]
+                }
+
+                NotifCard {
+                    Layout.fillWidth: true
+                }
+            }
+
+            TextButton {
+                Layout.alignment: Qt.AlignHCenter
+                visible: group.expandable && !group.expanded
+                text: qsTr("Show %1 more").arg(group.groupNotifs.length - group.previewNum)
+                type: TextButton.Text
+                onClicked: group.expanded = true
+            }
+        }
+
+        Behavior on implicitHeight {
+            Anim {}
         }
     }
 
@@ -140,7 +271,7 @@ Item {
         implicitHeight: content.implicitHeight + Tokens.padding.medium * 2
 
         radius: Tokens.rounding.medium
-        color: modelData?.urgency === NotificationUrgency.Critical ? Colours.palette.m3secondaryContainer : Colours.tPalette.m3surfaceContainer
+        color: modelData?.urgency === NotificationUrgency.Critical ? Colours.palette.m3secondaryContainer : Colours.tPalette.m3surfaceContainerHigh
 
         MouseArea {
             anchors.fill: parent
@@ -226,10 +357,7 @@ Item {
 
                     StyledText {
                         Layout.fillWidth: true
-                        text: {
-                            const app = card.modelData?.appName || qsTr("Unknown");
-                            return `${app} • ${card.modelData?.timeStr ?? ""}`;
-                        }
+                        text: card.modelData?.timeStr ?? ""
                         font: Tokens.font.body.small
                         color: Colours.palette.m3onSurfaceVariant
                         elide: Text.ElideRight
