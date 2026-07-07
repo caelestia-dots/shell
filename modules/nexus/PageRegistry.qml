@@ -81,6 +81,12 @@ QtObject {
             description: qsTr("UI language, weather location, display units"),
             category: "shell"
         },
+        {
+            label: qsTr("Keyboard shortcuts"),
+            icon: "keyboard",
+            description: qsTr("View your Hyprland keybinds"),
+            category: "shell"
+        },
 
         // About
         {
