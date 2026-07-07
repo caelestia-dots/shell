@@ -18,7 +18,21 @@ StyledRect {
     required property NotifData modelData
     readonly property bool hasImage: modelData.image.length > 0
     readonly property bool hasAppIcon: modelData.appIcon.length > 0
-    readonly property int bodyTextFormat: /[<*_`#\[\]]/.test(modelData.body) ? Text.MarkdownText : Text.PlainText
+    // Notification bodies allow a small HTML subset (<a>, <b>, <i>, <u>), not Markdown
+    readonly property bool hasMarkup: /<\/?(a|b|i|u)[ >]/i.test(modelData.body)
+    readonly property int bodyTextFormat: hasMarkup ? Text.RichText : /[<*_`#\[\]]/.test(modelData.body) ? Text.MarkdownText : Text.PlainText
+    // Escapes everything, then re-opens only the tags above, so a body can't sneak in
+    // bigger markup (e.g. <h1>, <table>) that Qt's rich text would happily also render
+    readonly property string richBody: {
+        if (!hasMarkup)
+            return modelData.body;
+        let s = modelData.body.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+        s = s.replace(/&lt;a href="([^"]*)"&gt;/gi, "<a href=\"$1\">");
+        return s.replace(/&lt;(\/?)(b|i|u)&gt;/gi, "<$1$2>");
+    }
+    // Eliding rich text mid-tag breaks the markup, so the one-line preview strips it
+    // entirely (links included, since a truncated URL isn't useful there anyway)
+    readonly property string plainBody: modelData.body.replace(/<a[^>]*>[\s\S]*?<\/a>/gi, "").replace(/<[^>]+>/g, "").replace(/\s+/g, " ").trim()
     readonly property int nonAnimHeight: summary.implicitHeight + (root.expanded ? Tokens.spacing.extraSmall * 2 + appName.height + body.height + actions.height + actions.anchors.topMargin : bodyPreview.height) + inner.anchors.margins * 2
     property bool expanded: Config.notifs.openExpanded
 
@@ -391,7 +405,7 @@ StyledRect {
                 anchors.rightMargin: Tokens.spacing.small
 
                 animate: true
-                textFormat: root.bodyTextFormat
+                textFormat: Text.PlainText
                 text: bodyPreviewMetrics.elidedText
                 color: Colours.palette.m3onSurfaceVariant
                 font: Tokens.font.body.small
@@ -408,7 +422,7 @@ StyledRect {
             TextMetrics {
                 id: bodyPreviewMetrics
 
-                text: root.modelData.body
+                text: root.plainBody
                 font: bodyPreview.font
                 elide: Text.ElideRight
                 elideWidth: bodyPreview.width
@@ -424,7 +438,7 @@ StyledRect {
 
                 animate: true
                 textFormat: root.bodyTextFormat
-                text: root.modelData.body
+                text: root.richBody
                 color: Colours.palette.m3onSurfaceVariant
                 font: Tokens.font.body.small
                 wrapMode: Text.WrapAtWordBoundaryOrAnywhere
