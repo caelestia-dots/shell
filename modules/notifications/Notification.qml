@@ -98,9 +98,27 @@ StyledRect {
             if (!GlobalConfig.notifs.actionOnClick || event.button !== Qt.LeftButton)
                 return;
 
+            // "default" is meant for a plain click; most senders (Chrome included) also
+            // send other actions, so this can't just be actions.length === 1 anymore
             const actions = root.modelData.actions;
-            if (actions.length === 1)
+            const defaultAction = actions.find(a => a.identifier === "default");
+            if (defaultAction) {
+                defaultAction.invoke();
+                root.modelData.popup = false;
+                return;
+            }
+
+            if (actions.length === 1) {
                 actions[0].invoke();
+                root.modelData.popup = false;
+                return;
+            }
+
+            const linkMatch = root.modelData.body.match(/<a[^>]*href="([^"]+)"/i);
+            if (linkMatch) {
+                Qt.openUrlExternally(linkMatch[1]);
+                root.modelData.popup = false;
+            }
         }
 
         Item {
