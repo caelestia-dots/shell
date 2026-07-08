@@ -23,26 +23,6 @@ PageBase {
     property bool hasError: false
     property string errorMessage: ""
 
-    title: root.ssid.length > 0 ? root.ssid : qsTr("Enterprise network")
-    isSubPage: true
-
-    Component.onCompleted: {
-        if (root.ssid.length > 0 && Nmcli.hasSavedProfile(root.ssid)) {
-            Nmcli.getEnterpriseConfig(root.ssid, cfg => {
-                if (!cfg)
-                    return;
-                identityField.text = cfg.identity;
-                anonIdentityField.text = cfg.anonymousIdentity;
-                domainSuffixField.text = cfg.domainSuffixMatch;
-                caCertField.text = cfg.caCertPath;
-                root.eapMethod = cfg.eapMethod;
-                root.phase2Method = cfg.phase2Method;
-                eapSelect.active = cfg.eapMethod === "tls" ? tlsItem : (cfg.eapMethod === "ttls" ? ttlsItem : peapItem);
-                phase2Select.active = cfg.phase2Method === "pap" ? papItem : (cfg.phase2Method === "gtc" ? gtcItem : (cfg.phase2Method === "md5" ? md5Item : mschapv2Item));
-            });
-        }
-    }
-
     function attemptConnect(): void {
         if (!root.network || root.connecting) {
             return;
@@ -82,6 +62,26 @@ PageBase {
                 }
             }
         });
+    }
+
+    title: root.ssid.length > 0 ? root.ssid : qsTr("Enterprise network")
+    isSubPage: true
+
+    Component.onCompleted: {
+        if (root.ssid.length > 0 && Nmcli.hasSavedProfile(root.ssid)) {
+            Nmcli.getEnterpriseConfig(root.ssid, cfg => {
+                if (!cfg)
+                    return;
+                identityField.text = cfg.identity;
+                anonIdentityField.text = cfg.anonymousIdentity;
+                domainSuffixField.text = cfg.domainSuffixMatch;
+                caCertField.text = cfg.caCertPath;
+                root.eapMethod = cfg.eapMethod;
+                root.phase2Method = cfg.phase2Method;
+                eapSelect.active = cfg.eapMethod === "tls" ? tlsItem : (cfg.eapMethod === "ttls" ? ttlsItem : peapItem);
+                phase2Select.active = cfg.phase2Method === "pap" ? papItem : (cfg.phase2Method === "gtc" ? gtcItem : (cfg.phase2Method === "md5" ? md5Item : mschapv2Item));
+            });
+        }
     }
 
     ColumnLayout {

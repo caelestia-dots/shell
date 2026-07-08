@@ -19,9 +19,6 @@ PageBase {
     property bool connecting: false
     property bool hasError: false
 
-    title: root.ssid.length > 0 ? root.ssid : qsTr("Enter password")
-    isSubPage: true
-
     function attemptConnect(): void {
         if (!root.network || root.connecting) {
             return;
@@ -41,6 +38,9 @@ PageBase {
             }
         });
     }
+
+    title: root.ssid.length > 0 ? root.ssid : qsTr("Enter password")
+    isSubPage: true
 
     ColumnLayout {
         anchors.horizontalCenter: parent.horizontalCenter

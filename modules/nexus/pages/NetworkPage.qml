@@ -102,17 +102,6 @@ PageBase {
                 radius: Tokens.rounding.extraSmall
                 anchors.fill: undefined
 
-                StyledRect {
-                    z: -1
-                    anchors.fill: parent
-                    radius: network.radius
-                    color: network.modelData.active ? Qt.alpha(Colours.palette.m3primary, 0.12) : "transparent"
-
-                    Behavior on color {
-                        CAnim {}
-                    }
-                }
-
                 onClicked: {
                     if (modelData.active) {
                         if (modelData.isEnterprise) {
@@ -162,6 +151,17 @@ PageBase {
                     }
 
                     target: root
+                }
+
+                StyledRect {
+                    z: -1
+                    anchors.fill: parent
+                    radius: network.radius
+                    color: network.modelData.active ? Qt.alpha(Colours.palette.m3primary, 0.12) : "transparent"
+
+                    Behavior on color {
+                        CAnim {}
+                    }
                 }
 
                 RowLayout {
