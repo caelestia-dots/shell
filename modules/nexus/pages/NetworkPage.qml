@@ -102,6 +102,17 @@ PageBase {
                 radius: Tokens.rounding.extraSmall
                 anchors.fill: undefined
 
+                StyledRect {
+                    z: -1
+                    anchors.fill: parent
+                    radius: network.radius
+                    color: network.modelData.active ? Qt.alpha(Colours.palette.m3primary, 0.12) : "transparent"
+
+                    Behavior on color {
+                        CAnim {}
+                    }
+                }
+
                 onClicked: {
                     if (modelData.active) {
                         if (modelData.isEnterprise) {
@@ -187,60 +198,98 @@ PageBase {
                         }
                     }
 
-                    AnimLoader {
-                        sourceComp: Nmcli.connectingSsid() === network.modelData.ssid ? loadingComp : iconComp
+                    StyledRect {
+                        id: statusPill
 
-                        Component {
-                            id: iconComp
+                        readonly property bool saved: Nmcli.hasSavedProfile(network.modelData.ssid)
 
-                            MaterialIcon {
-                                readonly property bool saved: Nmcli.hasSavedProfile(network.modelData.ssid)
+                        implicitWidth: statusPillRow.implicitWidth
+                        implicitHeight: statusPillRow.implicitHeight
+                        radius: Tokens.rounding.full
+                        color: network.modelData.active ? Qt.alpha(Colours.palette.m3primary, 0.18) : statusPill.saved ? Colours.palette.m3surfaceContainerHigh : "transparent"
 
-                                text: network.modelData.active ? (network.modelData.isEnterprise ? "settings" : "link_off") : (saved ? "wifi_lock" : (network.modelData.isSecure ? "lock" : "wifi"))
-                                fill: network.modelData.active || saved ? 1 : 0
-                                color: network.modelData.active || saved ? Colours.palette.m3primary : Colours.palette.m3onSurfaceVariant
-                                fontStyle: Tokens.font.icon.medium
-                                opacity: network.textOpacity
-                            }
+                        Behavior on color {
+                            CAnim {}
                         }
 
-                        Component {
-                            id: loadingComp
+                        Row {
+                            id: statusPillRow
 
-                            LoadingIndicator {
-                                implicitSize: Math.round(Tokens.font.icon.medium.pointSize * 1.3)
+                            Item {
+                                id: statusSegment
+
+                                width: Tokens.font.icon.medium.pointSize + Tokens.padding.small * 2
+                                height: width
+
+                                AnimLoader {
+                                    anchors.centerIn: parent
+                                    sourceComp: Nmcli.connectingSsid() === network.modelData.ssid ? loadingComp : iconComp
+
+                                    Component {
+                                        id: iconComp
+
+                                        MaterialIcon {
+                                            readonly property bool saved: Nmcli.hasSavedProfile(network.modelData.ssid)
+
+                                            text: network.modelData.active ? (network.modelData.isEnterprise ? "settings" : "link_off") : (saved ? "wifi_lock" : (network.modelData.isSecure ? "lock" : "wifi"))
+                                            fill: network.modelData.active || saved ? 1 : 0
+                                            color: network.modelData.active || saved ? Colours.palette.m3primary : Colours.palette.m3onSurfaceVariant
+                                            fontStyle: Tokens.font.icon.medium
+                                            opacity: network.textOpacity
+                                        }
+                                    }
+
+                                    Component {
+                                        id: loadingComp
+
+                                        LoadingIndicator {
+                                            implicitSize: Math.round(Tokens.font.icon.medium.pointSize * 1.3)
+                                        }
+                                    }
+                                }
                             }
-                        }
-                    }
 
-                    Loader {
-                        active: Nmcli.hasSavedProfile(network.modelData.ssid)
-                        asynchronous: true
-                        sourceComponent: Item {
-                            implicitWidth: Tokens.font.icon.medium.pointSize + Tokens.padding.small * 2
-                            implicitHeight: implicitWidth
+                            Item {
+                                visible: statusPill.saved
+                                width: visible ? 1 : 0
+                                height: statusSegment.height
 
-                            StateLayer {
-                                id: forgetState
-
-                                radius: Tokens.rounding.full
-                                onClicked: Nmcli.forgetNetwork(network.modelData.ssid)
+                                Rectangle {
+                                    anchors.centerIn: parent
+                                    width: 1
+                                    height: parent.height * 0.5
+                                    color: Qt.alpha(network.modelData.active ? Colours.palette.m3primary : Colours.palette.m3onSurfaceVariant, 0.3)
+                                }
                             }
 
-                            MaterialIcon {
-                                anchors.centerIn: parent
-                                text: "delete"
-                                fontStyle: Tokens.font.icon.small
-                                color: forgetState.containsMouse ? Colours.palette.m3error : Colours.palette.m3onSurfaceVariant
-                                opacity: (forgetState.containsMouse ? 1 : 0.6) * network.textOpacity
+                            Item {
+                                visible: statusPill.saved
+                                width: visible ? statusSegment.width : 0
+                                height: statusSegment.height
 
-                                Behavior on color {
-                                    CAnim {}
+                                StateLayer {
+                                    id: forgetState
+
+                                    anchors.fill: parent
+                                    radius: Tokens.rounding.full
+                                    onClicked: Nmcli.forgetNetwork(network.modelData.ssid)
                                 }
 
-                                Behavior on opacity {
-                                    Anim {
-                                        type: Anim.DefaultEffects
+                                MaterialIcon {
+                                    anchors.centerIn: parent
+                                    text: "delete"
+                                    fontStyle: Tokens.font.icon.small
+                                    color: forgetState.containsMouse ? Colours.palette.m3error : Colours.palette.m3onSurfaceVariant
+                                    opacity: (forgetState.containsMouse ? 1 : 0.6) * network.textOpacity
+
+                                    Behavior on color {
+                                        CAnim {}
+                                    }
+
+                                    Behavior on opacity {
+                                        Anim {
+                                            type: Anim.DefaultEffects
+                                        }
                                     }
                                 }
                             }
