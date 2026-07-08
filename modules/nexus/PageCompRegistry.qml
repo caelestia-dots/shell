@@ -52,6 +52,9 @@ QtObject {
                 Component {
                     EnterpriseConnectPage {}
                 }
+                Component {
+                    WifiPasswordPage {}
+                }
             }
         },
         Component {

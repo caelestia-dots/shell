@@ -131,7 +131,10 @@ PageBase {
                             return;
                         }
 
-                        NetworkConnection.handleConnect(modelData);
+                        NetworkConnection.handleConnect(modelData, null, network => {
+                            root.nState.selectedWifiNetwork = network;
+                            root.nState.openSubPage(3);
+                        });
                         currentSelected = true;
                         root.networkSelected(modelData);
                     }
