@@ -257,7 +257,6 @@ ColumnLayout {
         }
     }
 
-
     // Ethernet section
     StyledText {
         visible: root.view === "ethernet"
