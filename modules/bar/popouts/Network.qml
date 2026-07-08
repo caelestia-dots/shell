@@ -18,7 +18,7 @@ ColumnLayout {
     property string view: "wireless" // "wireless" or "ethernet"
     property var passwordNetwork: null
     property bool showPasswordDialog: false
-    property string enterpriseNoticeSsid: ""
+    property var enterpriseNetwork: null
 
     spacing: Tokens.spacing.small
     width: Tokens.sizes.bar.networkWidth
@@ -170,8 +170,8 @@ ColumnLayout {
                                     if (networkItem.modelData.active) {
                                         Nmcli.disconnectFromNetwork();
                                     } else if (networkItem.modelData.isEnterprise && !Nmcli.hasSavedProfile(networkItem.modelData.ssid)) {
-                                        root.enterpriseNoticeSsid = networkItem.modelData.ssid;
-                                        enterpriseNoticeTimer.restart();
+                                        root.enterpriseNetwork = networkItem.modelData;
+                                        root.popouts.currentName = "enterprisepassword";
                                     } else {
                                         root.connectingToSsid = networkItem.modelData.ssid;
                                         NetworkConnection.handleConnect(networkItem.modelData, null, network => {
@@ -257,47 +257,6 @@ ColumnLayout {
         }
     }
 
-    StyledRect {
-        id: enterpriseNotice
-
-        visible: root.view === "wireless" && root.enterpriseNoticeSsid.length > 0
-        Layout.preferredHeight: visible ? implicitHeight : 0
-        Layout.topMargin: visible ? Tokens.spacing.small : 0
-        Layout.fillWidth: true
-        implicitHeight: enterpriseNoticeLayout.implicitHeight + Tokens.padding.medium
-
-        radius: Tokens.rounding.large
-        color: Colours.palette.m3secondaryContainer
-
-        Timer {
-            id: enterpriseNoticeTimer
-
-            interval: 4000
-            onTriggered: root.enterpriseNoticeSsid = ""
-        }
-
-        RowLayout {
-            id: enterpriseNoticeLayout
-
-            anchors.centerIn: parent
-            width: parent.width - Tokens.padding.large * 2
-            spacing: Tokens.spacing.small
-
-            MaterialIcon {
-                text: "school"
-                color: Colours.palette.m3onSecondaryContainer
-                fontStyle: Tokens.font.icon.medium
-            }
-
-            StyledText {
-                Layout.fillWidth: true
-                text: qsTr("“%1” needs institutional credentials — configure it in Settings → Network.").arg(root.enterpriseNoticeSsid)
-                color: Colours.palette.m3onSecondaryContainer
-                font: Tokens.font.body.small
-                wrapMode: Text.WordWrap
-            }
-        }
-    }
 
     // Ethernet section
     StyledText {

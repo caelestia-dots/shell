@@ -98,6 +98,31 @@ Item {
         }
 
         Popout {
+            id: enterprisePopout
+
+            name: "enterprisepassword"
+            sourceComponent: EnterprisePassword {
+                popouts: root.popouts
+                network: (networkPopout.item as Network)?.enterpriseNetwork ?? null
+            }
+
+            Connections {
+                function onCurrentNameChanged() {
+                    if (root.popouts.currentName === "enterprisepassword") {
+                        if ((networkPopout.item as Network)?.enterpriseNetwork && enterprisePopout.item)
+                            (enterprisePopout.item as EnterprisePassword).network = (networkPopout.item as Network).enterpriseNetwork;
+                        Qt.callLater(() => {
+                            if (enterprisePopout.item && (networkPopout.item as Network)?.enterpriseNetwork)
+                                (enterprisePopout.item as EnterprisePassword).network = (networkPopout.item as Network).enterpriseNetwork;
+                        }, 100);
+                    }
+                }
+
+                target: root.popouts
+            }
+        }
+
+        Popout {
             name: "bluetooth"
             sourceComponent: Bluetooth {
                 popouts: root.popouts
