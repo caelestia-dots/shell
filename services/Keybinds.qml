@@ -171,6 +171,7 @@ Singleton {
         };
 
         let curComment = "General";
+        const literalCounts = {};
         const lines = kbText.split("\n");
         let li = 0;
         while (li < lines.length) {
@@ -225,13 +226,37 @@ Singleton {
             if (args.length < 2)
                 continue;
 
-            const keys = resolveExpr(args[0].trim());
+            const keyExpr = args[0].trim();
+            const keys = resolveExpr(keyExpr);
             if (keys === null)
                 continue;
 
+            // Track where this bind's keys come from so it can be rewritten.
+            // Only single-variable and single double-quoted literal binds are
+            // editable; concatenations (e.g. the workspace loop) are not.
+            let edit = null;
+            const vm = keyExpr.match(/^vars\.(\w+)$/);
+            const dq = keyExpr.match(/^"([^"]*)"$/);
+            if (vm) {
+                edit = {
+                    kind: "var",
+                    name: vm[1]
+                };
+            } else if (dq) {
+                const raw = dq[1];
+                const idx = literalCounts[raw] ?? 0;
+                literalCounts[raw] = idx + 1;
+                edit = {
+                    kind: "literal",
+                    raw,
+                    index: idx
+                };
+            }
+
             groupOf(curComment).binds.push({
                 keys: normalizeKeys(keys),
-                action: deriveAction(args[1].trim(), curComment)
+                action: deriveAction(args[1].trim(), curComment),
+                edit
             });
         }
 
@@ -255,7 +280,17 @@ Singleton {
             }
         }
 
-        return groups.filter(g => g.binds.length > 0);
+        const result = groups.filter(g => g.binds.length > 0);
+
+        // Stable per-bind id. Bind objects round-trip through this singleton's
+        // `var` property as fresh wrappers, so object identity can't be relied
+        // on downstream — consumers match on this string instead.
+        let idc = 0;
+        for (const g of result)
+            for (const b of g.binds)
+                b.id = "b" + idc++;
+
+        return result;
     }
 
     function normalizeKeys(keys) {
@@ -331,7 +366,56 @@ Singleton {
         return [...mods.map(m => modName[m]), ...restPretty].join(" + ");
     }
 
+    // Rewrite the value of a bind, given its `edit` descriptor (see _parse) and
+    // a new key combo string in Hyprland syntax (e.g. "SUPER + T"). Variable
+    // binds are rewritten in variables.lua, inline literals in keybinds.lua.
+    function setBind(edit: var, value: string): void {
+        if (!edit || !value)
+            return;
+        if (edit.kind === "var") {
+            const next = _replaceVar(_varsText, edit.name, value);
+            if (next === _varsText)
+                return;
+            _varsText = next;
+            varsFile.setText(next);
+        } else if (edit.kind === "literal") {
+            const next = _replaceLiteral(_kbText, edit.raw, edit.index, value);
+            if (next === _kbText)
+                return;
+            _kbText = next;
+            kbFile.setText(next);
+        } else {
+            return;
+        }
+        _rebuild();
+        reloadProc.running = true;
+    }
+
+    function _replaceVar(text, name, value) {
+        const re = new RegExp("(^\\s*" + name + "\\s*=\\s*)\"[^\"]*\"", "m");
+        return text.replace(re, `$1"${value}"`);
+    }
+
+    function _replaceLiteral(text, raw, index, value) {
+        const needle = `"${raw}"`;
+        let pos = -1;
+        for (let count = 0; count <= index; count++) {
+            pos = text.indexOf(needle, pos + 1);
+            if (pos === -1)
+                return text;
+        }
+        return text.slice(0, pos) + `"${value}"` + text.slice(pos + needle.length);
+    }
+
+    Process {
+        id: reloadProc
+
+        command: ["hyprctl", "reload"]
+    }
+
     FileView {
+        id: varsFile
+
         path: `${root.hyprDir}/variables.lua`
         watchChanges: true
         printErrors: false
@@ -343,6 +427,8 @@ Singleton {
     }
 
     FileView {
+        id: kbFile
+
         path: `${root.hyprDir}/hyprland/keybinds.lua`
         watchChanges: true
         printErrors: false
