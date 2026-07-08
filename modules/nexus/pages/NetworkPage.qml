@@ -103,7 +103,21 @@ PageBase {
                 anchors.fill: undefined
 
                 onClicked: {
+                    if (modelData.active) {
+                        if (modelData.isEnterprise) {
+                            root.nState.selectedWifiNetwork = modelData;
+                            root.nState.openSubPage(2);
+                        }
+                        return;
+                    }
+
                     if (!modelData.active) {
+                        if (modelData.isEnterprise && !Nmcli.hasSavedProfile(modelData.ssid)) {
+                            root.nState.selectedWifiNetwork = modelData;
+                            root.nState.openSubPage(2);
+                            return;
+                        }
+
                         NetworkConnection.handleConnect(modelData);
                         currentSelected = true;
                         root.networkSelected(modelData);

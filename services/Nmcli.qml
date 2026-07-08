@@ -493,6 +493,91 @@ Singleton {
         });
     }
 
+    function connectEnterpriseNetwork(ssid: string, bssid: string, params: var, callback: var): void {
+        executeCommand([root.nmcliCommandConnection, "show", ssid], showResult => {
+            const fields = ["802-1x.eap", params.eapMethod || "peap", "802-1x.identity", params.identity || "", "802-1x.anonymous-identity", params.anonymousIdentity || "", "802-1x.phase2-auth", params.phase2Method || "mschapv2", "802-1x.domain-suffix-match", params.domainSuffixMatch || "", "802-1x.system-ca-certs", params.verifyCert ? "yes" : "no", "wifi-sec.key-mgmt", "wpa-eap"];
+
+            if (params.password && params.password.length > 0) {
+                fields.push("802-1x.password", params.password);
+            }
+            if (params.caCertPath && params.caCertPath.length > 0) {
+                fields.push("802-1x.ca-cert", params.caCertPath);
+            }
+
+            if (showResult.success) {
+                executeCommand([root.nmcliCommandConnection, "modify", ssid, ...fields], modifyResult => {
+                    if (!modifyResult.success) {
+                        if (callback)
+                            callback(modifyResult);
+                        return;
+                    }
+                    activateConnection(ssid, callback);
+                });
+            } else {
+                const addCmd = [root.nmcliCommandConnection, "add", root.connectionParamType, root.deviceTypeWifi, root.connectionParamConName, ssid, root.connectionParamIfname, "*", root.connectionParamSsid, ssid, ...fields];
+                if (bssid && bssid.length > 0) {
+                    addCmd.push(root.connectionParamBssid, bssid.toUpperCase());
+                }
+
+                executeCommand(addCmd, addResult => {
+                    if (!addResult.success) {
+                        if (callback)
+                            callback(addResult);
+                        return;
+                    }
+                    activateConnection(ssid, callback);
+                });
+            }
+        });
+    }
+
+    function getEnterpriseConfig(connectionName: string, callback: var): void {
+        executeCommand(["-t", "-f", "802-1x.eap,802-1x.phase2-auth,802-1x.identity,802-1x.anonymous-identity,802-1x.domain-suffix-match,802-1x.ca-cert,802-1x.system-ca-certs", root.nmcliCommandConnection, "show", connectionName], result => {
+            if (!result.success) {
+                if (callback)
+                    callback(null);
+                return;
+            }
+
+            const cfg = {
+                eapMethod: "peap",
+                phase2Method: "mschapv2",
+                identity: "",
+                anonymousIdentity: "",
+                domainSuffixMatch: "",
+                caCertPath: ""
+            };
+
+            const lines = result.output.trim().split("\n");
+            for (const line of lines) {
+                const idx = line.indexOf(":");
+                if (idx < 0)
+                    continue;
+                const key = line.slice(0, idx).trim();
+                const value = line.slice(idx + 1).trim();
+
+                if (value === "" || value === "--")
+                    continue;
+
+                if (key === "802-1x.eap")
+                    cfg.eapMethod = value.split(",")[0].trim();
+                else if (key === "802-1x.phase2-auth")
+                    cfg.phase2Method = value;
+                else if (key === "802-1x.identity")
+                    cfg.identity = value;
+                else if (key === "802-1x.anonymous-identity")
+                    cfg.anonymousIdentity = value;
+                else if (key === "802-1x.domain-suffix-match")
+                    cfg.domainSuffixMatch = value;
+                else if (key === "802-1x.ca-cert")
+                    cfg.caCertPath = value;
+            }
+
+            if (callback)
+                callback(cfg);
+        });
+    }
+
     function loadSavedConnections(callback: var): void {
         executeCommand(["-t", "-f", root.connectionListFields, root.nmcliCommandConnection, "show"], result => {
             if (!result.success) {
@@ -1608,6 +1693,7 @@ Singleton {
         readonly property bool active: lastIpcObject.active
         readonly property string security: lastIpcObject.security
         readonly property bool isSecure: security.length > 0
+        readonly property bool isEnterprise: security.includes("802.1X")
     }
 
     component EthernetDevice: QtObject {

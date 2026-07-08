@@ -49,6 +49,9 @@ QtObject {
                 Component {
                     EthernetDetailPage {}
                 }
+                Component {
+                    EnterpriseConnectPage {}
+                }
             }
         },
         Component {
