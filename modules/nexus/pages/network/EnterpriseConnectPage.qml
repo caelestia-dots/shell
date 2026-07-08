@@ -339,6 +339,77 @@ PageBase {
                     }
                 }
             }
+
+            ButtonBase {
+                id: disconnectBtn
+
+                visible: root.network?.active ?? false
+                fillWidth: true
+                shapeMorph: true
+                isRound: true
+                inactiveColour: Colours.palette.m3secondaryContainer
+                inactiveOnColour: Colours.palette.m3onSecondaryContainer
+
+                implicitWidth: disconnectLayout.implicitWidth + Tokens.padding.extraLarge * 2
+                implicitHeight: disconnectLayout.implicitHeight + Tokens.padding.medium * 2
+
+                onClicked: Nmcli.disconnectFromNetwork()
+
+                RowLayout {
+                    id: disconnectLayout
+
+                    anchors.centerIn: parent
+                    spacing: Tokens.spacing.small
+
+                    MaterialIcon {
+                        text: "link_off"
+                        color: disconnectBtn.onColour
+                        fontStyle: Tokens.font.icon.medium
+                    }
+
+                    StyledText {
+                        text: qsTr("Disconnect")
+                        color: disconnectBtn.onColour
+                    }
+                }
+            }
+
+            ButtonBase {
+                id: forgetBtn
+
+                visible: root.ssid.length > 0 && Nmcli.hasSavedProfile(root.ssid)
+                fillWidth: true
+                shapeMorph: true
+                isRound: true
+                inactiveColour: Colours.palette.m3errorContainer
+                inactiveOnColour: Colours.palette.m3onErrorContainer
+
+                implicitWidth: forgetLayout.implicitWidth + Tokens.padding.extraLarge * 2
+                implicitHeight: forgetLayout.implicitHeight + Tokens.padding.medium * 2
+
+                onClicked: {
+                    Nmcli.forgetNetwork(root.ssid);
+                    nState.closeSubPage();
+                }
+
+                RowLayout {
+                    id: forgetLayout
+
+                    anchors.centerIn: parent
+                    spacing: Tokens.spacing.small
+
+                    MaterialIcon {
+                        text: "delete"
+                        color: forgetBtn.onColour
+                        fontStyle: Tokens.font.icon.medium
+                    }
+
+                    StyledText {
+                        text: qsTr("Forget network")
+                        color: forgetBtn.onColour
+                    }
+                }
+            }
         }
     }
 }

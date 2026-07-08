@@ -107,6 +107,8 @@ PageBase {
                         if (modelData.isEnterprise) {
                             root.nState.selectedWifiNetwork = modelData;
                             root.nState.openSubPage(2);
+                        } else {
+                            Nmcli.disconnectFromNetwork();
                         }
                         return;
                     }
@@ -192,8 +194,11 @@ PageBase {
                             id: iconComp
 
                             MaterialIcon {
-                                text: network.modelData.active ? "settings" : "lock"
-                                color: network.modelData.active ? Colours.palette.m3primary : Colours.palette.m3onSurfaceVariant
+                                readonly property bool saved: Nmcli.hasSavedProfile(network.modelData.ssid)
+
+                                text: network.modelData.active ? (network.modelData.isEnterprise ? "settings" : "link_off") : (saved ? "wifi_lock" : (network.modelData.isSecure ? "lock" : "wifi"))
+                                fill: network.modelData.active || saved ? 1 : 0
+                                color: network.modelData.active || saved ? Colours.palette.m3primary : Colours.palette.m3onSurfaceVariant
                                 fontStyle: Tokens.font.icon.medium
                                 opacity: network.textOpacity
                             }
@@ -204,6 +209,40 @@ PageBase {
 
                             LoadingIndicator {
                                 implicitSize: Math.round(Tokens.font.icon.medium.pointSize * 1.3)
+                            }
+                        }
+                    }
+
+                    Loader {
+                        active: Nmcli.hasSavedProfile(network.modelData.ssid)
+                        asynchronous: true
+                        sourceComponent: Item {
+                            implicitWidth: Tokens.font.icon.medium.pointSize + Tokens.padding.small * 2
+                            implicitHeight: implicitWidth
+
+                            StateLayer {
+                                id: forgetState
+
+                                radius: Tokens.rounding.full
+                                onClicked: Nmcli.forgetNetwork(network.modelData.ssid)
+                            }
+
+                            MaterialIcon {
+                                anchors.centerIn: parent
+                                text: "delete"
+                                fontStyle: Tokens.font.icon.small
+                                color: forgetState.containsMouse ? Colours.palette.m3error : Colours.palette.m3onSurfaceVariant
+                                opacity: (forgetState.containsMouse ? 1 : 0.6) * network.textOpacity
+
+                                Behavior on color {
+                                    CAnim {}
+                                }
+
+                                Behavior on opacity {
+                                    Anim {
+                                        type: Anim.DefaultEffects
+                                    }
+                                }
                             }
                         }
                     }

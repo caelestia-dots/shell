@@ -18,6 +18,7 @@ ColumnLayout {
     property string view: "wireless" // "wireless" or "ethernet"
     property var passwordNetwork: null
     property bool showPasswordDialog: false
+    property string enterpriseNoticeSsid: ""
 
     spacing: Tokens.spacing.small
     width: Tokens.sizes.bar.networkWidth
@@ -53,11 +54,10 @@ ColumnLayout {
     Repeater {
         visible: root.view === "wireless"
         model: ScriptModel {
-            values: [...Nmcli.networks].sort((a, b) => {
-                if (a.active !== b.active)
-                    return b.active - a.active;
-                return b.strength - a.strength;
-            }).slice(0, 8)
+            values: {
+                const rank = n => n.active ? 0 : Nmcli.hasSavedProfile(n.ssid) ? 1 : 2;
+                return [...Nmcli.networks].sort((a, b) => rank(a) - rank(b) || b.strength - a.strength).slice(0, 8);
+            }
         }
 
         RowLayout {
@@ -97,8 +97,12 @@ ColumnLayout {
             }
 
             MaterialIcon {
+                readonly property bool saved: Nmcli.hasSavedProfile(networkItem.modelData.ssid)
+
                 visible: networkItem.modelData.isSecure
-                text: "lock"
+                text: saved ? "wifi_lock" : "lock"
+                fill: saved ? 1 : 0
+                color: saved ? Colours.palette.m3primary : Colours.palette.m3onSurfaceVariant
                 fontStyle: Tokens.font.icon.small
             }
 
@@ -131,6 +135,9 @@ ColumnLayout {
                     onClicked: {
                         if (networkItem.modelData.active) {
                             Nmcli.disconnectFromNetwork();
+                        } else if (networkItem.modelData.isEnterprise && !Nmcli.hasSavedProfile(networkItem.modelData.ssid)) {
+                            root.enterpriseNoticeSsid = networkItem.modelData.ssid;
+                            enterpriseNoticeTimer.restart();
                         } else {
                             root.connectingToSsid = networkItem.modelData.ssid;
                             NetworkConnection.handleConnect(networkItem.modelData, null, network => {
@@ -149,10 +156,13 @@ ColumnLayout {
                 MaterialIcon {
                     id: wirelessConnectIcon
 
+                    readonly property bool saved: Nmcli.hasSavedProfile(networkItem.modelData.ssid)
+
                     anchors.centerIn: parent
                     animate: true
                     text: networkItem.modelData.active ? "link_off" : "link"
-                    color: networkItem.modelData.active ? Colours.palette.m3onPrimary : Colours.palette.m3onSurface
+                    fill: !networkItem.modelData.active && saved ? 1 : 0
+                    color: networkItem.modelData.active ? Colours.palette.m3onPrimary : (saved ? Colours.palette.m3primary : Colours.palette.m3onSurface)
 
                     opacity: networkItem.loading ? 0 : 1
 
@@ -162,6 +172,86 @@ ColumnLayout {
                         }
                     }
                 }
+            }
+
+            Loader {
+                active: Nmcli.hasSavedProfile(networkItem.modelData.ssid)
+                asynchronous: true
+                sourceComponent: StyledRect {
+                    implicitWidth: implicitHeight
+                    implicitHeight: wirelessConnectIcon.parent.implicitHeight
+
+                    radius: Tokens.rounding.full
+                    color: "transparent"
+
+                    StateLayer {
+                        id: forgetState
+
+                        radius: Tokens.rounding.full
+                        disabled: networkItem.loading
+                        onClicked: Nmcli.forgetNetwork(networkItem.modelData.ssid)
+                    }
+
+                    MaterialIcon {
+                        anchors.centerIn: parent
+                        text: "delete"
+                        fontStyle: Tokens.font.icon.small
+                        color: forgetState.containsMouse ? Colours.palette.m3error : Colours.palette.m3onSurfaceVariant
+                        opacity: forgetState.containsMouse ? 1 : 0.6
+
+                        Behavior on color {
+                            CAnim {}
+                        }
+
+                        Behavior on opacity {
+                            Anim {
+                                type: Anim.DefaultEffects
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    StyledRect {
+        id: enterpriseNotice
+
+        visible: root.view === "wireless" && root.enterpriseNoticeSsid.length > 0
+        Layout.preferredHeight: visible ? implicitHeight : 0
+        Layout.topMargin: visible ? Tokens.spacing.small : 0
+        Layout.fillWidth: true
+        implicitHeight: enterpriseNoticeLayout.implicitHeight + Tokens.padding.medium
+
+        radius: Tokens.rounding.large
+        color: Colours.palette.m3secondaryContainer
+
+        Timer {
+            id: enterpriseNoticeTimer
+
+            interval: 4000
+            onTriggered: root.enterpriseNoticeSsid = ""
+        }
+
+        RowLayout {
+            id: enterpriseNoticeLayout
+
+            anchors.centerIn: parent
+            width: parent.width - Tokens.padding.large * 2
+            spacing: Tokens.spacing.small
+
+            MaterialIcon {
+                text: "school"
+                color: Colours.palette.m3onSecondaryContainer
+                fontStyle: Tokens.font.icon.medium
+            }
+
+            StyledText {
+                Layout.fillWidth: true
+                text: qsTr("“%1” needs institutional credentials — configure it in Settings → Network.").arg(root.enterpriseNoticeSsid)
+                color: Colours.palette.m3onSecondaryContainer
+                font: Tokens.font.body.small
+                wrapMode: Text.WordWrap
             }
         }
     }
@@ -338,6 +428,18 @@ ColumnLayout {
                 }
             }
         }
+    }
+
+    IconTextButton {
+        Layout.fillWidth: true
+        Layout.topMargin: Tokens.spacing.medium
+        inactiveColour: Colours.palette.m3primaryContainer
+        inactiveOnColour: Colours.palette.m3onPrimaryContainer
+        verticalPadding: Tokens.padding.extraSmall
+        text: qsTr("Open settings")
+        icon: "settings"
+
+        onClicked: root.popouts.detachRequested("network")
     }
 
     Connections {
