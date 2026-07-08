@@ -68,6 +68,9 @@ PageBase {
     isSubPage: true
 
     Component.onCompleted: {
+        eapSelect.active = peapItem;
+        phase2Select.active = mschapv2Item;
+
         if (root.ssid.length > 0 && Nmcli.hasSavedProfile(root.ssid)) {
             Nmcli.getEnterpriseConfig(root.ssid, cfg => {
                 if (!cfg)
@@ -134,7 +137,6 @@ PageBase {
             label: qsTr("EAP method")
             fallbackText: qsTr("PEAP")
             fallbackIcon: "security"
-            active: peapItem
 
             menuItems: [peapItem, ttlsItem, tlsItem]
 
@@ -173,7 +175,6 @@ PageBase {
             label: qsTr("Phase 2 authentication")
             fallbackText: qsTr("MSCHAPv2")
             fallbackIcon: "verified_user"
-            active: mschapv2Item
 
             menuItems: [mschapv2Item, papItem, gtcItem, md5Item]
 
@@ -389,7 +390,7 @@ PageBase {
 
                 onClicked: {
                     Nmcli.forgetNetwork(root.ssid);
-                    nState.closeSubPage();
+                    root.nState.closeSubPage();
                 }
 
                 RowLayout {
