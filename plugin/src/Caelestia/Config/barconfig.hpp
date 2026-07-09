@@ -103,6 +103,8 @@ class BarStatus : public ConfigObject {
     CONFIG_PROPERTY(bool, showWifi, true)
     CONFIG_PROPERTY(bool, showBluetooth, true)
     CONFIG_PROPERTY(bool, showBattery, true)
+    CONFIG_PROPERTY(bool, showPeripheralBattery, false)
+    CONFIG_PROPERTY(QStringList, peripheralBatteryExcluded)
     CONFIG_PROPERTY(bool, showLockStatus, true)
 
 public:

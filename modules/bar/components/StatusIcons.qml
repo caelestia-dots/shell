@@ -255,6 +255,75 @@ StyledRect {
                 fill: 1
             }
         }
+
+        // Peripheral battery icons (mice, keyboards, headsets, etc.)
+        WrappedLoader {
+            Layout.preferredHeight: implicitHeight
+
+            name: "peripheralBattery"
+            active: Config.bar.status.showPeripheralBattery
+
+            sourceComponent: ColumnLayout {
+                id: peripheralColumn
+
+                readonly property var excluded: Config.bar.status.peripheralBatteryExcluded
+
+                spacing: Tokens.spacing.smaller / 2
+
+                Repeater {
+                    model: ScriptModel {
+                        values: UPower.devices.values.filter(d => !d.isLaptopBattery && d.type !== UPowerDeviceType.LinePower && d.isPresent && !peripheralColumn.excluded.some(e => e === d.model || e === d.nativePath))
+                    }
+
+                    ColumnLayout {
+                        id: peripheralDelegate
+
+                        required property UPowerDevice modelData
+
+                        spacing: 1
+
+                        MaterialIcon {
+                            Layout.alignment: Qt.AlignHCenter
+
+                            animate: true
+                            text: {
+                                const t = peripheralDelegate.modelData.type;
+                                if (t === UPowerDeviceType.Mouse || t === UPowerDeviceType.Touchpad)
+                                    return "mouse";
+                                if (t === UPowerDeviceType.Keyboard)
+                                    return "keyboard";
+                                if (t === UPowerDeviceType.Headset || t === UPowerDeviceType.Headphones)
+                                    return "headphones";
+                                if (t === UPowerDeviceType.GamingInput)
+                                    return "sports_esports";
+                                if (t === UPowerDeviceType.Pen)
+                                    return "stylus";
+                                if (t === UPowerDeviceType.Speakers || t === UPowerDeviceType.OtherAudio)
+                                    return "speaker";
+                                if (t === UPowerDeviceType.Phone)
+                                    return "smartphone";
+                                return "battery_full";
+                            }
+                            color: peripheralDelegate.modelData.percentage > 0.2 ? root.colour : Colours.palette.m3error
+                        }
+
+                        StyledText {
+                            Layout.alignment: Qt.AlignHCenter
+                            horizontalAlignment: Text.AlignHCenter
+
+                            text: Math.round(peripheralDelegate.modelData.percentage * 100) + "%"
+                            color: peripheralDelegate.modelData.percentage > 0.2 ? root.colour : Colours.palette.m3error
+                            font.family: Tokens.font.family.mono
+                            font.pointSize: Tokens.font.size.small
+                        }
+                    }
+                }
+            }
+
+            Behavior on Layout.preferredHeight {
+                Anim {}
+            }
+        }
     }
 
     component WrappedLoader: Loader {
