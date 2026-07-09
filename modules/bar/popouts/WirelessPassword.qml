@@ -69,6 +69,8 @@ ColumnLayout {
     }
 
     StyledRect {
+        id: card
+
         Layout.fillWidth: true
         Layout.preferredWidth: 400
         implicitHeight: content.implicitHeight + Tokens.padding.extraLargeIncreased
@@ -99,12 +101,12 @@ ColumnLayout {
 
             Anim {
                 type: Anim.DefaultEffects
-                target: parent
+                target: card
                 property: "opacity"
                 to: 0
             }
             Anim {
-                target: parent
+                target: card
                 property: "scale"
                 to: 0.7
             }
@@ -197,7 +199,7 @@ ColumnLayout {
 
                     if (event.key === Qt.Key_Escape) {
                         event.accepted = false;
-                        closeDialog();
+                        root.closeDialog();
                     }
 
                     // Clear error when user starts typing
