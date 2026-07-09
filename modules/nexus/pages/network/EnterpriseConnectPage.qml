@@ -35,8 +35,6 @@ PageBase {
         root.hasError = false;
         root.connecting = true;
 
-        const wasSaved = Nmcli.hasSavedProfile(root.ssid);
-
         const params = {
             identity: identityField.text.trim(),
             password: passwordField.text,
@@ -57,9 +55,6 @@ PageBase {
             } else {
                 root.hasError = true;
                 root.errorMessage = qsTr("Connection failed. Check your identity, password and EAP settings.");
-                if (root.ssid.length > 0 && !wasSaved) {
-                    Nmcli.forgetNetwork(root.ssid);
-                }
             }
         });
     }

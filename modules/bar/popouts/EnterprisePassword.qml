@@ -67,8 +67,6 @@ ColumnLayout {
             } else {
                 hasError = true;
                 passwordField.buffer = "";
-                if (root.network && root.network.ssid && !Nmcli.hasSavedProfile(root.network.ssid))
-                    Nmcli.forgetNetwork(root.network.ssid);
             }
         });
     }

@@ -18,39 +18,6 @@ ColumnLayout {
 
     readonly property bool shouldBeVisible: root.popouts.currentName === "wirelesspassword"
 
-    function checkConnectionStatus(): void {
-        if (!root.shouldBeVisible || !connectButton.connecting) {
-            return;
-        }
-
-        // Check if we're connected to the target network (case-insensitive SSID comparison)
-        const isConnected = root.network && Nmcli.active && Nmcli.active.ssid && Nmcli.active.ssid.toLowerCase().trim() === root.network.ssid.toLowerCase().trim();
-
-        if (isConnected) {
-            // Successfully connected - give it a moment for network list to update
-            // Use Timer for actual delay
-            connectionSuccessTimer.start();
-            return;
-        }
-
-        // Check for connection failures - if pending connection was cleared but we're not connected
-        if (Nmcli.pendingConnection === null && connectButton.connecting) {
-            // Wait a bit more before giving up (allow time for connection to establish)
-            if (connectionMonitor.repeatCount > 10) {
-                connectionMonitor.stop();
-                connectButton.connecting = false;
-                connectButton.hasError = true;
-                connectButton.enabled = true;
-                connectButton.text = qsTr("Connect");
-                passwordContainer.passwordBuffer = "";
-                // Delete the failed connection
-                if (root.network && root.network.ssid) {
-                    Nmcli.forgetNetwork(root.network.ssid);
-                }
-            }
-        }
-    }
-
     function closeDialog(): void {
         if (isClosing) {
             return;
@@ -61,7 +28,6 @@ ColumnLayout {
         connectButton.connecting = false;
         connectButton.hasError = false;
         connectButton.text = qsTr("Connect");
-        connectionMonitor.stop();
 
         // Return to network popout
         if (root.popouts.currentName === "wirelesspassword") {
@@ -91,29 +57,6 @@ ColumnLayout {
     }
 
     Keys.onEscapePressed: closeDialog()
-
-    Connections {
-        function onCurrentNameChanged() {
-            if (root.popouts.currentName === "wirelesspassword") {
-                // Update network when popout becomes active
-                Qt.callLater(() => {
-                    // Try to get network from parent Content's networkPopout
-                    const content = root.parent?.parent?.parent;
-                    if (content) {
-                        const networkPopout = content.children.find(c => c.name === "network");
-                        if (networkPopout && networkPopout.item) {
-                            root.network = networkPopout.item.passwordNetwork;
-                        }
-                    }
-                    // Force focus to password container when popout becomes active
-                    // Use Timer for actual delay to ensure dialog is fully rendered
-                    focusTimer.start();
-                });
-            }
-        }
-
-        target: root.popouts
-    }
 
     Timer {
         id: focusTimer
@@ -204,35 +147,6 @@ ColumnLayout {
                 }
                 color: Colours.palette.m3outline
                 font: Tokens.font.body.small
-            }
-
-            Timer {
-                property int attempts: 0
-
-                interval: 50
-                running: root.shouldBeVisible && (!root.network || !root.network.ssid)
-                repeat: true
-                onTriggered: {
-                    attempts++;
-                    // Keep trying to get network from Network component
-                    const content = root.parent?.parent?.parent;
-                    if (content) {
-                        const networkPopout = content.children.find(c => c.name === "network");
-                        if (networkPopout && networkPopout.item && networkPopout.item.passwordNetwork) {
-                            root.network = networkPopout.item.passwordNetwork;
-                        }
-                    }
-                    // Stop if we got it or after 20 attempts (1 second)
-                    if ((root.network && root.network.ssid) || attempts >= 20) {
-                        stop();
-                        attempts = 0;
-                    }
-                }
-                onRunningChanged: {
-                    if (!running) {
-                        attempts = 0;
-                    }
-                }
             }
 
             StyledText {
@@ -515,108 +429,23 @@ ColumnLayout {
                         enabled = false;
                         text = qsTr("Connecting...");
 
-                        // Connect to network
+                        // nmcli blocks until activation resolves, so this result is
+                        // final - no polling, and no cleanup to do here: the service
+                        // never leaves a profile behind for a failed attempt.
                         NetworkConnection.connectWithPassword(root.network, password, result => {
-                            if (result && result.success)
-                            // Connection successful, monitor will handle the rest
-                            {} else if (result && result.needsPassword) {
-                                // Shouldn't happen since we provided password
-                                connectionMonitor.stop();
-                                connecting = false;
-                                hasError = true;
-                                enabled = true;
-                                text = qsTr("Connect");
-                                passwordContainer.passwordBuffer = "";
-                                // Delete the failed connection
-                                if (root.network && root.network.ssid) {
-                                    Nmcli.forgetNetwork(root.network.ssid);
-                                }
+                            if (result && result.success) {
+                                root.closeDialog();
                             } else {
-                                // Connection failed immediately - show error
-                                connectionMonitor.stop();
                                 connecting = false;
                                 hasError = true;
                                 enabled = true;
                                 text = qsTr("Connect");
                                 passwordContainer.passwordBuffer = "";
-                                // Delete the failed connection
-                                if (root.network && root.network.ssid) {
-                                    Nmcli.forgetNetwork(root.network.ssid);
-                                }
                             }
                         });
-
-                        // Start monitoring connection
-                        connectionMonitor.start();
                     }
                 }
             }
         }
-    }
-
-    Timer {
-        id: connectionMonitor
-
-        property int repeatCount: 0
-
-        interval: 1000
-        repeat: true
-        triggeredOnStart: false
-
-        onTriggered: {
-            repeatCount++;
-            root.checkConnectionStatus();
-        }
-
-        onRunningChanged: {
-            if (!running) {
-                repeatCount = 0;
-            }
-        }
-    }
-
-    Timer {
-        id: connectionSuccessTimer
-
-        interval: 500
-        onTriggered: {
-            // Double-check connection is still active
-            if (root.shouldBeVisible && Nmcli.active && Nmcli.active.ssid) {
-                const stillConnected = Nmcli.active.ssid.toLowerCase().trim() === root.network.ssid.toLowerCase().trim();
-                if (stillConnected) {
-                    connectionMonitor.stop();
-                    connectButton.connecting = false;
-                    connectButton.text = qsTr("Connect");
-                    // Return to network popout on successful connection
-                    if (root.popouts.currentName === "wirelesspassword") {
-                        root.popouts.currentName = "network";
-                    }
-                    closeDialog();
-                }
-            }
-        }
-    }
-
-    Connections {
-        function onActiveChanged() {
-            if (root.shouldBeVisible) {
-                root.checkConnectionStatus();
-            }
-        }
-
-        function onConnectionFailed(ssid: string) {
-            if (root.shouldBeVisible && root.network && root.network.ssid === ssid && connectButton.connecting) {
-                connectionMonitor.stop();
-                connectButton.connecting = false;
-                connectButton.hasError = true;
-                connectButton.enabled = true;
-                connectButton.text = qsTr("Connect");
-                passwordContainer.passwordBuffer = "";
-                // Delete the failed connection
-                Nmcli.forgetNetwork(ssid);
-            }
-        }
-
-        target: Nmcli
     }
 }
