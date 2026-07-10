@@ -31,8 +31,6 @@ Item {
         }
 
         Popout {
-            id: networkPopout
-
             name: "network"
             sourceComponent: Network {
                 popouts: root.popouts
@@ -49,37 +47,18 @@ Item {
         }
 
         Popout {
-            id: passwordPopout
-
             name: "wirelesspassword"
             sourceComponent: WirelessPassword {
                 popouts: root.popouts
-                network: (networkPopout.item as Network)?.passwordNetwork ?? null
+                network: root.popouts.pendingNetwork
             }
         }
 
         Popout {
-            id: enterprisePopout
-
             name: "enterprisepassword"
             sourceComponent: EnterprisePassword {
                 popouts: root.popouts
-                network: (networkPopout.item as Network)?.enterpriseNetwork ?? null
-            }
-
-            Connections {
-                function onCurrentNameChanged() {
-                    if (root.popouts.currentName === "enterprisepassword") {
-                        if ((networkPopout.item as Network)?.enterpriseNetwork && enterprisePopout.item)
-                            (enterprisePopout.item as EnterprisePassword).network = (networkPopout.item as Network).enterpriseNetwork;
-                        Qt.callLater(() => {
-                            if (enterprisePopout.item && (networkPopout.item as Network)?.enterpriseNetwork)
-                                (enterprisePopout.item as EnterprisePassword).network = (networkPopout.item as Network).enterpriseNetwork;
-                        }, 100);
-                    }
-                }
-
-                target: root.popouts
+                network: root.popouts.pendingNetwork
             }
         }
 

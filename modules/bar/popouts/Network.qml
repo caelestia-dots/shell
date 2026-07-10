@@ -16,9 +16,6 @@ ColumnLayout {
 
     property string connectingToSsid: ""
     property string view: "wireless" // "wireless" or "ethernet"
-    property var passwordNetwork: null
-    property bool showPasswordDialog: false
-    property var enterpriseNetwork: null
 
     spacing: Tokens.spacing.small
     width: Tokens.sizes.bar.networkWidth
@@ -170,19 +167,14 @@ ColumnLayout {
                                     if (networkItem.modelData.active) {
                                         Nmcli.disconnectFromNetwork();
                                     } else if (networkItem.modelData.isEnterprise && !Nmcli.hasSavedProfile(networkItem.modelData.ssid)) {
-                                        root.enterpriseNetwork = networkItem.modelData;
+                                        root.popouts.pendingNetwork = networkItem.modelData;
                                         root.popouts.currentName = "enterprisepassword";
                                     } else {
                                         root.connectingToSsid = networkItem.modelData.ssid;
                                         NetworkConnection.handleConnect(networkItem.modelData, null, network => {
-                                            // Password is required - show password dialog
-                                            root.passwordNetwork = network;
-                                            root.showPasswordDialog = true;
+                                            root.popouts.pendingNetwork = network;
                                             root.popouts.currentName = "wirelesspassword";
                                         });
-
-                                        // Clear connecting state if connection succeeds immediately (saved profile)
-                                        // This is handled by the onActiveChanged connection below
                                     }
                                 }
                             }
@@ -482,14 +474,6 @@ ColumnLayout {
         function onActiveChanged(): void {
             if (Nmcli.active && root.connectingToSsid === Nmcli.active.ssid) {
                 root.connectingToSsid = "";
-                // Close password dialog if we successfully connected
-                if (root.showPasswordDialog && root.passwordNetwork && Nmcli.active.ssid === root.passwordNetwork.ssid) {
-                    root.showPasswordDialog = false;
-                    root.passwordNetwork = null;
-                    if (root.popouts.currentName === "wirelesspassword") {
-                        root.popouts.currentName = "network";
-                    }
-                }
             }
         }
 
@@ -499,18 +483,6 @@ ColumnLayout {
         }
 
         target: Nmcli
-    }
-
-    Connections {
-        function onCurrentNameChanged(): void {
-            // Clear password network when leaving password dialog
-            if (root.popouts.currentName !== "wirelesspassword" && root.showPasswordDialog) {
-                root.showPasswordDialog = false;
-                root.passwordNetwork = null;
-            }
-        }
-
-        target: root.popouts
     }
 
     component Toggle: RowLayout {
