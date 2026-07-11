@@ -77,6 +77,8 @@ ColumnLayout {
     }
 
     Repeater {
+        id: ethRepeater
+
         model: ScriptModel {
             values: Nmcli.ethernetDevices.filter(d => d.state !== "unavailable")
         }
@@ -93,7 +95,7 @@ ColumnLayout {
             readonly property var details: ethRow.isConnected ? Nmcli.ethernetDeviceDetails : null
 
             Layout.fillWidth: true
-            last: index === Nmcli.ethernetDevices.length - 1
+            last: index === ethRepeater.count - 1
             implicitHeight: ethLayout.implicitHeight + Tokens.padding.medium * 2
 
             // Tap opens the detail page for this interface.
