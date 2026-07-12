@@ -18,6 +18,8 @@ class PluginManager : public QObject {
 
     Q_PROPERTY(QString shellVersion READ shellVersion CONSTANT)
     Q_PROPERTY(QVariantList plugins READ plugins NOTIFY pluginsChanged)
+    Q_PROPERTY(QVariantList loadedPlugins READ loadedPlugins NOTIFY loadedPluginsChanged)
+    Q_PROPERTY(QVariantList conflictingPlugins READ conflictingPlugins NOTIFY conflictingPluginsChanged)
     Q_PROPERTY(QStringList enabled READ enabled WRITE setEnabled NOTIFY enabledChanged)
 
 public:
@@ -26,6 +28,12 @@ public:
     [[nodiscard]] QString shellVersion() const;
 
     [[nodiscard]] QVariantList plugins() const;
+
+    // The subset of plugins that are valid and enabled, i.e. the ones actually running.
+    [[nodiscard]] QVariantList loadedPlugins() const;
+
+    // Plugins shadowed by an earlier plugin declaring the same id (the losing side of a clash).
+    [[nodiscard]] QVariantList conflictingPlugins() const;
 
     [[nodiscard]] QStringList enabled() const;
     void setEnabled(const QStringList& enabled);
@@ -44,8 +52,13 @@ public:
 
 signals:
     void pluginsChanged();
+    void loadedPluginsChanged();
+    void conflictingPluginsChanged();
     void enabledChanged();
     void settingsChanged(const QString& pluginId);
+
+    // Emitted after a discovery/reload pass finishes populating the plugin list.
+    void loaded();
 
 private:
     void loadConfig();
@@ -66,6 +79,7 @@ private:
     QStringList m_extraPaths;
     QVariantMap m_settings;
     QVariantList m_plugins;
+    QVariantList m_conflictingPlugins;
 };
 
 } // namespace caelestia

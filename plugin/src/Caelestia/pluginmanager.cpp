@@ -7,6 +7,8 @@
 #include <qjsondocument.h>
 #include <qjsonobject.h>
 #include <qloggingcategory.h>
+#include <qregularexpression.h>
+#include <qset.h>
 #include <qstandardpaths.h>
 #include <qurl.h>
 #include <qversionnumber.h>
@@ -30,6 +32,12 @@ QVersionNumber parseVersion(QString str) {
     if (str.startsWith(QLatin1Char('v')))
         str.remove(0, 1);
     return QVersionNumber::fromString(str);
+}
+
+// Alphanumeric start then alphanumeric + ._-
+bool isValidIdSegment(const QString& segment) {
+    static const QRegularExpression re(QStringLiteral("^[A-Za-z0-9][A-Za-z0-9._-]*$"));
+    return re.match(segment).hasMatch();
 }
 
 bool satisfiesRequirement(const QString& requirement, const QVersionNumber& shell) {
@@ -97,6 +105,20 @@ QVariantList PluginManager::plugins() const {
     return m_plugins;
 }
 
+QVariantList PluginManager::loadedPlugins() const {
+    QVariantList result;
+    for (const auto& value : m_plugins) {
+        const auto plugin = value.toMap();
+        if (plugin.value(QStringLiteral("valid")).toBool() && plugin.value(QStringLiteral("enabled")).toBool())
+            result.append(plugin);
+    }
+    return result;
+}
+
+QVariantList PluginManager::conflictingPlugins() const {
+    return m_conflictingPlugins;
+}
+
 QStringList PluginManager::enabled() const {
     return m_enabled;
 }
@@ -116,6 +138,7 @@ void PluginManager::setEnabled(const QStringList& enabled) {
 
     emit enabledChanged();
     emit pluginsChanged();
+    emit loadedPluginsChanged();
     m_saveTimer->start();
 }
 
@@ -247,7 +270,8 @@ void PluginManager::saveConfig() {
 void PluginManager::rescan() {
     QVariantList result;
 
-    for (const auto& root : searchRoots()) {
+    const auto roots = searchRoots();
+    for (const auto& root : roots) {
         QDir dir(root);
         if (!dir.exists())
             continue;
@@ -261,8 +285,33 @@ void PluginManager::rescan() {
         }
     }
 
+    // Deduplicate plugins by id (keep first)
+    QSet<QString> seenIds;
+    QVariantList conflicting;
+    for (auto& value : result) {
+        auto plugin = value.toMap();
+        if (!plugin.value(QStringLiteral("valid")).toBool())
+            continue;
+
+        const auto id = plugin.value(QStringLiteral("id")).toString();
+        if (seenIds.contains(id)) {
+            qCWarning(lcPlugins) << "Duplicate plugin id" << id << "in"
+                                 << plugin.value(QStringLiteral("dir")).toString();
+            plugin.insert(QStringLiteral("valid"), false);
+            plugin.insert(QStringLiteral("error"), QStringLiteral("Shadowed by earlier plugin"));
+            value = plugin;
+            conflicting.append(plugin);
+        } else {
+            seenIds.insert(id);
+        }
+    }
+
     m_plugins = result;
+    m_conflictingPlugins = conflicting;
     emit pluginsChanged();
+    emit loadedPluginsChanged();
+    emit conflictingPluginsChanged();
+    emit loaded();
     updateWatches();
 }
 
@@ -288,13 +337,20 @@ QVariantMap PluginManager::parseManifest(const QString& dir, const QString& path
     }
 
     const auto obj = doc.object();
-    const auto id = obj.value(QStringLiteral("id")).toString();
+    const auto name = obj.value(QStringLiteral("name")).toString();
+
+    auto author = obj.value(QStringLiteral("author")).toString();
+    if (author.isEmpty()) // Author defaults to "unknown" if not specified
+        author = QStringLiteral("unknown");
+
+    // Canonical id is author/name
+    const auto id = author + QStringLiteral("/") + name;
 
     plugin.insert(QStringLiteral("id"), id);
-    plugin.insert(QStringLiteral("name"), obj.value(QStringLiteral("name")).toString(id));
+    plugin.insert(QStringLiteral("name"), name);
     plugin.insert(QStringLiteral("version"), obj.value(QStringLiteral("version")).toString());
     plugin.insert(QStringLiteral("description"), obj.value(QStringLiteral("description")).toString());
-    plugin.insert(QStringLiteral("author"), obj.value(QStringLiteral("author")).toString());
+    plugin.insert(QStringLiteral("author"), author);
 
     const auto requirement = obj.value(QStringLiteral("requires")).toString();
     plugin.insert(QStringLiteral("requires"), requirement);
@@ -314,20 +370,27 @@ QVariantMap PluginManager::parseManifest(const QString& dir, const QString& path
 
     bool valid = true;
     QString validationError;
-    if (id.isEmpty()) {
+    if (name.isEmpty()) {
         valid = false;
         validationError = QStringLiteral("Manifest is missing 'id'");
+    } else if (!isValidIdSegment(name)) {
+        valid = false;
+        validationError = QStringLiteral("Plugin id '%1' may only contain letters, digits, '.', '_' or '-'").arg(name);
+    } else if (!isValidIdSegment(author)) {
+        valid = false;
+        validationError =
+            QStringLiteral("Plugin author '%1' may only contain letters, digits, '.', '_' or '-'").arg(author);
     } else if (!satisfiesRequirement(requirement, parseVersion(QStringLiteral(CAELESTIA_VERSION)))) {
         valid = false;
         validationError =
-            QStringLiteral("Requires Caelestia %1 (shell is %2)").arg(requirement, QStringLiteral(CAELESTIA_VERSION));
+            QStringLiteral("Requires Caelestia %1 (current is %2)").arg(requirement, QStringLiteral(CAELESTIA_VERSION));
     }
 
     plugin.insert(QStringLiteral("valid"), valid);
     plugin.insert(QStringLiteral("error"), validationError);
 
     if (!valid)
-        qCWarning(lcPlugins) << "Ignoring plugin" << (id.isEmpty() ? dir : id) << "-" << validationError;
+        qCWarning(lcPlugins) << "Ignoring plugin" << id << "-" << validationError;
 
     return plugin;
 }
@@ -359,7 +422,8 @@ void PluginManager::updateWatches() {
     if (QFile::exists(m_configPath))
         m_watcher->addPath(m_configPath);
 
-    for (const auto& root : searchRoots())
+    const auto roots = searchRoots();
+    for (const auto& root : roots)
         if (QFile::exists(root))
             m_watcher->addPath(root);
 }
