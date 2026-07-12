@@ -16,8 +16,27 @@ StyledListView {
     required property SearchBar search
     required property ScreenState screenState
 
+    property string modelState: "apps"
+
     model: ScriptModel {
         id: model
+
+        // qmllint disable incompatible-type
+        values: {
+            switch (root.modelState) {
+            case "actions":
+                return Actions.query(root.search.text);
+            case "calc":
+                return [0];
+            case "scheme":
+                return Schemes.query(root.search.text);
+            case "variant":
+                return M3Variants.query(root.search.text);
+            default:
+                return Apps.search(root.search.text);
+            }
+        }
+        // qmllint enable incompatible-type
 
         onValuesChanged: root.currentIndex = 0
     }
@@ -69,7 +88,7 @@ StyledListView {
             name: "apps"
 
             PropertyChanges {
-                model.values: Apps.search(search.text)
+                root.modelState: "apps"
                 root.delegate: appItem
             }
         },
@@ -77,7 +96,7 @@ StyledListView {
             name: "actions"
 
             PropertyChanges {
-                model.values: Actions.query(search.text)
+                root.modelState: "actions"
                 root.delegate: actionItem
             }
         },
@@ -85,7 +104,7 @@ StyledListView {
             name: "calc"
 
             PropertyChanges {
-                model.values: [0]
+                root.modelState: "calc"
                 root.delegate: calcItem
             }
         },
@@ -93,7 +112,7 @@ StyledListView {
             name: "scheme"
 
             PropertyChanges {
-                model.values: Schemes.query(search.text)
+                root.modelState: "scheme"
                 root.delegate: schemeItem
             }
         },
@@ -101,7 +120,7 @@ StyledListView {
             name: "variant"
 
             PropertyChanges {
-                model.values: M3Variants.query(search.text)
+                root.modelState: "variant"
                 root.delegate: variantItem
             }
         }
@@ -128,8 +147,8 @@ StyledListView {
                 }
             }
             PropertyAction {
-                targets: [model, root]
-                properties: "values,delegate"
+                target: root
+                properties: "modelState,delegate"
             }
             ParallelAnimation {
                 Anim {
