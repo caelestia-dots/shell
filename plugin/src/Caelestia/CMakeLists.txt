@@ -2,6 +2,7 @@ qml_module(caelestia-core
     URI Caelestia
     SOURCES
         cutils.cpp
+        pluginmanager.cpp
         qalculator.cpp
         appdb.cpp
         requests.cpp

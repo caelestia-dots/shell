@@ -1,0 +1,376 @@
+#include "pluginmanager.hpp"
+
+#include <qdir.h>
+#include <qfile.h>
+#include <qfileinfo.h>
+#include <qjsonarray.h>
+#include <qjsondocument.h>
+#include <qjsonobject.h>
+#include <qloggingcategory.h>
+#include <qstandardpaths.h>
+#include <qurl.h>
+#include <qversionnumber.h>
+
+#ifndef CAELESTIA_VERSION
+#define CAELESTIA_VERSION ""
+#endif
+
+Q_LOGGING_CATEGORY(lcPlugins, "caelestia.plugins", QtInfoMsg)
+
+namespace caelestia {
+
+namespace {
+
+QString configDir() {
+    return QStandardPaths::writableLocation(QStandardPaths::GenericConfigLocation) + QStringLiteral("/caelestia/");
+}
+
+QVersionNumber parseVersion(QString str) {
+    str = str.trimmed();
+    if (str.startsWith(QLatin1Char('v')))
+        str.remove(0, 1);
+    return QVersionNumber::fromString(str);
+}
+
+bool satisfiesRequirement(const QString& requirement, const QVersionNumber& shell) {
+    QString req = requirement.trimmed();
+    if (req.isEmpty() || shell.isNull())
+        return true;
+
+    // Strip operator from front
+    QString op;
+    while (!req.isEmpty() && (req.front() == u'>' || req.front() == u'<' || req.front() == u'=')) {
+        op += req.front();
+        req.remove(0, 1);
+    }
+
+    const auto required = parseVersion(req);
+    if (required.isNull()) {
+        qCWarning(lcPlugins) << "Failed to parse plugin version requirement:" << requirement;
+        return true;
+    }
+
+    const int cmp = QVersionNumber::compare(shell, required);
+    if (op == u"<=")
+        return cmp <= 0;
+    if (op == u"<")
+        return cmp < 0;
+    if (op == u">")
+        return cmp > 0;
+    if (op == u"=" || op == u"==")
+        return cmp == 0;
+    // No operator means >=
+    return cmp >= 0;
+}
+
+} // namespace
+
+PluginManager::PluginManager(QObject* parent)
+    : QObject(parent)
+    , m_configPath(configDir() + QStringLiteral("plugins.json"))
+    , m_watcher(new QFileSystemWatcher(this))
+    , m_saveTimer(new QTimer(this))
+    , m_reloadTimer(new QTimer(this)) {
+    m_saveTimer->setSingleShot(true);
+    m_saveTimer->setInterval(300);
+    connect(m_saveTimer, &QTimer::timeout, this, &PluginManager::saveConfig);
+
+    m_reloadTimer->setSingleShot(true);
+    m_reloadTimer->setInterval(50);
+    connect(m_reloadTimer, &QTimer::timeout, this, [this] {
+        loadConfig();
+        rescan();
+    });
+
+    connect(m_watcher, &QFileSystemWatcher::directoryChanged, this, &PluginManager::onWatchEvent);
+    connect(m_watcher, &QFileSystemWatcher::fileChanged, this, &PluginManager::onWatchEvent);
+
+    loadConfig();
+    rescan();
+}
+
+QString PluginManager::shellVersion() const {
+    return QStringLiteral(CAELESTIA_VERSION);
+}
+
+QVariantList PluginManager::plugins() const {
+    return m_plugins;
+}
+
+QStringList PluginManager::enabled() const {
+    return m_enabled;
+}
+
+void PluginManager::setEnabled(const QStringList& enabled) {
+    if (m_enabled == enabled)
+        return;
+
+    m_enabled = enabled;
+
+    // Refresh the per-plugin enabled flags without re-reading manifests.
+    for (auto& value : m_plugins) {
+        auto plugin = value.toMap();
+        plugin.insert(QStringLiteral("enabled"), m_enabled.contains(plugin.value(QStringLiteral("id")).toString()));
+        value = plugin;
+    }
+
+    emit enabledChanged();
+    emit pluginsChanged();
+    m_saveTimer->start();
+}
+
+void PluginManager::setPluginEnabled(const QString& pluginId, bool enabled) {
+    QStringList next = m_enabled;
+    if (enabled) {
+        if (!next.contains(pluginId))
+            next.append(pluginId);
+    } else {
+        next.removeAll(pluginId);
+    }
+    setEnabled(next);
+}
+
+QVariantList PluginManager::extensions(const QString& type) const {
+    QVariantList result;
+
+    for (const auto& value : m_plugins) {
+        const auto plugin = value.toMap();
+        if (!plugin.value(QStringLiteral("valid")).toBool() || !plugin.value(QStringLiteral("enabled")).toBool())
+            continue;
+
+        const auto pluginId = plugin.value(QStringLiteral("id")).toString();
+        const auto provides = plugin.value(QStringLiteral("provides")).toList();
+        for (const auto& provided : provides) {
+            auto ext = provided.toMap();
+            if (ext.value(QStringLiteral("type")).toString() != type)
+                continue;
+            ext.insert(QStringLiteral("pluginId"), pluginId);
+            result.append(ext);
+        }
+    }
+
+    return result;
+}
+
+QVariantMap PluginManager::settings(const QString& pluginId) const {
+    return m_settings.value(pluginId).toMap();
+}
+
+QVariant PluginManager::setting(const QString& pluginId, const QString& key, const QVariant& fallback) const {
+    const auto pluginSettings = m_settings.value(pluginId).toMap();
+    return pluginSettings.contains(key) ? pluginSettings.value(key) : fallback;
+}
+
+void PluginManager::setSetting(const QString& pluginId, const QString& key, const QVariant& value) {
+    auto pluginSettings = m_settings.value(pluginId).toMap();
+    if (pluginSettings.value(key) == value)
+        return;
+
+    pluginSettings.insert(key, value);
+    m_settings.insert(pluginId, pluginSettings);
+
+    emit settingsChanged(pluginId);
+    m_saveTimer->start();
+}
+
+void PluginManager::reload() {
+    loadConfig();
+    rescan();
+}
+
+void PluginManager::loadConfig() {
+    m_enabled.clear();
+    m_extraPaths.clear();
+    m_settings.clear();
+
+    QFile file(m_configPath);
+    if (!file.exists()) {
+        emit enabledChanged();
+        return;
+    }
+
+    if (!file.open(QIODevice::ReadOnly)) {
+        qCWarning(lcPlugins) << "Failed to open" << m_configPath << file.errorString();
+        return;
+    }
+
+    QJsonParseError error{};
+    const auto doc = QJsonDocument::fromJson(file.readAll(), &error);
+    file.close();
+
+    if (error.error != QJsonParseError::NoError) {
+        qCWarning(lcPlugins) << "Failed to parse" << m_configPath << error.errorString();
+        return;
+    }
+
+    const auto obj = doc.object();
+
+    const auto enabledArray = obj.value(QStringLiteral("enabled")).toArray();
+    for (const auto& entry : enabledArray)
+        m_enabled.append(entry.toString());
+
+    const auto pathArray = obj.value(QStringLiteral("path")).toArray();
+    for (const auto& entry : pathArray)
+        m_extraPaths.append(entry.toString());
+
+    m_settings = obj.value(QStringLiteral("settings")).toObject().toVariantMap();
+
+    emit enabledChanged();
+}
+
+void PluginManager::saveConfig() {
+    QJsonObject obj;
+    obj.insert(QStringLiteral("enabled"), QJsonArray::fromStringList(m_enabled));
+    obj.insert(QStringLiteral("path"), QJsonArray::fromStringList(m_extraPaths));
+    obj.insert(QStringLiteral("settings"), QJsonObject::fromVariantMap(m_settings));
+
+    QDir().mkpath(QFileInfo(m_configPath).absolutePath());
+
+    QFile file(m_configPath);
+    if (!file.open(QIODevice::WriteOnly)) {
+        qCWarning(lcPlugins) << "Failed to write" << m_configPath << file.errorString();
+        return;
+    }
+
+    file.write(QJsonDocument(obj).toJson(QJsonDocument::Indented));
+    file.close();
+
+    // Ignore the watcher event triggered by our own write.
+    m_recentlySaved = true;
+    QTimer::singleShot(500, this, [this] {
+        m_recentlySaved = false;
+    });
+
+    updateWatches();
+}
+
+void PluginManager::rescan() {
+    QVariantList result;
+
+    for (const auto& root : searchRoots()) {
+        QDir dir(root);
+        if (!dir.exists())
+            continue;
+
+        const auto subdirs = dir.entryList(QDir::Dirs | QDir::NoDotAndDotDot, QDir::Name);
+        for (const auto& subdir : subdirs) {
+            const QString pluginDir = dir.absoluteFilePath(subdir);
+            const QString manifestPath = pluginDir + QStringLiteral("/manifest.json");
+            if (QFile::exists(manifestPath))
+                result.append(parseManifest(pluginDir, manifestPath));
+        }
+    }
+
+    m_plugins = result;
+    emit pluginsChanged();
+    updateWatches();
+}
+
+QVariantMap PluginManager::parseManifest(const QString& dir, const QString& path) const {
+    QVariantMap plugin;
+    plugin.insert(QStringLiteral("dir"), dir);
+
+    QFile file(path);
+    if (!file.open(QIODevice::ReadOnly)) {
+        plugin.insert(QStringLiteral("valid"), false);
+        plugin.insert(QStringLiteral("error"), QStringLiteral("Failed to open manifest"));
+        return plugin;
+    }
+
+    QJsonParseError error{};
+    const auto doc = QJsonDocument::fromJson(file.readAll(), &error);
+    file.close();
+
+    if (error.error != QJsonParseError::NoError) {
+        plugin.insert(QStringLiteral("valid"), false);
+        plugin.insert(QStringLiteral("error"), QStringLiteral("Invalid manifest JSON: ") + error.errorString());
+        return plugin;
+    }
+
+    const auto obj = doc.object();
+    const auto id = obj.value(QStringLiteral("id")).toString();
+
+    plugin.insert(QStringLiteral("id"), id);
+    plugin.insert(QStringLiteral("name"), obj.value(QStringLiteral("name")).toString(id));
+    plugin.insert(QStringLiteral("version"), obj.value(QStringLiteral("version")).toString());
+    plugin.insert(QStringLiteral("description"), obj.value(QStringLiteral("description")).toString());
+    plugin.insert(QStringLiteral("author"), obj.value(QStringLiteral("author")).toString());
+
+    const auto requirement = obj.value(QStringLiteral("requires")).toString();
+    plugin.insert(QStringLiteral("requires"), requirement);
+
+    QVariantList provides;
+    const auto providesArray = obj.value(QStringLiteral("provides")).toArray();
+    for (const auto& provided : providesArray) {
+        auto ext = provided.toObject().toVariantMap();
+        const auto source = ext.value(QStringLiteral("source")).toString();
+        if (!source.isEmpty())
+            ext.insert(QStringLiteral("source"), QUrl::fromLocalFile(dir + QStringLiteral("/") + source).toString());
+        provides.append(ext);
+    }
+    plugin.insert(QStringLiteral("provides"), provides);
+
+    plugin.insert(QStringLiteral("enabled"), m_enabled.contains(id));
+
+    bool valid = true;
+    QString validationError;
+    if (id.isEmpty()) {
+        valid = false;
+        validationError = QStringLiteral("Manifest is missing 'id'");
+    } else if (!satisfiesRequirement(requirement, parseVersion(QStringLiteral(CAELESTIA_VERSION)))) {
+        valid = false;
+        validationError =
+            QStringLiteral("Requires Caelestia %1 (shell is %2)").arg(requirement, QStringLiteral(CAELESTIA_VERSION));
+    }
+
+    plugin.insert(QStringLiteral("valid"), valid);
+    plugin.insert(QStringLiteral("error"), validationError);
+
+    if (!valid)
+        qCWarning(lcPlugins) << "Ignoring plugin" << (id.isEmpty() ? dir : id) << "-" << validationError;
+
+    return plugin;
+}
+
+QStringList PluginManager::searchRoots() const {
+    QStringList roots;
+    roots.append(configDir() + QStringLiteral("plugins"));
+
+    const auto envPath = qEnvironmentVariable("CAELESTIA_PLUGIN_PATH");
+    if (!envPath.isEmpty())
+        roots.append(envPath.split(QLatin1Char(':'), Qt::SkipEmptyParts));
+
+    roots.append(m_extraPaths);
+    roots.removeDuplicates();
+    return roots;
+}
+
+void PluginManager::updateWatches() {
+    const auto watchedDirs = m_watcher->directories();
+    if (!watchedDirs.isEmpty())
+        m_watcher->removePaths(watchedDirs);
+    const auto watchedFiles = m_watcher->files();
+    if (!watchedFiles.isEmpty())
+        m_watcher->removePaths(watchedFiles);
+
+    const auto cfgDir = QFileInfo(m_configPath).absolutePath();
+    if (QFile::exists(cfgDir))
+        m_watcher->addPath(cfgDir);
+    if (QFile::exists(m_configPath))
+        m_watcher->addPath(m_configPath);
+
+    for (const auto& root : searchRoots())
+        if (QFile::exists(root))
+            m_watcher->addPath(root);
+}
+
+void PluginManager::onWatchEvent() {
+    updateWatches();
+
+    if (m_recentlySaved)
+        return;
+
+    m_reloadTimer->start();
+}
+
+} // namespace caelestia
