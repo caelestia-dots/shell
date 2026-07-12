@@ -1,15 +1,18 @@
 #pragma once
 
 #include <qfilesystemwatcher.h>
+#include <qlist.h>
 #include <qobject.h>
 #include <qqmlintegration.h>
 #include <qstringlist.h>
 #include <qtimer.h>
 #include <qvariant.h>
 
-namespace caelestia {
+#include "pluginmanifest.hpp"
 
-// Discovers plugins on disk, parses their manifests and exposes their contributions.
+namespace caelestia::plugins {
+
+// Discovers plugins on disk, parses their manifests and exposes their entry points.
 // Backed by a single ~/.config/caelestia/plugins.json holding enabled + path + settings.
 class Plugins : public QObject {
     Q_OBJECT
@@ -17,9 +20,11 @@ class Plugins : public QObject {
     QML_SINGLETON
 
     Q_PROPERTY(QString shellVersion READ shellVersion CONSTANT)
-    Q_PROPERTY(QVariantList plugins READ plugins NOTIFY pluginsChanged)
-    Q_PROPERTY(QVariantList loadedPlugins READ loadedPlugins NOTIFY loadedPluginsChanged)
-    Q_PROPERTY(QVariantList conflictingPlugins READ conflictingPlugins NOTIFY conflictingPluginsChanged)
+    Q_PROPERTY(QList<caelestia::plugins::PluginManifest*> plugins READ plugins NOTIFY pluginsChanged)
+    Q_PROPERTY(
+        QList<caelestia::plugins::PluginManifest*> loadedPlugins READ loadedPlugins NOTIFY loadedPluginsChanged)
+    Q_PROPERTY(QList<caelestia::plugins::PluginManifest*> conflictingPlugins READ conflictingPlugins NOTIFY
+            conflictingPluginsChanged)
     Q_PROPERTY(QStringList enabled READ enabled WRITE setEnabled NOTIFY enabledChanged)
 
 public:
@@ -27,20 +32,19 @@ public:
 
     [[nodiscard]] QString shellVersion() const;
 
-    [[nodiscard]] QVariantList plugins() const;
+    [[nodiscard]] QList<PluginManifest*> plugins() const;
 
     // The subset of plugins that are valid and enabled, i.e. the ones actually running.
-    [[nodiscard]] QVariantList loadedPlugins() const;
+    [[nodiscard]] QList<PluginManifest*> loadedPlugins() const;
 
     // Plugins shadowed by an earlier plugin declaring the same id (the losing side of a clash).
-    [[nodiscard]] QVariantList conflictingPlugins() const;
+    [[nodiscard]] QList<PluginManifest*> conflictingPlugins() const;
 
     [[nodiscard]] QStringList enabled() const;
     void setEnabled(const QStringList& enabled);
 
-    // Flattened contributions of the given type across all enabled + valid plugins.
-    // Each entry is the manifest's provides[] object plus a "pluginId" key, with "source" resolved to a file URL.
-    Q_INVOKABLE QVariantList extensions(const QString& type) const;
+    // Flattened entry points of the given type across all enabled + valid plugins.
+    Q_INVOKABLE QList<EntryPoint> entryPoints(caelestia::plugins::EntryPointType::Type type) const;
 
     Q_INVOKABLE QVariantMap settings(const QString& pluginId) const;
     Q_INVOKABLE QVariant setting(
@@ -67,7 +71,6 @@ private:
     void onWatchEvent();
     void updateWatches();
     [[nodiscard]] QStringList searchRoots() const;
-    [[nodiscard]] QVariantMap parseManifest(const QString& dir, const QString& path) const;
 
     QString m_configPath;
     QFileSystemWatcher* m_watcher;
@@ -78,8 +81,8 @@ private:
     QStringList m_enabled;
     QStringList m_extraPaths;
     QVariantMap m_settings;
-    QVariantList m_plugins;
-    QVariantList m_conflictingPlugins;
+    QList<PluginManifest*> m_plugins;
+    QList<PluginManifest*> m_conflictingPlugins;
 };
 
-} // namespace caelestia
+} // namespace caelestia::plugins
