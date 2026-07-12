@@ -2,7 +2,6 @@ qml_module(caelestia-core
     URI Caelestia
     SOURCES
         cutils.cpp
-        pluginmanager.cpp
         qalculator.cpp
         appdb.cpp
         requests.cpp
@@ -23,6 +22,7 @@ add_subdirectory(Components)
 add_subdirectory(Config)
 add_subdirectory(Internal)
 add_subdirectory(Models)
+add_subdirectory(Plugins)
 add_subdirectory(Services)
 add_subdirectory(Blobs)
 add_subdirectory(Images)

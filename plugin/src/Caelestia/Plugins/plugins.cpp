@@ -1,4 +1,4 @@
-#include "pluginmanager.hpp"
+#include "plugins.hpp"
 
 #include <qdir.h>
 #include <qfile.h>
@@ -73,7 +73,7 @@ bool satisfiesRequirement(const QString& requirement, const QVersionNumber& shel
 
 } // namespace
 
-PluginManager::PluginManager(QObject* parent)
+Plugins::Plugins(QObject* parent)
     : QObject(parent)
     , m_configPath(configDir() + QStringLiteral("plugins.json"))
     , m_watcher(new QFileSystemWatcher(this))
@@ -81,7 +81,7 @@ PluginManager::PluginManager(QObject* parent)
     , m_reloadTimer(new QTimer(this)) {
     m_saveTimer->setSingleShot(true);
     m_saveTimer->setInterval(300);
-    connect(m_saveTimer, &QTimer::timeout, this, &PluginManager::saveConfig);
+    connect(m_saveTimer, &QTimer::timeout, this, &Plugins::saveConfig);
 
     m_reloadTimer->setSingleShot(true);
     m_reloadTimer->setInterval(50);
@@ -90,22 +90,22 @@ PluginManager::PluginManager(QObject* parent)
         rescan();
     });
 
-    connect(m_watcher, &QFileSystemWatcher::directoryChanged, this, &PluginManager::onWatchEvent);
-    connect(m_watcher, &QFileSystemWatcher::fileChanged, this, &PluginManager::onWatchEvent);
+    connect(m_watcher, &QFileSystemWatcher::directoryChanged, this, &Plugins::onWatchEvent);
+    connect(m_watcher, &QFileSystemWatcher::fileChanged, this, &Plugins::onWatchEvent);
 
     loadConfig();
     rescan();
 }
 
-QString PluginManager::shellVersion() const {
+QString Plugins::shellVersion() const {
     return QStringLiteral(CAELESTIA_VERSION);
 }
 
-QVariantList PluginManager::plugins() const {
+QVariantList Plugins::plugins() const {
     return m_plugins;
 }
 
-QVariantList PluginManager::loadedPlugins() const {
+QVariantList Plugins::loadedPlugins() const {
     QVariantList result;
     for (const auto& value : m_plugins) {
         const auto plugin = value.toMap();
@@ -115,15 +115,15 @@ QVariantList PluginManager::loadedPlugins() const {
     return result;
 }
 
-QVariantList PluginManager::conflictingPlugins() const {
+QVariantList Plugins::conflictingPlugins() const {
     return m_conflictingPlugins;
 }
 
-QStringList PluginManager::enabled() const {
+QStringList Plugins::enabled() const {
     return m_enabled;
 }
 
-void PluginManager::setEnabled(const QStringList& enabled) {
+void Plugins::setEnabled(const QStringList& enabled) {
     if (m_enabled == enabled)
         return;
 
@@ -142,7 +142,7 @@ void PluginManager::setEnabled(const QStringList& enabled) {
     m_saveTimer->start();
 }
 
-void PluginManager::setPluginEnabled(const QString& pluginId, bool enabled) {
+void Plugins::setPluginEnabled(const QString& pluginId, bool enabled) {
     QStringList next = m_enabled;
     if (enabled) {
         if (!next.contains(pluginId))
@@ -153,7 +153,7 @@ void PluginManager::setPluginEnabled(const QString& pluginId, bool enabled) {
     setEnabled(next);
 }
 
-QVariantList PluginManager::extensions(const QString& type) const {
+QVariantList Plugins::extensions(const QString& type) const {
     QVariantList result;
 
     for (const auto& value : m_plugins) {
@@ -175,16 +175,16 @@ QVariantList PluginManager::extensions(const QString& type) const {
     return result;
 }
 
-QVariantMap PluginManager::settings(const QString& pluginId) const {
+QVariantMap Plugins::settings(const QString& pluginId) const {
     return m_settings.value(pluginId).toMap();
 }
 
-QVariant PluginManager::setting(const QString& pluginId, const QString& key, const QVariant& fallback) const {
+QVariant Plugins::setting(const QString& pluginId, const QString& key, const QVariant& fallback) const {
     const auto pluginSettings = m_settings.value(pluginId).toMap();
     return pluginSettings.contains(key) ? pluginSettings.value(key) : fallback;
 }
 
-void PluginManager::setSetting(const QString& pluginId, const QString& key, const QVariant& value) {
+void Plugins::setSetting(const QString& pluginId, const QString& key, const QVariant& value) {
     auto pluginSettings = m_settings.value(pluginId).toMap();
     if (pluginSettings.value(key) == value)
         return;
@@ -196,12 +196,12 @@ void PluginManager::setSetting(const QString& pluginId, const QString& key, cons
     m_saveTimer->start();
 }
 
-void PluginManager::reload() {
+void Plugins::reload() {
     loadConfig();
     rescan();
 }
 
-void PluginManager::loadConfig() {
+void Plugins::loadConfig() {
     m_enabled.clear();
     m_extraPaths.clear();
     m_settings.clear();
@@ -241,7 +241,7 @@ void PluginManager::loadConfig() {
     emit enabledChanged();
 }
 
-void PluginManager::saveConfig() {
+void Plugins::saveConfig() {
     QJsonObject obj;
     obj.insert(QStringLiteral("enabled"), QJsonArray::fromStringList(m_enabled));
     obj.insert(QStringLiteral("path"), QJsonArray::fromStringList(m_extraPaths));
@@ -267,7 +267,7 @@ void PluginManager::saveConfig() {
     updateWatches();
 }
 
-void PluginManager::rescan() {
+void Plugins::rescan() {
     QVariantList result;
 
     const auto roots = searchRoots();
@@ -315,7 +315,7 @@ void PluginManager::rescan() {
     updateWatches();
 }
 
-QVariantMap PluginManager::parseManifest(const QString& dir, const QString& path) const {
+QVariantMap Plugins::parseManifest(const QString& dir, const QString& path) const {
     QVariantMap plugin;
     plugin.insert(QStringLiteral("dir"), dir);
 
@@ -395,7 +395,7 @@ QVariantMap PluginManager::parseManifest(const QString& dir, const QString& path
     return plugin;
 }
 
-QStringList PluginManager::searchRoots() const {
+QStringList Plugins::searchRoots() const {
     QStringList roots;
     roots.append(configDir() + QStringLiteral("plugins"));
 
@@ -408,7 +408,7 @@ QStringList PluginManager::searchRoots() const {
     return roots;
 }
 
-void PluginManager::updateWatches() {
+void Plugins::updateWatches() {
     const auto watchedDirs = m_watcher->directories();
     if (!watchedDirs.isEmpty())
         m_watcher->removePaths(watchedDirs);
@@ -428,7 +428,7 @@ void PluginManager::updateWatches() {
             m_watcher->addPath(root);
 }
 
-void PluginManager::onWatchEvent() {
+void Plugins::onWatchEvent() {
     updateWatches();
 
     if (m_recentlySaved)

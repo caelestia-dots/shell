@@ -11,7 +11,7 @@ namespace caelestia {
 
 // Discovers plugins on disk, parses their manifests and exposes their contributions.
 // Backed by a single ~/.config/caelestia/plugins.json holding enabled + path + settings.
-class PluginManager : public QObject {
+class Plugins : public QObject {
     Q_OBJECT
     QML_ELEMENT
     QML_SINGLETON
@@ -23,7 +23,7 @@ class PluginManager : public QObject {
     Q_PROPERTY(QStringList enabled READ enabled WRITE setEnabled NOTIFY enabledChanged)
 
 public:
-    explicit PluginManager(QObject* parent = nullptr);
+    explicit Plugins(QObject* parent = nullptr);
 
     [[nodiscard]] QString shellVersion() const;
 
