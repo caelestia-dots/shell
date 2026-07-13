@@ -4,6 +4,8 @@ import QtQuick
 import Quickshell
 
 Singleton {
+    id: root
+
     required property list<QtObject> list
     property string key: "name"
     property bool useFuzzy: false
@@ -13,17 +15,7 @@ Singleton {
     property list<string> keys: [key]
     property list<real> weights: [1]
 
-    readonly property var fzf: useFuzzy ? [] : new Fzf.Finder(list, Object.assign({
-        selector
-    }, extraOpts))
-    readonly property list<var> fuzzyPrepped: useFuzzy ? list.map(e => {
-        const obj = {
-            _item: e
-        };
-        for (const k of keys)
-            obj[k] = Fuzzy.prepare(e[k]);
-        return obj;
-    }) : []
+    property var cache: ({ fzf: null, fuzzyPrepped: [], lastList: null, lastKeys: null })
 
     function transformSearch(search: string): string {
         return search;
@@ -34,19 +26,52 @@ Singleton {
         return item[key];
     }
 
-    function query(search: string): list<var> {
+    function arraysEqual(a, b) {
+        if (!a || !b) return false;
+        if (a.length !== b.length) return false;
+        for (let i = 0; i < a.length; i++) {
+            if (a[i] !== b[i]) return false;
+        }
+        return true;
+    }
+
+    function query(search, queryKeys = keys, queryWeights = weights) {
         search = transformSearch(search.trim().replace(/\s+/g, " "));
         if (!search)
             return [...list];
 
-        if (useFuzzy)
-            return Fuzzy.go(search, fuzzyPrepped, Object.assign({
-                all: true,
-                keys,
-                scoreFn: r => weights.reduce((a, w, i) => a + r[i].score * w, 0)
-            }, extraOpts)).map(r => r.obj._item);
+        if (cache.lastList !== list || !root.arraysEqual(cache.lastKeys, queryKeys) || (cache.fzf && cache.fzf.items.length !== list.length) || (useFuzzy && cache.fuzzyPrepped.length !== list.length)) {
+            cache.lastList = list;
+            cache.lastKeys = queryKeys;
+            cache.fzf = null;
+            cache.fuzzyPrepped = [];
+        }
 
-        return fzf.find(search).sort((a, b) => {
+        if (useFuzzy) {
+            if (cache.fuzzyPrepped.length === 0 && list.length > 0) {
+                cache.fuzzyPrepped = list.map(e => {
+                    const obj = {
+                        _item: e
+                    };
+                    for (const k of queryKeys)
+                        obj[k] = Fuzzy.prepare(e[k]);
+                    return obj;
+                });
+            }
+            return Fuzzy.go(search, cache.fuzzyPrepped, Object.assign({
+                all: true,
+                keys: queryKeys,
+                scoreFn: r => queryWeights.reduce((a, w, i) => a + r[i].score * w, 0)
+            }, extraOpts)).map(r => r.obj._item);
+        }
+
+        if (!cache.fzf) {
+            cache.fzf = new Fzf.Finder(list, Object.assign({
+                selector
+            }, extraOpts));
+        }
+
+        return cache.fzf.find(search).sort((a, b) => {
             if (a.score === b.score)
                 return selector(a.item).trim().length - selector(b.item).trim().length;
             return b.score - a.score;

@@ -23,36 +23,42 @@ Searcher {
     function search(search: string): list<var> {
         const prefix = GlobalConfig.launcher.specialPrefix;
 
-        if (search.startsWith(`${prefix}i `)) {
-            keys = ["id", "name"];
-            weights = [0.9, 0.1];
-        } else if (search.startsWith(`${prefix}c `)) {
-            keys = ["categories", "name"];
-            weights = [0.9, 0.1];
-        } else if (search.startsWith(`${prefix}d `)) {
-            keys = ["comment", "name"];
-            weights = [0.9, 0.1];
-        } else if (search.startsWith(`${prefix}e `)) {
-            keys = ["execString", "name"];
-            weights = [0.9, 0.1];
-        } else if (search.startsWith(`${prefix}w `)) {
-            keys = ["startupClass", "name"];
-            weights = [0.9, 0.1];
-        } else if (search.startsWith(`${prefix}g `)) {
-            keys = ["genericName", "name"];
-            weights = [0.9, 0.1];
-        } else if (search.startsWith(`${prefix}k `)) {
-            keys = ["keywords", "name"];
-            weights = [0.9, 0.1];
-        } else {
-            keys = ["name"];
-            weights = [1];
+        let newKeys = ["name"];
+        let newWeights = [1];
+        let skipPrefixSlice = false;
 
-            if (!search.startsWith(`${prefix}t `))
-                return query(search).map(e => e.entry);
+        if (search.startsWith(`${prefix}i `)) {
+            newKeys = ["id", "name"];
+            newWeights = [0.9, 0.1];
+        } else if (search.startsWith(`${prefix}c `)) {
+            newKeys = ["categories", "name"];
+            newWeights = [0.9, 0.1];
+        } else if (search.startsWith(`${prefix}d `)) {
+            newKeys = ["comment", "name"];
+            newWeights = [0.9, 0.1];
+        } else if (search.startsWith(`${prefix}e `)) {
+            newKeys = ["execString", "name"];
+            newWeights = [0.9, 0.1];
+        } else if (search.startsWith(`${prefix}w `)) {
+            newKeys = ["startupClass", "name"];
+            newWeights = [0.9, 0.1];
+        } else if (search.startsWith(`${prefix}g `)) {
+            newKeys = ["genericName", "name"];
+            newWeights = [0.9, 0.1];
+        } else if (search.startsWith(`${prefix}k `)) {
+            newKeys = ["keywords", "name"];
+            newWeights = [0.9, 0.1];
+        } else {
+            if (!search.startsWith(`${prefix}t `)) {
+                skipPrefixSlice = true;
+            }
         }
 
-        const results = query(search.slice(prefix.length + 2)).map(e => e.entry);
+        if (skipPrefixSlice) {
+            return query(search, newKeys, newWeights).map(e => e.entry);
+        }
+
+        const results = query(search.slice(prefix.length + 2), newKeys, newWeights).map(e => e.entry);
         if (search.startsWith(`${prefix}t `))
             return results.filter(a => a.runInTerminal);
         return results;

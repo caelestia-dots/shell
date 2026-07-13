@@ -9,6 +9,8 @@ Item {
     required property var modelData
     required property var list
 
+    readonly property string iconName: root.modelData?.icon ?? ""
+
     implicitHeight: Tokens.sizes.launcher.itemHeight
 
     anchors.left: parent?.left
@@ -29,7 +31,7 @@ Item {
             id: icon
 
             anchors.verticalCenter: parent.verticalCenter
-            text: root.modelData?.icon ?? ""
+            text: (root.modelData && root.modelData.id === undefined) ? iconName : ""
             color: Colours.palette.m3onSurfaceVariant
             fontStyle: Tokens.font.icon.builders.large.scale(1.3).build()
         }

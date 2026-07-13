@@ -69,7 +69,6 @@ StyledListView {
             name: "apps"
 
             PropertyChanges {
-                model.values: Apps.search(search.text)
                 root.delegate: appItem
             }
         },
@@ -77,7 +76,6 @@ StyledListView {
             name: "actions"
 
             PropertyChanges {
-                model.values: Actions.query(search.text)
                 root.delegate: actionItem
             }
         },
@@ -85,7 +83,6 @@ StyledListView {
             name: "calc"
 
             PropertyChanges {
-                model.values: [0]
                 root.delegate: calcItem
             }
         },
@@ -93,7 +90,6 @@ StyledListView {
             name: "scheme"
 
             PropertyChanges {
-                model.values: Schemes.query(search.text)
                 root.delegate: schemeItem
             }
         },
@@ -101,7 +97,6 @@ StyledListView {
             name: "variant"
 
             PropertyChanges {
-                model.values: M3Variants.query(search.text)
                 root.delegate: variantItem
             }
         }
@@ -128,8 +123,8 @@ StyledListView {
                 }
             }
             PropertyAction {
-                targets: [model, root]
-                properties: "values,delegate"
+                target: root
+                property: "delegate"
             }
             ParallelAnimation {
                 Anim {
@@ -254,6 +249,27 @@ StyledListView {
 
         VariantItem {
             list: root
+        }
+    }
+
+    Binding {
+        target: model
+        property: "values"
+        value: {
+            const text = search.text;
+            const prefix = GlobalConfig.launcher.actionPrefix;
+            if (text.startsWith(prefix)) {
+                if (text.startsWith(`${prefix}calc `))
+                    return [0];
+                if (text.startsWith(`${prefix}scheme `))
+                    return Schemes.query(text);
+                if (text.startsWith(`${prefix}variant `))
+                    return M3Variants.query(text);
+
+                return Actions.query(text.substring(1).trim());
+            }
+
+            return Apps.search(text);
         }
     }
 }

@@ -13,6 +13,8 @@ Item {
     required property DesktopEntry modelData
     required property ScreenState screenState
 
+    readonly property string iconName: root.modelData?.icon ?? ""
+
     implicitHeight: Tokens.sizes.launcher.itemHeight
 
     anchors.left: parent?.left
@@ -36,7 +38,7 @@ Item {
             id: icon
 
             asynchronous: true
-            source: Quickshell.iconPath(root.modelData?.icon, "image-missing")
+            source: (root.modelData && root.modelData.id !== undefined && iconName !== "") ? Quickshell.iconPath(iconName, "image-missing") : ""
             implicitSize: parent.height * 0.8
 
             anchors.verticalCenter: parent.verticalCenter

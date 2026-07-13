@@ -110,7 +110,7 @@ Item {
 
         Connections {
             function onLauncherChanged(): void {
-                if (!root.screenState.launcher)
+                if (root.screenState.launcher)
                     search.text = "";
             }
 

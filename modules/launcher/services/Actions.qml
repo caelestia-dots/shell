@@ -11,10 +11,6 @@ import qs.utils
 Searcher {
     id: root
 
-    function transformSearch(search: string): string {
-        return search.slice(GlobalConfig.launcher.actionPrefix.length);
-    }
-
     list: variants.instances
     useFuzzy: GlobalConfig.launcher.useFuzzy.actions
 
