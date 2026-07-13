@@ -22,8 +22,8 @@ QString EntryPointType::toString(Type type) {
     return {};
 }
 
-EntryPoint::EntryPoint(const QJsonObject& json, const QString& dir, const QString& pluginId)
-    : m_pluginId(pluginId) {
+EntryPoint::EntryPoint(const QJsonObject& json, const QString& dir, PluginManifest* plugin)
+    : m_plugin(plugin) {
     const auto typeStr = json.value(QStringLiteral("type")).toString();
     if (const auto type = EntryPointType::fromString(typeStr))
         m_type = *type;

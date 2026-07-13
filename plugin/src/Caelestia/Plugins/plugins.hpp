@@ -46,11 +46,6 @@ public:
     // Flattened entry points of the given type across all enabled + valid plugins.
     Q_INVOKABLE QList<EntryPoint> entryPoints(caelestia::plugins::EntryPointType::Type type) const;
 
-    Q_INVOKABLE QVariantMap settings(const QString& pluginId) const;
-    Q_INVOKABLE QVariant setting(
-        const QString& pluginId, const QString& key, const QVariant& fallback = QVariant()) const;
-    Q_INVOKABLE void setSetting(const QString& pluginId, const QString& key, const QVariant& value);
-
     Q_INVOKABLE void setPluginEnabled(const QString& pluginId, bool enabled);
     Q_INVOKABLE void reload();
 
@@ -59,7 +54,6 @@ signals:
     void loadedPluginsChanged();
     void conflictingPluginsChanged();
     void enabledChanged();
-    void settingsChanged(const QString& pluginId);
 
     // Emitted after a discovery/reload pass finishes populating the plugin list.
     void loaded();

@@ -80,10 +80,7 @@ void Plugins::setEnabled(const QStringList& enabled) {
 
     m_enabled = enabled;
 
-    // Refresh the per-plugin enabled flags without re-reading manifests. Each manifest emits
-    // its own enabledChanged, so bindings on a specific plugin update in place; the list of
-    // manifest objects is unchanged, so pluginsChanged is not re-emitted.
-    for (auto* plugin : m_plugins)
+    for (auto* plugin : std::as_const(m_plugins))
         plugin->setEnabled(m_enabled.contains(plugin->id()));
 
     emit enabledChanged();
@@ -116,27 +113,6 @@ QList<EntryPoint> Plugins::entryPoints(EntryPointType::Type type) const {
     }
 
     return result;
-}
-
-QVariantMap Plugins::settings(const QString& pluginId) const {
-    return m_settings.value(pluginId).toMap();
-}
-
-QVariant Plugins::setting(const QString& pluginId, const QString& key, const QVariant& fallback) const {
-    const auto pluginSettings = m_settings.value(pluginId).toMap();
-    return pluginSettings.contains(key) ? pluginSettings.value(key) : fallback;
-}
-
-void Plugins::setSetting(const QString& pluginId, const QString& key, const QVariant& value) {
-    auto pluginSettings = m_settings.value(pluginId).toMap();
-    if (pluginSettings.value(key) == value)
-        return;
-
-    pluginSettings.insert(key, value);
-    m_settings.insert(pluginId, pluginSettings);
-
-    emit settingsChanged(pluginId);
-    m_saveTimer->start();
 }
 
 void Plugins::reload() {
@@ -185,6 +161,11 @@ void Plugins::loadConfig() {
 }
 
 void Plugins::saveConfig() {
+    // Merge settings into settings from file so confs for removed plugins are preserved
+    for (const auto* plugin : std::as_const(m_plugins))
+        if (!plugin->id().isEmpty())
+            m_settings.insert(plugin->id(), plugin->settings());
+
     QJsonObject obj;
     obj.insert(QStringLiteral("enabled"), QJsonArray::fromStringList(m_enabled));
     obj.insert(QStringLiteral("path"), QJsonArray::fromStringList(m_extraPaths));
@@ -228,6 +209,13 @@ void Plugins::rescan() {
 
             auto* manifest = new PluginManifest(pluginDir, manifestPath, this);
             manifest->setEnabled(m_enabled.contains(manifest->id()));
+
+            // Seed persisted settings, then persist any later change the plugin makes to itself.
+            manifest->setSettings(m_settings.value(manifest->id()).toMap());
+            connect(manifest, &PluginManifest::settingsChanged, this, [this] {
+                m_saveTimer->start();
+            });
+
             if (!manifest->valid())
                 qCWarning(lcPlugins) << "Ignoring plugin" << manifest->id() << "-" << manifest->error();
             result.append(manifest);

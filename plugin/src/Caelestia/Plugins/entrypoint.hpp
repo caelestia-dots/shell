@@ -10,6 +10,8 @@
 
 namespace caelestia::plugins {
 
+class PluginManifest;
+
 class EntryPointType : public QObject {
     Q_OBJECT
     QML_ELEMENT
@@ -28,19 +30,19 @@ public:
 
 class EntryPoint {
     Q_GADGET
+    Q_MOC_INCLUDE("pluginmanifest.hpp")
     QML_VALUE_TYPE(pluginEntryPoint)
 
-    // Required
+    // Required metadata
     Q_PROPERTY(caelestia::plugins::EntryPointType::Type type MEMBER m_type)
     Q_PROPERTY(QString source MEMBER m_source)
 
-    // Optional
-    Q_PROPERTY(QString pluginId MEMBER m_pluginId)
+    Q_PROPERTY(caelestia::plugins::PluginManifest* plugin MEMBER m_plugin)
     Q_PROPERTY(QVariantMap properties MEMBER m_properties)
 
 public:
     EntryPoint() = default;
-    EntryPoint(const QJsonObject& json, const QString& dir, const QString& pluginId);
+    EntryPoint(const QJsonObject& json, const QString& dir, PluginManifest* plugin);
 
     [[nodiscard]] EntryPointType::Type type() const;
 
@@ -50,7 +52,7 @@ public:
 private:
     EntryPointType::Type m_type = EntryPointType::Service;
     QString m_source;
-    QString m_pluginId;
+    PluginManifest* m_plugin = nullptr;
     QVariantMap m_properties;
     QString m_error;
 };

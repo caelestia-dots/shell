@@ -94,7 +94,7 @@ PluginManifest::PluginManifest(const QString& dir, const QString& path, QObject*
     QString entryPointError;
     const auto entryPointsArray = obj.value(QStringLiteral("entryPoints")).toArray();
     for (const auto& declared : entryPointsArray) {
-        const EntryPoint entryPoint(declared.toObject(), dir, m_id);
+        const EntryPoint entryPoint(declared.toObject(), dir, this);
         if (entryPointError.isEmpty())
             entryPointError = entryPoint.error();
         m_entryPoints.append(entryPoint);
@@ -165,6 +165,30 @@ void PluginManifest::setEnabled(bool enabled) {
 
     m_enabled = enabled;
     emit enabledChanged();
+}
+
+QVariantMap PluginManifest::settings() const {
+    return m_settings;
+}
+
+QVariant PluginManifest::setting(const QString& key, const QVariant& fallback) const {
+    return m_settings.contains(key) ? m_settings.value(key) : fallback;
+}
+
+void PluginManifest::setSetting(const QString& key, const QVariant& value) {
+    if (m_settings.value(key) == value)
+        return;
+
+    m_settings.insert(key, value);
+    emit settingsChanged();
+}
+
+void PluginManifest::setSettings(const QVariantMap& settings) {
+    if (m_settings == settings)
+        return;
+
+    m_settings = settings;
+    emit settingsChanged();
 }
 
 void PluginManifest::invalidate(const QString& error) {

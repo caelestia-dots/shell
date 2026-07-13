@@ -4,6 +4,7 @@
 #include <qobject.h>
 #include <qqmlintegration.h>
 #include <qstring.h>
+#include <qvariant.h>
 
 #include "entrypoint.hpp"
 
@@ -32,6 +33,7 @@ class PluginManifest : public QObject {
     Q_PROPERTY(bool valid READ valid CONSTANT)
     Q_PROPERTY(QString error READ error CONSTANT)
     Q_PROPERTY(bool enabled READ enabled NOTIFY enabledChanged)
+    Q_PROPERTY(QVariantMap settings READ settings NOTIFY settingsChanged)
 
 public:
     PluginManifest(const QString& dir, const QString& path, QObject* parent = nullptr);
@@ -53,11 +55,19 @@ public:
     [[nodiscard]] bool enabled() const;
     void setEnabled(bool enabled);
 
+    [[nodiscard]] QVariantMap settings() const;
+    Q_INVOKABLE QVariant setting(const QString& key, const QVariant& fallback = QVariant()) const;
+    Q_INVOKABLE void setSetting(const QString& key, const QVariant& value);
+
+    // Seeds settings from persisted config (used by Plugins); does not itself persist.
+    void setSettings(const QVariantMap& settings);
+
     // Marks the manifest as invalid
     void invalidate(const QString& error);
 
 signals:
     void enabledChanged();
+    void settingsChanged();
 
 private:
     QString m_id;
@@ -74,6 +84,7 @@ private:
     bool m_enabled = false;
     bool m_valid = false;
     QString m_error;
+    QVariantMap m_settings;
 };
 
 } // namespace caelestia::plugins
