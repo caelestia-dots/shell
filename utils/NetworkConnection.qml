@@ -36,65 +36,52 @@ QtObject {
      * @param network The network object to connect to (must have ssid property)
      * @param session Optional Session object (for controlcenter - must have network property with showPasswordDialog and pendingNetwork)
      * @param onPasswordNeeded Optional callback function(network) called when password is needed (for bar popouts)
+     * @param onEnterpriseNeeded Optional callback function(network) called when the network is WPA/WPA2/WPA3-Enterprise
+     *        (802.1X, e.g. eduroam) and has no saved profile — a plain password won't work, an identity + EAP method is needed.
      */
-    function handleConnect(network, session, onPasswordNeeded): void {
+    function handleConnect(network, session, onPasswordNeeded, onEnterpriseNeeded): void {
         if (!network) {
             return;
         }
 
         if (Nmcli.active && Nmcli.active.ssid !== network.ssid) {
-            Nmcli.disconnectFromNetwork();
-            Qt.callLater(() => {
-                root.connectToNetwork(network, session, onPasswordNeeded);
+            Nmcli.disconnectFromNetwork(() => {
+                root.connectToNetwork(network, session, onPasswordNeeded, onEnterpriseNeeded);
             });
         } else {
-            root.connectToNetwork(network, session, onPasswordNeeded);
+            root.connectToNetwork(network, session, onPasswordNeeded, onEnterpriseNeeded);
         }
     }
 
     /**
      * Connect to a wireless network.
      * Handles both secured and open networks, checks for saved profiles,
-     * and shows password dialog if needed.
+     * and shows password/enterprise-credentials dialog if needed.
      *
-     * @param network The network object to connect to (must have ssid, isSecure, bssid properties)
+     * @param network The network object to connect to (must have ssid, isSecure, isEnterprise, bssid properties)
      * @param session Optional Session object (for controlcenter - must have network property with showPasswordDialog and pendingNetwork)
      * @param onPasswordNeeded Optional callback function(network) called when password is needed (for bar popouts)
+     * @param onEnterpriseNeeded Optional callback function(network) called when 802.1X credentials are needed
      */
-    function connectToNetwork(network, session, onPasswordNeeded): void {
+    function connectToNetwork(network, session, onPasswordNeeded, onEnterpriseNeeded): void {
         if (!network) {
             return;
         }
 
-        if (network.isSecure) {
-            const hasSavedProfile = Nmcli.hasSavedProfile(network.ssid);
-
-            if (hasSavedProfile) {
-                Nmcli.connectToNetwork(network.ssid, "", network.bssid, null);
-            } else {
-                // Use password check with callback
-                Nmcli.connectToNetworkWithPasswordCheck(network.ssid, network.isSecure, result => {
-                    if (result.needsPassword) {
-                        // Clear pending connection if exists
-                        if (Nmcli.pendingConnection) {
-                            Nmcli.connectionCheckTimer.stop();
-                            Nmcli.immediateCheckTimer.stop();
-                            Nmcli.immediateCheckTimer.checkCount = 0;
-                            Nmcli.pendingConnection = null;
-                        }
-
-                        // Handle password dialog - use session if available, otherwise use callback
-                        if (session && session.network) {
-                            session.network.showPasswordDialog = true;
-                            session.network.pendingNetwork = network;
-                        } else if (onPasswordNeeded) {
-                            onPasswordNeeded(network);
-                        }
-                    }
-                }, network.bssid);
+        if (!network.isSecure || Nmcli.hasSavedProfile(network.ssid)) {
+            // Open, or NetworkManager already holds the secrets.
+            Nmcli.connectToNetwork(network.ssid, "", network.security, null);
+        } else if (network.isEnterprise) {
+            // 802.1X networks (eduroam, corp Wi-Fi) need an identity + EAP
+            // method, not a plain PSK.
+            if (onEnterpriseNeeded) {
+                onEnterpriseNeeded(network);
             }
-        } else {
-            Nmcli.connectToNetwork(network.ssid, "", network.bssid, null);
+        } else if (session && session.network) {
+            session.network.showPasswordDialog = true;
+            session.network.pendingNetwork = network;
+        } else if (onPasswordNeeded) {
+            onPasswordNeeded(network);
         }
     }
 
@@ -111,6 +98,23 @@ QtObject {
             return;
         }
 
-        Nmcli.connectToNetwork(network.ssid, password || "", network.bssid || "", onResult || null);
+        Nmcli.connectToNetwork(network.ssid, password || "", network.security || "", onResult || null);
+    }
+
+    /**
+     * Connect to a WPA/WPA2/WPA3-Enterprise (802.1X) network with the given credentials.
+     * Used by the enterprise credentials dialog/page once the user has filled in identity,
+     * password, EAP method and any advanced options.
+     *
+     * @param network The network object to connect to (must have ssid, bssid properties)
+     * @param params { identity, password, eapMethod, phase2Method, anonymousIdentity, domainSuffixMatch, caCertPath, verifyCert }
+     * @param onResult Optional callback function(result) called with connection result
+     */
+    function connectWithEnterpriseCredentials(network, params, onResult): void {
+        if (!network) {
+            return;
+        }
+
+        Nmcli.connectEnterpriseNetwork(network.ssid, params || {}, onResult || null);
     }
 }
