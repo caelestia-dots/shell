@@ -21,8 +21,7 @@ class Plugins : public QObject {
 
     Q_PROPERTY(QString shellVersion READ shellVersion CONSTANT)
     Q_PROPERTY(QList<caelestia::plugins::PluginManifest*> plugins READ plugins NOTIFY pluginsChanged)
-    Q_PROPERTY(
-        QList<caelestia::plugins::PluginManifest*> loadedPlugins READ loadedPlugins NOTIFY loadedPluginsChanged)
+    Q_PROPERTY(QList<caelestia::plugins::PluginManifest*> loadedPlugins READ loadedPlugins NOTIFY loadedPluginsChanged)
     Q_PROPERTY(QList<caelestia::plugins::PluginManifest*> conflictingPlugins READ conflictingPlugins NOTIFY
             conflictingPluginsChanged)
     Q_PROPERTY(QStringList enabled READ enabled WRITE setEnabled NOTIFY enabledChanged)
