@@ -4,8 +4,14 @@
 #include <qjsonarray.h>
 #include <qjsondocument.h>
 #include <qjsonobject.h>
+#include <qqmlcomponent.h>
+#include <qqmlengine.h>
 #include <qregularexpression.h>
+#include <qurl.h>
 #include <qversionnumber.h>
+
+#include "settingmeta.hpp"
+#include "settingsobject.hpp"
 
 #ifndef CAELESTIA_VERSION
 #define CAELESTIA_VERSION ""
@@ -90,6 +96,14 @@ PluginManifest::PluginManifest(const QString& dir, const QString& path, QObject*
     m_description = obj.value(QStringLiteral("description")).toString();
     m_requires = obj.value(QStringLiteral("requires")).toString();
 
+    const auto settingsSource = obj.value(QStringLiteral("settings")).toString();
+    if (!settingsSource.isEmpty())
+        m_settingsSource = QUrl::fromLocalFile(dir + QStringLiteral("/") + settingsSource).toString();
+
+    const auto settingsUiSource = obj.value(QStringLiteral("settingsUi")).toString();
+    if (!settingsUiSource.isEmpty())
+        m_settingsUiSource = QUrl::fromLocalFile(dir + QStringLiteral("/") + settingsUiSource).toString();
+
     // Each entry point parses itself; the first that fails invalidates the whole manifest.
     QString entryPointError;
     const auto entryPointsArray = obj.value(QStringLiteral("entryPoints")).toArray();
@@ -109,8 +123,8 @@ PluginManifest::PluginManifest(const QString& dir, const QString& path, QObject*
     else if (!entryPointError.isEmpty())
         m_error = entryPointError;
     else if (!satisfiesRequirement(m_requires, parseVersion(QStringLiteral(CAELESTIA_VERSION))))
-        m_error = QStringLiteral("Requires Caelestia %1 (current is %2)")
-                      .arg(m_requires, QStringLiteral(CAELESTIA_VERSION));
+        m_error =
+            QStringLiteral("Requires Caelestia %1 (current is %2)").arg(m_requires, QStringLiteral(CAELESTIA_VERSION));
 
     m_valid = m_error.isEmpty();
 }
@@ -143,6 +157,14 @@ QString PluginManifest::dir() const {
     return m_dir;
 }
 
+QString PluginManifest::settingsSource() const {
+    return m_settingsSource;
+}
+
+QString PluginManifest::settingsUiSource() const {
+    return m_settingsUiSource;
+}
+
 QList<EntryPoint> PluginManifest::entryPoints() const {
     return m_entryPoints;
 }
@@ -167,28 +189,51 @@ void PluginManifest::setEnabled(bool enabled) {
     emit enabledChanged();
 }
 
-QVariantMap PluginManifest::settings() const {
+SettingsObject* PluginManifest::settings() {
+    if (m_settings || m_settingsSource.isEmpty())
+        return m_settings;
+
+    // Get the qml engine from the parent Plugins singleton
+    auto* const engine = qmlEngine(parent());
+    if (!engine)
+        return nullptr;
+
+    QQmlComponent component(engine, QUrl(m_settingsSource));
+    auto* const object = component.create();
+    m_settings = qobject_cast<SettingsObject*>(object);
+
+    if (!m_settings) {
+        if (component.isError())
+            qCWarning(lcPluginSettings, "Failed to load settings for %s: %s", qUtf8Printable(m_id),
+                qUtf8Printable(component.errorString()));
+        else
+            qCWarning(lcPluginSettings, "Settings root for %s is not a SettingsObject", qUtf8Printable(m_id));
+
+        if (object)
+            object->deleteLater();
+
+        return nullptr;
+    }
+
+    QQmlEngine::setObjectOwnership(m_settings, QQmlEngine::CppOwnership);
+    m_settings->setParent(this);
+
+    // Load stored settings
+    m_settings->load(m_storedSettings);
+    connect(m_settings, &SettingsObject::changed, this, &PluginManifest::settingsChanged);
+
     return m_settings;
 }
 
-QVariant PluginManifest::setting(const QString& key, const QVariant& fallback) const {
-    return m_settings.contains(key) ? m_settings.value(key) : fallback;
+void PluginManifest::loadSettings(const QVariantMap& settings) {
+    if (m_settings)
+        m_settings->load(settings);
+    else
+        m_storedSettings = settings;
 }
 
-void PluginManifest::setSetting(const QString& key, const QVariant& value) {
-    if (m_settings.value(key) == value)
-        return;
-
-    m_settings.insert(key, value);
-    emit settingsChanged();
-}
-
-void PluginManifest::setSettings(const QVariantMap& settings) {
-    if (m_settings == settings)
-        return;
-
-    m_settings = settings;
-    emit settingsChanged();
+QVariantMap PluginManifest::settingsValues() const {
+    return m_settings ? m_settings->toMap() : m_storedSettings;
 }
 
 void PluginManifest::invalidate(const QString& error) {

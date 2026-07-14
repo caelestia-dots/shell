@@ -164,7 +164,7 @@ void Plugins::saveConfig() {
     // Merge settings into settings from file so confs for removed plugins are preserved
     for (const auto* plugin : std::as_const(m_plugins))
         if (!plugin->id().isEmpty())
-            m_settings.insert(plugin->id(), plugin->settings());
+            m_settings.insert(plugin->id(), plugin->settingsValues());
 
     QJsonObject obj;
     obj.insert(QStringLiteral("enabled"), QJsonArray::fromStringList(m_enabled));
@@ -207,11 +207,10 @@ void Plugins::rescan() {
             if (!QFile::exists(manifestPath))
                 continue;
 
-            auto* manifest = new PluginManifest(pluginDir, manifestPath, this);
+            auto* const manifest = new PluginManifest(pluginDir, manifestPath, this);
             manifest->setEnabled(m_enabled.contains(manifest->id()));
 
-            // Seed persisted settings, then persist any later change the plugin makes to itself.
-            manifest->setSettings(m_settings.value(manifest->id()).toMap());
+            manifest->loadSettings(m_settings.value(manifest->id()).toMap());
             connect(manifest, &PluginManifest::settingsChanged, this, [this] {
                 m_saveTimer->start();
             });

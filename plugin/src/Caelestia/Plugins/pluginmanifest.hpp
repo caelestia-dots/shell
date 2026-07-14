@@ -10,10 +10,13 @@
 
 namespace caelestia::plugins {
 
+class SettingsObject;
+
 class PluginManifest : public QObject {
     Q_OBJECT
     QML_ELEMENT
     QML_UNCREATABLE("PluginManifest is created by Plugins")
+    Q_MOC_INCLUDE("settingsobject.hpp")
 
     // Generated from author/name
     Q_PROPERTY(QString id READ id CONSTANT)
@@ -33,7 +36,11 @@ class PluginManifest : public QObject {
     Q_PROPERTY(bool valid READ valid CONSTANT)
     Q_PROPERTY(QString error READ error CONSTANT)
     Q_PROPERTY(bool enabled READ enabled NOTIFY enabledChanged)
-    Q_PROPERTY(QVariantMap settings READ settings NOTIFY settingsChanged)
+
+    // Settings
+    Q_PROPERTY(QString settingsSource READ settingsSource CONSTANT)
+    Q_PROPERTY(QString settingsUiSource READ settingsUiSource CONSTANT)
+    Q_PROPERTY(caelestia::plugins::SettingsObject* settings READ settings NOTIFY settingsChanged)
 
 public:
     PluginManifest(const QString& dir, const QString& path, QObject* parent = nullptr);
@@ -55,12 +62,14 @@ public:
     [[nodiscard]] bool enabled() const;
     void setEnabled(bool enabled);
 
-    [[nodiscard]] QVariantMap settings() const;
-    Q_INVOKABLE QVariant setting(const QString& key, const QVariant& fallback = QVariant()) const;
-    Q_INVOKABLE void setSetting(const QString& key, const QVariant& value);
+    [[nodiscard]] QString settingsSource() const;
+    [[nodiscard]] QString settingsUiSource() const;
 
-    // Seeds settings from persisted config (used by Plugins); does not itself persist.
-    void setSettings(const QVariantMap& settings);
+    // Lazily instantiates the plugin's SettingsObject on first access (null if it declares none)
+    [[nodiscard]] SettingsObject* settings();
+
+    void loadSettings(const QVariantMap& settings);
+    [[nodiscard]] QVariantMap settingsValues() const;
 
     // Marks the manifest as invalid
     void invalidate(const QString& error);
@@ -81,10 +90,14 @@ private:
 
     QString m_dir;
     QList<EntryPoint> m_entryPoints;
-    bool m_enabled = false;
     bool m_valid = false;
     QString m_error;
-    QVariantMap m_settings;
+    bool m_enabled = false;
+
+    QString m_settingsSource;
+    QString m_settingsUiSource;
+    SettingsObject* m_settings = nullptr;
+    QVariantMap m_storedSettings;
 };
 
 } // namespace caelestia::plugins

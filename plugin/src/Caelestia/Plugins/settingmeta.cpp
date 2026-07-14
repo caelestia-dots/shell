@@ -1,7 +1,5 @@
 #include "settingmeta.hpp"
 
-#include <qloggingcategory.h>
-
 #include "settingsobject.hpp"
 
 namespace caelestia::plugins {

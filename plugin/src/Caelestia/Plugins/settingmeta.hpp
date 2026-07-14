@@ -1,11 +1,14 @@
 #pragma once
 
+#include <qloggingcategory.h>
 #include <qobject.h>
 #include <qqmlintegration.h>
 #include <qqmlproperty.h>
 #include <qqmlpropertyvaluesource.h>
 
 namespace caelestia::plugins {
+
+Q_DECLARE_LOGGING_CATEGORY(lcPluginSettings)
 
 // Metadata for a property of a SettingsObject
 class SettingMeta : public QObject, public QQmlPropertyValueSource {
