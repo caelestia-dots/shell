@@ -4,21 +4,30 @@
 
 namespace caelestia::plugins {
 
+namespace {
+
+constexpr std::pair<EntryPointType::Type, QLatin1String> kTypeNames[] = {
+    { EntryPointType::Custom, QLatin1String("custom") },
+    { EntryPointType::BarEntry, QLatin1String("bar-entry") },
+    { EntryPointType::BarPopout, QLatin1String("bar-popout") },
+    { EntryPointType::StatusIcon, QLatin1String("status-icon") },
+    { EntryPointType::QuickToggle, QLatin1String("quick-toggle") },
+    { EntryPointType::DashboardTab, QLatin1String("dashboard-tab") },
+};
+
+} // namespace
+
 std::optional<EntryPointType::Type> EntryPointType::fromString(const QString& str) {
-    if (str == QStringLiteral("service"))
-        return Service;
-    if (str == QStringLiteral("bar-entry"))
-        return BarEntry;
+    for (const auto& [type, name] : kTypeNames)
+        if (str == name)
+            return type;
     return std::nullopt;
 }
 
 QString EntryPointType::toString(Type type) {
-    switch (type) {
-    case Service:
-        return QStringLiteral("service");
-    case BarEntry:
-        return QStringLiteral("bar-entry");
-    }
+    for (const auto& [t, name] : kTypeNames)
+        if (t == type)
+            return name;
     return {};
 }
 

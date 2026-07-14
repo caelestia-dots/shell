@@ -1,7 +1,5 @@
 #pragma once
 
-#include <optional>
-
 #include <qjsonobject.h>
 #include <qobject.h>
 #include <qqmlintegration.h>
@@ -19,8 +17,12 @@ class EntryPointType : public QObject {
 
 public:
     enum Type {
-        Service,  // a headless QObject instantiated for the lifetime of the plugin
-        BarEntry, // a widget contributed to the bar
+        Custom,       // Custom unparented component
+        BarEntry,     // Entry in the bar
+        BarPopout,    // Popout attached to a bar entry
+        StatusIcon,   // Status icon in the bar
+        QuickToggle,  // Quick toggle in utilities drawer
+        DashboardTab, // New dashboard tab
     };
     Q_ENUM(Type)
 
@@ -50,7 +52,7 @@ public:
     [[nodiscard]] QString error() const;
 
 private:
-    EntryPointType::Type m_type = EntryPointType::Service;
+    EntryPointType::Type m_type = EntryPointType::Custom;
     QString m_source;
     PluginManifest* m_plugin = nullptr;
     QVariantMap m_properties;
