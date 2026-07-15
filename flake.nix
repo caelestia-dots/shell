@@ -59,6 +59,10 @@
         gst_all_1.gst-libav
       ];
       CAELESTIA_XKB_RULES_PATH = "${pkgs.xkeyboard-config}/share/xkeyboard-config-2/rules/base.lst";
+      shellHook = ''
+      export QML2_IMPORT_PATH="$PWD/build/qml:${pkgs.qt6.qtmultimedia}/lib/qt-6/qml:$QML2_IMPORT_PATH"
+      export QT_PLUGIN_PATH="${pkgs.qt6.qtmultimedia}/lib/qt-6/plugins:${pkgs.gst_all_1.gstreamer}/lib/qt-6/plugins:$QT_PLUGIN_PATH"
+      '';
     };
 });
 

@@ -11,7 +11,8 @@ import Quickshell.Io
 Item {
     id: root
 
-    property string activeTab: "static"
+    property string activeTab: Wallpapers.activeTab
+    onActiveTabChanged: Wallpapers.activeTab = activeTab
 
     required property var content
     required property DrawerVisibilities visibilities
@@ -108,7 +109,7 @@ Item {
         visibilities: root.visibilities
         panels: root.panels
         content: root.content
-        activeTab: root.activeTab  // ← ajoute
+        activeTab: root.activeTab
     }
 }
 
