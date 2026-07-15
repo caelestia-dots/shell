@@ -16,28 +16,46 @@ StyledListView {
     required property SearchBar search
     required property ScreenState screenState
 
-    property string modelState: "apps"
+    property string displayText: search.text
+
+    readonly property string requestedState: stateForText(search.text)
+    readonly property string displayState: stateForText(displayText)
+
+    function syncDisplayText(): void {
+        if (screenState.launcher && requestedState === displayState)
+            displayText = search.text;
+    }
+
+    function stateForText(text: string): string {
+        const prefix = GlobalConfig.launcher.actionPrefix;
+        if (text.startsWith(prefix)) {
+            for (const action of ["calc", "scheme", "variant"])
+                if (text.startsWith(`${prefix}${action} `))
+                    return action;
+
+            return "actions";
+        }
+
+        return "apps";
+    }
+
+    function resultsForText(text: string): list<var> {
+        switch (stateForText(text)) {
+        case "actions":
+            return Actions.query(text);
+        case "calc":
+            return [0];
+        case "scheme":
+            return Schemes.query(text);
+        case "variant":
+            return M3Variants.query(text);
+        default:
+            return Apps.search(text);
+        }
+    }
 
     model: ScriptModel {
-        id: model
-
-        // qmllint disable incompatible-type
-        values: {
-            switch (root.modelState) {
-            case "actions":
-                return Actions.query(root.search.text);
-            case "calc":
-                return [0];
-            case "scheme":
-                return Schemes.query(root.search.text);
-            case "variant":
-                return M3Variants.query(root.search.text);
-            default:
-                return Apps.search(root.search.text);
-            }
-        }
-        // qmllint enable incompatible-type
-
+        values: [...root.resultsForText(root.displayText)]
         onValuesChanged: root.currentIndex = 0
     }
 
@@ -64,31 +82,20 @@ StyledListView {
         }
     }
 
-    state: {
-        const text = search.text;
-        const prefix = GlobalConfig.launcher.actionPrefix;
-        if (text.startsWith(prefix)) {
-            for (const action of ["calc", "scheme", "variant"])
-                if (text.startsWith(`${prefix}${action} `))
-                    return action;
-
-            return "actions";
-        }
-
-        return "apps";
-    }
+    state: screenState.launcher ? requestedState : displayState
 
     onStateChanged: {
         if (state === "scheme" || state === "variant")
             Schemes.reload();
     }
 
+    Component.onCompleted: displayText = search.text
+
     states: [
         State {
             name: "apps"
 
             PropertyChanges {
-                root.modelState: "apps"
                 root.delegate: appItem
             }
         },
@@ -96,7 +103,6 @@ StyledListView {
             name: "actions"
 
             PropertyChanges {
-                root.modelState: "actions"
                 root.delegate: actionItem
             }
         },
@@ -104,7 +110,6 @@ StyledListView {
             name: "calc"
 
             PropertyChanges {
-                root.modelState: "calc"
                 root.delegate: calcItem
             }
         },
@@ -112,7 +117,6 @@ StyledListView {
             name: "scheme"
 
             PropertyChanges {
-                root.modelState: "scheme"
                 root.delegate: schemeItem
             }
         },
@@ -120,7 +124,6 @@ StyledListView {
             name: "variant"
 
             PropertyChanges {
-                root.modelState: "variant"
                 root.delegate: variantItem
             }
         }
@@ -148,7 +151,15 @@ StyledListView {
             }
             PropertyAction {
                 target: root
-                properties: "modelState,delegate"
+                property: "delegate"
+                value: null
+            }
+            ScriptAction {
+                script: root.displayText = root.search.text
+            }
+            PropertyAction {
+                target: root
+                property: "delegate"
             }
             ParallelAnimation {
                 Anim {
@@ -274,5 +285,21 @@ StyledListView {
         VariantItem {
             list: root
         }
+    }
+
+    Connections {
+        function onTextChanged() {
+            root.syncDisplayText();
+        }
+
+        target: root.search
+    }
+
+    Connections {
+        function onLauncherChanged() {
+            root.syncDisplayText();
+        }
+
+        target: root.screenState
     }
 }
