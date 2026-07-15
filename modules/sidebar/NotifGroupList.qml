@@ -14,7 +14,7 @@ LazyListView {
     required property list<var> notifs
     required property bool expanded
     required property Flickable container
-    required property DrawerVisibilities visibilities
+    required property ScreenState screenState
 
     signal requestToggleExpand(expand: bool)
 
@@ -22,7 +22,7 @@ LazyListView {
     anchors.right: parent.right
     implicitHeight: contentHeight
 
-    spacing: Math.round(Tokens.spacing.small / 2)
+    spacing: Math.round(Tokens.spacing.extraSmall)
     asynchronous: true
 
     readyDelay: 1
@@ -38,7 +38,7 @@ LazyListView {
     model: ScriptModel {
         values: {
             if (root.expanded)
-                return root.notifs;
+                return root.notifs as Array;
 
             let count = 0;
             let i = 0;
@@ -49,7 +49,7 @@ LazyListView {
                 i++;
             }
 
-            return root.notifs.slice(0, i);
+            return root.notifs.slice(0, i) as Array;
         }
     }
 
@@ -107,6 +107,7 @@ LazyListView {
                 onFinished: notif.modelData?.unlock(notif)
 
                 Anim {
+                    type: Anim.DefaultEffects
                     target: notif
                     property: "opacity"
                     to: 0
@@ -125,19 +126,19 @@ LazyListView {
                 modelData: notif.modelData
                 props: root.props
                 expanded: root.expanded
-                visibilities: root.visibilities
+                screenState: root.screenState
             }
 
             Behavior on y {
                 enabled: notif.LazyListView.ready
 
-                Anim {
-                    type: Anim.DefaultSpatial
-                }
+                Anim {}
             }
 
             Behavior on opacity {
-                Anim {}
+                Anim {
+                    type: Anim.DefaultEffects
+                }
             }
 
             Behavior on scale {
@@ -145,9 +146,7 @@ LazyListView {
             }
 
             Behavior on x {
-                Anim {
-                    type: Anim.DefaultSpatial
-                }
+                Anim {}
             }
         }
     }

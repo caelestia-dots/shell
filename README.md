@@ -78,7 +78,6 @@ Dependencies:
 -   [`quickshell-git`](https://quickshell.outfoxxed.me) - this has to be the git version, not the latest tagged version
 -   [`ddcutil`](https://github.com/rockowitz/ddcutil)
 -   [`brightnessctl`](https://github.com/Hummer12007/brightnessctl)
--   [`app2unit`](https://github.com/Vladimir-csp/app2unit)
 -   [`libcava`](https://github.com/LukashonakV/cava)
 -   [`networkmanager`](https://networkmanager.dev)
 -   [`lm-sensors`](https://github.com/lm-sensors/lm-sensors)
@@ -240,12 +239,14 @@ For example, to disable the bar on DP-1:
 > - `launcher` (`specialPrefix`, `actionPrefix`, `enableDangerousActions`, `vimKeybinds`,
 >   `favouriteApps`, `hiddenApps`, `actions`)
 > - `launcher.useFuzzy` (`apps`, `actions`, `schemes`, `variants`, `wallpapers`)
-> - `notifs` (`expire`, `fullscreen`, `defaultExpireTimeout`, `actionOnClick`)
+> - `notifs` (`expire`, `fullscreen`, `defaultExpireTimeout`, `fullscreenExpireTimeout`, `actionOnClick`)
 > - `lock` (`enableFprint`, `maxFprintTries`)
-> - `utilities` (`toasts`, `vpn`)
+> - `nexus` (`networkRescanInterval`)
+> - `utilities.toasts` (all except `fullscreen`)
+> - `utilities.vpn` (`enabled`, `provider`)
 > - `services` (`weatherLocation`, `useFahrenheit`, `useFahrenheitPerformance`, `useTwelveHourClock`,
 >   `gpuType`, `visualiserBars`, `audioIncrement`, `brightnessIncrement`, `maxVolume`, `smartScheme`,
->   `defaultPlayer`, `playerAliases`, `showLyrics`, `lyricsBackend`)
+>   `defaultPlayer`, `playerAliases`, `lyricsBackend`)
 > - `paths` (`wallpaperDir`, `lyricsDir`)
 >
 > </details>
@@ -265,30 +266,61 @@ For example, to disable the bar on DP-1:
     "enabled": true,
     "appearance": {
         "deformScale": 1,
-        "anim": {
-            "durations": {
-                "scale": 1
-            }
-        },
-        "font": {
-            "family": {
-                "clock": "Rubik",
-                "material": "Material Symbols Rounded",
-                "mono": "CaskaydiaCove NF",
-                "sans": "Rubik"
-            },
-            "size": {
-                "scale": 1
-            }
-        },
-        "padding": {
-            "scale": 1
-        },
         "rounding": {
             "scale": 1
         },
         "spacing": {
             "scale": 1
+        },
+        "padding": {
+            "scale": 1
+        },
+        "font": {
+            "scale": 1,
+            "clock": "Rubik",
+            "workspaces": "Rubik",
+            "headline": {
+                "family": "GoogleSansFlex",
+                "large": { "size": 32, "weight": 500, "italic": false, "vaxes": { "ROND": 25 } },
+                "medium": { "size": 28, "weight": 500, "italic": false, "vaxes": { "ROND": 25 } },
+                "small": { "size": 24, "weight": 500, "italic": false, "vaxes": { "ROND": 25 } }
+            },
+            "title": {
+                "family": "GoogleSansFlex",
+                "large": { "size": 22, "weight": 500, "italic": false, "vaxes": { "ROND": 25 } },
+                "medium": { "size": 16, "weight": 500, "italic": false, "vaxes": { "ROND": 25 } },
+                "small": { "size": 14, "weight": 500, "italic": false, "vaxes": { "ROND": 25 } }
+            },
+            "body": {
+                "family": "GoogleSansFlex",
+                "large": { "size": 16, "weight": 400, "italic": false, "vaxes": { "ROND": 25 } },
+                "medium": { "size": 14, "weight": 400, "italic": false, "vaxes": { "ROND": 25 } },
+                "small": { "size": 12, "weight": 400, "italic": false, "vaxes": { "ROND": 25 } }
+            },
+            "label": {
+                "family": "GoogleSansFlex",
+                "large": { "size": 14, "weight": 500, "italic": false, "vaxes": { "ROND": 25 } },
+                "medium": { "size": 12, "weight": 500, "italic": false, "vaxes": { "ROND": 25 } },
+                "small": { "size": 11, "weight": 400, "italic": false, "vaxes": { "ROND": 25 } }
+            },
+            "mono": {
+                "family": "CaskaydiaCove NF",
+                "large": { "size": 16, "weight": 400, "italic": false, "vaxes": {} },
+                "medium": { "size": 14, "weight": 400, "italic": false, "vaxes": {} },
+                "small": { "size": 12, "weight": 400, "italic": false, "vaxes": {} }
+            },
+            "icon": {
+                "family": "Material Symbols Rounded",
+                "extraLarge": { "size": 36, "weight": 400, "italic": false, "vaxes": {} },
+                "large": { "size": 24, "weight": 400, "italic": false, "vaxes": {} },
+                "medium": { "size": 18, "weight": 400, "italic": false, "vaxes": {} },
+                "small": { "size": 15, "weight": 400, "italic": false, "vaxes": {} }
+            }
+        },
+        "anim": {
+            "durations": {
+                "scale": 1
+            }
         },
         "transparency": {
             "enabled": false,
@@ -297,7 +329,7 @@ For example, to disable the bar on DP-1:
         }
     },
     "general": {
-        "logo": "caelestia",
+        "logo": "",
         "showOverFullscreen": false,
         "mediaGifSpeedAdjustment": 300,
         "sessionGifSpeed": 0.7,
@@ -306,6 +338,29 @@ For example, to disable the bar on DP-1:
             "audio": ["pavucontrol"],
             "playback": ["mpv"],
             "explorer": ["thunar"]
+        },
+        "idle": {
+            "lockBeforeSleep": true,
+            "inhibitWhenAudio": true,
+            "inhibitWhenCharging": false,
+            "timeouts": [
+                {
+                    "timeout": 180,
+                    "idleAction": "lock",
+                    "inhibitWhenAudio": false,
+                    "inhibitWhenCharging": false,
+                    "respectInhibitors": true
+                },
+                {
+                    "timeout": 300,
+                    "idleAction": "dpms off",
+                    "returnAction": "dpms on"
+                },
+                {
+                    "timeout": 600,
+                    "idleAction": ["suspendThenHibernate"]
+                }
+            ]
         },
         "battery": {
             "warnLevels": [
@@ -330,65 +385,102 @@ For example, to disable the bar on DP-1:
                 }
             ],
             "criticalLevel": 3
-        },
-        "idle": {
-            "lockBeforeSleep": true,
-            "inhibitWhenAudio": true,
-            "timeouts": [
-                {
-                    "timeout": 180,
-                    "idleAction": "lock"
-                },
-                {
-                    "timeout": 300,
-                    "idleAction": "dpms off",
-                    "returnAction": "dpms on"
-                },
-                {
-                    "timeout": 600,
-                    "idleAction": ["systemctl", "suspend-then-hibernate"]
-                }
-            ]
         }
     },
     "background": {
+        "enabled": true,
+        "wallpaperEnabled": true,
         "desktopClock": {
             "enabled": false,
             "scale": 1.0,
             "position": "bottom-right",
-            "shadow": {
-                "enabled": true,
-                "opacity": 0.7,
-                "blur": 0.4
-            },
+            "invertColors": false,
             "background": {
                 "enabled": false,
                 "opacity": 0.7,
                 "blur": true
             },
-            "invertColors": false
+            "shadow": {
+                "enabled": true,
+                "opacity": 0.7,
+                "blur": 0.4
+            }
         },
-        "enabled": true,
         "visualiser": {
-            "blur": false,
             "enabled": false,
             "autoHide": true,
+            "blur": false,
             "rounding": 1,
             "spacing": 1
         }
     },
     "bar": {
+        "persistent": true,
+        "showOnHover": true,
+        "dragThreshold": 20,
+        "scrollActions": {
+            "workspaces": true,
+            "volume": true,
+            "brightness": true
+        },
+        "popouts": {
+            "activeWindow": true,
+            "tray": true,
+            "statusIcons": true
+        },
+        "workspaces": {
+            "shown": 5,
+            "activeIndicator": true,
+            "occupiedBg": false,
+            "showWindows": true,
+            "showWindowsOnSpecialWorkspaces": true,
+            "maxWindowIcons": 5,
+            "activeTrail": false,
+            "perMonitorWorkspaces": true,
+            "label": "  ",
+            "occupiedLabel": "󰮯",
+            "activeLabel": "󰮯",
+            "capitalisation": "preserve",
+            "specialWorkspaceIcons": [
+                {
+                    "name": "steam",
+                    "icon": "sports_esports"
+                }
+            ],
+            "windowIcons": [
+                {
+                    "regex": "steam(_app_(default|[0-9]+))?",
+                    "icon": "sports_esports"
+                }
+            ]
+        },
         "activeWindow": {
             "compact": false,
             "inverted": false,
             "showOnHover": true
+        },
+        "tray": {
+            "background": false,
+            "recolour": false,
+            "compact": false,
+            "iconSubs": [],
+            "hiddenIcons": []
+        },
+        "status": {
+            "showAudio": false,
+            "showMicrophone": false,
+            "showKbLayout": false,
+            "showNetwork": true,
+            "showWifi": true,
+            "showBluetooth": true,
+            "showBattery": true,
+            "showLockStatus": true
         },
         "clock": {
             "background": false,
             "showDate": false,
             "showIcon": true
         },
-        "dragThreshold": 20,
         "entries": [
             {
                 "id": "logo",
@@ -427,66 +519,12 @@ For example, to disable the bar on DP-1:
                 "enabled": true
             }
         ],
-        "persistent": true,
-        "popouts": {
-            "activeWindow": true,
-            "statusIcons": true,
-            "tray": true
-        },
-        "scrollActions": {
-            "brightness": true,
-            "workspaces": true,
-            "volume": true
-        },
-        "showOnHover": true,
-        "status": {
-            "showAudio": false,
-            "showBattery": true,
-            "showBluetooth": true,
-            "showKbLayout": false,
-            "showMicrophone": false,
-            "showNetwork": true,
-            "showWifi": true,
-            "showLockStatus": true
-        },
-        "tray": {
-            "background": false,
-            "compact": false,
-            "iconSubs": [],
-            "recolour": false
-        },
-        "workspaces": {
-            "activeIndicator": true,
-            "activeLabel": "󰮯",
-            "activeTrail": false,
-            "label": "  ",
-            "occupiedBg": false,
-            "occupiedLabel": "󰮯",
-            "perMonitorWorkspaces": true,
-            "showWindows": true,
-            "shown": 5,
-            "specialWorkspaceIcons": [
-                {
-                    "name": "steam",
-                    "icon": "sports_esports"
-                }
-            ],
-            "windowIcons": [
-                {
-                    "regex": "steam(_app_(default|[0-9]+))?",
-                    "icon": "sports_esports"
-                }
-            ]
-        },
-        "excludedScreens": [""],
-        "activeWindow": {
-            "inverted": false
-        }
+        "excludedScreens": []
     },
     "border": {
+        "thickness": 10,
         "rounding": 25,
-        "smoothing": 32,
-        "thickness": 10
+        "smoothing": 20
     },
     "dashboard": {
         "enabled": true,
@@ -495,11 +533,37 @@ For example, to disable the bar on DP-1:
         "showMedia": true,
         "showPerformance": true,
         "showWeather": true,
+        "mediaUpdateInterval": 500,
+        "resourceUpdateInterval": 1000,
         "dragThreshold": 50,
-        "mediaUpdateInterval": 500
+        "performance": {
+            "showBattery": true,
+            "showGpu": true,
+            "showCpu": true,
+            "showMemory": true,
+            "showStorage": true,
+            "showNetwork": true
+        }
     },
     "launcher": {
+        "enabled": true,
+        "showOnHover": false,
+        "maxShown": 7,
+        "maxWallpapers": 9,
+        "specialPrefix": "@",
         "actionPrefix": ">",
+        "enableDangerousActions": false,
+        "dragThreshold": 50,
+        "vimKeybinds": false,
+        "favouriteApps": [],
+        "hiddenApps": [],
+        "useFuzzy": {
+            "apps": false,
+            "actions": false,
+            "schemes": false,
+            "variants": false,
+            "wallpapers": false
+        },
         "actions": [
             {
                 "name": "Calculator",
@@ -534,14 +598,6 @@ For example, to disable the bar on DP-1:
                 "dangerous": false
             },
             {
-                "name": "Transparency",
-                "icon": "opacity",
-                "description": "Change shell transparency",
-                "command": ["autocomplete", "transparency"],
-                "enabled": false,
-                "dangerous": false
-            },
-            {
                 "name": "Random",
                 "icon": "casino",
                 "description": "Switch to a random wallpaper",
@@ -569,7 +625,7 @@ For example, to disable the bar on DP-1:
                 "name": "Shutdown",
                 "icon": "power_settings_new",
                 "description": "Shutdown the system",
-                "command": ["systemctl", "poweroff"],
+                "command": ["poweroff"],
                 "enabled": true,
                 "dangerous": true
             },
@@ -577,7 +633,7 @@ For example, to disable the bar on DP-1:
                 "name": "Reboot",
                 "icon": "cached",
                 "description": "Reboot the system",
-                "command": ["systemctl", "reboot"],
+                "command": ["reboot"],
                 "enabled": true,
                 "dangerous": true
             },
@@ -585,7 +641,7 @@ For example, to disable the bar on DP-1:
                 "name": "Logout",
                 "icon": "exit_to_app",
                 "description": "Log out of the current session",
-                "command": ["loginctl", "terminate-user", ""],
+                "command": ["logout"],
                 "enabled": true,
                 "dangerous": true
             },
@@ -601,7 +657,7 @@ For example, to disable the bar on DP-1:
                 "name": "Sleep",
                 "icon": "bedtime",
                 "description": "Suspend then hibernate",
-                "command": ["systemctl", "suspend-then-hibernate"],
+                "command": ["suspendThenHibernate"],
                 "enabled": true,
                 "dangerous": false
             },
@@ -609,71 +665,61 @@ For example, to disable the bar on DP-1:
                 "name": "Settings",
                 "icon": "settings",
                 "description": "Configure the shell",
-                "command": ["caelestia", "shell", "controlCenter", "open"],
+                "command": ["caelestia", "shell", "nexus", "open"],
                 "enabled": true,
                 "dangerous": false
             }
-        ],
-        "dragThreshold": 50,
-        "vimKeybinds": false,
-        "enableDangerousActions": false,
-        "maxShown": 7,
-        "maxWallpapers": 9,
-        "specialPrefix": "@",
-        "useFuzzy": {
-            "apps": false,
-            "actions": false,
-            "schemes": false,
-            "variants": false,
-            "wallpapers": false
-        },
-        "showOnHover": false,
-        "favouriteApps": [],
-        "hiddenApps": []
+        ]
     },
     "lock": {
-        "recolourLogo": false,
+        "enabled": true,
+        "recolourLogo": true,
+        "enableFprint": true,
+        "maxFprintTries": 3,
+        "enableHowdy": true,
+        "maxHowdyTries": 3,
+        "triggerHowdyOnWake": true,
         "hideNotifs": false
     },
+    "nexus": {
+        "wallpapersPerRow": 4,
+        "networkRescanInterval": 15000
+    },
     "notifs": {
-        "actionOnClick": false,
-        "clearThreshold": 0.3,
+        "expire": true,
+        "fullscreen": "on",
         "defaultExpireTimeout": 5000,
+        "fullscreenExpireTimeout": 2000,
+        "clearThreshold": 0.3,
         "expandThreshold": 20,
-        "openExpanded": false,
-        "expire": false
+        "actionOnClick": false,
+        "groupPreviewNum": 3,
+        "openExpanded": false
     },
     "osd": {
         "enabled": true,
+        "hideDelay": 2000,
         "enableBrightness": true,
-        "enableMicrophone": false,
-        "hideDelay": 2000
-    },
-    "paths": {
-        "mediaGif": "root:/assets/bongocat.gif",
-        "sessionGif": "root:/assets/kurukuru.gif",
-        "noNotifsPic": "root:/assets/dino.png",
-        "lockNoNotifsPic": "root:/assets/dino.png",
-        "wallpaperDir": "~/Pictures/Wallpapers",
-        "lyricsDir": "~/Music/lyrics"
+        "enableMicrophone": false
     },
     "services": {
-        "audioIncrement": 0.1,
-        "brightnessIncrement": 0.1,
-        "maxVolume": 1.0,
-        "defaultPlayer": "Spotify",
-        "gpuType": "",
-        "playerAliases": [{ "from": "com.github.th_ch.youtube_music", "to": "YT Music" }],
         "weatherLocation": "",
         "useFahrenheit": false,
         "useFahrenheitPerformance": false,
         "useTwelveHourClock": false,
+        "gpuType": "",
+        "visualiserBars": 60,
+        "audioIncrement": 0.1,
+        "brightnessIncrement": 0.1,
+        "maxVolume": 1.0,
         "smartScheme": true,
-        "visualiserBars": 45
+        "defaultPlayer": "Spotify",
+        "playerAliases": [{ "from": "com.github.th_ch.youtube_music", "to": "YT Music" }],
+        "lyricsBackend": "Auto"
     },
     "session": {
-        "dragThreshold": 30,
         "enabled": true,
+        "dragThreshold": 30,
         "vimKeybinds": false,
         "icons": {
             "logout": "logout",
@@ -682,35 +728,38 @@ For example, to disable the bar on DP-1:
             "reboot": "cached"
         },
         "commands": {
-            "logout": ["loginctl", "terminate-user", ""],
-            "shutdown": ["systemctl", "poweroff"],
-            "hibernate": ["systemctl", "hibernate"],
-            "reboot": ["systemctl", "reboot"]
+            "logout": ["logout"],
+            "shutdown": ["poweroff"],
+            "hibernate": ["hibernate"],
+            "reboot": ["reboot"]
         }
     },
     "sidebar": {
-        "dragThreshold": 80,
-        "enabled": true
+        "enabled": true,
+        "showOnHover": false,
+        "minHoverThreshold": 200,
+        "dragThreshold": 80
     },
     "utilities": {
         "enabled": true,
         "maxToasts": 4,
         "toasts": {
-            "audioInputChanged": true,
-            "audioOutputChanged": true,
-            "capsLockChanged": true,
-            "chargingChanged": true,
+            "fullscreen": "off",
             "configLoaded": true,
-            "dndChanged": true,
+            "chargingChanged": true,
             "gameModeChanged": true,
+            "dndChanged": true,
+            "audioOutputChanged": true,
+            "audioInputChanged": true,
+            "capsLockChanged": true,
+            "numLockChanged": true,
             "kbLayoutChanged": true,
             "kbLimit": true,
-            "numLockChanged": true,
             "vpnChanged": true,
             "nowPlaying": false
         },
         "vpn": {
-            "enabled": true,
+            "enabled": false,
             "provider": [
                 {
                     "name": "wireguard",
@@ -734,8 +783,8 @@ For example, to disable the bar on DP-1:
                 "enabled": true
             },
             {
-                "enabled": true,
-                "id": "settings"
+                "id": "settings",
+                "enabled": true
             },
             {
                 "id": "gameMode",
@@ -747,9 +796,17 @@ For example, to disable the bar on DP-1:
             },
             {
                 "id": "vpn",
-                "enabled": true
+                "enabled": false
             }
         ]
+    },
+    "paths": {
+        "wallpaperDir": "~/Pictures/Wallpapers",
+        "lyricsDir": "~/Music/lyrics/",
+        "sessionGif": "root:/assets/kurukuru.gif",
+        "mediaGif": "root:/assets/bongocat.gif",
+        "noNotifsPic": "root:/assets/dino.png",
+        "lockNoNotifsPic": "root:/assets/dino.png"
     }
 }
 ```

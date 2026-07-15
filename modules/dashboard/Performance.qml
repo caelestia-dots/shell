@@ -1,57 +1,47 @@
+import "performance"
 import QtQuick
-import QtQuick.Controls
 import QtQuick.Layouts
 import Quickshell.Services.UPower
 import Caelestia.Config
-import Caelestia.Internal
+import Caelestia.Services
 import qs.components
-import qs.components.misc
 import qs.services
 
 Item {
     id: root
 
-    readonly property int minWidth: 400 + 400 + Tokens.spacing.normal + 120 + Tokens.padding.large * 2
+    implicitWidth: placeholder.active ? Tokens.sizes.dashboard.perfPlaceholderWidth : content.implicitWidth
+    implicitHeight: placeholder.active ? placeholder.implicitHeight + Tokens.padding.extraLarge * 2 : content.implicitHeight
 
-    function displayTemp(temp: real): string {
-        return `${Math.ceil(GlobalConfig.services.useFahrenheitPerformance ? temp * 1.8 + 32 : temp)}°${GlobalConfig.services.useFahrenheitPerformance ? "F" : "C"}`;
-    }
-
-    implicitWidth: Math.max(minWidth, content.implicitWidth)
-    implicitHeight: placeholder.visible ? placeholder.height : content.implicitHeight
-
-    StyledRect {
+    Loader {
         id: placeholder
 
         anchors.centerIn: parent
-        width: 400
-        height: 350
-        radius: Tokens.rounding.large
-        color: Colours.tPalette.m3surfaceContainer
-        visible: !Config.dashboard.performance.showCpu && !(Config.dashboard.performance.showGpu && SystemUsage.gpuType !== "NONE") && !Config.dashboard.performance.showMemory && !Config.dashboard.performance.showStorage && !Config.dashboard.performance.showNetwork && !(UPower.displayDevice.isLaptopBattery && Config.dashboard.performance.showBattery)
+        active: !Config.dashboard.performance.showCpu && !(Config.dashboard.performance.showGpu && Gpu.type !== Gpu.None) && !Config.dashboard.performance.showMemory && !Config.dashboard.performance.showStorage && !Config.dashboard.performance.showNetwork && !(UPower.displayDevice.isLaptopBattery && Config.dashboard.performance.showBattery)
+        asynchronous: true
 
-        ColumnLayout {
-            anchors.centerIn: parent
-            spacing: Tokens.spacing.normal
+        sourceComponent: ColumnLayout {
+            spacing: Tokens.spacing.medium
 
             MaterialIcon {
                 Layout.alignment: Qt.AlignHCenter
                 text: "tune"
-                font.pointSize: Tokens.font.size.extraLarge * 2
+                fontStyle: Tokens.font.icon.builders.extraLarge.scale(2).build()
                 color: Colours.palette.m3onSurfaceVariant
             }
 
             StyledText {
+                Layout.topMargin: -Tokens.spacing.small
                 Layout.alignment: Qt.AlignHCenter
                 text: qsTr("No widgets enabled")
-                font.pointSize: Tokens.font.size.large
+                font: Tokens.font.title.large
                 color: Colours.palette.m3onSurface
             }
 
             StyledText {
                 Layout.alignment: Qt.AlignHCenter
-                text: qsTr("Enable widgets in dashboard settings")
-                font.pointSize: Tokens.font.size.small
+                text: qsTr("Enable widgets in the dashboard settings")
+                font: Tokens.font.body.small
                 color: Colours.palette.m3onSurfaceVariant
             }
         }
@@ -62,765 +52,95 @@ Item {
 
         anchors.left: parent.left
         anchors.right: parent.right
-        spacing: Tokens.spacing.normal
-        visible: !placeholder.visible
-
-        Ref {
-            service: SystemUsage
-        }
+        spacing: Tokens.spacing.medium
+        visible: !placeholder.active
 
         ColumnLayout {
             id: mainColumn
 
             Layout.fillWidth: true
-            spacing: Tokens.spacing.normal
+            spacing: Tokens.spacing.medium
 
             RowLayout {
-                Layout.fillWidth: true
-                spacing: Tokens.spacing.normal
-                visible: Config.dashboard.performance.showCpu || (Config.dashboard.performance.showGpu && SystemUsage.gpuType !== "NONE")
+                spacing: Tokens.spacing.medium
+                visible: cpuCard.active || gpuCard.active
 
-                HeroCard {
-                    Layout.fillWidth: true
-                    Layout.minimumWidth: 400
-                    Layout.preferredHeight: 150
-                    visible: Config.dashboard.performance.showCpu
-                    icon: "memory"
-                    title: SystemUsage.cpuName ? `CPU - ${SystemUsage.cpuName}` : qsTr("CPU")
-                    mainValue: `${Math.round(SystemUsage.cpuPerc * 100)}%`
-                    mainLabel: qsTr("Usage")
-                    secondaryValue: root.displayTemp(SystemUsage.cpuTemp)
-                    secondaryLabel: qsTr("Temp")
-                    usage: SystemUsage.cpuPerc
-                    temperature: SystemUsage.cpuTemp
-                    accentColor: Colours.palette.m3primary
-                }
+                WrappedLoader {
+                    id: cpuCard
 
-                HeroCard {
-                    Layout.fillWidth: true
-                    Layout.minimumWidth: 400
-                    Layout.preferredHeight: 150
-                    visible: Config.dashboard.performance.showGpu && SystemUsage.gpuType !== "NONE"
-                    icon: "desktop_windows"
-                    title: SystemUsage.gpuName ? `GPU - ${SystemUsage.gpuName}` : qsTr("GPU")
-                    mainValue: `${Math.round(SystemUsage.gpuPerc * 100)}%`
-                    mainLabel: qsTr("Usage")
-                    secondaryValue: root.displayTemp(SystemUsage.gpuTemp)
-                    secondaryLabel: qsTr("Temp")
-                    usage: SystemUsage.gpuPerc
-                    temperature: SystemUsage.gpuTemp
-                    accentColor: Colours.palette.m3secondary
-                }
-            }
+                    active: Config.dashboard.performance.showCpu
 
-            RowLayout {
-                Layout.fillWidth: true
-                spacing: Tokens.spacing.normal
-                visible: Config.dashboard.performance.showMemory || Config.dashboard.performance.showStorage || Config.dashboard.performance.showNetwork
+                    sourceComponent: HeroCard {
+                        icon: "memory"
+                        label: qsTr("CPU")
+                        subLabel: Cpu.name
+                        usage: Cpu.percentage
+                        temperature: Cpu.temperature
+                        accent: Colours.palette.m3primary
 
-                GaugeCard {
-                    Layout.minimumWidth: 250
-                    Layout.preferredHeight: 220
-                    Layout.fillWidth: !Config.dashboard.performance.showStorage && !Config.dashboard.performance.showNetwork
-                    icon: "memory_alt"
-                    title: qsTr("Memory")
-                    percentage: SystemUsage.memPerc
-                    subtitle: {
-                        const usedFmt = SystemUsage.formatKib(SystemUsage.memUsed);
-                        const totalFmt = SystemUsage.formatKib(SystemUsage.memTotal);
-                        return `${usedFmt.value.toFixed(1)} / ${Math.floor(totalFmt.value)} ${totalFmt.unit}`;
-                    }
-                    accentColor: Colours.palette.m3tertiary
-                    visible: Config.dashboard.performance.showMemory
-                }
-
-                StorageGaugeCard {
-                    Layout.minimumWidth: 250
-                    Layout.preferredHeight: 220
-                    Layout.fillWidth: !Config.dashboard.performance.showNetwork
-                    visible: Config.dashboard.performance.showStorage
-                }
-
-                NetworkCard {
-                    Layout.fillWidth: true
-                    Layout.minimumWidth: 200
-                    Layout.preferredHeight: 220
-                    visible: Config.dashboard.performance.showNetwork
-                }
-            }
-        }
-
-        BatteryTank {
-            Layout.preferredWidth: 120
-            Layout.preferredHeight: mainColumn.implicitHeight
-            visible: UPower.displayDevice.isLaptopBattery && Config.dashboard.performance.showBattery
-        }
-    }
-
-    component BatteryTank: StyledClippingRect {
-        id: batteryTank
-
-        property real percentage: UPower.displayDevice.percentage
-        property bool isCharging: UPower.displayDevice.state === UPowerDeviceState.Charging
-        property color accentColor: Colours.palette.m3primary
-        property real animatedPercentage: 0
-
-        color: Colours.tPalette.m3surfaceContainer
-        radius: Tokens.rounding.large
-        Component.onCompleted: animatedPercentage = percentage
-        onPercentageChanged: animatedPercentage = percentage
-
-        // Background Fill
-        StyledRect {
-            anchors.left: parent.left
-            anchors.right: parent.right
-            anchors.bottom: parent.bottom
-            height: parent.height * batteryTank.animatedPercentage
-            color: Qt.alpha(batteryTank.accentColor, 0.15)
-        }
-
-        ColumnLayout {
-            anchors.fill: parent
-            anchors.margins: Tokens.padding.large
-            spacing: Tokens.spacing.small
-
-            // Header Section
-            ColumnLayout {
-                Layout.fillWidth: true
-                spacing: Tokens.spacing.small
-
-                MaterialIcon {
-                    text: {
-                        if (!UPower.displayDevice.isLaptopBattery) {
-                            if (PowerProfiles.profile === PowerProfile.PowerSaver)
-                                return "energy_savings_leaf";
-
-                            if (PowerProfiles.profile === PowerProfile.Performance)
-                                return "rocket_launch";
-
-                            return "balance";
+                        ServiceRef {
+                            service: Cpu
                         }
-                        if (UPower.displayDevice.state === UPowerDeviceState.FullyCharged)
-                            return "battery_full";
-
-                        const perc = UPower.displayDevice.percentage;
-                        const charging = [UPowerDeviceState.Charging, UPowerDeviceState.PendingCharge].includes(UPower.displayDevice.state);
-                        if (perc >= 0.99)
-                            return "battery_full";
-
-                        let level = Math.floor(perc * 7);
-                        if (charging && (level === 4 || level === 1))
-                            level--;
-
-                        return charging ? `battery_charging_${(level + 3) * 10}` : `battery_${level}_bar`;
                     }
-                    font.pointSize: Tokens.font.size.large
-                    color: batteryTank.accentColor
                 }
 
-                StyledText {
-                    Layout.fillWidth: true
-                    text: qsTr("Battery")
-                    font.pointSize: Tokens.font.size.normal
-                    color: Colours.palette.m3onSurface
+                WrappedLoader {
+                    id: gpuCard
+
+                    active: Config.dashboard.performance.showGpu && Gpu.type !== Gpu.None
+
+                    sourceComponent: HeroCard {
+                        icon: "desktop_windows"
+                        label: qsTr("GPU")
+                        subLabel: Gpu.name
+                        usage: Gpu.percentage
+                        temperature: Gpu.temperature
+                        accent: Colours.palette.m3secondary
+
+                        ServiceRef {
+                            service: Gpu
+                        }
+                    }
                 }
             }
 
-            Item {
-                Layout.fillHeight: true
-            }
+            RowLayout {
+                spacing: Tokens.spacing.medium
+                visible: storageCard.active || networkCard.active || memoryCard.active
 
-            // Bottom Info Section
-            ColumnLayout {
-                Layout.fillWidth: true
-                spacing: -4
+                WrappedLoader {
+                    id: storageCard
 
-                StyledText {
-                    Layout.alignment: Qt.AlignRight
-                    text: `${Math.round(batteryTank.percentage * 100)}%`
-                    font.pointSize: Tokens.font.size.extraLarge
-                    font.weight: Font.Medium
-                    color: batteryTank.accentColor
+                    active: Config.dashboard.performance.showStorage
+                    sourceComponent: StorageCard {}
                 }
 
-                StyledText {
-                    Layout.alignment: Qt.AlignRight
-                    text: {
-                        if (UPower.displayDevice.state === UPowerDeviceState.FullyCharged)
-                            return qsTr("Full");
+                WrappedLoader {
+                    id: networkCard
 
-                        if (batteryTank.isCharging)
-                            return qsTr("Charging");
+                    active: Config.dashboard.performance.showNetwork
+                    sourceComponent: NetworkCard {}
+                }
 
-                        const s = UPower.displayDevice.timeToEmpty;
-                        if (s === 0)
-                            return qsTr("...");
+                WrappedLoader {
+                    id: memoryCard
 
-                        const hr = Math.floor(s / 3600);
-                        const min = Math.floor((s % 3600) / 60);
-                        if (hr > 0)
-                            return `${hr}h ${min}m`;
-
-                        return `${min}m`;
-                    }
-                    font.pointSize: Tokens.font.size.smaller
-                    color: Colours.palette.m3onSurfaceVariant
+                    active: Config.dashboard.performance.showMemory
+                    sourceComponent: MemoryCard {}
                 }
             }
         }
 
-        Behavior on animatedPercentage {
-            Anim {
-                type: Anim.StandardLarge
-            }
+        WrappedLoader {
+            Layout.fillWidth: false
+            active: UPower.displayDevice.isLaptopBattery && Config.dashboard.performance.showBattery
+            sourceComponent: BatteryTank {}
         }
     }
 
-    component CardHeader: RowLayout {
-        property string icon
-        property string title
-        property color accentColor: Colours.palette.m3primary
-
+    component WrappedLoader: Loader {
         Layout.fillWidth: true
-        spacing: Tokens.spacing.small
-
-        MaterialIcon {
-            text: parent.icon
-            fill: 1
-            color: parent.accentColor
-            font.pointSize: Tokens.spacing.large
-        }
-
-        StyledText {
-            Layout.fillWidth: true
-            text: parent.title
-            font.pointSize: Tokens.font.size.normal
-            elide: Text.ElideRight
-        }
-    }
-
-    component ProgressBar: StyledRect {
-        id: progressBar
-
-        property real value: 0
-        property color fgColor: Colours.palette.m3primary
-        property color bgColor: Colours.layer(Colours.palette.m3surfaceContainerHigh, 2)
-        property real animatedValue: 0
-
-        color: bgColor
-        radius: Tokens.rounding.full
-        Component.onCompleted: animatedValue = value
-        onValueChanged: animatedValue = value
-
-        StyledRect {
-            anchors.left: parent.left
-            anchors.top: parent.top
-            anchors.bottom: parent.bottom
-            width: parent.width * progressBar.animatedValue
-            color: progressBar.fgColor
-            radius: Tokens.rounding.full
-        }
-
-        Behavior on animatedValue {
-            Anim {
-                type: Anim.StandardLarge
-            }
-        }
-    }
-
-    component HeroCard: StyledClippingRect {
-        id: heroCard
-
-        property string icon
-        property string title
-        property string mainValue
-        property string mainLabel
-        property string secondaryValue
-        property string secondaryLabel
-        property real usage: 0
-        property real temperature: 0
-        property color accentColor: Colours.palette.m3primary
-        readonly property real maxTemp: 100
-        readonly property real tempProgress: Math.min(1, Math.max(0, temperature / maxTemp))
-        property real animatedUsage: 0
-        property real animatedTemp: 0
-
-        color: Colours.tPalette.m3surfaceContainer
-        radius: Tokens.rounding.large
-        Component.onCompleted: {
-            animatedUsage = usage;
-            animatedTemp = tempProgress;
-        }
-        onUsageChanged: animatedUsage = usage
-        onTempProgressChanged: animatedTemp = tempProgress
-
-        StyledRect {
-            anchors.left: parent.left
-            anchors.top: parent.top
-            anchors.bottom: parent.bottom
-            implicitWidth: parent.width * heroCard.animatedUsage
-            color: Qt.alpha(heroCard.accentColor, 0.15)
-        }
-
-        CardHeader {
-            anchors.left: parent.left
-            anchors.top: parent.top
-            anchors.leftMargin: Tokens.padding.large
-            anchors.topMargin: Math.round(Tokens.padding.large * 1.2)
-
-            width: parent.width - anchors.leftMargin - usageColumn.anchors.rightMargin - usageLabel.width - Tokens.spacing.normal
-            icon: heroCard.icon
-            title: heroCard.title
-            accentColor: heroCard.accentColor
-        }
-
-        Column {
-            anchors.left: parent.left
-            anchors.right: parent.right
-            anchors.bottom: parent.bottom
-            anchors.margins: Math.round(Tokens.padding.large * 1.2)
-            anchors.bottomMargin: Math.round(Tokens.padding.large * 1.3)
-
-            spacing: Tokens.spacing.small
-
-            Row {
-                spacing: Tokens.spacing.small
-
-                StyledText {
-                    text: heroCard.secondaryValue
-                    font.pointSize: Tokens.font.size.normal
-                    font.weight: Font.Medium
-                }
-
-                StyledText {
-                    text: heroCard.secondaryLabel
-                    font.pointSize: Tokens.font.size.small
-                    color: Colours.palette.m3onSurfaceVariant
-                    anchors.baseline: parent.children[0].baseline
-                }
-            }
-
-            ProgressBar {
-                implicitWidth: parent.width * 0.5
-                implicitHeight: 6
-                value: heroCard.tempProgress
-                fgColor: heroCard.accentColor
-                bgColor: Qt.alpha(heroCard.accentColor, 0.2)
-            }
-        }
-
-        Column {
-            id: usageColumn
-
-            anchors.right: parent.right
-            anchors.verticalCenter: parent.verticalCenter
-            anchors.margins: Tokens.padding.large
-            anchors.rightMargin: 32
-            spacing: 0
-
-            StyledText {
-                id: usageLabel
-
-                anchors.right: parent.right
-                text: heroCard.mainLabel
-                font.pointSize: Tokens.font.size.normal
-                color: Colours.palette.m3onSurfaceVariant
-            }
-
-            StyledText {
-                anchors.right: parent.right
-                text: heroCard.mainValue
-                font.pointSize: Tokens.font.size.extraLarge
-                font.weight: Font.Medium
-                color: heroCard.accentColor
-            }
-        }
-
-        Behavior on animatedUsage {
-            Anim {
-                type: Anim.StandardLarge
-            }
-        }
-
-        Behavior on animatedTemp {
-            Anim {
-                type: Anim.StandardLarge
-            }
-        }
-    }
-
-    component GaugeCard: StyledRect {
-        id: gaugeCard
-
-        property string icon
-        property string title
-        property real percentage: 0
-        property string subtitle
-        property color accentColor: Colours.palette.m3primary
-        readonly property real arcStartAngle: 0.75 * Math.PI
-        readonly property real arcSweep: 1.5 * Math.PI
-        property real animatedPercentage: 0
-
-        color: Colours.tPalette.m3surfaceContainer
-        radius: Tokens.rounding.large
-        clip: true
-        Component.onCompleted: animatedPercentage = percentage
-        onPercentageChanged: animatedPercentage = percentage
-
-        ColumnLayout {
-            anchors.fill: parent
-            anchors.margins: Tokens.padding.large
-            spacing: Tokens.spacing.smaller
-
-            CardHeader {
-                icon: gaugeCard.icon
-                title: gaugeCard.title
-                accentColor: gaugeCard.accentColor
-            }
-
-            Item {
-                Layout.fillWidth: true
-                Layout.fillHeight: true
-
-                ArcGauge {
-                    anchors.centerIn: parent
-                    width: Math.min(parent.width, parent.height)
-                    height: width
-                    percentage: gaugeCard.animatedPercentage
-                    accentColor: gaugeCard.accentColor
-                    trackColor: Colours.layer(Colours.palette.m3surfaceContainerHigh, 2)
-                    startAngle: gaugeCard.arcStartAngle
-                    sweepAngle: gaugeCard.arcSweep
-                }
-
-                StyledText {
-                    anchors.centerIn: parent
-                    text: `${Math.round(gaugeCard.percentage * 100)}%`
-                    font.pointSize: Tokens.font.size.extraLarge
-                    font.weight: Font.Medium
-                    color: gaugeCard.accentColor
-                }
-            }
-
-            StyledText {
-                Layout.alignment: Qt.AlignHCenter
-                text: gaugeCard.subtitle
-                font.pointSize: Tokens.font.size.smaller
-                color: Colours.palette.m3onSurfaceVariant
-            }
-        }
-
-        Behavior on animatedPercentage {
-            Anim {
-                type: Anim.StandardLarge
-            }
-        }
-    }
-
-    component StorageGaugeCard: StyledRect {
-        id: storageGaugeCard
-
-        property int currentDiskIndex: 0
-        readonly property var currentDisk: SystemUsage.disks.length > 0 ? SystemUsage.disks[currentDiskIndex] : null
-        property int diskCount: 0
-        readonly property real arcStartAngle: 0.75 * Math.PI
-        readonly property real arcSweep: 1.5 * Math.PI
-        property real animatedPercentage: 0
-        property color accentColor: Colours.palette.m3secondary
-
-        color: Colours.tPalette.m3surfaceContainer
-        radius: Tokens.rounding.large
-        clip: true
-        Component.onCompleted: {
-            diskCount = SystemUsage.disks.length;
-            if (currentDisk)
-                animatedPercentage = currentDisk.perc;
-        }
-        onCurrentDiskChanged: {
-            if (currentDisk)
-                animatedPercentage = currentDisk.perc;
-        }
-
-        // Update diskCount and animatedPercentage when disks data changes
-        Connections {
-            function onDisksChanged() {
-                if (SystemUsage.disks.length !== storageGaugeCard.diskCount)
-                    storageGaugeCard.diskCount = SystemUsage.disks.length;
-
-                // Update animated percentage when disk data refreshes
-                if (storageGaugeCard.currentDisk)
-                    storageGaugeCard.animatedPercentage = storageGaugeCard.currentDisk.perc;
-            }
-
-            target: SystemUsage
-        }
-
-        MouseArea {
-            anchors.fill: parent
-            onWheel: wheel => {
-                if (wheel.angleDelta.y > 0)
-                    storageGaugeCard.currentDiskIndex = (storageGaugeCard.currentDiskIndex - 1 + storageGaugeCard.diskCount) % storageGaugeCard.diskCount;
-                else if (wheel.angleDelta.y < 0)
-                    storageGaugeCard.currentDiskIndex = (storageGaugeCard.currentDiskIndex + 1) % storageGaugeCard.diskCount;
-            }
-        }
-
-        ColumnLayout {
-            anchors.fill: parent
-            anchors.margins: Tokens.padding.large
-            spacing: Tokens.spacing.smaller
-
-            CardHeader {
-                icon: "hard_disk"
-                title: {
-                    const base = qsTr("Storage");
-                    if (!storageGaugeCard.currentDisk)
-                        return base;
-
-                    return `${base} - ${storageGaugeCard.currentDisk.mount}`;
-                }
-                accentColor: storageGaugeCard.accentColor
-
-                // Scroll hint icon
-                MaterialIcon {
-                    text: "unfold_more"
-                    color: Colours.palette.m3onSurfaceVariant
-                    font.pointSize: Tokens.font.size.normal
-                    visible: storageGaugeCard.diskCount > 1
-                    opacity: 0.7
-                    ToolTip.visible: hintHover.hovered
-                    ToolTip.text: qsTr("Scroll to switch disks")
-                    ToolTip.delay: 500
-
-                    HoverHandler {
-                        id: hintHover
-                    }
-                }
-            }
-
-            Item {
-                Layout.fillWidth: true
-                Layout.fillHeight: true
-
-                ArcGauge {
-                    anchors.centerIn: parent
-                    width: Math.min(parent.width, parent.height)
-                    height: width
-                    percentage: storageGaugeCard.animatedPercentage
-                    accentColor: storageGaugeCard.accentColor
-                    trackColor: Colours.layer(Colours.palette.m3surfaceContainerHigh, 2)
-                    startAngle: storageGaugeCard.arcStartAngle
-                    sweepAngle: storageGaugeCard.arcSweep
-                }
-
-                StyledText {
-                    anchors.centerIn: parent
-                    text: storageGaugeCard.currentDisk ? `${Math.round(storageGaugeCard.currentDisk.perc * 100)}%` : "—"
-                    font.pointSize: Tokens.font.size.extraLarge
-                    font.weight: Font.Medium
-                    color: storageGaugeCard.accentColor
-                }
-            }
-
-            StyledText {
-                Layout.alignment: Qt.AlignHCenter
-                text: {
-                    if (!storageGaugeCard.currentDisk)
-                        return "—";
-
-                    const usedFmt = SystemUsage.formatKib(storageGaugeCard.currentDisk.used);
-                    const totalFmt = SystemUsage.formatKib(storageGaugeCard.currentDisk.total);
-                    return `${usedFmt.value.toFixed(1)} / ${Math.floor(totalFmt.value)} ${totalFmt.unit}`;
-                }
-                font.pointSize: Tokens.font.size.smaller
-                color: Colours.palette.m3onSurfaceVariant
-            }
-        }
-
-        Behavior on animatedPercentage {
-            Anim {
-                type: Anim.StandardLarge
-            }
-        }
-    }
-
-    component NetworkCard: StyledRect {
-        id: networkCard
-
-        property color accentColor: Colours.palette.m3primary
-
-        color: Colours.tPalette.m3surfaceContainer
-        radius: Tokens.rounding.large
-        clip: true
-
-        Ref {
-            service: NetworkUsage
-        }
-
-        ColumnLayout {
-            anchors.fill: parent
-            anchors.margins: Tokens.padding.large
-            spacing: Tokens.spacing.small
-
-            CardHeader {
-                icon: "swap_vert"
-                title: qsTr("Network")
-                accentColor: networkCard.accentColor
-            }
-
-            // Sparkline graph
-            Item {
-                Layout.fillWidth: true
-                Layout.fillHeight: true
-
-                SparklineItem {
-                    id: sparkline
-
-                    property real targetMax: 1024
-                    property real smoothMax: targetMax
-
-                    anchors.fill: parent
-                    line1: NetworkUsage.uploadBuffer // qmllint disable missing-type
-                    line1Color: Colours.palette.m3secondary
-                    line1FillAlpha: 0.15
-                    line2: NetworkUsage.downloadBuffer // qmllint disable missing-type
-                    line2Color: Colours.palette.m3tertiary
-                    line2FillAlpha: 0.2
-                    maxValue: smoothMax
-                    historyLength: NetworkUsage.historyLength
-
-                    Connections {
-                        function onValuesChanged(): void {
-                            sparkline.targetMax = Math.max(NetworkUsage.downloadBuffer.maximum, NetworkUsage.uploadBuffer.maximum, 1024);
-                            slideAnim.restart();
-                        }
-
-                        target: NetworkUsage.downloadBuffer
-                    }
-
-                    NumberAnimation {
-                        id: slideAnim
-
-                        target: sparkline
-                        property: "slideProgress"
-                        from: 0
-                        to: 1
-                        duration: GlobalConfig.dashboard.resourceUpdateInterval
-                    }
-
-                    Behavior on smoothMax {
-                        Anim {
-                            type: Anim.StandardLarge
-                        }
-                    }
-                }
-
-                // "No data" placeholder
-                StyledText {
-                    anchors.centerIn: parent
-                    text: qsTr("Collecting data...")
-                    font.pointSize: Tokens.font.size.small
-                    color: Colours.palette.m3onSurfaceVariant
-                    visible: NetworkUsage.downloadBuffer.count < 2
-                    opacity: 0.6
-                }
-            }
-
-            // Download row
-            RowLayout {
-                Layout.fillWidth: true
-                spacing: Tokens.spacing.normal
-
-                MaterialIcon {
-                    text: "download"
-                    color: Colours.palette.m3tertiary
-                    font.pointSize: Tokens.font.size.normal
-                }
-
-                StyledText {
-                    text: qsTr("Download")
-                    font.pointSize: Tokens.font.size.small
-                    color: Colours.palette.m3onSurfaceVariant
-                }
-
-                Item {
-                    Layout.fillWidth: true
-                }
-
-                StyledText {
-                    text: {
-                        const fmt = NetworkUsage.formatBytes(NetworkUsage.downloadSpeed ?? 0);
-                        return fmt ? `${fmt.value.toFixed(1)} ${fmt.unit}` : "0.0 B/s";
-                    }
-                    font.pointSize: Tokens.font.size.normal
-                    font.weight: Font.Medium
-                    color: Colours.palette.m3tertiary
-                }
-            }
-
-            // Upload row
-            RowLayout {
-                Layout.fillWidth: true
-                spacing: Tokens.spacing.normal
-
-                MaterialIcon {
-                    text: "upload"
-                    color: Colours.palette.m3secondary
-                    font.pointSize: Tokens.font.size.normal
-                }
-
-                StyledText {
-                    text: qsTr("Upload")
-                    font.pointSize: Tokens.font.size.small
-                    color: Colours.palette.m3onSurfaceVariant
-                }
-
-                Item {
-                    Layout.fillWidth: true
-                }
-
-                StyledText {
-                    text: {
-                        const fmt = NetworkUsage.formatBytes(NetworkUsage.uploadSpeed ?? 0);
-                        return fmt ? `${fmt.value.toFixed(1)} ${fmt.unit}` : "0.0 B/s";
-                    }
-                    font.pointSize: Tokens.font.size.normal
-                    font.weight: Font.Medium
-                    color: Colours.palette.m3secondary
-                }
-            }
-
-            // Session totals
-            RowLayout {
-                Layout.fillWidth: true
-                spacing: Tokens.spacing.normal
-
-                MaterialIcon {
-                    text: "history"
-                    color: Colours.palette.m3onSurfaceVariant
-                    font.pointSize: Tokens.font.size.normal
-                }
-
-                StyledText {
-                    text: qsTr("Total")
-                    font.pointSize: Tokens.font.size.small
-                    color: Colours.palette.m3onSurfaceVariant
-                }
-
-                Item {
-                    Layout.fillWidth: true
-                }
-
-                StyledText {
-                    text: {
-                        const down = NetworkUsage.formatBytesTotal(NetworkUsage.downloadTotal ?? 0);
-                        const up = NetworkUsage.formatBytesTotal(NetworkUsage.uploadTotal ?? 0);
-                        return (down && up) ? `↓${down.value.toFixed(1)}${down.unit} ↑${up.value.toFixed(1)}${up.unit}` : "↓0.0B ↑0.0B";
-                    }
-                    font.pointSize: Tokens.font.size.small
-                    color: Colours.palette.m3onSurfaceVariant
-                }
-            }
-        }
+        Layout.fillHeight: true
+        visible: active
     }
 }

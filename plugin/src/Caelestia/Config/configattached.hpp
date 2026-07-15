@@ -16,11 +16,11 @@ class Config : public QQuickAttachedPropertyPropagator, public QQmlParserStatus 
     Q_MOC_INCLUDE("backgroundconfig.hpp")
     Q_MOC_INCLUDE("barconfig.hpp")
     Q_MOC_INCLUDE("borderconfig.hpp")
-    Q_MOC_INCLUDE("controlcenterconfig.hpp")
     Q_MOC_INCLUDE("dashboardconfig.hpp")
     Q_MOC_INCLUDE("generalconfig.hpp")
     Q_MOC_INCLUDE("launcherconfig.hpp")
     Q_MOC_INCLUDE("lockconfig.hpp")
+    Q_MOC_INCLUDE("nexusconfig.hpp")
     Q_MOC_INCLUDE("notifsconfig.hpp")
     Q_MOC_INCLUDE("osdconfig.hpp")
     Q_MOC_INCLUDE("serviceconfig.hpp")
@@ -37,16 +37,16 @@ class Config : public QQuickAttachedPropertyPropagator, public QQmlParserStatus 
     Q_PROPERTY(const caelestia::config::BarConfig* bar READ bar NOTIFY sourceChanged)
     Q_PROPERTY(const caelestia::config::BorderConfig* border READ border NOTIFY sourceChanged)
     Q_PROPERTY(const caelestia::config::DashboardConfig* dashboard READ dashboard NOTIFY sourceChanged)
-    Q_PROPERTY(const caelestia::config::ControlCenterConfig* controlCenter READ controlCenter NOTIFY sourceChanged)
     Q_PROPERTY(const caelestia::config::LauncherConfig* launcher READ launcher NOTIFY sourceChanged)
+    Q_PROPERTY(const caelestia::config::LockConfig* lock READ lock NOTIFY sourceChanged)
+    Q_PROPERTY(const caelestia::config::NexusConfig* nexus READ nexus NOTIFY sourceChanged)
     Q_PROPERTY(const caelestia::config::NotifsConfig* notifs READ notifs NOTIFY sourceChanged)
     Q_PROPERTY(const caelestia::config::OsdConfig* osd READ osd NOTIFY sourceChanged)
-    Q_PROPERTY(const caelestia::config::SessionConfig* session READ session NOTIFY sourceChanged)
-    Q_PROPERTY(const caelestia::config::WInfoConfig* winfo READ winfo NOTIFY sourceChanged)
-    Q_PROPERTY(const caelestia::config::LockConfig* lock READ lock NOTIFY sourceChanged)
-    Q_PROPERTY(const caelestia::config::UtilitiesConfig* utilities READ utilities NOTIFY sourceChanged)
-    Q_PROPERTY(const caelestia::config::SidebarConfig* sidebar READ sidebar NOTIFY sourceChanged)
     Q_PROPERTY(const caelestia::config::ServiceConfig* services READ services NOTIFY sourceChanged)
+    Q_PROPERTY(const caelestia::config::SessionConfig* session READ session NOTIFY sourceChanged)
+    Q_PROPERTY(const caelestia::config::SidebarConfig* sidebar READ sidebar NOTIFY sourceChanged)
+    Q_PROPERTY(const caelestia::config::UtilitiesConfig* utilities READ utilities NOTIFY sourceChanged)
+    Q_PROPERTY(const caelestia::config::WInfoConfig* winfo READ winfo NOTIFY sourceChanged)
     Q_PROPERTY(const caelestia::config::UserPaths* paths READ paths NOTIFY sourceChanged)
 
 public:
@@ -61,16 +61,16 @@ public:
     [[nodiscard]] const BarConfig* bar() const;
     [[nodiscard]] const BorderConfig* border() const;
     [[nodiscard]] const DashboardConfig* dashboard() const;
-    [[nodiscard]] const ControlCenterConfig* controlCenter() const;
     [[nodiscard]] const LauncherConfig* launcher() const;
+    [[nodiscard]] const LockConfig* lock() const;
+    [[nodiscard]] const NexusConfig* nexus() const;
     [[nodiscard]] const NotifsConfig* notifs() const;
     [[nodiscard]] const OsdConfig* osd() const;
-    [[nodiscard]] const SessionConfig* session() const;
-    [[nodiscard]] const WInfoConfig* winfo() const;
-    [[nodiscard]] const LockConfig* lock() const;
-    [[nodiscard]] const UtilitiesConfig* utilities() const;
-    [[nodiscard]] const SidebarConfig* sidebar() const;
     [[nodiscard]] const ServiceConfig* services() const;
+    [[nodiscard]] const SessionConfig* session() const;
+    [[nodiscard]] const SidebarConfig* sidebar() const;
+    [[nodiscard]] const UtilitiesConfig* utilities() const;
+    [[nodiscard]] const WInfoConfig* winfo() const;
     [[nodiscard]] const UserPaths* paths() const;
 
     [[nodiscard]] Q_INVOKABLE static GlobalConfig* forScreen(const QString& screen);

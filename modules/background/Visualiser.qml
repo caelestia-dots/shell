@@ -65,8 +65,8 @@ Item {
                     values: Audio.cava.values
                     primaryColor: Qt.alpha(Colours.palette.m3primary, 0.7)
                     secondaryColor: Qt.alpha(Colours.palette.m3inversePrimary, 0.7)
-                    rounding: Tokens.rounding.small * Config.background.visualiser.rounding
-                    spacing: Tokens.spacing.small * Config.background.visualiser.spacing
+                    rounding: Tokens.rounding.medium * Config.background.visualiser.rounding
+                    spacing: Tokens.spacing.extraSmall * Config.background.visualiser.spacing
                     animationDuration: Tokens.anim.durations.normal
 
                     Behavior on anchors.leftMargin {
@@ -87,6 +87,8 @@ Item {
     }
 
     Behavior on opacity {
-        Anim {}
+        Anim {
+            type: Anim.DefaultEffects
+        }
     }
 }

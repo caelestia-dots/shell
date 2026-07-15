@@ -1,87 +1,75 @@
 import QtQuick
+import QtQuick.Layouts
 import Caelestia.Config
+import Caelestia.Services
 import qs.components
-import qs.components.misc
+import qs.components.controls
 import qs.services
 
-Row {
+Item {
     id: root
 
     anchors.top: parent.top
     anchors.bottom: parent.bottom
 
-    padding: Tokens.padding.large
-    spacing: Tokens.spacing.normal
+    implicitWidth: layout.implicitWidth + layout.anchors.margins * 2
 
-    Ref {
-        service: SystemUsage
+    ServiceRef {
+        service: Cpu
     }
 
-    Resource {
-        icon: "memory"
-        value: SystemUsage.cpuPerc
-        colour: Colours.palette.m3primary
+    ServiceRef {
+        service: Memory
     }
 
-    Resource {
-        icon: "memory_alt"
-        value: SystemUsage.memPerc
-        colour: Colours.palette.m3secondary
+    ServiceRef {
+        service: Storage
     }
 
-    Resource {
-        icon: "hard_disk"
-        value: SystemUsage.storagePerc
-        colour: Colours.palette.m3tertiary
-    }
+    ColumnLayout {
+        id: layout
 
-    component Resource: Item {
-        id: res
-
-        required property string icon
-        required property real value
-        required property color colour
-
+        anchors.horizontalCenter: parent.horizontalCenter
         anchors.top: parent.top
         anchors.bottom: parent.bottom
         anchors.margins: Tokens.padding.large
-        implicitWidth: icon.implicitWidth
+        spacing: Tokens.spacing.medium
 
-        StyledRect {
-            anchors.horizontalCenter: parent.horizontalCenter
-            anchors.top: parent.top
-            anchors.bottom: icon.top
-            anchors.bottomMargin: Tokens.spacing.small
+        Resource {
+            icon: "memory"
+            value: Cpu.percentage
+        }
 
-            implicitWidth: Tokens.sizes.dashboard.resourceProgressThickness
+        Resource {
+            icon: "memory_alt"
+            value: Memory.percentage
+            fgColour: Colours.palette.m3tertiary
+        }
 
-            color: Colours.layer(Colours.palette.m3surfaceContainerHigh, 2)
-            radius: Tokens.rounding.full
+        Resource {
+            icon: "hard_disk"
+            value: Storage.percentage
+            fgColour: Colours.palette.m3secondary
+        }
+    }
+    component Resource: CircularProgress {
+        id: res
 
-            StyledRect {
-                anchors.left: parent.left
-                anchors.right: parent.right
-                anchors.bottom: parent.bottom
-                implicitHeight: res.value * parent.height
+        required property string icon
 
-                color: res.colour
-                radius: Tokens.rounding.full
-            }
+        Layout.fillHeight: true
+        implicitSize: height
+        strokeWidth: Tokens.sizes.dashboard.resourceProgressThickness
+
+        Behavior on clampedVal {
+            Anim {}
         }
 
         MaterialIcon {
-            id: icon
-
-            anchors.bottom: parent.bottom
-
+            anchors.centerIn: parent
             text: res.icon
-            color: res.colour
-        }
-
-        Behavior on value {
-            Anim {
-                type: Anim.StandardLarge
-            }
+            font: Tokens.font.icon.large
+            color: res.fgColour
         }
     }
 }

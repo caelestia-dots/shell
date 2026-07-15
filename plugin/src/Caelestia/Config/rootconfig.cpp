@@ -1,5 +1,6 @@
 #include "rootconfig.hpp"
 
+#include <qdatetime.h>
 #include <qdir.h>
 #include <qfile.h>
 #include <qfileinfo.h>
@@ -29,7 +30,7 @@ QStringList RootConfig::collectUnknownKeys(const ConfigObject* obj, const QJsonO
     const auto* meta = obj->metaObject();
 
     QSet<QString> known;
-    for (int i = meta->propertyOffset(); i < meta->propertyCount(); ++i)
+    for (int i = ConfigObject::basePropertyOffset(); i < meta->propertyCount(); ++i)
         known.insert(QString::fromUtf8(meta->property(i).name()));
 
     for (auto it = json.begin(); it != json.end(); ++it) {
@@ -51,6 +52,40 @@ QStringList RootConfig::collectUnknownKeys(const ConfigObject* obj, const QJsonO
     }
 
     return unknown;
+}
+
+void RootConfig::mergeUnknownKeys(const ConfigObject* obj, const QJsonObject& source, QJsonObject& target) {
+    const auto* meta = obj->metaObject();
+
+    QSet<QString> known;
+    for (int i = ConfigObject::basePropertyOffset(); i < meta->propertyCount(); ++i)
+        known.insert(QString::fromUtf8(meta->property(i).name()));
+
+    for (auto it = source.begin(); it != source.end(); ++it) {
+        if (!known.contains(it.key())) {
+            if (!target.contains(it.key()))
+                target.insert(it.key(), it.value());
+            continue;
+        }
+
+        if (!it.value().isObject())
+            continue;
+
+        int idx = meta->indexOfProperty(it.key().toUtf8().constData());
+        if (idx < 0)
+            continue;
+
+        auto prop = meta->property(idx);
+        auto* subObj = prop.read(obj).value<ConfigObject*>();
+        if (!subObj)
+            continue;
+
+        auto childTarget = target.value(it.key()).toObject();
+        mergeUnknownKeys(subObj, it.value().toObject(), childTarget);
+
+        if (!childTarget.isEmpty())
+            target.insert(it.key(), childTarget);
+    }
 }
 
 void RootConfig::setupFileBackend(const QString& path, const QString& screen) {
@@ -80,11 +115,13 @@ void RootConfig::setupFileBackend(const QString& path, const QString& screen) {
         }
 
         auto json = toJsonObject();
+        mergeUnknownKeys(this, m_lastLoadedJson, json);
         file.write(QJsonDocument(json).toJson(QJsonDocument::Indented));
         file.close();
 
         // Update watches — save may have created directories
         updateWatch();
+        m_lastSignature = fileSignature();
 
         emit saved(m_screen);
     });
@@ -126,7 +163,7 @@ void RootConfig::connectAutoSave(ConfigObject* obj) {
 
     // Recurse into sub-objects
     const auto* meta = obj->metaObject();
-    for (int i = meta->propertyOffset(); i < meta->propertyCount(); ++i) {
+    for (int i = ConfigObject::basePropertyOffset(); i < meta->propertyCount(); ++i) {
         auto prop = meta->property(i);
         auto value = prop.read(obj);
         auto* subObj = value.value<ConfigObject*>();
@@ -169,8 +206,22 @@ void RootConfig::onWatcherEvent() {
     // Re-evaluate what to watch — directories may have been created or deleted
     updateWatch();
 
-    if (!m_recentlySaved)
-        m_reloadDebounce->start();
+    if (m_recentlySaved)
+        return;
+
+    // Only reload when the file actually changed (directory is watched so events fire for unrelated files)
+    if (fileSignature() == m_lastSignature)
+        return;
+
+    m_reloadDebounce->start();
+}
+
+QString RootConfig::fileSignature() const {
+    QFileInfo info(m_filePath);
+    if (!info.exists())
+        return QString();
+
+    return QStringLiteral("%1:%2").arg(info.size()).arg(info.lastModified().toMSecsSinceEpoch());
 }
 
 void RootConfig::saveToFile() {
@@ -182,6 +233,8 @@ void RootConfig::saveToFile() {
 }
 
 std::optional<QString> RootConfig::reloadFromFile() {
+    m_lastSignature = fileSignature();
+
     QFile file(m_filePath);
 
     if (!file.exists()) {
@@ -221,6 +274,7 @@ std::optional<QString> RootConfig::reloadFromFile() {
     clearLoadedKeys();
 
     auto jsonObj = doc.object();
+    m_lastLoadedJson = jsonObj;
     loadFromJson(jsonObj);
 
     m_loading = false;

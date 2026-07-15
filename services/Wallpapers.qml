@@ -13,6 +13,7 @@ Searcher {
 
     readonly property string currentNamePath: `${Paths.state}/wallpaper/path.txt`
     readonly property list<string> smartArg: GlobalConfig.services.smartScheme ? [] : ["--no-smart"]
+    readonly property string fallback: Quickshell.shellPath("assets/wallpaper.webp")
 
     property string activeTab: "static"
 
@@ -21,6 +22,18 @@ Searcher {
     property string previewPath
     property string actualCurrent
     property bool previewColourLock
+    property bool pendingPreviewClear
+
+    function getCategoryFor(w: FileSystemEntry): string {
+        let category = w.parentDir.slice(Paths.wallsdir.length + 1);
+        if (category.includes("/"))
+            category = category.slice(0, category.indexOf("/"));
+        return category;
+    }
+
+    function setRandom(): void {
+        Quickshell.execDetached(["caelestia", "wallpaper", "-r", ...smartArg]);
+    }
 
     function isVideo(path: string): bool {
         return path.endsWith(".mp4") || path.endsWith(".mkv") ||
@@ -42,7 +55,14 @@ Searcher {
 
     function stopPreview(): void {
         showPreview = false;
-        if (!previewColourLock)
+        if (previewColourLock)
+            pendingPreviewClear = true;
+        else
+            Colours.showPreview = false;
+    }
+
+    onPreviewColourLockChanged: {
+        if (!previewColourLock && pendingPreviewClear)
             Colours.showPreview = false;
     }
 
@@ -61,10 +81,21 @@ Searcher {
     FileView {
         path: root.currentNamePath
         watchChanges: true
+        printErrors: false
         onFileChanged: reload()
         onLoaded: {
-            root.actualCurrent = text().trim();
+            let wall = text().trim();
+            if (!wall) {
+                wall = root.fallback;
+                Quickshell.execDetached(["caelestia", "wallpaper", "-f", root.fallback, ...root.smartArg]);
+            }
+            root.actualCurrent = wall;
             root.previewColourLock = false;
+        }
+        onLoadFailed: {
+            root.actualCurrent = root.fallback;
+            root.previewColourLock = false;
+            Quickshell.execDetached(["caelestia", "wallpaper", "-f", root.fallback, ...root.smartArg]);
         }
     }
 

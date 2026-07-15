@@ -3,6 +3,7 @@ import Quickshell
 import Quickshell.Services.UPower
 import Caelestia
 import Caelestia.Config
+import Caelestia.Services
 
 Scope {
     id: root
@@ -51,6 +52,6 @@ Scope {
         id: hibernateTimer
 
         interval: 5000
-        onTriggered: Quickshell.execDetached(["systemctl", "hibernate"])
+        onTriggered: SessionManager.hibernate()
     }
 }

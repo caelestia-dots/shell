@@ -8,10 +8,12 @@ import qs.services
 StyledRect {
     id: root
 
-    Layout.fillWidth: true
-    implicitHeight: layout.implicitHeight + (IdleInhibitor.enabled ? activeChip.implicitHeight + activeChip.anchors.topMargin : 0) + Tokens.padding.large * 2
+    readonly property real nonAnimHeight: layout.implicitHeight + (IdleInhibitor.enabled ? activeChip.implicitHeight + activeChip.anchors.topMargin : 0) + Tokens.padding.extraLargeIncreased
 
-    radius: Tokens.rounding.normal
+    Layout.fillWidth: true
+    implicitHeight: nonAnimHeight
+
+    radius: Tokens.rounding.large
     color: Colours.tPalette.m3surfaceContainer
     clip: true
 
@@ -22,11 +24,11 @@ StyledRect {
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.margins: Tokens.padding.large
-        spacing: Tokens.spacing.normal
+        spacing: Tokens.spacing.medium
 
         StyledRect {
             implicitWidth: implicitHeight
-            implicitHeight: icon.implicitHeight + Tokens.padding.smaller * 2
+            implicitHeight: icon.implicitHeight + Tokens.padding.large
 
             radius: Tokens.rounding.full
             color: IdleInhibitor.enabled ? Colours.palette.m3secondary : Colours.palette.m3secondaryContainer
@@ -37,7 +39,7 @@ StyledRect {
                 anchors.centerIn: parent
                 text: "coffee"
                 color: IdleInhibitor.enabled ? Colours.palette.m3onSecondary : Colours.palette.m3onSecondaryContainer
-                font.pointSize: Tokens.font.size.large
+                fontStyle: Tokens.font.icon.large
             }
         }
 
@@ -48,7 +50,7 @@ StyledRect {
             StyledText {
                 Layout.fillWidth: true
                 text: qsTr("Keep Awake")
-                font.pointSize: Tokens.font.size.normal
+                font: Tokens.font.body.medium
                 elide: Text.ElideRight
             }
 
@@ -56,7 +58,7 @@ StyledRect {
                 Layout.fillWidth: true
                 text: IdleInhibitor.enabled ? qsTr("Preventing sleep mode") : qsTr("Normal power management")
                 color: Colours.palette.m3onSurfaceVariant
-                font.pointSize: Tokens.font.size.small
+                font: Tokens.font.body.small
                 elide: Text.ElideRight
             }
         }
@@ -73,7 +75,7 @@ StyledRect {
         asynchronous: true
         anchors.bottom: parent.bottom
         anchors.left: parent.left
-        anchors.topMargin: Tokens.spacing.larger
+        anchors.topMargin: Tokens.spacing.large
         anchors.bottomMargin: IdleInhibitor.enabled ? Tokens.padding.large : -implicitHeight
         anchors.leftMargin: Tokens.padding.large
 
@@ -83,8 +85,8 @@ StyledRect {
         Component.onCompleted: active = Qt.binding(() => opacity > 0)
 
         sourceComponent: StyledRect {
-            implicitWidth: activeText.implicitWidth + Tokens.padding.normal * 2
-            implicitHeight: activeText.implicitHeight + Tokens.padding.small * 2
+            implicitWidth: activeText.implicitWidth + Tokens.padding.medium * 2
+            implicitHeight: activeText.implicitHeight + Tokens.padding.small
 
             radius: Tokens.rounding.full
             color: Colours.palette.m3primary
@@ -95,14 +97,12 @@ StyledRect {
                 anchors.centerIn: parent
                 text: qsTr("Active since %1").arg(Qt.formatTime(IdleInhibitor.enabledSince, GlobalConfig.services.useTwelveHourClock ? "hh:mm a" : "hh:mm"))
                 color: Colours.palette.m3onPrimary
-                font.pointSize: Math.round(Tokens.font.size.small * 0.9)
+                font: Tokens.font.body.builders.small.size(Math.round(Tokens.font.body.small.pointSize * 0.9)).build()
             }
         }
 
         Behavior on anchors.bottomMargin {
-            Anim {
-                type: Anim.DefaultSpatial
-            }
+            Anim {}
         }
 
         Behavior on opacity {
@@ -117,8 +117,6 @@ StyledRect {
     }
 
     Behavior on implicitHeight {
-        Anim {
-            type: Anim.DefaultSpatial
-        }
+        Anim {}
     }
 }

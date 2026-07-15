@@ -19,10 +19,10 @@ ColumnLayout {
     spacing: Tokens.spacing.small
 
     StyledText {
-        Layout.topMargin: Tokens.padding.normal
-        Layout.rightMargin: Tokens.padding.small
+        Layout.topMargin: Tokens.padding.medium
+        Layout.rightMargin: Tokens.padding.extraSmall
         text: qsTr("Bluetooth")
-        font.weight: 500
+        font: Tokens.font.body.builders.medium.weight(Font.Medium).build()
     }
 
     Toggle {
@@ -47,7 +47,7 @@ ColumnLayout {
 
     StyledText {
         Layout.topMargin: Tokens.spacing.small
-        Layout.rightMargin: Tokens.padding.small
+        Layout.rightMargin: Tokens.padding.extraSmall
         text: {
             const devices = Bluetooth.devices.values; // qmllint disable unresolved-type
             let available = qsTr("%1 device%2 available").arg(devices.length).arg(devices.length === 1 ? "" : "s");
@@ -57,7 +57,7 @@ ColumnLayout {
             return available;
         }
         color: Colours.palette.m3onSurfaceVariant
-        font.pointSize: Tokens.font.size.small
+        font: Tokens.font.body.small
     }
 
     Repeater {
@@ -72,7 +72,7 @@ ColumnLayout {
             readonly property bool loading: modelData.state === BluetoothDeviceState.Connecting || modelData.state === BluetoothDeviceState.Disconnecting // qmllint disable unresolved-type
 
             Layout.fillWidth: true
-            Layout.rightMargin: Tokens.padding.small
+            Layout.rightMargin: Tokens.padding.extraSmall
             spacing: Tokens.spacing.small
 
             opacity: 0
@@ -84,7 +84,9 @@ ColumnLayout {
             }
 
             Behavior on opacity {
-                Anim {}
+                Anim {
+                    type: Anim.DefaultEffects
+                }
             }
 
             Behavior on scale {
@@ -96,8 +98,8 @@ ColumnLayout {
             }
 
             StyledText {
-                Layout.leftMargin: Tokens.spacing.small / 2
-                Layout.rightMargin: Tokens.spacing.small / 2
+                Layout.leftMargin: Tokens.spacing.extraSmall
+                Layout.rightMargin: Tokens.spacing.extraSmall
                 Layout.fillWidth: true
                 text: device.modelData.name
                 elide: Text.ElideRight
@@ -105,15 +107,15 @@ ColumnLayout {
 
             MaterialIcon {
                 visible: device.modelData.state === BluetoothDeviceState.Connected  // qmllint disable unresolved-type
-                text: Icons.getBatteryIcon(device.modelData.batteryAvailable ? device.modelData.battery * 100 : -1)
-                color: device.modelData.battery < 0.2 ? Colours.palette.m3error : Colours.palette.m3onSurfaceVariant
+                text: device.modelData.batteryAvailable ? Icons.getBatteryIcon(device.modelData.battery) : "battery_alert"
+                color: device.modelData.batteryAvailable && device.modelData.battery < 0.2 ? Colours.palette.m3error : Colours.palette.m3onSurfaceVariant
             }
 
             StyledRect {
                 id: connectBtn
 
                 implicitWidth: implicitHeight
-                implicitHeight: connectIcon.implicitHeight + Tokens.padding.small
+                implicitHeight: connectIcon.implicitHeight + Tokens.padding.extraSmall
 
                 radius: Tokens.rounding.full
                 color: Qt.alpha(Colours.palette.m3primary, device.modelData.state === BluetoothDeviceState.Connected ? 1 : 0) // qmllint disable unresolved-type
@@ -140,7 +142,9 @@ ColumnLayout {
                     opacity: device.loading ? 0 : 1
 
                     Behavior on opacity {
-                        Anim {}
+                        Anim {
+                            type: Anim.DefaultEffects
+                        }
                     }
                 }
             }
@@ -169,10 +173,10 @@ ColumnLayout {
 
     IconTextButton {
         Layout.fillWidth: true
-        Layout.topMargin: Tokens.spacing.normal
+        Layout.topMargin: Tokens.spacing.medium
         inactiveColour: Colours.palette.m3primaryContainer
         inactiveOnColour: Colours.palette.m3onPrimaryContainer
-        verticalPadding: Tokens.padding.small
+        verticalPadding: Tokens.padding.extraSmall
         text: qsTr("Open settings")
         icon: "settings"
 
@@ -185,8 +189,8 @@ ColumnLayout {
         property alias toggle: toggle
 
         Layout.fillWidth: true
-        Layout.rightMargin: Tokens.padding.small
-        spacing: Tokens.spacing.normal
+        Layout.rightMargin: Tokens.padding.extraSmall
+        spacing: Tokens.spacing.medium
 
         StyledText {
             Layout.fillWidth: true

@@ -9,50 +9,26 @@ RowLayout {
 
     required property var lock
 
-    spacing: Tokens.spacing.large * 2
+    spacing: Tokens.spacing.largeIncreased * 2
 
     ColumnLayout {
         Layout.fillWidth: true
-        spacing: Tokens.spacing.normal
+        spacing: Tokens.spacing.medium
 
-        StyledRect {
+        WeatherInfo {
             Layout.fillWidth: true
-            implicitHeight: weather.implicitHeight
-
-            topLeftRadius: Tokens.rounding.large
-            radius: Tokens.rounding.small
-            color: Colours.tPalette.m3surfaceContainer
-
-            WeatherInfo {
-                id: weather
-
-                rootHeight: root.height
-            }
+            rootHeight: root.height
         }
 
-        StyledRect {
+        Fetch {
+            Layout.fillWidth: true
+            rootHeight: root.height
+        }
+
+        Media {
             Layout.fillWidth: true
             Layout.fillHeight: true
-
-            radius: Tokens.rounding.small
-            color: Colours.tPalette.m3surfaceContainer
-
-            Fetch {}
-        }
-
-        StyledClippingRect {
-            Layout.fillWidth: true
-            implicitHeight: media.implicitHeight
-
-            bottomLeftRadius: Tokens.rounding.large
-            radius: Tokens.rounding.small
-            color: Colours.tPalette.m3surfaceContainer
-
-            Media {
-                id: media
-
-                lock: root.lock
-            }
+            lock: root.lock
         }
     }
 
@@ -62,27 +38,18 @@ RowLayout {
 
     ColumnLayout {
         Layout.fillWidth: true
-        spacing: Tokens.spacing.normal
+        spacing: Tokens.spacing.medium
 
-        StyledRect {
+        Resources {
             Layout.fillWidth: true
-            implicitHeight: resources.implicitHeight
-
-            topRightRadius: Tokens.rounding.large
-            radius: Tokens.rounding.small
-            color: Colours.tPalette.m3surfaceContainer
-
-            Resources {
-                id: resources
-            }
         }
 
         StyledRect {
             Layout.fillWidth: true
             Layout.fillHeight: true
 
-            bottomRightRadius: Tokens.rounding.large
-            radius: Tokens.rounding.small
+            bottomRightRadius: Tokens.rounding.extraLarge
+            radius: Tokens.rounding.medium
             color: Colours.tPalette.m3surfaceContainer
 
             NotifDock {

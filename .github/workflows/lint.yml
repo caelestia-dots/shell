@@ -25,6 +25,8 @@ jobs:
       - name: Lint QML
         shell: fish {0}
         run: |
+          /usr/lib/qt6/bin/qmllint --version
+
           # Generate tooling
           touch .qmlls.ini
           QT_QPA_PLATFORM=offscreen QML2_IMPORT_PATH="$PWD/build/qml:$QML2_IMPORT_PATH" timeout 2 qs -p .

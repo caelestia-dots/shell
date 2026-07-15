@@ -31,7 +31,9 @@ Item {
     Component.onCompleted: {
         if (source)
             Qt.callLater(() => {
-                one.update();
+                current = imgComp.createObject(this, {
+                    path: source
+                });
                 completed = true;
             });
     }
@@ -48,7 +50,7 @@ Item {
                 MaterialIcon {
                     text: "sentiment_stressed"
                     color: Colours.palette.m3onSurfaceVariant
-                    font.pointSize: Tokens.font.size.extraLarge * 5
+                    fontStyle: Tokens.font.icon.builders.extraLarge.scale(5).build()
                 }
                 Column {
                     anchors.verticalCenter: parent.verticalCenter
@@ -56,8 +58,7 @@ Item {
                     StyledText {
                         text: qsTr("Wallpaper missing?")
                         color: Colours.palette.m3onSurfaceVariant
-                        font.pointSize: Tokens.font.size.extraLarge * 2
-                        font.bold: true
+                        font: Tokens.font.body.builders.large.size(28 * 2).weight(Font.Bold).build()
                     }
                     StyledRect {
                         implicitWidth: selectWallText.implicitWidth + Tokens.padding.large * 2
@@ -81,7 +82,7 @@ Item {
                             anchors.centerIn: parent
                             text: qsTr("Set it now!")
                             color: Colours.palette.m3onPrimary
-                            font.pointSize: Tokens.font.size.large
+                            font: Tokens.font.body.large
                         }
                     }
                 }

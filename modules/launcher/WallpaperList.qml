@@ -18,7 +18,7 @@ PathView {
     required property var panels
     required property var content
 
-    readonly property int itemWidth: Tokens.sizes.launcher.wallpaperWidth * 0.8 + Tokens.padding.larger * 2
+    readonly property int itemWidth: Tokens.sizes.launcher.wallpaperWidth * 0.8 + Tokens.padding.medium * 2
 
     readonly property int numItems: {
         const screen = (QsWindow.window as QsWindow)?.screen;
@@ -30,7 +30,7 @@ PathView {
         let outerMargins = 0;
         if (panels.popouts.hasCurrent && panels.popouts.currentCenter + panels.popouts.nonAnimHeight / 2 > screen.height - content.implicitHeight - Config.border.thickness * 2)
             outerMargins = panels.popouts.nonAnimWidth;
-        if ((visibilities.utilities || visibilities.sidebar) && panels.utilities.implicitWidth > outerMargins)
+        if ((screenState.utilities || screenState.sidebar) && panels.utilities.implicitWidth > outerMargins)
             outerMargins = panels.utilities.implicitWidth;
         const maxWidth = screen.width - Config.border.rounding * 4 - (barMargins + outerMargins) * 2;
 
@@ -78,7 +78,7 @@ PathView {
     highlightRangeMode: PathView.StrictlyEnforceRange
 
     delegate: WallpaperItem {
-        visibilities: root.visibilities
+        screenState: root.screenState
     }
 
     path: Path {

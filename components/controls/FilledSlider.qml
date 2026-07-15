@@ -67,47 +67,29 @@ Slider {
 
                 property bool moving
 
-                function update(): void {
-                    animate = !moving;
-                    binding.when = moving;
-                    font.pointSize = moving ? Tokens.font.size.small : Tokens.font.size.larger;
-                    font.family = moving ? Tokens.font.family.sans : Tokens.font.family.material;
-                }
-
-                text: root.icon
-                color: Colours.palette.m3inverseOnSurface
                 anchors.centerIn: parent
+                anchors.verticalCenterOffset: 1
+                text: moving ? Math.round(root.value * 100) : root.icon
+                color: Colours.palette.m3inverseOnSurface
+                font: moving ? Tokens.font.body.small : Tokens.font.icon.medium
 
-                onMovingChanged: anim.restart()
-
-                Binding {
-                    id: binding
-
-                    target: icon
-                    property: "text"
-                    value: Math.round(root.value * 100)
-                    when: false
-                }
-
-                SequentialAnimation {
-                    id: anim
-
-                    Anim {
-                        target: icon
-                        property: "scale"
-                        to: 0
-                        duration: Tokens.anim.durations.normal / 2
-                        easing: Tokens.anim.standardAccel
-                    }
-                    ScriptAction {
-                        script: icon.update()
-                    }
-                    Anim {
-                        target: icon
-                        property: "scale"
-                        to: 1
-                        duration: Tokens.anim.durations.normal / 2
-                        easing: Tokens.anim.standardDecel
+                Behavior on moving {
+                    SequentialAnimation {
+                        Anim {
+                            target: icon
+                            property: "scale"
+                            to: 0.3
+                            duration: Tokens.anim.durations.small / 2
+                            easing: Tokens.anim.standardAccel
+                        }
+                        PropertyAction {}
+                        Anim {
+                            target: icon
+                            property: "scale"
+                            to: 1
+                            duration: Tokens.anim.durations.normal / 2
+                            easing: Tokens.anim.standardDecel
+                        }
                     }
                 }
             }

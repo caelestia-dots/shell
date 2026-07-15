@@ -35,15 +35,20 @@ signals:
 
 private:
     static QStringList collectUnknownKeys(const ConfigObject* obj, const QJsonObject& json);
+    static void mergeUnknownKeys(const ConfigObject* obj, const QJsonObject& source, QJsonObject& target);
     void emitLoadSignals(const std::optional<QString>& result, bool emitLoaded = true);
     void updateWatch();
     void onWatcherEvent();
+    // Signature of the target file (existence + size + mtime) used to ignore
+    // directory events caused by unrelated sibling files.
+    [[nodiscard]] QString fileSignature() const;
 
     void connectAutoSave(ConfigObject* obj);
 
     QString m_filePath;
     QString m_screen;
     QString m_watchedDir;
+    QString m_lastSignature;
     bool m_recentlySaved = false;
     bool m_loading = false;
 
@@ -54,6 +59,7 @@ private:
     QTimer* m_reloadDebounce = nullptr;
     int m_parseRetries = 0;
     QStringList m_lastUnknownKeys;
+    QJsonObject m_lastLoadedJson;
 };
 
 } // namespace caelestia::config
