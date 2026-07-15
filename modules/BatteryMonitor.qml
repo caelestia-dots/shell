@@ -5,6 +5,7 @@ import Quickshell.Services.UPower
 import Caelestia
 import Caelestia.Config
 import Caelestia.Services
+import qs.utils
 
 Scope {
     id: root
@@ -17,7 +18,7 @@ Scope {
     MediaPlayer {
         id: notifyLowBattery
 
-        source: "root:///assets/LowBattery.ogg"
+        source: Paths.absolutePath(GlobalConfig.paths.lowBatNotifSound)
         audioOutput: AudioOutput {}
     }
     property real lastPercentage: 100
