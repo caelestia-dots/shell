@@ -111,6 +111,7 @@ class GeneralBattery : public ConfigObject {
     CONFIG_GLOBAL_PROPERTY(bool, enableLowBatteryWarning, true)
     CONFIG_GLOBAL_PROPERTY(bool, enableHighBatteryWarning, false)
     CONFIG_GLOBAL_PROPERTY(bool, framedMaterialIcons, false)
+    CONFIG_GLOBAL_PROPERTY(bool, repeatedWarnings, false)
 
 public:
     explicit GeneralBattery(QObject* parent = nullptr)
