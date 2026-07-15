@@ -54,6 +54,40 @@ QStringList RootConfig::collectUnknownKeys(const ConfigObject* obj, const QJsonO
     return unknown;
 }
 
+void RootConfig::mergeUnknownKeys(const ConfigObject* obj, const QJsonObject& source, QJsonObject& target) {
+    const auto* meta = obj->metaObject();
+
+    QSet<QString> known;
+    for (int i = ConfigObject::basePropertyOffset(); i < meta->propertyCount(); ++i)
+        known.insert(QString::fromUtf8(meta->property(i).name()));
+
+    for (auto it = source.begin(); it != source.end(); ++it) {
+        if (!known.contains(it.key())) {
+            if (!target.contains(it.key()))
+                target.insert(it.key(), it.value());
+            continue;
+        }
+
+        if (!it.value().isObject())
+            continue;
+
+        int idx = meta->indexOfProperty(it.key().toUtf8().constData());
+        if (idx < 0)
+            continue;
+
+        auto prop = meta->property(idx);
+        auto* subObj = prop.read(obj).value<ConfigObject*>();
+        if (!subObj)
+            continue;
+
+        auto childTarget = target.value(it.key()).toObject();
+        mergeUnknownKeys(subObj, it.value().toObject(), childTarget);
+
+        if (!childTarget.isEmpty())
+            target.insert(it.key(), childTarget);
+    }
+}
+
 void RootConfig::setupFileBackend(const QString& path, const QString& screen) {
     m_filePath = path;
     m_screen = screen;
@@ -81,6 +115,7 @@ void RootConfig::setupFileBackend(const QString& path, const QString& screen) {
         }
 
         auto json = toJsonObject();
+        mergeUnknownKeys(this, m_lastLoadedJson, json);
         file.write(QJsonDocument(json).toJson(QJsonDocument::Indented));
         file.close();
 
@@ -239,6 +274,7 @@ std::optional<QString> RootConfig::reloadFromFile() {
     clearLoadedKeys();
 
     auto jsonObj = doc.object();
+    m_lastLoadedJson = jsonObj;
     loadFromJson(jsonObj);
 
     m_loading = false;
