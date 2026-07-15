@@ -44,6 +44,19 @@ PageBase {
         highWarnConfig.forEach(changeIcon);
     }
 
+    function resetWarningStatus(source) {
+        for (const level of source) {
+            level.warned = false;
+        }
+    }
+
+    function toggleRepeatWarning() {
+        GlobalConfig.general.battery.repeatedWarnings = !GlobalConfig.general.battery.repeatedWarnings;
+
+        resetWarningStatus(GlobalConfig.general.battery.lowBatteryWarnLevels);
+        resetWarningStatus(GlobalConfig.general.battery.chargingWarnLevels);
+    }
+
     title: qsTr("Power")
 
     ColumnLayout {
@@ -210,13 +223,24 @@ PageBase {
 
         ToggleRow {
             verticalPadding: Tokens.padding.large
-            last: true
+
             text: qsTr("Framed Toast Icon")
             subtext: qsTr("Enables the framed variant of Material battery icons")
             checked: GlobalConfig.general.battery.framedMaterialIcons ?? false
             onToggled: {
                 GlobalConfig.general.battery.framedMaterialIcons = !GlobalConfig.general.battery.framedMaterialIcons;
                 changeToastIconVariant();
+            }
+        }
+
+        ToggleRow {
+            verticalPadding: Tokens.padding.large
+            last: true
+            text: qsTr("Repeated Warnings")
+            subtext: qsTr("Enables repeated warning toasts everytime your battery level changes")
+            checked: GlobalConfig.general.battery.repeatedWarnings ?? false
+            onToggled: {
+                toggleRepeatWarning();
             }
         }
     }
