@@ -7,7 +7,6 @@
   fish,
   ddcutil,
   brightnessctl,
-  app2unit,
   networkmanager,
   lm_sensors,
   swappy,
@@ -29,6 +28,7 @@
   ninja,
   pkg-config,
   caelestia-cli,
+  m3shapes,
   debug ? false,
   withCli ? false,
   extraRuntimeDeps ? [],
@@ -40,7 +40,6 @@
       fish
       ddcutil
       brightnessctl
-      app2unit
       networkmanager
       lm_sensors
       swappy
@@ -66,6 +65,9 @@
     (lib.cmakeFeature "GIT_REVISION" rev)
     (lib.cmakeFeature "DISTRIBUTOR" "nix-flake")
   ];
+
+  # The build sandbox has no network access so add it as a flake input instead
+  m3shapesFlag = lib.cmakeFeature "FETCHCONTENT_SOURCE_DIR_M3SHAPES_EXTERNAL" "${m3shapes}";
 
   extras = stdenv.mkDerivation {
     inherit cmakeBuildType;
@@ -94,13 +96,34 @@
     };
 
     nativeBuildInputs = [cmake ninja pkg-config];
-    buildInputs = [qt6.qtbase qt6.qtdeclarative libqalculate pipewire aubio libcava fftw];
+    buildInputs = [qt6.qtbase qt6.qtdeclarative qt6.qtshadertools libqalculate pipewire aubio libcava fftw lm_sensors];
 
     dontWrapQtApps = true;
     cmakeFlags =
       [
         (lib.cmakeFeature "ENABLE_MODULES" "plugin")
         (lib.cmakeFeature "INSTALL_QMLDIR" qt6.qtbase.qtQmlPrefix)
+      ]
+      ++ cmakeVersionFlags;
+  };
+
+  m3shapesModule = stdenv.mkDerivation {
+    inherit cmakeBuildType;
+    name = "caelestia-m3shapes${lib.optionalString debug "-debug"}";
+    src = lib.fileset.toSource {
+      root = ./..;
+      fileset = ./../CMakeLists.txt;
+    };
+
+    nativeBuildInputs = [cmake ninja];
+    buildInputs = [qt6.qtbase qt6.qtdeclarative];
+
+    dontWrapQtApps = true;
+    cmakeFlags =
+      [
+        (lib.cmakeFeature "ENABLE_MODULES" "m3shapes")
+        (lib.cmakeFeature "INSTALL_QMLDIR" qt6.qtbase.qtQmlPrefix)
+        m3shapesFlag
       ]
       ++ cmakeVersionFlags;
   };
@@ -111,7 +134,7 @@ in
     src = ./..;
 
     nativeBuildInputs = [cmake ninja makeWrapper qt6.wrapQtAppsHook];
-    buildInputs = [quickshell extras plugin xkeyboard-config qt6.qtbase];
+    buildInputs = [quickshell extras plugin m3shapesModule xkeyboard-config qt6.qtbase];
     propagatedBuildInputs = runtimeDeps;
 
     cmakeFlags =
@@ -126,6 +149,8 @@ in
     prePatch = ''
       substituteInPlace assets/pam.d/fprint \
         --replace-fail pam_fprintd.so /run/current-system/sw/lib/security/pam_fprintd.so
+      substituteInPlace assets/pam.d/howdy \
+        --replace-fail pam_howdy.so /run/current-system/sw/lib/security/pam_howdy.so
     '';
 
     postInstall = ''
@@ -138,13 +163,10 @@ in
 
       mkdir -p $out/lib
       ln -s ${extras}/lib/* $out/lib/
-
-      # Ensure wrap_term_launch.sh is executable
-      chmod 755 $out/share/caelestia-shell/assets/wrap_term_launch.sh
     '';
 
     passthru = {
-      inherit plugin extras;
+      inherit plugin extras m3shapesModule;
     };
 
     meta = {

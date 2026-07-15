@@ -14,15 +14,18 @@ StyledRect {
     readonly property alias items: items
     readonly property alias expandIcon: expandIcon
 
-    readonly property int padding: Config.bar.tray.background ? Tokens.padding.normal : Tokens.padding.small
-    readonly property int spacing: Config.bar.tray.background ? Tokens.spacing.small : 0
+    readonly property int padding: Config.bar.tray.background ? Tokens.padding.medium : Tokens.padding.extraSmall
+    readonly property int spacing: Config.bar.tray.background ? Tokens.spacing.medium : Tokens.spacing.extraSmall
 
     property bool expanded
 
     readonly property real nonAnimHeight: {
         if (!Config.bar.tray.compact)
             return layout.implicitHeight + padding * 2;
-        return (expanded ? expandIcon.implicitHeight + layout.implicitHeight + spacing : expandIcon.implicitHeight) + padding * 2;
+        const pad = (Config.bar.tray.background ? Tokens.padding.extraSmall : 0) + padding;
+        if (expanded)
+            return expandIcon.implicitHeight + layout.implicitHeight + spacing + pad;
+        return Math.max(Config.bar.tray.background ? width : 0, expandIcon.implicitHeight + pad);
     }
 
     clip: true
@@ -75,7 +78,9 @@ StyledRect {
         }
 
         Behavior on opacity {
-            Anim {}
+            Anim {
+                type: Anim.DefaultEffects
+            }
         }
     }
 
@@ -91,16 +96,17 @@ StyledRect {
 
         sourceComponent: Item {
             implicitWidth: expandIconInner.implicitWidth
-            implicitHeight: expandIconInner.implicitHeight - Tokens.padding.small * 2
+            implicitHeight: expandIconInner.implicitHeight - Tokens.padding.small
 
             MaterialIcon {
                 id: expandIconInner
 
                 anchors.horizontalCenter: parent.horizontalCenter
                 anchors.bottom: parent.bottom
-                anchors.bottomMargin: Config.bar.tray.background ? Tokens.padding.small : -Tokens.padding.small
+                anchors.bottomMargin: Config.bar.tray.background ? Tokens.padding.extraSmall : -Tokens.padding.small
                 text: "expand_less"
-                font.pointSize: Tokens.font.size.large
+                color: Colours.palette.m3onSurfaceVariant
+                fontStyle: Tokens.font.icon.medium
                 rotation: root.expanded ? 180 : 0
 
                 Behavior on rotation {
@@ -115,8 +121,6 @@ StyledRect {
     }
 
     Behavior on implicitHeight {
-        Anim {
-            type: Anim.DefaultSpatial
-        }
+        Anim {}
     }
 }

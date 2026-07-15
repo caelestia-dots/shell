@@ -14,8 +14,8 @@ Item {
     readonly property Popout currentPopout: content.children.find(c => c.shouldBeActive) ?? null
     readonly property Item current: currentPopout?.item ?? null
 
-    implicitWidth: (currentPopout?.implicitWidth ?? 0) + Tokens.padding.large * 2
-    implicitHeight: (currentPopout?.implicitHeight ?? 0) + Tokens.padding.large * 2
+    implicitWidth: (currentPopout?.implicitWidth ?? 0) + Tokens.padding.extraLargeIncreased
+    implicitHeight: (currentPopout?.implicitHeight ?? 0) + Tokens.padding.extraLargeIncreased
 
     Item {
         id: content
@@ -172,7 +172,6 @@ Item {
         anchors.centerIn: parent
 
         opacity: 0
-        scale: 0.8
         active: false
 
         states: State {
@@ -182,7 +181,6 @@ Item {
             PropertyChanges {
                 popout.active: true
                 popout.opacity: 1
-                popout.scale: 1
             }
         }
 
@@ -193,11 +191,10 @@ Item {
 
                 SequentialAnimation {
                     Anim {
-                        properties: "opacity,scale"
-                        type: Anim.StandardSmall
+                        property: "opacity"
+                        type: Anim.DefaultEffects
                     }
                     PropertyAction {
-                        target: popout
                         property: "active"
                     }
                 }
@@ -208,11 +205,11 @@ Item {
 
                 SequentialAnimation {
                     PropertyAction {
-                        target: popout
                         property: "active"
                     }
                     Anim {
-                        properties: "opacity,scale"
+                        property: "opacity"
+                        type: Anim.SlowEffects
                     }
                 }
             }

@@ -1,5 +1,6 @@
 #include "rootconfig.hpp"
 
+#include <qdatetime.h>
 #include <qdir.h>
 #include <qfile.h>
 #include <qfileinfo.h>
@@ -29,7 +30,7 @@ QStringList RootConfig::collectUnknownKeys(const ConfigObject* obj, const QJsonO
     const auto* meta = obj->metaObject();
 
     QSet<QString> known;
-    for (int i = meta->propertyOffset(); i < meta->propertyCount(); ++i)
+    for (int i = ConfigObject::basePropertyOffset(); i < meta->propertyCount(); ++i)
         known.insert(QString::fromUtf8(meta->property(i).name()));
 
     for (auto it = json.begin(); it != json.end(); ++it) {
@@ -85,6 +86,7 @@ void RootConfig::setupFileBackend(const QString& path, const QString& screen) {
 
         // Update watches — save may have created directories
         updateWatch();
+        m_lastSignature = fileSignature();
 
         emit saved(m_screen);
     });
@@ -126,7 +128,7 @@ void RootConfig::connectAutoSave(ConfigObject* obj) {
 
     // Recurse into sub-objects
     const auto* meta = obj->metaObject();
-    for (int i = meta->propertyOffset(); i < meta->propertyCount(); ++i) {
+    for (int i = ConfigObject::basePropertyOffset(); i < meta->propertyCount(); ++i) {
         auto prop = meta->property(i);
         auto value = prop.read(obj);
         auto* subObj = value.value<ConfigObject*>();
@@ -169,8 +171,22 @@ void RootConfig::onWatcherEvent() {
     // Re-evaluate what to watch — directories may have been created or deleted
     updateWatch();
 
-    if (!m_recentlySaved)
-        m_reloadDebounce->start();
+    if (m_recentlySaved)
+        return;
+
+    // Only reload when the file actually changed (directory is watched so events fire for unrelated files)
+    if (fileSignature() == m_lastSignature)
+        return;
+
+    m_reloadDebounce->start();
+}
+
+QString RootConfig::fileSignature() const {
+    QFileInfo info(m_filePath);
+    if (!info.exists())
+        return QString();
+
+    return QStringLiteral("%1:%2").arg(info.size()).arg(info.lastModified().toMSecsSinceEpoch());
 }
 
 void RootConfig::saveToFile() {
@@ -182,6 +198,8 @@ void RootConfig::saveToFile() {
 }
 
 std::optional<QString> RootConfig::reloadFromFile() {
+    m_lastSignature = fileSignature();
+
     QFile file(m_filePath);
 
     if (!file.exists()) {

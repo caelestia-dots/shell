@@ -2,7 +2,9 @@
 
 #include "configobject.hpp"
 
+#include <qfont.h>
 #include <qstring.h>
+#include <qvariant.h>
 
 namespace caelestia::config {
 
@@ -10,7 +12,6 @@ namespace caelestia::config {
 class RoundingTokens;
 class SpacingTokens;
 class PaddingTokens;
-class FontSizeTokens;
 class AnimDurationTokens;
 
 class AppearanceRounding : public ConfigObject {
@@ -21,8 +22,12 @@ class AppearanceRounding : public ConfigObject {
 
     Q_PROPERTY(int extraSmall READ extraSmall NOTIFY valuesChanged)
     Q_PROPERTY(int small READ small NOTIFY valuesChanged)
-    Q_PROPERTY(int normal READ normal NOTIFY valuesChanged)
+    Q_PROPERTY(int medium READ medium NOTIFY valuesChanged)
     Q_PROPERTY(int large READ large NOTIFY valuesChanged)
+    Q_PROPERTY(int largeIncreased READ largeIncreased NOTIFY valuesChanged)
+    Q_PROPERTY(int extraLarge READ extraLarge NOTIFY valuesChanged)
+    Q_PROPERTY(int extraLargeIncreased READ extraLargeIncreased NOTIFY valuesChanged)
+    Q_PROPERTY(int extraExtraLarge READ extraExtraLarge NOTIFY valuesChanged)
     Q_PROPERTY(int full READ full NOTIFY valuesChanged)
 
 public:
@@ -33,8 +38,12 @@ public:
 
     [[nodiscard]] int extraSmall() const;
     [[nodiscard]] int small() const;
-    [[nodiscard]] int normal() const;
+    [[nodiscard]] int medium() const;
     [[nodiscard]] int large() const;
+    [[nodiscard]] int largeIncreased() const;
+    [[nodiscard]] int extraLarge() const;
+    [[nodiscard]] int extraLargeIncreased() const;
+    [[nodiscard]] int extraExtraLarge() const;
     [[nodiscard]] int full() const;
 
 signals:
@@ -50,11 +59,14 @@ class AppearanceSpacing : public ConfigObject {
 
     CONFIG_PROPERTY(qreal, scale, 1)
 
+    Q_PROPERTY(int extraSmall READ extraSmall NOTIFY valuesChanged)
     Q_PROPERTY(int small READ small NOTIFY valuesChanged)
-    Q_PROPERTY(int smaller READ smaller NOTIFY valuesChanged)
-    Q_PROPERTY(int normal READ normal NOTIFY valuesChanged)
-    Q_PROPERTY(int larger READ larger NOTIFY valuesChanged)
+    Q_PROPERTY(int medium READ medium NOTIFY valuesChanged)
     Q_PROPERTY(int large READ large NOTIFY valuesChanged)
+    Q_PROPERTY(int largeIncreased READ largeIncreased NOTIFY valuesChanged)
+    Q_PROPERTY(int extraLarge READ extraLarge NOTIFY valuesChanged)
+    Q_PROPERTY(int extraLargeIncreased READ extraLargeIncreased NOTIFY valuesChanged)
+    Q_PROPERTY(int extraExtraLarge READ extraExtraLarge NOTIFY valuesChanged)
 
 public:
     explicit AppearanceSpacing(QObject* parent = nullptr)
@@ -62,11 +74,14 @@ public:
 
     void bindTokens(SpacingTokens* tokens);
 
+    [[nodiscard]] int extraSmall() const;
     [[nodiscard]] int small() const;
-    [[nodiscard]] int smaller() const;
-    [[nodiscard]] int normal() const;
-    [[nodiscard]] int larger() const;
+    [[nodiscard]] int medium() const;
     [[nodiscard]] int large() const;
+    [[nodiscard]] int largeIncreased() const;
+    [[nodiscard]] int extraLarge() const;
+    [[nodiscard]] int extraLargeIncreased() const;
+    [[nodiscard]] int extraExtraLarge() const;
 
 signals:
     void valuesChanged();
@@ -81,11 +96,14 @@ class AppearancePadding : public ConfigObject {
 
     CONFIG_PROPERTY(qreal, scale, 1)
 
+    Q_PROPERTY(int extraSmall READ extraSmall NOTIFY valuesChanged)
     Q_PROPERTY(int small READ small NOTIFY valuesChanged)
-    Q_PROPERTY(int smaller READ smaller NOTIFY valuesChanged)
-    Q_PROPERTY(int normal READ normal NOTIFY valuesChanged)
-    Q_PROPERTY(int larger READ larger NOTIFY valuesChanged)
+    Q_PROPERTY(int medium READ medium NOTIFY valuesChanged)
     Q_PROPERTY(int large READ large NOTIFY valuesChanged)
+    Q_PROPERTY(int largeIncreased READ largeIncreased NOTIFY valuesChanged)
+    Q_PROPERTY(int extraLarge READ extraLarge NOTIFY valuesChanged)
+    Q_PROPERTY(int extraLargeIncreased READ extraLargeIncreased NOTIFY valuesChanged)
+    Q_PROPERTY(int extraExtraLarge READ extraExtraLarge NOTIFY valuesChanged)
 
 public:
     explicit AppearancePadding(QObject* parent = nullptr)
@@ -93,11 +111,14 @@ public:
 
     void bindTokens(PaddingTokens* tokens);
 
+    [[nodiscard]] int extraSmall() const;
     [[nodiscard]] int small() const;
-    [[nodiscard]] int smaller() const;
-    [[nodiscard]] int normal() const;
-    [[nodiscard]] int larger() const;
+    [[nodiscard]] int medium() const;
     [[nodiscard]] int large() const;
+    [[nodiscard]] int largeIncreased() const;
+    [[nodiscard]] int extraLarge() const;
+    [[nodiscard]] int extraLargeIncreased() const;
+    [[nodiscard]] int extraExtraLarge() const;
 
 signals:
     void valuesChanged();
@@ -106,65 +127,115 @@ private:
     PaddingTokens* m_tokens = nullptr;
 };
 
-class FontFamily : public ConfigObject {
+class FontConfig : public ConfigObject {
     Q_OBJECT
     QML_ANONYMOUS
 
-    CONFIG_PROPERTY(QString, sans, QStringLiteral("Rubik"))
-    CONFIG_PROPERTY(QString, mono, QStringLiteral("CaskaydiaCove NF"))
-    CONFIG_PROPERTY(QString, material, QStringLiteral("Material Symbols Rounded"))
-    CONFIG_PROPERTY(QString, clock, QStringLiteral("Rubik"))
+    // Empty family inherits from the parent FontStyleConfig.
+    CONFIG_PROPERTY(QString, family, {})
+    CONFIG_PROPERTY(int, size, 14)
+    CONFIG_PROPERTY(int, weight, QFont::Normal)
+    CONFIG_PROPERTY(bool, italic, false)
+    CONFIG_PROPERTY(QVariantMap, vaxes, {})
 
 public:
-    explicit FontFamily(QObject* parent = nullptr)
+    explicit FontConfig(QObject* parent = nullptr)
         : ConfigObject(parent) {}
+
+    void setDefaults(int size, int weight = QFont::Normal, const QVariantMap& vaxes = {});
 };
 
-class FontSize : public ConfigObject {
+class FontStyleConfig : public ConfigObject {
     Q_OBJECT
     QML_ANONYMOUS
 
-    CONFIG_PROPERTY(qreal, scale, 1)
-
-    Q_PROPERTY(int small READ small NOTIFY valuesChanged)
-    Q_PROPERTY(int smaller READ smaller NOTIFY valuesChanged)
-    Q_PROPERTY(int normal READ normal NOTIFY valuesChanged)
-    Q_PROPERTY(int larger READ larger NOTIFY valuesChanged)
-    Q_PROPERTY(int large READ large NOTIFY valuesChanged)
-    Q_PROPERTY(int extraLarge READ extraLarge NOTIFY valuesChanged)
+    CONFIG_PROPERTY(QString, family, QStringLiteral("GoogleSansFlex"))
+    CONFIG_SUBOBJECT(FontConfig, large)
+    CONFIG_SUBOBJECT(FontConfig, medium)
+    CONFIG_SUBOBJECT(FontConfig, small)
 
 public:
-    explicit FontSize(QObject* parent = nullptr)
-        : ConfigObject(parent) {}
+    explicit FontStyleConfig(QObject* parent = nullptr)
+        : ConfigObject(parent)
+        , m_large(new FontConfig(this))
+        , m_medium(new FontConfig(this))
+        , m_small(new FontConfig(this)) {}
 
-    void bindTokens(FontSizeTokens* tokens);
+    void setDefaultFamily(const QString& family);
+};
 
-    [[nodiscard]] int small() const;
-    [[nodiscard]] int smaller() const;
-    [[nodiscard]] int normal() const;
-    [[nodiscard]] int larger() const;
-    [[nodiscard]] int large() const;
-    [[nodiscard]] int extraLarge() const;
+class IconFontStyleConfig : public FontStyleConfig {
+    Q_OBJECT
+    QML_ANONYMOUS
 
-signals:
-    void valuesChanged();
+    CONFIG_SUBOBJECT(FontConfig, extraLarge)
 
-private:
-    FontSizeTokens* m_tokens = nullptr;
+public:
+    explicit IconFontStyleConfig(QObject* parent = nullptr)
+        : FontStyleConfig(parent)
+        , m_extraLarge(new FontConfig(this)) {}
 };
 
 class AppearanceFont : public ConfigObject {
     Q_OBJECT
     QML_ANONYMOUS
 
-    CONFIG_SUBOBJECT(FontFamily, family)
-    CONFIG_SUBOBJECT(FontSize, size)
+    CONFIG_PROPERTY(qreal, scale, 1)
+    CONFIG_SUBOBJECT(FontStyleConfig, headline)
+    CONFIG_SUBOBJECT(FontStyleConfig, title)
+    CONFIG_SUBOBJECT(FontStyleConfig, body)
+    CONFIG_SUBOBJECT(FontStyleConfig, label)
+    CONFIG_SUBOBJECT(FontStyleConfig, mono)
+    CONFIG_SUBOBJECT(IconFontStyleConfig, icon)
+    CONFIG_PROPERTY(QString, clock, QStringLiteral("Rubik"))
+    // Google Sans Flex doesn't play well with unicode symbols apparently, so use Rubik instead
+    CONFIG_PROPERTY(QString, workspaces, QStringLiteral("Rubik"))
 
 public:
     explicit AppearanceFont(QObject* parent = nullptr)
         : ConfigObject(parent)
-        , m_family(new FontFamily(this))
-        , m_size(new FontSize(this)) {}
+        , m_headline(new FontStyleConfig(this))
+        , m_title(new FontStyleConfig(this))
+        , m_body(new FontStyleConfig(this))
+        , m_label(new FontStyleConfig(this))
+        , m_mono(new FontStyleConfig(this))
+        , m_icon(new IconFontStyleConfig(this)) {
+        const auto sans = QStringLiteral("GoogleSansFlex");
+        const auto mono = QStringLiteral("CaskaydiaCove NF");
+        const auto icons = QStringLiteral("Material Symbols Rounded");
+        const QVariantMap vaxes = { { "ROND", 25 } };
+
+        m_headline->setDefaultFamily(sans);
+        m_headline->large()->setDefaults(32, QFont::Medium, vaxes);
+        m_headline->medium()->setDefaults(28, QFont::Medium, vaxes);
+        m_headline->small()->setDefaults(24, QFont::Medium, vaxes);
+
+        m_title->setDefaultFamily(sans);
+        m_title->large()->setDefaults(22, QFont::Medium, vaxes);
+        m_title->medium()->setDefaults(16, QFont::Medium, vaxes);
+        m_title->small()->setDefaults(14, QFont::Medium, vaxes);
+
+        m_body->setDefaultFamily(sans);
+        m_body->large()->setDefaults(16, QFont::Normal, vaxes);
+        m_body->medium()->setDefaults(14, QFont::Normal, vaxes);
+        m_body->small()->setDefaults(12, QFont::Normal, vaxes);
+
+        m_label->setDefaultFamily(sans);
+        m_label->large()->setDefaults(14, QFont::Medium, vaxes);
+        m_label->medium()->setDefaults(12, QFont::Medium, vaxes);
+        m_label->small()->setDefaults(11, QFont::Normal, vaxes);
+
+        m_mono->setDefaultFamily(mono);
+        m_mono->large()->setDefaults(16, QFont::Normal);
+        m_mono->medium()->setDefaults(14, QFont::Normal);
+        m_mono->small()->setDefaults(12, QFont::Normal);
+
+        m_icon->setDefaultFamily(icons);
+        m_icon->extraLarge()->setDefaults(static_cast<int>(48 / 1.33), QFont::Normal);
+        m_icon->large()->setDefaults(static_cast<int>(32 / 1.33), QFont::Normal);
+        m_icon->medium()->setDefaults(static_cast<int>(24 / 1.33), QFont::Normal);
+        m_icon->small()->setDefaults(static_cast<int>(20 / 1.33), QFont::Normal);
+    }
 };
 
 class AnimDurations : public ConfigObject {

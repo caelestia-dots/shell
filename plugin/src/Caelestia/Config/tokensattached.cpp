@@ -2,6 +2,7 @@
 #include "anim.hpp"
 #include "appearanceconfig.hpp"
 #include "config.hpp"
+#include "font.hpp"
 #include "monitorconfigmanager.hpp"
 #include "tokens.hpp"
 
@@ -23,8 +24,10 @@ const AppearanceConfig* resolveAppearance(GlobalConfig* config, bool complete, c
 
 Tokens::Tokens(QObject* parent)
     : QQuickAttachedPropertyPropagator(parent)
+    , m_font(new FontTokens(this))
     , m_anim(new AnimTokens(this)) {
     bindAnim();
+    bindFont();
     initialize();
 }
 
@@ -52,6 +55,7 @@ void Tokens::inheritScreen(const QString& screen) {
         m_tokens = MonitorConfigManager::instance()->tokensForScreen(m_screen);
     }
 
+    bindFont();
     propagateScreen();
     emit sourceChanged();
 }
@@ -78,6 +82,11 @@ void Tokens::bindAnim() {
     m_anim->bindCurves(TokenConfig::instance()->appearance()->curves());
 }
 
+void Tokens::bindFont() {
+    auto* appearance = m_config ? m_config->appearance() : GlobalConfig::instance()->appearance();
+    m_font->bindFont(appearance->font());
+}
+
 #define TOKENS_ATTACHED_GETTER(Type, name)                                                                             \
     const Type* Tokens::name() const {                                                                                 \
         auto* a = resolveAppearance(m_config, m_complete, #name, parent());                                            \
@@ -87,7 +96,6 @@ void Tokens::bindAnim() {
 TOKENS_ATTACHED_GETTER(AppearanceRounding, rounding)
 TOKENS_ATTACHED_GETTER(AppearanceSpacing, spacing)
 TOKENS_ATTACHED_GETTER(AppearancePadding, padding)
-TOKENS_ATTACHED_GETTER(AppearanceFont, font)
 
 #undef TOKENS_ATTACHED_GETTER
 
@@ -101,6 +109,10 @@ const SizeTokens* Tokens::sizes() const {
     if ((m_complete || !qobject_cast<QQuickItem*>(parent())) && parent())
         qCWarning(lcConfig, "Tokens.sizes accessed without a screen set on %s", parent()->metaObject()->className());
     return TokenConfig::instance()->sizes();
+}
+
+const FontTokens* Tokens::font() const {
+    return m_font;
 }
 
 const AnimTokens* Tokens::anim() const {

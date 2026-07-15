@@ -2,6 +2,7 @@ pragma ComponentBehavior: Bound
 
 import QtQuick
 import QtQuick.Layouts
+import Caelestia
 import Caelestia.Config
 import qs.components
 import qs.components.controls
@@ -12,7 +13,7 @@ Item {
     id: root
 
     required property Brightness.Monitor monitor
-    required property DrawerVisibilities visibilities
+    required property ScreenState screenState
 
     required property real volume
     required property bool muted
@@ -20,14 +21,15 @@ Item {
     required property bool sourceMuted
     required property real brightness
 
-    implicitWidth: layout.implicitWidth + Tokens.padding.large * 2
+    implicitWidth: layout.implicitWidth + Tokens.padding.large + layout.anchors.horizontalCenterOffset * 2
     implicitHeight: layout.implicitHeight + Tokens.padding.large * 2
 
     ColumnLayout {
         id: layout
 
         anchors.centerIn: parent
-        spacing: Tokens.spacing.normal
+        anchors.horizontalCenterOffset: CUtils.clamp(Tokens.padding.large - Config.border.thickness, 0, Tokens.padding.large) / 2
+        spacing: Tokens.spacing.medium
 
         // Speaker volume
         CustomMouseArea {
@@ -53,7 +55,7 @@ Item {
 
         // Microphone volume
         WrappedLoader {
-            shouldBeActive: Config.osd.enableMicrophone && (!Config.osd.enableBrightness || !root.visibilities.session)
+            shouldBeActive: Config.osd.enableMicrophone && (!Config.osd.enableBrightness || !root.screenState.session)
 
             sourceComponent: CustomMouseArea {
                 function onWheel(event: WheelEvent) {
@@ -122,7 +124,9 @@ Item {
         }
 
         Behavior on opacity {
-            Anim {}
+            Anim {
+                type: Anim.DefaultEffects
+            }
         }
     }
 }

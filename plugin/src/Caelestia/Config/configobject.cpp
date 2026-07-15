@@ -22,7 +22,7 @@ void ConfigObject::loadFromJson(const QJsonObject& obj) {
     qCDebug(lcConfig) << "Loading JSON into" << meta->className() << "with" << obj.keys().size()
                       << "keys:" << obj.keys();
 
-    for (int i = meta->propertyOffset(); i < meta->propertyCount(); ++i) {
+    for (int i = basePropertyOffset(); i < meta->propertyCount(); ++i) {
         auto prop = meta->property(i);
         const auto key = QString::fromUtf8(prop.name());
 
@@ -72,7 +72,7 @@ QJsonObject ConfigObject::toJsonObject() const {
     QJsonObject obj;
     const auto* meta = metaObject();
 
-    for (int i = meta->propertyOffset(); i < meta->propertyCount(); ++i) {
+    for (int i = basePropertyOffset(); i < meta->propertyCount(); ++i) {
         const auto prop = meta->property(i);
 
         if (!prop.isReadable())
@@ -127,7 +127,7 @@ void ConfigObject::clearLoadedKeys() {
     m_loadedKeys.clear();
 
     const auto* meta = metaObject();
-    for (int i = meta->propertyOffset(); i < meta->propertyCount(); ++i) {
+    for (int i = basePropertyOffset(); i < meta->propertyCount(); ++i) {
         auto prop = meta->property(i);
         if (isGlobalOnly(QString::fromUtf8(prop.name())))
             continue;
@@ -148,7 +148,7 @@ void ConfigObject::syncFromGlobal(ConfigObject* global) {
     connect(global, &ConfigObject::propertiesChanged, this, &ConfigObject::onGlobalPropertiesChanged);
 
     // Initial sync: copy all non-loaded property values from global
-    for (int i = meta->propertyOffset(); i < meta->propertyCount(); ++i) {
+    for (int i = basePropertyOffset(); i < meta->propertyCount(); ++i) {
         auto prop = meta->property(i);
         const auto key = QString::fromUtf8(prop.name());
 
@@ -185,7 +185,7 @@ void ConfigObject::resyncFromGlobal() {
         return;
 
     const auto* meta = metaObject();
-    for (int i = meta->propertyOffset(); i < meta->propertyCount(); ++i) {
+    for (int i = basePropertyOffset(); i < meta->propertyCount(); ++i) {
         auto prop = meta->property(i);
         const auto key = QString::fromUtf8(prop.name());
 
@@ -210,6 +210,10 @@ void ConfigObject::resyncFromGlobal() {
     }
 }
 
+int ConfigObject::basePropertyOffset() {
+    return ConfigObject::staticMetaObject.propertyCount();
+}
+
 QString ConfigObject::propertyPath(const QString& name) const {
     QStringList parts;
     parts.append(name);
@@ -223,7 +227,7 @@ QString ConfigObject::propertyPath(const QString& name) const {
         // Find which property name this child is on the parent
         const auto* meta = parentConfig->metaObject();
         bool found = false;
-        for (int i = meta->propertyOffset(); i < meta->propertyCount(); ++i) {
+        for (int i = basePropertyOffset(); i < meta->propertyCount(); ++i) {
             auto prop = meta->property(i);
             auto val = prop.read(parentObj);
             if (val.value<QObject*>() == obj) {

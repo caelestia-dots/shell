@@ -16,6 +16,8 @@ Singleton {
     property alias manualActive: props.manualActive
 
     function getIdentity(player: MprisPlayer): string {
+        if (!player)
+            return "";
         const alias = GlobalConfig.services.playerAliases.find(a => a.from === player.identity);
         return alias?.to ?? player.identity;
     }

@@ -65,7 +65,7 @@ Item {
             anchors.horizontalCenter: root.horizontalCenter
 
             y: (start?.y ?? 0) - 1
-            implicitWidth: Tokens.sizes.bar.innerWidth - Tokens.padding.small * 2 + 2
+            implicitWidth: Tokens.sizes.bar.innerWidth - Tokens.padding.small + 2
             implicitHeight: start && end ? end.y + end.size - start.y + 2 : 0
 
             color: Colours.layer(Colours.palette.m3surfaceContainerHigh, 2)

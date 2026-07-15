@@ -8,13 +8,13 @@ StyledRect {
     required property int extra
 
     anchors.right: parent.right
-    anchors.margins: Tokens.padding.normal
+    anchors.margins: Tokens.padding.medium
 
     color: Colours.palette.m3tertiary
-    radius: Tokens.rounding.small
+    radius: Tokens.rounding.medium
 
-    implicitWidth: count.implicitWidth + Tokens.padding.normal * 2
-    implicitHeight: count.implicitHeight + Tokens.padding.small * 2
+    implicitWidth: count.implicitWidth + Tokens.padding.medium * 2
+    implicitHeight: count.implicitHeight + Tokens.padding.small
 
     opacity: extra > 0 ? 1 : 0
     scale: extra > 0 ? 1 : 0.5
@@ -38,6 +38,7 @@ StyledRect {
 
     Behavior on opacity {
         Anim {
+            type: Anim.DefaultEffects
             duration: Tokens.anim.durations.expressiveFastSpatial
         }
     }
