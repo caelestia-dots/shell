@@ -16,7 +16,7 @@ StyledListView {
     required property SearchBar search
     required property ScreenState screenState
 
-    property string displayText: search.text
+    property string displayText
 
     readonly property string requestedState: stateForText(search.text)
     readonly property string displayState: stateForText(displayText)
@@ -39,7 +39,7 @@ StyledListView {
         return "apps";
     }
 
-    function resultsForText(text: string): list<var> {
+    function resultsForText(text: string): var {
         switch (stateForText(text)) {
         case "actions":
             return Actions.query(text);
@@ -55,7 +55,7 @@ StyledListView {
     }
 
     model: ScriptModel {
-        values: [...root.resultsForText(root.displayText)]
+        values: root.resultsForText(root.displayText)
         onValuesChanged: root.currentIndex = 0
     }
 
