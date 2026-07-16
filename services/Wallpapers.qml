@@ -59,7 +59,7 @@ Searcher {
             Colours.showPreview = false;
     }
 
-    list: wallpapers.entries
+    list: [...wallpapers.entries, ...videoWallpapers.entries]
     key: "relativePath"
     useFuzzy: GlobalConfig.launcher.useFuzzy.wallpapers
     extraOpts: useFuzzy ? ({}) : ({
@@ -109,6 +109,14 @@ Searcher {
         recursive: true
         path: Paths.wallsdir
         filter: FileSystemModel.Images
+    }
+
+    FileSystemModel {
+        id: videoWallpapers
+
+        recursive: true
+        path: Paths.videowallsdir
+        nameFilters: Images.validVideoExtensions.map(ext => "*." + ext)
     }
 
     Process {

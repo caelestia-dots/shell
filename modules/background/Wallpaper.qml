@@ -1,6 +1,7 @@
 pragma ComponentBehavior: Bound
 
 import QtQuick
+import QtMultimedia
 import Caelestia.Config
 import qs.components
 import qs.components.filedialog
@@ -12,24 +13,25 @@ Item {
     id: root
 
     property string source: Wallpapers.current
-    property CachingImage current
+    property Item current
     property bool completed
 
     onSourceChanged: {
         if (!source)
             current = null;
+        else if (Images.isVideoFile(source))
+            current = videoComp.createObject(this, { path: source });
         else
-            current = imgComp.createObject(this, {
-                path: source
-            });
+            current = imgComp.createObject(this, { path: source });
     }
 
     Component.onCompleted: {
         if (source)
             Qt.callLater(() => {
-                current = imgComp.createObject(this, {
-                    path: source
-                });
+                if (Images.isVideoFile(source))
+                    current = videoComp.createObject(this, { path: source });
+                else
+                    current = imgComp.createObject(this, { path: source });
                 completed = true;
             });
     }
@@ -125,9 +127,58 @@ Item {
             }
 
             Timer {
-                running: root.current !== img && root.current?.status === Image.Ready
+                running: root.current !== img && (root.current?.status === Image.Ready || root.current?.status === undefined)
                 interval: anim.duration
                 onTriggered: img.destroy()
+            }
+        }
+    }
+
+    Component {
+        id: videoComp
+
+        Item {
+            id: videoContainer
+            anchors.fill: parent
+
+            property string path
+            opacity: 0
+
+            MediaPlayer {
+                id: player
+                source: videoContainer.path ? "file://" + videoContainer.path : ""
+                videoOutput: output
+                loops: MediaPlayer.Infinite
+                autoPlay: true
+
+                onPlaybackStateChanged: {
+                    if (playbackState === MediaPlayer.PlayingState)
+                        videoAnim.start();
+                }
+
+                onErrorOccurred: function(error, errorString) {
+                    console.warn("Video wallpaper error:", errorString)
+                }
+            }
+
+            VideoOutput {
+                id: output
+                anchors.fill: parent
+                fillMode: VideoOutput.PreserveAspectCrop
+            }
+
+            Anim on opacity {
+                id: videoAnim
+                type: Anim.SlowEffects
+                running: false
+                from: 0
+                to: 1
+            }
+
+            Timer {
+                running: root.current !== videoContainer && (root.current?.status === Image.Ready || root.current?.status === undefined)
+                interval: videoAnim.duration
+                onTriggered: videoContainer.destroy()
             }
         }
     }

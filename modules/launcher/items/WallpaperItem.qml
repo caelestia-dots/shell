@@ -6,12 +6,22 @@ import qs.components
 import qs.components.effects
 import qs.components.images
 import qs.services
+import qs.utils
 
 Item {
     id: root
 
     required property FileSystemEntry modelData
     required property ScreenState screenState
+
+    readonly property bool isVideo: Images.isVideoFile(root.modelData.path)
+    readonly property string thumbnailPath: {
+        if (!isVideo) return root.modelData.path;
+        const i = root.modelData.path.lastIndexOf('/');
+        const dir = root.modelData.path.substring(0, i);
+        const name = root.modelData.path.substring(i + 1).replace(/\.[^.]+$/, '');
+        return `${dir}/.thumbs/${name}.jpg`;
+    }
 
     scale: 0.5
     opacity: 0
@@ -59,18 +69,36 @@ Item {
 
         MaterialIcon {
             anchors.centerIn: parent
-            text: "image"
+            text: root.isVideo ? "videocam" : "image"
             color: Colours.tPalette.m3outline
             fontStyle: Tokens.font.icon.builders.extraLarge.scale(2).weight(Font.DemiBold).build()
         }
 
         CachingImage {
             anchors.fill: parent
-            path: root.modelData.path
+            path: root.thumbnailPath
             smooth: !root.PathView.view.moving
             sourceSize: {
                 const dpr = (QsWindow.window as QsWindow)?.devicePixelRatio ?? 1;
                 return Qt.size(image.implicitWidth * dpr, image.implicitHeight * dpr);
+            }
+        }
+
+        StyledRect {
+            anchors.left: parent.left
+            anchors.top: parent.top
+            anchors.margins: 4
+            radius: Tokens.rounding.small
+            color: "#CC000000"
+            implicitWidth: badgeIcon.implicitWidth + 8
+            implicitHeight: badgeIcon.implicitHeight + 4
+
+            MaterialIcon {
+                id: badgeIcon
+                anchors.centerIn: parent
+                text: root.isVideo ? "videocam" : "image"
+                color: "white"
+                fontStyle: Tokens.font.icon.builders.extraSmall.scale(1).build()
             }
         }
     }
