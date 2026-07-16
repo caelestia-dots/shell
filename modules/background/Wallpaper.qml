@@ -171,7 +171,7 @@ Item {
 
             VideoOutput {
                 id: output
-                anchors.fill: parent
+                anchors.fill: videoContainer
                 fillMode: VideoOutput.PreserveAspectCrop // qmllint disable unqualified
             }
 

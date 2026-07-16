@@ -16,7 +16,8 @@ Item {
 
     readonly property bool isVideo: Images.isVideoFile(root.modelData.path)
     readonly property string thumbnailPath: {
-        if (!isVideo) return root.modelData.path;
+        if (!isVideo)
+            return root.modelData.path;
         const i = root.modelData.path.lastIndexOf('/');
         const dir = root.modelData.path.substring(0, i);
         const name = root.modelData.path.substring(i + 1).replace(/\.[^.]+$/, '');
