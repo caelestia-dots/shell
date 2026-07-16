@@ -6,6 +6,7 @@ import Quickshell
 import Caelestia.Config
 import qs.components
 import qs.components.controls
+import qs.components.filedialog
 import qs.services
 import qs.utils
 import qs.modules.nexus.common
@@ -13,6 +14,26 @@ import qs.modules.nexus.pages.battery
 
 PageBase {
     id: root
+
+    readonly property FileDialog lowBatSoundPicker: FileDialog {
+        title: qsTr("Select a sound file")
+        filterLabel: qsTr("Sound files")
+        filters: Sounds.validSoundExtensions
+        onAccepted: path => {
+            GlobalConfig.paths.lowBatNotifSound = path;
+            Quickshell.execDetached(["notify-send", "-a", "caelestia-shell", "-u", "low", "Warning sound replaced", `Low battery warning sound replaced to ${Paths.shortenHome(path)}`])
+        }
+    }
+
+    readonly property FileDialog chargingSoundPicker: FileDialog {
+        title: qsTr("Select a sound file")
+        filterLabel: qsTr("Sound files")
+        filters: Sounds.validSoundExtensions
+        onAccepted: path => {
+            GlobalConfig.paths.highBatNotifSound = path;
+            Quickshell.execDetached(["notify-send", "-a", "caelestia-shell", "-u", "low", "Warning sound replaced", `Charging warning sound replaced to ${Paths.shortenHome(path)}`])
+        }
+    }
 
     function toggleLowWarns() {
         GlobalConfig.general.battery.enableLowBatteryWarning = !GlobalConfig.general.battery.enableLowBatteryWarning;
@@ -203,7 +224,46 @@ PageBase {
             }
         }
 
-        // Framed Icons
+        SectionHeader {
+            text: qsTr("Warning sound options")
+        }
+
+        ToggleRow {
+            first: true
+            text: qsTr("Battery Toast Sound")
+            subtext: qsTr("Enables sound effect for battery toasts (charge and discharge)")
+            checked: GlobalConfig.general.battery.toastSound ?? false
+            onToggled: {
+                GlobalConfig.general.battery.toastSound = !GlobalConfig.general.battery.toastSound;
+            }
+        }
+
+        FileSelectRow {
+            // first: true
+            filePicker: lowBatSoundPicker
+            label: "Low battery sound"
+            icon: "music_note"
+            value: GlobalConfig.paths.lowBatNotifSound
+            onResetRequested: {
+                let defaultConf = GlobalConfig.defaults();
+                let defaultValue = defaultConf.paths.lowBatNotifSound;
+                GlobalConfig.paths.lowBatNotifSound = defaultValue;
+            }
+        }
+
+        FileSelectRow {
+            last: true
+            filePicker: chargingSoundPicker
+            label: "Charging battery sound"
+            icon: "music_note"
+            value: GlobalConfig.paths.highBatNotifSound
+            onResetRequested: {
+                let defaultConf = GlobalConfig.defaults();
+                let defaultValue = defaultConf.paths.highBatNotifSound;
+                GlobalConfig.paths.highBatNotifSound = defaultValue;
+            }
+        }
+
         SectionHeader {
             text: qsTr("Other power options")
         }
