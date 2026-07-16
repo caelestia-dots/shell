@@ -98,7 +98,7 @@ Item {
                 anchors.centerIn: parent
                 text: root.isVideo ? "videocam" : "image"
                 color: "white"
-                fontStyle: Tokens.font.icon.builders.extraSmall.scale(1).build()
+                fontStyle: Tokens.font.icon.builders.small.scale(1).build()
             }
         }
     }

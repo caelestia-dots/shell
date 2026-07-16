@@ -20,18 +20,26 @@ Item {
         if (!source)
             current = null;
         else if (Images.isVideoFile(source))
-            current = videoComp.createObject(this, { path: source });
+            current = videoComp.createObject(this, {
+                path: source
+            });
         else
-            current = imgComp.createObject(this, { path: source });
+            current = imgComp.createObject(this, {
+                path: source
+            });
     }
 
     Component.onCompleted: {
         if (source)
             Qt.callLater(() => {
                 if (Images.isVideoFile(source))
-                    current = videoComp.createObject(this, { path: source });
+                    current = videoComp.createObject(this, {
+                        path: source
+                    });
                 else
-                    current = imgComp.createObject(this, { path: source });
+                    current = imgComp.createObject(this, {
+                        path: source
+                    });
                 completed = true;
             });
     }
@@ -127,7 +135,7 @@ Item {
             }
 
             Timer {
-                running: root.current !== img && (root.current?.status === Image.Ready || root.current?.status === undefined)
+                running: root.current !== img && (root.current?.status === Image.Ready || root.current?.status === undefined) // qmllint disable missing-property
                 interval: anim.duration
                 onTriggered: img.destroy()
             }
@@ -139,7 +147,7 @@ Item {
 
         Item {
             id: videoContainer
-            anchors.fill: parent
+            anchors.fill: root
 
             property string path
             opacity: 0
@@ -148,23 +156,23 @@ Item {
                 id: player
                 source: videoContainer.path ? "file://" + videoContainer.path : ""
                 videoOutput: output
-                loops: MediaPlayer.Infinite
+                loops: MediaPlayer.Infinite // qmllint disable unqualified
                 autoPlay: true
 
-                onPlaybackStateChanged: {
-                    if (playbackState === MediaPlayer.PlayingState)
+                onPlaybackStateChanged: function (playbackState) {
+                    if (playbackState === MediaPlayer.PlayingState) // qmllint disable unqualified
                         videoAnim.start();
                 }
 
-                onErrorOccurred: function(error, errorString) {
-                    console.warn("Video wallpaper error:", errorString)
+                onErrorOccurred: function (error, errorString) {
+                    console.warn("Video wallpaper error:", errorString);
                 }
             }
 
             VideoOutput {
                 id: output
                 anchors.fill: parent
-                fillMode: VideoOutput.PreserveAspectCrop
+                fillMode: VideoOutput.PreserveAspectCrop // qmllint disable unqualified
             }
 
             Anim on opacity {
@@ -176,7 +184,7 @@ Item {
             }
 
             Timer {
-                running: root.current !== videoContainer && (root.current?.status === Image.Ready || root.current?.status === undefined)
+                running: root.current !== videoContainer && (root.current?.status === Image.Ready || root.current?.status === undefined) // qmllint disable missing-property
                 interval: videoAnim.duration
                 onTriggered: videoContainer.destroy()
             }
