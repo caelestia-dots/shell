@@ -147,13 +147,15 @@ Item {
 
         Item {
             id: videoContainer
-            anchors.fill: root
 
             property string path
+
+            anchors.fill: root
             opacity: 0
 
             MediaPlayer {
                 id: player
+
                 source: videoContainer.path ? "file://" + videoContainer.path : ""
                 videoOutput: output
                 loops: MediaPlayer.Infinite // qmllint disable unqualified
@@ -171,12 +173,15 @@ Item {
 
             VideoOutput {
                 id: output
+                // qmllint disable unqualified
+                // qmllint disable unresolved-type
                 anchors.fill: videoContainer
                 fillMode: VideoOutput.PreserveAspectCrop // qmllint disable unqualified
             }
 
             Anim on opacity {
                 id: videoAnim
+
                 type: Anim.SlowEffects
                 running: false
                 from: 0

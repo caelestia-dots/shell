@@ -96,6 +96,7 @@ Item {
 
             MaterialIcon {
                 id: badgeIcon
+
                 anchors.centerIn: parent
                 text: root.isVideo ? "videocam" : "image"
                 color: "white"
