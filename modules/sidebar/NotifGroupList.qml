@@ -38,7 +38,7 @@ LazyListView {
     model: ScriptModel {
         values: {
             if (root.expanded)
-                return root.notifs;
+                return root.notifs as Array;
 
             let count = 0;
             let i = 0;
@@ -49,7 +49,7 @@ LazyListView {
                 i++;
             }
 
-            return root.notifs.slice(0, i);
+            return root.notifs.slice(0, i) as Array;
         }
     }
 
