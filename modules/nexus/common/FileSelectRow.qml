@@ -42,7 +42,7 @@ ConnectedRect {
         anchors.margins: Tokens.padding.medium
         anchors.leftMargin: Tokens.padding.largeIncreased
         anchors.rightMargin: Tokens.padding.largeIncreased
-        spacing: Tokens.spacing.medium
+        spacing: Tokens.spacing.large
 
         Loader {
             visible: root.leadingComponent
@@ -72,19 +72,26 @@ ConnectedRect {
             }
         }
 
-        IconButton {
+        IconTextButton {
             id: resetBtn
 
+            type: IconTextButton.Tonal
+
             icon: "refresh"
+            text: qsTr("Reset")
+            isRound: true
 
             onClicked: {
                 root.resetRequested();
             }
         }
 
-        TextButton {
+        IconTextButton {
             Layout.preferredHeight: resetBtn.implicitHeight
             text: qsTr("Pick file")
+            icon: "folder"
+
+            isRound: true
 
             onClicked: filePicker.open()
         }
