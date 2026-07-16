@@ -10,7 +10,7 @@ import qs.services
 ColumnLayout {
     id: root
 
-    readonly property bool isLive: (Players.active?.length ?? 0) > 2147483647
+    readonly property bool hasUnknownLength: (Players.active?.length ?? 0) > 2147483647
 
     function lengthStr(length: int): string {
         if (length < 0)
@@ -69,7 +69,7 @@ ColumnLayout {
         TextMetrics {
             id: timeMetrics
 
-            text: Players.active ? root.isLive ? root.lengthStr(Players.active.position).replace(/[1-9]/g, "0") : root.lengthStr(Math.max(Players.active.position, Players.active.length)).replace(/[1-9]/g, "0") : "00:00"
+            text: Players.active ? root.lengthStr(Math.max(Players.active.position, root.hasUnknownLength ? 0 : Players.active.length)).replace(/[1-9]/g, "0") : "00:00"
             font: Tokens.font.label.medium
         }
 
@@ -88,7 +88,7 @@ ColumnLayout {
 
             Layout.fillWidth: true
             value: Players.active ? Players.active.position / (Players.active.length || 1) : 0
-            enabled: (Players.active?.canSeek ?? false) && !root.isLive
+            enabled: (Players.active?.canSeek ?? false) && !root.hasUnknownLength
             wavy: true
             animateWave: Players.active?.isPlaying ?? false
             waveFrequency: 5
@@ -110,7 +110,7 @@ ColumnLayout {
 
         StyledText {
             Layout.preferredWidth: timeMetrics.width
-            text: root.isLive ? qsTr("LIVE") : root.lengthStr(Players.active?.length ?? -1)
+            text: root.hasUnknownLength ? "--:--" : root.lengthStr(Players.active?.length ?? -1)
             color: Colours.palette.m3onSurfaceVariant
             font: timeMetrics.font
             horizontalAlignment: Text.AlignHCenter
