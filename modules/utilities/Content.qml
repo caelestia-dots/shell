@@ -9,7 +9,7 @@ Item {
     id: root
 
     required property var props
-    required property DrawerVisibilities visibilities
+    required property ScreenState screenState
     required property BarPopouts.Wrapper popouts
     required property matrix4x4 deformMatrix
 
@@ -26,20 +26,26 @@ Item {
 
         IdleInhibit {
             id: idleInhibit
+
+            objectName: "utilitiesKeepAwake"
         }
 
         Record {
             id: record
 
+            objectName: "utilitiesScreenRecorder"
+
             props: root.props
-            visibilities: root.visibilities
+            screenState: root.screenState
             z: 1
         }
 
         Toggles {
             id: toggles
 
-            visibilities: root.visibilities
+            objectName: "utilitiesQuickToggles"
+
+            screenState: root.screenState
             popouts: root.popouts
         }
     }

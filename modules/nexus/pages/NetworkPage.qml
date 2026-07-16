@@ -107,6 +107,10 @@ PageBase {
                         NetworkConnection.handleConnect(modelData);
                         currentSelected = true;
                         root.networkSelected(modelData);
+                    } else {
+                        // Active network: open its detail/settings sub-page.
+                        root.nState.selectedNetworkSsid = modelData.ssid;
+                        root.nState.openSubPage(3);
                     }
                 }
 
@@ -218,7 +222,9 @@ PageBase {
             implicitHeight: addNetworkLayout.implicitHeight + addNetworkLayout.anchors.margins * 2
             last: true
 
-            StateLayer {}
+            StateLayer {
+                onClicked: root.nState.openSubPage(2) // Add network sub-page
+            }
 
             RowLayout {
                 id: addNetworkLayout

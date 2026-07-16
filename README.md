@@ -676,6 +676,9 @@ For example, to disable the bar on DP-1:
         "recolourLogo": true,
         "enableFprint": true,
         "maxFprintTries": 3,
+        "enableHowdy": true,
+        "maxHowdyTries": 3,
+        "triggerHowdyOnWake": true,
         "hideNotifs": false
     },
     "nexus": {
