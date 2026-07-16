@@ -173,6 +173,7 @@ Item {
 
             VideoOutput {
                 id: output
+
                 // qmllint disable unqualified
                 // qmllint disable unresolved-type
                 anchors.fill: videoContainer
