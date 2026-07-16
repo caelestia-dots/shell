@@ -3,6 +3,7 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import QtQuick.Layouts
 import Quickshell
+import Quickshell.Io
 import Quickshell.Widgets
 import Caelestia.Config
 import Caelestia.Models
@@ -17,6 +18,20 @@ ColumnLayout {
 
     required property var props
     required property ScreenState screenState
+    property var recordingTimes: ({})
+
+    function reloadRecordingTimes(): void {
+        const paths = [];
+        for (let i = 0; i < recordingsModel.entries.length; i++)
+            paths.push(recordingsModel.entries[i].path);
+        if (paths.length === 0) {
+            root.recordingTimes = ({});
+            return;
+        }
+        statProc.running = false;
+        statProc.command = ["stat", "-c", "%W %Y %n", ...paths];
+        statProc.running = true;
+    }
 
     spacing: 0
 
@@ -51,13 +66,45 @@ ColumnLayout {
         }
     }
 
+    FileSystemModel {
+        id: recordingsModel
+
+        path: Paths.recsdir
+        nameFilters: ["recording_*.mp4"]
+        onEntriesChanged: root.reloadRecordingTimes()
+    }
+
+    Process {
+        id: statProc
+
+        stdout: StdioCollector {
+            onStreamFinished: {
+                const times = {};
+                for (const line of text.split("\n")) {
+                    const first = line.indexOf(" ");
+                    const second = line.indexOf(" ", first + 1);
+                    if (first < 0 || second < 0)
+                        continue;
+                    const birth = parseInt(line.slice(0, first), 10) || 0;
+                    const mtime = parseInt(line.slice(first + 1, second), 10) || 0;
+                    times[line.slice(second + 1)] = birth > 0 ? birth : mtime;
+                }
+                root.recordingTimes = times;
+            }
+        }
+    }
+
     StyledListView {
         id: list
 
-        model: FileSystemModel {
-            path: Paths.recsdir
-            nameFilters: ["recording_*.mp4"]
-            sortReverse: true
+        model: ScriptModel {
+            values: {
+                const times = root.recordingTimes;
+                const entries = [];
+                for (let i = 0; i < recordingsModel.entries.length; i++)
+                    entries.push(recordingsModel.entries[i]);
+                return entries.sort((a, b) => (times[b.path] ?? 0) - (times[a.path] ?? 0));
+            }
         }
 
         Layout.fillWidth: true
@@ -73,26 +120,18 @@ ColumnLayout {
             id: recording
 
             required property FileSystemEntry modelData
-            property string baseName
 
             anchors.left: list.contentItem.left
             anchors.right: list.contentItem.right
             anchors.rightMargin: Tokens.spacing.small
             spacing: Tokens.spacing.extraSmall
 
-            Component.onCompleted: baseName = modelData.baseName
-
             StyledText {
                 Layout.fillWidth: true
                 Layout.rightMargin: Tokens.spacing.extraSmall
                 text: {
-                    const time = recording.baseName;
-                    const matches = time.match(/^recording_(\d{4})(\d{2})(\d{2})_(\d{2})-(\d{2})-(\d{2})/);
-                    if (!matches)
-                        return time;
-                    const date = new Date(...matches.slice(1));
-                    date.setMonth(date.getMonth() - 1); // Woe (months start from 0)
-                    return qsTr("Recording at %1").arg(Qt.formatDateTime(date, Qt.locale()));
+                    const time = root.recordingTimes[recording.modelData.path];
+                    return time ? qsTr("Recording at %1").arg(Qt.formatDateTime(new Date(time * 1000), Qt.locale())) : recording.modelData.baseName;
                 }
                 color: Colours.palette.m3onSurfaceVariant
                 elide: Text.ElideRight
