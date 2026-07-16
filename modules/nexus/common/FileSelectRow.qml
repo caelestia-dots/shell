@@ -20,10 +20,10 @@ ConnectedRect {
     property color iconColour: Colours.palette.m3onSurfaceVariant
     property Component leadingComponent: icon ? iconComp : null
 
+    signal resetRequested
+
     Layout.fillWidth: true
     implicitHeight: rowLayout.implicitHeight + rowLayout.anchors.margins * 2
-
-    signal resetRequested()
 
     Component {
         id: iconComp
@@ -74,6 +74,7 @@ ConnectedRect {
 
         IconButton {
             id: resetBtn
+
             icon: "refresh"
 
             onClicked: {

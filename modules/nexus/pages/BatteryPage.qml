@@ -21,7 +21,7 @@ PageBase {
         filters: Sounds.validSoundExtensions
         onAccepted: path => {
             GlobalConfig.paths.lowBatNotifSound = path;
-            Quickshell.execDetached(["notify-send", "-a", "caelestia-shell", "-u", "low", "Warning sound replaced", `Low battery warning sound replaced to ${Paths.shortenHome(path)}`])
+            Quickshell.execDetached(["notify-send", "-a", "caelestia-shell", "-u", "low", "Warning sound replaced", `Low battery warning sound replaced to ${Paths.shortenHome(path)}`]);
         }
     }
 
@@ -31,7 +31,7 @@ PageBase {
         filters: Sounds.validSoundExtensions
         onAccepted: path => {
             GlobalConfig.paths.highBatNotifSound = path;
-            Quickshell.execDetached(["notify-send", "-a", "caelestia-shell", "-u", "low", "Warning sound replaced", `Charging warning sound replaced to ${Paths.shortenHome(path)}`])
+            Quickshell.execDetached(["notify-send", "-a", "caelestia-shell", "-u", "low", "Warning sound replaced", `Charging warning sound replaced to ${Paths.shortenHome(path)}`]);
         }
     }
 
