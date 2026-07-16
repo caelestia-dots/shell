@@ -3483,4 +3483,110 @@ Keyboard layout: %1</source>
         <translation>啟用休眠以使用此功能。</translation>
     </message>
 </context>
+<context>
+    <name>AddNetworkPage</name>
+    <message>
+        <location filename="../modules/nexus/pages/network/AddNetworkPage.qml" line="78"/>
+        <source>Enter the details below to manually connect to a network.</source>
+        <translation>請在下方輸入詳細資訊以手動連線到網路。</translation>
+    </message>
+    <message>
+        <location filename="../modules/nexus/pages/network/AddNetworkPage.qml" line="89"/>
+        <source>Network name (SSID)</source>
+        <translation>網路名稱 (SSID)</translation>
+    </message>
+    <message>
+        <location filename="../modules/nexus/pages/network/AddNetworkPage.qml" line="90"/>
+        <source>e.g. MyHiddenNetwork</source>
+        <translation>例如：MyHiddenNetwork</translation>
+    </message>
+    <message>
+        <location filename="../modules/nexus/pages/network/AddNetworkPage.qml" line="92"/>
+        <source>Network name is required</source>
+        <translation>必須填寫網路名稱</translation>
+    </message>
+    <message>
+        <location filename="../modules/nexus/pages/network/AddNetworkPage.qml" line="102"/>
+        <source>Hidden network</source>
+        <translation>隱藏網路</translation>
+    </message>
+    <message>
+        <location filename="../modules/nexus/pages/network/AddNetworkPage.qml" line="103"/>
+        <source>Actively probe for a network that doesn't broadcast its name</source>
+        <translation>主動探測不廣播其名稱的網路</translation>
+    </message>
+    <message>
+        <location filename="../modules/nexus/pages/network/AddNetworkPage.qml" line="112"/>
+        <source>Security</source>
+        <translation>安全性</translation>
+    </message>
+    <message>
+        <location filename="../modules/nexus/pages/network/AddNetworkPage.qml" line="113"/>
+        <source>WPA/WPA2/WPA3 Personal</source>
+        <translation>WPA/WPA2/WPA3 個人</translation>
+    </message>
+    <message>
+        <location filename="../modules/nexus/pages/network/AddNetworkPage.qml" line="125"/>
+        <source>None (open)</source>
+        <translation>無（開放）</translation>
+    </message>
+    <message>
+        <location filename="../modules/nexus/pages/network/AddNetworkPage.qml" line="176"/>
+        <source>WPA passwords are at least 8 characters</source>
+        <translation>WPA 密碼長度至少為 8 個字元</translation>
+    </message>
+    <message>
+        <location filename="../modules/nexus/pages/network/AddNetworkPage.qml" line="177"/>
+        <source>Password must be at least 8 characters</source>
+        <translation>密碼長度至少為 8 個字元</translation>
+    </message>
+    <message>
+        <location filename="../modules/nexus/pages/network/AddNetworkPage.qml" line="177"/>
+        <source>Connection failed — check the password</source>
+        <translation>連線失敗 — 檢查密碼</translation>
+    </message>
+</context>
+<context>
+    <name>NetworkDetailPage</name>
+    <message>
+        <location filename="../modules/nexus/pages/network/NetworkDetailPage.qml" line="195"/>
+        <source>Signal</source>
+        <translation>訊號</translation>
+    </message>
+    <message>
+        <location filename="../modules/nexus/pages/network/NetworkDetailPage.qml" line="196"/>
+        <source>%1%</source>
+        <translation>%1%</translation>
+    </message>
+    <message>
+        <location filename="../modules/nexus/pages/network/NetworkDetailPage.qml" line="201"/>
+        <source>Security</source>
+        <translation>安全性</translation>
+    </message>
+    <message>
+        <location filename="../modules/nexus/pages/network/NetworkDetailPage.qml" line="202"/>
+        <source>Open</source>
+        <translation>開放</translation>
+    </message>
+    <message>
+        <location filename="../modules/nexus/pages/network/NetworkDetailPage.qml" line="207"/>
+        <source>Frequency</source>
+        <translation>頻率</translation>
+    </message>
+    <message>
+        <location filename="../modules/nexus/pages/network/NetworkDetailPage.qml" line="208"/>
+        <source>%1 MHz</source>
+        <translation>%1 MHz</translation>
+    </message>
+    <message>
+        <location filename="../modules/nexus/pages/network/NetworkDetailPage.qml" line="239"/>
+        <source>Connect automatically</source>
+        <translation>自動連線</translation>
+    </message>
+    <message>
+        <location filename="../modules/nexus/pages/network/NetworkDetailPage.qml" line="240"/>
+        <source>Join this network when it's in range</source>
+        <translation>在此網路範圍內時加入</translation>
+    </message>
+</context>
 </TS>

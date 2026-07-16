@@ -9,6 +9,10 @@ Singleton {
     id: root
 
     readonly property string home: Quickshell.env("HOME")
+    readonly property string downloads: Quickshell.env("XDG_DOWNLOAD_DIR") || `${home}/Downloads`
+    readonly property string desktop: Quickshell.env("XDG_DESKTOP_DIR") || `${home}/Desktop`
+    readonly property string documents: Quickshell.env("XDG_DOCUMENTS_DIR") || `${home}/Documents`
+    readonly property string music: Quickshell.env("XDG_MUSIC_DIR") || `${home}/Music`
     readonly property string pictures: Quickshell.env("XDG_PICTURES_DIR") || `${home}/Pictures`
     readonly property string videos: Quickshell.env("XDG_VIDEOS_DIR") || `${home}/Videos`
 

@@ -6,6 +6,7 @@ import Caelestia.Config
 import qs.components
 import qs.components.filedialog
 import qs.services
+import qs.utils
 
 StyledRect {
     id: root
@@ -50,13 +51,22 @@ StyledRect {
                 radius: Tokens.rounding.full
                 color: Qt.alpha(Colours.palette.m3secondaryContainer, selected ? 1 : 0)
 
+                readonly property var xdgPaths: ({
+                    "Downloads": Paths.downloads,
+                    "Desktop": Paths.desktop,
+                    "Documents": Paths.documents,
+                    "Music": Paths.music,
+                    "Pictures": Paths.pictures,
+                    "Videos": Paths.videos,
+                })
+
                 StateLayer {
                     color: place.selected ? Colours.palette.m3onSecondaryContainer : Colours.palette.m3onSurface
                     onClicked: {
                         if (place.modelData === "Home")
                             root.dialog.cwd = ["Home"];
                         else
-                            root.dialog.cwd = ["Home", place.modelData];
+                            root.dialog.cwd = [place.xdgPaths[place.modelData]];
                     }
                 }
 

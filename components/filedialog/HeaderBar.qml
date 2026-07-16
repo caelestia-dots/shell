@@ -99,6 +99,13 @@ StyledRect {
                                 }
                             }
 
+                            readonly property string label: {
+                                if (folder.index === 0 && folder.modelData === "Home")
+                                    return "Home";
+                                const parts = String(folder.modelData).split("/");
+                                return parts[parts.length - 1];
+                            }
+
                             Loader {
                                 id: homeIcon
 
@@ -123,7 +130,7 @@ StyledRect {
                                 anchors.verticalCenter: parent.verticalCenter
                                 anchors.leftMargin: homeIcon.active ? Tokens.padding.extraSmall : 0
 
-                                text: folder.modelData
+                                text: label
                                 color: folder.index < root.dialog.cwd.length - 1 ? Colours.palette.m3onSurfaceVariant : Colours.palette.m3onSurface
                                 font: Tokens.font.body.builders.small.weight(Font.Bold).build()
                             }
