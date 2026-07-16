@@ -20,6 +20,11 @@ ColumnLayout {
 
     spacing: 0
 
+    function recordingDate(entry: var): var {
+        const m = entry.baseName.match(/^recording_(\d{4})(\d{2})(\d{2})_(\d{2})-(\d{2})-(\d{2})/);
+        return m ? new Date(+m[1], +m[2] - 1, +m[3], +m[4], +m[5], +m[6]) : null;
+    }
+
     WrapperMouseArea {
         Layout.fillWidth: true
 
@@ -51,13 +56,23 @@ ColumnLayout {
         }
     }
 
+    FileSystemModel {
+        id: recordingsModel
+
+        path: Paths.recsdir
+        nameFilters: ["recording_*.mp4"]
+    }
+
     StyledListView {
         id: list
 
-        model: FileSystemModel {
-            path: Paths.recsdir
-            nameFilters: ["recording_*.mp4"]
-            sortReverse: true
+        model: ScriptModel {
+            values: {
+                const entries = [];
+                for (let i = 0; i < recordingsModel.entries.length; i++)
+                    entries.push(recordingsModel.entries[i]);
+                return entries.sort((a, b) => (root.recordingDate(b)?.getTime() ?? 0) - (root.recordingDate(a)?.getTime() ?? 0));
+            }
         }
 
         Layout.fillWidth: true
@@ -73,26 +88,18 @@ ColumnLayout {
             id: recording
 
             required property FileSystemEntry modelData
-            property string baseName
 
             anchors.left: list.contentItem.left
             anchors.right: list.contentItem.right
             anchors.rightMargin: Tokens.spacing.small
             spacing: Tokens.spacing.extraSmall
 
-            Component.onCompleted: baseName = modelData.baseName
-
             StyledText {
                 Layout.fillWidth: true
                 Layout.rightMargin: Tokens.spacing.extraSmall
                 text: {
-                    const time = recording.baseName;
-                    const matches = time.match(/^recording_(\d{4})(\d{2})(\d{2})_(\d{2})-(\d{2})-(\d{2})/);
-                    if (!matches)
-                        return time;
-                    const date = new Date(...matches.slice(1));
-                    date.setMonth(date.getMonth() - 1); // Woe (months start from 0)
-                    return qsTr("Recording at %1").arg(Qt.formatDateTime(date, Qt.locale()));
+                    const date = root.recordingDate(recording.modelData);
+                    return date ? qsTr("Recording at %1").arg(Qt.formatDateTime(date, Qt.locale())) : recording.modelData.baseName;
                 }
                 color: Colours.palette.m3onSurfaceVariant
                 elide: Text.ElideRight
