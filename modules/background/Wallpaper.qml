@@ -2,6 +2,7 @@ pragma ComponentBehavior: Bound
 
 import QtQuick
 import QtMultimedia
+import Caelestia
 import Caelestia.Config
 import qs.components
 import qs.components.filedialog
@@ -15,31 +16,48 @@ Item {
     property string source: Wallpapers.current
     property Item current
     property bool completed
+    readonly property bool isPaused: (Hypr.focusedWorkspace?.toplevels.values.some(t => t.lastIpcObject.fullscreen > 1) ?? false) || GameMode.enabled // qmllint disable unqualified
+
+    function thumbPathFor(videoSource) {
+        var dir = videoSource.substring(0, videoSource.lastIndexOf("/"));
+        var name = videoSource.substring(videoSource.lastIndexOf("/") + 1);
+        var stem = name.substring(0, name.lastIndexOf("."));
+        return dir + "/.thumbs/" + stem + ".jpg";
+    }
 
     onSourceChanged: {
         if (!source)
             current = null;
-        else if (Images.isVideoFile(source))
-            current = videoComp.createObject(this, {
-                path: source
-            });
+        else if (Images.isVideoFile(source)) {
+            if (isPaused)
+                current = imgComp.createObject(this, { path: thumbPathFor(source) });
+            else
+                current = videoComp.createObject(this, { path: source });
+        } else
+            current = imgComp.createObject(this, { path: source });
+    }
+
+    onIsPausedChanged: {
+        if (!source || !Images.isVideoFile(source))
+            return;
+        if (current)
+            current.destroy();
+        if (isPaused)
+            current = imgComp.createObject(root, { path: thumbPathFor(source) });
         else
-            current = imgComp.createObject(this, {
-                path: source
-            });
+            current = videoComp.createObject(root, { path: source });
     }
 
     Component.onCompleted: {
         if (source)
             Qt.callLater(() => {
-                if (Images.isVideoFile(source))
-                    current = videoComp.createObject(this, {
-                        path: source
-                    });
-                else
-                    current = imgComp.createObject(this, {
-                        path: source
-                    });
+                if (Images.isVideoFile(source)) {
+                    if (isPaused)
+                        current = imgComp.createObject(this, { path: thumbPathFor(source) });
+                    else
+                        current = videoComp.createObject(this, { path: source });
+                } else
+                    current = imgComp.createObject(this, { path: source });
                 completed = true;
             });
     }
@@ -190,7 +208,7 @@ Item {
             }
 
             Timer {
-                running: root.current !== videoContainer && (root.current?.status === Image.Ready || root.current?.status === undefined) // qmllint disable missing-property
+                running: root.current !== videoContainer // qmllint disable missing-property
                 interval: videoAnim.duration
                 onTriggered: videoContainer.destroy()
             }
