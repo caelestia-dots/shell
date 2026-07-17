@@ -221,7 +221,7 @@ Item {
             }
 
             Timer {
-                running: root.current !== videoContainer // qmllint disable missing-property
+                running: root.current !== videoContainer
                 interval: videoAnim.duration
                 onTriggered: videoContainer.destroy()
             }
