@@ -191,7 +191,7 @@ Item {
 
                 source: videoContainer.path ? "file://" + videoContainer.path : ""
                 videoOutput: output
-                loops: MediaPlayer.Infinite // qmllint disable unqualified
+                loops: MediaPlayer.Infinite
                 autoPlay: true
 
                 onPlaybackStateChanged: function (playbackState) {
