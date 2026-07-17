@@ -208,7 +208,7 @@ Item {
                 id: output
 
                 anchors.fill: videoContainer
-                fillMode: VideoOutput.PreserveAspectCrop // qmllint disable unqualified
+                fillMode: VideoOutput.PreserveAspectCrop
             }
 
             Anim on opacity {
