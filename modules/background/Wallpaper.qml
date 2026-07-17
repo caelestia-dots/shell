@@ -15,7 +15,7 @@ Item {
     property string source: Wallpapers.current
     property Item current
     property bool completed
-    readonly property bool isPaused: (Hypr.focusedWorkspace?.toplevels.values.some(t => t.lastIpcObject.fullscreen > 1) ?? false) || GameMode.enabled // qmllint disable unqualified
+    readonly property bool isPaused: (Hypr.focusedWorkspace?.toplevels.values.some(t => t.lastIpcObject.fullscreen > 1) ?? false) || GameMode.enabled
 
     function thumbPathFor(videoSource) {
         var dir = videoSource.substring(0, videoSource.lastIndexOf("/"));
