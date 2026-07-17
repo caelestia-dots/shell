@@ -195,7 +195,7 @@ Item {
                 autoPlay: true
 
                 onPlaybackStateChanged: function (playbackState) {
-                    if (playbackState === MediaPlayer.PlayingState) // qmllint disable unqualified
+                    if (playbackState === MediaPlayer.PlayingState)
                         videoAnim.start();
                 }
 
