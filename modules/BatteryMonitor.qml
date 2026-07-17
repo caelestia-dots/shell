@@ -15,12 +15,22 @@ Scope {
     readonly property var chargeWarnLevels: [...GlobalConfig.general.battery.chargingWarnLevels].sort((a, b) => a.level - b.level)
     readonly property bool chargeWarningEnabled: GlobalConfig.general.battery.enableHighBatteryWarning
 
+    readonly property bool playSound: GlobalConfig.general.battery.toastSound
+
     MediaPlayer {
         id: notifyLowBattery
 
         source: Paths.absolutePath(GlobalConfig.paths.lowBatNotifSound)
         audioOutput: AudioOutput {}
     }
+
+    MediaPlayer {
+        id: notifyHighBattery
+
+        source: Paths.absolutePath(GlobalConfig.paths.highBatNotifSound)
+        audioOutput: AudioOutput {}
+    }
+    
     property real lastPercentage: 100
 
     function handleBatteryWarnings(): void {
@@ -60,6 +70,9 @@ Scope {
             for (const level of root.lowWarnLevels) {
                 if (p <= level.level && level.level < root.lastPercentage) {
                     Toaster.toast(level.title ?? qsTr("Battery warning"), level.message ?? qsTr("Battery level is low"), level.icon ?? "battery_android_alert", level.critical ? Toast.Error : Toast.Warning);
+                    if (playSound) {
+                        notifyLowBattery.play();
+                    }
                     break;
                 }
             }
@@ -69,6 +82,9 @@ Scope {
             for (const level of root.chargeWarnLevels) {
                 if (p >= level.level && level > root.lastPercentage) {
                     Toaster.toast(level.title ?? qsTr("Battery warning"), level.message ?? qsTr("Battery level is low"), level.icon ?? "battery_android_alert", level.critical ? Toast.Error : Toast.Warning);
+                    if (playSound) {
+                        notifyHighBattery.play();
+                    }
                     break;
                 }
             }
