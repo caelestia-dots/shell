@@ -2,7 +2,6 @@ pragma ComponentBehavior: Bound
 
 import QtQuick
 import QtMultimedia
-import Caelestia
 import Caelestia.Config
 import qs.components
 import qs.components.filedialog
@@ -30,11 +29,17 @@ Item {
             current = null;
         else if (Images.isVideoFile(source)) {
             if (isPaused)
-                current = imgComp.createObject(this, { path: thumbPathFor(source) });
+                current = imgComp.createObject(this, {
+                    path: thumbPathFor(source)
+                });
             else
-                current = videoComp.createObject(this, { path: source });
+                current = videoComp.createObject(this, {
+                    path: source
+                });
         } else
-            current = imgComp.createObject(this, { path: source });
+            current = imgComp.createObject(this, {
+                path: source
+            });
     }
 
     onIsPausedChanged: {
@@ -43,9 +48,13 @@ Item {
         if (current)
             current.destroy();
         if (isPaused)
-            current = imgComp.createObject(root, { path: thumbPathFor(source) });
+            current = imgComp.createObject(root, {
+                path: thumbPathFor(source)
+            });
         else
-            current = videoComp.createObject(root, { path: source });
+            current = videoComp.createObject(root, {
+                path: source
+            });
     }
 
     Component.onCompleted: {
@@ -53,11 +62,17 @@ Item {
             Qt.callLater(() => {
                 if (Images.isVideoFile(source)) {
                     if (isPaused)
-                        current = imgComp.createObject(this, { path: thumbPathFor(source) });
+                        current = imgComp.createObject(this, {
+                            path: thumbPathFor(source)
+                        });
                     else
-                        current = videoComp.createObject(this, { path: source });
+                        current = videoComp.createObject(this, {
+                            path: source
+                        });
                 } else
-                    current = imgComp.createObject(this, { path: source });
+                    current = imgComp.createObject(this, {
+                        path: source
+                    });
                 completed = true;
             });
     }
