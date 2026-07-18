@@ -136,6 +136,11 @@ QtObject {
                 Component {
                     BarClock {}
                 }
+
+                // Utilities panel sub-page
+                Component {
+                    UtilitiesPanel {}
+                }
             }
         },
         Component {
