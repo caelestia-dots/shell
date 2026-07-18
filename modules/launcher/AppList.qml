@@ -35,7 +35,10 @@ StyledListView {
 
             return "actions";
         }
-        if (/^[\d.($√\-]/.test(text) && /[+\-*/^%√$]/.test(text) || /^√[\d.(]/.test(text) || /^√\(/.test(text) || /^\d+\s+\w+\s+to\s/.test(text) && text.length < 80) {
+        const isConversion = /^\d+(?:\.\d+)?\s+\w+\s+to\s+/i.test(text);
+        const isExpression = /^(?:√(?=[\d.(])|-(?=[\d.(√])|(?=[\d.($])(?=.*[+\-*/^%√$]))/.test(text);
+
+        if ((isConversion || isExpression) && text.length < 80) {
             return "calc";
         }
         return "apps";
