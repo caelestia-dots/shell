@@ -35,7 +35,9 @@ StyledListView {
 
             return "actions";
         }
-
+        if (/^[\d.($√\-]/.test(text) && /[+\-*/^%√$]/.test(text) || /^√[\d.(]/.test(text) || /^√\(/.test(text) || /^\d+\s+\w+\s+to\s/.test(text) && text.length < 80) {
+            return "calc";
+        }
         return "apps";
     }
 
