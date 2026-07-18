@@ -21,6 +21,7 @@ Variants {
 
         required property ShellScreen modelData
         readonly property var monitor: Hypr.monitorFor(modelData)
+        readonly property var monitorData: Hyprctl.monitors.find(m => m.id == monitor?.id)
 
         screen: modelData
         name: "monitor-identifier"
@@ -70,7 +71,7 @@ Variants {
 
                 StyledText {
                     Layout.alignment: Qt.AlignHCenter
-                    text: win.monitor?.name ?? ""
+                    text: win.monitorData?.name ?? Hyprctl.monitors[win.monitor?.id]?.name ?? ""
                     font: Tokens.font.body.medium
                     color: Colours.palette.m3onSurfaceVariant
                 }

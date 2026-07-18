@@ -31,12 +31,212 @@ PageBase {
             property real offsetX: 0
             property real offsetY: 0
             property real padding: 24
-            // Track monitor to be refreshed after layout updates
-            property string pendingRefreshName: ""
+            property real softSnapDistance: 6
+            property var previewPositions: ({})
+            property bool dragging: false
+
+            function layoutMonitors(): var {
+                return Hyprctl.monitors ?? [];
+            }
+
+            function monitorsTouch(first: var, firstPosition: var, second: var, secondPosition: var): bool {
+                const firstW = first.width / (first.scale || 1);
+                const firstH = first.height / (first.scale || 1);
+                const secondW = second.width / (second.scale || 1);
+                const secondH = second.height / (second.scale || 1);
+                const horizontalTouch = Math.abs(firstPosition.x + firstW - secondPosition.x) <= 1 || Math.abs(secondPosition.x + secondW - firstPosition.x) <= 1;
+                const verticalTouch = Math.abs(firstPosition.y + firstH - secondPosition.y) <= 1 || Math.abs(secondPosition.y + secondH - firstPosition.y) <= 1;
+                const verticalOverlap = firstPosition.y < secondPosition.y + secondH && firstPosition.y + firstH > secondPosition.y;
+                const horizontalOverlap = firstPosition.x < secondPosition.x + secondW && firstPosition.x + firstW > secondPosition.x;
+                return horizontalTouch && verticalOverlap || verticalTouch && horizontalOverlap;
+            }
+
+            function layoutHasOverlaps(monitors: var, positions: var): bool {
+                for (let i = 0; i < monitors.length; i++) {
+                    const first = monitors[i];
+                    const firstPosition = positions[first.id] ?? {
+                        x: first.x,
+                        y: first.y
+                    };
+                    const firstW = first.width / (first.scale || 1);
+                    const firstH = first.height / (first.scale || 1);
+                    for (let j = i + 1; j < monitors.length; j++) {
+                        const second = monitors[j];
+                        const secondPosition = positions[second.id] ?? {
+                            x: second.x,
+                            y: second.y
+                        };
+                        const secondW = second.width / (second.scale || 1);
+                        const secondH = second.height / (second.scale || 1);
+                        if (firstPosition.x < secondPosition.x + secondW && firstPosition.x + firstW > secondPosition.x && firstPosition.y < secondPosition.y + secondH && firstPosition.y + firstH > secondPosition.y)
+                            return true;
+                    }
+                }
+                return false;
+            }
+
+            function layoutIsConnected(monitors: var, positions: var): bool {
+                if (monitors.length < 2)
+                    return true;
+                const connected = new Set([monitors[0].id]);
+                let expanded = true;
+
+                while (expanded) {
+                    expanded = false;
+                    for (let i = 0; i < monitors.length; i++) {
+                        const first = monitors[i];
+                        if (!connected.has(first.id))
+                            continue;
+                        const firstPosition = positions[first.id] ?? {
+                            x: first.x,
+                            y: first.y
+                        };
+                        for (let j = 0; j < monitors.length; j++) {
+                            const second = monitors[j];
+                            if (connected.has(second.id))
+                                continue;
+                            const secondPosition = positions[second.id] ?? {
+                                x: second.x,
+                                y: second.y
+                            };
+                            if (monitorsTouch(first, firstPosition, second, secondPosition)) {
+                                connected.add(second.id);
+                                expanded = true;
+                            }
+                        }
+                    }
+                }
+
+                return connected.size === monitors.length;
+            }
+
+            function normalizeLayout(monitors: var, positions: var, rootId: int): bool {
+                const connected = new Set([rootId]);
+                let expanded = true;
+
+                function updateConnected(): bool {
+                    const previousSize = connected.size;
+                    expanded = true;
+                    while (expanded) {
+                        expanded = false;
+                        for (let i = 0; i < monitors.length; i++) {
+                            const first = monitors[i];
+                            if (!connected.has(first.id))
+                                continue;
+                            const firstPosition = positions[first.id] ?? {
+                                x: first.x,
+                                y: first.y
+                            };
+                            for (let j = 0; j < monitors.length; j++) {
+                                const second = monitors[j];
+                                if (connected.has(second.id))
+                                    continue;
+                                const secondPosition = positions[second.id] ?? {
+                                    x: second.x,
+                                    y: second.y
+                                };
+                                if (monitorsTouch(first, firstPosition, second, secondPosition)) {
+                                    connected.add(second.id);
+                                    expanded = true;
+                                }
+                            }
+                        }
+                    }
+                    return connected.size > previousSize;
+                }
+
+                updateConnected();
+                while (connected.size < monitors.length) {
+                    let bestCandidate = null;
+                    for (let i = 0; i < monitors.length; i++) {
+                        const isolated = monitors[i];
+                        if (connected.has(isolated.id))
+                            continue;
+                        const isolatedPosition = positions[isolated.id] ?? {
+                            x: isolated.x,
+                            y: isolated.y
+                        };
+                        const isolatedW = isolated.width / (isolated.scale || 1);
+                        const isolatedH = isolated.height / (isolated.scale || 1);
+
+                        for (let j = 0; j < monitors.length; j++) {
+                            const target = monitors[j];
+                            if (!connected.has(target.id))
+                                continue;
+                            const targetPosition = positions[target.id] ?? {
+                                x: target.x,
+                                y: target.y
+                            };
+                            const targetW = target.width / (target.scale || 1);
+                            const targetH = target.height / (target.scale || 1);
+                            const minY = targetPosition.y - isolatedH;
+                            const maxY = targetPosition.y + targetH;
+                            const minX = targetPosition.x - isolatedW;
+                            const maxX = targetPosition.x + targetW;
+                            const candidates = [{
+                                x: targetPosition.x - isolatedW,
+                                y: Math.max(minY, Math.min(maxY, isolatedPosition.y))
+                            }, {
+                                x: targetPosition.x + targetW,
+                                y: Math.max(minY, Math.min(maxY, isolatedPosition.y))
+                            }, {
+                                x: Math.max(minX, Math.min(maxX, isolatedPosition.x)),
+                                y: targetPosition.y - isolatedH
+                            }, {
+                                x: Math.max(minX, Math.min(maxX, isolatedPosition.x)),
+                                y: targetPosition.y + targetH
+                            }];
+
+                            for (let k = 0; k < candidates.length; k++) {
+                                const candidate = candidates[k];
+                                let overlaps = false;
+                                for (let l = 0; l < monitors.length; l++) {
+                                    const other = monitors[l];
+                                    if (other.id === isolated.id || other.id === target.id)
+                                        continue;
+                                    const otherPosition = positions[other.id] ?? {
+                                        x: other.x,
+                                        y: other.y
+                                    };
+                                    const otherW = other.width / (other.scale || 1);
+                                    const otherH = other.height / (other.scale || 1);
+                                    if (candidate.x < otherPosition.x + otherW && candidate.x + isolatedW > otherPosition.x && candidate.y < otherPosition.y + otherH && candidate.y + isolatedH > otherPosition.y) {
+                                        overlaps = true;
+                                        break;
+                                    }
+                                }
+                                if (overlaps)
+                                    continue;
+
+                                const distance = Math.hypot(candidate.x - isolatedPosition.x, candidate.y - isolatedPosition.y);
+                                if (bestCandidate === null || distance < bestCandidate.distance) {
+                                    bestCandidate = {
+                                        monitor: isolated,
+                                        x: candidate.x,
+                                        y: candidate.y,
+                                        distance: distance
+                                    };
+                                }
+                            }
+                        }
+                    }
+
+                    if (bestCandidate === null)
+                        return false;
+                    positions[bestCandidate.monitor.id] = {
+                        x: bestCandidate.x,
+                        y: bestCandidate.y
+                    };
+                    if (!updateConnected())
+                        return false;
+                }
+
+                return true;
+            }
 
             function updateBoundaries(): void {
-                const mons = Hyprctl.monitors;
-                if (!mons || mons.length === 0)
+                const mons = layoutMonitors();
+                if (mons.length === 0)
                     return;
 
                 let min_x = Infinity;
@@ -78,6 +278,10 @@ PageBase {
                 offsetY = padding + (availH - spanY * scaleFactor) / 2;
             }
 
+            function positionFor(mon: var): var {
+                return previewPositions[mon.id] ?? mon;
+            }
+
             function getX(mon: var): real {
                 if (!mon)
                     return 0;
@@ -102,26 +306,21 @@ PageBase {
                 return (mon.height / (mon.scale || 1.0)) * scaleFactor;
             }
 
-            // Overlap detection
-            function rectsOverlap(ax: real, ay: real, aw: real, ah: real, bx: real, by: real, bw: real, bh: real): bool {
-                return ax < bx + bw && ax + aw > bx && ay < by + bh && ay + ah > by;
-            }
-
-            // Snap logic based on angular offset from neighbor center
-            function snapMonitor(mon: var, dropCX: real, dropCY: real): void {
-                if (!mon)
-                    return;
-                const mons = Hyprctl.monitors;
-                if (!mons || mons.length === 0)
-                    return;
+            // Snap monitor edges while preserving the dropped offset
+            function snapCandidate(mon: var, dropX: real, dropY: real): var {
+                if (!mon || scaleFactor <= 0)
+                    return null;
+                const mons = layoutMonitors();
+                if (mons.length === 0)
+                    return null;
 
                 const lw = Math.round(mon.width / (mon.scale || 1));
                 const lh = Math.round(mon.height / (mon.scale || 1));
-
-                let bestLX = 0;
-                let bestLY = 0;
-                let bestDist = Infinity;
-                let found = false;
+                const desiredX = Math.round(minX + (dropX - offsetX) / scaleFactor);
+                const desiredY = Math.round(minY + (dropY - offsetY) / scaleFactor);
+                const desiredCenterX = desiredX + lw / 2;
+                const desiredCenterY = desiredY + lh / 2;
+                let bestCandidate = null;
 
                 for (let i = 0; i < mons.length; i++) {
                     const o = mons[i];
@@ -130,68 +329,130 @@ PageBase {
 
                     const ow = Math.round(o.width / (o.scale || 1));
                     const oh = Math.round(o.height / (o.scale || 1));
-
-                    // Center of the other monitor in preview pixel coordinates
-                    const ocx = getX(o) + getWidth(o) * 0.5;
-                    const ocy = getY(o) + getHeight(o) * 0.5;
-
-                    // Vector from other's center to where the user dropped
-                    const dx = dropCX - ocx;
-                    const dy = dropCY - ocy;
-
-                    // Determine target side using aspect ratio comparison
-                    let snapLX, snapLY;
-                    if (Math.abs(dx) * oh > Math.abs(dy) * ow) {
-                        // ── Horizontal snap ────────────────────────────────
-                        if (dx > 0) {
-                            snapLX = o.x + ow;                          // right of other
-                            snapLY = o.y + Math.round((oh - lh) / 2);
-                        } else {
-                            snapLX = o.x - lw;                          // left of other
-                            snapLY = o.y + Math.round((oh - lh) / 2);
-                        }
+                    const dx = desiredCenterX - (o.x + ow / 2);
+                    const dy = desiredCenterY - (o.y + oh / 2);
+                    const verticalOverlap = desiredY < o.y + oh && desiredY + lh > o.y;
+                    const horizontalDistance = Math.abs(dx) / (ow + lw);
+                    const verticalDistance = Math.abs(dy) / (oh + lh);
+                    const horizontal = horizontalDistance >= verticalDistance * (verticalOverlap ? 0.75 : 1);
+                    let candidate;
+                    const softSnapThreshold = softSnapDistance / scaleFactor;
+                    if (horizontal) {
+                        const topOffset = Math.abs(desiredY - o.y);
+                        const bottomOffset = Math.abs(desiredY + lh - (o.y + oh));
+                        candidate = {
+                            x: dx < 0 ? o.x - lw : o.x + ow,
+                            y: topOffset <= softSnapThreshold && topOffset <= bottomOffset ? o.y : bottomOffset <= softSnapThreshold ? o.y + oh - lh : desiredY,
+                            side: dx < 0 ? "left" : "right",
+                            directionX: dx < 0 ? -1 : 1,
+                            directionY: 0
+                        };
                     } else {
-                        // ── Vertical snap ──────────────────────────────────
-                        if (dy > 0) {
-                            snapLX = o.x + Math.round((ow - lw) / 2);  // below other
-                            snapLY = o.y + oh;
-                        } else {
-                            snapLX = o.x + Math.round((ow - lw) / 2);  // above other
-                            snapLY = o.y - lh;
+                        const leftOffset = Math.abs(desiredX - o.x);
+                        const rightOffset = Math.abs(desiredX + lw - (o.x + ow));
+                        candidate = {
+                            x: leftOffset <= softSnapThreshold && leftOffset <= rightOffset ? o.x : rightOffset <= softSnapThreshold ? o.x + ow - lw : desiredX,
+                            y: dy < 0 ? o.y - lh : o.y + oh,
+                            side: dy < 0 ? "top" : "bottom",
+                            directionX: 0,
+                            directionY: dy < 0 ? -1 : 1
+                        };
+                    }
+                    candidate.targetId = o.id;
+                    candidate.distance = Math.hypot(dx / (ow + lw), dy / (oh + lh));
+
+                    if (bestCandidate === null || candidate.distance < bestCandidate.distance)
+                        bestCandidate = candidate;
+                }
+
+                return bestCandidate;
+            }
+
+            function layoutPlan(mon: var, dropX: real, dropY: real): var {
+                const candidate = snapCandidate(mon, dropX, dropY);
+                if (candidate === null)
+                    return null;
+                const mons = layoutMonitors();
+                const positions = {};
+                positions[mon.id] = {
+                    x: candidate.x,
+                    y: candidate.y
+                };
+                const queue = [mon];
+                const queued = new Set([mon.id]);
+                const maxIterations = mons.length * mons.length;
+                let iterations = 0;
+
+                while (queue.length > 0 && iterations < maxIterations) {
+                    const current = queue.shift();
+                    queued.delete(current.id);
+                    const currentPos = positions[current.id];
+                    const currentW = Math.round(current.width / (current.scale || 1));
+                    const currentH = Math.round(current.height / (current.scale || 1));
+                    iterations++;
+
+                    for (let i = 0; i < mons.length; i++) {
+                        const other = mons[i];
+                        if (other.id === current.id || (other.disabled ?? false))
+                            continue;
+                        const otherPos = positions[other.id] ?? {
+                            x: other.x,
+                            y: other.y
+                        };
+                        const otherW = Math.round(other.width / (other.scale || 1));
+                        const otherH = Math.round(other.height / (other.scale || 1));
+                        const overlaps = currentPos.x < otherPos.x + otherW && currentPos.x + currentW > otherPos.x && currentPos.y < otherPos.y + otherH && currentPos.y + currentH > otherPos.y;
+                        if (!overlaps)
+                            continue;
+
+                        const nextPos = {
+                            x: candidate.directionX > 0 ? currentPos.x + currentW : candidate.directionX < 0 ? currentPos.x - otherW : otherPos.x,
+                            y: candidate.directionY > 0 ? currentPos.y + currentH : candidate.directionY < 0 ? currentPos.y - otherH : otherPos.y
+                        };
+                        if (nextPos.x === otherPos.x && nextPos.y === otherPos.y)
+                            continue;
+                        positions[other.id] = nextPos;
+                        if (!queued.has(other.id)) {
+                            queue.push(other);
+                            queued.add(other.id);
                         }
                     }
-
-                    const dist = dx * dx + dy * dy;
-                    if (dist < bestDist) {
-                        bestDist = dist;
-                        bestLX = Math.round(snapLX);
-                        bestLY = Math.round(snapLY);
-                        found = true;
-                    }
                 }
 
-                if (!found)
+                if (queue.length > 0 || layoutHasOverlaps(mons, positions))
+                    return null;
+                if (!normalizeLayout(mons, positions, mon.id) || layoutHasOverlaps(mons, positions) || !layoutIsConnected(mons, positions))
+                    return null;
+                return {
+                    candidate: candidate,
+                    monitors: mons,
+                    positions: positions
+                };
+            }
+
+            function snapMonitor(mon: var, dropX: real, dropY: real): void {
+                const plan = layoutPlan(mon, dropX, dropY);
+                if (plan === null)
                     return;
+                const movedMonitors = plan.monitors.filter(monitor => plan.positions[monitor.id] !== undefined);
+                movedMonitors.sort((first, second) => {
+                    const firstPos = plan.positions[first.id];
+                    const secondPos = plan.positions[second.id];
+                    if (plan.candidate.directionX > 0)
+                        return secondPos.x - firstPos.x;
+                    if (plan.candidate.directionX < 0)
+                        return firstPos.x - secondPos.x;
+                    if (plan.candidate.directionY > 0)
+                        return secondPos.y - firstPos.y;
+                    return firstPos.y - secondPos.y;
+                });
 
-                // Avoid overlapping existing displays
-                for (let i = 0; i < mons.length; i++) {
-                    const o = mons[i];
-                    if (o.id === mon.id)
-                        continue;
-                    const ow = Math.round(o.width / (o.scale || 1));
-                    const oh = Math.round(o.height / (o.scale || 1));
-                    if (rectsOverlap(bestLX, bestLY, lw, lh, o.x, o.y, ow, oh))
-                        return;
+                for (let i = 0; i < movedMonitors.length; i++) {
+                    const moved = movedMonitors[i];
+                    const position = plan.positions[moved.id];
+                    Monitors.setPosition(moved.name, position.x, position.y);
                 }
-
-                // Apply changes to Hyprland
-                const scale = mon.scale || 1;
-                const transform = mon.transform || 0;
-                const rr = (mon.refreshRate || 60).toFixed(3);
-                let s = `${mon.name},${mon.width}x${mon.height}@${rr},${bestLX}x${bestLY},${scale}`;
-                if (transform !== 0)
-                    s += `,transform,${transform}`;
-                Monitors.sendKeyword(s);
+                updateBoundaries();
             }
 
             Layout.fillWidth: true
@@ -199,26 +460,23 @@ PageBase {
             implicitHeight: 280
             color: "transparent"
             radius: Tokens.rounding.large
+            border.color: previewContainer.dragging ? Colours.palette.m3primary : Colours.palette.m3outlineVariant
+            border.width: 1
 
             onWidthChanged: updateBoundaries()
+            onHeightChanged: updateBoundaries()
             Component.onCompleted: updateBoundaries()
 
             Connections {
                 function onMonitorsChanged(): void {
                     previewContainer.updateBoundaries();
-                    // Trigger refresh on the moved monitor
-                    if (previewContainer.pendingRefreshName !== "") {
-                        const name = previewContainer.pendingRefreshName;
-                        previewContainer.pendingRefreshName = "";
-                        Monitors.refresh(name);
-                    }
                 }
 
                 target: Hyprctl
             }
 
             Repeater {
-                model: Hyprctl.monitors
+                model: previewContainer.layoutMonitors()
 
                 delegate: Item {
                     id: monitorBox
@@ -226,8 +484,8 @@ PageBase {
                     required property var modelData
                     required property int index
 
-                    readonly property real targetX: previewContainer.getX(monitorBox.modelData)
-                    readonly property real targetY: previewContainer.getY(monitorBox.modelData)
+                    readonly property real targetX: previewContainer.getX(previewContainer.positionFor(monitorBox.modelData))
+                    readonly property real targetY: previewContainer.getY(previewContainer.positionFor(monitorBox.modelData))
                     readonly property real targetW: previewContainer.getWidth(monitorBox.modelData)
                     readonly property real targetH: previewContainer.getHeight(monitorBox.modelData)
                     readonly property bool isCurrentScreen: monitorBox.modelData != null && root.nState.screen != null && monitorBox.modelData.name === root.nState.screen.name
@@ -239,6 +497,15 @@ PageBase {
                     width: targetW
                     height: targetH
                     visible: monitorBox.modelData != null && targetW > 0 && targetH > 0
+
+                    Behavior on x {
+                        enabled: !dragArea.pressed
+                        Anim {}
+                    }
+                    Behavior on y {
+                        enabled: !dragArea.pressed
+                        Anim {}
+                    }
 
                     onTargetXChanged: {
                         if (!dragArea.pressed)
@@ -308,8 +575,10 @@ PageBase {
                     MouseArea {
                         id: dragArea
 
-                        property real startX
-                        property real startY
+                        property real grabOffsetX
+                        property real grabOffsetY
+                        property real dropX
+                        property real dropY
                         // Only true if the user dragged the monitor
                         property bool dragged: false
 
@@ -318,9 +587,12 @@ PageBase {
                         cursorShape: enabled ? Qt.SizeAllCursor : Qt.ArrowCursor
 
                         onPressed: mouse => {
-                            startX = mouse.x;
-                            startY = mouse.y;
+                            const point = dragArea.mapToItem(previewContainer, mouse.x, mouse.y);
+                            grabOffsetX = point.x - monitorBox.x;
+                            grabOffsetY = point.y - monitorBox.y;
                             dragged = false;
+                            previewContainer.previewPositions = ({});
+                            previewContainer.dragging = true;
                             monitorBox.z = 100;
                             root.nState.selectedMonitor = monitorBox.modelData;
                             root.flickable.interactive = false;
@@ -328,22 +600,27 @@ PageBase {
 
                         onPositionChanged: mouse => {
                             if (pressed) {
-                                const newX = monitorBox.x + mouse.x - startX;
-                                const newY = monitorBox.y + mouse.y - startY;
-                                monitorBox.x = Math.max(0, Math.min(previewContainer.width - monitorBox.width, newX));
-                                monitorBox.y = Math.max(0, Math.min(previewContainer.height - monitorBox.height, newY));
-                                // Register drag only after moving past threshold
-                                if (Math.abs(monitorBox.x - monitorBox.targetX) + Math.abs(monitorBox.y - monitorBox.targetY) > 5)
+                                const point = dragArea.mapToItem(previewContainer, mouse.x, mouse.y);
+                                const newX = point.x - grabOffsetX;
+                                const newY = point.y - grabOffsetY;
+                                const plan = previewContainer.layoutPlan(monitorBox.modelData, newX, newY);
+                                previewContainer.previewPositions = plan?.positions ?? ({});
+                                const position = previewContainer.previewPositions[monitorBox.modelData.id];
+                                monitorBox.x = position ? previewContainer.getX(position) : newX;
+                                monitorBox.y = position ? previewContainer.getY(position) : newY;
+                                dropX = newX;
+                                dropY = newY;
+                                if (Math.abs(newX - monitorBox.targetX) + Math.abs(newY - monitorBox.targetY) > 5)
                                     dragged = true;
                             }
                         }
 
                         onReleased: {
                             monitorBox.z = 1;
-                            if (dragged) {
-                                previewContainer.pendingRefreshName = monitorBox.modelData ? monitorBox.modelData.name : "";
-                                previewContainer.snapMonitor(monitorBox.modelData, monitorBox.x + monitorBox.width * 0.5, monitorBox.y + monitorBox.height * 0.5);
-                            }
+                            if (dragged)
+                                previewContainer.snapMonitor(monitorBox.modelData, dropX, dropY);
+                            previewContainer.previewPositions = ({});
+                            previewContainer.dragging = false;
                             monitorBox.x = monitorBox.targetX;
                             monitorBox.y = monitorBox.targetY;
                             root.flickable.interactive = true;
@@ -352,6 +629,8 @@ PageBase {
 
                         onCanceled: {
                             monitorBox.z = 1;
+                            previewContainer.previewPositions = ({});
+                            previewContainer.dragging = false;
                             monitorBox.x = monitorBox.targetX;
                             monitorBox.y = monitorBox.targetY;
                             root.flickable.interactive = true;

@@ -8,6 +8,7 @@ Singleton {
     id: root
 
     property bool identifying: false
+    property var pendingRefreshCommands: []
 
     function toggleIdentification(): void {
         identifying = !identifying;
@@ -49,29 +50,55 @@ Singleton {
 
     // Build the monitor string Hyprland expects:
     // NAME,WIDTHxHEIGHT@RATE,XxY,SCALE[,transform,N]
-    function monitorStr(mon: var, overrideScale: real, overrideTransform: int, overrideRefreshRate: real, overrideRes: string): string {
+    function monitorStr(mon: var, overrideScale: real, overrideTransform: int, overrideRefreshRate: real, overrideRes: string, x: real, y: real): string {
         const scale = overrideScale >= 0 ? overrideScale : (mon.scale || 1);
         const transform = overrideTransform >= 0 ? overrideTransform : (mon.transform || 0);
         const rr = (overrideRefreshRate > 0 ? overrideRefreshRate : (mon.refreshRate || 60)).toFixed(3);
         const res = (overrideRes !== undefined && overrideRes !== "") ? overrideRes : `${mon.width}x${mon.height}`;
-        let s = `${mon.name},${res}@${rr},${mon.x}x${mon.y},${scale}`;
+        let s = `${mon.name},${res}@${rr},${Math.round(x)}x${Math.round(y)},${scale}`;
         if (transform !== 0)
             s += `,transform,${transform}`;
         return s;
     }
 
-    // Use batchMessage (hyprctl keyword) to configure monitor settings
-    function sendKeyword(monStr: string): void {
-        Hypr.extras.batchMessage([`keyword monitor ${monStr}`]);
-        Hyprctl.update();
+    function luaString(value: string): string {
+        return `"${value.replace(/\\/g, "\\\\").replace(/"/g, "\\\"")}"`;
     }
 
-    // Re-send settled monitor keyword to trigger a Wayland configure cycle
-    function refresh(monitorName: string): void {
+    function queueRefresh(command: string): void {
+        pendingRefreshCommands.push(command);
+        refreshTimer.restart();
+    }
+
+    function sendMonitor(mon: var, overrideScale: real, overrideTransform: int, overrideRefreshRate: real, overrideRes: string, x: real, y: real): void {
+        if (!Hypr.usingLua) {
+            const config = monitorStr(mon, overrideScale, overrideTransform, overrideRefreshRate, overrideRes, x, y);
+            const command = `keyword monitor ${config}`;
+            Hypr.extras.batchMessage([command]);
+            Hyprctl.update();
+            queueRefresh(command);
+            return;
+        }
+
+        const scale = overrideScale >= 0 ? overrideScale : (mon.scale || 1);
+        const transform = overrideTransform >= 0 ? overrideTransform : (mon.transform || 0);
+        const rr = (overrideRefreshRate > 0 ? overrideRefreshRate : (mon.refreshRate || 60)).toFixed(3);
+        const res = (overrideRes !== undefined && overrideRes !== "") ? overrideRes : `${mon.width}x${mon.height}`;
+        let config = `hl.monitor({ output = ${luaString(mon.name)}, mode = ${luaString(`${res}@${rr}`)}, position = ${luaString(`${Math.round(x)}x${Math.round(y)}`)}, scale = ${scale}`;
+        if (transform !== 0)
+            config += `, transform = ${transform}`;
+        config += " })";
+        const command = `eval ${config}`;
+        Hypr.extras.batchMessage([command]);
+        Hyprctl.update();
+        queueRefresh(command);
+    }
+
+    function setPosition(monitorName: string, x: real, y: real): void {
         const mon = findMonitorByName(monitorName);
         if (!mon)
             return;
-        sendKeyword(monitorStr(mon, mon.scale || 1, mon.transform || 0, mon.refreshRate || 60, ""));
+        sendMonitor(mon, mon.scale || 1, mon.transform || 0, mon.refreshRate || 60, "", x, y);
     }
 
     function arrange(monitorName: string, pos: string, relativeToId: int): void {
@@ -97,15 +124,7 @@ Singleton {
         else if (pos === "bottom")
             y += targetH;
 
-        const scale = moving.scale || 1;
-        const transform = moving.transform || 0;
-        const rr = (moving.refreshRate || 60).toFixed(3);
-
-        let s = `${moving.name},${moving.width}x${moving.height}@${rr},${Math.round(x)}x${Math.round(y)},${scale}`;
-        if (transform !== 0)
-            s += `,transform,${transform}`;
-
-        sendKeyword(s);
+        sendMonitor(moving, moving.scale || 1, moving.transform || 0, moving.refreshRate || 60, "", x, y);
     }
 
     function rotate(monitorName: string, angle: int): void {
@@ -121,7 +140,7 @@ Singleton {
         else if (angle === 270)
             transform = 3;
 
-        sendKeyword(monitorStr(mon, mon.scale || 1, transform, mon.refreshRate || 60, ""));
+        sendMonitor(mon, mon.scale || 1, transform, mon.refreshRate || 60, "", mon.x, mon.y);
     }
 
     function setScale(monitorName: string, scale: real): void {
@@ -129,21 +148,35 @@ Singleton {
         if (!mon)
             return;
         const s = Math.max(0.5, Math.min(3.0, scale));
-        sendKeyword(monitorStr(mon, s, mon.transform || 0, mon.refreshRate || 60, ""));
+        sendMonitor(mon, s, mon.transform || 0, mon.refreshRate || 60, "", mon.x, mon.y);
     }
 
     function setRefreshRate(monitorName: string, refreshRate: real): void {
         const mon = findMonitorByName(monitorName);
         if (!mon)
             return;
-        sendKeyword(monitorStr(mon, mon.scale || 1, mon.transform || 0, Math.max(1, refreshRate), ""));
+        sendMonitor(mon, mon.scale || 1, mon.transform || 0, Math.max(1, refreshRate), "", mon.x, mon.y);
     }
 
     function setResolution(monitorName: string, resolution: string): void {
         const mon = findMonitorByName(monitorName);
         if (!mon)
             return;
-        sendKeyword(monitorStr(mon, mon.scale || 1, mon.transform || 0, mon.refreshRate || 60, resolution));
+        sendMonitor(mon, mon.scale || 1, mon.transform || 0, mon.refreshRate || 60, resolution, mon.x, mon.y);
+    }
+
+    Timer {
+        id: refreshTimer
+
+        interval: 600
+        onTriggered: {
+            if (root.pendingRefreshCommands.length === 0)
+                return;
+            const commands = root.pendingRefreshCommands;
+            root.pendingRefreshCommands = [];
+            Hypr.extras.batchMessage(commands);
+            Hyprctl.update();
+        }
     }
 
     // Auto-dismiss identify overlay after 5 seconds
