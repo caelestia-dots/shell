@@ -50,15 +50,34 @@ PathView {
         readonly property string search: root.search.text.split(" ").slice(1).join(" ")
 
         values: Wallpapers.query(search)
-        onValuesChanged: root.currentIndex = search ? 0 : values.findIndex(w => w.path === Wallpapers.actualCurrent)
+        onValuesChanged: {
+            const idx = values.findIndex(w => w.path === Wallpapers.actualCurrent);
+            root.currentIndex = search ? 0 : Math.max(0, idx);
+            syncTimer.restart();
+        }
     }
 
-    Component.onCompleted: currentIndex = Wallpapers.list.findIndex(w => w.path === Wallpapers.actualCurrent)
+    Timer {
+        id: syncTimer
+        interval: 50
+        repeat: false
+        onTriggered: {
+            if (scriptModel.values && scriptModel.values[root.currentIndex]) {
+                Wallpapers.preview(scriptModel.values[root.currentIndex].path);
+            }
+        }
+    }
+
+    Component.onCompleted: {
+        currentIndex = Math.max(0, Wallpapers.list.findIndex(w => w.path === Wallpapers.actualCurrent));
+        syncTimer.restart();
+    }
     Component.onDestruction: Wallpapers.stopPreview()
 
-    onCurrentItemChanged: {
-        if (currentItem)
-            Wallpapers.preview((currentItem as WallpaperItem).modelData.path);
+    onCurrentIndexChanged: {
+        if (scriptModel.values && scriptModel.values[currentIndex]) {
+            Wallpapers.preview(scriptModel.values[currentIndex].path);
+        }
     }
 
     implicitWidth: Math.min(numItems, count) * itemWidth

@@ -1,6 +1,9 @@
 pragma ComponentBehavior: Bound
 
 import QtQuick
+import QtQuick.Layouts
+import Quickshell
+import Quickshell.Io
 import Caelestia.Config
 import qs.components
 import qs.components.controls
@@ -48,7 +51,7 @@ Item {
 
             PropertyChanges {
                 root.implicitWidth: Math.max(root.Tokens.sizes.launcher.itemWidth * 1.2, wallpaperList.implicitWidth)
-                root.implicitHeight: root.Tokens.sizes.launcher.wallpaperHeight
+                root.implicitHeight: root.Tokens.sizes.launcher.wallpaperHeight + 56
                 wallpaperList.active: true
             }
         }
@@ -61,7 +64,7 @@ Item {
                 property: "opacity"
                 from: 1
                 to: 0
-                type: Anim.DefaultEffects
+                type: Anim.StandardSmall
             }
             PropertyAction {}
             Anim {
@@ -69,7 +72,7 @@ Item {
                 property: "opacity"
                 from: 0
                 to: 1
-                type: Anim.DefaultEffects
+                type: Anim.StandardSmall
             }
         }
     }
@@ -99,13 +102,82 @@ Item {
         anchors.bottom: parent.bottom
         anchors.horizontalCenter: parent.horizontalCenter
 
-        sourceComponent: WallpaperList {
-            objectName: "launcherWallpaperList"
+        sourceComponent: ColumnLayout {
+            spacing: Tokens.spacing.normal
+            implicitWidth: listComp.implicitWidth
 
-            search: root.search
-            screenState: root.screenState
-            panels: root.panels
-            content: root.content
+            RowLayout {
+                Layout.alignment: Qt.AlignHCenter
+                spacing: Tokens.spacing.normal * 1.06
+
+                IconTextButton {
+                    icon: "image"
+                    text: qsTr("Static")
+                    font.pointSize: Tokens.font.size.small
+                    isRound: true
+                    horizontalPadding: Tokens.padding.medium
+                    verticalPadding: Tokens.padding.extraSmall
+                    type: Wallpapers.wallpaperMode === "static" ? IconTextButton.Filled : IconTextButton.Tonal
+                    onClicked: Wallpapers.setWallpaperMode("static")
+                }
+
+                IconTextButton {
+                    icon: "movie"
+                    text: qsTr("Animated")
+                    font.pointSize: Tokens.font.size.small
+                    isRound: true
+                    horizontalPadding: Tokens.padding.medium
+                    verticalPadding: Tokens.padding.extraSmall
+                    type: Wallpapers.wallpaperMode === "animated" ? IconTextButton.Filled : IconTextButton.Tonal
+                    onClicked: Wallpapers.setWallpaperMode("animated")
+                }
+
+                IconTextButton {
+                    icon: "refresh"
+                    text: qsTr("Refresh")
+                    font.pointSize: Tokens.font.size.small
+                    scale: 0.9
+                    isRound: true
+                    horizontalPadding: Tokens.padding.medium
+                    verticalPadding: Tokens.padding.extraSmall
+                    visible: Wallpapers.wallpaperMode === "animated"
+                    type: IconTextButton.Tonal
+                    onClicked: {
+                        Wallpapers.refreshAnimatedThumbs();
+                    }
+                }
+
+                Text {
+                    id: processingText
+                    font.pointSize: Tokens.font.size.small
+                    color: Colours.palette.m3secondary
+                    visible: Wallpapers._refreshing && Wallpapers.wallpaperMode === "animated"
+                    Layout.alignment: Qt.AlignVCenter
+
+                    property int dotCount: 1
+                    text: "Processing" + ".".repeat(dotCount)
+
+                    Timer {
+                        running: processingText.visible
+                        repeat: true
+                        interval: 400
+                        onTriggered: {
+                            processingText.dotCount = (processingText.dotCount % 3) + 1;
+                        }
+                    }
+                }
+            }
+
+            WallpaperList {
+                id: listComp
+                objectName: "launcherWallpaperList"
+                Layout.fillWidth: true
+                Layout.fillHeight: true
+                search: root.search
+                screenState: root.screenState
+                panels: root.panels
+                content: root.content
+            }
         }
     }
 
@@ -115,7 +187,7 @@ Item {
         opacity: root.currentList?.count === 0 ? 1 : 0
         scale: root.currentList?.count === 0 ? 1 : 0.5
 
-        spacing: Tokens.spacing.medium
+        spacing: Tokens.spacing.normal
         padding: Tokens.padding.large
 
         anchors.horizontalCenter: parent.horizontalCenter
@@ -124,7 +196,7 @@ Item {
         MaterialIcon {
             text: root.state === "wallpapers" ? "wallpaper_slideshow" : "manage_search"
             color: Colours.palette.m3onSurfaceVariant
-            fontStyle: Tokens.font.icon.extraLarge
+            font.pointSize: Tokens.font.size.extraLarge
 
             anchors.verticalCenter: parent.verticalCenter
         }
@@ -135,20 +207,19 @@ Item {
             StyledText {
                 text: root.state === "wallpapers" ? qsTr("No wallpapers found") : qsTr("No results")
                 color: Colours.palette.m3onSurfaceVariant
-                font: Tokens.font.body.builders.large.weight(Font.Medium).build()
+                font.pointSize: Tokens.font.size.larger
+                font.weight: 500
             }
 
             StyledText {
                 text: root.state === "wallpapers" && Wallpapers.list.length === 0 ? qsTr("Try putting some wallpapers in %1").arg(Paths.shortenHome(Paths.wallsdir)) : qsTr("Try searching for something else")
                 color: Colours.palette.m3onSurfaceVariant
-                font: Tokens.font.body.medium
+                font.pointSize: Tokens.font.size.normal
             }
         }
 
         Behavior on opacity {
-            Anim {
-                type: Anim.DefaultEffects
-            }
+            Anim {}
         }
 
         Behavior on scale {
@@ -159,12 +230,18 @@ Item {
     Behavior on implicitWidth {
         enabled: root.screenState.launcher
 
-        Anim {}
+        Anim {
+            duration: Tokens.anim.durations.large
+            easing: Tokens.anim.emphasizedDecel
+        }
     }
 
     Behavior on implicitHeight {
         enabled: root.screenState.launcher
 
-        Anim {}
+        Anim {
+            duration: Tokens.anim.durations.large
+            easing: Tokens.anim.emphasizedDecel
+        }
     }
 }

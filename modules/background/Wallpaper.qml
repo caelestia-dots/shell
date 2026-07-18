@@ -9,126 +9,216 @@ import qs.services
 import qs.utils
 
 Item {
+    // qmllint disable missing-property
     id: root
 
-    property string source: Wallpapers.current
-    property CachingImage current
     property bool completed
+    property Image current: one
+    property string source: Wallpapers.current
+    readonly property bool sourceIsVideo: isVideoFile(source)
+    readonly property var validVideoExtensions: ["mp4", "webm", "mkv"]
+    readonly property url videoSource: sourceIsVideo ? toFileUrl(source) : ""
 
-    onSourceChanged: {
-        if (!source)
-            current = null;
-        else
-            current = imgComp.createObject(this, {
-                path: source
-            });
+    function fileExtension(path) {
+        const clean = String(path || "").split(/[?#]/)[0].toLowerCase();
+        const index = clean.lastIndexOf(".");
+        return index >= 0 ? clean.slice(index + 1) : "";
+    }
+    function isVideoFile(path) {
+        return validVideoExtensions.indexOf(fileExtension(path)) !== -1;
+    }
+    function toFileUrl(path) {
+        const clean = String(path || "").trim();
+
+        if (!clean)
+            return "";
+        if (clean.indexOf("file://") === 0)
+            return clean;
+        if (clean[0] === "/")
+            return "file://" + clean;
+
+        return Qt.resolvedUrl(clean);
     }
 
     Component.onCompleted: {
-        if (source)
+        if (sourceIsVideo) {
+            completed = true;
+        } else if (source) {
             Qt.callLater(() => {
-                current = imgComp.createObject(this, {
-                    path: source
-                });
+                one.update();
                 completed = true;
             });
+        }
+    }
+    onSourceChanged: {
+        if (sourceIsVideo) {
+            current = null;
+            videoUpdateTimer.restart();
+            if (current === one)
+                two.update();
+            else
+                one.update();
+        } else if (!source) {
+            current = null;
+        } else if (current === one) {
+            two.update();
+        } else {
+            one.update();
+        }
     }
 
-    Loader {
-        asynchronous: true
-        anchors.fill: parent
+    Timer {
+        id: videoUpdateTimer
 
+        interval: 50
+        repeat: false
+
+        onTriggered: {
+            if (videoLoader.item && root.sourceIsVideo) {
+                videoLoader.item.videoSource = root.videoSource;
+                videoLoader.item.autoStart = !WallpaperPauser.paused;
+            }
+        }
+    }
+
+    // Listens to WallpaperPauser singleton to physically halt video playback.
+    Connections {
+        function onPausedChanged() {
+            if (videoLoader.item && root.sourceIsVideo) {
+                videoLoader.item.autoStart = !WallpaperPauser.paused;
+                if (WallpaperPauser.paused) {
+                    videoLoader.item.pause();
+                } else {
+                    videoLoader.item.play();
+                }
+            }
+        }
+
+        ignoreUnknownSignals: true
+        target: WallpaperPauser
+    }
+    Loader {
         active: root.completed && !root.source
+        anchors.fill: parent
+        asynchronous: true
 
         sourceComponent: StyledRect {
             color: Colours.palette.m3surfaceContainer
 
             Row {
                 anchors.centerIn: parent
-                spacing: Tokens.spacing.largeIncreased
+                spacing: Tokens.spacing.large
 
                 MaterialIcon {
-                    text: "sentiment_stressed"
                     color: Colours.palette.m3onSurfaceVariant
-                    fontStyle: Tokens.font.icon.builders.extraLarge.scale(5).build()
+                    font.pointSize: Tokens.font.size.extraLarge * 5
+                    text: "sentiment_stressed"
                 }
-
                 Column {
                     anchors.verticalCenter: parent.verticalCenter
                     spacing: Tokens.spacing.small
 
                     StyledText {
-                        text: qsTr("Wallpaper missing?")
                         color: Colours.palette.m3onSurfaceVariant
-                        font: Tokens.font.body.builders.large.size(28 * 2).weight(Font.Bold).build()
+                        font.bold: true
+                        font.pointSize: Tokens.font.size.extraLarge * 2
+                        text: qsTr("Wallpaper missing?")
                     }
-
                     StyledRect {
-                        implicitWidth: selectWallText.implicitWidth + Tokens.padding.extraLargeIncreased
-                        implicitHeight: selectWallText.implicitHeight + Tokens.padding.small
-
-                        radius: Tokens.rounding.full
                         color: Colours.palette.m3primary
+                        implicitHeight: selectWallText.implicitHeight + Tokens.padding.small * 2
+                        implicitWidth: selectWallText.implicitWidth + Tokens.padding.large * 2
+                        radius: Tokens.rounding.full
 
                         FileDialog {
                             id: dialog
 
-                            title: qsTr("Select a wallpaper")
                             filterLabel: qsTr("Image files")
                             filters: Images.validImageExtensions
+                            title: qsTr("Select a wallpaper")
+
                             onAccepted: path => Wallpapers.setWallpaper(path)
                         }
-
                         StateLayer {
-                            radius: parent.radius
                             color: Colours.palette.m3onPrimary
+                            radius: parent.radius
+
                             onClicked: dialog.open()
                         }
-
                         StyledText {
                             id: selectWallText
 
                             anchors.centerIn: parent
-
-                            text: qsTr("Set it now!")
                             color: Colours.palette.m3onPrimary
-                            font: Tokens.font.body.large
+                            font.pointSize: Tokens.font.size.large
+                            text: qsTr("Set it now!")
                         }
                     }
                 }
             }
         }
     }
+    Img {
+        id: one
+    }
+    Img {
+        id: two
+    }
 
-    Component {
-        id: imgComp
+    // Asynchronous Loader that injects the QtMultimedia video player into the background layer only when a video is selected.
+    Loader {
+        id: videoLoader
 
-        CachingImage {
-            id: img
+        active: root.sourceIsVideo
+        anchors.fill: parent
+        source: "VideoWallpaper.qml"
 
-            anchors.fill: parent
+        onLoaded: {
+            item.autoStart = true;
+            item.videoSource = root.videoSource;
+        }
+    }
 
-            opacity: 0
+    component Img: CachingImage {
+        id: img
 
-            onStatusChanged: {
-                if (status === Image.Ready)
-                    anim.start();
+        function update(): void {
+            const newPath = root.sourceIsVideo ? Wallpapers.getWallpaperThumb(root.source, Wallpapers.cacheBuster) : root.source;
+            if (path === newPath && source === newPath)
+                root.current = this;
+            else {
+                path = root.source; // Keep IUtils happy for static images
+                source = newPath;   // Override source directly
             }
+        }
 
-            Anim on opacity {
-                id: anim
+        anchors.fill: parent
+        opacity: 0
+        scale: Wallpapers.showPreview ? 1 : 0.8
 
-                type: Anim.SlowEffects
-                running: false
-                from: 0
-                to: 1
+        // Keep thumbnail visible until the video has actual frames to render,
+        // OR whenever the video is paused (to prevent black blank screens).
+        visible: !root.sourceIsVideo || WallpaperPauser.paused || (videoLoader.item && videoLoader.item.mediaStatus < 2)
+
+        states: State {
+            name: "visible"
+            when: root.current === img
+
+            PropertyChanges {
+                img.opacity: 1
+                img.scale: 1
             }
-
-            Timer {
-                running: root.current !== img && root.current?.status === Image.Ready
-                interval: anim.duration
-                onTriggered: img.destroy()
+        }
+        transitions: Transition {
+            Anim {
+                properties: "opacity,scale"
+                target: img
             }
+        }
+
+        onStatusChanged: {
+            if (status === Image.Ready)
+                root.current = this;
         }
     }
 }
