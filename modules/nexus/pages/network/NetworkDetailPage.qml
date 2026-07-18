@@ -17,6 +17,7 @@ PageBase {
     readonly property string ssid: nState.selectedNetworkSsid
     readonly property var ap: Nmcli.findNetwork(root.ssid)
     readonly property var details: Nmcli.wirelessDeviceDetails
+    readonly property bool isActive: !!Nmcli.active && Nmcli.active.ssid === root.ssid
 
     // Locally-edited IPv4 form state.
     property string ipMethod: "auto" // "auto" | "auto-dns" | "manual"
@@ -80,8 +81,9 @@ PageBase {
     }
 
     // Close if the network is no longer active (e.g. disconnected elsewhere).
+    // ...But not when the page was opened from saved networks
     onApChanged: {
-        if (root.ipLoaded && !root.ap)
+        if (!nState.networkDetailsFromSaved && root.ipLoaded && !root.ap)
             nState.closeSubPage();
     }
 
@@ -103,14 +105,14 @@ PageBase {
         ButtonRow {
             Layout.bottomMargin: Tokens.spacing.large - parent.spacing
             Layout.alignment: Qt.AlignHCenter
-            Layout.minimumWidth: Math.round(root.cappedWidth * 0.7)
+            Layout.minimumWidth: Math.round(root.cappedWidth * (root.isActive ? 0.7 : 0.5))
             spacing: Tokens.spacing.small
 
             ButtonBase {
                 id: forgetBtn
 
                 fillWidth: true
-                shapeMorph: true
+                shapeMorph: root.isActive
                 isRound: true
                 inactiveColour: Colours.palette.m3errorContainer
                 inactiveOnColour: Colours.palette.m3onErrorContainer
@@ -147,6 +149,7 @@ PageBase {
             ButtonBase {
                 id: disconnectBtn
 
+                visible: root.isActive
                 fillWidth: true
                 shapeMorph: true
                 isRound: true
@@ -183,10 +186,11 @@ PageBase {
             }
         }
 
-        // ---- Connection info -------------------------------------------------
+        // ---- Connection info (only shows when active) ---------------------------------
         SectionHeader {
             first: true
             text: qsTr("Connection")
+            visible: root.isActive
         }
 
         InfoRow {
@@ -194,30 +198,35 @@ PageBase {
             icon: "signal_wifi_4_bar"
             label: qsTr("Signal")
             value: root.ap ? qsTr("%1%").arg(root.ap.strength) : qsTr("—")
+            visible: root.isActive
         }
 
         InfoRow {
             icon: "lock"
             label: qsTr("Security")
             value: root.ap?.security || qsTr("Open")
+            visible: root.isActive
         }
 
         InfoRow {
             icon: "graphic_eq"
             label: qsTr("Frequency")
             value: root.ap && root.ap.frequency > 0 ? qsTr("%1 MHz").arg(root.ap.frequency) : qsTr("—")
+            visible: root.isActive
         }
 
         InfoRow {
             icon: "lan"
             label: qsTr("IP address")
             value: root.details?.ipAddress || qsTr("—")
+            visible: root.isActive
         }
 
         InfoRow {
             icon: "router"
             label: qsTr("Gateway")
             value: root.details?.gateway || qsTr("—")
+            visible: root.isActive
         }
 
         InfoRow {
@@ -225,10 +234,12 @@ PageBase {
             icon: "memory"
             label: qsTr("MAC address")
             value: root.details?.macAddress || qsTr("—")
+            visible: root.isActive
         }
 
         // ---- Behaviour -------------------------------------------------------
         SectionHeader {
+            first: !root.isActive
             text: qsTr("Behaviour")
         }
 

@@ -157,12 +157,12 @@ PageBase {
 
         onClicked: filterState = (filterState + 1) % 3
 
-        defaultRadius: Tokens.rounding.small
+        defaultRadius: filterState > 0 ? implicitHeight / 2 : Tokens.rounding.small
         pressedRadius: Tokens.rounding.extraSmall
         spacing: Tokens.spacing.extraSmall
 
         icon: ["check_indeterminate_small", "check", "close"][filterState]
-        inactiveColour: [Colours.palette.m3secondaryContainer, Colours.palette.m3primary, Colours.palette.m3tertiary][filterState]
-        inactiveOnColour: [Colours.palette.m3onSecondaryContainer, Colours.palette.m3onPrimary, Colours.palette.m3onTertiary][filterState]
+        inactiveColour: [Colours.palette.m3secondaryContainer, Colours.palette.m3secondary, Colours.palette.m3tertiary][filterState]
+        inactiveOnColour: [Colours.palette.m3onSecondaryContainer, Colours.palette.m3onSecondary, Colours.palette.m3onTertiary][filterState]
     }
 }

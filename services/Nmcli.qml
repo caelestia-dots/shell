@@ -21,6 +21,8 @@ Singleton {
     readonly property AccessPoint active: networks.find(n => n.active) ?? null
     property list<string> savedConnections: []
     property list<string> savedConnectionSsids: []
+    // Map of saved Wi-Fi SSID (lowercased) -> security type
+    property var savedConnectionSecurity: ({})
 
     property var wifiConnectionQueue: []
     property int currentSsidQueryIndex: 0
@@ -499,6 +501,7 @@ Singleton {
             if (!result.success) {
                 root.savedConnections = [];
                 root.savedConnectionSsids = [];
+                root.savedConnectionSecurity = {};
                 if (callback)
                     callback([]);
                 return;
@@ -528,6 +531,8 @@ Singleton {
 
         root.savedConnections = connections;
 
+        root.savedConnectionSecurity = {};
+
         if (wifiConnections.length > 0) {
             root.wifiConnectionQueue = wifiConnections;
             root.currentSsidQueryIndex = 0;
@@ -546,7 +551,7 @@ Singleton {
             const connectionName = root.wifiConnectionQueue[root.currentSsidQueryIndex];
             root.currentSsidQueryIndex++;
 
-            executeCommand(["-t", "-f", root.wirelessSsidField, root.nmcliCommandConnection, "show", connectionName], result => {
+            executeCommand(["-t", "-f", `${root.wirelessSsidField},${root.securityKeyMgmt}`, root.nmcliCommandConnection, "show", connectionName], result => {
                 if (result.success) {
                     processSsidOutput(result.output);
                 }
@@ -561,21 +566,61 @@ Singleton {
     }
 
     function processSsidOutput(output: string): void {
-        const lines = output.trim().split("\n");
-        for (const line of lines) {
-            if (line.startsWith("802-11-wireless.ssid:")) {
-                const ssid = line.substring("802-11-wireless.ssid:".length).trim();
-                if (ssid && ssid.length > 0) {
-                    const ssidLower = ssid.toLowerCase();
-                    const exists = root.savedConnectionSsids.some(s => s && s.toLowerCase() === ssidLower);
-                    if (!exists) {
-                        const newList = root.savedConnectionSsids.slice();
-                        newList.push(ssid);
-                        root.savedConnectionSsids = newList;
-                    }
-                }
-            }
+        const ssidPrefix = "802-11-wireless.ssid:";
+        const keyMgmtPrefix = `${root.securityKeyMgmt}:`;
+
+        let ssid = "";
+        let keyMgmt = "";
+        for (const line of output.trim().split("\n")) {
+            if (line.startsWith(ssidPrefix))
+                ssid = line.substring(ssidPrefix.length).trim();
+            else if (line.startsWith(keyMgmtPrefix))
+                keyMgmt = line.substring(keyMgmtPrefix.length).trim();
         }
+
+        if (!ssid || ssid.length === 0)
+            return;
+
+        const ssidLower = ssid.toLowerCase();
+
+        const exists = root.savedConnectionSsids.some(s => s && s.toLowerCase() === ssidLower);
+        if (!exists) {
+            const newList = root.savedConnectionSsids.slice();
+            newList.push(ssid);
+            root.savedConnectionSsids = newList;
+        }
+
+        const security = Object.assign({}, root.savedConnectionSecurity);
+        security[ssidLower] = keyMgmt;
+        root.savedConnectionSecurity = security;
+    }
+
+    function securityLabel(keyMgmt: string): string {
+        switch ((keyMgmt || "").trim().toLowerCase()) {
+        case "":
+        case "none":
+            return qsTr("Open");
+        case "sae":
+            return "WPA3";
+        case "wpa-psk":
+            return "WPA2";
+        case "wpa-eap":
+        case "wpa-eap-suite-b-192":
+            return qsTr("Enterprise");
+        case "owe":
+            return qsTr("Enhanced Open");
+        case "ieee8021x":
+            return "802.1X";
+        default:
+            return keyMgmt.trim();
+        }
+    }
+
+    // Cached security label for a saved SSID, or "" if unknown (e.g. not loaded).
+    function savedSecurityFor(ssid: string): string {
+        if (!ssid || ssid.length === 0)
+            return "";
+        return root.savedConnectionSecurity[ssid.toLowerCase().trim()] || "";
     }
 
     function hasSavedProfile(ssid: string): bool {

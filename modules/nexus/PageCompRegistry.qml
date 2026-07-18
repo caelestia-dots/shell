@@ -61,6 +61,9 @@ QtObject {
                 Component {
                     AllNetworksPage {}
                 }
+                Component {
+                    SavedNetworksPage {}
+                }
             }
         },
         Component {
