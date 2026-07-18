@@ -16,8 +16,12 @@ QtObject {
     property string selectedWallpaperCategory
     property BluetoothDevice selectedBtDevice
     property DesktopEntry selectedApp
+    property int editingVpnIndex: -1
+    property string selectedNetworkSsid
     property string selectedEthernetInterface
     property var selectedMonitor
+    property bool networkDetailsFromSaved
+
     property Connections monitorsConnection: Connections {
         function onMonitorsChanged(): void {
             if (state.selectedMonitor) {

@@ -24,7 +24,7 @@ QtObject {
         {
             label: qsTr("Network"),
             icon: "wifi",
-            description: qsTr("Wi-Fi, ethernet"),
+            description: qsTr("Wi-Fi, ethernet, VPN"),
             category: "connectivity"
         },
         {

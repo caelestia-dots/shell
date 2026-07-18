@@ -38,6 +38,7 @@ class UtilitiesVpn : public ConfigObject {
 
     CONFIG_GLOBAL_PROPERTY(bool, enabled, false)
     CONFIG_GLOBAL_PROPERTY(QVariantList, provider)
+    CONFIG_GLOBAL_PROPERTY(QString, selectedProvider, u""_s)
 
 public:
     explicit UtilitiesVpn(QObject* parent = nullptr)

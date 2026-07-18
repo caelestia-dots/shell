@@ -61,6 +61,21 @@ QtObject {
                 Component {
                     EthernetDetailPage {}
                 }
+                Component {
+                    AddNetworkPage {}
+                }
+                Component {
+                    NetworkDetailPage {}
+                }
+                Component {
+                    AddVpnPage {}
+                }
+                Component {
+                    AllNetworksPage {}
+                }
+                Component {
+                    SavedNetworksPage {}
+                }
             }
         },
         Component {

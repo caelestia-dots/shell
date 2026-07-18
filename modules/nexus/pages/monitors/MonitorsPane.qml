@@ -498,15 +498,6 @@ PageBase {
                     height: targetH
                     visible: monitorBox.modelData != null && targetW > 0 && targetH > 0
 
-                    Behavior on x {
-                        enabled: !dragArea.pressed
-                        Anim {}
-                    }
-                    Behavior on y {
-                        enabled: !dragArea.pressed
-                        Anim {}
-                    }
-
                     onTargetXChanged: {
                         if (!dragArea.pressed)
                             x = targetX;
@@ -514,6 +505,18 @@ PageBase {
                     onTargetYChanged: {
                         if (!dragArea.pressed)
                             y = targetY;
+                    }
+
+                    Behavior on x {
+                        enabled: !dragArea.pressed
+
+                        Anim {}
+                    }
+
+                    Behavior on y {
+                        enabled: !dragArea.pressed
+
+                        Anim {}
                     }
 
                     // Box background
