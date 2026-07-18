@@ -123,6 +123,46 @@ PageBase {
             }
         }
 
+        // Saved networks button
+        ConnectedRect {
+            Layout.fillWidth: true
+            implicitHeight: savedNetworksLayout.implicitHeight + savedNetworksLayout.anchors.margins * 2
+
+            StateLayer {
+                onClicked: root.nState.openSubPage(6) // Saved networks sub-page
+            }
+
+            RowLayout {
+                id: savedNetworksLayout
+
+                anchors.fill: parent
+                anchors.margins: Tokens.padding.medium
+                anchors.leftMargin: Tokens.padding.largeIncreased
+                anchors.rightMargin: Tokens.padding.largeIncreased
+                spacing: Tokens.spacing.medium
+
+                MaterialIcon {
+                    text: "bookmark"
+                    color: Colours.palette.m3onSurfaceVariant
+                    fontStyle: Tokens.font.icon.medium
+                    fill: 1
+                }
+
+                StyledText {
+                    Layout.fillWidth: true
+                    text: qsTr("Saved networks")
+                    font: Tokens.font.body.small
+                    elide: Text.ElideRight
+                }
+
+                MaterialIcon {
+                    text: "chevron_right"
+                    color: Colours.palette.m3onSurfaceVariant
+                    fontStyle: Tokens.font.icon.medium
+                }
+            }
+        }
+
         ConnectedRect {
             Layout.fillWidth: true
             implicitHeight: addNetworkLayout.implicitHeight + addNetworkLayout.anchors.margins * 2
