@@ -71,7 +71,7 @@ PageBase {
             nState: root.nState
             limit: GlobalConfig.nexus.maxNetworksShown
 
-            Behavior on Layout.topMargin {
+            Behavior on Layout.bottomMargin {
                 Anim {
                     type: Anim.DefaultEffects
                 }
