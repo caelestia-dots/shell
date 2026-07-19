@@ -7,6 +7,7 @@ import QtQuick
 import QtQuick.Layouts
 import Quickshell
 import Caelestia.Config
+import Caelestia.Plugins
 import qs.components
 import qs.services
 
@@ -180,7 +181,31 @@ ColumnLayout {
                     }
                 }
             }
+            DelegateChoice {
+                delegate: Loader {
+                    required property var modelData
+                    required property int index
+
+                    Layout.topMargin: index === 0 ? root.vPadding : 0
+                    Layout.bottomMargin: index === repeater.count - 1 ? root.vPadding : 0
+                    Layout.alignment: Qt.AlignHCenter
+
+                    source: {
+                        const entry = Plugins.entryPoints(EntryPointType.BarEntry).find(e => e.properties.name === modelData.id);
+                        if (!entry)
+                            console.warn(logCat, "No plugin entry point found for", modelData.id);
+                        return entry?.source ?? "";
+                    }
+                }
+            }
         }
+    }
+
+    LoggingCategory {
+        id: logCat
+
+        name: "caelestia.bar"
+        defaultLogLevel: LoggingCategory.Info
     }
 
     component EntryWrapper: Item {
