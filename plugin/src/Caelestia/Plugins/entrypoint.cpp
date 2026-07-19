@@ -46,10 +46,7 @@ EntryPoint::EntryPoint(const QJsonObject& json, const QString& dir, PluginManife
     else if (m_error.isEmpty())
         m_error = QStringLiteral("Entry point '%1' is missing 'source'").arg(typeStr);
 
-    // Keep any author-defined keys beyond the known ones.
-    m_properties = json.toVariantMap();
-    m_properties.remove(QStringLiteral("type"));
-    m_properties.remove(QStringLiteral("source"));
+    m_properties = json.value(QStringLiteral("properties")).toObject().toVariantMap();
 }
 
 EntryPointType::Type EntryPoint::type() const {
