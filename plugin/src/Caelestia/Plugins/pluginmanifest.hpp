@@ -26,6 +26,7 @@ class PluginManifest : public QObject {
     Q_PROPERTY(QString version READ version CONSTANT)
 
     // Optional metadata
+    Q_PROPERTY(QString icon READ icon CONSTANT)
     Q_PROPERTY(QString description READ description CONSTANT)
     Q_PROPERTY(QString author READ author CONSTANT)
     Q_PROPERTY(QString requires READ requirement CONSTANT)
@@ -50,6 +51,7 @@ public:
     [[nodiscard]] QString name() const;
     [[nodiscard]] QString version() const;
 
+    [[nodiscard]] QString icon() const;
     [[nodiscard]] QString description() const;
     [[nodiscard]] QString author() const;
     [[nodiscard]] QString requirement() const;
@@ -84,6 +86,7 @@ private:
     QString m_name;
     QString m_version;
 
+    QString m_icon;
     QString m_description;
     QString m_author;
     QString m_requires;

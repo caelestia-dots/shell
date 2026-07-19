@@ -93,6 +93,7 @@ PluginManifest::PluginManifest(const QString& dir, const QString& path, QObject*
     // Canonical id is author/name
     m_id = m_author + QStringLiteral("/") + m_name;
     m_version = obj.value(QStringLiteral("version")).toString();
+    m_icon = obj.value(QStringLiteral("icon")).toString();
     m_description = obj.value(QStringLiteral("description")).toString();
     m_requires = obj.value(QStringLiteral("requires")).toString();
 
@@ -139,6 +140,10 @@ QString PluginManifest::name() const {
 
 QString PluginManifest::version() const {
     return m_version;
+}
+
+QString PluginManifest::icon() const {
+    return m_icon;
 }
 
 QString PluginManifest::description() const {
