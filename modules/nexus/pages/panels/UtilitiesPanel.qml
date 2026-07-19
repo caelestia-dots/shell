@@ -54,6 +54,34 @@ PageBase {
             onToggled: GlobalConfig.utilities.enabled = checked
         }
 
+        // Cards
+        SectionHeader {
+            text: qsTr("Cards")
+        }
+
+        ToggleRow {
+            first: true
+            text: qsTr("Keep awake")
+            subtext: qsTr("Show the idle inhibitor card")
+            checked: Config.utilities.cards.keepAwake
+            onToggled: GlobalConfig.utilities.cards.keepAwake = checked
+        }
+
+        ToggleRow {
+            text: qsTr("Screen recorder")
+            subtext: qsTr("Show the screen recorder card")
+            checked: Config.utilities.cards.recorder
+            onToggled: GlobalConfig.utilities.cards.recorder = checked
+        }
+
+        ToggleRow {
+            last: true
+            text: qsTr("Quick toggles")
+            subtext: qsTr("Show the quick toggles card")
+            checked: Config.utilities.cards.quickToggles
+            onToggled: GlobalConfig.utilities.cards.quickToggles = checked
+        }
+
         // Quick toggles
         SectionHeader {
             text: qsTr("Quick toggles")
@@ -63,6 +91,7 @@ PageBase {
             first: true
             text: qsTr("Wi-Fi")
             subtext: qsTr("Toggle wireless networking")
+            disabled: !Config.utilities.cards.quickToggles
             checked: root.isToggleOn("wifi")
             onToggled: root.setToggleOn("wifi", checked)
         }
@@ -70,6 +99,7 @@ PageBase {
         ToggleRow {
             text: qsTr("Bluetooth")
             subtext: qsTr("Toggle the Bluetooth adapter")
+            disabled: !Config.utilities.cards.quickToggles
             checked: root.isToggleOn("bluetooth")
             onToggled: root.setToggleOn("bluetooth", checked)
         }
@@ -77,6 +107,7 @@ PageBase {
         ToggleRow {
             text: qsTr("Microphone")
             subtext: qsTr("Mute or unmute the default source")
+            disabled: !Config.utilities.cards.quickToggles
             checked: root.isToggleOn("mic")
             onToggled: root.setToggleOn("mic", checked)
         }
@@ -84,6 +115,7 @@ PageBase {
         ToggleRow {
             text: qsTr("Settings")
             subtext: qsTr("Open the settings window")
+            disabled: !Config.utilities.cards.quickToggles
             checked: root.isToggleOn("settings")
             onToggled: root.setToggleOn("settings", checked)
         }
@@ -91,6 +123,7 @@ PageBase {
         ToggleRow {
             text: qsTr("Game mode")
             subtext: qsTr("Toggle game mode")
+            disabled: !Config.utilities.cards.quickToggles
             checked: root.isToggleOn("gameMode")
             onToggled: root.setToggleOn("gameMode", checked)
         }
@@ -98,6 +131,7 @@ PageBase {
         ToggleRow {
             text: qsTr("Do not disturb")
             subtext: qsTr("Silence notifications")
+            disabled: !Config.utilities.cards.quickToggles
             checked: root.isToggleOn("dnd")
             onToggled: root.setToggleOn("dnd", checked)
         }
@@ -106,6 +140,7 @@ PageBase {
             last: true
             text: qsTr("VPN")
             subtext: qsTr("Connect or disconnect the VPN")
+            disabled: !Config.utilities.cards.quickToggles
             checked: root.isToggleOn("vpn")
             onToggled: root.setToggleOn("vpn", checked)
         }
