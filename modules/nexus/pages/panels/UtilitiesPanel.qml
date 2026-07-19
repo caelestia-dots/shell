@@ -7,9 +7,6 @@ import qs.modules.nexus.common
 PageBase {
     id: root
 
-    title: qsTr("Utilities")
-    isSubPage: true
-
     function isToggleOn(id: string): bool {
         const item = Config.utilities.quickToggles.find(t => t.id === id);
         return item ? (item.enabled ?? true) : false;
@@ -32,6 +29,9 @@ PageBase {
             });
         GlobalConfig.utilities.quickToggles = next;
     }
+
+    title: qsTr("Utilities")
+    isSubPage: true
 
     ColumnLayout {
         anchors.horizontalCenter: parent.horizontalCenter
