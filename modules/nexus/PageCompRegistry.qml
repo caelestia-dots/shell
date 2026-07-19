@@ -119,6 +119,9 @@ QtObject {
                 Component {
                     SidebarPanel {}
                 }
+                Component {
+                    UtilitiesPanel {}
+                }
 
                 // Taskbar component sub-pages
                 Component {
@@ -135,11 +138,6 @@ QtObject {
                 }
                 Component {
                     BarClock {}
-                }
-
-                // Utilities panel sub-page
-                Component {
-                    UtilitiesPanel {}
                 }
             }
         },

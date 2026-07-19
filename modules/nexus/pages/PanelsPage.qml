@@ -47,7 +47,7 @@ PageBase {
             icon: "construction"
             label: qsTr("Utilities")
             status: Config.utilities.enabled ? qsTr("Enabled") : qsTr("Disabled")
-            onClicked: root.nState.openSubPage(10)
+            onClicked: root.nState.openSubPage(5)
         }
     }
 }
