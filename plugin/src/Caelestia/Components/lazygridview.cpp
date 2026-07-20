@@ -474,8 +474,19 @@ void LazyGridView::geometryChange(const QRectF& newGeometry, const QRectF& oldGe
     if (!m_componentComplete)
         return;
 
-    if (!qFuzzyCompare(newGeometry.width(), oldGeometry.width()))
-        updateResolvedColumns(); // width springs toward the new cell width in positionItem
+    if (!qFuzzyCompare(newGeometry.width(), oldGeometry.width())) {
+        // Snapshot the layout from before this resize so items created by the
+        // reflow can spring in from their pre-resize slot. Captured once and
+        // held until the reflow's creates finish (see updatePolish).
+        if (!m_resizeAnim) {
+            m_prevColumns = m_resolvedColumns;
+            m_prevCellWidth = m_resolvedCellWidth;
+            m_prevRowTops = m_rowTops;
+            m_prevRowHeights = m_rowHeights;
+            m_resizeAnim = true;
+        }
+        updateResolvedColumns();
+    }
 
     polish();
 }
@@ -543,6 +554,14 @@ void LazyGridView::updatePolish() {
         if (!entry.item || entry.pendingRemoval || entry.pendingInsert)
             continue;
         positionItem(entry);
+    }
+
+    // The resize reflow is done once no more items need creating; drop the
+    // pre-resize snapshot so later viewport changes place items at their target.
+    if (m_resizeAnim && m_createdThisPolish == 0) {
+        m_resizeAnim = false;
+        m_prevRowTops.clear();
+        m_prevRowHeights.clear();
     }
 }
 
@@ -789,6 +808,20 @@ void LazyGridView::positionItem(DelegateEntry& entry) {
         delegateHeight(item),
     };
 
+    // Resize-created items spring in from the pre-resize slot seeded at creation
+    // (springVal already holds it); set the target and let step() animate.
+    if (!entry.placed && entry.animateIn && m_stiffness > 0) {
+        for (int i = 0; i < GeomCount; ++i) {
+            entry.springTarget[i] = targets[i];
+            entry.springVel[i] = 0;
+        }
+        entry.animating = true;
+        entry.animateIn = false;
+        entry.placed = true;
+        setAnimating(true);
+        return;
+    }
+
     // First placement (or springs disabled) snaps into position.
     if (m_stiffness <= 0 || !entry.placed) {
         entry.animating = false;
@@ -945,13 +978,59 @@ void LazyGridView::syncDelegates() {
         auto entry = createDelegate(i);
         if (entry.item) {
             entry.pendingInsert = true;
-            entry.item->setX(itemX(i));
-            entry.item->setY(itemY(i) - m_contentY);
+
+            // Actual (post-layout) geometry.
+            const qreal aX = itemX(i);
+            const qreal aY = itemY(i) - m_contentY;
+            const qreal aW = m_resolvedCellWidth;
+            const qreal aH = delegateHeight(entry.item);
+
+            // When a resize creates this item, spring it in from its slot in the
+            // pre-resize layout. Otherwise (a plain viewport change) place it at
+            // its target. Model inserts keep their own enter animation.
+            bool fromVirtual = false;
+            if (m_resizeAnim && m_stiffness > 0 && !entry.isEnter && m_prevColumns > 0) {
+                const int pcols = m_prevColumns;
+                const int prow = i / pcols;
+                const int pcol = i % pcols;
+                const qreal vX = pcol * (m_prevCellWidth + m_columnSpacing);
+                const qreal vY = (prow < m_prevRowTops.size() ? m_prevRowTops[prow]
+                                                              : prow * (effectiveEstimatedHeight() + m_rowSpacing)) -
+                    m_contentY;
+                const qreal vW = m_prevCellWidth > 0 ? m_prevCellWidth : aW;
+                const qreal vH =
+                    (prow < m_prevRowHeights.size() && m_prevRowHeights[prow] > 0) ? m_prevRowHeights[prow] : aH;
+
+                if (!qFuzzyCompare(vX + 1.0, aX + 1.0) || !qFuzzyCompare(vY + 1.0, aY + 1.0) ||
+                    !qFuzzyCompare(vW + 1.0, aW + 1.0) || !qFuzzyCompare(vH + 1.0, aH + 1.0)) {
+                    entry.springVal[GeomX] = vX;
+                    entry.springVal[GeomY] = vY;
+                    entry.springVal[GeomW] = vW;
+                    entry.springVal[GeomH] = vH;
+                    entry.animateIn = true;
+                    fromVirtual = true;
+                }
+            }
+
+            if (!fromVirtual) {
+                entry.springVal[GeomX] = aX;
+                entry.springVal[GeomY] = aY;
+                entry.springVal[GeomW] = aW;
+                entry.springVal[GeomH] = aH;
+            }
+
+            entry.item->setX(entry.springVal[GeomX]);
+            entry.item->setY(entry.springVal[GeomY]);
+            entry.item->setWidth(quantizeWidth(entry.springVal[GeomW]));
+            entry.item->setHeight(entry.springVal[GeomH]);
+
             m_itemToIndex.insert(entry.item, i);
             m_delegates.insert(i, std::move(entry));
             ++created;
         }
     }
+
+    m_createdThisPolish = created;
 
     // Pending inserts must become visible next frame; async mode may also
     // have create/destroy work still queued.

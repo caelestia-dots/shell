@@ -236,6 +236,7 @@ private:
         qreal springTarget[GeomCount] = { 0, 0, 0, 0 };
         bool animating = false;
         bool placed = false;
+        bool animateIn = false;
         bool isEnter = false;
         bool pendingRemoval = false;
         bool pendingInsert = false;
@@ -320,6 +321,15 @@ private:
     QVector<ItemRecord> m_layout;
     QVector<qreal> m_rowTops;
     QVector<qreal> m_rowHeights;
+
+    // Snapshot of the layout from before an in-progress resize, so items created
+    // by the reflow can spring in from their pre-resize (virtual) slot.
+    bool m_resizeAnim = false;
+    int m_prevColumns = 0;
+    qreal m_prevCellWidth = 0;
+    QVector<qreal> m_prevRowTops;
+    QVector<qreal> m_prevRowHeights;
+    int m_createdThisPolish = 0;
 
     QHash<int, DelegateEntry> m_delegates;
     QHash<QQuickItem*, int> m_itemToIndex;
