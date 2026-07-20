@@ -24,6 +24,10 @@ QString configDir() {
     return QStandardPaths::writableLocation(QStandardPaths::GenericConfigLocation) + QStringLiteral("/caelestia/");
 }
 
+QString pluginDataDir() {
+    return QStandardPaths::writableLocation(QStandardPaths::GenericDataLocation) + QStringLiteral("/caelestia/plugins");
+}
+
 } // namespace
 
 Plugins::Plugins(QObject* parent)
@@ -257,6 +261,7 @@ void Plugins::rescan() {
 
 QStringList Plugins::searchRoots() const {
     QStringList roots;
+    roots.append(pluginDataDir());
     roots.append(configDir() + QStringLiteral("plugins"));
 
     const auto envPath = qEnvironmentVariable("CAELESTIA_PLUGIN_PATH");
