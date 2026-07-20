@@ -2,6 +2,7 @@ pragma ComponentBehavior: Bound
 
 import QtQuick
 import QtQuick.Layouts
+import Quickshell
 import Caelestia.Components
 import Caelestia.Config
 import Caelestia.Plugins
@@ -48,16 +49,54 @@ PageBase {
         //     text: qsTr("Enabled")
         // }
 
-        GridLayout {
+        LazyGridView {
+            id: grid
+
             Layout.fillWidth: true
-            columns: Math.floor(root.cappedWidth / 300)
+            implicitHeight: contentHeight
+
+            cellWidth: 300 // Minimum cell width, elements stretch to fill complete view width
             rowSpacing: Tokens.spacing.large
             columnSpacing: Tokens.spacing.large
+            estimatedRowHeight: 426 // Height per plugin card with default tokens and 2 line description, at nexus initial size
 
-            Repeater {
-                model: 5
+            asynchronous: true
+            cacheBuffer: 400
+            readyDelay: 1
 
-                PluginCard {}
+            // Expressive default spatial spring params
+            stiffness: 380
+            damping: 0.8
+
+            enterDuration: Tokens.anim.durations.expressiveDefaultEffects
+            removeDuration: Tokens.anim.durations.expressiveDefaultEffects
+            easing: Tokens.anim.expressiveDefaultEffects
+
+            useCustomViewport: true
+            viewport: {
+                tWatcher.transform; // mapToItem is not reactive so use this to trigger updates
+                return Qt.rect(0, root.flickable.contentY - mapToItem(root.flickable.contentItem, 0, 0).y, width, root.flickable.height);
+            }
+
+            model: ScriptModel {
+                values: Array.from({
+                    length: 30
+                }, (_, i) => i)
+            }
+
+            delegate: PluginCard {}
+
+            // Frame animation to trigger move/resize springs
+            FrameAnimation {
+                running: grid.animating
+                onTriggered: grid.step(frameTime)
+            }
+
+            TransformWatcher {
+                id: tWatcher
+
+                a: root.flickable.contentItem
+                b: grid
             }
         }
 
@@ -123,11 +162,12 @@ PageBase {
     }
 
     component PluginCard: StyledRect {
+        required property int index
+        required property var modelData
+
         color: Colours.tPalette.m3surfaceContainer
         radius: Tokens.rounding.extraLarge
 
-        Layout.fillWidth: true
-        // implicitWidth: 300
         implicitHeight: heroWrapper.implicitHeight + detailLayout.implicitHeight + detailLayout.anchors.topMargin + detailLayout.anchors.margins
 
         StyledClippingRect {
