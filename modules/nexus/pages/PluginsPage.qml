@@ -221,9 +221,23 @@ PageBase {
                 text: "image"
                 color: Colours.palette.m3outline
                 fontStyle: Tokens.font.icon.extraLarge
+                opacity: 1 - heroImage.opacity
             }
 
-            // TODO: image
+            Image {
+                id: heroImage
+
+                anchors.fill: parent
+                source: plugin.modelData.image ?? ""
+                retainWhileLoading: true
+                opacity: status === Image.Ready ? 1 : 0
+
+                Behavior on opacity {
+                    Anim {
+                        type: Anim.SlowEffects
+                    }
+                }
+            }
         }
 
         ColumnLayout {
