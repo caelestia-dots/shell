@@ -182,19 +182,20 @@ ColumnLayout {
                 }
             }
             DelegateChoice {
-                delegate: Loader {
-                    required property var modelData
-                    required property int index
+                delegate: EntryWrapper {
+                    id: pluginEntryWrapper
 
-                    Layout.topMargin: index === 0 ? root.vPadding : 0
-                    Layout.bottomMargin: index === repeater.count - 1 ? root.vPadding : 0
-                    Layout.alignment: Qt.AlignHCenter
+                    BoundComponent {
+                        readonly property pluginEntryPoint entryPoint: {
+                            const id = pluginEntryWrapper.modelData.id;
+                            const entry = Plugins.entryPoints(EntryPointType.BarEntry).find(e => e.properties.name === id);
+                            if (!entry)
+                                console.warn(logCat, "No plugin entry point found for", id);
+                            return entry;
+                        }
+                        readonly property var settings: entryPoint.plugin.settings
 
-                    source: {
-                        const entry = Plugins.entryPoints(EntryPointType.BarEntry).find(e => e.properties.name === modelData.id);
-                        if (!entry)
-                            console.warn(logCat, "No plugin entry point found for", modelData.id);
-                        return entry?.source ?? "";
+                        source: entryPoint.source
                     }
                 }
             }
