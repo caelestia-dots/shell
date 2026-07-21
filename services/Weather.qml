@@ -91,7 +91,7 @@ Singleton {
             return false;
 
         const ttlHeader = metadata?.headers?.["x-ttl"];
-        const ttl = ttlHeader === undefined ? NaN : Number(ttlHeader);
+        const ttl = Number(ttlHeader);
 
         const delaySeconds = Number.isFinite(ttl) ? Math.max(1, Math.ceil(ttl) + 1) : 61;
 
