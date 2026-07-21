@@ -477,8 +477,10 @@ void LazyGridView::geometryChange(const QRectF& newGeometry, const QRectF& oldGe
     if (!qFuzzyCompare(newGeometry.width(), oldGeometry.width())) {
         // Snapshot the layout from before this resize so items created by the
         // reflow can spring in from their pre-resize slot. Captured once and
-        // held until the reflow's creates finish (see updatePolish).
-        if (!m_resizeAnim) {
+        // held until the reflow's creates finish (see updatePolish). Skipped on
+        // the initial layout (oldGeometry has no real width), so items appear at
+        // their target instead of reflowing in.
+        if (oldGeometry.width() > 0 && !m_resizeAnim) {
             m_prevColumns = m_resolvedColumns;
             m_prevCellWidth = m_resolvedCellWidth;
             m_prevRowTops = m_rowTops;
