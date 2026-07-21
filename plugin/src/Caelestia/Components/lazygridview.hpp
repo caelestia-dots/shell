@@ -253,6 +253,7 @@ private:
     // Geometry
     void relayout();
     [[nodiscard]] int rowOf(int index) const;
+    [[nodiscard]] qreal rowHeightOf(int index) const;
     [[nodiscard]] qreal itemX(int index) const;
     [[nodiscard]] qreal itemY(int index) const;
     [[nodiscard]] qreal columnStride() const;

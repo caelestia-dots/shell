@@ -640,8 +640,9 @@ void LazyGridView::relayout() {
         emit contentHeightChanged();
     }
 
-    // Publish each live delegate's row height so delegates can opt into
-    // filling the row vertically (LazyGridView.rowHeight).
+    // Publish each live delegate's row height (LazyGridView.rowHeight). The view
+    // stretches items to this height itself (see positionItem); the property is
+    // exposed so delegates can read the row height they were sized to.
     for (auto it = m_delegates.begin(); it != m_delegates.end(); ++it) {
         if (!it->item)
             continue;
@@ -657,6 +658,13 @@ void LazyGridView::relayout() {
 int LazyGridView::rowOf(int index) const {
     const int cols = std::max(1, m_resolvedColumns);
     return index / cols;
+}
+
+qreal LazyGridView::rowHeightOf(int index) const {
+    const int r = rowOf(index);
+    if (r >= 0 && r < static_cast<int>(m_rowHeights.size()) && m_rowHeights[r] > 0)
+        return m_rowHeights[r];
+    return 0;
 }
 
 qreal LazyGridView::columnStride() const {
@@ -803,11 +811,17 @@ void LazyGridView::positionItem(DelegateEntry& entry) {
     if (!item || index < 0 || index >= static_cast<int>(m_layout.size()))
         return;
 
+    // Fill the row vertically: the height target is the row height (tallest
+    // cell), not the item's own preferred height. Row heights derive from
+    // delegateHeight (implicit/preferred), which setHeight doesn't affect, so
+    // there is no feedback loop. Falls back to the item's height until the row
+    // height is known.
+    const qreal rowH = rowHeightOf(index);
     const qreal targets[GeomCount] = {
         itemX(index),
         itemY(index) - m_contentY,
         m_resolvedCellWidth,
-        delegateHeight(item),
+        rowH > 0 ? rowH : delegateHeight(item),
     };
 
     // Resize-created items spring in from the pre-resize slot seeded at creation
@@ -981,11 +995,13 @@ void LazyGridView::syncDelegates() {
         if (entry.item) {
             entry.pendingInsert = true;
 
-            // Actual (post-layout) geometry.
+            // Actual (post-layout) geometry. Height fills the row (see
+            // positionItem); falls back to the item's height until known.
             const qreal aX = itemX(i);
             const qreal aY = itemY(i) - m_contentY;
             const qreal aW = m_resolvedCellWidth;
-            const qreal aH = delegateHeight(entry.item);
+            const qreal rowH = rowHeightOf(i);
+            const qreal aH = rowH > 0 ? rowH : delegateHeight(entry.item);
 
             // When a resize creates this item, spring it in from its slot in the
             // pre-resize layout. Otherwise (a plain viewport change) place it at
