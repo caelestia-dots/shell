@@ -58,6 +58,10 @@ class LazyGridView : public QQuickItem {
     Q_PROPERTY(int resolvedColumns READ resolvedColumns NOTIFY resolvedColumnsChanged)
     Q_PROPERTY(qreal resolvedCellWidth READ resolvedCellWidth NOTIFY resolvedCellWidthChanged)
     Q_PROPERTY(qreal contentHeight READ contentHeight NOTIFY contentHeightChanged)
+    // animatedContentHeight springs toward its measured value; use for a smoothly
+    // animated implicitHeight. contentHeight itself snaps (viewport math needs
+    // the true value).
+    Q_PROPERTY(qreal animatedContentHeight READ animatedContentHeight NOTIFY animatedContentHeightChanged)
     Q_PROPERTY(qreal contentY READ contentY WRITE setContentY NOTIFY contentYChanged)
 
     // Viewport & lazy loading
@@ -121,6 +125,7 @@ public:
     [[nodiscard]] int resolvedColumns() const;
     [[nodiscard]] qreal resolvedCellWidth() const;
     [[nodiscard]] qreal contentHeight() const;
+    [[nodiscard]] qreal animatedContentHeight() const;
 
     [[nodiscard]] qreal contentY() const;
     void setContentY(qreal contentY);
@@ -186,6 +191,7 @@ signals:
     void resolvedColumnsChanged();
     void resolvedCellWidthChanged();
     void contentHeightChanged();
+    void animatedContentHeightChanged();
     void contentYChanged();
     void viewportChanged();
     void useCustomViewportChanged();
@@ -252,6 +258,9 @@ private:
 
     // Geometry
     void relayout();
+    // Retargets the content-height spring after contentHeight changes (snaps on
+    // the first value / when springs are disabled, otherwise springs in step()).
+    void updateAnimatedContentHeight();
     [[nodiscard]] int rowOf(int index) const;
     [[nodiscard]] qreal rowHeightOf(int index) const;
     [[nodiscard]] qreal itemX(int index) const;
@@ -297,6 +306,9 @@ private:
     int m_resolvedColumns = 1;
     qreal m_resolvedCellWidth = 0;
     qreal m_contentHeight = 0;
+    qreal m_animatedContentHeight = 0;
+    qreal m_animatedContentHeightVel = 0;
+    bool m_animatedContentHeightPlaced = false;
     qreal m_contentY = 0;
 
     qreal m_knownHeightSum = 0;

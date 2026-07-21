@@ -147,7 +147,7 @@ PageBase {
         property alias plugins: model.values
 
         Layout.fillWidth: true
-        implicitHeight: contentHeight
+        implicitHeight: animatedContentHeight
 
         cellWidth: 300 // Minimum cell width, elements stretch to fill complete view width
         rowSpacing: Tokens.spacing.large

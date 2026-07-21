@@ -233,6 +233,10 @@ qreal LazyGridView::contentHeight() const {
     return m_contentHeight;
 }
 
+qreal LazyGridView::animatedContentHeight() const {
+    return m_animatedContentHeight;
+}
+
 qreal LazyGridView::contentY() const {
     return m_contentY;
 }
@@ -638,6 +642,7 @@ void LazyGridView::relayout() {
     if (!qFuzzyCompare(m_contentHeight + 1.0, y + 1.0)) {
         m_contentHeight = y;
         emit contentHeightChanged();
+        updateAnimatedContentHeight();
     }
 
     // Publish each live delegate's row height (LazyGridView.rowHeight). The view
@@ -653,6 +658,23 @@ void LazyGridView::relayout() {
         if (att)
             att->setRowHeight(m_rowHeights[r]);
     }
+}
+
+void LazyGridView::updateAnimatedContentHeight() {
+    // First value (or springs disabled) snaps; there is nothing to animate from.
+    if (!m_animatedContentHeightPlaced || m_stiffness <= 0) {
+        m_animatedContentHeightPlaced = true;
+        m_animatedContentHeightVel = 0;
+        if (!qFuzzyCompare(m_animatedContentHeight + 1.0, m_contentHeight + 1.0)) {
+            m_animatedContentHeight = m_contentHeight;
+            emit animatedContentHeightChanged();
+        }
+        return;
+    }
+
+    // Otherwise let step() spring toward the new target.
+    if (!qFuzzyCompare(m_animatedContentHeight + 1.0, m_contentHeight + 1.0))
+        setAnimating(true);
 }
 
 int LazyGridView::rowOf(int index) const {
@@ -799,6 +821,23 @@ void LazyGridView::step(qreal dt) {
         entry.item->setY(entry.springVal[GeomY]);
         entry.item->setWidth(quantizeWidth(entry.springVal[GeomW]));
         entry.item->setHeight(entry.springVal[GeomH]);
+    }
+
+    // Aggregate content height springs toward its measured target so a bound
+    // implicitHeight can animate (retargeted in updateAnimatedContentHeight).
+    if (m_animatedContentHeightPlaced && m_stiffness > 0 &&
+        (std::abs(m_animatedContentHeight - m_contentHeight) >= SETTLE_POS ||
+            std::abs(m_animatedContentHeightVel) >= SETTLE_VEL)) {
+        integrateSpring(
+            m_animatedContentHeight, m_animatedContentHeightVel, m_contentHeight, naturalFreq, dampingRatio, dt);
+        if (std::abs(m_animatedContentHeight - m_contentHeight) < SETTLE_POS &&
+            std::abs(m_animatedContentHeightVel) < SETTLE_VEL) {
+            m_animatedContentHeight = m_contentHeight;
+            m_animatedContentHeightVel = 0;
+        } else {
+            anyActive = true;
+        }
+        emit animatedContentHeightChanged();
     }
 
     if (!anyActive)
@@ -1216,6 +1255,10 @@ void LazyGridView::resetContent() {
 
     m_knownHeightSum = 0;
     m_knownHeightCount = 0;
+
+    // Snap the content-height spring to the next layout rather than animating
+    // from the torn-down content.
+    m_animatedContentHeightPlaced = false;
 
     m_layout.clear();
     m_rowTops.clear();
