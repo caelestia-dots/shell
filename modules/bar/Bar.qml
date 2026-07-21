@@ -186,16 +186,16 @@ ColumnLayout {
                     id: pluginEntryWrapper
 
                     BoundComponent {
-                        readonly property pluginEntryPoint entryPoint: {
+                        readonly property var entryPoint: {
                             const id = pluginEntryWrapper.modelData.id;
                             const entry = Plugins.entryPoints(EntryPointType.BarEntry).find(e => e.properties.name === id);
                             if (!entry)
                                 console.warn(logCat, "No plugin entry point found for", id);
                             return entry;
                         }
-                        readonly property var settings: entryPoint.plugin.settings
+                        readonly property var settings: entryPoint?.plugin.settings
 
-                        source: entryPoint.source
+                        source: entryPoint?.source ?? ""
                     }
                 }
             }
