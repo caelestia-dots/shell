@@ -275,7 +275,7 @@ PageBase {
                     StyledRect {
                         required property string modelData
 
-                        color: Colours.palette.m3tertiary
+                        color: Colours.palette.m3tertiaryContainer
                         radius: Tokens.rounding.full
 
                         implicitWidth: tagText.implicitWidth + Tokens.padding.medium * 2
@@ -286,7 +286,7 @@ PageBase {
 
                             anchors.centerIn: parent
                             text: parent.modelData
-                            color: Colours.palette.m3onTertiary
+                            color: Colours.palette.m3onTertiaryContainer
                             font: Tokens.font.label.small
                         }
                     }
