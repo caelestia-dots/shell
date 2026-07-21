@@ -1053,7 +1053,7 @@ void LazyGridView::syncDelegates() {
                 const qreal vX = pcol * (m_prevCellWidth + m_columnSpacing);
                 const qreal vY = (prow < m_prevRowTops.size() ? m_prevRowTops[prow]
                                                               : prow * (effectiveEstimatedHeight() + m_rowSpacing)) -
-                    m_contentY;
+                                 m_contentY;
                 const qreal vW = m_prevCellWidth > 0 ? m_prevCellWidth : aW;
                 const qreal vH =
                     (prow < m_prevRowHeights.size() && m_prevRowHeights[prow] > 0) ? m_prevRowHeights[prow] : aH;
