@@ -8,7 +8,7 @@ import Caelestia.Services
 Scope {
     id: root
 
-    readonly property list<var> warnLevels: [...GlobalConfig.general.battery.warnLevels].sort((a, b) => b.level - a.level)
+    readonly property list<var> warnLevels: [...GlobalConfig.general.battery.warnLevels].sort((a, b) => a.level - b.level)
     property real lastPercentage: 100
 
     Connections {
@@ -29,6 +29,37 @@ Scope {
         }
 
         target: UPower
+    }
+
+    Connections {
+        function onReadyChanged(): void {
+            if (!UPower.displayDevice.ready)
+                return;
+
+            const p = UPower.displayDevice.percentage * 100;
+            if (!UPower.onBattery) {
+                lastPercentage = p;
+                return;
+            }
+
+            if (lastPercentage >= 0) {
+                for (const level of root.warnLevels) {
+                    if (p <= level.level && lastPercentage > level.level) {
+                        Toaster.toast(level.title ?? qsTr("Battery warning"), level.message ?? qsTr("Battery level is low"), level.icon ?? "battery_android_alert", level.critical ? Toast.Error : Toast.Warning);
+                        break;
+                    }
+                }
+            }
+
+            if (!hibernateTimer.running && p <= GlobalConfig.general.battery.criticalLevel) {
+                Toaster.toast(qsTr("Hibernating in 5 seconds"), qsTr("Hibernating to prevent data loss"), "battery_android_alert", Toast.Error);
+                hibernateTimer.start();
+            }
+
+            lastPercentage = p;
+        }
+
+        target: UPower.displayDevice
     }
 
     Connections {
