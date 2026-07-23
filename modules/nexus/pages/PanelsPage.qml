@@ -36,11 +36,18 @@ PageBase {
         }
 
         NavRow {
-            last: true
             icon: "dock_to_right"
             label: qsTr("Sidebar")
             status: Config.sidebar.enabled ? qsTr("Enabled") : qsTr("Disabled")
             onClicked: root.nState.openSubPage(4)
+        }
+
+        NavRow {
+            last: true
+            icon: "construction"
+            label: qsTr("Utilities")
+            status: Config.utilities.enabled ? qsTr("Enabled") : qsTr("Disabled")
+            onClicked: root.nState.openSubPage(5)
         }
     }
 }
