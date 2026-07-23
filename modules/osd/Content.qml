@@ -19,6 +19,7 @@ Item {
     required property bool muted
     required property real sourceVolume
     required property bool sourceMuted
+    required property real callVolume
     required property real brightness
 
     implicitWidth: layout.implicitWidth + Tokens.padding.large + layout.anchors.horizontalCenterOffset * 2
@@ -75,6 +76,32 @@ Item {
                     value: root.sourceVolume
                     to: GlobalConfig.services.maxVolume
                     onMoved: Audio.setSourceVolume(value)
+                }
+            }
+        }
+
+        // Call volume
+        WrappedLoader {
+            shouldBeActive: Audio.getCallStreams().length > 0
+
+            sourceComponent: CustomMouseArea {
+                function onWheel(event: WheelEvent) {
+                    if (event.angleDelta.y > 0)
+                        Audio.incrementCallVolume();
+                    else if (event.angleDelta.y < 0)
+                        Audio.decrementCallVolume();
+                }
+
+                implicitWidth: Tokens.sizes.osd.sliderWidth
+                implicitHeight: Tokens.sizes.osd.sliderHeight
+
+                FilledSlider {
+                    anchors.fill: parent
+
+                    icon: "call"
+                    value: root.callVolume
+                    to: GlobalConfig.services.maxVolume
+                    onMoved: Audio.setCallVolume(value)
                 }
             }
         }

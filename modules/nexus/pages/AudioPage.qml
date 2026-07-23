@@ -72,6 +72,18 @@ PageBase {
             onSelected: node => Audio.setAudioSource(node)
         }
 
+        // Call volume — quick control for all communication apps at once
+        SliderRow {
+            Layout.topMargin: Tokens.spacing.large - parent.spacing
+            first: true
+            icon: "call"
+            label: qsTr("Call volume")
+            valueLabel: Math.round(value * 100) + "%"
+            value: Audio.callVolume
+            enabled: true
+            onMoved: v => Audio.setCallVolume(v)
+        }
+
         // Per-app volumes
         ConnectedRect {
             Layout.fillWidth: true

@@ -27,6 +27,74 @@ Singleton {
     readonly property bool sourceMuted: !!source?.audio?.muted
     readonly property real sourceVolume: source?.audio?.volume ?? 0
 
+    // Call volume — controls output volume of calling/communication apps
+    // (Discord, Teams, Zoom, etc.) independently of system volume.
+    // Edit this list to customize which apps are considered "call" apps.
+    // Matches against application.name, application.process.binary, and
+    // node name (case-insensitive substring match).
+    readonly property var callAppsPatterns: [
+        "discord", "teams-for-linux", "teams", "zoom", "slack",
+        "telegram-desktop", "signal-desktop", "skypeforlinux", "element",
+        "jitsi-meet", "mumble", "webex", "vesktop", "equicord"
+    ]
+
+    property real callVolume: 1.0
+
+    function getCallStreams() {
+        if (!root.streams)
+            return [];
+        const patterns = callAppsPatterns || [];
+        return root.streams.filter(s => {
+            if (!s || !s.properties)
+                return false;
+            // Only target output/playback streams, not microphone capture
+            const mediaClass = (s.properties["media.class"] || "");
+            if (!mediaClass.startsWith("Stream/Output"))
+                return false;
+            const appName = (s.properties["application.name"] || "").toLowerCase();
+            const binary = (s.properties["application.process.binary"] || "").toLowerCase();
+            const nodeName = (s.name || "").toLowerCase();
+            return patterns.some(pattern =>
+                appName.includes(pattern) || binary.includes(pattern) || nodeName.includes(pattern)
+            );
+        });
+    }
+
+    function setCallVolume(newVolume: real): void {
+        root.callVolume = Math.max(0, Math.min(GlobalConfig.services.maxVolume, newVolume));
+        const streams = getCallStreams();
+        if (!streams)
+            return;
+        for (const s of streams) {
+            if (s?.ready && s?.audio) {
+                s.audio.muted = false;
+                s.audio.volume = root.callVolume;
+            }
+        }
+    }
+
+    function incrementCallVolume(amount: real): void {
+        setCallVolume(root.callVolume + (amount || GlobalConfig.services.audioIncrement));
+    }
+
+    function decrementCallVolume(amount: real): void {
+        setCallVolume(root.callVolume - (amount || GlobalConfig.services.audioIncrement));
+    }
+
+    // Auto-apply call volume when new call streams appear
+    function applyCallVolumeToNewStreams(): void {
+        if (root.callVolume >= 1.0)
+            return;
+        const streams = getCallStreams();
+        if (!streams)
+            return;
+        for (const s of streams) {
+            if (s?.ready && s?.audio && Math.abs(s.audio.volume - root.callVolume) > 0.01) {
+                s.audio.volume = root.callVolume;
+            }
+        }
+    }
+
     readonly property alias cava: cava
     readonly property alias beatTracker: beatTracker
 
@@ -124,6 +192,7 @@ Singleton {
         root.sinks = newSinks;
         root.sources = newSources;
         root.streams = newStreams;
+        root.applyCallVolumeToNewStreams();
     }
 
     onSinkChanged: {
