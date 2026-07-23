@@ -72,6 +72,7 @@ PageBase {
             onSelected: node => Audio.setAudioSource(node)
         }
 
+        // Per-app volumes
         // Call volume — quick control for all communication apps at once
         SliderRow {
             Layout.topMargin: Tokens.spacing.large - parent.spacing

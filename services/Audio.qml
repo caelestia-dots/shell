@@ -32,13 +32,12 @@ Singleton {
     // Edit this list to customize which apps are considered "call" apps.
     // Matches against application.name, application.process.binary, and
     // node name (case-insensitive substring match).
-    readonly property var callAppsPatterns: [
-        "discord", "teams-for-linux", "teams", "zoom", "slack",
-        "telegram-desktop", "signal-desktop", "skypeforlinux", "element",
-        "jitsi-meet", "mumble", "webex", "vesktop", "equicord"
-    ]
+    readonly property var callAppsPatterns: ["discord", "teams-for-linux", "teams", "zoom", "slack", "telegram-desktop", "signal-desktop", "skypeforlinux", "element", "jitsi-meet", "mumble", "webex", "vesktop", "equicord"]
 
     property real callVolume: 1.0
+
+    readonly property alias cava: cava
+    readonly property alias beatTracker: beatTracker
 
     function getCallStreams() {
         if (!root.streams)
@@ -54,9 +53,7 @@ Singleton {
             const appName = (s.properties["application.name"] || "").toLowerCase();
             const binary = (s.properties["application.process.binary"] || "").toLowerCase();
             const nodeName = (s.name || "").toLowerCase();
-            return patterns.some(pattern =>
-                appName.includes(pattern) || binary.includes(pattern) || nodeName.includes(pattern)
-            );
+            return patterns.some(pattern => appName.includes(pattern) || binary.includes(pattern) || nodeName.includes(pattern));
         });
     }
 
@@ -94,9 +91,6 @@ Singleton {
             }
         }
     }
-
-    readonly property alias cava: cava
-    readonly property alias beatTracker: beatTracker
 
     function setVolume(newVolume: real): void {
         if (sink?.ready && sink?.audio) {
