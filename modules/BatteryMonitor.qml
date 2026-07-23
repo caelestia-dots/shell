@@ -24,7 +24,7 @@ Scope {
 
         if (root.lastPercentage >= 0 && UPower.onBattery && lowWarningEnabled) {
             for (const level of root.lowWarnLevels) {
-                if (p <= level.level && level.level < root.lastPercentage) {
+                if (p <= level.level && level.level < root.lastPercentage && level.enabled) {
                     Toaster.toast(level.title ?? qsTr("Battery warning"), level.message ?? qsTr("Battery level is low"), level.icon ?? "battery_android_alert", level.critical ? Toast.Error : Toast.Warning);
                     if (playSound) {
                         notifyLowBattery.play();
@@ -36,7 +36,7 @@ Scope {
 
         if (root.lastPercentage >= 0 && !UPower.onBattery && chargeWarningEnabled) {
             for (const level of root.chargeWarnLevels) {
-                if (p >= level.level && level > root.lastPercentage) {
+                if (p >= level.level && level > root.lastPercentage && level.enabled) {
                     Toaster.toast(level.title ?? qsTr("Battery warning"), level.message ?? qsTr("Battery level is low"), level.icon ?? "battery_android_alert", level.critical ? Toast.Error : Toast.Warning);
                     if (playSound) {
                         notifyHighBattery.play();
