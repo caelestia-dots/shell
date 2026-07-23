@@ -38,9 +38,23 @@ class UtilitiesVpn : public ConfigObject {
 
     CONFIG_GLOBAL_PROPERTY(bool, enabled, false)
     CONFIG_GLOBAL_PROPERTY(QVariantList, provider)
+    CONFIG_GLOBAL_PROPERTY(QString, selectedProvider, u""_s)
 
 public:
     explicit UtilitiesVpn(QObject* parent = nullptr)
+        : ConfigObject(parent) {}
+};
+
+class UtilitiesCards : public ConfigObject {
+    Q_OBJECT
+    QML_ANONYMOUS
+
+    CONFIG_PROPERTY(bool, keepAwake, true)
+    CONFIG_PROPERTY(bool, recorder, true)
+    CONFIG_PROPERTY(bool, quickToggles, true)
+
+public:
+    explicit UtilitiesCards(QObject* parent = nullptr)
         : ConfigObject(parent) {}
 };
 
@@ -50,6 +64,7 @@ class UtilitiesConfig : public ConfigObject {
 
     CONFIG_PROPERTY(bool, enabled, true)
     CONFIG_PROPERTY(int, maxToasts, 4)
+    CONFIG_SUBOBJECT(UtilitiesCards, cards)
     CONFIG_SUBOBJECT(UtilitiesToasts, toasts)
     CONFIG_SUBOBJECT(UtilitiesVpn, vpn)
     CONFIG_PROPERTY(QVariantList, quickToggles,
@@ -66,6 +81,7 @@ class UtilitiesConfig : public ConfigObject {
 public:
     explicit UtilitiesConfig(QObject* parent = nullptr)
         : ConfigObject(parent)
+        , m_cards(new UtilitiesCards(this))
         , m_toasts(new UtilitiesToasts(this))
         , m_vpn(new UtilitiesVpn(this)) {}
 };

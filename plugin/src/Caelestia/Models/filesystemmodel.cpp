@@ -420,39 +420,28 @@ void FileSystemModel::applyChanges(const QSet<QString>& removedPaths, const QSet
         return compareEntries(a, b);
     });
 
-    // Batch insert new entries
-    int insertStart = -1;
-    QList<FileSystemEntry*> batchItems;
-    for (const auto& entry : std::as_const(newEntries)) {
-        const auto it = std::lower_bound(
-            m_entries.begin(), m_entries.end(), entry, [this](const FileSystemEntry* a, const FileSystemEntry* b) {
+    // Batch insert new entries (each run lands contiguously before m_entries[row])
+    int i = 0;
+    while (i < newEntries.size()) {
+        const auto it = std::lower_bound(m_entries.begin(), m_entries.end(), newEntries[i],
+            [this](const FileSystemEntry* a, const FileSystemEntry* b) {
                 return compareEntries(a, b);
             });
         const auto row = static_cast<int>(it - m_entries.begin());
 
-        if (insertStart == -1) {
-            insertStart = row;
-            batchItems << entry;
-        } else if (row == insertStart + batchItems.size()) {
-            batchItems << entry;
-        } else {
-            beginInsertRows(QModelIndex(), insertStart, insertStart + static_cast<int>(batchItems.size()) - 1);
-            for (int i = 0; i < batchItems.size(); ++i) {
-                m_entries.insert(insertStart + i, batchItems[i]);
-            }
-            endInsertRows();
-
-            insertStart = row;
-            batchItems.clear();
-            batchItems << entry;
+        // Extend the run while the next new entry still sorts before the existing element at row
+        int j = i + 1;
+        while (j < newEntries.size() && (row >= m_entries.size() || compareEntries(newEntries[j], m_entries[row]))) {
+            ++j;
         }
-    }
-    if (!batchItems.isEmpty()) {
-        beginInsertRows(QModelIndex(), insertStart, insertStart + static_cast<int>(batchItems.size()) - 1);
-        for (int i = 0; i < batchItems.size(); ++i) {
-            m_entries.insert(insertStart + i, batchItems[i]);
+
+        beginInsertRows(QModelIndex(), row, row + (j - i) - 1);
+        for (int k = i; k < j; ++k) {
+            m_entries.insert(row + (k - i), newEntries[k]);
         }
         endInsertRows();
+
+        i = j;
     }
 
     emit entriesChanged();
