@@ -17,20 +17,6 @@ Scope {
 
     readonly property bool playSound: GlobalConfig.general.battery.toastSound
 
-    MediaPlayer {
-        id: notifyLowBattery
-
-        source: Paths.absolutePath(GlobalConfig.paths.lowBatNotifSound)
-        audioOutput: AudioOutput {}
-    }
-
-    MediaPlayer {
-        id: notifyHighBattery
-
-        source: Paths.absolutePath(GlobalConfig.paths.highBatNotifSound)
-        audioOutput: AudioOutput {}
-    }
-    
     property real lastPercentage: 100
 
     function handleBatteryWarnings(): void {
@@ -61,7 +47,6 @@ Scope {
 
         root.lastPercentage = p;
     }
-    property real lastPercentage: 100
 
     function handleBatteryWarnings(): void {
         const p = UPower.displayDevice.percentage * 100;
@@ -96,6 +81,20 @@ Scope {
         }
 
         root.lastPercentage = p;
+    }
+
+    MediaPlayer {
+        id: notifyLowBattery
+
+        source: Paths.absolutePath(GlobalConfig.paths.lowBatNotifSound)
+        audioOutput: AudioOutput {}
+    }
+
+    MediaPlayer {
+        id: notifyHighBattery
+
+        source: Paths.absolutePath(GlobalConfig.paths.highBatNotifSound)
+        audioOutput: AudioOutput {}
     }
 
     Connections {
