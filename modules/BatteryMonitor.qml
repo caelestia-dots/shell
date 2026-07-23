@@ -38,13 +38,13 @@ Scope {
 
             const p = UPower.displayDevice.percentage * 100;
             if (!UPower.onBattery) {
-                lastPercentage = p;
+                root.lastPercentage = p;
                 return;
             }
 
-            if (lastPercentage >= 0) {
+            if (root.lastPercentage >= 0) {
                 for (const level of root.warnLevels) {
-                    if (p <= level.level && lastPercentage > level.level) {
+                    if (p <= level.level && root.lastPercentage > level.level) {
                         Toaster.toast(level.title ?? qsTr("Battery warning"), level.message ?? qsTr("Battery level is low"), level.icon ?? "battery_android_alert", level.critical ? Toast.Error : Toast.Warning);
                         break;
                     }
@@ -56,7 +56,7 @@ Scope {
                 hibernateTimer.start();
             }
 
-            lastPercentage = p;
+            root.lastPercentage = p;
         }
 
         target: UPower.displayDevice
@@ -69,13 +69,13 @@ Scope {
 
             const p = UPower.displayDevice.percentage * 100;
             if (!UPower.onBattery) {
-                lastPercentage = p;
+                root.lastPercentage = p;
                 return;
             }
 
-            if (lastPercentage >= 0) {
+            if (root.lastPercentage >= 0) {
                 for (const level of root.warnLevels) {
-                    if (p <= level.level && lastPercentage > level.level) {
+                    if (p <= level.level && root.lastPercentage > level.level) {
                         Toaster.toast(level.title ?? qsTr("Battery warning"), level.message ?? qsTr("Battery level is low"), level.icon ?? "battery_android_alert", level.critical ? Toast.Error : Toast.Warning);
                         break;
                     }
@@ -87,7 +87,7 @@ Scope {
                 hibernateTimer.start();
             }
 
-            lastPercentage = p;
+            root.lastPercentage = p;
         }
 
         target: UPower.displayDevice
