@@ -292,16 +292,5 @@ PageBase {
                 changeToastIconVariant();
             }
         }
-
-        ToggleRow {
-            verticalPadding: Tokens.padding.large
-            last: true
-            text: qsTr("Repeated Warnings")
-            subtext: qsTr("Enables repeated warning toasts everytime your battery level changes")
-            checked: GlobalConfig.general.battery.repeatedWarnings ?? false
-            onToggled: {
-                toggleRepeatWarning();
-            }
-        }
     }
 }
