@@ -11,20 +11,44 @@ Scope {
     readonly property list<var> warnLevels: [...GlobalConfig.general.battery.warnLevels].sort((a, b) => a.level - b.level)
     property real lastPercentage: 100
 
+    function handleBatteryWarnings(): void {
+        const p = UPower.displayDevice.percentage * 100;
+
+        if (!UPower.onBattery) {
+            root.lastPercentage = p;
+            return;
+        }
+
+        if (root.lastPercentage >= 0) {
+            for (const level of root.warnLevels) {
+                if (p <= level.level && root.lastPercentage > level.level) {
+                    Toaster.toast(level.title ?? qsTr("Battery warning"), level.message ?? qsTr("Battery level is low"), level.icon ?? "battery_android_alert", level.critical ? Toast.Error : Toast.Warning);
+                    break;
+                }
+            }
+        }
+
+        if (!hibernateTimer.running && p <= GlobalConfig.general.battery.criticalLevel) {
+            Toaster.toast(qsTr("Hibernating in 5 seconds"), qsTr("Hibernating to prevent data loss"), "battery_android_alert", Toast.Error);
+            hibernateTimer.start();
+        }
+
+        root.lastPercentage = p;
+    }
+
     Connections {
         function onOnBatteryChanged(): void {
             if (!UPower.displayDevice.ready)
                 return;
+
             if (UPower.onBattery) {
                 if (GlobalConfig.utilities.toasts.chargingChanged)
                     Toaster.toast(qsTr("Charger unplugged"), qsTr("Battery is discharging"), "power_off");
-                const p = UPower.displayDevice.percentage * 100;
-                const level = root.nearestWarnLevelAbove(p);
-                if (level)
-                    Toaster.toast(level.title ?? qsTr("Battery warning"), level.message ?? qsTr("Battery level is low"), level.icon ?? "battery_android_alert", level.critical ? Toast.Error : Toast.Warning);
+                root.handleBatteryWarnings();
             } else {
                 if (GlobalConfig.utilities.toasts.chargingChanged)
                     Toaster.toast(qsTr("Charger plugged in"), qsTr("Battery is charging"), "power");
+                root.lastPercentage = 100;
             }
         }
 
@@ -35,28 +59,7 @@ Scope {
         function onReadyChanged(): void {
             if (!UPower.displayDevice.ready)
                 return;
-
-            const p = UPower.displayDevice.percentage * 100;
-            if (!UPower.onBattery) {
-                root.lastPercentage = p;
-                return;
-            }
-
-            if (root.lastPercentage >= 0) {
-                for (const level of root.warnLevels) {
-                    if (p <= level.level && root.lastPercentage > level.level) {
-                        Toaster.toast(level.title ?? qsTr("Battery warning"), level.message ?? qsTr("Battery level is low"), level.icon ?? "battery_android_alert", level.critical ? Toast.Error : Toast.Warning);
-                        break;
-                    }
-                }
-            }
-
-            if (!hibernateTimer.running && p <= GlobalConfig.general.battery.criticalLevel) {
-                Toaster.toast(qsTr("Hibernating in 5 seconds"), qsTr("Hibernating to prevent data loss"), "battery_android_alert", Toast.Error);
-                hibernateTimer.start();
-            }
-
-            root.lastPercentage = p;
+            root.handleBatteryWarnings();
         }
 
         target: UPower.displayDevice
@@ -66,28 +69,7 @@ Scope {
         function onPercentageChanged(): void {
             if (!UPower.displayDevice.ready)
                 return;
-
-            const p = UPower.displayDevice.percentage * 100;
-            if (!UPower.onBattery) {
-                root.lastPercentage = p;
-                return;
-            }
-
-            if (root.lastPercentage >= 0) {
-                for (const level of root.warnLevels) {
-                    if (p <= level.level && root.lastPercentage > level.level) {
-                        Toaster.toast(level.title ?? qsTr("Battery warning"), level.message ?? qsTr("Battery level is low"), level.icon ?? "battery_android_alert", level.critical ? Toast.Error : Toast.Warning);
-                        break;
-                    }
-                }
-            }
-
-            if (!hibernateTimer.running && p <= GlobalConfig.general.battery.criticalLevel) {
-                Toaster.toast(qsTr("Hibernating in 5 seconds"), qsTr("Hibernating to prevent data loss"), "battery_android_alert", Toast.Error);
-                hibernateTimer.start();
-            }
-
-            root.lastPercentage = p;
+            root.handleBatteryWarnings();
         }
 
         target: UPower.displayDevice
