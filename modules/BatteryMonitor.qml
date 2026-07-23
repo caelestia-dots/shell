@@ -66,7 +66,7 @@ Scope {
         function onPercentageChanged(): void {
             if (!UPower.displayDevice.ready)
                 return;
-        
+
             const p = UPower.displayDevice.percentage * 100;
             if (!UPower.onBattery) {
                 lastPercentage = p;
