@@ -14,8 +14,8 @@ QtObject {
     readonly property bool barOnTop: position === "top"
     readonly property bool barOnBottom: position === "bottom"
 
-    readonly property real barExtent: bar.implicitWidth
-    readonly property real barClamped: bar.clampedWidth
+    readonly property real barExtent: bar.extent
+    readonly property real barClamped: bar.clampedExtent
 
     function insetLeft(border: real, clamped = false): real {
         return barOnLeft ? (clamped ? barClamped : barExtent) : border;

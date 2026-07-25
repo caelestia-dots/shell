@@ -11,6 +11,7 @@ Item {
 
     required property var bar
     required property Brightness.Monitor monitor
+    required property bool horizontal
     property color colour: Colours.palette.m3primary
 
     readonly property string windowTitle: {
@@ -26,17 +27,17 @@ Item {
         return title;
     }
 
-    readonly property int maxHeight: {
+    readonly property int maxSize: {
         const otherModules = bar.children.filter(c => c.entryId && c.item !== this && c.entryId !== "spacer");
-        const otherHeight = otherModules.reduce((acc, curr) => acc + (curr.item.nonAnimHeight ?? curr.height), 0);
+        const otherSize = otherModules.reduce((acc, curr) => acc + (horizontal ? (curr.item.nonAnimWidth ?? curr.width) : (curr.item.nonAnimHeight ?? curr.height)), 0);
         // Length - 2 cause repeater counts as a child
-        return bar.height - otherHeight - bar.spacing * (bar.children.length - 1) - bar.vPadding * 2;
+        return horizontal ? bar.width - otherSize - bar.columnSpacing * (bar.children.length - 1) - bar.axisPadding * 2 : bar.height - otherSize - bar.rowSpacing * (bar.children.length - 1) - bar.axisPadding * 2;
     }
     property Title current: text1
 
     clip: true
-    implicitWidth: Math.max(icon.implicitWidth, current.implicitHeight)
-    implicitHeight: icon.implicitHeight + current.implicitWidth + current.anchors.topMargin
+    implicitWidth: horizontal ? icon.implicitWidth + current.implicitWidth + current.anchors.leftMargin : Math.max(icon.implicitWidth, current.implicitHeight)
+    implicitHeight: horizontal ? Math.max(icon.implicitHeight, current.implicitHeight) : icon.implicitHeight + current.implicitWidth + current.anchors.topMargin
 
     Loader {
         asynchronous: true
@@ -57,7 +58,7 @@ Item {
                     popouts.hasCurrent = false;
                 } else {
                     popouts.currentName = "activewindow";
-                    popouts.currentCenter = root.mapToItem(root.bar, 0, root.implicitHeight / 2).y;
+                    popouts.currentCenter = root.bar.axisCenterOf(root);
                     popouts.hasCurrent = true;
                 }
             }
@@ -67,7 +68,9 @@ Item {
     MaterialIcon {
         id: icon
 
-        anchors.horizontalCenter: parent.horizontalCenter
+        anchors.horizontalCenter: root.horizontal ? undefined : parent.horizontalCenter
+        anchors.verticalCenter: root.horizontal ? parent.verticalCenter : undefined
+        anchors.left: root.horizontal ? parent.left : undefined
 
         animate: true
         text: Icons.getAppCategoryIcon(Hypr.activeToplevel?.lastIpcObject.class, "desktop_windows")
@@ -88,7 +91,7 @@ Item {
         text: root.windowTitle
         font: root.Tokens.font.body.builders.small.letterSpacing(1.4).build()
         elide: Qt.ElideRight
-        elideWidth: root.maxHeight - icon.height
+        elideWidth: root.maxSize - (root.horizontal ? icon.width + root.current.anchors.leftMargin : icon.height)
 
         onTextChanged: {
             const next = root.current === text1 ? text2 : text1;
@@ -102,12 +105,21 @@ Item {
         Anim {}
     }
 
+    Behavior on implicitWidth {
+        enabled: root.horizontal
+
+        Anim {}
+    }
+
     component Title: StyledText {
         id: text
 
-        anchors.horizontalCenter: icon.horizontalCenter
-        anchors.top: icon.bottom
-        anchors.topMargin: Tokens.spacing.small
+        anchors.horizontalCenter: root.horizontal ? undefined : icon.horizontalCenter
+        anchors.verticalCenter: root.horizontal ? icon.verticalCenter : undefined
+        anchors.left: root.horizontal ? icon.right : undefined
+        anchors.top: root.horizontal ? undefined : icon.bottom
+        anchors.leftMargin: root.horizontal ? Tokens.spacing.small : 0
+        anchors.topMargin: root.horizontal ? 0 : Tokens.spacing.small
 
         font: metrics.font
         color: root.colour
@@ -116,17 +128,17 @@ Item {
 
         transform: [
             Translate {
-                x: root.Config.bar.activeWindow.inverted ? -text.implicitWidth + text.implicitHeight : 0
+                x: !root.horizontal && root.Config.bar.activeWindow.inverted ? -text.implicitWidth + text.implicitHeight : 0
             },
             Rotation {
-                angle: root.Config.bar.activeWindow.inverted ? 270 : 90
+                angle: root.horizontal ? 0 : root.Config.bar.activeWindow.inverted ? 270 : 90
                 origin.x: text.implicitHeight / 2
                 origin.y: text.implicitHeight / 2
             }
         ]
 
-        width: implicitHeight
-        height: implicitWidth
+        width: root.horizontal ? implicitWidth : implicitHeight
+        height: root.horizontal ? implicitHeight : implicitWidth
 
         Behavior on opacity {
             Anim {

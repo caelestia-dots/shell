@@ -123,6 +123,7 @@ Item {
         id: popoutsWrapper
 
         screen: root.screen
+        position: root.geometry.position
         borderThickness: root.borderThickness
     }
 

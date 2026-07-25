@@ -13,6 +13,7 @@ StyledClippingRect {
 
     required property ShellScreen screen
     required property bool fullscreen
+    required property bool horizontal
 
     readonly property bool onSpecial: (GlobalConfig.bar.workspaces.perMonitorWorkspaces ? Hypr.monitorFor(screen) : Hypr.focusedMonitor)?.lastIpcObject.specialWorkspace?.name !== ""
     readonly property int activeWsId: GlobalConfig.bar.workspaces.perMonitorWorkspaces ? (Hypr.monitorFor(screen).activeWorkspace?.id ?? 1) : Hypr.activeWsId
@@ -27,8 +28,8 @@ StyledClippingRect {
 
     property real blur: onSpecial ? 1 : 0
 
-    implicitWidth: Tokens.sizes.bar.innerWidth
-    implicitHeight: layout.implicitHeight + Tokens.padding.small
+    implicitWidth: horizontal ? layout.implicitWidth + Tokens.padding.small : Tokens.sizes.bar.innerWidth
+    implicitHeight: horizontal ? Tokens.sizes.bar.innerWidth : layout.implicitHeight + Tokens.padding.small
 
     color: Colours.tPalette.m3surfaceContainer
     radius: Tokens.rounding.full
@@ -57,14 +58,17 @@ StyledClippingRect {
                 workspaces: workspaces
                 occupied: root.occupied
                 groupOffset: root.groupOffset
+                horizontal: root.horizontal
             }
         }
 
-        ColumnLayout {
+        GridLayout {
             id: layout
 
             anchors.centerIn: parent
-            spacing: Math.floor(Tokens.spacing.extraSmall)
+            columns: root.horizontal ? -1 : 1
+            rowSpacing: Math.floor(Tokens.spacing.extraSmall)
+            columnSpacing: Math.floor(Tokens.spacing.extraSmall)
 
             Repeater {
                 id: workspaces
@@ -75,13 +79,15 @@ StyledClippingRect {
                     activeWsId: root.activeWsId
                     occupied: root.occupied
                     groupOffset: root.groupOffset
+                    horizontal: root.horizontal
                 }
             }
         }
 
         Loader {
             asynchronous: true
-            anchors.horizontalCenter: parent.horizontalCenter
+            anchors.horizontalCenter: root.horizontal ? undefined : parent.horizontalCenter
+            anchors.verticalCenter: root.horizontal ? parent.verticalCenter : undefined
             active: Config.bar.workspaces.activeIndicator
 
             sourceComponent: ActiveIndicator {
@@ -89,6 +95,7 @@ StyledClippingRect {
                 workspaces: workspaces
                 mask: layout
                 fullscreen: root.fullscreen
+                horizontal: root.horizontal
             }
         }
 
@@ -131,6 +138,7 @@ StyledClippingRect {
 
         sourceComponent: SpecialWorkspaces {
             screen: root.screen
+            horizontal: root.horizontal
         }
 
         Behavior on scale {
