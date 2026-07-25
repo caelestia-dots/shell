@@ -92,6 +92,7 @@ StyledWindow {
         bar: bar
         win: root
         configPosition: root.contentItem.Config.bar.position
+        configDashboardPosition: root.contentItem.Config.dashboard.position
     }
 
     Region {

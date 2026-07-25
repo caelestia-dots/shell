@@ -62,10 +62,14 @@ CustomMouseArea {
     }
 
     function inDashboardArea(x: real, y: real): bool {
-        if (geometry.horizontal) {
+        if (geometry.dashboardOnLeft) {
+            if (geometry.barOnLeft && geometry.barContains(x, y))
+                return false;
             const panelWidth = panels.dashboard.width * (1 - panels.dashboard.offsetScale);
             return x < Math.max(Config.border.minThickness, geometry.insetLeft(Config.border.thickness) + panelWidth) && withinPanelHeight(panels.dashboard, x, y);
         }
+        if (geometry.barOnTop && geometry.barContains(x, y))
+            return false;
         return inTopPanel(panels.dashboard, x, y);
     }
 
@@ -238,8 +242,8 @@ CustomMouseArea {
         }
 
         // Show/hide dashboard on drag (for touchscreen devices)
-        if (pressed && inDashboardArea(dragStart.x, dragStart.y) && (geometry.horizontal ? withinPanelHeight(panels.dashboard, x, y) : withinPanelWidth(panels.dashboard, x, y))) {
-            const dashDrag = geometry.horizontal ? dragX : dragY;
+        if (pressed && inDashboardArea(dragStart.x, dragStart.y) && (geometry.dashboardOnLeft ? withinPanelHeight(panels.dashboard, x, y) : withinPanelWidth(panels.dashboard, x, y))) {
+            const dashDrag = geometry.dashboardOnLeft ? dragX : dragY;
             if (dashDrag > Config.dashboard.dragThreshold)
                 screenState.dashboard = true;
             else if (dashDrag < -Config.dashboard.dragThreshold)
