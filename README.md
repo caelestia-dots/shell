@@ -259,6 +259,14 @@ For example, to disable the bar on DP-1:
 > This is meant to serve as a reference of all the available options, and you should
 > only add the ones you want to change to `shell.json`.
 
+> [!NOTE]
+> `bar.position` accepts `left`, `top` or `bottom`. `dashboard.position` accepts `top` or `left`.
+> Unrecognised values fall back to the default, and a dashboard configured on the bar's own edge
+> opens from the other one, since a bar covers the edge it would be revealed from.
+>
+> On a bottom bar the launcher's hover zone is covered by the bar, so it opens by keybind only,
+> and the utilities panel opens from the `power` entry instead of the bottom-right corner.
+
 <details><summary>Example</summary>
 
 ```json
@@ -415,6 +423,7 @@ For example, to disable the bar on DP-1:
         }
     },
     "bar": {
+        "position": "left",
         "persistent": true,
         "showOnHover": true,
         "dragThreshold": 20,
@@ -527,6 +536,7 @@ For example, to disable the bar on DP-1:
         "smoothing": 20
     },
     "dashboard": {
+        "position": "top",
         "enabled": true,
         "showOnHover": true,
         "showDashboard": true,
