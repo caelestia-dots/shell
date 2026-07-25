@@ -114,9 +114,12 @@ Item {
         id: dashboard
 
         screenState: root.screenState
+        onLeft: root.geometry.horizontal
 
-        anchors.horizontalCenter: parent.horizontalCenter
-        anchors.top: parent.top
+        anchors.horizontalCenter: root.geometry.horizontal ? undefined : parent.horizontalCenter
+        anchors.top: root.geometry.horizontal ? undefined : parent.top
+        anchors.verticalCenter: root.geometry.horizontal ? parent.verticalCenter : undefined
+        anchors.left: root.geometry.horizontal ? parent.left : undefined
     }
 
     BarPopouts.ClipWrapper {

@@ -22,8 +22,10 @@ Region {
 
     R {
         panel: root.panels.dashboard
-        y: 0
-        height: panel.height * (1 - root.panels.dashboard.offsetScale) + root.geometry.insetTop(root.borderThickness)
+        x: root.geometry.horizontal ? 0 : panel.x + root.geometry.insetLeft(root.borderThickness)
+        y: root.geometry.horizontal ? panel.y + root.geometry.insetTop(root.borderThickness) : 0
+        width: root.geometry.horizontal ? panel.width * (1 - root.panels.dashboard.offsetScale) + root.geometry.insetLeft(root.borderThickness) : panel.width
+        height: root.geometry.horizontal ? panel.height : panel.height * (1 - root.panels.dashboard.offsetScale) + root.geometry.insetTop(root.borderThickness)
     }
 
     R {
