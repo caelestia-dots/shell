@@ -14,14 +14,10 @@ Item {
     readonly property alias content: content
     property real offsetScale: x > 0 || content.hasCurrent ? 0 : 1
 
-    visible: width > 0 && height > 0
-    clip: true
-
-    implicitWidth: content.implicitWidth * (1 - offsetScale)
-    implicitHeight: content.implicitHeight
-
-    x: content.isDetached ? (parent.width - content.nonAnimWidth) / 2 : 0
-    y: {
+    // Where the popout is headed, before the Behaviors below lag it there. The input mask
+    // (modules/drawers/Regions.qml) is cut from these: a hole shaped from the animated geometry
+    // trails what is drawn, so the pointer falls through the visible popout to the window below.
+    readonly property real targetY: {
         if (content.isDetached)
             return (parent.height - content.nonAnimHeight) / 2;
 
@@ -31,6 +27,19 @@ Item {
             return off + diff;
         return Math.max(off, 0);
     }
+    // While closing there is nothing to settle into, so track the live size and let the hole shrink
+    readonly property bool opening: content.hasCurrent || content.isDetached
+    readonly property real nonAnimWidth: opening ? content.nonAnimWidth : width
+    readonly property real nonAnimHeight: opening ? content.nonAnimHeight : height
+
+    visible: width > 0 && height > 0
+    clip: true
+
+    implicitWidth: content.implicitWidth * (1 - offsetScale)
+    implicitHeight: content.implicitHeight
+
+    x: content.isDetached ? (parent.width - content.nonAnimWidth) / 2 : 0
+    y: targetY
 
     Behavior on offsetScale {
         Anim {}
