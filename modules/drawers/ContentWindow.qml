@@ -18,6 +18,7 @@ StyledWindow {
 
     readonly property alias bar: bar
     readonly property alias interactionWrapper: interactions
+    readonly property alias geometry: geometry
 
     readonly property ScreenState screenState: ShellState.forScreen(screen)
 
@@ -85,11 +86,19 @@ StyledWindow {
         CAnim {}
     }
 
+    EdgeGeometry {
+        id: geometry
+
+        bar: bar
+        win: root
+        configPosition: root.contentItem.Config.bar.position
+    }
+
     Region {
         id: emptyRegion
 
-        x: panels.notifications.x + bar.implicitWidth
-        y: panels.notifications.y + root.borderThickness
+        x: panels.notifications.x + geometry.insetLeft(root.borderThickness)
+        y: panels.notifications.y + geometry.insetTop(root.borderThickness)
         width: panels.notifications.width
         height: panels.notifications.height
 
@@ -104,7 +113,7 @@ StyledWindow {
     Regions {
         id: regions
 
-        bar: bar
+        geometry: geometry
         panels: panels
         win: root
     }
@@ -168,10 +177,10 @@ StyledWindow {
             anchors.margins: -50 // Make border thicker to smooth out bulge from closed drawers
             group: blobGroup
             radius: root.borderRounding
-            borderLeft: bar.implicitWidth - anchors.margins - root.sdfBorderOffset
+            borderLeft: geometry.insetLeft(root.borderThickness) - anchors.margins - root.sdfBorderOffset
             borderRight: root.borderThickness - anchors.margins - root.sdfBorderOffset
-            borderTop: root.borderThickness - anchors.margins - root.sdfBorderOffset
-            borderBottom: root.borderThickness - anchors.margins - root.sdfBorderOffset
+            borderTop: geometry.insetTop(root.borderThickness) - anchors.margins - root.sdfBorderOffset
+            borderBottom: geometry.insetBottom(root.borderThickness) - anchors.margins - root.sdfBorderOffset
         }
 
         PanelBg {
@@ -193,7 +202,7 @@ StyledWindow {
 
             panel: panels.sessionWrapper
             deformAmount: 0.2
-            x: panels.sessionWrapper.x + panels.session.x + bar.implicitWidth
+            x: panels.sessionWrapper.x + panels.session.x + geometry.insetLeft(root.borderThickness)
             implicitWidth: panels.session.width
         }
 
@@ -212,7 +221,7 @@ StyledWindow {
 
             panel: panels.osdWrapper
             deformAmount: 0.25
-            x: panels.osdWrapper.x + panels.osd.x + bar.implicitWidth
+            x: panels.osdWrapper.x + panels.osd.x + geometry.insetLeft(root.borderThickness)
             implicitWidth: panels.osd.width
         }
 
@@ -239,7 +248,7 @@ StyledWindow {
 
             panel: panels.popoutsWrapper
             deformAmount: panels.popouts.isDetached ? 0.05 : panels.popouts.hasCurrent ? 0.15 : 0.1
-            x: panels.popoutsWrapper.x + panels.popouts.x + bar.implicitWidth - panels.popouts.width * extraWidth
+            x: panels.popoutsWrapper.x + panels.popouts.x + geometry.insetLeft(root.borderThickness) - panels.popouts.width * extraWidth
             implicitWidth: panels.popouts.width * (1 + extraWidth)
 
             Behavior on extraWidth {
@@ -256,6 +265,7 @@ StyledWindow {
         screenState: root.screenState
         panels: panels
         bar: bar
+        geometry: geometry
         borderThickness: root.borderLayoutThickness
         fullscreen: root.hasFullscreen
 
@@ -265,6 +275,7 @@ StyledWindow {
             screen: root.screen
             screenState: root.screenState
             bar: bar
+            geometry: geometry
             borderThickness: root.borderThickness
 
             utilities.horizontalStretch: (sidebarBg.rawDeformMatrix.m11 - 1) / 2 + 1
@@ -339,8 +350,8 @@ StyledWindow {
         property real deformAmount: 0.15
 
         group: blobGroup
-        x: panel.x + bar.implicitWidth
-        y: panel.y + root.borderThickness
+        x: panel.x + geometry.insetLeft(root.borderThickness)
+        y: panel.y + geometry.insetTop(root.borderThickness)
         implicitWidth: panel.width
         implicitHeight: panel.height
         radius: Tokens.rounding.extraLarge
