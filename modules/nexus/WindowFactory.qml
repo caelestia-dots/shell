@@ -2,6 +2,7 @@ pragma Singleton
 
 import QtQuick
 import Quickshell
+import Quickshell.Hyprland
 import Caelestia.Config
 import qs.components
 import qs.services
@@ -10,8 +11,15 @@ import qs.modules.nexus
 Singleton {
     id: root
 
+    function activeScreen(): ShellScreen {
+        return Quickshell.screens.find(s => s.name === Hyprland.focusedMonitor?.name) ?? Quickshell.screens[0];
+    }
+
     function create(parent: Item, props: var): void {
-        nexusComp.createObject(parent ?? dummy, props);
+        const merged = Object.assign({
+            screen: activeScreen()
+        }, props ?? {});
+        nexusComp.createObject(parent ?? dummy, merged);
     }
 
     QtObject {
