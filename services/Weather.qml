@@ -161,23 +161,21 @@ Singleton {
         const [lat, lon] = coords.split(",").map(s => s.trim());
         const lang = Qt.locale().name.split("_")[0] || "en";
 
-        const fallbackToBigDataCloud = () => {
-            const fallbackUrl = `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lon}&localityLanguage=${lang}`;
-            Requests.get(fallbackUrl, text => {
-                const geo = JSON.parse(text);
-                const geoCity = geo.city || geo.locality;
-                if (geoCity) {
-                    city = fixCityName(geoCity);
-                    cachedCities.set(coords, city);
-                } else {
-                    city = "Unknown City";
-                }
-            });
+        const nominatimUrl = `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=geocodejson&accept-language=${lang}`;
+        const nominatimHeaders = {
+            "User-Agent": `caelestia-shell/${CUtils.version} (+https://github.com/caelestia-dots/shell)`
         };
 
-        const nominatimUrl = `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=geocodejson&accept-language=${lang}`;
         Requests.get(nominatimUrl, text => {
-            const geo = JSON.parse(text).features?.[0]?.properties.geocoding;
+            let geo;
+            try {
+                geo = JSON.parse(text).features?.[0]?.properties.geocoding;
+            } catch (error) {
+                console.warn(lc, `Unable to parse response from nominatim: ${error}`);
+                city = qsTr("Unknown City");
+                return;
+            }
+
             if (geo) {
                 const geoCity = geo.type === "city" ? geo.name : geo.city;
                 if (geoCity) {
@@ -186,8 +184,13 @@ Singleton {
                     return;
                 }
             }
-            fallbackToBigDataCloud();
-        }, fallbackToBigDataCloud);
+
+            console.warn(lc, "No locality in nominatim response");
+            city = qsTr("Unknown City");
+        }, error => {
+            console.warn(lc, `Nominatim request failed: ${error}`);
+            city = qsTr("Unknown City");
+        }, nominatimHeaders);
     }
 
     function fetchCoordsFromCity(cityName: string): void {
