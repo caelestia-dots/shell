@@ -19,6 +19,7 @@ Singleton {
     property bool ipApiRequestPending: false
     property double ipApiBlockedUntil: 0
     property bool citiesLoaded: false
+    property string pendingCoords
 
     readonly property string icon: cc ? Icons.getWeatherIcon(cc.weatherCode) : "cloud_alert"
     readonly property string description: cc?.weatherDesc ?? qsTr("No weather")
@@ -162,6 +163,12 @@ Singleton {
     function fetchCityFromCoords(coords: string): void {
         if (cachedCities.has(coords)) {
             city = cachedCities.get(coords);
+            return;
+        }
+
+        // Defer until cache is loaded
+        if (!citiesLoaded) {
+            pendingCoords = coords;
             return;
         }
 
@@ -321,6 +328,14 @@ Singleton {
     }
 
     onLocChanged: fetchWeatherData()
+    onCitiesLoadedChanged: {
+        if (!citiesLoaded || !pendingCoords)
+            return;
+
+        const coords = pendingCoords;
+        pendingCoords = "";
+        fetchCityFromCoords(coords);
+    }
 
     Connections {
         function onWeatherLocationChanged(): void {
