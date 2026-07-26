@@ -2,6 +2,7 @@ pragma Singleton
 
 import QtQuick
 import Quickshell
+import Quickshell.Io
 import Caelestia
 import Caelestia.Config
 import qs.utils
@@ -17,6 +18,7 @@ Singleton {
 
     property bool ipApiRequestPending: false
     property double ipApiBlockedUntil: 0
+    property bool citiesLoaded: false
 
     readonly property string icon: cc ? Icons.getWeatherIcon(cc.weatherCode) : "cloud_alert"
     readonly property string description: cc?.weatherDesc ?? qsTr("No weather")
@@ -152,6 +154,11 @@ Singleton {
         return mapping[cityName] || cityName;
     }
 
+    function cacheCity(coords: string, cityName: string): void {
+        cachedCities.set(coords, cityName);
+        citiesSaveTimer.restart();
+    }
+
     function fetchCityFromCoords(coords: string): void {
         if (cachedCities.has(coords)) {
             city = cachedCities.get(coords);
@@ -180,7 +187,7 @@ Singleton {
                 const geoCity = geo.type === "city" ? geo.name : geo.city;
                 if (geoCity) {
                     city = fixCityName(geoCity);
-                    cachedCities.set(coords, city);
+                    cacheCity(coords, city);
                     return;
                 }
             }
@@ -347,8 +354,48 @@ Singleton {
         }
     }
 
+    Timer {
+        id: citiesSaveTimer
+
+        interval: 1000
+        onTriggered: {
+            if (!root.citiesLoaded)
+                return;
+
+            const data = {};
+            root.cachedCities.forEach((cityName, coords) => data[coords] = cityName);
+            citiesStorage.setText(JSON.stringify(data));
+        }
+    }
+
     ElapsedTimer {
         id: timer
+    }
+
+    FileView {
+        id: citiesStorage
+
+        printErrors: false
+        path: `${Paths.cache}/cities.json`
+        onLoaded: {
+            try {
+                const data = JSON.parse(text());
+                for (const [coords, cityName] of Object.entries(data))
+                    if (!root.cachedCities.has(coords))
+                        root.cachedCities.set(coords, cityName);
+            } catch (error) {
+                console.warn(lc, `Unable to parse cached cities: ${error}`);
+            }
+
+            root.citiesLoaded = true;
+        }
+        onLoadFailed: err => {
+            root.citiesLoaded = true;
+            if (err === FileViewError.FileNotFound)
+                Qt.callLater(() => setText("{}"));
+            else
+                console.warn(lc, `Unable to load cached cities: ${err}`);
+        }
     }
 
     LoggingCategory {
