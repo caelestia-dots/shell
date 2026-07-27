@@ -6,8 +6,8 @@ import Caelestia
 import Caelestia.Config
 import Caelestia.I18n
 import Caelestia.Services
-import qs.utils
 import qs.services
+import qs.utils
 
 Scope {
     id: root
