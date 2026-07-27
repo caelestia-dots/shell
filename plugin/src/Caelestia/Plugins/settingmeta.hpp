@@ -39,9 +39,15 @@ public:
     enum InputType {
         Default,
 
+        // Boolean
+        Switch,
+
         // Numeric
         SpinBox,
         Slider,
+
+        // Text
+        TextField,
 
         // Multi select
         SplitButton,
