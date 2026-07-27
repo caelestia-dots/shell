@@ -19,6 +19,9 @@ ConnectedRect {
     property string icon
     property color iconColour: Colours.palette.m3onSurfaceVariant
     property Component leadingComponent: icon ? iconComp : null
+    property bool disabled: false
+
+    property real textOpacity: disabled ? 0.5 : 1
 
     signal resetRequested
 
@@ -32,6 +35,7 @@ ConnectedRect {
             text: root.icon
             color: root.iconColour
             fontStyle: Tokens.font.icon.small
+            opacity: root.textOpacity
         }
     }
 
@@ -60,6 +64,7 @@ ConnectedRect {
                 Layout.fillWidth: true
                 font: Tokens.font.body.small
                 elide: Text.ElideRight
+                opacity: root.textOpacity
             }
 
             StyledText {
@@ -69,6 +74,7 @@ ConnectedRect {
                 color: Colours.palette.m3outline
                 font: Tokens.font.label.small
                 elide: Text.ElideRight
+                opacity: root.textOpacity
             }
         }
 
@@ -80,8 +86,11 @@ ConnectedRect {
             icon: "refresh"
             text: qsTr("Reset")
             isRound: true
+            opacity: root.textOpacity
 
             onClicked: {
+                if (root.disabled) 
+                    return;
                 root.resetRequested();
             }
         }
@@ -90,10 +99,15 @@ ConnectedRect {
             Layout.preferredHeight: resetBtn.implicitHeight
             text: qsTr("Pick file")
             icon: "folder"
+            opacity: root.textOpacity
 
             isRound: true
 
-            onClicked: filePicker.open()
+            onClicked: {
+                if (root.disabled) 
+                    return;
+                filePicker.open()
+            }
         }
     }
 }
