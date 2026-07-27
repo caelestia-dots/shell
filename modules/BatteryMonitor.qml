@@ -7,6 +7,7 @@ import Caelestia.Config
 import Caelestia.I18n
 import Caelestia.Services
 import qs.utils
+import qs.services
 
 Scope {
     id: root
@@ -55,18 +56,38 @@ Scope {
         root.lastPercentage = p;
     }
 
+    function matchingAudioDevice(pwNode): var {
+        if (!pwNode?.ready)
+            return mediaDevices.defaultAudioOutput;
+
+        const name = pwNode.description || pwNode.name;
+        for (const dev of mediaDevices.audioOutputs) {
+            if (dev.description === name)
+                return dev;
+        }
+        return mediaDevices.defaultAudioOutput;
+    }
+
+    MediaDevices {
+        id: mediaDevices
+    }
+
     MediaPlayer {
         id: notifyLowBattery
 
         source: Paths.absolutePath(GlobalConfig.paths.lowBatNotifSound)
-        audioOutput: AudioOutput {}
+        audioOutput: AudioOutput {
+            device: root.matchingAudioDevice(Audio.sink)
+        }
     }
 
     MediaPlayer {
         id: notifyHighBattery
 
         source: Paths.absolutePath(GlobalConfig.paths.highBatNotifSound)
-        audioOutput: AudioOutput {}
+        audioOutput: AudioOutput {
+            device: root.matchingAudioDevice(Audio.sink)
+        }
     }
 
     Connections {
