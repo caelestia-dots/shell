@@ -239,7 +239,7 @@ PageBase {
         }
 
         FileSelectRow {
-            // first: true
+            disabled: !GlobalConfig.general.battery.toastSound
             filePicker: lowBatSoundPicker
             label: "Low battery sound"
             icon: "music_note"
@@ -252,6 +252,7 @@ PageBase {
         }
 
         FileSelectRow {
+            disabled: !GlobalConfig.general.battery.toastSound
             last: true
             filePicker: chargingSoundPicker
             label: "Charging battery sound"
