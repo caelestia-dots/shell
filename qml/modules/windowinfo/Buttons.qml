@@ -2,10 +2,9 @@ pragma ComponentBehavior: Bound
 
 import QtQuick
 import QtQuick.Layouts
-import Quickshell.Widgets
+import Caelestia.Config
 import qs.components
 import qs.services
-import qs.config
 
 ColumnLayout {
     id: root
@@ -14,14 +13,14 @@ ColumnLayout {
     property bool moveToWsExpanded
 
     anchors.fill: parent
-    spacing: Appearance.spacing.small
+    spacing: Tokens.spacing.small
 
     RowLayout {
-        Layout.topMargin: Appearance.padding.large
-        Layout.leftMargin: Appearance.padding.large
-        Layout.rightMargin: Appearance.padding.large
+        Layout.topMargin: Tokens.padding.large
+        Layout.leftMargin: Tokens.padding.large
+        Layout.rightMargin: Tokens.padding.large
 
-        spacing: Appearance.spacing.normal
+        spacing: Tokens.spacing.medium
 
         StyledText {
             Layout.fillWidth: true
@@ -31,17 +30,14 @@ ColumnLayout {
 
         StyledRect {
             color: Colours.palette.m3primary
-            radius: Appearance.rounding.small
+            radius: Tokens.rounding.medium
 
-            implicitWidth: moveToWsIcon.implicitWidth + Appearance.padding.small * 2
-            implicitHeight: moveToWsIcon.implicitHeight + Appearance.padding.small
+            implicitWidth: moveToWsIcon.implicitWidth + Tokens.padding.small
+            implicitHeight: moveToWsIcon.implicitHeight + Tokens.padding.extraSmall
 
             StateLayer {
-                function onClicked(): void {
-                    root.moveToWsExpanded = !root.moveToWsExpanded;
-                }
-
                 color: Colours.palette.m3onPrimary
+                onClicked: root.moveToWsExpanded = !root.moveToWsExpanded
             }
 
             MaterialIcon {
@@ -52,70 +48,77 @@ ColumnLayout {
                 animate: true
                 text: root.moveToWsExpanded ? "expand_more" : "keyboard_arrow_right"
                 color: Colours.palette.m3onPrimary
-                font.pointSize: Appearance.font.size.large
+                fontStyle: Tokens.font.icon.large
             }
         }
     }
 
-    WrapperItem {
-        Layout.fillWidth: true
-        Layout.leftMargin: Appearance.padding.large * 2
-        Layout.rightMargin: Appearance.padding.large * 2
+    GridLayout {
+        id: wsGrid
 
+        Layout.fillWidth: true
+        Layout.leftMargin: Tokens.padding.large
+        Layout.rightMargin: Tokens.padding.large
+        Layout.bottomMargin: root.moveToWsExpanded ? Tokens.spacing.medium : 0
         Layout.preferredHeight: root.moveToWsExpanded ? implicitHeight : 0
+        opacity: root.moveToWsExpanded ? 1 : 0
         clip: true
 
-        topMargin: Appearance.spacing.normal
-        bottomMargin: Appearance.spacing.normal
+        rowSpacing: Tokens.spacing.small
+        columnSpacing: Tokens.spacing.small
+        columns: 5
 
-        GridLayout {
-            id: wsGrid
-
-            rowSpacing: Appearance.spacing.smaller
-            columnSpacing: Appearance.spacing.normal
-            columns: 5
-
-            Repeater {
-                model: 10
-
-                Button {
-                    required property int index
-                    readonly property int wsId: Math.floor((Hypr.activeWsId - 1) / 10) * 10 + index + 1
-                    readonly property bool isCurrent: root.client?.workspace.id === wsId
-
-                    function onClicked(): void {
-                        Hypr.dispatch(`movetoworkspace ${wsId},address:0x${root.client?.address}`);
-                    }
-
-                    color: isCurrent ? Colours.tPalette.m3surfaceContainerHighest : Colours.palette.m3tertiaryContainer
-                    onColor: isCurrent ? Colours.palette.m3onSurface : Colours.palette.m3onTertiaryContainer
-                    text: wsId
-                    disabled: isCurrent
-                }
+        Behavior on Layout.bottomMargin {
+            Anim {
+                type: Anim.DefaultEffects
             }
         }
 
         Behavior on Layout.preferredHeight {
-            Anim {}
+            Anim {
+                type: Anim.DefaultEffects
+            }
+        }
+
+        Behavior on opacity {
+            Anim {
+                type: Anim.DefaultEffects
+            }
+        }
+
+        Repeater {
+            model: 10
+
+            Button {
+                required property int index
+                readonly property int wsId: Math.floor((Hypr.activeWsId - 1) / 10) * 10 + index + 1
+                readonly property bool isCurrent: root.client?.workspace.id === wsId
+
+                onClicked: {
+                    Hypr.dispatch(Hypr.usingLua ? `hl.dsp.window.move({ window = "address:0x${root.client?.address}", workspace = "${wsId}", follow = true })` : `movetoworkspace ${wsId},address:0x${root.client?.address}`);
+                }
+
+                color: isCurrent ? Colours.tPalette.m3surfaceContainerHighest : Colours.palette.m3tertiaryContainer
+                onColor: isCurrent ? Colours.palette.m3onSurface : Colours.palette.m3onTertiaryContainer
+                text: wsId
+                disabled: isCurrent
+            }
         }
     }
 
     RowLayout {
         Layout.fillWidth: true
-        Layout.leftMargin: Appearance.padding.large
-        Layout.rightMargin: Appearance.padding.large
-        Layout.bottomMargin: Appearance.padding.large
+        Layout.leftMargin: Tokens.padding.large
+        Layout.rightMargin: Tokens.padding.large
+        Layout.bottomMargin: Tokens.padding.large
 
-        spacing: root.client?.lastIpcObject.floating ? Appearance.spacing.normal : Appearance.spacing.small
+        spacing: root.client?.lastIpcObject.floating ? Tokens.spacing.medium : Tokens.spacing.small
 
         Button {
-            function onClicked(): void {
-                Hypr.dispatch(`togglefloating address:0x${root.client?.address}`);
-            }
-
             color: Colours.palette.m3secondaryContainer
             onColor: Colours.palette.m3onSecondaryContainer
             text: root.client?.lastIpcObject.floating ? qsTr("Tile") : qsTr("Float")
+            onClicked: Hypr.dispatch(Hypr.usingLua ? `hl.dsp.window.float({ window = "address:0x${root.client?.address}" })` : `togglefloating address:0x${root.client?.address}`)
         }
 
         Loader {
@@ -126,24 +129,18 @@ ColumnLayout {
             Layout.rightMargin: active ? 0 : -parent.spacing
 
             sourceComponent: Button {
-                function onClicked(): void {
-                    Hypr.dispatch(`pin address:0x${root.client?.address}`);
-                }
-
                 color: Colours.palette.m3secondaryContainer
                 onColor: Colours.palette.m3onSecondaryContainer
                 text: root.client?.lastIpcObject.pinned ? qsTr("Unpin") : qsTr("Pin")
+                onClicked: Hypr.dispatch(Hypr.usingLua ? `hl.dsp.window.pin({ window = "address:0x${root.client?.address}" })` : `pin address:0x${root.client?.address}`)
             }
         }
 
         Button {
-            function onClicked(): void {
-                Hypr.dispatch(`killwindow address:0x${root.client?.address}`);
-            }
-
             color: Colours.palette.m3errorContainer
             onColor: Colours.palette.m3onErrorContainer
             text: qsTr("Kill")
+            onClicked: Hypr.dispatch(Hypr.usingLua ? `hl.dsp.window.kill({ window = "address:0x${root.client?.address}" })` : `killwindow address:0x${root.client?.address}`)
         }
     }
 
@@ -152,22 +149,18 @@ ColumnLayout {
         property alias disabled: stateLayer.disabled
         property alias text: label.text
 
-        function onClicked(): void {
-        }
+        signal clicked
 
-        radius: Appearance.rounding.small
+        radius: Tokens.rounding.medium
 
         Layout.fillWidth: true
-        implicitHeight: label.implicitHeight + Appearance.padding.small * 2
+        implicitHeight: label.implicitHeight + Tokens.padding.small
 
         StateLayer {
             id: stateLayer
 
-            function onClicked(): void {
-                parent.onClicked();
-            }
-
             color: parent.onColor
+            onClicked: parent.clicked()
         }
 
         StyledText {
@@ -177,7 +170,7 @@ ColumnLayout {
 
             animate: true
             color: parent.onColor
-            font.pointSize: Appearance.font.size.normal
+            font: Tokens.font.body.medium
         }
     }
 }

@@ -15,4 +15,5 @@ qs_qml_module(caelestia-qml-utils
         QtQuick
         Quickshell
         Quickshell.Io
+        Quickshell.Services.Notifications
 )

@@ -4,10 +4,10 @@ import QtQuick
 import Quickshell
 import Quickshell.Hyprland
 import Quickshell.Wayland
+import Caelestia.Config
 import qs.components
 import qs.services
-import qs.config
-import qs.modules.controlcenter
+import qs.modules.nexus
 import qs.modules.windowinfo
 
 Item {
@@ -18,7 +18,7 @@ Item {
 
     readonly property alias content: content
     readonly property alias winfo: winfo
-    readonly property alias controlCenter: controlCenter
+    readonly property alias nexus: nexus
 
     readonly property real nonAnimWidth: children.find(c => c.shouldBeActive)?.implicitWidth ?? content.implicitWidth
     readonly property real nonAnimHeight: children.find(c => c.shouldBeActive)?.implicitHeight ?? content.implicitHeight
@@ -32,13 +32,16 @@ Item {
     property string detachedMode
     property string queuedMode
 
-    property int animLength: Appearance.anim.durations.expressiveDefaultSpatial
-    property list<real> animCurve: Appearance.anim.curves.expressiveDefaultSpatial
+    // Dummy object so Tokens attached prop resolves to global config
+    // Anim configs are not per-monitor
+    readonly property QtObject dummy: QtObject {}
+    property int animLength: dummy.Tokens.anim.durations.expressiveDefaultSpatial
+    property var animCurve: dummy.Tokens.anim.expressiveDefaultSpatial // The easingCurve type is Qt 6.11+ so we gotta use var for now
 
     function setAnims(detach: bool): void {
         const type = `expressive${detach ? "Slow" : "Default"}Spatial`;
-        animLength = Appearance.anim.durations[type];
-        animCurve = Appearance.anim.curves[type];
+        animLength = dummy.Tokens.anim.durations[type];
+        animCurve = dummy.Tokens.anim[type];
     }
 
     function detach(mode: string): void {
@@ -125,22 +128,32 @@ Item {
     }
 
     Comp {
-        id: controlCenter
+        id: nexus
 
         shouldBeActive: root.detachedMode === "any"
         anchors.centerIn: parent
 
-        sourceComponent: ControlCenter {
-            screen: root.screen
-            active: root.queuedMode
-            onClose: root.close()
+        sourceComponent: StyledClippingRect {
+            radius: Tokens.rounding.extraLarge
+            implicitWidth: nexusInner.implicitWidth
+            implicitHeight: nexusInner.implicitHeight
+
+            Nexus {
+                id: nexusInner
+
+                anchors.fill: parent
+                nState.screen: root.screen
+                nState.animatingContainer: nexus.opacity < 1
+                nState.currentPageIdx: ["appearance", "network", "bluetooth", "audio"].indexOf(root.queuedMode)
+                onClose: root.close()
+            }
         }
     }
 
     Behavior on implicitWidth {
         Anim {
             duration: root.animLength
-            easing.bezierCurve: root.animCurve
+            easing: root.animCurve
         }
     }
 
@@ -149,7 +162,7 @@ Item {
 
         Anim {
             duration: root.animLength
-            easing.bezierCurve: root.animCurve
+            easing: root.animCurve
         }
     }
 
@@ -182,6 +195,7 @@ Item {
                         property: "active"
                     }
                     Anim {
+                        type: Anim.DefaultEffects
                         property: "opacity"
                     }
                 }
@@ -192,6 +206,7 @@ Item {
 
                 SequentialAnimation {
                     Anim {
+                        type: Anim.DefaultEffects
                         property: "opacity"
                     }
                     PropertyAction {

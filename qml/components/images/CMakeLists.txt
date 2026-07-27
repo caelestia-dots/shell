@@ -3,7 +3,9 @@ qs_qml_module(caelestia-qml-components-images
     QML_FILES
         CachingIconImage.qml
         CachingImage.qml
+        FadeImage.qml
     DEPENDENCIES
         QtQuick
         Quickshell
+        Quickshell.Widgets
 )

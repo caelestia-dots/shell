@@ -5,5 +5,6 @@ qs_qml_module(caelestia-qml-modules-utilities-toasts
         Toasts.qml
     DEPENDENCIES
         QtQuick
+        QtQuick.Layouts
         Quickshell
 )

@@ -8,5 +8,8 @@ qs_qml_module(caelestia-qml-modules-bar-components-workspaces
         Workspaces.qml
     DEPENDENCIES
         QtQuick
+        QtQuick.Effects
+        QtQuick.Layouts
         Quickshell
+        Quickshell.Hyprland
 )

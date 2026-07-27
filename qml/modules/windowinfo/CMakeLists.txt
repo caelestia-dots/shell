@@ -9,4 +9,6 @@ qs_qml_module(caelestia-qml-modules-windowinfo
         QtQuick
         QtQuick.Layouts
         Quickshell
+        Quickshell.Hyprland
+        Quickshell.Wayland
 )

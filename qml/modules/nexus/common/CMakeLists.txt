@@ -1,0 +1,30 @@
+qs_qml_module(caelestia-qml-modules-nexus-common
+    URI Caelestia.Qml.Modules.Nexus.Common
+    QML_FILES
+        AnimatedLogo.qml
+        AudioDeviceList.qml
+        BlobPopup.qml
+        ConnectedRect.qml
+        EthernetSection.qml
+        InfoRow.qml
+        ItemList.qml
+        NavRow.qml
+        NetworkList.qml
+        PageBase.qml
+        PopupRow.qml
+        SectionHeader.qml
+        SelectRow.qml
+        SliderRow.qml
+        StackPage.qml
+        StepperRow.qml
+        ToggleRow.qml
+        WallItem.qml
+    DEPENDENCIES
+        QtQuick
+        QtQuick.Controls
+        QtQuick.Effects
+        QtQuick.Layouts
+        QtQuick.Shapes
+        Quickshell
+        Quickshell.Services.Pipewire
+)

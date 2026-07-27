@@ -9,17 +9,14 @@ qs_qml_module(caelestia-qml-services
         GameMode.qml
         Hypr.qml
         IdleInhibitor.qml
-        LyricsService.qml
-        Network.qml
         NetworkUsage.qml
         Nmcli.qml
         Notifs.qml
         Players.qml
         Recorder.qml
         Screens.qml
-        SystemUsage.qml
+        ShellState.qml
         Time.qml
-        Visibilities.qml
         VPN.qml
         Wallpapers.qml
         Weather.qml
@@ -32,4 +29,5 @@ qs_qml_module(caelestia-qml-services
         Quickshell.Services.Notifications
         Quickshell.Services.Pipewire
         Quickshell.Services.UPower
+        Quickshell.Wayland
 )

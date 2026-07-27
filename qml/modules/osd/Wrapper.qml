@@ -2,20 +2,20 @@ pragma ComponentBehavior: Bound
 
 import QtQuick
 import Quickshell
+import Caelestia.Config
 import qs.components
 import qs.services
-import qs.config
 
 Item {
     id: root
 
     required property ShellScreen screen
-    required property DrawerVisibilities visibilities
+    required property ScreenState screenState
     required property bool sidebarOrSessionVisible
 
     property bool hovered
     readonly property Brightness.Monitor monitor: Brightness.getMonitorForScreen(root.screen)
-    readonly property bool shouldBeActive: visibilities.osd && Config.osd.enabled && !(visibilities.utilities && Config.utilities.enabled)
+    readonly property bool shouldBeActive: screenState.osd && Config.osd.enabled && !(screenState.utilities && Config.utilities.enabled)
     property real offsetScale: shouldBeActive ? 0 : 1
     property real sidebarOffset: sidebarOrSessionVisible ? 12 : 0
 
@@ -26,7 +26,7 @@ Item {
     property real brightness
 
     function show(): void {
-        visibilities.osd = true;
+        screenState.osd = true;
         timer.restart();
     }
 
@@ -45,10 +45,7 @@ Item {
     opacity: 1 - offsetScale
 
     Behavior on offsetScale {
-        Anim {
-            duration: Appearance.anim.durations.expressiveDefaultSpatial
-            easing.bezierCurve: Appearance.anim.curves.expressiveDefaultSpatial
-        }
+        Anim {}
     }
 
     Connections {
@@ -87,10 +84,10 @@ Item {
     Timer {
         id: timer
 
-        interval: Config.osd.hideDelay
+        interval: root.Config.osd.hideDelay
         onTriggered: {
             if (!root.hovered)
-                root.visibilities.osd = false;
+                root.screenState.osd = false;
         }
     }
 
@@ -105,7 +102,7 @@ Item {
 
         sourceComponent: Content {
             monitor: root.monitor
-            visibilities: root.visibilities
+            screenState: root.screenState
             volume: root.volume
             muted: root.muted
             sourceVolume: root.sourceVolume

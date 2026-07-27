@@ -1,33 +1,35 @@
 pragma ComponentBehavior: Bound
 
 import QtQuick
+import Caelestia.Config
 import qs.components
 import qs.components.filedialog
 import qs.components.images
 import qs.services
-import qs.config
 import qs.utils
 
 Item {
     id: root
 
     property string source: Wallpapers.current
-    property Image current: one
+    property CachingImage current
     property bool completed
 
     onSourceChanged: {
         if (!source)
             current = null;
-        else if (current === one)
-            two.update();
         else
-            one.update();
+            current = imgComp.createObject(this, {
+                path: source
+            });
     }
 
     Component.onCompleted: {
         if (source)
             Qt.callLater(() => {
-                one.update();
+                current = imgComp.createObject(this, {
+                    path: source
+                });
                 completed = true;
             });
     }
@@ -43,30 +45,29 @@ Item {
 
             Row {
                 anchors.centerIn: parent
-                spacing: Appearance.spacing.large
+                spacing: Tokens.spacing.largeIncreased
 
                 MaterialIcon {
                     text: "sentiment_stressed"
                     color: Colours.palette.m3onSurfaceVariant
-                    font.pointSize: Appearance.font.size.extraLarge * 5
+                    fontStyle: Tokens.font.icon.builders.extraLarge.scale(5).build()
                 }
 
                 Column {
                     anchors.verticalCenter: parent.verticalCenter
-                    spacing: Appearance.spacing.small
+                    spacing: Tokens.spacing.small
 
                     StyledText {
                         text: qsTr("Wallpaper missing?")
                         color: Colours.palette.m3onSurfaceVariant
-                        font.pointSize: Appearance.font.size.extraLarge * 2
-                        font.bold: true
+                        font: Tokens.font.body.builders.large.size(28 * 2).weight(Font.Bold).build()
                     }
 
                     StyledRect {
-                        implicitWidth: selectWallText.implicitWidth + Appearance.padding.large * 2
-                        implicitHeight: selectWallText.implicitHeight + Appearance.padding.small * 2
+                        implicitWidth: selectWallText.implicitWidth + Tokens.padding.extraLargeIncreased
+                        implicitHeight: selectWallText.implicitHeight + Tokens.padding.small
 
-                        radius: Appearance.rounding.full
+                        radius: Tokens.rounding.full
                         color: Colours.palette.m3primary
 
                         FileDialog {
@@ -79,12 +80,9 @@ Item {
                         }
 
                         StateLayer {
-                            function onClicked(): void {
-                                dialog.open();
-                            }
-
                             radius: parent.radius
                             color: Colours.palette.m3onPrimary
+                            onClicked: dialog.open()
                         }
 
                         StyledText {
@@ -94,7 +92,7 @@ Item {
 
                             text: qsTr("Set it now!")
                             color: Colours.palette.m3onPrimary
-                            font.pointSize: Appearance.font.size.large
+                            font: Tokens.font.body.large
                         }
                     }
                 }
@@ -102,48 +100,34 @@ Item {
         }
     }
 
-    Img {
-        id: one
-    }
+    Component {
+        id: imgComp
 
-    Img {
-        id: two
-    }
+        CachingImage {
+            id: img
 
-    component Img: CachingImage {
-        id: img
+            anchors.fill: parent
 
-        function update(): void {
-            if (path === root.source)
-                root.current = this;
-            else
-                path = root.source;
-        }
+            opacity: 0
 
-        anchors.fill: parent
-
-        opacity: 0
-        scale: Wallpapers.showPreview ? 1 : 0.8
-
-        onStatusChanged: {
-            if (status === Image.Ready)
-                root.current = this;
-        }
-
-        states: State {
-            name: "visible"
-            when: root.current === img
-
-            PropertyChanges {
-                img.opacity: 1
-                img.scale: 1
+            onStatusChanged: {
+                if (status === Image.Ready)
+                    anim.start();
             }
-        }
 
-        transitions: Transition {
-            Anim {
-                target: img
-                properties: "opacity,scale"
+            Anim on opacity {
+                id: anim
+
+                type: Anim.SlowEffects
+                running: false
+                from: 0
+                to: 1
+            }
+
+            Timer {
+                running: root.current !== img && root.current?.status === Image.Ready
+                interval: anim.duration
+                onTriggered: img.destroy()
             }
         }
     }

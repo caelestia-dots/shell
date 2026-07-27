@@ -3,9 +3,9 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import QtQuick.Effects
 import QtQuick.Layouts
+import Caelestia.Config
 import qs.components
 import qs.services
-import qs.config
 
 Item {
     id: root
@@ -23,8 +23,8 @@ Item {
     readonly property color safeSecondary: useLightSet ? Colours.palette.m3secondaryContainer : Colours.palette.m3secondary
     readonly property color safeTertiary: useLightSet ? Colours.palette.m3tertiaryContainer : Colours.palette.m3tertiary
 
-    implicitWidth: layout.implicitWidth + (Appearance.padding.large * 4 * root.clockScale)
-    implicitHeight: layout.implicitHeight + (Appearance.padding.large * 2 * root.clockScale)
+    implicitWidth: layout.implicitWidth + (Tokens.padding.large * 4 * root.clockScale)
+    implicitHeight: layout.implicitHeight + (Tokens.padding.extraLargeIncreased * root.clockScale)
 
     Item {
         id: clockContainer
@@ -63,7 +63,7 @@ Item {
 
             visible: root.bgEnabled
             anchors.fill: parent
-            radius: Appearance.rounding.large * root.clockScale
+            radius: Tokens.rounding.extraLarge * root.clockScale
             opacity: Config.background.desktopClock.background.opacity
             color: Colours.palette.m3surface
 
@@ -74,44 +74,42 @@ Item {
             id: layout
 
             anchors.centerIn: parent
-            spacing: Appearance.spacing.larger * root.clockScale
+            spacing: Tokens.spacing.large * root.clockScale
 
             RowLayout {
-                spacing: Appearance.spacing.small
+                spacing: Tokens.spacing.small
 
                 StyledText {
                     text: Time.hourStr
-                    font.pointSize: Appearance.font.size.extraLarge * 3 * root.clockScale
-                    font.weight: Font.Bold
+                    font: Tokens.font.clock.size(Tokens.font.headline.medium.pointSize * 3 * root.clockScale).weight(Font.Bold).build()
                     color: root.safePrimary
                 }
 
                 StyledText {
                     text: ":"
-                    font.pointSize: Appearance.font.size.extraLarge * 3 * root.clockScale
+                    font: Tokens.font.clock.size(Tokens.font.headline.medium.pointSize * 3 * root.clockScale).build()
                     color: root.safeTertiary
                     opacity: 0.8
-                    Layout.topMargin: -Appearance.padding.large * 1.5 * root.clockScale
+                    Layout.topMargin: -Tokens.padding.large * 1.5 * root.clockScale
                 }
 
                 StyledText {
                     text: Time.minuteStr
-                    font.pointSize: Appearance.font.size.extraLarge * 3 * root.clockScale
-                    font.weight: Font.Bold
+                    font: Tokens.font.clock.size(Tokens.font.headline.medium.pointSize * 3 * root.clockScale).weight(Font.Bold).build()
                     color: root.safeSecondary
                 }
 
                 Loader {
                     asynchronous: true
                     Layout.alignment: Qt.AlignTop
-                    Layout.topMargin: Appearance.padding.large * 1.4 * root.clockScale
+                    Layout.topMargin: Tokens.padding.large * 1.4 * root.clockScale
 
-                    active: Config.services.useTwelveHourClock
+                    active: GlobalConfig.services.useTwelveHourClock
                     visible: active
 
                     sourceComponent: StyledText {
                         text: Time.amPmStr
-                        font.pointSize: Appearance.font.size.large * root.clockScale
+                        font: Tokens.font.clock.size(Tokens.font.title.medium.pointSize * root.clockScale).build()
                         color: root.safeSecondary
                     }
                 }
@@ -120,9 +118,9 @@ Item {
             StyledRect {
                 Layout.fillHeight: true
                 Layout.preferredWidth: 4 * root.clockScale
-                Layout.topMargin: Appearance.spacing.larger * root.clockScale
-                Layout.bottomMargin: Appearance.spacing.larger * root.clockScale
-                radius: Appearance.rounding.full
+                Layout.topMargin: Tokens.spacing.large * root.clockScale
+                Layout.bottomMargin: Tokens.spacing.large * root.clockScale
+                radius: Tokens.rounding.full
                 color: root.safePrimary
                 opacity: 0.8
             }
@@ -132,24 +130,19 @@ Item {
 
                 StyledText {
                     text: Time.format("MMMM").toUpperCase()
-                    font.pointSize: Appearance.font.size.large * root.clockScale
-                    font.letterSpacing: 4
-                    font.weight: Font.Bold
+                    font: Tokens.font.clock.size(Tokens.font.title.medium.pointSize * root.clockScale).letterSpacing(4).weight(Font.Bold).build()
                     color: root.safeSecondary
                 }
 
                 StyledText {
                     text: Time.format("dd")
-                    font.pointSize: Appearance.font.size.extraLarge * root.clockScale
-                    font.letterSpacing: 2
-                    font.weight: Font.Medium
+                    font: Tokens.font.clock.size(Tokens.font.headline.medium.pointSize * root.clockScale).letterSpacing(2).weight(Font.Medium).build()
                     color: root.safePrimary
                 }
 
                 StyledText {
                     text: Time.format("dddd")
-                    font.pointSize: Appearance.font.size.larger * root.clockScale
-                    font.letterSpacing: 2
+                    font: Tokens.font.clock.size(Tokens.font.body.large.pointSize * root.clockScale).letterSpacing(2).build()
                     color: root.safeSecondary
                 }
             }
@@ -157,15 +150,12 @@ Item {
     }
 
     Behavior on clockScale {
-        Anim {
-            duration: Appearance.anim.durations.expressiveDefaultSpatial
-            easing.bezierCurve: Appearance.anim.curves.expressiveDefaultSpatial
-        }
+        Anim {}
     }
 
     Behavior on implicitWidth {
         Anim {
-            duration: Appearance.anim.durations.small
+            type: Anim.StandardSmall
         }
     }
 }

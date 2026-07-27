@@ -4,7 +4,10 @@ qs_qml_module(caelestia-qml-components-containers
         StyledFlickable.qml
         StyledListView.qml
         StyledWindow.qml
+        VerticalFadeFlickable.qml
+        VerticalFadeListView.qml
     DEPENDENCIES
         QtQuick
         Quickshell
+        Quickshell.Wayland
 )

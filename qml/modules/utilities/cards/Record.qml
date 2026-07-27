@@ -2,53 +2,54 @@ pragma ComponentBehavior: Bound
 
 import QtQuick
 import QtQuick.Layouts
+import Caelestia.Components
+import Caelestia.Config
 import qs.components
 import qs.components.controls
 import qs.services
-import qs.config
 
 StyledRect {
     id: root
 
     required property var props
-    required property DrawerVisibilities visibilities
+    required property ScreenState screenState
+    readonly property real nonAnimHeight: btnLayout.implicitHeight + listOrControls.implicitHeight + layout.spacing + layout.anchors.margins * 2
 
-    Layout.fillWidth: true
     implicitHeight: layout.implicitHeight + layout.anchors.margins * 2
 
-    radius: Appearance.rounding.normal
+    radius: Tokens.rounding.large
     color: Colours.tPalette.m3surfaceContainer
 
     ColumnLayout {
         id: layout
 
         anchors.fill: parent
-        anchors.margins: Appearance.padding.large
-        spacing: Appearance.spacing.normal
+        anchors.margins: Tokens.padding.large
+        spacing: Tokens.spacing.medium
 
         RowLayout {
-            spacing: Appearance.spacing.normal
-            z: 1
+            id: btnLayout
+
+            spacing: Tokens.spacing.medium
 
             StyledRect {
                 implicitWidth: implicitHeight
                 implicitHeight: {
-                    const h = icon.implicitHeight + Appearance.padding.smaller * 2;
+                    const h = icon.implicitHeight + Tokens.padding.small * 2;
                     return h - (h % 2);
                 }
 
-                radius: Appearance.rounding.full
+                radius: Tokens.rounding.full
                 color: Recorder.running ? Colours.palette.m3secondary : Colours.palette.m3secondaryContainer
 
                 MaterialIcon {
                     id: icon
 
                     anchors.centerIn: parent
-                    anchors.horizontalCenterOffset: -0.5
-                    anchors.verticalCenterOffset: 1.5
+                    anchors.verticalCenterOffset: 1
                     text: "screen_record"
                     color: Recorder.running ? Colours.palette.m3onSecondary : Colours.palette.m3onSecondaryContainer
-                    font.pointSize: Appearance.font.size.large
+                    fontStyle: Tokens.font.icon.large
                 }
             }
 
@@ -59,21 +60,23 @@ StyledRect {
                 StyledText {
                     Layout.fillWidth: true
                     text: qsTr("Screen Recorder")
-                    font.pointSize: Appearance.font.size.normal
+                    font: Tokens.font.body.medium
                     elide: Text.ElideRight
                 }
 
                 StyledText {
                     Layout.fillWidth: true
-                    text: Recorder.paused ? qsTr("Recording paused") : Recorder.running ? qsTr("Recording running") : qsTr("Recording off")
+                    text: Recorder.paused ? qsTr("Paused") : Recorder.running ? qsTr("Running...") : qsTr("Ready")
                     color: Colours.palette.m3onSurfaceVariant
-                    font.pointSize: Appearance.font.size.small
+                    font: Tokens.font.body.small
                     elide: Text.ElideRight
+                    animate: true
                 }
             }
 
             SplitButton {
                 disabled: Recorder.running
+
                 active: menuItems.find(m => root.props.recordingMode === m.icon + m.text) ?? menuItems[0]
                 menu.onItemSelected: item => root.props.recordingMode = item.icon + item.text
 
@@ -115,6 +118,7 @@ StyledRect {
             Layout.fillWidth: true
             Layout.preferredHeight: implicitHeight
             sourceComponent: running ? recordingControls : recordingList
+            clip: Layout.preferredHeight < implicitHeight
 
             Behavior on Layout.preferredHeight {
                 id: locHeightAnim
@@ -126,21 +130,11 @@ StyledRect {
 
             Behavior on running {
                 SequentialAnimation {
-                    ParallelAnimation {
-                        Anim {
-                            target: listOrControls
-                            property: "scale"
-                            to: 0.7
-                            duration: Appearance.anim.durations.small
-                            easing.bezierCurve: Appearance.anim.curves.standardAccel
-                        }
-                        Anim {
-                            target: listOrControls
-                            property: "opacity"
-                            to: 0
-                            duration: Appearance.anim.durations.small
-                            easing.bezierCurve: Appearance.anim.curves.standardAccel
-                        }
+                    Anim {
+                        target: listOrControls
+                        property: "opacity"
+                        to: 0
+                        type: Anim.DefaultEffects
                     }
                     PropertyAction {
                         target: locHeightAnim
@@ -148,25 +142,22 @@ StyledRect {
                         value: true
                     }
                     PropertyAction {}
-                    PropertyAction {
-                        target: locHeightAnim
-                        property: "enabled"
-                        value: false
-                    }
                     ParallelAnimation {
-                        Anim {
-                            target: listOrControls
-                            property: "scale"
-                            to: 1
-                            duration: Appearance.anim.durations.small
-                            easing.bezierCurve: Appearance.anim.curves.standardDecel
+                        SequentialAnimation {
+                            PauseAnimation {
+                                duration: 100
+                            }
+                            PropertyAction {
+                                target: locHeightAnim
+                                property: "enabled"
+                                value: false
+                            }
                         }
                         Anim {
                             target: listOrControls
                             property: "opacity"
                             to: 1
-                            duration: Appearance.anim.durations.small
-                            easing.bezierCurve: Appearance.anim.curves.standardDecel
+                            type: Anim.SlowEffects
                         }
                     }
                 }
@@ -179,7 +170,7 @@ StyledRect {
 
         RecordingList {
             props: root.props
-            visibilities: root.visibilities
+            screenState: root.screenState
         }
     }
 
@@ -187,14 +178,14 @@ StyledRect {
         id: recordingControls
 
         RowLayout {
-            spacing: Appearance.spacing.normal
+            spacing: Tokens.spacing.medium
 
             StyledRect {
-                radius: Appearance.rounding.full
+                radius: Tokens.rounding.full
                 color: Recorder.paused ? Colours.palette.m3tertiary : Colours.palette.m3error
 
-                implicitWidth: recText.implicitWidth + Appearance.padding.normal * 2
-                implicitHeight: recText.implicitHeight + Appearance.padding.smaller * 2
+                implicitWidth: recText.implicitWidth + Tokens.padding.medium * 2
+                implicitHeight: recText.implicitHeight + Tokens.padding.large
 
                 StyledText {
                     id: recText
@@ -203,7 +194,7 @@ StyledRect {
                     animate: true
                     text: Recorder.paused ? "PAUSED" : "REC"
                     color: Recorder.paused ? Colours.palette.m3onTertiary : Colours.palette.m3onError
-                    font.family: Appearance.font.family.mono
+                    font: Tokens.font.mono.small
                 }
 
                 Behavior on implicitWidth {
@@ -218,19 +209,20 @@ StyledRect {
                     Anim {
                         from: 1
                         to: 0
-                        duration: Appearance.anim.durations.large
-                        easing.bezierCurve: Appearance.anim.curves.emphasizedAccel
+                        duration: Tokens.anim.durations.large
+                        easing: Tokens.anim.emphasizedAccel
                     }
                     Anim {
                         from: 0
                         to: 1
-                        duration: Appearance.anim.durations.extraLarge
-                        easing.bezierCurve: Appearance.anim.curves.emphasizedDecel
+                        duration: Tokens.anim.durations.extraLarge
+                        easing: Tokens.anim.emphasizedDecel
                     }
                 }
             }
 
             StyledText {
+                Layout.fillWidth: true
                 text: {
                     const elapsed = Recorder.elapsed;
 
@@ -246,32 +238,53 @@ StyledRect {
 
                     return qsTr("Recording for %1").arg(time);
                 }
-                font.pointSize: Appearance.font.size.normal
+                font: Tokens.font.body.medium
+                elide: Text.ElideMiddle
             }
 
-            Item {
-                Layout.fillWidth: true
-            }
+            ButtonRow {
+                spacing: Tokens.spacing.extraSmall
 
-            IconButton {
-                label.animate: true
-                icon: Recorder.paused ? "play_arrow" : "pause"
-                toggle: true
-                checked: Recorder.paused
-                type: IconButton.Tonal
-                font.pointSize: Appearance.font.size.large
-                onClicked: {
-                    Recorder.togglePause();
-                    internalChecked = Recorder.paused;
+                IconButton {
+                    shapeMorph: true
+                    isRound: true
+                    label.animate: true
+                    icon: Recorder.paused ? "play_arrow" : "pause"
+                    isToggle: true
+                    checked: Recorder.paused
+                    type: IconButton.Tonal
+                    font: Tokens.font.icon.medium
+                    onClicked: {
+                        Recorder.togglePause();
+                        internalChecked = Recorder.paused;
+                    }
+
+                    implicitWidth: {
+                        // Ensure even size so icon is centered properly
+                        const h = label.implicitHeight + Tokens.padding.large * 2;
+                        if (h % 2 !== 0)
+                            return h + 1;
+                        return h;
+                    }
                 }
-            }
 
-            IconButton {
-                icon: "stop"
-                inactiveColour: Colours.palette.m3error
-                inactiveOnColour: Colours.palette.m3onError
-                font.pointSize: Appearance.font.size.large
-                onClicked: Recorder.stop()
+                IconButton {
+                    shapeMorph: true
+                    isRound: true
+                    icon: "stop"
+                    inactiveColour: Colours.palette.m3error
+                    inactiveOnColour: Colours.palette.m3onError
+                    font: Tokens.font.icon.medium
+                    onClicked: Recorder.stop()
+
+                    implicitWidth: {
+                        // Ensure even size so icon is centered properly
+                        const h = label.implicitHeight + Tokens.padding.large * 2;
+                        if (h % 2 !== 0)
+                            return h + 1;
+                        return h;
+                    }
+                }
             }
         }
     }

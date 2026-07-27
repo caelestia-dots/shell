@@ -2,6 +2,7 @@ pragma ComponentBehavior: Bound
 
 import QtQuick
 import Quickshell
+import Caelestia.Config
 import qs.components.containers
 import qs.modules.bar as Bar
 
@@ -10,7 +11,6 @@ Scope {
 
     required property ShellScreen screen
     required property Bar.BarWrapper bar
-    required property real borderThickness
 
     ExclusionZone {
         anchors.left: true
@@ -32,7 +32,7 @@ Scope {
     component ExclusionZone: StyledWindow {
         screen: root.screen
         name: "border-exclusion"
-        exclusiveZone: root.borderThickness
+        exclusiveZone: contentItem.Config.border.thickness
         mask: Region {}
         implicitWidth: 1
         implicitHeight: 1

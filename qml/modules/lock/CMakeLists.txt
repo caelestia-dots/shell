@@ -4,7 +4,6 @@ qs_qml_module(caelestia-qml-modules-lock
         Center.qml
         Content.qml
         Fetch.qml
-        InputField.qml
         Lock.qml
         LockSurface.qml
         Media.qml
@@ -15,7 +14,16 @@ qs_qml_module(caelestia-qml-modules-lock
         WeatherInfo.qml
     DEPENDENCIES
         QtQuick
+        QtQuick.Effects
         QtQuick.Layouts
         Quickshell
+        Quickshell.Io
+        Quickshell.Services.Notifications
         Quickshell.Services.Pam
+        Quickshell.Services.UPower
+        Quickshell.Wayland
+        Quickshell.Widgets
 )
+
+add_subdirectory(center)
+add_subdirectory(weather)

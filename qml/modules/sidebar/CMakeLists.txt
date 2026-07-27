@@ -14,4 +14,6 @@ qs_qml_module(caelestia-qml-modules-sidebar
         QtQuick
         QtQuick.Layouts
         Quickshell
+        Quickshell.Services.Notifications
+        Quickshell.Widgets
 )

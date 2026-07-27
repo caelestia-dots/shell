@@ -1,28 +1,26 @@
 pragma ComponentBehavior: Bound
 
 import QtQuick
+import Caelestia
+import Caelestia.Config
 import qs.components
-import qs.config
 
 Item {
     id: root
 
-    required property DrawerVisibilities visibilities
+    required property ScreenState screenState
     readonly property Props props: Props {}
 
-    readonly property bool shouldBeActive: visibilities.sidebar && Config.sidebar.enabled
+    readonly property bool shouldBeActive: screenState.sidebar && Config.sidebar.enabled
     property real offsetScale: shouldBeActive ? 0 : 1
 
     visible: offsetScale < 1
     anchors.rightMargin: (-implicitWidth - 5) * offsetScale
-    implicitWidth: Config.sidebar.sizes.width
+    implicitWidth: Tokens.sizes.sidebar.width
     opacity: 1 - offsetScale
 
     Behavior on offsetScale {
-        Anim {
-            duration: Appearance.anim.durations.expressiveDefaultSpatial
-            easing.bezierCurve: Appearance.anim.curves.expressiveDefaultSpatial
-        }
+        Anim {}
     }
 
     Loader {
@@ -31,15 +29,16 @@ Item {
         anchors.top: parent.top
         anchors.bottom: parent.bottom
         anchors.left: parent.left
-        anchors.margins: Appearance.padding.large
+        anchors.leftMargin: Tokens.padding.large
+        anchors.margins: CUtils.clamp(anchors.leftMargin - Config.border.thickness, 0, anchors.leftMargin)
         anchors.bottomMargin: 0
 
         active: root.shouldBeActive || root.visible
 
         sourceComponent: Content {
-            implicitWidth: Config.sidebar.sizes.width - Appearance.padding.large * 2
+            implicitWidth: Tokens.sizes.sidebar.width - content.anchors.leftMargin - content.anchors.margins
             props: root.props
-            visibilities: root.visibilities
+            screenState: root.screenState
         }
     }
 }

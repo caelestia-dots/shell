@@ -3,10 +3,10 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import QtQuick.Layouts
 import Quickshell
+import Caelestia.Config
 import qs.components
 import qs.components.controls
 import qs.services
-import qs.config
 import qs.utils
 
 ColumnLayout {
@@ -69,9 +69,9 @@ ColumnLayout {
         }
     }
 
-    spacing: Appearance.spacing.normal
+    spacing: Tokens.spacing.medium
     implicitWidth: 400
-    implicitHeight: content.implicitHeight + Appearance.padding.large * 2
+    implicitHeight: content.implicitHeight + Tokens.padding.extraLargeIncreased
     visible: shouldBeVisible || isClosing
     enabled: shouldBeVisible && !isClosing
     focus: enabled
@@ -128,8 +128,8 @@ ColumnLayout {
     StyledRect {
         Layout.fillWidth: true
         Layout.preferredWidth: 400
-        implicitHeight: content.implicitHeight + Appearance.padding.large * 2
-        radius: Appearance.rounding.normal
+        implicitHeight: content.implicitHeight + Tokens.padding.extraLargeIncreased
+        radius: Tokens.rounding.large
         color: Colours.tPalette.m3surfaceContainer
         visible: root.shouldBeVisible || root.isClosing
         opacity: root.shouldBeVisible && !root.isClosing ? 1 : 0
@@ -137,7 +137,9 @@ ColumnLayout {
         Keys.onEscapePressed: root.closeDialog()
 
         Behavior on opacity {
-            Anim {}
+            Anim {
+                type: Anim.DefaultEffects
+            }
         }
 
         Behavior on scale {
@@ -153,6 +155,7 @@ ColumnLayout {
             }
 
             Anim {
+                type: Anim.DefaultEffects
                 target: parent
                 property: "opacity"
                 to: 0
@@ -170,21 +173,20 @@ ColumnLayout {
             anchors.left: parent.left
             anchors.right: parent.right
             anchors.verticalCenter: parent.verticalCenter
-            anchors.margins: Appearance.padding.large
+            anchors.margins: Tokens.padding.large
 
-            spacing: Appearance.spacing.normal
+            spacing: Tokens.spacing.medium
 
             MaterialIcon {
                 Layout.alignment: Qt.AlignHCenter
                 text: "lock"
-                font.pointSize: Appearance.font.size.extraLarge * 2
+                fontStyle: Tokens.font.icon.builders.extraLarge.scale(2).build()
             }
 
             StyledText {
                 Layout.alignment: Qt.AlignHCenter
                 text: qsTr("Enter password")
-                font.pointSize: Appearance.font.size.large
-                font.weight: 500
+                font: Tokens.font.body.builders.large.weight(Font.Medium).build()
             }
 
             StyledText {
@@ -201,7 +203,7 @@ ColumnLayout {
                     return qsTr("Network: Unknown");
                 }
                 color: Colours.palette.m3outline
-                font.pointSize: Appearance.font.size.small
+                font: Tokens.font.body.small
             }
 
             Timer {
@@ -237,7 +239,7 @@ ColumnLayout {
                 id: statusText
 
                 Layout.alignment: Qt.AlignHCenter
-                Layout.topMargin: Appearance.spacing.small
+                Layout.topMargin: Tokens.spacing.small
                 visible: connectButton.connecting || connectButton.hasError
                 text: {
                     if (connectButton.hasError) {
@@ -249,10 +251,9 @@ ColumnLayout {
                     return "";
                 }
                 color: connectButton.hasError ? Colours.palette.m3error : Colours.palette.m3onSurfaceVariant
-                font.pointSize: Appearance.font.size.small
-                font.weight: 400
+                font: Tokens.font.body.builders.small.weight(Font.Normal).build()
                 wrapMode: Text.WordWrap
-                Layout.maximumWidth: parent.width - Appearance.padding.large * 2
+                Layout.maximumWidth: parent.width - Tokens.padding.extraLargeIncreased
             }
 
             FocusScope {
@@ -261,9 +262,9 @@ ColumnLayout {
                 property string passwordBuffer: ""
 
                 objectName: "passwordContainer"
-                Layout.topMargin: Appearance.spacing.large
+                Layout.topMargin: Tokens.spacing.largeIncreased
                 Layout.fillWidth: true
-                implicitHeight: Math.max(48, charList.implicitHeight + Appearance.padding.normal * 2)
+                implicitHeight: Math.max(48, charList.implicitHeight + Tokens.padding.medium * 2)
                 focus: true
                 activeFocusOnTab: true
 
@@ -336,7 +337,7 @@ ColumnLayout {
 
                 StyledRect {
                     anchors.fill: parent
-                    radius: Appearance.rounding.normal
+                    radius: Tokens.rounding.large
                     color: passwordContainer.activeFocus ? Qt.lighter(Colours.tPalette.m3surfaceContainer, 1.05) : Colours.tPalette.m3surfaceContainer
                     border.width: passwordContainer.activeFocus || connectButton.hasError ? 4 : (root.shouldBeVisible ? 1 : 0)
                     border.color: {
@@ -363,13 +364,10 @@ ColumnLayout {
                 }
 
                 StateLayer {
-                    function onClicked(): void {
-                        passwordContainer.forceActiveFocus();
-                    }
-
                     hoverEnabled: false
                     cursorShape: Qt.IBeamCursor
-                    radius: Appearance.rounding.normal
+                    radius: Tokens.rounding.large
+                    onClicked: passwordContainer.forceActiveFocus()
                 }
 
                 StyledText {
@@ -378,12 +376,13 @@ ColumnLayout {
                     anchors.centerIn: parent
                     text: qsTr("Password")
                     color: Colours.palette.m3outline
-                    font.pointSize: Appearance.font.size.normal
-                    font.family: Appearance.font.family.mono
+                    font: Tokens.font.mono.medium
                     opacity: passwordContainer.passwordBuffer ? 0 : 1
 
                     Behavior on opacity {
-                        Anim {}
+                        Anim {
+                            type: Anim.DefaultEffects
+                        }
                     }
                 }
 
@@ -394,10 +393,10 @@ ColumnLayout {
 
                     anchors.centerIn: parent
                     implicitWidth: fullWidth
-                    implicitHeight: Appearance.font.size.normal
+                    implicitHeight: Tokens.font.body.medium.pointSize
 
                     orientation: Qt.Horizontal
-                    spacing: Appearance.spacing.small / 2
+                    spacing: Tokens.spacing.extraSmall
                     interactive: false
 
                     model: ScriptModel {
@@ -411,7 +410,7 @@ ColumnLayout {
                         implicitHeight: charList.implicitHeight
 
                         color: Colours.palette.m3onSurface
-                        radius: Appearance.rounding.small / 2
+                        radius: Tokens.rounding.medium / 2
 
                         opacity: 0
                         scale: 0
@@ -431,6 +430,7 @@ ColumnLayout {
                             }
                             ParallelAnimation {
                                 Anim {
+                                    type: Anim.DefaultEffects
                                     target: ch
                                     property: "opacity"
                                     to: 0
@@ -449,13 +449,14 @@ ColumnLayout {
                         }
 
                         Behavior on opacity {
-                            Anim {}
+                            Anim {
+                                type: Anim.DefaultEffects
+                            }
                         }
 
                         Behavior on scale {
                             Anim {
-                                duration: Appearance.anim.durations.expressiveFastSpatial
-                                easing.bezierCurve: Appearance.anim.curves.expressiveFastSpatial
+                                type: Anim.FastSpatial
                             }
                         }
                     }
@@ -467,15 +468,15 @@ ColumnLayout {
             }
 
             RowLayout {
-                Layout.topMargin: Appearance.spacing.normal
+                Layout.topMargin: Tokens.spacing.medium
                 Layout.fillWidth: true
-                spacing: Appearance.spacing.normal
+                spacing: Tokens.spacing.medium
 
                 TextButton {
                     id: cancelButton
 
                     Layout.fillWidth: true
-                    Layout.minimumHeight: Appearance.font.size.normal + Appearance.padding.normal * 2
+                    Layout.minimumHeight: Tokens.font.body.medium.pointSize + Tokens.padding.medium * 2
                     inactiveColour: Colours.palette.m3secondaryContainer
                     inactiveOnColour: Colours.palette.m3onSecondaryContainer
                     text: qsTr("Cancel")
@@ -490,7 +491,7 @@ ColumnLayout {
                     property bool hasError: false
 
                     Layout.fillWidth: true
-                    Layout.minimumHeight: Appearance.font.size.normal + Appearance.padding.normal * 2
+                    Layout.minimumHeight: Tokens.font.body.medium.pointSize + Tokens.padding.medium * 2
                     inactiveColour: Colours.palette.m3primary
                     inactiveOnColour: Colours.palette.m3onPrimary
                     text: qsTr("Connect")

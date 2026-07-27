@@ -2,22 +2,22 @@ pragma ComponentBehavior: Bound
 
 import QtQuick
 import Quickshell
+import Caelestia.Config
 import qs.components
-import qs.config
 import qs.modules.launcher.services
 
 Item {
     id: root
 
     required property ShellScreen screen
-    required property DrawerVisibilities visibilities
+    required property ScreenState screenState
     required property var panels
 
-    readonly property bool shouldBeActive: visibilities.launcher && Config.launcher.enabled
+    readonly property bool shouldBeActive: screenState.launcher && Config.launcher.enabled
 
     readonly property real maxHeight: {
-        let max = screen.height - Config.border.thickness * 2 - Appearance.spacing.large;
-        if (visibilities.dashboard)
+        let max = screen.height - Config.border.thickness * 2 + Tokens.padding.extraLarge;
+        if (screenState.dashboard)
             max -= panels.dashboard.nonAnimHeight;
         return max;
     }
@@ -40,10 +40,7 @@ Item {
     Component.onCompleted: Qt.callLater(() => Apps) // Load apps on init
 
     Behavior on offsetScale {
-        Anim {
-            duration: Appearance.anim.durations.expressiveDefaultSpatial
-            easing.bezierCurve: Appearance.anim.curves.expressiveDefaultSpatial
-        }
+        Anim {}
     }
 
     Loader {
@@ -55,7 +52,7 @@ Item {
         active: root.shouldBeActive || root.visible
 
         sourceComponent: Content {
-            visibilities: root.visibilities
+            screenState: root.screenState
             panels: root.panels
             maxHeight: root.maxHeight
         }

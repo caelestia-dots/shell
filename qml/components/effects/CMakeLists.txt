@@ -4,9 +4,10 @@ qs_qml_module(caelestia-qml-components-effects
         ColouredIcon.qml
         Colouriser.qml
         Elevation.qml
-        InnerBorder.qml
-        OpacityMask.qml
+        Mask.qml
     DEPENDENCIES
         QtQuick
+        QtQuick.Effects
         Quickshell
+        Quickshell.Widgets
 )

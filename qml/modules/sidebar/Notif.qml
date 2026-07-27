@@ -2,10 +2,9 @@ pragma ComponentBehavior: Bound
 
 import QtQuick
 import QtQuick.Layouts
-import Quickshell
+import Caelestia.Config
 import qs.components
 import qs.services
-import qs.config
 
 StyledRect {
     id: root
@@ -13,14 +12,14 @@ StyledRect {
     required property NotifData modelData
     required property Props props
     required property bool expanded
-    required property DrawerVisibilities visibilities
+    required property ScreenState screenState
 
     readonly property StyledText body: (expandedContent.item as ExpandedBody)?.body ?? null
-    readonly property real nonAnimHeight: expanded ? summary.implicitHeight + expandedContent.implicitHeight + expandedContent.anchors.topMargin + Appearance.padding.normal * 2 : summaryHeightMetrics.height
+    readonly property real nonAnimHeight: expanded ? summary.implicitHeight + expandedContent.implicitHeight + expandedContent.anchors.topMargin + Tokens.padding.medium * 2 : summaryHeightMetrics.height
 
     implicitHeight: nonAnimHeight
 
-    radius: Appearance.rounding.small
+    radius: Tokens.rounding.medium
     color: {
         const c = root.modelData?.urgency === "critical" ? Colours.palette.m3secondaryContainer : Colours.layer(Colours.palette.m3surfaceContainerHigh, 2);
         return expanded ? c : Qt.alpha(c, 0);
@@ -32,12 +31,12 @@ StyledRect {
         name: "expanded"
 
         PropertyChanges {
-            summary.anchors.margins: Appearance.padding.normal
-            dummySummary.anchors.margins: Appearance.padding.normal
-            compactBody.anchors.margins: Appearance.padding.normal
-            timeStr.anchors.margins: Appearance.padding.normal
-            expandedContent.anchors.margins: Appearance.padding.normal
-            summary.width: root.width - Appearance.padding.normal * 2 - timeStr.implicitWidth - Appearance.spacing.small
+            summary.anchors.margins: root.Tokens.padding.medium
+            dummySummary.anchors.margins: root.Tokens.padding.medium
+            compactBody.anchors.margins: root.Tokens.padding.medium
+            timeStr.anchors.margins: root.Tokens.padding.medium
+            expandedContent.anchors.margins: root.Tokens.padding.medium
+            summary.width: root.width - root.Tokens.padding.medium * 2 - timeStr.implicitWidth - root.Tokens.spacing.small
             summary.maximumLineCount: Number.MAX_SAFE_INTEGER
         }
     }
@@ -86,7 +85,7 @@ StyledRect {
         anchors.top: parent.top
         anchors.left: dummySummary.right
         anchors.right: parent.right
-        anchors.leftMargin: Appearance.spacing.small
+        anchors.leftMargin: Tokens.spacing.small
 
         sourceComponent: StyledText {
             text: String(root.modelData?.body ?? "").replace(/\n/g, " ")
@@ -106,7 +105,7 @@ StyledRect {
             animate: true
             text: root.modelData?.timeStr ?? ""
             color: Colours.palette.m3outline
-            font.pointSize: Appearance.font.size.small
+            font: Tokens.font.body.small
         }
     }
 
@@ -117,22 +116,19 @@ StyledRect {
         anchors.top: summary.bottom
         anchors.left: parent.left
         anchors.right: parent.right
-        anchors.topMargin: Appearance.spacing.small / 2
+        anchors.topMargin: Tokens.spacing.extraSmall
 
         sourceComponent: ExpandedBody {}
     }
 
     Behavior on implicitHeight {
-        Anim {
-            duration: Appearance.anim.durations.expressiveDefaultSpatial
-            easing.bezierCurve: Appearance.anim.curves.expressiveDefaultSpatial
-        }
+        Anim {}
     }
 
     component ExpandedBody: ColumnLayout {
         readonly property alias body: bodyText
 
-        spacing: Appearance.spacing.smaller
+        spacing: Tokens.spacing.medium
 
         StyledText {
             id: bodyText
@@ -144,8 +140,8 @@ StyledRect {
             wrapMode: Text.WordWrap
 
             onLinkActivated: link => {
-                Quickshell.execDetached(["app2unit", "-O", "--", link]);
-                root.visibilities.sidebar = false;
+                Qt.openUrlExternally(link);
+                root.screenState.sidebar = false;
             }
         }
 
@@ -183,6 +179,7 @@ StyledRect {
                         property: "active"
                     }
                     Anim {
+                        type: Anim.DefaultEffects
                         property: "opacity"
                     }
                 }
@@ -193,6 +190,7 @@ StyledRect {
 
                 SequentialAnimation {
                     Anim {
+                        type: Anim.DefaultEffects
                         property: "opacity"
                     }
                     PropertyAction {

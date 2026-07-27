@@ -9,6 +9,7 @@ qs_qml_module(caelestia-qml-modules-dashboard-dash
         User.qml
     DEPENDENCIES
         QtQuick
+        QtQuick.Controls
         QtQuick.Layouts
         Quickshell
 )

@@ -7,6 +7,8 @@ qs_qml_module(caelestia-qml-modules-background
         Wallpaper.qml
     DEPENDENCIES
         QtQuick
+        QtQuick.Effects
         QtQuick.Layouts
         Quickshell
+        Quickshell.Wayland
 )

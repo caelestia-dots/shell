@@ -6,4 +6,5 @@ qs_qml_module(caelestia-qml-components-misc
     DEPENDENCIES
         QtQuick
         Quickshell
+        Quickshell.Hyprland
 )

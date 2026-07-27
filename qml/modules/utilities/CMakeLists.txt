@@ -8,6 +8,7 @@ qs_qml_module(caelestia-qml-modules-utilities
     DEPENDENCIES
         QtQuick
         QtQuick.Layouts
+        QtQuick.Shapes
         Quickshell
 )
 

@@ -1,16 +1,17 @@
 import QtQuick
+import Quickshell
+import Caelestia.Config
 import Caelestia.Models
 import qs.components
 import qs.components.effects
 import qs.components.images
 import qs.services
-import qs.config
 
 Item {
     id: root
 
     required property FileSystemEntry modelData
-    required property DrawerVisibilities visibilities
+    required property ScreenState screenState
 
     scale: 0.5
     opacity: 0
@@ -21,16 +22,15 @@ Item {
         opacity = Qt.binding(() => PathView.onPath ? 1 : 0);
     }
 
-    implicitWidth: image.width + Appearance.padding.larger * 2
-    implicitHeight: image.height + label.height + Appearance.spacing.small / 2 + Appearance.padding.large + Appearance.padding.normal
+    implicitWidth: image.width + Tokens.padding.medium * 2
+    implicitHeight: image.height + label.height + Tokens.spacing.extraSmall + Tokens.padding.large + Tokens.padding.medium
 
     StateLayer {
-        function onClicked(): void {
+        radius: Tokens.rounding.large
+        onClicked: {
             Wallpapers.setWallpaper(root.modelData.path);
-            root.visibilities.launcher = false;
+            root.screenState.launcher = false;
         }
-
-        radius: Appearance.rounding.normal
     }
 
     Elevation {
@@ -40,7 +40,9 @@ Item {
         level: 4
 
         Behavior on opacity {
-            Anim {}
+            Anim {
+                type: Anim.DefaultEffects
+            }
         }
     }
 
@@ -48,27 +50,28 @@ Item {
         id: image
 
         anchors.horizontalCenter: parent.horizontalCenter
-        y: Appearance.padding.large
+        y: Tokens.padding.large
         color: Colours.tPalette.m3surfaceContainer
-        radius: Appearance.rounding.normal
+        radius: Tokens.rounding.large
 
-        implicitWidth: Config.launcher.sizes.wallpaperWidth
+        implicitWidth: Tokens.sizes.launcher.wallpaperWidth
         implicitHeight: implicitWidth / 16 * 9
 
         MaterialIcon {
             anchors.centerIn: parent
             text: "image"
             color: Colours.tPalette.m3outline
-            font.pointSize: Appearance.font.size.extraLarge * 2
-            font.weight: 600
+            fontStyle: Tokens.font.icon.builders.extraLarge.scale(2).weight(Font.DemiBold).build()
         }
 
         CachingImage {
+            anchors.fill: parent
             path: root.modelData.path
             smooth: !root.PathView.view.moving
-            cache: true
-
-            anchors.fill: parent
+            sourceSize: {
+                const dpr = (QsWindow.window as QsWindow)?.devicePixelRatio ?? 1;
+                return Qt.size(image.implicitWidth * dpr, image.implicitHeight * dpr);
+            }
         }
     }
 
@@ -76,15 +79,15 @@ Item {
         id: label
 
         anchors.top: image.bottom
-        anchors.topMargin: Appearance.spacing.small / 2
+        anchors.topMargin: Tokens.spacing.extraSmall
         anchors.horizontalCenter: parent.horizontalCenter
 
-        width: image.width - Appearance.padding.normal * 2
+        width: image.width - Tokens.padding.medium * 2
         horizontalAlignment: Text.AlignHCenter
         elide: Text.ElideRight
         renderType: Text.QtRendering
         text: root.modelData.relativePath
-        font.pointSize: Appearance.font.size.normal
+        font: Tokens.font.label.medium
     }
 
     Behavior on scale {
@@ -92,6 +95,8 @@ Item {
     }
 
     Behavior on opacity {
-        Anim {}
+        Anim {
+            type: Anim.DefaultEffects
+        }
     }
 }

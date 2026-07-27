@@ -5,5 +5,8 @@ qs_qml_module(caelestia-qml-modules-bar-popouts-kblayout
         KbLayoutModel.qml
     DEPENDENCIES
         QtQuick
+        QtQuick.Controls
+        QtQuick.Layouts
         Quickshell
+        Quickshell.Io
 )

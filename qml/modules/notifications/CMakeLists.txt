@@ -6,5 +6,8 @@ qs_qml_module(caelestia-qml-modules-notifications
         Wrapper.qml
     DEPENDENCIES
         QtQuick
+        QtQuick.Shapes
         Quickshell
+        Quickshell.Services.Notifications
+        Quickshell.Widgets
 )

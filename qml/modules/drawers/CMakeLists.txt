@@ -9,6 +9,9 @@ qs_qml_module(caelestia-qml-modules-drawers
         Regions.qml
     DEPENDENCIES
         QtQuick
+        QtQuick.Controls
+        QtQuick.Effects
         Quickshell
+        Quickshell.Hyprland
         Quickshell.Wayland
 )

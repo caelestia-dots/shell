@@ -2,7 +2,7 @@ pragma ComponentBehavior: Bound
 
 import QtQuick
 import Quickshell
-import qs.config
+import Caelestia.Config
 import qs.modules.bar as Bar
 
 Region {
@@ -12,22 +12,25 @@ Region {
     required property Panels panels
     required property var win
 
+    readonly property real borderThickness: win.contentItem.Config.border.thickness
+    readonly property real clampedThickness: win.contentItem.Config.border.clampedThickness
+
     x: bar.clampedWidth + win.dragMaskPadding
-    y: Config.border.clampedThickness + win.dragMaskPadding
-    width: win.width - bar.clampedWidth - Config.border.clampedThickness - win.dragMaskPadding * 2
-    height: win.height - Config.border.clampedThickness * 2 - win.dragMaskPadding * 2
+    y: clampedThickness + win.dragMaskPadding
+    width: win.width - bar.clampedWidth - clampedThickness - win.dragMaskPadding * 2
+    height: win.height - clampedThickness * 2 - win.dragMaskPadding * 2
     intersection: Intersection.Xor
 
     R {
         panel: root.panels.dashboard
         y: 0
-        height: panel.height * (1 - root.panels.dashboard.offsetScale) + Config.border.thickness
+        height: panel.height * (1 - root.panels.dashboard.offsetScale) + root.borderThickness
     }
 
     R {
         panel: root.panels.launcher
         y: root.win.height - height
-        height: panel.height * (1 - root.panels.launcher.offsetScale) + Config.border.thickness
+        height: panel.height * (1 - root.panels.launcher.offsetScale) + root.borderThickness
     }
 
     R {
@@ -35,7 +38,7 @@ Region {
 
         panel: root.panels.sessionWrapper
         x: root.win.width - width
-        width: panel.width * (1 - root.panels.session.offsetScale) + Config.border.thickness + sidebarRegion.width
+        width: panel.width * (1 - root.panels.session.offsetScale) + root.borderThickness + sidebarRegion.width
     }
 
     R {
@@ -43,25 +46,25 @@ Region {
 
         panel: root.panels.sidebar
         x: root.win.width - width
-        width: panel.width * (1 - root.panels.sidebar.offsetScale) + Config.border.thickness
+        width: panel.width * (1 - root.panels.sidebar.offsetScale) + root.borderThickness
     }
 
     R {
         panel: root.panels.osdWrapper
         x: root.win.width - width
-        width: panel.width * (1 - root.panels.osd.offsetScale) + Config.border.thickness + sessionRegion.width
+        width: panel.width * (1 - root.panels.osd.offsetScale) + root.borderThickness + sessionRegion.width
     }
 
     R {
         panel: root.panels.notifications
         y: 0
-        height: panel.height + Config.border.thickness
+        height: panel.height + root.borderThickness
     }
 
     R {
         panel: root.panels.utilities
         y: root.win.height - height
-        height: panel.height * (1 - root.panels.utilities.offsetScale) + Config.border.thickness
+        height: panel.height * (1 - root.panels.utilities.offsetScale) + root.borderThickness
     }
 
     R {
@@ -73,7 +76,7 @@ Region {
         required property Item panel
 
         x: panel.x + root.bar.implicitWidth
-        y: panel.y + Config.border.thickness
+        y: panel.y + root.borderThickness
         width: panel.width
         height: panel.height
         intersection: Intersection.Subtract

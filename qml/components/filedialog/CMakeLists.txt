@@ -12,6 +12,7 @@ qs_qml_module(caelestia-qml-components-filedialog
     DEPENDENCIES
         QtQuick
         QtQuick.Layouts
+        QtQuick.Shapes
         Quickshell
         Quickshell.Io
 )

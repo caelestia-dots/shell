@@ -1,12 +1,11 @@
 pragma ComponentBehavior: Bound
 
 import QtQuick
-import QtQuick.Layouts
 import Quickshell
 import Caelestia.Components
+import Caelestia.Config
 import qs.components
 import qs.services
-import qs.config
 
 LazyListView {
     id: root
@@ -15,19 +14,20 @@ LazyListView {
     required property list<var> notifs
     required property bool expanded
     required property Flickable container
-    required property DrawerVisibilities visibilities
+    required property ScreenState screenState
 
     signal requestToggleExpand(expand: bool)
 
-    Layout.fillWidth: true
+    anchors.left: parent.left
+    anchors.right: parent.right
     implicitHeight: contentHeight
 
-    spacing: Math.round(Appearance.spacing.small / 2)
+    spacing: Math.round(Tokens.spacing.extraSmall)
     asynchronous: true
 
     readyDelay: 1
     cacheBuffer: 400
-    removeDuration: Appearance.anim.durations.normal
+    removeDuration: Tokens.anim.durations.normal
 
     useCustomViewport: true
     viewport: {
@@ -38,18 +38,18 @@ LazyListView {
     model: ScriptModel {
         values: {
             if (root.expanded)
-                return root.notifs;
+                return root.notifs as Array;
 
             let count = 0;
             let i = 0;
-            const previewNum = Config.notifs.groupPreviewNum;
+            const previewNum = root.Config.notifs.groupPreviewNum;
             while (i < root.notifs.length && count < previewNum) {
                 if (!(root.notifs[i]?.closed ?? true))
                     count++;
                 i++;
             }
 
-            return root.notifs.slice(0, i);
+            return root.notifs.slice(0, i) as Array;
         }
     }
 
@@ -107,6 +107,7 @@ LazyListView {
                 onFinished: notif.modelData?.unlock(notif)
 
                 Anim {
+                    type: Anim.DefaultEffects
                     target: notif
                     property: "opacity"
                     to: 0
@@ -125,20 +126,19 @@ LazyListView {
                 modelData: notif.modelData
                 props: root.props
                 expanded: root.expanded
-                visibilities: root.visibilities
+                screenState: root.screenState
             }
 
             Behavior on y {
                 enabled: notif.LazyListView.ready
 
-                Anim {
-                    duration: Appearance.anim.durations.expressiveDefaultSpatial
-                    easing.bezierCurve: Appearance.anim.curves.expressiveDefaultSpatial
-                }
+                Anim {}
             }
 
             Behavior on opacity {
-                Anim {}
+                Anim {
+                    type: Anim.DefaultEffects
+                }
             }
 
             Behavior on scale {
@@ -146,10 +146,7 @@ LazyListView {
             }
 
             Behavior on x {
-                Anim {
-                    duration: Appearance.anim.durations.expressiveDefaultSpatial
-                    easing.bezierCurve: Appearance.anim.curves.expressiveDefaultSpatial
-                }
+                Anim {}
             }
         }
     }

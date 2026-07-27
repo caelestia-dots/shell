@@ -28,6 +28,14 @@ void BlobGroup::setColor(const QColor& c) {
     markDirty();
 }
 
+void BlobGroup::setCornerFill(bool e) {
+    if (m_cornerFill == e)
+        return;
+    m_cornerFill = e;
+    emit cornerFillChanged();
+    markDirty();
+}
+
 void BlobGroup::addShape(BlobShape* shape) {
     if (!shape || m_shapes.contains(shape))
         return;

@@ -8,4 +8,5 @@ qs_qml_module(caelestia-qml-modules-launcher-services
     DEPENDENCIES
         QtQuick
         Quickshell
+        Quickshell.Io
 )

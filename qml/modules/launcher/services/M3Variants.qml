@@ -2,7 +2,7 @@ pragma Singleton
 
 import QtQuick
 import Quickshell
-import qs.config
+import Caelestia.Config
 import qs.utils
 import qs.modules.launcher
 
@@ -10,7 +10,7 @@ Searcher {
     id: root
 
     function transformSearch(search: string): string {
-        return search.slice(`${Config.launcher.actionPrefix}variant `.length);
+        return search.slice(`${GlobalConfig.launcher.actionPrefix}variant `.length);
     }
 
     list: [
@@ -69,7 +69,7 @@ Searcher {
             description: qsTr("All colours are grayscale, no chroma.")
         }
     ]
-    useFuzzy: Config.launcher.useFuzzy.variants
+    useFuzzy: GlobalConfig.launcher.useFuzzy.variants
 
     component Variant: QtObject {
         required property string variant
@@ -78,7 +78,7 @@ Searcher {
         required property string description
 
         function onClicked(list: AppList): void {
-            list.visibilities.launcher = false;
+            list.screenState.launcher = false;
             Quickshell.execDetached(["caelestia", "scheme", "set", "-v", variant]);
         }
     }

@@ -15,9 +15,16 @@ qs_qml_module(caelestia-qml-modules-bar-popouts
         Wrapper.qml
     DEPENDENCIES
         QtQuick
+        QtQuick.Controls
         QtQuick.Layouts
         Quickshell
+        Quickshell.Bluetooth
+        Quickshell.Hyprland
+        Quickshell.Services.Pipewire
         Quickshell.Services.SystemTray
+        Quickshell.Services.UPower
+        Quickshell.Wayland
+        Quickshell.Widgets
 )
 
 add_subdirectory(kblayout)

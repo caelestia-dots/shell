@@ -6,4 +6,6 @@ qs_qml_module(caelestia-qml-modules-areapicker
     DEPENDENCIES
         QtQuick
         Quickshell
+        Quickshell.Io
+        Quickshell.Wayland
 )

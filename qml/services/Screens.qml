@@ -1,20 +1,14 @@
 pragma Singleton
 
 import Quickshell
-import qs.config
-import qs.utils
+import Caelestia.Config
 
 Singleton {
     id: root
 
-    readonly property list<ShellScreen> screens: {
-        const excluded = Config.general.excludedScreens;
-        if (excluded.length === 0)
-            return Quickshell.screens;
-        return Quickshell.screens.filter(s => !Strings.testRegexList(excluded, s.name));
-    }
+    readonly property list<ShellScreen> screens: Quickshell.screens.filter(s => GlobalConfig.forScreen(s.name).enabled)
 
     function isExcluded(screen: ShellScreen): bool {
-        return Strings.testRegexList(Config.general.excludedScreens, screen.name);
+        return !GlobalConfig.forScreen(screen.name).enabled;
     }
 }

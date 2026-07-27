@@ -3,10 +3,7 @@ qs_qml_module(caelestia-qml-modules-dashboard
     QML_FILES
         Content.qml
         Dash.qml
-        LyricMenu.qml
-        LyricsView.qml
         Media.qml
-        MediaWrapper.qml
         Performance.qml
         Tabs.qml
         WeatherTab.qml
@@ -14,7 +11,12 @@ qs_qml_module(caelestia-qml-modules-dashboard
     DEPENDENCIES
         QtQuick
         QtQuick.Layouts
+        QtQuick.Templates
         Quickshell
+        Quickshell.Services.UPower
+        Quickshell.Widgets
 )
 
 add_subdirectory(dash)
+add_subdirectory(media)
+add_subdirectory(performance)

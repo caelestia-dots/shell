@@ -1,8 +1,7 @@
 add_subdirectory(components)
-add_subdirectory(services)
-add_subdirectory(config)
-add_subdirectory(utils)
 add_subdirectory(modules)
+add_subdirectory(services)
+add_subdirectory(utils)
 
 configure_file(shell.qml "${CMAKE_BINARY_DIR}/Shell.qml" COPYONLY)
 _fix_imports("${CMAKE_BINARY_DIR}/Shell.qml")

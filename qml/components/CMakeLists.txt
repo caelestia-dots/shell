@@ -1,17 +1,13 @@
 qs_qml_module(caelestia-qml-components
     URI Caelestia.Qml.Components
     QML_FILES
+        AnchorAnim.qml
         Anim.qml
+        AnimLoader.qml
         CAnim.qml
-        ConnectionHeader.qml
-        ConnectionInfoSection.qml
-        DashboardState.qml
-        DrawerVisibilities.qml
         Logo.qml
         MaterialIcon.qml
-        PropertyRow.qml
-        SectionContainer.qml
-        SectionHeader.qml
+        ScreenState.qml
         StateLayer.qml
         StyledClippingRect.qml
         StyledRect.qml
@@ -19,7 +15,9 @@ qs_qml_module(caelestia-qml-components
     DEPENDENCIES
         QtQuick
         QtQuick.Layouts
+        QtQuick.Shapes
         Quickshell
+        Quickshell.Widgets
 )
 
 add_subdirectory(containers)

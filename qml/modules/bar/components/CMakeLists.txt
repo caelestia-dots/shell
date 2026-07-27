@@ -5,8 +5,6 @@ qs_qml_module(caelestia-qml-modules-bar-components
         Clock.qml
         OsIcon.qml
         Power.qml
-        Settings.qml
-        SettingsIcon.qml
         StatusIcons.qml
         Tray.qml
         TrayItem.qml
@@ -14,6 +12,9 @@ qs_qml_module(caelestia-qml-modules-bar-components
         QtQuick
         QtQuick.Layouts
         Quickshell
+        Quickshell.Bluetooth
+        Quickshell.Services.SystemTray
+        Quickshell.Services.UPower
 )
 
 add_subdirectory(workspaces)

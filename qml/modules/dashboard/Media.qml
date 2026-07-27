@@ -1,512 +1,150 @@
-pragma ComponentBehavior: Bound
-
 import QtQuick
 import QtQuick.Layouts
-import QtQuick.Shapes
-import Quickshell
-import Quickshell.Services.Mpris
-import Caelestia.Services
+import M3Shapes
+import Caelestia.Config
 import qs.components
-import qs.components.controls
 import qs.services
-import qs.config
-import qs.utils
+import qs.modules.dashboard.media
 
 Item {
     id: root
 
-    required property DrawerVisibilities visibilities
-    readonly property bool needsKeyboard: lyricMenuOpen
+    required property ScreenState screenState
 
-    readonly property real nonAnimHeight: Math.max(cover.implicitHeight + Config.dashboard.sizes.mediaVisualiserSize * 2, lyricMenuOpen ? lyricMenu.implicitHeight : details.implicitHeight, bongocat.implicitHeight) + Appearance.padding.large * 2
-    readonly property real detailsHeightWithoutLyrics: details.implicitHeight - lyricsViewInDetails.implicitHeight
+    implicitWidth: Tokens.sizes.dashboard.mediaTabWidth
+    implicitHeight: Tokens.sizes.dashboard.mediaTabHeight
 
-    property bool lyricMenuOpen: false
-    property bool lyricsShowing: LyricsService.lyricsVisible && LyricsService.model.count != 0
-    property bool lyricsShowingDebounced: false
-
-    property real playerProgress: {
-        const active = Players.active;
-        return active?.length ? active.position / active.length : 0;
-    }
-
-    function lengthStr(length: int): string {
-        if (length < 0)
-            return "-1:-1";
-
-        const hours = Math.floor(length / 3600);
-        const mins = Math.floor((length % 3600) / 60);
-        const secs = Math.floor(length % 60).toString().padStart(2, "0");
-
-        if (hours > 0)
-            return `${hours}:${mins.toString().padStart(2, "0")}:${secs}`;
-        return `${mins}:${secs}`;
-    }
-
-    onLyricsShowingChanged: {
-        if (lyricsShowing) {
-            lyricsHideDelay.stop();
-            lyricsShowingDebounced = true;
-        } else {
-            lyricsHideDelay.restart();
-        }
-    }
-
-    implicitWidth: cover.implicitWidth + Config.dashboard.sizes.mediaVisualiserSize * 2 + details.implicitWidth + details.anchors.leftMargin + bongocat.implicitWidth + bongocat.anchors.leftMargin * 2 + Appearance.padding.large * 2
-    implicitHeight: nonAnimHeight
-
-    Behavior on implicitHeight {
-        Anim {}
-    }
-
-    Behavior on playerProgress {
-        Anim {
-            duration: Appearance.anim.durations.large
-        }
-    }
-
-    Timer {
-        running: Players.active?.isPlaying ?? false
-        interval: Config.dashboard.mediaUpdateInterval
-        triggeredOnStart: true
-        repeat: true
-        onTriggered: {
-            if (!Players.active)
-                return;
-            LyricsService.updatePosition();
-            Players.active?.positionChanged();
-        }
-    }
-
-    Timer {
-        id: lyricsHideDelay
-
-        interval: 300
-        repeat: false
-    }
-
-    Connections {
-        function onTriggered() {
-            root.lyricsShowingDebounced = false;
-        }
-
-        target: lyricsHideDelay
-    }
-
-    ServiceRef {
-        service: Audio.cava
-    }
-
-    ServiceRef {
-        service: Audio.beatTracker
-    }
-
-    Shape {
-        id: visualiser
-
-        readonly property real centerX: width / 2
-        readonly property real centerY: height / 2
-        readonly property real innerX: cover.implicitWidth / 2 + Appearance.spacing.small
-        readonly property real innerY: cover.implicitHeight / 2 + Appearance.spacing.small
-        property color colour: Colours.palette.m3primary
-
-        anchors.fill: cover
-        anchors.margins: -Config.dashboard.sizes.mediaVisualiserSize
-
-        asynchronous: true
-        preferredRendererType: Shape.CurveRenderer
-        data: visualiserBars.instances
-    }
-
-    Variants {
-        id: visualiserBars
-
-        model: Array.from({
-            length: Config.services.visualiserBars
-        }, (_, i) => i)
-
-        ShapePath {
-            id: visualiserBar
-
-            required property int modelData
-            readonly property real value: Math.max(1e-3, Math.min(1, Audio.cava.values[modelData]))
-
-            readonly property real angle: modelData * 2 * Math.PI / Config.services.visualiserBars
-            readonly property real magnitude: value * Config.dashboard.sizes.mediaVisualiserSize
-            readonly property real cos: Math.cos(angle)
-            readonly property real sin: Math.sin(angle)
-
-            capStyle: Appearance.rounding.scale === 0 ? ShapePath.SquareCap : ShapePath.RoundCap
-            strokeWidth: 360 / Config.services.visualiserBars - Appearance.spacing.small / 4
-            strokeColor: Colours.palette.m3primary
-
-            startX: visualiser.centerX + (visualiser.innerX + strokeWidth / 2) * cos
-            startY: visualiser.centerY + (visualiser.innerY + strokeWidth / 2) * sin
-
-            PathLine {
-                x: visualiser.centerX + (visualiser.innerX + visualiserBar.strokeWidth / 2 + visualiserBar.magnitude) * visualiserBar.cos
-                y: visualiser.centerY + (visualiser.innerY + visualiserBar.strokeWidth / 2 + visualiserBar.magnitude) * visualiserBar.sin
-            }
-
-            Behavior on strokeColor {
-                CAnim {}
-            }
-        }
-    }
-
-    StyledClippingRect {
-        id: cover
-
-        anchors.verticalCenter: parent.verticalCenter
-        anchors.left: parent.left
-        anchors.leftMargin: Appearance.padding.large + Config.dashboard.sizes.mediaVisualiserSize
-
-        implicitWidth: Config.dashboard.sizes.mediaCoverArtSize
-        implicitHeight: Config.dashboard.sizes.mediaCoverArtSize
-
-        color: Colours.tPalette.m3surfaceContainerHigh
-        radius: Infinity
-
-        MaterialIcon {
-            anchors.centerIn: parent
-
-            grade: 200
-            text: "art_track"
-            color: Colours.palette.m3onSurfaceVariant
-            font.pointSize: (parent.width * 0.4) || 1
-        }
-
-        Image {
-            id: image
-
-            anchors.fill: parent
-
-            source: Players.getArtUrl(Players.active)
-            asynchronous: true
-            fillMode: Image.PreserveAspectCrop
-            sourceSize.width: width
-            sourceSize.height: height
-
-            MouseArea {
-                anchors.fill: parent
-                onClicked: {
-                    LyricsService.toggleVisibility();
-                }
-            }
-        }
-    }
-
-    ColumnLayout {
-        id: details
-
-        anchors.verticalCenter: parent.verticalCenter
-        anchors.left: visualiser.right
-        anchors.leftMargin: Appearance.spacing.normal
-
-        spacing: Appearance.spacing.small
-
-        StyledText {
-            id: title
-
-            Layout.fillWidth: true
-            Layout.maximumWidth: parent.implicitWidth
-
-            animate: true
-            horizontalAlignment: Text.AlignHCenter
-            text: (Players.active?.trackTitle ?? qsTr("No media")) || qsTr("Unknown title")
-            color: Players.active ? Colours.palette.m3primary : Colours.palette.m3onSurface
-            font.pointSize: Appearance.font.size.normal
-            elide: Text.ElideRight
-        }
-
-        StyledText {
-            id: album
-
-            Layout.fillWidth: true
-            Layout.maximumWidth: parent.implicitWidth
-
-            animate: true
-            horizontalAlignment: Text.AlignHCenter
-            visible: !!Players.active
-            text: Players.active?.trackAlbum || qsTr("Unknown album")
-            color: Colours.palette.m3outline
-            font.pointSize: Appearance.font.size.small
-            elide: Text.ElideRight
-        }
-
-        StyledText {
-            id: artist
-
-            Layout.fillWidth: true
-            Layout.maximumWidth: parent.implicitWidth
-
-            animate: true
-            horizontalAlignment: Text.AlignHCenter
-            text: (Players.active?.trackArtist ?? qsTr("Play some music for stuff to show up here!")) || qsTr("Unknown artist")
-            color: Players.active ? Colours.palette.m3secondary : Colours.palette.m3outline
-            elide: Text.ElideRight
-            wrapMode: Players.active ? Text.NoWrap : Text.WordWrap
-        }
-
-        LyricsView {
-            id: lyricsViewInDetails
-
-            Layout.fillWidth: true
-            Layout.preferredHeight: 200
-        }
-
-        RowLayout {
-            id: controls
-
-            Layout.alignment: Qt.AlignHCenter
-            Layout.topMargin: Appearance.spacing.small
-            Layout.bottomMargin: Appearance.spacing.smaller
-
-            spacing: Appearance.spacing.small
-
-            PlayerControl {
-                type: IconButton.Text
-                icon: Players.active?.shuffle ? "shuffle_on" : "shuffle"
-                font.pointSize: Math.round(Appearance.font.size.large)
-                disabled: !Players.active?.shuffleSupported
-                onClicked: Players.active.shuffle = !Players.active?.shuffle
-            }
-
-            PlayerControl {
-                type: IconButton.Text
-                icon: "skip_previous"
-                font.pointSize: Math.round(Appearance.font.size.large * 1.5)
-                disabled: !Players.active?.canGoPrevious
-                onClicked: Players.active?.previous()
-            }
-
-            PlayerControl {
-                icon: Players.active?.isPlaying ? "pause" : "play_arrow"
-                label.animate: true
-                toggle: true
-                padding: Appearance.padding.small / 2
-                checked: Players.active?.isPlaying ?? false
-                font.pointSize: Math.round(Appearance.font.size.large * 1.5)
-                disabled: !Players.active?.canTogglePlaying
-                onClicked: Players.active?.togglePlaying()
-            }
-
-            PlayerControl {
-                type: IconButton.Text
-                icon: "skip_next"
-                font.pointSize: Math.round(Appearance.font.size.large * 1.5)
-                disabled: !Players.active?.canGoNext
-                onClicked: Players.active?.next()
-            }
-
-            PlayerControl {
-                type: IconButton.Text
-                icon: "lyrics"
-                font.pointSize: Math.round(Appearance.font.size.large)
-                onClicked: root.lyricMenuOpen = !root.lyricMenuOpen
-            }
-        }
-
-        StyledSlider {
-            id: slider
-
-            enabled: !!Players.active
-            implicitWidth: 280
-            implicitHeight: Appearance.padding.normal * 3
-
-            onMoved: {
-                const active = Players.active;
-                if (active?.canSeek && active?.positionSupported)
-                    active.position = value * active.length;
-            }
-
-            Binding {
-                target: slider
-                property: "value"
-                value: root.playerProgress
-                when: !slider.pressed
-            }
-
-            CustomMouseArea {
-                function onWheel(event: WheelEvent) {
-                    const active = Players.active;
-                    if (!active?.canSeek || !active?.positionSupported)
-                        return;
-
-                    event.accepted = true;
-                    const delta = event.angleDelta.y > 0 ? 10 : -10;    // Time 10 seconds
-                    Qt.callLater(() => {
-                        active.position = Math.max(0, Math.min(active.length, active.position + delta));
-                    });
-                }
-
-                anchors.fill: parent
-                acceptedButtons: Qt.NoButton
-            }
-        }
-
-        Item {
-            Layout.fillWidth: true
-            implicitHeight: Math.max(position.implicitHeight, length.implicitHeight)
-
-            StyledText {
-                id: position
-
-                anchors.left: parent.left
-
-                text: root.lengthStr(Players.active?.position ?? -1)
-                color: Colours.palette.m3onSurfaceVariant
-                font.pointSize: Appearance.font.size.small
-            }
-
-            StyledText {
-                id: length
-
-                anchors.right: parent.right
-
-                text: root.lengthStr(Players.active?.length ?? -1)
-                color: Colours.palette.m3onSurfaceVariant
-                font.pointSize: Appearance.font.size.small
-            }
-        }
-    }
-
-    ColumnLayout {
-        id: leftSection
-
-        anchors.verticalCenter: parent.verticalCenter
-        anchors.verticalCenterOffset: playerChanger.parent == leftSection ? -playerChanger.height : 0
-        anchors.left: details.right
-        anchors.leftMargin: Appearance.spacing.normal
-
-        visible: lyricMenu.height === 0 || opacity > 0
-        opacity: lyricMenu.height === 0 ? 1 : 0
-
-        Behavior on opacity {
-            NumberAnimation {
-                duration: Appearance.anim.durations.normal
-                easing.type: Easing.OutCubic
-            }
-        }
-
-        Item {
-            id: bongocat
-
-            implicitWidth: visualiser.width
-            implicitHeight: visualiser.height
-
-            AnimatedImage {
-                anchors.centerIn: parent
-
-                width: visualiser.width * 0.75
-                height: visualiser.height * 0.75
-
-                playing: Players.active?.isPlaying ?? false
-                speed: Audio.beatTracker.bpm / Appearance.anim.mediaGifSpeedAdjustment // qmllint disable unresolved-type
-                source: Paths.absolutePath(Config.paths.mediaGif)
-                asynchronous: true
-                fillMode: AnimatedImage.PreserveAspectFit
-            }
-        }
-    }
-
-    LyricMenu {
-        id: lyricMenu
-
-        anchors.top: parent.top
-        anchors.left: details.right
-        anchors.right: parent.right
-        anchors.leftMargin: Appearance.spacing.normal
-
-        contentHeight: !root.lyricsShowingDebounced ? root.detailsHeightWithoutLyrics + Appearance.padding.large * 5 : root.detailsHeightWithoutLyrics + lyricsViewInDetails.implicitHeight
-
-        visible: root.lyricMenuOpen || height > 0
-        height: root.lyricMenuOpen ? implicitHeight : 0
-        clip: true
-
-        Behavior on height {
-            NumberAnimation {
-                duration: Appearance.anim.durations.normal
-                easing.type: Easing.OutCubic
-            }
-        }
+    BackgroundShapes {
+        anchors.fill: parent
     }
 
     RowLayout {
-        id: playerChanger
+        anchors.fill: parent
+        anchors.margins: Tokens.padding.large
+        spacing: Tokens.spacing.extraLarge
 
-        parent: !root.lyricsShowingDebounced ? details : leftSection
-        Layout.alignment: Qt.AlignHCenter
-        spacing: Appearance.spacing.small
+        CoverVisualiser {
+            Layout.fillHeight: true
+            implicitWidth: Tokens.sizes.dashboard.mediaSectionWidth
+        }
 
-        PlayerControl {
-            type: IconButton.Text
-            icon: "move_up"
-            inactiveOnColour: Colours.palette.m3secondary
-            padding: Appearance.padding.small
-            font.pointSize: Appearance.font.size.large
-            disabled: !Players.active?.canRaise
-            onClicked: {
-                Players.active?.raise();
-                root.visibilities.dashboard = false;
+        Item {
+            Layout.fillWidth: true
+            Layout.fillHeight: true
+
+            state: Players.active ? "" : "noMedia"
+
+            states: State {
+                name: "noMedia"
+
+                PropertyChanges {
+                    noMedia.opacity: 1
+                    content.opacity: 0
+                }
             }
-        }
 
-        SplitButton {
-            id: playerSelector
+            transitions: [
+                Transition {
+                    from: ""
 
-            disabled: !Players.list.length
-            active: menuItems.find(m => m.modelData === Players.active) ?? menuItems[0] ?? null
-            menu.onItemSelected: item => Players.manualActive = (item as PlayerItem).modelData
+                    SequentialAnimation {
+                        Anim {
+                            target: content
+                            property: "opacity"
+                            type: Anim.DefaultEffects
+                        }
+                        Anim {
+                            target: noMedia
+                            property: "opacity"
+                            type: Anim.SlowEffects
+                        }
+                    }
+                },
+                Transition {
+                    to: ""
 
-            menuItems: playerList.instances
-            fallbackIcon: "music_off"
-            fallbackText: qsTr("No players")
+                    SequentialAnimation {
+                        Anim {
+                            target: noMedia
+                            property: "opacity"
+                            type: Anim.DefaultEffects
+                        }
+                        Anim {
+                            target: content
+                            property: "opacity"
+                            type: Anim.SlowEffects
+                        }
+                    }
+                }
+            ]
 
-            label.Layout.maximumWidth: slider.implicitWidth * 0.28
-            label.elide: Text.ElideRight
+            Loader {
+                id: noMedia
 
-            stateLayer.disabled: true
-            menuOnTop: true
+                anchors.centerIn: parent
+                anchors.horizontalCenterOffset: -Tokens.padding.extraLarge * 2
+                asynchronous: true
+                active: opacity > 0
+                opacity: 0
 
-            Variants {
-                id: playerList
+                sourceComponent: ColumnLayout {
+                    spacing: Tokens.spacing.small
 
-                model: Players.list
+                    MaterialShape {
+                        Layout.topMargin: (pathBounds().height - implicitSize) / 2
+                        Layout.bottomMargin: (pathBounds().height - implicitSize) / 2 + Tokens.spacing.small
+                        Layout.alignment: Qt.AlignHCenter
+                        color: Colours.palette.m3primaryContainer
+                        implicitSize: icon.implicitHeight + Tokens.padding.extraLarge * 2
+                        shape: MaterialShape.ClamShell
 
-                PlayerItem {}
+                        Behavior on color {
+                            CAnim {}
+                        }
+
+                        MaterialIcon {
+                            id: icon
+
+                            anchors.centerIn: parent
+                            text: "queue_music"
+                            fontStyle: Tokens.font.icon.builders.large.scale(2).build()
+                            color: Colours.palette.m3onPrimaryContainer
+                        }
+                    }
+
+                    StyledText {
+                        Layout.alignment: Qt.AlignHCenter
+                        text: qsTr("Nothing playing")
+                        font: Tokens.font.headline.medium
+                    }
+
+                    StyledText {
+                        text: qsTr("Play something for it to show up here!")
+                        color: Colours.palette.m3onSurfaceVariant
+                        font: Tokens.font.body.large
+                    }
+                }
             }
-        }
 
-        PlayerControl {
-            type: IconButton.Text
-            icon: "delete"
-            inactiveOnColour: Colours.palette.m3error
-            padding: Appearance.padding.small
-            font.pointSize: Appearance.font.size.large
-            disabled: !Players.active?.canQuit
-            onClicked: Players.active?.quit()
-        }
-    }
+            Loader {
+                id: content
 
-    component PlayerItem: MenuItem {
-        required property MprisPlayer modelData
+                anchors.fill: parent
+                asynchronous: true
+                active: opacity > 0
 
-        icon: modelData === Players.active ? "check" : ""
-        text: Players.getIdentity(modelData)
-        activeIcon: "animated_images"
-    }
+                sourceComponent: RowLayout {
+                    spacing: Tokens.spacing.extraLarge
 
-    component PlayerControl: IconButton {
-        Layout.preferredWidth: implicitWidth + (stateLayer.pressed ? Appearance.padding.large : internalChecked ? Appearance.padding.smaller : 0)
-        radius: stateLayer.pressed ? Appearance.rounding.small / 2 : internalChecked ? Appearance.rounding.small : implicitHeight / 2
-        radiusAnim.duration: Appearance.anim.durations.expressiveFastSpatial
-        radiusAnim.easing.bezierCurve: Appearance.anim.curves.expressiveFastSpatial
+                    Details {
+                        Layout.fillWidth: true
+                    }
 
-        Behavior on Layout.preferredWidth {
-            Anim {
-                duration: Appearance.anim.durations.expressiveFastSpatial
-                easing.bezierCurve: Appearance.anim.curves.expressiveFastSpatial
+                    LyricsAndSelector {
+                        Layout.fillHeight: true
+                        implicitWidth: Tokens.sizes.dashboard.mediaSectionWidth
+                    }
+                }
             }
         }
     }

@@ -11,4 +11,5 @@ qs_qml_module(caelestia-qml-modules-launcher-items
         QtQuick
         QtQuick.Layouts
         Quickshell
+        Quickshell.Widgets
 )

@@ -41,35 +41,41 @@ float sdBox(vec2 p, vec2 center, vec2 halfSize) {
 }
 
 float smin(float a, float b, float k) {
-    // Cubic smooth min (C2 continuous — no curvature kinks at blend boundary)
-    float h = max(k - abs(a - b), 0.0) / k;
-    return min(a, b) - h * h * h * k * (1.0/6.0);
+    // Circular smooth min — the blend fillet is a true circular arc of radius k,
+    // tangent to both surfaces (not a polynomial/squircle curve). Deviates from
+    // min(a, b) only in the corner region where BOTH a < k and b < k (unlike the
+    // cubic it replaced, which deviated over the whole band |a - b| < k). Always
+    // <= min(a, b); max blend depth at a == b is (sqrt(2) - 1) * k. It is C1 but
+    // not C2 at the support boundary, so a circular-arc fillet shows the usual
+    // line-meets-arc curvature step — by design, that is the "circular" look.
+    return max(k, min(a, b)) - length(max(vec2(k) - vec2(a, b), vec2(0.0)));
 }
 
 float smax(float a, float b, float k) {
-    float h = max(k - abs(a - b), 0.0) / k;
-    return max(a, b) + h * h * h * k * (1.0/6.0);
+    // Circular smooth max — dual of smin: -smin(-a, -b, k). Always >= max(a, b).
+    return min(-k, max(a, b)) + length(max(vec2(a, b) + vec2(k), vec2(0.0)));
 }
 
 float smaxSharpA(float a, float b, float k) {
-    // smax variant that keeps a's boundary sharp (no inward rounding at a = 0).
-    // Used for the frame outer edge so it always fills to the edges.
-    float h = max(k - abs(a - b), 0.0) / k;
-    float blend = h * h * h * k * (1.0/6.0);
-    blend *= smoothstep(0.0, k * 0.5, -a);
+    // Circular smax variant that keeps a's boundary sharp (no inward rounding at
+    // a = 0). Used for the frame outer edge so it always fills to the edges.
+    float sm = min(-k, max(a, b)) + length(max(vec2(a, b) + vec2(k), vec2(0.0)));
+    float blend = (sm - max(a, b)) * smoothstep(0.0, k * 0.5, -a);
     return max(a, b) + blend;
 }
 
 void main() {
     vec2 pixel = vec2(paddedX, paddedY) + qt_TexCoord0 * vec2(paddedW, paddedH);
 
-    float mergedSdf = 1e10;
+    // Phase 1: compute per-rect SDF, track owner. We can't smin yet because excluded
+    // pairs need to skip the smooth blend, which requires pairwise pass below.
+    float dArr[16];
     int owner = -2;
     float minDist = 1e10;
 
     for (int i = 0; i < rectCount; i++) {
         vec4 rect = rectData[i * 5];         // cx, cy, hw, hh
-        vec4 props = rectData[i * 5 + 1];    // radius, offsetX, offsetY, minEig
+        vec4 props = rectData[i * 5 + 1];    // excludeMask(int bits), offsetX, offsetY, minEig
         vec4 invDm = rectData[i * 5 + 2];    // inverse deform matrix
         vec4 sh = rectData[i * 5 + 3];       // screenHalfX, screenHalfY, 0, 0
         vec4 radii = rectData[i * 5 + 4];    // effective per-corner radii (tr, br, bl, tl)
@@ -79,8 +85,10 @@ void main() {
 
         // AABB early-out: skip rects far from this pixel
         vec2 extent = sh.xy + vec2(smoothFactor * 1.5);
-        if (abs(pixel.x - center.x) > extent.x || abs(pixel.y - center.y) > extent.y)
+        if (abs(pixel.x - center.x) > extent.x || abs(pixel.y - center.y) > extent.y) {
+            dArr[i] = 1e10;
             continue;
+        }
 
         // Apply pre-computed inverse deformation to the evaluation point
         mat2 invDeform = mat2(invDm.xy, invDm.zw);
@@ -135,10 +143,34 @@ void main() {
             d *= scale;
         }
 
-        mergedSdf = smin(mergedSdf, d, smoothFactor);
+        dArr[i] = d;
         if (d < smoothFactor && d < minDist) {
             minDist = d;
             owner = i;
+        }
+    }
+
+    // Phase 2: hard-min baseline over all rects.
+    float mergedSdf = 1e10;
+    for (int i = 0; i < rectCount; i++) {
+        mergedSdf = min(mergedSdf, dArr[i]);
+    }
+
+    // Phase 3: pair-wise smin contributions, skipping excluded pairs. Pair smin <= min,
+    // so taking the min over all non-excluded pair smins gives the smoothly-merged SDF.
+    for (int i = 0; i < rectCount; i++) {
+        if (dArr[i] >= 1e9)
+            continue;
+        int excludeMask = floatBitsToInt(rectData[i * 5 + 1].x);
+        for (int j = i + 1; j < rectCount; j++) {
+            if (dArr[j] >= 1e9)
+                continue;
+            if ((excludeMask & (1 << j)) != 0)
+                continue;
+            // Circular smin deviates from min only where BOTH dArr are < smoothFactor.
+            if (max(dArr[i], dArr[j]) >= smoothFactor)
+                continue;
+            mergedSdf = min(mergedSdf, smin(dArr[i], dArr[j], smoothFactor));
         }
     }
 
@@ -165,8 +197,13 @@ void main() {
             // Screen-space center (with offset) and pre-computed AABB half-extents
             vec2 ctr = rect.xy + sinkProps.yz;
 
-            // Delay sink to absorb smin blend depth (cubic smin max = k/6)
-            float preOff = smoothFactor * (1.0/6.0);
+            // Sink onset / residual overlap: how far a rect must penetrate the border before
+            // the inner wall recedes to form its pocket. Too low and the wall recedes faster
+            // than the junction can stay convex, denting the inner edge inward near the rect's
+            // (squared) corners; too high and the rect nestles too deep before the wall yields.
+            // Tuned between the old cubic blend depth (k/6, too shallow) and the circular blend
+            // depth ((sqrt2-1)k): half the circular smin gap-closing distance, (2-sqrt2)k/2.
+            float preOff = smoothFactor * (2.0 - sqrt(2.0)) * 0.5;
 
             // Top border: track rect's BOTTOM edge, only within border thickness
             float topPen = clamp(innerTop - (ctr.y + sinkSh.y) - preOff, 0.0, innerTop - outerTop);
@@ -202,7 +239,16 @@ void main() {
 
         dInner -= sinkValue;
 
-        float dFrame = smaxSharpA(dOuter, -dInner, smoothFactor);
+        // The circular smax fillet has radius kFrame; when it exceeds the border thickness
+        // it can't complete inside the border, so the sharp outer-box term bleeds onto the
+        // inner edge and bulges the inner corners (worst when thickness < smoothFactor — the
+        // default border is thinner than the blend radius). Clamp kFrame to the thinnest side
+        // so the inner edge stays a clean constant-radius arc. Each inner corner is bounded by
+        // its thinner adjacent side, so the global min is correct for every corner.
+        float minThick = min(min(innerTop - outerTop, outerBot - innerBot),
+                             min(innerLeft - outerLeft, outerRight - innerRight));
+        float kFrame = clamp(min(smoothFactor, minThick - 1.0), 1.0, smoothFactor);
+        float dFrame = smaxSharpA(dOuter, -dInner, kFrame);
 
         mergedSdf = smin(mergedSdf, dFrame, smoothFactor);
         if (dFrame < minDist) {

@@ -2,18 +2,22 @@ pragma ComponentBehavior: Bound
 
 import QtQuick
 import Quickshell
+import Caelestia
+import Caelestia.Config
+import Caelestia.Services
 import qs.components
+import qs.components.controls
 import qs.services
-import qs.config
 import qs.utils
 
 Column {
     id: root
 
-    required property DrawerVisibilities visibilities
+    required property ScreenState screenState
 
-    padding: Appearance.padding.large
-    spacing: Appearance.spacing.large
+    padding: Tokens.padding.large
+    rightPadding: CUtils.clamp(padding - Config.border.thickness, 0, padding)
+    spacing: Tokens.spacing.large
 
     SessionButton {
         id: logout
@@ -27,11 +31,11 @@ Column {
 
         Connections {
             function onLauncherChanged(): void {
-                if (!root.visibilities.launcher)
+                if (!root.screenState.launcher)
                     logout.forceActiveFocus();
             }
 
-            target: root.visibilities
+            target: root.screenState
         }
     }
 
@@ -46,15 +50,15 @@ Column {
     }
 
     AnimatedImage {
-        width: Config.session.sizes.button
-        height: Config.session.sizes.button
-        sourceSize.width: width
-        sourceSize.height: height
+        width: Tokens.sizes.session.button
+        height: Tokens.sizes.session.button
+        sourceSize.width: width * ((QsWindow.window as QsWindow)?.devicePixelRatio ?? 1)
 
         playing: visible
         asynchronous: true
-        speed: Appearance.anim.sessionGifSpeed
+        speed: Config.general.sessionGifSpeed
         source: Paths.absolutePath(Config.paths.sessionGif)
+        fillMode: AnimatedImage.PreserveAspectFit
     }
 
     SessionButton {
@@ -76,21 +80,28 @@ Column {
         KeyNavigation.up: hibernate
     }
 
-    component SessionButton: StyledRect {
+    component SessionButton: IconButton {
         id: button
 
-        required property string icon
         required property list<string> command
 
-        implicitWidth: Config.session.sizes.button
-        implicitHeight: Config.session.sizes.button
+        function exec(): void {
+            if (!SessionManager.exec(command))
+                Quickshell.execDetached(command);
+        }
 
-        radius: Appearance.rounding.large
-        color: button.activeFocus ? Colours.palette.m3secondaryContainer : Colours.tPalette.m3surfaceContainer
+        implicitWidth: Tokens.sizes.session.button
+        implicitHeight: Tokens.sizes.session.button
 
-        Keys.onEnterPressed: Quickshell.execDetached(button.command)
-        Keys.onReturnPressed: Quickshell.execDetached(button.command)
-        Keys.onEscapePressed: root.visibilities.session = false
+        inactiveColour: activeFocus ? Colours.palette.m3secondaryContainer : Colours.tPalette.m3surfaceContainer
+        inactiveOnColour: activeFocus ? Colours.palette.m3onSecondaryContainer : Colours.palette.m3onSurface
+        radius: pressed ? Tokens.rounding.medium : activeFocus ? Tokens.rounding.extraLarge : Tokens.rounding.largeIncreased
+        font: Tokens.font.icon.builders.large.scale(1.3).build()
+        onClicked: exec()
+
+        Keys.onEnterPressed: exec()
+        Keys.onReturnPressed: exec()
+        Keys.onEscapePressed: root.screenState.session = false
         Keys.onPressed: event => {
             if (!Config.session.vimKeybinds)
                 return;
@@ -112,24 +123,6 @@ Column {
                     event.accepted = true;
                 }
             }
-        }
-
-        StateLayer {
-            function onClicked(): void {
-                Quickshell.execDetached(button.command);
-            }
-
-            radius: parent.radius
-            color: button.activeFocus ? Colours.palette.m3onSecondaryContainer : Colours.palette.m3onSurface
-        }
-
-        MaterialIcon {
-            anchors.centerIn: parent
-
-            text: button.icon
-            color: button.activeFocus ? Colours.palette.m3onSecondaryContainer : Colours.palette.m3onSurface
-            font.pointSize: Appearance.font.size.extraLarge
-            font.weight: 500
         }
     }
 }

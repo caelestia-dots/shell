@@ -3,7 +3,6 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import Quickshell
 import qs.components
-import qs.config
 import qs.modules.bar.popouts // Need to import this module so the Wrapper type is the same as others
 
 Item {
@@ -34,16 +33,13 @@ Item {
     }
 
     Behavior on offsetScale {
-        Anim {
-            duration: Appearance.anim.durations.expressiveDefaultSpatial
-            easing.bezierCurve: Appearance.anim.curves.expressiveDefaultSpatial
-        }
+        Anim {}
     }
 
     Behavior on x {
         Anim {
             duration: content.animLength
-            easing.bezierCurve: content.animCurve
+            easing: content.animCurve
         }
     }
 
@@ -52,7 +48,7 @@ Item {
 
         Anim {
             duration: content.animLength
-            easing.bezierCurve: content.animCurve
+            easing: content.animCurve
         }
     }
 

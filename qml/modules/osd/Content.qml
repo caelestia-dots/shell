@@ -2,17 +2,18 @@ pragma ComponentBehavior: Bound
 
 import QtQuick
 import QtQuick.Layouts
+import Caelestia
+import Caelestia.Config
 import qs.components
 import qs.components.controls
 import qs.services
-import qs.config
 import qs.utils
 
 Item {
     id: root
 
     required property Brightness.Monitor monitor
-    required property DrawerVisibilities visibilities
+    required property ScreenState screenState
 
     required property real volume
     required property bool muted
@@ -20,14 +21,15 @@ Item {
     required property bool sourceMuted
     required property real brightness
 
-    implicitWidth: layout.implicitWidth + Appearance.padding.large * 2
-    implicitHeight: layout.implicitHeight + Appearance.padding.large * 2
+    implicitWidth: layout.implicitWidth + Tokens.padding.large + layout.anchors.horizontalCenterOffset * 2
+    implicitHeight: layout.implicitHeight + Tokens.padding.large * 2
 
     ColumnLayout {
         id: layout
 
         anchors.centerIn: parent
-        spacing: Appearance.spacing.normal
+        anchors.horizontalCenterOffset: CUtils.clamp(Tokens.padding.large - Config.border.thickness, 0, Tokens.padding.large) / 2
+        spacing: Tokens.spacing.medium
 
         // Speaker volume
         CustomMouseArea {
@@ -38,22 +40,22 @@ Item {
                     Audio.decrementVolume();
             }
 
-            implicitWidth: Config.osd.sizes.sliderWidth
-            implicitHeight: Config.osd.sizes.sliderHeight
+            implicitWidth: Tokens.sizes.osd.sliderWidth
+            implicitHeight: Tokens.sizes.osd.sliderHeight
 
             FilledSlider {
                 anchors.fill: parent
 
                 icon: Icons.getVolumeIcon(value, root.muted)
                 value: root.volume
-                to: Config.services.maxVolume
+                to: GlobalConfig.services.maxVolume
                 onMoved: Audio.setVolume(value)
             }
         }
 
         // Microphone volume
         WrappedLoader {
-            shouldBeActive: Config.osd.enableMicrophone && (!Config.osd.enableBrightness || !root.visibilities.session)
+            shouldBeActive: Config.osd.enableMicrophone && (!Config.osd.enableBrightness || !root.screenState.session)
 
             sourceComponent: CustomMouseArea {
                 function onWheel(event: WheelEvent) {
@@ -63,15 +65,15 @@ Item {
                         Audio.decrementSourceVolume();
                 }
 
-                implicitWidth: Config.osd.sizes.sliderWidth
-                implicitHeight: Config.osd.sizes.sliderHeight
+                implicitWidth: Tokens.sizes.osd.sliderWidth
+                implicitHeight: Tokens.sizes.osd.sliderHeight
 
                 FilledSlider {
                     anchors.fill: parent
 
                     icon: Icons.getMicVolumeIcon(value, root.sourceMuted)
                     value: root.sourceVolume
-                    to: Config.services.maxVolume
+                    to: GlobalConfig.services.maxVolume
                     onMoved: Audio.setSourceVolume(value)
                 }
             }
@@ -87,13 +89,13 @@ Item {
                     if (!monitor)
                         return;
                     if (event.angleDelta.y > 0)
-                        monitor.setBrightness(monitor.brightness + Config.services.brightnessIncrement);
+                        monitor.setBrightness(monitor.brightness + GlobalConfig.services.brightnessIncrement);
                     else if (event.angleDelta.y < 0)
-                        monitor.setBrightness(monitor.brightness - Config.services.brightnessIncrement);
+                        monitor.setBrightness(monitor.brightness - GlobalConfig.services.brightnessIncrement);
                 }
 
-                implicitWidth: Config.osd.sizes.sliderWidth
-                implicitHeight: Config.osd.sizes.sliderHeight
+                implicitWidth: Tokens.sizes.osd.sliderWidth
+                implicitHeight: Tokens.sizes.osd.sliderHeight
 
                 FilledSlider {
                     anchors.fill: parent
@@ -110,19 +112,21 @@ Item {
         required property bool shouldBeActive
 
         asynchronous: true
-        Layout.preferredHeight: shouldBeActive ? Config.osd.sizes.sliderHeight : 0
+        Layout.preferredHeight: shouldBeActive ? Tokens.sizes.osd.sliderHeight : 0
         opacity: shouldBeActive ? 1 : 0
         active: opacity > 0
         visible: active
 
         Behavior on Layout.preferredHeight {
             Anim {
-                easing.bezierCurve: Appearance.anim.curves.emphasized
+                type: Anim.Emphasized
             }
         }
 
         Behavior on opacity {
-            Anim {}
+            Anim {
+                type: Anim.DefaultEffects
+            }
         }
     }
 }

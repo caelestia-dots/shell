@@ -9,4 +9,6 @@ qs_qml_module(caelestia-qml-modules-utilities-cards
         QtQuick
         QtQuick.Layouts
         Quickshell
+        Quickshell.Bluetooth
+        Quickshell.Widgets
 )

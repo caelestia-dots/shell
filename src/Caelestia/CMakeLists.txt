@@ -1,4 +1,4 @@
-qml_module(caelestia
+qml_module(caelestia-core
     URI Caelestia
     SOURCES
         cutils.hpp cutils.cpp
@@ -14,3 +14,6 @@ qml_module(caelestia
         Qt::Sql
         PkgConfig::Qalculate
 )
+
+# Bake the shell version in so CUtils can expose it without spawning a process
+target_compile_definitions(caelestia-core PRIVATE CAELESTIA_VERSION="${VERSION}")
