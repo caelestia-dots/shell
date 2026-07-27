@@ -36,5 +36,5 @@ jobs:
         shell: fish {0}
         run: |
           clang-format --version
-          find plugin extras -name '*.cpp' -o -name '*.hpp' \
+          find src extras -name '*.cpp' -o -name '*.hpp' \
             | xargs clang-format --dry-run --Werror

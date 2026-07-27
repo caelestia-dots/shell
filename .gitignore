@@ -1,6 +1,6 @@
 .direnv
 /result
-/.qmlls.ini
+.qmlls.ini
 build/
 .cache/
 logs

@@ -55,21 +55,15 @@ if("extras" IN_LIST ENABLE_MODULES)
     add_subdirectory(extras)
 endif()
 
-if("plugin" IN_LIST ENABLE_MODULES)
-    add_subdirectory(plugin)
-endif()
-
 if("shell" IN_LIST ENABLE_MODULES)
-    foreach(dir assets components modules services utils)
-        install(DIRECTORY ${dir} DESTINATION "${INSTALL_QSCONFDIR}")
-    endforeach()
+    include(cmake/qt-setup.cmake)
+    include(cmake/pch.cmake)
+    include(cmake/qml-module.cmake)
+    include(cmake/qs-qml-module.cmake)
 
-    install(PROGRAMS assets/wrap_term_launch.sh DESTINATION "${INSTALL_QSCONFDIR}/assets")
-
-    file(READ shell.qml SHELL_QML)
-    string(REPLACE "settings.watchFiles: true" "settings.watchFiles: false" SHELL_QML "${SHELL_QML}")
-    file(WRITE "${CMAKE_BINARY_DIR}/qml/shell.qml" "${SHELL_QML}")
-    install(FILES "${CMAKE_BINARY_DIR}/qml/shell.qml" DESTINATION "${INSTALL_QSCONFDIR}")
+    add_subdirectory(assets)
+    add_subdirectory(qml)
+    add_subdirectory(src)
 
     install(FILES LICENSE DESTINATION "${INSTALL_QSCONFDIR}")
 endif()

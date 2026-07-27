@@ -1,0 +1,29 @@
+qs_qml_module(caelestia-qml-modules-lock
+    URI Caelestia.Qml.Modules.Lock
+    QML_FILES
+        Center.qml
+        Content.qml
+        Fetch.qml
+        Lock.qml
+        LockSurface.qml
+        Media.qml
+        NotifDock.qml
+        NotifGroup.qml
+        Pam.qml
+        Resources.qml
+        WeatherInfo.qml
+    DEPENDENCIES
+        QtQuick
+        QtQuick.Effects
+        QtQuick.Layouts
+        Quickshell
+        Quickshell.Io
+        Quickshell.Services.Notifications
+        Quickshell.Services.Pam
+        Quickshell.Services.UPower
+        Quickshell.Wayland
+        Quickshell.Widgets
+)
+
+add_subdirectory(center)
+add_subdirectory(weather)

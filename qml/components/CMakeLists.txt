@@ -1,0 +1,29 @@
+qs_qml_module(caelestia-qml-components
+    URI Caelestia.Qml.Components
+    QML_FILES
+        AnchorAnim.qml
+        Anim.qml
+        AnimLoader.qml
+        CAnim.qml
+        Logo.qml
+        MaterialIcon.qml
+        ScreenState.qml
+        StateLayer.qml
+        StyledClippingRect.qml
+        StyledRect.qml
+        StyledText.qml
+    DEPENDENCIES
+        QtQuick
+        QtQuick.Layouts
+        QtQuick.Shapes
+        Quickshell
+        Quickshell.Widgets
+)
+
+add_subdirectory(containers)
+add_subdirectory(controls)
+add_subdirectory(effects)
+add_subdirectory(filedialog)
+add_subdirectory(images)
+add_subdirectory(misc)
+add_subdirectory(widgets)
