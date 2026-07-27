@@ -17,6 +17,7 @@ Scope {
     readonly property bool chargeWarningEnabled: GlobalConfig.general.battery.enableHighBatteryWarning
 
     readonly property bool playSound: GlobalConfig.general.battery.toastSound
+    readonly property var currentAudioDevice: root.matchingAudioDevice(Audio.sink)
 
     property real lastPercentage: 100
 
@@ -76,7 +77,7 @@ Scope {
 
         source: Paths.absolutePath(GlobalConfig.paths.lowBatNotifSound)
         audioOutput: AudioOutput {
-            device: root.matchingAudioDevice(Audio.sink)
+            device: root.currentAudioDevice
         }
     }
 
@@ -85,7 +86,7 @@ Scope {
 
         source: Paths.absolutePath(GlobalConfig.paths.highBatNotifSound)
         audioOutput: AudioOutput {
-            device: root.matchingAudioDevice(Audio.sink)
+            device: root.currentAudioDevice
         }
     }
 
