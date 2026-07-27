@@ -46,7 +46,11 @@ public:
     EntryPoint() = default;
     EntryPoint(const QJsonObject& json, const QString& dir, PluginManifest* plugin);
 
+    [[nodiscard]] bool operator==(const EntryPoint& other) const;
+
     [[nodiscard]] EntryPointType::Type type() const;
+    [[nodiscard]] QString source() const;
+    [[nodiscard]] PluginManifest* plugin() const;
 
     // Empty when the entry point parsed successfully, otherwise why it is invalid.
     [[nodiscard]] QString error() const;

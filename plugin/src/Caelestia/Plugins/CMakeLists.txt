@@ -4,8 +4,11 @@ qml_module(caelestia-plugins
         plugins.cpp
         pluginmanifest.cpp
         entrypoint.cpp
+        entrypointloader.cpp
         settingsobject.cpp
         settingmeta.cpp
+    LIBRARIES
+        Qt::Quick
 )
 
 # Bake the shell version in so plugin requirements can be checked against it

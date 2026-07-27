@@ -49,8 +49,21 @@ EntryPoint::EntryPoint(const QJsonObject& json, const QString& dir, PluginManife
     m_properties = json.value(QStringLiteral("properties")).toObject().toVariantMap();
 }
 
+bool EntryPoint::operator==(const EntryPoint& other) const {
+    return m_type == other.m_type && m_source == other.m_source && m_plugin == other.m_plugin &&
+           m_properties == other.m_properties;
+}
+
 EntryPointType::Type EntryPoint::type() const {
     return m_type;
+}
+
+QString EntryPoint::source() const {
+    return m_source;
+}
+
+PluginManifest* EntryPoint::plugin() const {
+    return m_plugin;
 }
 
 QString EntryPoint::error() const {
