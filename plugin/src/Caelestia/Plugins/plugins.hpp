@@ -16,8 +16,7 @@ namespace caelestia::plugins {
 // Backed by a single ~/.config/caelestia/plugins.json holding enabled + path + settings.
 class Plugins : public QObject {
     Q_OBJECT
-    QML_ELEMENT
-    QML_SINGLETON
+    QML_NAMED_ELEMENT(PluginsBase)
 
     Q_PROPERTY(QString shellVersion READ shellVersion CONSTANT)
     Q_PROPERTY(QList<caelestia::plugins::PluginManifest*> plugins READ plugins NOTIFY pluginsChanged)
@@ -43,7 +42,7 @@ public:
     void setEnabled(const QStringList& enabled);
 
     // Flattened entry points of the given type across all enabled + valid plugins.
-    Q_INVOKABLE QList<EntryPoint> entryPoints(caelestia::plugins::EntryPointType::Type type) const;
+    Q_INVOKABLE QList<EntryPoint> __entryPoints(caelestia::plugins::EntryPointType::Type type) const;
 
     Q_INVOKABLE void setPluginEnabled(const QString& pluginId, bool enabled);
     Q_INVOKABLE void reload();

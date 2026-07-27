@@ -103,7 +103,7 @@ void Plugins::setPluginEnabled(const QString& pluginId, bool enabled) {
     setEnabled(next);
 }
 
-QList<EntryPoint> Plugins::entryPoints(EntryPointType::Type type) const {
+QList<EntryPoint> Plugins::__entryPoints(EntryPointType::Type type) const {
     QList<EntryPoint> result;
 
     for (const auto* plugin : std::as_const(m_plugins)) {

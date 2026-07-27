@@ -7,6 +7,8 @@ qml_module(caelestia-plugins
         entrypointloader.cpp
         settingsobject.cpp
         settingmeta.cpp
+    QML_SINGLETONS
+        Plugins.qml
     LIBRARIES
         Qt::Quick
 )
