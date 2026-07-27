@@ -19,10 +19,9 @@ class Plugins : public QObject {
     QML_NAMED_ELEMENT(PluginsBase)
 
     Q_PROPERTY(QString shellVersion READ shellVersion CONSTANT)
-    Q_PROPERTY(QList<caelestia::plugins::PluginManifest*> plugins READ plugins NOTIFY pluginsChanged)
-    Q_PROPERTY(QList<caelestia::plugins::PluginManifest*> loadedPlugins READ loadedPlugins NOTIFY loadedPluginsChanged)
-    Q_PROPERTY(QList<caelestia::plugins::PluginManifest*> conflictingPlugins READ conflictingPlugins NOTIFY
-            conflictingPluginsChanged)
+    Q_PROPERTY(QVariantList plugins READ plugins NOTIFY pluginsChanged)
+    Q_PROPERTY(QVariantList loadedPlugins READ loadedPlugins NOTIFY loadedPluginsChanged)
+    Q_PROPERTY(QVariantList conflictingPlugins READ conflictingPlugins NOTIFY conflictingPluginsChanged)
     Q_PROPERTY(QStringList enabled READ enabled WRITE setEnabled NOTIFY enabledChanged)
 
 public:
@@ -30,13 +29,13 @@ public:
 
     [[nodiscard]] QString shellVersion() const;
 
-    [[nodiscard]] QList<PluginManifest*> plugins() const;
+    [[nodiscard]] QVariantList plugins() const;
 
     // The subset of plugins that are valid and enabled, i.e. the ones actually running.
-    [[nodiscard]] QList<PluginManifest*> loadedPlugins() const;
+    [[nodiscard]] QVariantList loadedPlugins() const;
 
     // Plugins shadowed by an earlier plugin declaring the same id (the losing side of a clash).
-    [[nodiscard]] QList<PluginManifest*> conflictingPlugins() const;
+    [[nodiscard]] QVariantList conflictingPlugins() const;
 
     [[nodiscard]] QStringList enabled() const;
     void setEnabled(const QStringList& enabled);

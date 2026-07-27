@@ -14,9 +14,6 @@ import qs.modules.nexus.common
 PageBase {
     id: root
 
-    readonly property var allPlugins: Plugins.plugins // qmllint disable unresolved-type
-    readonly property var enabledList: Plugins.loadedPlugins // qmllint disable unresolved-type
-
     // function openPlugin(plugin: PluginManifest): void {
     //     nState.selectedPlugin = plugin;
     //     nState.openSubPage(1);

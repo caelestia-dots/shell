@@ -58,20 +58,20 @@ QString Plugins::shellVersion() const {
     return QStringLiteral(CAELESTIA_VERSION);
 }
 
-QList<PluginManifest*> Plugins::plugins() const {
-    return m_plugins;
+QVariantList Plugins::plugins() const {
+    return QVariant::fromValue(m_plugins).toList();
 }
 
-QList<PluginManifest*> Plugins::loadedPlugins() const {
-    QList<PluginManifest*> result;
-    for (auto* plugin : m_plugins)
+QVariantList Plugins::loadedPlugins() const {
+    QVariantList result;
+    for (const auto* plugin : m_plugins)
         if (plugin->valid() && plugin->enabled())
-            result.append(plugin);
+            result.append(QVariant::fromValue(plugin));
     return result;
 }
 
-QList<PluginManifest*> Plugins::conflictingPlugins() const {
-    return m_conflictingPlugins;
+QVariantList Plugins::conflictingPlugins() const {
+    return QVariant::fromValue(m_conflictingPlugins).toList();
 }
 
 QStringList Plugins::enabled() const {
