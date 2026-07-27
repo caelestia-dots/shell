@@ -43,7 +43,7 @@ PageBase {
             text: qsTr("Language")
         }
 
-        // Read-only: the shell follows the system locale (no in-shell translations yet)
+        // Read-only: the shell follows the system locale (translations loaded automatically)
         ConnectedRect {
             Layout.fillWidth: true
             first: true
