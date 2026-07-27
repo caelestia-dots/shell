@@ -89,7 +89,7 @@ ConnectedRect {
             opacity: root.textOpacity
 
             onClicked: {
-                if (root.disabled) 
+                if (root.disabled)
                     return;
                 root.resetRequested();
             }
@@ -104,9 +104,9 @@ ConnectedRect {
             isRound: true
 
             onClicked: {
-                if (root.disabled) 
+                if (root.disabled)
                     return;
-                filePicker.open()
+                filePicker.open();
             }
         }
     }
