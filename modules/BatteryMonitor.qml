@@ -5,8 +5,8 @@ import Quickshell.Services.UPower
 import Caelestia
 import Caelestia.Config
 import Caelestia.Services
-import qs.utils
 import qs.services
+import qs.utils
 
 Scope {
     id: root
