@@ -65,19 +65,6 @@ PageBase {
         highWarnConfig.forEach(changeIcon);
     }
 
-    function resetWarningStatus(source) {
-        for (const level of source) {
-            level.warned = false;
-        }
-    }
-
-    function toggleRepeatWarning() {
-        GlobalConfig.general.battery.repeatedWarnings = !GlobalConfig.general.battery.repeatedWarnings;
-
-        resetWarningStatus(GlobalConfig.general.battery.lowBatteryWarnLevels);
-        resetWarningStatus(GlobalConfig.general.battery.chargingWarnLevels);
-    }
-
     title: qsTr("Power")
 
     ColumnLayout {
@@ -95,7 +82,7 @@ PageBase {
             font: Tokens.font.body.medium
             horizontalPadding: Tokens.padding.largeIncreased
             checked: GlobalConfig.general.battery.enableLowBatteryWarning
-            onToggled: toggleLowWarns()
+            onToggled: root.toggleLowWarns()
         }
 
         BatteryWarningList {
@@ -164,7 +151,7 @@ PageBase {
             font: Tokens.font.body.medium
             horizontalPadding: Tokens.padding.largeIncreased
             checked: GlobalConfig.general.battery.enableHighBatteryWarning
-            onToggled: toggleHighWarns()
+            onToggled: root.toggleHighWarns()
         }
 
         BatteryWarningList {
@@ -240,7 +227,7 @@ PageBase {
 
         FileSelectRow {
             disabled: !GlobalConfig.general.battery.toastSound
-            filePicker: lowBatSoundPicker
+            filePicker: root.lowBatSoundPicker
             label: "Low battery sound"
             icon: "music_note"
             value: GlobalConfig.paths.lowBatNotifSound
@@ -254,7 +241,7 @@ PageBase {
         FileSelectRow {
             disabled: !GlobalConfig.general.battery.toastSound
             last: true
-            filePicker: chargingSoundPicker
+            filePicker: root.chargingSoundPicker
             label: "Charging battery sound"
             icon: "music_note"
             value: GlobalConfig.paths.highBatNotifSound
@@ -290,7 +277,7 @@ PageBase {
             checked: GlobalConfig.general.battery.framedMaterialIcons ?? false
             onToggled: {
                 GlobalConfig.general.battery.framedMaterialIcons = !GlobalConfig.general.battery.framedMaterialIcons;
-                changeToastIconVariant();
+                root.changeToastIconVariant();
             }
         }
     }
