@@ -472,10 +472,11 @@ void Plugins::updateWatches() {
             m_watcher->addPath(path);
 }
 
-void Plugins::onWatchEvent() {
+void Plugins::onWatchEvent(const QString& path) {
     updateWatches();
 
-    if (m_recentlySaved)
+    // Only ignore writes to the config file
+    if (path == m_configPath && m_recentlySaved)
         return;
 
     m_reloadTimer->start();

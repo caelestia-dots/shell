@@ -109,7 +109,7 @@ private:
     // whose fingerprint moved.
     void updateModules(bool force);
 
-    void onWatchEvent();
+    void onWatchEvent(const QString& path);
     void updateWatches();
     [[nodiscard]] QStringList searchRoots() const;
 
