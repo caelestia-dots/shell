@@ -62,12 +62,16 @@ QVariantList Plugins::plugins() const {
     return QVariant::fromValue(m_plugins).toList();
 }
 
-QVariantList Plugins::loadedPlugins() const {
-    QVariantList result;
-    for (const auto* plugin : m_plugins)
+QList<PluginManifest*> Plugins::loadedManifests() const {
+    QList<PluginManifest*> result;
+    for (auto* const plugin : m_plugins)
         if (plugin->valid() && plugin->enabled())
-            result.append(QVariant::fromValue(plugin));
+            result.append(plugin);
     return result;
+}
+
+QVariantList Plugins::loadedPlugins() const {
+    return QVariant::fromValue(loadedManifests()).toList();
 }
 
 QVariantList Plugins::conflictingPlugins() const {
@@ -84,7 +88,7 @@ void Plugins::setEnabled(const QStringList& enabled) {
 
     m_enabled = enabled;
 
-    for (auto* plugin : std::as_const(m_plugins))
+    for (auto* const plugin : std::as_const(m_plugins))
         plugin->setEnabled(m_enabled.contains(plugin->id()));
 
     emit enabledChanged();
@@ -186,6 +190,10 @@ void Plugins::saveConfig() {
     file.write(QJsonDocument(obj).toJson(QJsonDocument::Indented));
     file.close();
 
+    // Everything in memory is now on disk, so a rescan may safely reload settings again.
+    for (auto* const plugin : std::as_const(m_plugins))
+        plugin->markSettingsSaved();
+
     // Ignore the watcher event triggered by our own write.
     m_recentlySaved = true;
     QTimer::singleShot(500, this, [this] {
@@ -195,8 +203,8 @@ void Plugins::saveConfig() {
     updateWatches();
 }
 
-void Plugins::rescan() {
-    QList<PluginManifest*> result;
+QStringList Plugins::discoverPluginDirs() const {
+    QStringList dirs;
 
     const auto roots = searchRoots();
     for (const auto& root : roots) {
@@ -207,56 +215,109 @@ void Plugins::rescan() {
         const auto subdirs = dir.entryList(QDir::Dirs | QDir::NoDotAndDotDot, QDir::Name);
         for (const auto& subdir : subdirs) {
             const QString pluginDir = dir.absoluteFilePath(subdir);
-            const QString manifestPath = pluginDir + QStringLiteral("/manifest.json");
-            if (!QFile::exists(manifestPath))
-                continue;
+            if (QFile::exists(pluginDir + QStringLiteral("/manifest.json")))
+                dirs.append(pluginDir);
+        }
+    }
 
-            auto* const manifest = new PluginManifest(pluginDir, manifestPath, this);
-            manifest->setEnabled(m_enabled.contains(manifest->id()));
+    return dirs;
+}
 
-            manifest->loadSettings(m_settings.value(manifest->id()).toMap());
+void Plugins::rescan() {
+    const auto previousPlugins = m_plugins;
+    const auto previousConflicting = m_conflictingPlugins;
+    const auto previousLoaded = loadedManifests();
+
+    // Reuse manifests instead of remaking all on rescan
+    const auto dirs = discoverPluginDirs();
+    QList<PluginManifest*> result;
+    for (const auto& pluginDir : dirs) {
+        auto* manifest = m_pluginsByDir.value(pluginDir);
+
+        if (manifest) {
+            manifest->reparse();
+        } else {
+            manifest = new PluginManifest(pluginDir, pluginDir + QStringLiteral("/manifest.json"), this);
+
             connect(manifest, &PluginManifest::settingsChanged, this, [this] {
                 m_saveTimer->start();
             });
+            connect(manifest, &PluginManifest::entryPointsChanged, this, &Plugins::bumpEntryPointsRevision);
+            connect(manifest, &PluginManifest::validChanged, this, &Plugins::bumpEntryPointsRevision);
+            connect(manifest, &PluginManifest::enabledChanged, this, &Plugins::bumpEntryPointsRevision);
 
-            if (!manifest->valid())
-                qCWarning(lcPlugins) << "Ignoring plugin" << manifest->id() << "-" << manifest->error();
-            result.append(manifest);
+            m_pluginsByDir.insert(pluginDir, manifest);
         }
+
+        manifest->setEnabled(m_enabled.contains(manifest->id()));
+
+        // Don't load from file if there are unsaved settings
+        if (!manifest->hasUnsavedSettings())
+            manifest->loadSettings(m_settings.value(manifest->id()).toMap());
+
+        if (manifest->hasParseError())
+            qCWarning(lcPlugins) << "Ignoring plugin" << manifest->id() << "-" << manifest->error();
+
+        result.append(manifest);
+    }
+
+    // Drop manifests whose directory no longer holds a manifest.json
+    for (auto it = m_pluginsByDir.begin(); it != m_pluginsByDir.end();) {
+        if (dirs.contains(it.key())) {
+            ++it;
+            continue;
+        }
+
+        it.value()->deleteLater();
+        it = m_pluginsByDir.erase(it);
     }
 
     // On id collision keep the first plugin encountered and shadow the rest: later duplicates
     // are marked invalid so they neither load nor contribute, with a warning at the clash.
+    // Recomputed from scratch every pass, since removing a plugin can unshadow another.
     QSet<QString> seenIds;
     QList<PluginManifest*> conflicting;
-    for (auto* plugin : result) {
-        if (!plugin->valid())
+    for (auto* const plugin : result) {
+        if (plugin->hasParseError()) {
+            plugin->setShadowed(false);
             continue;
+        }
 
         if (seenIds.contains(plugin->id())) {
             qCWarning(lcPlugins) << "Duplicate plugin id" << plugin->id() << "in" << plugin->dir()
                                  << "- shadowed by an earlier plugin";
-            plugin->invalidate(QStringLiteral("Shadowed by an earlier plugin with id '%1'").arg(plugin->id()));
+            plugin->setShadowed(true);
             conflicting.append(plugin);
         } else {
+            plugin->setShadowed(false);
             seenIds.insert(plugin->id());
         }
     }
 
-    const auto previous = m_plugins;
     m_plugins = result;
     m_conflictingPlugins = conflicting;
 
-    emit pluginsChanged();
-    emit loadedPluginsChanged();
-    emit conflictingPluginsChanged();
+    if (m_plugins != previousPlugins) {
+        emit pluginsChanged();
+        bumpEntryPointsRevision();
+    }
+    if (m_conflictingPlugins != previousConflicting)
+        emit conflictingPluginsChanged();
+    if (loadedManifests() != previousLoaded)
+        emit loadedPluginsChanged();
+
     emit loaded();
 
-    // Defer deleting the previous generation so QML rebinds to the new objects first.
-    for (auto* plugin : previous)
-        plugin->deleteLater();
-
     updateWatches();
+}
+
+void Plugins::bumpEntryPointsRevision() {
+    m_entryPointsRevision++;
+    emit entryPointsRevisionChanged();
+}
+
+int Plugins::entryPointsRevision() const {
+    return m_entryPointsRevision;
 }
 
 QStringList Plugins::searchRoots() const {

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <qfilesystemwatcher.h>
+#include <qhash.h>
 #include <qlist.h>
 #include <qobject.h>
 #include <qqmlintegration.h>
@@ -24,6 +25,12 @@ class Plugins : public QObject {
     Q_PROPERTY(QVariantList conflictingPlugins READ conflictingPlugins NOTIFY conflictingPluginsChanged)
     Q_PROPERTY(QStringList enabled READ enabled WRITE setEnabled NOTIFY enabledChanged)
 
+    // Bumped whenever the flattened entry point set could have changed: a plugin appearing or
+    // disappearing, its validity or enabled state flipping, or its manifest declaring different
+    // entry points. Exists because manifests are now reused across a rescan, so the plugin list
+    // itself can stay identical while its contents change.
+    Q_PROPERTY(int entryPointsRevision READ entryPointsRevision NOTIFY entryPointsRevisionChanged)
+
 public:
     explicit Plugins(QObject* parent = nullptr);
 
@@ -40,6 +47,8 @@ public:
     [[nodiscard]] QStringList enabled() const;
     void setEnabled(const QStringList& enabled);
 
+    [[nodiscard]] int entryPointsRevision() const;
+
     // Flattened entry points of the given type across all enabled + valid plugins.
     Q_INVOKABLE QList<EntryPoint> __entryPoints(caelestia::plugins::EntryPointType::Type type) const;
 
@@ -51,6 +60,7 @@ signals:
     void loadedPluginsChanged();
     void conflictingPluginsChanged();
     void enabledChanged();
+    void entryPointsRevisionChanged();
 
     // Emitted after a discovery/reload pass finishes populating the plugin list.
     void loaded();
@@ -63,6 +73,11 @@ private:
     void updateWatches();
     [[nodiscard]] QStringList searchRoots() const;
 
+    // Directories holding a manifest.json, in search order (earlier roots win an id clash)
+    [[nodiscard]] QStringList discoverPluginDirs() const;
+    [[nodiscard]] QList<PluginManifest*> loadedManifests() const;
+    void bumpEntryPointsRevision();
+
     QString m_configPath;
     QFileSystemWatcher* m_watcher;
     QTimer* m_saveTimer;
@@ -74,6 +89,11 @@ private:
     QVariantMap m_settings;
     QList<PluginManifest*> m_plugins;
     QList<PluginManifest*> m_conflictingPlugins;
+
+    // Manifests keyed by their directory, which is their stable identity across a rescan.
+    // The id cannot be used: it changes when the author edits name/author in the manifest.
+    QHash<QString, PluginManifest*> m_pluginsByDir;
+    int m_entryPointsRevision = 0;
 };
 
 } // namespace caelestia::plugins

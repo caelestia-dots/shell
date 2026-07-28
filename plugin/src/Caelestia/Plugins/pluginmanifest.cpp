@@ -67,67 +67,120 @@ bool satisfiesRequirement(const QString& requirement, const QVersionNumber& shel
 
 PluginManifest::PluginManifest(const QString& dir, const QString& path, QObject* parent)
     : QObject(parent)
-    , m_dir(dir) {
-    QFile file(path);
+    , m_dir(dir)
+    , m_path(path) {
+    parse();
+}
+
+void PluginManifest::parse() {
+    const auto wasValid = valid();
+    const auto wasError = error();
+
+    QString id;
+    QString name;
+    QString version;
+    QString icon;
+    QString description;
+    QString author;
+    QString requirement;
+    QString settingsSource;
+    QString settingsUiSource;
+    QList<EntryPoint> entryPoints;
+    QString parseError;
+
+    QFile file(m_path);
+    QJsonParseError jsonError{};
+    QJsonDocument doc;
+
     if (!file.open(QIODevice::ReadOnly)) {
-        m_error = QStringLiteral("Failed to open manifest");
-        return;
+        parseError = QStringLiteral("Failed to open manifest");
+    } else {
+        doc = QJsonDocument::fromJson(file.readAll(), &jsonError);
+        file.close();
+
+        if (jsonError.error != QJsonParseError::NoError)
+            parseError = QStringLiteral("Invalid manifest JSON: ") + jsonError.errorString();
     }
 
-    QJsonParseError error{};
-    const auto doc = QJsonDocument::fromJson(file.readAll(), &error);
-    file.close();
+    if (parseError.isEmpty()) {
+        const auto obj = doc.object();
+        name = obj.value(QStringLiteral("name")).toString();
 
-    if (error.error != QJsonParseError::NoError) {
-        m_error = QStringLiteral("Invalid manifest JSON: ") + error.errorString();
-        return;
+        author = obj.value(QStringLiteral("author")).toString();
+        if (author.isEmpty()) // Author defaults to "unknown" if not specified
+            author = QStringLiteral("unknown");
+
+        // Canonical id is author/name
+        id = author + QStringLiteral("/") + name;
+        version = obj.value(QStringLiteral("version")).toString();
+        icon = obj.value(QStringLiteral("icon")).toString();
+        description = obj.value(QStringLiteral("description")).toString();
+        requirement = obj.value(QStringLiteral("requires")).toString();
+
+        const auto declaredSettings = obj.value(QStringLiteral("settings")).toString();
+        if (!declaredSettings.isEmpty())
+            settingsSource = QUrl::fromLocalFile(m_dir + QStringLiteral("/") + declaredSettings).toString();
+
+        const auto declaredSettingsUi = obj.value(QStringLiteral("settingsUi")).toString();
+        if (!declaredSettingsUi.isEmpty())
+            settingsUiSource = QUrl::fromLocalFile(m_dir + QStringLiteral("/") + declaredSettingsUi).toString();
+
+        // Each entry point parses itself; the first that fails invalidates the whole manifest.
+        QString entryPointError;
+        const auto entryPointsArray = obj.value(QStringLiteral("entryPoints")).toArray();
+        for (const auto& declared : entryPointsArray) {
+            const EntryPoint entryPoint(declared.toObject(), m_dir, this);
+            if (entryPointError.isEmpty())
+                entryPointError = entryPoint.error();
+            entryPoints.append(entryPoint);
+        }
+
+        if (name.isEmpty())
+            parseError = QStringLiteral("Manifest is missing 'name'");
+        else if (!isValidIdSegment(name))
+            parseError = QStringLiteral("Plugin name '%1' may only contain letters, digits, '.', '_' or '-'").arg(name);
+        else if (!isValidIdSegment(author))
+            parseError =
+                QStringLiteral("Plugin author '%1' may only contain letters, digits, '.', '_' or '-'").arg(author);
+        else if (!entryPointError.isEmpty())
+            parseError = entryPointError;
+        else if (!satisfiesRequirement(requirement, parseVersion(QStringLiteral(CAELESTIA_VERSION))))
+            parseError = QStringLiteral("Requires Caelestia %1 (current is %2)")
+                             .arg(requirement, QStringLiteral(CAELESTIA_VERSION));
     }
 
-    const auto obj = doc.object();
-    m_name = obj.value(QStringLiteral("name")).toString();
+    // Set before the field assignments so anything reacting to those signals already observes
+    // the new validity rather than the previous pass's.
+    m_parseError = parseError;
 
-    m_author = obj.value(QStringLiteral("author")).toString();
-    if (m_author.isEmpty()) // Author defaults to "unknown" if not specified
-        m_author = QStringLiteral("unknown");
-
-    // Canonical id is author/name
-    m_id = m_author + QStringLiteral("/") + m_name;
-    m_version = obj.value(QStringLiteral("version")).toString();
-    m_icon = obj.value(QStringLiteral("icon")).toString();
-    m_description = obj.value(QStringLiteral("description")).toString();
-    m_requires = obj.value(QStringLiteral("requires")).toString();
-
-    const auto settingsSource = obj.value(QStringLiteral("settings")).toString();
-    if (!settingsSource.isEmpty())
-        m_settingsSource = QUrl::fromLocalFile(dir + QStringLiteral("/") + settingsSource).toString();
-
-    const auto settingsUiSource = obj.value(QStringLiteral("settingsUi")).toString();
-    if (!settingsUiSource.isEmpty())
-        m_settingsUiSource = QUrl::fromLocalFile(dir + QStringLiteral("/") + settingsUiSource).toString();
-
-    // Each entry point parses itself; the first that fails invalidates the whole manifest.
-    QString entryPointError;
-    const auto entryPointsArray = obj.value(QStringLiteral("entryPoints")).toArray();
-    for (const auto& declared : entryPointsArray) {
-        const EntryPoint entryPoint(declared.toObject(), dir, this);
-        if (entryPointError.isEmpty())
-            entryPointError = entryPoint.error();
-        m_entryPoints.append(entryPoint);
+    // Assign values to fields
+#define ASSIGN(field, value, sig)                                                                                      \
+    if ((field) != (value)) {                                                                                          \
+        (field) = (value);                                                                                             \
+        Q_EMIT sig();                                                                                                  \
     }
 
-    if (m_name.isEmpty())
-        m_error = QStringLiteral("Manifest is missing 'name'");
-    else if (!isValidIdSegment(m_name))
-        m_error = QStringLiteral("Plugin name '%1' may only contain letters, digits, '.', '_' or '-'").arg(m_name);
-    else if (!isValidIdSegment(m_author))
-        m_error = QStringLiteral("Plugin author '%1' may only contain letters, digits, '.', '_' or '-'").arg(m_author);
-    else if (!entryPointError.isEmpty())
-        m_error = entryPointError;
-    else if (!satisfiesRequirement(m_requires, parseVersion(QStringLiteral(CAELESTIA_VERSION))))
-        m_error =
-            QStringLiteral("Requires Caelestia %1 (current is %2)").arg(m_requires, QStringLiteral(CAELESTIA_VERSION));
+    ASSIGN(m_id, id, idChanged)
+    ASSIGN(m_name, name, nameChanged)
+    ASSIGN(m_version, version, versionChanged)
+    ASSIGN(m_icon, icon, iconChanged)
+    ASSIGN(m_description, description, descriptionChanged)
+    ASSIGN(m_author, author, authorChanged)
+    ASSIGN(m_requires, requirement, requirementChanged)
+    ASSIGN(m_settingsSource, settingsSource, settingsSourceChanged)
+    ASSIGN(m_settingsUiSource, settingsUiSource, settingsUiSourceChanged)
+    ASSIGN(m_entryPoints, entryPoints, entryPointsChanged)
 
-    m_valid = m_error.isEmpty();
+#undef ASSIGN
+
+    if (error() != wasError)
+        emit errorChanged();
+    if (valid() != wasValid)
+        emit validChanged();
+}
+
+void PluginManifest::reparse() {
+    parse();
 }
 
 QString PluginManifest::id() const {
@@ -175,11 +228,17 @@ QList<EntryPoint> PluginManifest::entryPoints() const {
 }
 
 bool PluginManifest::valid() const {
-    return m_valid;
+    return m_parseError.isEmpty() && !m_shadowed;
 }
 
 QString PluginManifest::error() const {
-    return m_error;
+    if (m_shadowed)
+        return QStringLiteral("Shadowed by an earlier plugin with id '%1'").arg(m_id);
+    return m_parseError;
+}
+
+bool PluginManifest::hasParseError() const {
+    return !m_parseError.isEmpty();
 }
 
 bool PluginManifest::enabled() const {
@@ -225,7 +284,10 @@ SettingsObject* PluginManifest::settings() {
 
     // Load stored settings
     m_settings->load(m_storedSettings);
-    connect(m_settings, &SettingsObject::changed, this, &PluginManifest::settingsChanged);
+    connect(m_settings, &SettingsObject::changed, this, [this] {
+        m_settingsDirty = true;
+        emit settingsChanged();
+    });
 
     return m_settings;
 }
@@ -237,13 +299,29 @@ void PluginManifest::loadSettings(const QVariantMap& settings) {
         m_storedSettings = settings;
 }
 
+bool PluginManifest::hasUnsavedSettings() const {
+    return m_settingsDirty;
+}
+
+void PluginManifest::markSettingsSaved() {
+    m_settingsDirty = false;
+}
+
 QVariantMap PluginManifest::settingsValues() const {
     return m_settings ? m_settings->toMap() : m_storedSettings;
 }
 
-void PluginManifest::invalidate(const QString& error) {
-    m_valid = false;
-    m_error = error;
+void PluginManifest::setShadowed(bool shadowed) {
+    if (m_shadowed == shadowed)
+        return;
+
+    const auto wasValid = valid();
+
+    m_shadowed = shadowed;
+    emit errorChanged();
+
+    if (valid() != wasValid)
+        emit validChanged();
 }
 
 } // namespace caelestia::plugins

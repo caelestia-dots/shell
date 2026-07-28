@@ -4,7 +4,7 @@ import Caelestia.Plugins
 
 PluginsBase {
     function entryPoints(type: int): list<pluginEntryPoint> {
-        loadedPlugins; // For reactivity
+        entryPointsRevision; // For reactivity
         return __entryPoints(type);
     }
 }
