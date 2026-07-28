@@ -7,7 +7,6 @@
 #include <qjsondocument.h>
 #include <qjsonobject.h>
 #include <qloggingcategory.h>
-#include <qset.h>
 #include <qstandardpaths.h>
 
 #include "pluginurlinterceptor.hpp"
@@ -334,32 +333,37 @@ void Plugins::rescan(bool force) {
         it = m_records.erase(it);
     }
 
-    // On id collision keep the first plugin encountered and shadow the rest: later duplicates
-    // are marked invalid so they neither load nor contribute, with a warning at the clash.
-    // Recomputed from scratch every pass, since removing a plugin can unshadow another.
-    QSet<QString> seenIds;
+    // Conflicting ids will disable all plugins with the contested id
+    QHash<QString, QList<PluginManifest*>> byId;
+    for (auto* const plugin : result)
+        if (!plugin->hasParseError())
+            byId[plugin->id()].append(plugin);
+
+    // Recomputed from scratch every pass, since removing a claimant revalidates the rest.
     QList<PluginManifest*> conflicting;
     for (auto* const plugin : result) {
-        if (plugin->hasParseError()) {
-            plugin->setShadowed(false);
+        const auto claimants = plugin->hasParseError() ? QList<PluginManifest*>() : byId.value(plugin->id());
+        if (claimants.size() < 2) {
+            plugin->setConflicts({});
             continue;
         }
 
-        if (seenIds.contains(plugin->id())) {
-            qCWarning(lcPlugins) << "Duplicate plugin id" << plugin->id() << "in" << plugin->dir()
-                                 << "- shadowed by an earlier plugin";
-            plugin->setShadowed(true);
-            conflicting.append(plugin);
-        } else {
-            plugin->setShadowed(false);
-            seenIds.insert(plugin->id());
-        }
+        QStringList others;
+        for (const auto* claimant : claimants)
+            if (claimant != plugin)
+                others.append(claimant->dir());
+
+        qCWarning(lcPlugins) << "Duplicate plugin id" << plugin->id() << "in" << plugin->dir() << "- also declared by"
+                             << others.join(QStringLiteral(", "));
+
+        plugin->setConflicts(others);
+        conflicting.append(plugin);
     }
 
     m_plugins = result;
     m_conflictingPlugins = conflicting;
 
-    // After shadowing, so a plugin that lost an id clash registers nothing
+    // After the id grouping, so a plugin caught in a clash registers nothing
     updateModules(force);
 
     if (m_plugins != previousPlugins) {

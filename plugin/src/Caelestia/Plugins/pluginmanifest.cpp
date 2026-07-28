@@ -105,7 +105,7 @@ void PluginManifest::parse() {
             author = QStringLiteral("unknown");
 
         // Canonical id is author/name. Lowercased here rather than when deriving the module URI,
-        // so the duplicate id check catches Foo/Bar shadowing foo/bar too.
+        // so the duplicate id check catches Foo/Bar clashing with foo/bar too.
         id = (author + QStringLiteral("/") + name).toLower();
         version = obj.value(QStringLiteral("version")).toString();
         icon = obj.value(QStringLiteral("icon")).toString();
@@ -249,13 +249,18 @@ QList<EntryPoint> PluginManifest::entryPoints() const {
 }
 
 bool PluginManifest::valid() const {
-    return m_parseError.isEmpty() && !m_shadowed;
+    return m_parseError.isEmpty() && m_conflicts.isEmpty();
 }
 
 QString PluginManifest::error() const {
-    if (m_shadowed)
-        return QStringLiteral("Shadowed by an earlier plugin with id '%1'").arg(m_id);
-    return m_parseError;
+    if (!m_parseError.isEmpty())
+        return m_parseError;
+
+    if (!m_conflicts.isEmpty())
+        return QStringLiteral("Duplicate plugin id '%1', also declared by %2")
+            .arg(m_id, m_conflicts.join(QStringLiteral(", ")));
+
+    return {};
 }
 
 bool PluginManifest::hasParseError() const {
@@ -374,13 +379,13 @@ QVariantMap PluginManifest::settingsValues() const {
     return m_settings ? m_settings->toMap() : m_storedSettings;
 }
 
-void PluginManifest::setShadowed(bool shadowed) {
-    if (m_shadowed == shadowed)
+void PluginManifest::setConflicts(const QStringList& dirs) {
+    if (m_conflicts == dirs)
         return;
 
     const auto wasValid = valid();
 
-    m_shadowed = shadowed;
+    m_conflicts = dirs;
     emit errorChanged();
 
     if (valid() != wasValid)

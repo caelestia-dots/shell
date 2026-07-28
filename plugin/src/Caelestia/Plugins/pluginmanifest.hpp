@@ -114,11 +114,13 @@ public:
     // Keeps the object (and therefore its SettingsObject) alive across a rescan.
     void reparse();
 
-    // True when the manifest itself failed to parse or validate, independent of shadowing.
+    // True when the manifest itself failed to parse or validate, independent of any id clash.
     [[nodiscard]] bool hasParseError() const;
 
-    // Marks the manifest as losing an id clash. Reversible: shadowing is recomputed every scan.
-    void setShadowed(bool shadowed);
+    // The directories of the other plugins declaring this plugin's id. A contested id invalidates
+    // every claimant, so this is set on all of them, not just the ones found later. Reversible:
+    // recomputed on every scan, since removing a claimant revalidates the rest.
+    void setConflicts(const QStringList& dirs);
 
 signals:
     void idChanged();
@@ -163,7 +165,7 @@ private:
     QList<EntryPoint> m_entryPoints;
     QString m_parseError;
     QStringList m_warnings;
-    bool m_shadowed = false;
+    QStringList m_conflicts;
     bool m_enabled = false;
     int m_generation = 0;
 

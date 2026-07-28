@@ -60,7 +60,8 @@ public:
     // The subset of plugins that are valid and enabled, i.e. the ones actually running.
     [[nodiscard]] QVariantList loadedPlugins() const;
 
-    // Plugins shadowed by an earlier plugin declaring the same id (the losing side of a clash).
+    // Every plugin caught in an id clash, both sides of it: a contested id invalidates all of the
+    // plugins declaring it rather than letting search order pick a winner.
     [[nodiscard]] QVariantList conflictingPlugins() const;
 
     [[nodiscard]] QStringList enabled() const;
@@ -118,7 +119,7 @@ private:
     // The config file's current bytes, empty when it is missing or unreadable
     [[nodiscard]] QByteArray readConfig() const;
 
-    // Directories holding a manifest.json, in search order (earlier roots win an id clash)
+    // Directories holding a manifest.json, in search order
     [[nodiscard]] QStringList discoverPluginDirs() const;
     [[nodiscard]] QList<PluginManifest*> loadedManifests() const;
     void bumpEntryPointsRevision();
