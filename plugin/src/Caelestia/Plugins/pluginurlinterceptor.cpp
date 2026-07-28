@@ -51,20 +51,25 @@ QUrl PluginUrlInterceptor::createSeal() {
 }
 
 void PluginUrlInterceptor::setRoots(const QStringList& roots) {
-    m_roots.clear();
-    m_roots.reserve(roots.size());
+    QStringList next;
+    next.reserve(roots.size());
 
     // Stored with the separator so the prefix match cannot spill into a sibling directory
     // sharing a name prefix, and so intercept() stays a plain comparison.
     for (const auto& root : roots)
-        m_roots.append(QDir::cleanPath(root) + u'/');
+        next.append(QDir::cleanPath(root) + u'/');
+
+    QMutexLocker locker(&m_mutex);
+    m_roots = std::move(next);
 }
 
 QUrl PluginUrlInterceptor::intercept(const QUrl& url, DataType type) {
-    if (type != QmldirFile || m_seal.isEmpty() || m_roots.isEmpty() || !url.isLocalFile())
+    if (type != QmldirFile || m_seal.isEmpty() || !url.isLocalFile())
         return url;
 
     const auto path = url.toLocalFile();
+
+    QMutexLocker locker(&m_mutex);
     for (const auto& root : std::as_const(m_roots))
         if (path.startsWith(root))
             return m_seal;
