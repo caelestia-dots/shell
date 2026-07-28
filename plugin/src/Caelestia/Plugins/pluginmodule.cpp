@@ -43,7 +43,7 @@ QString PluginModule::uriFor(const QString& id) {
 }
 
 bool PluginModule::isValidUriSegment(const QString& name) {
-    static const QRegularExpression re(QStringLiteral("^[A-Za-z0-9_]+$"));
+    static const QRegularExpression re(QStringLiteral("^[A-Za-z_][A-Za-z0-9_]*$"));
     return re.match(name).hasMatch();
 }
 
@@ -157,7 +157,8 @@ void PluginModule::scanDir(const QString& path, const QString& uri, const QStrin
 
         if (!isValidUriSegment(subdir)) {
             m_warnings.append(QStringLiteral(
-                "%1: invalid subdirectory name; use only letters, digits and '_'. Nothing inside will be importable.")
+                "%1: invalid subdirectory name; use only letters, digits and '_', and do not start with a digit. "
+                "Nothing inside will be importable.")
                     .arg(subdir));
             continue;
         }

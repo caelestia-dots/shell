@@ -130,9 +130,13 @@ void PluginManifest::parse() {
         if (name.isEmpty())
             parseError = QStringLiteral("Manifest is missing 'name'");
         else if (!PluginModule::isValidUriSegment(name))
-            parseError = QStringLiteral("Plugin name '%1' may only contain letters, digits or '_'").arg(name);
+            parseError = QStringLiteral("Plugin name '%1' may only contain letters, digits or '_', and "
+                                        "may not start with a digit")
+                             .arg(name);
         else if (!PluginModule::isValidUriSegment(author))
-            parseError = QStringLiteral("Plugin author '%1' may only contain letters, digits or '_'").arg(author);
+            parseError = QStringLiteral("Plugin author '%1' may only contain letters, digits or '_', and "
+                                        "may not start with a digit")
+                             .arg(author);
         else if (!entryPointError.isEmpty())
             parseError = entryPointError;
         else if (!satisfiesRequirement(requirement, parseVersion(QStringLiteral(CAELESTIA_VERSION))))
