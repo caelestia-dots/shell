@@ -237,7 +237,7 @@ void EntryPointLoader::setStatus(Status status) {
 
 void EntryPointLoader::warnComponentErrors() const {
     qCWarning(lcEntryPointLoader, "Failed to load %s: %s", qUtf8Printable(source()),
-        qUtf8Printable(m_component->errorString()));
+        qUtf8Printable(m_component->errorString().trimmed()));
 }
 
 QVariantMap EntryPointLoader::injectedProperties(const QObject* object) const {

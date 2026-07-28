@@ -337,7 +337,7 @@ SettingsObject* PluginManifest::settings() {
     if (!m_settings) {
         if (component.isError())
             qCWarning(lcPluginSettings, "Failed to load settings for %s: %s", qUtf8Printable(m_id),
-                qUtf8Printable(component.errorString()));
+                qUtf8Printable(component.errorString().trimmed()));
         else
             qCWarning(lcPluginSettings, "Settings root for %s is not a SettingsObject", qUtf8Printable(m_id));
 
