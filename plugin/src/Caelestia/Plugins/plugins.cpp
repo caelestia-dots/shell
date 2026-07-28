@@ -158,6 +158,7 @@ void Plugins::loadConfig() {
 
     QFile file(m_configPath);
     if (!file.exists()) {
+        m_configOnDisk.clear();
         emit enabledChanged();
         return;
     }
@@ -167,9 +168,15 @@ void Plugins::loadConfig() {
         return;
     }
 
-    QJsonParseError error{};
-    const auto doc = QJsonDocument::fromJson(file.readAll(), &error);
+    const auto data = file.readAll();
     file.close();
+
+    // Recorded even when it does not parse: re-reading an unchanged broken file achieves nothing,
+    // and the next save overwrites it anyway.
+    m_configOnDisk = data;
+
+    QJsonParseError error{};
+    const auto doc = QJsonDocument::fromJson(data, &error);
 
     if (error.error != QJsonParseError::NoError) {
         qCWarning(lcPlugins) << "Failed to parse" << m_configPath << error.errorString();
@@ -202,28 +209,38 @@ void Plugins::saveConfig() {
     obj.insert(QStringLiteral("path"), QJsonArray::fromStringList(m_extraPaths));
     obj.insert(QStringLiteral("settings"), QJsonObject::fromVariantMap(m_settings));
 
-    QDir().mkpath(QFileInfo(m_configPath).absolutePath());
+    const auto json = QJsonDocument(obj).toJson(QJsonDocument::Indented);
 
-    QFile file(m_configPath);
-    if (!file.open(QIODevice::WriteOnly)) {
-        qCWarning(lcPlugins) << "Failed to write" << m_configPath << file.errorString();
-        return;
+    // Nothing moved, so no write, no watcher event to recognise and nothing new to watch. Falls
+    // through to the dirty flags below: identical content means memory already matches the file.
+    if (json != m_configOnDisk) {
+        QDir().mkpath(QFileInfo(m_configPath).absolutePath());
+
+        QFile file(m_configPath);
+        if (!file.open(QIODevice::WriteOnly)) {
+            qCWarning(lcPlugins) << "Failed to write" << m_configPath << file.errorString();
+            return;
+        }
+
+        file.write(json);
+        file.close();
+
+        // Checked after the close, since a buffered write can fail there rather than above, and
+        // recording content that never reached the disk would make every later comparison lie.
+        if (file.error() != QFile::NoError) {
+            qCWarning(lcPlugins) << "Failed to write" << m_configPath << file.errorString();
+            return;
+        }
+
+        m_configOnDisk = json;
+
+        updateWatches();
     }
 
-    file.write(QJsonDocument(obj).toJson(QJsonDocument::Indented));
-    file.close();
-
-    // Everything in memory is now on disk, so a rescan may safely reload settings again.
+    // Everything in memory is now on disk, so a rescan may safely reload settings again. Skipped
+    // on a failed write, so the values stay dirty and a rescan does not reload over them.
     for (auto* const plugin : std::as_const(m_plugins))
         plugin->markSettingsSaved();
-
-    // Ignore the watcher event triggered by our own write.
-    m_recentlySaved = true;
-    QTimer::singleShot(500, this, [this] {
-        m_recentlySaved = false;
-    });
-
-    updateWatches();
 }
 
 QStringList Plugins::discoverPluginDirs() const {
@@ -472,11 +489,18 @@ void Plugins::updateWatches() {
             m_watcher->addPath(path);
 }
 
+QByteArray Plugins::readConfig() const {
+    QFile file(m_configPath);
+    if (!file.open(QIODevice::ReadOnly))
+        return {};
+    return file.readAll();
+}
+
 void Plugins::onWatchEvent(const QString& path) {
     updateWatches();
 
-    // Only ignore writes to the config file
-    if (path == m_configPath && m_recentlySaved)
+    // Only ignore writes to the config file, checked by content
+    if (path == m_configPath && readConfig() == m_configOnDisk)
         return;
 
     m_reloadTimer->start();

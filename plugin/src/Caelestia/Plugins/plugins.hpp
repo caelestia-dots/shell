@@ -113,6 +113,9 @@ private:
     void updateWatches();
     [[nodiscard]] QStringList searchRoots() const;
 
+    // The config file's current bytes, empty when it is missing or unreadable
+    [[nodiscard]] QByteArray readConfig() const;
+
     // Directories holding a manifest.json, in search order (earlier roots win an id clash)
     [[nodiscard]] QStringList discoverPluginDirs() const;
     [[nodiscard]] QList<PluginManifest*> loadedManifests() const;
@@ -122,7 +125,11 @@ private:
     QFileSystemWatcher* m_watcher;
     QTimer* m_saveTimer;
     QTimer* m_reloadTimer;
-    bool m_recentlySaved = false;
+
+    // The config bytes as last read from or written to disk, i.e. what the file is believed to
+    // hold. Lets a watcher event be attributed by content: equal means the write was ours and
+    // there is nothing to reload, and it doubles as the check that skips a no-op write.
+    QByteArray m_configOnDisk;
 
     QPointer<QQmlEngine> m_engine;
     PluginUrlInterceptor* m_interceptor = nullptr;
