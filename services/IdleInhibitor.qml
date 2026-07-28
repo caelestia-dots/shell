@@ -27,10 +27,18 @@ Singleton {
     IdleInhibitor {
         enabled: props.enabled
         window: PanelWindow {
-            implicitWidth: 0
-            implicitHeight: 0
+            // 0x0 surfaces do not map on Hyprland, so idle inhibitors are ignored.
+            // Use a 1x1 corner surface instead (see #635).
+            screen: Quickshell.screens[0]
+            visible: props.enabled
+            anchors.top: true
+            anchors.left: true
+            implicitWidth: 1
+            implicitHeight: 1
             color: "transparent"
             mask: Region {}
+            WlrLayershell.namespace: "caelestia-idle-inhibitor"
+            WlrLayershell.exclusionMode: ExclusionMode.Ignore
         }
     }
 
