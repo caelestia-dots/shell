@@ -152,17 +152,20 @@ void Plugins::reload() {
 }
 
 void Plugins::loadConfig() {
-    m_enabled.clear();
-    m_extraPaths.clear();
-    m_settings.clear();
-
     QFile file(m_configPath);
+
+    // No file at all is not a failure, it just means defaults
     if (!file.exists()) {
         m_configOnDisk.clear();
+        m_enabled.clear();
+        m_extraPaths.clear();
+        m_settings.clear();
         emit enabledChanged();
         return;
     }
 
+    // Every failure below leaves the last good config in place. Clearing first and bailing would
+    // disable every plugin, and the next save would write that empty state over the real one.
     if (!file.open(QIODevice::ReadOnly)) {
         qCWarning(lcPlugins) << "Failed to open" << m_configPath << file.errorString();
         return;
@@ -185,14 +188,20 @@ void Plugins::loadConfig() {
 
     const auto obj = doc.object();
 
+    QStringList enabled;
     const auto enabledArray = obj.value(QStringLiteral("enabled")).toArray();
     for (const auto& entry : enabledArray)
-        m_enabled.append(entry.toString());
+        enabled.append(entry.toString());
 
+    QStringList extraPaths;
     const auto pathArray = obj.value(QStringLiteral("path")).toArray();
     for (const auto& entry : pathArray)
-        m_extraPaths.append(entry.toString());
+        extraPaths.append(entry.toString());
 
+    // Committed only once the whole file has parsed, so a half read or malformed config never
+    // becomes the in memory state, and therefore never reaches disk on the next save.
+    m_enabled = std::move(enabled);
+    m_extraPaths = std::move(extraPaths);
     m_settings = obj.value(QStringLiteral("settings")).toObject().toVariantMap();
 
     emit enabledChanged();
