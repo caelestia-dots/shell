@@ -349,7 +349,7 @@ SettingsObject* PluginManifest::settings() {
     m_settings->load(m_storedSettings);
     connect(m_settings, &SettingsObject::changed, this, [this] {
         m_settingsDirty = true;
-        emit settingsChanged();
+        emit settingsValuesChanged();
     });
 
     return m_settings;

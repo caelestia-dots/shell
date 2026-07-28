@@ -137,7 +137,9 @@ signals:
     void generationChanged();
     void settingsSourceChanged();
     void settingsUiSourceChanged();
-    void settingsChanged();
+
+    void settingsChanged();       // Emitted when the settings object itself (m_settings) changed
+    void settingsValuesChanged(); // Emitted when a value inside the settings object changed
 
 private:
     void parse();

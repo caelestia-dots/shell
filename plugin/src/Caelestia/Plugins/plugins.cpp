@@ -269,7 +269,7 @@ void Plugins::rescan(bool force) {
         } else {
             manifest = new PluginManifest(pluginDir, pluginDir + QStringLiteral("/manifest.json"), this);
 
-            connect(manifest, &PluginManifest::settingsChanged, this, [this] {
+            connect(manifest, &PluginManifest::settingsValuesChanged, this, [this] {
                 m_saveTimer->start();
             });
             connect(manifest, &PluginManifest::entryPointsChanged, this, &Plugins::bumpEntryPointsRevision);
