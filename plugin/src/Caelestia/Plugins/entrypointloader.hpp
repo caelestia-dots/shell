@@ -1,6 +1,7 @@
 #pragma once
 
 #include <qobject.h>
+#include <qpointer.h>
 #include <qqmlcomponent.h>
 #include <qqmlintegration.h>
 #include <qquickitem.h>
@@ -11,6 +12,8 @@
 
 namespace caelestia::plugins {
 
+class PluginManifest;
+
 class EntryPointLoader : public QQuickItem {
     Q_OBJECT
     QML_ELEMENT
@@ -18,7 +21,8 @@ class EntryPointLoader : public QQuickItem {
     // The entry point to load
     Q_PROPERTY(caelestia::plugins::EntryPoint entryPoint READ entryPoint WRITE setEntryPoint RESET resetEntryPoint
             NOTIFY entryPointChanged)
-    // The file to load, defaults to the entry point's source
+    // The URL to load. Defaults to the entry point's source resolved against its plugin at the
+    // plugin's current generation, so it changes, and the loader reloads, on every plugin edit.
     Q_PROPERTY(QString source READ source WRITE setSource NOTIFY sourceChanged)
     // The loaded object, null until it has finished loading
     Q_PROPERTY(QObject* item READ item NOTIFY itemChanged)
@@ -58,6 +62,7 @@ signals:
 
 private slots:
     void onComponentStatusChanged(QQmlComponent::Status status);
+    void onGenerationChanged();
     void updateSize();
     void updateImplicitSize();
 
@@ -68,10 +73,16 @@ private:
     void setStatus(Status status);
     void warnComponentErrors() const;
 
+    // Follows the entry point's plugin so a generation bump reloads this loader. Loaders are
+    // created lazily, so each one derives its URL when it builds its component and joins
+    // whichever generation is current then; there is no stored URL to go stale.
+    void trackPlugin();
+
     // The subset of the injectable properties actually declared by the given object
     [[nodiscard]] QVariantMap injectedProperties(const QObject* object) const;
 
     EntryPoint m_entryPoint;
+    QPointer<PluginManifest> m_plugin;
     QString m_source;
     QQmlComponent* m_component = nullptr;
     QObject* m_object = nullptr;

@@ -4,6 +4,7 @@
 #include <qqmlcontext.h>
 #include <qqmlengine.h>
 #include <qurl.h>
+#include <qurlquery.h>
 
 #include "pluginmanifest.hpp"
 #include "settingsobject.hpp"
@@ -36,6 +37,7 @@ void EntryPointLoader::setEntryPoint(const EntryPoint& entryPoint) {
     const auto oldSource = source();
 
     m_entryPoint = entryPoint;
+    trackPlugin();
     emit entryPointChanged();
 
     if (source() != oldSource)
@@ -48,8 +50,29 @@ void EntryPointLoader::resetEntryPoint() {
     setEntryPoint(EntryPoint());
 }
 
+void EntryPointLoader::trackPlugin() {
+    auto* const plugin = m_entryPoint.plugin();
+    if (m_plugin == plugin)
+        return;
+
+    if (m_plugin)
+        QObject::disconnect(m_plugin, &PluginManifest::generationChanged, this, &EntryPointLoader::onGenerationChanged);
+
+    m_plugin = plugin;
+
+    if (m_plugin)
+        QObject::connect(m_plugin, &PluginManifest::generationChanged, this, &EntryPointLoader::onGenerationChanged);
+}
+
+void EntryPointLoader::onGenerationChanged() {
+    emit sourceChanged();
+    reload();
+}
+
 QString EntryPointLoader::source() const {
-    return m_source.isEmpty() ? m_entryPoint.source() : m_source;
+    if (!m_source.isEmpty())
+        return m_source;
+    return m_plugin ? m_plugin->sourceUrl(m_entryPoint.source()) : QString();
 }
 
 void EntryPointLoader::setSource(const QString& source) {
@@ -119,9 +142,14 @@ void EntryPointLoader::reload() {
         return;
     }
 
-    m_component =
-        new QQmlComponent(context->engine(), context->resolvedUrl(QUrl(src)), QQmlComponent::PreferSynchronous, this);
+    // An entry point's URL is already absolute and carries its plugin's generation; only an
+    // explicitly set source is a path that has to be resolved against this loader's own file.
+    const QUrl url(src);
+    m_component = new QQmlComponent(
+        context->engine(), url.isRelative() ? context->resolvedUrl(url) : url, QQmlComponent::PreferSynchronous, this);
 
+    // Creating the component inline keeps the whole fan-out of a generation bump synchronous, so
+    // no loader can observe a half updated set of module registrations.
     if (m_component->isLoading()) {
         setStatus(Loading);
         QObject::connect(m_component, &QQmlComponent::statusChanged, this, &EntryPointLoader::onComponentStatusChanged);
@@ -150,6 +178,16 @@ void EntryPointLoader::clear() {
 }
 
 void EntryPointLoader::create() {
+    // Catches any future path that manages to cache a URL: the whole scheme rests on every URL
+    // being derived from the plugin's one current generation at the moment it is needed.
+    if (m_source.isEmpty() && m_plugin) {
+        const auto gen = QUrlQuery(m_component->url()).queryItemValue(QStringLiteral("gen")).toInt();
+        if (gen != m_plugin->generation())
+            qCWarning(lcEntryPointLoader)
+                << "Loading" << m_component->url() << "at generation" << gen << "but" << m_plugin->id()
+                << "is at generation" << m_plugin->generation() << "- a stale URL was cached somewhere";
+    }
+
     auto* const object = m_component->beginCreate(qmlContext(this));
     if (!object) {
         warnComponentErrors();
@@ -210,8 +248,8 @@ QVariantMap EntryPointLoader::injectedProperties(const QObject* object) const {
         properties.insert(QStringLiteral("entryPoint"), QVariant::fromValue(m_entryPoint));
 
     if (meta->indexOfProperty("settings") != -1) {
-        auto* const plugin = m_entryPoint.plugin();
-        const SettingsObject* settings = plugin ? plugin->settings() : nullptr;
+        // Built on demand, so this picks up the object rebuilt for the current generation
+        const SettingsObject* settings = m_plugin ? m_plugin->settings() : nullptr;
         properties.insert(QStringLiteral("settings"), QVariant::fromValue(settings));
     }
 

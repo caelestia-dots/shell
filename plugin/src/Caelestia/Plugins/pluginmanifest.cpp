@@ -6,10 +6,10 @@
 #include <qjsonobject.h>
 #include <qqmlcomponent.h>
 #include <qqmlengine.h>
-#include <qregularexpression.h>
 #include <qurl.h>
 #include <qversionnumber.h>
 
+#include "pluginmodule.hpp"
 #include "settingmeta.hpp"
 #include "settingsobject.hpp"
 
@@ -26,12 +26,6 @@ QVersionNumber parseVersion(QString str) {
     if (str.startsWith(QLatin1Char('v')))
         str.remove(0, 1);
     return QVersionNumber::fromString(str);
-}
-
-// Alphanumeric start then alphanumeric + ._-
-bool isValidIdSegment(const QString& segment) {
-    static const QRegularExpression re(QStringLiteral("^[A-Za-z0-9][A-Za-z0-9._-]*$"));
-    return re.match(segment).hasMatch();
 }
 
 bool satisfiesRequirement(const QString& requirement, const QVersionNumber& shell) {
@@ -110,38 +104,35 @@ void PluginManifest::parse() {
         if (author.isEmpty()) // Author defaults to "unknown" if not specified
             author = QStringLiteral("unknown");
 
-        // Canonical id is author/name
-        id = author + QStringLiteral("/") + name;
+        // Canonical id is author/name. Lowercased here rather than when deriving the module URI,
+        // so the duplicate id check catches Foo/Bar shadowing foo/bar too.
+        id = (author + QStringLiteral("/") + name).toLower();
         version = obj.value(QStringLiteral("version")).toString();
         icon = obj.value(QStringLiteral("icon")).toString();
         description = obj.value(QStringLiteral("description")).toString();
         requirement = obj.value(QStringLiteral("requires")).toString();
 
-        const auto declaredSettings = obj.value(QStringLiteral("settings")).toString();
-        if (!declaredSettings.isEmpty())
-            settingsSource = QUrl::fromLocalFile(m_dir + QStringLiteral("/") + declaredSettings).toString();
-
-        const auto declaredSettingsUi = obj.value(QStringLiteral("settingsUi")).toString();
-        if (!declaredSettingsUi.isEmpty())
-            settingsUiSource = QUrl::fromLocalFile(m_dir + QStringLiteral("/") + declaredSettingsUi).toString();
+        settingsSource = obj.value(QStringLiteral("settings")).toString();
+        settingsUiSource = obj.value(QStringLiteral("settingsUi")).toString();
 
         // Each entry point parses itself; the first that fails invalidates the whole manifest.
         QString entryPointError;
         const auto entryPointsArray = obj.value(QStringLiteral("entryPoints")).toArray();
         for (const auto& declared : entryPointsArray) {
-            const EntryPoint entryPoint(declared.toObject(), m_dir, this);
+            const EntryPoint entryPoint(declared.toObject(), this);
             if (entryPointError.isEmpty())
                 entryPointError = entryPoint.error();
             entryPoints.append(entryPoint);
         }
 
+        // Both halves of the id become module URI segments, so they inherit QML's constraint on
+        // them: anything else is a parse error at the author's import, not at registration.
         if (name.isEmpty())
             parseError = QStringLiteral("Manifest is missing 'name'");
-        else if (!isValidIdSegment(name))
-            parseError = QStringLiteral("Plugin name '%1' may only contain letters, digits, '.', '_' or '-'").arg(name);
-        else if (!isValidIdSegment(author))
-            parseError =
-                QStringLiteral("Plugin author '%1' may only contain letters, digits, '.', '_' or '-'").arg(author);
+        else if (!PluginModule::isValidUriSegment(name))
+            parseError = QStringLiteral("Plugin name '%1' may only contain letters, digits or '_'").arg(name);
+        else if (!PluginModule::isValidUriSegment(author))
+            parseError = QStringLiteral("Plugin author '%1' may only contain letters, digits or '_'").arg(author);
         else if (!entryPointError.isEmpty())
             parseError = entryPointError;
         else if (!satisfiesRequirement(requirement, parseVersion(QStringLiteral(CAELESTIA_VERSION))))
@@ -160,7 +151,12 @@ void PluginManifest::parse() {
         Q_EMIT sig();                                                                                                  \
     }
 
-    ASSIGN(m_id, id, idChanged)
+    if (m_id != id) {
+        m_id = id;
+        emit idChanged();
+        emit moduleUriChanged();
+    }
+
     ASSIGN(m_name, name, nameChanged)
     ASSIGN(m_version, version, versionChanged)
     ASSIGN(m_icon, icon, iconChanged)
@@ -185,6 +181,10 @@ void PluginManifest::reparse() {
 
 QString PluginManifest::id() const {
     return m_id;
+}
+
+QString PluginManifest::moduleUri() const {
+    return PluginModule::uriFor(m_id);
 }
 
 QString PluginManifest::name() const {
@@ -215,12 +215,29 @@ QString PluginManifest::dir() const {
     return m_dir;
 }
 
-QString PluginManifest::settingsSource() const {
+QString PluginManifest::sourceUrl(const QString& source) const {
+    if (source.isEmpty())
+        return {};
+
+    auto url = QUrl::fromLocalFile(m_dir + QStringLiteral("/") + source);
+    url.setQuery(QStringLiteral("gen=%1").arg(m_generation));
+    return url.toString();
+}
+
+QString PluginManifest::declaredSettings() const {
     return m_settingsSource;
 }
 
-QString PluginManifest::settingsUiSource() const {
+QString PluginManifest::declaredSettingsUi() const {
     return m_settingsUiSource;
+}
+
+QString PluginManifest::settingsSource() const {
+    return sourceUrl(m_settingsSource);
+}
+
+QString PluginManifest::settingsUiSource() const {
+    return sourceUrl(m_settingsUiSource);
 }
 
 QList<EntryPoint> PluginManifest::entryPoints() const {
@@ -253,6 +270,48 @@ void PluginManifest::setEnabled(bool enabled) {
     emit enabledChanged();
 }
 
+QStringList PluginManifest::warnings() const {
+    return m_warnings;
+}
+
+void PluginManifest::setWarnings(const QStringList& warnings) {
+    if (m_warnings == warnings)
+        return;
+
+    m_warnings = warnings;
+    emit warningsChanged();
+}
+
+int PluginManifest::generation() const {
+    return m_generation;
+}
+
+void PluginManifest::setGeneration(int generation) {
+    if (m_generation == generation)
+        return;
+
+    m_generation = generation;
+
+    // Before the notify, since loaders inject settings while creating their new object and would
+    // otherwise pick up the one built from the previous generation's Settings.qml.
+    rebuildSettings();
+
+    emit settingsSourceChanged();
+    emit settingsUiSourceChanged();
+    emit generationChanged();
+}
+
+void PluginManifest::rebuildSettings() {
+    if (!m_settings)
+        return;
+
+    m_storedSettings = m_settings->toMap();
+    m_settings->deleteLater();
+    m_settings = nullptr;
+
+    emit settingsChanged();
+}
+
 SettingsObject* PluginManifest::settings() {
     if (m_settings || m_settingsSource.isEmpty())
         return m_settings;
@@ -262,7 +321,7 @@ SettingsObject* PluginManifest::settings() {
     if (!engine)
         return nullptr;
 
-    QQmlComponent component(engine, QUrl(m_settingsSource));
+    QQmlComponent component(engine, QUrl(settingsSource()));
     auto* const object = component.create();
     m_settings = qobject_cast<SettingsObject*>(object);
 

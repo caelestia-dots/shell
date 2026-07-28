@@ -3,6 +3,8 @@ qml_module(caelestia-plugins
     SOURCES
         plugins.cpp
         pluginmanifest.cpp
+        pluginmodule.cpp
+        pluginurlinterceptor.cpp
         entrypoint.cpp
         entrypointloader.cpp
         settingsobject.cpp

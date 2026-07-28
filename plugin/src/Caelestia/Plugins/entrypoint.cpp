@@ -1,7 +1,5 @@
 #include "entrypoint.hpp"
 
-#include <qurl.h>
-
 namespace caelestia::plugins {
 
 namespace {
@@ -31,7 +29,7 @@ QString EntryPointType::toString(Type type) {
     return {};
 }
 
-EntryPoint::EntryPoint(const QJsonObject& json, const QString& dir, PluginManifest* plugin)
+EntryPoint::EntryPoint(const QJsonObject& json, PluginManifest* plugin)
     : m_plugin(plugin) {
     const auto typeStr = json.value(QStringLiteral("type")).toString();
     if (const auto type = EntryPointType::fromString(typeStr))
@@ -40,10 +38,8 @@ EntryPoint::EntryPoint(const QJsonObject& json, const QString& dir, PluginManife
         m_error = typeStr.isEmpty() ? QStringLiteral("Entry point is missing 'type'")
                                     : QStringLiteral("Entry point has unknown type '%1'").arg(typeStr);
 
-    const auto source = json.value(QStringLiteral("source")).toString();
-    if (!source.isEmpty())
-        m_source = QUrl::fromLocalFile(dir + QStringLiteral("/") + source).toString();
-    else if (m_error.isEmpty())
+    m_source = json.value(QStringLiteral("source")).toString();
+    if (m_source.isEmpty() && m_error.isEmpty())
         m_error = QStringLiteral("Entry point '%1' is missing 'source'").arg(typeStr);
 
     m_properties = json.value(QStringLiteral("properties")).toObject().toVariantMap();

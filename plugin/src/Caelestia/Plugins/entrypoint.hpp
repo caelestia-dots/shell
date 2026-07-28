@@ -37,6 +37,9 @@ class EntryPoint {
 
     // Required metadata
     Q_PROPERTY(caelestia::plugins::EntryPointType::Type type MEMBER m_type)
+
+    // As declared, i.e. relative to the plugin directory and without a generation. The loadable
+    // URL is derived at use time via PluginManifest::sourceUrl, never stored.
     Q_PROPERTY(QString source MEMBER m_source)
 
     Q_PROPERTY(caelestia::plugins::PluginManifest* plugin MEMBER m_plugin)
@@ -44,7 +47,7 @@ class EntryPoint {
 
 public:
     EntryPoint() = default;
-    EntryPoint(const QJsonObject& json, const QString& dir, PluginManifest* plugin);
+    EntryPoint(const QJsonObject& json, PluginManifest* plugin);
 
     [[nodiscard]] bool operator==(const EntryPoint& other) const;
 

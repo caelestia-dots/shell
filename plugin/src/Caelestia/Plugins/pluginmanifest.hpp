@@ -4,6 +4,7 @@
 #include <qobject.h>
 #include <qqmlintegration.h>
 #include <qstring.h>
+#include <qstringlist.h>
 #include <qvariant.h>
 
 #include "entrypoint.hpp"
@@ -18,8 +19,11 @@ class PluginManifest : public QObject {
     QML_UNCREATABLE("PluginManifest is created by Plugins")
     Q_MOC_INCLUDE("settingsobject.hpp")
 
-    // Generated from author/name
+    // Generated from author/name, lowercased
     Q_PROPERTY(QString id READ id NOTIFY idChanged)
+
+    // The URI of the QML module holding this plugin's types, i.e. the id with '.' for '/'
+    Q_PROPERTY(QString moduleUri READ moduleUri NOTIFY moduleUriChanged)
 
     // Required metadata
     Q_PROPERTY(QString name READ name NOTIFY nameChanged)
@@ -38,6 +42,15 @@ class PluginManifest : public QObject {
     Q_PROPERTY(QString error READ error NOTIFY errorChanged)
     Q_PROPERTY(bool enabled READ enabled NOTIFY enabledChanged)
 
+    // Non fatal complaints about the plugin's layout, recomputed on every scan. Unlike `error`
+    // these do not stop it loading, they just tell the author something will not work.
+    Q_PROPERTY(QStringList warnings READ warnings NOTIFY warningsChanged)
+
+    // The plugin's current hot reload generation, allocated and bumped by Plugins. Everything
+    // loaded from a plugin stamps this onto its URL, so a bump makes Qt compile fresh units
+    // instead of returning the ones it cached by URL.
+    Q_PROPERTY(int generation READ generation NOTIFY generationChanged)
+
     // Settings
     Q_PROPERTY(QString settingsSource READ settingsSource NOTIFY settingsSourceChanged)
     Q_PROPERTY(QString settingsUiSource READ settingsUiSource NOTIFY settingsUiSourceChanged)
@@ -47,6 +60,7 @@ public:
     PluginManifest(const QString& dir, const QString& path, QObject* parent = nullptr);
 
     [[nodiscard]] QString id() const;
+    [[nodiscard]] QString moduleUri() const;
 
     [[nodiscard]] QString name() const;
     [[nodiscard]] QString version() const;
@@ -63,6 +77,24 @@ public:
 
     [[nodiscard]] bool enabled() const;
     void setEnabled(bool enabled);
+
+    [[nodiscard]] QStringList warnings() const;
+    void setWarnings(const QStringList& warnings);
+
+    [[nodiscard]] int generation() const;
+
+    // Adopts a new generation: rebuilds the settings object from the newly stamped source, then
+    // notifies. Everything reading a plugin URL derives it at that point from the new value, so
+    // one synchronous fan-out repoints every live loader onto the same generation.
+    void setGeneration(int generation);
+
+    // Absolute, generation stamped URL for a path declared in the manifest relative to dir().
+    // Never stored anywhere: a cached copy would outlive its generation.
+    [[nodiscard]] Q_INVOKABLE QString sourceUrl(const QString& source) const;
+
+    // The raw `settings`/`settingsUi` paths as declared, i.e. relative and without a generation
+    [[nodiscard]] QString declaredSettings() const;
+    [[nodiscard]] QString declaredSettingsUi() const;
 
     [[nodiscard]] QString settingsSource() const;
     [[nodiscard]] QString settingsUiSource() const;
@@ -90,6 +122,7 @@ public:
 
 signals:
     void idChanged();
+    void moduleUriChanged();
     void nameChanged();
     void versionChanged();
     void iconChanged();
@@ -100,12 +133,18 @@ signals:
     void validChanged();
     void errorChanged();
     void enabledChanged();
+    void warningsChanged();
+    void generationChanged();
     void settingsSourceChanged();
     void settingsUiSourceChanged();
     void settingsChanged();
 
 private:
     void parse();
+
+    // Drops the settings object so the next access rebuilds it from the current generation,
+    // keeping the live values so a reload does not discard unsaved edits.
+    void rebuildSettings();
 
     QString m_id;
 
@@ -121,9 +160,13 @@ private:
     QString m_path;
     QList<EntryPoint> m_entryPoints;
     QString m_parseError;
+    QStringList m_warnings;
     bool m_shadowed = false;
     bool m_enabled = false;
+    int m_generation = 0;
 
+    // Raw relative paths; the URLs are derived per access so they always carry the current
+    // generation. See sourceUrl().
     QString m_settingsSource;
     QString m_settingsUiSource;
     SettingsObject* m_settings = nullptr;

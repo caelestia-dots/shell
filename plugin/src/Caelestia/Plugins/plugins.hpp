@@ -4,20 +4,30 @@
 #include <qhash.h>
 #include <qlist.h>
 #include <qobject.h>
+#include <qpointer.h>
+#include <qqmlengine.h>
 #include <qqmlintegration.h>
+#include <qqmlparserstatus.h>
 #include <qstringlist.h>
 #include <qtimer.h>
 #include <qvariant.h>
 
 #include "pluginmanifest.hpp"
+#include "pluginmodule.hpp"
 
 namespace caelestia::plugins {
 
+class PluginUrlInterceptor;
+
 // Discovers plugins on disk, parses their manifests and exposes their entry points.
 // Backed by a single ~/.config/caelestia/plugins.json holding enabled + path + settings.
-class Plugins : public QObject {
+//
+// Also owns hot reloading: it seals every plugin directory, registers each plugin's QML module,
+// and hands out the generation numbers that make a re-registration visible to a running engine.
+class Plugins : public QObject, public QQmlParserStatus {
     Q_OBJECT
     QML_NAMED_ELEMENT(PluginsBase)
+    Q_INTERFACES(QQmlParserStatus)
 
     Q_PROPERTY(QString shellVersion READ shellVersion CONSTANT)
     Q_PROPERTY(QVariantList plugins READ plugins NOTIFY pluginsChanged)
@@ -33,6 +43,15 @@ class Plugins : public QObject {
 
 public:
     explicit Plugins(QObject* parent = nullptr);
+    ~Plugins() override;
+
+    Q_DISABLE_COPY_MOVE(Plugins)
+
+    void classBegin() override;
+
+    // Discovery waits for this, because sealing plugin directories needs the engine and nothing
+    // can look up a plugin qmldir before the singleton that finds the plugins exists.
+    void componentComplete() override;
 
     [[nodiscard]] QString shellVersion() const;
 
@@ -66,9 +85,30 @@ signals:
     void loaded();
 
 private:
+    // Everything about a plugin directory that has to outlive a single rescan. Manifests are
+    // reused where they can be, but the generation has to survive even their recreation: a
+    // counter living on the manifest would reset, and re-registering a module at a minor version
+    // it already has is a silent no-op, so edits would quietly stop taking effect.
+    struct PluginRecord {
+        PluginManifest* manifest = nullptr;
+        PluginModule module;
+        int generation = 0;
+
+        // The module's fingerprint plus the manifest fields a reload depends on
+        QByteArray fingerprint;
+    };
+
     void loadConfig();
     void saveConfig();
-    void rescan();
+
+    // `force` reloads every plugin even if nothing about it changed, which is what an explicit
+    // reload() asks for. Watch driven rescans leave it false so an unrelated edit costs nothing.
+    void rescan(bool force = false);
+
+    // Rescans every plugin's tree, refreshes its warnings, and bumps the generation of each one
+    // whose fingerprint moved.
+    void updateModules(bool force);
+
     void onWatchEvent();
     void updateWatches();
     [[nodiscard]] QStringList searchRoots() const;
@@ -84,16 +124,23 @@ private:
     QTimer* m_reloadTimer;
     bool m_recentlySaved = false;
 
+    QPointer<QQmlEngine> m_engine;
+    PluginUrlInterceptor* m_interceptor = nullptr;
+
     QStringList m_enabled;
     QStringList m_extraPaths;
     QVariantMap m_settings;
     QList<PluginManifest*> m_plugins;
     QList<PluginManifest*> m_conflictingPlugins;
 
-    // Manifests keyed by their directory, which is their stable identity across a rescan.
+    // Records keyed by their directory, which is their stable identity across a rescan.
     // The id cannot be used: it changes when the author edits name/author in the manifest.
-    QHash<QString, PluginManifest*> m_pluginsByDir;
+    QHash<QString, PluginRecord> m_records;
     int m_entryPointsRevision = 0;
+
+    // Shared by every plugin. Minor versions only have to increase per URI, and a shared counter
+    // is the one thing that cannot be reset by recreating a manifest.
+    int m_generationCounter = 0;
 };
 
 } // namespace caelestia::plugins

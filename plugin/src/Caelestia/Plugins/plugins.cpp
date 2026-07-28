@@ -10,6 +10,8 @@
 #include <qset.h>
 #include <qstandardpaths.h>
 
+#include "pluginurlinterceptor.hpp"
+
 #ifndef CAELESTIA_VERSION
 #define CAELESTIA_VERSION ""
 #endif
@@ -41,7 +43,7 @@ Plugins::Plugins(QObject* parent)
     connect(m_saveTimer, &QTimer::timeout, this, &Plugins::saveConfig);
 
     m_reloadTimer->setSingleShot(true);
-    m_reloadTimer->setInterval(50);
+    m_reloadTimer->setInterval(200);
     connect(m_reloadTimer, &QTimer::timeout, this, [this] {
         loadConfig();
         rescan();
@@ -49,6 +51,27 @@ Plugins::Plugins(QObject* parent)
 
     connect(m_watcher, &QFileSystemWatcher::directoryChanged, this, &Plugins::onWatchEvent);
     connect(m_watcher, &QFileSystemWatcher::fileChanged, this, &Plugins::onWatchEvent);
+}
+
+Plugins::~Plugins() {
+    // The engine keeps a raw pointer to the interceptor, and it may outlive this singleton
+    if (m_engine && m_interceptor)
+        m_engine->removeUrlInterceptor(m_interceptor);
+}
+
+void Plugins::classBegin() {}
+
+void Plugins::componentComplete() {
+    m_engine = qmlEngine(this);
+
+    if (m_engine) {
+        // Parented here so it dies with this engine generation rather than dangling
+        m_interceptor = new PluginUrlInterceptor(this);
+        m_engine->addUrlInterceptor(m_interceptor);
+    } else {
+        qCWarning(lcPlugins)
+            << "No QML engine available - unable to seal plugin directories, hot reload may not work as expected";
+    }
 
     loadConfig();
     rescan();
@@ -125,7 +148,7 @@ QList<EntryPoint> Plugins::__entryPoints(EntryPointType::Type type) const {
 
 void Plugins::reload() {
     loadConfig();
-    rescan();
+    rescan(true);
 }
 
 void Plugins::loadConfig() {
@@ -223,16 +246,23 @@ QStringList Plugins::discoverPluginDirs() const {
     return dirs;
 }
 
-void Plugins::rescan() {
+void Plugins::rescan(bool force) {
     const auto previousPlugins = m_plugins;
     const auto previousConflicting = m_conflictingPlugins;
     const auto previousLoaded = loadedManifests();
 
-    // Reuse manifests instead of remaking all on rescan
     const auto dirs = discoverPluginDirs();
+
+    // Sealed before anything in a newly discovered plugin can compile, since a directory that
+    // resolves its types by filename once keeps doing so for the rest of the process.
+    if (m_interceptor)
+        m_interceptor->setRoots(dirs);
+
+    // Reuse manifests instead of remaking all on rescan
     QList<PluginManifest*> result;
     for (const auto& pluginDir : dirs) {
-        auto* manifest = m_pluginsByDir.value(pluginDir);
+        auto& record = m_records[pluginDir];
+        auto* manifest = record.manifest;
 
         if (manifest) {
             manifest->reparse();
@@ -246,7 +276,7 @@ void Plugins::rescan() {
             connect(manifest, &PluginManifest::validChanged, this, &Plugins::bumpEntryPointsRevision);
             connect(manifest, &PluginManifest::enabledChanged, this, &Plugins::bumpEntryPointsRevision);
 
-            m_pluginsByDir.insert(pluginDir, manifest);
+            record.manifest = manifest;
         }
 
         manifest->setEnabled(m_enabled.contains(manifest->id()));
@@ -261,15 +291,16 @@ void Plugins::rescan() {
         result.append(manifest);
     }
 
-    // Drop manifests whose directory no longer holds a manifest.json
-    for (auto it = m_pluginsByDir.begin(); it != m_pluginsByDir.end();) {
+    // Drop records whose directory no longer holds a manifest.json. This leaks, but Qt does not have a
+    // public unregister API so we have to deal with it.
+    for (auto it = m_records.begin(); it != m_records.end();) {
         if (dirs.contains(it.key())) {
             ++it;
             continue;
         }
 
-        it.value()->deleteLater();
-        it = m_pluginsByDir.erase(it);
+        it.value().manifest->deleteLater();
+        it = m_records.erase(it);
     }
 
     // On id collision keep the first plugin encountered and shadow the rest: later duplicates
@@ -297,6 +328,9 @@ void Plugins::rescan() {
     m_plugins = result;
     m_conflictingPlugins = conflicting;
 
+    // After shadowing, so a plugin that lost an id clash registers nothing
+    updateModules(force);
+
     if (m_plugins != previousPlugins) {
         emit pluginsChanged();
         bumpEntryPointsRevision();
@@ -309,6 +343,81 @@ void Plugins::rescan() {
     emit loaded();
 
     updateWatches();
+}
+
+void Plugins::updateModules(bool force) {
+    // Every plugin's root URI, so a file importing another plugin's module can be flagged
+    QStringList uris;
+    for (const auto* plugin : std::as_const(m_plugins))
+        if (plugin->valid())
+            uris.append(plugin->moduleUri());
+
+    QList<PluginManifest*> bumped;
+
+    for (auto* const plugin : std::as_const(m_plugins)) {
+        auto& record = m_records[plugin->dir()];
+
+        if (!plugin->valid()) {
+            record.module = PluginModule();
+            record.fingerprint.clear();
+            plugin->setWarnings({});
+            continue;
+        }
+
+        auto others = uris;
+        others.removeAll(plugin->moduleUri());
+
+        const auto previousUri = record.module.uri();
+        const auto previousWarnings = plugin->warnings();
+
+        record.module = PluginModule(plugin->dir(), plugin->moduleUri());
+        record.module.scan(others);
+
+        auto warnings = record.module.warnings();
+
+        // Renaming the plugin renames its module, but the author's own imports can still name the old
+        // one and keep resolving to it until the QML engine dies. We can't do anything about that, so send
+        // a warning instead.
+        if (!previousUri.isEmpty() && previousUri != record.module.uri())
+            warnings.prepend(QStringLiteral(
+                "Plugin was renamed from '%1' to '%2'. Imports may not work as expected until next restart.")
+                    .arg(previousUri, record.module.uri()));
+
+        plugin->setWarnings(warnings);
+
+        // Manifest fields that pick files to load which may not necessarily be valid QML components (and are
+        // therefore skipped in the tree walk)
+        // e.g. a lowercase named QML file
+        auto fingerprint = record.module.fingerprint();
+        fingerprint.append(plugin->declaredSettings().toUtf8());
+        fingerprint.append('\0');
+        fingerprint.append(plugin->declaredSettingsUi().toUtf8());
+
+        const bool reload = fingerprint != record.fingerprint || force;
+
+        // Re-logged on every reload, since a warning describes a standing problem with the plugin
+        // rather than something that just happened. Also logged when only the warnings moved,
+        // which is how another plugin appearing can make a cross plugin import visible.
+        if (reload || warnings != previousWarnings)
+            for (const auto& warning : std::as_const(warnings))
+                qCWarning(lcPlugins, "[%s] %s", qUtf8Printable(plugin->id()), qUtf8Printable(warning));
+
+        if (!reload)
+            continue;
+
+        record.fingerprint = fingerprint;
+        record.generation = ++m_generationCounter;
+
+        // Before any fan-out, or an unversioned import resolves the previous minor
+        record.module.registerTypes(record.generation);
+
+        bumped.append(plugin);
+    }
+
+    // Fanned out only once every module is registered, and synchronously, so no live loader sees
+    // a half updated set of registrations and no loader created mid-pass joins the wrong cohort.
+    for (auto* const plugin : std::as_const(bumped))
+        plugin->setGeneration(m_records[plugin->dir()].generation);
 }
 
 void Plugins::bumpEntryPointsRevision() {
@@ -342,16 +451,25 @@ void Plugins::updateWatches() {
     if (!watchedFiles.isEmpty())
         m_watcher->removePaths(watchedFiles);
 
-    const auto cfgDir = QFileInfo(m_configPath).absolutePath();
-    if (QFile::exists(cfgDir))
-        m_watcher->addPath(cfgDir);
-    if (QFile::exists(m_configPath))
-        m_watcher->addPath(m_configPath);
+    QStringList paths;
+    paths.append(QFileInfo(m_configPath).absolutePath());
+    paths.append(m_configPath);
+    paths.append(searchRoots());
 
-    const auto roots = searchRoots();
-    for (const auto& root : roots)
-        if (QFile::exists(root))
-            m_watcher->addPath(root);
+    // Directories report files appearing and disappearing; the files themselves report edits,
+    // which a directory watch does not. The module's own walk decides what is worth watching, so
+    // dotfiles and .git stay out of it.
+    for (auto it = m_records.cbegin(); it != m_records.cend(); ++it) {
+        paths.append(it.key());
+        paths.append(it.key() + QStringLiteral("/manifest.json"));
+        paths.append(it.value().module.watchPaths());
+    }
+
+    paths.removeDuplicates();
+
+    for (const auto& path : std::as_const(paths))
+        if (QFile::exists(path))
+            m_watcher->addPath(path);
 }
 
 void Plugins::onWatchEvent() {
