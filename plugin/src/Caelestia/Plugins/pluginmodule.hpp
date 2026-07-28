@@ -2,6 +2,7 @@
 
 #include <qbytearray.h>
 #include <qlist.h>
+#include <qset.h>
 #include <qstring.h>
 #include <qstringlist.h>
 
@@ -54,7 +55,8 @@ public:
     [[nodiscard]] QByteArray fingerprint() const;
 
 private:
-    void scanDir(const QString& path, const QString& uri, const QStringList& otherUris, QByteArray& data);
+    void scanDir(const QString& path, const QString& uri, const QStringList& otherUris, QByteArray& data,
+        QSet<QString>& visited, int depth);
     void checkImports(const QString& path, const QString& uri, const QString& content, const QStringList& siblings,
         const QStringList& otherUris);
 

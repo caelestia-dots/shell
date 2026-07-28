@@ -2,6 +2,7 @@
 
 #include <qdir.h>
 #include <qfile.h>
+#include <qfileinfo.h>
 #include <qstandardpaths.h>
 
 Q_LOGGING_CATEGORY(lcPluginSeal, "caelestia.plugins.seal", QtInfoMsg)
@@ -52,12 +53,21 @@ QUrl PluginUrlInterceptor::createSeal() {
 
 void PluginUrlInterceptor::setRoots(const QStringList& roots) {
     QStringList next;
-    next.reserve(roots.size());
+    next.reserve(roots.size() * 2);
 
     // Stored with the separator so the prefix match cannot spill into a sibling directory
     // sharing a name prefix, and so intercept() stays a plain comparison.
-    for (const auto& root : roots)
-        next.append(QDir::cleanPath(root) + u'/');
+    for (const auto& root : roots) {
+        const auto clean = QDir::cleanPath(root);
+        next.append(clean + u'/');
+
+        // Use canonical path to resolve symlinks
+        const auto canonical = QFileInfo(clean).canonicalFilePath();
+        if (!canonical.isEmpty() && canonical != clean)
+            next.append(canonical + u'/');
+    }
+
+    next.removeDuplicates();
 
     QMutexLocker locker(&m_mutex);
     m_roots = std::move(next);

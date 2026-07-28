@@ -12,6 +12,9 @@ namespace caelestia::plugins {
 
 namespace {
 
+// The max recursion depth to scan for QML files. Plugins should not ever go this deep.
+constexpr int kMaxDepth = 16;
+
 // qmlRegisterSingletonType refuses a file without the pragma, so the pragma is what decides,
 // not anything the manifest could declare.
 bool hasSingletonPragma(const QString& content) {
@@ -77,12 +80,41 @@ void PluginModule::scan(const QStringList& otherUris) {
     m_watchPaths.clear();
 
     QByteArray data;
-    scanDir(m_dir, m_uri, otherUris, data);
+    QSet<QString> visited;
+    scanDir(m_dir, m_uri, otherUris, data, visited, 0);
     m_fingerprint = QCryptographicHash::hash(data, QCryptographicHash::Sha1);
 }
 
-void PluginModule::scanDir(const QString& path, const QString& uri, const QStringList& otherUris, QByteArray& data) {
+void PluginModule::scanDir(const QString& path, const QString& uri, const QStringList& otherUris, QByteArray& data,
+    QSet<QString>& visited, int depth) {
     const QDir dir(path);
+    const auto relativeDir = path == m_dir ? QStringLiteral(".") : QDir(m_dir).relativeFilePath(path);
+
+    // Resolving to nothing means a broken or unreadable link, which has no contents to contribute
+    const auto canonical = QFileInfo(path).canonicalFilePath();
+    if (canonical.isEmpty()) {
+        m_warnings.append(QStringLiteral("%1: cannot be resolved; likely a broken symlink or unreadable file, skipped.")
+                .arg(relativeDir));
+        return;
+    }
+
+    // Checked before anything is recorded, so a directory skipped for depth is not also claimed
+    if (depth > kMaxDepth) {
+        m_warnings.append(
+            QStringLiteral("%1: nested more than %2 directories deep; skipped.").arg(relativeDir).arg(kMaxDepth));
+        return;
+    }
+
+    // Stop walking if we find a visited directory (e.g. due to looped symlinks)
+    if (visited.contains(canonical)) {
+        // The canonical path rather than a relative one, since a link out of the tree has no
+        // sensible relative form and the absolute target is what points at the culprit anyway.
+        m_warnings.append(
+            QStringLiteral("%1: already scanned as '%2'; likely a symlink loop, skipped.").arg(relativeDir, canonical));
+        return;
+    }
+
+    visited.insert(canonical);
 
     m_watchPaths.append(path);
     data.append(uri.toUtf8());
@@ -163,7 +195,7 @@ void PluginModule::scanDir(const QString& path, const QString& uri, const QStrin
             continue;
         }
 
-        scanDir(dir.absoluteFilePath(subdir), uri + u'.' + subdir, otherUris, data);
+        scanDir(dir.absoluteFilePath(subdir), uri + u'.' + subdir, otherUris, data, visited, depth + 1);
     }
 }
 
