@@ -5,6 +5,7 @@ import QtQuick.Layouts
 import Quickshell.Bluetooth
 import Caelestia.Components
 import Caelestia.Config
+import Caelestia.Plugins
 import qs.components
 import qs.components.controls
 import qs.services
@@ -169,8 +170,36 @@ StyledRect {
                         onClicked: VPN.toggle()
                     }
                 }
+                DelegateChoice {
+                    delegate: EntryPointLoader {
+                        id: entryLoader
+
+                        required property var modelData
+
+                        // qmllint disable missing-property
+                        readonly property bool fillWidth: item?.fillWidth ?? true
+                        readonly property bool shapeMorph: item?.shapeMorph ?? true
+                        readonly property real shapeMorphExpansion: item?.shapeMorphExpansion ?? 0
+                        // qmllint enable missing-property
+
+                        entryPoint: {
+                            const id = modelData.id;
+                            const entry = Plugins.entryPoints(EntryPointType.QuickToggle).find(e => e.properties.name === id);
+                            if (!entry)
+                                console.warn(logCat, "No plugin entry point found for", id);
+                            return entry;
+                        }
+                    }
+                }
             }
         }
+    }
+
+    LoggingCategory {
+        id: logCat
+
+        name: "caelestia.utilities.toggles"
+        defaultLogLevel: LoggingCategory.Info
     }
 
     component Toggle: IconButton {
