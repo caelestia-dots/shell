@@ -86,9 +86,10 @@ signals:
 
 private:
     // Everything about a plugin directory that has to outlive a single rescan. Manifests are
-    // reused where they can be, but the generation has to survive even their recreation: a
-    // counter living on the manifest would reset, and re-registering a module at a minor version
-    // it already has is a silent no-op, so edits would quietly stop taking effect.
+    // reused where they can be, but the generation has to survive even their recreation: it is
+    // what keeps every registration's URL distinct, and a counter living on the manifest would
+    // reset and hand back a URL whose compiled unit is already cached, so edits would quietly
+    // stop taking effect.
     struct PluginRecord {
         PluginManifest* manifest = nullptr;
         PluginModule module;
@@ -145,8 +146,9 @@ private:
     QHash<QString, PluginRecord> m_records;
     int m_entryPointsRevision = 0;
 
-    // Shared by every plugin. Minor versions only have to increase per URI, and a shared counter
-    // is the one thing that cannot be reset by recreating a manifest.
+    // Shared by every plugin. All it has to do is keep climbing, since all it has to produce is a
+    // URL the engine has not compiled before, and a shared counter is the one thing that cannot
+    // be reset by recreating a manifest.
     int m_generationCounter = 0;
 };
 

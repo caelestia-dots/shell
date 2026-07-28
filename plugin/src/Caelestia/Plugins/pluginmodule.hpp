@@ -39,8 +39,10 @@ public:
     // plugin imports, which per plugin generations cannot keep consistent, can be flagged.
     void scan(const QStringList& otherUris);
 
-    // Registers every discovered type at minor version `generation`. Must happen before
-    // anything in the plugin recompiles, or an unversioned import resolves the old minor.
+    // Registers every discovered type, with `generation` in each URL's query so the engine
+    // compiles the file again instead of handing back the unit it cached for the last one. Must
+    // happen before anything in the plugin recompiles, or that recompile resolves the previous
+    // registration.
     void registerTypes(int generation) const;
 
     [[nodiscard]] QList<PluginModuleType> types() const;

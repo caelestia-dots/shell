@@ -15,6 +15,11 @@ namespace {
 // The max recursion depth to scan for QML files. Plugins should not ever go this deep.
 constexpr int kMaxDepth = 16;
 
+// Qt resolves module names to the most recently registered type no matter its version, so
+// we simply re-register types at the same version to reload.
+constexpr int kModuleMajor = 1;
+constexpr int kModuleMinor = 0;
+
 // qmlRegisterSingletonType refuses a file without the pragma, so the pragma is what decides,
 // not anything the manifest could declare.
 bool hasSingletonPragma(const QString& content) {
@@ -23,13 +28,12 @@ bool hasSingletonPragma(const QString& content) {
     return re.match(content).hasMatch();
 }
 
-// Matches `import <uri>` at the start of a line, capturing the trailing version if the author
-// wrote one. Refuses to match a longer URI that merely starts with the same characters;
-// `withSubmodules` widens it to the URI's own submodules, i.e. `<uri>.Anything`.
+// Matches `import <uri>` at the start of a line, whether or not the author wrote a version after
+// it. Refuses to match a longer URI that merely starts with the same characters; `withSubmodules`
+// widens it to the URI's own submodules, i.e. `<uri>.Anything`.
 QRegularExpression importPattern(const QString& uri, bool withSubmodules = false) {
     const auto tail = withSubmodules ? QStringLiteral("(?:\\.\\w+)*(?!\\w)") : QStringLiteral("(?![\\w.])");
-    return QRegularExpression(
-        QStringLiteral("^[ \t]*import[ \t]+%1%2[ \t]*([\\d.]+)?").arg(QRegularExpression::escape(uri), tail),
+    return QRegularExpression(QStringLiteral("^[ \t]*import[ \t]+%1%2").arg(QRegularExpression::escape(uri), tail),
         QRegularExpression::MultilineOption);
 }
 
@@ -203,24 +207,6 @@ void PluginModule::checkImports(const QString& path, const QString& uri, const Q
     const QStringList& siblings, const QStringList& otherUris) {
     const auto relative = QDir(m_dir).relativeFilePath(path);
 
-    // Its own directory's module, plus the plugin root when the file lives in a subdirectory
-    QStringList ownUris{ uri };
-    if (m_uri != uri)
-        ownUris.append(m_uri);
-
-    QRegularExpressionMatch self;
-
-    for (const auto& own : std::as_const(ownUris)) {
-        const auto match = importPattern(own).match(content);
-        if (own == uri)
-            self = match;
-
-        // Versioned imports will import a static version of the module, which will break hot reloads.
-        if (match.hasMatch() && !match.captured(1).isEmpty())
-            m_warnings.append(
-                QStringLiteral("%1: versioned imports are not supported; do not use them.").arg(relative));
-    }
-
     for (const auto& other : otherUris) {
         if (!importPattern(other, true).match(content).hasMatch())
             continue;
@@ -230,7 +216,8 @@ void PluginModule::checkImports(const QString& path, const QString& uri, const Q
                 .arg(relative));
     }
 
-    if (self.hasMatch() || siblings.size() < 2)
+    const auto hasSelfImport = importPattern(uri).match(content).hasMatch();
+    if (hasSelfImport || siblings.size() < 2)
         return;
 
     QStringList used;
@@ -257,9 +244,9 @@ void PluginModule::registerTypes(int generation) const {
         const auto name = type.name.toUtf8();
 
         if (type.singleton)
-            qmlRegisterSingletonType(url, uri.constData(), 1, generation, name.constData());
+            qmlRegisterSingletonType(url, uri.constData(), kModuleMajor, kModuleMinor, name.constData());
         else
-            qmlRegisterType(url, uri.constData(), 1, generation, name.constData());
+            qmlRegisterType(url, uri.constData(), kModuleMajor, kModuleMinor, name.constData());
     }
 }
 

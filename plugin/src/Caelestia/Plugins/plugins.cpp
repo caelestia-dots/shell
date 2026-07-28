@@ -434,7 +434,7 @@ void Plugins::updateModules(bool force) {
         record.fingerprint = fingerprint;
         record.generation = ++m_generationCounter;
 
-        // Before any fan-out, or an unversioned import resolves the previous minor
+        // Before any fan-out, or an import resolves the previous registration
         record.module.registerTypes(record.generation);
 
         bumped.append(plugin);
