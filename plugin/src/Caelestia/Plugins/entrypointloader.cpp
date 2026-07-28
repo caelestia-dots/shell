@@ -249,7 +249,7 @@ QVariantMap EntryPointLoader::injectedProperties(const QObject* object) const {
 
     if (meta->indexOfProperty("settings") != -1) {
         // Built on demand, so this picks up the object rebuilt for the current generation
-        const SettingsObject* settings = m_plugin ? m_plugin->settings() : nullptr;
+        SettingsObject* const settings = m_plugin ? m_plugin->settings() : nullptr;
         properties.insert(QStringLiteral("settings"), QVariant::fromValue(settings));
     }
 
