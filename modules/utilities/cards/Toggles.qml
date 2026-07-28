@@ -36,8 +36,6 @@ StyledRect {
             return true;
         });
     }
-    readonly property int splitIndex: Math.ceil(quickToggles.length / 2)
-    readonly property bool needExtraRow: quickToggles.length > 6
 
     implicitHeight: layout.implicitHeight + Tokens.padding.extraLargeIncreased
 
@@ -49,31 +47,53 @@ StyledRect {
 
         anchors.fill: parent
         anchors.margins: Tokens.padding.large
-        spacing: Tokens.spacing.medium
+        spacing: Tokens.spacing.small
 
         StyledText {
+            Layout.bottomMargin: Tokens.spacing.medium - parent.spacing
             text: qsTr("Quick Toggles")
             font: Tokens.font.body.medium
         }
 
-        QuickToggleRow {
-            model: root.needExtraRow ? root.quickToggles.slice(0, root.splitIndex) : root.quickToggles
-        }
+        Repeater {
+            model: {
+                const arr = root.quickToggles;
+                const n = arr.length;
+                if (n < 3)
+                    return [arr];
 
-        QuickToggleRow {
-            visible: root.needExtraRow
-            model: root.needExtraRow ? root.quickToggles.slice(root.splitIndex) : []
+                const k = Math.ceil(n / 6);
+                const baseSize = Math.floor(n / k);
+                const remainder = n % k;
+
+                const subsets = [];
+                let start = 0;
+
+                for (let i = 0; i < k; i++) {
+                    const size = baseSize + (i < remainder ? 1 : 0);
+                    subsets.push(arr.slice(start, start + size));
+                    start += size;
+                }
+
+                return subsets;
+            }
+
+            QuickToggleRow {}
         }
     }
 
     component QuickToggleRow: ButtonRow {
-        property alias model: repeater.model
+        id: toggleRow
+
+        required property var modelData
 
         Layout.fillWidth: true
-        spacing: Tokens.spacing.small
+        spacing: Tokens.spacing.extraSmall
 
         Repeater {
             id: repeater
+
+            model: toggleRow.modelData
 
             delegate: DelegateChooser {
                 role: "id"
