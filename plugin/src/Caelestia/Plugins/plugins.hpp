@@ -106,9 +106,10 @@ private:
     // reload() asks for. Watch driven rescans leave it false so an unrelated edit costs nothing.
     void rescan(bool force = false);
 
-    // Rescans every plugin's tree, refreshes its warnings, and bumps the generation of each one
-    // whose fingerprint moved.
-    void updateModules(bool force);
+    // Rescans the tree of every plugin that is going to run, refreshes its warnings, and bumps the
+    // generation of each one whose fingerprint moved. A plugin that is invalid or disabled has its
+    // record cleared instead, so it is neither registered nor watched until it comes back.
+    void updateModules(bool force = false);
 
     void onWatchEvent(const QString& path);
     void updateWatches();

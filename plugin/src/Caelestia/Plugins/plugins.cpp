@@ -111,6 +111,10 @@ void Plugins::setEnabled(const QStringList& enabled) {
 
     m_enabled = enabled;
 
+    // Update modules and watches before notifying QML
+    updateModules();
+    updateWatches();
+
     for (auto* const plugin : std::as_const(m_plugins))
         plugin->setEnabled(m_enabled.contains(plugin->id()));
 
@@ -280,7 +284,8 @@ void Plugins::rescan(bool force) {
     const auto dirs = discoverPluginDirs();
 
     // Sealed before anything in a newly discovered plugin can compile, since a directory that
-    // resolves its types by filename once keeps doing so for the rest of the process.
+    // resolves its types by filename once keeps doing so for the rest of the process. Every plugin
+    // found, enabled or not, is sealed otherwise the first compile after an enable would beat the seal to it.
     if (m_interceptor)
         m_interceptor->setRoots(dirs);
 
@@ -383,43 +388,51 @@ void Plugins::updateModules(bool force) {
     for (auto* const plugin : std::as_const(m_plugins)) {
         auto& record = m_records[plugin->dir()];
 
-        if (!plugin->valid()) {
-            record.module = PluginModule();
-            record.fingerprint.clear();
-            plugin->setWarnings({});
-            continue;
-        }
-
-        auto others = uris;
-        others.removeAll(plugin->moduleUri());
-
+        const auto valid = plugin->valid();
         const auto previousUri = record.module.uri();
         const auto previousWarnings = plugin->warnings();
 
-        record.module = PluginModule(plugin->dir(), plugin->moduleUri());
-        record.module.scan(others);
-
-        auto warnings = record.module.warnings();
+        QStringList warnings;
 
         // Renaming the plugin renames its module, but the author's own imports can still name the old
         // one and keep resolving to it until the QML engine dies. We can't do anything about that, so send
         // a warning instead.
-        if (!previousUri.isEmpty() && previousUri != record.module.uri())
-            warnings.prepend(QStringLiteral(
+        if (valid && !previousUri.isEmpty() && previousUri != plugin->moduleUri())
+            warnings.append(QStringLiteral(
                 "Plugin was renamed from '%1' to '%2'. Imports may not work as expected until next restart.")
-                    .arg(previousUri, record.module.uri()));
+                    .arg(previousUri, plugin->moduleUri()));
+
+        // Don't register plugins which are not enabled. Use the enabled map instead of the manifest
+        // as this is called before the manifest is flipped.
+        const auto active = valid && m_enabled.contains(plugin->id());
+
+        bool reload = false;
+
+        if (active) {
+            auto others = uris;
+            others.removeAll(plugin->moduleUri());
+
+            record.module = PluginModule(plugin->dir(), plugin->moduleUri());
+            record.module.scan(others);
+            warnings.append(record.module.warnings());
+
+            // Manifest fields that pick files to load which may not necessarily be valid QML components (and are
+            // therefore skipped in the tree walk)
+            // e.g. a lowercase named QML file
+            auto fingerprint = record.module.fingerprint();
+            fingerprint.append(plugin->declaredSettings().toUtf8());
+            fingerprint.append('\0');
+            fingerprint.append(plugin->declaredSettingsUi().toUtf8());
+
+            reload = fingerprint != record.fingerprint || force;
+            if (reload)
+                record.fingerprint = std::move(fingerprint);
+        } else {
+            record.module = PluginModule();
+            record.fingerprint.clear();
+        }
 
         plugin->setWarnings(warnings);
-
-        // Manifest fields that pick files to load which may not necessarily be valid QML components (and are
-        // therefore skipped in the tree walk)
-        // e.g. a lowercase named QML file
-        auto fingerprint = record.module.fingerprint();
-        fingerprint.append(plugin->declaredSettings().toUtf8());
-        fingerprint.append('\0');
-        fingerprint.append(plugin->declaredSettingsUi().toUtf8());
-
-        const bool reload = fingerprint != record.fingerprint || force;
 
         // Re-logged on every reload, since a warning describes a standing problem with the plugin
         // rather than something that just happened. Also logged when only the warnings moved,
@@ -431,7 +444,6 @@ void Plugins::updateModules(bool force) {
         if (!reload)
             continue;
 
-        record.fingerprint = fingerprint;
         record.generation = ++m_generationCounter;
 
         // Before any fan-out, or an import resolves the previous registration
