@@ -31,6 +31,8 @@ ColumnLayout {
 
             text: "keyboard_capslock_badge"
             color: root.colour
+            fill: 1
+            grade: 25
 
             Behavior on opacity {
                 Anim {
@@ -64,6 +66,8 @@ ColumnLayout {
 
             text: "looks_one"
             color: root.colour
+            fill: 1
+            grade: 25
 
             Behavior on opacity {
                 Anim {
