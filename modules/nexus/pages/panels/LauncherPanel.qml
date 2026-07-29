@@ -25,6 +25,7 @@ PageBase {
 
         ToggleRow {
             first: true
+            settingAnchor: "launcher-enabled"
             text: qsTr("Enabled")
             checked: Config.launcher.enabled
             onToggled: GlobalConfig.launcher.enabled = checked
@@ -32,6 +33,7 @@ PageBase {
 
         ToggleRow {
             last: true
+            settingAnchor: "launcher-show-on-hover"
             text: qsTr("Show on hover")
             subtext: qsTr("Reveal when the cursor reaches the screen edge")
             checked: Config.launcher.showOnHover
@@ -45,6 +47,7 @@ PageBase {
 
         StepperRow {
             first: true
+            settingAnchor: "launcher-max-items-shown"
             label: qsTr("Max items shown")
             value: Config.launcher.maxShown
             from: 1
@@ -54,6 +57,7 @@ PageBase {
         }
 
         StepperRow {
+            settingAnchor: "launcher-max-wallpapers"
             label: qsTr("Max wallpapers")
             value: Config.launcher.maxWallpapers
             from: 1
@@ -64,6 +68,7 @@ PageBase {
 
         StepperRow {
             last: true
+            settingAnchor: "launcher-drag-threshold"
             label: qsTr("Drag threshold")
             subtext: qsTr("Pixels dragged before the launcher opens")
             value: Config.launcher.dragThreshold
@@ -80,6 +85,7 @@ PageBase {
 
         ToggleRow {
             first: true
+            settingAnchor: "launcher-vim-keybinds"
             text: qsTr("Vim keybinds")
             subtext: qsTr("Navigate results with Ctrl+hjkl")
             checked: GlobalConfig.launcher.vimKeybinds
@@ -88,6 +94,7 @@ PageBase {
 
         ToggleRow {
             last: true
+            settingAnchor: "launcher-enable-dangerous-actions"
             text: qsTr("Enable dangerous actions")
             subtext: qsTr("Allow actions that shut down or log out")
             checked: GlobalConfig.launcher.enableDangerousActions
@@ -101,24 +108,28 @@ PageBase {
 
         ToggleRow {
             first: true
+            settingAnchor: "launcher-apps"
             text: qsTr("Apps")
             checked: GlobalConfig.launcher.useFuzzy.apps
             onToggled: GlobalConfig.launcher.useFuzzy.apps = checked
         }
 
         ToggleRow {
+            settingAnchor: "launcher-actions"
             text: qsTr("Actions")
             checked: GlobalConfig.launcher.useFuzzy.actions
             onToggled: GlobalConfig.launcher.useFuzzy.actions = checked
         }
 
         ToggleRow {
+            settingAnchor: "launcher-schemes"
             text: qsTr("Schemes")
             checked: GlobalConfig.launcher.useFuzzy.schemes
             onToggled: GlobalConfig.launcher.useFuzzy.schemes = checked
         }
 
         ToggleRow {
+            settingAnchor: "launcher-variants"
             text: qsTr("Variants")
             checked: GlobalConfig.launcher.useFuzzy.variants
             onToggled: GlobalConfig.launcher.useFuzzy.variants = checked
@@ -126,6 +137,7 @@ PageBase {
 
         ToggleRow {
             last: true
+            settingAnchor: "launcher-wallpapers"
             text: qsTr("Wallpapers")
             checked: GlobalConfig.launcher.useFuzzy.wallpapers
             onToggled: GlobalConfig.launcher.useFuzzy.wallpapers = checked
