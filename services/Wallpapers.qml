@@ -126,7 +126,8 @@ Searcher {
         stdout: StdioCollector {
             onStreamFinished: {
                 Colours.load(text, true);
-                Colours.showPreview = true;
+                if (root.showPreview)
+                    Colours.showPreview = true;
             }
         }
     }
