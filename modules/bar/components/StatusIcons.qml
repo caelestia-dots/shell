@@ -82,6 +82,7 @@ StyledRect {
                     roleValue: "microphone"
                     delegate: EntryWrapper {
                         margin: Tokens.spacing.extraSmall / 2
+                        name: "audio" // Mic opens audio popout
 
                         MaterialIcon {
                             animate: true
@@ -138,7 +139,7 @@ StyledRect {
         required property int index
         property int margin: root.spacing / 2
         default property Item item
-        readonly property string name: modelData.id.toLowerCase()
+        property string name: modelData.id.toLowerCase()
 
         Layout.topMargin: index === 0 ? 0 : ((repeater.itemAt(index - 1) as EntryWrapper)?.margin ?? 0)
         Layout.bottomMargin: index === repeater.count - 1 ? 0 : ((repeater.itemAt(index + 1) as EntryWrapper)?.margin ?? 0)
