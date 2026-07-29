@@ -57,8 +57,6 @@ StyledRect {
                         }
 
                         LockStatus {
-                            id: lockStatus
-
                             colour: root.colour
                             parentSpacing: root.spacing
                         }
