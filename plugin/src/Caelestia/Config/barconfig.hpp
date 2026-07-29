@@ -92,24 +92,6 @@ public:
         : ConfigObject(parent) {}
 };
 
-class BarStatus : public ConfigObject {
-    Q_OBJECT
-    QML_ANONYMOUS
-
-    CONFIG_PROPERTY(bool, showAudio, false)
-    CONFIG_PROPERTY(bool, showMicrophone, false)
-    CONFIG_PROPERTY(bool, showKbLayout, false)
-    CONFIG_PROPERTY(bool, showNetwork, true)
-    CONFIG_PROPERTY(bool, showWifi, true)
-    CONFIG_PROPERTY(bool, showBluetooth, true)
-    CONFIG_PROPERTY(bool, showBattery, true)
-    CONFIG_PROPERTY(bool, showLockStatus, true)
-
-public:
-    explicit BarStatus(QObject* parent = nullptr)
-        : ConfigObject(parent) {}
-};
-
 class BarClock : public ConfigObject {
     Q_OBJECT
     QML_ANONYMOUS
@@ -135,19 +117,29 @@ class BarConfig : public ConfigObject {
     CONFIG_SUBOBJECT(BarWorkspaces, workspaces)
     CONFIG_SUBOBJECT(BarActiveWindow, activeWindow)
     CONFIG_SUBOBJECT(BarTray, tray)
-    CONFIG_SUBOBJECT(BarStatus, status)
     CONFIG_SUBOBJECT(BarClock, clock)
+    CONFIG_PROPERTY(QVariantList, statusIcons,
+        {
+            CONFIG_ENTRY(lockStatus, true),
+            CONFIG_ENTRY(audio, false),
+            CONFIG_ENTRY(microphone, false),
+            CONFIG_ENTRY(kbLayout, false),
+            CONFIG_ENTRY(network, true),
+            CONFIG_ENTRY(wifi, true),
+            CONFIG_ENTRY(bluetooth, true),
+            CONFIG_ENTRY(battery, true),
+        })
     CONFIG_PROPERTY(QVariantList, entries,
         {
-            vmap({ { u"id"_s, u"logo"_s }, { u"enabled"_s, true } }),
-            vmap({ { u"id"_s, u"workspaces"_s }, { u"enabled"_s, true } }),
-            vmap({ { u"id"_s, u"spacer"_s }, { u"enabled"_s, true } }),
-            vmap({ { u"id"_s, u"activeWindow"_s }, { u"enabled"_s, true } }),
-            vmap({ { u"id"_s, u"spacer"_s }, { u"enabled"_s, true } }),
-            vmap({ { u"id"_s, u"tray"_s }, { u"enabled"_s, true } }),
-            vmap({ { u"id"_s, u"clock"_s }, { u"enabled"_s, true } }),
-            vmap({ { u"id"_s, u"statusIcons"_s }, { u"enabled"_s, true } }),
-            vmap({ { u"id"_s, u"power"_s }, { u"enabled"_s, true } }),
+            CONFIG_ENTRY(logo, true),
+            CONFIG_ENTRY(workspaces, true),
+            CONFIG_ENTRY(spacer, true),
+            CONFIG_ENTRY(activeWindow, true),
+            CONFIG_ENTRY(spacer, true),
+            CONFIG_ENTRY(tray, true),
+            CONFIG_ENTRY(clock, true),
+            CONFIG_ENTRY(statusIcons, true),
+            CONFIG_ENTRY(power, true),
         })
     CONFIG_PROPERTY(QStringList, excludedScreens)
 
@@ -159,7 +151,6 @@ public:
         , m_workspaces(new BarWorkspaces(this))
         , m_activeWindow(new BarActiveWindow(this))
         , m_tray(new BarTray(this))
-        , m_status(new BarStatus(this))
         , m_clock(new BarClock(this)) {}
 };
 

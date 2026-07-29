@@ -20,6 +20,9 @@ inline QVariantMap vmap(std::initializer_list<std::pair<QString, QVariant>> entr
 
 } // namespace caelestia::config
 
+// Shorthand for declaring an ID'd entry (bar entries/status icons, quick toggles, etc)
+#define CONFIG_ENTRY(id, enabled) vmap({ { u"id"_s, u## #id##_s }, { u"enabled"_s, enabled } })
+
 // Declares a serialized config property with getter, setter (change-detected), signal, and member.
 #define CONFIG_PROPERTY(Type, name, ...)                                                                               \
     Q_PROPERTY(Type name READ name WRITE set_##name NOTIFY name##Changed)                                              \
