@@ -19,6 +19,8 @@ PageBase {
     title: qsTr("Wallpapers")
     isSubPage: true
 
+    Component.onCompleted: Wallpapers.updateThumbs()
+
     ColumnLayout {
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.top: parent.top
@@ -192,6 +194,4 @@ PageBase {
             }
         }
     }
-
-    Component.onCompleted: Wallpapers.updateThumbs()
 }
