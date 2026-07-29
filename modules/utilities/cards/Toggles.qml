@@ -83,6 +83,13 @@ StyledRect {
         }
     }
 
+    LoggingCategory {
+        id: logCat
+
+        name: "caelestia.utilities.toggles"
+        defaultLogLevel: LoggingCategory.Info
+    }
+
     component QuickToggleRow: ButtonRow {
         id: toggleRow
 
@@ -193,13 +200,6 @@ StyledRect {
                 }
             }
         }
-    }
-
-    LoggingCategory {
-        id: logCat
-
-        name: "caelestia.utilities.toggles"
-        defaultLogLevel: LoggingCategory.Info
     }
 
     component Toggle: IconButton {
