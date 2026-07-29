@@ -85,6 +85,7 @@ Item {
 
                 MaterialIcon {
                     id: badgeIcon
+
                     anchors.centerIn: parent
                     text: root.isVideo ? "videocam" : "image"
                     color: "white"
@@ -102,6 +103,7 @@ Item {
 
                 MaterialIcon {
                     id: fallbackIcon
+
                     anchors.centerIn: parent
                     text: "play_circle"
                     color: Colours.palette.m3primary
