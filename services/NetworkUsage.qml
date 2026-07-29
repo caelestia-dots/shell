@@ -179,23 +179,18 @@ Singleton {
                 return;
             }
 
-            const timeDelta = (now - root._prevTimestamp) / 1000; // seconds
+            const timeDelta = (now - root._prevTimestamp) / 1000;
             if (timeDelta > 0) {
-                // Calculate byte deltas
                 let rxDelta = data.rx - root._prevRxBytes;
                 let txDelta = data.tx - root._prevTxBytes;
 
-                // Handle counter overflow (when counters wrap around from max to 0)
-                // This happens when counters exceed 32-bit or 64-bit limits
                 if (rxDelta < 0) {
-                    // Counter wrapped around - assume 64-bit counter
-                    rxDelta += Math.pow(2, 64);
+                    rxDelta = 0;
                 }
                 if (txDelta < 0) {
-                    txDelta += Math.pow(2, 64);
+                    txDelta = 0;
                 }
 
-                // Calculate speeds
                 root._downloadSpeed = rxDelta / timeDelta;
                 root._uploadSpeed = txDelta / timeDelta;
 
@@ -206,17 +201,15 @@ Singleton {
                     uploadHistory.push(root._uploadSpeed);
             }
 
-            // Calculate totals with overflow handling
-            let downTotal = data.rx - root._initialRxBytes;
-            let upTotal = data.tx - root._initialTxBytes;
+            if (data.rx < root._initialRxBytes) {
+                root._initialRxBytes = data.rx;
+            }
+            if (data.tx < root._initialTxBytes) {
+                root._initialTxBytes = data.tx;
+            }
 
-            // Handle counter overflow for totals
-            if (downTotal < 0) {
-                downTotal += Math.pow(2, 64);
-            }
-            if (upTotal < 0) {
-                upTotal += Math.pow(2, 64);
-            }
+            let downTotal = Math.max(0, data.rx - root._initialRxBytes);
+            let upTotal = Math.max(0, data.tx - root._initialTxBytes);
 
             root._downloadTotal = downTotal;
             root._uploadTotal = upTotal;
