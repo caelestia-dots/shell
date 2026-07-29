@@ -46,6 +46,11 @@ Searcher {
             getPreviewColoursProc.running = true;
     }
 
+    function updateThumbs(): void {
+        if (Paths.videowallsdir !== Paths.wallsdir)
+            thumbProcess.running = true;
+    }
+
     function stopPreview(): void {
         showPreview = false;
         if (previewColourLock)
@@ -129,6 +134,16 @@ Searcher {
                 if (root.showPreview)
                     Colours.showPreview = true;
             }
+        }
+    }
+
+    Process {
+        id: thumbProcess
+
+        command: ["caelestia", "wallpaper", "--update-thumbs"]
+        onExited: { // qmllint disable signal-handler-parameters
+            videoWallpapers.path = "";
+            videoWallpapers.path = Paths.videowallsdir;
         }
     }
 }

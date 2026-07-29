@@ -192,4 +192,6 @@ PageBase {
             }
         }
     }
+
+    Component.onCompleted: Wallpapers.updateThumbs()
 }
