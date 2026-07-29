@@ -125,7 +125,6 @@ class BarConfig : public ConfigObject {
             CONFIG_ENTRY(microphone, false),
             CONFIG_ENTRY(kbLayout, false),
             CONFIG_ENTRY(network, true),
-            CONFIG_ENTRY(wifi, true),
             CONFIG_ENTRY(bluetooth, true),
             CONFIG_ENTRY(battery, true),
         })
