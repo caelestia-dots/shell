@@ -23,6 +23,7 @@ Item {
     property bool muted
     property real sourceVolume
     property bool sourceMuted
+    property real callVolume
     property real brightness
 
     function show(): void {
@@ -35,6 +36,7 @@ Item {
         muted = Audio.muted;
         sourceVolume = Audio.sourceVolume;
         sourceMuted = Audio.sourceMuted;
+        callVolume = Audio.callVolume;
         brightness = root.monitor?.brightness ?? 0;
     }
 
@@ -67,6 +69,11 @@ Item {
         function onSourceVolumeChanged(): void {
             root.show();
             root.sourceVolume = Audio.sourceVolume;
+        }
+
+        function onCallVolumeChanged(): void {
+            root.show();
+            root.callVolume = Audio.callVolume;
         }
 
         target: Audio
@@ -107,6 +114,7 @@ Item {
             muted: root.muted
             sourceVolume: root.sourceVolume
             sourceMuted: root.sourceMuted
+            callVolume: root.callVolume
             brightness: root.brightness
         }
     }

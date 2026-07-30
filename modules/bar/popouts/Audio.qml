@@ -98,6 +98,36 @@ Item {
             }
         }
 
+        // Call volume — only visible when call apps are active
+        StyledText {
+            Layout.topMargin: Tokens.spacing.medium
+            visible: Audio.getCallStreams().length > 0
+            text: qsTr("Call volume (%1)").arg(`${Math.round(Audio.callVolume * 100)}%`)
+            font: Tokens.font.body.builders.medium.weight(Font.Medium).build()
+        }
+
+        CustomMouseArea {
+            Layout.fillWidth: true
+            implicitHeight: Tokens.padding.medium * 3
+            visible: Audio.getCallStreams().length > 0
+
+            onWheel: event => {
+                if (event.angleDelta.y > 0)
+                    Audio.incrementCallVolume();
+                else if (event.angleDelta.y < 0)
+                    Audio.decrementCallVolume();
+            }
+
+            StyledSlider {
+                anchors.left: parent.left
+                anchors.right: parent.right
+                implicitHeight: parent.implicitHeight
+
+                value: Audio.callVolume
+                onInteraction: value => Audio.setCallVolume(value)
+            }
+        }
+
         IconTextButton {
             Layout.fillWidth: true
             Layout.topMargin: Tokens.spacing.medium
