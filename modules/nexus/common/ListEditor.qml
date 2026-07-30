@@ -46,6 +46,43 @@ ListView {
         implicitHeight: row.implicitHeight + row.anchors.margins * 2
         z: Math.abs(itemContent.y) >= root.spacing ? 1 : 0
 
+        state: held ? "held" : ""
+
+        states: State {
+            name: "held"
+
+            PropertyChanges {
+                placeholder.opacity: 0.1
+                elevation.opacity: 1
+                itemBg.color: Colours.palette.m3tertiaryContainer
+                itemBg.radius: item.Tokens.rounding.large
+                stateLayer.color: Colours.palette.m3onTertiaryContainer
+                leadingIcon.color: Colours.palette.m3onTertiaryContainer
+                label.color: Colours.palette.m3onTertiaryContainer
+                dragHandle.color: Colours.palette.m3onTertiaryContainer
+                deleteButton.inactiveOnColour: Colours.palette.m3onError
+            }
+        }
+
+        transitions: Transition {
+            Anim {
+                properties: "opacity,radius"
+                type: Anim.SlowEffects
+            }
+            PropertyAction {
+                properties: "color,inactiveOnColour"
+            }
+        }
+
+        StyledRect {
+            id: placeholder
+
+            anchors.fill: parent
+            color: Colours.palette.m3tertiaryContainer
+            radius: Tokens.rounding.extraSmall
+            opacity: 0
+        }
+
         MouseArea {
             id: mouse
 
@@ -94,37 +131,20 @@ ListView {
             }
 
             Elevation {
+                id: elevation
+
                 anchors.fill: parent
                 radius: itemBg.radius
                 level: 3
-                opacity: item.held ? 1 : 0
-
-                Behavior on opacity {
-                    Anim {
-                        type: Anim.DefaultEffects
-                    }
-                }
+                opacity: 0
             }
 
             StyledRect {
                 id: itemBg
 
                 anchors.fill: parent
-                color: Qt.alpha(Colours.tPalette.m3surfaceContainer, 1)
-                opacity: item.held ? 1 : Colours.tPalette.m3surfaceContainer.a
-                radius: item.held ? Tokens.rounding.large : Tokens.rounding.extraSmall
-
-                Behavior on opacity {
-                    Anim {
-                        type: Anim.DefaultEffects
-                    }
-                }
-
-                Behavior on radius {
-                    Anim {
-                        type: Anim.DefaultEffects
-                    }
-                }
+                color: Colours.tPalette.m3surfaceContainer
+                radius: Tokens.rounding.extraSmall
             }
 
             StateLayer {
@@ -149,24 +169,32 @@ ListView {
                 spacing: Tokens.spacing.medium
 
                 MaterialIcon {
+                    id: leadingIcon
+
                     text: item.modelData.icon
                     color: Colours.palette.m3onSurfaceVariant
                     fontStyle: Tokens.font.icon.medium
                 }
 
                 StyledText {
+                    id: label
+
                     Layout.fillWidth: true
                     text: item.modelData.label
                     elide: Text.ElideRight
                 }
 
                 MaterialIcon {
+                    id: dragHandle
+
                     text: "drag_handle"
                     color: Colours.palette.m3onSurfaceVariant
                     fontStyle: Tokens.font.icon.medium
                 }
 
                 IconButton {
+                    id: deleteButton
+
                     type: IconButton.Text
                     isRound: true
                     icon: "delete"
