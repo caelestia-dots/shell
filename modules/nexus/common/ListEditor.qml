@@ -40,6 +40,7 @@ ListView {
 
         required property var modelData
         property bool held
+        property point pressPos
 
         anchors.left: root.contentItem.left
         anchors.right: root.contentItem.right
@@ -91,14 +92,15 @@ ListView {
 
             onPressed: e => {
                 stateLayer.press(e.x, e.y);
-                yAnim.enabled = true;
+                item.pressPos = Qt.point(e.x, e.y);
+                yAnim.enabled = false;
                 item.held = true;
             }
             onPositionChanged: yAnim.enabled = false
             onReleased: e => {
                 yAnim.enabled = true;
                 item.held = false;
-                itemContent.y = 0; // Manually reset to 0 in case the initial move anim was playing
+                itemContent.y = 0; // Manually reset to 0 in case move anim is running
 
             // TODO
             }
@@ -112,7 +114,7 @@ ListView {
 
             Binding on y {
                 value: {
-                    const y = mouse.mouseY - item.implicitHeight / 2;
+                    const y = mouse.mouseY - item.pressPos.y;
                     const absY = item.mapToItem(root.contentItem, 0, y).y;
                     const maxY = root.implicitHeight - item.implicitHeight;
                     if (absY < 0)
