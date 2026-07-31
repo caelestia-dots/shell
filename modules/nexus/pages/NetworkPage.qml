@@ -107,6 +107,7 @@ PageBase {
             last: true
             icon: "add"
             text: qsTr("Add network")
+            disabled: !Nmcli.wifiEnabled
             onClicked: root.nState.openSubPage(2) // Add network sub-page
         }
 
