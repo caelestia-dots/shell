@@ -3,10 +3,17 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import QtQuick.Layouts
 import Caelestia.Config
+import qs.components
+import qs.components.controls
+import qs.services
 import qs.modules.nexus.common
 
 PageBase {
     id: root
+
+    function normaliseActionPrefix(prefix: string): string {
+        return /^[^a-zA-Z0-9\s]$/.test(prefix) ? prefix : ">";
+    }
 
     title: qsTr("Launcher")
     isSubPage: true
@@ -31,11 +38,82 @@ PageBase {
         }
 
         ToggleRow {
-            last: true
             text: qsTr("Show on hover")
             subtext: qsTr("Reveal when the cursor reaches the screen edge")
             checked: Config.launcher.showOnHover
             onToggled: GlobalConfig.launcher.showOnHover = checked
+        }
+
+        Item {
+            Layout.fillWidth: true
+            Layout.preferredHeight: contentRow.implicitHeight + Tokens.padding.medium * 2
+
+            ConnectedRect {
+                id: bg
+
+                anchors.fill: parent
+                last: true
+            }
+
+            RowLayout {
+                id: contentRow
+
+                anchors.left: parent.left
+                anchors.right: parent.right
+                anchors.verticalCenter: parent.verticalCenter
+                anchors.leftMargin: Tokens.padding.largeIncreased
+                anchors.rightMargin: Tokens.padding.medium
+                spacing: Tokens.spacing.medium
+
+                Column {
+                    Layout.fillWidth: true
+                    spacing: 0
+
+                    StyledText {
+                        text: qsTr("Action Prefix")
+                        font: Tokens.font.body.small
+                        elide: Text.ElideRight
+                    }
+
+                    StyledText {
+                        text: qsTr("Prefix used to run actions in the launcher")
+                        font: Tokens.font.label.small
+                        color: Colours.palette.m3outline
+                        elide: Text.ElideRight
+                    }
+                }
+
+                StyledTextField {
+                    id: prefixInput
+
+                    function saveActionPrefix(): void {
+                        const prefix = root.normaliseActionPrefix(text);
+                        GlobalConfig.launcher.actionPrefix = prefix;
+                        if (prefix === ">" && text)
+                            clear();
+                    }
+
+                    Layout.preferredWidth: 100
+                    Layout.alignment: Qt.AlignVCenter
+                    text: {
+                        const normalised = root.normaliseActionPrefix(GlobalConfig.launcher.actionPrefix);
+                        return normalised === ">" ? "" : normalised;
+                    }
+                    placeholderText: ">"
+                    maximumLength: 1
+                    validator: RegularExpressionValidator {
+                        regularExpression: /^$|^[^a-zA-Z0-9\s]$/
+                    }
+
+                    onTextEdited: saveActionPrefix()
+                    onEditingFinished: saveActionPrefix()
+                    Component.onCompleted: {
+                        const prefix = root.normaliseActionPrefix(GlobalConfig.launcher.actionPrefix);
+                        if (GlobalConfig.launcher.actionPrefix !== prefix)
+                            GlobalConfig.launcher.actionPrefix = prefix;
+                    }
+                }
+            }
         }
 
         // Display
