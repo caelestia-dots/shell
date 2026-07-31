@@ -16,6 +16,14 @@ ListView {
 
     signal itemsCommitted(items: list<var>)
 
+    function iconFor(item: var): string {
+        return item.icon;
+    }
+
+    function labelFor(item: var): string {
+        return item.label;
+    }
+
     function commitItems(): void {
         const items = contentItem.children.filter(c => c instanceof ListRow);
         items.sort((a, b) => a.DelegateModel.itemsIndex - b.DelegateModel.itemsIndex);
@@ -249,7 +257,7 @@ ListView {
                 MaterialIcon {
                     id: leadingIcon
 
-                    text: item.modelData.icon
+                    text: root.iconFor(item.modelData)
                     color: Colours.palette.m3onSurfaceVariant
                     fontStyle: Tokens.font.icon.medium
                 }
@@ -258,7 +266,7 @@ ListView {
                     id: label
 
                     Layout.fillWidth: true
-                    text: item.modelData.label
+                    text: root.labelFor(item.modelData)
                     elide: Text.ElideRight
                 }
 
