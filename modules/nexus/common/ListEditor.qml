@@ -13,6 +13,7 @@ ListView {
     id: root
 
     property alias values: valuesModel.values
+    property bool first
 
     signal itemsCommitted(items: list<var>)
 
@@ -93,10 +94,16 @@ ListView {
         id: item
 
         required property var modelData
-        required property int index
         property bool held
         property point pressPos
         property real lastMoveY
+
+        property real topRadius: root?.first && DelegateModel.itemsIndex === 0 ? Tokens.rounding.extraLarge : Tokens.rounding.extraSmall
+        property real radiusLerpProg
+
+        function lerpRadius(a: real, b: real): real {
+            return a + (b - a) * radiusLerpProg;
+        }
 
         anchors.left: root?.contentItem.left
         anchors.right: root?.contentItem.right
@@ -109,10 +116,10 @@ ListView {
             name: "held"
 
             PropertyChanges {
+                item.radiusLerpProg: 1
                 placeholder.opacity: 0.1
                 elevation.opacity: 1
                 itemBg.color: Colours.palette.m3tertiaryContainer
-                itemBg.radius: item.Tokens.rounding.large
                 stateLayer.color: Colours.palette.m3onTertiaryContainer
                 leadingIcon.color: Colours.palette.m3onTertiaryContainer
                 label.color: Colours.palette.m3onTertiaryContainer
@@ -123,11 +130,17 @@ ListView {
 
         transitions: Transition {
             Anim {
-                properties: "opacity,radius"
+                properties: "opacity,radiusLerpProg"
                 type: Anim.SlowEffects
             }
             PropertyAction {
                 properties: "color,inactiveOnColour"
+            }
+        }
+
+        Behavior on topRadius {
+            Anim {
+                type: Anim.DefaultEffects
             }
         }
 
@@ -137,6 +150,8 @@ ListView {
             anchors.fill: parent
             color: Colours.palette.m3tertiaryContainer
             radius: Tokens.rounding.extraSmall
+            topLeftRadius: item.topRadius
+            topRightRadius: item.topRadius
             opacity: 0
         }
 
@@ -221,6 +236,8 @@ ListView {
 
                 anchors.fill: parent
                 radius: itemBg.radius
+                topLeftRadius: itemBg.topLeftRadius
+                topRightRadius: itemBg.topRightRadius
                 level: 3
                 opacity: 0
             }
@@ -230,7 +247,9 @@ ListView {
 
                 anchors.fill: parent
                 color: Colours.tPalette.m3surfaceContainer
-                radius: Tokens.rounding.extraSmall
+                radius: item.lerpRadius(Tokens.rounding.extraSmall, Tokens.rounding.large)
+                topLeftRadius: item.lerpRadius(item.topRadius, Tokens.rounding.large)
+                topRightRadius: item.lerpRadius(item.topRadius, Tokens.rounding.large)
             }
 
             StateLayer {
@@ -239,6 +258,8 @@ ListView {
                 enabled: false
                 hoverEnabled: false
                 radius: itemBg.radius
+                topLeftRadius: itemBg.topLeftRadius
+                topRightRadius: itemBg.topRightRadius
                 cursorShape: mouse.pressed ? Qt.ClosedHandCursor : Qt.OpenHandCursor
                 manualPressOverride: mouse.pressed
                 manualHoverOverride: mouse.containsMouse || mouse.pressed
