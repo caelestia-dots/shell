@@ -73,7 +73,7 @@ PageBase {
         }
 
         // Per-app volumes
-        RowButton {
+        NavRow {
             Layout.topMargin: Tokens.spacing.large - parent.spacing
             first: true
             last: true
@@ -81,9 +81,6 @@ PageBase {
             icon: "tune"
             text: qsTr("App volumes")
             subtext: Audio.streams.length === 0 ? qsTr("No apps playing audio") : Audio.streams.length === 1 ? qsTr("1 app playing audio") : qsTr("%1 apps playing audio").arg(Audio.streams.length)
-            subLabel.animate: true
-            trailingIcon: "chevron_right"
-
             onClicked: root.nState.openSubPage(1)
         }
     }
