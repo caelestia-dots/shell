@@ -43,6 +43,7 @@ ListView {
         required property int index
         property bool held
         property point pressPos
+        property real lastMoveY
 
         anchors.left: root?.contentItem.left
         anchors.right: root?.contentItem.right
@@ -96,7 +97,9 @@ ListView {
                 returnAnim.stop();
                 stateLayer.press(e.x, e.y);
                 item.pressPos = Qt.point(e.x, e.y);
+                item.lastMoveY = item.y;
                 item.held = true;
+
                 itemContent.x = Qt.binding(() => {
                     if (!root)
                         return 0;
@@ -110,7 +113,8 @@ ListView {
                         return 0;
 
                     const maxOvershoot = Tokens.padding.extraLarge;
-                    const y = mouse.mouseY - item.pressPos.y;
+                    const yDiff = item.y - item.lastMoveY; // Extra offset if the y of the item changed between mouseY updates
+                    const y = mouse.mouseY - item.pressPos.y - yDiff;
                     const absY = item.mapToItem(root.contentItem, 0, y).y;
                     const maxY = root.implicitHeight - item.implicitHeight;
                     if (absY < 0)
@@ -120,6 +124,20 @@ ListView {
                     return y;
                 });
             }
+
+            onPositionChanged: e => {
+                item.lastMoveY = item.y;
+                const absY = item.mapToItem(root.contentItem, 0, e.y).y;
+
+                const swap = root.itemAt(0, absY);
+                if (!swap || swap === item)
+                    return;
+
+                const idx = item.DelegateModel.itemsIndex;
+                const swapIdx = swap.DelegateModel.itemsIndex;
+                visualModel.items.move(idx, swapIdx);
+            }
+
             onReleased: e => {
                 // Break bindings
                 itemContent.x = itemContent.x;
