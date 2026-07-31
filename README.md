@@ -432,6 +432,7 @@ For example, to disable the bar on DP-1:
             "shown": 5,
             "activeIndicator": true,
             "occupiedBg": false,
+            "showUnoccupied": true,
             "showWindows": true,
             "showWindowsOnSpecialWorkspaces": true,
             "maxWindowIcons": 5,

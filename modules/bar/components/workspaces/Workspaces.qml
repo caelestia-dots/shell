@@ -75,6 +75,7 @@ StyledClippingRect {
                     activeWsId: root.activeWsId
                     occupied: root.occupied
                     groupOffset: root.groupOffset
+                    visible: Config.bar.workspaces.showUnoccupied || isOccupied || Hypr.monitors.values.some(m => m.activeWorkspace?.id === ws)
                 }
             }
         }
