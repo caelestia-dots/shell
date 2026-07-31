@@ -36,6 +36,45 @@ ListView {
         delegate: ListRow {}
     }
 
+    add: Transition {
+        Anim {
+            properties: "opacity"
+            type: Anim.DefaultEffects
+            from: 0
+            to: 1
+        }
+    }
+
+    remove: Transition {
+        Anim {
+            properties: "opacity"
+            type: Anim.DefaultEffects
+            to: 0
+        }
+    }
+
+    move: Transition {
+        Anim {
+            properties: "opacity"
+            type: Anim.DefaultEffects
+            to: 1
+        }
+        Anim {
+            properties: "y"
+        }
+    }
+
+    displaced: Transition {
+        Anim {
+            properties: "opacity"
+            type: Anim.DefaultEffects
+            to: 1
+        }
+        Anim {
+            properties: "y"
+        }
+    }
+
     component ListRow: Item {
         id: item
 
