@@ -12,6 +12,7 @@ ConnectedRect {
     property alias icon: iconLabel.text
     property alias text: label.text
     property string trailingIcon
+    property alias disabled: stateLayer.disabled
 
     signal clicked(event: MouseEvent)
 
@@ -19,6 +20,8 @@ ConnectedRect {
     implicitHeight: row.implicitHeight + Tokens.padding.medium * 2
 
     StateLayer {
+        id: stateLayer
+
         onClicked: e => root.clicked(e)
     }
 
@@ -31,6 +34,11 @@ ConnectedRect {
         anchors.margins: Tokens.padding.largeIncreased
 
         spacing: Tokens.spacing.medium
+        opacity: root.disabled ? 0.5 : 1
+
+        Behavior on opacity {
+            Anim {}
+        }
 
         MaterialIcon {
             id: iconLabel
