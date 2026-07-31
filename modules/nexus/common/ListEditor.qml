@@ -14,6 +14,7 @@ ListView {
 
     property alias values: valuesModel.values
 
+    signal itemsCommitted(items: list<var>)
     signal itemDeleted(index: int)
 
     function dampOvershoot(overshoot: real, maxOvershoot: real): real {
@@ -184,7 +185,9 @@ ListView {
                 returnAnim.start();
                 item.held = false;
 
-            // TODO
+                const items = root.contentItem.children.filter(c => c instanceof ListRow);
+                items.sort((a, b) => a.DelegateModel.itemsIndex - b.DelegateModel.itemsIndex);
+                root.itemsCommitted(items.map(i => i.modelData));
             }
         }
 
