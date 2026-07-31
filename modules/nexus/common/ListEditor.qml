@@ -13,12 +13,11 @@ ListView {
     id: root
 
     property alias values: valuesModel.values
-    property real maxOvershoot: Tokens.spacing.extraLarge
 
     signal itemDeleted(index: int)
 
-    function dampOvershoot(overshoot: real): real {
-        return overshoot / (1 + overshoot / root.maxOvershoot);
+    function dampOvershoot(overshoot: real, maxOvershoot: real): real {
+        return overshoot / (1 + overshoot / maxOvershoot);
     }
 
     Layout.fillWidth: true
@@ -45,8 +44,8 @@ ListView {
         property bool held
         property point pressPos
 
-        anchors.left: root.contentItem.left
-        anchors.right: root.contentItem.right
+        anchors.left: root?.contentItem.left
+        anchors.right: root?.contentItem.right
         implicitHeight: row.implicitHeight + row.anchors.margins * 2
         z: Math.abs(itemContent.y) >= root.spacing ? 1 : 0
 
@@ -94,19 +93,50 @@ ListView {
             preventStealing: true
 
             onPressed: e => {
+                returnAnim.stop();
                 stateLayer.press(e.x, e.y);
                 item.pressPos = Qt.point(e.x, e.y);
-                yAnim.enabled = false;
                 item.held = true;
+                itemContent.x = Qt.binding(() => {
+                    if (!root)
+                        return 0;
+
+                    const maxOvershoot = Tokens.padding.extraExtraLarge;
+                    const x = mouse.mouseX - item.pressPos.x;
+                    return root.dampOvershoot(Math.abs(x), maxOvershoot) * Math.sign(x);
+                });
+                itemContent.y = Qt.binding(() => {
+                    if (!root)
+                        return 0;
+
+                    const maxOvershoot = Tokens.padding.extraLarge;
+                    const y = mouse.mouseY - item.pressPos.y;
+                    const absY = item.mapToItem(root.contentItem, 0, y).y;
+                    const maxY = root.implicitHeight - item.implicitHeight;
+                    if (absY < 0)
+                        return y - absY - root.dampOvershoot(-absY, maxOvershoot);
+                    if (absY > maxY)
+                        return y - absY + maxY + root.dampOvershoot(absY - maxY, maxOvershoot);
+                    return y;
+                });
             }
-            onPositionChanged: yAnim.enabled = false
             onReleased: e => {
-                yAnim.enabled = true;
+                // Break bindings
+                itemContent.x = itemContent.x;
+                itemContent.y = itemContent.y;
+                returnAnim.start();
                 item.held = false;
-                itemContent.y = 0; // Manually reset to 0 in case move anim is running
 
             // TODO
             }
+        }
+
+        Anim {
+            id: returnAnim
+
+            target: itemContent
+            properties: "x,y"
+            to: 0
         }
 
         Item {
@@ -114,26 +144,6 @@ ListView {
 
             implicitWidth: item.width
             implicitHeight: item.implicitHeight
-
-            Binding on y {
-                value: {
-                    const y = mouse.mouseY - item.pressPos.y;
-                    const absY = item.mapToItem(root.contentItem, 0, y).y;
-                    const maxY = root.implicitHeight - item.implicitHeight;
-                    if (absY < 0)
-                        return y - absY - root.dampOvershoot(-absY);
-                    if (absY > maxY)
-                        return y - absY + maxY + root.dampOvershoot(absY - maxY);
-                    return y;
-                }
-                when: item.held
-            }
-
-            Behavior on y {
-                id: yAnim
-
-                Anim {}
-            }
 
             Elevation {
                 id: elevation
