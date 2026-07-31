@@ -73,58 +73,18 @@ PageBase {
         }
 
         // Per-app volumes
-        ConnectedRect {
-            Layout.fillWidth: true
+        RowButton {
             Layout.topMargin: Tokens.spacing.large - parent.spacing
-            implicitHeight: appLayout.implicitHeight + appLayout.anchors.margins * 2
             first: true
             last: true
 
-            StateLayer {
-                onClicked: root.nState.openSubPage(1)
-            }
+            icon: "tune"
+            text: qsTr("App volumes")
+            subtext: Audio.streams.length === 0 ? qsTr("No apps playing audio") : Audio.streams.length === 1 ? qsTr("1 app playing audio") : qsTr("%1 apps playing audio").arg(Audio.streams.length)
+            subLabel.animate: true
+            trailingIcon: "chevron_right"
 
-            RowLayout {
-                id: appLayout
-
-                anchors.fill: parent
-                anchors.margins: Tokens.padding.medium
-                anchors.leftMargin: Tokens.padding.largeIncreased
-                anchors.rightMargin: Tokens.padding.largeIncreased
-                spacing: Tokens.spacing.medium
-
-                MaterialIcon {
-                    text: "tune"
-                    fontStyle: Tokens.font.icon.medium
-                }
-
-                ColumnLayout {
-                    Layout.fillWidth: true
-                    spacing: 0
-
-                    StyledText {
-                        Layout.fillWidth: true
-                        text: qsTr("App volumes")
-                        font: Tokens.font.body.small
-                        elide: Text.ElideRight
-                    }
-
-                    StyledText {
-                        Layout.fillWidth: true
-                        text: Audio.streams.length === 0 ? qsTr("No apps playing audio") : Audio.streams.length === 1 ? qsTr("1 app playing audio") : qsTr("%1 apps playing audio").arg(Audio.streams.length)
-                        color: Colours.palette.m3outline
-                        font: Tokens.font.label.small
-                        elide: Text.ElideRight
-                        animate: true
-                    }
-                }
-
-                MaterialIcon {
-                    text: "chevron_right"
-                    color: Colours.palette.m3onSurfaceVariant
-                    fontStyle: Tokens.font.icon.medium
-                }
-            }
+            onClicked: root.nState.openSubPage(1)
         }
     }
 }
