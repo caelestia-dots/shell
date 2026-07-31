@@ -15,7 +15,12 @@ ListView {
     property alias values: valuesModel.values
 
     signal itemsCommitted(items: list<var>)
-    signal itemDeleted(index: int)
+
+    function commitItems(): void {
+        const items = contentItem.children.filter(c => c instanceof ListRow);
+        items.sort((a, b) => a.DelegateModel.itemsIndex - b.DelegateModel.itemsIndex);
+        itemsCommitted(items.map(i => i.modelData));
+    }
 
     function dampOvershoot(overshoot: real, maxOvershoot: real): real {
         return overshoot / (1 + overshoot / maxOvershoot);
@@ -185,9 +190,7 @@ ListView {
                 returnAnim.start();
                 item.held = false;
 
-                const items = root.contentItem.children.filter(c => c instanceof ListRow);
-                items.sort((a, b) => a.DelegateModel.itemsIndex - b.DelegateModel.itemsIndex);
-                root.itemsCommitted(items.map(i => i.modelData));
+                root.commitItems();
             }
         }
 
@@ -277,7 +280,10 @@ ListView {
                     font: Tokens.font.icon.medium
                     label.fill: 0
 
-                    onClicked: root.itemDeleted(item.index)
+                    onClicked: {
+                        visualModel.items.remove(item.DelegateModel.itemsIndex);
+                        root.commitItems();
+                    }
                 }
             }
         }
