@@ -87,7 +87,7 @@ ListView {
         anchors.left: root?.contentItem.left
         anchors.right: root?.contentItem.right
         implicitHeight: row.implicitHeight + row.anchors.margins * 2
-        z: Math.abs(itemContent.y) >= root.spacing ? 1 : 0
+        z: held || returnAnim.running ? 1 : 0
 
         state: held ? "held" : ""
 
