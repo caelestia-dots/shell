@@ -16,13 +16,14 @@ ListView {
     property bool first
 
     signal itemsCommitted(items: list<var>)
-
-    function iconFor(item: var): string {
-        return item.icon;
-    }
+    signal editItem(item: var)
 
     function labelFor(item: var): string {
         return item.label;
+    }
+
+    function canEdit(item: var): bool {
+        return false;
     }
 
     function commitItems(): void {
@@ -121,9 +122,9 @@ ListView {
                 elevation.opacity: 1
                 itemBg.color: Colours.palette.m3tertiaryContainer
                 stateLayer.color: Colours.palette.m3onTertiaryContainer
-                leadingIcon.color: Colours.palette.m3onTertiaryContainer
+                dragIcon.color: Colours.palette.m3onTertiaryContainer
                 label.color: Colours.palette.m3onTertiaryContainer
-                dragHandle.color: Colours.palette.m3onTertiaryContainer
+                editButton.inactiveOnColour: Colours.palette.m3onTertiaryContainer
                 deleteButton.inactiveOnColour: Colours.palette.m3onError
             }
         }
@@ -276,9 +277,9 @@ ListView {
                 spacing: Tokens.spacing.medium
 
                 MaterialIcon {
-                    id: leadingIcon
+                    id: dragIcon
 
-                    text: root.iconFor(item.modelData)
+                    text: "drag_indicator"
                     color: Colours.palette.m3onSurfaceVariant
                     fontStyle: Tokens.font.icon.medium
                 }
@@ -291,12 +292,18 @@ ListView {
                     elide: Text.ElideRight
                 }
 
-                MaterialIcon {
-                    id: dragHandle
+                IconButton {
+                    id: editButton
 
-                    text: "drag_handle"
-                    color: Colours.palette.m3onSurfaceVariant
-                    fontStyle: Tokens.font.icon.medium
+                    visible: root.canEdit(item.modelData)
+                    type: IconButton.Text
+                    isRound: true
+                    icon: "edit"
+                    inactiveOnColour: Colours.palette.m3onSurfaceVariant
+                    font: Tokens.font.icon.medium
+                    label.fill: 0
+
+                    onClicked: root.editItem(item.modelData)
                 }
 
                 IconButton {
