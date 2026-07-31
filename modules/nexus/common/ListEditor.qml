@@ -15,6 +15,8 @@ ListView {
     property alias values: valuesModel.values
     property real maxOvershoot: Tokens.spacing.extraLarge
 
+    signal itemDeleted(index: int)
+
     function dampOvershoot(overshoot: real): real {
         return overshoot / (1 + overshoot / root.maxOvershoot);
     }
@@ -39,6 +41,7 @@ ListView {
         id: item
 
         required property var modelData
+        required property int index
         property bool held
         property point pressPos
 
@@ -203,6 +206,8 @@ ListView {
                     inactiveOnColour: Colours.palette.m3error
                     font: Tokens.font.icon.medium
                     label.fill: 0
+
+                    onClicked: root.itemDeleted(item.index)
                 }
             }
         }
