@@ -10,9 +10,18 @@ ConfigNode::ConfigNode(QObject* parent)
     : QObject(parent) {}
 
 void ConfigNode::loadFromJsonQuietly(const QJsonValue& json) {
-    m_suppressNotify = true;
+    setNotifySuppressed(true);
     loadFromJson(json);
-    m_suppressNotify = false;
+    setNotifySuppressed(false);
+}
+
+void ConfigNode::setNotifySuppressed(bool suppressed) {
+    // Whole subtree, a child loaded during a quiet load must stay quiet too
+    m_suppressNotify = suppressed;
+
+    const auto children = childNodes();
+    for (auto* const child : children)
+        child->setNotifySuppressed(suppressed);
 }
 
 QList<ConfigNode*> ConfigNode::childNodes() const {

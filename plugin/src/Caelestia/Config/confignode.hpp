@@ -57,6 +57,7 @@ protected:
     ConfigNode* m_global = nullptr;
 
 private:
+    void setNotifySuppressed(bool suppressed);
     void emitBatchedChanges();
 
     QMap<QString, QVariant> m_pendingChanges;

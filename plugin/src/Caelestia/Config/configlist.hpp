@@ -56,6 +56,8 @@ private:
     void appendItem(const QJsonValue& json);
     void destroyItems();
     void destroyItem(ConfigObject* item);
+    void connectItem(ConfigNode* node);
+    void disconnectItem(ConfigNode* node);
     void onItemChanged();
     void notifyChanged();
 

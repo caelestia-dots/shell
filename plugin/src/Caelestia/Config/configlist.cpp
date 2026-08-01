@@ -168,9 +168,26 @@ void ConfigList::appendItem(const QJsonValue& json) {
     // Quiet so seeded defaults and synced values don't look like user edits
     item->loadFromJsonQuietly(json);
 
-    connect(item, &ConfigNode::propertiesChanged, this, &ConfigList::onItemChanged);
+    connectItem(item);
 
     m_items.append(item);
+}
+
+void ConfigList::connectItem(ConfigNode* node) {
+    // Whole subtree, an edit to a sub-object of an element must reach the save path
+    connect(node, &ConfigNode::propertiesChanged, this, &ConfigList::onItemChanged);
+
+    const auto children = node->childNodes();
+    for (auto* const child : children)
+        connectItem(child);
+}
+
+void ConfigList::disconnectItem(ConfigNode* node) {
+    node->disconnect(this);
+
+    const auto children = node->childNodes();
+    for (auto* const child : children)
+        disconnectItem(child);
 }
 
 void ConfigList::destroyItems() {
@@ -182,7 +199,7 @@ void ConfigList::destroyItems() {
 
 void ConfigList::destroyItem(ConfigObject* item) {
     // Disconnect first, a queued notification would otherwise mark the list loaded
-    item->disconnect(this);
+    disconnectItem(item);
     item->deleteLater();
 }
 
