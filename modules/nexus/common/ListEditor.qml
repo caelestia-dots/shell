@@ -317,8 +317,10 @@ ListView {
                     label.fill: 0
 
                     onClicked: {
-                        visualModel.items.remove(item.DelegateModel.itemsIndex);
-                        root.commitItems();
+                        // DelegateModelGroup.remove() doesn't seem to work, so do it manually instead
+                        const idx = item.DelegateModel.itemsIndex;
+                        const newItems = valuesModel.values.slice(0, idx).concat(valuesModel.values.slice(idx + 1));
+                        root.itemsCommitted(newItems);
                     }
                 }
             }
