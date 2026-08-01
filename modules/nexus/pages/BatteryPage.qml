@@ -91,54 +91,23 @@ PageBase {
             nState: root.nState
         }
 
-        ConnectedRect {
-            Layout.fillWidth: true
-            implicitHeight: addLowWarnLayout.implicitHeight + addLowWarnLayout.anchors.margins * 2
+        RowButton {
             last: true
-
-            StateLayer {
-                // This is for the add new level.
-                disabled: !lowWarnToggle.checked
-                onClicked: {
-                    root.nState.lowWarningSelected = true;
-                    root.nState.selectedBatteryLevel = {
-                        level: 0,
-                        title: "",
-                        message: "",
-                        icon: "",
-                        enabled: true,
-                        critical: false,
-                        autopick: true
-                    };
-                    root.nState.openSubPage(2);
-                }
-            }
-
-            RowLayout {
-                id: addLowWarnLayout
-
-                anchors.fill: parent
-                anchors.margins: Tokens.padding.medium
-                anchors.leftMargin: Tokens.padding.largeIncreased
-                anchors.rightMargin: Tokens.padding.largeIncreased
-                spacing: Tokens.spacing.medium
-                opacity: lowWarnToggle.checked ? 1 : 0.5
-
-                Behavior on opacity {
-                    Anim {}
-                }
-
-                MaterialIcon {
-                    text: "add"
-                    fontStyle: Tokens.font.icon.medium
-                }
-
-                StyledText {
-                    Layout.fillWidth: true
-                    text: qsTr("Add new warning")
-                    font: Tokens.font.body.small
-                    elide: Text.ElideRight
-                }
+            icon: "add"
+            text: qsTr("Add new warning")
+            disabled: !lowWarnToggle.checked
+            onClicked: {
+                root.nState.lowWarningSelected = true;
+                root.nState.selectedBatteryLevel = {
+                    level: 0,
+                    title: "",
+                    message: "",
+                    icon: "",
+                    enabled: true,
+                    critical: false,
+                    autopick: true
+                };
+                root.nState.openSubPage(2);
             }
         }
 
@@ -160,54 +129,23 @@ PageBase {
             nState: root.nState
         }
 
-        ConnectedRect {
-            Layout.fillWidth: true
-            implicitHeight: addHighWarnLayout.implicitHeight + addHighWarnLayout.anchors.margins * 2
+        RowButton {
             last: true
-
-            StateLayer {
-                // This is for the add new level.
-                disabled: !highWarnToggle.checked
-                onClicked: {
-                    root.nState.lowWarningSelected = false;
-                    root.nState.selectedBatteryLevel = {
-                        level: 0,
-                        title: "",
-                        message: "",
-                        icon: "",
-                        enabled: true,
-                        critical: false,
-                        autopick: true
-                    };
-                    root.nState.openSubPage(2);
-                }
-            }
-
-            RowLayout {
-                id: addHighWarnLayout
-
-                anchors.fill: parent
-                anchors.margins: Tokens.padding.medium
-                anchors.leftMargin: Tokens.padding.largeIncreased
-                anchors.rightMargin: Tokens.padding.largeIncreased
-                spacing: Tokens.spacing.medium
-                opacity: highWarnToggle.checked ? 1 : 0.5
-
-                Behavior on opacity {
-                    Anim {}
-                }
-
-                MaterialIcon {
-                    text: "add"
-                    fontStyle: Tokens.font.icon.medium
-                }
-
-                StyledText {
-                    Layout.fillWidth: true
-                    text: qsTr("Add new warning")
-                    font: Tokens.font.body.small
-                    elide: Text.ElideRight
-                }
+            icon: "add"
+            text: qsTr("Add new warning")
+            disabled: !highWarnToggle.checked
+            onClicked: {
+                root.nState.lowWarningSelected = false;
+                root.nState.selectedBatteryLevel = {
+                    level: 0,
+                    title: "",
+                    message: "",
+                    icon: "",
+                    enabled: true,
+                    critical: false,
+                    autopick: true
+                };
+                root.nState.openSubPage(2);
             }
         }
 
