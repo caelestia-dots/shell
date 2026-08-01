@@ -17,10 +17,25 @@ StyledRect {
     required property ScreenState screenState
     required property BarPopouts.Wrapper popouts
 
+    readonly property var configuredQuickToggles: {
+        const toggles = Config.utilities.quickToggles;
+        if (toggles.some(item => item.id === "nightLight"))
+            return toggles;
+
+        const nightLight = {
+            id: "nightLight",
+            enabled: true
+        };
+        const vpnIndex = toggles.findIndex(item => item.id === "vpn");
+        if (vpnIndex === -1)
+            return [...toggles, nightLight];
+
+        return [...toggles.slice(0, vpnIndex), nightLight, ...toggles.slice(vpnIndex)];
+    }
     readonly property var quickToggles: {
         const seenIds = new Set();
 
-        return Config.utilities.quickToggles.filter(item => {
+        return configuredQuickToggles.filter(item => {
             if (!(item.enabled ?? true))
                 return false;
 
@@ -136,6 +151,14 @@ StyledRect {
                         icon: "notifications_off"
                         checked: Notifs.dnd
                         onClicked: Notifs.dnd = !Notifs.dnd
+                    }
+                }
+                DelegateChoice {
+                    roleValue: "nightLight"
+                    delegate: Toggle {
+                        icon: "nightlight"
+                        checked: NightLight.enabled
+                        onClicked: NightLight.toggle()
                     }
                 }
                 DelegateChoice {
