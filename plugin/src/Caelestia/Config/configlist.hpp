@@ -11,6 +11,7 @@ namespace caelestia::config {
 // in CONFIG_LIST_TYPE since QML only sees what moc sees, and moc can't see templates.
 class ConfigList : public ConfigNode {
     Q_OBJECT
+    QML_ANONYMOUS
 
     Q_PROPERTY(int count READ count NOTIFY countChanged)
 
