@@ -33,7 +33,7 @@ void ConfigList::remove(int index) {
         return;
     }
 
-    delete m_items.takeAt(index);
+    destroyItem(m_items.takeAt(index));
 
     m_loaded = true;
     emit countChanged();
@@ -174,8 +174,16 @@ void ConfigList::appendItem(const QJsonValue& json) {
 }
 
 void ConfigList::destroyItems() {
-    qDeleteAll(m_items);
+    for (auto* const item : std::as_const(m_items))
+        destroyItem(item);
+
     m_items.clear();
+}
+
+void ConfigList::destroyItem(ConfigObject* item) {
+    // Disconnect first, a queued notification would otherwise mark the list loaded
+    item->disconnect(this);
+    item->deleteLater();
 }
 
 void ConfigList::onItemChanged() {

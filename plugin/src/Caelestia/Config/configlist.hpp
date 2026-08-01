@@ -54,6 +54,7 @@ private:
     void populate(const QJsonArray& arr);
     void appendItem(const QJsonValue& json);
     void destroyItems();
+    void destroyItem(ConfigObject* item);
     void onItemChanged();
     void notifyChanged();
 
