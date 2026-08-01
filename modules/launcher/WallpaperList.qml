@@ -10,17 +10,7 @@ import qs.services
 PathView {
     id: root
 
-    CustomMouseArea {
-        anchors.fill: parent
-        acceptedButtons: Qt.NoButton
 
-        function onWheel(event: WheelEvent): void {
-            if (event.angleDelta.y > 0 || event.angleDelta.x > 0)
-                root.decrementCurrentIndex();
-            else if (event.angleDelta.y < 0 || event.angleDelta.x < 0)
-                root.incrementCurrentIndex();
-        }
-    }
 
     required property SearchBar search
     required property var screenState
@@ -105,5 +95,17 @@ PathView {
             x: root.width
             relativeY: 0
         }
+    }
+
+    CustomMouseArea {
+        function onWheel(event: WheelEvent): void {
+            if (event.angleDelta.y > 0 || event.angleDelta.x > 0)
+                root.decrementCurrentIndex();
+            else if (event.angleDelta.y < 0 || event.angleDelta.x < 0)
+                root.incrementCurrentIndex();
+        }
+
+        anchors.fill: parent
+        acceptedButtons: Qt.NoButton
     }
 }
