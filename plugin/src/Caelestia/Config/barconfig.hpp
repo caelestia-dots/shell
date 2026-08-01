@@ -1,7 +1,10 @@
 #pragma once
 
+#include "configlist.hpp"
 #include "configobject.hpp"
 
+#include <qjsonarray.h>
+#include <qjsonobject.h>
 #include <qstring.h>
 #include <qstringlist.h>
 #include <qvariant.h>
@@ -9,6 +12,30 @@
 namespace caelestia::config {
 
 using Qt::StringLiterals::operator""_s;
+
+class BarEntry : public ConfigObject {
+    Q_OBJECT
+    QML_ANONYMOUS
+
+    CONFIG_PROPERTY(QString, id)
+    CONFIG_PROPERTY(bool, enabled, true)
+
+public:
+    explicit BarEntry(QObject* parent = nullptr)
+        : ConfigObject(parent) {}
+};
+
+CONFIG_LIST_TYPE(BarEntry, BarEntryList)
+
+inline QJsonArray defaultBarEntries() {
+    QJsonArray entries;
+
+    for (const auto& id : { u"logo"_s, u"workspaces"_s, u"spacer"_s, u"activeWindow"_s, u"spacer"_s, u"tray"_s,
+             u"clock"_s, u"statusIcons"_s, u"power"_s })
+        entries.append(QJsonObject{ { u"id"_s, id } });
+
+    return entries;
+}
 
 class BarScrollActions : public ConfigObject {
     Q_OBJECT
@@ -137,18 +164,7 @@ class BarConfig : public ConfigObject {
     CONFIG_SUBOBJECT(BarTray, tray)
     CONFIG_SUBOBJECT(BarStatus, status)
     CONFIG_SUBOBJECT(BarClock, clock)
-    CONFIG_PROPERTY(QVariantList, entries,
-        {
-            vmap({ { u"id"_s, u"logo"_s }, { u"enabled"_s, true } }),
-            vmap({ { u"id"_s, u"workspaces"_s }, { u"enabled"_s, true } }),
-            vmap({ { u"id"_s, u"spacer"_s }, { u"enabled"_s, true } }),
-            vmap({ { u"id"_s, u"activeWindow"_s }, { u"enabled"_s, true } }),
-            vmap({ { u"id"_s, u"spacer"_s }, { u"enabled"_s, true } }),
-            vmap({ { u"id"_s, u"tray"_s }, { u"enabled"_s, true } }),
-            vmap({ { u"id"_s, u"clock"_s }, { u"enabled"_s, true } }),
-            vmap({ { u"id"_s, u"statusIcons"_s }, { u"enabled"_s, true } }),
-            vmap({ { u"id"_s, u"power"_s }, { u"enabled"_s, true } }),
-        })
+    CONFIG_LIST(BarEntryList, entries)
     CONFIG_PROPERTY(QStringList, excludedScreens)
 
 public:
@@ -160,7 +176,8 @@ public:
         , m_activeWindow(new BarActiveWindow(this))
         , m_tray(new BarTray(this))
         , m_status(new BarStatus(this))
-        , m_clock(new BarClock(this)) {}
+        , m_clock(new BarClock(this))
+        , m_entries(new BarEntryList(this, defaultBarEntries())) {}
 };
 
 } // namespace caelestia::config
