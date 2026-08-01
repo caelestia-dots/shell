@@ -148,6 +148,15 @@ void ConfigList::onGlobalPropertiesChanged(const QMap<QString, QVariant>&) {
     syncValuesFromGlobal();
 }
 
+QString ConfigList::childPath(const ConfigNode* child) const {
+    // Position is how an element is addressed, correct at the moment it is asked for
+    for (int i = 0; i < m_items.size(); ++i)
+        if (m_items.at(i) == child)
+            return u"[%1]"_s.arg(i);
+
+    return {};
+}
+
 void ConfigList::populate(const QJsonArray& arr) {
     destroyItems();
 

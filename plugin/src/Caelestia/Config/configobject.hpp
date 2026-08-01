@@ -116,6 +116,7 @@ public:
 protected:
     void syncValuesFromGlobal() override;
     void onGlobalPropertiesChanged(const QMap<QString, QVariant>& changed) override;
+    [[nodiscard]] QString childPath(const ConfigNode* child) const override;
 
     void markPropertyLoaded(const QString& name);
     void markGlobalOnly(const QString& name);

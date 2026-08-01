@@ -44,36 +44,20 @@ bool ConfigNode::isOverlay() const {
 }
 
 QString ConfigNode::propertyPath(const QString& name) const {
-    QStringList parts;
+    auto path = name;
 
-    if (!name.isEmpty())
-        parts.append(name);
-
-    const QObject* obj = this;
-    while (auto* parentObj = obj->parent()) {
-        const auto* parentNode = qobject_cast<const ConfigNode*>(parentObj);
-        if (!parentNode)
+    // Each parent names its own children, so a list can report an index
+    const auto* node = this;
+    while (const auto* parent = qobject_cast<const ConfigNode*>(node->parent())) {
+        const auto childName = parent->childPath(node);
+        if (childName.isEmpty())
             break;
 
-        // Find which property name this child is on the parent
-        const auto* meta = parentNode->metaObject();
-        bool found = false;
-        for (int i = basePropertyOffset(); i < meta->propertyCount(); ++i) {
-            const auto prop = meta->property(i);
-            if (prop.read(parentObj).value<QObject*>() == obj) {
-                parts.prepend(QString::fromUtf8(prop.name()));
-                found = true;
-                break;
-            }
-        }
-
-        if (!found)
-            break;
-
-        obj = parentObj;
+        path = path.isEmpty() ? childName : joinPath(childName, path);
+        node = parent;
     }
 
-    return parts.join(QLatin1Char('.'));
+    return path;
 }
 
 int ConfigNode::basePropertyOffset() {

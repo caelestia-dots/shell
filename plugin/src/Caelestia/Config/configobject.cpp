@@ -289,6 +289,22 @@ void ConfigObject::onGlobalPropertiesChanged(const QMap<QString, QVariant>& chan
     }
 }
 
+QString ConfigObject::childPath(const ConfigNode* child) const {
+    const auto* meta = metaObject();
+    for (int i = basePropertyOffset(); i < meta->propertyCount(); ++i) {
+        const auto prop = meta->property(i);
+
+        // Never a node, and reading one on an overlay warns, which would recurse back here
+        if (isGlobalOnly(QString::fromUtf8(prop.name())))
+            continue;
+
+        if (prop.read(this).value<ConfigNode*>() == child)
+            return QString::fromUtf8(prop.name());
+    }
+
+    return {};
+}
+
 void ConfigObject::markPropertyLoaded(const QString& name) {
     m_loadedKeys.insert(name);
 }

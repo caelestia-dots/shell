@@ -50,6 +50,9 @@ protected:
     virtual void syncValuesFromGlobal() = 0;
     virtual void onGlobalPropertiesChanged(const QMap<QString, QVariant>& changed) = 0;
 
+    // Name this node gives the child, empty if it does not hold it
+    [[nodiscard]] virtual QString childPath(const ConfigNode* child) const = 0;
+
     void notifyPropertyChanged(const QString& name, const QVariant& value);
 
     [[nodiscard]] static QString joinPath(const QString& parent, const QString& child);

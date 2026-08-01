@@ -50,6 +50,7 @@ protected:
 
     void syncValuesFromGlobal() override;
     void onGlobalPropertiesChanged(const QMap<QString, QVariant>& changed) override;
+    [[nodiscard]] QString childPath(const ConfigNode* child) const override;
 
 private:
     void populate(const QJsonArray& arr);
