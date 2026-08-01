@@ -3,8 +3,6 @@
 #include "configlist.hpp"
 #include "configobject.hpp"
 
-#include <qjsonarray.h>
-#include <qjsonobject.h>
 #include <qstring.h>
 #include <qstringlist.h>
 #include <qvariant.h>
@@ -26,16 +24,6 @@ public:
 };
 
 CONFIG_LIST_TYPE(BarEntry, BarEntryList)
-
-inline QJsonArray defaultBarEntries() {
-    QJsonArray entries;
-
-    for (const auto& id : { u"logo"_s, u"workspaces"_s, u"spacer"_s, u"activeWindow"_s, u"spacer"_s, u"tray"_s,
-             u"clock"_s, u"statusIcons"_s, u"power"_s })
-        entries.append(QJsonObject{ { u"id"_s, id } });
-
-    return entries;
-}
 
 class BarScrollActions : public ConfigObject {
     Q_OBJECT
@@ -164,7 +152,18 @@ class BarConfig : public ConfigObject {
     CONFIG_SUBOBJECT(BarTray, tray)
     CONFIG_SUBOBJECT(BarStatus, status)
     CONFIG_SUBOBJECT(BarClock, clock)
-    CONFIG_LIST(BarEntryList, entries)
+    CONFIG_LIST(BarEntryList, entries,
+        {
+            vmap({ { u"id"_s, u"logo"_s } }),
+            vmap({ { u"id"_s, u"workspaces"_s } }),
+            vmap({ { u"id"_s, u"spacer"_s } }),
+            vmap({ { u"id"_s, u"activeWindow"_s } }),
+            vmap({ { u"id"_s, u"spacer"_s } }),
+            vmap({ { u"id"_s, u"tray"_s } }),
+            vmap({ { u"id"_s, u"clock"_s } }),
+            vmap({ { u"id"_s, u"statusIcons"_s } }),
+            vmap({ { u"id"_s, u"power"_s } }),
+        })
     CONFIG_PROPERTY(QStringList, excludedScreens)
 
 public:
@@ -176,8 +175,7 @@ public:
         , m_activeWindow(new BarActiveWindow(this))
         , m_tray(new BarTray(this))
         , m_status(new BarStatus(this))
-        , m_clock(new BarClock(this))
-        , m_entries(new BarEntryList(this, defaultBarEntries())) {}
+        , m_clock(new BarClock(this)) {}
 };
 
 } // namespace caelestia::config

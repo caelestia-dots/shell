@@ -15,7 +15,7 @@ class ConfigList : public ConfigNode {
     Q_PROPERTY(int count READ count NOTIFY countChanged)
 
 public:
-    explicit ConfigList(QObject* parent = nullptr, const QJsonArray& defaults = {});
+    explicit ConfigList(QObject* parent = nullptr, const QVariantList& defaults = {});
 
     [[nodiscard]] int count() const;
     [[nodiscard]] ConfigObject* itemAt(int index) const;
@@ -74,7 +74,7 @@ private:
         Q_PROPERTY(QList<caelestia::config::Element*> values READ values NOTIFY valuesChanged)                         \
                                                                                                                        \
     public:                                                                                                            \
-        explicit Name(QObject* parent = nullptr, const QJsonArray& defaults = {})                                      \
+        explicit Name(QObject* parent = nullptr, const QVariantList& defaults = {})                                    \
             : caelestia::config::ConfigList(parent, defaults) {                                                        \
             resetToDefaults();                                                                                         \
         }                                                                                                              \
@@ -100,5 +100,15 @@ private:
         }                                                                                                              \
     };
 
-// Declares a CONSTANT config list property. Initialize the member in the constructor.
-#define CONFIG_LIST(Type, name) CONFIG_SUBOBJECT(Type, name)
+// Declares a CONSTANT config list property, constructed inline with its defaults.
+// Passing `this` is safe here, bases are built before members and ConfigList only stores the parent.
+#define CONFIG_LIST(Type, name, ...)                                                                                   \
+    Q_PROPERTY(caelestia::config::Type* name READ name CONSTANT)                                                       \
+                                                                                                                       \
+public:                                                                                                                \
+    [[nodiscard]] Type* name() const {                                                                                 \
+        return m_##name;                                                                                               \
+    }                                                                                                                  \
+                                                                                                                       \
+private:                                                                                                               \
+    Type* m_##name = new Type(this __VA_OPT__(, __VA_ARGS__));

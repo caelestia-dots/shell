@@ -8,9 +8,9 @@ namespace caelestia::config {
 
 using Qt::StringLiterals::operator""_s;
 
-ConfigList::ConfigList(QObject* parent, const QJsonArray& defaults)
+ConfigList::ConfigList(QObject* parent, const QVariantList& defaults)
     : ConfigNode(parent)
-    , m_defaults(defaults) {}
+    , m_defaults(QJsonArray::fromVariantList(defaults)) {}
 
 int ConfigList::count() const {
     return static_cast<int>(m_items.size());
