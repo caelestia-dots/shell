@@ -98,6 +98,8 @@ public:
     [[nodiscard]] bool isPropertyLoaded(const QString& name) const;
     // Returns true only on overlays — global singleton always returns false.
     [[nodiscard]] bool isGlobalOnly(const QString& name) const;
+    // Names marked global-only, regardless of overlay state
+    [[nodiscard]] QStringList globalOnlyKeys() const;
 
     Q_INVOKABLE void resetOption(const QString& name);
 

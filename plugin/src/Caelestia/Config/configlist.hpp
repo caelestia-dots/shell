@@ -57,6 +57,7 @@ private:
     void appendItem(const QJsonValue& json);
     void destroyItems();
     void destroyItem(ConfigObject* item);
+    void rejectGlobalOnlyElement(const ConfigObject* item) const;
     void connectItem(ConfigNode* node);
     void disconnectItem(ConfigNode* node);
     void onItemChanged();
@@ -117,3 +118,23 @@ public:                                                                         
                                                                                                                        \
 private:                                                                                                               \
     Type* m_##name = new Type(this __VA_OPT__(, __VA_ARGS__));
+
+// Like CONFIG_LIST but warns on read when accessed on a per-monitor overlay.
+// Global-only belongs on the list, never on a property of its element type.
+#define CONFIG_GLOBAL_LIST(Type, name, ...)                                                                            \
+    Q_PROPERTY(caelestia::config::Type* name READ name CONSTANT)                                                       \
+                                                                                                                       \
+public:                                                                                                                \
+    [[nodiscard]] Type* name() const {                                                                                 \
+        if (isOverlay())                                                                                               \
+            qCWarning(caelestia::config::lcConfig, "Reading global-only option '%s' on per-monitor overlay",           \
+                qUtf8Printable(propertyPath(QStringLiteral(#name))));                                                  \
+        return m_##name;                                                                                               \
+    }                                                                                                                  \
+                                                                                                                       \
+private:                                                                                                               \
+    Type* m_##name = new Type(this __VA_OPT__(, __VA_ARGS__));                                                         \
+    const bool m_##name##_go = [this] {                                                                                \
+        markGlobalOnly(QStringLiteral(#name));                                                                         \
+        return true;                                                                                                   \
+    }();

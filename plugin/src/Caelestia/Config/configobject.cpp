@@ -254,6 +254,10 @@ bool ConfigObject::isGlobalOnly(const QString& name) const {
     return isOverlay() && m_globalOnlyKeys.contains(name);
 }
 
+QStringList ConfigObject::globalOnlyKeys() const {
+    return { m_globalOnlyKeys.begin(), m_globalOnlyKeys.end() };
+}
+
 void ConfigObject::resetOption(const QString& name) {
     m_loadedKeys.remove(name);
 

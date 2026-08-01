@@ -174,12 +174,27 @@ void ConfigList::appendItem(const QJsonValue& json) {
     auto* const item = createItem();
     QQmlEngine::setObjectOwnership(item, QQmlEngine::CppOwnership);
 
+    if (m_items.isEmpty())
+        rejectGlobalOnlyElement(item);
+
     // Quiet so seeded defaults and synced values don't look like user edits
     item->loadFromJsonQuietly(json);
 
     connectItem(item);
 
     m_items.append(item);
+}
+
+void ConfigList::rejectGlobalOnlyElement(const ConfigObject* item) const {
+    // Elements are never overlays, so isGlobalOnly() is always false for them and the
+    // option would be silently persisted per monitor
+    const auto keys = item->globalOnlyKeys();
+    if (keys.isEmpty())
+        return;
+
+    qCCritical(lcConfig,
+        "%s declares global-only options (%s) which do not work inside a list, use CONFIG_GLOBAL_LIST on %s instead",
+        item->metaObject()->className(), qUtf8Printable(keys.join(u", "_s)), metaObject()->className());
 }
 
 void ConfigList::connectItem(ConfigNode* node) {
