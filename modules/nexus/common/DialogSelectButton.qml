@@ -49,7 +49,7 @@ DialogRowButton {
                 anchors.margins: 1 // Gets cut off for some reason without this
                 implicitHeight: label.implicitHeight + Tokens.padding.medium * 2
 
-                radius: stateLayer.pressed ? Tokens.rounding.extraSmall : selected ? implicitHeight / 2 : Tokens.rounding.medium
+                radius: stateLayer.pressed ? Tokens.rounding.extraSmall : selected ? Tokens.rounding.largeIncreased : Tokens.rounding.medium
                 color: Qt.alpha(Colours.palette.m3tertiaryContainer, selected ? 1 : 0)
 
                 Behavior on radius {
