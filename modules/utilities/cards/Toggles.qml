@@ -20,8 +20,8 @@ StyledRect {
     readonly property var quickToggles: {
         const seenIds = new Set();
 
-        return Config.utilities.quickToggles.filter(item => {
-            if (!(item.enabled ?? true))
+        return Config.utilities.quickToggles.values.filter(item => {
+            if (!item.enabled)
                 return false;
 
             if (seenIds.has(item.id)) {
