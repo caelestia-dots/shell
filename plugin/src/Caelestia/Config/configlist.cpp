@@ -145,7 +145,8 @@ QJsonArray ConfigList::elementsToJson() const {
 }
 
 void ConfigList::resetToDefaults() {
-    populate(m_defaults);
+    // Quiet, seeding defaults is not a change and would dirty the config before the file is read
+    loadFromJsonQuietly(m_defaults);
     m_loaded = false;
 }
 
