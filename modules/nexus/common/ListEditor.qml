@@ -121,7 +121,6 @@ ListView {
                 placeholder.opacity: 0.1
                 elevation.opacity: 1
                 itemBg.color: Colours.palette.m3tertiaryContainer
-                stateLayer.color: Colours.palette.m3onTertiaryContainer
                 dragIcon.color: Colours.palette.m3onTertiaryContainer
                 label.color: Colours.palette.m3onTertiaryContainer
                 editButton.inactiveOnColour: Colours.palette.m3onTertiaryContainer
@@ -164,7 +163,6 @@ ListView {
 
             onPressed: e => {
                 returnAnim.stop();
-                stateLayer.press(e.x, e.y);
                 item.pressPos = Qt.point(e.x, e.y);
                 item.pressIndex = item.DelegateModel.itemsIndex;
                 item.lastMoveY = item.y;
@@ -256,17 +254,28 @@ ListView {
                 topRightRadius: item.lerpRadius(item.topRadius, Tokens.rounding.large)
             }
 
-            StateLayer {
+            MouseArea {
                 id: stateLayer
 
-                enabled: false
-                hoverEnabled: false
-                radius: itemBg.radius
-                topLeftRadius: itemBg.topLeftRadius
-                topRightRadius: itemBg.topRightRadius
+                anchors.fill: parent
+                acceptedButtons: Qt.NoButton
+                hoverEnabled: true
                 cursorShape: mouse.pressed ? Qt.ClosedHandCursor : Qt.OpenHandCursor
-                manualPressOverride: mouse.pressed
-                manualHoverOverride: mouse.containsMouse || mouse.pressed
+
+                StyledRect {
+                    anchors.fill: parent
+                    radius: itemBg.radius
+                    topLeftRadius: itemBg.topLeftRadius
+                    topRightRadius: itemBg.topRightRadius
+                    color: Colours.palette.m3onSurface
+                    opacity: parent.containsMouse && !item.held ? 0.08 : 0
+
+                    Behavior on opacity {
+                        Anim {
+                            type: Anim.DefaultEffects
+                        }
+                    }
+                }
             }
 
             RowLayout {
