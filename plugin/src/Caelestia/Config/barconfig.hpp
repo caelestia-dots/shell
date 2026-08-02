@@ -1,5 +1,6 @@
 #pragma once
 
+#include "configlist.hpp"
 #include "configobject.hpp"
 
 #include <qstring.h>
@@ -120,25 +121,25 @@ class BarConfig : public ConfigObject {
     CONFIG_SUBOBJECT(BarClock, clock)
     CONFIG_PROPERTY(QVariantList, statusIcons,
         {
-            CONFIG_ENTRY(lockStatus, true),
-            CONFIG_ENTRY(audio, false),
-            CONFIG_ENTRY(microphone, false),
-            CONFIG_ENTRY(kbLayout, false),
-            CONFIG_ENTRY(network, true),
-            CONFIG_ENTRY(bluetooth, true),
-            CONFIG_ENTRY(battery, true),
+            LIST_ENTRY(lockStatus, true),
+            LIST_ENTRY(audio, false),
+            LIST_ENTRY(microphone, false),
+            LIST_ENTRY(kbLayout, false),
+            LIST_ENTRY(network, true),
+            LIST_ENTRY(bluetooth, true),
+            LIST_ENTRY(battery, true),
         })
-    CONFIG_PROPERTY(QVariantList, entries,
+    CONFIG_LIST(EntryList, entries,
         {
-            CONFIG_ENTRY(logo, true),
-            CONFIG_ENTRY(workspaces, true),
-            CONFIG_ENTRY(spacer, true),
-            CONFIG_ENTRY(activeWindow, true),
-            CONFIG_ENTRY(spacer, true),
-            CONFIG_ENTRY(tray, true),
-            CONFIG_ENTRY(clock, true),
-            CONFIG_ENTRY(statusIcons, true),
-            CONFIG_ENTRY(power, true),
+            LIST_ENTRY(logo, true),
+            LIST_ENTRY(workspaces, true),
+            LIST_ENTRY(spacer, true),
+            LIST_ENTRY(activeWindow, true),
+            LIST_ENTRY(spacer, true),
+            LIST_ENTRY(tray, true),
+            LIST_ENTRY(clock, true),
+            LIST_ENTRY(statusIcons, true),
+            LIST_ENTRY(power, true),
         })
     CONFIG_PROPERTY(QStringList, excludedScreens)
 

@@ -1,5 +1,6 @@
 #pragma once
 
+#include "configlist.hpp"
 #include "configobject.hpp"
 
 #include <qstring.h>
@@ -67,15 +68,15 @@ class UtilitiesConfig : public ConfigObject {
     CONFIG_SUBOBJECT(UtilitiesCards, cards)
     CONFIG_SUBOBJECT(UtilitiesToasts, toasts)
     CONFIG_SUBOBJECT(UtilitiesVpn, vpn)
-    CONFIG_PROPERTY(QVariantList, quickToggles,
+    CONFIG_LIST(EntryList, quickToggles,
         {
-            CONFIG_ENTRY(wifi, true),
-            CONFIG_ENTRY(bluetooth, true),
-            CONFIG_ENTRY(mic, true),
-            CONFIG_ENTRY(settings, true),
-            CONFIG_ENTRY(gameMode, true),
-            CONFIG_ENTRY(dnd, true),
-            CONFIG_ENTRY(vpn, false),
+            LIST_ENTRY(wifi, true),
+            LIST_ENTRY(bluetooth, true),
+            LIST_ENTRY(mic, true),
+            LIST_ENTRY(settings, true),
+            LIST_ENTRY(gameMode, true),
+            LIST_ENTRY(dnd, true),
+            LIST_ENTRY(vpn, false),
         })
 
 public:
