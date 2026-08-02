@@ -52,6 +52,7 @@ private:
     bool m_recentlySaved = false;
     bool m_loading = false;
     bool m_loadFailed = false;
+    bool m_saveBlockedNotified = false;
 
     QFileSystemWatcher* m_watcher = nullptr;
     QTimer* m_saveTimer = nullptr;

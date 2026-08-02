@@ -169,6 +169,14 @@ void RootConfig::saveToFile() {
 
     if (m_loadFailed) {
         qCWarning(lcConfig) << "Not saving" << m_filePath << "- last load failed";
+
+        // Saves are attempted on every change, so only report the first one
+        if (!m_saveBlockedNotified) {
+            m_saveBlockedNotified = true;
+            emit saveFailed(
+                QStringLiteral("Not overwriting %1 until the last load error is fixed").arg(m_filePath), m_screen);
+        }
+
         return;
     }
 
@@ -180,6 +188,7 @@ void RootConfig::saveToFile() {
 std::optional<QString> RootConfig::reloadFromFile() {
     m_lastSignature = fileSignature();
     m_loadFailed = false;
+    m_saveBlockedNotified = false;
 
     QFile file(m_filePath);
 
