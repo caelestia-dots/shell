@@ -46,7 +46,7 @@ PageBase {
 
         Item {
             Layout.fillWidth: true
-            Layout.preferredHeight: contentRow.implicitHeight + Tokens.padding.medium * 2
+            Layout.preferredHeight: contentRow.implicitHeight + Tokens.padding.medium + (Tokens.padding.large - Tokens.padding.small) * 2
 
             ConnectedRect {
                 id: bg
@@ -93,17 +93,16 @@ PageBase {
                             clear();
                     }
 
-                    Layout.preferredWidth: 100
+                    Layout.preferredWidth: 70
                     Layout.alignment: Qt.AlignVCenter
+                    verticalPadding: Tokens.padding.small
                     text: {
-                        const normalised = root.normaliseActionPrefix(GlobalConfig.launcher.actionPrefix);
-                        return normalised === ">" ? "" : normalised;
+                        const prefix = root.normaliseActionPrefix(GlobalConfig.launcher.actionPrefix);
+                        return prefix === ">" ? "" : prefix;
                     }
                     placeholderText: ">"
                     maximumLength: 1
-                    validator: RegularExpressionValidator {
-                        regularExpression: /^$|^[^a-zA-Z0-9\s]$/
-                    }
+                    validate: /^$|^[^a-zA-Z0-9\s]$/
 
                     onTextEdited: saveActionPrefix()
                     onEditingFinished: saveActionPrefix()
