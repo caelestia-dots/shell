@@ -42,6 +42,8 @@ private:
     [[nodiscard]] QString fileSignature() const;
 
     void connectAutoSave(ConfigNode* node);
+    // Blocks saving until a load succeeds, memory no longer represents the file
+    void markLoadFailed();
 
     QString m_filePath;
     QString m_screen;
@@ -49,6 +51,7 @@ private:
     QString m_lastSignature;
     bool m_recentlySaved = false;
     bool m_loading = false;
+    bool m_loadFailed = false;
 
     QFileSystemWatcher* m_watcher = nullptr;
     QTimer* m_saveTimer = nullptr;

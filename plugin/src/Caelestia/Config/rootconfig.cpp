@@ -91,6 +91,14 @@ void RootConfig::setupFileBackend(const QString& path, const QString& screen) {
     });
 }
 
+void RootConfig::markLoadFailed() {
+    m_loadFailed = true;
+
+    // A queued save would write memory over a file that could not be read
+    if (m_saveTimer)
+        m_saveTimer->stop();
+}
+
 void RootConfig::connectAutoSave(ConfigNode* node) {
     connect(node, &ConfigNode::propertiesChanged, this, [this] {
         if (!m_loading)
@@ -158,6 +166,12 @@ QString RootConfig::fileSignature() const {
 void RootConfig::saveToFile() {
     if (!m_saveTimer)
         return;
+
+    if (m_loadFailed) {
+        qCWarning(lcConfig) << "Not saving" << m_filePath << "- last load failed";
+        return;
+    }
+
     m_saveTimer->start();
     m_recentlySaved = true;
     m_cooldownTimer->start();
@@ -165,6 +179,7 @@ void RootConfig::saveToFile() {
 
 std::optional<QString> RootConfig::reloadFromFile() {
     m_lastSignature = fileSignature();
+    m_loadFailed = false;
 
     QFile file(m_filePath);
 
@@ -174,6 +189,7 @@ std::optional<QString> RootConfig::reloadFromFile() {
     }
 
     if (!file.open(QIODevice::ReadOnly)) {
+        markLoadFailed();
         auto err = QStringLiteral("Failed to open %1: %2").arg(m_filePath, file.errorString());
         qCDebug(lcConfig, "%s", qUtf8Printable(err));
         return err;
@@ -183,6 +199,8 @@ std::optional<QString> RootConfig::reloadFromFile() {
     auto doc = QJsonDocument::fromJson(file.readAll(), &error);
 
     if (error.error != QJsonParseError::NoError) {
+        markLoadFailed();
+
         if (m_retryTimer && m_parseRetries < 3) {
             m_parseRetries++;
             qCDebug(lcConfig, "Failed to parse %s: %s - retrying (%d/3)", qUtf8Printable(m_filePath),
