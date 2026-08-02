@@ -182,19 +182,30 @@ void ConfigList::populate(const QJsonArray& arr) {
         return;
 
     const auto old = m_items;
+    QList<bool> reused(old.size(), false);
+
     m_items.clear();
     m_items.reserve(arr.size());
 
-    // Reuse elements that didn't change, recreating one resets the delegate bound to it
+    // Reuse elements that didn't change, recreating one resets the delegate bound to it.
+    // Matched by content, not position, so a reorder moves elements instead of rebuilding them
     for (int i = 0; i < arr.size(); ++i) {
-        if (i < old.size() && current.at(i) == arr.at(i))
-            m_items.append(old.at(i));
-        else
+        auto match = i < old.size() && !reused.at(i) && current.at(i) == arr.at(i) ? i : -1;
+
+        for (int j = 0; match < 0 && j < old.size(); ++j)
+            if (!reused.at(j) && current.at(j) == arr.at(i))
+                match = j;
+
+        if (match < 0) {
             appendItem(arr.at(i));
+        } else {
+            reused[match] = true;
+            m_items.append(old.at(match));
+        }
     }
 
     for (int i = 0; i < old.size(); ++i)
-        if (i >= arr.size() || current.at(i) != arr.at(i))
+        if (!reused.at(i))
             destroyItem(old.at(i));
 
     if (m_items.size() != old.size())
