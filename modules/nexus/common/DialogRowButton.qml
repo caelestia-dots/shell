@@ -29,8 +29,17 @@ Item {
     signal accepted
     signal cancelled
 
+    function reparentWrapper(): void {
+        const newParent = open ? rootParent : root;
+        const pos = dialogWrapper.mapToItem(newParent, 0, 0);
+        dialogWrapper.parent = newParent;
+        dialogWrapper.x = pos.x;
+        dialogWrapper.y = pos.y;
+    }
+
     Layout.fillWidth: true
     implicitHeight: openButton.implicitHeight
+    z: open || dialogTransition.running ? 2 : 0
 
     BlobGroup {
         id: blobGroup
@@ -63,12 +72,6 @@ Item {
             name: "open"
             when: root.open
 
-            ParentChange {
-                target: dialogWrapper
-                parent: root.rootParent
-                x: (root.rootParent.width - root.openWidth) / 2
-                y: (root.rootParent.height - root.openHeight) / 2
-            }
             PropertyChanges {
                 backdrop.enabled: true
                 elevation.opacity: 1
@@ -77,15 +80,20 @@ Item {
                 dialogBg.radius: root.Tokens.rounding.extraLargeIncreased
                 dialogBg.bottomLeftRadius: root.Tokens.rounding.extraLargeIncreased
                 dialogBg.bottomRightRadius: root.Tokens.rounding.extraLargeIncreased
+                dialogWrapper.x: (root.rootParent.width - root.openWidth) / 2
+                dialogWrapper.y: (root.rootParent.height - root.openHeight) / 2
                 dialogWrapper.width: root.openWidth
                 dialogWrapper.height: root.openHeight
             }
         }
 
         transitions: Transition {
-            ParentAnimation {
-                via: root.rootParent
+            id: dialogTransition
 
+            SequentialAnimation {
+                ScriptAction {
+                    script: root.reparentWrapper()
+                }
                 Anim {
                     properties: "x,y"
                 }
