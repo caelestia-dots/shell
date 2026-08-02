@@ -78,6 +78,11 @@ void ConfigList::clear() {
 }
 
 void ConfigList::loadFromJson(const QJsonValue& json) {
+    if (!json.isArray()) {
+        qCWarning(lcConfig, "Option '%s' must be a list, ignoring", qUtf8Printable(propertyPath()));
+        return;
+    }
+
     populate(json.toArray());
     m_loaded = true;
 }
