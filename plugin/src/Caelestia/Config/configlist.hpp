@@ -69,6 +69,9 @@ private:
     QJsonArray m_defaults;
     QList<ConfigObject*> m_items;
     bool m_loaded = false;
+    // A rejected non list value, kept verbatim so saving doesn't drop it from the file.
+    // Separate from ConfigObject::m_extras, which would report it as an unknown option.
+    QJsonValue m_rejectedJson = QJsonValue::Undefined;
 };
 
 } // namespace caelestia::config

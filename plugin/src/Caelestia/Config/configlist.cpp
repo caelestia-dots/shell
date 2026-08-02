@@ -80,23 +80,27 @@ void ConfigList::clear() {
 void ConfigList::loadFromJson(const QJsonValue& json) {
     if (!json.isArray()) {
         qCWarning(lcConfig, "Option '%s' must be a list, ignoring", qUtf8Printable(propertyPath()));
+        m_rejectedJson = json;
         return;
     }
 
+    m_rejectedJson = QJsonValue::Undefined;
     populate(json.toArray());
     m_loaded = true;
 }
 
 QJsonValue ConfigList::toJson() const {
-    if (!m_loaded)
-        return QJsonValue::Undefined;
+    // Checked first so editing a rejected list from QML replaces it
+    if (m_loaded)
+        return elementsToJson();
 
-    return elementsToJson();
+    return m_rejectedJson;
 }
 
 void ConfigList::clearLoadedKeys() {
     // Tracking only like ConfigObject, rebuilding here would drop an overlay to defaults
     m_loaded = false;
+    m_rejectedJson = QJsonValue::Undefined;
 }
 
 QStringList ConfigList::unknownKeys() const {
