@@ -119,7 +119,7 @@ class BarConfig : public ConfigObject {
     CONFIG_SUBOBJECT(BarActiveWindow, activeWindow)
     CONFIG_SUBOBJECT(BarTray, tray)
     CONFIG_SUBOBJECT(BarClock, clock)
-    CONFIG_PROPERTY(QVariantList, statusIcons,
+    CONFIG_LIST(EntryList, statusIcons,
         {
             LIST_ENTRY(lockStatus, true),
             LIST_ENTRY(audio, false),

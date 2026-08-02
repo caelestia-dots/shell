@@ -15,7 +15,8 @@ ListView {
     property alias values: valuesModel.values
     property bool first
 
-    signal itemsCommitted(items: list<var>)
+    signal itemMoved(from: int, to: int)
+    signal itemRemoved(index: int)
     signal editItem(item: var)
 
     function labelFor(item: var): string {
@@ -24,12 +25,6 @@ ListView {
 
     function canEdit(item: var): bool {
         return false;
-    }
-
-    function commitItems(): void {
-        const items = contentItem.children.filter(c => c instanceof ListRow);
-        items.sort((a, b) => a.DelegateModel.itemsIndex - b.DelegateModel.itemsIndex);
-        itemsCommitted(items.map(i => i.modelData));
     }
 
     function dampOvershoot(overshoot: real, maxOvershoot: real): real {
@@ -97,6 +92,7 @@ ListView {
         required property var modelData
         property bool held
         property point pressPos
+        property int pressIndex
         property real lastMoveY
 
         property real topRadius: root?.first && DelegateModel.itemsIndex === 0 ? Tokens.rounding.extraLarge : Tokens.rounding.extraSmall
@@ -166,6 +162,7 @@ ListView {
                 returnAnim.stop();
                 stateLayer.press(e.x, e.y);
                 item.pressPos = Qt.point(e.x, e.y);
+                item.pressIndex = item.DelegateModel.itemsIndex;
                 item.lastMoveY = item.y;
                 item.held = true;
 
@@ -214,7 +211,9 @@ ListView {
                 returnAnim.start();
                 item.held = false;
 
-                root.commitItems();
+                const idx = item.DelegateModel.itemsIndex;
+                if (idx !== item.pressIndex)
+                    root.itemMoved(item.pressIndex, idx);
             }
         }
 
@@ -316,12 +315,7 @@ ListView {
                     font: Tokens.font.icon.medium
                     label.fill: 0
 
-                    onClicked: {
-                        // DelegateModelGroup.remove() doesn't seem to work, so do it manually instead
-                        const idx = item.DelegateModel.itemsIndex;
-                        const newItems = valuesModel.values.slice(0, idx).concat(valuesModel.values.slice(idx + 1));
-                        root.itemsCommitted(newItems);
-                    }
+                    onClicked: root.itemRemoved(item.DelegateModel.itemsIndex)
                 }
             }
         }

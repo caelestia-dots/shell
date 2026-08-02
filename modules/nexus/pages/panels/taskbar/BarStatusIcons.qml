@@ -43,8 +43,9 @@ PageBase {
 
             z: 1
             first: true
-            values: Config.bar.statusIcons
-            onItemsCommitted: items => GlobalConfig.bar.statusIcons = items
+            values: Config.bar.statusIcons.values
+            onItemMoved: (from, to) => GlobalConfig.bar.statusIcons.move(from, to)
+            onItemRemoved: index => GlobalConfig.bar.statusIcons.remove(index)
         }
 
         DialogSelectButton {
@@ -68,7 +69,7 @@ PageBase {
                 if (!selectedItem) // Should never happen but just in case
                     return;
 
-                GlobalConfig.bar.statusIcons = Config.bar.statusIcons.concat({
+                GlobalConfig.bar.statusIcons.insert({
                     id: selectedItem,
                     enabled: true
                 });

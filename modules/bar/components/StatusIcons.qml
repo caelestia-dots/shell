@@ -38,7 +38,7 @@ StyledRect {
             id: repeater
 
             model: ScriptModel {
-                values: root.Config.bar.statusIcons.filter(e => e.enabled ?? true)
+                values: root.Config.bar.statusIcons.values.filter(e => e.enabled)
             }
 
             DelegateChooser {
