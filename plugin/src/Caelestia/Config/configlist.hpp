@@ -4,6 +4,7 @@
 
 #include <qjsonarray.h>
 #include <qqmlintegration.h>
+#include <qvariantlist.h>
 
 namespace caelestia::config {
 
@@ -14,11 +15,13 @@ class ConfigList : public ConfigNode {
     QML_ANONYMOUS
 
     Q_PROPERTY(int count READ count NOTIFY countChanged)
+    Q_PROPERTY(QVariantList values READ values NOTIFY valuesChanged)
 
 public:
     explicit ConfigList(QObject* parent = nullptr, const QVariantList& defaults = {});
 
     [[nodiscard]] int count() const;
+    [[nodiscard]] QVariantList values() const;
     [[nodiscard]] ConfigObject* itemAt(int index) const;
     [[nodiscard]] const QList<ConfigObject*>& items() const;
 
@@ -77,20 +80,10 @@ private:
         Q_OBJECT                                                                                                       \
         QML_ANONYMOUS                                                                                                  \
                                                                                                                        \
-        Q_PROPERTY(QList<caelestia::config::Element*> values READ values NOTIFY valuesChanged)                         \
-                                                                                                                       \
     public:                                                                                                            \
         explicit Name(QObject* parent = nullptr, const QVariantList& defaults = {})                                    \
             : caelestia::config::ConfigList(parent, defaults) {                                                        \
             resetToDefaults();                                                                                         \
-        }                                                                                                              \
-                                                                                                                       \
-        [[nodiscard]] QList<caelestia::config::Element*> values() const {                                              \
-            QList<caelestia::config::Element*> vals;                                                                   \
-            vals.reserve(items().size());                                                                              \
-            for (auto* const item : items())                                                                           \
-                vals.append(static_cast<caelestia::config::Element*>(item));                                           \
-            return vals;                                                                                               \
         }                                                                                                              \
                                                                                                                        \
         Q_INVOKABLE caelestia::config::Element* at(int index) const {                                                  \

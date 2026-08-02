@@ -16,6 +16,14 @@ int ConfigList::count() const {
     return static_cast<int>(m_items.size());
 }
 
+QVariantList ConfigList::values() const {
+    QVariantList vals;
+    vals.reserve(m_items.size());
+    for (auto* const item : m_items)
+        vals.append(QVariant::fromValue(item));
+    return vals;
+}
+
 ConfigObject* ConfigList::itemAt(int index) const {
     if (index < 0 || index >= m_items.size())
         return nullptr;
