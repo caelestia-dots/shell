@@ -11,20 +11,6 @@ namespace caelestia::config {
 
 using Qt::StringLiterals::operator""_s;
 
-class BarEntry : public ConfigObject {
-    Q_OBJECT
-    QML_ANONYMOUS
-
-    CONFIG_PROPERTY(QString, id)
-    CONFIG_PROPERTY(bool, enabled, true)
-
-public:
-    explicit BarEntry(QObject* parent = nullptr)
-        : ConfigObject(parent) {}
-};
-
-CONFIG_LIST_TYPE(BarEntry, BarEntryList)
-
 class BarScrollActions : public ConfigObject {
     Q_OBJECT
     QML_ANONYMOUS
@@ -152,17 +138,17 @@ class BarConfig : public ConfigObject {
     CONFIG_SUBOBJECT(BarTray, tray)
     CONFIG_SUBOBJECT(BarStatus, status)
     CONFIG_SUBOBJECT(BarClock, clock)
-    CONFIG_LIST(BarEntryList, entries,
+    CONFIG_LIST(EntryList, entries,
         {
-            vmap({ { u"id"_s, u"logo"_s } }),
-            vmap({ { u"id"_s, u"workspaces"_s } }),
-            vmap({ { u"id"_s, u"spacer"_s } }),
-            vmap({ { u"id"_s, u"activeWindow"_s } }),
-            vmap({ { u"id"_s, u"spacer"_s } }),
-            vmap({ { u"id"_s, u"tray"_s } }),
-            vmap({ { u"id"_s, u"clock"_s } }),
-            vmap({ { u"id"_s, u"statusIcons"_s } }),
-            vmap({ { u"id"_s, u"power"_s } }),
+            LIST_ENTRY(logo, true),
+            LIST_ENTRY(workspaces, true),
+            LIST_ENTRY(spacer, true),
+            LIST_ENTRY(activeWindow, true),
+            LIST_ENTRY(spacer, true),
+            LIST_ENTRY(tray, true),
+            LIST_ENTRY(clock, true),
+            LIST_ENTRY(statusIcons, true),
+            LIST_ENTRY(power, true),
         })
     CONFIG_PROPERTY(QStringList, excludedScreens)
 

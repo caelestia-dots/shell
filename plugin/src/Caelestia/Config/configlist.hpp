@@ -134,3 +134,24 @@ private:                                                                        
         markGlobalOnly(QStringLiteral(#name));                                                                         \
         return true;                                                                                                   \
     }();
+
+namespace caelestia::config {
+
+class ListEntry : public ConfigObject {
+    Q_OBJECT
+    QML_ANONYMOUS
+
+    CONFIG_PROPERTY(QString, id)
+    CONFIG_PROPERTY(bool, enabled, true)
+
+public:
+    explicit ListEntry(QObject* parent = nullptr)
+        : ConfigObject(parent) {}
+};
+
+CONFIG_LIST_TYPE(ListEntry, EntryList)
+
+} // namespace caelestia::config
+
+// Shorthand for declaring an ID'd entry (bar entries/status icons, quick toggles, etc)
+#define LIST_ENTRY(id, enabled) vmap({ { u"id"_s, u## #id##_s }, { u"enabled"_s, enabled } })
