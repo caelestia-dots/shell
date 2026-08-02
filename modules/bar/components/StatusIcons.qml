@@ -13,6 +13,7 @@ import qs.utils
 StyledRect {
     id: root
 
+    required property bool horizontal
     property color colour: Colours.palette.m3secondary
     readonly property alias items: iconColumn
 
@@ -20,30 +21,39 @@ StyledRect {
     radius: Tokens.rounding.full
 
     clip: true
-    implicitWidth: Tokens.sizes.bar.innerWidth
-    implicitHeight: iconColumn.implicitHeight + Tokens.padding.medium * 2 - (Config.bar.status.showLockStatus && !Hypr.capsLock && !Hypr.numLock ? iconColumn.spacing : 0)
+    implicitWidth: horizontal ? iconColumn.implicitWidth + Tokens.padding.medium * 2 - (Config.bar.status.showLockStatus && !Hypr.capsLock && !Hypr.numLock ? iconColumn.columnSpacing : 0) : Tokens.sizes.bar.innerWidth
+    implicitHeight: horizontal ? Tokens.sizes.bar.innerWidth : iconColumn.implicitHeight + Tokens.padding.medium * 2 - (Config.bar.status.showLockStatus && !Hypr.capsLock && !Hypr.numLock ? iconColumn.rowSpacing : 0)
 
-    ColumnLayout {
+    GridLayout {
         id: iconColumn
 
-        anchors.left: parent.left
-        anchors.right: parent.right
-        anchors.bottom: parent.bottom
-        anchors.bottomMargin: Tokens.padding.medium
+        // Only one orientation's anchors resolve, the others are undefined
+        // qmllint disable Quick.anchor-combinations
+        anchors.left: root.horizontal ? undefined : parent.left
+        anchors.right: root.horizontal ? undefined : parent.right
+        anchors.bottom: root.horizontal ? undefined : parent.bottom
+        anchors.horizontalCenter: root.horizontal ? parent.horizontalCenter : undefined
+        anchors.verticalCenter: root.horizontal ? parent.verticalCenter : undefined
+        anchors.bottomMargin: root.horizontal ? 0 : Tokens.padding.medium
+        // qmllint enable Quick.anchor-combinations
 
-        spacing: Tokens.spacing.medium / 2
+        columns: root.horizontal ? -1 : 1
+        rowSpacing: Tokens.spacing.medium / 2
+        columnSpacing: Tokens.spacing.medium / 2
 
         // Lock keys status
         WrappedLoader {
             name: "lockstatus"
             active: Config.bar.status.showLockStatus
 
-            sourceComponent: ColumnLayout {
-                spacing: 0
+            sourceComponent: GridLayout {
+                columns: root.horizontal ? -1 : 1
+                rowSpacing: 0
+                columnSpacing: 0
 
                 Item {
-                    implicitWidth: capslockIcon.implicitWidth
-                    implicitHeight: Hypr.capsLock ? capslockIcon.implicitHeight : 0
+                    implicitWidth: root.horizontal ? (Hypr.capsLock ? capslockIcon.implicitWidth : 0) : capslockIcon.implicitWidth
+                    implicitHeight: root.horizontal ? capslockIcon.implicitHeight : (Hypr.capsLock ? capslockIcon.implicitHeight : 0)
 
                     MaterialIcon {
                         id: capslockIcon
@@ -70,13 +80,18 @@ StyledRect {
                     Behavior on implicitHeight {
                         Anim {}
                     }
+
+                    Behavior on implicitWidth {
+                        Anim {}
+                    }
                 }
 
                 Item {
-                    Layout.topMargin: Hypr.capsLock && Hypr.numLock ? iconColumn.spacing : 0
+                    Layout.leftMargin: root.horizontal && Hypr.capsLock && Hypr.numLock ? iconColumn.columnSpacing : 0
+                    Layout.topMargin: !root.horizontal && Hypr.capsLock && Hypr.numLock ? iconColumn.rowSpacing : 0
 
-                    implicitWidth: numlockIcon.implicitWidth
-                    implicitHeight: Hypr.numLock ? numlockIcon.implicitHeight : 0
+                    implicitWidth: root.horizontal ? (Hypr.numLock ? numlockIcon.implicitWidth : 0) : numlockIcon.implicitWidth
+                    implicitHeight: root.horizontal ? numlockIcon.implicitHeight : (Hypr.numLock ? numlockIcon.implicitHeight : 0)
 
                     MaterialIcon {
                         id: numlockIcon
@@ -101,6 +116,10 @@ StyledRect {
                     }
 
                     Behavior on implicitHeight {
+                        Anim {}
+                    }
+
+                    Behavior on implicitWidth {
                         Anim {}
                     }
                 }
@@ -170,13 +189,16 @@ StyledRect {
 
         // Bluetooth section
         WrappedLoader {
-            Layout.preferredHeight: implicitHeight
+            Layout.preferredWidth: root.horizontal ? implicitWidth : -1
+            Layout.preferredHeight: root.horizontal ? -1 : implicitHeight
 
             name: "bluetooth"
             active: Config.bar.status.showBluetooth
 
-            sourceComponent: ColumnLayout {
-                spacing: Tokens.spacing.medium / 2
+            sourceComponent: GridLayout {
+                columns: root.horizontal ? -1 : 1
+                rowSpacing: Tokens.spacing.medium / 2
+                columnSpacing: Tokens.spacing.medium / 2
 
                 // Bluetooth icon
                 MaterialIcon {
@@ -232,6 +254,10 @@ StyledRect {
             Behavior on Layout.preferredHeight {
                 Anim {}
             }
+
+            Behavior on Layout.preferredWidth {
+                Anim {}
+            }
         }
 
         // Battery icon
@@ -261,7 +287,7 @@ StyledRect {
         required property string name
 
         asynchronous: true
-        Layout.alignment: Qt.AlignHCenter
+        Layout.alignment: root.horizontal ? Qt.AlignVCenter : Qt.AlignHCenter
         visible: active
     }
 }

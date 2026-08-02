@@ -13,6 +13,7 @@ StyledRect {
     required property Repeater workspaces
     required property Item mask
     required property bool fullscreen
+    required property bool horizontal
 
     readonly property int currentWsIdx: {
         let i = activeWsId - 1;
@@ -21,15 +22,15 @@ StyledRect {
         return i % Config.bar.workspaces.shown;
     }
 
-    property real leading: workspaces.count > 0 ? workspaces.itemAt(currentWsIdx)?.y ?? 0 : 0
-    property real trailing: workspaces.count > 0 ? workspaces.itemAt(currentWsIdx)?.y ?? 0 : 0
+    property real leading: workspaces.count > 0 ? (horizontal ? workspaces.itemAt(currentWsIdx)?.x : workspaces.itemAt(currentWsIdx)?.y) ?? 0 : 0
+    property real trailing: workspaces.count > 0 ? (horizontal ? workspaces.itemAt(currentWsIdx)?.x : workspaces.itemAt(currentWsIdx)?.y) ?? 0 : 0
     property real currentSize: workspaces.count > 0 ? (workspaces.itemAt(currentWsIdx) as Workspace)?.size ?? 0 : 0
     property real offset: Math.min(leading, trailing)
     property real size: {
         const s = Math.abs(leading - trailing) + currentSize;
         if (Config.bar.workspaces.activeTrail && lastWs > currentWsIdx) {
             const ws = workspaces.itemAt(lastWs) as Workspace;
-            return ws ? Math.min(ws.y + ws.size - offset, s) : 0;
+            return ws ? Math.min((horizontal ? ws.x : ws.y) + ws.size - offset, s) : 0;
         }
         return s;
     }
@@ -43,9 +44,10 @@ StyledRect {
     }
 
     clip: true
-    y: offset + mask.y
-    implicitWidth: Tokens.sizes.bar.innerWidth - Tokens.padding.small
-    implicitHeight: size
+    x: horizontal ? offset + mask.x : 0
+    y: horizontal ? 0 : offset + mask.y
+    implicitWidth: horizontal ? size : Tokens.sizes.bar.innerWidth - Tokens.padding.small
+    implicitHeight: horizontal ? Tokens.sizes.bar.innerWidth - Tokens.padding.small : size
     radius: Tokens.rounding.full
     color: Colours.palette.m3primary
 
@@ -54,12 +56,13 @@ StyledRect {
         sourceColor: Colours.palette.m3onSurface
         colorizationColor: Colours.palette.m3onPrimary
 
-        x: 0
-        y: -parent.offset
+        x: root.horizontal ? -parent.offset : 0
+        y: root.horizontal ? 0 : -parent.offset
         implicitWidth: root.mask.implicitWidth
         implicitHeight: root.mask.implicitHeight
 
-        anchors.horizontalCenter: parent.horizontalCenter
+        anchors.horizontalCenter: root.horizontal ? undefined : parent.horizontalCenter
+        anchors.verticalCenter: root.horizontal ? parent.verticalCenter : undefined
     }
 
     Behavior on leading {

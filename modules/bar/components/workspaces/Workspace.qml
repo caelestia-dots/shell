@@ -8,32 +8,37 @@ import qs.components
 import qs.services
 import qs.utils
 
-ColumnLayout {
+GridLayout {
     id: root
 
     required property int index
     required property int activeWsId
     required property var occupied
     required property int groupOffset
+    required property bool horizontal
 
     readonly property bool isWorkspace: true // Flag for finding workspace children
     // Unanimated prop for others to use as reference
-    readonly property int size: implicitHeight + (hasWindows ? Tokens.padding.extraSmall : 0)
+    readonly property int size: (horizontal ? implicitWidth : implicitHeight) + (hasWindows ? Tokens.padding.extraSmall : 0)
 
     readonly property int ws: groupOffset + index + 1
     readonly property bool isOccupied: occupied[ws] ?? false
     readonly property bool hasWindows: isOccupied && Config.bar.workspaces.showWindows
 
-    Layout.alignment: Qt.AlignHCenter
-    Layout.preferredHeight: size
+    Layout.alignment: horizontal ? Qt.AlignVCenter : Qt.AlignHCenter
+    Layout.preferredWidth: horizontal ? size : -1
+    Layout.preferredHeight: horizontal ? -1 : size
 
-    spacing: 0
+    columns: horizontal ? -1 : 1
+    rowSpacing: 0
+    columnSpacing: 0
 
     StyledText {
         id: indicator
 
-        Layout.alignment: Qt.AlignHCenter | Qt.AlignTop
-        Layout.preferredHeight: Tokens.sizes.bar.innerWidth - Tokens.padding.small
+        Layout.alignment: root.horizontal ? Qt.AlignVCenter | Qt.AlignLeft : Qt.AlignHCenter | Qt.AlignTop
+        Layout.preferredWidth: root.horizontal ? Tokens.sizes.bar.innerWidth - Tokens.padding.small : -1
+        Layout.preferredHeight: root.horizontal ? -1 : Tokens.sizes.bar.innerWidth - Tokens.padding.small
 
         animate: true
         text: {
@@ -60,14 +65,17 @@ ColumnLayout {
 
         asynchronous: true
 
-        Layout.alignment: Qt.AlignHCenter
-        Layout.fillHeight: true
-        Layout.topMargin: -Tokens.sizes.bar.innerWidth / 10
+        Layout.alignment: root.horizontal ? Qt.AlignVCenter : Qt.AlignHCenter
+        Layout.fillWidth: root.horizontal
+        Layout.fillHeight: !root.horizontal
+        Layout.leftMargin: root.horizontal ? -Tokens.sizes.bar.innerWidth / 10 : 0
+        Layout.topMargin: root.horizontal ? 0 : -Tokens.sizes.bar.innerWidth / 10
 
         visible: active
         active: root.hasWindows
 
-        sourceComponent: Column {
+        sourceComponent: Grid {
+            columns: root.horizontal ? Math.max(1, items.count) : 1
             spacing: 0
 
             add: Transition {
@@ -91,6 +99,8 @@ ColumnLayout {
             }
 
             Repeater {
+                id: items
+
                 model: ScriptModel {
                     values: {
                         const ws = root.ws;
@@ -112,6 +122,10 @@ ColumnLayout {
     }
 
     Behavior on Layout.preferredHeight {
+        Anim {}
+    }
+
+    Behavior on Layout.preferredWidth {
         Anim {}
     }
 }

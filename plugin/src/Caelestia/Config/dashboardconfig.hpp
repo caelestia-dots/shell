@@ -2,7 +2,11 @@
 
 #include "configobject.hpp"
 
+#include <qstring.h>
+
 namespace caelestia::config {
+
+using Qt::StringLiterals::operator""_s;
 
 class DashboardPerformance : public ConfigObject {
     Q_OBJECT
@@ -24,6 +28,7 @@ class DashboardConfig : public ConfigObject {
     Q_OBJECT
     QML_ANONYMOUS
 
+    CONFIG_PROPERTY(QString, position, u"top"_s)
     CONFIG_PROPERTY(bool, enabled, true)
     CONFIG_PROPERTY(bool, showOnHover, true)
     CONFIG_PROPERTY(bool, showDashboard, true)

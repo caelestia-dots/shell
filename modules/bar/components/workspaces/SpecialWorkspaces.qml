@@ -14,6 +14,7 @@ Item {
     id: root
 
     required property ShellScreen screen
+    required property bool horizontal
     readonly property HyprlandMonitor monitor: Hypr.monitorFor(screen)
     readonly property string activeSpecial: (GlobalConfig.bar.workspaces.perMonitorWorkspaces ? monitor : Hypr.focusedMonitor)?.lastIpcObject.specialWorkspace?.name ?? ""
 
@@ -34,7 +35,7 @@ Item {
             radius: Tokens.rounding.full
 
             gradient: Gradient {
-                orientation: Gradient.Vertical
+                orientation: root.horizontal ? Gradient.Horizontal : Gradient.Vertical
 
                 GradientStop {
                     position: 0
@@ -57,12 +58,14 @@ Item {
 
         Rectangle {
             anchors.top: parent.top
+            anchors.bottom: root.horizontal ? parent.bottom : undefined
             anchors.left: parent.left
-            anchors.right: parent.right
+            anchors.right: root.horizontal ? undefined : parent.right
 
             radius: Tokens.rounding.full
-            implicitHeight: parent.height / 2
-            opacity: view.contentY > 0 ? 0 : 1
+            implicitWidth: root.horizontal ? parent.width / 2 : 0
+            implicitHeight: root.horizontal ? 0 : parent.height / 2
+            opacity: (root.horizontal ? view.contentX : view.contentY) > 0 ? 0 : 1
 
             Behavior on opacity {
                 Anim {
@@ -72,13 +75,15 @@ Item {
         }
 
         Rectangle {
+            anchors.top: root.horizontal ? parent.top : undefined
             anchors.bottom: parent.bottom
-            anchors.left: parent.left
+            anchors.left: root.horizontal ? undefined : parent.left
             anchors.right: parent.right
 
             radius: Tokens.rounding.full
-            implicitHeight: parent.height / 2
-            opacity: view.contentY < view.contentHeight - parent.height + Tokens.padding.extraSmall ? 0 : 1
+            implicitWidth: root.horizontal ? parent.width / 2 : 0
+            implicitHeight: root.horizontal ? 0 : parent.height / 2
+            opacity: (root.horizontal ? view.contentX < view.contentWidth - parent.width + Tokens.padding.extraSmall : view.contentY < view.contentHeight - parent.height + Tokens.padding.extraSmall) ? 0 : 1
 
             Behavior on opacity {
                 Anim {
@@ -94,6 +99,7 @@ Item {
         anchors.fill: parent
         spacing: Tokens.spacing.medium
         interactive: false
+        orientation: root.horizontal ? ListView.Horizontal : ListView.Vertical
 
         currentIndex: model.values.findIndex(w => w.name === root.activeSpecial)
         onCurrentIndexChanged: currentIndex = Qt.binding(() => model.values.findIndex(w => w.name === root.activeSpecial))
@@ -103,13 +109,19 @@ Item {
         }
 
         preferredHighlightBegin: 0
-        preferredHighlightEnd: height
+        preferredHighlightEnd: root.horizontal ? width : height
         highlightRangeMode: ListView.StrictlyEnforceRange
 
         highlightFollowsCurrentItem: false
         highlight: Item {
-            y: view.currentItem?.y ?? 0
-            implicitHeight: (view.currentItem as SpecialWsDelegate)?.size ?? 0
+            x: root.horizontal ? view.currentItem?.x ?? 0 : 0
+            y: root.horizontal ? 0 : view.currentItem?.y ?? 0
+            implicitWidth: root.horizontal ? (view.currentItem as SpecialWsDelegate)?.size ?? 0 : 0
+            implicitHeight: root.horizontal ? 0 : (view.currentItem as SpecialWsDelegate)?.size ?? 0
+
+            Behavior on x {
+                Anim {}
+            }
 
             Behavior on y {
                 Anim {}
@@ -172,11 +184,15 @@ Item {
             StyledClippingRect {
                 id: indicator
 
-                anchors.left: parent.left
-                anchors.right: parent.right
+                anchors.top: root.horizontal ? parent.top : undefined
+                anchors.bottom: root.horizontal ? parent.bottom : undefined
+                anchors.left: root.horizontal ? undefined : parent.left
+                anchors.right: root.horizontal ? undefined : parent.right
 
-                y: (view.currentItem?.y ?? 0) - view.contentY
-                implicitHeight: (view.currentItem as SpecialWsDelegate)?.size ?? 0
+                x: root.horizontal ? (view.currentItem?.x ?? 0) - view.contentX : 0
+                y: root.horizontal ? 0 : (view.currentItem?.y ?? 0) - view.contentY
+                implicitWidth: root.horizontal ? (view.currentItem as SpecialWsDelegate)?.size ?? 0 : 0
+                implicitHeight: root.horizontal ? 0 : (view.currentItem as SpecialWsDelegate)?.size ?? 0
 
                 color: Colours.palette.m3tertiary
                 radius: Tokens.rounding.full
@@ -186,15 +202,28 @@ Item {
                     sourceColor: Colours.palette.m3onSurface
                     colorizationColor: Colours.palette.m3onTertiary
 
-                    anchors.horizontalCenter: parent.horizontalCenter
+                    anchors.horizontalCenter: root.horizontal ? undefined : parent.horizontalCenter
+                    anchors.verticalCenter: root.horizontal ? parent.verticalCenter : undefined
 
-                    x: 0
-                    y: -indicator.y
+                    x: root.horizontal ? -indicator.x : 0
+                    y: root.horizontal ? 0 : -indicator.y
                     implicitWidth: view.width
                     implicitHeight: view.height
                 }
 
+                Behavior on x {
+                    Anim {
+                        type: Anim.Emphasized
+                    }
+                }
+
                 Behavior on y {
+                    Anim {
+                        type: Anim.Emphasized
+                    }
+                }
+
+                Behavior on implicitWidth {
                     Anim {
                         type: Anim.Emphasized
                     }
@@ -210,19 +239,25 @@ Item {
     }
 
     MouseArea {
+        property real startX
         property real startY
 
         anchors.fill: view
 
         drag.target: view.contentItem
-        drag.axis: Drag.YAxis
+        drag.axis: root.horizontal ? Drag.XAxis : Drag.YAxis
+        drag.maximumX: 0
+        drag.minimumX: Math.min(0, view.width - view.contentWidth - Tokens.padding.extraSmall)
         drag.maximumY: 0
         drag.minimumY: Math.min(0, view.height - view.contentHeight - Tokens.padding.extraSmall)
 
-        onPressed: event => startY = event.y
+        onPressed: event => {
+            startX = event.x;
+            startY = event.y;
+        }
 
         onClicked: event => {
-            if (Math.abs(event.y - startY) > drag.threshold)
+            if (Math.abs((root.horizontal ? event.x - startX : event.y - startY)) > drag.threshold)
                 return;
 
             const ws = view.itemAt(event.x, event.y) as SpecialWsDelegate;
@@ -233,19 +268,23 @@ Item {
         }
     }
 
-    component SpecialWsDelegate: ColumnLayout {
+    component SpecialWsDelegate: GridLayout {
         id: ws
 
         required property HyprlandWorkspace modelData
-        readonly property int size: label.Layout.preferredHeight + (hasWindows ? windows.implicitHeight + Tokens.padding.extraSmall : 0)
+        readonly property int size: (root.horizontal ? label.Layout.preferredWidth : label.Layout.preferredHeight) + (hasWindows ? (root.horizontal ? windows.implicitWidth : windows.implicitHeight) + Tokens.padding.extraSmall : 0)
         property int wsId
         property string icon
         property bool hasWindows
 
-        anchors.left: view.contentItem.left
-        anchors.right: view.contentItem.right
+        anchors.top: root.horizontal ? view.contentItem.top : undefined
+        anchors.bottom: root.horizontal ? view.contentItem.bottom : undefined
+        anchors.left: root.horizontal ? undefined : view.contentItem.left
+        anchors.right: root.horizontal ? undefined : view.contentItem.right
 
-        spacing: 0
+        columns: root.horizontal ? -1 : 1
+        rowSpacing: 0
+        columnSpacing: 0
 
         Component.onCompleted: {
             wsId = modelData.id;
@@ -287,8 +326,9 @@ Item {
 
             asynchronous: true
 
-            Layout.alignment: Qt.AlignHCenter | Qt.AlignTop
-            Layout.preferredHeight: Tokens.sizes.bar.innerWidth - Tokens.padding.small
+            Layout.alignment: root.horizontal ? Qt.AlignVCenter | Qt.AlignLeft : Qt.AlignHCenter | Qt.AlignTop
+            Layout.preferredWidth: root.horizontal ? Tokens.sizes.bar.innerWidth - Tokens.padding.small : -1
+            Layout.preferredHeight: root.horizontal ? -1 : Tokens.sizes.bar.innerWidth - Tokens.padding.small
 
             sourceComponent: ws.icon.length === 1 ? letterComp : iconComp
 
@@ -317,14 +357,17 @@ Item {
 
             asynchronous: true
 
-            Layout.alignment: Qt.AlignHCenter
-            Layout.fillHeight: true
-            Layout.preferredHeight: implicitHeight
+            Layout.alignment: root.horizontal ? Qt.AlignVCenter : Qt.AlignHCenter
+            Layout.fillWidth: root.horizontal
+            Layout.fillHeight: !root.horizontal
+            Layout.preferredWidth: root.horizontal ? implicitWidth : -1
+            Layout.preferredHeight: root.horizontal ? -1 : implicitHeight
 
             visible: active
             active: ws.hasWindows
 
-            sourceComponent: Column {
+            sourceComponent: Grid {
+                columns: root.horizontal ? items.count : 1
                 spacing: 0
 
                 add: Transition {
@@ -348,6 +391,8 @@ Item {
                 }
 
                 Repeater {
+                    id: items
+
                     model: ScriptModel {
                         values: {
                             const windows = Hypr.toplevels.values.filter(c => c.workspace?.id === ws.wsId);
@@ -367,6 +412,10 @@ Item {
             }
 
             Behavior on Layout.preferredHeight {
+                Anim {}
+            }
+
+            Behavior on Layout.preferredWidth {
                 Anim {}
             }
         }

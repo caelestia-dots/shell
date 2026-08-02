@@ -1,11 +1,38 @@
 pragma ComponentBehavior: Bound
 
+import QtQuick
 import QtQuick.Layouts
 import Caelestia.Config
+import qs.components.controls
 import qs.modules.nexus.common
 
 PageBase {
     id: root
+
+    // Bar edges + the config value each maps to
+    readonly property list<MenuItem> positionItems: [
+        MenuItem {
+            text: qsTr("Left")
+        },
+        MenuItem {
+            text: qsTr("Top")
+        },
+        MenuItem {
+            text: qsTr("Bottom")
+        }
+    ]
+    readonly property var positionValues: ["left", "top", "bottom"]
+
+    // Dashboard edges + the config value each maps to
+    readonly property list<MenuItem> dashboardItems: [
+        MenuItem {
+            text: qsTr("Top")
+        },
+        MenuItem {
+            text: qsTr("Left")
+        }
+    ]
+    readonly property var dashboardValues: ["top", "left"]
 
     title: qsTr("Taskbar")
     isSubPage: true
@@ -16,9 +43,32 @@ PageBase {
         width: root.cappedWidth
         spacing: Tokens.spacing.extraSmall / 2
 
-        // Behaviour
+        // Layout
         SectionHeader {
             first: true
+            text: qsTr("Layout")
+        }
+
+        SelectRow {
+            first: true
+            label: qsTr("Position")
+            subtext: qsTr("Which screen edge the bar sits on")
+            menuItems: root.positionItems
+            active: root.positionItems[Math.max(0, root.positionValues.indexOf(Config.bar.position))]
+            onSelected: item => GlobalConfig.bar.position = root.positionValues[root.positionItems.indexOf(item)]
+        }
+
+        SelectRow {
+            last: true
+            label: qsTr("Dashboard")
+            subtext: qsTr("Which edge the dashboard opens from")
+            menuItems: root.dashboardItems
+            active: root.dashboardItems[Math.max(0, root.dashboardValues.indexOf(Config.dashboard.position))]
+            onSelected: item => GlobalConfig.dashboard.position = root.dashboardValues[root.dashboardItems.indexOf(item)]
+        }
+
+        // Behaviour
+        SectionHeader {
             text: qsTr("Behaviour")
         }
 
