@@ -176,12 +176,30 @@ QString ConfigList::childPath(const ConfigNode* child) const {
 }
 
 void ConfigList::populate(const QJsonArray& arr) {
-    destroyItems();
+    // Every reload runs through here, so an edit elsewhere in the file must be a no-op
+    const auto current = elementsToJson();
+    if (current == arr)
+        return;
 
-    for (const auto& val : arr)
-        appendItem(val);
+    const auto old = m_items;
+    m_items.clear();
+    m_items.reserve(arr.size());
 
-    emit countChanged();
+    // Reuse elements that didn't change, recreating one resets the delegate bound to it
+    for (int i = 0; i < arr.size(); ++i) {
+        if (i < old.size() && current.at(i) == arr.at(i))
+            m_items.append(old.at(i));
+        else
+            appendItem(arr.at(i));
+    }
+
+    for (int i = 0; i < old.size(); ++i)
+        if (i >= arr.size() || current.at(i) != arr.at(i))
+            destroyItem(old.at(i));
+
+    if (m_items.size() != old.size())
+        emit countChanged();
+
     emit valuesChanged();
 
     // Persistence is gated on m_loaded, not on silence, so defaults still serialise to nothing
