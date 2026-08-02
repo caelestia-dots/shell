@@ -86,6 +86,10 @@ ListView {
         }
     }
 
+    Behavior on implicitHeight {
+        Anim {}
+    }
+
     component ListRow: Item {
         id: item
 
