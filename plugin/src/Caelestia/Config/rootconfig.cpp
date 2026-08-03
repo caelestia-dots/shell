@@ -25,69 +25,6 @@ bool RootConfig::recentlySaved() const {
     return m_recentlySaved;
 }
 
-QStringList RootConfig::collectUnknownKeys(const ConfigObject* obj, const QJsonObject& json) {
-    QStringList unknown;
-    const auto* meta = obj->metaObject();
-
-    QSet<QString> known;
-    for (int i = ConfigObject::basePropertyOffset(); i < meta->propertyCount(); ++i)
-        known.insert(QString::fromUtf8(meta->property(i).name()));
-
-    for (auto it = json.begin(); it != json.end(); ++it) {
-        if (!known.contains(it.key())) {
-            unknown.append(it.key());
-        } else if (it.value().isObject()) {
-            int idx = meta->indexOfProperty(it.key().toUtf8().constData());
-            if (idx >= 0) {
-                auto prop = meta->property(idx);
-                auto value = prop.read(obj);
-                auto* subObj = value.value<ConfigObject*>();
-                if (subObj) {
-                    const auto subUnknown = collectUnknownKeys(subObj, it.value().toObject());
-                    for (const auto& subKey : subUnknown)
-                        unknown.append(it.key() + QStringLiteral(".") + subKey);
-                }
-            }
-        }
-    }
-
-    return unknown;
-}
-
-void RootConfig::mergeUnknownKeys(const ConfigObject* obj, const QJsonObject& source, QJsonObject& target) {
-    const auto* meta = obj->metaObject();
-
-    QSet<QString> known;
-    for (int i = ConfigObject::basePropertyOffset(); i < meta->propertyCount(); ++i)
-        known.insert(QString::fromUtf8(meta->property(i).name()));
-
-    for (auto it = source.begin(); it != source.end(); ++it) {
-        if (!known.contains(it.key())) {
-            if (!target.contains(it.key()))
-                target.insert(it.key(), it.value());
-            continue;
-        }
-
-        if (!it.value().isObject())
-            continue;
-
-        int idx = meta->indexOfProperty(it.key().toUtf8().constData());
-        if (idx < 0)
-            continue;
-
-        auto prop = meta->property(idx);
-        auto* subObj = prop.read(obj).value<ConfigObject*>();
-        if (!subObj)
-            continue;
-
-        auto childTarget = target.value(it.key()).toObject();
-        mergeUnknownKeys(subObj, it.value().toObject(), childTarget);
-
-        if (!childTarget.isEmpty())
-            target.insert(it.key(), childTarget);
-    }
-}
-
 void RootConfig::setupFileBackend(const QString& path, const QString& screen) {
     m_filePath = path;
     m_screen = screen;
@@ -114,8 +51,7 @@ void RootConfig::setupFileBackend(const QString& path, const QString& screen) {
             return;
         }
 
-        auto json = toJsonObject();
-        mergeUnknownKeys(this, m_lastLoadedJson, json);
+        const auto json = toJson().toObject();
         file.write(QJsonDocument(json).toJson(QJsonDocument::Indented));
         file.close();
 
@@ -155,21 +91,24 @@ void RootConfig::setupFileBackend(const QString& path, const QString& screen) {
     });
 }
 
-void RootConfig::connectAutoSave(ConfigObject* obj) {
-    connect(obj, &ConfigObject::propertiesChanged, this, [this] {
+void RootConfig::markLoadFailed() {
+    m_loadFailed = true;
+
+    // A queued save would write memory over a file that could not be read
+    if (m_saveTimer)
+        m_saveTimer->stop();
+}
+
+void RootConfig::connectAutoSave(ConfigNode* node) {
+    connect(node, &ConfigNode::propertiesChanged, this, [this] {
         if (!m_loading)
             saveToFile();
     });
 
-    // Recurse into sub-objects
-    const auto* meta = obj->metaObject();
-    for (int i = ConfigObject::basePropertyOffset(); i < meta->propertyCount(); ++i) {
-        auto prop = meta->property(i);
-        auto value = prop.read(obj);
-        auto* subObj = value.value<ConfigObject*>();
-        if (subObj)
-            connectAutoSave(subObj);
-    }
+    // Recurse into child nodes
+    const auto children = node->childNodes();
+    for (auto* const child : children)
+        connectAutoSave(child);
 }
 
 void RootConfig::updateWatch() {
@@ -227,6 +166,20 @@ QString RootConfig::fileSignature() const {
 void RootConfig::saveToFile() {
     if (!m_saveTimer)
         return;
+
+    if (m_loadFailed) {
+        qCWarning(lcConfig) << "Not saving" << m_filePath << "- last load failed";
+
+        // Saves are attempted on every change, so only report the first one
+        if (!m_saveBlockedNotified) {
+            m_saveBlockedNotified = true;
+            emit saveFailed(
+                QStringLiteral("Not overwriting %1 until the last load error is fixed").arg(m_filePath), m_screen);
+        }
+
+        return;
+    }
+
     m_saveTimer->start();
     m_recentlySaved = true;
     m_cooldownTimer->start();
@@ -234,6 +187,8 @@ void RootConfig::saveToFile() {
 
 std::optional<QString> RootConfig::reloadFromFile() {
     m_lastSignature = fileSignature();
+    m_loadFailed = false;
+    m_saveBlockedNotified = false;
 
     QFile file(m_filePath);
 
@@ -243,6 +198,7 @@ std::optional<QString> RootConfig::reloadFromFile() {
     }
 
     if (!file.open(QIODevice::ReadOnly)) {
+        markLoadFailed();
         auto err = QStringLiteral("Failed to open %1: %2").arg(m_filePath, file.errorString());
         qCDebug(lcConfig, "%s", qUtf8Printable(err));
         return err;
@@ -252,6 +208,8 @@ std::optional<QString> RootConfig::reloadFromFile() {
     auto doc = QJsonDocument::fromJson(file.readAll(), &error);
 
     if (error.error != QJsonParseError::NoError) {
+        markLoadFailed();
+
         if (m_retryTimer && m_parseRetries < 3) {
             m_parseRetries++;
             qCDebug(lcConfig, "Failed to parse %s: %s - retrying (%d/3)", qUtf8Printable(m_filePath),
@@ -273,14 +231,12 @@ std::optional<QString> RootConfig::reloadFromFile() {
 
     clearLoadedKeys();
 
-    auto jsonObj = doc.object();
-    m_lastLoadedJson = jsonObj;
-    loadFromJson(jsonObj);
+    loadFromJson(doc.object());
 
     m_loading = false;
 
     // Collect unknown keys — caller is responsible for emitting signals
-    m_lastUnknownKeys = collectUnknownKeys(this, jsonObj);
+    m_lastUnknownKeys = unknownKeys();
 
     return QString(); // success
 }
