@@ -159,9 +159,9 @@ ColumnLayout {
             Repeater {
                 model: ScriptModel {
                     values: {
-                        const ws = root.ws;
+                        const ws = root.ws; // qmllint disable unqualified
                         const windows = Hypr.toplevels.values.filter(c => c.workspace && c.workspace.id === ws);
-                        const maxIcons = root.Config.bar.workspaces.maxWindowIcons;
+                        const maxIcons = Config.bar.workspaces.maxWindowIcons;
                         return maxIcons > 0 ? windows.slice(0, maxIcons) : windows;
                     }
                 }
