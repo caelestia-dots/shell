@@ -41,11 +41,16 @@ PageBase {
                 return label.charAt(0).toUpperCase() + label.slice(1).toLowerCase();
             }
 
+            function toggledFor(item: var): bool {
+                return item.enabled;
+            }
+
             z: 1
             first: true
             values: Config.bar.statusIcons.values
             onItemMoved: (from, to) => GlobalConfig.bar.statusIcons.move(from, to)
             onItemRemoved: index => GlobalConfig.bar.statusIcons.remove(index)
+            onItemToggled: (item, checked) => item.enabled = checked
         }
 
         DialogSelectButton {

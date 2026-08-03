@@ -17,13 +17,13 @@ ListView {
 
     signal itemMoved(from: int, to: int)
     signal itemRemoved(index: int)
-    signal editItem(item: var)
+    signal itemToggled(item: var, checked: bool)
 
     function labelFor(item: var): string {
         return item.label;
     }
 
-    function canEdit(item: var): bool {
+    function toggledFor(item: var): bool {
         return false;
     }
 
@@ -123,7 +123,6 @@ ListView {
                 itemBg.color: Colours.palette.m3tertiaryContainer
                 dragIcon.color: Colours.palette.m3onTertiaryContainer
                 label.color: Colours.palette.m3onTertiaryContainer
-                editButton.inactiveOnColour: Colours.palette.m3onTertiaryContainer
                 deleteButton.inactiveOnColour: Colours.palette.m3onError
             }
         }
@@ -292,7 +291,7 @@ ListView {
                     id: dragIcon
 
                     text: "drag_indicator"
-                    color: Colours.palette.m3onSurfaceVariant
+                    color: Qt.alpha(Colours.palette.m3onSurfaceVariant, enabledSwitch.checked ? 1 : 0.5)
                     fontStyle: Tokens.font.icon.medium
                 }
 
@@ -301,21 +300,16 @@ ListView {
 
                     Layout.fillWidth: true
                     text: root.labelFor(item.modelData)
+                    color: Qt.alpha(Colours.palette.m3onSurface, enabledSwitch.checked ? 1 : 0.5)
                     elide: Text.ElideRight
                 }
 
-                IconButton {
-                    id: editButton
+                StyledSwitch {
+                    id: enabledSwitch
 
-                    visible: root.canEdit(item.modelData)
-                    type: IconButton.Text
-                    isRound: true
-                    icon: "edit"
-                    inactiveOnColour: Colours.palette.m3onSurfaceVariant
+                    checked: root.toggledFor(item.modelData)
                     font: Tokens.font.icon.medium
-                    label.fill: 0
-
-                    onClicked: root.editItem(item.modelData)
+                    onToggled: root.itemToggled(item.modelData, checked)
                 }
 
                 IconButton {
