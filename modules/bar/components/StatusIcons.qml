@@ -17,6 +17,29 @@ StyledRect {
 
     readonly property int spacing: Tokens.spacing.medium / 2
 
+    // Index of the first/last entry that isn't collapsed, for edge margin gating
+    readonly property int firstPresent: {
+        const values = model.values;
+        for (let i = 0; i < values.length; i++)
+            if (!collapsed(values[i]))
+                return i;
+        return -1;
+    }
+    readonly property int lastPresent: {
+        const values = model.values;
+        for (let i = values.length - 1; i >= 0; i--)
+            if (!collapsed(values[i]))
+                return i;
+        return -1;
+    }
+
+    // Entries that can shrink to nothing, spacing included
+    function collapsed(entry: var): bool {
+        if (entry.id === "lockStatus")
+            return !Hypr.capsLock && !Hypr.numLock;
+        return false;
+    }
+
     color: Colours.tPalette.m3surfaceContainer
     radius: Tokens.rounding.full
 
@@ -35,8 +58,6 @@ StyledRect {
         spacing: 0
 
         Repeater {
-            id: repeater
-
             model: ScriptModel {
                 id: model
 
@@ -49,15 +70,6 @@ StyledRect {
                 DelegateChoice {
                     roleValue: "lockStatus"
                     delegate: EntryWrapper {
-                        margin: Hypr.capsLock || Hypr.numLock ? root.spacing / 2 : 0
-                        Layout.bottomMargin: margin
-
-                        Behavior on margin {
-                            Anim {
-                                type: Anim.SlowEffects
-                            }
-                        }
-
                         LockStatus {
                             colour: root.colour
                             parentSpacing: root.spacing
@@ -138,26 +150,31 @@ StyledRect {
         required property var modelData
         required property int index
         property int margin: root.spacing / 2
+        readonly property bool present: !root.collapsed(modelData)
+        property real topGap: present && index !== root.firstPresent ? margin : 0
+        property real bottomGap: present && index !== root.lastPresent ? margin : 0
         default property Item item
         property string name: modelData.id.toLowerCase()
 
-        Layout.topMargin: {
-            if (index === 0)
-                return 0;
-            model.values; // Force update on model changed
-            return ((repeater.itemAt(index - 1) as EntryWrapper)?.margin ?? 0);
-        }
-        Layout.bottomMargin: {
-            if (index === repeater.count - 1)
-                return 0;
-            model.values; // Force update on model changed
-            return ((repeater.itemAt(index + 1) as EntryWrapper)?.margin ?? 0);
-        }
+        Layout.topMargin: Math.round(topGap)
+        Layout.bottomMargin: Math.round(bottomGap)
         Layout.alignment: Qt.AlignHCenter
 
         implicitWidth: item?.implicitWidth ?? 0
         implicitHeight: item?.implicitHeight ?? 0
 
         children: item
+
+        Behavior on topGap {
+            Anim {
+                type: Anim.SlowEffects
+            }
+        }
+
+        Behavior on bottomGap {
+            Anim {
+                type: Anim.SlowEffects
+            }
+        }
     }
 }

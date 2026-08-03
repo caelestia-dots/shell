@@ -9,9 +9,25 @@ ColumnLayout {
     required property color colour
     required property int parentSpacing
 
-    spacing: Hypr.capsLock && Hypr.numLock ? root.parentSpacing : 0
+    property real gap: Hypr.capsLock && Hypr.numLock ? parentSpacing : 0
+    property real capsHeight: Hypr.capsLock ? capslockIcon.implicitHeight : 0
+    property real numHeight: Hypr.numLock ? numlockIcon.implicitHeight : 0
 
-    Behavior on spacing {
+    spacing: Math.round(gap)
+
+    Behavior on gap {
+        Anim {
+            type: Anim.SlowEffects
+        }
+    }
+
+    Behavior on capsHeight {
+        Anim {
+            type: Anim.SlowEffects
+        }
+    }
+
+    Behavior on numHeight {
         Anim {
             type: Anim.SlowEffects
         }
@@ -19,7 +35,7 @@ ColumnLayout {
 
     Item {
         implicitWidth: capslockIcon.implicitWidth
-        implicitHeight: Hypr.capsLock ? capslockIcon.implicitHeight : 0
+        implicitHeight: Math.round(root.capsHeight)
 
         MaterialIcon {
             id: capslockIcon
@@ -44,17 +60,11 @@ ColumnLayout {
                 Anim {}
             }
         }
-
-        Behavior on implicitHeight {
-            Anim {
-                type: Anim.SlowEffects
-            }
-        }
     }
 
     Item {
         implicitWidth: numlockIcon.implicitWidth
-        implicitHeight: Hypr.numLock ? numlockIcon.implicitHeight : 0
+        implicitHeight: Math.round(root.numHeight)
 
         MaterialIcon {
             id: numlockIcon
@@ -77,12 +87,6 @@ ColumnLayout {
 
             Behavior on scale {
                 Anim {}
-            }
-        }
-
-        Behavior on implicitHeight {
-            Anim {
-                type: Anim.SlowEffects
             }
         }
     }
