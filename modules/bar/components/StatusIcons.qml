@@ -38,6 +38,8 @@ StyledRect {
             id: repeater
 
             model: ScriptModel {
+                id: model
+
                 values: root.Config.bar.statusIcons.values.filter(e => e.enabled)
             }
 
@@ -139,8 +141,18 @@ StyledRect {
         default property Item item
         property string name: modelData.id.toLowerCase()
 
-        Layout.topMargin: index === 0 ? 0 : ((repeater.itemAt(index - 1) as EntryWrapper)?.margin ?? 0)
-        Layout.bottomMargin: index === repeater.count - 1 ? 0 : ((repeater.itemAt(index + 1) as EntryWrapper)?.margin ?? 0)
+        Layout.topMargin: {
+            if (index === 0)
+                return 0;
+            model.values; // Force update on model changed
+            return ((repeater.itemAt(index - 1) as EntryWrapper)?.margin ?? 0);
+        }
+        Layout.bottomMargin: {
+            if (index === repeater.count - 1)
+                return 0;
+            model.values; // Force update on model changed
+            return ((repeater.itemAt(index + 1) as EntryWrapper)?.margin ?? 0);
+        }
         Layout.alignment: Qt.AlignHCenter
 
         implicitWidth: item?.implicitWidth ?? 0
