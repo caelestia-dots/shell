@@ -145,6 +145,10 @@ void ConfigObject::clearLoadedKeys() {
     }
 }
 
+QStringList ConfigObject::identityKeys() const {
+    return {};
+}
+
 QStringList ConfigObject::unknownKeys() const {
     auto keys = m_extras.keys();
 

@@ -17,7 +17,7 @@ ListView {
 
     signal itemMoved(from: int, to: int)
     signal itemRemoved(index: int)
-    signal itemToggled(item: var, checked: bool)
+    signal itemToggled(index: int, checked: bool)
 
     function labelFor(item: var): string {
         return item.label;
@@ -308,7 +308,7 @@ ListView {
 
                     checked: root.toggledFor(item.modelData)
                     font: Tokens.font.icon.medium
-                    onToggled: root.itemToggled(item.modelData, checked)
+                    onToggled: root.itemToggled(item.DelegateModel.itemsIndex, checked)
                 }
 
                 IconButton {

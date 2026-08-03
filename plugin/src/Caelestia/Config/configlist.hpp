@@ -57,6 +57,8 @@ protected:
 
 private:
     void populate(const QJsonArray& arr);
+    // Whether json is the same element as current, differing only in the values of its keys
+    [[nodiscard]] static bool sameElement(const ConfigObject* item, const QJsonValue& current, const QJsonValue& json);
     void appendItem(const QJsonValue& json);
     void destroyItems();
     void destroyItem(ConfigObject* item);
@@ -147,6 +149,8 @@ class ListEntry : public ConfigObject {
 public:
     explicit ListEntry(QObject* parent = nullptr)
         : ConfigObject(parent) {}
+
+    [[nodiscard]] QStringList identityKeys() const override { return { QStringLiteral("id") }; }
 };
 
 CONFIG_LIST_TYPE(ListEntry, EntryList)

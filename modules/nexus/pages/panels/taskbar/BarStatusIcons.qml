@@ -50,7 +50,7 @@ PageBase {
             values: Config.bar.statusIcons.values
             onItemMoved: (from, to) => GlobalConfig.bar.statusIcons.move(from, to)
             onItemRemoved: index => GlobalConfig.bar.statusIcons.remove(index)
-            onItemToggled: (item, checked) => item.enabled = checked
+            onItemToggled: (index, checked) => GlobalConfig.bar.statusIcons.at(index).enabled = checked
         }
 
         DialogSelectButton {
