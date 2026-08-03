@@ -16,6 +16,7 @@ ColumnLayout {
     required property int activeWsId
     required property var occupied
     required property int groupOffset
+    required property bool shouldShow
 
     readonly property bool isWorkspace: true // Flag for finding workspace children
     // Unanimated prop for others to use as reference
@@ -26,6 +27,11 @@ ColumnLayout {
     readonly property bool hasWindows: isOccupied && Config.bar.workspaces.showWindows && (Config.bar.workspaces.maxWindowIcons > 0)
     readonly property bool focused: activeWsId === ws
     readonly property list<int> focusedShapeList: [MaterialShape.Slanted, MaterialShape.Oval, MaterialShape.Pill, MaterialShape.Triangle, MaterialShape.Arrow, MaterialShape.Diamond, MaterialShape.Pentagon, MaterialShape.Gem, MaterialShape.VerySunny, MaterialShape.Sunny, MaterialShape.Cookie4Sided, MaterialShape.Cookie6Sided, MaterialShape.Cookie7Sided, MaterialShape.Cookie9Sided, MaterialShape.Cookie12Sided, MaterialShape.Clover4Leaf, MaterialShape.SoftBurst, MaterialShape.Ghostish]
+
+    readonly property real revealProgress: Math.max(0, Math.min(1, reveal))
+
+    property real reveal: shouldShow ? 1 : 0
+    property real animatedSize: size
 
     function updateShape(): void {
         const shape = indicator.item as MaterialShape;
@@ -39,7 +45,11 @@ ColumnLayout {
     }
 
     Layout.alignment: Qt.AlignHCenter
-    Layout.preferredHeight: size
+    Layout.preferredHeight: animatedSize * revealProgress
+
+    visible: shouldShow || revealProgress > 0
+    opacity: revealProgress
+    clip: true
 
     spacing: 0
 
@@ -171,7 +181,19 @@ ColumnLayout {
         }
     }
 
-    Behavior on Layout.preferredHeight {
+    Behavior on animatedSize {
         Anim {}
+    }
+
+    Behavior on reveal {
+        SequentialAnimation {
+            PauseAnimation {
+                duration: (root.shouldShow ? root.index : (root.Config.bar.workspaces.shown - root.index - 1)) * 20
+            }
+
+            Anim {
+                type: root.shouldShow ? Anim.FastEffects : Anim.DefaultEffects
+            }
+        }
     }
 }
