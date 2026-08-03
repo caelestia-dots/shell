@@ -1,4 +1,4 @@
-// // pragma ComponentBehavior: Bound
+pragma ComponentBehavior: Bound
 
 import QtQuick
 import QtQuick.Layouts
@@ -124,6 +124,8 @@ ColumnLayout {
     Loader {
         id: windows
 
+        property int ws: root.ws
+
         asynchronous: true
 
         Layout.alignment: Qt.AlignHCenter
@@ -134,6 +136,10 @@ ColumnLayout {
         active: root.hasWindows
 
         sourceComponent: Column {
+            id: col
+
+            required property int ws
+
             spacing: 0
 
             add: Transition {
@@ -151,6 +157,7 @@ ColumnLayout {
                     to: 1
                     easing: Tokens.anim.standardDecel
                 }
+
                 Anim {
                     properties: "x,y"
                 }
@@ -159,10 +166,9 @@ ColumnLayout {
             Repeater {
                 model: ScriptModel {
                     values: {
-                        const ws = root.ws; // qmllint disable unqualified
-                        const windows = Hypr.toplevels.values.filter(c => c.workspace && c.workspace.id === ws);
+                        const windowsList = Hypr.toplevels.values.filter(c => c.workspace && c.workspace.id === col.ws);
                         const maxIcons = Config.bar.workspaces.maxWindowIcons;
-                        return maxIcons > 0 ? windows.slice(0, maxIcons) : windows;
+                        return maxIcons > 0 ? windowsList.slice(0, maxIcons) : windowsList;
                     }
                 }
 
