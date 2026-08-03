@@ -34,7 +34,6 @@ signals:
     void unknownOption(const QString& key, const QString& screen);
 
 private:
-    static QStringList collectUnknownKeys(const ConfigObject* obj, const QJsonObject& json);
     void emitLoadSignals(const std::optional<QString>& result, bool emitLoaded = true);
     void updateWatch();
     void onWatcherEvent();
@@ -42,7 +41,9 @@ private:
     // directory events caused by unrelated sibling files.
     [[nodiscard]] QString fileSignature() const;
 
-    void connectAutoSave(ConfigObject* obj);
+    void connectAutoSave(ConfigNode* node);
+    // Blocks saving until a load succeeds, memory no longer represents the file
+    void markLoadFailed();
 
     QString m_filePath;
     QString m_screen;
@@ -50,6 +51,8 @@ private:
     QString m_lastSignature;
     bool m_recentlySaved = false;
     bool m_loading = false;
+    bool m_loadFailed = false;
+    bool m_saveBlockedNotified = false;
 
     QFileSystemWatcher* m_watcher = nullptr;
     QTimer* m_saveTimer = nullptr;

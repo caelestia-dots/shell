@@ -1,5 +1,6 @@
 #pragma once
 
+#include "configlist.hpp"
 #include "configobject.hpp"
 
 #include <qstring.h>
@@ -137,17 +138,17 @@ class BarConfig : public ConfigObject {
     CONFIG_SUBOBJECT(BarTray, tray)
     CONFIG_SUBOBJECT(BarStatus, status)
     CONFIG_SUBOBJECT(BarClock, clock)
-    CONFIG_PROPERTY(QVariantList, entries,
+    CONFIG_LIST(EntryList, entries,
         {
-            vmap({ { u"id"_s, u"logo"_s }, { u"enabled"_s, true } }),
-            vmap({ { u"id"_s, u"workspaces"_s }, { u"enabled"_s, true } }),
-            vmap({ { u"id"_s, u"spacer"_s }, { u"enabled"_s, true } }),
-            vmap({ { u"id"_s, u"activeWindow"_s }, { u"enabled"_s, true } }),
-            vmap({ { u"id"_s, u"spacer"_s }, { u"enabled"_s, true } }),
-            vmap({ { u"id"_s, u"tray"_s }, { u"enabled"_s, true } }),
-            vmap({ { u"id"_s, u"clock"_s }, { u"enabled"_s, true } }),
-            vmap({ { u"id"_s, u"statusIcons"_s }, { u"enabled"_s, true } }),
-            vmap({ { u"id"_s, u"power"_s }, { u"enabled"_s, true } }),
+            LIST_ENTRY(logo, true),
+            LIST_ENTRY(workspaces, true),
+            LIST_ENTRY(spacer, true),
+            LIST_ENTRY(activeWindow, true),
+            LIST_ENTRY(spacer, true),
+            LIST_ENTRY(tray, true),
+            LIST_ENTRY(clock, true),
+            LIST_ENTRY(statusIcons, true),
+            LIST_ENTRY(power, true),
         })
     CONFIG_PROPERTY(QStringList, excludedScreens)
 

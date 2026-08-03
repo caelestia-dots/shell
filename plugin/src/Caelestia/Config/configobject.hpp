@@ -1,13 +1,10 @@
 #pragma once
 
+#include "confignode.hpp"
+
 #include <qjsonobject.h>
-#include <qloggingcategory.h>
-#include <qmap.h>
-#include <qobject.h>
 #include <qqmlintegration.h>
 #include <qset.h>
-#include <qtimer.h>
-#include <qvariant.h>
 
 namespace caelestia::config {
 
@@ -84,33 +81,25 @@ private:                                                                        
 
 namespace caelestia::config {
 
-Q_DECLARE_LOGGING_CATEGORY(lcConfig)
-
-class ConfigObject : public QObject {
+// A node whose state lives in its declared properties.
+class ConfigObject : public ConfigNode {
     Q_OBJECT
 
 public:
     explicit ConfigObject(QObject* parent = nullptr);
 
-    void loadFromJson(const QJsonObject& obj);
-    [[nodiscard]] QJsonObject toJsonObject() const;
-
-    // Per-monitor overlay support (Qt Resolve Mask pattern).
-    void syncFromGlobal(ConfigObject* global);
-    void resyncFromGlobal();
-    void clearLoadedKeys();
+    void loadFromJson(const QJsonValue& json) override;
+    [[nodiscard]] QJsonValue toJson() const override;
+    void clearLoadedKeys() override;
+    [[nodiscard]] QStringList unknownKeys() const override;
+    [[nodiscard]] QList<ConfigNode*> childNodes() const override;
+    void resyncFromGlobal() override;
 
     [[nodiscard]] bool isPropertyLoaded(const QString& name) const;
-    [[nodiscard]] QString propertyPath(const QString& name) const;
-
-    // First property index past QObject's own (objectName). ConfigObject declares no
-    // properties, so this is where every subclass's config properties begin — including
-    // ones inherited from an intermediate config class (e.g. IconFontStyleConfig). Use
-    // this instead of metaObject()->propertyOffset(), which excludes inherited properties.
-    [[nodiscard]] static int basePropertyOffset();
-    [[nodiscard]] bool isOverlay() const;
     // Returns true only on overlays — global singleton always returns false.
     [[nodiscard]] bool isGlobalOnly(const QString& name) const;
+    // Names marked global-only, regardless of overlay state
+    [[nodiscard]] QStringList globalOnlyKeys() const;
 
     Q_INVOKABLE void resetOption(const QString& name);
 
@@ -126,24 +115,19 @@ public:
         return true;
     }
 
-signals:
-    void propertiesChanged(const QMap<QString, QVariant>& changed);
-
 protected:
+    void syncValuesFromGlobal() override;
+    void onGlobalPropertiesChanged(const QMap<QString, QVariant>& changed) override;
+    [[nodiscard]] QString childPath(const ConfigNode* child) const override;
+
     void markPropertyLoaded(const QString& name);
     void markGlobalOnly(const QString& name);
-    void notifyPropertyChanged(const QString& name, const QVariant& value);
 
 private:
-    void onGlobalPropertiesChanged(const QMap<QString, QVariant>& changed);
-    void emitBatchedChanges();
-
-    // Per-monitor overlay state
-    ConfigObject* m_global = nullptr;
     QSet<QString> m_loadedKeys;
     QSet<QString> m_globalOnlyKeys;
-    QMap<QString, QVariant> m_pendingChanges;
-    QTimer* m_batchTimer = nullptr;
+    // Loaded keys matching no property, kept verbatim so a save does not drop them
+    QJsonObject m_extras;
 };
 
 } // namespace caelestia::config

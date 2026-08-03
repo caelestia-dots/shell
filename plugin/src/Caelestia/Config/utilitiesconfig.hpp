@@ -1,5 +1,6 @@
 #pragma once
 
+#include "configlist.hpp"
 #include "configobject.hpp"
 
 #include <qstring.h>
@@ -38,9 +39,23 @@ class UtilitiesVpn : public ConfigObject {
 
     CONFIG_GLOBAL_PROPERTY(bool, enabled, false)
     CONFIG_GLOBAL_PROPERTY(QVariantList, provider)
+    CONFIG_GLOBAL_PROPERTY(QString, selectedProvider, u""_s)
 
 public:
     explicit UtilitiesVpn(QObject* parent = nullptr)
+        : ConfigObject(parent) {}
+};
+
+class UtilitiesCards : public ConfigObject {
+    Q_OBJECT
+    QML_ANONYMOUS
+
+    CONFIG_PROPERTY(bool, keepAwake, true)
+    CONFIG_PROPERTY(bool, recorder, true)
+    CONFIG_PROPERTY(bool, quickToggles, true)
+
+public:
+    explicit UtilitiesCards(QObject* parent = nullptr)
         : ConfigObject(parent) {}
 };
 
@@ -50,22 +65,24 @@ class UtilitiesConfig : public ConfigObject {
 
     CONFIG_PROPERTY(bool, enabled, true)
     CONFIG_PROPERTY(int, maxToasts, 4)
+    CONFIG_SUBOBJECT(UtilitiesCards, cards)
     CONFIG_SUBOBJECT(UtilitiesToasts, toasts)
     CONFIG_SUBOBJECT(UtilitiesVpn, vpn)
-    CONFIG_PROPERTY(QVariantList, quickToggles,
+    CONFIG_LIST(EntryList, quickToggles,
         {
-            vmap({ { u"id"_s, u"wifi"_s }, { u"enabled"_s, true } }),
-            vmap({ { u"id"_s, u"bluetooth"_s }, { u"enabled"_s, true } }),
-            vmap({ { u"id"_s, u"mic"_s }, { u"enabled"_s, true } }),
-            vmap({ { u"id"_s, u"settings"_s }, { u"enabled"_s, true } }),
-            vmap({ { u"id"_s, u"gameMode"_s }, { u"enabled"_s, true } }),
-            vmap({ { u"id"_s, u"dnd"_s }, { u"enabled"_s, true } }),
-            vmap({ { u"id"_s, u"vpn"_s }, { u"enabled"_s, false } }),
+            LIST_ENTRY(wifi, true),
+            LIST_ENTRY(bluetooth, true),
+            LIST_ENTRY(mic, true),
+            LIST_ENTRY(settings, true),
+            LIST_ENTRY(gameMode, true),
+            LIST_ENTRY(dnd, true),
+            LIST_ENTRY(vpn, false),
         })
 
 public:
     explicit UtilitiesConfig(QObject* parent = nullptr)
         : ConfigObject(parent)
+        , m_cards(new UtilitiesCards(this))
         , m_toasts(new UtilitiesToasts(this))
         , m_vpn(new UtilitiesVpn(this)) {}
 };

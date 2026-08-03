@@ -35,6 +35,8 @@
 }: let
   version = "1.0.0";
 
+  qs = quickshell.withModules [qt6.qtimageformats];
+
   runtimeDeps =
     [
       fish
@@ -134,7 +136,7 @@ in
     src = ./..;
 
     nativeBuildInputs = [cmake ninja makeWrapper qt6.wrapQtAppsHook];
-    buildInputs = [quickshell extras plugin m3shapesModule xkeyboard-config qt6.qtbase];
+    buildInputs = [qs extras plugin m3shapesModule xkeyboard-config qt6.qtbase];
     propagatedBuildInputs = runtimeDeps;
 
     cmakeFlags =
@@ -154,7 +156,7 @@ in
     '';
 
     postInstall = ''
-      makeWrapper ${quickshell}/bin/qs $out/bin/caelestia-shell \
+      makeWrapper ${qs}/bin/qs $out/bin/caelestia-shell \
       	--prefix PATH : "${lib.makeBinPath runtimeDeps}" \
       	--set FONTCONFIG_FILE "${fontconfig}" \
       	--set CAELESTIA_LIB_DIR ${extras}/lib \
