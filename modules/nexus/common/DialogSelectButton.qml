@@ -87,7 +87,7 @@ DialogRowButton {
 
                     text: "check"
                     color: Colours.palette.m3onTertiaryContainer
-                    font: Tokens.font.icon.medium
+                    fontStyle: Tokens.font.icon.medium
                     opacity: item.selected ? 1 : 0
 
                     Behavior on opacity {
