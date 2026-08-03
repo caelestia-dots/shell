@@ -3,17 +3,10 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import QtQuick.Layouts
 import Caelestia.Config
-import qs.components
-import qs.components.controls
-import qs.services
 import qs.modules.nexus.common
 
 PageBase {
     id: root
-
-    function normaliseActionPrefix(prefix: string): string {
-        return /^[^a-zA-Z0-9\s]$/.test(prefix) ? prefix : ">";
-    }
 
     title: qsTr("Launcher")
     isSubPage: true
@@ -44,75 +37,27 @@ PageBase {
             onToggled: GlobalConfig.launcher.showOnHover = checked
         }
 
-        Item {
-            Layout.fillWidth: true
-            Layout.preferredHeight: contentRow.implicitHeight + Tokens.padding.medium + (Tokens.padding.large - Tokens.padding.small) * 2
+        TextFieldRow {
+            id: prefixRow
 
-            ConnectedRect {
-                id: bg
-
-                anchors.fill: parent
-                last: true
+            function saveActionPrefix(): void {
+                GlobalConfig.launcher.actionPrefix = value;
+                if (GlobalConfig.launcher.actionPrefix === ">")
+                    clear();
             }
 
-            RowLayout {
-                id: contentRow
+            last: true
+            label: qsTr("Action Prefix")
+            subtext: qsTr("Prefix used to run actions in the launcher")
+            fieldWidth: 70
+            value: GlobalConfig.launcher.actionPrefix === ">" ? "" : GlobalConfig.launcher.actionPrefix
+            placeholderText: ">"
+            errorText: qsTr("Cannot be alphanumeric")
+            maximumLength: 1
+            validate: /^$|^[^a-zA-Z0-9\s]$/
 
-                anchors.left: parent.left
-                anchors.right: parent.right
-                anchors.verticalCenter: parent.verticalCenter
-                anchors.leftMargin: Tokens.padding.largeIncreased
-                anchors.rightMargin: Tokens.padding.medium
-                spacing: Tokens.spacing.medium
-
-                Column {
-                    Layout.fillWidth: true
-                    spacing: 0
-
-                    StyledText {
-                        text: qsTr("Action Prefix")
-                        font: Tokens.font.body.small
-                        elide: Text.ElideRight
-                    }
-
-                    StyledText {
-                        text: qsTr("Prefix used to run actions in the launcher")
-                        font: Tokens.font.label.small
-                        color: Colours.palette.m3outline
-                        elide: Text.ElideRight
-                    }
-                }
-
-                StyledTextField {
-                    id: prefixInput
-
-                    function saveActionPrefix(): void {
-                        const prefix = root.normaliseActionPrefix(text);
-                        GlobalConfig.launcher.actionPrefix = prefix;
-                        if (prefix === ">" && text)
-                            clear();
-                    }
-
-                    Layout.preferredWidth: 70
-                    Layout.alignment: Qt.AlignVCenter
-                    verticalPadding: Tokens.padding.small
-                    text: {
-                        const prefix = root.normaliseActionPrefix(GlobalConfig.launcher.actionPrefix);
-                        return prefix === ">" ? "" : prefix;
-                    }
-                    placeholderText: ">"
-                    maximumLength: 1
-                    validate: /^$|^[^a-zA-Z0-9\s]$/
-
-                    onTextEdited: saveActionPrefix()
-                    onEditingFinished: saveActionPrefix()
-                    Component.onCompleted: {
-                        const prefix = root.normaliseActionPrefix(GlobalConfig.launcher.actionPrefix);
-                        if (GlobalConfig.launcher.actionPrefix !== prefix)
-                            GlobalConfig.launcher.actionPrefix = prefix;
-                    }
-                }
-            }
+            onValueEdited: saveActionPrefix()
+            onEditingFinished: saveActionPrefix()
         }
 
         // Display
