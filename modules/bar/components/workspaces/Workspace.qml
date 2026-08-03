@@ -44,14 +44,7 @@ ColumnLayout {
         onActiveChanged: {
             const wasActive = prevActiveWsId === root.ws;
             if (active && !wasActive) {
-                const shapes = [
-                    MaterialShape.Slanted, MaterialShape.Arch, MaterialShape.Oval, MaterialShape.Pill,
-                    MaterialShape.Triangle, MaterialShape.Arrow, MaterialShape.Diamond, MaterialShape.Pentagon,
-                    MaterialShape.Gem, MaterialShape.VerySunny, MaterialShape.Sunny, MaterialShape.Cookie4Sided,
-                    MaterialShape.Cookie6Sided, MaterialShape.Cookie7Sided, MaterialShape.Cookie9Sided,
-                    MaterialShape.Cookie12Sided, MaterialShape.Clover4Leaf, MaterialShape.Clover8Leaf,
-                    MaterialShape.SoftBurst, MaterialShape.Ghostish
-                ];
+                const shapes = [MaterialShape.Slanted, MaterialShape.Arch, MaterialShape.Oval, MaterialShape.Pill, MaterialShape.Triangle, MaterialShape.Arrow, MaterialShape.Diamond, MaterialShape.Pentagon, MaterialShape.Gem, MaterialShape.VerySunny, MaterialShape.Sunny, MaterialShape.Cookie4Sided, MaterialShape.Cookie6Sided, MaterialShape.Cookie7Sided, MaterialShape.Cookie9Sided, MaterialShape.Cookie12Sided, MaterialShape.Clover4Leaf, MaterialShape.Clover8Leaf, MaterialShape.SoftBurst, MaterialShape.Ghostish];
                 const shuffled = [...shapes].sort(() => Math.random() - 0.5);
                 randShape = shuffled[0];
                 activateAnim.running = true;
