@@ -120,10 +120,9 @@ ListView {
                 item.radiusLerpProg: 1
                 placeholder.opacity: 0.1
                 elevation.opacity: 1
-                itemBg.color: Colours.palette.m3tertiaryContainer
-                dragIcon.color: Colours.palette.m3onTertiaryContainer
-                label.color: Colours.palette.m3onTertiaryContainer
-                deleteButton.inactiveOnColour: Colours.palette.m3onError
+                itemBg.color: Colours.palette.m3primaryContainer
+                dragIcon.color: Colours.palette.m3onPrimaryContainer
+                label.color: Colours.palette.m3onPrimaryContainer
             }
         }
 
@@ -147,7 +146,7 @@ ListView {
             id: placeholder
 
             anchors.fill: parent
-            color: Colours.palette.m3tertiaryContainer
+            color: Colours.palette.m3primary
             radius: Tokens.rounding.extraSmall
             topLeftRadius: item.topRadius
             topRightRadius: item.topRadius
@@ -313,8 +312,6 @@ ListView {
                 }
 
                 IconButton {
-                    id: deleteButton
-
                     type: IconButton.Text
                     isRound: true
                     icon: "delete"
