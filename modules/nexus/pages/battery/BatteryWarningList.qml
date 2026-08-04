@@ -7,7 +7,6 @@ import Caelestia.Config
 import qs.components
 import qs.components.controls
 import qs.services
-import qs.utils
 import qs.modules.nexus
 import qs.modules.nexus.common
 
@@ -25,8 +24,8 @@ ItemList {
 
     model: ScriptModel {
         values: {
-            const data = isLowWarning ? GlobalConfig.general.battery.lowBatteryWarnLevels : GlobalConfig.general.battery.chargingWarnLevels;
-            const values = [...data].sort((a, b) => isLowWarning ? b.level - a.level : a.level - b.level);
+            const data = root.isLowWarning ? GlobalConfig.general.battery.lowBatteryWarnLevels : GlobalConfig.general.battery.chargingWarnLevels;
+            const values = [...data].sort((a, b) => root.isLowWarning ? b.level - a.level : a.level - b.level);
             return values;
         }
     }
@@ -100,7 +99,7 @@ ItemList {
                             opacity: warningLayer.textOpacity
 
                             onClicked: {
-                                root.nState.lowWarningSelected = isLowWarning;
+                                root.nState.lowWarningSelected = root.isLowWarning;
                                 root.nState.selectedBatteryLevel = warningLayer.modelData;
                                 root.nState.openSubPage(1);
                             }
