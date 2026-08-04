@@ -18,6 +18,7 @@ ConnectedRect {
     property alias errorText: input.errorText
     property alias maximumLength: input.maximumLength
     property alias validate: input.validate
+    property alias validator: input.validator
     property int fieldWidth: Tokens.sizes.nexus.textFieldWidth
     property int fieldVerticalPadding: Tokens.padding.small
     readonly property alias field: input

@@ -41,8 +41,9 @@ PageBase {
             id: prefixRow
 
             function saveActionPrefix(): void {
-                GlobalConfig.launcher.actionPrefix = value;
-                if (GlobalConfig.launcher.actionPrefix === ">")
+                const prefix = value || "";
+                GlobalConfig.launcher.actionPrefix = prefix;
+                if (prefix === ">")
                     clear();
             }
 
@@ -54,7 +55,9 @@ PageBase {
             placeholderText: ">"
             errorText: qsTr("Cannot be alphanumeric")
             maximumLength: 1
-            validate: /^[^a-zA-Z0-9\s]$/
+            validator: RegularExpressionValidator {
+                regularExpression: /^[^a-zA-Z0-9\s]$/
+            }
 
             onValueEdited: saveActionPrefix()
             onEditingFinished: saveActionPrefix()
