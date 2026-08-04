@@ -693,14 +693,14 @@ For example, to disable the bar on DP-1:
     },
     "lock": {
         "enabled": true,
+        "useWallpaper": false,
         "recolourLogo": true,
         "enableFprint": true,
         "maxFprintTries": 3,
         "enableHowdy": true,
         "maxHowdyTries": 3,
         "triggerHowdyOnWake": true,
-        "hideNotifs": false,
-        "useWallpaper": false
+        "hideNotifs": false
     },
     "nexus": {
         "wallpapersPerRow": 4,
