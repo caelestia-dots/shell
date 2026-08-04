@@ -47,14 +47,14 @@ PageBase {
             }
 
             last: true
-            label: qsTr("Action Prefix")
+            label: qsTr("Action prefix")
             subtext: qsTr("Prefix used to run actions in the launcher")
             fieldWidth: 70
             value: GlobalConfig.launcher.actionPrefix === ">" ? "" : GlobalConfig.launcher.actionPrefix
             placeholderText: ">"
             errorText: qsTr("Cannot be alphanumeric")
             maximumLength: 1
-            validate: /^$|^[^a-zA-Z0-9\s]$/
+            validate: /^[^a-zA-Z0-9\s]$/
 
             onValueEdited: saveActionPrefix()
             onEditingFinished: saveActionPrefix()
