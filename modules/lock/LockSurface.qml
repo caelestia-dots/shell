@@ -172,7 +172,7 @@ WlSessionLockSurface {
 
         Loader {
             anchors.fill: parent
-            sourceComponent: Config.lock.useScreencopy ? screencopyBackground : wallpaperBackground
+            sourceComponent: Config.lock.useWallpaper ? wallpaperBackground : screencopyBackground
         }
     }
 
@@ -188,7 +188,7 @@ WlSessionLockSurface {
         id: wallpaperBackground
 
         CachingImage {
-            path: Wallpapers.current || Wallpapers.fallback
+            path: Wallpapers.current
         }
     }
 
