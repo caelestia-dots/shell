@@ -250,7 +250,7 @@ PageBase {
             ButtonBase {
                 id: deleteBtn
 
-                visible: !newLevelPage
+                visible: !root.newLevelPage
 
                 fillWidth: true
                 shapeMorph: true
@@ -263,7 +263,7 @@ PageBase {
                 implicitHeight: deleteBtnLayout.implicitHeight + Tokens.padding.medium * 2
 
                 onClicked: {
-                    deleteLevel();
+                    root.deleteLevel();
                     root.nState.closeSubPage();
                 }
 
@@ -290,7 +290,7 @@ PageBase {
             ButtonBase {
                 id: addBtn
 
-                visible: newLevelPage
+                visible: root.newLevelPage
 
                 fillWidth: true
                 shapeMorph: true
@@ -303,7 +303,7 @@ PageBase {
                 implicitHeight: addBtnLayout.implicitHeight + Tokens.padding.medium * 2
 
                 onClicked: {
-                    addLevel(batteryLevel);
+                    root.addLevel(batteryLevel);
                     root.nState.closeSubPage();
                 }
 
