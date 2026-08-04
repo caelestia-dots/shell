@@ -699,7 +699,8 @@ For example, to disable the bar on DP-1:
         "enableHowdy": true,
         "maxHowdyTries": 3,
         "triggerHowdyOnWake": true,
-        "hideNotifs": false
+        "hideNotifs": false,
+        "useScreencopy": true
     },
     "nexus": {
         "wallpapersPerRow": 4,
