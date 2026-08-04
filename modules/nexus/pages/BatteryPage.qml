@@ -4,10 +4,7 @@ import QtQuick
 import QtQuick.Layouts
 import Quickshell
 import Caelestia.Config
-import qs.components
-import qs.components.controls
 import qs.components.filedialog
-import qs.services
 import qs.utils
 import qs.modules.nexus.common
 import qs.modules.nexus.pages.battery
