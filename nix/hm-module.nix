@@ -72,6 +72,14 @@ in {
           description = "Caelestia CLI extra configs written to cli.json";
         };
       };
+      ydotool = {
+        enable = mkEnableOption "Enable ydotool daemon";
+        package = mkOption {
+          type = types.package;
+          default = pkgs.ydotool;
+          description = "ydotool package";
+        };
+      };
     };
   };
 
@@ -80,33 +88,54 @@ in {
     shell = cfg.package;
   in
     lib.mkIf cfg.enable {
-      systemd.user.services.caelestia = lib.mkIf cfg.systemd.enable {
-        Unit = {
-          Description = "Caelestia Shell Service";
-          After = [cfg.systemd.target];
-          PartOf = [cfg.systemd.target];
-          X-Restart-Triggers = lib.mkIf (cfg.settings != {}) [
-            "${config.xdg.configFile."caelestia/shell.json".source}"
-          ];
+      systemd.user.services = {
+        caelestia = lib.mkIf cfg.systemd.enable {
+          Unit = {
+            Description = "Caelestia Shell Service";
+            After = [cfg.systemd.target];
+            PartOf = [cfg.systemd.target];
+            X-Restart-Triggers = lib.mkIf (cfg.settings != {}) [
+              "${config.xdg.configFile."caelestia/shell.json".source}"
+            ];
+          };
+
+          Service = {
+            Type = "exec";
+            ExecStart = "${shell}/bin/caelestia-shell";
+            Restart = "on-failure";
+            RestartSec = "5s";
+            TimeoutStopSec = "5s";
+            Environment =
+              [
+                "QT_QPA_PLATFORM=wayland"
+                "YDOTOOL_SOCKET=%t/.ydotool_socket"
+              ]
+              ++ cfg.systemd.environment;
+
+            Slice = "session.slice";
+          };
+
+          Install = {
+            WantedBy = [cfg.systemd.target];
+          };
         };
 
-        Service = {
-          Type = "exec";
-          ExecStart = "${shell}/bin/caelestia-shell";
-          Restart = "on-failure";
-          RestartSec = "5s";
-          TimeoutStopSec = "5s";
-          Environment =
-            [
-              "QT_QPA_PLATFORM=wayland"
-            ]
-            ++ cfg.systemd.environment;
+        caelestia-ydotoold = lib.mkIf cfg.ydotool.enable {
+          Unit = {
+            Description = "ydotool daemon";
+            After = [cfg.systemd.target];
+            PartOf = [cfg.systemd.target];
+          };
 
-          Slice = "session.slice";
-        };
+          Service = {
+            Type = "simple";
+            ExecStart = "${cfg.ydotool.package}/bin/ydotoold --socket-path=%t/.ydotool_socket";
+            Restart = "on-failure";
+          };
 
-        Install = {
-          WantedBy = [cfg.systemd.target];
+          Install = {
+            WantedBy = [cfg.systemd.target];
+          };
         };
       };
 
