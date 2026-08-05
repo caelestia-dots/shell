@@ -7,11 +7,11 @@ import qs.components
 Item {
     id: root
 
-    required property DrawerVisibilities visibilities
+    required property ScreenState screenState
     required property bool sidebarVisible
     readonly property real nonAnimWidth: content.implicitWidth
 
-    readonly property bool shouldBeActive: visibilities.session && Config.session.enabled
+    readonly property bool shouldBeActive: screenState.session && Config.session.enabled
     property real offsetScale: shouldBeActive ? 0 : 1
     property real sidebarOffset: sidebarVisible ? 14 : 0
 
@@ -34,7 +34,7 @@ Item {
         active: root.shouldBeActive || root.visible
 
         sourceComponent: Content {
-            visibilities: root.visibilities
+            screenState: root.screenState
         }
     }
 }

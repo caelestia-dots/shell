@@ -13,7 +13,7 @@ Item {
     id: root
 
     required property real nonAnimWidth
-    required property DashboardState dashState
+    required property ScreenState screenState
     required property var tabs
 
     readonly property alias count: bar.count
@@ -28,8 +28,8 @@ Item {
         anchors.top: parent.top
         anchors.topMargin: Tokens.sizes.dashboard.tabIndicatorSpacing
 
-        currentIndex: root.dashState.currentTab
-        onCurrentIndexChanged: root.dashState.currentTab = currentIndex
+        currentIndex: root.screenState.dashboardTab
+        onCurrentIndexChanged: root.screenState.dashboardTab = currentIndex
 
         implicitHeight: contentHeight
         background: null
@@ -126,9 +126,9 @@ Item {
 
             function onWheel(event: WheelEvent): void {
                 if (event.angleDelta.y < 0)
-                    root.dashState.currentTab = Math.min(root.dashState.currentTab + 1, bar.count - 1);
+                    root.screenState.dashboardTab = Math.min(root.screenState.dashboardTab + 1, bar.count - 1);
                 else if (event.angleDelta.y > 0)
-                    root.dashState.currentTab = Math.max(root.dashState.currentTab - 1, 0);
+                    root.screenState.dashboardTab = Math.max(root.screenState.dashboardTab - 1, 0);
             }
 
             implicitWidth: Math.max(icon.width, label.width)
@@ -137,7 +137,7 @@ Item {
             hoverEnabled: true
             cursorShape: Qt.PointingHandCursor
 
-            onPressed: root.dashState.currentTab = tab.TabBar.index
+            onPressed: root.screenState.dashboardTab = tab.TabBar.index
 
             StateLayer {
                 id: stateLayer
@@ -150,7 +150,7 @@ Item {
 
                 radius: Tokens.rounding.medium
                 color: tab.current ? Colours.palette.m3primary : Colours.palette.m3onSurface
-                onClicked: root.dashState.currentTab = tab.TabBar.index
+                onClicked: root.screenState.dashboardTab = tab.TabBar.index
             }
 
             MaterialIcon {

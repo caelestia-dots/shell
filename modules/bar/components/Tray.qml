@@ -15,14 +15,17 @@ StyledRect {
     readonly property alias expandIcon: expandIcon
 
     readonly property int padding: Config.bar.tray.background ? Tokens.padding.medium : Tokens.padding.extraSmall
-    readonly property int spacing: Config.bar.tray.background ? Tokens.spacing.small : 0
+    readonly property int spacing: Config.bar.tray.background ? Tokens.spacing.medium : Tokens.spacing.extraSmall
 
     property bool expanded
 
     readonly property real nonAnimHeight: {
         if (!Config.bar.tray.compact)
             return layout.implicitHeight + padding * 2;
-        return (expanded ? expandIcon.implicitHeight + layout.implicitHeight + spacing : expandIcon.implicitHeight) + padding * 2;
+        const pad = (Config.bar.tray.background ? Tokens.padding.extraSmall : 0) + padding;
+        if (expanded)
+            return expandIcon.implicitHeight + layout.implicitHeight + spacing + pad;
+        return Math.max(Config.bar.tray.background ? width : 0, expandIcon.implicitHeight + pad);
     }
 
     clip: true
@@ -100,9 +103,10 @@ StyledRect {
 
                 anchors.horizontalCenter: parent.horizontalCenter
                 anchors.bottom: parent.bottom
-                anchors.bottomMargin: Config.bar.tray.background ? Tokens.padding.extraSmall : -Tokens.padding.extraSmall
+                anchors.bottomMargin: Config.bar.tray.background ? Tokens.padding.extraSmall : -Tokens.padding.small
                 text: "expand_less"
-                fontStyle: Tokens.font.icon.large
+                color: Colours.palette.m3onSurfaceVariant
+                fontStyle: Tokens.font.icon.medium
                 rotation: root.expanded ? 180 : 0
 
                 Behavior on rotation {

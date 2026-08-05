@@ -54,6 +54,23 @@ PageBase {
     function saveIpConfig(): void {
         if (!root.connectionName)
             return;
+
+        // Bail out and flag the offending field before touching nmcli.
+        if (root.ipMethod === "manual") {
+            if (!addressField.valid) {
+                addressField.isError = true;
+                return;
+            }
+            if (!gatewayField.valid) {
+                gatewayField.isError = true;
+                return;
+            }
+        }
+        if ((root.ipMethod === "manual" || root.ipMethod === "auto-dns") && !dnsField.valid) {
+            dnsField.isError = true;
+            return;
+        }
+
         root.savingIp = true;
         Nmcli.setIpv4Config(root.connectionName, {
             method: root.ipMethod,
@@ -233,40 +250,41 @@ PageBase {
             spacing: Tokens.spacing.large
             visible: root.ipMethod === "manual" || root.ipMethod === "auto-dns"
 
-            M3TextField {
+            StyledTextField {
                 id: addressField
 
                 Layout.fillWidth: true
                 visible: root.ipMethod === "manual"
-                label: qsTr("Address (CIDR)")
-                placeholder: qsTr("192.168.1.50/24")
+                placeholderText: qsTr("Address (CIDR)")
                 leadingIcon: "router"
                 supportingText: qsTr("IP and prefix, e.g. 192.168.1.50/24")
                 errorText: qsTr("Enter a valid address in CIDR notation")
                 inputMethodHints: Qt.ImhNoPredictiveText
+                validate: /^(?:(?:25[0-5]|2[0-4]\d|1?\d?\d)\.){3}(?:25[0-5]|2[0-4]\d|1?\d?\d)\/(?:3[0-2]|[12]?\d)$/
             }
 
-            M3TextField {
+            StyledTextField {
                 id: gatewayField
 
                 Layout.fillWidth: true
                 visible: root.ipMethod === "manual"
-                label: qsTr("Gateway")
-                placeholder: qsTr("192.168.1.1")
+                placeholderText: qsTr("Gateway")
                 leadingIcon: "exit_to_app"
+                errorText: qsTr("Enter a valid gateway address")
                 inputMethodHints: Qt.ImhNoPredictiveText
+                validate: /^$|^(?:(?:25[0-5]|2[0-4]\d|1?\d?\d)\.){3}(?:25[0-5]|2[0-4]\d|1?\d?\d)$/
             }
 
-            M3TextField {
+            StyledTextField {
                 id: dnsField
 
                 Layout.fillWidth: true
-                label: qsTr("DNS servers")
-                placeholder: qsTr("1.1.1.1, 8.8.8.8")
+                placeholderText: qsTr("DNS servers")
                 leadingIcon: "dns"
                 supportingText: qsTr("Comma-separated")
                 errorText: qsTr("Enter valid DNS server addresses")
                 inputMethodHints: Qt.ImhNoPredictiveText
+                validate: /^$|^\s*(?:(?:25[0-5]|2[0-4]\d|1?\d?\d)\.){3}(?:25[0-5]|2[0-4]\d|1?\d?\d)(?:\s*,\s*(?:(?:25[0-5]|2[0-4]\d|1?\d?\d)\.){3}(?:25[0-5]|2[0-4]\d|1?\d?\d))*\s*$/
             }
         }
 

@@ -8,10 +8,10 @@ import qs.components
 Item {
     id: root
 
-    required property DrawerVisibilities visibilities
+    required property ScreenState screenState
     readonly property Props props: Props {}
 
-    readonly property bool shouldBeActive: visibilities.sidebar && Config.sidebar.enabled
+    readonly property bool shouldBeActive: screenState.sidebar && Config.sidebar.enabled
     property real offsetScale: shouldBeActive ? 0 : 1
 
     visible: offsetScale < 1
@@ -38,7 +38,7 @@ Item {
         sourceComponent: Content {
             implicitWidth: Tokens.sizes.sidebar.width - content.anchors.leftMargin - content.anchors.margins
             props: root.props
-            visibilities: root.visibilities
+            screenState: root.screenState
         }
     }
 }

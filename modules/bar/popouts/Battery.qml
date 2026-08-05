@@ -19,7 +19,7 @@ Column {
     StyledText {
         function formatSeconds(s: int, fallback: string): string {
             const day = Math.floor(s / 86400);
-            const hr = Math.floor(s / 3600) % 60;
+            const hr = Math.floor(s / 3600) % 24;
             const min = Math.floor(s / 60) % 60;
 
             let comps = [];

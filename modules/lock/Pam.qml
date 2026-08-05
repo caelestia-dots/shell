@@ -1,27 +1,49 @@
+pragma ComponentBehavior: Bound
+
 import QtQuick
 import Quickshell
 import Quickshell.Io
 import Quickshell.Wayland
 import Quickshell.Services.Pam
 import Caelestia.Config
+import Caelestia.Services
 
 Scope {
     id: root
+
+    enum PamState {
+        None,
+        Error,
+        MaxTries,
+        Failed
+    }
 
     required property WlSessionLock lock
 
     readonly property alias passwd: passwd
     readonly property alias fprint: fprint
+    readonly property alias howdy: howdy
+
     property string lockMessage
-    property string state
-    property string fprintState
+    property int state
     property string buffer
 
     signal flashMsg
 
     function handleKey(event: KeyEvent): void {
-        if (passwd.active || state === "max")
+        if (passwd.active)
             return;
+
+        // Trigger howdy on enter while empty buffer
+        if (howdy.canAttempt && !howdy.active && (event.key === Qt.Key_Enter || event.key === Qt.Key_Return) && buffer.length === 0)
+            return howdy.start(); // Gate on active so double enter still allows empty password
+
+        if (state === Pam.MaxTries)
+            return;
+
+        // Abort howdy on pwd input
+        if (howdy.active)
+            howdy.abort();
 
         if (event.key === Qt.Key_Enter || event.key === Qt.Key_Return) {
             passwd.start();
@@ -37,11 +59,25 @@ Scope {
         }
     }
 
+    function restartFprint(): void {
+        fprint.reset();
+        if (fprint.canAttempt)
+            fprint.start();
+        else
+            fprint.abort();
+    }
+
+    function clearTransientState(): void {
+        for (const obj of [root, fprint, howdy])
+            if (obj.state !== Pam.MaxTries)
+                obj.state = Pam.None;
+    }
+
     PamContext {
         id: passwd
 
         config: "passwd"
-        configDirectory: Quickshell.shellDir + "/assets/pam.d"
+        configDirectory: Quickshell.shellPath("assets/pam.d")
 
         onMessageChanged: {
             if (message.startsWith("The account is locked"))
@@ -62,122 +98,76 @@ Scope {
             if (res === PamResult.Success)
                 return root.lock.unlock();
 
+            root.clearTransientState();
+
             if (res === PamResult.Error)
-                root.state = "error";
+                root.state = Pam.Error;
             else if (res === PamResult.MaxTries)
-                root.state = "max";
+                root.state = Pam.MaxTries;
             else if (res === PamResult.Failed)
-                root.state = "fail";
+                root.state = Pam.Failed;
 
             root.flashMsg();
-            stateReset.restart();
+            pwdStateReset.restart();
         }
     }
 
-    PamContext {
+    Timer {
+        id: pwdStateReset
+
+        interval: 4000
+        onTriggered: {
+            if (root.state !== Pam.MaxTries)
+                root.state = Pam.None;
+        }
+    }
+
+    ManualPamContext {
         id: fprint
 
-        property bool available
-        property int tries
-        property int errorTries
-
-        function checkAvail(): void {
-            if (!available || !GlobalConfig.lock.enableFprint || !root.lock.secure) {
-                abort();
-                return;
-            }
-
-            tries = 0;
-            errorTries = 0;
-            start();
-        }
-
         config: "fprint"
-        configDirectory: Quickshell.shellDir + "/assets/pam.d"
-
-        onCompleted: res => {
-            if (!available)
-                return;
-
-            if (res === PamResult.Success)
-                return root.lock.unlock();
-
-            if (res === PamResult.Error) {
-                root.fprintState = "error";
-                errorTries++;
-                if (errorTries < 5) {
-                    abort();
-                    errorRetry.restart();
-                }
-            } else if (res === PamResult.MaxTries) {
-                // Isn't actually the real max tries as pam only reports completed
-                // when max tries is reached.
-                tries++;
-                if (tries < GlobalConfig.lock.maxFprintTries) {
-                    // Restart if not actually real max tries
-                    root.fprintState = "fail";
-                    start();
-                } else {
-                    root.fprintState = "max";
-                    abort();
-                }
-            }
-
-            root.flashMsg();
-            fprintStateReset.start();
-        }
+        availCommand: ["sh", "-c", "fprintd-list $USER"]
+        retryOnFail: true
+        enabled: GlobalConfig.lock.enableFprint
+        maxTries: GlobalConfig.lock.maxFprintTries
+        onAvailProcExited: root.restartFprint()
     }
 
-    Process {
-        id: availProc
+    ManualPamContext {
+        id: howdy
 
-        command: ["sh", "-c", "fprintd-list $USER"]
-        onExited: code => { // qmllint disable signal-handler-parameters
-            fprint.available = code === 0;
-            fprint.checkAvail();
-        }
+        config: "howdy"
+        availCommand: ["sh", "-c", "command -v howdy"]
+        enabled: GlobalConfig.lock.enableHowdy
+        maxTries: GlobalConfig.lock.maxHowdyTries
     }
 
-    Timer {
-        id: errorRetry
-
-        interval: 800
-        onTriggered: fprint.start()
-    }
-
-    Timer {
-        id: stateReset
-
-        interval: 4000
-        onTriggered: {
-            if (root.state !== "max")
-                root.state = "";
+    Connections {
+        function onResumed(): void {
+            if (howdy.canAttempt && !howdy.active && GlobalConfig.lock.triggerHowdyOnWake)
+                howdy.start();
         }
-    }
 
-    Timer {
-        id: fprintStateReset
-
-        interval: 4000
-        onTriggered: {
-            root.fprintState = "";
-            fprint.errorTries = 0;
-        }
+        target: SessionManager
     }
 
     Connections {
         function onSecureChanged(): void {
             if (root.lock.secure) {
-                availProc.running = true;
+                fprint.checkAvailable();
+                howdy.checkAvailable();
+                fprint.reset();
+                howdy.reset();
                 root.buffer = "";
-                root.state = "";
-                root.fprintState = "";
+                root.state = Pam.None;
                 root.lockMessage = "";
             }
         }
 
         function onUnlock(): void {
             fprint.abort();
+            howdy.abort();
+            passwd.abort();
         }
 
         target: root.lock
@@ -185,9 +175,118 @@ Scope {
 
     Connections {
         function onEnableFprintChanged(): void {
-            fprint.checkAvail();
+            root.restartFprint();
+        }
+
+        function onEnableHowdyChanged(): void {
+            if (!GlobalConfig.lock.enableHowdy && howdy.active)
+                howdy.abort();
         }
 
         target: GlobalConfig.lock
+    }
+
+    component ManualPamContext: Scope {
+        id: ctx
+
+        required property bool enabled
+        required property int maxTries
+        property alias config: pam.config
+        property alias availCommand: availProc.command
+        property bool retryOnFail
+
+        property bool available
+        property int tries
+        property int errorTries
+        property int state
+        readonly property bool canAttempt: available && enabled && root.lock.secure && tries < maxTries
+
+        readonly property alias active: pam.active
+        readonly property alias message: pam.message
+
+        signal availProcExited(code: int)
+
+        function checkAvailable(): void {
+            availProc.running = true;
+        }
+
+        function start(): void {
+            pam.start();
+        }
+
+        function abort(): void {
+            pam.abort();
+        }
+
+        function reset(): void {
+            tries = 0;
+            errorTries = 0;
+            state = Pam.None;
+        }
+
+        PamContext {
+            id: pam
+
+            configDirectory: Quickshell.shellPath("assets/pam.d")
+
+            onCompleted: res => {
+                if (!ctx.available)
+                    return;
+
+                if (res === PamResult.Success)
+                    return root.lock.unlock();
+
+                root.clearTransientState();
+
+                if (res === PamResult.Error) {
+                    ctx.state = Pam.Error;
+                    ctx.errorTries++;
+                    if (ctx.errorTries < 5) {
+                        abort();
+                        errorRetry.restart();
+                    }
+                } else if (res === PamResult.MaxTries || res === PamResult.Failed) {
+                    ctx.tries++;
+                    if (ctx.tries < ctx.maxTries) {
+                        ctx.state = Pam.Failed;
+                        if (ctx.retryOnFail)
+                            start();
+                    } else {
+                        ctx.state = Pam.MaxTries;
+                        abort();
+                    }
+                }
+
+                root.flashMsg();
+                stateReset.restart();
+            }
+        }
+
+        Timer {
+            id: errorRetry
+
+            interval: 800
+            onTriggered: pam.start()
+        }
+
+        Timer {
+            id: stateReset
+
+            interval: 4000
+            onTriggered: {
+                if (ctx.state !== Pam.MaxTries)
+                    ctx.state = Pam.None;
+                ctx.errorTries = 0;
+            }
+        }
+
+        Process {
+            id: availProc
+
+            onExited: code => { // qmllint disable signal-handler-parameters
+                ctx.available = code === 0;
+                ctx.availProcExited(code);
+            }
+        }
     }
 }

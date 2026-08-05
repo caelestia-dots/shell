@@ -13,7 +13,7 @@ import qs.utils
 Column {
     id: root
 
-    required property DrawerVisibilities visibilities
+    required property ScreenState screenState
 
     padding: Tokens.padding.large
     rightPadding: CUtils.clamp(padding - Config.border.thickness, 0, padding)
@@ -31,11 +31,11 @@ Column {
 
         Connections {
             function onLauncherChanged(): void {
-                if (!root.visibilities.launcher)
+                if (!root.screenState.launcher)
                     logout.forceActiveFocus();
             }
 
-            target: root.visibilities
+            target: root.screenState
         }
     }
 
@@ -101,7 +101,7 @@ Column {
 
         Keys.onEnterPressed: exec()
         Keys.onReturnPressed: exec()
-        Keys.onEscapePressed: root.visibilities.session = false
+        Keys.onEscapePressed: root.screenState.session = false
         Keys.onPressed: event => {
             if (!Config.session.vimKeybinds)
                 return;

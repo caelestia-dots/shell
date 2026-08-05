@@ -11,10 +11,7 @@ import qs.utils
 Item {
     id: root
 
-    required property DrawerVisibilities visibilities
-    readonly property DashboardState dashState: DashboardState {
-        reloadableId: "dashboardState"
-    }
+    required property ScreenState screenState
     readonly property FileDialog facePicker: FileDialog {
         title: qsTr("Select a profile picture")
         filterLabel: qsTr("Image files")
@@ -28,7 +25,7 @@ Item {
     }
 
     readonly property real nonAnimHeight: (content.item as Content)?.nonAnimHeight ?? 0
-    readonly property bool shouldBeActive: visibilities.dashboard && Config.dashboard.enabled
+    readonly property bool shouldBeActive: screenState.dashboard && Config.dashboard.enabled
     property real offsetScale: shouldBeActive ? 0 : 1
 
     visible: offsetScale < 1
@@ -50,8 +47,7 @@ Item {
         active: root.shouldBeActive || root.visible
 
         sourceComponent: Content {
-            visibilities: root.visibilities
-            dashState: root.dashState
+            screenState: root.screenState
             facePicker: root.facePicker
         }
     }

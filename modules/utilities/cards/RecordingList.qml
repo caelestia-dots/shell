@@ -16,7 +16,7 @@ ColumnLayout {
     id: root
 
     required property var props
-    required property DrawerVisibilities visibilities
+    required property ScreenState screenState
 
     spacing: 0
 
@@ -102,8 +102,8 @@ ColumnLayout {
                 icon: "play_arrow"
                 type: IconButton.Text
                 onClicked: {
-                    root.visibilities.utilities = false;
-                    root.visibilities.sidebar = false;
+                    root.screenState.utilities = false;
+                    root.screenState.sidebar = false;
                     Quickshell.execDetached([...GlobalConfig.general.apps.playback, recording.modelData.path]);
                 }
             }
@@ -112,8 +112,8 @@ ColumnLayout {
                 icon: "folder"
                 type: IconButton.Text
                 onClicked: {
-                    root.visibilities.utilities = false;
-                    root.visibilities.sidebar = false;
+                    root.screenState.utilities = false;
+                    root.screenState.sidebar = false;
                     Quickshell.execDetached([...GlobalConfig.general.apps.explorer, recording.modelData.path]);
                 }
             }

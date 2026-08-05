@@ -11,7 +11,7 @@ Item {
     id: root
 
     required property FileSystemEntry modelData
-    required property DrawerVisibilities visibilities
+    required property ScreenState screenState
 
     scale: 0.5
     opacity: 0
@@ -29,7 +29,7 @@ Item {
         radius: Tokens.rounding.large
         onClicked: {
             Wallpapers.setWallpaper(root.modelData.path);
-            root.visibilities.launcher = false;
+            root.screenState.launcher = false;
         }
     }
 
