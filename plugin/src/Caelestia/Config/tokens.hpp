@@ -328,6 +328,8 @@ class NexusTokens : public ConfigObject {
     CONFIG_PROPERTY(int, networkShowVpnDetailWidth, 620)
     CONFIG_PROPERTY(int, maxDialogWidth, 400)
     CONFIG_PROPERTY(int, maxDialogHeight, 600)
+    CONFIG_PROPERTY(int, textFieldWidth, 250)
+    CONFIG_PROPERTY(int, smallTextFieldWidth, 100)
 
 public:
     explicit NexusTokens(QObject* parent = nullptr)
