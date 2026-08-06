@@ -40,26 +40,23 @@ PageBase {
         TextFieldRow {
             id: prefixRow
 
-            function saveActionPrefix(): void {
-                const prefix = value || "";
-                GlobalConfig.launcher.actionPrefix = prefix;
-                if (prefix === ">")
-                    clear();
-            }
-
             last: true
             label: qsTr("Action prefix")
             subtext: qsTr("Prefix used to run actions in the launcher")
-            fieldWidth: 70
-            value: GlobalConfig.launcher.actionPrefix === ">" ? "" : GlobalConfig.launcher.actionPrefix
+            errorText: qsTr("Prefix must not be alphanumeric")
+            value: GlobalConfig.launcher.actionPrefix === ">" ? "" : GlobalConfig.launcher.actionPrefix // TODO: replace with empty only when not loaded once loaded state is exposed
             placeholderText: ">"
             maximumLength: 1
-            validator: RegularExpressionValidator {
-                regularExpression: /^[^a-zA-Z0-9\s]$/
+            smallField: true
+            validate: /^[^a-zA-Z0-9\s]$/
+            onEditingFinished: value => {
+                if (!field.valid)
+                    return;
+                /// TODO: replace with GlobalConfig.launcher.resetOption("actionPrefix") on empty commit when reset is fixed
+                GlobalConfig.launcher.actionPrefix = value || ">";
+                if (GlobalConfig.launcher.actionPrefix === ">")
+                    clear();
             }
-
-            onValueEdited: saveActionPrefix()
-            onEditingFinished: saveActionPrefix()
         }
 
         // Display

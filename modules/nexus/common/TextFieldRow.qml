@@ -15,12 +15,11 @@ ConnectedRect {
     property string subtext
     property alias value: input.text
     property alias placeholderText: input.placeholderText
-    property alias errorText: input.errorText
+    property string errorText
     property alias maximumLength: input.maximumLength
     property alias validate: input.validate
     property alias validator: input.validator
-    property int fieldWidth: Tokens.sizes.nexus.textFieldWidth
-    property int fieldVerticalPadding: Tokens.padding.small
+    property bool smallField
     readonly property alias field: input
 
     signal valueEdited(value: string)
@@ -31,7 +30,7 @@ ConnectedRect {
     }
 
     Layout.fillWidth: true
-    implicitHeight: rowLayout.implicitHeight + Tokens.padding.medium + Math.max(0, Tokens.padding.large - fieldVerticalPadding) * 2
+    implicitHeight: rowLayout.implicitHeight + Tokens.padding.medium + Math.max(0, Tokens.padding.large - input.verticalPadding) * 2
 
     RowLayout {
         id: rowLayout
@@ -58,19 +57,21 @@ ConnectedRect {
             StyledText {
                 Layout.fillWidth: true
                 visible: root.subtext
-                text: root.subtext
-                color: Colours.palette.m3outline
+                text: input.isError && root.errorText ? root.errorText : root.subtext
+                color: input.isError && root.errorText ? Colours.palette.m3error : Colours.palette.m3outline
                 font: Tokens.font.label.small
                 elide: Text.ElideRight
+                animate: root.errorText
             }
         }
 
         StyledTextField {
             id: input
 
-            Layout.preferredWidth: root.fieldWidth
+            Layout.preferredWidth: root.smallField ? Tokens.sizes.nexus.smallTextFieldWidth : Tokens.sizes.nexus.textFieldWidth
+            Layout.maximumWidth: root.width / 2
             Layout.alignment: Qt.AlignVCenter
-            verticalPadding: root.fieldVerticalPadding
+            verticalPadding: Tokens.padding.small
 
             onTextEdited: root.valueEdited(text)
             onEditingFinished: root.editingFinished(text)
