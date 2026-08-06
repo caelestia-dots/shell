@@ -19,6 +19,8 @@ PageBase {
     title: qsTr("Wallpapers")
     isSubPage: true
 
+    Component.onCompleted: Wallpapers.updateThumbs()
+
     ColumnLayout {
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.top: parent.top
@@ -101,10 +103,13 @@ PageBase {
                 model: {
                     const walls = Wallpapers.list;
                     const baseDir = Paths.wallsdir;
+                    const videoBase = Paths.videowallsdir;
                     const categories = {};
                     const list = [];
                     for (const w of walls) {
-                        if (w.parentDir !== baseDir) {
+                        if (w.parentDir === videoBase) {
+                            list.push(w);
+                        } else if (w.parentDir !== baseDir) {
                             const category = Wallpapers.getCategoryFor(w);
                             if (category && (!(category in categories) || categories[category].name.localeCompare(w.name) > 0))
                                 categories[category] = w;
@@ -113,7 +118,11 @@ PageBase {
                         }
                     }
                     list.push(...Object.values(categories));
-                    list.sort((a, b) => ((a.parentDir === baseDir) - (b.parentDir === baseDir)) || a.name.localeCompare(b.name));
+                    list.sort((a, b) => {
+                        const aIsDirect = a.parentDir === baseDir || a.parentDir === videoBase;
+                        const bIsDirect = b.parentDir === baseDir || b.parentDir === videoBase;
+                        return (bIsDirect - aIsDirect) || a.name.localeCompare(b.name);
+                    });
                     while (list.length < Config.nexus.wallpapersPerRow)
                         list.push(null);
                     return list;
@@ -131,14 +140,14 @@ PageBase {
                         if (!modelData)
                             return "";
 
-                        if (modelData.parentDir !== Paths.wallsdir) {
+                        if (modelData.parentDir !== Paths.wallsdir && modelData.parentDir !== Paths.videowallsdir) {
                             const category = Wallpapers.getCategoryFor(modelData);
                             return category.slice(0, 1).toUpperCase() + category.slice(1);
                         }
                         return modelData.name;
                     }
                     onClicked: {
-                        if (modelData.parentDir !== Paths.wallsdir) {
+                        if (modelData.parentDir !== Paths.wallsdir && modelData.parentDir !== Paths.videowallsdir) {
                             root.nState.selectedWallpaperCategory = Wallpapers.getCategoryFor(modelData);
                             root.nState.openSubPage(2); // Category page
                         } else {

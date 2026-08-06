@@ -1,6 +1,7 @@
 pragma ComponentBehavior: Bound
 
 import QtQuick
+import QtMultimedia
 import Caelestia.Config
 import qs.components
 import qs.components.filedialog
@@ -12,14 +13,46 @@ Item {
     id: root
 
     property string source: Wallpapers.current
-    property CachingImage current
+    property Item current
     property bool completed
+    readonly property bool isPaused: (Hypr.focusedWorkspace?.toplevels.values.some(t => t.lastIpcObject.fullscreen > 1) ?? false) || GameMode.enabled
+
+    function thumbPathFor(videoSource) {
+        var dir = videoSource.substring(0, videoSource.lastIndexOf("/"));
+        var name = videoSource.substring(videoSource.lastIndexOf("/") + 1);
+        var stem = name.substring(0, name.lastIndexOf("."));
+        return dir + "/.thumbs/" + stem + ".jpg";
+    }
 
     onSourceChanged: {
         if (!source)
             current = null;
-        else
+        else if (Images.isVideoFile(source)) {
+            if (isPaused)
+                current = imgComp.createObject(this, {
+                    path: thumbPathFor(source)
+                });
+            else
+                current = videoComp.createObject(this, {
+                    path: source
+                });
+        } else
             current = imgComp.createObject(this, {
+                path: source
+            });
+    }
+
+    onIsPausedChanged: {
+        if (!source || !Images.isVideoFile(source))
+            return;
+        if (current)
+            current.destroy();
+        if (isPaused)
+            current = imgComp.createObject(root, {
+                path: thumbPathFor(source)
+            });
+        else
+            current = videoComp.createObject(root, {
                 path: source
             });
     }
@@ -27,9 +60,19 @@ Item {
     Component.onCompleted: {
         if (source)
             Qt.callLater(() => {
-                current = imgComp.createObject(this, {
-                    path: source
-                });
+                if (Images.isVideoFile(source)) {
+                    if (isPaused)
+                        current = imgComp.createObject(this, {
+                            path: thumbPathFor(source)
+                        });
+                    else
+                        current = videoComp.createObject(this, {
+                            path: source
+                        });
+                } else
+                    current = imgComp.createObject(this, {
+                        path: source
+                    });
                 completed = true;
             });
     }
@@ -125,9 +168,62 @@ Item {
             }
 
             Timer {
-                running: root.current !== img && root.current?.status === Image.Ready
+                running: root.current !== img && (root.current?.status === Image.Ready || root.current?.status === undefined) // qmllint disable missing-property
                 interval: anim.duration
                 onTriggered: img.destroy()
+            }
+        }
+    }
+
+    Component {
+        id: videoComp
+
+        Item {
+            id: videoContainer
+
+            property string path
+
+            anchors.fill: root
+            opacity: 0
+
+            MediaPlayer {
+                id: player
+
+                source: videoContainer.path ? "file://" + videoContainer.path : ""
+                videoOutput: output
+                loops: MediaPlayer.Infinite
+                autoPlay: true
+
+                onPlaybackStateChanged: function (playbackState) {
+                    if (playbackState === MediaPlayer.PlayingState)
+                        videoAnim.start();
+                }
+
+                onErrorOccurred: function (error, errorString) {
+                    console.warn("Video wallpaper error:", errorString);
+                }
+            }
+
+            VideoOutput {
+                id: output
+
+                anchors.fill: videoContainer
+                fillMode: VideoOutput.PreserveAspectCrop
+            }
+
+            Anim on opacity {
+                id: videoAnim
+
+                type: Anim.SlowEffects
+                running: false
+                from: 0
+                to: 1
+            }
+
+            Timer {
+                running: root.current !== videoContainer
+                interval: videoAnim.duration
+                onTriggered: videoContainer.destroy()
             }
         }
     }
