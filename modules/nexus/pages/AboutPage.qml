@@ -90,27 +90,32 @@ PageBase {
 
         InfoRow {
             first: true
+            icon: "dns"
             label: qsTr("Hostname")
             value: SysInfo.hostname
         }
 
         InfoRow {
+            icon: "computer"
             label: qsTr("Device")
             value: SysInfo.device
         }
 
         InfoRow {
+            icon: "rocket_launch"
             label: qsTr("Distro")
             value: SysInfo.osPrettyName || SysInfo.osName
         }
 
         InfoRow {
+            icon: "memory"
             label: qsTr("Kernel")
             value: SysInfo.kernel
         }
 
         InfoRow {
             last: true
+            icon: "developer_board"
             label: qsTr("Firmware")
             value: SysInfo.firmware
         }
@@ -124,22 +129,71 @@ PageBase {
             first: true
             label: qsTr("Shell")
             value: CUtils.version || "…"
+
+            leadingComponent: Component {
+                Item {
+                    readonly property real targetSize: 20
+
+                    implicitWidth: targetSize
+                    implicitHeight: targetSize * (90.38 / 128)
+
+                    AnimatedLogo {
+                        anchors.centerIn: parent
+                        skipIntroAnimation: true
+                        scale: parent.targetSize / 128
+                    }
+                }
+            }
         }
 
         InfoRow {
+            icon: "terminal"
             label: qsTr("CLI")
             value: root.cliVersion || "…"
         }
 
         InfoRow {
+            icon: "deployed_code"
             label: qsTr("Quickshell")
             value: root.quickshellVersion || "…"
         }
 
         InfoRow {
             last: true
+            icon: "code"
             label: qsTr("Qt")
             value: CUtils.qtVersion || "…"
+        }
+
+        // Resources
+        SectionHeader {
+            text: qsTr("Resources")
+        }
+
+        InfoRow {
+            first: true
+            icon: "forum"
+            label: qsTr("Discord")
+            value: "discord.gg/Caelestia"
+
+            MouseArea {
+                anchors.fill: parent
+                cursorShape: Qt.PointingHandCursor
+                onClicked: Qt.openUrlExternally("https://discord.gg/HM24fh65E")
+            }
+        }
+
+        InfoRow {
+            last: true
+            icon: "language"
+            label: qsTr("Website")
+            value: "www.caelestiashell.com"
+
+            MouseArea {
+                anchors.fill: parent
+                cursorShape: Qt.PointingHandCursor
+                onClicked: Qt.openUrlExternally("https://caelestiashell.com/")
+            }
         }
 
         // Plugins
@@ -150,6 +204,7 @@ PageBase {
         InfoRow {
             first: true
             last: true
+            icon: "extension"
             label: qsTr("Loaded plugins")
             value: root.pluginCount.toString()
         }
