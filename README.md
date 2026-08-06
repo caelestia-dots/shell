@@ -240,7 +240,9 @@ For example, to disable the bar on DP-1:
 >   `favouriteApps`, `hiddenApps`, `actions`)
 > - `launcher.useFuzzy` (`apps`, `actions`, `schemes`, `variants`, `wallpapers`)
 > - `notifs` (`expire`, `fullscreen`, `defaultExpireTimeout`, `fullscreenExpireTimeout`, `actionOnClick`)
-> - `lock` (`enableFprint`, `maxFprintTries`)
+> - `lock` (`enableFprint`, `maxFprintTries`, `enableFaceUnlock`, `faceAuthProvider`,
+>   `maxFaceAuthTries`, `triggerFaceAuthOnWake`; deprecated Howdy aliases: `enableHowdy`,
+>   `maxHowdyTries`, `triggerHowdyOnWake`)
 > - `nexus` (`networkRescanInterval`)
 > - `utilities.toasts` (all except `fullscreen`)
 > - `utilities.vpn` (`enabled`, `provider`)
@@ -697,6 +699,10 @@ For example, to disable the bar on DP-1:
         "recolourLogo": true,
         "enableFprint": true,
         "maxFprintTries": 3,
+        "enableFaceUnlock": true,
+        "faceAuthProvider": "howdy",
+        "maxFaceAuthTries": 3,
+        "triggerFaceAuthOnWake": true,
         "enableHowdy": true,
         "maxHowdyTries": 3,
         "triggerHowdyOnWake": true,
