@@ -53,7 +53,6 @@ PageBase {
             fieldWidth: 70
             value: GlobalConfig.launcher.actionPrefix === ">" ? "" : GlobalConfig.launcher.actionPrefix
             placeholderText: ">"
-            errorText: qsTr("Cannot be alphanumeric")
             maximumLength: 1
             validator: RegularExpressionValidator {
                 regularExpression: /^[^a-zA-Z0-9\s]$/
