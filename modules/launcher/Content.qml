@@ -58,7 +58,7 @@ Item {
         topPadding: Math.round((Tokens.padding.medium + Tokens.padding.large) / 2)
         bottomPadding: Math.round((Tokens.padding.medium + Tokens.padding.large) / 2)
 
-        placeholderText: qsTr("Type \"%1\" for commands").arg(GlobalConfig.launcher.actionPrefix)
+        placeholderText: qsTr("Type \"%1\" for commands or a math expression").arg(GlobalConfig.launcher.actionPrefix)
 
         onAccepted: {
             const currentItem = list.currentList?.currentItem;
@@ -73,6 +73,8 @@ Item {
                         currentItem.onClicked();
                     else
                         currentItem.modelData.onClicked(list.currentList);
+                } else if (list.currentList?.state === "calc") {
+                    currentItem.onClicked();
                 } else {
                     Apps.launch(currentItem.modelData);
                     root.screenState.launcher = false;
