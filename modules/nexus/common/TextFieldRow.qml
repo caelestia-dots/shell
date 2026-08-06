@@ -40,7 +40,7 @@ ConnectedRect {
         anchors.right: parent.right
         anchors.verticalCenter: parent.verticalCenter
         anchors.leftMargin: Tokens.padding.largeIncreased
-        anchors.rightMargin: Tokens.padding.medium
+        anchors.rightMargin: Tokens.padding.largeIncreased
         spacing: Tokens.spacing.medium
 
         ColumnLayout {
