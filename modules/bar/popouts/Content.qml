@@ -5,6 +5,7 @@ import QtQuick
 import Quickshell
 import Quickshell.Services.SystemTray
 import Caelestia.Config
+import Caelestia.Plugins
 import qs.components
 import qs.services
 
@@ -151,6 +152,23 @@ Item {
                         popouts: root.popouts
                         trayItem: trayMenu.modelData.menu // qmllint disable unresolved-type
                     }
+                }
+            }
+        }
+
+        Repeater {
+            model: ScriptModel {
+                values: Plugins.entryPoints(EntryPointType.BarPopout) as Array
+            }
+
+            Popout {
+                id: entryPointPopout
+
+                required property pluginEntryPoint modelData
+
+                name: modelData.properties.entry
+                sourceComponent: EntryPointLoader {
+                    entryPoint: entryPointPopout.modelData
                 }
             }
         }
