@@ -13,7 +13,7 @@ ConnectedRect {
 
     property alias label: label.text
     property string subtext
-    property alias value: input.text
+    property string value
     property alias placeholderText: input.placeholderText
     property string errorText
     property alias maximumLength: input.maximumLength
@@ -27,6 +27,11 @@ ConnectedRect {
 
     function clear(): void {
         input.clear();
+    }
+
+    Component.onDestruction: {
+        if (value !== input.text)
+            editingFinished(input.text);
     }
 
     Layout.fillWidth: true
@@ -72,6 +77,8 @@ ConnectedRect {
             Layout.maximumWidth: root.width / 2
             Layout.alignment: Qt.AlignVCenter
             verticalPadding: Tokens.padding.small
+
+            text: root.value
 
             onTextEdited: root.valueEdited(text)
             onEditingFinished: root.editingFinished(text)
