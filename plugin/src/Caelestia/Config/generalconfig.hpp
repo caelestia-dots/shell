@@ -57,19 +57,21 @@ class GeneralBattery : public ConfigObject {
     Q_OBJECT
     QML_ANONYMOUS
 
-    CONFIG_GLOBAL_PROPERTY(QVariantList, warnLevels,
+    CONFIG_GLOBAL_PROPERTY(QVariantList, lowBatteryWarnLevels,
         {
             vmap({
                 { u"level"_s, 20 },
                 { u"title"_s, u"Low battery"_s },
                 { u"message"_s, u"You might want to plug in a charger"_s },
-                { u"icon"_s, u"battery_android_frame_2"_s },
+                { u"icon"_s, u"battery_android_2"_s },
+                { u"enabled"_s, true },
             }),
             vmap({
                 { u"level"_s, 10 },
                 { u"title"_s, u"Did you see the previous message?"_s },
                 { u"message"_s, u"You should probably plug in a charger <b>now</b>"_s },
-                { u"icon"_s, u"battery_android_frame_1"_s },
+                { u"icon"_s, u"battery_android_1"_s },
+                { u"enabled"_s, true },
             }),
             vmap({
                 { u"level"_s, 5 },
@@ -77,9 +79,39 @@ class GeneralBattery : public ConfigObject {
                 { u"message"_s, u"PLUG THE CHARGER RIGHT NOW!!"_s },
                 { u"icon"_s, u"battery_android_alert"_s },
                 { u"critical"_s, true },
+                { u"enabled"_s, true },
             }),
         })
+
+    CONFIG_GLOBAL_PROPERTY(QVariantList, chargingWarnLevels,
+        { vmap({
+              { u"level"_s, 80 },
+              { u"title"_s, u"High battery"_s },
+              { u"message"_s, u"You might want to unplug the charger"_s },
+              { u"icon"_s, u"battery_android_5"_s },
+              { u"enabled"_s, true },
+          }),
+            vmap({
+                { u"level"_s, 90 },
+                { u"title"_s, u"Did you see the previous message?"_s },
+                { u"message"_s, u"You should probably unplug the charger <b>now</b>"_s },
+                { u"icon"_s, u"battery_android_6"_s },
+                { u"enabled"_s, true },
+            }),
+            vmap({
+                { u"level"_s, 95 },
+                { u"title"_s, u"Critical battery level"_s },
+                { u"message"_s, u"UNPLUG THE CHARGER RIGHT NOW!!"_s },
+                { u"icon"_s, u"battery_android_alert"_s },
+                { u"critical"_s, true },
+                { u"enabled"_s, true },
+            }) })
+
     CONFIG_GLOBAL_PROPERTY(int, criticalLevel, 3)
+    CONFIG_GLOBAL_PROPERTY(bool, enableLowBatteryWarning, true)
+    CONFIG_GLOBAL_PROPERTY(bool, enableHighBatteryWarning, false)
+    CONFIG_GLOBAL_PROPERTY(bool, framedMaterialIcons, false)
+    CONFIG_GLOBAL_PROPERTY(bool, toastSound, false)
 
 public:
     explicit GeneralBattery(QObject* parent = nullptr)

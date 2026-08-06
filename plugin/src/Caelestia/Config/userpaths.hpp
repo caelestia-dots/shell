@@ -23,6 +23,9 @@ class UserPaths : public ConfigObject {
     CONFIG_PROPERTY(QString, noNotifsPic, u"root:/assets/dino.png"_s)
     CONFIG_PROPERTY(QString, lockNoNotifsPic, u"root:/assets/dino.png"_s)
 
+    CONFIG_GLOBAL_PROPERTY(QString, lowBatNotifSound, u"root:/assets/LowBattery.ogg"_s)
+    CONFIG_GLOBAL_PROPERTY(QString, highBatNotifSound, u"root:/assets/HighBattery.ogg"_s)
+
 public:
     explicit UserPaths(QObject* parent = nullptr)
         : ConfigObject(parent) {}
