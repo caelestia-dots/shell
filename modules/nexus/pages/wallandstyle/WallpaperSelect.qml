@@ -5,7 +5,6 @@ import QtQuick.Layouts
 import Quickshell
 import Caelestia.Components
 import Caelestia.Config
-import Caelestia.Models
 import qs.components
 import qs.components.controls
 import qs.components.filedialog
@@ -105,7 +104,7 @@ PageBase {
                     const list = [];
                     for (const w of walls) {
                         if (w.parentDir !== baseDir) {
-                            const category = Wallpapers.getCategoryFor(w);
+                            const category = Wallpapers.getCategoryFor(w.path);
                             if (category && (!(category in categories) || categories[category].name.localeCompare(w.name) > 0))
                                 categories[category] = w;
                         } else {
@@ -120,27 +119,30 @@ PageBase {
                 }
 
                 WallItem {
-                    required property FileSystemEntry modelData
+                    required property QtObject modelData
 
-                    // Empty placeholders for sizing
                     opacity: modelData ? 1 : 0
                     enabled: modelData
-
-                    source: String(modelData?.path ?? "")
+                    source: {
+                        if (!modelData) return "";
+                        const thumb = Wallpapers.getThumbnailPath(modelData.path);
+                        if (!thumb) return "";
+                        return "file://" + thumb + "?v=" + Wallpapers.thumbnailVersion;
+                    }
                     text: {
                         if (!modelData)
                             return "";
 
                         if (modelData.parentDir !== Paths.wallsdir) {
-                            const category = Wallpapers.getCategoryFor(modelData);
+                            const category = Wallpapers.getCategoryFor(modelData.path);
                             return category.slice(0, 1).toUpperCase() + category.slice(1);
                         }
                         return modelData.name;
                     }
                     onClicked: {
                         if (modelData.parentDir !== Paths.wallsdir) {
-                            root.nState.selectedWallpaperCategory = Wallpapers.getCategoryFor(modelData);
-                            root.nState.openSubPage(2); // Category page
+                            root.nState.selectedWallpaperCategory = Wallpapers.getCategoryFor(modelData.path);
+                            root.nState.openSubPage(2);
                         } else {
                             Wallpapers.setWallpaper(modelData.path);
                             root.nState.closeSubPage();

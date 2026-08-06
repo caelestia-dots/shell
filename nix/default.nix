@@ -14,6 +14,7 @@
   libqalculate,
   bash,
   hyprland,
+  ffmpeg,
   material-symbols,
   rubik,
   nerd-fonts,
@@ -35,7 +36,7 @@
 }: let
   version = "1.0.0";
 
-  qs = quickshell.withModules [qt6.qtimageformats];
+  qs = quickshell.withModules [qt6.qtimageformats qt6.qtmultimedia];
 
   runtimeDeps =
     [
@@ -48,6 +49,7 @@
       wl-clipboard
       libqalculate
       bash
+      ffmpeg
       hyprland
     ]
     ++ extraRuntimeDeps
@@ -98,7 +100,7 @@
     };
 
     nativeBuildInputs = [cmake ninja pkg-config];
-    buildInputs = [qt6.qtbase qt6.qtdeclarative qt6.qtshadertools libqalculate pipewire aubio libcava fftw lm_sensors];
+    buildInputs = [qt6.qtbase qt6.qtdeclarative qt6.qtshadertools qt6.qtmultimedia libqalculate pipewire aubio libcava fftw lm_sensors];
 
     dontWrapQtApps = true;
     cmakeFlags =
