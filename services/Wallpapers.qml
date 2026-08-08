@@ -124,6 +124,7 @@ Searcher {
     }
     Timer {
         id: wallpaperTimer
+
         interval: GlobalConfig.background.wallpaperInterval * 1000
         running: GlobalConfig.background.wallpaperAutoChange
         repeat: true
@@ -133,8 +134,6 @@ Searcher {
         }
     }
     Connections {
-        target: GlobalConfig.background
-
         function onWallpaperIntervalChanged() {
             if (wallpaperTimer.running)
                 wallpaperTimer.restart();
@@ -144,5 +143,7 @@ Searcher {
             if (wallpaperTimer.running)
                 wallpaperTimer.restart();
         }
+
+        target: GlobalConfig.background
     }
 }
