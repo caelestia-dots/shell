@@ -122,4 +122,27 @@ Searcher {
             }
         }
     }
+    Timer {
+        id: wallpaperTimer
+        interval: GlobalConfig.background.wallpaperInterval * 1000
+        running: GlobalConfig.background.wallpaperAutoChange
+        repeat: true
+
+        onTriggered: {
+            root.setRandom()
+        }
+    }
+    Connections {
+        target: GlobalConfig.background
+
+        function onWallpaperIntervalChanged() {
+            if (wallpaperTimer.running)
+                wallpaperTimer.restart()
+        }
+
+        function onWallpaperAutoChangeChanged() {
+            if (wallpaperTimer.running)
+                wallpaperTimer.restart()
+        }
+    }
 }

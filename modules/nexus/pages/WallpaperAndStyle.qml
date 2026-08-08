@@ -178,6 +178,39 @@ PageBase {
         }
 
         ToggleRow {
+            text: qsTr("Automatic wallpaper change")
+            subtext: qsTr("Change wallpaper automatically after an interval")
+
+            checked: Config.background.wallpaperAutoChange
+
+            onToggled: GlobalConfig.background.wallpaperAutoChange = checked
+        }
+
+        StepperRow {
+            label: qsTr("Wallpaper interval")
+            subtext: qsTr("Time between wallpaper changes")
+
+            enabled: GlobalConfig.background.wallpaperAutoChange
+
+            from: 5
+            to: 360
+            stepSize: 5
+
+            value: GlobalConfig.background.wallpaperInterval / 60
+
+            onMoved: value => {
+                let minutes = Math.round(value)
+
+                if (minutes > 60)
+                    minutes = Math.round(minutes / 60) * 60
+                    else
+                        minutes = Math.round(minutes / 5) * 5
+
+                GlobalConfig.background.wallpaperInterval = minutes * 60
+            }
+        }
+
+        ToggleRow {
             Layout.topMargin: Tokens.spacing.extraSmall / 2 - parent.spacing
 
             text: qsTr("Transparency")

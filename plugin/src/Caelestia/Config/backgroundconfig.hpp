@@ -71,6 +71,8 @@ class BackgroundConfig : public ConfigObject {
 
     CONFIG_PROPERTY(bool, enabled, true)
     CONFIG_PROPERTY(bool, wallpaperEnabled, true)
+    CONFIG_PROPERTY(bool, wallpaperAutoChange, false)
+    CONFIG_PROPERTY(int, wallpaperInterval, 600)
     CONFIG_SUBOBJECT(DesktopClock, desktopClock)
     CONFIG_SUBOBJECT(BackgroundVisualiser, visualiser)
 
