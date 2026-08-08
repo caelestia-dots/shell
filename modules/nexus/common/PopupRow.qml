@@ -13,8 +13,10 @@ ConnectedRect {
     property alias icon: icon.text
     property alias label: label.text
     property alias status: status.text
+    property string popupIcon: "view_apps"
     property bool keepPopupAsChild
     readonly property alias popup: popup
+
     default required property Item content
 
     Layout.fillWidth: true
@@ -96,7 +98,6 @@ ConnectedRect {
                 hoverEnabled: popup.open
                 cursorShape: popup.open ? Qt.ArrowCursor : undefined
                 z: popup.animDriver > 0 ? 1 : 0
-
                 onClicked: popup.open = false
 
                 BlobPopup {
@@ -114,6 +115,7 @@ ConnectedRect {
                     content: root.content
                     pressOverride: stateLayer.pressed
                     hoverOverride: stateLayer.containsMouse
+                    icon: root.popupIcon
                     color: open || hovered || stateLayer.containsMouse ? Colours.palette.m3secondaryContainer : Colours.palette.m3surfaceContainerHighest
                 }
             }
