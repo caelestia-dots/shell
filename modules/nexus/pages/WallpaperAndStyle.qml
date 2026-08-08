@@ -199,14 +199,14 @@ PageBase {
             value: GlobalConfig.background.wallpaperInterval / 60
 
             onMoved: value => {
-                let minutes = Math.round(value)
+                let minutes = Math.round(value);
 
                 if (minutes > 60)
-                    minutes = Math.round(minutes / 60) * 60
-                    else
-                        minutes = Math.round(minutes / 5) * 5
+                    minutes = Math.round(minutes / 60) * 60;
+                else
+                    minutes = Math.round(minutes / 5) * 5;
 
-                GlobalConfig.background.wallpaperInterval = minutes * 60
+                GlobalConfig.background.wallpaperInterval = minutes * 60;
             }
         }
 

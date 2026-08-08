@@ -129,7 +129,7 @@ Searcher {
         repeat: true
 
         onTriggered: {
-            root.setRandom()
+            root.setRandom();
         }
     }
     Connections {
@@ -137,12 +137,12 @@ Searcher {
 
         function onWallpaperIntervalChanged() {
             if (wallpaperTimer.running)
-                wallpaperTimer.restart()
+                wallpaperTimer.restart();
         }
 
         function onWallpaperAutoChangeChanged() {
             if (wallpaperTimer.running)
-                wallpaperTimer.restart()
+                wallpaperTimer.restart();
         }
     }
 }
