@@ -91,7 +91,7 @@ PageBase {
         ColumnLayout {
             Layout.topMargin: Tokens.spacing.medium
             Layout.preferredHeight: implicitHeight
-            width: root.cappedWidth
+            Layout.preferredWidth: root.cappedWidth
             spacing: Tokens.spacing.large
 
             // Title
@@ -109,7 +109,7 @@ PageBase {
                 enabled: root.batteryLevel?.enabled ?? false
 
                 onAccepted: {
-                    setValueProperty("title", text);
+                    root.setValueProperty("title", text);
                     isSaved = true;
                     saveTimerTitle.restart();
                 }
@@ -138,7 +138,7 @@ PageBase {
                 enabled: root.batteryLevel?.enabled ?? false
 
                 onAccepted: {
-                    setValueProperty("message", text);
+                    root.setValueProperty("message", text);
                     isSaved = true;
                     saveTimerMessage.restart();
                 }
@@ -164,9 +164,9 @@ PageBase {
             value: root.batteryLevel?.level / 100
             enabled: root.batteryLevel?.enabled ?? false
             onMoved: v => {
-                setValueProperty("level", Math.round(v * 100));
+                root.setValueProperty("level", Math.round(v * 100));
                 if (root.batteryLevel?.autopick ?? false) {
-                    setValueProperty("icon", Icons.getBatteryHorizontalIcon(v, false, root.batteryLevel?.critical ?? false, GlobalConfig.general.battery.framedMaterialIcons));
+                    root.setValueProperty("icon", Icons.getBatteryHorizontalIcon(v, false, root.batteryLevel?.critical ?? false, GlobalConfig.general.battery.framedMaterialIcons));
                 }
             }
         }
@@ -185,7 +185,7 @@ PageBase {
             trailingIcon: text
 
             onAccepted: {
-                setValueProperty("icon", text);
+                root.setValueProperty("icon", text);
                 isSaved = true;
                 saveTimerIcon.restart();
             }
@@ -213,7 +213,7 @@ PageBase {
             checked: root.batteryLevel?.enabled ?? false
             onToggled: {
                 if (root.batteryLevel)
-                    toggleProperty("enabled");
+                    root.toggleProperty("enabled");
             }
         }
         // Icon auto picked from slider
@@ -224,7 +224,7 @@ PageBase {
             checked: root.batteryLevel?.autopick ?? false
             onToggled: {
                 if (root.batteryLevel)
-                    toggleProperty("autopick");
+                    root.toggleProperty("autopick");
             }
         }
         // Criticality
@@ -237,14 +237,14 @@ PageBase {
             checked: root.batteryLevel?.critical ?? false
             onToggled: {
                 if (root.batteryLevel)
-                    toggleProperty("critical");
+                    root.toggleProperty("critical");
             }
         }
 
         ButtonRow {
             Layout.topMargin: Tokens.spacing.large - parent.spacing
             Layout.alignment: Qt.AlignHCenter
-            Layout.minimumWidth: Math.round(newLevelPage ? root.cappedWidth * 0.7 : root.cappedWidth * 0.5)
+            Layout.minimumWidth: Math.round(root.newLevelPage ? root.cappedWidth * 0.7 : root.cappedWidth * 0.5)
             spacing: Tokens.spacing.small
 
             ButtonBase {
@@ -303,7 +303,7 @@ PageBase {
                 implicitHeight: addBtnLayout.implicitHeight + Tokens.padding.medium * 2
 
                 onClicked: {
-                    root.addLevel(batteryLevel);
+                    root.addLevel(root.batteryLevel);
                     root.nState.closeSubPage();
                 }
 
