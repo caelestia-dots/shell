@@ -106,7 +106,7 @@ ConnectedRect {
             onClicked: {
                 if (root.disabled)
                     return;
-                filePicker.open();
+                root.filePicker.open();
             }
         }
     }
