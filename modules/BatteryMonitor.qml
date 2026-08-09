@@ -1,4 +1,5 @@
 pragma ComponentBehavior: Bound
+
 import QtQuick
 import QtMultimedia
 import Quickshell
@@ -79,7 +80,8 @@ Scope {
 
         source: Paths.absolutePath(GlobalConfig.paths.lowBatNotifSound)
         audioOutput: AudioOutput {
-            device: root.currentAudioDevice
+            id: lowBatteryAudioOutput
+            // device: root.currentAudioDevice
         }
     }
 
@@ -88,7 +90,8 @@ Scope {
 
         source: Paths.absolutePath(GlobalConfig.paths.highBatNotifSound)
         audioOutput: AudioOutput {
-            device: root.currentAudioDevice
+            id: highBatteryAudioOutput
+            // device: root.currentAudioDevice
         }
     }
 
