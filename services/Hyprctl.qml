@@ -13,7 +13,9 @@ Singleton {
     property string lastRaw: ""
 
     readonly property Process proc: Process {
-        command: ["hyprctl", "monitors", "-j"]
+        // `all` also lists monitors that are turned off, which is the only way
+        // to offer turning one back on.
+        command: ["hyprctl", "monitors", "all", "-j"]
         stdout: StdioCollector {
             onStreamFinished: {
                 // Reassigning an identical list still churns every binding and

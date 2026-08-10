@@ -15,6 +15,9 @@ PageBase {
     readonly property var brightnessMon: mon ? Brightness.getMonitor(mon.name) : null
 
     readonly property string currentResolution: mon ? Monitors.modeResolution(mon) : ""
+    readonly property bool isDisabled: (mon?.disabled ?? false)
+    // Nothing would be left to turn it back on with
+    readonly property bool isOnlyEnabled: !isDisabled && Monitors.enabledMonitors().length <= 1
 
     property var availableResolutions: []
     property var availableRefreshRates: []
@@ -233,10 +236,27 @@ PageBase {
             text: qsTr("Configuration")
         }
 
-        SliderRow {
+        ToggleRow {
             Layout.fillWidth: true
             first: true
-            visible: root.brightnessMon !== null && root.brightnessMon !== undefined
+            text: qsTr("Enabled")
+            font: Tokens.font.body.medium
+            horizontalPadding: Tokens.padding.largeIncreased
+            // Turning off the last display would leave nothing to turn it back on with
+            disabled: root.isOnlyEnabled
+            checked: !root.isDisabled
+            onToggled: {
+                // Toggling breaks the binding, so restore it and let the actual
+                // monitor state drive the switch back
+                checked = Qt.binding(() => !root.isDisabled);
+                if (root.mon)
+                    Monitors.setEnabled(root.mon.name, root.isDisabled);
+            }
+        }
+
+        SliderRow {
+            Layout.fillWidth: true
+            visible: !root.isDisabled && root.brightnessMon !== null && root.brightnessMon !== undefined
             icon: (root.brightnessMon?.brightness ?? 0) > 0.5 ? "brightness_high" : "brightness_low"
             label: qsTr("Brightness")
             valueLabel: Math.round((root.brightnessMon?.brightness ?? 0) * 100) + "%"
@@ -249,7 +269,7 @@ PageBase {
 
         SelectRow {
             Layout.fillWidth: true
-            first: root.brightnessMon === null || root.brightnessMon === undefined
+            visible: !root.isDisabled
             label: qsTr("Resolution")
             subtext: qsTr("Display resolution")
             menuItems: resolutionItemsInstantiator.items
@@ -260,7 +280,7 @@ PageBase {
 
         SelectRow {
             Layout.fillWidth: true
-            first: false
+            visible: !root.isDisabled
             label: qsTr("Refresh rate")
             subtext: qsTr("Rates available at %1").arg(root.currentResolution)
             menuItems: refreshItemsInstantiator.items
@@ -271,6 +291,7 @@ PageBase {
 
         SelectRow {
             Layout.fillWidth: true
+            visible: !root.isDisabled
             label: qsTr("Rotation")
             subtext: qsTr("Screen orientation")
             menuItems: root.rotationItems
@@ -287,6 +308,7 @@ PageBase {
 
         SelectRow {
             Layout.fillWidth: true
+            visible: !root.isDisabled
             last: true
             label: qsTr("Scale")
             subtext: qsTr("UI scaling factor")

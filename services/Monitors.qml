@@ -7,8 +7,15 @@ import qs.services
 Singleton {
     id: root
 
+    // Long enough to see whether a new mode actually displays, short enough
+    // that a black screen is not a disaster
+    readonly property int confirmTimeout: 15
+
     property bool identifying: false
     property var lastApplied: []
+    property var pendingRevert: []
+    property bool confirming: false
+    property int confirmSecondsLeft: 0
 
     function toggleIdentification(): void {
         identifying = !identifying;
@@ -542,12 +549,21 @@ Singleton {
         return `"${value.replace(/\\/g, "\\\\").replace(/"/g, "\\\"")}"`;
     }
 
+    // A monitor that is off keeps reporting its mode, position and mode list,
+    // so turning it back on can restore what it had instead of guessing.
     function specFor(mon: var, overrides: var): var {
         const o = overrides ?? ({});
+        if (o.disabled ?? (mon.disabled ?? false))
+            return {
+                name: mon.name,
+                disabled: true
+            };
+
         const resolution = o.resolution ?? root.modeResolution(mon);
         const requested = o.refreshRate ?? (mon.refreshRate ?? 60);
         return {
             name: mon.name,
+            disabled: false,
             resolution: resolution,
             refreshRate: root.bestRateFor(mon, resolution, requested),
             scale: o.scale ?? (mon.scale || 1),
@@ -557,18 +573,27 @@ Singleton {
         };
     }
 
+    // Hyprland remembers `disabled` between commands, so every enabled monitor
+    // has to say so explicitly or one turned off earlier silently stays off.
     function monitorCommand(spec: var): string {
-        const mode = `${spec.resolution}@${spec.refreshRate.toFixed(3)}`;
-        const position = `${Math.round(spec.x)}x${Math.round(spec.y)}`;
-
         if (!Hypr.usingLua) {
+            if (spec.disabled)
+                return `keyword monitor ${spec.name},disable`;
+
+            const mode = `${spec.resolution}@${spec.refreshRate.toFixed(3)}`;
+            const position = `${Math.round(spec.x)}x${Math.round(spec.y)}`;
             let keyword = `keyword monitor ${spec.name},${mode},${position},${spec.scale}`;
             if (spec.transform !== 0)
                 keyword += `,transform,${spec.transform}`;
             return keyword;
         }
 
-        let lua = `hl.monitor({ output = ${root.luaString(spec.name)}, mode = ${root.luaString(mode)}, position = ${root.luaString(position)}, scale = ${spec.scale}`;
+        if (spec.disabled)
+            return `eval hl.monitor({ output = ${root.luaString(spec.name)}, disabled = true })`;
+
+        const mode = `${spec.resolution}@${spec.refreshRate.toFixed(3)}`;
+        const position = `${Math.round(spec.x)}x${Math.round(spec.y)}`;
+        let lua = `hl.monitor({ output = ${root.luaString(spec.name)}, disabled = false, mode = ${root.luaString(mode)}, position = ${root.luaString(position)}, scale = ${spec.scale}`;
         if (spec.transform !== 0)
             lua += `, transform = ${spec.transform}`;
         lua += " })";
@@ -577,13 +602,53 @@ Singleton {
 
     // One batch for the whole layout. Applying monitors one at a time makes
     // Hyprland see transient overlaps and shuffle them itself.
-    function apply(specs: var): void {
+    function sendSpecs(specs: var): void {
         if (!specs || specs.length === 0)
             return;
         Hypr.extras.batchMessage(specs.map(root.monitorCommand));
         root.lastApplied = specs;
         Hyprctl.update();
         verifyTimer.restart();
+    }
+
+    // Every enabled monitor, exactly as it stands. Taken before a change so
+    // there is something to go back to.
+    function snapshotSpecs(): var {
+        return root.sourceMonitors().filter(m => m).map(m => root.specFor(m, ({})));
+    }
+
+    // A mode, scale or rotation that the hardware cannot show leaves a black
+    // screen and no way to undo it, so every change has to be confirmed and
+    // goes back on its own if it is not. Changes made while already waiting
+    // keep the original snapshot: reverting should undo the whole run.
+    function apply(specs: var): void {
+        if (!specs || specs.length === 0)
+            return;
+
+        if (!root.confirming) {
+            root.pendingRevert = root.snapshotSpecs();
+            root.confirming = true;
+            root.confirmSecondsLeft = root.confirmTimeout;
+            confirmTimer.restart();
+        }
+
+        root.sendSpecs(specs);
+    }
+
+    function keepChanges(): void {
+        confirmTimer.stop();
+        root.confirming = false;
+        root.pendingRevert = [];
+        root.confirmSecondsLeft = 0;
+    }
+
+    function revertChanges(): void {
+        const specs = root.pendingRevert;
+        confirmTimer.stop();
+        root.confirming = false;
+        root.pendingRevert = [];
+        root.confirmSecondsLeft = 0;
+        root.sendSpecs(specs);
     }
 
     // Hyprland anchors the desktop at 0,0, so slide the whole arrangement back
@@ -696,6 +761,65 @@ Singleton {
         root.applyArrangement(root.solveLayout(rects, mover.id, dirX, dirY, true));
     }
 
+    // A monitor that is off keeps its position, so leaving the others exactly
+    // where they are means turning it back on restores the arrangement as it
+    // was. Closing the gap instead would scramble a layout the user set up, and
+    // it cannot be put back afterwards.
+    function setEnabled(monitorName: string, enabled: bool): void {
+        const mon = root.findMonitorByName(monitorName);
+        if (!mon)
+            return;
+        if (!(mon.disabled ?? false) === enabled)
+            return;
+        // Turning off the only display leaves nothing to turn it back on with
+        if (!enabled && root.enabledMonitors().length <= 1)
+            return;
+
+        if (!enabled) {
+            const off = root.specFor(mon, {
+                disabled: true
+            });
+            root.apply([off]);
+            return;
+        }
+
+        // Its old spot may have been taken while it was off, so only push
+        // things apart if they actually collide.
+        const size = root.logicalSize(mon);
+        const rects = root.currentRects().filter(r => r.name !== monitorName);
+        rects.push({
+            id: mon.id,
+            name: mon.name,
+            x: Math.round(mon.x ?? 0),
+            y: Math.round(mon.y ?? 0),
+            w: size.w,
+            h: size.h
+        });
+        root.resolveOverlaps(rects, mon.id, 0, 0);
+        root.normalizeOrigin(rects);
+
+        const specs = [];
+        for (let i = 0; i < rects.length; i++) {
+            const rect = rects[i];
+            const other = root.findMonitorByName(rect.name);
+            if (!other)
+                continue;
+            if (rect.name === monitorName)
+                specs.push(root.specFor(other, {
+                    disabled: false,
+                    x: rect.x,
+                    y: rect.y
+                }));
+            else if (Math.round(other.x ?? 0) !== rect.x || Math.round(other.y ?? 0) !== rect.y)
+                specs.push(root.specFor(other, {
+                    x: rect.x,
+                    y: rect.y
+                }));
+        }
+
+        root.apply(specs);
+    }
+
     function rotate(monitorName: string, angle: int): void {
         const transform = angle === 90 ? 1 : angle === 180 ? 2 : angle === 270 ? 3 : 0;
         root.applyMonitorChange(monitorName, {
@@ -755,6 +879,18 @@ Singleton {
 
             Hypr.extras.batchMessage(drift.map(root.monitorCommand));
             Hyprctl.update();
+        }
+    }
+
+    Timer {
+        id: confirmTimer
+
+        interval: 1000
+        repeat: true
+        onTriggered: {
+            root.confirmSecondsLeft--;
+            if (root.confirmSecondsLeft <= 0)
+                root.revertChanges();
         }
     }
 
