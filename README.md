@@ -790,6 +790,11 @@ For example, to disable the bar on DP-1:
                 }
             ]
         },
+        "recording": {
+            "recordSystem": true,
+            "recordMicrophone": false,
+            "videoMode": "fullscreen"
+        },
         "quickToggles": [
             {
                 "id": "wifi",
