@@ -16,11 +16,27 @@ PageBase {
 
     readonly property string currentResolution: mon ? Monitors.modeResolution(mon) : ""
     readonly property bool isDisabled: (mon?.disabled ?? false)
+    readonly property string mirrorTarget: mon ? Monitors.mirrorTargetName(mon) : ""
+    // Everything else describes a display that has its own place on the desktop
+    readonly property bool isMirroring: mirrorTarget !== ""
+    // Mirroring the only display with a place of its own would leave no desktop
+    readonly property bool canMirror: !isDisabled && (isMirroring || Monitors.arrangedMonitors().length > 1)
+    readonly property var mirrorCandidates: Monitors.arrangedMonitors().filter(m => m.name !== (root.mon?.name ?? ""))
     // Nothing would be left to turn it back on with
     readonly property bool isOnlyEnabled: !isDisabled && Monitors.enabledMonitors().length <= 1
 
     property var availableResolutions: []
     property var availableRefreshRates: []
+
+    readonly property MenuItem extendItem: MenuItem {
+        icon: "splitscreen_right"
+        text: qsTr("Extend desktop")
+        activeText: qsTr("Extend")
+        onClicked: {
+            if (root.mon)
+                Monitors.setMirror(root.mon.name, "");
+        }
+    }
 
     readonly property list<MenuItem> rotationItems: [
         MenuItem {
@@ -101,6 +117,13 @@ PageBase {
         return idx >= 0 ? (resolutionItemsInstantiator.items[idx] ?? null) : null;
     }
 
+    function getMirrorItem(): var {
+        if (!root.isMirroring)
+            return root.extendItem;
+        const idx = root.mirrorCandidates.findIndex(m => m.name === root.mirrorTarget);
+        return idx >= 0 ? (mirrorItemsInstantiator.items[idx] ?? root.extendItem) : root.extendItem;
+    }
+
     function getScaleItem(): var {
         const s = root.mon?.scale ?? 1.0;
         const idx = root.scaleValues.findIndex(v => Math.abs(v - s) < 0.01);
@@ -149,6 +172,35 @@ PageBase {
                 onClicked: {
                     if (root.mon)
                         Monitors.setRefreshRate(root.mon.name, modelData);
+                }
+            }
+        },
+        Instantiator {
+            id: mirrorItemsInstantiator
+
+            property var items: []
+
+            model: root.mirrorCandidates
+            onObjectAdded: (index, object) => {
+                const next = mirrorItemsInstantiator.items.slice();
+                next.splice(index, 0, object);
+                mirrorItemsInstantiator.items = next;
+            }
+            onObjectRemoved: (index, object) => {
+                const next = mirrorItemsInstantiator.items.slice();
+                next.splice(index, 1);
+                mirrorItemsInstantiator.items = next;
+            }
+
+            delegate: MenuItem {
+                required property var modelData
+
+                icon: "content_copy"
+                text: qsTr("Mirror %1").arg(modelData.name)
+                activeText: qsTr("Mirror of %1").arg(modelData.name)
+                onClicked: {
+                    if (root.mon)
+                        Monitors.setMirror(root.mon.name, modelData.name);
                 }
             }
         },
@@ -252,6 +304,17 @@ PageBase {
                 if (root.mon)
                     Monitors.setEnabled(root.mon.name, root.isDisabled);
             }
+        }
+
+        SelectRow {
+            Layout.fillWidth: true
+            visible: root.canMirror
+            label: qsTr("Mode")
+            subtext: qsTr("Give this display its own space, or show a copy of another")
+            menuItems: [root.extendItem].concat(mirrorItemsInstantiator.items)
+            active: root.getMirrorItem()
+            fallbackText: root.isMirroring ? qsTr("Mirror of %1").arg(root.mirrorTarget) : qsTr("Extend")
+            fallbackIcon: "splitscreen_right"
         }
 
         SliderRow {

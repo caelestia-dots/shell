@@ -40,6 +40,29 @@ Singleton {
         return root.sourceMonitors().filter(m => m && !(m.disabled ?? false));
     }
 
+    // A display showing a copy of another one has no place of its own in the
+    // desktop, so it is not part of the arrangement.
+    function isMirroring(mon: var): bool {
+        const target = String(mon?.mirrorOf ?? "none");
+        return target !== "none" && target !== "";
+    }
+
+    // hyprctl reports the mirrored output by id, not by name
+    function mirrorTargetName(mon: var): string {
+        if (!root.isMirroring(mon))
+            return "";
+        const target = String(mon.mirrorOf);
+        const byId = root.findMonitorById(parseInt(target));
+        if (byId)
+            return byId.name;
+        const byName = root.findMonitorByName(target);
+        return byName ? byName.name : "";
+    }
+
+    function arrangedMonitors(): var {
+        return root.enabledMonitors().filter(m => !root.isMirroring(m));
+    }
+
     function findMonitorByName(name: string): var {
         return root.sourceMonitors().find(m => m.name === name) ?? null;
     }
@@ -135,7 +158,7 @@ Singleton {
 
     // ── Rect helpers ──────────────────────────────────────────
     function currentRects(): var {
-        return root.enabledMonitors().map(m => {
+        return root.arrangedMonitors().map(m => {
             const size = root.logicalSize(m);
             return {
                 id: m.id,
@@ -564,6 +587,7 @@ Singleton {
         return {
             name: mon.name,
             disabled: false,
+            mirror: o.mirror ?? root.mirrorTargetName(mon),
             resolution: resolution,
             refreshRate: root.bestRateFor(mon, resolution, requested),
             scale: o.scale ?? (mon.scale || 1),
@@ -585,6 +609,8 @@ Singleton {
             let keyword = `keyword monitor ${spec.name},${mode},${position},${spec.scale}`;
             if (spec.transform !== 0)
                 keyword += `,transform,${spec.transform}`;
+            if (spec.mirror)
+                keyword += `,mirror,${spec.mirror}`;
             return keyword;
         }
 
@@ -593,7 +619,8 @@ Singleton {
 
         const mode = `${spec.resolution}@${spec.refreshRate.toFixed(3)}`;
         const position = `${Math.round(spec.x)}x${Math.round(spec.y)}`;
-        let lua = `hl.monitor({ output = ${root.luaString(spec.name)}, disabled = false, mode = ${root.luaString(mode)}, position = ${root.luaString(position)}, scale = ${spec.scale}`;
+        // `mirror` is as sticky as `disabled`, so it always has to be stated
+        let lua = `hl.monitor({ output = ${root.luaString(spec.name)}, disabled = false, mirror = ${root.luaString(spec.mirror || "none")}, mode = ${root.luaString(mode)}, position = ${root.luaString(position)}, scale = ${spec.scale}`;
         if (spec.transform !== 0)
             lua += `, transform = ${spec.transform}`;
         lua += " })";
@@ -761,63 +788,109 @@ Singleton {
         root.applyArrangement(root.solveLayout(rects, mover.id, dirX, dirY, true));
     }
 
-    // A monitor that is off keeps its position, so leaving the others exactly
-    // where they are means turning it back on restores the arrangement as it
-    // was. Closing the gap instead would scramble a layout the user set up, and
-    // it cannot be put back afterwards.
-    function setEnabled(monitorName: string, enabled: bool): void {
+    // Turning a display off, or making it mirror another, takes it out of the
+    // arrangement and leaves a hole. A hole is dead space the pointer cannot
+    // cross, stranding the displays either side of it, so it gets closed.
+    // Closing it moves the others, so the whole arrangement is remembered first
+    // and put back when the display comes back.
+    function setPresence(monitorName: string, present: bool, overrides: var): void {
         const mon = root.findMonitorByName(monitorName);
         if (!mon)
             return;
-        if (!(mon.disabled ?? false) === enabled)
-            return;
-        // Turning off the only display leaves nothing to turn it back on with
-        if (!enabled && root.enabledMonitors().length <= 1)
-            return;
-
-        if (!enabled) {
-            const off = root.specFor(mon, {
-                disabled: true
-            });
-            root.apply([off]);
-            return;
-        }
-
-        // Its old spot may have been taken while it was off, so only push
-        // things apart if they actually collide.
-        const size = root.logicalSize(mon);
-        const rects = root.currentRects().filter(r => r.name !== monitorName);
-        rects.push({
-            id: mon.id,
-            name: mon.name,
-            x: Math.round(mon.x ?? 0),
-            y: Math.round(mon.y ?? 0),
-            w: size.w,
-            h: size.h
-        });
-        root.resolveOverlaps(rects, mon.id, 0, 0);
-        root.normalizeOrigin(rects);
 
         const specs = [];
+        let rects;
+
+        if (present) {
+            const size = root.logicalSize(mon);
+            const saved = persist.savedPositions[monitorName];
+            rects = root.currentRects();
+            rects.push({
+                id: mon.id,
+                name: mon.name,
+                x: Math.round(saved?.x ?? mon.x ?? 0),
+                y: Math.round(saved?.y ?? mon.y ?? 0),
+                w: size.w,
+                h: size.h
+            });
+
+            // Put every display back where it was before this one was turned
+            // off, so a disable/enable round trip is a no-op
+            for (let i = 0; i < rects.length; i++) {
+                const remembered = persist.savedPositions[rects[i].name];
+                if (remembered) {
+                    rects[i].x = remembered.x;
+                    rects[i].y = remembered.y;
+                }
+            }
+
+            specs.push(root.specFor(mon, overrides));
+        } else {
+            const positions = ({});
+            const current = root.currentRects();
+            for (let i = 0; i < current.length; i++)
+                positions[current[i].name] = {
+                    x: current[i].x,
+                    y: current[i].y
+                };
+            persist.savedPositions = positions;
+
+            rects = current.filter(r => r.name !== monitorName);
+            specs.push(root.specFor(mon, overrides));
+        }
+
+        if (rects.length > 0)
+            root.solveLayout(rects, present ? mon.id : rects[0].id, 0, 0, true);
+
         for (let i = 0; i < rects.length; i++) {
             const rect = rects[i];
             const other = root.findMonitorByName(rect.name);
             if (!other)
                 continue;
-            if (rect.name === monitorName)
-                specs.push(root.specFor(other, {
-                    disabled: false,
-                    x: rect.x,
-                    y: rect.y
-                }));
-            else if (Math.round(other.x ?? 0) !== rect.x || Math.round(other.y ?? 0) !== rect.y)
+            if (rect.name === monitorName) {
+                specs[0].x = rect.x;
+                specs[0].y = rect.y;
+            } else if (Math.round(other.x ?? 0) !== rect.x || Math.round(other.y ?? 0) !== rect.y) {
                 specs.push(root.specFor(other, {
                     x: rect.x,
                     y: rect.y
                 }));
+            }
         }
 
         root.apply(specs);
+    }
+
+    function setEnabled(monitorName: string, enabled: bool): void {
+        const mon = root.findMonitorByName(monitorName);
+        if (!mon || !(mon.disabled ?? false) === enabled)
+            return;
+        // Turning off the only display leaves nothing to turn it back on with
+        if (!enabled && root.enabledMonitors().length <= 1)
+            return;
+
+        root.setPresence(monitorName, enabled, {
+            disabled: !enabled,
+            mirror: ""
+        });
+    }
+
+    // An empty target extends instead of mirroring. A display cannot mirror
+    // itself, and mirroring the last one with a place of its own would leave
+    // the desktop with no arrangement at all.
+    function setMirror(monitorName: string, targetName: string): void {
+        const mon = root.findMonitorByName(monitorName);
+        if (!mon || monitorName === targetName)
+            return;
+        if (targetName && root.arrangedMonitors().length <= 1)
+            return;
+        if (targetName && !root.findMonitorByName(targetName))
+            return;
+
+        root.setPresence(monitorName, !targetName, {
+            disabled: false,
+            mirror: targetName
+        });
     }
 
     function rotate(monitorName: string, angle: int): void {
@@ -880,6 +953,16 @@ Singleton {
             Hypr.extras.batchMessage(drift.map(root.monitorCommand));
             Hyprctl.update();
         }
+    }
+
+    // Kept across reloads so turning a display back on still restores the
+    // arrangement it was turned off from
+    PersistentProperties {
+        id: persist
+
+        property var savedPositions: ({})
+
+        reloadableId: "monitorArrangement"
     }
 
     Timer {
