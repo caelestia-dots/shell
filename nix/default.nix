@@ -172,7 +172,7 @@ in
     };
 
     meta = {
-      description = "A very segsy desktop shell";
+      description = "A fluid, morphing shell for your Linux desktop";
       homepage = "https://github.com/caelestia-dots/shell";
       license = lib.licenses.gpl3Only;
       mainProgram = "caelestia-shell";

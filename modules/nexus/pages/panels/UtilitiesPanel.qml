@@ -8,26 +8,23 @@ PageBase {
     id: root
 
     function isToggleOn(id: string): bool {
-        const item = Config.utilities.quickToggles.find(t => t.id === id);
-        return item ? (item.enabled ?? true) : false;
+        const item = Config.utilities.quickToggles.values.find(t => t.id === id);
+        return item?.enabled ?? false;
     }
 
     function setToggleOn(id: string, on: bool): void {
-        let found = false;
-        const next = Config.utilities.quickToggles.map(item => {
-            if (item.id !== id)
-                return item;
-            found = true;
-            return Object.assign({}, item, {
-                enabled: on
-            });
+        const list = GlobalConfig.utilities.quickToggles;
+        for (let i = 0; i < list.count; i++) {
+            const item = list.at(i);
+            if (item.id === id) {
+                item.enabled = on;
+                return;
+            }
+        }
+        list.insert({
+            id,
+            enabled: on
         });
-        if (!found)
-            next.push({
-                id,
-                enabled: on
-            });
-        GlobalConfig.utilities.quickToggles = next;
     }
 
     title: qsTr("Utilities")

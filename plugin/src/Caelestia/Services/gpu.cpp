@@ -108,8 +108,8 @@ struct NameSource {
     QString (*parse)(const QByteArray&);
 };
 
-// Name probes in priority order; the first non-empty result wins. The NVIDIA
-// probe is first and doubles as the type probe (see finishNameSource).
+// Name probes in priority order; the first non-empty result wins. Which of them run
+// depends on the resolved type.
 const std::array<NameSource, 3>& nameSources() {
     static const std::array<NameSource, 3> sources = { {
         { QStringLiteral("nvidia-smi"), { QStringLiteral("--query-gpu=name"), QStringLiteral("--format=csv,noheader") },
@@ -120,8 +120,9 @@ const std::array<NameSource, 3>& nameSources() {
     return sources;
 }
 
-// Index of the NVIDIA source within nameSources(); its result also drives type.
+// Indices within nameSources(): nvidia-smi, then the driver-agnostic probes.
 constexpr int kNvidiaSource = 0;
+constexpr int kFirstGenericSource = 1;
 
 } // namespace
 
@@ -132,22 +133,19 @@ Gpu::Gpu(QObject* parent)
     auto* svc = caelestia::config::GlobalConfig::instance()->services();
     m_userType = parseType(svc->gpuType());
     QObject::connect(svc, &caelestia::config::ServiceConfig::gpuTypeChanged, this, [this, svc] {
-        setUserType(parseType(svc->gpuType()));
+        const Type value = parseType(svc->gpuType());
+        if (value == m_userType) {
+            return;
+        }
+        m_userType = value;
+        resolveGpu();
     });
 
-    detectGpu();
+    resolveGpu();
 }
 
 Gpu::Type Gpu::type() const {
-    return m_userType == Auto ? m_autoType : m_userType;
-}
-
-Gpu::Type Gpu::userType() const {
-    return m_userType;
-}
-
-Gpu::Type Gpu::autoType() const {
-    return m_autoType;
+    return m_type;
 }
 
 QString Gpu::name() const {
@@ -162,33 +160,15 @@ qreal Gpu::temperature() const {
     return m_temperature;
 }
 
-void Gpu::setUserType(Type value) {
-    if (value == m_userType) {
+void Gpu::setType(Type value) {
+    if (value == m_type) {
         return;
     }
-    const Type prevDerived = type();
-    m_userType = value;
-    emit userTypeChanged();
-    if (type() != prevDerived) {
-        emit typeChanged();
+    m_type = value;
+    if (m_type == None) {
+        resetUsage();
     }
-
-    // Probe again when switching back to auto
-    if (value == Auto) {
-        detectGpu();
-    }
-}
-
-void Gpu::setAutoType(Type value) {
-    if (value == m_autoType) {
-        return;
-    }
-    const Type prevDerived = type();
-    m_autoType = value;
-    emit autoTypeChanged();
-    if (type() != prevDerived) {
-        emit typeChanged();
-    }
+    emit typeChanged();
 }
 
 void Gpu::setName(QString value) {
@@ -200,60 +180,70 @@ void Gpu::setName(QString value) {
 }
 
 void Gpu::tick() {
-    const Type t = type();
-    if (t == Generic) {
+    if (m_type == Generic) {
         readGenericUsage();
         readGpuTemperature();
-    } else if (t == Nvidia) {
+    } else if (m_type == Nvidia) {
         startNvidiaUsage();
     } else {
-        if (std::abs(m_percentage) > 0.0001) {
-            m_percentage = 0.0;
-            emit percentageChanged();
-        }
-        if (std::abs(m_temperature) > 0.05) {
-            m_temperature = 0.0;
-            emit temperatureChanged();
-        }
+        resetUsage();
     }
 }
 
-void Gpu::detectGpu() {
-    if (m_detecting) {
+void Gpu::resolveGpu() {
+    // Supersede any chain still in flight so its callbacks cannot write stale state
+    const int generation = ++m_generation;
+
+    if (m_userType != Auto) {
+        setType(m_userType);
+    }
+
+    if (m_userType == None) {
+        setName(tr("None"));
         return;
     }
-    m_detecting = true;
 
-    // Probe in priority order, stopping at the first result
-    tryNameSource(0);
+    setName(tr("Detecting GPU..."));
+    tryNameSource(m_userType == Generic ? kFirstGenericSource : kNvidiaSource, generation);
 }
 
-void Gpu::tryNameSource(int index) {
+int Gpu::probeEnd() const {
+    return m_userType == Nvidia ? kFirstGenericSource : static_cast<int>(nameSources().size());
+}
+
+void Gpu::tryNameSource(int index, int generation) {
     const NameSource& src = nameSources().at(static_cast<std::size_t>(index));
-    runProcess(src.program, src.args, [this, index, parse = src.parse](const QByteArray& out) {
-        finishNameSource(index, parse(out));
+    runProcess(src.program, src.args, [this, index, generation, parse = src.parse](const QByteArray& out) {
+        finishNameSource(index, generation, parse(out));
     });
 }
 
-void Gpu::finishNameSource(int index, QString name) {
-    // The NVIDIA name probe doubles as the type probe: a non-empty result means an
-    // NVIDIA GPU is present and queryable. Derive autoType unconditionally (even when
-    // the user pins a type) so a later switch to Auto reads a correct value without
-    // depending on its own re-probe, which is skipped while a probe is in flight.
-    if (index == kNvidiaSource) {
-        setAutoType(!name.isEmpty() ? Nvidia : (m_busyFiles.isEmpty() ? None : Generic));
+void Gpu::finishNameSource(int index, int generation, QString name) {
+    if (generation != m_generation) {
+        return; // superseded by a newer resolution
+    }
+
+    // Under Auto the NVIDIA name probe doubles as the type probe: a non-empty result
+    // means an NVIDIA GPU is present and queryable.
+    if (m_userType == Auto && index == kNvidiaSource) {
+        setType(!name.isEmpty() ? Nvidia : (m_busyFiles.isEmpty() ? None : Generic));
+        if (m_type == None) {
+            setName(tr("None"));
+            return;
+        }
     }
 
     if (!name.isEmpty()) {
         setName(std::move(name));
-        m_detecting = false;
         return;
     }
 
-    if (index + 1 < static_cast<int>(nameSources().size())) {
-        tryNameSource(index + 1);
+    // Fall through to the next applicable source
+    const int next = index + 1;
+    if (next < probeEnd()) {
+        tryNameSource(next, generation);
     } else {
-        m_detecting = false;
+        setName(tr("None"));
     }
 }
 
@@ -261,16 +251,17 @@ void Gpu::runProcess(const QString& program, const QStringList& args, std::funct
     auto* proc = new QProcess(this);
     proc->setStandardErrorFile(QProcess::nullDevice());
 
-    // Deliver the result exactly once, then tear the process down. A crash or a
-    // missing binary yields empty output so the caller can fall through gracefully:
-    // only FailedToStart skips finished(), and a crash reports CrashExit there.
+    // Deliver the result exactly once, then tear the process down. A crash, a missing
+    // binary or a failed run yields empty output so the caller can fall through
+    // gracefully: only FailedToStart skips finished(), and a crash reports CrashExit there.
     const auto finish = [proc, callback = std::move(callback)](const QByteArray& out) {
         callback(out);
         proc->deleteLater();
     };
 
-    QObject::connect(proc, &QProcess::finished, this, [finish, proc](int, QProcess::ExitStatus status) {
-        finish(status == QProcess::NormalExit ? proc->readAllStandardOutput() : QByteArray());
+    QObject::connect(proc, &QProcess::finished, this, [finish, proc](int code, QProcess::ExitStatus status) {
+        const bool ok = status == QProcess::NormalExit && code == 0; // Fail on crashes and non-zero exit codes
+        finish(ok ? proc->readAllStandardOutput() : QByteArray());
     });
     QObject::connect(proc, &QProcess::errorOccurred, this, [finish](QProcess::ProcessError err) {
         if (err == QProcess::FailedToStart) {
@@ -309,11 +300,17 @@ void Gpu::startNvidiaUsage() {
         return;
     }
     m_nvidiaQuerying = true;
+    const int generation = m_generation;
     runProcess(QStringLiteral("nvidia-smi"),
         { QStringLiteral("--query-gpu=utilization.gpu,temperature.gpu"),
             QStringLiteral("--format=csv,noheader,nounits") },
-        [this](const QByteArray& out) {
+        [this, generation](const QByteArray& out) {
             m_nvidiaQuerying = false;
+
+            // The type moved out from under the sample, so it no longer describes the GPU
+            if (generation != m_generation) {
+                return;
+            }
 
             const QList<QByteArray> parts = out.trimmed().split(',');
             if (parts.size() < 2) {
@@ -339,6 +336,17 @@ void Gpu::readGpuTemperature() {
     const qreal newTemp = t.value_or(0.0);
     if (std::abs(newTemp - m_temperature) > 0.05) {
         m_temperature = newTemp;
+        emit temperatureChanged();
+    }
+}
+
+void Gpu::resetUsage() {
+    if (std::abs(m_percentage) > 0.0001) {
+        m_percentage = 0.0;
+        emit percentageChanged();
+    }
+    if (std::abs(m_temperature) > 0.05) {
+        m_temperature = 0.0;
         emit temperatureChanged();
     }
 }
