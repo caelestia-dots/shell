@@ -76,7 +76,7 @@ PageBase {
     function getRefreshItem(): var {
         if (!root.mon || !root.availableRefreshRates || root.availableRefreshRates.length === 0)
             return null;
-        if (!refreshItemsInstantiator.objects || refreshItemsInstantiator.objects.length === 0)
+        if (refreshItemsInstantiator.items.length === 0)
             return null;
         const rate = root.mon.refreshRate ?? 60;
         let minDiff = 999999;
@@ -88,16 +88,14 @@ PageBase {
                 bestIdx = i;
             }
         }
-        return bestIdx >= 0 ? refreshItemsInstantiator.objects[bestIdx] : null;
+        return bestIdx >= 0 ? (refreshItemsInstantiator.items[bestIdx] ?? null) : null;
     }
 
     function getResolutionItem(): var {
         if (!root.mon || !root.availableResolutions || root.availableResolutions.length === 0)
             return null;
-        if (!resolutionItemsInstantiator.objects || resolutionItemsInstantiator.objects.length === 0)
-            return null;
         const idx = root.availableResolutions.indexOf(root.currentResolution);
-        return idx >= 0 ? resolutionItemsInstantiator.objects[idx] : null;
+        return idx >= 0 ? (resolutionItemsInstantiator.items[idx] ?? null) : null;
     }
 
     function getScaleItem(): var {
@@ -120,14 +118,29 @@ PageBase {
 
     Component.onCompleted: updateModes()
 
+    // Instantiator keeps no list of what it built, so track it as it goes. A
+    // model swap of the same length leaves `count` alone while replacing every
+    // object, so counting is not enough to stay in sync.
     resources: [
         Instantiator {
             id: refreshItemsInstantiator
 
+            property var items: []
+
             model: root.availableRefreshRates
+            onObjectAdded: (index, object) => {
+                const next = refreshItemsInstantiator.items.slice();
+                next.splice(index, 0, object);
+                refreshItemsInstantiator.items = next;
+            }
+            onObjectRemoved: (index, object) => {
+                const next = refreshItemsInstantiator.items.slice();
+                next.splice(index, 1);
+                refreshItemsInstantiator.items = next;
+            }
+
             delegate: MenuItem {
                 required property var modelData
-                required property int index
 
                 text: Monitors.formatRate(modelData) + " Hz"
                 onClicked: {
@@ -139,10 +152,22 @@ PageBase {
         Instantiator {
             id: resolutionItemsInstantiator
 
+            property var items: []
+
             model: root.availableResolutions
+            onObjectAdded: (index, object) => {
+                const next = resolutionItemsInstantiator.items.slice();
+                next.splice(index, 0, object);
+                resolutionItemsInstantiator.items = next;
+            }
+            onObjectRemoved: (index, object) => {
+                const next = resolutionItemsInstantiator.items.slice();
+                next.splice(index, 1);
+                resolutionItemsInstantiator.items = next;
+            }
+
             delegate: MenuItem {
                 required property var modelData
-                required property int index
 
                 text: modelData
                 onClicked: {
@@ -227,15 +252,10 @@ PageBase {
             first: root.brightnessMon === null || root.brightnessMon === undefined
             label: qsTr("Resolution")
             subtext: qsTr("Display resolution")
-            menuItems: resolutionItemsInstantiator.objects || []
+            menuItems: resolutionItemsInstantiator.items
             active: root.getResolutionItem()
             fallbackText: root.mon ? qsTr("%1×%2").arg(root.mon.width).arg(root.mon.height) : qsTr("Unknown")
             fallbackIcon: "aspect_ratio"
-            onSelected: item => {
-                const idx = resolutionItemsInstantiator.objects.indexOf(item);
-                if (idx >= 0 && root.mon)
-                    Monitors.setResolution(root.mon.name, root.availableResolutions[idx]);
-            }
         }
 
         SelectRow {
@@ -243,15 +263,10 @@ PageBase {
             first: false
             label: qsTr("Refresh rate")
             subtext: qsTr("Rates available at %1").arg(root.currentResolution)
-            menuItems: refreshItemsInstantiator.objects || []
+            menuItems: refreshItemsInstantiator.items
             active: root.getRefreshItem()
             fallbackText: root.mon?.refreshRate ? qsTr("%1 Hz").arg(Monitors.formatRate(root.mon.refreshRate)) : qsTr("Unknown")
             fallbackIcon: "speed"
-            onSelected: item => {
-                const idx = refreshItemsInstantiator.objects.indexOf(item);
-                if (idx >= 0 && root.mon)
-                    Monitors.setRefreshRate(root.mon.name, root.availableRefreshRates[idx]);
-            }
         }
 
         SelectRow {
