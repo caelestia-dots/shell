@@ -19,6 +19,9 @@ StyledRect {
     property string lastError: ""
     readonly property string currentVideoMode: GlobalConfig.utilities?.recording?.videoMode ?? "fullscreen"
 
+    // Parallel to the split button's menu items
+    readonly property list<string> videoModes: ["fullscreen", "region", "window"]
+
     // gpu-screen-recorder takes one audio argument, so the two switches collapse
     // into a single mode
     readonly property string currentAudioMode: {
@@ -156,39 +159,31 @@ StyledRect {
 
             SplitButton {
                 disabled: root.recordingBusy
-                active: menuItems.find(m => m["mode"] === root.currentVideoMode) ?? menuItems[0]
-                menu.onItemSelected: item => root.setVideoMode(item["mode"])
+                active: menuItems[root.videoModes.indexOf(root.currentVideoMode)] ?? menuItems[0]
+                menu.onItemSelected: item => {
+                    const idx = menuItems.indexOf(item);
+                    if (idx >= 0)
+                        root.setVideoMode(root.videoModes[idx]);
+                }
 
                 menuItems: [
                     MenuItem {
-                        id: modeFullscreen
-
-                        property string mode: "fullscreen"
-
                         icon: "fullscreen"
                         text: qsTr("Record fullscreen")
                         activeText: qsTr("Fullscreen")
-                        onClicked: root.startRecording(modeFullscreen.mode)
+                        onClicked: root.startRecording("fullscreen")
                     },
                     MenuItem {
-                        id: modeRegion
-
-                        property string mode: "region"
-
                         icon: "screenshot_region"
                         text: qsTr("Record region")
                         activeText: qsTr("Region")
-                        onClicked: root.startRecording(modeRegion.mode)
+                        onClicked: root.startRecording("region")
                     },
                     MenuItem {
-                        id: modeWindow
-
-                        property string mode: "window"
-
                         icon: "web_asset"
                         text: qsTr("Record window")
                         activeText: qsTr("Window")
-                        onClicked: root.startRecording(modeWindow.mode)
+                        onClicked: root.startRecording("window")
                     }
                 ]
             }
