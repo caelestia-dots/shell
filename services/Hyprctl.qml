@@ -10,12 +10,20 @@ Singleton {
 
     property list<var> monitors: []
 
+    property string lastRaw: ""
+
     readonly property Process proc: Process {
         command: ["hyprctl", "monitors", "-j"]
         stdout: StdioCollector {
             onStreamFinished: {
+                // Reassigning an identical list still churns every binding and
+                // Repeater downstream, so only publish real changes.
+                if (text === root.lastRaw)
+                    return;
                 try {
-                    root.monitors = JSON.parse(text);
+                    const parsed = JSON.parse(text);
+                    root.lastRaw = text;
+                    root.monitors = parsed;
                 } catch (e) {
                     console.error("Hyprctl: failed to parse monitors JSON", e);
                 }

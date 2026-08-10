@@ -14,6 +14,8 @@ PageBase {
     readonly property var mon: nState.selectedMonitor
     readonly property var brightnessMon: mon ? Brightness.getMonitor(mon.name) : null
 
+    readonly property string currentResolution: mon ? Monitors.modeResolution(mon) : ""
+
     property var availableResolutions: []
     property var availableRefreshRates: []
 
@@ -51,46 +53,24 @@ PageBase {
 
     readonly property list<real> scaleValues: [1.0, 1.25, 1.5, 2.0]
 
+    // Resolution and refresh rate are not independent: availableModes pairs
+    // them, so the rate list only ever shows what the current resolution can do.
     function updateModes(): void {
-        const res = [];
-        const rates = [];
-        if (root.mon && root.mon.availableModes) {
-            const modes = root.mon.availableModes;
-            for (let i = 0; i < modes.length; i++) {
-                const mode = modes[i];
-                const parts = mode.split("@");
-                if (parts.length === 2) {
-                    const rStr = parts[0];
-                    if (res.indexOf(rStr) === -1) {
-                        res.push(rStr);
-                    }
-                    const rateStr = parts[1].replace("Hz", "");
-                    const rate = parseFloat(rateStr);
-                    if (!isNaN(rate)) {
-                        const roundedRate = Math.round(rate * 100) / 100;
-                        if (rates.indexOf(roundedRate) === -1) {
-                            rates.push(roundedRate);
-                        }
-                    }
-                }
-            }
-            // Sort resolutions descending by total pixels
-            res.sort((a, b) => {
-                const aParts = a.split("x").map(Number);
-                const bParts = b.split("x").map(Number);
-                return (bParts[0] * bParts[1]) - (aParts[0] * aParts[1]);
-            });
-            // Sort rates descending
-            rates.sort((a, b) => b - a);
-        } else if (root.mon) {
-            // Fallback if no availableModes
-            const currentRes = `${root.mon.width}x${root.mon.height}`;
-            res.push(currentRes);
-            rates.push(Math.round(root.mon.refreshRate ?? 60));
+        if (!root.mon) {
+            root.availableResolutions = [];
+            root.availableRefreshRates = [];
+            return;
         }
 
-        root.availableResolutions = res;
-        root.availableRefreshRates = rates;
+        const res = Monitors.resolutionsFor(root.mon);
+        const rates = Monitors.refreshRatesFor(root.mon, root.currentResolution);
+
+        // Rebuilding the instantiator models tears down any open dropdown, so
+        // only publish when the contents actually differ.
+        if (res.join("|") !== root.availableResolutions.join("|"))
+            root.availableResolutions = res;
+        if (rates.join("|") !== root.availableRefreshRates.join("|"))
+            root.availableRefreshRates = rates;
     }
 
     function getRefreshItem(): var {
@@ -116,8 +96,7 @@ PageBase {
             return null;
         if (!resolutionItemsInstantiator.objects || resolutionItemsInstantiator.objects.length === 0)
             return null;
-        const currentRes = `${root.mon.width}x${root.mon.height}`;
-        const idx = root.availableResolutions.indexOf(currentRes);
+        const idx = root.availableResolutions.indexOf(root.currentResolution);
         return idx >= 0 ? resolutionItemsInstantiator.objects[idx] : null;
     }
 
@@ -137,6 +116,8 @@ PageBase {
         }
     }
 
+    onCurrentResolutionChanged: updateModes()
+
     Component.onCompleted: updateModes()
 
     resources: [
@@ -148,7 +129,7 @@ PageBase {
                 required property var modelData
                 required property int index
 
-                text: modelData + " Hz"
+                text: Monitors.formatRate(modelData) + " Hz"
                 onClicked: {
                     if (root.mon)
                         Monitors.setRefreshRate(root.mon.name, modelData);
@@ -213,7 +194,7 @@ PageBase {
                         const h = root.mon?.height ?? 0;
                         const r = root.mon?.refreshRate ?? 0;
                         if (w && h && r)
-                            return qsTr("%1 × %2 @ %3 Hz").arg(w).arg(h).arg(r.toFixed(0));
+                            return qsTr("%1 × %2 @ %3 Hz").arg(w).arg(h).arg(Monitors.formatRate(r));
                         return qsTr("Unavailable");
                     }
                     color: Colours.palette.m3onSurfaceVariant
@@ -261,10 +242,10 @@ PageBase {
             Layout.fillWidth: true
             first: false
             label: qsTr("Refresh rate")
-            subtext: qsTr("Maximum refresh rate")
+            subtext: qsTr("Rates available at %1").arg(root.currentResolution)
             menuItems: refreshItemsInstantiator.objects || []
             active: root.getRefreshItem()
-            fallbackText: root.mon?.refreshRate ? qsTr("%1 Hz").arg((root.mon.refreshRate).toFixed(0)) : qsTr("Unknown")
+            fallbackText: root.mon?.refreshRate ? qsTr("%1 Hz").arg(Monitors.formatRate(root.mon.refreshRate)) : qsTr("Unknown")
             fallbackIcon: "speed"
             onSelected: item => {
                 const idx = refreshItemsInstantiator.objects.indexOf(item);
