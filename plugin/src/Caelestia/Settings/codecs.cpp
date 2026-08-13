@@ -62,6 +62,9 @@ ValueCodec* ValueCodec::codecFor(const QMetaType& type) {
     case QMetaType::QString:
         codec = new StringCodec(type);
         break;
+    case QMetaType::QVariantList:
+        codec = new VariantListCodec(type);
+        break;
     default:
         if (type.flags().testFlag(QMetaType::IsEnumeration))
             codec = new EnumCodec(type);
@@ -134,6 +137,17 @@ DecodeResult StringCodec::decode(const QJsonValue& value) const {
         return mismatch(QStringLiteral("a string"), value);
 
     return { value.toString(), std::nullopt };
+}
+
+QJsonValue VariantListCodec::encode(const QVariant& value) const {
+    return QJsonArray::fromVariantList(value.toList());
+}
+
+DecodeResult VariantListCodec::decode(const QJsonValue& value) const {
+    if (!value.isArray())
+        return mismatch(QStringLiteral("an array"), value);
+
+    return { value.toArray().toVariantList(), std::nullopt };
 }
 
 QJsonValue EnumCodec::encode(const QVariant& value) const {

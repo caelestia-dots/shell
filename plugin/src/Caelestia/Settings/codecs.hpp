@@ -43,6 +43,7 @@ CODEC(Bool)
 CODEC(Int)
 CODEC(Real)
 CODEC(String)
+CODEC(VariantList)
 CODEC(Enum)
 
 #undef CODEC
