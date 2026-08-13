@@ -16,4 +16,15 @@ WriteScope::~WriteScope() {
     m_root->m_writeOrigin = m_previous;
 }
 
+QString DiagnosticType::toString(Type t) {
+    switch (t) {
+    case UnknownOption:
+        return QStringLiteral("UnknownOption");
+    case TypeMismatch:
+        return QStringLiteral("TypeMismatch");
+    case InvalidValue:
+        return QStringLiteral("InvalidValue");
+    }
+}
+
 } // namespace caelestia::settings

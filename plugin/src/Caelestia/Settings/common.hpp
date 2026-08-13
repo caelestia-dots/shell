@@ -1,6 +1,7 @@
 #pragma once
 
 #include <qloggingcategory.h>
+#include <qqmlintegration.h>
 
 namespace caelestia::settings {
 
@@ -26,6 +27,38 @@ private:
     WriteOrigin m_previous;
 
     Q_DISABLE_COPY_MOVE(WriteScope)
+};
+
+class DiagnosticType : public QObject {
+    Q_OBJECT
+    QML_ELEMENT
+    QML_SINGLETON
+
+public:
+    enum Type {
+        UnknownOption = 0,
+        TypeMismatch,
+        InvalidValue,
+    };
+    Q_ENUM(Type)
+
+    Q_INVOKABLE QString toString(Type t);
+};
+
+struct Diagnostic {
+    Q_GADGET
+    QML_VALUE_TYPE(diagnostic)
+
+    Q_PROPERTY(DiagnosticType::Type type MEMBER type)
+    Q_PROPERTY(QString option MEMBER option)
+    Q_PROPERTY(QString message MEMBER message)
+    Q_PROPERTY(QString layer MEMBER layer) // The layer, i.e. the screen name or empty for global
+
+public:
+    DiagnosticType::Type type;
+    QString option;
+    QString message;
+    QString layer;
 };
 
 } // namespace caelestia::settings
