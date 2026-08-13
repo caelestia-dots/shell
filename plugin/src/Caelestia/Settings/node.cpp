@@ -29,6 +29,10 @@ Node* Node::rootNode() const {
     return m_rootNode;
 }
 
+Node* Node::fallbackNode() const {
+    return m_fallbackNode;
+}
+
 bool Node::isOverride(const QString& key) const {
     return m_overrides.contains(key);
 }
@@ -39,10 +43,6 @@ const QSet<QString>& Node::overrides() const {
 
 bool Node::hasOverrides() const {
     return !m_overrides.isEmpty();
-}
-
-Node* Node::fallbackNode() const {
-    return m_fallbackNode;
 }
 
 QVariant Node::value(const QString& key) const {

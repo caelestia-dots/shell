@@ -17,13 +17,11 @@ public:
     [[nodiscard]] QString path() const;
     [[nodiscard]] Node* parentNode() const;
     [[nodiscard]] Node* rootNode() const;
+    [[nodiscard]] Node* fallbackNode() const;
 
     [[nodiscard]] bool isOverride(const QString& key) const;
     [[nodiscard]] const QSet<QString>& overrides() const;
     [[nodiscard]] bool hasOverrides() const; // Recursive
-
-    [[nodiscard]] Node* fallbackNode() const;
-    void pullFallback();
 
     [[nodiscard]] virtual const Schema& schema() const = 0;
 
