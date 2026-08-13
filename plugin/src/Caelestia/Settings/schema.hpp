@@ -30,6 +30,7 @@ public:
     static const Schema build(const QMetaObject* meta, int baseOffset);
     static void annotate(const QMetaObject* meta, const QString& key, Descriptor descriptor);
 
+    [[nodiscard]] const QList<Descriptor>& descriptors() const;
     [[nodiscard]] const Descriptor* get(const QString& key) const;
 
 private:

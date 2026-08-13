@@ -48,6 +48,10 @@ void Schema::annotate(const QMetaObject* meta, const QString& key, Descriptor de
     descriptorCache()[meta].insert(key, std::move(descriptor));
 }
 
+const QList<Descriptor>& Schema::descriptors() const {
+    return m_descriptors;
+}
+
 const Descriptor* Schema::get(const QString& key) const {
     const auto it = m_keyToIndex.find(key);
     return it != m_keyToIndex.end() ? &m_descriptors[it.value()] : nullptr;
