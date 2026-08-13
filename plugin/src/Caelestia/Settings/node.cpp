@@ -71,6 +71,49 @@ bool Node::setValue(const QString& key, const QVariant& value) {
     return metaObject()->property(desc->metaIndex).write(this, value);
 }
 
+bool Node::recordWrite(const QString& key, const QVariant& value) {
+    const auto* desc = schema().get(key);
+    if (!desc) {
+        qCCritical(lcSettings, "Attempted to record a write for an unknown key %s.%s, something is seriously wrong...",
+            qUtf8Printable(path()), qUtf8Printable(key));
+        return false;
+    }
+
+    // TODO: handle global only props by forwarding to fallback node
+    Q_UNUSED(value)
+
+    const auto origin = m_rootNode->m_writeOrigin;
+
+    switch (origin) {
+    // Init does not notify or write to file
+    case WriteOrigin::Init:
+        return false;
+
+    // File and qml both count as overrides
+    case WriteOrigin::File:
+    case WriteOrigin::Qml:
+        m_overrides << key;
+        break;
+
+    // Layer is not an override, it is a sync with the fallback value
+    case WriteOrigin::Layer:
+        break;
+
+    // Reset clears the override
+    case WriteOrigin::Reset:
+        m_overrides.remove(key);
+        break;
+    }
+
+    // Both qml and reset write to the file
+    if (origin == WriteOrigin::Qml || origin == WriteOrigin::Reset) {
+        // TODO: write to file
+    }
+
+    emit optionChanged(key);
+    return true;
+}
+
 template <typename T> T Node::fallbackValue(const QString& key, T defaultValue) const {
     return m_fallbackNode ? m_fallbackNode->value(key).value<T>() : defaultValue;
 }
