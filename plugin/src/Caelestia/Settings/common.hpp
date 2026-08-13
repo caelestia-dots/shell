@@ -20,6 +20,8 @@ public:
 private:
     Node* m_root;
     WriteOrigin m_previous;
+
+    Q_DISABLE_COPY_MOVE(WriteScope)
 };
 
 } // namespace caelestia::settings
