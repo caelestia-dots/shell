@@ -37,6 +37,9 @@ protected:
 
     [[nodiscard]] virtual QString keyOf(const Node* child) const = 0;
 
+    template <typename T> [[nodiscard]] T fallbackValue(const QString& key, T defaultValue) const;
+    template <typename T> [[nodiscard]] T* fallbackChild(const QString& key) const;
+
 private:
     QSet<QString> m_overrides; // Overridden keys from file/qml writes
     Node* const m_rootNode;
