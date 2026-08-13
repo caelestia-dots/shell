@@ -1,5 +1,6 @@
 #include "codecs.hpp"
 
+#include <qjsonarray.h>
 #include <qmetaobject.h>
 
 namespace caelestia::settings {
@@ -38,6 +39,21 @@ DecodeResult mismatch(const QString& expected, const QJsonValue& value) {
         DiagnosticType::TypeMismatch, QStringLiteral("Expected %1, got %2").arg(expected, jsonTypeName(value)));
 }
 
+template <typename Container> ValueCodec* makeListCodec(const QMetaType& type) {
+    const auto* elementCodec = ValueCodec::codecFor(QMetaType::fromType<typename Container::value_type>());
+    return elementCodec ? new ListCodec<Container>(type, elementCodec) : nullptr;
+}
+
+using ListFactory = ValueCodec* (*)(const QMetaType&);
+
+const QHash<int, ListFactory>& listFactories() {
+    static const QHash<int, ListFactory> factories{
+        { QMetaType::fromType<QStringList>().id(), &makeListCodec<QStringList> },
+        { QMetaType::fromType<QList<qreal>>().id(), &makeListCodec<QList<qreal>> },
+    };
+    return factories;
+}
+
 } // namespace
 
 ValueCodec* ValueCodec::codecFor(const QMetaType& type) {
@@ -66,7 +82,9 @@ ValueCodec* ValueCodec::codecFor(const QMetaType& type) {
         codec = new VariantListCodec(type);
         break;
     default:
-        if (type.flags().testFlag(QMetaType::IsEnumeration))
+        if (const auto factory = listFactories().constFind(type.id()); factory != listFactories().constEnd())
+            codec = (*factory)(type);
+        else if (type.flags().testFlag(QMetaType::IsEnumeration))
             codec = new EnumCodec(type);
         break;
     }
@@ -172,5 +190,45 @@ DecodeResult EnumCodec::decode(const QJsonValue& value) const {
     return error(DiagnosticType::InvalidValue,
         QStringLiteral("Invalid enum value %1. Expected one of %2").arg(value.toString(), options.join(", ")));
 }
+
+template <typename Container>
+ListCodec<Container>::ListCodec(const QMetaType& type, const ValueCodec* elementCodec)
+    : ValueCodec(type)
+    , m_elementCodec(elementCodec) {}
+
+template <typename Container> QJsonValue ListCodec<Container>::encode(const QVariant& value) const {
+    QJsonArray array;
+    const auto list = value.value<Container>();
+    for (const auto& element : list)
+        array.append(m_elementCodec->encode(QVariant::fromValue(element)));
+    return array;
+}
+
+template <typename Container> DecodeResult ListCodec<Container>::decode(const QJsonValue& value) const {
+    if (!value.isArray())
+        return mismatch(QStringLiteral("an array"), value);
+
+    const auto array = value.toArray();
+    Container list;
+    list.reserve(array.size());
+
+    for (qsizetype i = 0; i < array.size(); ++i) {
+        auto result = m_elementCodec->decode(array.at(i));
+
+        // Reject the entire list if any element is invalid
+        if (result.error) {
+            result.error->message = QStringLiteral("Element %1: %2").arg(i).arg(result.error->message);
+            return result;
+        }
+
+        list.append(result.value.value<Value>());
+    }
+
+    return { QVariant::fromValue(list), std::nullopt };
+}
+
+// Instantiated for types as needed
+template class ListCodec<QStringList>;
+template class ListCodec<QList<qreal>>;
 
 } // namespace caelestia::settings

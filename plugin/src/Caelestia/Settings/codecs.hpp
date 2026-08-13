@@ -48,4 +48,17 @@ CODEC(Enum)
 
 #undef CODEC
 
+template <typename Container> class ListCodec : public ValueCodec {
+    using Value = typename Container::value_type;
+
+public:
+    explicit ListCodec(const QMetaType& type, const ValueCodec* elementCodec);
+
+    [[nodiscard]] QJsonValue encode(const QVariant& value) const override;
+    [[nodiscard]] DecodeResult decode(const QJsonValue& value) const override;
+
+private:
+    const ValueCodec* m_elementCodec;
+};
+
 } // namespace caelestia::settings
