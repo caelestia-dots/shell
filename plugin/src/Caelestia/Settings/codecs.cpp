@@ -1,6 +1,7 @@
 #include "codecs.hpp"
 
 #include <qjsonarray.h>
+#include <qjsonobject.h>
 #include <qmetaobject.h>
 
 namespace caelestia::settings {
@@ -80,6 +81,9 @@ ValueCodec* ValueCodec::codecFor(const QMetaType& type) {
         break;
     case QMetaType::QVariantList:
         codec = new VariantListCodec(type);
+        break;
+    case QMetaType::QVariantMap:
+        codec = new VariantMapCodec(type);
         break;
     default:
         if (const auto factory = listFactories().constFind(type.id()); factory != listFactories().constEnd())
@@ -166,6 +170,17 @@ DecodeResult VariantListCodec::decode(const QJsonValue& value) const {
         return mismatch(QStringLiteral("an array"), value);
 
     return { value.toArray().toVariantList(), std::nullopt };
+}
+
+QJsonValue VariantMapCodec::encode(const QVariant& value) const {
+    return QJsonObject::fromVariantMap(value.toMap());
+}
+
+DecodeResult VariantMapCodec::decode(const QJsonValue& value) const {
+    if (!value.isObject())
+        return mismatch(QStringLiteral("an object"), value);
+
+    return { value.toObject().toVariantMap(), std::nullopt };
 }
 
 QJsonValue EnumCodec::encode(const QVariant& value) const {

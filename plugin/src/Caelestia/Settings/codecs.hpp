@@ -44,6 +44,7 @@ CODEC(Int)
 CODEC(Real)
 CODEC(String)
 CODEC(VariantList)
+CODEC(VariantMap)
 CODEC(Enum)
 
 #undef CODEC
