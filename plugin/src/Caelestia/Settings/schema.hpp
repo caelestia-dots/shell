@@ -1,5 +1,13 @@
 #pragma once
 
+#include <qhash.h>
+#include <qlist.h>
+#include <qmetaobject.h>
+#include <qmetatype.h>
+#include <qstring.h>
+#include <qtmetamacros.h>
+#include <qvariant.h>
+
 namespace caelestia::settings {
 
 struct Descriptor {
