@@ -40,6 +40,19 @@ DecodeResult mismatch(const QString& expected, const QJsonValue& value) {
         DiagnosticType::TypeMismatch, QStringLiteral("Expected %1, got %2").arg(expected, jsonTypeName(value)));
 }
 
+QMetaEnum metaEnumFor(const QMetaType& type) {
+    const auto* meta = type.metaObject();
+    if (!meta)
+        return {};
+
+    // Metatype names are scoped (Class::Enum) but enumerators are registered unscoped
+    auto name = QByteArray(type.name());
+    if (const auto scope = name.lastIndexOf("::"); scope >= 0)
+        name = name.mid(scope + 2);
+
+    return meta->enumerator(meta->indexOfEnumerator(name.constData()));
+}
+
 template <typename Container> ValueCodec* makeListCodec(const QMetaType& type) {
     const auto* elementCodec = ValueCodec::codecFor(QMetaType::fromType<typename Container::value_type>());
     return elementCodec ? new ListCodec<Container>(type, elementCodec) : nullptr;
@@ -88,8 +101,11 @@ ValueCodec* ValueCodec::codecFor(const QMetaType& type) {
     default:
         if (const auto factory = listFactories().constFind(type.id()); factory != listFactories().constEnd())
             codec = (*factory)(type);
-        else if (type.flags().testFlag(QMetaType::IsEnumeration))
-            codec = new EnumCodec(type);
+        else if (type.flags().testFlag(QMetaType::IsEnumeration)) {
+            // QFlags also passes the test but is not an enum
+            if (const auto metaEnum = metaEnumFor(type); metaEnum.isValid() && !metaEnum.is64Bit())
+                codec = new EnumCodec(type, metaEnum);
+        }
         break;
     }
 
@@ -183,27 +199,52 @@ DecodeResult VariantMapCodec::decode(const QJsonValue& value) const {
     return { value.toObject().toVariantMap(), std::nullopt };
 }
 
+EnumCodec::EnumCodec(const QMetaType& type, const QMetaEnum& metaEnum)
+    : ValueCodec(type)
+    , m_metaEnum(metaEnum) {}
+
 QJsonValue EnumCodec::encode(const QVariant& value) const {
-    const auto* meta = m_type.metaObject();
-    const auto metaEnum = meta->enumerator(meta->indexOfEnumerator(m_type.name()));
-    return QString::fromUtf8(metaEnum.valueToKey(value.toUInt()));
+    // Qt sign extends negative enumerators, so the value has to be widened before it is reinterpreted
+    const auto raw = static_cast<quint64>(value.toLongLong());
+
+    const auto* key = m_metaEnum.valueToKey(raw);
+    if (!key) {
+        qCWarning(
+            lcSettings, "Cannot encode value %lld of enum %s, no such enumerator", value.toLongLong(), m_type.name());
+        return {};
+    }
+
+    return QString::fromUtf8(key);
 }
 
 DecodeResult EnumCodec::decode(const QJsonValue& value) const {
-    const auto* meta = m_type.metaObject();
-    const auto metaEnum = meta->enumerator(meta->indexOfEnumerator(m_type.name()));
+    if (!value.isString())
+        return mismatch(QStringLiteral("a string"), value);
 
-    for (int i = 0; i < metaEnum.keyCount(); ++i) {
-        if (QString::compare(QString::fromUtf8(metaEnum.key(i)), value.toString(), Qt::CaseInsensitive) == 0)
-            return { metaEnum.value(i), std::nullopt };
+    const auto key = value.toString();
+
+    for (int i = 0; i < m_metaEnum.keyCount(); ++i) {
+        if (QString::compare(QString::fromUtf8(m_metaEnum.key(i)), key, Qt::CaseInsensitive) != 0)
+            continue;
+
+        const auto raw = m_metaEnum.value(i);
+        QVariant decoded(m_type);
+        if (!QMetaType::convert(QMetaType::fromType<int>(), &raw, m_type, decoded.data())) {
+            qCCritical(lcSettings, "Failed to convert value %d to enum %s", raw, m_type.name());
+            return error(DiagnosticType::InvalidValue,
+                QStringLiteral("Could not convert %1 to %2").arg(key, QString::fromUtf8(m_type.name())));
+        }
+
+        return { decoded, std::nullopt };
     }
 
     QStringList options;
-    for (int i = 0; i < metaEnum.keyCount(); ++i)
-        options << QString::fromUtf8(metaEnum.key(i));
+    options.reserve(m_metaEnum.keyCount());
+    for (int i = 0; i < m_metaEnum.keyCount(); ++i)
+        options << QString::fromUtf8(m_metaEnum.key(i));
 
     return error(DiagnosticType::InvalidValue,
-        QStringLiteral("Invalid enum value %1. Expected one of %2").arg(value.toString(), options.join(", ")));
+        QStringLiteral("Invalid enum value %1. Expected one of %2").arg(key, options.join(", ")));
 }
 
 template <typename Container>

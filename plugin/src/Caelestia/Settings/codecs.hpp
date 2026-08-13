@@ -1,6 +1,7 @@
 #pragma once
 
 #include <qjsonvalue.h>
+#include <qmetaobject.h>
 #include <qvariant.h>
 
 #include "common.hpp"
@@ -45,9 +46,19 @@ CODEC(Real)
 CODEC(String)
 CODEC(VariantList)
 CODEC(VariantMap)
-CODEC(Enum)
 
 #undef CODEC
+
+class EnumCodec : public ValueCodec {
+public:
+    explicit EnumCodec(const QMetaType& type, const QMetaEnum& metaEnum);
+
+    [[nodiscard]] QJsonValue encode(const QVariant& value) const override;
+    [[nodiscard]] DecodeResult decode(const QJsonValue& value) const override;
+
+private:
+    const QMetaEnum m_metaEnum;
+};
 
 template <typename Container> class ListCodec : public ValueCodec {
     using Value = typename Container::value_type;
