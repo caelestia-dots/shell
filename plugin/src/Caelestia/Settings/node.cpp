@@ -79,10 +79,21 @@ bool Node::recordWrite(const QString& key, const QVariant& value) {
         return false;
     }
 
-    // TODO: handle global only props by forwarding to fallback node
-    Q_UNUSED(value)
-
     const auto origin = m_rootNode->m_writeOrigin;
+    const auto fromUser = origin == WriteOrigin::Qml || origin == WriteOrigin::Reset;
+
+    // Forward to fallback node if global property. This should not be relied upon however, global properties
+    // should be written to explicitly from the global tree, not overlay trees, for the sake of clarity.
+    if (desc->globalOnly && fromUser && m_fallbackNode) {
+        qCWarning(lcSettings,
+            "Forwarding write of global property %s.%s to the global layer. "
+            "This should not be used, write global properties from the global layer instead.",
+            qUtf8Printable(path()), qUtf8Printable(key));
+
+        const WriteScope scope(m_fallbackNode, origin);
+        m_fallbackNode->setValue(key, value);
+        return true; // Notify regardless of fallback write, since the value did change
+    }
 
     switch (origin) {
     // Init does not notify or write to file
@@ -106,7 +117,7 @@ bool Node::recordWrite(const QString& key, const QVariant& value) {
     }
 
     // Both qml and reset write to the file
-    if (origin == WriteOrigin::Qml || origin == WriteOrigin::Reset) {
+    if (fromUser) {
         // TODO: write to file
     }
 

@@ -43,7 +43,7 @@ protected:
 private:
     QSet<QString> m_overrides; // Overridden keys from file/qml writes
     Node* const m_rootNode;
-    Node* const m_fallbackNode;
+    Node* const m_fallbackNode; // No fallback node either means global tree or inside overridden list
     WriteOrigin m_writeOrigin;
 
     void onFallbackNotify(const QString& key);

@@ -20,6 +20,8 @@ public:
     bool isNode = false;
 
     QVariant defaultValue;
+    // Global only properties do not work on list items. Either the entire list is global only,
+    // or the entire list is not.
     bool globalOnly = false;
 };
 
