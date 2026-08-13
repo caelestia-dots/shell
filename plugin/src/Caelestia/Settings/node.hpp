@@ -27,6 +27,9 @@ public:
 
     [[nodiscard]] virtual const Schema& schema() const = 0;
 
+    [[nodiscard]] virtual QVariant value(const QString& key) const;
+    virtual bool setValue(const QString& key, const QVariant& value); // Returns whether the write was successful or not
+
 signals:
     void optionChanged(const QString& key);
 

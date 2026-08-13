@@ -1,6 +1,10 @@
 #pragma once
 
+#include <qloggingcategory.h>
+
 namespace caelestia::settings {
+
+Q_DECLARE_LOGGING_CATEGORY(lcSettings)
 
 class Node;
 
