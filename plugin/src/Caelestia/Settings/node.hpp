@@ -3,6 +3,7 @@
 #include <qobject.h>
 
 #include "common.hpp"
+#include "schema.hpp"
 
 namespace caelestia::settings {
 
@@ -23,6 +24,8 @@ public:
 
     [[nodiscard]] Node* fallbackNode() const;
     void pullFallback();
+
+    [[nodiscard]] virtual const Schema& schema() const = 0;
 
 signals:
     void optionChanged(const QString& key);
