@@ -1,74 +1,47 @@
 #pragma once
 
-#include <qjsonvalue.h>
 #include <qobject.h>
-#include <qqmlintegration.h>
+
+#include "common.hpp"
 
 namespace caelestia::settings {
-
-struct RejectedOption {
-    Q_GADGET
-    QML_VALUE_TYPE(rejectedOption)
-
-    Q_PROPERTY(QString key MEMBER key)
-    Q_PROPERTY(QVariant value MEMBER value)
-    Q_PROPERTY(QString reason MEMBER reason)
-
-public:
-    QString key;
-    QVariant value;
-    QString reason;
-
-    bool operator==(const RejectedOption& other) const;
-    bool operator!=(const RejectedOption& other) const;
-    friend size_t qHash(const RejectedOption& option, size_t seed) noexcept;
-};
-
-struct SyncResult {
-    Q_GADGET
-    QML_VALUE_TYPE(syncResult)
-
-    Q_PROPERTY(QSet<RejectedOption> rejected MEMBER rejected)
-    Q_PROPERTY(QSet<QString> unknown MEMBER unknown)
-
-public:
-    QSet<RejectedOption> rejected;
-    QSet<QString> unknown;
-};
-
-class Node;
-
-class SaveSuppressor {
-public:
-    explicit SaveSuppressor(Node* node);
-    ~SaveSuppressor();
-
-private:
-    Node* m_node;
-};
 
 class Node : public QObject {
     Q_OBJECT
 
 public:
-    explicit Node(QObject* parent = nullptr);
+    explicit Node(Node* fallback, QObject* parent = nullptr);
 
-    bool saveSuppressed() const;
+    [[nodiscard]] QString key() const; // The key of this in the parent node
+    [[nodiscard]] QString path() const;
+    [[nodiscard]] Node* parentNode() const;
+    [[nodiscard]] Node* rootNode() const;
 
-    virtual QJsonValue toJson() const = 0;
-    virtual SyncResult syncJson(const QJsonValue& json) = 0;
+    [[nodiscard]] bool isOverride(const QString& key) const;
+    [[nodiscard]] const QSet<QString>& overrides() const;
+    [[nodiscard]] bool hasOverrides() const; // Recursive
+
+    [[nodiscard]] Node* fallbackNode() const;
+    void pullFallback();
 
 signals:
-    void needsSave();
+    void optionChanged(const QString& key);
 
 protected:
-    virtual void connectNotifiers() const = 0;
-    static int basePropertyOffset();
+    // Returns true if the notify signal should be emitted
+    bool recordWrite(const QString& key, const QVariant& value);
+
+    [[nodiscard]] virtual QString keyOf(const Node* child) const = 0;
 
 private:
-    bool m_suppressSave;
+    QSet<QString> m_overrides; // Overridden keys from file/qml writes
+    Node* m_rootNode;
+    Node* m_fallbackNode;
+    WriteOrigin m_writeOrigin;
 
-    friend class SaveSuppressor;
+    void onFallbackNotify(const QString& key);
+
+    friend class WriteScope;
 };
 
 } // namespace caelestia::settings

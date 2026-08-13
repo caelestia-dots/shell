@@ -1,38 +1,48 @@
 #include "node.hpp"
 
+#include "common.hpp"
+
 namespace caelestia::settings {
 
-bool RejectedOption::operator==(const RejectedOption& other) const {
-    return key == other.key && value == other.value && reason == other.reason;
-}
-
-bool RejectedOption::operator!=(const RejectedOption& other) const {
-    return !(*this == other);
-}
-
-size_t qHash(const RejectedOption& option, size_t seed) noexcept {
-    return qHashMulti(seed, option.key, option.reason);
-}
-
-SaveSuppressor::SaveSuppressor(Node* node)
-    : m_node(node) {
-    m_node->m_suppressSave = true;
-}
-
-SaveSuppressor::~SaveSuppressor() {
-    m_node->m_suppressSave = false;
-}
-
-Node::Node(QObject* parent)
+Node::Node(Node* fallback, QObject* parent)
     : QObject(parent)
-    , m_suppressSave(false) {}
-
-bool Node::saveSuppressed() const {
-    return m_suppressSave;
+    , m_rootNode(parentNode() ? parentNode()->rootNode() : this)
+    , m_fallbackNode(fallback)
+    , m_writeOrigin(WriteOrigin::Init) {
+    if (fallback)
+        QObject::connect(fallback, &Node::optionChanged, this, &Node::onFallbackNotify);
 }
 
-int Node::basePropertyOffset() {
-    return Node::staticMetaObject.propertyOffset();
+QString Node::key() const {
+    return parentNode() ? parentNode()->keyOf(this) : QString();
+}
+
+QString Node::path() const {
+    return parentNode() ? parentNode()->path() + "." + key() : key();
+}
+
+Node* Node::parentNode() const {
+    return qobject_cast<Node*>(parent());
+}
+
+Node* Node::rootNode() const {
+    return m_rootNode;
+}
+
+bool Node::isOverride(const QString& key) const {
+    return m_overrides.contains(key);
+}
+
+const QSet<QString>& Node::overrides() const {
+    return m_overrides;
+}
+
+bool Node::hasOverrides() const {
+    return !m_overrides.isEmpty();
+}
+
+Node* Node::fallbackNode() const {
+    return m_fallbackNode;
 }
 
 } // namespace caelestia::settings
