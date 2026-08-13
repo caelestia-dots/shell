@@ -71,4 +71,12 @@ bool Node::setValue(const QString& key, const QVariant& value) {
     return metaObject()->property(desc->metaIndex).write(this, value);
 }
 
+void Node::onFallbackNotify(const QString& key) {
+    if (m_overrides.contains(key))
+        return;
+
+    const WriteScope scope(this, WriteOrigin::Layer);
+    setValue(key, m_fallbackNode->value(key));
+}
+
 } // namespace caelestia::settings
