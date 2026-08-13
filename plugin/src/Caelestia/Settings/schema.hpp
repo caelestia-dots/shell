@@ -36,7 +36,7 @@ private:
     explicit Schema();
 
     QList<Descriptor> m_descriptors;
-    QHash<QString, int> m_keyToIndex;
+    QHash<QString, qsizetype> m_keyToIndex;
 };
 
 } // namespace caelestia::settings

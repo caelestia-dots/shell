@@ -38,7 +38,7 @@ const Schema Schema::build(const QMetaObject* meta, int baseOffset) {
         desc.isNode = isNodeType(prop.metaType());
 
         schema.m_descriptors.append(std::move(desc));
-        schema.m_keyToIndex.insert(key, i);
+        schema.m_keyToIndex.insert(key, schema.m_descriptors.size() - 1);
     }
 
     return schema;
