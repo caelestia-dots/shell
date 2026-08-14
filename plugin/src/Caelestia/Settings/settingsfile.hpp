@@ -18,6 +18,8 @@ public:
 
 signals:
     void changed(); // Data changed, not file watcher event
+    void readFailed(const QString& error);
+    void writeFailed(const QString& error);
 
 private:
     QString m_path;

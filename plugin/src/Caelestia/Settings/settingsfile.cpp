@@ -77,6 +77,7 @@ void SettingsFile::load() {
     if (!file.open(QIODevice::ReadOnly)) {
         qCWarning(lcSettingsFile, "Failed to open %s for reading: %s", qUtf8Printable(m_path),
             qUtf8Printable(file.errorString()));
+        emit readFailed(QStringLiteral("Failed to open: %1").arg(file.errorString()));
         return;
     }
 
@@ -89,6 +90,7 @@ void SettingsFile::load() {
     if (error.error != QJsonParseError::NoError) {
         qCWarning(lcSettingsFile, "Failed to parse %s as JSON: %s", qUtf8Printable(m_path),
             qUtf8Printable(error.errorString()));
+        emit readFailed(QStringLiteral("Failed to parse: %1").arg(error.errorString()));
         return;
     }
 
@@ -126,6 +128,7 @@ void SettingsFile::save() {
 
     if (!QDir().mkpath(dir)) {
         qCWarning(lcSettingsFile) << "Failed to create dir" << dir;
+        emit writeFailed(QStringLiteral("Failed to create parent directory"));
         return;
     }
 
@@ -135,6 +138,7 @@ void SettingsFile::save() {
     if (!file.open(QIODevice::WriteOnly)) {
         qCWarning(lcSettingsFile, "Failed to open %s for writing: %s", qUtf8Printable(m_path),
             qUtf8Printable(file.errorString()));
+        emit writeFailed(QStringLiteral("Failed to open: %1").arg(file.errorString()));
         return;
     }
 
@@ -142,6 +146,7 @@ void SettingsFile::save() {
 
     if (!file.commit()) {
         qCWarning(lcSettingsFile, "Failed to write %s: %s", qUtf8Printable(m_path), qUtf8Printable(file.errorString()));
+        emit writeFailed(QStringLiteral("Failed to write: %1").arg(file.errorString()));
         return;
     }
 
