@@ -1,7 +1,5 @@
 #include "node.hpp"
 
-#include "common.hpp"
-
 namespace caelestia::settings {
 
 Node::Node(Node* fallback, QObject* parent)
