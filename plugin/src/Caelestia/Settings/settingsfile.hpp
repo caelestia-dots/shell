@@ -1,10 +1,9 @@
 #pragma once
 
 #include <qfilesystemwatcher.h>
+#include <qjsonvalue.h>
 #include <qobject.h>
 #include <qtimer.h>
-
-#include "node.hpp"
 
 namespace caelestia::settings {
 
@@ -12,18 +11,23 @@ class SettingsFile : public QObject {
     Q_OBJECT
 
 public:
-    explicit SettingsFile(const QString& path, Node* node, QObject* parent = nullptr);
+    explicit SettingsFile(const QString& path, QObject* parent = nullptr);
+
+    [[nodiscard]] std::optional<QJsonValue> read() const;
+    void write(const QJsonValue& json);
+
+signals:
+    void changed(); // Data changed, not file watcher event
 
 private:
     QString m_path;
-    Node* m_node;
     QFileSystemWatcher* m_watcher;
-    QTimer* m_saveTimer;
-    QByteArray m_lastData;
+    QTimer* m_saveDebounce;
+    std::optional<QJsonValue> m_lastData;
+    std::optional<QJsonValue> m_pendingWrite;
 
     void onFileChanged();
     void onDirChanged();
-    void onNeedsSave();
 
     void initWatcher();
     void load();
