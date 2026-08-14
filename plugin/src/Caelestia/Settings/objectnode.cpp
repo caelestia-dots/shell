@@ -34,15 +34,20 @@ QJsonValue ObjectNode::toJson(bool sparse) const {
         json.insert(desc.key, codec->encode(val));
     }
 
+    if (m_quarantine)
+        return m_quarantine->apply(json);
+
     return json;
 }
 
-void ObjectNode::syncJson(const QJsonValue& json, QList<Diagnostic>& diagnostics) {
+bool ObjectNode::syncJson(const QJsonValue& json, QList<Diagnostic>& diagnostics) {
+    m_quarantine.reset(); // Clear out old quarantine
+
     if (!json.isObject()) {
         const auto d = Diagnostic::mismatch("an object", json, path());
         qCWarning(lcSettings, "Error decoding option %s: %s", qUtf8Printable(d.option), qUtf8Printable(d.message));
         diagnostics << d;
-        return;
+        return false;
     }
 
     const auto obj = json.toObject();
@@ -52,12 +57,18 @@ void ObjectNode::syncJson(const QJsonValue& json, QList<Diagnostic>& diagnostics
 
     const auto visited = loadFromJson(obj, diagnostics);
     resetUnvisited(visited);
+
+    return true;
 }
 
-const Quarantine& ObjectNode::quarantine() {
+Quarantine* ObjectNode::quarantine() const {
+    return m_quarantine.get();
+}
+
+void ObjectNode::quarantineKey(const QString& key, const QJsonValue& value) {
     if (!m_quarantine)
         m_quarantine = std::make_unique<ObjectQuarantine>();
-    return *m_quarantine;
+    m_quarantine->insert(key, value);
 }
 
 QSet<QString> ObjectNode::loadFromJson(const QJsonObject& json, QList<Diagnostic>& diagnostics) {
@@ -65,6 +76,11 @@ QSet<QString> ObjectNode::loadFromJson(const QJsonObject& json, QList<Diagnostic
 
     QSet<QString> visited;
     visited.reserve(json.size());
+
+    // Convenience macro for quarantine then skip
+#define SKIP                                                                                                           \
+    quarantineKey(key, v);                                                                                             \
+    continue
 
     for (const auto [k, v] : json.asKeyValueRange()) {
         const auto key = k.toString();
@@ -78,7 +94,7 @@ QSet<QString> ObjectNode::loadFromJson(const QJsonObject& json, QList<Diagnostic
                 path,
                 QStringLiteral("Unknown option %1").arg(key),
             };
-            continue;
+            SKIP;
         }
 
         visited << key;
@@ -87,7 +103,8 @@ QSet<QString> ObjectNode::loadFromJson(const QJsonObject& json, QList<Diagnostic
         if (desc->isNode) {
             qCDebug(lcSettings) << "  Recursing into" << key;
             auto* const node = value(key).value<Node*>();
-            node->syncJson(v, diagnostics);
+            if (!node->syncJson(v, diagnostics))
+                quarantineKey(key, v); // Quarantine entire node cause sync failed
             continue;
         }
 
@@ -98,14 +115,14 @@ QSet<QString> ObjectNode::loadFromJson(const QJsonObject& json, QList<Diagnostic
                 pathFor(key),
                 QStringLiteral("Global properties should not be defined in overlay files"),
             };
-            continue;
+            SKIP;
         }
 
         const auto codec = ValueCodec::codecFor(desc->type);
         if (!codec) { // This should not happen
             qCCritical(lcSettings, "No codec found for type %s, not loading %s", desc->type.name(),
                 qUtf8Printable(pathFor(key)));
-            continue;
+            SKIP;
         }
 
         auto val = codec->decode(v);
@@ -115,11 +132,13 @@ QSet<QString> ObjectNode::loadFromJson(const QJsonObject& json, QList<Diagnostic
                 lcSettings, "Error decoding option %s: %s", qUtf8Printable(path), qUtf8Printable(val.error->message));
             val.error->option = path;
             diagnostics << *val.error;
-            continue;
+            SKIP;
         }
 
         setValue(key, val.value);
     }
+
+#undef SKIP
 
     return visited;
 }

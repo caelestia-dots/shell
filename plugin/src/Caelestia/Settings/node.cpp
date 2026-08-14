@@ -85,6 +85,10 @@ void Node::resetToDefaults() {
     }
 }
 
+const Quarantine* Node::quarantineConst() const {
+    return quarantine();
+}
+
 bool Node::recordWrite(const QString& key, const QVariant& value, bool changed) {
     const auto* desc = schema().get(key);
     if (!desc) {
@@ -113,7 +117,7 @@ bool Node::recordWrite(const QString& key, const QVariant& value, bool changed) 
         return false;
     }
 
-    bool overridesChanged = false;
+    bool dirty = changed;
     switch (origin) {
     // Init does not notify or write to file
     case WriteOrigin::Init:
@@ -122,7 +126,7 @@ bool Node::recordWrite(const QString& key, const QVariant& value, bool changed) 
     // File and qml both count as overrides
     case WriteOrigin::File:
     case WriteOrigin::Qml:
-        overridesChanged = !m_overrides.contains(key);
+        dirty |= !m_overrides.contains(key);
         m_overrides << key;
         break;
 
@@ -133,12 +137,16 @@ bool Node::recordWrite(const QString& key, const QVariant& value, bool changed) 
     // Both resets clear the override
     case WriteOrigin::FileReset:
     case WriteOrigin::QmlReset:
-        overridesChanged = m_overrides.remove(key);
+        dirty |= m_overrides.remove(key);
         break;
     }
 
+    // User writes override quarantine
+    if (fromUser && quarantine())
+        dirty |= quarantine()->remove(key);
+
     // Both qml and reset write to the file (only write if dirty)
-    if (fromUser && (overridesChanged || changed)) {
+    if (fromUser && dirty) {
         // TODO: write to file
     }
 

@@ -33,8 +33,9 @@ public:
     virtual void resetToDefaults(); // Recursive, resets to fallbacks then defaults if not overridden
 
     [[nodiscard]] virtual QJsonValue toJson(bool sparse = true) const = 0;
-    virtual void syncJson(const QJsonValue& json, QList<Diagnostic>& diagnostics) = 0;
-    [[nodiscard]] virtual const Quarantine& quarantine() = 0; // Non const so we can lazy initialise it
+    // Returns false if the entire node was rejected
+    virtual bool syncJson(const QJsonValue& json, QList<Diagnostic>& diagnostics) = 0;
+    [[nodiscard]] const Quarantine* quarantineConst() const;
 
 signals:
     void optionChanged(const QString& key);
@@ -43,6 +44,7 @@ protected:
     // Returns true if the notify signal should be emitted
     bool recordWrite(const QString& key, const QVariant& value, bool changed);
 
+    [[nodiscard]] virtual Quarantine* quarantine() const = 0; // Returns non const for internal use
     [[nodiscard]] virtual QString keyOf(const Node* child) const;
 
     template <typename C, typename T>

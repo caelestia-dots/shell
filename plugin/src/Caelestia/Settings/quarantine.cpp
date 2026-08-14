@@ -15,7 +15,8 @@ bool ObjectQuarantine::remove(const QString& key) {
 QJsonValue ObjectQuarantine::apply(const QJsonValue& json) const {
     auto result = json.toObject();
     for (const auto& [key, value] : m_quarantine.asKeyValueRange())
-        result.insert(key, value);
+        if (!result.contains(key)) // Don't clobber existing values
+            result.insert(key, value);
     return result;
 }
 
