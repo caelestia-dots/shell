@@ -27,7 +27,7 @@ QString jsonTypeName(const QJsonValue& value) {
     }
 }
 
-// We don't know the option or layer here so they aren't set, they should be set by the caller
+// We don't know the option here so it isn't set, it should be set by the caller
 DecodeResult error(DiagnosticType::Type type, const QString& message) {
     Diagnostic error;
     error.type = type;

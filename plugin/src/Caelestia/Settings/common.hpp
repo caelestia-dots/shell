@@ -52,13 +52,11 @@ struct Diagnostic {
     Q_PROPERTY(DiagnosticType::Type type MEMBER type)
     Q_PROPERTY(QString option MEMBER option)
     Q_PROPERTY(QString message MEMBER message)
-    Q_PROPERTY(QString layer MEMBER layer) // The layer, i.e. the screen name or empty for global
 
 public:
     DiagnosticType::Type type;
     QString option;
     QString message;
-    QString layer;
 };
 
 } // namespace caelestia::settings
