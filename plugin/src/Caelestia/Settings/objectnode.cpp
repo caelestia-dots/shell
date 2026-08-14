@@ -38,6 +38,8 @@ void ObjectNode::syncJson(const QJsonValue& json, QList<Diagnostic>& diagnostics
 
     qCDebug(lcSettings) << "Loading JSON into" << meta->className() << "with" << obj.size() << "keys:" << obj.keys();
 
+    const WriteScope scope(this, WriteOrigin::File);
+
     // Load values from json
     for (const auto [k, v] : obj.asKeyValueRange()) {
         const auto key = k.toString();
@@ -83,7 +85,10 @@ void ObjectNode::syncJson(const QJsonValue& json, QList<Diagnostic>& diagnostics
 
         auto val = codec->decode(v);
         if (val.error) {
-            val.error->option = pathFor(key);
+            const auto path = pathFor(key);
+            qCWarning(
+                lcSettings, "Error decoding option %s: %s", qUtf8Printable(path), qUtf8Printable(val.error->message));
+            val.error->option = path;
             diagnostics << *val.error;
             continue;
         }
