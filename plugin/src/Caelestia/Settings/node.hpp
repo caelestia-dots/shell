@@ -42,8 +42,8 @@ protected:
 
     [[nodiscard]] virtual QString keyOf(const Node* child) const;
 
-    template <typename T> [[nodiscard]] T fallbackValue(const QString& key, T defaultValue) const;
-    template <typename T> [[nodiscard]] T* fallbackChild(const QString& key) const;
+    template <typename C, typename T>
+    [[nodiscard]] T fallbackValue(T C::* member, std::type_identity_t<T> defaultValue) const;
 
 private:
     QSet<QString> m_overrides; // Overridden keys from file/qml writes
@@ -56,17 +56,9 @@ private:
     friend class WriteScope;
 };
 
-template <typename T> T Node::fallbackValue(const QString& key, T defaultValue) const {
-    return m_fallbackNode ? m_fallbackNode->value(key).value<T>() : defaultValue;
-}
-
-template <typename T> T* Node::fallbackChild(const QString& key) const {
-    if (!m_fallbackNode)
-        return nullptr;
-    const auto* desc = m_fallbackNode->schema().get(key);
-    if (!desc || !desc->isNode)
-        return nullptr;
-    return qobject_cast<T*>(m_fallbackNode->value(key).value<QObject*>());
+template <typename C, typename T> T Node::fallbackValue(T C::* member, std::type_identity_t<T> defaultValue) const {
+    const auto* fallback = static_cast<const C*>(m_fallbackNode);
+    return fallback ? fallback->*member : defaultValue;
 }
 
 } // namespace caelestia::settings

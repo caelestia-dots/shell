@@ -29,7 +29,8 @@ public:                                                                         
         return schema;                                                                                                 \
     }                                                                                                                  \
                                                                                                                        \
-private:
+private:                                                                                                               \
+    using Self = Class; // For use in the below macros
 
 // Defines a property on a node.
 #define CONFIG_PROPERTY(Type, name, defaultVal, ...)                                                                   \
@@ -52,7 +53,7 @@ public:                                                                         
     Q_SIGNAL void name##Changed();                                                                                     \
                                                                                                                        \
 private:                                                                                                               \
-    Type m_##name = fallbackValue<Type>(QStringLiteral(#name), Type(defaultVal));                                      \
+    Type m_##name = fallbackValue(&Self::m_##name, Type(defaultVal));                                                  \
     inline static const bool s_register_##name =                                                                       \
         (caelestia::settings::Schema::annotate(&staticMetaObject, QStringLiteral(#name),                               \
              { .defaultValue = QVariant::fromValue(Type(defaultVal)), __VA_ARGS__ }),                                  \
@@ -72,6 +73,6 @@ public:                                                                         
     }                                                                                                                  \
                                                                                                                        \
 private:                                                                                                               \
-    Type* m_##name = new Type(fallbackChild<Type>(QStringLiteral(#name)), this);                                       \
+    Type* m_##name = new Type(fallbackValue(&Self::m_##name, nullptr), this);                                          \
     inline static const bool s_register_##name =                                                                       \
         (caelestia::settings::Schema::annotate(&staticMetaObject, QStringLiteral(#name), {}), true);
