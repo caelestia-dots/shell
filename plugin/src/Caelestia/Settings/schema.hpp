@@ -28,14 +28,14 @@ public:
 
 class Schema {
 public:
-    static const Schema build(const QMetaObject* meta, int baseOffset);
+    static Schema build(const QMetaObject* meta, int baseOffset);
     static void annotate(const QMetaObject* meta, const QString& key, Descriptor descriptor);
 
     [[nodiscard]] const QList<Descriptor>& descriptors() const;
     [[nodiscard]] const Descriptor* get(const QString& key) const;
 
 private:
-    explicit Schema();
+    explicit Schema() = default;
 
     QList<Descriptor> m_descriptors;
     QHash<QString, qsizetype> m_keyToIndex;

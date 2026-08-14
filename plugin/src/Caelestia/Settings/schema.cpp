@@ -20,7 +20,7 @@ bool isNodeType(const QMetaType& type) {
 
 } // namespace
 
-const Schema Schema::build(const QMetaObject* meta, int baseOffset) {
+Schema Schema::build(const QMetaObject* meta, int baseOffset) {
     Schema schema;
     schema.m_descriptors.reserve(meta->propertyCount() - baseOffset);
 
