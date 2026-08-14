@@ -97,13 +97,13 @@ QSet<QString> ObjectNode::loadFromJson(const QJsonObject& json, QList<Diagnostic
             SKIP;
         }
 
-        visited << key;
-
         // Recurse into child nodes
         if (desc->isNode) {
             qCDebug(lcSettings) << "  Recursing into" << key;
             auto* const node = value(key).value<Node*>();
-            if (!node->syncJson(v, diagnostics))
+            if (node->syncJson(v, diagnostics))
+                visited << key;
+            else
                 quarantineKey(key, v); // Quarantine entire node cause sync failed
             continue;
         }
@@ -135,6 +135,7 @@ QSet<QString> ObjectNode::loadFromJson(const QJsonObject& json, QList<Diagnostic
             SKIP;
         }
 
+        visited << key;
         setValue(key, val.value);
     }
 
