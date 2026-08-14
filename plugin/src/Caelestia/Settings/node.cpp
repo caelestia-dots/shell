@@ -138,19 +138,6 @@ QString Node::keyOf(const Node* child) const {
     return QString();
 }
 
-template <typename T> T Node::fallbackValue(const QString& key, T defaultValue) const {
-    return m_fallbackNode ? m_fallbackNode->value(key).value<T>() : defaultValue;
-}
-
-template <typename T> T* Node::fallbackChild(const QString& key) const {
-    if (!m_fallbackNode)
-        return nullptr;
-    const auto* desc = m_fallbackNode->schema().get(key);
-    if (!desc || !desc->isNode)
-        return nullptr;
-    return qobject_cast<T*>(m_fallbackNode->value(key).value<QObject*>());
-}
-
 void Node::onFallbackNotify(const QString& key) {
     if (m_overrides.contains(key))
         return;
