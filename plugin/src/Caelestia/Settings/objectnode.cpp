@@ -66,7 +66,7 @@ QSet<QString> ObjectNode::loadFromJson(const QJsonObject& json, QList<Diagnostic
         // Recurse into child nodes
         if (desc->isNode) {
             qCDebug(lcSettings) << "  Recursing into" << key;
-            auto* const node = value(key).view<Node*>();
+            auto* const node = value(key).value<Node*>();
             node->syncJson(v, diagnostics);
             continue;
         }
