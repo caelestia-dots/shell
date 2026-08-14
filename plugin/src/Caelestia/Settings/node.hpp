@@ -35,16 +35,17 @@ public:
     [[nodiscard]] virtual QJsonValue toJson(bool sparse = true) const = 0;
     // Returns false if the entire node was rejected
     virtual bool syncJson(const QJsonValue& json, QList<Diagnostic>& diagnostics) = 0;
-    [[nodiscard]] const Quarantine* quarantineConst() const;
+    [[nodiscard]] const Quarantine* quarantine() const;
 
 signals:
     void optionChanged(const QString& key);
 
 protected:
+    std::unique_ptr<Quarantine> m_quarantine;
+
     // Returns true if the notify signal should be emitted
     bool recordWrite(const QString& key, const QVariant& value, bool changed);
 
-    [[nodiscard]] virtual Quarantine* quarantine() const = 0; // Returns non const for internal use
     [[nodiscard]] virtual QString keyOf(const Node* child) const;
 
     template <typename C, typename T>

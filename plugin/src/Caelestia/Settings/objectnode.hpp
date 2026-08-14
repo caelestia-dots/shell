@@ -17,12 +17,7 @@ public:
     [[nodiscard]] QJsonValue toJson(bool sparse = true) const override;
     bool syncJson(const QJsonValue& json, QList<Diagnostic>& diagnostics) override;
 
-protected:
-    [[nodiscard]] Quarantine* quarantine() const override;
-
 private:
-    std::unique_ptr<ObjectQuarantine> m_quarantine;
-
     void quarantineKey(const QString& key, const QJsonValue& value);
 
     QSet<QString> loadFromJson(const QJsonObject& json, QList<Diagnostic>& diagnostics);

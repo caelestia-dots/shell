@@ -61,10 +61,6 @@ bool ObjectNode::syncJson(const QJsonValue& json, QList<Diagnostic>& diagnostics
     return true;
 }
 
-Quarantine* ObjectNode::quarantine() const {
-    return m_quarantine.get();
-}
-
 void ObjectNode::quarantineKey(const QString& key, const QJsonValue& value) {
     if (!m_quarantine)
         m_quarantine = std::make_unique<ObjectQuarantine>();

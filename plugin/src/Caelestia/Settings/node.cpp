@@ -76,6 +76,8 @@ bool Node::setValue(const QString& key, const QVariant& value) {
 }
 
 void Node::resetToDefaults() {
+    m_quarantine.reset(); // Reset quarantine as well
+
     const WriteScope scope(this, WriteOrigin::FileReset);
     for (const auto& desc : schema().descriptors()) {
         if (desc.isNode)
@@ -85,8 +87,8 @@ void Node::resetToDefaults() {
     }
 }
 
-const Quarantine* Node::quarantineConst() const {
-    return quarantine();
+const Quarantine* Node::quarantine() const {
+    return m_quarantine.get();
 }
 
 bool Node::recordWrite(const QString& key, const QVariant& value, bool changed) {
@@ -142,8 +144,8 @@ bool Node::recordWrite(const QString& key, const QVariant& value, bool changed) 
     }
 
     // User writes override quarantine
-    if (fromUser && quarantine())
-        dirty |= quarantine()->remove(key);
+    if (fromUser && m_quarantine)
+        dirty |= m_quarantine->remove(key);
 
     // Both qml and reset write to the file (only write if dirty)
     if (fromUser && dirty) {
