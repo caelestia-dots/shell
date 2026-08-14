@@ -4,14 +4,15 @@
 #include <qlist.h>
 #include <qmetaobject.h>
 #include <qmetatype.h>
+#include <qqmlintegration.h>
 #include <qstring.h>
-#include <qtmetamacros.h>
 #include <qvariant.h>
 
 namespace caelestia::settings {
 
 struct Descriptor {
     Q_GADGET
+    QML_VALUE_TYPE(descriptor)
 
 public:
     QString key;
