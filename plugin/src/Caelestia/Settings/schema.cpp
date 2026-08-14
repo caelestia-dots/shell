@@ -14,6 +14,8 @@ QHash<const QMetaObject*, QHash<QString, Descriptor>>& descriptorCache() {
 }
 
 bool isNodeType(const QMetaType& type) {
+    if (!type.flags().testFlag(QMetaType::PointerToQObject))
+        return false;
     const auto* meta = type.metaObject();
     return meta && meta->inherits(&Node::staticMetaObject);
 }
