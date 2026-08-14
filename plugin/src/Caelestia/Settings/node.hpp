@@ -39,7 +39,7 @@ signals:
 
 protected:
     // Returns true if the notify signal should be emitted
-    bool recordWrite(const QString& key, const QVariant& value);
+    bool recordWrite(const QString& key, const QVariant& value, bool changed);
 
     [[nodiscard]] virtual QString keyOf(const Node* child) const;
 

@@ -85,7 +85,7 @@ void Node::resetToDefaults() {
     }
 }
 
-bool Node::recordWrite(const QString& key, const QVariant& value) {
+bool Node::recordWrite(const QString& key, const QVariant& value, bool changed) {
     const auto* desc = schema().get(key);
     if (!desc) {
         qCCritical(lcSettings, "Attempted to record a write for an unknown key %s, something is seriously wrong...",
@@ -104,14 +104,16 @@ bool Node::recordWrite(const QString& key, const QVariant& value) {
             "This should not be used, write global properties from the global layer instead.",
             qUtf8Printable(pathFor(key)));
 
-        const WriteScope scope(m_fallbackNode, origin);
-        if (!m_fallbackNode->setValue(key, value)) {
-            onFallbackNotify(key); // Manually sync value with fallback if fallback write failed
-            return false;
+        {
+            const WriteScope scope(m_fallbackNode, origin);
+            m_fallbackNode->setValue(key, value);
         }
-        return true;
+
+        onFallbackNotify(key); // Keep fallback in sync, will notify if needed
+        return false;
     }
 
+    bool overridesChanged = false;
     switch (origin) {
     // Init does not notify or write to file
     case WriteOrigin::Init:
@@ -120,6 +122,7 @@ bool Node::recordWrite(const QString& key, const QVariant& value) {
     // File and qml both count as overrides
     case WriteOrigin::File:
     case WriteOrigin::Qml:
+        overridesChanged = !m_overrides.contains(key);
         m_overrides << key;
         break;
 
@@ -129,17 +132,19 @@ bool Node::recordWrite(const QString& key, const QVariant& value) {
 
     // Reset clears the override
     case WriteOrigin::Reset:
-        m_overrides.remove(key);
+        overridesChanged = m_overrides.remove(key);
         break;
     }
 
-    // Both qml and reset write to the file
-    if (fromUser) {
+    // Both qml and reset write to the file (only write if dirty)
+    if (fromUser && (overridesChanged || changed)) {
         // TODO: write to file
     }
 
-    emit optionChanged(key);
-    return true;
+    if (changed)
+        emit optionChanged(key);
+
+    return changed;
 }
 
 QString Node::keyOf(const Node* child) const {

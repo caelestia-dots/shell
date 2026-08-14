@@ -45,7 +45,7 @@ public:                                                                         
                                                                                                                        \
         const auto needsNotify = value != m_##name;                                                                    \
         m_##name = value;                                                                                              \
-        if (recordWrite(QStringLiteral(#name), QVariant::fromValue(value)) && needsNotify)                             \
+        if (recordWrite(QStringLiteral(#name), QVariant::fromValue(value), needsNotify))                               \
             Q_EMIT name##Changed();                                                                                    \
     }                                                                                                                  \
                                                                                                                        \
