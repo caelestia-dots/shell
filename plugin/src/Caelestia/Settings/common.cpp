@@ -20,6 +20,8 @@ QString DiagnosticType::toString(Type t) {
     switch (t) {
     case UnknownOption:
         return QStringLiteral("UnknownOption");
+    case GlobalOption:
+        return QStringLiteral("GlobalOption");
     case TypeMismatch:
         return QStringLiteral("TypeMismatch");
     case InvalidValue:
