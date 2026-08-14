@@ -1,8 +1,6 @@
 #pragma once
 
-#include <qjsonobject.h>
-#include <qqmlintegration.h>
-#include <qset.h>
+#include <qvariant.h>
 
 namespace caelestia::settings {
 
