@@ -1,129 +1,93 @@
 #include "objectnode.hpp"
 
-#include <qjsonarray.h>
 #include <qjsonobject.h>
+
+#include "codecs.hpp"
 
 namespace caelestia::settings {
 
-Q_LOGGING_CATEGORY(lcSettingsObj, "caelestia.settings.objectnode", QtInfoMsg)
+ObjectNode::ObjectNode(ObjectNode* fallback, QObject* parent)
+    : Node(fallback, parent) {}
 
-ObjectNode::ObjectNode(QObject* parent)
-    : Node(parent) {
-    const auto* meta = metaObject();
-    for (int i = basePropertyOffset(); i < meta->propertyCount(); ++i) {
-        auto prop = meta->property(i);
-        m_notifyToProp.insert(prop.notifySignalIndex(), prop.name());
-    }
+QJsonValue ObjectNode::toJson(bool sparse) const {
+    QJsonObject json;
 
-    connectNotifiers();
-}
+    for (const auto& desc : schema().descriptors()) {
+        const auto val = value(desc.key);
 
-QJsonValue ObjectNode::toJson() const {
-    return m_json;
-}
+        if (const auto* node = val.value<Node*>()) {
+            if (!sparse || node->hasOverrides())
+                json.insert(desc.key, node->toJson(sparse));
+            continue;
+        }
 
-SyncResult ObjectNode::syncJson(const QJsonValue& json) {
-    const SaveSuppressor suppressor(this); // Prevent property writes from saving to file
-
-    m_json = json.toObject();
-    const auto* meta = metaObject();
-    SyncResult result;
-    QSet<QString> known;
-
-    qCDebug(lcSettingsObj) << "Loading JSON into" << meta->className() << "with" << m_json.keys().size()
-                           << "keys:" << m_json.keys();
-
-    for (int i = basePropertyOffset(); i < meta->propertyCount(); ++i) {
-        auto prop = meta->property(i);
-        const auto key = QString::fromUtf8(prop.name());
-
-        known << key;
-
-        if (!m_json.contains(key))
+        if (sparse && !isOverride(desc.key))
             continue;
 
-        const auto jsonVal = m_json.value(key);
+        json.insert(desc.key, QJsonValue::fromVariant(val));
+    }
+
+    return json;
+}
+
+void ObjectNode::syncJson(const QJsonValue& json, QList<Diagnostic>& diagnostics) {
+    const auto obj = json.toObject();
+    const auto* meta = metaObject();
+    QSet<QString> visited;
+    visited.reserve(obj.size());
+
+    qCDebug(lcSettings) << "Loading JSON into" << meta->className() << "with" << obj.size() << "keys:" << obj.keys();
+
+    // Load values from json
+    for (const auto [k, v] : obj.asKeyValueRange()) {
+        const auto key = k.toString();
+        const auto* desc = schema().get(key);
+
+        if (!desc) {
+            const auto path = pathFor(key);
+            qCWarning(lcSettings) << "Unknown option" << path;
+            diagnostics << Diagnostic{
+                DiagnosticType::UnknownOption,
+                path,
+                QStringLiteral("Unknown option %1").arg(key),
+            };
+            continue;
+        }
+
+        visited << key;
 
         // Recurse into child nodes
-        if (auto* const node = prop.read(this).value<Node*>()) {
-            qCDebug(lcSettingsObj) << "  Recursing into" << key;
-            const auto res = node->syncJson(jsonVal);
-
-            for (const auto& rejected : res.rejected)
-                result.rejected << RejectedOption{ key + "." + rejected.key, rejected.value, rejected.reason };
-            for (const auto& unknown : res.unknown)
-                result.unknown << key + "." + unknown;
-
+        if (desc->isNode) {
+            qCDebug(lcSettings) << "  Recursing into" << key;
+            auto* const node = value(key).view<Node*>();
+            node->syncJson(v, diagnostics);
             continue;
         }
 
-        // Skip read-only properties
-        if (!prop.isWritable())
-            continue;
-
-        // Handle QStringList explicitly
-        if (prop.metaType().id() == QMetaType::QStringList) {
-            QStringList list;
-            const auto jsonArr = jsonVal.toArray();
-            for (const auto& v : jsonArr)
-                list << v.toString();
-
-            prop.write(this, QVariant::fromValue(list));
-            qCDebug(lcSettingsObj) << "  Loaded" << key << "=" << list;
-
+        const auto codec = ValueCodec::codecFor(desc->type);
+        if (!codec) { // This should not happen
+            qCCritical(lcSettings, "No codec found for type %s, ignoring option %s", desc->type.name(),
+                qUtf8Printable(pathFor(key)));
             continue;
         }
 
-        // Generic types
-        prop.write(this, jsonVal.toVariant());
-        qCDebug(lcSettingsObj) << "  Loaded" << key << "=" << jsonVal.toVariant();
+        auto val = codec->decode(v);
+        if (val.error) {
+            val.error->option = pathFor(key);
+            diagnostics << *val.error;
+            continue;
+        }
+
+        setValue(key, val.value);
     }
 
-    // Check for unknown keys
-    for (auto it = m_json.constBegin(); it != m_json.constEnd(); ++it) {
-        if (!known.contains(it.key())) {
-            result.unknown << it.key();
-            qCDebug(lcSettingsObj) << "  Unknown key:" << it.key();
-        }
-    }
-
-    return result;
-}
-
-void ObjectNode::connectNotifiers() const {
-    const auto* meta = metaObject();
-    const auto notifySlot = meta->method(meta->indexOfSlot("onPropChanged()"));
-
-    for (int i = basePropertyOffset(); i < meta->propertyCount(); ++i) {
-        auto prop = meta->property(i);
-
-        // Connect nested child nodes
-        if (auto* const node = prop.read(this).value<Node*>()) {
-            QObject::connect(node, &Node::needsSave, this, &ObjectNode::onPropChanged);
-            continue;
-        }
-
-        // Skip properties without a notify signal
-        if (!prop.hasNotifySignal())
+    // Reset missing values to defaults
+    for (const auto& desc : schema().descriptors()) {
+        if (visited.contains(desc.key))
             continue;
 
-        QObject::connect(this, prop.notifySignal(), this, notifySlot);
+        setValue(desc.key, desc.defaultValue);
     }
-}
-
-void ObjectNode::onPropChanged() {
-    if (saveSuppressed())
-        return;
-
-    const auto* prop = m_notifyToProp.value(senderSignalIndex());
-    const auto propVal = property(prop);
-
-    if (const auto* node = propVal.value<Node*>())
-        m_json.insert(prop, node->toJson());
-    else
-        m_json.insert(prop, propVal.toJsonValue());
-
-    emit needsSave();
 }
 
 } // namespace caelestia::settings

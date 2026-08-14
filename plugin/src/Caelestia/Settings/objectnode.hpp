@@ -1,7 +1,5 @@
 #pragma once
 
-#include <qjsonobject.h>
-#include <qjsonvalue.h>
 #include <qobject.h>
 
 #include "node.hpp"
@@ -12,20 +10,10 @@ class ObjectNode : public Node {
     Q_OBJECT
 
 public:
-    explicit ObjectNode(QObject* parent = nullptr);
+    explicit ObjectNode(ObjectNode* fallback, QObject* parent = nullptr);
 
-    QJsonValue toJson() const override;
-    SyncResult syncJson(const QJsonValue& json) override;
-
-protected:
-    void connectNotifiers() const override;
-
-private slots:
-    void onPropChanged();
-
-private:
-    QJsonObject m_json;
-    QHash<int, const char*> m_notifyToProp;
+    [[nodiscard]] QJsonValue toJson(bool sparse = true) const override;
+    void syncJson(const QJsonValue& json, QList<Diagnostic>& diagnostics) override;
 };
 
 } // namespace caelestia::settings

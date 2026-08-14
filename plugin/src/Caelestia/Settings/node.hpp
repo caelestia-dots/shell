@@ -1,5 +1,6 @@
 #pragma once
 
+#include <qjsonvalue.h>
 #include <qobject.h>
 
 #include "common.hpp"
@@ -28,6 +29,9 @@ public:
 
     [[nodiscard]] virtual QVariant value(const QString& key) const;
     virtual bool setValue(const QString& key, const QVariant& value); // Returns whether the write was successful or not
+
+    [[nodiscard]] virtual QJsonValue toJson(bool sparse = true) const = 0;
+    virtual void syncJson(const QJsonValue& json, QList<Diagnostic>& diagnostics) = 0;
 
 signals:
     void optionChanged(const QString& key);
