@@ -16,7 +16,12 @@ QString Node::key() const {
 }
 
 QString Node::path() const {
-    return parentNode() ? parentNode()->path() + "." + key() : key();
+    return parentNode() ? parentNode()->pathFor(key()) : key();
+}
+
+QString Node::pathFor(const QString& key) const {
+    const auto p = path();
+    return p.isEmpty() ? key : p + "." + key;
 }
 
 Node* Node::parentNode() const {
@@ -62,8 +67,8 @@ bool Node::setValue(const QString& key, const QVariant& value) {
 
     // Type mismatch, conversion should happen before this function is called
     if (desc->type != value.metaType()) {
-        qCWarning(lcSettings, "Type mismatch for %s.%s, expected %s got %s", qUtf8Printable(path()),
-            qUtf8Printable(key), desc->type.name(), value.metaType().name());
+        qCWarning(lcSettings, "Type mismatch for %s, expected %s got %s", qUtf8Printable(pathFor(key)),
+            desc->type.name(), value.metaType().name());
         return false;
     }
 
@@ -73,8 +78,8 @@ bool Node::setValue(const QString& key, const QVariant& value) {
 bool Node::recordWrite(const QString& key, const QVariant& value) {
     const auto* desc = schema().get(key);
     if (!desc) {
-        qCCritical(lcSettings, "Attempted to record a write for an unknown key %s.%s, something is seriously wrong...",
-            qUtf8Printable(path()), qUtf8Printable(key));
+        qCCritical(lcSettings, "Attempted to record a write for an unknown key %s, something is seriously wrong...",
+            qUtf8Printable(pathFor(key)));
         return false;
     }
 
@@ -85,9 +90,9 @@ bool Node::recordWrite(const QString& key, const QVariant& value) {
     // should be written to explicitly from the global tree, not overlay trees, for the sake of clarity.
     if (desc->globalOnly && fromUser && m_fallbackNode) {
         qCWarning(lcSettings,
-            "Forwarding write of global property %s.%s to the global layer. "
+            "Forwarding write of global property %s to the global layer. "
             "This should not be used, write global properties from the global layer instead.",
-            qUtf8Printable(path()), qUtf8Printable(key));
+            qUtf8Printable(pathFor(key)));
 
         const WriteScope scope(m_fallbackNode, origin);
         m_fallbackNode->setValue(key, value);
