@@ -12,8 +12,8 @@ public:
     virtual ~Quarantine() = default;
 
     virtual void insert(const QString& key, const QJsonValue& value) = 0;
-    virtual bool remove(const QString& key) = 0;
-    virtual QJsonValue apply(const QJsonValue& json) const = 0;
+    [[nodiscard]] virtual bool remove(const QString& key) = 0;
+    [[nodiscard]] virtual QJsonValue apply(const QJsonValue& json) const = 0;
 
     Q_DISABLE_COPY_MOVE(Quarantine)
 };
@@ -21,8 +21,8 @@ public:
 class ObjectQuarantine : public Quarantine {
 public:
     void insert(const QString& key, const QJsonValue& value) override;
-    bool remove(const QString& key) override;
-    QJsonValue apply(const QJsonValue& json) const override;
+    [[nodiscard]] bool remove(const QString& key) override;
+    [[nodiscard]] QJsonValue apply(const QJsonValue& json) const override;
 
 private:
     QHash<QString, QJsonValue> m_quarantine;
