@@ -43,9 +43,12 @@ public:                                                                         
         if (!true /* TODO: validation */)                                                                              \
             return;                                                                                                    \
                                                                                                                        \
+        if (forwardGlobalWrite(QStringLiteral(#name), QVariant::fromValue(value)))                                     \
+            return; /* Skip writes to global only keys, they are forwarded to the global layer */                      \
+                                                                                                                       \
         const auto needsNotify = value != m_##name;                                                                    \
         m_##name = value;                                                                                              \
-        if (recordWrite(QStringLiteral(#name), QVariant::fromValue(value), needsNotify))                               \
+        if (recordWrite(QStringLiteral(#name), needsNotify))                                                           \
             Q_EMIT name##Changed();                                                                                    \
     }                                                                                                                  \
                                                                                                                        \

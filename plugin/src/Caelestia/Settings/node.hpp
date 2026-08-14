@@ -43,8 +43,10 @@ signals:
 protected:
     std::unique_ptr<Quarantine> m_quarantine;
 
+    // Returns true if the write should be skipped afterwards
+    bool forwardGlobalWrite(const QString& key, const QVariant& value);
     // Returns true if the notify signal should be emitted
-    bool recordWrite(const QString& key, const QVariant& value, bool changed);
+    bool recordWrite(const QString& key, bool changed);
 
     [[nodiscard]] virtual QString keyOf(const Node* child) const;
 

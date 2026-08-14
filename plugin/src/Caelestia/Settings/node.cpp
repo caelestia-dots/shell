@@ -91,7 +91,40 @@ const Quarantine* Node::quarantine() const {
     return m_quarantine.get();
 }
 
-bool Node::recordWrite(const QString& key, const QVariant& value, bool changed) {
+bool Node::forwardGlobalWrite(const QString& key, const QVariant& value) {
+    const auto* desc = schema().get(key);
+    if (!desc) {
+        qCCritical(lcSettings, "Attempted to forward a write for an unknown key %s, something is seriously wrong...",
+            qUtf8Printable(pathFor(key)));
+        return false;
+    }
+
+    const auto origin = m_rootNode->m_writeOrigin;
+    const auto fromUser = origin == WriteOrigin::Qml || origin == WriteOrigin::QmlReset;
+
+    if (!desc->globalOnly || !fromUser || !m_fallbackNode)
+        return false;
+
+    if (origin == WriteOrigin::QmlReset) {
+        qCWarning(lcSettings,
+            "Attempted to reset global property %s, ignoring. "
+            "This should not be used, reset global properties from the global layer instead.",
+            qUtf8Printable(pathFor(key)));
+        return true;
+    }
+
+    qCWarning(lcSettings,
+        "Forwarding write of global property %s to the global layer. "
+        "This should not be used, write global properties from the global layer instead.",
+        qUtf8Printable(pathFor(key)));
+
+    const WriteScope scope(m_fallbackNode, origin);
+    m_fallbackNode->setValue(key, value);
+
+    return true;
+}
+
+bool Node::recordWrite(const QString& key, bool changed) {
     const auto* desc = schema().get(key);
     if (!desc) {
         qCCritical(lcSettings, "Attempted to record a write for an unknown key %s, something is seriously wrong...",
@@ -101,23 +134,6 @@ bool Node::recordWrite(const QString& key, const QVariant& value, bool changed) 
 
     const auto origin = m_rootNode->m_writeOrigin;
     const auto fromUser = origin == WriteOrigin::Qml || origin == WriteOrigin::QmlReset;
-
-    // Forward to fallback node if global property. This should not be relied upon however, global properties
-    // should be written to explicitly from the global tree, not overlay trees, for the sake of clarity.
-    if (desc->globalOnly && fromUser && m_fallbackNode) {
-        qCWarning(lcSettings,
-            "Forwarding write of global property %s to the global layer. "
-            "This should not be used, write global properties from the global layer instead.",
-            qUtf8Printable(pathFor(key)));
-
-        {
-            const WriteScope scope(m_fallbackNode, origin);
-            m_fallbackNode->setValue(key, value);
-        }
-
-        onFallbackNotify(key); // Keep fallback in sync, will notify if needed
-        return false;
-    }
 
     bool dirty = changed;
     switch (origin) {
