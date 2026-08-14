@@ -187,7 +187,7 @@ bool Node::removeQuarantined(const QString& key) {
 
 QString Node::keyOf(const Node* child) const {
     for (const auto& desc : schema().descriptors()) {
-        if (child == value(desc.key).value<Node*>())
+        if (desc.isNode && child == value(desc.key).value<Node*>())
             return desc.key;
     }
 
