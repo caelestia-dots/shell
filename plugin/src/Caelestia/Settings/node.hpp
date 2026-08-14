@@ -29,7 +29,7 @@ public:
 
     [[nodiscard]] virtual QVariant value(const QString& key) const;
     virtual bool setValue(const QString& key, const QVariant& value); // Returns whether the write was successful or not
-    virtual void resetToDefaults();                                   // Recursive
+    virtual void resetToDefaults(); // Recursive, resets to fallbacks then defaults if not overridden
 
     [[nodiscard]] virtual QJsonValue toJson(bool sparse = true) const = 0;
     virtual void syncJson(const QJsonValue& json, QList<Diagnostic>& diagnostics) = 0;

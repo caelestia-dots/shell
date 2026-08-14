@@ -117,7 +117,7 @@ void ObjectNode::resetUnvisited(const QSet<QString>& visited) {
             continue;
         }
 
-        setValue(desc.key, desc.defaultValue);
+        setValue(desc.key, fallbackNode() ? fallbackNode()->value(desc.key) : desc.defaultValue);
     }
 }
 

@@ -81,7 +81,7 @@ void Node::resetToDefaults() {
         if (desc.isNode)
             value(desc.key).value<Node*>()->resetToDefaults();
         else
-            setValue(desc.key, desc.defaultValue);
+            setValue(desc.key, m_fallbackNode ? m_fallbackNode->value(desc.key) : desc.defaultValue);
     }
 }
 
