@@ -1,6 +1,8 @@
 #pragma once
 
+#include <qjsonobject.h>
 #include <qobject.h>
+#include <qset.h>
 
 #include "node.hpp"
 
@@ -14,6 +16,10 @@ public:
 
     [[nodiscard]] QJsonValue toJson(bool sparse = true) const override;
     void syncJson(const QJsonValue& json, QList<Diagnostic>& diagnostics) override;
+
+private:
+    QSet<QString> loadFromJson(const QJsonObject& json, QList<Diagnostic>& diagnostics);
+    void resetUnvisited(const QSet<QString>& visited);
 };
 
 } // namespace caelestia::settings

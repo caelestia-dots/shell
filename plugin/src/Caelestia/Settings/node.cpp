@@ -75,6 +75,16 @@ bool Node::setValue(const QString& key, const QVariant& value) {
     return metaObject()->property(desc->metaIndex).write(this, value);
 }
 
+void Node::resetToDefaults() {
+    const WriteScope scope(this, WriteOrigin::Reset);
+    for (const auto& desc : schema().descriptors()) {
+        if (desc.isNode)
+            value(desc.key).value<Node*>()->resetToDefaults();
+        else
+            setValue(desc.key, desc.defaultValue);
+    }
+}
+
 bool Node::recordWrite(const QString& key, const QVariant& value) {
     const auto* desc = schema().get(key);
     if (!desc) {

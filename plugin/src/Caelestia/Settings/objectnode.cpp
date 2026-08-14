@@ -32,16 +32,21 @@ QJsonValue ObjectNode::toJson(bool sparse) const {
 
 void ObjectNode::syncJson(const QJsonValue& json, QList<Diagnostic>& diagnostics) {
     const auto obj = json.toObject();
-    const auto* meta = metaObject();
-    QSet<QString> visited;
-    visited.reserve(obj.size());
 
-    qCDebug(lcSettings) << "Loading JSON into" << meta->className() << "with" << obj.size() << "keys:" << obj.keys();
+    qCDebug(lcSettings) << "Loading JSON into" << metaObject()->className() << "with" << obj.size()
+                        << "keys:" << obj.keys();
 
+    const auto visited = loadFromJson(obj, diagnostics);
+    resetUnvisited(visited);
+}
+
+QSet<QString> ObjectNode::loadFromJson(const QJsonObject& json, QList<Diagnostic>& diagnostics) {
     const WriteScope scope(this, WriteOrigin::File);
 
-    // Load values from json
-    for (const auto [k, v] : obj.asKeyValueRange()) {
+    QSet<QString> visited;
+    visited.reserve(json.size());
+
+    for (const auto [k, v] : json.asKeyValueRange()) {
         const auto key = k.toString();
         const auto* desc = schema().get(key);
 
@@ -96,10 +101,21 @@ void ObjectNode::syncJson(const QJsonValue& json, QList<Diagnostic>& diagnostics
         setValue(key, val.value);
     }
 
-    // Reset missing values to defaults
+    return visited;
+}
+
+void ObjectNode::resetUnvisited(const QSet<QString>& visited) {
+    const WriteScope scope(this, WriteOrigin::Reset);
+
     for (const auto& desc : schema().descriptors()) {
         if (visited.contains(desc.key))
             continue;
+
+        // Reset nodes recursively
+        if (desc.isNode) {
+            value(desc.key).value<Node*>()->resetToDefaults();
+            continue;
+        }
 
         setValue(desc.key, desc.defaultValue);
     }
