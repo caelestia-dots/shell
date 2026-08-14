@@ -6,7 +6,7 @@ Node::Node(Node* fallback, QObject* parent)
     : QObject(parent)
     , m_rootNode(parentNode() ? parentNode()->rootNode() : this)
     , m_fallbackNode(fallback)
-    , m_writeOrigin(WriteOrigin::Init) {
+    , m_writeOrigin(WriteOrigin::Qml) {
     if (fallback)
         QObject::connect(fallback, &Node::optionChanged, this, &Node::onFallbackNotify);
 }
