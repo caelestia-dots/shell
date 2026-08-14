@@ -1,6 +1,7 @@
 #pragma once
 
 #include <qloggingcategory.h>
+#include <qobject.h>
 #include <qqmlintegration.h>
 
 namespace caelestia::settings {
