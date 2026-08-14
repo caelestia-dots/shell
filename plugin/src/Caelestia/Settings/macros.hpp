@@ -41,11 +41,11 @@ public:                                                                         
     }                                                                                                                  \
                                                                                                                        \
     void set_##name(const Type& value) {                                                                               \
-        if (value == m_##name || !true /* TODO: validation */)                                                         \
+        if (!true /* TODO: validation */)                                                                              \
             return;                                                                                                    \
                                                                                                                        \
         m_##name = value;                                                                                              \
-        if (recordWrite(QStringLiteral(#name), QVariant::fromValue(value)))                                            \
+        if (recordWrite(QStringLiteral(#name), QVariant::fromValue(value)) && value != m_##name)                       \
             Q_EMIT name##Changed();                                                                                    \
     }                                                                                                                  \
                                                                                                                        \
