@@ -41,12 +41,15 @@ signals:
     void optionChanged(const QString& key);
 
 protected:
+    // Null means empty, otherwise it has content
     std::unique_ptr<Quarantine> m_quarantine;
 
     // Returns true if the write should be skipped afterwards
     bool forwardGlobalWrite(const QString& key, const QVariant& value);
     // Returns true if the notify signal should be emitted
     bool recordWrite(const QString& key, bool changed);
+
+    [[nodiscard]] bool removeQuarantined(const QString& key);
 
     [[nodiscard]] virtual QString keyOf(const Node* child) const;
 

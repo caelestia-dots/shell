@@ -12,6 +12,10 @@ bool ObjectQuarantine::remove(const QString& key) {
     return m_quarantine.remove(key);
 }
 
+bool ObjectQuarantine::isEmpty() const {
+    return m_quarantine.isEmpty();
+}
+
 QJsonValue ObjectQuarantine::apply(const QJsonValue& json) const {
     auto result = json.toObject();
     for (const auto& [key, value] : m_quarantine.asKeyValueRange())

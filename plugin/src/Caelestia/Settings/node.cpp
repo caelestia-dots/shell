@@ -159,9 +159,9 @@ bool Node::recordWrite(const QString& key, bool changed) {
         break;
     }
 
-    // User writes override quarantine
-    if (fromUser && m_quarantine)
-        dirty |= m_quarantine->remove(key);
+    // User writes/reset override quarantine
+    if (fromUser)
+        dirty |= removeQuarantined(key);
 
     // Both qml and reset write to the file (only write if dirty)
     if (fromUser && dirty) {
@@ -172,6 +172,17 @@ bool Node::recordWrite(const QString& key, bool changed) {
         emit optionChanged(key);
 
     return changed;
+}
+
+bool Node::removeQuarantined(const QString& key) {
+    if (!m_quarantine)
+        return false;
+
+    const auto removed = m_quarantine->remove(key);
+    if (m_quarantine->isEmpty())
+        m_quarantine.reset();
+
+    return removed;
 }
 
 QString Node::keyOf(const Node* child) const {
