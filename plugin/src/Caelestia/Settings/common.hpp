@@ -37,6 +37,7 @@ class DiagnosticType : public QObject {
 public:
     enum Type {
         UnknownOption = 0,
+        GlobalOption,
         TypeMismatch,
         InvalidValue,
     };

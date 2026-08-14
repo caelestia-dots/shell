@@ -64,6 +64,16 @@ void ObjectNode::syncJson(const QJsonValue& json, QList<Diagnostic>& diagnostics
             continue;
         }
 
+        if (desc->globalOnly && fallbackNode()) {
+            qCWarning(lcSettings) << "Global property definition found in overlay file, ignoring" << key;
+            diagnostics << Diagnostic{
+                DiagnosticType::GlobalOption,
+                pathFor(key),
+                QStringLiteral("Global properties should not be defined in overlay files"),
+            };
+            continue;
+        }
+
         const auto codec = ValueCodec::codecFor(desc->type);
         if (!codec) { // This should not happen
             qCCritical(lcSettings, "No codec found for type %s, ignoring option %s", desc->type.name(),
