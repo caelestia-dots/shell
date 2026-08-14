@@ -11,11 +11,12 @@ Q_DECLARE_LOGGING_CATEGORY(lcSettings)
 class Node;
 
 enum class WriteOrigin {
-    Init,  // On init
-    File,  // From the JSON file
-    Layer, // From the fallback layer
-    Qml,   // From QML
-    Reset, // On option reset
+    Init,      // On init
+    File,      // From the JSON file
+    FileReset, // When option not present in file
+    Layer,     // From the fallback layer
+    Qml,       // From QML
+    QmlReset,  // On option reset
 };
 
 class WriteScope {

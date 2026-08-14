@@ -76,7 +76,7 @@ bool Node::setValue(const QString& key, const QVariant& value) {
 }
 
 void Node::resetToDefaults() {
-    const WriteScope scope(this, WriteOrigin::Reset);
+    const WriteScope scope(this, WriteOrigin::FileReset);
     for (const auto& desc : schema().descriptors()) {
         if (desc.isNode)
             value(desc.key).value<Node*>()->resetToDefaults();
@@ -94,7 +94,7 @@ bool Node::recordWrite(const QString& key, const QVariant& value, bool changed) 
     }
 
     const auto origin = m_rootNode->m_writeOrigin;
-    const auto fromUser = origin == WriteOrigin::Qml || origin == WriteOrigin::Reset;
+    const auto fromUser = origin == WriteOrigin::Qml || origin == WriteOrigin::QmlReset;
 
     // Forward to fallback node if global property. This should not be relied upon however, global properties
     // should be written to explicitly from the global tree, not overlay trees, for the sake of clarity.
@@ -130,8 +130,9 @@ bool Node::recordWrite(const QString& key, const QVariant& value, bool changed) 
     case WriteOrigin::Layer:
         break;
 
-    // Reset clears the override
-    case WriteOrigin::Reset:
+    // Both resets clear the override
+    case WriteOrigin::FileReset:
+    case WriteOrigin::QmlReset:
         overridesChanged = m_overrides.remove(key);
         break;
     }

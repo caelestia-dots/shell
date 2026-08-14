@@ -105,7 +105,7 @@ QSet<QString> ObjectNode::loadFromJson(const QJsonObject& json, QList<Diagnostic
 }
 
 void ObjectNode::resetUnvisited(const QSet<QString>& visited) {
-    const WriteScope scope(this, WriteOrigin::Reset);
+    const WriteScope scope(this, WriteOrigin::FileReset);
 
     for (const auto& desc : schema().descriptors()) {
         if (visited.contains(desc.key))
