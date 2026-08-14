@@ -16,7 +16,7 @@ QJsonValue ObjectNode::toJson(bool sparse) const {
         const auto val = value(desc.key);
 
         if (const auto* node = val.value<Node*>()) {
-            if (!sparse || node->hasOverrides())
+            if (!sparse || node->hasContent())
                 json.insert(desc.key, node->toJson(sparse));
             continue;
         }

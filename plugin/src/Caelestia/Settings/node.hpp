@@ -24,7 +24,7 @@ public:
 
     [[nodiscard]] bool isOverride(const QString& key) const;
     [[nodiscard]] const QSet<QString>& overrides() const;
-    [[nodiscard]] bool hasOverrides() const; // Recursive
+    [[nodiscard]] bool hasContent() const; // Recursive
 
     [[nodiscard]] virtual const Schema& schema() const = 0;
 

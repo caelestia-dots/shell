@@ -44,9 +44,9 @@ const QSet<QString>& Node::overrides() const {
     return m_overrides;
 }
 
-bool Node::hasOverrides() const {
-    return !m_overrides.isEmpty() ||
-           std::ranges::any_of(findChildren<Node*>(Qt::FindDirectChildrenOnly), &Node::hasOverrides);
+bool Node::hasContent() const {
+    return !m_overrides.isEmpty() || m_quarantine ||
+           std::ranges::any_of(findChildren<Node*>(Qt::FindDirectChildrenOnly), &Node::hasContent);
 }
 
 QVariant Node::value(const QString& key) const {
