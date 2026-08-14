@@ -4,6 +4,7 @@
 #include <qobject.h>
 
 #include "common.hpp"
+#include "quarantine.hpp"
 #include "schema.hpp"
 
 namespace caelestia::settings {
@@ -33,6 +34,7 @@ public:
 
     [[nodiscard]] virtual QJsonValue toJson(bool sparse = true) const = 0;
     virtual void syncJson(const QJsonValue& json, QList<Diagnostic>& diagnostics) = 0;
+    [[nodiscard]] virtual const Quarantine& quarantine() = 0; // Non const so we can lazy initialise it
 
 signals:
     void optionChanged(const QString& key);

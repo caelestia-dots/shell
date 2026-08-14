@@ -54,6 +54,12 @@ void ObjectNode::syncJson(const QJsonValue& json, QList<Diagnostic>& diagnostics
     resetUnvisited(visited);
 }
 
+const Quarantine& ObjectNode::quarantine() {
+    if (!m_quarantine)
+        m_quarantine = std::make_unique<ObjectQuarantine>();
+    return *m_quarantine;
+}
+
 QSet<QString> ObjectNode::loadFromJson(const QJsonObject& json, QList<Diagnostic>& diagnostics) {
     const WriteScope scope(this, WriteOrigin::File);
 
