@@ -43,8 +43,9 @@ public:                                                                         
         if (!true /* TODO: validation */)                                                                              \
             return;                                                                                                    \
                                                                                                                        \
+        const auto needsNotify = value != m_##name;                                                                    \
         m_##name = value;                                                                                              \
-        if (recordWrite(QStringLiteral(#name), QVariant::fromValue(value)) && value != m_##name)                       \
+        if (recordWrite(QStringLiteral(#name), QVariant::fromValue(value)) && needsNotify)                             \
             Q_EMIT name##Changed();                                                                                    \
     }                                                                                                                  \
                                                                                                                        \
