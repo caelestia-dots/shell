@@ -40,7 +40,7 @@ protected:
     // Returns true if the notify signal should be emitted
     bool recordWrite(const QString& key, const QVariant& value);
 
-    [[nodiscard]] virtual QString keyOf(const Node* child) const = 0;
+    [[nodiscard]] virtual QString keyOf(const Node* child) const;
 
     template <typename T> [[nodiscard]] T fallbackValue(const QString& key, T defaultValue) const;
     template <typename T> [[nodiscard]] T* fallbackChild(const QString& key) const;

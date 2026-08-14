@@ -129,6 +129,15 @@ bool Node::recordWrite(const QString& key, const QVariant& value) {
     return true;
 }
 
+QString Node::keyOf(const Node* child) const {
+    for (const auto& desc : schema().descriptors()) {
+        if (child == value(desc.key).value<Node*>())
+            return desc.key;
+    }
+
+    return QString();
+}
+
 template <typename T> T Node::fallbackValue(const QString& key, T defaultValue) const {
     return m_fallbackNode ? m_fallbackNode->value(key).value<T>() : defaultValue;
 }
