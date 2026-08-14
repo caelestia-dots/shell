@@ -1,5 +1,6 @@
 #pragma once
 
+#include <qjsonvalue.h>
 #include <qloggingcategory.h>
 #include <qobject.h>
 #include <qqmlintegration.h>
@@ -60,6 +61,8 @@ public:
     DiagnosticType::Type type = DiagnosticType::UnknownOption;
     QString option;
     QString message;
+
+    static Diagnostic mismatch(const QString& expected, const QJsonValue& value, const QString& option = QString());
 };
 
 } // namespace caelestia::settings

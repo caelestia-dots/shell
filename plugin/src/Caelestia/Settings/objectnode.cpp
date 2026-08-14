@@ -38,6 +38,13 @@ QJsonValue ObjectNode::toJson(bool sparse) const {
 }
 
 void ObjectNode::syncJson(const QJsonValue& json, QList<Diagnostic>& diagnostics) {
+    if (!json.isObject()) {
+        const auto d = Diagnostic::mismatch("an object", json, path());
+        qCWarning(lcSettings, "Error decoding option %s: %s", qUtf8Printable(d.option), qUtf8Printable(d.message));
+        diagnostics << d;
+        return;
+    }
+
     const auto obj = json.toObject();
 
     qCDebug(lcSettings) << "Loading JSON into" << metaObject()->className() << "with" << obj.size()

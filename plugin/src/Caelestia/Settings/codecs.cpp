@@ -8,25 +8,6 @@ namespace caelestia::settings {
 
 namespace {
 
-QString jsonTypeName(const QJsonValue& value) {
-    switch (value.type()) {
-    case QJsonValue::Null:
-        return QStringLiteral("null");
-    case QJsonValue::Bool:
-        return QStringLiteral("a boolean");
-    case QJsonValue::Double:
-        return QStringLiteral("a number");
-    case QJsonValue::String:
-        return QStringLiteral("a string");
-    case QJsonValue::Array:
-        return QStringLiteral("an array");
-    case QJsonValue::Object:
-        return QStringLiteral("an object");
-    default:
-        return QStringLiteral("nothing");
-    }
-}
-
 // We don't know the option here so it isn't set, it should be set by the caller
 DecodeResult error(DiagnosticType::Type type, const QString& message) {
     Diagnostic error;
@@ -36,8 +17,7 @@ DecodeResult error(DiagnosticType::Type type, const QString& message) {
 }
 
 DecodeResult mismatch(const QString& expected, const QJsonValue& value) {
-    return error(
-        DiagnosticType::TypeMismatch, QStringLiteral("Expected %1, got %2").arg(expected, jsonTypeName(value)));
+    return { QVariant(), Diagnostic::mismatch(expected, value) };
 }
 
 QMetaEnum metaEnumFor(const QMetaType& type) {
