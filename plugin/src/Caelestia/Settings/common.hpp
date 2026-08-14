@@ -56,7 +56,7 @@ struct Diagnostic {
     Q_PROPERTY(QString message MEMBER message)
 
 public:
-    DiagnosticType::Type type;
+    DiagnosticType::Type type = DiagnosticType::UnknownOption;
     QString option;
     QString message;
 };
