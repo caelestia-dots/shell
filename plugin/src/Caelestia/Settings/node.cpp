@@ -105,8 +105,11 @@ bool Node::recordWrite(const QString& key, const QVariant& value) {
             qUtf8Printable(pathFor(key)));
 
         const WriteScope scope(m_fallbackNode, origin);
-        m_fallbackNode->setValue(key, value);
-        return true; // Notify regardless of fallback write, since the value did change
+        if (!m_fallbackNode->setValue(key, value)) {
+            onFallbackNotify(key); // Manually sync value with fallback if fallback write failed
+            return false;
+        }
+        return true;
     }
 
     switch (origin) {
