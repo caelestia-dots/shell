@@ -95,6 +95,7 @@ Singleton {
         }
     }
 
+    onUsingLuaChanged: reloadDynamicConfs()
     Component.onCompleted: reloadDynamicConfs()
 
     onCapsLockChanged: {
