@@ -36,6 +36,14 @@ public:
     void syncFromGlobal(ConfigNode* global);
     virtual void resyncFromGlobal() = 0;
 
+    // Delivers queued change notifications immediately, instead of waiting for
+    // the next event loop tick. Used by loads so listeners hear load-time
+    // writes while the root still knows a load is in progress.
+    void flushBatchedChanges();
+    // Drops queued change notifications without delivering them, for writes
+    // superseded by an incoming load.
+    void discardBatchedChanges();
+
     [[nodiscard]] bool isOverlay() const;
     [[nodiscard]] QString propertyPath(const QString& name = {}) const;
 

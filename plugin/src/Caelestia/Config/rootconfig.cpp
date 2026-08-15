@@ -111,6 +111,22 @@ void RootConfig::connectAutoSave(ConfigNode* node) {
         connectAutoSave(child);
 }
 
+void RootConfig::flushPendingBatches(ConfigNode* node) {
+    node->flushBatchedChanges();
+
+    const auto children = node->childNodes();
+    for (auto* const child : children)
+        flushPendingBatches(child);
+}
+
+void RootConfig::discardPendingBatches(ConfigNode* node) {
+    node->discardBatchedChanges();
+
+    const auto children = node->childNodes();
+    for (auto* const child : children)
+        discardPendingBatches(child);
+}
+
 void RootConfig::updateWatch() {
     auto targetDir = QFileInfo(m_filePath).absolutePath();
 
@@ -231,7 +247,16 @@ std::optional<QString> RootConfig::reloadFromFile() {
 
     clearLoadedKeys();
 
+    // Drop notifications queued before the load, e.g. an edit made in the same
+    // tick as a reload: the file supersedes them and queued values are stale.
+    discardPendingBatches(this);
+
     loadFromJson(doc.object());
+
+    // Deliver load-time notifications while m_loading is still set, so auto-save
+    // (gated on m_loading) does not rewrite the very file it just read. Without
+    // this the 0ms batching timer delivers after the flag has been cleared.
+    flushPendingBatches(this);
 
     m_loading = false;
 
