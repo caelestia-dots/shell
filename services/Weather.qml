@@ -278,8 +278,8 @@ Singleton {
         });
     }
 
-    function toFahrenheit(celcius: real): real {
-        return celcius * 9 / 5 + 32;
+    function toFahrenheit(celsius: real): real {
+        return celsius * 9 / 5 + 32;
     }
 
     function getWeatherUrl(): string {

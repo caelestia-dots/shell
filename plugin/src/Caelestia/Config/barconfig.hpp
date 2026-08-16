@@ -1,5 +1,6 @@
 #pragma once
 
+#include "configlist.hpp"
 #include "configobject.hpp"
 
 #include <qstring.h>
@@ -92,24 +93,6 @@ public:
         : ConfigObject(parent) {}
 };
 
-class BarStatus : public ConfigObject {
-    Q_OBJECT
-    QML_ANONYMOUS
-
-    CONFIG_PROPERTY(bool, showAudio, false)
-    CONFIG_PROPERTY(bool, showMicrophone, false)
-    CONFIG_PROPERTY(bool, showKbLayout, false)
-    CONFIG_PROPERTY(bool, showNetwork, true)
-    CONFIG_PROPERTY(bool, showWifi, true)
-    CONFIG_PROPERTY(bool, showBluetooth, true)
-    CONFIG_PROPERTY(bool, showBattery, true)
-    CONFIG_PROPERTY(bool, showLockStatus, true)
-
-public:
-    explicit BarStatus(QObject* parent = nullptr)
-        : ConfigObject(parent) {}
-};
-
 class BarClock : public ConfigObject {
     Q_OBJECT
     QML_ANONYMOUS
@@ -135,19 +118,28 @@ class BarConfig : public ConfigObject {
     CONFIG_SUBOBJECT(BarWorkspaces, workspaces)
     CONFIG_SUBOBJECT(BarActiveWindow, activeWindow)
     CONFIG_SUBOBJECT(BarTray, tray)
-    CONFIG_SUBOBJECT(BarStatus, status)
     CONFIG_SUBOBJECT(BarClock, clock)
-    CONFIG_PROPERTY(QVariantList, entries,
+    CONFIG_LIST(EntryList, statusIcons,
         {
-            vmap({ { u"id"_s, u"logo"_s }, { u"enabled"_s, true } }),
-            vmap({ { u"id"_s, u"workspaces"_s }, { u"enabled"_s, true } }),
-            vmap({ { u"id"_s, u"spacer"_s }, { u"enabled"_s, true } }),
-            vmap({ { u"id"_s, u"activeWindow"_s }, { u"enabled"_s, true } }),
-            vmap({ { u"id"_s, u"spacer"_s }, { u"enabled"_s, true } }),
-            vmap({ { u"id"_s, u"tray"_s }, { u"enabled"_s, true } }),
-            vmap({ { u"id"_s, u"clock"_s }, { u"enabled"_s, true } }),
-            vmap({ { u"id"_s, u"statusIcons"_s }, { u"enabled"_s, true } }),
-            vmap({ { u"id"_s, u"power"_s }, { u"enabled"_s, true } }),
+            LIST_ENTRY(lockStatus, true),
+            LIST_ENTRY(audio, false),
+            LIST_ENTRY(microphone, false),
+            LIST_ENTRY(kbLayout, false),
+            LIST_ENTRY(network, true),
+            LIST_ENTRY(bluetooth, true),
+            LIST_ENTRY(battery, true),
+        })
+    CONFIG_LIST(EntryList, entries,
+        {
+            LIST_ENTRY(logo, true),
+            LIST_ENTRY(workspaces, true),
+            LIST_ENTRY(spacer, true),
+            LIST_ENTRY(activeWindow, true),
+            LIST_ENTRY(spacer, true),
+            LIST_ENTRY(tray, true),
+            LIST_ENTRY(clock, true),
+            LIST_ENTRY(statusIcons, true),
+            LIST_ENTRY(power, true),
         })
     CONFIG_PROPERTY(QStringList, excludedScreens)
 
@@ -159,7 +151,6 @@ public:
         , m_workspaces(new BarWorkspaces(this))
         , m_activeWindow(new BarActiveWindow(this))
         , m_tray(new BarTray(this))
-        , m_status(new BarStatus(this))
         , m_clock(new BarClock(this)) {}
 };
 

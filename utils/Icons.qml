@@ -236,7 +236,9 @@ Singleton {
 
         if (icon.includes("?path=")) {
             const [name, path] = icon.split("?path=");
-            icon = Qt.resolvedUrl(`${path}/${name.slice(name.lastIndexOf("/") + 1)}`);
+            const file = name.slice(name.lastIndexOf("/") + 1);
+            const themed = Quickshell.iconPath(file, true);
+            icon = themed ? themed : Qt.resolvedUrl(`${path}/${file}`);
         }
         return icon;
     }

@@ -31,11 +31,32 @@ PageBase {
         }
 
         ToggleRow {
-            last: true
             text: qsTr("Show on hover")
             subtext: qsTr("Reveal when the cursor reaches the screen edge")
             checked: Config.launcher.showOnHover
             onToggled: GlobalConfig.launcher.showOnHover = checked
+        }
+
+        TextFieldRow {
+            id: prefixRow
+
+            last: true
+            label: qsTr("Action prefix")
+            subtext: qsTr("Prefix used to run actions in the launcher")
+            errorText: qsTr("Prefix must not be alphanumeric")
+            value: GlobalConfig.launcher.actionPrefix === ">" ? "" : GlobalConfig.launcher.actionPrefix // TODO: replace with empty only when not loaded once loaded state is exposed
+            placeholderText: ">"
+            maximumLength: 1
+            smallField: true
+            validate: /^[^a-zA-Z0-9\s]$/
+            onEditingFinished: value => {
+                if (!field.valid)
+                    return;
+                /// TODO: replace with GlobalConfig.launcher.resetOption("actionPrefix") on empty commit when reset is fixed
+                GlobalConfig.launcher.actionPrefix = value || ">";
+                if (GlobalConfig.launcher.actionPrefix === ">")
+                    clear();
+            }
         }
 
         // Display
