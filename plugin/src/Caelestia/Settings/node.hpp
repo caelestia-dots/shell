@@ -3,6 +3,7 @@
 #include <qjsonvalue.h>
 #include <qobject.h>
 
+#include "changebatcher.hpp"
 #include "common.hpp"
 #include "quarantine.hpp"
 #include "schema.hpp"
@@ -50,6 +51,7 @@ protected:
     bool recordWrite(const QString& key, bool changed);
 
     [[nodiscard]] bool removeQuarantined(const QString& key);
+    [[nodiscard]] ChangeBatcher* batcher() const;
 
     [[nodiscard]] virtual QString keyOf(const Node* child) const;
 
@@ -60,7 +62,10 @@ private:
     QSet<QString> m_overrides; // Overridden keys from file/qml writes
     Node* const m_rootNode;
     Node* const m_fallbackNode; // No fallback node either means global tree or inside overridden list
+
+    // For root node use only
     WriteOrigin m_writeOrigin;
+    ChangeBatcher* const m_batcher;
 
     void onFallbackNotify(const QString& key);
 

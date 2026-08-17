@@ -6,7 +6,8 @@ Node::Node(Node* fallback, QObject* parent)
     : QObject(parent)
     , m_rootNode(parentNode() ? parentNode()->rootNode() : this)
     , m_fallbackNode(fallback)
-    , m_writeOrigin(WriteOrigin::Qml) {
+    , m_writeOrigin(WriteOrigin::Qml)
+    , m_batcher(m_rootNode == this ? new ChangeBatcher(this) : nullptr) {
     if (fallback)
         QObject::connect(fallback, &Node::optionChanged, this, &Node::onFallbackNotify);
 }
@@ -164,9 +165,8 @@ bool Node::recordWrite(const QString& key, bool changed) {
         dirty |= removeQuarantined(key);
 
     // Both qml and reset write to the file (only write if dirty)
-    if (fromUser && dirty) {
-        // TODO: write to file
-    }
+    if (fromUser && dirty)
+        m_rootNode->m_batcher->dirty();
 
     if (changed)
         emit optionChanged(key);
@@ -183,6 +183,10 @@ bool Node::removeQuarantined(const QString& key) {
         m_quarantine.reset();
 
     return removed;
+}
+
+ChangeBatcher* Node::batcher() const {
+    return m_rootNode->m_batcher;
 }
 
 QString Node::keyOf(const Node* child) const {

@@ -63,6 +63,8 @@ public:
     QString message;
 
     static Diagnostic mismatch(const QString& expected, const QJsonValue& value, const QString& option = QString());
+
+    bool operator==(const Diagnostic& other) const = default;
 };
 
 } // namespace caelestia::settings

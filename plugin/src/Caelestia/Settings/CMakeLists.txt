@@ -7,6 +7,8 @@ qml_module(caelestia-settings
         quarantine.cpp
         node.cpp
         objectnode.cpp
+        rootnode.cpp
         settingsfile.cpp
+        changebatcher.cpp
 )
 target_include_directories(caelestia-settings PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}")
