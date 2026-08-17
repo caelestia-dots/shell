@@ -715,7 +715,9 @@ For example, to disable the bar on DP-1:
         "expandThreshold": 20,
         "actionOnClick": false,
         "groupPreviewNum": 3,
-        "openExpanded": false
+        "openExpanded": false,
+        "timeoutBar": false,
+        "timeoutCircle": false,
     },
     "osd": {
         "enabled": true,
