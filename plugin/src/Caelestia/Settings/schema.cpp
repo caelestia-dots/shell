@@ -6,10 +6,10 @@ namespace caelestia::settings {
 
 namespace {
 
-// Descriptor schemas are stored here by Schema::annotate, which is called in the CONFIG_XXX macros.
+// Descriptor annotations are stored here by Schema::annotate, which is called in the CONFIG_XXX macros.
 // Schema::build then takes them from here.
-QHash<const QMetaObject*, QHash<QString, Descriptor>>& descriptorCache() {
-    static QHash<const QMetaObject*, QHash<QString, Descriptor>> cache;
+QHash<const QMetaObject*, QHash<QString, Annotation>>& annotationCache() {
+    static QHash<const QMetaObject*, QHash<QString, Annotation>> cache;
     return cache;
 }
 
@@ -27,17 +27,19 @@ Schema Schema::build(const QMetaObject* meta, int baseOffset) {
     schema.m_descriptors.reserve(meta->propertyCount() - baseOffset);
 
     // Descriptors are taken from cache since this should be called exactly once per class
-    auto descriptors = descriptorCache().take(meta);
+    auto annotations = annotationCache().take(meta);
 
     for (int i = baseOffset; i < meta->propertyCount(); ++i) {
         const auto prop = meta->property(i);
         const auto key = QString::fromUtf8(prop.name());
 
-        auto desc = descriptors.value(key);
-        desc.key = key;
-        desc.type = prop.metaType();
-        desc.metaIndex = i;
-        desc.isNode = isNodeType(prop.metaType());
+        Descriptor desc{
+            .key = key,
+            .type = prop.metaType(),
+            .metaIndex = i,
+            .isNode = isNodeType(prop.metaType()),
+            .annotation = annotations.value(key),
+        };
 
         schema.m_descriptors.append(std::move(desc));
         schema.m_keyToIndex.insert(key, schema.m_descriptors.size() - 1);
@@ -46,8 +48,8 @@ Schema Schema::build(const QMetaObject* meta, int baseOffset) {
     return schema;
 }
 
-void Schema::annotate(const QMetaObject* meta, const QString& key, Descriptor descriptor) {
-    descriptorCache()[meta].insert(key, std::move(descriptor));
+void Schema::annotate(const QMetaObject* meta, const QString& key, Annotation annotation) {
+    annotationCache()[meta].insert(key, std::move(annotation));
 }
 
 const QList<Descriptor>& Schema::descriptors() const {

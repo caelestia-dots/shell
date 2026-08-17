@@ -83,8 +83,8 @@ void Node::resetToDefaults() {
     for (const auto& desc : schema().descriptors()) {
         if (desc.isNode)
             value(desc.key).value<Node*>()->resetToDefaults();
-        else if (!desc.globalOnly || !m_fallbackNode) // Skip resetting global options on overlays
-            setValue(desc.key, m_fallbackNode ? m_fallbackNode->value(desc.key) : desc.defaultValue);
+        else if (!desc.globalOnly() || !m_fallbackNode) // Skip resetting global options on overlays
+            setValue(desc.key, m_fallbackNode ? m_fallbackNode->value(desc.key) : desc.defaultValue());
     }
 }
 
@@ -103,7 +103,7 @@ bool Node::forwardGlobalWrite(const QString& key, const QVariant& value) {
     const auto origin = m_rootNode->m_writeOrigin;
     const auto fromUser = origin == WriteOrigin::Qml || origin == WriteOrigin::QmlReset;
 
-    if (!desc->globalOnly || !fromUser || !m_fallbackNode)
+    if (!desc->globalOnly() || !fromUser || !m_fallbackNode)
         return false;
 
     if (origin == WriteOrigin::QmlReset) {

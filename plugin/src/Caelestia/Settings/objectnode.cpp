@@ -104,7 +104,7 @@ QSet<QString> ObjectNode::loadFromJson(const QJsonObject& json, QList<Diagnostic
             continue;
         }
 
-        if (desc->globalOnly && fallbackNode()) {
+        if (desc->globalOnly() && fallbackNode()) {
             qCWarning(lcSettings) << "Global property definition found in overlay file, ignoring" << key;
             diagnostics << Diagnostic{
                 DiagnosticType::GlobalOption,
@@ -153,7 +153,7 @@ void ObjectNode::resetUnvisited(const QSet<QString>& visited) {
             continue;
         }
 
-        setValue(desc.key, fallbackNode() ? fallbackNode()->value(desc.key) : desc.defaultValue);
+        setValue(desc.key, fallbackNode() ? fallbackNode()->value(desc.key) : desc.defaultValue());
     }
 }
 
