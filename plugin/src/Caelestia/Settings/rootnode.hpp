@@ -14,6 +14,8 @@ class RootNode : public settings::ObjectNode {
 public:
     explicit RootNode(const QString& path, RootNode* fallback, QObject* parent = nullptr);
 
+    [[nodiscard]] QList<Diagnostic> diagnostics() const;
+
 signals:
     void diagnosticsChanged();
     void loadFailed(const QString& error);

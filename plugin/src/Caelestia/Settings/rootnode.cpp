@@ -15,6 +15,10 @@ RootNode::RootNode(const QString& path, RootNode* fallback, QObject* parent)
     reloadFromFile();
 }
 
+QList<Diagnostic> RootNode::diagnostics() const {
+    return m_diagnostics;
+}
+
 void RootNode::reloadFromFile() {
     const auto oldDiagnostics = m_diagnostics;
     m_diagnostics.clear();
