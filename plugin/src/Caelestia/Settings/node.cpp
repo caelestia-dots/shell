@@ -22,7 +22,7 @@ QString Node::path() const {
 
 QString Node::pathFor(const QString& key) const {
     const auto p = path();
-    return p.isEmpty() ? key : p + "." + key;
+    return p.isEmpty() ? key : p + QLatin1Char('.') + key;
 }
 
 Node* Node::parentNode() const {
