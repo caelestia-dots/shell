@@ -51,7 +51,7 @@ private:
 
     [[nodiscard]] bool validIndex(qsizetype index) const;
     [[nodiscard]] Node* fallbackFor(qsizetype index) const;
-    [[nodiscard]] Node* createNode(const QVariantMap& props, Node* fallback = nullptr) const;
+    [[nodiscard]] Node* createNode(const QVariantMap& props, Node* fallback) const;
     [[nodiscard]] Node* createNode(Node* node) const;
 
     void onFallbackListNotify(const NodeChanges& added, const NodeChanges& removed, const MoveChanges& moved);

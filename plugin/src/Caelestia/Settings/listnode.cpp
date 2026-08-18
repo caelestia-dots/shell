@@ -135,8 +135,8 @@ bool ListNode::setValue(const QString& key, const QVariant& value) {
     } else if (value.typeId() == qMetaTypeId<QList<QVariantMap>>()) {
         // On reset to defaults
         const auto list = value.value<QList<QVariantMap>>();
-        for (const auto& map : list)
-            m_elements << createNode(map);
+        for (qsizetype i = 0; i < list.count(); ++i)
+            m_elements << createNode(list.at(i), fallbackFor(i));
     } else {
         qCWarning(lcSettings, "Unexpected type %s for list node %s", value.typeName(), qUtf8Printable(path()));
         return false;
@@ -162,6 +162,9 @@ bool ListNode::validIndex(qsizetype index) const {
 }
 
 Node* ListNode::fallbackFor(qsizetype index) const {
+    if (isOverride(valuesKey()))
+        return nullptr;
+
     const auto* fallback = static_cast<ListNode*>(fallbackNode());
     if (!fallback || !fallback->validIndex(index))
         return nullptr;
