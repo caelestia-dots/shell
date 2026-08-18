@@ -85,3 +85,46 @@ private:                                                                        
     Type* m_##name = new Type(fallbackValue(&Self::m_##name, nullptr), this);                                          \
     inline static const bool s_register_##name =                                                                       \
         (caelestia::settings::Schema::annotate(&staticMetaObject, QStringLiteral(#name), {}), true);
+
+// Defines a list type for use with CONFIG_LIST.
+#define CONFIG_LIST_TYPE(Element, Name)                                                                                \
+    class Name : public caelestia::settings::ListNode {                                                                \
+        Q_OBJECT                                                                                                       \
+        QML_ANONYMOUS                                                                                                  \
+                                                                                                                       \
+    public:                                                                                                            \
+        explicit Name(Name* fallback = nullptr, QObject* parent = nullptr)                                             \
+            : caelestia::settings::ListNode(fallback, parent) {}                                                       \
+                                                                                                                       \
+        [[nodiscard]] Q_INVOKABLE Element* at(qsizetype index) { /* Format ugh */                                      \
+            return static_cast<Element*>(elementAt(index));                                                            \
+        }                                                                                                              \
+        [[nodiscard]] Q_INVOKABLE Element* insert(const QVariantMap& props, qsizetype index = -1) {                    \
+            return static_cast<Element*>(insertElement(props, index));                                                 \
+        }                                                                                                              \
+                                                                                                                       \
+    protected:                                                                                                         \
+        [[nodiscard]] caelestia::settings::Node* createElement(caelestia::settings::Node* fallback) const override {   \
+            return new Element(static_cast<Element*>(fallback), this);                                                 \
+        }                                                                                                              \
+    };
+
+// Defines a list property on a node. List properties are CONSTANT.
+#define CONFIG_LIST(Type, name, defaultVal, ...)                                                                       \
+    Q_PROPERTY(Type* name READ name CONSTANT)                                                                          \
+                                                                                                                       \
+public:                                                                                                                \
+    [[nodiscard]] Type* name() const {                                                                                 \
+        return m_##name;                                                                                               \
+    }                                                                                                                  \
+                                                                                                                       \
+private:                                                                                                               \
+    Type* m_##name = new Type(fallbackValue(&Self::m_##name, nullptr), this);                                          \
+    inline static const bool s_register_##name =                                                                       \
+        (caelestia::settings::Schema::annotate(&staticMetaObject, QStringLiteral(#name),                               \
+             { .defaultValue = QVariant::fromValue(QVariantList defaultVal), __VA_ARGS__ }),                           \
+            true);
+
+// Defines a global list property on a node. Shorthand for .globalOnly = true.
+#define CONFIG_GLOBAL_LIST(Type, name, defaultVal, ...)                                                                \
+    CONFIG_LIST(Type, name, defaultVal, .globalOnly = true, __VA_ARGS__)
