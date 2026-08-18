@@ -5,6 +5,8 @@
 namespace caelestia::settings {
 
 class ChangeBatcher : public QObject {
+    Q_OBJECT
+
 public:
     explicit ChangeBatcher(QObject* parent = nullptr);
 
