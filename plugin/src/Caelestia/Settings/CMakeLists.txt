@@ -7,6 +7,7 @@ qml_module(caelestia-settings
         quarantine.cpp
         node.cpp
         objectnode.cpp
+        listnode.cpp
         rootnode.cpp
         settingsfile.cpp
         changebatcher.cpp
