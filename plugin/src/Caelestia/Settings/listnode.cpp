@@ -18,9 +18,8 @@ void deleteNode(Node* node) {
 
 } // namespace
 
-ListNode::ListNode(QList<QVariantMap> defaultValues, ListNode* fallback, QObject* parent)
-    : Node(fallback, parent)
-    , m_defaultValues(std::move(defaultValues)) {
+ListNode::ListNode(ListNode* fallback, QObject* parent)
+    : Node(fallback, parent) {
     if (fallback) {
         // Disconnect generic fallback notify, lists use a custom one
         QObject::disconnect(fallback, &ListNode::optionChanged, this, nullptr);

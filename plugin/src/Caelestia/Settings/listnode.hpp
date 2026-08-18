@@ -15,7 +15,7 @@ class ListNode : public Node {
     using MoveChanges = QList<QPair<qsizetype, qsizetype>>;
 
 public:
-    explicit ListNode(QList<QVariantMap> defaultValues, ListNode* fallback, QObject* parent = nullptr);
+    explicit ListNode(ListNode* fallback, QObject* parent = nullptr);
 
     [[nodiscard]] qsizetype count() const;
     [[nodiscard]] QVariantList values() const;
@@ -48,7 +48,6 @@ protected:
 
 private:
     QList<Node*> m_elements;
-    const QList<QVariantMap> m_defaultValues;
 
     [[nodiscard]] bool validIndex(qsizetype index) const;
     [[nodiscard]] Node* fallbackFor(qsizetype index) const;
