@@ -149,7 +149,8 @@ bool ListNode::setValue(const QString& key, const QVariant& value, QList<Diagnos
         for (const auto& json : array)
             m_elements << createNode(json.toObject(), *diagnostics);
     } else {
-        qCWarning(lcSettings, "Unexpected type %s for list node %s", value.typeName(), qUtf8Printable(path()));
+        qCWarning(lcSettings, "Unexpected type %s for list node %s, something is wrong.", value.typeName(),
+            qUtf8Printable(path()));
         return false;
     }
 
