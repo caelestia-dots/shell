@@ -1,5 +1,8 @@
 #include "listnode.hpp"
 
+#include <qjsonarray.h>
+#include <qjsonobject.h>
+
 namespace caelestia::settings {
 
 namespace {
@@ -114,6 +117,10 @@ QVariant ListNode::value(const QString& key) const {
 }
 
 bool ListNode::setValue(const QString& key, const QVariant& value) {
+    return setValue(key, value, nullptr);
+}
+
+bool ListNode::setValue(const QString& key, const QVariant& value, QList<Diagnostic>* diagnostics) {
     if (key != valuesKey()) {
         qCWarning(lcSettings,
             "Attempted to write %s on list node %s. List nodes only have a 'values' key, something is wrong.",
@@ -137,6 +144,11 @@ bool ListNode::setValue(const QString& key, const QVariant& value) {
         const auto list = value.value<QList<QVariantMap>>();
         for (qsizetype i = 0; i < list.count(); ++i)
             m_elements << createNode(list.at(i), fallbackFor(i));
+    } else if (value.typeId() == QMetaType::QJsonArray) {
+        // From syncJson
+        const auto array = value.toJsonArray();
+        for (const auto& json : array)
+            m_elements << createNode(json.toObject(), *diagnostics);
     } else {
         qCWarning(lcSettings, "Unexpected type %s for list node %s", value.typeName(), qUtf8Printable(path()));
         return false;
@@ -153,6 +165,27 @@ bool ListNode::setValue(const QString& key, const QVariant& value) {
     std::iota(added.begin(), added.end(), 0);
     std::iota(removed.begin(), removed.end(), 0);
     emit elementsChanged(added, removed, {});
+
+    return true;
+}
+
+QJsonValue ListNode::toJson(bool sparse) const {
+    QJsonArray array;
+    for (auto* const element : m_elements)
+        array << element->toJson(sparse);
+    return array;
+}
+
+bool ListNode::syncJson(const QJsonValue& json, QList<Diagnostic>& diagnostics) {
+    if (!json.isArray()) {
+        const auto d = Diagnostic::mismatch("an array", json, path());
+        qCWarning(lcSettings, "Error decoding option %s: %s", qUtf8Printable(d.option), qUtf8Printable(d.message));
+        diagnostics << d;
+        return false;
+    }
+
+    const WriteScope scope(this, WriteOrigin::File);
+    setValue(valuesKey(), json, &diagnostics);
 
     return true;
 }
@@ -191,6 +224,14 @@ Node* ListNode::createNode(Node* node) const {
         copy->setValue(desc.key, node->value(desc.key));
 
     return copy;
+}
+
+Node* ListNode::createNode(const QJsonObject& json, QList<Diagnostic>& diagnostics) const {
+    // Write origin will be file/file reset, which is correct.
+    // This function should only be called from the JSON path of setValue.
+    auto* const node = createElement(nullptr); // Nodes synced from JSON get no fallback as they are overrides
+    node->syncJson(json, diagnostics);
+    return node;
 }
 
 void ListNode::onFallbackListNotify(const NodeChanges& added, const NodeChanges& removed, const MoveChanges& moved) {

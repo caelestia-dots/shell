@@ -31,6 +31,7 @@ public:
     [[nodiscard]] const Schema& schema() const override;
     [[nodiscard]] QVariant value(const QString& key) const override;
     bool setValue(const QString& key, const QVariant& value) override;
+    bool setValue(const QString& key, const QVariant& value, QList<Diagnostic>* diagnostics);
 
     [[nodiscard]] QJsonValue toJson(bool sparse = true) const override;
     bool syncJson(const QJsonValue& json, QList<Diagnostic>& diagnostics) override;
@@ -53,6 +54,7 @@ private:
     [[nodiscard]] Node* fallbackFor(qsizetype index) const;
     [[nodiscard]] Node* createNode(const QVariantMap& props, Node* fallback) const;
     [[nodiscard]] Node* createNode(Node* node) const;
+    [[nodiscard]] Node* createNode(const QJsonObject& json, QList<Diagnostic>& diagnostics) const;
 
     void onFallbackListNotify(const NodeChanges& added, const NodeChanges& removed, const MoveChanges& moved);
 };
