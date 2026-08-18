@@ -106,7 +106,7 @@ const Schema& ListNode::schema() const {
 
 QVariant ListNode::value(const QString& key) const {
     if (key != valuesKey()) {
-        qCWarning(lcSettings,
+        qCCritical(lcSettings,
             "Attempted to read %s on list node %s. List nodes only have a 'values' key, something is wrong.",
             qUtf8Printable(key), qUtf8Printable(path()));
         return QVariant();
@@ -121,7 +121,7 @@ bool ListNode::setValue(const QString& key, const QVariant& value) {
 
 bool ListNode::setValue(const QString& key, const QVariant& value, QList<Diagnostic>* diagnostics) {
     if (key != valuesKey()) {
-        qCWarning(lcSettings,
+        qCCritical(lcSettings,
             "Attempted to write %s on list node %s. List nodes only have a 'values' key, something is wrong.",
             qUtf8Printable(key), qUtf8Printable(path()));
         return false;
@@ -149,7 +149,7 @@ bool ListNode::setValue(const QString& key, const QVariant& value, QList<Diagnos
         for (const auto& json : array)
             m_elements << createNode(json.toObject(), *diagnostics);
     } else {
-        qCWarning(lcSettings, "Unexpected type %s for list node %s, something is wrong.", value.typeName(),
+        qCCritical(lcSettings, "Unexpected type %s for list node %s, something is wrong.", value.typeName(),
             qUtf8Printable(path()));
         return false;
     }
