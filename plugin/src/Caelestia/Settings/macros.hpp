@@ -14,13 +14,10 @@ inline QVariantMap vmap(std::initializer_list<std::pair<QString, QVariant>> entr
 } // namespace caelestia::settings
 
 // Declares a class to be a node class. This replaces the Q_OBJECT call at the top of the class.
-#define CONFIG_NODE(Class, Base)                                                                                       \
+#define CONFIG_NODE_NO_CTOR(Class, Base)                                                                               \
     Q_OBJECT                                                                                                           \
                                                                                                                        \
 public:                                                                                                                \
-    explicit Class(Class* fallback = nullptr, QObject* parent = nullptr)                                               \
-        : Base(fallback, parent) {}                                                                                    \
-                                                                                                                       \
     [[nodiscard]] const caelestia::settings::Schema& schema() const override {                                         \
         static const auto schema =                                                                                     \
             caelestia::settings::Schema::build(&staticMetaObject, Base::staticMetaObject.propertyCount());             \
@@ -29,6 +26,16 @@ public:                                                                         
                                                                                                                        \
 private:                                                                                                               \
     using Self = Class; // For use in the below macros
+
+#define CONFIG_NODE(Class, Base)                                                                                       \
+    CONFIG_NODE_NO_CTOR(Class, Base)                                                                                   \
+    QML_ANONYMOUS                                                                                                      \
+                                                                                                                       \
+public:                                                                                                                \
+    explicit Class(Class* fallback = nullptr, QObject* parent = nullptr)                                               \
+        : Base(fallback, parent) {}                                                                                    \
+                                                                                                                       \
+private:
 
 // Defines a property on a node.
 #define CONFIG_PROPERTY(Type, name, defaultVal, ...)                                                                   \
