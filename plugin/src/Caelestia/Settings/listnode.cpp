@@ -234,6 +234,9 @@ Node* ListNode::createNode(const QJsonObject& json, QList<Diagnostic>& diagnosti
 }
 
 void ListNode::onFallbackListNotify(const NodeChanges& added, const NodeChanges& removed, const MoveChanges& moved) {
+    if (isOverride(valuesKey()))
+        return;
+
     const WriteScope scope(this, WriteOrigin::Layer);
 
     for (const auto index : added)
