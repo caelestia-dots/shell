@@ -240,10 +240,10 @@ void ListNode::onFallbackListNotify(const NodeChanges& added, const NodeChanges&
 
     const WriteScope scope(this, WriteOrigin::Layer);
 
+    for (const auto index : removed | std::views::reverse)
+        deleteNode(m_elements.takeAt(index));
     for (const auto index : added)
         m_elements.insert(index, createNode(fallbackFor(index)));
-    for (const auto index : removed)
-        deleteNode(m_elements.takeAt(index));
     for (const auto& move : moved)
         m_elements.move(move.first, move.second);
 
