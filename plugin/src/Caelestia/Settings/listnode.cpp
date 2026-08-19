@@ -103,7 +103,7 @@ void ListNode::clear() {
 
     NodeChanges removed(len);
     std::iota(removed.begin(), removed.end(), 0);
-    emit elementsChanged(removed, {}, {});
+    emit elementsChanged({}, removed, {});
 }
 
 QString ListNode::pathFor(const QString& key) const {
