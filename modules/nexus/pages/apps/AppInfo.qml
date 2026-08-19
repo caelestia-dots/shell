@@ -15,6 +15,7 @@ PageBase {
     readonly property DesktopEntry app: nState.selectedApp
     readonly property bool favouriteByRegex: app && matchedByRegex(GlobalConfig.launcher.favouriteApps, app.id)
     readonly property bool hiddenByRegex: app && matchedByRegex(GlobalConfig.launcher.hiddenApps, app.id)
+    readonly property bool dgpuVisible: Dgpu.nvidiaPresent
 
     function isRegexEntry(s: string): bool {
         return /^\^.*\$$/.test(s);
@@ -93,7 +94,7 @@ PageBase {
         }
 
         ToggleRow {
-            last: true
+            last: !root.dgpuVisible
             text: Tr.tr("Hidden")
             subtext: root.hiddenByRegex ? Tr.tr("Matched by a regex in hiddenApps — edit the config file to change") : Tr.tr("Hide from the launcher")
             enabled: !root.hiddenByRegex
@@ -102,6 +103,22 @@ PageBase {
                 const apps = GlobalConfig.launcher.hiddenApps;
                 GlobalConfig.launcher.hiddenApps = checked ? [...apps, root.app.id] : apps.filter(a => a !== root.app.id);
             }
+        }
+
+        // Discrete GPU
+        SectionHeader {
+            visible: root.dgpuVisible
+            text: qsTr("Discrete GPU")
+        }
+
+        ToggleRow {
+            first: true
+            last: true
+            visible: root.dgpuVisible
+            text: qsTr("Add .desktop entry to run on dGPU")
+            subtext: qsTr("Launch on the discrete NVIDIA GPU via a PRIME offload launcher .desktop entry")
+            checked: root.app && Dgpu.isDgpu(root.app.id)
+            onToggled: Dgpu.setDgpu(root.app.id, checked)
         }
 
         // Details

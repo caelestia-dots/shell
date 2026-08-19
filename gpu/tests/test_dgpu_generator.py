@@ -1,5 +1,6 @@
 import contextlib
 import io
+import json
 import shutil
 import sys
 import tempfile
@@ -166,6 +167,149 @@ class DgpuGeneratorTests(unittest.TestCase):
         ]
         self.assertEqual(gen.main(args), 0)
         self.assertEqual(list(self.apps_dir.iterdir()), [])
+
+
+class DgpuSetTests(unittest.TestCase):
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.root = Path(self.tmp.name)
+        self.apps_dir = self.root / "applications"
+        self.source_dir = self.root / "source"
+        self.source_dir.mkdir()
+        for entry in SOURCE_DIR.glob("*.desktop"):
+            shutil.copy(entry, self.source_dir / entry.name)
+        self.apps_dir.mkdir()
+        self.registry = self.root / "dgpu.json"
+
+    def tearDown(self):
+        self.tmp.cleanup()
+
+    def copy_registry(self, name):
+        shutil.copy(REGISTRY_DIR / name, self.registry)
+
+    def run_set(self, entry_id, onoff):
+        args = [
+            "set",
+            entry_id,
+            onoff,
+            "--registry",
+            str(self.registry),
+            "--applications-dir",
+            str(self.apps_dir),
+            "--source-dirs",
+            str(self.source_dir),
+        ]
+        stderr = io.StringIO()
+        with contextlib.redirect_stderr(stderr):
+            code = gen.main(args)
+        return code, stderr.getvalue()
+
+    def registry_text(self):
+        return self.registry.read_text()
+
+    def wrapper(self, entry_id):
+        return self.apps_dir / gen.wrapper_filename(entry_id)
+
+    def test_set_on_writes_registry_and_creates_wrapper(self):
+        self.copy_registry("two-apps.json")
+        code, stderr = self.run_set("org.mozilla.firefox.desktop", "on")
+        self.assertEqual(code, 0, stderr)
+        data = json.loads(self.registry_text())
+        self.assertEqual(data["apps"]["org.mozilla.firefox.desktop"], "dGPU")
+        self.assertTrue(self.wrapper("org.mozilla.firefox.desktop").exists())
+
+    def test_set_on_is_idempotent(self):
+        self.copy_registry("two-apps.json")
+        code, stderr = self.run_set("org.mozilla.firefox.desktop", "on")
+        self.assertEqual(code, 0, stderr)
+        content_before = self.registry_text()
+        mtime_before = self.registry.stat().st_mtime_ns
+        code, stderr = self.run_set("org.mozilla.firefox.desktop", "on")
+        self.assertEqual(code, 0, stderr)
+        self.assertEqual(self.registry_text(), content_before)
+        self.assertEqual(self.registry.stat().st_mtime_ns, mtime_before)
+
+    def test_set_off_removes_entry_and_wrapper(self):
+        self.copy_registry("two-apps.json")
+        code, stderr = self.run_set("com.valvesoftware.Steam.desktop", "off")
+        self.assertEqual(code, 0, stderr)
+        data = json.loads(self.registry_text())
+        self.assertNotIn("com.valvesoftware.Steam.desktop", data["apps"])
+        self.assertIn("com.visualstudio.code.desktop", data["apps"])
+        self.assertFalse(self.wrapper("com.valvesoftware.Steam.desktop").exists())
+        self.assertTrue(self.wrapper("com.visualstudio.code.desktop").exists())
+
+    def test_set_off_when_not_assigned_is_noop(self):
+        self.copy_registry("one-app.json")
+        content_before = self.registry_text()
+        code, stderr = self.run_set("com.valvesoftware.Steam.desktop", "off")
+        self.assertEqual(code, 0, stderr)
+        self.assertEqual(self.registry_text(), content_before)
+
+    def test_set_on_missing_registry_creates_it(self):
+        code, stderr = self.run_set("com.visualstudio.code.desktop", "on")
+        self.assertEqual(code, 0, stderr)
+        data = json.loads(self.registry_text())
+        self.assertEqual(data["apps"], {"com.visualstudio.code.desktop": "dGPU"})
+        self.assertTrue(self.wrapper("com.visualstudio.code.desktop").exists())
+
+    def test_set_preserves_other_entries_and_extra_keys(self):
+        self.copy_registry("two-apps.json")
+        data = json.loads(self.registry_text())
+        data["gpus"] = {"primary": "iGPU"}
+        self.registry.write_text(json.dumps(data))
+        code, stderr = self.run_set("org.mozilla.firefox.desktop", "on")
+        self.assertEqual(code, 0, stderr)
+        after = json.loads(self.registry_text())
+        self.assertEqual(after["gpus"], {"primary": "iGPU"})
+        self.assertEqual(
+            set(after["apps"]),
+            {
+                "com.visualstudio.code.desktop",
+                "com.valvesoftware.Steam.desktop",
+                "org.mozilla.firefox.desktop",
+            },
+        )
+
+    def test_set_invalid_registry_errors(self):
+        self.copy_registry("invalid.json")
+        code, stderr = self.run_set("org.mozilla.firefox.desktop", "on")
+        self.assertEqual(code, 1)
+        self.assertIn("cannot read registry", stderr)
+
+    def test_set_registry_with_non_object_apps_errors(self):
+        self.registry.write_text('{"apps": 42}')
+        code, stderr = self.run_set("org.mozilla.firefox.desktop", "on")
+        self.assertEqual(code, 1)
+        self.assertIn("'apps' must be an object", stderr)
+
+    def test_set_missing_arguments_errors(self):
+        stderr = io.StringIO()
+        with contextlib.redirect_stderr(stderr):
+            code = gen.main(["set", "on"])
+        self.assertEqual(code, 2)
+        self.assertIn("usage", stderr.getvalue())
+
+    def test_set_invalid_gpu_value_errors(self):
+        self.copy_registry("one-app.json")
+        code, stderr = self.run_set("org.mozilla.firefox.desktop", "turbo")
+        self.assertEqual(code, 2)
+        self.assertIn("usage", stderr)
+
+    def test_set_on_unresolvable_source_writes_registry_only(self):
+        code, stderr = self.run_set("org.only.ghost.desktop", "on")
+        self.assertEqual(code, 0, stderr)
+        data = json.loads(self.registry_text())
+        self.assertEqual(data["apps"]["org.only.ghost.desktop"], "dGPU")
+        self.assertFalse(self.wrapper("org.only.ghost.desktop").exists())
+
+    def test_set_writes_indented_json_with_newline(self):
+        self.copy_registry("one-app.json")
+        code, stderr = self.run_set("org.mozilla.firefox.desktop", "on")
+        self.assertEqual(code, 0, stderr)
+        text = self.registry_text()
+        self.assertTrue(text.endswith("\n"))
+        self.assertIn('\n  "apps": {', text)
 
 
 if __name__ == "__main__":
