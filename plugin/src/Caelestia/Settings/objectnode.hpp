@@ -12,7 +12,7 @@ class ObjectNode : public Node {
     Q_OBJECT
 
 public:
-    explicit ObjectNode(ObjectNode* fallback, QObject* parent = nullptr);
+    explicit ObjectNode(ObjectNode* fallback, QObject* parent = nullptr, bool globalOnly = false);
 
     [[nodiscard]] QJsonValue toJson(bool sparse = true) const override;
     bool syncJson(const QJsonValue& json, QList<Diagnostic>& diagnostics) override;

@@ -73,7 +73,7 @@ private:                                                                        
     CONFIG_PROPERTY(Type, name, defaultVal, .globalOnly = true, __VA_ARGS__)
 
 // Defines a subobject property on a node. Subobject properties are CONSTANT.
-#define CONFIG_SUBOBJECT(Type, name)                                                                                   \
+#define CONFIG_SUBOBJECT_IMPL(Type, name, global)                                                                      \
     Q_PROPERTY(Type* name READ name CONSTANT)                                                                          \
                                                                                                                        \
 public:                                                                                                                \
@@ -82,9 +82,15 @@ public:                                                                         
     }                                                                                                                  \
                                                                                                                        \
 private:                                                                                                               \
-    Type* m_##name = new Type(fallbackValue(&Self::m_##name, nullptr), this);                                          \
+    Type* m_##name = new Type(fallbackValue(&Self::m_##name, nullptr), this, global);                                  \
     inline static const bool s_register_##name =                                                                       \
-        (caelestia::settings::Schema::annotate(&staticMetaObject, QStringLiteral(#name), {}), true);
+        (caelestia::settings::Schema::annotate(&staticMetaObject, QStringLiteral(#name), { .globalOnly = global }),    \
+            true);
+
+#define CONFIG_SUBOBJECT(Type, name) CONFIG_SUBOBJECT_IMPL(Type, name, false)
+
+// Defines a global subobject on a node. Everything inside it is global only.
+#define CONFIG_GLOBAL_SUBOBJECT(Type, name) CONFIG_SUBOBJECT_IMPL(Type, name, true)
 
 // Defines a list type for use with CONFIG_LIST.
 #define CONFIG_LIST_TYPE(Element, Name)                                                                                \

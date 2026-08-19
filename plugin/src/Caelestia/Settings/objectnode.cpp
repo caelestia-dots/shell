@@ -6,8 +6,8 @@
 
 namespace caelestia::settings {
 
-ObjectNode::ObjectNode(ObjectNode* fallback, QObject* parent)
-    : Node(fallback, parent) {}
+ObjectNode::ObjectNode(ObjectNode* fallback, QObject* parent, bool globalOnly)
+    : Node(fallback, parent, globalOnly) {}
 
 QJsonValue ObjectNode::toJson(bool sparse) const {
     QJsonObject json;
@@ -104,7 +104,7 @@ QSet<QString> ObjectNode::loadFromJson(const QJsonObject& json, QList<Diagnostic
             continue;
         }
 
-        if (desc->globalOnly() && fallbackNode()) {
+        if ((isGlobalOnly() || desc->globalOnly()) && fallbackNode()) {
             const auto path = pathFor(key);
             qCWarning(
                 lcSettings, "Global property definition %s found in overlay file, ignoring.", qUtf8Printable(path));
