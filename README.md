@@ -119,8 +119,8 @@ sudo cmake --install build
 > [!TIP]
 > You can customise the installation location via the CMake flags `INSTALL_LIBDIR`, `INSTALL_QMLDIR`, and
 > `INSTALL_QSCONFDIR` for the libraries (e.g. the version helper), QML plugin, and Quickshell config directories
-> respectively. If changing the library directory, remember to set the `CAELESTIA_LIB_DIR` environment
-> variable to the custom directory when launching the shell.
+> respectively. If you set the `INSTALL_LIBDIR` flag, the `CAELESTIA_LIB_DIR` variable must also be set to
+> the same directory in your system's environment.
 >
 > For example, installing to `~/.config/quickshell/caelestia` for easy local changes:
 >
