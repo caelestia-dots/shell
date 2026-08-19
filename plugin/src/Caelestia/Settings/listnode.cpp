@@ -115,6 +115,9 @@ void ListNode::remove(qsizetype index) {
     const WriteScope scope(this, WriteOrigin::Qml);
 
     if (!validIndex(index)) {
+        qCWarning(lcSettings, "Attempted to remove invalid index %lld from list node %s, ignoring.", index,
+            qUtf8Printable(path()));
+
         recordWrite(valuesKey(), false);
         return;
     }
@@ -134,7 +137,15 @@ void ListNode::move(qsizetype from, qsizetype to) {
 
     const WriteScope scope(this, WriteOrigin::Qml);
 
-    if (!validIndex(from) || !validIndex(to)) {
+    const auto fromInvalid = !validIndex(from);
+    if (!fromInvalid || !validIndex(to)) {
+        if (!fromInvalid)
+            qCWarning(lcSettings, "Attempted to move invalid index %lld to index %lld on list node %s, ignoring.", from,
+                to, qUtf8Printable(path()));
+        else
+            qCWarning(lcSettings, "Attempted to move index %lld to invalid index %lld on list node %s, ignoring.", from,
+                to, qUtf8Printable(path()));
+
         recordWrite(valuesKey(), false);
         return;
     }
