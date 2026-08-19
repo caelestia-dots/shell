@@ -230,6 +230,18 @@ bool ListNode::syncJson(const QJsonValue& json, QList<Diagnostic>& diagnostics) 
         return false;
     }
 
+    // Refuse syncs to global only list nodes on overlays (nested list nodes inherit global status from parent)
+    if (fallbackNode() && (!qobject_cast<ListNode*>(parentNode()) || isGlobalOnly())) {
+        const auto p = path();
+        qCWarning(lcSettings, "Global property definition %s found in overlay file, ignoring.", qUtf8Printable(p));
+        diagnostics << Diagnostic{
+            DiagnosticType::GlobalOption,
+            p,
+            QStringLiteral("Global properties should not be defined in overlay files"),
+        };
+        return false;
+    }
+
     const WriteScope scope(this, WriteOrigin::File);
     setValue(valuesKey(), json, &diagnostics);
 

@@ -105,10 +105,12 @@ QSet<QString> ObjectNode::loadFromJson(const QJsonObject& json, QList<Diagnostic
         }
 
         if (desc->globalOnly() && fallbackNode()) {
-            qCWarning(lcSettings) << "Global property definition found in overlay file, ignoring" << key;
+            const auto path = pathFor(key);
+            qCWarning(
+                lcSettings, "Global property definition %s found in overlay file, ignoring.", qUtf8Printable(path));
             diagnostics << Diagnostic{
                 DiagnosticType::GlobalOption,
-                pathFor(key),
+                path,
                 QStringLiteral("Global properties should not be defined in overlay files"),
             };
             SKIP;
