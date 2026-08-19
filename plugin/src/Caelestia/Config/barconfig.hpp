@@ -54,6 +54,11 @@ class BarWorkspaces : public ConfigObject {
     CONFIG_PROPERTY(QString, activeLabel, u"󰮯"_s)
     CONFIG_PROPERTY(QString, capitalisation, u"preserve"_s)
     CONFIG_GLOBAL_PROPERTY(QVariantList, specialWorkspaceIcons)
+    CONFIG_GLOBAL_PROPERTY(QStringList, ignoredTags,
+        {
+            u"hide_in_bar"_s,
+            u"xwl_popup"_s,
+        })
     CONFIG_GLOBAL_PROPERTY(QVariantList, windowIcons,
         { vmap({
             { u"regex"_s, u"steam(_app_(default|[0-9]+))?"_s },
