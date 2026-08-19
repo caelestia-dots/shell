@@ -39,6 +39,7 @@ signals:
     void elementsChanged(const NodeChanges& added, const NodeChanges& removed, const MoveChanges& moved);
 
 protected:
+    bool recordWrite(const QString& key, bool changed) override;
     [[nodiscard]] QString keyOf(const Node* child) const override;
 
     [[nodiscard]] Node* elementAt(qsizetype index) const;

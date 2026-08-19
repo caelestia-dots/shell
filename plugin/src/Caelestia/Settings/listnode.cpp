@@ -12,6 +12,7 @@ QString valuesKey() {
 }
 
 void deleteNode(Node* node) {
+    node->detachFallback();
     node->setParent(nullptr);
     node->deleteLater();
 }
@@ -211,6 +212,18 @@ bool ListNode::syncJson(const QJsonValue& json, QList<Diagnostic>& diagnostics) 
     setValue(valuesKey(), json, &diagnostics);
 
     return true;
+}
+
+bool ListNode::recordWrite(const QString& key, bool changed) {
+    const auto wasOverride = isOverride(key);
+    const auto notify = Node::recordWrite(key, changed);
+
+    // Elements inside overridden lists have no fallbacks, so detach here
+    if (!wasOverride && isOverride(key))
+        for (auto* const element : std::as_const(m_elements))
+            element->detachFallback();
+
+    return notify;
 }
 
 QString ListNode::keyOf(const Node* node) const {

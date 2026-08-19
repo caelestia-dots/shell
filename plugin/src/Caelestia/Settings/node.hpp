@@ -22,6 +22,7 @@ public:
     [[nodiscard]] Node* parentNode() const;
     [[nodiscard]] Node* rootNode() const;
     [[nodiscard]] Node* fallbackNode() const;
+    void detachFallback(); // Recursive, unlinks this and its children from the fallback layer
 
     [[nodiscard]] bool isOverride(const QString& key) const;
     [[nodiscard]] const QSet<QString>& overrides() const;
@@ -48,7 +49,7 @@ protected:
     // Returns true if the write should be skipped afterwards
     bool forwardGlobalWrite(const QString& key, const QVariant& value);
     // Returns true if the notify signal should be emitted
-    bool recordWrite(const QString& key, bool changed);
+    virtual bool recordWrite(const QString& key, bool changed);
 
     [[nodiscard]] bool removeQuarantined(const QString& key);
     [[nodiscard]] ChangeBatcher* batcher() const;
@@ -61,7 +62,7 @@ protected:
 private:
     QSet<QString> m_overrides; // Overridden keys from file/qml writes
     Node* const m_rootNode;
-    Node* const m_fallbackNode; // No fallback node either means global tree or inside overridden list
+    Node* m_fallbackNode; // No fallback node either means global tree or inside overridden list
 
     // For root node use only
     WriteOrigin m_writeOrigin;

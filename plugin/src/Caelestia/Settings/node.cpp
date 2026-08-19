@@ -37,6 +37,16 @@ Node* Node::fallbackNode() const {
     return m_fallbackNode;
 }
 
+void Node::detachFallback() {
+    if (m_fallbackNode) {
+        QObject::disconnect(m_fallbackNode, nullptr, this, nullptr);
+        m_fallbackNode = nullptr;
+    }
+
+    for (auto* const child : findChildren<Node*>(Qt::FindDirectChildrenOnly))
+        child->detachFallback();
+}
+
 bool Node::isOverride(const QString& key) const {
     return m_overrides.contains(key);
 }
