@@ -1,0 +1,21 @@
+[Desktop Entry]
+X-Caelestia-DGPU-Source=com.valvesoftware.Steam.desktop
+Name=Steam (dGPU)
+Comment=Application for managing and playing games on Steam
+Exec=env __NV_PRIME_RENDER_OFFLOAD=1 __GLX_VENDOR_LIBRARY_NAME=nvidia __VK_LAYER_NV_optimus=NVIDIA_only steam %U
+Icon=steam
+Terminal=false
+Type=Application
+Categories=Network;FileTransfer;Game;
+MimeType=x-scheme-handler/steam;x-scheme-handler/steamlink;
+Actions=Store;Library;
+PrefersNonDefaultGPU=true
+X-KDE-RunOnDiscreteGpu=true
+
+[Desktop Action Store]
+Name=Store
+Exec=steam steam://store
+
+[Desktop Action Library]
+Name=Library
+Exec=steam steam://open/games

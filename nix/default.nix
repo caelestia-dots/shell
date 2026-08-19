@@ -14,6 +14,7 @@
   libqalculate,
   bash,
   hyprland,
+  python3,
   material-symbols,
   rubik,
   nerd-fonts,
@@ -49,6 +50,7 @@
       libqalculate
       bash
       hyprland
+      python3
     ]
     ++ extraRuntimeDeps
     ++ lib.optional withCli caelestia-cli;
