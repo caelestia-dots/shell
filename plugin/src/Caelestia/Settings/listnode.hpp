@@ -15,7 +15,7 @@ class ListNode : public Node {
     using MoveChanges = QList<QPair<qsizetype, qsizetype>>;
 
 public:
-    explicit ListNode(ListNode* fallback, QObject* parent = nullptr);
+    explicit ListNode(ListNode* fallback, QObject* parent = nullptr, bool globalOnly = false);
 
     [[nodiscard]] qsizetype count() const;
     [[nodiscard]] QVariantList values() const;
@@ -50,8 +50,10 @@ private:
     QList<Node*> m_elements;
 
     [[nodiscard]] QList<QVariantMap> defaultValue() const;
-    [[nodiscard]] bool isGlobalOnly() const;
     [[nodiscard]] bool isNested() const;
+
+    // Returns the global list to mutate instead of this one, or nullptr to mutate this one
+    [[nodiscard]] ListNode* forwardGlobalMutation() const;
 
     [[nodiscard]] bool validIndex(qsizetype index) const;
     [[nodiscard]] const Descriptor* getDescriptor() const;

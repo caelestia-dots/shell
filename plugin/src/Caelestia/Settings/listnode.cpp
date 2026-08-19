@@ -19,8 +19,8 @@ void deleteNode(Node* node) {
 
 } // namespace
 
-ListNode::ListNode(ListNode* fallback, QObject* parent)
-    : Node(fallback, parent) {
+ListNode::ListNode(ListNode* fallback, QObject* parent, bool globalOnly)
+    : Node(fallback, parent, globalOnly) {
     if (fallback) {
         // Disconnect generic fallback notify, lists use a custom one
         QObject::disconnect(fallback, &ListNode::optionChanged, this, nullptr);
@@ -41,6 +41,11 @@ QVariantList ListNode::values() const {
 }
 
 void ListNode::remove(qsizetype index) {
+    if (auto* const global = forwardGlobalMutation()) {
+        global->remove(index);
+        return;
+    }
+
     const WriteScope scope(this, WriteOrigin::Qml);
 
     if (!validIndex(index)) {
@@ -56,6 +61,11 @@ void ListNode::remove(qsizetype index) {
 }
 
 void ListNode::move(qsizetype from, qsizetype to) {
+    if (auto* const global = forwardGlobalMutation()) {
+        global->move(from, to);
+        return;
+    }
+
     const WriteScope scope(this, WriteOrigin::Qml);
 
     if (!validIndex(from) || !validIndex(to)) {
@@ -70,6 +80,11 @@ void ListNode::move(qsizetype from, qsizetype to) {
 }
 
 void ListNode::clear() {
+    if (auto* const global = forwardGlobalMutation()) {
+        global->clear();
+        return;
+    }
+
     const WriteScope scope(this, WriteOrigin::Qml);
 
     if (m_elements.isEmpty()) {
@@ -196,8 +211,8 @@ bool ListNode::syncJson(const QJsonValue& json, QList<Diagnostic>& diagnostics) 
         return false;
     }
 
-    // Refuse syncs to global only list nodes on overlays (nested list nodes inherit global status from parent)
-    if (fallbackNode() && (!isNested() || isGlobalOnly())) {
+    // Refuse syncs to global only list nodes on overlays
+    if (fallbackNode() && isGlobalOnly()) {
         const auto p = path();
         qCWarning(lcSettings, "Global property definition %s found in overlay file, ignoring.", qUtf8Printable(p));
         diagnostics << Diagnostic{
@@ -237,6 +252,9 @@ Node* ListNode::elementAt(qsizetype index) const {
 }
 
 Node* ListNode::insertElement(const QVariantMap& props, qsizetype index) {
+    if (auto* const global = forwardGlobalMutation())
+        return global->insertElement(props, index);
+
     const WriteScope scope(this, WriteOrigin::Qml);
 
     if (!validIndex(index)) // Invalid index means append
@@ -258,13 +276,20 @@ QList<QVariantMap> ListNode::defaultValue() const {
     return desc->defaultValue().value<QList<QVariantMap>>();
 }
 
-bool ListNode::isGlobalOnly() const {
-    const auto* desc = getDescriptor();
-    return desc ? desc->globalOnly() : false;
-}
-
 bool ListNode::isNested() const {
     return qobject_cast<ListNode*>(parentNode());
+}
+
+ListNode* ListNode::forwardGlobalMutation() const {
+    if (!isGlobalOnly() || !fallbackNode())
+        return nullptr;
+
+    qCWarning(lcSettings,
+        "Forwarding mutation of global list %s to the global layer. "
+        "This should not be used, mutate global lists from the global layer instead.",
+        qUtf8Printable(path()));
+
+    return static_cast<ListNode*>(fallbackNode());
 }
 
 bool ListNode::validIndex(qsizetype index) const {

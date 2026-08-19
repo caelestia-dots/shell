@@ -99,8 +99,8 @@ private:                                                                        
         QML_ANONYMOUS                                                                                                  \
                                                                                                                        \
     public:                                                                                                            \
-        explicit Name(Name* fallback = nullptr, QObject* parent = nullptr)                                             \
-            : caelestia::settings::ListNode(fallback, parent) {}                                                       \
+        explicit Name(Name* fallback = nullptr, QObject* parent = nullptr, bool globalOnly = false)                    \
+            : caelestia::settings::ListNode(fallback, parent, globalOnly) {}                                           \
                                                                                                                        \
         [[nodiscard]] Q_INVOKABLE Element* at(qsizetype index) const { /* Format ugh */                                \
             return static_cast<Element*>(elementAt(index));                                                            \
@@ -116,7 +116,7 @@ private:                                                                        
     };
 
 // Defines a list property on a node. List properties are CONSTANT.
-#define CONFIG_LIST(Type, name, defaultVal, ...)                                                                       \
+#define CONFIG_LIST_IMPL(Type, name, global, defaultVal, ...)                                                          \
     Q_PROPERTY(Type* name READ name CONSTANT)                                                                          \
                                                                                                                        \
 public:                                                                                                                \
@@ -125,12 +125,15 @@ public:                                                                         
     }                                                                                                                  \
                                                                                                                        \
 private:                                                                                                               \
-    Type* m_##name = new Type(fallbackValue(&Self::m_##name, nullptr), this);                                          \
+    Type* m_##name = new Type(fallbackValue(&Self::m_##name, nullptr), this, global);                                  \
     inline static const bool s_register_##name =                                                                       \
         (caelestia::settings::Schema::annotate(&staticMetaObject, QStringLiteral(#name),                               \
-             { .defaultValue = QVariant::fromValue(QList<QVariantMap> defaultVal), __VA_ARGS__ }),                     \
+             { .defaultValue = QVariant::fromValue(QList<QVariantMap> defaultVal),                                     \
+                 .globalOnly = global,                                                                                 \
+                 __VA_ARGS__ }),                                                                                       \
             true);
 
-// Defines a global list property on a node. Shorthand for .globalOnly = true.
-#define CONFIG_GLOBAL_LIST(Type, name, defaultVal, ...)                                                                \
-    CONFIG_LIST(Type, name, defaultVal, .globalOnly = true, __VA_ARGS__)
+#define CONFIG_LIST(Type, name, defaultVal, ...) CONFIG_LIST_IMPL(Type, name, false, defaultVal, __VA_ARGS__)
+
+// Defines a global list on a node. Everything inside it is global only.
+#define CONFIG_GLOBAL_LIST(Type, name, defaultVal, ...) CONFIG_LIST_IMPL(Type, name, true, defaultVal, __VA_ARGS__)
