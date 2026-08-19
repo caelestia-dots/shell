@@ -87,11 +87,39 @@ def load_registry(path: Path) -> dict:
         raise ValueError(f"cannot read registry {path}: {e}") from e
 
 
-def assigned_dgpu_ids(registry: dict) -> set[str]:
-    apps = registry.get("apps", {})
+def get_apps(registry: dict) -> dict:
+    apps = registry.setdefault("apps", {})
     if not isinstance(apps, dict):
         raise ValueError("registry key 'apps' must be an object")
-    return {app_id for app_id, gpu in apps.items() if gpu == DGPU}
+    return apps
+
+
+def assigned_dgpu_ids(registry: dict) -> set[str]:
+    return {app_id for app_id, gpu in get_apps(registry).items() if gpu == DGPU}
+
+
+def set_assignment(registry: dict, entry_id: str, on: bool) -> bool:
+    """Apply a toggle to the registry in memory; returns whether the value changed."""
+    apps = get_apps(registry)
+    if on:
+        if apps.get(entry_id) == DGPU:
+            return False
+        apps[entry_id] = DGPU
+        return True
+    if entry_id not in apps:
+        return False
+    del apps[entry_id]
+    return True
+
+
+def write_json_atomic(path: Path, registry: dict) -> None:
+    """Serialize the registry, skipping the write when the content is unchanged."""
+    text = json.dumps(registry, indent=2) + "\n"
+    if path.exists() and path.read_text() == text:
+        return
+    tmp = path.with_name(path.name + ".tmp")
+    tmp.write_text(text)
+    os.replace(tmp, path)
 
 
 def find_source(
@@ -191,11 +219,7 @@ def apply(registry: dict, applications_dir: Path, source_dirs: list[Path]) -> No
             entry.unlink(missing_ok=True)
 
 
-def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
-    parser = argparse.ArgumentParser(
-        prog="caelestia-dgpu-generator",
-        description="Create/remove 'App (dGPU)' wrapper desktop entries from a sidecar registry.",
-    )
+def add_common_args(parser: argparse.ArgumentParser) -> None:
     parser.add_argument("--registry", type=Path, default=default_registry())
     parser.add_argument(
         "--applications-dir", type=Path, default=default_applications_dir()
@@ -206,19 +230,73 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         default=":".join(str(p) for p in default_source_dirs()),
         help="Colon-separated dirs to resolve source desktop entries from (default: XDG_DATA_DIRS).",
     )
+
+
+def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
+    parser = argparse.ArgumentParser(
+        prog="caelestia-dgpu-generator",
+        description="Create/remove 'App (dGPU)' wrapper desktop entries from a sidecar registry.",
+    )
+    add_common_args(parser)
     return parser.parse_args(argv)
 
 
-def main(argv: list[str] | None = None) -> int:
-    args = parse_args(argv)
-    source_dirs = [Path(d) for d in args.source_dirs.split(":") if d]
+def parse_set_args(argv: list[str]) -> argparse.Namespace:
+    parser = argparse.ArgumentParser(
+        prog="caelestia-dgpu-generator set",
+        description="Toggle one app on or off the dGPU, then reconcile wrappers.",
+    )
+    parser.add_argument("entry_id", help="Desktop entry id, e.g. com.foo.App.desktop")
+    parser.add_argument("value", choices=("on", "off"))
+    add_common_args(parser)
+    return parser.parse_args(argv)
+
+
+def reconcile(
+    registry_path: Path, applications_dir: Path, source_dirs: list[Path]
+) -> int:
     try:
-        registry = load_registry(args.registry)
-        apply(registry, args.applications_dir, source_dirs)
+        registry = load_registry(registry_path)
+        apply(registry, applications_dir, source_dirs)
     except ValueError as e:
         print(f"error: {e}", file=sys.stderr)
         return 1
     return 0
+
+
+def run_set(argv: list[str]) -> int:
+    try:
+        args = parse_set_args(argv)
+    except SystemExit as e:
+        return e.code
+    try:
+        registry = load_registry(args.registry)
+        changed = set_assignment(registry, args.entry_id, args.value == "on")
+    except ValueError as e:
+        print(f"error: {e}", file=sys.stderr)
+        return 1
+    if changed:
+        write_json_atomic(args.registry, registry)
+    return reconcile(
+        args.registry, args.applications_dir, source_dirs_from(args.source_dirs)
+    )
+
+
+def source_dirs_from(value: str) -> list[Path]:
+    return [Path(d) for d in value.split(":") if d]
+
+
+def main(argv: list[str] | None = None) -> int:
+    args = argv if argv is not None else sys.argv[1:]
+    if args and args[0] == "set":
+        return run_set(args[1:])
+    try:
+        parsed = parse_args(args)
+    except SystemExit as e:
+        return e.code
+    return reconcile(
+        parsed.registry, parsed.applications_dir, source_dirs_from(parsed.source_dirs)
+    )
 
 
 if __name__ == "__main__":
