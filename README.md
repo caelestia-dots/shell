@@ -886,10 +886,7 @@ You can join the Caelestia Discord server for assistance and discussion [here][d
 
 ### I want to make my own changes to the Hyprland config!
 
-You can add your custom Hyprland configs to `~/.config/caelestia/hypr-user.lua`.
-Most default Hyprland values can be modified by overriding variables in `~/.config/caelestia/hypr-vars.lua`.
-You can reference the [variables.lua](https://github.com/caelestia-dots/caelestia/blob/main/hypr/variables.lua) file for all available
-variables and their default values.
+Check out the configuring section on the [dots repo](https://github.com/caelestia-dots/caelestia#configuring).
 
 ### I want to make my own changes to other stuff!
 
