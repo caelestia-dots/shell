@@ -49,9 +49,7 @@ void ListNode::remove(qsizetype index) {
 
     deleteNode(m_elements.takeAt(index));
 
-    if (!recordWrite(valuesKey(), true))
-        return;
-
+    recordWrite(valuesKey(), true);
     emit countChanged();
     emit elementsChanged({}, { index }, {});
 }
@@ -65,8 +63,9 @@ void ListNode::move(qsizetype from, qsizetype to) {
     }
 
     m_elements.move(from, to);
-    if (recordWrite(valuesKey(), true))
-        emit elementsChanged({}, {}, { { from, to } });
+
+    recordWrite(valuesKey(), true);
+    emit elementsChanged({}, {}, { { from, to } });
 }
 
 void ListNode::clear() {
@@ -83,9 +82,7 @@ void ListNode::clear() {
         deleteNode(element);
     m_elements.clear();
 
-    if (!recordWrite(valuesKey(), true))
-        return;
-
+    recordWrite(valuesKey(), true);
     emit countChanged();
 
     NodeChanges removed(len);
@@ -109,9 +106,7 @@ Node* ListNode::insertElement(const QVariantMap& props, qsizetype index) {
 
     m_elements.insert(index, element);
 
-    if (!recordWrite(valuesKey(), true))
-        return nullptr;
-
+    recordWrite(valuesKey(), true);
     emit countChanged();
     emit elementsChanged({ index }, {}, {});
 
