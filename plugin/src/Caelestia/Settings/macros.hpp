@@ -96,7 +96,7 @@ private:                                                                        
         explicit Name(Name* fallback = nullptr, QObject* parent = nullptr)                                             \
             : caelestia::settings::ListNode(fallback, parent) {}                                                       \
                                                                                                                        \
-        [[nodiscard]] Q_INVOKABLE Element* at(qsizetype index) { /* Format ugh */                                      \
+        [[nodiscard]] Q_INVOKABLE Element* at(qsizetype index) const { /* Format ugh */                                \
             return static_cast<Element*>(elementAt(index));                                                            \
         }                                                                                                              \
         [[nodiscard]] Q_INVOKABLE Element* insert(const QVariantMap& props, qsizetype index = -1) {                    \
