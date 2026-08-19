@@ -100,11 +100,11 @@ Build dependencies:
 -   `qt6-shadertools`
 
 > [!IMPORTANT]
-> The commands (and in the "Updating" section) expect `$XDG_CONFIG_HOME` to be set.
+> The commands below (and in the "Updating" section) assume `$XDG_CONFIG_HOME` is set.
 > If it is unset, substitute it with the path to your config folder (typically `~/.config`).
 
 To install the shell manually, install all dependencies and clone this repo to `$XDG_CONFIG_HOME/quickshell/caelestia`.
-Then build and install using `cmake`.
+Then build and install using CMake.
 
 ```sh
 cd $XDG_CONFIG_HOME/quickshell
@@ -118,11 +118,11 @@ sudo cmake --install build
 
 > [!TIP]
 > You can customise the installation location via the CMake flags `INSTALL_LIBDIR`, `INSTALL_QMLDIR`, and
-> `INSTALL_QSCONFDIR` for the libraries (e.g., the beat detector), QML plugin, and Quickshell config directories
+> `INSTALL_QSCONFDIR` for the libraries (e.g. the version helper), QML plugin, and Quickshell config directories
 > respectively. If changing the library directory, remember to set the `CAELESTIA_LIB_DIR` environment
 > variable to the custom directory when launching the shell.
 >
-> e.g., installing to `~/.config/quickshell/caelestia` for easy local changes:
+> For example, installing to `~/.config/quickshell/caelestia` for easy local changes:
 >
 > ```sh
 > mkdir -p ~/.config/quickshell/caelestia
@@ -145,7 +145,7 @@ via a `hl.on("hyprland.start", ...)` function in the Hyprland config.
 
 All keybinds are accessible via Hyprland [global shortcuts](https://wiki.hypr.land/Configuring/Basics/Binds/#dbus-global-shortcuts).
 If using the [Caelestia dotfiles][dots-repo], the keybinds are already configured for you.
-Otherwise, the [`keybinds.lua` file](https://github.com/caelestia-dots/caelestia/blob/main/hypr/hyprland/keybinds.lua#L63-L67)
+Otherwise, the [`keybinds.lua`](https://github.com/caelestia-dots/caelestia/blob/main/hypr/hyprland/keybinds.lua#L63-L67) file
 contains an example of how to use global shortcuts.
 
 All IPC commands can be accessed via `caelestia shell ...`, for example:
@@ -164,7 +164,8 @@ or by manually copying or symlinking your image to the path.
 The wallpapers for the wallpaper switcher are read from `~/Pictures/Wallpapers`
 by default. To change it, modify `paths.wallpaperDir` in `~/.config/caelestia/shell.json`.
 
-To set the wallpaper, you can use `caelestia wallpaper -f <path_to_wallpaper>`.
+To set the wallpaper, you can type `>wallpaper` in the launcher to open the wallpaper switcher.
+Alternatively, you can also use `caelestia wallpaper -f <path_to_wallpaper>` to set the wallpaper directly.
 Use `caelestia wallpaper -h` for more info about this command.
 
 ## Updating
@@ -245,7 +246,7 @@ For example, to disable the bar on the monitor named `DP-1`:
 > [!WARNING]
 > The example configuration includes **ALL** configuration options in `shell.json`. It is
 > **not** recommended to copy and paste this entire configuration into `shell.json`,
-> as options or their default values may be updated, resulting in a stale config.
+> as options or their default values may change across updates, resulting in a stale config.
 >
 > This is meant to serve as a reference of all the available options, and you should
 > <ins>only add the ones you want to change</ins> to `shell.json`.
@@ -254,572 +255,571 @@ For example, to disable the bar on the monitor named `DP-1`:
 
 ```json
 {
+    "enabled": true,
     "appearance": {
-        "anim": {
-            "durations": {
-                "scale": 1
-            }
-        },
         "deformScale": 1,
-        "font": {
-            "body": {
-                "family": "GoogleSansFlex",
-                "large": { "italic": false, "size": 16, "vaxes": { "ROND": 25 }, "weight": 400 },
-                "medium": { "italic": false, "size": 14, "vaxes": { "ROND": 25 }, "weight": 400 },
-                "small": { "italic": false, "size": 12, "vaxes": { "ROND": 25 }, "weight": 400 }
-            },
-            "clock": "Rubik",
-            "headline": {
-                "family": "GoogleSansFlex",
-                "large": { "italic": false, "size": 32, "vaxes": { "ROND": 25 }, "weight": 500 },
-                "medium": { "italic": false, "size": 28, "vaxes": { "ROND": 25 }, "weight": 500 },
-                "small": { "italic": false, "size": 24, "vaxes": {"ROND": 25 }, "weight": 500 }
-            },
-            "icon": {
-                "extraLarge": { "italic": false, "size": 36, "vaxes": {}, "weight": 400 },
-                "family": "Material Symbols Rounded",
-                "large": { "italic": false, "size": 24, "vaxes": {}, "weight": 400 },
-                "medium": { "italic": false, "size": 18, "vaxes": {}, "weight": 400 },
-                "small": { "italic": false, "size": 15, "vaxes": {}, "weight": 400 }
-            },
-            "label": {
-                "family": "GoogleSansFlex",
-                "large": { "italic": false, "size": 14, "vaxes": { "ROND": 25 }, "weight": 500 },
-                "medium": { "italic": false, "size": 12, "vaxes": { "ROND": 25 }, "weight": 500 },
-                "small": { "italic": false, "size": 11, "vaxes": { "ROND": 25 }, "weight": 400 }
-            },
-            "mono": {
-                "family": "CaskaydiaCove NF",
-                "large": { "italic": false, "size": 16, "vaxes": {}, "weight": 400 },
-                "medium": { "italic": false, "size": 14, "vaxes": {}, "weight": 400 },
-                "small": { "italic": false, "size": 12, "vaxes": {}, "weight": 400 }
-            },
-            "scale": 1,
-            "title": {
-                "family": "GoogleSansFlex",
-                "large": { "italic": false, "size": 22, "vaxes": { "ROND": 25 }, "weight": 500 },
-                "medium": { "italic": false, "size": 16, "vaxes": { "ROND": 25 }, "weight": 500 },
-                "small": { "italic": false, "size": 14, "vaxes": { "ROND": 25 }, "weight": 500 }
-            },
-            "workspaces": "Rubik"
-        },
-        "padding": {
-            "scale": 1
-        },
         "rounding": {
             "scale": 1
         },
         "spacing": {
             "scale": 1
         },
+        "padding": {
+            "scale": 1
+        },
+        "font": {
+            "scale": 1,
+            "clock": "Rubik",
+            "workspaces": "Rubik",
+            "headline": {
+                "family": "GoogleSansFlex",
+                "large": { "size": 32, "weight": 500, "italic": false, "vaxes": { "ROND": 25 } },
+                "medium": { "size": 28, "weight": 500, "italic": false, "vaxes": { "ROND": 25 } },
+                "small": { "size": 24, "weight": 500, "italic": false, "vaxes": { "ROND": 25 } }
+            },
+            "title": {
+                "family": "GoogleSansFlex",
+                "large": { "size": 22, "weight": 500, "italic": false, "vaxes": { "ROND": 25 } },
+                "medium": { "size": 16, "weight": 500, "italic": false, "vaxes": { "ROND": 25 } },
+                "small": { "size": 14, "weight": 500, "italic": false, "vaxes": { "ROND": 25 } }
+            },
+            "body": {
+                "family": "GoogleSansFlex",
+                "large": { "size": 16, "weight": 400, "italic": false, "vaxes": { "ROND": 25 } },
+                "medium": { "size": 14, "weight": 400, "italic": false, "vaxes": { "ROND": 25 } },
+                "small": { "size": 12, "weight": 400, "italic": false, "vaxes": { "ROND": 25 } }
+            },
+            "label": {
+                "family": "GoogleSansFlex",
+                "large": { "size": 14, "weight": 500, "italic": false, "vaxes": { "ROND": 25 } },
+                "medium": { "size": 12, "weight": 500, "italic": false, "vaxes": { "ROND": 25 } },
+                "small": { "size": 11, "weight": 400, "italic": false, "vaxes": { "ROND": 25 } }
+            },
+            "mono": {
+                "family": "CaskaydiaCove NF",
+                "large": { "size": 16, "weight": 400, "italic": false, "vaxes": {} },
+                "medium": { "size": 14, "weight": 400, "italic": false, "vaxes": {} },
+                "small": { "size": 12, "weight": 400, "italic": false, "vaxes": {} }
+            },
+            "icon": {
+                "family": "Material Symbols Rounded",
+                "extraLarge": { "size": 36, "weight": 400, "italic": false, "vaxes": {} },
+                "large": { "size": 24, "weight": 400, "italic": false, "vaxes": {} },
+                "medium": { "size": 18, "weight": 400, "italic": false, "vaxes": {} },
+                "small": { "size": 15, "weight": 400, "italic": false, "vaxes": {} }
+            }
+        },
+        "anim": {
+            "durations": {
+                "scale": 1
+            }
+        },
         "transparency": {
-            "base": 0.85,
             "enabled": false,
+            "base": 0.85,
             "layers": 0.4
         }
     },
+    "general": {
+        "logo": "",
+        "showOverFullscreen": false,
+        "mediaGifSpeedAdjustment": 300,
+        "sessionGifSpeed": 0.7,
+        "apps": {
+            "terminal": ["foot"],
+            "audio": ["pwvucontrol"],
+            "playback": ["mpv"],
+            "explorer": ["thunar"]
+        },
+        "idle": {
+            "lockBeforeSleep": true,
+            "inhibitWhenAudio": true,
+            "inhibitWhenCharging": false,
+            "timeouts": [
+                {
+                    "timeout": 180,
+                    "idleAction": "lock",
+                    "inhibitWhenAudio": false,
+                    "inhibitWhenCharging": false,
+                    "respectInhibitors": true
+                },
+                {
+                    "timeout": 300,
+                    "idleAction": "dpms off",
+                    "returnAction": "dpms on"
+                },
+                {
+                    "timeout": 600,
+                    "idleAction": ["suspendThenHibernate"]
+                }
+            ]
+        },
+        "battery": {
+            "warnLevels": [
+                {
+                    "level": 20,
+                    "title": "Low battery",
+                    "message": "You might want to plug in a charger",
+                    "icon": "battery_android_frame_2"
+                },
+                {
+                    "level": 10,
+                    "title": "Did you see the previous message?",
+                    "message": "You should probably plug in a charger <b>now</b>",
+                    "icon": "battery_android_frame_1"
+                },
+                {
+                    "level": 5,
+                    "title": "Critical battery level",
+                    "message": "PLUG THE CHARGER RIGHT NOW!!",
+                    "icon": "battery_android_alert",
+                    "critical": true
+                }
+            ],
+            "criticalLevel": 3
+        }
+    },
     "background": {
+        "enabled": true,
+        "wallpaperEnabled": true,
         "desktopClock": {
-            "background": {
-                "blur": true,
-                "enabled": false,
-                "opacity": 0.7
-            },
             "enabled": false,
-            "invertColors": false,
-            "position": "bottom-right",
             "scale": 1.0,
+            "position": "bottom-right",
+            "invertColors": false,
+            "background": {
+                "enabled": false,
+                "opacity": 0.7,
+                "blur": true
+            },
             "shadow": {
-                "blur": 0.4,
                 "enabled": true,
-                "opacity": 0.7
+                "opacity": 0.7,
+                "blur": 0.4
             }
         },
-        "enabled": true,
         "visualiser": {
+            "enabled": false,
             "autoHide": true,
             "blur": false,
-            "enabled": false,
             "rounding": 1,
             "spacing": 1
-        },
-        "wallpaperEnabled": true
+        }
     },
     "bar": {
+        "persistent": true,
+        "showOnHover": true,
+        "dragThreshold": 20,
+        "scrollActions": {
+            "workspaces": true,
+            "volume": true,
+            "brightness": true
+        },
+        "popouts": {
+            "activeWindow": true,
+            "tray": true,
+            "statusIcons": true
+        },
+        "workspaces": {
+            "shown": 5,
+            "activeIndicator": true,
+            "occupiedBg": false,
+            "showWindows": true,
+            "showWindowsOnSpecialWorkspaces": true,
+            "maxWindowIcons": 5,
+            "activeTrail": false,
+            "perMonitorWorkspaces": true,
+            "label": "  ",
+            "occupiedLabel": "󰮯",
+            "activeLabel": "󰮯",
+            "capitalisation": "preserve",
+            "specialWorkspaceIcons": [
+                {
+                    "name": "steam",
+                    "icon": "sports_esports"
+                }
+            ],
+            "windowIcons": [
+                {
+                    "regex": "steam(_app_(default|[0-9]+))?",
+                    "icon": "sports_esports"
+                }
+            ]
+        },
         "activeWindow": {
             "compact": false,
             "inverted": false,
             "showOnHover": true
+        },
+        "tray": {
+            "background": false,
+            "recolour": false,
+            "compact": false,
+            "iconSubs": [],
+            "hiddenIcons": []
         },
         "clock": {
             "background": false,
             "showDate": false,
             "showIcon": true
         },
-        "dragThreshold": 20,
-        "entries": [
-            {
-                "enabled": true,
-                "id": "logo"
-            },
-            {
-                "enabled": true,
-                "id": "workspaces"
-            },
-            {
-                "enabled": true,
-                "id": "spacer"
-            },
-            {
-                "enabled": true,
-                "id": "activeWindow"
-            },
-            {
-                "enabled": true,
-                "id": "spacer"
-            },
-            {
-                "enabled": true,
-                "id": "tray"
-            },
-            {
-                "enabled": true,
-                "id": "clock"
-            },
-            {
-                "enabled": true,
-                "id": "statusIcons"
-            },
-            {
-                "enabled": true,
-                "id": "power"
-            }
-        ],
-        "excludedScreens": [],
-        "persistent": true,
-        "popouts": {
-            "activeWindow": true,
-            "statusIcons": true,
-            "tray": true
-        },
-        "scrollActions": {
-            "brightness": true,
-            "volume": true,
-            "workspaces": true
-        },
-        "showOnHover": true,
         "statusIcons": [
             {
-                "enabled": true,
-                "id": "lockStatus"
+                "id": "lockStatus",
+                "enabled": true
             },
             {
-                "enabled": false,
-                "id": "audio"
+                "id": "audio",
+                "enabled": false
             },
             {
-                "enabled": false,
-                "id": "microphone"
+                "id": "microphone",
+                "enabled": false
             },
             {
-                "enabled": false,
-                "id": "kbLayout"
+                "id": "kbLayout",
+                "enabled": false
             },
             {
-                "enabled": true,
-                "id": "network"
+                "id": "network",
+                "enabled": true
             },
             {
-                "enabled": true,
-                "id": "bluetooth"
+                "id": "bluetooth",
+                "enabled": true
             },
             {
-                "enabled": true,
-                "id": "battery"
+                "id": "battery",
+                "enabled": true
             }
         ],
-        "tray": {
-            "background": false,
-            "compact": false,
-            "hiddenIcons": [],
-            "iconSubs": [],
-            "recolour": false
-        },
-        "workspaces": {
-            "activeIndicator": true,
-            "activeLabel": "󰮯",
-            "activeTrail": false,
-            "capitalisation": "preserve",
-            "label": "  ",
-            "maxWindowIcons": 5,
-            "occupiedBg": false,
-            "occupiedLabel": "󰮯",
-            "perMonitorWorkspaces": true,
-            "showWindows": true,
-            "showWindowsOnSpecialWorkspaces": true,
-            "shown": 5,
-            "specialWorkspaceIcons": [
-                {
-                    "icon": "sports_esports",
-                    "name": "steam"
-                }
-            ],
-            "windowIcons": [
-                {
-                    "icon": "sports_esports",
-                    "regex": "steam(_app_(default|[0-9]+))?"
-                }
-            ]
-        }
+        "entries": [
+            {
+                "id": "logo",
+                "enabled": true
+            },
+            {
+                "id": "workspaces",
+                "enabled": true
+            },
+            {
+                "id": "spacer",
+                "enabled": true
+            },
+            {
+                "id": "activeWindow",
+                "enabled": true
+            },
+            {
+                "id": "spacer",
+                "enabled": true
+            },
+            {
+                "id": "tray",
+                "enabled": true
+            },
+            {
+                "id": "clock",
+                "enabled": true
+            },
+            {
+                "id": "statusIcons",
+                "enabled": true
+            },
+            {
+                "id": "power",
+                "enabled": true
+            }
+        ],
+        "excludedScreens": []
     },
     "border": {
+        "thickness": 10,
         "rounding": 25,
-        "smoothing": 20,
-        "thickness": 10
+        "smoothing": 20
     },
     "dashboard": {
-        "dragThreshold": 50,
         "enabled": true,
-        "mediaUpdateInterval": 500,
-        "performance": {
-            "showBattery": true,
-            "showCpu": true,
-            "showGpu": true,
-            "showMemory": true,
-            "showNetwork": true,
-            "showStorage": true
-        },
-        "resourceUpdateInterval": 1000,
+        "showOnHover": true,
         "showDashboard": true,
         "showMedia": true,
-        "showOnHover": true,
         "showPerformance": true,
-        "showWeather": true
-    },
-    "enabled": true,
-    "general": {
-        "apps": {
-            "audio": ["pwvucontrol"],
-            "explorer": ["thunar"],
-            "playback": ["mpv"],
-            "terminal": ["foot"]
-        },
-        "battery": {
-            "criticalLevel": 3,
-            "warnLevels": [
-                {
-                    "icon": "battery_android_frame_2",
-                    "level": 20,
-                    "message": "You might want to plug in a charger",
-                    "title": "Low battery"
-                },
-                {
-                    "icon": "battery_android_frame_1",
-                    "level": 10,
-                    "message": "You should probably plug in a charger <b>now</b>",
-                    "title": "Did you see the previous message?"
-                },
-                {
-                    "critical": true,
-                    "icon": "battery_android_alert",
-                    "level": 5,
-                    "message": "PLUG THE CHARGER RIGHT NOW!!",
-                    "title": "Critical battery level"
-                }
-            ]
-        },
-        "idle": {
-            "inhibitWhenAudio": true,
-            "inhibitWhenCharging": false,
-            "lockBeforeSleep": true,
-            "timeouts": [
-                {
-                    "idleAction": "lock",
-                    "inhibitWhenAudio": false,
-                    "inhibitWhenCharging": false,
-                    "respectInhibitors": true,
-                    "timeout": 180
-                },
-                {
-                    "idleAction": "dpms off",
-                    "returnAction": "dpms on",
-                    "timeout": 300
-                },
-                {
-                    "idleAction": ["suspendThenHibernate"],
-                    "timeout": 600
-                }
-            ]
-        },
-        "logo": "",
-        "mediaGifSpeedAdjustment": 300,
-        "sessionGifSpeed": 0.7,
-        "showOverFullscreen": false
+        "showWeather": true,
+        "mediaUpdateInterval": 500,
+        "resourceUpdateInterval": 1000,
+        "dragThreshold": 50,
+        "performance": {
+            "showBattery": true,
+            "showGpu": true,
+            "showCpu": true,
+            "showMemory": true,
+            "showStorage": true,
+            "showNetwork": true
+        }
     },
     "launcher": {
-        "actionPrefix": ">",
-        "actions": [
-            {
-                "command": ["autocomplete", "calc"],
-                "dangerous": false,
-                "description": "Do simple math equations (powered by Qalc)",
-                "enabled": true,
-                "icon": "calculate",
-                "name": "Calculator"
-            },
-            {
-                "command": ["autocomplete", "scheme"],
-                "dangerous": false,
-                "description": "Change the current colour scheme",
-                "enabled": true,
-                "icon": "palette",
-                "name": "Scheme"
-            },
-            {
-                "command": ["autocomplete", "wallpaper"],
-                "dangerous": false,
-                "description": "Change the current wallpaper",
-                "enabled": true,
-                "icon": "image",
-                "name": "Wallpaper"
-            },
-            {
-                "command": ["autocomplete", "variant"],
-                "dangerous": false,
-                "description": "Change the current scheme variant",
-                "enabled": true,
-                "icon": "colors",
-                "name": "Variant"
-            },
-            {
-                "command": ["caelestia", "wallpaper", "-r"],
-                "dangerous": false,
-                "description": "Switch to a random wallpaper",
-                "enabled": true,
-                "icon": "casino",
-                "name": "Random"
-            },
-            {
-                "command": ["setMode", "light"],
-                "dangerous": false,
-                "description": "Change the scheme to light mode",
-                "enabled": true,
-                "icon": "light_mode",
-                "name": "Light"
-            },
-            {
-                "command": ["setMode", "dark"],
-                "dangerous": false,
-                "description": "Change the scheme to dark mode",
-                "enabled": true,
-                "icon": "dark_mode",
-                "name": "Dark"
-            },
-            {
-                "command": ["poweroff"],
-                "dangerous": true,
-                "description": "Shutdown the system",
-                "enabled": true,
-                "icon": "power_settings_new",
-                "name": "Shutdown"
-            },
-            {
-                "command": ["reboot"],
-                "dangerous": true,
-                "description": "Reboot the system",
-                "enabled": true,
-                "icon": "cached",
-                "name": "Reboot"
-            },
-            {
-                "command": ["logout"],
-                "dangerous": true,
-                "description": "Log out of the current session",
-                "enabled": true,
-                "icon": "exit_to_app",
-                "name": "Logout"
-            },
-            {
-                "command": ["loginctl", "lock-session"],
-                "dangerous": false,
-                "description": "Lock the current session",
-                "enabled": true,
-                "icon": "lock",
-                "name": "Lock"
-            },
-            {
-                "command": ["suspendThenHibernate"],
-                "dangerous": false,
-                "description": "Suspend then hibernate",
-                "enabled": true,
-                "icon": "bedtime",
-                "name": "Sleep"
-            },
-            {
-                "command": ["caelestia", "shell", "nexus", "open"],
-                "dangerous": false,
-                "description": "Configure the shell",
-                "enabled": true,
-                "icon": "settings",
-                "name": "Settings"
-            }
-        ],
-        "dragThreshold": 50,
-        "enableDangerousActions": false,
         "enabled": true,
-        "favouriteApps": [],
-        "hiddenApps": [],
+        "showOnHover": false,
         "maxShown": 7,
         "maxWallpapers": 9,
-        "showOnHover": false,
         "specialPrefix": "@",
+        "actionPrefix": ">",
+        "enableDangerousActions": false,
+        "dragThreshold": 50,
+        "vimKeybinds": false,
+        "favouriteApps": [],
+        "hiddenApps": [],
         "useFuzzy": {
-            "actions": false,
             "apps": false,
+            "actions": false,
             "schemes": false,
             "variants": false,
             "wallpapers": false
         },
-        "vimKeybinds": false
+        "actions": [
+            {
+                "name": "Calculator",
+                "icon": "calculate",
+                "description": "Do simple math equations (powered by Qalc)",
+                "command": ["autocomplete", "calc"],
+                "enabled": true,
+                "dangerous": false
+            },
+            {
+                "name": "Scheme",
+                "icon": "palette",
+                "description": "Change the current colour scheme",
+                "command": ["autocomplete", "scheme"],
+                "enabled": true,
+                "dangerous": false
+            },
+            {
+                "name": "Wallpaper",
+                "icon": "image",
+                "description": "Change the current wallpaper",
+                "command": ["autocomplete", "wallpaper"],
+                "enabled": true,
+                "dangerous": false
+            },
+            {
+                "name": "Variant",
+                "icon": "colors",
+                "description": "Change the current scheme variant",
+                "command": ["autocomplete", "variant"],
+                "enabled": true,
+                "dangerous": false
+            },
+            {
+                "name": "Random",
+                "icon": "casino",
+                "description": "Switch to a random wallpaper",
+                "command": ["caelestia", "wallpaper", "-r"],
+                "enabled": true,
+                "dangerous": false
+            },
+            {
+                "name": "Light",
+                "icon": "light_mode",
+                "description": "Change the scheme to light mode",
+                "command": ["setMode", "light"],
+                "enabled": true,
+                "dangerous": false
+            },
+            {
+                "name": "Dark",
+                "icon": "dark_mode",
+                "description": "Change the scheme to dark mode",
+                "command": ["setMode", "dark"],
+                "enabled": true,
+                "dangerous": false
+            },
+            {
+                "name": "Shutdown",
+                "icon": "power_settings_new",
+                "description": "Shutdown the system",
+                "command": ["poweroff"],
+                "enabled": true,
+                "dangerous": true
+            },
+            {
+                "name": "Reboot",
+                "icon": "cached",
+                "description": "Reboot the system",
+                "command": ["reboot"],
+                "enabled": true,
+                "dangerous": true
+            },
+            {
+                "name": "Logout",
+                "icon": "exit_to_app",
+                "description": "Log out of the current session",
+                "command": ["logout"],
+                "enabled": true,
+                "dangerous": true
+            },
+            {
+                "name": "Lock",
+                "icon": "lock",
+                "description": "Lock the current session",
+                "command": ["loginctl", "lock-session"],
+                "enabled": true,
+                "dangerous": false
+            },
+            {
+                "name": "Sleep",
+                "icon": "bedtime",
+                "description": "Suspend then hibernate",
+                "command": ["suspendThenHibernate"],
+                "enabled": true,
+                "dangerous": false
+            },
+            {
+                "name": "Settings",
+                "icon": "settings",
+                "description": "Configure the shell",
+                "command": ["caelestia", "shell", "nexus", "open"],
+                "enabled": true,
+                "dangerous": false
+            }
+        ]
     },
     "lock": {
-        "enableFprint": true,
-        "enableHowdy": true,
         "enabled": true,
-        "hideNotifs": false,
-        "maxFprintTries": 3,
-        "maxHowdyTries": 3,
+        "useWallpaper": false,
         "recolourLogo": true,
+        "enableFprint": true,
+        "maxFprintTries": 3,
+        "enableHowdy": true,
+        "maxHowdyTries": 3,
         "triggerHowdyOnWake": true,
-        "useWallpaper": false
+        "hideNotifs": false
     },
     "nexus": {
-        "networkRescanInterval": 15000,
-        "wallpapersPerRow": 4
+        "wallpapersPerRow": 4,
+        "networkRescanInterval": 15000
     },
     "notifs": {
-        "actionOnClick": false,
-        "clearThreshold": 0.3,
-        "defaultExpireTimeout": 5000,
-        "expandThreshold": 20,
         "expire": true,
         "fullscreen": "on",
+        "defaultExpireTimeout": 5000,
         "fullscreenExpireTimeout": 2000,
+        "clearThreshold": 0.3,
+        "expandThreshold": 20,
+        "actionOnClick": false,
         "groupPreviewNum": 3,
         "openExpanded": false
     },
     "osd": {
-        "enableBrightness": true,
-        "enableMicrophone": false,
         "enabled": true,
-        "hideDelay": 2000
-    },
-    "paths": {
-        "lockNoNotifsPic": "root:/assets/dino.png",
-        "lyricsDir": "~/Music/lyrics/",
-        "mediaGif": "root:/assets/bongocat.gif",
-        "noNotifsPic": "root:/assets/dino.png",
-        "sessionGif": "root:/assets/kurukuru.gif",
-        "wallpaperDir": "~/Pictures/Wallpapers"
+        "hideDelay": 2000,
+        "enableBrightness": true,
+        "enableMicrophone": false
     },
     "services": {
-        "audioIncrement": 0.1,
-        "brightnessIncrement": 0.1,
-        "defaultPlayer": "Spotify",
-        "gpuType": "",
-        "lyricsBackend": "Auto",
-        "maxVolume": 1.0,
-        "playerAliases": [{ "from": "com.github.th_ch.youtube_music", "to": "YT Music" }],
-        "smartScheme": true,
+        "weatherLocation": "",
         "useFahrenheit": false,
         "useFahrenheitPerformance": false,
         "useTwelveHourClock": false,
+        "gpuType": "",
         "visualiserBars": 60,
-        "weatherLocation": ""
+        "audioIncrement": 0.1,
+        "brightnessIncrement": 0.1,
+        "maxVolume": 1.0,
+        "smartScheme": true,
+        "defaultPlayer": "Spotify",
+        "playerAliases": [{ "from": "com.github.th_ch.youtube_music", "to": "YT Music" }],
+        "lyricsBackend": "Auto"
     },
     "session": {
-        "commands": {
-            "hibernate": ["hibernate"],
-            "logout": ["logout"],
-            "reboot": ["reboot"
-            ],
-            "shutdown": ["poweroff"]
-        },
-        "dragThreshold": 30,
         "enabled": true,
+        "dragThreshold": 30,
+        "vimKeybinds": false,
         "icons": {
-            "hibernate": "downloading",
             "logout": "logout",
-            "reboot": "cached",
-            "shutdown": "power_settings_new"
+            "shutdown": "power_settings_new",
+            "hibernate": "downloading",
+            "reboot": "cached"
         },
-        "vimKeybinds": false
+        "commands": {
+            "logout": ["logout"],
+            "shutdown": ["poweroff"],
+            "hibernate": ["hibernate"],
+            "reboot": ["reboot"]
+        }
     },
     "sidebar": {
-        "dragThreshold": 80,
         "enabled": true,
+        "showOnHover": false,
         "minHoverThreshold": 200,
-        "showOnHover": false
+        "dragThreshold": 80
     },
     "utilities": {
         "enabled": true,
         "maxToasts": 4,
-        "quickToggles": [
-            {
-                "enabled": true,
-                "id": "wifi"
-            },
-            {
-                "enabled": true,
-                "id": "bluetooth"
-            },
-            {
-                "enabled": true,
-                "id": "mic"
-            },
-            {
-                "enabled": true,
-                "id": "settings"
-            },
-            {
-                "enabled": true,
-                "id": "gameMode"
-            },
-            {
-                "enabled": true,
-                "id": "dnd"
-            },
-            {
-                "enabled": false,
-                "id": "vpn"
-            }
-        ],
         "toasts": {
-            "audioInputChanged": true,
-            "audioOutputChanged": true,
-            "capsLockChanged": true,
-            "chargingChanged": true,
-            "configLoaded": true,
-            "dndChanged": true,
             "fullscreen": "off",
+            "configLoaded": true,
+            "chargingChanged": true,
             "gameModeChanged": true,
+            "dndChanged": true,
+            "audioOutputChanged": true,
+            "audioInputChanged": true,
+            "capsLockChanged": true,
+            "numLockChanged": true,
             "kbLayoutChanged": true,
             "kbLimit": true,
-            "nowPlaying": false,
-            "numLockChanged": true,
-            "vpnChanged": true
+            "vpnChanged": true,
+            "nowPlaying": false
         },
         "vpn": {
             "enabled": false,
             "provider": [
                 {
-                    "displayName": "Wireguard (Your VPN)",
-                    "enabled": false,
+                    "name": "wireguard",
                     "interface": "your-connection-name",
-                    "name": "wireguard"
+                    "displayName": "Wireguard (Your VPN)",
+                    "enabled": false
                 }
             ]
-        }
+        },
+        "quickToggles": [
+            {
+                "id": "wifi",
+                "enabled": true
+            },
+            {
+                "id": "bluetooth",
+                "enabled": true
+            },
+            {
+                "id": "mic",
+                "enabled": true
+            },
+            {
+                "id": "settings",
+                "enabled": true
+            },
+            {
+                "id": "gameMode",
+                "enabled": true
+            },
+            {
+                "id": "dnd",
+                "enabled": true
+            },
+            {
+                "id": "vpn",
+                "enabled": false
+            }
+        ]
+    },
+    "paths": {
+        "wallpaperDir": "~/Pictures/Wallpapers",
+        "lyricsDir": "~/Music/lyrics/",
+        "sessionGif": "root:/assets/kurukuru.gif",
+        "mediaGif": "root:/assets/bongocat.gif",
+        "noNotifsPic": "root:/assets/dino.png",
+        "lockNoNotifsPic": "root:/assets/dino.png"
     }
 }
 ```
@@ -887,6 +887,9 @@ You can join the Caelestia Discord server for assistance and discussion [here][d
 ### I want to make my own changes to the Hyprland config!
 
 You can add your custom Hyprland configs to `~/.config/caelestia/hypr-user.lua`.
+Most default Hyprland values can be modified by overriding variables in `~/.config/caelestia/hypr-vars.lua`.
+You can reference the [variables.lua](https://github.com/caelestia-dots/caelestia/blob/main/hypr/variables.lua) file for all available
+variables and their default values.
 
 ### I want to make my own changes to other stuff!
 
