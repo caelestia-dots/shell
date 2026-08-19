@@ -207,7 +207,7 @@ Options set in these files will **override** the respective options in the globa
 per-monitor configs will inherit their values from the global config.
 
 
-For example, to disable the bar on the monitor named `DP-1`:
+For example, to automatically hide the bar on the monitor named `DP-1`:
 
 **`~/.config/caelestia/monitors/DP-1/shell.json`**
 
