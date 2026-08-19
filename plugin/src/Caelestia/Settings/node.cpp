@@ -2,10 +2,11 @@
 
 namespace caelestia::settings {
 
-Node::Node(Node* fallback, QObject* parent)
+Node::Node(Node* fallback, QObject* parent, bool globalOnly)
     : QObject(parent)
     , m_rootNode(parentNode() ? parentNode()->rootNode() : this)
     , m_fallbackNode(fallback)
+    , m_globalOnly(globalOnly || (parentNode() && parentNode()->m_globalOnly))
     , m_writeOrigin(WriteOrigin::Qml)
     , m_batcher(m_rootNode == this ? new ChangeBatcher(this) : nullptr) {
     if (fallback)
@@ -45,6 +46,10 @@ void Node::detachFallback() {
 
     for (auto* const child : findChildren<Node*>(Qt::FindDirectChildrenOnly))
         child->detachFallback();
+}
+
+bool Node::isGlobalOnly() const {
+    return m_globalOnly;
 }
 
 bool Node::isOverride(const QString& key) const {
@@ -87,6 +92,10 @@ bool Node::setValue(const QString& key, const QVariant& value) {
 }
 
 void Node::resetToDefaults() {
+    // Don't reset global only nodes on overlays, the whole subtree belongs to the global layer
+    if (m_globalOnly && m_fallbackNode)
+        return;
+
     m_quarantine.reset(); // Reset quarantine as well
 
     const WriteScope scope(this, WriteOrigin::FileReset);
@@ -113,7 +122,7 @@ bool Node::forwardGlobalWrite(const QString& key, const QVariant& value) {
     const auto origin = m_rootNode->m_writeOrigin;
     const auto fromUser = origin == WriteOrigin::Qml || origin == WriteOrigin::QmlReset;
 
-    if (!desc->globalOnly() || !fromUser || !m_fallbackNode)
+    if ((!m_globalOnly && !desc->globalOnly()) || !fromUser || !m_fallbackNode)
         return false;
 
     if (origin == WriteOrigin::QmlReset) {

@@ -14,7 +14,8 @@ class Node : public QObject {
     Q_OBJECT
 
 public:
-    explicit Node(Node* fallback, QObject* parent = nullptr);
+    // Global only nodes are inherited, anything inside one is also global only
+    explicit Node(Node* fallback, QObject* parent = nullptr, bool globalOnly = false);
 
     [[nodiscard]] QString key() const; // The key of this in the parent node
     [[nodiscard]] QString path() const;
@@ -24,6 +25,7 @@ public:
     [[nodiscard]] Node* fallbackNode() const;
     void detachFallback(); // Recursive, unlinks this and its children from the fallback layer
 
+    [[nodiscard]] Q_INVOKABLE bool isGlobalOnly() const;
     [[nodiscard]] bool isOverride(const QString& key) const;
     [[nodiscard]] const QSet<QString>& overrides() const;
     [[nodiscard]] bool hasContent() const; // Recursive
@@ -62,7 +64,8 @@ protected:
 private:
     QSet<QString> m_overrides; // Overridden keys from file/qml writes
     Node* const m_rootNode;
-    Node* m_fallbackNode; // No fallback node either means global tree or inside overridden list
+    Node* m_fallbackNode;    // No fallback node either means global tree or inside overridden list
+    const bool m_globalOnly; // Own flag or inherited from the parent node
 
     // For root node use only
     WriteOrigin m_writeOrigin;

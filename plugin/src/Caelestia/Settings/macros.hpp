@@ -32,8 +32,8 @@ private:                                                                        
     QML_ANONYMOUS                                                                                                      \
                                                                                                                        \
 public:                                                                                                                \
-    explicit Class(Class* fallback = nullptr, QObject* parent = nullptr)                                               \
-        : Base(fallback, parent) {}                                                                                    \
+    explicit Class(Class* fallback = nullptr, QObject* parent = nullptr, bool globalOnly = false)                      \
+        : Base(fallback, parent, globalOnly) {}                                                                        \
                                                                                                                        \
 private:
 
