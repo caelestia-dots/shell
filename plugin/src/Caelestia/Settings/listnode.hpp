@@ -24,12 +24,6 @@ public:
     Q_INVOKABLE void move(qsizetype from, qsizetype to);
     Q_INVOKABLE void clear();
 
-    [[nodiscard]] Node* elementAt(qsizetype index) const;
-    [[nodiscard]] Node* insertElement(const QVariantMap& props, qsizetype index = -1);
-
-    [[nodiscard]] QList<QVariantMap> defaultValue() const;
-    [[nodiscard]] bool isGlobalOnly() const;
-
     [[nodiscard]] QString pathFor(const QString& key) const override;
     [[nodiscard]] const Schema& schema() const override;
     [[nodiscard]] QVariant value(const QString& key) const override;
@@ -47,14 +41,21 @@ signals:
 protected:
     [[nodiscard]] QString keyOf(const Node* child) const override;
 
+    [[nodiscard]] Node* elementAt(qsizetype index) const;
+    [[nodiscard]] Node* insertElement(const QVariantMap& props, qsizetype index = -1);
     [[nodiscard]] virtual Node* createElement(Node* fallback) = 0;
 
 private:
     QList<Node*> m_elements;
 
+    [[nodiscard]] QList<QVariantMap> defaultValue() const;
+    [[nodiscard]] bool isGlobalOnly() const;
+    [[nodiscard]] bool isNested() const;
+
     [[nodiscard]] bool validIndex(qsizetype index) const;
     [[nodiscard]] const Descriptor* getDescriptor() const;
     [[nodiscard]] Node* fallbackFor(qsizetype index) const;
+
     [[nodiscard]] Node* createNode(const QVariantMap& props, Node* fallback);
     [[nodiscard]] Node* createNode(Node* node);
     [[nodiscard]] Node* createNode(const QJsonObject& json, QList<Diagnostic>& diagnostics);

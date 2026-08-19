@@ -90,41 +90,6 @@ void ListNode::clear() {
     emit elementsChanged(removed, {}, {});
 }
 
-Node* ListNode::elementAt(qsizetype index) const {
-    if (!validIndex(index))
-        return nullptr;
-    return m_elements.at(index);
-}
-
-Node* ListNode::insertElement(const QVariantMap& props, qsizetype index) {
-    const WriteScope scope(this, WriteOrigin::Qml);
-
-    auto* const element = createNode(props, nullptr);
-
-    if (!validIndex(index)) // Invalid index means append
-        index = m_elements.count();
-
-    m_elements.insert(index, element);
-
-    recordWrite(valuesKey(), true);
-    emit countChanged();
-    emit elementsChanged({ index }, {}, {});
-
-    return element;
-}
-
-QList<QVariantMap> ListNode::defaultValue() const {
-    const auto* desc = getDescriptor();
-    if (!desc)
-        return {};
-    return desc->defaultValue().value<QList<QVariantMap>>();
-}
-
-bool ListNode::isGlobalOnly() const {
-    const auto* desc = getDescriptor();
-    return desc ? desc->globalOnly() : false;
-}
-
 QString ListNode::pathFor(const QString& key) const {
     return path() + QStringLiteral("[%1]").arg(key);
 }
@@ -201,7 +166,7 @@ bool ListNode::setValue(const QString& key, const QVariant& value, QList<Diagnos
 }
 
 void ListNode::resetToDefaults() {
-    if (qobject_cast<ListNode*>(parentNode())) {
+    if (isNested()) {
         qCCritical(lcSettings, "List node %s has a parent list node, resetToDefaults should never be called on it.",
             qUtf8Printable(path()));
         return;
@@ -231,7 +196,7 @@ bool ListNode::syncJson(const QJsonValue& json, QList<Diagnostic>& diagnostics) 
     }
 
     // Refuse syncs to global only list nodes on overlays (nested list nodes inherit global status from parent)
-    if (fallbackNode() && (!qobject_cast<ListNode*>(parentNode()) || isGlobalOnly())) {
+    if (fallbackNode() && (!isNested() || isGlobalOnly())) {
         const auto p = path();
         qCWarning(lcSettings, "Global property definition %s found in overlay file, ignoring.", qUtf8Printable(p));
         diagnostics << Diagnostic{
@@ -250,6 +215,45 @@ bool ListNode::syncJson(const QJsonValue& json, QList<Diagnostic>& diagnostics) 
 
 QString ListNode::keyOf(const Node* node) const {
     return QString::number(m_elements.indexOf(const_cast<Node*>(node)));
+}
+
+Node* ListNode::elementAt(qsizetype index) const {
+    if (!validIndex(index))
+        return nullptr;
+    return m_elements.at(index);
+}
+
+Node* ListNode::insertElement(const QVariantMap& props, qsizetype index) {
+    const WriteScope scope(this, WriteOrigin::Qml);
+
+    auto* const element = createNode(props, nullptr);
+
+    if (!validIndex(index)) // Invalid index means append
+        index = m_elements.count();
+
+    m_elements.insert(index, element);
+
+    recordWrite(valuesKey(), true);
+    emit countChanged();
+    emit elementsChanged({ index }, {}, {});
+
+    return element;
+}
+
+QList<QVariantMap> ListNode::defaultValue() const {
+    const auto* desc = getDescriptor();
+    if (!desc)
+        return {};
+    return desc->defaultValue().value<QList<QVariantMap>>();
+}
+
+bool ListNode::isGlobalOnly() const {
+    const auto* desc = getDescriptor();
+    return desc ? desc->globalOnly() : false;
+}
+
+bool ListNode::isNested() const {
+    return qobject_cast<ListNode*>(parentNode());
 }
 
 bool ListNode::validIndex(qsizetype index) const {
