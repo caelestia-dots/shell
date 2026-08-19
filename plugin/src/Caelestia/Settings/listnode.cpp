@@ -134,17 +134,17 @@ bool ListNode::setValue(const QString& key, const QVariant& value, QList<Diagnos
         // On reset to fallback
         const auto nodes = value.value<QList<Node*>>();
         for (auto* const node : nodes)
-            m_elements << createNode(node);
+            insertNode(m_elements.count(), node);
     } else if (value.typeId() == qMetaTypeId<QList<QVariantMap>>()) {
         // On reset to defaults
         const auto list = value.value<QList<QVariantMap>>();
         for (qsizetype i = 0; i < list.count(); ++i)
-            m_elements << createNode(list.at(i), fallbackFor(i));
+            insertNode(i, list.at(i), fallbackFor(i));
     } else if (value.typeId() == QMetaType::QJsonArray) {
         // From syncJson
         const auto array = value.toJsonArray();
         for (const auto& json : array)
-            m_elements << createNode(json.toObject(), *diagnostics);
+            insertNode(m_elements.count(), json.toObject(), *diagnostics);
     } else {
         qCCritical(lcSettings, "Unexpected type %s for list node %s, something is wrong.", value.typeName(),
             qUtf8Printable(path()));
@@ -239,12 +239,10 @@ Node* ListNode::elementAt(qsizetype index) const {
 Node* ListNode::insertElement(const QVariantMap& props, qsizetype index) {
     const WriteScope scope(this, WriteOrigin::Qml);
 
-    auto* const element = createNode(props, nullptr);
-
     if (!validIndex(index)) // Invalid index means append
         index = m_elements.count();
 
-    m_elements.insert(index, element);
+    auto* const element = insertNode(index, props, nullptr);
 
     recordWrite(valuesKey(), true);
     emit countChanged();
@@ -300,8 +298,9 @@ Node* ListNode::fallbackFor(qsizetype index) const {
     return fallback->m_elements.at(index);
 }
 
-Node* ListNode::createNode(const QVariantMap& props, Node* fallback) {
+Node* ListNode::insertNode(qsizetype index, const QVariantMap& props, Node* fallback) {
     auto* const node = createElement(fallback);
+    m_elements.insert(index, node);
 
     const WriteScope scope(node, WriteOrigin::Init);
     for (const auto& [key, val] : props.asKeyValueRange())
@@ -310,8 +309,10 @@ Node* ListNode::createNode(const QVariantMap& props, Node* fallback) {
     return node;
 }
 
-Node* ListNode::createNode(Node* node) {
+Node* ListNode::insertNode(qsizetype index, Node* node) {
     auto* const copy = createElement(node);
+    m_elements.insert(index, copy);
+
     const auto& schema = copy->schema();
 
     const WriteScope scope(copy, WriteOrigin::Init);
@@ -321,11 +322,14 @@ Node* ListNode::createNode(Node* node) {
     return copy;
 }
 
-Node* ListNode::createNode(const QJsonObject& json, QList<Diagnostic>& diagnostics) {
+Node* ListNode::insertNode(qsizetype index, const QJsonObject& json, QList<Diagnostic>& diagnostics) {
     // Write origin will be file/file reset, which is correct.
     // This function should only be called from the JSON path of setValue.
     auto* const node = createElement(nullptr); // Nodes synced from JSON get no fallback as they are overrides
+    m_elements.insert(index, node);
+
     node->syncJson(json, diagnostics);
+
     return node;
 }
 
@@ -338,7 +342,7 @@ void ListNode::onFallbackListNotify(const NodeChanges& added, const NodeChanges&
     for (const auto index : removed | std::views::reverse)
         deleteNode(m_elements.takeAt(index));
     for (const auto index : added)
-        m_elements.insert(index, createNode(fallbackFor(index)));
+        insertNode(index, fallbackFor(index));
     for (const auto& move : moved)
         m_elements.move(move.first, move.second);
 

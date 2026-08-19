@@ -57,9 +57,9 @@ private:
     [[nodiscard]] const Descriptor* getDescriptor() const;
     [[nodiscard]] Node* fallbackFor(qsizetype index) const;
 
-    [[nodiscard]] Node* createNode(const QVariantMap& props, Node* fallback);
-    [[nodiscard]] Node* createNode(Node* node);
-    [[nodiscard]] Node* createNode(const QJsonObject& json, QList<Diagnostic>& diagnostics);
+    Node* insertNode(qsizetype index, const QVariantMap& props, Node* fallback);
+    Node* insertNode(qsizetype index, Node* node);
+    Node* insertNode(qsizetype index, const QJsonObject& json, QList<Diagnostic>& diagnostics);
 
     void onFallbackListNotify(const NodeChanges& added, const NodeChanges& removed, const MoveChanges& moved);
 };
