@@ -113,6 +113,18 @@ Node* ListNode::insertElement(const QVariantMap& props, qsizetype index) {
     return element;
 }
 
+QList<QVariantMap> ListNode::defaultValue() const {
+    const auto* desc = getDescriptor();
+    if (!desc)
+        return {};
+    return desc->defaultValue().value<QList<QVariantMap>>();
+}
+
+bool ListNode::isGlobalOnly() const {
+    const auto* desc = getDescriptor();
+    return desc ? desc->globalOnly() : false;
+}
+
 QString ListNode::pathFor(const QString& key) const {
     return path() + QStringLiteral("[%1]").arg(key);
 }
@@ -188,6 +200,21 @@ bool ListNode::setValue(const QString& key, const QVariant& value, QList<Diagnos
     return true;
 }
 
+void ListNode::resetToDefaults() {
+    if (qobject_cast<ListNode*>(parentNode())) {
+        qCCritical(lcSettings, "List node %s has a parent list node, resetToDefaults should never be called on it.",
+            qUtf8Printable(path()));
+        return;
+    }
+
+    // Don't reset global only list nodes on overlays
+    if (fallbackNode() && isGlobalOnly())
+        return;
+
+    const WriteScope scope(this, WriteOrigin::FileReset);
+    setValue(valuesKey(), fallbackNode() ? fallbackNode()->value(valuesKey()) : QVariant::fromValue(defaultValue()));
+}
+
 QJsonValue ListNode::toJson(bool sparse) const {
     QJsonArray array;
     for (auto* const element : m_elements)
@@ -215,6 +242,22 @@ QString ListNode::keyOf(const Node* node) const {
 
 bool ListNode::validIndex(qsizetype index) const {
     return index >= 0 && index < m_elements.count();
+}
+
+const Descriptor* ListNode::getDescriptor() const {
+    if (!parentNode()) { // List nodes should not be root nodes
+        qCCritical(lcSettings, "List node %s has no parent, something is wrong.", qUtf8Printable(path()));
+        return nullptr;
+    }
+
+    const auto* desc = parentNode()->schema().get(key());
+
+    if (!desc) {
+        qCCritical(lcSettings, "List node %s is not in parent schema, something is wrong.", qUtf8Printable(path()));
+        return nullptr;
+    }
+
+    return desc;
 }
 
 Node* ListNode::fallbackFor(qsizetype index) const {

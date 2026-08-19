@@ -122,7 +122,7 @@ private:                                                                        
     Type* m_##name = new Type(fallbackValue(&Self::m_##name, nullptr), this);                                          \
     inline static const bool s_register_##name =                                                                       \
         (caelestia::settings::Schema::annotate(&staticMetaObject, QStringLiteral(#name),                               \
-             { .defaultValue = QVariant::fromValue(QVariantList defaultVal), __VA_ARGS__ }),                           \
+             { .defaultValue = QVariant::fromValue(QList<QVariantMap> defaultVal), __VA_ARGS__ }),                     \
             true);
 
 // Defines a global list property on a node. Shorthand for .globalOnly = true.

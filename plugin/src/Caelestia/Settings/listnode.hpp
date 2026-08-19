@@ -27,11 +27,15 @@ public:
     [[nodiscard]] Node* elementAt(qsizetype index) const;
     [[nodiscard]] Node* insertElement(const QVariantMap& props, qsizetype index = -1);
 
+    [[nodiscard]] QList<QVariantMap> defaultValue() const;
+    [[nodiscard]] bool isGlobalOnly() const;
+
     [[nodiscard]] QString pathFor(const QString& key) const override;
     [[nodiscard]] const Schema& schema() const override;
     [[nodiscard]] QVariant value(const QString& key) const override;
     bool setValue(const QString& key, const QVariant& value) override;
     bool setValue(const QString& key, const QVariant& value, QList<Diagnostic>* diagnostics);
+    void resetToDefaults() override;
 
     [[nodiscard]] QJsonValue toJson(bool sparse = true) const override;
     bool syncJson(const QJsonValue& json, QList<Diagnostic>& diagnostics) override;
@@ -49,6 +53,7 @@ private:
     QList<Node*> m_elements;
 
     [[nodiscard]] bool validIndex(qsizetype index) const;
+    [[nodiscard]] const Descriptor* getDescriptor() const;
     [[nodiscard]] Node* fallbackFor(qsizetype index) const;
     [[nodiscard]] Node* createNode(const QVariantMap& props, Node* fallback);
     [[nodiscard]] Node* createNode(Node* node);
