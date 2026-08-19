@@ -17,6 +17,72 @@ void deleteNode(Node* node) {
     node->deleteLater();
 }
 
+bool isVariantListType(const QVariant& value) {
+    return value.typeId() == QMetaType::QVariantList || value.typeId() == qMetaTypeId<QList<QVariantMap>>();
+}
+
+QList<QVariantMap> toMaps(const QVariant& value) {
+    if (value.typeId() == qMetaTypeId<QList<QVariantMap>>())
+        return value.value<QList<QVariantMap>>();
+
+    const auto list = value.toList();
+    QList<QVariantMap> maps;
+    maps.reserve(list.count());
+
+    for (const auto& el : list) {
+        if (el.typeId() != QMetaType::QVariantMap) {
+            qCCritical(lcSettings, "Expected a map in list properties, got %s.", el.typeName());
+            continue;
+        }
+
+        maps << el.toMap();
+    }
+
+    return maps;
+}
+
+void syncNodeRecursive(Node* node, const QVariantMap& props) {
+    const auto& schema = node->schema();
+
+    for (const auto& [key, val] : props.asKeyValueRange()) {
+        const auto* desc = schema.get(key);
+
+        if (!desc) {
+            qCCritical(lcSettings, "Unknown key %s in props for %s, something is wrong.", qUtf8Printable(key),
+                qUtf8Printable(node->path()));
+            continue;
+        }
+
+        // `setValue` warns on type mismatches itself
+        if (!desc->isNode) {
+            node->setValue(key, val);
+            continue;
+        }
+
+        auto* const child = node->value(key).value<Node*>();
+
+        // Nested lists take their elements straight from props
+        if (auto* const list = qobject_cast<ListNode*>(child)) {
+            if (!isVariantListType(val)) {
+                qCCritical(lcSettings, "Expected a list for node key %s on %s, got %s.", qUtf8Printable(key),
+                    qUtf8Printable(node->path()), val.typeName());
+                continue;
+            }
+
+            list->setValue(valuesKey(), val);
+            continue;
+        }
+
+        if (val.typeId() != QMetaType::QVariantMap) {
+            qCCritical(lcSettings, "Expected a map for node key %s on %s, got %s.", qUtf8Printable(key),
+                qUtf8Printable(node->path()), val.typeName());
+            continue;
+        }
+
+        syncNodeRecursive(child, val.toMap());
+    }
+}
+
 } // namespace
 
 ListNode::ListNode(ListNode* fallback, QObject* parent, bool globalOnly)
@@ -150,9 +216,9 @@ bool ListNode::setValue(const QString& key, const QVariant& value, QList<Diagnos
         const auto nodes = value.value<QList<Node*>>();
         for (auto* const node : nodes)
             insertNode(m_elements.count(), node);
-    } else if (value.typeId() == qMetaTypeId<QList<QVariantMap>>()) {
-        // On reset to defaults
-        const auto list = value.value<QList<QVariantMap>>();
+    } else if (isVariantListType(value)) {
+        // From defaults or QML
+        const auto list = toMaps(value);
         for (qsizetype i = 0; i < list.count(); ++i)
             insertNode(i, list.at(i), fallbackFor(i));
     } else if (value.typeId() == QMetaType::QJsonArray) {
@@ -328,8 +394,7 @@ Node* ListNode::insertNode(qsizetype index, const QVariantMap& props, Node* fall
     m_elements.insert(index, node);
 
     const WriteScope scope(node, WriteOrigin::Init);
-    for (const auto& [key, val] : props.asKeyValueRange())
-        node->setValue(key, val);
+    syncNodeRecursive(node, props);
 
     return node;
 }
@@ -337,13 +402,6 @@ Node* ListNode::insertNode(qsizetype index, const QVariantMap& props, Node* fall
 Node* ListNode::insertNode(qsizetype index, Node* node) {
     auto* const copy = createElement(node);
     m_elements.insert(index, copy);
-
-    const auto& schema = copy->schema();
-
-    const WriteScope scope(copy, WriteOrigin::Init);
-    for (const auto& desc : schema.descriptors())
-        copy->setValue(desc.key, node->value(desc.key));
-
     return copy;
 }
 
