@@ -233,7 +233,7 @@ Node* ListNode::fallbackFor(qsizetype index) const {
     return fallback->m_elements.at(index);
 }
 
-Node* ListNode::createNode(const QVariantMap& props, Node* fallback) const {
+Node* ListNode::createNode(const QVariantMap& props, Node* fallback) {
     auto* const node = createElement(fallback);
 
     const WriteScope scope(node, WriteOrigin::Init);
@@ -243,7 +243,7 @@ Node* ListNode::createNode(const QVariantMap& props, Node* fallback) const {
     return node;
 }
 
-Node* ListNode::createNode(Node* node) const {
+Node* ListNode::createNode(Node* node) {
     auto* const copy = createElement(node);
     const auto& schema = copy->schema();
 
@@ -254,7 +254,7 @@ Node* ListNode::createNode(Node* node) const {
     return copy;
 }
 
-Node* ListNode::createNode(const QJsonObject& json, QList<Diagnostic>& diagnostics) const {
+Node* ListNode::createNode(const QJsonObject& json, QList<Diagnostic>& diagnostics) {
     // Write origin will be file/file reset, which is correct.
     // This function should only be called from the JSON path of setValue.
     auto* const node = createElement(nullptr); // Nodes synced from JSON get no fallback as they are overrides
@@ -280,7 +280,7 @@ void ListNode::onFallbackListNotify(const NodeChanges& added, const NodeChanges&
 
     if (!added.isEmpty() || !removed.isEmpty())
         emit countChanged();
-    emit valuesChanged();
+    emit elementsChanged(added, removed, moved);
 }
 
 } // namespace caelestia::settings

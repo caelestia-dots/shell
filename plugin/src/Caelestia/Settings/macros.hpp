@@ -104,7 +104,7 @@ private:                                                                        
         }                                                                                                              \
                                                                                                                        \
     protected:                                                                                                         \
-        [[nodiscard]] caelestia::settings::Node* createElement(caelestia::settings::Node* fallback) const override {   \
+        [[nodiscard]] caelestia::settings::Node* createElement(caelestia::settings::Node* fallback) override {         \
             return new Element(static_cast<Element*>(fallback), this);                                                 \
         }                                                                                                              \
     };

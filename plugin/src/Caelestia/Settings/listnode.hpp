@@ -9,7 +9,7 @@ class ListNode : public Node {
     QML_ANONYMOUS
 
     Q_PROPERTY(qsizetype count READ count NOTIFY countChanged)
-    Q_PROPERTY(QVariantList values READ values NOTIFY valuesChanged)
+    Q_PROPERTY(QVariantList values READ values NOTIFY elementsChanged)
 
     using NodeChanges = QList<qsizetype>;
     using MoveChanges = QList<QPair<qsizetype, qsizetype>>;
@@ -38,22 +38,21 @@ public:
 
 signals:
     void countChanged();
-    void valuesChanged();
     void elementsChanged(const NodeChanges& added, const NodeChanges& removed, const MoveChanges& moved);
 
 protected:
     [[nodiscard]] QString keyOf(const Node* child) const override;
 
-    [[nodiscard]] virtual Node* createElement(Node* fallback) const = 0;
+    [[nodiscard]] virtual Node* createElement(Node* fallback) = 0;
 
 private:
     QList<Node*> m_elements;
 
     [[nodiscard]] bool validIndex(qsizetype index) const;
     [[nodiscard]] Node* fallbackFor(qsizetype index) const;
-    [[nodiscard]] Node* createNode(const QVariantMap& props, Node* fallback) const;
-    [[nodiscard]] Node* createNode(Node* node) const;
-    [[nodiscard]] Node* createNode(const QJsonObject& json, QList<Diagnostic>& diagnostics) const;
+    [[nodiscard]] Node* createNode(const QVariantMap& props, Node* fallback);
+    [[nodiscard]] Node* createNode(Node* node);
+    [[nodiscard]] Node* createNode(const QJsonObject& json, QList<Diagnostic>& diagnostics);
 
     void onFallbackListNotify(const NodeChanges& added, const NodeChanges& removed, const MoveChanges& moved);
 };
