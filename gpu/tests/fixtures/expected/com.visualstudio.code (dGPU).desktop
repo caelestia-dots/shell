@@ -1,0 +1,12 @@
+[Desktop Entry]
+X-Caelestia-DGPU-Source=com.visualstudio.code.desktop
+Name=Visual Studio Code (dGPU)
+Comment=Code Editing. Redefined.
+Exec=env __NV_PRIME_RENDER_OFFLOAD=1 __GLX_VENDOR_LIBRARY_NAME=nvidia __VK_LAYER_NV_optimus=NVIDIA_only code %U
+Icon=com.visualstudio.code
+Terminal=false
+Type=Application
+Categories=Development;IDE;
+MimeType=text/plain;inode/directory;
+Keywords=vscode;
+StartupWMClass=Code

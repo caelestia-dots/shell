@@ -1,0 +1,11 @@
+[Desktop Entry]
+Name=Visual Studio Code
+Comment=Code Editing. Redefined.
+Exec=code %U
+Icon=com.visualstudio.code
+Terminal=false
+Type=Application
+Categories=Development;IDE;
+MimeType=text/plain;inode/directory;
+Keywords=vscode;
+StartupWMClass=Code
