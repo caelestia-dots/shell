@@ -93,9 +93,33 @@ void ListNode::clear() {
     emit elementsChanged(removed, {}, {});
 }
 
+Node* ListNode::elementAt(qsizetype index) const {
+    if (!validIndex(index))
+        return nullptr;
+    return m_elements.at(index);
+}
+
+Node* ListNode::insertElement(const QVariantMap& props, qsizetype index) {
+    const WriteScope scope(this, WriteOrigin::Qml);
+
+    auto* const element = createNode(props, nullptr);
+
+    if (!validIndex(index)) // Invalid index means append
+        index = m_elements.count();
+
+    m_elements.insert(index, element);
+
+    if (!recordWrite(valuesKey(), true))
+        return nullptr;
+
+    emit countChanged();
+    emit elementsChanged({ index }, {}, {});
+
+    return element;
+}
+
 QString ListNode::pathFor(const QString& key) const {
-    const auto p = path();
-    return p + QStringLiteral("[%1]").arg(key);
+    return path() + QStringLiteral("[%1]").arg(key);
 }
 
 const Schema& ListNode::schema() const {
@@ -188,6 +212,10 @@ bool ListNode::syncJson(const QJsonValue& json, QList<Diagnostic>& diagnostics) 
     setValue(valuesKey(), json, &diagnostics);
 
     return true;
+}
+
+QString ListNode::keyOf(const Node* node) const {
+    return QString::number(m_elements.indexOf(const_cast<Node*>(node)));
 }
 
 bool ListNode::validIndex(qsizetype index) const {
