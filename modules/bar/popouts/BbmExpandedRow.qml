@@ -1,11 +1,11 @@
 pragma ComponentBehavior: Bound
 
 import QtQuick
-import QtQuick.Effects
 import QtQuick.Layouts
 import Caelestia.Config
 import qs.components
 import qs.components.controls
+import qs.components.effects
 import qs.services
 
 StyledRect {
@@ -60,8 +60,8 @@ StyledRect {
                     BbmIcon {
                         url: BbmService.batteryIconUrl(modelData.icon)
                         visible: url.length > 0
-                        size: 14
-                        colour: Colours.palette.m3onSurfaceVariant
+                        size: 16
+                        colour: Colours.palette.m3onSurface
                     }
 
                     StyledProgressBar {
@@ -130,8 +130,8 @@ StyledRect {
                             required property var modelData
 
                             // Square-ish pill: equal height/width padding so icon is centred
-                            implicitHeight: 14 + Tokens.padding.small * 2
-                            implicitWidth: 14 + Tokens.padding.medium * 2
+                            implicitHeight: 18 + Tokens.padding.small * 2
+                            implicitWidth: 18 + Tokens.padding.medium * 2
 
                             radius: Tokens.rounding.medium
                             color: pill.modelData.active
@@ -151,9 +151,8 @@ StyledRect {
                             BbmIcon {
                                 anchors.centerIn: parent
                                 url: BbmService.toggleIconUrl(pill.modelData.icon)
-                                // Fall back to nothing if no icon (pill colour still shows active state)
                                 visible: url.length > 0
-                                size: 14
+                                size: 18
                                 colour: pill.modelData.active ? Colours.palette.m3onPrimary : Colours.palette.m3onSurface
                             }
                         }
@@ -251,14 +250,18 @@ StyledRect {
         }
     }
 
-    // ── Theme-aware SVG icon — alpha mask coloured by the theme token ─────────
+    // ── Theme-aware SVG icon ──────────────────────────────────────────────────
+    // BBM SVGs have fill="#2e3436" (dark). Colouriser brightens by
+    // (1 - sourceColor.hslLightness) so the dark pixels normalise to near-white
+    // before colorizationColor is applied — the icon then takes on the exact
+    // theme token colour regardless of light/dark mode.
 
     component BbmIcon: Item {
         id: iconItem
 
         required property string url
         required property color colour
-        property int size: 16
+        property int size: 18
 
         implicitWidth: size
         implicitHeight: size
@@ -270,8 +273,8 @@ StyledRect {
             fillMode: Image.PreserveAspectFit
             smooth: true
             layer.enabled: true
-            layer.effect: MultiEffect {
-                colorization: 1.0
+            layer.effect: Colouriser {
+                sourceColor: "#2e3436"
                 colorizationColor: iconItem.colour
             }
         }
