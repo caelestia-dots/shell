@@ -61,7 +61,7 @@ public:
 
 class Schema {
 public:
-    static Schema build(const QMetaObject* meta, int baseOffset);
+    static Schema build(const QMetaObject* meta, int baseOffset, bool includeReadOnly = false);
     static void annotate(const QMetaObject* meta, const QString& key, Annotation annotation);
 
     [[nodiscard]] const QList<Descriptor>& descriptors() const;

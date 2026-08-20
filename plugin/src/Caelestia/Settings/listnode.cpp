@@ -188,8 +188,8 @@ QString ListNode::pathFor(const QString& key) const {
 }
 
 const Schema& ListNode::schema() const {
-    // Offset +1 so count is not registered
-    static const auto schema = Schema::build(&staticMetaObject, Node::staticMetaObject.propertyCount() + 1);
+    // Offset +1 so count is not registered (allow read only cause values is read only)
+    static const auto schema = Schema::build(&staticMetaObject, Node::staticMetaObject.propertyCount() + 1, true);
     return schema;
 }
 

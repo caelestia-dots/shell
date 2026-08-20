@@ -4,6 +4,8 @@
 
 namespace caelestia::settings {
 
+Q_LOGGING_CATEGORY(lcSchema, "caelestia.settings.schema", QtInfoMsg)
+
 namespace {
 
 // Descriptor annotations are stored here by Schema::annotate, which is called in the CONFIG_XXX macros.
@@ -22,22 +24,33 @@ bool isNodeType(const QMetaType& type) {
 
 } // namespace
 
-Schema Schema::build(const QMetaObject* meta, int baseOffset) {
+Schema Schema::build(const QMetaObject* meta, int baseOffset, bool includeReadOnly) {
     Schema schema;
     schema.m_descriptors.reserve(meta->propertyCount() - baseOffset);
 
     // Descriptors are taken from cache since this should be called exactly once per class
-    auto annotations = annotationCache().take(meta);
+    const auto annotations = annotationCache().take(meta);
+
+    qCDebug(lcSchema) << "Building schema for" << meta->className();
 
     for (int i = baseOffset; i < meta->propertyCount(); ++i) {
         const auto prop = meta->property(i);
         const auto key = QString::fromUtf8(prop.name());
+        const auto isNode = isNodeType(prop.metaType());
+
+        // Skip read only properties (unless includeReadOnly)
+        if (!isNode && !includeReadOnly && !prop.isWritable()) {
+            qCDebug(lcSchema) << "  Skipping computed property" << key;
+            continue;
+        }
+
+        qCDebug(lcSchema) << "  Adding property" << key;
 
         Descriptor desc{
             .key = key,
             .type = prop.metaType(),
             .metaIndex = i,
-            .isNode = isNodeType(prop.metaType()),
+            .isNode = isNode,
             .annotation = annotations.value(key),
         };
 
