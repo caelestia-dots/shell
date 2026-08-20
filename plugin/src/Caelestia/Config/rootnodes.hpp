@@ -88,7 +88,7 @@ public:
                                                                                                                        \
     private:                                                                                                           \
         explicit Type(QObject* parent = nullptr)                                                                       \
-            : Root(configDir() + file, nullptr, parent)                                                                \
+            : Root(configDir() + QLatin1Char('/') + file, nullptr, parent)                                             \
             , m_layers(monitorConfigDir(), file, this) {}                                                              \
                                                                                                                        \
         settings::LayerRegistry<Root> m_layers;                                                                        \
