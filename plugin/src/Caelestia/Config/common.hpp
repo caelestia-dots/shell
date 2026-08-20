@@ -3,7 +3,6 @@
 #include <qloggingcategory.h>
 #include <qstring.h>
 
-#include "settings/listnode.hpp"
 #include "settings/macros.hpp"
 #include "settings/objectnode.hpp"
 

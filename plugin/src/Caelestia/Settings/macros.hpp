@@ -1,6 +1,10 @@
 #pragma once
 
+#include <qobject.h>
 #include <qvariant.h>
+
+#include "listnode.hpp" // IWYU pragma: keep
+#include "schema.hpp"   // IWYU pragma: keep
 
 namespace caelestia::settings {
 
