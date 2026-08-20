@@ -149,7 +149,6 @@ PageBase {
             subtext: qsTr("When only changing the exit node")
         }
 
-
         SectionHeader {
             text: qsTr("Custom commands (optional)")
         }

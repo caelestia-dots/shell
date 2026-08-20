@@ -356,7 +356,6 @@ Singleton {
 
                 if (usingExitNode)
                     status.server = (exitNode.DNSName || exitNode.HostName || "").replace(/\.$/, "");
-                
             } else if (backendState === "Starting") {
                 status.state = "connecting";
             } else if (backendState === "NeedsLogin" || backendState === "NeedsMachineAuth") {
