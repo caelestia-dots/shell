@@ -80,7 +80,8 @@ Scope {
         source: Paths.absolutePath(GlobalConfig.paths.lowBatNotifSound)
         audioOutput: AudioOutput {
             id: lowBatteryAudioOutput
-            // device: root.currentAudioDevice
+
+            device: root.currentAudioDevice
         }
     }
 
@@ -90,7 +91,8 @@ Scope {
         source: Paths.absolutePath(GlobalConfig.paths.highBatNotifSound)
         audioOutput: AudioOutput {
             id: highBatteryAudioOutput
-            // device: root.currentAudioDevice
+
+            device: root.currentAudioDevice
         }
     }
 
