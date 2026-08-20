@@ -59,6 +59,19 @@ public:
         : ConfigObject(parent) {}
 };
 
+class UtilitiesRecording : public ConfigObject {
+    Q_OBJECT
+    QML_ANONYMOUS
+
+    CONFIG_GLOBAL_PROPERTY(bool, recordSystem, true)
+    CONFIG_GLOBAL_PROPERTY(bool, recordMicrophone, false)
+    CONFIG_GLOBAL_PROPERTY(QString, videoMode, u"fullscreen"_s)
+
+public:
+    explicit UtilitiesRecording(QObject* parent = nullptr)
+        : ConfigObject(parent) {}
+};
+
 class UtilitiesConfig : public ConfigObject {
     Q_OBJECT
     QML_ANONYMOUS
@@ -68,6 +81,7 @@ class UtilitiesConfig : public ConfigObject {
     CONFIG_SUBOBJECT(UtilitiesCards, cards)
     CONFIG_SUBOBJECT(UtilitiesToasts, toasts)
     CONFIG_SUBOBJECT(UtilitiesVpn, vpn)
+    CONFIG_SUBOBJECT(UtilitiesRecording, recording)
     CONFIG_LIST(EntryList, quickToggles,
         {
             LIST_ENTRY(wifi, true),
@@ -84,7 +98,8 @@ public:
         : ConfigObject(parent)
         , m_cards(new UtilitiesCards(this))
         , m_toasts(new UtilitiesToasts(this))
-        , m_vpn(new UtilitiesVpn(this)) {}
+        , m_vpn(new UtilitiesVpn(this))
+        , m_recording(new UtilitiesRecording(this)) {}
 };
 
 } // namespace caelestia::config
