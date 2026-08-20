@@ -11,6 +11,28 @@ inline QVariantMap vmap(std::initializer_list<std::pair<QString, QVariant>> entr
     return map;
 }
 
+namespace detail {
+
+template <typename T> inline bool compare(const T& a, const T& b) {
+    return a == b;
+}
+
+template <std::floating_point T> bool compare(const T& a, const T& b) {
+    return qFuzzyCompare(a + T(1), b + T(1));
+}
+
+template <std::floating_point T> bool compare(const QList<T>& a, const QList<T>& b) {
+    if (a.size() != b.size())
+        return false;
+
+    for (qsizetype i = 0; i < a.size(); ++i)
+        if (!compare(a.at(i), b.at(i)))
+            return false;
+    return true;
+}
+
+} // namespace detail
+
 } // namespace caelestia::settings
 
 // Helper macro to prevent splitting initialiser lists
@@ -56,7 +78,7 @@ public:                                                                         
         if (forwardGlobalWrite(QStringLiteral(#name), QVariant::fromValue(value)))                                     \
             return; /* Skip writes to global only keys, they are forwarded to the global layer */                      \
                                                                                                                        \
-        const auto needsNotify = value != m_##name;                                                                    \
+        const auto needsNotify = !caelestia::settings::detail::compare(value, m_##name);                               \
         m_##name = value;                                                                                              \
         if (recordWrite(QStringLiteral(#name), needsNotify))                                                           \
             Q_EMIT name##Changed();                                                                                    \
