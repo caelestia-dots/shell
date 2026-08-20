@@ -2,6 +2,7 @@ pragma ComponentBehavior: Bound
 
 import QtQuick
 import QtQuick.Layouts
+import Caelestia
 import Caelestia.Config
 import qs.components
 import qs.components.controls
@@ -250,10 +251,9 @@ StyledRect {
     }
 
     // ── Theme-aware SVG icon ──────────────────────────────────────────────────
-    // BBM SVGs have fill="#2e3436" (dark). Colouriser brightens by
-    // (1 - sourceColor.hslLightness) so the dark pixels normalise to near-white
-    // before colorizationColor is applied — the icon then takes on the exact
-    // theme token colour regardless of light/dark mode.
+    // Mirrors ColouredIcon.qml: ImageAnalyser reads the dominant colour from
+    // the rendered image so Colouriser can compensate for any source luminosity
+    // dynamically — no hardcoded fill value, works across all BBM SVG variants.
 
     component BbmIcon: Item {
         id: iconItem
@@ -272,12 +272,29 @@ StyledRect {
             sourceSize: Qt.size(iconItem.size, iconItem.size)
             fillMode: Image.PreserveAspectFit
             smooth: true
+            asynchronous: true
             visible: status !== Image.Error
+
             layer.enabled: true
             layer.effect: Colouriser {
-                sourceColor: "#2e3436"
+                sourceColor: analyser.dominantColour
                 colorizationColor: iconItem.colour
             }
+
+            layer.onEnabledChanged: {
+                if (layer.enabled && img.status === Image.Ready)
+                    analyser.requestUpdate();
+            }
+
+            onStatusChanged: {
+                if (layer.enabled && img.status === Image.Ready)
+                    analyser.requestUpdate();
+            }
+        }
+
+        ImageAnalyser {
+            id: analyser
+            sourceItem: img
         }
     }
 }
