@@ -21,6 +21,10 @@ signals:
     void loadFailed(const QString& error);
     void saveFailed(const QString& error);
 
+protected:
+    // Should be called in subclass ctors to load on init
+    void load();
+
 private:
     settings::SettingsFile* const m_file;
     QList<Diagnostic> m_diagnostics;

@@ -11,7 +11,9 @@ RootNode::RootNode(const QString& path, RootNode* fallback, QObject* parent)
     QObject::connect(m_file, &SettingsFile::changed, this, &RootNode::reloadFromFile);
     QObject::connect(m_file, &SettingsFile::readFailed, this, &RootNode::loadFailed);
     QObject::connect(m_file, &SettingsFile::writeFailed, this, &RootNode::saveFailed);
+}
 
+void RootNode::load() {
     reloadFromFile();
 }
 
