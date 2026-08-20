@@ -30,6 +30,10 @@ project(caelestia-shell VERSION ${VERSION} LANGUAGES CXX)
 
 include(GNUInstallDirs)
 
+# Ninja + Qt QML modules fail when install RPATHs would require relinking from the build tree.
+# Build with the install RPATH already active to avoid that relink step on ELF platforms.
+set(CMAKE_BUILD_WITH_INSTALL_RPATH ON)
+
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)

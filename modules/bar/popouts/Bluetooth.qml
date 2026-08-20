@@ -14,6 +14,35 @@ ColumnLayout {
     id: root
 
     required property PopoutState popouts
+    readonly property int indicatorType: {
+        const mode = GlobalConfig.services ? GlobalConfig.services.bluetoothBatteryIndicatorType : undefined;
+        return Number.isFinite(mode) ? mode : 2;
+    }
+    readonly property bool showBatteryIcon: Boolean(GlobalConfig.services && GlobalConfig.services.bluetoothBatteryIcon)
+    readonly property bool showBatteryText: Boolean(GlobalConfig.services && GlobalConfig.services.bluetoothBatteryText)
+    readonly property bool showBatteryRing: Boolean(GlobalConfig.services && GlobalConfig.services.bluetoothBatteryRing)
+    readonly property bool swapIconText: Boolean(GlobalConfig.services && GlobalConfig.services.bluetoothBatterySwapIconText)
+    function batteryColorForLevel(levelPercent) {
+        const palette = GlobalConfig.services && GlobalConfig.services.bluetoothBatteryUseCustomColors
+            ? (GlobalConfig.services.bluetoothBatteryColors || [])
+            : [
+                "#22c55e",
+                "#22c55e",
+                "#4ade80",
+                "#84cc16",
+                "#facc15",
+                "#f59e0b",
+                "#fb923c",
+                "#f97316",
+                "#f87171",
+                "#ef4444"
+            ];
+        const clamp = Math.max(0, Math.min(100, Number(levelPercent) || 0));
+        if (clamp >= 100)
+            return palette[0] || palette[0] || Colours.palette.m3primary;
+        const idx = Math.min(9, Math.max(0, 9 - Math.floor(clamp / 10)));
+        return palette[idx] || palette[0] || Colours.palette.m3primary;
+    }
 
     width: 320
     spacing: Tokens.spacing.small
@@ -101,7 +130,25 @@ ColumnLayout {
                 spacing: Tokens.spacing.small
 
                 MaterialIcon {
+                    visible: true
                     text: Icons.getBluetoothIcon(device.modelData.icon)
+                }
+
+                MaterialIcon {
+                    visible: root.showBatteryIcon && root.swapIconText && device.modelData.state === BluetoothDeviceState.Connected  // qmllint disable unresolved-type
+                    text: device.modelData.batteryAvailable ? Icons.getBatteryIcon(device.modelData.battery) : "battery_alert"
+                    color: device.modelData.batteryAvailable
+                        ? root.batteryColorForLevel(device.modelData.battery * 100)
+                        : Colours.palette.m3error
+                }
+
+                StyledText {
+                    visible: root.showBatteryText && root.swapIconText && device.modelData.state === BluetoothDeviceState.Connected  // qmllint disable unresolved-type
+                    text: device.modelData.batteryAvailable ? Math.round(device.modelData.battery * 100) + "%" : "--%"
+                    color: device.modelData.batteryAvailable
+                        ? root.batteryColorForLevel(device.modelData.battery * 100)
+                        : Colours.palette.m3error
+                    font: Tokens.font.body.small
                 }
 
                 StyledText {
@@ -112,10 +159,21 @@ ColumnLayout {
                     elide: Text.ElideRight
                 }
 
+                StyledText {
+                    visible: root.showBatteryText && !root.swapIconText && device.modelData.state === BluetoothDeviceState.Connected  // qmllint disable unresolved-type
+                    text: device.modelData.batteryAvailable ? Math.round(device.modelData.battery * 100) + "%" : "--%"
+                    color: device.modelData.batteryAvailable
+                        ? root.batteryColorForLevel(device.modelData.battery * 100)
+                        : Colours.palette.m3error
+                    font: Tokens.font.body.small
+                }
+
                 MaterialIcon {
-                    visible: device.modelData.state === BluetoothDeviceState.Connected  // qmllint disable unresolved-type
+                    visible: root.showBatteryIcon && !root.swapIconText && device.modelData.state === BluetoothDeviceState.Connected  // qmllint disable unresolved-type
                     text: device.modelData.batteryAvailable ? Icons.getBatteryIcon(device.modelData.battery) : "battery_alert"
-                    color: device.modelData.batteryAvailable && device.modelData.battery < 0.2 ? Colours.palette.m3error : Colours.palette.m3onSurfaceVariant
+                    color: device.modelData.batteryAvailable
+                        ? root.batteryColorForLevel(device.modelData.battery * 100)
+                        : Colours.palette.m3error
                 }
 
                 StyledRect {
@@ -179,12 +237,27 @@ ColumnLayout {
 
             Loader {
                 visible: status === Loader.Ready
-                active: device.modelData.connected
-                    && BbmService.available
-                    && BbmService.dataFor(device.modelData.address) !== null
+                active: root.showBatteryRing && device.modelData.connected && (
+                    (BbmService.available && BbmService.dataFor(device.modelData.address) !== null)
+                    || (GlobalConfig.services && GlobalConfig.services.bluetoothBatteryUpowerSupport && device.modelData.batteryAvailable)
+                )
                 Layout.fillWidth: true
                 sourceComponent: BbmExpandedRow {
-                    bbmData: BbmService.dataFor(device.modelData.address)
+                    bbmData: {
+                        const bbm = BbmService.available ? BbmService.dataFor(device.modelData.address) : null;
+                        if (bbm)
+                            return bbm;
+                        if (GlobalConfig.services && GlobalConfig.services.bluetoothBatteryUpowerSupport && device.modelData.batteryAvailable) {
+                            return {
+                                Battery1Level: Math.round(device.modelData.battery * 100),
+                                Battery1Icon: "",
+                                Battery1Status: "discharging",
+                                Battery2Level: 0,
+                                Battery3Level: 0,
+                            };
+                        }
+                        return null;
+                    }
                     address: device.modelData.address
                 }
             }

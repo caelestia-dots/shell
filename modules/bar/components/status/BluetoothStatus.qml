@@ -13,8 +13,37 @@ import qs.utils
 Item {
     id: root
 
+    property string name: "bluetooth"
     required property color colour
+    readonly property bool taskbarEnabled: {
+        const values = Config.bar?.statusIcons?.values ?? [];
+        return values.some(item => item?.id === "bluetooth" && item.enabled !== false);
+    }
+    readonly property bool showBatteryRing: Boolean(GlobalConfig.services && GlobalConfig.services.bluetoothBatteryRing)
 
+    readonly property var connectedPhoneBattery: {
+        const devices = Bluetooth.devices.values ?? []; // qmllint disable unresolved-type
+        for (const device of devices) {
+            if (!device?.connected)
+                continue;
+            const icon = (device.icon ?? "").toLowerCase();
+            const isPhone = icon.includes("phone") || icon.includes("android") || icon.includes("smartphone");
+            if (!isPhone)
+                continue;
+            if (device.batteryAvailable !== undefined && device.batteryAvailable !== null) {
+                const pct = Number(device.battery) * 100;
+                if (Number.isFinite(pct))
+                    return { percentage: pct, available: true };
+            }
+            const bbmEntry = BbmService.available ? BbmService.dataFor(device.address ?? "") : null;
+            const bbmLevel = Number(bbmEntry?.ComputedLevel ?? NaN);
+            if (Number.isFinite(bbmLevel))
+                return { percentage: bbmLevel, available: true };
+        }
+        return null;
+    }
+
+    visible: root.taskbarEnabled
     implicitWidth: layout.implicitWidth
     implicitHeight: layout.implicitHeight
 
@@ -24,12 +53,11 @@ Item {
         }
     }
 
-    ColumnLayout {
+    RowLayout {
         id: layout
 
-        spacing: Tokens.spacing.medium / 2
+        spacing: Tokens.spacing.extraSmall
 
-        // Bluetooth icon
         MaterialIcon {
             animate: true
             text: {
@@ -42,67 +70,32 @@ Item {
             color: root.colour
         }
 
-        // Connected bluetooth devices — with optional BBM battery ring
-        Repeater {
-            model: ScriptModel {
-                values: Bluetooth.devices.values.filter(d => d.state !== BluetoothDeviceState.Disconnected) // qmllint disable unresolved-type
+        MaterialIcon {
+            visible: !!root.connectedPhoneBattery
+            animate: true
+            text: {
+                const pct = Number(root.connectedPhoneBattery?.percentage ?? 0);
+                if (pct >= 90)
+                    return "battery_6_bar";
+                if (pct >= 70)
+                    return "battery_5_bar";
+                if (pct >= 50)
+                    return "battery_4_bar";
+                if (pct >= 30)
+                    return "battery_3_bar";
+                if (pct >= 15)
+                    return "battery_2_bar";
+                return "battery_1_bar";
             }
+            color: root.colour
+            fontStyle: Tokens.font.icon.small
+        }
 
-            Item {
-                id: device
-
-                required property BluetoothDevice modelData
-
-                // Cached once: avoids calling dataFor() three times in three separate bindings.
-                readonly property var bbmEntry: BbmService.available
-                    ? BbmService.dataFor(modelData?.address ?? "")
-                    : null
-
-                // Ring adds strokeWidth on each side plus 1px breathing room per side.
-                implicitWidth: deviceIcon.implicitWidth + batteryRing.strokeWidth * 2 + 2
-                implicitHeight: deviceIcon.implicitHeight + batteryRing.strokeWidth * 2 + 2
-
-                // Circular battery ring — only visible when BBM tracks this device
-                CircularProgress {
-                    id: batteryRing
-                    anchors.fill: parent
-                    value: (device.bbmEntry?.ComputedLevel ?? 0) / 100
-                    visible: device.bbmEntry !== null
-                    strokeWidth: 2
-                    fgColour: (device.bbmEntry?.ComputedLevel ?? 100) < 20
-                        ? Colours.palette.m3error
-                        : root.colour
-                    bgColour: Qt.alpha(root.colour, 0.2)
-                }
-
-                MaterialIcon {
-                    id: deviceIcon
-                    anchors.centerIn: parent
-                    animate: true
-                    text: Icons.getBluetoothIcon(device.modelData?.icon)
-                    color: root.colour
-                    fill: 1
-
-                    SequentialAnimation on opacity {
-                        running: device.modelData?.state !== BluetoothDeviceState.Connected // qmllint disable unresolved-type
-                        alwaysRunToEnd: true
-                        loops: Animation.Infinite
-
-                        Anim {
-                            from: 1
-                            to: 0
-                            duration: Tokens.anim.durations.large
-                            easing: Tokens.anim.standardAccel
-                        }
-                        Anim {
-                            from: 0
-                            to: 1
-                            duration: Tokens.anim.durations.large
-                            easing: Tokens.anim.standardDecel
-                        }
-                    }
-                }
-            }
+        StyledText {
+            visible: !!root.connectedPhoneBattery
+            text: `${Math.round(root.connectedPhoneBattery?.percentage ?? 0)}%`
+            color: root.colour
+            font: Tokens.font.body.small
         }
     }
 }
