@@ -16,6 +16,7 @@ PageBase {
     readonly property int editIndex: nState.editingVpnIndex
     readonly property bool editing: editIndex >= 0
     readonly property VPN.Provider existing: editing ? (VPN.providers[editIndex] ?? null) : null
+    readonly property bool isTailscale: nameField.text.trim().toLowerCase() === "tailscale"
 
     function splitCmd(arr: var): string {
         return arr?.join(" ") ?? "";
@@ -43,7 +44,8 @@ PageBase {
             displayName: displayField.text.trim() || name,
             interface: interfaceField.text.trim(),
             connectCmd: joinCmd(connectField.text),
-            disconnectCmd: joinCmd(disconnectField.text)
+            disconnectCmd: joinCmd(disconnectField.text),
+            exitNodeOnly: exitNodeToggle.checked
         };
 
         if (editing) {
@@ -83,6 +85,7 @@ PageBase {
             interfaceField.text = existing.iface;
             connectField.text = splitCmd(existing.connectCmd);
             disconnectField.text = splitCmd(existing.disconnectCmd);
+            exitNodeToggle.checked = existing.exitNodeOnly;
         }
     }
 
@@ -138,6 +141,14 @@ PageBase {
 
             onAccepted: connectField.forceActiveFocus()
         }
+
+        ToggleRow {
+            id: exitNodeToggle
+            visible: root.isTailscale
+            text: qsTr("Exit node mode")
+            subtext: qsTr("When only changing the exit node")
+        }
+
 
         SectionHeader {
             text: qsTr("Custom commands (optional)")
