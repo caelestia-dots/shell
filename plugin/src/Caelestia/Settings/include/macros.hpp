@@ -13,6 +13,9 @@ inline QVariantMap vmap(std::initializer_list<std::pair<QString, QVariant>> entr
 
 } // namespace caelestia::settings
 
+// Helper macro to prevent splitting initialiser lists
+#define DEFAULT_ARG(...) __VA_ARGS__
+
 // Declares a class to be a node class. This replaces the Q_OBJECT call at the top of the class.
 #define CONFIG_NODE_NO_CTOR(Class, Base)                                                                               \
     Q_OBJECT                                                                                                           \
@@ -70,7 +73,7 @@ private:                                                                        
 
 // Defines a global property on a node. Shorthand for .globalOnly = true, and to keep compat with prev design.
 #define CONFIG_GLOBAL_PROPERTY(Type, name, defaultVal, ...)                                                            \
-    CONFIG_PROPERTY(Type, name, defaultVal, .globalOnly = true, __VA_ARGS__)
+    CONFIG_PROPERTY(Type, name, DEFAULT_ARG(defaultVal), .globalOnly = true, __VA_ARGS__)
 
 // Defines a subobject property on a node. Subobject properties are CONSTANT.
 #define CONFIG_SUBOBJECT_IMPL(Type, name, global)                                                                      \
@@ -84,7 +87,8 @@ public:                                                                         
 private:                                                                                                               \
     Type* m_##name = new Type(fallbackValue(&Self::m_##name, nullptr), this, global);                                  \
     inline static const bool s_register_##name =                                                                       \
-        (caelestia::settings::Schema::annotate(&staticMetaObject, QStringLiteral(#name), { .globalOnly = global }),    \
+        (caelestia::settings::Schema::annotate(                                                                        \
+             &staticMetaObject, QStringLiteral(#name), { .defaultValue = QVariant(), .globalOnly = global }),          \
             true);
 
 #define CONFIG_SUBOBJECT(Type, name) CONFIG_SUBOBJECT_IMPL(Type, name, false)
@@ -133,7 +137,9 @@ private:                                                                        
                  __VA_ARGS__ }),                                                                                       \
             true);
 
-#define CONFIG_LIST(Type, name, defaultVal, ...) CONFIG_LIST_IMPL(Type, name, false, defaultVal, __VA_ARGS__)
+#define CONFIG_LIST(Type, name, defaultVal, ...)                                                                       \
+    CONFIG_LIST_IMPL(Type, name, false, DEFAULT_ARG(defaultVal), __VA_ARGS__)
 
 // Defines a global list on a node. Everything inside it is global only.
-#define CONFIG_GLOBAL_LIST(Type, name, defaultVal, ...) CONFIG_LIST_IMPL(Type, name, true, defaultVal, __VA_ARGS__)
+#define CONFIG_GLOBAL_LIST(Type, name, defaultVal, ...)                                                                \
+    CONFIG_LIST_IMPL(Type, name, true, DEFAULT_ARG(defaultVal), __VA_ARGS__)
