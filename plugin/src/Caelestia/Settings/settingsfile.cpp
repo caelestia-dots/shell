@@ -1,4 +1,4 @@
-#include "settingsfile.hpp"
+#include "include/settingsfile.hpp"
 
 #include <qdir.h>
 #include <qfile.h>

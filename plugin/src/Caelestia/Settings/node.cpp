@@ -1,4 +1,4 @@
-#include "node.hpp"
+#include "include/node.hpp"
 
 namespace caelestia::settings {
 
