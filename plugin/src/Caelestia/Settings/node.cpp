@@ -44,7 +44,8 @@ void Node::detachFallback() {
         m_fallbackNode = nullptr;
     }
 
-    for (auto* const child : findChildren<Node*>(Qt::FindDirectChildrenOnly))
+    const auto childNodes = findChildren<Node*>(Qt::FindDirectChildrenOnly);
+    for (auto* const child : childNodes)
         child->detachFallback();
 }
 
