@@ -1,4 +1,4 @@
-#include "include/changebatcher.hpp"
+#include "changebatcher.hpp"
 
 namespace caelestia::settings {
 

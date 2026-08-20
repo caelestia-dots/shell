@@ -1,4 +1,4 @@
-#include "include/listnode.hpp"
+#include "listnode.hpp"
 
 #include <qjsonarray.h>
 #include <qjsonobject.h>

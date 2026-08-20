@@ -1,6 +1,6 @@
-#include "include/schema.hpp"
+#include "schema.hpp"
 
-#include "include/node.hpp"
+#include "node.hpp"
 
 namespace caelestia::settings {
 

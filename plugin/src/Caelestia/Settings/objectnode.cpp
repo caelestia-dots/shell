@@ -1,8 +1,8 @@
-#include "include/objectnode.hpp"
+#include "objectnode.hpp"
 
 #include <qjsonobject.h>
 
-#include "include/codecs.hpp"
+#include "codecs.hpp"
 
 namespace caelestia::settings {
 

@@ -1,4 +1,4 @@
-#include "include/codecs.hpp"
+#include "codecs.hpp"
 
 #include <qjsonarray.h>
 #include <qjsonobject.h>
