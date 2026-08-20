@@ -144,7 +144,7 @@ PageBase {
 
         ToggleRow {
             id: exitNodeToggle
-            
+
             visible: root.isTailscale
             text: qsTr("Exit node mode")
             subtext: qsTr("When only changing the exit node")
