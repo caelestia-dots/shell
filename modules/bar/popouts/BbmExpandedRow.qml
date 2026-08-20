@@ -15,7 +15,6 @@ StyledRect {
     required property string address
 
     Layout.fillWidth: true
-    Layout.rightMargin: Tokens.padding.extraSmall
     Layout.topMargin: Tokens.spacing.extraSmall
 
     radius: Tokens.rounding.large
@@ -41,7 +40,7 @@ StyledRect {
         // ── Per-bud battery row ───────────────────────────────────────────────
 
         RowLayout {
-            visible: (root.bbmData?.Battery2Level ?? 0) > 0
+            visible: (root.bbmData?.Battery1Level ?? 0) > 0
             Layout.fillWidth: true
             spacing: Tokens.spacing.medium
 
@@ -267,11 +266,13 @@ StyledRect {
         implicitHeight: size
 
         Image {
+            id: img
             anchors.fill: parent
             source: iconItem.url
             sourceSize: Qt.size(iconItem.size, iconItem.size)
             fillMode: Image.PreserveAspectFit
             smooth: true
+            visible: status !== Image.Error
             layer.enabled: true
             layer.effect: Colouriser {
                 sourceColor: "#2e3436"

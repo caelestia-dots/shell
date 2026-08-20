@@ -72,7 +72,8 @@ ColumnLayout {
             readonly property bool loading: modelData.state === BluetoothDeviceState.Connecting || modelData.state === BluetoothDeviceState.Disconnecting // qmllint disable unresolved-type
 
             Layout.fillWidth: true
-            Layout.rightMargin: Tokens.padding.extraSmall
+            Layout.leftMargin: 2
+            Layout.rightMargin: 2
             spacing: 0
 
             opacity: 0
