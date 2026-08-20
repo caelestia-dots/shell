@@ -35,7 +35,12 @@ StyledListView {
 
             return "actions";
         }
+        const isConversion = /^\d+(?:\.\d+)?\s+\w+\s+to\s+/i.test(text);
+        const isExpression = /^(?:√(?=[\d.(])|-(?=[\d.(√])|(?=[\d.($])(?=.*[+\-*/^%√$]))/.test(text);
 
+        if ((isConversion || isExpression) && text.length < 80) {
+            return "calc";
+        }
         return "apps";
     }
 
