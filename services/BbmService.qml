@@ -7,6 +7,10 @@ import Quickshell.Io
 Singleton {
     id: root
 
+    readonly property string _dest: "org.bbm"
+    readonly property string _path: "/org/bbm"
+    readonly property string _iface: "org.bbm.Manager"
+
     // True when the org.bbm daemon is reachable on the session bus.
     property bool available: false
 
@@ -39,8 +43,8 @@ Singleton {
 
     function sendUIAction(address, widgetId, value) {
         sendActionComp.createObject(root, {
-            command: ["gdbus", "call", "--session", "--dest", "org.bbm",
-                "--object-path", "/org/bbm", "--method", "org.bbm.Manager.SendUIAction",
+            command: ["gdbus", "call", "--session", "--dest", root._dest,
+                "--object-path", root._path, "--method", `${root._iface}.SendUIAction`,
                 `'${address}'`, `'${widgetId}'`, String(value)]
         }).running = true;
     }
@@ -117,8 +121,8 @@ Singleton {
         id: fetchDeviceComp
         Process {
             property string addr: ""
-            command: ["gdbus", "call", "--session", "--dest", "org.bbm",
-                "--object-path", "/org/bbm", "--method", "org.bbm.Manager.GetDeviceData",
+            command: ["gdbus", "call", "--session", "--dest", root._dest,
+                "--object-path", root._path, "--method", `${root._iface}.GetDeviceData`,
                 `'${addr}'`]
             stdout: StdioCollector {
                 onStreamFinished: {
@@ -146,8 +150,8 @@ Singleton {
     Process {
         id: iconPathProc
         running: false
-        command: ["gdbus", "call", "--session", "--dest", "org.bbm",
-            "--object-path", "/org/bbm", "--method", "org.bbm.Manager.GetIconPath"]
+        command: ["gdbus", "call", "--session", "--dest", root._dest,
+            "--object-path", root._path, "--method", `${root._iface}.GetIconPath`]
         stdout: StdioCollector {
             onStreamFinished: {
                 // Output format: ('/path/to/icons',)\n
@@ -163,11 +167,12 @@ Singleton {
     Process {
         id: monitor
         running: false
-        command: ["gdbus", "monitor", "--session", "--dest", "org.bbm",
-            "--object-path", "/org/bbm"]
+        command: ["gdbus", "monitor", "--session", "--dest", root._dest,
+            "--object-path", root._path]
         stdout: SplitParser {
             onRead: line => {
-                const m = line.match(/org\.bbm\.Manager\.(\w+) \('([^']+)',\)/);
+                const ifaceEsc = root._iface.replace(/\./g, "\\.");
+                const m = line.match(new RegExp(ifaceEsc + "\\.(\\w+) \\('([^']+)',\\)"));
                 if (!m)
                     return;
                 const [, signal, address] = m;
@@ -191,8 +196,8 @@ Singleton {
     Process {
         id: listProc
         running: false
-        command: ["gdbus", "call", "--session", "--dest", "org.bbm",
-            "--object-path", "/org/bbm", "--method", "org.bbm.Manager.GetDevices"]
+        command: ["gdbus", "call", "--session", "--dest", root._dest,
+            "--object-path", root._path, "--method", `${root._iface}.GetDevices`]
         stdout: StdioCollector {
             onStreamFinished: {
                 if (!text.trim().startsWith("("))

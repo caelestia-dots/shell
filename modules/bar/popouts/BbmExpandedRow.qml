@@ -80,7 +80,6 @@ StyledRect {
                     MaterialIcon {
                         visible: modelData.charging
                         text: "bolt"
-                        font.pixelSize: 12
                         color: Colours.palette.m3primary
                     }
                 }
@@ -129,9 +128,8 @@ StyledRect {
 
                             required property var modelData
 
-                            // Square-ish pill: equal height/width padding so icon is centred
-                            implicitHeight: 18 + Tokens.padding.small * 2
-                            implicitWidth: 18 + Tokens.padding.medium * 2
+                            implicitHeight: pillIcon.size + Tokens.padding.small * 2
+                            implicitWidth: pillIcon.size + Tokens.padding.medium * 2
 
                             radius: Tokens.rounding.medium
                             color: pill.modelData.active
@@ -149,6 +147,7 @@ StyledRect {
                             }
 
                             BbmIcon {
+                                id: pillIcon
                                 anchors.centerIn: parent
                                 url: BbmService.toggleIconUrl(pill.modelData.icon)
                                 visible: url.length > 0
