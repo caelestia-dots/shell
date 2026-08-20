@@ -68,19 +68,26 @@ bool Node::hasContent() const {
 
 QVariant Node::value(const QString& key) const {
     const auto* desc = schema().get(key);
-    if (!desc) // Unknown key
+    if (!desc) {
+        qCCritical(
+            lcSettings, "Attempted to read an unknown key %s, something is wrong.", qUtf8Printable(pathFor(key)));
         return QVariant();
+    }
 
     return metaObject()->property(desc->metaIndex).read(this);
 }
 
 bool Node::setValue(const QString& key, const QVariant& value) {
     const auto* desc = schema().get(key);
-    if (!desc) // Unknown key
+    if (!desc) {
+        qCCritical(lcSettings, "Attempted to set an unknown key %s, something is wrong.", qUtf8Printable(pathFor(key)));
         return false;
+    }
 
-    if (desc->isNode) // Nodes can't be set
+    if (desc->isNode) {
+        qCCritical(lcSettings, "Attempted to set node %s directly, something is wrong.", qUtf8Printable(pathFor(key)));
         return false;
+    }
 
     // Type mismatch, conversion should happen before this function is called
     if (desc->type != value.metaType()) {
