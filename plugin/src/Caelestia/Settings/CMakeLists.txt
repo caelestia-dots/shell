@@ -12,4 +12,9 @@ qml_module(caelestia-settings
         settingsfile.cpp
         changebatcher.cpp
 )
-target_include_directories(caelestia-settings PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}")
+
+# Expose headers as settings/xxx.hpp
+set(settings_include_dir "${CMAKE_CURRENT_BINARY_DIR}/include")
+file(MAKE_DIRECTORY "${settings_include_dir}")
+file(CREATE_LINK "${CMAKE_CURRENT_SOURCE_DIR}" "${settings_include_dir}/settings" SYMBOLIC)
+target_include_directories(caelestia-settings PUBLIC "${settings_include_dir}")
