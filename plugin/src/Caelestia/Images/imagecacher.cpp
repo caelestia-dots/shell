@@ -8,6 +8,7 @@
 #include <qloggingcategory.h>
 #include <qmutex.h>
 #include <qpainter.h>
+#include <qprocess.h>
 #include <qsavefile.h>
 #include <qthreadpool.h>
 
@@ -66,6 +67,17 @@ QString ImageCacher::cachePathFor(const QString& sourcePath, const QSize& size, 
     return cacheDir() + QLatin1Char('/') + filename;
 }
 
+bool ImageCacher::isVideoLike(const QString& path) {
+    static const QStringList suffixes = {
+        QStringLiteral(".mp4"),  QStringLiteral(".webm"), QStringLiteral(".mov"),
+        QStringLiteral(".avi"),  QStringLiteral(".mkv"),  QStringLiteral(".gif"),
+        QStringLiteral(".m4v"),  QStringLiteral(".ogv"),
+    };
+
+    const QString lower = QFileInfo(path).suffix().toLower();
+    return suffixes.contains(QLatin1Char('.') + lower);
+}
+
 ImageCacher* ImageCacher::instance() {
     static ImageCacher s_instance;
     return &s_instance;
@@ -96,8 +108,55 @@ void ImageCacher::schedule(const QString& sourcePath, const QString& cachePath, 
     });
 }
 
+bool ImageCacher::runFfmpegJob(const QString& sourcePath, const QString& cachePath, const QSize& size) {
+    QProcess proc;
+
+    // ffmpeg filter syntax requires ':' between width and height. Use a representative
+    // frame from the start of the stream (avoid 0 which often opens with a black frame).
+    const QString filter = QStringLiteral("scale=%1:%2:force_original_aspect_ratio=increase,crop=%1:%2")
+                              .arg(size.width())
+                              .arg(size.height());
+
+    const QStringList args = {
+        QStringLiteral("-loglevel"), QStringLiteral("error"),
+        QStringLiteral("-y"),
+        QStringLiteral("-ss"), QStringLiteral("00:00:00.100"),
+        QStringLiteral("-i"), sourcePath,
+        QStringLiteral("-vframes"), QStringLiteral("1"),
+        QStringLiteral("-vf"), filter,
+        cachePath,
+    };
+
+    proc.start(QStringLiteral("ffmpeg"), args);
+    if (!proc.waitForFinished(30000)) {
+        qCWarning(lcCacher) << "ffmpeg timed out for" << sourcePath;
+        proc.kill();
+        return false;
+    }
+
+    if (proc.exitStatus() != QProcess::NormalExit || proc.exitCode() != 0) {
+        qCWarning(lcCacher) << "ffmpeg failed for" << sourcePath << ":" << proc.readAllStandardError();
+        return false;
+    }
+
+    return QFile::exists(cachePath);
+}
+
 void ImageCacher::runJob(const QString& sourcePath, const QString& cachePath, const QSize& size, FillMode fillMode) {
     if (QFile::exists(cachePath)) {
+        return;
+    }
+
+    const QString cacheParent = QFileInfo(cachePath).absolutePath();
+    if (!QDir().mkpath(cacheParent)) {
+        qCWarning(lcCacher).noquote() << "Failed to create cache dir" << cacheParent;
+        return;
+    }
+
+    if (isVideoLike(sourcePath)) {
+        if (runFfmpegJob(sourcePath, cachePath, size)) {
+            qCDebug(lcCacher).noquote() << "Saved (ffmpeg) to" << cachePath;
+        }
         return;
     }
 
@@ -138,12 +197,6 @@ void ImageCacher::runJob(const QString& sourcePath, const QString& cachePath, co
         QPainter painter(&canvas);
         painter.drawImage((size.width() - image.width()) / 2, (size.height() - image.height()) / 2, image);
         painter.end();
-    }
-
-    const QString parent = QFileInfo(cachePath).absolutePath();
-    if (!QDir().mkpath(parent)) {
-        qCWarning(lcCacher).noquote() << "Failed to create cache dir" << parent;
-        return;
     }
 
     QSaveFile saveFile(cachePath);
