@@ -38,49 +38,72 @@ StyledRect {
         }
         spacing: Tokens.spacing.small
 
-        // ── Per-bud battery row ───────────────────────────────────────────────
+        // ── Circular per-component battery rings ──────────────────────────────
 
-        RowLayout {
+        Item {
             visible: (root.bbmData?.Battery1Level ?? 0) > 0
             Layout.fillWidth: true
-            spacing: Tokens.spacing.medium
+            implicitHeight: batteryRow.implicitHeight
 
-            Repeater {
-                model: root.bbmData ? [
-                    {icon: root.bbmData.Battery1Icon ?? "", level: root.bbmData.Battery1Level ?? 0, charging: (root.bbmData.Battery1Status ?? "") === "charging"},
-                    {icon: root.bbmData.Battery2Icon ?? "", level: root.bbmData.Battery2Level ?? 0, charging: (root.bbmData.Battery2Status ?? "") === "charging"},
-                    {icon: root.bbmData.Battery3Icon ?? "", level: root.bbmData.Battery3Level ?? 0, charging: (root.bbmData.Battery3Status ?? "") === "charging"},
-                ].filter(b => b.level > 0) : []
+            Row {
+                id: batteryRow
+                anchors.horizontalCenter: parent.horizontalCenter
+                spacing: Tokens.spacing.large
 
-                delegate: RowLayout {
-                    required property var modelData
+                Repeater {
+                    model: root.bbmData ? [
+                        {icon: root.bbmData.Battery1Icon ?? "", level: root.bbmData.Battery1Level ?? 0, charging: (root.bbmData.Battery1Status ?? "") === "charging"},
+                        {icon: root.bbmData.Battery2Icon ?? "", level: root.bbmData.Battery2Level ?? 0, charging: (root.bbmData.Battery2Status ?? "") === "charging"},
+                        {icon: root.bbmData.Battery3Icon ?? "", level: root.bbmData.Battery3Level ?? 0, charging: (root.bbmData.Battery3Status ?? "") === "charging"},
+                    ].filter(b => b.level > 0) : []
 
-                    spacing: Tokens.spacing.extraSmall
+                    delegate: Column {
+                        id: circleDel
 
-                    BbmIcon {
-                        url: BbmService.batteryIconUrl(modelData.icon)
-                        visible: url.length > 0
-                        size: 16
-                        colour: Colours.palette.m3onSurface
-                    }
+                        required property var modelData
 
-                    StyledProgressBar {
-                        implicitWidth: 32
-                        implicitHeight: 4
-                        value: modelData.level / 100
-                        fgColour: modelData.level < 20 ? Colours.palette.m3error : Colours.palette.m3primary
-                    }
+                        spacing: Tokens.spacing.extraSmall
 
-                    StyledText {
-                        text: `${modelData.level}%`
-                        color: Colours.palette.m3onSurfaceVariant
-                        font: Tokens.font.body.small
-                    }
+                        Item {
+                            implicitWidth: 56
+                            implicitHeight: 56
 
-                    MaterialIcon {
-                        visible: modelData.charging
-                        text: "bolt"
-                        color: Colours.palette.m3primary
+                            CircularProgress {
+                                anchors.fill: parent
+                                value: circleDel.modelData.level / 100
+                                strokeWidth: 4
+                                fgColour: circleDel.modelData.charging ? Colours.palette.m3tertiary
+                                         : circleDel.modelData.level < 20 ? Colours.palette.m3error
+                                         : Colours.palette.m3primary
+                                bgColour: Qt.alpha(Colours.palette.m3onSurface, 0.12)
+                            }
+
+                            BbmIcon {
+                                anchors.centerIn: parent
+                                url: BbmService.batteryIconUrl(circleDel.modelData.icon)
+                                visible: url.length > 0
+                                size: 22
+                                colour: circleDel.modelData.charging ? Colours.palette.m3tertiary
+                                       : circleDel.modelData.level < 20 ? Colours.palette.m3error
+                                       : Colours.palette.m3onSurface
+                            }
+
+                            // Charging bolt badge at bottom of ring
+                            MaterialIcon {
+                                visible: circleDel.modelData.charging
+                                anchors { bottom: parent.bottom; horizontalCenter: parent.horizontalCenter }
+                                text: "bolt"
+                                color: Colours.palette.m3tertiary
+                                fontStyle: Tokens.font.icon.small
+                            }
+                        }
+
+                        StyledText {
+                            anchors.horizontalCenter: parent.horizontalCenter
+                            text: `${circleDel.modelData.level}%`
+                            color: Colours.palette.m3onSurfaceVariant
+                            font: Tokens.font.body.small
+                        }
                     }
                 }
             }
@@ -250,9 +273,6 @@ StyledRect {
     }
 
     // ── Theme-aware SVG icon ──────────────────────────────────────────────────
-    // Mirrors ColouredIcon.qml: ImageAnalyser reads the dominant colour from
-    // the rendered image so Colouriser can compensate for any source luminosity
-    // dynamically — no hardcoded fill value, works across all BBM SVG variants.
 
     component BbmIcon: Item {
         id: iconItem

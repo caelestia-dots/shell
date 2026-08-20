@@ -88,6 +88,13 @@ export class DbusService {
         this._emitSignal('DeviceAdded', new GLib.Variant('(s)', [address]));
     }
 
+    // Called by orchestrator when a device reconnects with a fresh DataHandler.
+    updateDeviceHandler(address, dataHandler) {
+        const entry = this._devices.get(address);
+        if (entry)
+            entry.dataHandler = dataHandler;
+    }
+
     // Called by orchestrator when a device disconnects/is removed.
     removeDevice(address) {
         this._devices.delete(address);

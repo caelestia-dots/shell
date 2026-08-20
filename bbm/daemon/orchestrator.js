@@ -104,6 +104,9 @@ export class Orchestrator {
 
     // Called by EnhancedDeviceSupportManager and BluezEnumerator on lifecycle events.
     sync() {
+        // Guard against calls that arrive after destroy() (idle callbacks, in-flight BlueZ signals).
+        if (!this._enhancedManager || !this._enumerator)
+            return;
         if (this._syncRunning) {
             this._syncPending = true;
             return;
@@ -157,6 +160,7 @@ export class Orchestrator {
             });
 
             this._addressMap.set(existingAddress, {record: entry.record, dataHandler, configId, propsId});
+            this._dbusService.updateDeviceHandler(existingAddress, dataHandler);
             this._dbusService.emitDeviceChanged(existingAddress);
             return;
         }
@@ -205,8 +209,10 @@ export class Orchestrator {
     _cleanupDevice(address, path) {
         const entry = this._addressMap.get(address);
         if (entry) {
-            entry.dataHandler.disconnect(entry.configId);
-            entry.dataHandler.disconnect(entry.propsId);
+            if (entry.dataHandler) {
+                entry.dataHandler.disconnect(entry.configId);
+                entry.dataHandler.disconnect(entry.propsId);
+            }
             this._addressMap.delete(address);
         }
         this._pathToAddress.delete(path);

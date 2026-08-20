@@ -22,6 +22,7 @@ const orchestrator = new Orchestrator(daemonDir);
 
 orchestrator.start().catch(e => {
     console.error('BBM Daemon: failed to start:', e.message, e.stack ?? '');
+    orchestrator.destroy();
     loop.quit();
 });
 
