@@ -1,8 +1,10 @@
 #pragma once
 
-#include "fontbuilder.hpp"
-
+#include <qobject.h>
 #include <qqmlintegration.h>
+#include <qvariantmap.h>
+
+#include "fontbuilder.hpp"
 
 namespace caelestia::config {
 

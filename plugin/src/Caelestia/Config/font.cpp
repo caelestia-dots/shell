@@ -51,10 +51,10 @@ void FontStyleBase::bind(FontStyleConfig* cfg) {
     m_cfg = cfg;
 
     if (cfg) {
-        connect(cfg, &ConfigObject::propertiesChanged, this, &FontStyleBase::rebuild);
-        connect(cfg->large(), &ConfigObject::propertiesChanged, this, &FontStyleBase::rebuild);
-        connect(cfg->medium(), &ConfigObject::propertiesChanged, this, &FontStyleBase::rebuild);
-        connect(cfg->small(), &ConfigObject::propertiesChanged, this, &FontStyleBase::rebuild);
+        connect(cfg, &settings::Node::optionChanged, this, &FontStyleBase::rebuild);
+        connect(cfg->large(), &settings::Node::optionChanged, this, &FontStyleBase::rebuild);
+        connect(cfg->medium(), &settings::Node::optionChanged, this, &FontStyleBase::rebuild);
+        connect(cfg->small(), &settings::Node::optionChanged, this, &FontStyleBase::rebuild);
     }
 
     rebuild();
@@ -114,7 +114,7 @@ void IconFontStyle::bind(IconFontStyleConfig* cfg) {
     FontStyleBase::bind(cfg);
 
     if (cfg)
-        connect(cfg->extraLarge(), &ConfigObject::propertiesChanged, this, &IconFontStyle::rebuild);
+        connect(cfg->extraLarge(), &settings::Node::optionChanged, this, &IconFontStyle::rebuild);
 }
 
 QFont IconFontStyle::extraLarge() const {
