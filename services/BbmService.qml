@@ -173,7 +173,10 @@ Singleton {
     Process {
         id: monitor
         running: false
-        command: ["gdbus", "monitor", "--session", "--dest", root._dest,
+        // stdbuf -oL forces line-buffering: gdbus switches to block-buffered
+        // stdout when piped (not a tty), so signals would silently queue until
+        // the 4-8KB buffer fills without this.
+        command: ["stdbuf", "-oL", "gdbus", "monitor", "--session", "--dest", root._dest,
             "--object-path", root._path]
         stdout: SplitParser {
             onRead: line => {
