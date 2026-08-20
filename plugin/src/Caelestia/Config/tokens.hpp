@@ -3,7 +3,7 @@
 #include <limits>
 #include <qlist.h>
 
-#include "settings/macros.hpp"
+#include "common.hpp"
 #include "settings/objectnode.hpp"
 
 namespace caelestia::config {

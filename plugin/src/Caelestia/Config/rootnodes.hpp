@@ -4,7 +4,7 @@
 #include <qqmlengine.h>
 
 #include "settings/layerregistry.hpp"
-#include "settings/macros.hpp"
+#include "common.hpp"
 #include "settings/rootnode.hpp"
 
 #include "appearanceconfig.hpp"

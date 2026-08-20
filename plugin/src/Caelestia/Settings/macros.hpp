@@ -39,7 +39,7 @@ template <std::floating_point T> bool compare(const QList<T>& a, const QList<T>&
 #define DEFAULT_ARG(...) __VA_ARGS__
 
 // Declares a class to be a node class. This replaces the Q_OBJECT call at the top of the class.
-#define CONFIG_NODE_NO_CTOR(Class, Base)                                                                               \
+#define SETTINGS_NODE_NO_CTOR(Class, Base)                                                                             \
     Q_OBJECT                                                                                                           \
                                                                                                                        \
 public:                                                                                                                \
@@ -52,8 +52,8 @@ public:                                                                         
 private:                                                                                                               \
     using Self = Class; // For use in the below macros
 
-#define CONFIG_NODE(Class, Base)                                                                                       \
-    CONFIG_NODE_NO_CTOR(Class, Base)                                                                                   \
+#define SETTINGS_NODE(Class, Base)                                                                                     \
+    SETTINGS_NODE_NO_CTOR(Class, Base)                                                                                 \
     QML_ANONYMOUS                                                                                                      \
                                                                                                                        \
 public:                                                                                                                \
@@ -63,7 +63,7 @@ public:                                                                         
 private:
 
 // Defines a property on a node.
-#define CONFIG_PROPERTY(Type, name, defaultVal, ...)                                                                   \
+#define SETTINGS_PROPERTY(Type, name, defaultVal, ...)                                                                 \
     Q_PROPERTY(Type name READ name WRITE set_##name NOTIFY name##Changed)                                              \
                                                                                                                        \
 public:                                                                                                                \
@@ -93,12 +93,12 @@ private:                                                                        
              { .defaultValue = QVariant::fromValue(Type(defaultVal)), __VA_ARGS__ }),                                  \
             true);
 
-// Defines a global property on a node. Shorthand for .globalOnly = true, and to keep compat with prev design.
-#define CONFIG_GLOBAL_PROPERTY(Type, name, defaultVal, ...)                                                            \
-    CONFIG_PROPERTY(Type, name, DEFAULT_ARG(defaultVal), .globalOnly = true, __VA_ARGS__)
+// Defines a global property on a node. Shorthand for .globalOnly = true.
+#define SETTINGS_GLOBAL_PROPERTY(Type, name, defaultVal, ...)                                                          \
+    SETTINGS_PROPERTY(Type, name, DEFAULT_ARG(defaultVal), .globalOnly = true, __VA_ARGS__)
 
 // Defines a subobject property on a node. Subobject properties are CONSTANT.
-#define CONFIG_SUBOBJECT_IMPL(Type, name, global)                                                                      \
+#define SETTINGS_SUBOBJECT_IMPL(Type, name, global)                                                                    \
     Q_PROPERTY(Type* name READ name CONSTANT)                                                                          \
                                                                                                                        \
 public:                                                                                                                \
@@ -113,13 +113,13 @@ private:                                                                        
              &staticMetaObject, QStringLiteral(#name), { .defaultValue = QVariant(), .globalOnly = global }),          \
             true);
 
-#define CONFIG_SUBOBJECT(Type, name) CONFIG_SUBOBJECT_IMPL(Type, name, false)
+#define SETTINGS_SUBOBJECT(Type, name) SETTINGS_SUBOBJECT_IMPL(Type, name, false)
 
 // Defines a global subobject on a node. Everything inside it is global only.
-#define CONFIG_GLOBAL_SUBOBJECT(Type, name) CONFIG_SUBOBJECT_IMPL(Type, name, true)
+#define SETTINGS_GLOBAL_SUBOBJECT(Type, name) SETTINGS_SUBOBJECT_IMPL(Type, name, true)
 
-// Defines a list type for use with CONFIG_LIST.
-#define CONFIG_LIST_TYPE(Element, Name)                                                                                \
+// Defines a list type for use with SETTINGS_LIST.
+#define SETTINGS_LIST_TYPE(Element, Name)                                                                              \
     class Name : public caelestia::settings::ListNode {                                                                \
         Q_OBJECT                                                                                                       \
         QML_ANONYMOUS                                                                                                  \
@@ -142,7 +142,7 @@ private:                                                                        
     };
 
 // Defines a list property on a node. List properties are CONSTANT.
-#define CONFIG_LIST_IMPL(Type, name, global, defaultVal, ...)                                                          \
+#define SETTINGS_LIST_IMPL(Type, name, global, defaultVal, ...)                                                        \
     Q_PROPERTY(Type* name READ name CONSTANT)                                                                          \
                                                                                                                        \
 public:                                                                                                                \
@@ -159,9 +159,9 @@ private:                                                                        
                  __VA_ARGS__ }),                                                                                       \
             true);
 
-#define CONFIG_LIST(Type, name, defaultVal, ...)                                                                       \
-    CONFIG_LIST_IMPL(Type, name, false, DEFAULT_ARG(defaultVal), __VA_ARGS__)
+#define SETTINGS_LIST(Type, name, defaultVal, ...)                                                                     \
+    SETTINGS_LIST_IMPL(Type, name, false, DEFAULT_ARG(defaultVal), __VA_ARGS__)
 
 // Defines a global list on a node. Everything inside it is global only.
-#define CONFIG_GLOBAL_LIST(Type, name, defaultVal, ...)                                                                \
-    CONFIG_LIST_IMPL(Type, name, true, DEFAULT_ARG(defaultVal), __VA_ARGS__)
+#define SETTINGS_GLOBAL_LIST(Type, name, defaultVal, ...)                                                              \
+    SETTINGS_LIST_IMPL(Type, name, true, DEFAULT_ARG(defaultVal), __VA_ARGS__)

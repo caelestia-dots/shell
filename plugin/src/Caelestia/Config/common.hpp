@@ -7,6 +7,20 @@
 #include "settings/macros.hpp"
 #include "settings/objectnode.hpp"
 
+#define CONFIG_NODE_NO_CTOR SETTINGS_NODE_NO_CTOR
+#define CONFIG_NODE SETTINGS_NODE
+#define CONFIG_PROPERTY SETTINGS_PROPERTY
+#define CONFIG_GLOBAL_PROPERTY SETTINGS_GLOBAL_PROPERTY
+
+#define CONFIG_SUBOBJECT(Type, name) SETTINGS_SUBOBJECT(caelestia::config::Type, name)
+#define CONFIG_GLOBAL_SUBOBJECT(Type, name) SETTINGS_GLOBAL_SUBOBJECT(caelestia::config::Type, name)
+
+#define CONFIG_LIST_TYPE SETTINGS_LIST_TYPE
+#define CONFIG_LIST(Type, name, defaultVal, ...)                                                                       \
+    SETTINGS_LIST(caelestia::config::Type, name, DEFAULT_ARG(defaultVal), __VA_ARGS__)
+#define CONFIG_GLOBAL_LIST(Type, name, defaultVal, ...)                                                                \
+    SETTINGS_GLOBAL_LIST(caelestia::config::Type, name, DEFAULT_ARG(defaultVal), __VA_ARGS__)
+
 namespace caelestia::config {
 
 Q_DECLARE_LOGGING_CATEGORY(lcConfig)

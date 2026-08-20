@@ -4,7 +4,7 @@
 #include <qstringlist.h>
 #include <qvariantlist.h>
 
-#include "settings/macros.hpp"
+#include "common.hpp"
 #include "settings/objectnode.hpp"
 
 #include "common.hpp"

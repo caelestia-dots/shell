@@ -3,7 +3,7 @@
 #include <qstandardpaths.h>
 #include <qstring.h>
 
-#include "settings/macros.hpp"
+#include "common.hpp"
 #include "settings/objectnode.hpp"
 
 namespace caelestia::config {

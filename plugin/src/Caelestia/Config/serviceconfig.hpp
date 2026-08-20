@@ -4,7 +4,7 @@
 #include <qstring.h>
 #include <qvariantlist.h>
 
-#include "settings/macros.hpp"
+#include "common.hpp"
 #include "settings/objectnode.hpp"
 
 namespace caelestia::config {
