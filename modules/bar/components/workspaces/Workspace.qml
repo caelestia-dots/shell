@@ -3,6 +3,7 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import QtQuick.Layouts
 import Quickshell
+import M3Shapes
 import Caelestia.Config
 import qs.components
 import qs.services
@@ -29,34 +30,100 @@ ColumnLayout {
 
     spacing: 0
 
-    StyledText {
+    Item {
         id: indicator
 
         Layout.alignment: Qt.AlignHCenter | Qt.AlignTop
+        Layout.preferredWidth: Tokens.sizes.bar.innerWidth - Tokens.padding.small
         Layout.preferredHeight: Tokens.sizes.bar.innerWidth - Tokens.padding.small
 
-        animate: true
-        text: {
-            const ws = Hypr.workspaces.values.find(w => w.id === root.ws);
-            const wsName = !ws || ws.name == root.ws ? root.ws : ws.name[0];
-            let displayName = wsName.toString();
-            if (Config.bar.workspaces.capitalisation.toLowerCase() === "upper") {
-                displayName = displayName.toUpperCase();
-            } else if (Config.bar.workspaces.capitalisation.toLowerCase() === "lower") {
-                displayName = displayName.toLowerCase();
+        readonly property bool active: root.activeWsId === root.ws
+        property int randShape: MaterialShape.Slanted
+        property int prevActiveWsId: -1
+
+        onActiveChanged: {
+            const wasActive = !active && prevActiveWsId === root.ws;
+            if (!wasActive) {
+                const shapes = [MaterialShape.Slanted, MaterialShape.Arch, MaterialShape.Oval, MaterialShape.Pill, MaterialShape.Triangle, MaterialShape.Arrow, MaterialShape.Diamond, MaterialShape.Pentagon, MaterialShape.Gem, MaterialShape.VerySunny, MaterialShape.Sunny, MaterialShape.Cookie4Sided, MaterialShape.Cookie6Sided, MaterialShape.Cookie7Sided, MaterialShape.Cookie9Sided, MaterialShape.Cookie12Sided, MaterialShape.Clover4Leaf, MaterialShape.Clover8Leaf, MaterialShape.SoftBurst, MaterialShape.Ghostish];
+                randShape = shapes[Math.floor(Math.random() * shapes.length)];
+                activateAnim.running = true;
+            } else {
+                deactivateAnim.running = true;
             }
-            const label = Config.bar.workspaces.label || displayName;
-            const occupiedLabel = Config.bar.workspaces.occupiedLabel || label;
-            const activeLabel = Config.bar.workspaces.activeLabel || (root.isOccupied ? occupiedLabel : label);
-            return root.activeWsId === root.ws ? activeLabel : root.isOccupied ? occupiedLabel : label;
+            prevActiveWsId = root.activeWsId;
         }
-        color: Config.bar.workspaces.occupiedBg || root.isOccupied || root.activeWsId === root.ws ? Colours.palette.m3onSurface : Colours.layer(Colours.palette.m3outlineVariant, 2)
-        verticalAlignment: Qt.AlignVCenter
-        font.family: Tokens.font.workspaces
+
+        MaterialShape {
+            id: wsShape
+
+            anchors.centerIn: parent
+            implicitSize: indicator.width
+            scale: indicator.active ? 2 / 3 : 1 / 3
+            shape: indicator.active ? indicator.randShape : (root.isOccupied ? MaterialShape.Square : MaterialShape.Circle)
+            color: Config.bar.workspaces.occupiedBg || root.isOccupied || root.activeWsId === root.ws ? Colours.palette.m3onSurface : Colours.layer(Colours.palette.m3outlineVariant, 2)
+
+            Behavior on color {
+                CAnim {}
+            }
+
+            Behavior on scale {
+                enabled: !activateAnim.running && !deactivateAnim.running
+
+                Anim {
+                    type: Anim.DefaultEffects
+                }
+            }
+
+            SequentialAnimation {
+                id: activateAnim
+
+                Anim {
+                    target: wsShape
+                    property: "scale"
+                    from: 1 / 3
+                    to: 2 / 3
+                    type: Anim.FastSpatial
+                }
+                PropertyAction {
+                    target: wsShape
+                    property: "shape"
+                    value: indicator.randShape
+                }
+                PropertyAction {
+                    targets: [activateAnim, deactivateAnim]
+                    property: "running"
+                    value: false
+                }
+            }
+
+            SequentialAnimation {
+                id: deactivateAnim
+
+                Anim {
+                    target: wsShape
+                    property: "scale"
+                    from: 2 / 3
+                    to: 1 / 3
+                    type: Anim.FastSpatial
+                }
+                PropertyAction {
+                    target: wsShape
+                    property: "shape"
+                    value: root.isOccupied ? MaterialShape.Square : MaterialShape.Circle
+                }
+                PropertyAction {
+                    targets: [activateAnim, deactivateAnim]
+                    property: "running"
+                    value: false
+                }
+            }
+        }
     }
 
     Loader {
         id: windows
+
+        property int ws: root.ws
 
         asynchronous: true
 
@@ -68,6 +135,10 @@ ColumnLayout {
         active: root.hasWindows
 
         sourceComponent: Column {
+            id: col
+
+            required property int ws
+
             spacing: 0
 
             add: Transition {
@@ -85,6 +156,7 @@ ColumnLayout {
                     to: 1
                     easing: Tokens.anim.standardDecel
                 }
+
                 Anim {
                     properties: "x,y"
                 }
@@ -93,10 +165,9 @@ ColumnLayout {
             Repeater {
                 model: ScriptModel {
                     values: {
-                        const ws = root.ws;
-                        const windows = Hypr.toplevels.values.filter(c => c.workspace?.id === ws);
+                        const windowsList = Hypr.toplevels.values.filter(c => c.workspace && c.workspace.id === col.ws);
                         const maxIcons = root.Config.bar.workspaces.maxWindowIcons;
-                        return maxIcons > 0 ? windows.slice(0, maxIcons) : windows;
+                        return maxIcons > 0 ? windowsList.slice(0, maxIcons) : windowsList;
                     }
                 }
 
