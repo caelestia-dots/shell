@@ -16,5 +16,7 @@ Scope {
 
         if (GlobalConfig.utilities.vpn.enabled)
             VPN;
+
+        BbmService;
     }
 }

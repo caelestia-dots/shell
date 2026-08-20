@@ -65,7 +65,7 @@ ColumnLayout {
             values: [...Bluetooth.devices.values].sort((a, b) => (b.connected - a.connected) || (b.paired - a.paired) || a.name.localeCompare(b.name)).slice(0, 5) // qmllint disable unresolved-type
         }
 
-        RowLayout {
+        ColumnLayout {
             id: device
 
             required property BluetoothDevice modelData
@@ -73,7 +73,7 @@ ColumnLayout {
 
             Layout.fillWidth: true
             Layout.rightMargin: Tokens.padding.extraSmall
-            spacing: Tokens.spacing.small
+            spacing: 0
 
             opacity: 0
             scale: 0.7
@@ -93,57 +93,82 @@ ColumnLayout {
                 Anim {}
             }
 
-            MaterialIcon {
-                text: Icons.getBluetoothIcon(device.modelData.icon)
-            }
-
-            StyledText {
-                Layout.leftMargin: Tokens.spacing.extraSmall
-                Layout.rightMargin: Tokens.spacing.extraSmall
+            RowLayout {
                 Layout.fillWidth: true
-                text: device.modelData.name
-                elide: Text.ElideRight
-            }
+                spacing: Tokens.spacing.small
 
-            MaterialIcon {
-                visible: device.modelData.state === BluetoothDeviceState.Connected  // qmllint disable unresolved-type
-                text: device.modelData.batteryAvailable ? Icons.getBatteryIcon(device.modelData.battery) : "battery_alert"
-                color: device.modelData.batteryAvailable && device.modelData.battery < 0.2 ? Colours.palette.m3error : Colours.palette.m3onSurfaceVariant
-            }
-
-            StyledRect {
-                id: connectBtn
-
-                implicitWidth: implicitHeight
-                implicitHeight: connectIcon.implicitHeight + Tokens.padding.extraSmall
-
-                radius: Tokens.rounding.full
-                color: Qt.alpha(Colours.palette.m3primary, device.modelData.state === BluetoothDeviceState.Connected ? 1 : 0) // qmllint disable unresolved-type
-
-                CircularIndicator {
-                    anchors.fill: parent
-                    running: device.loading
+                MaterialIcon {
+                    text: Icons.getBluetoothIcon(device.modelData.icon)
                 }
 
-                StateLayer {
-                    color: device.modelData.state === BluetoothDeviceState.Connected ? Colours.palette.m3onPrimary : Colours.palette.m3onSurface // qmllint disable unresolved-type
-                    disabled: device.loading
-                    onClicked: device.modelData.connected = !device.modelData.connected
+                StyledText {
+                    Layout.leftMargin: Tokens.spacing.extraSmall
+                    Layout.rightMargin: Tokens.spacing.extraSmall
+                    Layout.fillWidth: true
+                    text: device.modelData.name
+                    elide: Text.ElideRight
                 }
 
                 MaterialIcon {
-                    id: connectIcon
+                    visible: device.modelData.state === BluetoothDeviceState.Connected  // qmllint disable unresolved-type
+                    text: device.modelData.batteryAvailable ? Icons.getBatteryIcon(device.modelData.battery) : "battery_alert"
+                    color: device.modelData.batteryAvailable && device.modelData.battery < 0.2 ? Colours.palette.m3error : Colours.palette.m3onSurfaceVariant
+                }
 
-                    anchors.centerIn: parent
-                    animate: true
-                    text: device.modelData.connected ? "link_off" : "link"
-                    color: device.modelData.state === BluetoothDeviceState.Connected ? Colours.palette.m3onPrimary : Colours.palette.m3onSurface // qmllint disable unresolved-type
+                StyledRect {
+                    id: connectBtn
 
-                    opacity: device.loading ? 0 : 1
+                    implicitWidth: implicitHeight
+                    implicitHeight: connectIcon.implicitHeight + Tokens.padding.extraSmall
 
-                    Behavior on opacity {
-                        Anim {
-                            type: Anim.DefaultEffects
+                    radius: Tokens.rounding.full
+                    color: Qt.alpha(Colours.palette.m3primary, device.modelData.state === BluetoothDeviceState.Connected ? 1 : 0) // qmllint disable unresolved-type
+
+                    CircularIndicator {
+                        anchors.fill: parent
+                        running: device.loading
+                    }
+
+                    StateLayer {
+                        color: device.modelData.state === BluetoothDeviceState.Connected ? Colours.palette.m3onPrimary : Colours.palette.m3onSurface // qmllint disable unresolved-type
+                        disabled: device.loading
+                        onClicked: device.modelData.connected = !device.modelData.connected
+                    }
+
+                    MaterialIcon {
+                        id: connectIcon
+
+                        anchors.centerIn: parent
+                        animate: true
+                        text: device.modelData.connected ? "link_off" : "link"
+                        color: device.modelData.state === BluetoothDeviceState.Connected ? Colours.palette.m3onPrimary : Colours.palette.m3onSurface // qmllint disable unresolved-type
+
+                        opacity: device.loading ? 0 : 1
+
+                        Behavior on opacity {
+                            Anim {
+                                type: Anim.DefaultEffects
+                            }
+                        }
+                    }
+                }
+
+                Loader {
+                    visible: status === Loader.Ready
+                    asynchronous: true
+                    active: device.modelData.bonded
+                    sourceComponent: Item {
+                        implicitWidth: connectBtn.implicitWidth
+                        implicitHeight: connectBtn.implicitHeight
+
+                        StateLayer {
+                            radius: Tokens.rounding.full
+                            onClicked: device.modelData.forget()
+                        }
+
+                        MaterialIcon {
+                            anchors.centerIn: parent
+                            text: "delete"
                         }
                     }
                 }
@@ -151,21 +176,13 @@ ColumnLayout {
 
             Loader {
                 visible: status === Loader.Ready
-                asynchronous: true
-                active: device.modelData.bonded
-                sourceComponent: Item {
-                    implicitWidth: connectBtn.implicitWidth
-                    implicitHeight: connectBtn.implicitHeight
-
-                    StateLayer {
-                        radius: Tokens.rounding.full
-                        onClicked: device.modelData.forget()
-                    }
-
-                    MaterialIcon {
-                        anchors.centerIn: parent
-                        text: "delete"
-                    }
+                active: device.modelData.connected
+                    && BbmService.available
+                    && BbmService.dataFor(device.modelData.address) !== null
+                Layout.fillWidth: true
+                sourceComponent: BbmExpandedRow {
+                    bbmData: BbmService.dataFor(device.modelData.address)
+                    address: device.modelData.address
                 }
             }
         }
