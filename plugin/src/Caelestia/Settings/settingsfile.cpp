@@ -104,6 +104,9 @@ void SettingsFile::load() {
 
     m_lastData = json;
     emit changed();
+
+    qCDebug(lcSettingsFile) << "Read JSON from" << m_path;
+    qCDebug(lcSettingsFile) << " " << json;
 }
 
 void SettingsFile::save() {

@@ -6,14 +6,24 @@ namespace caelestia::config {
 
 using Qt::StringLiterals::operator""_s;
 
+namespace {
+
+QString nameFor(const QString& key) {
+    return key.isEmpty() ? u"global"_s : key;
+}
+
+} // namespace
+
 ConfigRoot::ConfigRoot(const QString& path, ConfigRoot* fallback, QObject* parent)
     : RootNode(path, fallback, parent) {
     load();
     bindTokens();
+
+    qCDebug(lcConfig) << "Created config root for" << nameFor(key());
 }
 
 void ConfigRoot::bindTokens() {
-    qCDebug(lcConfig) << "Binding appearance to token values for" << (key().isEmpty() ? u"global"_s : key());
+    qCDebug(lcConfig) << "Binding appearance to token values for" << nameFor(key());
 
     auto* const tokens = TokensSingleton::instance()->appearance();
     m_appearance->rounding()->bindTokens(tokens->rounding());
@@ -25,6 +35,8 @@ void ConfigRoot::bindTokens() {
 TokensRoot::TokensRoot(const QString& path, TokensRoot* fallback, QObject* parent)
     : RootNode(path, fallback, parent) {
     load();
+
+    qCDebug(lcConfig) << "Created tokens root for" << nameFor(key());
 }
 
 } // namespace caelestia::config
