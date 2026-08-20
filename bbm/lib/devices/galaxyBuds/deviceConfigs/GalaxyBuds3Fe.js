@@ -1,0 +1,57 @@
+'use strict';
+
+// 10) Galaxy Buds 3 FE
+export default {
+    modelId: 10,
+    name: 'Galaxy Buds3 FE',
+
+    features: {
+        adaptiveNoiseControl: true,
+        advancedTouchLockForCalls: true,
+        advancedTouchIsPinch: true,
+        //  ambientCustomize: true,
+        ambientExtraLoud: true,
+        ambientSidetone: true,
+        ambientSound: true,
+        ambientSoundVolume: true,
+        ambientVolumeMax: 4,
+        autoAdjustSound: true,
+        bixbyWakeup: true,
+        callPathControl: true,
+        caseBattery: true,
+        chargingState: true,
+        detectConversations: true,
+        doubleTapVolume: true,
+        extraClearCallSound: true,
+        fmgRingWhileWearing: true,
+        gamingMode: true,
+        gearFitTest: true,
+        headTracking: true,
+        noiseCancellation: true,
+        noiseControl: true,
+        noiseControlModeDualSide: true,
+        noiseControlsWithOneEarbud: true,
+        noiseReductionAdjustments: true,
+        noiseReductionLevels: 4,
+        noiseTouchAndHoldNewVersion: true,
+        quickLaunchAdvance: true,
+        rename: true,
+        seamlessConnection: true,
+        smartThingsFind: true,
+        spatialSensor: true,
+        stereoPan: true,
+    },
+    touchOptions: {
+        voiceAssistant: 1,
+        noiseControl: 2,
+        volume: 3,
+        spotifySpotOn: 4,
+        otherL: 5,
+        otherR: 6,
+    },
+
+    albumArtIcon: 'earbuds-stem',
+    budsIcon: 'earbuds-stem',
+    case: 'case-normal',
+};
+

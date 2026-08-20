@@ -107,8 +107,14 @@ Singleton {
                     ? content.split(/, (?=')/).map(item => item.replace(/^'|'$/g, ''))
                     : [];
             } else {
-                const n = parseInt(raw, 10);
-                result[key] = isNaN(n) ? raw : n;
+                // GVariant type-annotated number: "int32 65", "uint32 3", "double 1.5", etc.
+                const typedNum = /^(?:byte|int16|uint16|int32|uint32|int64|uint64|double|handle) (-?\d+(?:\.\d+)?)$/.exec(raw);
+                if (typedNum) {
+                    result[key] = Number(typedNum[1]);
+                } else {
+                    const n = parseInt(raw, 10);
+                    result[key] = isNaN(n) ? raw : n;
+                }
             }
         }
         return result;

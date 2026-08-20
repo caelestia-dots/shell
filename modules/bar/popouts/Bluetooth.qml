@@ -20,6 +20,7 @@ ColumnLayout {
 
     StyledText {
         Layout.topMargin: Tokens.padding.medium
+        Layout.leftMargin: Tokens.padding.extraSmall
         Layout.rightMargin: Tokens.padding.extraSmall
         text: qsTr("Bluetooth")
         font: Tokens.font.body.builders.medium.weight(Font.Medium).build()
@@ -47,6 +48,7 @@ ColumnLayout {
 
     StyledText {
         Layout.topMargin: Tokens.spacing.small
+        Layout.leftMargin: Tokens.padding.extraSmall
         Layout.rightMargin: Tokens.padding.extraSmall
         text: {
             const devices = Bluetooth.devices.values; // qmllint disable unresolved-type
@@ -207,6 +209,7 @@ ColumnLayout {
         property alias toggle: toggle
 
         Layout.fillWidth: true
+        Layout.leftMargin: Tokens.padding.extraSmall
         Layout.rightMargin: Tokens.padding.extraSmall
         spacing: Tokens.spacing.medium
 
