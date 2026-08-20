@@ -301,7 +301,7 @@ bool ListNode::syncJson(const QJsonValue& json, QList<Diagnostic>& diagnostics) 
     }
 
     const WriteScope scope(this, WriteOrigin::File);
-    setValue(valuesKey(), json, &diagnostics);
+    setValue(valuesKey(), json.toArray(), &diagnostics);
 
     return true;
 }
