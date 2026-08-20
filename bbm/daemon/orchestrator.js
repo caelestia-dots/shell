@@ -39,7 +39,7 @@ export class Orchestrator {
         // Callback for profile registration failures (replaces Notifier)
         this.notifyCb = notifyProfileRegisteredError;
 
-        // address → {record, dataHandler, configChangedId, propsChangedId}
+        // address → {record, dataHandler, configId, propsId}
         this._addressMap = new Map();
         // bluezPath → address (for lookup on removal)
         this._pathToAddress = new Map();
@@ -115,9 +115,9 @@ export class Orchestrator {
             const result = this._enhancedManager.onDeviceSync(
                 path, info.connected, info.icon, info.alias
             );
-            // ESMD stores the dataHandler in its own map and calls toggle.sync();
-            // we read it back from the return value here to announce to D-Bus clients.
-            if (result?.dataHandler && !this._pathToAddress.has(path))
+            // Always call updateDeviceMapCb when a dataHandler is available — it handles
+            // both first-connect (creates record) and reconnect (rewires to fresh handler).
+            if (result?.dataHandler)
                 this.updateDeviceMapCb(path, result.dataHandler);
         }
         this._enhancedManager.updateEnhancedDevicesInstance();
@@ -128,14 +128,40 @@ export class Orchestrator {
     }
 
     /**
-     * Called by EnhancedDeviceSupportManager when a device's protocol handshake
-     * completes and a DataHandler is ready.
-     * This is the moment we create the DeviceRecord and announce DeviceAdded.
+     * Called whenever EnhancedDeviceSupportManager has a live DataHandler for a device.
+     * Handles both first-connect (creates DeviceRecord, announces DeviceAdded) and
+     * reconnect (rewires signal handlers to the fresh DataHandler so live data flows again).
      */
     updateDeviceMapCb(path, dataHandler) {
-        if (this._pathToAddress.has(path))
-            return; // Already announced; further updates come via configuration-changed signal
+        const existingAddress = this._pathToAddress.get(path);
 
+        if (existingAddress) {
+            // Device already known — check if the DataHandler changed (reconnect case).
+            const entry = this._addressMap.get(existingAddress);
+            if (!entry || entry.dataHandler === dataHandler)
+                return; // Same handler or entry missing — nothing to do.
+
+            // Disconnect stale signals from the dead handler and rewire to the fresh one.
+            entry.dataHandler.disconnect(entry.configId);
+            entry.dataHandler.disconnect(entry.propsId);
+
+            updateRecordFromDataHandler(entry.record, dataHandler);
+
+            const configId = dataHandler.connect('configuration-changed', () => {
+                updateRecordFromDataHandler(entry.record, dataHandler);
+                this._dbusService.emitDeviceChanged(existingAddress);
+            });
+            const propsId = dataHandler.connect('properties-changed', () => {
+                updateRecordFromDataHandler(entry.record, dataHandler);
+                this._dbusService.emitDeviceChanged(existingAddress);
+            });
+
+            this._addressMap.set(existingAddress, {record: entry.record, dataHandler, configId, propsId});
+            this._dbusService.emitDeviceChanged(existingAddress);
+            return;
+        }
+
+        // First time seeing this device — create DeviceRecord and announce to D-Bus clients.
         const info = this._enumerator.getDevices().get(path);
         if (!info) {
             console.warn('BBM: updateDeviceMapCb called for unknown path:', path);
@@ -144,11 +170,9 @@ export class Orchestrator {
 
         const {address, alias, icon, connected, paired} = info;
 
-        // Create the canonical DeviceRecord
         const record = createDeviceRecord(address, alias, icon, connected, paired);
         updateRecordFromDataHandler(record, dataHandler);
 
-        // Subscribe to DataHandler signals — update record and notify D-Bus clients
         const configId = dataHandler.connect('configuration-changed', () => {
             updateRecordFromDataHandler(record, dataHandler);
             this._dbusService.emitDeviceChanged(address);
@@ -161,23 +185,20 @@ export class Orchestrator {
         this._addressMap.set(address, {record, dataHandler, configId, propsId});
         this._pathToAddress.set(path, address);
 
-        // Announce to D-Bus clients
         this._dbusService.addDevice(address, record, dataHandler);
 
-        // Trigger another sync so WidgetManagers (if any) are notified
+        // Run another sync so any pending devices are also processed.
         this.sync();
     }
 
     _onDeviceAdded(path) {
-        // BlueZ enumeration found a new device — run sync to detect type
         this.sync();
     }
 
     _onDeviceRemoved(path) {
         const address = this._pathToAddress.get(path);
-        if (address) {
+        if (address)
             this._cleanupDevice(address, path);
-        }
         this.sync();
     }
 
