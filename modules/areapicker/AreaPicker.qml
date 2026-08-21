@@ -14,6 +14,7 @@ Scope {
         property bool freeze
         property bool closing
         property bool clipboardOnly
+        property bool saveAndClip
 
         Variants {
             model: Screens.screens
@@ -128,6 +129,20 @@ Scope {
             root.closing = false;
             root.clipboardOnly = true;
             root.activeAsync = true;
+        }
+    }
+
+    // qmllint disable unresolved-type
+    CustomShortcut {
+        // qmllint enable unresolved-type
+        name: "screenshotFreezeClipSave"
+        description: "Open screenshot tool (save and clipboard)"
+        onPressed: {
+            root.freeze = true;
+            root.closing = false;
+            root.clipboardOnly = false;
+            root.activeAsync = true;
+            root.saveAndClip = true;
         }
     }
 }
