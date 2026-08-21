@@ -15,6 +15,10 @@ Singleton {
     readonly property string registryPath: `${Paths.config}/dgpu.json`
     readonly property string generatorPath: `${Quickshell.shellDir}/gpu/dgpu_generator.py`
 
+    // Must match WRAPPER_SUFFIX in gpu/dgpu_generator.py; Quickshell desktop
+    // entry ids carry no .desktop extension, so wrappers end in this suffix.
+    readonly property string wrapperSuffix: " (dGPU)"
+
     // Desktop entry ids (with .desktop) currently assigned to the dGPU
     property var assignments: ({})
 
@@ -23,6 +27,10 @@ Singleton {
 
     function normaliseId(id: string): string {
         return id.endsWith(".desktop") ? id : `${id}.desktop`;
+    }
+
+    function isWrapper(id: string): bool {
+        return root.normaliseId(id).endsWith(`${root.wrapperSuffix}.desktop`);
     }
 
     function isDgpu(id: string): bool {
