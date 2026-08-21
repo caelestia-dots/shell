@@ -74,26 +74,30 @@ Scope {
         id: mediaDevices
     }
 
+    AudioOutput {
+        id: lowBatteryAudioOutput
+
+        device: root.currentAudioDevice
+    }
+
+    AudioOutput {
+        id: highBatteryAudioOutput
+
+        device: root.currentAudioDevice
+    }
+
     MediaPlayer {
         id: notifyLowBattery
 
         source: Paths.absolutePath(GlobalConfig.paths.lowBatNotifSound)
-        audioOutput: AudioOutput {
-            id: lowBatteryAudioOutput
-
-            device: root.currentAudioDevice
-        }
+        audioOutput: lowBatteryAudioOutput
     }
 
     MediaPlayer {
         id: notifyHighBattery
 
         source: Paths.absolutePath(GlobalConfig.paths.highBatNotifSound)
-        audioOutput: AudioOutput {
-            id: highBatteryAudioOutput
-
-            device: root.currentAudioDevice
-        }
+        audioOutput: highBatteryAudioOutput
     }
 
     Connections {
