@@ -42,6 +42,10 @@ private:
     [[nodiscard]] QString fileSignature() const;
 
     void connectAutoSave(ConfigNode* node);
+    // Applies flush/discard to the whole config tree, mirroring connectAutoSave's
+    // traversal. Spans lists' child objects but not their elements, which load quietly.
+    void flushPendingBatches(ConfigNode* node);
+    void discardPendingBatches(ConfigNode* node);
     // Blocks saving until a load succeeds, memory no longer represents the file
     void markLoadFailed();
 

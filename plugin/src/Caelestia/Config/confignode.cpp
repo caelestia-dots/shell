@@ -97,4 +97,19 @@ void ConfigNode::emitBatchedChanges() {
     emit propertiesChanged(changes);
 }
 
+void ConfigNode::flushBatchedChanges() {
+    if (!m_batchTimer)
+        return;
+
+    m_batchTimer->stop();
+    emitBatchedChanges();
+}
+
+void ConfigNode::discardBatchedChanges() {
+    if (m_batchTimer)
+        m_batchTimer->stop();
+
+    m_pendingChanges.clear();
+}
+
 } // namespace caelestia::config
