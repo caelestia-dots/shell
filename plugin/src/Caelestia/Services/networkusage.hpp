@@ -20,8 +20,8 @@ class NetworkUsage : public TickingService {
     Q_PROPERTY(qreal uploadTotal READ uploadTotal NOTIFY changed)
     Q_PROPERTY(int historyLength READ historyLength CONSTANT)
 
-    Q_PROPERTY(internal::CircularBuffer* downloadBuffer READ downloadBuffer CONSTANT)
-    Q_PROPERTY(internal::CircularBuffer* uploadBuffer READ uploadBuffer CONSTANT)
+    Q_PROPERTY(caelestia::internal::CircularBuffer* downloadBuffer READ downloadBuffer CONSTANT)
+    Q_PROPERTY(caelestia::internal::CircularBuffer* uploadBuffer READ uploadBuffer CONSTANT)
 
 public:
     explicit NetworkUsage(QObject* parent = nullptr);
@@ -35,8 +35,8 @@ public:
     Q_INVOKABLE [[nodiscard]] QVariantMap formatBytes(qreal bytes) const;
     Q_INVOKABLE [[nodiscard]] QVariantMap formatBytesTotal(qreal bytes) const;
 
-    [[nodiscard]] internal::CircularBuffer* downloadBuffer() const;
-    [[nodiscard]] internal::CircularBuffer* uploadBuffer() const;
+    [[nodiscard]] caelestia::internal::CircularBuffer* downloadBuffer() const;
+    [[nodiscard]] caelestia::internal::CircularBuffer* uploadBuffer() const;
 
 signals:
     void changed();
@@ -51,8 +51,8 @@ private:
     qreal m_uploadTotal = 0.0;
     int m_historyLength = 30;
 
-    internal::CircularBuffer* m_downloadBuffer = nullptr;
-    internal::CircularBuffer* m_uploadBuffer = nullptr;
+    caelestia::internal::CircularBuffer* m_downloadBuffer = nullptr;
+    caelestia::internal::CircularBuffer* m_uploadBuffer = nullptr;
 
     quint64 m_prevRx = 0;
     quint64 m_prevTx = 0;

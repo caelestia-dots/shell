@@ -33,11 +33,11 @@ int NetworkUsage::historyLength() const {
     return m_historyLength;
 }
 
-internal::CircularBuffer* NetworkUsage::downloadBuffer() const {
+caelestia::internal::CircularBuffer* NetworkUsage::downloadBuffer() const {
     return m_downloadBuffer;
 }
 
-internal::CircularBuffer* NetworkUsage::uploadBuffer() const {
+caelestia::internal::CircularBuffer* NetworkUsage::uploadBuffer() const {
     return m_uploadBuffer;
 }
 
