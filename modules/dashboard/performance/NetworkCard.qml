@@ -2,6 +2,7 @@ import QtQuick
 import QtQuick.Layouts
 import Caelestia.Config
 import Caelestia.Internal
+import Caelestia.Services
 import qs.components
 import qs.components.misc
 import qs.services
@@ -15,7 +16,7 @@ StyledRect {
     implicitWidth: Tokens.sizes.dashboard.perfNetworkCardWidth
     implicitHeight: Tokens.sizes.dashboard.perfNetworkCardHeight
 
-    Ref {
+    ServiceRef {
         service: NetworkUsage
     }
 
