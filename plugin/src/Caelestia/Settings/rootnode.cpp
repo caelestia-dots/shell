@@ -30,6 +30,8 @@ void RootNode::reloadFromFile() {
 
     if (m_diagnostics != oldDiagnostics)
         emit diagnosticsChanged();
+
+    emit loaded();
 }
 
 void RootNode::saveToFile() {

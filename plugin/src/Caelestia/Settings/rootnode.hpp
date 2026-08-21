@@ -18,6 +18,7 @@ public:
 
 signals:
     void diagnosticsChanged();
+    void loaded();
     void loadFailed(const QString& error);
     void saveFailed(const QString& error);
 
