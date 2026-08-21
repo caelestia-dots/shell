@@ -9,6 +9,21 @@ namespace caelestia::settings {
 ObjectNode::ObjectNode(ObjectNode* fallback, QObject* parent, bool globalOnly)
     : Node(fallback, parent, globalOnly) {}
 
+void ObjectNode::resetOption(const QString& key) {
+    const auto* desc = schema().get(key);
+
+    if (!desc) {
+        qCWarning(lcSettings) << "Attempted to reset unknown option" << pathFor(key);
+        return;
+    }
+
+    const WriteScope scope(this, WriteOrigin::QmlReset);
+    if (desc->isNode)
+        value(key).value<Node*>()->resetToDefaults();
+    else
+        setValue(key, fallbackNode() ? fallbackNode()->value(key) : desc->defaultValue(this));
+}
+
 QJsonValue ObjectNode::toJson(bool sparse) const {
     QJsonObject json;
 

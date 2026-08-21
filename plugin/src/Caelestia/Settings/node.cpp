@@ -106,7 +106,7 @@ void Node::resetToDefaults() {
 
     m_quarantine.reset(); // Reset quarantine as well
 
-    const WriteScope scope(this, WriteOrigin::FileReset);
+    // No write scope, callers should create the scope
     for (const auto& desc : schema().descriptors()) {
         if (desc.isNode)
             value(desc.key).value<Node*>()->resetToDefaults();
