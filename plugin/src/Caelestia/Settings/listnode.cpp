@@ -274,9 +274,11 @@ void ListNode::resetToDefaults() {
 }
 
 QJsonValue ListNode::toJson(bool sparse) const {
+    Q_UNUSED(sparse) // Lists can't be sparse
+
     QJsonArray array;
     for (auto* const element : m_elements)
-        array << element->toJson(sparse);
+        array << element->toJson(false);
     return array;
 }
 
