@@ -5,8 +5,6 @@
 
 namespace caelestia::config {
 
-using Qt::StringLiterals::operator""_s;
-
 // Helper: connect all changed signals from a token object to a single valuesChanged signal,
 // plus connect the local scaleChanged signal.
 template <typename Source, typename Target> static void connectTokenSignals(Source* source, Target* target) {
@@ -142,62 +140,6 @@ int AppearancePadding::extraLargeIncreased() const {
 
 int AppearancePadding::extraExtraLarge() const {
     return m_tokens ? static_cast<int>(m_tokens->extraExtraLarge() * m_scale) : 0;
-}
-
-// FontConfig
-
-// Defaults are per style, so they are applied after construction. The fallback layer still wins.
-void FontConfig::setDefaults(int size, int weight, const QVariantMap& vaxes) {
-    m_size = fallbackValue(&FontConfig::m_size, size);
-    m_weight = fallbackValue(&FontConfig::m_weight, weight);
-    m_vaxes = fallbackValue(&FontConfig::m_vaxes, vaxes);
-}
-
-// FontStyleConfig
-
-void FontStyleConfig::setDefaultFamily(const QString& family) {
-    m_family = fallbackValue(&FontStyleConfig::m_family, family);
-}
-
-// AppearanceFont
-
-AppearanceFont::AppearanceFont(AppearanceFont* fallback, QObject* parent, bool globalOnly)
-    : settings::ObjectNode(fallback, parent, globalOnly) {
-    const auto sans = u"GoogleSansFlex"_s;
-    const auto mono = u"CaskaydiaCove NF"_s;
-    const auto icons = u"Material Symbols Rounded"_s;
-    const QVariantMap vaxes = { { u"ROND"_s, 25 } };
-
-    m_headline->setDefaultFamily(sans);
-    m_headline->large()->setDefaults(32, QFont::Medium, vaxes);
-    m_headline->medium()->setDefaults(28, QFont::Medium, vaxes);
-    m_headline->small()->setDefaults(24, QFont::Medium, vaxes);
-
-    m_title->setDefaultFamily(sans);
-    m_title->large()->setDefaults(22, QFont::Medium, vaxes);
-    m_title->medium()->setDefaults(16, QFont::Medium, vaxes);
-    m_title->small()->setDefaults(14, QFont::Medium, vaxes);
-
-    m_body->setDefaultFamily(sans);
-    m_body->large()->setDefaults(16, QFont::Normal, vaxes);
-    m_body->medium()->setDefaults(14, QFont::Normal, vaxes);
-    m_body->small()->setDefaults(12, QFont::Normal, vaxes);
-
-    m_label->setDefaultFamily(sans);
-    m_label->large()->setDefaults(14, QFont::Medium, vaxes);
-    m_label->medium()->setDefaults(12, QFont::Medium, vaxes);
-    m_label->small()->setDefaults(11, QFont::Normal, vaxes);
-
-    m_mono->setDefaultFamily(mono);
-    m_mono->large()->setDefaults(16, QFont::Normal);
-    m_mono->medium()->setDefaults(14, QFont::Normal);
-    m_mono->small()->setDefaults(12, QFont::Normal);
-
-    m_icon->setDefaultFamily(icons);
-    m_icon->extraLarge()->setDefaults(static_cast<int>(48 / 1.33), QFont::Normal);
-    m_icon->large()->setDefaults(static_cast<int>(32 / 1.33), QFont::Normal);
-    m_icon->medium()->setDefaults(static_cast<int>(24 / 1.33), QFont::Normal);
-    m_icon->small()->setDefaults(static_cast<int>(20 / 1.33), QFont::Normal);
 }
 
 // AnimDurations

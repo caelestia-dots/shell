@@ -118,62 +118,108 @@ private:
     PaddingTokens* m_tokens = nullptr;
 };
 
-class FontConfig : public settings::ObjectNode {
-    CONFIG_NODE(FontConfig, settings::ObjectNode)
+namespace detail {
 
-    // Empty family inherits from the parent FontStyleConfig.
-    CONFIG_PROPERTY(QString, family, QString())
-    CONFIG_PROPERTY(int, size, 14)
-    CONFIG_PROPERTY(int, weight, QFont::Normal)
-    CONFIG_PROPERTY(bool, italic, false)
-    CONFIG_PROPERTY(QVariantMap, vaxes, {})
-
-public:
-    void setDefaults(int size, int weight = QFont::Normal, const QVariantMap& vaxes = {});
+struct FontConfig {
+    QString family = QString();
+    int size;
+    int weight = QFont::Normal;
+    bool italic = false;
+    QVariantMap vaxes = { { u"ROND"_s, 25 } };
 };
 
-class FontStyleConfig : public settings::ObjectNode {
-    CONFIG_NODE(FontStyleConfig, settings::ObjectNode)
+} // namespace detail
 
-    CONFIG_PROPERTY(QString, family, u"GoogleSansFlex"_s)
-    CONFIG_SUBOBJECT(FontConfig, large)
-    CONFIG_SUBOBJECT(FontConfig, medium)
-    CONFIG_SUBOBJECT(FontConfig, small)
+#define ARG(...) __VA_ARGS__
+#define FONT(...) detail::FontConfig __VA_ARGS__
+#define FONT_CONFIG(Style, Size, props)                                                                                \
+    class FontConfig##Style##Size : public settings::ObjectNode {                                                      \
+        CONFIG_NODE(FontConfig##Style##Size, settings::ObjectNode)                                                     \
+                                                                                                                       \
+        CONFIG_PROPERTY(QString, family, ARG([](const settings::Node* self) {                                          \
+            const auto family = ARG(props).family;                                                                     \
+            return family.isEmpty() ? self->parentNode()->value(u"family"_s).toString() : family;                      \
+        }))                                                                                                            \
+        CONFIG_PROPERTY(int, size, ARG(props).size)                                                                    \
+        CONFIG_PROPERTY(int, weight, ARG(props).weight)                                                                \
+        CONFIG_PROPERTY(bool, italic, ARG(props).italic)                                                               \
+        CONFIG_PROPERTY(QVariantMap, vaxes, ARG(props).vaxes)                                                          \
+    };
+#define FONT_STYLE(Style, family_, large_, medium_, small_)                                                            \
+    FONT_CONFIG(Style, Large, ARG(large_))                                                                             \
+    FONT_CONFIG(Style, Medium, ARG(medium_))                                                                           \
+    FONT_CONFIG(Style, Small, ARG(small_))                                                                             \
+                                                                                                                       \
+    class FontStyle##Style : public settings::ObjectNode {                                                             \
+        CONFIG_NODE(FontStyle##Style, settings::ObjectNode)                                                            \
+                                                                                                                       \
+        CONFIG_PROPERTY(QString, family, family_)                                                                      \
+        CONFIG_SUBOBJECT(FontConfig##Style##Large, large)                                                              \
+        CONFIG_SUBOBJECT(FontConfig##Style##Medium, medium)                                                            \
+        CONFIG_SUBOBJECT(FontConfig##Style##Small, small)                                                              \
+    };
 
-public:
-    void setDefaultFamily(const QString& family);
+// clang-format off
+FONT_STYLE(Headline, u"GoogleSansFlex"_s,
+    FONT({ .size = 32, .weight = QFont::Medium }),
+    FONT({ .size = 28, .weight = QFont::Medium }),
+    FONT({ .size = 24, .weight = QFont::Medium })
+)
+FONT_STYLE(Title, u"GoogleSansFlex"_s,
+    FONT({ .size = 22, .weight = QFont::Medium }),
+    FONT({ .size = 16, .weight = QFont::Medium }),
+    FONT({ .size = 14, .weight = QFont::Medium })
+)
+FONT_STYLE(Body, u"GoogleSansFlex"_s,
+    FONT({ .size = 16 }),
+    FONT({ .size = 14 }),
+    FONT({ .size = 12 })
+)
+FONT_STYLE(Label, u"GoogleSansFlex"_s,
+    FONT({ .size = 14, .weight = QFont::Medium }),
+    FONT({ .size = 12, .weight = QFont::Medium }),
+    FONT({ .size = 11 })
+)
+FONT_STYLE(Mono, u"CaskaydiaCove NF"_s,
+    FONT({ .size = 16, .vaxes = {} }),
+    FONT({ .size = 14, .vaxes = {} }),
+    FONT({ .size = 12, .vaxes = {} })
+)
+// clang-format on
+
+FONT_CONFIG(Icon, ExtraLarge, FONT({ .size = static_cast<int>(48 / 1.33) }))
+FONT_CONFIG(Icon, Large, FONT({ .size = static_cast<int>(32 / 1.33) }))
+FONT_CONFIG(Icon, Medium, FONT({ .size = static_cast<int>(24 / 1.33) }))
+FONT_CONFIG(Icon, Small, FONT({ .size = static_cast<int>(20 / 1.33) }))
+
+class FontStyleIcon : public settings::ObjectNode {
+    CONFIG_NODE(FontStyleIcon, settings::ObjectNode)
+
+    CONFIG_PROPERTY(QString, family, u"Material Symbols Rounded"_s)
+    CONFIG_SUBOBJECT(FontConfigIconExtraLarge, extraLarge)
+    CONFIG_SUBOBJECT(FontConfigIconLarge, large)
+    CONFIG_SUBOBJECT(FontConfigIconMedium, medium)
+    CONFIG_SUBOBJECT(FontConfigIconSmall, small)
 };
 
-// The schema base is ObjectNode, not FontStyleConfig, so the inherited styles stay in the schema
-class IconFontStyleConfig : public FontStyleConfig {
-    CONFIG_NODE_NO_CTOR(IconFontStyleConfig, settings::ObjectNode)
-    QML_ANONYMOUS
-
-    CONFIG_SUBOBJECT(FontConfig, extraLarge)
-
-public:
-    explicit IconFontStyleConfig(
-        IconFontStyleConfig* fallback = nullptr, QObject* parent = nullptr, bool globalOnly = false)
-        : FontStyleConfig(fallback, parent, globalOnly) {}
-};
+#undef ARG
+#undef FONT
+#undef FONT_CONFIG
+#undef FONT_STYLE
 
 class AppearanceFont : public settings::ObjectNode {
-    CONFIG_NODE_NO_CTOR(AppearanceFont, settings::ObjectNode)
-    QML_ANONYMOUS
+    CONFIG_NODE(AppearanceFont, settings::ObjectNode)
 
     CONFIG_PROPERTY(qreal, scale, 1)
-    CONFIG_SUBOBJECT(FontStyleConfig, headline)
-    CONFIG_SUBOBJECT(FontStyleConfig, title)
-    CONFIG_SUBOBJECT(FontStyleConfig, body)
-    CONFIG_SUBOBJECT(FontStyleConfig, label)
-    CONFIG_SUBOBJECT(FontStyleConfig, mono)
-    CONFIG_SUBOBJECT(IconFontStyleConfig, icon)
+    CONFIG_SUBOBJECT(FontStyleHeadline, headline)
+    CONFIG_SUBOBJECT(FontStyleTitle, title)
+    CONFIG_SUBOBJECT(FontStyleBody, body)
+    CONFIG_SUBOBJECT(FontStyleLabel, label)
+    CONFIG_SUBOBJECT(FontStyleMono, mono)
+    CONFIG_SUBOBJECT(FontStyleIcon, icon)
     CONFIG_PROPERTY(QString, clock, u"Rubik"_s)
     // Google Sans Flex doesn't play well with unicode symbols apparently, so use Rubik instead
     CONFIG_PROPERTY(QString, workspaces, u"Rubik"_s)
-
-public:
-    explicit AppearanceFont(AppearanceFont* fallback = nullptr, QObject* parent = nullptr, bool globalOnly = false);
 };
 
 class AnimDurations : public settings::ObjectNode {
