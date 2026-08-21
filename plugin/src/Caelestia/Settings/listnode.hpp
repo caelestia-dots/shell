@@ -31,7 +31,7 @@ public:
     bool setValue(const QString& key, const QVariant& value, QList<Diagnostic>* diagnostics);
     void resetToDefaults() override;
 
-    [[nodiscard]] QJsonValue toJson(bool sparse = true) const override;
+    [[nodiscard]] QJsonValue toJson(bool sparse = false) const override;
     bool syncJson(const QJsonValue& json, QList<Diagnostic>& diagnostics) override;
 
 signals:
