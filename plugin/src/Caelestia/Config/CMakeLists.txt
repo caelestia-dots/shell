@@ -28,6 +28,8 @@ qml_module(caelestia-config
     LIBRARIES
         Qt::Quick
         Qt::QuickControls2
+    DEPENDENCIES
+        Caelestia.Settings
 )
 target_link_libraries(caelestia-config PUBLIC
     Qt::Gui

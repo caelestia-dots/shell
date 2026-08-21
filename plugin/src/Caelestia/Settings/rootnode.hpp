@@ -9,7 +9,7 @@ namespace caelestia::settings {
 class RootNode : public settings::ObjectNode {
     Q_OBJECT
 
-    Q_PROPERTY(QList<Diagnostic> diagnostics READ diagnostics NOTIFY diagnosticsChanged)
+    Q_PROPERTY(QList<caelestia::settings::Diagnostic> diagnostics READ diagnostics NOTIFY diagnosticsChanged)
 
 public:
     explicit RootNode(const QString& path, RootNode* fallback, QObject* parent = nullptr);
