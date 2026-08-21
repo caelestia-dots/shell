@@ -350,7 +350,7 @@ QList<QVariantMap> ListNode::defaultValue() const {
     const auto* desc = getDescriptor();
     if (!desc)
         return {};
-    return desc->defaultValue().value<QList<QVariantMap>>();
+    return desc->defaultValue(this).value<QList<QVariantMap>>();
 }
 
 bool ListNode::isNested() const {

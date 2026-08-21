@@ -91,10 +91,10 @@ public:                                                                         
     Q_SIGNAL void name##Changed();                                                                                     \
                                                                                                                        \
 private:                                                                                                               \
-    Type m_##name = fallbackValue(&Self::m_##name, Type(defaultVal));                                                  \
+    Type m_##name = fallbackValue(&Self::m_##name, caelestia::settings::DefaultSpec::resolve<Type>(this, defaultVal)); \
     inline static const bool s_register_##name =                                                                       \
         (caelestia::settings::Schema::annotate(&staticMetaObject, QStringLiteral(#name),                               \
-             { .defaultValue = QVariant::fromValue(Type(defaultVal)), __VA_ARGS__ }),                                  \
+             { .defaultValue = caelestia::settings::DefaultSpec::create<Type>(defaultVal), __VA_ARGS__ }),             \
             true);
 
 // Defines a global property on a node. Shorthand for .globalOnly = true.
@@ -114,7 +114,7 @@ private:                                                                        
     Type* m_##name = new Type(fallbackValue(&Self::m_##name, nullptr), this, global);                                  \
     inline static const bool s_register_##name =                                                                       \
         (caelestia::settings::Schema::annotate(                                                                        \
-             &staticMetaObject, QStringLiteral(#name), { .defaultValue = QVariant(), .globalOnly = global }),          \
+             &staticMetaObject, QStringLiteral(#name), { .defaultValue = {}, .globalOnly = global }),                \
             true);
 
 #define SETTINGS_SUBOBJECT(Type, name) SETTINGS_SUBOBJECT_IMPL(Type, name, false)
@@ -158,7 +158,7 @@ private:                                                                        
     Type* m_##name = new Type(fallbackValue(&Self::m_##name, nullptr), this, global);                                  \
     inline static const bool s_register_##name =                                                                       \
         (caelestia::settings::Schema::annotate(&staticMetaObject, QStringLiteral(#name),                               \
-             { .defaultValue = QVariant::fromValue(QList<QVariantMap> defaultVal),                                     \
+             { .defaultValue = caelestia::settings::DefaultSpec::create<QList<QVariantMap>>(defaultVal),                \
                  .globalOnly = global,                                                                                 \
                  __VA_ARGS__ }),                                                                                       \
             true);

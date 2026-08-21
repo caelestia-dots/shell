@@ -24,6 +24,20 @@ bool isNodeType(const QMetaType& type) {
 
 } // namespace
 
+QVariant DefaultSpec::resolve(const Node* self) const {
+    if (func)
+        return func(self);
+    return value;
+}
+
+QString Descriptor::typeString() const {
+    return type.name();
+}
+
+QVariant Descriptor::defaultValue(const Node* self) const {
+    return annotation.defaultValue.resolve(self);
+}
+
 Schema Schema::build(const QMetaObject* meta, int baseOffset, bool includeReadOnly) {
     Schema schema;
     schema.m_descriptors.reserve(meta->propertyCount() - baseOffset);
