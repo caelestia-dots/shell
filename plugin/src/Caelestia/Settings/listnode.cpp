@@ -138,8 +138,8 @@ void ListNode::move(qsizetype from, qsizetype to) {
     const WriteScope scope(this, WriteOrigin::Qml);
 
     const auto fromInvalid = !validIndex(from);
-    if (!fromInvalid || !validIndex(to)) {
-        if (!fromInvalid)
+    if (fromInvalid || !validIndex(to)) {
+        if (fromInvalid)
             qCWarning(lcSettings, "Attempted to move invalid index %lld to index %lld on list node %s, ignoring.", from,
                 to, qUtf8Printable(path()));
         else
