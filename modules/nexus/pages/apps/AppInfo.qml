@@ -14,7 +14,7 @@ PageBase {
     readonly property DesktopEntry app: nState.selectedApp
     readonly property bool favouriteByRegex: app && matchedByRegex(GlobalConfig.launcher.favouriteApps, app.id)
     readonly property bool hiddenByRegex: app && matchedByRegex(GlobalConfig.launcher.hiddenApps, app.id)
-    readonly property bool dgpuVisible: Dgpu.nvidiaPresent
+    readonly property bool dgpuVisible: root.app && Dgpu.nvidiaPresent && !Dgpu.isWrapper(root.app.id)
 
     function isRegexEntry(s: string): bool {
         return /^\^.*\$$/.test(s);
