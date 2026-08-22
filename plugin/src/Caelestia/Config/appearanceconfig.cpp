@@ -142,20 +142,6 @@ int AppearancePadding::extraExtraLarge() const {
     return m_tokens ? static_cast<int>(m_tokens->extraExtraLarge() * m_scale) : 0;
 }
 
-// FontConfig
-
-void FontConfig::setDefaults(int size, int weight, const QVariantMap& vaxes) {
-    m_size = size;
-    m_weight = weight;
-    m_vaxes = vaxes;
-}
-
-// FontStyleConfig
-
-void FontStyleConfig::setDefaultFamily(const QString& family) {
-    m_family = family;
-}
-
 // AnimDurations
 
 void AnimDurations::bindTokens(AnimDurationTokens* tokens) {

@@ -6,6 +6,7 @@
 #include <qjsonobject.h>
 #include <qnetworkaccessmanager.h>
 #include <qnetworkreply.h>
+#include <qtimer.h>
 
 namespace caelestia::services {
 

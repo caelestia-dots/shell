@@ -1,50 +1,33 @@
 #pragma once
 
-#include "rootconfig.hpp"
-
 #include <limits>
 #include <qlist.h>
-#include <qqmlengine.h>
+
+#include "common.hpp"
+#include "settings/objectnode.hpp"
 
 namespace caelestia::config {
 
-class AnimCurves : public ConfigObject {
-    Q_OBJECT
-    QML_ANONYMOUS
+class AnimCurves : public settings::ObjectNode {
+    CONFIG_NODE(AnimCurves, settings::ObjectNode)
 
-    CONFIG_GLOBAL_PROPERTY(QList<qreal>, emphasized)
-    CONFIG_GLOBAL_PROPERTY(QList<qreal>, emphasizedAccel)
-    CONFIG_GLOBAL_PROPERTY(QList<qreal>, emphasizedDecel)
-    CONFIG_GLOBAL_PROPERTY(QList<qreal>, standard)
-    CONFIG_GLOBAL_PROPERTY(QList<qreal>, standardAccel)
-    CONFIG_GLOBAL_PROPERTY(QList<qreal>, standardDecel)
-    CONFIG_GLOBAL_PROPERTY(QList<qreal>, expressiveFastSpatial)
-    CONFIG_GLOBAL_PROPERTY(QList<qreal>, expressiveDefaultSpatial)
-    CONFIG_GLOBAL_PROPERTY(QList<qreal>, expressiveSlowSpatial)
-    CONFIG_GLOBAL_PROPERTY(QList<qreal>, expressiveFastEffects)
-    CONFIG_GLOBAL_PROPERTY(QList<qreal>, expressiveDefaultEffects)
-    CONFIG_GLOBAL_PROPERTY(QList<qreal>, expressiveSlowEffects)
-
-public:
-    explicit AnimCurves(QObject* parent = nullptr)
-        : ConfigObject(parent)
-        , m_emphasized({ 0.05, 0, 2.0 / 15.0, 0.06, 1.0 / 6.0, 0.4, 5.0 / 24.0, 0.82, 0.25, 1, 1, 1 })
-        , m_emphasizedAccel({ 0.3, 0, 0.8, 0.15, 1, 1 })
-        , m_emphasizedDecel({ 0.05, 0.7, 0.1, 1, 1, 1 })
-        , m_standard({ 0.2, 0, 0, 1, 1, 1 })
-        , m_standardAccel({ 0.3, 0, 1, 1, 1, 1 })
-        , m_standardDecel({ 0, 0, 0, 1, 1, 1 })
-        , m_expressiveFastSpatial({ 0.42, 1.67, 0.21, 0.9, 1, 1 })
-        , m_expressiveDefaultSpatial({ 0.38, 1.21, 0.22, 1, 1, 1 })
-        , m_expressiveSlowSpatial({ 0.39, 1.29, 0.35, 0.98, 1, 1 })
-        , m_expressiveFastEffects({ 0.31, 0.94, 0.34, 1, 1, 1 })
-        , m_expressiveDefaultEffects({ 0.34, 0.8, 0.34, 1, 1, 1 })
-        , m_expressiveSlowEffects({ 0.34, 0.88, 0.34, 1, 1, 1 }) {}
+    CONFIG_GLOBAL_PROPERTY(QList<qreal>, emphasized,
+        DEFAULT_ARG({ 0.05, 0, 2.0 / 15.0, 0.06, 1.0 / 6.0, 0.4, 5.0 / 24.0, 0.82, 0.25, 1, 1, 1 }))
+    CONFIG_GLOBAL_PROPERTY(QList<qreal>, emphasizedAccel, DEFAULT_ARG({ 0.3, 0, 0.8, 0.15, 1, 1 }))
+    CONFIG_GLOBAL_PROPERTY(QList<qreal>, emphasizedDecel, DEFAULT_ARG({ 0.05, 0.7, 0.1, 1, 1, 1 }))
+    CONFIG_GLOBAL_PROPERTY(QList<qreal>, standard, DEFAULT_ARG({ 0.2, 0, 0, 1, 1, 1 }))
+    CONFIG_GLOBAL_PROPERTY(QList<qreal>, standardAccel, DEFAULT_ARG({ 0.3, 0, 1, 1, 1, 1 }))
+    CONFIG_GLOBAL_PROPERTY(QList<qreal>, standardDecel, DEFAULT_ARG({ 0, 0, 0, 1, 1, 1 }))
+    CONFIG_GLOBAL_PROPERTY(QList<qreal>, expressiveFastSpatial, DEFAULT_ARG({ 0.42, 1.67, 0.21, 0.9, 1, 1 }))
+    CONFIG_GLOBAL_PROPERTY(QList<qreal>, expressiveDefaultSpatial, DEFAULT_ARG({ 0.38, 1.21, 0.22, 1, 1, 1 }))
+    CONFIG_GLOBAL_PROPERTY(QList<qreal>, expressiveSlowSpatial, DEFAULT_ARG({ 0.39, 1.29, 0.35, 0.98, 1, 1 }))
+    CONFIG_GLOBAL_PROPERTY(QList<qreal>, expressiveFastEffects, DEFAULT_ARG({ 0.31, 0.94, 0.34, 1, 1, 1 }))
+    CONFIG_GLOBAL_PROPERTY(QList<qreal>, expressiveDefaultEffects, DEFAULT_ARG({ 0.34, 0.8, 0.34, 1, 1, 1 }))
+    CONFIG_GLOBAL_PROPERTY(QList<qreal>, expressiveSlowEffects, DEFAULT_ARG({ 0.34, 0.88, 0.34, 1, 1, 1 }))
 };
 
-class RoundingTokens : public ConfigObject {
-    Q_OBJECT
-    QML_ANONYMOUS
+class RoundingTokens : public settings::ObjectNode {
+    CONFIG_NODE(RoundingTokens, settings::ObjectNode)
 
     CONFIG_PROPERTY(int, extraSmall, 4)
     CONFIG_PROPERTY(int, small, 8)
@@ -55,15 +38,10 @@ class RoundingTokens : public ConfigObject {
     CONFIG_PROPERTY(int, extraLargeIncreased, 32)
     CONFIG_PROPERTY(int, extraExtraLarge, 48)
     CONFIG_PROPERTY(int, full, std::numeric_limits<int>::max())
-
-public:
-    explicit RoundingTokens(QObject* parent = nullptr)
-        : ConfigObject(parent) {}
 };
 
-class SpacingTokens : public ConfigObject {
-    Q_OBJECT
-    QML_ANONYMOUS
+class SpacingTokens : public settings::ObjectNode {
+    CONFIG_NODE(SpacingTokens, settings::ObjectNode)
 
     CONFIG_PROPERTY(int, extraSmall, 4)
     CONFIG_PROPERTY(int, small, 8)
@@ -73,15 +51,10 @@ class SpacingTokens : public ConfigObject {
     CONFIG_PROPERTY(int, extraLarge, 28)
     CONFIG_PROPERTY(int, extraLargeIncreased, 32)
     CONFIG_PROPERTY(int, extraExtraLarge, 48)
-
-public:
-    explicit SpacingTokens(QObject* parent = nullptr)
-        : ConfigObject(parent) {}
 };
 
-class PaddingTokens : public ConfigObject {
-    Q_OBJECT
-    QML_ANONYMOUS
+class PaddingTokens : public settings::ObjectNode {
+    CONFIG_NODE(PaddingTokens, settings::ObjectNode)
 
     CONFIG_PROPERTY(int, extraSmall, 4)
     CONFIG_PROPERTY(int, small, 8)
@@ -91,15 +64,10 @@ class PaddingTokens : public ConfigObject {
     CONFIG_PROPERTY(int, extraLarge, 28)
     CONFIG_PROPERTY(int, extraLargeIncreased, 32)
     CONFIG_PROPERTY(int, extraExtraLarge, 48)
-
-public:
-    explicit PaddingTokens(QObject* parent = nullptr)
-        : ConfigObject(parent) {}
 };
 
-class FontSizeTokens : public ConfigObject {
-    Q_OBJECT
-    QML_ANONYMOUS
+class FontSizeTokens : public settings::ObjectNode {
+    CONFIG_NODE(FontSizeTokens, settings::ObjectNode)
 
     CONFIG_PROPERTY(int, small, 11)
     CONFIG_PROPERTY(int, smaller, 12)
@@ -107,15 +75,10 @@ class FontSizeTokens : public ConfigObject {
     CONFIG_PROPERTY(int, larger, 15)
     CONFIG_PROPERTY(int, large, 18)
     CONFIG_PROPERTY(int, extraLarge, 28)
-
-public:
-    explicit FontSizeTokens(QObject* parent = nullptr)
-        : ConfigObject(parent) {}
 };
 
-class AnimDurationTokens : public ConfigObject {
-    Q_OBJECT
-    QML_ANONYMOUS
+class AnimDurationTokens : public settings::ObjectNode {
+    CONFIG_NODE(AnimDurationTokens, settings::ObjectNode)
 
     CONFIG_GLOBAL_PROPERTY(int, small, 200)
     CONFIG_GLOBAL_PROPERTY(int, normal, 400)
@@ -127,15 +90,10 @@ class AnimDurationTokens : public ConfigObject {
     CONFIG_GLOBAL_PROPERTY(int, expressiveFastEffects, 150)
     CONFIG_GLOBAL_PROPERTY(int, expressiveDefaultEffects, 200)
     CONFIG_GLOBAL_PROPERTY(int, expressiveSlowEffects, 300)
-
-public:
-    explicit AnimDurationTokens(QObject* parent = nullptr)
-        : ConfigObject(parent) {}
 };
 
-class AppearanceTokens : public ConfigObject {
-    Q_OBJECT
-    QML_ANONYMOUS
+class AppearanceTokens : public settings::ObjectNode {
+    CONFIG_NODE(AppearanceTokens, settings::ObjectNode)
 
     CONFIG_SUBOBJECT(AnimCurves, curves)
     CONFIG_SUBOBJECT(RoundingTokens, rounding)
@@ -143,21 +101,10 @@ class AppearanceTokens : public ConfigObject {
     CONFIG_SUBOBJECT(PaddingTokens, padding)
     CONFIG_SUBOBJECT(FontSizeTokens, fontSize)
     CONFIG_SUBOBJECT(AnimDurationTokens, animDurations)
-
-public:
-    explicit AppearanceTokens(QObject* parent = nullptr)
-        : ConfigObject(parent)
-        , m_curves(new AnimCurves(this))
-        , m_rounding(new RoundingTokens(this))
-        , m_spacing(new SpacingTokens(this))
-        , m_padding(new PaddingTokens(this))
-        , m_fontSize(new FontSizeTokens(this))
-        , m_animDurations(new AnimDurationTokens(this)) {}
 };
 
-class BarTokens : public ConfigObject {
-    Q_OBJECT
-    QML_ANONYMOUS
+class BarTokens : public settings::ObjectNode {
+    CONFIG_NODE(BarTokens, settings::ObjectNode)
 
     CONFIG_PROPERTY(int, innerWidth, 40)
     CONFIG_PROPERTY(int, windowPreviewSize, 400)
@@ -165,15 +112,10 @@ class BarTokens : public ConfigObject {
     CONFIG_PROPERTY(int, batteryWidth, 250)
     CONFIG_PROPERTY(int, networkWidth, 320)
     CONFIG_PROPERTY(int, kbLayoutWidth, 320)
-
-public:
-    explicit BarTokens(QObject* parent = nullptr)
-        : ConfigObject(parent) {}
 };
 
-class DashboardTokens : public ConfigObject {
-    Q_OBJECT
-    QML_ANONYMOUS
+class DashboardTokens : public settings::ObjectNode {
+    CONFIG_NODE(DashboardTokens, settings::ObjectNode)
 
     CONFIG_PROPERTY(int, tabIndicatorHeight, 3)
     CONFIG_PROPERTY(int, tabIndicatorSpacing, 5)
@@ -199,88 +141,53 @@ class DashboardTokens : public ConfigObject {
     CONFIG_PROPERTY(int, perfBattWidthSingle, 400)
     CONFIG_PROPERTY(int, perfBattHeight, 160)
     CONFIG_PROPERTY(int, perfPlaceholderWidth, 700)
-
-public:
-    explicit DashboardTokens(QObject* parent = nullptr)
-        : ConfigObject(parent) {}
 };
 
-class LauncherTokens : public ConfigObject {
-    Q_OBJECT
-    QML_ANONYMOUS
+class LauncherTokens : public settings::ObjectNode {
+    CONFIG_NODE(LauncherTokens, settings::ObjectNode)
 
     CONFIG_PROPERTY(int, itemWidth, 600)
     CONFIG_PROPERTY(int, itemHeight, 57)
     CONFIG_PROPERTY(int, wallpaperWidth, 280)
     CONFIG_PROPERTY(int, wallpaperHeight, 200)
-
-public:
-    explicit LauncherTokens(QObject* parent = nullptr)
-        : ConfigObject(parent) {}
 };
 
-class NotifsTokens : public ConfigObject {
-    Q_OBJECT
-    QML_ANONYMOUS
+class NotifsTokens : public settings::ObjectNode {
+    CONFIG_NODE(NotifsTokens, settings::ObjectNode)
 
     CONFIG_PROPERTY(int, width, 430)
     CONFIG_GLOBAL_PROPERTY(int, image, 42)
     CONFIG_PROPERTY(int, badge, 20)
-
-public:
-    explicit NotifsTokens(QObject* parent = nullptr)
-        : ConfigObject(parent) {}
 };
 
-class OsdTokens : public ConfigObject {
-    Q_OBJECT
-    QML_ANONYMOUS
+class OsdTokens : public settings::ObjectNode {
+    CONFIG_NODE(OsdTokens, settings::ObjectNode)
 
     CONFIG_PROPERTY(int, sliderWidth, 30)
     CONFIG_PROPERTY(int, sliderHeight, 150)
-
-public:
-    explicit OsdTokens(QObject* parent = nullptr)
-        : ConfigObject(parent) {}
 };
 
-class SessionTokens : public ConfigObject {
-    Q_OBJECT
-    QML_ANONYMOUS
+class SessionTokens : public settings::ObjectNode {
+    CONFIG_NODE(SessionTokens, settings::ObjectNode)
 
     CONFIG_PROPERTY(int, button, 80)
-
-public:
-    explicit SessionTokens(QObject* parent = nullptr)
-        : ConfigObject(parent) {}
 };
 
-class SidebarTokens : public ConfigObject {
-    Q_OBJECT
-    QML_ANONYMOUS
+class SidebarTokens : public settings::ObjectNode {
+    CONFIG_NODE(SidebarTokens, settings::ObjectNode)
 
     CONFIG_PROPERTY(int, width, 430)
-
-public:
-    explicit SidebarTokens(QObject* parent = nullptr)
-        : ConfigObject(parent) {}
 };
 
-class UtilitiesTokens : public ConfigObject {
-    Q_OBJECT
-    QML_ANONYMOUS
+class UtilitiesTokens : public settings::ObjectNode {
+    CONFIG_NODE(UtilitiesTokens, settings::ObjectNode)
 
     CONFIG_PROPERTY(int, width, 430)
     CONFIG_PROPERTY(int, toastWidth, 430)
-
-public:
-    explicit UtilitiesTokens(QObject* parent = nullptr)
-        : ConfigObject(parent) {}
 };
 
-class LockTokens : public ConfigObject {
-    Q_OBJECT
-    QML_ANONYMOUS
+class LockTokens : public settings::ObjectNode {
+    CONFIG_NODE(LockTokens, settings::ObjectNode)
 
     CONFIG_PROPERTY(qreal, heightMult, 0.7)
     CONFIG_PROPERTY(qreal, ratio, 16.0 / 9.0)
@@ -293,27 +200,17 @@ class LockTokens : public ConfigObject {
     CONFIG_PROPERTY(int, fetch4LinesHeight, 600)
     CONFIG_PROPERTY(int, fetch3LinesHeight, 500)
     CONFIG_PROPERTY(int, showColourBoxRowHeight, 570)
-
-public:
-    explicit LockTokens(QObject* parent = nullptr)
-        : ConfigObject(parent) {}
 };
 
-class WInfoTokens : public ConfigObject {
-    Q_OBJECT
-    QML_ANONYMOUS
+class WInfoTokens : public settings::ObjectNode {
+    CONFIG_NODE(WInfoTokens, settings::ObjectNode)
 
     CONFIG_PROPERTY(qreal, heightMult, 0.7)
     CONFIG_PROPERTY(qreal, detailsWidth, 500)
-
-public:
-    explicit WInfoTokens(QObject* parent = nullptr)
-        : ConfigObject(parent) {}
 };
 
-class NexusTokens : public ConfigObject {
-    Q_OBJECT
-    QML_ANONYMOUS
+class NexusTokens : public settings::ObjectNode {
+    CONFIG_NODE(NexusTokens, settings::ObjectNode)
 
     CONFIG_PROPERTY(qreal, heightMult, 0.7)
     CONFIG_PROPERTY(qreal, ratio, 16.0 / 9.0)
@@ -330,15 +227,10 @@ class NexusTokens : public ConfigObject {
     CONFIG_PROPERTY(int, maxDialogHeight, 600)
     CONFIG_PROPERTY(int, textFieldWidth, 250)
     CONFIG_PROPERTY(int, smallTextFieldWidth, 100)
-
-public:
-    explicit NexusTokens(QObject* parent = nullptr)
-        : ConfigObject(parent) {}
 };
 
-class SizeTokens : public ConfigObject {
-    Q_OBJECT
-    QML_ANONYMOUS
+class SizeTokens : public settings::ObjectNode {
+    CONFIG_NODE(SizeTokens, settings::ObjectNode)
 
     CONFIG_SUBOBJECT(BarTokens, bar)
     CONFIG_SUBOBJECT(DashboardTokens, dashboard)
@@ -351,44 +243,6 @@ class SizeTokens : public ConfigObject {
     CONFIG_SUBOBJECT(LockTokens, lock)
     CONFIG_SUBOBJECT(WInfoTokens, winfo)
     CONFIG_SUBOBJECT(NexusTokens, nexus)
-
-public:
-    explicit SizeTokens(QObject* parent = nullptr)
-        : ConfigObject(parent)
-        , m_bar(new BarTokens(this))
-        , m_dashboard(new DashboardTokens(this))
-        , m_launcher(new LauncherTokens(this))
-        , m_notifs(new NotifsTokens(this))
-        , m_osd(new OsdTokens(this))
-        , m_session(new SessionTokens(this))
-        , m_sidebar(new SidebarTokens(this))
-        , m_utilities(new UtilitiesTokens(this))
-        , m_lock(new LockTokens(this))
-        , m_winfo(new WInfoTokens(this))
-        , m_nexus(new NexusTokens(this)) {}
-};
-
-class TokenConfig : public RootConfig {
-    Q_OBJECT
-    QML_ELEMENT
-    QML_SINGLETON
-
-    CONFIG_SUBOBJECT(AppearanceTokens, appearance)
-    CONFIG_SUBOBJECT(SizeTokens, sizes)
-
-public:
-    static TokenConfig* instance();
-    [[nodiscard]] Q_INVOKABLE TokenConfig* defaults();
-    [[nodiscard]] Q_INVOKABLE static TokenConfig* forScreen(const QString& screen);
-    static TokenConfig* create(QQmlEngine*, QJSEngine*);
-
-private:
-    friend class MonitorConfigManager;
-    explicit TokenConfig(QObject* parent = nullptr);
-    explicit TokenConfig(
-        TokenConfig* fallback, const QString& filePath, const QString& screen = {}, QObject* parent = nullptr);
-
-    TokenConfig* m_defaults = nullptr;
 };
 
 } // namespace caelestia::config

@@ -1,22 +1,24 @@
 #pragma once
 
-#include "configobject.hpp"
-
 #include <qfont.h>
 #include <qstring.h>
-#include <qvariant.h>
+#include <qvariantmap.h>
+
+#include "common.hpp"
+#include "settings/objectnode.hpp"
 
 namespace caelestia::config {
 
-// Forward declare token types from advancedconfig.hpp
+using Qt::StringLiterals::operator""_s;
+
+// Forward declare token types from tokens.hpp
 class RoundingTokens;
 class SpacingTokens;
 class PaddingTokens;
 class AnimDurationTokens;
 
-class AppearanceRounding : public ConfigObject {
-    Q_OBJECT
-    QML_ANONYMOUS
+class AppearanceRounding : public settings::ObjectNode {
+    CONFIG_NODE(AppearanceRounding, settings::ObjectNode)
 
     CONFIG_PROPERTY(qreal, scale, 1)
 
@@ -31,9 +33,6 @@ class AppearanceRounding : public ConfigObject {
     Q_PROPERTY(int full READ full NOTIFY valuesChanged)
 
 public:
-    explicit AppearanceRounding(QObject* parent = nullptr)
-        : ConfigObject(parent) {}
-
     void bindTokens(RoundingTokens* tokens);
 
     [[nodiscard]] int extraSmall() const;
@@ -53,9 +52,8 @@ private:
     RoundingTokens* m_tokens = nullptr;
 };
 
-class AppearanceSpacing : public ConfigObject {
-    Q_OBJECT
-    QML_ANONYMOUS
+class AppearanceSpacing : public settings::ObjectNode {
+    CONFIG_NODE(AppearanceSpacing, settings::ObjectNode)
 
     CONFIG_PROPERTY(qreal, scale, 1)
 
@@ -69,9 +67,6 @@ class AppearanceSpacing : public ConfigObject {
     Q_PROPERTY(int extraExtraLarge READ extraExtraLarge NOTIFY valuesChanged)
 
 public:
-    explicit AppearanceSpacing(QObject* parent = nullptr)
-        : ConfigObject(parent) {}
-
     void bindTokens(SpacingTokens* tokens);
 
     [[nodiscard]] int extraSmall() const;
@@ -90,9 +85,8 @@ private:
     SpacingTokens* m_tokens = nullptr;
 };
 
-class AppearancePadding : public ConfigObject {
-    Q_OBJECT
-    QML_ANONYMOUS
+class AppearancePadding : public settings::ObjectNode {
+    CONFIG_NODE(AppearancePadding, settings::ObjectNode)
 
     CONFIG_PROPERTY(qreal, scale, 1)
 
@@ -106,9 +100,6 @@ class AppearancePadding : public ConfigObject {
     Q_PROPERTY(int extraExtraLarge READ extraExtraLarge NOTIFY valuesChanged)
 
 public:
-    explicit AppearancePadding(QObject* parent = nullptr)
-        : ConfigObject(parent) {}
-
     void bindTokens(PaddingTokens* tokens);
 
     [[nodiscard]] int extraSmall() const;
@@ -127,120 +118,112 @@ private:
     PaddingTokens* m_tokens = nullptr;
 };
 
-class FontConfig : public ConfigObject {
-    Q_OBJECT
-    QML_ANONYMOUS
+namespace detail {
 
-    // Empty family inherits from the parent FontStyleConfig.
-    CONFIG_PROPERTY(QString, family, {})
-    CONFIG_PROPERTY(int, size, 14)
-    CONFIG_PROPERTY(int, weight, QFont::Normal)
-    CONFIG_PROPERTY(bool, italic, false)
-    CONFIG_PROPERTY(QVariantMap, vaxes, {})
-
-public:
-    explicit FontConfig(QObject* parent = nullptr)
-        : ConfigObject(parent) {}
-
-    void setDefaults(int size, int weight = QFont::Normal, const QVariantMap& vaxes = {});
+struct FontConfig {
+    QString family = QString();
+    int size;
+    int weight = QFont::Normal;
+    bool italic = false;
+    QVariantMap vaxes = { { u"ROND"_s, 25 } };
 };
 
-class FontStyleConfig : public ConfigObject {
-    Q_OBJECT
-    QML_ANONYMOUS
+} // namespace detail
 
-    CONFIG_PROPERTY(QString, family, QStringLiteral("GoogleSansFlex"))
-    CONFIG_SUBOBJECT(FontConfig, large)
-    CONFIG_SUBOBJECT(FontConfig, medium)
-    CONFIG_SUBOBJECT(FontConfig, small)
+#define ARG(...) __VA_ARGS__
+#define FONT(...) detail::FontConfig __VA_ARGS__
+#define FONT_CONFIG(Style, Size, props)                                                                                \
+    class FontConfig##Style##Size : public settings::ObjectNode {                                                      \
+        CONFIG_NODE(FontConfig##Style##Size, settings::ObjectNode)                                                     \
+                                                                                                                       \
+        CONFIG_PROPERTY(QString, family, ARG([](const settings::Node* self) {                                          \
+            const auto family = ARG(props).family;                                                                     \
+            return family.isEmpty() ? self->parentNode()->value(u"family"_s).toString() : family;                      \
+        }))                                                                                                            \
+        CONFIG_PROPERTY(int, size, ARG(props).size)                                                                    \
+        CONFIG_PROPERTY(int, weight, ARG(props).weight)                                                                \
+        CONFIG_PROPERTY(bool, italic, ARG(props).italic)                                                               \
+        CONFIG_PROPERTY(QVariantMap, vaxes, ARG(props).vaxes)                                                          \
+    };
+#define FONT_STYLE(Style, family_, large_, medium_, small_)                                                            \
+    FONT_CONFIG(Style, Large, ARG(large_))                                                                             \
+    FONT_CONFIG(Style, Medium, ARG(medium_))                                                                           \
+    FONT_CONFIG(Style, Small, ARG(small_))                                                                             \
+                                                                                                                       \
+    class FontStyle##Style : public settings::ObjectNode {                                                             \
+        CONFIG_NODE(FontStyle##Style, settings::ObjectNode)                                                            \
+                                                                                                                       \
+        CONFIG_PROPERTY(QString, family, family_)                                                                      \
+        CONFIG_SUBOBJECT(FontConfig##Style##Large, large)                                                              \
+        CONFIG_SUBOBJECT(FontConfig##Style##Medium, medium)                                                            \
+        CONFIG_SUBOBJECT(FontConfig##Style##Small, small)                                                              \
+    };
 
-public:
-    explicit FontStyleConfig(QObject* parent = nullptr)
-        : ConfigObject(parent)
-        , m_large(new FontConfig(this))
-        , m_medium(new FontConfig(this))
-        , m_small(new FontConfig(this)) {}
+// clang-format off
+FONT_STYLE(Headline, u"GoogleSansFlex"_s,
+    FONT({ .size = 32, .weight = QFont::Medium }),
+    FONT({ .size = 28, .weight = QFont::Medium }),
+    FONT({ .size = 24, .weight = QFont::Medium })
+)
+FONT_STYLE(Title, u"GoogleSansFlex"_s,
+    FONT({ .size = 22, .weight = QFont::Medium }),
+    FONT({ .size = 16, .weight = QFont::Medium }),
+    FONT({ .size = 14, .weight = QFont::Medium })
+)
+FONT_STYLE(Body, u"GoogleSansFlex"_s,
+    FONT({ .size = 16 }),
+    FONT({ .size = 14 }),
+    FONT({ .size = 12 })
+)
+FONT_STYLE(Label, u"GoogleSansFlex"_s,
+    FONT({ .size = 14, .weight = QFont::Medium }),
+    FONT({ .size = 12, .weight = QFont::Medium }),
+    FONT({ .size = 11 })
+)
+FONT_STYLE(Mono, u"CaskaydiaCove NF"_s,
+    FONT({ .size = 16, .vaxes = {} }),
+    FONT({ .size = 14, .vaxes = {} }),
+    FONT({ .size = 12, .vaxes = {} })
+)
+// clang-format on
 
-    void setDefaultFamily(const QString& family);
+FONT_CONFIG(Icon, ExtraLarge, FONT({ .size = static_cast<int>(48 / 1.33) }))
+FONT_CONFIG(Icon, Large, FONT({ .size = static_cast<int>(32 / 1.33) }))
+FONT_CONFIG(Icon, Medium, FONT({ .size = static_cast<int>(24 / 1.33) }))
+FONT_CONFIG(Icon, Small, FONT({ .size = static_cast<int>(20 / 1.33) }))
+
+class FontStyleIcon : public settings::ObjectNode {
+    CONFIG_NODE(FontStyleIcon, settings::ObjectNode)
+
+    CONFIG_PROPERTY(QString, family, u"Material Symbols Rounded"_s)
+    CONFIG_SUBOBJECT(FontConfigIconExtraLarge, extraLarge)
+    CONFIG_SUBOBJECT(FontConfigIconLarge, large)
+    CONFIG_SUBOBJECT(FontConfigIconMedium, medium)
+    CONFIG_SUBOBJECT(FontConfigIconSmall, small)
 };
 
-class IconFontStyleConfig : public FontStyleConfig {
-    Q_OBJECT
-    QML_ANONYMOUS
+#undef ARG
+#undef FONT
+#undef FONT_CONFIG
+#undef FONT_STYLE
 
-    CONFIG_SUBOBJECT(FontConfig, extraLarge)
-
-public:
-    explicit IconFontStyleConfig(QObject* parent = nullptr)
-        : FontStyleConfig(parent)
-        , m_extraLarge(new FontConfig(this)) {}
-};
-
-class AppearanceFont : public ConfigObject {
-    Q_OBJECT
-    QML_ANONYMOUS
+class AppearanceFont : public settings::ObjectNode {
+    CONFIG_NODE(AppearanceFont, settings::ObjectNode)
 
     CONFIG_PROPERTY(qreal, scale, 1)
-    CONFIG_SUBOBJECT(FontStyleConfig, headline)
-    CONFIG_SUBOBJECT(FontStyleConfig, title)
-    CONFIG_SUBOBJECT(FontStyleConfig, body)
-    CONFIG_SUBOBJECT(FontStyleConfig, label)
-    CONFIG_SUBOBJECT(FontStyleConfig, mono)
-    CONFIG_SUBOBJECT(IconFontStyleConfig, icon)
-    CONFIG_PROPERTY(QString, clock, QStringLiteral("Rubik"))
+    CONFIG_SUBOBJECT(FontStyleHeadline, headline)
+    CONFIG_SUBOBJECT(FontStyleTitle, title)
+    CONFIG_SUBOBJECT(FontStyleBody, body)
+    CONFIG_SUBOBJECT(FontStyleLabel, label)
+    CONFIG_SUBOBJECT(FontStyleMono, mono)
+    CONFIG_SUBOBJECT(FontStyleIcon, icon)
+    CONFIG_PROPERTY(QString, clock, u"Rubik"_s)
     // Google Sans Flex doesn't play well with unicode symbols apparently, so use Rubik instead
-    CONFIG_PROPERTY(QString, workspaces, QStringLiteral("Rubik"))
-
-public:
-    explicit AppearanceFont(QObject* parent = nullptr)
-        : ConfigObject(parent)
-        , m_headline(new FontStyleConfig(this))
-        , m_title(new FontStyleConfig(this))
-        , m_body(new FontStyleConfig(this))
-        , m_label(new FontStyleConfig(this))
-        , m_mono(new FontStyleConfig(this))
-        , m_icon(new IconFontStyleConfig(this)) {
-        const auto sans = QStringLiteral("GoogleSansFlex");
-        const auto mono = QStringLiteral("CaskaydiaCove NF");
-        const auto icons = QStringLiteral("Material Symbols Rounded");
-        const QVariantMap vaxes = { { "ROND", 25 } };
-
-        m_headline->setDefaultFamily(sans);
-        m_headline->large()->setDefaults(32, QFont::Medium, vaxes);
-        m_headline->medium()->setDefaults(28, QFont::Medium, vaxes);
-        m_headline->small()->setDefaults(24, QFont::Medium, vaxes);
-
-        m_title->setDefaultFamily(sans);
-        m_title->large()->setDefaults(22, QFont::Medium, vaxes);
-        m_title->medium()->setDefaults(16, QFont::Medium, vaxes);
-        m_title->small()->setDefaults(14, QFont::Medium, vaxes);
-
-        m_body->setDefaultFamily(sans);
-        m_body->large()->setDefaults(16, QFont::Normal, vaxes);
-        m_body->medium()->setDefaults(14, QFont::Normal, vaxes);
-        m_body->small()->setDefaults(12, QFont::Normal, vaxes);
-
-        m_label->setDefaultFamily(sans);
-        m_label->large()->setDefaults(14, QFont::Medium, vaxes);
-        m_label->medium()->setDefaults(12, QFont::Medium, vaxes);
-        m_label->small()->setDefaults(11, QFont::Normal, vaxes);
-
-        m_mono->setDefaultFamily(mono);
-        m_mono->large()->setDefaults(16, QFont::Normal);
-        m_mono->medium()->setDefaults(14, QFont::Normal);
-        m_mono->small()->setDefaults(12, QFont::Normal);
-
-        m_icon->setDefaultFamily(icons);
-        m_icon->extraLarge()->setDefaults(static_cast<int>(48 / 1.33), QFont::Normal);
-        m_icon->large()->setDefaults(static_cast<int>(32 / 1.33), QFont::Normal);
-        m_icon->medium()->setDefaults(static_cast<int>(24 / 1.33), QFont::Normal);
-        m_icon->small()->setDefaults(static_cast<int>(20 / 1.33), QFont::Normal);
-    }
+    CONFIG_PROPERTY(QString, workspaces, u"Rubik"_s)
 };
 
-class AnimDurations : public ConfigObject {
-    Q_OBJECT
-    QML_ANONYMOUS
+class AnimDurations : public settings::ObjectNode {
+    CONFIG_NODE(AnimDurations, settings::ObjectNode)
 
     CONFIG_GLOBAL_PROPERTY(qreal, scale, 1)
 
@@ -256,9 +239,6 @@ class AnimDurations : public ConfigObject {
     Q_PROPERTY(int expressiveSlowEffects READ expressiveSlowEffects NOTIFY valuesChanged)
 
 public:
-    explicit AnimDurations(QObject* parent = nullptr)
-        : ConfigObject(parent) {}
-
     void bindTokens(AnimDurationTokens* tokens);
 
     [[nodiscard]] int small() const;
@@ -279,34 +259,22 @@ private:
     AnimDurationTokens* m_tokens = nullptr;
 };
 
-class AppearanceAnim : public ConfigObject {
-    Q_OBJECT
-    QML_ANONYMOUS
+class AppearanceAnim : public settings::ObjectNode {
+    CONFIG_NODE(AppearanceAnim, settings::ObjectNode)
 
     CONFIG_SUBOBJECT(AnimDurations, durations)
-
-public:
-    explicit AppearanceAnim(QObject* parent = nullptr)
-        : ConfigObject(parent)
-        , m_durations(new AnimDurations(this)) {}
 };
 
-class AppearanceTransparency : public ConfigObject {
-    Q_OBJECT
-    QML_ANONYMOUS
+class AppearanceTransparency : public settings::ObjectNode {
+    CONFIG_NODE(AppearanceTransparency, settings::ObjectNode)
 
     CONFIG_GLOBAL_PROPERTY(bool, enabled, false)
     CONFIG_GLOBAL_PROPERTY(qreal, base, 0.85)
     CONFIG_GLOBAL_PROPERTY(qreal, layers, 0.4)
-
-public:
-    explicit AppearanceTransparency(QObject* parent = nullptr)
-        : ConfigObject(parent) {}
 };
 
-class AppearanceConfig : public ConfigObject {
-    Q_OBJECT
-    QML_ANONYMOUS
+class AppearanceConfig : public settings::ObjectNode {
+    CONFIG_NODE(AppearanceConfig, settings::ObjectNode)
 
     CONFIG_PROPERTY(qreal, deformScale, 1)
     CONFIG_SUBOBJECT(AppearanceRounding, rounding)
@@ -315,16 +283,6 @@ class AppearanceConfig : public ConfigObject {
     CONFIG_SUBOBJECT(AppearanceFont, font)
     CONFIG_SUBOBJECT(AppearanceAnim, anim)
     CONFIG_SUBOBJECT(AppearanceTransparency, transparency)
-
-public:
-    explicit AppearanceConfig(QObject* parent = nullptr)
-        : ConfigObject(parent)
-        , m_rounding(new AppearanceRounding(this))
-        , m_spacing(new AppearanceSpacing(this))
-        , m_padding(new AppearancePadding(this))
-        , m_font(new AppearanceFont(this))
-        , m_anim(new AppearanceAnim(this))
-        , m_transparency(new AppearanceTransparency(this)) {}
 };
 
 } // namespace caelestia::config

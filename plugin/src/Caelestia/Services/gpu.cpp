@@ -1,6 +1,6 @@
 #include "gpu.hpp"
 
-#include "../Config/config.hpp"
+#include "../Config/rootnodes.hpp"
 #include "../Config/serviceconfig.hpp"
 #include "sensorslib.hpp"
 
@@ -130,7 +130,7 @@ Gpu::Gpu(QObject* parent)
     : TickingService(parent) {
     m_busyFiles = gpuBusyFiles();
 
-    auto* svc = caelestia::config::GlobalConfig::instance()->services();
+    auto* svc = caelestia::config::ConfigSingleton::instance()->services();
     m_userType = parseType(svc->gpuType());
     QObject::connect(svc, &caelestia::config::ServiceConfig::gpuTypeChanged, this, [this, svc] {
         const Type value = parseType(svc->gpuType());

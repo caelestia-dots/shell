@@ -1,5 +1,7 @@
 #pragma once
 
+#include <qtimer.h>
+
 #include "service.hpp"
 
 namespace caelestia::services {
