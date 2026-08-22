@@ -224,24 +224,22 @@ Singleton {
     function getEthernetInterfaces(callback: var): void {
         executeCommand(["-t", "-f", root.deviceStatusFields, root.nmcliCommandDevice, "status"], result => {
             const interfaces = parseDeviceStatusOutput(result.output, root.deviceTypeEthernet);
-            const devices = interfaces.map(iface => ({
-                        interface: iface.device,
-                        type: iface.type,
-                        state: iface.state,
-                        connection: iface.connection,
-                        connected: isConnectedState(iface.state),
-                        ipAddress: "",
-                        gateway: "",
-                        dns: [],
-                        subnet: "",
-                        macAddress: "",
-                        speed: ""
-                    }));
-
-            root.ethernetInterfaces = interfaces;
-            syncEthernetDevices(devices);
-            if (callback)
-                callback(interfaces);
+            if (interfaces.length === 0) {
+                root.ethernetInterfaces = [];
+                syncEthernetDevices([]);
+                if (callback)
+                    callback([]);
+                return;
+            }
+            // NetworkManager reports container/VM veth pairs (Docker, Podman,
+            // etc.) as type "ethernet" too, so they'd show up here like real
+            // connections. A physical NIC always has
+            // /sys/class/net/<iface>/device; veth/bridge/tun interfaces
+            // never do, so that's how we tell them apart.
+            physicalCheckProc.pendingInterfaces = interfaces;
+            physicalCheckProc.pendingCallback = callback;
+            physicalCheckProc.command = ["sh", "-c", `for i in ${interfaces.map(i => i.device).join(" ")}; do [ -e "/sys/class/net/$i/device" ] && echo "$i"; done`];
+            physicalCheckProc.running = true;
         });
     }
 
@@ -1636,6 +1634,39 @@ Singleton {
                 } else {
                     root.ethernetSpeed = `${mbit} Mbps`;
                 }
+            }
+        }
+    }
+
+    Process {
+        id: physicalCheckProc
+
+        property list<var> pendingInterfaces: []
+        property var pendingCallback: null
+
+        stdout: StdioCollector {
+            onStreamFinished: {
+                const physical = text.trim().split("\n").filter(l => l.length > 0);
+                const interfaces = physicalCheckProc.pendingInterfaces.filter(iface => physical.includes(iface.device));
+                const devices = interfaces.map(iface => ({
+                            interface: iface.device,
+                            type: iface.type,
+                            state: iface.state,
+                            connection: iface.connection,
+                            connected: root.isConnectedState(iface.state),
+                            ipAddress: "",
+                            gateway: "",
+                            dns: [],
+                            subnet: "",
+                            macAddress: "",
+                            speed: ""
+                        }));
+
+                root.ethernetInterfaces = interfaces;
+                root.syncEthernetDevices(devices);
+                if (physicalCheckProc.pendingCallback)
+                    physicalCheckProc.pendingCallback(interfaces);
+                physicalCheckProc.pendingCallback = null;
             }
         }
     }
