@@ -18,6 +18,31 @@ Singleton {
     // Dedup key for progressive metadata (e.g. mpv-mpris/yt-dlp player fills title then artist later).
     property string lastNowPlayingKey: ""
 
+        property real targetSeekPos: -1.0
+
+        Timer {
+            id: seekDebounceTimer
+            interval: 300
+            repeat: false
+            onTriggered: {
+                const player = root.active;
+                if (player && root.targetSeekPos >= 0.0) {
+                    player.position = root.targetSeekPos;
+                    root.targetSeekPos = -1.0;
+                }
+            }
+        }
+
+        function queueSeek(offset) {
+            const player = root.active;
+            if (!player || player.position === undefined) 
+                return;
+
+            const currentBase = (root.targetSeekPos < 0.0) ? player.position : root.targetSeekPos;
+            root.targetSeekPos = Math.max(0.0, currentBase + offset);
+            seekDebounceTimer.restart();
+        }
+
     function getIdentity(player: MprisPlayer): string {
         if (!player)
             return "";
@@ -134,6 +159,38 @@ Singleton {
         onPressed: root.active?.stop()
     }
 
+    // qmllint disable unresolved-type
+    CustomShortcut {
+        // qmllint enable unresolved-type
+        name: "mediaSeekForward"
+        description: "Seek forward 5 seconds"
+        onPressed: queueSeek(5.0)
+    }
+
+    // qmllint disable unresolved-type
+    CustomShortcut {
+        // qmllint enable unresolved-type
+        name: "mediaSeekBackward"
+        description: "Seek backward 5 seconds"
+        onPressed: queueSeek(-5.0)
+    }
+
+    // qmllint disable unresolved-type
+    CustomShortcut {
+        // qmllint enable unresolved-type
+        name: "mediaSeekForwardLong"
+        description: "Seek forward 10 seconds"
+        onPressed: queueSeek(10.0)
+    }
+
+    // qmllint disable unresolved-type
+    CustomShortcut {
+        // qmllint enable unresolved-type
+        name: "mediaSeekBackwardLong"
+        description: "Seek backward 10 seconds"
+        onPressed: queueSeek(-10.0)
+    }
+
     IpcHandler {
         function getActive(prop: string): string {
             const active = root.active;
@@ -176,6 +233,22 @@ Singleton {
 
         function stop(): void {
             root.active?.stop();
+        }
+
+        function seekForward(): void {
+            queueSeek(5.0);
+        }
+
+        function seekBackward(): void {
+            queueSeek(-5.0);
+        }
+
+        function seekForwardLong(): void {
+            queueSeek(10.0);
+        }
+
+        function seekBackwardLong(): void {
+            queueSeek(-10.0);
         }
 
         target: "mpris"
