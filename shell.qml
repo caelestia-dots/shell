@@ -17,6 +17,7 @@ ShellRoot {
     id: root
 
     settings.watchFiles: true
+    property bool requestWallpaperPicker: false
 
     Binding {
         target: ShellState

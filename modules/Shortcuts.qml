@@ -108,6 +108,22 @@ Scope {
         }
     }
 
+    //qmllint disable unresolved-type
+    CustomShortcut {
+        // qmllint enable unresolved-type
+        name: "wallpaper"
+        description: "Toggle wallpaper selector"
+        onPressed: {
+            const v = ShellState.forActive();
+            if (!v.launcher) {
+                ShellState.shellRoot.requestWallpaperPicker = true;
+                v.launcher = true;
+            } else {
+                v.launcher = false;
+            }
+        }
+    }
+
     IpcHandler {
         function toggle(drawer: string): void {
             if (list().split("\n").includes(drawer)) {

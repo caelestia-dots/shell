@@ -106,7 +106,14 @@ Item {
             }
         }
 
-        Component.onCompleted: forceActiveFocus()
+        Component.onCompleted: {
+            forceActiveFocus();
+            if (ShellState.shellRoot.requestWallpaperPicker) {
+                search.text = GlobalConfig.launcher.actionPrefix + "wallpaper ";
+                // Reset the global flag
+                ShellState.shellRoot.requestWallpaperPicker = false;
+            }
+        }
 
         Connections {
             function onLauncherChanged(): void {
