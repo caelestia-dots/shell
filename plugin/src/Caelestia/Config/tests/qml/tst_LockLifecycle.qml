@@ -8,18 +8,6 @@ import "../../../../../../modules/lock" as Lock
 TestCase {
     name: "LockLifecycle"
 
-    Component {
-        id: lifecycleComponent
-
-        Lock.LockLifecycle {}
-    }
-
-    Component {
-        id: signalSpyComponent
-
-        SignalSpy {}
-    }
-
     function createLifecycle(properties): var {
         return lifecycleComponent.createObject(this, properties);
     }
@@ -173,5 +161,17 @@ TestCase {
         lifecycle.update(false, false);
         compare(secureSpy.count, 0);
         compare(releaseSpy.count, 0);
+    }
+
+    Component {
+        id: lifecycleComponent
+
+        Lock.LockLifecycle {}
+    }
+
+    Component {
+        id: signalSpyComponent
+
+        SignalSpy {}
     }
 }
