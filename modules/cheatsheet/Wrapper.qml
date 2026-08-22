@@ -37,16 +37,14 @@ Item {
             when: root.shouldBeActive
 
             PropertyChanges {
-                target: root
+                root.visible: true
+                root.enabled: true
 
-                visible: true
-                enabled: true
+                root.opacity: 1
+                root.scale: 1.0
 
-                opacity: 1
-                scale: 1.0
-
-                slideX: 0
-                slideY: 0
+                root.slideX: 0
+                root.slideY: 0
             }
         },
         State {
@@ -54,16 +52,14 @@ Item {
             when: !root.shouldBeActive
 
             PropertyChanges {
-                target: root
+                root.visible: false
+                root.enabled: false
 
-                visible: false
-                enabled: false
+                root.opacity: 0
+                root.scale: 0.95
 
-                opacity: 0
-                scale: 0.95
-
-                slideX: 0
-                slideY: -250
+                root.slideX: 0
+                root.slideY: -250
             }
         }
     ]
