@@ -46,6 +46,11 @@ class BarWorkspaces : public settings::ObjectNode {
     CONFIG_PROPERTY(QString, activeLabel, u"󰮯"_s)
     CONFIG_PROPERTY(QString, capitalisation, u"preserve"_s)
     CONFIG_GLOBAL_PROPERTY(QVariantList, specialWorkspaceIcons, {})
+    CONFIG_GLOBAL_PROPERTY(QStringList, ignoredTags,
+        DEFAULT_ARG({
+            u"hide_in_bar"_s,
+            u"xwl_popup"_s,
+        }))
     CONFIG_GLOBAL_PROPERTY(QVariantList, windowIcons,
         DEFAULT_ARG({
             vmap({

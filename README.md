@@ -227,7 +227,7 @@ For example, to automatically hide the bar on the monitor named `DP-1`:
 >
 > - `appearance`: `anim.*`, `transparency.*`
 > - `bar.tray`: `hiddenIcons`, `iconSubs`
-> - `bar.workspaces`: `perMonitorWorkspaces`, `specialWorkspaceIcons`, `windowIcons`
+> - `bar.workspaces`: `ignoredTags`, `perMonitorWorkspaces`, `specialWorkspaceIcons`, `windowIcons`
 > - `dashboard`: `mediaUpdateInterval`, `resourceUpdateInterval`
 > - `general`: `apps.*`, `battery.*`, `idle.*`, `logo`
 > - `launcher`: `actionPrefix`, `actions`, `enableDangerousActions`, `favouriteApps`, `hiddenApps`, `specialPrefix`, `useFuzzy.*`, `vimKeybinds`
@@ -438,6 +438,10 @@ For example, to automatically hide the bar on the monitor named `DP-1`:
                     "name": "steam",
                     "icon": "sports_esports"
                 }
+            ],
+            "ignoredTags": [
+                "hide_in_bar",
+                "xwl_popup"
             ],
             "windowIcons": [
                 {
