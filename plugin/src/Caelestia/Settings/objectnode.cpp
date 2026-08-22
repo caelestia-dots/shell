@@ -24,6 +24,16 @@ void ObjectNode::resetOption(const QString& key) {
         setValue(key, fallbackNode() ? fallbackNode()->value(key) : desc->defaultValue(this));
 }
 
+Descriptor ObjectNode::descriptorFor(const QString& key) const {
+    const auto* desc = schema().get(key);
+    if (!desc) {
+        qCWarning(lcSettings) << "Attempted to get descriptor for unknown option" << pathFor(key);
+        return Descriptor();
+    }
+
+    return *desc;
+}
+
 QJsonValue ObjectNode::toJson(bool sparse) const {
     QJsonObject json;
 
