@@ -930,11 +930,11 @@ Finally, another thank you to all the configs I took inspiration from (only one 
 
 ## Stonks 📈
 
-<a href="https://www.star-history.com/#caelestia-dots/shell&Date">
+<a href="https://star-history.dera.page/#caelestia-dots/shell&Date">
  <picture>
-   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=caelestia-dots/shell&type=Date&theme=dark" />
-   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=caelestia-dots/shell&type=Date" />
-   <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=caelestia-dots/shell&type=Date" />
+   <source media="(prefers-color-scheme: dark)" srcset="https://star-history.dera.page/svg?repos=caelestia-dots/shell&type=Date&theme=dark" />
+   <source media="(prefers-color-scheme: light)" srcset="https://star-history.dera.page/svg?repos=caelestia-dots/shell&type=Date" />
+   <img alt="Star History Chart" src="https://star-history.dera.page/svg?repos=caelestia-dots/shell&type=Date" />
  </picture>
 </a>
 
