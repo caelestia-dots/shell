@@ -16,7 +16,7 @@ class GeneralApps : public settings::ObjectNode {
     CONFIG_NODE(GeneralApps, settings::ObjectNode)
 
     CONFIG_GLOBAL_PROPERTY(QStringList, terminal, { u"foot"_s })
-    CONFIG_GLOBAL_PROPERTY(QStringList, audio, { u"pavucontrol"_s })
+    CONFIG_GLOBAL_PROPERTY(QStringList, audio, { u"pwvucontrol"_s })
     CONFIG_GLOBAL_PROPERTY(QStringList, playback, { u"mpv"_s })
     CONFIG_GLOBAL_PROPERTY(QStringList, explorer, { u"thunar"_s })
 };
