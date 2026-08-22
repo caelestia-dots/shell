@@ -17,8 +17,6 @@ Item {
     property string activeCategory: "All"
     property var allEntries: []
 
-    enabled: Boolean(screenState.cheatsheet)
-
     readonly property var categories: {
         const cats = ["All"];
         for (const e of allEntries) {
@@ -26,6 +24,39 @@ Item {
                 cats.push(e.category);
         }
         return cats;
+    }
+
+    readonly property var filteredEntries: {
+        const q = filterText.trim().toLowerCase();
+
+        // First filter by category
+        const categoryEntries = allEntries.filter(e => activeCategory === "All" || e.category === activeCategory);
+
+        // No search text: preserve normal category ordering
+        if (!q)
+            return categoryEntries;
+
+        const results = [];
+
+        for (const e of categoryEntries) {
+            const keyScore = fuzzyScore(q, e.keyStr);
+            const labelScore = fuzzyScore(q, e.label);
+            const categoryScore = fuzzyScore(q, e.category);
+
+            const score = Math.max(keyScore, labelScore, categoryScore);
+
+            if (score >= 0) {
+                results.push({
+                    entry: e,
+                    score: score
+                });
+            }
+        }
+
+        // Best matches first
+        results.sort((a, b) => b.score - a.score);
+
+        return results.map(r => r.entry);
     }
 
     function fuzzyScore(query, text) {
@@ -109,42 +140,6 @@ Item {
         return result;
     }
 
-    readonly property var filteredEntries: {
-        const q = filterText.trim().toLowerCase();
-
-        // First filter by category
-        const categoryEntries = allEntries.filter(e => activeCategory === "All" || e.category === activeCategory);
-
-        // No search text: preserve normal category ordering
-        if (!q)
-            return categoryEntries;
-
-        const results = [];
-
-        for (const e of categoryEntries) {
-            const keyScore = fuzzyScore(q, e.keyStr);
-            const labelScore = fuzzyScore(q, e.label);
-            const categoryScore = fuzzyScore(q, e.category);
-
-            const score = Math.max(keyScore, labelScore, categoryScore);
-
-            if (score >= 0) {
-                results.push({
-                    entry: e,
-                    score: score
-                });
-            }
-        }
-
-        // Best matches first
-        results.sort((a, b) => b.score - a.score);
-
-        return results.map(r => r.entry);
-    }
-
-    implicitWidth: 1200
-    implicitHeight: 900
-
     function refreshBinds() {
         bindsProc.running = true;
     }
@@ -156,6 +151,10 @@ Item {
         return bits.filter(([bit]) => (mask & bit) !== 0).map(([, name]) => name).join(" + ");
     }
 
+    enabled: Boolean(screenState.cheatsheet)
+    implicitWidth: 1200
+    implicitHeight: 900
+
     Keys.onPressed: event => {
         if (event.key === Qt.Key_Escape) {
             screenState.cheatsheet = false;
@@ -163,7 +162,6 @@ Item {
         }
     }
 
-    // Component.onCompleted: refreshBinds()
     Component.onCompleted: {
         refreshBinds();
         Qt.callLater(() => search.forceActiveFocus());
@@ -172,6 +170,7 @@ Item {
     // Re-query live every time the panel opens, so it can never go stale
     Connections {
         target: root.screenState
+
         function onCheatsheetChanged() {
             if (root.screenState.cheatsheet) {
                 root.refreshBinds();
@@ -182,6 +181,7 @@ Item {
 
     Process {
         id: bindsProc
+
         command: ["hyprctl", "binds", "-j"]
 
         stdout: StdioCollector {
@@ -249,11 +249,13 @@ Item {
                         StateLayer {
                             radius: 80
                             color: pill.color === Colours.palette.m3primary ? Colours.palette.m3onPrimary : Colours.palette.m3onSurface
+
                             onClicked: root.activeCategory = pill.modelData
                         }
 
                         StyledText {
                             id: pillText
+
                             anchors.centerIn: parent
                             text: pill.modelData
                             color: root.activeCategory === pill.modelData ? Colours.palette.m3onPrimary : Colours.palette.m3onSurface
