@@ -58,7 +58,6 @@ Item {
             anchors.verticalCenter: parent.verticalCenter
             anchors.right: parent.right
         }
-
     }
 
     Notifications.Wrapper {
@@ -91,7 +90,6 @@ Item {
             anchors.verticalCenter: parent.verticalCenter
             anchors.right: parent.right
         }
-
     }
 
     Launcher.Wrapper {
@@ -154,5 +152,4 @@ Item {
         anchors.right: parent.right
         anchors.topMargin: -notifications.anchors.topMargin
     }
-
 }
