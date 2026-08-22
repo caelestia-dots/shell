@@ -1,8 +1,11 @@
 import QtQuick
 import Quickshell
 import Quickshell.Bluetooth
+import qs.services
 
 QtObject {
+    id: state
+
     property ShellScreen screen
     property bool isWindow
     property bool animatingContainer
@@ -16,7 +19,24 @@ QtObject {
     property int editingVpnIndex: -1
     property string selectedNetworkSsid
     property string selectedEthernetInterface
+    property var selectedMonitor
     property bool networkDetailsFromSaved
+
+    property Connections monitorsConnection: Connections {
+        function onMonitorsChanged(): void {
+            if (state.selectedMonitor) {
+                for (let i = 0; i < Hyprctl.monitors.length; i++) {
+                    if (Hyprctl.monitors[i].name === state.selectedMonitor.name) {
+                        state.selectedMonitor = Hyprctl.monitors[i];
+                        return;
+                    }
+                }
+                state.selectedMonitor = null;
+            }
+        }
+
+        target: Hyprctl
+    }
 
     signal close
     signal subPageOpened(idx: int)
