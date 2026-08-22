@@ -17,6 +17,8 @@ QtObject {
     property string selectedNetworkSsid
     property string selectedEthernetInterface
     property bool networkDetailsFromSaved
+    // Network awaiting a password in the password sub-page (null = closed).
+    property var passwordNetwork: null
 
     signal close
     signal subPageOpened(idx: int)
