@@ -169,14 +169,14 @@ Item {
 
     // Re-query live every time the panel opens, so it can never go stale
     Connections {
-        target: root.screenState
-
         function onCheatsheetChanged() {
             if (root.screenState.cheatsheet) {
                 root.refreshBinds();
                 Qt.callLater(() => search.forceActiveFocus());
             }
         }
+
+        target: root.screenState
     }
 
     Process {

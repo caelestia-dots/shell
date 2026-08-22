@@ -1,10 +1,9 @@
 import QtQuick
-import Caelestia.Config
 import Quickshell
+import Caelestia.Config
 import qs.components
 import qs.modules.bar as Bar
 import qs.modules.cheatsheet as Cheatsheet
-import qs.modules.bar.popouts as BarPopouts
 import qs.modules.dashboard as Dashboard
 import qs.modules.launcher as Launcher
 import qs.modules.notifications as Notifications
@@ -12,6 +11,7 @@ import qs.modules.osd as Osd
 import qs.modules.session as Session
 import qs.modules.sidebar as Sidebar
 import qs.modules.utilities as Utilities
+import qs.modules.bar.popouts as BarPopouts
 import qs.modules.utilities.toasts as Toasts
 
 Item {
