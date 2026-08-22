@@ -231,7 +231,7 @@ For example, to automatically hide the bar on the monitor named `DP-1`:
 > - `dashboard`: `mediaUpdateInterval`, `resourceUpdateInterval`
 > - `general`: `apps.*`, `battery.*`, `idle.*`, `logo`
 > - `launcher`: `actionPrefix`, `actions`, `enableDangerousActions`, `favouriteApps`, `hiddenApps`, `specialPrefix`, `useFuzzy.*`, `vimKeybinds`
-> - `lock`: `enableFprint`, `enableHowdy`, `maxFprintTries`, `maxHowdyTries`, `triggerHowdyOnWake`
+> - `lock`: `enableFprint`, `enableHowdy`, `maxFprintTries`, `maxHowdyTries`, `onRelease`, `onSecure`, `triggerHowdyOnWake`
 > - `nexus`: `networkRescanInterval`
 > - `notifs`: `actionOnClick`, `defaultExpireTimeout`, `expire`, `fullscreen`, `fullscreenExpireTimeout`
 > - `paths`: `lyricsDir`, `wallpaperDir`
@@ -247,9 +247,31 @@ For example, to automatically hide the bar on the monitor named `DP-1`:
 > The example configuration includes **ALL** configuration options in `shell.json`. It is
 > **not** recommended to copy and paste this entire configuration into `shell.json`,
 > as options or their default values may change across updates, resulting in a stale config.
+
 >
 > This is meant to serve as a reference of all the available options, and you should
 > <ins>only add the ones you want to change</ins> to `shell.json`.
+
+### Lock lifecycle hooks
+
+`lock.onSecure` and `lock.onRelease` optionally run one command each. `onSecure` runs after a lock becomes
+secure; `onRelease` runs when the active lock is fully released. Each lifecycle event requests its command
+once per lock cycle. Each command is a direct argv array, not a shell command, and runs asynchronously as the
+session user. Use a wrapper program if sequencing or shell syntax is required.
+
+Both options are global-only. Definitions in per-monitor configuration files are ignored. An empty array, or an
+omitted option, disables that hook. Each non-empty array must contain only strings; other values are rejected by
+Settings and the effective command falls back to empty. A blank or whitespace-only first item is schema-valid but
+is logged and skipped at execution time.
+
+```json
+{
+    "lock": {
+        "onSecure": ["lock-lifecycle-hook", "secure"],
+        "onRelease": ["lock-lifecycle-hook", "release"]
+    }
+}
+```
 
 <details><summary>Example config</summary>
 
@@ -696,7 +718,9 @@ For example, to automatically hide the bar on the monitor named `DP-1`:
         "enableHowdy": true,
         "maxHowdyTries": 3,
         "triggerHowdyOnWake": true,
-        "hideNotifs": false
+        "hideNotifs": false,
+        "onSecure": [],
+        "onRelease": []
     },
     "nexus": {
         "wallpapersPerRow": 4,

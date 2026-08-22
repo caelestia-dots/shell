@@ -35,3 +35,7 @@ target_link_libraries(caelestia-config PUBLIC
     Qt::Gui
     caelestia-settings
 )
+
+if(BUILD_TESTING)
+    add_subdirectory(tests)
+endif()
