@@ -1,17 +1,14 @@
 pragma ComponentBehavior: Bound
 
 import QtQuick
-import Quickshell
 import qs.components
-import qs.services
 
 Item {
     id: root
 
     required property ScreenState screenState
 
-    readonly property bool shouldBeActive:
-        Boolean(screenState && screenState.cheatsheet)
+    readonly property bool shouldBeActive: Boolean(screenState && screenState.cheatsheet)
 
     implicitWidth: 1200
     implicitHeight: 900
@@ -41,17 +38,16 @@ Item {
             PropertyChanges {
                 target: root
 
-                visible: true
-                enabled: true
+                root.visible: true
+                root.enabled: true
 
-                opacity: 1
-                scale: 1.0
+                root.opacity: 1
+                root.scale: 1.0
 
-                slideX: 0
-                slideY: 0
+                root.slideX: 0
+                root.slideY: 0
             }
         },
-
         State {
             name: "inactive"
             when: !root.shouldBeActive
@@ -59,14 +55,14 @@ Item {
             PropertyChanges {
                 target: root
 
-                visible: false
-                enabled: false
+                root.visible: false
+                root.enabled: false
 
-                opacity: 0
-                scale: 0.95
+                root.opacity: 0
+                root.scale: 0.95
 
-                slideX: 0
-                slideY: -250
+                root.slideX: 0
+                root.slideY: -250
             }
         }
     ]
@@ -82,7 +78,6 @@ Item {
                 easing.type: Easing.OutCubic
             }
         },
-
         Transition {
             from: "active"
             to: "inactive"

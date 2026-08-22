@@ -1,9 +1,7 @@
 pragma ComponentBehavior: Bound
 
 import QtQuick
-import QtQuick.Controls
 import QtQuick.Layouts
-import Quickshell
 import Quickshell.Io
 import qs.components
 import qs.components.controls
@@ -22,8 +20,8 @@ Item {
 
     Keys.onPressed: event => {
         if (event.key === Qt.Key_Escape) {
-            screenState.cheatsheet = false
-            event.accepted = true
+            screenState.cheatsheet = false;
+            event.accepted = true;
         }
     }
 
@@ -87,28 +85,17 @@ Item {
         const lowerText = text.toLowerCase();
 
         // Escape HTML characters so the text is safe for RichText
-        const escaped = text
-            .replace(/&/g, "&amp;")
-            .replace(/</g, "&lt;")
-            .replace(/>/g, "&gt;")
-            .replace(/"/g, "&quot;");
+        const escaped = text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 
         // Find the query as a consecutive substring first
         const substringIndex = lowerText.indexOf(query);
 
         if (substringIndex !== -1) {
             const before = escaped.substring(0, substringIndex);
-            const match = escaped.substring(
-                substringIndex,
-                substringIndex + query.length
-            );
-            const after = escaped.substring(
-                substringIndex + query.length
-            );
+            const match = escaped.substring(substringIndex, substringIndex + query.length);
+            const after = escaped.substring(substringIndex + query.length);
 
-            return before
-                 + "<b>" + match + "</b>"
-                 + after;
+            return before + "<b>" + match + "</b>" + after;
         }
 
         // Otherwise highlight fuzzy-matched characters
@@ -116,10 +103,7 @@ Item {
         let result = "";
 
         for (let i = 0; i < text.length; i++) {
-            if (
-                queryIndex < query.length &&
-                lowerText[i] === query[queryIndex]
-            ) {
+            if (queryIndex < query.length && lowerText[i] === query[queryIndex]) {
                 const char = escaped[i];
                 result += "<b>" + char + "</b>";
                 queryIndex++;
@@ -135,10 +119,7 @@ Item {
         const q = filterText.trim().toLowerCase();
 
         // First filter by category
-        const categoryEntries = allEntries.filter(e =>
-            activeCategory === "All" ||
-            e.category === activeCategory
-        );
+        const categoryEntries = allEntries.filter(e => activeCategory === "All" || e.category === activeCategory);
 
         // No search text: preserve normal category ordering
         if (!q)
@@ -151,11 +132,7 @@ Item {
             const labelScore = fuzzyScore(q, e.label);
             const categoryScore = fuzzyScore(q, e.category);
 
-            const score = Math.max(
-                keyScore,
-                labelScore,
-                categoryScore
-            );
+            const score = Math.max(keyScore, labelScore, categoryScore);
 
             if (score >= 0) {
                 results.push({
@@ -187,15 +164,15 @@ Item {
 
     // Component.onCompleted: refreshBinds()
     Component.onCompleted: {
-        refreshBinds()
-        Qt.callLater(() => search.forceActiveFocus())
+        refreshBinds();
+        Qt.callLater(() => search.forceActiveFocus());
     }
 
     // Re-query live every time the panel opens, so it can never go stale
     Connections {
-        target: screenState
+        target: root.screenState
         function onCheatsheetChanged() {
-            if (screenState.cheatsheet) {
+            if (root.screenState.cheatsheet) {
                 root.refreshBinds();
                 Qt.callLater(() => search.forceActiveFocus());
             }
@@ -210,21 +187,19 @@ Item {
             onStreamFinished: {
                 try {
                     const raw = JSON.parse(text);
-                    root.allEntries = raw
-                        .filter(b => b.has_description && b.description && b.description.length > 0)
-                        .map(b => {
-                            // Convention: description = "Category: Label"
-                            const parts = b.description.split(":");
-                            const category = parts.length > 1 ? parts[0].trim() : "Other";
-                            const label = parts.length > 1 ? parts.slice(1).join(":").trim() : b.description.trim();
-                            const modStr = b.modkeys ? b.modkeys.trim().replace(/\s+/g, " + ") : root.decodeModmask(b.modmask);
-                            const keyStr = modStr ? `${modStr} + ${b.key}` : b.key;
-                            return {
-                                keyStr,
-                                label,
-                                category
-                            };
-                        });
+                    root.allEntries = raw.filter(b => b.has_description && b.description && b.description.length > 0).map(b => {
+                        // Convention: description = "Category: Label"
+                        const parts = b.description.split(":");
+                        const category = parts.length > 1 ? parts[0].trim() : "Other";
+                        const label = parts.length > 1 ? parts.slice(1).join(":").trim() : b.description.trim();
+                        const modStr = b.modkeys ? b.modkeys.trim().replace(/\s+/g, " + ") : root.decodeModmask(b.modmask);
+                        const keyStr = modStr ? `${modStr} + ${b.key}` : b.key;
+                        return {
+                            keyStr,
+                            label,
+                            category
+                        };
+                    });
                 } catch (e) {
                     console.log("Cheatsheet: failed to parse hyprctl binds -j —", e);
                 }
@@ -315,10 +290,7 @@ Item {
 
                         StyledText {
                             Layout.preferredWidth: 260
-                            text: root.highlightMatch(
-                                root.filterText,
-                                delegateRoot.modelData.keyStr
-                            )
+                            text: root.highlightMatch(root.filterText, delegateRoot.modelData.keyStr)
                             textFormat: Text.RichText
                             font.family: Tokens.font.mono.family
                             color: Colours.palette.m3primary
@@ -326,10 +298,7 @@ Item {
 
                         StyledText {
                             Layout.fillWidth: true
-                            text: root.highlightMatch(
-                                root.filterText,
-                                delegateRoot.modelData.label
-                            )
+                            text: root.highlightMatch(root.filterText, delegateRoot.modelData.label)
                             textFormat: Text.RichText
                             color: Colours.palette.m3onSurface
                         }
