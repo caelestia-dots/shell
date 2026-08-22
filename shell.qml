@@ -16,8 +16,9 @@ import qs.services
 ShellRoot {
     id: root
 
-    settings.watchFiles: true
     property bool requestWallpaperPicker: false
+
+    settings.watchFiles: true
 
     Binding {
         target: ShellState
