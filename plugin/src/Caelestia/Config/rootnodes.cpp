@@ -16,9 +16,7 @@ QString nameFor(const QString& key) {
 
 ConfigRoot::ConfigRoot(const QString& path, ConfigRoot* fallback, QObject* parent)
     : RootNode(path, fallback, parent) {
-    load();
     bindTokens();
-
     qCDebug(lcConfig) << "Created config root for" << nameFor(key());
 }
 
@@ -34,8 +32,6 @@ void ConfigRoot::bindTokens() {
 
 TokensRoot::TokensRoot(const QString& path, TokensRoot* fallback, QObject* parent)
     : RootNode(path, fallback, parent) {
-    load();
-
     qCDebug(lcConfig) << "Created tokens root for" << nameFor(key());
 }
 
