@@ -1,5 +1,7 @@
 #include "networkusage.hpp"
+#include <array>
 #include <cmath>
+#include <cstdio>
 #include <qfile.h>
 #include <qtypes.h>
 
@@ -41,31 +43,13 @@ caelestia::internal::CircularBuffer* NetworkUsage::uploadBuffer() const {
     return m_uploadBuffer;
 }
 
-QVariantMap NetworkUsage::formatBytes(qreal bytes) const {
-    QVariantMap result;
-
-    if (bytes < 0 || std::isnan(bytes) || !std::isfinite(bytes)) {
-        result["value"] = 0;
-        result["unit"] = "B/s";
-        return result;
-    }
-    if (bytes < 1024) {
-        result["value"] = bytes;
-        result["unit"] = "B/s";
-    } else if (bytes < 1024 * 1024) {
-        result["value"] = bytes / 1024.0;
-        result["unit"] = "KB/s";
-    } else if (bytes < 1024 * 1024 * 1024) {
-        result["value"] = bytes / (1024.0 * 1024.0);
-        result["unit"] = "MB/s";
-    } else {
-        result["value"] = bytes / (1024.0 * 1024.0 * 1024.0);
-        result["unit"] = "GB/s";
-    }
+QVariantMap NetworkUsage::formatBytesRate(qreal bytes) const {
+    QVariantMap result = formatBytes(bytes);
+    result["unit"] = result["unit"].toString() + QStringLiteral("/s");
     return result;
 }
 
-QVariantMap NetworkUsage::formatBytesTotal(qreal bytes) const {
+QVariantMap NetworkUsage::formatBytes(qreal bytes) const {
     QVariantMap result;
 
     if (bytes < 0 || std::isnan(bytes) || !std::isfinite(bytes)) {
@@ -111,29 +95,36 @@ void NetworkUsage::tick() {
         if (iface == "lo") {
             continue; // skip loopback interface
         }
-        unsigned long long rx = 0, tx = 0;
-        sscanf(line.constData() + splitIdx + 1, "%llu %*u %*u %*u %*u %*u %*u %*u %llu", &rx, &tx);
-        totalRx += rx;
-        totalTx += tx;
+
+        std::array<unsigned long long, 9> fields{};
+        const int parsed = std::sscanf(line.constData() + splitIdx + 1, "%llu %llu %llu %llu %llu %llu %llu %llu %llu",
+            &fields[0], &fields[1], &fields[2], &fields[3], &fields[4], &fields[5], &fields[6], &fields[7], &fields[8]);
+
+        if (parsed != static_cast<int>(fields.size())) {
+            continue;
+        }
+
+        totalRx += static_cast<quint64>(fields[0]);
+        totalTx += static_cast<quint64>(fields[8]);
     }
     f.close();
 
     if (!m_initialized) {
         m_prevRx = totalRx;
         m_prevTx = totalTx;
-        m_initialRx = totalRx;
-        m_initialTx = totalTx;
         m_timer.start();
         m_initialized = true;
         return;
     }
 
     const qreal elapsed = static_cast<qreal>(m_timer.restart()) / 1000.0;
-    if (elapsed > 0.0) {
-        // Calculate byte deltas
-        quint64 rxDelta = totalRx >= m_prevRx ? totalRx - m_prevRx : 0;
-        quint64 txDelta = totalTx >= m_prevTx ? totalTx - m_prevTx : 0;
+    const quint64 rxDelta = totalRx >= m_prevRx ? totalRx - m_prevRx : 0;
+    const quint64 txDelta = totalTx >= m_prevTx ? totalTx - m_prevTx : 0;
 
+    m_downloadTotal += static_cast<qreal>(rxDelta);
+    m_uploadTotal += static_cast<qreal>(txDelta);
+
+    if (elapsed > 0.0) {
         // Calculate speeds
         m_downloadSpeed = static_cast<qreal>(rxDelta) / elapsed;
         m_uploadSpeed = static_cast<qreal>(txDelta) / elapsed;
@@ -141,10 +132,6 @@ void NetworkUsage::tick() {
         m_downloadBuffer->push(m_downloadSpeed);
         m_uploadBuffer->push(m_uploadSpeed);
     }
-
-    // Calculate totals
-    m_downloadTotal = totalRx >= m_initialRx ? static_cast<qreal>(totalRx - m_initialRx) : 0.0;
-    m_uploadTotal = totalTx >= m_initialTx ? static_cast<qreal>(totalTx - m_initialTx) : 0.0;
 
     m_prevRx = totalRx;
     m_prevTx = totalTx;

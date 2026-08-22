@@ -32,8 +32,8 @@ public:
     [[nodiscard]] qreal uploadTotal() const;
     [[nodiscard]] int historyLength() const;
 
+    Q_INVOKABLE [[nodiscard]] QVariantMap formatBytesRate(qreal bytes) const;
     Q_INVOKABLE [[nodiscard]] QVariantMap formatBytes(qreal bytes) const;
-    Q_INVOKABLE [[nodiscard]] QVariantMap formatBytesTotal(qreal bytes) const;
 
     [[nodiscard]] caelestia::internal::CircularBuffer* downloadBuffer() const;
     [[nodiscard]] caelestia::internal::CircularBuffer* uploadBuffer() const;
@@ -56,8 +56,6 @@ private:
 
     quint64 m_prevRx = 0;
     quint64 m_prevTx = 0;
-    quint64 m_initialRx = 0;
-    quint64 m_initialTx = 0;
     bool m_initialized = false;
     QElapsedTimer m_timer;
 };
