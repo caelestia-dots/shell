@@ -70,6 +70,7 @@ if("shell" IN_LIST ENABLE_MODULES)
     endforeach()
 
     install(PROGRAMS assets/wrap_term_launch.sh DESTINATION "${INSTALL_QSCONFDIR}/assets")
+    install(PROGRAMS gpu/dgpu_generator.py DESTINATION "${INSTALL_QSCONFDIR}/gpu")
 
     file(READ shell.qml SHELL_QML)
     string(REPLACE "settings.watchFiles: true" "settings.watchFiles: false" SHELL_QML "${SHELL_QML}")
@@ -96,4 +97,14 @@ if("m3shapes" IN_LIST ENABLE_MODULES)
     if(TARGET m3shapesplugin)
         set_target_properties(m3shapesplugin PROPERTIES INSTALL_RPATH "$ORIGIN")
     endif()
+endif()
+
+include(CTest)
+if(BUILD_TESTING)
+    find_package(Python3 REQUIRED COMPONENTS Interpreter)
+    add_test(
+        NAME dgpu-generator
+        COMMAND ${CMAKE_COMMAND} -E env PYTHONPATH="${CMAKE_CURRENT_SOURCE_DIR}/gpu"
+            ${Python3_EXECUTABLE} -m unittest discover -s "${CMAKE_CURRENT_SOURCE_DIR}/gpu/tests"
+    )
 endif()

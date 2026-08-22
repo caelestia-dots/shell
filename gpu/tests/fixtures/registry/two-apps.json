@@ -1,0 +1,6 @@
+{
+  "apps": {
+    "com.visualstudio.code.desktop": "dGPU",
+    "com.valvesoftware.Steam.desktop": "dGPU"
+  }
+}
