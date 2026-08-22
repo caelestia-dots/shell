@@ -8,6 +8,7 @@ import qs.components
 import qs.components.controls
 import qs.components.images
 import qs.services
+import qs.utils
 import qs.modules.nexus.common
 
 PageBase {
@@ -114,7 +115,9 @@ PageBase {
 
                     interval: 100
                     onTriggered: {
-                        if (wallImg.status !== Image.Ready)
+                        if (wallImg.status === Image.Error)
+                            wallIndicatorLoader.opacity = 0;
+                        else if (wallImg.status !== Image.Ready)
                             wallIndicatorLoader.opacity = 1;
                     }
                 }
@@ -123,7 +126,16 @@ PageBase {
                     id: wallImg
 
                     anchors.fill: parent
-                    source: Wallpapers.current
+                    source: {
+                        const cur = Wallpapers.current;
+                        if (Images.isVideoFile(cur)) {
+                            const i = cur.lastIndexOf('/');
+                            const dir = cur.substring(0, i);
+                            const name = cur.substring(i + 1).replace(/\.[^.]+$/, '');
+                            return `${dir}/.thumbs/${name}.jpg`;
+                        }
+                        return cur;
+                    }
                     preventInit: wallIndicatorLoader.opacity > 0
                     fadeOutAnim: Anim.DefaultEffects
                     fadeInAnim: Anim.SlowEffects

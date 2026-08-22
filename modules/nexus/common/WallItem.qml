@@ -6,16 +6,26 @@ import Quickshell
 import Caelestia.Config
 import qs.components
 import qs.components.controls
-import qs.services
+import qs.utils
 
 Item {
     id: root
 
-    property alias source: img.source
+    property string source
     property alias text: label.text
     property alias radius: imgWrapper.radius
     property alias imgHeight: imgWrapper.implicitHeight
     property bool fillLabel: true
+
+    readonly property bool isVideo: Images.isVideoFile(root.source)
+    readonly property string thumbnailPath: {
+        if (!root.isVideo)
+            return root.source;
+        const i = root.source.lastIndexOf('/');
+        const dir = root.source.substring(0, i);
+        const name = root.source.substring(i + 1).replace(/\.[^.]+$/, '');
+        return `${dir}/.thumbs/${name}.jpg`;
+    }
 
     signal clicked
 
@@ -36,33 +46,11 @@ Item {
             radius: Tokens.rounding.largeIncreased
             color: Colours.tPalette.m3surfaceContainer
 
-            Loader {
+            MaterialIcon {
                 anchors.centerIn: parent
-
-                opacity: img.status === Image.Ready ? 0 : 1
-                active: opacity > 0
-
-                sourceComponent: StyledRect {
-                    implicitWidth: loadingIndicator.implicitSize + Tokens.padding.large * 2
-                    implicitHeight: loadingIndicator.implicitSize + Tokens.padding.large * 2
-
-                    color: Colours.palette.m3primaryContainer
-                    radius: Tokens.rounding.full
-
-                    LoadingIndicator {
-                        id: loadingIndicator
-
-                        anchors.centerIn: parent
-                        containsIcon: true
-                        implicitSize: Math.min(imgWrapper.width, imgWrapper.height) * 0.3
-                    }
-                }
-
-                Behavior on opacity {
-                    Anim {
-                        type: Anim.DefaultEffects
-                    }
-                }
+                text: root.isVideo ? "videocam" : "image"
+                color: Colours.tPalette.m3outline
+                fontStyle: Tokens.font.icon.builders.extraLarge.scale(2).weight(Font.DemiBold).build()
             }
 
             Image {
@@ -71,6 +59,7 @@ Item {
                 anchors.fill: parent
                 asynchronous: true
                 fillMode: Image.PreserveAspectCrop
+                source: root.thumbnailPath
                 sourceSize: {
                     const dpr = (QsWindow.window as QsWindow)?.devicePixelRatio ?? 1;
                     return Qt.size(width * dpr, height * dpr);
@@ -82,6 +71,43 @@ Item {
                     Anim {
                         type: Anim.SlowEffects
                     }
+                }
+            }
+
+            StyledRect {
+                anchors.left: parent.left
+                anchors.top: parent.top
+                anchors.margins: 4
+                radius: Tokens.rounding.small
+                color: "#CC000000"
+                implicitWidth: badgeIcon.implicitWidth + 8
+                implicitHeight: badgeIcon.implicitHeight + 4
+
+                MaterialIcon {
+                    id: badgeIcon
+
+                    anchors.centerIn: parent
+                    text: root.isVideo ? "videocam" : "image"
+                    color: "white"
+                    fontStyle: Tokens.font.icon.builders.small.scale(1).build()
+                }
+            }
+
+            StyledRect {
+                anchors.centerIn: parent
+                visible: root.isVideo && img.status === Image.Error
+                radius: Tokens.rounding.full
+                color: Colours.palette.m3primaryContainer
+                implicitWidth: fallbackIcon.implicitWidth + Tokens.padding.large * 2
+                implicitHeight: fallbackIcon.implicitHeight + Tokens.padding.large * 2
+
+                MaterialIcon {
+                    id: fallbackIcon
+
+                    anchors.centerIn: parent
+                    text: "play_circle"
+                    color: Colours.palette.m3primary
+                    fontStyle: Tokens.font.icon.builders.medium.scale(1.5).build()
                 }
             }
         }
