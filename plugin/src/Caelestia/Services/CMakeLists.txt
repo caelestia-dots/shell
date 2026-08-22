@@ -1,5 +1,9 @@
 qml_module(caelestia-services
     URI Caelestia.Services
+    DEPENDENCIES
+        Caelestia.Internal
+    IMPORTS
+        Caelestia.Internal
     SOURCES
         service.cpp
         serviceref.cpp
@@ -18,6 +22,7 @@ qml_module(caelestia-services
         lyriccandidate.cpp
         lyrics.cpp
         sessionmanager.cpp
+        networkusage.cpp
     LIBRARIES
         Qt::DBus
         PkgConfig::Pipewire
