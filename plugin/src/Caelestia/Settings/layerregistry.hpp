@@ -17,7 +17,8 @@ public:
     explicit LayerRegistry(const QString& prefix, const QString& suffix, QObject* parent);
 
     [[nodiscard]] QString pathFor(const QString& name) const;
-    [[nodiscard]] T* get(const QString& name, T* fallback); // Created on demand
+    [[nodiscard]] QString nameFor(T* layer) const;
+    [[nodiscard]] T* get(const QString& name, T* fallback, bool* created = nullptr); // Created on demand
 
 private:
     const QString m_prefix;
@@ -52,9 +53,19 @@ template <LayerType T> QString LayerRegistry<T>::pathFor(const QString& name) co
     return m_prefix + QLatin1Char('/') + name + QLatin1Char('/') + m_suffix;
 }
 
-template <LayerType T> T* LayerRegistry<T>::get(const QString& name, T* fallback) {
-    if (auto* const layer = m_layers.value(name))
+template <LayerType T> QString LayerRegistry<T>::nameFor(T* layer) const {
+    return m_layers.key(layer);
+}
+
+template <LayerType T> T* LayerRegistry<T>::get(const QString& name, T* fallback, bool* created) {
+    if (auto* const layer = m_layers.value(name)) {
+        if (created)
+            *created = false;
         return layer;
+    }
+
+    if (created)
+        *created = true;
 
     auto* const layer = new T(pathFor(name), fallback, m_parent);
     m_layers.insert(name, layer);

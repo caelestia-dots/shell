@@ -3,8 +3,8 @@
 #include <qjsengine.h>
 #include <qqmlengine.h>
 
-#include "settings/layerregistry.hpp"
 #include "common.hpp"
+#include "settings/layerregistry.hpp"
 #include "settings/rootnode.hpp"
 
 #include "appearanceconfig.hpp"
@@ -84,14 +84,68 @@ public:
             return instance();                                                                                         \
         }                                                                                                              \
                                                                                                                        \
-        [[nodiscard]] Q_INVOKABLE Root* forScreen(const QString& screen) { return m_layers.get(screen, this); }        \
+        [[nodiscard]] Q_INVOKABLE Root* forScreen(const QString& screen) {                                             \
+            bool created;                                                                                              \
+            auto* const layer = m_layers.get(screen, this, &created);                                                  \
+            if (created)                                                                                               \
+                initLayer(layer);                                                                                      \
+            return layer;                                                                                              \
+        }                                                                                                              \
+                                                                                                                       \
+        Q_INVOKABLE void flushLoadSignals() {                                                                          \
+            m_flushed = true;                                                                                          \
+            for (const auto& [screen, error] : std::as_const(m_pendingLoads)) {                                        \
+                if (error.isNull())                                                                                    \
+                    emit loaded(screen);                                                                               \
+                else                                                                                                   \
+                    emit loadFailed(error, screen);                                                                    \
+            }                                                                                                          \
+            m_pendingLoads.clear();                                                                                    \
+        }                                                                                                              \
+                                                                                                                       \
+    Q_SIGNALS:                                                                                                         \
+        void loaded(const QString& screen);                                                                            \
+        void loadFailed(const QString& error, const QString& screen);                                                  \
+        void saveFailed(const QString& error, const QString& screen);                                                  \
                                                                                                                        \
     private:                                                                                                           \
         explicit Type(QObject* parent = nullptr)                                                                       \
             : Root(configDir() + QLatin1Char('/') + file, nullptr, parent)                                             \
-            , m_layers(monitorConfigDir(), file, this) {}                                                              \
+            , m_layers(monitorConfigDir(), file, this)                                                                 \
+            , m_flushed(false) {                                                                                       \
+            initLayer(this);                                                                                           \
+        }                                                                                                              \
+                                                                                                                       \
+        void onTreeLoaded(settings::RootNode* layer) {                                                                 \
+            const auto screen = m_layers.nameFor(static_cast<Root*>(layer));                                           \
+            if (m_flushed)                                                                                             \
+                emit loaded(screen);                                                                                   \
+            else                                                                                                       \
+                m_pendingLoads.emplaceBack(screen, QString());                                                         \
+        }                                                                                                              \
+                                                                                                                       \
+        void onTreeLoadFailed(settings::RootNode* layer, const QString& error) {                                       \
+            const auto screen = m_layers.nameFor(static_cast<Root*>(layer));                                           \
+            if (m_flushed)                                                                                             \
+                emit loadFailed(error, screen);                                                                        \
+            else                                                                                                       \
+                m_pendingLoads.emplaceBack(screen, error.isNull() ? QStringLiteral("") : error);                       \
+        }                                                                                                              \
+                                                                                                                       \
+        void onTreeSaveFailed(settings::RootNode* layer, const QString& error) {                                       \
+            emit saveFailed(error, m_layers.nameFor(static_cast<Root*>(layer)));                                       \
+        }                                                                                                              \
+                                                                                                                       \
+        void initLayer(Root* layer) {                                                                                  \
+            QObject::connect(layer, &Root::treeLoaded, this, &Type::onTreeLoaded);                                     \
+            QObject::connect(layer, &Root::treeLoadFailed, this, &Type::onTreeLoadFailed);                             \
+            QObject::connect(layer, &Root::treeSaveFailed, this, &Type::onTreeSaveFailed);                             \
+            layer->load();                                                                                             \
+        }                                                                                                              \
                                                                                                                        \
         settings::LayerRegistry<Root> m_layers;                                                                        \
+        QList<std::pair<QString, QString>> m_pendingLoads;                                                             \
+        bool m_flushed;                                                                                                \
     };
 
 SINGLETON(ConfigSingleton, ConfigRoot, GlobalConfig, QStringLiteral("shell.json"))

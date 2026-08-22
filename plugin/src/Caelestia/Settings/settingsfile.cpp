@@ -24,7 +24,6 @@ SettingsFile::SettingsFile(const QString& path, QObject* parent)
     QObject::connect(m_watcher, &QFileSystemWatcher::directoryChanged, this, &SettingsFile::onDirChanged);
 
     initWatcher();
-    load();
 }
 
 std::optional<QJsonValue> SettingsFile::read() const {

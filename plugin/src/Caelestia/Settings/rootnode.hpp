@@ -6,7 +6,7 @@
 
 namespace caelestia::settings {
 
-class RootNode : public settings::ObjectNode {
+class RootNode : public ObjectNode {
     Q_OBJECT
 
     Q_PROPERTY(QList<caelestia::settings::Diagnostic> diagnostics READ diagnostics NOTIFY diagnosticsChanged)
@@ -16,18 +16,16 @@ public:
 
     [[nodiscard]] QList<Diagnostic> diagnostics() const;
 
-signals:
-    void diagnosticsChanged();
-    void loaded();
-    void loadFailed(const QString& error);
-    void saveFailed(const QString& error);
-
-protected:
-    // Should be called in subclass ctors to load on init
     void load();
 
+signals:
+    void diagnosticsChanged();
+    void treeLoaded(RootNode* self);
+    void treeLoadFailed(RootNode* self, const QString& error);
+    void treeSaveFailed(RootNode* self, const QString& error);
+
 private:
-    settings::SettingsFile* const m_file;
+    SettingsFile* const m_file;
     QList<Diagnostic> m_diagnostics;
 
     void reloadFromFile();

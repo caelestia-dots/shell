@@ -9,11 +9,16 @@ RootNode::RootNode(const QString& path, RootNode* fallback, QObject* parent)
     , m_file(new SettingsFile(path, this)) {
     QObject::connect(batcher(), &ChangeBatcher::dirtied, this, &RootNode::saveToFile);
     QObject::connect(m_file, &SettingsFile::changed, this, &RootNode::reloadFromFile);
-    QObject::connect(m_file, &SettingsFile::readFailed, this, &RootNode::loadFailed);
-    QObject::connect(m_file, &SettingsFile::writeFailed, this, &RootNode::saveFailed);
+    QObject::connect(m_file, &SettingsFile::readFailed, this, [this](const QString& error) {
+        emit treeLoadFailed(this, error);
+    });
+    QObject::connect(m_file, &SettingsFile::writeFailed, this, [this](const QString& error) {
+        emit treeSaveFailed(this, error);
+    });
 }
 
 void RootNode::load() {
+    m_file->load();
     reloadFromFile();
 }
 
@@ -31,7 +36,7 @@ void RootNode::reloadFromFile() {
     if (m_diagnostics != oldDiagnostics)
         emit diagnosticsChanged();
 
-    emit loaded();
+    emit treeLoaded(this);
 }
 
 void RootNode::saveToFile() {
