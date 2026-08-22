@@ -6,8 +6,6 @@ import "../../../../../../modules/lock" as Lock
 
 // qmllint disable unqualified
 TestCase {
-    name: "LockLifecycle"
-
     function createLifecycle(properties): var {
         return lifecycleComponent.createObject(this, properties);
     }
@@ -162,6 +160,8 @@ TestCase {
         compare(secureSpy.count, 0);
         compare(releaseSpy.count, 0);
     }
+
+    name: "LockLifecycle"
 
     Component {
         id: lifecycleComponent
