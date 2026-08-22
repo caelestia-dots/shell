@@ -25,7 +25,6 @@ Item {
     opacity: 0
     scale: 0.95
 
-
     transform: Translate {
         x: root.slideX
         y: root.slideY
