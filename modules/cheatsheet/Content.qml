@@ -13,17 +13,11 @@ Item {
     required property ScreenState screenState
 
     // Disable all internal search bar and list view event listeners when closed
-    enabled: Boolean(screenState.cheatsheet)
     property string filterText: ""
     property string activeCategory: "All"
     property var allEntries: []
 
-    Keys.onPressed: event => {
-        if (event.key === Qt.Key_Escape) {
-            screenState.cheatsheet = false;
-            event.accepted = true;
-        }
-    }
+    enabled: Boolean(screenState.cheatsheet)
 
     readonly property var categories: {
         const cats = ["All"];
@@ -160,6 +154,13 @@ Item {
     function decodeModmask(mask) {
         const bits = [[1, "Shift"], [4, "Ctrl"], [8, "Alt"], [64, "Super"]];
         return bits.filter(([bit]) => (mask & bit) !== 0).map(([, name]) => name).join(" + ");
+    }
+
+    Keys.onPressed: event => {
+        if (event.key === Qt.Key_Escape) {
+            screenState.cheatsheet = false;
+            event.accepted = true;
+        }
     }
 
     // Component.onCompleted: refreshBinds()

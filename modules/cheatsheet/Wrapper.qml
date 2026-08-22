@@ -10,6 +10,9 @@ Item {
 
     readonly property bool shouldBeActive: Boolean(screenState && screenState.cheatsheet)
 
+    property real slideX: 0
+    property real slideY: -250
+
     implicitWidth: 1200
     implicitHeight: 900
 
@@ -22,8 +25,6 @@ Item {
     opacity: 0
     scale: 0.95
 
-    property real slideX: 0
-    property real slideY: -250
 
     transform: Translate {
         x: root.slideX
