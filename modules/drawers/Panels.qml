@@ -1,10 +1,10 @@
-import Caelestia.Config
 import QtQuick
+import Caelestia.Config
 import Quickshell
 import qs.components
 import qs.modules.bar as Bar
-import qs.modules.bar.popouts as BarPopouts
 import qs.modules.cheatsheet as Cheatsheet
+import qs.modules.bar.popouts as BarPopouts
 import qs.modules.dashboard as Dashboard
 import qs.modules.launcher as Launcher
 import qs.modules.notifications as Notifications
