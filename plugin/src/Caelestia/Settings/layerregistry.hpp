@@ -28,6 +28,12 @@ private:
 
 namespace detail {
 
+inline QString stripTrailingSlashes(QStringView str) {
+    while (str.endsWith(QLatin1Char('/')))
+        str = str.left(str.length() - 1);
+    return str.toString();
+}
+
 inline QString stripLeadingSlashes(QStringView str) {
     while (str.startsWith(QLatin1Char('/')))
         str = str.mid(1);
@@ -38,7 +44,7 @@ inline QString stripLeadingSlashes(QStringView str) {
 
 template <LayerType T>
 LayerRegistry<T>::LayerRegistry(const QString& prefix, const QString& suffix, QObject* parent)
-    : m_prefix(prefix)
+    : m_prefix(detail::stripTrailingSlashes(prefix))
     , m_suffix(detail::stripLeadingSlashes(suffix))
     , m_parent(parent) {}
 
