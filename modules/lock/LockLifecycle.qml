@@ -1,7 +1,6 @@
 pragma ComponentBehavior: Bound
 
 import QtQuick
-import Quickshell
 
 QtObject {
     id: root
@@ -20,7 +19,7 @@ QtObject {
 
     function initialize(locked, secure): bool {
         if (initialized) {
-            console.warn(lc, "Lock lifecycle controller initialized more than once");
+            console.warn("Lock lifecycle controller initialized more than once");
             return false;
         }
 
@@ -34,7 +33,7 @@ QtObject {
 
     function update(locked, secure): void {
         if (!initialized) {
-            console.warn(lc, "Lock lifecycle update before initialization");
+            console.warn("Lock lifecycle update before initialization");
             return;
         }
 
@@ -67,17 +66,10 @@ QtObject {
             return false;
 
         if (command[0].trim().length === 0) {
-            console.warn(lc, "Ignoring lock lifecycle hook with blank argv[0]");
+            console.warn("Ignoring lock lifecycle hook with blank argv[0]");
             return false;
         }
 
         return true;
-    }
-
-    LoggingCategory {
-        id: lc
-
-        name: "caelestia.qml.lock.lifecycle"
-        defaultLogLevel: LoggingCategory.Info
     }
 }

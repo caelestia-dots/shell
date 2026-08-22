@@ -55,7 +55,7 @@ void LockConfigTest::decodesValidHooks() {
         QVERIFY(!lock->quarantine());
     }
 
-    for (const auto& blank : { QStringList{ QStringLiteral("") }, QStringList{ QStringLiteral("   ") } }) {
+    for (const auto& blank : { QStringList{ QString() }, QStringList{ QStringLiteral("   ") } }) {
         for (const auto& field : { QStringLiteral("onSecure"), QStringLiteral("onRelease") }) {
             TestConfig config;
             auto* const lock = config.lock();
@@ -88,8 +88,10 @@ void LockConfigTest::quarantinesInvalidHooks() {
             QCOMPARE(diagnostics.size(), 1);
             QCOMPARE(diagnostics.constFirst().type, settings::DiagnosticType::TypeMismatch);
             QCOMPARE(diagnostics.constFirst().option, QStringLiteral("lock.%1").arg(field));
-            QVERIFY(lock->quarantine());
-            QCOMPARE(lock->toJson(false).toObject().value(field), value);
+            const auto* const quarantine = lock->quarantine();
+            QVERIFY(quarantine);
+            QCOMPARE(quarantine->apply(QJsonObject{}).toObject().value(field), value);
+            QCOMPARE(lock->toJson(false).toObject().value(field), QJsonValue(QJsonArray{}));
         }
     }
 }
@@ -124,8 +126,10 @@ void LockConfigTest::resetsHooksOnSubsequentSync() {
         QCOMPARE(command(lock, field), QStringList());
         QCOMPARE(diagnostics.size(), 1);
         QCOMPARE(diagnostics.constFirst().type, settings::DiagnosticType::TypeMismatch);
-        QVERIFY(lock->quarantine());
-        QCOMPARE(lock->toJson(false).toObject().value(field), QJsonValue(malformed));
+        const auto* const quarantine = lock->quarantine();
+        QVERIFY(quarantine);
+        QCOMPARE(quarantine->apply(QJsonObject{}).toObject().value(field), QJsonValue(malformed));
+        QCOMPARE(lock->toJson(false).toObject().value(field), QJsonValue(QJsonArray{}));
     }
 }
 
@@ -148,8 +152,11 @@ void LockConfigTest::retainsGlobalFallbackInOverlays() {
         QCOMPARE(diagnostics.size(), 1);
         QCOMPARE(diagnostics.constFirst().type, settings::DiagnosticType::GlobalOption);
         QCOMPARE(diagnostics.constFirst().option, QStringLiteral("lock.%1").arg(field));
-        QVERIFY(overlayLock->quarantine());
-        QCOMPARE(overlayLock->toJson(false).toObject().value(field), QJsonValue(overlayValue));
+        const auto* const quarantine = overlayLock->quarantine();
+        QVERIFY(quarantine);
+        QCOMPARE(quarantine->apply(QJsonObject{}).toObject().value(field), QJsonValue(overlayValue));
+        QCOMPARE(
+            overlayLock->toJson(false).toObject().value(field), QJsonValue(QJsonArray::fromStringList(globalCommand)));
     }
 }
 

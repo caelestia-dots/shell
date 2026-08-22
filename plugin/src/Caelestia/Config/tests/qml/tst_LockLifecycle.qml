@@ -4,6 +4,7 @@ import QtQuick
 import QtTest
 import "../../../../../../modules/lock" as Lock
 
+// qmllint disable unqualified
 TestCase {
     name: "LockLifecycle"
 
@@ -31,7 +32,7 @@ TestCase {
     }
 
     function ignoreLifecycleWarning(message): void {
-        ignoreWarning(new RegExp("caelestia\\.qml\\.lock\\.lifecycle.*" + message));
+        ignoreWarning(new RegExp(message));
     }
 
     function test_secureAndReleaseFireOncePerCycle(): void {
@@ -64,7 +65,9 @@ TestCase {
     }
 
     function test_preservesSecuredCycleAcrossReload(): void {
-        const first = createLifecycle({ secureCommand: ["hook", "secure"] });
+        const first = createLifecycle({
+            secureCommand: ["hook", "secure"]
+        });
         const firstSecureSpy = createSpy(first, "secureHookRequested");
 
         verify(first.initialize(false, false));
