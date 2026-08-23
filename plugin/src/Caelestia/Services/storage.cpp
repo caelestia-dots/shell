@@ -7,6 +7,11 @@
 #include <qfileinfo.h>
 #include <qhash.h>
 #include <qloggingcategory.h>
+
+// for async QStorageInfo::mountedVolumes() call
+#include <QtConcurrent/qtconcurrentrun.h>
+// included by hpp #include <qfuturewatcher.h>
+
 #include <qstorageinfo.h>
 #include <sys/stat.h>
 #include <sys/sysmacros.h>
@@ -98,7 +103,14 @@ QStringList resolveByDevt(uint major, uint minor, int depth) {
 } // namespace
 
 Storage::Storage(QObject* parent)
-    : TickingService(parent) {}
+    : TickingService(parent)
+    , m_volumeWatcher(new QFutureWatcher<QList<QStorageInfo>>(this)) {
+    connect(m_volumeWatcher, &QFutureWatcher<QList<QStorageInfo>>::finished, this, [this] {
+        const auto volumes = m_volumeWatcher->result();
+        m_volumeWatcherRunning = false;
+        parseScannedVolumes(volumes);
+    });
+}
 
 qreal Storage::percentage() const {
     qreal totalUsed = 0.0;
@@ -204,6 +216,16 @@ QStringList Storage::resolveToPhysicalDisks(const QString& devicePath) {
 }
 
 void Storage::tick() {
+    if (m_volumeWatcherRunning)
+        return;
+
+    m_volumeWatcherRunning = true;
+    m_volumeWatcher->setFuture(QtConcurrent::run([] {
+        return QStorageInfo::mountedVolumes();
+    }));
+}
+
+void Storage::parseScannedVolumes(const QList<QStorageInfo>& mountedVols) {
     const qreal prevPercentage = percentage();
     QHash<QString, Accum> byDisk;
 
@@ -220,7 +242,8 @@ void Storage::tick() {
 
     QHash<QByteArray, DeviceEntry> byDevice;
 
-    const auto mountedVols = QStorageInfo::mountedVolumes();
+    // replaced this synchronous call with an asynchronous mountedVolumes evaluation to avoid blocking the main thread
+    // const auto mountedVols = QStorageInfo::mountedVolumes();
     for (const QStorageInfo& v : mountedVols) {
         if (!v.isReady() || !v.isValid() || v.bytesTotal() <= 0) {
             continue;

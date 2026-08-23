@@ -8,6 +8,9 @@
 #include <qqmllist.h>
 #include <qvariant.h>
 
+#include <qfuturewatcher.h>
+#include <qstorageinfo.h>
+
 namespace caelestia::services {
 
 class Storage : public TickingService {
@@ -49,6 +52,11 @@ private:
 
     QList<DiskInfo*> m_disks;
     QPointer<DiskInfo> m_manualPrimaryDisk;
+
+    // for async QStorageInfo::mountedVolumes() call
+    void parseScannedVolumes(const QList<QStorageInfo>& mountedVols);
+    QFutureWatcher<QList<QStorageInfo>>* m_volumeWatcher;
+    bool m_volumeWatcherRunning = false;
 };
 
 } // namespace caelestia::services

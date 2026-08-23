@@ -20,6 +20,7 @@ qml_module(caelestia-services
         sessionmanager.cpp
     LIBRARIES
         Qt::DBus
+        Qt::Concurrent
         PkgConfig::Pipewire
         PkgConfig::Aubio
         PkgConfig::Cava
