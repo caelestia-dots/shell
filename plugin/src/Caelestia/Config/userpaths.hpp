@@ -24,10 +24,6 @@ class UserPaths : public settings::ObjectNode {
 
     CONFIG_GLOBAL_PROPERTY(QString, lowBatNotifSound, u"root:/assets/LowBattery.ogg"_s)
     CONFIG_GLOBAL_PROPERTY(QString, highBatNotifSound, u"root:/assets/HighBattery.ogg"_s)
-
-public:
-    explicit UserPaths(QObject* parent = nullptr)
-        : ConfigObject(parent) {}
 };
 
 } // namespace caelestia::config
