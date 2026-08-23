@@ -56,10 +56,10 @@ StyledRect {
                 property real smoothMax: targetMax
 
                 anchors.fill: parent
-                line1: NetworkUsage.uploadBuffer // qmllint disable missing-type
+                line1: NetworkUsage.uploadBuffer // qmllint disable missing-type unresolved-type
                 line1Color: Colours.palette.m3secondary
                 line1FillAlpha: 0.15
-                line2: NetworkUsage.downloadBuffer // qmllint disable missing-type
+                line2: NetworkUsage.downloadBuffer // qmllint disable missing-type unresolved-type
                 line2Color: Colours.palette.m3tertiary
                 line2FillAlpha: 0.2
                 maxValue: smoothMax
@@ -67,11 +67,11 @@ StyledRect {
 
                 Connections {
                     function onValuesChanged(): void {
-                        sparkline.targetMax = Math.max(NetworkUsage.downloadBuffer.maximum, NetworkUsage.uploadBuffer.maximum, 1024);
+                        sparkline.targetMax = Math.max(NetworkUsage.downloadBuffer.maximum, NetworkUsage.uploadBuffer.maximum, 1024); // qmllint disable unresolved-type
                         slideAnim.restart();
                     }
 
-                    target: NetworkUsage.downloadBuffer
+                    target: NetworkUsage.downloadBuffer // qmllint disable unresolved-type
                 }
 
                 NumberAnimation {
@@ -96,7 +96,7 @@ StyledRect {
                 text: qsTr("Collecting data...")
                 font: Tokens.font.body.small
                 color: Colours.palette.m3outline
-                visible: NetworkUsage.downloadBuffer.count < 2
+                visible: NetworkUsage.downloadBuffer.count < 2 // qmllint disable unresolved-type
             }
         }
 
