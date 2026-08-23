@@ -102,7 +102,7 @@ void NetworkUsage::tick() {
             continue;
         }
         const QByteArray iface = line.left(splitIdx).trimmed();
-        if (iface == "lo") {
+        if (iface == QByteArrayLiteral("lo")) {
             continue; // skip loopback interface
         }
 
