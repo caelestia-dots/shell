@@ -111,6 +111,30 @@ StyledRect {
             Layout.topMargin: -parent.spacing - 4
             Layout.alignment: Qt.AlignHCenter
             asynchronous: true
+            active: GlobalConfig.bar.clock.showSeconds
+            visible: active
+
+            sourceComponent: StyledText {
+                text: Time.format("ss")
+                font: {
+                    const scale = text === "11" ? 1.15 : Math.min(1.05, Math.max(hourMetrics.width, minMetrics.width) / secMetrics.width);
+                    return root.font.width(scale * 100).letterSpacing(scale).build();
+                }
+                color: root.colour
+
+                TextMetrics {
+                    id: secMetrics
+
+                    font: root.font.build()
+                    text: Time.format("ss")
+                }
+            }
+        }
+
+        Loader {
+            Layout.topMargin: -parent.spacing - 4
+            Layout.alignment: Qt.AlignHCenter
+            asynchronous: true
             active: GlobalConfig.services.useTwelveHourClock
             visible: active
 
