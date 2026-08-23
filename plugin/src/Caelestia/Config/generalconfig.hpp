@@ -49,7 +49,7 @@ class GeneralBattery : public settings::ObjectNode {
     CONFIG_NODE(GeneralBattery, settings::ObjectNode)
 
     CONFIG_GLOBAL_PROPERTY(QVariantList, lowBatteryWarnLevels,
-        {
+        DEFAULT_ARG({
             vmap({
                 { u"level"_s, 20 },
                 { u"title"_s, u"Low battery"_s },
@@ -72,16 +72,16 @@ class GeneralBattery : public settings::ObjectNode {
                 { u"critical"_s, true },
                 { u"enabled"_s, true },
             }),
-        })
+        }))
 
     CONFIG_GLOBAL_PROPERTY(QVariantList, chargingWarnLevels,
-        { vmap({
-              { u"level"_s, 80 },
-              { u"title"_s, u"High battery"_s },
-              { u"message"_s, u"You might want to unplug the charger"_s },
-              { u"icon"_s, u"battery_android_5"_s },
-              { u"enabled"_s, true },
-          }),
+        DEFAULT_ARG({ vmap({
+                          { u"level"_s, 80 },
+                          { u"title"_s, u"High battery"_s },
+                          { u"message"_s, u"You might want to unplug the charger"_s },
+                          { u"icon"_s, u"battery_android_5"_s },
+                          { u"enabled"_s, true },
+                      }),
             vmap({
                 { u"level"_s, 90 },
                 { u"title"_s, u"Did you see the previous message?"_s },
@@ -96,17 +96,13 @@ class GeneralBattery : public settings::ObjectNode {
                 { u"icon"_s, u"battery_android_alert"_s },
                 { u"critical"_s, true },
                 { u"enabled"_s, true },
-            }) })
+            }) }))
 
     CONFIG_GLOBAL_PROPERTY(int, criticalLevel, 3)
     CONFIG_GLOBAL_PROPERTY(bool, enableLowBatteryWarning, true)
     CONFIG_GLOBAL_PROPERTY(bool, enableHighBatteryWarning, false)
     CONFIG_GLOBAL_PROPERTY(bool, framedMaterialIcons, false)
     CONFIG_GLOBAL_PROPERTY(bool, toastSound, false)
-
-public:
-    explicit GeneralBattery(QObject* parent = nullptr)
-        : ConfigObject(parent) {}
 };
 
 class GeneralConfig : public settings::ObjectNode {
