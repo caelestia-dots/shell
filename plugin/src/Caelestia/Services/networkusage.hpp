@@ -31,8 +31,8 @@ class NetworkUsage : public TickingService {
     Q_PROPERTY(qreal uploadTotal READ uploadTotal NOTIFY changed)
     Q_PROPERTY(int historyLength READ historyLength CONSTANT)
 
-    Q_PROPERTY(internal::CircularBuffer* downloadBuffer READ downloadBuffer CONSTANT)
-    Q_PROPERTY(internal::CircularBuffer* uploadBuffer READ uploadBuffer CONSTANT)
+    Q_PROPERTY(caelestia::internal::CircularBuffer* downloadBuffer READ downloadBuffer CONSTANT)
+    Q_PROPERTY(caelestia::internal::CircularBuffer* uploadBuffer READ uploadBuffer CONSTANT)
 
 public:
     explicit NetworkUsage(QObject* parent = nullptr);

@@ -9,9 +9,9 @@
 
 namespace {
 
-constexpr qreal BytesPerKiB = 1024.0;
-constexpr qreal BytesPerMiB = 1024.0 * 1024.0;
-constexpr qreal BytesPerGiB = 1024.0 * 1024.0 * 1024.0;
+constexpr qreal kBytesPerKiB = 1024.0;
+constexpr qreal kBytesPerMiB = 1024.0 * 1024.0;
+constexpr qreal kBytesPerGiB = 1024.0 * 1024.0 * 1024.0;
 
 } // namespace
 
@@ -67,17 +67,17 @@ NetworkFormatResult NetworkUsage::formatBytes(qreal bytes) const {
         result.unit = QStringLiteral("B");
         return result;
     }
-    if (bytes < BytesPerKiB) {
+    if (bytes < kBytesPerKiB) {
         result.value = bytes;
         result.unit = QStringLiteral("B");
-    } else if (bytes < BytesPerMiB) {
-        result.value = bytes / BytesPerKiB;
+    } else if (bytes < kBytesPerMiB) {
+        result.value = bytes / kBytesPerKiB;
         result.unit = QStringLiteral("KB");
-    } else if (bytes < BytesPerGiB) {
-        result.value = bytes / BytesPerMiB;
+    } else if (bytes < kBytesPerGiB) {
+        result.value = bytes / kBytesPerMiB;
         result.unit = QStringLiteral("MB");
     } else {
-        result.value = bytes / BytesPerGiB;
+        result.value = bytes / kBytesPerGiB;
         result.unit = QStringLiteral("GB");
     }
     return result;
