@@ -167,9 +167,7 @@ PageBase {
             icon: "music_note"
             value: GlobalConfig.paths.lowBatNotifSound
             onResetRequested: {
-                let defaultConf = GlobalConfig.defaults();
-                let defaultValue = defaultConf.paths.lowBatNotifSound;
-                GlobalConfig.paths.lowBatNotifSound = defaultValue;
+                GlobalConfig.paths.resetOption("lowBatNotifSound");
             }
         }
 
@@ -181,9 +179,7 @@ PageBase {
             icon: "music_note"
             value: GlobalConfig.paths.highBatNotifSound
             onResetRequested: {
-                let defaultConf = GlobalConfig.defaults();
-                let defaultValue = defaultConf.paths.highBatNotifSound;
-                GlobalConfig.paths.highBatNotifSound = defaultValue;
+                GlobalConfig.paths.resetOption("highBatNotifSound");
             }
         }
 
