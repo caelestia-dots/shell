@@ -38,6 +38,14 @@ PageBase {
             onToggled: GlobalConfig.dashboard.showOnHover = checked
         }
 
+        ToggleRow {
+            last: true
+            text: qsTr("Show clock seconds")
+            subtext: qsTr("Display seconds for the clock in the main panel")
+            checked: Config.dashboard.showClockSeconds
+            onToggled: GlobalConfig.dashboard.showClockSeconds = checked
+        }
+
         // Tabs
         SectionHeader {
             text: qsTr("Tabs")
