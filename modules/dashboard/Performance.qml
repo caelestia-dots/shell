@@ -75,11 +75,14 @@ Item {
                         label: qsTr("CPU")
                         subLabel: Cpu.name
                         usage: Cpu.percentage
-                        temperature: Cpu.temperature
+                        temperature: Cpu.temperature > 0 ? Cpu.temperature : Gpu.temperature
                         accent: Colours.palette.m3primary
 
                         ServiceRef {
                             service: Cpu
+                        }
+                        ServiceRef {
+                            service: Gpu
                         }
                     }
                 }
