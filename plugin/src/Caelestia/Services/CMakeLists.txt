@@ -18,6 +18,7 @@ qml_module(caelestia-services
         lyriccandidate.cpp
         lyrics.cpp
         sessionmanager.cpp
+        networkusage.cpp
     LIBRARIES
         Qt::DBus
         PkgConfig::Pipewire
@@ -27,4 +28,6 @@ qml_module(caelestia-services
         caelestia-core
         caelestia-config
         caelestia-internal
+    DEPENDENCIES
+        Caelestia.Internal
 )
