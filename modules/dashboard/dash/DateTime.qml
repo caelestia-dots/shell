@@ -36,10 +36,40 @@ Item {
 
         StyledText {
             Layout.topMargin: -(font.pointSize * 0.4)
+            Layout.bottomMargin: GlobalConfig.dashboard.showClockSeconds ? -(font.pointSize * 0.4) : 0
             Layout.alignment: Qt.AlignHCenter
             text: Time.minuteStr
             color: Colours.palette.m3secondary
             font: Tokens.font.clock.size(28).weight(Font.DemiBold).build()
+        }
+
+        Loader {
+            asynchronous: true
+            Layout.alignment: Qt.AlignHCenter
+
+            active: GlobalConfig.dashboard.showClockSeconds
+            visible: active
+
+            sourceComponent: StyledText {
+                text: "•••"
+                color: Colours.palette.m3primary
+                font: Tokens.font.clock.size(28 * 0.9).build()
+            }
+        }
+
+        Loader {
+            asynchronous: true
+            Layout.alignment: Qt.AlignHCenter
+            Layout.topMargin: -(28 * 0.4)
+
+            active: GlobalConfig.dashboard.showClockSeconds
+            visible: active
+
+            sourceComponent: StyledText {
+                text: Time.format("ss")
+                color: Colours.palette.m3secondary
+                font: Tokens.font.clock.size(28).weight(Font.DemiBold).build()
+            }
         }
 
         Loader {
