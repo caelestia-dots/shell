@@ -2,8 +2,8 @@ import QtQuick
 import QtQuick.Layouts
 import Caelestia.Config
 import Caelestia.Internal
+import Caelestia.Services
 import qs.components
-import qs.components.misc
 import qs.services
 
 StyledRect {
@@ -15,7 +15,7 @@ StyledRect {
     implicitWidth: Tokens.sizes.dashboard.perfNetworkCardWidth
     implicitHeight: Tokens.sizes.dashboard.perfNetworkCardHeight
 
-    Ref {
+    ServiceRef {
         service: NetworkUsage
     }
 
@@ -123,7 +123,7 @@ StyledRect {
 
             StyledText {
                 text: {
-                    const fmt = NetworkUsage.formatBytes(NetworkUsage.downloadSpeed ?? 0);
+                    const fmt = NetworkUsage.formatBytesRate(NetworkUsage.downloadSpeed ?? 0);
                     return fmt ? `${fmt.value.toFixed(1)} ${fmt.unit}` : "0.0 B/s";
                 }
                 font: Tokens.font.body.builders.medium.weight(Font.Medium).build()
@@ -154,7 +154,7 @@ StyledRect {
 
             StyledText {
                 text: {
-                    const fmt = NetworkUsage.formatBytes(NetworkUsage.uploadSpeed ?? 0);
+                    const fmt = NetworkUsage.formatBytesRate(NetworkUsage.uploadSpeed ?? 0);
                     return fmt ? `${fmt.value.toFixed(1)} ${fmt.unit}` : "0.0 B/s";
                 }
                 font: Tokens.font.body.builders.medium.weight(Font.Medium).build()
@@ -185,8 +185,8 @@ StyledRect {
 
             StyledText {
                 text: {
-                    const down = NetworkUsage.formatBytesTotal(NetworkUsage.downloadTotal ?? 0);
-                    const up = NetworkUsage.formatBytesTotal(NetworkUsage.uploadTotal ?? 0);
+                    const down = NetworkUsage.formatBytes(NetworkUsage.downloadTotal ?? 0);
+                    const up = NetworkUsage.formatBytes(NetworkUsage.uploadTotal ?? 0);
                     return (down && up) ? `↓${down.value.toFixed(1)}${down.unit} ↑${up.value.toFixed(1)}${up.unit}` : "↓0.0B ↑0.0B";
                 }
                 font: Tokens.font.body.small
