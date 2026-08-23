@@ -1,38 +1,34 @@
 #pragma once
 
-#include "configobject.hpp"
-
 #include <qstring.h>
 #include <qstringlist.h>
-#include <qvariant.h>
+#include <qvariantlist.h>
+
+#include "common.hpp"
+#include "settings/objectnode.hpp"
 
 namespace caelestia::config {
 
 using Qt::StringLiterals::operator""_s;
+using settings::vmap;
 
-class GeneralApps : public ConfigObject {
-    Q_OBJECT
-    QML_ANONYMOUS
+class GeneralApps : public settings::ObjectNode {
+    CONFIG_NODE(GeneralApps, settings::ObjectNode)
 
     CONFIG_GLOBAL_PROPERTY(QStringList, terminal, { u"foot"_s })
     CONFIG_GLOBAL_PROPERTY(QStringList, audio, { u"pwvucontrol"_s })
     CONFIG_GLOBAL_PROPERTY(QStringList, playback, { u"mpv"_s })
     CONFIG_GLOBAL_PROPERTY(QStringList, explorer, { u"thunar"_s })
-
-public:
-    explicit GeneralApps(QObject* parent = nullptr)
-        : ConfigObject(parent) {}
 };
 
-class GeneralIdle : public ConfigObject {
-    Q_OBJECT
-    QML_ANONYMOUS
+class GeneralIdle : public settings::ObjectNode {
+    CONFIG_NODE(GeneralIdle, settings::ObjectNode)
 
     CONFIG_GLOBAL_PROPERTY(bool, lockBeforeSleep, true)
     CONFIG_GLOBAL_PROPERTY(bool, inhibitWhenAudio, true)
     CONFIG_GLOBAL_PROPERTY(bool, inhibitWhenCharging, false)
     CONFIG_GLOBAL_PROPERTY(QVariantList, timeouts,
-        {
+        DEFAULT_ARG({
             vmap({
                 { u"timeout"_s, 180 },
                 { u"idleAction"_s, u"lock"_s },
@@ -46,19 +42,14 @@ class GeneralIdle : public ConfigObject {
                 { u"timeout"_s, 600 },
                 { u"idleAction"_s, QStringList{ u"suspendThenHibernate"_s } },
             }),
-        })
-
-public:
-    explicit GeneralIdle(QObject* parent = nullptr)
-        : ConfigObject(parent) {}
+        }))
 };
 
-class GeneralBattery : public ConfigObject {
-    Q_OBJECT
-    QML_ANONYMOUS
+class GeneralBattery : public settings::ObjectNode {
+    CONFIG_NODE(GeneralBattery, settings::ObjectNode)
 
     CONFIG_GLOBAL_PROPERTY(QVariantList, warnLevels,
-        {
+        DEFAULT_ARG({
             vmap({
                 { u"level"_s, 20 },
                 { u"title"_s, u"Low battery"_s },
@@ -78,32 +69,20 @@ class GeneralBattery : public ConfigObject {
                 { u"icon"_s, u"battery_android_alert"_s },
                 { u"critical"_s, true },
             }),
-        })
+        }))
     CONFIG_GLOBAL_PROPERTY(int, criticalLevel, 3)
-
-public:
-    explicit GeneralBattery(QObject* parent = nullptr)
-        : ConfigObject(parent) {}
 };
 
-class GeneralConfig : public ConfigObject {
-    Q_OBJECT
-    QML_ANONYMOUS
+class GeneralConfig : public settings::ObjectNode {
+    CONFIG_NODE(GeneralConfig, settings::ObjectNode)
 
-    CONFIG_GLOBAL_PROPERTY(QString, logo)
+    CONFIG_GLOBAL_PROPERTY(QString, logo, QString())
     CONFIG_PROPERTY(bool, showOverFullscreen, false)
     CONFIG_PROPERTY(qreal, mediaGifSpeedAdjustment, 300)
     CONFIG_PROPERTY(qreal, sessionGifSpeed, 0.7)
     CONFIG_SUBOBJECT(GeneralApps, apps)
     CONFIG_SUBOBJECT(GeneralIdle, idle)
     CONFIG_SUBOBJECT(GeneralBattery, battery)
-
-public:
-    explicit GeneralConfig(QObject* parent = nullptr)
-        : ConfigObject(parent)
-        , m_apps(new GeneralApps(this))
-        , m_idle(new GeneralIdle(this))
-        , m_battery(new GeneralBattery(this)) {}
 };
 
 } // namespace caelestia::config

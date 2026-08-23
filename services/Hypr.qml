@@ -87,6 +87,19 @@ Singleton {
         return Hyprland.monitorFor(screen);
     }
 
+    function toplevelsForWs(ws: int): list<HyprlandToplevel> {
+        return toplevels.values.filter(t => t.workspace && t.workspace.id === ws && !isToplevelIgnored(t));
+    }
+
+    function isToplevelIgnored(toplevel: HyprlandToplevel): bool {
+        const ipc = toplevel?.lastIpcObject;
+        if (!ipc?.class || !ipc.mapped)
+            return true;
+
+        const ignoredTags = GlobalConfig.bar.workspaces.ignoredTags;
+        return ipc.tags?.some(tag => ignoredTags.includes(tag.replace(/\*$/, ""))) ?? false;
+    }
+
     function reloadDynamicConfs(): void {
         if (usingLua) {
             extras.batchMessage(['eval hl.bind("Caps_Lock", hl.dsp.global("caelestia:refreshDevices"), { locked = true, non_consuming = true, ignore_mods = true, release = true })', 'eval hl.bind("Num_Lock", hl.dsp.global("caelestia:refreshDevices"), { locked = true, non_consuming = true, ignore_mods = true, release = true })']);

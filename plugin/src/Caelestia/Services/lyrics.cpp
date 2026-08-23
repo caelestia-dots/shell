@@ -1,6 +1,6 @@
 #include "lyrics.hpp"
 
-#include "../Config/config.hpp"
+#include "../Config/rootnodes.hpp"
 #include "../Config/serviceconfig.hpp"
 #include "../Config/userpaths.hpp"
 
@@ -69,7 +69,7 @@ Lyrics::Lyrics(QObject* parent)
     m_loadDebounce->setInterval(kLoadDebounceMs);
     QObject::connect(m_loadDebounce, &QTimer::timeout, this, &Lyrics::doLoad);
 
-    const auto* cfg = config::GlobalConfig::instance();
+    const auto* cfg = config::ConfigSingleton::instance();
     const auto* svcCfg = cfg->services();
     const auto* paths = cfg->paths();
 
@@ -101,7 +101,7 @@ void Lyrics::setPreferredBackend(LyricsBackend::Backend value) {
     m_preferredBackend = value;
     emit preferredBackendChanged();
 
-    auto* const svcCfg = config::GlobalConfig::instance()->services();
+    auto* const svcCfg = config::ConfigSingleton::instance()->services();
     const QString key = backendKey(value);
     if (svcCfg->lyricsBackend() != key) {
         svcCfg->set_lyricsBackend(key);
@@ -779,7 +779,7 @@ QNetworkReply* Lyrics::getJson(const QUrl& url, const QHash<QByteArray, QByteArr
 }
 
 void Lyrics::onPreferredBackendConfigChanged() {
-    auto* svcCfg = config::GlobalConfig::instance()->services();
+    auto* svcCfg = config::ConfigSingleton::instance()->services();
     const LyricsBackend::Backend desired = backendFromKey(svcCfg->lyricsBackend());
     if (desired == m_preferredBackend) {
         return;
@@ -848,7 +848,7 @@ void Lyrics::persistTrackPrefs() {
 }
 
 QString Lyrics::lyricsDir() const {
-    QString dir = config::GlobalConfig::instance()->paths()->lyricsDir();
+    QString dir = config::ConfigSingleton::instance()->paths()->lyricsDir();
     if (dir.isEmpty()) {
         return {};
     }
