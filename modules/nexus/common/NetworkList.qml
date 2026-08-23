@@ -63,8 +63,7 @@ ItemList {
             if (!modelData.active) {
                 NetworkConnection.handleConnect(modelData, null, network => {
                     // Password required — open the password sub-page.
-                    root.nState.passwordNetwork = network;
-                    root.nState.openSubPage(7); // Network password sub-page
+                    root.nState.openPasswordPage(network);
                 });
                 currentSelected = true;
                 root.networkSelected(modelData);
