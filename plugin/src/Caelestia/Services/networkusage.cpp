@@ -1,9 +1,19 @@
 #include "networkusage.hpp"
+
 #include <array>
 #include <cmath>
 #include <cstdio>
+
 #include <qfile.h>
 #include <qtypes.h>
+
+namespace {
+
+constexpr qreal BytesPerKiB = 1024.0;
+constexpr qreal BytesPerMiB = 1024.0 * 1024.0;
+constexpr qreal BytesPerGiB = 1024.0 * 1024.0 * 1024.0;
+
+} // namespace
 
 namespace caelestia::services {
 
@@ -35,40 +45,40 @@ int NetworkUsage::historyLength() const {
     return m_historyLength;
 }
 
-caelestia::internal::CircularBuffer* NetworkUsage::downloadBuffer() const {
+internal::CircularBuffer* NetworkUsage::downloadBuffer() const {
     return m_downloadBuffer;
 }
 
-caelestia::internal::CircularBuffer* NetworkUsage::uploadBuffer() const {
+internal::CircularBuffer* NetworkUsage::uploadBuffer() const {
     return m_uploadBuffer;
 }
 
-QVariantMap NetworkUsage::formatBytesRate(qreal bytes) const {
-    QVariantMap result = formatBytes(bytes);
-    result["unit"] = result["unit"].toString() + QStringLiteral("/s");
+NetworkFormatResult NetworkUsage::formatBytesRate(qreal bytes) const {
+    NetworkFormatResult result = formatBytes(bytes);
+    result.unit = result.unit + QStringLiteral("/s");
     return result;
 }
 
-QVariantMap NetworkUsage::formatBytes(qreal bytes) const {
-    QVariantMap result;
+NetworkFormatResult NetworkUsage::formatBytes(qreal bytes) const {
+    NetworkFormatResult result;
 
     if (bytes < 0 || std::isnan(bytes) || !std::isfinite(bytes)) {
-        result["value"] = 0;
-        result["unit"] = "B";
+        result.value = 0;
+        result.unit = QStringLiteral("B");
         return result;
     }
-    if (bytes < 1024) {
-        result["value"] = bytes;
-        result["unit"] = "B";
-    } else if (bytes < 1024 * 1024) {
-        result["value"] = bytes / 1024.0;
-        result["unit"] = "KB";
-    } else if (bytes < 1024 * 1024 * 1024) {
-        result["value"] = bytes / (1024.0 * 1024.0);
-        result["unit"] = "MB";
+    if (bytes < BytesPerKiB) {
+        result.value = bytes;
+        result.unit = QStringLiteral("B");
+    } else if (bytes < BytesPerMiB) {
+        result.value = bytes / BytesPerKiB;
+        result.unit = QStringLiteral("KB");
+    } else if (bytes < BytesPerGiB) {
+        result.value = bytes / BytesPerMiB;
+        result.unit = QStringLiteral("MB");
     } else {
-        result["value"] = bytes / (1024.0 * 1024.0 * 1024.0);
-        result["unit"] = "GB";
+        result.value = bytes / BytesPerGiB;
+        result.unit = QStringLiteral("GB");
     }
     return result;
 }

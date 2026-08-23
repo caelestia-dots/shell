@@ -5,9 +5,20 @@
 
 #include <qelapsedtimer.h>
 #include <qqmlintegration.h>
-#include <qvariant.h>
 
 namespace caelestia::services {
+
+struct NetworkFormatResult {
+    Q_GADGET
+    QML_ANONYMOUS
+
+    Q_PROPERTY(qreal value MEMBER value CONSTANT)
+    Q_PROPERTY(QString unit MEMBER unit CONSTANT)
+
+public:
+    qreal value = 0.0;
+    QString unit;
+};
 
 class NetworkUsage : public TickingService {
     Q_OBJECT
@@ -20,8 +31,8 @@ class NetworkUsage : public TickingService {
     Q_PROPERTY(qreal uploadTotal READ uploadTotal NOTIFY changed)
     Q_PROPERTY(int historyLength READ historyLength CONSTANT)
 
-    Q_PROPERTY(caelestia::internal::CircularBuffer* downloadBuffer READ downloadBuffer CONSTANT)
-    Q_PROPERTY(caelestia::internal::CircularBuffer* uploadBuffer READ uploadBuffer CONSTANT)
+    Q_PROPERTY(internal::CircularBuffer* downloadBuffer READ downloadBuffer CONSTANT)
+    Q_PROPERTY(internal::CircularBuffer* uploadBuffer READ uploadBuffer CONSTANT)
 
 public:
     explicit NetworkUsage(QObject* parent = nullptr);
@@ -32,11 +43,11 @@ public:
     [[nodiscard]] qreal uploadTotal() const;
     [[nodiscard]] int historyLength() const;
 
-    Q_INVOKABLE [[nodiscard]] QVariantMap formatBytesRate(qreal bytes) const;
-    Q_INVOKABLE [[nodiscard]] QVariantMap formatBytes(qreal bytes) const;
+    [[nodiscard]] Q_INVOKABLE NetworkFormatResult formatBytesRate(qreal bytes) const;
+    [[nodiscard]] Q_INVOKABLE NetworkFormatResult formatBytes(qreal bytes) const;
 
-    [[nodiscard]] caelestia::internal::CircularBuffer* downloadBuffer() const;
-    [[nodiscard]] caelestia::internal::CircularBuffer* uploadBuffer() const;
+    [[nodiscard]] internal::CircularBuffer* downloadBuffer() const;
+    [[nodiscard]] internal::CircularBuffer* uploadBuffer() const;
 
 signals:
     void changed();
@@ -51,8 +62,8 @@ private:
     qreal m_uploadTotal = 0.0;
     int m_historyLength = 30;
 
-    caelestia::internal::CircularBuffer* m_downloadBuffer = nullptr;
-    caelestia::internal::CircularBuffer* m_uploadBuffer = nullptr;
+    internal::CircularBuffer* m_downloadBuffer = nullptr;
+    internal::CircularBuffer* m_uploadBuffer = nullptr;
 
     quint64 m_prevRx = 0;
     quint64 m_prevTx = 0;
