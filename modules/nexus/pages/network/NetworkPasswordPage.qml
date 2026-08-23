@@ -54,19 +54,19 @@ PageBase {
     title: nState.passwordNetwork?.ssid ?? qsTr("Password")
     isSubPage: true
 
-    Connections {
-        function onSubPageClosed(): void {
-            root.nState.passwordNetwork = null;
-        }
-
-        target: root.nState
-    }
-
     ColumnLayout {
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.top: parent.top
         width: root.cappedWidth
         spacing: Tokens.spacing.large
+
+        Connections {
+            function onSubPageClosed(): void {
+                root.nState.passwordNetwork = null;
+            }
+
+            target: root.nState
+        }
 
         StyledText {
             Layout.fillWidth: true
