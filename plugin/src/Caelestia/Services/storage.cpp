@@ -103,8 +103,9 @@ QStringList resolveByDevt(uint major, uint minor, int depth) {
 } // namespace
 
 Storage::Storage(QObject* parent)
-    : TickingService(parent), m_volumeWatcher(new QFutureWatcher<QList<QStorageInfo>>(this)){
-    connect(m_volumeWatcher, &QFutureWatcher<QList<QStorageInfo>>::finished, this, [this]{
+    : TickingService(parent)
+    , m_volumeWatcher(new QFutureWatcher<QList<QStorageInfo>>(this)) {
+    connect(m_volumeWatcher, &QFutureWatcher<QList<QStorageInfo>>::finished, this, [this] {
         const auto volumes = m_volumeWatcher->result();
         m_volumeWatcherRunning = false;
         parseScannedVolumes(volumes);
@@ -214,8 +215,9 @@ QStringList Storage::resolveToPhysicalDisks(const QString& devicePath) {
     return resolveByDevt(major(st.st_rdev), minor(st.st_rdev));
 }
 
-void Storage::tick(){
-    if(m_volumeWatcherRunning) return;
+void Storage::tick() {
+    if (m_volumeWatcherRunning)
+        return;
 
     m_volumeWatcherRunning = true;
     m_volumeWatcher->setFuture(QtConcurrent::run([] {
