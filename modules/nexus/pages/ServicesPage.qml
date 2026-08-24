@@ -184,6 +184,13 @@ PageBase {
 
         ToggleRow {
             first: true
+            text: qsTr("Use per-device defaults")
+            subtext: qsTr("Let each Bluetooth device keep its own preferred battery display and behaviour")
+            checked: GlobalConfig.services?.bluetoothBatteryPerDeviceDefaults ?? true
+            onToggled: if (GlobalConfig.services) GlobalConfig.services.bluetoothBatteryPerDeviceDefaults = checked
+        }
+
+        ToggleRow {
             text: qsTr("Bluetooth battery support")
             subtext: qsTr("Enable Bluetooth battery indicators and quick-menu status")
             checked: Boolean(GlobalConfig.services && (GlobalConfig.services.bluetoothBatteryIcon || GlobalConfig.services.bluetoothBatteryText || GlobalConfig.services.bluetoothBatteryRing))
@@ -337,14 +344,15 @@ PageBase {
         ToggleRow {
             text: qsTr("Use hover mode")
             subtext: qsTr("Only reveal the extended battery view when the pointer hovers over the indicator")
-            checked: Boolean(GlobalConfig.services && GlobalConfig.services.bluetoothBatteryHoverMode)
+            checked: GlobalConfig.services?.bluetoothBatteryHoverMode ?? true
             onToggled: if (GlobalConfig.services) GlobalConfig.services.bluetoothBatteryHoverMode = checked
         }
 
         StepperRow {
+            last: true
             label: qsTr("Hover delay")
             subtext: qsTr("Delay before the hover battery popup is shown (ms)")
-            value: GlobalConfig.services ? GlobalConfig.services.bluetoothBatteryHoverDelay : 1000
+            value: GlobalConfig.services?.bluetoothBatteryHoverDelay ?? 1000
             from: 250
             to: 5000
             stepSize: 50
@@ -352,20 +360,6 @@ PageBase {
                 if (GlobalConfig.services)
                     GlobalConfig.services.bluetoothBatteryHoverDelay = Math.round(v);
             }
-        }
-
-        ToggleRow {
-            text: qsTr("Show battery tooltips")
-            subtext: qsTr("Display the device battery and status when hovering over the Bluetooth icon")
-            checked: Boolean(GlobalConfig.services && GlobalConfig.services.bluetoothBatteryTooltips)
-            onToggled: if (GlobalConfig.services) GlobalConfig.services.bluetoothBatteryTooltips = checked
-        }
-
-        ToggleRow {
-            text: qsTr("Use per-device defaults")
-            subtext: qsTr("Let each Bluetooth device keep its own preferred battery display and behaviour")
-            checked: Boolean(GlobalConfig.services && GlobalConfig.services.bluetoothBatteryPerDeviceDefaults)
-            onToggled: if (GlobalConfig.services) GlobalConfig.services.bluetoothBatteryPerDeviceDefaults = checked
         }
 
         ToggleRow {

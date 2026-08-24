@@ -70,32 +70,35 @@ Item {
             color: root.colour
         }
 
-        MaterialIcon {
+        RowLayout {
             visible: !!root.connectedPhoneBattery
-            animate: true
-            text: {
-                const pct = Number(root.connectedPhoneBattery?.percentage ?? 0);
-                if (pct >= 90)
-                    return "battery_6_bar";
-                if (pct >= 70)
-                    return "battery_5_bar";
-                if (pct >= 50)
-                    return "battery_4_bar";
-                if (pct >= 30)
-                    return "battery_3_bar";
-                if (pct >= 15)
-                    return "battery_2_bar";
-                return "battery_1_bar";
-            }
-            color: root.colour
-            fontStyle: Tokens.font.icon.small
-        }
+            spacing: Tokens.spacing.extraSmall / 2
 
-        StyledText {
-            visible: !!root.connectedPhoneBattery
-            text: `${Math.round(root.connectedPhoneBattery?.percentage ?? 0)}%`
-            color: root.colour
-            font: Tokens.font.body.small
+            MaterialIcon {
+                animate: true
+                text: {
+                    const pct = Number(root.connectedPhoneBattery?.percentage ?? 0);
+                    if (pct >= 90)
+                        return "battery_6_bar";
+                    if (pct >= 70)
+                        return "battery_5_bar";
+                    if (pct >= 50)
+                        return "battery_4_bar";
+                    if (pct >= 30)
+                        return "battery_3_bar";
+                    if (pct >= 15)
+                        return "battery_2_bar";
+                    return "battery_1_bar";
+                }
+                color: root.colour
+                fontStyle: Tokens.font.icon.medium
+            }
+
+            StyledText {
+                text: `${Math.round(root.connectedPhoneBattery?.percentage ?? 0)}%`
+                color: root.colour
+                font: Tokens.font.body.small
+            }
         }
     }
 }
