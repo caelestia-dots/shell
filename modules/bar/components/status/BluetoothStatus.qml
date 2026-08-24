@@ -43,7 +43,7 @@ Item {
         return null;
     }
 
-    visible: root.taskbarEnabled
+    visible: root.taskbarEnabled && Bluetooth.devices.values.some(d => d.connected) // qmllint disable unresolved-type
     implicitWidth: layout.implicitWidth
     implicitHeight: layout.implicitHeight
 
