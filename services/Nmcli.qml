@@ -236,10 +236,31 @@ Singleton {
             // connections. A physical NIC always has
             // /sys/class/net/<iface>/device; veth/bridge/tun interfaces
             // never do, so that's how we tell them apart.
-            physicalCheckProc.pendingInterfaces = interfaces;
-            physicalCheckProc.pendingCallback = callback;
-            physicalCheckProc.command = ["sh", "-c", `for i in ${interfaces.map(i => i.device).join(" ")}; do [ -e "/sys/class/net/$i/device" ] && echo "$i"; done`];
-            physicalCheckProc.running = true;
+            const proc = physicalCheckProc.createObject(root);
+            proc.callback = physical => {
+                const physicalSet = physical.trim().split("\n").filter(l => l.length > 0);
+                const filtered = interfaces.filter(iface => physicalSet.includes(iface.device));
+                const devices = filtered.map(iface => ({
+                            interface: iface.device,
+                            type: iface.type,
+                            state: iface.state,
+                            connection: iface.connection,
+                            connected: isConnectedState(iface.state),
+                            ipAddress: "",
+                            gateway: "",
+                            dns: [],
+                            subnet: "",
+                            macAddress: "",
+                            speed: ""
+                        }));
+
+                root.ethernetInterfaces = filtered;
+                syncEthernetDevices(devices);
+                if (callback)
+                    callback(filtered);
+                proc.destroy();
+            };
+            proc.exec(["sh", "-c", 'for i do [ -e "/sys/class/net/$i/device" ] && echo "$i"; done', "sh"].concat(interfaces.map(iface => iface.device)));
         });
     }
 
@@ -1453,6 +1474,18 @@ Singleton {
         EthernetDevice {}
     }
 
+    Component {
+        id: physicalCheckProc
+
+        Process {
+            property var callback: null
+
+            stdout: StdioCollector {
+                onStreamFinished: callback?.(text)
+            }
+        }
+    }
+
     Timer {
         id: connectionCheckTimer
 
@@ -1634,39 +1667,6 @@ Singleton {
                 } else {
                     root.ethernetSpeed = `${mbit} Mbps`;
                 }
-            }
-        }
-    }
-
-    Process {
-        id: physicalCheckProc
-
-        property list<var> pendingInterfaces: []
-        property var pendingCallback: null
-
-        stdout: StdioCollector {
-            onStreamFinished: {
-                const physical = text.trim().split("\n").filter(l => l.length > 0);
-                const interfaces = physicalCheckProc.pendingInterfaces.filter(iface => physical.includes(iface.device));
-                const devices = interfaces.map(iface => ({
-                            interface: iface.device,
-                            type: iface.type,
-                            state: iface.state,
-                            connection: iface.connection,
-                            connected: root.isConnectedState(iface.state),
-                            ipAddress: "",
-                            gateway: "",
-                            dns: [],
-                            subnet: "",
-                            macAddress: "",
-                            speed: ""
-                        }));
-
-                root.ethernetInterfaces = interfaces;
-                root.syncEthernetDevices(devices);
-                if (physicalCheckProc.pendingCallback)
-                    physicalCheckProc.pendingCallback(interfaces);
-                physicalCheckProc.pendingCallback = null;
             }
         }
     }
