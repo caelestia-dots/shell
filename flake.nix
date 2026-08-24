@@ -26,40 +26,45 @@
     nixpkgs,
     ...
   } @ inputs: let
-    forAllSystems = fn:
-      nixpkgs.lib.genAttrs nixpkgs.lib.platforms.linux (
-        system: fn nixpkgs.legacyPackages.${system}
-      );
-  in {
-    formatter = forAllSystems (pkgs: pkgs.alejandra);
+    inherit (nixpkgs.lib) genAttrs platforms modules lists systems;
 
-    packages = forAllSystems (pkgs: rec {
+    pkgsOf = nixpkgs.legacyPackages;
+    systems' = lists.intersectLists platforms.linux systems.flakeExposed;
+    eachSystem = genAttrs systems';
+  in {
+    formatter = eachSystem (system: pkgsOf.${system}.alejandra);
+
+    packages = eachSystem (system: let
+      pkgs = pkgsOf.${system};
+    in rec {
       caelestia-shell = pkgs.callPackage ./nix {
         inherit (inputs) m3shapes;
         rev = self.rev or self.dirtyRev;
         stdenv = pkgs.clangStdenv;
-        quickshell = inputs.quickshell.packages.${pkgs.stdenv.hostPlatform.system}.default.override {
+        quickshell = inputs.quickshell.packages.${system}.default.override {
           withX11 = false;
           withI3 = false;
         };
-        caelestia-cli = inputs.caelestia-cli.packages.${pkgs.stdenv.hostPlatform.system}.default;
+        caelestia-cli = inputs.caelestia-cli.packages.${system}.default;
       };
       with-cli = caelestia-shell.override {withCli = true;};
       debug = caelestia-shell.override {debug = true;};
       default = caelestia-shell;
     });
 
-    devShells = forAllSystems (pkgs: {
+    devShells = eachSystem (system: {
       default = let
-        shell = self.packages.${pkgs.stdenv.hostPlatform.system}.caelestia-shell;
+        pkgs = pkgsOf.${system};
+        shell = self.packages.${system}.caelestia-shell;
+        mkShell = pkgs.mkShell.override {stdenv = shell.stdenv;};
       in
-        pkgs.mkShell.override {stdenv = shell.stdenv;} {
+        mkShell {
           inputsFrom = [shell shell.plugin shell.extras shell.m3shapesModule];
           packages = with pkgs; [clazy material-symbols rubik nerd-fonts.caskaydia-cove];
           CAELESTIA_XKB_RULES_PATH = "${pkgs.xkeyboard-config}/share/xkeyboard-config-2/rules/base.lst";
         };
     });
 
-    homeManagerModules.default = import ./nix/hm-module.nix self;
+    homeManagerModules.default = modules.importApply ./nix/hm-module.nix self;
   };
 }
