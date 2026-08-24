@@ -56,5 +56,6 @@ jobs:
 
             nix
             assets
+            i18n
           subjectPattern: ^(?![A-Z]).+$ # No starting with uppercase
           subjectPatternError: The subject must not start with an uppercase character.
