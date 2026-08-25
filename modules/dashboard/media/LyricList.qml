@@ -255,6 +255,7 @@ Item {
 
         spacing: Tokens.spacing.small
         opacity: 0
+        enabled: opacity > 0
 
         delegate: StyledText {
             id: lyric
