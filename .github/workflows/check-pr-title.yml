@@ -38,11 +38,11 @@ jobs:
             nexus
             picker
 
-            services
-            config
-            utils
             components
+            config
             plugins
+            services
+            utils
 
             assets
             i18n
