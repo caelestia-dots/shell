@@ -71,6 +71,7 @@ class GeneralBattery : public settings::ObjectNode {
             }),
         }))
     CONFIG_GLOBAL_PROPERTY(int, criticalLevel, 3)
+    CONFIG_GLOBAL_PROPERTY(int, chargeThresholdPollInterval, 15000)
 };
 
 class GeneralConfig : public settings::ObjectNode {

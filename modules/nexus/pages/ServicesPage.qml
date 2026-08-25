@@ -107,7 +107,6 @@ PageBase {
         }
 
         StepperRow {
-            last: true
             label: qsTr("Wi-Fi rescan")
             subtext: qsTr("How often available networks are rescanned (seconds)")
             value: GlobalConfig.nexus.networkRescanInterval / 1000
@@ -115,6 +114,17 @@ PageBase {
             to: 120
             stepSize: 5
             onMoved: v => GlobalConfig.nexus.networkRescanInterval = Math.round(v * 1000)
+        }
+
+        StepperRow {
+            last: true
+            label: qsTr("Charge limit refresh")
+            subtext: qsTr("How often the battery charge limit is re-read (seconds)")
+            value: GlobalConfig.general.battery.chargeThresholdPollInterval / 1000
+            from: 5
+            to: 120
+            stepSize: 5
+            onMoved: v => GlobalConfig.general.battery.chargeThresholdPollInterval = Math.round(v * 1000)
         }
 
         // Media & lyrics
