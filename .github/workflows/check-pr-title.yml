@@ -44,8 +44,9 @@ jobs:
             components
             plugins
 
-            nix
             assets
             i18n
+            nix
+            scripts
           subjectPattern: ^(?![A-Z]).+$ # No starting with uppercase
           subjectPatternError: The subject must not start with an uppercase character.
