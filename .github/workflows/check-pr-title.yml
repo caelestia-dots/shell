@@ -20,16 +20,6 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          types: |
-            fix
-            feat
-            chore
-            build
-            refactor
-            ci
-            docs
-            style
-            perf
           scopes: |
             bar
             dashboard
