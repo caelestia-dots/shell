@@ -91,7 +91,6 @@ PageBase {
     isSubPage: true
 
     Component.onCompleted: {
-        Nmcli.getWirelessDeviceDetails("", () => {});
         loadIpConfig();
     }
 
