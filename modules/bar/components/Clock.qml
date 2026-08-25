@@ -12,6 +12,14 @@ StyledRect {
     readonly property color colour: Colours.palette.m3tertiary
     readonly property int padding: Config.bar.clock.background ? Tokens.padding.medium : Tokens.padding.extraSmall
     readonly property var font: Tokens.font.body.builders.small.scale(1.1)
+    readonly property var timeFont: {
+        const value = root.font.width(105).letterSpacing(-0.25).build();
+        value.features = {
+            "tnum": 1
+        };
+        return value;
+    }
+    readonly property real timeCellWidth: widestMetrics.advanceWidth
 
     implicitWidth: Tokens.sizes.bar.innerWidth
     implicitHeight: layout.implicitHeight + root.padding * 2
@@ -56,7 +64,7 @@ StyledRect {
                 StyledText {
                     Layout.alignment: Qt.AlignHCenter
                     text: Time.format("d")
-                    font: root.font.scale(1.1).build()
+                    font: root.timeFont
                     color: root.colour
                 }
 
@@ -73,76 +81,61 @@ StyledRect {
         }
 
         StyledText {
+            Layout.preferredWidth: root.timeCellWidth
             Layout.alignment: Qt.AlignHCenter
+            horizontalAlignment: Text.AlignHCenter
             text: Time.hourStr
-            font: {
-                const scale = text === "11" ? 1.15 : Math.min(1.05, Math.max(hourMetrics.width, minMetrics.width) / hourMetrics.width);
-                return root.font.width(scale * 100).letterSpacing(scale).build();
-            }
+            font: root.timeFont
             color: root.colour
-
-            TextMetrics {
-                id: hourMetrics
-
-                font: root.font.build()
-                text: Time.hourStr
-            }
         }
 
         StyledText {
             Layout.topMargin: -parent.spacing - 4
+            Layout.preferredWidth: root.timeCellWidth
             Layout.alignment: Qt.AlignHCenter
+            horizontalAlignment: Text.AlignHCenter
             text: Time.minuteStr
-            font: {
-                const scale = text === "11" ? 1.15 : Math.min(1.05, Math.max(hourMetrics.width, minMetrics.width) / minMetrics.width);
-                return root.font.width(scale * 100).letterSpacing(scale).build();
-            }
+            font: root.timeFont
             color: root.colour
-
-            TextMetrics {
-                id: minMetrics
-
-                font: root.font.build()
-                text: Time.minuteStr
-            }
         }
 
         Loader {
             Layout.topMargin: -parent.spacing - 4
+            Layout.preferredWidth: root.timeCellWidth
             Layout.alignment: Qt.AlignHCenter
             asynchronous: true
             active: Config.bar.clock.showSeconds
             visible: active
 
             sourceComponent: StyledText {
+                horizontalAlignment: Text.AlignHCenter
                 text: Time.format("ss")
-                font: {
-                    const scale = text === "11" ? 1.15 : Math.min(1.05, Math.max(hourMetrics.width, minMetrics.width) / secMetrics.width);
-                    return root.font.width(scale * 100).letterSpacing(scale).build();
-                }
+                font: root.timeFont
                 color: root.colour
-
-                TextMetrics {
-                    id: secMetrics
-
-                    font: root.font.build()
-                    text: Time.format("ss")
-                }
             }
         }
 
         Loader {
             Layout.topMargin: -parent.spacing - 4
+            Layout.preferredWidth: root.timeCellWidth
             Layout.alignment: Qt.AlignHCenter
             asynchronous: true
             active: GlobalConfig.services.useTwelveHourClock
             visible: active
 
             sourceComponent: StyledText {
+                horizontalAlignment: Text.AlignHCenter
                 text: Time.amPmStr.toLowerCase()
                 font: Tokens.font.body.builders.small.scale(0.9).build()
                 color: root.colour
             }
         }
+    }
+
+    TextMetrics {
+        id: widestMetrics
+
+        font: root.font.build()
+        text: "88"
     }
 }
