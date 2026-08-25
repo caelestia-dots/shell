@@ -50,25 +50,23 @@ Item {
             active: Config.dashboard.showClockSeconds
             visible: active
 
-            sourceComponent: StyledText {
-                text: "•••"
-                color: Colours.palette.m3primary
-                font: Tokens.font.clock.size(28 * 0.9).build()
-            }
-        }
+            sourceComponent: ColumnLayout {
+                spacing: 0
 
-        Loader {
-            asynchronous: true
-            Layout.alignment: Qt.AlignHCenter
-            Layout.topMargin: -(28 * 0.4)
+                StyledText {
+                    Layout.alignment: Qt.AlignHCenter
+                    text: "•••"
+                    color: Colours.palette.m3primary
+                    font: Tokens.font.clock.size(28 * 0.9).build()
+                }
 
-            active: Config.dashboard.showClockSeconds
-            visible: active
-
-            sourceComponent: StyledText {
-                text: Time.format("ss")
-                color: Colours.palette.m3secondary
-                font: Tokens.font.clock.size(28).weight(Font.DemiBold).build()
+                StyledText {
+                    Layout.topMargin: -(28 * 0.4)
+                    Layout.alignment: Qt.AlignHCenter
+                    text: Time.format("ss")
+                    color: Colours.palette.m3secondary
+                    font: Tokens.font.clock.size(28).weight(Font.DemiBold).build()
+                }
             }
         }
 
