@@ -224,22 +224,7 @@ Singleton {
     function getEthernetInterfaces(callback: var): void {
         executeCommand(["-t", "-f", root.deviceStatusFields, root.nmcliCommandDevice, "status"], result => {
             const interfaces = parseDeviceStatusOutput(result.output, root.deviceTypeEthernet);
-            if (interfaces.length === 0) {
-                root.ethernetInterfaces = [];
-                syncEthernetDevices([]);
-                if (callback)
-                    callback([]);
-                return;
-            }
-            // NetworkManager reports container/VM veth pairs (Docker, Podman,
-            // etc.) as type "ethernet" too, so they'd show up here like real
-            // connections. A physical NIC always has
-            // /sys/class/net/<iface>/device; veth/bridge/tun interfaces
-            // never do, so that's how we tell them apart.
-            const proc = physicalCheckProc.createObject(root);
-            proc.callback = physical => {
-                const physicalSet = physical.trim().split("\n").filter(l => l.length > 0);
-                const filtered = interfaces.filter(iface => physicalSet.includes(iface.device));
+            const applyInterfaces = filtered => {
                 const devices = filtered.map(iface => ({
                             interface: iface.device,
                             type: iface.type,
@@ -258,9 +243,33 @@ Singleton {
                 syncEthernetDevices(devices);
                 if (callback)
                     callback(filtered);
-                proc.destroy();
             };
-            proc.exec(["sh", "-c", 'for i do [ -e "/sys/class/net/$i/device" ] && echo "$i"; done', "sh"].concat(interfaces.map(iface => iface.device)));
+
+            if (interfaces.length === 0) {
+                applyInterfaces([]);
+                return;
+            }
+
+            // NetworkManager reports container/VM veth pairs (Docker, Podman,
+            // etc.) as type "ethernet" too, so they'd show up here like real
+            // connections. A physical NIC always has
+            // /sys/class/net/<iface>/device; veth/bridge/tun interfaces
+            // never do, so that's how we tell them apart.
+            const proc = physicalCheckProc.createObject(root);
+            proc.callback = result => {
+                if (!result.success) {
+                    console.warn(lc, `Failed to classify ethernet interfaces (exited: ${result.exitCode}); keeping the unfiltered list.`);
+                    applyInterfaces(interfaces);
+                    return;
+                }
+
+                const physicalSet = result.output.trim().split("\n").filter(l => l.length > 0);
+                const filtered = interfaces.filter(iface => physicalSet.includes(iface.device));
+
+                applyInterfaces(filtered);
+            };
+
+            proc.exec(["sh", "-c", 'test -d /sys/class/net || exit 1; for i do [ -e "/sys/class/net/$i/device" ] && printf "%s\\n" "$i"; done; exit 0', "sh", ...interfaces.map(iface => iface.device)]);
         });
     }
 
