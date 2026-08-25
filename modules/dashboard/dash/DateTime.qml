@@ -36,7 +36,7 @@ Item {
 
         StyledText {
             Layout.topMargin: -(font.pointSize * 0.4)
-            Layout.bottomMargin: GlobalConfig.dashboard.showClockSeconds ? -(font.pointSize * 0.4) : 0
+            Layout.bottomMargin: Config.dashboard.showClockSeconds ? -(font.pointSize * 0.4) : 0
             Layout.alignment: Qt.AlignHCenter
             text: Time.minuteStr
             color: Colours.palette.m3secondary
@@ -47,7 +47,7 @@ Item {
             asynchronous: true
             Layout.alignment: Qt.AlignHCenter
 
-            active: GlobalConfig.dashboard.showClockSeconds
+            active: Config.dashboard.showClockSeconds
             visible: active
 
             sourceComponent: StyledText {
@@ -62,7 +62,7 @@ Item {
             Layout.alignment: Qt.AlignHCenter
             Layout.topMargin: -(28 * 0.4)
 
-            active: GlobalConfig.dashboard.showClockSeconds
+            active: Config.dashboard.showClockSeconds
             visible: active
 
             sourceComponent: StyledText {
