@@ -21,22 +21,21 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           scopes: |
+            background
             bar
             dashboard
+            drawers
             launcher
-            sidebar
-            utilities
+            lock
+            nexus
             notifs
             osd
-            lock
-            session
-            winfo
-            popouts
-            toasts
-
-            background
-            nexus
             picker
+            toasts
+            session
+            sidebar
+            utilities
+            winfo
 
             components
             config
