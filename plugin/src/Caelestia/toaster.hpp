@@ -5,7 +5,7 @@
 #include <qqmllist.h>
 #include <qset.h>
 
-namespace caelestia::services {
+namespace caelestia {
 
 class Toast : public QObject {
     Q_OBJECT
@@ -62,7 +62,7 @@ class Toaster : public QObject {
     QML_ELEMENT
     QML_SINGLETON
 
-    Q_PROPERTY(QQmlListProperty<caelestia::services::Toast> toasts READ toasts NOTIFY toastsChanged)
+    Q_PROPERTY(QQmlListProperty<caelestia::Toast> toasts READ toasts NOTIFY toastsChanged)
 
 public:
     static Toaster* instance();
@@ -71,7 +71,7 @@ public:
     [[nodiscard]] QQmlListProperty<Toast> toasts();
 
     Q_INVOKABLE void toast(const QString& title, const QString& message, const QString& icon = QString(),
-        caelestia::services::Toast::Type type = Toast::Type::Info, int timeout = 5000);
+        caelestia::Toast::Type type = Toast::Type::Info, int timeout = 5000);
 
 signals:
     void toastsChanged();
@@ -82,4 +82,4 @@ private:
     QList<Toast*> m_toasts;
 };
 
-} // namespace caelestia::services
+} // namespace caelestia

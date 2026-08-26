@@ -3,7 +3,7 @@
 #include <qlogging.h>
 #include <qtimer.h>
 
-namespace caelestia::services {
+namespace caelestia {
 
 Toast::Toast(const QString& title, const QString& message, const QString& icon, Type type, int timeout, QObject* parent)
     : QObject(parent)
@@ -122,4 +122,4 @@ void Toaster::toast(const QString& title, const QString& message, const QString&
     emit toastsChanged();
 }
 
-} // namespace caelestia::services
+} // namespace caelestia
