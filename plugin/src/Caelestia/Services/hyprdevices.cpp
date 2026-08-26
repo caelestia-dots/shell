@@ -2,7 +2,7 @@
 
 #include <qjsonarray.h>
 
-namespace caelestia::internal::hypr {
+namespace caelestia::services::hypr {
 
 HyprKeyboard::HyprKeyboard(QJsonObject ipcObject, QObject* parent)
     : QObject(parent)
@@ -131,4 +131,4 @@ bool HyprDevices::updateLastIpcObject(QJsonObject object) {
     return dirty;
 }
 
-} // namespace caelestia::internal::hypr
+} // namespace caelestia::services::hypr

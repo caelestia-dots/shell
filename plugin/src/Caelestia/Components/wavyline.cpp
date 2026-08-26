@@ -3,7 +3,7 @@
 #include <qpainter.h>
 #include <qpainterpath.h>
 
-namespace caelestia::controls {
+namespace caelestia::components {
 
 WavyLine::WavyLine(QQuickItem* parent)
     : QQuickPaintedItem(parent)
@@ -252,4 +252,4 @@ void WavyLine::paintArc(QPainter* painter) {
     painter->drawPath(path);
 }
 
-} // namespace caelestia::controls
+} // namespace caelestia::components
