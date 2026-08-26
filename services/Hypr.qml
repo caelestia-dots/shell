@@ -38,6 +38,7 @@ Singleton {
     readonly property alias devices: extras.devices
 
     property bool hadKeyboard
+    property string lastKbLayoutFull: ""
     property string lastSpecialWorkspace: ""
 
     signal configReloaded
@@ -132,8 +133,11 @@ Singleton {
     }
 
     onKbLayoutFullChanged: {
-        if (hadKeyboard && GlobalConfig.utilities.toasts.kbLayoutChanged)
+        if (hadKeyboard && kbLayoutFull && kbLayoutFull !== "Unknown" && kbLayoutFull !== lastKbLayoutFull && GlobalConfig.utilities.toasts.kbLayoutChanged)
             Toaster.toast(qsTr("Keyboard layout changed"), qsTr("Layout changed to: %1").arg(kbLayoutFull), "keyboard");
+
+        if (kbLayoutFull && kbLayoutFull !== "Unknown")
+            lastKbLayoutFull = kbLayoutFull;
 
         hadKeyboard = !!keyboard;
     }
