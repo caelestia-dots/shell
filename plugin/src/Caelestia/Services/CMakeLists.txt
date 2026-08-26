@@ -19,7 +19,6 @@ qml_module(caelestia-services
         lyrics.cpp
         sessionmanager.cpp
         networkusage.cpp
-        toaster.cpp
         hyprdevices.cpp
         hyprextras.cpp
     LIBRARIES

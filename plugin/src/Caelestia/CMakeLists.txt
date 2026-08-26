@@ -4,6 +4,7 @@ qml_module(caelestia-core
         cutils.cpp
         qalculator.cpp
         requests.cpp
+        toaster.cpp
         circularbuffer.cpp
     LIBRARIES
         Qt::Gui

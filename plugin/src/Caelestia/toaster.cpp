@@ -3,7 +3,7 @@
 #include <qlogging.h>
 #include <qtimer.h>
 
-namespace caelestia::services {
+namespace caelestia {
 
 Toast::Toast(const QString& title, const QString& message, const QString& icon, Type type, int timeout, QObject* parent)
     : QObject(parent)
@@ -96,12 +96,22 @@ void Toast::unlock(QObject* sender) {
 Toaster::Toaster(QObject* parent)
     : QObject(parent) {}
 
+Toaster* Toaster::instance() {
+    static Toaster instance;
+    return &instance;
+}
+
+Toaster* Toaster::create(QQmlEngine*, QJSEngine*) {
+    QQmlEngine::setObjectOwnership(instance(), QQmlEngine::CppOwnership);
+    return instance();
+}
+
 QQmlListProperty<Toast> Toaster::toasts() {
     return QQmlListProperty<Toast>(this, &m_toasts);
 }
 
 void Toaster::toast(const QString& title, const QString& message, const QString& icon, Toast::Type type, int timeout) {
-    auto* toast = new Toast(title, message, icon, type, timeout, this);
+    auto* const toast = new Toast(title, message, icon, type, timeout, this);
     QObject::connect(toast, &Toast::finishedClose, this, [toast, this]() {
         if (m_toasts.removeOne(toast)) {
             emit toastsChanged();
@@ -112,4 +122,4 @@ void Toaster::toast(const QString& title, const QString& message, const QString&
     emit toastsChanged();
 }
 
-} // namespace caelestia::services
+} // namespace caelestia
