@@ -1,7 +1,7 @@
 import QtQuick
 import Quickshell
 import Quickshell.Io
-import Caelestia.Services
+import Caelestia
 import qs.components.misc
 import qs.services
 import qs.modules.nexus

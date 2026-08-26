@@ -8,7 +8,7 @@
 #include <QtDBus/qdbusreply.h>
 #include <qloggingcategory.h>
 
-#include "toaster.hpp"
+#include "../toaster.hpp"
 
 Q_LOGGING_CATEGORY(lcSessionManager, "caelestia.services.sessionmanager", QtInfoMsg)
 
@@ -110,13 +110,7 @@ void SessionManager::hibernate() {
     } else {
         qCWarning(lcSessionManager) << "Hibernate unavailable, ignoring hibernate request";
 
-        auto* const engine = qmlEngine(this);
-        if (!engine)
-            return;
-        auto* const toaster = engine->singletonInstance<Toaster*>("Caelestia.Services", "Toaster");
-        if (!toaster)
-            return;
-        toaster->toast(
+        Toaster::instance()->toast(
             tr("Hibernate failed"), tr("Enable hibernation to use this feature."), "warning", Toast::Type::Warning);
     }
 }

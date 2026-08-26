@@ -4,8 +4,8 @@ import QtQml
 import Quickshell
 import Quickshell.Io
 import Quickshell.Services.Mpris
+import Caelestia
 import Caelestia.Config
-import Caelestia.Services
 import qs.components.misc
 
 Singleton {
