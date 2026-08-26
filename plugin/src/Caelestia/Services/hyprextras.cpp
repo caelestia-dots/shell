@@ -7,9 +7,9 @@
 #include <qloggingcategory.h>
 #include <qvariant.h>
 
-Q_LOGGING_CATEGORY(lcHypr, "caelestia.internal.hypr", QtInfoMsg)
+Q_LOGGING_CATEGORY(lcHypr, "caelestia.services.hypr", QtInfoMsg)
 
-namespace caelestia::internal::hypr {
+namespace caelestia::services::hypr {
 
 HyprExtras::HyprExtras(QObject* parent)
     : QObject(parent)
@@ -225,4 +225,4 @@ HyprExtras::SocketPtr HyprExtras::makeRequest(
     return socket;
 }
 
-} // namespace caelestia::internal::hypr
+} // namespace caelestia::services::hypr
