@@ -106,10 +106,16 @@ PageBase {
         }
 
         ToggleRow {
-            last: true
             text: qsTr("Network")
             checked: Config.dashboard.performance.showNetwork
             onToggled: GlobalConfig.dashboard.performance.showNetwork = checked
+        }
+
+        ToggleRow {
+            last: true
+            text: qsTr("Top Apps")
+            checked: Config.dashboard.performance.showTopApps
+            onToggled: GlobalConfig.dashboard.performance.showTopApps = checked
         }
 
         // Behaviour
