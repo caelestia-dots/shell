@@ -19,8 +19,8 @@ namespace caelestia::services {
 
 NetworkUsage::NetworkUsage(QObject* parent)
     : TickingService(parent)
-    , m_downloadBuffer(new internal::CircularBuffer(this))
-    , m_uploadBuffer(new internal::CircularBuffer(this)) {
+    , m_downloadBuffer(new CircularBuffer(this))
+    , m_uploadBuffer(new CircularBuffer(this)) {
     m_downloadBuffer->setCapacity(m_historyLength + 1);
     m_uploadBuffer->setCapacity(m_historyLength + 1);
 }
@@ -45,11 +45,11 @@ int NetworkUsage::historyLength() const {
     return m_historyLength;
 }
 
-internal::CircularBuffer* NetworkUsage::downloadBuffer() const {
+CircularBuffer* NetworkUsage::downloadBuffer() const {
     return m_downloadBuffer;
 }
 
-internal::CircularBuffer* NetworkUsage::uploadBuffer() const {
+CircularBuffer* NetworkUsage::uploadBuffer() const {
     return m_uploadBuffer;
 }
 

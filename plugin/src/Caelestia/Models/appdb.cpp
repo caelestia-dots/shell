@@ -7,7 +7,7 @@
 
 Q_LOGGING_CATEGORY(lcAppDb, "caelestia.appdb", QtInfoMsg)
 
-namespace caelestia {
+namespace caelestia::models {
 
 AppEntry::AppEntry(QObject* entry, unsigned int frequency, QObject* parent)
     : QObject(parent)
@@ -321,4 +321,4 @@ void AppDb::updateApps() {
     }
 }
 
-} // namespace caelestia
+} // namespace caelestia::models
