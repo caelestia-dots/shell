@@ -2,7 +2,7 @@
 
 #include <algorithm>
 
-namespace caelestia::internal {
+namespace caelestia {
 
 CircularBuffer::CircularBuffer(QObject* parent)
     : QObject(parent) {}
@@ -91,4 +91,4 @@ qreal CircularBuffer::at(int index) const {
     return m_data[actualIndex];
 }
 
-} // namespace caelestia::internal
+} // namespace caelestia

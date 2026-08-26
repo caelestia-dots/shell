@@ -5,7 +5,7 @@
 #include <qqmlintegration.h>
 #include <qqmllist.h>
 
-namespace caelestia::internal::hypr {
+namespace caelestia::services::hypr {
 
 class HyprKeyboard : public QObject {
     Q_OBJECT
@@ -55,7 +55,7 @@ class HyprDevices : public QObject {
     QML_UNCREATABLE("HyprDevices instances can only be retrieved from a HyprExtras")
 
     Q_PROPERTY(
-        QQmlListProperty<caelestia::internal::hypr::HyprKeyboard> keyboards READ keyboards NOTIFY keyboardsChanged)
+        QQmlListProperty<caelestia::services::hypr::HyprKeyboard> keyboards READ keyboards NOTIFY keyboardsChanged)
 
 public:
     explicit HyprDevices(QObject* parent = nullptr);
@@ -71,4 +71,4 @@ private:
     QList<HyprKeyboard*> m_keyboards;
 };
 
-} // namespace caelestia::internal::hypr
+} // namespace caelestia::services::hypr

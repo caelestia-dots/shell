@@ -3,7 +3,7 @@
 #include <qqmlintegration.h>
 #include <qquickpainteditem.h>
 
-namespace caelestia::controls {
+namespace caelestia::components {
 
 class WavyLine : public QQuickPaintedItem {
     Q_OBJECT
@@ -104,4 +104,4 @@ private:
     qreal m_fullAngleRad;
 };
 
-} // namespace caelestia::controls
+} // namespace caelestia::components

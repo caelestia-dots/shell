@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../Internal/circularbuffer.hpp"
+#include "../circularbuffer.hpp"
 #include "tickingservice.hpp"
 
 #include <qelapsedtimer.h>
@@ -31,8 +31,8 @@ class NetworkUsage : public TickingService {
     Q_PROPERTY(qreal uploadTotal READ uploadTotal NOTIFY changed)
     Q_PROPERTY(int historyLength READ historyLength CONSTANT)
 
-    Q_PROPERTY(caelestia::internal::CircularBuffer* downloadBuffer READ downloadBuffer CONSTANT)
-    Q_PROPERTY(caelestia::internal::CircularBuffer* uploadBuffer READ uploadBuffer CONSTANT)
+    Q_PROPERTY(caelestia::CircularBuffer* downloadBuffer READ downloadBuffer CONSTANT)
+    Q_PROPERTY(caelestia::CircularBuffer* uploadBuffer READ uploadBuffer CONSTANT)
 
 public:
     explicit NetworkUsage(QObject* parent = nullptr);
@@ -46,8 +46,8 @@ public:
     [[nodiscard]] Q_INVOKABLE NetworkFormatResult formatBytesRate(qreal bytes) const;
     [[nodiscard]] Q_INVOKABLE NetworkFormatResult formatBytes(qreal bytes) const;
 
-    [[nodiscard]] internal::CircularBuffer* downloadBuffer() const;
-    [[nodiscard]] internal::CircularBuffer* uploadBuffer() const;
+    [[nodiscard]] CircularBuffer* downloadBuffer() const;
+    [[nodiscard]] CircularBuffer* uploadBuffer() const;
 
 signals:
     void changed();
@@ -62,8 +62,8 @@ private:
     qreal m_uploadTotal = 0.0;
     int m_historyLength = 30;
 
-    internal::CircularBuffer* m_downloadBuffer = nullptr;
-    internal::CircularBuffer* m_uploadBuffer = nullptr;
+    CircularBuffer* m_downloadBuffer = nullptr;
+    CircularBuffer* m_uploadBuffer = nullptr;
 
     quint64 m_prevRx = 0;
     quint64 m_prevTx = 0;

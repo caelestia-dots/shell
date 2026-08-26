@@ -3,15 +3,12 @@ qml_module(caelestia-core
     SOURCES
         cutils.cpp
         qalculator.cpp
-        appdb.cpp
         requests.cpp
-        toaster.cpp
-        imageanalyser.cpp
+        circularbuffer.cpp
     LIBRARIES
         Qt::Gui
         Qt::Quick
         Qt::Concurrent
-        Qt::Sql
         PkgConfig::Qalculate
 )
 
@@ -27,7 +24,6 @@ list(APPEND CMAKE_AUTOMOC_MACRO_NAMES
 add_subdirectory(Settings)
 add_subdirectory(Components)
 add_subdirectory(Config)
-add_subdirectory(Internal)
 add_subdirectory(Models)
 add_subdirectory(Services)
 add_subdirectory(Blobs)
