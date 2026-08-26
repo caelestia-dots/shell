@@ -37,10 +37,14 @@ jobs:
             utilities
             winfo
 
+            blobs
             components
             config
+            images
+            models
             plugins
             services
+            settings
             utils
 
             assets
