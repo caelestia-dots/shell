@@ -38,46 +38,44 @@ PageBase {
     function loadIpConfig(): void {
         if (!root.ssid)
             return;
-        Nmcli.getIpv4Config(root.ssid, cfg => {
-            if (!cfg)
-                return;
-            root.ipMethod = cfg.method; // "auto" | "auto-dns" | "manual"
-            methodSelect.active = cfg.method === "manual" ? manualItem : (cfg.method === "auto-dns" ? autoDnsItem : autoItem);
-            addressField.text = cfg.address;
-            gatewayField.text = cfg.gateway;
-            dnsField.text = cfg.dns;
-            root.autoconnect = cfg.autoconnect;
-            root.origMethod = cfg.method;
-            root.origAddress = cfg.address;
-            root.origGateway = cfg.gateway;
-            root.origDns = cfg.dns;
-            root.ipLoaded = true;
-        });
+        const cfg = Nmcli.getIpv4Config(root.ssid);
+        if (!cfg)
+            return;
+        root.ipMethod = cfg.method; // "auto" | "auto-dns" | "manual"
+        methodSelect.active = cfg.method === "manual" ? manualItem : (cfg.method === "auto-dns" ? autoDnsItem : autoItem);
+        addressField.text = cfg.address;
+        gatewayField.text = cfg.gateway;
+        dnsField.text = cfg.dns;
+        root.autoconnect = cfg.autoconnect;
+        root.origMethod = cfg.method;
+        root.origAddress = cfg.address;
+        root.origGateway = cfg.gateway;
+        root.origDns = cfg.dns;
+        root.ipLoaded = true;
     }
 
     function saveIpConfig(): void {
         if (!root.ssid)
             return;
         root.savingIp = true;
-        Nmcli.setIpv4Config(root.ssid, {
+        const result = Nmcli.setIpv4Config(root.ssid, {
             method: root.ipMethod,
             address: addressField.text.trim(),
             gateway: gatewayField.text.trim(),
             dns: dnsField.text.trim()
-        }, result => {
-            root.savingIp = false;
-            if (!(result && result.success)) {
-                if (root.ipMethod === "manual")
-                    addressField.isError = true;
-                else
-                    dnsField.isError = true;
-            } else {
-                root.origMethod = root.ipMethod;
-                root.origAddress = addressField.text.trim();
-                root.origGateway = gatewayField.text.trim();
-                root.origDns = dnsField.text.trim();
-            }
         });
+        root.savingIp = false;
+        if (!result) {
+            if (root.ipMethod === "manual")
+                addressField.isError = true;
+            else
+                dnsField.isError = true;
+        } else {
+            root.origMethod = root.ipMethod;
+            root.origAddress = addressField.text.trim();
+            root.origGateway = gatewayField.text.trim();
+            root.origDns = dnsField.text.trim();
+        }
     }
 
     // Close if the network is no longer active (e.g. disconnected elsewhere).
@@ -252,7 +250,7 @@ PageBase {
             enabled: root.ipLoaded
             onToggled: {
                 root.autoconnect = checked;
-                Nmcli.setAutoconnect(root.ssid, checked, () => {});
+                Nmcli.setAutoconnect(root.ssid, checked);
             }
         }
 
