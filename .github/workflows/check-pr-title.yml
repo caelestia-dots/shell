@@ -9,7 +9,7 @@ on:
       - synchronize
 
 jobs:
-  check:
+  check-pr-title:
     runs-on: ubuntu-slim
 
     permissions:
