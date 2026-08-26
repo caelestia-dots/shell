@@ -1,5 +1,6 @@
 #include "rootnodes.hpp"
 
+#include "../toaster.hpp"
 #include "common.hpp"
 
 namespace caelestia::config {
@@ -12,7 +13,50 @@ QString nameFor(const QString& key) {
     return key.isEmpty() ? u"global"_s : key;
 }
 
+QString forScreen(const QString& global, const QString& layer, const QString& screen) {
+    return screen.isEmpty() ? global : layer.arg(screen);
+}
+
 } // namespace
+
+namespace detail {
+
+void loaded(ConfigKind kind, settings::RootNode* layer, const QString& screen) {
+    if (kind != ConfigKind::Shell || !screen.isEmpty())
+        return;
+
+    auto* const config = static_cast<ConfigRoot*>(layer);
+    if (!config->utilities()->toasts()->configLoaded())
+        return;
+
+    const auto issues = config->diagnostics().count();
+    // TODO: tr when translations added
+    const auto message = issues > 0
+                             ? u"Config loaded with %1 issue%2."_s.arg(issues).arg(issues > 1 ? u"s"_s : QString())
+                             : u"Config loaded successfully!"_s;
+    Toaster::instance()->toast(u"Config loaded"_s, message, issues > 0 ? u"settings_alert"_s : u"rule_settings"_s,
+        issues > 0 ? Toast::Type::Warning : Toast::Type::Info);
+}
+
+void loadFailed(ConfigKind kind, const QString& error, const QString& screen) {
+    // TODO: tr when translations added
+    const auto title =
+        kind == ConfigKind::Tokens
+            ? forScreen(u"Failed to parse token config"_s, u"Failed to parse token config for %1"_s, screen)
+            : forScreen(u"Failed to parse config"_s, u"Failed to parse config for %1"_s, screen);
+    Toaster::instance()->toast(title, error, u"settings_alert"_s, Toast::Type::Warning);
+}
+
+void saveFailed(ConfigKind kind, const QString& error, const QString& screen) {
+    if (kind != ConfigKind::Shell)
+        return;
+
+    // TODO: tr when translations added
+    const auto title = forScreen(u"Failed to save config"_s, u"Failed to save config for %1"_s, screen);
+    Toaster::instance()->toast(title, error, u"settings_alert"_s, Toast::Type::Error);
+}
+
+} // namespace detail
 
 ConfigRoot::ConfigRoot(const QString& path, ConfigRoot* fallback, QObject* parent)
     : RootNode(path, fallback, parent) {
