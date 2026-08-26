@@ -354,8 +354,16 @@ Singleton {
                 status.connected = root.active.exitNodeOnly ? usingExitNode : true;
                 status.state = status.connected ? "connected" : "disconnected";
 
-                if (usingExitNode)
-                    status.server = (exitNode.DNSName || exitNode.HostName || "").replace(/\.$/, "");
+                if (usingExitNode) {
+                    const peers = data.Peer || {};
+                    for (const key in peers) {
+                        const peer = peers[key];
+                        if (peer && (peer.ID === exitNode.ID || peer.ExitNode)) {
+                            status.server = (peer.DNSName || peer.HostName || "").replace(/\.$/, "");
+                            break;
+                        }
+                    }
+                }
             } else if (backendState === "Starting") {
                 status.state = "connecting";
             } else if (backendState === "NeedsLogin" || backendState === "NeedsMachineAuth") {

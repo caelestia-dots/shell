@@ -45,7 +45,7 @@ PageBase {
             interface: interfaceField.text.trim(),
             connectCmd: joinCmd(connectField.text),
             disconnectCmd: joinCmd(disconnectField.text),
-            exitNodeOnly: exitNodeToggle.checked
+            exitNodeOnly: root.isTailscale && exitNodeToggle.checked
         };
 
         if (editing) {
