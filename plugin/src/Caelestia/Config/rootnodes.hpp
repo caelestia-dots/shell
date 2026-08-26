@@ -81,62 +81,33 @@ void saveFailed(ConfigKind kind, const QString& error, const QString& screen);
 
 } // namespace detail
 
-#define SINGLETON(Type, Root, QmlName, file, kind)                                                                     \
+#define SINGLETON_DECL(Type, Root, QmlName)                                                                            \
     class Type : public Root {                                                                                         \
         Q_OBJECT                                                                                                       \
         QML_NAMED_ELEMENT(QmlName)                                                                                     \
         QML_SINGLETON                                                                                                  \
                                                                                                                        \
     public:                                                                                                            \
-        static Type* instance() {                                                                                      \
-            static Type instance;                                                                                      \
-            return &instance;                                                                                          \
-        }                                                                                                              \
-        static Type* create(QQmlEngine*, QJSEngine*) {                                                                 \
-            QQmlEngine::setObjectOwnership(instance(), QQmlEngine::CppOwnership);                                      \
-            return instance();                                                                                         \
-        }                                                                                                              \
+        static Type* instance();                                                                                       \
+        static Type* create(QQmlEngine*, QJSEngine*);                                                                  \
                                                                                                                        \
-        [[nodiscard]] Q_INVOKABLE Root* forScreen(const QString& screen) {                                             \
-            bool created;                                                                                              \
-            auto* const layer = m_layers.get(screen, this, &created);                                                  \
-            if (created)                                                                                               \
-                initLayer(layer);                                                                                      \
-            return layer;                                                                                              \
-        }                                                                                                              \
+        [[nodiscard]] Q_INVOKABLE Root* forScreen(const QString& screen);                                              \
                                                                                                                        \
     private:                                                                                                           \
-        explicit Type(QObject* parent = nullptr)                                                                       \
-            : Root(configDir() + QLatin1Char('/') + file, nullptr, parent)                                             \
-            , m_layers(monitorConfigDir(), file, this) {                                                               \
-            initLayer(this);                                                                                           \
-        }                                                                                                              \
+        explicit Type(QObject* parent = nullptr);                                                                      \
                                                                                                                        \
-        void onTreeLoaded(settings::RootNode* layer) {                                                                 \
-            detail::loaded(kind, layer, m_layers.nameFor(static_cast<Root*>(layer)));                                  \
-        }                                                                                                              \
+        void onTreeLoaded(settings::RootNode* layer);                                                                  \
+        void onTreeLoadFailed(settings::RootNode* layer, const QString& error);                                        \
+        void onTreeSaveFailed(settings::RootNode* layer, const QString& error);                                        \
                                                                                                                        \
-        void onTreeLoadFailed(settings::RootNode* layer, const QString& error) {                                       \
-            detail::loadFailed(kind, error, m_layers.nameFor(static_cast<Root*>(layer)));                              \
-        }                                                                                                              \
-                                                                                                                       \
-        void onTreeSaveFailed(settings::RootNode* layer, const QString& error) {                                       \
-            detail::saveFailed(kind, error, m_layers.nameFor(static_cast<Root*>(layer)));                              \
-        }                                                                                                              \
-                                                                                                                       \
-        void initLayer(Root* layer) {                                                                                  \
-            QObject::connect(layer, &Root::treeLoaded, this, &Type::onTreeLoaded);                                     \
-            QObject::connect(layer, &Root::treeLoadFailed, this, &Type::onTreeLoadFailed);                             \
-            QObject::connect(layer, &Root::treeSaveFailed, this, &Type::onTreeSaveFailed);                             \
-            layer->load();                                                                                             \
-        }                                                                                                              \
+        void initLayer(Root* layer);                                                                                   \
                                                                                                                        \
         settings::LayerRegistry<Root> m_layers;                                                                        \
     };
 
-SINGLETON(ConfigSingleton, ConfigRoot, GlobalConfig, QStringLiteral("shell.json"), detail::ConfigKind::Shell)
-SINGLETON(TokensSingleton, TokensRoot, TokenConfig, QStringLiteral("shell-tokens.json"), detail::ConfigKind::Tokens)
+SINGLETON_DECL(ConfigSingleton, ConfigRoot, GlobalConfig)
+SINGLETON_DECL(TokensSingleton, TokensRoot, TokenConfig)
 
-#undef SINGLETON
+#undef SINGLETON_DECL
 
 } // namespace caelestia::config
