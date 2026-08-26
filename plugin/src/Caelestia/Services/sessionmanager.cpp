@@ -110,13 +110,7 @@ void SessionManager::hibernate() {
     } else {
         qCWarning(lcSessionManager) << "Hibernate unavailable, ignoring hibernate request";
 
-        auto* const engine = qmlEngine(this);
-        if (!engine)
-            return;
-        auto* const toaster = engine->singletonInstance<Toaster*>("Caelestia", "Toaster");
-        if (!toaster)
-            return;
-        toaster->toast(
+        Toaster::instance()->toast(
             tr("Hibernate failed"), tr("Enable hibernation to use this feature."), "warning", Toast::Type::Warning);
     }
 }

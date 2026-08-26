@@ -5,17 +5,16 @@
 #include <qqmlintegration.h>
 #include <qquickpainteditem.h>
 
-namespace caelestia::internal {
+#include "../circularbuffer.hpp"
 
-class CircularBuffer;
+namespace caelestia::components {
 
 class SparklineItem : public QQuickPaintedItem {
     Q_OBJECT
     QML_ELEMENT
-    Q_MOC_INCLUDE("circularbuffer.hpp")
 
-    Q_PROPERTY(CircularBuffer* line1 READ line1 WRITE setLine1 NOTIFY line1Changed)
-    Q_PROPERTY(CircularBuffer* line2 READ line2 WRITE setLine2 NOTIFY line2Changed)
+    Q_PROPERTY(caelestia::CircularBuffer* line1 READ line1 WRITE setLine1 NOTIFY line1Changed)
+    Q_PROPERTY(caelestia::CircularBuffer* line2 READ line2 WRITE setLine2 NOTIFY line2Changed)
     Q_PROPERTY(QColor line1Color READ line1Color WRITE setLine1Color NOTIFY line1ColorChanged)
     Q_PROPERTY(QColor line2Color READ line2Color WRITE setLine2Color NOTIFY line2ColorChanged)
     Q_PROPERTY(qreal line1FillAlpha READ line1FillAlpha WRITE setLine1FillAlpha NOTIFY line1FillAlphaChanged)
@@ -88,4 +87,4 @@ private:
     qreal m_lineWidth = 2.0;
 };
 
-} // namespace caelestia::internal
+} // namespace caelestia::components
