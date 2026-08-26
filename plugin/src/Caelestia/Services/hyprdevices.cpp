@@ -2,7 +2,48 @@
 
 #include <qjsonarray.h>
 
+#include "../Config/rootnodes.hpp"
+#include "../toaster.hpp"
+
 namespace caelestia::services::hypr {
+
+using Qt::StringLiterals::operator""_s;
+
+namespace {
+
+const config::UtilitiesToasts* toastConfig() {
+    return config::ConfigSingleton::instance()->utilities()->toasts();
+}
+
+void toastCapsLock(bool enabled) {
+    if (!toastConfig()->capsLockChanged())
+        return;
+
+    // TODO: tr when translations added
+    Toaster::instance()->toast(enabled ? u"Caps lock enabled"_s : u"Caps lock disabled"_s,
+        enabled ? u"Caps lock is currently enabled"_s : u"Caps lock is currently disabled"_s,
+        enabled ? u"keyboard_capslock_badge"_s : u"keyboard_capslock"_s);
+}
+
+void toastNumLock(bool enabled) {
+    if (!toastConfig()->numLockChanged())
+        return;
+
+    // TODO: tr when translations added
+    Toaster::instance()->toast(enabled ? u"Num lock enabled"_s : u"Num lock disabled"_s,
+        enabled ? u"Num lock is currently enabled"_s : u"Num lock is currently disabled"_s,
+        enabled ? u"looks_one"_s : u"timer_1"_s);
+}
+
+void toastKbLayout(const QString& layout) {
+    if (!toastConfig()->kbLayoutChanged())
+        return;
+
+    // TODO: tr when translations added
+    Toaster::instance()->toast(u"Keyboard layout changed"_s, u"Layout changed to: %1"_s.arg(layout), u"keyboard"_s);
+}
+
+} // namespace
 
 HyprKeyboard::HyprKeyboard(QJsonObject ipcObject, QObject* parent)
     : QObject(parent)
@@ -46,6 +87,7 @@ bool HyprKeyboard::updateLastIpcObject(QJsonObject object) {
     }
 
     const auto last = m_lastIpcObject;
+    const auto isMain = object.value("main").toBool();
 
     m_lastIpcObject = object;
     emit lastIpcObjectChanged();
@@ -66,14 +108,20 @@ bool HyprKeyboard::updateLastIpcObject(QJsonObject object) {
     if (last.value("active_keymap") != object.value("active_keymap")) {
         dirty = true;
         emit activeKeymapChanged();
+        if (isMain && !last.value("active_keymap").toString().isEmpty())
+            toastKbLayout(object.value("active_keymap").toString());
     }
     if (last.value("capsLock") != object.value("capsLock")) {
         dirty = true;
         emit capsLockChanged();
+        if (isMain)
+            toastCapsLock(object.value("capsLock").toBool());
     }
     if (last.value("numLock") != object.value("numLock")) {
         dirty = true;
         emit numLockChanged();
+        if (isMain)
+            toastNumLock(object.value("numLock").toBool());
     }
     if (last.value("main") != object.value("main")) {
         dirty = true;
