@@ -41,6 +41,14 @@ QtObject {
 
         // Connectivity
         Component {
+            // Display
+            StackPage {
+                Component {
+                    DisplayPage {}
+                }
+            }
+        },
+        Component {
             // Network
             StackPage {
                 Component {
