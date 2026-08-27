@@ -17,14 +17,7 @@ QtObject {
         if (!network)
             return;
 
-        if (Nmcli.active && Nmcli.active.ssid !== network.ssid) {
-            Nmcli.disconnectFromNetwork();
-            Qt.callLater(() => {
-                root.connectToNetwork(network, session, onPasswordNeeded);
-            });
-        } else {
-            root.connectToNetwork(network, session, onPasswordNeeded);
-        }
+        root.connectToNetwork(network, session, onPasswordNeeded);
     }
 
     function connectToNetwork(network, session, onPasswordNeeded): void {
