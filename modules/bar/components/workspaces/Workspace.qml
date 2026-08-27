@@ -28,10 +28,14 @@ ColumnLayout {
     readonly property list<int> focusedShapeList: [MaterialShape.Slanted, MaterialShape.Oval, MaterialShape.Pill, MaterialShape.Triangle, MaterialShape.Arrow, MaterialShape.Diamond, MaterialShape.Pentagon, MaterialShape.Gem, MaterialShape.VerySunny, MaterialShape.Sunny, MaterialShape.Cookie4Sided, MaterialShape.Cookie6Sided, MaterialShape.Cookie7Sided, MaterialShape.Cookie9Sided, MaterialShape.Cookie12Sided, MaterialShape.Clover4Leaf, MaterialShape.SoftBurst, MaterialShape.Ghostish]
 
     function updateShape(): void {
+        const shape = indicator.item as MaterialShape;
+        if (!shape)
+            return;
+
         if (focused)
-            indicator.shape = focusedShapeList[Math.floor(Math.random() * focusedShapeList.length)];
+            shape.shape = focusedShapeList[Math.floor(Math.random() * focusedShapeList.length)];
         else
-            indicator.shape = Qt.binding(() => isOccupied ? MaterialShape.Square : MaterialShape.Circle);
+            shape.shape = Qt.binding(() => isOccupied ? MaterialShape.Square : MaterialShape.Circle);
     }
 
     Layout.alignment: Qt.AlignHCenter
@@ -42,24 +46,60 @@ ColumnLayout {
     onFocusedChanged: updateShape()
     Component.onCompleted: updateShape()
 
-    MaterialShape {
+    Loader {
         id: indicator
 
         Layout.alignment: Qt.AlignHCenter | Qt.AlignTop
-        implicitSize: Tokens.sizes.bar.innerWidth - Tokens.padding.small
+        Layout.preferredHeight: Tokens.sizes.bar.innerWidth - Tokens.padding.small
+        sourceComponent: Config.bar.workspaces.displayType === BarEnums.Text ? textComponent : shapeComponent
 
-        color: Config.bar.workspaces.occupiedBg || root.isOccupied || root.focused ? Colours.palette.m3onSurface : Colours.layer(Colours.palette.m3outlineVariant, 2)
-        scale: root.focused ? 2 / 3 : root.isOccupied ? 1 / 3 : 1 / 4
+        onItemChanged: root.updateShape()
+    }
 
-        animationEasing: Tokens.anim.expressiveDefaultSpatial
-        animationDuration: Tokens.anim.durations.expressiveDefaultSpatial * Tokens.anim.durations.scale
+    Component {
+        id: shapeComponent
 
-        Behavior on color {
-            CAnim {}
+        MaterialShape {
+            implicitSize: Tokens.sizes.bar.innerWidth - Tokens.padding.small
+
+            color: Config.bar.workspaces.occupiedBg || root.isOccupied || root.focused ? Colours.palette.m3onSurface : Colours.layer(Colours.palette.m3outlineVariant, 2)
+            scale: root.focused ? 2 / 3 : root.isOccupied ? 1 / 3 : 1 / 4
+
+            animationEasing: Tokens.anim.expressiveDefaultSpatial
+            animationDuration: Tokens.anim.durations.expressiveDefaultSpatial * Tokens.anim.durations.scale
+
+            Behavior on color {
+                CAnim {}
+            }
+
+            Behavior on scale {
+                Anim {}
+            }
         }
+    }
 
-        Behavior on scale {
-            Anim {}
+    Component {
+        id: textComponent
+
+        StyledText {
+            animate: true
+            text: {
+                const ws = Hypr.workspaces.values.find(w => w.id === root.ws);
+                const wsName = !ws || ws.name == root.ws ? root.ws : ws.name[0];
+                let displayName = wsName.toString();
+                if (Config.bar.workspaces.capitalisation.toLowerCase() === "upper") {
+                    displayName = displayName.toUpperCase();
+                } else if (Config.bar.workspaces.capitalisation.toLowerCase() === "lower") {
+                    displayName = displayName.toLowerCase();
+                }
+                const label = Config.bar.workspaces.label || displayName;
+                const occupiedLabel = Config.bar.workspaces.occupiedLabel || label;
+                const activeLabel = Config.bar.workspaces.activeLabel || (root.isOccupied ? occupiedLabel : label);
+                return root.activeWsId === root.ws ? activeLabel : root.isOccupied ? occupiedLabel : label;
+            }
+            color: Config.bar.workspaces.occupiedBg || root.isOccupied || root.activeWsId === root.ws ? Colours.palette.m3onSurface : Colours.layer(Colours.palette.m3outlineVariant, 2)
+            verticalAlignment: Qt.AlignVCenter
+            font.family: Tokens.font.workspaces
         }
     }
 

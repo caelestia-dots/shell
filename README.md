@@ -429,6 +429,7 @@ For example, to automatically hide the bar on the monitor named `DP-1`:
             "maxWindowIcons": 5,
             "activeTrail": false,
             "perMonitorWorkspaces": true,
+            "displayType": "shapes",
             "label": "  ",
             "occupiedLabel": "󰮯",
             "activeLabel": "󰮯",
