@@ -3,15 +3,12 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import QtQuick.Layouts
 import Caelestia.Config
-import qs.components
 import qs.components.controls
 import qs.services
 import qs.modules.nexus.common
 
 PageBase {
     id: root
-
-    title: qsTr("Display")
 
     property int monitorIndex: 0
     readonly property var monitor: Hypr.monitors.values[Math.min(root.monitorIndex, Hypr.monitors.values.length - 1)] ?? null
@@ -74,6 +71,8 @@ PageBase {
             }));
         return items;
     }
+
+    title: qsTr("Display")
 
     ColumnLayout {
         anchors.horizontalCenter: parent.horizontalCenter
