@@ -11,6 +11,8 @@
 #define CONFIG_PROPERTY SETTINGS_PROPERTY
 #define CONFIG_GLOBAL_PROPERTY SETTINGS_GLOBAL_PROPERTY
 
+#define CONFIG_ENUM_PROPERTY(Type, name, defaultVal) CONFIG_PROPERTY(caelestia::config::Type, name, defaultVal)
+
 #define CONFIG_SUBOBJECT(Type, name) SETTINGS_SUBOBJECT(caelestia::config::Type, name)
 #define CONFIG_GLOBAL_SUBOBJECT(Type, name) SETTINGS_GLOBAL_SUBOBJECT(caelestia::config::Type, name)
 

@@ -5,9 +5,8 @@
 #include <qvariantlist.h>
 
 #include "common.hpp"
+#include "enums.hpp"
 #include "settings/objectnode.hpp"
-
-#include "common.hpp"
 
 namespace caelestia::config {
 
@@ -41,6 +40,7 @@ class BarWorkspaces : public settings::ObjectNode {
     CONFIG_PROPERTY(int, maxWindowIcons, 5)
     CONFIG_PROPERTY(bool, activeTrail, false)
     CONFIG_GLOBAL_PROPERTY(bool, perMonitorWorkspaces, true)
+    CONFIG_ENUM_PROPERTY(bar::WorkspaceDisplay, displayType, bar::WorkspaceDisplay::Shapes)
     CONFIG_PROPERTY(QString, label, u"  "_s)
     CONFIG_PROPERTY(QString, occupiedLabel, u"󰮯"_s)
     CONFIG_PROPERTY(QString, activeLabel, u"󰮯"_s)
