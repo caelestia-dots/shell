@@ -16,20 +16,19 @@ Item {
     readonly property color bgColour: Colours.tPalette.m3surfaceContainerHighest
 
     function resolveShape(name: string): int {
-        if (!name)
-            return MaterialShape.ClamShell;
-
-        if (name !== "Custom" && typeof MaterialShape[name] === "number" && MaterialShape[name] >= 0)
+        if (typeof MaterialShape[name] === "number" && MaterialShape[name] >= 0)
             return MaterialShape[name];
 
-        console.warn(`[ProfilePic] Unknown shape "${name}", falling back to ClamShell`);
+        console.warn(lc, `Unknown shape "${name}" for pfpShape; falling back to "ClamShell"`);
         return MaterialShape.ClamShell;
     }
 
     implicitWidth: Math.round(centerWidth * 0.7)
     implicitHeight: {
+        // Force update when the shape or its height changes
         shape.height;
-        shape.shape; // Force update when shape changes
+        shape.shape;
+        shape.morphProgress;
         return shape.pathBounds().height;
     }
 
@@ -64,5 +63,12 @@ Item {
         layer.effect: Mask {
             maskSource: shape
         }
+    }
+    
+    LoggingCategory {
+        id: lc
+
+        name: "caelestia.qml.lock"
+        defaultLogLevel: LoggingCategory.Info
     }
 }

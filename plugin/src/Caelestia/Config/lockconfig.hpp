@@ -5,6 +5,8 @@
 
 namespace caelestia::config {
 
+using Qt::StringLiterals::operator""_s;
+
 class LockConfig : public settings::ObjectNode {
     CONFIG_NODE(LockConfig, settings::ObjectNode)
 
@@ -17,7 +19,7 @@ class LockConfig : public settings::ObjectNode {
     CONFIG_GLOBAL_PROPERTY(int, maxHowdyTries, 3)
     CONFIG_GLOBAL_PROPERTY(bool, triggerHowdyOnWake, true)
     CONFIG_PROPERTY(bool, hideNotifs, false)
-    CONFIG_PROPERTY(QString, pfpShape, QStringLiteral("ClamShell"))
+    CONFIG_PROPERTY(QString, pfpShape, u"ClamShell"_s)
 };
 
 } // namespace caelestia::config
