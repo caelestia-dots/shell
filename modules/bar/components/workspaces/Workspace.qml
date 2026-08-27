@@ -95,7 +95,6 @@ ColumnLayout {
                     to: 1
                     easing: Tokens.anim.standardDecel
                 }
-
                 Anim {
                     properties: "x,y"
                 }
