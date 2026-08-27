@@ -98,7 +98,7 @@ TokensRoot::TokensRoot(const QString& path, TokensRoot* fallback, QObject* paren
         return layer;                                                                                                  \
     }                                                                                                                  \
                                                                                                                        \
-    Type::Type(QObject* parent)                                                                                         \
+    Type::Type(QObject* parent)                                                                                        \
         : Root(configDir() + QLatin1Char('/') + file, nullptr, parent)                                                 \
         , m_layers(monitorConfigDir(), file, this) {                                                                   \
         initLayer(this);                                                                                               \
