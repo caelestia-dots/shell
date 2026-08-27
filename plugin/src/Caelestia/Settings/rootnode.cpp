@@ -18,8 +18,8 @@ RootNode::RootNode(const QString& path, RootNode* fallback, QObject* parent)
 }
 
 void RootNode::load() {
-    m_file->load();
-    reloadFromFile();
+    if (!m_file->load())
+        reloadFromFile();
 }
 
 QList<Diagnostic> RootNode::diagnostics() const {

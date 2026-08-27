@@ -6,7 +6,7 @@
 #include <qqmlengine.h>
 #include <qqmlintegration.h>
 
-namespace caelestia::controls {
+namespace caelestia::components {
 
 class LinearIndicatorManager;
 
@@ -43,7 +43,7 @@ class LinearIndicatorManager : public QObject {
     QML_ELEMENT
 
     Q_PROPERTY(
-        QList<caelestia::controls::LinearIndicatorSegment*> activeIndicators READ activeIndicators CONSTANT FINAL)
+        QList<caelestia::components::LinearIndicatorSegment*> activeIndicators READ activeIndicators CONSTANT FINAL)
 
     Q_PROPERTY(qreal progress READ progress WRITE update NOTIFY updated FINAL)
     Q_PROPERTY(qreal completeEndProgress READ completeEndProgress WRITE updateCompleteEndProgress NOTIFY updated FINAL)
@@ -83,4 +83,4 @@ private:
     std::array<LinearIndicatorSegment*, SEGMENTS> m_activeIndicators;
 };
 
-} // namespace caelestia::controls
+} // namespace caelestia::components
