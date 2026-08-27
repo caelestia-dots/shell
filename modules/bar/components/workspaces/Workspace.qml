@@ -76,8 +76,6 @@ ColumnLayout {
         active: root.hasWindows
 
         sourceComponent: Column {
-            id: col
-
             spacing: 0
 
             add: Transition {
