@@ -14,6 +14,7 @@ class DashboardPerformance : public settings::ObjectNode {
     CONFIG_PROPERTY(bool, showMemory, true)
     CONFIG_PROPERTY(bool, showStorage, true)
     CONFIG_PROPERTY(bool, showNetwork, true)
+    CONFIG_PROPERTY(bool, showTopApps, true)
 };
 
 class DashboardConfig : public settings::ObjectNode {

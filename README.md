@@ -558,7 +558,8 @@ For example, to automatically hide the bar on the monitor named `DP-1`:
             "showCpu": true,
             "showMemory": true,
             "showStorage": true,
-            "showNetwork": true
+            "showNetwork": true,
+            "showTopApps": true
         }
     },
     "launcher": {
