@@ -64,7 +64,7 @@ Item {
             maskSource: shape
         }
     }
-    
+
     LoggingCategory {
         id: lc
 
