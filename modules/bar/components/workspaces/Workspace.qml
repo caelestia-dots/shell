@@ -24,99 +24,42 @@ ColumnLayout {
     readonly property int ws: groupOffset + index + 1
     readonly property bool isOccupied: occupied[ws] ?? false
     readonly property bool hasWindows: isOccupied && Config.bar.workspaces.showWindows
+    readonly property bool focused: activeWsId === ws
+    readonly property list<int> focusedShapeList: [MaterialShape.Slanted, MaterialShape.Oval, MaterialShape.Pill, MaterialShape.Triangle, MaterialShape.Arrow, MaterialShape.Diamond, MaterialShape.Pentagon, MaterialShape.Gem, MaterialShape.VerySunny, MaterialShape.Sunny, MaterialShape.Cookie4Sided, MaterialShape.Cookie6Sided, MaterialShape.Cookie7Sided, MaterialShape.Cookie9Sided, MaterialShape.Cookie12Sided, MaterialShape.Clover4Leaf, MaterialShape.SoftBurst, MaterialShape.Ghostish]
+
+    function updateShape(): void {
+        if (focused)
+            indicator.shape = focusedShapeList[Math.floor(Math.random() * focusedShapeList.length)];
+        else
+            indicator.shape = Qt.binding(() => isOccupied ? MaterialShape.Square : MaterialShape.Circle);
+    }
 
     Layout.alignment: Qt.AlignHCenter
     Layout.preferredHeight: size
 
     spacing: 0
 
-    Item {
+    onFocusedChanged: updateShape()
+    Component.onCompleted: updateShape()
+
+    MaterialShape {
         id: indicator
 
         Layout.alignment: Qt.AlignHCenter | Qt.AlignTop
-        Layout.preferredWidth: Tokens.sizes.bar.innerWidth - Tokens.padding.small
-        Layout.preferredHeight: Tokens.sizes.bar.innerWidth - Tokens.padding.small
+        implicitSize: Tokens.sizes.bar.innerWidth - Tokens.padding.small
 
-        readonly property bool active: root.activeWsId === root.ws
-        property int randShape: MaterialShape.Slanted
-        property int prevActiveWsId: -1
+        color: Config.bar.workspaces.occupiedBg || root.isOccupied || root.focused ? Colours.palette.m3onSurface : Colours.layer(Colours.palette.m3outlineVariant, 2)
+        scale: root.focused ? 2 / 3 : root.isOccupied ? 1 / 3 : 1 / 4
 
-        onActiveChanged: {
-            const wasActive = !active && prevActiveWsId === root.ws;
-            if (!wasActive) {
-                const shapes = [MaterialShape.Slanted, MaterialShape.Arch, MaterialShape.Oval, MaterialShape.Pill, MaterialShape.Triangle, MaterialShape.Arrow, MaterialShape.Diamond, MaterialShape.Pentagon, MaterialShape.Gem, MaterialShape.VerySunny, MaterialShape.Sunny, MaterialShape.Cookie4Sided, MaterialShape.Cookie6Sided, MaterialShape.Cookie7Sided, MaterialShape.Cookie9Sided, MaterialShape.Cookie12Sided, MaterialShape.Clover4Leaf, MaterialShape.Clover8Leaf, MaterialShape.SoftBurst, MaterialShape.Ghostish];
-                randShape = shapes[Math.floor(Math.random() * shapes.length)];
-                activateAnim.running = true;
-            } else {
-                deactivateAnim.running = true;
-            }
-            prevActiveWsId = root.activeWsId;
+        animationEasing: Tokens.anim.expressiveDefaultSpatial
+        animationDuration: Tokens.anim.durations.expressiveDefaultSpatial * Tokens.anim.durations.scale
+
+        Behavior on color {
+            CAnim {}
         }
 
-        MaterialShape {
-            id: wsShape
-
-            anchors.centerIn: parent
-            implicitSize: indicator.width
-            scale: indicator.active ? 2 / 3 : 1 / 3
-            shape: indicator.active ? indicator.randShape : (root.isOccupied ? MaterialShape.Square : MaterialShape.Circle)
-            color: Config.bar.workspaces.occupiedBg || root.isOccupied || root.activeWsId === root.ws ? Colours.palette.m3onSurface : Colours.layer(Colours.palette.m3outlineVariant, 2)
-
-            Behavior on color {
-                CAnim {}
-            }
-
-            Behavior on scale {
-                enabled: !activateAnim.running && !deactivateAnim.running
-
-                Anim {
-                    type: Anim.DefaultEffects
-                }
-            }
-
-            SequentialAnimation {
-                id: activateAnim
-
-                Anim {
-                    target: wsShape
-                    property: "scale"
-                    from: 1 / 3
-                    to: 2 / 3
-                    type: Anim.FastSpatial
-                }
-                PropertyAction {
-                    target: wsShape
-                    property: "shape"
-                    value: indicator.randShape
-                }
-                PropertyAction {
-                    targets: [activateAnim, deactivateAnim]
-                    property: "running"
-                    value: false
-                }
-            }
-
-            SequentialAnimation {
-                id: deactivateAnim
-
-                Anim {
-                    target: wsShape
-                    property: "scale"
-                    from: 2 / 3
-                    to: 1 / 3
-                    type: Anim.FastSpatial
-                }
-                PropertyAction {
-                    target: wsShape
-                    property: "shape"
-                    value: root.isOccupied ? MaterialShape.Square : MaterialShape.Circle
-                }
-                PropertyAction {
-                    targets: [activateAnim, deactivateAnim]
-                    property: "running"
-                    value: false
-                }
-            }
+        Behavior on scale {
+            Anim {}
         }
     }
 
