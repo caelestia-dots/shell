@@ -18,13 +18,18 @@ qml_module(caelestia-services
         lyriccandidate.cpp
         lyrics.cpp
         sessionmanager.cpp
+        networkusage.cpp
+        hyprdevices.cpp
+        hyprextras.cpp
     LIBRARIES
         Qt::DBus
+        Qt::Network
         PkgConfig::Pipewire
         PkgConfig::Aubio
         PkgConfig::Cava
         Sensors::Sensors
         caelestia-core
         caelestia-config
-        caelestia-internal
+    DEPENDENCIES
+        Caelestia
 )

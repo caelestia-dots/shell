@@ -68,89 +68,46 @@ public:
     explicit TokensRoot(const QString& path, TokensRoot* fallback = nullptr, QObject* parent = nullptr);
 };
 
-#define SINGLETON(Type, Root, QmlName, file)                                                                           \
+namespace detail {
+
+enum class ConfigKind {
+    Shell,
+    Tokens
+};
+
+void loaded(ConfigKind kind, settings::RootNode* layer, const QString& screen);
+void loadFailed(ConfigKind kind, const QString& error, const QString& screen);
+void saveFailed(ConfigKind kind, const QString& error, const QString& screen);
+
+} // namespace detail
+
+#define SINGLETON_DECL(Type, Root, QmlName)                                                                            \
     class Type : public Root {                                                                                         \
         Q_OBJECT                                                                                                       \
         QML_NAMED_ELEMENT(QmlName)                                                                                     \
         QML_SINGLETON                                                                                                  \
                                                                                                                        \
     public:                                                                                                            \
-        static Type* instance() {                                                                                      \
-            static Type instance;                                                                                      \
-            return &instance;                                                                                          \
-        }                                                                                                              \
-        static Type* create(QQmlEngine*, QJSEngine*) {                                                                 \
-            QQmlEngine::setObjectOwnership(instance(), QQmlEngine::CppOwnership);                                      \
-            return instance();                                                                                         \
-        }                                                                                                              \
+        static Type* instance();                                                                                       \
+        static Type* create(QQmlEngine*, QJSEngine*);                                                                  \
                                                                                                                        \
-        [[nodiscard]] Q_INVOKABLE Root* forScreen(const QString& screen) {                                             \
-            bool created;                                                                                              \
-            auto* const layer = m_layers.get(screen, this, &created);                                                  \
-            if (created)                                                                                               \
-                initLayer(layer);                                                                                      \
-            return layer;                                                                                              \
-        }                                                                                                              \
-                                                                                                                       \
-        Q_INVOKABLE void flushLoadSignals() {                                                                          \
-            m_flushed = true;                                                                                          \
-            for (const auto& [screen, error] : std::as_const(m_pendingLoads)) {                                        \
-                if (error.isNull())                                                                                    \
-                    emit loaded(screen);                                                                               \
-                else                                                                                                   \
-                    emit loadFailed(error, screen);                                                                    \
-            }                                                                                                          \
-            m_pendingLoads.clear();                                                                                    \
-        }                                                                                                              \
-                                                                                                                       \
-    Q_SIGNALS:                                                                                                         \
-        void loaded(const QString& screen);                                                                            \
-        void loadFailed(const QString& error, const QString& screen);                                                  \
-        void saveFailed(const QString& error, const QString& screen);                                                  \
+        [[nodiscard]] Q_INVOKABLE Root* forScreen(const QString& screen);                                              \
                                                                                                                        \
     private:                                                                                                           \
-        explicit Type(QObject* parent = nullptr)                                                                       \
-            : Root(configDir() + QLatin1Char('/') + file, nullptr, parent)                                             \
-            , m_layers(monitorConfigDir(), file, this)                                                                 \
-            , m_flushed(false) {                                                                                       \
-            initLayer(this);                                                                                           \
-        }                                                                                                              \
+        explicit Type(QObject* parent = nullptr);                                                                      \
                                                                                                                        \
-        void onTreeLoaded(settings::RootNode* layer) {                                                                 \
-            const auto screen = m_layers.nameFor(static_cast<Root*>(layer));                                           \
-            if (m_flushed)                                                                                             \
-                emit loaded(screen);                                                                                   \
-            else                                                                                                       \
-                m_pendingLoads.emplaceBack(screen, QString());                                                         \
-        }                                                                                                              \
+        void onTreeLoaded(settings::RootNode* layer);                                                                  \
+        void onTreeLoadFailed(settings::RootNode* layer, const QString& error);                                        \
+        void onTreeSaveFailed(settings::RootNode* layer, const QString& error);                                        \
                                                                                                                        \
-        void onTreeLoadFailed(settings::RootNode* layer, const QString& error) {                                       \
-            const auto screen = m_layers.nameFor(static_cast<Root*>(layer));                                           \
-            if (m_flushed)                                                                                             \
-                emit loadFailed(error, screen);                                                                        \
-            else                                                                                                       \
-                m_pendingLoads.emplaceBack(screen, error.isNull() ? QStringLiteral("") : error);                       \
-        }                                                                                                              \
-                                                                                                                       \
-        void onTreeSaveFailed(settings::RootNode* layer, const QString& error) {                                       \
-            emit saveFailed(error, m_layers.nameFor(static_cast<Root*>(layer)));                                       \
-        }                                                                                                              \
-                                                                                                                       \
-        void initLayer(Root* layer) {                                                                                  \
-            QObject::connect(layer, &Root::treeLoaded, this, &Type::onTreeLoaded);                                     \
-            QObject::connect(layer, &Root::treeLoadFailed, this, &Type::onTreeLoadFailed);                             \
-            QObject::connect(layer, &Root::treeSaveFailed, this, &Type::onTreeSaveFailed);                             \
-            layer->load();                                                                                             \
-        }                                                                                                              \
+        void initLayer(Root* layer);                                                                                   \
                                                                                                                        \
         settings::LayerRegistry<Root> m_layers;                                                                        \
-        QList<std::pair<QString, QString>> m_pendingLoads;                                                             \
-        bool m_flushed;                                                                                                \
     };
 
-SINGLETON(ConfigSingleton, ConfigRoot, GlobalConfig, QStringLiteral("shell.json"))
-SINGLETON(TokensSingleton, TokensRoot, TokenConfig, QStringLiteral("shell-tokens.json"))
+SINGLETON_DECL(ConfigSingleton, ConfigRoot, GlobalConfig)
+SINGLETON_DECL(TokensSingleton, TokensRoot, TokenConfig)
 
-#undef SINGLETON
+#undef SINGLETON_DECL
 
 } // namespace caelestia::config

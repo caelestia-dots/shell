@@ -9,6 +9,7 @@ qml_module(caelestia-config
         fontbuilder.cpp
         tokensattached.cpp
         anim.cpp
+        enums.hpp
         backgroundconfig.hpp
         barconfig.hpp
         borderconfig.hpp
@@ -33,5 +34,6 @@ qml_module(caelestia-config
 )
 target_link_libraries(caelestia-config PUBLIC
     Qt::Gui
+    caelestia-core
     caelestia-settings
 )

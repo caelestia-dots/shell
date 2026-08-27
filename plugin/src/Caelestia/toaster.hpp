@@ -65,7 +65,8 @@ class Toaster : public QObject {
     Q_PROPERTY(QQmlListProperty<caelestia::Toast> toasts READ toasts NOTIFY toastsChanged)
 
 public:
-    explicit Toaster(QObject* parent = nullptr);
+    static Toaster* instance();
+    static Toaster* create(QQmlEngine*, QJSEngine*);
 
     [[nodiscard]] QQmlListProperty<Toast> toasts();
 
@@ -76,6 +77,8 @@ signals:
     void toastsChanged();
 
 private:
+    explicit Toaster(QObject* parent = nullptr);
+
     QList<Toast*> m_toasts;
 };
 
