@@ -14,8 +14,12 @@ qml_module(caelestia-core
         caelestia-util
 )
 
-# Bake the shell version in so CUtils can expose it without spawning a process
-target_compile_definitions(caelestia-core PRIVATE CAELESTIA_VERSION="${VERSION}")
+# Bake the shell version and git revision in so CUtils can expose them without
+# spawning a process; the revision also invalidates the settings index cache.
+target_compile_definitions(caelestia-core PRIVATE
+    CAELESTIA_VERSION="${VERSION}"
+    GIT_REVISION="${GIT_REVISION}"
+)
 
 # Node macros expand to Q_OBJECT, automoc can't see it otherwise
 list(APPEND CMAKE_AUTOMOC_MACRO_NAMES

@@ -27,6 +27,7 @@ PageBase {
 
         ToggleRow {
             first: true
+            settingAnchor: "bluetooth-bluetooth"
             text: qsTr("Bluetooth")
             font: Tokens.font.body.medium
             horizontalPadding: Tokens.padding.largeIncreased
@@ -180,6 +181,7 @@ PageBase {
             Layout.topMargin: Tokens.spacing.large - parent.spacing
 
             first: true
+            settingAnchor: "bluetooth-discoverable"
             text: qsTr("Discoverable")
             subtext: qsTr("Allow nearby devices to find this one")
             disabled: !root.btEnabled
@@ -196,6 +198,7 @@ PageBase {
 
         ToggleRow {
             last: true
+            settingAnchor: "bluetooth-pairable"
             text: qsTr("Pairable")
             subtext: qsTr("Allow nearby devices to pair with this one")
             disabled: !root.btEnabled

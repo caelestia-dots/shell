@@ -35,6 +35,14 @@ public:
     Q_INVOKABLE static QString enumToString(
         QObject* target, const QString& property, const QVariant& value = QVariant());
 
+    // The git revision the plugin was built from; the settings search index
+    // cache is invalidated when it changes (i.e. on every update).
+    Q_INVOKABLE static QString gitRevision();
+
+    Q_INVOKABLE static QString readTextFile(const QString& path);
+    Q_INVOKABLE static bool writeTextFile(const QString& path, const QString& text);
+    Q_INVOKABLE static QStringList listFiles(const QString& dir, const QString& suffix);
+
     Q_INVOKABLE static QQuickItem* findChild(QQuickItem* root, const QString& name);
     Q_INVOKABLE static QList<QQuickItem*> findChildren(QQuickItem* root, const QString& name);
     Q_INVOKABLE static QList<QQuickItem*> findChildrenMatching(QQuickItem* root, const QString& pattern);

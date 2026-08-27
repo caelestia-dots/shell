@@ -25,6 +25,7 @@ PageBase {
 
         ToggleRow {
             first: true
+            settingAnchor: "dash-enabled"
             text: qsTr("Enabled")
             checked: Config.dashboard.enabled
             onToggled: GlobalConfig.dashboard.enabled = checked
@@ -32,6 +33,7 @@ PageBase {
 
         ToggleRow {
             last: true
+            settingAnchor: "dash-show-on-hover"
             text: qsTr("Show on hover")
             subtext: qsTr("Reveal when the cursor reaches the screen edge")
             checked: Config.dashboard.showOnHover
@@ -45,18 +47,21 @@ PageBase {
 
         ToggleRow {
             first: true
+            settingAnchor: "dash-dashboard"
             text: qsTr("Dashboard")
             checked: Config.dashboard.showDashboard
             onToggled: GlobalConfig.dashboard.showDashboard = checked
         }
 
         ToggleRow {
+            settingAnchor: "dash-media"
             text: qsTr("Media")
             checked: Config.dashboard.showMedia
             onToggled: GlobalConfig.dashboard.showMedia = checked
         }
 
         ToggleRow {
+            settingAnchor: "dash-performance"
             text: qsTr("Performance")
             checked: Config.dashboard.showPerformance
             onToggled: GlobalConfig.dashboard.showPerformance = checked
@@ -64,6 +69,7 @@ PageBase {
 
         ToggleRow {
             last: true
+            settingAnchor: "dash-weather"
             text: qsTr("Weather")
             checked: Config.dashboard.showWeather
             onToggled: GlobalConfig.dashboard.showWeather = checked
@@ -76,30 +82,35 @@ PageBase {
 
         ToggleRow {
             first: true
+            settingAnchor: "dash-battery"
             text: qsTr("Battery")
             checked: Config.dashboard.performance.showBattery
             onToggled: GlobalConfig.dashboard.performance.showBattery = checked
         }
 
         ToggleRow {
+            settingAnchor: "dash-gpu"
             text: qsTr("GPU")
             checked: Config.dashboard.performance.showGpu
             onToggled: GlobalConfig.dashboard.performance.showGpu = checked
         }
 
         ToggleRow {
+            settingAnchor: "dash-cpu"
             text: qsTr("CPU")
             checked: Config.dashboard.performance.showCpu
             onToggled: GlobalConfig.dashboard.performance.showCpu = checked
         }
 
         ToggleRow {
+            settingAnchor: "dash-memory"
             text: qsTr("Memory")
             checked: Config.dashboard.performance.showMemory
             onToggled: GlobalConfig.dashboard.performance.showMemory = checked
         }
 
         ToggleRow {
+            settingAnchor: "dash-storage"
             text: qsTr("Storage")
             checked: Config.dashboard.performance.showStorage
             onToggled: GlobalConfig.dashboard.performance.showStorage = checked
@@ -107,6 +118,7 @@ PageBase {
 
         ToggleRow {
             last: true
+            settingAnchor: "dash-network"
             text: qsTr("Network")
             checked: Config.dashboard.performance.showNetwork
             onToggled: GlobalConfig.dashboard.performance.showNetwork = checked
@@ -120,6 +132,7 @@ PageBase {
         StepperRow {
             first: true
             last: true
+            settingAnchor: "dash-drag-threshold"
             label: qsTr("Drag threshold")
             subtext: qsTr("Pixels dragged before the dashboard opens")
             value: Config.dashboard.dragThreshold
