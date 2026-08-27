@@ -70,7 +70,7 @@ ColumnLayout {
 
         Layout.alignment: Qt.AlignHCenter
         Layout.fillHeight: true
-        Layout.topMargin: -Tokens.sizes.bar.innerWidth / 10
+        Layout.topMargin: -Tokens.spacing.extraSmall / 2
 
         visible: active
         active: root.hasWindows
