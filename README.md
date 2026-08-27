@@ -90,6 +90,7 @@ Dependencies:
 -   `qt6-declarative`
 -   `qt6-imageformats`
 -   [`swappy`](https://github.com/jtheoof/swappy)
+-   [`hyprsunset`](https://github.com/hyprwm/hyprsunset) (optional, for blue light / night light filter)
 -   [`fish`](https://github.com/fish-shell/fish-shell)
 -   [`bash`](https://www.gnu.org/software/bash)
 
@@ -733,7 +734,9 @@ For example, to automatically hide the bar on the monitor named `DP-1`:
         "smartScheme": true,
         "defaultPlayer": "Spotify",
         "playerAliases": [{ "from": "com.github.th_ch.youtube_music", "to": "YT Music" }],
-        "lyricsBackend": "Auto"
+        "lyricsBackend": "Auto",
+        "nightLightEnabled": false,
+        "nightLightTemperature": 4000
     },
     "session": {
         "enabled": true,

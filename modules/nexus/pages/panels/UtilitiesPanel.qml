@@ -126,6 +126,14 @@ PageBase {
         }
 
         ToggleRow {
+            text: qsTr("Night light")
+            subtext: qsTr("Toggle blue light filter")
+            disabled: !Config.utilities.cards.quickToggles
+            checked: root.isToggleOn("nightLight")
+            onToggled: root.setToggleOn("nightLight", checked)
+        }
+
+        ToggleRow {
             text: qsTr("Do not disturb")
             subtext: qsTr("Silence notifications")
             disabled: !Config.utilities.cards.quickToggles

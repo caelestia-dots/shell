@@ -223,5 +223,29 @@ PageBase {
             active: root.gpuItems[root.gpuKeyToIndex(GlobalConfig.services.gpuType)]
             onSelected: item => GlobalConfig.services.gpuType = root.gpuValues[root.gpuItems.indexOf(item)]
         }
+
+        // Night Light
+        SectionHeader {
+            text: qsTr("Night Light")
+        }
+
+        ToggleRow {
+            first: true
+            text: qsTr("Enable Night Light")
+            subtext: qsTr("Reduce blue light to ease eye strain")
+            checked: NightLight.enabled
+            onToggled: NightLight.enabled = checked
+        }
+
+        StepperRow {
+            last: true
+            label: qsTr("Color temperature")
+            subtext: qsTr("Lower values result in a warmer/redder screen (Kelvin)")
+            value: NightLight.temperature
+            from: 1000
+            to: 6500
+            stepSize: 250
+            onMoved: v => NightLight.temperature = v
+        }
     }
 }

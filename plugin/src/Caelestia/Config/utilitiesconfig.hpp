@@ -61,6 +61,7 @@ class UtilitiesConfig : public settings::ObjectNode {
             LIST_ENTRY(mic, true),
             LIST_ENTRY(settings, true),
             LIST_ENTRY(gameMode, true),
+            LIST_ENTRY(nightLight, true),
             LIST_ENTRY(dnd, true),
             LIST_ENTRY(vpn, false),
         }))
