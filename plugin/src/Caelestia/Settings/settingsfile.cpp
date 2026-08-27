@@ -62,22 +62,23 @@ void SettingsFile::initWatcher() {
         m_watcher->addPath(m_path);
 }
 
-void SettingsFile::load() {
+bool SettingsFile::load() {
     QFile file(m_path);
 
     if (!file.exists()) {
         if (m_lastData) {
             m_lastData = std::nullopt;
             emit changed();
+            return true;
         }
-        return;
+        return false;
     }
 
     if (!file.open(QIODevice::ReadOnly)) {
         qCWarning(lcSettingsFile, "Failed to open %s for reading: %s", qUtf8Printable(m_path),
             qUtf8Printable(file.errorString()));
         emit readFailed(QStringLiteral("Failed to open: %1").arg(file.errorString()));
-        return;
+        return false;
     }
 
     const auto data = file.readAll();
@@ -90,13 +91,13 @@ void SettingsFile::load() {
         qCWarning(lcSettingsFile, "Failed to parse %s as JSON: %s", qUtf8Printable(m_path),
             qUtf8Printable(error.errorString()));
         emit readFailed(QStringLiteral("Failed to parse: %1").arg(error.errorString()));
-        return;
+        return false;
     }
 
     const auto json = doc.isObject() ? QJsonValue(doc.object()) : QJsonValue(doc.array());
 
     if (json == m_lastData)
-        return;
+        return false;
 
     // Clear pending write, stuff loaded from file should take precedence
     m_pendingWrite = std::nullopt;
@@ -106,6 +107,8 @@ void SettingsFile::load() {
 
     qCDebug(lcSettingsFile) << "Read JSON from" << m_path;
     qCDebug(lcSettingsFile) << " " << json;
+
+    return true;
 }
 
 void SettingsFile::save() {
