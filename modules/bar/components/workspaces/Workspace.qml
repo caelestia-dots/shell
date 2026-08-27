@@ -165,7 +165,7 @@ ColumnLayout {
             Repeater {
                 model: ScriptModel {
                     values: {
-                        const windowsList = Hypr.toplevels.values.filter(c => c.workspace && c.workspace.id === col.ws);
+                        const windows = Hypr.toplevelsForWs(col.ws);
                         const maxIcons = root.Config.bar.workspaces.maxWindowIcons;
                         return maxIcons > 0 ? windowsList.slice(0, maxIcons) : windowsList;
                     }
