@@ -18,7 +18,7 @@ RootNode::RootNode(const QString& path, RootNode* fallback, QObject* parent)
 }
 
 void RootNode::load() {
-    if (!m_file->load())
+    if (m_file->load() != SettingsFile::LoadResult::Changed)
         reloadFromFile();
 }
 

@@ -11,13 +11,19 @@ class SettingsFile : public QObject {
     Q_OBJECT
 
 public:
+    enum class LoadResult {
+        Unchanged,
+        Changed,
+        ParseError,
+        Error
+    };
+
     explicit SettingsFile(const QString& path, QObject* parent = nullptr);
 
     [[nodiscard]] std::optional<QJsonValue> read() const;
     void write(const QJsonValue& json);
 
-    // Returns true if the data changed
-    bool load();
+    LoadResult load(bool emitErrors = true);
 
 signals:
     void changed(); // Data changed, not file watcher event
@@ -28,6 +34,8 @@ private:
     QString m_path;
     QFileSystemWatcher* m_watcher;
     QTimer* m_saveDebounce;
+    QTimer* m_loadDebounce;
+    int m_loadRetries;
     std::optional<QJsonValue> m_lastData;
     std::optional<QJsonValue> m_pendingWrite;
 
@@ -35,6 +43,8 @@ private:
     void onDirChanged();
 
     void initWatcher();
+    void scheduleLoad();
+    void onLoadDebounced();
     void save();
 };
 
