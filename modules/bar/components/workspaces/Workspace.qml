@@ -123,8 +123,6 @@ ColumnLayout {
     Loader {
         id: windows
 
-        property int ws: root.ws
-
         asynchronous: true
 
         Layout.alignment: Qt.AlignHCenter
@@ -136,8 +134,6 @@ ColumnLayout {
 
         sourceComponent: Column {
             id: col
-
-            required property int ws
 
             spacing: 0
 
@@ -165,9 +161,9 @@ ColumnLayout {
             Repeater {
                 model: ScriptModel {
                     values: {
-                        const windows = Hypr.toplevelsForWs(col.ws);
+                        const windows = Hypr.toplevelsForWs(root.ws);
                         const maxIcons = root.Config.bar.workspaces.maxWindowIcons;
-                        return maxIcons > 0 ? windowsList.slice(0, maxIcons) : windowsList;
+                        return maxIcons > 0 ? windows.slice(0, maxIcons) : windows;
                     }
                 }
 
