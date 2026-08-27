@@ -1,0 +1,17 @@
+[Unit]
+Description=Bluetooth Battery Meter daemon
+Documentation=https://github.com/maniacx/Bluetooth-Battery-Meter
+After=bluetooth.target graphical-session.target
+PartOf=graphical-session.target
+
+[Service]
+Type=simple
+# %h expands to $HOME. Adjust ExecStart path to match your install location.
+ExecStart=/usr/bin/gjs -m %h/.local/share/bbm-daemon/daemon/main.js
+Restart=on-failure
+RestartSec=5
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=graphical-session.target

@@ -13,6 +13,7 @@
   wl-clipboard,
   libqalculate,
   bash,
+  glib,
   hyprland,
   material-symbols,
   rubik,
@@ -48,6 +49,7 @@
       wl-clipboard
       libqalculate
       bash
+      glib
       hyprland
     ]
     ++ extraRuntimeDeps

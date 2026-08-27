@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schemalist>
+  <schema id="org.bbm" path="/org/bbm/">
+
+    <!-- Device enable flags -->
+    <key name="enable-airpods-device" type="b">
+      <default>true</default>
+    </key>
+    <key name="enable-sony-device" type="b">
+      <default>true</default>
+    </key>
+    <key name="enable-galaxy-buds-device" type="b">
+      <default>true</default>
+    </key>
+    <key name="enable-nothing-buds-device" type="b">
+      <default>true</default>
+    </key>
+    <key name="enable-google-buds-device" type="b">
+      <default>true</default>
+    </key>
+    <key name="enable-bose-buds-device" type="b">
+      <default>true</default>
+    </key>
+    <key name="enable-redmi-buds-device" type="b">
+      <default>true</default>
+    </key>
+    <key name="enable-senh-buds-device" type="b">
+      <default>true</default>
+    </key>
+    <key name="enable-gfps-device" type="b">
+      <default>true</default>
+    </key>
+    <key name="enable-gattbas-device" type="b">
+      <default>true</default>
+    </key>
+
+    <!-- Per-device persistence lists -->
+    <key name="airpods-list" type="as">
+      <default>[]</default>
+    </key>
+    <key name="sony-list" type="as">
+      <default>[]</default>
+    </key>
+    <key name="galaxy-buds-list" type="as">
+      <default>[]</default>
+    </key>
+    <key name="nothing-buds-list" type="as">
+      <default>[]</default>
+    </key>
+    <key name="google-buds-list" type="as">
+      <default>[]</default>
+    </key>
+    <key name="bose-buds-list" type="as">
+      <default>[]</default>
+    </key>
+    <key name="redmi-buds-list" type="as">
+      <default>[]</default>
+    </key>
+    <key name="senh-buds-list" type="as">
+      <default>[]</default>
+    </key>
+    <key name="gfps-list" type="as">
+      <default>[]</default>
+    </key>
+    <key name="gattbas-list" type="as">
+      <default>[]</default>
+    </key>
+
+    <!-- AirPods-specific: volume attenuation state across restarts -->
+    <key name="attenuated-on-destroy-info" type="as">
+      <default>[]</default>
+    </key>
+
+  </schema>
+</schemalist>

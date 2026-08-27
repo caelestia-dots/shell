@@ -31,7 +31,10 @@ ColumnLayout {
     }
 
     function checkPopout(y: real): void {
-        const ch = childAt(width / 2, y) as EntryWrapper;
+        let ch = childAt(width / 2, y) as EntryWrapper;
+        while (ch && !ch.entryId && ch.parent && ch !== root) {
+            ch = ch.parent as EntryWrapper;
+        }
 
         if (ch?.entryId !== "tray")
             closeTray();
@@ -46,10 +49,33 @@ ColumnLayout {
 
         if (id === "statusIcons" && Config.bar.popouts.statusIcons) {
             const items = (ch.item as StatusIcons).items;
-            const icon = items.childAt(items.width / 2, mapToItem(items, 0, y).y);
+            const localY = mapToItem(items, 0, y).y;
+            let icon = null;
+
+            for (let i = 0; i < items.children.length; ++i) {
+                const child = items.children[i];
+                if (!child || !child.visible)
+                    continue;
+                const top = child.mapToItem(items, 0, 0).y;
+                const bottom = top + (child.implicitHeight || child.height || 0);
+                if (localY >= top && localY <= bottom) {
+                    icon = child;
+                    break;
+                }
+            }
+
             if (icon) {
-                popouts.currentName = icon.name;
-                popouts.currentCenter = Qt.binding(() => icon.mapToItem(root, 0, icon.implicitHeight / 2).y);
+                let hit = icon;
+                while (hit && !hit.name && hit.parent && hit !== items) {
+                    hit = hit.parent;
+                }
+                const hitName = hit?.name ?? icon?.name ?? "";
+                if (hitName === "bluetooth" && GlobalConfig.services && !GlobalConfig.services.bluetoothBatteryHoverMode) {
+                    popouts.hasCurrent = false;
+                    return;
+                }
+                popouts.currentName = hitName || "bluetooth";
+                popouts.currentCenter = Qt.binding(() => (hit ?? icon).mapToItem(root, 0, (hit ?? icon).implicitHeight / 2).y);
                 popouts.hasCurrent = true;
             }
         } else if (id === "tray" && Config.bar.popouts.tray) {

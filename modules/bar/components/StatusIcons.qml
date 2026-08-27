@@ -129,7 +129,9 @@ StyledRect {
                 DelegateChoice {
                     roleValue: "bluetooth"
                     delegate: EntryWrapper {
+                        name: "bluetooth"
                         BluetoothStatus {
+                            name: "bluetooth"
                             colour: root.colour
                         }
                     }

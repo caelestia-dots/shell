@@ -37,6 +37,27 @@ class ServiceConfig : public settings::ObjectNode {
             vmap({ { u"from"_s, u"com.github.th_ch.youtube_music"_s }, { u"to"_s, u"YT Music"_s } }),
         }))
     CONFIG_GLOBAL_PROPERTY(QString, lyricsBackend, u"Auto"_s)
+    CONFIG_GLOBAL_PROPERTY(bool, bluetoothBatteryIcon, true)
+    CONFIG_GLOBAL_PROPERTY(bool, bluetoothBatteryText, false)
+    CONFIG_GLOBAL_PROPERTY(bool, bluetoothBatterySwapIconText, false)
+    CONFIG_GLOBAL_PROPERTY(int, bluetoothBatteryIndicatorType, 2)
+    CONFIG_GLOBAL_PROPERTY(bool, bluetoothBatteryRing, true)
+    CONFIG_GLOBAL_PROPERTY(bool, bluetoothBatteryPopupInQuickSettings, false)
+    CONFIG_GLOBAL_PROPERTY(bool, bluetoothBatterySortByHistory, false)
+    CONFIG_GLOBAL_PROPERTY(int, bluetoothBatteryHideIndicatorMode, 0)
+    CONFIG_GLOBAL_PROPERTY(int, bluetoothBatteryIndicatorStyle, 1)
+    CONFIG_GLOBAL_PROPERTY(bool, bluetoothBatteryMultiIndicator, false)
+    CONFIG_GLOBAL_PROPERTY(bool, bluetoothBatteryHoverMode, true)
+    CONFIG_GLOBAL_PROPERTY(int, bluetoothBatteryHoverDelay, 1000)
+    CONFIG_GLOBAL_PROPERTY(bool, bluetoothBatteryTooltips, true)
+    CONFIG_GLOBAL_PROPERTY(bool, bluetoothBatteryPerDeviceDefaults, true)
+    CONFIG_GLOBAL_PROPERTY(bool, bluetoothBatteryUpowerSupport, false)
+    CONFIG_GLOBAL_PROPERTY(int, bluetoothBatteryLevelIndicatorType, 0)
+    CONFIG_GLOBAL_PROPERTY(bool, bluetoothBatteryUseCustomColors, false)
+    CONFIG_GLOBAL_PROPERTY(int, bluetoothBatteryColorScheme, 0)
+    CONFIG_GLOBAL_PROPERTY(QStringList, bluetoothBatteryColors,
+        { u"#4ade80"_s, u"#4ade80"_s, u"#65d66d"_s, u"#8ae06d"_s, u"#b7db6d"_s,
+            u"#facc15"_s, u"#f59e0b"_s, u"#fb923c"_s, u"#f87171"_s, u"#ef4444"_s })
 };
 
 } // namespace caelestia::config

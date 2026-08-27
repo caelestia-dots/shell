@@ -8,6 +8,7 @@ self: {
 
   cli-default = self.inputs.caelestia-cli.packages.${system}.default;
   shell-default = self.packages.${system}.with-cli;
+  bbm-default = self.packages.${system}.bbm-daemon;
 
   cfg = config.programs.caelestia;
 in {
@@ -54,6 +55,18 @@ in {
         default = "";
         description = "Caelestia shell extra configs written to shell.json";
       };
+      bbm = {
+        enable = mkOption {
+          type = types.bool;
+          default = true;
+          description = "Enable the BBM daemon systemd service (Bluetooth battery + ANC controls)";
+        };
+        package = mkOption {
+          type = types.package;
+          default = bbm-default;
+          description = "The BBM daemon package";
+        };
+      };
       cli = {
         enable = mkEnableOption "Enable Caelestia CLI";
         package = mkOption {
@@ -80,6 +93,26 @@ in {
     shell = cfg.package;
   in
     lib.mkIf cfg.enable {
+      systemd.user.services.bbm-daemon = lib.mkIf cfg.bbm.enable {
+        Unit = {
+          Description = "Bluetooth Battery Meter daemon";
+          After = ["bluetooth.target" cfg.systemd.target];
+          PartOf = [cfg.systemd.target];
+        };
+
+        Service = {
+          Type = "simple";
+          ExecStart = "${cfg.bbm.package}/bin/bbm-daemon";
+          Restart = "on-failure";
+          RestartSec = "5s";
+          TimeoutStopSec = "5s";
+        };
+
+        Install = {
+          WantedBy = [cfg.systemd.target];
+        };
+      };
+
       systemd.user.services.caelestia = lib.mkIf cfg.systemd.enable {
         Unit = {
           Description = "Caelestia Shell Service";
@@ -131,6 +164,8 @@ in {
         };
       };
 
-      home.packages = [shell] ++ lib.optional cfg.cli.enable cli;
+      home.packages = [shell]
+        ++ lib.optional cfg.bbm.enable cfg.bbm.package
+        ++ lib.optional cfg.cli.enable cli;
     };
 }
