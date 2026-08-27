@@ -15,6 +15,13 @@ enum WorkspaceDisplay {
 };
 Q_ENUM_NS(WorkspaceDisplay)
 
+enum WorkspaceCapitalisation {
+    Preserve,
+    Upper,
+    Lower
+};
+Q_ENUM_NS(WorkspaceCapitalisation)
+
 } // namespace bar
 
 } // namespace caelestia::config

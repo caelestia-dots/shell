@@ -44,7 +44,7 @@ class BarWorkspaces : public settings::ObjectNode {
     CONFIG_PROPERTY(QString, label, u"  "_s)
     CONFIG_PROPERTY(QString, occupiedLabel, u"󰮯"_s)
     CONFIG_PROPERTY(QString, activeLabel, u"󰮯"_s)
-    CONFIG_PROPERTY(QString, capitalisation, u"preserve"_s)
+    CONFIG_ENUM_PROPERTY(bar::WorkspaceCapitalisation, capitalisation, bar::WorkspaceCapitalisation::Preserve)
     CONFIG_GLOBAL_PROPERTY(QVariantList, specialWorkspaceIcons, {})
     CONFIG_GLOBAL_PROPERTY(QStringList, ignoredTags,
         DEFAULT_ARG({
