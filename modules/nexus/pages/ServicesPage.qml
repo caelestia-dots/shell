@@ -10,7 +10,7 @@ import qs.modules.nexus.common
 PageBase {
     id: root
 
-    // Lyrics backends, ordered to match LyricsBackend::Backend (Auto, Local, LRCLIB, NetEase)
+    // Lyrics backends, ordered to match config::LyricsBackend (Auto, Local, LRCLIB, NetEase)
     readonly property list<MenuItem> lyricsItems: [
         MenuItem {
             text: qsTr("Auto")

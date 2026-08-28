@@ -73,7 +73,7 @@ Lyrics::Lyrics(QObject* parent)
     const auto* svcCfg = cfg->services();
     const auto* paths = cfg->paths();
 
-    m_preferredBackend = backendFromKey(svcCfg->lyricsBackend());
+    m_preferredBackend = svcCfg->lyricsBackend();
 
     QObject::connect(
         svcCfg, &config::ServiceConfig::lyricsBackendChanged, this, &Lyrics::onPreferredBackendConfigChanged);
@@ -86,26 +86,22 @@ QStringList Lyrics::lyrics() const {
     return m_lyrics;
 }
 
-LyricsBackend::Backend Lyrics::backend() const {
+LyricsBackend Lyrics::backend() const {
     return m_backend;
 }
 
-LyricsBackend::Backend Lyrics::preferredBackend() const {
+LyricsBackend Lyrics::preferredBackend() const {
     return m_preferredBackend;
 }
 
-void Lyrics::setPreferredBackend(LyricsBackend::Backend value) {
+void Lyrics::setPreferredBackend(LyricsBackend value) {
     if (m_preferredBackend == value) {
         return;
     }
     m_preferredBackend = value;
     emit preferredBackendChanged();
 
-    auto* const svcCfg = config::ConfigSingleton::instance()->services();
-    const QString key = backendKey(value);
-    if (svcCfg->lyricsBackend() != key) {
-        svcCfg->set_lyricsBackend(key);
-    }
+    config::ConfigSingleton::instance()->services()->set_lyricsBackend(value);
 
     scheduleLoad();
 }
@@ -264,7 +260,7 @@ void Lyrics::refresh() {
     scheduleLoad();
 }
 
-void Lyrics::setBackend(LyricsBackend::Backend value) {
+void Lyrics::setBackend(LyricsBackend value) {
     if (m_backend == value) {
         return;
     }
@@ -280,7 +276,7 @@ void Lyrics::setLoading(bool value) {
     emit loadingChanged();
 }
 
-void Lyrics::setLines(QVector<LyricLine> lines, LyricsBackend::Backend source) {
+void Lyrics::setLines(QVector<LyricLine> lines, LyricsBackend source) {
     std::sort(lines.begin(), lines.end(), [](const LyricLine& a, const LyricLine& b) {
         return a.time < b.time;
     });
@@ -417,7 +413,7 @@ void Lyrics::doLoad() {
     }
 }
 
-void Lyrics::chainNext(LyricsBackend::Backend just_failed, int reqId) {
+void Lyrics::chainNext(LyricsBackend just_failed, int reqId) {
     if (m_preferredBackend != LyricsBackend::Auto) {
         // Non-auto modes don't chain
         setLoading(false);
@@ -779,8 +775,7 @@ QNetworkReply* Lyrics::getJson(const QUrl& url, const QHash<QByteArray, QByteArr
 }
 
 void Lyrics::onPreferredBackendConfigChanged() {
-    auto* svcCfg = config::ConfigSingleton::instance()->services();
-    const LyricsBackend::Backend desired = backendFromKey(svcCfg->lyricsBackend());
+    const LyricsBackend desired = config::ConfigSingleton::instance()->services()->lyricsBackend();
     if (desired == m_preferredBackend) {
         return;
     }
@@ -874,7 +869,7 @@ QString Lyrics::trackKey() const {
     return u"%1 - %2"_s.arg(joinArtists(m_artist), m_title);
 }
 
-QString Lyrics::backendKey(LyricsBackend::Backend value) {
+QString Lyrics::backendKey(LyricsBackend value) {
     switch (value) {
     case LyricsBackend::Local:
         return u"Local"_s;
@@ -888,7 +883,7 @@ QString Lyrics::backendKey(LyricsBackend::Backend value) {
     }
 }
 
-LyricsBackend::Backend Lyrics::backendFromKey(const QString& key) {
+LyricsBackend Lyrics::backendFromKey(const QString& key) {
     if (key.compare(u"Local"_s, Qt::CaseInsensitive) == 0) {
         return LyricsBackend::Local;
     }
@@ -923,14 +918,14 @@ const QString& Lyrics::cacheDir() {
     return s_dir;
 }
 
-QString Lyrics::cachePathFor(LyricsBackend::Backend backend, const QString& id) {
+QString Lyrics::cachePathFor(LyricsBackend backend, const QString& id) {
     if (id.isEmpty() || backend == LyricsBackend::Auto || backend == LyricsBackend::Local) {
         return {};
     }
     return u"%1/%2/%3.lrc"_s.arg(cacheDir(), backendKey(backend), sanitizeFilenamePart(id));
 }
 
-QString Lyrics::readCachedLrc(LyricsBackend::Backend backend, const QString& id) {
+QString Lyrics::readCachedLrc(LyricsBackend backend, const QString& id) {
     const QString path = cachePathFor(backend, id);
     if (path.isEmpty()) {
         return {};
@@ -942,7 +937,7 @@ QString Lyrics::readCachedLrc(LyricsBackend::Backend backend, const QString& id)
     return QString::fromUtf8(f.readAll());
 }
 
-void Lyrics::writeCachedLrc(LyricsBackend::Backend backend, const QString& id, const QString& text) {
+void Lyrics::writeCachedLrc(LyricsBackend backend, const QString& id, const QString& text) {
     if (text.isEmpty()) {
         return;
     }

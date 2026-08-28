@@ -32,4 +32,5 @@ qml_module(caelestia-services
         caelestia-config
     DEPENDENCIES
         Caelestia
+        Caelestia.Config
 )
