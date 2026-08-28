@@ -40,6 +40,7 @@ jobs:
             blobs
             components
             config
+            core
             images
             models
             plugins
