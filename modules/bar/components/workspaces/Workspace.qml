@@ -51,7 +51,7 @@ ColumnLayout {
 
         Layout.alignment: Qt.AlignHCenter | Qt.AlignTop
         Layout.preferredHeight: Tokens.sizes.bar.innerWidth - Tokens.padding.small
-        sourceComponent: Config.bar.workspaces.displayType === BarEnums.Text ? textComponent : shapeComponent
+        sourceComponent: Config.bar.workspaces.displayType === BarWorkspaceDisplay.Text ? textComponent : shapeComponent
 
         onItemChanged: root.updateShape()
     }
@@ -104,9 +104,9 @@ ColumnLayout {
                 const wsName = !ws || ws.name == root.ws ? root.ws : ws.name[0];
 
                 const capitalisation = Config.bar.workspaces.capitalisation;
-                if (capitalisation === BarEnums.Upper)
+                if (capitalisation === BarWorkspaceCapitalisation.Upper)
                     return wsName.toString().toUpperCase();
-                else if (capitalisation === BarEnums.Lower)
+                else if (capitalisation === BarWorkspaceCapitalisation.Lower)
                     return wsName.toString().toLowerCase();
                 return wsName;
             }
