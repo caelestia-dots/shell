@@ -11,12 +11,12 @@ import qs.services
 Column {
     id: root
 
-    spacing: Tokens.spacing.medium
-    width: Tokens.sizes.bar.batteryWidth
-
     property string conservationPath: ""
     property bool conservationMode: false
     readonly property bool conservationAvailable: conservationPath !== ""
+
+    spacing: Tokens.spacing.medium
+    width: Tokens.sizes.bar.batteryWidth
 
     FileView {
         path: "/sys/bus/platform/drivers/ideapad_acpi/VPC2004:00/conservation_mode"
