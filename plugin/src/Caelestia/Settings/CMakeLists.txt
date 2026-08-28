@@ -11,6 +11,8 @@ qml_module(caelestia-settings
         rootnode.cpp
         settingsfile.cpp
         changebatcher.cpp
+    LIBRARIES
+        caelestia-util
 )
 
 # Expose headers as settings/xxx.hpp

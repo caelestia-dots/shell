@@ -4,6 +4,7 @@
 #include <qlist.h>
 #include <qobject.h>
 #include <qqmlintegration.h>
+#include <qvariant.h>
 
 namespace caelestia {
 
@@ -30,6 +31,8 @@ public:
     Q_INVOKABLE static QString toLocalFile(const QUrl& url);
 
     Q_INVOKABLE static qreal clamp(qreal value, qreal min, qreal max);
+
+    Q_INVOKABLE static QString enumToString(const QVariant& value);
 
     Q_INVOKABLE static QQuickItem* findChild(QQuickItem* root, const QString& name);
     Q_INVOKABLE static QList<QQuickItem*> findChildren(QQuickItem* root, const QString& name);

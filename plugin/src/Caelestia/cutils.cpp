@@ -10,6 +10,8 @@
 #include <qqmlengine.h>
 #include <qregularexpression.h>
 
+#include "util/metaenum.hpp"
+
 Q_LOGGING_CATEGORY(lcCUtils, "caelestia.cutils", QtInfoMsg)
 
 namespace caelestia {
@@ -141,6 +143,22 @@ QString CUtils::toLocalFile(const QUrl& url) {
 
 qreal CUtils::clamp(qreal value, qreal min, qreal max) {
     return qBound(min, value, max);
+}
+
+QString CUtils::enumToString(const QVariant& value) {
+    const auto type = value.metaType();
+    if (!util::isSupportedEnum(type)) {
+        qCWarning(lcCUtils, "enumToString: %s is not a supported enum", type.isValid() ? type.name() : "the value");
+        return {};
+    }
+
+    const auto* key = util::enumKeyFor(util::metaEnumFor(type), value);
+    if (!key) {
+        qCWarning(lcCUtils, "enumToString: no enumerator of %s has the value %lld", type.name(), value.toLongLong());
+        return {};
+    }
+
+    return QString::fromUtf8(key);
 }
 
 namespace {
