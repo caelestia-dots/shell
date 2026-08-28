@@ -172,6 +172,7 @@ PageBase {
         RowButton {
             last: true
             icon: "add"
+            settingAnchor: "bluetooth-pair-device"
             text: qsTr("Pair new device")
             disabled: !root.btEnabled
             onClicked: root.nState.openSubPage(2)

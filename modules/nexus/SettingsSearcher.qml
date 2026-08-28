@@ -6,7 +6,7 @@ import QtQuick
 import Quickshell
 import Caelestia
 import Caelestia.Config
-import qs.utils
+import qs.utils // qmllint disable
 
 // Search service over the settings index. The index is built by the shell
 // itself on first use - the page QML sources are parsed at runtime (see

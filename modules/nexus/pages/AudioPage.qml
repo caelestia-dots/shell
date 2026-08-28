@@ -80,6 +80,7 @@ PageBase {
             last: true
 
             icon: "tune"
+            settingAnchor: "audio-app-volumes"
             text: qsTr("App volumes")
             subtext: Audio.streams.length === 0 ? qsTr("No apps playing audio") : Audio.streams.length === 1 ? qsTr("1 app playing audio") : qsTr("%1 apps playing audio").arg(Audio.streams.length)
             onClicked: root.nState.openSubPage(1)

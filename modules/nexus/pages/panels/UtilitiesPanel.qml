@@ -45,6 +45,7 @@ PageBase {
         ToggleRow {
             first: true
             last: true
+            settingAnchor: "utilities-enabled"
             text: qsTr("Enabled")
             subtext: qsTr("Show the utilities panel")
             checked: Config.utilities.enabled
@@ -58,6 +59,7 @@ PageBase {
 
         ToggleRow {
             first: true
+            settingAnchor: "utilities-keep-awake"
             text: qsTr("Keep awake")
             subtext: qsTr("Show the idle inhibitor card")
             checked: Config.utilities.cards.keepAwake
@@ -65,6 +67,7 @@ PageBase {
         }
 
         ToggleRow {
+            settingAnchor: "utilities-screen-recorder"
             text: qsTr("Screen recorder")
             subtext: qsTr("Show the screen recorder card")
             checked: Config.utilities.cards.recorder
@@ -73,6 +76,7 @@ PageBase {
 
         ToggleRow {
             last: true
+            settingAnchor: "utilities-quick-toggles"
             text: qsTr("Quick toggles")
             subtext: qsTr("Show the quick toggles card")
             checked: Config.utilities.cards.quickToggles
@@ -86,6 +90,7 @@ PageBase {
 
         ToggleRow {
             first: true
+            settingAnchor: "utilities-wi-fi"
             text: qsTr("Wi-Fi")
             subtext: qsTr("Toggle wireless networking")
             disabled: !Config.utilities.cards.quickToggles
@@ -94,6 +99,7 @@ PageBase {
         }
 
         ToggleRow {
+            settingAnchor: "utilities-bluetooth"
             text: qsTr("Bluetooth")
             subtext: qsTr("Toggle the Bluetooth adapter")
             disabled: !Config.utilities.cards.quickToggles
@@ -102,6 +108,7 @@ PageBase {
         }
 
         ToggleRow {
+            settingAnchor: "utilities-microphone"
             text: qsTr("Microphone")
             subtext: qsTr("Mute or unmute the default source")
             disabled: !Config.utilities.cards.quickToggles
@@ -110,6 +117,7 @@ PageBase {
         }
 
         ToggleRow {
+            settingAnchor: "utilities-settings"
             text: qsTr("Settings")
             subtext: qsTr("Open the settings window")
             disabled: !Config.utilities.cards.quickToggles
@@ -118,6 +126,7 @@ PageBase {
         }
 
         ToggleRow {
+            settingAnchor: "utilities-game-mode"
             text: qsTr("Game mode")
             subtext: qsTr("Toggle game mode")
             disabled: !Config.utilities.cards.quickToggles
@@ -126,6 +135,7 @@ PageBase {
         }
 
         ToggleRow {
+            settingAnchor: "utilities-do-not-disturb"
             text: qsTr("Do not disturb")
             subtext: qsTr("Silence notifications")
             disabled: !Config.utilities.cards.quickToggles
@@ -135,6 +145,7 @@ PageBase {
 
         ToggleRow {
             last: true
+            settingAnchor: "utilities-vpn"
             text: qsTr("VPN")
             subtext: qsTr("Connect or disconnect the VPN")
             disabled: !Config.utilities.cards.quickToggles

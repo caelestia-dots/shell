@@ -49,6 +49,7 @@ PageBase {
         NavRow {
             last: true
             icon: "construction"
+            settingAnchor: "panels-utilities"
             text: qsTr("Utilities")
             subtext: Config.utilities.enabled ? qsTr("Enabled") : qsTr("Disabled")
             onClicked: root.nState.openSubPage(5)

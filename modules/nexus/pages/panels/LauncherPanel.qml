@@ -43,6 +43,7 @@ PageBase {
             id: prefixRow
 
             last: true
+            settingAnchor: "launcher-action-prefix"
             label: qsTr("Action prefix")
             subtext: qsTr("Prefix used to run actions in the launcher")
             errorText: qsTr("Prefix must not be alphanumeric")

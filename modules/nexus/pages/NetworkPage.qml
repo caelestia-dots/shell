@@ -85,6 +85,7 @@ PageBase {
             clip: true
 
             icon: "expand_content"
+            settingAnchor: "network-all-networks"
             text: qsTr("Show all networks (%1)").arg(Nmcli.networks.length)
             trailingIcon: "chevron_right"
             onClicked: root.nState.openSubPage(5) // All networks sub-page
@@ -99,6 +100,7 @@ PageBase {
         // Saved networks button
         RowButton {
             icon: "bookmark"
+            settingAnchor: "network-saved-networks"
             text: qsTr("Saved networks")
             trailingIcon: "chevron_right"
             onClicked: root.nState.openSubPage(6) // Saved networks sub-page
@@ -107,6 +109,7 @@ PageBase {
         RowButton {
             last: true
             icon: "add"
+            settingAnchor: "network-add-network"
             text: qsTr("Add network")
             disabled: !Nmcli.wifiEnabled
             onClicked: root.nState.openSubPage(2) // Add network sub-page
@@ -117,6 +120,7 @@ PageBase {
             Layout.topMargin: Tokens.spacing.large
             Layout.fillWidth: true
             first: true
+            settingAnchor: "network-vpn"
             text: qsTr("VPN")
             font: Tokens.font.body.medium
             horizontalPadding: Tokens.padding.largeIncreased
@@ -342,6 +346,7 @@ PageBase {
         RowButton {
             last: true
             icon: "add"
+            settingAnchor: "network-add-provider"
             text: qsTr("Add provider")
             onClicked: {
                 root.nState.editingVpnIndex = -1;

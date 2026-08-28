@@ -20,13 +20,17 @@ VerticalFadeFlickable {
     readonly property var results: {
         if (!searching)
             return [];
-        const all = SettingsSearcher.query(search);
-        // The ethernet section hides itself when no ethernet device is available
-        // (e.g. the cable is unplugged), so drop its settings from the results
-        // too, otherwise the search would link to a page that isn't reachable.
-        if (Nmcli.hasAvailableEthernet)
-            return all;
-        return all.filter(e => !e.anchor.startsWith("ethernet-"));
+        // Sections hide themselves when what they configure isn't available -
+        // the ethernet rows when no cable is plugged in, the add-network flow
+        // when Wi-Fi is off. Their settings have to drop out of the results
+        // as well, or search links to a page that can't be opened.
+        return SettingsSearcher.query(search).filter(e => {
+            if (!Nmcli.hasAvailableEthernet && e.anchor.startsWith("ethernet-"))
+                return false;
+            if (!Nmcli.wifiEnabled && (e.anchor.startsWith("add-network-") || e.anchor === "network-add-network"))
+                return false;
+            return true;
+        });
     }
     // Results grouped by their top-level page, so the list can show one heading
     // per page with the matching settings joined underneath it (like the

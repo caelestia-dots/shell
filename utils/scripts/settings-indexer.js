@@ -133,7 +133,29 @@ const SETTING_ICONS = {
     "notif-now-playing": "play_circle",
     "lang-temperature": "thermostat",
     "lang-system-temperatures": "device_thermostat",
-    "lang-clock-format": "schedule"
+    "lang-clock-format": "schedule",
+    "utilities-enabled": "toggle_on",
+    "utilities-keep-awake": "coffee",
+    "utilities-screen-recorder": "screen_record",
+    "utilities-quick-toggles": "tune",
+    "utilities-wi-fi": "wifi",
+    "utilities-bluetooth": "bluetooth",
+    "utilities-microphone": "mic",
+    "utilities-settings": "settings",
+    "utilities-game-mode": "sports_esports",
+    "utilities-do-not-disturb": "do_not_disturb_on",
+    "utilities-vpn": "vpn_key",
+    "panels-utilities": "widgets",
+    "audio-app-volumes": "tune",
+    "bluetooth-pair-device": "bluetooth_searching",
+    "network-all-networks": "wifi_find",
+    "network-saved-networks": "bookmark",
+    "network-add-network": "add_circle",
+    "network-vpn": "vpn_key",
+    "network-add-provider": "vpn_key_alert",
+    "add-network-hidden": "visibility_off",
+    "add-network-security": "lock",
+    "launcher-action-prefix": "keyboard",
 };
 
 const STOPWORDS = ["a", "an", "and", "are", "for", "in", "not", "notification", "of", "on", "or", "out", "the", "to"];
@@ -144,7 +166,14 @@ const FIELD_WEIGHT = {
 };
 const SKIP_LABELS = ["Muted", "None"];
 
-const ROW_RE = /^\s*(ToggleRow|SliderRow|SelectRow|StepperRow|NavRow|InfoRow|PopupRow|DefaultRow)\s*\{/;
+
+// Strips the argument placeholders some qsTr labels carry ("Show all networks
+// (%1)"), which have nothing to substitute into them here.
+function cleanLabel(text) {
+    return String(text ?? "").replace(/\s*\(?%\d+\)?/g, "").trim();
+}
+
+const ROW_RE = /^\s*(ToggleRow|SliderRow|SelectRow|StepperRow|NavRow|RowButton|InfoRow|PopupRow|DefaultRow|TextFieldRow)\s*\{/;
 const LABEL_RE = /^\s*(?:label|text):\s*qsTr\("([^"]+)"\)/;
 const ANCHOR_RE = /^\s*settingAnchor:\s*"([^"]+)"/;
 // A ToggleRow whose value is a plain config property can be flipped straight
@@ -449,23 +478,61 @@ function extractSettings(files, nav, readLines) {
             const togglePath = rowType === "ToggleRow" && checkedPath && checkedPath === toggledPath ? checkedPath : "";
             if (label && !SKIP_LABELS.includes(label) && anchor) {
                 // keyword sources: breadcrumb path, section header, subtext.
-                const extra = meta.crumbLabels.join(" ") + " " + section + " " + (subtext ?? "");
+                const extra = meta.crumbLabels.join(" ") + " " + section + " " + (subtext && !/%\d/.test(subtext) ? subtext : "");
                 entries.push({
+                    rowType: rowType,
                     pageIdx: meta.pageIdx,
                     subPath: meta.subPath,
                     crumbIcons: meta.crumbIcons,
                     crumbLabels: meta.crumbLabels,
-                    title: label,
+                    trailKey: meta.crumbLabels.join("/"),
+                    title: cleanLabel(label),
                     anchor: anchor,
                     section: section,
-                    subtext: subtext ?? "",
+                    // Subtexts with argument placeholders ("Base %1, layers
+                    // %2") have nothing to substitute here, so they'd show
+                    // the raw markers - leave them out entirely.
+                    subtext: subtext && !/%\d/.test(subtext) ? subtext : "",
                     togglePath: togglePath,
                     icon: SETTING_ICONS[anchor] ?? (meta.crumbIcons.length > 0 ? meta.crumbIcons[meta.crumbIcons.length - 1] : "")
                 });
             }
         }
     }
-    return entries;
+    return mergeInfoRows(entries);
+}
+
+// InfoRow sections are read-only readouts - an ethernet connection's status,
+// interface, address and so on. Listing each as its own result buries actual
+// settings under rows nothing can be done to, so a section's info rows collapse
+// into one entry named after the section, keeping every label as a keyword so
+// searching "gateway" or "mac address" still finds it. Applies to any info
+// section, including ones added later.
+function mergeInfoRows(entries) {
+    const out = [];
+    const merged = {};
+
+    for (const entry of entries) {
+        const isInfo = entry.rowType === "InfoRow";
+        delete entry.rowType;
+
+        if (!isInfo || !entry.section) {
+            out.push(entry);
+            continue;
+        }
+
+        const key = entry.anchor.split("-")[0] + "/" + entry.trailKey + "/" + entry.section;
+        const existing = merged[key];
+        if (existing === undefined) {
+            entry.keywords = entry.title;
+            entry.title = entry.section;
+            merged[key] = entry;
+            out.push(entry);
+        } else {
+            existing.keywords += " " + entry.title;
+        }
+    }
+    return out;
 }
 
 // Classic inverted index + precomputed per-token ranking weights. Keywords are
@@ -475,7 +542,9 @@ function buildInvertedAndRanking(entries) {
     const ranking = {};
     for (let idx = 0; idx < entries.length; idx++) {
         const e = entries[idx];
-        const extra = e.crumbLabels.join(" ") + " " + e.section + " " + e.subtext;
+        // e.keywords carries the labels of an info section merged into one
+        // entry, so searching any of them still reaches it.
+        const extra = e.crumbLabels.join(" ") + " " + e.section + " " + e.subtext + " " + (e.keywords ?? "");
         const fields = {
             title: e.title,
             keywords: tokenize(e.title + " " + extra).sort().join(" ")
