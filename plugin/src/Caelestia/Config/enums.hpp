@@ -20,6 +20,7 @@ namespace caelestia::config {
 ENUM(BarWorkspaceDisplay, Shapes, Text)
 ENUM(BarWorkspaceCapitalisation, Preserve, Upper, Lower)
 ENUM(LyricsBackend, Auto, Local, LRCLIB, NetEase)
+ENUM(GpuType, Auto, Nvidia, Generic, None)
 
 #undef ENUM
 
