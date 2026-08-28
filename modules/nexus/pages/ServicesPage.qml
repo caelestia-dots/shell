@@ -10,7 +10,7 @@ import qs.modules.nexus.common
 PageBase {
     id: root
 
-    // Lyrics backends, ordered to match LyricsBackend::Backend (Auto, Local, LRCLIB, NetEase)
+    // Lyrics backends, ordered to match config::LyricsBackend (Auto, Local, LRCLIB, NetEase)
     readonly property list<MenuItem> lyricsItems: [
         MenuItem {
             text: qsTr("Auto")
@@ -26,7 +26,7 @@ PageBase {
         }
     ]
 
-    // GPU options + the config string each maps to (see Gpu::parseType)
+    // GPU types, ordered to match config::GpuType (Auto, Nvidia, Generic, None)
     readonly property list<MenuItem> gpuItems: [
         MenuItem {
             text: qsTr("Auto")
@@ -41,18 +41,6 @@ PageBase {
             text: qsTr("None")
         }
     ]
-    readonly property list<string> gpuValues: ["", "NVIDIA", "GENERIC", "None"]
-
-    function gpuKeyToIndex(key: string): int {
-        const u = (key ?? "").trim().toUpperCase();
-        if (u === "")
-            return 0; // Auto
-        if (u === "NVIDIA")
-            return 1;
-        if (u === "GENERIC")
-            return 2;
-        return 3; // None
-    }
 
     title: qsTr("Services")
 
@@ -220,8 +208,8 @@ PageBase {
             subtext: Gpu.name ? qsTr("Monitoring: %1").arg(Gpu.name) : qsTr("Override for GPU type")
             menuOnTop: true
             menuItems: root.gpuItems
-            active: root.gpuItems[root.gpuKeyToIndex(GlobalConfig.services.gpuType)]
-            onSelected: item => GlobalConfig.services.gpuType = root.gpuValues[root.gpuItems.indexOf(item)]
+            active: root.gpuItems[GlobalConfig.services.gpuType]
+            onSelected: item => GlobalConfig.services.gpuType = root.gpuItems.indexOf(item)
         }
     }
 }
