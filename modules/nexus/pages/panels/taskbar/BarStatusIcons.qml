@@ -47,7 +47,6 @@ PageBase {
 
             z: 1
             first: true
-            settingAnchor: "bar-si-visible-icons"
             values: Config.bar.statusIcons.values
             onItemMoved: (from, to) => GlobalConfig.bar.statusIcons.move(from, to)
             onItemRemoved: index => GlobalConfig.bar.statusIcons.remove(index)
@@ -59,7 +58,6 @@ PageBase {
 
             rootParent: root.flickable
             icon: "add"
-            settingAnchor: "bar-si-add-entry"
             label: qsTr("Add entry")
             header: qsTr("Add new entry")
             acceptLabel: qsTr("Add")

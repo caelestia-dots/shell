@@ -14,37 +14,10 @@ ListView {
 
     property alias values: valuesModel.values
     property bool first
-    // The list is a searchable target in its own right - what someone looks
-    // for here are the entries it holds, not the rows around it.
-    property string settingAnchor
 
     signal itemMoved(from: int, to: int)
     signal itemRemoved(index: int)
     signal itemToggled(index: int, checked: bool)
-
-    // Matches what ConnectedRect does for ordinary rows, so arriving here from
-    // the settings search is marked the same way. The list doesn't scroll on
-    // its own (interactive is false and it's as tall as its content), so an
-    // overlay covering it stays put.
-    function flashHighlight(entry: string): void {
-        // Search points at one entry of the list, so highlight that row rather
-        // than the whole thing. Every row exists (the list isn't virtualised -
-        // it's as tall as its content), so the lookup always finds a live one.
-        if (entry) {
-            for (let i = 0; i < count; i++) {
-                const row = itemAtIndex(i);
-                if (row && root.labelFor(row.modelData) === entry) {
-                    row.flash();
-                    return;
-                }
-            }
-        }
-        // Nothing named, so fall back to the first row rather than lighting up
-        // the whole list, which says nothing about what matched.
-        const first = itemAtIndex(0);
-        if (first)
-            first.flash();
-    }
 
     function labelFor(item: var): string {
         return item.label;
@@ -131,10 +104,6 @@ ListView {
 
         function lerpRadius(a: real, b: real): real {
             return a + (b - a) * radiusLerpProg;
-        }
-
-        function flash(): void {
-            rowFlash.restart();
         }
 
         anchors.left: root?.contentItem.left
@@ -281,46 +250,6 @@ ListView {
                 radius: item.lerpRadius(Tokens.rounding.extraSmall, Tokens.rounding.large)
                 topLeftRadius: item.lerpRadius(item.topRadius, Tokens.rounding.large)
                 topRightRadius: item.lerpRadius(item.topRadius, Tokens.rounding.large)
-
-                StyledRect {
-                    id: rowHighlight
-
-                    anchors.fill: parent
-                    radius: itemBg.radius
-                    topLeftRadius: itemBg.topLeftRadius
-                    topRightRadius: itemBg.topRightRadius
-                    color: Colours.palette.m3primary
-                    opacity: 0
-
-                    SequentialAnimation {
-                        id: rowFlash
-
-                        Anim {
-                            target: rowHighlight
-                            property: "opacity"
-                            to: 0.2
-                            duration: Tokens.anim.durations.small
-                        }
-                        Anim {
-                            target: rowHighlight
-                            property: "opacity"
-                            to: 0.08
-                            duration: Tokens.anim.durations.normal
-                        }
-                        Anim {
-                            target: rowHighlight
-                            property: "opacity"
-                            to: 0.2
-                            duration: Tokens.anim.durations.small
-                        }
-                        Anim {
-                            target: rowHighlight
-                            property: "opacity"
-                            to: 0
-                            duration: Tokens.anim.durations.extraLarge
-                        }
-                    }
-                }
             }
 
             MouseArea {

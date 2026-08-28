@@ -71,8 +71,14 @@ const SETTING_ICONS = {
     "bar-tray-recolour-icons": "format_paint",
     "bar-tray-compact": "compress",
     "bar-tray-popout-on-hover": "open_in_new",
-    "bar-si-visible-icons": "format_list_bulleted",
-    "bar-si-add-entry": "add_circle",
+    "bar-si-speakers": "speaker",
+    "bar-si-microphone": "mic",
+    "bar-si-keyboard-layout": "keyboard",
+    "bar-si-network": "lan",
+    "bar-si-wi-fi": "network_wifi",
+    "bar-si-bluetooth": "bluetooth",
+    "bar-si-battery": "battery_full",
+    "bar-si-caps-lock": "keyboard_capslock_badge",
     "bar-si-popout-on-hover": "open_in_new",
     "bar-clock-background": "format_color_fill",
     "bar-clock-show-date": "calendar_month",
@@ -167,7 +173,7 @@ function cleanLabel(text) {
     return String(text ?? "").replace(/\s*\(?%\d+\)?/g, "").trim();
 }
 
-const ROW_RE = /^\s*(ToggleRow|SliderRow|SelectRow|StepperRow|NavRow|RowButton|InfoRow|PopupRow|DefaultRow|TextFieldRow|DialogSelectButton|ListEditor)\s*\{/;
+const ROW_RE = /^\s*(ToggleRow|SliderRow|SelectRow|StepperRow|NavRow|RowButton|InfoRow|PopupRow|DefaultRow|TextFieldRow)\s*\{/;
 const LABEL_RE = /^\s*(?:label|text):\s*qsTr\("([^"]+)"\)/;
 const ANCHOR_RE = /^\s*settingAnchor:\s*"([^"]+)"/;
 // A ToggleRow whose value is a plain config property can be flipped straight
@@ -411,29 +417,6 @@ function buildNavMap(nexusDir, files, readFile, readLines) {
     return nav;
 }
 
-// Some pages keep the names of the things they manage in an object literal
-// instead of in rows - the status icons page lists Bluetooth, Microphone and
-// so on that way, and its rows are a dynamic list editor with no labels of
-// their own. Those names are exactly what someone would search for, so collect
-// them and attach them to the page's entries as keywords.
-function pageItemNames(lines) {
-    const names = [];
-    let depth = 0;
-    for (const line of lines) {
-        if (/^\s*(?:readonly\s+)?property\s+var\s+\w+\s*:\s*\(\{/.test(line))
-            depth = 1;
-        if (depth > 0) {
-            const re = /qsTr\("([^"]+)"\)/g;
-            let hit;
-            while ((hit = re.exec(line)) !== null)
-                names.push(hit[1]);
-            if (/\}\)/.test(line))
-                depth = 0;
-        }
-    }
-    return names;
-}
-
 function extractSettings(files, nav, readLines) {
     const entries = [];
     for (const comp in nav) {
@@ -442,7 +425,6 @@ function extractSettings(files, nav, readLines) {
         if (!pf)
             continue;
         const lines = readLines(pf);
-        const itemNames = pageItemNames(lines);
         let section = ""; // text of the most recent SectionHeader
         for (let i = 0; i < lines.length; i++) {
             // Track the current section header so its words are searchable too.
@@ -464,12 +446,7 @@ function extractSettings(files, nav, readLines) {
             let subtext = null;
             let checkedPath = null;
             let toggledPath = null;
-            // Wide enough to clear a row that declares helper functions
-            // before its properties, which the section ordering requires.
-            for (let j = i + 1; j < Math.min(i + 24, lines.length); j++) {
-                // Don't run past this row into the next one.
-                if (j > i + 1 && ROW_RE.test(lines[j]))
-                    break;
+            for (let j = i + 1; j < Math.min(i + 12, lines.length); j++) {
                 if (label === null) {
                     const m = LABEL_RE.exec(lines[j]);
                     if (m)
@@ -499,20 +476,7 @@ function extractSettings(files, nav, readLines) {
             // Only expose a toggle path when read and write target the same
             // property (symmetric), so flipping from search is safe.
             const togglePath = rowType === "ToggleRow" && checkedPath && checkedPath === toggledPath ? checkedPath : "";
-            // A dynamic list has no label of its own, and what someone
-            // searches for are the entries inside it, which it builds at
-            // runtime from names declared on the page. Emit one result per
-            // name so they read the same as the rows on screen, all pointing
-            // at the list. Falls back to the section header when the page
-            // names nothing.
-            if (!label && anchor && rowType === "ListEditor")
-                label = itemNames.length > 0 ? null : section;
-
-            const titles = label === null && anchor && rowType === "ListEditor" ? itemNames : label ? [label] : [];
-
-            for (const rowTitle of titles) {
-                if (SKIP_LABELS.includes(rowTitle) || !anchor)
-                    continue;
+            if (label && !SKIP_LABELS.includes(label) && anchor) {
                 // keyword sources: breadcrumb path, section header, subtext.
                 const extra = meta.crumbLabels.join(" ") + " " + section + " " + (subtext && !/%\d/.test(subtext) ? subtext : "");
                 entries.push({
@@ -521,13 +485,9 @@ function extractSettings(files, nav, readLines) {
                     subPath: meta.subPath,
                     crumbIcons: meta.crumbIcons,
                     crumbLabels: meta.crumbLabels,
-                    context: comp,
                     trailKey: meta.crumbLabels.join("/"),
-                    title: cleanLabel(rowTitle),
-                    // A dynamic list's entries all live behind one anchor, so
-                    // the entry name rides along after a "#" - that's what tells
-                    // the list which of its rows to highlight on arrival.
-                    anchor: rowTitle !== label && rowType === "ListEditor" ? `${anchor}#${rowTitle}` : anchor,
+                    title: cleanLabel(label),
+                    anchor: anchor,
                     section: section,
                     // Subtexts with argument placeholders ("Base %1, layers
                     // %2") have nothing to substitute here, so they'd show
@@ -610,13 +570,7 @@ function buildInvertedAndRanking(entries) {
 
 // Builds the whole index. readFile(path) -> string ("" if unreadable);
 // listFiles(dir, suffix) -> recursive absolute paths.
-// `translate` maps (context, sourceText) to the displayed string. Qt's
-// qsTranslate() returns the source unchanged when there's no translation
-// loaded, so passing it through changes nothing today and starts working on
-// its own once .ts/.qm files are shipped. It has to run here rather than at
-// display time because the inverted index is built from these strings - a
-// query has to match what the user actually sees.
-function buildIndex(nexusDir, readFile, listFiles, translate) {
+function buildIndex(nexusDir, readFile, listFiles) {
     const lineCache = {};
     const readLines = path => {
         if (!(path in lineCache))
@@ -626,17 +580,6 @@ function buildIndex(nexusDir, readFile, listFiles, translate) {
     const files = discoverFiles(nexusDir, listFiles);
     const nav = buildNavMap(nexusDir, files, readFile, readLines);
     const entries = extractSettings(files, nav, readLines);
-
-    if (translate)
-        for (const e of entries) {
-            e.title = translate(e.context, e.title);
-            if (e.subtext)
-                e.subtext = translate(e.context, e.subtext);
-            if (e.section)
-                e.section = translate(e.context, e.section);
-            if (e.keywords)
-                e.keywords = e.keywords.split(" ").map(k => translate(e.context, k)).join(" ");
-        }
     const [inverted, ranking] = buildInvertedAndRanking(entries);
     return {
         version: 3,

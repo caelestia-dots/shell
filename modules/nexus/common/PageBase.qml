@@ -27,14 +27,7 @@ ColumnLayout {
     function scrollToAnchor(anchor: string): bool {
         if (!anchor || !contentChild)
             return false;
-        // An anchor may name one entry inside a row that holds several (a
-        // dynamic list), as "<anchor>#<entry>". The row is found by the part
-        // before it; the rest tells the row what to highlight.
-        const sep = anchor.indexOf("#");
-        const rowAnchor = sep < 0 ? anchor : anchor.slice(0, sep);
-        const entry = sep < 0 ? "" : anchor.slice(sep + 1);
-
-        const row = findAnchor(contentChild, rowAnchor);
+        const row = findAnchor(contentChild, anchor);
         if (!row)
             return false;
         const pos = row.mapToItem(flickable.contentItem, 0, 0);
@@ -47,14 +40,8 @@ ColumnLayout {
         root.animateScroll = true;
         flickable.contentY = target;
         Qt.callLater(() => root.animateScroll = false);
-        // Only rows that hold several entries take an argument; the rest
-        // declare no parameter, so don't hand them one.
         if (row.flashHighlight !== undefined) // qmllint disable missing-property
-            if (entry)
-                row.flashHighlight(entry);
-            else
-                // qmllint disable missing-property
-                row.flashHighlight(); // qmllint disable missing-property
+            row.flashHighlight(); // qmllint disable missing-property
         return true;
     }
 
@@ -83,14 +70,9 @@ ColumnLayout {
 
     // Flash a row without scrolling (used when re-selecting the current setting).
     function highlightAnchor(anchor: string): void {
-        const sep = anchor.indexOf("#");
-        const row = findAnchor(contentChild, sep < 0 ? anchor : anchor.slice(0, sep));
+        const row = findAnchor(contentChild, anchor);
         if (row && row.flashHighlight !== undefined) // qmllint disable missing-property
-            if (sep < 0)
-                row.flashHighlight();
-            else
-                // qmllint disable missing-property
-                row.flashHighlight(anchor.slice(sep + 1)); // qmllint disable missing-property
+            row.flashHighlight(); // qmllint disable missing-property
     }
 
     spacing: Tokens.spacing.extraLargeIncreased
