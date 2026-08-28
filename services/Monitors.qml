@@ -17,12 +17,9 @@ Singleton {
     property bool confirming: false
     property int confirmSecondsLeft: 0
 
-    function toggleIdentification(): void {
-        identifying = !identifying;
-        if (identifying)
-            identifyTimer.restart();
-        else
-            identifyTimer.stop();
+    function identify(): void {
+        identifying = true;
+        identifyTimer.restart();
     }
 
     function stopIdentification(): void {

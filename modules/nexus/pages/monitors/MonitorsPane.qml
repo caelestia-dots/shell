@@ -476,14 +476,11 @@ PageBase {
             Layout.fillWidth: true
             spacing: Tokens.spacing.extraSmall / 2
 
-            ToggleRow {
-                Layout.fillWidth: true
+            RowButton {
                 first: true
+                icon: "info"
                 text: qsTr("Identify displays")
-                font: Tokens.font.body.medium
-                horizontalPadding: Tokens.padding.largeIncreased
-                checked: Monitors.identifying
-                onToggled: Monitors.toggleIdentification()
+                onClicked: Monitors.identify()
             }
 
             Repeater {
@@ -557,8 +554,8 @@ PageBase {
                         }
 
                         MaterialIcon {
-                            text: (monitorItem.modelData.focused ?? false) ? "settings" : "chevron_right"
-                            color: (monitorItem.modelData.focused ?? false) ? Colours.palette.m3primary : Colours.palette.m3onSurfaceVariant
+                            text: "chevron_right"
+                            color: Colours.palette.m3onSurfaceVariant
                             fontStyle: Tokens.font.icon.medium
                         }
                     }

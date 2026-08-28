@@ -25,9 +25,7 @@ ColumnLayout {
         IconTextButton {
             icon: "info"
             text: qsTr("Identify")
-            isToggle: true
-            checked: Monitors.identifying
-            onClicked: Monitors.toggleIdentification()
+            onClicked: Monitors.identify()
         }
     }
 
