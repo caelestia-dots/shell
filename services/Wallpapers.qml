@@ -21,6 +21,7 @@ Searcher {
     property string actualCurrent
     property bool previewColourLock
     property bool pendingPreviewClear
+    property var recent: []
 
     function getCategoryFor(w: FileSystemEntry): string {
         let category = w.parentDir.slice(Paths.wallsdir.length + 1);
@@ -35,7 +36,23 @@ Searcher {
 
     function setWallpaper(path: string): void {
         actualCurrent = path;
+        recordRecent(path);
         Quickshell.execDetached(["caelestia", "wallpaper", "-f", path, ...smartArg]);
+    }
+
+    function recordRecent(path: string): void {
+        if (path.startsWith(`${Paths.wallsdir}/`))
+            return;
+
+        const name = path.slice(path.lastIndexOf("/") + 1);
+        const filtered = root.recent.filter(e => e.path !== path);
+        root.recent = [
+            {
+                path,
+                name
+            },
+            ...filtered].slice(0, 12);
+        recentStorage.setText(JSON.stringify(root.recent));
     }
 
     function preview(path: string): void {
@@ -100,6 +117,22 @@ Searcher {
             root.actualCurrent = root.fallback;
             root.previewColourLock = false;
             Quickshell.execDetached(["caelestia", "wallpaper", "-f", root.fallback, ...root.smartArg]);
+        }
+    }
+
+    FileView {
+        id: recentStorage
+
+        path: `${Paths.state}/wallpaper/recent.json`
+        printErrors: false
+        onLoaded: {
+            root.recent = JSON.parse(text());
+        }
+        onLoadFailed: err => {
+            if (err === FileViewError.FileNotFound) {
+                root.recent = [];
+                Qt.callLater(() => setText("[]"));
+            }
         }
     }
 

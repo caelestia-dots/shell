@@ -83,6 +83,39 @@ PageBase {
 
         StyledText {
             Layout.topMargin: Tokens.spacing.large
+            text: qsTr("Recently used")
+            font: Tokens.font.title.small
+            visible: recentWalls.count > 0
+        }
+
+        GridLayout {
+            Layout.fillWidth: true
+            visible: recentWalls.count > 0
+
+            columns: Config.nexus.wallpapersPerRow
+            rowSpacing: Tokens.spacing.medium
+            columnSpacing: Tokens.spacing.large
+
+            Repeater {
+                id: recentWalls
+
+                model: Wallpapers.recent
+
+                WallItem {
+                    required property var modelData
+
+                    source: String(modelData.path)
+                    text: String(modelData.name)
+                    onClicked: {
+                        Wallpapers.setWallpaper(modelData.path);
+                        root.nState.closeSubPage();
+                    }
+                }
+            }
+        }
+
+        StyledText {
+            Layout.topMargin: Tokens.spacing.large
             text: qsTr("Local wallpapers")
             font: Tokens.font.title.small
         }
