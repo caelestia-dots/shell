@@ -26,7 +26,7 @@ class ServiceConfig : public settings::ObjectNode {
     // Attempt to guess based on locale
     CONFIG_GLOBAL_PROPERTY(
         bool, useTwelveHourClock, QLocale().timeFormat(QLocale::ShortFormat).toLower().contains(u"a"_s))
-    CONFIG_GLOBAL_PROPERTY(QString, gpuType, QString())
+    CONFIG_GLOBAL_ENUM_PROPERTY(GpuType, gpuType, GpuType::Auto)
     CONFIG_GLOBAL_PROPERTY(int, visualiserBars, 60)
     CONFIG_GLOBAL_PROPERTY(qreal, audioIncrement, 0.1)
     CONFIG_GLOBAL_PROPERTY(qreal, brightnessIncrement, 0.1)

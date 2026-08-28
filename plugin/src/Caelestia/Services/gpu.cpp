@@ -131,9 +131,9 @@ Gpu::Gpu(QObject* parent)
     m_busyFiles = gpuBusyFiles();
 
     auto* svc = caelestia::config::ConfigSingleton::instance()->services();
-    m_userType = parseType(svc->gpuType());
+    m_userType = svc->gpuType();
     QObject::connect(svc, &caelestia::config::ServiceConfig::gpuTypeChanged, this, [this, svc] {
-        const Type value = parseType(svc->gpuType());
+        const GpuType value = svc->gpuType();
         if (value == m_userType) {
             return;
         }
@@ -144,7 +144,7 @@ Gpu::Gpu(QObject* parent)
     resolveGpu();
 }
 
-Gpu::Type Gpu::type() const {
+GpuType Gpu::type() const {
     return m_type;
 }
 
@@ -160,12 +160,12 @@ qreal Gpu::temperature() const {
     return m_temperature;
 }
 
-void Gpu::setType(Type value) {
+void Gpu::setType(GpuType value) {
     if (value == m_type) {
         return;
     }
     m_type = value;
-    if (m_type == None) {
+    if (m_type == GpuType::None) {
         resetUsage();
     }
     emit typeChanged();
@@ -180,10 +180,10 @@ void Gpu::setName(QString value) {
 }
 
 void Gpu::tick() {
-    if (m_type == Generic) {
+    if (m_type == GpuType::Generic) {
         readGenericUsage();
         readGpuTemperature();
-    } else if (m_type == Nvidia) {
+    } else if (m_type == GpuType::Nvidia) {
         startNvidiaUsage();
     } else {
         resetUsage();
@@ -194,21 +194,21 @@ void Gpu::resolveGpu() {
     // Supersede any chain still in flight so its callbacks cannot write stale state
     const int generation = ++m_generation;
 
-    if (m_userType != Auto) {
+    if (m_userType != GpuType::Auto) {
         setType(m_userType);
     }
 
-    if (m_userType == None) {
+    if (m_userType == GpuType::None) {
         setName(tr("None"));
         return;
     }
 
     setName(tr("Detecting GPU..."));
-    tryNameSource(m_userType == Generic ? kFirstGenericSource : kNvidiaSource, generation);
+    tryNameSource(m_userType == GpuType::Generic ? kFirstGenericSource : kNvidiaSource, generation);
 }
 
 int Gpu::probeEnd() const {
-    return m_userType == Nvidia ? kFirstGenericSource : static_cast<int>(nameSources().size());
+    return m_userType == GpuType::Nvidia ? kFirstGenericSource : static_cast<int>(nameSources().size());
 }
 
 void Gpu::tryNameSource(int index, int generation) {
@@ -225,9 +225,9 @@ void Gpu::finishNameSource(int index, int generation, QString name) {
 
     // Under Auto the NVIDIA name probe doubles as the type probe: a non-empty result
     // means an NVIDIA GPU is present and queryable.
-    if (m_userType == Auto && index == kNvidiaSource) {
-        setType(!name.isEmpty() ? Nvidia : (m_busyFiles.isEmpty() ? None : Generic));
-        if (m_type == None) {
+    if (m_userType == GpuType::Auto && index == kNvidiaSource) {
+        setType(!name.isEmpty() ? GpuType::Nvidia : (m_busyFiles.isEmpty() ? GpuType::None : GpuType::Generic));
+        if (m_type == GpuType::None) {
             setName(tr("None"));
             return;
         }
@@ -349,20 +349,6 @@ void Gpu::resetUsage() {
         m_temperature = 0.0;
         emit temperatureChanged();
     }
-}
-
-Gpu::Type Gpu::parseType(const QString& s) {
-    const QString u = s.trimmed().toUpper();
-    if (u.isEmpty()) {
-        return Auto;
-    }
-    if (u == QStringLiteral("NVIDIA")) {
-        return Nvidia;
-    }
-    if (u == QStringLiteral("GENERIC")) {
-        return Generic;
-    }
-    return None;
 }
 
 } // namespace caelestia::services

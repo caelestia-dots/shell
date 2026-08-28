@@ -725,7 +725,7 @@ For example, to automatically hide the bar on the monitor named `DP-1`:
         "useFahrenheit": false,
         "useFahrenheitPerformance": false,
         "useTwelveHourClock": false,
-        "gpuType": "",
+        "gpuType": "Auto",
         "visualiserBars": 60,
         "audioIncrement": 0.1,
         "brightnessIncrement": 0.1,
