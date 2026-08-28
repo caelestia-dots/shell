@@ -15,6 +15,23 @@ StyledRect {
     required property int centerWidth
     required property var lock
 
+    property bool revealPassword
+    readonly property string leadingIcon: {
+        if (revealPassword)
+            return "visibility";
+
+        if (lock.pam.fprint.tries >= GlobalConfig.lock.maxFprintTries) {
+            if (lock.pam.howdy.canAttempt)
+                return "face";
+            return "fingerprint_off";
+        }
+        if (lock.pam.fprint.active)
+            return "fingerprint";
+        if (lock.pam.howdy.canAttempt)
+            return "face";
+        return "lock";
+    }
+
     implicitWidth: {
         const w = centerWidth * 0.8;
         return lock.pam.buffer ? w : Math.min(w, inputField.placeholderWidth + iconWrapper.implicitWidth + enterButton.implicitWidth + input.spacing * 2 + Tokens.padding.medium * 2);
@@ -44,6 +61,15 @@ StyledRect {
         Anim {}
     }
 
+    Connections {
+        function onBufferChanged(): void {
+            if (!root.lock.pam.buffer)
+                root.revealPassword = false;
+        }
+
+        target: root.lock.pam
+    }
+
     StateLayer {
         hoverEnabled: false
         cursorShape: Qt.IBeamCursor
@@ -60,13 +86,16 @@ StyledRect {
         Item {
             id: iconWrapper
 
+            readonly property bool isPasswordIcon: root.leadingIcon === "lock" || root.leadingIcon === "visibility"
+            readonly property bool isPamLoading: root.lock.pam.passwd.active || root.lock.pam.howdy.active
+
             Layout.fillHeight: true
             implicitWidth: height
 
             AnimLoader {
                 anchors.centerIn: parent
                 anchors.verticalCenterOffset: sourceComponent === iconComp ? 1 : 0
-                sourceComp: root.lock.pam.passwd.active || root.lock.pam.howdy.active ? loadingComp : iconComp
+                sourceComp: iconWrapper.isPamLoading ? loadingComp : iconComp
             }
 
             Component {
@@ -74,21 +103,17 @@ StyledRect {
 
                 MaterialIcon {
                     animate: true
-                    text: {
-                        if (root.lock.pam.fprint.tries >= GlobalConfig.lock.maxFprintTries) {
-                            if (root.lock.pam.howdy.canAttempt)
-                                return "face";
-                            return "fingerprint_off";
-                        }
-                        if (root.lock.pam.fprint.active)
-                            return "fingerprint";
-                        if (root.lock.pam.howdy.canAttempt)
-                            return "face";
-                        return "lock";
-                    }
+                    text: root.leadingIcon
                     color: !root.lock.pam.howdy.canAttempt && root.lock.pam.fprint.tries >= GlobalConfig.lock.maxFprintTries ? Colours.palette.m3error : Colours.palette.m3onSurfaceVariant
                     fontStyle: Tokens.font.icon.builders.medium.scale(root.centerScale).build()
                     fill: text === "face"
+                    scale: iconWrapper.isPasswordIcon && visibilityLayer.containsMouse ? 1.1 : 1
+
+                    Behavior on scale {
+                        Anim {
+                            type: Anim.FastSpatial
+                        }
+                    }
                 }
             }
 
@@ -97,6 +122,20 @@ StyledRect {
 
                 LoadingIndicator {
                     implicitSize: iconWrapper.height - Tokens.padding.small * 2
+                }
+            }
+
+            StateLayer {
+                id: visibilityLayer
+
+                anchors.fill: parent
+                radius: root.radius
+                visible: !iconWrapper.isPamLoading && iconWrapper.isPasswordIcon
+                cursorShape: Qt.PointingHandCursor
+
+                onClicked: {
+                    root.revealPassword = !root.revealPassword;
+                    root.forceActiveFocus();
                 }
             }
         }
@@ -109,6 +148,7 @@ StyledRect {
 
             centerScale: root.centerScale
             pam: root.lock.pam
+            revealPassword: root.revealPassword
         }
 
         Item {
