@@ -7,6 +7,7 @@
 #include <qfileinfo.h>
 #include <qfuturewatcher.h>
 #include <qloggingcategory.h>
+#include <qmetaobject.h>
 #include <qqmlengine.h>
 #include <qregularexpression.h>
 
@@ -145,16 +146,31 @@ qreal CUtils::clamp(qreal value, qreal min, qreal max) {
     return qBound(min, value, max);
 }
 
-QString CUtils::enumToString(const QVariant& value) {
-    const auto type = value.metaType();
-    if (!util::isSupportedEnum(type)) {
-        qCWarning(lcCUtils, "enumToString: %s is not a supported enum", type.isValid() ? type.name() : "the value");
+QString CUtils::enumToString(QObject* target, const QString& property, const QVariant& value) {
+    if (!target) {
+        qCWarning(lcCUtils) << "enumToString: a target is required";
         return {};
     }
 
-    const auto* key = util::enumKeyFor(util::metaEnumFor(type), value);
+    const auto* meta = target->metaObject();
+    const auto index = meta->indexOfProperty(property.toUtf8().constData());
+    if (index < 0) {
+        qCWarning(lcCUtils) << "enumToString:" << target << "has no property" << property;
+        return {};
+    }
+
+    const auto prop = meta->property(index);
+    const auto metaEnum = prop.isEnumType() ? prop.enumerator() : util::metaEnumFor(prop.metaType());
+    if (!metaEnum.isValid() || metaEnum.is64Bit()) {
+        qCWarning(lcCUtils) << "enumToString: property" << property << "of" << target << "is not a supported enum";
+        return {};
+    }
+
+    const auto val = value.isValid() ? value : prop.read(target);
+    const auto* key = util::enumKeyFor(metaEnum, val);
     if (!key) {
-        qCWarning(lcCUtils, "enumToString: no enumerator of %s has the value %lld", type.name(), value.toLongLong());
+        qCWarning(lcCUtils, "enumToString: no enumerator of %s::%s has the value %lld", metaEnum.scope(),
+            metaEnum.name(), val.toLongLong());
         return {};
     }
 
