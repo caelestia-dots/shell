@@ -1,6 +1,8 @@
 pragma ComponentBehavior: Bound
 
 import QtQuick
+import Quickshell
+import Quickshell.Io
 import Quickshell.Services.UPower
 import Caelestia.Config
 import qs.components
@@ -11,6 +13,67 @@ Column {
 
     spacing: Tokens.spacing.medium
     width: Tokens.sizes.bar.batteryWidth
+
+    property string conservationPath: ""
+    property bool conservationMode: false
+    readonly property bool conservationAvailable: conservationPath !== ""
+
+    FileView {
+        path: "/sys/bus/platform/drivers/ideapad_acpi/VPC2004:00/conservation_mode"
+        printErrors: false
+        onLoaded: {
+            root.conservationPath = path;
+            root.conservationMode = text().trim() === "1";
+        }
+    }
+
+    FileView {
+        path: "/sys/class/power_supply/BAT0/charge_control_end_threshold"
+        printErrors: false
+        onLoaded: {
+            if (!root.conservationPath) {
+                root.conservationPath = path;
+                const val = parseInt(text().trim());
+                root.conservationMode = val > 0 && val <= 80;
+            }
+        }
+    }
+
+    FileView {
+        path: "/sys/devices/platform/asus-nb-wmi/charge_control_end_threshold"
+        printErrors: false
+        onLoaded: {
+            if (!root.conservationPath) {
+                root.conservationPath = path;
+                const val = parseInt(text().trim());
+                root.conservationMode = val > 0 && val <= 80;
+            }
+        }
+    }
+
+    FileView {
+        id: conservationWatcher
+
+        path: root.conservationPath
+        printErrors: false
+        onLoaded: {
+            const val = text().trim();
+            if (path.includes("conservation_mode")) {
+                root.conservationMode = val === "1";
+            } else {
+                const n = parseInt(val);
+                root.conservationMode = n > 0 && n <= 80;
+            }
+        }
+    }
+
+    Timer {
+        id: refreshTimer
+
+        interval: 250
+        repeat: false
+        onTriggered: conservationWatcher.reload()
+    }
 
     StyledText {
         text: UPower.displayDevice.isLaptopBattery ? qsTr("Remaining: %1%").arg(Math.round(UPower.displayDevice.percentage * 100)) : qsTr("No battery detected")
@@ -94,91 +157,145 @@ Column {
         }
     }
 
-    StyledRect {
-        id: profiles
-
-        property string current: {
-            const p = PowerProfiles.profile;
-            if (p === PowerProfile.PowerSaver)
-                return saver.icon;
-            if (p === PowerProfile.Performance)
-                return perf.icon;
-            return balance.icon;
-        }
-
+    Row {
         anchors.horizontalCenter: parent.horizontalCenter
-
-        implicitWidth: saver.implicitHeight + balance.implicitHeight + perf.implicitHeight + Tokens.padding.medium * 2 + Tokens.spacing.largeIncreased * 2
-        implicitHeight: Math.max(saver.implicitHeight, balance.implicitHeight, perf.implicitHeight) + Tokens.padding.small
-
-        color: Colours.tPalette.m3surfaceContainer
-        radius: Tokens.rounding.full
+        spacing: Tokens.spacing.small
 
         StyledRect {
-            id: indicator
+            id: profiles
 
-            color: Colours.palette.m3primary
+            property string current: {
+                const p = PowerProfiles.profile;
+                if (p === PowerProfile.PowerSaver)
+                    return saver.icon;
+                if (p === PowerProfile.Performance)
+                    return perf.icon;
+                return balance.icon;
+            }
+
+            implicitWidth: saver.implicitHeight + balance.implicitHeight + perf.implicitHeight + Tokens.padding.medium * 2 + Tokens.spacing.largeIncreased * 2
+            implicitHeight: Math.max(saver.implicitHeight, balance.implicitHeight, perf.implicitHeight) + Tokens.padding.small
+
+            color: Colours.tPalette.m3surfaceContainer
             radius: Tokens.rounding.full
-            state: profiles.current
 
-            states: [
-                State {
-                    name: saver.icon
+            StyledRect {
+                id: indicator
 
-                    Fill {
-                        item: saver
+                color: Colours.palette.m3primary
+                radius: Tokens.rounding.full
+                state: profiles.current
+
+                states: [
+                    State {
+                        name: saver.icon
+
+                        Fill {
+                            item: saver
+                        }
+                    },
+                    State {
+                        name: balance.icon
+
+                        Fill {
+                            item: balance
+                        }
+                    },
+                    State {
+                        name: perf.icon
+
+                        Fill {
+                            item: perf
+                        }
                     }
-                },
-                State {
-                    name: balance.icon
+                ]
 
-                    Fill {
-                        item: balance
-                    }
-                },
-                State {
-                    name: perf.icon
-
-                    Fill {
-                        item: perf
-                    }
+                transitions: Transition {
+                    AnchorAnim {}
                 }
-            ]
+            }
 
-            transitions: Transition {
-                AnchorAnim {}
+            Profile {
+                id: saver
+
+                anchors.verticalCenter: parent.verticalCenter
+                anchors.left: parent.left
+                anchors.leftMargin: Tokens.padding.extraSmall
+
+                profile: PowerProfile.PowerSaver
+                icon: "energy_savings_leaf"
+            }
+
+            Profile {
+                id: balance
+
+                anchors.centerIn: parent
+
+                profile: PowerProfile.Balanced
+                icon: "balance"
+            }
+
+            Profile {
+                id: perf
+
+                anchors.verticalCenter: parent.verticalCenter
+                anchors.right: parent.right
+                anchors.rightMargin: Tokens.padding.extraSmall
+
+                profile: PowerProfile.Performance
+                icon: "rocket_launch"
             }
         }
 
-        Profile {
-            id: saver
+        StyledRect {
+            id: conservationBtn
 
+            visible: root.conservationAvailable
             anchors.verticalCenter: parent.verticalCenter
-            anchors.left: parent.left
-            anchors.leftMargin: Tokens.padding.extraSmall
+            implicitWidth: profiles.implicitHeight - 4
+            implicitHeight: profiles.implicitHeight - 4
 
-            profile: PowerProfile.PowerSaver
-            icon: "energy_savings_leaf"
-        }
+            radius: Tokens.rounding.full
+            color: root.conservationMode ? Colours.palette.m3primary : Colours.tPalette.m3surfaceContainer
 
-        Profile {
-            id: balance
+            Behavior on color {
+                CAnim {}
+            }
 
-            anchors.centerIn: parent
+            MaterialIcon {
+                id: consIcon
 
-            profile: PowerProfile.Balanced
-            icon: "balance"
-        }
+                anchors.centerIn: parent
+                text: "battery_saver"
+                fontStyle: Tokens.font.icon.large
+                color: root.conservationMode ? Colours.palette.m3onPrimary : Colours.palette.m3onSurfaceVariant
+                fill: root.conservationMode ? 1 : 0
 
-        Profile {
-            id: perf
+                Behavior on color {
+                    CAnim {}
+                }
 
-            anchors.verticalCenter: parent.verticalCenter
-            anchors.right: parent.right
-            anchors.rightMargin: Tokens.padding.extraSmall
+                Behavior on fill {
+                    Anim {
+                        type: Anim.DefaultEffects
+                    }
+                }
+            }
 
-            profile: PowerProfile.Performance
-            icon: "rocket_launch"
+            StateLayer {
+                radius: Tokens.rounding.full
+                color: root.conservationMode ? Colours.palette.m3onPrimary : Colours.palette.m3onSurface
+                onClicked: {
+                    if (root.conservationPath.includes("conservation_mode")) {
+                        const next = root.conservationMode ? "0" : "1";
+                        Quickshell.execDetached(["sh", "-c", `echo ${next} > "${root.conservationPath}"`]);
+                    } else {
+                        const next = root.conservationMode ? "100" : "80";
+                        Quickshell.execDetached(["sh", "-c", `echo ${next} > "${root.conservationPath}"`]);
+                    }
+                    refreshTimer.restart();
+                }
+            }
         }
     }
 
