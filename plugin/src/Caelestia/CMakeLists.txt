@@ -11,6 +11,7 @@ qml_module(caelestia-core
         Qt::Quick
         Qt::Concurrent
         PkgConfig::Qalculate
+        caelestia-util
 )
 
 # Bake the shell version in so CUtils can expose it without spawning a process
