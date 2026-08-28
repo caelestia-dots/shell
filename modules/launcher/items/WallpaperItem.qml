@@ -1,7 +1,6 @@
 import QtQuick
 import Quickshell
 import Caelestia.Config
-import Caelestia.Models
 import qs.components
 import qs.components.effects
 import qs.components.images
@@ -10,7 +9,7 @@ import qs.services
 Item {
     id: root
 
-    required property FileSystemEntry modelData
+    required property QtObject modelData
     required property ScreenState screenState
 
     scale: 0.5
@@ -57,17 +56,29 @@ Item {
         implicitWidth: Tokens.sizes.launcher.wallpaperWidth
         implicitHeight: implicitWidth / 16 * 9
 
+        // Placeholder while the cached thumbnail is still being generated
         MaterialIcon {
             anchors.centerIn: parent
-            text: "image"
+            text: Wallpapers.isVideo(root.modelData.path) ? "movie" : "image"
             color: Colours.tPalette.m3outline
             fontStyle: Tokens.font.icon.builders.extraLarge.scale(2).weight(Font.DemiBold).build()
         }
 
-        CachingImage {
+        // Plain `Image` reads the picker thumbnail file directly. The C++
+        // imagecacher is bypassed entirely: scripts/thumbgen.py populates
+        // $cache/wallpaper-thumbs/ with 280x158 JPGs for every supported
+        // extension (images, gifs, videos).
+        Image {
             anchors.fill: parent
-            path: root.modelData.path
+            asynchronous: true
             smooth: !root.PathView.view.moving
+            fillMode: Image.PreserveAspectCrop
+            cache: false
+            source: {
+                const thumb = Wallpapers.getThumbnailPath(root.modelData.path);
+                if (!thumb) return "";
+                return "file://" + thumb + "?v=" + Wallpapers.thumbnailVersion;
+            }
             sourceSize: {
                 const dpr = (QsWindow.window as QsWindow)?.devicePixelRatio ?? 1;
                 return Qt.size(image.implicitWidth * dpr, image.implicitHeight * dpr);

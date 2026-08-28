@@ -3,7 +3,6 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import QtQuick.Layouts
 import Caelestia.Config
-import Caelestia.Models
 import qs.services
 import qs.modules.nexus.common
 
@@ -27,20 +26,23 @@ PageBase {
 
         Repeater {
             model: {
-                const walls = Wallpapers.list.filter(w => Wallpapers.getCategoryFor(w) === root.nState.selectedWallpaperCategory).sort((a, b) => a.name.localeCompare(b.name));
+                const walls = Wallpapers.list.filter(w => Wallpapers.getCategoryFor(w.path) === root.nState.selectedWallpaperCategory).sort((a, b) => a.name.localeCompare(b.name));
                 while (walls.length < Config.nexus.wallpapersPerRow)
                     walls.push(null);
                 return walls;
             }
 
             WallItem {
-                required property FileSystemEntry modelData
+                required property QtObject modelData
 
-                // Empty placeholders for sizing
                 opacity: modelData ? 1 : 0
                 enabled: modelData
-
-                source: String(modelData?.path ?? "")
+                source: {
+                    if (!modelData) return "";
+                    const thumb = Wallpapers.getThumbnailPath(modelData.path);
+                    if (!thumb) return "";
+                    return "file://" + thumb + "?v=" + Wallpapers.thumbnailVersion;
+                }
                 text: modelData?.name ?? ""
                 onClicked: {
                     Wallpapers.setWallpaper(modelData.path);

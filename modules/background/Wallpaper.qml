@@ -1,6 +1,7 @@
 pragma ComponentBehavior: Bound
 
 import QtQuick
+import QtMultimedia
 import Caelestia.Config
 import qs.components
 import qs.components.filedialog
@@ -11,28 +12,38 @@ import qs.utils
 Item {
     id: root
 
+    // Currently visible wallpaper. When `source` changes, the previous media
+    // is destroyed once the new one signals ready, so the old stays visible
+    // until the new fades in. Mirrors the upstream caelestia engine: simple
+    // one-item-at-a-time replacement, no A/B preloading.
+    property var current
+
     property string source: Wallpapers.current
-    property CachingImage current
-    property bool completed
+    property bool completed: false
+
+    function _createMedia(path: string): var {
+        const ft = Wallpapers.getFileType(path);
+        if (ft === "gif") return gifMedia.createObject(root, { sourceFile: path });
+        if (ft === "video") return videoMedia.createObject(root, { sourceFile: path });
+        return imageMedia.createObject(root, { sourceFile: path });
+    }
 
     onSourceChanged: {
-        if (!source)
-            current = null;
-        else
-            current = imgComp.createObject(this, {
-                path: source
-            });
+        if (!source) {
+            if (current) { current.destroy(); current = null; }
+        } else {
+            current = _createMedia(source);
+        }
     }
 
     Component.onCompleted: {
-        if (source)
-            Qt.callLater(() => {
-                current = imgComp.createObject(this, {
-                    path: source
-                });
-                completed = true;
-            });
+        Qt.callLater(() => {
+            if (source) current = _createMedia(source);
+            completed = true;
+        });
     }
+
+    // ── Placeholder when no wallpaper is set ────────────────────────────
 
     Loader {
         asynchronous: true
@@ -100,34 +111,156 @@ Item {
         }
     }
 
-    Component {
-        id: imgComp
+    // ── Media components ───────────────────────────────────────────────
+    //
+    // Each wrapper carries the source path, paints itself full-bleed via an
+    // inner Image/AnimatedImage/Video, and exposes two things to the engine:
+    //
+    //   1. `ready` flips to true on the first frame being decodable / playable
+    //   2. An `Anim on opacity` ramp from 0 → 1 once that happens
+    //
+    // The Timer at the bottom watches `root.current` and self-destructs once
+    // it's no longer the active media and the new one is ready, so the old
+    // layer stays visible for the full duration of the new layer's ramp.
 
-        CachingImage {
-            id: img
+    Component {
+        id: imageMedia
+
+        Item {
+            id: wrapItem
 
             anchors.fill: parent
-
+            property string sourceFile: ""
+            property bool ready: false
             opacity: 0
 
-            onStatusChanged: {
-                if (status === Image.Ready)
-                    anim.start();
+            CachingImage {
+                anchors.fill: parent
+                path: wrapItem.sourceFile
+                fillMode: Image.PreserveAspectCrop
+                asynchronous: true
+                smooth: true
+
+                onStatusChanged: {
+                    if (status === Image.Ready && !wrapItem.ready) {
+                        wrapItem.ready = true;
+                        anim.restart();
+                    }
+                }
             }
 
             Anim on opacity {
                 id: anim
 
-                type: Anim.SlowEffects
+                type: Anim.DefaultEffects
                 running: false
                 from: 0
                 to: 1
             }
 
             Timer {
-                running: root.current !== img && root.current?.status === Image.Ready
-                interval: anim.duration
-                onTriggered: img.destroy()
+                running: root.current !== wrapItem && root.current?.ready === true
+                interval: anim.duration + 50
+                onTriggered: wrapItem.destroy()
+            }
+        }
+    }
+
+    Component {
+        id: gifMedia
+
+        Item {
+            id: wrapItem
+
+            anchors.fill: parent
+            property string sourceFile: ""
+            property bool ready: false
+            opacity: 0
+
+            AnimatedImage {
+                anchors.fill: parent
+                fillMode: Image.PreserveAspectCrop
+                playing: true
+                asynchronous: true
+                source: wrapItem.sourceFile ? "file://" + wrapItem.sourceFile : ""
+
+                onStatusChanged: {
+                    if (status === AnimatedImage.Ready && !wrapItem.ready) {
+                        wrapItem.ready = true;
+                        anim.restart();
+                    }
+                }
+            }
+
+            Anim on opacity {
+                id: anim
+
+                type: Anim.DefaultEffects
+                running: false
+                from: 0
+                to: 1
+            }
+
+            Timer {
+                running: root.current !== wrapItem && root.current?.ready === true
+                interval: anim.duration + 50
+                onTriggered: wrapItem.destroy()
+            }
+        }
+    }
+
+    Component {
+        id: videoMedia
+
+        Item {
+            id: wrapItem
+
+            anchors.fill: parent
+            property string sourceFile: ""
+            property bool ready: false
+            opacity: 0
+
+            Video {
+                id: video
+
+                anchors.fill: parent
+                loops: MediaPlayer.Infinite
+                autoPlay: true
+                muted: true
+                fillMode: VideoOutput.PreserveAspectCrop
+                source: wrapItem.sourceFile ? "file://" + wrapItem.sourceFile : ""
+
+                onPlaybackStateChanged: {
+                    if (wrapItem.ready) return;
+                    if (playbackState === MediaPlayer.PlayingState
+                        || playbackState === MediaPlayer.Loaded) {
+                        wrapItem.ready = true;
+                        anim.restart();
+                    }
+                }
+
+                onErrorOccurred: (error, errorString) => {
+                    console.warn("Wallpaper video error:", errorString);
+                    if (!wrapItem.ready) {
+                        wrapItem.ready = true;
+                        anim.restart();
+                    }
+                }
+            }
+
+            Anim on opacity {
+                id: anim
+
+                type: Anim.DefaultEffects
+                running: false
+                from: 0
+                to: 1
+            }
+
+            Timer {
+                running: root.current !== wrapItem && root.current?.ready === true
+                interval: anim.duration + 50
+                onTriggered: wrapItem.destroy()
             }
         }
     }

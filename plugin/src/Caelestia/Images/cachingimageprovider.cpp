@@ -36,6 +36,17 @@ public:
     }
 
 private:
+    // Try to load an image from disk, set m_error / return false on miss.
+    bool loadInto(const QString& path, QImage& out) {
+        if (!QFileInfo::exists(path))
+            return false;
+        QImage img(path);
+        if (img.isNull())
+            return false;
+        out = img;
+        return true;
+    }
+
     void process() {
         QString path = QString::fromUtf8(m_id.toUtf8().percentDecoded());
         if (!path.startsWith(QLatin1Char('/')))
@@ -51,52 +62,70 @@ private:
         const bool needsW = size.width() <= 0;
         const bool needsH = size.height() <= 0;
 
-        // If both dimensions are missing, return the original directly
+        // If both dimensions are missing, the cache key is identity-only —
+        // decode the source directly.
         if (needsW && needsH) {
             qCDebug(lcCProv).noquote() << "Given source size is invalid, returning original:" << path;
-            m_image = QImage(path);
-            if (m_image.isNull()) {
+            if (!loadInto(path, m_image))
                 m_error = QStringLiteral("Failed to decode source: ") + path;
-                qCWarning(lcCProv).noquote() << m_error;
-            }
             return;
         }
 
-        // If one dimension is missing, derive it from the source aspect ratio
+        // If one dimension is missing, derive it from the source aspect ratio.
+        // For videos Qt's QImageReader can't decode, so probe via ffprobe-less
+        // means: try cached first, otherwise skip derived sizing.
         if (needsW || needsH) {
-            const QImageReader sourceReader(path);
-            const QSize sourceSize = sourceReader.size();
-            if (!sourceSize.isValid() || sourceSize.isEmpty()) {
-                m_error = QStringLiteral("Could not determine source size for: ") + path;
-                qCWarning(lcCProv).noquote() << m_error;
-                return;
-            }
-
-            if (needsW)
-                size.setWidth(qRound(size.height() * sourceSize.width() / static_cast<qreal>(sourceSize.height())));
-            else
-                size.setHeight(qRound(size.width() * sourceSize.height() / static_cast<qreal>(sourceSize.width())));
-        }
-
-        // Try to use cached image
-        const auto cachePath = ImageCacher::cachePathFor(path, size, m_fillMode);
-        if (!cachePath.isEmpty()) {
-            QImageReader cacheReader(cachePath);
-            if (cacheReader.canRead()) {
-                m_image = cacheReader.read();
-                if (!m_image.isNull())
+            if (ImageCacher::isVideoLike(path)) {
+                // Videos: keep the missing dimension at the requested value so
+                // ffmpeg scales cleanly; the cachePath stays stable.
+                if (needsW)
+                    size.setWidth(size.height() > 0 ? size.height() : 1);
+                else
+                    size.setHeight(size.width() > 0 ? size.width() : 1);
+            } else {
+                const QImageReader sourceReader(path);
+                const QSize sourceSize = sourceReader.size();
+                if (!sourceSize.isValid() || sourceSize.isEmpty()) {
+                    m_error = QStringLiteral("Could not determine source size for: ") + path;
+                    qCWarning(lcCProv).noquote() << m_error;
                     return;
+                }
+                if (needsW)
+                    size.setWidth(qRound(size.height() * sourceSize.width() / static_cast<qreal>(sourceSize.height())));
+                else
+                    size.setHeight(qRound(size.width() * sourceSize.height() / static_cast<qreal>(sourceSize.width())));
             }
         }
 
-        // Schedule cache job (this call will return the original image, but later ones will use cache)
+        const QString cachePath = ImageCacher::cachePathFor(path, size, m_fillMode);
+        if (cachePath.isEmpty()) {
+            m_error = QStringLiteral("Failed to compute cache path for: ") + path;
+            return;
+        }
+
+        // Fast path: cache already has a valid PNG.
+        if (loadInto(cachePath, m_image))
+            return;
+
+        // For video/large-image sources we can't defer: QImage("video.mp4")
+        // returns null, so the Image would receive nothing in this response.
+        // Run the job synchronously here (we're already on a worker thread,
+        // so blocking this thread is fine and only delays the first paint).
+        if (ImageCacher::isVideoLike(path)) {
+            ImageCacher::runJob(path, cachePath, size, m_fillMode);
+            if (loadInto(cachePath, m_image))
+                return;
+            m_error = QStringLiteral("Failed to render video frame for: ") + path;
+            qCWarning(lcCProv).noquote() << m_error;
+            return;
+        }
+
+        // Image path: kick off background caching for next time, but reply
+        // now with the original so the user doesn't see an empty box.
         ImageCacher::instance()->schedule(path, cachePath, size, m_fillMode);
 
-        m_image = QImage(path);
-        if (m_image.isNull()) {
+        if (!loadInto(path, m_image))
             m_error = QStringLiteral("Failed to decode source: ") + path;
-            qCWarning(lcCProv).noquote() << m_error;
-        }
     }
 
     QString m_id;
