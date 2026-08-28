@@ -7,18 +7,17 @@ import qs.modules.nexus.common
 PageBase {
     id: root
 
-    // Notification fullscreen visibility, mapped to GlobalConfig.notifs.fullscreen
+    // Notification fullscreen visibility, ordered to match config::NotifsFullscreen (On, Off)
     readonly property list<MenuItem> notifFullscreenItems: [
-        MenuItem {
-            text: qsTr("Off")
-            icon: "notifications_off"
-        },
         MenuItem {
             text: qsTr("On")
             icon: "notifications"
+        },
+        MenuItem {
+            text: qsTr("Off")
+            icon: "notifications_off"
         }
     ]
-    readonly property list<string> notifFullscreenValues: ["off", "on"]
 
     // Toast fullscreen visibility, mapped to GlobalConfig.utilities.toasts.fullscreen
     readonly property list<MenuItem> toastFullscreenItems: [
@@ -57,8 +56,8 @@ PageBase {
             label: qsTr("Show in fullscreen")
             subtext: qsTr("Whether notifications appear over fullscreen apps")
             menuItems: root.notifFullscreenItems
-            active: root.notifFullscreenItems[Math.max(0, root.notifFullscreenValues.indexOf(GlobalConfig.notifs.fullscreen))]
-            onSelected: item => GlobalConfig.notifs.fullscreen = root.notifFullscreenValues[root.notifFullscreenItems.indexOf(item)]
+            active: root.notifFullscreenItems[GlobalConfig.notifs.fullscreen]
+            onSelected: item => GlobalConfig.notifs.fullscreen = root.notifFullscreenItems.indexOf(item)
         }
 
         ToggleRow {

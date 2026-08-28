@@ -21,6 +21,7 @@ ENUM(BarWorkspaceDisplay, Shapes, Text)
 ENUM(BarWorkspaceCapitalisation, Preserve, Upper, Lower)
 ENUM(LyricsBackend, Auto, Local, LRCLIB, NetEase)
 ENUM(GpuType, Auto, Nvidia, Generic, None)
+ENUM(NotifsFullscreen, On, Off)
 
 #undef ENUM
 

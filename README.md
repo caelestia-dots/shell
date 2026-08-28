@@ -705,7 +705,7 @@ For example, to automatically hide the bar on the monitor named `DP-1`:
     },
     "notifs": {
         "expire": true,
-        "fullscreen": "on",
+        "fullscreen": "On",
         "defaultExpireTimeout": 5000,
         "fullscreenExpireTimeout": 2000,
         "clearThreshold": 0.3,
