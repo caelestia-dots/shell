@@ -15,6 +15,7 @@ import qs.services
 StyledRect {
     id: root
 
+    readonly property bool sessionControlsShown: GlobalConfig.lock.enableSessionControls && hover.hovered
     readonly property real fontScale: {
         const diff = width / 391 - 1; // 391 is the width at 1080 height screen
         return 1 + Math.pow(Math.abs(diff), 0.8) * Math.sign(diff);
@@ -38,6 +39,8 @@ StyledRect {
 
     HoverHandler {
         id: hover
+
+        enabled: GlobalConfig.lock.enableSessionControls
     }
 
     Item {
@@ -51,7 +54,7 @@ StyledRect {
             Translate {
                 id: resourcesTranslate
 
-                y: hover.hovered ? root.height : 0
+                y: root.sessionControlsShown ? root.height : 0
 
                 Behavior on y {
                     Anim {}
@@ -61,7 +64,7 @@ StyledRect {
             Translate {
                 id: buttonsTranslate
 
-                y: hover.hovered ? 0 : -root.height
+                y: root.sessionControlsShown ? 0 : -root.height
 
                 Behavior on y {
                     Anim {}
@@ -76,7 +79,7 @@ StyledRect {
                 spacing: Tokens.spacing.large
 
                 transform: resourcesTranslate
-                opacity: hover.hovered ? 0 : 1
+                opacity: root.sessionControlsShown ? 0 : 1
 
                 Behavior on opacity {
                     Anim {}
@@ -156,7 +159,7 @@ StyledRect {
                 spacing: Tokens.spacing.large
 
                 transform: buttonsTranslate
-                opacity: hover.hovered ? 1 : 0
+                opacity: root.sessionControlsShown ? 1 : 0
 
                 Behavior on opacity {
                     Anim {}
