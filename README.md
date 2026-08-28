@@ -89,6 +89,7 @@ Dependencies:
 -   `qt6-base`
 -   `qt6-declarative`
 -   `qt6-imageformats`
+-   [`qt6-m3shapes-git`](https://github.com/soramanew/m3shapes)
 -   [`swappy`](https://github.com/jtheoof/swappy)
 -   [`fish`](https://github.com/fish-shell/fish-shell)
 -   [`bash`](https://www.gnu.org/software/bash)
