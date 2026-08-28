@@ -12,6 +12,11 @@ import qs.services
 Item {
     id: root
 
+    // Lets the settings search treat this like any other row: the anchor it
+    // looks for and the highlight it flashes both live on the button that's
+    // actually drawn, not on this wrapper.
+    property alias settingAnchor: openButton.settingAnchor
+
     required property Item rootParent
     required property string icon
     required property string label
@@ -28,6 +33,10 @@ Item {
 
     signal accepted
     signal cancelled
+
+    function flashHighlight(): void {
+        openButton.flashHighlight();
+    }
 
     function reparentWrapper(): void {
         const newParent = open ? rootParent : root;
