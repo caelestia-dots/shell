@@ -6,7 +6,7 @@ import QtQuick
 import Quickshell
 import Caelestia
 import Caelestia.Config
-import qs.utils // qmllint disable
+import qs.utils
 
 // Search service over the settings index. The index is built by the shell
 // itself on first use - the page QML sources are parsed at runtime (see
@@ -30,6 +30,10 @@ Singleton {
     // when the exact/prefix index lookup comes up short. fzf is the same matcher
     // the launcher uses, so typo and mid-word matching behave consistently.
     property var fzfFinder: null
+    // Declared here rather than inlined in loadIndex(): qmllint doesn't see
+    // identifiers used inside template literals in a function body, so
+    // referencing Paths only there had it report qs.utils as unused.
+    readonly property string cachePath: Paths.cache + "/settings-index.json"
 
     function query(search: string): list<QtObject> {
         const tokens = root.tokenize(search);
@@ -140,17 +144,23 @@ Singleton {
 
     function loadIndex(): var {
         const revision = CUtils.gitRevision();
-        const cachePath = `${Paths.cache}/settings-index.json`;
         const cached = CUtils.readTextFile(cachePath);
         if (cached) {
             try {
                 const parsed = JSON.parse(cached);
-                if (parsed.version === 3 && revision && parsed.revision === revision)
+                if (parsed.version === 3 && revision && parsed.revision === revision && parsed.locale === Qt.locale().name)
                     return parsed;
             } catch (e) {}
         }
-        const data = SettingsIndexer.buildIndex(`${Quickshell.shellDir}/modules/nexus`, p => CUtils.readTextFile(p), (d, s) => CUtils.listFiles(d, s));
+        // qsTranslate returns the source string untouched while no
+        // translations are loaded, so this is a no-op today and starts
+        // working by itself once .ts/.qm files ship (see #1006). It runs at
+        // build time because the search index is built from these strings -
+        // matching has to happen against what the user actually reads.
+        const data = SettingsIndexer.buildIndex(`${Quickshell.shellDir}/modules/nexus`, p => CUtils.readTextFile(p), (d, s) => CUtils.listFiles(d, s), (ctx, text) => qsTranslate(ctx, text));
         data.revision = revision;
+        // Cached strings are translated, so a language change has to rebuild.
+        data.locale = Qt.locale().name;
         CUtils.writeTextFile(cachePath, JSON.stringify(data));
         console.log(`SettingsSearcher: indexed ${data.entries.length} settings (revision ${revision || "unknown"})`);
         return data;
