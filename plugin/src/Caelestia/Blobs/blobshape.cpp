@@ -1,9 +1,10 @@
 #include "blobshape.hpp"
 
-#include <algorithm>
-#include <cmath>
 #include <qsggeometry.h>
 #include <qsgnode.h>
+
+#include <algorithm>
+#include <cmath>
 
 #include "blobgroup.hpp"
 #include "blobinvertedrect.hpp"

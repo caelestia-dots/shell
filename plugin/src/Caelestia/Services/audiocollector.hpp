@@ -1,10 +1,12 @@
 #pragma once
 
-#include <pipewire/pipewire.h>
-#include <spa/param/audio/format-utils.h>
-#include <atomic>
 #include <qmutex.h>
 #include <qqmlintegration.h>
+
+#include <pipewire/pipewire.h>
+#include <spa/param/audio/format-utils.h>
+
+#include <atomic>
 #include <stop_token>
 #include <thread>
 #include <vector>

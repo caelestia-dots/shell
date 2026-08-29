@@ -1,7 +1,8 @@
 #pragma once
 
-#include <aubio/aubio.h>
 #include <qqmlintegration.h>
+
+#include <aubio/aubio.h>
 
 #include "audioprovider.hpp"
 

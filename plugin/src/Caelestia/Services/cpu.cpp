@@ -1,8 +1,9 @@
 #include "cpu.hpp"
 
-#include <cmath>
 #include <qfile.h>
 #include <qregularexpression.h>
+
+#include <cmath>
 
 #include "sensorslib.hpp"
 
