@@ -1,6 +1,8 @@
 #pragma once
 
+#include <qjsengine.h>
 #include <qobject.h>
+#include <qqmlengine.h>
 #include <qqmlintegration.h>
 #include <qqmllist.h>
 #include <qset.h>

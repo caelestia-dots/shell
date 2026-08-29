@@ -1,12 +1,13 @@
 #pragma once
 
-#include "diskinfo.hpp"
-#include "tickingservice.hpp"
-
 #include <qbytearrayview.h>
+#include <qpointer.h>
 #include <qqmlintegration.h>
 #include <qqmllist.h>
 #include <qvariant.h>
+
+#include "diskinfo.hpp"
+#include "tickingservice.hpp"
 
 namespace caelestia::services {
 

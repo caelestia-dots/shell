@@ -6,6 +6,7 @@
 #include <qjsonarray.h>
 #include <qjsondocument.h>
 #include <qjsonobject.h>
+#include <qloggingcategory.h>
 #include <qsavefile.h>
 
 namespace caelestia::settings {
