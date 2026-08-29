@@ -123,7 +123,7 @@ QSGNode* BlobInvertedRect::updatePaintNode(QSGNode* oldNode, UpdatePaintNodeData
     memcpy(material->m_invertedOuter, m_cachedInvertedOuter, sizeof(m_cachedInvertedOuter));
     memcpy(material->m_invertedInner, m_cachedInvertedInner, sizeof(m_cachedInvertedInner));
 
-    const int count = static_cast<int>(qMin(m_cachedRects.size(), qsizetype(16)));
+    const int count = static_cast<int>(qMin(m_cachedRects.size(), static_cast<qsizetype>(16)));
     material->m_rectCount = count;
     for (int i = 0; i < count; ++i)
         material->m_rects[i] = m_cachedRects[i];

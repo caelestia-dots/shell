@@ -88,17 +88,15 @@ void CircularIndicatorManager::setProgress(qreal progress) {
 qreal CircularIndicatorManager::duration() const {
     if (m_type == IndeterminateAnimationType::Advance) {
         return advance::TOTAL_DURATION_IN_MS;
-    } else {
-        return retreat::TOTAL_DURATION_IN_MS;
     }
+    return retreat::TOTAL_DURATION_IN_MS;
 }
 
 qreal CircularIndicatorManager::completeEndDuration() const {
     if (m_type == IndeterminateAnimationType::Advance) {
         return advance::DURATION_TO_COMPLETE_END_IN_MS;
-    } else {
-        return retreat::DURATION_TO_COMPLETE_END_IN_MS;
     }
+    return retreat::DURATION_TO_COMPLETE_END_IN_MS;
 }
 
 CircularIndicatorManager::IndeterminateAnimationType CircularIndicatorManager::indeterminateAnimationType() const {

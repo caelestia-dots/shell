@@ -61,7 +61,7 @@ private:
 };
 
 template <typename Container> class ListCodec : public ValueCodec {
-    using Value = typename Container::value_type;
+    using Value = Container::value_type;
 
 public:
     explicit ListCodec(const QMetaType& type, const ValueCodec* elementCodec);

@@ -6,6 +6,7 @@
 #include <array>
 #include <cmath>
 #include <cstdio>
+#include <utility>
 
 namespace {
 
@@ -107,10 +108,12 @@ void NetworkUsage::tick() {
         }
 
         std::array<unsigned long long, 9> fields{};
+        // NOLINTBEGIN(readability-container-data-pointer)
         const int parsed = std::sscanf(line.constData() + splitIdx + 1, "%llu %llu %llu %llu %llu %llu %llu %llu %llu",
             &fields[0], &fields[1], &fields[2], &fields[3], &fields[4], &fields[5], &fields[6], &fields[7], &fields[8]);
+        // NOLINTEND(readability-container-data-pointer)
 
-        if (parsed != static_cast<int>(fields.size())) {
+        if (std::cmp_not_equal(parsed, fields.size())) {
             continue;
         }
 

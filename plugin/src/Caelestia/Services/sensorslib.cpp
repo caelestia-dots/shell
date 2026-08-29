@@ -9,6 +9,7 @@
 #include <cstdlib>
 #include <cstring>
 #include <mutex>
+#include <utility>
 
 Q_LOGGING_CATEGORY(lcSensorsLib, "caelestia.services.sensorslib", QtInfoMsg)
 
@@ -61,7 +62,7 @@ bool labelEquals(const QByteArray& label, const char* literal) {
 
 bool labelStartsWith(const QByteArray& label, const char* prefix) {
     const auto n = std::strlen(prefix);
-    return static_cast<size_t>(label.size()) >= n && std::memcmp(label.constData(), prefix, n) == 0;
+    return std::cmp_greater_equal(label.size(), n) && std::memcmp(label.constData(), prefix, n) == 0;
 }
 
 } // namespace

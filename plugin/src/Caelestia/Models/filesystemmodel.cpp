@@ -381,7 +381,7 @@ void FileSystemModel::applyChanges(const QSet<QString>& removedPaths, const QSet
             removedIndices << i;
         }
     }
-    std::sort(removedIndices.begin(), removedIndices.end(), std::greater<int>());
+    std::sort(removedIndices.begin(), removedIndices.end(), std::greater<>());
 
     // Batch remove old entries
     int start = -1;
