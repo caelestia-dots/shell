@@ -7,26 +7,25 @@
 #include "settings/rootnode.hpp"
 #include "common.hpp"
 
-namespace caelestia::config {
+#include "appearanceconfig.hpp"
+#include "backgroundconfig.hpp"
+#include "barconfig.hpp"
+#include "borderconfig.hpp"
+#include "dashboardconfig.hpp"
+#include "generalconfig.hpp"
+#include "launcherconfig.hpp"
+#include "lockconfig.hpp"
+#include "nexusconfig.hpp"
+#include "notifsconfig.hpp"
+#include "osdconfig.hpp"
+#include "serviceconfig.hpp"
+#include "sessionconfig.hpp"
+#include "sidebarconfig.hpp"
+#include "tokens.hpp"
+#include "userpaths.hpp"
+#include "utilitiesconfig.hpp"
 
-class AppearanceConfig;
-class AppearanceTokens;
-class BackgroundConfig;
-class BarConfig;
-class BorderConfig;
-class DashboardConfig;
-class GeneralConfig;
-class LauncherConfig;
-class LockConfig;
-class NexusConfig;
-class NotifsConfig;
-class OsdConfig;
-class ServiceConfig;
-class SessionConfig;
-class SidebarConfig;
-class SizeTokens;
-class UserPaths;
-class UtilitiesConfig;
+namespace caelestia::config {
 
 Q_MOC_INCLUDE("appearanceconfig.hpp")
 Q_MOC_INCLUDE("backgroundconfig.hpp")
