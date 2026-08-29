@@ -1,10 +1,10 @@
 #pragma once
 
-#include "service.hpp"
-
 #include <qfilesystemwatcher.h>
 #include <qqmlintegration.h>
 #include <qstring.h>
+
+#include "service.hpp"
 
 namespace caelestia::services {
 
