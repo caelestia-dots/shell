@@ -7,9 +7,8 @@ on:
   pull_request:
 
 jobs:
-  lint:
+  lint-qml:
     runs-on: ubuntu-latest
-
     container:
       image: ghcr.io/${{ github.repository_owner }}/shell-arch-env:latest
 
@@ -43,3 +42,22 @@ jobs:
           # Lint
           set -l lint_out (/usr/lib/qt6/bin/qmllint --import disable $args $qml_files 2>&1 | tee /dev/stderr)
           test -z "$lint_out" || exit 1
+
+  lint-cpp:
+    runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/${{ github.repository_owner }}/shell-arch-env:latest
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Configure
+        run: |
+          cmake -B build -G Ninja -DCMAKE_CXX_COMPILER=clang++ \
+            -DCMAKE_DISABLE_PRECOMPILE_HEADERS=ON -DVERSION= -DGIT_REVISION=
+
+      - name: Lint C++
+        run: |
+          clang-tidy --version
+          run-clang-tidy -p build -quiet -j "$(nproc)" -warnings-as-errors='*' \
+            -source-filter='^(?!build/).*\.cpp$'
