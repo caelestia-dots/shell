@@ -105,8 +105,7 @@ PageBase {
                 values: {
                     const isAddress = d => !d?.name || d.name === d.address?.replace(/:/g, "-");
                     return Bluetooth.devices.values // qmllint disable unresolved-type
-                        .filter(d => !d.bonded && (root.showAll || !isAddress(d) || d.pairing))
-                        .sort((a, b) => (b.pairing - a.pairing) || a.name.localeCompare(b.name));
+                    .filter(d => !d.bonded && (root.showAll || !isAddress(d) || d.pairing)).sort((a, b) => (b.pairing - a.pairing) || a.name.localeCompare(b.name));
                 }
             }
 
