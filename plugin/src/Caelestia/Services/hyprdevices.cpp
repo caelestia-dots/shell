@@ -3,6 +3,7 @@
 #include <qjsonarray.h>
 
 #include "../Config/rootnodes.hpp"
+#include "../Config/utilitiesconfig.hpp"
 #include "../toaster.hpp"
 
 namespace caelestia::services::hypr {
