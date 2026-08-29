@@ -43,7 +43,9 @@ static void setFrameIndices(quint16* idx) {
     idx[23] = 7;
 }
 
-QSGNode* BlobInvertedRect::updatePaintNode(QSGNode* oldNode, UpdatePaintNodeData*) {
+QSGNode* BlobInvertedRect::updatePaintNode(QSGNode* oldNode, UpdatePaintNodeData* data) {
+    Q_UNUSED(data);
+
     if (!m_group) {
         delete oldNode;
         return nullptr;

@@ -101,7 +101,10 @@ Toaster* Toaster::instance() {
     return &instance;
 }
 
-Toaster* Toaster::create(QQmlEngine*, QJSEngine*) {
+Toaster* Toaster::create(QQmlEngine* engine, QJSEngine* jsEngine) {
+    Q_UNUSED(engine);
+    Q_UNUSED(jsEngine);
+
     QQmlEngine::setObjectOwnership(instance(), QQmlEngine::CppOwnership);
     return instance();
 }

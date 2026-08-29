@@ -22,7 +22,7 @@ struct BlobRectData {
 class BlobMaterial : public QSGMaterial {
 public:
     QSGMaterialType* type() const override;
-    QSGMaterialShader* createShader(QSGRendererInterface::RenderMode) const override;
+    QSGMaterialShader* createShader(QSGRendererInterface::RenderMode mode) const override;
     int compare(const QSGMaterial* other) const override;
 
     float m_paddedX = 0;

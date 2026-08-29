@@ -354,7 +354,9 @@ void BlobShape::updatePolish() {
     }
 }
 
-QSGNode* BlobShape::updatePaintNode(QSGNode* oldNode, UpdatePaintNodeData*) {
+QSGNode* BlobShape::updatePaintNode(QSGNode* oldNode, UpdatePaintNodeData* data) {
+    Q_UNUSED(data);
+
     if (!m_group) {
         delete oldNode;
         return nullptr;

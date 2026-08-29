@@ -68,7 +68,7 @@ class Toaster : public QObject {
 
 public:
     static Toaster* instance();
-    static Toaster* create(QQmlEngine*, QJSEngine*);
+    static Toaster* create(QQmlEngine* engine, QJSEngine* jsEngine);
 
     [[nodiscard]] QQmlListProperty<Toast> toasts();
 

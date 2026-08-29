@@ -10,7 +10,8 @@ QSGMaterialType* BlobMaterial::type() const {
     return &s_type;
 }
 
-QSGMaterialShader* BlobMaterial::createShader(QSGRendererInterface::RenderMode) const {
+QSGMaterialShader* BlobMaterial::createShader(QSGRendererInterface::RenderMode mode) const {
+    Q_UNUSED(mode);
     return new BlobMaterialShader;
 }
 
