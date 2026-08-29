@@ -11,8 +11,10 @@
 
 static float deformPadding(const QMatrix4x4& dm, float hw, float hh) {
     // Bounding box of the deformed shape: |M * corners|
-    const float dm00 = dm(0, 0), dm01 = dm(0, 1);
-    const float dm10 = dm(1, 0), dm11 = dm(1, 1);
+    const float dm00 = dm(0, 0);
+    const float dm01 = dm(0, 1);
+    const float dm10 = dm(1, 0);
+    const float dm11 = dm(1, 1);
     const float boundX = std::abs(dm00) * hw + std::abs(dm01) * hh;
     const float boundY = std::abs(dm10) * hw + std::abs(dm11) * hh;
     const float extraX = std::max(boundX - hw, 0.0f) + std::abs(dm(0, 3));
@@ -197,8 +199,10 @@ void BlobShape::updatePolish() {
                 m_cachedMyIndex = static_cast<int>(m_cachedRects.size());
 
             const QMatrix4x4& dm = other->m_deformMatrix;
-            const float a = dm(0, 0), b = dm(1, 0);
-            const float c = dm(0, 1), d = dm(1, 1);
+            const float a = dm(0, 0);
+            const float b = dm(1, 0);
+            const float c = dm(0, 1);
+            const float d = dm(1, 1);
 
             BlobRectData r;
             r.cx = static_cast<float>(otherScene.x() + other->width() / 2.0);
@@ -307,12 +311,19 @@ void BlobShape::updatePolish() {
         auto& ri = m_cachedRects[i];
         const int riExcludeMask = ri.excludeMask;
         BlobShape* const si = rectShapes[i];
-        float fTr = 1.0f, fBr = 1.0f, fBl = 1.0f, fTl = 1.0f;
+        float fTr = 1.0f;
+        float fBr = 1.0f;
+        float fBl = 1.0f;
+        float fTl = 1.0f;
 
-        const float cTrX = ri.cx + ri.hw, cTrY = ri.cy - ri.hh;
-        const float cBrX = ri.cx + ri.hw, cBrY = ri.cy + ri.hh;
-        const float cBlX = ri.cx - ri.hw, cBlY = ri.cy + ri.hh;
-        const float cTlX = ri.cx - ri.hw, cTlY = ri.cy - ri.hh;
+        const float cTrX = ri.cx + ri.hw;
+        const float cTrY = ri.cy - ri.hh;
+        const float cBrX = ri.cx + ri.hw;
+        const float cBrY = ri.cy + ri.hh;
+        const float cBlX = ri.cx - ri.hw;
+        const float cBlY = ri.cy + ri.hh;
+        const float cTlX = ri.cx - ri.hw;
+        const float cTlY = ri.cy - ri.hh;
 
         for (qsizetype j = 0; cornerFill && j < rectCount; ++j) {
             if (j == i)

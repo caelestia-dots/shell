@@ -54,7 +54,7 @@ void Requests::get(const QUrl& url, QJSValue onSuccess, QJSValue onError, QJSVal
         }
     }
 
-    auto reply = m_manager->get(request);
+    auto* reply = m_manager->get(request);
 
     QObject::connect(reply, &QNetworkReply::finished, this, [this, reply, onSuccess, onError]() {
         const QString body = QString::fromUtf8(reply->readAll());

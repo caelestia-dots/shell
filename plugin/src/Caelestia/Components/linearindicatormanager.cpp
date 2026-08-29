@@ -58,7 +58,7 @@ LinearIndicatorManager::LinearIndicatorManager(QObject* parent)
           new LinearIndicatorSegment(m_gap, this),
           new LinearIndicatorSegment(m_gap, this),
       }) {
-    for (auto el : m_activeIndicators)
+    for (auto* el : m_activeIndicators)
         QObject::connect(this, &LinearIndicatorManager::updated, el, &LinearIndicatorSegment::updated);
 }
 
@@ -80,7 +80,7 @@ int LinearIndicatorManager::gap() const {
 
 void LinearIndicatorManager::setGap(int gap) {
     m_gap = gap;
-    for (auto el : m_activeIndicators)
+    for (auto* el : m_activeIndicators)
         el->m_gapSize = m_gap;
     update(m_progress);
 }
