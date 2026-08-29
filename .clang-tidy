@@ -12,6 +12,7 @@ Checks: >
   -misc-non-private-member-variables-in-classes,
   -misc-no-recursion,
   -modernize-avoid-c-arrays,
+  -modernize-use-default-member-init,
   -modernize-use-trailing-return-type,
   -readability-braces-around-statements,
   -readability-identifier-length,
@@ -59,6 +60,5 @@ CheckOptions:
   readability-identifier-naming.TypeAliasCase: CamelCase
   readability-identifier-naming.TemplateParameterCase: CamelCase
   readability-implicit-bool-conversion.AllowPointerConditions: true
-  modernize-use-default-member-init.UseAssignment: true
   # Ban Q* (e.g. Qt module includes or Qt module prefixes)
   portability-restrict-system-includes.Includes: '*,-Q*'
