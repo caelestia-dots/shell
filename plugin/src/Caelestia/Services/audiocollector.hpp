@@ -62,7 +62,7 @@ public:
 
 private:
     explicit AudioCollector(QObject* parent = nullptr);
-    ~AudioCollector();
+    ~AudioCollector() override;
 
     std::jthread m_thread;
     std::vector<float> m_buffer1;
