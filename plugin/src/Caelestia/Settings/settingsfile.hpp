@@ -23,7 +23,7 @@ public:
     [[nodiscard]] std::optional<QJsonValue> read() const;
     void write(const QJsonValue& json);
 
-    LoadResult load(bool emitErrors = true);
+    LoadResult load(bool reportErrors = true);
 
 signals:
     void changed(); // Data changed, not file watcher event

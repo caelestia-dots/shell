@@ -15,7 +15,7 @@ public:
     explicit Requests(QObject* parent = nullptr);
 
     Q_INVOKABLE void get(
-        const QUrl& url, QJSValue callback, QJSValue onError = QJSValue(), QJSValue headers = QJSValue()) const;
+        const QUrl& url, QJSValue onSuccess, QJSValue onError = QJSValue(), QJSValue headers = QJSValue()) const;
     Q_INVOKABLE void resetCookies() const;
 
 private:

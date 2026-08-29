@@ -320,8 +320,8 @@ bool ListNode::recordWrite(const QString& key, bool changed) {
     return notify;
 }
 
-QString ListNode::keyOf(const Node* node) const {
-    return QString::number(m_elements.indexOf(const_cast<Node*>(node)));
+QString ListNode::keyOf(const Node* child) const {
+    return QString::number(m_elements.indexOf(const_cast<Node*>(child)));
 }
 
 Node* ListNode::elementAt(qsizetype index) const {
