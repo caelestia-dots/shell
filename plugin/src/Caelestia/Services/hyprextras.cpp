@@ -1,11 +1,12 @@
 #include "hyprextras.hpp"
-#include "hyprdevices.hpp"
 
 #include <qdir.h>
 #include <qjsonarray.h>
 #include <qlocalsocket.h>
 #include <qloggingcategory.h>
 #include <qvariant.h>
+
+#include "hyprdevices.hpp"
 
 Q_LOGGING_CATEGORY(lcHypr, "caelestia.services.hypr", QtInfoMsg)
 

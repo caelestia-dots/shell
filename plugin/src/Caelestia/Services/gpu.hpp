@@ -1,11 +1,11 @@
 #pragma once
 
-#include "../Config/enums.hpp"
-#include "tickingservice.hpp"
-
 #include <qprocess.h>
 #include <qqmlintegration.h>
 #include <qstringlist.h>
+
+#include "../Config/enums.hpp"
+#include "tickingservice.hpp"
 
 namespace caelestia::services {
 

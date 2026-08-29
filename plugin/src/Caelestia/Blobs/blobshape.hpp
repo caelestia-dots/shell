@@ -1,10 +1,10 @@
 #pragma once
 
-#include "blobmaterial.hpp"
-
 #include <qmatrix4x4.h>
 #include <qquickitem.h>
 #include <qvector.h>
+
+#include "blobmaterial.hpp"
 
 class BlobGroup;
 

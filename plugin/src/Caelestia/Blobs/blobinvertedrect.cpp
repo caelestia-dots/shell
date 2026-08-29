@@ -1,12 +1,12 @@
 #include "blobinvertedrect.hpp"
-#include "blobgroup.hpp"
-#include "blobmaterial.hpp"
-
-#include <qsggeometry.h>
-#include <qsgnode.h>
 
 #include <algorithm>
 #include <cstring>
+#include <qsggeometry.h>
+#include <qsgnode.h>
+
+#include "blobgroup.hpp"
+#include "blobmaterial.hpp"
 
 BlobInvertedRect::BlobInvertedRect(QQuickItem* parent)
     : BlobShape(parent) {}

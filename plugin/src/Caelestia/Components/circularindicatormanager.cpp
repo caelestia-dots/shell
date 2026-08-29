@@ -1,4 +1,5 @@
 #include "circularindicatormanager.hpp"
+
 #include <qeasingcurve.h>
 #include <qpoint.h>
 

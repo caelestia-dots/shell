@@ -1,10 +1,10 @@
 #include "cpu.hpp"
 
-#include "sensorslib.hpp"
-
 #include <cmath>
 #include <qfile.h>
 #include <qregularexpression.h>
+
+#include "sensorslib.hpp"
 
 namespace caelestia::services {
 

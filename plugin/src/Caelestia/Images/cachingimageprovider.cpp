@@ -1,13 +1,13 @@
 #include "cachingimageprovider.hpp"
 
-#include "imagecacher.hpp"
-
 #include <qfileinfo.h>
 #include <qimage.h>
 #include <qimagereader.h>
 #include <qloggingcategory.h>
 #include <qrunnable.h>
 #include <qthreadpool.h>
+
+#include "imagecacher.hpp"
 
 Q_LOGGING_CATEGORY(lcCProv, "caelestia.images.cacheprovider", QtInfoMsg)
 

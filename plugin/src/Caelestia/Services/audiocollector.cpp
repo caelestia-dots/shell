@@ -1,14 +1,15 @@
 #include "audiocollector.hpp"
 
-#include "service.hpp"
-#include <algorithm>
 #include <pipewire/pipewire.h>
-#include <qloggingcategory.h>
-#include <qmutex.h>
 #include <spa/param/audio/format-utils.h>
 #include <spa/param/latency-utils.h>
+#include <algorithm>
+#include <qloggingcategory.h>
+#include <qmutex.h>
 #include <stop_token>
 #include <vector>
+
+#include "service.hpp"
 
 Q_LOGGING_CATEGORY(lcAc, "caelestia.services.ac", QtInfoMsg)
 Q_LOGGING_CATEGORY(lcAcWorker, "caelestia.services.ac.worker", QtInfoMsg)

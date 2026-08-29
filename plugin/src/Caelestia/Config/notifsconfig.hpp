@@ -1,8 +1,8 @@
 #pragma once
 
+#include "settings/objectnode.hpp"
 #include "common.hpp"
 #include "enums.hpp"
-#include "settings/objectnode.hpp"
 
 namespace caelestia::config {
 

@@ -1,8 +1,8 @@
 #pragma once
 
-#include "blobshape.hpp"
-
 #include <qqmlengine.h>
+
+#include "blobshape.hpp"
 
 class BlobInvertedRect : public BlobShape {
     Q_OBJECT
