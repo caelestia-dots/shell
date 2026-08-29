@@ -1,11 +1,11 @@
 #include "sessionmanager.hpp"
 
-#include <QtDBus/qdbusconnection.h>
-#include <QtDBus/qdbuserror.h>
-#include <QtDBus/qdbusmessage.h>
-#include <QtDBus/qdbuspendingcall.h>
-#include <QtDBus/qdbuspendingreply.h>
-#include <QtDBus/qdbusreply.h>
+#include <qdbusconnection.h>
+#include <qdbuserror.h>
+#include <qdbusmessage.h>
+#include <qdbuspendingcall.h>
+#include <qdbuspendingreply.h>
+#include <qdbusreply.h>
 #include <qloggingcategory.h>
 
 #include "core/toaster.hpp"

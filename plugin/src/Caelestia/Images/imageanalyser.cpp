@@ -1,11 +1,11 @@
 #include "imageanalyser.hpp"
 
-#include <QtConcurrent/qtconcurrentrun.h>
-#include <QtQuick/qquickitemgrabresult.h>
 #include <qfuturewatcher.h>
 #include <qimage.h>
 #include <qloggingcategory.h>
+#include <qquickitemgrabresult.h>
 #include <qquickwindow.h>
+#include <qtconcurrentrun.h>
 
 Q_LOGGING_CATEGORY(lcImageAnalyser, "caelestia.imageanalyser", QtInfoMsg)
 

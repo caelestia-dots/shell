@@ -1,15 +1,15 @@
 #include "cutils.hpp"
 
-#include <QtConcurrent/qtconcurrentrun.h>
-#include <QtQuick/qquickitemgrabresult.h>
-#include <QtQuick/qquickwindow.h>
 #include <qdir.h>
 #include <qfileinfo.h>
 #include <qfuturewatcher.h>
 #include <qloggingcategory.h>
 #include <qmetaobject.h>
 #include <qqmlengine.h>
+#include <qquickitemgrabresult.h>
+#include <qquickwindow.h>
 #include <qregularexpression.h>
+#include <qtconcurrentrun.h>
 
 #include "util/metaenum.hpp"
 

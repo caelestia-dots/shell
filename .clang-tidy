@@ -5,6 +5,7 @@ Checks: >
   misc-*,
   modernize-*,
   performance-*,
+  portability-restrict-system-includes,
   readability-*,
   -bugprone-easily-swappable-parameters,
   -bugprone-throwing-static-initialization,
@@ -57,3 +58,5 @@ CheckOptions:
   readability-identifier-naming.TemplateParameterCase: CamelCase
   readability-implicit-bool-conversion.AllowPointerConditions: true
   modernize-use-default-member-init.UseAssignment: true
+  # Ban Q* (e.g. Qt module includes or Qt module prefixes)
+  portability-restrict-system-includes.Includes: '*,-Q*'

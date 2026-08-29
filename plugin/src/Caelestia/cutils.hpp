@@ -1,9 +1,9 @@
 #pragma once
 
-#include <QtQuick/qquickitem.h>
 #include <qlist.h>
 #include <qobject.h>
 #include <qqmlintegration.h>
+#include <qquickitem.h>
 #include <qvariant.h>
 
 namespace caelestia {
