@@ -26,7 +26,7 @@ class UsageFmt : public QObject {
     QML_SINGLETON
 
 public:
-    Q_INVOKABLE [[nodiscard]] FormatResult formatKib(qreal kib, qreal total) const;
+    [[nodiscard]] Q_INVOKABLE FormatResult formatKib(qreal kib, qreal total) const;
 };
 
 } // namespace caelestia::services::usagefmt

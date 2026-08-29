@@ -23,9 +23,9 @@ class LinearIndicatorSegment : public QObject {
 public:
     explicit LinearIndicatorSegment(int gap, QObject* parent = nullptr);
 
-    qreal startFraction() const;
-    qreal endFraction() const;
-    int gapSize() const;
+    [[nodiscard]] qreal startFraction() const;
+    [[nodiscard]] qreal endFraction() const;
+    [[nodiscard]] int gapSize() const;
 
 signals:
     void updated();
@@ -55,16 +55,16 @@ class LinearIndicatorManager : public QObject {
 public:
     explicit LinearIndicatorManager(QObject* parent = nullptr);
 
-    QList<LinearIndicatorSegment*> activeIndicators() const;
+    [[nodiscard]] QList<LinearIndicatorSegment*> activeIndicators() const;
 
-    qreal progress() const;
-    qreal completeEndProgress() const;
+    [[nodiscard]] qreal progress() const;
+    [[nodiscard]] qreal completeEndProgress() const;
 
-    int gap() const;
+    [[nodiscard]] int gap() const;
     void setGap(int gap);
 
-    int duration() const;
-    int completeEndDuration() const;
+    [[nodiscard]] int duration() const;
+    [[nodiscard]] int completeEndDuration() const;
 
     void update(qreal progress);
     void updateCompleteEndProgress(qreal progress);

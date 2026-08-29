@@ -18,7 +18,7 @@ class Qalculator : public QObject {
 public:
     explicit Qalculator(QObject* parent = nullptr);
 
-    Q_INVOKABLE QString eval(const QString& expr, bool printExpr = true) const;
+    [[nodiscard]] Q_INVOKABLE QString eval(const QString& expr, bool printExpr = true) const;
     Q_INVOKABLE void evalAsync(const QString& expr);
 
     [[nodiscard]] QString result() const;

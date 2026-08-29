@@ -21,17 +21,17 @@ public:
     explicit BlobShape(QQuickItem* parent = nullptr);
     ~BlobShape() override = default;
 
-    BlobGroup* group() const { return m_group; }
+    [[nodiscard]] BlobGroup* group() const { return m_group; }
 
     void setGroup(BlobGroup* g);
 
-    qreal radius() const { return m_radius; }
+    [[nodiscard]] qreal radius() const { return m_radius; }
 
     void setRadius(qreal r);
 
-    QMatrix4x4 deformMatrix() const { return m_centeredDeformMatrix; }
+    [[nodiscard]] QMatrix4x4 deformMatrix() const { return m_centeredDeformMatrix; }
 
-    QMatrix4x4 rawDeformMatrix() const { return m_deformMatrix; }
+    [[nodiscard]] QMatrix4x4 rawDeformMatrix() const { return m_deformMatrix; }
 
 signals:
     void groupChanged();
@@ -45,7 +45,7 @@ protected:
     void updatePolish() override;
     QSGNode* updatePaintNode(QSGNode* oldNode, UpdatePaintNodeData* data) override;
 
-    virtual bool isInvertedRect() const { return false; }
+    [[nodiscard]] virtual bool isInvertedRect() const { return false; }
 
     virtual bool isExcluded(const BlobShape* /*other*/) const { return false; }
 
