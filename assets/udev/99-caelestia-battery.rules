@@ -1,0 +1,7 @@
+# Caelestia Shell: Allow non-root users in active session / wheel group to write to battery charge limit sysfs nodes
+ACTION=="add|change", SUBSYSTEM=="power_supply", ATTR{charge_control_end_threshold}!="", MODE="0664", GROUP="wheel"
+ACTION=="add|change", SUBSYSTEM=="platform", DRIVERS=="ideapad_acpi", ATTR{conservation_mode}!="", MODE="0664", GROUP="wheel"
+ACTION=="add|change", SUBSYSTEM=="platform", DRIVERS=="asus-nb-wmi", ATTR{charge_control_end_threshold}!="", MODE="0664", GROUP="wheel"
+ACTION=="add|change", SUBSYSTEM=="platform", DRIVERS=="huawei-wmi", ATTR{charge_control_thresholds}!="", MODE="0664", GROUP="wheel"
+ACTION=="add|change", SUBSYSTEM=="platform", DRIVERS=="lg-laptop", ATTR{battery_care_limit}!="", MODE="0664", GROUP="wheel"
+ACTION=="add|change", SUBSYSTEM=="platform", DRIVERS=="samsung", ATTR{battery_life_extender}!="", MODE="0664", GROUP="wheel"
