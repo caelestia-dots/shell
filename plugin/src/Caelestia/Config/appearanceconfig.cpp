@@ -1,7 +1,8 @@
 #include "appearanceconfig.hpp"
-#include "tokens.hpp"
 
 #include <qmetaobject.h>
+
+#include "tokens.hpp"
 
 namespace caelestia::config {
 
@@ -140,20 +141,6 @@ int AppearancePadding::extraLargeIncreased() const {
 
 int AppearancePadding::extraExtraLarge() const {
     return m_tokens ? static_cast<int>(m_tokens->extraExtraLarge() * m_scale) : 0;
-}
-
-// FontConfig
-
-void FontConfig::setDefaults(int size, int weight, const QVariantMap& vaxes) {
-    m_size = size;
-    m_weight = weight;
-    m_vaxes = vaxes;
-}
-
-// FontStyleConfig
-
-void FontStyleConfig::setDefaultFamily(const QString& family) {
-    m_family = family;
 }
 
 // AnimDurations

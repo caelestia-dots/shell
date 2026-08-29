@@ -7,8 +7,11 @@
 #include <qfileinfo.h>
 #include <qfuturewatcher.h>
 #include <qloggingcategory.h>
+#include <qmetaobject.h>
 #include <qqmlengine.h>
 #include <qregularexpression.h>
+
+#include "util/metaenum.hpp"
 
 Q_LOGGING_CATEGORY(lcCUtils, "caelestia.cutils", QtInfoMsg)
 
@@ -141,6 +144,37 @@ QString CUtils::toLocalFile(const QUrl& url) {
 
 qreal CUtils::clamp(qreal value, qreal min, qreal max) {
     return qBound(min, value, max);
+}
+
+QString CUtils::enumToString(QObject* target, const QString& property, const QVariant& value) {
+    if (!target) {
+        qCWarning(lcCUtils) << "enumToString: a target is required";
+        return {};
+    }
+
+    const auto* meta = target->metaObject();
+    const auto index = meta->indexOfProperty(property.toUtf8().constData());
+    if (index < 0) {
+        qCWarning(lcCUtils) << "enumToString:" << target << "has no property" << property;
+        return {};
+    }
+
+    const auto prop = meta->property(index);
+    const auto metaEnum = prop.isEnumType() ? prop.enumerator() : util::metaEnumFor(prop.metaType());
+    if (!metaEnum.isValid() || metaEnum.is64Bit()) {
+        qCWarning(lcCUtils) << "enumToString: property" << property << "of" << target << "is not a supported enum";
+        return {};
+    }
+
+    const auto val = value.isValid() ? value : prop.read(target);
+    const auto* key = util::enumKeyFor(metaEnum, val);
+    if (!key) {
+        qCWarning(lcCUtils, "enumToString: no enumerator of %s::%s has the value %lld", metaEnum.scope(),
+            metaEnum.name(), val.toLongLong());
+        return {};
+    }
+
+    return QString::fromUtf8(key);
 }
 
 namespace {

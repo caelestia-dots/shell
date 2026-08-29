@@ -3,6 +3,7 @@ qml_module(caelestia-images
     SOURCES
         cachingimageprovider.cpp
         imagecacher.cpp
+        imageanalyser.cpp
         iutils.cpp
     LIBRARIES
         Qt::Gui

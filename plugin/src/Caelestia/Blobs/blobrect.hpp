@@ -1,11 +1,11 @@
 #pragma once
 
-#include "blobshape.hpp"
-
 #include <qelapsedtimer.h>
 #include <qpointer.h>
 #include <qqmlengine.h>
 #include <qqmllist.h>
+
+#include "blobshape.hpp"
 
 class BlobRect : public BlobShape {
     Q_OBJECT

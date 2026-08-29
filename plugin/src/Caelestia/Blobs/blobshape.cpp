@@ -1,12 +1,13 @@
 #include "blobshape.hpp"
-#include "blobgroup.hpp"
-#include "blobinvertedrect.hpp"
 
 #include <qsggeometry.h>
 #include <qsgnode.h>
 
 #include <algorithm>
 #include <cmath>
+
+#include "blobgroup.hpp"
+#include "blobinvertedrect.hpp"
 
 static float deformPadding(const QMatrix4x4& dm, float hw, float hh) {
     // Bounding box of the deformed shape: |M * corners|
