@@ -60,4 +60,4 @@ jobs:
         run: |
           clang-tidy --version
           run-clang-tidy -p build -quiet -j "$(nproc)" -warnings-as-errors='*' \
-            -source-filter='^(?!build/).*\.cpp$'
+            -source-filter='^(?!.*/build/).*\.cpp$'
