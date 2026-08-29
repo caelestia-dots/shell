@@ -15,6 +15,7 @@ import qs.services
 StyledRect {
     id: root
 
+    readonly property bool sessionControlsShown: GlobalConfig.lock.enableSessionControls && hover.hovered
     readonly property real fontScale: {
         const diff = width / 391 - 1; // 391 is the width at 1080 height screen
         return 1 + Math.pow(Math.abs(diff), 0.8) * Math.sign(diff);
@@ -38,142 +39,148 @@ StyledRect {
 
     HoverHandler {
         id: hover
+
+        enabled: GlobalConfig.lock.enableSessionControls
     }
 
     Item {
         anchors.fill: parent
-        anchors.margins: Tokens.padding.large
         clip: true
 
-        Translate {
-            id: resourcesTranslate
+        Item {
+            anchors.fill: parent
+            anchors.margins: Tokens.padding.large
 
-            y: hover.hovered ? root.height : 0
+            Translate {
+                id: resourcesTranslate
 
-            Behavior on y {
-                Anim {}
-            }
-        }
+                y: root.sessionControlsShown ? root.height : 0
 
-        Translate {
-            id: buttonsTranslate
-
-            y: hover.hovered ? 0 : -root.height
-
-            Behavior on y {
-                Anim {}
-            }
-        }
-
-        RowLayout {
-            id: layout
-
-            anchors.left: parent.left
-            anchors.right: parent.right
-            spacing: Tokens.spacing.large
-
-            transform: resourcesTranslate
-            opacity: hover.hovered ? 0 : 1
-
-            Behavior on opacity {
-                Anim {}
-            }
-
-            Resource {
-                id: cpu
-
-                icon: "memory"
-                value: Math.round(Cpu.percentage * 100) + "%"
-                fillValue: Cpu.percentage
-                colour: Colours.palette.m3primary
-                shapeColour: Colours.palette.m3primaryContainer
-                fillColour: Qt.alpha(Colours.palette.m3secondary, 0.3)
-                shape: MaterialShape.Pentagon
-
-                MaterialShape {
-                    x: cpu.mShape.pointAtAngle(45).x - implicitSize / 2 + Tokens.padding.medium
-                    y: cpu.mShape.pointAtAngle(45).y - implicitSize / 2
-
-                    shape: Cpu.temperature > 90 ? MaterialShape.SoftBurst : MaterialShape.Circle
-                    color: Cpu.temperature > 90 ? Colours.palette.m3errorContainer : Colours.palette.m3secondaryContainer
-                    implicitSize: {
-                        const size = Math.round(tempLabel.implicitHeight * 2);
-                        return size % 2 === 0 ? size : size + 1; // Ensure even size so center works properly
-                    }
-
-                    Behavior on color {
-                        CAnim {}
-                    }
-
-                    StyledText {
-                        id: tempLabel
-
-                        anchors.centerIn: parent
-                        anchors.verticalCenterOffset: Math.round(fontInfo.pointSize * 0.04)
-
-                        text: {
-                            const temp = Cpu.temperature;
-                            const useF = GlobalConfig.services.useFahrenheitPerformance;
-                            return `${Math.ceil(useF ? temp * 1.8 + 32 : temp)}°${useF ? "F" : "C"}`;
-                        }
-                        color: Cpu.temperature > 90 ? Colours.palette.m3onErrorContainer : Colours.palette.m3secondary
-                        font: Tokens.font.title.builders.medium.scale(cpu.width / 112).width(50).build()
-                    }
+                Behavior on y {
+                    Anim {}
                 }
             }
 
-            Resource {
-                icon: "memory_alt"
-                value: Math.round(Memory.percentage * 100) + "%"
-                fillValue: Memory.percentage
-                colour: Colours.palette.m3tertiary
-                shapeColour: Colours.palette.m3onTertiary
-                fillColour: Qt.alpha(Colours.palette.m3tertiary, 0.3)
-                shape: MaterialShape.Slanted
+            Translate {
+                id: buttonsTranslate
+
+                y: root.sessionControlsShown ? 0 : -root.height
+
+                Behavior on y {
+                    Anim {}
+                }
             }
 
-            Resource {
-                icon: "hard_disk"
-                value: Math.round(Storage.percentage * 100) + "%"
-                fillValue: Storage.percentage
-                colour: Colours.palette.m3secondary
-                shapeColour: Colours.palette.m3secondaryContainer
-                fillColour: Qt.alpha(Colours.palette.m3secondary, 0.4)
-                shape: MaterialShape.Gem
-            }
-        }
+            RowLayout {
+                id: layout
 
-        RowLayout {
-            id: buttonsLayout
+                anchors.left: parent.left
+                anchors.right: parent.right
+                spacing: Tokens.spacing.large
 
-            anchors.left: parent.left
-            anchors.right: parent.right
-            anchors.verticalCenter: parent.verticalCenter
-            anchors.margins: Tokens.padding.large
-            spacing: Tokens.spacing.large
+                transform: resourcesTranslate
+                opacity: root.sessionControlsShown ? 0 : 1
 
-            transform: buttonsTranslate
-            opacity: hover.hovered ? 1 : 0
+                Behavior on opacity {
+                    Anim {}
+                }
 
-            Behavior on opacity {
-                Anim {}
+                Resource {
+                    id: cpu
+
+                    icon: "memory"
+                    value: Math.round(Cpu.percentage * 100) + "%"
+                    fillValue: Cpu.percentage
+                    colour: Colours.palette.m3primary
+                    shapeColour: Colours.palette.m3primaryContainer
+                    fillColour: Qt.alpha(Colours.palette.m3secondary, 0.3)
+                    shape: MaterialShape.Pentagon
+
+                    MaterialShape {
+                        x: cpu.mShape.pointAtAngle(45).x - implicitSize / 2 + Tokens.padding.medium
+                        y: Math.max(cpu.mShape.pointAtAngle(45).y - implicitSize / 2, 1 - Tokens.padding.large)
+
+                        shape: Cpu.temperature > 90 ? MaterialShape.SoftBurst : MaterialShape.Circle
+                        color: Cpu.temperature > 90 ? Colours.palette.m3errorContainer : Colours.palette.m3secondaryContainer
+                        implicitSize: {
+                            const size = Math.round(tempLabel.implicitHeight * 2);
+                            return size % 2 === 0 ? size : size + 1; // Ensure even size so center works properly
+                        }
+
+                        Behavior on color {
+                            CAnim {}
+                        }
+
+                        StyledText {
+                            id: tempLabel
+
+                            anchors.centerIn: parent
+                            anchors.verticalCenterOffset: Math.round(fontInfo.pointSize * 0.04)
+
+                            text: {
+                                const temp = Cpu.temperature;
+                                const useF = GlobalConfig.services.useFahrenheitPerformance;
+                                return `${Math.ceil(useF ? temp * 1.8 + 32 : temp)}°${useF ? "F" : "C"}`;
+                            }
+                            color: Cpu.temperature > 90 ? Colours.palette.m3onErrorContainer : Colours.palette.m3secondary
+                            font: Tokens.font.title.builders.medium.scale(cpu.width / 112).width(50).build()
+                        }
+                    }
+                }
+
+                Resource {
+                    icon: "memory_alt"
+                    value: Math.round(Memory.percentage * 100) + "%"
+                    fillValue: Memory.percentage
+                    colour: Colours.palette.m3tertiary
+                    shapeColour: Colours.palette.m3onTertiary
+                    fillColour: Qt.alpha(Colours.palette.m3tertiary, 0.3)
+                    shape: MaterialShape.Slanted
+                }
+
+                Resource {
+                    icon: "hard_disk"
+                    value: Math.round(Storage.percentage * 100) + "%"
+                    fillValue: Storage.percentage
+                    colour: Colours.palette.m3secondary
+                    shapeColour: Colours.palette.m3secondaryContainer
+                    fillColour: Qt.alpha(Colours.palette.m3secondary, 0.4)
+                    shape: MaterialShape.Gem
+                }
             }
 
-            SessionButton {
-                icon: Config.session.icons.logout
-                command: Config.session.commands.logout
-            }
-            SessionButton {
-                icon: Config.session.icons.shutdown
-                command: Config.session.commands.shutdown
-            }
-            SessionButton {
-                icon: Config.session.icons.hibernate
-                command: Config.session.commands.hibernate
-            }
-            SessionButton {
-                icon: Config.session.icons.reboot
-                command: Config.session.commands.reboot
+            RowLayout {
+                id: buttonsLayout
+
+                anchors.left: parent.left
+                anchors.right: parent.right
+                anchors.verticalCenter: parent.verticalCenter
+                anchors.margins: Tokens.padding.large
+                spacing: Tokens.spacing.large
+
+                transform: buttonsTranslate
+                opacity: root.sessionControlsShown ? 1 : 0
+
+                Behavior on opacity {
+                    Anim {}
+                }
+
+                SessionButton {
+                    icon: Config.session.icons.logout
+                    command: Config.session.commands.logout
+                }
+                SessionButton {
+                    icon: Config.session.icons.shutdown
+                    command: Config.session.commands.shutdown
+                }
+                SessionButton {
+                    icon: Config.session.icons.hibernate
+                    command: Config.session.commands.hibernate
+                }
+                SessionButton {
+                    icon: Config.session.icons.reboot
+                    command: Config.session.commands.reboot
+                }
             }
         }
     }
