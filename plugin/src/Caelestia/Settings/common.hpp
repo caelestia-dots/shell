@@ -26,8 +26,8 @@ public:
     ~WriteScope();
 
 private:
-    Node* m_root;
-    WriteOrigin m_previous;
+    Node* const m_root;
+    const WriteOrigin m_previous;
 
     Q_DISABLE_COPY_MOVE(WriteScope)
 };
