@@ -38,6 +38,14 @@ HyprExtras::HyprExtras(QObject* parent)
     m_requestSocket = hyprDir + "/.socket.sock";
     m_eventSocket = hyprDir + "/.socket2.sock";
 
+    const auto hyprConfig = qEnvironmentVariable("HYPRLAND_CONFIG");
+    if (!hyprConfig.isEmpty()) {
+        m_usingLua = hyprConfig.endsWith(QLatin1String(".lua"));
+    } else {
+        const QString home = QDir::homePath();
+        m_usingLua = QFile::exists(home + QLatin1String("/.config/hypr/hyprland.lua"));
+    }
+
     refreshOptions();
     refreshDevices();
 
