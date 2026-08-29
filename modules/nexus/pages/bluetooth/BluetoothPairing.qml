@@ -1,6 +1,7 @@
 pragma ComponentBehavior: Bound
 
 import QtQuick
+import QtQuick.Controls
 import QtQuick.Layouts
 import Quickshell
 import Quickshell.Bluetooth
@@ -15,6 +16,7 @@ PageBase {
     id: root
 
     readonly property BluetoothAdapter adapter: Bluetooth.defaultAdapter // qmllint disable unresolved-type
+    property bool showAll: false
 
     function setScan(on: bool): void {
         if (adapter?.enabled)
@@ -45,20 +47,46 @@ PageBase {
 
         ConnectedRect {
             Layout.fillWidth: true
-            implicitHeight: headerText.implicitHeight + Tokens.padding.medium * 2
+            implicitHeight: headerRow.implicitHeight + Tokens.padding.medium * 2
             first: true
 
-            StyledText {
-                id: headerText
+            RowLayout {
+                id: headerRow
 
-                anchors.left: parent.left
-                anchors.verticalCenter: parent.verticalCenter
+                anchors.fill: parent
                 anchors.leftMargin: Tokens.padding.large
-                anchors.verticalCenterOffset: Math.round(fontInfo.pointSize * 0.2)
+                anchors.rightMargin: Tokens.padding.large
+                spacing: Tokens.spacing.medium
 
-                text: qsTr("Available devices")
-                color: Colours.palette.m3onSurfaceVariant
-                font: Tokens.font.body.small
+                StyledText {
+                    Layout.fillWidth: true
+                    text: qsTr("Available devices")
+                    color: Colours.palette.m3onSurfaceVariant
+                }
+
+                RowLayout {
+                    spacing: Tokens.spacing.small
+
+                    StyledText {
+                        text: qsTr("Show all")
+                        color: Colours.palette.m3onSurfaceVariant
+                    }
+
+                    StyledSwitch {
+                        id: showAllSwitch
+
+                        checked: root.showAll
+                        onToggled: root.showAll = checked
+
+                        HoverHandler {
+                            id: showAllHover
+                        }
+
+                        ToolTip.visible: showAllHover.hovered
+                        ToolTip.text: qsTr("Include devices broadcasting only a Bluetooth address")
+                        ToolTip.delay: 500
+                    }
+                }
             }
         }
 
@@ -74,7 +102,12 @@ PageBase {
             list.anchors.top: scanIndicator.bottom
 
             model: ScriptModel {
-                values: Bluetooth.devices.values.filter(d => !d.bonded).sort((a, b) => (b.pairing - a.pairing) || a.name.localeCompare(b.name)) // qmllint disable unresolved-type
+                values: {
+                    const isAddress = d => !d?.name || d.name === d.address?.replace(/:/g, "-");
+                    return Bluetooth.devices.values // qmllint disable unresolved-type
+                        .filter(d => !d.bonded && (root.showAll || !isAddress(d) || d.pairing))
+                        .sort((a, b) => (b.pairing - a.pairing) || a.name.localeCompare(b.name));
+                }
             }
 
             delegate: Item {
