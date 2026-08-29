@@ -1,14 +1,15 @@
 #pragma once
 
-#include "service.hpp"
-#include <atomic>
 #include <pipewire/pipewire.h>
+#include <spa/param/audio/format-utils.h>
+#include <atomic>
 #include <qmutex.h>
 #include <qqmlintegration.h>
-#include <spa/param/audio/format-utils.h>
 #include <stop_token>
 #include <thread>
 #include <vector>
+
+#include "service.hpp"
 
 namespace caelestia::services {
 

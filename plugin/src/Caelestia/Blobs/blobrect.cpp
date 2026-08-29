@@ -1,8 +1,9 @@
 #include "blobrect.hpp"
-#include "blobgroup.hpp"
 
 #include <algorithm>
 #include <cmath>
+
+#include "blobgroup.hpp"
 
 BlobRect::BlobRect(QQuickItem* parent)
     : BlobShape(parent) {}

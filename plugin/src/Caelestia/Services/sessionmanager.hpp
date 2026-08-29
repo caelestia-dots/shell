@@ -1,13 +1,12 @@
 #pragma once
 
+#include <optional>
 #include <qdbusconnection.h>
 #include <qobject.h>
 #include <qqmlintegration.h>
 #include <qstring.h>
 #include <qstringlist.h>
 #include <qvariant.h>
-
-#include <optional>
 
 namespace caelestia::services {
 

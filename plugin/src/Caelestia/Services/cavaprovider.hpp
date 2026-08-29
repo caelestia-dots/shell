@@ -1,8 +1,9 @@
 #pragma once
 
-#include "audioprovider.hpp"
 #include <cava/cavacore.h>
 #include <qqmlintegration.h>
+
+#include "audioprovider.hpp"
 
 namespace caelestia::services {
 

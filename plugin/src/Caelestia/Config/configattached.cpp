@@ -1,8 +1,8 @@
 #include "configattached.hpp"
 
-#include "common.hpp"
-
 #include <qquickitem.h>
+
+#include "common.hpp"
 
 namespace caelestia::config {
 

@@ -4,8 +4,8 @@
 #include <qqmlintegration.h>
 #include <qvariantmap.h>
 
-#include "fontbuilder.hpp"
 #include "settings/objectnode.hpp"
+#include "fontbuilder.hpp"
 
 namespace caelestia::config {
 

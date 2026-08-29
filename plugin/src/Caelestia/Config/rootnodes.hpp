@@ -3,9 +3,9 @@
 #include <qjsengine.h>
 #include <qqmlengine.h>
 
-#include "common.hpp"
 #include "settings/layerregistry.hpp"
 #include "settings/rootnode.hpp"
+#include "common.hpp"
 
 namespace caelestia::config {
 

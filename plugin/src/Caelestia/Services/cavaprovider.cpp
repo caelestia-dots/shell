@@ -1,10 +1,11 @@
 #include "cavaprovider.hpp"
 
-#include "audiocollector.hpp"
-#include "audioprovider.hpp"
 #include <cava/cavacore.h>
 #include <cstddef>
 #include <qloggingcategory.h>
+
+#include "audiocollector.hpp"
+#include "audioprovider.hpp"
 
 Q_LOGGING_CATEGORY(lcCava, "caelestia.services.cava", QtInfoMsg)
 Q_LOGGING_CATEGORY(lcCavaProcessor, "caelestia.services.cava.processor", QtInfoMsg)

@@ -1,5 +1,7 @@
 #include "storage.hpp"
 
+#include <sys/stat.h>
+#include <sys/sysmacros.h>
 #include <algorithm>
 #include <cmath>
 #include <qdir.h>
@@ -8,8 +10,6 @@
 #include <qhash.h>
 #include <qloggingcategory.h>
 #include <qstorageinfo.h>
-#include <sys/stat.h>
-#include <sys/sysmacros.h>
 
 Q_LOGGING_CATEGORY(lcStorage, "caelestia.services.storage", QtInfoMsg)
 

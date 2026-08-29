@@ -1,12 +1,12 @@
 #pragma once
 
-#include "lyriccandidate.hpp"
-
 #include <qhash.h>
 #include <qjsonobject.h>
 #include <qnetworkaccessmanager.h>
 #include <qnetworkreply.h>
 #include <qtimer.h>
+
+#include "lyriccandidate.hpp"
 
 namespace caelestia::services {
 

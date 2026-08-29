@@ -3,7 +3,6 @@
 #include <array>
 #include <cmath>
 #include <cstdio>
-
 #include <qfile.h>
 #include <qtypes.h>
 
