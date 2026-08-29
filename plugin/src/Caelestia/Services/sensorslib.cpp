@@ -11,7 +11,11 @@
 #include <mutex>
 #include <utility>
 
+namespace {
+
 Q_LOGGING_CATEGORY(lcSensorsLib, "caelestia.services.sensorslib", QtInfoMsg)
+
+} // namespace
 
 namespace caelestia::services::sensorslib {
 

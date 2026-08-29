@@ -13,8 +13,11 @@
 
 #include "service.hpp"
 
-Q_LOGGING_CATEGORY(lcAc, "caelestia.services.ac", QtInfoMsg)
+namespace {
+
 Q_LOGGING_CATEGORY(lcAcWorker, "caelestia.services.ac.worker", QtInfoMsg)
+
+} // namespace
 
 namespace caelestia::services {
 

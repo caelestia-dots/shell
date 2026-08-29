@@ -6,8 +6,11 @@
 #include "audiocollector.hpp"
 #include "service.hpp"
 
+namespace {
+
 Q_LOGGING_CATEGORY(lcAp, "caelestia.services.ap", QtInfoMsg)
-Q_LOGGING_CATEGORY(lcApProcessor, "caelestia.services.ap.processor", QtInfoMsg)
+
+} // namespace
 
 namespace caelestia::services {
 

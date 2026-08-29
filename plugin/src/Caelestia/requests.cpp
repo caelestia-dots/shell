@@ -10,7 +10,11 @@
 #include <qqmlengine.h>
 #include <qvariant.h>
 
+namespace {
+
 Q_LOGGING_CATEGORY(lcRequests, "caelestia.requests", QtInfoMsg)
+
+} // namespace
 
 namespace caelestia {
 

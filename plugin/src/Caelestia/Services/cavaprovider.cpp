@@ -9,8 +9,12 @@
 #include "audiocollector.hpp"
 #include "audioprovider.hpp"
 
+namespace {
+
 Q_LOGGING_CATEGORY(lcCava, "caelestia.services.cava", QtInfoMsg)
 Q_LOGGING_CATEGORY(lcCavaProcessor, "caelestia.services.cava.processor", QtInfoMsg)
+
+} // namespace
 
 namespace caelestia::services {
 

@@ -10,7 +10,11 @@
 
 #include "core/toaster.hpp"
 
+namespace {
+
 Q_LOGGING_CATEGORY(lcSessionManager, "caelestia.services.sessionmanager", QtInfoMsg)
+
+} // namespace
 
 namespace caelestia::services {
 

@@ -11,7 +11,11 @@
 #include <qsavefile.h>
 #include <qthreadpool.h>
 
+namespace {
+
 Q_LOGGING_CATEGORY(lcCacher, "caelestia.images.cacher", QtInfoMsg)
+
+} // namespace
 
 namespace caelestia::images {
 

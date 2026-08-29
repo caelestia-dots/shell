@@ -11,7 +11,11 @@
 #include "config/serviceconfig.hpp"
 #include "config/userpaths.hpp"
 
+namespace {
+
 Q_LOGGING_CATEGORY(lcLyrics, "caelestia.lyrics", QtInfoMsg)
+
+} // namespace
 
 namespace caelestia::services {
 

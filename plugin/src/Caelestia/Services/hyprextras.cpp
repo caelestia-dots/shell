@@ -8,7 +8,11 @@
 
 #include "hyprdevices.hpp"
 
+namespace {
+
 Q_LOGGING_CATEGORY(lcHypr, "caelestia.services.hypr", QtInfoMsg)
+
+} // namespace
 
 namespace caelestia::services::hypr {
 

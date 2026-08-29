@@ -9,7 +9,11 @@
 
 #include "imagecacher.hpp"
 
+namespace {
+
 Q_LOGGING_CATEGORY(lcCProv, "caelestia.images.cacheprovider", QtInfoMsg)
+
+} // namespace
 
 namespace caelestia::images {
 

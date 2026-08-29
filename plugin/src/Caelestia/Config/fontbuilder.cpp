@@ -2,9 +2,13 @@
 
 #include <qloggingcategory.h>
 
-namespace caelestia::config {
+namespace {
 
 Q_LOGGING_CATEGORY(lcFontBuilder, "caelestia.fontbuilder", QtInfoMsg)
+
+} // namespace
+
+namespace caelestia::config {
 
 FontBuilder::FontBuilder(QFont font)
     : m_font(std::move(font)) {}

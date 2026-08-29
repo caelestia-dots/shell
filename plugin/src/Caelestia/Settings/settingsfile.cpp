@@ -9,9 +9,13 @@
 #include <qloggingcategory.h>
 #include <qsavefile.h>
 
-namespace caelestia::settings {
+namespace {
 
 Q_LOGGING_CATEGORY(lcSettingsFile, "caelestia.settings.file", QtInfoMsg)
+
+} // namespace
+
+namespace caelestia::settings {
 
 namespace {
 

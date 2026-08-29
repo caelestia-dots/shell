@@ -13,7 +13,11 @@
 
 #include "util/metaenum.hpp"
 
+namespace {
+
 Q_LOGGING_CATEGORY(lcCUtils, "caelestia.cutils", QtInfoMsg)
+
+} // namespace
 
 namespace caelestia {
 

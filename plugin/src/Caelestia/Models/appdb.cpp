@@ -5,7 +5,11 @@
 #include <qsqlquery.h>
 #include <quuid.h>
 
+namespace {
+
 Q_LOGGING_CATEGORY(lcAppDb, "caelestia.appdb", QtInfoMsg)
+
+} // namespace
 
 namespace caelestia::models {
 

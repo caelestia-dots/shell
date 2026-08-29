@@ -9,7 +9,9 @@
 #include "blobgroup.hpp"
 #include "blobinvertedrect.hpp"
 
-static float deformPadding(const QMatrix4x4& dm, float hw, float hh) {
+namespace {
+
+float deformPadding(const QMatrix4x4& dm, float hw, float hh) {
     // Bounding box of the deformed shape: |M * corners|
     const float dm00 = dm(0, 0);
     const float dm01 = dm(0, 1);
@@ -22,7 +24,7 @@ static float deformPadding(const QMatrix4x4& dm, float hw, float hh) {
     return std::max(extraX, extraY);
 }
 
-static float cpuSdBox(float px, float py, float cx, float cy, float hw, float hh) {
+float cpuSdBox(float px, float py, float cx, float cy, float hw, float hh) {
     const float dx = std::abs(px - cx) - hw;
     const float dy = std::abs(py - cy) - hh;
     const float mdx = std::max(dx, 0.0f);
@@ -30,12 +32,12 @@ static float cpuSdBox(float px, float py, float cx, float cy, float hw, float hh
     return std::sqrt(mdx * mdx + mdy * mdy) + std::min(std::max(dx, dy), 0.0f);
 }
 
-static float cpuSmoothstep(float edge0, float edge1, float x) {
+float cpuSmoothstep(float edge0, float edge1, float x) {
     const float t = std::clamp((x - edge0) / (edge1 - edge0), 0.0f, 1.0f);
     return t * t * (3.0f - 2.0f * t);
 }
 
-static float cornerFillFactor(float sd, float smoothFactor) {
+float cornerFillFactor(float sd, float smoothFactor) {
     // Continuous two-sided window. The corner is squared (factor -> 0) only within
     // ±smoothFactor of the neighbour's edge (the visible junction); it keeps its full
     // radius both far outside the neighbour and deep inside it (where it is buried and
@@ -46,6 +48,8 @@ static float cornerFillFactor(float sd, float smoothFactor) {
     const float inside = cpuSmoothstep(0.0f, -smoothFactor, sd); // 0 at edge, ->1 deep inside
     return std::max(outside, inside);
 }
+
+} // namespace
 
 BlobShape::BlobShape(QQuickItem* parent)
     : QQuickItem(parent) {

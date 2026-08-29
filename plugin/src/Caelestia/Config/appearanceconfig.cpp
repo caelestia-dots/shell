@@ -6,9 +6,11 @@
 
 namespace caelestia::config {
 
+namespace {
+
 // Helper: connect all changed signals from a token object to a single valuesChanged signal,
 // plus connect the local scaleChanged signal.
-template <typename Source, typename Target> static void connectTokenSignals(Source* source, Target* target) {
+template <typename Source, typename Target> void connectTokenSignals(Source* source, Target* target) {
     const auto* meta = source->metaObject();
 
     for (int i = meta->propertyOffset(); i < meta->propertyCount(); ++i) {
@@ -21,6 +23,8 @@ template <typename Source, typename Target> static void connectTokenSignals(Sour
 
     QObject::connect(target, &Target::scaleChanged, target, &Target::valuesChanged);
 }
+
+} // namespace
 
 // AppearanceRounding
 

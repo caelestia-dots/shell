@@ -4,7 +4,6 @@
 #include <qfile.h>
 #include <qfileinfo.h>
 #include <qhash.h>
-#include <qloggingcategory.h>
 #include <qstorageinfo.h>
 
 #include <sys/stat.h>
@@ -12,8 +11,6 @@
 
 #include <algorithm>
 #include <cmath>
-
-Q_LOGGING_CATEGORY(lcStorage, "caelestia.services.storage", QtInfoMsg)
 
 namespace caelestia::services {
 

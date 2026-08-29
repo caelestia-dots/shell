@@ -12,7 +12,9 @@
 BlobInvertedRect::BlobInvertedRect(QQuickItem* parent)
     : BlobShape(parent) {}
 
-static void setFrameIndices(quint16* idx) {
+namespace {
+
+void setFrameIndices(quint16* idx) {
     // Top strip: 0-1-4, 1-5-4
     idx[0] = 0;
     idx[1] = 1;
@@ -42,6 +44,8 @@ static void setFrameIndices(quint16* idx) {
     idx[22] = 4;
     idx[23] = 7;
 }
+
+} // namespace
 
 QSGNode* BlobInvertedRect::updatePaintNode(QSGNode* oldNode, UpdatePaintNodeData* data) {
     Q_UNUSED(data);

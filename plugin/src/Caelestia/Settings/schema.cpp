@@ -2,9 +2,13 @@
 
 #include "node.hpp"
 
-namespace caelestia::settings {
+namespace {
 
 Q_LOGGING_CATEGORY(lcSchema, "caelestia.settings.schema", QtInfoMsg)
+
+} // namespace
+
+namespace caelestia::settings {
 
 namespace {
 

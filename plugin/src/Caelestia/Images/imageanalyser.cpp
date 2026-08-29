@@ -7,7 +7,11 @@
 #include <qquickwindow.h>
 #include <qtconcurrentrun.h>
 
+namespace {
+
 Q_LOGGING_CATEGORY(lcImageAnalyser, "caelestia.imageanalyser", QtInfoMsg)
+
+} // namespace
 
 namespace caelestia::images {
 
