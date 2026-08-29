@@ -15,6 +15,7 @@ Checks: >
   -modernize-use-trailing-return-type,
   -readability-braces-around-statements,
   -readability-identifier-length,
+  -readability-implicit-bool-conversion,
   -readability-magic-numbers,
   -readability-math-missing-parentheses,
   -readability-redundant-access-specifiers,
