@@ -240,19 +240,37 @@ WlSessionLockSurface {
             rotation: 180
         }
 
-        Content {
+        Loader {
             id: content
 
             anchors.centerIn: parent
             width: (root.isPortrait ? lockContent.cardShort : lockContent.cardLong) - Tokens.padding.extraLargeIncreased
             height: (root.isPortrait ? lockContent.cardLong : lockContent.cardShort) - Tokens.padding.extraLargeIncreased
 
-            isPortrait: root.isPortrait
-            lockHeight: root.shortEdge
-
-            lock: root
             opacity: 0
             scale: 0
+
+            focus: true
+
+            sourceComponent: root.isPortrait ? portraitLayout : landscapeLayout
+        }
+
+        Component {
+            id: landscapeLayout
+
+            Content {
+                lock: root
+                lockHeight: root.shortEdge
+            }
+        }
+
+        Component {
+            id: portraitLayout
+
+            PortraitContent {
+                lock: root
+                lockHeight: root.shortEdge
+            }
         }
     }
 }
