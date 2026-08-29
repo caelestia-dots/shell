@@ -4,7 +4,7 @@
 #include <qqmlintegration.h>
 #include <qstringlist.h>
 
-#include "../Config/enums.hpp"
+#include "config/enums.hpp"
 #include "tickingservice.hpp"
 
 namespace caelestia::services {

@@ -8,7 +8,7 @@
 #include <QtDBus/qdbusreply.h>
 #include <qloggingcategory.h>
 
-#include "../toaster.hpp"
+#include "core/toaster.hpp"
 
 Q_LOGGING_CATEGORY(lcSessionManager, "caelestia.services.sessionmanager", QtInfoMsg)
 

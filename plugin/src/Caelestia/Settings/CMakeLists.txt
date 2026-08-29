@@ -1,5 +1,6 @@
 qml_module(caelestia-settings
     URI Caelestia.Settings
+    INCLUDE_PREFIX settings
     SOURCES
         common.cpp
         schema.cpp
@@ -14,9 +15,3 @@ qml_module(caelestia-settings
     LIBRARIES
         caelestia-util
 )
-
-# Expose headers as settings/xxx.hpp
-set(settings_include_dir "${CMAKE_CURRENT_BINARY_DIR}/include")
-file(MAKE_DIRECTORY "${settings_include_dir}")
-file(CREATE_LINK "${CMAKE_CURRENT_SOURCE_DIR}" "${settings_include_dir}/settings" SYMBOLIC)
-target_include_directories(caelestia-settings PUBLIC "${settings_include_dir}")

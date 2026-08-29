@@ -1,5 +1,6 @@
 qml_module(caelestia-core
     URI Caelestia
+    INCLUDE_PREFIX core
     SOURCES
         cutils.cpp
         qalculator.cpp

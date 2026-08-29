@@ -3,7 +3,7 @@
 #include <qobject.h>
 #include <qqmlintegration.h>
 
-#include "../Config/enums.hpp"
+#include "config/enums.hpp"
 
 namespace caelestia::services {
 
