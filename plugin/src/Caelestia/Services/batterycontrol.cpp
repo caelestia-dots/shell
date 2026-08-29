@@ -47,11 +47,6 @@ void BatteryControl::detectInterface() {
             return false;
         }
 
-        const QFileInfo info(path);
-        if (!info.isWritable()) {
-            return false;
-        }
-
         m_path = path;
         m_isConservationMode = isConservation;
         m_isSupported = true;
@@ -144,6 +139,7 @@ bool BatteryControl::writeValue(const QString& val) {
         return false;
     }
 
+    // 1. Attempt direct unprivileged write first (fast path when udev rule is installed)
     QFile file(m_path);
     if (file.open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Truncate)) {
         QTextStream out(&file);
@@ -153,7 +149,15 @@ bool BatteryControl::writeValue(const QString& val) {
         return true;
     }
 
-    return false;
+    // 2. Privilege escalation fallback: run via pkexec so the system polkit agent pops up a password dialog
+    const QString cmd = QStringLiteral("echo %1 | pkexec tee %2 > /dev/null").arg(val, m_path);
+    auto* proc = new QProcess(this);
+    connect(proc, QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished), this, [this, proc]() {
+        refreshState();
+        proc->deleteLater();
+    });
+    proc->start(QStringLiteral("sh"), { QStringLiteral("-c"), cmd });
+    return true;
 }
 
 void BatteryControl::toggle() {
