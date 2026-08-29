@@ -1,78 +1,20 @@
 pragma ComponentBehavior: Bound
 
 import QtQuick
-import Quickshell
-import Quickshell.Io
 import Quickshell.Services.UPower
 import Caelestia.Config
+import Caelestia.Services
 import qs.components
 import qs.services
 
 Column {
     id: root
 
-    property string conservationPath: ""
-    property bool conservationMode: false
-    readonly property bool conservationAvailable: conservationPath !== ""
-
     spacing: Tokens.spacing.medium
     width: Tokens.sizes.bar.batteryWidth
 
-    FileView {
-        path: "/sys/bus/platform/drivers/ideapad_acpi/VPC2004:00/conservation_mode"
-        printErrors: false
-        onLoaded: {
-            root.conservationPath = path;
-            root.conservationMode = text().trim() === "1";
-        }
-    }
-
-    FileView {
-        path: "/sys/class/power_supply/BAT0/charge_control_end_threshold"
-        printErrors: false
-        onLoaded: {
-            if (!root.conservationPath) {
-                root.conservationPath = path;
-                const val = parseInt(text().trim());
-                root.conservationMode = val > 0 && val <= 80;
-            }
-        }
-    }
-
-    FileView {
-        path: "/sys/devices/platform/asus-nb-wmi/charge_control_end_threshold"
-        printErrors: false
-        onLoaded: {
-            if (!root.conservationPath) {
-                root.conservationPath = path;
-                const val = parseInt(text().trim());
-                root.conservationMode = val > 0 && val <= 80;
-            }
-        }
-    }
-
-    FileView {
-        id: conservationWatcher
-
-        path: root.conservationPath
-        printErrors: false
-        onLoaded: {
-            const val = text().trim();
-            if (path.includes("conservation_mode")) {
-                root.conservationMode = val === "1";
-            } else {
-                const n = parseInt(val);
-                root.conservationMode = n > 0 && n <= 80;
-            }
-        }
-    }
-
-    Timer {
-        id: refreshTimer
-
-        interval: 250
-        repeat: false
-        onTriggered: conservationWatcher.reload()
+    ServiceRef {
+        service: BatteryControl
     }
 
     StyledText {
@@ -247,53 +189,51 @@ Column {
             }
         }
 
-        StyledRect {
-            id: conservationBtn
+        Loader {
+            id: conservationLoader
 
-            visible: root.conservationAvailable
             anchors.verticalCenter: parent.verticalCenter
-            implicitWidth: profiles.implicitHeight - 4
-            implicitHeight: profiles.implicitHeight - 4
+            active: BatteryControl.isSupported
 
-            radius: Tokens.rounding.full
-            color: root.conservationMode ? Colours.palette.m3primary : Colours.tPalette.m3surfaceContainer
+            sourceComponent: StyledRect {
+                id: conservationBtn
 
-            Behavior on color {
-                CAnim {}
-            }
+                implicitWidth: profiles.implicitHeight - 4
+                implicitHeight: profiles.implicitHeight - 4
 
-            MaterialIcon {
-                id: consIcon
-
-                anchors.centerIn: parent
-                text: "battery_saver"
-                fontStyle: Tokens.font.icon.large
-                color: root.conservationMode ? Colours.palette.m3onPrimary : Colours.palette.m3onSurfaceVariant
-                fill: root.conservationMode ? 1 : 0
+                radius: Tokens.rounding.full
+                color: BatteryControl.enabled ? Colours.palette.m3primary : Colours.tPalette.m3surfaceContainer
 
                 Behavior on color {
                     CAnim {}
                 }
 
-                Behavior on fill {
-                    Anim {
-                        type: Anim.DefaultEffects
+                MaterialIcon {
+                    id: consIcon
+
+                    anchors.centerIn: parent
+                    text: "battery_saver"
+                    fontStyle: Tokens.font.icon.large
+                    color: BatteryControl.enabled ? Colours.palette.m3onPrimary : Colours.palette.m3onSurfaceVariant
+                    fill: BatteryControl.enabled ? 1 : 0
+
+                    Behavior on color {
+                        CAnim {}
+                    }
+
+                    Behavior on fill {
+                        Anim {
+                            type: Anim.DefaultEffects
+                        }
                     }
                 }
-            }
 
-            StateLayer {
-                radius: Tokens.rounding.full
-                color: root.conservationMode ? Colours.palette.m3onPrimary : Colours.palette.m3onSurface
-                onClicked: {
-                    if (root.conservationPath.includes("conservation_mode")) {
-                        const next = root.conservationMode ? "0" : "1";
-                        Quickshell.execDetached(["sh", "-c", `echo ${next} > "${root.conservationPath}"`]);
-                    } else {
-                        const next = root.conservationMode ? "100" : "80";
-                        Quickshell.execDetached(["sh", "-c", `echo ${next} > "${root.conservationPath}"`]);
+                StateLayer {
+                    radius: Tokens.rounding.full
+                    color: BatteryControl.enabled ? Colours.palette.m3onPrimary : Colours.palette.m3onSurface
+                    onClicked: {
+                        BatteryControl.toggle();
                     }
-                    refreshTimer.restart();
                 }
             }
         }
