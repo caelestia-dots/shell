@@ -76,7 +76,7 @@ void BlobRect::updatePhysics() {
 
     // Compute target deformation matrix from velocity
     // R(θ) * diag(stretch, compress) * R(θ)^T
-    const float kStretchFactor = static_cast<float>(m_deformScale);
+    const auto kStretchFactor = static_cast<float>(m_deformScale);
     constexpr float kMaxStretch = 0.35f;
 
     float target00 = 1.0f;
@@ -102,8 +102,8 @@ void BlobRect::updatePhysics() {
     // (the friction term uses the new velocity, solved in closed form) so the 1/(1 + c*dt)
     // factor stays in (0, 1) for any dt; an explicit -c*v*dt term would flip sign and inject
     // energy once c*dt > 1 (here dt > ~62ms), making the deformation diverge on slow frames.
-    const float kStiffness = static_cast<float>(m_stiffness);
-    const float kDamping = static_cast<float>(m_damping);
+    const auto kStiffness = static_cast<float>(m_stiffness);
+    const auto kDamping = static_cast<float>(m_damping);
     const float invDamp = 1.0f / (1.0f + kDamping * dt);
 
     m_dmVel00 = (m_dmVel00 - kStiffness * (m_dm00 - target00) * dt) * invDamp;
@@ -184,13 +184,13 @@ bool BlobRect::isCornerExcluded(const BlobShape* other) const {
 }
 
 QQmlListProperty<BlobRect> BlobRect::exclude() {
-    return QQmlListProperty<BlobRect>(
-        this, nullptr, &excludeAppend, &excludeCount, &excludeAt, &excludeClear, &excludeReplace, &excludeRemoveLast);
+    return { this, nullptr, &excludeAppend, &excludeCount, &excludeAt, &excludeClear, &excludeReplace,
+        &excludeRemoveLast };
 }
 
 QQmlListProperty<BlobRect> BlobRect::excludeCorners() {
-    return QQmlListProperty<BlobRect>(this, nullptr, &excludeCornersAppend, &excludeCornersCount, &excludeCornersAt,
-        &excludeCornersClear, &excludeCornersReplace, &excludeCornersRemoveLast);
+    return { this, nullptr, &excludeCornersAppend, &excludeCornersCount, &excludeCornersAt, &excludeCornersClear,
+        &excludeCornersReplace, &excludeCornersRemoveLast };
 }
 
 void BlobRect::excludeAppend(QQmlListProperty<BlobRect>* prop, BlobRect* rect) {

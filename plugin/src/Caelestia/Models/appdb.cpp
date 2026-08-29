@@ -203,7 +203,7 @@ QString AppDb::regexifyString(const QString& original) const {
 }
 
 QQmlListProperty<AppEntry> AppDb::apps() {
-    return QQmlListProperty<AppEntry>(this, &getSortedApps());
+    return { this, &getSortedApps() };
 }
 
 void AppDb::incrementFrequency(const QString& id) {

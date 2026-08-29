@@ -55,7 +55,7 @@ QSGNode* BlobInvertedRect::updatePaintNode(QSGNode* oldNode, UpdatePaintNodeData
         return nullptr;
     }
 
-    const float pad = static_cast<float>(m_group->smoothing());
+    const auto pad = static_cast<float>(m_group->smoothing());
 
     // Compute inner hole boundary in local coords
     // Inset past the inner border edge by 2x smoothing to cover the blend zone
@@ -92,8 +92,8 @@ QSGNode* BlobInvertedRect::updatePaintNode(QSGNode* oldNode, UpdatePaintNodeData
     }
 
     // Outer bounds (local coords)
-    const float x0 = static_cast<float>(m_localPaddedRect.x());
-    const float y0 = static_cast<float>(m_localPaddedRect.y());
+    const auto x0 = static_cast<float>(m_localPaddedRect.x());
+    const auto y0 = static_cast<float>(m_localPaddedRect.y());
     const float x1 = x0 + static_cast<float>(m_localPaddedRect.width());
     const float y1 = y0 + static_cast<float>(m_localPaddedRect.height());
     const float w = x1 - x0;

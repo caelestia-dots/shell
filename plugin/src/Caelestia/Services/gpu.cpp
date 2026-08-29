@@ -65,7 +65,7 @@ QString parseGlxinfoName(const QByteArray& out) {
         }
     }
 
-    return QString();
+    return {};
 }
 
 QString parseLspciName(const QByteArray& out) {
@@ -82,7 +82,7 @@ QString parseLspciName(const QByteArray& out) {
     }
 
     if (match.isEmpty()) {
-        return QString();
+        return {};
     }
 
     static const QRegularExpression bracketRe(QStringLiteral("\\[([^\\]]+)\\][^\\[]*$"));
@@ -99,7 +99,7 @@ QString parseLspciName(const QByteArray& out) {
         return cleanName(colon.captured(1));
     }
 
-    return QString();
+    return {};
 }
 
 struct NameSource {

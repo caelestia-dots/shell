@@ -134,7 +134,7 @@ HyprDevices::HyprDevices(QObject* parent)
     : QObject(parent) {}
 
 QQmlListProperty<HyprKeyboard> HyprDevices::keyboards() {
-    return QQmlListProperty<HyprKeyboard>(this, &m_keyboards);
+    return { this, &m_keyboards };
 }
 
 bool HyprDevices::updateLastIpcObject(QJsonObject object) {

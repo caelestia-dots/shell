@@ -198,7 +198,7 @@ QVariant ListNode::value(const QString& key) const {
         qCCritical(lcSettings,
             "Attempted to read %s on list node %s. List nodes only have a 'values' key, something is wrong.",
             qUtf8Printable(key), qUtf8Printable(path()));
-        return QVariant();
+        return {};
     }
 
     return QVariant::fromValue(m_elements);

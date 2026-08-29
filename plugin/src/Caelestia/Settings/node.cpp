@@ -71,7 +71,7 @@ QVariant Node::value(const QString& key) const {
     if (!desc) {
         qCCritical(
             lcSettings, "Attempted to read an unknown key %s, something is wrong.", qUtf8Printable(pathFor(key)));
-        return QVariant();
+        return {};
     }
 
     return metaObject()->property(desc->metaIndex).read(this);
@@ -222,7 +222,7 @@ QString Node::keyOf(const Node* child) const {
             return desc.key;
     }
 
-    return QString();
+    return {};
 }
 
 void Node::onFallbackNotify(const QString& key) {

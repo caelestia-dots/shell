@@ -141,7 +141,7 @@ void BlobShape::updatePolish() {
     m_group->ensurePhysicsUpdated();
 
     const QPointF scenePos = mapToScene(QPointF(0, 0));
-    const float pad = static_cast<float>(m_group->smoothing());
+    const auto pad = static_cast<float>(m_group->smoothing());
 
     if (isInvertedRect()) {
         m_cachedPaddedX = static_cast<float>(scenePos.x());
@@ -267,10 +267,10 @@ void BlobShape::updatePolish() {
     auto* inv = m_group->invertedRect();
     if (inv) {
         const QPointF invScene = inv->mapToScene(QPointF(0, 0));
-        const float outerCX = static_cast<float>(invScene.x() + inv->width() / 2.0);
-        const float outerCY = static_cast<float>(invScene.y() + inv->height() / 2.0);
-        const float outerHW = static_cast<float>(inv->width() / 2.0);
-        const float outerHH = static_cast<float>(inv->height() / 2.0);
+        const auto outerCX = static_cast<float>(invScene.x() + inv->width() / 2.0);
+        const auto outerCY = static_cast<float>(invScene.y() + inv->height() / 2.0);
+        const auto outerHW = static_cast<float>(inv->width() / 2.0);
+        const auto outerHH = static_cast<float>(inv->height() / 2.0);
 
         const float innerCX = outerCX + static_cast<float>((inv->borderLeft() - inv->borderRight()) / 2.0);
         const float innerCY = outerCY + static_cast<float>((inv->borderTop() - inv->borderBottom()) / 2.0);
@@ -396,8 +396,8 @@ QSGNode* BlobShape::updatePaintNode(QSGNode* oldNode, UpdatePaintNodeData* data)
     auto* geometry = node->geometry();
     auto* v = geometry->vertexDataAsTexturedPoint2D();
 
-    const float x0 = static_cast<float>(m_localPaddedRect.x());
-    const float y0 = static_cast<float>(m_localPaddedRect.y());
+    const auto x0 = static_cast<float>(m_localPaddedRect.x());
+    const auto y0 = static_cast<float>(m_localPaddedRect.y());
     const float x1 = x0 + static_cast<float>(m_localPaddedRect.width());
     const float y1 = y0 + static_cast<float>(m_localPaddedRect.height());
 

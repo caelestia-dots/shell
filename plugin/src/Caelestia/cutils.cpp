@@ -140,7 +140,7 @@ bool CUtils::deleteFile(const QUrl& path) {
 QString CUtils::toLocalFile(const QUrl& url) {
     if (!url.isLocalFile()) {
         qCWarning(lcCUtils) << "toLocalFile: given url is not a local file" << url;
-        return QString();
+        return {};
     }
 
     return url.toLocalFile();

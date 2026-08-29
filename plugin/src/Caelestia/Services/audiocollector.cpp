@@ -157,7 +157,7 @@ void PipeWireWorker::processStream() {
     }
 
     const spa_buffer* buf = buffer->buffer;
-    const qint16* samples = reinterpret_cast<const qint16*>(buf->datas[0].data);
+    const auto* samples = reinterpret_cast<const qint16*>(buf->datas[0].data);
     if (samples == nullptr) {
         return;
     }

@@ -203,9 +203,9 @@ void ImageAnalyser::analyse(QPromise<AnalyseResult>& promise, const QImage& imag
                 continue;
             }
 
-            const quint32 mr = static_cast<quint32>(pixel[2] & 0xF8);
-            const quint32 mg = static_cast<quint32>(pixel[1] & 0xF8);
-            const quint32 mb = static_cast<quint32>(pixel[0] & 0xF8);
+            const auto mr = static_cast<quint32>(pixel[2] & 0xF8);
+            const auto mg = static_cast<quint32>(pixel[1] & 0xF8);
+            const auto mb = static_cast<quint32>(pixel[0] & 0xF8);
             ++colours[(mr << 16) | (mg << 8) | mb];
 
             const qreal r = pixel[2] / 255.0;

@@ -110,7 +110,7 @@ Toaster* Toaster::create(QQmlEngine* engine, QJSEngine* jsEngine) {
 }
 
 QQmlListProperty<Toast> Toaster::toasts() {
-    return QQmlListProperty<Toast>(this, &m_toasts);
+    return { this, &m_toasts };
 }
 
 void Toaster::toast(const QString& title, const QString& message, const QString& icon, Toast::Type type, int timeout) {

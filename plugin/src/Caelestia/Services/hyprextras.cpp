@@ -203,7 +203,7 @@ HyprExtras::SocketPtr HyprExtras::makeRequestJson(
 HyprExtras::SocketPtr HyprExtras::makeRequest(
     const QString& request, const std::function<void(bool, QByteArray)>& callback) {
     if (m_requestSocket.isEmpty()) {
-        return SocketPtr();
+        return {};
     }
 
     auto socket = SocketPtr::create(this);

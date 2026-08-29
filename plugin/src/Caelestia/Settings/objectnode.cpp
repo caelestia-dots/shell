@@ -28,7 +28,7 @@ Descriptor ObjectNode::descriptorFor(const QString& key) const {
     const auto* desc = schema().get(key);
     if (!desc) {
         qCWarning(lcSettings) << "Attempted to get descriptor for unknown option" << pathFor(key);
-        return Descriptor();
+        return {};
     }
 
     return *desc;

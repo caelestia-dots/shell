@@ -91,7 +91,7 @@ int FileSystemModel::rowCount(const QModelIndex& parent) const {
 
 QVariant FileSystemModel::data(const QModelIndex& index, int role) const {
     if (role != Qt::UserRole || !index.isValid() || index.row() >= m_entries.size()) {
-        return QVariant();
+        return {};
     }
     return QVariant::fromValue(m_entries.at(index.row()));
 }
@@ -212,7 +212,7 @@ void FileSystemModel::setNameFilters(const QStringList& nameFilters) {
 }
 
 QQmlListProperty<FileSystemEntry> FileSystemModel::entries() {
-    return QQmlListProperty<FileSystemEntry>(this, &m_entries);
+    return { this, &m_entries };
 }
 
 void FileSystemModel::watchDirIfRecursive(const QString& path) {

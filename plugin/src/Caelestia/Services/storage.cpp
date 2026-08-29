@@ -122,7 +122,7 @@ bool Storage::sameOrder(const QList<DiskInfo*>& a, const QList<DiskInfo*>& b) {
 }
 
 QQmlListProperty<DiskInfo> Storage::disksProp() {
-    return QQmlListProperty<DiskInfo>(this, nullptr, &Storage::disksCount, &Storage::disksAt);
+    return { this, nullptr, &Storage::disksCount, &Storage::disksAt };
 }
 
 qsizetype Storage::disksCount(QQmlListProperty<DiskInfo>* prop) {

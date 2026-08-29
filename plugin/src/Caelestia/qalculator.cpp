@@ -23,7 +23,7 @@ Qalculator::Qalculator(QObject* parent)
 
 QString Qalculator::eval(const QString& expr, bool printExpr) const {
     if (expr.isEmpty()) {
-        return QString();
+        return {};
     }
 
     QMutexLocker locker(&s_calculatorMutex);
