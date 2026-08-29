@@ -5,8 +5,10 @@
 #include <qquickattachedpropertypropagator.h>
 
 #include "anim.hpp"
+#include "appearanceconfig.hpp"
 #include "font.hpp"
 #include "rootnodes.hpp"
+#include "tokens.hpp"
 
 namespace caelestia::config {
 

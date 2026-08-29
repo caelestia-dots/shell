@@ -35,6 +35,11 @@ template <std::floating_point T> bool compare(const QList<T>& a, const QList<T>&
     return true;
 }
 
+// Defers `new T` to the point of instantiation so nodes can forward declare their subobjects
+template <typename T, typename... Args> [[nodiscard]] T* makeSubobject(Args&&... args) {
+    return new T(std::forward<Args>(args)...);
+}
+
 } // namespace detail
 
 } // namespace caelestia::settings
@@ -111,7 +116,8 @@ public:                                                                         
     }                                                                                                                  \
                                                                                                                        \
 private:                                                                                                               \
-    Type* m_##name = new Type(fallbackValue(&Self::m_##name, nullptr), this, global);                                  \
+    Type* m_##name =                                                                                                   \
+        caelestia::settings::detail::makeSubobject<Type>(fallbackValue(&Self::m_##name, nullptr), this, global);       \
     inline static const bool s_register_##name =                                                                       \
         (caelestia::settings::Schema::annotate(                                                                        \
              &staticMetaObject, QStringLiteral(#name), { .defaultValue = {}, .globalOnly = global }),                  \
