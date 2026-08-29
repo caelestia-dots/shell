@@ -1,7 +1,8 @@
 #include "qalculator.hpp"
 
-#include <libqalculate/qalculate.h>
 #include <qtconcurrentrun.h>
+
+#include <libqalculate/qalculate.h>
 
 namespace caelestia {
 

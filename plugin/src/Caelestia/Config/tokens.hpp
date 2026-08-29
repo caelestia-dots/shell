@@ -1,7 +1,8 @@
 #pragma once
 
-#include <limits>
 #include <qlist.h>
+
+#include <limits>
 
 #include "settings/objectnode.hpp"
 #include "common.hpp"

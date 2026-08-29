@@ -1,8 +1,10 @@
 #include "cavaprovider.hpp"
 
-#include <cava/cavacore.h>
-#include <cstddef>
 #include <qloggingcategory.h>
+
+#include <cava/cavacore.h>
+
+#include <cstddef>
 
 #include "audiocollector.hpp"
 #include "audioprovider.hpp"

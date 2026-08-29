@@ -1,7 +1,8 @@
 #pragma once
 
-#include <cava/cavacore.h>
 #include <qqmlintegration.h>
+
+#include <cava/cavacore.h>
 
 #include "audioprovider.hpp"
 
