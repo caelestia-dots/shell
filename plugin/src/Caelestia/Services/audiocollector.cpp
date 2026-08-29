@@ -195,9 +195,7 @@ void AudioCollector::clearBuffer() {
 }
 
 void AudioCollector::loadChunk(const qint16* samples, quint32 count) {
-    if (count > ac::CHUNK_SIZE) {
-        count = ac::CHUNK_SIZE;
-    }
+    count = std::min(count, ac::CHUNK_SIZE);
 
     auto* writeBuffer = m_writeBuffer.load(std::memory_order_relaxed);
     std::transform(samples, samples + count, writeBuffer->begin(), [](qint16 sample) {
