@@ -59,10 +59,10 @@ bool BlobMaterialShader::updateUniformData(RenderState& state, QSGMaterial* newM
 
     // Color as vec4 (offset 96, 16 bytes)
     const float color[4] = {
-        static_cast<float>(mat->m_color.redF()),
-        static_cast<float>(mat->m_color.greenF()),
-        static_cast<float>(mat->m_color.blueF()),
-        static_cast<float>(mat->m_color.alphaF()),
+        mat->m_color.redF(),
+        mat->m_color.greenF(),
+        mat->m_color.blueF(),
+        mat->m_color.alphaF(),
     };
     memcpy(buf->data() + 96, color, 16);
 

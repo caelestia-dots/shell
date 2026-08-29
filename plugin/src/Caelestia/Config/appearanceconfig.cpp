@@ -62,7 +62,7 @@ int AppearanceRounding::extraExtraLarge() const {
 }
 
 int AppearanceRounding::full() const {
-    return m_tokens ? static_cast<int>(m_tokens->full()) : 0;
+    return m_tokens ? m_tokens->full() : 0;
 }
 
 // AppearanceSpacing
