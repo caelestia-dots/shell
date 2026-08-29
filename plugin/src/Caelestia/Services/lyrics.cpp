@@ -7,9 +7,9 @@
 #include <qsavefile.h>
 #include <qurlquery.h>
 
-#include "../Config/rootnodes.hpp"
-#include "../Config/serviceconfig.hpp"
-#include "../Config/userpaths.hpp"
+#include "config/rootnodes.hpp"
+#include "config/serviceconfig.hpp"
+#include "config/userpaths.hpp"
 
 Q_LOGGING_CATEGORY(lcLyrics, "caelestia.lyrics", QtInfoMsg)
 

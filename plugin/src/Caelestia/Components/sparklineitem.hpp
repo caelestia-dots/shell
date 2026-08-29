@@ -5,7 +5,7 @@
 #include <qqmlintegration.h>
 #include <qquickpainteditem.h>
 
-#include "../circularbuffer.hpp"
+#include "core/circularbuffer.hpp"
 
 namespace caelestia::components {
 

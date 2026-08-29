@@ -1,6 +1,6 @@
 #include "rootnodes.hpp"
 
-#include "../toaster.hpp"
+#include "core/toaster.hpp"
 #include "appearanceconfig.hpp"
 #include "backgroundconfig.hpp"
 #include "barconfig.hpp"

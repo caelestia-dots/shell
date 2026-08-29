@@ -3,7 +3,7 @@
 #include <qelapsedtimer.h>
 #include <qqmlintegration.h>
 
-#include "../circularbuffer.hpp"
+#include "core/circularbuffer.hpp"
 #include "tickingservice.hpp"
 
 namespace caelestia::services {
