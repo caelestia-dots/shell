@@ -12,11 +12,15 @@ WlSessionLockSurface {
     id: root
 
     required property WlSessionLock lock
+    // The card is sized against the monitor's short edge. That happens to be
+    // screen.height on a landscape monitor, which is why it was written that
+    // way, but on a rotated one it's the long edge - so the card came out
+    // taller than the screen and spilled off it.
+    readonly property bool isPortrait: (screen?.width ?? 0) < (screen?.height ?? 0)
+    readonly property real shortEdge: Math.min(screen?.width ?? 0, screen?.height ?? 0)
     required property Pam pam
 
     readonly property alias unlocking: unlockAnim.running
-    readonly property real lockHeight: Math.min(root.screen?.width ?? 0, root.screen?.height ?? 0)
-    readonly property bool isPortrait: (root.screen?.width ?? 0) < (root.screen?.height ?? 0)
 
     contentItem.Config.screen: screen.name
     contentItem.Tokens.screen: screen.name
@@ -146,12 +150,12 @@ WlSessionLockSurface {
                 Anim {
                     target: lockContent
                     property: "implicitWidth"
-                    to: root.isPortrait ? lockContent.lockShort : lockContent.lockLong
+                    to: root.isPortrait ? lockContent.cardShort : lockContent.cardLong
                 }
                 Anim {
                     target: lockContent
                     property: "implicitHeight"
-                    to: root.isPortrait ? lockContent.lockLong : lockContent.lockShort
+                    to: root.isPortrait ? lockContent.cardLong : lockContent.cardShort
                 }
             }
         }
@@ -197,13 +201,11 @@ WlSessionLockSurface {
     Item {
         id: lockContent
 
+        readonly property real cardLong: root.shortEdge * Tokens.sizes.lock.heightMult * Tokens.sizes.lock.ratio
+        readonly property real cardShort: root.shortEdge * Tokens.sizes.lock.heightMult
+
         readonly property int size: lockIcon.implicitHeight + Tokens.padding.large * 4
         readonly property int radius: size / 4 * Tokens.rounding.scale
-
-        // Long/short axis of the lock surface relative to the monitor's short edge.
-        // Portrait swaps which axis maps to width/height.
-        readonly property real lockLong: root.lockHeight * Tokens.sizes.lock.heightMult * Tokens.sizes.lock.ratio
-        readonly property real lockShort: root.lockHeight * Tokens.sizes.lock.heightMult
 
         anchors.centerIn: parent
         implicitWidth: size
@@ -241,12 +243,12 @@ WlSessionLockSurface {
         Content {
             id: content
 
-            isPortrait: root.isPortrait
-            lockHeight: root.lockHeight
-
             anchors.centerIn: parent
-            width: (root.isPortrait ? lockContent.lockShort : lockContent.lockLong) - Tokens.padding.extraLargeIncreased
-            height: (root.isPortrait ? lockContent.lockLong : lockContent.lockShort) - Tokens.padding.extraLargeIncreased
+            width: (root.isPortrait ? lockContent.cardShort : lockContent.cardLong) - Tokens.padding.extraLargeIncreased
+            height: (root.isPortrait ? lockContent.cardLong : lockContent.cardShort) - Tokens.padding.extraLargeIncreased
+
+            isPortrait: root.isPortrait
+            lockHeight: root.shortEdge
 
             lock: root
             opacity: 0
