@@ -76,15 +76,15 @@ void BlobRect::updatePhysics() {
 
     // Compute target deformation matrix from velocity
     // R(θ) * diag(stretch, compress) * R(θ)^T
-    const auto kStretchFactor = static_cast<float>(m_deformScale);
-    constexpr float kMaxStretch = 0.35f;
+    const auto stretchFactor = static_cast<float>(m_deformScale);
+    constexpr float k_maxStretch = 0.35f;
 
     float target00 = 1.0f;
     float target01 = 0.0f;
     float target11 = 1.0f;
 
     if (speed > 5.0f) {
-        const float targetStretch = 1.0f + std::min(speed * kStretchFactor, kMaxStretch);
+        const float targetStretch = 1.0f + std::min(speed * stretchFactor, k_maxStretch);
         const float targetCompress = 1.0f / targetStretch;
 
         const float cosA = velX / speed;
@@ -102,17 +102,17 @@ void BlobRect::updatePhysics() {
     // (the friction term uses the new velocity, solved in closed form) so the 1/(1 + c*dt)
     // factor stays in (0, 1) for any dt; an explicit -c*v*dt term would flip sign and inject
     // energy once c*dt > 1 (here dt > ~62ms), making the deformation diverge on slow frames.
-    const auto kStiffness = static_cast<float>(m_stiffness);
-    const auto kDamping = static_cast<float>(m_damping);
-    const float invDamp = 1.0f / (1.0f + kDamping * dt);
+    const auto stiffness = static_cast<float>(m_stiffness);
+    const auto damping = static_cast<float>(m_damping);
+    const float invDamp = 1.0f / (1.0f + damping * dt);
 
-    m_dmVel00 = (m_dmVel00 - kStiffness * (m_dm00 - target00) * dt) * invDamp;
+    m_dmVel00 = (m_dmVel00 - stiffness * (m_dm00 - target00) * dt) * invDamp;
     m_dm00 += m_dmVel00 * dt;
 
-    m_dmVel01 = (m_dmVel01 - kStiffness * (m_dm01 - target01) * dt) * invDamp;
+    m_dmVel01 = (m_dmVel01 - stiffness * (m_dm01 - target01) * dt) * invDamp;
     m_dm01 += m_dmVel01 * dt;
 
-    m_dmVel11 = (m_dmVel11 - kStiffness * (m_dm11 - target11) * dt) * invDamp;
+    m_dmVel11 = (m_dmVel11 - stiffness * (m_dm11 - target11) * dt) * invDamp;
     m_dm11 += m_dmVel11 * dt;
 
     m_deformMatrix = QMatrix4x4(m_dm00, m_dm01, 0, 0, m_dm01, m_dm11, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1);
@@ -331,10 +331,10 @@ void BlobRect::excludeCornersRemoveLast(QQmlListProperty<BlobRect>* prop) {
 }
 
 void BlobRect::checkAtRest(float speed) {
-    constexpr float kEpsilon = 0.002f;
-    const bool atRest = std::abs(m_dm00 - 1.0f) < kEpsilon && std::abs(m_dm01) < kEpsilon &&
-                        std::abs(m_dm11 - 1.0f) < kEpsilon && std::abs(m_dmVel00) < kEpsilon &&
-                        std::abs(m_dmVel01) < kEpsilon && std::abs(m_dmVel11) < kEpsilon && speed < 5.0f;
+    constexpr float k_epsilon = 0.002f;
+    const bool atRest = std::abs(m_dm00 - 1.0f) < k_epsilon && std::abs(m_dm01) < k_epsilon &&
+                        std::abs(m_dm11 - 1.0f) < k_epsilon && std::abs(m_dmVel00) < k_epsilon &&
+                        std::abs(m_dmVel01) < k_epsilon && std::abs(m_dmVel11) < k_epsilon && speed < 5.0f;
 
     if (atRest) {
         m_dm00 = 1.0f;

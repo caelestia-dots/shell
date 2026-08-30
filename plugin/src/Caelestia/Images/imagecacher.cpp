@@ -49,13 +49,13 @@ QString fillSuffix(ImageCacher::FillMode fillMode) {
 } // namespace
 
 const QString& ImageCacher::cacheDir() {
-    static const QString s_dir = [] {
+    static const QString k_dir = [] {
         QString cache = qEnvironmentVariable("XDG_CACHE_HOME");
         if (cache.isEmpty())
             cache = QDir::homePath() + QStringLiteral("/.cache");
         return cache + QStringLiteral("/caelestia/imagecache");
     }();
-    return s_dir;
+    return k_dir;
 }
 
 QString ImageCacher::cachePathFor(const QString& sourcePath, const QSize& size, FillMode fillMode) {

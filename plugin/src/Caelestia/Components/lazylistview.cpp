@@ -7,8 +7,8 @@
 
 namespace {
 
-constexpr int ASYNC_BATCH_CREATE = 2;
-constexpr int ASYNC_BATCH_DESTROY = 4;
+constexpr int k_asyncBatchCreate = 2;
+constexpr int k_asyncBatchDestroy = 4;
 
 } // namespace
 
@@ -612,7 +612,7 @@ void LazyListView::syncDelegates() {
     }
 
     // Batch destroy
-    const int destroyBudget = m_asynchronous ? ASYNC_BATCH_DESTROY : static_cast<int>(toRemove.size());
+    const int destroyBudget = m_asynchronous ? k_asyncBatchDestroy : static_cast<int>(toRemove.size());
     QVector<DelegateEntry> removedEntries;
     removedEntries.reserve(std::min(destroyBudget, static_cast<int>(toRemove.size())));
     int destroyed = 0;
@@ -638,7 +638,7 @@ void LazyListView::syncDelegates() {
     }
 
     // Batch create
-    const int createBudget = m_asynchronous ? ASYNC_BATCH_CREATE : static_cast<int>(toCreate.size());
+    const int createBudget = m_asynchronous ? k_asyncBatchCreate : static_cast<int>(toCreate.size());
     int created = 0;
     for (const int i : toCreate) {
         if (created >= createBudget)

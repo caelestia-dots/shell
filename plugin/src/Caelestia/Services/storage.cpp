@@ -154,7 +154,7 @@ DiskInfo* Storage::primaryDisk() const {
 }
 
 bool Storage::isPseudoFs(QByteArrayView fsType) {
-    static constexpr const char* kPseudo[] = {
+    static constexpr const char* k_pseudo[] = {
         "tmpfs",
         "devtmpfs",
         "proc",
@@ -180,7 +180,7 @@ bool Storage::isPseudoFs(QByteArrayView fsType) {
         "efivarfs",
         "selinuxfs",
     };
-    for (const char* p : kPseudo) {
+    for (const char* p : k_pseudo) {
         if (fsType == QByteArrayView(p)) {
             return true;
         }

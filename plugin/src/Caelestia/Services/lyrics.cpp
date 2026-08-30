@@ -26,22 +26,22 @@ using Qt::StringLiterals::operator""_ba;
 
 namespace {
 
-constexpr int kLoadDebounceMs = 50;
-constexpr qreal kIndexFudge = 0.1;
+constexpr int k_loadDebounceMs = 50;
+constexpr qreal k_indexFudge = 0.1;
 
 [[nodiscard]] const QHash<QByteArray, QByteArray>& netEaseHeaders() {
-    static const QHash<QByteArray, QByteArray> h = {
+    static const QHash<QByteArray, QByteArray> k_h = {
         { "User-Agent"_ba, "Mozilla/5.0 (X11; Linux x86_64; rv:120.0) Gecko/20100101 Firefox/120.0"_ba },
         { "Referer"_ba, "https://music.163.com/"_ba },
     };
-    return h;
+    return k_h;
 }
 
 [[nodiscard]] const QHash<QByteArray, QByteArray>& lrclibHeaders() {
-    static const QHash<QByteArray, QByteArray> h = {
+    static const QHash<QByteArray, QByteArray> k_h = {
         { "User-Agent"_ba, "caelestia-shell (https://github.com/caelestia-dots/shell)"_ba },
     };
-    return h;
+    return k_h;
 }
 
 [[nodiscard]] QString joinArtists(const QString& s) {
@@ -72,7 +72,7 @@ Lyrics::Lyrics(QObject* parent)
     , m_nam(new QNetworkAccessManager(this))
     , m_loadDebounce(new QTimer(this)) {
     m_loadDebounce->setSingleShot(true);
-    m_loadDebounce->setInterval(kLoadDebounceMs);
+    m_loadDebounce->setInterval(k_loadDebounceMs);
     QObject::connect(m_loadDebounce, &QTimer::timeout, this, &Lyrics::doLoad);
 
     const auto* cfg = config::ConfigSingleton::instance();
@@ -211,7 +211,7 @@ int Lyrics::indexForTime(qreal time) const {
     if (m_lines.isEmpty()) {
         return -1;
     }
-    const qreal target = time - m_offset + kIndexFudge;
+    const qreal target = time - m_offset + k_indexFudge;
     qsizetype lo = 0;
     qsizetype hi = m_lines.size();
     while (lo < hi) {
@@ -513,8 +513,8 @@ void Lyrics::tryLrclib(int reqId) {
         q.addQueryItem(u"album_name"_s, m_album);
     }
 
-    constexpr qreal kMaxDurationSecs = std::numeric_limits<int>::max();
-    if (m_duration > 0 && qIsFinite(m_duration) && m_duration < kMaxDurationSecs) {
+    constexpr qreal k_maxDurationSecs = std::numeric_limits<int>::max();
+    if (m_duration > 0 && qIsFinite(m_duration) && m_duration < k_maxDurationSecs) {
         q.addQueryItem(u"duration"_s, QString::number(qRound(m_duration)));
     }
     url.setQuery(q);
@@ -903,25 +903,25 @@ LyricsBackend Lyrics::backendFromKey(const QString& key) {
 }
 
 const QString& Lyrics::stateDir() {
-    static const QString s_dir = [] {
+    static const QString k_dir = [] {
         QString state = qEnvironmentVariable("XDG_STATE_HOME");
         if (state.isEmpty()) {
             state = QDir::homePath() + u"/.local/state"_s;
         }
         return state + u"/caelestia/lyrics"_s;
     }();
-    return s_dir;
+    return k_dir;
 }
 
 const QString& Lyrics::cacheDir() {
-    static const QString s_dir = [] {
+    static const QString k_dir = [] {
         QString cache = qEnvironmentVariable("XDG_CACHE_HOME");
         if (cache.isEmpty()) {
             cache = QDir::homePath() + u"/.cache"_s;
         }
         return cache + u"/caelestia/lyrics"_s;
     }();
-    return s_dir;
+    return k_dir;
 }
 
 QString Lyrics::cachePathFor(LyricsBackend backend, const QString& id) {
@@ -1004,8 +1004,8 @@ QVector<LyricLine> Lyrics::parseLrc(const QString& text) {
         return result;
     }
 
-    static const QRegularExpression timeRegex(u"\\[(\\d+):(\\d+(?:\\.\\d+)?)\\]"_s);
-    static const QStringList creditKeywords = {
+    static const QRegularExpression k_timeRegex(u"\\[(\\d+):(\\d+(?:\\.\\d+)?)\\]"_s);
+    static const QStringList k_creditKeywords = {
         u"作词"_s,
         u"作曲"_s,
         u"编曲"_s,
@@ -1025,7 +1025,7 @@ QVector<LyricLine> Lyrics::parseLrc(const QString& text) {
     const QStringList lines = text.split(QLatin1Char('\n'));
     for (const QString& line : lines) {
         QList<QRegularExpressionMatch> matches;
-        auto it = timeRegex.globalMatch(line);
+        auto it = k_timeRegex.globalMatch(line);
         while (it.hasNext()) {
             matches.append(it.next());
         }
@@ -1034,14 +1034,14 @@ QVector<LyricLine> Lyrics::parseLrc(const QString& text) {
         }
 
         QString lyric = line;
-        lyric.replace(timeRegex, QString());
+        lyric.replace(k_timeRegex, QString());
         lyric = lyric.trimmed();
 
         const qreal firstTime = matches.first().captured(1).toInt() * 60.0 + matches.first().captured(2).toDouble();
 
         if (firstTime < 20.0) {
             bool isCredit = false;
-            for (const QString& k : creditKeywords) {
+            for (const QString& k : k_creditKeywords) {
                 if (lyric.contains(k, Qt::CaseInsensitive)) {
                     isCredit = true;
                     break;

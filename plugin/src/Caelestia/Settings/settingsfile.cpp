@@ -22,7 +22,7 @@ namespace caelestia::settings {
 namespace {
 
 // Max retries for loads which fail due to malformed JSON, e.g. partial writes
-constexpr int kMaxLoadRetries = 3;
+constexpr int k_maxLoadRetries = 3;
 
 } // namespace
 
@@ -92,12 +92,12 @@ void SettingsFile::scheduleLoad() {
 }
 
 void SettingsFile::onLoadDebounced() {
-    const auto isFinalTry = m_loadRetries >= kMaxLoadRetries;
+    const auto isFinalTry = m_loadRetries >= k_maxLoadRetries;
 
     if (load(isFinalTry) == LoadResult::ParseError && !isFinalTry) {
         // Likely a partial write, retry after another debounce
         ++m_loadRetries;
-        qCDebug(lcSettingsFile, "Retrying load of %s (%d/%d)", qUtf8Printable(m_path), m_loadRetries, kMaxLoadRetries);
+        qCDebug(lcSettingsFile, "Retrying load of %s (%d/%d)", qUtf8Printable(m_path), m_loadRetries, k_maxLoadRetries);
         m_loadDebounce->start();
     }
 }

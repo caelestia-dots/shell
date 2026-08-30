@@ -21,7 +21,7 @@ namespace caelestia::services {
 CavaProcessor::CavaProcessor(QObject* parent)
     : AudioProcessor(parent)
     , m_plan(nullptr)
-    , m_in(new double[ac::CHUNK_SIZE])
+    , m_in(new double[ac::k_chunkSize])
     , m_out(nullptr)
     , m_bars(0) {};
 
@@ -99,7 +99,7 @@ void CavaProcessor::initCava() {
         return;
     }
 
-    m_plan = cava_init(m_bars, ac::SAMPLE_RATE, 1, 1, 0.85, 50, 10000);
+    m_plan = cava_init(m_bars, ac::k_sampleRate, 1, 1, 0.85, 50, 10000);
     m_out = new double[static_cast<size_t>(m_bars)];
 }
 

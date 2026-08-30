@@ -73,14 +73,14 @@ signals:
     void updated();
 
 private:
-    static constexpr int SEGMENTS = 2;
+    static constexpr int k_segments = 2;
 
     std::array<QEasingCurve, 4> m_interpolators;
     qreal m_progress;
     qreal m_completeEndProgress;
     int m_gap;
 
-    std::array<LinearIndicatorSegment*, SEGMENTS> m_activeIndicators;
+    std::array<LinearIndicatorSegment*, k_segments> m_activeIndicators;
 };
 
 } // namespace caelestia::components

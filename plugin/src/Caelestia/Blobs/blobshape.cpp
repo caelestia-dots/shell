@@ -340,7 +340,7 @@ void BlobShape::updatePolish() {
 
     // Pre-compute effective per-corner radii (moves O(N²) work from GPU to CPU)
     const float smoothFactor = pad;
-    constexpr float minR = 2.0f;
+    constexpr float k_minR = 2.0f;
     const bool cornerFill = m_group->cornerFill();
     const auto rectCount = m_cachedRects.size();
     for (qsizetype i = 0; i < rectCount; ++i) {
@@ -394,10 +394,10 @@ void BlobShape::updatePolish() {
         }
 
         // Combine base radii with fill factors into effective per-corner radii
-        ri.radius[0] = std::max(ri.radius[0] * fTr, minR);
-        ri.radius[1] = std::max(ri.radius[1] * fBr, minR);
-        ri.radius[2] = std::max(ri.radius[2] * fBl, minR);
-        ri.radius[3] = std::max(ri.radius[3] * fTl, minR);
+        ri.radius[0] = std::max(ri.radius[0] * fTr, k_minR);
+        ri.radius[1] = std::max(ri.radius[1] * fBr, k_minR);
+        ri.radius[2] = std::max(ri.radius[2] * fBl, k_minR);
+        ri.radius[3] = std::max(ri.radius[3] * fTl, k_minR);
     }
 }
 

@@ -30,11 +30,11 @@ template <typename Container> ValueCodec* makeListCodec(const QMetaType& type) {
 using ListFactory = ValueCodec* (*)(const QMetaType&);
 
 const QHash<int, ListFactory>& listFactories() {
-    static const QHash<int, ListFactory> factories{
+    static const QHash<int, ListFactory> k_factories{
         { QMetaType::fromType<QStringList>().id(), &makeListCodec<QStringList> },
         { QMetaType::fromType<QList<qreal>>().id(), &makeListCodec<QList<qreal>> },
     };
-    return factories;
+    return k_factories;
 }
 
 } // namespace
@@ -111,13 +111,13 @@ DecodeResult IntCodec::decode(const QJsonValue& value) const {
     if (std::modf(num, &integral) != 0.0)
         return error(DiagnosticType::InvalidValue, QStringLiteral("Expected an integer, got the real %1").arg(num));
 
-    constexpr auto min = std::numeric_limits<int>::min();
-    constexpr auto max = std::numeric_limits<int>::max();
-    if (num < static_cast<double>(min) || num > static_cast<double>(max)) {
+    constexpr auto k_min = std::numeric_limits<int>::min();
+    constexpr auto k_max = std::numeric_limits<int>::max();
+    if (num < static_cast<double>(k_min) || num > static_cast<double>(k_max)) {
         const auto message = QStringLiteral("Integer %1 is out of range, expected between %2 and %3")
                                  .arg(num, 0, 'f', 0)
-                                 .arg(min)
-                                 .arg(max);
+                                 .arg(k_min)
+                                 .arg(k_max);
         return error(DiagnosticType::InvalidValue, message);
     }
 

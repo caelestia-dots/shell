@@ -49,19 +49,19 @@ PipeWireWorker::PipeWireWorker(std::stop_token token, AudioCollector* collector)
         PW_KEY_MEDIA_TYPE, "Audio", PW_KEY_MEDIA_CATEGORY, "Capture", PW_KEY_MEDIA_ROLE, "Music", nullptr);
     pw_properties_set(props, PW_KEY_STREAM_CAPTURE_SINK, "true");
     pw_properties_setf(
-        props, PW_KEY_NODE_LATENCY, "%u/%u", nextPowerOf2(512 * ac::SAMPLE_RATE / 48000), ac::SAMPLE_RATE);
+        props, PW_KEY_NODE_LATENCY, "%u/%u", nextPowerOf2(512 * ac::k_sampleRate / 48000), ac::k_sampleRate);
     pw_properties_set(props, PW_KEY_NODE_PASSIVE, "true");
     pw_properties_set(props, PW_KEY_NODE_VIRTUAL, "true");
     pw_properties_set(props, PW_KEY_STREAM_DONT_REMIX, "false");
     pw_properties_set(props, "channelmix.upmix", "true");
 
-    std::vector<uint8_t> buffer(ac::CHUNK_SIZE);
+    std::vector<uint8_t> buffer(ac::k_chunkSize);
     spa_pod_builder b;
     spa_pod_builder_init(&b, buffer.data(), static_cast<quint32>(buffer.size()));
 
     spa_audio_info_raw info{};
     info.format = SPA_AUDIO_FORMAT_S16;
-    info.rate = ac::SAMPLE_RATE;
+    info.rate = ac::k_sampleRate;
     info.channels = 1;
 
     const spa_pod* params[1];
@@ -196,7 +196,7 @@ void AudioCollector::clearBuffer() {
 }
 
 void AudioCollector::loadChunk(const qint16* samples, quint32 count) {
-    count = std::min(count, ac::CHUNK_SIZE);
+    count = std::min(count, ac::k_chunkSize);
 
     auto* writeBuffer = m_writeBuffer.load(std::memory_order_relaxed);
     std::transform(samples, samples + count, writeBuffer->begin(), [](qint16 sample) {
@@ -208,8 +208,8 @@ void AudioCollector::loadChunk(const qint16* samples, quint32 count) {
 }
 
 quint32 AudioCollector::readChunk(float* out, quint32 count) {
-    if (count == 0 || count > ac::CHUNK_SIZE) {
-        count = ac::CHUNK_SIZE;
+    if (count == 0 || count > ac::k_chunkSize) {
+        count = ac::k_chunkSize;
     }
 
     auto* readBuffer = m_readBuffer.load(std::memory_order_acquire);
@@ -219,8 +219,8 @@ quint32 AudioCollector::readChunk(float* out, quint32 count) {
 }
 
 quint32 AudioCollector::readChunk(double* out, quint32 count) {
-    if (count == 0 || count > ac::CHUNK_SIZE) {
-        count = ac::CHUNK_SIZE;
+    if (count == 0 || count > ac::k_chunkSize) {
+        count = ac::k_chunkSize;
     }
 
     auto* readBuffer = m_readBuffer.load(std::memory_order_acquire);
@@ -233,8 +233,8 @@ quint32 AudioCollector::readChunk(double* out, quint32 count) {
 
 AudioCollector::AudioCollector(QObject* parent)
     : Service(parent)
-    , m_buffer1(ac::CHUNK_SIZE)
-    , m_buffer2(ac::CHUNK_SIZE)
+    , m_buffer1(ac::k_chunkSize)
+    , m_buffer2(ac::k_chunkSize)
     , m_readBuffer(&m_buffer1)
     , m_writeBuffer(&m_buffer2) {}
 

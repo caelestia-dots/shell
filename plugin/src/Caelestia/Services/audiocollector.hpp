@@ -17,8 +17,8 @@ namespace caelestia::services {
 
 namespace ac {
 
-constexpr quint32 SAMPLE_RATE = 44100;
-constexpr quint32 CHUNK_SIZE = 512;
+constexpr quint32 k_sampleRate = 44100;
+constexpr quint32 k_chunkSize = 512;
 
 } // namespace ac
 

@@ -59,8 +59,8 @@ bool FileSystemEntry::isImage() const {
 
 QString FileSystemEntry::mimeType() const {
     if (!m_mimeTypeInitialised) {
-        static const QMimeDatabase s_db;
-        m_mimeType = s_db.mimeTypeForFile(m_path).name();
+        static const QMimeDatabase k_db;
+        m_mimeType = k_db.mimeTypeForFile(m_path).name();
         m_mimeTypeInitialised = true;
     }
     return m_mimeType;
