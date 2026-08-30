@@ -5,6 +5,8 @@
 #include <qsqlquery.h>
 #include <quuid.h>
 
+#include <algorithm>
+
 namespace {
 
 Q_LOGGING_CATEGORY(lcAppDb, "caelestia.appdb", QtInfoMsg)
@@ -253,12 +255,10 @@ QList<AppEntry*>& AppDb::getSortedApps() const {
 }
 
 bool AppDb::isFavourite(const AppEntry* app) const {
-    for (const QRegularExpression& re : m_favouriteAppsRegex) {
-        if (re.match(app->id()).hasMatch()) {
-            return true;
-        }
-    }
-    return false;
+    const QString id = app->id();
+    return std::ranges::any_of(m_favouriteAppsRegex, [&id](const QRegularExpression& re) {
+        return re.match(id).hasMatch();
+    });
 }
 
 quint32 AppDb::getFrequency(const QString& id) const {

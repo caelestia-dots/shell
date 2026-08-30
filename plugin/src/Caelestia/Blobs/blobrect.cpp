@@ -217,19 +217,15 @@ void BlobRect::cornerRadii(float out[4]) const {
 }
 
 bool BlobRect::isExcluded(const BlobShape* other) const {
-    for (const auto& ptr : m_exclude) {
-        if (ptr == other)
-            return true;
-    }
-    return false;
+    return std::ranges::any_of(m_exclude, [other](const auto& ptr) {
+        return ptr == other;
+    });
 }
 
 bool BlobRect::isCornerExcluded(const BlobShape* other) const {
-    for (const auto& ptr : m_excludeCorners) {
-        if (ptr == other)
-            return true;
-    }
-    return false;
+    return std::ranges::any_of(m_excludeCorners, [other](const auto& ptr) {
+        return ptr == other;
+    });
 }
 
 QQmlListProperty<BlobRect> BlobRect::exclude() {
