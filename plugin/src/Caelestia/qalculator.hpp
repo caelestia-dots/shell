@@ -2,6 +2,7 @@
 
 #include <qmutex.h>
 #include <qobject.h>
+#include <qpair.h>
 #include <qqmlintegration.h>
 
 namespace caelestia {
@@ -32,6 +33,12 @@ signals:
 
 private:
     static QMutex s_calculatorMutex;
+
+    [[nodiscard]] static QPair<QString, QString> evaluate(const QString& expr);
+
+    void applyResult(quint64 gen, const QPair<QString, QString>& result);
+    void clearResult();
+    void setBusy(bool busy);
 
     QString m_result;
     QString m_rawResult;
