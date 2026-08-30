@@ -63,5 +63,7 @@ CheckOptions:
   readability-identifier-naming.TypeAliasCase: CamelCase
   readability-identifier-naming.TemplateParameterCase: CamelCase
   readability-implicit-bool-conversion.AllowPointerConditions: true
+  # Qt logging macros expand to for loops, so ignore them (we don't really use other macros)
+  readability-function-cognitive-complexity.IgnoreMacros: true
   # Ban Q* (e.g. Qt module includes or Qt module prefixes)
   portability-restrict-system-includes.Includes: '*,-Q*'
