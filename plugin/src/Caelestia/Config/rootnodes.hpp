@@ -5,12 +5,11 @@
 
 #include "settings/layerregistry.hpp"
 #include "settings/rootnode.hpp"
-#include "common.hpp"
-
 #include "appearanceconfig.hpp"
 #include "backgroundconfig.hpp"
 #include "barconfig.hpp"
 #include "borderconfig.hpp"
+#include "common.hpp"
 #include "dashboardconfig.hpp"
 #include "generalconfig.hpp"
 #include "launcherconfig.hpp"
