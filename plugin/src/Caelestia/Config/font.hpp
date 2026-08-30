@@ -57,7 +57,7 @@ class FontStyleBase : public QObject {
 public:
     explicit FontStyleBase(QObject* parent = nullptr);
 
-    void bind(settings::ObjectNode* cfg);
+    virtual void bind(settings::ObjectNode* cfg);
     void setScale(qreal scale);
 
     [[nodiscard]] QFont large() const;
@@ -106,7 +106,7 @@ public:
 
     Q_INVOKABLE FontBuilder size(int pointSize);
 
-    void bind(settings::ObjectNode* cfg);
+    void bind(settings::ObjectNode* cfg) override;
 
     [[nodiscard]] QFont extraLarge() const;
     [[nodiscard]] IconFontBuilders* builders() const;
