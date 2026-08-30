@@ -7,6 +7,8 @@
 #include <qsavefile.h>
 #include <qurlquery.h>
 
+#include <algorithm>
+
 #include "config/rootnodes.hpp"
 #include "config/serviceconfig.hpp"
 #include "config/userpaths.hpp"
@@ -281,7 +283,7 @@ void Lyrics::setLoading(bool value) {
 }
 
 void Lyrics::setLines(QVector<LyricLine> lines, LyricsBackend source) {
-    std::sort(lines.begin(), lines.end(), [](const LyricLine& a, const LyricLine& b) {
+    std::ranges::sort(lines, [](const LyricLine& a, const LyricLine& b) {
         return a.time < b.time;
     });
 
@@ -1056,7 +1058,7 @@ QVector<LyricLine> Lyrics::parseLrc(const QString& text) {
         }
     }
 
-    std::sort(result.begin(), result.end(), [](const LyricLine& a, const LyricLine& b) {
+    std::ranges::sort(result, [](const LyricLine& a, const LyricLine& b) {
         return a.time < b.time;
     });
 

@@ -191,7 +191,7 @@ AudioCollector& AudioCollector::instance() {
 
 void AudioCollector::clearBuffer() {
     auto* writeBuffer = m_writeBuffer.load(std::memory_order_relaxed);
-    std::fill(writeBuffer->begin(), writeBuffer->end(), 0.0f);
+    std::ranges::fill(*writeBuffer, 0.0f);
 
     auto* oldRead = m_readBuffer.exchange(writeBuffer, std::memory_order_acq_rel);
     m_writeBuffer.store(oldRead, std::memory_order_release);

@@ -2,6 +2,8 @@
 
 #include <qjsonarray.h>
 
+#include <algorithm>
+
 #include "config/rootnodes.hpp"
 #include "core/toaster.hpp"
 
@@ -143,7 +145,7 @@ bool HyprDevices::updateLastIpcObject(QJsonObject object) {
 
     for (auto it = m_keyboards.begin(); it != m_keyboards.end();) {
         auto* const keyboard = *it;
-        const auto inNewValues = std::any_of(val.begin(), val.end(), [keyboard](const QJsonValue& o) {
+        const auto inNewValues = std::ranges::any_of(val, [keyboard](const QJsonValue& o) {
             return o.toObject().value(u"address"_s).toString() == keyboard->address();
         });
 
@@ -160,7 +162,7 @@ bool HyprDevices::updateLastIpcObject(QJsonObject object) {
         const auto obj = o.toObject();
         const auto addr = obj.value(u"address"_s).toString();
 
-        auto it = std::find_if(m_keyboards.begin(), m_keyboards.end(), [addr](const HyprKeyboard* kb) {
+        auto it = std::ranges::find_if(m_keyboards, [addr](const HyprKeyboard* kb) {
             return kb->address() == addr;
         });
 

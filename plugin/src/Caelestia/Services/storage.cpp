@@ -293,7 +293,7 @@ void Storage::tick() {
         }
     }
 
-    std::sort(next.begin(), next.end(), [](const DiskInfo* a, const DiskInfo* b) {
+    std::ranges::sort(next, [](const DiskInfo* a, const DiskInfo* b) {
         if (a->hasRoot() != b->hasRoot()) {
             return a->hasRoot();
         }

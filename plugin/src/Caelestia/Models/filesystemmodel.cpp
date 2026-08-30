@@ -4,6 +4,8 @@
 #include <qfuturewatcher.h>
 #include <qtconcurrentrun.h>
 
+#include <algorithm>
+
 namespace caelestia::models {
 
 FileSystemEntry::FileSystemEntry(const QString& path, const QString& relativePath, QObject* parent)
@@ -381,7 +383,7 @@ void FileSystemModel::applyChanges(const QSet<QString>& removedPaths, const QSet
             removedIndices << i;
         }
     }
-    std::sort(removedIndices.begin(), removedIndices.end(), std::greater<>());
+    std::ranges::sort(removedIndices, std::greater<>());
 
     // Batch remove old entries
     int start = -1;
@@ -416,15 +418,15 @@ void FileSystemModel::applyChanges(const QSet<QString>& removedPaths, const QSet
     for (const auto& path : addedPaths) {
         newEntries << new FileSystemEntry(path, m_dir.relativeFilePath(path), this);
     }
-    std::sort(newEntries.begin(), newEntries.end(), [this](const FileSystemEntry* a, const FileSystemEntry* b) {
+    std::ranges::sort(newEntries, [this](const FileSystemEntry* a, const FileSystemEntry* b) {
         return compareEntries(a, b);
     });
 
     // Batch insert new entries (each run lands contiguously before m_entries[row])
     int i = 0;
     while (i < newEntries.size()) {
-        const auto it = std::lower_bound(m_entries.begin(), m_entries.end(), newEntries[i],
-            [this](const FileSystemEntry* a, const FileSystemEntry* b) {
+        const auto it = std::ranges::lower_bound(
+            m_entries, newEntries[i], [this](const FileSystemEntry* a, const FileSystemEntry* b) {
                 return compareEntries(a, b);
             });
         const auto row = static_cast<int>(it - m_entries.begin());

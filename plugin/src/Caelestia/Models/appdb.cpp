@@ -242,7 +242,7 @@ QList<AppEntry*>& AppDb::getSortedApps() const {
             favSet.insert(app->id());
     }
 
-    std::sort(m_sortedApps.begin(), m_sortedApps.end(), [&favSet](AppEntry* a, AppEntry* b) {
+    std::ranges::sort(m_sortedApps, [&favSet](AppEntry* a, AppEntry* b) {
         const bool aIsFav = favSet.contains(a->id());
         const bool bIsFav = favSet.contains(b->id());
         if (aIsFav != bIsFav)
