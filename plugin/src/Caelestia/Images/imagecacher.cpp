@@ -96,6 +96,7 @@ void ImageCacher::schedule(const QString& sourcePath, const QString& cachePath, 
     QThreadPool::globalInstance()->start([this, sourcePath, cachePath, size, fillMode]() {
         runJob(sourcePath, cachePath, size, fillMode);
         const QMutexLocker locker(&m_mutex);
+        // NOLINTNEXTLINE(clang-analyzer-core.CallAndMessage) m_inflight is a value member, not a pointer
         m_inflight.remove(cachePath);
     });
 }

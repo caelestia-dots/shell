@@ -168,6 +168,7 @@ void SessionManager::call(const QString& path, const QString& iface, const QStri
             qCWarning(lcSessionManager) << "Call to" << method << "failed:" << reply.error().message();
         self->deleteLater();
     });
+    // NOLINTNEXTLINE(clang-analyzer-cplusplus.NewDeleteLeaks) watcher is parented and self-deletes
 }
 
 void SessionManager::callManager(const QString& method) {

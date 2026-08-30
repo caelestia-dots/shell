@@ -163,6 +163,7 @@ void SettingsFile::save() {
     if (m_saveDebounce->isActive()) {
         // Queue save for debounce end
         QObject::connect(m_saveDebounce, &QTimer::timeout, this, &SettingsFile::save,
+            // NOLINTNEXTLINE(clang-analyzer-optin.core.EnumCastOutOfRange) ConnectionType is OR-able by design
             static_cast<Qt::ConnectionType>(Qt::UniqueConnection | Qt::SingleShotConnection));
         return;
     }
