@@ -295,9 +295,9 @@ bool ListNode::syncJson(const QJsonValue& json, QList<Diagnostic>& diagnostics) 
         const auto p = path();
         qCWarning(lcSettings, "Global property definition %s found in overlay file, ignoring.", qUtf8Printable(p));
         diagnostics << Diagnostic{
-            DiagnosticType::GlobalOption,
-            p,
-            QStringLiteral("Global properties should not be defined in overlay files"),
+            .type = DiagnosticType::GlobalOption,
+            .option = p,
+            .message = QStringLiteral("Global properties should not be defined in overlay files"),
         };
         return false;
     }

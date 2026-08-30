@@ -1054,7 +1054,7 @@ QVector<LyricLine> Lyrics::parseLrc(const QString& text) {
 
         for (const auto& m : matches) {
             const qreal t = m.captured(1).toInt() * 60.0 + m.captured(2).toDouble();
-            result.append(LyricLine{ t, lyric });
+            result.append(LyricLine{ .time = t, .text = lyric });
         }
     }
 

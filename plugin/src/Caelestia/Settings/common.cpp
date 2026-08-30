@@ -53,8 +53,11 @@ QString DiagnosticType::toString(Type t) {
 }
 
 Diagnostic Diagnostic::mismatch(const QString& expected, const QJsonValue& value, const QString& option) {
-    return { DiagnosticType::TypeMismatch, option,
-        QStringLiteral("Expected %1, got %2").arg(expected, jsonTypeName(value)) };
+    return {
+        .type = DiagnosticType::TypeMismatch,
+        .option = option,
+        .message = QStringLiteral("Expected %1, got %2").arg(expected, jsonTypeName(value)),
+    };
 }
 
 } // namespace caelestia::settings

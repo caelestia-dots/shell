@@ -112,10 +112,21 @@ struct NameSource {
 // depends on the resolved type.
 const std::array<NameSource, 3>& nameSources() {
     static const std::array<NameSource, 3> sources = { {
-        { QStringLiteral("nvidia-smi"), { QStringLiteral("--query-gpu=name"), QStringLiteral("--format=csv,noheader") },
-            &parseNvidiaName },
-        { QStringLiteral("glxinfo"), { QStringLiteral("-B") }, &parseGlxinfoName },
-        { QStringLiteral("lspci"), {}, &parseLspciName },
+        {
+            .program = QStringLiteral("nvidia-smi"),
+            .args = { QStringLiteral("--query-gpu=name"), QStringLiteral("--format=csv,noheader") },
+            .parse = &parseNvidiaName,
+        },
+        {
+            .program = QStringLiteral("glxinfo"),
+            .args = { QStringLiteral("-B") },
+            .parse = &parseGlxinfoName,
+        },
+        {
+            .program = QStringLiteral("lspci"),
+            .args = {},
+            .parse = &parseLspciName,
+        },
     } };
     return sources;
 }

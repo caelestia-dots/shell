@@ -38,7 +38,7 @@ PipeWireWorker::PipeWireWorker(std::stop_token token, AudioCollector* collector)
         return;
     }
 
-    timespec timeout = { 0, 10 * SPA_NSEC_PER_MSEC };
+    timespec timeout = { .tv_sec = 0, .tv_nsec = 10 * SPA_NSEC_PER_MSEC };
     m_timer = pw_loop_add_timer(pw_main_loop_get_loop(m_loop), handleTimeout, this);
     if (!m_timer) {
         qCWarning(lcAcWorker) << "init: failed to create timer";
@@ -121,7 +121,7 @@ void PipeWireWorker::handleTimeout(void* data, uint64_t expirations) {
             self->m_collector->clearBuffer();
         } else {
             self->m_idle = true;
-            timespec timeout = { 0, 500 * SPA_NSEC_PER_MSEC };
+            timespec timeout = { .tv_sec = 0, .tv_nsec = 500 * SPA_NSEC_PER_MSEC };
             pw_loop_update_timer(pw_main_loop_get_loop(self->m_loop), self->m_timer, &timeout, &timeout, false);
         }
     }
@@ -131,7 +131,7 @@ void PipeWireWorker::streamStateChanged(pw_stream_state state) {
     m_idle = false;
     switch (state) {
     case PW_STREAM_STATE_PAUSED: {
-        timespec timeout = { 0, 10 * SPA_NSEC_PER_MSEC };
+        timespec timeout = { .tv_sec = 0, .tv_nsec = 10 * SPA_NSEC_PER_MSEC };
         pw_loop_update_timer(pw_main_loop_get_loop(m_loop), m_timer, &timeout, &timeout, false);
         break;
     }

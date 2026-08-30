@@ -915,7 +915,7 @@ void LazyListView::onRowsInserted(const QModelIndex& parent, int first, int last
 
     const int insertCount = last - first + 1;
     // Insert new layout records
-    m_layout.insert(first, insertCount, ItemRecord{ 0, 0, false, true });
+    m_layout.insert(first, insertCount, ItemRecord{ .targetY = 0, .height = 0, .heightKnown = false, .isNew = true });
 
     // Shift existing delegate indices
     QHash<int, DelegateEntry> shifted;

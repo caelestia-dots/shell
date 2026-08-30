@@ -111,9 +111,9 @@ QSet<QString> ObjectNode::loadFromJson(const QJsonObject& json, QList<Diagnostic
             const auto path = pathFor(key);
             qCWarning(lcSettings) << "Unknown option" << path;
             diagnostics << Diagnostic{
-                DiagnosticType::UnknownOption,
-                path,
-                QStringLiteral("Unknown option %1").arg(key),
+                .type = DiagnosticType::UnknownOption,
+                .option = path,
+                .message = QStringLiteral("Unknown option %1").arg(key),
             };
             SKIP;
         }
@@ -134,9 +134,9 @@ QSet<QString> ObjectNode::loadFromJson(const QJsonObject& json, QList<Diagnostic
             qCWarning(
                 lcSettings, "Global property definition %s found in overlay file, ignoring.", qUtf8Printable(path));
             diagnostics << Diagnostic{
-                DiagnosticType::GlobalOption,
-                path,
-                QStringLiteral("Global properties should not be defined in overlay files"),
+                .type = DiagnosticType::GlobalOption,
+                .option = path,
+                .message = QStringLiteral("Global properties should not be defined in overlay files"),
             };
             SKIP;
         }
