@@ -281,6 +281,12 @@ void FileSystemModel::updateEntries() {
 }
 
 void FileSystemModel::updateEntriesForDir(const QString& dir) {
+    Q_UNUSED(dir);
+    if (m_path.isEmpty()) {
+        return;
+    }
+    const QString targetDir = m_path;
+
     const auto recursive = m_recursive;
     const auto showHidden = m_showHidden;
     const auto filter = m_filter;
@@ -308,7 +314,7 @@ void FileSystemModel::updateEntriesForDir(const QString& dir) {
                 filters |= QDir::Hidden;
             }
 
-            iter.emplace(dir, extraNameFilters, filters, flags);
+            iter.emplace(targetDir, extraNameFilters, filters, flags);
         } else {
             QDir::Filters filters;
 
@@ -325,9 +331,9 @@ void FileSystemModel::updateEntriesForDir(const QString& dir) {
             }
 
             if (nameFilters.isEmpty()) {
-                iter.emplace(dir, filters, flags);
+                iter.emplace(targetDir, filters, flags);
             } else {
-                iter.emplace(dir, nameFilters, filters, flags);
+                iter.emplace(targetDir, nameFilters, filters, flags);
             }
         }
 
@@ -356,21 +362,21 @@ void FileSystemModel::updateEntriesForDir(const QString& dir) {
         promise.addResult(qMakePair(oldPaths - newPaths, newPaths - oldPaths));
     });
 
-    if (m_futures.contains(dir)) {
-        m_futures[dir].cancel();
+    if (m_futures.contains(targetDir)) {
+        m_futures[targetDir].cancel();
     }
-    m_futures.insert(dir, future);
+    m_futures.insert(targetDir, future);
 
     future
         .then(this,
-            [dir, this](QPair<QSet<QString>, QSet<QString>> result) {
-                m_futures.remove(dir);
+            [targetDir, this](QPair<QSet<QString>, QSet<QString>> result) {
+                m_futures.remove(targetDir);
                 if (!result.first.isEmpty() || !result.second.isEmpty()) {
                     applyChanges(result.first, result.second);
                 }
             })
-        .onCanceled(this, [dir, this]() {
-            m_futures.remove(dir);
+        .onCanceled(this, [targetDir, this]() {
+            m_futures.remove(targetDir);
         });
 }
 
