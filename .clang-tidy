@@ -10,6 +10,7 @@ Checks: >
   -bugprone-easily-swappable-parameters,
   -bugprone-macro-parentheses,
   -bugprone-throwing-static-initialization,
+  -misc-include-cleaner,
   -misc-multiple-inheritance,
   -misc-non-private-member-variables-in-classes,
   -misc-no-recursion,
