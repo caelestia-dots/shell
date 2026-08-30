@@ -197,7 +197,7 @@ void ImageAnalyser::analyse(QPromise<AnalyseResult>& promise, const QImage& imag
                 return;
             }
 
-            const uchar* pixel = line + x * 4;
+            const uchar* pixel = line + (static_cast<qsizetype>(x) * 4);
 
             if (pixel[3] == 0) {
                 continue;

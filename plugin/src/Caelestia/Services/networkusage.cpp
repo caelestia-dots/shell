@@ -4,9 +4,9 @@
 #include <qtypes.h>
 
 #include <array>
+#include <charconv>
 #include <cmath>
-#include <cstdio>
-#include <utility>
+#include <system_error>
 
 namespace {
 
@@ -89,7 +89,7 @@ void NetworkUsage::tick() {
     if (!f.open(QIODevice::ReadOnly | QIODevice::Text)) {
         return;
     }
-    // skip headers
+    // Skip headers
     f.readLine();
     f.readLine();
 
@@ -104,18 +104,29 @@ void NetworkUsage::tick() {
         }
         const QByteArray iface = line.left(splitIdx).trimmed();
         if (iface == QByteArrayLiteral("lo")) {
-            continue; // skip loopback interface
+            continue; // Skip loopback interface
         }
+
+        // Parse every counter through tx bytes to validate the row
+        const char* pos = line.constData() + splitIdx + 1;
+        const char* const end = line.constData() + line.size();
 
         std::array<unsigned long long, 9> fields{};
-        // NOLINTBEGIN(readability-container-data-pointer)
-        const int parsed = std::sscanf(line.constData() + splitIdx + 1, "%llu %llu %llu %llu %llu %llu %llu %llu %llu",
-            &fields[0], &fields[1], &fields[2], &fields[3], &fields[4], &fields[5], &fields[6], &fields[7], &fields[8]);
-        // NOLINTEND(readability-container-data-pointer)
+        bool valid = true;
+        for (unsigned long long& field : fields) {
+            while (pos < end && (*pos == ' ' || *pos == '\t'))
+                ++pos;
 
-        if (std::cmp_not_equal(parsed, fields.size())) {
-            continue;
+            const auto [next, ec] = std::from_chars(pos, end, field);
+            if (ec != std::errc{}) {
+                valid = false;
+                break;
+            }
+            pos = next;
         }
+
+        if (!valid)
+            continue;
 
         totalRx += static_cast<quint64>(fields[0]);
         totalTx += static_cast<quint64>(fields[8]);

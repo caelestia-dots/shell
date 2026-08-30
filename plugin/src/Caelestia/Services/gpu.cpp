@@ -226,7 +226,11 @@ void Gpu::finishNameSource(int index, int generation, QString name) {
     // Under Auto the NVIDIA name probe doubles as the type probe: a non-empty result
     // means an NVIDIA GPU is present and queryable.
     if (m_userType == GpuType::Auto && index == kNvidiaSource) {
-        setType(!name.isEmpty() ? GpuType::Nvidia : (m_busyFiles.isEmpty() ? GpuType::None : GpuType::Generic));
+        if (!name.isEmpty())
+            setType(GpuType::Nvidia);
+        else
+            setType(m_busyFiles.isEmpty() ? GpuType::None : GpuType::Generic);
+
         if (m_type == GpuType::None) {
             setName(tr("None"));
             return;
