@@ -37,10 +37,6 @@ public:
     QQmlListProperty<BlobRect> exclude();
     QQmlListProperty<BlobRect> excludeCorners();
 
-    bool isExcluded(const BlobShape* other) const override;
-    bool isCornerExcluded(const BlobShape* other) const override;
-    void cornerRadii(float out[4]) const override;
-
     [[nodiscard]] qreal topLeftRadius() const;
     void setTopLeftRadius(qreal r);
 
@@ -67,6 +63,10 @@ signals:
 protected:
     void updatePolish() override;
     void updatePhysics() override;
+
+    [[nodiscard]] bool isExcluded(const BlobShape* other) const override;
+    [[nodiscard]] bool isCornerExcluded(const BlobShape* other) const override;
+    void cornerRadii(float out[4]) const override;
 
 private:
     void checkAtRest(float speed);

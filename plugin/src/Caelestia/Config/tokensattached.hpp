@@ -45,6 +45,9 @@ public:
 
     static Tokens* qmlAttachedProperties(QObject* object);
 
+    void classBegin() override;
+    void componentComplete() override;
+
 signals:
     void sourceChanged();
 
@@ -53,9 +56,6 @@ protected:
         QQuickAttachedPropertyPropagator* newParent, QQuickAttachedPropertyPropagator* oldParent) override;
 
 private:
-    void classBegin() override;
-    void componentComplete() override;
-
     void propagateScreen();
     void bindAnim();
     void bindFont();
