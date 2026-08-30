@@ -56,6 +56,10 @@ BlobShape::BlobShape(QQuickItem* parent)
     setFlag(ItemHasContents);
 }
 
+BlobGroup* BlobShape::group() const {
+    return m_group;
+}
+
 void BlobShape::setGroup(BlobGroup* g) {
     if (m_group == g)
         return;
@@ -69,6 +73,10 @@ void BlobShape::setGroup(BlobGroup* g) {
         m_group->markDirty();
 }
 
+qreal BlobShape::radius() const {
+    return m_radius;
+}
+
 void BlobShape::setRadius(qreal r) {
     if (qFuzzyCompare(m_radius, r))
         return;
@@ -76,6 +84,14 @@ void BlobShape::setRadius(qreal r) {
     emit radiusChanged();
     if (m_group)
         m_group->markDirty();
+}
+
+QMatrix4x4 BlobShape::deformMatrix() const {
+    return m_centeredDeformMatrix;
+}
+
+QMatrix4x4 BlobShape::rawDeformMatrix() const {
+    return m_deformMatrix;
 }
 
 void BlobShape::componentComplete() {
@@ -114,6 +130,20 @@ void BlobShape::updateCenteredDeformMatrix() {
     }
 }
 
+bool BlobShape::isInvertedRect() const {
+    return false;
+}
+
+bool BlobShape::isExcluded(const BlobShape* other) const {
+    Q_UNUSED(other);
+    return false;
+}
+
+bool BlobShape::isCornerExcluded(const BlobShape* other) const {
+    Q_UNUSED(other);
+    return false;
+}
+
 void BlobShape::cornerRadii(float out[4]) const {
     const auto maxR = static_cast<float>(std::min(width(), height())) * 0.5f;
     const auto r = std::min(static_cast<float>(m_radius), maxR);
@@ -122,6 +152,8 @@ void BlobShape::cornerRadii(float out[4]) const {
     out[2] = r;
     out[3] = r;
 }
+
+void BlobShape::updatePhysics() {}
 
 void BlobShape::registerWithGroup() {
     if (m_group)

@@ -21,17 +21,14 @@ public:
     explicit BlobShape(QQuickItem* parent = nullptr);
     ~BlobShape() override = default;
 
-    [[nodiscard]] BlobGroup* group() const { return m_group; }
-
+    [[nodiscard]] BlobGroup* group() const;
     void setGroup(BlobGroup* g);
 
-    [[nodiscard]] qreal radius() const { return m_radius; }
-
+    [[nodiscard]] qreal radius() const;
     void setRadius(qreal r);
 
-    [[nodiscard]] QMatrix4x4 deformMatrix() const { return m_centeredDeformMatrix; }
-
-    [[nodiscard]] QMatrix4x4 rawDeformMatrix() const { return m_deformMatrix; }
+    [[nodiscard]] QMatrix4x4 deformMatrix() const;
+    [[nodiscard]] QMatrix4x4 rawDeformMatrix() const;
 
 signals:
     void groupChanged();
@@ -45,15 +42,12 @@ protected:
     void updatePolish() override;
     QSGNode* updatePaintNode(QSGNode* oldNode, UpdatePaintNodeData* data) override;
 
-    [[nodiscard]] virtual bool isInvertedRect() const { return false; }
-
-    virtual bool isExcluded(const BlobShape* /*other*/) const { return false; }
-
-    virtual bool isCornerExcluded(const BlobShape* /*other*/) const { return false; }
+    [[nodiscard]] virtual bool isInvertedRect() const;
+    [[nodiscard]] virtual bool isExcluded(const BlobShape* other) const;
+    [[nodiscard]] virtual bool isCornerExcluded(const BlobShape* other) const;
 
     virtual void cornerRadii(float out[4]) const;
-
-    virtual void updatePhysics() {}
+    virtual void updatePhysics();
 
     virtual void registerWithGroup();
     virtual void unregisterFromGroup();

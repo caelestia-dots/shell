@@ -144,6 +144,10 @@ BlobInvertedRect::~BlobInvertedRect() {
         m_group->clearInvertedRect(this);
 }
 
+qreal BlobInvertedRect::borderLeft() const {
+    return m_borderLeft;
+}
+
 void BlobInvertedRect::setBorderLeft(qreal v) {
     if (qFuzzyCompare(m_borderLeft, v))
         return;
@@ -151,6 +155,10 @@ void BlobInvertedRect::setBorderLeft(qreal v) {
     emit borderLeftChanged();
     if (m_group)
         m_group->markDirty();
+}
+
+qreal BlobInvertedRect::borderRight() const {
+    return m_borderRight;
 }
 
 void BlobInvertedRect::setBorderRight(qreal v) {
@@ -162,6 +170,10 @@ void BlobInvertedRect::setBorderRight(qreal v) {
         m_group->markDirty();
 }
 
+qreal BlobInvertedRect::borderTop() const {
+    return m_borderTop;
+}
+
 void BlobInvertedRect::setBorderTop(qreal v) {
     if (qFuzzyCompare(m_borderTop, v))
         return;
@@ -171,6 +183,10 @@ void BlobInvertedRect::setBorderTop(qreal v) {
         m_group->markDirty();
 }
 
+qreal BlobInvertedRect::borderBottom() const {
+    return m_borderBottom;
+}
+
 void BlobInvertedRect::setBorderBottom(qreal v) {
     if (qFuzzyCompare(m_borderBottom, v))
         return;
@@ -178,6 +194,10 @@ void BlobInvertedRect::setBorderBottom(qreal v) {
     emit borderBottomChanged();
     if (m_group)
         m_group->markDirty();
+}
+
+bool BlobInvertedRect::isInvertedRect() const {
+    return true;
 }
 
 void BlobInvertedRect::registerWithGroup() {

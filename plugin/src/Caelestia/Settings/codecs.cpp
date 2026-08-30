@@ -39,6 +39,9 @@ const QHash<int, ListFactory>& listFactories() {
 
 } // namespace
 
+ValueCodec::ValueCodec(const QMetaType& type)
+    : m_type(type) {}
+
 ValueCodec* ValueCodec::codecFor(const QMetaType& type) {
     // Cache for codecs, keyed by type id
     static QHash<int, ValueCodec*> registry;

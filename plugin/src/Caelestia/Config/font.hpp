@@ -55,8 +55,7 @@ class FontStyleBase : public QObject {
     Q_PROPERTY(QFont small READ small NOTIFY fontsChanged FINAL)
 
 public:
-    explicit FontStyleBase(QObject* parent = nullptr)
-        : QObject(parent) {}
+    explicit FontStyleBase(QObject* parent = nullptr);
 
     void bind(settings::ObjectNode* cfg);
     void setScale(qreal scale);

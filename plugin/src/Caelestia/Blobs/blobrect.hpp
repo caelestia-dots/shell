@@ -25,32 +25,14 @@ public:
     explicit BlobRect(QQuickItem* parent = nullptr);
     ~BlobRect() override;
 
-    [[nodiscard]] qreal stiffness() const { return m_stiffness; }
+    [[nodiscard]] qreal stiffness() const;
+    void setStiffness(qreal s);
 
-    void setStiffness(qreal s) {
-        if (!qFuzzyCompare(m_stiffness, s)) {
-            m_stiffness = s;
-            emit stiffnessChanged();
-        }
-    }
+    [[nodiscard]] qreal damping() const;
+    void setDamping(qreal d);
 
-    [[nodiscard]] qreal damping() const { return m_damping; }
-
-    void setDamping(qreal d) {
-        if (!qFuzzyCompare(m_damping, d)) {
-            m_damping = d;
-            emit dampingChanged();
-        }
-    }
-
-    [[nodiscard]] qreal deformScale() const { return m_deformScale; }
-
-    void setDeformScale(qreal s) {
-        if (!qFuzzyCompare(m_deformScale, s)) {
-            m_deformScale = s;
-            emit deformScaleChanged();
-        }
-    }
+    [[nodiscard]] qreal deformScale() const;
+    void setDeformScale(qreal s);
 
     QQmlListProperty<BlobRect> exclude();
     QQmlListProperty<BlobRect> excludeCorners();
@@ -59,20 +41,16 @@ public:
     bool isCornerExcluded(const BlobShape* other) const override;
     void cornerRadii(float out[4]) const override;
 
-    [[nodiscard]] qreal topLeftRadius() const { return m_topLeftRadius; }
-
+    [[nodiscard]] qreal topLeftRadius() const;
     void setTopLeftRadius(qreal r);
 
-    [[nodiscard]] qreal topRightRadius() const { return m_topRightRadius; }
-
+    [[nodiscard]] qreal topRightRadius() const;
     void setTopRightRadius(qreal r);
 
-    [[nodiscard]] qreal bottomLeftRadius() const { return m_bottomLeftRadius; }
-
+    [[nodiscard]] qreal bottomLeftRadius() const;
     void setBottomLeftRadius(qreal r);
 
-    [[nodiscard]] qreal bottomRightRadius() const { return m_bottomRightRadius; }
-
+    [[nodiscard]] qreal bottomRightRadius() const;
     void setBottomRightRadius(qreal r);
 
 signals:

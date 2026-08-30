@@ -122,6 +122,43 @@ void BlobRect::updatePhysics() {
     checkAtRest(speed);
 }
 
+qreal BlobRect::stiffness() const {
+    return m_stiffness;
+}
+
+void BlobRect::setStiffness(qreal s) {
+    if (!qFuzzyCompare(m_stiffness, s)) {
+        m_stiffness = s;
+        emit stiffnessChanged();
+    }
+}
+
+qreal BlobRect::damping() const {
+    return m_damping;
+}
+
+void BlobRect::setDamping(qreal d) {
+    if (!qFuzzyCompare(m_damping, d)) {
+        m_damping = d;
+        emit dampingChanged();
+    }
+}
+
+qreal BlobRect::deformScale() const {
+    return m_deformScale;
+}
+
+void BlobRect::setDeformScale(qreal s) {
+    if (!qFuzzyCompare(m_deformScale, s)) {
+        m_deformScale = s;
+        emit deformScaleChanged();
+    }
+}
+
+qreal BlobRect::topLeftRadius() const {
+    return m_topLeftRadius;
+}
+
 void BlobRect::setTopLeftRadius(qreal r) {
     if (!qFuzzyCompare(m_topLeftRadius, r)) {
         m_topLeftRadius = r;
@@ -129,6 +166,10 @@ void BlobRect::setTopLeftRadius(qreal r) {
         if (m_group)
             m_group->markDirty();
     }
+}
+
+qreal BlobRect::topRightRadius() const {
+    return m_topRightRadius;
 }
 
 void BlobRect::setTopRightRadius(qreal r) {
@@ -140,6 +181,10 @@ void BlobRect::setTopRightRadius(qreal r) {
     }
 }
 
+qreal BlobRect::bottomLeftRadius() const {
+    return m_bottomLeftRadius;
+}
+
 void BlobRect::setBottomLeftRadius(qreal r) {
     if (!qFuzzyCompare(m_bottomLeftRadius, r)) {
         m_bottomLeftRadius = r;
@@ -147,6 +192,10 @@ void BlobRect::setBottomLeftRadius(qreal r) {
         if (m_group)
             m_group->markDirty();
     }
+}
+
+qreal BlobRect::bottomRightRadius() const {
+    return m_bottomRightRadius;
 }
 
 void BlobRect::setBottomRightRadius(qreal r) {
