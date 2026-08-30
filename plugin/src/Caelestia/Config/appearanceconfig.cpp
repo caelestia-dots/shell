@@ -1,7 +1,5 @@
 #include "appearanceconfig.hpp"
 
-#include <qmetaobject.h>
-
 #include "tokens.hpp"
 
 namespace caelestia::config {

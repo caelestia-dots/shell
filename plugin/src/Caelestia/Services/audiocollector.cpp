@@ -1,11 +1,8 @@
 #include "audiocollector.hpp"
 
 #include <qloggingcategory.h>
-#include <qmutex.h>
 
 #include <pipewire/pipewire.h>
-#include <spa/param/audio/format-utils.h>
-#include <spa/param/latency-utils.h>
 
 #include <algorithm>
 #include <stop_token>

@@ -3,7 +3,6 @@
 #include <qsggeometry.h>
 #include <qsgnode.h>
 
-#include <algorithm>
 #include <cstring>
 
 #include "blobgroup.hpp"

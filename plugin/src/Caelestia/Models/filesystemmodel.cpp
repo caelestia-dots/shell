@@ -1,7 +1,6 @@
 #include "filesystemmodel.hpp"
 
 #include <qdiriterator.h>
-#include <qfuturewatcher.h>
 #include <qtconcurrentrun.h>
 
 #include <algorithm>
