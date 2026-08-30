@@ -5,14 +5,15 @@
 #include <qtconcurrentrun.h>
 
 #include <algorithm>
+#include <utility>
 
 namespace caelestia::models {
 
-FileSystemEntry::FileSystemEntry(const QString& path, const QString& relativePath, QObject* parent)
+FileSystemEntry::FileSystemEntry(const QString& path, QString relativePath, QObject* parent)
     : QObject(parent)
     , m_fileInfo(path)
     , m_path(path)
-    , m_relativePath(relativePath)
+    , m_relativePath(std::move(relativePath))
     , m_isImageInitialised(false)
     , m_mimeTypeInitialised(false) {}
 

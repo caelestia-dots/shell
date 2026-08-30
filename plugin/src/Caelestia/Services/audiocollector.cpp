@@ -9,6 +9,7 @@
 
 #include <algorithm>
 #include <stop_token>
+#include <utility>
 #include <vector>
 
 #include "service.hpp"
@@ -26,7 +27,7 @@ PipeWireWorker::PipeWireWorker(std::stop_token token, AudioCollector* collector)
     , m_stream(nullptr)
     , m_timer(nullptr)
     , m_idle(true)
-    , m_token(token)
+    , m_token(std::move(token))
     , m_collector(collector) {
     pw_init(nullptr, nullptr);
 

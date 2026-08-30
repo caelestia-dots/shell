@@ -30,8 +30,7 @@ public:
     };
     Q_ENUM(Type)
 
-    explicit Toast(const QString& title, const QString& message, const QString& icon, Type type, int timeout,
-        QObject* parent = nullptr);
+    explicit Toast(QString title, QString message, QString icon, Type type, int timeout, QObject* parent = nullptr);
 
     [[nodiscard]] bool closed() const;
     [[nodiscard]] QString title() const;

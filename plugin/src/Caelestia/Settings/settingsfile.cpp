@@ -9,6 +9,8 @@
 #include <qloggingcategory.h>
 #include <qsavefile.h>
 
+#include <utility>
+
 namespace {
 
 Q_LOGGING_CATEGORY(lcSettingsFile, "caelestia.settings.file", QtInfoMsg)
@@ -24,9 +26,9 @@ constexpr int kMaxLoadRetries = 3;
 
 } // namespace
 
-SettingsFile::SettingsFile(const QString& path, QObject* parent)
+SettingsFile::SettingsFile(QString path, QObject* parent)
     : QObject(parent)
-    , m_path(path)
+    , m_path(std::move(path))
     , m_watcher(new QFileSystemWatcher(this))
     , m_saveDebounce(new QTimer(this))
     , m_loadDebounce(new QTimer(this))

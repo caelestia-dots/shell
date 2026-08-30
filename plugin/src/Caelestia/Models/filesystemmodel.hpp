@@ -29,7 +29,7 @@ class FileSystemEntry : public QObject {
     Q_PROPERTY(QString mimeType READ mimeType CONSTANT)
 
 public:
-    explicit FileSystemEntry(const QString& path, const QString& relativePath, QObject* parent = nullptr);
+    explicit FileSystemEntry(const QString& path, QString relativePath, QObject* parent = nullptr);
 
     [[nodiscard]] QString path() const;
     [[nodiscard]] QString relativePath() const;

@@ -3,14 +3,16 @@
 #include <qlogging.h>
 #include <qtimer.h>
 
+#include <utility>
+
 namespace caelestia {
 
-Toast::Toast(const QString& title, const QString& message, const QString& icon, Type type, int timeout, QObject* parent)
+Toast::Toast(QString title, QString message, QString icon, Type type, int timeout, QObject* parent)
     : QObject(parent)
     , m_closed(false)
-    , m_title(title)
-    , m_message(message)
-    , m_icon(icon)
+    , m_title(std::move(title))
+    , m_message(std::move(message))
+    , m_icon(std::move(icon))
     , m_type(type)
     , m_timeout(timeout) {
     QTimer::singleShot(timeout, this, &Toast::close);

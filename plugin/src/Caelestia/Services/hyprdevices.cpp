@@ -3,6 +3,7 @@
 #include <qjsonarray.h>
 
 #include <algorithm>
+#include <utility>
 
 #include "config/rootnodes.hpp"
 #include "core/toaster.hpp"
@@ -49,7 +50,7 @@ void toastKbLayout(const QString& layout) {
 
 HyprKeyboard::HyprKeyboard(QJsonObject ipcObject, QObject* parent)
     : QObject(parent)
-    , m_lastIpcObject(ipcObject) {}
+    , m_lastIpcObject(std::move(ipcObject)) {}
 
 QVariantHash HyprKeyboard::lastIpcObject() const {
     return m_lastIpcObject.toVariantHash();

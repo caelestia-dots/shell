@@ -7,6 +7,8 @@
 #include <qrunnable.h>
 #include <qthreadpool.h>
 
+#include <utility>
+
 #include "imagecacher.hpp"
 
 namespace {
@@ -21,7 +23,7 @@ namespace {
 
 class CachingImageResponse final : public QQuickImageResponse, public QRunnable {
 public:
-    CachingImageResponse(const QString& id, const QSize& requestedSize, ImageCacher::FillMode fillMode);
+    CachingImageResponse(QString id, const QSize& requestedSize, ImageCacher::FillMode fillMode);
 
     [[nodiscard]] QQuickTextureFactory* textureFactory() const override;
 
@@ -39,9 +41,8 @@ private:
     QString m_error;
 };
 
-CachingImageResponse::CachingImageResponse(
-    const QString& id, const QSize& requestedSize, ImageCacher::FillMode fillMode)
-    : m_id(id)
+CachingImageResponse::CachingImageResponse(QString id, const QSize& requestedSize, ImageCacher::FillMode fillMode)
+    : m_id(std::move(id))
     , m_requestedSize(requestedSize)
     , m_fillMode(fillMode) {
     setAutoDelete(false);

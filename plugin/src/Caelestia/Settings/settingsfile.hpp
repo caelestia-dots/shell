@@ -18,7 +18,7 @@ public:
         Error
     };
 
-    explicit SettingsFile(const QString& path, QObject* parent = nullptr);
+    explicit SettingsFile(QString path, QObject* parent = nullptr);
 
     [[nodiscard]] std::optional<QJsonValue> read() const;
     void write(const QJsonValue& json);
