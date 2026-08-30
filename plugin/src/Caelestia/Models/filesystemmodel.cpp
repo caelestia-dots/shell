@@ -48,7 +48,7 @@ bool FileSystemEntry::isDir() const {
 
 bool FileSystemEntry::isImage() const {
     if (!m_isImageInitialised) {
-        QImageReader reader(m_path);
+        const QImageReader reader(m_path);
         m_isImage = reader.canRead();
         m_isImageInitialised = true;
     }
@@ -337,10 +337,10 @@ void FileSystemModel::updateEntriesForDir(const QString& dir) {
                 return;
             }
 
-            QString path = iter->next();
+            const QString path = iter->next();
 
             if (filter == Images) {
-                QImageReader reader(path);
+                const QImageReader reader(path);
                 if (!reader.canRead()) {
                     continue;
                 }
@@ -386,7 +386,7 @@ void FileSystemModel::applyChanges(const QSet<QString>& removedPaths, const QSet
     // Batch remove old entries
     int start = -1;
     int end = -1;
-    for (int idx : std::as_const(removedIndices)) {
+    for (const int idx : std::as_const(removedIndices)) {
         if (start == -1) {
             start = idx;
             end = idx;

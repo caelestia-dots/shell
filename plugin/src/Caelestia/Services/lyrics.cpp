@@ -703,7 +703,7 @@ void Lyrics::searchNetEaseCandidates(int reqId) {
 }
 
 void Lyrics::fetchLrclibById(const QString& id, int reqId) {
-    QUrl url(u"https://lrclib.net/api/get/"_s + id);
+    const QUrl url(u"https://lrclib.net/api/get/"_s + id);
     auto* reply = getJson(url, lrclibHeaders());
     trackReply(reqId, reply);
 

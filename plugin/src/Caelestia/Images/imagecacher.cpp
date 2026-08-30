@@ -87,7 +87,7 @@ void ImageCacher::schedule(const QString& sourcePath, const QString& cachePath, 
         return;
 
     {
-        QMutexLocker locker(&m_mutex);
+        const QMutexLocker locker(&m_mutex);
         if (m_inflight.contains(cachePath))
             return;
         m_inflight.insert(cachePath);
@@ -95,7 +95,7 @@ void ImageCacher::schedule(const QString& sourcePath, const QString& cachePath, 
 
     QThreadPool::globalInstance()->start([this, sourcePath, cachePath, size, fillMode]() {
         runJob(sourcePath, cachePath, size, fillMode);
-        QMutexLocker locker(&m_mutex);
+        const QMutexLocker locker(&m_mutex);
         m_inflight.remove(cachePath);
     });
 }

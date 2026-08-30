@@ -2,7 +2,7 @@
 
 int main(int argc, char* argv[]) {
     if (argc > 1) {
-        std::string arg = argv[1];
+        const std::string arg = argv[1];
 
         if (arg == "-t" || arg == "--terse") {
             std::cout << PROJECT_NAME << '\n';

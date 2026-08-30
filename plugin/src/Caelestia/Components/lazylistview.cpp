@@ -616,7 +616,7 @@ void LazyListView::syncDelegates() {
     QVector<DelegateEntry> removedEntries;
     removedEntries.reserve(std::min(destroyBudget, static_cast<int>(toRemove.size())));
     int destroyed = 0;
-    for (int idx : toRemove) {
+    for (const int idx : toRemove) {
         if (destroyed >= destroyBudget)
             break;
         auto entry = m_delegates.take(idx);
@@ -640,7 +640,7 @@ void LazyListView::syncDelegates() {
     // Batch create
     const int createBudget = m_asynchronous ? ASYNC_BATCH_CREATE : static_cast<int>(toCreate.size());
     int created = 0;
-    for (int i : toCreate) {
+    for (const int i : toCreate) {
         if (created >= createBudget)
             break;
 
@@ -920,7 +920,7 @@ void LazyListView::onRowsInserted(const QModelIndex& parent, int first, int last
     // Shift existing delegate indices
     QHash<int, DelegateEntry> shifted;
     for (auto it = m_delegates.begin(); it != m_delegates.end(); ++it) {
-        int newIdx = it.key() >= first ? it.key() + insertCount : it.key();
+        const int newIdx = it.key() >= first ? it.key() + insertCount : it.key();
         auto entry = std::move(it.value());
         entry.modelIndex = newIdx;
         if (entry.item) {
@@ -996,7 +996,7 @@ void LazyListView::onRowsRemoved(const QModelIndex& parent, int first, int last)
     // Shift remaining delegate indices down
     QHash<int, DelegateEntry> shifted;
     for (auto it = m_delegates.begin(); it != m_delegates.end(); ++it) {
-        int newIdx = it.key() > last ? it.key() - removeCount : it.key();
+        const int newIdx = it.key() > last ? it.key() - removeCount : it.key();
         auto entry = std::move(it.value());
         entry.modelIndex = newIdx;
         if (entry.item) {
@@ -1030,7 +1030,7 @@ void LazyListView::onRowsMoved(const QModelIndex& parent, int start, int end, co
     // Remap delegate indices to match new model order
     QHash<int, DelegateEntry> remapped;
     for (auto it = m_delegates.begin(); it != m_delegates.end(); ++it) {
-        int oldIdx = it.key();
+        const int oldIdx = it.key();
         int newIdx = oldIdx;
 
         if (oldIdx >= start && oldIdx <= end) {

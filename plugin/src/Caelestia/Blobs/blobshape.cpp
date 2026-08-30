@@ -279,11 +279,11 @@ void BlobShape::updatePolish() {
     const auto cachedCount = m_cachedRects.size();
     for (qsizetype i = 0; i < cachedCount; ++i) {
         int mask = 0;
-        BlobShape* si = rectShapes[i];
+        const BlobShape* si = rectShapes[i];
         for (qsizetype j = 0; j < cachedCount; ++j) {
             if (j == i)
                 continue;
-            BlobShape* sj = rectShapes[j];
+            const BlobShape* sj = rectShapes[j];
             if (si->isExcluded(sj) || sj->isExcluded(si))
                 mask |= (1 << j);
         }
@@ -346,7 +346,7 @@ void BlobShape::updatePolish() {
     for (qsizetype i = 0; i < rectCount; ++i) {
         auto& ri = m_cachedRects[i];
         const int riExcludeMask = ri.excludeMask;
-        BlobShape* const si = rectShapes[i];
+        const BlobShape* si = rectShapes[i];
         float fTr = 1.0f;
         float fBr = 1.0f;
         float fBl = 1.0f;
@@ -366,7 +366,7 @@ void BlobShape::updatePolish() {
                 continue;
             if (riExcludeMask & (1 << j))
                 continue;
-            BlobShape* const sj = rectShapes[j];
+            const BlobShape* sj = rectShapes[j];
             if (si->isCornerExcluded(sj) || sj->isCornerExcluded(si))
                 continue;
             const auto& rj = m_cachedRects[j];

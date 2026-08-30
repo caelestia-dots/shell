@@ -277,6 +277,7 @@ void Storage::tick() {
 
     QHash<QString, DiskInfo*> existing;
     existing.reserve(m_disks.size());
+    // NOLINTNEXTLINE(misc-const-correctness) hash value type is non const
     for (DiskInfo* d : std::as_const(m_disks)) {
         existing.insert(d->mount(), d);
     }
@@ -300,7 +301,7 @@ void Storage::tick() {
     });
 
     bool manualCleared = false;
-    if (DiskInfo* m = m_manualPrimaryDisk.data(); m && existing.contains(m->mount())) {
+    if (const DiskInfo* m = m_manualPrimaryDisk.data(); m && existing.contains(m->mount())) {
         m_manualPrimaryDisk.clear();
         manualCleared = true;
     }
@@ -309,7 +310,7 @@ void Storage::tick() {
     }
 
     const bool listChanged = !sameOrder(m_disks, next);
-    DiskInfo* prevPrimary = primaryDisk();
+    const DiskInfo* prevPrimary = primaryDisk();
     m_disks = next;
 
     if (listChanged) {

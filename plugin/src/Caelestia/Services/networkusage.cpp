@@ -97,7 +97,7 @@ void NetworkUsage::tick() {
     quint64 totalTx = 0;
 
     while (!f.atEnd()) {
-        QByteArray line = f.readLine();
+        const QByteArray line = f.readLine();
         const qsizetype splitIdx = line.indexOf(':');
         if (splitIdx == -1) {
             continue;

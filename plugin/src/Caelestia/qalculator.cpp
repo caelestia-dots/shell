@@ -13,7 +13,7 @@ Qalculator::Qalculator(QObject* parent)
     if (!CALCULATOR) {
         // Calculator constructor sets the global `calculator` pointer (CALCULATOR macro),
         // but we need to assign it to a var so compiler doesn't flag it as a leak
-        static const auto* const instance = new Calculator();
+        static const auto* instance = new Calculator();
         Q_UNUSED(instance)
         CALCULATOR->loadExchangeRates();
         CALCULATOR->loadGlobalDefinitions();
@@ -26,13 +26,13 @@ QString Qalculator::eval(const QString& expr, bool printExpr) const {
         return {};
     }
 
-    QMutexLocker locker(&s_calculatorMutex);
+    const QMutexLocker locker(&s_calculatorMutex);
 
-    EvaluationOptions eo;
-    PrintOptions po;
+    const EvaluationOptions eo;
+    const PrintOptions po;
 
     std::string parsed;
-    std::string result = CALCULATOR->calculateAndPrint(
+    const std::string result = CALCULATOR->calculateAndPrint(
         CALCULATOR->unlocalizeExpression(expr.toStdString(), eo.parse_options), 100, eo, po, &parsed);
 
     std::string error;
@@ -83,13 +83,13 @@ void Qalculator::evalAsync(const QString& expr) {
     }
 
     QtConcurrent::run([expr]() -> QPair<QString, QString> {
-        QMutexLocker locker(&s_calculatorMutex);
+        const QMutexLocker locker(&s_calculatorMutex);
 
-        EvaluationOptions eo;
-        PrintOptions po;
+        const EvaluationOptions eo;
+        const PrintOptions po;
 
         std::string parsed;
-        std::string result = CALCULATOR->calculateAndPrint(
+        const std::string result = CALCULATOR->calculateAndPrint(
             CALCULATOR->unlocalizeExpression(expr.toStdString(), eo.parse_options), 100, eo, po, &parsed);
 
         std::string error;
