@@ -1507,27 +1507,6 @@ Singleton {
                         output: stdoutCollector.text ?? "",
                         error: stderrCollector.text ?? "",
                         exitCode: code
-        Process {
-            id: proc
-
-            property var callback: null
-
-            stdout: StdioCollector {
-                id: stdoutCollector
-            }
-
-            stderr: StdioCollector {
-                id: stderrCollector
-            }
-
-            onExited: code => { // qmllint disable signal-handler-parameters
-                Qt.callLater(() => {
-                    const callback = proc.callback;
-                    const result = {
-                        success: code === 0,
-                        output: stdoutCollector.text ?? "",
-                        error: stderrCollector.text ?? "",
-                        exitCode: code
                     };
 
                     proc.destroy();
