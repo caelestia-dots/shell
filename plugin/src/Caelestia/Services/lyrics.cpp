@@ -419,13 +419,13 @@ void Lyrics::doLoad() {
     }
 }
 
-void Lyrics::chainNext(LyricsBackend just_failed, int reqId) {
+void Lyrics::chainNext(LyricsBackend justFailed, int reqId) {
     if (m_preferredBackend != LyricsBackend::Auto) {
         // Non-auto modes don't chain
         setLoading(false);
         return;
     }
-    switch (just_failed) {
+    switch (justFailed) {
     case LyricsBackend::Local:
         tryLrclib(reqId);
         return;

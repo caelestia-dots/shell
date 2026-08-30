@@ -44,10 +44,10 @@ ValueCodec::ValueCodec(const QMetaType& type)
 
 ValueCodec* ValueCodec::codecFor(const QMetaType& type) {
     // Cache for codecs, keyed by type id
-    static QHash<int, ValueCodec*> registry;
+    static QHash<int, ValueCodec*> s_registry;
 
     // Cached lookup
-    if (const auto it = registry.constFind(type.id()); it != registry.constEnd())
+    if (const auto it = s_registry.constFind(type.id()); it != s_registry.constEnd())
         return *it;
 
     ValueCodec* codec = nullptr;
@@ -80,7 +80,7 @@ ValueCodec* ValueCodec::codecFor(const QMetaType& type) {
 
     // Cache codec
     if (codec)
-        registry.insert(type.id(), codec);
+        s_registry.insert(type.id(), codec);
 
     return codec;
 }

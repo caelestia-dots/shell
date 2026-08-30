@@ -99,8 +99,8 @@ Toaster::Toaster(QObject* parent)
     : QObject(parent) {}
 
 Toaster* Toaster::instance() {
-    static Toaster instance;
-    return &instance;
+    static Toaster s_instance;
+    return &s_instance;
 }
 
 Toaster* Toaster::create(QQmlEngine* engine, QJSEngine* jsEngine) {

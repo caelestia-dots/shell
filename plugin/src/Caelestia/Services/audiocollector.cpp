@@ -186,8 +186,8 @@ unsigned int PipeWireWorker::nextPowerOf2(unsigned int n) {
 }
 
 AudioCollector& AudioCollector::instance() {
-    static AudioCollector instance;
-    return instance;
+    static AudioCollector s_instance;
+    return s_instance;
 }
 
 void AudioCollector::clearBuffer() {
