@@ -12,7 +12,7 @@ class FontBuilder {
 
 public:
     FontBuilder() = default;
-    explicit FontBuilder(QFont font);
+    explicit FontBuilder(const QFont& font);
 
     [[nodiscard]] Q_INVOKABLE FontBuilder family(const QString& family);
     [[nodiscard]] Q_INVOKABLE FontBuilder size(int pointSize);

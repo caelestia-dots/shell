@@ -10,8 +10,8 @@ Q_LOGGING_CATEGORY(lcFontBuilder, "caelestia.fontbuilder", QtInfoMsg)
 
 namespace caelestia::config {
 
-FontBuilder::FontBuilder(QFont font)
-    : m_font(std::move(font)) {}
+FontBuilder::FontBuilder(const QFont& font)
+    : m_font(font) {}
 
 FontBuilder FontBuilder::family(const QString& family) {
     m_font.setFamily(family);

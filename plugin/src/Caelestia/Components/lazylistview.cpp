@@ -651,7 +651,7 @@ void LazyListView::syncDelegates() {
             entry.pendingInsert = true;
             entry.item->setY(m_layout[i].targetY - m_contentY);
             m_itemToIndex.insert(entry.item, i);
-            m_delegates.insert(i, std::move(entry));
+            m_delegates.insert(i, entry);
             ++created;
         }
     }
@@ -921,13 +921,13 @@ void LazyListView::onRowsInserted(const QModelIndex& parent, int first, int last
     QHash<int, DelegateEntry> shifted;
     for (auto it = m_delegates.begin(); it != m_delegates.end(); ++it) {
         const int newIdx = it.key() >= first ? it.key() + insertCount : it.key();
-        auto entry = std::move(it.value());
+        auto entry = it.value();
         entry.modelIndex = newIdx;
         if (entry.item) {
             entry.item->setProperty("index", newIdx);
             m_itemToIndex[entry.item] = newIdx;
         }
-        shifted.insert(newIdx, std::move(entry));
+        shifted.insert(newIdx, entry);
     }
     m_delegates = std::move(shifted);
 
@@ -997,13 +997,13 @@ void LazyListView::onRowsRemoved(const QModelIndex& parent, int first, int last)
     QHash<int, DelegateEntry> shifted;
     for (auto it = m_delegates.begin(); it != m_delegates.end(); ++it) {
         const int newIdx = it.key() > last ? it.key() - removeCount : it.key();
-        auto entry = std::move(it.value());
+        auto entry = it.value();
         entry.modelIndex = newIdx;
         if (entry.item) {
             entry.item->setProperty("index", newIdx);
             m_itemToIndex[entry.item] = newIdx;
         }
-        shifted.insert(newIdx, std::move(entry));
+        shifted.insert(newIdx, entry);
     }
     m_delegates = std::move(shifted);
 
@@ -1042,13 +1042,13 @@ void LazyListView::onRowsMoved(const QModelIndex& parent, int start, int end, co
                 newIdx += count;
         }
 
-        auto entry = std::move(it.value());
+        auto entry = it.value();
         entry.modelIndex = newIdx;
         if (entry.item) {
             entry.item->setProperty("index", newIdx);
             m_itemToIndex[entry.item] = newIdx;
         }
-        remapped.insert(newIdx, std::move(entry));
+        remapped.insert(newIdx, entry);
     }
     m_delegates = std::move(remapped);
 

@@ -210,7 +210,7 @@ HyprExtras::SocketPtr HyprExtras::makeRequest(
 
     QObject::connect(socket.data(), &QLocalSocket::connected, this, [=, this]() {
         QObject::connect(socket.data(), &QLocalSocket::readyRead, this, [socket, callback]() {
-            const auto response = socket->readAll();
+            auto response = socket->readAll();
             callback(true, std::move(response));
             socket->close();
         });
