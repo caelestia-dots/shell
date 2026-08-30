@@ -43,7 +43,7 @@ private:
     void streamStateChanged(pw_stream_state state);
     void processStream();
 
-    [[nodiscard]] unsigned int nextPowerOf2(unsigned int n);
+    [[nodiscard]] static unsigned int nextPowerOf2(unsigned int n);
 };
 
 class AudioCollector : public Service {

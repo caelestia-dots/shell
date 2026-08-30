@@ -194,7 +194,7 @@ private:
     // Delegate lifecycle
     void syncDelegates();
     DelegateEntry createDelegate(int modelIndex);
-    void destroyDelegate(DelegateEntry& entry);
+    static void destroyDelegate(DelegateEntry& entry);
     void updateDelegateData(DelegateEntry& entry);
 
     // Model connection

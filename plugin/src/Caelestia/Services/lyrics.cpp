@@ -846,7 +846,7 @@ void Lyrics::persistTrackPrefs() {
     }
 }
 
-QString Lyrics::lyricsDir() const {
+QString Lyrics::lyricsDir() {
     QString dir = config::ConfigSingleton::instance()->paths()->lyricsDir();
     if (dir.isEmpty()) {
         return {};
@@ -862,7 +862,7 @@ QString Lyrics::lyricsDir() const {
     return dir;
 }
 
-QString Lyrics::lyricsMapPath() const {
+QString Lyrics::lyricsMapPath() {
     return stateDir() + u"/lyrics_map.json"_s;
 }
 

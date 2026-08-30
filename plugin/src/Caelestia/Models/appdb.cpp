@@ -196,7 +196,7 @@ void AppDb::setFavouriteApps(const QStringList& favApps) {
     emit appsChanged();
 }
 
-QString AppDb::regexifyString(const QString& original) const {
+QString AppDb::regexifyString(const QString& original) {
     if (original.startsWith('^') && original.endsWith('$'))
         return original;
 

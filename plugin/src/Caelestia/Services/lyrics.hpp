@@ -102,8 +102,8 @@ private:
     void loadLyricsMap();
     void persistTrackPrefs();
 
-    [[nodiscard]] QString lyricsDir() const;
-    [[nodiscard]] QString lyricsMapPath() const;
+    [[nodiscard]] static QString lyricsDir();
+    [[nodiscard]] static QString lyricsMapPath();
     [[nodiscard]] QString trackKey() const;
     [[nodiscard]] static QString backendKey(LyricsBackend value);
     [[nodiscard]] static LyricsBackend backendFromKey(const QString& key);

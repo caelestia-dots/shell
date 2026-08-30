@@ -63,8 +63,8 @@ public:
     [[nodiscard]] int gap() const;
     void setGap(int gap);
 
-    [[nodiscard]] int duration() const;
-    [[nodiscard]] int completeEndDuration() const;
+    [[nodiscard]] static int duration();
+    [[nodiscard]] static int completeEndDuration();
 
     void update(qreal progress);
     void updateCompleteEndProgress(qreal progress);

@@ -85,11 +85,11 @@ void LinearIndicatorManager::setGap(int gap) {
     update(m_progress);
 }
 
-int LinearIndicatorManager::duration() const {
+int LinearIndicatorManager::duration() {
     return TOTAL_DURATION_IN_MS;
 }
 
-int LinearIndicatorManager::completeEndDuration() const {
+int LinearIndicatorManager::completeEndDuration() {
     return TOTAL_DURATION_IN_MS;
 }
 

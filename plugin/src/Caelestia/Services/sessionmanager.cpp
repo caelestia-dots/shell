@@ -127,7 +127,7 @@ void SessionManager::reboot() {
     callManager("Reboot");
 }
 
-std::optional<QDBusConnection> SessionManager::getSystemBus() const {
+std::optional<QDBusConnection> SessionManager::getSystemBus() {
     auto bus = QDBusConnection::systemBus();
     if (!bus.isConnected()) {
         qCWarning(lcSessionManager) << "Failed to connect to system bus:" << bus.lastError().message();
@@ -136,7 +136,7 @@ std::optional<QDBusConnection> SessionManager::getSystemBus() const {
     return bus;
 }
 
-bool SessionManager::queryHibernateAvailable() const {
+bool SessionManager::queryHibernateAvailable() {
     auto bus = getSystemBus();
     if (!bus)
         return false;

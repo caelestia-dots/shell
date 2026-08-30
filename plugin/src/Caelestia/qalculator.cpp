@@ -21,7 +21,7 @@ Qalculator::Qalculator(QObject* parent)
     }
 }
 
-QString Qalculator::eval(const QString& expr, bool printExpr) const {
+QString Qalculator::eval(const QString& expr, bool printExpr) {
     if (expr.isEmpty()) {
         return {};
     }

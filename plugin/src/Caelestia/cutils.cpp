@@ -252,11 +252,11 @@ QList<QQuickItem*> CUtils::findChildrenMatching(QQuickItem* root, const QString&
 #define CAELESTIA_VERSION ""
 #endif
 
-QString CUtils::version() const {
+QString CUtils::version() {
     return QStringLiteral(CAELESTIA_VERSION);
 }
 
-QString CUtils::qtVersion() const {
+QString CUtils::qtVersion() {
     return QStringLiteral(QT_VERSION_STR);
 }
 

@@ -46,7 +46,7 @@ public:
     };
     Q_ENUM(Type)
 
-    Q_INVOKABLE QString toString(Type t);
+    Q_INVOKABLE static QString toString(Type t);
 };
 
 struct Diagnostic {

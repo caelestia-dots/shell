@@ -39,8 +39,8 @@ public:
     Q_INVOKABLE static QList<QQuickItem*> findChildren(QQuickItem* root, const QString& name);
     Q_INVOKABLE static QList<QQuickItem*> findChildrenMatching(QQuickItem* root, const QString& pattern);
 
-    [[nodiscard]] QString version() const;
-    [[nodiscard]] QString qtVersion() const;
+    [[nodiscard]] static QString version();
+    [[nodiscard]] static QString qtVersion();
 };
 
 } // namespace caelestia

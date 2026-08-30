@@ -54,13 +54,13 @@ CircularBuffer* NetworkUsage::uploadBuffer() const {
     return m_uploadBuffer;
 }
 
-NetworkFormatResult NetworkUsage::formatBytesRate(qreal bytes) const {
+NetworkFormatResult NetworkUsage::formatBytesRate(qreal bytes) {
     NetworkFormatResult result = formatBytes(bytes);
     result.unit = result.unit + QStringLiteral("/s");
     return result;
 }
 
-NetworkFormatResult NetworkUsage::formatBytes(qreal bytes) const {
+NetworkFormatResult NetworkUsage::formatBytes(qreal bytes) {
     NetworkFormatResult result;
 
     if (bytes < 0 || std::isnan(bytes) || !std::isfinite(bytes)) {

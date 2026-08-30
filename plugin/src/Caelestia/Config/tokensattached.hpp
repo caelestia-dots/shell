@@ -35,7 +35,7 @@ public:
     [[nodiscard]] const AppearanceRounding* rounding() const;
     [[nodiscard]] const AppearanceSpacing* spacing() const;
     [[nodiscard]] const AppearancePadding* padding() const;
-    [[nodiscard]] const AppearanceTransparency* transparency() const;
+    [[nodiscard]] static const AppearanceTransparency* transparency();
 
     [[nodiscard]] const SizeTokens* sizes() const;
     [[nodiscard]] const FontTokens* font() const;
