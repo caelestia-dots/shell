@@ -22,7 +22,7 @@ class Toast : public QObject {
     Q_PROPERTY(Type type READ type CONSTANT)
 
 public:
-    enum class Type {
+    enum class Type : quint8 {
         Info = 0,
         Success,
         Warning,

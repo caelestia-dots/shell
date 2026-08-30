@@ -11,7 +11,7 @@ class SettingsFile : public QObject {
     Q_OBJECT
 
 public:
-    enum class LoadResult {
+    enum class LoadResult : quint8 {
         Unchanged,
         Changed,
         ParseError,

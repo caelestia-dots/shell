@@ -11,7 +11,7 @@ Q_DECLARE_LOGGING_CATEGORY(lcSettings)
 
 class Node;
 
-enum class WriteOrigin {
+enum class WriteOrigin : quint8 {
     Init,      // On init
     File,      // From the JSON file
     FileReset, // When option not present in file
@@ -38,7 +38,7 @@ class DiagnosticType : public QObject {
     QML_SINGLETON
 
 public:
-    enum Type {
+    enum Type : quint8 {
         UnknownOption = 0,
         GlobalOption,
         TypeMismatch,

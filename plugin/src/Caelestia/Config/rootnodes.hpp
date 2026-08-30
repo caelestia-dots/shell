@@ -69,7 +69,7 @@ public:
 
 namespace detail {
 
-enum class ConfigKind {
+enum class ConfigKind : quint8 {
     Shell,
     Tokens
 };

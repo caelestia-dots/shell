@@ -75,7 +75,7 @@ class FileSystemModel : public QAbstractListModel {
     Q_PROPERTY(QQmlListProperty<caelestia::models::FileSystemEntry> entries READ entries NOTIFY entriesChanged)
 
 public:
-    enum Filter {
+    enum Filter : quint8 {
         NoFilter,
         Images,
         Files,
