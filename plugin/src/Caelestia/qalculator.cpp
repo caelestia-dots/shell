@@ -112,7 +112,7 @@ void Qalculator::evalAsync(const QString& expr) {
 
         const QString rawStr = QString::fromStdString(result);
         return { QString("%1 = %2").arg(parsed).arg(result), rawStr };
-    }).then(this, [this, gen](QPair<QString, QString> result) {
+    }).then(this, [this, gen](const QPair<QString, QString>& result) {
         if (gen != m_generation) {
             return;
         }

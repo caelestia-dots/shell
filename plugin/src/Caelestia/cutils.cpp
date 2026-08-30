@@ -29,19 +29,20 @@ void CUtils::saveItem(QQuickItem* target, const QUrl& path, const QRect& rect) {
     this->saveItem(target, path, rect, QJSValue(), QJSValue());
 }
 
-void CUtils::saveItem(QQuickItem* target, const QUrl& path, QJSValue onSaved) {
+void CUtils::saveItem(QQuickItem* target, const QUrl& path, const QJSValue& onSaved) {
     this->saveItem(target, path, QRect(), onSaved, QJSValue());
 }
 
-void CUtils::saveItem(QQuickItem* target, const QUrl& path, QJSValue onSaved, QJSValue onFailed) {
+void CUtils::saveItem(QQuickItem* target, const QUrl& path, const QJSValue& onSaved, const QJSValue& onFailed) {
     this->saveItem(target, path, QRect(), onSaved, onFailed);
 }
 
-void CUtils::saveItem(QQuickItem* target, const QUrl& path, const QRect& rect, QJSValue onSaved) {
+void CUtils::saveItem(QQuickItem* target, const QUrl& path, const QRect& rect, const QJSValue& onSaved) {
     this->saveItem(target, path, rect, onSaved, QJSValue());
 }
 
-void CUtils::saveItem(QQuickItem* target, const QUrl& path, const QRect& rect, QJSValue onSaved, QJSValue onFailed) {
+void CUtils::saveItem(
+    QQuickItem* target, const QUrl& path, const QRect& rect, const QJSValue& onSaved, const QJSValue& onFailed) {
     if (!target) {
         qCWarning(lcCUtils) << "saveItem: a target is required";
         return;

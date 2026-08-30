@@ -37,7 +37,7 @@ Requests::Requests(QObject* parent)
     : QObject(parent)
     , m_manager(new QNetworkAccessManager(this)) {}
 
-void Requests::get(const QUrl& url, QJSValue onSuccess, QJSValue onError, QJSValue headers) const {
+void Requests::get(const QUrl& url, const QJSValue& onSuccess, const QJSValue& onError, const QJSValue& headers) const {
     if (!onSuccess.isCallable()) {
         qCWarning(lcRequests) << "get: onSuccess is not callable";
         return;

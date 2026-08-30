@@ -140,7 +140,7 @@ QVector<double> CavaProvider::values() const {
     return m_values;
 }
 
-void CavaProvider::updateValues(QVector<double> values) {
+void CavaProvider::updateValues(const QVector<double>& values) {
     if (values != m_values) {
         m_values = values;
         emit valuesChanged();

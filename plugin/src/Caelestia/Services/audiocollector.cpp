@@ -253,7 +253,7 @@ void AudioCollector::start() {
     clearBuffer();
 
     m_thread = std::jthread([this](std::stop_token token) {
-        const PipeWireWorker worker(token, this);
+        const PipeWireWorker worker(std::move(token), this);
     });
 }
 

@@ -60,7 +60,7 @@ FontBuilder FontBuilder::vaxis(const QString& tag, float value) {
     return *this;
 }
 
-FontBuilder FontBuilder::vaxes(QVariantMap axes) {
+FontBuilder FontBuilder::vaxes(const QVariantMap& axes) {
     for (auto it = axes.constBegin(); it != axes.constEnd(); ++it) {
         if (it.value().canConvert<float>()) {
             if (auto tag = QFont::Tag::fromString(it.key()))

@@ -366,7 +366,7 @@ void FileSystemModel::updateEntriesForDir(const QString& dir) {
 
     future
         .then(this,
-            [dir, this](QPair<QSet<QString>, QSet<QString>> result) {
+            [dir, this](const QPair<QSet<QString>, QSet<QString>>& result) {
                 m_futures.remove(dir);
                 if (!result.first.isEmpty() || !result.second.isEmpty()) {
                     applyChanges(result.first, result.second);
