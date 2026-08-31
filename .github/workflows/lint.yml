@@ -53,7 +53,7 @@ jobs:
 
       - name: Configure
         run: |
-          cmake -B build -G Ninja -DCMAKE_CXX_COMPILER=clang++ \
+          cmake -B build -G Ninja -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
             -DCMAKE_DISABLE_PRECOMPILE_HEADERS=ON -DVERSION= -DGIT_REVISION=
 
       - name: Lint C++
