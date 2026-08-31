@@ -21,13 +21,13 @@ PageBase {
         width: root.cappedWidth
         spacing: Tokens.spacing.extraSmall / 2
 
-    Component.onCompleted: {
-        Nmcli.enableScanner(root.visible);
-    }
+        Component.onCompleted: {
+            Nmcli.enableScanner(root.visible);
+        }
 
-    onVisibleChanged: {
-        Nmcli.enableScanner(root.visible);
-    }
+        onVisibleChanged: {
+            Nmcli.enableScanner(root.visible);
+        }
 
         ConnectedRect {
             Layout.fillWidth: true

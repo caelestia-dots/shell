@@ -21,6 +21,10 @@ ColumnLayout {
     spacing: Tokens.spacing.small
     width: Tokens.sizes.bar.networkWidth
 
+    Component.onCompleted: {
+        Nmcli.enableScanner(root.popouts.currentName === "network");
+    }
+
     // Wireless section
     StyledText {
         visible: root.view === "wireless"
@@ -177,6 +181,7 @@ ColumnLayout {
 
         Timer {
             id: rescanVisualTimer
+
             interval: 2000
             onTriggered: rescanContainer.isRescanning = false
         }
@@ -369,10 +374,6 @@ ColumnLayout {
         }
 
         target: Nmcli
-    }
-
-    Component.onCompleted: {
-        Nmcli.enableScanner(root.popouts.currentName === "network");
     }
 
     Connections {

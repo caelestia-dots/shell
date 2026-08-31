@@ -59,6 +59,7 @@ Singleton {
     }
 
     property var pendingConnection: null
+    property list<var> activeProcesses: []
 
     //
     // Hardware and Connection Details
@@ -122,7 +123,6 @@ Singleton {
         return savedConnectionSecurity[normalizeName(ssid)] || "";
     }
 
-    // returns mapped network object
     function findNetwork(ssid: string): var {
         if (!ssid)
             return null;
@@ -130,7 +130,6 @@ Singleton {
         return root.networks.find(n => normalizeName(n.ssid) === target || normalizeName(n.name) === target) ?? null;
     }
 
-    // returns raw native WifiNetwork object
     function findWifiNetwork(ssid: string): var {
         if (!ssid)
             return null;
@@ -145,130 +144,15 @@ Singleton {
         return root.savedNetworks.some(n => normalizeName(n.ssid) === target);
     }
 
-    // since Quickshell already maps the security type to a string, we just need to handle the "None" case and return "Open" instead
     function securityLabel(security: string): string {
         if (!security || security === "None" || security === "Open")
             return qsTr("Open");
         return security;
     }
 
-    onActiveChanged: {
-        if (root.active && root.pendingConnection) {
-            root.pendingConnection = null;
-        }
-        updateWifiDetails();
-    }
-
-    onActiveEthernetChanged: {
-        updateEthDetails();
-    }
-
-    Timer {
-        id: pendingTimeout
-        interval: 15000
-        running: !!root.pendingConnection
-        onTriggered: {
-            if (root.pendingConnection) {
-                root.pendingConnection = null;
-            }
-        }
-    }
-
-    Connections {
-        target: root.wifiDevice
-
-        function onStateChanged() {
-            if (root.wifiDevice?.state === ConnectionState.Connected) {
-                root.pendingConnection = null;
-                root.updateWifiDetails();
-            }
-        }
-
-        function onConnectedChanged() {
-            if (root.pendingConnection && root.wifiDevice?.connected) {
-                root.pendingConnection = null;
-            }
-            root.updateWifiDetails();
-        }
-    }
-
-    Connections {
-        target: root.wiredDevice
-
-        function onStateChanged() {
-            if (root.wiredDevice?.state === ConnectionState.Connected) {
-                root.updateEthDetails();
-            }
-        }
-
-        function onConnectedChanged() {
-            root.updateEthDetails();
-        }
-    }
-
-    Component.onCompleted: {
-        updateWifiDetails();
-        updateEthDetails();
-    }
-
     //
-    // Command Process Execution (Original Caelestia Engine)
+    // Command Process Execution
     //
-
-    component CommandProcess: Process {
-        id: proc
-
-        property var callback: null
-        property list<string> cmdArgs: []
-        property bool callbackCalled: false
-        property int exitCode: 0
-
-        signal processFinished
-
-        environment: ({
-                LANG: "C.UTF-8",
-                LC_ALL: "C.UTF-8"
-            })
-
-        stdout: StdioCollector {
-            id: stdoutCollector
-        }
-
-        stderr: StdioCollector {
-            id: stderrCollector
-        }
-
-        onExited: code => {
-            exitCode = code;
-
-            Qt.callLater(() => {
-                if (callbackCalled) {
-                    processFinished();
-                    return;
-                }
-
-                callbackCalled = true;
-                if (proc.callback) {
-                    const output = (stdoutCollector && stdoutCollector.text) ? stdoutCollector.text : "";
-                    const error = (stderrCollector && stderrCollector.text) ? stderrCollector.text : "";
-                    proc.callback({
-                        success: exitCode === 0,
-                        output: output,
-                        error: error,
-                        exitCode: exitCode
-                    });
-                }
-                processFinished();
-            });
-        }
-    }
-
-    Component {
-        id: commandProc
-        CommandProcess {}
-    }
-
-    property list<var> activeProcesses: []
 
     function executeCommand(args: list<string>, callback: var): void {
         const proc = commandProc.createObject(root);
@@ -594,5 +478,119 @@ Singleton {
                     success: result.success
                 });
         });
+    }
+
+    onActiveChanged: {
+        if (root.active && root.pendingConnection) {
+            root.pendingConnection = null;
+        }
+        updateWifiDetails();
+    }
+
+    onActiveEthernetChanged: {
+        updateEthDetails();
+    }
+
+    Component.onCompleted: {
+        updateWifiDetails();
+        updateEthDetails();
+    }
+
+    Timer {
+        id: pendingTimeout
+
+        interval: 15000
+        running: !!root.pendingConnection
+        onTriggered: {
+            if (root.pendingConnection) {
+                root.pendingConnection = null;
+            }
+        }
+    }
+
+    Connections {
+        function onStateChanged() {
+            if (root.wifiDevice?.state === ConnectionState.Connected) {
+                root.pendingConnection = null;
+                root.updateWifiDetails();
+            }
+        }
+
+        function onConnectedChanged() {
+            if (root.pendingConnection && root.wifiDevice?.connected) {
+                root.pendingConnection = null;
+            }
+            root.updateWifiDetails();
+        }
+
+        target: root.wifiDevice
+    }
+
+    Connections {
+        function onStateChanged() {
+            if (root.wiredDevice?.state === ConnectionState.Connected) {
+                root.updateEthDetails();
+            }
+        }
+
+        function onConnectedChanged() {
+            root.updateEthDetails();
+        }
+
+        target: root.wiredDevice
+    }
+
+    Component {
+        id: commandProc
+
+        CommandProcess {}
+    }
+
+    component CommandProcess: Process {
+        id: proc
+
+        property var callback: null
+        property list<string> cmdArgs: []
+        property bool callbackCalled: false
+        property int exitCode: 0
+
+        signal processFinished
+
+        environment: ({
+                LANG: "C.UTF-8",
+                LC_ALL: "C.UTF-8"
+            })
+
+        stdout: StdioCollector {
+            id: stdoutCollector
+        }
+
+        stderr: StdioCollector {
+            id: stderrCollector
+        }
+
+        onExited: code => {
+            exitCode = code;
+
+            Qt.callLater(() => {
+                if (callbackCalled) {
+                    processFinished();
+                    return;
+                }
+
+                callbackCalled = true;
+                if (proc.callback) {
+                    const output = (stdoutCollector && stdoutCollector.text) ? stdoutCollector.text : "";
+                    const error = (stderrCollector && stderrCollector.text) ? stderrCollector.text : "";
+                    proc.callback({
+                        success: exitCode === 0,
+                        output: output,
+                        error: error,
+                        exitCode: exitCode
+                    });
+                }
+                processFinished();
+            });
+        }
     }
 }
