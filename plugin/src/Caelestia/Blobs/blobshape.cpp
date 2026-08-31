@@ -9,6 +9,8 @@
 #include "blobgroup.hpp"
 #include "blobinvertedrect.hpp"
 
+namespace caelestia::blobs {
+
 namespace {
 
 float deformPadding(const QMatrix4x4& dm, float hw, float hh) {
@@ -493,3 +495,5 @@ QSGNode* BlobShape::updatePaintNode(QSGNode* oldNode, UpdatePaintNodeData* data)
 
     return node;
 }
+
+} // namespace caelestia::blobs

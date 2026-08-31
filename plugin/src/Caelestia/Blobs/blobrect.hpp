@@ -7,14 +7,17 @@
 
 #include "blobshape.hpp"
 
+namespace caelestia::blobs {
+
 class BlobRect : public BlobShape {
     Q_OBJECT
     QML_ELEMENT
     Q_PROPERTY(qreal stiffness READ stiffness WRITE setStiffness NOTIFY stiffnessChanged)
     Q_PROPERTY(qreal damping READ damping WRITE setDamping NOTIFY dampingChanged)
     Q_PROPERTY(qreal deformScale READ deformScale WRITE setDeformScale NOTIFY deformScaleChanged)
-    Q_PROPERTY(QQmlListProperty<BlobRect> exclude READ exclude NOTIFY excludeChanged)
-    Q_PROPERTY(QQmlListProperty<BlobRect> excludeCorners READ excludeCorners NOTIFY excludeCornersChanged)
+    Q_PROPERTY(QQmlListProperty<caelestia::blobs::BlobRect> exclude READ exclude NOTIFY excludeChanged)
+    Q_PROPERTY(
+        QQmlListProperty<caelestia::blobs::BlobRect> excludeCorners READ excludeCorners NOTIFY excludeCornersChanged)
     Q_PROPERTY(qreal topLeftRadius READ topLeftRadius WRITE setTopLeftRadius NOTIFY topLeftRadiusChanged)
     Q_PROPERTY(qreal topRightRadius READ topRightRadius WRITE setTopRightRadius NOTIFY topRightRadiusChanged)
     Q_PROPERTY(qreal bottomLeftRadius READ bottomLeftRadius WRITE setBottomLeftRadius NOTIFY bottomLeftRadiusChanged)
@@ -114,3 +117,5 @@ private:
     static void excludeCornersReplace(QQmlListProperty<BlobRect>* prop, qsizetype index, BlobRect* rect);
     static void excludeCornersRemoveLast(QQmlListProperty<BlobRect>* prop);
 };
+
+} // namespace caelestia::blobs
