@@ -1,6 +1,6 @@
 #include "rootnodes.hpp"
 
-#include "../toaster.hpp"
+#include "core/toaster.hpp"
 #include "common.hpp"
 
 namespace caelestia::config {

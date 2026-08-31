@@ -12,7 +12,7 @@ class ImageCacher : public QObject {
     Q_OBJECT
 
 public:
-    enum class FillMode {
+    enum class FillMode : quint8 {
         Crop,
         Fit,
         Stretch,

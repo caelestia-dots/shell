@@ -5,7 +5,13 @@
 #include <qsqlquery.h>
 #include <quuid.h>
 
+#include <algorithm>
+
+namespace {
+
 Q_LOGGING_CATEGORY(lcAppDb, "caelestia.appdb", QtInfoMsg)
+
+} // namespace
 
 namespace caelestia::models {
 
@@ -13,8 +19,8 @@ AppEntry::AppEntry(QObject* entry, unsigned int frequency, QObject* parent)
     : QObject(parent)
     , m_entry(entry)
     , m_frequency(frequency) {
-    const auto mo = m_entry->metaObject();
-    const auto tmo = &AppEntry::staticMetaObject;
+    const auto* mo = m_entry->metaObject();
+    const auto* tmo = &AppEntry::staticMetaObject;
 
     for (const auto& prop :
         { "name", "comment", "execString", "startupClass", "genericName", "categories", "keywords" }) {
@@ -190,7 +196,7 @@ void AppDb::setFavouriteApps(const QStringList& favApps) {
     emit appsChanged();
 }
 
-QString AppDb::regexifyString(const QString& original) const {
+QString AppDb::regexifyString(const QString& original) {
     if (original.startsWith('^') && original.endsWith('$'))
         return original;
 
@@ -199,7 +205,7 @@ QString AppDb::regexifyString(const QString& original) const {
 }
 
 QQmlListProperty<AppEntry> AppDb::apps() {
-    return QQmlListProperty<AppEntry>(this, &getSortedApps());
+    return { this, &getSortedApps() };
 }
 
 void AppDb::incrementFrequency(const QString& id) {
@@ -236,7 +242,7 @@ QList<AppEntry*>& AppDb::getSortedApps() const {
             favSet.insert(app->id());
     }
 
-    std::sort(m_sortedApps.begin(), m_sortedApps.end(), [&favSet](AppEntry* a, AppEntry* b) {
+    std::ranges::sort(m_sortedApps, [&favSet](AppEntry* a, AppEntry* b) {
         const bool aIsFav = favSet.contains(a->id());
         const bool bIsFav = favSet.contains(b->id());
         if (aIsFav != bIsFav)
@@ -249,12 +255,10 @@ QList<AppEntry*>& AppDb::getSortedApps() const {
 }
 
 bool AppDb::isFavourite(const AppEntry* app) const {
-    for (const QRegularExpression& re : m_favouriteAppsRegex) {
-        if (re.match(app->id()).hasMatch()) {
-            return true;
-        }
-    }
-    return false;
+    const QString id = app->id();
+    return std::ranges::any_of(m_favouriteAppsRegex, [&id](const QRegularExpression& re) {
+        return re.match(id).hasMatch();
+    });
 }
 
 quint32 AppDb::getFrequency(const QString& id) const {

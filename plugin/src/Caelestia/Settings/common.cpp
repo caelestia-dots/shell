@@ -30,8 +30,8 @@ namespace caelestia::settings {
 Q_LOGGING_CATEGORY(lcSettings, "caelestia.settings", QtInfoMsg)
 
 WriteScope::WriteScope(Node* node, WriteOrigin origin)
-    : m_root(node->rootNode()) {
-    m_previous = m_root->m_writeOrigin;
+    : m_root(node->rootNode())
+    , m_previous(m_root->m_writeOrigin) {
     m_root->m_writeOrigin = origin;
 }
 
@@ -50,11 +50,16 @@ QString DiagnosticType::toString(Type t) {
     case InvalidValue:
         return QStringLiteral("InvalidValue");
     }
+
+    Q_UNREACHABLE_RETURN(QString());
 }
 
 Diagnostic Diagnostic::mismatch(const QString& expected, const QJsonValue& value, const QString& option) {
-    return { DiagnosticType::TypeMismatch, option,
-        QStringLiteral("Expected %1, got %2").arg(expected, jsonTypeName(value)) };
+    return {
+        .type = DiagnosticType::TypeMismatch,
+        .option = option,
+        .message = QStringLiteral("Expected %1, got %2").arg(expected, jsonTypeName(value)),
+    };
 }
 
 } // namespace caelestia::settings

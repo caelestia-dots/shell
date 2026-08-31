@@ -4,8 +4,9 @@
 #include <qstring.h>
 #include <qvariantlist.h>
 
-#include "common.hpp"
 #include "settings/objectnode.hpp"
+#include "common.hpp"
+#include "enums.hpp"
 
 namespace caelestia::config {
 
@@ -25,7 +26,7 @@ class ServiceConfig : public settings::ObjectNode {
     // Attempt to guess based on locale
     CONFIG_GLOBAL_PROPERTY(
         bool, useTwelveHourClock, QLocale().timeFormat(QLocale::ShortFormat).toLower().contains(u"a"_s))
-    CONFIG_GLOBAL_PROPERTY(QString, gpuType, QString())
+    CONFIG_GLOBAL_ENUM_PROPERTY(GpuType, gpuType, GpuType::Auto)
     CONFIG_GLOBAL_PROPERTY(int, visualiserBars, 60)
     CONFIG_GLOBAL_PROPERTY(qreal, audioIncrement, 0.1)
     CONFIG_GLOBAL_PROPERTY(qreal, brightnessIncrement, 0.1)
@@ -36,7 +37,7 @@ class ServiceConfig : public settings::ObjectNode {
         DEFAULT_ARG({
             vmap({ { u"from"_s, u"com.github.th_ch.youtube_music"_s }, { u"to"_s, u"YT Music"_s } }),
         }))
-    CONFIG_GLOBAL_PROPERTY(QString, lyricsBackend, u"Auto"_s)
+    CONFIG_GLOBAL_ENUM_PROPERTY(LyricsBackend, lyricsBackend, LyricsBackend::Auto)
 };
 
 } // namespace caelestia::config

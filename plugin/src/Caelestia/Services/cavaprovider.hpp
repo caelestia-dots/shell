@@ -1,8 +1,10 @@
 #pragma once
 
-#include "audioprovider.hpp"
-#include <cava/cavacore.h>
 #include <qqmlintegration.h>
+
+#include <cava/cavacore.h>
+
+#include "audioprovider.hpp"
 
 namespace caelestia::services {
 
@@ -11,7 +13,7 @@ class CavaProcessor : public AudioProcessor {
 
 public:
     explicit CavaProcessor(QObject* parent = nullptr);
-    ~CavaProcessor();
+    ~CavaProcessor() override;
 
     void setBars(int bars);
 
@@ -58,7 +60,7 @@ private:
     int m_bars;
     QVector<double> m_values;
 
-    void updateValues(QVector<double> values);
+    void updateValues(const QVector<double>& values);
 };
 
 } // namespace caelestia::services

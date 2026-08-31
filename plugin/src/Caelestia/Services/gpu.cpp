@@ -1,26 +1,26 @@
 #include "gpu.hpp"
 
-#include "../Config/rootnodes.hpp"
-#include "../Config/serviceconfig.hpp"
-#include "sensorslib.hpp"
-
 #include <qdir.h>
 #include <qdiriterator.h>
 #include <qfile.h>
 #include <qregularexpression.h>
+
+#include "config/rootnodes.hpp"
+#include "config/serviceconfig.hpp"
+#include "sensorslib.hpp"
 
 namespace caelestia::services {
 
 namespace {
 
 QStringList gpuBusyFiles() {
-    static const QRegularExpression cardRe(QStringLiteral("^card\\d+$"));
+    static const QRegularExpression k_cardRe(QStringLiteral("^card\\d+$"));
 
     QStringList files;
     QDirIterator it(QStringLiteral("/sys/class/drm"), QDir::Dirs | QDir::NoDotAndDotDot);
     while (it.hasNext()) {
         const QString path = it.next();
-        if (!cardRe.match(it.fileName()).hasMatch()) {
+        if (!k_cardRe.match(it.fileName()).hasMatch()) {
             continue;
         }
         const QString busy = path + QStringLiteral("/device/gpu_busy_percent");
@@ -32,11 +32,11 @@ QStringList gpuBusyFiles() {
 }
 
 QString cleanName(QString s) {
-    static const QRegularExpression noise(
+    static const QRegularExpression k_noise(
         QStringLiteral("\\(R\\)|\\(TM\\)|Graphics"), QRegularExpression::CaseInsensitiveOption);
-    static const QRegularExpression spaces(QStringLiteral("\\s+"));
-    s.replace(noise, QString());
-    s.replace(spaces, QStringLiteral(" "));
+    static const QRegularExpression k_spaces(QStringLiteral("\\s+"));
+    s.replace(k_noise, QString());
+    s.replace(k_spaces, QStringLiteral(" "));
     return s.trimmed();
 }
 
@@ -65,41 +65,41 @@ QString parseGlxinfoName(const QByteArray& out) {
         }
     }
 
-    return QString();
+    return {};
 }
 
 QString parseLspciName(const QByteArray& out) {
-    static const QRegularExpression lineRe(
+    static const QRegularExpression k_lineRe(
         QStringLiteral("vga|3d controller|display"), QRegularExpression::CaseInsensitiveOption);
 
     const QStringList lines = QString::fromUtf8(out).split('\n');
     QString match;
     for (const QString& line : lines) {
-        if (lineRe.match(line).hasMatch()) {
+        if (k_lineRe.match(line).hasMatch()) {
             match = line;
             break;
         }
     }
 
     if (match.isEmpty()) {
-        return QString();
+        return {};
     }
 
-    static const QRegularExpression bracketRe(QStringLiteral("\\[([^\\]]+)\\][^\\[]*$"));
-    const auto bracket = bracketRe.match(match);
+    static const QRegularExpression k_bracketRe(QStringLiteral("\\[([^\\]]+)\\][^\\[]*$"));
+    const auto bracket = k_bracketRe.match(match);
     if (bracket.hasMatch()) {
         return cleanName(bracket.captured(1));
     }
 
     // Split on a colon followed by whitespace so the PCI slot ("00:02.0") is not
     // mistaken for the class/name separator ("controller: Device").
-    static const QRegularExpression colonRe(QStringLiteral(":\\s+(.+)"));
-    const auto colon = colonRe.match(match);
+    static const QRegularExpression k_colonRe(QStringLiteral(":\\s+(.+)"));
+    const auto colon = k_colonRe.match(match);
     if (colon.hasMatch()) {
         return cleanName(colon.captured(1));
     }
 
-    return QString();
+    return {};
 }
 
 struct NameSource {
@@ -111,18 +111,29 @@ struct NameSource {
 // Name probes in priority order; the first non-empty result wins. Which of them run
 // depends on the resolved type.
 const std::array<NameSource, 3>& nameSources() {
-    static const std::array<NameSource, 3> sources = { {
-        { QStringLiteral("nvidia-smi"), { QStringLiteral("--query-gpu=name"), QStringLiteral("--format=csv,noheader") },
-            &parseNvidiaName },
-        { QStringLiteral("glxinfo"), { QStringLiteral("-B") }, &parseGlxinfoName },
-        { QStringLiteral("lspci"), {}, &parseLspciName },
+    static const std::array<NameSource, 3> k_sources = { {
+        {
+            .program = QStringLiteral("nvidia-smi"),
+            .args = { QStringLiteral("--query-gpu=name"), QStringLiteral("--format=csv,noheader") },
+            .parse = &parseNvidiaName,
+        },
+        {
+            .program = QStringLiteral("glxinfo"),
+            .args = { QStringLiteral("-B") },
+            .parse = &parseGlxinfoName,
+        },
+        {
+            .program = QStringLiteral("lspci"),
+            .args = {},
+            .parse = &parseLspciName,
+        },
     } };
-    return sources;
+    return k_sources;
 }
 
 // Indices within nameSources(): nvidia-smi, then the driver-agnostic probes.
-constexpr int kNvidiaSource = 0;
-constexpr int kFirstGenericSource = 1;
+constexpr int k_nvidiaSource = 0;
+constexpr int k_firstGenericSource = 1;
 
 } // namespace
 
@@ -131,9 +142,9 @@ Gpu::Gpu(QObject* parent)
     m_busyFiles = gpuBusyFiles();
 
     auto* svc = caelestia::config::ConfigSingleton::instance()->services();
-    m_userType = parseType(svc->gpuType());
+    m_userType = svc->gpuType();
     QObject::connect(svc, &caelestia::config::ServiceConfig::gpuTypeChanged, this, [this, svc] {
-        const Type value = parseType(svc->gpuType());
+        const GpuType value = svc->gpuType();
         if (value == m_userType) {
             return;
         }
@@ -144,7 +155,7 @@ Gpu::Gpu(QObject* parent)
     resolveGpu();
 }
 
-Gpu::Type Gpu::type() const {
+GpuType Gpu::type() const {
     return m_type;
 }
 
@@ -160,12 +171,12 @@ qreal Gpu::temperature() const {
     return m_temperature;
 }
 
-void Gpu::setType(Type value) {
+void Gpu::setType(GpuType value) {
     if (value == m_type) {
         return;
     }
     m_type = value;
-    if (m_type == None) {
+    if (m_type == GpuType::None) {
         resetUsage();
     }
     emit typeChanged();
@@ -180,10 +191,10 @@ void Gpu::setName(QString value) {
 }
 
 void Gpu::tick() {
-    if (m_type == Generic) {
+    if (m_type == GpuType::Generic) {
         readGenericUsage();
         readGpuTemperature();
-    } else if (m_type == Nvidia) {
+    } else if (m_type == GpuType::Nvidia) {
         startNvidiaUsage();
     } else {
         resetUsage();
@@ -194,21 +205,21 @@ void Gpu::resolveGpu() {
     // Supersede any chain still in flight so its callbacks cannot write stale state
     const int generation = ++m_generation;
 
-    if (m_userType != Auto) {
+    if (m_userType != GpuType::Auto) {
         setType(m_userType);
     }
 
-    if (m_userType == None) {
+    if (m_userType == GpuType::None) {
         setName(tr("None"));
         return;
     }
 
     setName(tr("Detecting GPU..."));
-    tryNameSource(m_userType == Generic ? kFirstGenericSource : kNvidiaSource, generation);
+    tryNameSource(m_userType == GpuType::Generic ? k_firstGenericSource : k_nvidiaSource, generation);
 }
 
 int Gpu::probeEnd() const {
-    return m_userType == Nvidia ? kFirstGenericSource : static_cast<int>(nameSources().size());
+    return m_userType == GpuType::Nvidia ? k_firstGenericSource : static_cast<int>(nameSources().size());
 }
 
 void Gpu::tryNameSource(int index, int generation) {
@@ -225,9 +236,13 @@ void Gpu::finishNameSource(int index, int generation, QString name) {
 
     // Under Auto the NVIDIA name probe doubles as the type probe: a non-empty result
     // means an NVIDIA GPU is present and queryable.
-    if (m_userType == Auto && index == kNvidiaSource) {
-        setType(!name.isEmpty() ? Nvidia : (m_busyFiles.isEmpty() ? None : Generic));
-        if (m_type == None) {
+    if (m_userType == GpuType::Auto && index == k_nvidiaSource) {
+        if (!name.isEmpty())
+            setType(GpuType::Nvidia);
+        else
+            setType(m_busyFiles.isEmpty() ? GpuType::None : GpuType::Generic);
+
+        if (m_type == GpuType::None) {
             setName(tr("None"));
             return;
         }
@@ -349,20 +364,6 @@ void Gpu::resetUsage() {
         m_temperature = 0.0;
         emit temperatureChanged();
     }
-}
-
-Gpu::Type Gpu::parseType(const QString& s) {
-    const QString u = s.trimmed().toUpper();
-    if (u.isEmpty()) {
-        return Auto;
-    }
-    if (u == QStringLiteral("NVIDIA")) {
-        return Nvidia;
-    }
-    if (u == QStringLiteral("GENERIC")) {
-        return Generic;
-    }
-    return None;
 }
 
 } // namespace caelestia::services

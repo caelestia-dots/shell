@@ -4,6 +4,10 @@
 #include <qjsonobject.h>
 #include <qmetaobject.h>
 
+#include <cmath>
+
+#include "util/metaenum.hpp"
+
 namespace caelestia::settings {
 
 namespace {
@@ -13,24 +17,11 @@ DecodeResult error(DiagnosticType::Type type, const QString& message) {
     Diagnostic error;
     error.type = type;
     error.message = message;
-    return { QVariant(), error };
+    return { .value = QVariant(), .error = error };
 }
 
 DecodeResult mismatch(const QString& expected, const QJsonValue& value) {
-    return { QVariant(), Diagnostic::mismatch(expected, value) };
-}
-
-QMetaEnum metaEnumFor(const QMetaType& type) {
-    const auto* meta = type.metaObject();
-    if (!meta)
-        return {};
-
-    // Metatype names are scoped (Class::Enum) but enumerators are registered unscoped
-    auto name = QByteArray(type.name());
-    if (const auto scope = name.lastIndexOf("::"); scope >= 0)
-        name = name.mid(scope + 2);
-
-    return meta->enumerator(meta->indexOfEnumerator(name.constData()));
+    return { .value = QVariant(), .error = Diagnostic::mismatch(expected, value) };
 }
 
 template <typename Container> ValueCodec* makeListCodec(const QMetaType& type) {
@@ -41,21 +32,24 @@ template <typename Container> ValueCodec* makeListCodec(const QMetaType& type) {
 using ListFactory = ValueCodec* (*)(const QMetaType&);
 
 const QHash<int, ListFactory>& listFactories() {
-    static const QHash<int, ListFactory> factories{
+    static const QHash<int, ListFactory> k_factories{
         { QMetaType::fromType<QStringList>().id(), &makeListCodec<QStringList> },
         { QMetaType::fromType<QList<qreal>>().id(), &makeListCodec<QList<qreal>> },
     };
-    return factories;
+    return k_factories;
 }
 
 } // namespace
 
+ValueCodec::ValueCodec(const QMetaType& type)
+    : m_type(type) {}
+
 ValueCodec* ValueCodec::codecFor(const QMetaType& type) {
     // Cache for codecs, keyed by type id
-    static QHash<int, ValueCodec*> registry;
+    static QHash<int, ValueCodec*> s_registry;
 
     // Cached lookup
-    if (const auto it = registry.constFind(type.id()); it != registry.constEnd())
+    if (const auto it = s_registry.constFind(type.id()); it != s_registry.constEnd())
         return *it;
 
     ValueCodec* codec = nullptr;
@@ -81,17 +75,14 @@ ValueCodec* ValueCodec::codecFor(const QMetaType& type) {
     default:
         if (const auto factory = listFactories().constFind(type.id()); factory != listFactories().constEnd())
             codec = (*factory)(type);
-        else if (type.flags().testFlag(QMetaType::IsEnumeration)) {
-            // QFlags also passes the test but is not an enum
-            if (const auto metaEnum = metaEnumFor(type); metaEnum.isValid() && !metaEnum.is64Bit())
-                codec = new EnumCodec(type, metaEnum);
-        }
+        else if (util::isSupportedEnum(type))
+            codec = new EnumCodec(type, util::metaEnumFor(type));
         break;
     }
 
     // Cache codec
     if (codec)
-        registry.insert(type.id(), codec);
+        s_registry.insert(type.id(), codec);
 
     return codec;
 }
@@ -105,7 +96,7 @@ DecodeResult BoolCodec::decode(const QJsonValue& value) const {
     if (!value.isBool())
         return mismatch(QStringLiteral("a boolean"), value);
 
-    return { value.toBool(), std::nullopt };
+    return { .value = value.toBool(), .error = std::nullopt };
 }
 
 QJsonValue IntCodec::encode(const QVariant& value) const {
@@ -119,20 +110,20 @@ DecodeResult IntCodec::decode(const QJsonValue& value) const {
     const auto num = value.toDouble();
 
     double integral;
-    if (std::modf(num, &integral) != 0.0)
+    if (std::fpclassify(std::modf(num, &integral)) != FP_ZERO)
         return error(DiagnosticType::InvalidValue, QStringLiteral("Expected an integer, got the real %1").arg(num));
 
-    constexpr auto min = std::numeric_limits<int>::min();
-    constexpr auto max = std::numeric_limits<int>::max();
-    if (num < static_cast<double>(min) || num > static_cast<double>(max)) {
+    constexpr auto k_min = std::numeric_limits<int>::min();
+    constexpr auto k_max = std::numeric_limits<int>::max();
+    if (num < static_cast<double>(k_min) || num > static_cast<double>(k_max)) {
         const auto message = QStringLiteral("Integer %1 is out of range, expected between %2 and %3")
                                  .arg(num, 0, 'f', 0)
-                                 .arg(min)
-                                 .arg(max);
+                                 .arg(k_min)
+                                 .arg(k_max);
         return error(DiagnosticType::InvalidValue, message);
     }
 
-    return { static_cast<int>(num), std::nullopt };
+    return { .value = static_cast<int>(num), .error = std::nullopt };
 }
 
 QJsonValue RealCodec::encode(const QVariant& value) const {
@@ -143,7 +134,7 @@ DecodeResult RealCodec::decode(const QJsonValue& value) const {
     if (!value.isDouble())
         return mismatch(QStringLiteral("a number"), value);
 
-    return { QVariant::fromValue<qreal>(value.toDouble()), std::nullopt };
+    return { .value = QVariant::fromValue<qreal>(value.toDouble()), .error = std::nullopt };
 }
 
 QJsonValue StringCodec::encode(const QVariant& value) const {
@@ -154,7 +145,7 @@ DecodeResult StringCodec::decode(const QJsonValue& value) const {
     if (!value.isString())
         return mismatch(QStringLiteral("a string"), value);
 
-    return { value.toString(), std::nullopt };
+    return { .value = value.toString(), .error = std::nullopt };
 }
 
 QJsonValue VariantListCodec::encode(const QVariant& value) const {
@@ -165,7 +156,7 @@ DecodeResult VariantListCodec::decode(const QJsonValue& value) const {
     if (!value.isArray())
         return mismatch(QStringLiteral("an array"), value);
 
-    return { value.toArray().toVariantList(), std::nullopt };
+    return { .value = value.toArray().toVariantList(), .error = std::nullopt };
 }
 
 QJsonValue VariantMapCodec::encode(const QVariant& value) const {
@@ -176,7 +167,7 @@ DecodeResult VariantMapCodec::decode(const QJsonValue& value) const {
     if (!value.isObject())
         return mismatch(QStringLiteral("an object"), value);
 
-    return { value.toObject().toVariantMap(), std::nullopt };
+    return { .value = value.toObject().toVariantMap(), .error = std::nullopt };
 }
 
 EnumCodec::EnumCodec(const QMetaType& type, const QMetaEnum& metaEnum)
@@ -184,10 +175,7 @@ EnumCodec::EnumCodec(const QMetaType& type, const QMetaEnum& metaEnum)
     , m_metaEnum(metaEnum) {}
 
 QJsonValue EnumCodec::encode(const QVariant& value) const {
-    // Qt sign extends negative enumerators, so the value has to be widened before it is reinterpreted
-    const auto raw = static_cast<quint64>(value.toLongLong());
-
-    const auto* key = m_metaEnum.valueToKey(raw);
+    const auto* key = util::enumKeyFor(m_metaEnum, value);
     if (!key) {
         qCWarning(
             lcSettings, "Cannot encode value %lld of enum %s, no such enumerator", value.toLongLong(), m_type.name());
@@ -215,7 +203,7 @@ DecodeResult EnumCodec::decode(const QJsonValue& value) const {
                 QStringLiteral("Could not convert %1 to %2").arg(key, QString::fromUtf8(m_type.name())));
         }
 
-        return { decoded, std::nullopt };
+        return { .value = decoded, .error = std::nullopt };
     }
 
     QStringList options;

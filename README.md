@@ -89,6 +89,7 @@ Dependencies:
 -   `qt6-base`
 -   `qt6-declarative`
 -   `qt6-imageformats`
+-   [`qt6-m3shapes-git`](https://github.com/soramanew/m3shapes)
 -   [`swappy`](https://github.com/jtheoof/swappy)
 -   [`fish`](https://github.com/fish-shell/fish-shell)
 -   [`bash`](https://www.gnu.org/software/bash)
@@ -429,6 +430,7 @@ For example, to automatically hide the bar on the monitor named `DP-1`:
             "maxWindowIcons": 5,
             "activeTrail": false,
             "perMonitorWorkspaces": true,
+            "displayType": "shapes",
             "label": "  ",
             "occupiedLabel": "󰮯",
             "activeLabel": "󰮯",
@@ -704,7 +706,7 @@ For example, to automatically hide the bar on the monitor named `DP-1`:
     },
     "notifs": {
         "expire": true,
-        "fullscreen": "on",
+        "fullscreen": "On",
         "defaultExpireTimeout": 5000,
         "fullscreenExpireTimeout": 2000,
         "clearThreshold": 0.3,
@@ -724,7 +726,7 @@ For example, to automatically hide the bar on the monitor named `DP-1`:
         "useFahrenheit": false,
         "useFahrenheitPerformance": false,
         "useTwelveHourClock": false,
-        "gpuType": "",
+        "gpuType": "Auto",
         "visualiserBars": 60,
         "audioIncrement": 0.1,
         "brightnessIncrement": 0.1,

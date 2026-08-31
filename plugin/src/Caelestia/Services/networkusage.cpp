@@ -1,17 +1,18 @@
 #include "networkusage.hpp"
 
-#include <array>
-#include <cmath>
-#include <cstdio>
-
 #include <qfile.h>
 #include <qtypes.h>
 
+#include <array>
+#include <charconv>
+#include <cmath>
+#include <system_error>
+
 namespace {
 
-constexpr qreal kBytesPerKiB = 1024.0;
-constexpr qreal kBytesPerMiB = 1024.0 * 1024.0;
-constexpr qreal kBytesPerGiB = 1024.0 * 1024.0 * 1024.0;
+constexpr qreal k_bytesPerKib = 1024.0;
+constexpr qreal k_bytesPerMib = 1024.0 * 1024.0;
+constexpr qreal k_bytesPerGib = 1024.0 * 1024.0 * 1024.0;
 
 } // namespace
 
@@ -53,13 +54,13 @@ CircularBuffer* NetworkUsage::uploadBuffer() const {
     return m_uploadBuffer;
 }
 
-NetworkFormatResult NetworkUsage::formatBytesRate(qreal bytes) const {
+NetworkFormatResult NetworkUsage::formatBytesRate(qreal bytes) {
     NetworkFormatResult result = formatBytes(bytes);
     result.unit = result.unit + QStringLiteral("/s");
     return result;
 }
 
-NetworkFormatResult NetworkUsage::formatBytes(qreal bytes) const {
+NetworkFormatResult NetworkUsage::formatBytes(qreal bytes) {
     NetworkFormatResult result;
 
     if (bytes < 0 || std::isnan(bytes) || !std::isfinite(bytes)) {
@@ -67,17 +68,17 @@ NetworkFormatResult NetworkUsage::formatBytes(qreal bytes) const {
         result.unit = QStringLiteral("B");
         return result;
     }
-    if (bytes < kBytesPerKiB) {
+    if (bytes < k_bytesPerKib) {
         result.value = bytes;
         result.unit = QStringLiteral("B");
-    } else if (bytes < kBytesPerMiB) {
-        result.value = bytes / kBytesPerKiB;
+    } else if (bytes < k_bytesPerMib) {
+        result.value = bytes / k_bytesPerKib;
         result.unit = QStringLiteral("KB");
-    } else if (bytes < kBytesPerGiB) {
-        result.value = bytes / kBytesPerMiB;
+    } else if (bytes < k_bytesPerGib) {
+        result.value = bytes / k_bytesPerMib;
         result.unit = QStringLiteral("MB");
     } else {
-        result.value = bytes / kBytesPerGiB;
+        result.value = bytes / k_bytesPerGib;
         result.unit = QStringLiteral("GB");
     }
     return result;
@@ -88,7 +89,7 @@ void NetworkUsage::tick() {
     if (!f.open(QIODevice::ReadOnly | QIODevice::Text)) {
         return;
     }
-    // skip headers
+    // Skip headers
     f.readLine();
     f.readLine();
 
@@ -96,23 +97,36 @@ void NetworkUsage::tick() {
     quint64 totalTx = 0;
 
     while (!f.atEnd()) {
-        QByteArray line = f.readLine();
+        const QByteArray line = f.readLine();
         const qsizetype splitIdx = line.indexOf(':');
         if (splitIdx == -1) {
             continue;
         }
         const QByteArray iface = line.left(splitIdx).trimmed();
         if (iface == QByteArrayLiteral("lo")) {
-            continue; // skip loopback interface
+            continue; // Skip loopback interface
         }
+
+        // Parse every counter through tx bytes to validate the row
+        const char* pos = line.constData() + splitIdx + 1;
+        const char* const end = line.constData() + line.size();
 
         std::array<unsigned long long, 9> fields{};
-        const int parsed = std::sscanf(line.constData() + splitIdx + 1, "%llu %llu %llu %llu %llu %llu %llu %llu %llu",
-            &fields[0], &fields[1], &fields[2], &fields[3], &fields[4], &fields[5], &fields[6], &fields[7], &fields[8]);
+        bool valid = true;
+        for (unsigned long long& field : fields) {
+            while (pos < end && (*pos == ' ' || *pos == '\t'))
+                ++pos;
 
-        if (parsed != static_cast<int>(fields.size())) {
-            continue;
+            const auto [next, ec] = std::from_chars(pos, end, field);
+            if (ec != std::errc{}) {
+                valid = false;
+                break;
+            }
+            pos = next;
         }
+
+        if (!valid)
+            continue;
 
         totalRx += static_cast<quint64>(fields[0]);
         totalTx += static_cast<quint64>(fields[8]);

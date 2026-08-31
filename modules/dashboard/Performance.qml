@@ -17,7 +17,7 @@ Item {
         id: placeholder
 
         anchors.centerIn: parent
-        active: !Config.dashboard.performance.showCpu && !(Config.dashboard.performance.showGpu && Gpu.type !== Gpu.None) && !Config.dashboard.performance.showMemory && !Config.dashboard.performance.showStorage && !Config.dashboard.performance.showNetwork && !(UPower.displayDevice.isLaptopBattery && Config.dashboard.performance.showBattery)
+        active: !Config.dashboard.performance.showCpu && !(Config.dashboard.performance.showGpu && Gpu.type !== GpuType.None) && !Config.dashboard.performance.showMemory && !Config.dashboard.performance.showStorage && !Config.dashboard.performance.showNetwork && !(UPower.displayDevice.isLaptopBattery && Config.dashboard.performance.showBattery)
         asynchronous: true
 
         sourceComponent: ColumnLayout {
@@ -87,7 +87,7 @@ Item {
                 WrappedLoader {
                     id: gpuCard
 
-                    active: Config.dashboard.performance.showGpu && Gpu.type !== Gpu.None
+                    active: Config.dashboard.performance.showGpu && Gpu.type !== GpuType.None
 
                     sourceComponent: HeroCard {
                         icon: "desktop_windows"

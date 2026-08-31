@@ -2,6 +2,8 @@
 
 #include <cstring>
 
+namespace caelestia::blobs {
+
 static_assert(sizeof(decltype(BlobRectData::excludeMask)) == sizeof(float),
     "BlobMaterial packs excludeMask into a float slot via memcpy");
 
@@ -10,7 +12,8 @@ QSGMaterialType* BlobMaterial::type() const {
     return &s_type;
 }
 
-QSGMaterialShader* BlobMaterial::createShader(QSGRendererInterface::RenderMode) const {
+QSGMaterialShader* BlobMaterial::createShader(QSGRendererInterface::RenderMode mode) const {
+    Q_UNUSED(mode);
     return new BlobMaterialShader;
 }
 
@@ -59,10 +62,10 @@ bool BlobMaterialShader::updateUniformData(RenderState& state, QSGMaterial* newM
 
     // Color as vec4 (offset 96, 16 bytes)
     const float color[4] = {
-        static_cast<float>(mat->m_color.redF()),
-        static_cast<float>(mat->m_color.greenF()),
-        static_cast<float>(mat->m_color.blueF()),
-        static_cast<float>(mat->m_color.alphaF()),
+        mat->m_color.redF(),
+        mat->m_color.greenF(),
+        mat->m_color.blueF(),
+        mat->m_color.alphaF(),
     };
     memcpy(buf->data() + 96, color, 16);
 
@@ -81,7 +84,7 @@ bool BlobMaterialShader::updateUniformData(RenderState& state, QSGMaterial* newM
     memcpy(buf->data() + 144, mat->m_invertedInner, 16);
 
     // Rect data (offset 160, each rect = 5 vec4s = 80 bytes)
-    const int count = qMin(mat->m_rectCount, 16);
+    const int count = qMin(mat->m_rectCount, k_maxRects);
     for (int i = 0; i < count; ++i) {
         const auto& r = mat->m_rects[i];
         const int base = 160 + i * 80;
@@ -100,3 +103,5 @@ bool BlobMaterialShader::updateUniformData(RenderState& state, QSGMaterial* newM
 
     return true;
 }
+
+} // namespace caelestia::blobs

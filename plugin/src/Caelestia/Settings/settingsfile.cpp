@@ -6,19 +6,39 @@
 #include <qjsonarray.h>
 #include <qjsondocument.h>
 #include <qjsonobject.h>
+#include <qloggingcategory.h>
 #include <qsavefile.h>
 
-namespace caelestia::settings {
+#include <utility>
+
+namespace {
 
 Q_LOGGING_CATEGORY(lcSettingsFile, "caelestia.settings.file", QtInfoMsg)
 
-SettingsFile::SettingsFile(const QString& path, QObject* parent)
+} // namespace
+
+namespace caelestia::settings {
+
+namespace {
+
+// Max retries for loads which fail due to malformed JSON, e.g. partial writes
+constexpr int k_maxLoadRetries = 3;
+
+} // namespace
+
+SettingsFile::SettingsFile(QString path, QObject* parent)
     : QObject(parent)
-    , m_path(path)
+    , m_path(std::move(path))
     , m_watcher(new QFileSystemWatcher(this))
-    , m_saveDebounce(new QTimer(this)) {
+    , m_saveDebounce(new QTimer(this))
+    , m_loadDebounce(new QTimer(this))
+    , m_loadRetries(0) {
     m_saveDebounce->setSingleShot(true);
     m_saveDebounce->setInterval(500); // Save at most once every 500ms
+
+    m_loadDebounce->setSingleShot(true);
+    m_loadDebounce->setInterval(50); // Coalesce watcher events within 50ms
+    QObject::connect(m_loadDebounce, &QTimer::timeout, this, &SettingsFile::onLoadDebounced);
 
     QObject::connect(m_watcher, &QFileSystemWatcher::fileChanged, this, &SettingsFile::onFileChanged);
     QObject::connect(m_watcher, &QFileSystemWatcher::directoryChanged, this, &SettingsFile::onDirChanged);
@@ -37,7 +57,7 @@ void SettingsFile::write(const QJsonValue& json) {
 
 void SettingsFile::onFileChanged() {
     initWatcher(); // Re-add path in case the file was replaced
-    load();
+    scheduleLoad();
 }
 
 void SettingsFile::onDirChanged() {
@@ -48,7 +68,7 @@ void SettingsFile::onDirChanged() {
     initWatcher();
 
     if (QFile::exists(m_path))
-        load();
+        scheduleLoad();
 }
 
 void SettingsFile::initWatcher() {
@@ -62,22 +82,43 @@ void SettingsFile::initWatcher() {
         m_watcher->addPath(m_path);
 }
 
-void SettingsFile::load() {
+void SettingsFile::scheduleLoad() {
+    // Ignore if a load is already pending
+    if (m_loadDebounce->isActive())
+        return;
+
+    m_loadRetries = 0;
+    m_loadDebounce->start();
+}
+
+void SettingsFile::onLoadDebounced() {
+    const auto isFinalTry = m_loadRetries >= k_maxLoadRetries;
+
+    if (load(isFinalTry) == LoadResult::ParseError && !isFinalTry) {
+        // Likely a partial write, retry after another debounce
+        ++m_loadRetries;
+        qCDebug(lcSettingsFile, "Retrying load of %s (%d/%d)", qUtf8Printable(m_path), m_loadRetries, k_maxLoadRetries);
+        m_loadDebounce->start();
+    }
+}
+
+SettingsFile::LoadResult SettingsFile::load(bool reportErrors) {
     QFile file(m_path);
 
     if (!file.exists()) {
         if (m_lastData) {
             m_lastData = std::nullopt;
             emit changed();
+            return LoadResult::Changed;
         }
-        return;
+        return LoadResult::Unchanged;
     }
 
     if (!file.open(QIODevice::ReadOnly)) {
         qCWarning(lcSettingsFile, "Failed to open %s for reading: %s", qUtf8Printable(m_path),
             qUtf8Printable(file.errorString()));
         emit readFailed(QStringLiteral("Failed to open: %1").arg(file.errorString()));
-        return;
+        return LoadResult::Error;
     }
 
     const auto data = file.readAll();
@@ -87,16 +128,21 @@ void SettingsFile::load() {
     const auto doc = QJsonDocument::fromJson(data, &error);
 
     if (error.error != QJsonParseError::NoError) {
-        qCWarning(lcSettingsFile, "Failed to parse %s as JSON: %s", qUtf8Printable(m_path),
-            qUtf8Printable(error.errorString()));
-        emit readFailed(QStringLiteral("Failed to parse: %1").arg(error.errorString()));
-        return;
+        if (reportErrors) {
+            qCWarning(lcSettingsFile, "Failed to parse %s as JSON: %s", qUtf8Printable(m_path),
+                qUtf8Printable(error.errorString()));
+            emit readFailed(QStringLiteral("Failed to parse: %1").arg(error.errorString()));
+        } else {
+            qCDebug(lcSettingsFile, "Failed to parse %s as JSON: %s", qUtf8Printable(m_path),
+                qUtf8Printable(error.errorString()));
+        }
+        return LoadResult::ParseError;
     }
 
     const auto json = doc.isObject() ? QJsonValue(doc.object()) : QJsonValue(doc.array());
 
     if (json == m_lastData)
-        return;
+        return LoadResult::Unchanged;
 
     // Clear pending write, stuff loaded from file should take precedence
     m_pendingWrite = std::nullopt;
@@ -106,6 +152,8 @@ void SettingsFile::load() {
 
     qCDebug(lcSettingsFile) << "Read JSON from" << m_path;
     qCDebug(lcSettingsFile) << " " << json;
+
+    return LoadResult::Changed;
 }
 
 void SettingsFile::save() {
@@ -115,6 +163,7 @@ void SettingsFile::save() {
     if (m_saveDebounce->isActive()) {
         // Queue save for debounce end
         QObject::connect(m_saveDebounce, &QTimer::timeout, this, &SettingsFile::save,
+            // NOLINTNEXTLINE(clang-analyzer-optin.core.EnumCastOutOfRange) ConnectionType is OR-able by design
             static_cast<Qt::ConnectionType>(Qt::UniqueConnection | Qt::SingleShotConnection));
         return;
     }
