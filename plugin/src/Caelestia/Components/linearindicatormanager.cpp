@@ -23,7 +23,7 @@ qreal getFractionInRange(qreal playtime, int start, int duration) {
 
 } // namespace
 
-namespace caelestia::controls {
+namespace caelestia::components {
 
 LinearIndicatorSegment::LinearIndicatorSegment(int gap, QObject* parent)
     : QObject(parent)
@@ -116,4 +116,4 @@ void LinearIndicatorManager::updateCompleteEndProgress(qreal progress) {
     update(m_progress);
 }
 
-} // namespace caelestia::controls
+} // namespace caelestia::components

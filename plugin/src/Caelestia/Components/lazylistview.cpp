@@ -1,8 +1,9 @@
 #include "lazylistview.hpp"
 
-#include <algorithm>
 #include <qqmlcontext.h>
 #include <qtimer.h>
+
+#include <algorithm>
 
 namespace {
 

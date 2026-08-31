@@ -1,5 +1,4 @@
 #include "hyprextras.hpp"
-#include "hyprdevices.hpp"
 
 #include <qdir.h>
 #include <qjsonarray.h>
@@ -7,9 +6,11 @@
 #include <qloggingcategory.h>
 #include <qvariant.h>
 
-Q_LOGGING_CATEGORY(lcHypr, "caelestia.internal.hypr", QtInfoMsg)
+#include "hyprdevices.hpp"
 
-namespace caelestia::internal::hypr {
+Q_LOGGING_CATEGORY(lcHypr, "caelestia.services.hypr", QtInfoMsg)
+
+namespace caelestia::services::hypr {
 
 HyprExtras::HyprExtras(QObject* parent)
     : QObject(parent)
@@ -225,4 +226,4 @@ HyprExtras::SocketPtr HyprExtras::makeRequest(
     return socket;
 }
 
-} // namespace caelestia::internal::hypr
+} // namespace caelestia::services::hypr

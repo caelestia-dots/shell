@@ -4,6 +4,8 @@
 #include <qjsonobject.h>
 #include <qmetaobject.h>
 
+#include "util/metaenum.hpp"
+
 namespace caelestia::settings {
 
 namespace {
@@ -18,19 +20,6 @@ DecodeResult error(DiagnosticType::Type type, const QString& message) {
 
 DecodeResult mismatch(const QString& expected, const QJsonValue& value) {
     return { QVariant(), Diagnostic::mismatch(expected, value) };
-}
-
-QMetaEnum metaEnumFor(const QMetaType& type) {
-    const auto* meta = type.metaObject();
-    if (!meta)
-        return {};
-
-    // Metatype names are scoped (Class::Enum) but enumerators are registered unscoped
-    auto name = QByteArray(type.name());
-    if (const auto scope = name.lastIndexOf("::"); scope >= 0)
-        name = name.mid(scope + 2);
-
-    return meta->enumerator(meta->indexOfEnumerator(name.constData()));
 }
 
 template <typename Container> ValueCodec* makeListCodec(const QMetaType& type) {
@@ -81,11 +70,8 @@ ValueCodec* ValueCodec::codecFor(const QMetaType& type) {
     default:
         if (const auto factory = listFactories().constFind(type.id()); factory != listFactories().constEnd())
             codec = (*factory)(type);
-        else if (type.flags().testFlag(QMetaType::IsEnumeration)) {
-            // QFlags also passes the test but is not an enum
-            if (const auto metaEnum = metaEnumFor(type); metaEnum.isValid() && !metaEnum.is64Bit())
-                codec = new EnumCodec(type, metaEnum);
-        }
+        else if (util::isSupportedEnum(type))
+            codec = new EnumCodec(type, util::metaEnumFor(type));
         break;
     }
 
@@ -184,10 +170,7 @@ EnumCodec::EnumCodec(const QMetaType& type, const QMetaEnum& metaEnum)
     , m_metaEnum(metaEnum) {}
 
 QJsonValue EnumCodec::encode(const QVariant& value) const {
-    // Qt sign extends negative enumerators, so the value has to be widened before it is reinterpreted
-    const auto raw = static_cast<quint64>(value.toLongLong());
-
-    const auto* key = m_metaEnum.valueToKey(raw);
+    const auto* key = util::enumKeyFor(m_metaEnum, value);
     if (!key) {
         qCWarning(
             lcSettings, "Cannot encode value %lld of enum %s, no such enumerator", value.toLongLong(), m_type.name());

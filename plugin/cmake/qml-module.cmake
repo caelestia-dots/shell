@@ -1,7 +1,7 @@
 message(STATUS "QML install dir: ${CMAKE_INSTALL_PREFIX}/${INSTALL_QMLDIR}")
 
 function(qml_module arg_TARGET)
-    cmake_parse_arguments(PARSE_ARGV 1 arg "" "URI" "SOURCES;QML_FILES;QML_SINGLETONS;DEPENDENCIES;IMPORTS;OPTIONAL_IMPORTS;DEFAULT_IMPORTS;LIBRARIES")
+    cmake_parse_arguments(PARSE_ARGV 1 arg "" "URI;INCLUDE_PREFIX" "SOURCES;QML_FILES;QML_SINGLETONS;DEPENDENCIES;IMPORTS;OPTIONAL_IMPORTS;DEFAULT_IMPORTS;LIBRARIES")
 
     set_source_files_properties(${arg_QML_SINGLETONS} PROPERTIES QT_QML_SINGLETON_TYPE TRUE)
 
@@ -45,6 +45,14 @@ function(qml_module arg_TARGET)
     install(FILES "${module_typeinfo}" DESTINATION "${module_dir}")
 
     target_link_libraries(${arg_TARGET} PRIVATE caelestia-pch Qt::Core Qt::Qml ${arg_LIBRARIES})
+
+    # Expose headers to other modules as <prefix>/xxx.hpp
+    if(arg_INCLUDE_PREFIX)
+        set(include_dir "${CMAKE_CURRENT_BINARY_DIR}/include")
+        file(MAKE_DIRECTORY "${include_dir}")
+        file(CREATE_LINK "${CMAKE_CURRENT_SOURCE_DIR}" "${include_dir}/${arg_INCLUDE_PREFIX}" SYMBOLIC)
+        target_include_directories(${arg_TARGET} PUBLIC "${include_dir}")
+    endif()
 
     # Add backing target dir to plugin rpath so it can find its backing target
     file(RELATIVE_PATH plugin_to_lib "/${module_target_path}" "/${top_level}/lib")
