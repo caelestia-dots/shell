@@ -1,10 +1,12 @@
 pragma ComponentBehavior: Bound
 
 import QtQuick
+import QtQuick.Layouts
 import Quickshell.Services.UPower
 import Caelestia.Config
 import Caelestia.Services
 import qs.components
+import qs.components.controls
 import qs.services
 
 Column {
@@ -99,142 +101,175 @@ Column {
         }
     }
 
-    Row {
+    StyledRect {
+        id: profiles
+
+        property string current: {
+            const p = PowerProfiles.profile;
+            if (p === PowerProfile.PowerSaver)
+                return saver.icon;
+            if (p === PowerProfile.Performance)
+                return perf.icon;
+            return balance.icon;
+        }
+
         anchors.horizontalCenter: parent.horizontalCenter
-        spacing: Tokens.spacing.small
+        implicitWidth: saver.implicitHeight + balance.implicitHeight + perf.implicitHeight + Tokens.padding.medium * 2 + Tokens.spacing.largeIncreased * 2
+        implicitHeight: Math.max(saver.implicitHeight, balance.implicitHeight, perf.implicitHeight) + Tokens.padding.small
+        color: Colours.tPalette.m3surfaceContainer
+        radius: Tokens.rounding.full
 
         StyledRect {
-            id: profiles
+            id: indicator
 
-            property string current: {
-                const p = PowerProfiles.profile;
-                if (p === PowerProfile.PowerSaver)
-                    return saver.icon;
-                if (p === PowerProfile.Performance)
-                    return perf.icon;
-                return balance.icon;
-            }
-
-            implicitWidth: saver.implicitHeight + balance.implicitHeight + perf.implicitHeight + Tokens.padding.medium * 2 + Tokens.spacing.largeIncreased * 2
-            implicitHeight: Math.max(saver.implicitHeight, balance.implicitHeight, perf.implicitHeight) + Tokens.padding.small
-
-            color: Colours.tPalette.m3surfaceContainer
+            color: Colours.palette.m3primary
             radius: Tokens.rounding.full
+            state: profiles.current
 
-            StyledRect {
-                id: indicator
+            states: [
+                State {
+                    name: saver.icon
 
-                color: Colours.palette.m3primary
-                radius: Tokens.rounding.full
-                state: profiles.current
-
-                states: [
-                    State {
-                        name: saver.icon
-
-                        Fill {
-                            item: saver
-                        }
-                    },
-                    State {
-                        name: balance.icon
-
-                        Fill {
-                            item: balance
-                        }
-                    },
-                    State {
-                        name: perf.icon
-
-                        Fill {
-                            item: perf
-                        }
+                    Fill {
+                        item: saver
                     }
-                ]
+                },
+                State {
+                    name: balance.icon
 
-                transitions: Transition {
-                    AnchorAnim {}
+                    Fill {
+                        item: balance
+                    }
+                },
+                State {
+                    name: perf.icon
+
+                    Fill {
+                        item: perf
+                    }
                 }
-            }
+            ]
 
-            Profile {
-                id: saver
-
-                anchors.verticalCenter: parent.verticalCenter
-                anchors.left: parent.left
-                anchors.leftMargin: Tokens.padding.extraSmall
-
-                profile: PowerProfile.PowerSaver
-                icon: "energy_savings_leaf"
-            }
-
-            Profile {
-                id: balance
-
-                anchors.centerIn: parent
-
-                profile: PowerProfile.Balanced
-                icon: "balance"
-            }
-
-            Profile {
-                id: perf
-
-                anchors.verticalCenter: parent.verticalCenter
-                anchors.right: parent.right
-                anchors.rightMargin: Tokens.padding.extraSmall
-
-                profile: PowerProfile.Performance
-                icon: "rocket_launch"
+            transitions: Transition {
+                AnchorAnim {}
             }
         }
 
-        Loader {
-            id: conservationLoader
+        Profile {
+            id: saver
 
             anchors.verticalCenter: parent.verticalCenter
-            active: BatteryControl.isSupported
+            anchors.left: parent.left
+            anchors.leftMargin: Tokens.padding.extraSmall
+            profile: PowerProfile.PowerSaver
+            icon: "energy_savings_leaf"
+        }
 
-            sourceComponent: StyledRect {
-                id: conservationBtn
+        Profile {
+            id: balance
 
-                implicitWidth: profiles.implicitHeight - 4
-                implicitHeight: profiles.implicitHeight - 4
+            anchors.centerIn: parent
+            profile: PowerProfile.Balanced
+            icon: "balance"
+        }
 
-                radius: Tokens.rounding.full
-                color: BatteryControl.enabled ? Colours.palette.m3primary : Colours.tPalette.m3surfaceContainer
+        Profile {
+            id: perf
 
-                Behavior on color {
-                    CAnim {}
-                }
+            anchors.verticalCenter: parent.verticalCenter
+            anchors.right: parent.right
+            anchors.rightMargin: Tokens.padding.extraSmall
+            profile: PowerProfile.Performance
+            icon: "rocket_launch"
+        }
+    }
+
+    StyledRect {
+        id: batteryCard
+
+        visible: BatteryControl.isSupported
+        anchors.horizontalCenter: parent.horizontalCenter
+        implicitWidth: parent.width
+        implicitHeight: cardLayout.implicitHeight + Tokens.padding.medium * 2
+        color: Colours.tPalette.m3surfaceContainer
+        radius: Tokens.rounding.large
+
+        ColumnLayout {
+            id: cardLayout
+
+            anchors.left: parent.left
+            anchors.right: parent.right
+            anchors.top: parent.top
+            anchors.margins: Tokens.padding.medium
+            spacing: Tokens.spacing.small
+
+            RowLayout {
+                Layout.fillWidth: true
+                spacing: Tokens.spacing.small
 
                 MaterialIcon {
-                    id: consIcon
-
-                    anchors.centerIn: parent
                     text: "battery_saver"
-                    fontStyle: Tokens.font.icon.large
-                    color: BatteryControl.enabled ? Colours.palette.m3onPrimary : Colours.palette.m3onSurfaceVariant
-                    fill: BatteryControl.enabled ? 1 : 0
+                    fontStyle: Tokens.font.icon.medium
+                    color: BatteryControl.enabled ? Colours.palette.m3primary : Colours.palette.m3onSurfaceVariant
+                }
 
-                    Behavior on color {
-                        CAnim {}
+                ColumnLayout {
+                    Layout.fillWidth: true
+                    spacing: 2
+
+                    StyledText {
+                        Layout.fillWidth: true
+                        elide: Text.ElideRight
+                        text: BatteryControl.title
+                        font: Tokens.font.body.builders.medium.weight(Font.Medium).build()
                     }
 
-                    Behavior on fill {
-                        Anim {
-                            type: Anim.DefaultEffects
-                        }
+                    StyledText {
+                        Layout.fillWidth: true
+                        elide: Text.ElideRight
+                        text: BatteryControl.subtitle
+                        color: Colours.palette.m3onSurfaceVariant
+                        font: Tokens.font.body.builders.small.build()
                     }
                 }
 
-                StateLayer {
-                    radius: Tokens.rounding.full
-                    color: BatteryControl.enabled ? Colours.palette.m3onPrimary : Colours.palette.m3onSurface
-                    onClicked: {
-                        BatteryControl.toggle();
+                StyledSwitch {
+                    visible: BatteryControl.controlType === BatteryControl.BinaryConservation
+                    Layout.alignment: Qt.AlignVCenter | Qt.AlignRight
+                    checked: BatteryControl.enabled
+                    onToggled: BatteryControl.toggle()
+                }
+            }
+
+            RowLayout {
+                visible: BatteryControl.controlType === BatteryControl.DiscreteTiers
+                Layout.fillWidth: true
+                spacing: Tokens.spacing.extraSmall
+
+                Repeater {
+                    model: BatteryControl.supportedTiers
+
+                    TextButton {
+                        required property int modelData
+
+                        Layout.fillWidth: true
+                        isToggle: true
+                        type: TextButton.Tonal
+                        text: `${modelData}%`
+                        checked: BatteryControl.threshold === modelData
+                        onClicked: BatteryControl.setThreshold(modelData)
                     }
                 }
+            }
+
+            StyledSlider {
+                visible: BatteryControl.controlType === BatteryControl.ContinuousRange
+                Layout.fillWidth: true
+                Layout.topMargin: Tokens.spacing.extraSmall
+                from: BatteryControl.minThreshold
+                to: BatteryControl.maxThreshold
+                value: BatteryControl.threshold
+                onInteraction: v => BatteryControl.setThreshold(Math.round(v * (to - from) + from))
             }
         }
     }

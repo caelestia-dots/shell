@@ -10,23 +10,23 @@
 namespace caelestia::services {
 
 BatteryControl::BatteryControl(QObject* parent)
-    : Service(parent)
-    , m_watcher(new QFileSystemWatcher(this)) {
+    : TickingService(parent) {
     detectInterface();
     if (m_isSupported) {
         refreshState();
-        m_watcher->addPath(m_path);
-        connect(m_watcher, &QFileSystemWatcher::fileChanged, this, [this](const QString& path) {
-            refreshState();
-            if (!m_watcher->files().contains(path) && QFile::exists(path)) {
-                m_watcher->addPath(path);
-            }
-        });
     }
+}
+
+void BatteryControl::tick() {
+    refreshState();
 }
 
 bool BatteryControl::isSupported() const {
     return m_isSupported;
+}
+
+BatteryControl::ControlType BatteryControl::controlType() const {
+    return m_controlType;
 }
 
 bool BatteryControl::enabled() const {
@@ -37,55 +37,95 @@ int BatteryControl::threshold() const {
     return m_threshold;
 }
 
+int BatteryControl::minThreshold() const {
+    return m_minThreshold;
+}
+
+int BatteryControl::maxThreshold() const {
+    return m_maxThreshold;
+}
+
+QList<int> BatteryControl::supportedTiers() const {
+    return m_supportedTiers;
+}
+
+QString BatteryControl::title() const {
+    return m_title;
+}
+
+QString BatteryControl::subtitle() const {
+    return m_subtitle;
+}
+
 QString BatteryControl::path() const {
     return m_path;
 }
 
 void BatteryControl::detectInterface() {
-    auto checkPath = [this](const QString& path, bool isConservation) -> bool {
+    auto check = [this](const QString& path,
+                        ControlType type,
+                        const QString& title,
+                        const QList<int>& tiers = {},
+                        int minThresh = 50,
+                        int maxThresh = 100) -> bool {
         if (!QFile::exists(path)) {
             return false;
         }
 
         m_path = path;
-        m_isConservationMode = isConservation;
+        m_controlType = type;
+        m_title = title;
+        m_supportedTiers = tiers;
+        m_minThreshold = minThresh;
+        m_maxThreshold = maxThresh;
         m_isSupported = true;
         return true;
     };
 
-    // 1. Lenovo IdeaPad conservation mode
-    if (checkPath(QStringLiteral("/sys/bus/platform/drivers/ideapad_acpi/VPC2004:00/conservation_mode"), true)) {
+    // 1. Lenovo IdeaPad / LOQ / Legion conservation mode
+    if (check(QStringLiteral("/sys/bus/platform/drivers/ideapad_acpi/VPC2004:00/conservation_mode"),
+              ControlType::BinaryConservation,
+              QStringLiteral("Conservation Mode"))) {
         return;
     }
 
-    // 2. Standard Linux power supply charge control end threshold (BAT0, BAT1, BATC, BATT, etc.)
+    // 2. Asus WMI discrete threshold (60%, 80%, 100%)
+    if (check(QStringLiteral("/sys/devices/platform/asus-nb-wmi/charge_control_end_threshold"),
+              ControlType::DiscreteTiers,
+              QStringLiteral("Battery Care Limit"),
+              { 60, 80, 100 })) {
+        return;
+    }
+
+    // 3. LG Laptop battery care limit (80%, 100%)
+    if (check(QStringLiteral("/sys/devices/platform/lg-laptop/battery_care_limit"),
+              ControlType::DiscreteTiers,
+              QStringLiteral("Battery Care Limit"),
+              { 80, 100 })) {
+        return;
+    }
+
+    // 4. Samsung battery life extender
+    if (check(QStringLiteral("/sys/devices/platform/samsung/battery_life_extender"),
+              ControlType::BinaryConservation,
+              QStringLiteral("Battery Life Extender"))) {
+        return;
+    }
+
+    // 5. Standard Linux power supply charge control end threshold (ThinkPad, Framework, Dell, etc.)
     const QDir powerSupplyDir(QStringLiteral("/sys/class/power_supply"));
     const QStringList batteries = powerSupplyDir.entryList(
         { QStringLiteral("BAT*"), QStringLiteral("battery*") }, QDir::Dirs | QDir::NoDotAndDotDot);
     for (const auto& bat : batteries) {
-        if (checkPath(QStringLiteral("/sys/class/power_supply/%1/charge_control_end_threshold").arg(bat), false)) {
+        const QString threshPath = QStringLiteral("/sys/class/power_supply/%1/charge_control_end_threshold").arg(bat);
+        if (check(threshPath,
+                  ControlType::ContinuousRange,
+                  QStringLiteral("Charge Limit"),
+                  { 60, 80, 100 },
+                  50,
+                  100)) {
             return;
         }
-    }
-
-    // 3. Asus WMI threshold
-    if (checkPath(QStringLiteral("/sys/devices/platform/asus-nb-wmi/charge_control_end_threshold"), false)) {
-        return;
-    }
-
-    // 4. Huawei WMI thresholds
-    if (checkPath(QStringLiteral("/sys/devices/platform/huawei-wmi/charge_control_thresholds"), false)) {
-        return;
-    }
-
-    // 5. LG Laptop battery care limit
-    if (checkPath(QStringLiteral("/sys/devices/platform/lg-laptop/battery_care_limit"), false)) {
-        return;
-    }
-
-    // 6. Samsung battery life extender
-    if (checkPath(QStringLiteral("/sys/devices/platform/samsung/battery_life_extender"), true)) {
-        return;
     }
 }
 
@@ -114,13 +154,16 @@ void BatteryControl::refreshState() {
 
     bool newEnabled = false;
     int newThreshold = 100;
+    QString newSubtitle;
 
-    if (m_isConservationMode) {
+    if (m_controlType == ControlType::BinaryConservation) {
         newEnabled = (val == 1);
         newThreshold = newEnabled ? 60 : 100;
+        newSubtitle = newEnabled ? QStringLiteral("Capped at ~60%") : QStringLiteral("Charges to 100%");
     } else {
         newThreshold = val;
         newEnabled = (val > 0 && val < 100);
+        newSubtitle = newEnabled ? QStringLiteral("Capped at %1%").arg(newThreshold) : QStringLiteral("Charges to 100%");
     }
 
     if (m_enabled != newEnabled) {
@@ -131,6 +174,11 @@ void BatteryControl::refreshState() {
     if (m_threshold != newThreshold) {
         m_threshold = newThreshold;
         emit thresholdChanged();
+    }
+
+    if (m_subtitle != newSubtitle) {
+        m_subtitle = newSubtitle;
+        emit subtitleChanged();
     }
 }
 
@@ -152,7 +200,8 @@ bool BatteryControl::writeValue(const QString& val) {
     // 2. Privilege escalation fallback: run via pkexec so the system polkit agent pops up a password dialog
     const QString cmd = QStringLiteral("echo %1 | pkexec tee %2 > /dev/null").arg(val, m_path);
     auto* proc = new QProcess(this);
-    connect(proc, QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished), this, [this, proc]() {
+    proc->setProcessEnvironment(QProcessEnvironment::systemEnvironment());
+    connect(proc, QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished), this, [this, proc](int, QProcess::ExitStatus) {
         refreshState();
         proc->deleteLater();
     });
@@ -165,7 +214,7 @@ void BatteryControl::toggle() {
         return;
     }
 
-    if (m_isConservationMode) {
+    if (m_controlType == ControlType::BinaryConservation) {
         writeValue(m_enabled ? QStringLiteral("0") : QStringLiteral("1"));
     } else {
         writeValue(m_enabled ? QStringLiteral("100") : QStringLiteral("80"));
