@@ -24,25 +24,24 @@ QtObject {
         if (!network)
             return;
 
-        // If secure and not saved yet, show password dialog
-        if (network.isSecure && !network.known) {
-            if (session && session.network) {
-                session.network.showPasswordDialog = true;
-                session.network.pendingNetwork = network;
-            } else if (onPasswordNeeded) {
-                onPasswordNeeded(network);
+        // Try connecting directly first (for saved profiles and open networks)
+        Nmcli.connectToNetwork(network.ssid, "", result => {
+            if (result && !result.success && network.isSecure) {
+                // If it failed and is secure, password is required
+                if (session && session.network) {
+                    session.network.showPasswordDialog = true;
+                    session.network.pendingNetwork = network;
+                } else if (onPasswordNeeded) {
+                    onPasswordNeeded(network);
+                }
             }
-            return;
-        }
-
-        // Otherwise connect directly (open or already saved)
-        Nmcli.connectToNetwork(network.ssid);
+        });
     }
 
     function connectWithPassword(network, password, onResult): void {
         if (!network)
             return;
 
-        Nmcli.connectToNetwork(network.ssid, password || "");
+        Nmcli.connectToNetwork(network.ssid, password || "", onResult);
     }
 }

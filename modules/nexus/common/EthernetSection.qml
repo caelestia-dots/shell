@@ -151,13 +151,15 @@ ColumnLayout {
                     onVisibleChanged: {
                         if (visible) {
                             ethIpAddr.value = ethRow.details?.ipAddress ?? "";
-                            ethDns.value = ethRow.details?.dns[0] ?? "";
+                            const dnsVal = ethRow.details?.dns;
+                            ethDns.value = Array.isArray(dnsVal) ? (dnsVal[0] ?? "") : (typeof dnsVal === "string" ? (dnsVal.split(",")[0]?.trim() ?? "") : "");
                         }
                     }
                     Component.onCompleted: {
                         if (visible) {
                             ethIpAddr.value = ethRow.details?.ipAddress ?? "";
-                            ethDns.value = ethRow.details?.dns[0] ?? "";
+                            const dnsVal = ethRow.details?.dns;
+                            ethDns.value = Array.isArray(dnsVal) ? (dnsVal[0] ?? "") : (typeof dnsVal === "string" ? (dnsVal.split(",")[0]?.trim() ?? "") : "");
                         }
                     }
 

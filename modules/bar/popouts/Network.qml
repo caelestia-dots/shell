@@ -162,6 +162,10 @@ ColumnLayout {
     }
 
     StyledRect {
+        id: rescanContainer
+
+        property bool isRescanning: false
+
         visible: root.view === "wireless"
         Layout.preferredHeight: visible ? implicitHeight : 0
         Layout.topMargin: visible ? Tokens.spacing.small : 0
@@ -171,10 +175,20 @@ ColumnLayout {
         radius: Tokens.rounding.full
         color: Colours.palette.m3primaryContainer
 
+        Timer {
+            id: rescanVisualTimer
+            interval: 2000
+            onTriggered: rescanContainer.isRescanning = false
+        }
+
         StateLayer {
             color: Colours.palette.m3onPrimaryContainer
-            disabled: Nmcli.scanning || !Nmcli.wifiEnabled
-            onClicked: Nmcli.rescanWifi()
+            disabled: rescanContainer.isRescanning || !Nmcli.wifiEnabled
+            onClicked: {
+                rescanContainer.isRescanning = true;
+                rescanVisualTimer.restart();
+                Nmcli.rescanWifi();
+            }
         }
 
         RowLayout {
@@ -182,7 +196,7 @@ ColumnLayout {
 
             anchors.centerIn: parent
             spacing: Tokens.spacing.small
-            opacity: Nmcli.scanning ? 0 : 1
+            opacity: rescanContainer.isRescanning ? 0 : 1
 
             MaterialIcon {
                 id: scanIcon
@@ -211,7 +225,7 @@ ColumnLayout {
             strokeWidth: Tokens.padding.extraSmall / 2
             bgColour: "transparent"
             implicitSize: parent.implicitHeight - Tokens.padding.large
-            running: Nmcli.scanning
+            running: rescanContainer.isRescanning
         }
     }
 
@@ -357,6 +371,10 @@ ColumnLayout {
         target: Nmcli
     }
 
+    Component.onCompleted: {
+        Nmcli.enableScanner(root.popouts.currentName === "network");
+    }
+
     Connections {
         function onCurrentNameChanged(): void {
             // Clear password network when leaving password dialog
@@ -364,6 +382,7 @@ ColumnLayout {
                 root.showPasswordDialog = false;
                 root.passwordNetwork = null;
             }
+            Nmcli.enableScanner(root.popouts.currentName === "network");
         }
 
         target: root.popouts

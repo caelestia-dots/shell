@@ -18,7 +18,7 @@ Singleton {
     readonly property WiredDevice wiredDevice: Networking.devices.values.find(d => d.type === DeviceType.Wired) ?? null
 
     property bool isConnected: (wifiDevice?.connected || wiredDevice?.connected) ?? false
-    readonly property bool connecting: wifiDevice?.state === ConnectionState.Connecting
+    readonly property bool connecting: (wifiDevice?.state === ConnectionState.Connecting) || !!root.pendingConnection
     property bool wifiEnabled: Networking.wifiEnabled
     readonly property bool scanning: wifiDevice?.scannerEnabled ?? false
 
@@ -64,18 +64,18 @@ Singleton {
     // Hardware and Connection Details
     //
 
-    readonly property var wirelessDeviceDetails: ({
+    property var wirelessDeviceDetails: ({
             macAddress: wifiDevice?.address ?? "",
-            ipAddress: active?.raw?.nmSettings?.[0]?.read()?.["ipv4"]?.["addresses"]?.[0]?.[0] ?? "",
-            gateway: active?.raw?.nmSettings?.[0]?.read()?.["ipv4"]?.["gateway"] ?? "",
-            dns: active?.raw?.nmSettings?.[0]?.read()?.["ipv4"]?.["dns"] ?? ""
+            ipAddress: "",
+            gateway: "",
+            dns: ""
         })
 
-    readonly property var ethernetDeviceDetails: ({
+    property var ethernetDeviceDetails: ({
             macAddress: wiredDevice?.address ?? "",
-            ipAddress: activeEthernet?.device?.nmSettings?.[0]?.read()?.["ipv4"]?.["addresses"]?.[0]?.[0] ?? "",
-            gateway: activeEthernet?.device?.nmSettings?.[0]?.read()?.["ipv4"]?.["gateway"] ?? "",
-            dns: activeEthernet?.device?.nmSettings?.[0]?.read()?.["ipv4"]?.["dns"] ?? ""
+            ipAddress: "",
+            gateway: "",
+            dns: ""
         })
 
     //
@@ -156,11 +156,16 @@ Singleton {
         if (root.active && root.pendingConnection) {
             root.pendingConnection = null;
         }
+        updateWifiDetails();
+    }
+
+    onActiveEthernetChanged: {
+        updateEthDetails();
     }
 
     Timer {
         id: pendingTimeout
-        interval: 10000
+        interval: 15000
         running: !!root.pendingConnection
         onTriggered: {
             if (root.pendingConnection) {
@@ -175,13 +180,196 @@ Singleton {
         function onStateChanged() {
             if (root.wifiDevice?.state === ConnectionState.Connected) {
                 root.pendingConnection = null;
+                root.updateWifiDetails();
             }
         }
 
         function onConnectedChanged() {
-            if (root.pendingConnection) {
+            if (root.pendingConnection && root.wifiDevice?.connected) {
                 root.pendingConnection = null;
             }
+            root.updateWifiDetails();
+        }
+    }
+
+    Connections {
+        target: root.wiredDevice
+
+        function onStateChanged() {
+            if (root.wiredDevice?.state === ConnectionState.Connected) {
+                root.updateEthDetails();
+            }
+        }
+
+        function onConnectedChanged() {
+            root.updateEthDetails();
+        }
+    }
+
+    Component.onCompleted: {
+        updateWifiDetails();
+        updateEthDetails();
+    }
+
+    //
+    // Command Process Execution (Original Caelestia Engine)
+    //
+
+    component CommandProcess: Process {
+        id: proc
+
+        property var callback: null
+        property list<string> cmdArgs: []
+        property bool callbackCalled: false
+        property int exitCode: 0
+
+        signal processFinished
+
+        environment: ({
+                LANG: "C.UTF-8",
+                LC_ALL: "C.UTF-8"
+            })
+
+        stdout: StdioCollector {
+            id: stdoutCollector
+        }
+
+        stderr: StdioCollector {
+            id: stderrCollector
+        }
+
+        onExited: code => {
+            exitCode = code;
+
+            Qt.callLater(() => {
+                if (callbackCalled) {
+                    processFinished();
+                    return;
+                }
+
+                callbackCalled = true;
+                if (proc.callback) {
+                    const output = (stdoutCollector && stdoutCollector.text) ? stdoutCollector.text : "";
+                    const error = (stderrCollector && stderrCollector.text) ? stderrCollector.text : "";
+                    proc.callback({
+                        success: exitCode === 0,
+                        output: output,
+                        error: error,
+                        exitCode: exitCode
+                    });
+                }
+                processFinished();
+            });
+        }
+    }
+
+    Component {
+        id: commandProc
+        CommandProcess {}
+    }
+
+    property list<var> activeProcesses: []
+
+    function executeCommand(args: list<string>, callback: var): void {
+        const proc = commandProc.createObject(root);
+        proc.cmdArgs = ["nmcli", ...args];
+        proc.command = proc.cmdArgs;
+        proc.callback = callback;
+
+        activeProcesses.push(proc);
+
+        proc.processFinished.connect(() => {
+            const index = activeProcesses.indexOf(proc);
+            if (index >= 0) {
+                activeProcesses.splice(index, 1);
+            }
+            proc.destroy();
+        });
+
+        proc.running = true;
+    }
+
+    function updateWifiDetails(): void {
+        if (root.wifiDevice?.name && root.wifiDevice.connected) {
+            executeCommand(["-t", "-f", "IP4.ADDRESS,IP4.GATEWAY,IP4.DNS,GENERAL.HWADDR", "device", "show", root.wifiDevice.name], result => {
+                if (result.success && result.output) {
+                    let ip = "";
+                    let gw = "";
+                    let dnsList = [];
+                    let mac = root.wifiDevice?.address ?? "";
+                    const lines = result.output.split("\n");
+                    for (const line of lines) {
+                        const colon = line.indexOf(":");
+                        if (colon === -1)
+                            continue;
+                        const key = line.slice(0, colon).trim();
+                        const val = line.slice(colon + 1).trim();
+                        if (key.startsWith("IP4.ADDRESS") && !ip)
+                            ip = val;
+                        else if (key.startsWith("IP4.GATEWAY") && !gw)
+                            gw = val;
+                        else if (key.startsWith("IP4.DNS") && val)
+                            dnsList.push(val);
+                        else if (key === "GENERAL.HWADDR" && val)
+                            mac = val;
+                    }
+                    root.wirelessDeviceDetails = {
+                        macAddress: mac,
+                        ipAddress: ip,
+                        gateway: gw,
+                        dns: dnsList.join(", ")
+                    };
+                }
+            });
+        } else {
+            root.wirelessDeviceDetails = {
+                macAddress: root.wifiDevice?.address ?? "",
+                ipAddress: "",
+                gateway: "",
+                dns: ""
+            };
+        }
+    }
+
+    function updateEthDetails(): void {
+        if (root.wiredDevice?.name && root.wiredDevice.connected) {
+            executeCommand(["-t", "-f", "IP4.ADDRESS,IP4.GATEWAY,IP4.DNS,GENERAL.HWADDR", "device", "show", root.wiredDevice.name], result => {
+                if (result.success && result.output) {
+                    let ip = "";
+                    let gw = "";
+                    let dnsList = [];
+                    let mac = root.wiredDevice?.address ?? "";
+                    const lines = result.output.split("\n");
+                    for (const line of lines) {
+                        const colon = line.indexOf(":");
+                        if (colon === -1)
+                            continue;
+                        const key = line.slice(0, colon).trim();
+                        const val = line.slice(colon + 1).trim();
+                        if (key.startsWith("IP4.ADDRESS") && !ip)
+                            ip = val;
+                        else if (key.startsWith("IP4.GATEWAY") && !gw)
+                            gw = val;
+                        else if (key.startsWith("IP4.DNS") && val)
+                            dnsList.push(val);
+                        else if (key === "GENERAL.HWADDR" && val)
+                            mac = val;
+                    }
+                    root.ethernetDeviceDetails = {
+                        macAddress: mac,
+                        ipAddress: ip,
+                        gateway: gw,
+                        dns: dnsList.join(", ")
+                    };
+                }
+            });
+        } else {
+            root.ethernetDeviceDetails = {
+                macAddress: root.wiredDevice?.address ?? "",
+                ipAddress: "",
+                gateway: "",
+                dns: ""
+            };
         }
     }
 
@@ -197,8 +385,15 @@ Singleton {
         Networking.wifiEnabled = enabled;
     }
 
-    function rescanWifi(): void {
+    function enableScanner(enabled: bool): void {
         if (root.wifiDevice) {
+            root.wifiDevice.scannerEnabled = enabled && root.wifiEnabled;
+        }
+    }
+
+    function rescanWifi(): void {
+        if (root.wifiDevice && root.wifiEnabled) {
+            root.wifiDevice.scannerEnabled = false;
             root.wifiDevice.scannerEnabled = true;
         }
     }
@@ -208,41 +403,74 @@ Singleton {
         return connectingNet?.name ?? root.pendingConnection?.ssid ?? "";
     }
 
-    function connectToNetwork(ssid: string, password: string): void {
-        const network = findWifiNetwork(ssid);
-        if (!network)
+    function connectToNetwork(ssid: string, password: string, callback: var): void {
+        if (!ssid)
             return;
 
         root.pendingConnection = {
             ssid: ssid
         };
 
-        const onFailed = () => {
-            network.connectionFailed.disconnect(onFailed);
-            if (root.pendingConnection?.ssid === ssid) {
-                root.pendingConnection = null;
-            }
-            root.connectionFailed(ssid);
-        };
-        network.connectionFailed.connect(onFailed);
-
+        let cmd = [];
         if (password && password.length > 0) {
-            network.connectWithPsk(password);
+            cmd = ["dev", "wifi", "connect", ssid, "password", password];
         } else {
-            network.connect();
+            cmd = ["connection", "up", "id", ssid];
         }
+
+        executeCommand(cmd, result => {
+            if (!result.success && !password && cmd[0] === "connection") {
+                executeCommand(["dev", "wifi", "connect", ssid], fbResult => {
+                    root.pendingConnection = null;
+                    if (!fbResult.success) {
+                        root.connectionFailed(ssid);
+                    }
+                    updateWifiDetails();
+                    if (callback)
+                        callback(fbResult);
+                });
+                return;
+            }
+            root.pendingConnection = null;
+            if (!result.success) {
+                root.connectionFailed(ssid);
+            }
+            updateWifiDetails();
+            if (callback)
+                callback(result);
+        });
     }
 
     function disconnectFromNetwork(): void {
-        wifiDevice?.disconnect();
+        root.pendingConnection = null;
+        if (root.active && root.active.ssid) {
+            executeCommand(["connection", "down", "id", root.active.ssid], result => {
+                if (!result.success && root.wifiDevice?.name) {
+                    executeCommand(["device", "disconnect", root.wifiDevice.name], () => {
+                        updateWifiDetails();
+                    });
+                } else {
+                    updateWifiDetails();
+                }
+            });
+        } else if (root.wifiDevice?.name) {
+            executeCommand(["device", "disconnect", root.wifiDevice.name], result => {
+                updateWifiDetails();
+            });
+        }
     }
 
     function forgetNetwork(ssid: string): void {
-        const network = findWifiNetwork(ssid);
-        if (!network) {
+        if (!ssid)
             return;
+        const net = findWifiNetwork(ssid);
+        if (net) {
+            net.forget();
+        } else {
+            executeCommand(["connection", "delete", ssid], () => {
+                updateWifiDetails();
+            });
         }
-        network.forget();
     }
 
     //
@@ -256,33 +484,23 @@ Singleton {
     }
 
     function connectEthernet(connectionName: string, interfaceName: string): void {
-        const device = findWiredDevice(interfaceName);
-        if (!device) {
-            return;
-        }
-
         if (connectionName) {
-            const targetNet = (device.networks?.values ?? []).find(n => n.name === connectionName);
-            if (targetNet) {
-                targetNet.connect();
-                return;
-            }
-        }
-
-        const primaryNet = device.networks?.values?.[0];
-        if (primaryNet) {
-            primaryNet.connect();
-        } else {
-            device.autoconnect = true;
+            executeCommand(["connection", "up", connectionName], result => {
+                updateEthDetails();
+            });
+        } else if (interfaceName) {
+            executeCommand(["device", "connect", interfaceName], result => {
+                updateEthDetails();
+            });
         }
     }
 
     function disconnectEthernet(interfaceName: string): void {
-        const device = findWiredDevice(interfaceName);
-        if (!device) {
-            return;
+        if (interfaceName) {
+            executeCommand(["device", "disconnect", interfaceName], result => {
+                updateEthDetails();
+            });
         }
-        device.disconnect();
     }
 
     //
@@ -353,20 +571,6 @@ Singleton {
     // Hidden Networks Fallback
     //
 
-    Process {
-        id: hiddenNetworkProc
-        property var cb: null
-
-        onExited: (code, status) => {
-            if (cb) {
-                cb({
-                    success: code === 0
-                });
-                cb = null;
-            }
-        }
-    }
-
     function addHiddenNetwork(ssid: string, password: string, security: string, hidden: bool, callback: var): void {
         if (!ssid) {
             if (callback)
@@ -376,7 +580,7 @@ Singleton {
             return;
         }
 
-        const args = ["nmcli", "dev", "wifi", "connect", ssid];
+        const args = ["dev", "wifi", "connect", ssid];
         if (password && password.length > 0) {
             args.push("password", password);
         }
@@ -384,8 +588,11 @@ Singleton {
             args.push("hidden", "yes");
         }
 
-        hiddenNetworkProc.cb = callback;
-        hiddenNetworkProc.command = args;
-        hiddenNetworkProc.running = true;
+        executeCommand(args, result => {
+            if (callback)
+                callback({
+                    success: result.success
+                });
+        });
     }
 }

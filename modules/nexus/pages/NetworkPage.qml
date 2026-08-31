@@ -20,29 +20,13 @@ PageBase {
         width: root.cappedWidth
         spacing: Tokens.spacing.extraSmall / 2
 
-        Timer {
-            running: root.visible && Nmcli.wifiEnabled
-            repeat: true
-            triggeredOnStart: true
-            interval: GlobalConfig.nexus.networkRescanInterval
-            onTriggered: Nmcli.rescanWifi()
-        }
+    Component.onCompleted: {
+        Nmcli.enableScanner(root.visible);
+    }
 
-        Timer {
-            id: wifiScanDelay
-
-            interval: 100
-            onTriggered: Nmcli.rescanWifi()
-        }
-
-        Connections {
-            function onWifiEnabledChanged(): void {
-                if (Nmcli.wifiEnabled)
-                    wifiScanDelay.start();
-            }
-
-            target: Nmcli
-        }
+    onVisibleChanged: {
+        Nmcli.enableScanner(root.visible);
+    }
 
         Loader {
             Layout.fillWidth: true
