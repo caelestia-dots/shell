@@ -225,10 +225,10 @@ void BlobShape::updatePaddedBounds(float pad) {
 
 void BlobShape::writeRectData(BlobRectData& r, const QPointF& scenePos) const {
     const QMatrix4x4& dm = m_deformMatrix;
-    const float a = dm(0, 0);
-    const float b = dm(1, 0);
-    const float c = dm(0, 1);
-    const float d = dm(1, 1);
+    const float m00 = dm(0, 0);
+    const float m10 = dm(1, 0);
+    const float m01 = dm(0, 1);
+    const float m11 = dm(1, 1);
 
     r.cx = static_cast<float>(scenePos.x() + width() / 2.0);
     r.cy = static_cast<float>(scenePos.y() + height() / 2.0);
@@ -239,21 +239,21 @@ void BlobShape::writeRectData(BlobRectData& r, const QPointF& scenePos) const {
     r.offsetY = dm(1, 3);
 
     // Pre-compute inverse deformation matrix
-    const float det = a * d - c * b;
+    const float det = m00 * m11 - m01 * m10;
     const float invDet = std::abs(det) > 1e-6f ? 1.0f / det : 1.0f;
-    r.invDeform[0] = d * invDet;
-    r.invDeform[1] = -b * invDet;
-    r.invDeform[2] = -c * invDet;
-    r.invDeform[3] = a * invDet;
+    r.invDeform[0] = m11 * invDet;
+    r.invDeform[1] = -m10 * invDet;
+    r.invDeform[2] = -m01 * invDet;
+    r.invDeform[3] = m00 * invDet;
 
     // Pre-compute minimum eigenvalue (avoids per-pixel sqrt)
-    const float halfTr = 0.5f * (a + d);
-    const float halfDiff = 0.5f * (a - d);
-    r.minEig = halfTr - std::sqrt(halfDiff * halfDiff + c * c);
+    const float halfTr = 0.5f * (m00 + m11);
+    const float halfDiff = 0.5f * (m00 - m11);
+    r.minEig = halfTr - std::sqrt(halfDiff * halfDiff + m01 * m01);
 
     // Pre-compute screen-space AABB half-extents
-    r.screenHalfX = std::abs(a) * r.hw + std::abs(c) * r.hh;
-    r.screenHalfY = std::abs(b) * r.hw + std::abs(d) * r.hh;
+    r.screenHalfX = std::abs(m00) * r.hw + std::abs(m01) * r.hh;
+    r.screenHalfY = std::abs(m10) * r.hw + std::abs(m11) * r.hh;
 }
 
 void BlobShape::collectNearbyRects(float pad, QVector<BlobShape*>& rectShapes) {

@@ -49,11 +49,8 @@ add_compile_options(
     -Wunreachable-code
 )
 
-# Disable non-portable include path warnings, we build only for Linux
-add_compile_options(-Wno-nonportable-include-path)
-
 if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-    add_compile_options(-Wunused-lambda-capture)
+    add_compile_options(-Wunused-lambda-capture -Wno-nonportable-include-path)
 endif()
 
 if("extras" IN_LIST ENABLE_MODULES)

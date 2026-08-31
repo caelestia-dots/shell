@@ -139,9 +139,9 @@ qreal BlobRect::damping() const {
     return m_damping;
 }
 
-void BlobRect::setDamping(qreal d) {
-    if (!qFuzzyCompare(m_damping, d)) {
-        m_damping = d;
+void BlobRect::setDamping(qreal damping) {
+    if (!qFuzzyCompare(m_damping, damping)) {
+        m_damping = damping;
         emit dampingChanged();
     }
 }

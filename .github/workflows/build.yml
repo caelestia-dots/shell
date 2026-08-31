@@ -1,4 +1,4 @@
-name: Build on Nix
+name: Build
 
 on:
   push:
@@ -7,7 +7,7 @@ on:
   pull_request:
 
 jobs:
-  build:
+  build-nix:
     runs-on: ubuntu-latest
 
     steps:
@@ -45,3 +45,28 @@ jobs:
 
       - name: Build flake
         run: nix build
+
+  build-cpp:
+    name: build-arch-${{ matrix.name }}
+    runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/${{ github.repository_owner }}/shell-arch-env:latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: gcc
+            compiler: g++
+          - name: clazy
+            compiler: clazy
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Build
+        run: |
+          # Set version and git rev for CI build so we don't call git
+          cmake -B build -G Ninja -DCMAKE_CXX_COMPILER=${{ matrix.compiler }} -DCMAKE_CXX_FLAGS=-Werror \
+            -DVERSION= -DGIT_REVISION=
+          cmake --build build

@@ -50,6 +50,8 @@ QString DiagnosticType::toString(Type t) {
     case InvalidValue:
         return QStringLiteral("InvalidValue");
     }
+
+    Q_UNREACHABLE_RETURN(QString());
 }
 
 Diagnostic Diagnostic::mismatch(const QString& expected, const QJsonValue& value, const QString& option) {

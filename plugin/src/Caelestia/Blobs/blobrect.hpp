@@ -32,7 +32,7 @@ public:
     void setStiffness(qreal s);
 
     [[nodiscard]] qreal damping() const;
-    void setDamping(qreal d);
+    void setDamping(qreal damping);
 
     [[nodiscard]] qreal deformScale() const;
     void setDeformScale(qreal s);
