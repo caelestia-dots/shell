@@ -230,12 +230,12 @@ void WavyLine::paintArc(QPainter* painter) {
         return;
     }
 
-    const auto N = qMax(64, qCeil(radius * drawAngleRad));
-    const auto dTheta = drawAngleRad / N;
+    const auto segments = qMax(64, qCeil(radius * drawAngleRad));
+    const auto dTheta = drawAngleRad / segments;
 
     QPainterPath path;
 
-    for (int i = 0; i <= N; ++i) {
+    for (int i = 0; i <= segments; ++i) {
         const auto theta = m_startAngleRad + i * dTheta;
         const auto s = i * dTheta * radius;
         const auto phi = m_frequency * 2 * M_PI * (s + m_startX) / len + phase;

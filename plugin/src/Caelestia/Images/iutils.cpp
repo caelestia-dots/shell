@@ -4,6 +4,9 @@
 
 namespace caelestia::images {
 
+IUtils::IUtils(QObject* parent)
+    : QObject(parent) {}
+
 IUtils* IUtils::create(QQmlEngine* engine, QJSEngine* jsEngine) {
     Q_UNUSED(jsEngine);
 
@@ -17,7 +20,7 @@ IUtils* IUtils::create(QQmlEngine* engine, QJSEngine* jsEngine) {
 
 QUrl IUtils::urlForPath(const QString& path, int fillMode) {
     if (path.isEmpty())
-        return QUrl();
+        return {};
 
     QString prefix;
     switch (fillMode) {

@@ -17,8 +17,8 @@ namespace caelestia::services {
 
 namespace ac {
 
-constexpr quint32 SAMPLE_RATE = 44100;
-constexpr quint32 CHUNK_SIZE = 512;
+constexpr quint32 k_sampleRate = 44100;
+constexpr quint32 k_chunkSize = 512;
 
 } // namespace ac
 
@@ -43,7 +43,7 @@ private:
     void streamStateChanged(pw_stream_state state);
     void processStream();
 
-    [[nodiscard]] unsigned int nextPowerOf2(unsigned int n);
+    [[nodiscard]] static unsigned int nextPowerOf2(unsigned int n);
 };
 
 class AudioCollector : public Service {
@@ -62,7 +62,7 @@ public:
 
 private:
     explicit AudioCollector(QObject* parent = nullptr);
-    ~AudioCollector();
+    ~AudioCollector() override;
 
     std::jthread m_thread;
     std::vector<float> m_buffer1;

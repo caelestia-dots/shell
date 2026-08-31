@@ -16,20 +16,16 @@ public:
     explicit BlobInvertedRect(QQuickItem* parent = nullptr);
     ~BlobInvertedRect() override;
 
-    qreal borderLeft() const { return m_borderLeft; }
-
+    [[nodiscard]] qreal borderLeft() const;
     void setBorderLeft(qreal v);
 
-    qreal borderRight() const { return m_borderRight; }
-
+    [[nodiscard]] qreal borderRight() const;
     void setBorderRight(qreal v);
 
-    qreal borderTop() const { return m_borderTop; }
-
+    [[nodiscard]] qreal borderTop() const;
     void setBorderTop(qreal v);
 
-    qreal borderBottom() const { return m_borderBottom; }
-
+    [[nodiscard]] qreal borderBottom() const;
     void setBorderBottom(qreal v);
 
 signals:
@@ -39,9 +35,9 @@ signals:
     void borderBottomChanged();
 
 protected:
-    bool isInvertedRect() const override { return true; }
+    [[nodiscard]] bool isInvertedRect() const override;
 
-    QSGNode* updatePaintNode(QSGNode* oldNode, UpdatePaintNodeData*) override;
+    QSGNode* updatePaintNode(QSGNode* oldNode, UpdatePaintNodeData* data) override;
 
     void registerWithGroup() override;
     void unregisterFromGroup() override;

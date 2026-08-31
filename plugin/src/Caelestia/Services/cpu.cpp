@@ -42,8 +42,8 @@ void Cpu::readNameOnce() {
     const QByteArray data = f.readAll();
     f.close();
 
-    static const QRegularExpression re(QStringLiteral("model name\\s*:\\s*(.+)"));
-    const auto match = re.match(QString::fromLatin1(data));
+    static const QRegularExpression k_re(QStringLiteral("model name\\s*:\\s*(.+)"));
+    const auto match = k_re.match(QString::fromLatin1(data));
     if (!match.hasMatch()) {
         return;
     }
@@ -65,9 +65,9 @@ void Cpu::refreshPercentage() {
     const QByteArray data = f.readAll();
     f.close();
 
-    static const QRegularExpression re(
+    static const QRegularExpression k_re(
         QStringLiteral("^cpu\\s+(\\d+)\\s+(\\d+)\\s+(\\d+)\\s+(\\d+)\\s+(\\d+)\\s+(\\d+)\\s+(\\d+)"));
-    const auto match = re.match(QString::fromLatin1(data));
+    const auto match = k_re.match(QString::fromLatin1(data));
     if (!match.hasMatch()) {
         return;
     }
@@ -105,13 +105,13 @@ void Cpu::refreshTemperature() {
 }
 
 QString Cpu::cleanName(QString s) {
-    static const QRegularExpression noise(
+    static const QRegularExpression k_noise(
         QStringLiteral("\\(R\\)|\\(TM\\)|CPU|\\d+(?:th|nd|rd|st) Gen |Core |Processor"),
         QRegularExpression::CaseInsensitiveOption);
-    static const QRegularExpression spaces(QStringLiteral("\\s+"));
+    static const QRegularExpression k_spaces(QStringLiteral("\\s+"));
 
-    s.replace(noise, QString());
-    s.replace(spaces, QStringLiteral(" "));
+    s.replace(k_noise, QString());
+    s.replace(k_spaces, QStringLiteral(" "));
     return s.trimmed();
 }
 

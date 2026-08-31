@@ -1,7 +1,5 @@
 #pragma once
 
-#include <algorithm>
-
 #include "settings/objectnode.hpp"
 #include "common.hpp"
 
@@ -18,9 +16,8 @@ class BorderConfig : public settings::ObjectNode {
     Q_PROPERTY(int clampedThickness READ clampedThickness NOTIFY thicknessChanged)
 
 public:
-    [[nodiscard]] static int minThickness() { return 2; }
-
-    [[nodiscard]] int clampedThickness() const { return std::max(minThickness(), m_thickness); }
+    [[nodiscard]] static int minThickness();
+    [[nodiscard]] int clampedThickness() const;
 };
 
 } // namespace caelestia::config
