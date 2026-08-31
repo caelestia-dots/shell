@@ -3,6 +3,7 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import Quickshell.Services.UPower
 import Caelestia.Config
+import Caelestia.Services
 import qs.components
 import qs.services
 
@@ -11,6 +12,10 @@ Column {
 
     spacing: Tokens.spacing.medium
     width: Tokens.sizes.bar.batteryWidth
+
+    ServiceRef {
+        service: ChargeThreshold
+    }
 
     StyledText {
         text: UPower.displayDevice.isLaptopBattery ? qsTr("Remaining: %1%").arg(Math.round(UPower.displayDevice.percentage * 100)) : qsTr("No battery detected")

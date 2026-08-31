@@ -21,6 +21,10 @@ StyledClippingRect {
         Anim {}
     }
 
+    ServiceRef {
+        service: ChargeThreshold
+    }
+
     Contents {
         id: layout
 

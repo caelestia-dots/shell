@@ -377,8 +377,7 @@ For example, to automatically hide the bar on the monitor named `DP-1`:
                     "critical": true
                 }
             ],
-            "criticalLevel": 3,
-            "chargeThresholdPollInterval": 15000
+            "criticalLevel": 3
         }
     },
     "background": {
