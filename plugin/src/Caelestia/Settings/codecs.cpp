@@ -4,6 +4,8 @@
 #include <qjsonobject.h>
 #include <qmetaobject.h>
 
+#include <cmath>
+
 #include "util/metaenum.hpp"
 
 namespace caelestia::settings {
@@ -108,7 +110,7 @@ DecodeResult IntCodec::decode(const QJsonValue& value) const {
     const auto num = value.toDouble();
 
     double integral;
-    if (std::modf(num, &integral) != 0.0)
+    if (std::fpclassify(std::modf(num, &integral)) != FP_ZERO)
         return error(DiagnosticType::InvalidValue, QStringLiteral("Expected an integer, got the real %1").arg(num));
 
     constexpr auto k_min = std::numeric_limits<int>::min();
