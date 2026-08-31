@@ -53,6 +53,20 @@ protected:
     virtual void unregisterFromGroup();
     void updateCenteredDeformMatrix();
 
+    [[nodiscard]] QRectF localPaddedRect(float pad) const;
+    [[nodiscard]] QRectF paddedSceneRect(const QPointF& scenePos, float pad) const;
+    void writeRectData(BlobRectData& r, const QPointF& scenePos) const;
+    void updatePaddedBounds(float pad);
+    void collectNearbyRects(float pad, QVector<BlobShape*>& rectShapes);
+    void computeExcludeMasks(const QVector<BlobShape*>& rectShapes);
+    [[nodiscard]] bool isNearInvertedBorder(float cx, float cy, float hw, float hh, float margin) const;
+    void cacheInvertedRect(float pad);
+    void accumulateNeighbourFill(qsizetype index, const QVector<BlobShape*>& rectShapes, const float cornerX[4],
+        const float cornerY[4], float smoothFactor, float factors[4]) const;
+    void accumulateInvertedFill(
+        const float cornerX[4], const float cornerY[4], float smoothFactor, float factors[4]) const;
+    void applyCornerFill(float smoothFactor, const QVector<BlobShape*>& rectShapes);
+
     BlobGroup* m_group = nullptr;
     qreal m_radius = 0;
     QMatrix4x4 m_deformMatrix; // identity by default

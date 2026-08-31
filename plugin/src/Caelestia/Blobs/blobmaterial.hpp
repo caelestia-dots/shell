@@ -4,6 +4,9 @@
 #include <qsgmaterial.h>
 #include <qsgmaterialshader.h>
 
+// Max rects the shader smins over; must match the loop bounds in blob.frag
+inline constexpr int k_maxRects = 16;
+
 struct BlobRectData {
     float cx = 0, cy = 0, hw = 0, hh = 0;
     float offsetX = 0, offsetY = 0;
@@ -37,7 +40,7 @@ public:
     float m_invertedRadius = 0;
     float m_invertedOuter[4] = {};
     float m_invertedInner[4] = {};
-    BlobRectData m_rects[16] = {};
+    BlobRectData m_rects[k_maxRects] = {};
 };
 
 class BlobMaterialShader : public QSGMaterialShader {
