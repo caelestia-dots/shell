@@ -569,7 +569,7 @@ Singleton {
             id: stderrCollector
         }
 
-        onExited: code => {
+        onExited: code => { // qmllint disable signal-handler-parameters
             exitCode = code;
 
             Qt.callLater(() => {
