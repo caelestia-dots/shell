@@ -5,6 +5,8 @@
 
 #include "blobgroup.hpp"
 
+namespace caelestia::blobs {
+
 BlobRect::BlobRect(QQuickItem* parent)
     : BlobShape(parent) {}
 
@@ -349,3 +351,5 @@ void BlobRect::checkAtRest(float speed) {
         m_physicsActive = false;
     }
 }
+
+} // namespace caelestia::blobs

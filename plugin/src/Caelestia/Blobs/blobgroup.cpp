@@ -3,6 +3,8 @@
 #include "blobinvertedrect.hpp"
 #include "blobshape.hpp"
 
+namespace caelestia::blobs {
+
 BlobGroup::BlobGroup(QObject* parent)
     : QObject(parent) {}
 
@@ -131,3 +133,5 @@ void BlobGroup::ensurePhysicsUpdated() {
     for (auto* shape : std::as_const(m_shapes))
         shape->updatePhysics();
 }
+
+} // namespace caelestia::blobs

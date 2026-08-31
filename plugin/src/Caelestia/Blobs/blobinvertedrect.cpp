@@ -8,6 +8,8 @@
 #include "blobgroup.hpp"
 #include "blobmaterial.hpp"
 
+namespace caelestia::blobs {
+
 BlobInvertedRect::BlobInvertedRect(QQuickItem* parent)
     : BlobShape(parent) {}
 
@@ -208,3 +210,5 @@ void BlobInvertedRect::unregisterFromGroup() {
     if (m_group)
         m_group->clearInvertedRect(this);
 }
+
+} // namespace caelestia::blobs
