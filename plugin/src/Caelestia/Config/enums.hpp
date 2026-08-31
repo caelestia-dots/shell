@@ -1,20 +1,29 @@
 #pragma once
 
+#include <qobject.h>
 #include <qqmlintegration.h>
 
 namespace caelestia::config {
 
-namespace bar {
+#define ENUM(Name, ...)                                                                                                \
+    namespace Name {                                                                                                   \
+                                                                                                                       \
+    Q_NAMESPACE                                                                                                        \
+    QML_ELEMENT                                                                                                        \
+                                                                                                                       \
+    enum Enum {                                                                                                        \
+        __VA_ARGS__                                                                                                    \
+    };                                                                                                                 \
+    Q_ENUM_NS(Enum)                                                                                                    \
+                                                                                                                       \
+    };
 
-Q_NAMESPACE
-QML_NAMED_ELEMENT(BarEnums)
+ENUM(BarWorkspaceDisplay, Shapes, Text)
+ENUM(BarWorkspaceCapitalisation, Preserve, Upper, Lower)
+ENUM(LyricsBackend, Auto, Local, LRCLIB, NetEase)
+ENUM(GpuType, Auto, Nvidia, Generic, None)
+ENUM(NotifsFullscreen, On, Off)
 
-enum WorkspaceDisplay {
-    Shapes,
-    Text
-};
-Q_ENUM_NS(WorkspaceDisplay)
-
-} // namespace bar
+#undef ENUM
 
 } // namespace caelestia::config

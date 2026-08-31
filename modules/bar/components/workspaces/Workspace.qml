@@ -51,7 +51,7 @@ ColumnLayout {
 
         Layout.alignment: Qt.AlignHCenter | Qt.AlignTop
         Layout.preferredHeight: Tokens.sizes.bar.innerWidth - Tokens.padding.small
-        sourceComponent: Config.bar.workspaces.displayType === BarEnums.Text ? textComponent : shapeComponent
+        sourceComponent: Config.bar.workspaces.displayType === BarWorkspaceDisplay.Text ? textComponent : shapeComponent
 
         onItemChanged: root.updateShape()
     }
@@ -84,20 +84,33 @@ ColumnLayout {
         StyledText {
             animate: true
             text: {
+                if (root.focused) {
+                    const label = Config.bar.workspaces.activeLabel;
+                    if (label)
+                        return label;
+                }
+
+                if (root.focused || root.isOccupied) {
+                    const label = Config.bar.workspaces.occupiedLabel;
+                    if (label)
+                        return label;
+                }
+
+                const label = Config.bar.workspaces.label;
+                if (label)
+                    return label;
+
                 const ws = Hypr.workspaces.values.find(w => w.id === root.ws);
                 const wsName = !ws || ws.name == root.ws ? root.ws : ws.name[0];
-                let displayName = wsName.toString();
-                if (Config.bar.workspaces.capitalisation.toLowerCase() === "upper") {
-                    displayName = displayName.toUpperCase();
-                } else if (Config.bar.workspaces.capitalisation.toLowerCase() === "lower") {
-                    displayName = displayName.toLowerCase();
-                }
-                const label = Config.bar.workspaces.label || displayName;
-                const occupiedLabel = Config.bar.workspaces.occupiedLabel || label;
-                const activeLabel = Config.bar.workspaces.activeLabel || (root.isOccupied ? occupiedLabel : label);
-                return root.activeWsId === root.ws ? activeLabel : root.isOccupied ? occupiedLabel : label;
+
+                const capitalisation = Config.bar.workspaces.capitalisation;
+                if (capitalisation === BarWorkspaceCapitalisation.Upper)
+                    return wsName.toString().toUpperCase();
+                else if (capitalisation === BarWorkspaceCapitalisation.Lower)
+                    return wsName.toString().toLowerCase();
+                return wsName;
             }
-            color: Config.bar.workspaces.occupiedBg || root.isOccupied || root.activeWsId === root.ws ? Colours.palette.m3onSurface : Colours.layer(Colours.palette.m3outlineVariant, 2)
+            color: Config.bar.workspaces.occupiedBg || root.isOccupied || root.focused ? Colours.palette.m3onSurface : Colours.layer(Colours.palette.m3outlineVariant, 2)
             verticalAlignment: Qt.AlignVCenter
             font.family: Tokens.font.workspaces
         }

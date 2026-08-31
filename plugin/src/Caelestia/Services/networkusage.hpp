@@ -1,10 +1,10 @@
 #pragma once
 
-#include "../circularbuffer.hpp"
-#include "tickingservice.hpp"
-
 #include <qelapsedtimer.h>
 #include <qqmlintegration.h>
+
+#include "core/circularbuffer.hpp"
+#include "tickingservice.hpp"
 
 namespace caelestia::services {
 

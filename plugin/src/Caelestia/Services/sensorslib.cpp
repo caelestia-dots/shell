@@ -1,12 +1,14 @@
 #include "sensorslib.hpp"
 
+#include <qloggingcategory.h>
+
+#include <sensors/sensors.h>
+
 #include <atomic>
 #include <cctype>
 #include <cstdlib>
 #include <cstring>
 #include <mutex>
-#include <qloggingcategory.h>
-#include <sensors/sensors.h>
 
 Q_LOGGING_CATEGORY(lcSensorsLib, "caelestia.services.sensorslib", QtInfoMsg)
 

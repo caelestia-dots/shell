@@ -1,11 +1,11 @@
 #include "networkusage.hpp"
 
+#include <qfile.h>
+#include <qtypes.h>
+
 #include <array>
 #include <cmath>
 #include <cstdio>
-
-#include <qfile.h>
-#include <qtypes.h>
 
 namespace {
 
