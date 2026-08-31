@@ -4,6 +4,8 @@
 
 #include "blobshape.hpp"
 
+namespace caelestia::blobs {
+
 class BlobInvertedRect : public BlobShape {
     Q_OBJECT
     QML_ELEMENT
@@ -48,3 +50,5 @@ private:
     qreal m_borderTop = 0;
     qreal m_borderBottom = 0;
 };
+
+} // namespace caelestia::blobs

@@ -2,6 +2,8 @@
 
 #include <cstring>
 
+namespace caelestia::blobs {
+
 static_assert(sizeof(decltype(BlobRectData::excludeMask)) == sizeof(float),
     "BlobMaterial packs excludeMask into a float slot via memcpy");
 
@@ -101,3 +103,5 @@ bool BlobMaterialShader::updateUniformData(RenderState& state, QSGMaterial* newM
 
     return true;
 }
+
+} // namespace caelestia::blobs
