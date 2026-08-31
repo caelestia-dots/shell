@@ -62,12 +62,8 @@ QString BatteryControl::path() const {
 }
 
 void BatteryControl::detectInterface() {
-    auto check = [this](const QString& path,
-                        ControlType type,
-                        const QString& title,
-                        const QList<int>& tiers = {},
-                        int minThresh = 50,
-                        int maxThresh = 100) -> bool {
+    auto check = [this](const QString& path, ControlType type, const QString& title, const QList<int>& tiers = {},
+                     int minThresh = 50, int maxThresh = 100) -> bool {
         if (!QFile::exists(path)) {
             return false;
         }
@@ -84,31 +80,25 @@ void BatteryControl::detectInterface() {
 
     // 1. Lenovo IdeaPad / LOQ / Legion conservation mode
     if (check(QStringLiteral("/sys/bus/platform/drivers/ideapad_acpi/VPC2004:00/conservation_mode"),
-              ControlType::BinaryConservation,
-              QStringLiteral("Conservation Mode"))) {
+            ControlType::BinaryConservation, QStringLiteral("Conservation Mode"))) {
         return;
     }
 
     // 2. Asus WMI discrete threshold (60%, 80%, 100%)
     if (check(QStringLiteral("/sys/devices/platform/asus-nb-wmi/charge_control_end_threshold"),
-              ControlType::DiscreteTiers,
-              QStringLiteral("Battery Care Limit"),
-              { 60, 80, 100 })) {
+            ControlType::DiscreteTiers, QStringLiteral("Battery Care Limit"), { 60, 80, 100 })) {
         return;
     }
 
     // 3. LG Laptop battery care limit (80%, 100%)
-    if (check(QStringLiteral("/sys/devices/platform/lg-laptop/battery_care_limit"),
-              ControlType::DiscreteTiers,
-              QStringLiteral("Battery Care Limit"),
-              { 80, 100 })) {
+    if (check(QStringLiteral("/sys/devices/platform/lg-laptop/battery_care_limit"), ControlType::DiscreteTiers,
+            QStringLiteral("Battery Care Limit"), { 80, 100 })) {
         return;
     }
 
     // 4. Samsung battery life extender
-    if (check(QStringLiteral("/sys/devices/platform/samsung/battery_life_extender"),
-              ControlType::BinaryConservation,
-              QStringLiteral("Battery Life Extender"))) {
+    if (check(QStringLiteral("/sys/devices/platform/samsung/battery_life_extender"), ControlType::BinaryConservation,
+            QStringLiteral("Battery Life Extender"))) {
         return;
     }
 
@@ -118,12 +108,7 @@ void BatteryControl::detectInterface() {
         { QStringLiteral("BAT*"), QStringLiteral("battery*") }, QDir::Dirs | QDir::NoDotAndDotDot);
     for (const auto& bat : batteries) {
         const QString threshPath = QStringLiteral("/sys/class/power_supply/%1/charge_control_end_threshold").arg(bat);
-        if (check(threshPath,
-                  ControlType::ContinuousRange,
-                  QStringLiteral("Charge Limit"),
-                  { 60, 80, 100 },
-                  50,
-                  100)) {
+        if (check(threshPath, ControlType::ContinuousRange, QStringLiteral("Charge Limit"), { 60, 80, 100 }, 50, 100)) {
             return;
         }
     }
@@ -163,7 +148,8 @@ void BatteryControl::refreshState() {
     } else {
         newThreshold = val;
         newEnabled = (val > 0 && val < 100);
-        newSubtitle = newEnabled ? QStringLiteral("Capped at %1%").arg(newThreshold) : QStringLiteral("Charges to 100%");
+        newSubtitle =
+            newEnabled ? QStringLiteral("Capped at %1%").arg(newThreshold) : QStringLiteral("Charges to 100%");
     }
 
     if (m_enabled != newEnabled) {
@@ -201,10 +187,11 @@ bool BatteryControl::writeValue(const QString& val) {
     const QString cmd = QStringLiteral("echo %1 | pkexec tee %2 > /dev/null").arg(val, m_path);
     auto* proc = new QProcess(this);
     proc->setProcessEnvironment(QProcessEnvironment::systemEnvironment());
-    connect(proc, QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished), this, [this, proc](int, QProcess::ExitStatus) {
-        refreshState();
-        proc->deleteLater();
-    });
+    connect(proc, QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished), this,
+        [this, proc](int, QProcess::ExitStatus) {
+            refreshState();
+            proc->deleteLater();
+        });
     proc->start(QStringLiteral("sh"), { QStringLiteral("-c"), cmd });
     return true;
 }
