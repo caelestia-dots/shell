@@ -2,7 +2,6 @@
 
 #include <qdir.h>
 #include <qfileinfo.h>
-#include <qfuturewatcher.h>
 #include <qloggingcategory.h>
 #include <qmetaobject.h>
 #include <qqmlengine.h>
@@ -43,53 +42,31 @@ void CUtils::saveItem(
     }
 
     auto scaledRect = rect;
-    const qreal scale = target->window()->devicePixelRatio();
+    const auto scale = target->window()->devicePixelRatio();
     if (rect.isValid() && !qFuzzyCompare(scale + 1.0, 2.0)) {
         scaledRect =
             QRectF(rect.left() * scale, rect.top() * scale, rect.width() * scale, rect.height() * scale).toRect();
     }
 
-    const QSharedPointer<const QQuickItemGrabResult> grabResult = target->grabToImage();
+    const auto grabResult = target->grabToImage();
 
-    QObject::connect(grabResult.data(), &QQuickItemGrabResult::ready, this,
-        [grabResult, scaledRect, path, onSaved, onFailed, this]() {
-            const auto future = QtConcurrent::run([=]() {
-                QImage image = grabResult->image();
-
-                if (scaledRect.isValid()) {
+    QObject::connect(
+        grabResult.data(), &QQuickItemGrabResult::ready, this, [grabResult, scaledRect, path, onSaved, onFailed, this] {
+            QtConcurrent::run([grabResult, scaledRect, file = path.toLocalFile()] {
+                auto image = grabResult->image();
+                if (scaledRect.isValid())
                     image = image.copy(scaledRect);
-                }
 
-                const QString file = path.toLocalFile();
-                const QString parent = QFileInfo(file).absolutePath();
+                const auto parent = QFileInfo(file).absolutePath();
                 return QDir().mkpath(parent) && image.save(file);
-            });
-
-            auto* watcher = new QFutureWatcher<bool>(this);
-            auto* engine = qmlEngine(this);
-
-            QObject::connect(watcher, &QFutureWatcher<bool>::finished, this, [=]() {
-                if (watcher->result()) {
-                    if (onSaved.isCallable()) {
-                        QJSValueList args = { QJSValue(path.toLocalFile()) };
-                        if (engine) {
-                            args << engine->toScriptValue(QVariant::fromValue(path));
-                        }
-                        onSaved.call(args);
-                    }
-                } else {
+            }).then(this, [path, onSaved, onFailed](bool ok) {
+                const auto* cb = ok ? &onSaved : &onFailed;
+                if (!ok)
                     qCWarning(lcCUtils) << "saveItem: failed to save" << path;
-                    if (onFailed.isCallable()) {
-                        if (engine) {
-                            onFailed.call({ engine->toScriptValue(QVariant::fromValue(path)) });
-                        } else {
-                            onFailed.call();
-                        }
-                    }
-                }
-                watcher->deleteLater();
+
+                if (cb->isCallable())
+                    cb->call({ path.toLocalFile() });
             });
-            watcher->setFuture(future);
         });
 }
 
