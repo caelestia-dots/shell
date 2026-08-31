@@ -1,16 +1,19 @@
 #include "filesystemmodel.hpp"
 
 #include <qdiriterator.h>
-#include <qfuturewatcher.h>
 #include <qtconcurrentrun.h>
+
+#include <algorithm>
+#include <optional>
+#include <utility>
 
 namespace caelestia::models {
 
-FileSystemEntry::FileSystemEntry(const QString& path, const QString& relativePath, QObject* parent)
+FileSystemEntry::FileSystemEntry(const QString& path, QString relativePath, QObject* parent)
     : QObject(parent)
     , m_fileInfo(path)
     , m_path(path)
-    , m_relativePath(relativePath)
+    , m_relativePath(std::move(relativePath))
     , m_isImageInitialised(false)
     , m_mimeTypeInitialised(false) {}
 
@@ -48,7 +51,7 @@ bool FileSystemEntry::isDir() const {
 
 bool FileSystemEntry::isImage() const {
     if (!m_isImageInitialised) {
-        QImageReader reader(m_path);
+        const QImageReader reader(m_path);
         m_isImage = reader.canRead();
         m_isImageInitialised = true;
     }
@@ -57,8 +60,8 @@ bool FileSystemEntry::isImage() const {
 
 QString FileSystemEntry::mimeType() const {
     if (!m_mimeTypeInitialised) {
-        static const QMimeDatabase s_db;
-        m_mimeType = s_db.mimeTypeForFile(m_path).name();
+        static const QMimeDatabase k_db;
+        m_mimeType = k_db.mimeTypeForFile(m_path).name();
         m_mimeTypeInitialised = true;
     }
     return m_mimeType;
@@ -91,7 +94,7 @@ int FileSystemModel::rowCount(const QModelIndex& parent) const {
 
 QVariant FileSystemModel::data(const QModelIndex& index, int role) const {
     if (role != Qt::UserRole || !index.isValid() || index.row() >= m_entries.size()) {
-        return QVariant();
+        return {};
     }
     return QVariant::fromValue(m_entries.at(index.row()));
 }
@@ -212,7 +215,7 @@ void FileSystemModel::setNameFilters(const QStringList& nameFilters) {
 }
 
 QQmlListProperty<FileSystemEntry> FileSystemModel::entries() {
-    return QQmlListProperty<FileSystemEntry>(this, &m_entries);
+    return { this, &m_entries };
 }
 
 void FileSystemModel::watchDirIfRecursive(const QString& path) {
@@ -287,91 +290,86 @@ void FileSystemModel::updateEntriesForDir(const QString& dir) {
     const auto nameFilters = m_nameFilters;
 
     QSet<QString> oldPaths;
-    for (const auto& entry : std::as_const(m_entries)) {
+    for (const auto& entry : std::as_const(m_entries))
         oldPaths << entry->path();
-    }
 
-    auto future = QtConcurrent::run([=](QPromise<QPair<QSet<QString>, QSet<QString>>>& promise) {
+    auto future = QtConcurrent::run([=](QPromise<PathDiff>& promise) {
         const auto flags = recursive ? QDirIterator::Subdirectories : QDirIterator::NoIteratorFlags;
-
-        std::optional<QDirIterator> iter;
-
-        if (filter == Images) {
-            QStringList extraNameFilters = nameFilters;
-            const auto formats = QImageReader::supportedImageFormats();
-            for (const auto& format : formats) {
-                extraNameFilters << "*." + format;
-            }
-
-            QDir::Filters filters = QDir::Files;
-            if (showHidden) {
-                filters |= QDir::Hidden;
-            }
-
-            iter.emplace(dir, extraNameFilters, filters, flags);
-        } else {
-            QDir::Filters filters;
-
-            if (filter == Files) {
-                filters = QDir::Files;
-            } else if (filter == Dirs) {
-                filters = QDir::Dirs | QDir::NoDotAndDotDot;
-            } else {
-                filters = QDir::Dirs | QDir::Files | QDir::NoDotAndDotDot;
-            }
-
-            if (showHidden) {
-                filters |= QDir::Hidden;
-            }
-
-            if (nameFilters.isEmpty()) {
-                iter.emplace(dir, filters, flags);
-            } else {
-                iter.emplace(dir, nameFilters, filters, flags);
-            }
-        }
-
-        QSet<QString> newPaths;
-        while (iter->hasNext()) {
-            if (promise.isCanceled()) {
-                return;
-            }
-
-            QString path = iter->next();
-
-            if (filter == Images) {
-                QImageReader reader(path);
-                if (!reader.canRead()) {
-                    continue;
-                }
-            }
-
-            newPaths.insert(path);
-        }
-
-        if (promise.isCanceled()) {
+        const auto newPaths = scanDir(dir, filtersFor(filter, nameFilters, showHidden), flags, promise);
+        if (!newPaths)
             return;
-        }
 
-        promise.addResult(qMakePair(oldPaths - newPaths, newPaths - oldPaths));
+        promise.addResult({ .removed = oldPaths - *newPaths, .added = *newPaths - oldPaths });
     });
 
-    if (m_futures.contains(dir)) {
+    if (m_futures.contains(dir))
         m_futures[dir].cancel();
-    }
     m_futures.insert(dir, future);
 
     future
         .then(this,
-            [dir, this](QPair<QSet<QString>, QSet<QString>> result) {
+            [dir, this](const PathDiff& result) {
                 m_futures.remove(dir);
-                if (!result.first.isEmpty() || !result.second.isEmpty()) {
-                    applyChanges(result.first, result.second);
-                }
+                if (!result.removed.isEmpty() || !result.added.isEmpty())
+                    applyChanges(result.removed, result.added);
             })
         .onCanceled(this, [dir, this]() {
             m_futures.remove(dir);
         });
+}
+
+FileSystemModel::ScanFilters FileSystemModel::filtersFor(
+    Filter filter, const QStringList& nameFilters, bool showHidden) {
+    ScanFilters filters;
+    filters.nameFilters = nameFilters;
+
+    if (filter == Filter::Images) {
+        const auto formats = QImageReader::supportedImageFormats();
+        for (const auto& format : formats)
+            filters.nameFilters << "*." + format;
+
+        filters.filterFn = [](const QString& path) {
+            return QImageReader(path).canRead();
+        };
+    }
+
+    if (filter == Filter::Files || filter == Filter::Images)
+        filters.filters = QDir::Files;
+    else if (filter == Filter::Dirs)
+        filters.filters = QDir::Dirs | QDir::NoDotAndDotDot;
+    else
+        filters.filters = QDir::Dirs | QDir::Files | QDir::NoDotAndDotDot;
+
+    if (showHidden)
+        filters.filters |= QDir::Hidden;
+
+    return filters;
+}
+
+std::optional<QSet<QString>> FileSystemModel::scanDir(const QString& dir, const ScanFilters& filters,
+    QDirIterator::IteratorFlags flags, const QPromise<PathDiff>& promise) {
+    std::optional<QDirIterator> iter;
+    if (filters.nameFilters.isEmpty())
+        iter.emplace(dir, filters.filters, flags);
+    else
+        iter.emplace(dir, filters.nameFilters, filters.filters, flags);
+
+    QSet<QString> paths;
+    while (iter->hasNext()) {
+        if (promise.isCanceled())
+            return std::nullopt;
+
+        const QString path = iter->next();
+        if (filters.filterFn && !filters.filterFn(path))
+            continue;
+
+        paths.insert(path);
+    }
+
+    if (promise.isCanceled())
+        return std::nullopt;
+
+    return paths;
 }
 
 void FileSystemModel::applyChanges(const QSet<QString>& removedPaths, const QSet<QString>& addedPaths) {
@@ -381,12 +379,12 @@ void FileSystemModel::applyChanges(const QSet<QString>& removedPaths, const QSet
             removedIndices << i;
         }
     }
-    std::sort(removedIndices.begin(), removedIndices.end(), std::greater<int>());
+    std::ranges::sort(removedIndices, std::greater<>());
 
     // Batch remove old entries
     int start = -1;
     int end = -1;
-    for (int idx : std::as_const(removedIndices)) {
+    for (const int idx : std::as_const(removedIndices)) {
         if (start == -1) {
             start = idx;
             end = idx;
@@ -416,15 +414,15 @@ void FileSystemModel::applyChanges(const QSet<QString>& removedPaths, const QSet
     for (const auto& path : addedPaths) {
         newEntries << new FileSystemEntry(path, m_dir.relativeFilePath(path), this);
     }
-    std::sort(newEntries.begin(), newEntries.end(), [this](const FileSystemEntry* a, const FileSystemEntry* b) {
+    std::ranges::sort(newEntries, [this](const FileSystemEntry* a, const FileSystemEntry* b) {
         return compareEntries(a, b);
     });
 
     // Batch insert new entries (each run lands contiguously before m_entries[row])
     int i = 0;
     while (i < newEntries.size()) {
-        const auto it = std::lower_bound(m_entries.begin(), m_entries.end(), newEntries[i],
-            [this](const FileSystemEntry* a, const FileSystemEntry* b) {
+        const auto it = std::ranges::lower_bound(
+            m_entries, newEntries[i], [this](const FileSystemEntry* a, const FileSystemEntry* b) {
                 return compareEntries(a, b);
             });
         const auto row = static_cast<int>(it - m_entries.begin());

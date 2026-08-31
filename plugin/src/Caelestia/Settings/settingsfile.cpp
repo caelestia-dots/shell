@@ -9,20 +9,26 @@
 #include <qloggingcategory.h>
 #include <qsavefile.h>
 
-namespace caelestia::settings {
+#include <utility>
+
+namespace {
 
 Q_LOGGING_CATEGORY(lcSettingsFile, "caelestia.settings.file", QtInfoMsg)
+
+} // namespace
+
+namespace caelestia::settings {
 
 namespace {
 
 // Max retries for loads which fail due to malformed JSON, e.g. partial writes
-constexpr int kMaxLoadRetries = 3;
+constexpr int k_maxLoadRetries = 3;
 
 } // namespace
 
-SettingsFile::SettingsFile(const QString& path, QObject* parent)
+SettingsFile::SettingsFile(QString path, QObject* parent)
     : QObject(parent)
-    , m_path(path)
+    , m_path(std::move(path))
     , m_watcher(new QFileSystemWatcher(this))
     , m_saveDebounce(new QTimer(this))
     , m_loadDebounce(new QTimer(this))
@@ -86,12 +92,12 @@ void SettingsFile::scheduleLoad() {
 }
 
 void SettingsFile::onLoadDebounced() {
-    const auto isFinalTry = m_loadRetries >= kMaxLoadRetries;
+    const auto isFinalTry = m_loadRetries >= k_maxLoadRetries;
 
     if (load(isFinalTry) == LoadResult::ParseError && !isFinalTry) {
         // Likely a partial write, retry after another debounce
         ++m_loadRetries;
-        qCDebug(lcSettingsFile, "Retrying load of %s (%d/%d)", qUtf8Printable(m_path), m_loadRetries, kMaxLoadRetries);
+        qCDebug(lcSettingsFile, "Retrying load of %s (%d/%d)", qUtf8Printable(m_path), m_loadRetries, k_maxLoadRetries);
         m_loadDebounce->start();
     }
 }
@@ -157,6 +163,7 @@ void SettingsFile::save() {
     if (m_saveDebounce->isActive()) {
         // Queue save for debounce end
         QObject::connect(m_saveDebounce, &QTimer::timeout, this, &SettingsFile::save,
+            // NOLINTNEXTLINE(clang-analyzer-optin.core.EnumCastOutOfRange) ConnectionType is OR-able by design
             static_cast<Qt::ConnectionType>(Qt::UniqueConnection | Qt::SingleShotConnection));
         return;
     }

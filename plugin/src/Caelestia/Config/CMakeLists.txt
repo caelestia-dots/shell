@@ -6,6 +6,7 @@ qml_module(caelestia-config
         rootnodes.cpp
         configattached.cpp
         appearanceconfig.cpp
+        borderconfig.cpp
         font.cpp
         fontbuilder.cpp
         tokensattached.cpp
@@ -13,7 +14,6 @@ qml_module(caelestia-config
         enums.hpp
         backgroundconfig.hpp
         barconfig.hpp
-        borderconfig.hpp
         dashboardconfig.hpp
         generalconfig.hpp
         launcherconfig.hpp

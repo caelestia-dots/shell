@@ -189,8 +189,8 @@ QString ListNode::pathFor(const QString& key) const {
 
 const Schema& ListNode::schema() const {
     // Offset +1 so count is not registered (allow read only cause values is read only)
-    static const auto schema = Schema::build(&staticMetaObject, Node::staticMetaObject.propertyCount() + 1, true);
-    return schema;
+    static const auto k_schema = Schema::build(&staticMetaObject, Node::staticMetaObject.propertyCount() + 1, true);
+    return k_schema;
 }
 
 QVariant ListNode::value(const QString& key) const {
@@ -198,7 +198,7 @@ QVariant ListNode::value(const QString& key) const {
         qCCritical(lcSettings,
             "Attempted to read %s on list node %s. List nodes only have a 'values' key, something is wrong.",
             qUtf8Printable(key), qUtf8Printable(path()));
-        return QVariant();
+        return {};
     }
 
     return QVariant::fromValue(m_elements);
@@ -295,9 +295,9 @@ bool ListNode::syncJson(const QJsonValue& json, QList<Diagnostic>& diagnostics) 
         const auto p = path();
         qCWarning(lcSettings, "Global property definition %s found in overlay file, ignoring.", qUtf8Printable(p));
         diagnostics << Diagnostic{
-            DiagnosticType::GlobalOption,
-            p,
-            QStringLiteral("Global properties should not be defined in overlay files"),
+            .type = DiagnosticType::GlobalOption,
+            .option = p,
+            .message = QStringLiteral("Global properties should not be defined in overlay files"),
         };
         return false;
     }
@@ -320,8 +320,8 @@ bool ListNode::recordWrite(const QString& key, bool changed) {
     return notify;
 }
 
-QString ListNode::keyOf(const Node* node) const {
-    return QString::number(m_elements.indexOf(const_cast<Node*>(node)));
+QString ListNode::keyOf(const Node* child) const {
+    return QString::number(m_elements.indexOf(const_cast<Node*>(child)));
 }
 
 Node* ListNode::elementAt(qsizetype index) const {

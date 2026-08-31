@@ -13,7 +13,7 @@ class CavaProcessor : public AudioProcessor {
 
 public:
     explicit CavaProcessor(QObject* parent = nullptr);
-    ~CavaProcessor();
+    ~CavaProcessor() override;
 
     void setBars(int bars);
 
@@ -60,7 +60,7 @@ private:
     int m_bars;
     QVector<double> m_values;
 
-    void updateValues(QVector<double> values);
+    void updateValues(const QVector<double>& values);
 };
 
 } // namespace caelestia::services

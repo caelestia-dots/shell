@@ -7,7 +7,12 @@
 #include <qqmlintegration.h>
 #include <qquickitem.h>
 #include <qrect.h>
+#include <qset.h>
+#include <qvariant.h>
 #include <qvector.h>
+
+#include <functional>
+#include <utility>
 
 namespace caelestia::components {
 
@@ -180,22 +185,58 @@ private:
         bool readyDelayStarted = false;
     };
 
+    // Delegate properties in the order they must be applied
+    using PropertyList = QList<std::pair<QString, QVariant>>;
+
+    // Result of recording a measured delegate height
+    struct HeightUpdate {
+        qreal previousHeight = 0;
+        bool wasKnown = false;
+    };
+
+    // Attached properties
+    [[nodiscard]] static LazyListViewAttached* attachedFor(QQuickItem* item);
+    [[nodiscard]] static LazyListViewAttached* attachedForCreate(QQuickItem* item);
+
     // Layout
     void relayout();
+    void updateLayoutPositions();
+    void updateContentHeight();
+    void scheduleRelayout();
     [[nodiscard]] std::pair<int, int> computeVisibleRange() const;
     [[nodiscard]] QRectF effectiveViewport() const;
+    [[nodiscard]] qreal viewportTop() const;
     [[nodiscard]] qreal effectiveEstimatedHeight() const;
+    [[nodiscard]] qreal layoutHeightAt(int index) const;
+    [[nodiscard]] qreal visibleHeightAt(int index) const;
+    [[nodiscard]] qreal visualYAt(int index) const;
     [[nodiscard]] static qreal delegateHeight(QQuickItem* item);
     [[nodiscard]] static qreal delegateVisibleHeight(QQuickItem* item);
     [[nodiscard]] static bool isDelegateReady(QQuickItem* item);
     void trackHeight(qreal height);
     void untrackHeight(qreal height);
+    HeightUpdate setKnownHeight(int index, qreal height);
+    void adjustViewportIfAbove(int index, QQuickItem* item, qreal delta);
 
     // Delegate lifecycle
     void syncDelegates();
+    [[nodiscard]] QList<int> delegatesOutsideViewport(const QSet<int>& keep, const QRectF& viewport) const;
+    [[nodiscard]] QList<int> missingDelegates(int first, int last) const;
+    int destroyDelegates(const QList<int>& indices, int budget);
+    int createDelegates(const QList<int>& indices, int budget);
     DelegateEntry createDelegate(int modelIndex);
-    void destroyDelegate(DelegateEntry& entry);
+    void connectDelegate(const DelegateEntry& entry);
+    [[nodiscard]] int indexOfDelegate(QQuickItem* item) const;
+    void onDelegateHeightChanged(QQuickItem* item);
+    void onDelegateReady(QQuickItem* item);
+    static void destroyDelegate(DelegateEntry& entry);
+    static void revealDelegate(QQuickItem* item);
+    void flushPendingInserts();
+    void finishDelayedInsert(QQuickItem* item);
+    void positionDelegates();
+    [[nodiscard]] PropertyList delegateProperties(int modelIndex) const;
     void updateDelegateData(DelegateEntry& entry);
+    void remapDelegates(const std::function<int(int)>& mapIndex);
 
     // Model connection
     void connectModel();

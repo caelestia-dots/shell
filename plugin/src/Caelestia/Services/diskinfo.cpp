@@ -4,7 +4,7 @@ namespace caelestia::services {
 
 namespace {
 
-constexpr qreal kKib = 1024.0;
+constexpr qreal k_kib = 1024.0;
 
 } // namespace
 
@@ -20,16 +20,16 @@ QString DiskInfo::mount() const {
 }
 
 qreal DiskInfo::used() const {
-    return static_cast<qreal>(m_usedBytes) / kKib;
+    return static_cast<qreal>(m_usedBytes) / k_kib;
 }
 
 qreal DiskInfo::total() const {
-    return static_cast<qreal>(m_totalBytes) / kKib;
+    return static_cast<qreal>(m_totalBytes) / k_kib;
 }
 
 qreal DiskInfo::free() const {
     const quint64 freeBytes = m_totalBytes > m_usedBytes ? m_totalBytes - m_usedBytes : 0;
-    return static_cast<qreal>(freeBytes) / kKib;
+    return static_cast<qreal>(freeBytes) / k_kib;
 }
 
 qreal DiskInfo::perc() const {

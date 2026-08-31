@@ -13,6 +13,10 @@ BlobGroup::~BlobGroup() {
         static_cast<BlobShape*>(m_invertedRect)->m_group = nullptr;
 }
 
+qreal BlobGroup::smoothing() const {
+    return m_smoothing;
+}
+
 void BlobGroup::setSmoothing(qreal s) {
     if (qFuzzyCompare(m_smoothing, s))
         return;
@@ -21,12 +25,20 @@ void BlobGroup::setSmoothing(qreal s) {
     markDirty();
 }
 
+QColor BlobGroup::color() const {
+    return m_color;
+}
+
 void BlobGroup::setColor(const QColor& c) {
     if (m_color == c)
         return;
     m_color = c;
     emit colorChanged();
     markDirty();
+}
+
+bool BlobGroup::cornerFill() const {
+    return m_cornerFill;
 }
 
 void BlobGroup::setCornerFill(bool e) {
@@ -61,6 +73,14 @@ void BlobGroup::clearInvertedRect(BlobInvertedRect* rect) {
         return;
     m_invertedRect = nullptr;
     markDirty();
+}
+
+const QList<BlobShape*>& BlobGroup::shapes() const {
+    return m_shapes;
+}
+
+BlobInvertedRect* BlobGroup::invertedRect() const {
+    return m_invertedRect;
 }
 
 void BlobGroup::markDirty() {

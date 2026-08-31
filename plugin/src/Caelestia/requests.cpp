@@ -10,7 +10,11 @@
 #include <qqmlengine.h>
 #include <qvariant.h>
 
+namespace {
+
 Q_LOGGING_CATEGORY(lcRequests, "caelestia.requests", QtInfoMsg)
+
+} // namespace
 
 namespace caelestia {
 
@@ -33,7 +37,7 @@ Requests::Requests(QObject* parent)
     : QObject(parent)
     , m_manager(new QNetworkAccessManager(this)) {}
 
-void Requests::get(const QUrl& url, QJSValue onSuccess, QJSValue onError, QJSValue headers) const {
+void Requests::get(const QUrl& url, const QJSValue& onSuccess, const QJSValue& onError, const QJSValue& headers) const {
     if (!onSuccess.isCallable()) {
         qCWarning(lcRequests) << "get: onSuccess is not callable";
         return;
@@ -54,7 +58,7 @@ void Requests::get(const QUrl& url, QJSValue onSuccess, QJSValue onError, QJSVal
         }
     }
 
-    auto reply = m_manager->get(request);
+    auto* reply = m_manager->get(request);
 
     QObject::connect(reply, &QNetworkReply::finished, this, [this, reply, onSuccess, onError]() {
         const QString body = QString::fromUtf8(reply->readAll());

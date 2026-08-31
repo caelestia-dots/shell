@@ -11,7 +11,11 @@
 #include <qsavefile.h>
 #include <qthreadpool.h>
 
+namespace {
+
 Q_LOGGING_CATEGORY(lcCacher, "caelestia.images.cacher", QtInfoMsg)
+
+} // namespace
 
 namespace caelestia::images {
 
@@ -45,13 +49,13 @@ QString fillSuffix(ImageCacher::FillMode fillMode) {
 } // namespace
 
 const QString& ImageCacher::cacheDir() {
-    static const QString s_dir = [] {
+    static const QString k_dir = [] {
         QString cache = qEnvironmentVariable("XDG_CACHE_HOME");
         if (cache.isEmpty())
             cache = QDir::homePath() + QStringLiteral("/.cache");
         return cache + QStringLiteral("/caelestia/imagecache");
     }();
-    return s_dir;
+    return k_dir;
 }
 
 QString ImageCacher::cachePathFor(const QString& sourcePath, const QSize& size, FillMode fillMode) {
@@ -83,7 +87,7 @@ void ImageCacher::schedule(const QString& sourcePath, const QString& cachePath, 
         return;
 
     {
-        QMutexLocker locker(&m_mutex);
+        const QMutexLocker locker(&m_mutex);
         if (m_inflight.contains(cachePath))
             return;
         m_inflight.insert(cachePath);
@@ -91,7 +95,8 @@ void ImageCacher::schedule(const QString& sourcePath, const QString& cachePath, 
 
     QThreadPool::globalInstance()->start([this, sourcePath, cachePath, size, fillMode]() {
         runJob(sourcePath, cachePath, size, fillMode);
-        QMutexLocker locker(&m_mutex);
+        const QMutexLocker locker(&m_mutex);
+        // NOLINTNEXTLINE(clang-analyzer-core.CallAndMessage) m_inflight is a value member, not a pointer
         m_inflight.remove(cachePath);
     });
 }

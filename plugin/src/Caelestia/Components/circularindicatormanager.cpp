@@ -7,39 +7,39 @@ namespace {
 
 namespace advance {
 
-constexpr qint32 TOTAL_CYCLES = 4;
-constexpr qint32 TOTAL_DURATION_IN_MS = 5400;
-constexpr qint32 DURATION_TO_EXPAND_IN_MS = 667;
-constexpr qint32 DURATION_TO_COLLAPSE_IN_MS = 667;
-constexpr qint32 DURATION_TO_COMPLETE_END_IN_MS = 333;
-constexpr qint32 TAIL_DEGREES_OFFSET = -20;
-constexpr qint32 EXTRA_DEGREES_PER_CYCLE = 250;
-constexpr qint32 CONSTANT_ROTATION_DEGREES = 1520;
+constexpr qint32 k_totalCycles = 4;
+constexpr qint32 k_totalDurationInMs = 5400;
+constexpr qint32 k_durationToExpandInMs = 667;
+constexpr qint32 k_durationToCollapseInMs = 667;
+constexpr qint32 k_durationToCompleteEndInMs = 333;
+constexpr qint32 k_tailDegreesOffset = -20;
+constexpr qint32 k_extraDegreesPerCycle = 250;
+constexpr qint32 k_constantRotationDegrees = 1520;
 
-constexpr std::array<qint32, TOTAL_CYCLES> DELAY_TO_EXPAND_IN_MS = { 0, 1350, 2700, 4050 };
-constexpr std::array<qint32, TOTAL_CYCLES> DELAY_TO_COLLAPSE_IN_MS = { 667, 2017, 3367, 4717 };
+constexpr std::array<qint32, k_totalCycles> k_delayToExpandInMs = { 0, 1350, 2700, 4050 };
+constexpr std::array<qint32, k_totalCycles> k_delayToCollapseInMs = { 667, 2017, 3367, 4717 };
 
 } // namespace advance
 
 namespace retreat {
 
-constexpr qint32 TOTAL_DURATION_IN_MS = 6000;
-constexpr qint32 DURATION_SPIN_IN_MS = 500;
-constexpr qint32 DURATION_GROW_ACTIVE_IN_MS = 3000;
-constexpr qint32 DURATION_SHRINK_ACTIVE_IN_MS = 3000;
-constexpr std::array DELAY_SPINS_IN_MS = { 0, 1500, 3000, 4500 };
-constexpr qint32 DELAY_GROW_ACTIVE_IN_MS = 0;
-constexpr qint32 DELAY_SHRINK_ACTIVE_IN_MS = 3000;
-constexpr qint32 DURATION_TO_COMPLETE_END_IN_MS = 500;
+constexpr qint32 k_totalDurationInMs = 6000;
+constexpr qint32 k_durationSpinInMs = 500;
+constexpr qint32 k_durationGrowActiveInMs = 3000;
+constexpr qint32 k_durationShrinkActiveInMs = 3000;
+constexpr std::array k_delaySpinsInMs = { 0, 1500, 3000, 4500 };
+constexpr qint32 k_delayGrowActiveInMs = 0;
+constexpr qint32 k_delayShrinkActiveInMs = 3000;
+constexpr qint32 k_durationToCompleteEndInMs = 500;
 
 // Constants for animation values.
 
 // The total degrees that a constant rotation goes by.
-constexpr qint32 CONSTANT_ROTATION_DEGREES = 1080;
+constexpr qint32 k_constantRotationDegrees = 1080;
 // Despite of the constant rotation, there are also 5 extra rotations the entire animation. The
 // total degrees that each extra rotation goes by.
-constexpr qint32 SPIN_ROTATION_DEGREES = 90;
-constexpr std::array<qreal, 2> END_FRACTION_RANGE = { 0.10, 0.87 };
+constexpr qint32 k_spinRotationDegrees = 90;
+constexpr std::array<qreal, 2> k_endFractionRange = { 0.10, 0.87 };
 
 } // namespace retreat
 
@@ -87,18 +87,16 @@ void CircularIndicatorManager::setProgress(qreal progress) {
 
 qreal CircularIndicatorManager::duration() const {
     if (m_type == IndeterminateAnimationType::Advance) {
-        return advance::TOTAL_DURATION_IN_MS;
-    } else {
-        return retreat::TOTAL_DURATION_IN_MS;
+        return advance::k_totalDurationInMs;
     }
+    return retreat::k_totalDurationInMs;
 }
 
 qreal CircularIndicatorManager::completeEndDuration() const {
     if (m_type == IndeterminateAnimationType::Advance) {
-        return advance::DURATION_TO_COMPLETE_END_IN_MS;
-    } else {
-        return retreat::DURATION_TO_COMPLETE_END_IN_MS;
+        return advance::k_durationToCompleteEndInMs;
     }
+    return retreat::k_durationToCompleteEndInMs;
 }
 
 CircularIndicatorManager::IndeterminateAnimationType CircularIndicatorManager::indeterminateAnimationType() const {
@@ -144,15 +142,15 @@ void CircularIndicatorManager::update(qreal progress) {
 
 void CircularIndicatorManager::updateRetreat(qreal progress) {
     using namespace retreat;
-    const auto playtime = progress * TOTAL_DURATION_IN_MS;
+    const auto playtime = progress * k_totalDurationInMs;
 
     // Constant rotation.
-    const qreal constantRotation = CONSTANT_ROTATION_DEGREES * progress;
+    const qreal constantRotation = k_constantRotationDegrees * progress;
     // Extra rotation for the faster spinning.
     qreal spinRotation = 0;
-    for (const int spinDelay : DELAY_SPINS_IN_MS) {
-        spinRotation += m_curve.valueForProgress(getFractionInRange(playtime, spinDelay, DURATION_SPIN_IN_MS)) *
-                        SPIN_ROTATION_DEGREES;
+    for (const int spinDelay : k_delaySpinsInMs) {
+        spinRotation += m_curve.valueForProgress(getFractionInRange(playtime, spinDelay, k_durationSpinInMs)) *
+                        k_spinRotationDegrees;
     }
     const auto oldRotation = m_rotation;
     m_rotation = constantRotation + spinRotation;
@@ -161,16 +159,16 @@ void CircularIndicatorManager::updateRetreat(qreal progress) {
 
     // Grow active indicator.
     qreal fraction =
-        m_curve.valueForProgress(getFractionInRange(playtime, DELAY_GROW_ACTIVE_IN_MS, DURATION_GROW_ACTIVE_IN_MS));
+        m_curve.valueForProgress(getFractionInRange(playtime, k_delayGrowActiveInMs, k_durationGrowActiveInMs));
     fraction -=
-        m_curve.valueForProgress(getFractionInRange(playtime, DELAY_SHRINK_ACTIVE_IN_MS, DURATION_SHRINK_ACTIVE_IN_MS));
+        m_curve.valueForProgress(getFractionInRange(playtime, k_delayShrinkActiveInMs, k_durationShrinkActiveInMs));
 
     if (!qFuzzyIsNull(m_startFraction)) {
         m_startFraction = 0.0;
         emit startFractionChanged();
     }
     const auto oldEndFrac = m_endFraction;
-    m_endFraction = std::lerp(END_FRACTION_RANGE[0], END_FRACTION_RANGE[1], fraction);
+    m_endFraction = std::lerp(k_endFractionRange[0], k_endFractionRange[1], fraction);
 
     // Completing animation.
     if (m_completeEndProgress > 0) {
@@ -184,23 +182,23 @@ void CircularIndicatorManager::updateRetreat(qreal progress) {
 
 void CircularIndicatorManager::updateAdvance(qreal progress) {
     using namespace advance;
-    const auto playtime = progress * TOTAL_DURATION_IN_MS;
+    const auto playtime = progress * k_totalDurationInMs;
     const auto oldStart = m_startFraction;
     const auto oldEnd = m_endFraction;
 
     // Adds constant rotation to segment positions.
-    m_startFraction = CONSTANT_ROTATION_DEGREES * progress + TAIL_DEGREES_OFFSET;
-    m_endFraction = CONSTANT_ROTATION_DEGREES * progress;
+    m_startFraction = k_constantRotationDegrees * progress + k_tailDegreesOffset;
+    m_endFraction = k_constantRotationDegrees * progress;
 
     // Adds cycle specific rotation to segment positions.
-    for (size_t cycleIndex = 0; cycleIndex < TOTAL_CYCLES; ++cycleIndex) {
+    for (size_t cycleIndex = 0; cycleIndex < k_totalCycles; ++cycleIndex) {
         // While expanding.
-        qreal fraction = getFractionInRange(playtime, DELAY_TO_EXPAND_IN_MS[cycleIndex], DURATION_TO_EXPAND_IN_MS);
-        m_endFraction += m_curve.valueForProgress(fraction) * EXTRA_DEGREES_PER_CYCLE;
+        qreal fraction = getFractionInRange(playtime, k_delayToExpandInMs[cycleIndex], k_durationToExpandInMs);
+        m_endFraction += m_curve.valueForProgress(fraction) * k_extraDegreesPerCycle;
 
         // While collapsing.
-        fraction = getFractionInRange(playtime, DELAY_TO_COLLAPSE_IN_MS[cycleIndex], DURATION_TO_COLLAPSE_IN_MS);
-        m_startFraction += m_curve.valueForProgress(fraction) * EXTRA_DEGREES_PER_CYCLE;
+        fraction = getFractionInRange(playtime, k_delayToCollapseInMs[cycleIndex], k_durationToCollapseInMs);
+        m_startFraction += m_curve.valueForProgress(fraction) * k_extraDegreesPerCycle;
     }
 
     // Closes the gap between head and tail for complete end.

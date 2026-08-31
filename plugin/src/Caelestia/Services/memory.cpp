@@ -28,12 +28,12 @@ void Memory::tick() {
     const QByteArray data = f.readAll();
     f.close();
 
-    static const QRegularExpression reTotal(QStringLiteral("MemTotal: *(\\d+)"));
-    static const QRegularExpression reAvail(QStringLiteral("MemAvailable: *(\\d+)"));
+    static const QRegularExpression k_reTotal(QStringLiteral("MemTotal: *(\\d+)"));
+    static const QRegularExpression k_reAvail(QStringLiteral("MemAvailable: *(\\d+)"));
     const QString text = QString::fromLatin1(data);
 
-    const auto totalMatch = reTotal.match(text);
-    const auto availMatch = reAvail.match(text);
+    const auto totalMatch = k_reTotal.match(text);
+    const auto availMatch = k_reAvail.match(text);
     if (!totalMatch.hasMatch() || !availMatch.hasMatch()) {
         return;
     }

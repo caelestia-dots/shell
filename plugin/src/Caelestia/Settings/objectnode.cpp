@@ -28,7 +28,7 @@ Descriptor ObjectNode::descriptorFor(const QString& key) const {
     const auto* desc = schema().get(key);
     if (!desc) {
         qCWarning(lcSettings) << "Attempted to get descriptor for unknown option" << pathFor(key);
-        return Descriptor();
+        return {};
     }
 
     return *desc;
@@ -49,7 +49,7 @@ QJsonValue ObjectNode::toJson(bool sparse) const {
         if (sparse && !isOverride(desc.key))
             continue;
 
-        const auto codec = ValueCodec::codecFor(desc.type);
+        auto* const codec = ValueCodec::codecFor(desc.type);
         if (!codec) { // This should not happen
             qCCritical(lcSettings, "No codec found for type %s, not serialising %s", desc.type.name(),
                 qUtf8Printable(pathFor(desc.key)));
@@ -111,9 +111,9 @@ QSet<QString> ObjectNode::loadFromJson(const QJsonObject& json, QList<Diagnostic
             const auto path = pathFor(key);
             qCWarning(lcSettings) << "Unknown option" << path;
             diagnostics << Diagnostic{
-                DiagnosticType::UnknownOption,
-                path,
-                QStringLiteral("Unknown option %1").arg(key),
+                .type = DiagnosticType::UnknownOption,
+                .option = path,
+                .message = QStringLiteral("Unknown option %1").arg(key),
             };
             SKIP;
         }
@@ -134,14 +134,14 @@ QSet<QString> ObjectNode::loadFromJson(const QJsonObject& json, QList<Diagnostic
             qCWarning(
                 lcSettings, "Global property definition %s found in overlay file, ignoring.", qUtf8Printable(path));
             diagnostics << Diagnostic{
-                DiagnosticType::GlobalOption,
-                path,
-                QStringLiteral("Global properties should not be defined in overlay files"),
+                .type = DiagnosticType::GlobalOption,
+                .option = path,
+                .message = QStringLiteral("Global properties should not be defined in overlay files"),
             };
             SKIP;
         }
 
-        const auto codec = ValueCodec::codecFor(desc->type);
+        auto* const codec = ValueCodec::codecFor(desc->type);
         if (!codec) { // This should not happen
             qCCritical(lcSettings, "No codec found for type %s, not loading %s", desc->type.name(),
                 qUtf8Printable(pathFor(key)));

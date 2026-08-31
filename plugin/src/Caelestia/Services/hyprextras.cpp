@@ -8,7 +8,11 @@
 
 #include "hyprdevices.hpp"
 
+namespace {
+
 Q_LOGGING_CATEGORY(lcHypr, "caelestia.services.hypr", QtInfoMsg)
+
+} // namespace
 
 namespace caelestia::services::hypr {
 
@@ -199,14 +203,14 @@ HyprExtras::SocketPtr HyprExtras::makeRequestJson(
 HyprExtras::SocketPtr HyprExtras::makeRequest(
     const QString& request, const std::function<void(bool, QByteArray)>& callback) {
     if (m_requestSocket.isEmpty()) {
-        return SocketPtr();
+        return {};
     }
 
     auto socket = SocketPtr::create(this);
 
     QObject::connect(socket.data(), &QLocalSocket::connected, this, [=, this]() {
         QObject::connect(socket.data(), &QLocalSocket::readyRead, this, [socket, callback]() {
-            const auto response = socket->readAll();
+            auto response = socket->readAll();
             callback(true, std::move(response));
             socket->close();
         });

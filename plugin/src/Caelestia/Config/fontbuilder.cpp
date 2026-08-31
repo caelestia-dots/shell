@@ -2,12 +2,16 @@
 
 #include <qloggingcategory.h>
 
-namespace caelestia::config {
+namespace {
 
 Q_LOGGING_CATEGORY(lcFontBuilder, "caelestia.fontbuilder", QtInfoMsg)
 
-FontBuilder::FontBuilder(QFont font)
-    : m_font(std::move(font)) {}
+} // namespace
+
+namespace caelestia::config {
+
+FontBuilder::FontBuilder(const QFont& font)
+    : m_font(font) {}
 
 FontBuilder FontBuilder::family(const QString& family) {
     m_font.setFamily(family);
@@ -56,7 +60,7 @@ FontBuilder FontBuilder::vaxis(const QString& tag, float value) {
     return *this;
 }
 
-FontBuilder FontBuilder::vaxes(QVariantMap axes) {
+FontBuilder FontBuilder::vaxes(const QVariantMap& axes) {
     for (auto it = axes.constBegin(); it != axes.constEnd(); ++it) {
         if (it.value().canConvert<float>()) {
             if (auto tag = QFont::Tag::fromString(it.key()))

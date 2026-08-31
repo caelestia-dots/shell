@@ -95,7 +95,7 @@ TOKENS_ATTACHED_GETTER(AppearancePadding, padding)
 
 #undef TOKENS_ATTACHED_GETTER
 
-const AppearanceTransparency* Tokens::transparency() const {
+const AppearanceTransparency* Tokens::transparency() {
     return ConfigSingleton::instance()->appearance()->transparency(); // Transparency is always global
 }
 

@@ -1,16 +1,17 @@
 #include "toaster.hpp"
 
-#include <qlogging.h>
 #include <qtimer.h>
+
+#include <utility>
 
 namespace caelestia {
 
-Toast::Toast(const QString& title, const QString& message, const QString& icon, Type type, int timeout, QObject* parent)
+Toast::Toast(QString title, QString message, QString icon, Type type, int timeout, QObject* parent)
     : QObject(parent)
     , m_closed(false)
-    , m_title(title)
-    , m_message(message)
-    , m_icon(icon)
+    , m_title(std::move(title))
+    , m_message(std::move(message))
+    , m_icon(std::move(icon))
     , m_type(type)
     , m_timeout(timeout) {
     QTimer::singleShot(timeout, this, &Toast::close);
@@ -97,17 +98,20 @@ Toaster::Toaster(QObject* parent)
     : QObject(parent) {}
 
 Toaster* Toaster::instance() {
-    static Toaster instance;
-    return &instance;
+    static Toaster s_instance;
+    return &s_instance;
 }
 
-Toaster* Toaster::create(QQmlEngine*, QJSEngine*) {
+Toaster* Toaster::create(QQmlEngine* engine, QJSEngine* jsEngine) {
+    Q_UNUSED(engine);
+    Q_UNUSED(jsEngine);
+
     QQmlEngine::setObjectOwnership(instance(), QQmlEngine::CppOwnership);
     return instance();
 }
 
 QQmlListProperty<Toast> Toaster::toasts() {
-    return QQmlListProperty<Toast>(this, &m_toasts);
+    return { this, &m_toasts };
 }
 
 void Toaster::toast(const QString& title, const QString& message, const QString& icon, Toast::Type type, int timeout) {
