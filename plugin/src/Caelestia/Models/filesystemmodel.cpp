@@ -4,6 +4,7 @@
 #include <qtconcurrentrun.h>
 
 #include <algorithm>
+#include <optional>
 #include <utility>
 
 namespace caelestia::models {
@@ -289,91 +290,86 @@ void FileSystemModel::updateEntriesForDir(const QString& dir) {
     const auto nameFilters = m_nameFilters;
 
     QSet<QString> oldPaths;
-    for (const auto& entry : std::as_const(m_entries)) {
+    for (const auto& entry : std::as_const(m_entries))
         oldPaths << entry->path();
-    }
 
-    auto future = QtConcurrent::run([=](QPromise<QPair<QSet<QString>, QSet<QString>>>& promise) {
+    auto future = QtConcurrent::run([=](QPromise<PathDiff>& promise) {
         const auto flags = recursive ? QDirIterator::Subdirectories : QDirIterator::NoIteratorFlags;
-
-        std::optional<QDirIterator> iter;
-
-        if (filter == Images) {
-            QStringList extraNameFilters = nameFilters;
-            const auto formats = QImageReader::supportedImageFormats();
-            for (const auto& format : formats) {
-                extraNameFilters << "*." + format;
-            }
-
-            QDir::Filters filters = QDir::Files;
-            if (showHidden) {
-                filters |= QDir::Hidden;
-            }
-
-            iter.emplace(dir, extraNameFilters, filters, flags);
-        } else {
-            QDir::Filters filters;
-
-            if (filter == Files) {
-                filters = QDir::Files;
-            } else if (filter == Dirs) {
-                filters = QDir::Dirs | QDir::NoDotAndDotDot;
-            } else {
-                filters = QDir::Dirs | QDir::Files | QDir::NoDotAndDotDot;
-            }
-
-            if (showHidden) {
-                filters |= QDir::Hidden;
-            }
-
-            if (nameFilters.isEmpty()) {
-                iter.emplace(dir, filters, flags);
-            } else {
-                iter.emplace(dir, nameFilters, filters, flags);
-            }
-        }
-
-        QSet<QString> newPaths;
-        while (iter->hasNext()) {
-            if (promise.isCanceled()) {
-                return;
-            }
-
-            const QString path = iter->next();
-
-            if (filter == Images) {
-                const QImageReader reader(path);
-                if (!reader.canRead()) {
-                    continue;
-                }
-            }
-
-            newPaths.insert(path);
-        }
-
-        if (promise.isCanceled()) {
+        const auto newPaths = scanDir(dir, filtersFor(filter, nameFilters, showHidden), flags, promise);
+        if (!newPaths)
             return;
-        }
 
-        promise.addResult(qMakePair(oldPaths - newPaths, newPaths - oldPaths));
+        promise.addResult({ .removed = oldPaths - *newPaths, .added = *newPaths - oldPaths });
     });
 
-    if (m_futures.contains(dir)) {
+    if (m_futures.contains(dir))
         m_futures[dir].cancel();
-    }
     m_futures.insert(dir, future);
 
     future
         .then(this,
-            [dir, this](const QPair<QSet<QString>, QSet<QString>>& result) {
+            [dir, this](const PathDiff& result) {
                 m_futures.remove(dir);
-                if (!result.first.isEmpty() || !result.second.isEmpty()) {
-                    applyChanges(result.first, result.second);
-                }
+                if (!result.removed.isEmpty() || !result.added.isEmpty())
+                    applyChanges(result.removed, result.added);
             })
         .onCanceled(this, [dir, this]() {
             m_futures.remove(dir);
         });
+}
+
+FileSystemModel::ScanFilters FileSystemModel::filtersFor(
+    Filter filter, const QStringList& nameFilters, bool showHidden) {
+    ScanFilters filters;
+    filters.nameFilters = nameFilters;
+
+    if (filter == Filter::Images) {
+        const auto formats = QImageReader::supportedImageFormats();
+        for (const auto& format : formats)
+            filters.nameFilters << "*." + format;
+
+        filters.filterFn = [](const QString& path) {
+            return QImageReader(path).canRead();
+        };
+    }
+
+    if (filter == Filter::Files || filter == Filter::Images)
+        filters.filters = QDir::Files;
+    else if (filter == Filter::Dirs)
+        filters.filters = QDir::Dirs | QDir::NoDotAndDotDot;
+    else
+        filters.filters = QDir::Dirs | QDir::Files | QDir::NoDotAndDotDot;
+
+    if (showHidden)
+        filters.filters |= QDir::Hidden;
+
+    return filters;
+}
+
+std::optional<QSet<QString>> FileSystemModel::scanDir(const QString& dir, const ScanFilters& filters,
+    QDirIterator::IteratorFlags flags, const QPromise<PathDiff>& promise) {
+    std::optional<QDirIterator> iter;
+    if (filters.nameFilters.isEmpty())
+        iter.emplace(dir, filters.filters, flags);
+    else
+        iter.emplace(dir, filters.nameFilters, filters.filters, flags);
+
+    QSet<QString> paths;
+    while (iter->hasNext()) {
+        if (promise.isCanceled())
+            return std::nullopt;
+
+        const QString path = iter->next();
+        if (filters.filterFn && !filters.filterFn(path))
+            continue;
+
+        paths.insert(path);
+    }
+
+    if (promise.isCanceled())
+        return std::nullopt;
+
+    return paths;
 }
 
 void FileSystemModel::applyChanges(const QSet<QString>& removedPaths, const QSet<QString>& addedPaths) {

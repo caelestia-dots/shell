@@ -2,6 +2,7 @@
 
 #include <qabstractitemmodel.h>
 #include <qdir.h>
+#include <qdiriterator.h>
 #include <qfilesystemwatcher.h>
 #include <qfuture.h>
 #include <qimagereader.h>
@@ -123,10 +124,21 @@ signals:
     void entriesChanged();
 
 private:
+    struct PathDiff {
+        QSet<QString> removed;
+        QSet<QString> added;
+    };
+
+    struct ScanFilters {
+        QStringList nameFilters;
+        QDir::Filters filters;
+        std::function<bool(const QString&)> filterFn = nullptr;
+    };
+
     QDir m_dir;
     QFileSystemWatcher m_watcher;
     QList<FileSystemEntry*> m_entries;
-    QHash<QString, QFuture<QPair<QSet<QString>, QSet<QString>>>> m_futures;
+    QHash<QString, QFuture<PathDiff>> m_futures;
 
     QString m_path;
     bool m_recursive;
@@ -141,6 +153,9 @@ private:
     void updateWatcher();
     void updateEntries();
     void updateEntriesForDir(const QString& dir);
+    [[nodiscard]] static ScanFilters filtersFor(Filter filter, const QStringList& nameFilters, bool showHidden);
+    [[nodiscard]] static std::optional<QSet<QString>> scanDir(const QString& dir, const ScanFilters& filters,
+        QDirIterator::IteratorFlags flags, const QPromise<PathDiff>& promise);
     void applyChanges(const QSet<QString>& removedPaths, const QSet<QString>& addedPaths);
     [[nodiscard]] bool compareEntries(const FileSystemEntry* a, const FileSystemEntry* b) const;
 };
