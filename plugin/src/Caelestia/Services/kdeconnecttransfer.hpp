@@ -26,6 +26,10 @@ public:
     Q_INVOKABLE void share(const QString& deviceId, const QVariantList& urls);
     Q_INVOKABLE void cancel();
 
+    Q_INVOKABLE void mount(const QString& deviceId);
+    Q_INVOKABLE void unmount(const QString& deviceId);
+    Q_INVOKABLE void refreshMount(const QString& deviceId);
+
 signals:
     void runningChanged();
     void progressChanged();
@@ -34,6 +38,18 @@ signals:
     void shared(const QString& deviceId, int count);
     void failed(const QString& deviceId, const QString& error);
     void cancelled(const QString& deviceId);
+
+    void mountStateChanged(
+        const QString& deviceId,
+        bool mounted,
+        const QString& mountPoint,
+        const QVariantMap& directories
+    );
+
+    void mountFailed(
+        const QString& deviceId,
+        const QString& error
+    );
 
 private:
     void setRunning(bool running);

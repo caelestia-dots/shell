@@ -10,6 +10,7 @@
 #include <QPointer>
 #include <QThread>
 #include <QUrl>
+#include <QElapsedTimer>
 
 #include <algorithm>
 #include <functional>
@@ -23,6 +24,74 @@ enum class CopyResult {
     Cancelled,
     Failed
 };
+
+QString sftpObjectPath(const QString& deviceId)
+{
+    return QStringLiteral("/modules/kdeconnect/devices/%1/sftp")
+        .arg(deviceId);
+}
+
+bool readMountState(
+    const QString& deviceId,
+    bool* mounted,
+    QString* mountPoint,
+    QVariantMap* directories,
+    QString* error
+)
+{
+    QDBusInterface sftp(
+        QStringLiteral("org.kde.kdeconnect"),
+        sftpObjectPath(deviceId),
+        QStringLiteral("org.kde.kdeconnect.device.sftp"),
+        QDBusConnection::sessionBus()
+    );
+
+    if (!sftp.isValid()) {
+        *error = sftp.lastError().message();
+
+        if (error->isEmpty())
+            *error = QStringLiteral("KDE Connect SFTP interface is unavailable");
+
+        return false;
+    }
+
+    const QDBusReply<bool> mountedReply =
+        sftp.call(QStringLiteral("isMounted"));
+
+    if (!mountedReply.isValid()) {
+        *error = mountedReply.error().message();
+        return false;
+    }
+
+    *mounted = mountedReply.value();
+
+    if (!*mounted) {
+        mountPoint->clear();
+        directories->clear();
+        return true;
+    }
+
+    const QDBusReply<QString> mountPointReply =
+        sftp.call(QStringLiteral("mountPoint"));
+
+    if (!mountPointReply.isValid()) {
+        *error = mountPointReply.error().message();
+        return false;
+    }
+
+    const QDBusReply<QVariantMap> directoriesReply =
+        sftp.call(QStringLiteral("getDirectories"));
+
+    if (!directoriesReply.isValid()) {
+        *error = directoriesReply.error().message();
+        return false;
+    }
+
+    *mountPoint = mountPointReply.value();
+    *directories = directoriesReply.value();
+
+    return true;
+}
 
 QString findDownloadDirectory(const QVariantMap& directories)
 {
@@ -48,6 +117,29 @@ QString findDownloadDirectory(const QVariantMap& directories)
     }
 
     return {};
+}
+
+bool waitForMountReady(
+    const QVariantMap& directories,
+    QString* error
+)
+{
+    QElapsedTimer timer;
+    timer.start();
+
+    while (timer.elapsed() < 5000) {
+        for (auto it = directories.cbegin(); it != directories.cend(); ++it) {
+            const QFileInfo info(it.key());
+
+            if (info.exists() && info.isDir())
+                return true;
+        }
+
+        QThread::msleep(50);
+    }
+
+    *error = QStringLiteral("Mounted filesystem did not become ready");
+    return false;
 }
 
 QString uniqueDestinationPath(const QString& directory, const QString& fileName)
@@ -83,12 +175,9 @@ bool mountDownloadDirectory(
     QString* error
 )
 {
-    const QString objectPath =
-        QStringLiteral("/modules/kdeconnect/devices/%1/sftp").arg(deviceId);
-
     QDBusInterface sftp(
         QStringLiteral("org.kde.kdeconnect"),
-        objectPath,
+        sftpObjectPath(deviceId),
         QStringLiteral("org.kde.kdeconnect.device.sftp"),
         QDBusConnection::sessionBus()
     );
@@ -130,8 +219,13 @@ bool mountDownloadDirectory(
         return false;
     }
 
+    const QVariantMap directories = directoriesReply.value();
+
+    if (!waitForMountReady(directories, error))
+        return false;
+
     const QString directory =
-        findDownloadDirectory(directoriesReply.value());
+        findDownloadDirectory(directories);
 
     if (directory.isEmpty()) {
         *error = QStringLiteral("Could not find a Download directory on the device");
@@ -553,6 +647,273 @@ void KdeConnectTransfer::cancel()
         return;
 
     m_cancelToken->store(true, std::memory_order_relaxed);
+}
+
+void KdeConnectTransfer::mount(const QString& deviceId)
+{
+    if (deviceId.isEmpty())
+        return;
+
+    if (m_running) {
+        emit mountFailed(
+            deviceId,
+            QStringLiteral("Cannot mount storage while a transfer is in progress")
+        );
+        return;
+    }
+
+    QPointer<KdeConnectTransfer> self(this);
+
+    auto* thread = QThread::create(
+        [self, deviceId]() {
+            QDBusInterface sftp(
+                QStringLiteral("org.kde.kdeconnect"),
+                sftpObjectPath(deviceId),
+                QStringLiteral("org.kde.kdeconnect.device.sftp"),
+                QDBusConnection::sessionBus()
+            );
+
+            QString error;
+
+            if (!sftp.isValid()) {
+                error = sftp.lastError().message();
+
+                if (error.isEmpty())
+                    error = QStringLiteral("KDE Connect SFTP interface is unavailable");
+            } else {
+                const QDBusReply<bool> reply =
+                    sftp.call(QStringLiteral("mountAndWait"));
+
+                if (!reply.isValid()) {
+                    error = reply.error().message();
+                } else if (!reply.value()) {
+                    const QDBusReply<QString> mountError =
+                        sftp.call(QStringLiteral("getMountError"));
+
+                    if (mountError.isValid() && !mountError.value().isEmpty())
+                        error = mountError.value();
+                    else
+                        error = QStringLiteral("Failed to mount the device filesystem");
+                }
+            }
+
+            if (!error.isEmpty()) {
+                if (!self)
+                    return;
+
+                QMetaObject::invokeMethod(
+                    self.data(),
+                    [self, deviceId, error]() {
+                        if (self)
+                            emit self->mountFailed(deviceId, error);
+                    },
+                    Qt::QueuedConnection
+                );
+
+                return;
+            }
+
+            bool mounted = false;
+            QString mountPoint;
+            QVariantMap directories;
+
+            if (!readMountState(
+                    deviceId,
+                    &mounted,
+                    &mountPoint,
+                    &directories,
+                    &error
+                )) {
+                if (!self)
+                    return;
+
+                QMetaObject::invokeMethod(
+                    self.data(),
+                    [self, deviceId, error]() {
+                        if (self)
+                            emit self->mountFailed(deviceId, error);
+                    },
+                    Qt::QueuedConnection
+                );
+
+                return;
+            }
+
+            if (mounted && !waitForMountReady(directories, &error)) {
+                if (!self)
+                    return;
+
+                QMetaObject::invokeMethod(
+                    self.data(),
+                    [self, deviceId, error]() {
+                        if (self)
+                            emit self->mountFailed(deviceId, error);
+                    },
+                    Qt::QueuedConnection
+                );
+
+                return;
+            }
+
+            if (!self)
+                return;
+
+            QMetaObject::invokeMethod(
+                self.data(),
+                [self, deviceId, mounted, mountPoint, directories]() {
+                    if (self) {
+                        emit self->mountStateChanged(
+                            deviceId,
+                            mounted,
+                            mountPoint,
+                            directories
+                        );
+                    }
+                },
+                Qt::QueuedConnection
+            );
+        }
+    );
+
+    connect(
+        thread,
+        &QThread::finished,
+        thread,
+        &QObject::deleteLater
+    );
+
+    thread->start();
+}
+
+void KdeConnectTransfer::unmount(const QString& deviceId)
+{
+    if (deviceId.isEmpty())
+        return;
+
+    if (m_running) {
+        emit mountFailed(
+            deviceId,
+            QStringLiteral("Cannot unmount storage while a transfer is in progress")
+        );
+        return;
+    }
+
+    QPointer<KdeConnectTransfer> self(this);
+
+    auto* thread = QThread::create(
+        [self, deviceId]() {
+            QDBusInterface sftp(
+                QStringLiteral("org.kde.kdeconnect"),
+                sftpObjectPath(deviceId),
+                QStringLiteral("org.kde.kdeconnect.device.sftp"),
+                QDBusConnection::sessionBus()
+            );
+
+            QString error;
+
+            if (!sftp.isValid()) {
+                error = sftp.lastError().message();
+
+                if (error.isEmpty())
+                    error = QStringLiteral("KDE Connect SFTP interface is unavailable");
+            } else {
+                const QDBusReply<void> reply =
+                    sftp.call(QStringLiteral("unmount"));
+
+                if (!reply.isValid())
+                    error = reply.error().message();
+            }
+
+            if (!self)
+                return;
+
+            QMetaObject::invokeMethod(
+                self.data(),
+                [self, deviceId, error]() {
+                    if (!self)
+                        return;
+
+                    if (!error.isEmpty()) {
+                        emit self->mountFailed(deviceId, error);
+                        return;
+                    }
+
+                    emit self->mountStateChanged(
+                        deviceId,
+                        false,
+                        QString(),
+                        QVariantMap()
+                    );
+                },
+                Qt::QueuedConnection
+            );
+        }
+    );
+
+    connect(
+        thread,
+        &QThread::finished,
+        thread,
+        &QObject::deleteLater
+    );
+
+    thread->start();
+}
+
+void KdeConnectTransfer::refreshMount(const QString& deviceId)
+{
+    if (deviceId.isEmpty())
+        return;
+
+    QPointer<KdeConnectTransfer> self(this);
+
+    auto* thread = QThread::create(
+        [self, deviceId]() {
+            bool mounted = false;
+            QString mountPoint;
+            QVariantMap directories;
+            QString error;
+
+            if (!readMountState(
+                    deviceId,
+                    &mounted,
+                    &mountPoint,
+                    &directories,
+                    &error
+                )) {
+                mounted = false;
+                mountPoint.clear();
+                directories.clear();
+            }
+
+            if (!self)
+                return;
+
+            QMetaObject::invokeMethod(
+                self.data(),
+                [self, deviceId, mounted, mountPoint, directories]() {
+                    if (self) {
+                        emit self->mountStateChanged(
+                            deviceId,
+                            mounted,
+                            mountPoint,
+                            directories
+                        );
+                    }
+                },
+                Qt::QueuedConnection
+            );
+        }
+    );
+
+    connect(
+        thread,
+        &QThread::finished,
+        thread,
+        &QObject::deleteLater
+    );
+
+    thread->start();
 }
 
 void KdeConnectTransfer::setRunning(bool running)
