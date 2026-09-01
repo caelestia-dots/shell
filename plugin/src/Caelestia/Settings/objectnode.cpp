@@ -6,6 +6,8 @@
 
 namespace caelestia::settings {
 
+using Qt::StringLiterals::operator""_s;
+
 ObjectNode::ObjectNode(ObjectNode* fallback, QObject* parent, bool globalOnly)
     : Node(fallback, parent, globalOnly) {}
 
@@ -113,7 +115,7 @@ QSet<QString> ObjectNode::loadFromJson(const QJsonObject& json, QList<Diagnostic
             diagnostics << Diagnostic{
                 .type = DiagnosticType::UnknownOption,
                 .option = path,
-                .message = QStringLiteral("Unknown option %1").arg(key),
+                .message = u"Unknown option %1"_s.arg(key),
             };
             SKIP;
         }
@@ -136,7 +138,7 @@ QSet<QString> ObjectNode::loadFromJson(const QJsonObject& json, QList<Diagnostic
             diagnostics << Diagnostic{
                 .type = DiagnosticType::GlobalOption,
                 .option = path,
-                .message = QStringLiteral("Global properties should not be defined in overlay files"),
+                .message = u"Global properties should not be defined in overlay files"_s,
             };
             SKIP;
         }

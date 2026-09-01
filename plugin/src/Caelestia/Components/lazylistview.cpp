@@ -24,6 +24,8 @@ QRectF clipVertical(const QRectF& rect, qreal top, qreal bottom) {
 
 namespace caelestia::components {
 
+using Qt::StringLiterals::operator""_s;
+
 // --- LazyListViewAttached ---
 
 LazyListViewAttached::LazyListViewAttached(QObject* parent)
@@ -911,15 +913,15 @@ LazyListView::PropertyList LazyListView::delegateProperties(int modelIndex) cons
     for (auto it = roleNames.constBegin(); it != roleNames.constEnd(); ++it) {
         const auto name = QString::fromUtf8(it.value());
         props.emplaceBack(name, m_model->data(index, it.key()));
-        if (name == QStringLiteral("modelData"))
+        if (name == u"modelData"_s)
             hasModelData = true;
     }
 
-    props.emplaceBack(QStringLiteral("index"), modelIndex);
+    props.emplaceBack(u"index"_s, modelIndex);
 
     if (!hasModelData) {
         const auto role = roleNames.isEmpty() ? Qt::DisplayRole : roleNames.constBegin().key();
-        props.emplaceBack(QStringLiteral("modelData"), m_model->data(index, role));
+        props.emplaceBack(u"modelData"_s, m_model->data(index, role));
     }
 
     return props;

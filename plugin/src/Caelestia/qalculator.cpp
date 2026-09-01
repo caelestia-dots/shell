@@ -6,6 +6,8 @@
 
 namespace caelestia {
 
+using Qt::StringLiterals::operator""_s;
+
 QMutex Qalculator::s_calculatorMutex;
 
 Qalculator::Qalculator(QObject* parent)
@@ -88,7 +90,7 @@ QPair<QString, QString> Qalculator::evaluate(const QString& expr) {
         return { errorStr, errorStr };
     }
 
-    return { QStringLiteral("%1 = %2").arg(parsed).arg(result), QString::fromStdString(result) };
+    return { u"%1 = %2"_s.arg(parsed).arg(result), QString::fromStdString(result) };
 }
 
 void Qalculator::applyResult(quint64 gen, const QPair<QString, QString>& result) {
