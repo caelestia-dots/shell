@@ -1,3 +1,5 @@
+pragma ComponentBehavior: Bound
+
 import QtQuick
 import QtQuick.Layouts
 import Caelestia.Components
@@ -24,7 +26,7 @@ StyledRect {
     // Refreshed when the card appears rather than on a timer: the list only
     // changes when a phone comes or goes, and the card is short-lived.
     Component.onCompleted: KdeConnect.refresh()
-    Component.onDestruction: screenState.utilitiesDragTarget = false
+    Component.onDestruction: screenState.utilities = false
 
     ColumnLayout {
         id: layout
@@ -107,9 +109,7 @@ StyledRect {
                     anchors.fill: parent
                     keys: ["text/uri-list"]
 
-                    // Tells the drawer the drag is on the panel, so it doesn't
-                    // close it while something is about to be dropped.
-                    onContainsDragChanged: root.screenState.utilitiesDragTarget = containsDrag
+                    onContainsDragChanged: root.screenState.utilities = containsDrag
 
                     onDropped: drop => {
                         if (drop.hasUrls) {

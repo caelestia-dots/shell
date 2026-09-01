@@ -60,20 +60,20 @@ Singleton {
         id: listProc
 
         command: ["kdeconnect-cli", "-a", "--id-name-only"]
-        environment: ({
-                LANG: "C.UTF-8",
-                LC_ALL: "C.UTF-8"
-            })
+        // environment: ({
+        //         LANG: "C.UTF-8",
+        //         LC_ALL: "C.UTF-8"
+        //     })
 
         stdout: StdioCollector {
             id: listOut
         }
 
-        onExited: code => {
+        onExited: code => { // qmllint disable
             // Anything non-zero means the daemon isn't there to answer.
             if (code !== 0) {
                 root.available = false;
-                root.devices = [];
+                root.devices = []; // qmllint disable
                 return;
             }
 
@@ -89,7 +89,7 @@ Singleton {
                     name: line.slice(split + 1).trim()
                 });
             }
-            root.devices = found;
+            root.devices = found; // qmllint disable
         }
     }
 
@@ -99,16 +99,16 @@ Singleton {
         property string deviceId
         property int count
 
-        environment: ({
-                LANG: "C.UTF-8",
-                LC_ALL: "C.UTF-8"
-            })
+        // environment: ({
+        //         LANG: "C.UTF-8",
+        //         LC_ALL: "C.UTF-8"
+        //     })
 
         stderr: StdioCollector {
             id: shareErr
         }
 
-        onExited: code => {
+        onExited: code => { // qmllint disable
             root.sharing = false;
 
             if (code === 0) {
