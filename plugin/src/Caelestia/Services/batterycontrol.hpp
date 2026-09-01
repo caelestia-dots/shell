@@ -3,6 +3,7 @@
 #include <qlist.h>
 #include <qqmlintegration.h>
 #include <qstring.h>
+#include <qtypes.h>
 
 #include "tickingservice.hpp"
 
@@ -14,7 +15,7 @@ class BatteryControl : public TickingService {
     QML_SINGLETON
 
 public:
-    enum class ControlType {
+    enum class ControlType : quint8 {
         Unsupported = 0,
         BinaryConservation,
         DiscreteTiers,
