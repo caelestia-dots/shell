@@ -52,8 +52,8 @@ constexpr qreal k_indexFudge = 0.1;
     QString out;
     out.reserve(s.size());
     for (const QChar c : s) {
-        if (c == QLatin1Char('/') || c == QLatin1Char('\0')) {
-            out.append(QLatin1Char('_'));
+        if (c == u'/' || c == u'\0') {
+            out.append(u'_');
         } else {
             out.append(c);
         }
@@ -858,7 +858,7 @@ QString Lyrics::lyricsDir() {
     } else if (dir.startsWith(u"~/"_s)) {
         dir.replace(0, 1, QDir::homePath());
     }
-    while (dir.endsWith(QLatin1Char('/')) && dir.size() > 1) {
+    while (dir.endsWith(u'/') && dir.size() > 1) {
         dir.chop(1);
     }
     return dir;
@@ -1022,7 +1022,7 @@ QVector<LyricLine> Lyrics::parseLrc(const QString& text) {
         u"Mastering"_s,
     };
 
-    const QStringList lines = text.split(QLatin1Char('\n'));
+    const QStringList lines = text.split(u'\n');
     for (const QString& line : lines) {
         QList<QRegularExpressionMatch> matches;
         auto it = k_timeRegex.globalMatch(line);
@@ -1047,7 +1047,7 @@ QVector<LyricLine> Lyrics::parseLrc(const QString& text) {
                     break;
                 }
             }
-            if (isCredit && (lyric.contains(QLatin1Char(':')) || lyric.contains(QChar(0xFF1A)) || lyric.size() < 25)) {
+            if (isCredit && (lyric.contains(u':') || lyric.contains(QChar(0xFF1A)) || lyric.size() < 25)) {
                 continue;
             }
         }

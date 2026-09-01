@@ -30,13 +30,13 @@ private:
 namespace detail {
 
 inline QString stripTrailingSlashes(QStringView str) {
-    while (str.endsWith(QLatin1Char('/')))
+    while (str.endsWith(u'/'))
         str = str.left(str.length() - 1);
     return str.toString();
 }
 
 inline QString stripLeadingSlashes(QStringView str) {
-    while (str.startsWith(QLatin1Char('/')))
+    while (str.startsWith(u'/'))
         str = str.mid(1);
     return str.toString();
 }
@@ -50,7 +50,7 @@ LayerRegistry<T>::LayerRegistry(const QString& prefix, const QString& suffix, QO
     , m_parent(parent) {}
 
 template <LayerType T> QString LayerRegistry<T>::pathFor(const QString& name) const {
-    return m_prefix + QLatin1Char('/') + name + QLatin1Char('/') + m_suffix;
+    return m_prefix + u'/' + name + u'/' + m_suffix;
 }
 
 template <LayerType T> QString LayerRegistry<T>::nameFor(T* layer) const {

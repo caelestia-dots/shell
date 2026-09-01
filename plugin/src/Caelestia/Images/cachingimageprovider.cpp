@@ -65,8 +65,8 @@ void CachingImageResponse::run() {
 
 void CachingImageResponse::process() {
     QString path = QString::fromUtf8(m_id.toUtf8().percentDecoded());
-    if (!path.startsWith(QLatin1Char('/')))
-        path.prepend(QLatin1Char('/'));
+    if (!path.startsWith(u'/'))
+        path.prepend(u'/');
 
     if (!QFileInfo::exists(path)) {
         m_error = u"Source file does not exist: "_s + path;

@@ -68,7 +68,7 @@ QString ImageCacher::cachePathFor(const QString& sourcePath, const QSize& size, 
     const QString filename = u"%1@%2x%3-%4.png"_s.arg(
         sha, QString::number(size.width()), QString::number(size.height()), fillSuffix(fillMode));
 
-    return cacheDir() + QLatin1Char('/') + filename;
+    return cacheDir() + u'/' + filename;
 }
 
 ImageCacher* ImageCacher::instance() {

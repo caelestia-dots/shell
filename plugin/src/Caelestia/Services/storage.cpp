@@ -185,7 +185,7 @@ bool Storage::isPseudoFs(QByteArrayView fsType) {
 }
 
 QStringList Storage::resolveToPhysicalDisks(const QString& devicePath) {
-    if (devicePath.isEmpty() || !devicePath.startsWith(QLatin1Char('/'))) {
+    if (devicePath.isEmpty() || !devicePath.startsWith(u'/')) {
         return {};
     }
     struct stat st{};
