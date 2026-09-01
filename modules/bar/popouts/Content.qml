@@ -154,6 +154,11 @@ Item {
                     TrayMenu {
                         popouts: root.popouts
                         trayItem: trayMenu.modelData.menu // qmllint disable unresolved-type
+
+                        onRootMenuResolved: hasEntries => {
+                            if (root.popouts.hasCurrent && trayMenu.shouldBeActive && !hasEntries)
+                                root.popouts.hasCurrent = false;
+                        }
                     }
                 }
             }

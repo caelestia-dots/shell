@@ -14,6 +14,8 @@ StackView {
     required property PopoutState popouts
     required property QsMenuHandle trayItem
 
+    signal rootMenuResolved(hasEntries: bool)
+
     implicitWidth: currentItem?.implicitWidth ?? 0
     implicitHeight: currentItem?.implicitHeight ?? 0
 
@@ -43,6 +45,7 @@ StackView {
 
         required property QsMenuHandle handle
         property bool isSubMenu
+        property bool resolved
         property bool shown
 
         padding: Tokens.padding.small
@@ -70,6 +73,18 @@ StackView {
             id: menuOpener
 
             menu: menu.handle
+        }
+
+        Connections {
+            function onMenuChanged(): void {
+                if (menu.isSubMenu || menu.resolved)
+                    return;
+
+                menu.resolved = true;
+                root.rootMenuResolved(menuOpener.children.values.some(entry => !entry.isSeparator));
+            }
+
+            target: menu.handle
         }
 
         Repeater {
