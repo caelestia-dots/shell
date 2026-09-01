@@ -2,10 +2,10 @@
 
 #include <qdir.h>
 #include <qfile.h>
-#include <qfileinfo.h>
 #include <qprocess.h>
 #include <qtextstream.h>
-#include <qtimer.h>
+
+#include <utility>
 
 namespace caelestia::services {
 
@@ -111,7 +111,7 @@ void BatteryControl::detectInterface() {
     const QDir powerSupplyDir(QStringLiteral("/sys/class/power_supply"));
     const QStringList batteries = powerSupplyDir.entryList(
         { QStringLiteral("BAT*"), QStringLiteral("battery*") }, QDir::Dirs | QDir::NoDotAndDotDot);
-    for (const auto& bat : batteries) {
+    for (const QString& bat : std::as_const(batteries)) {
         const QString threshPath = QStringLiteral("/sys/class/power_supply/%1/charge_control_end_threshold").arg(bat);
         if (check(threshPath, ControlType::ContinuousRange, QStringLiteral("Charge Limit"), { 60, 80, 100 }, 50, 100,
                 5)) {
