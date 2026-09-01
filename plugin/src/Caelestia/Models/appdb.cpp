@@ -199,7 +199,7 @@ void AppDb::setFavouriteApps(const QStringList& favApps) {
 }
 
 QString AppDb::regexifyString(const QString& original) {
-    if (original.startsWith('^') && original.endsWith('$'))
+    if (original.startsWith(u'^') && original.endsWith(u'$'))
         return original;
 
     const QString escaped = QRegularExpression::escape(original);
