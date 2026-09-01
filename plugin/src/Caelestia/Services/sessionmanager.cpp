@@ -22,10 +22,10 @@ using Qt::StringLiterals::operator""_s;
 
 namespace {
 
-constexpr const char* k_loginService = "org.freedesktop.login1";
-constexpr const char* k_loginPath = "/org/freedesktop/login1";
-constexpr const char* k_loginIface = "org.freedesktop.login1.Manager";
-constexpr const char* k_sessionIface = "org.freedesktop.login1.Session";
+const QString k_loginService = u"org.freedesktop.login1"_s;
+const QString k_loginPath = u"/org/freedesktop/login1"_s;
+const QString k_loginIface = u"org.freedesktop.login1.Manager"_s;
+const QString k_sessionIface = u"org.freedesktop.login1.Session"_s;
 
 } // namespace
 
@@ -80,7 +80,7 @@ bool SessionManager::exec(const QStringList& command) {
         cmd = u"logout"_s; // Manual alias `loginctl terminate-user ''` -> logout
 
     // Normalise command
-    cmd = cmd.remove('-').remove('_').toLower();
+    cmd = cmd.remove(u'-').remove(u'_').toLower();
 
     const auto methodPtr = k_cmds.value(cmd, nullptr);
     if (methodPtr) {
