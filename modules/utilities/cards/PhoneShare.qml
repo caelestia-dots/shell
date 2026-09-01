@@ -93,15 +93,47 @@ StyledRect {
 
                 required property var modelData
 
+                readonly property bool sharing: KdeConnect.sharing && KdeConnect.sharingDevice === modelData.id
+
+                property real shareProgress: 0
+
                 Layout.fillWidth: true
                 implicitHeight: deviceLayout.implicitHeight + Tokens.padding.medium * 2
 
                 radius: Tokens.rounding.medium
-                // Lights up while something is held over it, so it's obvious
-                // which device is about to receive the files.
+                clip: true
+
                 color: dropArea.containsDrag ? Colours.palette.m3primaryContainer : Colours.tPalette.m3surfaceContainerHigh
 
                 CAnim on color {}
+
+                // Fill animation only inside this device row.
+                StyledRect {
+                    anchors.top: parent.top
+                    anchors.bottom: parent.bottom
+                    anchors.left: parent.left
+
+                    width: parent.width * target.shareProgress
+                    radius: target.radius
+
+                    color: Colours.palette.m3primaryContainer
+                    opacity: target.sharing ? 0.6 : 0
+                }
+
+                Anim {
+                    target: target
+                    property: "shareProgress"
+
+                    from: 0
+                    to: 1
+                    running: target.sharing
+                    loops: Animation.Infinite
+
+                    duration: Tokens.anim.durations.expressiveSlowSpatial * 2
+                    easing.type: Easing.Linear
+
+                    onStopped: target.shareProgress = 0
+                }
 
                 DropArea {
                     id: dropArea
@@ -109,6 +141,8 @@ StyledRect {
                     anchors.fill: parent
                     keys: ["text/uri-list"]
 
+                    // BUNU KORUYORUZ.
+                    // Nested DropArea drag'i alınca utilities kapanmasın.
                     onContainsDragChanged: root.screenState.utilities = containsDrag
 
                     onDropped: drop => {
