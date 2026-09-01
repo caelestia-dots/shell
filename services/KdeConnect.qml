@@ -27,6 +27,7 @@ Singleton {
 
     signal shared(string device, int count)
     signal shareFailed(string device, string error)
+    signal shareCancelled(string device)
 
     function refresh(): void {
         listProc.running = true;
@@ -40,6 +41,10 @@ Singleton {
         transfer.share(deviceId, urls);
     }
 
+    function cancel(): void {
+        transfer.cancel();
+    }
+
     KdeConnectTransfer {
         id: transfer
 
@@ -50,6 +55,10 @@ Singleton {
         onFailed: (device, error) => {
             console.warn(lc, `Failed to share with ${device}: ${error}`);
             root.shareFailed(device, error);
+        }
+
+        onCancelled: device => {
+            root.shareCancelled(device);
         }
     }
 
