@@ -83,7 +83,7 @@ FileSystemModel::FileSystemModel(QObject* parent)
     , m_recursive(false)
     , m_watchChanges(true)
     , m_showHidden(false)
-    , m_filter(NoFilter) {
+    , m_filter(Filter::NoFilter) {
     connect(&m_watcher, &QFileSystemWatcher::directoryChanged, this, &FileSystemModel::watchDirIfRecursive);
     connect(&m_watcher, &QFileSystemWatcher::directoryChanged, this, &FileSystemModel::updateEntriesForDir);
 }
