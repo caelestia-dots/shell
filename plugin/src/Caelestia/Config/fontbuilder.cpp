@@ -10,6 +10,8 @@ Q_LOGGING_CATEGORY(lcFontBuilder, "caelestia.fontbuilder", QtInfoMsg)
 
 namespace caelestia::config {
 
+using Qt::StringLiterals::operator""_s;
+
 FontBuilder::FontBuilder(const QFont& font)
     : m_font(font) {}
 
@@ -79,15 +81,15 @@ QFont FontBuilder::build() const {
 }
 
 FontBuilder FontBuilder::fill(float value) {
-    return vaxis("FILL", value);
+    return vaxis(u"FILL"_s, value);
 }
 
 FontBuilder FontBuilder::grade(float value) {
-    return vaxis("GRAD", value);
+    return vaxis(u"GRAD"_s, value);
 }
 
 FontBuilder FontBuilder::width(float value) {
-    return vaxis("wdth", value);
+    return vaxis(u"wdth"_s, value);
 }
 
 FontBuilder FontBuilder::scale(qreal factor) {

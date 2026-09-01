@@ -212,7 +212,7 @@ DecodeResult EnumCodec::decode(const QJsonValue& value) const {
         options << QString::fromUtf8(m_metaEnum.key(i));
 
     return error(
-        DiagnosticType::InvalidValue, u"Invalid enum value %1. Expected one of %2"_s.arg(key, options.join(", ")));
+        DiagnosticType::InvalidValue, u"Invalid enum value %1. Expected one of %2"_s.arg(key, options.join(u", "_s)));
 }
 
 template <typename Container>

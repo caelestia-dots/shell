@@ -6,6 +6,8 @@
 
 namespace caelestia {
 
+using Qt::StringLiterals::operator""_s;
+
 Toast::Toast(QString title, QString message, QString icon, Type type, int timeout, QObject* parent)
     : QObject(parent)
     , m_closed(false)
@@ -19,16 +21,16 @@ Toast::Toast(QString title, QString message, QString icon, Type type, int timeou
     if (m_icon.isEmpty()) {
         switch (m_type) {
         case Type::Success:
-            m_icon = "check_circle_unread";
+            m_icon = u"check_circle_unread"_s;
             break;
         case Type::Warning:
-            m_icon = "warning";
+            m_icon = u"warning"_s;
             break;
         case Type::Error:
-            m_icon = "error";
+            m_icon = u"error"_s;
             break;
         default:
-            m_icon = "info";
+            m_icon = u"info"_s;
             break;
         }
     }

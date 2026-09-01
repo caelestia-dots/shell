@@ -16,10 +16,10 @@ Q_LOGGING_CATEGORY(lcHypr, "caelestia.services.hypr", QtInfoMsg)
 
 namespace caelestia::services::hypr {
 
+using Qt::StringLiterals::operator""_s;
+
 HyprExtras::HyprExtras(QObject* parent)
     : QObject(parent)
-    , m_requestSocket("")
-    , m_eventSocket("")
     , m_socket(nullptr)
     , m_socketValid(false)
     , m_devices(new HyprDevices(this)) {
@@ -29,9 +29,9 @@ HyprExtras::HyprExtras(QObject* parent)
         return;
     }
 
-    auto hyprDir = QString("%1/hypr/%2").arg(qEnvironmentVariable("XDG_RUNTIME_DIR"), his);
+    auto hyprDir = u"%1/hypr/%2"_s.arg(qEnvironmentVariable("XDG_RUNTIME_DIR"), his);
     if (!QDir(hyprDir).exists()) {
-        hyprDir = "/tmp/hypr/" + his;
+        hyprDir = u"/tmp/hypr/"_s + his;
 
         if (!QDir(hyprDir).exists()) {
             qCWarning(lcHypr) << "Hyprland socket directory does not exist. Unable to connect to Hyprland socket.";
@@ -39,8 +39,8 @@ HyprExtras::HyprExtras(QObject* parent)
         }
     }
 
-    m_requestSocket = hyprDir + "/.socket.sock";
-    m_eventSocket = hyprDir + "/.socket2.sock";
+    m_requestSocket = hyprDir + u"/.socket.sock"_s;
+    m_eventSocket = hyprDir + u"/.socket2.sock"_s;
 
     refreshOptions();
     refreshDevices();
@@ -79,7 +79,7 @@ void HyprExtras::batchMessage(const QStringList& messages) {
         return;
     }
 
-    makeRequest("[[BATCH]]" + messages.join(";"), [](bool success, const QByteArray& res) {
+    makeRequest(u"[[BATCH]]"_s + messages.join(u";"_s), [](bool success, const QByteArray& res) {
         if (!success) {
             qCWarning(lcHypr) << "batchMessage: request error:" << QString::fromUtf8(res);
         }
@@ -100,8 +100,8 @@ void HyprExtras::applyOptions(const QVariantHash& options) {
                 QLatin1String("keyword ") + it.key() + QLatin1Char(' ') + it.value().toString() + QLatin1Char(';');
         } else {
             auto parts = it.key().split(':');
-            request += "eval hl.config({ " + parts.join(" = { ") + " = " + it.value().toString() +
-                       QString(" }").repeated(parts.size() - 1) + " });";
+            request += u"eval hl.config({ "_s + parts.join(u" = { "_s) + u" = "_s + it.value().toString() +
+                       u" }"_s.repeated(parts.size() - 1) + u" });"_s;
         }
     }
 
@@ -119,7 +119,7 @@ void HyprExtras::refreshOptions() {
         m_optionsRefresh->close();
     }
 
-    m_optionsRefresh = makeRequestJson("descriptions", [this](bool success, const QJsonDocument& response) {
+    m_optionsRefresh = makeRequestJson(u"descriptions"_s, [this](bool success, const QJsonDocument& response) {
         m_optionsRefresh.reset();
         if (!success) {
             return;
@@ -130,8 +130,8 @@ void HyprExtras::refreshOptions() {
 
         for (const auto& o : std::as_const(options)) {
             const auto obj = o.toObject();
-            const auto key = obj.value("value").toString();
-            const auto value = obj.value("data").toObject().value("current").toVariant();
+            const auto key = obj.value(u"value"_s).toString();
+            const auto value = obj.value(u"data"_s).toObject().value(u"current"_s).toVariant();
             if (m_options.value(key) != value) {
                 dirty = true;
                 m_options.insert(key, value);
@@ -149,7 +149,7 @@ void HyprExtras::refreshDevices() {
         m_devicesRefresh->close();
     }
 
-    m_devicesRefresh = makeRequestJson("devices", [this](bool success, const QJsonDocument& response) {
+    m_devicesRefresh = makeRequestJson(u"devices"_s, [this](bool success, const QJsonDocument& response) {
         m_devicesRefresh.reset();
         if (success) {
             m_devices->updateLastIpcObject(response.object());
@@ -195,7 +195,7 @@ void HyprExtras::handleEvent(const QString& event) {
 
 HyprExtras::SocketPtr HyprExtras::makeRequestJson(
     const QString& request, const std::function<void(bool, QJsonDocument)>& callback) {
-    return makeRequest("j/" + request, [callback](bool success, const QByteArray& response) {
+    return makeRequest(u"j/"_s + request, [callback](bool success, const QByteArray& response) {
         callback(success, QJsonDocument::fromJson(response));
     });
 }

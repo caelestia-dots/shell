@@ -59,58 +59,58 @@ void AppEntry::incrementFrequency() {
 
 QString AppEntry::id() const {
     if (!m_entry) {
-        return "";
+        return {};
     }
     return m_entry->property("id").toString();
 }
 
 QString AppEntry::name() const {
     if (!m_entry) {
-        return "";
+        return {};
     }
     return m_entry->property("name").toString();
 }
 
 QString AppEntry::comment() const {
     if (!m_entry) {
-        return "";
+        return {};
     }
     return m_entry->property("comment").toString();
 }
 
 QString AppEntry::execString() const {
     if (!m_entry) {
-        return "";
+        return {};
     }
     return m_entry->property("execString").toString();
 }
 
 QString AppEntry::startupClass() const {
     if (!m_entry) {
-        return "";
+        return {};
     }
     return m_entry->property("startupClass").toString();
 }
 
 QString AppEntry::genericName() const {
     if (!m_entry) {
-        return "";
+        return {};
     }
     return m_entry->property("genericName").toString();
 }
 
 QString AppEntry::categories() const {
     if (!m_entry) {
-        return "";
+        return {};
     }
-    return m_entry->property("categories").toStringList().join(" ");
+    return m_entry->property("categories").toStringList().join(u" "_s);
 }
 
 QString AppEntry::keywords() const {
     if (!m_entry) {
-        return "";
+        return {};
     }
-    return m_entry->property("keywords").toStringList().join(" ");
+    return m_entry->property("keywords").toStringList().join(u" "_s);
 }
 
 AppDb::AppDb(QObject* parent)
@@ -121,12 +121,12 @@ AppDb::AppDb(QObject* parent)
     m_timer->setInterval(300);
     QObject::connect(m_timer, &QTimer::timeout, this, &AppDb::updateApps);
 
-    auto db = QSqlDatabase::addDatabase("QSQLITE", m_uuid);
-    db.setDatabaseName(":memory:");
+    auto db = QSqlDatabase::addDatabase(u"QSQLITE"_s, m_uuid);
+    db.setDatabaseName(u":memory:"_s);
     db.open();
 
     QSqlQuery query(db);
-    query.exec("CREATE TABLE IF NOT EXISTS frequencies (id TEXT PRIMARY KEY, frequency INTEGER)");
+    query.exec(u"CREATE TABLE IF NOT EXISTS frequencies (id TEXT PRIMARY KEY, frequency INTEGER)"_s);
 }
 
 QString AppDb::uuid() const {
@@ -138,7 +138,7 @@ QString AppDb::path() const {
 }
 
 void AppDb::setPath(const QString& path) {
-    auto newPath = path.isEmpty() ? ":memory:" : path;
+    auto newPath = path.isEmpty() ? u":memory:"_s : path;
 
     if (m_path == newPath) {
         return;
@@ -153,7 +153,7 @@ void AppDb::setPath(const QString& path) {
     db.open();
 
     QSqlQuery query(db);
-    query.exec("CREATE TABLE IF NOT EXISTS frequencies (id TEXT PRIMARY KEY, frequency INTEGER)");
+    query.exec(u"CREATE TABLE IF NOT EXISTS frequencies (id TEXT PRIMARY KEY, frequency INTEGER)"_s);
 
     updateAppFrequencies();
 }
@@ -214,10 +214,10 @@ void AppDb::incrementFrequency(const QString& id) {
     auto db = QSqlDatabase::database(m_uuid);
     QSqlQuery query(db);
 
-    query.prepare("INSERT INTO frequencies (id, frequency) "
+    query.prepare(u"INSERT INTO frequencies (id, frequency) "
                   "VALUES (:id, 1) "
-                  "ON CONFLICT (id) DO UPDATE SET frequency = frequency + 1");
-    query.bindValue(":id", id);
+                  "ON CONFLICT (id) DO UPDATE SET frequency = frequency + 1"_s);
+    query.bindValue(u":id"_s, id);
     query.exec();
 
     auto* app = m_apps.value(id);
@@ -267,8 +267,8 @@ quint32 AppDb::getFrequency(const QString& id) const {
     auto db = QSqlDatabase::database(m_uuid);
     QSqlQuery query(db);
 
-    query.prepare("SELECT frequency FROM frequencies WHERE id = :id");
-    query.bindValue(":id", id);
+    query.prepare(u"SELECT frequency FROM frequencies WHERE id = :id"_s);
+    query.bindValue(u":id"_s, id);
 
     if (query.exec() && query.next()) {
         return query.value(0).toUInt();
