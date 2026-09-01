@@ -93,10 +93,9 @@ StyledRect {
 
                 required property var modelData
 
-                // Real transfer progress for this device. It intentionally
-                // stays at 1 after a successful transfer and is reset when a
-                // new transfer starts.
                 property real shareProgress: 0
+                property bool showCancel: false
+                property bool cancelRequested: false
 
                 Layout.fillWidth: true
                 implicitHeight: deviceLayout.implicitHeight + Tokens.padding.medium * 2
@@ -128,14 +127,44 @@ StyledRect {
                             deviceCard.shareProgress = KdeConnect.progress;
                     }
 
-                    function onShared(device) {
-                        if (device === deviceCard.modelData.id)
+                    function onShared(device, count) {
+                        if (device === deviceCard.modelData.id) {
+                            cancelTimer.stop();
                             deviceCard.shareProgress = 1;
+                            deviceCard.showCancel = false;
+                            deviceCard.cancelRequested = false;
+                        }
                     }
 
-                    function onShareFailed(device) {
-                        if (device === deviceCard.modelData.id)
+                    function onShareFailed(device, error) {
+                        if (device === deviceCard.modelData.id) {
+                            cancelTimer.stop();
                             deviceCard.shareProgress = 0;
+                            deviceCard.showCancel = false;
+                            deviceCard.cancelRequested = false;
+                        }
+                    }
+
+                    function onShareCancelled(device) {
+                        if (device === deviceCard.modelData.id) {
+                            cancelTimer.stop();
+                            deviceCard.shareProgress = 0;
+                            deviceCard.showCancel = false;
+                            deviceCard.cancelRequested = false;
+                        }
+                    }
+                }
+
+                Timer {
+                    id: cancelTimer
+
+                    interval: 900
+                    repeat: false
+
+                    onTriggered: {
+                        if (KdeConnect.sharing && KdeConnect.sharingDevice === deviceCard.modelData.id && !deviceCard.cancelRequested) {
+                            deviceCard.showCancel = true;
+                        }
                     }
                 }
 
@@ -150,8 +179,13 @@ StyledRect {
                     onDropped: drop => {
                         if (drop.hasUrls) {
                             deviceCard.shareProgress = 0;
+                            deviceCard.showCancel = false;
+                            deviceCard.cancelRequested = false;
 
                             KdeConnect.share(deviceCard.modelData.id, drop.urls);
+
+                            cancelTimer.restart();
+
                             drop.acceptProposedAction();
                         }
                     }
@@ -178,6 +212,37 @@ StyledRect {
 
                         font: Tokens.font.body.small
                         elide: Text.ElideRight
+                    }
+
+                    StyledRect {
+                        visible: deviceCard.showCancel
+
+                        implicitWidth: cancelText.implicitWidth + Tokens.padding.medium * 2
+                        implicitHeight: cancelText.implicitHeight + Tokens.padding.medium
+
+                        radius: Tokens.rounding.full
+                        color: Colours.palette.m3secondaryContainer
+
+                        StyledText {
+                            id: cancelText
+
+                            anchors.centerIn: parent
+
+                            text: qsTr("Cancel")
+                            color: Colours.palette.m3onSecondaryContainer
+                            font: Tokens.font.body.small
+                        }
+
+                        TapHandler {
+                            enabled: !deviceCard.cancelRequested
+
+                            onTapped: {
+                                deviceCard.cancelRequested = true;
+                                deviceCard.showCancel = false;
+
+                                KdeConnect.cancel();
+                            }
+                        }
                     }
                 }
             }

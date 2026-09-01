@@ -3,6 +3,8 @@
 #include <QObject>
 #include <QString>
 #include <QVariant>
+#include <atomic>
+#include <memory>
 #include <qqmlintegration.h>
 
 class KdeConnectTransfer : public QObject
@@ -22,6 +24,7 @@ public:
     [[nodiscard]] QString deviceId() const;
 
     Q_INVOKABLE void share(const QString& deviceId, const QVariantList& urls);
+    Q_INVOKABLE void cancel();
 
 signals:
     void runningChanged();
@@ -30,6 +33,7 @@ signals:
 
     void shared(const QString& deviceId, int count);
     void failed(const QString& deviceId, const QString& error);
+    void cancelled(const QString& deviceId);
 
 private:
     void setRunning(bool running);
@@ -39,4 +43,6 @@ private:
     bool m_running = false;
     qreal m_progress = 0.0;
     QString m_deviceId;
+
+    std::shared_ptr<std::atomic_bool> m_cancelToken;
 };
