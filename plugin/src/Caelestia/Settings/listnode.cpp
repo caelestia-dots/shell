@@ -5,10 +5,12 @@
 
 namespace caelestia::settings {
 
+using Qt::StringLiterals::operator""_s;
+
 namespace {
 
 QString valuesKey() {
-    return QStringLiteral("values");
+    return u"values"_s;
 }
 
 void deleteNode(Node* node) {
@@ -184,7 +186,7 @@ void ListNode::clear() {
 }
 
 QString ListNode::pathFor(const QString& key) const {
-    return path() + QStringLiteral("[%1]").arg(key);
+    return path() + u"[%1]"_s.arg(key);
 }
 
 const Schema& ListNode::schema() const {
@@ -297,7 +299,7 @@ bool ListNode::syncJson(const QJsonValue& json, QList<Diagnostic>& diagnostics) 
         diagnostics << Diagnostic{
             .type = DiagnosticType::GlobalOption,
             .option = p,
-            .message = QStringLiteral("Global properties should not be defined in overlay files"),
+            .message = u"Global properties should not be defined in overlay files"_s,
         };
         return false;
     }

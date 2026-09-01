@@ -18,6 +18,8 @@ constexpr qreal k_bytesPerGib = 1024.0 * 1024.0 * 1024.0;
 
 namespace caelestia::services {
 
+using Qt::StringLiterals::operator""_s;
+
 NetworkUsage::NetworkUsage(QObject* parent)
     : TickingService(parent)
     , m_downloadBuffer(new CircularBuffer(this))
@@ -56,7 +58,7 @@ CircularBuffer* NetworkUsage::uploadBuffer() const {
 
 NetworkFormatResult NetworkUsage::formatBytesRate(qreal bytes) {
     NetworkFormatResult result = formatBytes(bytes);
-    result.unit = result.unit + QStringLiteral("/s");
+    result.unit = result.unit + u"/s"_s;
     return result;
 }
 
@@ -65,27 +67,27 @@ NetworkFormatResult NetworkUsage::formatBytes(qreal bytes) {
 
     if (bytes < 0 || std::isnan(bytes) || !std::isfinite(bytes)) {
         result.value = 0;
-        result.unit = QStringLiteral("B");
+        result.unit = u"B"_s;
         return result;
     }
     if (bytes < k_bytesPerKib) {
         result.value = bytes;
-        result.unit = QStringLiteral("B");
+        result.unit = u"B"_s;
     } else if (bytes < k_bytesPerMib) {
         result.value = bytes / k_bytesPerKib;
-        result.unit = QStringLiteral("KB");
+        result.unit = u"KB"_s;
     } else if (bytes < k_bytesPerGib) {
         result.value = bytes / k_bytesPerMib;
-        result.unit = QStringLiteral("MB");
+        result.unit = u"MB"_s;
     } else {
         result.value = bytes / k_bytesPerGib;
-        result.unit = QStringLiteral("GB");
+        result.unit = u"GB"_s;
     }
     return result;
 }
 
 void NetworkUsage::tick() {
-    QFile f(QStringLiteral("/proc/net/dev"));
+    QFile f(u"/proc/net/dev"_s);
     if (!f.open(QIODevice::ReadOnly | QIODevice::Text)) {
         return;
     }

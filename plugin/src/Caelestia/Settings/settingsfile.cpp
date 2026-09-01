@@ -19,6 +19,8 @@ Q_LOGGING_CATEGORY(lcSettingsFile, "caelestia.settings.file", QtInfoMsg)
 
 namespace caelestia::settings {
 
+using Qt::StringLiterals::operator""_s;
+
 namespace {
 
 // Max retries for loads which fail due to malformed JSON, e.g. partial writes
@@ -117,7 +119,7 @@ SettingsFile::LoadResult SettingsFile::load(bool reportErrors) {
     if (!file.open(QIODevice::ReadOnly)) {
         qCWarning(lcSettingsFile, "Failed to open %s for reading: %s", qUtf8Printable(m_path),
             qUtf8Printable(file.errorString()));
-        emit readFailed(QStringLiteral("Failed to open: %1").arg(file.errorString()));
+        emit readFailed(u"Failed to open: %1"_s.arg(file.errorString()));
         return LoadResult::Error;
     }
 
@@ -131,7 +133,7 @@ SettingsFile::LoadResult SettingsFile::load(bool reportErrors) {
         if (reportErrors) {
             qCWarning(lcSettingsFile, "Failed to parse %s as JSON: %s", qUtf8Printable(m_path),
                 qUtf8Printable(error.errorString()));
-            emit readFailed(QStringLiteral("Failed to parse: %1").arg(error.errorString()));
+            emit readFailed(u"Failed to parse: %1"_s.arg(error.errorString()));
         } else {
             qCDebug(lcSettingsFile, "Failed to parse %s as JSON: %s", qUtf8Printable(m_path),
                 qUtf8Printable(error.errorString()));
@@ -179,7 +181,7 @@ void SettingsFile::save() {
 
     if (!QDir().mkpath(dir)) {
         qCWarning(lcSettingsFile) << "Failed to create dir" << dir;
-        emit writeFailed(QStringLiteral("Failed to create parent directory"));
+        emit writeFailed(u"Failed to create parent directory"_s);
         return;
     }
 
@@ -189,7 +191,7 @@ void SettingsFile::save() {
     if (!file.open(QIODevice::WriteOnly)) {
         qCWarning(lcSettingsFile, "Failed to open %s for writing: %s", qUtf8Printable(m_path),
             qUtf8Printable(file.errorString()));
-        emit writeFailed(QStringLiteral("Failed to open: %1").arg(file.errorString()));
+        emit writeFailed(u"Failed to open: %1"_s.arg(file.errorString()));
         return;
     }
 
@@ -197,7 +199,7 @@ void SettingsFile::save() {
 
     if (!file.commit()) {
         qCWarning(lcSettingsFile, "Failed to write %s: %s", qUtf8Printable(m_path), qUtf8Printable(file.errorString()));
-        emit writeFailed(QStringLiteral("Failed to write: %1").arg(file.errorString()));
+        emit writeFailed(u"Failed to write: %1"_s.arg(file.errorString()));
         return;
     }
 
