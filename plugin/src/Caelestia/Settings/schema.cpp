@@ -35,7 +35,7 @@ QVariant DefaultSpec::resolve(const Node* self) const {
 }
 
 QString Descriptor::typeString() const {
-    return type.name();
+    return QString::fromUtf8(type.name());
 }
 
 QVariant Descriptor::defaultValue(const Node* self) const {

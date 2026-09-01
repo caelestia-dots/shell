@@ -185,9 +185,9 @@ void HyprExtras::readEvent() {
 }
 
 void HyprExtras::handleEvent(const QString& event) {
-    if (event == "configreloaded") {
+    if (event == u"configreloaded"_s) {
         refreshOptions();
-    } else if (event == "activelayout") {
+    } else if (event == u"activelayout"_s) {
         refreshDevices();
     }
 }

@@ -42,12 +42,12 @@ QString cleanName(QString s) {
 }
 
 QString parseNvidiaName(const QByteArray& out) {
-    const QString first = QString::fromUtf8(out).split('\n').value(0).trimmed();
+    const QString first = QString::fromUtf8(out).split(u'\n').value(0).trimmed();
     return first.isEmpty() ? QString() : cleanName(first);
 }
 
 QString parseGlxinfoName(const QByteArray& out) {
-    const QStringList lines = QString::fromUtf8(out).split('\n');
+    const QStringList lines = QString::fromUtf8(out).split(u'\n');
     for (const QString& line : lines) {
         const qsizetype idx = line.indexOf(u"Device:"_s);
         if (idx < 0) {
@@ -55,7 +55,7 @@ QString parseGlxinfoName(const QByteArray& out) {
         }
 
         QString rest = line.mid(idx + 7);
-        const qsizetype paren = rest.indexOf('(');
+        const qsizetype paren = rest.indexOf(u'(');
         if (paren >= 0) {
             rest = rest.left(paren);
         }
@@ -72,7 +72,7 @@ QString parseGlxinfoName(const QByteArray& out) {
 QString parseLspciName(const QByteArray& out) {
     static const QRegularExpression k_lineRe(u"vga|3d controller|display"_s, QRegularExpression::CaseInsensitiveOption);
 
-    const QStringList lines = QString::fromUtf8(out).split('\n');
+    const QStringList lines = QString::fromUtf8(out).split(u'\n');
     QString match;
     for (const QString& line : lines) {
         if (k_lineRe.match(line).hasMatch()) {
