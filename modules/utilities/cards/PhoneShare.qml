@@ -89,11 +89,9 @@ StyledRect {
             model: KdeConnect.devices
 
             StyledRect {
-                id: target
+                id: deviceCard
 
                 required property var modelData
-
-                readonly property bool sharing: KdeConnect.sharing && KdeConnect.sharingDevice === modelData.id
 
                 property real shareProgress: 0
 
@@ -107,32 +105,36 @@ StyledRect {
 
                 CAnim on color {}
 
-                // Fill animation only inside this device row.
                 StyledRect {
                     anchors.top: parent.top
                     anchors.bottom: parent.bottom
                     anchors.left: parent.left
 
-                    width: parent.width * target.shareProgress
-                    radius: target.radius
+                    width: parent.width * deviceCard.shareProgress
 
+                    radius: deviceCard.radius
                     color: Colours.palette.m3primaryContainer
-                    opacity: target.sharing ? 0.6 : 0
+                    opacity: deviceCard.shareProgress > 0 ? 0.65 : 0
                 }
 
-                Anim {
-                    target: target
-                    property: "shareProgress"
+                SequentialAnimation {
+                    id: shareAnimation
 
-                    from: 0
-                    to: 1
-                    running: target.sharing
-                    loops: Animation.Infinite
+                    PropertyAction {
+                        target: deviceCard
+                        property: "shareProgress"
+                        value: 0
+                    }
 
-                    duration: Tokens.anim.durations.expressiveSlowSpatial * 2
-                    easing.type: Easing.Linear
+                    Anim {
+                        target: deviceCard
+                        property: "shareProgress"
 
-                    onStopped: target.shareProgress = 0
+                        to: 1
+
+                        duration: Tokens.anim.durations.expressiveDefaultSpatial * 2
+                        easing.type: Easing.OutCubic
+                    }
                 }
 
                 DropArea {
@@ -141,13 +143,13 @@ StyledRect {
                     anchors.fill: parent
                     keys: ["text/uri-list"]
 
-                    // BUNU KORUYORUZ.
-                    // Nested DropArea drag'i alınca utilities kapanmasın.
                     onContainsDragChanged: root.screenState.utilities = containsDrag
 
                     onDropped: drop => {
                         if (drop.hasUrls) {
-                            KdeConnect.share(target.modelData.id, drop.urls);
+                            shareAnimation.restart();
+
+                            KdeConnect.share(deviceCard.modelData.id, drop.urls);
                             drop.acceptProposedAction();
                         }
                     }
@@ -168,8 +170,10 @@ StyledRect {
 
                     StyledText {
                         Layout.fillWidth: true
-                        text: target.modelData.name
+                        text: deviceCard.modelData.name
+
                         color: dropArea.containsDrag ? Colours.palette.m3onPrimaryContainer : Colours.palette.m3onSurface
+
                         font: Tokens.font.body.small
                         elide: Text.ElideRight
                     }
