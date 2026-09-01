@@ -37,6 +37,17 @@ Singleton {
         transfer.cancel();
     }
 
+    function browseRoot(deviceId: string): string {
+        const dirs = root.directories(deviceId);
+        const paths = Object.keys(dirs);
+
+        if (paths.length === 0)
+            return "";
+
+        paths.sort((a, b) => a.length - b.length);
+        return paths[0];
+    }
+
     function mount(deviceId: string): void {
         if (!deviceId || root.isMountBusy(deviceId))
             return;

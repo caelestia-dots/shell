@@ -12,7 +12,9 @@ StyledRect {
 
     required property ScreenState screenState
 
-    readonly property real nonAnimHeight: layout.implicitHeight + Tokens.padding.extraLargeIncreased
+    readonly property real nonAnimHeight:
+        layout.implicitHeight
+        + Tokens.padding.extraLargeIncreased
 
     implicitHeight: nonAnimHeight
 
@@ -30,6 +32,7 @@ StyledRect {
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.margins: Tokens.padding.large
+
         spacing: Tokens.spacing.small
 
         RowLayout {
@@ -38,7 +41,9 @@ StyledRect {
 
             StyledRect {
                 implicitWidth: implicitHeight
-                implicitHeight: icon.implicitHeight + Tokens.padding.large
+                implicitHeight:
+                    icon.implicitHeight
+                    + Tokens.padding.large
 
                 radius: Tokens.rounding.full
                 color: Colours.palette.m3secondaryContainer
@@ -47,6 +52,7 @@ StyledRect {
                     id: icon
 
                     anchors.centerIn: parent
+
                     text: "smartphone"
                     color: Colours.palette.m3onSecondaryContainer
                     fontStyle: Tokens.font.icon.large
@@ -59,20 +65,26 @@ StyledRect {
 
                 StyledText {
                     Layout.fillWidth: true
+
                     text: qsTr("Send to Phone")
+
                     font: Tokens.font.body.medium
                     elide: Text.ElideRight
                 }
 
                 StyledText {
                     Layout.fillWidth: true
+
                     text: {
                         if (KdeConnect.sharing)
                             return qsTr("Sending…");
+
                         if (KdeConnect.devices.length === 0)
                             return qsTr("No phone connected");
+
                         return qsTr("Drop files on a device");
                     }
+
                     color: Colours.palette.m3onSurfaceVariant
                     font: Tokens.font.body.small
                     elide: Text.ElideRight
@@ -93,17 +105,25 @@ StyledRect {
                 property bool cancelRequested: false
 
                 readonly property bool storageMounted:
-                    KdeConnect.isMounted(deviceCard.modelData.id)
+                    KdeConnect.isMounted(
+                        deviceCard.modelData.id
+                    )
 
                 readonly property bool storageBusy:
-                    KdeConnect.isMountBusy(deviceCard.modelData.id)
+                    KdeConnect.isMountBusy(
+                        deviceCard.modelData.id
+                    )
 
                 readonly property bool transferringHere:
                     KdeConnect.sharing
-                    && KdeConnect.sharingDevice === deviceCard.modelData.id
+                    && KdeConnect.sharingDevice
+                        === deviceCard.modelData.id
 
                 Layout.fillWidth: true
-                implicitHeight: deviceLayout.implicitHeight + Tokens.padding.medium * 2
+
+                implicitHeight:
+                    deviceLayout.implicitHeight
+                    + Tokens.padding.medium * 2
 
                 radius: Tokens.rounding.medium
                 clip: true
@@ -119,24 +139,36 @@ StyledRect {
                     anchors.bottom: parent.bottom
                     anchors.left: parent.left
 
-                    width: parent.width * deviceCard.shareProgress
+                    width:
+                        parent.width
+                        * deviceCard.shareProgress
 
                     radius: deviceCard.radius
-                    color: Colours.palette.m3primaryContainer
-                    opacity: deviceCard.shareProgress > 0 ? 0.65 : 0
+
+                    color:
+                        Colours.palette.m3primaryContainer
+
+                    opacity:
+                        deviceCard.shareProgress > 0
+                            ? 0.65
+                            : 0
                 }
 
                 Connections {
                     target: KdeConnect
 
                     function onProgressChanged() {
-                        if (KdeConnect.sharingDevice === deviceCard.modelData.id)
-                            deviceCard.shareProgress = KdeConnect.progress;
+                        if (KdeConnect.sharingDevice
+                                === deviceCard.modelData.id) {
+                            deviceCard.shareProgress =
+                                KdeConnect.progress;
+                        }
                     }
 
                     function onShared(device, count) {
                         if (device === deviceCard.modelData.id) {
                             cancelTimer.stop();
+
                             deviceCard.shareProgress = 1;
                             deviceCard.showCancel = false;
                             deviceCard.cancelRequested = false;
@@ -146,6 +178,7 @@ StyledRect {
                     function onShareFailed(device, error) {
                         if (device === deviceCard.modelData.id) {
                             cancelTimer.stop();
+
                             deviceCard.shareProgress = 0;
                             deviceCard.showCancel = false;
                             deviceCard.cancelRequested = false;
@@ -155,6 +188,7 @@ StyledRect {
                     function onShareCancelled(device) {
                         if (device === deviceCard.modelData.id) {
                             cancelTimer.stop();
+
                             deviceCard.shareProgress = 0;
                             deviceCard.showCancel = false;
                             deviceCard.cancelRequested = false;
@@ -165,12 +199,13 @@ StyledRect {
                 Timer {
                     id: cancelTimer
 
-                    interval: 1000
+                    interval: 1500
                     repeat: false
 
                     onTriggered: {
                         if (KdeConnect.sharing
-                                && KdeConnect.sharingDevice === deviceCard.modelData.id
+                                && KdeConnect.sharingDevice
+                                    === deviceCard.modelData.id
                                 && !deviceCard.cancelRequested) {
                             deviceCard.showCancel = true;
                         }
@@ -183,7 +218,9 @@ StyledRect {
                     anchors.fill: parent
                     keys: ["text/uri-list"]
 
-                    onContainsDragChanged: root.screenState.utilities = containsDrag
+                    onContainsDragChanged:
+                        root.screenState.utilities =
+                            containsDrag
 
                     onDropped: drop => {
                         if (drop.hasUrls) {
@@ -208,6 +245,7 @@ StyledRect {
 
                     anchors.fill: parent
                     anchors.margins: Tokens.padding.medium
+
                     spacing: Tokens.spacing.small
 
                     MaterialIcon {
@@ -224,6 +262,7 @@ StyledRect {
 
                     StyledText {
                         Layout.fillWidth: true
+
                         text: deviceCard.modelData.name
 
                         color: dropArea.containsDrag
@@ -234,19 +273,98 @@ StyledRect {
                         elide: Text.ElideRight
                     }
 
+                    //
+                    // Browse
+                    //
                     StyledRect {
-                        visible: !deviceCard.transferringHere
+                        visible:
+                            deviceCard.storageMounted
+                            && !deviceCard.transferringHere
 
-                        implicitWidth: mountText.implicitWidth
+                        implicitWidth:
+                            browseText.implicitWidth
                             + Tokens.padding.medium * 2
 
-                        implicitHeight: mountText.implicitHeight
+                        implicitHeight:
+                            browseText.implicitHeight
                             + Tokens.padding.medium
 
                         radius: Tokens.rounding.full
-                        color: Colours.palette.m3secondaryContainer
+                        color:
+                            Colours.palette.m3secondaryContainer
 
-                        opacity: deviceCard.storageBusy ? 0.5 : 1
+                        opacity:
+                            deviceCard.storageBusy
+                                ? 0.5
+                                : 1
+
+                        StyledText {
+                            id: browseText
+
+                            anchors.centerIn: parent
+
+                            text: qsTr("Browse")
+
+                            color:
+                                Colours.palette.m3onSecondaryContainer
+
+                            font: Tokens.font.body.small
+                        }
+
+                        TapHandler {
+                            enabled: !deviceCard.storageBusy
+
+                            onTapped: {
+                                const directories =
+                                    KdeConnect.directories(
+                                        deviceCard.modelData.id
+                                    );
+
+                                const paths =
+                                    Object.keys(directories);
+
+                                if (paths.length === 0)
+                                    return;
+
+                                paths.sort(
+                                    (a, b) =>
+                                        a.length - b.length
+                                );
+
+                                const browserRoot = paths[0];
+
+                                ShellState.shellRoot.phoneBrowser.openForDevice(
+                                    deviceCard.modelData.id,
+                                    deviceCard.modelData.name,
+                                    browserRoot
+                                );
+                            }
+                        }
+                    }
+
+                    //
+                    // Mount / Unmount
+                    //
+                    StyledRect {
+                        visible:
+                            !deviceCard.transferringHere
+
+                        implicitWidth:
+                            mountText.implicitWidth
+                            + Tokens.padding.medium * 2
+
+                        implicitHeight:
+                            mountText.implicitHeight
+                            + Tokens.padding.medium
+
+                        radius: Tokens.rounding.full
+                        color:
+                            Colours.palette.m3secondaryContainer
+
+                        opacity:
+                            deviceCard.storageBusy
+                                ? 0.5
+                                : 1
 
                         StyledText {
                             id: mountText
@@ -262,7 +380,9 @@ StyledRect {
                                     : qsTr("Mount");
                             }
 
-                            color: Colours.palette.m3onSecondaryContainer
+                            color:
+                                Colours.palette.m3onSecondaryContainer
+
                             font: Tokens.font.body.small
                         }
 
@@ -270,25 +390,36 @@ StyledRect {
                             enabled: !deviceCard.storageBusy
 
                             onTapped: {
-                                if (deviceCard.storageMounted)
-                                    KdeConnect.unmount(deviceCard.modelData.id);
-                                else
-                                    KdeConnect.mount(deviceCard.modelData.id);
+                                if (deviceCard.storageMounted) {
+                                    KdeConnect.unmount(
+                                        deviceCard.modelData.id
+                                    );
+                                } else {
+                                    KdeConnect.mount(
+                                        deviceCard.modelData.id
+                                    );
+                                }
                             }
                         }
                     }
 
+                    //
+                    // Transfer cancellation
+                    //
                     StyledRect {
                         visible: deviceCard.showCancel
 
-                        implicitWidth: cancelText.implicitWidth
+                        implicitWidth:
+                            cancelText.implicitWidth
                             + Tokens.padding.medium * 2
 
-                        implicitHeight: cancelText.implicitHeight
+                        implicitHeight:
+                            cancelText.implicitHeight
                             + Tokens.padding.medium
 
                         radius: Tokens.rounding.full
-                        color: Colours.palette.m3secondaryContainer
+                        color:
+                            Colours.palette.m3secondaryContainer
 
                         StyledText {
                             id: cancelText
@@ -296,12 +427,16 @@ StyledRect {
                             anchors.centerIn: parent
 
                             text: qsTr("Cancel")
-                            color: Colours.palette.m3onSecondaryContainer
+
+                            color:
+                                Colours.palette.m3onSecondaryContainer
+
                             font: Tokens.font.body.small
                         }
 
                         TapHandler {
-                            enabled: !deviceCard.cancelRequested
+                            enabled:
+                                !deviceCard.cancelRequested
 
                             onTapped: {
                                 deviceCard.cancelRequested = true;
