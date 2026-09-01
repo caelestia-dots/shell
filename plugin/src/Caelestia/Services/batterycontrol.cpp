@@ -45,6 +45,10 @@ int BatteryControl::maxThreshold() const {
     return m_maxThreshold;
 }
 
+int BatteryControl::stepSize() const {
+    return m_stepSize;
+}
+
 QList<int> BatteryControl::supportedTiers() const {
     return m_supportedTiers;
 }
@@ -63,7 +67,7 @@ QString BatteryControl::path() const {
 
 void BatteryControl::detectInterface() {
     auto check = [this](const QString& path, ControlType type, const QString& title, const QList<int>& tiers = {},
-                     int minThresh = 50, int maxThresh = 100) -> bool {
+                     int minThresh = 50, int maxThresh = 100, int stepSize = 1) -> bool {
         if (!QFile::exists(path)) {
             return false;
         }
@@ -74,6 +78,7 @@ void BatteryControl::detectInterface() {
         m_supportedTiers = tiers;
         m_minThreshold = minThresh;
         m_maxThreshold = maxThresh;
+        m_stepSize = std::max(1, stepSize);
         m_isSupported = true;
         return true;
     };
@@ -108,7 +113,8 @@ void BatteryControl::detectInterface() {
         { QStringLiteral("BAT*"), QStringLiteral("battery*") }, QDir::Dirs | QDir::NoDotAndDotDot);
     for (const auto& bat : batteries) {
         const QString threshPath = QStringLiteral("/sys/class/power_supply/%1/charge_control_end_threshold").arg(bat);
-        if (check(threshPath, ControlType::ContinuousRange, QStringLiteral("Charge Limit"), { 60, 80, 100 }, 50, 100)) {
+        if (check(threshPath, ControlType::ContinuousRange, QStringLiteral("Charge Limit"), { 60, 80, 100 }, 50, 100,
+                5)) {
             return;
         }
     }
@@ -216,10 +222,21 @@ void BatteryControl::setEnabled(bool enabled) {
 }
 
 void BatteryControl::setThreshold(int threshold) {
-    if (!m_isSupported) {
+    if (!m_isSupported || m_path.isEmpty()) {
         return;
     }
-    writeValue(QString::number(threshold));
+
+    int val = threshold;
+    if (m_stepSize > 1) {
+        val = static_cast<int>(std::round(static_cast<double>(threshold) / m_stepSize)) * m_stepSize;
+    }
+    val = std::clamp(val, m_minThreshold, m_maxThreshold);
+
+    if (val == m_threshold) {
+        return;
+    }
+
+    writeValue(QString::number(val));
 }
 
 } // namespace caelestia::services

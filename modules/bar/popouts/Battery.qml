@@ -268,8 +268,14 @@ Column {
                 Layout.topMargin: Tokens.spacing.extraSmall
                 from: BatteryControl.minThreshold
                 to: BatteryControl.maxThreshold
+                stepSize: BatteryControl.stepSize
                 value: BatteryControl.threshold
-                onInteraction: v => BatteryControl.setThreshold(Math.round(v * (to - from) + from))
+                onInteraction: v => {
+                    const raw = v * (to - from) + from;
+                    const step = Math.max(1, BatteryControl.stepSize);
+                    const snapped = Math.round(raw / step) * step;
+                    BatteryControl.setThreshold(Math.max(from, Math.min(to, snapped)));
+                }
             }
         }
     }
