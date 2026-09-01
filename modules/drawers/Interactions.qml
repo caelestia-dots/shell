@@ -246,7 +246,23 @@ CustomMouseArea {
         }
     }
 
-    // Monitor individual visibility changes
+    DropArea {
+        anchors.fill: parent
+
+        onPositionChanged: drag => {
+            if (root.fullscreen) {
+                root.screenState.utilitiesDragTarget = false;
+                return;
+            }
+
+            root.screenState.utilitiesDragTarget = root.inBottomPanel(root.panels.utilities, drag.x, drag.y, true);
+        }
+
+        onExited: {
+            root.screenState.utilitiesDragTarget = false;
+        }
+    }
+
     Connections {
         function onLauncherChanged() {
             // If launcher is hidden, clear shortcut flags for dashboard and OSD
