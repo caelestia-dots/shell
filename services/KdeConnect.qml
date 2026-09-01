@@ -11,9 +11,23 @@ Singleton {
     readonly property list<var> devices: []
     property bool available: true
 
-    readonly property bool sharing: transfer.running
-    readonly property real progress: transfer.progress
-    readonly property string sharingDevice: transfer.running ? transfer.deviceId : ""
+    readonly property bool sharing:
+        transfer.running && !transfer.receiving
+
+    readonly property bool receiving:
+        transfer.running && transfer.receiving
+
+    readonly property bool transferring:
+        transfer.running
+
+    readonly property real progress:
+        transfer.progress
+
+    readonly property string sharingDevice:
+        root.sharing ? transfer.deviceId : ""
+
+    readonly property string receivingDevice:
+        root.receiving ? transfer.deviceId : ""
 
     property var mounts: ({})
     property var mountBusy: ({})
@@ -21,6 +35,10 @@ Singleton {
     signal shared(string device, int count)
     signal shareFailed(string device, string error)
     signal shareCancelled(string device)
+
+    signal downloaded(string device, string destinationPath)
+    signal downloadFailed(string device, string error)
+    signal downloadCancelled(string device)
 
     function refresh(): void {
         listProc.running = true;
@@ -33,19 +51,15 @@ Singleton {
         transfer.share(deviceId, urls);
     }
 
-    function cancel(): void {
-        transfer.cancel();
+    function download(deviceId: string, sourcePath: string): void {
+        if (!deviceId || !sourcePath)
+            return;
+
+        transfer.download(deviceId, sourcePath);
     }
 
-    function browseRoot(deviceId: string): string {
-        const dirs = root.directories(deviceId);
-        const paths = Object.keys(dirs);
-
-        if (paths.length === 0)
-            return "";
-
-        paths.sort((a, b) => a.length - b.length);
-        return paths[0];
+    function cancel(): void {
+        transfer.cancel();
     }
 
     function mount(deviceId: string): void {
@@ -73,7 +87,9 @@ Singleton {
 
     function isMounted(deviceId: string): bool {
         const state = root.mounts[deviceId];
-        return state !== undefined && state.mounted === true;
+
+        return state !== undefined
+            && state.mounted === true;
     }
 
     function isMountBusy(deviceId: string): bool {
@@ -98,14 +114,25 @@ Singleton {
         return state.directories;
     }
 
-    function setMountBusy(deviceId: string, busy: bool): void {
-        const next = Object.assign({}, root.mountBusy);
+    function setMountBusy(
+        deviceId: string,
+        busy: bool
+    ): void {
+        const next =
+            Object.assign({}, root.mountBusy);
+
         next[deviceId] = busy;
         root.mountBusy = next;
     }
 
-    function setMountState(deviceId: string, mounted: bool, mountPoint: string, directories: var): void {
-        const next = Object.assign({}, root.mounts);
+    function setMountState(
+        deviceId: string,
+        mounted: bool,
+        mountPoint: string,
+        directories: var
+    ): void {
+        const next =
+            Object.assign({}, root.mounts);
 
         next[deviceId] = {
             mounted: mounted,
@@ -125,7 +152,11 @@ Singleton {
         }
 
         onFailed: (device, error) => {
-            console.warn(lc, `Failed to share with ${device}: ${error}`);
+            console.warn(
+                lc,
+                `Failed to share with ${device}: ${error}`
+            );
+
             root.shareFailed(device, error);
             root.refreshMount(device);
         }
@@ -135,21 +166,69 @@ Singleton {
             root.refreshMount(device);
         }
 
-        onMountStateChanged: (device, mounted, mountPoint, directories) => {
-            root.setMountBusy(device, false);
-            root.setMountState(device, mounted, mountPoint, directories);
+        onDownloaded: (device, destinationPath) => {
+            root.downloaded(
+                device,
+                destinationPath
+            );
+        }
+
+        onDownloadFailed: (device, error) => {
+            console.warn(
+                lc,
+                `Failed to download from ${device}: ${error}`
+            );
+
+            root.downloadFailed(
+                device,
+                error
+            );
+        }
+
+        onDownloadCancelled: device => {
+            root.downloadCancelled(device);
+        }
+
+        onMountStateChanged: (
+            device,
+            mounted,
+            mountPoint,
+            directories
+        ) => {
+            root.setMountBusy(
+                device,
+                false
+            );
+
+            root.setMountState(
+                device,
+                mounted,
+                mountPoint,
+                directories
+            );
         }
 
         onMountFailed: (device, error) => {
-            root.setMountBusy(device, false);
-            console.warn(lc, `Failed to change mount state for ${device}: ${error}`);
+            root.setMountBusy(
+                device,
+                false
+            );
+
+            console.warn(
+                lc,
+                `Failed to change mount state for ${device}: ${error}`
+            );
         }
     }
 
     Process {
         id: listProc
 
-        command: ["kdeconnect-cli", "-a", "--id-name-only"]
+        command: [
+            "kdeconnect-cli",
+            "-a",
+            "--id-name-only"
+        ]
 
         stdout: StdioCollector {
             id: listOut
@@ -166,8 +245,10 @@ Singleton {
 
             const found = [];
 
-            for (const line of listOut.text.trim().split("\n")) {
-                const split = line.indexOf(" ");
+            for (const line of
+                    listOut.text.trim().split("\n")) {
+                const split =
+                    line.indexOf(" ");
 
                 if (split < 0)
                     continue;
