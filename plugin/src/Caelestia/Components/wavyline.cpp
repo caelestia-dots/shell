@@ -14,7 +14,7 @@ WavyLine::WavyLine(QQuickItem* parent)
     , m_fullLength(0)
     , m_color(Qt::white)
     , m_waveProgress(0)
-    , m_pathType(Linear)
+    , m_pathType(PathType::Linear)
     , m_startAngle(0)
     , m_fullAngle(360)
     , m_radius(-1)
@@ -174,7 +174,7 @@ void WavyLine::paint(QPainter* painter) {
     painter->setRenderHint(QPainter::Antialiasing);
     painter->setPen(QPen(m_color, m_lineWidth, Qt::SolidLine, Qt::RoundCap));
 
-    if (m_pathType == Arc) {
+    if (m_pathType == PathType::Arc) {
         paintArc(painter);
     } else {
         paintLinear(painter);
