@@ -11,8 +11,12 @@ import Caelestia.Services
 Singleton {
     id: root
 
+    property PwNode previousSink: null
+    property PwNode previousSource: null
     property string previousSinkName: ""
     property string previousSourceName: ""
+    property bool sinkInitialized: false
+    property bool sourceInitialized: false
 
     property list<PwNode> sinks: []
     property list<PwNode> sources: []
@@ -126,41 +130,86 @@ Singleton {
         root.streams = newStreams;
     }
 
-    onSinkChanged: {
+    function checkSinkChange(): void {
         if (!sink?.ready)
             return;
 
-        const newSinkName = sink.description || sink.name || qsTr("Unknown Device");
+        const newSinkName = sink.description || sink.name;
+        if (!newSinkName)
+            return;
 
-        if (previousSinkName && previousSinkName !== newSinkName && GlobalConfig.utilities.toasts.audioOutputChanged)
-            Toaster.toast(qsTr("Audio output changed"), qsTr("Now using: %1").arg(newSinkName), "volume_up");
+        if (!sinkInitialized) {
+            sinkInitialized = true;
+            previousSink = sink;
+            previousSinkName = newSinkName;
+            return;
+        }
 
+        if (previousSinkName && previousSinkName !== newSinkName && GlobalConfig.utilities.toasts.audioOutputChanged) {
+            const oldSink = previousSink;
+            const actions = oldSink ? [
+                {
+                    text: qsTr("Undo"),
+                    icon: "undo",
+                    callback: () => root.setAudioSink(oldSink)
+                }
+            ] : [];
+
+            Toaster.toast(qsTr("Audio output changed"), qsTr("Now using: %1").arg(newSinkName), "volume_up", actions);
+        }
+
+        previousSink = sink;
         previousSinkName = newSinkName;
     }
 
-    onSourceChanged: {
+    function checkSourceChange(): void {
         if (!source?.ready)
             return;
 
-        const newSourceName = source.description || source.name || qsTr("Unknown Device");
+        const newSourceName = source.description || source.name;
+        if (!newSourceName)
+            return;
 
-        if (previousSourceName && previousSourceName !== newSourceName && GlobalConfig.utilities.toasts.audioInputChanged)
-            Toaster.toast(qsTr("Audio input changed"), qsTr("Now using: %1").arg(newSourceName), "mic");
+        if (!sourceInitialized) {
+            sourceInitialized = true;
+            previousSource = source;
+            previousSourceName = newSourceName;
+            return;
+        }
 
+        if (previousSourceName && previousSourceName !== newSourceName && GlobalConfig.utilities.toasts.audioInputChanged) {
+            const oldSource = previousSource;
+            const actions = oldSource ? [
+                {
+                    text: qsTr("Undo"),
+                    icon: "undo",
+                    callback: () => root.setAudioSource(oldSource)
+                }
+            ] : [];
+
+            Toaster.toast(qsTr("Audio input changed"), qsTr("Now using: %1").arg(newSourceName), "mic", actions);
+        }
+
+        previousSource = source;
         previousSourceName = newSourceName;
     }
+
+    onSinkChanged: checkSinkChange()
+    onSourceChanged: checkSourceChange()
 
     // Populate immediately: Pipewire.nodes may already be filled by the time this
     // lazily-loaded singleton is created, so onValuesChanged would never fire.
     Component.onCompleted: {
         refreshNodes();
-        previousSinkName = sink?.description || sink?.name || qsTr("Unknown Device");
-        previousSourceName = source?.description || source?.name || qsTr("Unknown Device");
+        checkSinkChange();
+        checkSourceChange();
     }
 
     Connections {
         function onValuesChanged(): void {
             root.refreshNodes();
+            root.checkSinkChange();
+            root.checkSourceChange();
         }
 
         target: Pipewire.nodes

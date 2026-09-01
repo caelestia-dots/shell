@@ -1,5 +1,8 @@
 #include "toaster.hpp"
 
+#include <qjsvalue.h>
+#include <qlist.h>
+#include <qlogging.h>
 #include <qtimer.h>
 
 #include <utility>
@@ -8,14 +11,35 @@ namespace caelestia {
 
 using Qt::StringLiterals::operator""_s;
 
-Toast::Toast(QString title, QString message, QString icon, Type type, int timeout, QObject* parent)
+ToastAction::ToastAction(QString text, QString icon, Callback cb)
+    : m_text(std::move(text))
+    , m_icon(std::move(icon))
+    , m_callback(std::move(cb)) {}
+
+ToastAction::ToastAction(QString text, QString icon, QJSValue jsCb)
+    : m_text(std::move(text))
+    , m_icon(std::move(icon))
+    , m_jsCallback(std::move(jsCb)) {}
+
+void ToastAction::invoke() const {
+    if (m_callback) {
+        m_callback();
+    }
+    if (m_jsCallback.isCallable()) {
+        m_jsCallback.call();
+    }
+}
+
+Toast::Toast(
+    QString title, QString message, QString icon, Type type, int timeout, QList<ToastAction> actions, QObject* parent)
     : QObject(parent)
     , m_closed(false)
     , m_title(std::move(title))
     , m_message(std::move(message))
     , m_icon(std::move(icon))
     , m_type(type)
-    , m_timeout(timeout) {
+    , m_timeout(timeout)
+    , m_actions(std::move(actions)) {
     QTimer::singleShot(timeout, this, &Toast::close);
 
     if (m_icon.isEmpty()) {
@@ -74,6 +98,10 @@ Toast::Type Toast::type() const {
     return m_type;
 }
 
+const QList<ToastAction>& Toast::actions() const {
+    return m_actions;
+}
+
 void Toast::close() {
     if (!m_closed) {
         m_closed = true;
@@ -116,8 +144,37 @@ QQmlListProperty<Toast> Toaster::toasts() {
     return { this, &m_toasts };
 }
 
-void Toaster::toast(const QString& title, const QString& message, const QString& icon, Toast::Type type, int timeout) {
-    auto* const toast = new Toast(title, message, icon, type, timeout, this);
+// qml entry point
+void Toaster::toast(const QString& title, const QString& message, const QString& icon, const QJSValue& actionsOrType,
+    int timeout, const QJSValue& actions) {
+    Toast::Type type = Toast::Type::Info;
+    QJSValue rawActions = actions;
+
+    if (actionsOrType.isArray()) {
+        rawActions = actionsOrType;
+    } else if (actionsOrType.isNumber()) {
+        type = static_cast<Toast::Type>(actionsOrType.toInt());
+    }
+
+    QList<ToastAction> actionList;
+    if (rawActions.isArray()) {
+        const quint32 length = rawActions.property(u"length"_s).toUInt();
+        actionList.reserve(length);
+
+        for (quint32 i = 0; i < length; ++i) {
+            const QJSValue item = rawActions.property(i);
+            actionList.append(ToastAction(item.property(u"text"_s).toString(), item.property(u"icon"_s).toString(),
+                item.property(u"callback"_s)));
+        }
+    }
+
+    toast(title, message, icon, type, timeout, std::move(actionList));
+}
+
+// c++ entry point
+void Toaster::toast(const QString& title, const QString& message, const QString& icon, Toast::Type type, int timeout,
+    QList<ToastAction> actions) {
+    auto* const toast = new Toast(title, message, icon, type, timeout, std::move(actions), this);
     QObject::connect(toast, &Toast::finishedClose, this, [toast, this]() {
         if (m_toasts.removeOne(toast)) {
             emit toastsChanged();
