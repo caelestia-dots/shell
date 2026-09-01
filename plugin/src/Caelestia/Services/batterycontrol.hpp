@@ -28,6 +28,7 @@ public:
     Q_PROPERTY(int threshold READ threshold NOTIFY thresholdChanged)
     Q_PROPERTY(int minThreshold READ minThreshold CONSTANT)
     Q_PROPERTY(int maxThreshold READ maxThreshold CONSTANT)
+    Q_PROPERTY(int stepSize READ stepSize NOTIFY stepSizeChanged)
     Q_PROPERTY(QList<int> supportedTiers READ supportedTiers NOTIFY supportedTiersChanged)
     Q_PROPERTY(QString title READ title NOTIFY titleChanged)
     Q_PROPERTY(QString subtitle READ subtitle NOTIFY subtitleChanged)
@@ -41,6 +42,7 @@ public:
     [[nodiscard]] int threshold() const;
     [[nodiscard]] int minThreshold() const;
     [[nodiscard]] int maxThreshold() const;
+    [[nodiscard]] int stepSize() const;
     [[nodiscard]] QList<int> supportedTiers() const;
     [[nodiscard]] QString title() const;
     [[nodiscard]] QString subtitle() const;
@@ -56,6 +58,7 @@ signals:
     void controlTypeChanged();
     void enabledChanged();
     void thresholdChanged();
+    void stepSizeChanged();
     void supportedTiersChanged();
     void titleChanged();
     void subtitleChanged();
@@ -76,6 +79,7 @@ private:
     int m_threshold = 100;
     int m_minThreshold = 50;
     int m_maxThreshold = 100;
+    int m_stepSize = 1;
     QList<int> m_supportedTiers;
     QString m_title = QStringLiteral("Battery Control");
     QString m_subtitle;
