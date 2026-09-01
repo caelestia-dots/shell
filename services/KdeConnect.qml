@@ -19,8 +19,9 @@ Singleton {
     // Paired and reachable devices, as { id, name }.
     readonly property list<var> devices: []
     property bool available: true
-    // True while a transfer is running, so the card can show it.
+    // True while a share request is being handed to KDE Connect.
     property bool sharing: false
+    property string sharingDevice: ""
 
     signal shared(string device, int count)
     signal shareFailed(string device, string error)
@@ -50,6 +51,7 @@ Singleton {
         shareProc.deviceId = deviceId;
         shareProc.count = paths.length;
         shareProc.command = args;
+        root.sharingDevice = deviceId;
         root.sharing = true;
         shareProc.running = true;
     }
@@ -110,6 +112,7 @@ Singleton {
 
         onExited: code => { // qmllint disable
             root.sharing = false;
+            root.sharingDevice = "";
 
             if (code === 0) {
                 root.shared(shareProc.deviceId, shareProc.count);
