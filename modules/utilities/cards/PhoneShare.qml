@@ -7,9 +7,6 @@ import Caelestia.Config
 import qs.components
 import qs.services
 
-// Drop files here to send them to a paired phone. Each reachable device is its
-// own drop target, so with more than one paired there's no guessing which gets
-// the files.
 StyledRect {
     id: root
 
@@ -23,8 +20,6 @@ StyledRect {
     color: Colours.tPalette.m3surfaceContainer
     clip: true
 
-    // Refreshed when the card appears rather than on a timer: the list only
-    // changes when a phone comes or goes, and the card is short-lived.
     Component.onCompleted: KdeConnect.refresh()
     Component.onDestruction: screenState.utilities = false
 
@@ -97,13 +92,25 @@ StyledRect {
                 property bool showCancel: false
                 property bool cancelRequested: false
 
+                readonly property bool storageMounted:
+                    KdeConnect.isMounted(deviceCard.modelData.id)
+
+                readonly property bool storageBusy:
+                    KdeConnect.isMountBusy(deviceCard.modelData.id)
+
+                readonly property bool transferringHere:
+                    KdeConnect.sharing
+                    && KdeConnect.sharingDevice === deviceCard.modelData.id
+
                 Layout.fillWidth: true
                 implicitHeight: deviceLayout.implicitHeight + Tokens.padding.medium * 2
 
                 radius: Tokens.rounding.medium
                 clip: true
 
-                color: dropArea.containsDrag ? Colours.palette.m3primaryContainer : Colours.tPalette.m3surfaceContainerHigh
+                color: dropArea.containsDrag
+                    ? Colours.palette.m3primaryContainer
+                    : Colours.tPalette.m3surfaceContainerHigh
 
                 CAnim on color {}
 
@@ -158,11 +165,13 @@ StyledRect {
                 Timer {
                     id: cancelTimer
 
-                    interval: 900
+                    interval: 1000
                     repeat: false
 
                     onTriggered: {
-                        if (KdeConnect.sharing && KdeConnect.sharingDevice === deviceCard.modelData.id && !deviceCard.cancelRequested) {
+                        if (KdeConnect.sharing
+                                && KdeConnect.sharingDevice === deviceCard.modelData.id
+                                && !deviceCard.cancelRequested) {
                             deviceCard.showCancel = true;
                         }
                     }
@@ -182,7 +191,10 @@ StyledRect {
                             deviceCard.showCancel = false;
                             deviceCard.cancelRequested = false;
 
-                            KdeConnect.share(deviceCard.modelData.id, drop.urls);
+                            KdeConnect.share(
+                                deviceCard.modelData.id,
+                                drop.urls
+                            );
 
                             cancelTimer.restart();
 
@@ -199,8 +211,14 @@ StyledRect {
                     spacing: Tokens.spacing.small
 
                     MaterialIcon {
-                        text: dropArea.containsDrag ? "file_download" : "smartphone"
-                        color: dropArea.containsDrag ? Colours.palette.m3onPrimaryContainer : Colours.palette.m3onSurfaceVariant
+                        text: dropArea.containsDrag
+                            ? "file_download"
+                            : "smartphone"
+
+                        color: dropArea.containsDrag
+                            ? Colours.palette.m3onPrimaryContainer
+                            : Colours.palette.m3onSurfaceVariant
+
                         fontStyle: Tokens.font.icon.small
                     }
 
@@ -208,17 +226,66 @@ StyledRect {
                         Layout.fillWidth: true
                         text: deviceCard.modelData.name
 
-                        color: dropArea.containsDrag ? Colours.palette.m3onPrimaryContainer : Colours.palette.m3onSurface
+                        color: dropArea.containsDrag
+                            ? Colours.palette.m3onPrimaryContainer
+                            : Colours.palette.m3onSurface
 
                         font: Tokens.font.body.small
                         elide: Text.ElideRight
                     }
 
                     StyledRect {
+                        visible: !deviceCard.transferringHere
+
+                        implicitWidth: mountText.implicitWidth
+                            + Tokens.padding.medium * 2
+
+                        implicitHeight: mountText.implicitHeight
+                            + Tokens.padding.medium
+
+                        radius: Tokens.rounding.full
+                        color: Colours.palette.m3secondaryContainer
+
+                        opacity: deviceCard.storageBusy ? 0.5 : 1
+
+                        StyledText {
+                            id: mountText
+
+                            anchors.centerIn: parent
+
+                            text: {
+                                if (deviceCard.storageBusy)
+                                    return qsTr("Wait…");
+
+                                return deviceCard.storageMounted
+                                    ? qsTr("Unmount")
+                                    : qsTr("Mount");
+                            }
+
+                            color: Colours.palette.m3onSecondaryContainer
+                            font: Tokens.font.body.small
+                        }
+
+                        TapHandler {
+                            enabled: !deviceCard.storageBusy
+
+                            onTapped: {
+                                if (deviceCard.storageMounted)
+                                    KdeConnect.unmount(deviceCard.modelData.id);
+                                else
+                                    KdeConnect.mount(deviceCard.modelData.id);
+                            }
+                        }
+                    }
+
+                    StyledRect {
                         visible: deviceCard.showCancel
 
-                        implicitWidth: cancelText.implicitWidth + Tokens.padding.medium * 2
-                        implicitHeight: cancelText.implicitHeight + Tokens.padding.medium
+                        implicitWidth: cancelText.implicitWidth
+                            + Tokens.padding.medium * 2
+
+                        implicitHeight: cancelText.implicitHeight
+                            + Tokens.padding.medium
 
                         radius: Tokens.rounding.full
                         color: Colours.palette.m3secondaryContainer
