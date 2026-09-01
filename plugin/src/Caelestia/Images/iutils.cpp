@@ -39,7 +39,7 @@ QUrl IUtils::urlForPath(const QString& path, int fillMode) {
     QUrl url;
     url.setScheme(u"image"_s);
     url.setHost(prefix);
-    url.setPath(path.startsWith(QLatin1Char('/')) ? path : QLatin1Char('/') + path);
+    url.setPath(path.startsWith(u'/') ? path : u'/' + path);
     return url;
 }
 

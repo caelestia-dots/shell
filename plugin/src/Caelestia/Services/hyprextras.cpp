@@ -96,10 +96,9 @@ void HyprExtras::applyOptions(const QVariantHash& options) {
     request += QLatin1String("[[BATCH]]");
     for (auto it = options.constBegin(); it != options.constEnd(); ++it) {
         if (!m_usingLua) {
-            request +=
-                QLatin1String("keyword ") + it.key() + QLatin1Char(' ') + it.value().toString() + QLatin1Char(';');
+            request += QLatin1String("keyword ") + it.key() + u' ' + it.value().toString() + u';';
         } else {
-            auto parts = it.key().split(':');
+            auto parts = it.key().split(u':');
             request += u"eval hl.config({ "_s + parts.join(u" = { "_s) + u" = "_s + it.value().toString() +
                        u" }"_s.repeated(parts.size() - 1) + u" });"_s;
         }
