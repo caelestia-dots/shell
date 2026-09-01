@@ -239,7 +239,7 @@ QHash<QString, Storage::Accum> Storage::foldToDisks(const QHash<QByteArray, Devi
             // keying by the pool name. Datasets in a pool share the pool's free
             // space, so keep a single representative entry per pool (preferring
             // the root dataset, else the largest) rather than summing them.
-            if (e.fsType != QByteArrayLiteral("zfs"))
+            if (e.fsType != QByteArrayView("zfs"))
                 continue;
 
             const auto slash = e.device.indexOf('/');

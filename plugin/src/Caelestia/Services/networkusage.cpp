@@ -1,5 +1,6 @@
 #include "networkusage.hpp"
 
+#include <qbytearrayview.h>
 #include <qfile.h>
 #include <qtypes.h>
 
@@ -105,7 +106,7 @@ void NetworkUsage::tick() {
             continue;
         }
         const QByteArray iface = line.left(splitIdx).trimmed();
-        if (iface == QByteArrayLiteral("lo")) {
+        if (iface == QByteArrayView("lo")) {
             continue; // Skip loopback interface
         }
 
