@@ -4,13 +4,15 @@
 #include <QDBusInterface>
 #include <QDBusReply>
 #include <QDir>
+#include <QElapsedTimer>
 #include <QFile>
 #include <QFileInfo>
 #include <QMetaObject>
 #include <QPointer>
+#include <QStandardPaths>
+#include <QStringList>
 #include <QThread>
 #include <QUrl>
-#include <QElapsedTimer>
 
 #include <algorithm>
 #include <functional>
@@ -93,32 +95,6 @@ bool readMountState(
     return true;
 }
 
-QString findDownloadDirectory(const QVariantMap& directories)
-{
-    QStringList roots = directories.keys();
-
-    std::sort(roots.begin(), roots.end(), [](const QString& lhs, const QString& rhs) {
-        return lhs.size() < rhs.size();
-    });
-
-    for (const QString& root : roots) {
-        const QDir directory(root);
-
-        for (const QString& name : {
-                 QStringLiteral("Download"),
-                 QStringLiteral("Downloads")
-             }) {
-            const QString candidate = directory.filePath(name);
-            const QFileInfo info(candidate);
-
-            if (info.exists() && info.isDir())
-                return info.absoluteFilePath();
-        }
-    }
-
-    return {};
-}
-
 bool waitForMountReady(
     const QVariantMap& directories,
     QString* error
@@ -142,36 +118,9 @@ bool waitForMountReady(
     return false;
 }
 
-QString uniqueDestinationPath(const QString& directory, const QString& fileName)
-{
-    const QDir dir(directory);
-
-    QString candidate = dir.filePath(fileName);
-
-    if (!QFileInfo::exists(candidate))
-        return candidate;
-
-    const qsizetype dot = fileName.lastIndexOf(QLatin1Char('.'));
-
-    const QString stem = dot > 0 ? fileName.left(dot) : fileName;
-    const QString extension = dot > 0 ? fileName.mid(dot) : QString();
-
-    for (int index = 1; index < 10000; ++index) {
-        candidate = dir.filePath(
-            QStringLiteral("%1 (%2)%3")
-                .arg(stem, QString::number(index), extension)
-        );
-
-        if (!QFileInfo::exists(candidate))
-            return candidate;
-    }
-
-    return {};
-}
-
-bool mountDownloadDirectory(
+bool ensureDeviceMounted(
     const QString& deviceId,
-    QString* downloadDirectory,
+    QVariantMap* directories,
     QString* error
 )
 {
@@ -219,16 +168,119 @@ bool mountDownloadDirectory(
         return false;
     }
 
-    const QVariantMap directories = directoriesReply.value();
+    *directories = directoriesReply.value();
 
-    if (!waitForMountReady(directories, error))
+    return waitForMountReady(*directories, error);
+}
+
+QString findDownloadDirectory(const QVariantMap& directories)
+{
+    QStringList roots = directories.keys();
+
+    std::sort(roots.begin(), roots.end(), [](const QString& lhs, const QString& rhs) {
+        return lhs.size() < rhs.size();
+    });
+
+    for (const QString& root : roots) {
+        const QDir directory(root);
+
+        for (const QString& name : {
+                 QStringLiteral("Download"),
+                 QStringLiteral("Downloads")
+             }) {
+            const QString candidate = directory.filePath(name);
+            const QFileInfo info(candidate);
+
+            if (info.exists() && info.isDir())
+                return info.absoluteFilePath();
+        }
+    }
+
+    return {};
+}
+
+bool pathInsideDirectories(
+    const QString& path,
+    const QVariantMap& directories
+)
+{
+    const QString cleanedPath = QDir::cleanPath(path);
+
+    for (auto it = directories.cbegin(); it != directories.cend(); ++it) {
+        const QString rootPath = QDir::cleanPath(it.key());
+
+        if (cleanedPath == rootPath)
+            return true;
+
+        const QString prefix = rootPath.endsWith(QLatin1Char('/'))
+            ? rootPath
+            : rootPath + QLatin1Char('/');
+
+        if (cleanedPath.startsWith(prefix))
+            return true;
+    }
+
+    return false;
+}
+
+QString uniqueDestinationPath(
+    const QString& directory,
+    const QString& fileName
+)
+{
+    const QDir dir(directory);
+
+    QString candidate = dir.filePath(fileName);
+
+    if (!QFileInfo::exists(candidate))
+        return candidate;
+
+    const qsizetype dot =
+        fileName.lastIndexOf(QLatin1Char('.'));
+
+    const QString stem =
+        dot > 0 ? fileName.left(dot) : fileName;
+
+    const QString extension =
+        dot > 0 ? fileName.mid(dot) : QString();
+
+    for (int index = 1; index < 10000; ++index) {
+        candidate = dir.filePath(
+            QStringLiteral("%1 (%2)%3")
+                .arg(stem, QString::number(index), extension)
+        );
+
+        if (!QFileInfo::exists(candidate))
+            return candidate;
+    }
+
+    return {};
+}
+
+bool mountDownloadDirectory(
+    const QString& deviceId,
+    QString* downloadDirectory,
+    QString* error
+)
+{
+    QVariantMap directories;
+
+    if (!ensureDeviceMounted(
+            deviceId,
+            &directories,
+            error
+        )) {
         return false;
+    }
 
     const QString directory =
         findDownloadDirectory(directories);
 
     if (directory.isEmpty()) {
-        *error = QStringLiteral("Could not find a Download directory on the device");
+        *error = QStringLiteral(
+            "Could not find a Download directory on the device"
+        );
+
         return false;
     }
 
@@ -242,7 +294,8 @@ CopyResult copyFiles(
     qint64 totalBytes,
     const std::shared_ptr<std::atomic_bool>& cancelToken,
     const std::function<void(qreal)>& reportProgress,
-    QString* error
+    QString* error,
+    QStringList* copiedPaths = nullptr
 )
 {
     qint64 copiedBytes = 0;
@@ -263,25 +316,38 @@ CopyResult copyFiles(
         if (!source.open(QIODevice::ReadOnly)) {
             *error = QStringLiteral("Failed to open %1: %2")
                          .arg(sourcePath, source.errorString());
+
             return CopyResult::Failed;
         }
 
         const QFileInfo sourceInfo(sourcePath);
 
         const QString destinationPath =
-            uniqueDestinationPath(destinationDirectory, sourceInfo.fileName());
+            uniqueDestinationPath(
+                destinationDirectory,
+                sourceInfo.fileName()
+            );
 
         if (destinationPath.isEmpty()) {
-            *error = QStringLiteral("Could not create a unique destination name for %1")
-                         .arg(sourceInfo.fileName());
+            *error = QStringLiteral(
+                "Could not create a unique destination name for %1"
+            ).arg(sourceInfo.fileName());
+
             return CopyResult::Failed;
         }
 
         QFile destination(destinationPath);
 
-        if (!destination.open(QIODevice::WriteOnly | QIODevice::Truncate)) {
+        if (!destination.open(
+                QIODevice::WriteOnly
+                | QIODevice::Truncate
+            )) {
             *error = QStringLiteral("Failed to create %1: %2")
-                         .arg(destinationPath, destination.errorString());
+                         .arg(
+                             destinationPath,
+                             destination.errorString()
+                         );
+
             return CopyResult::Failed;
         }
 
@@ -293,11 +359,17 @@ CopyResult copyFiles(
             }
 
             const qint64 bytesRead =
-                source.read(buffer.data(), CHUNK_SIZE);
+                source.read(
+                    buffer.data(),
+                    CHUNK_SIZE
+                );
 
             if (bytesRead < 0) {
                 *error = QStringLiteral("Failed to read %1: %2")
-                             .arg(sourcePath, source.errorString());
+                             .arg(
+                                 sourcePath,
+                                 source.errorString()
+                             );
 
                 destination.close();
                 QFile::remove(destinationPath);
@@ -316,14 +388,20 @@ CopyResult copyFiles(
                     return CopyResult::Cancelled;
                 }
 
-                const qint64 bytesWritten = destination.write(
-                    buffer.constData() + static_cast<qsizetype>(offset),
-                    bytesRead - offset
-                );
+                const qint64 bytesWritten =
+                    destination.write(
+                        buffer.constData()
+                            + static_cast<qsizetype>(offset),
+                        bytesRead - offset
+                    );
 
                 if (bytesWritten <= 0) {
-                    *error = QStringLiteral("Failed to write %1: %2")
-                                 .arg(destinationPath, destination.errorString());
+                    *error = QStringLiteral(
+                        "Failed to write %1: %2"
+                    ).arg(
+                        destinationPath,
+                        destination.errorString()
+                    );
 
                     destination.close();
                     QFile::remove(destinationPath);
@@ -334,11 +412,12 @@ CopyResult copyFiles(
                 copiedBytes += bytesWritten;
 
                 if (totalBytes > 0) {
-                    const qreal progress = std::min(
-                        qreal(1.0),
-                        static_cast<qreal>(copiedBytes)
-                            / static_cast<qreal>(totalBytes)
-                    );
+                    const qreal progress =
+                        std::min(
+                            qreal(1.0),
+                            static_cast<qreal>(copiedBytes)
+                                / static_cast<qreal>(totalBytes)
+                        );
 
                     reportProgress(progress);
                 }
@@ -353,12 +432,18 @@ CopyResult copyFiles(
 
         if (!destination.flush()) {
             *error = QStringLiteral("Failed to flush %1: %2")
-                         .arg(destinationPath, destination.errorString());
+                         .arg(
+                             destinationPath,
+                             destination.errorString()
+                         );
 
             destination.close();
             QFile::remove(destinationPath);
             return CopyResult::Failed;
         }
+
+        if (copiedPaths)
+            copiedPaths->append(destinationPath);
     }
 
     if (isCancelled())
@@ -367,12 +452,19 @@ CopyResult copyFiles(
     return CopyResult::Success;
 }
 
-void sendCompletionNotification(const QString& deviceId, int count)
+void sendCompletionNotification(
+    const QString& deviceId,
+    int count
+)
 {
     QDBusInterface ping(
         QStringLiteral("org.kde.kdeconnect"),
-        QStringLiteral("/modules/kdeconnect/devices/%1/ping").arg(deviceId),
-        QStringLiteral("org.kde.kdeconnect.device.ping"),
+        QStringLiteral(
+            "/modules/kdeconnect/devices/%1/ping"
+        ).arg(deviceId),
+        QStringLiteral(
+            "org.kde.kdeconnect.device.ping"
+        ),
         QDBusConnection::sessionBus()
     );
 
@@ -381,7 +473,8 @@ void sendCompletionNotification(const QString& deviceId, int count)
 
     const QString message = count == 1
         ? QStringLiteral("File received from Caelestia")
-        : QStringLiteral("%1 files received from Caelestia").arg(count);
+        : QStringLiteral("%1 files received from Caelestia")
+              .arg(count);
 
     ping.asyncCall(
         QStringLiteral("sendPing"),
@@ -399,6 +492,11 @@ KdeConnectTransfer::KdeConnectTransfer(QObject* parent)
 bool KdeConnectTransfer::running() const
 {
     return m_running;
+}
+
+bool KdeConnectTransfer::receiving() const
+{
+    return m_receiving;
 }
 
 qreal KdeConnectTransfer::progress() const
@@ -419,8 +517,11 @@ void KdeConnectTransfer::share(
     if (m_running) {
         emit failed(
             deviceId,
-            QStringLiteral("A file transfer is already in progress")
+            QStringLiteral(
+                "A file transfer is already in progress"
+            )
         );
+
         return;
     }
 
@@ -436,8 +537,11 @@ void KdeConnectTransfer::share(
         if (!url.isValid() || !url.isLocalFile()) {
             emit failed(
                 deviceId,
-                QStringLiteral("Only local files can be transferred")
+                QStringLiteral(
+                    "Only local files can be transferred"
+                )
             );
+
             return;
         }
 
@@ -447,8 +551,11 @@ void KdeConnectTransfer::share(
         if (!info.exists() || !info.isFile()) {
             emit failed(
                 deviceId,
-                QStringLiteral("%1 is not a regular file").arg(path)
+                QStringLiteral(
+                    "%1 is not a regular file"
+                ).arg(path)
             );
+
             return;
         }
 
@@ -459,18 +566,28 @@ void KdeConnectTransfer::share(
     if (paths.isEmpty())
         return;
 
-    auto cancelToken = std::make_shared<std::atomic_bool>(false);
+    auto cancelToken =
+        std::make_shared<std::atomic_bool>(false);
+
     m_cancelToken = cancelToken;
 
     setDeviceId(deviceId);
+    setReceiving(false);
     setProgress(0.0);
     setRunning(true);
 
-    const int count = static_cast<int>(paths.size());
+    const int count =
+        static_cast<int>(paths.size());
+
     QPointer<KdeConnectTransfer> self(this);
 
     auto* thread = QThread::create(
-        [self, deviceId, paths, totalBytes, count, cancelToken]() {
+        [self,
+         deviceId,
+         paths,
+         totalBytes,
+         count,
+         cancelToken]() {
             QString destinationDirectory;
             QString error;
 
@@ -484,7 +601,10 @@ void KdeConnectTransfer::share(
 
                 QMetaObject::invokeMethod(
                     self.data(),
-                    [self, deviceId, error, cancelToken]() {
+                    [self,
+                     deviceId,
+                     error,
+                     cancelToken]() {
                         if (!self)
                             return;
 
@@ -492,10 +612,16 @@ void KdeConnectTransfer::share(
                         self->setProgress(0.0);
                         self->setRunning(false);
 
-                        if (cancelToken->load(std::memory_order_relaxed))
+                        if (cancelToken->load(
+                                std::memory_order_relaxed
+                            )) {
                             emit self->cancelled(deviceId);
-                        else
-                            emit self->failed(deviceId, error);
+                        } else {
+                            emit self->failed(
+                                deviceId,
+                                error
+                            );
+                        }
                     },
                     Qt::QueuedConnection
                 );
@@ -503,7 +629,9 @@ void KdeConnectTransfer::share(
                 return;
             }
 
-            if (cancelToken->load(std::memory_order_relaxed)) {
+            if (cancelToken->load(
+                    std::memory_order_relaxed
+                )) {
                 if (!self)
                     return;
 
@@ -524,28 +652,30 @@ void KdeConnectTransfer::share(
                 return;
             }
 
-            const auto reportProgress = [self](qreal progress) {
-                if (!self)
-                    return;
+            const auto reportProgress =
+                [self](qreal progress) {
+                    if (!self)
+                        return;
 
-                QMetaObject::invokeMethod(
-                    self.data(),
-                    [self, progress]() {
-                        if (self)
-                            self->setProgress(progress);
-                    },
-                    Qt::QueuedConnection
+                    QMetaObject::invokeMethod(
+                        self.data(),
+                        [self, progress]() {
+                            if (self)
+                                self->setProgress(progress);
+                        },
+                        Qt::QueuedConnection
+                    );
+                };
+
+            const CopyResult result =
+                copyFiles(
+                    paths,
+                    destinationDirectory,
+                    totalBytes,
+                    cancelToken,
+                    reportProgress,
+                    &error
                 );
-            };
-
-            const CopyResult result = copyFiles(
-                paths,
-                destinationDirectory,
-                totalBytes,
-                cancelToken,
-                reportProgress,
-                &error
-            );
 
             if (result == CopyResult::Cancelled) {
                 if (!self)
@@ -581,7 +711,10 @@ void KdeConnectTransfer::share(
                         self->m_cancelToken.reset();
                         self->setProgress(0.0);
                         self->setRunning(false);
-                        emit self->failed(deviceId, error);
+                        emit self->failed(
+                            deviceId,
+                            error
+                        );
                     },
                     Qt::QueuedConnection
                 );
@@ -589,7 +722,9 @@ void KdeConnectTransfer::share(
                 return;
             }
 
-            if (cancelToken->load(std::memory_order_relaxed)) {
+            if (cancelToken->load(
+                    std::memory_order_relaxed
+                )) {
                 if (!self)
                     return;
 
@@ -610,7 +745,10 @@ void KdeConnectTransfer::share(
                 return;
             }
 
-            sendCompletionNotification(deviceId, count);
+            sendCompletionNotification(
+                deviceId,
+                count
+            );
 
             if (!self)
                 return;
@@ -624,7 +762,375 @@ void KdeConnectTransfer::share(
                     self->m_cancelToken.reset();
                     self->setProgress(1.0);
                     self->setRunning(false);
-                    emit self->shared(deviceId, count);
+                    emit self->shared(
+                        deviceId,
+                        count
+                    );
+                },
+                Qt::QueuedConnection
+            );
+        }
+    );
+
+    connect(
+        thread,
+        &QThread::finished,
+        thread,
+        &QObject::deleteLater
+    );
+
+    thread->start();
+}
+
+void KdeConnectTransfer::download(
+    const QString& deviceId,
+    const QString& sourcePath
+)
+{
+    if (m_running) {
+        emit downloadFailed(
+            deviceId,
+            QStringLiteral(
+                "A file transfer is already in progress"
+            )
+        );
+
+        return;
+    }
+
+    if (deviceId.isEmpty() || sourcePath.isEmpty())
+        return;
+
+    auto cancelToken =
+        std::make_shared<std::atomic_bool>(false);
+
+    m_cancelToken = cancelToken;
+
+    setDeviceId(deviceId);
+    setReceiving(true);
+    setProgress(0.0);
+    setRunning(true);
+
+    QPointer<KdeConnectTransfer> self(this);
+
+    auto* thread = QThread::create(
+        [self,
+         deviceId,
+         sourcePath,
+         cancelToken]() {
+            QString error;
+            QVariantMap directories;
+
+            if (!ensureDeviceMounted(
+                    deviceId,
+                    &directories,
+                    &error
+                )) {
+                if (!self)
+                    return;
+
+                QMetaObject::invokeMethod(
+                    self.data(),
+                    [self,
+                     deviceId,
+                     error,
+                     cancelToken]() {
+                        if (!self)
+                            return;
+
+                        self->m_cancelToken.reset();
+                        self->setProgress(0.0);
+                        self->setRunning(false);
+                        self->setReceiving(false);
+
+                        if (cancelToken->load(
+                                std::memory_order_relaxed
+                            )) {
+                            emit self->downloadCancelled(
+                                deviceId
+                            );
+                        } else {
+                            emit self->downloadFailed(
+                                deviceId,
+                                error
+                            );
+                        }
+                    },
+                    Qt::QueuedConnection
+                );
+
+                return;
+            }
+
+            if (cancelToken->load(
+                    std::memory_order_relaxed
+                )) {
+                if (!self)
+                    return;
+
+                QMetaObject::invokeMethod(
+                    self.data(),
+                    [self, deviceId]() {
+                        if (!self)
+                            return;
+
+                        self->m_cancelToken.reset();
+                        self->setProgress(0.0);
+                        self->setRunning(false);
+                        self->setReceiving(false);
+
+                        emit self->downloadCancelled(
+                            deviceId
+                        );
+                    },
+                    Qt::QueuedConnection
+                );
+
+                return;
+            }
+
+            if (!pathInsideDirectories(
+                    sourcePath,
+                    directories
+                )) {
+                error = QStringLiteral(
+                    "The selected file is outside the mounted phone storage"
+                );
+
+                if (!self)
+                    return;
+
+                QMetaObject::invokeMethod(
+                    self.data(),
+                    [self, deviceId, error]() {
+                        if (!self)
+                            return;
+
+                        self->m_cancelToken.reset();
+                        self->setProgress(0.0);
+                        self->setRunning(false);
+                        self->setReceiving(false);
+
+                        emit self->downloadFailed(
+                            deviceId,
+                            error
+                        );
+                    },
+                    Qt::QueuedConnection
+                );
+
+                return;
+            }
+
+            const QFileInfo sourceInfo(sourcePath);
+
+            if (!sourceInfo.exists()
+                    || !sourceInfo.isFile()) {
+                error = QStringLiteral(
+                    "%1 is not a regular file"
+                ).arg(sourcePath);
+
+                if (!self)
+                    return;
+
+                QMetaObject::invokeMethod(
+                    self.data(),
+                    [self, deviceId, error]() {
+                        if (!self)
+                            return;
+
+                        self->m_cancelToken.reset();
+                        self->setProgress(0.0);
+                        self->setRunning(false);
+                        self->setReceiving(false);
+
+                        emit self->downloadFailed(
+                            deviceId,
+                            error
+                        );
+                    },
+                    Qt::QueuedConnection
+                );
+
+                return;
+            }
+
+            QString destinationDirectory =
+                QStandardPaths::writableLocation(
+                    QStandardPaths::DownloadLocation
+                );
+
+            if (destinationDirectory.isEmpty()) {
+                destinationDirectory =
+                    QDir::home().filePath(
+                        QStringLiteral("Downloads")
+                    );
+            }
+
+            if (!QDir().mkpath(
+                    destinationDirectory
+                )) {
+                error = QStringLiteral(
+                    "Failed to create download directory: %1"
+                ).arg(destinationDirectory);
+
+                if (!self)
+                    return;
+
+                QMetaObject::invokeMethod(
+                    self.data(),
+                    [self, deviceId, error]() {
+                        if (!self)
+                            return;
+
+                        self->m_cancelToken.reset();
+                        self->setProgress(0.0);
+                        self->setRunning(false);
+                        self->setReceiving(false);
+
+                        emit self->downloadFailed(
+                            deviceId,
+                            error
+                        );
+                    },
+                    Qt::QueuedConnection
+                );
+
+                return;
+            }
+
+            const auto reportProgress =
+                [self](qreal progress) {
+                    if (!self)
+                        return;
+
+                    QMetaObject::invokeMethod(
+                        self.data(),
+                        [self, progress]() {
+                            if (self)
+                                self->setProgress(progress);
+                        },
+                        Qt::QueuedConnection
+                    );
+                };
+
+            QStringList copiedPaths;
+
+            const CopyResult result =
+                copyFiles(
+                    QStringList {sourcePath},
+                    destinationDirectory,
+                    sourceInfo.size(),
+                    cancelToken,
+                    reportProgress,
+                    &error,
+                    &copiedPaths
+                );
+
+            if (result == CopyResult::Cancelled) {
+                if (!self)
+                    return;
+
+                QMetaObject::invokeMethod(
+                    self.data(),
+                    [self, deviceId]() {
+                        if (!self)
+                            return;
+
+                        self->m_cancelToken.reset();
+                        self->setProgress(0.0);
+                        self->setRunning(false);
+                        self->setReceiving(false);
+
+                        emit self->downloadCancelled(
+                            deviceId
+                        );
+                    },
+                    Qt::QueuedConnection
+                );
+
+                return;
+            }
+
+            if (result == CopyResult::Failed) {
+                if (!self)
+                    return;
+
+                QMetaObject::invokeMethod(
+                    self.data(),
+                    [self, deviceId, error]() {
+                        if (!self)
+                            return;
+
+                        self->m_cancelToken.reset();
+                        self->setProgress(0.0);
+                        self->setRunning(false);
+                        self->setReceiving(false);
+
+                        emit self->downloadFailed(
+                            deviceId,
+                            error
+                        );
+                    },
+                    Qt::QueuedConnection
+                );
+
+                return;
+            }
+
+            if (copiedPaths.isEmpty()) {
+                error = QStringLiteral(
+                    "The downloaded file path is unavailable"
+                );
+
+                if (!self)
+                    return;
+
+                QMetaObject::invokeMethod(
+                    self.data(),
+                    [self, deviceId, error]() {
+                        if (!self)
+                            return;
+
+                        self->m_cancelToken.reset();
+                        self->setProgress(0.0);
+                        self->setRunning(false);
+                        self->setReceiving(false);
+
+                        emit self->downloadFailed(
+                            deviceId,
+                            error
+                        );
+                    },
+                    Qt::QueuedConnection
+                );
+
+                return;
+            }
+
+            const QString destinationPath =
+                copiedPaths.constFirst();
+
+            if (!self)
+                return;
+
+            QMetaObject::invokeMethod(
+                self.data(),
+                [self,
+                 deviceId,
+                 destinationPath]() {
+                    if (!self)
+                        return;
+
+                    self->m_cancelToken.reset();
+                    self->setProgress(1.0);
+                    self->setRunning(false);
+                    self->setReceiving(false);
+
+                    emit self->downloaded(
+                        deviceId,
+                        destinationPath
+                    );
                 },
                 Qt::QueuedConnection
             );
@@ -646,10 +1152,15 @@ void KdeConnectTransfer::cancel()
     if (!m_running || !m_cancelToken)
         return;
 
-    m_cancelToken->store(true, std::memory_order_relaxed);
+    m_cancelToken->store(
+        true,
+        std::memory_order_relaxed
+    );
 }
 
-void KdeConnectTransfer::mount(const QString& deviceId)
+void KdeConnectTransfer::mount(
+    const QString& deviceId
+)
 {
     if (deviceId.isEmpty())
         return;
@@ -657,8 +1168,11 @@ void KdeConnectTransfer::mount(const QString& deviceId)
     if (m_running) {
         emit mountFailed(
             deviceId,
-            QStringLiteral("Cannot mount storage while a transfer is in progress")
+            QStringLiteral(
+                "Cannot mount storage while a transfer is in progress"
+            )
         );
+
         return;
     }
 
@@ -666,61 +1180,11 @@ void KdeConnectTransfer::mount(const QString& deviceId)
 
     auto* thread = QThread::create(
         [self, deviceId]() {
-            QDBusInterface sftp(
-                QStringLiteral("org.kde.kdeconnect"),
-                sftpObjectPath(deviceId),
-                QStringLiteral("org.kde.kdeconnect.device.sftp"),
-                QDBusConnection::sessionBus()
-            );
-
             QString error;
-
-            if (!sftp.isValid()) {
-                error = sftp.lastError().message();
-
-                if (error.isEmpty())
-                    error = QStringLiteral("KDE Connect SFTP interface is unavailable");
-            } else {
-                const QDBusReply<bool> reply =
-                    sftp.call(QStringLiteral("mountAndWait"));
-
-                if (!reply.isValid()) {
-                    error = reply.error().message();
-                } else if (!reply.value()) {
-                    const QDBusReply<QString> mountError =
-                        sftp.call(QStringLiteral("getMountError"));
-
-                    if (mountError.isValid() && !mountError.value().isEmpty())
-                        error = mountError.value();
-                    else
-                        error = QStringLiteral("Failed to mount the device filesystem");
-                }
-            }
-
-            if (!error.isEmpty()) {
-                if (!self)
-                    return;
-
-                QMetaObject::invokeMethod(
-                    self.data(),
-                    [self, deviceId, error]() {
-                        if (self)
-                            emit self->mountFailed(deviceId, error);
-                    },
-                    Qt::QueuedConnection
-                );
-
-                return;
-            }
-
-            bool mounted = false;
-            QString mountPoint;
             QVariantMap directories;
 
-            if (!readMountState(
+            if (!ensureDeviceMounted(
                     deviceId,
-                    &mounted,
-                    &mountPoint,
                     &directories,
                     &error
                 )) {
@@ -730,8 +1194,12 @@ void KdeConnectTransfer::mount(const QString& deviceId)
                 QMetaObject::invokeMethod(
                     self.data(),
                     [self, deviceId, error]() {
-                        if (self)
-                            emit self->mountFailed(deviceId, error);
+                        if (self) {
+                            emit self->mountFailed(
+                                deviceId,
+                                error
+                            );
+                        }
                     },
                     Qt::QueuedConnection
                 );
@@ -739,15 +1207,29 @@ void KdeConnectTransfer::mount(const QString& deviceId)
                 return;
             }
 
-            if (mounted && !waitForMountReady(directories, &error)) {
+            bool mounted = false;
+            QString mountPoint;
+            QVariantMap stateDirectories;
+
+            if (!readMountState(
+                    deviceId,
+                    &mounted,
+                    &mountPoint,
+                    &stateDirectories,
+                    &error
+                )) {
                 if (!self)
                     return;
 
                 QMetaObject::invokeMethod(
                     self.data(),
                     [self, deviceId, error]() {
-                        if (self)
-                            emit self->mountFailed(deviceId, error);
+                        if (self) {
+                            emit self->mountFailed(
+                                deviceId,
+                                error
+                            );
+                        }
                     },
                     Qt::QueuedConnection
                 );
@@ -760,15 +1242,20 @@ void KdeConnectTransfer::mount(const QString& deviceId)
 
             QMetaObject::invokeMethod(
                 self.data(),
-                [self, deviceId, mounted, mountPoint, directories]() {
-                    if (self) {
-                        emit self->mountStateChanged(
-                            deviceId,
-                            mounted,
-                            mountPoint,
-                            directories
-                        );
-                    }
+                [self,
+                 deviceId,
+                 mounted,
+                 mountPoint,
+                 stateDirectories]() {
+                    if (!self)
+                        return;
+
+                    emit self->mountStateChanged(
+                        deviceId,
+                        mounted,
+                        mountPoint,
+                        stateDirectories
+                    );
                 },
                 Qt::QueuedConnection
             );
@@ -785,7 +1272,9 @@ void KdeConnectTransfer::mount(const QString& deviceId)
     thread->start();
 }
 
-void KdeConnectTransfer::unmount(const QString& deviceId)
+void KdeConnectTransfer::unmount(
+    const QString& deviceId
+)
 {
     if (deviceId.isEmpty())
         return;
@@ -793,8 +1282,11 @@ void KdeConnectTransfer::unmount(const QString& deviceId)
     if (m_running) {
         emit mountFailed(
             deviceId,
-            QStringLiteral("Cannot unmount storage while a transfer is in progress")
+            QStringLiteral(
+                "Cannot unmount storage while a transfer is in progress"
+            )
         );
+
         return;
     }
 
@@ -805,7 +1297,9 @@ void KdeConnectTransfer::unmount(const QString& deviceId)
             QDBusInterface sftp(
                 QStringLiteral("org.kde.kdeconnect"),
                 sftpObjectPath(deviceId),
-                QStringLiteral("org.kde.kdeconnect.device.sftp"),
+                QStringLiteral(
+                    "org.kde.kdeconnect.device.sftp"
+                ),
                 QDBusConnection::sessionBus()
             );
 
@@ -814,11 +1308,16 @@ void KdeConnectTransfer::unmount(const QString& deviceId)
             if (!sftp.isValid()) {
                 error = sftp.lastError().message();
 
-                if (error.isEmpty())
-                    error = QStringLiteral("KDE Connect SFTP interface is unavailable");
+                if (error.isEmpty()) {
+                    error = QStringLiteral(
+                        "KDE Connect SFTP interface is unavailable"
+                    );
+                }
             } else {
                 const QDBusReply<void> reply =
-                    sftp.call(QStringLiteral("unmount"));
+                    sftp.call(
+                        QStringLiteral("unmount")
+                    );
 
                 if (!reply.isValid())
                     error = reply.error().message();
@@ -834,7 +1333,11 @@ void KdeConnectTransfer::unmount(const QString& deviceId)
                         return;
 
                     if (!error.isEmpty()) {
-                        emit self->mountFailed(deviceId, error);
+                        emit self->mountFailed(
+                            deviceId,
+                            error
+                        );
+
                         return;
                     }
 
@@ -860,7 +1363,9 @@ void KdeConnectTransfer::unmount(const QString& deviceId)
     thread->start();
 }
 
-void KdeConnectTransfer::refreshMount(const QString& deviceId)
+void KdeConnectTransfer::refreshMount(
+    const QString& deviceId
+)
 {
     if (deviceId.isEmpty())
         return;
@@ -891,15 +1396,20 @@ void KdeConnectTransfer::refreshMount(const QString& deviceId)
 
             QMetaObject::invokeMethod(
                 self.data(),
-                [self, deviceId, mounted, mountPoint, directories]() {
-                    if (self) {
-                        emit self->mountStateChanged(
-                            deviceId,
-                            mounted,
-                            mountPoint,
-                            directories
-                        );
-                    }
+                [self,
+                 deviceId,
+                 mounted,
+                 mountPoint,
+                 directories]() {
+                    if (!self)
+                        return;
+
+                    emit self->mountStateChanged(
+                        deviceId,
+                        mounted,
+                        mountPoint,
+                        directories
+                    );
                 },
                 Qt::QueuedConnection
             );
@@ -916,7 +1426,9 @@ void KdeConnectTransfer::refreshMount(const QString& deviceId)
     thread->start();
 }
 
-void KdeConnectTransfer::setRunning(bool running)
+void KdeConnectTransfer::setRunning(
+    bool running
+)
 {
     if (m_running == running)
         return;
@@ -925,16 +1437,35 @@ void KdeConnectTransfer::setRunning(bool running)
     emit runningChanged();
 }
 
-void KdeConnectTransfer::setProgress(qreal progress)
+void KdeConnectTransfer::setReceiving(
+    bool receiving
+)
 {
-    if (qFuzzyCompare(m_progress + 1.0, progress + 1.0))
+    if (m_receiving == receiving)
         return;
+
+    m_receiving = receiving;
+    emit receivingChanged();
+}
+
+void KdeConnectTransfer::setProgress(
+    qreal progress
+)
+{
+    if (qFuzzyCompare(
+            m_progress + 1.0,
+            progress + 1.0
+        )) {
+        return;
+    }
 
     m_progress = progress;
     emit progressChanged();
 }
 
-void KdeConnectTransfer::setDeviceId(const QString& deviceId)
+void KdeConnectTransfer::setDeviceId(
+    const QString& deviceId
+)
 {
     if (m_deviceId == deviceId)
         return;

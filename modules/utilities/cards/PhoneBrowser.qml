@@ -18,6 +18,15 @@ FloatingWindow {
 
     property string currentPath: ""
     property string selectedPath: ""
+    property bool selectedIsDir: false
+
+    property string activeDownloadName: ""
+    property string downloadStatus: ""
+    property bool showDownloadCancel: false
+
+    readonly property bool downloadingHere:
+        KdeConnect.receiving
+        && KdeConnect.receivingDevice === root.deviceId
 
     title: `${deviceName} — Phone Files`
 
@@ -35,7 +44,8 @@ FloatingWindow {
         if (!currentPath || currentPath === rootPath)
             return "/";
 
-        const relative = currentPath.slice(rootPath.length);
+        const relative =
+            currentPath.slice(rootPath.length);
 
         return relative.length > 0
             ? relative
@@ -53,13 +63,18 @@ FloatingWindow {
 
         root.currentPath = rootPath;
         root.selectedPath = "";
+        root.selectedIsDir = false;
+
+        root.downloadStatus = "";
 
         root.visible = true;
     }
 
     function insideRoot(path: string): bool {
         return path === root.rootPath
-            || path.startsWith(root.rootPath + "/");
+            || path.startsWith(
+                root.rootPath + "/"
+            );
     }
 
     function openDirectory(path: string): void {
@@ -67,6 +82,9 @@ FloatingWindow {
             return;
 
         root.selectedPath = "";
+        root.selectedIsDir = false;
+        root.downloadStatus = "";
+
         root.currentPath = path;
     }
 
@@ -74,21 +92,31 @@ FloatingWindow {
         if (root.atRoot)
             return;
 
-        const index = root.currentPath.lastIndexOf("/");
+        const index =
+            root.currentPath.lastIndexOf("/");
 
         if (index <= 0) {
-            root.currentPath = root.rootPath;
+            root.currentPath =
+                root.rootPath;
+
             root.selectedPath = "";
+            root.selectedIsDir = false;
+            root.downloadStatus = "";
+
             return;
         }
 
-        const parentPath = root.currentPath.slice(0, index);
+        const parentPath =
+            root.currentPath.slice(0, index);
 
-        root.currentPath = root.insideRoot(parentPath)
-            ? parentPath
-            : root.rootPath;
+        root.currentPath =
+            root.insideRoot(parentPath)
+                ? parentPath
+                : root.rootPath;
 
         root.selectedPath = "";
+        root.selectedIsDir = false;
+        root.downloadStatus = "";
     }
 
     function iconFor(
@@ -122,16 +150,80 @@ FloatingWindow {
         return "draft";
     }
 
+    Connections {
+        target: KdeConnect
+
+        function onDownloaded(
+            device,
+            destinationPath
+        ) {
+            if (device !== root.deviceId)
+                return;
+
+            downloadCancelTimer.stop();
+
+            root.showDownloadCancel = false;
+            root.activeDownloadName = "";
+
+            root.downloadStatus =
+                qsTr("Saved to %1")
+                    .arg(destinationPath);
+        }
+
+        function onDownloadFailed(
+            device,
+            error
+        ) {
+            if (device !== root.deviceId)
+                return;
+
+            downloadCancelTimer.stop();
+
+            root.showDownloadCancel = false;
+            root.activeDownloadName = "";
+
+            root.downloadStatus = error;
+        }
+
+        function onDownloadCancelled(device) {
+            if (device !== root.deviceId)
+                return;
+
+            downloadCancelTimer.stop();
+
+            root.showDownloadCancel = false;
+            root.activeDownloadName = "";
+
+            root.downloadStatus =
+                qsTr("Download cancelled");
+        }
+    }
+
+    Timer {
+        id: downloadCancelTimer
+
+        interval: 1500
+        repeat: false
+
+        onTriggered: {
+            if (root.downloadingHere)
+                root.showDownloadCancel = true;
+        }
+    }
+
     StyledRect {
         anchors.fill: parent
 
         radius: Tokens.rounding.large
-        color: Colours.tPalette.m3surfaceContainer
+        color:
+            Colours.tPalette.m3surfaceContainer
+
         clip: true
 
         ColumnLayout {
             anchors.fill: parent
-            anchors.margins: Tokens.padding.large
+            anchors.margins:
+                Tokens.padding.large
 
             spacing: Tokens.spacing.medium
 
@@ -140,26 +232,37 @@ FloatingWindow {
             //
             RowLayout {
                 Layout.fillWidth: true
+
                 spacing: Tokens.spacing.medium
 
                 StyledRect {
                     implicitWidth: 40
                     implicitHeight: 40
 
-                    radius: Tokens.rounding.full
+                    radius:
+                        Tokens.rounding.full
 
-                    color: backHover.hovered && !root.atRoot
+                    color:
+                        backHover.hovered
+                            && !root.atRoot
                         ? Colours.palette.m3secondaryContainer
                         : "transparent"
 
-                    opacity: root.atRoot ? 0.4 : 1
+                    opacity:
+                        root.atRoot
+                            ? 0.4
+                            : 1
 
                     MaterialIcon {
                         anchors.centerIn: parent
 
                         text: "arrow_back"
-                        color: Colours.palette.m3onSurface
-                        fontStyle: Tokens.font.icon.small
+
+                        color:
+                            Colours.palette.m3onSurface
+
+                        fontStyle:
+                            Tokens.font.icon.small
                     }
 
                     HoverHandler {
@@ -169,7 +272,8 @@ FloatingWindow {
                     TapHandler {
                         enabled: !root.atRoot
 
-                        onTapped: root.goBack()
+                        onTapped:
+                            root.goBack()
                     }
                 }
 
@@ -182,9 +286,14 @@ FloatingWindow {
 
                         text: root.deviceName
 
-                        color: Colours.palette.m3onSurface
-                        font: Tokens.font.body.medium
-                        elide: Text.ElideRight
+                        color:
+                            Colours.palette.m3onSurface
+
+                        font:
+                            Tokens.font.body.medium
+
+                        elide:
+                            Text.ElideRight
                     }
 
                     StyledText {
@@ -192,9 +301,14 @@ FloatingWindow {
 
                         text: root.displayPath
 
-                        color: Colours.palette.m3onSurfaceVariant
-                        font: Tokens.font.body.small
-                        elide: Text.ElideMiddle
+                        color:
+                            Colours.palette.m3onSurfaceVariant
+
+                        font:
+                            Tokens.font.body.small
+
+                        elide:
+                            Text.ElideMiddle
                     }
                 }
 
@@ -202,9 +316,11 @@ FloatingWindow {
                     implicitWidth: 40
                     implicitHeight: 40
 
-                    radius: Tokens.rounding.full
+                    radius:
+                        Tokens.rounding.full
 
-                    color: closeHover.hovered
+                    color:
+                        closeHover.hovered
                         ? Colours.palette.m3secondaryContainer
                         : "transparent"
 
@@ -212,8 +328,12 @@ FloatingWindow {
                         anchors.centerIn: parent
 
                         text: "close"
-                        color: Colours.palette.m3onSurface
-                        fontStyle: Tokens.font.icon.small
+
+                        color:
+                            Colours.palette.m3onSurface
+
+                        fontStyle:
+                            Tokens.font.icon.small
                     }
 
                     HoverHandler {
@@ -221,7 +341,8 @@ FloatingWindow {
                     }
 
                     TapHandler {
-                        onTapped: root.visible = false
+                        onTapped:
+                            root.visible = false
                     }
                 }
             }
@@ -230,7 +351,8 @@ FloatingWindow {
                 Layout.fillWidth: true
                 implicitHeight: 1
 
-                color: Colours.palette.m3outlineVariant
+                color:
+                    Colours.palette.m3outlineVariant
             }
 
             //
@@ -243,11 +365,17 @@ FloatingWindow {
                 StyledText {
                     anchors.centerIn: parent
 
-                    visible: fileView.count === 0
+                    visible:
+                        fileView.count === 0
 
-                    text: qsTr("This folder is empty")
-                    color: Colours.palette.m3outline
-                    font: Tokens.font.body.medium
+                    text:
+                        qsTr("This folder is empty")
+
+                    color:
+                        Colours.palette.m3outline
+
+                    font:
+                        Tokens.font.body.medium
                 }
 
                 GridView {
@@ -266,7 +394,8 @@ FloatingWindow {
                     model: FileSystemModel {
                         path: root.currentPath
 
-                        onPathChanged: fileView.currentIndex = -1
+                        onPathChanged:
+                            fileView.currentIndex = -1
                     }
 
                     delegate: StyledRect {
@@ -275,11 +404,6 @@ FloatingWindow {
                         required property int index
                         required property FileSystemEntry modelData
 
-                        //
-                        // FileSystemModel can invalidate modelData while
-                        // replacing delegates after a directory change.
-                        // Never bind the UI directly to modelData.*.
-                        //
                         readonly property bool valid:
                             entry.modelData !== null
 
@@ -311,38 +435,49 @@ FloatingWindow {
                             fileView.cellHeight
                             - Tokens.spacing.small
 
-                        radius: Tokens.rounding.medium
+                        radius:
+                            Tokens.rounding.medium
+
                         clip: true
 
-                        color: entry.GridView.isCurrentItem
+                        color:
+                            entry.GridView.isCurrentItem
                             ? Colours.palette.m3secondaryContainer
                             : "transparent"
 
                         ColumnLayout {
                             anchors.fill: parent
-                            anchors.margins: Tokens.padding.medium
 
-                            spacing: Tokens.spacing.small
+                            anchors.margins:
+                                Tokens.padding.medium
+
+                            spacing:
+                                Tokens.spacing.small
 
                             MaterialIcon {
-                                Layout.alignment: Qt.AlignHCenter
+                                Layout.alignment:
+                                    Qt.AlignHCenter
 
-                                text: root.iconFor(
-                                    entry.entryIsDir,
-                                    entry.entryMimeType
-                                )
+                                text:
+                                    root.iconFor(
+                                        entry.entryIsDir,
+                                        entry.entryMimeType
+                                    )
 
-                                color: entry.entryIsDir
+                                color:
+                                    entry.entryIsDir
                                     ? Colours.palette.m3primary
                                     : Colours.palette.m3onSurfaceVariant
 
-                                fontStyle: Tokens.font.icon.large
+                                fontStyle:
+                                    Tokens.font.icon.large
                             }
 
                             StyledText {
                                 Layout.fillWidth: true
 
-                                text: entry.entryName
+                                text:
+                                    entry.entryName
 
                                 horizontalAlignment:
                                     Text.AlignHCenter
@@ -359,6 +494,8 @@ FloatingWindow {
                         }
 
                         StateLayer {
+                            enabled: entry.valid
+
                             onClicked: {
                                 if (!entry.valid)
                                     return;
@@ -368,6 +505,11 @@ FloatingWindow {
 
                                 root.selectedPath =
                                     entry.entryPath;
+
+                                root.selectedIsDir =
+                                    entry.entryIsDir;
+
+                                root.downloadStatus = "";
                             }
 
                             onDoubleClicked: {
@@ -378,6 +520,7 @@ FloatingWindow {
                                     root.openDirectory(
                                         entry.entryPath
                                     );
+
                                     return;
                                 }
 
@@ -392,31 +535,72 @@ FloatingWindow {
             }
 
             //
-            // Selected file/folder
+            // Selected item / transfer
             //
             StyledRect {
                 Layout.fillWidth: true
 
-                visible: root.selectedPath !== ""
+                visible:
+                    root.selectedPath !== ""
+                    || root.downloadingHere
+                    || root.downloadStatus !== ""
 
                 implicitHeight:
                     selectedLayout.implicitHeight
                     + Tokens.padding.medium * 2
 
-                radius: Tokens.rounding.medium
+                radius:
+                    Tokens.rounding.medium
+
                 color:
                     Colours.tPalette.m3surfaceContainerHigh
+
+                clip: true
+
+                //
+                // Actual phone -> PC transfer progress.
+                //
+                StyledRect {
+                    anchors.top: parent.top
+                    anchors.bottom: parent.bottom
+                    anchors.left: parent.left
+
+                    width:
+                        root.downloadingHere
+                        ? parent.width
+                            * KdeConnect.progress
+                        : 0
+
+                    radius:
+                        parent.radius
+
+                    color:
+                        Colours.palette.m3primaryContainer
+
+                    opacity:
+                        root.downloadingHere
+                            ? 0.65
+                            : 0
+                }
 
                 RowLayout {
                     id: selectedLayout
 
                     anchors.fill: parent
-                    anchors.margins: Tokens.padding.medium
 
-                    spacing: Tokens.spacing.medium
+                    anchors.margins:
+                        Tokens.padding.medium
+
+                    spacing:
+                        Tokens.spacing.medium
 
                     MaterialIcon {
-                        text: "description"
+                        text:
+                            root.downloadingHere
+                                ? "download"
+                                : root.selectedIsDir
+                                    ? "folder"
+                                    : "description"
 
                         color:
                             Colours.palette.m3onSurfaceVariant
@@ -425,22 +609,183 @@ FloatingWindow {
                             Tokens.font.icon.small
                     }
 
-                    StyledText {
+                    ColumnLayout {
                         Layout.fillWidth: true
+                        spacing: 0
 
-                        text:
-                            root.selectedPath
-                                .split("/")
-                                .pop()
+                        StyledText {
+                            Layout.fillWidth: true
+
+                            text: {
+                                if (root.downloadingHere
+                                        && root.activeDownloadName) {
+                                    return root.activeDownloadName;
+                                }
+
+                                if (root.selectedPath) {
+                                    return root.selectedPath
+                                        .split("/")
+                                        .pop();
+                                }
+
+                                return qsTr("Phone file");
+                            }
+
+                            color:
+                                Colours.palette.m3onSurface
+
+                            font:
+                                Tokens.font.body.small
+
+                            elide:
+                                Text.ElideMiddle
+                        }
+
+                        StyledText {
+                            Layout.fillWidth: true
+
+                            visible:
+                                root.downloadingHere
+                                || root.downloadStatus !== ""
+
+                            text: {
+                                if (root.downloadingHere) {
+                                    return qsTr(
+                                        "Downloading… %1%"
+                                    ).arg(
+                                        Math.round(
+                                            KdeConnect.progress
+                                                * 100
+                                        )
+                                    );
+                                }
+
+                                return root.downloadStatus;
+                            }
+
+                            color:
+                                Colours.palette.m3onSurfaceVariant
+
+                            font:
+                                Tokens.font.body.small
+
+                            elide:
+                                Text.ElideMiddle
+                        }
+                    }
+
+                    //
+                    // Download to PC
+                    //
+                    StyledRect {
+                        visible:
+                            root.selectedPath !== ""
+                            && !root.selectedIsDir
+                            && !root.downloadingHere
+
+                        implicitWidth:
+                            downloadText.implicitWidth
+                            + Tokens.padding.medium * 2
+
+                        implicitHeight:
+                            downloadText.implicitHeight
+                            + Tokens.padding.medium
+
+                        radius:
+                            Tokens.rounding.full
 
                         color:
-                            Colours.palette.m3onSurface
+                            Colours.palette.m3secondaryContainer
 
-                        font:
-                            Tokens.font.body.small
+                        opacity:
+                            KdeConnect.transferring
+                                ? 0.5
+                                : 1
 
-                        elide:
-                            Text.ElideMiddle
+                        StyledText {
+                            id: downloadText
+
+                            anchors.centerIn: parent
+
+                            text:
+                                qsTr("Download to PC")
+
+                            color:
+                                Colours.palette.m3onSecondaryContainer
+
+                            font:
+                                Tokens.font.body.small
+                        }
+
+                        StateLayer {
+                            enabled:
+                                !KdeConnect.transferring
+
+                            onClicked: {
+                                root.activeDownloadName =
+                                    root.selectedPath
+                                        .split("/")
+                                        .pop();
+
+                                root.downloadStatus = "";
+                                root.showDownloadCancel = false;
+
+                                //
+                                // Start this first so a synchronous
+                                // failure can stop it again.
+                                //
+                                downloadCancelTimer.restart();
+
+                                KdeConnect.download(
+                                    root.deviceId,
+                                    root.selectedPath
+                                );
+                            }
+                        }
+                    }
+
+                    //
+                    // Cancel download after 1.5 seconds.
+                    //
+                    StyledRect {
+                        visible:
+                            root.downloadingHere
+                            && root.showDownloadCancel
+
+                        implicitWidth:
+                            cancelText.implicitWidth
+                            + Tokens.padding.medium * 2
+
+                        implicitHeight:
+                            cancelText.implicitHeight
+                            + Tokens.padding.medium
+
+                        radius:
+                            Tokens.rounding.full
+
+                        color:
+                            Colours.palette.m3secondaryContainer
+
+                        StyledText {
+                            id: cancelText
+
+                            anchors.centerIn: parent
+
+                            text: qsTr("Cancel")
+
+                            color:
+                                Colours.palette.m3onSecondaryContainer
+
+                            font:
+                                Tokens.font.body.small
+                        }
+
+                        StateLayer {
+                            onClicked: {
+                                root.showDownloadCancel = false;
+                                KdeConnect.cancel();
+                            }
+                        }
                     }
                 }
             }
