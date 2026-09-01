@@ -251,15 +251,15 @@ CustomMouseArea {
 
         onPositionChanged: drag => {
             if (root.fullscreen) {
-                root.screenState.utilitiesDragTarget = false;
+                root.screenState.utilities = false;
                 return;
             }
 
-            root.screenState.utilitiesDragTarget = root.inBottomPanel(root.panels.utilities, drag.x, drag.y, true);
+            root.screenState.utilities = root.inBottomPanel(root.panels.utilities, drag.x, drag.y, true);
         }
 
         onExited: {
-            root.screenState.utilitiesDragTarget = false;
+            root.screenState.utilities = false;
         }
     }
 

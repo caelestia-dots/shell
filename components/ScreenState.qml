@@ -11,7 +11,6 @@ PersistentProperties {
     property bool dashboard
     property bool utilities
     property bool sidebar
-    property bool utilitiesDragTarget
 
     // Dashboard state
     property int dashboardTab
