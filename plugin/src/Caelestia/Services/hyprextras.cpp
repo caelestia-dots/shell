@@ -179,8 +179,12 @@ void HyprExtras::readEvent() {
             break;
         }
         rawEvent.truncate(rawEvent.length() - 1); // Remove trailing \n
-        const auto event = QByteArrayView(rawEvent.data(), rawEvent.indexOf(">>"));
-        handleEvent(QString::fromUtf8(event));
+        const auto sep = rawEvent.indexOf(">>");
+        if (sep < 0) {
+            qCWarning(lcHypr) << "readEvent: malformed event (no >> separator):" << rawEvent;
+            continue;
+        }
+        handleEvent(QString::fromUtf8(QByteArrayView(rawEvent.data(), sep)));
     }
 }
 
