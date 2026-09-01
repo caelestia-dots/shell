@@ -9,6 +9,8 @@
 
 namespace caelestia::services {
 
+using Qt::StringLiterals::operator""_s;
+
 Cpu::Cpu(QObject* parent)
     : TickingService(parent) {
     readNameOnce();
@@ -35,14 +37,14 @@ void Cpu::tick() {
 }
 
 void Cpu::readNameOnce() {
-    QFile f(QStringLiteral("/proc/cpuinfo"));
+    QFile f(u"/proc/cpuinfo"_s);
     if (!f.open(QIODevice::ReadOnly | QIODevice::Text)) {
         return;
     }
     const QByteArray data = f.readAll();
     f.close();
 
-    static const QRegularExpression k_re(QStringLiteral("model name\\s*:\\s*(.+)"));
+    static const QRegularExpression k_re(u"model name\\s*:\\s*(.+)"_s);
     const auto match = k_re.match(QString::fromLatin1(data));
     if (!match.hasMatch()) {
         return;
@@ -58,7 +60,7 @@ void Cpu::readNameOnce() {
 }
 
 void Cpu::refreshPercentage() {
-    QFile f(QStringLiteral("/proc/stat"));
+    QFile f(u"/proc/stat"_s);
     if (!f.open(QIODevice::ReadOnly | QIODevice::Text)) {
         return;
     }
@@ -66,7 +68,7 @@ void Cpu::refreshPercentage() {
     f.close();
 
     static const QRegularExpression k_re(
-        QStringLiteral("^cpu\\s+(\\d+)\\s+(\\d+)\\s+(\\d+)\\s+(\\d+)\\s+(\\d+)\\s+(\\d+)\\s+(\\d+)"));
+        u"^cpu\\s+(\\d+)\\s+(\\d+)\\s+(\\d+)\\s+(\\d+)\\s+(\\d+)\\s+(\\d+)\\s+(\\d+)"_s);
     const auto match = k_re.match(QString::fromLatin1(data));
     if (!match.hasMatch()) {
         return;
@@ -106,12 +108,11 @@ void Cpu::refreshTemperature() {
 
 QString Cpu::cleanName(QString s) {
     static const QRegularExpression k_noise(
-        QStringLiteral("\\(R\\)|\\(TM\\)|CPU|\\d+(?:th|nd|rd|st) Gen |Core |Processor"),
-        QRegularExpression::CaseInsensitiveOption);
-    static const QRegularExpression k_spaces(QStringLiteral("\\s+"));
+        u"\\(R\\)|\\(TM\\)|CPU|\\d+(?:th|nd|rd|st) Gen |Core |Processor"_s, QRegularExpression::CaseInsensitiveOption);
+    static const QRegularExpression k_spaces(u"\\s+"_s);
 
     s.replace(k_noise, QString());
-    s.replace(k_spaces, QStringLiteral(" "));
+    s.replace(k_spaces, u" "_s);
     return s.trimmed();
 }
 

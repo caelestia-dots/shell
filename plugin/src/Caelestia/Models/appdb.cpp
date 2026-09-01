@@ -15,6 +15,8 @@ Q_LOGGING_CATEGORY(lcAppDb, "caelestia.appdb", QtInfoMsg)
 
 namespace caelestia::models {
 
+using Qt::StringLiterals::operator""_s;
+
 AppEntry::AppEntry(QObject* entry, unsigned int frequency, QObject* parent)
     : QObject(parent)
     , m_entry(entry)
@@ -201,7 +203,7 @@ QString AppDb::regexifyString(const QString& original) {
         return original;
 
     const QString escaped = QRegularExpression::escape(original);
-    return QStringLiteral("^%1$").arg(escaped);
+    return u"^%1$"_s.arg(escaped);
 }
 
 QQmlListProperty<AppEntry> AppDb::apps() {

@@ -4,6 +4,8 @@
 
 namespace caelestia::blobs {
 
+using Qt::StringLiterals::operator""_s;
+
 static_assert(sizeof(decltype(BlobRectData::excludeMask)) == sizeof(float),
     "BlobMaterial packs excludeMask into a float slot via memcpy");
 
@@ -26,8 +28,8 @@ int BlobMaterial::compare(const QSGMaterial* other) const {
 }
 
 BlobMaterialShader::BlobMaterialShader() {
-    setShaderFileName(VertexStage, QStringLiteral(":/shaders/blob.vert.qsb"));
-    setShaderFileName(FragmentStage, QStringLiteral(":/shaders/blob.frag.qsb"));
+    setShaderFileName(VertexStage, u":/shaders/blob.vert.qsb"_s);
+    setShaderFileName(FragmentStage, u":/shaders/blob.frag.qsb"_s);
 }
 
 bool BlobMaterialShader::updateUniformData(RenderState& state, QSGMaterial* newMaterial, QSGMaterial* oldMaterial) {
