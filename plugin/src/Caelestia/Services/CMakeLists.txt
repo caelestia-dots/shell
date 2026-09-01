@@ -21,6 +21,7 @@ qml_module(caelestia-services
         networkusage.cpp
         hyprdevices.cpp
         hyprextras.cpp
+        kdeconnecttransfer.cpp
     LIBRARIES
         Qt::DBus
         Qt::Network

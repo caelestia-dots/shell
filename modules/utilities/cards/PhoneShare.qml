@@ -93,6 +93,9 @@ StyledRect {
 
                 required property var modelData
 
+                // Real transfer progress for this device. It intentionally
+                // stays at 1 after a successful transfer and is reset when a
+                // new transfer starts.
                 property real shareProgress: 0
 
                 Layout.fillWidth: true
@@ -117,23 +120,22 @@ StyledRect {
                     opacity: deviceCard.shareProgress > 0 ? 0.65 : 0
                 }
 
-                SequentialAnimation {
-                    id: shareAnimation
+                Connections {
+                    target: KdeConnect
 
-                    PropertyAction {
-                        target: deviceCard
-                        property: "shareProgress"
-                        value: 0
+                    function onProgressChanged() {
+                        if (KdeConnect.sharingDevice === deviceCard.modelData.id)
+                            deviceCard.shareProgress = KdeConnect.progress;
                     }
 
-                    Anim {
-                        target: deviceCard
-                        property: "shareProgress"
+                    function onShared(device) {
+                        if (device === deviceCard.modelData.id)
+                            deviceCard.shareProgress = 1;
+                    }
 
-                        to: 1
-
-                        duration: Tokens.anim.durations.expressiveDefaultSpatial * 2
-                        easing.type: Easing.OutCubic
+                    function onShareFailed(device) {
+                        if (device === deviceCard.modelData.id)
+                            deviceCard.shareProgress = 0;
                     }
                 }
 
@@ -147,7 +149,7 @@ StyledRect {
 
                     onDropped: drop => {
                         if (drop.hasUrls) {
-                            shareAnimation.restart();
+                            deviceCard.shareProgress = 0;
 
                             KdeConnect.share(deviceCard.modelData.id, drop.urls);
                             drop.acceptProposedAction();
