@@ -26,6 +26,10 @@ class UtilitiesToasts : public settings::ObjectNode {
     CONFIG_GLOBAL_PROPERTY(bool, kbLimit, true)
     CONFIG_GLOBAL_PROPERTY(bool, vpnChanged, true)
     CONFIG_GLOBAL_PROPERTY(bool, nowPlaying, false)
+    CONFIG_GLOBAL_PROPERTY(bool, removableMediaChanged, true)
+    CONFIG_GLOBAL_PROPERTY(bool, inputDevicesChanged, true)
+    CONFIG_GLOBAL_PROPERTY(bool, autoMount, false)
+    CONFIG_GLOBAL_PROPERTY(bool, autoOpen, false)
 };
 
 class UtilitiesVpn : public settings::ObjectNode {
