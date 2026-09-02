@@ -13,6 +13,12 @@ StyledRect {
     required property ScreenState screenState
     required property var phoneBrowser
 
+    readonly property var primaryDevice: KdeConnect.devices.length > 0 ? KdeConnect.devices[0] : null
+
+    readonly property bool primaryMounted: primaryDevice !== null && KdeConnect.isMounted(primaryDevice.id)
+
+    readonly property bool primaryMountBusy: primaryDevice !== null && KdeConnect.isMountBusy(primaryDevice.id)
+
     readonly property real nonAnimHeight: layout.implicitHeight + Tokens.padding.extraLargeIncreased
 
     implicitHeight: nonAnimHeight
@@ -25,21 +31,44 @@ StyledRect {
 
     Component.onDestruction: screenState.utilities = false
 
+    function browsePrimaryDevice(): void {
+        if (root.primaryDevice === null)
+            return;
+
+        if (!root.primaryMounted)
+            return;
+
+        const directories = KdeConnect.directories(root.primaryDevice.id);
+
+        const paths = Object.keys(directories);
+
+        if (paths.length === 0)
+            return;
+
+        paths.sort((a, b) => a.length - b.length);
+
+        root.phoneBrowser.openForDevice(root.primaryDevice.id, root.primaryDevice.name, paths[0]);
+    }
+
     ColumnLayout {
         id: layout
 
         anchors.top: parent.top
         anchors.left: parent.left
         anchors.right: parent.right
+
         anchors.margins: Tokens.padding.large
 
         spacing: Tokens.spacing.small
 
         //
+        // ==========================================
         // Header
+        // ==========================================
         //
         RowLayout {
             Layout.fillWidth: true
+
             spacing: Tokens.spacing.medium
 
             StyledRect {
@@ -74,6 +103,7 @@ StyledRect {
                     text: qsTr("Send to Phone")
 
                     font: Tokens.font.body.medium
+
                     elide: Text.ElideRight
                 }
 
@@ -93,13 +123,54 @@ StyledRect {
                     color: Colours.palette.m3onSurfaceVariant
 
                     font: Tokens.font.body.small
+
                     elide: Text.ElideRight
+                }
+            }
+
+            //
+            // Browse is now a small header icon.
+            //
+            StyledRect {
+                id: browseButton
+
+                visible: root.primaryDevice !== null && root.primaryMounted
+
+                implicitWidth: 34
+                implicitHeight: 34
+
+                radius: Tokens.rounding.full
+
+                color: browseHover.hovered ? Colours.palette.m3secondaryContainer : "transparent"
+
+                opacity: root.primaryMountBusy || KdeConnect.transferring ? 0.5 : 1
+
+                MaterialIcon {
+                    anchors.centerIn: parent
+
+                    text: "folder_open"
+
+                    color: Colours.palette.m3onSurfaceVariant
+
+                    fontStyle: Tokens.font.icon.small
+                }
+
+                HoverHandler {
+                    id: browseHover
+                }
+
+                TapHandler {
+                    enabled: !root.primaryMountBusy && !KdeConnect.transferring
+
+                    onTapped: root.browsePrimaryDevice()
                 }
             }
         }
 
         //
+        // ==========================================
         // Devices
+        // ==========================================
         //
         Repeater {
             model: KdeConnect.devices
@@ -120,16 +191,16 @@ StyledRect {
                 readonly property bool transferringHere: KdeConnect.sharing && KdeConnect.sharingDevice === deviceCard.modelData.id
 
                 //
-                // Preserve the action area's height while
-                // Browse / Mount disappear during a transfer.
+                // Keep height stable during transfer.
                 //
-                readonly property real actionHeight: Math.max(browseButton.implicitHeight, mountButton.implicitHeight, cancelButton.implicitHeight)
+                readonly property real actionHeight: Math.max(mountButton.implicitHeight, cancelButton.implicitHeight)
 
                 Layout.fillWidth: true
 
                 implicitHeight: Math.max(deviceLayout.implicitHeight, deviceCard.actionHeight) + Tokens.padding.medium * 2
 
                 radius: Tokens.rounding.medium
+
                 clip: true
 
                 color: dropArea.containsDrag ? Colours.palette.m3primaryContainer : Colours.tPalette.m3surfaceContainerHigh
@@ -137,9 +208,9 @@ StyledRect {
                 CAnim on color {}
 
                 //
-                // =====================================
+                // ======================================
                 // Layer 0: transfer progress
-                // =====================================
+                // ======================================
                 //
                 StyledRect {
                     z: 0
@@ -217,9 +288,9 @@ StyledRect {
                 }
 
                 //
-                // =====================================
+                // ======================================
                 // Layer 1: normal UI
-                // =====================================
+                // ======================================
                 //
                 RowLayout {
                     id: deviceLayout
@@ -227,6 +298,7 @@ StyledRect {
                     z: 1
 
                     anchors.fill: parent
+
                     anchors.margins: Tokens.padding.medium
 
                     spacing: Tokens.spacing.small
@@ -236,7 +308,7 @@ StyledRect {
 
                         color: dropArea.containsDrag ? Colours.palette.m3onPrimaryContainer : Colours.palette.m3onSurfaceVariant
 
-                        fontStyle: Tokens.font.icon.small
+                        fontStyle: Tokens.font.icon.medium
                     }
 
                     StyledText {
@@ -247,90 +319,46 @@ StyledRect {
                         color: dropArea.containsDrag ? Colours.palette.m3onPrimaryContainer : Colours.palette.m3onSurface
 
                         font: Tokens.font.body.small
+
                         elide: Text.ElideRight
                     }
 
                     //
-                    // Browse
-                    //
-                    StyledRect {
-                        id: browseButton
-
-                        visible: deviceCard.storageMounted && !deviceCard.transferringHere
-
-                        implicitWidth: browseText.implicitWidth + Tokens.padding.medium * 2
-
-                        implicitHeight: browseText.implicitHeight + Tokens.padding.medium
-
-                        radius: Tokens.rounding.full
-
-                        color: Colours.palette.m3secondaryContainer
-
-                        opacity: deviceCard.storageBusy ? 0.5 : 1
-
-                        StyledText {
-                            id: browseText
-
-                            anchors.centerIn: parent
-
-                            text: qsTr("Browse")
-
-                            color: Colours.palette.m3onSecondaryContainer
-
-                            font: Tokens.font.body.small
-                        }
-
-                        TapHandler {
-                            enabled: !deviceCard.storageBusy
-
-                            onTapped: {
-                                const directories = KdeConnect.directories(deviceCard.modelData.id);
-
-                                const paths = Object.keys(directories);
-
-                                if (paths.length === 0)
-                                    return;
-
-                                paths.sort((a, b) => a.length - b.length);
-
-                                root.phoneBrowser.openForDevice(deviceCard.modelData.id, deviceCard.modelData.name, paths[0]);
-                            }
-                        }
-                    }
-
-                    //
-                    // Mount / Unmount
+                    // ==================================
+                    // Mount / Unmount icon
+                    // ==================================
                     //
                     StyledRect {
                         id: mountButton
 
                         visible: !deviceCard.transferringHere
 
-                        implicitWidth: mountText.implicitWidth + Tokens.padding.medium * 2
-
-                        implicitHeight: mountText.implicitHeight + Tokens.padding.medium
+                        implicitWidth: 32
+                        implicitHeight: 32
 
                         radius: Tokens.rounding.full
 
-                        color: Colours.palette.m3secondaryContainer
+                        color: mountHover.hovered ? Colours.palette.m3secondaryContainer : "transparent"
 
                         opacity: deviceCard.storageBusy ? 0.5 : 1
 
-                        StyledText {
-                            id: mountText
-
+                        MaterialIcon {
                             anchors.centerIn: parent
 
                             text: {
                                 if (deviceCard.storageBusy)
-                                    return qsTr("Wait…");
+                                    return "hourglass_top";
 
-                                return deviceCard.storageMounted ? qsTr("Unmount") : qsTr("Mount");
+                                return deviceCard.storageMounted ? "eject" : "link";
                             }
 
-                            color: Colours.palette.m3onSecondaryContainer
+                            color: Colours.palette.m3onSurfaceVariant
 
-                            font: Tokens.font.body.small
+                            fontStyle: Tokens.font.icon.medium
+                        }
+
+                        HoverHandler {
+                            id: mountHover
                         }
 
                         TapHandler {
@@ -347,7 +375,9 @@ StyledRect {
                     }
 
                     //
+                    // ==================================
                     // Cancel
+                    // ==================================
                     //
                     StyledRect {
                         id: cancelButton
@@ -356,7 +386,7 @@ StyledRect {
 
                         implicitWidth: cancelText.implicitWidth + Tokens.padding.medium * 2
 
-                        implicitHeight: cancelText.implicitHeight + Tokens.padding.medium
+                        implicitHeight: 32
 
                         radius: Tokens.rounding.full
 
@@ -388,13 +418,9 @@ StyledRect {
                 }
 
                 //
-                // =====================================
-                // Layer 2: drag/drop surface
-                //
-                // Keep this above Browse / Mount / Unmount
-                // so drag tracking does not get interrupted
-                // when the cursor moves over those buttons.
-                // =====================================
+                // ======================================
+                // Layer 2: drag/drop
+                // ======================================
                 //
                 DropArea {
                     id: dropArea
@@ -406,11 +432,9 @@ StyledRect {
                     keys: ["text/uri-list"]
 
                     //
-                    // IMPORTANT:
-                    // This exact behaviour is needed to keep
-                    // Utilities open during external dragging.
+                    // Do NOT set utilities=false when
+                    // containsDrag becomes false.
                     //
-                    // onContainsDragChanged: root.screenState.utilities = containsDrag
                     onContainsDragChanged: {
                         if (containsDrag)
                             root.screenState.utilities = true;
