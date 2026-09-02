@@ -58,8 +58,6 @@ Item {
 
     readonly property bool downloadingHere: KdeConnect.receiving && KdeConnect.receivingDevice === root.deviceId
 
-    readonly property int columnCount: 3
-
     readonly property string displayPath: {
         if (!currentPath || currentPath === rootPath) {
             return qsTr("Internal storage");
@@ -544,7 +542,7 @@ Item {
 
         anchors.fill: parent
 
-        spacing: Tokens.spacing.medium
+        spacing: Tokens.spacing.small
 
         //
         // ============================================
@@ -554,7 +552,7 @@ Item {
         StyledRect {
             Layout.fillWidth: true
 
-            implicitHeight: headerLayout.implicitHeight + Tokens.padding.medium * 2
+            implicitHeight: headerLayout.implicitHeight + Tokens.padding.small * 2
 
             radius: Tokens.rounding.large
 
@@ -565,16 +563,16 @@ Item {
 
                 anchors.fill: parent
 
-                anchors.margins: Tokens.padding.medium
+                anchors.margins: Tokens.padding.small
 
-                spacing: Tokens.spacing.medium
+                spacing: Tokens.spacing.small
 
                 //
                 // Back
                 //
                 StyledRect {
-                    implicitWidth: 36
-                    implicitHeight: 36
+                    implicitWidth: 30
+                    implicitHeight: 30
 
                     radius: Tokens.rounding.full
 
@@ -605,8 +603,8 @@ Item {
                 // Phone icon remains stationary.
                 //
                 StyledRect {
-                    implicitWidth: 46
-                    implicitHeight: 46
+                    implicitWidth: 36
+                    implicitHeight: 36
 
                     radius: Tokens.rounding.full
 
@@ -619,7 +617,7 @@ Item {
 
                         color: Colours.palette.m3onSecondaryContainer
 
-                        fontStyle: Tokens.font.icon.large
+                        fontStyle: Tokens.font.icon.medium
                     }
                 }
 
@@ -712,19 +710,18 @@ Item {
                     font: Tokens.font.body.small
                 }
 
-                GridView {
+                ListView {
                     id: fileView
 
                     anchors.fill: parent
 
                     clip: true
+
                     focus: true
 
                     currentIndex: -1
 
-                    cellWidth: width / root.columnCount
-
-                    cellHeight: 92
+                    spacing: 0
 
                     boundsBehavior: Flickable.StopAtBounds
 
@@ -758,11 +755,9 @@ Item {
                     }
 
                     //
-                    // Do NOT bind directly to currentPath.
-                    //
-                    // modelPath lets us explicitly detach from
-                    // the old directory before loading the next
-                    // KDE Connect FUSE directory.
+                    // Keep modelPath separate from currentPath so
+                    // switching folders does not leave stale delegates
+                    // from the previous FUSE directory.
                     //
                     model: FileSystemModel {
                         path: root.wrapper.browserOpen ? root.modelPath : ""
@@ -788,61 +783,71 @@ Item {
 
                         readonly property string entryMimeType: entry.valid ? entry.modelData.mimeType : ""
 
-                        width: fileView.cellWidth
+                        width: fileView.width
 
-                        height: fileView.cellHeight
+                        height: 38
 
                         StyledRect {
                             anchors.fill: parent
 
-                            anchors.margins: 3
-
                             radius: Tokens.rounding.medium
 
-                            color: entry.GridView.isCurrentItem ? Colours.palette.m3secondaryContainer : entryHover.hovered ? Colours.tPalette.m3surfaceContainerHigh : "transparent"
+                            color: entry.ListView.isCurrentItem ? Colours.palette.m3secondaryContainer : entryHover.hovered ? Colours.tPalette.m3surfaceContainerHigh : "transparent"
 
-                            ColumnLayout {
-                                anchors.centerIn: parent
+                            RowLayout {
+                                anchors.fill: parent
 
-                                width: parent.width - Tokens.padding.small * 2
+                                anchors.leftMargin: Tokens.padding.small
+
+                                anchors.rightMargin: Tokens.padding.small
 
                                 spacing: Tokens.spacing.small
 
-                                StyledRect {
-                                    Layout.alignment: Qt.AlignHCenter
+                                //
+                                // File / folder icon.
+                                //
+                                MaterialIcon {
+                                    Layout.alignment: Qt.AlignVCenter
 
-                                    implicitWidth: 40
-                                    implicitHeight: 40
+                                    text: root.iconFor(entry.entryIsDir, entry.entryMimeType)
 
-                                    radius: Tokens.rounding.full
+                                    color: entry.ListView.isCurrentItem ? Colours.palette.m3onSecondaryContainer : Colours.palette.m3onSurfaceVariant
 
-                                    color: entry.GridView.isCurrentItem ? Colours.palette.m3primary : Colours.palette.m3secondaryContainer
-
-                                    MaterialIcon {
-                                        anchors.centerIn: parent
-
-                                        text: root.iconFor(entry.entryIsDir, entry.entryMimeType)
-
-                                        color: entry.GridView.isCurrentItem ? Colours.palette.m3onPrimary : Colours.palette.m3onSecondaryContainer
-
-                                        fontStyle: Tokens.font.icon.small
-                                    }
+                                    fontStyle: Tokens.font.icon.small
                                 }
 
+                                //
+                                // File name.
+                                //
                                 StyledText {
                                     Layout.fillWidth: true
 
+                                    Layout.alignment: Qt.AlignVCenter
+
                                     text: entry.entryName
 
-                                    horizontalAlignment: Text.AlignHCenter
-
-                                    color: entry.GridView.isCurrentItem ? Colours.palette.m3onSecondaryContainer : Colours.palette.m3onSurface
+                                    color: entry.ListView.isCurrentItem ? Colours.palette.m3onSecondaryContainer : Colours.palette.m3onSurface
 
                                     font: Tokens.font.body.small
 
-                                    elide: Text.ElideRight
+                                    elide: Text.ElideMiddle
 
                                     maximumLineCount: 1
+                                }
+
+                                //
+                                // Directory navigation hint.
+                                //
+                                MaterialIcon {
+                                    visible: entry.entryIsDir
+
+                                    Layout.alignment: Qt.AlignVCenter
+
+                                    text: "chevron_right"
+
+                                    color: entry.ListView.isCurrentItem ? Colours.palette.m3onSecondaryContainer : Colours.palette.m3onSurfaceVariant
+
+                                    fontStyle: Tokens.font.icon.small
                                 }
                             }
 
@@ -857,22 +862,36 @@ Item {
                                     if (!entry.valid)
                                         return;
 
+                                    //
+                                    // Directories behave like normal list
+                                    // navigation: one click enters them.
+                                    //
+                                    if (entry.entryIsDir) {
+                                        root.openDirectory(entry.entryPath);
+
+                                        return;
+                                    }
+
+                                    //
+                                    // Files are selected first so the
+                                    // Download action can be used.
+                                    //
                                     fileView.currentIndex = entry.index;
 
                                     root.selectedPath = entry.entryPath;
 
-                                    root.selectedIsDir = entry.entryIsDir;
+                                    root.selectedIsDir = false;
 
                                     root.downloadStatus = "";
                                 }
 
+                                //
+                                // Keep the existing convenience:
+                                // double-clicking a file opens it locally
+                                // through the mounted filesystem.
+                                //
                                 onDoubleClicked: {
-                                    if (!entry.valid)
-                                        return;
-
-                                    if (entry.entryIsDir) {
-                                        root.openDirectory(entry.entryPath);
-
+                                    if (!entry.valid || entry.entryIsDir) {
                                         return;
                                     }
 

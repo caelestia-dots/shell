@@ -1,5 +1,6 @@
 pragma ComponentBehavior: Bound
 
+import ".." as Utilities
 import QtQuick
 import QtQuick.Layouts
 import Caelestia.Components
@@ -15,13 +16,26 @@ StyledRect {
 
     readonly property var primaryDevice: KdeConnect.devices.length > 0 ? KdeConnect.devices[0] : null
 
-    readonly property bool primaryMounted: primaryDevice !== null && KdeConnect.isMounted(primaryDevice.id)
+    readonly property bool primaryMounted: root.primaryDevice !== null && KdeConnect.isMounted(root.primaryDevice.id)
 
-    readonly property bool primaryMountBusy: primaryDevice !== null && KdeConnect.isMountBusy(primaryDevice.id)
+    readonly property bool primaryMountBusy: root.primaryDevice !== null && KdeConnect.isMountBusy(root.primaryDevice.id)
 
-    readonly property real nonAnimHeight: layout.implicitHeight + Tokens.padding.extraLargeIncreased
+    readonly property bool browserOpen: root.phoneBrowser.browserOpen
 
-    implicitHeight: nonAnimHeight
+    readonly property real compactHeight: compactLayout.implicitHeight + Tokens.padding.extraLargeIncreased
+    readonly property real transitionDistance: Tokens.padding.large
+
+    //
+    // Keep the inline browser bounded.
+    // The file list scrolls inside this area.
+    //
+    readonly property real browserHeight: 340
+
+    readonly property real targetHeight: root.browserOpen ? root.browserHeight : root.compactHeight
+
+    readonly property real nonAnimHeight: root.targetHeight
+
+    implicitHeight: root.targetHeight
 
     radius: Tokens.rounding.large
 
@@ -29,9 +43,11 @@ StyledRect {
 
     clip: true
 
-    Component.onCompleted: KdeConnect.refresh()
+    // Behavior on implicitHeight {
+    //     Anim {}
+    // }
 
-    // Component.onDestruction: screenState.utilities = false
+    Component.onCompleted: KdeConnect.refresh()
 
     function browsePrimaryDevice(): void {
         if (root.primaryDevice === null)
@@ -52,8 +68,13 @@ StyledRect {
         root.phoneBrowser.openForDevice(root.primaryDevice.id, root.primaryDevice.name, paths[0]);
     }
 
+    //
+    // ==================================================
+    // Compact phone card
+    // ==================================================
+    //
     ColumnLayout {
-        id: layout
+        id: compactLayout
 
         anchors.top: parent.top
 
@@ -64,6 +85,22 @@ StyledRect {
         anchors.margins: Tokens.padding.large
 
         spacing: Tokens.spacing.small
+
+        enabled: !root.browserOpen
+
+        opacity: root.browserOpen ? 0 : 1
+
+        transform: Translate {
+            x: root.browserOpen ? -root.transitionDistance : 0
+
+            Behavior on x {
+                Anim {}
+            }
+        }
+
+        Behavior on opacity {
+            Anim {}
+        }
 
         //
         // ==========================================
@@ -89,7 +126,7 @@ StyledRect {
 
                     anchors.centerIn: parent
 
-                    text: "mobile_arrow_down"
+                    text: "send_to_mobile"
 
                     color: Colours.palette.m3onSecondaryContainer
 
@@ -119,8 +156,9 @@ StyledRect {
                         if (KdeConnect.sharing)
                             return qsTr("Sending…");
 
-                        if (KdeConnect.devices.length === 0)
+                        if (KdeConnect.devices.length === 0) {
                             return qsTr("No phone connected");
+                        }
 
                         return qsTr("Drop files on a device");
                     }
@@ -133,10 +171,15 @@ StyledRect {
                 }
             }
 
+            //
+            // ==========================================
+            // Download progress indicator
+            // ==========================================
+            //
             Item {
                 id: receivingIndicator
 
-                visible: root.primaryDevice !== null && KdeConnect.receiving && KdeConnect.receivingDevice === root.primaryDevice.id
+                visible: KdeConnect.receiving
 
                 implicitWidth: 34
                 implicitHeight: 34
@@ -150,7 +193,7 @@ StyledRect {
                     height: 20
 
                     //
-                    // Empty / inactive part.
+                    // Empty / inactive portion.
                     //
                     MaterialIcon {
                         anchors.centerIn: parent
@@ -165,11 +208,13 @@ StyledRect {
                     }
 
                     //
-                    // Filled part.
+                    // Filled portion.
                     //
                     Item {
                         anchors.top: parent.top
+
                         anchors.left: parent.left
+
                         anchors.right: parent.right
 
                         height: parent.height * KdeConnect.progress
@@ -198,7 +243,9 @@ StyledRect {
             }
 
             //
+            // ==========================================
             // Browse
+            // ==========================================
             //
             StyledRect {
                 id: browseButton
@@ -212,6 +259,12 @@ StyledRect {
 
                 color: browseHover.hovered ? Colours.palette.m3secondaryContainer : "transparent"
 
+                //
+                // Downloading FROM the phone does not
+                // block Browse. This allows the user to
+                // reopen the browser while the download
+                // continues.
+                //
                 opacity: root.primaryMountBusy || (root.primaryDevice !== null && KdeConnect.sharing && KdeConnect.sharingDevice === root.primaryDevice.id) ? 0.5 : 1
 
                 MaterialIcon {
@@ -250,25 +303,20 @@ StyledRect {
                 required property var modelData
 
                 property real shareProgress: 0
+
                 property bool showCancel: false
+
                 property bool cancelRequested: false
 
                 readonly property bool storageMounted: KdeConnect.isMounted(deviceCard.modelData.id)
 
                 readonly property bool storageBusy: KdeConnect.isMountBusy(deviceCard.modelData.id)
 
-                //
-                // IMPORTANT:
-                //
-                // This now covers BOTH directions:
-                //
-                // PC -> Phone
-                // Phone -> PC
-                //
                 readonly property bool transferringHere: (KdeConnect.sharing && KdeConnect.sharingDevice === deviceCard.modelData.id) || (KdeConnect.receiving && KdeConnect.receivingDevice === deviceCard.modelData.id)
 
                 //
-                // Keep height stable during transfer.
+                // Keep the row height stable when the
+                // Mount action changes to Cancel.
                 //
                 readonly property real actionHeight: Math.max(mountButton.implicitHeight, cancelButton.implicitHeight)
 
@@ -286,7 +334,7 @@ StyledRect {
 
                 //
                 // ======================================
-                // Layer 0: transfer progress
+                // Layer 0: upload progress
                 // ======================================
                 //
                 StyledRect {
@@ -357,6 +405,7 @@ StyledRect {
                     id: cancelTimer
 
                     interval: 1500
+
                     repeat: false
 
                     onTriggered: {
@@ -425,8 +474,9 @@ StyledRect {
                             anchors.centerIn: parent
 
                             text: {
-                                if (deviceCard.storageBusy)
+                                if (deviceCard.storageBusy) {
                                     return "hourglass_top";
+                                }
 
                                 return deviceCard.storageMounted ? "eject" : "link";
                             }
@@ -455,10 +505,7 @@ StyledRect {
 
                     //
                     // ==================================
-                    // Cancel
-                    //
-                    // This remains specifically for the
-                    // PC -> Phone drag transfer.
+                    // Upload Cancel
                     // ==================================
                     //
                     StyledRect {
@@ -491,6 +538,7 @@ StyledRect {
 
                             onTapped: {
                                 deviceCard.cancelRequested = true;
+
                                 deviceCard.showCancel = false;
 
                                 KdeConnect.cancel();
@@ -514,10 +562,10 @@ StyledRect {
                     keys: ["text/uri-list"]
 
                     //
-                    // Do NOT set utilities=false here when
-                    // containsDrag becomes false.
+                    // Interactions.qml handles closing
+                    // Utilities when the drag leaves.
                     //
-                    // Interactions.qml owns closing.
+                    // Never set utilities=false here.
                     //
                     onContainsDragChanged: {
                         if (containsDrag)
@@ -540,6 +588,37 @@ StyledRect {
                     }
                 }
             }
+        }
+    }
+
+    //
+    // ==================================================
+    // Inline phone browser
+    // ==================================================
+    //
+    Utilities.PhoneBrowser {
+        id: inlineBrowser
+
+        anchors.fill: parent
+
+        anchors.margins: Tokens.padding.medium
+
+        wrapper: root.phoneBrowser
+
+        enabled: root.browserOpen
+
+        opacity: root.browserOpen ? 1 : 0
+
+        transform: Translate {
+            x: root.browserOpen ? 0 : root.transitionDistance
+
+            Behavior on x {
+                Anim {}
+            }
+        }
+
+        Behavior on opacity {
+            Anim {}
         }
     }
 }
