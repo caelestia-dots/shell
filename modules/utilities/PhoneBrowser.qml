@@ -15,12 +15,38 @@ Item {
     required property var wrapper
 
     property string currentPath: ""
+    property string modelPath: ""
+    property string pendingPath: ""
+
     property string selectedPath: ""
     property bool selectedIsDir: false
 
     property string activeDownloadName: ""
     property string downloadStatus: ""
     property bool showDownloadCancel: false
+
+    //
+    // Folder navigation state.
+    //
+    property bool navigating: false
+    property bool waitingForModel: false
+
+    //
+    // Calendar-style animation.
+    //
+    // -1 -> forward:
+    // old content moves left, new content enters from right.
+    //
+    // 1 -> backward:
+    // old content moves right, new content enters from left.
+    //
+    property int animDirection: -1
+    property real animTranslate: 0
+    property real animOpacity: 1
+
+    readonly property real animDistance: Tokens.padding.extraLarge
+
+    property bool showEmptyState: false
 
     readonly property string deviceId: wrapper.browserDeviceId
 
@@ -50,8 +76,103 @@ Item {
         return relative.split("/").join("  ›  ");
     }
 
+    clip: true
+
+    //
+    // ==================================================
+    // Empty-state handling
+    // ==================================================
+    //
+
+    function scheduleEmptyStateCheck(): void {
+        emptyStateTimer.stop();
+
+        root.showEmptyState = false;
+
+        if (!root.wrapper.browserOpen)
+            return;
+
+        if (root.navigating || root.waitingForModel) {
+            return;
+        }
+
+        if (!root.currentPath)
+            return;
+
+        if (fileView.count > 0)
+            return;
+
+        emptyStateTimer.restart();
+    }
+
+    Timer {
+        id: emptyStateTimer
+
+        //
+        // Prevent a temporary count === 0 from flashing
+        // "This folder is empty".
+        //
+        interval: 750
+        repeat: false
+
+        onTriggered: {
+            root.showEmptyState = root.wrapper.browserOpen && !root.navigating && !root.waitingForModel && root.currentPath !== "" && fileView.count === 0;
+        }
+    }
+
+    //
+    // Used while switching to a new FileSystemModel path.
+    //
+    // If items arrive, onCountChanged completes the navigation
+    // immediately.
+    //
+    // If count remains zero, this timer decides that the
+    // directory is genuinely empty.
+    //
+    Timer {
+        id: modelReadyTimer
+
+        interval: 500
+        repeat: false
+
+        onTriggered: {
+            if (!root.waitingForModel)
+                return;
+
+            root.showEmptyState = fileView.count === 0;
+
+            root.showPendingPath();
+        }
+    }
+
+    //
+    // ==================================================
+    // Browser lifecycle
+    // ==================================================
+    //
+
     function resetBrowser(): void {
+        exitAnimation.stop();
+        enterAnimation.stop();
+
+        emptyStateTimer.stop();
+        modelReadyTimer.stop();
+        downloadCancelTimer.stop();
+
+        root.navigating = false;
+        root.waitingForModel = false;
+
+        root.pendingPath = "";
+
+        root.animTranslate = 0;
+        root.animOpacity = 1;
+
+        root.showEmptyState = false;
+
         root.currentPath = root.rootPath;
+
+        root.modelPath = root.rootPath;
+
         root.selectedPath = "";
         root.selectedIsDir = false;
         root.downloadStatus = "";
@@ -59,18 +180,15 @@ Item {
         fileView.currentIndex = -1;
 
         //
-        // A download may still be running even though the
-        // browser page was temporarily left.
+        // Check whether the initial/root directory is empty.
+        //
+        root.scheduleEmptyStateCheck();
+
+        //
+        // A download may still be running after temporarily
+        // leaving the browser.
         //
         if (root.downloadingHere) {
-            //
-            // If the original 1.5s timer is still running,
-            // preserve the delay.
-            //
-            // If there is no timer anymore, the transfer
-            // has already been running long enough, so
-            // Cancel should be available immediately.
-            //
             if (!downloadCancelTimer.running)
                 root.showDownloadCancel = true;
 
@@ -85,20 +203,139 @@ Item {
         return path === root.rootPath || path.startsWith(root.rootPath + "/");
     }
 
-    function openDirectory(path: string): void {
-        if (!root.insideRoot(path))
-            return;
+    function clearSelection(): void {
+        fileView.currentIndex = -1;
 
         root.selectedPath = "";
         root.selectedIsDir = false;
         root.downloadStatus = "";
+    }
 
-        root.currentPath = path;
+    //
+    // ==================================================
+    // Folder navigation
+    // ==================================================
+    //
+
+    function navigateTo(path: string, forward: bool): void {
+        if (root.navigating)
+            return;
+
+        if (!root.insideRoot(path))
+            return;
+
+        if (path === root.currentPath)
+            return;
+
+        root.animDirection = forward ? -1 : 1;
+
+        root.pendingPath = path;
+
+        root.navigating = true;
+        root.waitingForModel = false;
+
+        emptyStateTimer.stop();
+        modelReadyTimer.stop();
+
+        root.showEmptyState = false;
+
+        root.clearSelection();
+
+        //
+        // First animate the old directory out.
+        //
+        exitAnimation.restart();
+    }
+
+    function preparePendingPath(): void {
+        if (!root.navigating || !root.pendingPath) {
+            return;
+        }
+
+        root.waitingForModel = true;
+
+        //
+        // currentPath changes while the contents are invisible.
+        // This updates the header/breadcrumb without exposing
+        // the path change.
+        //
+        root.currentPath = root.pendingPath;
+
+        //
+        // New content will enter from the opposite direction.
+        //
+        root.animTranslate = root.animDistance * -root.animDirection;
+
+        root.animOpacity = 0;
+
+        //
+        // IMPORTANT:
+        //
+        // Detach the FileSystemModel from the previous directory
+        // first. This forces the old delegates to disappear.
+        //
+        root.modelPath = "";
+
+        //
+        // Let QML process modelPath = "" before attaching the
+        // model to the next SFTP/FUSE directory.
+        //
+        Qt.callLater(() => {
+            if (!root.waitingForModel || !root.wrapper.browserOpen) {
+                return;
+            }
+
+            //
+            // Start the empty-folder timeout BEFORE assigning
+            // the path. If count > 0 arrives immediately,
+            // onCountChanged will stop this timer.
+            //
+            modelReadyTimer.restart();
+
+            root.modelPath = root.pendingPath;
+        });
+    }
+
+    function showPendingPath(): void {
+        if (!root.waitingForModel)
+            return;
+
+        modelReadyTimer.stop();
+
+        root.waitingForModel = false;
+        root.pendingPath = "";
+
+        //
+        // The new directory is ready.
+        // Bring it in using Calendar's Default animation.
+        //
+        enterAnimation.restart();
+    }
+
+    function finishEnterAnimation(): void {
+        root.animTranslate = 0;
+        root.animOpacity = 1;
+
+        root.navigating = false;
+
+        if (fileView.count > 0) {
+            emptyStateTimer.stop();
+            root.showEmptyState = false;
+        } else if (!root.showEmptyState) {
+            root.scheduleEmptyStateCheck();
+        }
+    }
+
+    function openDirectory(path: string): void {
+        root.navigateTo(path, true);
     }
 
     function back(): void {
+        if (root.navigating)
+            return;
+
         //
-        // Root folder -> back to Utilities.
+        // At storage root Back returns to Utilities.
         //
         if (root.atRoot) {
             root.wrapper.closeBrowser();
@@ -108,22 +345,14 @@ Item {
         const index = root.currentPath.lastIndexOf("/");
 
         if (index <= 0) {
-            root.currentPath = root.rootPath;
-
-            root.selectedPath = "";
-            root.selectedIsDir = false;
-            root.downloadStatus = "";
+            root.navigateTo(root.rootPath, false);
 
             return;
         }
 
         const parentPath = root.currentPath.slice(0, index);
 
-        root.currentPath = root.insideRoot(parentPath) ? parentPath : root.rootPath;
-
-        root.selectedPath = "";
-        root.selectedIsDir = false;
-        root.downloadStatus = "";
+        root.navigateTo(root.insideRoot(parentPath) ? parentPath : root.rootPath, false);
     }
 
     function iconFor(isDir: bool, mimeType: string): string {
@@ -152,11 +381,103 @@ Item {
         return "draft";
     }
 
+    //
+    // ==================================================
+    // Calendar-style animations
+    // ==================================================
+    //
+    // Same idea as Dashboard Calendar:
+    //
+    // FastSpatial + FastEffects
+    //         ↓
+    // change/load content
+    //         ↓
+    // DefaultSpatial + DefaultEffects
+    //
+
+    ParallelAnimation {
+        id: exitAnimation
+
+        Anim {
+            target: root
+            property: "animTranslate"
+
+            to: root.animDistance * root.animDirection
+
+            type: Anim.FastSpatial
+        }
+
+        Anim {
+            target: root
+            property: "animOpacity"
+
+            to: 0
+
+            type: Anim.FastEffects
+        }
+
+        onFinished: root.preparePendingPath()
+    }
+
+    ParallelAnimation {
+        id: enterAnimation
+
+        Anim {
+            target: root
+            property: "animTranslate"
+
+            to: 0
+
+            type: Anim.DefaultSpatial
+        }
+
+        Anim {
+            target: root
+            property: "animOpacity"
+
+            to: 1
+
+            type: Anim.DefaultEffects
+        }
+
+        onFinished: root.finishEnterAnimation()
+    }
+
+    //
+    // ==================================================
+    // Connections
+    // ==================================================
+    //
+
     Connections {
         target: root.wrapper
 
         function onBrowserOpened() {
             root.resetBrowser();
+        }
+
+        function onBrowserOpenChanged() {
+            if (root.wrapper.browserOpen)
+                return;
+
+            //
+            // Stop an unfinished folder transition if Utilities
+            // gets closed while a model is loading.
+            //
+            exitAnimation.stop();
+            enterAnimation.stop();
+
+            modelReadyTimer.stop();
+            emptyStateTimer.stop();
+
+            root.navigating = false;
+            root.waitingForModel = false;
+            root.pendingPath = "";
+
+            root.animTranslate = 0;
+            root.animOpacity = 1;
+
+            root.showEmptyState = false;
         }
     }
 
@@ -183,6 +504,7 @@ Item {
 
             root.showDownloadCancel = false;
             root.activeDownloadName = "";
+
             root.downloadStatus = error;
         }
 
@@ -211,14 +533,22 @@ Item {
         }
     }
 
+    //
+    // ==================================================
+    // Browser UI
+    // ==================================================
+    //
+
     ColumnLayout {
+        id: browserPage
+
         anchors.fill: parent
 
         spacing: Tokens.spacing.medium
 
         //
         // ============================================
-        // Device / navigation card
+        // Header card
         // ============================================
         //
         StyledRect {
@@ -240,7 +570,7 @@ Item {
                 spacing: Tokens.spacing.medium
 
                 //
-                // Back button.
+                // Back
                 //
                 StyledRect {
                     implicitWidth: 36
@@ -265,13 +595,14 @@ Item {
                     }
 
                     TapHandler {
+                        enabled: !root.navigating
+
                         onTapped: root.back()
                     }
                 }
 
                 //
-                // Same circular icon language used by
-                // Utilities cards.
+                // Phone icon remains stationary.
                 //
                 StyledRect {
                     implicitWidth: 46
@@ -309,8 +640,18 @@ Item {
                         elide: Text.ElideRight
                     }
 
+                    //
+                    // Breadcrumb follows the same animation as
+                    // the file contents.
+                    //
                     StyledText {
                         Layout.fillWidth: true
+
+                        opacity: root.animOpacity
+
+                        transform: Translate {
+                            x: root.animTranslate
+                        }
 
                         text: root.displayPath
 
@@ -330,6 +671,8 @@ Item {
         // ============================================
         //
         StyledRect {
+            id: storageCard
+
             Layout.fillWidth: true
             Layout.fillHeight: true
 
@@ -339,152 +682,202 @@ Item {
 
             clip: true
 
-            StyledText {
-                anchors.centerIn: parent
-
-                visible: fileView.count === 0
-
-                text: qsTr("This folder is empty")
-
-                color: Colours.palette.m3onSurfaceVariant
-
-                font: Tokens.font.body.small
-            }
-
-            GridView {
-                id: fileView
+            Item {
+                id: fileContent
 
                 anchors.fill: parent
 
                 anchors.margins: Tokens.padding.small
 
-                clip: true
-                focus: true
+                opacity: root.animOpacity
 
-                currentIndex: -1
-
-                cellWidth: width / root.columnCount
-
-                cellHeight: 92
-
-                boundsBehavior: Flickable.StopAtBounds
-
-                model: FileSystemModel {
-                    path: root.currentPath
-
-                    onPathChanged: fileView.currentIndex = -1
+                transform: Translate {
+                    x: root.animTranslate
                 }
 
-                delegate: Item {
-                    id: entry
+                //
+                // Empty directory.
+                //
+                StyledText {
+                    z: 1
 
-                    required property int index
-                    required property FileSystemEntry modelData
+                    anchors.centerIn: parent
 
-                    readonly property bool valid: entry.modelData !== null
+                    visible: root.showEmptyState
 
-                    readonly property string entryPath: entry.valid ? entry.modelData.path : ""
+                    text: qsTr("This folder is empty")
 
-                    readonly property string entryName: entry.valid ? entry.modelData.name : ""
+                    color: Colours.palette.m3onSurfaceVariant
 
-                    readonly property bool entryIsDir: entry.valid ? entry.modelData.isDir : false
+                    font: Tokens.font.body.small
+                }
 
-                    readonly property string entryMimeType: entry.valid ? entry.modelData.mimeType : ""
+                GridView {
+                    id: fileView
 
-                    width: fileView.cellWidth
+                    anchors.fill: parent
 
-                    height: fileView.cellHeight
+                    clip: true
+                    focus: true
 
-                    StyledRect {
-                        id: entryCard
+                    currentIndex: -1
 
-                        anchors.fill: parent
+                    cellWidth: width / root.columnCount
 
-                        anchors.margins: 3
+                    cellHeight: 92
 
-                        radius: Tokens.rounding.medium
+                    boundsBehavior: Flickable.StopAtBounds
 
-                        color: entry.GridView.isCurrentItem ? Colours.palette.m3secondaryContainer : entryHover.hovered ? Colours.tPalette.m3surfaceContainerHigh : "transparent"
+                    onCountChanged: {
+                        //
+                        // We are waiting for the new directory.
+                        //
+                        if (root.waitingForModel) {
+                            if (count > 0) {
+                                root.showEmptyState = false;
 
-                        ColumnLayout {
-                            anchors.centerIn: parent
+                                root.showPendingPath();
+                            }
 
-                            width: parent.width - Tokens.padding.small * 2
+                            return;
+                        }
 
-                            spacing: Tokens.spacing.small
+                        //
+                        // Normal directory state.
+                        //
+                        if (count > 0) {
+                            emptyStateTimer.stop();
 
-                            //
-                            // Utilities-style round icon surface.
-                            //
-                            StyledRect {
-                                Layout.alignment: Qt.AlignHCenter
+                            root.showEmptyState = false;
 
-                                implicitWidth: 40
-                                implicitHeight: 40
+                            return;
+                        }
 
-                                radius: Tokens.rounding.full
+                        if (!root.navigating)
+                            root.scheduleEmptyStateCheck();
+                    }
 
-                                color: entry.GridView.isCurrentItem ? Colours.palette.m3primary : Colours.palette.m3secondaryContainer
+                    //
+                    // Do NOT bind directly to currentPath.
+                    //
+                    // modelPath lets us explicitly detach from
+                    // the old directory before loading the next
+                    // KDE Connect FUSE directory.
+                    //
+                    model: FileSystemModel {
+                        path: root.wrapper.browserOpen ? root.modelPath : ""
 
-                                MaterialIcon {
-                                    anchors.centerIn: parent
+                        onPathChanged: {
+                            fileView.currentIndex = -1;
+                        }
+                    }
 
-                                    text: root.iconFor(entry.entryIsDir, entry.entryMimeType)
+                    delegate: Item {
+                        id: entry
 
-                                    color: entry.GridView.isCurrentItem ? Colours.palette.m3onPrimary : Colours.palette.m3onSecondaryContainer
+                        required property int index
+                        required property FileSystemEntry modelData
 
-                                    fontStyle: Tokens.font.icon.small
+                        readonly property bool valid: entry.modelData !== null
+
+                        readonly property string entryPath: entry.valid ? entry.modelData.path : ""
+
+                        readonly property string entryName: entry.valid ? entry.modelData.name : ""
+
+                        readonly property bool entryIsDir: entry.valid ? entry.modelData.isDir : false
+
+                        readonly property string entryMimeType: entry.valid ? entry.modelData.mimeType : ""
+
+                        width: fileView.cellWidth
+
+                        height: fileView.cellHeight
+
+                        StyledRect {
+                            anchors.fill: parent
+
+                            anchors.margins: 3
+
+                            radius: Tokens.rounding.medium
+
+                            color: entry.GridView.isCurrentItem ? Colours.palette.m3secondaryContainer : entryHover.hovered ? Colours.tPalette.m3surfaceContainerHigh : "transparent"
+
+                            ColumnLayout {
+                                anchors.centerIn: parent
+
+                                width: parent.width - Tokens.padding.small * 2
+
+                                spacing: Tokens.spacing.small
+
+                                StyledRect {
+                                    Layout.alignment: Qt.AlignHCenter
+
+                                    implicitWidth: 40
+                                    implicitHeight: 40
+
+                                    radius: Tokens.rounding.full
+
+                                    color: entry.GridView.isCurrentItem ? Colours.palette.m3primary : Colours.palette.m3secondaryContainer
+
+                                    MaterialIcon {
+                                        anchors.centerIn: parent
+
+                                        text: root.iconFor(entry.entryIsDir, entry.entryMimeType)
+
+                                        color: entry.GridView.isCurrentItem ? Colours.palette.m3onPrimary : Colours.palette.m3onSecondaryContainer
+
+                                        fontStyle: Tokens.font.icon.small
+                                    }
+                                }
+
+                                StyledText {
+                                    Layout.fillWidth: true
+
+                                    text: entry.entryName
+
+                                    horizontalAlignment: Text.AlignHCenter
+
+                                    color: entry.GridView.isCurrentItem ? Colours.palette.m3onSecondaryContainer : Colours.palette.m3onSurface
+
+                                    font: Tokens.font.body.small
+
+                                    elide: Text.ElideRight
+
+                                    maximumLineCount: 1
                                 }
                             }
 
-                            StyledText {
-                                Layout.fillWidth: true
-
-                                text: entry.entryName
-
-                                horizontalAlignment: Text.AlignHCenter
-
-                                color: entry.GridView.isCurrentItem ? Colours.palette.m3onSecondaryContainer : Colours.palette.m3onSurface
-
-                                font: Tokens.font.body.small
-
-                                elide: Text.ElideRight
-
-                                maximumLineCount: 1
-                            }
-                        }
-
-                        HoverHandler {
-                            id: entryHover
-                        }
-
-                        StateLayer {
-                            enabled: entry.valid
-
-                            onClicked: {
-                                if (!entry.valid)
-                                    return;
-
-                                fileView.currentIndex = entry.index;
-
-                                root.selectedPath = entry.entryPath;
-
-                                root.selectedIsDir = entry.entryIsDir;
-
-                                root.downloadStatus = "";
+                            HoverHandler {
+                                id: entryHover
                             }
 
-                            onDoubleClicked: {
-                                if (!entry.valid)
-                                    return;
+                            StateLayer {
+                                enabled: entry.valid && !root.navigating
 
-                                if (entry.entryIsDir) {
-                                    root.openDirectory(entry.entryPath);
+                                onClicked: {
+                                    if (!entry.valid)
+                                        return;
 
-                                    return;
+                                    fileView.currentIndex = entry.index;
+
+                                    root.selectedPath = entry.entryPath;
+
+                                    root.selectedIsDir = entry.entryIsDir;
+
+                                    root.downloadStatus = "";
                                 }
 
-                                Quickshell.execDetached(["xdg-open", entry.entryPath]);
+                                onDoubleClicked: {
+                                    if (!entry.valid)
+                                        return;
+
+                                    if (entry.entryIsDir) {
+                                        root.openDirectory(entry.entryPath);
+
+                                        return;
+                                    }
+
+                                    Quickshell.execDetached(["xdg-open", entry.entryPath]);
+                                }
                             }
                         }
                     }
@@ -511,7 +904,7 @@ Item {
             clip: true
 
             //
-            // Real progress fill.
+            // Real download progress.
             //
             StyledRect {
                 anchors.top: parent.top
@@ -538,9 +931,6 @@ Item {
 
                 spacing: Tokens.spacing.medium
 
-                //
-                // Utilities-style icon.
-                //
                 StyledRect {
                     implicitWidth: 40
                     implicitHeight: 40
@@ -609,7 +999,7 @@ Item {
                 }
 
                 //
-                // Download action pill.
+                // Download
                 //
                 StyledRect {
                     visible: root.selectedPath !== "" && !root.selectedIsDir && !root.downloadingHere
@@ -637,7 +1027,7 @@ Item {
                     }
 
                     StateLayer {
-                        enabled: !KdeConnect.transferring
+                        enabled: !KdeConnect.transferring && !root.navigating
 
                         onClicked: {
                             root.activeDownloadName = root.selectedPath.split("/").pop();
@@ -653,7 +1043,7 @@ Item {
                 }
 
                 //
-                // Cancel action.
+                // Cancel
                 //
                 StyledRect {
                     visible: root.downloadingHere && root.showDownloadCancel
@@ -681,6 +1071,7 @@ Item {
                     StateLayer {
                         onClicked: {
                             root.showDownloadCancel = false;
+
                             KdeConnect.cancel();
                         }
                     }
