@@ -148,7 +148,7 @@ StyledRect {
 
                 color: browseHover.hovered ? Colours.palette.m3secondaryContainer : "transparent"
 
-                opacity: root.primaryMountBusy || KdeConnect.transferring ? 0.5 : 1
+                opacity: root.primaryMountBusy || (root.primaryDevice !== null && KdeConnect.sharing && KdeConnect.sharingDevice === root.primaryDevice.id) ? 0.5 : 1
 
                 MaterialIcon {
                     anchors.centerIn: parent
@@ -165,7 +165,7 @@ StyledRect {
                 }
 
                 TapHandler {
-                    enabled: !root.primaryMountBusy && !KdeConnect.transferring
+                    enabled: root.primaryDevice !== null && !root.primaryMountBusy && !(KdeConnect.sharing && KdeConnect.sharingDevice === root.primaryDevice.id)
 
                     onTapped: root.browsePrimaryDevice()
                 }
