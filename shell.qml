@@ -9,15 +9,12 @@ import "modules/drawers"
 import "modules/background"
 import "modules/areapicker"
 import "modules/lock"
-import "modules/utilities/cards"
 import QtQuick
 import Quickshell
 import qs.services
 
 ShellRoot {
     id: root
-
-    property alias phoneBrowser: phoneBrowserWindow
 
     settings.watchFiles: true
 
@@ -33,16 +30,14 @@ ShellRoot {
     Background {}
     Drawers {}
     AreaPicker {}
+
     Lock {
         id: lock
     }
 
-    PhoneBrowser {
-        id: phoneBrowserWindow
-    }
-
     Shortcuts {}
     BatteryMonitor {}
+
     IdleMonitors {
         lock: lock
     }
