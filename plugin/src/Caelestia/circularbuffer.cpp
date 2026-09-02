@@ -2,7 +2,7 @@
 
 #include <algorithm>
 
-namespace caelestia::internal {
+namespace caelestia {
 
 CircularBuffer::CircularBuffer(QObject* parent)
     : QObject(parent) {}
@@ -12,8 +12,7 @@ int CircularBuffer::capacity() const {
 }
 
 void CircularBuffer::setCapacity(int capacity) {
-    if (capacity < 0)
-        capacity = 0;
+    capacity = std::max(capacity, 0);
     if (m_capacity == capacity)
         return;
 
@@ -91,4 +90,4 @@ qreal CircularBuffer::at(int index) const {
     return m_data[actualIndex];
 }
 
-} // namespace caelestia::internal
+} // namespace caelestia

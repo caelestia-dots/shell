@@ -4,7 +4,7 @@
 #include <qobject.h>
 #include <qqmlintegration.h>
 
-namespace caelestia::internal {
+namespace caelestia::components {
 
 class CircularIndicatorManager : public QObject {
     Q_OBJECT
@@ -24,7 +24,7 @@ class CircularIndicatorManager : public QObject {
 public:
     explicit CircularIndicatorManager(QObject* parent = nullptr);
 
-    enum IndeterminateAnimationType {
+    enum class IndeterminateAnimationType : quint8 {
         Advance = 0,
         Retreat
     };
@@ -69,4 +69,4 @@ private:
     void updateRetreat(qreal progress);
 };
 
-} // namespace caelestia::internal
+} // namespace caelestia::components

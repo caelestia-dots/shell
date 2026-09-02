@@ -1,17 +1,19 @@
 qml_module(caelestia-config
     URI Caelestia.Config
+    INCLUDE_PREFIX config
     SOURCES
         common.cpp
         rootnodes.cpp
         configattached.cpp
         appearanceconfig.cpp
+        borderconfig.cpp
         font.cpp
         fontbuilder.cpp
         tokensattached.cpp
         anim.cpp
+        enums.hpp
         backgroundconfig.hpp
         barconfig.hpp
-        borderconfig.hpp
         dashboardconfig.hpp
         generalconfig.hpp
         launcherconfig.hpp
@@ -33,5 +35,6 @@ qml_module(caelestia-config
 )
 target_link_libraries(caelestia-config PUBLIC
     Qt::Gui
+    caelestia-core
     caelestia-settings
 )

@@ -1,13 +1,13 @@
 #pragma once
 
-#include <QtQuick/qquickitem.h>
 #include <qfuture.h>
 #include <qfuturewatcher.h>
 #include <qobject.h>
 #include <qpointer.h>
 #include <qqmlintegration.h>
+#include <qquickitem.h>
 
-namespace caelestia {
+namespace caelestia::images {
 
 class ImageAnalyser : public QObject {
     Q_OBJECT
@@ -59,4 +59,4 @@ private:
     static void analyse(QPromise<AnalyseResult>& promise, const QImage& image, int rescaleSize);
 };
 
-} // namespace caelestia
+} // namespace caelestia::images

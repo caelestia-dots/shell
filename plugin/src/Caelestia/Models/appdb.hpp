@@ -7,7 +7,7 @@
 #include <qregularexpression.h>
 #include <qtimer.h>
 
-namespace caelestia {
+namespace caelestia::models {
 
 class AppEntry : public QObject {
     Q_OBJECT
@@ -68,7 +68,7 @@ class AppDb : public QObject {
     Q_PROPERTY(QString path READ path WRITE setPath NOTIFY pathChanged REQUIRED)
     Q_PROPERTY(QObjectList entries READ entries WRITE setEntries NOTIFY entriesChanged REQUIRED)
     Q_PROPERTY(QStringList favouriteApps READ favouriteApps WRITE setFavouriteApps NOTIFY favouriteAppsChanged REQUIRED)
-    Q_PROPERTY(QQmlListProperty<caelestia::AppEntry> apps READ apps NOTIFY appsChanged)
+    Q_PROPERTY(QQmlListProperty<caelestia::models::AppEntry> apps READ apps NOTIFY appsChanged)
 
 public:
     explicit AppDb(QObject* parent = nullptr);
@@ -105,7 +105,7 @@ private:
     QHash<QString, AppEntry*> m_apps;
     mutable QList<AppEntry*> m_sortedApps;
 
-    QString regexifyString(const QString& original) const;
+    static QString regexifyString(const QString& original);
     QList<AppEntry*>& getSortedApps() const;
     bool isFavourite(const AppEntry* app) const;
     quint32 getFrequency(const QString& id) const;
@@ -113,4 +113,4 @@ private:
     void updateApps();
 };
 
-} // namespace caelestia
+} // namespace caelestia::models

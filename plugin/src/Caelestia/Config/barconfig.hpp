@@ -4,10 +4,9 @@
 #include <qstringlist.h>
 #include <qvariantlist.h>
 
-#include "common.hpp"
 #include "settings/objectnode.hpp"
-
 #include "common.hpp"
+#include "enums.hpp"
 
 namespace caelestia::config {
 
@@ -41,10 +40,11 @@ class BarWorkspaces : public settings::ObjectNode {
     CONFIG_PROPERTY(int, maxWindowIcons, 5)
     CONFIG_PROPERTY(bool, activeTrail, false)
     CONFIG_GLOBAL_PROPERTY(bool, perMonitorWorkspaces, true)
+    CONFIG_ENUM_PROPERTY(BarWorkspaceDisplay, displayType, BarWorkspaceDisplay::Shapes)
     CONFIG_PROPERTY(QString, label, u"  "_s)
     CONFIG_PROPERTY(QString, occupiedLabel, u"󰮯"_s)
     CONFIG_PROPERTY(QString, activeLabel, u"󰮯"_s)
-    CONFIG_PROPERTY(QString, capitalisation, u"preserve"_s)
+    CONFIG_ENUM_PROPERTY(BarWorkspaceCapitalisation, capitalisation, BarWorkspaceCapitalisation::Preserve)
     CONFIG_GLOBAL_PROPERTY(QVariantList, specialWorkspaceIcons, {})
     CONFIG_GLOBAL_PROPERTY(QStringList, ignoredTags,
         DEFAULT_ARG({

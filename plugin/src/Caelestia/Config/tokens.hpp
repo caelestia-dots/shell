@@ -1,10 +1,11 @@
 #pragma once
 
-#include <limits>
 #include <qlist.h>
 
-#include "common.hpp"
+#include <limits>
+
 #include "settings/objectnode.hpp"
+#include "common.hpp"
 
 namespace caelestia::config {
 

@@ -1,13 +1,14 @@
 #include "visualiserbars.hpp"
 
-#include <algorithm>
-#include <cmath>
 #include <qbrush.h>
 #include <qpainter.h>
 #include <qpainterpath.h>
 #include <qpen.h>
 
-namespace caelestia::internal {
+#include <algorithm>
+#include <cmath>
+
+namespace caelestia::components {
 
 VisualiserBars::VisualiserBars(QQuickItem* parent)
     : QQuickPaintedItem(parent) {
@@ -195,4 +196,4 @@ void VisualiserBars::setAnimationDuration(int duration) {
     emit animationDurationChanged();
 }
 
-} // namespace caelestia::internal
+} // namespace caelestia::components

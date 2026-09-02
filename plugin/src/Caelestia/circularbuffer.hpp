@@ -4,7 +4,7 @@
 #include <qqmlintegration.h>
 #include <qvector.h>
 
-namespace caelestia::internal {
+namespace caelestia {
 
 class CircularBuffer : public QObject {
     Q_OBJECT
@@ -27,7 +27,7 @@ public:
 
     Q_INVOKABLE void push(qreal value);
     Q_INVOKABLE void clear();
-    Q_INVOKABLE [[nodiscard]] qreal at(int index) const;
+    [[nodiscard]] Q_INVOKABLE qreal at(int index) const;
 
 signals:
     void capacityChanged();
@@ -41,4 +41,4 @@ private:
     int m_capacity = 0;
 };
 
-} // namespace caelestia::internal
+} // namespace caelestia

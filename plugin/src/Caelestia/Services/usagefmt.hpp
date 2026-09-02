@@ -1,6 +1,8 @@
 #pragma once
 
+#include <qobject.h>
 #include <qqmlintegration.h>
+#include <qstring.h>
 
 namespace caelestia::services::usagefmt {
 
@@ -24,7 +26,7 @@ class UsageFmt : public QObject {
     QML_SINGLETON
 
 public:
-    Q_INVOKABLE [[nodiscard]] FormatResult formatKib(qreal kib, qreal total) const;
+    [[nodiscard]] Q_INVOKABLE static FormatResult formatKib(qreal kib, qreal total);
 };
 
 } // namespace caelestia::services::usagefmt
