@@ -1386,9 +1386,33 @@ void KdeConnectTransfer::refreshMount(
                     &directories,
                     &error
                 )) {
-                mounted = false;
-                mountPoint.clear();
-                directories.clear();
+                //
+                // IMPORTANT:
+                //
+                // A failed refresh does NOT mean the device
+                // became unmounted.
+                //
+                // Preserve the last known mount state and only
+                // report the refresh failure.
+                //
+                if (!self)
+                    return;
+
+                QMetaObject::invokeMethod(
+                    self.data(),
+                    [self, deviceId, error]() {
+                        if (!self)
+                            return;
+
+                        emit self->mountFailed(
+                            deviceId,
+                            error
+                        );
+                    },
+                    Qt::QueuedConnection
+                );
+
+                return;
             }
 
             if (!self)
