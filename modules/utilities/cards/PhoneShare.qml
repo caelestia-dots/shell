@@ -89,7 +89,7 @@ StyledRect {
 
                     anchors.centerIn: parent
 
-                    text: "smartphone"
+                    text: "mobile_arrow_down"
 
                     color: Colours.palette.m3onSecondaryContainer
 
@@ -130,6 +130,70 @@ StyledRect {
                     font: Tokens.font.body.small
 
                     elide: Text.ElideRight
+                }
+            }
+
+            Item {
+                id: receivingIndicator
+
+                visible: root.primaryDevice !== null && KdeConnect.receiving && KdeConnect.receivingDevice === root.primaryDevice.id
+
+                implicitWidth: 34
+                implicitHeight: 34
+
+                Item {
+                    id: downloadIcon
+
+                    anchors.centerIn: parent
+
+                    width: 20
+                    height: 20
+
+                    //
+                    // Empty / inactive part.
+                    //
+                    MaterialIcon {
+                        anchors.centerIn: parent
+
+                        text: "download"
+
+                        color: Colours.palette.m3onSurfaceVariant
+
+                        opacity: 0.25
+
+                        fontStyle: Tokens.font.icon.small
+                    }
+
+                    //
+                    // Filled part.
+                    //
+                    Item {
+                        anchors.top: parent.top
+                        anchors.left: parent.left
+                        anchors.right: parent.right
+
+                        height: parent.height * KdeConnect.progress
+
+                        clip: true
+
+                        Behavior on height {
+                            NumberAnimation {
+                                duration: 100
+                            }
+                        }
+
+                        MaterialIcon {
+                            x: (downloadIcon.width - implicitWidth) / 2
+
+                            y: (downloadIcon.height - implicitHeight) / 2
+
+                            text: "download"
+
+                            color: Colours.palette.m3onSurfaceVariant
+
+                            fontStyle: Tokens.font.icon.small
+                        }
+                    }
                 }
             }
 
