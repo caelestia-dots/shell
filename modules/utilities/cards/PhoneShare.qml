@@ -24,12 +24,14 @@ StyledRect {
     implicitHeight: nonAnimHeight
 
     radius: Tokens.rounding.large
+
     color: Colours.tPalette.m3surfaceContainer
+
     clip: true
 
     Component.onCompleted: KdeConnect.refresh()
 
-    Component.onDestruction: screenState.utilities = false
+    // Component.onDestruction: screenState.utilities = false
 
     function browsePrimaryDevice(): void {
         if (root.primaryDevice === null)
@@ -54,7 +56,9 @@ StyledRect {
         id: layout
 
         anchors.top: parent.top
+
         anchors.left: parent.left
+
         anchors.right: parent.right
 
         anchors.margins: Tokens.padding.large
@@ -95,6 +99,7 @@ StyledRect {
 
             ColumnLayout {
                 Layout.fillWidth: true
+
                 spacing: 0
 
                 StyledText {
@@ -129,7 +134,7 @@ StyledRect {
             }
 
             //
-            // Browse is now a small header icon.
+            // Browse
             //
             StyledRect {
                 id: browseButton
@@ -188,7 +193,15 @@ StyledRect {
 
                 readonly property bool storageBusy: KdeConnect.isMountBusy(deviceCard.modelData.id)
 
-                readonly property bool transferringHere: KdeConnect.sharing && KdeConnect.sharingDevice === deviceCard.modelData.id
+                //
+                // IMPORTANT:
+                //
+                // This now covers BOTH directions:
+                //
+                // PC -> Phone
+                // Phone -> PC
+                //
+                readonly property bool transferringHere: (KdeConnect.sharing && KdeConnect.sharingDevice === deviceCard.modelData.id) || (KdeConnect.receiving && KdeConnect.receivingDevice === deviceCard.modelData.id)
 
                 //
                 // Keep height stable during transfer.
@@ -216,7 +229,9 @@ StyledRect {
                     z: 0
 
                     anchors.top: parent.top
+
                     anchors.bottom: parent.bottom
+
                     anchors.left: parent.left
 
                     width: parent.width * deviceCard.shareProgress
@@ -325,7 +340,7 @@ StyledRect {
 
                     //
                     // ==================================
-                    // Mount / Unmount icon
+                    // Mount / Unmount
                     // ==================================
                     //
                     StyledRect {
@@ -377,6 +392,9 @@ StyledRect {
                     //
                     // ==================================
                     // Cancel
+                    //
+                    // This remains specifically for the
+                    // PC -> Phone drag transfer.
                     // ==================================
                     //
                     StyledRect {
@@ -432,8 +450,10 @@ StyledRect {
                     keys: ["text/uri-list"]
 
                     //
-                    // Do NOT set utilities=false when
+                    // Do NOT set utilities=false here when
                     // containsDrag becomes false.
+                    //
+                    // Interactions.qml owns closing.
                     //
                     onContainsDragChanged: {
                         if (containsDrag)
