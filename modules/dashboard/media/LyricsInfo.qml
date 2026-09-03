@@ -5,13 +5,16 @@ import Caelestia.Blobs
 import Caelestia.Config
 import Caelestia.Services
 import qs.components
+import qs.components.controls
 import qs.services
+import qs.utils
 
 Item {
     id: root
 
     property bool open
-    readonly property real padding: Tokens.padding.large
+    readonly property real padding: Tokens.padding.medium
+    readonly property real popupWidth: 320
 
     implicitWidth: btn.implicitWidth * 0.9
     implicitHeight: btn.implicitHeight * 0.9
@@ -61,7 +64,7 @@ Item {
             PropertyChanges {
                 rect.anchors.rightMargin: root.width - root.Tokens.spacing.small
                 rect.anchors.topMargin: -root.Tokens.padding.medium
-                rect.implicitWidth: Math.max(layout.implicitWidth, placeholder.implicitWidth) + root.padding * 2
+                rect.implicitWidth: root.popupWidth
                 rect.implicitHeight: Math.max(layout.implicitHeight, placeholder.implicitHeight) + root.padding * 2
                 content.opacity: 1
             }
@@ -144,28 +147,143 @@ Item {
             ColumnLayout {
                 id: layout
 
-                anchors.centerIn: parent
-                spacing: Tokens.spacing.extraSmall
+                anchors.fill: parent
+                anchors.margins: root.padding
+                spacing: Tokens.spacing.small
                 opacity: 0
 
-                StyledText {
-                    text: qsTr("Backend: %1").arg(CUtils.enumToString(Lyrics, "backend"))
-                    color: Colours.palette.m3onSurfaceVariant
-                    animate: true
+                RowLayout {
+                    Layout.fillWidth: true
+                    spacing: Tokens.spacing.small
+
+                    MaterialIcon {
+                        text: "sync"
+                        color: Colours.palette.m3primary
+                        fontStyle: Tokens.font.icon.small
+                    }
+
+                    StyledText {
+                        Layout.fillWidth: true
+                        text: qsTr("Backend: %1").arg(CUtils.enumToString(Lyrics, "backend"))
+                        color: Colours.palette.m3onSurfaceVariant
+                        font: Tokens.font.label.medium
+                    }
+
+                    StyledText {
+                        visible: Lyrics.selectedCandidate.duration > 0
+                        text: `${Math.floor(Lyrics.selectedCandidate.duration / 60)}:${Math.floor(Lyrics.selectedCandidate.duration % 60).toString().padStart(2, "0")}`
+                        color: Colours.palette.m3onSurfaceVariant
+                        font: Tokens.font.label.small
+                    }
                 }
 
                 StyledText {
-                    Layout.maximumWidth: Tokens.sizes.dashboard.mediaTabWidth / 2
-                    text: qsTr("Selected candidate: %1 | %2 | %3").arg(Lyrics.selectedCandidate.title).arg(Lyrics.selectedCandidate.artist).arg(Lyrics.selectedCandidate.album)
-                    color: Colours.palette.m3onSurfaceVariant
-                    wrapMode: Text.WrapAtWordBoundaryOrAnywhere
-                    animate: true
+                    Layout.fillWidth: true
+                    text: `${Lyrics.selectedCandidate.title || qsTr("Unknown")} • ${Lyrics.selectedCandidate.artist || qsTr("Unknown")}`
+                    color: Colours.palette.m3onSurface
+                    font: Tokens.font.label.large
+                    elide: Text.ElideRight
                 }
 
-                StyledText {
-                    text: qsTr("Offset: %1 ms").arg(Lyrics.offset)
-                    color: Colours.palette.m3onSurfaceVariant
-                    animate: true
+                RowLayout {
+                    Layout.fillWidth: true
+                    spacing: Tokens.spacing.small
+
+                    IconButton {
+                        type: IconButton.Tonal
+                        icon: "remove"
+                        onClicked: Lyrics.offset -= 0.5
+                    }
+
+                    StyledText {
+                        Layout.fillWidth: true
+                        horizontalAlignment: Text.AlignHCenter
+                        text: qsTr("Offset: %1%2 s").arg(Lyrics.offset >= 0 ? "+" : "").arg(Lyrics.offset.toFixed(1))
+                        color: Colours.palette.m3onSurface
+                        font: Tokens.font.label.large
+                    }
+
+                    IconButton {
+                        type: IconButton.Tonal
+                        icon: "add"
+                        onClicked: Lyrics.offset += 0.5
+                    }
+
+                    TextButton {
+                        visible: Lyrics.offset !== 0
+                        type: TextButton.Text
+                        text: qsTr("Reset")
+                        onClicked: Lyrics.offset = 0
+                    }
+                }
+
+                ColumnLayout {
+                    visible: Lyrics.lyricCandidates.length > 1
+                    Layout.fillWidth: true
+                    spacing: Tokens.spacing.extraSmall
+
+                    StyledText {
+                        text: qsTr("Alternative Candidates (%1)").arg(Lyrics.lyricCandidates.length)
+                        color: Colours.palette.m3onSurfaceVariant
+                        font: Tokens.font.label.small
+                    }
+
+                    Repeater {
+                        model: Lyrics.lyricCandidates.slice(0, 3)
+
+                        delegate: Rectangle {
+                            id: candItem
+
+                            required property var modelData
+
+                            readonly property bool isSelected: Lyrics.selectedCandidate.id === modelData.id && Lyrics.selectedCandidate.backend === modelData.backend
+
+                            Layout.fillWidth: true
+                            implicitHeight: candRow.implicitHeight + Tokens.padding.extraSmall * 2
+                            radius: Tokens.rounding.small
+                            color: isSelected ? Colours.palette.m3secondaryContainer : Colours.palette.m3surfaceContainer
+
+                            Behavior on color {
+                                CAnim {}
+                            }
+
+                            StateLayer {
+                                radius: parent.radius
+                                color: candItem.isSelected ? Colours.palette.m3onSecondaryContainer : Colours.palette.m3onSurface
+                                onClicked: Lyrics.selectedCandidate = candItem.modelData
+                            }
+
+                            RowLayout {
+                                id: candRow
+
+                                anchors.fill: parent
+                                anchors.leftMargin: Tokens.padding.small
+                                anchors.rightMargin: Tokens.padding.small
+                                spacing: Tokens.spacing.small
+
+                                MaterialIcon {
+                                    text: candItem.isSelected ? "check" : "radio_button_unchecked"
+                                    color: candItem.isSelected ? Colours.palette.m3primary : Colours.palette.m3outline
+                                    fontStyle: Tokens.font.icon.small
+                                }
+
+                                StyledText {
+                                    Layout.fillWidth: true
+                                    text: `${candItem.modelData.title} • ${candItem.modelData.artist}`
+                                    color: candItem.isSelected ? Colours.palette.m3onSecondaryContainer : Colours.palette.m3onSurface
+                                    font: Tokens.font.body.small
+                                    elide: Text.ElideRight
+                                }
+
+                                StyledText {
+                                    visible: candItem.modelData.duration > 0
+                                    text: `${Math.floor(candItem.modelData.duration / 60)}:${Math.floor(candItem.modelData.duration % 60).toString().padStart(2, "0")}`
+                                    color: Colours.palette.m3outline
+                                    font: Tokens.font.label.small
+                                }
+                            }
+                        }
+                    }
                 }
             }
 

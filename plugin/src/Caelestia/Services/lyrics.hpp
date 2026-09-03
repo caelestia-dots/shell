@@ -36,6 +36,7 @@ class Lyrics : public QObject {
 
 public:
     explicit Lyrics(QObject* parent = nullptr);
+    ~Lyrics() override;
 
     [[nodiscard]] QStringList lyrics() const;
     [[nodiscard]] LyricsBackend backend() const;
@@ -114,12 +115,16 @@ private:
     [[nodiscard]] static QString readCachedLrc(LyricsBackend backend, const QString& id);
     static void writeCachedLrc(LyricsBackend backend, const QString& id, const QString& text);
 
+    [[nodiscard]] static QString cleanTrackTitle(const QString& title);
+    [[nodiscard]] static QString extractPrimaryArtist(const QString& artist);
+
     [[nodiscard]] static QVector<LyricLine> parseLrc(const QString& text);
     [[nodiscard]] static QString tryReadLocalLrc(const QString& dir, const QString& artist, const QString& title);
     [[nodiscard]] static QString findLocalLrcRecursive(const QString& dir, const QString& artist, const QString& title);
 
     QNetworkAccessManager* m_nam;
     QTimer* m_loadDebounce;
+    QTimer* m_saveDebounce;
 
     QVector<LyricLine> m_lines;
     QStringList m_lyrics;

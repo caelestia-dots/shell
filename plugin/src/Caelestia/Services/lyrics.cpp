@@ -67,13 +67,67 @@ constexpr qreal k_indexFudge = 0.1;
 
 } // namespace
 
+QString Lyrics::cleanTrackTitle(const QString& title) {
+    if (title.isEmpty()) {
+        return {};
+    }
+
+    QString s = title.normalized(QString::NormalizationForm_C);
+
+    // 1. Strip YouTube 11-character video IDs: [kffacxfA7G4]
+    static const QRegularExpression ytIdRegex(u"\\[[a-zA-Z0-9_-]{11}\\]"_s);
+    s.remove(ytIdRegex);
+
+    // 2. Strip bracketed boilerplate (supporting ASCII + CJK/Full-width brackets)
+    // Brackets: ( ) [ ] { } （ ） ［ ］ 【 】 「 」 『 』
+    static const QRegularExpression boilerplateRegex(
+        u"\\s*[\\(\\[\\{\\x{FF08}\\x{FF3B}\\x{3010}\\x{300C}\\x{300E}][^\\)\\]\\}\\x{FF09}\\x{FF3D}\\x{3011}\\x{300D}\\x{300F}]*?"
+        u"(?:official\\s*(?:music\\s*video|video|audio|lyric\\s*video|visualizer)?|music\\s*video|lyric\\s*video|visualizer|"
+        u"remaster(?:ed)?|4k|hd|hq|pv|mv|full\\s*ver(?:sion)?|live(?:\\s+at\\s+[^\\)\\]\\}]+)?|prod(?:\\.|\\s+by)[^\\)\\]\\}]+)"
+        u"[^\\)\\]\\}\\x{FF09}\\x{FF3D}\\x{3011}\\x{300D}\\x{300F}]*?"
+        u"[\\)\\]\\}\\x{FF09}\\x{FF3D}\\x{3011}\\x{300D}\\x{300F}]"_s,
+        QRegularExpression::CaseInsensitiveOption);
+    s.remove(boilerplateRegex);
+
+    // 3. Strip bracketed feature tags: (feat. Ludacris) or [ft. Artist]
+    static const QRegularExpression bracketedFeatRegex(
+        u"\\s*[\\(\\[\\{\\x{FF08}\\x{FF3B}\\x{3010}]\\s*(?:ft\\.?|feat\\.?|featuring|with)\\s+[^\\)\\]\\}\\x{FF09}\\x{FF3D}\\x{3011}]+[\\)\\]\\}\\x{FF09}\\x{FF3D}\\x{3011}]"_s,
+        QRegularExpression::CaseInsensitiveOption);
+    s.remove(bracketedFeatRegex);
+
+    // 4. Strip trailing unbracketed feature tags: "Track Title feat. Artist"
+    static const QRegularExpression trailingFeatRegex(
+        u"\\s*(?:\\bft\\.?|\\bfeat\\.?|\\bfeaturing|\\bwith)\\s+.*$"_s,
+        QRegularExpression::CaseInsensitiveOption);
+    s.remove(trailingFeatRegex);
+
+    s = s.trimmed();
+    return s.isEmpty() ? title.trimmed() : s;
+}
+
+QString Lyrics::extractPrimaryArtist(const QString& artist) {
+    if (artist.isEmpty()) {
+        return {};
+    }
+    static const QRegularExpression splitRegex(
+        u"\\s*(?:,|;|/|&|\\bft\\.?|\\bfeat\\.?|\\bfeaturing|\\bwith|\\bx\\b|\\b\\x{00D7}\\b)\\s*"_s,
+        QRegularExpression::CaseInsensitiveOption);
+    const QStringList parts = artist.split(splitRegex, Qt::SkipEmptyParts);
+    return parts.isEmpty() ? artist.trimmed() : parts.first().trimmed();
+}
+
 Lyrics::Lyrics(QObject* parent)
     : QObject(parent)
     , m_nam(new QNetworkAccessManager(this))
-    , m_loadDebounce(new QTimer(this)) {
+    , m_loadDebounce(new QTimer(this))
+    , m_saveDebounce(new QTimer(this)) {
     m_loadDebounce->setSingleShot(true);
     m_loadDebounce->setInterval(k_loadDebounceMs);
     QObject::connect(m_loadDebounce, &QTimer::timeout, this, &Lyrics::doLoad);
+
+    m_saveDebounce->setSingleShot(true);
+    m_saveDebounce->setInterval(400);
+    QObject::connect(m_saveDebounce, &QTimer::timeout, this, &Lyrics::persistTrackPrefs);
 
     const auto* cfg = config::ConfigSingleton::instance();
     const auto* svcCfg = cfg->services();
@@ -86,6 +140,13 @@ Lyrics::Lyrics(QObject* parent)
     QObject::connect(paths, &config::UserPaths::lyricsDirChanged, this, &Lyrics::onLyricsDirChanged);
 
     loadLyricsMap();
+}
+
+Lyrics::~Lyrics() {
+    if (m_saveDebounce && m_saveDebounce->isActive()) {
+        m_saveDebounce->stop();
+        persistTrackPrefs();
+    }
 }
 
 QStringList Lyrics::lyrics() const {
@@ -170,8 +231,15 @@ void Lyrics::setSelectedCandidate(const LyricCandidate& value) {
         }
     }
 
-    if (!m_settingFromPrefs) {
-        persistTrackPrefs();
+    if (!m_settingFromPrefs && !trackKey().isEmpty()) {
+        QJsonObject entry = m_lyricsMap.value(trackKey()).toObject();
+        entry.insert(u"offset"_s, m_offset);
+        entry.insert(u"backend"_s, backendKey(value.backend()));
+        entry.insert(u"id"_s, value.id());
+        m_lyricsMap.insert(trackKey(), entry);
+        if (m_saveDebounce) {
+            m_saveDebounce->start();
+        }
     }
 }
 
@@ -188,14 +256,23 @@ qreal Lyrics::offset() const {
 }
 
 void Lyrics::setOffset(qreal value) {
-    if (qFuzzyCompare(m_offset, value)) {
+    if (qFuzzyCompare(m_offset + 1.0, value + 1.0)) {
         return;
     }
     m_offset = value;
     emit offsetChanged();
 
-    if (!m_settingFromPrefs) {
-        persistTrackPrefs();
+    if (!m_settingFromPrefs && !trackKey().isEmpty()) {
+        QJsonObject entry = m_lyricsMap.value(trackKey()).toObject();
+        entry.insert(u"offset"_s, m_offset);
+        if (m_selected.isValid()) {
+            entry.insert(u"backend"_s, backendKey(m_selected.backend()));
+            entry.insert(u"id"_s, m_selected.id());
+        }
+        m_lyricsMap.insert(trackKey(), entry);
+        if (m_saveDebounce) {
+            m_saveDebounce->start();
+        }
     }
 }
 
@@ -344,9 +421,12 @@ int Lyrics::newRequestId() {
 }
 
 void Lyrics::cancelInFlight() {
+    m_currentRequestId++;
+
     for (auto it = m_pendingReplies.begin(); it != m_pendingReplies.end(); ++it) {
         for (auto& ptr : it.value()) {
             if (auto* reply = ptr.data()) {
+                reply->disconnect(this);
                 reply->abort();
                 reply->deleteLater();
             }
@@ -505,10 +585,13 @@ void Lyrics::tryLrclib(int reqId) {
 
     setBackend(LyricsBackend::LRCLIB);
 
+    const QString cleanTitle = cleanTrackTitle(m_title);
+    const QString primaryArtist = extractPrimaryArtist(m_artist);
+
     QUrl url(u"https://lrclib.net/api/get"_s);
     QUrlQuery q;
-    q.addQueryItem(u"track_name"_s, m_title);
-    q.addQueryItem(u"artist_name"_s, m_artist);
+    q.addQueryItem(u"track_name"_s, cleanTitle);
+    q.addQueryItem(u"artist_name"_s, primaryArtist);
     if (!m_album.isEmpty()) {
         q.addQueryItem(u"album_name"_s, m_album);
     }
@@ -522,7 +605,7 @@ void Lyrics::tryLrclib(int reqId) {
     auto* reply = getJson(url, lrclibHeaders());
     trackReply(reqId, reply);
 
-    QObject::connect(reply, &QNetworkReply::finished, this, [this, reply, reqId] {
+    QObject::connect(reply, &QNetworkReply::finished, this, [this, reply, reqId, cleanTitle, primaryArtist] {
         reply->deleteLater();
         if (reqId != m_currentRequestId) {
             return;
@@ -538,7 +621,7 @@ void Lyrics::tryLrclib(int reqId) {
         const qint64 id = static_cast<qint64>(obj.value(u"id"_s).toDouble());
 
         if (synced.isEmpty()) {
-            qCDebug(lcLyrics) << "lrclib: no syncedLyrics for" << m_artist << "-" << m_title;
+            qCDebug(lcLyrics) << "lrclib: no syncedLyrics for" << primaryArtist << "-" << cleanTitle;
             chainNext(LyricsBackend::LRCLIB, reqId);
             return;
         }
@@ -555,8 +638,10 @@ void Lyrics::tryLrclib(int reqId) {
             obj.value(u"artistName"_s).toString(), obj.value(u"albumName"_s).toString(),
             obj.value(u"duration"_s).toDouble());
         appendCandidates({ cand });
-        m_selected = cand;
-        emit selectedCandidateChanged();
+        if (!m_selected.isValid() || m_selected.backend() == LyricsBackend::Auto) {
+            m_selected = cand;
+            emit selectedCandidateChanged();
+        }
         if (!m_settingFromPrefs) {
             persistTrackPrefs();
         }
@@ -574,9 +659,12 @@ void Lyrics::tryNetEase(int reqId) {
     // Reset cookies (LyricsBackend::NetEase rejects requests with stale cookies sometimes)
     m_nam->setCookieJar(new QNetworkCookieJar(m_nam));
 
+    const QString cleanTitle = cleanTrackTitle(m_title);
+    const QString primaryArtist = extractPrimaryArtist(m_artist);
+
     QUrl url(u"https://music.163.com/api/search/get"_s);
     QUrlQuery q;
-    q.addQueryItem(u"s"_s, u"%1 %2"_s.arg(m_title, m_artist));
+    q.addQueryItem(u"s"_s, u"%1 %2"_s.arg(cleanTitle, m_artist.isEmpty() ? primaryArtist : m_artist));
     q.addQueryItem(u"type"_s, u"1"_s);
     q.addQueryItem(u"limit"_s, u"5"_s);
     url.setQuery(q);
@@ -584,7 +672,7 @@ void Lyrics::tryNetEase(int reqId) {
     auto* reply = getJson(url, netEaseHeaders());
     trackReply(reqId, reply);
 
-    QObject::connect(reply, &QNetworkReply::finished, this, [this, reply, reqId] {
+    QObject::connect(reply, &QNetworkReply::finished, this, [this, reply, reqId, cleanTitle, primaryArtist] {
         reply->deleteLater();
         if (reqId != m_currentRequestId) {
             return;
@@ -607,14 +695,14 @@ void Lyrics::tryNetEase(int reqId) {
                 continue;
             }
             const QString sArtist = artists.first().toObject().value(u"name"_s).toString();
-            if (containsCi(m_artist, sArtist) || containsCi(sArtist, m_artist)) {
+            if (containsCi(m_artist, sArtist) || containsCi(sArtist, m_artist) || containsCi(primaryArtist, sArtist) || containsCi(sArtist, primaryArtist)) {
                 bestId = static_cast<qint64>(s.value(u"id"_s).toDouble());
                 break;
             }
         }
 
         if (bestId < 0) {
-            qCDebug(lcLyrics) << "netease: no artist match for" << m_artist << "-" << m_title;
+            qCDebug(lcLyrics) << "netease: no artist match for" << m_artist << "-" << cleanTitle;
             chainNext(LyricsBackend::NetEase, reqId);
             return;
         }
@@ -624,10 +712,13 @@ void Lyrics::tryNetEase(int reqId) {
 }
 
 void Lyrics::searchLrclibCandidates(int reqId) {
+    const QString cleanTitle = cleanTrackTitle(m_title);
+    const QString primaryArtist = extractPrimaryArtist(m_artist);
+
     QUrl url(u"https://lrclib.net/api/search"_s);
     QUrlQuery q;
-    q.addQueryItem(u"track_name"_s, m_title);
-    q.addQueryItem(u"artist_name"_s, m_artist);
+    q.addQueryItem(u"track_name"_s, cleanTitle);
+    q.addQueryItem(u"artist_name"_s, primaryArtist);
     url.setQuery(q);
 
     auto* reply = getJson(url, lrclibHeaders());
@@ -647,26 +738,69 @@ void Lyrics::searchLrclibCandidates(int reqId) {
 
         QList<LyricCandidate> add;
         add.reserve(arr.size());
+
+        LyricCandidate bestCand;
+        qreal bestScore = -1e9;
+        QString bestSynced;
+
         for (const auto& v : arr) {
             const QJsonObject o = v.toObject();
-            if (o.value(u"syncedLyrics"_s).isNull() && o.value(u"plainLyrics"_s).isNull()) {
+            const QString synced = o.value(u"syncedLyrics"_s).toString();
+            const QString plain = o.value(u"plainLyrics"_s).toString();
+            if (synced.isEmpty() && plain.isEmpty()) {
                 continue;
             }
-            add.append(
-                LyricCandidate(LyricsBackend::LRCLIB, QString::number(static_cast<qint64>(o.value(u"id"_s).toDouble())),
-                    o.value(u"trackName"_s).toString(), o.value(u"artistName"_s).toString(),
-                    o.value(u"albumName"_s).toString(), o.value(u"duration"_s).toDouble()));
+            const qint64 id = static_cast<qint64>(o.value(u"id"_s).toDouble());
+            const qreal candDur = o.value(u"duration"_s).toDouble();
+            const LyricCandidate cand(LyricsBackend::LRCLIB, QString::number(id),
+                o.value(u"trackName"_s).toString(), o.value(u"artistName"_s).toString(),
+                o.value(u"albumName"_s).toString(), candDur);
+            add.append(cand);
+
+            if (!synced.isEmpty()) {
+                qreal score = 1000.0;
+                if (m_duration > 10.0 && candDur > 0.0) {
+                    score -= std::abs(candDur - m_duration) * 10.0;
+                }
+                if (score > bestScore) {
+                    bestScore = score;
+                    bestCand = cand;
+                    bestSynced = synced;
+                }
+            }
         }
         appendCandidates(add);
+
+        // If user didn't have an explicit saved preference, auto-upgrade to the duration-matched candidate
+        if (!m_settingFromPrefs && bestCand.isValid() && !bestSynced.isEmpty()) {
+            const bool shouldUpgrade = !m_hasLyrics || (!m_selected.isValid()) ||
+                (m_duration > 10.0 && m_selected.duration() > 0.0 &&
+                 std::abs(m_selected.duration() - m_duration) > 10.0 &&
+                 std::abs(bestCand.duration() - m_duration) < 5.0);
+
+            if (shouldUpgrade) {
+                const auto lines = parseLrc(bestSynced);
+                if (!lines.isEmpty()) {
+                    writeCachedLrc(LyricsBackend::LRCLIB, bestCand.id(), bestSynced);
+                    setLines(lines, LyricsBackend::LRCLIB);
+                    m_selected = bestCand;
+                    emit selectedCandidateChanged();
+                    setLoading(false);
+                }
+            }
+        }
     });
 }
 
 void Lyrics::searchNetEaseCandidates(int reqId) {
     m_nam->setCookieJar(new QNetworkCookieJar(m_nam));
 
+    const QString cleanTitle = cleanTrackTitle(m_title);
+    const QString primaryArtist = extractPrimaryArtist(m_artist);
+
     QUrl url(u"https://music.163.com/api/search/get"_s);
     QUrlQuery q;
-    q.addQueryItem(u"s"_s, u"%1 %2"_s.arg(m_title, m_artist));
+    q.addQueryItem(u"s"_s, u"%1 %2"_s.arg(cleanTitle, m_artist.isEmpty() ? primaryArtist : m_artist));
     q.addQueryItem(u"type"_s, u"1"_s);
     q.addQueryItem(u"limit"_s, u"5"_s);
     url.setQuery(q);
