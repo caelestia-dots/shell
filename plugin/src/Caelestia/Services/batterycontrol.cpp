@@ -29,6 +29,18 @@ BatteryControl::ControlType BatteryControl::controlType() const {
     return m_controlType;
 }
 
+bool BatteryControl::isBinary() const {
+    return m_controlType == ControlType::BinaryConservation;
+}
+
+bool BatteryControl::isTiers() const {
+    return m_controlType == ControlType::DiscreteTiers;
+}
+
+bool BatteryControl::isRange() const {
+    return m_controlType == ControlType::ContinuousRange;
+}
+
 bool BatteryControl::enabled() const {
     return m_enabled;
 }

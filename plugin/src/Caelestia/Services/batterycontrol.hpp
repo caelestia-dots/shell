@@ -25,6 +25,9 @@ public:
 
     Q_PROPERTY(bool isSupported READ isSupported NOTIFY isSupportedChanged)
     Q_PROPERTY(ControlType controlType READ controlType NOTIFY controlTypeChanged)
+    Q_PROPERTY(bool isBinary READ isBinary CONSTANT)
+    Q_PROPERTY(bool isTiers READ isTiers CONSTANT)
+    Q_PROPERTY(bool isRange READ isRange CONSTANT)
     Q_PROPERTY(bool enabled READ enabled NOTIFY enabledChanged)
     Q_PROPERTY(int threshold READ threshold NOTIFY thresholdChanged)
     Q_PROPERTY(int minThreshold READ minThreshold CONSTANT)
@@ -39,6 +42,9 @@ public:
 
     [[nodiscard]] bool isSupported() const;
     [[nodiscard]] ControlType controlType() const;
+    [[nodiscard]] bool isBinary() const;
+    [[nodiscard]] bool isTiers() const;
+    [[nodiscard]] bool isRange() const;
     [[nodiscard]] bool enabled() const;
     [[nodiscard]] int threshold() const;
     [[nodiscard]] int minThreshold() const;
