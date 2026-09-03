@@ -43,8 +43,8 @@ public:
     [[nodiscard]] qreal uploadTotal() const;
     [[nodiscard]] int historyLength() const;
 
-    [[nodiscard]] Q_INVOKABLE NetworkFormatResult formatBytesRate(qreal bytes) const;
-    [[nodiscard]] Q_INVOKABLE NetworkFormatResult formatBytes(qreal bytes) const;
+    [[nodiscard]] Q_INVOKABLE static NetworkFormatResult formatBytesRate(qreal bytes);
+    [[nodiscard]] Q_INVOKABLE static NetworkFormatResult formatBytes(qreal bytes);
 
     [[nodiscard]] CircularBuffer* downloadBuffer() const;
     [[nodiscard]] CircularBuffer* uploadBuffer() const;

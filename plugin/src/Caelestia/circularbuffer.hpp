@@ -27,7 +27,7 @@ public:
 
     Q_INVOKABLE void push(qreal value);
     Q_INVOKABLE void clear();
-    Q_INVOKABLE [[nodiscard]] qreal at(int index) const;
+    [[nodiscard]] Q_INVOKABLE qreal at(int index) const;
 
 signals:
     void capacityChanged();

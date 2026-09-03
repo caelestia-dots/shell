@@ -14,7 +14,7 @@ WavyLine::WavyLine(QQuickItem* parent)
     , m_fullLength(0)
     , m_color(Qt::white)
     , m_waveProgress(0)
-    , m_pathType(Linear)
+    , m_pathType(PathType::Linear)
     , m_startAngle(0)
     , m_fullAngle(360)
     , m_radius(-1)
@@ -174,7 +174,7 @@ void WavyLine::paint(QPainter* painter) {
     painter->setRenderHint(QPainter::Antialiasing);
     painter->setPen(QPen(m_color, m_lineWidth, Qt::SolidLine, Qt::RoundCap));
 
-    if (m_pathType == Arc) {
+    if (m_pathType == PathType::Arc) {
         paintArc(painter);
     } else {
         paintLinear(painter);
@@ -230,12 +230,12 @@ void WavyLine::paintArc(QPainter* painter) {
         return;
     }
 
-    const auto N = qMax(64, qCeil(radius * drawAngleRad));
-    const auto dTheta = drawAngleRad / N;
+    const auto segments = qMax(64, qCeil(radius * drawAngleRad));
+    const auto dTheta = drawAngleRad / segments;
 
     QPainterPath path;
 
-    for (int i = 0; i <= N; ++i) {
+    for (int i = 0; i <= segments; ++i) {
         const auto theta = m_startAngleRad + i * dTheta;
         const auto s = i * dTheta * radius;
         const auto phi = m_frequency * 2 * M_PI * (s + m_startX) / len + phase;

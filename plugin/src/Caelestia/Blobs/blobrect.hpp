@@ -7,14 +7,17 @@
 
 #include "blobshape.hpp"
 
+namespace caelestia::blobs {
+
 class BlobRect : public BlobShape {
     Q_OBJECT
     QML_ELEMENT
     Q_PROPERTY(qreal stiffness READ stiffness WRITE setStiffness NOTIFY stiffnessChanged)
     Q_PROPERTY(qreal damping READ damping WRITE setDamping NOTIFY dampingChanged)
     Q_PROPERTY(qreal deformScale READ deformScale WRITE setDeformScale NOTIFY deformScaleChanged)
-    Q_PROPERTY(QQmlListProperty<BlobRect> exclude READ exclude NOTIFY excludeChanged)
-    Q_PROPERTY(QQmlListProperty<BlobRect> excludeCorners READ excludeCorners NOTIFY excludeCornersChanged)
+    Q_PROPERTY(QQmlListProperty<caelestia::blobs::BlobRect> exclude READ exclude NOTIFY excludeChanged)
+    Q_PROPERTY(
+        QQmlListProperty<caelestia::blobs::BlobRect> excludeCorners READ excludeCorners NOTIFY excludeCornersChanged)
     Q_PROPERTY(qreal topLeftRadius READ topLeftRadius WRITE setTopLeftRadius NOTIFY topLeftRadiusChanged)
     Q_PROPERTY(qreal topRightRadius READ topRightRadius WRITE setTopRightRadius NOTIFY topRightRadiusChanged)
     Q_PROPERTY(qreal bottomLeftRadius READ bottomLeftRadius WRITE setBottomLeftRadius NOTIFY bottomLeftRadiusChanged)
@@ -25,54 +28,28 @@ public:
     explicit BlobRect(QQuickItem* parent = nullptr);
     ~BlobRect() override;
 
-    qreal stiffness() const { return m_stiffness; }
+    [[nodiscard]] qreal stiffness() const;
+    void setStiffness(qreal s);
 
-    void setStiffness(qreal s) {
-        if (!qFuzzyCompare(m_stiffness, s)) {
-            m_stiffness = s;
-            emit stiffnessChanged();
-        }
-    }
+    [[nodiscard]] qreal damping() const;
+    void setDamping(qreal damping);
 
-    qreal damping() const { return m_damping; }
-
-    void setDamping(qreal d) {
-        if (!qFuzzyCompare(m_damping, d)) {
-            m_damping = d;
-            emit dampingChanged();
-        }
-    }
-
-    qreal deformScale() const { return m_deformScale; }
-
-    void setDeformScale(qreal s) {
-        if (!qFuzzyCompare(m_deformScale, s)) {
-            m_deformScale = s;
-            emit deformScaleChanged();
-        }
-    }
+    [[nodiscard]] qreal deformScale() const;
+    void setDeformScale(qreal s);
 
     QQmlListProperty<BlobRect> exclude();
     QQmlListProperty<BlobRect> excludeCorners();
 
-    bool isExcluded(const BlobShape* other) const override;
-    bool isCornerExcluded(const BlobShape* other) const override;
-    void cornerRadii(float out[4]) const override;
-
-    qreal topLeftRadius() const { return m_topLeftRadius; }
-
+    [[nodiscard]] qreal topLeftRadius() const;
     void setTopLeftRadius(qreal r);
 
-    qreal topRightRadius() const { return m_topRightRadius; }
-
+    [[nodiscard]] qreal topRightRadius() const;
     void setTopRightRadius(qreal r);
 
-    qreal bottomLeftRadius() const { return m_bottomLeftRadius; }
-
+    [[nodiscard]] qreal bottomLeftRadius() const;
     void setBottomLeftRadius(qreal r);
 
-    qreal bottomRightRadius() const { return m_bottomRightRadius; }
-
+    [[nodiscard]] qreal bottomRightRadius() const;
     void setBottomRightRadius(qreal r);
 
 signals:
@@ -89,6 +66,10 @@ signals:
 protected:
     void updatePolish() override;
     void updatePhysics() override;
+
+    [[nodiscard]] bool isExcluded(const BlobShape* other) const override;
+    [[nodiscard]] bool isCornerExcluded(const BlobShape* other) const override;
+    void cornerRadii(float out[4]) const override;
 
 private:
     void checkAtRest(float speed);
@@ -136,3 +117,5 @@ private:
     static void excludeCornersReplace(QQmlListProperty<BlobRect>* prop, qsizetype index, BlobRect* rect);
     static void excludeCornersRemoveLast(QQmlListProperty<BlobRect>* prop);
 };
+
+} // namespace caelestia::blobs

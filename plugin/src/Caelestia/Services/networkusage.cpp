@@ -1,21 +1,25 @@
 #include "networkusage.hpp"
 
+#include <qbytearrayview.h>
 #include <qfile.h>
 #include <qtypes.h>
 
 #include <array>
+#include <charconv>
 #include <cmath>
-#include <cstdio>
+#include <system_error>
 
 namespace {
 
-constexpr qreal kBytesPerKiB = 1024.0;
-constexpr qreal kBytesPerMiB = 1024.0 * 1024.0;
-constexpr qreal kBytesPerGiB = 1024.0 * 1024.0 * 1024.0;
+constexpr qreal k_bytesPerKib = 1024.0;
+constexpr qreal k_bytesPerMib = 1024.0 * 1024.0;
+constexpr qreal k_bytesPerGib = 1024.0 * 1024.0 * 1024.0;
 
 } // namespace
 
 namespace caelestia::services {
+
+using Qt::StringLiterals::operator""_s;
 
 NetworkUsage::NetworkUsage(QObject* parent)
     : TickingService(parent)
@@ -53,42 +57,42 @@ CircularBuffer* NetworkUsage::uploadBuffer() const {
     return m_uploadBuffer;
 }
 
-NetworkFormatResult NetworkUsage::formatBytesRate(qreal bytes) const {
+NetworkFormatResult NetworkUsage::formatBytesRate(qreal bytes) {
     NetworkFormatResult result = formatBytes(bytes);
-    result.unit = result.unit + QStringLiteral("/s");
+    result.unit = result.unit + u"/s"_s;
     return result;
 }
 
-NetworkFormatResult NetworkUsage::formatBytes(qreal bytes) const {
+NetworkFormatResult NetworkUsage::formatBytes(qreal bytes) {
     NetworkFormatResult result;
 
     if (bytes < 0 || std::isnan(bytes) || !std::isfinite(bytes)) {
         result.value = 0;
-        result.unit = QStringLiteral("B");
+        result.unit = u"B"_s;
         return result;
     }
-    if (bytes < kBytesPerKiB) {
+    if (bytes < k_bytesPerKib) {
         result.value = bytes;
-        result.unit = QStringLiteral("B");
-    } else if (bytes < kBytesPerMiB) {
-        result.value = bytes / kBytesPerKiB;
-        result.unit = QStringLiteral("KB");
-    } else if (bytes < kBytesPerGiB) {
-        result.value = bytes / kBytesPerMiB;
-        result.unit = QStringLiteral("MB");
+        result.unit = u"B"_s;
+    } else if (bytes < k_bytesPerMib) {
+        result.value = bytes / k_bytesPerKib;
+        result.unit = u"KB"_s;
+    } else if (bytes < k_bytesPerGib) {
+        result.value = bytes / k_bytesPerMib;
+        result.unit = u"MB"_s;
     } else {
-        result.value = bytes / kBytesPerGiB;
-        result.unit = QStringLiteral("GB");
+        result.value = bytes / k_bytesPerGib;
+        result.unit = u"GB"_s;
     }
     return result;
 }
 
 void NetworkUsage::tick() {
-    QFile f(QStringLiteral("/proc/net/dev"));
+    QFile f(u"/proc/net/dev"_s);
     if (!f.open(QIODevice::ReadOnly | QIODevice::Text)) {
         return;
     }
-    // skip headers
+    // Skip headers
     f.readLine();
     f.readLine();
 
@@ -96,23 +100,36 @@ void NetworkUsage::tick() {
     quint64 totalTx = 0;
 
     while (!f.atEnd()) {
-        QByteArray line = f.readLine();
+        const QByteArray line = f.readLine();
         const qsizetype splitIdx = line.indexOf(':');
         if (splitIdx == -1) {
             continue;
         }
         const QByteArray iface = line.left(splitIdx).trimmed();
-        if (iface == QByteArrayLiteral("lo")) {
-            continue; // skip loopback interface
+        if (iface == QByteArrayView("lo")) {
+            continue; // Skip loopback interface
         }
+
+        // Parse every counter through tx bytes to validate the row
+        const char* pos = line.constData() + splitIdx + 1;
+        const char* const end = line.constData() + line.size();
 
         std::array<unsigned long long, 9> fields{};
-        const int parsed = std::sscanf(line.constData() + splitIdx + 1, "%llu %llu %llu %llu %llu %llu %llu %llu %llu",
-            &fields[0], &fields[1], &fields[2], &fields[3], &fields[4], &fields[5], &fields[6], &fields[7], &fields[8]);
+        bool valid = true;
+        for (unsigned long long& field : fields) {
+            while (pos < end && (*pos == ' ' || *pos == '\t'))
+                ++pos;
 
-        if (parsed != static_cast<int>(fields.size())) {
-            continue;
+            const auto [next, ec] = std::from_chars(pos, end, field);
+            if (ec != std::errc{}) {
+                valid = false;
+                break;
+            }
+            pos = next;
         }
+
+        if (!valid)
+            continue;
 
         totalRx += static_cast<quint64>(fields[0]);
         totalTx += static_cast<quint64>(fields[8]);
