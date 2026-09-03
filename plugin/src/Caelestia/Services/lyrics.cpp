@@ -181,12 +181,32 @@ LyricCandidate Lyrics::selectedCandidate() const {
     return m_selected;
 }
 
+LyricCandidate Lyrics::autoCandidate() const {
+    return m_autoCandidate;
+}
+
+bool Lyrics::hasCandidateOverride() const {
+    return m_hasCandidateOverride;
+}
+
 void Lyrics::setSelectedCandidate(const LyricCandidate& value) {
     if (m_selected == value) {
         return;
     }
     m_selected = value;
     emit selectedCandidateChanged();
+
+    if (m_autoCandidate.isValid() && value == m_autoCandidate) {
+        if (m_hasCandidateOverride) {
+            m_hasCandidateOverride = false;
+            emit hasCandidateOverrideChanged();
+        }
+    } else if (!m_settingFromPrefs) {
+        if (!m_hasCandidateOverride) {
+            m_hasCandidateOverride = true;
+            emit hasCandidateOverrideChanged();
+        }
+    }
 
     if (!value.isValid()) {
         return;
@@ -234,12 +254,45 @@ void Lyrics::setSelectedCandidate(const LyricCandidate& value) {
     if (!m_settingFromPrefs && !trackKey().isEmpty()) {
         QJsonObject entry = m_lyricsMap.value(trackKey()).toObject();
         entry.insert(u"offset"_s, m_offset);
-        entry.insert(u"backend"_s, backendKey(value.backend()));
-        entry.insert(u"id"_s, value.id());
+        if (m_hasCandidateOverride) {
+            entry.insert(u"backend"_s, backendKey(value.backend()));
+            entry.insert(u"id"_s, value.id());
+        } else {
+            entry.remove(u"backend"_s);
+            entry.remove(u"id"_s);
+        }
         m_lyricsMap.insert(trackKey(), entry);
         if (m_saveDebounce) {
             m_saveDebounce->start();
         }
+    }
+}
+
+void Lyrics::resetToAuto() {
+    if (!m_hasCandidateOverride && (!m_autoCandidate.isValid() || m_selected == m_autoCandidate)) {
+        return;
+    }
+    m_hasCandidateOverride = false;
+    emit hasCandidateOverrideChanged();
+
+    if (!trackKey().isEmpty()) {
+        QJsonObject entry = m_lyricsMap.value(trackKey()).toObject();
+        entry.remove(u"backend"_s);
+        entry.remove(u"id"_s);
+        if (entry.isEmpty() || (entry.size() == 1 && qFuzzyIsNull(entry.value(u"offset"_s).toDouble()))) {
+            m_lyricsMap.remove(trackKey());
+        } else {
+            m_lyricsMap.insert(trackKey(), entry);
+        }
+        if (m_saveDebounce) {
+            m_saveDebounce->start();
+        }
+    }
+
+    if (m_autoCandidate.isValid()) {
+        setSelectedCandidate(m_autoCandidate);
+    } else {
+        refresh();
     }
 }
 
@@ -400,6 +453,23 @@ void Lyrics::appendCandidates(const QList<LyricCandidate>& add) {
         }
     }
     if (changed) {
+        std::stable_sort(m_candidates.begin(), m_candidates.end(), [this](const LyricCandidate& a, const LyricCandidate& b) {
+            // 1. autoCandidate always ranks first
+            if (m_autoCandidate.isValid()) {
+                if (a == m_autoCandidate) return true;
+                if (b == m_autoCandidate) return false;
+            }
+            // 2. Duration matching if duration is known
+            if (m_duration > 0.0) {
+                const qreal diffA = a.duration() > 0.0 ? std::abs(a.duration() - m_duration) : 99999.0;
+                const qreal diffB = b.duration() > 0.0 ? std::abs(b.duration() - m_duration) : 99999.0;
+                if (std::abs(diffA - diffB) > 1.0) {
+                    return diffA < diffB;
+                }
+            }
+            return false;
+        });
+
         emit lyricCandidatesChanged();
     }
 }
@@ -457,6 +527,9 @@ void Lyrics::doLoad() {
     clearLines();
     clearCandidates();
 
+    m_autoCandidate = LyricCandidate();
+    emit autoCandidateChanged();
+
     // Restore per-track prefs (offset, last-selected backend/id)
     m_settingFromPrefs = true;
     const QJsonObject saved = m_lyricsMap.value(trackKey()).toObject();
@@ -469,17 +542,20 @@ void Lyrics::doLoad() {
     }
     m_settingFromPrefs = false;
 
-    // Always populate online candidates for the picker, regardless of preferred backend
-    searchLrclibCandidates(reqId);
-    searchNetEaseCandidates(reqId);
-
     if (restored.isValid()) {
-        // Honor saved selection for this track
+        m_hasCandidateOverride = true;
+        emit hasCandidateOverrideChanged();
         m_settingFromPrefs = true;
         setSelectedCandidate(restored);
         m_settingFromPrefs = false;
-        return;
+    } else {
+        m_hasCandidateOverride = false;
+        emit hasCandidateOverrideChanged();
     }
+
+    // Always populate online candidates for the picker, regardless of preferred backend
+    searchLrclibCandidates(reqId);
+    searchNetEaseCandidates(reqId);
 
     // Primary attempt by preferred backend
     switch (m_preferredBackend) {
@@ -539,13 +615,16 @@ void Lyrics::tryLocal(int reqId) {
             const QString text = QString::fromUtf8(f.readAll());
             const auto lines = parseLrc(text);
             if (!lines.isEmpty()) {
-                setLines(lines, LyricsBackend::Local);
-                appendCandidates(
-                    { LyricCandidate(LyricsBackend::Local, direct, m_title, m_artist, m_album, m_duration) });
-                m_selected = LyricCandidate(LyricsBackend::Local, direct, m_title, m_artist, m_album, m_duration);
-                emit selectedCandidateChanged();
-                if (!m_settingFromPrefs) {
-                    persistTrackPrefs();
+                const LyricCandidate cand(LyricsBackend::Local, direct, m_title, m_artist, m_album, m_duration);
+                if (!m_autoCandidate.isValid()) {
+                    m_autoCandidate = cand;
+                    emit autoCandidateChanged();
+                }
+                appendCandidates({ cand });
+                if (!m_hasCandidateOverride) {
+                    setLines(lines, LyricsBackend::Local);
+                    m_selected = cand;
+                    emit selectedCandidateChanged();
                 }
                 setLoading(false);
                 return;
@@ -560,13 +639,16 @@ void Lyrics::tryLocal(int reqId) {
             const QString text = QString::fromUtf8(f.readAll());
             const auto lines = parseLrc(text);
             if (!lines.isEmpty()) {
-                setLines(lines, LyricsBackend::Local);
-                appendCandidates(
-                    { LyricCandidate(LyricsBackend::Local, recursive, m_title, m_artist, m_album, m_duration) });
-                m_selected = LyricCandidate(LyricsBackend::Local, recursive, m_title, m_artist, m_album, m_duration);
-                emit selectedCandidateChanged();
-                if (!m_settingFromPrefs) {
-                    persistTrackPrefs();
+                const LyricCandidate cand(LyricsBackend::Local, recursive, m_title, m_artist, m_album, m_duration);
+                if (!m_autoCandidate.isValid()) {
+                    m_autoCandidate = cand;
+                    emit autoCandidateChanged();
+                }
+                appendCandidates({ cand });
+                if (!m_hasCandidateOverride) {
+                    setLines(lines, LyricsBackend::Local);
+                    m_selected = cand;
+                    emit selectedCandidateChanged();
                 }
                 setLoading(false);
                 return;
@@ -633,17 +715,18 @@ void Lyrics::tryLrclib(int reqId) {
         }
 
         writeCachedLrc(LyricsBackend::LRCLIB, QString::number(id), synced);
-        setLines(lines, LyricsBackend::LRCLIB);
         const LyricCandidate cand(LyricsBackend::LRCLIB, QString::number(id), obj.value(u"trackName"_s).toString(),
             obj.value(u"artistName"_s).toString(), obj.value(u"albumName"_s).toString(),
             obj.value(u"duration"_s).toDouble());
+        if (!m_autoCandidate.isValid()) {
+            m_autoCandidate = cand;
+            emit autoCandidateChanged();
+        }
         appendCandidates({ cand });
-        if (!m_selected.isValid() || m_selected.backend() == LyricsBackend::Auto) {
+        if (!m_hasCandidateOverride) {
+            setLines(lines, LyricsBackend::LRCLIB);
             m_selected = cand;
             emit selectedCandidateChanged();
-        }
-        if (!m_settingFromPrefs) {
-            persistTrackPrefs();
         }
         setLoading(false);
     });
@@ -782,9 +865,13 @@ void Lyrics::searchLrclibCandidates(int reqId) {
                 const auto lines = parseLrc(bestSynced);
                 if (!lines.isEmpty()) {
                     writeCachedLrc(LyricsBackend::LRCLIB, bestCand.id(), bestSynced);
-                    setLines(lines, LyricsBackend::LRCLIB);
-                    m_selected = bestCand;
-                    emit selectedCandidateChanged();
+                    m_autoCandidate = bestCand;
+                    emit autoCandidateChanged();
+                    if (!m_hasCandidateOverride) {
+                        setLines(lines, LyricsBackend::LRCLIB);
+                        m_selected = bestCand;
+                        emit selectedCandidateChanged();
+                    }
                     setLoading(false);
                 }
             }
@@ -830,9 +917,11 @@ void Lyrics::searchNetEaseCandidates(int reqId) {
             for (const auto& a : artists) {
                 artistNames.append(a.toObject().value(u"name"_s).toString());
             }
+            const double durMs = s.contains(u"duration"_s) ? s.value(u"duration"_s).toDouble() : s.value(u"dt"_s).toDouble();
+            const double durSec = durMs > 0.0 ? durMs / 1000.0 : 0.0;
             add.append(LyricCandidate(LyricsBackend::NetEase,
                 QString::number(static_cast<qint64>(s.value(u"id"_s).toDouble())), s.value(u"name"_s).toString(),
-                artistNames.join(u", "_s)));
+                artistNames.join(u", "_s), {}, durSec));
         }
         appendCandidates(add);
     });
@@ -896,7 +985,17 @@ void Lyrics::fetchNetEaseLyricsById(const QString& id, int reqId) {
             return;
         }
         writeCachedLrc(LyricsBackend::NetEase, id, lrc);
-        setLines(parseLrc(lrc), LyricsBackend::NetEase);
+        const auto lines = parseLrc(lrc);
+        const LyricCandidate cand(LyricsBackend::NetEase, id, m_title, m_artist, m_album, m_duration);
+        if (!m_autoCandidate.isValid()) {
+            m_autoCandidate = cand;
+            emit autoCandidateChanged();
+        }
+        if (!m_hasCandidateOverride) {
+            setLines(lines, LyricsBackend::NetEase);
+            m_selected = cand;
+            emit selectedCandidateChanged();
+        }
         setLoading(false);
     });
 }
@@ -958,11 +1057,18 @@ void Lyrics::persistTrackPrefs() {
     const QString key = trackKey();
     QJsonObject entry = m_lyricsMap.value(key).toObject();
     entry.insert(u"offset"_s, m_offset);
-    if (m_selected.isValid()) {
+    if (m_hasCandidateOverride && m_selected.isValid()) {
         entry.insert(u"backend"_s, backendKey(m_selected.backend()));
         entry.insert(u"id"_s, m_selected.id());
+    } else {
+        entry.remove(u"backend"_s);
+        entry.remove(u"id"_s);
     }
-    m_lyricsMap.insert(key, entry);
+    if (entry.isEmpty() || (entry.size() == 1 && qFuzzyIsNull(entry.value(u"offset"_s).toDouble()))) {
+        m_lyricsMap.remove(key);
+    } else {
+        m_lyricsMap.insert(key, entry);
+    }
 
     QDir().mkpath(stateDir());
 

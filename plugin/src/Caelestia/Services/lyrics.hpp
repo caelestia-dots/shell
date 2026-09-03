@@ -28,6 +28,8 @@ class Lyrics : public QObject {
         QList<caelestia::services::LyricCandidate> lyricCandidates READ lyricCandidates NOTIFY lyricCandidatesChanged)
     Q_PROPERTY(caelestia::services::LyricCandidate selectedCandidate READ selectedCandidate WRITE setSelectedCandidate
             NOTIFY selectedCandidateChanged)
+    Q_PROPERTY(caelestia::services::LyricCandidate autoCandidate READ autoCandidate NOTIFY autoCandidateChanged)
+    Q_PROPERTY(bool hasCandidateOverride READ hasCandidateOverride NOTIFY hasCandidateOverrideChanged)
     Q_PROPERTY(bool loading READ loading NOTIFY loadingChanged)
     Q_PROPERTY(bool hasLyrics READ hasLyrics NOTIFY lyricsChanged)
     Q_PROPERTY(qreal offset READ offset WRITE setOffset NOTIFY offsetChanged)
@@ -45,6 +47,8 @@ public:
     [[nodiscard]] QList<LyricCandidate> lyricCandidates() const;
     [[nodiscard]] LyricCandidate selectedCandidate() const;
     void setSelectedCandidate(const LyricCandidate& value);
+    [[nodiscard]] LyricCandidate autoCandidate() const;
+    [[nodiscard]] bool hasCandidateOverride() const;
     [[nodiscard]] bool loading() const;
     [[nodiscard]] bool hasLyrics() const;
     [[nodiscard]] qreal offset() const;
@@ -58,6 +62,7 @@ public:
         const QString& artist, const QString& title, const QString& album = {}, qreal duration = 0.0);
     Q_INVOKABLE void clearTrack();
     Q_INVOKABLE void refresh();
+    Q_INVOKABLE void resetToAuto();
 
 signals:
     void lyricsChanged();
@@ -65,6 +70,8 @@ signals:
     void preferredBackendChanged();
     void lyricCandidatesChanged();
     void selectedCandidateChanged();
+    void autoCandidateChanged();
+    void hasCandidateOverrideChanged();
     void loadingChanged();
     void hasLyricsChanged();
     void offsetChanged();
@@ -132,6 +139,8 @@ private:
     LyricsBackend m_preferredBackend = LyricsBackend::Auto;
     QList<LyricCandidate> m_candidates;
     LyricCandidate m_selected;
+    LyricCandidate m_autoCandidate;
+    bool m_hasCandidateOverride = false;
     bool m_loading = false;
     bool m_hasLyrics = false;
     qreal m_offset = 0.0;
