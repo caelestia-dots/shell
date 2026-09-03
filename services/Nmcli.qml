@@ -35,11 +35,7 @@ Singleton {
                 signalStrength: n.signalStrength,
                 security: WifiSecurityType.toString(n.security),
                 isSecure: n.security !== WifiSecurityType.None,
-                frequency: n.frequency,
-                bssid: n.bssid,
-                maxBitrate: n.maxBitrate,
-                bandwidth: n.bandwidth,
-                lastSeen: n.lastSeen,
+                frequency: root.getFrequency(n),
                 known: n.known,
                 raw: n
             }))
@@ -47,7 +43,8 @@ Singleton {
     readonly property var active: networks.find(n => n.connected) ?? null
 
     readonly property list<var> savedNetworks: networks.filter(n => n.known)
-    readonly property list<string> savedConnectionSsids: savedNetworks.map(n => n.ssid)
+    property list<string> allSavedSsids: []
+    readonly property list<string> savedConnectionSsids: allSavedSsids.length > 0 ? allSavedSsids : savedNetworks.map(n => n.ssid)
     readonly property list<string> savedConnections: savedConnectionSsids
 
     readonly property var savedConnectionSecurity: {
@@ -69,7 +66,8 @@ Singleton {
             macAddress: wifiDevice?.address ?? "",
             ipAddress: "",
             gateway: "",
-            dns: ""
+            dns: "",
+            frequency: 0
         })
 
     property var ethernetDeviceDetails: ({
@@ -91,7 +89,7 @@ Singleton {
                 hasLink: d.hasLink,
                 speed: d.linkSpeed,
                 state: d.hasLink ? (d.connected ? "connected" : "disconnected") : "unavailable",
-                connection: d.name,
+                connection: d.network?.name || d.name,
                 device: d
             }))
 
@@ -105,7 +103,12 @@ Singleton {
         return speed >= 1000 ? `${speed / 1000} Gbps` : `${speed} Mbps`;
     }
 
-    readonly property string ethernetDataUsage: activeEthernet ? NetworkUsage.formatBytesTotal((NetworkUsage.downloadTotal ?? 0) + (NetworkUsage.uploadTotal ?? 0)) : ""
+    readonly property string ethernetDataUsage: {
+        if (!activeEthernet)
+            return "";
+        const res = NetworkUsage.formatBytes((NetworkUsage.downloadTotal ?? 0) + (NetworkUsage.uploadTotal ?? 0));
+        return res ? `${res.value.toFixed(1)} ${res.unit}` : "";
+    }
 
     signal connectionFailed(string ssid)
 
@@ -141,6 +144,8 @@ Singleton {
         if (!ssid)
             return false;
         const target = normalizeName(ssid);
+        if (root.savedConnectionSsids.some(s => normalizeName(s) === target))
+            return true;
         return root.savedNetworks.some(n => normalizeName(n.ssid) === target);
     }
 
@@ -148,6 +153,21 @@ Singleton {
         if (!security || security === "None" || security === "Open")
             return qsTr("Open");
         return security;
+    }
+
+    function getFrequency(n: var): int {
+        if (n?.frequency !== undefined && n.frequency > 0)
+            return n.frequency;
+        if (n?.connected && root.wirelessDeviceDetails?.frequency)
+            return root.wirelessDeviceDetails.frequency;
+        return 0;
+    }
+
+    function ipToUint32(ip: string): int {
+        const parts = ip.trim().split(".").map(x => parseInt(x, 10));
+        if (parts.length !== 4 || parts.some(isNaN))
+            return 0;
+        return (parts[0] | (parts[1] << 8) | (parts[2] << 16) | (parts[3] << 24)) >>> 0;
     }
 
     //
@@ -176,11 +196,11 @@ Singleton {
     function updateWifiDetails(): void {
         if (root.wifiDevice?.name && root.wifiDevice.connected) {
             executeCommand(["-t", "-f", "IP4.ADDRESS,IP4.GATEWAY,IP4.DNS,GENERAL.HWADDR", "device", "show", root.wifiDevice.name], result => {
+                let ip = "";
+                let gw = "";
+                let dnsList = [];
+                let mac = root.wifiDevice?.address ?? "";
                 if (result.success && result.output) {
-                    let ip = "";
-                    let gw = "";
-                    let dnsList = [];
-                    let mac = root.wifiDevice?.address ?? "";
                     const lines = result.output.split("\n");
                     for (const line of lines) {
                         const colon = line.indexOf(":");
@@ -197,20 +217,31 @@ Singleton {
                         else if (key === "GENERAL.HWADDR" && val)
                             mac = val;
                     }
+                }
+
+                executeCommand(["-t", "-f", "IN-USE,FREQ", "dev", "wifi", "list", "ifname", root.wifiDevice.name], wifiResult => {
+                    let freq = 0;
+                    if (wifiResult.success && wifiResult.output) {
+                        const match = wifiResult.output.split("\n").find(l => l.startsWith("*:"));
+                        if (match)
+                            freq = parseInt(match.slice(2), 10) || 0;
+                    }
                     root.wirelessDeviceDetails = {
                         macAddress: mac,
                         ipAddress: ip,
                         gateway: gw,
-                        dns: dnsList.join(", ")
+                        dns: dnsList.join(", "),
+                        frequency: freq
                     };
-                }
+                });
             });
         } else {
             root.wirelessDeviceDetails = {
                 macAddress: root.wifiDevice?.address ?? "",
                 ipAddress: "",
                 gateway: "",
-                dns: ""
+                dns: "",
+                frequency: 0
             };
         }
     }
@@ -350,9 +381,11 @@ Singleton {
         const net = findWifiNetwork(ssid);
         if (net) {
             net.forget();
+            loadSavedConnections();
         } else {
             executeCommand(["connection", "delete", ssid], () => {
                 updateWifiDetails();
+                loadSavedConnections();
             });
         }
     }
@@ -370,21 +403,33 @@ Singleton {
     function connectEthernet(connectionName: string, interfaceName: string): void {
         if (connectionName) {
             executeCommand(["connection", "up", connectionName], result => {
-                updateEthDetails();
+                if (!result.success && interfaceName) {
+                    executeCommand(["device", "connect", interfaceName], () => {
+                        updateEthDetails();
+                    });
+                } else {
+                    updateEthDetails();
+                }
             });
         } else if (interfaceName) {
-            executeCommand(["device", "connect", interfaceName], result => {
+            executeCommand(["device", "connect", interfaceName], () => {
                 updateEthDetails();
             });
         }
     }
 
-    function disconnectEthernet(interfaceName: string): void {
-        if (interfaceName) {
-            executeCommand(["device", "disconnect", interfaceName], result => {
+    function disconnectEthernet(name: string): void {
+        if (!name)
+            return;
+        executeCommand(["connection", "down", name], result => {
+            if (!result.success) {
+                executeCommand(["device", "disconnect", name], () => {
+                    updateEthDetails();
+                });
+            } else {
                 updateEthDetails();
-            });
-        }
+            }
+        });
     }
 
     //
@@ -394,7 +439,11 @@ Singleton {
     function findAnyNetwork(name: string): var {
         if (!name)
             return null;
-        return findWifiNetwork(name) ?? (root.wiredDevice?.networks?.values ?? []).find(n => n.name === name) ?? null;
+        const target = normalizeName(name);
+        const wired = Networking.devices.values.find(d => d.type === DeviceType.Wired && (normalizeName(d.network?.name) === target || normalizeName(d.name) === target));
+        if (wired?.network)
+            return wired.network;
+        return findWifiNetwork(name);
     }
 
     function findSettings(name: string): var {
@@ -417,11 +466,31 @@ Singleton {
             method = "auto-dns";
         }
 
+        let address = "";
+        if (ipv4["address-data"]?.[0]?.address) {
+            address = `${ipv4["address-data"][0].address}/${ipv4["address-data"][0].prefix ?? 24}`;
+        } else if (ipv4["addresses"]?.[0]) {
+            const a = ipv4["addresses"][0];
+            address = `${a[0]}/${a[1]}`;
+        }
+
+        let dnsStr = "";
+        if (Array.isArray(ipv4["dns"])) {
+            dnsStr = ipv4["dns"].map(d => {
+                if (typeof d === "number") {
+                    return [(d >> 0) & 255, (d >> 8) & 255, (d >> 16) & 255, (d >> 24) & 255].join(".");
+                }
+                return String(d);
+            }).join(", ");
+        } else if (ipv4["dns"]) {
+            dnsStr = String(ipv4["dns"]);
+        }
+
         return {
             method: method,
-            address: ipv4["addresses"]?.[0] ? `${ipv4["addresses"][0][0]}/${ipv4["addresses"][0][1]}` : "",
+            address: address,
             gateway: ipv4["gateway"] ?? "",
-            dns: Array.isArray(ipv4["dns"]) ? ipv4["dns"].join(", ") : (ipv4["dns"] ?? ""),
+            dns: dnsStr,
             autoconnect: conn["autoconnect"] ?? true
         };
     }
@@ -432,12 +501,23 @@ Singleton {
             return false;
         }
 
+        const addrParts = (config.address || "").split("/");
+        const ip = addrParts[0]?.trim() || "";
+        const prefix = parseInt(addrParts[1], 10) || 24;
+
+        const dnsNums = (config.dns || "").split(/[, ]+/)
+            .map(s => s.trim())
+            .filter(Boolean)
+            .map(ipToUint32)
+            .filter(n => n > 0);
+
         settings.write({
             "ipv4": {
                 "method": config.method === "auto-dns" ? "auto" : (config.method || "auto"),
                 "ignore-auto-dns": config.method === "auto-dns",
                 "gateway": config.gateway || null,
-                "dns": config.dns ? config.dns.split(/[, ]+/).filter(Boolean) : null
+                "address-data": (config.method === "manual" && ip) ? [{ "address": ip, "prefix": prefix }] : null,
+                "dns": dnsNums.length > 0 ? dnsNums : null
             }
         });
         return true;
@@ -480,6 +560,25 @@ Singleton {
         });
     }
 
+    function loadSavedConnections(): void {
+        executeCommand(["-t", "-f", "NAME,TYPE", "connection", "show"], result => {
+            if (!result.success || !result.output)
+                return;
+            const ssids = [];
+            for (const line of result.output.split("\n")) {
+                if (!line)
+                    continue;
+                const idx = line.lastIndexOf(":");
+                if (idx >= 0 && line.slice(idx + 1).trim() === "802-11-wireless") {
+                    const name = line.slice(0, idx).trim();
+                    if (name && !ssids.includes(name))
+                        ssids.push(name);
+                }
+            }
+            root.allSavedSsids = ssids;
+        });
+    }
+
     onActiveChanged: {
         if (root.active && root.pendingConnection) {
             root.pendingConnection = null;
@@ -494,6 +593,7 @@ Singleton {
     Component.onCompleted: {
         updateWifiDetails();
         updateEthDetails();
+        loadSavedConnections();
     }
 
     Timer {

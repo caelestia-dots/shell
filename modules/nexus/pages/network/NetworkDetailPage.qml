@@ -208,7 +208,7 @@ PageBase {
         InfoRow {
             icon: "graphic_eq"
             label: qsTr("Frequency")
-            value: root.ap && root.ap.frequency > 0 ? qsTr("%1 MHz").arg(root.ap.frequency) : qsTr("—")
+            value: (root.details?.frequency && root.details.frequency > 0) ? qsTr("%1 MHz").arg(root.details.frequency) : (root.ap && root.ap.frequency > 0 ? qsTr("%1 MHz").arg(root.ap.frequency) : qsTr("—"))
             visible: root.isActive
         }
 
