@@ -2,24 +2,7 @@
 
 #include <qquickattachedpropertypropagator.h>
 
-#include "appearanceconfig.hpp"
-#include "backgroundconfig.hpp"
-#include "barconfig.hpp"
-#include "borderconfig.hpp"
-#include "dashboardconfig.hpp"
-#include "generalconfig.hpp"
-#include "launcherconfig.hpp"
-#include "lockconfig.hpp"
-#include "nexusconfig.hpp"
-#include "notifsconfig.hpp"
-#include "osdconfig.hpp"
 #include "rootnodes.hpp"
-#include "serviceconfig.hpp"
-#include "sessionconfig.hpp"
-#include "sidebarconfig.hpp"
-#include "tokens.hpp"
-#include "userpaths.hpp"
-#include "utilitiesconfig.hpp"
 
 namespace caelestia::config {
 
@@ -75,6 +58,9 @@ public:
 
     static Config* qmlAttachedProperties(QObject* object);
 
+    void classBegin() override;
+    void componentComplete() override;
+
 signals:
     void sourceChanged();
 
@@ -83,9 +69,6 @@ protected:
         QQuickAttachedPropertyPropagator* newParent, QQuickAttachedPropertyPropagator* oldParent) override;
 
 private:
-    void classBegin() override;
-    void componentComplete() override;
-
     void propagateScreen();
 
     bool m_complete = false;

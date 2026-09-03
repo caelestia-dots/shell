@@ -5,10 +5,8 @@
 #include <qquickattachedpropertypropagator.h>
 
 #include "anim.hpp"
-#include "appearanceconfig.hpp"
 #include "font.hpp"
 #include "rootnodes.hpp"
-#include "tokens.hpp"
 
 namespace caelestia::config {
 
@@ -37,7 +35,7 @@ public:
     [[nodiscard]] const AppearanceRounding* rounding() const;
     [[nodiscard]] const AppearanceSpacing* spacing() const;
     [[nodiscard]] const AppearancePadding* padding() const;
-    [[nodiscard]] const AppearanceTransparency* transparency() const;
+    [[nodiscard]] static const AppearanceTransparency* transparency();
 
     [[nodiscard]] const SizeTokens* sizes() const;
     [[nodiscard]] const FontTokens* font() const;
@@ -47,6 +45,9 @@ public:
 
     static Tokens* qmlAttachedProperties(QObject* object);
 
+    void classBegin() override;
+    void componentComplete() override;
+
 signals:
     void sourceChanged();
 
@@ -55,9 +56,6 @@ protected:
         QQuickAttachedPropertyPropagator* newParent, QQuickAttachedPropertyPropagator* oldParent) override;
 
 private:
-    void classBegin() override;
-    void componentComplete() override;
-
     void propagateScreen();
     void bindAnim();
     void bindFont();

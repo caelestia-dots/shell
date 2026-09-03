@@ -2,8 +2,10 @@
 
 #include <qjsonarray.h>
 
+#include <algorithm>
+#include <utility>
+
 #include "config/rootnodes.hpp"
-#include "config/utilitiesconfig.hpp"
 #include "core/toaster.hpp"
 
 namespace caelestia::services::hypr {
@@ -48,7 +50,7 @@ void toastKbLayout(const QString& layout) {
 
 HyprKeyboard::HyprKeyboard(QJsonObject ipcObject, QObject* parent)
     : QObject(parent)
-    , m_lastIpcObject(ipcObject) {}
+    , m_lastIpcObject(std::move(ipcObject)) {}
 
 QVariantHash HyprKeyboard::lastIpcObject() const {
     return m_lastIpcObject.toVariantHash();
@@ -82,7 +84,7 @@ bool HyprKeyboard::main() const {
     return m_lastIpcObject.value(u"main"_s).toBool();
 }
 
-bool HyprKeyboard::updateLastIpcObject(QJsonObject object) {
+bool HyprKeyboard::updateLastIpcObject(const QJsonObject& object) {
     if (m_lastIpcObject == object) {
         return false;
     }
@@ -135,16 +137,16 @@ HyprDevices::HyprDevices(QObject* parent)
     : QObject(parent) {}
 
 QQmlListProperty<HyprKeyboard> HyprDevices::keyboards() {
-    return QQmlListProperty<HyprKeyboard>(this, &m_keyboards);
+    return { this, &m_keyboards };
 }
 
-bool HyprDevices::updateLastIpcObject(QJsonObject object) {
+bool HyprDevices::updateLastIpcObject(const QJsonObject& object) {
     const auto val = object.value(u"keyboards"_s).toArray();
     bool dirty = false;
 
     for (auto it = m_keyboards.begin(); it != m_keyboards.end();) {
         auto* const keyboard = *it;
-        const auto inNewValues = std::any_of(val.begin(), val.end(), [keyboard](const QJsonValue& o) {
+        const auto inNewValues = std::ranges::any_of(val, [keyboard](const QJsonValue& o) {
             return o.toObject().value(u"address"_s).toString() == keyboard->address();
         });
 
@@ -161,7 +163,7 @@ bool HyprDevices::updateLastIpcObject(QJsonObject object) {
         const auto obj = o.toObject();
         const auto addr = obj.value(u"address"_s).toString();
 
-        auto it = std::find_if(m_keyboards.begin(), m_keyboards.end(), [addr](const HyprKeyboard* kb) {
+        auto it = std::ranges::find_if(m_keyboards, [addr](const HyprKeyboard* kb) {
             return kb->address() == addr;
         });
 

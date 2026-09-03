@@ -11,7 +11,7 @@ Q_DECLARE_LOGGING_CATEGORY(lcSettings)
 
 class Node;
 
-enum class WriteOrigin {
+enum class WriteOrigin : quint8 {
     Init,      // On init
     File,      // From the JSON file
     FileReset, // When option not present in file
@@ -26,8 +26,8 @@ public:
     ~WriteScope();
 
 private:
-    Node* m_root;
-    WriteOrigin m_previous;
+    Node* const m_root;
+    const WriteOrigin m_previous;
 
     Q_DISABLE_COPY_MOVE(WriteScope)
 };
@@ -38,7 +38,7 @@ class DiagnosticType : public QObject {
     QML_SINGLETON
 
 public:
-    enum Type {
+    enum Type : quint8 {
         UnknownOption = 0,
         GlobalOption,
         TypeMismatch,
@@ -46,7 +46,7 @@ public:
     };
     Q_ENUM(Type)
 
-    Q_INVOKABLE QString toString(Type t);
+    Q_INVOKABLE static QString toString(Type t);
 };
 
 struct Diagnostic {

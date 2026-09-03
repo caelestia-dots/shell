@@ -11,7 +11,7 @@ namespace caelestia::config {
     Q_NAMESPACE                                                                                                        \
     QML_ELEMENT                                                                                                        \
                                                                                                                        \
-    enum Enum {                                                                                                        \
+    enum Enum : quint8 {                                                                                               \
         __VA_ARGS__                                                                                                    \
     };                                                                                                                 \
     Q_ENUM_NS(Enum)                                                                                                    \

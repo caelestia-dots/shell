@@ -5,46 +5,26 @@
 
 #include "settings/layerregistry.hpp"
 #include "settings/rootnode.hpp"
+#include "appearanceconfig.hpp"
+#include "backgroundconfig.hpp"
+#include "barconfig.hpp"
+#include "borderconfig.hpp"
 #include "common.hpp"
+#include "dashboardconfig.hpp"
+#include "generalconfig.hpp"
+#include "launcherconfig.hpp"
+#include "lockconfig.hpp"
+#include "nexusconfig.hpp"
+#include "notifsconfig.hpp"
+#include "osdconfig.hpp"
+#include "serviceconfig.hpp"
+#include "sessionconfig.hpp"
+#include "sidebarconfig.hpp"
+#include "tokens.hpp"
+#include "userpaths.hpp"
+#include "utilitiesconfig.hpp"
 
 namespace caelestia::config {
-
-class AppearanceConfig;
-class AppearanceTokens;
-class BackgroundConfig;
-class BarConfig;
-class BorderConfig;
-class DashboardConfig;
-class GeneralConfig;
-class LauncherConfig;
-class LockConfig;
-class NexusConfig;
-class NotifsConfig;
-class OsdConfig;
-class ServiceConfig;
-class SessionConfig;
-class SidebarConfig;
-class SizeTokens;
-class UserPaths;
-class UtilitiesConfig;
-
-Q_MOC_INCLUDE("appearanceconfig.hpp")
-Q_MOC_INCLUDE("backgroundconfig.hpp")
-Q_MOC_INCLUDE("barconfig.hpp")
-Q_MOC_INCLUDE("borderconfig.hpp")
-Q_MOC_INCLUDE("dashboardconfig.hpp")
-Q_MOC_INCLUDE("generalconfig.hpp")
-Q_MOC_INCLUDE("launcherconfig.hpp")
-Q_MOC_INCLUDE("lockconfig.hpp")
-Q_MOC_INCLUDE("nexusconfig.hpp")
-Q_MOC_INCLUDE("notifsconfig.hpp")
-Q_MOC_INCLUDE("osdconfig.hpp")
-Q_MOC_INCLUDE("serviceconfig.hpp")
-Q_MOC_INCLUDE("sessionconfig.hpp")
-Q_MOC_INCLUDE("sidebarconfig.hpp")
-Q_MOC_INCLUDE("tokens.hpp")
-Q_MOC_INCLUDE("userpaths.hpp")
-Q_MOC_INCLUDE("utilitiesconfig.hpp")
 
 class ConfigRoot : public settings::RootNode {
     CONFIG_NODE_NO_CTOR(ConfigRoot, settings::RootNode)
@@ -89,7 +69,7 @@ public:
 
 namespace detail {
 
-enum class ConfigKind {
+enum class ConfigKind : quint8 {
     Shell,
     Tokens
 };
