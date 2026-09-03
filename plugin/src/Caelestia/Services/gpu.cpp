@@ -4,6 +4,9 @@
 #include <qdiriterator.h>
 #include <qfile.h>
 #include <qregularexpression.h>
+#include <qset.h>
+
+#include <chrono>
 
 #include "config/rootnodes.hpp"
 #include "config/serviceconfig.hpp"
@@ -31,6 +34,111 @@ QStringList gpuBusyFiles() {
         }
     }
     return files;
+}
+
+// PCI slot (e.g. "0000:00:02.0") of the first Intel i915 GPU, empty if none.
+// i915 exposes busy time through /proc/*/fdinfo, not a sysfs gpu_busy_percent,
+// so this picks the Intel usage path.
+QString intelGpuPdev() {
+    static const QRegularExpression k_cardRe(u"^card\\d+$"_s);
+
+    QDirIterator it(u"/sys/class/drm"_s, QDir::Dirs | QDir::NoDotAndDotDot);
+    while (it.hasNext()) {
+        const QString path = it.next();
+        if (!k_cardRe.match(it.fileName()).hasMatch()) {
+            continue;
+        }
+        const QString device = path + u"/device"_s;
+        const QString driver = QFile::symLinkTarget(device + u"/driver"_s);
+        if (!driver.endsWith(u"/i915"_s)) {
+            continue;
+        }
+        QFile vendor(device + u"/vendor"_s);
+        if (!vendor.open(QIODevice::ReadOnly | QIODevice::Text) ||
+            QString::fromUtf8(vendor.readAll()).trimmed() != u"0x8086"_s) {
+            continue;
+        }
+
+        QFile uevent(device + u"/uevent"_s);
+        if (!uevent.open(QIODevice::ReadOnly | QIODevice::Text)) {
+            continue;
+        }
+        QString pdev;
+        const QStringList lines = QString::fromUtf8(uevent.readAll()).split(u'\n');
+        uevent.close();
+        for (const QString& line : lines) {
+            if (line.startsWith(u"PCI_SLOT_NAME="_s)) {
+                pdev = line.mid(14).trimmed();
+                break;
+            }
+        }
+        if (!pdev.isEmpty()) {
+            return pdev;
+        }
+    }
+    return {};
+}
+
+// Parses a "<number> ns" fdinfo value into its plain nanoseconds.
+quint64 parseNs(const QString& value) {
+    const qsizetype sp = value.indexOf(u' ');
+    return value.left(sp).toULongLong();
+}
+
+// Accumulated render+compute busy ns per DRM client of this GPU, read from each
+// running process's fdinfo. Render and compute share Intel's EUs so they drive the
+// usage figure; copy/video/video-enhance are ignored, as in NVTOP. A client can
+// span several fds, so only the first fd seen per client-id counts.
+QHash<unsigned int, QPair<quint64, quint64>> intelFdinfoBusy(const QString& pdev) {
+    static const QRegularExpression k_pidRe(u"^\\d+$"_s);
+
+    QHash<unsigned int, QPair<quint64, quint64>> busy;
+    QSet<unsigned int> seen;
+    QDirIterator pidIt(u"/proc"_s, QDir::Dirs | QDir::NoDotAndDotDot);
+    while (pidIt.hasNext()) {
+        const QString pidPath = pidIt.next();
+        if (!k_pidRe.match(pidIt.fileName()).hasMatch()) {
+            continue;
+        }
+
+        QDirIterator fdIt(pidPath + u"/fdinfo"_s, QDir::Files | QDir::NoDotAndDotDot);
+        while (fdIt.hasNext()) {
+            QFile f(fdIt.next());
+            if (!f.open(QIODevice::ReadOnly | QIODevice::Text)) {
+                continue;
+            }
+
+            bool isTarget = false;
+            unsigned client = 0;
+            quint64 renderNs = 0;
+            quint64 computeNs = 0;
+            const QStringList lines = QString::fromUtf8(f.readAll()).split(u'\n');
+            f.close();
+            for (const QString& line : lines) {
+                if (line.startsWith(u"drm-pdev:\t"_s)) {
+                    isTarget = line.mid(10).trimmed() == pdev;
+                } else if (line.startsWith(u"drm-client-id:\t"_s)) {
+                    client = static_cast<unsigned>(line.mid(14).trimmed().toUInt());
+                } else if (line.startsWith(u"drm-engine-render:\t"_s)) {
+                    renderNs = parseNs(line.mid(19));
+                } else if (line.startsWith(u"drm-engine-compute:\t"_s)) {
+                    computeNs = parseNs(line.mid(19));
+                }
+            }
+
+            if (isTarget && client != 0 && !seen.contains(client)) {
+                seen.insert(client);
+                busy.insert(client, { renderNs, computeNs });
+            }
+        }
+    }
+    return busy;
+}
+
+// Mirrors NVTOP's busy_usage_from_time_usage_round: given a busy-time delta and the
+// wall time elapsed between two samples (both in ns), returns a 0-100 percentage.
+unsigned busyUsageFromDelta(quint64 deltaNs, quint64 elapsedNs) {
+    return static_cast<unsigned>((deltaNs * 100 + elapsedNs / 2) / elapsedNs);
 }
 
 QString cleanName(QString s) {
@@ -102,6 +210,47 @@ QString parseLspciName(const QByteArray& out) {
     return {};
 }
 
+QString parseIntelPciName(const QByteArray& out) {
+    static const QRegularExpression k_lineRe(u"vga|3d controller|display"_s, QRegularExpression::CaseInsensitiveOption);
+
+    const QStringList lines = QString::fromUtf8(out).split(u'\n');
+    QString match;
+    for (const QString& line : lines) {
+        if (k_lineRe.match(line).hasMatch()) {
+            match = line;
+            break;
+        }
+    }
+
+    if (match.isEmpty()) {
+        return {};
+    }
+
+    // Split on a colon followed by whitespace so the PCI slot ("00:02.0") is not
+    // mistaken for the class/name separator ("controller: Device").
+    static const QRegularExpression k_colonRe(u":\\s+(.+)"_s);
+    QString rest = k_colonRe.match(match).captured(1);
+    if (rest.isEmpty()) {
+        return {};
+    }
+
+    // Keep the model variant ("(Ice Lake)") but drop the revision ("(rev 07)").
+    static const QRegularExpression k_rev(u"\\(rev[^)]*\\)"_s, QRegularExpression::CaseInsensitiveOption);
+    rest.replace(k_rev, QString());
+
+    // Shorten the vendor prefix: "Intel Corporation <model>" -> "Intel <model>".
+    rest.replace(u"Intel Corporation"_s, u"Intel"_s);
+
+    static const QRegularExpression k_spaces(u"\\s+"_s);
+    rest.replace(k_spaces, u" "_s);
+
+    // Shorter panel label: drop the vendor and any trailing "(Ice Lake)" suffix.
+    rest.replace(u"Intel "_s, QString());
+    static const QRegularExpression k_suffixRe(u"\\s*\\([^)]*\\)\\s*$"_s);
+    rest.remove(k_suffixRe);
+    return rest.trimmed();
+}
+
 struct NameSource {
     QString program;
     QStringList args;
@@ -110,8 +259,8 @@ struct NameSource {
 
 // Name probes in priority order; the first non-empty result wins. Which of them run
 // depends on the resolved type.
-const std::array<NameSource, 3>& nameSources() {
-    static const std::array<NameSource, 3> k_sources = { {
+const std::array<NameSource, 4>& nameSources() {
+    static const std::array<NameSource, 4> k_sources = { {
         {
             .program = u"nvidia-smi"_s,
             .args = { u"--query-gpu=name"_s, u"--format=csv,noheader"_s },
@@ -127,19 +276,27 @@ const std::array<NameSource, 3>& nameSources() {
             .args = {},
             .parse = &parseLspciName,
         },
+        {
+            .program = u"lspci"_s,
+            .args = {},
+            .parse = &parseIntelPciName,
+        },
     } };
     return k_sources;
 }
 
-// Indices within nameSources(): nvidia-smi, then the driver-agnostic probes.
+// Indices within nameSources(): nvidia-smi, then the driver-agnostic probes, then the
+// Intel-specific PCI probe.
 constexpr int k_nvidiaSource = 0;
 constexpr int k_firstGenericSource = 1;
+constexpr int k_intelSource = 3;
 
 } // namespace
 
 Gpu::Gpu(QObject* parent)
     : TickingService(parent) {
     m_busyFiles = gpuBusyFiles();
+    m_intelPdev = intelGpuPdev();
 
     auto* svc = caelestia::config::ConfigSingleton::instance()->services();
     m_userType = svc->gpuType();
@@ -194,6 +351,8 @@ void Gpu::tick() {
     if (m_type == GpuType::Generic) {
         readGenericUsage();
         readGpuTemperature();
+    } else if (m_type == GpuType::Intel) {
+        readIntelUsage();
     } else if (m_type == GpuType::Nvidia) {
         startNvidiaUsage();
     } else {
@@ -215,7 +374,13 @@ void Gpu::resolveGpu() {
     }
 
     setName(tr("Detecting GPU..."));
-    tryNameSource(m_userType == GpuType::Generic ? k_firstGenericSource : k_nvidiaSource, generation);
+    const GpuType user = m_userType;
+    if (user == GpuType::Intel) {
+        tryNameSource(k_intelSource, generation);
+    } else {
+        const bool startsGeneric = user == GpuType::Generic || user == GpuType::Intel;
+        tryNameSource(startsGeneric ? k_firstGenericSource : k_nvidiaSource, generation);
+    }
 }
 
 int Gpu::probeEnd() const {
@@ -237,10 +402,15 @@ void Gpu::finishNameSource(int index, int generation, QString name) {
     // Under Auto the NVIDIA name probe doubles as the type probe: a non-empty result
     // means an NVIDIA GPU is present and queryable.
     if (m_userType == GpuType::Auto && index == k_nvidiaSource) {
-        if (!name.isEmpty())
-            setType(GpuType::Nvidia);
-        else
-            setType(m_busyFiles.isEmpty() ? GpuType::None : GpuType::Generic);
+        GpuType resolved;
+        if (!name.isEmpty()) {
+            resolved = GpuType::Nvidia;
+        } else if (!m_intelPdev.isEmpty()) {
+            resolved = GpuType::Intel;
+        } else {
+            resolved = m_busyFiles.isEmpty() ? GpuType::None : GpuType::Generic;
+        }
+        setType(resolved);
 
         if (m_type == GpuType::None) {
             setName(tr("None"));
@@ -254,7 +424,11 @@ void Gpu::finishNameSource(int index, int generation, QString name) {
     }
 
     // Fall through to the next applicable source
-    const int next = index + 1;
+    int next = index + 1;
+    // Name Auto-resolved Intel from the PCI probe, not the Mesa renderer string.
+    if (m_type == GpuType::Intel && index < k_intelSource) {
+        next = k_intelSource;
+    }
     if (next < probeEnd()) {
         tryNameSource(next, generation);
     } else {
@@ -307,6 +481,74 @@ void Gpu::readGenericUsage() {
     if (std::abs(newPerc - m_percentage) > 0.0001) {
         m_percentage = newPerc;
         emit percentageChanged();
+    }
+}
+
+void Gpu::readIntelUsage() {
+    if (m_intelPdev.isEmpty()) {
+        resetUsage();
+        return;
+    }
+
+    // Same math as NVTOP's busy_usage_from_time_usage_round: per client, sum render +
+    // compute, from the ns delta between scans scaled by the wall time elapsed. A delta
+    // larger than that window is treated as over-counting and skipped.
+    const auto now = std::chrono::steady_clock::now().time_since_epoch().count();
+    const auto cur = intelFdinfoBusy(m_intelPdev);
+
+    // First tick only seeds the baseline; there is nothing to diff yet.
+    if (m_lastIntelNs == 0) {
+        m_lastFdinfo.clear();
+        for (auto it = cur.cbegin(); it != cur.cend(); ++it) {
+            m_lastFdinfo.insert(it.key(), IntelClientBusy{ .render = it.value().first, .compute = it.value().second });
+        }
+        m_lastIntelNs = now;
+        return;
+    }
+
+    const auto elapsedNs = static_cast<quint64>(now - m_lastIntelNs);
+    if (elapsedNs == 0) {
+        return;
+    }
+
+    unsigned totalPerc = 0;
+    for (auto it = cur.cbegin(); it != cur.cend(); ++it) {
+        const auto prev = m_lastFdinfo.value(it.key());
+        const quint64 renderDelta = it.value().first >= prev.render ? it.value().first - prev.render : 0;
+        const quint64 computeDelta = it.value().second >= prev.compute ? it.value().second - prev.compute : 0;
+
+        // Skip deltas that exceed the wall-time window (i915 can over-report). Compute
+        // usage only counts on top of a valid render reading, as in NVTOP.
+        const bool renderValid = renderDelta != 0 && renderDelta <= elapsedNs;
+        const bool computeValid = renderValid && computeDelta != 0 && computeDelta <= elapsedNs;
+
+        unsigned clientPerc = 0;
+        if (renderValid) {
+            clientPerc = busyUsageFromDelta(renderDelta, elapsedNs);
+        }
+        if (computeValid) {
+            clientPerc += busyUsageFromDelta(computeDelta, elapsedNs);
+        }
+        clientPerc = std::min(clientPerc, 100u);
+        totalPerc = std::min(totalPerc + clientPerc, 100u);
+    }
+
+    m_lastFdinfo.clear();
+    for (auto it = cur.cbegin(); it != cur.cend(); ++it) {
+        m_lastFdinfo.insert(it.key(), IntelClientBusy{ .render = it.value().first, .compute = it.value().second });
+    }
+    m_lastIntelNs = now;
+
+    const qreal usage = qMin<qreal>(1.0, static_cast<qreal>(totalPerc) / 100.0);
+    if (std::abs(usage - m_percentage) > 0.0001) {
+        m_percentage = usage;
+        emit percentageChanged();
+    }
+
+    // No temperature source for iGPUs on most systems.
+    if (std::abs(m_temperature) > 0.05) {
+        m_temperature = 0.0;
+        emit temperatureChanged();
     }
 }
 
