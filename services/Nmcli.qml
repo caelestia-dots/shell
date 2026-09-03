@@ -505,18 +505,19 @@ Singleton {
         const ip = addrParts[0]?.trim() || "";
         const prefix = parseInt(addrParts[1], 10) || 24;
 
-        const dnsNums = (config.dns || "").split(/[, ]+/)
-            .map(s => s.trim())
-            .filter(Boolean)
-            .map(ipToUint32)
-            .filter(n => n > 0);
+        const dnsNums = (config.dns || "").split(/[, ]+/).map(s => s.trim()).filter(Boolean).map(ipToUint32).filter(n => n > 0);
 
         settings.write({
             "ipv4": {
                 "method": config.method === "auto-dns" ? "auto" : (config.method || "auto"),
                 "ignore-auto-dns": config.method === "auto-dns",
                 "gateway": config.gateway || null,
-                "address-data": (config.method === "manual" && ip) ? [{ "address": ip, "prefix": prefix }] : null,
+                "address-data": (config.method === "manual" && ip) ? [
+                    {
+                        "address": ip,
+                        "prefix": prefix
+                    }
+                ] : null,
                 "dns": dnsNums.length > 0 ? dnsNums : null
             }
         });
