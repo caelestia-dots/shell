@@ -278,7 +278,7 @@ Column {
                 }
 
                 StyledSwitch {
-                    visible: BatteryControl.controlType === BatteryControl.BinaryConservation
+                    visible: BatteryControl.isSupported && BatteryControl.isBinary
                     Layout.alignment: Qt.AlignVCenter | Qt.AlignRight
                     checked: BatteryControl.enabled
                     onToggled: BatteryControl.toggle()
@@ -286,7 +286,7 @@ Column {
             }
 
             RowLayout {
-                visible: BatteryControl.controlType === BatteryControl.DiscreteTiers
+                visible: BatteryControl.isSupported && BatteryControl.isTiers
                 Layout.fillWidth: true
                 spacing: Tokens.spacing.extraSmall
 
@@ -307,7 +307,7 @@ Column {
             }
 
             StyledSlider {
-                visible: BatteryControl.controlType === BatteryControl.ContinuousRange
+                visible: BatteryControl.isSupported && BatteryControl.isRange
                 Layout.fillWidth: true
                 Layout.topMargin: Tokens.spacing.extraSmall
                 from: BatteryControl.minThreshold
