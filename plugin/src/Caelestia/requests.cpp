@@ -18,6 +18,9 @@ Q_LOGGING_CATEGORY(lcRequests, "caelestia.requests", QtInfoMsg)
 
 namespace caelestia {
 
+using Qt::StringLiterals::operator""_s;
+using Qt::StringLiterals::operator""_ba;
+
 namespace {
 
 QVariantMap responseMetadata(const QNetworkReply* reply) {
@@ -27,8 +30,8 @@ QVariantMap responseMetadata(const QNetworkReply* reply) {
         headers.insert(QString::fromLatin1(name).toLower(), QString::fromLatin1(value));
     }
 
-    return { { "statusCode", reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt() },
-        { "headers", headers } };
+    return { { u"statusCode"_s, reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt() },
+        { u"headers"_s, headers } };
 }
 
 } // namespace
@@ -46,9 +49,9 @@ void Requests::get(const QUrl& url, const QJSValue& onSuccess, const QJSValue& o
     QNetworkRequest request(url);
     request.setAttribute(QNetworkRequest::CacheLoadControlAttribute, QNetworkRequest::AlwaysNetwork);
     request.setAttribute(QNetworkRequest::CookieSaveControlAttribute, QNetworkRequest::Manual);
-    request.setRawHeader("Cache-Control", "no-cache, no-store");
-    request.setRawHeader("Pragma", "no-cache");
-    request.setRawHeader("Connection", "close");
+    request.setRawHeader("Cache-Control"_ba, "no-cache, no-store"_ba);
+    request.setRawHeader("Pragma"_ba, "no-cache"_ba);
+    request.setRawHeader("Connection"_ba, "close"_ba);
 
     if (headers.isObject()) {
         QJSValueIterator it(headers);

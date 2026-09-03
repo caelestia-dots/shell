@@ -19,6 +19,8 @@ Q_LOGGING_CATEGORY(lcCacher, "caelestia.images.cacher", QtInfoMsg)
 
 namespace caelestia::images {
 
+using Qt::StringLiterals::operator""_s;
+
 namespace {
 
 QString sha256sum(const QString& path) {
@@ -32,17 +34,17 @@ QString sha256sum(const QString& path) {
     hash.addData(&file);
     file.close();
 
-    return hash.result().toHex();
+    return QString::fromLatin1(hash.result().toHex());
 }
 
 QString fillSuffix(ImageCacher::FillMode fillMode) {
     switch (fillMode) {
     case ImageCacher::FillMode::Crop:
-        return QStringLiteral("crop");
+        return u"crop"_s;
     case ImageCacher::FillMode::Fit:
-        return QStringLiteral("fit");
+        return u"fit"_s;
     default:
-        return QStringLiteral("stretch");
+        return u"stretch"_s;
     }
 }
 
@@ -52,8 +54,8 @@ const QString& ImageCacher::cacheDir() {
     static const QString k_dir = [] {
         QString cache = qEnvironmentVariable("XDG_CACHE_HOME");
         if (cache.isEmpty())
-            cache = QDir::homePath() + QStringLiteral("/.cache");
-        return cache + QStringLiteral("/caelestia/imagecache");
+            cache = QDir::homePath() + u"/.cache"_s;
+        return cache + u"/caelestia/imagecache"_s;
     }();
     return k_dir;
 }
@@ -63,11 +65,10 @@ QString ImageCacher::cachePathFor(const QString& sourcePath, const QSize& size, 
     if (sha.isEmpty())
         return {};
 
-    const QString filename =
-        QStringLiteral("%1@%2x%3-%4.png")
-            .arg(sha, QString::number(size.width()), QString::number(size.height()), fillSuffix(fillMode));
+    const QString filename = u"%1@%2x%3-%4.png"_s.arg(
+        sha, QString::number(size.width()), QString::number(size.height()), fillSuffix(fillMode));
 
-    return cacheDir() + QLatin1Char('/') + filename;
+    return cacheDir() + u'/' + filename;
 }
 
 ImageCacher* ImageCacher::instance() {

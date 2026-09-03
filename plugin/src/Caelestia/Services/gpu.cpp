@@ -11,19 +11,21 @@
 
 namespace caelestia::services {
 
+using Qt::StringLiterals::operator""_s;
+
 namespace {
 
 QStringList gpuBusyFiles() {
-    static const QRegularExpression k_cardRe(QStringLiteral("^card\\d+$"));
+    static const QRegularExpression k_cardRe(u"^card\\d+$"_s);
 
     QStringList files;
-    QDirIterator it(QStringLiteral("/sys/class/drm"), QDir::Dirs | QDir::NoDotAndDotDot);
+    QDirIterator it(u"/sys/class/drm"_s, QDir::Dirs | QDir::NoDotAndDotDot);
     while (it.hasNext()) {
         const QString path = it.next();
         if (!k_cardRe.match(it.fileName()).hasMatch()) {
             continue;
         }
-        const QString busy = path + QStringLiteral("/device/gpu_busy_percent");
+        const QString busy = path + u"/device/gpu_busy_percent"_s;
         if (QFile::exists(busy)) {
             files << busy;
         }
@@ -32,29 +34,28 @@ QStringList gpuBusyFiles() {
 }
 
 QString cleanName(QString s) {
-    static const QRegularExpression k_noise(
-        QStringLiteral("\\(R\\)|\\(TM\\)|Graphics"), QRegularExpression::CaseInsensitiveOption);
-    static const QRegularExpression k_spaces(QStringLiteral("\\s+"));
+    static const QRegularExpression k_noise(u"\\(R\\)|\\(TM\\)|Graphics"_s, QRegularExpression::CaseInsensitiveOption);
+    static const QRegularExpression k_spaces(u"\\s+"_s);
     s.replace(k_noise, QString());
-    s.replace(k_spaces, QStringLiteral(" "));
+    s.replace(k_spaces, u" "_s);
     return s.trimmed();
 }
 
 QString parseNvidiaName(const QByteArray& out) {
-    const QString first = QString::fromUtf8(out).split('\n').value(0).trimmed();
+    const QString first = QString::fromUtf8(out).split(u'\n').value(0).trimmed();
     return first.isEmpty() ? QString() : cleanName(first);
 }
 
 QString parseGlxinfoName(const QByteArray& out) {
-    const QStringList lines = QString::fromUtf8(out).split('\n');
+    const QStringList lines = QString::fromUtf8(out).split(u'\n');
     for (const QString& line : lines) {
-        const qsizetype idx = line.indexOf(QStringLiteral("Device:"));
+        const qsizetype idx = line.indexOf(u"Device:"_s);
         if (idx < 0) {
             continue;
         }
 
         QString rest = line.mid(idx + 7);
-        const qsizetype paren = rest.indexOf('(');
+        const qsizetype paren = rest.indexOf(u'(');
         if (paren >= 0) {
             rest = rest.left(paren);
         }
@@ -69,10 +70,9 @@ QString parseGlxinfoName(const QByteArray& out) {
 }
 
 QString parseLspciName(const QByteArray& out) {
-    static const QRegularExpression k_lineRe(
-        QStringLiteral("vga|3d controller|display"), QRegularExpression::CaseInsensitiveOption);
+    static const QRegularExpression k_lineRe(u"vga|3d controller|display"_s, QRegularExpression::CaseInsensitiveOption);
 
-    const QStringList lines = QString::fromUtf8(out).split('\n');
+    const QStringList lines = QString::fromUtf8(out).split(u'\n');
     QString match;
     for (const QString& line : lines) {
         if (k_lineRe.match(line).hasMatch()) {
@@ -85,7 +85,7 @@ QString parseLspciName(const QByteArray& out) {
         return {};
     }
 
-    static const QRegularExpression k_bracketRe(QStringLiteral("\\[([^\\]]+)\\][^\\[]*$"));
+    static const QRegularExpression k_bracketRe(u"\\[([^\\]]+)\\][^\\[]*$"_s);
     const auto bracket = k_bracketRe.match(match);
     if (bracket.hasMatch()) {
         return cleanName(bracket.captured(1));
@@ -93,7 +93,7 @@ QString parseLspciName(const QByteArray& out) {
 
     // Split on a colon followed by whitespace so the PCI slot ("00:02.0") is not
     // mistaken for the class/name separator ("controller: Device").
-    static const QRegularExpression k_colonRe(QStringLiteral(":\\s+(.+)"));
+    static const QRegularExpression k_colonRe(u":\\s+(.+)"_s);
     const auto colon = k_colonRe.match(match);
     if (colon.hasMatch()) {
         return cleanName(colon.captured(1));
@@ -113,17 +113,17 @@ struct NameSource {
 const std::array<NameSource, 3>& nameSources() {
     static const std::array<NameSource, 3> k_sources = { {
         {
-            .program = QStringLiteral("nvidia-smi"),
-            .args = { QStringLiteral("--query-gpu=name"), QStringLiteral("--format=csv,noheader") },
+            .program = u"nvidia-smi"_s,
+            .args = { u"--query-gpu=name"_s, u"--format=csv,noheader"_s },
             .parse = &parseNvidiaName,
         },
         {
-            .program = QStringLiteral("glxinfo"),
-            .args = { QStringLiteral("-B") },
+            .program = u"glxinfo"_s,
+            .args = { u"-B"_s },
             .parse = &parseGlxinfoName,
         },
         {
-            .program = QStringLiteral("lspci"),
+            .program = u"lspci"_s,
             .args = {},
             .parse = &parseLspciName,
         },
@@ -316,9 +316,8 @@ void Gpu::startNvidiaUsage() {
     }
     m_nvidiaQuerying = true;
     const int generation = m_generation;
-    runProcess(QStringLiteral("nvidia-smi"),
-        { QStringLiteral("--query-gpu=utilization.gpu,temperature.gpu"),
-            QStringLiteral("--format=csv,noheader,nounits") },
+    runProcess(u"nvidia-smi"_s,
+        { u"--query-gpu=utilization.gpu,temperature.gpu"_s, u"--format=csv,noheader,nounits"_s },
         [this, generation](const QByteArray& out) {
             m_nvidiaQuerying = false;
 

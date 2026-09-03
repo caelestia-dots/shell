@@ -14,16 +14,18 @@
 
 namespace caelestia::services {
 
+using Qt::StringLiterals::operator""_s;
+
 namespace {
 
 [[nodiscard]] QString sysfsRealPath(uint major, uint minor) {
-    const QString link = QStringLiteral("/sys/dev/block/%1:%2").arg(major).arg(minor);
+    const QString link = u"/sys/dev/block/%1:%2"_s.arg(major).arg(minor);
     const QString resolved = QFileInfo(link).canonicalFilePath();
     return resolved;
 }
 
 [[nodiscard]] bool readDevtFromSysfs(const QString& sysfsBlockDir, uint& major, uint& minor) {
-    QFile f(sysfsBlockDir + QStringLiteral("/dev"));
+    QFile f(sysfsBlockDir + u"/dev"_s);
     if (!f.open(QIODevice::ReadOnly | QIODevice::Text)) {
         return false;
     }
@@ -53,12 +55,12 @@ QStringList resolveAtNode(const QString& node, int depth) {
         return {};
     }
 
-    if (QFileInfo::exists(node + QStringLiteral("/partition"))) {
+    if (QFileInfo::exists(node + u"/partition"_s)) {
         const QString diskNode = nodeInfo.path();
         return { QFileInfo(diskNode).fileName() };
     }
 
-    const QDir slavesDir(node + QStringLiteral("/slaves"));
+    const QDir slavesDir(node + u"/slaves"_s);
     if (slavesDir.exists()) {
         const QStringList slaves = slavesDir.entryList(QDir::Dirs | QDir::NoDotAndDotDot);
         if (!slaves.isEmpty()) {
@@ -66,7 +68,7 @@ QStringList resolveAtNode(const QString& node, int depth) {
             for (const QString& slave : slaves) {
                 uint sm = 0;
                 uint sn = 0;
-                const QString slaveDir = QStringLiteral("/sys/class/block/") + slave;
+                const QString slaveDir = u"/sys/class/block/"_s + slave;
                 if (!readDevtFromSysfs(slaveDir, sm, sn)) {
                     continue;
                 }
@@ -183,7 +185,7 @@ bool Storage::isPseudoFs(QByteArrayView fsType) {
 }
 
 QStringList Storage::resolveToPhysicalDisks(const QString& devicePath) {
-    if (devicePath.isEmpty() || !devicePath.startsWith(QLatin1Char('/'))) {
+    if (devicePath.isEmpty() || !devicePath.startsWith(u'/')) {
         return {};
     }
     struct stat st{};
@@ -210,7 +212,7 @@ QHash<QByteArray, Storage::DeviceEntry> Storage::collectDevices() {
         const auto totalBytes = static_cast<quint64>(v.bytesTotal());
         const auto availBytes = static_cast<quint64>(v.bytesAvailable());
         const auto usedBytes = totalBytes > availBytes ? totalBytes - availBytes : 0;
-        const auto isRoot = v.rootPath() == QStringLiteral("/");
+        const auto isRoot = v.rootPath() == u"/"_s;
 
         DeviceEntry& e = byDevice[device];
         e.device = device;
@@ -237,7 +239,7 @@ QHash<QString, Storage::Accum> Storage::foldToDisks(const QHash<QByteArray, Devi
             // keying by the pool name. Datasets in a pool share the pool's free
             // space, so keep a single representative entry per pool (preferring
             // the root dataset, else the largest) rather than summing them.
-            if (e.fsType != QByteArrayLiteral("zfs"))
+            if (e.fsType != QByteArrayView("zfs"))
                 continue;
 
             const auto slash = e.device.indexOf('/');
@@ -252,7 +254,7 @@ QHash<QString, Storage::Accum> Storage::foldToDisks(const QHash<QByteArray, Devi
         }
 
         for (const auto& d : disks) {
-            if (d.startsWith(QStringLiteral("zram")))
+            if (d.startsWith(u"zram"_s))
                 continue;
 
             Accum& a = byDisk[d];

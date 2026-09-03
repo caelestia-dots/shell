@@ -9,6 +9,9 @@
 
 namespace caelestia::models {
 
+using Qt::StringLiterals::operator""_s;
+using Qt::StringLiterals::operator""_ba;
+
 FileSystemEntry::FileSystemEntry(const QString& path, QString relativePath, QObject* parent)
     : QObject(parent)
     , m_fileInfo(path)
@@ -80,7 +83,7 @@ FileSystemModel::FileSystemModel(QObject* parent)
     , m_recursive(false)
     , m_watchChanges(true)
     , m_showHidden(false)
-    , m_filter(NoFilter) {
+    , m_filter(Filter::NoFilter) {
     connect(&m_watcher, &QFileSystemWatcher::directoryChanged, this, &FileSystemModel::watchDirIfRecursive);
     connect(&m_watcher, &QFileSystemWatcher::directoryChanged, this, &FileSystemModel::updateEntriesForDir);
 }
@@ -100,7 +103,7 @@ QVariant FileSystemModel::data(const QModelIndex& index, int role) const {
 }
 
 QHash<int, QByteArray> FileSystemModel::roleNames() const {
-    return { { Qt::UserRole, "modelData" } };
+    return { { Qt::UserRole, "modelData"_ba } };
 }
 
 QString FileSystemModel::path() const {
@@ -326,7 +329,7 @@ FileSystemModel::ScanFilters FileSystemModel::filtersFor(
     if (filter == Filter::Images) {
         const auto formats = QImageReader::supportedImageFormats();
         for (const auto& format : formats)
-            filters.nameFilters << "*." + format;
+            filters.nameFilters << u"*."_s + QString::fromUtf8(format);
 
         filters.filterFn = [](const QString& path) {
             return QImageReader(path).canRead();

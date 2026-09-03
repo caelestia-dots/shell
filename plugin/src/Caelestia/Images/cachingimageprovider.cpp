@@ -19,6 +19,8 @@ Q_LOGGING_CATEGORY(lcCProv, "caelestia.images.cacheprovider", QtInfoMsg)
 
 namespace caelestia::images {
 
+using Qt::StringLiterals::operator""_s;
+
 namespace {
 
 class CachingImageResponse final : public QQuickImageResponse, public QRunnable {
@@ -63,11 +65,11 @@ void CachingImageResponse::run() {
 
 void CachingImageResponse::process() {
     QString path = QString::fromUtf8(m_id.toUtf8().percentDecoded());
-    if (!path.startsWith(QLatin1Char('/')))
-        path.prepend(QLatin1Char('/'));
+    if (!path.startsWith(u'/'))
+        path.prepend(u'/');
 
     if (!QFileInfo::exists(path)) {
-        m_error = QStringLiteral("Source file does not exist: ") + path;
+        m_error = u"Source file does not exist: "_s + path;
         qCWarning(lcCProv).noquote() << m_error;
         return;
     }
@@ -81,7 +83,7 @@ void CachingImageResponse::process() {
         qCDebug(lcCProv).noquote() << "Given source size is invalid, returning original:" << path;
         m_image = QImage(path);
         if (m_image.isNull()) {
-            m_error = QStringLiteral("Failed to decode source: ") + path;
+            m_error = u"Failed to decode source: "_s + path;
             qCWarning(lcCProv).noquote() << m_error;
         }
         return;
@@ -92,7 +94,7 @@ void CachingImageResponse::process() {
         const QImageReader sourceReader(path);
         const QSize sourceSize = sourceReader.size();
         if (!sourceSize.isValid() || sourceSize.isEmpty()) {
-            m_error = QStringLiteral("Could not determine source size for: ") + path;
+            m_error = u"Could not determine source size for: "_s + path;
             qCWarning(lcCProv).noquote() << m_error;
             return;
         }
@@ -119,7 +121,7 @@ void CachingImageResponse::process() {
 
     m_image = QImage(path);
     if (m_image.isNull()) {
-        m_error = QStringLiteral("Failed to decode source: ") + path;
+        m_error = u"Failed to decode source: "_s + path;
         qCWarning(lcCProv).noquote() << m_error;
     }
 }

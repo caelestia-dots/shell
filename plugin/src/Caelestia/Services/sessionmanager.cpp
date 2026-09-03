@@ -18,12 +18,14 @@ Q_LOGGING_CATEGORY(lcSessionManager, "caelestia.services.sessionmanager", QtInfo
 
 namespace caelestia::services {
 
+using Qt::StringLiterals::operator""_s;
+
 namespace {
 
-constexpr const char* k_loginService = "org.freedesktop.login1";
-constexpr const char* k_loginPath = "/org/freedesktop/login1";
-constexpr const char* k_loginIface = "org.freedesktop.login1.Manager";
-constexpr const char* k_sessionIface = "org.freedesktop.login1.Session";
+const QString k_loginService = u"org.freedesktop.login1"_s;
+const QString k_loginPath = u"/org/freedesktop/login1"_s;
+const QString k_loginIface = u"org.freedesktop.login1.Manager"_s;
+const QString k_sessionIface = u"org.freedesktop.login1.Session"_s;
 
 } // namespace
 
@@ -34,12 +36,12 @@ SessionManager::SessionManager(QObject* parent)
         return;
 
     bool ok = bus->connect(
-        k_loginService, k_loginPath, k_loginIface, "PrepareForSleep", this, SLOT(handlePrepareForSleep(bool)));
+        k_loginService, k_loginPath, k_loginIface, u"PrepareForSleep"_s, this, SLOT(handlePrepareForSleep(bool)));
     if (!ok)
         qCWarning(lcSessionManager) << "Failed to connect to PrepareForSleep signal:" << bus->lastError().message();
 
-    auto sessionMsg = QDBusMessage::createMethodCall(k_loginService, k_loginPath, k_loginIface, "GetSession");
-    sessionMsg.setArguments({ "auto" });
+    auto sessionMsg = QDBusMessage::createMethodCall(k_loginService, k_loginPath, k_loginIface, u"GetSession"_s);
+    sessionMsg.setArguments({ u"auto"_s });
     const QDBusReply<QDBusObjectPath> sessionReply = bus->call(sessionMsg);
     if (!sessionReply.isValid()) {
         qCWarning(lcSessionManager) << "Failed to get session path:" << sessionReply.error().message();
@@ -47,11 +49,11 @@ SessionManager::SessionManager(QObject* parent)
     }
     m_sessionPath = sessionReply.value().path();
 
-    ok = bus->connect(k_loginService, m_sessionPath, k_sessionIface, "Lock", this, SLOT(handleLockRequested()));
+    ok = bus->connect(k_loginService, m_sessionPath, k_sessionIface, u"Lock"_s, this, SLOT(handleLockRequested()));
     if (!ok)
         qCWarning(lcSessionManager) << "Failed to connect to Lock signal:" << bus->lastError().message();
 
-    ok = bus->connect(k_loginService, m_sessionPath, k_sessionIface, "Unlock", this, SLOT(handleUnlockRequested()));
+    ok = bus->connect(k_loginService, m_sessionPath, k_sessionIface, u"Unlock"_s, this, SLOT(handleUnlockRequested()));
     if (!ok)
         qCWarning(lcSessionManager) << "Failed to connect to Unlock signal:" << bus->lastError().message();
 }
@@ -61,7 +63,6 @@ bool SessionManager::exec(const QStringList& command) {
         return false;
     }
 
-    using Qt::StringLiterals::operator""_s;
     static const QHash<QString, void (SessionManager::*)()> k_cmds = {
         { u"logout"_s, &SessionManager::logout },
         { u"suspend"_s, &SessionManager::suspend },
@@ -79,7 +80,7 @@ bool SessionManager::exec(const QStringList& command) {
         cmd = u"logout"_s; // Manual alias `loginctl terminate-user ''` -> logout
 
     // Normalise command
-    cmd = cmd.remove("-").remove("_").toLower();
+    cmd = cmd.remove(u'-').remove(u'_').toLower();
 
     const auto methodPtr = k_cmds.value(cmd, nullptr);
     if (methodPtr) {
@@ -91,40 +92,40 @@ bool SessionManager::exec(const QStringList& command) {
 }
 
 void SessionManager::logout() {
-    callSession("Terminate");
+    callSession(u"Terminate"_s);
 }
 
 void SessionManager::suspend() {
-    callManager("Suspend");
+    callManager(u"Suspend"_s);
 }
 
 void SessionManager::suspendThenHibernate() {
     if (queryHibernateAvailable()) {
-        callManager("SuspendThenHibernate");
+        callManager(u"SuspendThenHibernate"_s);
     } else {
         // Fall back to suspend when no hibernate
         qCInfo(lcSessionManager) << "SuspendThenHibernate unavailable, falling back to suspend";
-        callManager("Suspend");
+        callManager(u"Suspend"_s);
     }
 }
 
 void SessionManager::hibernate() {
     if (queryHibernateAvailable()) {
-        callManager("Hibernate");
+        callManager(u"Hibernate"_s);
     } else {
         qCWarning(lcSessionManager) << "Hibernate unavailable, ignoring hibernate request";
 
         Toaster::instance()->toast(
-            tr("Hibernate failed"), tr("Enable hibernation to use this feature."), "warning", Toast::Type::Warning);
+            tr("Hibernate failed"), tr("Enable hibernation to use this feature."), u"warning"_s, Toast::Type::Warning);
     }
 }
 
 void SessionManager::poweroff() {
-    callManager("PowerOff");
+    callManager(u"PowerOff"_s);
 }
 
 void SessionManager::reboot() {
-    callManager("Reboot");
+    callManager(u"Reboot"_s);
 }
 
 std::optional<QDBusConnection> SessionManager::getSystemBus() {
@@ -141,13 +142,13 @@ bool SessionManager::queryHibernateAvailable() {
     if (!bus)
         return false;
 
-    auto hibernateMsg = QDBusMessage::createMethodCall(k_loginService, k_loginPath, k_loginIface, "CanHibernate");
+    auto hibernateMsg = QDBusMessage::createMethodCall(k_loginService, k_loginPath, k_loginIface, u"CanHibernate"_s);
     const QDBusReply<QString> hibernateReply = bus->call(hibernateMsg);
     if (!hibernateReply.isValid()) {
         qCWarning(lcSessionManager) << "Failed to query hibernate support:" << hibernateReply.error().message();
     } else {
         const auto state = hibernateReply.value();
-        return state == "yes" || state == "challenge";
+        return state == u"yes"_s || state == u"challenge"_s;
     }
 
     return false;
