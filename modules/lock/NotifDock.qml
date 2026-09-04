@@ -23,7 +23,7 @@ ColumnLayout {
 
     StyledText {
         Layout.fillWidth: true
-        text: Notifs.list.length > 0 ? qsTr("%1 notification%2").arg(Notifs.list.length).arg(Notifs.list.length === 1 ? "" : "s") : qsTr("Notifications")
+        text: Notifs.list.length > 0 ? (Notifs.list.length === 1 ? qsTr("%1 notification") : qsTr("%1 notifications")).arg(Notifs.list.length) : qsTr("Notifications")
         color: Colours.palette.m3outline
         font: Tokens.font.mono.builders.small.weight(Font.Medium).build()
         elide: Text.ElideRight

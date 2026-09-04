@@ -742,8 +742,12 @@
         <translation>検出中</translation>
     </message>
     <message>
-        <source>%1 device%2 available</source>
-        <translation>%1個のデバイス%2が利用可能</translation>
+        <source>%1 device available</source>
+        <translation>%1台のデバイスが利用可能</translation>
+    </message>
+    <message>
+        <source>%1 devices available</source>
+        <translation>%1台のデバイスが利用可能</translation>
     </message>
     <message>
         <source> (%1 connected)</source>
@@ -2101,12 +2105,16 @@
 <context>
     <name>NotifDock</name>
     <message>
-        <source>%1 notification%2</source>
-        <translation>%1件の通知%2</translation>
-    </message>
-    <message>
         <source>Notifications</source>
         <translation>通知</translation>
+    </message>
+    <message>
+        <source>%1 notification</source>
+        <translation>%1件の通知</translation>
+    </message>
+    <message>
+        <source>%1 notifications</source>
+        <translation>%1件の通知</translation>
     </message>
     <message>
         <source>Unlock for Notifications</source>
@@ -2117,8 +2125,12 @@
         <translation>通知はありません</translation>
     </message>
     <message>
-        <source>notification%1</source>
-        <translation>通知%1</translation>
+        <source>notification</source>
+        <translation>件の通知</translation>
+    </message>
+    <message>
+        <source>notifications</source>
+        <translation>件の通知</translation>
     </message>
     <message>
         <source>All up to date!</source>

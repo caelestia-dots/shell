@@ -742,8 +742,12 @@
         <translation>검색 중</translation>
     </message>
     <message>
-        <source>%1 device%2 available</source>
-        <translation>%1개 장치%2 사용 가능</translation>
+        <source>%1 device available</source>
+        <translation>사용 가능한 장치 %1개</translation>
+    </message>
+    <message>
+        <source>%1 devices available</source>
+        <translation>사용 가능한 장치 %1개</translation>
     </message>
     <message>
         <source> (%1 connected)</source>
@@ -2101,12 +2105,16 @@
 <context>
     <name>NotifDock</name>
     <message>
-        <source>%1 notification%2</source>
-        <translation>알림 %1개%2</translation>
-    </message>
-    <message>
         <source>Notifications</source>
         <translation>알림</translation>
+    </message>
+    <message>
+        <source>%1 notification</source>
+        <translation>알림 %1개</translation>
+    </message>
+    <message>
+        <source>%1 notifications</source>
+        <translation>알림 %1개</translation>
     </message>
     <message>
         <source>Unlock for Notifications</source>
@@ -2117,8 +2125,12 @@
         <translation>알림 없음</translation>
     </message>
     <message>
-        <source>notification%1</source>
-        <translation>알림%1</translation>
+        <source>notification</source>
+        <translation>알림</translation>
+    </message>
+    <message>
+        <source>notifications</source>
+        <translation>알림</translation>
     </message>
     <message>
         <source>All up to date!</source>

@@ -742,8 +742,12 @@
         <translation>正在搜索</translation>
     </message>
     <message>
-        <source>%1 device%2 available</source>
-        <translation>%1 个可用设备%2</translation>
+        <source>%1 device available</source>
+        <translation>%1 个可用设备</translation>
+    </message>
+    <message>
+        <source>%1 devices available</source>
+        <translation>%1 个可用设备</translation>
     </message>
     <message>
         <source> (%1 connected)</source>
@@ -2101,12 +2105,16 @@
 <context>
     <name>NotifDock</name>
     <message>
-        <source>%1 notification%2</source>
-        <translation>%1 条通知%2</translation>
-    </message>
-    <message>
         <source>Notifications</source>
         <translation>通知</translation>
+    </message>
+    <message>
+        <source>%1 notification</source>
+        <translation>%1 条通知</translation>
+    </message>
+    <message>
+        <source>%1 notifications</source>
+        <translation>%1 条通知</translation>
     </message>
     <message>
         <source>Unlock for Notifications</source>
@@ -2117,8 +2125,12 @@
         <translation>无通知</translation>
     </message>
     <message>
-        <source>notification%1</source>
-        <translation>条通知%1</translation>
+        <source>notification</source>
+        <translation>条通知</translation>
+    </message>
+    <message>
+        <source>notifications</source>
+        <translation>条通知</translation>
     </message>
     <message>
         <source>All up to date!</source>
