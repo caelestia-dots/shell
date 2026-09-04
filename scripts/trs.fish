@@ -1,7 +1,7 @@
 #!/usr/bin/env fish
 
 if test (count $argv) -lt 1
-    echo "Usage: $(status basename) raw|ll_CC"
+    echo "Usage: $(status basename) raw|test|ll_CC"
     exit 1
 end
 
@@ -25,7 +25,7 @@ function gen -a lang
         (string match -v 'build/*' $argv[2..])
 end
 
-if test $argv[1] = raw || ! test -f $pot_file
+function gen_trs
     echo > $pot_file
     gen JavaScript **.qml
     gen C++ **.cpp **.hpp
@@ -41,8 +41,28 @@ if test $argv[1] = raw || ! test -f $pot_file
     ' $pot_file
 end
 
-if test $argv[1] != raw
-    msginit --locale=$argv[1] \
-        --input=$pot_file \
-        --output=$tr_dir/$argv[1].po
+if test $argv[1] = raw
+    gen_trs
+    exit
 end
+
+test -f $pot_file || gen_trs
+
+if test $argv[1] = test
+    if test (count $argv) -lt 2
+        echo "Usage: $(status basename) test <out_file>"
+        exit 1
+    end
+
+    msginit --locale=en_US \
+        --input=$pot_file \
+        --output=$argv[2] \
+        --no-translator
+    sed -Ei 's/^msgstr "(.*)"$/msgstr "[[ \1 ]]"/' $argv[2]
+
+    exit
+end
+
+msginit --locale=$argv[1] \
+    --input=$pot_file \
+    --output=$tr_dir/$argv[1].po
