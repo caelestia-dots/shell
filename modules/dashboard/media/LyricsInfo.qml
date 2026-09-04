@@ -97,8 +97,12 @@ Item {
             PropertyChanges {
                 rect.anchors.rightMargin: root.width - root.Tokens.spacing.small
                 rect.anchors.topMargin: -root.Tokens.padding.medium
-                rect.implicitWidth: root.popupWidth
-                rect.implicitHeight: Math.min(root.maxPopupHeight, Math.max(layout.implicitHeight, placeholder.implicitHeight) + root.padding * 2)
+                rect.implicitWidth: (Lyrics.hasLyrics && !Lyrics.loading)
+                    ? root.popupWidth
+                    : Math.max(140, placeholder.implicitWidth + root.padding * 3)
+                rect.implicitHeight: (Lyrics.hasLyrics && !Lyrics.loading)
+                    ? Math.min(root.maxPopupHeight, layout.implicitHeight + root.padding * 2)
+                    : placeholder.implicitHeight + root.padding * 2
                 content.opacity: 1
             }
         }
