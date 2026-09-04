@@ -23,7 +23,14 @@ QStringList translationDirs() {
         dirs << QDir(dataHome).filePath(QStringLiteral("caelestia/translations"));
     }
 
-    // System install location (set by CMake via CAELESTIA_TRANSLATIONS_DIR).
+    // Runtime override for split installs (e.g. the Nix wrapper), where the
+    // plugin can't know the shell's install dir at compile time.
+    const auto envDir = qEnvironmentVariable("CAELESTIA_TRANSLATIONS_DIR");
+    if (!envDir.isEmpty()) {
+        dirs << envDir;
+    }
+
+    // System install location baked in by CMake from INSTALL_QSCONFDIR.
 #ifdef CAELESTIA_TRANSLATIONS_DIR
     dirs << QStringLiteral(CAELESTIA_TRANSLATIONS_DIR);
 #endif

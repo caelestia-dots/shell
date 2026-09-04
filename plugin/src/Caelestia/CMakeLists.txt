@@ -20,9 +20,12 @@ qml_module(caelestia-core
 # Bake the shell version in so CUtils can expose it without spawning a process
 target_compile_definitions(caelestia-core PRIVATE CAELESTIA_VERSION="${VERSION}")
 
-# Where to look for installed translations at runtime.
+# Where to look for installed translations at runtime. INSTALL_QSCONFDIR may be
+# relative to the install prefix or absolute (e.g. Nix), so resolve it here.
+cmake_path(ABSOLUTE_PATH INSTALL_QSCONFDIR BASE_DIRECTORY "${CMAKE_INSTALL_PREFIX}" NORMALIZE
+    OUTPUT_VARIABLE CAELESTIA_TRANSLATIONS_DIR)
 target_compile_definitions(caelestia-core PRIVATE
-    CAELESTIA_TRANSLATIONS_DIR="/${INSTALL_QSCONFDIR}/translations"
+    CAELESTIA_TRANSLATIONS_DIR="${CAELESTIA_TRANSLATIONS_DIR}/translations"
 )
 
 # Node macros expand to Q_OBJECT, automoc can't see it otherwise
