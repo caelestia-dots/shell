@@ -2,6 +2,7 @@ import QtQuick
 import QtQuick.Layouts
 import M3Shapes
 import Caelestia.Config
+import Caelestia.I18n
 import qs.components
 import qs.components.controls
 import qs.services
@@ -133,7 +134,7 @@ StyledRect {
             anchors.bottom: parent.top
             anchors.horizontalCenter: parent.horizontalCenter
 
-            text: qsTr("Usage")
+            text: Tr.tr("Usage")
             color: Colours.palette.m3onSurfaceVariant
             font: Tokens.font.body.small
         }

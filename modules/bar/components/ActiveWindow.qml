@@ -2,6 +2,7 @@ pragma ComponentBehavior: Bound
 
 import QtQuick
 import Caelestia.Config
+import Caelestia.I18n
 import qs.components
 import qs.services
 import qs.utils
@@ -16,7 +17,7 @@ Item {
     readonly property string windowTitle: {
         const title = Hypr.activeToplevel?.title;
         if (!title)
-            return qsTr("Desktop");
+            return Tr.tr("Desktop");
         if (Config.bar.activeWindow.compact) {
             // " - " (standard hyphen), " — " (em dash), " – " (en dash)
             const parts = title.split(/\s+[\-\u2013\u2014]\s+/);

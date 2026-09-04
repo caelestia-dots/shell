@@ -2,6 +2,7 @@ import QtQuick
 import QtQuick.Layouts
 import Quickshell
 import Caelestia.Config
+import Caelestia.I18n
 import Caelestia.Services
 import qs.components
 import qs.components.controls
@@ -71,7 +72,7 @@ StyledRect {
 
                     StyledText {
                         Layout.alignment: Qt.AlignHCenter
-                        text: qsTr("Used")
+                        text: Tr.tr("Used")
                         font: Tokens.font.body.small
                         color: Colours.palette.m3onSurfaceVariant
                     }
@@ -83,14 +84,14 @@ StyledRect {
                 spacing: Tokens.spacing.extraSmall
 
                 StyledText {
-                    text: qsTr("Storage")
+                    text: Tr.tr("Storage")
                     font: Tokens.font.title.medium
                 }
 
                 StyledText {
                     text: {
                         if (!Storage.primaryDisk)
-                            return qsTr("No disks detected");
+                            return Tr.tr("No disks detected");
 
                         const fmt = UsageFmt.formatKib(Storage.primaryDisk.used, Storage.primaryDisk.total);
                         return `${+fmt.value.toFixed(1)} / ${+fmt.total.toFixed(1)} ${fmt.unit}`;
@@ -107,7 +108,7 @@ StyledRect {
             type: SplitButton.Tonal
             disabled: !Storage.disks.length
             fallbackIcon: "storage"
-            fallbackText: qsTr("No disks")
+            fallbackText: Tr.tr("No disks")
             menuOnTop: true
             minLeftWidth: row.implicitWidth * 0.6
 

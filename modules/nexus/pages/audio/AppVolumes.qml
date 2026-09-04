@@ -5,6 +5,7 @@ import QtQuick.Layouts
 import Quickshell
 import Quickshell.Services.Pipewire
 import Caelestia.Config
+import Caelestia.I18n
 import qs.components
 import qs.services
 import qs.utils
@@ -13,7 +14,7 @@ import qs.modules.nexus.common
 PageBase {
     id: root
 
-    title: qsTr("App volumes")
+    title: Tr.tr("App volumes")
     isSubPage: true
 
     ColumnLayout {
@@ -26,7 +27,7 @@ PageBase {
             Layout.fillWidth: true
             Layout.leftMargin: Tokens.padding.small
             Layout.bottomMargin: Tokens.spacing.medium
-            text: qsTr("Adjust the volume of individual apps currently playing audio.")
+            text: Tr.tr("Adjust the volume of individual apps currently playing audio.")
             color: Colours.palette.m3outline
             font: Tokens.font.body.small
             wrapMode: Text.WordWrap
@@ -39,7 +40,7 @@ PageBase {
             last: true
             showList: true
             placeholderIcon: "music_off"
-            placeholderText: qsTr("No apps playing audio")
+            placeholderText: Tr.tr("No apps playing audio")
             color: list.count === 0 ? Colours.tPalette.m3surfaceContainer : "transparent"
             list.spacing: Tokens.spacing.extraSmall / 2
 

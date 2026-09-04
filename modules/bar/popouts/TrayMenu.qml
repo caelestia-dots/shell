@@ -5,6 +5,7 @@ import QtQuick.Controls
 import Quickshell
 import Quickshell.Widgets
 import Caelestia.Config
+import Caelestia.I18n
 import qs.components
 import qs.services
 
@@ -217,7 +218,7 @@ StackView {
 
                         StyledText {
                             anchors.verticalCenter: parent.verticalCenter
-                            text: qsTr("Back")
+                            text: Tr.tr("Back")
                             color: Colours.palette.m3onSecondaryContainer
                         }
                     }

@@ -5,6 +5,7 @@ import QtQuick.Layouts
 import Quickshell
 import Quickshell.Bluetooth
 import Caelestia.Config
+import Caelestia.I18n
 import qs.components
 import qs.components.controls
 import qs.services
@@ -17,7 +18,7 @@ PageBase {
     readonly property BluetoothAdapter adapter: Bluetooth.defaultAdapter // qmllint disable unresolved-type
     readonly property bool btEnabled: adapter?.enabled ?? false
 
-    title: qsTr("Connected devices")
+    title: Tr.tr("Connected devices")
 
     ColumnLayout {
         anchors.horizontalCenter: parent.horizontalCenter
@@ -27,7 +28,7 @@ PageBase {
 
         ToggleRow {
             first: true
-            text: qsTr("Bluetooth")
+            text: Tr.tr("Bluetooth")
             font: Tokens.font.body.medium
             horizontalPadding: Tokens.padding.largeIncreased
             checked: root.btEnabled
@@ -42,7 +43,7 @@ PageBase {
 
             showList: root.btEnabled
             placeholderIcon: root.btEnabled ? "devices_other" : "bluetooth_disabled"
-            placeholderText: root.btEnabled ? qsTr("No saved devices") : qsTr("Bluetooth disabled")
+            placeholderText: root.btEnabled ? Tr.tr("No saved devices") : Tr.tr("Bluetooth disabled")
 
             model: ScriptModel {
                 values: Bluetooth.devices.values.filter(d => d.bonded).sort((a, b) => (b.connected - a.connected) || a.name.localeCompare(b.name)) // qmllint disable unresolved-type
@@ -115,14 +116,14 @@ PageBase {
 
                         StyledText {
                             Layout.fillWidth: true
-                            text: device.modelData?.name ?? qsTr("Unknown")
+                            text: device.modelData?.name ?? Tr.tr("Unknown")
                             font: Tokens.font.body.small
                             elide: Text.ElideRight
                         }
 
                         StyledText {
                             Layout.fillWidth: true
-                            text: device.connected ? qsTr("Connected%1").arg(device.modelData?.batteryAvailable ? " • " + Math.round(device.modelData.battery * 100) + "%" : "") : qsTr("Saved")
+                            text: device.connected ? Tr.tr("Connected%1").arg(device.modelData?.batteryAvailable ? " • " + Math.round(device.modelData.battery * 100) + "%" : "") : Tr.tr("Saved")
                             color: Colours.palette.m3outline
                             font: Tokens.font.label.small
                             elide: Text.ElideRight
@@ -171,7 +172,7 @@ PageBase {
         RowButton {
             last: true
             icon: "add"
-            text: qsTr("Pair new device")
+            text: Tr.tr("Pair new device")
             disabled: !root.btEnabled
             onClicked: root.nState.openSubPage(2)
         }
@@ -180,8 +181,8 @@ PageBase {
             Layout.topMargin: Tokens.spacing.large - parent.spacing
 
             first: true
-            text: qsTr("Discoverable")
-            subtext: qsTr("Allow nearby devices to find this one")
+            text: Tr.tr("Discoverable")
+            subtext: Tr.tr("Allow nearby devices to find this one")
             disabled: !root.btEnabled
             checked: root.adapter?.discoverable ?? false
             onToggled: {
@@ -196,8 +197,8 @@ PageBase {
 
         ToggleRow {
             last: true
-            text: qsTr("Pairable")
-            subtext: qsTr("Allow nearby devices to pair with this one")
+            text: Tr.tr("Pairable")
+            subtext: Tr.tr("Allow nearby devices to pair with this one")
             disabled: !root.btEnabled
             checked: root.adapter?.pairable ?? false
             onToggled: {

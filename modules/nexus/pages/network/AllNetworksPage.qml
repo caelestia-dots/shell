@@ -3,6 +3,7 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import QtQuick.Layouts
 import Caelestia.Config
+import Caelestia.I18n
 import qs.components
 import qs.components.controls
 import qs.services
@@ -11,7 +12,7 @@ import qs.modules.nexus.common
 PageBase {
     id: root
 
-    title: qsTr("All networks")
+    title: Tr.tr("All networks")
     isSubPage: true
     flickable.bottomMargin: Tokens.padding.extraExtraLarge * 2 // Extra scrolling space at the bottom
 
@@ -47,7 +48,7 @@ PageBase {
                 spacing: Tokens.spacing.extraSmall / 2
 
                 StyledText {
-                    text: qsTr("Filters")
+                    text: Tr.tr("Filters")
                     font: Tokens.font.title.small
                 }
 
@@ -62,7 +63,7 @@ PageBase {
                         return Nmcli.hasSavedProfile(ap.ssid);
                     }
 
-                    text: qsTr("Saved")
+                    text: Tr.tr("Saved")
                     topLeftRadius: pressed ? pressedRadius : implicitHeight / 2
                     bottomLeftRadius: pressed ? pressedRadius : implicitHeight / 2
 
@@ -86,7 +87,7 @@ PageBase {
                         return ap.security !== "none";
                     }
 
-                    text: qsTr("Secured")
+                    text: Tr.tr("Secured")
                 }
 
                 FilterButton {
@@ -96,7 +97,7 @@ PageBase {
                         return ap.frequency >= 4900 && ap.frequency <= 5900;
                     }
 
-                    text: qsTr("5 GHz")
+                    text: Tr.tr("5 GHz")
                 }
 
                 FilterButton {
@@ -106,7 +107,7 @@ PageBase {
                         return ap.frequency >= 2400 && ap.frequency <= 2500;
                     }
 
-                    text: qsTr("2.4 GHz")
+                    text: Tr.tr("2.4 GHz")
                     topRightRadius: pressed ? pressedRadius : implicitHeight / 2
                     bottomRightRadius: pressed ? pressedRadius : implicitHeight / 2
 

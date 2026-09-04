@@ -3,6 +3,7 @@ import QtQuick.Layouts
 import M3Shapes
 import Caelestia
 import Caelestia.Config
+import Caelestia.I18n
 import qs.components
 import qs.services
 
@@ -31,7 +32,7 @@ StyledRect {
         StyledText {
             id: title
 
-            text: qsTr("Hourly forecast")
+            text: Tr.tr("Hourly forecast")
             font: Tokens.font.title.medium
         }
     }
@@ -95,7 +96,7 @@ StyledRect {
                 StyledText {
                     Layout.topMargin: Tokens.spacing.extraSmall
                     Layout.alignment: Qt.AlignHCenter
-                    text: hour.index === 0 ? qsTr("Now") : Qt.formatDateTime(new Date(hour.cond.timestamp.replace("T", " ")), GlobalConfig.services.useTwelveHourClock ? "ha" : "hh:00")
+                    text: hour.index === 0 ? Tr.tr("Now") : Qt.formatDateTime(new Date(hour.cond.timestamp.replace("T", " ")), GlobalConfig.services.useTwelveHourClock ? "ha" : "hh:00")
                     color: Colours.palette.m3onSurfaceVariant
                     font: Tokens.font.body.medium
                 }

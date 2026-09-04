@@ -2,6 +2,7 @@ import QtQuick
 import QtQuick.Layouts
 import Quickshell.Services.UPower
 import Caelestia.Config
+import Caelestia.I18n
 import Caelestia.Services
 import qs.components
 import qs.services
@@ -74,7 +75,7 @@ StyledClippingRect {
 
         StyledText {
             Layout.fillWidth: true
-            text: qsTr("Battery")
+            text: Tr.tr("Battery")
             color: contents.textColour
             font: Tokens.font.body.medium
         }
@@ -87,14 +88,14 @@ StyledClippingRect {
             Layout.alignment: Qt.AlignRight
             text: {
                 if (UPower.displayDevice.state === UPowerDeviceState.FullyCharged)
-                    return qsTr("Full");
+                    return Tr.tr("Full");
 
                 if (contents.charging)
-                    return qsTr("Charging");
+                    return Tr.tr("Charging");
 
                 const s = UPower.displayDevice.timeToEmpty;
                 if (s === 0)
-                    return qsTr("...");
+                    return Tr.tr("...");
 
                 const hr = Math.floor(s / 3600);
                 const min = Math.floor((s % 3600) / 60);

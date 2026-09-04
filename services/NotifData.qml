@@ -5,6 +5,7 @@ import Quickshell
 import Quickshell.Services.Notifications
 import Caelestia
 import Caelestia.Config
+import Caelestia.I18n
 import qs.services
 import qs.utils
 
@@ -16,7 +17,7 @@ QtObject {
     property var locks: new Set()
 
     property date time: new Date()
-    property string timeStr: qsTr("now")
+    property string timeStr: Tr.tr("now")
 
     readonly property Timer timeStrTimer: Timer {
         running: !notif.closed
@@ -173,7 +174,7 @@ QtObject {
         const m = Math.floor(diff / 60000);
 
         if (m < 1) {
-            timeStr = qsTr("now");
+            timeStr = Tr.tr("now");
             timeStrTimer.interval = 5000;
         } else {
             const h = Math.floor(m / 60);

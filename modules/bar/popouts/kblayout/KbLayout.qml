@@ -4,6 +4,7 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 import Caelestia.Config
+import Caelestia.I18n
 import qs.components
 import qs.services
 
@@ -26,7 +27,7 @@ ColumnLayout {
     StyledText {
         Layout.topMargin: Tokens.padding.medium
         Layout.rightMargin: Tokens.padding.extraSmall
-        text: qsTr("Keyboard Layouts")
+        text: Tr.tr("Keyboard Layouts")
         font: Tokens.font.body.builders.medium.weight(Font.Medium).build()
     }
 

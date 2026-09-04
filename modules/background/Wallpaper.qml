@@ -2,6 +2,7 @@ pragma ComponentBehavior: Bound
 
 import QtQuick
 import Caelestia.Config
+import Caelestia.I18n
 import qs.components
 import qs.components.filedialog
 import qs.components.images
@@ -58,7 +59,7 @@ Item {
                     spacing: Tokens.spacing.small
 
                     StyledText {
-                        text: qsTr("Wallpaper missing?")
+                        text: Tr.tr("Wallpaper missing?")
                         color: Colours.palette.m3onSurfaceVariant
                         font: Tokens.font.body.builders.large.size(28 * 2).weight(Font.Bold).build()
                     }
@@ -73,8 +74,8 @@ Item {
                         FileDialog {
                             id: dialog
 
-                            title: qsTr("Select a wallpaper")
-                            filterLabel: qsTr("Image files")
+                            title: Tr.tr("Select a wallpaper")
+                            filterLabel: Tr.tr("Image files")
                             filters: Images.validImageExtensions
                             onAccepted: path => Wallpapers.setWallpaper(path)
                         }
@@ -90,7 +91,7 @@ Item {
 
                             anchors.centerIn: parent
 
-                            text: qsTr("Set it now!")
+                            text: Tr.tr("Set it now!")
                             color: Colours.palette.m3onPrimary
                             font: Tokens.font.body.large
                         }

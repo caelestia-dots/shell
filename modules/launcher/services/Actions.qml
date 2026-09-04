@@ -4,6 +4,7 @@ import ".."
 import QtQuick
 import Quickshell
 import Caelestia.Config
+import Caelestia.I18n
 import Caelestia.Services
 import qs.services
 import qs.utils
@@ -28,8 +29,8 @@ Searcher {
 
     component Action: QtObject {
         required property var modelData
-        readonly property string name: modelData.name ?? qsTr("Unnamed")
-        readonly property string desc: modelData.description ?? qsTr("No description")
+        readonly property string name: modelData.name ?? Tr.tr("Unnamed")
+        readonly property string desc: modelData.description ?? Tr.tr("No description")
         readonly property string icon: modelData.icon ?? "help_outline"
         readonly property list<string> command: modelData.command ?? []
         readonly property bool enabled: modelData.enabled ?? true

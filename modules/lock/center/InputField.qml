@@ -4,6 +4,7 @@ import QtQuick
 import Quickshell
 import M3Shapes
 import Caelestia.Config
+import Caelestia.I18n
 import qs.components
 import qs.services
 import qs.modules.lock
@@ -47,12 +48,12 @@ Item {
 
         text: {
             if (root.pam.passwd.active)
-                return qsTr("Loading...");
+                return Tr.tr("Loading...");
             if (root.pam.howdy.active)
-                return qsTr("Scanning face...");
+                return Tr.tr("Scanning face...");
             if (root.pam.state === Pam.MaxTries)
-                return qsTr("Max tries reached");
-            return qsTr("Enter your password");
+                return Tr.tr("Max tries reached");
+            return Tr.tr("Enter your password");
         }
         font: placeholder.font
     }

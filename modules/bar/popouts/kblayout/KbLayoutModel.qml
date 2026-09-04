@@ -4,6 +4,7 @@ import QtQuick
 import Quickshell.Io
 import Caelestia
 import Caelestia.Config
+import Caelestia.I18n
 
 // TODO: handle this better later
 
@@ -110,7 +111,7 @@ Item {
             return;
 
         if (layoutsModel.count > 4) {
-            Toaster.toast(qsTr("Keyboard layout limit"), qsTr("XKB supports only 4 layouts at a time"), "warning");
+            Toaster.toast(Tr.tr("Keyboard layout limit"), Tr.tr("XKB supports only 4 layouts at a time"), "warning");
         }
     }
 

@@ -4,6 +4,7 @@ import QtQuick
 import QtQuick.Layouts
 import Caelestia.Blobs
 import Caelestia.Config
+import Caelestia.I18n
 import qs.components
 import qs.components.controls
 import qs.components.effects
@@ -221,7 +222,7 @@ Item {
                             isRound: true
                             horizontalPadding: Tokens.padding.largeIncreased
                             verticalPadding: Tokens.padding.medium
-                            text: qsTr("Cancel")
+                            text: Tr.tr("Cancel")
                             onClicked: {
                                 root.cancelled();
                                 root.open = false;

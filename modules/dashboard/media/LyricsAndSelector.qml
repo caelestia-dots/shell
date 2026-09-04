@@ -3,6 +3,7 @@ import QtQuick.Layouts
 import Quickshell
 import Quickshell.Services.Mpris
 import Caelestia.Config
+import Caelestia.I18n
 import qs.components
 import qs.components.controls
 import qs.services
@@ -28,7 +29,7 @@ Item {
 
             StyledText {
                 Layout.fillWidth: true
-                text: qsTr("Lyrics")
+                text: Tr.tr("Lyrics")
                 font: Tokens.font.title.medium
             }
 
@@ -50,7 +51,7 @@ Item {
 
             menuItems: playerList.instances
             fallbackIcon: "music_off"
-            fallbackText: qsTr("No players")
+            fallbackText: Tr.tr("No players")
 
             minLeftWidth: layout.width - expandBtn.implicitWidth - spacing
             label.Layout.maximumWidth: minLeftWidth - iconLabel.implicitWidth - textRow.spacing - textRow.anchors.horizontalCenterOffset / 2 - horizontalPadding * 2

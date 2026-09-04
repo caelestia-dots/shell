@@ -3,6 +3,7 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import QtQuick.Layouts
 import Caelestia.Config
+import Caelestia.I18n
 import qs.services
 import qs.utils
 import qs.modules.nexus.common
@@ -10,7 +11,7 @@ import qs.modules.nexus.common
 PageBase {
     id: root
 
-    title: qsTr("Audio")
+    title: Tr.tr("Audio")
 
     ColumnLayout {
         anchors.horizontalCenter: parent.horizontalCenter
@@ -22,7 +23,7 @@ PageBase {
         SliderRow {
             first: true
             icon: Icons.getVolumeIcon(Audio.volume, Audio.muted)
-            label: qsTr("Output")
+            label: Tr.tr("Output")
             valueLabel: Math.round(value * 100) + "%"
             value: Audio.volume
             enabled: !Audio.muted
@@ -30,7 +31,7 @@ PageBase {
         }
 
         ToggleRow {
-            text: qsTr("Muted")
+            text: Tr.tr("Muted")
             checked: Audio.muted
             onToggled: Audio.setStreamMuted(Audio.sink, checked)
         }
@@ -40,7 +41,7 @@ PageBase {
             currentId: Audio.sink?.id ?? -1
             iconName: "speaker"
             placeholderIcon: "speaker"
-            placeholderText: qsTr("No output devices")
+            placeholderText: Tr.tr("No output devices")
             onSelected: node => Audio.setAudioSink(node)
         }
 
@@ -49,7 +50,7 @@ PageBase {
             Layout.topMargin: Tokens.spacing.large - parent.spacing
             first: true
             icon: Icons.getMicVolumeIcon(Audio.sourceVolume, Audio.sourceMuted)
-            label: qsTr("Input")
+            label: Tr.tr("Input")
             valueLabel: Math.round(value * 100) + "%"
             value: Audio.sourceVolume
             enabled: !Audio.sourceMuted
@@ -57,7 +58,7 @@ PageBase {
         }
 
         ToggleRow {
-            text: qsTr("Muted")
+            text: Tr.tr("Muted")
             checked: Audio.sourceMuted
             onToggled: Audio.setStreamMuted(Audio.source, checked)
         }
@@ -67,7 +68,7 @@ PageBase {
             currentId: Audio.source?.id ?? -1
             iconName: "mic"
             placeholderIcon: "mic_off"
-            placeholderText: qsTr("No input devices")
+            placeholderText: Tr.tr("No input devices")
             onSelected: node => Audio.setAudioSource(node)
         }
 
@@ -78,8 +79,8 @@ PageBase {
             last: true
 
             icon: "tune"
-            text: qsTr("App volumes")
-            subtext: Audio.streams.length === 0 ? qsTr("No apps playing audio") : Audio.streams.length === 1 ? qsTr("1 app playing audio") : qsTr("%1 apps playing audio").arg(Audio.streams.length)
+            text: Tr.tr("App volumes")
+            subtext: Audio.streams.length === 0 ? Tr.tr("No apps playing audio") : Audio.streams.length === 1 ? Tr.tr("1 app playing audio") : Tr.tr("%1 apps playing audio").arg(Audio.streams.length)
             onClicked: root.nState.openSubPage(1)
         }
     }

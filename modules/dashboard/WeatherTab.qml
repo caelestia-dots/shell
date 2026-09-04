@@ -1,6 +1,7 @@
 import QtQuick
 import QtQuick.Layouts
 import Caelestia.Config
+import Caelestia.I18n
 import qs.components
 import qs.services
 
@@ -28,7 +29,7 @@ Item {
                 spacing: Tokens.spacing.extraSmall
 
                 StyledText {
-                    text: Weather.city || qsTr("Loading...")
+                    text: Weather.city || Tr.tr("Loading...")
                     font: Tokens.font.body.builders.large.size(28).weight(Font.DemiBold).build()
                     color: Colours.palette.m3onSurface
                 }
@@ -132,7 +133,7 @@ Item {
             Layout.topMargin: Tokens.spacing.medium
             Layout.leftMargin: Tokens.padding.medium
             visible: forecastRepeater.count > 0
-            text: qsTr("7-Day Forecast")
+            text: Tr.tr("7-Day Forecast")
             font: Tokens.font.body.builders.medium.weight(Font.DemiBold).build()
             color: Colours.palette.m3onSurface
         }
@@ -166,7 +167,7 @@ Item {
 
                         StyledText {
                             Layout.alignment: Qt.AlignHCenter
-                            text: forecastItem.index === 0 ? qsTr("Today") : new Date(forecastItem.modelData.date).toLocaleDateString(Qt.locale(), "ddd")
+                            text: forecastItem.index === 0 ? Tr.tr("Today") : new Date(forecastItem.modelData.date).toLocaleDateString(Qt.locale(), "ddd")
                             font: Tokens.font.body.builders.medium.weight(Font.DemiBold).build()
                             color: Colours.palette.m3primary
                         }

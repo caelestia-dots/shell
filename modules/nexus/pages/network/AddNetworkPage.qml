@@ -3,6 +3,7 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import QtQuick.Layouts
 import Caelestia.Config
+import Caelestia.I18n
 import qs.components
 import qs.components.controls
 import qs.services
@@ -50,7 +51,7 @@ PageBase {
         });
     }
 
-    title: qsTr("Add network")
+    title: Tr.tr("Add network")
     isSubPage: true
 
     ColumnLayout {
@@ -75,7 +76,7 @@ PageBase {
         StyledText {
             Layout.fillWidth: true
             Layout.leftMargin: Tokens.padding.extraSmall
-            text: qsTr("Enter the details below to manually connect to a network.")
+            text: Tr.tr("Enter the details below to manually connect to a network.")
             color: Colours.palette.m3onSurfaceVariant
             font: Tokens.font.body.small
             wrapMode: Text.WordWrap
@@ -86,10 +87,10 @@ PageBase {
 
             Layout.fillWidth: true
             Layout.topMargin: Tokens.spacing.extraSmall
-            placeholderText: qsTr("Network name (SSID)")
-            supportingText: qsTr("e.g. MyHiddenNetwork")
+            placeholderText: Tr.tr("Network name (SSID)")
+            supportingText: Tr.tr("e.g. MyHiddenNetwork")
             leadingIcon: "wifi"
-            errorText: qsTr("Network name is required")
+            errorText: Tr.tr("Network name is required")
             inputMethodHints: Qt.ImhNoAutoUppercase | Qt.ImhNoPredictiveText
 
             onAccepted: root.secured ? passwordField.forceActiveFocus() : root.submit()
@@ -99,8 +100,8 @@ PageBase {
             id: hiddenToggle
 
             first: true
-            text: qsTr("Hidden network")
-            subtext: qsTr("Actively probe for a network that doesn't broadcast its name")
+            text: Tr.tr("Hidden network")
+            subtext: Tr.tr("Actively probe for a network that doesn't broadcast its name")
             checked: true
         }
 
@@ -109,20 +110,20 @@ PageBase {
 
             Layout.topMargin: Tokens.spacing.extraSmall / 2 - parent.spacing
             last: !root.secured
-            label: qsTr("Security")
-            fallbackText: qsTr("WPA/WPA2/WPA3 Personal")
+            label: Tr.tr("Security")
+            fallbackText: Tr.tr("WPA/WPA2/WPA3 Personal")
             fallbackIcon: "lock"
 
             menuItems: [
                 MenuItem {
                     icon: "lock"
-                    text: qsTr("WPA/WPA2/WPA3 Personal")
+                    text: Tr.tr("WPA/WPA2/WPA3 Personal")
                 },
                 MenuItem {
                     id: noneItem
 
                     icon: "lock_open"
-                    text: qsTr("None (open)")
+                    text: Tr.tr("None (open)")
                 }
             ]
 
@@ -170,11 +171,11 @@ PageBase {
                 anchors.right: parent.right
 
                 enabled: root.secured
-                placeholderText: qsTr("Password")
+                placeholderText: Tr.tr("Password")
                 leadingIcon: "key"
                 echoMode: TextInput.Password
-                supportingText: qsTr("WPA passwords are at least 8 characters")
-                errorText: root.failed ? qsTr("Connection failed — check the password") : qsTr("Password must be at least 8 characters")
+                supportingText: Tr.tr("WPA passwords are at least 8 characters")
+                errorText: root.failed ? Tr.tr("Connection failed — check the password") : Tr.tr("Password must be at least 8 characters")
 
                 onAccepted: root.submit()
             }
@@ -190,7 +191,7 @@ PageBase {
                 isRound: true
                 horizontalPadding: Tokens.padding.extraLarge
                 type: TextButton.Tonal
-                text: qsTr("Cancel")
+                text: Tr.tr("Cancel")
                 onClicked: root.nState.closeSubPage()
             }
 
@@ -216,7 +217,7 @@ PageBase {
                 TextMetrics {
                     id: connectMetrics
 
-                    text: qsTr("Connect")
+                    text: Tr.tr("Connect")
                     font: connectBtn.font
                 }
 

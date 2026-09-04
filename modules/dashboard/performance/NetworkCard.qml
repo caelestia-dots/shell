@@ -2,6 +2,7 @@ import QtQuick
 import QtQuick.Layouts
 import Caelestia.Components
 import Caelestia.Config
+import Caelestia.I18n
 import Caelestia.Services
 import qs.components
 import qs.services
@@ -37,7 +38,7 @@ StyledRect {
             }
 
             StyledText {
-                text: qsTr("Network")
+                text: Tr.tr("Network")
                 font: Tokens.font.title.medium
             }
         }
@@ -93,7 +94,7 @@ StyledRect {
             // "Collecting data" placeholder
             StyledText {
                 anchors.centerIn: parent
-                text: qsTr("Collecting data...")
+                text: Tr.tr("Collecting data...")
                 font: Tokens.font.body.small
                 color: Colours.palette.m3outline
                 visible: NetworkUsage.downloadBuffer.count < 2
@@ -112,7 +113,7 @@ StyledRect {
             }
 
             StyledText {
-                text: qsTr("Download")
+                text: Tr.tr("Download")
                 font: Tokens.font.body.small
                 color: Colours.palette.m3onSurfaceVariant
             }
@@ -143,7 +144,7 @@ StyledRect {
             }
 
             StyledText {
-                text: qsTr("Upload")
+                text: Tr.tr("Upload")
                 font: Tokens.font.body.small
                 color: Colours.palette.m3onSurfaceVariant
             }
@@ -174,7 +175,7 @@ StyledRect {
             }
 
             StyledText {
-                text: qsTr("Total")
+                text: Tr.tr("Total")
                 font: Tokens.font.body.small
                 color: Colours.palette.m3onSurfaceVariant
             }

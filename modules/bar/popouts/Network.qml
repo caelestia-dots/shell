@@ -4,6 +4,7 @@ import QtQuick
 import QtQuick.Layouts
 import Quickshell
 import Caelestia.Config
+import Caelestia.I18n
 import qs.components
 import qs.components.controls
 import qs.services
@@ -28,14 +29,14 @@ ColumnLayout {
         Layout.preferredHeight: visible ? implicitHeight : 0
         Layout.topMargin: visible ? Tokens.padding.medium : 0
         Layout.rightMargin: Tokens.padding.extraSmall
-        text: qsTr("Wireless")
+        text: Tr.tr("Wireless")
         font: Tokens.font.body.builders.medium.weight(Font.Medium).build()
     }
 
     Toggle {
         visible: root.view === "wireless"
         Layout.preferredHeight: visible ? implicitHeight : 0
-        label: qsTr("Enabled")
+        label: Tr.tr("Enabled")
         checked: Nmcli.wifiEnabled
         toggle.onToggled: Nmcli.enableWifi(checked)
     }
@@ -45,7 +46,7 @@ ColumnLayout {
         Layout.preferredHeight: visible ? implicitHeight : 0
         Layout.topMargin: visible ? Tokens.spacing.small : 0
         Layout.rightMargin: Tokens.padding.extraSmall
-        text: qsTr("%1 networks available").arg(Nmcli.networks.length) // qmllint disable missing-property
+        text: Tr.tr("%1 networks available").arg(Nmcli.networks.length) // qmllint disable missing-property
         color: Colours.palette.m3onSurfaceVariant
         font: Tokens.font.body.small
     }
@@ -200,7 +201,7 @@ ColumnLayout {
 
             StyledText {
                 Layout.topMargin: -Math.round(scanIcon.fontInfo.pointSize * 0.0575)
-                text: qsTr("Rescan networks")
+                text: Tr.tr("Rescan networks")
                 color: Colours.palette.m3onPrimaryContainer
             }
 
@@ -226,7 +227,7 @@ ColumnLayout {
         Layout.preferredHeight: visible ? implicitHeight : 0
         Layout.topMargin: visible ? Tokens.padding.medium : 0
         Layout.rightMargin: Tokens.padding.extraSmall
-        text: qsTr("Ethernet")
+        text: Tr.tr("Ethernet")
         font: Tokens.font.body.builders.medium.weight(Font.Medium).build()
     }
 
@@ -235,7 +236,7 @@ ColumnLayout {
         Layout.preferredHeight: visible ? implicitHeight : 0
         Layout.topMargin: visible ? Tokens.spacing.small : 0
         Layout.rightMargin: Tokens.padding.extraSmall
-        text: qsTr("%1 devices available").arg(Nmcli.ethernetDevices.length)
+        text: Tr.tr("%1 devices available").arg(Nmcli.ethernetDevices.length)
         color: Colours.palette.m3onSurfaceVariant
         font: Tokens.font.body.small
     }
@@ -289,7 +290,7 @@ ColumnLayout {
                 Layout.leftMargin: Tokens.spacing.extraSmall
                 Layout.rightMargin: Tokens.spacing.extraSmall
                 Layout.fillWidth: true
-                text: ethernetItem.modelData.iface || qsTr("Unknown")
+                text: ethernetItem.modelData.iface || Tr.tr("Unknown")
                 elide: Text.ElideRight
                 font: Tokens.font.body.builders.medium.weight(ethernetItem.modelData.connected ? Font.Medium : Font.Normal).build()
                 color: ethernetItem.modelData.connected ? Colours.palette.m3primary : Colours.palette.m3onSurface

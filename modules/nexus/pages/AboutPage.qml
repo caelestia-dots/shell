@@ -3,6 +3,7 @@ import QtQuick.Layouts
 import Quickshell.Io
 import Caelestia
 import Caelestia.Config
+import Caelestia.I18n
 import qs.components
 import qs.services
 import qs.utils
@@ -17,7 +18,7 @@ PageBase {
     property string quickshellVersion
     property string cliVersion
 
-    title: qsTr("About")
+    title: Tr.tr("About")
 
     ColumnLayout {
         anchors.horizontalCenter: parent.horizontalCenter
@@ -85,72 +86,72 @@ PageBase {
 
         // System
         SectionHeader {
-            text: qsTr("System")
+            text: Tr.tr("System")
         }
 
         InfoRow {
             first: true
-            label: qsTr("Hostname")
+            label: Tr.tr("Hostname")
             value: SysInfo.hostname
         }
 
         InfoRow {
-            label: qsTr("Device")
+            label: Tr.tr("Device")
             value: SysInfo.device
         }
 
         InfoRow {
-            label: qsTr("Distro")
+            label: Tr.tr("Distro")
             value: SysInfo.osPrettyName || SysInfo.osName
         }
 
         InfoRow {
-            label: qsTr("Kernel")
+            label: Tr.tr("Kernel")
             value: SysInfo.kernel
         }
 
         InfoRow {
             last: true
-            label: qsTr("Firmware")
+            label: Tr.tr("Firmware")
             value: SysInfo.firmware
         }
 
         // Software
         SectionHeader {
-            text: qsTr("Software")
+            text: Tr.tr("Software")
         }
 
         InfoRow {
             first: true
-            label: qsTr("Shell")
+            label: Tr.tr("Shell")
             value: CUtils.version || "…"
         }
 
         InfoRow {
-            label: qsTr("CLI")
+            label: Tr.tr("CLI")
             value: root.cliVersion || "…"
         }
 
         InfoRow {
-            label: qsTr("Quickshell")
+            label: Tr.tr("Quickshell")
             value: root.quickshellVersion || "…"
         }
 
         InfoRow {
             last: true
-            label: qsTr("Qt")
+            label: Tr.tr("Qt")
             value: CUtils.qtVersion || "…"
         }
 
         // Plugins
         SectionHeader {
-            text: qsTr("Plugins")
+            text: Tr.tr("Plugins")
         }
 
         InfoRow {
             first: true
             last: true
-            label: qsTr("Loaded plugins")
+            label: Tr.tr("Loaded plugins")
             value: root.pluginCount.toString()
         }
     }

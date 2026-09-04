@@ -4,6 +4,7 @@ import QtQuick
 import QtQuick.Layouts
 import Caelestia.Components
 import Caelestia.Config
+import Caelestia.I18n
 import qs.components
 import qs.components.controls
 import qs.services
@@ -73,7 +74,7 @@ PageBase {
         nState.closeSubPage();
     }
 
-    title: editing ? qsTr("Edit VPN provider") : qsTr("Add VPN provider")
+    title: editing ? Tr.tr("Edit VPN provider") : Tr.tr("Add VPN provider")
     isSubPage: true
 
     Component.onCompleted: {
@@ -95,7 +96,7 @@ PageBase {
         StyledText {
             Layout.fillWidth: true
             Layout.leftMargin: Tokens.padding.small
-            text: qsTr("Built-in names (wireguard, warp, tailscale, netbird) auto-fill their commands. For others, provide the connect/disconnect commands.")
+            text: Tr.tr("Built-in names (wireguard, warp, tailscale, netbird) auto-fill their commands. For others, provide the connect/disconnect commands.")
             color: Colours.palette.m3onSurfaceVariant
             font: Tokens.font.body.small
             wrapMode: Text.WordWrap
@@ -106,10 +107,10 @@ PageBase {
 
             Layout.fillWidth: true
             Layout.topMargin: Tokens.spacing.small
-            placeholderText: qsTr("Provider name")
+            placeholderText: Tr.tr("Provider name")
             leadingIcon: "vpn_key"
-            supportingText: qsTr("Built-in id or a custom name")
-            errorText: qsTr("Provider name is required")
+            supportingText: Tr.tr("Built-in id or a custom name")
+            errorText: Tr.tr("Provider name is required")
             inputMethodHints: Qt.ImhNoAutoUppercase | Qt.ImhNoPredictiveText
 
             onAccepted: displayField.forceActiveFocus()
@@ -119,8 +120,8 @@ PageBase {
             id: displayField
 
             Layout.fillWidth: true
-            placeholderText: qsTr("Display name")
-            supportingText: qsTr("Shown in the list")
+            placeholderText: Tr.tr("Display name")
+            supportingText: Tr.tr("Shown in the list")
             leadingIcon: "label"
             inputMethodHints: Qt.ImhNoPredictiveText
 
@@ -131,25 +132,25 @@ PageBase {
             id: interfaceField
 
             Layout.fillWidth: true
-            placeholderText: qsTr("Interface")
+            placeholderText: Tr.tr("Interface")
             leadingIcon: "lan"
-            supportingText: qsTr("Network interface (for WireGuard / status checks)")
+            supportingText: Tr.tr("Network interface (for WireGuard / status checks)")
             inputMethodHints: Qt.ImhNoAutoUppercase | Qt.ImhNoPredictiveText
 
             onAccepted: connectField.forceActiveFocus()
         }
 
         SectionHeader {
-            text: qsTr("Custom commands (optional)")
+            text: Tr.tr("Custom commands (optional)")
         }
 
         StyledTextField {
             id: connectField
 
             Layout.fillWidth: true
-            placeholderText: qsTr("Connect command")
+            placeholderText: Tr.tr("Connect command")
             leadingIcon: "play_arrow"
-            supportingText: qsTr("Leave empty to use the built-in default")
+            supportingText: Tr.tr("Leave empty to use the built-in default")
             inputMethodHints: Qt.ImhNoAutoUppercase | Qt.ImhNoPredictiveText
 
             onAccepted: disconnectField.forceActiveFocus()
@@ -159,9 +160,9 @@ PageBase {
             id: disconnectField
 
             Layout.fillWidth: true
-            placeholderText: qsTr("Disconnect command")
+            placeholderText: Tr.tr("Disconnect command")
             leadingIcon: "stop"
-            supportingText: qsTr("Leave empty to use the built-in default")
+            supportingText: Tr.tr("Leave empty to use the built-in default")
             inputMethodHints: Qt.ImhNoAutoUppercase | Qt.ImhNoPredictiveText
 
             onAccepted: root.submit()
@@ -182,7 +183,7 @@ PageBase {
                 iconLabel.fill: 1
                 iconLabel.grade: 25
                 icon: "delete_forever"
-                text: qsTr("Delete")
+                text: Tr.tr("Delete")
                 onClicked: {
                     if (root.existing.providerId === VPN.selectedProvider && VPN.connected)
                         VPN.disconnect();
@@ -204,7 +205,7 @@ PageBase {
                     horizontalPadding: Tokens.padding.extraLarge
                     verticalPadding: Tokens.padding.medium
                     type: TextButton.Tonal
-                    text: qsTr("Cancel")
+                    text: Tr.tr("Cancel")
                     onClicked: root.nState.closeSubPage()
                 }
 
@@ -213,7 +214,7 @@ PageBase {
                     shapeMorph: true
                     horizontalPadding: Tokens.padding.extraLarge
                     verticalPadding: Tokens.padding.medium
-                    text: root.editing ? qsTr("Save") : qsTr("Add")
+                    text: root.editing ? Tr.tr("Save") : Tr.tr("Add")
                     disabled: !nameField.text.trim()
                     onClicked: root.submit()
                 }

@@ -5,6 +5,7 @@ import QtQuick.Layouts
 import Quickshell
 import Quickshell.Widgets
 import Caelestia.Config
+import Caelestia.I18n
 import qs.components
 import qs.components.containers
 import qs.components.controls
@@ -65,7 +66,7 @@ Item {
             anchors.right: parent.right
             anchors.leftMargin: Tokens.spacing.extraSmall
 
-            text: root.notifCount > 0 ? qsTr("notification%1").arg(root.notifCount === 1 ? "" : "s") : qsTr("Notifications")
+            text: root.notifCount > 0 ? Tr.tr("notification%1").arg(root.notifCount === 1 ? "" : "s") : Tr.tr("Notifications")
             color: Colours.palette.m3outline
             font: Tokens.font.label.large
             elide: Text.ElideRight
@@ -108,7 +109,7 @@ Item {
 
                 StyledText {
                     Layout.alignment: Qt.AlignHCenter
-                    text: qsTr("All up to date!")
+                    text: Tr.tr("All up to date!")
                     color: Colours.palette.m3outlineVariant
                     font: Tokens.font.headline.builders.small.width(90).build()
                 }

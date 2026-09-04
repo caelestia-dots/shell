@@ -6,6 +6,7 @@ import Quickshell
 import Quickshell.Widgets
 import Caelestia
 import Caelestia.Config
+import Caelestia.I18n
 import qs.components
 import qs.components.containers
 import qs.services
@@ -15,7 +16,7 @@ import qs.modules.nexus.common
 PageBase {
     id: root
 
-    title: qsTr("Apps")
+    title: Tr.tr("Apps")
 
     ColumnLayout {
         anchors.horizontalCenter: parent.horizontalCenter
@@ -26,27 +27,27 @@ PageBase {
         // Default applications
         SectionHeader {
             first: true
-            text: qsTr("Default applications")
+            text: Tr.tr("Default applications")
         }
 
         DefaultRow {
             first: true
             icon: "terminal"
-            label: qsTr("Terminal")
+            label: Tr.tr("Terminal")
             status: GlobalConfig.general.apps.terminal.join(" ")
             onSelected: app => GlobalConfig.general.apps.terminal = app.command
         }
 
         DefaultRow {
             icon: "volume_up"
-            label: qsTr("Audio")
+            label: Tr.tr("Audio")
             status: GlobalConfig.general.apps.audio.join(" ")
             onSelected: app => GlobalConfig.general.apps.audio = app.command
         }
 
         DefaultRow {
             icon: "play_circle"
-            label: qsTr("Media playback")
+            label: Tr.tr("Media playback")
             status: GlobalConfig.general.apps.playback.join(" ")
             onSelected: app => GlobalConfig.general.apps.playback = app.command
         }
@@ -54,22 +55,22 @@ PageBase {
         DefaultRow {
             last: true
             icon: "folder"
-            label: qsTr("File manager")
+            label: Tr.tr("File manager")
             status: GlobalConfig.general.apps.explorer.join(" ")
             onSelected: app => GlobalConfig.general.apps.explorer = app.command
         }
 
         // Library
         SectionHeader {
-            text: qsTr("Library")
+            text: Tr.tr("Library")
         }
 
         NavRow {
             first: true
             last: true
             icon: "apps"
-            text: qsTr("All apps")
-            subtext: qsTr("Browse installed apps, set favourites and hidden")
+            text: Tr.tr("All apps")
+            subtext: Tr.tr("Browse installed apps, set favourites and hidden")
             onClicked: root.nState.openSubPage(1)
         }
     }

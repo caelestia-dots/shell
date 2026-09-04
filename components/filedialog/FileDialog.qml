@@ -3,6 +3,7 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import QtQuick.Layouts
 import Quickshell
+import Caelestia.I18n
 import qs.components
 import qs.services
 
@@ -12,7 +13,7 @@ LazyLoader {
     property list<string> cwd: ["Home"]
     property string filterLabel: "All files"
     property list<string> filters: ["*"]
-    property string title: qsTr("Select a file")
+    property string title: Tr.tr("Select a file")
 
     signal accepted(path: string)
     signal rejected

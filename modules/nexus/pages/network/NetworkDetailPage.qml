@@ -4,6 +4,7 @@ import QtQuick
 import QtQuick.Layouts
 import Caelestia.Components
 import Caelestia.Config
+import Caelestia.I18n
 import qs.components
 import qs.components.controls
 import qs.services
@@ -87,7 +88,7 @@ PageBase {
             nState.closeSubPage();
     }
 
-    title: root.ssid || qsTr("Network")
+    title: root.ssid || Tr.tr("Network")
     isSubPage: true
 
     Component.onCompleted: {
@@ -140,7 +141,7 @@ PageBase {
 
                     StyledText {
                         Layout.alignment: Qt.AlignHCenter
-                        text: qsTr("Forget")
+                        text: Tr.tr("Forget")
                         color: forgetBtn.onColour
                     }
                 }
@@ -179,7 +180,7 @@ PageBase {
 
                     StyledText {
                         Layout.alignment: Qt.AlignHCenter
-                        text: qsTr("Disconnect")
+                        text: Tr.tr("Disconnect")
                         color: disconnectBtn.onColour
                     }
                 }
@@ -189,66 +190,66 @@ PageBase {
         // ---- Connection info (only shows when active) ---------------------------------
         SectionHeader {
             first: true
-            text: qsTr("Connection")
+            text: Tr.tr("Connection")
             visible: root.isActive
         }
 
         InfoRow {
             first: true
             icon: "signal_wifi_4_bar"
-            label: qsTr("Signal")
-            value: root.ap ? qsTr("%1%").arg(root.ap.strength) : qsTr("—")
+            label: Tr.tr("Signal")
+            value: root.ap ? Tr.tr("%1%").arg(root.ap.strength) : Tr.tr("—")
             visible: root.isActive
         }
 
         InfoRow {
             icon: "lock"
-            label: qsTr("Security")
-            value: root.ap?.security || qsTr("Open")
+            label: Tr.tr("Security")
+            value: root.ap?.security || Tr.tr("Open")
             visible: root.isActive
         }
 
         InfoRow {
             icon: "graphic_eq"
-            label: qsTr("Frequency")
-            value: root.ap && root.ap.frequency > 0 ? qsTr("%1 MHz").arg(root.ap.frequency) : qsTr("—")
+            label: Tr.tr("Frequency")
+            value: root.ap && root.ap.frequency > 0 ? Tr.tr("%1 MHz").arg(root.ap.frequency) : Tr.tr("—")
             visible: root.isActive
         }
 
         InfoRow {
             icon: "lan"
-            label: qsTr("IP address")
-            value: root.details?.ipAddress || qsTr("—")
+            label: Tr.tr("IP address")
+            value: root.details?.ipAddress || Tr.tr("—")
             visible: root.isActive
         }
 
         InfoRow {
             icon: "router"
-            label: qsTr("Gateway")
-            value: root.details?.gateway || qsTr("—")
+            label: Tr.tr("Gateway")
+            value: root.details?.gateway || Tr.tr("—")
             visible: root.isActive
         }
 
         InfoRow {
             last: true
             icon: "memory"
-            label: qsTr("MAC address")
-            value: root.details?.macAddress || qsTr("—")
+            label: Tr.tr("MAC address")
+            value: root.details?.macAddress || Tr.tr("—")
             visible: root.isActive
         }
 
         // ---- Behaviour -------------------------------------------------------
         SectionHeader {
             first: !root.isActive
-            text: qsTr("Behaviour")
+            text: Tr.tr("Behaviour")
         }
 
         ToggleRow {
             Layout.fillWidth: true
             first: true
             last: true
-            text: qsTr("Connect automatically")
-            subtext: qsTr("Join this network when it's in range")
+            text: Tr.tr("Connect automatically")
+            subtext: Tr.tr("Join this network when it's in range")
             checked: root.autoconnect
             enabled: root.ipLoaded
             onToggled: {
@@ -259,7 +260,7 @@ PageBase {
 
         // ---- IPv4 ------------------------------------------------------------
         SectionHeader {
-            text: qsTr("IPv4")
+            text: Tr.tr("IPv4")
         }
 
         SelectRow {
@@ -267,8 +268,8 @@ PageBase {
 
             first: true
             last: root.ipMethod === "auto"
-            label: qsTr("IP assignment")
-            fallbackText: qsTr("Automatic (DHCP)")
+            label: Tr.tr("IP assignment")
+            fallbackText: Tr.tr("Automatic (DHCP)")
             fallbackIcon: "lan"
 
             onSelected: item => root.ipMethod = item === manualItem ? "manual" : (item === autoDnsItem ? "auto-dns" : "auto")
@@ -278,19 +279,19 @@ PageBase {
                     id: autoItem
 
                     icon: "lan"
-                    text: qsTr("Automatic (DHCP)")
+                    text: Tr.tr("Automatic (DHCP)")
                 },
                 MenuItem {
                     id: autoDnsItem
 
                     icon: "dns"
-                    text: qsTr("Automatic, DNS only")
+                    text: Tr.tr("Automatic, DNS only")
                 },
                 MenuItem {
                     id: manualItem
 
                     icon: "edit"
-                    text: qsTr("Manual")
+                    text: Tr.tr("Manual")
                 }
             ]
 
@@ -373,10 +374,10 @@ PageBase {
                             id: addressField
 
                             Layout.fillWidth: true
-                            placeholderText: qsTr("Address (CIDR)")
+                            placeholderText: Tr.tr("Address (CIDR)")
                             leadingIcon: "router"
-                            supportingText: qsTr("IP and prefix, e.g. 192.168.1.50/24")
-                            errorText: qsTr("Enter a valid address in CIDR notation")
+                            supportingText: Tr.tr("IP and prefix, e.g. 192.168.1.50/24")
+                            errorText: Tr.tr("Enter a valid address in CIDR notation")
                             inputMethodHints: Qt.ImhNoPredictiveText
                             validate: /^(?:(?:25[0-5]|2[0-4]\d|1?\d?\d)\.){3}(?:25[0-5]|2[0-4]\d|1?\d?\d)\/(?:3[0-2]|[12]?\d)$/
                         }
@@ -385,9 +386,9 @@ PageBase {
                             id: gatewayField
 
                             Layout.fillWidth: true
-                            placeholderText: qsTr("Gateway")
+                            placeholderText: Tr.tr("Gateway")
                             leadingIcon: "exit_to_app"
-                            errorText: qsTr("Enter a valid gateway address")
+                            errorText: Tr.tr("Enter a valid gateway address")
                             inputMethodHints: Qt.ImhNoPredictiveText
                             validate: /^$|^(?:(?:25[0-5]|2[0-4]\d|1?\d?\d)\.){3}(?:25[0-5]|2[0-4]\d|1?\d?\d)$/
                         }
@@ -398,10 +399,10 @@ PageBase {
                     id: dnsField
 
                     Layout.fillWidth: true
-                    placeholderText: qsTr("DNS servers")
+                    placeholderText: Tr.tr("DNS servers")
                     leadingIcon: "dns"
-                    supportingText: qsTr("Comma-separated")
-                    errorText: qsTr("Enter valid DNS server addresses")
+                    supportingText: Tr.tr("Comma-separated")
+                    errorText: Tr.tr("Enter valid DNS server addresses")
                     inputMethodHints: Qt.ImhNoPredictiveText
                     validate: /^$|^\s*(?:(?:25[0-5]|2[0-4]\d|1?\d?\d)\.){3}(?:25[0-5]|2[0-4]\d|1?\d?\d)(?:\s*,\s*(?:(?:25[0-5]|2[0-4]\d|1?\d?\d)\.){3}(?:25[0-5]|2[0-4]\d|1?\d?\d))*\s*$/
                 }
@@ -449,7 +450,7 @@ PageBase {
                 TextMetrics {
                     id: applyMetrics
 
-                    text: qsTr("Apply")
+                    text: Tr.tr("Apply")
                     font: applyBtn.font
                 }
 

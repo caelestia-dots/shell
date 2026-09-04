@@ -4,6 +4,7 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import Quickshell
 import Quickshell.Io
+import Caelestia.I18n
 
 Singleton {
     id: root
@@ -627,16 +628,16 @@ Singleton {
         switch ((keyMgmt || "").trim().toLowerCase()) {
         case "":
         case "none":
-            return qsTr("Open");
+            return Tr.tr("Open");
         case "sae":
             return "WPA3";
         case "wpa-psk":
             return "WPA2";
         case "wpa-eap":
         case "wpa-eap-suite-b-192":
-            return qsTr("Enterprise");
+            return Tr.tr("Enterprise");
         case "owe":
-            return qsTr("Enhanced Open");
+            return Tr.tr("Enhanced Open");
         case "ieee8021x":
             return "802.1X";
         default:
