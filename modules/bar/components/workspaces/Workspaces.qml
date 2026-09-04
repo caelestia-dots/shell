@@ -57,14 +57,26 @@ StyledClippingRect {
                 workspaces: workspaces
                 occupied: root.occupied
                 groupOffset: root.groupOffset
+                layoutTransitionRunning: layout.revealTransitionRunning
             }
         }
 
         ColumnLayout {
             id: layout
 
+            readonly property real workspaceSpacing: Math.floor(Tokens.spacing.extraSmall)
+            readonly property bool revealTransitionRunning: {
+                for (let i = 0; i < workspaces.count; ++i) {
+                    const workspace = workspaces.itemAt(i) as Workspace;
+                    if (workspace?.revealTransitionRunning)
+                        return true;
+                }
+
+                return false;
+            }
+
             anchors.centerIn: parent
-            spacing: Math.floor(Tokens.spacing.extraSmall)
+            spacing: 0
 
             Repeater {
                 id: workspaces
@@ -76,6 +88,9 @@ StyledClippingRect {
                     occupied: root.occupied
                     groupOffset: root.groupOffset
                     shouldShow: Config.bar.workspaces.showUnoccupied || isOccupied || Hypr.monitors.values.some(m => m.activeWorkspace?.id === ws)
+
+                    workspaceRepeater: workspaces
+                    layoutSpacing: layout.workspaceSpacing
                 }
             }
         }
@@ -90,6 +105,7 @@ StyledClippingRect {
                 workspaces: workspaces
                 mask: layout
                 fullscreen: root.fullscreen
+                layoutTransitionRunning: layout.revealTransitionRunning
             }
         }
 

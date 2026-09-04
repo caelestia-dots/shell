@@ -12,6 +12,7 @@ Item {
     required property Repeater workspaces
     required property var occupied
     required property int groupOffset
+    required property bool layoutTransitionRunning
 
     property list<var> pills: []
 
@@ -81,10 +82,14 @@ Item {
             }
 
             Behavior on y {
+                enabled: !root.layoutTransitionRunning
+
                 Anim {}
             }
 
             Behavior on implicitHeight {
+                enabled: !root.layoutTransitionRunning
+
                 Anim {}
             }
         }

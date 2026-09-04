@@ -18,6 +18,9 @@ ColumnLayout {
     required property int groupOffset
     required property bool shouldShow
 
+    required property Repeater workspaceRepeater
+    required property real layoutSpacing
+
     readonly property bool isWorkspace: true // Flag for finding workspace children
     // Unanimated prop for others to use as reference
     readonly property int size: implicitHeight + (hasWindows ? Tokens.padding.extraSmall : 0)
@@ -29,6 +32,29 @@ ColumnLayout {
     readonly property list<int> focusedShapeList: [MaterialShape.Slanted, MaterialShape.Oval, MaterialShape.Pill, MaterialShape.Triangle, MaterialShape.Arrow, MaterialShape.Diamond, MaterialShape.Pentagon, MaterialShape.Gem, MaterialShape.VerySunny, MaterialShape.Sunny, MaterialShape.Cookie4Sided, MaterialShape.Cookie6Sided, MaterialShape.Cookie7Sided, MaterialShape.Cookie9Sided, MaterialShape.Cookie12Sided, MaterialShape.Clover4Leaf, MaterialShape.SoftBurst, MaterialShape.Ghostish]
 
     readonly property real revealProgress: Math.max(0, Math.min(1, reveal))
+    readonly property bool revealTransitionRunning: revealAnimation.running
+    readonly property real precedingRevealProgress: {
+        let progress = 0;
+
+        for (let i = 0; i < index; ++i) {
+            const workspace = workspaceRepeater.itemAt(i) as Workspace;
+            if (workspace)
+                progress = Math.max(progress, workspace.revealProgress);
+        }
+
+        return progress;
+    }
+    readonly property real targetY: {
+        let offset = 0;
+
+        for (let i = 0; i < index; ++i) {
+            const workspace = workspaceRepeater.itemAt(i) as Workspace;
+            if (workspace?.shouldShow)
+                offset += workspace.size + layoutSpacing;
+        }
+
+        return offset;
+    }
 
     property real reveal: shouldShow ? 1 : 0
     property real animatedSize: size
@@ -46,6 +72,7 @@ ColumnLayout {
 
     Layout.alignment: Qt.AlignHCenter
     Layout.preferredHeight: animatedSize * revealProgress
+    Layout.topMargin: layoutSpacing * Math.min(revealProgress, precedingRevealProgress)
 
     visible: shouldShow || revealProgress > 0
     opacity: revealProgress
@@ -186,14 +213,10 @@ ColumnLayout {
     }
 
     Behavior on reveal {
-        SequentialAnimation {
-            PauseAnimation {
-                duration: (root.shouldShow ? root.index : (root.Config.bar.workspaces.shown - root.index - 1)) * 20
-            }
+        Anim {
+            id: revealAnimation
 
-            Anim {
-                type: root.shouldShow ? Anim.FastEffects : Anim.DefaultEffects
-            }
+            type: Anim.DefaultEffects
         }
     }
 }
