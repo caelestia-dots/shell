@@ -226,8 +226,8 @@ void Lyrics::setSelectedCandidate(const LyricCandidate& value) {
             if (!lines.isEmpty()) {
                 setLines(lines, b);
                 setLoading(false);
-                if (!m_settingFromPrefs) {
-                    persistTrackPrefs();
+                if (!m_settingFromPrefs && !trackKey().isEmpty() && m_saveDebounce) {
+                    m_saveDebounce->start();
                 }
                 return;
             }
@@ -252,16 +252,6 @@ void Lyrics::setSelectedCandidate(const LyricCandidate& value) {
     }
 
     if (!m_settingFromPrefs && !trackKey().isEmpty()) {
-        QJsonObject entry = m_lyricsMap.value(trackKey()).toObject();
-        entry.insert(u"offset"_s, m_offset);
-        if (m_hasCandidateOverride) {
-            entry.insert(u"backend"_s, backendKey(value.backend()));
-            entry.insert(u"id"_s, value.id());
-        } else {
-            entry.remove(u"backend"_s);
-            entry.remove(u"id"_s);
-        }
-        m_lyricsMap.insert(trackKey(), entry);
         if (m_saveDebounce) {
             m_saveDebounce->start();
         }
@@ -275,18 +265,8 @@ void Lyrics::resetToAuto() {
     m_hasCandidateOverride = false;
     emit hasCandidateOverrideChanged();
 
-    if (!trackKey().isEmpty()) {
-        QJsonObject entry = m_lyricsMap.value(trackKey()).toObject();
-        entry.remove(u"backend"_s);
-        entry.remove(u"id"_s);
-        if (entry.isEmpty() || (entry.size() == 1 && qFuzzyIsNull(entry.value(u"offset"_s).toDouble()))) {
-            m_lyricsMap.remove(trackKey());
-        } else {
-            m_lyricsMap.insert(trackKey(), entry);
-        }
-        if (m_saveDebounce) {
-            m_saveDebounce->start();
-        }
+    if (!trackKey().isEmpty() && m_saveDebounce) {
+        m_saveDebounce->start();
     }
 
     if (m_autoCandidate.isValid()) {
@@ -316,13 +296,6 @@ void Lyrics::setOffset(qreal value) {
     emit offsetChanged();
 
     if (!m_settingFromPrefs && !trackKey().isEmpty()) {
-        QJsonObject entry = m_lyricsMap.value(trackKey()).toObject();
-        entry.insert(u"offset"_s, m_offset);
-        if (m_selected.isValid()) {
-            entry.insert(u"backend"_s, backendKey(m_selected.backend()));
-            entry.insert(u"id"_s, m_selected.id());
-        }
-        m_lyricsMap.insert(trackKey(), entry);
         if (m_saveDebounce) {
             m_saveDebounce->start();
         }
@@ -370,22 +343,53 @@ void Lyrics::setTrack(const QString& artist, const QString& title, const QString
         return;
     }
 
+    if (m_saveDebounce && m_saveDebounce->isActive()) {
+        m_saveDebounce->stop();
+        persistTrackPrefs();
+    }
+
+    cancelInFlight();
+
     m_artist = a;
     m_title = t;
     m_album = album;
     m_duration = duration;
     emit trackChanged();
 
+    m_selected = LyricCandidate();
+    emit selectedCandidateChanged();
+    m_autoCandidate = LyricCandidate();
+    emit autoCandidateChanged();
+    m_hasCandidateOverride = false;
+    emit hasCandidateOverrideChanged();
+    m_offset = 0.0;
+    emit offsetChanged();
+    clearLines();
+    clearCandidates();
+
     scheduleLoad();
 }
 
 void Lyrics::clearTrack() {
+    if (m_saveDebounce && m_saveDebounce->isActive()) {
+        m_saveDebounce->stop();
+        persistTrackPrefs();
+    }
     cancelInFlight();
     m_artist.clear();
     m_title.clear();
     m_album.clear();
     m_duration = 0.0;
     emit trackChanged();
+
+    m_selected = LyricCandidate();
+    emit selectedCandidateChanged();
+    m_autoCandidate = LyricCandidate();
+    emit autoCandidateChanged();
+    m_hasCandidateOverride = false;
+    emit hasCandidateOverrideChanged();
+    m_offset = 0.0;
+    emit offsetChanged();
 
     clearCandidates();
     clearLines();
@@ -537,17 +541,26 @@ void Lyrics::doLoad() {
     LyricCandidate restored;
     const QString savedBackendKey = saved.value(u"backend"_s).toString();
     const QString savedId = saved.value(u"id"_s).toString();
+    const qreal savedDuration = saved.value(u"duration"_s).toDouble(0.0);
     if (!savedBackendKey.isEmpty() && !savedId.isEmpty()) {
-        restored = LyricCandidate(backendFromKey(savedBackendKey), savedId, m_title, m_artist, m_album, m_duration);
+        restored = LyricCandidate(backendFromKey(savedBackendKey), savedId, m_title, m_artist, m_album,
+            savedDuration > 0.0 ? savedDuration : m_duration);
     }
     m_settingFromPrefs = false;
 
     if (restored.isValid()) {
-        m_hasCandidateOverride = true;
-        emit hasCandidateOverrideChanged();
-        m_settingFromPrefs = true;
-        setSelectedCandidate(restored);
-        m_settingFromPrefs = false;
+        if (m_duration > 10.0 && savedDuration > 0.0 && std::abs(savedDuration - m_duration) > 25.0) {
+            qCWarning(lcLyrics) << "Ignoring stored candidate override" << restored.id()
+                                << "due to duration mismatch:" << savedDuration << "vs track" << m_duration;
+            m_hasCandidateOverride = false;
+            emit hasCandidateOverrideChanged();
+        } else {
+            m_hasCandidateOverride = true;
+            emit hasCandidateOverrideChanged();
+            m_settingFromPrefs = true;
+            setSelectedCandidate(restored);
+            m_settingFromPrefs = false;
+        }
     } else {
         m_hasCandidateOverride = false;
         emit hasCandidateOverrideChanged();
@@ -1060,9 +1073,11 @@ void Lyrics::persistTrackPrefs() {
     if (m_hasCandidateOverride && m_selected.isValid()) {
         entry.insert(u"backend"_s, backendKey(m_selected.backend()));
         entry.insert(u"id"_s, m_selected.id());
+        entry.insert(u"duration"_s, m_selected.duration());
     } else {
         entry.remove(u"backend"_s);
         entry.remove(u"id"_s);
+        entry.remove(u"duration"_s);
     }
     if (entry.isEmpty() || (entry.size() == 1 && qFuzzyIsNull(entry.value(u"offset"_s).toDouble()))) {
         m_lyricsMap.remove(key);
