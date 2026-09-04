@@ -6,9 +6,9 @@ namespace {
 
 // See
 // https://github.com/material-components/material-components-android/blob/master/lib/java/com/google/android/material/progressindicator/LinearIndeterminateDisjointAnimatorDelegate.java#L44-L46
-constexpr int TOTAL_DURATION_IN_MS = 1800;
-constexpr std::array DURATION_TO_MOVE_SEGMENT_ENDS = { 533, 567, 850, 750 };
-constexpr std::array DELAY_TO_MOVE_SEGMENT_ENDS = { 1267, 1000, 333, 0 };
+constexpr int k_totalDurationInMs = 1800;
+constexpr std::array k_durationToMoveSegmentEnds = { 533, 567, 850, 750 };
+constexpr std::array k_delayToMoveSegmentEnds = { 1267, 1000, 333, 0 };
 
 QEasingCurve curve(const QPointF& c1, const QPointF& c2) {
     QEasingCurve curve(QEasingCurve::BezierSpline);
@@ -58,7 +58,7 @@ LinearIndicatorManager::LinearIndicatorManager(QObject* parent)
           new LinearIndicatorSegment(m_gap, this),
           new LinearIndicatorSegment(m_gap, this),
       }) {
-    for (auto el : m_activeIndicators)
+    for (auto* el : m_activeIndicators)
         QObject::connect(this, &LinearIndicatorManager::updated, el, &LinearIndicatorSegment::updated);
 }
 
@@ -80,30 +80,29 @@ int LinearIndicatorManager::gap() const {
 
 void LinearIndicatorManager::setGap(int gap) {
     m_gap = gap;
-    for (auto el : m_activeIndicators)
+    for (auto* el : m_activeIndicators)
         el->m_gapSize = m_gap;
     update(m_progress);
 }
 
-int LinearIndicatorManager::duration() const {
-    return TOTAL_DURATION_IN_MS;
+int LinearIndicatorManager::duration() {
+    return k_totalDurationInMs;
 }
 
-int LinearIndicatorManager::completeEndDuration() const {
-    return TOTAL_DURATION_IN_MS;
+int LinearIndicatorManager::completeEndDuration() {
+    return k_totalDurationInMs;
 }
 
 void LinearIndicatorManager::update(qreal progress) {
-    const auto playtime = progress * TOTAL_DURATION_IN_MS;
-    for (size_t i = 0; i < SEGMENTS; i++) {
+    const auto playtime = progress * k_totalDurationInMs;
+    for (size_t i = 0; i < k_segments; i++) {
         const auto di = i * 2;
         auto* const indicator = m_activeIndicators[i];
 
-        auto fraction = getFractionInRange(playtime, DELAY_TO_MOVE_SEGMENT_ENDS[di], DURATION_TO_MOVE_SEGMENT_ENDS[di]);
+        auto fraction = getFractionInRange(playtime, k_delayToMoveSegmentEnds[di], k_durationToMoveSegmentEnds[di]);
         indicator->m_startFraction = std::clamp(m_interpolators[di].valueForProgress(fraction), 0.0, 1.0);
 
-        fraction =
-            getFractionInRange(playtime, DELAY_TO_MOVE_SEGMENT_ENDS[di + 1], DURATION_TO_MOVE_SEGMENT_ENDS[di + 1]);
+        fraction = getFractionInRange(playtime, k_delayToMoveSegmentEnds[di + 1], k_durationToMoveSegmentEnds[di + 1]);
         indicator->m_endFraction = std::clamp(m_interpolators[di + 1].valueForProgress(fraction), 0.0, 1.0);
     }
 

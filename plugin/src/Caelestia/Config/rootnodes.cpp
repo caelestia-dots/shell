@@ -99,7 +99,7 @@ TokensRoot::TokensRoot(const QString& path, TokensRoot* fallback, QObject* paren
     }                                                                                                                  \
                                                                                                                        \
     Type::Type(QObject* parent)                                                                                        \
-        : Root(configDir() + QLatin1Char('/') + file, nullptr, parent)                                                 \
+        : Root(configDir() + u'/' + file, nullptr, parent)                                                             \
         , m_layers(monitorConfigDir(), file, this) {                                                                   \
         initLayer(this);                                                                                               \
     }                                                                                                                  \
@@ -123,8 +123,8 @@ TokensRoot::TokensRoot(const QString& path, TokensRoot* fallback, QObject* paren
         layer->load();                                                                                                 \
     }
 
-SINGLETON_IMPL(ConfigSingleton, ConfigRoot, QStringLiteral("shell.json"), detail::ConfigKind::Shell)
-SINGLETON_IMPL(TokensSingleton, TokensRoot, QStringLiteral("shell-tokens.json"), detail::ConfigKind::Tokens)
+SINGLETON_IMPL(ConfigSingleton, ConfigRoot, u"shell.json"_s, detail::ConfigKind::Shell)
+SINGLETON_IMPL(TokensSingleton, TokensRoot, u"shell-tokens.json"_s, detail::ConfigKind::Tokens)
 
 #undef SINGLETON_IMPL
 

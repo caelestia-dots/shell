@@ -2,6 +2,7 @@
 
 #include <qmutex.h>
 #include <qobject.h>
+#include <qpair.h>
 #include <qqmlintegration.h>
 
 namespace caelestia {
@@ -18,7 +19,7 @@ class Qalculator : public QObject {
 public:
     explicit Qalculator(QObject* parent = nullptr);
 
-    Q_INVOKABLE QString eval(const QString& expr, bool printExpr = true) const;
+    [[nodiscard]] Q_INVOKABLE static QString eval(const QString& expr, bool printExpr = true);
     Q_INVOKABLE void evalAsync(const QString& expr);
 
     [[nodiscard]] QString result() const;
@@ -32,6 +33,12 @@ signals:
 
 private:
     static QMutex s_calculatorMutex;
+
+    [[nodiscard]] static QPair<QString, QString> evaluate(const QString& expr);
+
+    void applyResult(quint64 gen, const QPair<QString, QString>& result);
+    void clearResult();
+    void setBusy(bool busy);
 
     QString m_result;
     QString m_rawResult;

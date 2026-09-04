@@ -2,17 +2,21 @@
 
 #include "node.hpp"
 
-namespace caelestia::settings {
+namespace {
 
 Q_LOGGING_CATEGORY(lcSchema, "caelestia.settings.schema", QtInfoMsg)
+
+} // namespace
+
+namespace caelestia::settings {
 
 namespace {
 
 // Descriptor annotations are stored here by Schema::annotate, which is called in the CONFIG_XXX macros.
 // Schema::build then takes them from here.
 QHash<const QMetaObject*, QHash<QString, Annotation>>& annotationCache() {
-    static QHash<const QMetaObject*, QHash<QString, Annotation>> cache;
-    return cache;
+    static QHash<const QMetaObject*, QHash<QString, Annotation>> s_cache;
+    return s_cache;
 }
 
 bool isNodeType(const QMetaType& type) {
@@ -31,7 +35,7 @@ QVariant DefaultSpec::resolve(const Node* self) const {
 }
 
 QString Descriptor::typeString() const {
-    return type.name();
+    return QString::fromUtf8(type.name());
 }
 
 QVariant Descriptor::defaultValue(const Node* self) const {

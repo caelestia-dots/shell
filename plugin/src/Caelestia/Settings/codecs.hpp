@@ -15,9 +15,7 @@ struct DecodeResult {
 
 class ValueCodec {
 public:
-    explicit ValueCodec(const QMetaType& type)
-        : m_type(type) {}
-
+    explicit ValueCodec(const QMetaType& type);
     virtual ~ValueCodec() = default;
 
     // Returns the shared codec for a type, or nullptr if the type is unsupported
@@ -61,7 +59,7 @@ private:
 };
 
 template <typename Container> class ListCodec : public ValueCodec {
-    using Value = typename Container::value_type;
+    using Value = Container::value_type;
 
 public:
     explicit ListCodec(const QMetaType& type, const ValueCodec* elementCodec);

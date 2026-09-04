@@ -23,7 +23,7 @@ QString Node::path() const {
 
 QString Node::pathFor(const QString& key) const {
     const auto p = path();
-    return p.isEmpty() ? key : p + QLatin1Char('.') + key;
+    return p.isEmpty() ? key : p + u'.' + key;
 }
 
 Node* Node::parentNode() const {
@@ -71,7 +71,7 @@ QVariant Node::value(const QString& key) const {
     if (!desc) {
         qCCritical(
             lcSettings, "Attempted to read an unknown key %s, something is wrong.", qUtf8Printable(pathFor(key)));
-        return QVariant();
+        return {};
     }
 
     return metaObject()->property(desc->metaIndex).read(this);
@@ -222,7 +222,7 @@ QString Node::keyOf(const Node* child) const {
             return desc.key;
     }
 
-    return QString();
+    return {};
 }
 
 void Node::onFallbackNotify(const QString& key) {

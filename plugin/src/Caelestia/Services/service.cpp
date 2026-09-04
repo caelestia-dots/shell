@@ -1,7 +1,5 @@
 #include "service.hpp"
 
-#include <qpointer.h>
-
 namespace caelestia::services {
 
 Service::Service(QObject* parent)
