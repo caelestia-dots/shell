@@ -246,16 +246,21 @@ void Lyrics::setSelectedCandidate(const LyricCandidate& value) {
         return;
     }
 
+    appendCandidates({ value });
+
     const auto b = value.backend();
     setBackend(b);
-    setLoading(true);
-
-    cancelInFlight();
-    const int reqId = newRequestId();
 
     if (loadCachedLyrics(value)) {
         return;
     }
+
+    setLoading(true);
+
+    if (!m_settingFromPrefs) {
+        cancelInFlight();
+    }
+    const int reqId = m_settingFromPrefs ? m_currentRequestId : newRequestId();
 
     if (b == LyricsBackend::LRCLIB) {
         fetchLrclibById(value.id(), reqId);
@@ -590,21 +595,23 @@ void Lyrics::doLoad() {
     searchLrclibCandidates(reqId);
     searchNetEaseCandidates(reqId);
 
-    // Primary attempt by preferred backend
-    switch (m_preferredBackend) {
-    case LyricsBackend::Local:
-        tryLocal(reqId);
-        break;
-    case LyricsBackend::LRCLIB:
-        tryLrclib(reqId);
-        break;
-    case LyricsBackend::NetEase:
-        tryNetEase(reqId);
-        break;
-    case LyricsBackend::Auto:
-    default:
-        tryLocal(reqId);
-        break;
+    // Primary attempt by preferred backend (only if no candidate override was restored)
+    if (!m_hasCandidateOverride) {
+        switch (m_preferredBackend) {
+        case LyricsBackend::Local:
+            tryLocal(reqId);
+            break;
+        case LyricsBackend::LRCLIB:
+            tryLrclib(reqId);
+            break;
+        case LyricsBackend::NetEase:
+            tryNetEase(reqId);
+            break;
+        case LyricsBackend::Auto:
+        default:
+            tryLocal(reqId);
+            break;
+        }
     }
 }
 
