@@ -25,7 +25,7 @@ public:
 
     // NOLINTBEGIN(readability-identifier-naming)
     Q_INVOKABLE [[nodiscard]] QString _tr(const QString& text, const QString& context = {}) const;
-    Q_INVOKABLE [[nodiscard]] QString _mark(const QString& text, const QString& context = {}) const;
+    Q_INVOKABLE [[nodiscard]] static QString mark(const QString& text, const QString& context = {});
     // NOLINTEND(readability-identifier-naming)
 
 signals:
@@ -46,6 +46,7 @@ private:
     void loadTranslations();
     [[nodiscard]] quint32 readU32(qsizetype offset) const;
     [[nodiscard]] QString lookup(QByteArrayView key) const;
+    [[nodiscard]] static bool isMarked(const QString& text);
 };
 
 } // namespace caelestia::tr

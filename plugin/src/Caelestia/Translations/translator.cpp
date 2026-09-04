@@ -22,6 +22,7 @@ namespace {
 constexpr quint32 k_magic = 0x950412de;
 constexpr quint32 k_magicSwapped = 0xde120495;
 constexpr qsizetype k_headerSize = 28;
+constexpr char k_markChar = '\x01';
 constexpr char k_contextSep = '\x04';
 
 // .mo header field offsets
@@ -74,14 +75,23 @@ QString Translator::_tr(const QString& text, const QString& context) const {
     if (m_count == 0 || text.isEmpty())
         return text;
 
-    const auto key = context.isEmpty() ? text.toUtf8() : context.toUtf8() + k_contextSep + text.toUtf8();
+    QByteArray key;
+    if (isMarked(text)) {
+        if (!context.isEmpty())
+            qCWarning(lcTr) << "Attempted to translate a marked string with context. Ignoring context.";
+        key = text.mid(1).toUtf8(); // Marked strings with context are already in the correct format
+    } else {
+        key = context.isEmpty() ? text.toUtf8() : context.toUtf8() + k_contextSep + text.toUtf8();
+    }
+
     const auto translated = lookup(key);
     return translated.isNull() ? text : translated;
 }
 
-QString Translator::_mark(const QString& text, const QString& context) const {
-    // TODO
-    return {};
+QString Translator::mark(const QString& text, const QString& context) {
+    if (context.isEmpty())
+        return QChar::fromLatin1(k_markChar) + text;
+    return QChar::fromLatin1(k_markChar) + context + QChar::fromLatin1(k_contextSep) + text;
 }
 
 QStringList Translator::findSupportedLangs() {
@@ -180,6 +190,10 @@ QString Translator::lookup(QByteArrayView key) const {
     }
 
     return {};
+}
+
+bool Translator::isMarked(const QString& text) {
+    return text.startsWith(QChar::fromLatin1(k_markChar));
 }
 
 } // namespace caelestia::tr
