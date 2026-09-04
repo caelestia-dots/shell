@@ -43,7 +43,10 @@ QString resourceDir() {
 
 Translator::Translator(QObject* parent)
     : QObject(parent)
-    , m_supportedLanguages(findSupportedLangs()) {}
+    , m_supportedLanguages(findSupportedLangs())
+    , m_language(trForLocale()) {
+    loadTranslations();
+}
 
 bool Translator::trsChangedFlag() {
     return false;
@@ -194,6 +197,13 @@ QString Translator::lookup(QByteArrayView key) const {
 
 bool Translator::isMarked(const QString& text) {
     return text.startsWith(QChar::fromLatin1(k_markChar));
+}
+
+QString Translator::trForLocale() const {
+    const auto locale = QLocale::system();
+    if (m_supportedLanguages.contains(locale.name()))
+        return locale.name();
+    return {};
 }
 
 } // namespace caelestia::i18n

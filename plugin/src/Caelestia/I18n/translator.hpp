@@ -47,6 +47,7 @@ private:
     [[nodiscard]] quint32 readU32(qsizetype offset) const;
     [[nodiscard]] QString lookup(QByteArrayView key) const;
     [[nodiscard]] static bool isMarked(const QString& text);
+    [[nodiscard]] QString trForLocale() const;
 };
 
 } // namespace caelestia::i18n
