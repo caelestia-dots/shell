@@ -1,7 +1,7 @@
 #!/usr/bin/env fish
 
 if test (count $argv) -lt 1
-    echo "Usage: $(status basename) raw|test|ll_CC"
+    echo "Usage: $(status basename) raw|compile|test|<ll_CC>"
     exit 1
 end
 
@@ -25,6 +25,10 @@ function gen -a lang
         (string match -v 'build/*' $argv[2..])
 end
 
+function compile -a po mo
+    msgfmt --check-format -o $mo $po
+end
+
 function gen_trs
     echo > $pot_file
     gen JavaScript **.qml
@@ -46,6 +50,16 @@ if test $argv[1] = raw
     exit
 end
 
+if test $argv[1] = compile
+    if test (count $argv) -lt 3
+        echo "Usage: $(status basename) compile <ll_CC> <out_file>"
+        exit 1
+    end
+
+    compile $tr_dir/$argv[2].po $argv[3]
+    exit
+end
+
 test -f $pot_file || gen_trs
 
 if test $argv[1] = test
@@ -54,12 +68,17 @@ if test $argv[1] = test
         exit 1
     end
 
+    set -l tmp_dir (mktemp -d)
+    set -l test_po $tmp_dir/test.po
+
     msginit --locale=en_US \
         --input=$pot_file \
-        --output=$argv[2] \
-        --no-translator
-    sed -Ei 's/^msgstr "(.*)"$/msgstr "[[ \1 ]]"/' $argv[2]
+        --output=$test_po \
+        --no-translator 2>/dev/null
+    sed -Ei 's/^msgstr "(.*)"$/msgstr "[[ \1 ]]"/' $test_po
+    compile $test_po $argv[2]
 
+    rm -r $tmp_dir
     exit
 end
 
