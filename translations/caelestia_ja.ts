@@ -79,10 +79,179 @@
     </message>
 </context>
 <context>
+    <name>AddNetworkPage</name>
+    <message>
+        <source>Add network</source>
+        <translation>ネットワークを追加</translation>
+    </message>
+    <message>
+        <source>Enter the details below to manually connect to a network.</source>
+        <translation>ネットワークに手動で接続するには、以下の情報を入力してください。</translation>
+    </message>
+    <message>
+        <source>Network name (SSID)</source>
+        <translation>ネットワーク名 (SSID)</translation>
+    </message>
+    <message>
+        <source>e.g. MyHiddenNetwork</source>
+        <translation>例: MyHiddenNetwork</translation>
+    </message>
+    <message>
+        <source>Network name is required</source>
+        <translation>ネットワーク名は必須です</translation>
+    </message>
+    <message>
+        <source>Hidden network</source>
+        <translation>非公開ネットワーク</translation>
+    </message>
+    <message>
+        <source>Actively probe for a network that doesn&apos;t broadcast its name</source>
+        <translation>名前をブロードキャストしないネットワークを能動的に探索します</translation>
+    </message>
+    <message>
+        <source>Security</source>
+        <translation>セキュリティ</translation>
+    </message>
+    <message>
+        <source>WPA/WPA2/WPA3 Personal</source>
+        <translation>WPA/WPA2/WPA3 パーソナル</translation>
+    </message>
+    <message>
+        <source>None (open)</source>
+        <translation>なし (オープン)</translation>
+    </message>
+    <message>
+        <source>Password</source>
+        <translation>パスワード</translation>
+    </message>
+    <message>
+        <source>WPA passwords are at least 8 characters</source>
+        <translation>WPAパスワードは8文字以上です</translation>
+    </message>
+    <message>
+        <source>Connection failed — check the password</source>
+        <translation>接続に失敗しました — パスワードを確認してください</translation>
+    </message>
+    <message>
+        <source>Password must be at least 8 characters</source>
+        <translation>パスワードは8文字以上にしてください</translation>
+    </message>
+    <message>
+        <source>Cancel</source>
+        <translation>キャンセル</translation>
+    </message>
+    <message>
+        <source>Connect</source>
+        <translation>接続</translation>
+    </message>
+</context>
+<context>
+    <name>AddVpnPage</name>
+    <message>
+        <source>Edit VPN provider</source>
+        <translation>VPNプロバイダーを編集</translation>
+    </message>
+    <message>
+        <source>Add VPN provider</source>
+        <translation>VPNプロバイダーを追加</translation>
+    </message>
+    <message>
+        <source>Built-in names (wireguard, warp, tailscale, netbird) auto-fill their commands. For others, provide the connect/disconnect commands.</source>
+        <translation>組み込み名 (wireguard, warp, tailscale, netbird) はコマンドが自動入力されます。それ以外は接続/切断コマンドを指定してください。</translation>
+    </message>
+    <message>
+        <source>Provider name</source>
+        <translation>プロバイダー名</translation>
+    </message>
+    <message>
+        <source>Built-in id or a custom name</source>
+        <translation>組み込みIDまたはカスタム名</translation>
+    </message>
+    <message>
+        <source>Provider name is required</source>
+        <translation>プロバイダー名は必須です</translation>
+    </message>
+    <message>
+        <source>Display name</source>
+        <translation>表示名</translation>
+    </message>
+    <message>
+        <source>Shown in the list</source>
+        <translation>リストに表示されます</translation>
+    </message>
+    <message>
+        <source>Interface</source>
+        <translation>インターフェース</translation>
+    </message>
+    <message>
+        <source>Network interface (for WireGuard / status checks)</source>
+        <translation>ネットワークインターフェース (WireGuard / 状態確認用)</translation>
+    </message>
+    <message>
+        <source>Custom commands (optional)</source>
+        <translation>カスタムコマンド (任意)</translation>
+    </message>
+    <message>
+        <source>Connect command</source>
+        <translation>接続コマンド</translation>
+    </message>
+    <message>
+        <source>Leave empty to use the built-in default</source>
+        <translation>空欄にすると組み込みの既定値を使用します</translation>
+    </message>
+    <message>
+        <source>Disconnect command</source>
+        <translation>切断コマンド</translation>
+    </message>
+    <message>
+        <source>Delete</source>
+        <translation>削除</translation>
+    </message>
+    <message>
+        <source>Cancel</source>
+        <translation>キャンセル</translation>
+    </message>
+    <message>
+        <source>Save</source>
+        <translation>保存</translation>
+    </message>
+    <message>
+        <source>Add</source>
+        <translation>追加</translation>
+    </message>
+</context>
+<context>
     <name>AllApps</name>
     <message>
         <source>All apps</source>
         <translation>すべてのアプリ</translation>
+    </message>
+</context>
+<context>
+    <name>AllNetworksPage</name>
+    <message>
+        <source>All networks</source>
+        <translation>すべてのネットワーク</translation>
+    </message>
+    <message>
+        <source>Filters</source>
+        <translation>フィルター</translation>
+    </message>
+    <message>
+        <source>Saved</source>
+        <translation>保存済み</translation>
+    </message>
+    <message>
+        <source>Secured</source>
+        <translation>保護あり</translation>
+    </message>
+    <message>
+        <source>5 GHz</source>
+        <translation>5 GHz</translation>
+    </message>
+    <message>
+        <source>2.4 GHz</source>
+        <translation>2.4 GHz</translation>
     </message>
 </context>
 <context>
@@ -189,24 +358,28 @@
 <context>
     <name>Audio</name>
     <message>
-        <source>Output device</source>
-        <translation>出力デバイス</translation>
+        <source>Unknown</source>
+        <translation>不明</translation>
     </message>
     <message>
-        <source>Input device</source>
-        <translation>入力デバイス</translation>
+        <source>Unknown Application</source>
+        <translation>不明なアプリケーション</translation>
     </message>
     <message>
-        <source>Volume (%1)</source>
-        <translation>音量 (%1)</translation>
+        <source>Unknown Device</source>
+        <translation>不明なデバイス</translation>
     </message>
     <message>
-        <source>Muted</source>
-        <translation>ミュート</translation>
+        <source>Audio output changed</source>
+        <translation>音声出力が変更されました</translation>
     </message>
     <message>
-        <source>Open settings</source>
-        <translation>設定を開く</translation>
+        <source>Now using: %1</source>
+        <translation>使用中: %1</translation>
+    </message>
+    <message>
+        <source>Audio input changed</source>
+        <translation>音声入力が変更されました</translation>
     </message>
 </context>
 <context>
@@ -257,6 +430,29 @@
     <message>
         <source>%1 apps playing audio</source>
         <translation>%1個のアプリがオーディオを再生中</translation>
+    </message>
+</context>
+<context>
+    <name>AudioPopout</name>
+    <message>
+        <source>Output device</source>
+        <translation>出力デバイス</translation>
+    </message>
+    <message>
+        <source>Input device</source>
+        <translation>入力デバイス</translation>
+    </message>
+    <message>
+        <source>Volume (%1)</source>
+        <translation>音量 (%1)</translation>
+    </message>
+    <message>
+        <source>Muted</source>
+        <translation>ミュート</translation>
+    </message>
+    <message>
+        <source>Open settings</source>
+        <translation>設定を開く</translation>
     </message>
 </context>
 <context>
@@ -324,8 +520,24 @@
         <translation>スピーカー</translation>
     </message>
     <message>
+        <source>Lock keys</source>
+        <translation>ロックキー</translation>
+    </message>
+    <message>
         <source>Microphone</source>
         <translation>マイク</translation>
+    </message>
+    <message>
+        <source>Add entry</source>
+        <translation>項目を追加</translation>
+    </message>
+    <message>
+        <source>Add new entry</source>
+        <translation>新しい項目を追加</translation>
+    </message>
+    <message>
+        <source>Add</source>
+        <translation>追加</translation>
     </message>
     <message>
         <source>Keyboard layout</source>
@@ -336,20 +548,12 @@
         <translation>ネットワーク</translation>
     </message>
     <message>
-        <source>Wi-Fi</source>
-        <translation>Wi-Fi</translation>
-    </message>
-    <message>
         <source>Bluetooth</source>
         <translation>Bluetooth</translation>
     </message>
     <message>
         <source>Battery</source>
         <translation>バッテリー</translation>
-    </message>
-    <message>
-        <source>Caps lock</source>
-        <translation>Caps Lock</translation>
     </message>
     <message>
         <source>Behaviour</source>
@@ -760,60 +964,6 @@
     </message>
 </context>
 <context>
-    <name>ConfigToasts</name>
-    <message>
-        <source>Config loaded</source>
-        <translation>設定を読み込みました</translation>
-    </message>
-    <message>
-        <source>Config loaded successfully!</source>
-        <translation>設定を正常に読み込みました！</translation>
-    </message>
-    <message>
-        <source>Failed to parse config%1</source>
-        <translation>設定の解析に失敗しました%1</translation>
-    </message>
-    <message>
-        <source>Failed to save config%1</source>
-        <translation>設定の保存に失敗しました%1</translation>
-    </message>
-    <message>
-        <source>Unknown option in%1 config</source>
-        <translation>%1設定に不明なオプションがあります</translation>
-    </message>
-    <message>
-        <source>Failed to parse token config%1</source>
-        <translation>トークン設定の解析に失敗しました%1</translation>
-    </message>
-    <message>
-        <source>Unknown option in%1 token config</source>
-        <translation>%1トークン設定に不明なオプションがあります</translation>
-    </message>
-</context>
-<context>
-    <name>ConnectionInfoSection</name>
-    <message>
-        <source>IP Address</source>
-        <translation>IPアドレス</translation>
-    </message>
-    <message>
-        <source>Not available</source>
-        <translation>利用不可</translation>
-    </message>
-    <message>
-        <source>Subnet Mask</source>
-        <translation>サブネットマスク</translation>
-    </message>
-    <message>
-        <source>Gateway</source>
-        <translation>ゲートウェイ</translation>
-    </message>
-    <message>
-        <source>DNS Servers</source>
-        <translation>DNSサーバー</translation>
-    </message>
-</context>
-<context>
     <name>Content</name>
     <message>
         <source>Dashboard</source>
@@ -1028,6 +1178,155 @@
     </message>
 </context>
 <context>
+    <name>DialogRowButton</name>
+    <message>
+        <source>Cancel</source>
+        <translation>キャンセル</translation>
+    </message>
+</context>
+<context>
+    <name>EthernetDetailPage</name>
+    <message>
+        <source>Ethernet</source>
+        <translation>イーサネット</translation>
+    </message>
+    <message>
+        <source>Disconnect</source>
+        <translation>切断</translation>
+    </message>
+    <message>
+        <source>Connect</source>
+        <translation>接続</translation>
+    </message>
+    <message>
+        <source>Connection</source>
+        <translation>接続</translation>
+    </message>
+    <message>
+        <source>Status</source>
+        <translation>状態</translation>
+    </message>
+    <message>
+        <source>Connected</source>
+        <translation>接続済み</translation>
+    </message>
+    <message>
+        <source>Not connected</source>
+        <translation>未接続</translation>
+    </message>
+    <message>
+        <source>Interface</source>
+        <translation>インターフェース</translation>
+    </message>
+    <message>
+        <source>—</source>
+        <translation>—</translation>
+    </message>
+    <message>
+        <source>Speed</source>
+        <translation>速度</translation>
+    </message>
+    <message>
+        <source>IP address</source>
+        <translation>IPアドレス</translation>
+    </message>
+    <message>
+        <source>Gateway</source>
+        <translation>ゲートウェイ</translation>
+    </message>
+    <message>
+        <source>MAC address</source>
+        <translation>MACアドレス</translation>
+    </message>
+    <message>
+        <source>IPv4</source>
+        <translation>IPv4</translation>
+    </message>
+    <message>
+        <source>IP assignment</source>
+        <translation>IP割り当て</translation>
+    </message>
+    <message>
+        <source>Automatic (DHCP)</source>
+        <translation>自動 (DHCP)</translation>
+    </message>
+    <message>
+        <source>Automatic, DNS only</source>
+        <translation>自動 (DNSのみ手動)</translation>
+    </message>
+    <message>
+        <source>Manual</source>
+        <translation>手動</translation>
+    </message>
+    <message>
+        <source>Address (CIDR)</source>
+        <translation>アドレス (CIDR)</translation>
+    </message>
+    <message>
+        <source>IP and prefix, e.g. 192.168.1.50/24</source>
+        <translation>IPとプレフィックス (例: 192.168.1.50/24)</translation>
+    </message>
+    <message>
+        <source>Enter a valid address in CIDR notation</source>
+        <translation>CIDR表記で有効なアドレスを入力してください</translation>
+    </message>
+    <message>
+        <source>Enter a valid gateway address</source>
+        <translation>有効なゲートウェイアドレスを入力してください</translation>
+    </message>
+    <message>
+        <source>DNS servers</source>
+        <translation>DNSサーバー</translation>
+    </message>
+    <message>
+        <source>Comma-separated</source>
+        <translation>カンマ区切り</translation>
+    </message>
+    <message>
+        <source>Enter valid DNS server addresses</source>
+        <translation>有効なDNSサーバーアドレスを入力してください</translation>
+    </message>
+    <message>
+        <source>Apply</source>
+        <translation>適用</translation>
+    </message>
+</context>
+<context>
+    <name>EthernetSection</name>
+    <message>
+        <source>Ethernet</source>
+        <translation>イーサネット</translation>
+    </message>
+    <message>
+        <source>Connected</source>
+        <translation>接続済み</translation>
+    </message>
+    <message>
+        <source>Not connected</source>
+        <translation>未接続</translation>
+    </message>
+    <message>
+        <source>Data usage: %1</source>
+        <translation>データ使用量: %1</translation>
+    </message>
+    <message>
+        <source>Wired connection</source>
+        <translation>有線接続</translation>
+    </message>
+    <message>
+        <source>Not connected • %1</source>
+        <translation>未接続 • %1</translation>
+    </message>
+    <message>
+        <source>Local IP Address</source>
+        <translation>ローカルIPアドレス</translation>
+    </message>
+    <message>
+        <source>Primary DNS</source>
+        <translation>プライマリDNS</translation>
+    </message>
+</context>
+<context>
     <name>ExtraIndicator</name>
     <message>
         <source>+%1</source>
@@ -1057,6 +1356,25 @@
     <message>
         <source>Now</source>
         <translation>現在</translation>
+    </message>
+</context>
+<context>
+    <name>GameMode</name>
+    <message>
+        <source>Game mode enabled</source>
+        <translation>ゲームモードが有効になりました</translation>
+    </message>
+    <message>
+        <source>Disabled Hyprland animations, blur, gaps and shadows</source>
+        <translation>Hyprlandのアニメーション、ブラー、ギャップ、影を無効にしました</translation>
+    </message>
+    <message>
+        <source>Game mode disabled</source>
+        <translation>ゲームモードが無効になりました</translation>
+    </message>
+    <message>
+        <source>Hyprland settings restored</source>
+        <translation>Hyprlandの設定を復元しました</translation>
     </message>
 </context>
 <context>
@@ -1090,6 +1408,10 @@
     <message>
         <source>Loading...</source>
         <translation>読み込み中...</translation>
+    </message>
+    <message>
+        <source>Scanning face...</source>
+        <translation>顔をスキャン中...</translation>
     </message>
     <message>
         <source>Max tries reached</source>
@@ -1214,6 +1536,18 @@
     <message>
         <source>Reveal when the cursor reaches the screen edge</source>
         <translation>カーソルが画面の端に達したときに表示</translation>
+    </message>
+    <message>
+        <source>Action prefix</source>
+        <translation>アクションのプレフィックス</translation>
+    </message>
+    <message>
+        <source>Prefix used to run actions in the launcher</source>
+        <translation>ランチャーでアクションを実行するためのプレフィックス</translation>
+    </message>
+    <message>
+        <source>Prefix must not be alphanumeric</source>
+        <translation>プレフィックスに英数字は使用できません</translation>
     </message>
     <message>
         <source>Display</source>
@@ -1454,6 +1788,13 @@
     </message>
 </context>
 <context>
+    <name>NavPane</name>
+    <message>
+        <source>Search settings</source>
+        <translation>設定を検索</translation>
+    </message>
+</context>
+<context>
     <name>Network</name>
     <message>
         <source>Wireless</source>
@@ -1508,15 +1849,130 @@
     </message>
 </context>
 <context>
-    <name>NetworkPage</name>
+    <name>NetworkDetailPage</name>
     <message>
         <source>Network</source>
         <translation>ネットワーク</translation>
     </message>
     <message>
-        <source>Wi-Fi</source>
-        <translation>Wi-Fi</translation>
+        <source>Forget</source>
+        <translation>削除</translation>
     </message>
+    <message>
+        <source>Disconnect</source>
+        <translation>切断</translation>
+    </message>
+    <message>
+        <source>Connection</source>
+        <translation>接続</translation>
+    </message>
+    <message>
+        <source>Signal</source>
+        <translation>信号</translation>
+    </message>
+    <message>
+        <source>%1%</source>
+        <translation>%1%</translation>
+    </message>
+    <message>
+        <source>—</source>
+        <translation>—</translation>
+    </message>
+    <message>
+        <source>Security</source>
+        <translation>セキュリティ</translation>
+    </message>
+    <message>
+        <source>Open</source>
+        <translation>オープン</translation>
+    </message>
+    <message>
+        <source>Frequency</source>
+        <translation>周波数</translation>
+    </message>
+    <message>
+        <source>%1 MHz</source>
+        <translation>%1 MHz</translation>
+    </message>
+    <message>
+        <source>IP address</source>
+        <translation>IPアドレス</translation>
+    </message>
+    <message>
+        <source>Gateway</source>
+        <translation>ゲートウェイ</translation>
+    </message>
+    <message>
+        <source>MAC address</source>
+        <translation>MACアドレス</translation>
+    </message>
+    <message>
+        <source>Behaviour</source>
+        <translation>動作</translation>
+    </message>
+    <message>
+        <source>Connect automatically</source>
+        <translation>自動的に接続</translation>
+    </message>
+    <message>
+        <source>Join this network when it&apos;s in range</source>
+        <translation>範囲内にあるときにこのネットワークへ接続します</translation>
+    </message>
+    <message>
+        <source>IPv4</source>
+        <translation>IPv4</translation>
+    </message>
+    <message>
+        <source>IP assignment</source>
+        <translation>IP割り当て</translation>
+    </message>
+    <message>
+        <source>Automatic (DHCP)</source>
+        <translation>自動 (DHCP)</translation>
+    </message>
+    <message>
+        <source>Automatic, DNS only</source>
+        <translation>自動 (DNSのみ手動)</translation>
+    </message>
+    <message>
+        <source>Manual</source>
+        <translation>手動</translation>
+    </message>
+    <message>
+        <source>Address (CIDR)</source>
+        <translation>アドレス (CIDR)</translation>
+    </message>
+    <message>
+        <source>IP and prefix, e.g. 192.168.1.50/24</source>
+        <translation>IPとプレフィックス (例: 192.168.1.50/24)</translation>
+    </message>
+    <message>
+        <source>Enter a valid address in CIDR notation</source>
+        <translation>CIDR表記で有効なアドレスを入力してください</translation>
+    </message>
+    <message>
+        <source>Enter a valid gateway address</source>
+        <translation>有効なゲートウェイアドレスを入力してください</translation>
+    </message>
+    <message>
+        <source>DNS servers</source>
+        <translation>DNSサーバー</translation>
+    </message>
+    <message>
+        <source>Comma-separated</source>
+        <translation>カンマ区切り</translation>
+    </message>
+    <message>
+        <source>Enter valid DNS server addresses</source>
+        <translation>有効なDNSサーバーアドレスを入力してください</translation>
+    </message>
+    <message>
+        <source>Apply</source>
+        <translation>適用</translation>
+    </message>
+</context>
+<context>
+    <name>NetworkList</name>
     <message>
         <source>No networks found</source>
         <translation>ネットワークが見つかりません</translation>
@@ -1537,9 +1993,95 @@
         <source> • Saved</source>
         <translation> • 保存済み</translation>
     </message>
+</context>
+<context>
+    <name>NetworkPage</name>
+    <message>
+        <source>Network</source>
+        <translation>ネットワーク</translation>
+    </message>
+    <message>
+        <source>Wi-Fi</source>
+        <translation>Wi-Fi</translation>
+    </message>
+    <message>
+        <source>Show all networks (%1)</source>
+        <translation>すべてのネットワークを表示 (%1)</translation>
+    </message>
+    <message>
+        <source>Saved networks</source>
+        <translation>保存済みネットワーク</translation>
+    </message>
+    <message>
+        <source>VPN</source>
+        <translation>VPN</translation>
+    </message>
+    <message>
+        <source>No VPN providers configured</source>
+        <translation>VPNプロバイダーが設定されていません</translation>
+    </message>
+    <message>
+        <source>Tap to select</source>
+        <translation>タップして選択</translation>
+    </message>
+    <message>
+        <source>Connecting...</source>
+        <translation>接続中...</translation>
+    </message>
+    <message>
+        <source>Disconnecting...</source>
+        <translation>切断中...</translation>
+    </message>
+    <message>
+        <source>Connected</source>
+        <translation>接続済み</translation>
+    </message>
+    <message>
+        <source>Authentication required</source>
+        <translation>認証が必要です</translation>
+    </message>
+    <message>
+        <source>An error occurred</source>
+        <translation>エラーが発生しました</translation>
+    </message>
+    <message>
+        <source>Selected</source>
+        <translation>選択済み</translation>
+    </message>
+    <message>
+        <source>Interface</source>
+        <translation>インターフェース</translation>
+    </message>
+    <message>
+        <source>Current Ping</source>
+        <translation>現在のPing</translation>
+    </message>
+    <message>
+        <source>%1 ms</source>
+        <translation>%1 ms</translation>
+    </message>
+    <message>
+        <source>Add provider</source>
+        <translation>プロバイダーを追加</translation>
+    </message>
     <message>
         <source>Add network</source>
         <translation>ネットワークを追加</translation>
+    </message>
+</context>
+<context>
+    <name>Nmcli</name>
+    <message>
+        <source>Open</source>
+        <translation>オープン</translation>
+    </message>
+    <message>
+        <source>Enterprise</source>
+        <translation>エンタープライズ</translation>
+    </message>
+    <message>
+        <source>Enhanced Open</source>
+        <translation>Enhanced Open</translation>
     </message>
 </context>
 <context>
@@ -1547,6 +2089,13 @@
     <message>
         <source>No body here! :/</source>
         <translation>本文がありません :/</translation>
+    </message>
+</context>
+<context>
+    <name>NotifData</name>
+    <message>
+        <source>now</source>
+        <translation>たった今</translation>
     </message>
 </context>
 <context>
@@ -1696,6 +2245,25 @@
     </message>
 </context>
 <context>
+    <name>Notifs</name>
+    <message>
+        <source>Do not disturb enabled</source>
+        <translation>応答不可が有効になりました</translation>
+    </message>
+    <message>
+        <source>Popup notifications are now disabled</source>
+        <translation>ポップアップ通知が無効になりました</translation>
+    </message>
+    <message>
+        <source>Do not disturb disabled</source>
+        <translation>応答不可が無効になりました</translation>
+    </message>
+    <message>
+        <source>Popup notifications are now enabled</source>
+        <translation>ポップアップ通知が有効になりました</translation>
+    </message>
+</context>
+<context>
     <name>PageCompRegistry</name>
     <message>
         <source>Page under construction</source>
@@ -1721,8 +2289,8 @@
         <translation>ネットワーク</translation>
     </message>
     <message>
-        <source>Wi-Fi, ethernet</source>
-        <translation>Wi-Fi、イーサネット</translation>
+        <source>Wi-Fi, ethernet, VPN</source>
+        <translation>Wi-Fi、イーサネット、VPN</translation>
     </message>
     <message>
         <source>Connected devices</source>
@@ -1839,6 +2407,10 @@
         <source>Sidebar</source>
         <translation>サイドバー</translation>
     </message>
+    <message>
+        <source>Utilities</source>
+        <translation>ユーティリティ</translation>
+    </message>
 </context>
 <context>
     <name>Performance</name>
@@ -1857,6 +2429,17 @@
     <message>
         <source>GPU</source>
         <translation>GPU</translation>
+    </message>
+</context>
+<context>
+    <name>Players</name>
+    <message>
+        <source>Now Playing</source>
+        <translation>再生中</translation>
+    </message>
+    <message>
+        <source>%1 - %2</source>
+        <translation>%1 - %2</translation>
     </message>
 </context>
 <context>
@@ -1956,10 +2539,26 @@
     </message>
 </context>
 <context>
-    <name>SearchBar</name>
+    <name>SavedNetworksPage</name>
     <message>
-        <source>Search settings</source>
-        <translation>設定を検索</translation>
+        <source>Saved networks</source>
+        <translation>保存済みネットワーク</translation>
+    </message>
+    <message>
+        <source>No saved networks</source>
+        <translation>保存済みのネットワークはありません</translation>
+    </message>
+    <message>
+        <source>Open</source>
+        <translation>オープン</translation>
+    </message>
+    <message>
+        <source>Unknown</source>
+        <translation>不明</translation>
+    </message>
+    <message>
+        <source>Connected • %1</source>
+        <translation>接続済み • %1</translation>
     </message>
 </context>
 <context>
@@ -2138,10 +2737,6 @@
         <translation>PWエラー: %1</translation>
     </message>
     <message>
-        <source>Maximum password and fingerprint attempts reached.</source>
-        <translation>パスワードと指紋認証の試行回数が上限に達しました。</translation>
-    </message>
-    <message>
         <source>Maximum password attempts reached. Please use fingerprint.</source>
         <translation>パスワードの試行回数が上限に達しました。指紋認証を使用してください。</translation>
     </message>
@@ -2164,6 +2759,38 @@
     <message>
         <source>Fingerprint not recognized (%1/%2). Please try again or use password.</source>
         <translation>指紋が認識されませんでした (%1/%2)。もう一度試すか、パスワードを使用してください。</translation>
+    </message>
+    <message>
+        <source>FACE ERROR: %1</source>
+        <translation>顔認証エラー: %1</translation>
+    </message>
+    <message>
+        <source>Face not recognized (%1/%2). Please try again or use password.</source>
+        <translation>顔が認識されませんでした (%1/%2)。もう一度試すか、パスワードを使用してください。</translation>
+    </message>
+    <message>
+        <source>Fingerprint not recognized (%1/%2). Please try again.</source>
+        <translation>指紋が認識されませんでした (%1/%2)。もう一度お試しください。</translation>
+    </message>
+    <message>
+        <source>Face not recognized (%1/%2). Please try again.</source>
+        <translation>顔が認識されませんでした (%1/%2)。もう一度お試しください。</translation>
+    </message>
+    <message>
+        <source>Incorrect password. Please try again or use face.</source>
+        <translation>パスワードが正しくありません。もう一度試すか、顔認証を使用してください。</translation>
+    </message>
+    <message>
+        <source>Maximum password attempts reached. Please use face.</source>
+        <translation>パスワードの試行回数が上限に達しました。顔認証を使用してください。</translation>
+    </message>
+    <message>
+        <source>Maximum attempts for all authentication methods reached.</source>
+        <translation>すべての認証方法の試行回数が上限に達しました。</translation>
+    </message>
+    <message>
+        <source>Maximum face attempts reached. Please use password.</source>
+        <translation>顔認証の試行回数が上限に達しました。パスワードを使用してください。</translation>
     </message>
     <message>
         <source>Caps lock and Num lock are ON.
@@ -2333,6 +2960,156 @@ Keyboard layout: %1</source>
     </message>
 </context>
 <context>
+    <name>UtilitiesPanel</name>
+    <message>
+        <source>Utilities</source>
+        <translation>ユーティリティ</translation>
+    </message>
+    <message>
+        <source>General</source>
+        <translation>一般</translation>
+    </message>
+    <message>
+        <source>Enabled</source>
+        <translation>有効</translation>
+    </message>
+    <message>
+        <source>Show the utilities panel</source>
+        <translation>ユーティリティパネルを表示します</translation>
+    </message>
+    <message>
+        <source>Cards</source>
+        <translation>カード</translation>
+    </message>
+    <message>
+        <source>Keep awake</source>
+        <translation>スリープを防止</translation>
+    </message>
+    <message>
+        <source>Show the idle inhibitor card</source>
+        <translation>スリープ防止カードを表示します</translation>
+    </message>
+    <message>
+        <source>Screen recorder</source>
+        <translation>画面録画</translation>
+    </message>
+    <message>
+        <source>Show the screen recorder card</source>
+        <translation>画面録画カードを表示します</translation>
+    </message>
+    <message>
+        <source>Quick toggles</source>
+        <translation>クイックトグル</translation>
+    </message>
+    <message>
+        <source>Show the quick toggles card</source>
+        <translation>クイックトグルカードを表示します</translation>
+    </message>
+    <message>
+        <source>Wi-Fi</source>
+        <translation>Wi-Fi</translation>
+    </message>
+    <message>
+        <source>Toggle wireless networking</source>
+        <translation>無線ネットワークを切り替えます</translation>
+    </message>
+    <message>
+        <source>Bluetooth</source>
+        <translation>Bluetooth</translation>
+    </message>
+    <message>
+        <source>Toggle the Bluetooth adapter</source>
+        <translation>Bluetoothアダプターを切り替えます</translation>
+    </message>
+    <message>
+        <source>Microphone</source>
+        <translation>マイク</translation>
+    </message>
+    <message>
+        <source>Mute or unmute the default source</source>
+        <translation>既定の入力デバイスをミュート/ミュート解除します</translation>
+    </message>
+    <message>
+        <source>Settings</source>
+        <translation>設定</translation>
+    </message>
+    <message>
+        <source>Open the settings window</source>
+        <translation>設定ウィンドウを開きます</translation>
+    </message>
+    <message>
+        <source>Game mode</source>
+        <translation>ゲームモード</translation>
+    </message>
+    <message>
+        <source>Toggle game mode</source>
+        <translation>ゲームモードを切り替えます</translation>
+    </message>
+    <message>
+        <source>Do not disturb</source>
+        <translation>応答不可</translation>
+    </message>
+    <message>
+        <source>Silence notifications</source>
+        <translation>通知を無音にします</translation>
+    </message>
+    <message>
+        <source>VPN</source>
+        <translation>VPN</translation>
+    </message>
+    <message>
+        <source>Connect or disconnect the VPN</source>
+        <translation>VPNを接続または切断します</translation>
+    </message>
+</context>
+<context>
+    <name>VPN</name>
+    <message>
+        <source>VPN connection failed</source>
+        <translation>VPN接続に失敗しました</translation>
+    </message>
+    <message>
+        <source>VPN disconnection failed</source>
+        <translation>VPN切断に失敗しました</translation>
+    </message>
+    <message>
+        <source>VPN connected</source>
+        <translation>VPN接続済み</translation>
+    </message>
+    <message>
+        <source>Connected to %1</source>
+        <translation>%1に接続しました</translation>
+    </message>
+    <message>
+        <source>VPN disconnected</source>
+        <translation>VPN切断済み</translation>
+    </message>
+    <message>
+        <source>Disconnected from %1</source>
+        <translation>%1から切断しました</translation>
+    </message>
+    <message>
+        <source>VPN authentication required</source>
+        <translation>VPN認証が必要です</translation>
+    </message>
+    <message>
+        <source>%1: %2</source>
+        <translation>%1: %2</translation>
+    </message>
+    <message>
+        <source>VPN error</source>
+        <translation>VPNエラー</translation>
+    </message>
+    <message>
+        <source>Could not start %1. Is it installed?</source>
+        <translation>%1を起動できませんでした。インストールされていますか?</translation>
+    </message>
+    <message>
+        <source>Could not connect to %1</source>
+        <translation>%1に接続できませんでした</translation>
+    </message>
+</context>
+<context>
     <name>Wallpaper</name>
     <message>
         <source>Wallpaper missing?</source>
@@ -2422,6 +3199,17 @@ Keyboard layout: %1</source>
     </message>
 </context>
 <context>
+    <name>Weather</name>
+    <message>
+        <source>No weather</source>
+        <translation>天気情報なし</translation>
+    </message>
+    <message>
+        <source>Unknown City</source>
+        <translation>不明な都市</translation>
+    </message>
+</context>
+<context>
     <name>WeatherTab</name>
     <message>
         <source>Loading...</source>
@@ -2507,6 +3295,28 @@ Keyboard layout: %1</source>
     <message>
         <source>Image files</source>
         <translation>画像ファイル</translation>
+    </message>
+</context>
+<context>
+    <name>caelestia::services::Gpu</name>
+    <message>
+        <source>None</source>
+        <translation>なし</translation>
+    </message>
+    <message>
+        <source>Detecting GPU...</source>
+        <translation>GPUを検出中...</translation>
+    </message>
+</context>
+<context>
+    <name>caelestia::services::SessionManager</name>
+    <message>
+        <source>Hibernate failed</source>
+        <translation>休止状態に失敗しました</translation>
+    </message>
+    <message>
+        <source>Enable hibernation to use this feature.</source>
+        <translation>この機能を使用するには休止状態を有効にしてください。</translation>
     </message>
 </context>
 </TS>

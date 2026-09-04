@@ -79,10 +79,179 @@
     </message>
 </context>
 <context>
+    <name>AddNetworkPage</name>
+    <message>
+        <source>Add network</source>
+        <translation>添加网络</translation>
+    </message>
+    <message>
+        <source>Enter the details below to manually connect to a network.</source>
+        <translation>在下方输入详细信息以手动连接到网络。</translation>
+    </message>
+    <message>
+        <source>Network name (SSID)</source>
+        <translation>网络名称 (SSID)</translation>
+    </message>
+    <message>
+        <source>e.g. MyHiddenNetwork</source>
+        <translation>例如 MyHiddenNetwork</translation>
+    </message>
+    <message>
+        <source>Network name is required</source>
+        <translation>需要输入网络名称</translation>
+    </message>
+    <message>
+        <source>Hidden network</source>
+        <translation>隐藏网络</translation>
+    </message>
+    <message>
+        <source>Actively probe for a network that doesn&apos;t broadcast its name</source>
+        <translation>主动探测不广播名称的网络</translation>
+    </message>
+    <message>
+        <source>Security</source>
+        <translation>安全性</translation>
+    </message>
+    <message>
+        <source>WPA/WPA2/WPA3 Personal</source>
+        <translation>WPA/WPA2/WPA3 个人版</translation>
+    </message>
+    <message>
+        <source>None (open)</source>
+        <translation>无（开放）</translation>
+    </message>
+    <message>
+        <source>Password</source>
+        <translation>密码</translation>
+    </message>
+    <message>
+        <source>WPA passwords are at least 8 characters</source>
+        <translation>WPA 密码至少为 8 个字符</translation>
+    </message>
+    <message>
+        <source>Connection failed — check the password</source>
+        <translation>连接失败 — 请检查密码</translation>
+    </message>
+    <message>
+        <source>Password must be at least 8 characters</source>
+        <translation>密码必须至少为 8 个字符</translation>
+    </message>
+    <message>
+        <source>Cancel</source>
+        <translation>取消</translation>
+    </message>
+    <message>
+        <source>Connect</source>
+        <translation>连接</translation>
+    </message>
+</context>
+<context>
+    <name>AddVpnPage</name>
+    <message>
+        <source>Edit VPN provider</source>
+        <translation>编辑 VPN 提供商</translation>
+    </message>
+    <message>
+        <source>Add VPN provider</source>
+        <translation>添加 VPN 提供商</translation>
+    </message>
+    <message>
+        <source>Built-in names (wireguard, warp, tailscale, netbird) auto-fill their commands. For others, provide the connect/disconnect commands.</source>
+        <translation>内置名称（wireguard、warp、tailscale、netbird）会自动填充命令。其他提供商需要填写连接/断开命令。</translation>
+    </message>
+    <message>
+        <source>Provider name</source>
+        <translation>提供商名称</translation>
+    </message>
+    <message>
+        <source>Built-in id or a custom name</source>
+        <translation>内置 ID 或自定义名称</translation>
+    </message>
+    <message>
+        <source>Provider name is required</source>
+        <translation>需要输入提供商名称</translation>
+    </message>
+    <message>
+        <source>Display name</source>
+        <translation>显示名称</translation>
+    </message>
+    <message>
+        <source>Shown in the list</source>
+        <translation>显示在列表中</translation>
+    </message>
+    <message>
+        <source>Interface</source>
+        <translation>接口</translation>
+    </message>
+    <message>
+        <source>Network interface (for WireGuard / status checks)</source>
+        <translation>网络接口（用于 WireGuard / 状态检查）</translation>
+    </message>
+    <message>
+        <source>Custom commands (optional)</source>
+        <translation>自定义命令（可选）</translation>
+    </message>
+    <message>
+        <source>Connect command</source>
+        <translation>连接命令</translation>
+    </message>
+    <message>
+        <source>Leave empty to use the built-in default</source>
+        <translation>留空以使用内置默认值</translation>
+    </message>
+    <message>
+        <source>Disconnect command</source>
+        <translation>断开命令</translation>
+    </message>
+    <message>
+        <source>Delete</source>
+        <translation>删除</translation>
+    </message>
+    <message>
+        <source>Cancel</source>
+        <translation>取消</translation>
+    </message>
+    <message>
+        <source>Save</source>
+        <translation>保存</translation>
+    </message>
+    <message>
+        <source>Add</source>
+        <translation>添加</translation>
+    </message>
+</context>
+<context>
     <name>AllApps</name>
     <message>
         <source>All apps</source>
         <translation>全部应用</translation>
+    </message>
+</context>
+<context>
+    <name>AllNetworksPage</name>
+    <message>
+        <source>All networks</source>
+        <translation>所有网络</translation>
+    </message>
+    <message>
+        <source>Filters</source>
+        <translation>筛选</translation>
+    </message>
+    <message>
+        <source>Saved</source>
+        <translation>已保存</translation>
+    </message>
+    <message>
+        <source>Secured</source>
+        <translation>加密</translation>
+    </message>
+    <message>
+        <source>5 GHz</source>
+        <translation>5 GHz</translation>
+    </message>
+    <message>
+        <source>2.4 GHz</source>
+        <translation>2.4 GHz</translation>
     </message>
 </context>
 <context>
@@ -189,24 +358,28 @@
 <context>
     <name>Audio</name>
     <message>
-        <source>Output device</source>
-        <translation>输出设备</translation>
+        <source>Unknown</source>
+        <translation>未知</translation>
     </message>
     <message>
-        <source>Input device</source>
-        <translation>输入设备</translation>
+        <source>Unknown Application</source>
+        <translation>未知应用</translation>
     </message>
     <message>
-        <source>Volume (%1)</source>
-        <translation>音量 (%1)</translation>
+        <source>Unknown Device</source>
+        <translation>未知设备</translation>
     </message>
     <message>
-        <source>Muted</source>
-        <translation>已静音</translation>
+        <source>Audio output changed</source>
+        <translation>音频输出已更改</translation>
     </message>
     <message>
-        <source>Open settings</source>
-        <translation>打开设置</translation>
+        <source>Now using: %1</source>
+        <translation>当前使用: %1</translation>
+    </message>
+    <message>
+        <source>Audio input changed</source>
+        <translation>音频输入已更改</translation>
     </message>
 </context>
 <context>
@@ -257,6 +430,29 @@
     <message>
         <source>%1 apps playing audio</source>
         <translation>%1 个应用正在播放音频</translation>
+    </message>
+</context>
+<context>
+    <name>AudioPopout</name>
+    <message>
+        <source>Output device</source>
+        <translation>输出设备</translation>
+    </message>
+    <message>
+        <source>Input device</source>
+        <translation>输入设备</translation>
+    </message>
+    <message>
+        <source>Volume (%1)</source>
+        <translation>音量 (%1)</translation>
+    </message>
+    <message>
+        <source>Muted</source>
+        <translation>已静音</translation>
+    </message>
+    <message>
+        <source>Open settings</source>
+        <translation>打开设置</translation>
     </message>
 </context>
 <context>
@@ -324,8 +520,24 @@
         <translation>扬声器</translation>
     </message>
     <message>
+        <source>Lock keys</source>
+        <translation>锁定键</translation>
+    </message>
+    <message>
         <source>Microphone</source>
         <translation>麦克风</translation>
+    </message>
+    <message>
+        <source>Add entry</source>
+        <translation>添加条目</translation>
+    </message>
+    <message>
+        <source>Add new entry</source>
+        <translation>添加新条目</translation>
+    </message>
+    <message>
+        <source>Add</source>
+        <translation>添加</translation>
     </message>
     <message>
         <source>Keyboard layout</source>
@@ -336,20 +548,12 @@
         <translation>网络</translation>
     </message>
     <message>
-        <source>Wi-Fi</source>
-        <translation>Wi-Fi</translation>
-    </message>
-    <message>
         <source>Bluetooth</source>
         <translation>蓝牙</translation>
     </message>
     <message>
         <source>Battery</source>
         <translation>电池</translation>
-    </message>
-    <message>
-        <source>Caps lock</source>
-        <translation>大写锁定</translation>
     </message>
     <message>
         <source>Behaviour</source>
@@ -760,60 +964,6 @@
     </message>
 </context>
 <context>
-    <name>ConfigToasts</name>
-    <message>
-        <source>Config loaded</source>
-        <translation>配置已加载</translation>
-    </message>
-    <message>
-        <source>Config loaded successfully!</source>
-        <translation>配置加载成功!</translation>
-    </message>
-    <message>
-        <source>Failed to parse config%1</source>
-        <translation>解析配置失败%1</translation>
-    </message>
-    <message>
-        <source>Failed to save config%1</source>
-        <translation>保存配置失败%1</translation>
-    </message>
-    <message>
-        <source>Unknown option in%1 config</source>
-        <translation>%1 配置中存在未知选项</translation>
-    </message>
-    <message>
-        <source>Failed to parse token config%1</source>
-        <translation>解析令牌配置失败%1</translation>
-    </message>
-    <message>
-        <source>Unknown option in%1 token config</source>
-        <translation>%1 令牌配置中存在未知选项</translation>
-    </message>
-</context>
-<context>
-    <name>ConnectionInfoSection</name>
-    <message>
-        <source>IP Address</source>
-        <translation>IP 地址</translation>
-    </message>
-    <message>
-        <source>Not available</source>
-        <translation>不可用</translation>
-    </message>
-    <message>
-        <source>Subnet Mask</source>
-        <translation>子网掩码</translation>
-    </message>
-    <message>
-        <source>Gateway</source>
-        <translation>网关</translation>
-    </message>
-    <message>
-        <source>DNS Servers</source>
-        <translation>DNS 服务器</translation>
-    </message>
-</context>
-<context>
     <name>Content</name>
     <message>
         <source>Dashboard</source>
@@ -1028,6 +1178,155 @@
     </message>
 </context>
 <context>
+    <name>DialogRowButton</name>
+    <message>
+        <source>Cancel</source>
+        <translation>取消</translation>
+    </message>
+</context>
+<context>
+    <name>EthernetDetailPage</name>
+    <message>
+        <source>Ethernet</source>
+        <translation>以太网</translation>
+    </message>
+    <message>
+        <source>Disconnect</source>
+        <translation>断开连接</translation>
+    </message>
+    <message>
+        <source>Connect</source>
+        <translation>连接</translation>
+    </message>
+    <message>
+        <source>Connection</source>
+        <translation>连接</translation>
+    </message>
+    <message>
+        <source>Status</source>
+        <translation>状态</translation>
+    </message>
+    <message>
+        <source>Connected</source>
+        <translation>已连接</translation>
+    </message>
+    <message>
+        <source>Not connected</source>
+        <translation>未连接</translation>
+    </message>
+    <message>
+        <source>Interface</source>
+        <translation>接口</translation>
+    </message>
+    <message>
+        <source>—</source>
+        <translation>—</translation>
+    </message>
+    <message>
+        <source>Speed</source>
+        <translation>速度</translation>
+    </message>
+    <message>
+        <source>IP address</source>
+        <translation>IP 地址</translation>
+    </message>
+    <message>
+        <source>Gateway</source>
+        <translation>网关</translation>
+    </message>
+    <message>
+        <source>MAC address</source>
+        <translation>MAC 地址</translation>
+    </message>
+    <message>
+        <source>IPv4</source>
+        <translation>IPv4</translation>
+    </message>
+    <message>
+        <source>IP assignment</source>
+        <translation>IP 分配</translation>
+    </message>
+    <message>
+        <source>Automatic (DHCP)</source>
+        <translation>自动 (DHCP)</translation>
+    </message>
+    <message>
+        <source>Automatic, DNS only</source>
+        <translation>自动（仅 DNS 手动）</translation>
+    </message>
+    <message>
+        <source>Manual</source>
+        <translation>手动</translation>
+    </message>
+    <message>
+        <source>Address (CIDR)</source>
+        <translation>地址 (CIDR)</translation>
+    </message>
+    <message>
+        <source>IP and prefix, e.g. 192.168.1.50/24</source>
+        <translation>IP 和前缀，例如 192.168.1.50/24</translation>
+    </message>
+    <message>
+        <source>Enter a valid address in CIDR notation</source>
+        <translation>请输入有效的 CIDR 格式地址</translation>
+    </message>
+    <message>
+        <source>Enter a valid gateway address</source>
+        <translation>请输入有效的网关地址</translation>
+    </message>
+    <message>
+        <source>DNS servers</source>
+        <translation>DNS 服务器</translation>
+    </message>
+    <message>
+        <source>Comma-separated</source>
+        <translation>以逗号分隔</translation>
+    </message>
+    <message>
+        <source>Enter valid DNS server addresses</source>
+        <translation>请输入有效的 DNS 服务器地址</translation>
+    </message>
+    <message>
+        <source>Apply</source>
+        <translation>应用</translation>
+    </message>
+</context>
+<context>
+    <name>EthernetSection</name>
+    <message>
+        <source>Ethernet</source>
+        <translation>以太网</translation>
+    </message>
+    <message>
+        <source>Connected</source>
+        <translation>已连接</translation>
+    </message>
+    <message>
+        <source>Not connected</source>
+        <translation>未连接</translation>
+    </message>
+    <message>
+        <source>Data usage: %1</source>
+        <translation>数据用量: %1</translation>
+    </message>
+    <message>
+        <source>Wired connection</source>
+        <translation>有线连接</translation>
+    </message>
+    <message>
+        <source>Not connected • %1</source>
+        <translation>未连接 • %1</translation>
+    </message>
+    <message>
+        <source>Local IP Address</source>
+        <translation>本地 IP 地址</translation>
+    </message>
+    <message>
+        <source>Primary DNS</source>
+        <translation>主 DNS</translation>
+    </message>
+</context>
+<context>
     <name>ExtraIndicator</name>
     <message>
         <source>+%1</source>
@@ -1057,6 +1356,25 @@
     <message>
         <source>Now</source>
         <translation>现在</translation>
+    </message>
+</context>
+<context>
+    <name>GameMode</name>
+    <message>
+        <source>Game mode enabled</source>
+        <translation>游戏模式已启用</translation>
+    </message>
+    <message>
+        <source>Disabled Hyprland animations, blur, gaps and shadows</source>
+        <translation>已禁用 Hyprland 动画、模糊、间隙和阴影</translation>
+    </message>
+    <message>
+        <source>Game mode disabled</source>
+        <translation>游戏模式已禁用</translation>
+    </message>
+    <message>
+        <source>Hyprland settings restored</source>
+        <translation>已恢复 Hyprland 设置</translation>
     </message>
 </context>
 <context>
@@ -1090,6 +1408,10 @@
     <message>
         <source>Loading...</source>
         <translation>正在加载...</translation>
+    </message>
+    <message>
+        <source>Scanning face...</source>
+        <translation>正在扫描面部...</translation>
     </message>
     <message>
         <source>Max tries reached</source>
@@ -1214,6 +1536,18 @@
     <message>
         <source>Reveal when the cursor reaches the screen edge</source>
         <translation>当光标到达屏幕边缘时显示</translation>
+    </message>
+    <message>
+        <source>Action prefix</source>
+        <translation>操作前缀</translation>
+    </message>
+    <message>
+        <source>Prefix used to run actions in the launcher</source>
+        <translation>在启动器中运行操作所用的前缀</translation>
+    </message>
+    <message>
+        <source>Prefix must not be alphanumeric</source>
+        <translation>前缀不能是字母或数字</translation>
     </message>
     <message>
         <source>Display</source>
@@ -1454,6 +1788,13 @@
     </message>
 </context>
 <context>
+    <name>NavPane</name>
+    <message>
+        <source>Search settings</source>
+        <translation>搜索设置</translation>
+    </message>
+</context>
+<context>
     <name>Network</name>
     <message>
         <source>Wireless</source>
@@ -1508,15 +1849,130 @@
     </message>
 </context>
 <context>
-    <name>NetworkPage</name>
+    <name>NetworkDetailPage</name>
     <message>
         <source>Network</source>
         <translation>网络</translation>
     </message>
     <message>
-        <source>Wi-Fi</source>
-        <translation>Wi-Fi</translation>
+        <source>Forget</source>
+        <translation>忘记</translation>
     </message>
+    <message>
+        <source>Disconnect</source>
+        <translation>断开连接</translation>
+    </message>
+    <message>
+        <source>Connection</source>
+        <translation>连接</translation>
+    </message>
+    <message>
+        <source>Signal</source>
+        <translation>信号</translation>
+    </message>
+    <message>
+        <source>%1%</source>
+        <translation>%1%</translation>
+    </message>
+    <message>
+        <source>—</source>
+        <translation>—</translation>
+    </message>
+    <message>
+        <source>Security</source>
+        <translation>安全性</translation>
+    </message>
+    <message>
+        <source>Open</source>
+        <translation>开放</translation>
+    </message>
+    <message>
+        <source>Frequency</source>
+        <translation>频率</translation>
+    </message>
+    <message>
+        <source>%1 MHz</source>
+        <translation>%1 MHz</translation>
+    </message>
+    <message>
+        <source>IP address</source>
+        <translation>IP 地址</translation>
+    </message>
+    <message>
+        <source>Gateway</source>
+        <translation>网关</translation>
+    </message>
+    <message>
+        <source>MAC address</source>
+        <translation>MAC 地址</translation>
+    </message>
+    <message>
+        <source>Behaviour</source>
+        <translation>行为</translation>
+    </message>
+    <message>
+        <source>Connect automatically</source>
+        <translation>自动连接</translation>
+    </message>
+    <message>
+        <source>Join this network when it&apos;s in range</source>
+        <translation>在范围内时自动加入此网络</translation>
+    </message>
+    <message>
+        <source>IPv4</source>
+        <translation>IPv4</translation>
+    </message>
+    <message>
+        <source>IP assignment</source>
+        <translation>IP 分配</translation>
+    </message>
+    <message>
+        <source>Automatic (DHCP)</source>
+        <translation>自动 (DHCP)</translation>
+    </message>
+    <message>
+        <source>Automatic, DNS only</source>
+        <translation>自动（仅 DNS 手动）</translation>
+    </message>
+    <message>
+        <source>Manual</source>
+        <translation>手动</translation>
+    </message>
+    <message>
+        <source>Address (CIDR)</source>
+        <translation>地址 (CIDR)</translation>
+    </message>
+    <message>
+        <source>IP and prefix, e.g. 192.168.1.50/24</source>
+        <translation>IP 和前缀，例如 192.168.1.50/24</translation>
+    </message>
+    <message>
+        <source>Enter a valid address in CIDR notation</source>
+        <translation>请输入有效的 CIDR 格式地址</translation>
+    </message>
+    <message>
+        <source>Enter a valid gateway address</source>
+        <translation>请输入有效的网关地址</translation>
+    </message>
+    <message>
+        <source>DNS servers</source>
+        <translation>DNS 服务器</translation>
+    </message>
+    <message>
+        <source>Comma-separated</source>
+        <translation>以逗号分隔</translation>
+    </message>
+    <message>
+        <source>Enter valid DNS server addresses</source>
+        <translation>请输入有效的 DNS 服务器地址</translation>
+    </message>
+    <message>
+        <source>Apply</source>
+        <translation>应用</translation>
+    </message>
+</context>
+<context>
+    <name>NetworkList</name>
     <message>
         <source>No networks found</source>
         <translation>未找到网络</translation>
@@ -1537,9 +1993,95 @@
         <source> • Saved</source>
         <translation> • 已保存</translation>
     </message>
+</context>
+<context>
+    <name>NetworkPage</name>
+    <message>
+        <source>Network</source>
+        <translation>网络</translation>
+    </message>
+    <message>
+        <source>Wi-Fi</source>
+        <translation>Wi-Fi</translation>
+    </message>
+    <message>
+        <source>Show all networks (%1)</source>
+        <translation>显示所有网络 (%1)</translation>
+    </message>
+    <message>
+        <source>Saved networks</source>
+        <translation>已保存的网络</translation>
+    </message>
+    <message>
+        <source>VPN</source>
+        <translation>VPN</translation>
+    </message>
+    <message>
+        <source>No VPN providers configured</source>
+        <translation>未配置 VPN 提供商</translation>
+    </message>
+    <message>
+        <source>Tap to select</source>
+        <translation>点击选择</translation>
+    </message>
+    <message>
+        <source>Connecting...</source>
+        <translation>正在连接...</translation>
+    </message>
+    <message>
+        <source>Disconnecting...</source>
+        <translation>正在断开...</translation>
+    </message>
+    <message>
+        <source>Connected</source>
+        <translation>已连接</translation>
+    </message>
+    <message>
+        <source>Authentication required</source>
+        <translation>需要身份验证</translation>
+    </message>
+    <message>
+        <source>An error occurred</source>
+        <translation>发生错误</translation>
+    </message>
+    <message>
+        <source>Selected</source>
+        <translation>已选择</translation>
+    </message>
+    <message>
+        <source>Interface</source>
+        <translation>接口</translation>
+    </message>
+    <message>
+        <source>Current Ping</source>
+        <translation>当前延迟</translation>
+    </message>
+    <message>
+        <source>%1 ms</source>
+        <translation>%1 ms</translation>
+    </message>
+    <message>
+        <source>Add provider</source>
+        <translation>添加提供商</translation>
+    </message>
     <message>
         <source>Add network</source>
         <translation>添加网络</translation>
+    </message>
+</context>
+<context>
+    <name>Nmcli</name>
+    <message>
+        <source>Open</source>
+        <translation>开放</translation>
+    </message>
+    <message>
+        <source>Enterprise</source>
+        <translation>企业</translation>
+    </message>
+    <message>
+        <source>Enhanced Open</source>
+        <translation>Enhanced Open</translation>
     </message>
 </context>
 <context>
@@ -1547,6 +2089,13 @@
     <message>
         <source>No body here! :/</source>
         <translation>这里没有内容! :/</translation>
+    </message>
+</context>
+<context>
+    <name>NotifData</name>
+    <message>
+        <source>now</source>
+        <translation>刚刚</translation>
     </message>
 </context>
 <context>
@@ -1696,6 +2245,25 @@
     </message>
 </context>
 <context>
+    <name>Notifs</name>
+    <message>
+        <source>Do not disturb enabled</source>
+        <translation>勿扰模式已启用</translation>
+    </message>
+    <message>
+        <source>Popup notifications are now disabled</source>
+        <translation>弹出通知已禁用</translation>
+    </message>
+    <message>
+        <source>Do not disturb disabled</source>
+        <translation>勿扰模式已禁用</translation>
+    </message>
+    <message>
+        <source>Popup notifications are now enabled</source>
+        <translation>弹出通知已启用</translation>
+    </message>
+</context>
+<context>
     <name>PageCompRegistry</name>
     <message>
         <source>Page under construction</source>
@@ -1721,8 +2289,8 @@
         <translation>网络</translation>
     </message>
     <message>
-        <source>Wi-Fi, ethernet</source>
-        <translation>Wi-Fi、以太网</translation>
+        <source>Wi-Fi, ethernet, VPN</source>
+        <translation>Wi-Fi、以太网、VPN</translation>
     </message>
     <message>
         <source>Connected devices</source>
@@ -1839,6 +2407,10 @@
         <source>Sidebar</source>
         <translation>侧边栏</translation>
     </message>
+    <message>
+        <source>Utilities</source>
+        <translation>实用工具</translation>
+    </message>
 </context>
 <context>
     <name>Performance</name>
@@ -1857,6 +2429,17 @@
     <message>
         <source>GPU</source>
         <translation>GPU</translation>
+    </message>
+</context>
+<context>
+    <name>Players</name>
+    <message>
+        <source>Now Playing</source>
+        <translation>正在播放</translation>
+    </message>
+    <message>
+        <source>%1 - %2</source>
+        <translation>%1 - %2</translation>
     </message>
 </context>
 <context>
@@ -1956,10 +2539,26 @@
     </message>
 </context>
 <context>
-    <name>SearchBar</name>
+    <name>SavedNetworksPage</name>
     <message>
-        <source>Search settings</source>
-        <translation>搜索设置</translation>
+        <source>Saved networks</source>
+        <translation>已保存的网络</translation>
+    </message>
+    <message>
+        <source>No saved networks</source>
+        <translation>没有已保存的网络</translation>
+    </message>
+    <message>
+        <source>Open</source>
+        <translation>开放</translation>
+    </message>
+    <message>
+        <source>Unknown</source>
+        <translation>未知</translation>
+    </message>
+    <message>
+        <source>Connected • %1</source>
+        <translation>已连接 • %1</translation>
     </message>
 </context>
 <context>
@@ -2138,10 +2737,6 @@
         <translation>密码错误: %1</translation>
     </message>
     <message>
-        <source>Maximum password and fingerprint attempts reached.</source>
-        <translation>已达到密码和指纹的最大尝试次数。</translation>
-    </message>
-    <message>
         <source>Maximum password attempts reached. Please use fingerprint.</source>
         <translation>已达到密码最大尝试次数。请使用指纹。</translation>
     </message>
@@ -2164,6 +2759,38 @@
     <message>
         <source>Fingerprint not recognized (%1/%2). Please try again or use password.</source>
         <translation>无法识别指纹 (%1/%2)。请重试或使用密码。</translation>
+    </message>
+    <message>
+        <source>FACE ERROR: %1</source>
+        <translation>面部识别错误: %1</translation>
+    </message>
+    <message>
+        <source>Face not recognized (%1/%2). Please try again or use password.</source>
+        <translation>无法识别面部 (%1/%2)。请重试或使用密码。</translation>
+    </message>
+    <message>
+        <source>Fingerprint not recognized (%1/%2). Please try again.</source>
+        <translation>无法识别指纹 (%1/%2)。请重试。</translation>
+    </message>
+    <message>
+        <source>Face not recognized (%1/%2). Please try again.</source>
+        <translation>无法识别面部 (%1/%2)。请重试。</translation>
+    </message>
+    <message>
+        <source>Incorrect password. Please try again or use face.</source>
+        <translation>密码错误。请重试或使用面部识别。</translation>
+    </message>
+    <message>
+        <source>Maximum password attempts reached. Please use face.</source>
+        <translation>已达到密码最大尝试次数。请使用面部识别。</translation>
+    </message>
+    <message>
+        <source>Maximum attempts for all authentication methods reached.</source>
+        <translation>所有身份验证方式均已达到最大尝试次数。</translation>
+    </message>
+    <message>
+        <source>Maximum face attempts reached. Please use password.</source>
+        <translation>已达到面部识别最大尝试次数。请使用密码。</translation>
     </message>
     <message>
         <source>Caps lock and Num lock are ON.
@@ -2333,6 +2960,156 @@ Keyboard layout: %1</source>
     </message>
 </context>
 <context>
+    <name>UtilitiesPanel</name>
+    <message>
+        <source>Utilities</source>
+        <translation>实用工具</translation>
+    </message>
+    <message>
+        <source>General</source>
+        <translation>常规</translation>
+    </message>
+    <message>
+        <source>Enabled</source>
+        <translation>已启用</translation>
+    </message>
+    <message>
+        <source>Show the utilities panel</source>
+        <translation>显示实用工具面板</translation>
+    </message>
+    <message>
+        <source>Cards</source>
+        <translation>卡片</translation>
+    </message>
+    <message>
+        <source>Keep awake</source>
+        <translation>保持唤醒</translation>
+    </message>
+    <message>
+        <source>Show the idle inhibitor card</source>
+        <translation>显示防止空闲卡片</translation>
+    </message>
+    <message>
+        <source>Screen recorder</source>
+        <translation>屏幕录制</translation>
+    </message>
+    <message>
+        <source>Show the screen recorder card</source>
+        <translation>显示屏幕录制卡片</translation>
+    </message>
+    <message>
+        <source>Quick toggles</source>
+        <translation>快速切换</translation>
+    </message>
+    <message>
+        <source>Show the quick toggles card</source>
+        <translation>显示快速切换卡片</translation>
+    </message>
+    <message>
+        <source>Wi-Fi</source>
+        <translation>Wi-Fi</translation>
+    </message>
+    <message>
+        <source>Toggle wireless networking</source>
+        <translation>开启或关闭无线网络</translation>
+    </message>
+    <message>
+        <source>Bluetooth</source>
+        <translation>蓝牙</translation>
+    </message>
+    <message>
+        <source>Toggle the Bluetooth adapter</source>
+        <translation>开启或关闭蓝牙适配器</translation>
+    </message>
+    <message>
+        <source>Microphone</source>
+        <translation>麦克风</translation>
+    </message>
+    <message>
+        <source>Mute or unmute the default source</source>
+        <translation>静音或取消静音默认输入源</translation>
+    </message>
+    <message>
+        <source>Settings</source>
+        <translation>设置</translation>
+    </message>
+    <message>
+        <source>Open the settings window</source>
+        <translation>打开设置窗口</translation>
+    </message>
+    <message>
+        <source>Game mode</source>
+        <translation>游戏模式</translation>
+    </message>
+    <message>
+        <source>Toggle game mode</source>
+        <translation>开启或关闭游戏模式</translation>
+    </message>
+    <message>
+        <source>Do not disturb</source>
+        <translation>勿扰模式</translation>
+    </message>
+    <message>
+        <source>Silence notifications</source>
+        <translation>静默通知</translation>
+    </message>
+    <message>
+        <source>VPN</source>
+        <translation>VPN</translation>
+    </message>
+    <message>
+        <source>Connect or disconnect the VPN</source>
+        <translation>连接或断开 VPN</translation>
+    </message>
+</context>
+<context>
+    <name>VPN</name>
+    <message>
+        <source>VPN connection failed</source>
+        <translation>VPN 连接失败</translation>
+    </message>
+    <message>
+        <source>VPN disconnection failed</source>
+        <translation>VPN 断开失败</translation>
+    </message>
+    <message>
+        <source>VPN connected</source>
+        <translation>VPN 已连接</translation>
+    </message>
+    <message>
+        <source>Connected to %1</source>
+        <translation>已连接到 %1</translation>
+    </message>
+    <message>
+        <source>VPN disconnected</source>
+        <translation>VPN 已断开</translation>
+    </message>
+    <message>
+        <source>Disconnected from %1</source>
+        <translation>已断开与 %1 的连接</translation>
+    </message>
+    <message>
+        <source>VPN authentication required</source>
+        <translation>需要 VPN 身份验证</translation>
+    </message>
+    <message>
+        <source>%1: %2</source>
+        <translation>%1: %2</translation>
+    </message>
+    <message>
+        <source>VPN error</source>
+        <translation>VPN 错误</translation>
+    </message>
+    <message>
+        <source>Could not start %1. Is it installed?</source>
+        <translation>无法启动 %1。是否已安装？</translation>
+    </message>
+    <message>
+        <source>Could not connect to %1</source>
+        <translation>无法连接到 %1</translation>
+    </message>
+</context>
+<context>
     <name>Wallpaper</name>
     <message>
         <source>Wallpaper missing?</source>
@@ -2422,6 +3199,17 @@ Keyboard layout: %1</source>
     </message>
 </context>
 <context>
+    <name>Weather</name>
+    <message>
+        <source>No weather</source>
+        <translation>无天气信息</translation>
+    </message>
+    <message>
+        <source>Unknown City</source>
+        <translation>未知城市</translation>
+    </message>
+</context>
+<context>
     <name>WeatherTab</name>
     <message>
         <source>Loading...</source>
@@ -2507,6 +3295,28 @@ Keyboard layout: %1</source>
     <message>
         <source>Image files</source>
         <translation>图像文件</translation>
+    </message>
+</context>
+<context>
+    <name>caelestia::services::Gpu</name>
+    <message>
+        <source>None</source>
+        <translation>无</translation>
+    </message>
+    <message>
+        <source>Detecting GPU...</source>
+        <translation>正在检测 GPU...</translation>
+    </message>
+</context>
+<context>
+    <name>caelestia::services::SessionManager</name>
+    <message>
+        <source>Hibernate failed</source>
+        <translation>休眠失败</translation>
+    </message>
+    <message>
+        <source>Enable hibernation to use this feature.</source>
+        <translation>请启用休眠以使用此功能。</translation>
     </message>
 </context>
 </TS>

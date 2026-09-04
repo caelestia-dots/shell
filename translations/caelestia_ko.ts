@@ -79,10 +79,179 @@
     </message>
 </context>
 <context>
+    <name>AddNetworkPage</name>
+    <message>
+        <source>Add network</source>
+        <translation>네트워크 추가</translation>
+    </message>
+    <message>
+        <source>Enter the details below to manually connect to a network.</source>
+        <translation>네트워크에 수동으로 연결하려면 아래 정보를 입력하세요.</translation>
+    </message>
+    <message>
+        <source>Network name (SSID)</source>
+        <translation>네트워크 이름 (SSID)</translation>
+    </message>
+    <message>
+        <source>e.g. MyHiddenNetwork</source>
+        <translation>예: MyHiddenNetwork</translation>
+    </message>
+    <message>
+        <source>Network name is required</source>
+        <translation>네트워크 이름을 입력해야 합니다</translation>
+    </message>
+    <message>
+        <source>Hidden network</source>
+        <translation>숨겨진 네트워크</translation>
+    </message>
+    <message>
+        <source>Actively probe for a network that doesn&apos;t broadcast its name</source>
+        <translation>이름을 브로드캐스트하지 않는 네트워크를 직접 탐색</translation>
+    </message>
+    <message>
+        <source>Security</source>
+        <translation>보안</translation>
+    </message>
+    <message>
+        <source>WPA/WPA2/WPA3 Personal</source>
+        <translation>WPA/WPA2/WPA3 개인용</translation>
+    </message>
+    <message>
+        <source>None (open)</source>
+        <translation>없음 (개방형)</translation>
+    </message>
+    <message>
+        <source>Password</source>
+        <translation>비밀번호</translation>
+    </message>
+    <message>
+        <source>WPA passwords are at least 8 characters</source>
+        <translation>WPA 비밀번호는 8자 이상이어야 합니다</translation>
+    </message>
+    <message>
+        <source>Connection failed — check the password</source>
+        <translation>연결 실패 — 비밀번호를 확인하세요</translation>
+    </message>
+    <message>
+        <source>Password must be at least 8 characters</source>
+        <translation>비밀번호는 8자 이상이어야 합니다</translation>
+    </message>
+    <message>
+        <source>Cancel</source>
+        <translation>취소</translation>
+    </message>
+    <message>
+        <source>Connect</source>
+        <translation>연결</translation>
+    </message>
+</context>
+<context>
+    <name>AddVpnPage</name>
+    <message>
+        <source>Edit VPN provider</source>
+        <translation>VPN 제공자 편집</translation>
+    </message>
+    <message>
+        <source>Add VPN provider</source>
+        <translation>VPN 제공자 추가</translation>
+    </message>
+    <message>
+        <source>Built-in names (wireguard, warp, tailscale, netbird) auto-fill their commands. For others, provide the connect/disconnect commands.</source>
+        <translation>기본 제공 이름(wireguard, warp, tailscale, netbird)은 명령이 자동으로 채워집니다. 그 외에는 연결/연결 끊기 명령을 직접 입력하세요.</translation>
+    </message>
+    <message>
+        <source>Provider name</source>
+        <translation>제공자 이름</translation>
+    </message>
+    <message>
+        <source>Built-in id or a custom name</source>
+        <translation>기본 제공 ID 또는 사용자 지정 이름</translation>
+    </message>
+    <message>
+        <source>Provider name is required</source>
+        <translation>제공자 이름을 입력해야 합니다</translation>
+    </message>
+    <message>
+        <source>Display name</source>
+        <translation>표시 이름</translation>
+    </message>
+    <message>
+        <source>Shown in the list</source>
+        <translation>목록에 표시됩니다</translation>
+    </message>
+    <message>
+        <source>Interface</source>
+        <translation>인터페이스</translation>
+    </message>
+    <message>
+        <source>Network interface (for WireGuard / status checks)</source>
+        <translation>네트워크 인터페이스 (WireGuard / 상태 확인용)</translation>
+    </message>
+    <message>
+        <source>Custom commands (optional)</source>
+        <translation>사용자 지정 명령 (선택 사항)</translation>
+    </message>
+    <message>
+        <source>Connect command</source>
+        <translation>연결 명령</translation>
+    </message>
+    <message>
+        <source>Leave empty to use the built-in default</source>
+        <translation>비워 두면 기본 제공 값을 사용합니다</translation>
+    </message>
+    <message>
+        <source>Disconnect command</source>
+        <translation>연결 끊기 명령</translation>
+    </message>
+    <message>
+        <source>Delete</source>
+        <translation>삭제</translation>
+    </message>
+    <message>
+        <source>Cancel</source>
+        <translation>취소</translation>
+    </message>
+    <message>
+        <source>Save</source>
+        <translation>저장</translation>
+    </message>
+    <message>
+        <source>Add</source>
+        <translation>추가</translation>
+    </message>
+</context>
+<context>
     <name>AllApps</name>
     <message>
         <source>All apps</source>
         <translation>모든 앱</translation>
+    </message>
+</context>
+<context>
+    <name>AllNetworksPage</name>
+    <message>
+        <source>All networks</source>
+        <translation>모든 네트워크</translation>
+    </message>
+    <message>
+        <source>Filters</source>
+        <translation>필터</translation>
+    </message>
+    <message>
+        <source>Saved</source>
+        <translation>저장됨</translation>
+    </message>
+    <message>
+        <source>Secured</source>
+        <translation>보안됨</translation>
+    </message>
+    <message>
+        <source>5 GHz</source>
+        <translation>5 GHz</translation>
+    </message>
+    <message>
+        <source>2.4 GHz</source>
+        <translation>2.4 GHz</translation>
     </message>
 </context>
 <context>
@@ -189,24 +358,28 @@
 <context>
     <name>Audio</name>
     <message>
-        <source>Output device</source>
-        <translation>출력 장치</translation>
+        <source>Unknown</source>
+        <translation>알 수 없음</translation>
     </message>
     <message>
-        <source>Input device</source>
-        <translation>입력 장치</translation>
+        <source>Unknown Application</source>
+        <translation>알 수 없는 애플리케이션</translation>
     </message>
     <message>
-        <source>Volume (%1)</source>
-        <translation>볼륨 (%1)</translation>
+        <source>Unknown Device</source>
+        <translation>알 수 없는 장치</translation>
     </message>
     <message>
-        <source>Muted</source>
-        <translation>음소거</translation>
+        <source>Audio output changed</source>
+        <translation>오디오 출력 변경됨</translation>
     </message>
     <message>
-        <source>Open settings</source>
-        <translation>설정 열기</translation>
+        <source>Now using: %1</source>
+        <translation>현재 사용 중: %1</translation>
+    </message>
+    <message>
+        <source>Audio input changed</source>
+        <translation>오디오 입력 변경됨</translation>
     </message>
 </context>
 <context>
@@ -257,6 +430,29 @@
     <message>
         <source>%1 apps playing audio</source>
         <translation>%1개 앱이 오디오 재생 중</translation>
+    </message>
+</context>
+<context>
+    <name>AudioPopout</name>
+    <message>
+        <source>Output device</source>
+        <translation>출력 장치</translation>
+    </message>
+    <message>
+        <source>Input device</source>
+        <translation>입력 장치</translation>
+    </message>
+    <message>
+        <source>Volume (%1)</source>
+        <translation>볼륨 (%1)</translation>
+    </message>
+    <message>
+        <source>Muted</source>
+        <translation>음소거</translation>
+    </message>
+    <message>
+        <source>Open settings</source>
+        <translation>설정 열기</translation>
     </message>
 </context>
 <context>
@@ -324,8 +520,24 @@
         <translation>스피커</translation>
     </message>
     <message>
+        <source>Lock keys</source>
+        <translation>잠금 키</translation>
+    </message>
+    <message>
         <source>Microphone</source>
         <translation>마이크</translation>
+    </message>
+    <message>
+        <source>Add entry</source>
+        <translation>항목 추가</translation>
+    </message>
+    <message>
+        <source>Add new entry</source>
+        <translation>새 항목 추가</translation>
+    </message>
+    <message>
+        <source>Add</source>
+        <translation>추가</translation>
     </message>
     <message>
         <source>Keyboard layout</source>
@@ -336,20 +548,12 @@
         <translation>네트워크</translation>
     </message>
     <message>
-        <source>Wi-Fi</source>
-        <translation>Wi-Fi</translation>
-    </message>
-    <message>
         <source>Bluetooth</source>
         <translation>블루투스</translation>
     </message>
     <message>
         <source>Battery</source>
         <translation>배터리</translation>
-    </message>
-    <message>
-        <source>Caps lock</source>
-        <translation>Caps Lock</translation>
     </message>
     <message>
         <source>Behaviour</source>
@@ -760,60 +964,6 @@
     </message>
 </context>
 <context>
-    <name>ConfigToasts</name>
-    <message>
-        <source>Config loaded</source>
-        <translation>설정 불러옴</translation>
-    </message>
-    <message>
-        <source>Config loaded successfully!</source>
-        <translation>설정을 성공적으로 불러왔습니다!</translation>
-    </message>
-    <message>
-        <source>Failed to parse config%1</source>
-        <translation>설정을 분석하지 못했습니다%1</translation>
-    </message>
-    <message>
-        <source>Failed to save config%1</source>
-        <translation>설정을 저장하지 못했습니다%1</translation>
-    </message>
-    <message>
-        <source>Unknown option in%1 config</source>
-        <translation>%1 설정에 알 수 없는 옵션이 있습니다</translation>
-    </message>
-    <message>
-        <source>Failed to parse token config%1</source>
-        <translation>토큰 설정을 분석하지 못했습니다%1</translation>
-    </message>
-    <message>
-        <source>Unknown option in%1 token config</source>
-        <translation>%1 토큰 설정에 알 수 없는 옵션이 있습니다</translation>
-    </message>
-</context>
-<context>
-    <name>ConnectionInfoSection</name>
-    <message>
-        <source>IP Address</source>
-        <translation>IP 주소</translation>
-    </message>
-    <message>
-        <source>Not available</source>
-        <translation>사용할 수 없음</translation>
-    </message>
-    <message>
-        <source>Subnet Mask</source>
-        <translation>서브넷 마스크</translation>
-    </message>
-    <message>
-        <source>Gateway</source>
-        <translation>게이트웨이</translation>
-    </message>
-    <message>
-        <source>DNS Servers</source>
-        <translation>DNS 서버</translation>
-    </message>
-</context>
-<context>
     <name>Content</name>
     <message>
         <source>Dashboard</source>
@@ -1028,6 +1178,155 @@
     </message>
 </context>
 <context>
+    <name>DialogRowButton</name>
+    <message>
+        <source>Cancel</source>
+        <translation>취소</translation>
+    </message>
+</context>
+<context>
+    <name>EthernetDetailPage</name>
+    <message>
+        <source>Ethernet</source>
+        <translation>이더넷</translation>
+    </message>
+    <message>
+        <source>Disconnect</source>
+        <translation>연결 끊기</translation>
+    </message>
+    <message>
+        <source>Connect</source>
+        <translation>연결</translation>
+    </message>
+    <message>
+        <source>Connection</source>
+        <translation>연결</translation>
+    </message>
+    <message>
+        <source>Status</source>
+        <translation>상태</translation>
+    </message>
+    <message>
+        <source>Connected</source>
+        <translation>연결됨</translation>
+    </message>
+    <message>
+        <source>Not connected</source>
+        <translation>연결되지 않음</translation>
+    </message>
+    <message>
+        <source>Interface</source>
+        <translation>인터페이스</translation>
+    </message>
+    <message>
+        <source>—</source>
+        <translation>—</translation>
+    </message>
+    <message>
+        <source>Speed</source>
+        <translation>속도</translation>
+    </message>
+    <message>
+        <source>IP address</source>
+        <translation>IP 주소</translation>
+    </message>
+    <message>
+        <source>Gateway</source>
+        <translation>게이트웨이</translation>
+    </message>
+    <message>
+        <source>MAC address</source>
+        <translation>MAC 주소</translation>
+    </message>
+    <message>
+        <source>IPv4</source>
+        <translation>IPv4</translation>
+    </message>
+    <message>
+        <source>IP assignment</source>
+        <translation>IP 할당</translation>
+    </message>
+    <message>
+        <source>Automatic (DHCP)</source>
+        <translation>자동 (DHCP)</translation>
+    </message>
+    <message>
+        <source>Automatic, DNS only</source>
+        <translation>자동 (DNS만 수동)</translation>
+    </message>
+    <message>
+        <source>Manual</source>
+        <translation>수동</translation>
+    </message>
+    <message>
+        <source>Address (CIDR)</source>
+        <translation>주소 (CIDR)</translation>
+    </message>
+    <message>
+        <source>IP and prefix, e.g. 192.168.1.50/24</source>
+        <translation>IP와 프리픽스, 예: 192.168.1.50/24</translation>
+    </message>
+    <message>
+        <source>Enter a valid address in CIDR notation</source>
+        <translation>CIDR 표기법으로 올바른 주소를 입력하세요</translation>
+    </message>
+    <message>
+        <source>Enter a valid gateway address</source>
+        <translation>올바른 게이트웨이 주소를 입력하세요</translation>
+    </message>
+    <message>
+        <source>DNS servers</source>
+        <translation>DNS 서버</translation>
+    </message>
+    <message>
+        <source>Comma-separated</source>
+        <translation>쉼표로 구분</translation>
+    </message>
+    <message>
+        <source>Enter valid DNS server addresses</source>
+        <translation>올바른 DNS 서버 주소를 입력하세요</translation>
+    </message>
+    <message>
+        <source>Apply</source>
+        <translation>적용</translation>
+    </message>
+</context>
+<context>
+    <name>EthernetSection</name>
+    <message>
+        <source>Ethernet</source>
+        <translation>이더넷</translation>
+    </message>
+    <message>
+        <source>Connected</source>
+        <translation>연결됨</translation>
+    </message>
+    <message>
+        <source>Not connected</source>
+        <translation>연결되지 않음</translation>
+    </message>
+    <message>
+        <source>Data usage: %1</source>
+        <translation>데이터 사용량: %1</translation>
+    </message>
+    <message>
+        <source>Wired connection</source>
+        <translation>유선 연결</translation>
+    </message>
+    <message>
+        <source>Not connected • %1</source>
+        <translation>연결되지 않음 • %1</translation>
+    </message>
+    <message>
+        <source>Local IP Address</source>
+        <translation>로컬 IP 주소</translation>
+    </message>
+    <message>
+        <source>Primary DNS</source>
+        <translation>기본 DNS</translation>
+    </message>
+</context>
+<context>
     <name>ExtraIndicator</name>
     <message>
         <source>+%1</source>
@@ -1057,6 +1356,25 @@
     <message>
         <source>Now</source>
         <translation>지금</translation>
+    </message>
+</context>
+<context>
+    <name>GameMode</name>
+    <message>
+        <source>Game mode enabled</source>
+        <translation>게임 모드 활성화됨</translation>
+    </message>
+    <message>
+        <source>Disabled Hyprland animations, blur, gaps and shadows</source>
+        <translation>Hyprland 애니메이션, 블러, 간격, 그림자를 비활성화했습니다</translation>
+    </message>
+    <message>
+        <source>Game mode disabled</source>
+        <translation>게임 모드 비활성화됨</translation>
+    </message>
+    <message>
+        <source>Hyprland settings restored</source>
+        <translation>Hyprland 설정이 복원되었습니다</translation>
     </message>
 </context>
 <context>
@@ -1090,6 +1408,10 @@
     <message>
         <source>Loading...</source>
         <translation>불러오는 중...</translation>
+    </message>
+    <message>
+        <source>Scanning face...</source>
+        <translation>얼굴 인식 중...</translation>
     </message>
     <message>
         <source>Max tries reached</source>
@@ -1214,6 +1536,18 @@
     <message>
         <source>Reveal when the cursor reaches the screen edge</source>
         <translation>커서가 화면 가장자리에 닿으면 표시</translation>
+    </message>
+    <message>
+        <source>Action prefix</source>
+        <translation>동작 접두사</translation>
+    </message>
+    <message>
+        <source>Prefix used to run actions in the launcher</source>
+        <translation>런처에서 동작을 실행할 때 사용하는 접두사</translation>
+    </message>
+    <message>
+        <source>Prefix must not be alphanumeric</source>
+        <translation>접두사는 영숫자가 아니어야 합니다</translation>
     </message>
     <message>
         <source>Display</source>
@@ -1454,6 +1788,13 @@
     </message>
 </context>
 <context>
+    <name>NavPane</name>
+    <message>
+        <source>Search settings</source>
+        <translation>설정 검색</translation>
+    </message>
+</context>
+<context>
     <name>Network</name>
     <message>
         <source>Wireless</source>
@@ -1508,15 +1849,130 @@
     </message>
 </context>
 <context>
-    <name>NetworkPage</name>
+    <name>NetworkDetailPage</name>
     <message>
         <source>Network</source>
         <translation>네트워크</translation>
     </message>
     <message>
-        <source>Wi-Fi</source>
-        <translation>Wi-Fi</translation>
+        <source>Forget</source>
+        <translation>잊기</translation>
     </message>
+    <message>
+        <source>Disconnect</source>
+        <translation>연결 끊기</translation>
+    </message>
+    <message>
+        <source>Connection</source>
+        <translation>연결</translation>
+    </message>
+    <message>
+        <source>Signal</source>
+        <translation>신호</translation>
+    </message>
+    <message>
+        <source>%1%</source>
+        <translation>%1%</translation>
+    </message>
+    <message>
+        <source>—</source>
+        <translation>—</translation>
+    </message>
+    <message>
+        <source>Security</source>
+        <translation>보안</translation>
+    </message>
+    <message>
+        <source>Open</source>
+        <translation>개방형</translation>
+    </message>
+    <message>
+        <source>Frequency</source>
+        <translation>주파수</translation>
+    </message>
+    <message>
+        <source>%1 MHz</source>
+        <translation>%1 MHz</translation>
+    </message>
+    <message>
+        <source>IP address</source>
+        <translation>IP 주소</translation>
+    </message>
+    <message>
+        <source>Gateway</source>
+        <translation>게이트웨이</translation>
+    </message>
+    <message>
+        <source>MAC address</source>
+        <translation>MAC 주소</translation>
+    </message>
+    <message>
+        <source>Behaviour</source>
+        <translation>동작</translation>
+    </message>
+    <message>
+        <source>Connect automatically</source>
+        <translation>자동으로 연결</translation>
+    </message>
+    <message>
+        <source>Join this network when it&apos;s in range</source>
+        <translation>범위 안에 있으면 이 네트워크에 연결</translation>
+    </message>
+    <message>
+        <source>IPv4</source>
+        <translation>IPv4</translation>
+    </message>
+    <message>
+        <source>IP assignment</source>
+        <translation>IP 할당</translation>
+    </message>
+    <message>
+        <source>Automatic (DHCP)</source>
+        <translation>자동 (DHCP)</translation>
+    </message>
+    <message>
+        <source>Automatic, DNS only</source>
+        <translation>자동 (DNS만 수동)</translation>
+    </message>
+    <message>
+        <source>Manual</source>
+        <translation>수동</translation>
+    </message>
+    <message>
+        <source>Address (CIDR)</source>
+        <translation>주소 (CIDR)</translation>
+    </message>
+    <message>
+        <source>IP and prefix, e.g. 192.168.1.50/24</source>
+        <translation>IP와 프리픽스, 예: 192.168.1.50/24</translation>
+    </message>
+    <message>
+        <source>Enter a valid address in CIDR notation</source>
+        <translation>CIDR 표기법으로 올바른 주소를 입력하세요</translation>
+    </message>
+    <message>
+        <source>Enter a valid gateway address</source>
+        <translation>올바른 게이트웨이 주소를 입력하세요</translation>
+    </message>
+    <message>
+        <source>DNS servers</source>
+        <translation>DNS 서버</translation>
+    </message>
+    <message>
+        <source>Comma-separated</source>
+        <translation>쉼표로 구분</translation>
+    </message>
+    <message>
+        <source>Enter valid DNS server addresses</source>
+        <translation>올바른 DNS 서버 주소를 입력하세요</translation>
+    </message>
+    <message>
+        <source>Apply</source>
+        <translation>적용</translation>
+    </message>
+</context>
+<context>
+    <name>NetworkList</name>
     <message>
         <source>No networks found</source>
         <translation>네트워크를 찾을 수 없음</translation>
@@ -1537,9 +1993,95 @@
         <source> • Saved</source>
         <translation> • 저장됨</translation>
     </message>
+</context>
+<context>
+    <name>NetworkPage</name>
+    <message>
+        <source>Network</source>
+        <translation>네트워크</translation>
+    </message>
+    <message>
+        <source>Wi-Fi</source>
+        <translation>Wi-Fi</translation>
+    </message>
+    <message>
+        <source>Show all networks (%1)</source>
+        <translation>모든 네트워크 표시 (%1)</translation>
+    </message>
+    <message>
+        <source>Saved networks</source>
+        <translation>저장된 네트워크</translation>
+    </message>
+    <message>
+        <source>VPN</source>
+        <translation>VPN</translation>
+    </message>
+    <message>
+        <source>No VPN providers configured</source>
+        <translation>구성된 VPN 제공자 없음</translation>
+    </message>
+    <message>
+        <source>Tap to select</source>
+        <translation>눌러서 선택</translation>
+    </message>
+    <message>
+        <source>Connecting...</source>
+        <translation>연결 중...</translation>
+    </message>
+    <message>
+        <source>Disconnecting...</source>
+        <translation>연결 끊는 중...</translation>
+    </message>
+    <message>
+        <source>Connected</source>
+        <translation>연결됨</translation>
+    </message>
+    <message>
+        <source>Authentication required</source>
+        <translation>인증 필요</translation>
+    </message>
+    <message>
+        <source>An error occurred</source>
+        <translation>오류가 발생했습니다</translation>
+    </message>
+    <message>
+        <source>Selected</source>
+        <translation>선택됨</translation>
+    </message>
+    <message>
+        <source>Interface</source>
+        <translation>인터페이스</translation>
+    </message>
+    <message>
+        <source>Current Ping</source>
+        <translation>현재 핑</translation>
+    </message>
+    <message>
+        <source>%1 ms</source>
+        <translation>%1 ms</translation>
+    </message>
+    <message>
+        <source>Add provider</source>
+        <translation>제공자 추가</translation>
+    </message>
     <message>
         <source>Add network</source>
         <translation>네트워크 추가</translation>
+    </message>
+</context>
+<context>
+    <name>Nmcli</name>
+    <message>
+        <source>Open</source>
+        <translation>개방형</translation>
+    </message>
+    <message>
+        <source>Enterprise</source>
+        <translation>엔터프라이즈</translation>
+    </message>
+    <message>
+        <source>Enhanced Open</source>
+        <translation>Enhanced Open</translation>
     </message>
 </context>
 <context>
@@ -1547,6 +2089,13 @@
     <message>
         <source>No body here! :/</source>
         <translation>내용이 없습니다! :/</translation>
+    </message>
+</context>
+<context>
+    <name>NotifData</name>
+    <message>
+        <source>now</source>
+        <translation>방금</translation>
     </message>
 </context>
 <context>
@@ -1696,6 +2245,25 @@
     </message>
 </context>
 <context>
+    <name>Notifs</name>
+    <message>
+        <source>Do not disturb enabled</source>
+        <translation>방해 금지 활성화됨</translation>
+    </message>
+    <message>
+        <source>Popup notifications are now disabled</source>
+        <translation>팝업 알림이 비활성화되었습니다</translation>
+    </message>
+    <message>
+        <source>Do not disturb disabled</source>
+        <translation>방해 금지 비활성화됨</translation>
+    </message>
+    <message>
+        <source>Popup notifications are now enabled</source>
+        <translation>팝업 알림이 활성화되었습니다</translation>
+    </message>
+</context>
+<context>
     <name>PageCompRegistry</name>
     <message>
         <source>Page under construction</source>
@@ -1721,8 +2289,8 @@
         <translation>네트워크</translation>
     </message>
     <message>
-        <source>Wi-Fi, ethernet</source>
-        <translation>Wi-Fi, 이더넷</translation>
+        <source>Wi-Fi, ethernet, VPN</source>
+        <translation>Wi-Fi, 이더넷, VPN</translation>
     </message>
     <message>
         <source>Connected devices</source>
@@ -1839,6 +2407,10 @@
         <source>Sidebar</source>
         <translation>사이드바</translation>
     </message>
+    <message>
+        <source>Utilities</source>
+        <translation>유틸리티</translation>
+    </message>
 </context>
 <context>
     <name>Performance</name>
@@ -1857,6 +2429,17 @@
     <message>
         <source>GPU</source>
         <translation>GPU</translation>
+    </message>
+</context>
+<context>
+    <name>Players</name>
+    <message>
+        <source>Now Playing</source>
+        <translation>재생 중</translation>
+    </message>
+    <message>
+        <source>%1 - %2</source>
+        <translation>%1 - %2</translation>
     </message>
 </context>
 <context>
@@ -1956,10 +2539,26 @@
     </message>
 </context>
 <context>
-    <name>SearchBar</name>
+    <name>SavedNetworksPage</name>
     <message>
-        <source>Search settings</source>
-        <translation>설정 검색</translation>
+        <source>Saved networks</source>
+        <translation>저장된 네트워크</translation>
+    </message>
+    <message>
+        <source>No saved networks</source>
+        <translation>저장된 네트워크 없음</translation>
+    </message>
+    <message>
+        <source>Open</source>
+        <translation>개방형</translation>
+    </message>
+    <message>
+        <source>Unknown</source>
+        <translation>알 수 없음</translation>
+    </message>
+    <message>
+        <source>Connected • %1</source>
+        <translation>연결됨 • %1</translation>
     </message>
 </context>
 <context>
@@ -2138,10 +2737,6 @@
         <translation>비밀번호 오류: %1</translation>
     </message>
     <message>
-        <source>Maximum password and fingerprint attempts reached.</source>
-        <translation>비밀번호와 지문 시도 횟수가 최대에 도달했습니다.</translation>
-    </message>
-    <message>
         <source>Maximum password attempts reached. Please use fingerprint.</source>
         <translation>비밀번호 시도 횟수가 최대에 도달했습니다. 지문을 사용하세요.</translation>
     </message>
@@ -2164,6 +2759,38 @@
     <message>
         <source>Fingerprint not recognized (%1/%2). Please try again or use password.</source>
         <translation>지문이 인식되지 않았습니다 (%1/%2). 다시 시도하거나 비밀번호를 사용하세요.</translation>
+    </message>
+    <message>
+        <source>FACE ERROR: %1</source>
+        <translation>얼굴 인식 오류: %1</translation>
+    </message>
+    <message>
+        <source>Face not recognized (%1/%2). Please try again or use password.</source>
+        <translation>얼굴이 인식되지 않았습니다 (%1/%2). 다시 시도하거나 비밀번호를 사용하세요.</translation>
+    </message>
+    <message>
+        <source>Fingerprint not recognized (%1/%2). Please try again.</source>
+        <translation>지문이 인식되지 않았습니다 (%1/%2). 다시 시도하세요.</translation>
+    </message>
+    <message>
+        <source>Face not recognized (%1/%2). Please try again.</source>
+        <translation>얼굴이 인식되지 않았습니다 (%1/%2). 다시 시도하세요.</translation>
+    </message>
+    <message>
+        <source>Incorrect password. Please try again or use face.</source>
+        <translation>비밀번호가 올바르지 않습니다. 다시 시도하거나 얼굴 인식을 사용하세요.</translation>
+    </message>
+    <message>
+        <source>Maximum password attempts reached. Please use face.</source>
+        <translation>비밀번호 시도 횟수가 최대에 도달했습니다. 얼굴 인식을 사용하세요.</translation>
+    </message>
+    <message>
+        <source>Maximum attempts for all authentication methods reached.</source>
+        <translation>모든 인증 방법의 시도 횟수가 최대에 도달했습니다.</translation>
+    </message>
+    <message>
+        <source>Maximum face attempts reached. Please use password.</source>
+        <translation>얼굴 인식 시도 횟수가 최대에 도달했습니다. 비밀번호를 사용하세요.</translation>
     </message>
     <message>
         <source>Caps lock and Num lock are ON.
@@ -2333,6 +2960,156 @@ Keyboard layout: %1</source>
     </message>
 </context>
 <context>
+    <name>UtilitiesPanel</name>
+    <message>
+        <source>Utilities</source>
+        <translation>유틸리티</translation>
+    </message>
+    <message>
+        <source>General</source>
+        <translation>일반</translation>
+    </message>
+    <message>
+        <source>Enabled</source>
+        <translation>활성화됨</translation>
+    </message>
+    <message>
+        <source>Show the utilities panel</source>
+        <translation>유틸리티 패널 표시</translation>
+    </message>
+    <message>
+        <source>Cards</source>
+        <translation>카드</translation>
+    </message>
+    <message>
+        <source>Keep awake</source>
+        <translation>깨어 있기</translation>
+    </message>
+    <message>
+        <source>Show the idle inhibitor card</source>
+        <translation>유휴 방지 카드 표시</translation>
+    </message>
+    <message>
+        <source>Screen recorder</source>
+        <translation>화면 녹화기</translation>
+    </message>
+    <message>
+        <source>Show the screen recorder card</source>
+        <translation>화면 녹화기 카드 표시</translation>
+    </message>
+    <message>
+        <source>Quick toggles</source>
+        <translation>빠른 전환</translation>
+    </message>
+    <message>
+        <source>Show the quick toggles card</source>
+        <translation>빠른 전환 카드 표시</translation>
+    </message>
+    <message>
+        <source>Wi-Fi</source>
+        <translation>Wi-Fi</translation>
+    </message>
+    <message>
+        <source>Toggle wireless networking</source>
+        <translation>무선 네트워크 켜기/끄기</translation>
+    </message>
+    <message>
+        <source>Bluetooth</source>
+        <translation>블루투스</translation>
+    </message>
+    <message>
+        <source>Toggle the Bluetooth adapter</source>
+        <translation>블루투스 어댑터 켜기/끄기</translation>
+    </message>
+    <message>
+        <source>Microphone</source>
+        <translation>마이크</translation>
+    </message>
+    <message>
+        <source>Mute or unmute the default source</source>
+        <translation>기본 입력 장치 음소거 또는 해제</translation>
+    </message>
+    <message>
+        <source>Settings</source>
+        <translation>설정</translation>
+    </message>
+    <message>
+        <source>Open the settings window</source>
+        <translation>설정 창 열기</translation>
+    </message>
+    <message>
+        <source>Game mode</source>
+        <translation>게임 모드</translation>
+    </message>
+    <message>
+        <source>Toggle game mode</source>
+        <translation>게임 모드 켜기/끄기</translation>
+    </message>
+    <message>
+        <source>Do not disturb</source>
+        <translation>방해 금지</translation>
+    </message>
+    <message>
+        <source>Silence notifications</source>
+        <translation>알림 끄기</translation>
+    </message>
+    <message>
+        <source>VPN</source>
+        <translation>VPN</translation>
+    </message>
+    <message>
+        <source>Connect or disconnect the VPN</source>
+        <translation>VPN 연결 또는 연결 끊기</translation>
+    </message>
+</context>
+<context>
+    <name>VPN</name>
+    <message>
+        <source>VPN connection failed</source>
+        <translation>VPN 연결 실패</translation>
+    </message>
+    <message>
+        <source>VPN disconnection failed</source>
+        <translation>VPN 연결 끊기 실패</translation>
+    </message>
+    <message>
+        <source>VPN connected</source>
+        <translation>VPN 연결됨</translation>
+    </message>
+    <message>
+        <source>Connected to %1</source>
+        <translation>%1에 연결됨</translation>
+    </message>
+    <message>
+        <source>VPN disconnected</source>
+        <translation>VPN 연결 끊김</translation>
+    </message>
+    <message>
+        <source>Disconnected from %1</source>
+        <translation>%1 연결 끊김</translation>
+    </message>
+    <message>
+        <source>VPN authentication required</source>
+        <translation>VPN 인증 필요</translation>
+    </message>
+    <message>
+        <source>%1: %2</source>
+        <translation>%1: %2</translation>
+    </message>
+    <message>
+        <source>VPN error</source>
+        <translation>VPN 오류</translation>
+    </message>
+    <message>
+        <source>Could not start %1. Is it installed?</source>
+        <translation>%1을(를) 시작할 수 없습니다. 설치되어 있나요?</translation>
+    </message>
+    <message>
+        <source>Could not connect to %1</source>
+        <translation>%1에 연결할 수 없습니다</translation>
+    </message>
+</context>
+<context>
     <name>Wallpaper</name>
     <message>
         <source>Wallpaper missing?</source>
@@ -2422,6 +3199,17 @@ Keyboard layout: %1</source>
     </message>
 </context>
 <context>
+    <name>Weather</name>
+    <message>
+        <source>No weather</source>
+        <translation>날씨 정보 없음</translation>
+    </message>
+    <message>
+        <source>Unknown City</source>
+        <translation>알 수 없는 도시</translation>
+    </message>
+</context>
+<context>
     <name>WeatherTab</name>
     <message>
         <source>Loading...</source>
@@ -2507,6 +3295,28 @@ Keyboard layout: %1</source>
     <message>
         <source>Image files</source>
         <translation>이미지 파일</translation>
+    </message>
+</context>
+<context>
+    <name>caelestia::services::Gpu</name>
+    <message>
+        <source>None</source>
+        <translation>없음</translation>
+    </message>
+    <message>
+        <source>Detecting GPU...</source>
+        <translation>GPU 감지 중...</translation>
+    </message>
+</context>
+<context>
+    <name>caelestia::services::SessionManager</name>
+    <message>
+        <source>Hibernate failed</source>
+        <translation>최대 절전 모드 실패</translation>
+    </message>
+    <message>
+        <source>Enable hibernation to use this feature.</source>
+        <translation>이 기능을 사용하려면 최대 절전 모드를 활성화하세요.</translation>
     </message>
 </context>
 </TS>
