@@ -1,6 +1,7 @@
 #pragma once
 
 #include <qhash.h>
+#include <qjsonarray.h>
 #include <qjsonobject.h>
 #include <qnetworkaccessmanager.h>
 #include <qnetworkreply.h>
@@ -84,16 +85,30 @@ private:
     void clearLines();
     void appendCandidates(const QList<LyricCandidate>& add);
     void clearCandidates();
+    [[nodiscard]] bool compareCandidates(const LyricCandidate& a, const LyricCandidate& b) const;
 
     void scheduleLoad();
     void doLoad();
     void cancelInFlight();
     int newRequestId();
 
+    bool loadCachedLyrics(const LyricCandidate& value);
+    void loadLocalLyricFile(const QString& path);
+    bool tryLoadLocalFile(const QString& path);
+
     void tryLocal(int reqId);
     void tryLrclib(int reqId);
     void tryNetEase(int reqId);
     void chainNext(LyricsBackend justFailed, int reqId);
+
+    struct LrclibSearchResult {
+        QList<LyricCandidate> candidates;
+        LyricCandidate bestCandidate;
+        QString bestSynced;
+    };
+
+    [[nodiscard]] LrclibSearchResult parseLrclibSearchResult(const QJsonArray& arr) const;
+    void applyLrclibCandidateUpgrade(const LyricCandidate& bestCand, const QString& bestSynced);
 
     void searchLrclibCandidates(int reqId);
     void searchNetEaseCandidates(int reqId);
