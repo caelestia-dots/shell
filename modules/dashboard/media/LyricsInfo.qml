@@ -257,7 +257,7 @@ Item {
                 }
 
                 RowLayout {
-                    visible: Lyrics.lyricCandidates.length > 1
+                    visible: Lyrics.lyricCandidates.length > 1 || Lyrics.hasCandidateOverride
                     Layout.fillWidth: true
 
                     StyledText {
@@ -280,7 +280,7 @@ Item {
                 StyledFlickable {
                     id: candFlickable
 
-                    visible: Lyrics.lyricCandidates.length > 1
+                    visible: Lyrics.lyricCandidates.length > 1 || Lyrics.hasCandidateOverride
                     Layout.fillWidth: true
                     Layout.fillHeight: true
                     Layout.maximumHeight: root.maxListHeight
