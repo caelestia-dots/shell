@@ -11,7 +11,7 @@ class Translator : public QObject {
 
     Q_PROPERTY(bool __trsChanged READ trsChangedFlag NOTIFY languageChanged)
 
-    Q_PROPERTY(QStringList supportedLanguages READ supportedLanguages)
+    Q_PROPERTY(QStringList supportedLanguages READ supportedLanguages CONSTANT)
     Q_PROPERTY(QString language READ language WRITE setLanguage NOTIFY languageChanged)
 
 public:
