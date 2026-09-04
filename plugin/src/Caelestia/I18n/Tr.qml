@@ -1,6 +1,6 @@
 pragma Singleton
 
-import Caelestia.Translations
+import Caelestia.I18n
 
 TranslatorInternal {
     function tr(text: string, context = ""): string {

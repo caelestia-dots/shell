@@ -6,7 +6,7 @@ if test (count $argv) -lt 1
 end
 
 cd (status dirname)/.. || exit 1
-set -l tr_dir plugin/src/Caelestia/Translations/trs
+set -l tr_dir plugin/src/Caelestia/I18n/trs
 set -g pot_file $tr_dir/raw.pot
 mkdir -p $tr_dir
 

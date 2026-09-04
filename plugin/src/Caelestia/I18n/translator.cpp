@@ -9,11 +9,11 @@
 
 namespace {
 
-Q_LOGGING_CATEGORY(lcTr, "caelestia.tr", QtInfoMsg)
+Q_LOGGING_CATEGORY(lcI18n, "caelestia.i18n", QtInfoMsg)
 
 } // namespace
 
-namespace caelestia::tr {
+namespace caelestia::i18n {
 
 using Qt::StringLiterals::operator""_s;
 
@@ -35,7 +35,7 @@ constexpr qsizetype k_entrySize = 8;
 constexpr qsizetype k_entryOffsetField = 4;
 
 QString resourceDir() {
-    static const QString k_s = u":/qt/qml/Caelestia/Translations/"_s;
+    static const QString k_s = u":/qt/qml/Caelestia/I18n/"_s;
     return k_s;
 }
 
@@ -62,7 +62,7 @@ void Translator::setLanguage(const QString& language) {
         return;
 
     if (!m_supportedLanguages.contains(language)) {
-        qCWarning(lcTr) << "Unknown language" << language;
+        qCWarning(lcI18n) << "Unknown language" << language;
         return;
     }
 
@@ -78,7 +78,7 @@ QString Translator::_tr(const QString& text, const QString& context) const {
     QByteArray key;
     if (isMarked(text)) {
         if (!context.isEmpty())
-            qCWarning(lcTr) << "Attempted to translate a marked string with context. Ignoring context.";
+            qCWarning(lcI18n) << "Attempted to translate a marked string with context. Ignoring context.";
         key = text.mid(1).toUtf8(); // Marked strings with context are already in the correct format
     } else {
         key = context.isEmpty() ? text.toUtf8() : context.toUtf8() + k_contextSep + text.toUtf8();
@@ -111,20 +111,20 @@ void Translator::loadTranslations() {
 
     QFile file(resourceDir() + m_language + u".mo"_s);
     if (!file.open(QIODevice::ReadOnly)) {
-        qCWarning(lcTr) << "Failed to open catalog for" << m_language;
+        qCWarning(lcI18n) << "Failed to open catalog for" << m_language;
         return;
     }
 
     auto data = file.readAll();
     if (data.size() < k_headerSize) {
-        qCWarning(lcTr) << "Truncated catalog for" << m_language;
+        qCWarning(lcI18n) << "Truncated catalog for" << m_language;
         return;
     }
 
     // Magic read as big endian to find the file's real byte order
     const auto magic = qFromBigEndian<quint32>(data.constData());
     if (magic != k_magic && magic != k_magicSwapped) {
-        qCWarning(lcTr) << "Bad magic in catalog for" << m_language;
+        qCWarning(lcI18n) << "Bad magic in catalog for" << m_language;
         return;
     }
 
@@ -139,7 +139,7 @@ void Translator::loadTranslations() {
     const auto tableSize = k_entrySize * static_cast<qsizetype>(count);
     if (static_cast<qsizetype>(origs) + tableSize > m_catalog.size() ||
         static_cast<qsizetype>(trans) + tableSize > m_catalog.size()) {
-        qCWarning(lcTr) << "Corrupt string tables in catalog for" << m_language;
+        qCWarning(lcI18n) << "Corrupt string tables in catalog for" << m_language;
         m_catalog.clear();
         return;
     }
@@ -148,7 +148,7 @@ void Translator::loadTranslations() {
     m_origs = origs;
     m_trans = trans;
 
-    qCDebug(lcTr) << "Loaded" << m_count << "messages for" << m_language;
+    qCDebug(lcI18n) << "Loaded" << m_count << "messages for" << m_language;
 }
 
 quint32 Translator::readU32(qsizetype offset) const {
@@ -196,4 +196,4 @@ bool Translator::isMarked(const QString& text) {
     return text.startsWith(QChar::fromLatin1(k_markChar));
 }
 
-} // namespace caelestia::tr
+} // namespace caelestia::i18n

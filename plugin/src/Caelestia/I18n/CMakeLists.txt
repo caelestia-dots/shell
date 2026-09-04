@@ -38,9 +38,9 @@ if(CAELESTIA_TEST_TRS)
     compile_po("${CMAKE_CURRENT_BINARY_DIR}/trs/test.po")
 endif()
 
-qml_module(caelestia-translations
-    URI Caelestia.Translations
-    INCLUDE_PREFIX translations
+qml_module(caelestia-i18n
+    URI Caelestia.I18n
+    INCLUDE_PREFIX i18n
     SOURCES
         translator.cpp
     QML_SINGLETONS

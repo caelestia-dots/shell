@@ -3,7 +3,7 @@
 #include <qobject.h>
 #include <qqmlintegration.h>
 
-namespace caelestia::tr {
+namespace caelestia::i18n {
 
 class Translator : public QObject {
     Q_OBJECT
@@ -49,4 +49,4 @@ private:
     [[nodiscard]] static bool isMarked(const QString& text);
 };
 
-} // namespace caelestia::tr
+} // namespace caelestia::i18n
