@@ -111,7 +111,7 @@ in
     pname = "caelestia-shell${lib.optionalString debug "-debug"}";
     src = ./..;
 
-    nativeBuildInputs = [cmake ninja makeWrapper qt6.wrapQtAppsHook];
+    nativeBuildInputs = [cmake ninja makeWrapper qt6.wrapQtAppsHook qt6.qttools];
     buildInputs = [qs extras plugin xkeyboard-config qt6.qtbase];
     propagatedBuildInputs = runtimeDeps;
 
