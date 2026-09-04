@@ -10,7 +10,6 @@ import qs.components
 import qs.components.containers
 import qs.components.controls
 import qs.services
-import qs.utils
 import qs.modules.drawers
 
 Item {
@@ -98,12 +97,8 @@ Item {
             PropertyChanges {
                 rect.anchors.rightMargin: root.width - root.Tokens.spacing.small
                 rect.anchors.topMargin: -root.Tokens.padding.medium
-                rect.implicitWidth: (Lyrics.hasLyrics && !Lyrics.loading)
-                    ? root.popupWidth
-                    : Math.max(140, placeholder.implicitWidth + root.padding * 3)
-                rect.implicitHeight: (Lyrics.hasLyrics && !Lyrics.loading)
-                    ? Math.min(root.maxPopupHeight, layout.implicitHeight + root.padding * 2)
-                    : placeholder.implicitHeight + root.padding * 2
+                rect.implicitWidth: (Lyrics.hasLyrics && !Lyrics.loading) ? root.popupWidth : Math.max(140, placeholder.implicitWidth + root.padding * 3)
+                rect.implicitHeight: (Lyrics.hasLyrics && !Lyrics.loading) ? Math.min(root.maxPopupHeight, layout.implicitHeight + root.padding * 2) : placeholder.implicitHeight + root.padding * 2
                 content.opacity: 1
             }
         }
@@ -209,9 +204,7 @@ Item {
 
                     StyledText {
                         Layout.fillWidth: true
-                        text: Lyrics.preferredBackend === LyricsBackend.Auto
-                            ? qsTr("Source: %1 (Auto)").arg(CUtils.enumToString(Lyrics, "backend"))
-                            : qsTr("Source: %1").arg(CUtils.enumToString(Lyrics, "backend"))
+                        text: Lyrics.preferredBackend === LyricsBackend.Auto ? qsTr("Source: %1 (Auto)").arg(CUtils.enumToString(Lyrics, "backend")) : qsTr("Source: %1").arg(CUtils.enumToString(Lyrics, "backend"))
                         color: Colours.palette.m3onSurfaceVariant
                         font: Tokens.font.label.medium
                     }
@@ -345,9 +338,7 @@ Item {
 
                                     StyledText {
                                         Layout.fillWidth: true
-                                        text: candItem.isAuto
-                                            ? `${candItem.modelData.title} • ${candItem.modelData.artist} (${qsTr("Auto")})`
-                                            : `${candItem.modelData.title} • ${candItem.modelData.artist}`
+                                        text: candItem.isAuto ? `${candItem.modelData.title} • ${candItem.modelData.artist} (${qsTr("Auto")})` : `${candItem.modelData.title} • ${candItem.modelData.artist}`
                                         color: candItem.isSelected ? Colours.palette.m3onSecondaryContainer : Colours.palette.m3onSurface
                                         font: Tokens.font.body.small
                                         elide: Text.ElideRight
@@ -405,4 +396,3 @@ Item {
         }
     }
 }
-

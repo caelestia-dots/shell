@@ -75,31 +75,32 @@ QString Lyrics::cleanTrackTitle(const QString& title) {
     QString s = title.normalized(QString::NormalizationForm_C);
 
     // 1. Strip YouTube 11-character video IDs: [kffacxfA7G4]
-    static const QRegularExpression ytIdRegex(u"\\[[a-zA-Z0-9_-]{11}\\]"_s);
-    s.remove(ytIdRegex);
+    static const QRegularExpression k_ytIdRegex(u"\\[[a-zA-Z0-9_-]{11}\\]"_s);
+    s.remove(k_ytIdRegex);
 
     // 2. Strip bracketed boilerplate (supporting ASCII + CJK/Full-width brackets)
     // Brackets: ( ) [ ] { } （ ） ［ ］ 【 】 「 」 『 』
-    static const QRegularExpression boilerplateRegex(
-        u"\\s*[\\(\\[\\{\\x{FF08}\\x{FF3B}\\x{3010}\\x{300C}\\x{300E}][^\\)\\]\\}\\x{FF09}\\x{FF3D}\\x{3011}\\x{300D}\\x{300F}]*?"
-        u"(?:official\\s*(?:music\\s*video|video|audio|lyric\\s*video|visualizer)?|music\\s*video|lyric\\s*video|visualizer|"
-        u"remaster(?:ed)?|4k|hd|hq|pv|mv|full\\s*ver(?:sion)?|live(?:\\s+at\\s+[^\\)\\]\\}]+)?|prod(?:\\.|\\s+by)[^\\)\\]\\}]+)"
-        u"[^\\)\\]\\}\\x{FF09}\\x{FF3D}\\x{3011}\\x{300D}\\x{300F}]*?"
-        u"[\\)\\]\\}\\x{FF09}\\x{FF3D}\\x{3011}\\x{300D}\\x{300F}]"_s,
+    static const QRegularExpression k_boilerplateRegex(u"\\s*[\\(\\[\\{\\x{FF08}\\x{FF3B}\\x{3010}\\x{300C}\\x{300E}][^"
+                                                       u"\\)\\]\\}\\x{FF09}\\x{FF3D}\\x{3011}\\x{300D}\\x{300F}]*?"
+                                                       u"(?:official\\s*(?:music\\s*video|video|audio|lyric\\s*video|"
+                                                       u"visualizer)?|music\\s*video|lyric\\s*video|visualizer|"
+                                                       u"remaster(?:ed)?|4k|hd|hq|pv|mv|full\\s*ver(?:sion)?|live(?:"
+                                                       u"\\s+at\\s+[^\\)\\]\\}]+)?|prod(?:\\.|\\s+by)[^\\)\\]\\}]+)"
+                                                       u"[^\\)\\]\\}\\x{FF09}\\x{FF3D}\\x{3011}\\x{300D}\\x{300F}]*?"
+                                                       u"[\\)\\]\\}\\x{FF09}\\x{FF3D}\\x{3011}\\x{300D}\\x{300F}]"_s,
         QRegularExpression::CaseInsensitiveOption);
-    s.remove(boilerplateRegex);
+    s.remove(k_boilerplateRegex);
 
     // 3. Strip bracketed feature tags: (feat. Ludacris) or [ft. Artist]
-    static const QRegularExpression bracketedFeatRegex(
+    static const QRegularExpression k_bracketedFeatRegex(
         u"\\s*[\\(\\[\\{\\x{FF08}\\x{FF3B}\\x{3010}]\\s*(?:ft\\.?|feat\\.?|featuring|with)\\s+[^\\)\\]\\}\\x{FF09}\\x{FF3D}\\x{3011}]+[\\)\\]\\}\\x{FF09}\\x{FF3D}\\x{3011}]"_s,
         QRegularExpression::CaseInsensitiveOption);
-    s.remove(bracketedFeatRegex);
+    s.remove(k_bracketedFeatRegex);
 
     // 4. Strip trailing unbracketed feature tags: "Track Title feat. Artist"
-    static const QRegularExpression trailingFeatRegex(
-        u"\\s*(?:\\bft\\.?|\\bfeat\\.?|\\bfeaturing|\\bwith)\\s+.*$"_s,
-        QRegularExpression::CaseInsensitiveOption);
-    s.remove(trailingFeatRegex);
+    static const QRegularExpression k_trailingFeatRegex(
+        u"\\s*(?:\\bft\\.?|\\bfeat\\.?|\\bfeaturing|\\bwith)\\s+.*$"_s, QRegularExpression::CaseInsensitiveOption);
+    s.remove(k_trailingFeatRegex);
 
     s = s.trimmed();
     return s.isEmpty() ? title.trimmed() : s;
@@ -109,10 +110,10 @@ QString Lyrics::extractPrimaryArtist(const QString& artist) {
     if (artist.isEmpty()) {
         return {};
     }
-    static const QRegularExpression splitRegex(
+    static const QRegularExpression k_splitRegex(
         u"\\s*(?:,|;|/|&|\\bft\\.?|\\bfeat\\.?|\\bfeaturing|\\bwith|\\bx\\b|\\b\\x{00D7}\\b)\\s*"_s,
         QRegularExpression::CaseInsensitiveOption);
-    const QStringList parts = artist.split(splitRegex, Qt::SkipEmptyParts);
+    const QStringList parts = artist.split(k_splitRegex, Qt::SkipEmptyParts);
     return parts.isEmpty() ? artist.trimmed() : parts.first().trimmed();
 }
 
@@ -189,6 +190,39 @@ bool Lyrics::hasCandidateOverride() const {
     return m_hasCandidateOverride;
 }
 
+bool Lyrics::loadCachedLyrics(const LyricCandidate& value) {
+    const auto b = value.backend();
+    if (b != LyricsBackend::LRCLIB && b != LyricsBackend::NetEase) {
+        return false;
+    }
+    const QString cached = readCachedLrc(b, value.id());
+    if (cached.isEmpty()) {
+        return false;
+    }
+    const auto lines = parseLrc(cached);
+    if (lines.isEmpty()) {
+        return false;
+    }
+    setLines(lines, b);
+    setLoading(false);
+    if (!m_settingFromPrefs && !trackKey().isEmpty() && m_saveDebounce) {
+        m_saveDebounce->start();
+    }
+    return true;
+}
+
+void Lyrics::loadLocalLyricFile(const QString& path) {
+    // For local, the id is the file path. Read directly.
+    QFile f(path);
+    if (f.open(QIODevice::ReadOnly)) {
+        const QString text = QString::fromUtf8(f.readAll());
+        setLines(parseLrc(text), LyricsBackend::Local);
+    } else {
+        qCWarning(lcLyrics) << "selectedCandidate: cannot open local file" << path;
+    }
+    setLoading(false);
+}
+
 void Lyrics::setSelectedCandidate(const LyricCandidate& value) {
     if (m_selected == value) {
         return;
@@ -219,19 +253,8 @@ void Lyrics::setSelectedCandidate(const LyricCandidate& value) {
     cancelInFlight();
     const int reqId = newRequestId();
 
-    if (b == LyricsBackend::LRCLIB || b == LyricsBackend::NetEase) {
-        const QString cached = readCachedLrc(b, value.id());
-        if (!cached.isEmpty()) {
-            const auto lines = parseLrc(cached);
-            if (!lines.isEmpty()) {
-                setLines(lines, b);
-                setLoading(false);
-                if (!m_settingFromPrefs && !trackKey().isEmpty() && m_saveDebounce) {
-                    m_saveDebounce->start();
-                }
-                return;
-            }
-        }
+    if (loadCachedLyrics(value)) {
+        return;
     }
 
     if (b == LyricsBackend::LRCLIB) {
@@ -239,22 +262,11 @@ void Lyrics::setSelectedCandidate(const LyricCandidate& value) {
     } else if (b == LyricsBackend::NetEase) {
         fetchNetEaseLyricsById(value.id(), reqId);
     } else if (b == LyricsBackend::Local) {
-        // For local, the id is the file path. Read directly.
-        QFile f(value.id());
-        if (f.open(QIODevice::ReadOnly)) {
-            const QString text = QString::fromUtf8(f.readAll());
-            setLines(parseLrc(text), LyricsBackend::Local);
-            setLoading(false);
-        } else {
-            qCWarning(lcLyrics) << "selectedCandidate: cannot open local file" << value.id();
-            setLoading(false);
-        }
+        loadLocalLyricFile(value.id());
     }
 
-    if (!m_settingFromPrefs && !trackKey().isEmpty()) {
-        if (m_saveDebounce) {
-            m_saveDebounce->start();
-        }
+    if (!m_settingFromPrefs && !trackKey().isEmpty() && m_saveDebounce) {
+        m_saveDebounce->start();
     }
 }
 
@@ -445,6 +457,27 @@ void Lyrics::clearLines() {
     emit hasLyricsChanged();
 }
 
+bool Lyrics::compareCandidates(const LyricCandidate& a, const LyricCandidate& b) const {
+    // 1. autoCandidate always ranks first
+    if (m_autoCandidate.isValid()) {
+        if (a == m_autoCandidate) {
+            return true;
+        }
+        if (b == m_autoCandidate) {
+            return false;
+        }
+    }
+    // 2. Duration matching if duration is known
+    if (m_duration > 0.0) {
+        const qreal diffA = a.duration() > 0.0 ? std::abs(a.duration() - m_duration) : 99999.0;
+        const qreal diffB = b.duration() > 0.0 ? std::abs(b.duration() - m_duration) : 99999.0;
+        if (std::abs(diffA - diffB) > 1.0) {
+            return diffA < diffB;
+        }
+    }
+    return false;
+}
+
 void Lyrics::appendCandidates(const QList<LyricCandidate>& add) {
     if (add.isEmpty()) {
         return;
@@ -457,21 +490,8 @@ void Lyrics::appendCandidates(const QList<LyricCandidate>& add) {
         }
     }
     if (changed) {
-        std::stable_sort(m_candidates.begin(), m_candidates.end(), [this](const LyricCandidate& a, const LyricCandidate& b) {
-            // 1. autoCandidate always ranks first
-            if (m_autoCandidate.isValid()) {
-                if (a == m_autoCandidate) return true;
-                if (b == m_autoCandidate) return false;
-            }
-            // 2. Duration matching if duration is known
-            if (m_duration > 0.0) {
-                const qreal diffA = a.duration() > 0.0 ? std::abs(a.duration() - m_duration) : 99999.0;
-                const qreal diffB = b.duration() > 0.0 ? std::abs(b.duration() - m_duration) : 99999.0;
-                if (std::abs(diffA - diffB) > 1.0) {
-                    return diffA < diffB;
-                }
-            }
-            return false;
+        std::ranges::stable_sort(m_candidates, [this](const LyricCandidate& a, const LyricCandidate& b) {
+            return compareCandidates(a, b);
         });
 
         emit lyricCandidatesChanged();
@@ -608,6 +628,34 @@ void Lyrics::chainNext(LyricsBackend justFailed, int reqId) {
     }
 }
 
+bool Lyrics::tryLoadLocalFile(const QString& path) {
+    if (path.isEmpty()) {
+        return false;
+    }
+    QFile f(path);
+    if (!f.open(QIODevice::ReadOnly)) {
+        return false;
+    }
+    const QString text = QString::fromUtf8(f.readAll());
+    const auto lines = parseLrc(text);
+    if (lines.isEmpty()) {
+        return false;
+    }
+    const LyricCandidate cand(LyricsBackend::Local, path, m_title, m_artist, m_album, m_duration);
+    if (!m_autoCandidate.isValid()) {
+        m_autoCandidate = cand;
+        emit autoCandidateChanged();
+    }
+    appendCandidates({ cand });
+    if (!m_hasCandidateOverride) {
+        setLines(lines, LyricsBackend::Local);
+        m_selected = cand;
+        emit selectedCandidateChanged();
+    }
+    setLoading(false);
+    return true;
+}
+
 void Lyrics::tryLocal(int reqId) {
     if (reqId != m_currentRequestId) {
         return;
@@ -621,52 +669,12 @@ void Lyrics::tryLocal(int reqId) {
         return;
     }
 
-    const QString direct = tryReadLocalLrc(dir, m_artist, m_title);
-    if (!direct.isEmpty()) {
-        QFile f(direct);
-        if (f.open(QIODevice::ReadOnly)) {
-            const QString text = QString::fromUtf8(f.readAll());
-            const auto lines = parseLrc(text);
-            if (!lines.isEmpty()) {
-                const LyricCandidate cand(LyricsBackend::Local, direct, m_title, m_artist, m_album, m_duration);
-                if (!m_autoCandidate.isValid()) {
-                    m_autoCandidate = cand;
-                    emit autoCandidateChanged();
-                }
-                appendCandidates({ cand });
-                if (!m_hasCandidateOverride) {
-                    setLines(lines, LyricsBackend::Local);
-                    m_selected = cand;
-                    emit selectedCandidateChanged();
-                }
-                setLoading(false);
-                return;
-            }
-        }
+    if (tryLoadLocalFile(tryReadLocalLrc(dir, m_artist, m_title))) {
+        return;
     }
 
-    const QString recursive = findLocalLrcRecursive(dir, m_artist, m_title);
-    if (!recursive.isEmpty()) {
-        QFile f(recursive);
-        if (f.open(QIODevice::ReadOnly)) {
-            const QString text = QString::fromUtf8(f.readAll());
-            const auto lines = parseLrc(text);
-            if (!lines.isEmpty()) {
-                const LyricCandidate cand(LyricsBackend::Local, recursive, m_title, m_artist, m_album, m_duration);
-                if (!m_autoCandidate.isValid()) {
-                    m_autoCandidate = cand;
-                    emit autoCandidateChanged();
-                }
-                appendCandidates({ cand });
-                if (!m_hasCandidateOverride) {
-                    setLines(lines, LyricsBackend::Local);
-                    m_selected = cand;
-                    emit selectedCandidateChanged();
-                }
-                setLoading(false);
-                return;
-            }
-        }
+    if (tryLoadLocalFile(findLocalLrcRecursive(dir, m_artist, m_title))) {
+        return;
     }
 
     qCDebug(lcLyrics) << "no local lrc for" << m_artist << "-" << m_title;
@@ -791,7 +799,8 @@ void Lyrics::tryNetEase(int reqId) {
                 continue;
             }
             const QString sArtist = artists.first().toObject().value(u"name"_s).toString();
-            if (containsCi(m_artist, sArtist) || containsCi(sArtist, m_artist) || containsCi(primaryArtist, sArtist) || containsCi(sArtist, primaryArtist)) {
+            if (containsCi(m_artist, sArtist) || containsCi(sArtist, m_artist) || containsCi(primaryArtist, sArtist) ||
+                containsCi(sArtist, primaryArtist)) {
                 bestId = static_cast<qint64>(s.value(u"id"_s).toDouble());
                 break;
             }
@@ -805,6 +814,69 @@ void Lyrics::tryNetEase(int reqId) {
 
         fetchNetEaseLyricsById(QString::number(bestId), reqId);
     });
+}
+
+Lyrics::LrclibSearchResult Lyrics::parseLrclibSearchResult(const QJsonArray& arr) const {
+    LrclibSearchResult result;
+    result.candidates.reserve(arr.size());
+    qreal bestScore = -1e9;
+
+    for (const auto& v : arr) {
+        const QJsonObject o = v.toObject();
+        const QString synced = o.value(u"syncedLyrics"_s).toString();
+        const QString plain = o.value(u"plainLyrics"_s).toString();
+        if (synced.isEmpty() && plain.isEmpty()) {
+            continue;
+        }
+        const qint64 id = static_cast<qint64>(o.value(u"id"_s).toDouble());
+        const qreal candDur = o.value(u"duration"_s).toDouble();
+        const LyricCandidate cand(LyricsBackend::LRCLIB, QString::number(id), o.value(u"trackName"_s).toString(),
+            o.value(u"artistName"_s).toString(), o.value(u"albumName"_s).toString(), candDur);
+        result.candidates.append(cand);
+
+        if (!synced.isEmpty()) {
+            qreal score = 1000.0;
+            if (m_duration > 10.0 && candDur > 0.0) {
+                score -= std::abs(candDur - m_duration) * 10.0;
+            }
+            if (score > bestScore) {
+                bestScore = score;
+                result.bestCandidate = cand;
+                result.bestSynced = synced;
+            }
+        }
+    }
+    return result;
+}
+
+void Lyrics::applyLrclibCandidateUpgrade(const LyricCandidate& bestCand, const QString& bestSynced) {
+    if (m_settingFromPrefs || !bestCand.isValid() || bestSynced.isEmpty()) {
+        return;
+    }
+
+    const bool shouldUpgrade =
+        !m_hasLyrics || (!m_selected.isValid()) ||
+        (m_duration > 10.0 && m_selected.duration() > 0.0 && std::abs(m_selected.duration() - m_duration) > 10.0 &&
+            std::abs(bestCand.duration() - m_duration) < 5.0);
+
+    if (!shouldUpgrade) {
+        return;
+    }
+
+    const auto lines = parseLrc(bestSynced);
+    if (lines.isEmpty()) {
+        return;
+    }
+
+    writeCachedLrc(LyricsBackend::LRCLIB, bestCand.id(), bestSynced);
+    m_autoCandidate = bestCand;
+    emit autoCandidateChanged();
+    if (!m_hasCandidateOverride) {
+        setLines(lines, LyricsBackend::LRCLIB);
+        m_selected = bestCand;
+        emit selectedCandidateChanged();
+    }
+    setLoading(false);
 }
 
 void Lyrics::searchLrclibCandidates(int reqId) {
@@ -830,65 +902,9 @@ void Lyrics::searchLrclibCandidates(int reqId) {
             return;
         }
         const QJsonDocument doc = QJsonDocument::fromJson(reply->readAll());
-        const QJsonArray arr = doc.array();
-
-        QList<LyricCandidate> add;
-        add.reserve(arr.size());
-
-        LyricCandidate bestCand;
-        qreal bestScore = -1e9;
-        QString bestSynced;
-
-        for (const auto& v : arr) {
-            const QJsonObject o = v.toObject();
-            const QString synced = o.value(u"syncedLyrics"_s).toString();
-            const QString plain = o.value(u"plainLyrics"_s).toString();
-            if (synced.isEmpty() && plain.isEmpty()) {
-                continue;
-            }
-            const qint64 id = static_cast<qint64>(o.value(u"id"_s).toDouble());
-            const qreal candDur = o.value(u"duration"_s).toDouble();
-            const LyricCandidate cand(LyricsBackend::LRCLIB, QString::number(id),
-                o.value(u"trackName"_s).toString(), o.value(u"artistName"_s).toString(),
-                o.value(u"albumName"_s).toString(), candDur);
-            add.append(cand);
-
-            if (!synced.isEmpty()) {
-                qreal score = 1000.0;
-                if (m_duration > 10.0 && candDur > 0.0) {
-                    score -= std::abs(candDur - m_duration) * 10.0;
-                }
-                if (score > bestScore) {
-                    bestScore = score;
-                    bestCand = cand;
-                    bestSynced = synced;
-                }
-            }
-        }
-        appendCandidates(add);
-
-        // If user didn't have an explicit saved preference, auto-upgrade to the duration-matched candidate
-        if (!m_settingFromPrefs && bestCand.isValid() && !bestSynced.isEmpty()) {
-            const bool shouldUpgrade = !m_hasLyrics || (!m_selected.isValid()) ||
-                (m_duration > 10.0 && m_selected.duration() > 0.0 &&
-                 std::abs(m_selected.duration() - m_duration) > 10.0 &&
-                 std::abs(bestCand.duration() - m_duration) < 5.0);
-
-            if (shouldUpgrade) {
-                const auto lines = parseLrc(bestSynced);
-                if (!lines.isEmpty()) {
-                    writeCachedLrc(LyricsBackend::LRCLIB, bestCand.id(), bestSynced);
-                    m_autoCandidate = bestCand;
-                    emit autoCandidateChanged();
-                    if (!m_hasCandidateOverride) {
-                        setLines(lines, LyricsBackend::LRCLIB);
-                        m_selected = bestCand;
-                        emit selectedCandidateChanged();
-                    }
-                    setLoading(false);
-                }
-            }
-        }
+        const auto result = parseLrclibSearchResult(doc.array());
+        appendCandidates(result.candidates);
+        applyLrclibCandidateUpgrade(result.bestCandidate, result.bestSynced);
     });
 }
 
@@ -930,7 +946,8 @@ void Lyrics::searchNetEaseCandidates(int reqId) {
             for (const auto& a : artists) {
                 artistNames.append(a.toObject().value(u"name"_s).toString());
             }
-            const double durMs = s.contains(u"duration"_s) ? s.value(u"duration"_s).toDouble() : s.value(u"dt"_s).toDouble();
+            const double durMs =
+                s.contains(u"duration"_s) ? s.value(u"duration"_s).toDouble() : s.value(u"dt"_s).toDouble();
             const double durSec = durMs > 0.0 ? durMs / 1000.0 : 0.0;
             add.append(LyricCandidate(LyricsBackend::NetEase,
                 QString::number(static_cast<qint64>(s.value(u"id"_s).toDouble())), s.value(u"name"_s).toString(),
