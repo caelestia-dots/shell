@@ -6,6 +6,7 @@ import Caelestia.Blobs
 import Caelestia.Config
 import Caelestia.Services
 import qs.components
+import qs.components.containers
 import qs.components.controls
 import qs.services
 import qs.utils
@@ -17,6 +18,8 @@ Item {
     property bool open
     readonly property real padding: Tokens.padding.medium
     readonly property real popupWidth: 320
+    readonly property real maxPopupHeight: 256
+    readonly property real maxListHeight: 104
 
     implicitWidth: btn.implicitWidth * 0.9
     implicitHeight: btn.implicitHeight * 0.9
@@ -95,7 +98,7 @@ Item {
                 rect.anchors.rightMargin: root.width - root.Tokens.spacing.small
                 rect.anchors.topMargin: -root.Tokens.padding.medium
                 rect.implicitWidth: root.popupWidth
-                rect.implicitHeight: Math.max(layout.implicitHeight, placeholder.implicitHeight) + root.padding * 2
+                rect.implicitHeight: Math.min(root.maxPopupHeight, Math.max(layout.implicitHeight, placeholder.implicitHeight) + root.padding * 2)
                 content.opacity: 1
             }
         }
@@ -126,6 +129,7 @@ Item {
             id: innerCatchArea
 
             anchors.fill: parent
+            onWheel: wheel => wheel.accepted = true
         }
 
         Item {
@@ -258,6 +262,7 @@ Item {
                 RowLayout {
                     visible: Lyrics.lyricCandidates.length > 1
                     Layout.fillWidth: true
+                    implicitHeight: resetBtn.implicitHeight
 
                     StyledText {
                         Layout.fillWidth: true
@@ -267,99 +272,132 @@ Item {
                     }
 
                     TextButton {
-                        visible: Lyrics.hasCandidateOverride
+                        id: resetBtn
+
+                        opacity: Lyrics.hasCandidateOverride ? 1 : 0
+                        enabled: Lyrics.hasCandidateOverride
                         type: TextButton.Text
                         text: qsTr("Reset to Auto")
                         onClicked: Lyrics.resetToAuto()
+
+                        Behavior on opacity {
+                            CAnim {}
+                        }
                     }
                 }
 
-                Repeater {
-                    model: Lyrics.lyricCandidates.slice(0, 4)
+                StyledFlickable {
+                    id: candFlickable
 
-                    delegate: Rectangle {
-                        id: candItem
+                    visible: Lyrics.lyricCandidates.length > 1
+                    Layout.fillWidth: true
+                    Layout.fillHeight: true
+                    Layout.maximumHeight: root.maxListHeight
+                    implicitHeight: Math.min(candCol.implicitHeight, root.maxListHeight)
 
-                        required property var modelData
+                    flickableDirection: Flickable.VerticalFlick
+                    clip: true
+                    contentWidth: width
+                    contentHeight: candCol.implicitHeight
 
-                        readonly property bool isSelected: Lyrics.selectedCandidate.id === modelData.id && Lyrics.selectedCandidate.backend === modelData.backend
-                        readonly property bool isAuto: Lyrics.autoCandidate.id === modelData.id && Lyrics.autoCandidate.backend === modelData.backend
+                    StyledScrollBar.vertical: StyledScrollBar {
+                        flickable: candFlickable
+                    }
 
-                        Layout.fillWidth: true
-                        implicitHeight: candRow.implicitHeight + Tokens.padding.extraSmall * 2
-                        radius: Tokens.rounding.small
-                        color: isSelected ? Colours.palette.m3secondaryContainer : Colours.palette.m3surfaceContainer
+                    ColumnLayout {
+                        id: candCol
 
-                        Behavior on color {
-                            CAnim {}
-                        }
+                        width: candFlickable.width
+                        spacing: Tokens.spacing.extraSmall
 
-                        StateLayer {
-                            radius: parent.radius
-                            color: candItem.isSelected ? Colours.palette.m3onSecondaryContainer : Colours.palette.m3onSurface
-                            onClicked: Lyrics.selectedCandidate = candItem.modelData
-                        }
+                        Repeater {
+                            model: Lyrics.lyricCandidates
 
-                        RowLayout {
-                            id: candRow
+                            delegate: Rectangle {
+                                id: candItem
 
-                            anchors.fill: parent
-                            anchors.leftMargin: Tokens.padding.small
-                            anchors.rightMargin: Tokens.padding.small
-                            spacing: Tokens.spacing.small
+                                required property var modelData
 
-                            MaterialIcon {
-                                text: candItem.isSelected ? "check_circle" : "radio_button_unchecked"
-                                color: candItem.isSelected ? Colours.palette.m3primary : Colours.palette.m3outline
-                                fontStyle: Tokens.font.icon.small
-                            }
+                                readonly property bool isSelected: Lyrics.selectedCandidate.id === modelData.id && Lyrics.selectedCandidate.backend === modelData.backend
+                                readonly property bool isAuto: Lyrics.autoCandidate.id === modelData.id && Lyrics.autoCandidate.backend === modelData.backend
 
-                            StyledText {
                                 Layout.fillWidth: true
-                                text: `${candItem.modelData.title} • ${candItem.modelData.artist}`
-                                color: candItem.isSelected ? Colours.palette.m3onSecondaryContainer : Colours.palette.m3onSurface
-                                font: Tokens.font.body.small
-                                elide: Text.ElideRight
-                            }
+                                implicitHeight: candRow.implicitHeight + Tokens.padding.extraSmall * 2
+                                radius: Tokens.rounding.small
+                                color: isSelected ? Colours.palette.m3secondaryContainer : Colours.palette.m3surfaceContainer
 
-                            Rectangle {
-                                visible: candItem.isAuto
-                                implicitWidth: autoText.implicitWidth + Tokens.padding.extraSmall * 2
-                                implicitHeight: autoText.implicitHeight + 2
-                                radius: Tokens.rounding.extraSmall
-                                color: candItem.isSelected ? Colours.palette.m3primary : Colours.palette.m3surfaceContainerHighest
-
-                                StyledText {
-                                    id: autoText
-
-                                    anchors.centerIn: parent
-                                    text: qsTr("Auto")
-                                    color: candItem.isSelected ? Colours.palette.m3onPrimary : Colours.palette.m3primary
-                                    font: Tokens.font.label.small
+                                Behavior on color {
+                                    CAnim {}
                                 }
-                            }
 
-                            Rectangle {
-                                implicitWidth: provText.implicitWidth + Tokens.padding.extraSmall * 2
-                                implicitHeight: provText.implicitHeight + 2
-                                radius: Tokens.rounding.extraSmall
-                                color: Colours.palette.m3surfaceContainerHighest
-
-                                StyledText {
-                                    id: provText
-
-                                    anchors.centerIn: parent
-                                    text: CUtils.enumToString(candItem.modelData, "backend")
-                                    color: Colours.palette.m3outline
-                                    font: Tokens.font.label.small
+                                StateLayer {
+                                    radius: parent.radius
+                                    color: candItem.isSelected ? Colours.palette.m3onSecondaryContainer : Colours.palette.m3onSurface
+                                    onClicked: Lyrics.selectedCandidate = candItem.modelData
                                 }
-                            }
 
-                            StyledText {
-                                visible: candItem.modelData.duration > 0
-                                text: `${Math.floor(candItem.modelData.duration / 60)}:${Math.floor(candItem.modelData.duration % 60).toString().padStart(2, "0")}`
-                                color: Colours.palette.m3outline
-                                font: Tokens.font.label.small
+                                RowLayout {
+                                    id: candRow
+
+                                    anchors.fill: parent
+                                    anchors.leftMargin: Tokens.padding.small
+                                    anchors.rightMargin: Tokens.padding.small
+                                    spacing: Tokens.spacing.small
+
+                                    MaterialIcon {
+                                        text: candItem.isSelected ? "check_circle" : "radio_button_unchecked"
+                                        color: candItem.isSelected ? Colours.palette.m3primary : Colours.palette.m3outline
+                                        fontStyle: Tokens.font.icon.small
+                                    }
+
+                                    StyledText {
+                                        Layout.fillWidth: true
+                                        text: `${candItem.modelData.title} • ${candItem.modelData.artist}`
+                                        color: candItem.isSelected ? Colours.palette.m3onSecondaryContainer : Colours.palette.m3onSurface
+                                        font: Tokens.font.body.small
+                                        elide: Text.ElideRight
+                                    }
+
+                                    Rectangle {
+                                        visible: candItem.isAuto
+                                        implicitWidth: autoText.implicitWidth + Tokens.padding.extraSmall * 2
+                                        implicitHeight: autoText.implicitHeight + 2
+                                        radius: Tokens.rounding.extraSmall
+                                        color: candItem.isSelected ? Colours.palette.m3primary : Colours.palette.m3surfaceContainerHighest
+
+                                        StyledText {
+                                            id: autoText
+
+                                            anchors.centerIn: parent
+                                            text: qsTr("Auto")
+                                            color: candItem.isSelected ? Colours.palette.m3onPrimary : Colours.palette.m3primary
+                                            font: Tokens.font.label.small
+                                        }
+                                    }
+
+                                    Rectangle {
+                                        implicitWidth: provText.implicitWidth + Tokens.padding.extraSmall * 2
+                                        implicitHeight: provText.implicitHeight + 2
+                                        radius: Tokens.rounding.extraSmall
+                                        color: Colours.palette.m3surfaceContainerHighest
+
+                                        StyledText {
+                                            id: provText
+
+                                            anchors.centerIn: parent
+                                            text: CUtils.enumToString(candItem.modelData, "backend")
+                                            color: Colours.palette.m3outline
+                                            font: Tokens.font.label.small
+                                        }
+                                    }
+
+                                    StyledText {
+                                        visible: candItem.modelData.duration > 0
+                                        text: `${Math.floor(candItem.modelData.duration / 60)}:${Math.floor(candItem.modelData.duration % 60).toString().padStart(2, "0")}`
+                                        color: Colours.palette.m3outline
+                                        font: Tokens.font.label.small
+                                    }
+                                }
                             }
                         }
                     }
