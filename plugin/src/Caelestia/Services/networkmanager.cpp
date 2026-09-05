@@ -21,6 +21,8 @@ constexpr const char* kManagerPath = "/org/freedesktop/NetworkManager";
 constexpr const char* kManagerIface = "org.freedesktop.NetworkManager";
 constexpr const char* kDeviceIface = "org.freedesktop.NetworkManager.Device";
 constexpr const char* kActiveIface = "org.freedesktop.NetworkManager.Connection.Active";
+constexpr const char* kWirelessIface = "org.freedesktop.NetworkManager.Device.Wireless";
+constexpr const char* kApIface = "org.freedesktop.NetworkManager.AccessPoint";
 constexpr const char* kPropsIface = "org.freedesktop.DBus.Properties";
 
 // From NMDeviceType; only the two we classify are named.
@@ -29,6 +31,40 @@ constexpr uint kDeviceTypeWifi = 2;
 
 // NM_DEVICE_STATE_ACTIVATED
 constexpr uint kStateActivated = 100;
+
+// From NM80211ApFlags and NM80211ApSecurityFlags.
+constexpr uint kApFlagPrivacy = 0x1;
+constexpr uint kApSecKeyMgmt8021X = 0x200;
+constexpr uint kApSecKeyMgmtSae = 0x400;
+constexpr uint kApSecKeyMgmtOwe = 0x800;
+constexpr uint kApSecKeyMgmtOweTm = 0x1000;
+
+// Builds the label nmcli printed in its SECURITY column, so the string the UI
+// shows doesn't change now that it comes from dbus rather than parsed output.
+QString securityLabel(uint flags, uint wpaFlags, uint rsnFlags) {
+    if (wpaFlags == 0 && rsnFlags == 0) {
+        return (flags & kApFlagPrivacy) != 0 ? QStringLiteral("WEP") : QString();
+    }
+
+    QStringList parts;
+    if (wpaFlags != 0) {
+        parts << QStringLiteral("WPA1");
+    }
+    if ((rsnFlags & ~(kApSecKeyMgmtSae | kApSecKeyMgmtOwe | kApSecKeyMgmtOweTm)) != 0) {
+        parts << QStringLiteral("WPA2");
+    }
+    if ((rsnFlags & kApSecKeyMgmtSae) != 0) {
+        parts << QStringLiteral("WPA3");
+    }
+    if ((rsnFlags & (kApSecKeyMgmtOwe | kApSecKeyMgmtOweTm)) != 0) {
+        parts << QStringLiteral("OWE");
+    }
+    if (((wpaFlags | rsnFlags) & kApSecKeyMgmt8021X) != 0) {
+        parts << QStringLiteral("802.1X");
+    }
+
+    return parts.join(QLatin1Char(' '));
+}
 
 Transport transportForDeviceType(uint deviceType) {
     switch (deviceType) {
@@ -39,6 +75,121 @@ Transport transportForDeviceType(uint deviceType) {
 }
 
 } // namespace
+
+NmAccessPoint::NmAccessPoint(QString path, QObject* parent)
+    : QObject(parent)
+    , m_path(std::move(path)) {}
+
+QString NmAccessPoint::path() const {
+    return m_path;
+}
+
+QString NmAccessPoint::ssid() const {
+    return m_ssid;
+}
+
+QString NmAccessPoint::bssid() const {
+    return m_bssid;
+}
+
+int NmAccessPoint::strength() const {
+    return m_strength;
+}
+
+int NmAccessPoint::frequency() const {
+    return m_frequency;
+}
+
+QString NmAccessPoint::security() const {
+    return securityLabel(m_flags, m_wpaFlags, m_rsnFlags);
+}
+
+bool NmAccessPoint::isSecure() const {
+    return !security().isEmpty();
+}
+
+bool NmAccessPoint::active() const {
+    return m_active;
+}
+
+void NmAccessPoint::setActive(bool active) {
+    if (active == m_active) {
+        return;
+    }
+
+    m_active = active;
+    emit changed();
+}
+
+// Merges rather than replaces: PropertiesChanged carries only what moved, so a
+// missing key means unchanged, not empty.
+void NmAccessPoint::update(const QVariantMap& props) {
+    bool dirty = false;
+
+    const auto apply = [&props, &dirty](const char* key, auto& field, auto convert) {
+        const auto it = props.find(QString::fromUtf8(key));
+        if (it == props.end()) {
+            return;
+        }
+
+        const auto value = convert(it.value());
+        if (value != field) {
+            field = value;
+            dirty = true;
+        }
+    };
+
+    // Ssid is a byte array; NetworkManager doesn't promise it's valid UTF-8.
+    apply("Ssid", m_ssid, [](const QVariant& v) {
+        return QString::fromUtf8(v.toByteArray());
+    });
+    apply("HwAddress", m_bssid, [](const QVariant& v) {
+        return v.toString();
+    });
+    apply("Strength", m_strength, [](const QVariant& v) {
+        return static_cast<int>(v.toUInt());
+    });
+    apply("Frequency", m_frequency, [](const QVariant& v) {
+        return static_cast<int>(v.toUInt());
+    });
+    apply("Flags", m_flags, [](const QVariant& v) {
+        return v.toUInt();
+    });
+    apply("WpaFlags", m_wpaFlags, [](const QVariant& v) {
+        return v.toUInt();
+    });
+    apply("RsnFlags", m_rsnFlags, [](const QVariant& v) {
+        return v.toUInt();
+    });
+
+    if (dirty) {
+        emit changed();
+    }
+}
+
+void NmAccessPoint::watch() {
+    auto bus = QDBusConnection::systemBus();
+    if (!bus.isConnected()) {
+        return;
+    }
+
+    bus.connect(
+        QString::fromUtf8(kService),
+        m_path,
+        QString::fromUtf8(kPropsIface),
+        QStringLiteral("PropertiesChanged"),
+        this,
+        SLOT(handlePropertiesChanged(QString, QVariantMap, QStringList)));
+}
+
+void NmAccessPoint::handlePropertiesChanged(
+    const QString& iface, const QVariantMap& properties, const QStringList& invalidated) {
+    Q_UNUSED(invalidated);
+
+    if (iface == QString::fromUtf8(kApIface)) {
+        update(properties);
+    }
+}
 
 NmDevice::NmDevice(QString path, QObject* parent)
     : QObject(parent)
@@ -75,6 +226,44 @@ void NmDevice::setConnection(const QString& connection) {
 
     m_connection = connection;
     emit changed();
+}
+
+QList<NmAccessPoint*> NmDevice::accessPoints() const {
+    return m_accessPoints;
+}
+
+NmAccessPoint* NmDevice::accessPoint(const QString& path) const {
+    return m_apByPath.value(path);
+}
+
+void NmDevice::addAccessPoint(NmAccessPoint* accessPoint) {
+    if (accessPoint == nullptr || m_apByPath.contains(accessPoint->path())) {
+        return;
+    }
+
+    m_apByPath.insert(accessPoint->path(), accessPoint);
+    m_accessPoints.append(accessPoint);
+    emit accessPointsChanged();
+}
+
+bool NmDevice::retainAccessPoints(const QSet<QString>& keep) {
+    bool removed = false;
+
+    for (int i = m_accessPoints.size() - 1; i >= 0; i--) {
+        auto* accessPoint = m_accessPoints.at(i);
+        if (!keep.contains(accessPoint->path())) {
+            m_apByPath.remove(accessPoint->path());
+            m_accessPoints.removeAt(i);
+            accessPoint->deleteLater();
+            removed = true;
+        }
+    }
+
+    if (removed) {
+        emit accessPointsChanged();
+    }
+
+    return removed;
 }
 
 void NmDevice::update(const QVariantMap& props) {
@@ -160,7 +349,10 @@ void NetworkManager::handlePropertiesChanged(
     Q_UNUSED(properties);
     Q_UNUSED(invalidated);
 
-    if (iface == QString::fromUtf8(kManagerIface) || iface == QString::fromUtf8(kDeviceIface)) {
+    // Access points keep themselves up to date, so this only needs to catch
+    // membership changes on the wireless interface, not per-AP churn.
+    if (iface == QString::fromUtf8(kManagerIface) || iface == QString::fromUtf8(kDeviceIface) ||
+        iface == QString::fromUtf8(kWirelessIface)) {
         scheduleRefresh();
     }
 }
@@ -348,6 +540,10 @@ void NetworkManager::readDevice(const QString& path) {
             readConnection(path, connectionPath);
         }
 
+        if (device->type() == config::NetworkTransport::Wifi) {
+            readWireless(path);
+        }
+
         step(-1);
     });
 }
@@ -382,6 +578,101 @@ void NetworkManager::readConnection(const QString& devicePath, const QString& co
 
         step(-1);
     });
+}
+
+void NetworkManager::readWireless(const QString& devicePath) {
+    auto bus = systemBus();
+    if (!bus) {
+        return;
+    }
+
+    auto msg = QDBusMessage::createMethodCall(
+        QString::fromUtf8(kService), devicePath, QString::fromUtf8(kPropsIface), QStringLiteral("GetAll"));
+    msg << QString::fromUtf8(kWirelessIface);
+
+    step(1);
+    auto* watcher = new QDBusPendingCallWatcher(bus->asyncCall(msg), this);
+    connect(watcher, &QDBusPendingCallWatcher::finished, this, [this, devicePath](QDBusPendingCallWatcher* call) {
+        call->deleteLater();
+
+        const QDBusPendingReply<QVariantMap> reply = *call;
+        auto* device = m_byPath.value(devicePath);
+        if (reply.isError() || device == nullptr) {
+            if (reply.isError()) {
+                qCDebug(logNetworkManager) << "Skipping wireless" << devicePath << ":" << reply.error().message();
+            }
+            step(-1);
+            return;
+        }
+
+        const auto props = reply.value();
+
+        QList<QDBusObjectPath> paths;
+        props.value(QStringLiteral("AccessPoints")).value<QDBusArgument>() >> paths;
+
+        const auto activePath =
+            props.value(QStringLiteral("ActiveAccessPoint")).value<QDBusObjectPath>().path();
+
+        QSet<QString> seen;
+        for (const auto& path : paths) {
+            seen.insert(path.path());
+
+            auto* accessPoint = device->accessPoint(path.path());
+            if (accessPoint == nullptr) {
+                // Only new access points cost a read; the ones already held
+                // track their own properties.
+                readAccessPoint(devicePath, path.path());
+            } else {
+                accessPoint->setActive(path.path() == activePath);
+            }
+        }
+
+        device->retainAccessPoints(seen);
+
+        step(-1);
+    });
+}
+
+void NetworkManager::readAccessPoint(const QString& devicePath, const QString& accessPointPath) {
+    auto bus = systemBus();
+    if (!bus) {
+        return;
+    }
+
+    auto msg = QDBusMessage::createMethodCall(
+        QString::fromUtf8(kService), accessPointPath, QString::fromUtf8(kPropsIface), QStringLiteral("GetAll"));
+    msg << QString::fromUtf8(kApIface);
+
+    step(1);
+    auto* watcher = new QDBusPendingCallWatcher(bus->asyncCall(msg), this);
+    connect(
+        watcher,
+        &QDBusPendingCallWatcher::finished,
+        this,
+        [this, devicePath, accessPointPath](QDBusPendingCallWatcher* call) {
+            call->deleteLater();
+
+            const QDBusPendingReply<QVariantMap> reply = *call;
+            auto* device = m_byPath.value(devicePath);
+            if (reply.isError() || device == nullptr) {
+                if (reply.isError()) {
+                    // Access points come and go between scans; that's expected.
+                    qCDebug(logNetworkManager)
+                        << "Skipping access point" << accessPointPath << ":" << reply.error().message();
+                }
+                step(-1);
+                return;
+            }
+
+            if (device->accessPoint(accessPointPath) == nullptr) {
+                auto* accessPoint = new NmAccessPoint(accessPointPath, device);
+                accessPoint->update(reply.value());
+                accessPoint->watch();
+                device->addAccessPoint(accessPoint);
+            }
+
+            step(-1);
+        });
 }
 
 } // namespace caelestia::services

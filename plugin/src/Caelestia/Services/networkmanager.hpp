@@ -17,6 +17,69 @@ namespace caelestia::services {
 
 using Transport = config::NetworkTransport::Enum;
 
+// A wifi access point as NetworkManager sees it.
+//
+// Each one subscribes to its own D-Bus object. Signal strength changes
+// constantly, and routing every one of those through a full device walk would
+// cost far more than the update is worth.
+class NmAccessPoint : public QObject {
+    Q_OBJECT
+    QML_ELEMENT
+    QML_UNCREATABLE("NmAccessPoint instances are owned by NetworkManager")
+
+    Q_PROPERTY(QString ssid READ ssid NOTIFY changed)
+    Q_PROPERTY(QString bssid READ bssid NOTIFY changed)
+    // Signal strength as a percentage.
+    Q_PROPERTY(int strength READ strength NOTIFY changed)
+    // Frequency in MHz.
+    Q_PROPERTY(int frequency READ frequency NOTIFY changed)
+    // Security label in the same shape nmcli printed, e.g. "WPA2" or "WPA1
+    // WPA2", empty on an open network.
+    Q_PROPERTY(QString security READ security NOTIFY changed)
+    Q_PROPERTY(bool isSecure READ isSecure NOTIFY changed)
+    // Whether this is the access point the device is currently associated with.
+    Q_PROPERTY(bool active READ active NOTIFY changed)
+
+public:
+    explicit NmAccessPoint(QString path, QObject* parent = nullptr);
+
+    [[nodiscard]] QString path() const;
+    [[nodiscard]] QString ssid() const;
+    [[nodiscard]] QString bssid() const;
+    [[nodiscard]] int strength() const;
+    [[nodiscard]] int frequency() const;
+    [[nodiscard]] QString security() const;
+    [[nodiscard]] bool isSecure() const;
+    [[nodiscard]] bool active() const;
+
+    // Merges a property map, which may be a full snapshot or just the keys a
+    // PropertiesChanged signal carried.
+    void update(const QVariantMap& props);
+    // Set apart from update(): which access point is active is a property of
+    // the device, not of the access point.
+    void setActive(bool active);
+
+    // Subscribes to this access point's own object on the system bus.
+    void watch();
+
+signals:
+    void changed();
+
+private slots:
+    void handlePropertiesChanged(const QString& iface, const QVariantMap& properties, const QStringList& invalidated);
+
+private:
+    QString m_path;
+    QString m_ssid;
+    QString m_bssid;
+    int m_strength = 0;
+    int m_frequency = 0;
+    uint m_flags = 0;
+    uint m_wpaFlags = 0;
+    uint m_rsnFlags = 0;
+    bool m_active = false;
+};
+
 // A network device as NetworkManager sees it.
 //
 // Held as an object rather than a plain value so consumers can bind to it and
@@ -38,6 +101,8 @@ class NmDevice : public QObject {
     // Name of the profile currently active on the device, empty when it's down.
     // This is what `nmcli device status` reported in its CONNECTION column.
     Q_PROPERTY(QString connection READ connection NOTIFY changed)
+    // Only ever populated for wifi devices; empty for everything else.
+    Q_PROPERTY(QList<caelestia::services::NmAccessPoint*> accessPoints READ accessPoints NOTIFY accessPointsChanged)
 
 public:
     explicit NmDevice(QString path, QObject* parent = nullptr);
@@ -49,9 +114,17 @@ public:
     [[nodiscard]] bool connected() const;
     [[nodiscard]] QString connection() const;
 
+    [[nodiscard]] QList<NmAccessPoint*> accessPoints() const;
+    [[nodiscard]] NmAccessPoint* accessPoint(const QString& path) const;
+
     // Set apart from update(): the name lives on the device's active connection
     // object, which is a second read.
     void setConnection(const QString& connection);
+
+    void addAccessPoint(NmAccessPoint* accessPoint);
+    // Drops any access point whose path isn't in `keep`. Returns whether the
+    // list changed.
+    bool retainAccessPoints(const QSet<QString>& keep);
 
     // Applies a property map read from the device's D-Bus object, emitting
     // changed() only when something actually differs.
@@ -59,6 +132,7 @@ public:
 
 signals:
     void changed();
+    void accessPointsChanged();
 
 private:
     QString m_path;
@@ -66,6 +140,9 @@ private:
     Transport m_type = config::NetworkTransport::None;
     uint m_state = 0;
     QString m_connection;
+
+    QList<NmAccessPoint*> m_accessPoints;
+    QHash<QString, NmAccessPoint*> m_apByPath;
 };
 
 // NetworkManager's device list, read over D-Bus.
@@ -109,6 +186,8 @@ private:
     void readManager();
     void readDevice(const QString& path);
     void readConnection(const QString& devicePath, const QString& connectionPath);
+    void readWireless(const QString& devicePath);
+    void readAccessPoint(const QString& devicePath, const QString& accessPointPath);
     void step(int delta);
     void finish();
 
