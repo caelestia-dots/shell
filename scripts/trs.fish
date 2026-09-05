@@ -16,7 +16,7 @@ function gen -a lang
         --join-existing \
         --from-code=UTF-8 \
         --no-wrap \
-        --no-location \
+        --add-location=file \
         --add-comments=TRANSLATORS: \
         --package-name=caelestia-shell \
         -k \
