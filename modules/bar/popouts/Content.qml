@@ -15,6 +15,11 @@ Item {
     readonly property Popout currentPopout: content.children.find(c => c.shouldBeActive) ?? null
     readonly property Item current: currentPopout?.item ?? null
 
+    readonly property var trayItemsToIndices: SystemTray.items.values.reduce((acc, item, i) => {
+        acc[item.id] = i;
+        return acc;
+    }, {})
+
     implicitWidth: (currentPopout?.implicitWidth ?? 0) + Tokens.padding.extraLargeIncreased
     implicitHeight: (currentPopout?.implicitHeight ?? 0) + Tokens.padding.extraLargeIncreased
 
@@ -121,16 +126,15 @@ Item {
 
         Repeater {
             model: ScriptModel {
-                values: SystemTray.items.values.filter(i => !GlobalConfig.bar.tray.hiddenIcons.includes(i.id))
+                values: SystemTray.items.values.filter(i => i.hasMenu && !GlobalConfig.bar.tray.hiddenIcons.includes(i.id))
             }
 
             Popout {
                 id: trayMenu
 
                 required property SystemTrayItem modelData
-                required property int index
 
-                name: `traymenu${index}`
+                name: `traymenu${root.trayItemsToIndices[modelData.id]}`
                 sourceComponent: trayMenuComp
 
                 Connections {
