@@ -70,12 +70,9 @@ QString securityLabel(uint flags, uint wpaFlags, uint rsnFlags) {
 
 Transport transportForDeviceType(uint deviceType) {
     switch (deviceType) {
-    case kDeviceTypeEthernet:
-        return config::NetworkTransport::Ethernet;
-    case kDeviceTypeWifi:
-        return config::NetworkTransport::Wifi;
-    default:
-        return config::NetworkTransport::Other;
+    case kDeviceTypeEthernet: return config::NetworkTransport::Ethernet;
+    case kDeviceTypeWifi: return config::NetworkTransport::Wifi;
+    default: return config::NetworkTransport::Other;
     }
 }
 
@@ -178,8 +175,13 @@ void NmAccessPoint::watch() {
         return;
     }
 
-    bus.connect(QString::fromUtf8(kService), m_path, QString::fromUtf8(kPropsIface),
-        QStringLiteral("PropertiesChanged"), this, SLOT(handlePropertiesChanged(QString, QVariantMap, QStringList)));
+    bus.connect(
+        QString::fromUtf8(kService),
+        m_path,
+        QString::fromUtf8(kPropsIface),
+        QStringLiteral("PropertiesChanged"),
+        this,
+        SLOT(handlePropertiesChanged(QString, QVariantMap, QStringList)));
 }
 
 void NmAccessPoint::handlePropertiesChanged(
@@ -355,8 +357,13 @@ NetworkManager::NetworkManager(QObject* parent)
     }
 
     // NetworkManager may not be up yet, or may restart under us.
-    bus->connect(QStringLiteral("org.freedesktop.DBus"), QStringLiteral("/org/freedesktop/DBus"),
-        QStringLiteral("org.freedesktop.DBus"), QStringLiteral("NameOwnerChanged"), QStringLiteral("sss"), this,
+    bus->connect(
+        QStringLiteral("org.freedesktop.DBus"),
+        QStringLiteral("/org/freedesktop/DBus"),
+        QStringLiteral("org.freedesktop.DBus"),
+        QStringLiteral("NameOwnerChanged"),
+        QStringLiteral("sss"),
+        this,
         SLOT(handleNameOwnerChanged(QString, QString, QString)));
 
     watchObject(QString::fromUtf8(kManagerPath));
@@ -394,8 +401,12 @@ void NetworkManager::watchObject(const QString& path) {
         return;
     }
 
-    if (bus->connect(QString::fromUtf8(kService), path, QString::fromUtf8(kPropsIface),
-            QStringLiteral("PropertiesChanged"), this,
+    if (bus->connect(
+            QString::fromUtf8(kService),
+            path,
+            QString::fromUtf8(kPropsIface),
+            QStringLiteral("PropertiesChanged"),
+            this,
             SLOT(handlePropertiesChanged(QString, QVariantMap, QStringList)))) {
         m_watched.insert(path);
     }
@@ -512,8 +523,11 @@ void NetworkManager::readManager() {
         return;
     }
 
-    auto msg = QDBusMessage::createMethodCall(QString::fromUtf8(kService), QString::fromUtf8(kManagerPath),
-        QString::fromUtf8(kPropsIface), QStringLiteral("GetAll"));
+    auto msg = QDBusMessage::createMethodCall(
+        QString::fromUtf8(kService),
+        QString::fromUtf8(kManagerPath),
+        QString::fromUtf8(kPropsIface),
+        QStringLiteral("GetAll"));
     msg << QString::fromUtf8(kManagerIface);
 
     step(1);
@@ -747,7 +761,10 @@ void NetworkManager::readAccessPoint(const QString& devicePath, const QString& a
 
     step(1);
     auto* watcher = new QDBusPendingCallWatcher(bus->asyncCall(msg), this);
-    connect(watcher, &QDBusPendingCallWatcher::finished, this,
+    connect(
+        watcher,
+        &QDBusPendingCallWatcher::finished,
+        this,
         [this, devicePath, accessPointPath](QDBusPendingCallWatcher* call) {
             call->deleteLater();
 
@@ -794,7 +811,8 @@ void NetworkManager::readIp4Config(const QString& devicePath, const QString& con
         if (reply.isError() || device == nullptr) {
             if (reply.isError()) {
                 // Addresses come and go with the link; that's expected.
-                qCDebug(logNetworkManager) << "Skipping ip4 config for" << devicePath << ":" << reply.error().message();
+                qCDebug(logNetworkManager) << "Skipping ip4 config for" << devicePath << ":"
+                                           << reply.error().message();
             }
             step(-1);
             return;

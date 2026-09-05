@@ -40,8 +40,13 @@ NetworkRoute::NetworkRoute(QObject* parent)
     }
 
     // NetworkManager may not be up yet, or may restart under us.
-    bus->connect(QStringLiteral("org.freedesktop.DBus"), QStringLiteral("/org/freedesktop/DBus"),
-        QStringLiteral("org.freedesktop.DBus"), QStringLiteral("NameOwnerChanged"), QStringLiteral("sss"), this,
+    bus->connect(
+        QStringLiteral("org.freedesktop.DBus"),
+        QStringLiteral("/org/freedesktop/DBus"),
+        QStringLiteral("org.freedesktop.DBus"),
+        QStringLiteral("NameOwnerChanged"),
+        QStringLiteral("sss"),
+        this,
         SLOT(handleNameOwnerChanged(QString, QString, QString)));
 
     watchObject(QString::fromUtf8(kManagerPath));
@@ -65,8 +70,7 @@ Transport NetworkRoute::ipv6Transport() const {
 }
 
 bool NetworkRoute::mixed() const {
-    return m_current.ipv4 != config::NetworkTransport::None && m_current.ipv6 != config::NetworkTransport::None &&
-           m_current.ipv4 != m_current.ipv6;
+    return m_current.ipv4 != config::NetworkTransport::None && m_current.ipv6 != config::NetworkTransport::None && m_current.ipv4 != m_current.ipv6;
 }
 
 QString NetworkRoute::primaryInterface() const {
@@ -84,12 +88,9 @@ std::optional<QDBusConnection> NetworkRoute::systemBus() {
 
 Transport NetworkRoute::transportForDeviceType(uint deviceType) {
     switch (deviceType) {
-    case kDeviceTypeEthernet:
-        return config::NetworkTransport::Ethernet;
-    case kDeviceTypeWifi:
-        return config::NetworkTransport::Wifi;
-    default:
-        return config::NetworkTransport::Other;
+    case kDeviceTypeEthernet: return config::NetworkTransport::Ethernet;
+    case kDeviceTypeWifi: return config::NetworkTransport::Wifi;
+    default: return config::NetworkTransport::Other;
     }
 }
 
@@ -106,8 +107,12 @@ void NetworkRoute::watchObject(const QString& path) {
         return;
     }
 
-    if (bus->connect(QString::fromUtf8(kService), path, QString::fromUtf8(kPropsIface),
-            QStringLiteral("PropertiesChanged"), this,
+    if (bus->connect(
+            QString::fromUtf8(kService),
+            path,
+            QString::fromUtf8(kPropsIface),
+            QStringLiteral("PropertiesChanged"),
+            this,
             SLOT(handlePropertiesChanged(QString, QVariantMap, QStringList)))) {
         m_watched.insert(path);
     }
@@ -118,8 +123,8 @@ void NetworkRoute::handlePropertiesChanged(
     Q_UNUSED(properties);
     Q_UNUSED(invalidated);
 
-    if (iface == QString::fromUtf8(kManagerIface) || iface == QString::fromUtf8(kActiveIface) ||
-        iface == QString::fromUtf8(kDeviceIface)) {
+    if (iface == QString::fromUtf8(kManagerIface) || iface == QString::fromUtf8(kActiveIface)
+        || iface == QString::fromUtf8(kDeviceIface)) {
         scheduleRefresh();
     }
 }
@@ -224,8 +229,11 @@ void NetworkRoute::readManager() {
         return;
     }
 
-    auto msg = QDBusMessage::createMethodCall(QString::fromUtf8(kService), QString::fromUtf8(kManagerPath),
-        QString::fromUtf8(kPropsIface), QStringLiteral("GetAll"));
+    auto msg = QDBusMessage::createMethodCall(
+        QString::fromUtf8(kService),
+        QString::fromUtf8(kManagerPath),
+        QString::fromUtf8(kPropsIface),
+        QStringLiteral("GetAll"));
     msg << QString::fromUtf8(kManagerIface);
 
     step(1);

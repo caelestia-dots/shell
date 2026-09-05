@@ -61,10 +61,10 @@ QStringList packedDnsToStrings(const QVariant& value) {
     dns.reserve(packed.size());
     for (const auto address : std::as_const(packed)) {
         dns.append(QStringLiteral("%1.%2.%3.%4")
-                .arg(address & 0xff)
-                .arg((address >> 8) & 0xff)
-                .arg((address >> 16) & 0xff)
-                .arg((address >> 24) & 0xff));
+                       .arg(address & 0xff)
+                       .arg((address >> 8) & 0xff)
+                       .arg((address >> 16) & 0xff)
+                       .arg((address >> 24) & 0xff));
     }
     return dns;
 }
@@ -157,8 +157,8 @@ void NmConnection::update(const QMap<QString, QVariantMap>& settings) {
     // dns-data is what NetworkManager publishes now; dns is the deprecated
     // packed form, still sent by older daemons.
     const auto dnsData = ipv4.find(QStringLiteral("dns-data"));
-    const auto ipv4Dns =
-        dnsData == ipv4.end() ? packedDnsToStrings(ipv4.value(QStringLiteral("dns"))) : dnsData.value().toStringList();
+    const auto ipv4Dns = dnsData == ipv4.end() ? packedDnsToStrings(ipv4.value(QStringLiteral("dns")))
+                                               : dnsData.value().toStringList();
 
     if (id == m_id && uuid == m_uuid && type == m_type && ssid == m_ssid && keyMgmt == m_keyMgmt &&
         autoconnect == m_autoconnect && ipv4Method == m_ipv4Method && ipv4Address == m_ipv4Address &&
@@ -187,8 +187,13 @@ void NmConnection::watch() {
         return;
     }
 
-    bus.connect(QString::fromUtf8(kService), m_path, QString::fromUtf8(kConnectionIface), QStringLiteral("Updated"),
-        this, SLOT(handleUpdated()));
+    bus.connect(
+        QString::fromUtf8(kService),
+        m_path,
+        QString::fromUtf8(kConnectionIface),
+        QStringLiteral("Updated"),
+        this,
+        SLOT(handleUpdated()));
 }
 
 void NmConnection::handleUpdated() {
@@ -207,8 +212,13 @@ NetworkProfiles::NetworkProfiles(QObject* parent)
     }
 
     // NetworkManager may not be up yet, or may restart under us.
-    bus->connect(QStringLiteral("org.freedesktop.DBus"), QStringLiteral("/org/freedesktop/DBus"),
-        QStringLiteral("org.freedesktop.DBus"), QStringLiteral("NameOwnerChanged"), QStringLiteral("sss"), this,
+    bus->connect(
+        QStringLiteral("org.freedesktop.DBus"),
+        QStringLiteral("/org/freedesktop/DBus"),
+        QStringLiteral("org.freedesktop.DBus"),
+        QStringLiteral("NameOwnerChanged"),
+        QStringLiteral("sss"),
+        this,
         SLOT(handleNameOwnerChanged(QString, QString, QString)));
 
     watchObject(QString::fromUtf8(kSettingsPath));
@@ -242,8 +252,12 @@ void NetworkProfiles::watchObject(const QString& path) {
         return;
     }
 
-    if (bus->connect(QString::fromUtf8(kService), path, QString::fromUtf8(kPropsIface),
-            QStringLiteral("PropertiesChanged"), this,
+    if (bus->connect(
+            QString::fromUtf8(kService),
+            path,
+            QString::fromUtf8(kPropsIface),
+            QStringLiteral("PropertiesChanged"),
+            this,
             SLOT(handlePropertiesChanged(QString, QVariantMap, QStringList)))) {
         m_watched.insert(path);
     }
@@ -359,8 +373,11 @@ void NetworkProfiles::readSettings() {
         return;
     }
 
-    auto msg = QDBusMessage::createMethodCall(QString::fromUtf8(kService), QString::fromUtf8(kSettingsPath),
-        QString::fromUtf8(kPropsIface), QStringLiteral("GetAll"));
+    auto msg = QDBusMessage::createMethodCall(
+        QString::fromUtf8(kService),
+        QString::fromUtf8(kSettingsPath),
+        QString::fromUtf8(kPropsIface),
+        QStringLiteral("GetAll"));
     msg << QString::fromUtf8(kSettingsIface);
 
     step(1);
