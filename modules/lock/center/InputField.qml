@@ -13,6 +13,7 @@ Item {
 
     required property real centerScale
     required property Pam pam
+    property bool revealPassword: false
     readonly property alias placeholder: placeholder
     readonly property alias placeholderWidth: nonAnimPlaceholder.width
     property string buffer
@@ -78,6 +79,23 @@ Item {
         }
     }
 
+    StyledText {
+        anchors.centerIn: parent
+        anchors.horizontalCenterOffset: implicitWidth > root.width ? -(implicitWidth - root.width) / 2 : 0
+        text: root.buffer
+        color: Colours.palette.m3onSurface
+        font: placeholder.font
+
+        opacity: root.revealPassword ? 1 : 0
+        visible: opacity > 0
+
+        Behavior on opacity {
+            Anim {
+                type: Anim.DefaultEffects
+            }
+        }
+    }
+
     ListView {
         id: charList
 
@@ -103,6 +121,8 @@ Item {
         orientation: Qt.Horizontal
         spacing: Tokens.spacing.extraSmall
         interactive: false
+        opacity: root.revealPassword ? 0 : 1
+        visible: opacity > 0
 
         model: ScriptModel {
             values: root.buffer.split("")
@@ -114,6 +134,12 @@ Item {
             id: imWidthBehavior
 
             Anim {}
+        }
+
+        Behavior on opacity {
+            Anim {
+                type: Anim.DefaultEffects
+            }
         }
     }
 
