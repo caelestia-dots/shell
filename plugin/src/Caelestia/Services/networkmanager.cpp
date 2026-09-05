@@ -228,8 +228,8 @@ void NmDevice::setConnection(const QString& connection) {
     emit changed();
 }
 
-QList<NmAccessPoint*> NmDevice::accessPoints() const {
-    return m_accessPoints;
+QQmlListProperty<NmAccessPoint> NmDevice::accessPoints() {
+    return { this, &m_accessPoints };
 }
 
 qlonglong NmDevice::lastScan() const {
@@ -319,8 +319,8 @@ bool NetworkManager::ready() const {
     return m_ready;
 }
 
-QList<NmDevice*> NetworkManager::devices() const {
-    return m_devices;
+QQmlListProperty<NmDevice> NetworkManager::devices() {
+    return { this, &m_devices };
 }
 
 bool NetworkManager::wirelessEnabled() const {

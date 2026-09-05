@@ -4,6 +4,7 @@
 #include <qhash.h>
 #include <qobject.h>
 #include <qqmlintegration.h>
+#include <qqmllist.h>
 #include <qset.h>
 #include <qstring.h>
 #include <qstringlist.h>
@@ -102,7 +103,8 @@ class NmDevice : public QObject {
     // This is what `nmcli device status` reported in its CONNECTION column.
     Q_PROPERTY(QString connection READ connection NOTIFY changed)
     // Only ever populated for wifi devices; empty for everything else.
-    Q_PROPERTY(QList<caelestia::services::NmAccessPoint*> accessPoints READ accessPoints NOTIFY accessPointsChanged)
+    Q_PROPERTY(QQmlListProperty<caelestia::services::NmAccessPoint> accessPoints READ accessPoints NOTIFY
+            accessPointsChanged)
     // Boot time in milliseconds at which the device last finished a scan, or -1
     // if it never has. NetworkManager publishes no scanning flag, so this
     // moving is the only signal that a scan finished. Wifi devices only.
@@ -118,7 +120,7 @@ public:
     [[nodiscard]] bool connected() const;
     [[nodiscard]] QString connection() const;
 
-    [[nodiscard]] QList<NmAccessPoint*> accessPoints() const;
+    [[nodiscard]] QQmlListProperty<NmAccessPoint> accessPoints();
     [[nodiscard]] qlonglong lastScan() const;
     [[nodiscard]] NmAccessPoint* accessPoint(const QString& path) const;
 
@@ -167,14 +169,14 @@ class NetworkManager : public QObject {
     // False until a full snapshot has been read, so consumers can hold their
     // previous behaviour rather than acting on an empty list.
     Q_PROPERTY(bool ready READ ready NOTIFY changed)
-    Q_PROPERTY(QList<caelestia::services::NmDevice*> devices READ devices NOTIFY devicesChanged)
+    Q_PROPERTY(QQmlListProperty<caelestia::services::NmDevice> devices READ devices NOTIFY devicesChanged)
     Q_PROPERTY(bool wirelessEnabled READ wirelessEnabled NOTIFY changed)
 
 public:
     explicit NetworkManager(QObject* parent = nullptr);
 
     [[nodiscard]] bool ready() const;
-    [[nodiscard]] QList<NmDevice*> devices() const;
+    [[nodiscard]] QQmlListProperty<NmDevice> devices();
     [[nodiscard]] bool wirelessEnabled() const;
 
 signals:

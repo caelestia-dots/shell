@@ -112,7 +112,7 @@ Singleton {
                     LC_ALL: "C.UTF-8"
                 })
 
-            onExited: code => {
+            onExited: code => { // qmllint disable signal-handler-parameters
                 const callback = proc.callback;
                 proc.destroy();
                 callback?.(code === 0);

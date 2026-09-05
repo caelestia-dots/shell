@@ -25,7 +25,13 @@ Singleton {
 
     // Every access point in range, including several per SSID when a network is
     // on more than one band or radio.
-    readonly property list<var> accessPoints: device?.accessPoints ?? []
+    readonly property list<var> accessPoints: {
+        const found = [];
+        if (root.device)
+            for (const ap of root.device.accessPoints)
+                found.push(ap);
+        return found;
+    }
 
     // One entry per SSID: the active access point if there is one, otherwise the
     // strongest. Same rule Nmcli's deduplicateNetworks applied to nmcli output.
@@ -132,7 +138,7 @@ Singleton {
                     LC_ALL: "C.UTF-8"
                 })
 
-            onExited: code => {
+            onExited: code => { // qmllint disable signal-handler-parameters
                 const callback = proc.callback;
                 proc.destroy();
                 callback?.(code === 0);
