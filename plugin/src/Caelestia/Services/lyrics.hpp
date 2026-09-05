@@ -1,6 +1,7 @@
 #pragma once
 
 #include <qhash.h>
+#include <qjsonarray.h>
 #include <qjsonobject.h>
 #include <qnetworkaccessmanager.h>
 #include <qnetworkreply.h>
@@ -28,6 +29,8 @@ class Lyrics : public QObject {
         QList<caelestia::services::LyricCandidate> lyricCandidates READ lyricCandidates NOTIFY lyricCandidatesChanged)
     Q_PROPERTY(caelestia::services::LyricCandidate selectedCandidate READ selectedCandidate WRITE setSelectedCandidate
             NOTIFY selectedCandidateChanged)
+    Q_PROPERTY(caelestia::services::LyricCandidate autoCandidate READ autoCandidate NOTIFY autoCandidateChanged)
+    Q_PROPERTY(bool hasCandidateOverride READ hasCandidateOverride NOTIFY hasCandidateOverrideChanged)
     Q_PROPERTY(bool loading READ loading NOTIFY loadingChanged)
     Q_PROPERTY(bool hasLyrics READ hasLyrics NOTIFY lyricsChanged)
     Q_PROPERTY(qreal offset READ offset WRITE setOffset NOTIFY offsetChanged)
@@ -36,6 +39,7 @@ class Lyrics : public QObject {
 
 public:
     explicit Lyrics(QObject* parent = nullptr);
+    ~Lyrics() override;
 
     [[nodiscard]] QStringList lyrics() const;
     [[nodiscard]] LyricsBackend backend() const;
@@ -44,6 +48,8 @@ public:
     [[nodiscard]] QList<LyricCandidate> lyricCandidates() const;
     [[nodiscard]] LyricCandidate selectedCandidate() const;
     void setSelectedCandidate(const LyricCandidate& value);
+    [[nodiscard]] LyricCandidate autoCandidate() const;
+    [[nodiscard]] bool hasCandidateOverride() const;
     [[nodiscard]] bool loading() const;
     [[nodiscard]] bool hasLyrics() const;
     [[nodiscard]] qreal offset() const;
@@ -57,6 +63,7 @@ public:
         const QString& artist, const QString& title, const QString& album = {}, qreal duration = 0.0);
     Q_INVOKABLE void clearTrack();
     Q_INVOKABLE void refresh();
+    Q_INVOKABLE void resetToAuto();
 
 signals:
     void lyricsChanged();
@@ -64,6 +71,8 @@ signals:
     void preferredBackendChanged();
     void lyricCandidatesChanged();
     void selectedCandidateChanged();
+    void autoCandidateChanged();
+    void hasCandidateOverrideChanged();
     void loadingChanged();
     void hasLyricsChanged();
     void offsetChanged();
@@ -76,16 +85,30 @@ private:
     void clearLines();
     void appendCandidates(const QList<LyricCandidate>& add);
     void clearCandidates();
+    [[nodiscard]] bool compareCandidates(const LyricCandidate& a, const LyricCandidate& b) const;
 
     void scheduleLoad();
     void doLoad();
     void cancelInFlight();
     int newRequestId();
 
+    bool loadCachedLyrics(const LyricCandidate& value);
+    void loadLocalLyricFile(const QString& path);
+    bool tryLoadLocalFile(const QString& path);
+
     void tryLocal(int reqId);
     void tryLrclib(int reqId);
     void tryNetEase(int reqId);
     void chainNext(LyricsBackend justFailed, int reqId);
+
+    struct LrclibSearchResult {
+        QList<LyricCandidate> candidates;
+        LyricCandidate bestCandidate;
+        QString bestSynced;
+    };
+
+    [[nodiscard]] LrclibSearchResult parseLrclibSearchResult(const QJsonArray& arr) const;
+    void applyLrclibCandidateUpgrade(const LyricCandidate& bestCand, const QString& bestSynced);
 
     void searchLrclibCandidates(int reqId);
     void searchNetEaseCandidates(int reqId);
@@ -114,12 +137,16 @@ private:
     [[nodiscard]] static QString readCachedLrc(LyricsBackend backend, const QString& id);
     static void writeCachedLrc(LyricsBackend backend, const QString& id, const QString& text);
 
+    [[nodiscard]] static QString cleanTrackTitle(const QString& title);
+    [[nodiscard]] static QString extractPrimaryArtist(const QString& artist);
+
     [[nodiscard]] static QVector<LyricLine> parseLrc(const QString& text);
     [[nodiscard]] static QString tryReadLocalLrc(const QString& dir, const QString& artist, const QString& title);
     [[nodiscard]] static QString findLocalLrcRecursive(const QString& dir, const QString& artist, const QString& title);
 
     QNetworkAccessManager* m_nam;
     QTimer* m_loadDebounce;
+    QTimer* m_saveDebounce;
 
     QVector<LyricLine> m_lines;
     QStringList m_lyrics;
@@ -127,6 +154,8 @@ private:
     LyricsBackend m_preferredBackend = LyricsBackend::Auto;
     QList<LyricCandidate> m_candidates;
     LyricCandidate m_selected;
+    LyricCandidate m_autoCandidate;
+    bool m_hasCandidateOverride = false;
     bool m_loading = false;
     bool m_hasLyrics = false;
     qreal m_offset = 0.0;
