@@ -66,6 +66,17 @@ Singleton {
     }
     readonly property bool enabled: NetworkManager.wirelessEnabled
 
+    // NetworkManager runs device states 40 through 90 as the activation
+    // sequence; 100 is up.
+    readonly property bool connecting: {
+        const state = root.device?.state ?? 0;
+        return state >= 40 && state < 100;
+    }
+
+    // The profile being activated, which is the SSID for the profiles
+    // NetworkManager names after the network.
+    readonly property string connectingSsid: root.connecting ? (root.device?.connection ?? "") : ""
+
     readonly property real lastScan: root.device?.lastScan ?? -1
 
     // `nmcli device wifi rescan` asks NetworkManager for a scan and returns

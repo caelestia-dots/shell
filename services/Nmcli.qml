@@ -11,12 +11,7 @@ import qs.services
 Singleton {
     id: root
 
-    property var deviceStatus: null
-    property var wirelessInterfaces: []
-    property bool isConnected: false
-    readonly property bool connecting: wirelessInterfaces.some(i => isConnectingState(i.state))
-    property string activeInterface: ""
-    property string activeConnection: ""
+    readonly property bool connecting: Wifi.connecting
     // Wifi state lives in Wifi now, read from NetworkManager over dbus.
     // These forward it so existing consumers keep working unchanged.
     readonly property bool wifiEnabled: Wifi.enabled
@@ -55,12 +50,9 @@ Singleton {
 
     // Constants
     readonly property string deviceTypeWifi: "wifi"
-    readonly property string deviceTypeEthernet: "ethernet"
     readonly property string nmcliCommandDevice: "device"
     readonly property string nmcliCommandConnection: "connection"
     readonly property string nmcliCommandWifi: "wifi"
-    readonly property string deviceStatusFields: "DEVICE,TYPE,STATE,CONNECTION"
-    readonly property string networkListFields: "SSID,SIGNAL,SECURITY"
     readonly property string securityKeyMgmt: "802-11-wireless-security.key-mgmt"
     readonly property string securityPsk: "802-11-wireless-security.psk"
     readonly property string keyMgmtWpaPsk: "wpa-psk"
@@ -90,57 +82,8 @@ Singleton {
         return command.includes(root.nmcliCommandWifi) || command.includes(root.nmcliCommandConnection);
     }
 
-    function parseDeviceStatusOutput(output: string, filterType: string): list<var> {
-        if (!output || output.length === 0) {
-            return [];
-        }
-
-        const interfaces = [];
-        const lines = output.trim().split("\n");
-
-        for (const line of lines) {
-            const parts = line.split(":");
-            if (parts.length >= 2) {
-                const deviceType = parts[1];
-                let shouldInclude = false;
-
-                if (filterType === root.deviceTypeWifi && deviceType === root.deviceTypeWifi) {
-                    shouldInclude = true;
-                } else if (filterType === root.deviceTypeEthernet && deviceType === root.deviceTypeEthernet) {
-                    shouldInclude = true;
-                } else if (filterType === "both" && (deviceType === root.deviceTypeWifi || deviceType === root.deviceTypeEthernet)) {
-                    shouldInclude = true;
-                }
-
-                if (shouldInclude) {
-                    interfaces.push({
-                        device: parts[0] || "",
-                        type: parts[1] || "",
-                        state: parts[2] || "",
-                        connection: parts[3] || ""
-                    });
-                }
-            }
-        }
-
-        return interfaces;
-    }
-
-    function isConnectedState(state: string): bool {
-        if (!state || state.length === 0) {
-            return false;
-        }
-
-        return state === "100 (connected)" || state === "connected" || state.startsWith("connected");
-    }
-
-    function isConnectingState(state: string): bool {
-        return !!state && state.startsWith("connecting");
-    }
-
     function connectingSsid(): string {
-        const iface = root.wirelessInterfaces.find(i => isConnectingState(i.state));
-        return iface ? iface.connection : "";
+        return Wifi.connectingSsid;
     }
 
     function executeCommand(args: list<string>, callback: var): void {
@@ -162,38 +105,12 @@ Singleton {
         });
     }
 
-    function getWirelessInterfaces(callback: var): void {
-        executeCommand(["-t", "-f", root.deviceStatusFields, root.nmcliCommandDevice, "status"], result => {
-            const interfaces = parseDeviceStatusOutput(result.output, root.deviceTypeWifi);
-            root.wirelessInterfaces = interfaces;
-            if (callback)
-                callback(interfaces);
-        });
-    }
-
     function connectEthernet(connectionName: string, interfaceName: string, callback: var): void {
         Wired.connect(connectionName, interfaceName, callback);
     }
 
     function disconnectEthernet(connectionName: string, callback: var): void {
         Wired.disconnect(connectionName, callback);
-    }
-
-    function isInterfaceConnected(interfaceName: string, callback: var): void {
-        executeCommand([root.nmcliCommandDevice, "status"], result => {
-            const lines = result.output.trim().split("\n");
-            for (const line of lines) {
-                const parts = line.split(/\s+/);
-                if (parts.length >= 3 && parts[0] === interfaceName) {
-                    const connected = isConnectedState(parts[2]);
-                    if (callback)
-                        callback(connected);
-                    return;
-                }
-            }
-            if (callback)
-                callback(false);
-        });
     }
 
     function connectToNetworkWithPasswordCheck(ssid: string, isSecure: bool, callback: var, bssid: string): void {
@@ -403,20 +320,6 @@ Singleton {
         Profiles.forget(Profiles.nameFor(ssid), callback);
     }
 
-    function disconnect(interfaceName: string, callback: var): void {
-        if (interfaceName && interfaceName.length > 0) {
-            executeCommand([root.nmcliCommandDevice, "disconnect", interfaceName], result => {
-                if (callback)
-                    callback(result.success ? result.output : "");
-            });
-        } else {
-            executeCommand([root.nmcliCommandDevice, "disconnect", root.deviceTypeWifi], result => {
-                if (callback)
-                    callback(result.success ? result.output : "");
-            });
-        }
-    }
-
     function disconnectFromNetwork(): void {
         Wifi.disconnect(null);
     }
@@ -597,11 +500,9 @@ Singleton {
                     callback(result);
                 return;
             }
-            // Reactivate so changes take effect immediately.
+            // Reactivate so changes take effect immediately. Nothing to
+            // refresh afterwards; the new addresses arrive over dbus.
             executeCommand([root.nmcliCommandConnection, "up", connectionName], upResult => {
-                Qt.callLater(() => {
-                    refreshOnConnectionChange();
-                });
                 if (callback)
                     callback(upResult);
             });
@@ -610,10 +511,6 @@ Singleton {
 
     function getEthernetDataUsage(interfaceName: string): void {
         Wired.refreshDataUsage(interfaceName);
-    }
-
-    function refreshOnConnectionChange(): void {
-        getWirelessInterfaces(() => {});
     }
 
     // Association is reported over dbus now, so a pending connect resolves the
@@ -651,30 +548,6 @@ Singleton {
                 exitCode: -1,
                 needsPassword: false
             });
-        }
-    }
-
-    Process {
-        id: monitorProc
-
-        running: true
-        command: ["nmcli", "monitor"]
-        environment: ({
-                LANG: "C.UTF-8",
-                LC_ALL: "C.UTF-8"
-            })
-        stdout: SplitParser {
-            onRead: root.refreshOnConnectionChange()
-        }
-        onExited: monitorRestartTimer.start() // qmllint disable signal-handler-parameters
-    }
-
-    Timer {
-        id: monitorRestartTimer
-
-        interval: 2000
-        onTriggered: {
-            monitorProc.running = true;
         }
     }
 
