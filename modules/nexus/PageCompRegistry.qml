@@ -97,6 +97,13 @@ QtObject {
             PlaceholderComp {}
         },
         Component {
+            StackPage {
+                Component {
+                    StoragePage {}
+                }
+            }
+        },
+        Component {
             PlaceholderComp {}
         },
 
