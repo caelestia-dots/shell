@@ -45,13 +45,18 @@ Singleton {
     readonly property var active: root.accessPoints.find(ap => ap.active) ?? null
     readonly property bool enabled: NetworkManager.wirelessEnabled
 
+    readonly property real lastScan: root.device?.lastScan ?? -1
+
     // `nmcli device wifi rescan` asks NetworkManager for a scan and returns
     // straight away, so a running process says nothing about whether a scan is
     // still going. NetworkManager publishes no scanning flag either, so track
     // the request instead: the scan is in flight from asking until lastScan
-    // moves off where it stood.
-    property var scanBaseline: null
-    readonly property bool scanning: root.scanBaseline !== null && (root.device?.lastScan ?? -1) === root.scanBaseline
+    // moves off where it stood when we asked.
+    //
+    // Set rather than bound: a binding that read scanBaseline while the
+    // handler wrote it would be a loop.
+    property bool scanning: false
+    property real scanBaseline: -1
 
     function findNetwork(ssid: string): var {
         return root.networks.find(n => n.ssid === ssid) ?? null;
@@ -81,7 +86,8 @@ Singleton {
         if (root.scanning)
             return;
 
-        root.scanBaseline = root.device?.lastScan ?? -1;
+        root.scanBaseline = root.lastScan;
+        root.scanning = true;
         scanTimeout.restart();
         run(["device", "wifi", "rescan"], null);
     }
@@ -105,9 +111,10 @@ Singleton {
         run(["connection", "delete", connectionName], callback);
     }
 
-    onScanningChanged: {
-        if (!root.scanning) {
-            root.scanBaseline = null;
+    // The only word NetworkManager gives that a scan finished.
+    onLastScanChanged: {
+        if (root.scanning && root.lastScan !== root.scanBaseline) {
+            root.scanning = false;
             scanTimeout.stop();
         }
     }
@@ -139,6 +146,6 @@ Singleton {
         id: scanTimeout
 
         interval: 20000
-        onTriggered: root.scanBaseline = null
+        onTriggered: root.scanning = false
     }
 }
