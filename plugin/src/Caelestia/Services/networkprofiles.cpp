@@ -27,6 +27,7 @@ constexpr const char* kPropsIface = "org.freedesktop.DBus.Properties";
 constexpr const char* kGroupConnection = "connection";
 constexpr const char* kGroupWireless = "802-11-wireless";
 constexpr const char* kGroupWirelessSecurity = "802-11-wireless-security";
+constexpr const char* kGroupIpv4 = "ipv4";
 
 // An `ay` inside a variant arrives as a byte array on most paths, but as a
 // nested argument on some, so both are worth handling.
@@ -42,6 +43,30 @@ QString byteArrayToString(const QVariant& value) {
     }
 
     return {};
+}
+
+// The legacy ipv4.dns is an array of in_addr values, i.e. already in network
+// byte order, so the low byte is the first octet. NetworkManager publishes
+// dns-data alongside it as plain strings and prefers that; this is only for
+// older daemons that send the packed form.
+QStringList packedDnsToStrings(const QVariant& value) {
+    if (!value.canConvert<QDBusArgument>()) {
+        return {};
+    }
+
+    QList<uint> packed;
+    value.value<QDBusArgument>() >> packed;
+
+    QStringList dns;
+    dns.reserve(packed.size());
+    for (const auto address : std::as_const(packed)) {
+        dns.append(QStringLiteral("%1.%2.%3.%4")
+                       .arg(address & 0xff)
+                       .arg((address >> 8) & 0xff)
+                       .arg((address >> 16) & 0xff)
+                       .arg((address >> 24) & 0xff));
+    }
+    return dns;
 }
 
 } // namespace
@@ -78,10 +103,31 @@ bool NmConnection::autoconnect() const {
     return m_autoconnect;
 }
 
+QString NmConnection::ipv4Method() const {
+    return m_ipv4Method;
+}
+
+QString NmConnection::ipv4Address() const {
+    return m_ipv4Address;
+}
+
+QString NmConnection::ipv4Gateway() const {
+    return m_ipv4Gateway;
+}
+
+QStringList NmConnection::ipv4Dns() const {
+    return m_ipv4Dns;
+}
+
+bool NmConnection::ipv4IgnoreAutoDns() const {
+    return m_ipv4IgnoreAutoDns;
+}
+
 void NmConnection::update(const QMap<QString, QVariantMap>& settings) {
     const auto connection = settings.value(QString::fromUtf8(kGroupConnection));
     const auto wireless = settings.value(QString::fromUtf8(kGroupWireless));
     const auto security = settings.value(QString::fromUtf8(kGroupWirelessSecurity));
+    const auto ipv4 = settings.value(QString::fromUtf8(kGroupIpv4));
 
     const auto id = connection.value(QStringLiteral("id")).toString();
     const auto uuid = connection.value(QStringLiteral("uuid")).toString();
@@ -94,8 +140,29 @@ void NmConnection::update(const QMap<QString, QVariantMap>& settings) {
     const auto autoconnectValue = connection.find(QStringLiteral("autoconnect"));
     const auto autoconnect = autoconnectValue == connection.end() ? true : autoconnectValue.value().toBool();
 
+    const auto ipv4Method = ipv4.value(QStringLiteral("method")).toString();
+    const auto ipv4Gateway = ipv4.value(QStringLiteral("gateway")).toString();
+    const auto ipv4IgnoreAutoDns = ipv4.value(QStringLiteral("ignore-auto-dns")).toBool();
+
+    QList<QVariantMap> addresses;
+    ipv4.value(QStringLiteral("address-data")).value<QDBusArgument>() >> addresses;
+
+    QString ipv4Address;
+    if (!addresses.isEmpty()) {
+        ipv4Address = QStringLiteral("%1/%2")
+                          .arg(addresses.first().value(QStringLiteral("address")).toString())
+                          .arg(addresses.first().value(QStringLiteral("prefix")).toInt());
+    }
+
+    // dns-data is what NetworkManager publishes now; dns is the deprecated
+    // packed form, still sent by older daemons.
+    const auto dnsData = ipv4.find(QStringLiteral("dns-data"));
+    const auto ipv4Dns = dnsData == ipv4.end() ? packedDnsToStrings(ipv4.value(QStringLiteral("dns")))
+                                               : dnsData.value().toStringList();
+
     if (id == m_id && uuid == m_uuid && type == m_type && ssid == m_ssid && keyMgmt == m_keyMgmt &&
-        autoconnect == m_autoconnect) {
+        autoconnect == m_autoconnect && ipv4Method == m_ipv4Method && ipv4Address == m_ipv4Address &&
+        ipv4Gateway == m_ipv4Gateway && ipv4Dns == m_ipv4Dns && ipv4IgnoreAutoDns == m_ipv4IgnoreAutoDns) {
         return;
     }
 
@@ -105,6 +172,11 @@ void NmConnection::update(const QMap<QString, QVariantMap>& settings) {
     m_ssid = ssid;
     m_keyMgmt = keyMgmt;
     m_autoconnect = autoconnect;
+    m_ipv4Method = ipv4Method;
+    m_ipv4Address = ipv4Address;
+    m_ipv4Gateway = ipv4Gateway;
+    m_ipv4Dns = ipv4Dns;
+    m_ipv4IgnoreAutoDns = ipv4IgnoreAutoDns;
 
     emit changed();
 }

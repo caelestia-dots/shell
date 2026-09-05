@@ -33,6 +33,14 @@ class NmConnection : public QObject {
     // Raw key management, e.g. "wpa-psk" or "sae". Empty on an open network.
     Q_PROPERTY(QString keyMgmt READ keyMgmt NOTIFY changed)
     Q_PROPERTY(bool autoconnect READ autoconnect NOTIFY changed)
+    // IPv4 configuration as saved on the profile, which is not the same thing
+    // as what the device ended up with; that lives on NmDevice.
+    Q_PROPERTY(QString ipv4Method READ ipv4Method NOTIFY changed)
+    // First manual address in CIDR form, e.g. "192.168.1.5/24". Empty on auto.
+    Q_PROPERTY(QString ipv4Address READ ipv4Address NOTIFY changed)
+    Q_PROPERTY(QString ipv4Gateway READ ipv4Gateway NOTIFY changed)
+    Q_PROPERTY(QStringList ipv4Dns READ ipv4Dns NOTIFY changed)
+    Q_PROPERTY(bool ipv4IgnoreAutoDns READ ipv4IgnoreAutoDns NOTIFY changed)
 
 public:
     explicit NmConnection(QString path, QObject* parent = nullptr);
@@ -44,6 +52,11 @@ public:
     [[nodiscard]] QString ssid() const;
     [[nodiscard]] QString keyMgmt() const;
     [[nodiscard]] bool autoconnect() const;
+    [[nodiscard]] QString ipv4Method() const;
+    [[nodiscard]] QString ipv4Address() const;
+    [[nodiscard]] QString ipv4Gateway() const;
+    [[nodiscard]] QStringList ipv4Dns() const;
+    [[nodiscard]] bool ipv4IgnoreAutoDns() const;
 
     // Applies the nested settings map GetSettings returns.
     void update(const QMap<QString, QVariantMap>& settings);
@@ -68,6 +81,11 @@ private:
     QString m_ssid;
     QString m_keyMgmt;
     bool m_autoconnect = true;
+    QString m_ipv4Method;
+    QString m_ipv4Address;
+    QString m_ipv4Gateway;
+    QStringList m_ipv4Dns;
+    bool m_ipv4IgnoreAutoDns = false;
 };
 
 // NetworkManager's saved profiles, read over D-Bus.

@@ -118,6 +118,36 @@ Singleton {
         return profile ? root.securityLabel(profile.keyMgmt) : "";
     }
 
+    // Looks a profile up by SSID first, then by name, since callers pass
+    // whichever they have.
+    function profileFor(nameOrSsid: string): var {
+        if (!nameOrSsid)
+            return null;
+
+        const wanted = nameOrSsid.toLowerCase().trim();
+        return root.find(nameOrSsid) ?? root.list.find(p => p.id && p.id.toLowerCase().trim() === wanted) ?? null;
+    }
+
+    // The saved IPv4 configuration, in the shape the parsed nmcli output had.
+    function ipv4ConfigFor(nameOrSsid: string): var {
+        const profile = root.profileFor(nameOrSsid);
+        if (!profile)
+            return null;
+
+        // "auto-dns" isn't a NetworkManager method; it's how the UI
+        // distinguishes DHCP with custom DNS from plain DHCP.
+        const method = profile.ipv4Method || "auto";
+
+        return {
+            method: method === "auto" && profile.ipv4IgnoreAutoDns ? "auto-dns" : method,
+            address: profile.ipv4Address,
+            gateway: profile.ipv4Gateway,
+            dns: profile.ipv4Dns.join(", "),
+            ignoreAutoDns: profile.ipv4IgnoreAutoDns,
+            autoconnect: profile.autoconnect
+        };
+    }
+
     // One-shot nmcli call; only the exit code matters, so there's nothing to
     // parse and no shared state to race.
     function run(args: list<string>, callback: var): void {

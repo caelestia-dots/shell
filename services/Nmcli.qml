@@ -668,62 +668,11 @@ Singleton {
 
     // Reads the IPv4 configuration (method, address, gateway, DNS, autoconnect)
     // of a connection profile for the ethernet detail page.
+    // Kept for existing callers; the saved configuration is a live binding on
+    // Profiles now, so there is nothing to fetch.
     function getIpv4Config(connectionName: string, callback: var): void {
-        if (!connectionName || connectionName.length === 0) {
-            if (callback)
-                callback(null);
-            return;
-        }
-
-        executeCommand(["-t", "-f", "ipv4.method,ipv4.addresses,ipv4.gateway,ipv4.dns,ipv4.ignore-auto-dns,connection.autoconnect", root.nmcliCommandConnection, "show", connectionName], result => {
-            if (!result.success) {
-                if (callback)
-                    callback(null);
-                return;
-            }
-
-            const cfg = {
-                method: "auto",
-                address: "",
-                gateway: "",
-                dns: "",
-                ignoreAutoDns: false,
-                autoconnect: true
-            };
-
-            const lines = result.output.trim().split("\n");
-            for (const line of lines) {
-                const idx = line.indexOf(":");
-                if (idx < 0)
-                    continue;
-                const key = line.slice(0, idx).trim();
-                const value = line.slice(idx + 1).trim();
-
-                if (key === "ipv4.ignore-auto-dns")
-                    cfg.ignoreAutoDns = value === "yes";
-                else if (key === "connection.autoconnect")
-                    cfg.autoconnect = value !== "no";
-
-                if (value === "" || value === "--")
-                    continue;
-
-                if (key === "ipv4.method")
-                    cfg.method = value;
-                else if (key === "ipv4.addresses")
-                    cfg.address = value.split(",")[0].trim();
-                else if (key === "ipv4.gateway")
-                    cfg.gateway = value;
-                else if (key === "ipv4.dns")
-                    cfg.dns = value.replace(/;\s*$/, "").split(/[;,]/).map(d => d.trim()).filter(d => d.length > 0).join(", ");
-            }
-
-            // Distinguish "automatic + custom DNS only" from plain DHCP.
-            if (cfg.method === "auto" && cfg.ignoreAutoDns)
-                cfg.method = "auto-dns";
-
-            if (callback)
-                callback(cfg);
-        });
+        if (callback)
+            callback(Profiles.ipv4ConfigFor(connectionName));
     }
 
     // Writes an IPv4 configuration to a connection profile and reactivates it so
