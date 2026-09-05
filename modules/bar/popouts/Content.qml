@@ -14,14 +14,15 @@ Item {
     required property PopoutState popouts
     readonly property Popout currentPopout: content.children.find(c => c.shouldBeActive) ?? null
     readonly property Item current: currentPopout?.item ?? null
+    readonly property bool currentReady: currentPopout?.ready ?? false
 
     readonly property var trayItemsToIndices: SystemTray.items.values.reduce((acc, item, i) => {
         acc[item.id] = i;
         return acc;
     }, {})
 
-    implicitWidth: currentPopout ? currentPopout.implicitWidth + Tokens.padding.extraLargeIncreased : 0
-    implicitHeight: currentPopout ? currentPopout.implicitHeight + Tokens.padding.extraLargeIncreased : 0
+    implicitWidth: currentReady && currentPopout ? currentPopout.implicitWidth + Tokens.padding.extraLargeIncreased : 0
+    implicitHeight: currentReady && currentPopout ? currentPopout.implicitHeight + Tokens.padding.extraLargeIncreased : 0
 
     Item {
         id: content
@@ -134,15 +135,22 @@ Item {
 
                 required property SystemTrayItem modelData
 
+                function reloadMenu(): void {
+                    if (!root.popouts.hasCurrent || root.popouts.currentName !== trayMenu.name)
+                        return;
+
+                    trayMenu.ready = false;
+                    trayMenu.sourceComponent = null;
+                    trayMenu.sourceComponent = trayMenuComp;
+                }
+
+                ready: false
                 name: `traymenu${root.trayItemsToIndices[modelData.id]}`
                 sourceComponent: trayMenuComp
 
                 Connections {
                     function onHasCurrentChanged(): void {
-                        if (root.popouts.hasCurrent && trayMenu.shouldBeActive) {
-                            trayMenu.sourceComponent = null;
-                            trayMenu.sourceComponent = trayMenuComp;
-                        }
+                        trayMenu.reloadMenu();
                     }
 
                     target: root.popouts
@@ -156,6 +164,8 @@ Item {
                         trayItem: trayMenu.modelData.menu // qmllint disable unresolved-type
 
                         onRootMenuResolved: hasEntries => {
+                            trayMenu.ready = hasEntries;
+
                             if (root.popouts.hasCurrent && trayMenu.shouldBeActive && !hasEntries)
                                 root.popouts.hasCurrent = false;
                         }
@@ -170,6 +180,7 @@ Item {
 
         required property string name
         readonly property bool shouldBeActive: root.popouts.currentName === name
+        property bool ready: true
 
         anchors.centerIn: parent
 
