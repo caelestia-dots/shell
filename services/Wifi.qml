@@ -4,6 +4,7 @@ import QtQuick
 import Quickshell
 import Quickshell.Io
 import Caelestia.Services
+import Caelestia.Config
 
 // Wifi networking, split out of Nmcli along its own boundary.
 //
