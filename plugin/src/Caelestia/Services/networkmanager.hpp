@@ -105,6 +105,11 @@ class NmDevice : public QObject {
     // Only ever populated for wifi devices; empty for everything else.
     Q_PROPERTY(QQmlListProperty<caelestia::services::NmAccessPoint> accessPoints READ accessPoints NOTIFY
             accessPointsChanged)
+    // Whether the link has a carrier, i.e. a cable is plugged in. Wired
+    // devices only; false for everything else.
+    Q_PROPERTY(bool carrier READ carrier NOTIFY changed)
+    // Negotiated link speed in Mb/s, 0 when there is no link. Wired only.
+    Q_PROPERTY(uint speed READ speed NOTIFY changed)
     // Hardware address of the device, e.g. "00:1a:2b:3c:4d:5e".
     Q_PROPERTY(QString hwAddress READ hwAddress NOTIFY changed)
     // Active IPv4 configuration. Empty while the device is down.
@@ -130,6 +135,8 @@ public:
 
     [[nodiscard]] QQmlListProperty<NmAccessPoint> accessPoints();
     [[nodiscard]] qlonglong lastScan() const;
+    [[nodiscard]] bool carrier() const;
+    [[nodiscard]] uint speed() const;
     [[nodiscard]] QString hwAddress() const;
     [[nodiscard]] QString address() const;
     [[nodiscard]] int prefix() const;
@@ -141,6 +148,9 @@ public:
     // object, which is a second read.
     void setConnection(const QString& connection);
     void setLastScan(qlonglong lastScan);
+    // Set apart from update(): both live on the device's Wired interface,
+    // which is a second read.
+    void setWired(bool carrier, uint speed);
     // Set apart from update(): the addresses live on the device's Ip4Config
     // object, which is a second read.
     void setIp4Config(const QString& address, int prefix, const QString& gateway, const QStringList& dns);
@@ -165,6 +175,8 @@ private:
     uint m_state = 0;
     QString m_connection;
     qlonglong m_lastScan = -1;
+    bool m_carrier = false;
+    uint m_speed = 0;
     QString m_hwAddress;
     QString m_address;
     int m_prefix = 0;
@@ -216,6 +228,7 @@ private:
     void readManager();
     void readDevice(const QString& path);
     void readConnection(const QString& devicePath, const QString& connectionPath);
+    void readWired(const QString& devicePath);
     void readWireless(const QString& devicePath);
     void readIp4Config(const QString& devicePath, const QString& configPath);
     void readAccessPoint(const QString& devicePath, const QString& accessPointPath);

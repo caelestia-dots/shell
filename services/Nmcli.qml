@@ -54,7 +54,6 @@ Singleton {
     property list<var> activeProcesses: []
 
     readonly property alias connectionCheckTimer: connectionCheckTimer
-    readonly property alias immediateCheckTimer: immediateCheckTimer
 
     // Constants
     readonly property string deviceTypeWifi: "wifi"
@@ -271,8 +270,6 @@ Singleton {
                 retryCount: retries
             };
             connectionCheckTimer.start();
-            immediateCheckTimer.checkCount = 0;
-            immediateCheckTimer.start();
         }
 
         if (password && password.length > 0 && hasBssid) {
@@ -622,8 +619,6 @@ Singleton {
 
         if (needsPassword && !proc.callbackCalled && root.pendingConnection) {
             connectionCheckTimer.stop();
-            immediateCheckTimer.stop();
-            immediateCheckTimer.checkCount = 0;
             const pending = root.pendingConnection;
             root.pendingConnection = null;
             proc.callbackCalled = true;
@@ -652,8 +647,6 @@ Singleton {
                 const connected = root.active && root.active.ssid === root.pendingConnection.ssid;
                 if (connected) {
                     connectionCheckTimer.stop();
-                    immediateCheckTimer.stop();
-                    immediateCheckTimer.checkCount = 0;
                     if (root.pendingConnection.callback) {
                         root.pendingConnection.callback({
                             success: true,
@@ -663,10 +656,6 @@ Singleton {
                         });
                     }
                     root.pendingConnection = null;
-                } else {
-                    if (!immediateCheckTimer.running) {
-                        immediateCheckTimer.start();
-                    }
                 }
             });
         }
@@ -835,147 +824,31 @@ Singleton {
         CommandProcess {}
     }
 
+    // Nothing reports a connect that simply never happens, so this stays as the
+    // backstop. Success arrives on onActiveChanged and a rejected password on
+    // the process's own stderr, both immediately, so neither needs polling.
     Timer {
         id: connectionCheckTimer
 
         interval: 4000
         onTriggered: {
-            if (root.pendingConnection) {
-                const connected = root.active && root.active.ssid === root.pendingConnection.ssid;
+            if (!root.pendingConnection)
+                return;
 
-                if (!connected && root.pendingConnection.callback) {
-                    let foundPasswordError = false;
-                    for (let i = 0; i < root.activeProcesses.length; i++) {
-                        const proc = root.activeProcesses[i];
-                        if (proc && proc.stderr && proc.stderr.text) {
-                            const error = proc.stderr.text.trim();
-                            if (error && error.length > 0) {
-                                if (root.isConnectionCommand(proc.cmdArgs)) {
-                                    const needsPassword = root.detectPasswordRequired(error);
+            const pending = root.pendingConnection;
+            root.pendingConnection = null;
 
-                                    if (needsPassword && !proc.callbackCalled && root.pendingConnection) {
-                                        const pending = root.pendingConnection;
-                                        root.pendingConnection = null;
-                                        immediateCheckTimer.stop();
-                                        immediateCheckTimer.checkCount = 0;
-                                        proc.callbackCalled = true;
-                                        const result = {
-                                            success: false,
-                                            output: (proc.stdout && proc.stdout.text) ? proc.stdout.text : "",
-                                            error: error,
-                                            exitCode: -1,
-                                            needsPassword: true
-                                        };
-                                        if (pending.callback) {
-                                            pending.callback(result);
-                                        }
-                                        if (proc.callback && proc.callback !== pending.callback) {
-                                            proc.callback(result);
-                                        }
-                                        foundPasswordError = true;
-                                        break;
-                                    }
-                                }
-                            }
-                        }
-                    }
+            if (root.active?.ssid === pending.ssid)
+                return;
 
-                    if (!foundPasswordError) {
-                        const pending = root.pendingConnection;
-                        const failedSsid = pending.ssid;
-                        root.pendingConnection = null;
-                        immediateCheckTimer.stop();
-                        immediateCheckTimer.checkCount = 0;
-                        root.connectionFailed(failedSsid);
-                        pending.callback({
-                            success: false,
-                            output: "",
-                            error: "Connection timeout",
-                            exitCode: -1,
-                            needsPassword: false
-                        });
-                    }
-                } else if (connected) {
-                    root.pendingConnection = null;
-                    immediateCheckTimer.stop();
-                    immediateCheckTimer.checkCount = 0;
-                }
-            }
-        }
-    }
-
-    Timer {
-        id: immediateCheckTimer
-
-        property int checkCount: 0
-
-        interval: 500
-        repeat: true
-        triggeredOnStart: false
-
-        onTriggered: {
-            if (root.pendingConnection) {
-                checkCount++;
-                const connected = root.active && root.active.ssid === root.pendingConnection.ssid;
-
-                if (connected) {
-                    connectionCheckTimer.stop();
-                    immediateCheckTimer.stop();
-                    immediateCheckTimer.checkCount = 0;
-                    if (root.pendingConnection.callback) {
-                        root.pendingConnection.callback({
-                            success: true,
-                            output: "Connected",
-                            error: "",
-                            exitCode: 0
-                        });
-                    }
-                    root.pendingConnection = null;
-                } else {
-                    for (let i = 0; i < root.activeProcesses.length; i++) {
-                        const proc = root.activeProcesses[i];
-                        if (proc && proc.stderr && proc.stderr.text) {
-                            const error = proc.stderr.text.trim();
-                            if (error && error.length > 0) {
-                                if (root.isConnectionCommand(proc.cmdArgs)) {
-                                    const needsPassword = root.detectPasswordRequired(error);
-
-                                    if (needsPassword && !proc.callbackCalled && root.pendingConnection && root.pendingConnection.callback) {
-                                        connectionCheckTimer.stop();
-                                        immediateCheckTimer.stop();
-                                        immediateCheckTimer.checkCount = 0;
-                                        const pending = root.pendingConnection;
-                                        root.pendingConnection = null;
-                                        proc.callbackCalled = true;
-                                        const result = {
-                                            success: false,
-                                            output: (proc.stdout && proc.stdout.text) ? proc.stdout.text : "",
-                                            error: error,
-                                            exitCode: -1,
-                                            needsPassword: true
-                                        };
-                                        if (pending.callback) {
-                                            pending.callback(result);
-                                        }
-                                        if (proc.callback && proc.callback !== pending.callback) {
-                                            proc.callback(result);
-                                        }
-                                        return;
-                                    }
-                                }
-                            }
-                        }
-                    }
-
-                    if (checkCount >= 6) {
-                        immediateCheckTimer.stop();
-                        immediateCheckTimer.checkCount = 0;
-                    }
-                }
-            } else {
-                immediateCheckTimer.stop();
-                immediateCheckTimer.checkCount = 0;
-            }
+            root.connectionFailed(pending.ssid);
+            pending.callback?.({
+                success: false,
+                output: "",
+                error: "Connection timeout",
+                exitCode: -1,
+                needsPassword: false
+            });
         }
     }
 

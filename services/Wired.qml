@@ -25,9 +25,8 @@ Singleton {
 
     // The wired device that finished activating, if any.
     readonly property var active: devices.find(d => d.connected) ?? null
-    // Whether any wired device is usable. NM reports state 20 (unavailable)
-    // for a NIC with no carrier, so anything past that means a cable is in.
-    readonly property bool available: devices.some(d => d.state > 20)
+    // Whether any wired device has a cable in it.
+    readonly property bool available: devices.some(d => d.carrier)
 
     // Active IPv4 details, or null when nothing is connected. Same shape the
     // parsed `nmcli device show` output produced, minus the subnet mask and
@@ -45,9 +44,20 @@ Singleton {
         };
     }
 
-    // Negotiated link speed of the active device, e.g. "1 Gbps". NM doesn't
-    // expose this, so it comes from sysfs - a plain file read, no daemon.
-    property string speed: ""
+    // Negotiated link speed of the active device, e.g. "1 Gbps".
+    readonly property string speed: {
+        const mbit = root.active?.speed ?? 0;
+        if (mbit <= 0)
+            return "";
+        if (mbit < 1000)
+            return `${mbit} Mbps`;
+
+        const gbps = mbit / 1000;
+        return `${Number.isInteger(gbps) ? gbps : gbps.toFixed(1)} Gbps`;
+    }
+
+    // Cumulative since-boot byte counters, which NetworkManager doesn't keep,
+    // so this stays a sysfs read.
     property string dataUsage: ""
 
     function connect(connectionName: string, interfaceName: string, callback: var): void {
@@ -78,13 +88,8 @@ Singleton {
         proc.running = true;
     }
 
+    // Kept for existing callers; the speed is a live binding on the device now.
     function refreshSpeed(interfaceName: string): void {
-        if (!interfaceName) {
-            root.speed = "";
-            return;
-        }
-        speedProc.command = ["cat", `/sys/class/net/${interfaceName}/speed`];
-        speedProc.running = true;
     }
 
     function refreshDataUsage(interfaceName: string): void {
@@ -111,7 +116,6 @@ Singleton {
 
     // Follows whichever device is active, so consumers don't have to ask.
     onActiveChanged: {
-        refreshSpeed(active?.interface ?? "");
         refreshDataUsage(active?.interface ?? "");
     }
 
@@ -132,24 +136,6 @@ Singleton {
                 const callback = proc.callback;
                 proc.destroy();
                 callback?.(code === 0);
-            }
-        }
-    }
-
-    Process {
-        id: speedProc
-
-        stdout: StdioCollector {
-            onStreamFinished: {
-                const mbit = parseInt(text.trim(), 10);
-                // Disconnected or virtual interfaces report -1, or nothing.
-                if (isNaN(mbit) || mbit <= 0)
-                    root.speed = "";
-                else if (mbit >= 1000) {
-                    const gbps = mbit / 1000;
-                    root.speed = `${Number.isInteger(gbps) ? gbps : gbps.toFixed(1)} Gbps`;
-                } else
-                    root.speed = `${mbit} Mbps`;
             }
         }
     }

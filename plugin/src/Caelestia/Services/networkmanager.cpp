@@ -21,6 +21,7 @@ constexpr const char* kManagerPath = "/org/freedesktop/NetworkManager";
 constexpr const char* kManagerIface = "org.freedesktop.NetworkManager";
 constexpr const char* kDeviceIface = "org.freedesktop.NetworkManager.Device";
 constexpr const char* kActiveIface = "org.freedesktop.NetworkManager.Connection.Active";
+constexpr const char* kWiredIface = "org.freedesktop.NetworkManager.Device.Wired";
 constexpr const char* kWirelessIface = "org.freedesktop.NetworkManager.Device.Wireless";
 constexpr const char* kApIface = "org.freedesktop.NetworkManager.AccessPoint";
 constexpr const char* kIp4Iface = "org.freedesktop.NetworkManager.IP4Config";
@@ -235,6 +236,24 @@ QQmlListProperty<NmAccessPoint> NmDevice::accessPoints() {
 
 qlonglong NmDevice::lastScan() const {
     return m_lastScan;
+}
+
+bool NmDevice::carrier() const {
+    return m_carrier;
+}
+
+uint NmDevice::speed() const {
+    return m_speed;
+}
+
+void NmDevice::setWired(bool carrier, uint speed) {
+    if (carrier == m_carrier && speed == m_speed) {
+        return;
+    }
+
+    m_carrier = carrier;
+    m_speed = speed;
+    emit changed();
 }
 
 QString NmDevice::hwAddress() const {
@@ -589,7 +608,9 @@ void NetworkManager::readDevice(const QString& path) {
             readConnection(path, connectionPath);
         }
 
-        if (device->type() == config::NetworkTransport::Wifi) {
+        if (device->type() == config::NetworkTransport::Ethernet) {
+            readWired(path);
+        } else if (device->type() == config::NetworkTransport::Wifi) {
             readWireless(path);
         }
 
@@ -631,6 +652,39 @@ void NetworkManager::readConnection(const QString& devicePath, const QString& co
         if (device != nullptr) {
             device->setConnection(reply.isError() ? QString() : reply.value().variant().toString());
         }
+
+        step(-1);
+    });
+}
+
+void NetworkManager::readWired(const QString& devicePath) {
+    auto bus = systemBus();
+    if (!bus) {
+        return;
+    }
+
+    auto msg = QDBusMessage::createMethodCall(
+        QString::fromUtf8(kService), devicePath, QString::fromUtf8(kPropsIface), QStringLiteral("GetAll"));
+    msg << QString::fromUtf8(kWiredIface);
+
+    step(1);
+    auto* watcher = new QDBusPendingCallWatcher(bus->asyncCall(msg), this);
+    connect(watcher, &QDBusPendingCallWatcher::finished, this, [this, devicePath](QDBusPendingCallWatcher* call) {
+        call->deleteLater();
+
+        const QDBusPendingReply<QVariantMap> reply = *call;
+        auto* device = m_byPath.value(devicePath);
+        if (reply.isError() || device == nullptr) {
+            if (reply.isError()) {
+                qCDebug(logNetworkManager) << "Skipping wired" << devicePath << ":" << reply.error().message();
+            }
+            step(-1);
+            return;
+        }
+
+        const auto props = reply.value();
+        device->setWired(
+            props.value(QStringLiteral("Carrier")).toBool(), props.value(QStringLiteral("Speed")).toUInt());
 
         step(-1);
     });

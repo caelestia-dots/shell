@@ -81,8 +81,7 @@ ColumnLayout {
         id: ethRepeater
 
         model: ScriptModel {
-            // NM_DEVICE_STATE_UNAVAILABLE is 20: anything past it has a carrier.
-            values: Nmcli.ethernetDevices.filter(d => d.state > 20)
+            values: Nmcli.ethernetDevices.filter(d => d.carrier)
         }
 
         delegate: ConnectedRect {
