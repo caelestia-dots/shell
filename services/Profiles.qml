@@ -26,6 +26,9 @@ Singleton {
 
     readonly property list<var> wireless: root.list.filter(p => p.type === "802-11-wireless")
 
+    // Profile names, i.e. what nmcli takes as a connection argument.
+    readonly property list<string> names: root.list.map(p => p.id)
+
     // SSIDs with a saved profile, deduplicated case-insensitively the way the
     // parsed version was.
     readonly property list<string> ssids: {
@@ -59,6 +62,33 @@ Singleton {
 
     function keyMgmtFor(ssid: string): string {
         return root.find(ssid)?.keyMgmt ?? "";
+    }
+
+    // The profile name for an SSID. Falls back to the SSID itself, which is
+    // what NetworkManager names a profile by default.
+    function nameFor(ssid: string): string {
+        if (!ssid)
+            return "";
+
+        const wanted = ssid.toLowerCase().trim();
+        return root.find(ssid)?.id ?? root.names.find(n => n && n.toLowerCase().trim() === wanted) ?? ssid;
+    }
+
+    // Whether anything saved matches this SSID, by profile SSID or by name.
+    function hasName(ssid: string): bool {
+        if (!ssid)
+            return false;
+
+        const wanted = ssid.toLowerCase().trim();
+        return root.has(ssid) || root.names.some(n => n && n.toLowerCase().trim() === wanted);
+    }
+
+    function autoconnectFor(name: string): bool {
+        if (!name)
+            return true;
+
+        const wanted = name.toLowerCase().trim();
+        return (root.find(name) ?? root.list.find(p => p.id && p.id.toLowerCase().trim() === wanted))?.autoconnect ?? true;
     }
 
     // Turns NetworkManager's key management into the label the UI shows.
@@ -107,14 +137,32 @@ Singleton {
         run(["connection", "delete", name], callback);
     }
 
+    // Turning autoconnect off also makes NetworkManager ask for the password on
+    // the next manual connect rather than silently reusing the stored one
+    // (psk-flags 2 = "not saved, always ask"); turning it back on restores
+    // psk-flags 0 so the next password is saved.
     function setAutoconnect(name: string, autoconnect: bool, callback: var): void {
         if (!name) {
             if (callback)
                 callback(false);
             return;
         }
+
+        const base = ["connection", "modify", name, "connection.autoconnect", autoconnect ? "yes" : "no"];
+        const cmd = autoconnect ? [...base, "802-11-wireless-security.psk-flags", "0"] : [...base, "802-11-wireless-security.psk-flags", "2", "802-11-wireless-security.psk", ""];
+
         // No refetch afterwards: the profile reports its own edits over dbus.
-        run(["connection", "modify", name, "connection.autoconnect", autoconnect ? "yes" : "no"], callback);
+        run(cmd, (success, error) => {
+            // Open networks have no security settings, so nmcli rejects those
+            // fields. Retry with just the autoconnect change.
+            if (!success && (error.includes("802-11-wireless-security") || error.includes("is not a valid property") || error.includes("Error: invalid"))) {
+                run(base, callback);
+                return;
+            }
+
+            if (callback)
+                callback(success);
+        });
     }
 
     Component {
@@ -124,16 +172,22 @@ Singleton {
             id: proc
 
             property var callback: null
+            property string error: ""
 
             environment: ({
                     LANG: "C.UTF-8",
                     LC_ALL: "C.UTF-8"
                 })
 
+            stderr: StdioCollector {
+                onStreamFinished: proc.error = text
+            }
+
             onExited: code => { // qmllint disable signal-handler-parameters
                 const callback = proc.callback;
+                const error = proc.error;
                 proc.destroy();
-                callback?.(code === 0);
+                callback?.(code === 0, error);
             }
         }
     }

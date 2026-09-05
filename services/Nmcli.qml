@@ -23,13 +23,13 @@ Singleton {
     readonly property bool scanning: Wifi.scanning
     readonly property list<var> networks: Wifi.networks
     readonly property var active: Wifi.active
-    property list<string> savedConnections: []
-    property list<string> savedConnectionSsids: []
+    // Saved profiles live in Profiles now, read from NetworkManager's Settings
+    // interface. These forward them so existing consumers keep working.
+    readonly property list<string> savedConnections: Profiles.names
+    readonly property list<string> savedConnectionSsids: Profiles.ssids
     // Map of saved Wi-Fi SSID (lowercased) -> security type
-    property var savedConnectionSecurity: ({})
+    readonly property var savedConnectionSecurity: Profiles.securityBySsid
 
-    property var wifiConnectionQueue: []
-    property int currentSsidQueryIndex: 0
     property var pendingConnection: null
     property var wirelessDeviceDetails: null
     property var ethernetDeviceDetails: null
@@ -62,8 +62,6 @@ Singleton {
     readonly property string nmcliCommandConnection: "connection"
     readonly property string nmcliCommandWifi: "wifi"
     readonly property string deviceStatusFields: "DEVICE,TYPE,STATE,CONNECTION"
-    readonly property string connectionListFields: "NAME,TYPE"
-    readonly property string wirelessSsidField: "802-11-wireless.ssid"
     readonly property string networkListFields: "SSID,SIGNAL,SECURITY"
     readonly property string securityKeyMgmt: "802-11-wireless-security.key-mgmt"
     readonly property string securityPsk: "802-11-wireless-security.psk"
@@ -322,13 +320,11 @@ Singleton {
 
             executeCommand(cmd, result => {
                 if (result.success) {
-                    loadSavedConnections(() => {});
                     activateConnection(ssid, callback);
                 } else {
                     const hasDuplicateWarning = result.error && (result.error.includes("another connection with the name") || result.error.includes("Reference the connection by its uuid"));
 
                     if (hasDuplicateWarning || (result.exitCode > 0 && result.exitCode < 10)) {
-                        loadSavedConnections(() => {});
                         activateConnection(ssid, callback);
                     } else {
                         console.warn(lc, "Connection profile creation failed, trying fallback...");
@@ -366,155 +362,28 @@ Singleton {
         });
     }
 
+    // Kept so existing callers still get their callback; the saved profiles
+    // are a live binding on Profiles now, so there is nothing to fetch.
     function loadSavedConnections(callback: var): void {
-        executeCommand(["-t", "-f", root.connectionListFields, root.nmcliCommandConnection, "show"], result => {
-            if (!result.success) {
-                root.savedConnections = [];
-                root.savedConnectionSsids = [];
-                root.savedConnectionSecurity = {};
-                if (callback)
-                    callback([]);
-                return;
-            }
-
-            parseConnectionList(result.output, callback);
-        });
-    }
-
-    function parseConnectionList(output: string, callback: var): void {
-        const lines = output.trim().split("\n").filter(line => line.length > 0);
-        const wifiConnections = [];
-        const connections = [];
-
-        for (const line of lines) {
-            const parts = line.split(":");
-            if (parts.length >= 2) {
-                const name = parts[0];
-                const type = parts[1];
-                connections.push(name);
-
-                if (type === root.connectionTypeWireless) {
-                    wifiConnections.push(name);
-                }
-            }
-        }
-
-        root.savedConnections = connections;
-
-        root.savedConnectionSecurity = {};
-
-        if (wifiConnections.length > 0) {
-            root.wifiConnectionQueue = wifiConnections;
-            root.currentSsidQueryIndex = 0;
-            root.savedConnectionSsids = [];
-            queryNextSsid(callback);
-        } else {
-            root.savedConnectionSsids = [];
-            root.wifiConnectionQueue = [];
-            if (callback)
-                callback(root.savedConnectionSsids);
-        }
-    }
-
-    function queryNextSsid(callback: var): void {
-        if (root.currentSsidQueryIndex < root.wifiConnectionQueue.length) {
-            const connectionName = root.wifiConnectionQueue[root.currentSsidQueryIndex];
-            root.currentSsidQueryIndex++;
-
-            executeCommand(["-t", "-f", `${root.wirelessSsidField},${root.securityKeyMgmt}`, root.nmcliCommandConnection, "show", connectionName], result => {
-                if (result.success) {
-                    processSsidOutput(result.output);
-                }
-                queryNextSsid(callback);
-            });
-        } else {
-            root.wifiConnectionQueue = [];
-            root.currentSsidQueryIndex = 0;
-            if (callback)
-                callback(root.savedConnectionSsids);
-        }
-    }
-
-    function processSsidOutput(output: string): void {
-        const ssidPrefix = "802-11-wireless.ssid:";
-        const keyMgmtPrefix = `${root.securityKeyMgmt}:`;
-
-        let ssid = "";
-        let keyMgmt = "";
-        for (const line of output.trim().split("\n")) {
-            if (line.startsWith(ssidPrefix))
-                ssid = line.substring(ssidPrefix.length).trim();
-            else if (line.startsWith(keyMgmtPrefix))
-                keyMgmt = line.substring(keyMgmtPrefix.length).trim();
-        }
-
-        if (!ssid || ssid.length === 0)
-            return;
-
-        const ssidLower = ssid.toLowerCase();
-
-        const exists = root.savedConnectionSsids.some(s => s && s.toLowerCase() === ssidLower);
-        if (!exists) {
-            const newList = root.savedConnectionSsids.slice();
-            newList.push(ssid);
-            root.savedConnectionSsids = newList;
-        }
-
-        const security = Object.assign({}, root.savedConnectionSecurity);
-        security[ssidLower] = keyMgmt;
-        root.savedConnectionSecurity = security;
+        if (callback)
+            callback(root.savedConnectionSsids);
     }
 
     function securityLabel(keyMgmt: string): string {
-        switch ((keyMgmt || "").trim().toLowerCase()) {
-        case "":
-        case "none":
-            return qsTr("Open");
-        case "sae":
-            return "WPA3";
-        case "wpa-psk":
-            return "WPA2";
-        case "wpa-eap":
-        case "wpa-eap-suite-b-192":
-            return qsTr("Enterprise");
-        case "owe":
-            return qsTr("Enhanced Open");
-        case "ieee8021x":
-            return "802.1X";
-        default:
-            return keyMgmt.trim();
-        }
+        return Profiles.securityLabel(keyMgmt);
     }
 
-    // Cached security label for a saved SSID, or "" if unknown (e.g. not loaded).
+    // Raw key management for a saved SSID, or "" if there is no profile.
     function savedSecurityFor(ssid: string): string {
-        if (!ssid || ssid.length === 0)
-            return "";
-        return root.savedConnectionSecurity[ssid.toLowerCase().trim()] || "";
+        return Profiles.keyMgmtFor(ssid);
     }
 
     function hasSavedProfile(ssid: string): bool {
-        if (!ssid || ssid.length === 0) {
-            return false;
-        }
-        const ssidLower = ssid.toLowerCase().trim();
-
-        if (root.active && root.active.ssid) {
-            const activeSsidLower = root.active.ssid.toLowerCase().trim();
-            if (activeSsidLower === ssidLower) {
-                return true;
-            }
-        }
-
-        const hasSsid = root.savedConnectionSsids.some(savedSsid => savedSsid && savedSsid.toLowerCase().trim() === ssidLower);
-
-        if (hasSsid) {
+        // An active network counts as saved even before the profile lands.
+        if (ssid && root.active?.ssid && root.active.ssid.toLowerCase().trim() === ssid.toLowerCase().trim())
             return true;
-        }
 
-        const hasConnectionName = root.savedConnections.some(connName => connName && connName.toLowerCase().trim() === ssidLower);
-
-        return hasConnectionName;
+        return Profiles.hasName(ssid);
     }
 
     // Adds and connects to an SSID by name. When hidden is true the profile is
@@ -544,13 +413,11 @@ Singleton {
 
             executeCommand(cmd, result => {
                 if (result.success) {
-                    loadSavedConnections(() => {});
                     activateConnection(ssid, callback);
                 } else {
                     const hasDuplicateWarning = result.error && (result.error.includes("another connection with the name") || result.error.includes("Reference the connection by its uuid"));
 
                     if (hasDuplicateWarning) {
-                        loadSavedConnections(() => {});
                         activateConnection(ssid, callback);
                     } else if (callback) {
                         callback(result);
@@ -561,88 +428,24 @@ Singleton {
     }
 
     // Reads whether a saved connection auto-connects.
+    // Kept for existing callers; autoconnect is a live binding on Profiles now.
     function getAutoconnect(connectionName: string, callback: var): void {
-        if (!connectionName || connectionName.length === 0) {
-            if (callback)
-                callback(true);
-            return;
-        }
-        executeCommand(["-t", "-f", "connection.autoconnect", root.nmcliCommandConnection, "show", connectionName], result => {
-            let auto = true;
-            if (result.success) {
-                const line = result.output.trim();
-                const idx = line.indexOf(":");
-                if (idx >= 0)
-                    auto = line.slice(idx + 1).trim() !== "no";
-            }
-            if (callback)
-                callback(auto);
-        });
+        if (callback)
+            callback(Profiles.autoconnectFor(connectionName));
     }
 
-    // Toggles auto-connect for a saved connection. When turned OFF, also makes
-    // NetworkManager ask for the password on the next manual connect instead of
-    // silently reusing the stored one (psk-flags 2 = "not saved, always ask");
-    // turning it back ON restores psk-flags 0 so the next password is saved.
     function setAutoconnect(connectionName: string, enabled: bool, callback: var): void {
-        if (!connectionName || connectionName.length === 0) {
-            if (callback)
-                callback({
-                    success: false,
-                    output: "",
-                    error: "No connection specified",
-                    exitCode: -1
-                });
-            return;
-        }
-
-        let cmd = [root.nmcliCommandConnection, "modify", connectionName, "connection.autoconnect", enabled ? "yes" : "no"];
-
-        if (enabled) {
-            cmd.push("802-11-wireless-security.psk-flags", "0");
-        } else {
-            cmd.push("802-11-wireless-security.psk-flags", "2");
-            cmd.push("802-11-wireless-security.psk", "");
-        }
-
-        executeCommand(cmd, result => {
-            // For open networks the security fields don't exist; nmcli then
-            // errors. Retry with just the autoconnect change so it still works.
-            if (!result.success && result.error && (result.error.includes("802-11-wireless-security") || result.error.includes("is not a valid property") || result.error.includes("Error: invalid"))) {
-                executeCommand([root.nmcliCommandConnection, "modify", connectionName, "connection.autoconnect", enabled ? "yes" : "no"], retryResult => {
-                    if (callback)
-                        callback(retryResult);
-                });
-                return;
-            }
-            if (callback)
-                callback(result);
-        });
+        Profiles.setAutoconnect(Profiles.nameFor(connectionName), enabled, callback);
     }
 
     function forgetNetwork(ssid: string, callback: var): void {
-        if (!ssid || ssid.length === 0) {
+        if (!ssid) {
             if (callback)
-                callback({
-                    success: false,
-                    output: "",
-                    error: "No SSID specified",
-                    exitCode: -1
-                });
+                callback(false);
             return;
         }
 
-        const connectionName = root.savedConnections.find(conn => conn && conn.toLowerCase().trim() === ssid.toLowerCase().trim()) || ssid;
-
-        executeCommand([root.nmcliCommandConnection, "delete", connectionName], result => {
-            if (result.success) {
-                Qt.callLater(() => {
-                    loadSavedConnections(() => {});
-                }, 500);
-            }
-            if (callback)
-                callback(result);
-        });
+        Profiles.forget(Profiles.nameFor(ssid), callback);
     }
 
     function disconnect(interfaceName: string, callback: var): void {
@@ -1176,8 +979,6 @@ Singleton {
     onActiveChanged: checkPendingConnection()
 
     Component.onCompleted: {
-        loadSavedConnections(() => {});
-
         Qt.callLater(() => {
             if (root.wirelessInterfaces.length > 0) {
                 const activeWireless = root.wirelessInterfaces.find(iface => {
