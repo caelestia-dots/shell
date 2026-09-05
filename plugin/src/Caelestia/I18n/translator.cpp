@@ -76,7 +76,7 @@ QString Translator::_tr(const QString& text, const QString& context, bool marked
 
         const auto& [msg, args] = util::i18n::parseMarked(text);
         const auto translated = lookup(msg.toUtf8());
-        auto result = translated.isNull() ? text : translated;
+        auto result = translated.isNull() ? msg : translated;
         for (const auto& arg : args)
             result = result.arg(arg);
         return result;
