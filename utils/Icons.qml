@@ -109,7 +109,7 @@ Singleton {
         [["profile"], "person"],
         [["file"], "folder_copy"]
     ]
-    //qmlformat on
+    // qmlformat on
 
     /**
      * Checks if a name matches an icon config. Icon configs can have the following keys:
