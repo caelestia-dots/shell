@@ -2,10 +2,12 @@ pragma ComponentBehavior: Bound
 
 import QtQuick
 import QtQuick.Layouts
+import Qt.labs.platform as Labs
 import Caelestia.Config
 import qs.components
 import qs.components.filedialog
 import qs.services
+import qs.utils
 
 StyledRect {
     id: root
@@ -16,6 +18,24 @@ StyledRect {
     implicitHeight: inner.implicitHeight + Tokens.padding.medium * 2
 
     color: Colours.tPalette.m3surfaceContainer
+
+    // Real on-disk names for the XDG user dirs, resolved via QStandardPaths so
+    // localised setups (e.g. ~/Música instead of ~/Music) still work. Falls
+    // back to the English label when a location isn't under $HOME.
+    function xdgDirName(location, fallback) {
+        const path = Labs.StandardPaths.writableLocation(location).toString().replace("file://", "");
+        const name = path.substring(path.lastIndexOf("/") + 1);
+        return name.length > 0 && path.startsWith(Paths.home) ? name : fallback;
+    }
+
+    readonly property var dirNames: ({
+        "Downloads": xdgDirName(Labs.StandardPaths.DownloadLocation, "Downloads"),
+        "Desktop": xdgDirName(Labs.StandardPaths.DesktopLocation, "Desktop"),
+        "Documents": xdgDirName(Labs.StandardPaths.DocumentsLocation, "Documents"),
+        "Music": xdgDirName(Labs.StandardPaths.MusicLocation, "Music"),
+        "Pictures": xdgDirName(Labs.StandardPaths.PicturesLocation, "Pictures"),
+        "Videos": xdgDirName(Labs.StandardPaths.MoviesLocation, "Videos")
+    })
 
     ColumnLayout {
         id: inner
@@ -42,7 +62,8 @@ StyledRect {
                 id: place
 
                 required property string modelData
-                readonly property bool selected: modelData === root.dialog.cwd[root.dialog.cwd.length - 1]
+                readonly property string realName: root.dirNames[modelData] ?? modelData
+                readonly property bool selected: realName === root.dialog.cwd[root.dialog.cwd.length - 1]
 
                 Layout.fillWidth: true
                 implicitHeight: placeInner.implicitHeight + Tokens.padding.medium * 2
@@ -56,7 +77,7 @@ StyledRect {
                         if (place.modelData === "Home")
                             root.dialog.cwd = ["Home"];
                         else
-                            root.dialog.cwd = ["Home", place.modelData];
+                            root.dialog.cwd = ["Home", place.realName];
                     }
                 }
 
