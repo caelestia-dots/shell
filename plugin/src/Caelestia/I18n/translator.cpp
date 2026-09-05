@@ -292,9 +292,13 @@ QString Translator::translatePlural(const QString& text, const QString& plural, 
 }
 
 QString Translator::langForLocale() const {
-    const auto locale = QLocale::system();
-    if (m_supportedLanguages.contains(locale.name()))
-        return locale.name();
+    const auto langs = QLocale::system().uiLanguages(QLocale::TagSeparator::Underscore);
+    for (const auto& lang : langs) {
+        if (m_supportedLanguages.contains(lang))
+            return lang;
+    }
+
+    qCDebug(lcI18n) << "No catalog for any of the system UI languages";
     return {};
 }
 
