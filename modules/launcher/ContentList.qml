@@ -51,6 +51,10 @@ Item {
                 root.implicitHeight: root.Tokens.sizes.launcher.wallpaperHeight
                 wallpaperList.active: true
             }
+
+            StateChangeScript {
+                script: Wallpapers.updateThumbs()
+            }
         }
     ]
 

@@ -46,6 +46,11 @@ Searcher {
             getPreviewColoursProc.running = true;
     }
 
+    function updateThumbs(): void {
+        if (Paths.videowallsdir !== Paths.wallsdir)
+            thumbProcess.running = true;
+    }
+
     function stopPreview(): void {
         showPreview = false;
         if (previewColourLock)
@@ -59,7 +64,7 @@ Searcher {
             Colours.showPreview = false;
     }
 
-    list: wallpapers.entries
+    list: [...wallpapers.entries, ...videoWallpapers.entries]
     key: "relativePath"
     useFuzzy: GlobalConfig.launcher.useFuzzy.wallpapers
     extraOpts: useFuzzy ? ({}) : ({
@@ -111,6 +116,14 @@ Searcher {
         filter: FileSystemModel.Images
     }
 
+    FileSystemModel {
+        id: videoWallpapers
+
+        recursive: true
+        path: Paths.videowallsdir
+        nameFilters: Images.validVideoExtensions.map(ext => "*." + ext)
+    }
+
     Process {
         id: getPreviewColoursProc
 
@@ -118,8 +131,19 @@ Searcher {
         stdout: StdioCollector {
             onStreamFinished: {
                 Colours.load(text, true);
-                Colours.showPreview = true;
+                if (root.showPreview)
+                    Colours.showPreview = true;
             }
+        }
+    }
+
+    Process {
+        id: thumbProcess
+
+        command: ["caelestia", "wallpaper", "--update-thumbs"]
+        onExited: { // qmllint disable signal-handler-parameters
+            videoWallpapers.path = "";
+            videoWallpapers.path = Paths.videowallsdir;
         }
     }
 }
