@@ -328,11 +328,22 @@ void Lyrics::appendCandidates(const QList<LyricCandidate>& add) {
 }
 
 void Lyrics::clearCandidates() {
-    if (m_candidates.isEmpty()) {
-        return;
+    // The selection has to go with the list it points into. Leaving it set
+    // means doLoad()'s restore of a saved backend/id hits
+    // setSelectedCandidate()'s dedup and returns having done nothing - and
+    // since doLoad() has already called setLoading(true) by then, nothing
+    // clears it again and the spinner stays up until the track changes.
+    // LyricCandidate compares by backend + id only, so it only takes leaving a
+    // track and coming back to it for the restored candidate to match whatever
+    // is still selected.
+    if (!m_candidates.isEmpty()) {
+        m_candidates.clear();
+        emit lyricCandidatesChanged();
     }
-    m_candidates.clear();
-    emit lyricCandidatesChanged();
+    if (m_selected.isValid()) {
+        m_selected = LyricCandidate();
+        emit selectedCandidateChanged();
+    }
 }
 
 void Lyrics::scheduleLoad() {
