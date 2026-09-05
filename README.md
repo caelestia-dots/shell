@@ -66,6 +66,49 @@ You can then run the shell with `caelestia-shell`.
 
 For home-manager, you can also use Caelestia's Home Manager module (explained in [the configuration section](#home-manager-module)), which installs and configures the shell and CLI.
 
+### Gentoo
+
+> [!NOTE]
+> The shell and its runtime dependencies are packaged in the community-maintained
+> [`hougeapps-overlay`](https://github.com/HougeLangley/hougeapps-overlay), not in the Gentoo
+> tree. Enable the overlay first, then install `gui-apps/caelestia-shell`.
+
+Add the overlay in `/etc/portage/repos.conf/hougeapps-overlay.conf`:
+
+```ini
+[hougeapps-overlay]
+location = /var/db/repos/hougeapps-overlay
+sync-type = git
+sync-uri = https://github.com/HougeLangley/hougeapps-overlay.git
+auto-sync = yes
+```
+
+Then sync it and accept its keywords:
+
+```sh
+sudo emerge --sync hougeapps-overlay
+echo "*/*::hougeapps-overlay" | sudo tee -a /etc/portage/package.accept_keywords/hougeapps-overlay
+```
+
+Install the shell (the `cli` USE flag, enabled by default, pulls in [`caelestia-cli`][cli-repo]):
+
+```sh
+sudo emerge -av gui-apps/caelestia-shell
+```
+
+The ebuild builds the shell from a release tag with CMake and installs it to the system Quickshell
+config directory, so the manual build steps below are not needed.
+Note that `gui-wm/hyprland` is pulled in as a runtime dependency by the ebuild itself.
+
+To assemble the full Caelestia desktop on Gentoo, also install the remaining overlay packages
+and deploy the dotfiles with the CLI:
+
+```sh
+sudo emerge -av media-libs/libcava dev-python/materialyoucolor media-fonts/rubik \
+    media-fonts/material-symbols media-sound/pwvucontrol
+caelestia install
+```
+
 ### Manual installation
 
 Dependencies:
@@ -176,6 +219,15 @@ Use `caelestia wallpaper -h` for more info about this command.
 If using the full dotfiles or the CLI, run `caelestia update` to perform a full system update and
 update the dots.
 Otherwise, if you installed the shell on its own, update your system using your AUR helper (e.g., `paru`).
+
+### Packaged install (Gentoo)
+
+The overlay is synced automatically during `emerge --sync`, so a regular system update picks up
+new shell releases:
+
+```sh
+sudo emerge -avuDN @world gui-apps/caelestia-shell
+```
 
 ### Manual install
 
@@ -945,4 +997,5 @@ Finally, another thank you to all the configs I took inspiration from (only one 
 </a>
 
 [dots-repo]: https://github.com/caelestia-dots/caelestia
+[cli-repo]: https://github.com/caelestia-dots/cli
 [discord]: https://caelestiashell.com/discord
