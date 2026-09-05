@@ -291,6 +291,20 @@ ColumnLayout {
                         connectButton.hasError = false;
                     }
 
+                    // Paste from the clipboard. This field is not a TextField:
+                    // the text is assembled by hand from event.text, so without
+                    // this branch Ctrl+V lands in the buffer as a control
+                    // character and the password silently comes out wrong.
+                    // Handles Ctrl+V and Shift+Insert.
+                    const isPaste = (event.key === Qt.Key_V && (event.modifiers & Qt.ControlModifier)) || (event.key === Qt.Key_Insert && (event.modifiers & Qt.ShiftModifier));
+                    if (isPaste) {
+                        const clip = Quickshell.clipboardText;
+                        if (clip)
+                            passwordBuffer += clip.replace(/[\r\n]+$/, "");
+                        event.accepted = true;
+                        return;
+                    }
+
                     if (event.key === Qt.Key_Enter || event.key === Qt.Key_Return) {
                         if (connectButton.enabled) {
                             connectButton.clicked();
