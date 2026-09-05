@@ -38,6 +38,15 @@ Singleton {
     // nmcli reports "unavailable" for ethernet NICs with no link, so we treat
     // anything other than that as a usable connection.
     readonly property bool hasAvailableEthernet: ethernetDevices.some(d => d.state !== "unavailable")
+    // Interface carrying the default route, i.e. the one traffic actually
+    // leaves through. Not the same question as whether a device is connected:
+    // with both a cable and Wi-Fi up, either can hold the route depending on
+    // the metrics, and it changes without any device changing state.
+    property string defaultRouteInterface: ""
+    // Whether traffic is leaving over a wired link. Falls back to "a cable is
+    // connected" until the routing table has been read, so nothing flickers on
+    // startup.
+    readonly property bool onEthernet: !!activeEthernet && (!defaultRouteInterface || ethernetDevices.some(d => d.iface === defaultRouteInterface))
     property list<var> activeProcesses: []
 
     readonly property alias connectionCheckTimer: connectionCheckTimer
@@ -1398,7 +1407,15 @@ Singleton {
         return details;
     }
 
+    // NetworkManager doesn't report which connection owns the default route -
+    // `connection show --active` has no field for it - so read it from the
+    // routing table. Lowest metric wins, which is what the kernel picks.
+    function refreshDefaultRoute(): void {
+        defaultRouteProc.running = true;
+    }
+
     function refreshOnConnectionChange(): void {
+        refreshDefaultRoute();
         getNetworks(networks => {
             const newActive = root.active;
 
@@ -1439,6 +1456,7 @@ Singleton {
     }
 
     Component.onCompleted: {
+        refreshDefaultRoute();
         getWifiStatus(() => {});
         getNetworks(() => {});
         loadSavedConnections(() => {});
@@ -1706,6 +1724,30 @@ Singleton {
 
         command: ["nmcli", "dev", root.nmcliCommandWifi, "list", "--rescan", "yes"]
         onExited: root.getNetworks() // qmllint disable signal-handler-parameters
+    }
+
+    Process {
+        id: defaultRouteProc
+
+        command: ["ip", "-j", "route", "show", "default"]
+        environment: ({
+                LANG: "C.UTF-8",
+                LC_ALL: "C.UTF-8"
+            })
+        stdout: StdioCollector {
+            onStreamFinished: {
+                let best = null;
+                try {
+                    for (const route of JSON.parse(text || "[]"))
+                        if (route.dev && (best === null || (route.metric ?? 0) < (best.metric ?? 0)))
+                            best = route;
+                } catch (error) {
+                    console.warn(lc, `Unable to parse routing table: ${error}`);
+                    return;
+                }
+                root.defaultRouteInterface = best?.dev ?? "";
+            }
+        }
     }
 
     Process {
