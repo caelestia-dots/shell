@@ -1,6 +1,8 @@
 #include "cutils.hpp"
 
 #include <qdir.h>
+#include <qdiriterator.h>
+#include <qfile.h>
 #include <qfileinfo.h>
 #include <qloggingcategory.h>
 #include <qmetaobject.h>
@@ -141,6 +143,48 @@ QString CUtils::enumToString(QObject* target, const QString& property, const QVa
     }
 
     return QString::fromUtf8(key);
+}
+
+QString CUtils::gitRevision() {
+#ifdef GIT_REVISION
+    return QStringLiteral(GIT_REVISION);
+#else
+    return QString();
+#endif
+}
+
+QString CUtils::readTextFile(const QString& path) {
+    QFile file(path);
+    if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        return QString();
+    }
+    return QString::fromUtf8(file.readAll());
+}
+
+bool CUtils::writeTextFile(const QString& path, const QString& text) {
+    const QFileInfo info(path);
+    if (!QDir().mkpath(info.absolutePath())) {
+        qCWarning(lcCUtils) << "Failed to create directory for" << path;
+        return false;
+    }
+    QFile file(path);
+    if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
+        qCWarning(lcCUtils) << "Failed to open" << path << "for writing";
+        return false;
+    }
+    return file.write(text.toUtf8()) >= 0;
+}
+
+QStringList CUtils::listFiles(const QString& dir, const QString& suffix) {
+    QStringList out;
+    QDirIterator it(dir, QDirIterator::Subdirectories);
+    while (it.hasNext()) {
+        const QString path = it.next();
+        if (it.fileInfo().isFile() && path.endsWith(suffix)) {
+            out.append(path);
+        }
+    }
+    return out;
 }
 
 namespace {

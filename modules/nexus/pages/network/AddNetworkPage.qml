@@ -99,6 +99,7 @@ PageBase {
             id: hiddenToggle
 
             first: true
+            settingAnchor: "add-network-hidden"
             text: qsTr("Hidden network")
             subtext: qsTr("Actively probe for a network that doesn't broadcast its name")
             checked: true
@@ -109,6 +110,7 @@ PageBase {
 
             Layout.topMargin: Tokens.spacing.extraSmall / 2 - parent.spacing
             last: !root.secured
+            settingAnchor: "add-network-security"
             label: qsTr("Security")
             fallbackText: qsTr("WPA/WPA2/WPA3 Personal")
             fallbackIcon: "lock"

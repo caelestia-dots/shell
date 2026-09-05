@@ -22,6 +22,7 @@ PageBase {
         SliderRow {
             first: true
             icon: Icons.getVolumeIcon(Audio.volume, Audio.muted)
+            settingAnchor: "audio-output"
             label: qsTr("Output")
             valueLabel: Math.round(value * 100) + "%"
             value: Audio.volume
@@ -49,6 +50,7 @@ PageBase {
             Layout.topMargin: Tokens.spacing.large - parent.spacing
             first: true
             icon: Icons.getMicVolumeIcon(Audio.sourceVolume, Audio.sourceMuted)
+            settingAnchor: "audio-input"
             label: qsTr("Input")
             valueLabel: Math.round(value * 100) + "%"
             value: Audio.sourceVolume
@@ -78,6 +80,7 @@ PageBase {
             last: true
 
             icon: "tune"
+            settingAnchor: "audio-app-volumes"
             text: qsTr("App volumes")
             subtext: Audio.streams.length === 0 ? qsTr("No apps playing audio") : Audio.streams.length === 1 ? qsTr("1 app playing audio") : qsTr("%1 apps playing audio").arg(Audio.streams.length)
             onClicked: root.nState.openSubPage(1)

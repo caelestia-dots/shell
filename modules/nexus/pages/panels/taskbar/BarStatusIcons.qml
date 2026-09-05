@@ -89,6 +89,7 @@ PageBase {
         ToggleRow {
             first: true
             last: true
+            settingAnchor: "bar-si-popout-on-hover"
             text: qsTr("Popout on hover")
             subtext: qsTr("Show a details popout when hovering the status icons")
             checked: Config.bar.popouts.statusIcons

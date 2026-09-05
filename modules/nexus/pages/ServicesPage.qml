@@ -75,6 +75,7 @@ PageBase {
             first: true
             last: true
             icon: "notifications"
+            settingAnchor: "services-notifications"
             text: qsTr("Notifications")
             subtext: qsTr("Notifications, toasts, timeouts")
             onClicked: root.nState.openSubPage(1)
@@ -87,6 +88,7 @@ PageBase {
 
         StepperRow {
             first: true
+            settingAnchor: "services-media-refresh"
             label: qsTr("Media refresh")
             subtext: qsTr("How often the media position updates (ms)")
             value: GlobalConfig.dashboard.mediaUpdateInterval
@@ -97,6 +99,7 @@ PageBase {
         }
 
         StepperRow {
+            settingAnchor: "services-system-stats-refresh"
             label: qsTr("System stats refresh")
             subtext: qsTr("CPU, memory and GPU update interval (seconds)")
             value: GlobalConfig.dashboard.resourceUpdateInterval / 1000
@@ -108,6 +111,7 @@ PageBase {
 
         StepperRow {
             last: true
+            settingAnchor: "services-wi-fi-rescan"
             label: qsTr("Wi-Fi rescan")
             subtext: qsTr("How often available networks are rescanned (seconds)")
             value: GlobalConfig.nexus.networkRescanInterval / 1000
@@ -124,6 +128,7 @@ PageBase {
 
         SelectRow {
             first: true
+            settingAnchor: "services-lyrics-backend"
             label: qsTr("Lyrics backend")
             subtext: qsTr("Source used to fetch synced lyrics")
             menuItems: root.lyricsItems
@@ -133,6 +138,7 @@ PageBase {
 
         SelectRow {
             last: true
+            settingAnchor: "services-default-player"
             label: qsTr("Default player")
             subtext: qsTr("Preferred media player when several are open")
             menuItems: playerVariants.instances
@@ -149,6 +155,7 @@ PageBase {
 
         StepperRow {
             first: true
+            settingAnchor: "services-volume-step"
             label: qsTr("Volume step")
             subtext: qsTr("Amount the volume changes per scroll (%)")
             value: Math.round(GlobalConfig.services.audioIncrement * 100)
@@ -159,6 +166,7 @@ PageBase {
         }
 
         StepperRow {
+            settingAnchor: "services-brightness-step"
             label: qsTr("Brightness step")
             subtext: qsTr("Amount the brightness changes per scroll (%)")
             value: Math.round(GlobalConfig.services.brightnessIncrement * 100)
@@ -170,6 +178,7 @@ PageBase {
 
         StepperRow {
             last: true
+            settingAnchor: "services-max-volume"
             label: qsTr("Max volume")
             subtext: qsTr("Upper limit for output volume (%)")
             value: Math.round(GlobalConfig.services.maxVolume * 100)
@@ -186,6 +195,7 @@ PageBase {
 
         StepperRow {
             first: true
+            settingAnchor: "services-visualiser-bars"
             label: qsTr("Visualiser bars")
             subtext: qsTr("Number of bars in the audio visualisers")
             value: GlobalConfig.services.visualiserBars
@@ -196,6 +206,7 @@ PageBase {
         }
 
         ToggleRow {
+            settingAnchor: "services-smart-colour-scheme"
             text: qsTr("Smart colour scheme")
             subtext: qsTr("Derive theme mode and variant from the wallpaper")
             checked: GlobalConfig.services.smartScheme
@@ -204,6 +215,7 @@ PageBase {
 
         SelectRow {
             last: true
+            settingAnchor: "services-gpu"
             label: qsTr("GPU")
             subtext: Gpu.name ? qsTr("Monitoring: %1").arg(Gpu.name) : qsTr("Override for GPU type")
             menuOnTop: true
