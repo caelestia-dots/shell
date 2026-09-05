@@ -85,7 +85,8 @@ QString Translator::_tr(const QString& text, const QString& context, bool marked
     if (markedOnly)
         return text; // Don't translate unmarked strings when markedOnly
 
-    const auto key = context.isEmpty() ? text.toUtf8() : context.toUtf8() + util::i18n::k_contextSep + text.toUtf8();
+    const auto key =
+        context.isEmpty() ? text.toUtf8() : context.toUtf8() + util::i18n::k_contextSep.toLatin1() + text.toUtf8();
     const auto translated = lookup(key);
     return translated.isNull() ? text : translated;
 }

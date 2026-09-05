@@ -6,9 +6,9 @@
 
 namespace util::i18n {
 
-constexpr char k_markChar = '\x01';
-constexpr char k_argSep = '\x02';
-constexpr char k_contextSep = '\x04';
+inline constexpr QChar k_markChar = u'\x01';
+inline constexpr QChar k_argSep = u'\x02';
+inline constexpr QChar k_contextSep = u'\x04';
 
 // Marks a string with the given context and args.
 // The marked format is `markChar {<arg> argSep} [<context> contextSep] <text>`
@@ -21,16 +21,16 @@ inline QString mark(const QString& text, const QString& context = {}, const QStr
 
     QString result;
     result.reserve(len);
-    result += QChar::fromLatin1(k_markChar);
+    result += k_markChar;
 
     for (const auto& arg : args) {
         result += arg;
-        result += QChar::fromLatin1(k_argSep);
+        result += k_argSep;
     }
 
     if (!context.isEmpty()) {
         result += context;
-        result += QChar::fromLatin1(k_contextSep);
+        result += k_contextSep;
     }
 
     result += text;
@@ -40,7 +40,7 @@ inline QString mark(const QString& text, const QString& context = {}, const QStr
 // Parses a marked string into <context + text, args>
 inline QPair<QString, QStringList> parseMarked(const QString& text) {
     const auto unmarked = text.mid(1);
-    const auto parts = unmarked.split(QChar::fromLatin1(k_argSep));
+    const auto parts = unmarked.split(k_argSep);
     if (parts.size() == 1)
         return { unmarked, {} };
 
@@ -53,7 +53,7 @@ inline QPair<QString, QStringList> parseMarked(const QString& text) {
 }
 
 inline bool isMarked(const QString& text) {
-    return text.startsWith(QChar::fromLatin1(k_markChar));
+    return text.startsWith(k_markChar);
 }
 
 } // namespace util::i18n
