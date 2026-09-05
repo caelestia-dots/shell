@@ -20,8 +20,8 @@ Item {
         return acc;
     }, {})
 
-    implicitWidth: (currentPopout?.implicitWidth ?? 0) + Tokens.padding.extraLargeIncreased
-    implicitHeight: (currentPopout?.implicitHeight ?? 0) + Tokens.padding.extraLargeIncreased
+    implicitWidth: currentPopout ? currentPopout.implicitWidth + Tokens.padding.extraLargeIncreased : 0
+    implicitHeight: currentPopout ? currentPopout.implicitHeight + Tokens.padding.extraLargeIncreased : 0
 
     Item {
         id: content
