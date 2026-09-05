@@ -1,0 +1,566 @@
+#!/usr/bin/env python3
+"""Emit privacy-device usage on stdout as JSON lines, one per state change.
+
+Watches four sensors and reports which application is responsible:
+
+  microphone  ALSA capture PCM state (cheap gate) confirmed against PipeWire
+  camera      uvcvideo module refcount (cheap gate) resolved via /proc fd scan
+  screen      PipeWire portal screencast nodes + known recorder processes
+  location    GeoClue2 Manager.InUse
+
+Idle costs nothing but small file reads: the expensive attribution work only
+runs while a sensor is actually live. PipeWire is followed through a single
+long-lived `pw-dump -m` stream rather than repeated polling.
+
+Consumed by the caelestia shell's Privacy service. Also usable standalone:
+
+    caelestia-privacy-monitor --once     print current state and exit
+    caelestia-privacy-monitor --probe    stream raw signals, for diagnosing
+"""
+
+from __future__ import annotations
+
+import argparse
+import glob
+import json
+import os
+import signal
+import subprocess
+import sys
+import threading
+import time
+
+POLL_INTERVAL = 1.5
+
+# How long a delivered location fix keeps the location indicator lit.
+LOCATION_ALERT_WINDOW = 30.0
+
+# Nodes the portal creates while a screencast is live. An app consuming the
+# cast shows up as a video stream; the portal side names itself.
+SCREENCAST_NODE_HINTS = ("xdg-desktop-portal", "screencast", "screen-cast")
+SCREENCAST_CLASSES = ("Stream/Input/Video", "Stream/Output/Video")
+
+# Recorders that capture via wlr-screencopy and so never touch the portal.
+RECORDER_PROCS = (
+    "gpu-screen-recorder",
+    "wf-recorder",
+    "wl-screenrec",
+    "obs",
+)
+
+# application.name values that describe the plumbing rather than the culprit.
+GENERIC_APP_NAMES = {
+    "pipewire",
+    "pipewire alsa",
+    "libpipewire",
+    "speech-dispatcher",
+    "wireplumber",
+}
+
+
+def read_text(path: str) -> str:
+    try:
+        with open(path, "r", errors="replace") as fh:
+            return fh.read()
+    except OSError:
+        return ""
+
+
+def clean_app_name(name: str | None) -> str | None:
+    """Normalise a PipeWire application.name into something worth showing."""
+    if not name:
+        return None
+    name = name.strip()
+    # "PipeWire ALSA [aplay]" -> "aplay"
+    if "[" in name and name.endswith("]"):
+        inner = name[name.index("[") + 1 : -1].strip()
+        if inner:
+            name = inner
+    if not name or name.lower() in GENERIC_APP_NAMES:
+        return None
+    return name
+
+
+# --------------------------------------------------------------------------
+# PipeWire
+# --------------------------------------------------------------------------
+
+
+class PipeWireMonitor:
+    """Follows `pw-dump -m`, keeping a live view of interesting nodes.
+
+    pw-dump emits one full dump then a delta per change. A delta object that
+    carries no `info` means the node went away.
+    """
+
+    def __init__(self) -> None:
+        self.nodes: dict[int, dict] = {}
+        self.lock = threading.Lock()
+        self.ok = False
+        # Set once the opening full dump has been parsed, so the first reading
+        # is not taken against a half-built table.
+        self.ready = threading.Event()
+        # Pulsed on every applied delta so the main loop can re-evaluate at
+        # once instead of waiting out its poll interval and missing a short
+        # burst of microphone use.
+        self.changed = threading.Event()
+        self._proc: subprocess.Popen | None = None
+        self._stop = False
+
+    def start(self) -> None:
+        self._stop = False
+        threading.Thread(target=self._run, daemon=True).start()
+
+    def shutdown(self) -> None:
+        """Terminate the pw-dump child.
+
+        It does not share our process group, so without this it survives as an
+        orphan every time the helper is restarted -- and the shell restarts the
+        helper whenever the setting is toggled.
+        """
+        self._stop = True
+        proc = self._proc
+        if proc and proc.poll() is None:
+            proc.terminate()
+            try:
+                proc.wait(timeout=2)
+            except subprocess.TimeoutExpired:
+                proc.kill()
+
+    def _run(self) -> None:
+        while not self._stop:
+            try:
+                self._proc = subprocess.Popen(
+                    ["pw-dump", "-m", "-N"],
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.DEVNULL,
+                    text=True,
+                    bufsize=1,
+                )
+            except (OSError, FileNotFoundError):
+                self.ok = False
+                time.sleep(5)
+                continue
+
+            self.ok = True
+            try:
+                self._consume(self._proc.stdout)
+            except Exception:
+                pass
+            self.ok = False
+            self.ready.clear()
+            with self.lock:
+                self.nodes.clear()
+            self.changed.set()
+            time.sleep(2)  # pipewire restarted or the pipe broke; reconnect
+
+    def _consume(self, stream) -> None:
+        # readline() rather than a block read or `for line in stream`: both of
+        # those buffer ahead and block until the buffer fills, which strands a
+        # delta in the pipe until unrelated traffic arrives. pw-dump
+        # pretty-prints, so every complete top-level value ends on a line
+        # boundary.
+        decoder = json.JSONDecoder()
+        chunks: list[str] = []
+        while True:
+            line = stream.readline()
+            if not line:
+                return
+            chunks.append(line)
+            # Only attempt a decode once a top-level value has closed. pw-dump
+            # pretty-prints, so that is a "]" or "}" in column zero. Trying to
+            # decode on every line instead re-scans the whole accumulated
+            # buffer each time, which turns the 500KB opening dump into
+            # quadratic work and delays it by many seconds -- long enough to
+            # miss the events this monitor exists to catch.
+            if line[0] not in ("]", "}"):
+                continue
+
+            buf = "".join(chunks)
+            chunks = []
+            while True:
+                stripped = buf.lstrip()
+                if not stripped:
+                    break
+                offset = len(buf) - len(stripped)
+                try:
+                    obj, end = decoder.raw_decode(buf, offset)
+                except ValueError:
+                    # Not actually complete; keep accumulating.
+                    chunks = [buf]
+                    break
+                buf = buf[end:]
+                self._apply(obj)
+                self.ready.set()
+                self.changed.set()
+
+    def _apply(self, obj) -> None:
+        batch = obj if isinstance(obj, list) else [obj]
+        with self.lock:
+            for entry in batch:
+                if not isinstance(entry, dict) or "id" not in entry:
+                    continue
+                nid = entry["id"]
+                info = entry.get("info")
+                if info is None:
+                    self.nodes.pop(nid, None)
+                    continue
+                if entry.get("type", "").endswith("Node") or nid in self.nodes:
+                    props = info.get("props") or {}
+                    if not props.get("media.class"):
+                        continue
+                    self.nodes[nid] = {
+                        "class": props.get("media.class", ""),
+                        "state": info.get("state", ""),
+                        "app": props.get("application.name"),
+                        "binary": props.get("application.process.binary"),
+                        "name": props.get("node.name", ""),
+                    }
+
+    def snapshot(self) -> list[dict]:
+        with self.lock:
+            return list(self.nodes.values())
+
+    def running_mic_apps(self) -> list[str]:
+        apps = []
+        for n in self.snapshot():
+            if n["class"] == "Stream/Input/Audio" and n["state"] == "running":
+                apps.append(clean_app_name(n["app"]) or n["binary"] or n["name"])
+        return [a for a in apps if a]
+
+    def has_running_mic_stream(self) -> bool:
+        return any(
+            n["class"] == "Stream/Input/Audio" and n["state"] == "running"
+            for n in self.snapshot()
+        )
+
+    def screencast_apps(self) -> list[str]:
+        apps = []
+        for n in self.snapshot():
+            if n["state"] not in ("running", "active"):
+                continue
+            name = (n["name"] or "").lower()
+            is_portal = any(h in name for h in SCREENCAST_NODE_HINTS)
+            if n["class"] in SCREENCAST_CLASSES or is_portal:
+                label = clean_app_name(n["app"]) or n["binary"] or n["name"]
+                if label:
+                    apps.append(label)
+        return apps
+
+
+# --------------------------------------------------------------------------
+# Cheap /proc gates
+# --------------------------------------------------------------------------
+
+
+def alsa_capture_active() -> bool:
+    """True when any ALSA capture substream is actually running."""
+    for path in glob.glob("/proc/asound/card*/pcm*c/sub*/status"):
+        if "RUNNING" in read_text(path):
+            return True
+    return False
+
+
+def camera_refcount() -> int:
+    """Combined use count of the camera kernel modules. 0 means nothing has it."""
+    total = 0
+    for line in read_text("/proc/modules").splitlines():
+        parts = line.split()
+        if len(parts) >= 3 and parts[0] in ("uvcvideo", "videodev_v4l2loopback"):
+            try:
+                total += int(parts[2])
+            except ValueError:
+                pass
+    return total
+
+
+def video_device_holders() -> list[str]:
+    """Scan /proc for processes holding a /dev/video* fd. Only called when the
+    refcount already says something has the camera, so the cost is rare."""
+    holders: dict[str, None] = {}
+    for entry in glob.glob("/proc/[0-9]*/fd/*"):
+        try:
+            target = os.readlink(entry)
+        except OSError:
+            continue
+        if not target.startswith("/dev/video"):
+            continue
+        pid = entry.split("/")[2]
+        comm = read_text(f"/proc/{pid}/comm").strip()
+        if comm:
+            holders[comm] = None
+    return list(holders)
+
+
+def recorder_processes() -> list[str]:
+    found: dict[str, None] = {}
+    for entry in glob.glob("/proc/[0-9]*/comm"):
+        comm = read_text(entry).strip()
+        if comm in RECORDER_PROCS:
+            found[comm] = None
+    return list(found)
+
+
+# --------------------------------------------------------------------------
+# GeoClue
+# --------------------------------------------------------------------------
+
+
+def geoclue_in_use() -> bool:
+    try:
+        out = subprocess.run(
+            [
+                "busctl",
+                "--system",
+                "get-property",
+                "org.freedesktop.GeoClue2",
+                "/org/freedesktop/GeoClue2/Manager",
+                "org.freedesktop.GeoClue2.Manager",
+                "InUse",
+            ],
+            capture_output=True,
+            text=True,
+            timeout=3,
+        )
+    except (OSError, subprocess.SubprocessError):
+        return False
+    return out.returncode == 0 and out.stdout.strip().endswith("true")
+
+
+def geoclue_fix_paths() -> set[str]:
+    """Object paths of delivered location fixes.
+
+    GeoClue mints a new /Client/<n>/Location/<m> object for every fix it hands
+    out, so the appearance of a path we have not seen before is the moment a
+    location actually reached an application. That edge is the privacy event
+    worth reporting; Manager.InUse is a level, and it stays true for as long as
+    a client is merely *registered*, which can be hours.
+
+    GeoClue refuses Client property reads to anything that is not the owning
+    client or a whitelisted agent, so the requesting app cannot be named.
+    """
+    try:
+        tree = subprocess.run(
+            ["busctl", "--system", "tree", "org.freedesktop.GeoClue2"],
+            capture_output=True,
+            text=True,
+            timeout=3,
+        ).stdout
+    except (OSError, subprocess.SubprocessError):
+        return set()
+
+    return {
+        path
+        for line in tree.splitlines()
+        if "/Location/" in (path := line.strip().lstrip("├└─│ "))
+    }
+
+
+class LocationTracker:
+    """Turns GeoClue's sticky InUse level into a fix-delivered edge."""
+
+    def __init__(self, window: float) -> None:
+        self.window = window
+        self.seen: set[str] | None = None
+        self.last_fix: float = 0.0
+        self.standby = False
+
+    def poll(self) -> bool:
+        """True while a location was handed out within the alert window."""
+        self.standby = geoclue_in_use()
+        if not self.standby:
+            self.seen = None
+            return False
+
+        paths = geoclue_fix_paths()
+        if self.seen is None:
+            # First reading of this session: adopt as the baseline rather than
+            # reporting every pre-existing fix as brand new.
+            self.seen = paths
+        elif paths - self.seen:
+            self.seen = paths
+            self.last_fix = time.monotonic()
+
+        return bool(self.last_fix) and (time.monotonic() - self.last_fix) < self.window
+
+
+# --------------------------------------------------------------------------
+# State assembly
+# --------------------------------------------------------------------------
+
+
+class NameCache:
+    """Holds on to the app names for a sensor while it stays continuously live.
+
+    Attribution is sampled: the fd scan or the PipeWire table can momentarily
+    come back empty while the device is still held. Without this the label
+    would flicker between the app name and a bare "in use".
+    """
+
+    def __init__(self) -> None:
+        self._names: dict[str, list[str]] = {}
+
+    def resolve(self, sensor: str, active: bool, apps: list[str]) -> list[str]:
+        if not active:
+            self._names.pop(sensor, None)
+            return []
+        if apps:
+            self._names[sensor] = apps
+        return self._names.get(sensor, [])
+
+
+def build_state(pw: PipeWireMonitor, loc: LocationTracker, names: NameCache) -> dict:
+    # Microphone: PipeWire owns the audio devices here, so a running input
+    # stream is the precise signal and it clears the instant capture stops.
+    # The ALSA gate is only a fallback for when PipeWire is not up -- it cannot
+    # be OR-ed in, because PipeWire keeps the capture device open for several
+    # seconds after a stream ends and ALSA would keep reporting RUNNING.
+    mic_apps = pw.running_mic_apps()
+    mic_active = bool(mic_apps) if pw.ok else alsa_capture_active()
+
+    # Camera: refcount is the gate, the fd scan supplies the name.
+    cam_apps: list[str] = []
+    cam_active = camera_refcount() > 0
+    if cam_active:
+        cam_apps = video_device_holders()
+    if not cam_active:
+        # A camera reached only through the portal never bumps uvcvideo.
+        portal_cam = [
+            n for n in pw.snapshot()
+            if n["class"] == "Stream/Input/Video" and n["state"] == "running"
+        ]
+        if portal_cam:
+            cam_active = True
+            cam_apps = [
+                clean_app_name(n["app"]) or n["name"] for n in portal_cam
+            ]
+
+    screen_apps = pw.screencast_apps() + recorder_processes()
+    screen_active = bool(screen_apps)
+
+    loc_active = loc.poll()
+
+    def sensor(active: bool, apps: list[str]) -> dict:
+        seen: dict[str, None] = {}
+        for a in apps:
+            if a:
+                seen[a] = None
+        return {"active": bool(active), "apps": list(seen)}
+
+    state = {
+        "microphone": sensor(mic_active, names.resolve("microphone", mic_active, mic_apps)),
+        "camera": sensor(cam_active, names.resolve("camera", cam_active, cam_apps)),
+        "screen": sensor(screen_active, names.resolve("screen", screen_active, screen_apps)),
+        "location": sensor(loc_active, []),
+        "pipewire": pw.ok,
+    }
+    # A registered-but-quiet location client is worth showing in settings
+    # without lighting the indicator.
+    state["location"]["standby"] = loc.standby
+    return state
+
+
+def emit(state: dict) -> None:
+    sys.stdout.write(json.dumps(state, separators=(",", ":")) + "\n")
+    sys.stdout.flush()
+
+
+def main() -> int:
+    ap = argparse.ArgumentParser(description=__doc__)
+    ap.add_argument("--once", action="store_true", help="print state once and exit")
+    ap.add_argument("--probe", action="store_true", help="stream raw sensor signals")
+    ap.add_argument("--interval", type=float, default=POLL_INTERVAL)
+    ap.add_argument(
+        "--location-window",
+        type=float,
+        default=LOCATION_ALERT_WINDOW,
+        help="seconds a delivered location fix keeps the indicator lit",
+    )
+    args = ap.parse_args()
+
+    _die_with_parent()
+
+    pw = PipeWireMonitor()
+    pw.start()
+    loc = LocationTracker(args.location_window)
+    names = NameCache()
+    _install_signal_handlers(pw)
+    # Wait out the opening full dump so the first reading sees a complete table.
+    pw.ready.wait(timeout=10)
+
+    if args.once:
+        emit(build_state(pw, loc, names))
+        return 0
+
+    if args.probe:
+        while True:
+            nodes = [
+                n for n in pw.snapshot()
+                if "Video" in n["class"] or "Input/Audio" in n["class"]
+            ]
+            print(
+                f"alsa={alsa_capture_active()} uvc={camera_refcount()} "
+                f"geoclue_inuse={geoclue_in_use()} fix={loc.poll()} "
+                f"recorders={recorder_processes()}"
+            )
+            for n in nodes:
+                print(f"    {n['class']:20} {n['state']:12} {n['app']} :: {n['name']}")
+            print("-" * 60)
+            time.sleep(args.interval)
+
+    last: str | None = None
+    while True:
+        try:
+            state = build_state(pw, loc, names)
+        except Exception as exc:  # never let one bad reading kill the monitor
+            print(f"privacy-monitor: {exc}", file=sys.stderr)
+            time.sleep(args.interval)
+            continue
+        payload = json.dumps(state, separators=(",", ":"))
+        if payload != last:
+            last = payload
+            emit(state)
+        # Wake early when PipeWire reports a change, so a brief burst of
+        # microphone or screencast use is not lost between samples. The
+        # timeout still drives the /proc- and D-Bus-backed sensors.
+        pw.changed.wait(timeout=args.interval)
+        pw.changed.clear()
+
+
+def _die_with_parent() -> None:
+    """Ask the kernel to signal us when our parent goes away.
+
+    Quickshell does not reliably reap this helper when the shell exits, and a
+    surviving orphan keeps its own pw-dump alive. Across a few shell restarts
+    that accumulates into several redundant monitors.
+    """
+    try:
+        import ctypes
+
+        PR_SET_PDEATHSIG = 1
+        ctypes.CDLL("libc.so.6", use_errno=True).prctl(
+            PR_SET_PDEATHSIG, signal.SIGTERM, 0, 0, 0
+        )
+    except Exception:
+        return  # not fatal; the helper simply loses this safety net
+
+    # The parent may already have exited between fork and prctl, in which case
+    # the signal was never armed.
+    if os.getppid() == 1:
+        sys.exit(0)
+
+
+def _install_signal_handlers(pw: PipeWireMonitor) -> None:
+    def handler(_signum, _frame):
+        pw.shutdown()
+        sys.exit(0)
+
+    for sig in (signal.SIGTERM, signal.SIGINT, signal.SIGHUP):
+        signal.signal(sig, handler)
+
+
+if __name__ == "__main__":
+    try:
+        sys.exit(main())
+    except KeyboardInterrupt:
+        sys.exit(0)

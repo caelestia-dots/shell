@@ -64,6 +64,12 @@ QtObject {
             category: "shell"
         },
         {
+            label: qsTr("Privacy"),
+            icon: "shield_lock",
+            description: qsTr("Microphone, camera, screen and location use"),
+            category: "shell"
+        },
+        {
             label: qsTr("Apps"),
             icon: "apps",
             description: qsTr("Default apps, favourites, hidden apps"),

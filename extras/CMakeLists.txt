@@ -7,3 +7,6 @@ target_compile_definitions(version PRIVATE
     DISTRIBUTOR="${DISTRIBUTOR}"
 )
 install(TARGETS version DESTINATION "${INSTALL_LIBDIR}")
+
+# Privacy monitor
+install(PROGRAMS privacy-monitor DESTINATION "${INSTALL_LIBDIR}")

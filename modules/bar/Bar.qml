@@ -9,6 +9,7 @@ import Quickshell
 import Caelestia.Config
 import qs.components
 import qs.services
+import qs.modules.privacy
 
 ColumnLayout {
     id: root
@@ -181,6 +182,12 @@ ColumnLayout {
                 }
             }
         }
+    }
+
+    PrivacyDot {
+        Layout.alignment: Qt.AlignHCenter
+        Layout.bottomMargin: root.vPadding
+        reservedMargin: root.vPadding
     }
 
     component EntryWrapper: Item {

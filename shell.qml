@@ -9,6 +9,7 @@ import "modules/drawers"
 import "modules/background"
 import "modules/areapicker"
 import "modules/lock"
+import "modules/privacy"
 import QtQuick
 import Quickshell
 import qs.services
@@ -34,6 +35,7 @@ ShellRoot {
         id: lock
     }
 
+    PrivacyIndicator {}
     Shortcuts {}
     BatteryMonitor {}
     IdleMonitors {

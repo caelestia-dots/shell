@@ -105,6 +105,41 @@ Singleton {
         return stream.properties["application.name"] || stream.description || stream.name || qsTr("Unknown Application");
     }
 
+    // A device can show up more than once under the same node.name. WirePlumber
+    // rebuilds its ALSA nodes when a card is re-probed, and on some hardware the
+    // previous set survives the rebuild as suspended leftovers -- one extra copy
+    // per resume, on machines that suspend often. The copies are identical in
+    // any device picker, so the user cannot tell which is live, and the leftover
+    // is not the one carrying the streams: writing volume to it moves a number
+    // that never reaches the speakers.
+    //
+    // Keep the node the server actually routes -- the current default -- and
+    // otherwise the first seen, which leaves ordering untouched. On a graph
+    // without duplicates every node is first seen, so this is a no-op.
+    function dedupByName(nodes: var, preferred: var): var {
+        const indexByName = new Map();
+        const deduped = [];
+
+        for (const node of nodes) {
+            const name = node.name;
+
+            // Nothing to key on: keep it rather than collapse unrelated nodes.
+            if (!name) {
+                deduped.push(node);
+                continue;
+            }
+
+            if (!indexByName.has(name)) {
+                indexByName.set(name, deduped.length);
+                deduped.push(node);
+            } else if (node === preferred) {
+                deduped[indexByName.get(name)] = node;
+            }
+        }
+
+        return deduped;
+    }
+
     function refreshNodes(): void {
         const newSinks = [];
         const newSources = [];
@@ -121,8 +156,10 @@ Singleton {
             }
         }
 
-        root.sinks = newSinks;
-        root.sources = newSources;
+        // Streams are deliberately not deduped: two windows of the same app are
+        // two real streams that happen to share a name.
+        root.sinks = dedupByName(newSinks, root.sink);
+        root.sources = dedupByName(newSources, root.source);
         root.streams = newStreams;
     }
 

@@ -142,6 +142,14 @@ QtObject {
             }
         },
         Component {
+            // Privacy
+            StackPage {
+                Component {
+                    PrivacyPage {}
+                }
+            }
+        },
+        Component {
             // Apps
             StackPage {
                 Component {
