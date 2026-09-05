@@ -20,6 +20,7 @@ constexpr const char* kService = "org.freedesktop.NetworkManager";
 constexpr const char* kManagerPath = "/org/freedesktop/NetworkManager";
 constexpr const char* kManagerIface = "org.freedesktop.NetworkManager";
 constexpr const char* kDeviceIface = "org.freedesktop.NetworkManager.Device";
+constexpr const char* kActiveIface = "org.freedesktop.NetworkManager.Connection.Active";
 constexpr const char* kPropsIface = "org.freedesktop.DBus.Properties";
 
 // From NMDeviceType; only the two we classify are named.
@@ -61,6 +62,19 @@ uint NmDevice::state() const {
 
 bool NmDevice::connected() const {
     return m_state == kStateActivated;
+}
+
+QString NmDevice::connection() const {
+    return m_connection;
+}
+
+void NmDevice::setConnection(const QString& connection) {
+    if (connection == m_connection) {
+        return;
+    }
+
+    m_connection = connection;
+    emit changed();
 }
 
 void NmDevice::update(const QVariantMap& props) {
@@ -322,7 +336,49 @@ void NetworkManager::readDevice(const QString& path) {
             m_devices.append(device);
             m_listChanged = true;
         }
-        device->update(reply.value());
+        const auto props = reply.value();
+        device->update(props);
+
+        // The profile name isn't on the device, it's on whatever active
+        // connection is attached to it, so that's a second read.
+        const auto connectionPath = props.value(QStringLiteral("ActiveConnection")).value<QDBusObjectPath>().path();
+        if (connectionPath.isEmpty() || connectionPath == QStringLiteral("/")) {
+            device->setConnection(QString());
+        } else {
+            readConnection(path, connectionPath);
+        }
+
+        step(-1);
+    });
+}
+
+void NetworkManager::readConnection(const QString& devicePath, const QString& connectionPath) {
+    auto bus = systemBus();
+    if (!bus) {
+        return;
+    }
+
+    auto msg = QDBusMessage::createMethodCall(
+        QString::fromUtf8(kService), connectionPath, QString::fromUtf8(kPropsIface), QStringLiteral("Get"));
+    msg << QString::fromUtf8(kActiveIface) << QStringLiteral("Id");
+
+    step(1);
+    auto* watcher = new QDBusPendingCallWatcher(bus->asyncCall(msg), this);
+    connect(watcher, &QDBusPendingCallWatcher::finished, this, [this, devicePath](QDBusPendingCallWatcher* call) {
+        call->deleteLater();
+
+        const QDBusPendingReply<QDBusVariant> reply = *call;
+        if (reply.isError()) {
+            // Connections go down while we're walking; that's expected.
+            qCDebug(logNetworkManager) << "Skipping connection for" << devicePath << ":" << reply.error().message();
+        }
+
+        // Looked up again rather than captured: the walk may have dropped the
+        // device while this was in flight.
+        auto* device = m_byPath.value(devicePath);
+        if (device != nullptr) {
+            device->setConnection(reply.isError() ? QString() : reply.value().variant().toString());
+        }
 
         step(-1);
     });

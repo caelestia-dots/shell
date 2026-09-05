@@ -25,10 +25,11 @@ ColumnLayout {
         triggeredOnStart: true
         interval: 5000
         onTriggered: {
-            Nmcli.getEthernetInterfaces(() => {});
+            // The device list is a live binding now; only the nmcli-backed
+            // details and the sysfs counters still need polling.
             if (Nmcli.activeEthernet) {
                 Nmcli.getEthernetDeviceDetails(Nmcli.activeEthernet.iface, () => {});
-                Nmcli.getEthernetDataUsage(Nmcli.activeEthernet.iface, () => {});
+                Nmcli.getEthernetDataUsage(Nmcli.activeEthernet.iface);
                 Nmcli.getEthernetSpeed(Nmcli.activeEthernet.iface);
             }
         }
@@ -80,13 +81,14 @@ ColumnLayout {
         id: ethRepeater
 
         model: ScriptModel {
-            values: Nmcli.ethernetDevices.filter(d => d.state !== "unavailable")
+            // NM_DEVICE_STATE_UNAVAILABLE is 20: anything past it has a carrier.
+            values: Nmcli.ethernetDevices.filter(d => d.state > 20)
         }
 
         delegate: ConnectedRect {
             id: ethRow
 
-            required property Nmcli.EthernetDevice modelData
+            required property var modelData
             required property int index
 
             readonly property bool isConnected: modelData.connected

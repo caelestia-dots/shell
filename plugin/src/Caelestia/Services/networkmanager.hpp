@@ -28,10 +28,16 @@ class NmDevice : public QObject {
     QML_UNCREATABLE("NmDevice instances are owned by NetworkManager")
 
     Q_PROPERTY(QString interface READ interface NOTIFY changed)
+    // Alias for `interface`. QML consumers have always called this `iface`, and
+    // aliasing here is cheaper than renaming it at every use site.
+    Q_PROPERTY(QString iface READ interface NOTIFY changed)
     Q_PROPERTY(caelestia::config::NetworkTransport::Enum type READ type NOTIFY changed)
     Q_PROPERTY(uint state READ state NOTIFY changed)
     // Whether the device has finished activating, i.e. NM state 100.
     Q_PROPERTY(bool connected READ connected NOTIFY changed)
+    // Name of the profile currently active on the device, empty when it's down.
+    // This is what `nmcli device status` reported in its CONNECTION column.
+    Q_PROPERTY(QString connection READ connection NOTIFY changed)
 
 public:
     explicit NmDevice(QString path, QObject* parent = nullptr);
@@ -41,6 +47,11 @@ public:
     [[nodiscard]] Transport type() const;
     [[nodiscard]] uint state() const;
     [[nodiscard]] bool connected() const;
+    [[nodiscard]] QString connection() const;
+
+    // Set apart from update(): the name lives on the device's active connection
+    // object, which is a second read.
+    void setConnection(const QString& connection);
 
     // Applies a property map read from the device's D-Bus object, emitting
     // changed() only when something actually differs.
@@ -54,6 +65,7 @@ private:
     QString m_interface;
     Transport m_type = config::NetworkTransport::None;
     uint m_state = 0;
+    QString m_connection;
 };
 
 // NetworkManager's device list, read over D-Bus.
@@ -96,6 +108,7 @@ private:
     void refresh();
     void readManager();
     void readDevice(const QString& path);
+    void readConnection(const QString& devicePath, const QString& connectionPath);
     void step(int delta);
     void finish();
 

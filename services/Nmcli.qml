@@ -6,13 +6,13 @@ import Quickshell
 import Quickshell.Io
 import Caelestia.Config
 import Caelestia.Services
+import qs.services
 
 Singleton {
     id: root
 
     property var deviceStatus: null
     property var wirelessInterfaces: []
-    property var ethernetInterfaces: []
     property bool isConnected: false
     readonly property bool connecting: wirelessInterfaces.some(i => isConnectingState(i.state))
     property string activeInterface: ""
@@ -31,11 +31,12 @@ Singleton {
     property var pendingConnection: null
     property var wirelessDeviceDetails: null
     property var ethernetDeviceDetails: null
-    property string ethernetDataUsage: ""
-    // Link speed of the active ethernet interface (from sysfs), e.g. "1 Gbps".
-    property string ethernetSpeed: ""
-    readonly property list<EthernetDevice> ethernetDevices: []
-    readonly property EthernetDevice activeEthernet: ethernetDevices.find(d => d.connected) ?? null
+    // Wired state lives in Wired now, read from NetworkManager over dbus.
+    // These forward it so existing consumers keep working unchanged.
+    readonly property string ethernetDataUsage: Wired.dataUsage
+    readonly property string ethernetSpeed: Wired.speed
+    readonly property list<var> ethernetDevices: Wired.devices
+    readonly property var activeEthernet: Wired.active
     // Whether traffic is actually leaving over a wired link, which isn't the
     // same question as whether a cable is plugged in - with both a cable and
     // wifi up, either can be carrying it. NetworkManager already tracks which
@@ -45,10 +46,7 @@ Singleton {
     // icon doesn't flicker through a wrong state on startup or if
     // NetworkManager isn't reachable.
     readonly property bool onEthernet: NetworkRoute.ready ? NetworkRoute.primaryTransport === NetworkTransport.Ethernet : !!activeEthernet
-    // True when at least one wired device has a carrier (cable plugged in).
-    // nmcli reports "unavailable" for ethernet NICs with no link, so we treat
-    // anything other than that as a usable connection.
-    readonly property bool hasAvailableEthernet: ethernetDevices.some(d => d.state !== "unavailable")
+    readonly property bool hasAvailableEthernet: Wired.available
     property list<var> activeProcesses: []
 
     readonly property alias connectionCheckTimer: connectionCheckTimer
@@ -232,149 +230,30 @@ Singleton {
         });
     }
 
+    // Kept so existing callers still get their callback; the device list is
+    // a live binding on Wired now, so there is nothing to fetch.
     function getEthernetInterfaces(callback: var): void {
-        executeCommand(["-t", "-f", root.deviceStatusFields, root.nmcliCommandDevice, "status"], result => {
-            const interfaces = parseDeviceStatusOutput(result.output, root.deviceTypeEthernet);
-            const applyInterfaces = filtered => {
-                const devices = filtered.map(iface => ({
-                            interface: iface.device,
-                            type: iface.type,
-                            state: iface.state,
-                            connection: iface.connection,
-                            connected: isConnectedState(iface.state),
-                            ipAddress: "",
-                            gateway: "",
-                            dns: [],
-                            subnet: "",
-                            macAddress: "",
-                            speed: ""
-                        }));
-
-                root.ethernetInterfaces = filtered;
-                syncEthernetDevices(devices);
-                if (callback)
-                    callback(filtered);
-            };
-
-            if (interfaces.length === 0) {
-                applyInterfaces([]);
-                return;
-            }
-
-            // NetworkManager reports container/VM veth pairs (Docker, Podman,
-            // etc.) as type "ethernet" too, so they'd show up here like real
-            // connections. A physical NIC always has
-            // /sys/class/net/<iface>/device; veth/bridge/tun interfaces
-            // never do, so that's how we tell them apart.
-            const proc = physicalCheckProc.createObject(root);
-            proc.callback = result => {
-                if (!result.success) {
-                    console.warn(lc, `Failed to classify ethernet interfaces (exited: ${result.exitCode}); keeping the unfiltered list.`);
-                    applyInterfaces(interfaces);
-                    return;
-                }
-
-                const physicalSet = result.output.trim().split("\n").filter(l => l.length > 0);
-                const filtered = interfaces.filter(iface => physicalSet.includes(iface.device));
-
-                applyInterfaces(filtered);
-            };
-
-            proc.exec(["sh", "-c", 'test -d /sys/class/net || exit 1; for i do [ -e "/sys/class/net/$i/device" ] && printf "%s\\n" "$i"; done; exit 0', "sh", ...interfaces.map(iface => iface.device)]);
-        });
-    }
-
-    // Sync a list of ethernet devices to the existing device list. Same logic as getNetworks
-    function syncEthernetDevices(devices: list<var>): void {
-        const rDevices = root.ethernetDevices;
-
-        const newMap = new Map();
-        for (const d of devices)
-            newMap.set(d.interface, d);
-
-        for (let i = rDevices.length - 1; i >= 0; i--) {
-            if (!newMap.has(rDevices[i].iface)) {
-                const removed = rDevices.splice(i, 1)[0];
-                removed.destroy();
-            }
-        }
-
-        const existingMap = new Map();
-        for (const rd of rDevices)
-            existingMap.set(rd.iface, rd);
-
-        for (const [iface, data] of newMap) {
-            const match = existingMap.get(iface);
-            if (match)
-                match.lastIpcObject = data;
-            else
-                rDevices.push(ethComp.createObject(root, {
-                    lastIpcObject: data
-                }));
-        }
+        if (callback)
+            callback(root.ethernetDevices);
     }
 
     function connectEthernet(connectionName: string, interfaceName: string, callback: var): void {
-        if (connectionName && connectionName.length > 0) {
-            executeCommand([root.nmcliCommandConnection, "up", connectionName], result => {
-                if (result.success) {
-                    Qt.callLater(() => {
-                        getEthernetInterfaces(() => {});
-                        if (interfaceName && interfaceName.length > 0) {
-                            Qt.callLater(() => {
-                                getEthernetDeviceDetails(interfaceName, () => {});
-                            }, 1000);
-                        }
-                    }, 500);
-                }
-                if (callback)
-                    callback(result);
-            });
-        } else if (interfaceName && interfaceName.length > 0) {
-            executeCommand([root.nmcliCommandDevice, "connect", interfaceName], result => {
-                if (result.success) {
-                    Qt.callLater(() => {
-                        getEthernetInterfaces(() => {});
-                        Qt.callLater(() => {
-                            getEthernetDeviceDetails(interfaceName, () => {});
-                        }, 1000);
-                    }, 500);
-                }
-                if (callback)
-                    callback(result);
-            });
-        } else {
+        Wired.connect(connectionName, interfaceName, success => {
+            // The device list updates itself; details still come from nmcli, and
+            // NM needs a moment after activation before they are worth reading.
+            if (success && interfaceName)
+                Qt.callLater(() => getEthernetDeviceDetails(interfaceName, () => {}), 1000);
             if (callback)
-                callback({
-                    success: false,
-                    output: "",
-                    error: "No connection name or interface specified",
-                    exitCode: -1
-                });
-        }
+                callback(success);
+        });
     }
 
     function disconnectEthernet(connectionName: string, callback: var): void {
-        if (!connectionName || connectionName.length === 0) {
-            if (callback)
-                callback({
-                    success: false,
-                    output: "",
-                    error: "No connection name specified",
-                    exitCode: -1
-                });
-            return;
-        }
-
-        executeCommand([root.nmcliCommandConnection, "down", connectionName], result => {
-            if (result.success) {
+        Wired.disconnect(connectionName, success => {
+            if (success)
                 root.ethernetDeviceDetails = null;
-                Qt.callLater(() => {
-                    getEthernetInterfaces(() => {});
-                }, 500);
-            }
             if (callback)
-                callback(result);
+                callback(success);
         });
     }
 
@@ -1291,30 +1170,12 @@ Singleton {
         });
     }
 
-    // Reads cumulative since-boot byte counters from sysfs for an interface and
-    // returns a human-readable total via the callback.
-    // Reads the negotiated link speed (Mbit/s) from sysfs and stores a
-    // human-readable form in ethernetSpeed. nmcli `device show` doesn't expose
-    // link speed, so sysfs is the root-free source.
     function getEthernetSpeed(interfaceName: string): void {
-        if (!interfaceName || interfaceName.length === 0) {
-            root.ethernetSpeed = "";
-            return;
-        }
-        speedProc.command = ["sh", "-c", `cat /sys/class/net/${interfaceName}/speed 2>/dev/null`];
-        speedProc.running = true;
+        Wired.refreshSpeed(interfaceName);
     }
 
-    function getEthernetDataUsage(interfaceName: string, callback: var): void {
-        if (!interfaceName || interfaceName.length === 0) {
-            if (callback)
-                callback("");
-            return;
-        }
-        dataUsageProc.iface = interfaceName;
-        dataUsageProc.cb = callback;
-        dataUsageProc.command = ["sh", "-c", `cat /sys/class/net/${interfaceName}/statistics/rx_bytes /sys/class/net/${interfaceName}/statistics/tx_bytes 2>/dev/null`];
-        dataUsageProc.running = true;
+    function getEthernetDataUsage(interfaceName: string): void {
+        Wired.refreshDataUsage(interfaceName);
     }
 
     function formatBytes(bytes: var): string {
@@ -1332,16 +1193,12 @@ Singleton {
 
     function getEthernetDeviceDetails(interfaceName: string, callback: var): void {
         if (!interfaceName || interfaceName.length === 0) {
-            const activeInterface = root.ethernetInterfaces.find(iface => {
-                return isConnectedState(iface.state);
-            });
-            if (activeInterface && activeInterface.device) {
-                interfaceName = activeInterface.device;
-            } else {
+            if (!root.activeEthernet) {
                 if (callback)
                     callback(null);
                 return;
             }
+            interfaceName = root.activeEthernet.iface;
         }
 
         executeCommand(["device", "show", interfaceName], result => {
@@ -1424,13 +1281,8 @@ Singleton {
                         }
                     }
 
-                    if (root.ethernetInterfaces.length > 0) {
-                        const activeEthernet = root.ethernetInterfaces.find(iface => {
-                            return isConnectedState(iface.state);
-                        });
-                        if (activeEthernet && activeEthernet.device) {
-                            getEthernetDeviceDetails(activeEthernet.device, () => {});
-                        }
+                    if (root.activeEthernet) {
+                        getEthernetDeviceDetails(root.activeEthernet.iface, () => {});
                     }
                 }, 500);
             } else {
@@ -1439,13 +1291,11 @@ Singleton {
             }
 
             getWirelessInterfaces(() => {});
-            getEthernetInterfaces(() => {
-                if (root.activeEthernet && root.activeEthernet.connected) {
-                    Qt.callLater(() => {
-                        getEthernetDeviceDetails(root.activeEthernet.iface, () => {});
-                    }, 500);
-                }
-            });
+            if (root.activeEthernet) {
+                Qt.callLater(() => {
+                    getEthernetDeviceDetails(root.activeEthernet.iface, () => {});
+                }, 500);
+            }
         });
     }
 
@@ -1453,7 +1303,6 @@ Singleton {
         getWifiStatus(() => {});
         getNetworks(() => {});
         loadSavedConnections(() => {});
-        getEthernetInterfaces(() => {});
 
         Qt.callLater(() => {
             if (root.wirelessInterfaces.length > 0) {
@@ -1465,13 +1314,8 @@ Singleton {
                 }
             }
 
-            if (root.ethernetInterfaces.length > 0) {
-                const activeEthernet = root.ethernetInterfaces.find(iface => {
-                    return isConnectedState(iface.state);
-                });
-                if (activeEthernet && activeEthernet.device) {
-                    getEthernetDeviceDetails(activeEthernet.device, () => {});
-                }
+            if (root.activeEthernet) {
+                getEthernetDeviceDetails(root.activeEthernet.iface, () => {});
             }
         }, 2000);
     }
@@ -1486,45 +1330,6 @@ Singleton {
         id: apComp
 
         AccessPoint {}
-    }
-
-    Component {
-        id: ethComp
-
-        EthernetDevice {}
-    }
-
-    Component {
-        id: physicalCheckProc
-
-        Process {
-            id: proc
-
-            property var callback: null
-
-            stdout: StdioCollector {
-                id: stdoutCollector
-            }
-
-            stderr: StdioCollector {
-                id: stderrCollector
-            }
-
-            onExited: code => { // qmllint disable signal-handler-parameters
-                Qt.callLater(() => {
-                    const callback = proc.callback;
-                    const result = {
-                        success: code === 0,
-                        output: stdoutCollector.text ?? "",
-                        error: stderrCollector.text ?? "",
-                        exitCode: code
-                    };
-
-                    proc.destroy();
-                    callback?.(result);
-                });
-            }
-        }
     }
 
     Timer {
@@ -1672,47 +1477,6 @@ Singleton {
     }
 
     Process {
-        id: dataUsageProc
-
-        property string iface
-        property var cb
-
-        stdout: StdioCollector {
-            onStreamFinished: {
-                const nums = text.trim().split("\n").map(n => parseInt(n.trim(), 10)).filter(n => !isNaN(n));
-                if (nums.length < 2) {
-                    if (dataUsageProc.cb)
-                        dataUsageProc.cb("");
-                    return;
-                }
-                const human = root.formatBytes(nums[0] + nums[1]);
-                root.ethernetDataUsage = human;
-                if (dataUsageProc.cb)
-                    dataUsageProc.cb(human);
-            }
-        }
-    }
-
-    Process {
-        id: speedProc
-
-        stdout: StdioCollector {
-            onStreamFinished: {
-                const mbit = parseInt(text.trim(), 10);
-                // Disconnected/virtual interfaces report -1 or nothing.
-                if (isNaN(mbit) || mbit <= 0) {
-                    root.ethernetSpeed = "";
-                } else if (mbit >= 1000) {
-                    const gbps = mbit / 1000;
-                    root.ethernetSpeed = `${Number.isInteger(gbps) ? gbps : gbps.toFixed(1)} Gbps`;
-                } else {
-                    root.ethernetSpeed = `${mbit} Mbps`;
-                }
-            }
-        }
-    }
-
-    Process {
         id: rescanProc
 
         command: ["nmcli", "dev", root.nmcliCommandWifi, "list", "--rescan", "yes"]
@@ -1833,20 +1597,5 @@ Singleton {
         readonly property bool active: lastIpcObject.active
         readonly property string security: lastIpcObject.security
         readonly property bool isSecure: security.length > 0
-    }
-
-    component EthernetDevice: QtObject {
-        required property var lastIpcObject
-        readonly property string iface: lastIpcObject.interface
-        readonly property string type: lastIpcObject.type
-        readonly property string state: lastIpcObject.state
-        readonly property string connection: lastIpcObject.connection
-        readonly property bool connected: lastIpcObject.connected
-        readonly property string ipAddress: lastIpcObject.ipAddress ?? ""
-        readonly property string gateway: lastIpcObject.gateway ?? ""
-        readonly property var dns: lastIpcObject.dns ?? []
-        readonly property string subnet: lastIpcObject.subnet ?? ""
-        readonly property string macAddress: lastIpcObject.macAddress ?? ""
-        readonly property string speed: lastIpcObject.speed ?? ""
     }
 }
