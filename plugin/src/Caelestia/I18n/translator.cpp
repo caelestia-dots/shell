@@ -91,12 +91,12 @@ QString Translator::_tr(const QString& text, const QString& context, bool marked
     return translated.isNull() ? text : translated;
 }
 
-QString Translator::mark(const QString& text) {
-    return util::i18n::mark(text);
+QString Translator::mark(const QString& text, const QStringList& args) {
+    return util::i18n::detail::doMark(text, {}, args);
 }
 
-QString Translator::markCtx(const QString& text, const QString& context) {
-    return util::i18n::mark(text, context);
+QString Translator::markCtx(const QString& text, const QString& context, const QStringList& args) {
+    return util::i18n::detail::doMark(text, context, args);
 }
 
 QStringList Translator::findSupportedLangs() {

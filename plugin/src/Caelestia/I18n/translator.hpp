@@ -24,8 +24,9 @@ public:
 
     // NOLINTNEXTLINE(readability-identifier-naming)
     Q_INVOKABLE [[nodiscard]] QString _tr(const QString& text, const QString& context, bool markedOnly) const;
-    Q_INVOKABLE [[nodiscard]] static QString mark(const QString& text);
-    Q_INVOKABLE [[nodiscard]] static QString markCtx(const QString& text, const QString& context);
+    Q_INVOKABLE [[nodiscard]] static QString mark(const QString& text, const QStringList& args = {});
+    Q_INVOKABLE [[nodiscard]] static QString markCtx(
+        const QString& text, const QString& context, const QStringList& args = {});
 
 signals:
     void languageChanged();

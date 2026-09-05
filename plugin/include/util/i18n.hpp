@@ -10,9 +10,11 @@ inline constexpr QChar k_markChar = u'\x01';
 inline constexpr QChar k_argSep = u'\x02';
 inline constexpr QChar k_contextSep = u'\x04';
 
+namespace detail {
+
 // Marks a string with the given context and args.
 // The marked format is `markChar {<arg> argSep} [<context> contextSep] <text>`
-inline QString mark(const QString& text, const QString& context = {}, const QStringList& args = {}) {
+inline QString doMark(const QString& text, const QString& context, const QStringList& args) {
     auto len = 1 + text.size();
     if (!context.isEmpty())
         len += context.size() + 1;
@@ -35,6 +37,16 @@ inline QString mark(const QString& text, const QString& context = {}, const QStr
 
     result += text;
     return result;
+}
+
+} // namespace detail
+
+inline QString mark(const QString& text, const QStringList& args = {}) {
+    return detail::doMark(text, {}, args);
+}
+
+inline QString markCtx(const QString& text, const QString& context, const QStringList& args = {}) {
+    return detail::doMark(text, context, args);
 }
 
 // Parses a marked string into <context + text, args>
