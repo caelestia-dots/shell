@@ -65,6 +65,75 @@ constexpr qreal k_indexFudge = 0.1;
     return haystack.contains(needle, Qt::CaseInsensitive);
 }
 
+[[nodiscard]] bool isUnknownAlbum(const QString& album) {
+    return album.trimmed().startsWith(u"unknown"_s, Qt::CaseInsensitive);
+}
+
+struct ArtistTitleSplit {
+    QString artist;
+    QString title;
+    bool valid = false;
+};
+
+[[nodiscard]] ArtistTitleSplit splitArtistTitle(const QString& title) {
+    const QString trimmed = title.trimmed();
+    if (trimmed.isEmpty()) {
+        return {};
+    }
+    static const QRegularExpression k_sepRegex(u"\\s+-\\s+|\\s*[\\x{2013}\\x{2014}]\\s*"_s);
+    QList<QRegularExpressionMatch> matches;
+    auto it = k_sepRegex.globalMatch(trimmed);
+    while (it.hasNext()) {
+        matches.append(it.next());
+    }
+    if (matches.isEmpty()) {
+        return {};
+    }
+    const QString prefix = trimmed.left(matches.first().capturedStart()).trimmed();
+    const QString stripped = trimmed.mid(matches.last().capturedEnd()).trimmed();
+    if (prefix.isEmpty() || stripped.isEmpty() || stripped == trimmed) {
+        return {};
+    }
+    return { prefix, stripped, true };
+}
+
+[[nodiscard]] QUrl buildLrclibGetUrl(
+    const QString& track, const QString& artist, const QString& album, qreal duration) {
+    QUrl url(u"https://lrclib.net/api/get"_s);
+    QUrlQuery q;
+    q.addQueryItem(u"track_name"_s, track);
+    q.addQueryItem(u"artist_name"_s, artist);
+    if (!album.isEmpty() && !isUnknownAlbum(album)) {
+        q.addQueryItem(u"album_name"_s, album);
+    }
+    constexpr qreal k_maxDurationSecs = std::numeric_limits<int>::max();
+    if (duration > 0 && qIsFinite(duration) && duration < k_maxDurationSecs) {
+        q.addQueryItem(u"duration"_s, QString::number(qRound(duration)));
+    }
+    url.setQuery(q);
+    return url;
+}
+
+[[nodiscard]] QUrl buildLrclibSearchUrl(const QString& track, const QString& artist) {
+    QUrl url(u"https://lrclib.net/api/search"_s);
+    QUrlQuery q;
+    q.addQueryItem(u"track_name"_s, track);
+    q.addQueryItem(u"artist_name"_s, artist);
+    url.setQuery(q);
+    return url;
+}
+
+[[nodiscard]] bool isLrclibNotFound(const QNetworkReply* reply) {
+    if (reply == nullptr) {
+        return false;
+    }
+    if (reply->error() == QNetworkReply::ContentNotFoundError) {
+        return true;
+    }
+    const QVariant status = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute);
+    return status.isValid() && status.toInt() == 404;
+}
+
 } // namespace
 
 QString Lyrics::cleanTrackTitle(const QString& title) {
@@ -697,51 +766,20 @@ void Lyrics::tryLrclib(int reqId) {
 
     const QString cleanTitle = cleanTrackTitle(m_title);
     const QString primaryArtist = extractPrimaryArtist(m_artist);
+    const QString album = m_album;
+    const qreal duration = m_duration;
 
-    QUrl url(u"https://lrclib.net/api/get"_s);
-    QUrlQuery q;
-    q.addQueryItem(u"track_name"_s, cleanTitle);
-    q.addQueryItem(u"artist_name"_s, primaryArtist);
-    if (!m_album.isEmpty()) {
-        q.addQueryItem(u"album_name"_s, m_album);
-    }
-
-    constexpr qreal k_maxDurationSecs = std::numeric_limits<int>::max();
-    if (m_duration > 0 && qIsFinite(m_duration) && m_duration < k_maxDurationSecs) {
-        q.addQueryItem(u"duration"_s, QString::number(qRound(m_duration)));
-    }
-    url.setQuery(q);
-
-    auto* reply = getJson(url, lrclibHeaders());
-    trackReply(reqId, reply);
-
-    QObject::connect(reply, &QNetworkReply::finished, this, [this, reply, reqId, cleanTitle, primaryArtist] {
-        reply->deleteLater();
-        if (reqId != m_currentRequestId) {
-            return;
-        }
-        if (reply->error() != QNetworkReply::NoError) {
-            qCDebug(lcLyrics) << "lrclib /get error:" << reply->errorString();
-            chainNext(LyricsBackend::LRCLIB, reqId);
-            return;
-        }
-        const QJsonDocument doc = QJsonDocument::fromJson(reply->readAll());
-        const QJsonObject obj = doc.object();
+    auto applyGetObject = [this](const QJsonObject& obj, const QString& logTrack, const QString& logArtist) -> bool {
         const QString synced = obj.value(u"syncedLyrics"_s).toString();
-        const qint64 id = static_cast<qint64>(obj.value(u"id"_s).toDouble());
-
         if (synced.isEmpty()) {
-            qCDebug(lcLyrics) << "lrclib: no syncedLyrics for" << primaryArtist << "-" << cleanTitle;
-            chainNext(LyricsBackend::LRCLIB, reqId);
-            return;
+            qCDebug(lcLyrics) << "lrclib: no syncedLyrics for" << logArtist << "-" << logTrack;
+            return false;
         }
-
         const auto lines = parseLrc(synced);
         if (lines.isEmpty()) {
-            chainNext(LyricsBackend::LRCLIB, reqId);
-            return;
+            return false;
         }
-
+        const qint64 id = static_cast<qint64>(obj.value(u"id"_s).toDouble());
         writeCachedLrc(LyricsBackend::LRCLIB, QString::number(id), synced);
         const LyricCandidate cand(LyricsBackend::LRCLIB, QString::number(id), obj.value(u"trackName"_s).toString(),
             obj.value(u"artistName"_s).toString(), obj.value(u"albumName"_s).toString(),
@@ -757,7 +795,55 @@ void Lyrics::tryLrclib(int reqId) {
             emit selectedCandidateChanged();
         }
         setLoading(false);
-    });
+        return true;
+    };
+
+    const QUrl url = buildLrclibGetUrl(cleanTitle, primaryArtist, album, duration);
+    auto* reply = getJson(url, lrclibHeaders());
+    trackReply(reqId, reply);
+
+    QObject::connect(reply, &QNetworkReply::finished, this,
+        [this, reply, reqId, cleanTitle, primaryArtist, album, duration, applyGetObject] {
+            reply->deleteLater();
+            if (reqId != m_currentRequestId) {
+                return;
+            }
+            if (reply->error() != QNetworkReply::NoError) {
+                if (isLrclibNotFound(reply)) {
+                    const ArtistTitleSplit split = splitArtistTitle(cleanTitle);
+                    if (split.valid && (split.title != cleanTitle || split.artist != primaryArtist)) {
+                        qCDebug(lcLyrics) << "lrclib /get retry split:" << split.artist << "-" << split.title;
+                        const QUrl retryUrl = buildLrclibGetUrl(split.title, split.artist, album, duration);
+                        auto* retry = getJson(retryUrl, lrclibHeaders());
+                        trackReply(reqId, retry);
+                        QObject::connect(
+                            retry, &QNetworkReply::finished, this, [this, retry, reqId, split, applyGetObject] {
+                                retry->deleteLater();
+                                if (reqId != m_currentRequestId) {
+                                    return;
+                                }
+                                if (retry->error() != QNetworkReply::NoError) {
+                                    qCDebug(lcLyrics) << "lrclib /get retry error:" << retry->errorString();
+                                    chainNext(LyricsBackend::LRCLIB, reqId);
+                                    return;
+                                }
+                                const QJsonObject retryObj = QJsonDocument::fromJson(retry->readAll()).object();
+                                if (!applyGetObject(retryObj, split.title, split.artist)) {
+                                    chainNext(LyricsBackend::LRCLIB, reqId);
+                                }
+                            });
+                        return;
+                    }
+                }
+                qCDebug(lcLyrics) << "lrclib /get error:" << reply->errorString();
+                chainNext(LyricsBackend::LRCLIB, reqId);
+                return;
+            }
+            const QJsonDocument doc = QJsonDocument::fromJson(reply->readAll());
+            if (!applyGetObject(doc.object(), cleanTitle, primaryArtist)) {
+                chainNext(LyricsBackend::LRCLIB, reqId);
+            }
+        });
 }
 
 void Lyrics::tryNetEase(int reqId) {
@@ -890,16 +976,11 @@ void Lyrics::searchLrclibCandidates(int reqId) {
     const QString cleanTitle = cleanTrackTitle(m_title);
     const QString primaryArtist = extractPrimaryArtist(m_artist);
 
-    QUrl url(u"https://lrclib.net/api/search"_s);
-    QUrlQuery q;
-    q.addQueryItem(u"track_name"_s, cleanTitle);
-    q.addQueryItem(u"artist_name"_s, primaryArtist);
-    url.setQuery(q);
-
+    const QUrl url = buildLrclibSearchUrl(cleanTitle, primaryArtist);
     auto* reply = getJson(url, lrclibHeaders());
     trackReply(reqId, reply);
 
-    QObject::connect(reply, &QNetworkReply::finished, this, [this, reply, reqId] {
+    QObject::connect(reply, &QNetworkReply::finished, this, [this, reply, reqId, cleanTitle, primaryArtist] {
         reply->deleteLater();
         if (reqId != m_currentRequestId) {
             return;
@@ -910,6 +991,30 @@ void Lyrics::searchLrclibCandidates(int reqId) {
         }
         const QJsonDocument doc = QJsonDocument::fromJson(reply->readAll());
         const auto result = parseLrclibSearchResult(doc.array());
+        if (result.candidates.isEmpty()) {
+            const ArtistTitleSplit split = splitArtistTitle(cleanTitle);
+            if (split.valid && (split.title != cleanTitle || split.artist != primaryArtist)) {
+                qCDebug(lcLyrics) << "lrclib /search retry split:" << split.artist << "-" << split.title;
+                const QUrl retryUrl = buildLrclibSearchUrl(split.title, split.artist);
+                auto* retry = getJson(retryUrl, lrclibHeaders());
+                trackReply(reqId, retry);
+                QObject::connect(retry, &QNetworkReply::finished, this, [this, retry, reqId] {
+                    retry->deleteLater();
+                    if (reqId != m_currentRequestId) {
+                        return;
+                    }
+                    if (retry->error() != QNetworkReply::NoError) {
+                        qCDebug(lcLyrics) << "lrclib /search retry error:" << retry->errorString();
+                        return;
+                    }
+                    const QJsonDocument retryDoc = QJsonDocument::fromJson(retry->readAll());
+                    const auto retryResult = parseLrclibSearchResult(retryDoc.array());
+                    appendCandidates(retryResult.candidates);
+                    applyLrclibCandidateUpgrade(retryResult.bestCandidate, retryResult.bestSynced);
+                });
+                return;
+            }
+        }
         appendCandidates(result.candidates);
         applyLrclibCandidateUpgrade(result.bestCandidate, result.bestSynced);
     });
