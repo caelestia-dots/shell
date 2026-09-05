@@ -119,10 +119,56 @@ StyledRect {
                 DelegateChoice {
                     roleValue: "network"
                     delegate: EntryWrapper {
-                        MaterialIcon {
-                            animate: true
-                            text: Nmcli.onEthernet ? "cable" : Nmcli.active ? Icons.getNetworkIcon(Nmcli.active.strength ?? 0) : "wifi_off"
-                            color: root.colour
+                        Item {
+                            implicitWidth: networkIcon.implicitWidth
+                            implicitHeight: networkIcon.implicitHeight
+
+                            MaterialIcon {
+                                id: networkIcon
+
+                                animate: true
+                                text: Nmcli.onEthernet ? "cable" : Nmcli.active ? Icons.getNetworkIcon(Nmcli.active.strength ?? 0) : "wifi_off"
+                                color: root.colour
+                            }
+
+                            // A tunnel doesn't replace the link, it sits on top
+                            // of it - so this badges the icon that's already
+                            // saying which link, rather than taking its place.
+                            // The enabled check comes first deliberately:
+                            // reading VPN otherwise starts the service for
+                            // someone who has it turned off.
+                            StyledRect {
+                                id: vpnBadge
+
+                                anchors.left: parent.left
+                                anchors.top: parent.top
+                                anchors.leftMargin: -implicitWidth / 4
+                                anchors.topMargin: -implicitHeight / 4
+
+                                implicitWidth: vpnIcon.implicitHeight
+                                implicitHeight: implicitWidth
+
+                                radius: Tokens.rounding.full
+                                // Backed so the glyph stays legible over the
+                                // icon underneath it.
+                                color: Colours.tPalette.m3surfaceContainer
+                                visible: opacity > 0
+                                opacity: GlobalConfig.utilities.vpn.enabled && (VPN.connected || VPN.connecting) ? 1 : 0
+
+                                Behavior on opacity {
+                                    Anim {}
+                                }
+
+                                MaterialIcon {
+                                    id: vpnIcon
+
+                                    anchors.centerIn: parent
+                                    text: VPN.connecting ? "more_horiz" : "vpn_key"
+                                    color: root.colour
+                                    fontStyle: Tokens.font.icon.builders.small.scale(0.5).build()
+                                    fill: 1
+                                }
+                            }
                         }
                     }
                 }
