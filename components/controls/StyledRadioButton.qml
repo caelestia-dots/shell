@@ -7,9 +7,11 @@ import qs.services
 RadioButton {
     id: root
 
+    property real maximumTextWidth: -1
+
     font: Tokens.font.body.small
 
-    implicitWidth: implicitIndicatorWidth + implicitContentWidth + contentItem.anchors.leftMargin
+    implicitWidth: implicitIndicatorWidth + (root.maximumTextWidth > 0 ? Math.min(implicitContentWidth, root.maximumTextWidth) : implicitContentWidth) + contentItem.anchors.leftMargin
     implicitHeight: Math.max(implicitIndicatorHeight, implicitContentHeight)
 
     indicator: Rectangle {
@@ -50,5 +52,7 @@ RadioButton {
         anchors.verticalCenter: parent.verticalCenter
         anchors.left: outerCircle.right
         anchors.leftMargin: Tokens.spacing.medium
+        width: root.maximumTextWidth > 0 ? root.maximumTextWidth : implicitWidth
+        elide: root.maximumTextWidth > 0 ? Text.ElideRight : Text.ElideNone
     }
 }
