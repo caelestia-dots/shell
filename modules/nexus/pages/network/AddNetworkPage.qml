@@ -44,8 +44,6 @@ PageBase {
                 root.failed = true;
                 if (root.secured)
                     passwordField.isError = true;
-                // Clean up the half-created profile so a retry starts fresh.
-                Nmcli.forgetNetwork(ssid);
             }
         });
     }
@@ -58,19 +56,6 @@ PageBase {
         anchors.top: parent.top
         width: root.cappedWidth
         spacing: Tokens.spacing.large
-
-        Connections {
-            function onSubPageClosed(): void {
-                if (root.success)
-                    return;
-
-                const ssid = ssidField.text.trim();
-                if (ssid)
-                    Nmcli.forgetNetwork(ssid);
-            }
-
-            target: root.nState
-        }
 
         StyledText {
             Layout.fillWidth: true

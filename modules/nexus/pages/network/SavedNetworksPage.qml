@@ -15,8 +15,6 @@ PageBase {
     title: qsTr("Saved networks")
     isSubPage: true
 
-    Component.onCompleted: Nmcli.loadSavedConnections(() => {})
-
     ColumnLayout {
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.top: parent.top

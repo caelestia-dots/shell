@@ -14,13 +14,16 @@ ColumnLayout {
 
     required property PopoutState popouts
 
-    property string connectingToSsid: ""
     property string view: "wireless" // "wireless" or "ethernet"
     property var passwordNetwork: null
     property bool showPasswordDialog: false
 
     spacing: Tokens.spacing.small
     width: Tokens.sizes.bar.networkWidth
+
+    Component.onCompleted: {
+        Nmcli.enableScanner(root.popouts.currentName === "network");
+    }
 
     // Wireless section
     StyledText {
@@ -63,8 +66,8 @@ ColumnLayout {
         RowLayout {
             id: networkItem
 
-            required property Nmcli.AccessPoint modelData
-            readonly property bool isConnecting: root.connectingToSsid === modelData.ssid
+            required property var modelData
+            readonly property bool isConnecting: Nmcli.connectingSsid() === modelData.ssid
             readonly property bool loading: networkItem.isConnecting
 
             visible: root.view === "wireless"
@@ -132,16 +135,12 @@ ColumnLayout {
                         if (networkItem.modelData.active) {
                             Nmcli.disconnectFromNetwork();
                         } else {
-                            root.connectingToSsid = networkItem.modelData.ssid;
                             NetworkConnection.handleConnect(networkItem.modelData, null, network => {
                                 // Password is required - show password dialog
                                 root.passwordNetwork = network;
                                 root.showPasswordDialog = true;
                                 root.popouts.currentName = "wirelesspassword";
                             });
-
-                            // Clear connecting state if connection succeeds immediately (saved profile)
-                            // This is handled by the onActiveChanged connection below
                         }
                     }
                 }
@@ -167,6 +166,10 @@ ColumnLayout {
     }
 
     StyledRect {
+        id: rescanContainer
+
+        property bool isRescanning: false
+
         visible: root.view === "wireless"
         Layout.preferredHeight: visible ? implicitHeight : 0
         Layout.topMargin: visible ? Tokens.spacing.small : 0
@@ -176,10 +179,21 @@ ColumnLayout {
         radius: Tokens.rounding.full
         color: Colours.palette.m3primaryContainer
 
+        Timer {
+            id: rescanVisualTimer
+
+            interval: 2000
+            onTriggered: rescanContainer.isRescanning = false
+        }
+
         StateLayer {
             color: Colours.palette.m3onPrimaryContainer
-            disabled: Nmcli.scanning || !Nmcli.wifiEnabled
-            onClicked: Nmcli.rescanWifi()
+            disabled: rescanContainer.isRescanning || !Nmcli.wifiEnabled
+            onClicked: {
+                rescanContainer.isRescanning = true;
+                rescanVisualTimer.restart();
+                Nmcli.rescanWifi();
+            }
         }
 
         RowLayout {
@@ -187,7 +201,7 @@ ColumnLayout {
 
             anchors.centerIn: parent
             spacing: Tokens.spacing.small
-            opacity: Nmcli.scanning ? 0 : 1
+            opacity: rescanContainer.isRescanning ? 0 : 1
 
             MaterialIcon {
                 id: scanIcon
@@ -216,7 +230,7 @@ ColumnLayout {
             strokeWidth: Tokens.padding.extraSmall / 2
             bgColour: "transparent"
             implicitSize: parent.implicitHeight - Tokens.padding.large
-            running: Nmcli.scanning
+            running: rescanContainer.isRescanning
         }
     }
 
@@ -313,9 +327,9 @@ ColumnLayout {
 
                     onClicked: {
                         if (ethernetItem.modelData.connected && ethernetItem.modelData.connection) {
-                            Nmcli.disconnectEthernet(ethernetItem.modelData.connection, () => {});
+                            Nmcli.disconnectEthernet(ethernetItem.modelData.connection);
                         } else {
-                            Nmcli.connectEthernet(ethernetItem.modelData.connection || "", ethernetItem.modelData.iface || "", () => {});
+                            Nmcli.connectEthernet(ethernetItem.modelData.connection || "", ethernetItem.modelData.iface || "");
                         }
                     }
                 }
@@ -342,10 +356,9 @@ ColumnLayout {
 
     Connections {
         function onActiveChanged(): void {
-            if (Nmcli.active && root.connectingToSsid === Nmcli.active.ssid) {
-                root.connectingToSsid = "";
+            if (Nmcli.active) {
                 // Close password dialog if we successfully connected
-                if (root.showPasswordDialog && root.passwordNetwork && Nmcli.active.ssid === root.passwordNetwork.ssid) {
+                if (root.showPasswordDialog && root.passwordNetwork && Nmcli.normalizeName(Nmcli.active.ssid) === Nmcli.normalizeName(root.passwordNetwork.ssid)) {
                     root.showPasswordDialog = false;
                     root.passwordNetwork = null;
                     if (root.popouts.currentName === "wirelesspassword") {
@@ -370,6 +383,7 @@ ColumnLayout {
                 root.showPasswordDialog = false;
                 root.passwordNetwork = null;
             }
+            Nmcli.enableScanner(root.popouts.currentName === "network");
         }
 
         target: root.popouts
