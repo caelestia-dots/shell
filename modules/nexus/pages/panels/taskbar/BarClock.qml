@@ -35,5 +35,12 @@ PageBase {
             checked: Config.bar.clock.showIcon
             onToggled: GlobalConfig.bar.clock.showIcon = checked
         }
+
+        ToggleRow {
+            last: true
+            text: qsTr("Show seconds")
+            checked: Config.bar.clock.showSeconds
+            onToggled: GlobalConfig.bar.clock.showSeconds = checked
+        }
     }
 }
