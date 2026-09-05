@@ -33,7 +33,7 @@ Item {
                 return qsTr("Face not recognized (%1/%2). Please try again.").arg(pam.howdy.tries).arg(GlobalConfig.lock.maxHowdyTries);
         }
 
-        if (pam.lockMessage) // Password max tries message
+        if (pam.lockMessage) // PAM error message
             return pam.lockMessage;
 
         // Password fail
