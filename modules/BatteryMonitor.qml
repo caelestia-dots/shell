@@ -23,7 +23,7 @@ Scope {
         if (root.lastPercentage >= 0) {
             for (const level of root.warnLevels) {
                 if (p <= level.level && root.lastPercentage > level.level) {
-                    Toaster.toast(level.title ?? Tr.tr("Battery warning"), level.message ?? Tr.tr("Battery level is low"), level.icon ?? "battery_android_alert", level.critical ? Toast.Error : Toast.Warning);
+                    Toaster.toast(Tr.trMarked(level.title ?? Tr.tr("Battery warning")), Tr.trMarked(level.message ?? Tr.tr("Battery level is low")), level.icon ?? "battery_android_alert", level.critical ? Toast.Error : Toast.Warning);
                     break;
                 }
             }

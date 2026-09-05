@@ -66,7 +66,7 @@ Item {
             anchors.right: parent.right
             anchors.leftMargin: Tokens.spacing.extraSmall
 
-            text: root.notifCount > 0 ? Tr.tr("notification%1").arg(root.notifCount === 1 ? "" : "s") : Tr.tr("Notifications")
+            text: root.notifCount > 0 ? Tr.trN("notification", "notifications", root.notifCount) : Tr.tr("Notifications")
             color: Colours.palette.m3outline
             font: Tokens.font.label.large
             elide: Text.ElideRight

@@ -4,6 +4,7 @@ import QtQuick
 import Quickshell
 import Quickshell.Io
 import Caelestia.Config
+import Caelestia.I18n
 import qs.utils
 
 Singleton {
@@ -127,11 +128,11 @@ Singleton {
 
             let str = "";
             if (days > 0)
-                str += `${days} day${days === 1 ? "" : "s"}`;
+                str += Tr.trN("%n day", "%n days", days);
             if (hours > 0)
-                str += `${str ? ", " : ""}${hours} hour${hours === 1 ? "" : "s"}`;
+                str += (str ? ", " : "") + Tr.trN("%n hour", "%n hours", hours);
             if (minutes > 0 || !str)
-                str += `${str ? ", " : ""}${minutes} minute${minutes === 1 ? "" : "s"}`;
+                str += (str ? ", " : "") + Tr.trN("%n minute", "%n minutes", minutes);
             root.uptime = str;
         }
     }

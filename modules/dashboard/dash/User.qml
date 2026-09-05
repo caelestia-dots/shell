@@ -3,6 +3,7 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import M3Shapes
 import Caelestia.Config
+import Caelestia.I18n
 import qs.components
 import qs.components.effects
 import qs.components.filedialog
@@ -201,7 +202,7 @@ Item {
         anchors.leftMargin: Tokens.spacing.small
         anchors.verticalCenterOffset: Math.round(fontInfo.pointSize * 0.1)
 
-        text: "up " + SysInfo.uptime.split(",").slice(0, 2).join(",") // Max 2 components
+        text: Tr.tr("up %1").arg(SysInfo.uptime.split(",").slice(0, 2).join(",")) // Max 2 components
         width: Tokens.sizes.dashboard.userWidth - x - Tokens.padding.extraLarge
         elide: Text.ElideRight
     }

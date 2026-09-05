@@ -51,7 +51,7 @@ ColumnLayout {
         Layout.rightMargin: Tokens.padding.extraSmall
         text: {
             const devices = Bluetooth.devices.values; // qmllint disable unresolved-type
-            let available = Tr.tr("%1 device%2 available").arg(devices.length).arg(devices.length === 1 ? "" : "s");
+            let available = Tr.trN("%n device available", "%n devices available", devices.length);
             const connected = devices.filter(d => d.connected).length;
             if (connected > 0)
                 available += Tr.tr(" (%1 connected)").arg(connected);
