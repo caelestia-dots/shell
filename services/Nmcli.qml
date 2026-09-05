@@ -17,10 +17,12 @@ Singleton {
     readonly property bool connecting: wirelessInterfaces.some(i => isConnectingState(i.state))
     property string activeInterface: ""
     property string activeConnection: ""
-    property bool wifiEnabled: true
-    readonly property bool scanning: rescanProc.running
-    readonly property list<AccessPoint> networks: []
-    readonly property AccessPoint active: networks.find(n => n.active) ?? null
+    // Wifi state lives in Wifi now, read from NetworkManager over dbus.
+    // These forward it so existing consumers keep working unchanged.
+    readonly property bool wifiEnabled: Wifi.enabled
+    readonly property bool scanning: Wifi.scanning
+    readonly property list<var> networks: Wifi.networks
+    readonly property var active: Wifi.active
     property list<string> savedConnections: []
     property list<string> savedConnectionSsids: []
     // Map of saved Wi-Fi SSID (lowercased) -> security type
@@ -59,12 +61,10 @@ Singleton {
     readonly property string nmcliCommandDevice: "device"
     readonly property string nmcliCommandConnection: "connection"
     readonly property string nmcliCommandWifi: "wifi"
-    readonly property string nmcliCommandRadio: "radio"
     readonly property string deviceStatusFields: "DEVICE,TYPE,STATE,CONNECTION"
     readonly property string connectionListFields: "NAME,TYPE"
     readonly property string wirelessSsidField: "802-11-wireless.ssid"
     readonly property string networkListFields: "SSID,SIGNAL,SECURITY"
-    readonly property string networkDetailFields: "ACTIVE,SIGNAL,FREQ,SSID,BSSID,SECURITY"
     readonly property string securityKeyMgmt: "802-11-wireless-security.key-mgmt"
     readonly property string securityPsk: "802-11-wireless-security.psk"
     readonly property string keyMgmtWpaPsk: "wpa-psk"
@@ -84,54 +84,6 @@ Singleton {
         }
 
         return (error.includes("Secrets were required") || error.includes("Secrets were required, but not provided") || error.includes("No secrets provided") || error.includes("802-11-wireless-security.psk") || error.includes("password for") || (error.includes("password") && !error.includes("Connection activated") && !error.includes("successfully")) || (error.includes("Secrets") && !error.includes("Connection activated") && !error.includes("successfully")) || (error.includes("802.11") && !error.includes("Connection activated") && !error.includes("successfully"))) && !error.includes("Connection activated") && !error.includes("successfully");
-    }
-
-    function parseNetworkOutput(output: string): list<var> {
-        if (!output || output.length === 0) {
-            return [];
-        }
-
-        const PLACEHOLDER = "STRINGWHICHHOPEFULLYWONTBEUSED";
-        const rep = new RegExp("\\\\:", "g");
-        const rep2 = new RegExp(PLACEHOLDER, "g");
-
-        const allNetworks = output.trim().split("\n").filter(line => line && line.length > 0).map(n => {
-            const net = n.replace(rep, PLACEHOLDER).split(":");
-            return {
-                active: net[0] === "yes",
-                strength: parseInt(net[1] || "0", 10) || 0,
-                frequency: parseInt(net[2] || "0", 10) || 0,
-                ssid: (net[3]?.replace(rep2, ":") ?? "").trim(),
-                bssid: (net[4]?.replace(rep2, ":") ?? "").trim(),
-                security: (net[5] ?? "").trim()
-            };
-        }).filter(n => n.ssid && n.ssid.length > 0);
-
-        return allNetworks;
-    }
-
-    function deduplicateNetworks(networks: list<var>): list<var> {
-        if (!networks || networks.length === 0) {
-            return [];
-        }
-
-        const networkMap = new Map();
-        for (const network of networks) {
-            const existing = networkMap.get(network.ssid);
-            if (!existing) {
-                networkMap.set(network.ssid, network);
-            } else {
-                if (network.active && !existing.active) {
-                    networkMap.set(network.ssid, network);
-                } else if (!network.active && !existing.active) {
-                    if (network.strength > existing.strength) {
-                        networkMap.set(network.ssid, network);
-                    }
-                }
-            }
-        }
-
-        return Array.from(networkMap.values());
     }
 
     function isConnectionCommand(command: list<string>): bool {
@@ -708,19 +660,11 @@ Singleton {
     }
 
     function disconnectFromNetwork(): void {
-        if (active && active.ssid) {
-            executeCommand([root.nmcliCommandConnection, "down", active.ssid], result => {
-                if (result.success) {
-                    getNetworks(() => {});
-                }
-            });
-        } else {
-            executeCommand([root.nmcliCommandDevice, "disconnect", root.deviceTypeWifi], result => {
-                if (result.success) {
-                    getNetworks(() => {});
-                }
-            });
-        }
+        // No refresh afterwards: the active access point is a live binding.
+        if (root.active?.ssid)
+            Wifi.run([root.nmcliCommandConnection, "down", root.active.ssid], null);
+        else
+            Wifi.disconnect(null);
     }
 
     function getDeviceDetails(interfaceName: string, callback: var): void {
@@ -800,104 +744,40 @@ Singleton {
     }
 
     function scanWirelessNetworks(interfaceName: string, callback: var): void {
-        let cmd = [root.nmcliCommandDevice, root.nmcliCommandWifi, "rescan"];
-        if (interfaceName && interfaceName.length > 0) {
-            cmd.push(root.connectionParamIfname, interfaceName);
-        }
-        executeCommand(cmd, result => {
-            if (callback) {
-                callback(result);
-            }
-        });
+        Wifi.scan();
+        if (callback)
+            callback(true);
     }
 
     function rescanWifi(): void {
-        rescanProc.running = true;
+        Wifi.scan();
     }
 
     function enableWifi(enabled: bool, callback: var): void {
-        const cmd = enabled ? "on" : "off";
-        executeCommand([root.nmcliCommandRadio, root.nmcliCommandWifi, cmd], result => {
-            if (result.success) {
-                getWifiStatus(status => {
-                    root.wifiEnabled = status;
-                    if (callback)
-                        callback(result);
-                });
-            } else {
-                if (callback)
-                    callback(result);
-            }
-        });
+        Wifi.setEnabled(enabled, callback);
     }
 
     function toggleWifi(callback: var): void {
-        const newState = !root.wifiEnabled;
-        enableWifi(newState, callback);
+        Wifi.toggle(callback);
     }
 
+    // Kept for existing callers; wifiEnabled is a live binding now, so there is
+    // nothing to fetch.
     function getWifiStatus(callback: var): void {
-        executeCommand([root.nmcliCommandRadio, root.nmcliCommandWifi], result => {
-            if (result.success) {
-                const enabled = result.output.trim() === "enabled";
-                root.wifiEnabled = enabled;
-                if (callback)
-                    callback(enabled);
-            } else {
-                if (callback)
-                    callback(root.wifiEnabled);
-            }
-        });
+        if (callback)
+            callback(root.wifiEnabled);
     }
 
     function findNetwork(ssid: string): var {
-        return networks.find(n => n.ssid === ssid) ?? null;
+        return Wifi.findNetwork(ssid);
     }
 
+    // Kept so existing callers still get their callback; the network list is
+    // a live binding on Wifi now, so there is nothing to fetch.
     function getNetworks(callback: var): void {
-        executeCommand(["-g", root.networkDetailFields, "d", "w"], result => {
-            if (!result.success) {
-                if (callback)
-                    callback([]);
-                return;
-            }
-
-            const allNetworks = parseNetworkOutput(result.output);
-            const networks = deduplicateNetworks(allNetworks);
-            const rNetworks = root.networks;
-
-            const newMap = new Map();
-            for (const n of networks)
-                newMap.set(`${n.frequency}:${n.ssid}:${n.bssid}`, n);
-
-            for (let i = rNetworks.length - 1; i >= 0; i--) {
-                const rn = rNetworks[i];
-                const key = `${rn.frequency}:${rn.ssid}:${rn.bssid}`;
-                if (!newMap.has(key)) {
-                    rNetworks.splice(i, 1);
-                    rn.destroy();
-                }
-            }
-
-            const existingMap = new Map();
-            for (const rn of rNetworks)
-                existingMap.set(`${rn.frequency}:${rn.ssid}:${rn.bssid}`, rn);
-
-            for (const [key, network] of newMap) {
-                const match = existingMap.get(key);
-                if (match) {
-                    match.lastIpcObject = network;
-                } else {
-                    rNetworks.push(apComp.createObject(root, {
-                        lastIpcObject: network
-                    }));
-                }
-            }
-
-            if (callback)
-                callback(root.networks);
-            checkPendingConnection();
-        });
+        if (callback)
+            callback(root.networks);
+        checkPendingConnection();
     }
 
     function getWirelessSSIDs(interfaceName: string, callback: var): void {
@@ -1267,41 +1147,39 @@ Singleton {
     }
 
     function refreshOnConnectionChange(): void {
-        getNetworks(networks => {
-            const newActive = root.active;
-
-            if (newActive && newActive.active) {
-                Qt.callLater(() => {
-                    if (root.wirelessInterfaces.length > 0) {
-                        const activeWireless = root.wirelessInterfaces.find(iface => {
-                            return isConnectedState(iface.state);
-                        });
-                        if (activeWireless && activeWireless.device) {
-                            getWirelessDeviceDetails(activeWireless.device, () => {});
-                        }
+        if (root.active) {
+            Qt.callLater(() => {
+                if (root.wirelessInterfaces.length > 0) {
+                    const activeWireless = root.wirelessInterfaces.find(iface => {
+                        return isConnectedState(iface.state);
+                    });
+                    if (activeWireless && activeWireless.device) {
+                        getWirelessDeviceDetails(activeWireless.device, () => {});
                     }
+                }
 
-                    if (root.activeEthernet) {
-                        getEthernetDeviceDetails(root.activeEthernet.iface, () => {});
-                    }
-                }, 500);
-            } else {
-                root.wirelessDeviceDetails = null;
-                root.ethernetDeviceDetails = null;
-            }
-
-            getWirelessInterfaces(() => {});
-            if (root.activeEthernet) {
-                Qt.callLater(() => {
+                if (root.activeEthernet) {
                     getEthernetDeviceDetails(root.activeEthernet.iface, () => {});
-                }, 500);
-            }
-        });
+                }
+            }, 500);
+        } else {
+            root.wirelessDeviceDetails = null;
+            root.ethernetDeviceDetails = null;
+        }
+
+        getWirelessInterfaces(() => {});
+        if (root.activeEthernet) {
+            Qt.callLater(() => {
+                getEthernetDeviceDetails(root.activeEthernet.iface, () => {});
+            }, 500);
+        }
     }
 
+    // Association is reported over dbus now, so a pending connect resolves the
+    // moment NetworkManager says so rather than on the next poll.
+    onActiveChanged: checkPendingConnection()
+
     Component.onCompleted: {
-        getWifiStatus(() => {});
-        getNetworks(() => {});
         loadSavedConnections(() => {});
 
         Qt.callLater(() => {
@@ -1324,12 +1202,6 @@ Singleton {
         id: commandProc
 
         CommandProcess {}
-    }
-
-    Component {
-        id: apComp
-
-        AccessPoint {}
     }
 
     Timer {
@@ -1477,13 +1349,6 @@ Singleton {
     }
 
     Process {
-        id: rescanProc
-
-        command: ["nmcli", "dev", root.nmcliCommandWifi, "list", "--rescan", "yes"]
-        onExited: root.getNetworks() // qmllint disable signal-handler-parameters
-    }
-
-    Process {
         id: monitorProc
 
         running: true
@@ -1586,16 +1451,5 @@ Singleton {
                 }
             });
         }
-    }
-
-    component AccessPoint: QtObject {
-        required property var lastIpcObject
-        readonly property string ssid: lastIpcObject.ssid
-        readonly property string bssid: lastIpcObject.bssid
-        readonly property int strength: lastIpcObject.strength
-        readonly property int frequency: lastIpcObject.frequency
-        readonly property bool active: lastIpcObject.active
-        readonly property string security: lastIpcObject.security
-        readonly property bool isSecure: security.length > 0
     }
 }

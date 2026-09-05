@@ -17,9 +17,9 @@ ItemList {
     property int limit: 0 // 0 = show all
     property bool enableFilter
 
-    signal networkSelected(ap: Nmcli.AccessPoint)
+    signal networkSelected(ap: var)
 
-    function networkFilter(ap: Nmcli.AccessPoint): bool {
+    function networkFilter(ap: var): bool {
         return true;
     }
 
@@ -88,7 +88,7 @@ ItemList {
         }
 
         Connections {
-            function onNetworkSelected(ap: Nmcli.AccessPoint): void {
+            function onNetworkSelected(ap: var): void {
                 if (ap !== network.modelData)
                     network.currentSelected = false;
             }
