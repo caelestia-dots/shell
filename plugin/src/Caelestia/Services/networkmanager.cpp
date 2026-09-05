@@ -232,6 +232,19 @@ QList<NmAccessPoint*> NmDevice::accessPoints() const {
     return m_accessPoints;
 }
 
+qlonglong NmDevice::lastScan() const {
+    return m_lastScan;
+}
+
+void NmDevice::setLastScan(qlonglong lastScan) {
+    if (lastScan == m_lastScan) {
+        return;
+    }
+
+    m_lastScan = lastScan;
+    emit changed();
+}
+
 NmAccessPoint* NmDevice::accessPoint(const QString& path) const {
     return m_apByPath.value(path);
 }
@@ -610,8 +623,14 @@ void NetworkManager::readWireless(const QString& devicePath) {
         QList<QDBusObjectPath> paths;
         props.value(QStringLiteral("AccessPoints")).value<QDBusArgument>() >> paths;
 
-        const auto activePath =
-            props.value(QStringLiteral("ActiveAccessPoint")).value<QDBusObjectPath>().path();
+        const auto activePath = props.value(QStringLiteral("ActiveAccessPoint")).value<QDBusObjectPath>().path();
+
+        // Absent on older NetworkManager; leave it at -1 rather than reading a
+        // missing key as "scanned at boot".
+        const auto lastScan = props.find(QStringLiteral("LastScan"));
+        if (lastScan != props.end()) {
+            device->setLastScan(lastScan.value().toLongLong());
+        }
 
         QSet<QString> seen;
         for (const auto& path : paths) {

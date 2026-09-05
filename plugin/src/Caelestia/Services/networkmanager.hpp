@@ -103,6 +103,10 @@ class NmDevice : public QObject {
     Q_PROPERTY(QString connection READ connection NOTIFY changed)
     // Only ever populated for wifi devices; empty for everything else.
     Q_PROPERTY(QList<caelestia::services::NmAccessPoint*> accessPoints READ accessPoints NOTIFY accessPointsChanged)
+    // Boot time in milliseconds at which the device last finished a scan, or -1
+    // if it never has. NetworkManager publishes no scanning flag, so this
+    // moving is the only signal that a scan finished. Wifi devices only.
+    Q_PROPERTY(qlonglong lastScan READ lastScan NOTIFY changed)
 
 public:
     explicit NmDevice(QString path, QObject* parent = nullptr);
@@ -115,11 +119,13 @@ public:
     [[nodiscard]] QString connection() const;
 
     [[nodiscard]] QList<NmAccessPoint*> accessPoints() const;
+    [[nodiscard]] qlonglong lastScan() const;
     [[nodiscard]] NmAccessPoint* accessPoint(const QString& path) const;
 
     // Set apart from update(): the name lives on the device's active connection
     // object, which is a second read.
     void setConnection(const QString& connection);
+    void setLastScan(qlonglong lastScan);
 
     void addAccessPoint(NmAccessPoint* accessPoint);
     // Drops any access point whose path isn't in `keep`. Returns whether the
@@ -140,6 +146,7 @@ private:
     Transport m_type = config::NetworkTransport::None;
     uint m_state = 0;
     QString m_connection;
+    qlonglong m_lastScan = -1;
 
     QList<NmAccessPoint*> m_accessPoints;
     QHash<QString, NmAccessPoint*> m_apByPath;

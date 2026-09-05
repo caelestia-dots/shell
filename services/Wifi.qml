@@ -44,7 +44,14 @@ Singleton {
 
     readonly property var active: root.accessPoints.find(ap => ap.active) ?? null
     readonly property bool enabled: NetworkManager.wirelessEnabled
-    readonly property bool scanning: scanProc.running
+
+    // `nmcli device wifi rescan` asks NetworkManager for a scan and returns
+    // straight away, so a running process says nothing about whether a scan is
+    // still going. NetworkManager publishes no scanning flag either, so track
+    // the request instead: the scan is in flight from asking until lastScan
+    // moves off where it stood.
+    property var scanBaseline: null
+    readonly property bool scanning: root.scanBaseline !== null && (root.device?.lastScan ?? -1) === root.scanBaseline
 
     function findNetwork(ssid: string): var {
         return root.networks.find(n => n.ssid === ssid) ?? null;
@@ -71,8 +78,12 @@ Singleton {
     }
 
     function scan(): void {
-        if (!scanProc.running)
-            scanProc.running = true;
+        if (root.scanning)
+            return;
+
+        root.scanBaseline = root.device?.lastScan ?? -1;
+        scanTimeout.restart();
+        run(["device", "wifi", "rescan"], null);
     }
 
     function disconnect(callback: var): void {
@@ -92,6 +103,13 @@ Singleton {
             return;
         }
         run(["connection", "delete", connectionName], callback);
+    }
+
+    onScanningChanged: {
+        if (!root.scanning) {
+            root.scanBaseline = null;
+            scanTimeout.stop();
+        }
     }
 
     Component {
@@ -115,9 +133,12 @@ Singleton {
         }
     }
 
-    Process {
-        id: scanProc
+    // A scan that never reports back would otherwise leave the indicator
+    // spinning for good.
+    Timer {
+        id: scanTimeout
 
-        command: ["nmcli", "device", "wifi", "rescan"]
+        interval: 20000
+        onTriggered: root.scanBaseline = null
     }
 }
