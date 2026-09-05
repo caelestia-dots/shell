@@ -698,7 +698,8 @@ For example, to automatically hide the bar on the monitor named `DP-1`:
         "enableHowdy": true,
         "maxHowdyTries": 3,
         "triggerHowdyOnWake": true,
-        "hideNotifs": false
+        "hideNotifs": false,
+        "pfpShape": "ClamShell"
     },
     "nexus": {
         "wallpapersPerRow": 4,

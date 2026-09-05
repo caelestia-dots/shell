@@ -15,9 +15,20 @@ Item {
     required property int centerWidth
     readonly property color bgColour: Colours.tPalette.m3surfaceContainerHighest
 
+    function resolveShape(name: string): int {
+        if (typeof MaterialShape[name] === "number" && MaterialShape[name] >= 0)
+            return MaterialShape[name];
+
+        console.warn(lc, `Unknown shape "${name}" for pfpShape; falling back to "ClamShell"`);
+        return MaterialShape.ClamShell;
+    }
+
     implicitWidth: Math.round(centerWidth * 0.7)
     implicitHeight: {
-        shape.height; // Force update when shape height changes
+        // Force update when the shape or its height changes
+        shape.height;
+        shape.shape;
+        shape.morphProgress;
         return shape.pathBounds().height;
     }
 
@@ -27,7 +38,7 @@ Item {
         anchors.centerIn: parent
         implicitSize: root.implicitWidth
 
-        shape: MaterialShape.ClamShell
+        shape: root.resolveShape(Config.lock.pfpShape)
         color: Qt.alpha(root.bgColour, 1)
         opacity: root.bgColour.a
         layer.enabled: true
@@ -52,5 +63,12 @@ Item {
         layer.effect: Mask {
             maskSource: shape
         }
+    }
+
+    LoggingCategory {
+        id: lc
+
+        name: "caelestia.qml.lock"
+        defaultLogLevel: LoggingCategory.Info
     }
 }
