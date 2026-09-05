@@ -21,6 +21,10 @@ StyledClippingRect {
         Anim {}
     }
 
+    ServiceRef {
+        service: ChargeThreshold
+    }
+
     Contents {
         id: layout
 
@@ -53,6 +57,16 @@ StyledClippingRect {
             textColour: Colours.palette.m3onSecondary
             subTextColour: Colours.palette.m3secondaryContainer
         }
+    }
+
+    StyledRect {
+        anchors.left: parent.left
+        anchors.right: parent.right
+        y: parent.height * (1 - ChargeThreshold.limit)
+        implicitHeight: 2
+
+        visible: ChargeThreshold.isLimited
+        color: Colours.palette.m3tertiary
     }
 
     component Contents: ColumnLayout {
@@ -89,8 +103,11 @@ StyledClippingRect {
                 if (UPower.displayDevice.state === UPowerDeviceState.FullyCharged)
                     return qsTr("Full");
 
-                if (contents.charging)
+                if (contents.charging) {
+                    if (ChargeThreshold.isLimited && UPower.displayDevice.percentage >= ChargeThreshold.limit)
+                        return qsTr("Limit reached");
                     return qsTr("Charging");
+                }
 
                 const s = UPower.displayDevice.timeToEmpty;
                 if (s === 0)

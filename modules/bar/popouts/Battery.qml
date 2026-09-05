@@ -3,6 +3,7 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import Quickshell.Services.UPower
 import Caelestia.Config
+import Caelestia.Services
 import qs.components
 import qs.services
 
@@ -11,6 +12,10 @@ Column {
 
     spacing: Tokens.spacing.medium
     width: Tokens.sizes.bar.batteryWidth
+
+    ServiceRef {
+        service: ChargeThreshold
+    }
 
     StyledText {
         text: UPower.displayDevice.isLaptopBattery ? qsTr("Remaining: %1%").arg(Math.round(UPower.displayDevice.percentage * 100)) : qsTr("No battery detected")
@@ -33,7 +38,25 @@ Column {
             return comps.join(", ") || fallback;
         }
 
-        text: UPower.displayDevice.isLaptopBattery ? qsTr("Time %1: %2").arg(UPower.onBattery ? "remaining" : "until charged").arg(UPower.onBattery ? formatSeconds(UPower.displayDevice.timeToEmpty, "Calculating...") : formatSeconds(UPower.displayDevice.timeToFull, "Fully charged!")) : qsTr("Power profile: %1").arg(PowerProfile.toString(PowerProfiles.profile))
+        function timeUntilCharged(): string {
+            const perc = UPower.displayDevice.percentage;
+            let s = UPower.displayDevice.timeToFull;
+
+            if (ChargeThreshold.isLimited) {
+                if (perc >= ChargeThreshold.limit)
+                    return qsTr("Limit reached");
+                s = Math.round(s * (ChargeThreshold.limit - perc) / (1 - perc));
+            }
+
+            return formatSeconds(s, qsTr("Fully charged!"));
+        }
+
+        text: UPower.displayDevice.isLaptopBattery ? qsTr("Time %1: %2").arg(UPower.onBattery ? "remaining" : "until charged").arg(UPower.onBattery ? formatSeconds(UPower.displayDevice.timeToEmpty, "Calculating...") : timeUntilCharged()) : qsTr("Power profile: %1").arg(PowerProfile.toString(PowerProfiles.profile))
+    }
+
+    StyledText {
+        visible: UPower.displayDevice.isLaptopBattery && ChargeThreshold.isLimited
+        text: qsTr("Charge limit: %1%").arg(ChargeThreshold.threshold)
     }
 
     Loader {
