@@ -99,6 +99,13 @@ StyledWindow {
             width: panels.osdWrapper.width * (1 - panels.osd.offsetScale) + root.borderThickness
             height: panels.osd.height
         }
+
+        Region {
+            x: panels.toasts.x + bar.implicitWidth
+            y: panels.toasts.y + root.borderThickness
+            width: panels.toasts.width
+            height: panels.toasts.height
+        }
     }
 
     Regions {

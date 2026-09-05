@@ -1,6 +1,7 @@
 import QtQuick
 import Quickshell
 import Caelestia.Config
+import Caelestia.Services
 import qs.services
 
 Scope {
@@ -12,6 +13,7 @@ Scope {
         Notifs;
         Players;
         Brightness;
+        UdevService;
         Weather.reload();
 
         if (GlobalConfig.utilities.vpn.enabled)

@@ -19,6 +19,7 @@ class GeneralApps : public settings::ObjectNode {
     CONFIG_GLOBAL_PROPERTY(QStringList, audio, { u"pwvucontrol"_s })
     CONFIG_GLOBAL_PROPERTY(QStringList, playback, { u"mpv"_s })
     CONFIG_GLOBAL_PROPERTY(QStringList, explorer, { u"thunar"_s })
+    CONFIG_GLOBAL_PROPERTY(QStringList, editor, { { u"nvim"_s } })
 };
 
 class GeneralIdle : public settings::ObjectNode {

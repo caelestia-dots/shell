@@ -38,6 +38,13 @@ PageBase {
         }
 
         DefaultRow {
+            icon: "edit"
+            label: qsTr("Text editor")
+            status: GlobalConfig.general.apps.editor.join(" ")
+            onSelected: app => GlobalConfig.general.apps.editor = app.command
+        }
+
+        DefaultRow {
             icon: "volume_up"
             label: qsTr("Audio")
             status: GlobalConfig.general.apps.audio.join(" ")

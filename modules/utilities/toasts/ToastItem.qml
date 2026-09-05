@@ -1,15 +1,19 @@
+pragma ComponentBehavior: Bound
+
 import QtQuick
 import QtQuick.Layouts
 import Caelestia
 import Caelestia.Config
 import qs.components
 import qs.components.effects
+import qs.components.controls
 import qs.services
 
 StyledRect {
     id: root
 
     required property Toast modelData
+    readonly property bool hasActions: root.modelData.actions.length > 0
 
     anchors.left: parent.left
     anchors.right: parent.right
@@ -125,6 +129,33 @@ StyledRect {
                 }
                 opacity: 0.8
                 elide: Text.ElideRight
+            }
+
+            RowLayout {
+                id: actionsRow
+
+                Layout.fillWidth: true
+                Layout.topMargin: Tokens.spacing.medium
+                visible: root.hasActions
+                spacing: Tokens.spacing.small
+
+                Repeater {
+                    model: root.modelData.actions
+
+                    IconTextButton {
+                        required property var modelData
+
+                        isRound: true
+                        text: modelData.text
+                        icon: modelData.icon
+                        iconLabel.visible: modelData.icon.length > 0
+
+                        onClicked: {
+                            modelData.invoke();
+                            root.modelData.close();
+                        }
+                    }
+                }
             }
         }
     }

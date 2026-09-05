@@ -21,12 +21,14 @@ qml_module(caelestia-services
         networkusage.cpp
         hyprdevices.cpp
         hyprextras.cpp
+        udevservice.cpp
     LIBRARIES
         Qt::DBus
         Qt::Network
         PkgConfig::Pipewire
         PkgConfig::Aubio
         PkgConfig::Cava
+        PkgConfig::Udev
         Sensors::Sensors
         caelestia-core
         caelestia-config
