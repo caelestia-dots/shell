@@ -29,6 +29,22 @@ Singleton {
     // for a NIC with no carrier, so anything past that means a cable is in.
     readonly property bool available: devices.some(d => d.state > 20)
 
+    // Active IPv4 details, or null when nothing is connected. Same shape the
+    // parsed `nmcli device show` output produced, minus the subnet mask and
+    // link speed, which nothing read.
+    readonly property var details: {
+        const device = root.active;
+        if (!device)
+            return null;
+
+        return {
+            ipAddress: device.address,
+            gateway: device.gateway,
+            dns: device.dns,
+            macAddress: device.hwAddress
+        };
+    }
+
     // Negotiated link speed of the active device, e.g. "1 Gbps". NM doesn't
     // expose this, so it comes from sysfs - a plain file read, no daemon.
     property string speed: ""

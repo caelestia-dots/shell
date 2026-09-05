@@ -105,6 +105,14 @@ class NmDevice : public QObject {
     // Only ever populated for wifi devices; empty for everything else.
     Q_PROPERTY(QQmlListProperty<caelestia::services::NmAccessPoint> accessPoints READ accessPoints NOTIFY
             accessPointsChanged)
+    // Hardware address of the device, e.g. "00:1a:2b:3c:4d:5e".
+    Q_PROPERTY(QString hwAddress READ hwAddress NOTIFY changed)
+    // Active IPv4 configuration. Empty while the device is down.
+    Q_PROPERTY(QString address READ address NOTIFY changed)
+    // Prefix length of the address, e.g. 24, or 0 when there is none.
+    Q_PROPERTY(int prefix READ prefix NOTIFY changed)
+    Q_PROPERTY(QString gateway READ gateway NOTIFY changed)
+    Q_PROPERTY(QStringList dns READ dns NOTIFY changed)
     // Boot time in milliseconds at which the device last finished a scan, or -1
     // if it never has. NetworkManager publishes no scanning flag, so this
     // moving is the only signal that a scan finished. Wifi devices only.
@@ -122,12 +130,20 @@ public:
 
     [[nodiscard]] QQmlListProperty<NmAccessPoint> accessPoints();
     [[nodiscard]] qlonglong lastScan() const;
+    [[nodiscard]] QString hwAddress() const;
+    [[nodiscard]] QString address() const;
+    [[nodiscard]] int prefix() const;
+    [[nodiscard]] QString gateway() const;
+    [[nodiscard]] QStringList dns() const;
     [[nodiscard]] NmAccessPoint* accessPoint(const QString& path) const;
 
     // Set apart from update(): the name lives on the device's active connection
     // object, which is a second read.
     void setConnection(const QString& connection);
     void setLastScan(qlonglong lastScan);
+    // Set apart from update(): the addresses live on the device's Ip4Config
+    // object, which is a second read.
+    void setIp4Config(const QString& address, int prefix, const QString& gateway, const QStringList& dns);
 
     void addAccessPoint(NmAccessPoint* accessPoint);
     // Drops any access point whose path isn't in `keep`. Returns whether the
@@ -149,6 +165,11 @@ private:
     uint m_state = 0;
     QString m_connection;
     qlonglong m_lastScan = -1;
+    QString m_hwAddress;
+    QString m_address;
+    int m_prefix = 0;
+    QString m_gateway;
+    QStringList m_dns;
 
     QList<NmAccessPoint*> m_accessPoints;
     QHash<QString, NmAccessPoint*> m_apByPath;
@@ -196,6 +217,7 @@ private:
     void readDevice(const QString& path);
     void readConnection(const QString& devicePath, const QString& connectionPath);
     void readWireless(const QString& devicePath);
+    void readIp4Config(const QString& devicePath, const QString& configPath);
     void readAccessPoint(const QString& devicePath, const QString& accessPointPath);
     void step(int delta);
     void finish();

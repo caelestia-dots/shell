@@ -49,6 +49,22 @@ Singleton {
     }
 
     readonly property var active: root.accessPoints.find(ap => ap.active) ?? null
+
+    // Active IPv4 details, or null when nothing is connected. Same shape the
+    // parsed `nmcli device show` output produced, minus the subnet mask and
+    // link speed, which nothing read.
+    readonly property var details: {
+        const device = root.device;
+        if (!device?.connected)
+            return null;
+
+        return {
+            ipAddress: device.address,
+            gateway: device.gateway,
+            dns: device.dns,
+            macAddress: device.hwAddress
+        };
+    }
     readonly property bool enabled: NetworkManager.wirelessEnabled
 
     readonly property real lastScan: root.device?.lastScan ?? -1

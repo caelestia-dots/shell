@@ -31,8 +31,10 @@ Singleton {
     readonly property var savedConnectionSecurity: Profiles.securityBySsid
 
     property var pendingConnection: null
-    property var wirelessDeviceDetails: null
-    property var ethernetDeviceDetails: null
+    // Device details come from NetworkManager's IP4Config over dbus now.
+    // These forward them so existing consumers keep working unchanged.
+    readonly property var wirelessDeviceDetails: Wifi.details
+    readonly property var ethernetDeviceDetails: Wired.details
     // Wired state lives in Wired now, read from NetworkManager over dbus.
     // These forward it so existing consumers keep working unchanged.
     readonly property string ethernetDataUsage: Wired.dataUsage
@@ -188,23 +190,11 @@ Singleton {
     }
 
     function connectEthernet(connectionName: string, interfaceName: string, callback: var): void {
-        Wired.connect(connectionName, interfaceName, success => {
-            // The device list updates itself; details still come from nmcli, and
-            // NM needs a moment after activation before they are worth reading.
-            if (success && interfaceName)
-                Qt.callLater(() => getEthernetDeviceDetails(interfaceName, () => {}), 1000);
-            if (callback)
-                callback(success);
-        });
+        Wired.connect(connectionName, interfaceName, callback);
     }
 
     function disconnectEthernet(connectionName: string, callback: var): void {
-        Wired.disconnect(connectionName, success => {
-            if (success)
-                root.ethernetDeviceDetails = null;
-            if (callback)
-                callback(success);
-        });
+        Wired.disconnect(connectionName, callback);
     }
 
     function getAllInterfaces(callback: var): void {
@@ -466,13 +456,6 @@ Singleton {
         Wifi.disconnect(null);
     }
 
-    function getDeviceDetails(interfaceName: string, callback: var): void {
-        executeCommand([root.nmcliCommandDevice, "show", interfaceName], result => {
-            if (callback)
-                callback(result.output);
-        });
-    }
-
     function refreshStatus(callback: var): void {
         getDeviceStatus(output => {
             const lines = output.trim().split("\n");
@@ -689,48 +672,9 @@ Singleton {
         }
     }
 
-    function cidrToSubnetMask(cidr: string): string {
-        const cidrNum = parseInt(cidr, 10);
-        if (isNaN(cidrNum) || cidrNum < 0 || cidrNum > 32) {
-            return "";
-        }
-
-        const mask = (0xffffffff << (32 - cidrNum)) >>> 0;
-        const octet1 = (mask >>> 24) & 0xff;
-        const octet2 = (mask >>> 16) & 0xff;
-        const octet3 = (mask >>> 8) & 0xff;
-        const octet4 = mask & 0xff;
-
-        return `${octet1}.${octet2}.${octet3}.${octet4}`;
-    }
-
     function getWirelessDeviceDetails(interfaceName: string, callback: var): void {
-        if (!interfaceName || interfaceName.length === 0) {
-            const activeInterface = root.wirelessInterfaces.find(iface => {
-                return isConnectedState(iface.state);
-            });
-            if (activeInterface && activeInterface.device) {
-                interfaceName = activeInterface.device;
-            } else {
-                if (callback)
-                    callback(null);
-                return;
-            }
-        }
-
-        executeCommand(["device", "show", interfaceName], result => {
-            if (!result.success || !result.output) {
-                root.wirelessDeviceDetails = null;
-                if (callback)
-                    callback(null);
-                return;
-            }
-
-            const details = parseDeviceDetails(result.output, false);
-            root.wirelessDeviceDetails = details;
-            if (callback)
-                callback(details);
-        });
+        if (callback)
+            callback(root.wirelessDeviceDetails);
     }
 
     // Reads the IPv4 configuration (method, address, gateway, DNS, autoconnect)
@@ -870,130 +814,20 @@ Singleton {
         return `${v.toFixed(v < 10 && i > 0 ? 1 : 0)} ${units[i]}`;
     }
 
+    // Kept so existing callers still get their callback; the details are a
+    // live binding on Wired now, so there is nothing to fetch.
     function getEthernetDeviceDetails(interfaceName: string, callback: var): void {
-        if (!interfaceName || interfaceName.length === 0) {
-            if (!root.activeEthernet) {
-                if (callback)
-                    callback(null);
-                return;
-            }
-            interfaceName = root.activeEthernet.iface;
-        }
-
-        executeCommand(["device", "show", interfaceName], result => {
-            if (!result.success || !result.output) {
-                // Transient failure (e.g. nmcli busy during a toggle). Keep the
-                // previous details so dependent UI (gateway, IP/DNS) doesn't
-                // blink out and back.
-                if (callback)
-                    callback(root.ethernetDeviceDetails);
-                return;
-            }
-
-            const details = parseDeviceDetails(result.output, true);
-            root.ethernetDeviceDetails = details;
-            if (callback)
-                callback(details);
-        });
-    }
-
-    function parseDeviceDetails(output: string, isEthernet: bool): var {
-        const details = {
-            ipAddress: "",
-            gateway: "",
-            dns: [],
-            subnet: "",
-            macAddress: "",
-            speed: ""
-        };
-
-        if (!output || output.length === 0) {
-            return details;
-        }
-
-        const lines = output.trim().split("\n");
-
-        for (let i = 0; i < lines.length; i++) {
-            const line = lines[i];
-            const parts = line.split(":");
-            if (parts.length >= 2) {
-                const key = parts[0].trim();
-                const value = parts.slice(1).join(":").trim();
-
-                if (key.startsWith("IP4.ADDRESS")) {
-                    const ipParts = value.split("/");
-                    details.ipAddress = ipParts[0] || "";
-                    if (ipParts[1]) {
-                        details.subnet = cidrToSubnetMask(ipParts[1]);
-                    } else {
-                        details.subnet = "";
-                    }
-                } else if (key === "IP4.GATEWAY") {
-                    if (value !== "--") {
-                        details.gateway = value;
-                    }
-                } else if (key.startsWith("IP4.DNS")) {
-                    if (value !== "--" && value.length > 0) {
-                        details.dns.push(value);
-                    }
-                } else if (key === "GENERAL.HWADDR") {
-                    details.macAddress = value;
-                }
-            }
-        }
-
-        return details;
+        if (callback)
+            callback(root.ethernetDeviceDetails);
     }
 
     function refreshOnConnectionChange(): void {
-        if (root.active) {
-            Qt.callLater(() => {
-                if (root.wirelessInterfaces.length > 0) {
-                    const activeWireless = root.wirelessInterfaces.find(iface => {
-                        return isConnectedState(iface.state);
-                    });
-                    if (activeWireless && activeWireless.device) {
-                        getWirelessDeviceDetails(activeWireless.device, () => {});
-                    }
-                }
-
-                if (root.activeEthernet) {
-                    getEthernetDeviceDetails(root.activeEthernet.iface, () => {});
-                }
-            }, 500);
-        } else {
-            root.wirelessDeviceDetails = null;
-            root.ethernetDeviceDetails = null;
-        }
-
         getWirelessInterfaces(() => {});
-        if (root.activeEthernet) {
-            Qt.callLater(() => {
-                getEthernetDeviceDetails(root.activeEthernet.iface, () => {});
-            }, 500);
-        }
     }
 
     // Association is reported over dbus now, so a pending connect resolves the
     // moment NetworkManager says so rather than on the next poll.
     onActiveChanged: checkPendingConnection()
-
-    Component.onCompleted: {
-        Qt.callLater(() => {
-            if (root.wirelessInterfaces.length > 0) {
-                const activeWireless = root.wirelessInterfaces.find(iface => {
-                    return isConnectedState(iface.state);
-                });
-                if (activeWireless && activeWireless.device) {
-                    getWirelessDeviceDetails(activeWireless.device, () => {});
-                }
-            }
-
-            if (root.activeEthernet) {
-                getEthernetDeviceDetails(root.activeEthernet.iface, () => {});
-            }
-        }, 2000);
-    }
 
     Component {
         id: commandProc

@@ -23,6 +23,7 @@ constexpr const char* kDeviceIface = "org.freedesktop.NetworkManager.Device";
 constexpr const char* kActiveIface = "org.freedesktop.NetworkManager.Connection.Active";
 constexpr const char* kWirelessIface = "org.freedesktop.NetworkManager.Device.Wireless";
 constexpr const char* kApIface = "org.freedesktop.NetworkManager.AccessPoint";
+constexpr const char* kIp4Iface = "org.freedesktop.NetworkManager.IP4Config";
 constexpr const char* kPropsIface = "org.freedesktop.DBus.Properties";
 
 // From NMDeviceType; only the two we classify are named.
@@ -236,6 +237,39 @@ qlonglong NmDevice::lastScan() const {
     return m_lastScan;
 }
 
+QString NmDevice::hwAddress() const {
+    return m_hwAddress;
+}
+
+QString NmDevice::address() const {
+    return m_address;
+}
+
+int NmDevice::prefix() const {
+    return m_prefix;
+}
+
+QString NmDevice::gateway() const {
+    return m_gateway;
+}
+
+QStringList NmDevice::dns() const {
+    return m_dns;
+}
+
+void NmDevice::setIp4Config(const QString& address, int prefix, const QString& gateway, const QStringList& dns) {
+    if (address == m_address && prefix == m_prefix && gateway == m_gateway && dns == m_dns) {
+        return;
+    }
+
+    m_address = address;
+    m_prefix = prefix;
+    m_gateway = gateway;
+    m_dns = dns;
+
+    emit changed();
+}
+
 void NmDevice::setLastScan(qlonglong lastScan) {
     if (lastScan == m_lastScan) {
         return;
@@ -283,14 +317,16 @@ void NmDevice::update(const QVariantMap& props) {
     const auto interface = props.value(QStringLiteral("Interface")).toString();
     const auto type = transportForDeviceType(props.value(QStringLiteral("DeviceType")).toUInt());
     const auto state = props.value(QStringLiteral("State")).toUInt();
+    const auto hwAddress = props.value(QStringLiteral("HwAddress")).toString();
 
-    if (interface == m_interface && type == m_type && state == m_state) {
+    if (interface == m_interface && type == m_type && state == m_state && hwAddress == m_hwAddress) {
         return;
     }
 
     m_interface = interface;
     m_type = type;
     m_state = state;
+    m_hwAddress = hwAddress;
     emit changed();
 }
 
@@ -557,6 +593,13 @@ void NetworkManager::readDevice(const QString& path) {
             readWireless(path);
         }
 
+        const auto configPath = props.value(QStringLiteral("Ip4Config")).value<QDBusObjectPath>().path();
+        if (configPath.isEmpty() || configPath == QStringLiteral("/")) {
+            device->setIp4Config(QString(), 0, QString(), {});
+        } else {
+            readIp4Config(path, configPath);
+        }
+
         step(-1);
     });
 }
@@ -692,6 +735,65 @@ void NetworkManager::readAccessPoint(const QString& devicePath, const QString& a
 
             step(-1);
         });
+}
+
+void NetworkManager::readIp4Config(const QString& devicePath, const QString& configPath) {
+    auto bus = systemBus();
+    if (!bus) {
+        return;
+    }
+
+    auto msg = QDBusMessage::createMethodCall(
+        QString::fromUtf8(kService), configPath, QString::fromUtf8(kPropsIface), QStringLiteral("GetAll"));
+    msg << QString::fromUtf8(kIp4Iface);
+
+    step(1);
+    auto* watcher = new QDBusPendingCallWatcher(bus->asyncCall(msg), this);
+    connect(watcher, &QDBusPendingCallWatcher::finished, this, [this, devicePath](QDBusPendingCallWatcher* call) {
+        call->deleteLater();
+
+        const QDBusPendingReply<QVariantMap> reply = *call;
+        auto* device = m_byPath.value(devicePath);
+        if (reply.isError() || device == nullptr) {
+            if (reply.isError()) {
+                // Addresses come and go with the link; that's expected.
+                qCDebug(logNetworkManager) << "Skipping ip4 config for" << devicePath << ":"
+                                           << reply.error().message();
+            }
+            step(-1);
+            return;
+        }
+
+        const auto props = reply.value();
+
+        // AddressData and NameserverData are both aa{sv}; the older Addresses
+        // and Nameservers properties are packed uint32s and not worth reading.
+        QList<QVariantMap> addresses;
+        props.value(QStringLiteral("AddressData")).value<QDBusArgument>() >> addresses;
+
+        QString address;
+        int prefix = 0;
+        if (!addresses.isEmpty()) {
+            address = addresses.first().value(QStringLiteral("address")).toString();
+            prefix = addresses.first().value(QStringLiteral("prefix")).toInt();
+        }
+
+        QList<QVariantMap> nameservers;
+        props.value(QStringLiteral("NameserverData")).value<QDBusArgument>() >> nameservers;
+
+        QStringList dns;
+        dns.reserve(nameservers.size());
+        for (const auto& nameserver : std::as_const(nameservers)) {
+            const auto entry = nameserver.value(QStringLiteral("address")).toString();
+            if (!entry.isEmpty()) {
+                dns.append(entry);
+            }
+        }
+
+        device->setIp4Config(address, prefix, props.value(QStringLiteral("Gateway")).toString(), dns);
+
+        step(-1);
+    });
 }
 
 } // namespace caelestia::services
