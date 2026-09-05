@@ -1,9 +1,12 @@
 pragma ComponentBehavior: Bound
 
 import QtQuick
+import QtQuick.Layouts
 import Quickshell.Services.UPower
 import Caelestia.Config
+import Caelestia.Services
 import qs.components
+import qs.components.controls
 import qs.services
 
 Column {
@@ -11,6 +14,10 @@ Column {
 
     spacing: Tokens.spacing.medium
     width: Tokens.sizes.bar.batteryWidth
+
+    ServiceRef {
+        service: BatteryControl
+    }
 
     StyledText {
         text: UPower.displayDevice.isLaptopBattery ? qsTr("Remaining: %1%").arg(Math.round(UPower.displayDevice.percentage * 100)) : qsTr("No battery detected")
@@ -107,10 +114,8 @@ Column {
         }
 
         anchors.horizontalCenter: parent.horizontalCenter
-
         implicitWidth: saver.implicitHeight + balance.implicitHeight + perf.implicitHeight + Tokens.padding.medium * 2 + Tokens.spacing.largeIncreased * 2
         implicitHeight: Math.max(saver.implicitHeight, balance.implicitHeight, perf.implicitHeight) + Tokens.padding.small
-
         color: Colours.tPalette.m3surfaceContainer
         radius: Tokens.rounding.full
 
@@ -156,7 +161,6 @@ Column {
             anchors.verticalCenter: parent.verticalCenter
             anchors.left: parent.left
             anchors.leftMargin: Tokens.padding.extraSmall
-
             profile: PowerProfile.PowerSaver
             icon: "energy_savings_leaf"
         }
@@ -165,7 +169,6 @@ Column {
             id: balance
 
             anchors.centerIn: parent
-
             profile: PowerProfile.Balanced
             icon: "balance"
         }
@@ -176,9 +179,104 @@ Column {
             anchors.verticalCenter: parent.verticalCenter
             anchors.right: parent.right
             anchors.rightMargin: Tokens.padding.extraSmall
-
             profile: PowerProfile.Performance
             icon: "rocket_launch"
+        }
+    }
+
+    StyledRect {
+        id: batteryCard
+
+        visible: BatteryControl.isSupported
+        anchors.horizontalCenter: parent.horizontalCenter
+        implicitWidth: parent.width
+        implicitHeight: cardLayout.implicitHeight + Tokens.padding.medium * 2
+        color: Colours.tPalette.m3surfaceContainer
+        radius: Tokens.rounding.large
+
+        ColumnLayout {
+            id: cardLayout
+
+            anchors.left: parent.left
+            anchors.right: parent.right
+            anchors.top: parent.top
+            anchors.margins: Tokens.padding.medium
+            spacing: Tokens.spacing.small
+
+            RowLayout {
+                Layout.fillWidth: true
+                spacing: Tokens.spacing.small
+
+                MaterialIcon {
+                    text: "battery_saver"
+                    fontStyle: Tokens.font.icon.medium
+                    color: BatteryControl.enabled ? Colours.palette.m3primary : Colours.palette.m3onSurfaceVariant
+                }
+
+                ColumnLayout {
+                    Layout.fillWidth: true
+                    spacing: 2
+
+                    StyledText {
+                        Layout.fillWidth: true
+                        elide: Text.ElideRight
+                        text: BatteryControl.title
+                        font: Tokens.font.body.builders.medium.weight(Font.Medium).build()
+                    }
+
+                    StyledText {
+                        Layout.fillWidth: true
+                        elide: Text.ElideRight
+                        text: BatteryControl.subtitle
+                        color: Colours.palette.m3onSurfaceVariant
+                        font: Tokens.font.body.builders.small.build()
+                    }
+                }
+
+                StyledSwitch {
+                    visible: BatteryControl.isSupported && BatteryControl.isBinary
+                    Layout.alignment: Qt.AlignVCenter | Qt.AlignRight
+                    checked: BatteryControl.enabled
+                    onToggled: BatteryControl.toggle()
+                }
+            }
+
+            RowLayout {
+                visible: BatteryControl.isSupported && BatteryControl.isTiers
+                Layout.fillWidth: true
+                spacing: Tokens.spacing.extraSmall
+
+                Repeater {
+                    model: BatteryControl.supportedTiers
+
+                    TextButton {
+                        required property int modelData
+
+                        Layout.fillWidth: true
+                        isToggle: true
+                        type: TextButton.Tonal
+                        text: `${modelData}%`
+                        checked: BatteryControl.threshold === modelData
+                        onClicked: BatteryControl.setThreshold(modelData)
+                    }
+                }
+            }
+
+            StyledSlider {
+                visible: BatteryControl.isSupported && BatteryControl.isRange
+                Layout.fillWidth: true
+                Layout.topMargin: Tokens.spacing.extraSmall
+                from: BatteryControl.minThreshold
+                to: BatteryControl.maxThreshold
+                stepSize: BatteryControl.stepSize
+                value: BatteryControl.threshold
+                onInteraction: v => {
+                    const raw = v * (to - from) + from;
+                    const step = Math.max(1, BatteryControl.stepSize);
+                    const snapped = Math.round(raw / step) * step;
+                    BatteryControl.setThreshold(Math.max(from, Math.min(to, snapped)));
+                }
+            }
         }
     }
 
