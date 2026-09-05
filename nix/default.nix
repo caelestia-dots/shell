@@ -111,7 +111,7 @@ in
     pname = "caelestia-shell${lib.optionalString debug "-debug"}";
     src = ./..;
 
-    nativeBuildInputs = [cmake ninja makeWrapper qt6.wrapQtAppsHook];
+    nativeBuildInputs = [cmake ninja makeWrapper qt6.wrapQtAppsHook qt6.qttools];
     buildInputs = [qs extras plugin xkeyboard-config qt6.qtbase];
     propagatedBuildInputs = runtimeDeps;
 
@@ -136,6 +136,7 @@ in
       	--prefix PATH : "${lib.makeBinPath runtimeDeps}" \
       	--set FONTCONFIG_FILE "${fontconfig}" \
       	--set CAELESTIA_LIB_DIR ${extras}/lib \
+      	--set CAELESTIA_TRANSLATIONS_DIR $out/share/caelestia-shell/translations \
         --set CAELESTIA_XKB_RULES_PATH ${xkeyboard-config}/share/xkeyboard-config-2/rules/base.lst \
       	--add-flags "-p $out/share/caelestia-shell"
 

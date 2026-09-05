@@ -49,14 +49,14 @@ Item {
 
                 WeatherStat {
                     icon: "wb_twilight"
-                    label: "Sunrise"
+                    label: qsTr("Sunrise")
                     value: Weather.sunrise
                     colour: Colours.palette.m3tertiary
                 }
 
                 WeatherStat {
                     icon: "bedtime"
-                    label: "Sunset"
+                    label: qsTr("Sunset")
                     value: Weather.sunset
                     colour: Colours.palette.m3tertiary
                 }
@@ -110,19 +110,19 @@ Item {
 
             DetailCard {
                 icon: "water_drop"
-                label: "Humidity"
+                label: qsTr("Humidity")
                 value: Weather.humidity + "%"
                 colour: Colours.palette.m3secondary
             }
             DetailCard {
                 icon: "thermostat"
-                label: "Feels Like"
+                label: qsTr("Feels Like")
                 value: Weather.feelsLike
                 colour: Colours.palette.m3primary
             }
             DetailCard {
                 icon: "air"
-                label: "Wind"
+                label: qsTr("Wind")
                 value: Weather.windSpeed ? Weather.windSpeed + " km/h" : "--"
                 colour: Colours.palette.m3tertiary
             }
