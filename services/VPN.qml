@@ -64,7 +64,7 @@ Singleton {
         const input = providerInput;
         const custom = typeof input === "object" ? input : null;
         const name = custom ? (custom.name || "custom") : String(input);
-        const adapter = adapters.find(a => a.name === name) ?? null;
+        const adapter = adapters.find(a => a.name === name.toLowerCase()) ?? null;
         const iface = (custom ? custom.interface : "") || (adapter ? adapter.iface : "") || (adapter ? "" : name);
         const resolve = c => typeof c === "function" ? c(iface) : c;
         return {
@@ -73,6 +73,7 @@ Singleton {
             interface: iface,
             connectCmd: (custom && custom.connectCmd && custom.connectCmd.length > 0 ? custom.connectCmd : resolve(adapter ? adapter.connectCmd : null)) || [name, "up"],
             disconnectCmd: (custom && custom.disconnectCmd && custom.disconnectCmd.length > 0 ? custom.disconnectCmd : resolve(adapter ? adapter.disconnectCmd : null)) || [name, "down"],
+            exitNodeOnly: name.toLowerCase() === "tailscale" && custom?.exitNodeOnly === true,
             statusCmd: (adapter ? adapter.statusCmd : null) || ["ip", "link", "show"],
             parse: (adapter ? adapter.parse : null) || (out => root.parseInterfaceStatus(out, iface)),
             service: adapter ? adapter.service : `${name}d`,
@@ -111,6 +112,7 @@ Singleton {
                 interface: isObject ? (p.interface || "") : "",
                 connectCmd: isObject && p.connectCmd ? p.connectCmd : [],
                 disconnectCmd: isObject && p.disconnectCmd ? p.disconnectCmd : [],
+                exitNodeOnly: isObject && p.exitNodeOnly === true,
                 isObject: isObject
             });
         }
@@ -168,6 +170,8 @@ Singleton {
             obj.connectCmd = data.connectCmd;
         if (data.disconnectCmd && data.disconnectCmd.length > 0)
             obj.disconnectCmd = data.disconnectCmd;
+        if (data.exitNodeOnly === true)
+            obj.exitNodeOnly = true;
         return obj;
     }
 
@@ -344,20 +348,22 @@ Singleton {
             const backendState = data.BackendState || "";
 
             if (backendState === "Running") {
-                status.connected = true;
-                status.state = "connected";
+                const exitNode = data.ExitNodeStatus;
+                const usingExitNode = exitNode !== null && exitNode !== undefined;
 
-                // Exit node, if one is in use, is the most meaningful "server".
-                try {
+                status.connected = root.active.exitNodeOnly ? usingExitNode : true;
+                status.state = status.connected ? "connected" : "disconnected";
+
+                if (usingExitNode) {
                     const peers = data.Peer || {};
                     for (const key in peers) {
-                        const p = peers[key];
-                        if (p && p.ExitNode) {
-                            status.server = (p.DNSName || p.HostName || "").replace(/\.$/, "");
+                        const peer = peers[key];
+                        if (peer && (peer.ID === exitNode.ID || peer.ExitNode)) {
+                            status.server = (peer.DNSName || peer.HostName || "").replace(/\.$/, "");
                             break;
                         }
                     }
-                } catch (e2) {}
+                }
             } else if (backendState === "Starting") {
                 status.state = "connecting";
             } else if (backendState === "NeedsLogin" || backendState === "NeedsMachineAuth") {
@@ -937,6 +943,7 @@ Singleton {
         readonly property var connectCmd: lastIpcObject.connectCmd
         readonly property var disconnectCmd: lastIpcObject.disconnectCmd
         readonly property bool isObject: lastIpcObject.isObject
+        readonly property bool exitNodeOnly: lastIpcObject.exitNodeOnly
     }
 
     // Everything a provider needs to be driven by the generic engine above.
