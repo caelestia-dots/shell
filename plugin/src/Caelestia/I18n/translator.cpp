@@ -74,7 +74,7 @@ void Translator::setLanguage(const QString& language) {
     emit languageChanged();
 }
 
-QString Translator::_tr(const QString& text, const QString& context) const {
+QString Translator::_tr(const QString& text, const QString& context, bool markedOnly) const {
     if (m_count == 0 || text.isEmpty())
         return text;
 
@@ -83,6 +83,8 @@ QString Translator::_tr(const QString& text, const QString& context) const {
         if (!context.isEmpty())
             qCWarning(lcI18n) << "Attempted to translate a marked string with context. Ignoring context.";
         key = text.mid(1).toUtf8(); // Marked strings with context are already in the correct format
+    } else if (markedOnly) {
+        return text; // Don't translate unmarked strings when markedOnly
     } else {
         key = context.isEmpty() ? text.toUtf8() : context.toUtf8() + k_contextSep + text.toUtf8();
     }
@@ -91,9 +93,13 @@ QString Translator::_tr(const QString& text, const QString& context) const {
     return translated.isNull() ? text : translated;
 }
 
-QString Translator::mark(const QString& text, const QString& context) {
+QString Translator::mark(const QString& text) {
+    return QChar::fromLatin1(k_markChar) + text;
+}
+
+QString Translator::markCtx(const QString& text, const QString& context) {
     if (context.isEmpty())
-        return QChar::fromLatin1(k_markChar) + text;
+        return mark(text);
     return QChar::fromLatin1(k_markChar) + context + QChar::fromLatin1(k_contextSep) + text;
 }
 

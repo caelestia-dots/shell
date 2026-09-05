@@ -23,10 +23,10 @@ public:
     [[nodiscard]] QString language() const;
     void setLanguage(const QString& language);
 
-    // NOLINTBEGIN(readability-identifier-naming)
-    Q_INVOKABLE [[nodiscard]] QString _tr(const QString& text, const QString& context = {}) const;
-    Q_INVOKABLE [[nodiscard]] static QString mark(const QString& text, const QString& context = {});
-    // NOLINTEND(readability-identifier-naming)
+    // NOLINTNEXTLINE(readability-identifier-naming)
+    Q_INVOKABLE [[nodiscard]] QString _tr(const QString& text, const QString& context, bool markedOnly) const;
+    Q_INVOKABLE [[nodiscard]] static QString mark(const QString& text);
+    Q_INVOKABLE [[nodiscard]] static QString markCtx(const QString& text, const QString& context);
 
 signals:
     void languageChanged();

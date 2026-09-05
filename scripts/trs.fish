@@ -20,7 +20,7 @@ function gen -a lang
         --add-comments=TRANSLATORS: \
         --package-name=caelestia-shell \
         -k \
-        -ktr:1 -ktrCtx:1c,2 \
+        -ktr:1 -ktrCtx:1c,2 -ktrMarked:1 \
         -kmark:1 -kmarkCtx:1c,2 \
         (string match -v 'build/*' $argv[2..])
 end
