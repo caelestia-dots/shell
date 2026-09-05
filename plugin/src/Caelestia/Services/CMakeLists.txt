@@ -21,6 +21,7 @@ qml_module(caelestia-services
         networkusage.cpp
         networkroute.cpp
         networkmanager.cpp
+        networkprofiles.cpp
         hyprdevices.cpp
         hyprextras.cpp
     LIBRARIES

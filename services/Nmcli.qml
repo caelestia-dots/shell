@@ -660,11 +660,7 @@ Singleton {
     }
 
     function disconnectFromNetwork(): void {
-        // No refresh afterwards: the active access point is a live binding.
-        if (root.active?.ssid)
-            Wifi.run([root.nmcliCommandConnection, "down", root.active.ssid], null);
-        else
-            Wifi.disconnect(null);
+        Wifi.disconnect(null);
     }
 
     function getDeviceDetails(interfaceName: string, callback: var): void {

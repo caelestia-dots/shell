@@ -98,7 +98,15 @@ Singleton {
         run(["device", "wifi", "rescan"], null);
     }
 
+    // Brings down the profile on the wifi device, falling back to
+    // disconnecting the device itself when nothing is named.
     function disconnect(callback: var): void {
+        const connection = root.device?.connection ?? "";
+        if (connection) {
+            run(["connection", "down", connection], callback);
+            return;
+        }
+
         const iface = root.device?.iface ?? "";
         if (!iface) {
             if (callback)
