@@ -64,6 +64,7 @@ public:
     Q_INVOKABLE void clearTrack();
     Q_INVOKABLE void refresh();
     Q_INVOKABLE void resetToAuto();
+    Q_INVOKABLE void forceSearch();
 
 signals:
     void lyricsChanged();

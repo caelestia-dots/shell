@@ -362,6 +362,71 @@ void Lyrics::resetToAuto() {
     }
 }
 
+void Lyrics::forceSearch() {
+    const QString rawTitle = m_title.trimmed();
+    const QString rawArtist = m_artist.trimmed();
+    if (rawTitle.isEmpty() && rawArtist.isEmpty()) {
+        return;
+    }
+    const int reqId = m_currentRequestId;
+
+    const QUrl lrclibUrl = buildLrclibSearchUrl(rawTitle, rawArtist);
+    auto* lrclibReply = getJson(lrclibUrl, lrclibHeaders());
+    trackReply(reqId, lrclibReply);
+    QObject::connect(lrclibReply, &QNetworkReply::finished, this, [this, lrclibReply, reqId] {
+        lrclibReply->deleteLater();
+        if (reqId != m_currentRequestId) {
+            return;
+        }
+        if (lrclibReply->error() != QNetworkReply::NoError) {
+            qCDebug(lcLyrics) << "lrclib force search error:" << lrclibReply->errorString();
+            return;
+        }
+        const QJsonDocument doc = QJsonDocument::fromJson(lrclibReply->readAll());
+        appendCandidates(parseLrclibSearchResult(doc.array()).candidates);
+    });
+
+    m_nam->setCookieJar(new QNetworkCookieJar(m_nam));
+    QUrl netEaseUrl(u"https://music.163.com/api/search/get"_s);
+    QUrlQuery netEaseQuery;
+    netEaseQuery.addQueryItem(u"s"_s, u"%1 %2"_s.arg(rawTitle, rawArtist));
+    netEaseQuery.addQueryItem(u"type"_s, u"1"_s);
+    netEaseQuery.addQueryItem(u"limit"_s, u"5"_s);
+    netEaseUrl.setQuery(netEaseQuery);
+    auto* netEaseReply = getJson(netEaseUrl, netEaseHeaders());
+    trackReply(reqId, netEaseReply);
+    QObject::connect(netEaseReply, &QNetworkReply::finished, this, [this, netEaseReply, reqId] {
+        netEaseReply->deleteLater();
+        if (reqId != m_currentRequestId) {
+            return;
+        }
+        if (netEaseReply->error() != QNetworkReply::NoError) {
+            qCDebug(lcLyrics) << "netease force search error:" << netEaseReply->errorString();
+            return;
+        }
+        const QJsonDocument doc = QJsonDocument::fromJson(netEaseReply->readAll());
+        const QJsonArray songs = doc.object().value(u"result"_s).toObject().value(u"songs"_s).toArray();
+        QList<LyricCandidate> add;
+        add.reserve(songs.size());
+        for (const auto& v : songs) {
+            const QJsonObject s = v.toObject();
+            QStringList artistNames;
+            const QJsonArray artists = s.value(u"artists"_s).toArray();
+            artistNames.reserve(artists.size());
+            for (const auto& a : artists) {
+                artistNames.append(a.toObject().value(u"name"_s).toString());
+            }
+            const double durMs =
+                s.contains(u"duration"_s) ? s.value(u"duration"_s).toDouble() : s.value(u"dt"_s).toDouble();
+            const double durSec = durMs > 0.0 ? durMs / 1000.0 : 0.0;
+            add.append(LyricCandidate(LyricsBackend::NetEase,
+                QString::number(static_cast<qint64>(s.value(u"id"_s).toDouble())), s.value(u"name"_s).toString(),
+                artistNames.join(u", "_s), {}, durSec));
+        }
+        appendCandidates(add);
+    });
+}
+
 bool Lyrics::loading() const {
     return m_loading;
 }
