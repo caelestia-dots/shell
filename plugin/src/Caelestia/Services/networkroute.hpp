@@ -9,9 +9,9 @@
 #include <qstringlist.h>
 #include <qvariant.h>
 
-#include "config/enums.hpp"
-
 #include <optional>
+
+#include "config/enums.hpp"
 
 namespace caelestia::services {
 
