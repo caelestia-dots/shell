@@ -16,6 +16,10 @@ ColumnLayout {
     required property int activeWsId
     required property var occupied
     required property int groupOffset
+    required property bool shouldShow
+
+    required property Repeater workspaceRepeater
+    required property real layoutSpacing
 
     readonly property bool isWorkspace: true // Flag for finding workspace children
     // Unanimated prop for others to use as reference
@@ -26,6 +30,34 @@ ColumnLayout {
     readonly property bool hasWindows: isOccupied && Config.bar.workspaces.showWindows && (Config.bar.workspaces.maxWindowIcons > 0)
     readonly property bool focused: activeWsId === ws
     readonly property list<int> focusedShapeList: [MaterialShape.Slanted, MaterialShape.Oval, MaterialShape.Pill, MaterialShape.Triangle, MaterialShape.Arrow, MaterialShape.Diamond, MaterialShape.Pentagon, MaterialShape.Gem, MaterialShape.VerySunny, MaterialShape.Sunny, MaterialShape.Cookie4Sided, MaterialShape.Cookie6Sided, MaterialShape.Cookie7Sided, MaterialShape.Cookie9Sided, MaterialShape.Cookie12Sided, MaterialShape.Clover4Leaf, MaterialShape.SoftBurst, MaterialShape.Ghostish]
+
+    readonly property real revealProgress: Math.max(0, Math.min(1, reveal))
+    readonly property bool revealTransitionRunning: revealAnimation.running
+    readonly property real precedingRevealProgress: {
+        let progress = 0;
+
+        for (let i = 0; i < index; ++i) {
+            const workspace = workspaceRepeater.itemAt(i) as Workspace;
+            if (workspace)
+                progress = Math.max(progress, workspace.revealProgress);
+        }
+
+        return progress;
+    }
+    readonly property real targetY: {
+        let offset = 0;
+
+        for (let i = 0; i < index; ++i) {
+            const workspace = workspaceRepeater.itemAt(i) as Workspace;
+            if (workspace?.shouldShow)
+                offset += workspace.size + layoutSpacing;
+        }
+
+        return offset;
+    }
+
+    property real reveal: shouldShow ? 1 : 0
+    property real animatedSize: size
 
     function updateShape(): void {
         const shape = indicator.item as MaterialShape;
@@ -39,7 +71,12 @@ ColumnLayout {
     }
 
     Layout.alignment: Qt.AlignHCenter
-    Layout.preferredHeight: size
+    Layout.preferredHeight: animatedSize * revealProgress
+    Layout.topMargin: layoutSpacing * Math.min(revealProgress, precedingRevealProgress)
+
+    visible: shouldShow || revealProgress > 0
+    opacity: revealProgress
+    clip: true
 
     spacing: 0
 
@@ -171,7 +208,15 @@ ColumnLayout {
         }
     }
 
-    Behavior on Layout.preferredHeight {
+    Behavior on animatedSize {
         Anim {}
+    }
+
+    Behavior on reveal {
+        Anim {
+            id: revealAnimation
+
+            type: Anim.DefaultEffects
+        }
     }
 }
