@@ -12,7 +12,7 @@ class Translator : public QObject {
     Q_PROPERTY(bool __trsChanged READ trsChangedFlag NOTIFY languageChanged)
 
     Q_PROPERTY(QStringList supportedLanguages READ supportedLanguages CONSTANT)
-    Q_PROPERTY(QString language READ language WRITE setLanguage NOTIFY languageChanged)
+    Q_PROPERTY(QString language READ language NOTIFY languageChanged)
 
 public:
     explicit Translator(QObject* parent = nullptr);
@@ -21,7 +21,6 @@ public:
 
     [[nodiscard]] QStringList supportedLanguages() const;
     [[nodiscard]] QString language() const;
-    void setLanguage(const QString& language);
 
     // NOLINTNEXTLINE(readability-identifier-naming)
     Q_INVOKABLE [[nodiscard]] QString _tr(const QString& text, const QString& context, bool markedOnly) const;
@@ -46,8 +45,10 @@ private:
     void loadTranslations();
     [[nodiscard]] quint32 readU32(qsizetype offset) const;
     [[nodiscard]] QString lookup(QByteArrayView key) const;
-    [[nodiscard]] static bool isMarked(const QString& text);
-    [[nodiscard]] QString trForLocale() const;
+
+    [[nodiscard]] QString langForLocale() const;
+    [[nodiscard]] QString resolveLanguage(const QString& language) const;
+    void setLanguage(const QString& language);
 };
 
 } // namespace caelestia::i18n

@@ -48,4 +48,9 @@ qml_module(caelestia-i18n
         Tr.qml
     RESOURCES
         ${mo_files}
+    LIBRARIES
+        caelestia-util
+        caelestia-config
+    DEPENDENCIES
+        Caelestia.Config
 )

@@ -7,6 +7,9 @@
 
 #include <cstring>
 
+#include "config/rootnodes.hpp"
+#include "util/i18n.hpp"
+
 namespace {
 
 Q_LOGGING_CATEGORY(lcI18n, "caelestia.i18n", QtInfoMsg)
@@ -22,8 +25,6 @@ namespace {
 constexpr quint32 k_magic = 0x950412de;
 constexpr quint32 k_magicSwapped = 0xde120495;
 constexpr qsizetype k_headerSize = 28;
-constexpr char k_markChar = '\x01';
-constexpr char k_contextSep = '\x04';
 
 // .mo header field offsets
 constexpr qsizetype k_countOffset = 8;
@@ -43,8 +44,13 @@ QString resourceDir() {
 
 Translator::Translator(QObject* parent)
     : QObject(parent)
-    , m_supportedLanguages(findSupportedLangs())
-    , m_language(trForLocale()) {
+    , m_supportedLanguages(findSupportedLangs()) {
+    auto* const general = config::ConfigSingleton::instance()->general();
+    QObject::connect(general, &config::GeneralConfig::languageChanged, this, [this, general]() {
+        setLanguage(resolveLanguage(general->language()));
+    });
+
+    m_language = resolveLanguage(general->language());
     loadTranslations();
 }
 
@@ -60,33 +66,19 @@ QString Translator::language() const {
     return m_language;
 }
 
-void Translator::setLanguage(const QString& language) {
-    if (m_language == language)
-        return;
-
-    if (!m_supportedLanguages.contains(language)) {
-        qCWarning(lcI18n) << "Unknown language" << language;
-        return;
-    }
-
-    m_language = language;
-    loadTranslations(); // Load before emitting cause trsChangedFlag reuses the signal
-    emit languageChanged();
-}
-
 QString Translator::_tr(const QString& text, const QString& context, bool markedOnly) const {
     if (m_count == 0 || text.isEmpty())
         return text;
 
     QByteArray key;
-    if (isMarked(text)) {
+    if (util::i18n::isMarked(text)) {
         if (!context.isEmpty())
             qCWarning(lcI18n) << "Attempted to translate a marked string with context. Ignoring context.";
         key = text.mid(1).toUtf8(); // Marked strings with context are already in the correct format
     } else if (markedOnly) {
         return text; // Don't translate unmarked strings when markedOnly
     } else {
-        key = context.isEmpty() ? text.toUtf8() : context.toUtf8() + k_contextSep + text.toUtf8();
+        key = context.isEmpty() ? text.toUtf8() : context.toUtf8() + util::i18n::k_contextSep + text.toUtf8();
     }
 
     const auto translated = lookup(key);
@@ -94,13 +86,11 @@ QString Translator::_tr(const QString& text, const QString& context, bool marked
 }
 
 QString Translator::mark(const QString& text) {
-    return QChar::fromLatin1(k_markChar) + text;
+    return util::i18n::mark(text);
 }
 
 QString Translator::markCtx(const QString& text, const QString& context) {
-    if (context.isEmpty())
-        return mark(text);
-    return QChar::fromLatin1(k_markChar) + context + QChar::fromLatin1(k_contextSep) + text;
+    return util::i18n::mark(text, context);
 }
 
 QStringList Translator::findSupportedLangs() {
@@ -201,15 +191,32 @@ QString Translator::lookup(QByteArrayView key) const {
     return {};
 }
 
-bool Translator::isMarked(const QString& text) {
-    return text.startsWith(QChar::fromLatin1(k_markChar));
-}
-
-QString Translator::trForLocale() const {
+QString Translator::langForLocale() const {
     const auto locale = QLocale::system();
     if (m_supportedLanguages.contains(locale.name()))
         return locale.name();
     return {};
+}
+
+QString Translator::resolveLanguage(const QString& language) const {
+    if (language.isEmpty())
+        return langForLocale();
+
+    if (!m_supportedLanguages.contains(language)) {
+        qCWarning(lcI18n) << "Unsupported language" << language << "- falling back to the system locale";
+        return langForLocale();
+    }
+
+    return language;
+}
+
+void Translator::setLanguage(const QString& language) {
+    if (m_language == language)
+        return;
+
+    m_language = language;
+    loadTranslations(); // Load before emitting cause trsChangedFlag reuses the signal
+    emit languageChanged();
 }
 
 } // namespace caelestia::i18n

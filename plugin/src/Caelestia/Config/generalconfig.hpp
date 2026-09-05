@@ -77,6 +77,7 @@ class GeneralConfig : public settings::ObjectNode {
     CONFIG_NODE(GeneralConfig, settings::ObjectNode)
 
     CONFIG_GLOBAL_PROPERTY(QString, logo, QString())
+    CONFIG_GLOBAL_PROPERTY(QString, language, QString())
     CONFIG_PROPERTY(bool, showOverFullscreen, false)
     CONFIG_PROPERTY(qreal, mediaGifSpeedAdjustment, 300)
     CONFIG_PROPERTY(qreal, sessionGifSpeed, 0.7)
