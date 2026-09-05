@@ -77,10 +77,18 @@ MouseArea {
             if (root.loader.clipboardOnly) {
                 Quickshell.execDetached(["sh", "-c", "wl-copy --type image/png < " + path]);
                 Quickshell.execDetached(["notify-send", "-a", "caelestia-cli", "-i", path, "Screenshot taken", "Screenshot copied to clipboard"]);
+                closeAnim.start();
+            } else if (root.loader.saveAndClip) {
+                const date = new Date();
+                const filename = `Screenshot_${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}_${String(date.getHours()).padStart(2, '0')}-${String(date.getMinutes()).padStart(2, '0')}-${String(date.getSeconds()).padStart(2, '0')}.png`;
+                Quickshell.execDetached(["sh", "-c", "mkdir -p ~/Pictures/Screenshots && cp " + path + " ~/Pictures/Screenshots/" + filename]);
+                Quickshell.execDetached(["sh", "-c", "wl-copy --type image/png < " + path]);
+                Quickshell.execDetached(["notify-send", "-a", "caelestia-cli", "-i", path, "Screenshot taken", "Saved to Pictures/Screenshots and copied to clipboard"]);
+                closeAnim.start();
             } else {
                 Quickshell.execDetached(["swappy", "-f", path]);
+                closeAnim.start();
             }
-            closeAnim.start();
         });
     }
 
@@ -187,6 +195,11 @@ MouseArea {
         PropertyAction {
             target: root.loader
             property: "activeAsync"
+            value: false
+        }
+        PropertyAction {
+            target: root.loader
+            property: "saveAndClip"
             value: false
         }
     }
