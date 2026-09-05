@@ -354,6 +354,17 @@ Item {
                         }
                     }
                 }
+
+                RowLayout {
+                    Layout.fillWidth: true
+
+                    TextButton {
+                        Layout.alignment: Qt.AlignRight
+                        type: TextButton.Text
+                        text: qsTr("Force search")
+                        onClicked: Lyrics.forceSearch()
+                    }
+                }
             }
 
             Item {
