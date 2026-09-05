@@ -13,7 +13,12 @@ StyledClippingRect {
 
     required property var lock
 
-    implicitHeight: layout.implicitHeight + layout.anchors.margins * 2
+    // Portrait pairs this with the resource gauges in a row that shouldn't eat
+    // the height the modules above it need, and this padding is what sets the
+    // floor for how short it can get.
+    property int contentPadding: Tokens.padding.extraLarge
+
+    implicitHeight: layout.implicitHeight + contentPadding * 2
     radius: Tokens.rounding.extraLarge
     color: Colours.tPalette.m3surfaceContainer
 
@@ -50,7 +55,7 @@ StyledClippingRect {
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.verticalCenter: parent.verticalCenter
-        anchors.margins: Tokens.padding.extraLarge
+        anchors.margins: root.contentPadding
         spacing: Tokens.spacing.extraSmall
 
         StyledText {

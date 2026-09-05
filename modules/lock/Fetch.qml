@@ -76,6 +76,9 @@ StyledRect {
                 id: iconLoader
 
                 Layout.fillHeight: true
+                // Capped so the logo can't crowd out the text when Fetch is
+                // given an unusually wide box.
+                Layout.maximumWidth: root.width * 0.32
                 active: root.width > Tokens.sizes.lock.largeLogoWidth
 
                 sourceComponent: SysInfo.isDefaultLogo ? caelestiaLogo : distroIcon
