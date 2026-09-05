@@ -79,11 +79,37 @@ Singleton {
             Office: "content_paste"
         })
 
-    readonly property list<string> networkIcons: ["signal_wifi_0_bar", "network_wifi_1_bar", "network_wifi_2_bar", "network_wifi_3_bar", "network_wifi"]
+    // qmlformat off
+    readonly property list<string> networkIcons: [
+        "signal_wifi_0_bar",
+        "network_wifi_1_bar",
+        "network_wifi_2_bar",
+        "network_wifi_3_bar",
+        "network_wifi"
+    ]
 
-    readonly property var bluetoothIconRules: [[["headset", "headphones"], "headphones"], [["audio"], "speaker"], [["phone"], "smartphone"], [["mouse"], "mouse"], [["keyboard"], "keyboard"]]
+    readonly property var bluetoothIconRules: [
+        [["headset", "headphones"], "headphones"],
+        [["audio"], "speaker"],
+        [["phone"], "smartphone"],
+        [["mouse"], "mouse"],
+        [["keyboard"], "keyboard"]
+    ]
 
-    readonly property var notifIconRules: [[["reboot"], "restart_alt"], [["recording"], "screen_record"], [["battery"], "power"], [["screenshot"], "screenshot_monitor"], [["welcome"], "waving_hand"], [["time", "a break"], "schedule"], [["installed"], "download"], [["update"], "update"], [["unable to"], "deployed_code_alert"], [["profile"], "person"], [["file"], "folder_copy"]]
+    readonly property var notifIconRules: [
+        [["reboot"], "restart_alt"],
+        [["recording"], "screen_record"],
+        [["battery"], "power"],
+        [["screenshot"], "screenshot_monitor"],
+        [["welcome"], "waving_hand"],
+        [["time", "a break"], "schedule"],
+        [["installed"], "download"],
+        [["update"], "update"],
+        [["unable to"], "deployed_code_alert"],
+        [["profile"], "person"],
+        [["file"], "folder_copy"]
+    ]
+    //qmlformat on
 
     /**
      * Checks if a name matches an icon config. Icon configs can have the following keys:
@@ -171,7 +197,7 @@ Singleton {
     }
 
     function getMicVolumeIcon(volume: real, isMuted: bool): string {
-        return (!isMuted && volume > 0) ? "mic" : "mic_off";
+        return !isMuted && volume > 0 ? "mic" : "mic_off";
     }
 
     function getSpecialWsIcon(name: string): string {
