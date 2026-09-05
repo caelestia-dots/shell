@@ -70,17 +70,22 @@ QString Translator::_tr(const QString& text, const QString& context, bool marked
     if (m_count == 0 || text.isEmpty())
         return text;
 
-    QByteArray key;
     if (util::i18n::isMarked(text)) {
         if (!context.isEmpty())
             qCWarning(lcI18n) << "Attempted to translate a marked string with context. Ignoring context.";
-        key = text.mid(1).toUtf8(); // Marked strings with context are already in the correct format
-    } else if (markedOnly) {
-        return text; // Don't translate unmarked strings when markedOnly
-    } else {
-        key = context.isEmpty() ? text.toUtf8() : context.toUtf8() + util::i18n::k_contextSep + text.toUtf8();
+
+        const auto& [msg, args] = util::i18n::parseMarked(text);
+        const auto translated = lookup(msg.toUtf8());
+        auto result = translated.isNull() ? text : translated;
+        for (const auto& arg : args)
+            result = result.arg(arg);
+        return result;
     }
 
+    if (markedOnly)
+        return text; // Don't translate unmarked strings when markedOnly
+
+    const auto key = context.isEmpty() ? text.toUtf8() : context.toUtf8() + util::i18n::k_contextSep + text.toUtf8();
     const auto translated = lookup(key);
     return translated.isNull() ? text : translated;
 }
