@@ -20,8 +20,10 @@ function gen -a lang
         --add-comments=TRANSLATORS: \
         --package-name=caelestia-shell \
         -k \
-        -ktr:1 -ktrCtx:1c,2 -ktrMarked:1 \
-        -kmark:1 -kmarkCtx:1c,2 \
+        -ktr:1 -ktrCtx:2c,1 -ktrMarked:1 \
+        -ktrN:1,2 -ktrCtxN:4c,1,2 \
+        -kmark:1 -kmarkCtx:2c,1 \
+        -kmarkN:1,2 -kmarkCtxN:4c,1,2 \
         (string match -v 'build/*' $argv[2..])
 end
 
@@ -34,13 +36,18 @@ function gen_trs
     gen JavaScript **.qml
     gen C++ **.cpp **.hpp
 
-    # Strip js format then tag qt-format
+    # Strip js format then tag qt-format, with qt-plural-format for the %n count
     perl -00 -i -pe '
         s/^#, javascript-format\n//m;
         s/, javascript-format//;
 
-        if (/%L?[1-9]/ && !/^#,.*qt-format/m) {
-            s/^#,/#, qt-format,/m or s/^(?=msgctxt |msgid )/#, qt-format\n/m
+        my @fmts;
+        push @fmts, "qt-format" if /%L?[1-9]/;
+        push @fmts, "qt-plural-format" if /%L?n/;
+
+        if (@fmts && !/^#,.*qt-format/m) {
+            my $fmts = join ", ", @fmts;
+            s/^#,/#, $fmts,/m or s/^(?=msgctxt |msgid )/#, $fmts\n/m
         }
     ' $pot_file
 end
@@ -75,7 +82,7 @@ if test $argv[1] = test
         --input=$pot_file \
         --output=$test_po \
         --no-translator 2>/dev/null
-    sed -Ei 's/^msgstr "(.*)"$/msgstr "[[ \1 ]]"/' $test_po
+    sed -Ei 's/^msgstr(\[[0-9]+\])? "(.*)"$/msgstr\1 "[[ \2 ]]"/' $test_po
     compile $test_po $argv[2]
 
     rm -r $tmp_dir

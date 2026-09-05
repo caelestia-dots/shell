@@ -3,6 +3,7 @@
 #include <qdirlisting.h>
 #include <qendian.h>
 #include <qfile.h>
+#include <qlocale.h>
 #include <qloggingcategory.h>
 
 #include <cstring>
@@ -40,6 +41,26 @@ QString resourceDir() {
     return k_s;
 }
 
+// Substitutes the count into a plural form. `%n` is plain, `%Ln` is localised
+void substitutePercentN(QString& text, int n) {
+    qsizetype pos = 0;
+    while ((pos = text.indexOf(u'%', pos)) >= 0) {
+        auto len = 1;
+        const auto localised = pos + len < text.size() && text.at(pos + len) == u'L';
+        if (localised)
+            ++len;
+
+        if (pos + len >= text.size() || text.at(pos + len) != u'n') {
+            pos += len;
+            continue;
+        }
+
+        const auto count = localised ? QLocale().toString(n) : QString::number(n);
+        text.replace(pos, len + 1, count);
+        pos += count.size();
+    }
+}
+
 } // namespace
 
 Translator::Translator(QObject* parent)
@@ -67,17 +88,18 @@ QString Translator::language() const {
 }
 
 QString Translator::_tr(const QString& text, const QString& context, bool markedOnly) const {
-    if (m_count == 0 || text.isEmpty())
+    if (text.isEmpty())
         return text;
 
     if (util::i18n::isMarked(text)) {
         if (!context.isEmpty())
-            qCWarning(lcI18n) << "Attempted to translate a marked string with context. Ignoring context.";
+            qCWarning(lcI18n) << "Attempted to translate a marked string with context. "
+                                 "Context should be baked in when marking, ignoring context.";
 
-        const auto& [msg, args] = util::i18n::parseMarked(text);
-        const auto translated = lookup(msg.toUtf8());
-        auto result = translated.isNull() ? msg : translated;
-        for (const auto& arg : args)
+        const auto marked = util::i18n::parseMarked(text);
+        auto result = marked.n < 0 ? translate(marked.text, marked.context)
+                                   : translatePlural(marked.text, marked.plural, marked.n, marked.context);
+        for (const auto& arg : marked.args)
             result = result.arg(arg);
         return result;
     }
@@ -85,18 +107,37 @@ QString Translator::_tr(const QString& text, const QString& context, bool marked
     if (markedOnly)
         return text; // Don't translate unmarked strings when markedOnly
 
-    const auto key =
-        context.isEmpty() ? text.toUtf8() : context.toUtf8() + util::i18n::k_contextSep.toLatin1() + text.toUtf8();
-    const auto translated = lookup(key);
-    return translated.isNull() ? text : translated;
+    return translate(text, context);
+}
+
+QString Translator::_trN(const QString& text, const QString& plural, int n, const QString& context) const {
+    if (util::i18n::isMarked(text)) {
+        qCWarning(lcI18n) << "Attempted to translate a marked string with plural forms. "
+                             "Plural forms should be baked in when marking, ignoring plural forms.";
+        return _tr(text, context, false);
+    }
+
+    if (text.isEmpty())
+        return text;
+
+    return translatePlural(text, plural, n, context);
 }
 
 QString Translator::mark(const QString& text, const QStringList& args) {
-    return util::i18n::detail::doMark(text, {}, args);
+    return util::i18n::detail::doMark(text, {}, -1, {}, args);
 }
 
 QString Translator::markCtx(const QString& text, const QString& context, const QStringList& args) {
-    return util::i18n::detail::doMark(text, context, args);
+    return util::i18n::detail::doMark(text, {}, -1, context, args);
+}
+
+QString Translator::markN(const QString& text, const QString& plural, int n, const QStringList& args) {
+    return util::i18n::detail::doMark(text, plural, n, {}, args);
+}
+
+QString Translator::markCtxN(
+    const QString& text, const QString& plural, int n, const QString& context, const QStringList& args) {
+    return util::i18n::detail::doMark(text, plural, n, context, args);
 }
 
 QStringList Translator::findSupportedLangs() {
@@ -153,6 +194,10 @@ void Translator::loadTranslations() {
     m_origs = origs;
     m_trans = trans;
 
+    // The metadata entry keyed by the empty msgid carries the Plural-Forms rule
+    if (!m_plurals.parse(lookupRaw("")))
+        qCDebug(lcI18n) << "No usable Plural-Forms for" << m_language << "- assuming the default rule";
+
     qCDebug(lcI18n) << "Loaded" << m_count << "messages for" << m_language;
 }
 
@@ -161,7 +206,25 @@ quint32 Translator::readU32(qsizetype offset) const {
     return m_littleEndian ? qFromLittleEndian<quint32>(raw + offset) : qFromBigEndian<quint32>(raw + offset);
 }
 
-QString Translator::lookup(QByteArrayView key) const {
+QByteArray Translator::catalogKey(const QString& text, const QString& context) {
+    if (context.isEmpty())
+        return text.toUtf8();
+    return context.toUtf8() + util::i18n::k_contextSep.toLatin1() + text.toUtf8();
+}
+
+QString Translator::segment(QByteArrayView blob, quint32 index) {
+    for (quint32 i = 0; i < index; ++i) {
+        const auto nul = blob.indexOf('\0');
+        if (nul < 0)
+            return {}; // Catalog has fewer forms than the rule asked for
+        blob = blob.sliced(nul + 1);
+    }
+
+    const auto nul = blob.indexOf('\0');
+    return QString::fromUtf8(nul < 0 ? blob : blob.first(nul));
+}
+
+QByteArrayView Translator::lookupRaw(QByteArrayView key) const {
     const auto* raw = m_catalog.constData();
 
     // Entries are sorted against msgid, so we can use a binary search
@@ -175,9 +238,14 @@ QString Translator::lookup(QByteArrayView key) const {
         if (off + len > m_catalog.size())
             return {};
 
-        auto cmp = std::memcmp(key.constData(), raw + off, static_cast<size_t>(qMin(key.size(), len)));
-        if (cmp == 0 && key.size() != len)
-            cmp = key.size() < len ? -1 : 1;
+        // Plural entries store `msgid \0 msgid_plural`, only the msgid is part of the key
+        const QByteArrayView orig(raw + off, len);
+        const auto nul = orig.indexOf('\0');
+        const auto msgid = nul < 0 ? orig : orig.first(nul);
+
+        auto cmp = std::memcmp(key.constData(), msgid.constData(), static_cast<size_t>(qMin(key.size(), msgid.size())));
+        if (cmp == 0 && key.size() != msgid.size())
+            cmp = key.size() < msgid.size() ? -1 : 1;
 
         if (cmp == 0) {
             const auto hit = static_cast<qsizetype>(m_trans) + k_entrySize * probe;
@@ -185,7 +253,7 @@ QString Translator::lookup(QByteArrayView key) const {
             const auto toff = static_cast<qsizetype>(readU32(hit + k_entryOffsetField));
             if (toff + tlen > m_catalog.size())
                 return {};
-            return QString::fromUtf8(raw + toff, tlen);
+            return { raw + toff, tlen };
         }
 
         if (cmp < 0)
@@ -195,6 +263,32 @@ QString Translator::lookup(QByteArrayView key) const {
     }
 
     return {};
+}
+
+QString Translator::lookup(QByteArrayView key, quint32 index) const {
+    const auto blob = lookupRaw(key);
+    return blob.isNull() ? QString() : segment(blob, index);
+}
+
+QString Translator::translate(const QString& text, const QString& context) const {
+    if (m_count == 0)
+        return text;
+
+    const auto translated = lookup(catalogKey(text, context));
+    return translated.isNull() ? text : translated;
+}
+
+QString Translator::translatePlural(const QString& text, const QString& plural, int n, const QString& context) const {
+    auto result = n == 1 ? text : plural; // Default English plural rule
+
+    if (m_count > 0) {
+        const auto translated = lookup(catalogKey(text, context), m_plurals.evaluate(n));
+        if (!translated.isNull())
+            result = translated;
+    }
+
+    substitutePercentN(result, n);
+    return result;
 }
 
 QString Translator::langForLocale() const {

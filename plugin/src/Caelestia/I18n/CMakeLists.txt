@@ -44,6 +44,7 @@ qml_module(caelestia-i18n
     INCLUDE_PREFIX i18n
     SOURCES
         translator.cpp
+        pluralrules.cpp
     QML_SINGLETONS
         Tr.qml
     RESOURCES
