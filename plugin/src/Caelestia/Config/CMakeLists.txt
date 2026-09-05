@@ -38,3 +38,7 @@ target_link_libraries(caelestia-config PUBLIC
     caelestia-core
     caelestia-settings
 )
+
+if(BUILD_TESTING)
+    add_subdirectory(tests)
+endif()
