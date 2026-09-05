@@ -1,6 +1,7 @@
 #pragma once
 
-#include <qdbusconnection.h>
+#include "networkwalker.hpp"
+
 #include <qhash.h>
 #include <qobject.h>
 #include <qqmlintegration.h>
@@ -9,8 +10,6 @@
 #include <qstring.h>
 #include <qstringlist.h>
 #include <qvariant.h>
-
-#include <optional>
 
 #include "config/enums.hpp"
 
@@ -194,66 +193,43 @@ private:
 // to poll and no output format to depend on. Actions - connecting, forgetting,
 // scanning - stay on the CLI, where there's nothing to parse and nothing to
 // gain from moving them.
-class NetworkManager : public QObject {
+class NetworkManager : public NmWalker {
     Q_OBJECT
     QML_ELEMENT
     QML_SINGLETON
 
-    // False until a full snapshot has been read, so consumers can hold their
-    // previous behaviour rather than acting on an empty list.
-    Q_PROPERTY(bool ready READ ready NOTIFY changed)
-    Q_PROPERTY(QQmlListProperty<caelestia::services::NmDevice> devices READ devices NOTIFY devicesChanged)
+    Q_PROPERTY(QQmlListProperty<caelestia::services::NmDevice> devices READ devices NOTIFY itemsChanged)
     Q_PROPERTY(bool wirelessEnabled READ wirelessEnabled NOTIFY changed)
 
 public:
     explicit NetworkManager(QObject* parent = nullptr);
 
-    [[nodiscard]] bool ready() const;
     [[nodiscard]] QQmlListProperty<NmDevice> devices();
     [[nodiscard]] bool wirelessEnabled() const;
 
-signals:
-    void changed();
-    void devicesChanged();
 
-private slots:
-    void handlePropertiesChanged(const QString& iface, const QVariantMap& properties, const QStringList& invalidated);
-    void handleNameOwnerChanged(const QString& name, const QString& oldOwner, const QString& newOwner);
+protected:
+    void readRoot() override;
+    [[nodiscard]] bool triggersRefresh(const QString& iface) const override;
+    void pruneUnseen() override;
+    void clearItems() override;
 
 private:
-    // One walk at a time, with a flag to run again after. Bursts of signals
-    // would otherwise each start their own and land out of order.
-    void scheduleRefresh();
-    void refresh();
-    void readManager();
     void readDevice(const QString& path);
     void readConnection(const QString& devicePath, const QString& connectionPath);
     void readWired(const QString& devicePath);
     void readWireless(const QString& devicePath);
     void readIp4Config(const QString& devicePath, const QString& configPath);
     void readAccessPoint(const QString& devicePath, const QString& accessPointPath);
-    void step(int delta);
-    void finish();
 
-    void watchObject(const QString& path);
-    void clearDevices();
 
-    [[nodiscard]] static std::optional<QDBusConnection> systemBus();
 
-    bool m_ready = false;
     bool m_wirelessEnabled = false;
 
     QList<NmDevice*> m_devices;
     QHash<QString, NmDevice*> m_byPath;
-    // Paths seen by the walk in progress; anything missing afterwards has gone.
-    QSet<QString> m_seen;
 
-    bool m_refreshing = false;
-    bool m_refreshQueued = false;
-    int m_pending = 0;
-    bool m_listChanged = false;
 
-    QSet<QString> m_watched;
 };
 
 } // namespace caelestia::services

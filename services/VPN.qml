@@ -118,8 +118,7 @@ Singleton {
     }
 
     // Sync the normalised config into the `providers` object list, reusing
-    // existing entries by index. Same create/update/destroy diff as
-    // Nmcli.syncEthernetDevices / getNetworks.
+    // existing entries by index.
     function syncProviders(): void {
         const configs = root.providerConfigs;
         const rProviders = root.providers;

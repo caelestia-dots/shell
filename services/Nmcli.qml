@@ -25,10 +25,8 @@ Singleton {
     readonly property var active: Wifi.active
     // Saved profiles live in Profiles now, read from NetworkManager's Settings
     // interface. These forward them so existing consumers keep working.
-    readonly property list<string> savedConnections: Profiles.names
     readonly property list<string> savedConnectionSsids: Profiles.ssids
     // Map of saved Wi-Fi SSID (lowercased) -> security type
-    readonly property var savedConnectionSecurity: Profiles.securityBySsid
 
     property var pendingConnection: null
     // Device details come from NetworkManager's IP4Config over dbus now.
@@ -58,7 +56,6 @@ Singleton {
     // Constants
     readonly property string deviceTypeWifi: "wifi"
     readonly property string deviceTypeEthernet: "ethernet"
-    readonly property string connectionTypeWireless: "802-11-wireless"
     readonly property string nmcliCommandDevice: "device"
     readonly property string nmcliCommandConnection: "connection"
     readonly property string nmcliCommandWifi: "wifi"
@@ -165,13 +162,6 @@ Singleton {
         });
     }
 
-    function getDeviceStatus(callback: var): void {
-        executeCommand(["-t", "-f", root.deviceStatusFields, root.nmcliCommandDevice, "status"], result => {
-            if (callback)
-                callback(result.output);
-        });
-    }
-
     function getWirelessInterfaces(callback: var): void {
         executeCommand(["-t", "-f", root.deviceStatusFields, root.nmcliCommandDevice, "status"], result => {
             const interfaces = parseDeviceStatusOutput(result.output, root.deviceTypeWifi);
@@ -181,27 +171,12 @@ Singleton {
         });
     }
 
-    // Kept so existing callers still get their callback; the device list is
-    // a live binding on Wired now, so there is nothing to fetch.
-    function getEthernetInterfaces(callback: var): void {
-        if (callback)
-            callback(root.ethernetDevices);
-    }
-
     function connectEthernet(connectionName: string, interfaceName: string, callback: var): void {
         Wired.connect(connectionName, interfaceName, callback);
     }
 
     function disconnectEthernet(connectionName: string, callback: var): void {
         Wired.disconnect(connectionName, callback);
-    }
-
-    function getAllInterfaces(callback: var): void {
-        executeCommand(["-t", "-f", root.deviceStatusFields, root.nmcliCommandDevice, "status"], result => {
-            const interfaces = parseDeviceStatusOutput(result.output, "both");
-            if (callback)
-                callback(interfaces);
-        });
     }
 
     function isInterfaceConnected(interfaceName: string, callback: var): void {
@@ -414,13 +389,6 @@ Singleton {
         });
     }
 
-    // Reads whether a saved connection auto-connects.
-    // Kept for existing callers; autoconnect is a live binding on Profiles now.
-    function getAutoconnect(connectionName: string, callback: var): void {
-        if (callback)
-            callback(Profiles.autoconnectFor(connectionName));
-    }
-
     function setAutoconnect(connectionName: string, enabled: bool, callback: var): void {
         Profiles.setAutoconnect(Profiles.nameFor(connectionName), enabled, callback);
     }
@@ -451,39 +419,6 @@ Singleton {
 
     function disconnectFromNetwork(): void {
         Wifi.disconnect(null);
-    }
-
-    function refreshStatus(callback: var): void {
-        getDeviceStatus(output => {
-            const lines = output.trim().split("\n");
-            let connected = false;
-            let activeIf = "";
-            let activeConn = "";
-
-            for (const line of lines) {
-                const parts = line.split(":");
-                if (parts.length >= 4) {
-                    const state = parts[2] || "";
-                    if (isConnectedState(state)) {
-                        connected = true;
-                        activeIf = parts[0] || "";
-                        activeConn = parts[3] || "";
-                        break;
-                    }
-                }
-            }
-
-            root.isConnected = connected;
-            root.activeInterface = activeIf;
-            root.activeConnection = activeConn;
-
-            if (callback)
-                callback({
-                    connected,
-                    interface: activeIf,
-                    connection: activeConn
-                });
-        });
     }
 
     function bringInterfaceUp(interfaceName: string, callback: var): void {
@@ -522,12 +457,6 @@ Singleton {
         }
     }
 
-    function scanWirelessNetworks(interfaceName: string, callback: var): void {
-        Wifi.scan();
-        if (callback)
-            callback(true);
-    }
-
     function rescanWifi(): void {
         Wifi.scan();
     }
@@ -557,53 +486,6 @@ Singleton {
         if (callback)
             callback(root.networks);
         checkPendingConnection();
-    }
-
-    function getWirelessSSIDs(interfaceName: string, callback: var): void {
-        let cmd = ["-t", "-f", root.networkListFields, root.nmcliCommandDevice, root.nmcliCommandWifi, "list"];
-        if (interfaceName && interfaceName.length > 0) {
-            cmd.push(root.connectionParamIfname, interfaceName);
-        }
-        executeCommand(cmd, result => {
-            if (!result.success) {
-                if (callback)
-                    callback([]);
-                return;
-            }
-
-            const ssids = [];
-            const lines = result.output.trim().split("\n");
-            const seenSSIDs = new Set();
-
-            for (const line of lines) {
-                if (!line || line.length === 0)
-                    continue;
-
-                const parts = line.split(":");
-                if (parts.length >= 1) {
-                    const ssid = parts[0].trim();
-                    if (ssid && ssid.length > 0 && !seenSSIDs.has(ssid)) {
-                        seenSSIDs.add(ssid);
-                        const signalStr = parts.length >= 2 ? parts[1].trim() : "";
-                        const signal = signalStr ? parseInt(signalStr, 10) : 0;
-                        const security = parts.length >= 3 ? parts[2].trim() : "";
-                        ssids.push({
-                            ssid: ssid,
-                            signal: signalStr,
-                            signalValue: isNaN(signal) ? 0 : signal,
-                            security: security
-                        });
-                    }
-                }
-            }
-
-            ssids.sort((a, b) => {
-                return b.signalValue - a.signalValue;
-            });
-
-            if (callback)
-                callback(ssids);
-        });
     }
 
     function handlePasswordRequired(proc: var, error: string, output: string, exitCode: int): bool {
@@ -659,11 +541,6 @@ Singleton {
                 }
             });
         }
-    }
-
-    function getWirelessDeviceDetails(interfaceName: string, callback: var): void {
-        if (callback)
-            callback(root.wirelessDeviceDetails);
     }
 
     // Reads the IPv4 configuration (method, address, gateway, DNS, autoconnect)
@@ -731,32 +608,8 @@ Singleton {
         });
     }
 
-    function getEthernetSpeed(interfaceName: string): void {
-        Wired.refreshSpeed(interfaceName);
-    }
-
     function getEthernetDataUsage(interfaceName: string): void {
         Wired.refreshDataUsage(interfaceName);
-    }
-
-    function formatBytes(bytes: var): string {
-        if (!bytes || bytes <= 0)
-            return "0 B";
-        const units = ["B", "KB", "MB", "GB", "TB"];
-        let i = 0;
-        let v = bytes;
-        while (v >= 1024 && i < units.length - 1) {
-            v /= 1024;
-            i++;
-        }
-        return `${v.toFixed(v < 10 && i > 0 ? 1 : 0)} ${units[i]}`;
-    }
-
-    // Kept so existing callers still get their callback; the details are a
-    // live binding on Wired now, so there is nothing to fetch.
-    function getEthernetDeviceDetails(interfaceName: string, callback: var): void {
-        if (callback)
-            callback(root.ethernetDeviceDetails);
     }
 
     function refreshOnConnectionChange(): void {

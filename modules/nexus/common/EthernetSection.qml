@@ -25,13 +25,10 @@ ColumnLayout {
         triggeredOnStart: true
         interval: 5000
         onTriggered: {
-            // The device list is a live binding now; only the nmcli-backed
-            // details and the sysfs counters still need polling.
-            if (Nmcli.activeEthernet) {
-                Nmcli.getEthernetDeviceDetails(Nmcli.activeEthernet.iface, () => {});
+            // Everything else is a live binding; only the sysfs byte counters
+            // still have to be re-read.
+            if (Nmcli.activeEthernet)
                 Nmcli.getEthernetDataUsage(Nmcli.activeEthernet.iface);
-                Nmcli.getEthernetSpeed(Nmcli.activeEthernet.iface);
-            }
         }
     }
 

@@ -2,7 +2,6 @@ pragma Singleton
 
 import QtQuick
 import Quickshell
-import Quickshell.Io
 import Caelestia.Services
 
 // Saved connection profiles, split out of Nmcli along their own boundary.
@@ -37,15 +36,6 @@ Singleton {
             if (profile.ssid && !seen.has(profile.ssid.toLowerCase()))
                 seen.set(profile.ssid.toLowerCase(), profile.ssid);
         return Array.from(seen.values());
-    }
-
-    // Key management per saved SSID, lowercased key, e.g. "wpa-psk".
-    readonly property var securityBySsid: {
-        const security = {};
-        for (const profile of root.wireless)
-            if (profile.ssid)
-                security[profile.ssid.toLowerCase()] = profile.keyMgmt;
-        return security;
     }
 
     function find(ssid: string): var {
@@ -83,14 +73,6 @@ Singleton {
         return root.has(ssid) || root.names.some(n => n && n.toLowerCase().trim() === wanted);
     }
 
-    function autoconnectFor(name: string): bool {
-        if (!name)
-            return true;
-
-        const wanted = name.toLowerCase().trim();
-        return (root.find(name) ?? root.list.find(p => p.id && p.id.toLowerCase().trim() === wanted))?.autoconnect ?? true;
-    }
-
     // Turns NetworkManager's key management into the label the UI shows.
     function securityLabel(keyMgmt: string): string {
         switch ((keyMgmt || "").trim().toLowerCase()) {
@@ -111,11 +93,6 @@ Singleton {
         default:
             return keyMgmt.trim();
         }
-    }
-
-    function securityFor(ssid: string): string {
-        const profile = root.find(ssid);
-        return profile ? root.securityLabel(profile.keyMgmt) : "";
     }
 
     // Looks a profile up by SSID first, then by name, since callers pass
@@ -148,23 +125,13 @@ Singleton {
         };
     }
 
-    // One-shot nmcli call; only the exit code matters, so there's nothing to
-    // parse and no shared state to race.
-    function run(args: list<string>, callback: var): void {
-        const proc = actionProc.createObject(root, {
-            command: ["nmcli", ...args],
-            callback: callback ?? null
-        });
-        proc.running = true;
-    }
-
     function forget(name: string, callback: var): void {
         if (!name) {
             if (callback)
                 callback(false);
             return;
         }
-        run(["connection", "delete", name], callback);
+        NmAction.run(["connection", "delete", name], callback);
     }
 
     // Turning autoconnect off also makes NetworkManager ask for the password on
@@ -182,43 +149,16 @@ Singleton {
         const cmd = autoconnect ? [...base, "802-11-wireless-security.psk-flags", "0"] : [...base, "802-11-wireless-security.psk-flags", "2", "802-11-wireless-security.psk", ""];
 
         // No refetch afterwards: the profile reports its own edits over dbus.
-        run(cmd, (success, error) => {
+        NmAction.run(cmd, (success, error) => {
             // Open networks have no security settings, so nmcli rejects those
             // fields. Retry with just the autoconnect change.
             if (!success && (error.includes("802-11-wireless-security") || error.includes("is not a valid property") || error.includes("Error: invalid"))) {
-                run(base, callback);
+                NmAction.run(base, callback);
                 return;
             }
 
             if (callback)
                 callback(success);
         });
-    }
-
-    Component {
-        id: actionProc
-
-        Process {
-            id: proc
-
-            property var callback: null
-            property string error: ""
-
-            environment: ({
-                    LANG: "C.UTF-8",
-                    LC_ALL: "C.UTF-8"
-                })
-
-            stderr: StdioCollector {
-                onStreamFinished: proc.error = text
-            }
-
-            onExited: code => { // qmllint disable signal-handler-parameters
-                const callback = proc.callback;
-                const error = proc.error;
-                proc.destroy();
-                callback?.(code === 0, error);
-            }
-        }
     }
 }

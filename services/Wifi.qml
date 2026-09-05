@@ -2,7 +2,6 @@ pragma Singleton
 
 import QtQuick
 import Quickshell
-import Quickshell.Io
 import Caelestia.Services
 import Caelestia.Config
 
@@ -84,20 +83,10 @@ Singleton {
         return root.networks.find(n => n.ssid === ssid) ?? null;
     }
 
-    // One-shot nmcli call; only the exit code matters, so there's nothing to
-    // parse and no shared state to race.
-    function run(args: list<string>, callback: var): void {
-        const proc = actionProc.createObject(root, {
-            command: ["nmcli", ...args],
-            callback: callback ?? null
-        });
-        proc.running = true;
-    }
-
     function setEnabled(enabled: bool, callback: var): void {
         // No refetch afterwards: wirelessEnabled is a live binding on
         // NetworkManager, so it updates itself once NM applies the change.
-        run(["radio", "wifi", enabled ? "on" : "off"], callback);
+        NmAction.run(["radio", "wifi", enabled ? "on" : "off"], callback);
     }
 
     function toggle(callback: var): void {
@@ -111,7 +100,7 @@ Singleton {
         root.scanBaseline = root.lastScan;
         root.scanning = true;
         scanTimeout.restart();
-        run(["device", "wifi", "rescan"], null);
+        NmAction.run(["device", "wifi", "rescan"], null);
     }
 
     // Brings down the profile on the wifi device, falling back to
@@ -119,7 +108,7 @@ Singleton {
     function disconnect(callback: var): void {
         const connection = root.device?.connection ?? "";
         if (connection) {
-            run(["connection", "down", connection], callback);
+            NmAction.run(["connection", "down", connection], callback);
             return;
         }
 
@@ -129,7 +118,7 @@ Singleton {
                 callback(false);
             return;
         }
-        run(["device", "disconnect", iface], callback);
+        NmAction.run(["device", "disconnect", iface], callback);
     }
 
     function forget(connectionName: string, callback: var): void {
@@ -138,7 +127,7 @@ Singleton {
                 callback(false);
             return;
         }
-        run(["connection", "delete", connectionName], callback);
+        NmAction.run(["connection", "delete", connectionName], callback);
     }
 
     // The only word NetworkManager gives that a scan finished.
@@ -146,27 +135,6 @@ Singleton {
         if (root.scanning && root.lastScan !== root.scanBaseline) {
             root.scanning = false;
             scanTimeout.stop();
-        }
-    }
-
-    Component {
-        id: actionProc
-
-        Process {
-            id: proc
-
-            property var callback: null
-
-            environment: ({
-                    LANG: "C.UTF-8",
-                    LC_ALL: "C.UTF-8"
-                })
-
-            onExited: code => { // qmllint disable signal-handler-parameters
-                const callback = proc.callback;
-                proc.destroy();
-                callback?.(code === 0);
-            }
         }
     }
 

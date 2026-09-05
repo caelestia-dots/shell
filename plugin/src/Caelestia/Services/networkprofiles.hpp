@@ -1,16 +1,16 @@
 #pragma once
 
-#include <qdbusconnection.h>
+#include "networkwalker.hpp"
+
 #include <qhash.h>
 #include <qobject.h>
 #include <qqmlintegration.h>
 #include <qqmllist.h>
-#include <qset.h>
 #include <qstring.h>
 #include <qstringlist.h>
 #include <qvariant.h>
 
-#include <optional>
+#include <cstdint>
 
 namespace caelestia::services {
 
@@ -95,58 +95,36 @@ private:
 // profile returns everything at once, and they run in parallel. Actions -
 // adding, deleting, toggling autoconnect - stay on the CLI, where there's
 // nothing to parse and nothing to gain from moving them.
-class NetworkProfiles : public QObject {
+class NetworkProfiles : public NmWalker {
     Q_OBJECT
     QML_ELEMENT
     QML_SINGLETON
 
-    // False until a full snapshot has been read, so consumers can hold their
-    // previous behaviour rather than acting on an empty list.
-    Q_PROPERTY(bool ready READ ready NOTIFY changed)
-    Q_PROPERTY(QQmlListProperty<caelestia::services::NmConnection> profiles READ profiles NOTIFY profilesChanged)
+    Q_PROPERTY(QQmlListProperty<caelestia::services::NmConnection> profiles READ profiles NOTIFY itemsChanged)
 
 public:
     explicit NetworkProfiles(QObject* parent = nullptr);
 
-    [[nodiscard]] bool ready() const;
     [[nodiscard]] QQmlListProperty<NmConnection> profiles();
 
-signals:
-    void changed();
-    void profilesChanged();
 
-private slots:
-    void handlePropertiesChanged(const QString& iface, const QVariantMap& properties, const QStringList& invalidated);
-    void handleNameOwnerChanged(const QString& name, const QString& oldOwner, const QString& newOwner);
+protected:
+    void readRoot() override;
+    [[nodiscard]] bool triggersRefresh(const QString& iface) const override;
+    void pruneUnseen() override;
+    void clearItems() override;
 
 private:
-    // One walk at a time, with a flag to run again after. Bursts of signals
-    // would otherwise each start their own and land out of order.
-    void scheduleRefresh();
-    void refresh();
-    void readSettings();
-    void readProfile(const QString& path);
-    void step(int delta);
-    void finish();
+    // Whether the read belongs to a walk. A reread triggered by an edit does
+    // not: it must stay out of the walk's pending count and seen set, or it
+    // will drive the count to zero underneath a walk in progress and prune
+    // profiles the walk hasn't reached yet.
+    enum class Read : std::uint8_t { Walk, Detached };
 
-    void watchObject(const QString& path);
-    void clearProfiles();
-
-    [[nodiscard]] static std::optional<QDBusConnection> systemBus();
-
-    bool m_ready = false;
+    void readProfile(const QString& path, Read read);
 
     QList<NmConnection*> m_profiles;
     QHash<QString, NmConnection*> m_byPath;
-    // Paths seen by the walk in progress; anything missing afterwards has gone.
-    QSet<QString> m_seen;
-
-    bool m_refreshing = false;
-    bool m_refreshQueued = false;
-    int m_pending = 0;
-    bool m_listChanged = false;
-
-    QSet<QString> m_watched;
 };
 
 } // namespace caelestia::services

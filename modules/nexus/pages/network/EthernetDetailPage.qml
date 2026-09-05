@@ -98,11 +98,7 @@ PageBase {
     title: root.device?.connection || root.ifaceName || qsTr("Ethernet")
     isSubPage: true
 
-    Component.onCompleted: {
-        Nmcli.getEthernetDeviceDetails(root.ifaceName, () => {});
-        Nmcli.getEthernetSpeed(root.ifaceName);
-        loadIpConfig();
-    }
+    Component.onCompleted: loadIpConfig()
 
     ColumnLayout {
         anchors.horizontalCenter: parent.horizontalCenter

@@ -90,10 +90,7 @@ PageBase {
     title: root.ssid || qsTr("Network")
     isSubPage: true
 
-    Component.onCompleted: {
-        Nmcli.getWirelessDeviceDetails("", () => {});
-        loadIpConfig();
-    }
+    Component.onCompleted: loadIpConfig()
 
     ColumnLayout {
         anchors.horizontalCenter: parent.horizontalCenter

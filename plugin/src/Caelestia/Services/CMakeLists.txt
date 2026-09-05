@@ -20,6 +20,7 @@ qml_module(caelestia-services
         sessionmanager.cpp
         networkusage.cpp
         networkroute.cpp
+        networkwalker.cpp
         networkmanager.cpp
         networkprofiles.cpp
         hyprdevices.cpp

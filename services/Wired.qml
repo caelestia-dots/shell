@@ -62,9 +62,9 @@ Singleton {
 
     function connect(connectionName: string, interfaceName: string, callback: var): void {
         if (connectionName)
-            run(["connection", "up", connectionName], callback);
+            NmAction.run(["connection", "up", connectionName], callback);
         else if (interfaceName)
-            run(["device", "connect", interfaceName], callback);
+            NmAction.run(["device", "connect", interfaceName], callback);
         else if (callback)
             callback(false);
     }
@@ -75,21 +75,7 @@ Singleton {
                 callback(false);
             return;
         }
-        run(["connection", "down", connectionName], callback);
-    }
-
-    // One-shot nmcli call; only the exit code matters, so there's nothing to
-    // parse and no shared state to race.
-    function run(args: list<string>, callback: var): void {
-        const proc = actionProc.createObject(root, {
-            command: ["nmcli", ...args],
-            callback: callback ?? null
-        });
-        proc.running = true;
-    }
-
-    // Kept for existing callers; the speed is a live binding on the device now.
-    function refreshSpeed(interfaceName: string): void {
+        NmAction.run(["connection", "down", connectionName], callback);
     }
 
     function refreshDataUsage(interfaceName: string): void {
@@ -117,27 +103,6 @@ Singleton {
     // Follows whichever device is active, so consumers don't have to ask.
     onActiveChanged: {
         refreshDataUsage(active?.interface ?? "");
-    }
-
-    Component {
-        id: actionProc
-
-        Process {
-            id: proc
-
-            property var callback: null
-
-            environment: ({
-                    LANG: "C.UTF-8",
-                    LC_ALL: "C.UTF-8"
-                })
-
-            onExited: code => { // qmllint disable signal-handler-parameters
-                const callback = proc.callback;
-                proc.destroy();
-                callback?.(code === 0);
-            }
-        }
     }
 
     Process {

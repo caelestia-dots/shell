@@ -350,28 +350,36 @@ void NmDevice::update(const QVariantMap& props) {
 }
 
 NetworkManager::NetworkManager(QObject* parent)
-    : QObject(parent) {
-    auto bus = systemBus();
-    if (!bus) {
-        return;
-    }
+    : NmWalker(QString::fromUtf8(kManagerPath), parent) {}
 
-    // NetworkManager may not be up yet, or may restart under us.
-    bus->connect(
-        QStringLiteral("org.freedesktop.DBus"),
-        QStringLiteral("/org/freedesktop/DBus"),
-        QStringLiteral("org.freedesktop.DBus"),
-        QStringLiteral("NameOwnerChanged"),
-        QStringLiteral("sss"),
-        this,
-        SLOT(handleNameOwnerChanged(QString, QString, QString)));
-
-    watchObject(QString::fromUtf8(kManagerPath));
-    scheduleRefresh();
+// Access points and the profile name track themselves, so this only needs to
+// catch the tree moving: devices appearing, changing state, or swapping their
+// wired link, wireless membership or ip config.
+bool NetworkManager::triggersRefresh(const QString& iface) const {
+    return iface == QString::fromUtf8(kManagerIface) || iface == QString::fromUtf8(kDeviceIface) ||
+        iface == QString::fromUtf8(kWiredIface) || iface == QString::fromUtf8(kWirelessIface) ||
+        iface == QString::fromUtf8(kIp4Iface);
 }
 
-bool NetworkManager::ready() const {
-    return m_ready;
+void NetworkManager::clearItems() {
+    for (auto* device : std::as_const(m_devices)) {
+        device->deleteLater();
+    }
+    m_devices.clear();
+    m_byPath.clear();
+}
+
+// Anything not seen by this walk is gone.
+void NetworkManager::pruneUnseen() {
+    for (int i = m_devices.size() - 1; i >= 0; i--) {
+        auto* device = m_devices.at(i);
+        if (!seen().contains(device->path())) {
+            m_byPath.remove(device->path());
+            m_devices.removeAt(i);
+            device->deleteLater();
+            setListChanged();
+        }
+    }
 }
 
 QQmlListProperty<NmDevice> NetworkManager::devices() {
@@ -382,144 +390,10 @@ bool NetworkManager::wirelessEnabled() const {
     return m_wirelessEnabled;
 }
 
-std::optional<QDBusConnection> NetworkManager::systemBus() {
-    auto bus = QDBusConnection::systemBus();
-    if (!bus.isConnected()) {
-        qCWarning(logNetworkManager) << "System bus unavailable";
-        return std::nullopt;
-    }
-    return bus;
-}
-
-void NetworkManager::watchObject(const QString& path) {
-    if (path.isEmpty() || path == QStringLiteral("/") || m_watched.contains(path)) {
-        return;
-    }
-
+void NetworkManager::readRoot() {
     auto bus = systemBus();
     if (!bus) {
-        return;
-    }
-
-    if (bus->connect(
-            QString::fromUtf8(kService),
-            path,
-            QString::fromUtf8(kPropsIface),
-            QStringLiteral("PropertiesChanged"),
-            this,
-            SLOT(handlePropertiesChanged(QString, QVariantMap, QStringList)))) {
-        m_watched.insert(path);
-    }
-}
-
-void NetworkManager::handlePropertiesChanged(
-    const QString& iface, const QVariantMap& properties, const QStringList& invalidated) {
-    Q_UNUSED(properties);
-    Q_UNUSED(invalidated);
-
-    // Access points keep themselves up to date, so this only needs to catch
-    // membership changes on the wireless interface, not per-AP churn.
-    if (iface == QString::fromUtf8(kManagerIface) || iface == QString::fromUtf8(kDeviceIface) ||
-        iface == QString::fromUtf8(kWirelessIface)) {
-        scheduleRefresh();
-    }
-}
-
-void NetworkManager::handleNameOwnerChanged(const QString& name, const QString& oldOwner, const QString& newOwner) {
-    Q_UNUSED(oldOwner);
-
-    if (name != QString::fromUtf8(kService)) {
-        return;
-    }
-
-    m_watched.clear();
-
-    if (newOwner.isEmpty()) {
-        // NetworkManager went away; report nothing rather than stale devices.
-        clearDevices();
-        m_ready = false;
-        emit devicesChanged();
-        emit changed();
-        return;
-    }
-
-    // Fresh objects on the new owner, so the old subscriptions are worthless.
-    watchObject(QString::fromUtf8(kManagerPath));
-    scheduleRefresh();
-}
-
-void NetworkManager::clearDevices() {
-    for (auto* device : std::as_const(m_devices)) {
-        device->deleteLater();
-    }
-    m_devices.clear();
-    m_byPath.clear();
-}
-
-void NetworkManager::scheduleRefresh() {
-    if (m_refreshing) {
-        m_refreshQueued = true;
-        return;
-    }
-
-    m_refreshing = true;
-    QTimer::singleShot(0, this, [this]() {
-        refresh();
-    });
-}
-
-void NetworkManager::refresh() {
-    m_seen.clear();
-    m_listChanged = false;
-    m_pending = 0;
-
-    readManager();
-}
-
-// Each async read holds a reference; the result is published when the last one
-// lands, so a partial walk is never visible.
-void NetworkManager::step(int delta) {
-    m_pending += delta;
-    if (m_pending > 0) {
-        return;
-    }
-
-    finish();
-}
-
-void NetworkManager::finish() {
-    // Anything not seen by this walk is gone.
-    for (int i = m_devices.size() - 1; i >= 0; i--) {
-        auto* device = m_devices.at(i);
-        if (!m_seen.contains(device->path())) {
-            m_byPath.remove(device->path());
-            m_devices.removeAt(i);
-            device->deleteLater();
-            m_listChanged = true;
-        }
-    }
-
-    const bool wasReady = m_ready;
-    m_ready = true;
-
-    if (m_listChanged) {
-        emit devicesChanged();
-    }
-    if (!wasReady || m_listChanged) {
-        emit changed();
-    }
-
-    m_refreshing = false;
-    if (m_refreshQueued) {
-        m_refreshQueued = false;
-        scheduleRefresh();
-    }
-}
-
-void NetworkManager::readManager() {
-    auto bus = systemBus();
-    if (!bus) {
-        finish();
+        abandonWalk();
         return;
     }
 
@@ -587,14 +461,14 @@ void NetworkManager::readDevice(const QString& path) {
             return;
         }
 
-        m_seen.insert(path);
+        seen().insert(path);
 
         auto* device = m_byPath.value(path);
         if (device == nullptr) {
             device = new NmDevice(path, this);
             m_byPath.insert(path, device);
             m_devices.append(device);
-            m_listChanged = true;
+            setListChanged();
         }
         const auto props = reply.value();
         device->update(props);
