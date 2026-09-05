@@ -15,7 +15,7 @@ PageBase {
     id: root
 
     readonly property string ifaceName: nState.selectedEthernetInterface
-    readonly property Nmcli.EthernetDevice device: Nmcli.ethernetDevices.find(d => d.iface === root.ifaceName) ?? null
+    readonly property var device: Nmcli.ethernetDevices.find(d => d.iface === root.ifaceName) ?? null
     readonly property var details: Nmcli.ethernetDeviceDetails
     readonly property string connectionName: root.device?.connection ?? ""
 
@@ -98,11 +98,7 @@ PageBase {
     title: root.device?.connection || root.ifaceName || qsTr("Ethernet")
     isSubPage: true
 
-    Component.onCompleted: {
-        Nmcli.getEthernetDeviceDetails(root.ifaceName, () => {});
-        Nmcli.getEthernetSpeed(root.ifaceName);
-        loadIpConfig();
-    }
+    Component.onCompleted: loadIpConfig()
 
     ColumnLayout {
         anchors.horizontalCenter: parent.horizontalCenter

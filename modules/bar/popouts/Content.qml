@@ -42,7 +42,7 @@ Item {
             name: "network"
             sourceComponent: Network {
                 popouts: root.popouts
-                view: Nmcli.activeEthernet ? "ethernet" : "wireless"
+                view: Nmcli.onEthernet ? "ethernet" : "wireless"
             }
         }
 

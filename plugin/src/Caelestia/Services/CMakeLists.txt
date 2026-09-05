@@ -19,6 +19,10 @@ qml_module(caelestia-services
         lyrics.cpp
         sessionmanager.cpp
         networkusage.cpp
+        networkroute.cpp
+        networkwalker.cpp
+        networkmanager.cpp
+        networkprofiles.cpp
         hyprdevices.cpp
         hyprextras.cpp
     LIBRARIES

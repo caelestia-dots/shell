@@ -25,12 +25,10 @@ ColumnLayout {
         triggeredOnStart: true
         interval: 5000
         onTriggered: {
-            Nmcli.getEthernetInterfaces(() => {});
-            if (Nmcli.activeEthernet) {
-                Nmcli.getEthernetDeviceDetails(Nmcli.activeEthernet.iface, () => {});
-                Nmcli.getEthernetDataUsage(Nmcli.activeEthernet.iface, () => {});
-                Nmcli.getEthernetSpeed(Nmcli.activeEthernet.iface);
-            }
+            // Everything else is a live binding; only the sysfs byte counters
+            // still have to be re-read.
+            if (Nmcli.activeEthernet)
+                Nmcli.getEthernetDataUsage(Nmcli.activeEthernet.iface);
         }
     }
 
@@ -80,13 +78,13 @@ ColumnLayout {
         id: ethRepeater
 
         model: ScriptModel {
-            values: Nmcli.ethernetDevices.filter(d => d.state !== "unavailable")
+            values: Nmcli.ethernetDevices.filter(d => d.carrier)
         }
 
         delegate: ConnectedRect {
             id: ethRow
 
-            required property Nmcli.EthernetDevice modelData
+            required property var modelData
             required property int index
 
             readonly property bool isConnected: modelData.connected

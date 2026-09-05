@@ -78,8 +78,6 @@ QtObject {
                         // Clear pending connection if exists
                         if (Nmcli.pendingConnection) {
                             Nmcli.connectionCheckTimer.stop();
-                            Nmcli.immediateCheckTimer.stop();
-                            Nmcli.immediateCheckTimer.checkCount = 0;
                             Nmcli.pendingConnection = null;
                         }
 
