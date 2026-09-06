@@ -37,6 +37,9 @@ public:
     Q_PROPERTY(QString title READ title NOTIFY titleChanged)
     Q_PROPERTY(QString subtitle READ subtitle NOTIFY subtitleChanged)
     Q_PROPERTY(QString path READ path NOTIFY pathChanged)
+    Q_PROPERTY(QString error READ error NOTIFY errorChanged)
+    Q_PROPERTY(QString lastError READ lastError NOTIFY lastErrorChanged)
+    Q_PROPERTY(bool busy READ busy NOTIFY busyChanged)
 
     explicit BatteryControl(QObject* parent = nullptr);
 
@@ -54,6 +57,9 @@ public:
     [[nodiscard]] QString title() const;
     [[nodiscard]] QString subtitle() const;
     [[nodiscard]] QString path() const;
+    [[nodiscard]] QString error() const;
+    [[nodiscard]] QString lastError() const;
+    [[nodiscard]] bool busy() const;
 
     Q_INVOKABLE void toggle();
     Q_INVOKABLE void refresh();
@@ -70,6 +76,9 @@ signals:
     void titleChanged();
     void subtitleChanged();
     void pathChanged();
+    void errorChanged();
+    void lastErrorChanged();
+    void busyChanged();
 
 protected:
     void tick() override;
@@ -78,6 +87,8 @@ private:
     void detectInterface();
     void refreshState();
     bool writeValue(const QString& val);
+    void setError(const QString& error);
+    void setBusy(bool busy);
 
     QString m_path;
     ControlType m_controlType = ControlType::Unsupported;
@@ -90,6 +101,9 @@ private:
     QList<int> m_supportedTiers;
     QString m_title = QStringLiteral("Battery Control");
     QString m_subtitle;
+    QString m_error;
+    QString m_lastError;
+    bool m_busy = false;
 };
 
 } // namespace caelestia::services

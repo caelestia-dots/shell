@@ -111,6 +111,36 @@ QString BatteryControl::path() const {
     return m_path;
 }
 
+QString BatteryControl::error() const {
+    return m_error;
+}
+
+QString BatteryControl::lastError() const {
+    return m_lastError;
+}
+
+bool BatteryControl::busy() const {
+    return m_busy;
+}
+
+void BatteryControl::setError(const QString& error) {
+    if (m_error != error) {
+        m_error = error;
+        emit errorChanged();
+    }
+    if (!error.isEmpty() && m_lastError != error) {
+        m_lastError = error;
+        emit lastErrorChanged();
+    }
+}
+
+void BatteryControl::setBusy(bool busy) {
+    if (m_busy != busy) {
+        m_busy = busy;
+        emit busyChanged();
+    }
+}
+
 void BatteryControl::detectInterface() {
     auto check = [this](const QString& path, ControlType type, const QString& title, const QList<int>& tiers = {},
                      int minThresh = 50, int maxThresh = 100, int stepSize = 1) -> bool {
@@ -172,11 +202,13 @@ void BatteryControl::refresh() {
 
 void BatteryControl::refreshState() {
     if (!m_isSupported || m_path.isEmpty()) {
+        setError(QStringLiteral("battery control not supported"));
         return;
     }
 
     QFile file(m_path);
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        setError(QStringLiteral("cannot open %1: %2").arg(m_path, file.errorString()));
         return;
     }
 
@@ -186,6 +218,7 @@ void BatteryControl::refreshState() {
     bool ok = false;
     const int val = content.toInt(&ok);
     if (!ok) {
+        setError(QStringLiteral("invalid value in %1: %2").arg(m_path, content));
         return;
     }
 
@@ -218,10 +251,13 @@ void BatteryControl::refreshState() {
         m_subtitle = newSubtitle;
         emit subtitleChanged();
     }
+
+    setError(QString());
 }
 
 bool BatteryControl::writeValue(const QString& val) {
     if (!m_isSupported || m_path.isEmpty()) {
+        setError(QStringLiteral("battery control not supported"));
         return false;
     }
 
@@ -253,16 +289,19 @@ bool BatteryControl::writeValue(const QString& val) {
     proc->setProcessEnvironment(QProcessEnvironment::systemEnvironment());
 
     connect(proc, QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished), this,
+    connect(proc, QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished), this,
         [this, proc](int exitCode, QProcess::ExitStatus exitStatus) {
             const QString err = QString::fromUtf8(proc->readAllStandardError()).trimmed();
             if (exitStatus != QProcess::NormalExit || exitCode != 0) {
                 qCWarning(lcBatteryControl) << "pkexec tee failed:" << exitCode << err;
+                setError(QStringLiteral("Write failed: %1").arg(err.isEmpty() ? QString::number(exitCode) : err));
             } else {
                 if (!err.isEmpty()) {
                     qCWarning(lcBatteryControl) << "pkexec tee stderr:" << err;
                 }
                 refreshState();
             }
+            setBusy(false);
             proc->deleteLater();
         });
     connect(proc, &QProcess::errorOccurred, this, [proc](QProcess::ProcessError err) {
@@ -273,16 +312,8 @@ bool BatteryControl::writeValue(const QString& val) {
         // Other errors are reported via finished().
     });
 
+    setBusy(true);
     proc->start();
-    if (!proc->waitForStarted(3000)) {
-        qCWarning(lcBatteryControl) << "pkexec failed to start:" << proc->errorString();
-        proc->deleteLater();
-        return false;
-    }
-
-    // Byte-identical payload to the previous `echo %1` (value + newline).
-    proc->write((val + QStringLiteral("\n")).toUtf8());
-    proc->closeWriteChannel();
     return true;
 }
 
