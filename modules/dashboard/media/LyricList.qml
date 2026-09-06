@@ -19,6 +19,13 @@ Item {
     property bool flag
     property list<string> lyricList: Lyrics.lyrics
 
+    // qmllint disable missing-property
+    readonly property string lyricsError: String(Lyrics?.error ?? "")
+    readonly property string lyricsOffline: String(Lyrics?.offline ?? "")
+    // qmllint enable missing-property
+    readonly property bool hasLyricsError: lyricsError.length > 0
+    readonly property bool isLyricsOffline: !hasLyricsError && lyricsOffline.length > 0
+
     function syncTrack(): void {
         const p = Players.active;
         if (p)
@@ -248,15 +255,45 @@ Item {
 
             MaterialIcon {
                 Layout.alignment: Qt.AlignHCenter
-                text: "sentiment_sad"
+                text: root.hasLyricsError ? "error" : root.isLyricsOffline ? "cloud_off" : "sentiment_sad"
                 fontStyle: Tokens.font.icon.builders.large.scale(2).build()
-                color: Colours.palette.m3outline
+                color: root.hasLyricsError ? Colours.palette.m3error : Colours.palette.m3outline
             }
 
             StyledText {
-                text: Tr.tr("No lyrics found")
-                color: Colours.palette.m3outline
+                Layout.alignment: Qt.AlignHCenter
+                horizontalAlignment: Text.AlignHCenter
+                text: root.hasLyricsError ? Tr.tr("Couldn't load lyrics") : root.isLyricsOffline ? Tr.tr("You're offline") : Tr.tr("No lyrics found")
+                color: root.hasLyricsError ? Colours.palette.m3error : Colours.palette.m3outline
                 font: Tokens.font.title.medium
+            }
+
+            StyledText {
+                visible: root.hasLyricsError || root.isLyricsOffline
+                Layout.alignment: Qt.AlignHCenter
+                Layout.fillWidth: true
+                horizontalAlignment: Text.AlignHCenter
+                text: root.hasLyricsError ? root.lyricsError : root.lyricsOffline
+                color: Colours.palette.m3onSurfaceVariant
+                font: Tokens.font.body.small
+                wrapMode: Text.WrapAtWordBoundaryOrAnywhere
+                elide: Text.ElideRight
+            }
+
+            TextButton {
+                visible: root.hasLyricsError || root.isLyricsOffline
+                Layout.alignment: Qt.AlignHCenter
+                type: TextButton.Text
+                text: qsTr("Retry")
+                onClicked: Lyrics.refresh()
+            }
+
+            TextButton {
+                visible: !root.hasLyricsError && !root.isLyricsOffline
+                Layout.alignment: Qt.AlignHCenter
+                type: TextButton.Text
+                text: qsTr("Force search")
+                onClicked: Lyrics.forceSearch()
             }
         }
     }
