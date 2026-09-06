@@ -207,6 +207,33 @@ struct ArtistTitleSplit {
     return {};
 }
 
+[[nodiscard]] QUrl buildNetEaseSearchUrl(const QString& cleanTitle, const QString& artistQuery) {
+    QUrl url(u"https://music.163.com/api/search/get"_s);
+    QUrlQuery q;
+    q.addQueryItem(u"s"_s, u"%1 %2"_s.arg(cleanTitle, artistQuery));
+    q.addQueryItem(u"type"_s, u"1"_s);
+    q.addQueryItem(u"limit"_s, u"5"_s);
+    url.setQuery(q);
+    return url;
+}
+
+[[nodiscard]] qint64 findBestNetEaseSongId(
+    const QJsonArray& songs, const QString& artist, const QString& primaryArtist) {
+    for (const auto& v : songs) {
+        const QJsonObject s = v.toObject();
+        const QJsonArray artists = s.value(u"artists"_s).toArray();
+        if (artists.isEmpty()) {
+            continue;
+        }
+        const QString sArtist = artists.first().toObject().value(u"name"_s).toString();
+        if (containsCi(artist, sArtist) || containsCi(sArtist, artist) || containsCi(primaryArtist, sArtist) ||
+            containsCi(sArtist, primaryArtist)) {
+            return static_cast<qint64>(s.value(u"id"_s).toDouble());
+        }
+    }
+    return -1;
+}
+
 } // namespace
 
 QString Lyrics::cleanTrackTitle(const QString& title) {
@@ -872,10 +899,32 @@ void Lyrics::doLoad() {
             m_settingFromPrefs = true;
             setSelectedCandidate(restored);
             m_settingFromPrefs = false;
+            // Restored override already resolved the selection (cached or fetch by id in
+            // flight); skip the unconditional candidate fan-out.
+            return;
         }
     } else {
         m_hasCandidateOverride = false;
         emit hasCandidateOverrideChanged();
+    }
+
+    if (m_preferredBackend == LyricsBackend::Local) {
+        tryLocal(reqId);
+        if (m_hasLyrics) {
+            // Local already hit synchronously; skip online fan-out.
+            return;
+        }
+        searchLrclibCandidates(reqId);
+        searchNetEaseCandidates(reqId);
+        return;
+    }
+
+    if (m_preferredBackend == LyricsBackend::NetEase) {
+        // Single shared NetEase query: tryNetEase also appends picker candidates,
+        // so skip the separate searchNetEaseCandidates fan-out.
+        searchLrclibCandidates(reqId);
+        tryNetEase(reqId);
+        return;
     }
 
     // Always populate online candidates for the picker, regardless of preferred backend
@@ -1092,12 +1141,7 @@ void Lyrics::tryNetEase(int reqId) {
     const QString cleanTitle = cleanTrackTitle(m_title);
     const QString primaryArtist = extractPrimaryArtist(m_artist);
 
-    QUrl url(u"https://music.163.com/api/search/get"_s);
-    QUrlQuery q;
-    q.addQueryItem(u"s"_s, u"%1 %2"_s.arg(cleanTitle, m_artist.isEmpty() ? primaryArtist : m_artist));
-    q.addQueryItem(u"type"_s, u"1"_s);
-    q.addQueryItem(u"limit"_s, u"5"_s);
-    url.setQuery(q);
+    const QUrl url = buildNetEaseSearchUrl(cleanTitle, m_artist.isEmpty() ? primaryArtist : m_artist);
 
     auto* reply = getJson(url, netEaseHeaders());
     trackReply(reqId, reply);
@@ -1114,23 +1158,12 @@ void Lyrics::tryNetEase(int reqId) {
         }
 
         const QJsonDocument doc = QJsonDocument::fromJson(reply->readAll());
+        // Share this single query result with the picker as well.
+        appendCandidates(parseNetEaseSearchResult(doc));
         const QJsonArray songs = doc.object().value(u"result"_s).toObject().value(u"songs"_s).toArray();
 
         // Find best match by artist substring
-        qint64 bestId = -1;
-        for (const auto& v : songs) {
-            const QJsonObject s = v.toObject();
-            const QJsonArray artists = s.value(u"artists"_s).toArray();
-            if (artists.isEmpty()) {
-                continue;
-            }
-            const QString sArtist = artists.first().toObject().value(u"name"_s).toString();
-            if (containsCi(m_artist, sArtist) || containsCi(sArtist, m_artist) || containsCi(primaryArtist, sArtist) ||
-                containsCi(sArtist, primaryArtist)) {
-                bestId = static_cast<qint64>(s.value(u"id"_s).toDouble());
-                break;
-            }
-        }
+        const qint64 bestId = findBestNetEaseSongId(songs, m_artist, primaryArtist);
 
         if (bestId < 0) {
             qCDebug(lcLyrics) << "netease: no artist match for" << m_artist << "-" << cleanTitle;
@@ -1301,12 +1334,7 @@ void Lyrics::searchNetEaseCandidates(int reqId) {
     const QString cleanTitle = cleanTrackTitle(m_title);
     const QString primaryArtist = extractPrimaryArtist(m_artist);
 
-    QUrl url(u"https://music.163.com/api/search/get"_s);
-    QUrlQuery q;
-    q.addQueryItem(u"s"_s, u"%1 %2"_s.arg(cleanTitle, m_artist.isEmpty() ? primaryArtist : m_artist));
-    q.addQueryItem(u"type"_s, u"1"_s);
-    q.addQueryItem(u"limit"_s, u"5"_s);
-    url.setQuery(q);
+    const QUrl url = buildNetEaseSearchUrl(cleanTitle, m_artist.isEmpty() ? primaryArtist : m_artist);
 
     auto* reply = getJson(url, netEaseHeaders());
     trackReply(reqId, reply);
