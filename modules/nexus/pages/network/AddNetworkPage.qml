@@ -16,6 +16,9 @@ PageBase {
     // Security model: index 0 = none, 1 = WPA/WPA2/WPA3 personal.
     readonly property bool secured: securitySelect.active !== noneItem
     property bool connecting: false
+    // SSID of a profile this page created. Only that may be cleaned up; a
+    // profile that was already saved belongs to the user.
+    property string createdSsid: ""
     property bool failed: false
     property bool success: false
 
@@ -35,17 +38,23 @@ PageBase {
         root.failed = false;
         root.connecting = true;
 
+        root.createdSsid = Nmcli.hasSavedProfile(ssid) ? "" : ssid;
+
         Nmcli.addHiddenNetwork(ssid, root.secured ? passwordField.text : "", root.secured ? "wpa" : "none", hiddenToggle.checked, result => {
             root.connecting = false;
             if (result && result.success) {
                 root.success = true;
+                root.createdSsid = "";
                 root.nState.closeSubPage();
             } else {
                 root.failed = true;
                 if (root.secured)
                     passwordField.isError = true;
                 // Clean up the half-created profile so a retry starts fresh.
-                Nmcli.forgetNetwork(ssid);
+                if (root.createdSsid) {
+                    Nmcli.forgetNetwork(root.createdSsid);
+                    root.createdSsid = "";
+                }
             }
         });
     }
@@ -60,13 +69,16 @@ PageBase {
         spacing: Tokens.spacing.large
 
         Connections {
+            // Backing out of a half-finished attempt leaves the profile
+            // behind, so remove it - but only the one this page created.
+            // Deleting by whatever is typed in the field wipes the user's
+            // saved profile if they happen to type an SSID they already have.
             function onSubPageClosed(): void {
-                if (root.success)
+                if (!root.createdSsid)
                     return;
 
-                const ssid = ssidField.text.trim();
-                if (ssid)
-                    Nmcli.forgetNetwork(ssid);
+                Nmcli.forgetNetwork(root.createdSsid);
+                root.createdSsid = "";
             }
 
             target: root.nState

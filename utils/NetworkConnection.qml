@@ -57,7 +57,7 @@ QtObject {
      * Handles both secured and open networks, checks for saved profiles,
      * and shows password dialog if needed.
      *
-     * @param network The network object to connect to (must have ssid, isSecure, bssid properties)
+     * @param network The network object to connect to (must have ssid and isSecure properties)
      * @param session Optional Session object (for controlcenter - must have network property with showPasswordDialog and pendingNetwork)
      * @param onPasswordNeeded Optional callback function(network) called when password is needed (for bar popouts)
      */
@@ -70,7 +70,7 @@ QtObject {
             const hasSavedProfile = Nmcli.hasSavedProfile(network.ssid);
 
             if (hasSavedProfile) {
-                Nmcli.connectToNetwork(network.ssid, "", network.bssid, null);
+                Nmcli.connectToNetwork(network.ssid, "", null);
             } else {
                 // Use password check with callback
                 Nmcli.connectToNetworkWithPasswordCheck(network.ssid, network.isSecure, result => {
@@ -89,10 +89,10 @@ QtObject {
                             onPasswordNeeded(network);
                         }
                     }
-                }, network.bssid);
+                });
             }
         } else {
-            Nmcli.connectToNetwork(network.ssid, "", network.bssid, null);
+            Nmcli.connectToNetwork(network.ssid, "", null);
         }
     }
 
@@ -100,7 +100,7 @@ QtObject {
      * Connect to a wireless network with a provided password.
      * Used by password dialogs when the user has already entered a password.
      *
-     * @param network The network object to connect to (must have ssid, bssid properties)
+     * @param network The network object to connect to (must have an ssid property)
      * @param password The password to use for connection
      * @param onResult Optional callback function(result) called with connection result
      */
@@ -109,6 +109,6 @@ QtObject {
             return;
         }
 
-        Nmcli.connectToNetwork(network.ssid, password || "", network.bssid || "", onResult || null);
+        Nmcli.connectToNetwork(network.ssid, password || "", onResult || null);
     }
 }

@@ -61,7 +61,6 @@ Singleton {
     readonly property string connectionParamIfname: "ifname"
     readonly property string connectionParamSsid: "ssid"
     readonly property string connectionParamPassword: "password"
-    readonly property string connectionParamBssid: "802-11-wireless.bssid"
     readonly property string connectionParamHidden: "802-11-wireless.hidden"
 
     signal connectionFailed(string ssid)
@@ -113,10 +112,9 @@ Singleton {
         Wired.disconnect(connectionName, callback);
     }
 
-    function connectToNetworkWithPasswordCheck(ssid: string, isSecure: bool, callback: var, bssid: string): void {
+    function connectToNetworkWithPasswordCheck(ssid: string, isSecure: bool, callback: var): void {
         if (isSecure) {
-            const hasBssid = bssid !== undefined && bssid !== null && bssid.length > 0;
-            connectWireless(ssid, "", bssid, result => {
+            connectWireless(ssid, "", result => {
                 if (result.success) {
                     if (callback)
                         callback({
@@ -141,96 +139,92 @@ Singleton {
                 }
             });
         } else {
-            connectWireless(ssid, "", bssid, callback);
+            connectWireless(ssid, "", callback);
         }
     }
 
-    function connectToNetwork(ssid: string, password: string, bssid: string, callback: var): void {
-        connectWireless(ssid, password, bssid, callback);
+    function connectToNetwork(ssid: string, password: string, callback: var): void {
+        connectWireless(ssid, password, callback);
     }
 
-    function connectWireless(ssid: string, password: string, bssid: string, callback: var, retryCount: int): void {
-        const hasBssid = bssid !== undefined && bssid !== null && bssid.length > 0;
+    // Connecting is left to nmcli, which reuses a saved profile when one
+    // matches the access point and updates it in place, and picks WEP, WPA-PSK
+    // or SAE from the access point's own security flags.
+    //
+    // What it must not be given is a BSSID. That pins the profile to one access
+    // point, which breaks roaming on a mesh and stops the profile matching the
+    // other access points, so the next connection through a different one
+    // leaves a second profile behind.
+    function connectWireless(ssid: string, password: string, callback: var, retryCount: int): void {
         const retries = retryCount !== undefined ? retryCount : 0;
         const maxRetries = 2;
 
         if (callback) {
             root.pendingConnection = {
                 ssid: ssid,
-                bssid: hasBssid ? bssid : "",
                 callback: callback,
                 retryCount: retries
             };
             connectionCheckTimer.start();
         }
 
-        if (password && password.length > 0 && hasBssid) {
-            const bssidUpper = bssid.toUpperCase();
-            createConnectionWithPassword(ssid, bssidUpper, password, callback);
-            return;
+        // A saved profile with no new password is brought up as it stands, so
+        // nothing the user set on it - a static address, a custom name, an
+        // autoconnect preference - is touched. If the profile list hasn't been
+        // read yet this falls through to the command below, which reuses the
+        // profile anyway.
+        const saved = Profiles.find(ssid);
+        let cmd;
+        if (saved && !password) {
+            cmd = [root.nmcliCommandConnection, "up", saved.id];
+        } else {
+            cmd = [root.nmcliCommandDevice, root.nmcliCommandWifi, "connect", ssid];
+            if (password && password.length > 0)
+                cmd.push(root.connectionParamPassword, password);
         }
 
-        let cmd = [root.nmcliCommandDevice, root.nmcliCommandWifi, "connect", ssid];
-        if (password && password.length > 0) {
-            cmd.push(root.connectionParamPassword, password);
-        }
         executeCommand(cmd, result => {
-            if (result.needsPassword && callback) {
+            if (result.needsPassword) {
                 if (callback)
                     callback(result);
                 return;
             }
 
             if (!result.success && root.pendingConnection && retries < maxRetries) {
-                console.warn(lc, "Connection failed, retrying... (attempt " + (retries + 1) + "/" + maxRetries + ")");
-                Qt.callLater(() => {
-                    connectWireless(ssid, password, bssid, callback, retries + 1);
-                }, 1000);
-            } else if (!result.success && root.pendingConnection) {} else if (result.success && callback) {} else if (!result.success && !root.pendingConnection) {
-                if (callback)
-                    callback(result);
+                console.warn(lc, `Connection failed, retrying (attempt ${retries + 1}/${maxRetries})`);
+                connectRetryTimer.ssid = ssid;
+                connectRetryTimer.password = password;
+                connectRetryTimer.callback = callback;
+                connectRetryTimer.retries = retries + 1;
+                connectRetryTimer.restart();
+                return;
             }
+
+            // A pending connect is reported by whichever of onActiveChanged
+            // or connectionCheckTimer resolves it, and a success always goes
+            // through one of those, so this only has to cover a failure that
+            // nothing else will pick up. Reporting here as well would call the
+            // callback twice.
+            if (!result.success && !root.pendingConnection && callback)
+                callback(result);
         });
     }
 
-    function createConnectionWithPassword(ssid: string, bssidUpper: string, password: string, callback: var): void {
-        checkAndDeleteConnection(ssid, () => {
-            const cmd = [root.nmcliCommandConnection, "add", root.connectionParamType, root.deviceTypeWifi, root.connectionParamConName, ssid, root.connectionParamIfname, "*", root.connectionParamSsid, ssid, root.connectionParamBssid, bssidUpper, root.securityKeyMgmt, root.keyMgmtWpaPsk, root.securityPsk, password];
-
-            executeCommand(cmd, result => {
-                if (result.success) {
-                    activateConnection(ssid, callback);
-                } else {
-                    const hasDuplicateWarning = result.error && (result.error.includes("another connection with the name") || result.error.includes("Reference the connection by its uuid"));
-
-                    if (hasDuplicateWarning || (result.exitCode > 0 && result.exitCode < 10)) {
-                        activateConnection(ssid, callback);
-                    } else {
-                        console.warn(lc, "Connection profile creation failed, trying fallback...");
-                        let fallbackCmd = [root.nmcliCommandDevice, root.nmcliCommandWifi, "connect", ssid, root.connectionParamPassword, password];
-                        executeCommand(fallbackCmd, fallbackResult => {
-                            if (callback)
-                                callback(fallbackResult);
-                        });
-                    }
-                }
-            });
-        });
-    }
-
+    // Replaces a profile for the same SSID, for the add-network form, which is
+    // an explicit request to redefine it. Resolved through Profiles so a
+    // profile saved under a name other than its SSID is replaced rather than
+    // duplicated.
     function checkAndDeleteConnection(ssid: string, callback: var): void {
-        executeCommand([root.nmcliCommandConnection, "show", ssid], result => {
-            if (result.success) {
-                executeCommand([root.nmcliCommandConnection, "delete", ssid], deleteResult => {
-                    Qt.callLater(() => {
-                        if (callback)
-                            callback();
-                    }, 300);
-                });
-            } else {
-                if (callback)
-                    callback();
-            }
+        const saved = Profiles.find(ssid);
+        if (!saved) {
+            if (callback)
+                callback();
+            return;
+        }
+
+        executeCommand([root.nmcliCommandConnection, "delete", saved.id], () => {
+            if (callback)
+                callback();
         });
     }
 
@@ -526,6 +520,20 @@ Singleton {
     // Nothing reports a connect that simply never happens, so this stays as the
     // backstop. Success arrives on onActiveChanged and a rejected password on
     // the process's own stderr, both immediately, so neither needs polling.
+    // Qt.callLater takes arguments to pass on, not a delay, so the retry used
+    // to fire straight away and put three attempts back to back.
+    Timer {
+        id: connectRetryTimer
+
+        property var callback: null
+        property string password: ""
+        property int retries: 0
+        property string ssid: ""
+
+        interval: 1000
+        onTriggered: root.connectWireless(connectRetryTimer.ssid, connectRetryTimer.password, connectRetryTimer.callback, connectRetryTimer.retries)
+    }
+
     Timer {
         id: connectionCheckTimer
 
