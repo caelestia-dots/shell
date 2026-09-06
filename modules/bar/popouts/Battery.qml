@@ -343,7 +343,9 @@ Column {
                 Layout.alignment: Qt.AlignHCenter
                 type: TextButton.Text
                 text: qsTr("Retry")
-                onClicked: BatteryControl.refresh()
+                // qmllint disable missing-property
+                onClicked: BatteryControl.retry()
+                // qmllint enable missing-property
             }
         }
     }

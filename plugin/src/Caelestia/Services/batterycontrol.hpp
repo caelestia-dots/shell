@@ -63,6 +63,7 @@ public:
 
     Q_INVOKABLE void toggle();
     Q_INVOKABLE void refresh();
+    Q_INVOKABLE void retry();
     Q_INVOKABLE void setEnabled(bool enabled);
     Q_INVOKABLE void setThreshold(int threshold);
 
@@ -103,6 +104,7 @@ private:
     QString m_subtitle;
     QString m_error;
     QString m_lastError;
+    QString m_lastAttemptedValue;
     bool m_busy = false;
 };
 

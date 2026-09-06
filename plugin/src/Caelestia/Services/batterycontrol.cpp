@@ -197,7 +197,17 @@ void BatteryControl::detectInterface() {
 }
 
 void BatteryControl::refresh() {
+    m_lastAttemptedValue.clear();
+    setError(QString());
     refreshState();
+}
+
+void BatteryControl::retry() {
+    if (!m_lastAttemptedValue.isEmpty()) {
+        writeValue(m_lastAttemptedValue);
+    } else {
+        refresh();
+    }
 }
 
 void BatteryControl::refreshState() {
@@ -251,7 +261,9 @@ void BatteryControl::refreshState() {
         emit subtitleChanged();
     }
 
-    setError(QString());
+    if (m_lastAttemptedValue.isEmpty()) {
+        setError(QString());
+    }
 }
 
 bool BatteryControl::writeValue(const QString& val) {
@@ -260,18 +272,10 @@ bool BatteryControl::writeValue(const QString& val) {
         return false;
     }
 
-    // 1. Attempt direct unprivileged write first (fast path when udev rule is installed)
-    QFile file(m_path);
-    if (file.open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Truncate)) {
-        QTextStream out(&file);
-        out << val << "\n";
-        file.close();
-        refreshState();
-        return true;
+    if (m_busy) {
+        return false;
     }
 
-    // 2. Privilege escalation fallback: run via pkexec so the system polkit agent pops up a password dialog.
-    // Hardened: argument-vector form (no shell), value via stdin, path validated, exit code checked.
     if (!isSafeValue(val)) {
         qCWarning(lcBatteryControl) << "Refusing to write unsafe value to" << m_path;
         return false;
@@ -280,6 +284,22 @@ bool BatteryControl::writeValue(const QString& val) {
         qCWarning(lcBatteryControl) << "Refusing to write to unexpected sysfs path:" << m_path;
         return false;
     }
+
+    m_lastAttemptedValue = val;
+
+    // 1. Attempt direct unprivileged write first (fast path when udev rule is installed)
+    QFile file(m_path);
+    if (file.open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Truncate)) {
+        QTextStream out(&file);
+        out << val << "\n";
+        file.close();
+        m_lastAttemptedValue.clear();
+        refreshState();
+        return true;
+    }
+
+    // 2. Privilege escalation fallback: run via pkexec so the system polkit agent pops up a password dialog.
+    // Hardened: argument-vector form (no shell), value via stdin, path validated, exit code checked.
 
     auto* proc = new QProcess(this);
     proc->setProgram(QStringLiteral("pkexec"));
@@ -297,6 +317,7 @@ bool BatteryControl::writeValue(const QString& val) {
                 if (!err.isEmpty()) {
                     qCWarning(lcBatteryControl) << "pkexec tee stderr:" << err;
                 }
+                m_lastAttemptedValue.clear();
                 refreshState();
             }
             setBusy(false);
