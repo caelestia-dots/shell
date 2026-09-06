@@ -1266,6 +1266,7 @@ void Lyrics::fetchNetEaseLyricsById(const QString& id, int reqId) {
             m_autoCandidate = cand;
             emit autoCandidateChanged();
         }
+        appendCandidates({ cand });
         if (!m_hasCandidateOverride) {
             setLines(lines, LyricsBackend::NetEase);
             m_selected = cand;
@@ -1481,15 +1482,31 @@ void Lyrics::applySuggestedMetadata() {
         persistTrackPrefs();
     }
 
+    if (m_saveDebounce && m_saveDebounce->isActive()) {
+        m_saveDebounce->stop();
+        persistTrackPrefs();
+    }
+
+    cancelInFlight();
+
     m_artist = newArtist;
     m_title = newTitle;
     emit trackChanged();
 
+    m_selected = LyricCandidate();
+    emit selectedCandidateChanged();
+    m_autoCandidate = LyricCandidate();
+    emit autoCandidateChanged();
+    m_hasCandidateOverride = false;
+    emit hasCandidateOverrideChanged();
+    m_offset = 0.0;
+    emit offsetChanged();
+    clearLines();
+    clearCandidates();
+
     updateMetadataSuggestion();
 
-    if (m_lines.isEmpty()) {
-        scheduleLoad();
-    }
+    scheduleLoad();
 }
 
 QString Lyrics::backendKey(LyricsBackend value) {
