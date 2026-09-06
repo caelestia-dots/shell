@@ -40,9 +40,10 @@ protected:
     // Whether a PropertiesChanged on this interface means the tree moved.
     // Interfaces whose objects track themselves should say no.
     [[nodiscard]] virtual bool triggersRefresh(const QString& iface) const = 0;
-    // Drops anything whose path isn't in seen(). Should set listChanged() when
-    // it removes something.
-    virtual void pruneUnseen() = 0;
+    // Applies what the walk found, once every read has landed. Should call
+    // setListChanged() when the result differs from what consumers were last
+    // told, which is what makes the change signal fire.
+    virtual void publish() = 0;
     // NetworkManager went away; report nothing rather than a stale tree.
     virtual void clearItems() = 0;
 

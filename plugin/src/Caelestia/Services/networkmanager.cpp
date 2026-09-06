@@ -363,7 +363,7 @@ void NetworkManager::clearItems() {
 }
 
 // Anything not seen by this walk is gone.
-void NetworkManager::pruneUnseen() {
+void NetworkManager::publish() {
     for (qsizetype i = m_devices.size() - 1; i >= 0; i--) {
         auto* device = m_devices.at(i);
         if (!seen().contains(device->path())) {

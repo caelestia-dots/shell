@@ -203,7 +203,7 @@ public:
 protected:
     void readRoot() override;
     [[nodiscard]] bool triggersRefresh(const QString& iface) const override;
-    void pruneUnseen() override;
+    void publish() override;
     void clearItems() override;
 
 private:

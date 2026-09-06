@@ -142,7 +142,7 @@ void NmWalker::abandonWalk() {
 }
 
 void NmWalker::finish() {
-    pruneUnseen();
+    publish();
 
     const bool wasReady = m_ready;
     m_ready = true;

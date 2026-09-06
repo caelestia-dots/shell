@@ -5,9 +5,7 @@
 #include <qdbusmessage.h>
 #include <qdbuspendingcall.h>
 #include <qdbuspendingreply.h>
-#include <qdbusreply.h>
 #include <qloggingcategory.h>
-#include <qtimer.h>
 
 #include <utility>
 
@@ -30,58 +28,11 @@ constexpr uint k_deviceTypeWifi = 2;
 
 } // namespace
 
-bool NetworkRoute::Snapshot::operator==(const Snapshot& o) const noexcept {
-    return primary == o.primary && ipv4 == o.ipv4 && ipv6 == o.ipv6 && primaryInterface == o.primaryInterface;
-}
-
 NetworkRoute::NetworkRoute(QObject* parent)
-    : QObject(parent) {
-    auto bus = systemBus();
-    if (!bus) {
-        return;
-    }
-
-    // NetworkManager may not be up yet, or may restart under us.
-    bus->connect(QStringLiteral("org.freedesktop.DBus"), QStringLiteral("/org/freedesktop/DBus"),
-        QStringLiteral("org.freedesktop.DBus"), QStringLiteral("NameOwnerChanged"), QStringLiteral("sss"), this,
-        SLOT(handleNameOwnerChanged(QString, QString, QString)));
-
-    watchObject(QString::fromUtf8(k_managerPath));
-    scheduleRefresh();
-}
-
-bool NetworkRoute::ready() const {
-    return m_ready;
-}
+    : NmWalker(QString::fromUtf8(k_managerPath), parent) {}
 
 Transport NetworkRoute::primaryTransport() const {
-    return m_current.primary;
-}
-
-Transport NetworkRoute::ipv4Transport() const {
-    return m_current.ipv4;
-}
-
-Transport NetworkRoute::ipv6Transport() const {
-    return m_current.ipv6;
-}
-
-bool NetworkRoute::mixed() const {
-    return m_current.ipv4 != config::NetworkTransport::None && m_current.ipv6 != config::NetworkTransport::None &&
-           m_current.ipv4 != m_current.ipv6;
-}
-
-QString NetworkRoute::primaryInterface() const {
-    return m_current.primaryInterface;
-}
-
-std::optional<QDBusConnection> NetworkRoute::systemBus() {
-    auto bus = QDBusConnection::systemBus();
-    if (!bus.isConnected()) {
-        qCWarning(logNetworkRoute) << "System bus unavailable";
-        return std::nullopt;
-    }
-    return bus;
+    return m_primary;
 }
 
 Transport NetworkRoute::transportForDeviceType(uint deviceType) {
@@ -95,134 +46,33 @@ Transport NetworkRoute::transportForDeviceType(uint deviceType) {
     }
 }
 
-// Subscribes to property changes on an object once. NetworkManager emits these
-// for the manager, every active connection and every device, which is what
-// tells us a walk is out of date.
-void NetworkRoute::watchObject(const QString& path) {
-    if (path.isEmpty() || path == QStringLiteral("/") || m_watched.contains(path)) {
+// The primary connection is a manager property, and its device's type is a
+// device property, so a change to either has to start a fresh walk. The active
+// connection is watched too, since its device list can change under it.
+bool NetworkRoute::triggersRefresh(const QString& iface) const {
+    return iface == QString::fromUtf8(k_managerIface) || iface == QString::fromUtf8(k_activeIface) ||
+           iface == QString::fromUtf8(k_deviceIface);
+}
+
+void NetworkRoute::publish() {
+    if (m_building == m_primary) {
         return;
     }
+
+    m_primary = m_building;
+    setListChanged();
+}
+
+void NetworkRoute::clearItems() {
+    m_primary = config::NetworkTransport::None;
+}
+
+void NetworkRoute::readRoot() {
+    m_building = config::NetworkTransport::None;
 
     auto bus = systemBus();
     if (!bus) {
-        return;
-    }
-
-    if (bus->connect(QString::fromUtf8(k_service), path, QString::fromUtf8(k_propsIface),
-            QStringLiteral("PropertiesChanged"), this,
-            SLOT(handlePropertiesChanged(QString, QVariantMap, QStringList)))) {
-        m_watched.insert(path);
-    }
-}
-
-void NetworkRoute::handlePropertiesChanged(
-    const QString& iface, const QVariantMap& properties, const QStringList& invalidated) {
-    Q_UNUSED(properties);
-    Q_UNUSED(invalidated);
-
-    if (iface == QString::fromUtf8(k_managerIface) || iface == QString::fromUtf8(k_activeIface) ||
-        iface == QString::fromUtf8(k_deviceIface)) {
-        scheduleRefresh();
-    }
-}
-
-void NetworkRoute::handleNameOwnerChanged(const QString& name, const QString& oldOwner, const QString& newOwner) {
-    Q_UNUSED(oldOwner);
-
-    if (name != QString::fromUtf8(k_service)) {
-        return;
-    }
-
-    if (newOwner.isEmpty()) {
-        // NetworkManager went away; report nothing rather than stale state.
-        m_watched.clear();
-        m_ready = false;
-        m_current = Snapshot();
-        emit changed();
-        return;
-    }
-
-    // Fresh objects on the new owner, so the old subscriptions are worthless.
-    m_watched.clear();
-    watchObject(QString::fromUtf8(k_managerPath));
-    scheduleRefresh();
-}
-
-// Signals arrive in bursts - a connection going up touches the manager, the
-// active connection and its device in quick succession. Coalescing them means
-// one walk per burst instead of several racing ones.
-void NetworkRoute::scheduleRefresh() {
-    if (m_refreshing) {
-        m_refreshQueued = true;
-        return;
-    }
-
-    m_refreshing = true;
-    QTimer::singleShot(0, this, [this]() {
-        refresh();
-    });
-}
-
-void NetworkRoute::refresh() {
-    m_building = Snapshot();
-    m_primaryConnection.clear();
-    m_connIsDefault4.clear();
-    m_connIsDefault6.clear();
-    m_connTransport.clear();
-    m_connInterface.clear();
-    m_pending = 0;
-
-    readManager();
-}
-
-// Each async read holds a reference; the snapshot is applied when the last one
-// lands, so a partial walk is never published.
-void NetworkRoute::step(int delta) {
-    m_pending += delta;
-    if (m_pending > 0) {
-        return;
-    }
-
-    Snapshot snapshot;
-    snapshot.primaryInterface = m_connInterface.value(m_primaryConnection);
-    snapshot.primary = m_connTransport.value(m_primaryConnection, config::NetworkTransport::None);
-
-    for (auto it = m_connIsDefault4.cbegin(); it != m_connIsDefault4.cend(); ++it) {
-        if (it.value()) {
-            snapshot.ipv4 = m_connTransport.value(it.key(), config::NetworkTransport::None);
-            break;
-        }
-    }
-    for (auto it = m_connIsDefault6.cbegin(); it != m_connIsDefault6.cend(); ++it) {
-        if (it.value()) {
-            snapshot.ipv6 = m_connTransport.value(it.key(), config::NetworkTransport::None);
-            break;
-        }
-    }
-
-    finishRefresh(snapshot);
-}
-
-void NetworkRoute::finishRefresh(const Snapshot& snapshot) {
-    const bool wasReady = m_ready;
-    m_ready = true;
-
-    if (!wasReady || !(snapshot == m_current)) {
-        m_current = snapshot;
-        emit changed();
-    }
-
-    m_refreshing = false;
-    if (m_refreshQueued) {
-        m_refreshQueued = false;
-        scheduleRefresh();
-    }
-}
-
-void NetworkRoute::readManager() {
-    const auto bus = systemBus();
-    if (!bus) {
-        finishRefresh(Snapshot());
+        abandonWalk();
         return;
     }
 
@@ -242,26 +92,15 @@ void NetworkRoute::readManager() {
             return;
         }
 
-        const auto props = reply.value();
-        m_primaryConnection = props.value(QStringLiteral("PrimaryConnection")).value<QDBusObjectPath>().path();
-
-        const auto actives = props.value(QStringLiteral("ActiveConnections")).value<QDBusArgument>();
-        QList<QDBusObjectPath> paths;
-        actives >> paths;
-
-        for (const auto& path : std::as_const(paths)) {
-            readActiveConnection(path.path(), path.path() == m_primaryConnection);
-        }
+        readActiveConnection(reply.value().value(QStringLiteral("PrimaryConnection")).value<QDBusObjectPath>().path());
 
         step(-1);
     });
     // NOLINTNEXTLINE(clang-analyzer-cplusplus.NewDeleteLeaks) watcher is parented and self-deletes
 }
 
-void NetworkRoute::readActiveConnection(const QString& path, bool isPrimary) {
-    Q_UNUSED(isPrimary);
-
-    const auto bus = systemBus();
+void NetworkRoute::readActiveConnection(const QString& path) {
+    auto bus = systemBus();
     if (!bus || path.isEmpty() || path == QStringLiteral("/")) {
         return;
     }
@@ -285,20 +124,15 @@ void NetworkRoute::readActiveConnection(const QString& path, bool isPrimary) {
             return;
         }
 
-        const auto props = reply.value();
-        m_connIsDefault4.insert(path, props.value(QStringLiteral("Default")).toBool());
-        m_connIsDefault6.insert(path, props.value(QStringLiteral("Default6")).toBool());
-
-        const auto devices = props.value(QStringLiteral("Devices")).value<QDBusArgument>();
         QList<QDBusObjectPath> paths;
-        devices >> paths;
+        reply.value().value(QStringLiteral("Devices")).value<QDBusArgument>() >> paths;
 
         // A connection's devices are its stack bottom-up, so the first one is
         // the link the traffic actually goes over. A VPN's active connection
         // has no devices of its own beyond its tunnel, which classifies as
         // Other and leaves the underlying connection to answer for the link.
         if (!paths.isEmpty()) {
-            readDevice(path, paths.first().path());
+            readDevice(paths.first().path());
         }
 
         step(-1);
@@ -306,8 +140,8 @@ void NetworkRoute::readActiveConnection(const QString& path, bool isPrimary) {
     // NOLINTNEXTLINE(clang-analyzer-cplusplus.NewDeleteLeaks) watcher is parented and self-deletes
 }
 
-void NetworkRoute::readDevice(const QString& connPath, const QString& devicePath) {
-    const auto bus = systemBus();
+void NetworkRoute::readDevice(const QString& devicePath) {
+    auto bus = systemBus();
     if (!bus || devicePath.isEmpty() || devicePath == QStringLiteral("/")) {
         return;
     }
@@ -320,19 +154,17 @@ void NetworkRoute::readDevice(const QString& connPath, const QString& devicePath
 
     step(1);
     auto* watcher = new QDBusPendingCallWatcher(bus->asyncCall(msg), this);
-    connect(watcher, &QDBusPendingCallWatcher::finished, this, [this, connPath](QDBusPendingCallWatcher* call) {
+    connect(watcher, &QDBusPendingCallWatcher::finished, this, [this, devicePath](QDBusPendingCallWatcher* call) {
         call->deleteLater();
 
         const QDBusPendingReply<QVariantMap> reply = *call;
         if (reply.isError()) {
-            qCDebug(logNetworkRoute) << "Skipping device for" << connPath << ":" << reply.error().message();
+            qCDebug(logNetworkRoute) << "Skipping device" << devicePath << ":" << reply.error().message();
             step(-1);
             return;
         }
 
-        const auto props = reply.value();
-        m_connTransport.insert(connPath, transportForDeviceType(props.value(QStringLiteral("DeviceType")).toUInt()));
-        m_connInterface.insert(connPath, props.value(QStringLiteral("Interface")).toString());
+        m_building = transportForDeviceType(reply.value().value(QStringLiteral("DeviceType")).toUInt());
 
         step(-1);
     });

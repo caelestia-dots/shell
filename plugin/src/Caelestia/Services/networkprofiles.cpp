@@ -211,7 +211,7 @@ void NetworkProfiles::clearItems() {
 }
 
 // Anything not seen by this walk is gone.
-void NetworkProfiles::pruneUnseen() {
+void NetworkProfiles::publish() {
     for (qsizetype i = m_profiles.size() - 1; i >= 0; i--) {
         auto* profile = m_profiles.at(i);
         if (!seen().contains(profile->path())) {
