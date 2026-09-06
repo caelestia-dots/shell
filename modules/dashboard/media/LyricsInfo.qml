@@ -36,9 +36,9 @@ Item {
             const filePath = decodeURIComponent(rawUrl.substring(7));
             const cmd = ["bash", "-c", 'ext="${1##*.}"\n' + 'tmp="$(mktemp --suffix=.$ext)"\n' + 'args=("-y" "-i" "$1" "-c" "copy" "-metadata" "artist=$2" "-metadata" "title=$3")\n' + 'if [ "${ext,,}" = "mp3" ]; then args+=("-id3v2_version" "3"); fi\n' + 'if ffmpeg "${args[@]}" "$tmp" >/dev/null 2>&1; then mv -f "$tmp" "$1"; else rm -f "$tmp"; fi', "--", filePath, sugArtist, sugTitle];
             Quickshell.execDetached(cmd);
-            Toaster.toast(qsTr("File Metadata Updated"), qsTr("Applied tags to: %1 - %2").arg(sugArtist, sugTitle), "check_circle");
+            Toaster.toast(qsTr("File Metadata Updated"), qsTr("Applied tags to: %1 - %2").arg(sugArtist).arg(sugTitle), "check_circle");
         } else {
-            Toaster.toast(qsTr("Streaming Metadata Applied"), qsTr("Saved stream alias: %1 - %2").arg(sugArtist, sugTitle), "check_circle");
+            Toaster.toast(qsTr("Streaming Metadata Applied"), qsTr("Saved stream alias: %1 - %2").arg(sugArtist).arg(sugTitle), "check_circle");
         }
     }
 
