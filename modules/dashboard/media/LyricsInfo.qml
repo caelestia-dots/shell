@@ -19,6 +19,7 @@ Item {
     readonly property real popupWidth: 320
     readonly property real maxPopupHeight: 256
     readonly property real maxListHeight: 104
+    readonly property bool hasDisplayableContent: (Lyrics.hasLyrics || Lyrics.lyricCandidates.length > 0) && !Lyrics.loading
 
     implicitWidth: btn.implicitWidth * 0.9
     implicitHeight: btn.implicitHeight * 0.9
@@ -96,8 +97,8 @@ Item {
             PropertyChanges {
                 rect.anchors.rightMargin: root.width - root.Tokens.spacing.small
                 rect.anchors.topMargin: -root.Tokens.padding.medium
-                rect.implicitWidth: (Lyrics.hasLyrics && !Lyrics.loading) ? root.popupWidth : Math.max(140, placeholder.implicitWidth + root.padding * 3)
-                rect.implicitHeight: (Lyrics.hasLyrics && !Lyrics.loading) ? Math.min(root.maxPopupHeight, layout.implicitHeight + root.padding * 2) : placeholder.implicitHeight + root.padding * 2
+                rect.implicitWidth: root.hasDisplayableContent ? root.popupWidth : Math.max(140, placeholder.implicitWidth + root.padding * 3)
+                rect.implicitHeight: root.hasDisplayableContent ? Math.min(root.maxPopupHeight, layout.implicitHeight + root.padding * 2) : placeholder.implicitHeight + root.padding * 2
                 content.opacity: 1
             }
         }
@@ -137,7 +138,7 @@ Item {
             anchors.fill: parent
             clip: true
             opacity: 0
-            state: Lyrics.loading || !Lyrics.hasLyrics ? "" : "hasLyrics"
+            state: root.hasDisplayableContent ? "hasLyrics" : ""
 
             states: State {
                 name: "hasLyrics"
@@ -192,6 +193,7 @@ Item {
                 opacity: 0
 
                 RowLayout {
+                    visible: Lyrics.hasLyrics
                     Layout.fillWidth: true
                     spacing: Tokens.spacing.small
 
@@ -217,6 +219,7 @@ Item {
                 }
 
                 StyledText {
+                    visible: Lyrics.hasLyrics
                     Layout.fillWidth: true
                     text: `${Lyrics.selectedCandidate.title || qsTr("Unknown")} • ${Lyrics.selectedCandidate.artist || qsTr("Unknown")}`
                     color: Colours.palette.m3onSurface
@@ -225,6 +228,7 @@ Item {
                 }
 
                 RowLayout {
+                    visible: Lyrics.hasLyrics
                     Layout.fillWidth: true
                     spacing: Tokens.spacing.small
 
@@ -257,7 +261,7 @@ Item {
                 }
 
                 RowLayout {
-                    visible: Lyrics.lyricCandidates.length > 1 || Lyrics.hasCandidateOverride
+                    visible: Lyrics.lyricCandidates.length > 1 || Lyrics.hasCandidateOverride || (!Lyrics.hasLyrics && Lyrics.lyricCandidates.length > 0)
                     Layout.fillWidth: true
 
                     StyledText {
@@ -265,6 +269,12 @@ Item {
                         text: qsTr("Candidates (%1)").arg(Lyrics.lyricCandidates.length)
                         color: Colours.palette.m3onSurfaceVariant
                         font: Tokens.font.label.small
+                    }
+
+                    TextButton {
+                        type: TextButton.Text
+                        text: qsTr("Force search")
+                        onClicked: Lyrics.forceSearch()
                     }
 
                     TextButton {
@@ -280,7 +290,7 @@ Item {
                 StyledFlickable {
                     id: candFlickable
 
-                    visible: Lyrics.lyricCandidates.length > 1 || Lyrics.hasCandidateOverride
+                    visible: Lyrics.lyricCandidates.length > 1 || Lyrics.hasCandidateOverride || (!Lyrics.hasLyrics && Lyrics.lyricCandidates.length > 0)
                     Layout.fillWidth: true
                     Layout.fillHeight: true
                     Layout.maximumHeight: root.maxListHeight
@@ -354,33 +364,30 @@ Item {
                         }
                     }
                 }
-
-                RowLayout {
-                    Layout.fillWidth: true
-
-                    TextButton {
-                        Layout.alignment: Qt.AlignRight
-                        type: TextButton.Text
-                        text: qsTr("Force search")
-                        onClicked: Lyrics.forceSearch()
-                    }
-                }
             }
 
-            Item {
+            ColumnLayout {
                 id: placeholder
 
                 anchors.centerIn: parent
-                implicitWidth: placeholderText.implicitWidth
-                implicitHeight: placeholderText.implicitHeight
+                spacing: Tokens.spacing.small
 
                 StyledText {
                     id: placeholderText
 
+                    Layout.alignment: Qt.AlignHCenter
                     text: Lyrics.loading ? qsTr("Loading...") : qsTr("No lyrics found")
                     color: Colours.palette.m3onSurfaceVariant
                     font: Tokens.font.body.medium
                     animate: true
+                }
+
+                TextButton {
+                    visible: !Lyrics.loading && !Lyrics.hasLyrics && Lyrics.lyricCandidates.length === 0
+                    Layout.alignment: Qt.AlignHCenter
+                    type: TextButton.Text
+                    text: qsTr("Force search")
+                    onClicked: Lyrics.forceSearch()
                 }
             }
         }
