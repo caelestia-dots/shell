@@ -19,6 +19,11 @@ StyledRect {
     readonly property bool hasImage: modelData.image.length > 0
     readonly property bool hasAppIcon: modelData.appIcon.length > 0
     readonly property int bodyTextFormat: /[<*_`#\[\]]/.test(modelData.body) ? Text.MarkdownText : Text.PlainText
+    // The preview goes through TextMetrics, which knows nothing about
+    // textFormat and so elides the raw markup: use the text only there. Links
+    // stay clickable in the expanded body, which is rendered in full.
+    readonly property string bodyPreviewText: Strings.stripMarkup(modelData.body)
+    readonly property int bodyPreviewTextFormat: Strings.hasMarkup(modelData.body) ? Text.PlainText : bodyTextFormat
     readonly property int nonAnimHeight: summary.implicitHeight + (root.expanded ? Tokens.spacing.extraSmall * 2 + appName.height + body.height + actions.height + actions.anchors.topMargin : bodyPreview.height) + inner.anchors.margins * 2
     property bool expanded: Config.notifs.openExpanded
 
@@ -391,7 +396,7 @@ StyledRect {
                 anchors.rightMargin: Tokens.spacing.small
 
                 animate: true
-                textFormat: root.bodyTextFormat
+                textFormat: root.bodyPreviewTextFormat
                 text: bodyPreviewMetrics.elidedText
                 color: Colours.palette.m3onSurfaceVariant
                 font: Tokens.font.body.small
@@ -408,7 +413,7 @@ StyledRect {
             TextMetrics {
                 id: bodyPreviewMetrics
 
-                text: root.modelData.body
+                text: root.bodyPreviewText
                 font: bodyPreview.font
                 elide: Text.ElideRight
                 elideWidth: bodyPreview.width
