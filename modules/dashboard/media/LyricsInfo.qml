@@ -272,13 +272,6 @@ Item {
                     }
 
                     TextButton {
-                        disabled: Lyrics.loading || Lyrics.forceSearching
-                        type: TextButton.Text
-                        text: qsTr("Force search")
-                        onClicked: Lyrics.forceSearch()
-                    }
-
-                    TextButton {
                         id: resetBtn
 
                         disabled: !Lyrics.hasCandidateOverride
