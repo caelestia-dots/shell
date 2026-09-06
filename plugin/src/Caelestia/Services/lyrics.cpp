@@ -487,9 +487,17 @@ void Lyrics::loadLocalLyricFile(const QString& path) {
     QFile f(path);
     if (f.open(QIODevice::ReadOnly)) {
         const QString text = QString::fromUtf8(f.readAll());
-        setLines(parseLrc(text), LyricsBackend::Local);
+        const auto lines = parseLrc(text);
+        if (lines.isEmpty()) {
+            setError(QStringLiteral("empty or invalid LRC file: %1").arg(path));
+            setOffline(false);
+        } else {
+            setLines(lines, LyricsBackend::Local);
+        }
     } else {
         qCWarning(lcLyrics) << "selectedCandidate: cannot open local file" << path;
+        setError(QStringLiteral("cannot open %1: %2").arg(path, f.errorString()));
+        setOffline(false);
     }
     setLoading(false);
 }
@@ -1080,6 +1088,10 @@ void Lyrics::doLoad() {
 }
 
 void Lyrics::chainNext(LyricsBackend justFailed, int reqId) {
+    if (m_hasLyrics) {
+        setLoading(false);
+        return;
+    }
     if (m_preferredBackend != LyricsBackend::Auto) {
         // Non-auto modes don't chain
         setLoading(false);
@@ -1204,7 +1216,9 @@ void Lyrics::retryLrclibGetSplit(
                 return;
             }
             qCDebug(lcLyrics) << "lrclib /get retry error:" << retry->errorString();
-            noteReplyError(retry);
+            if (!m_hasLyrics) {
+                noteReplyError(retry);
+            }
             chainNext(LyricsBackend::LRCLIB, reqId);
             return;
         }
@@ -1251,7 +1265,9 @@ void Lyrics::tryLrclib(int reqId) {
                     return;
                 }
                 qCDebug(lcLyrics) << "lrclib /get error:" << reply->errorString();
-                noteReplyError(reply);
+                if (!m_hasLyrics) {
+                    noteReplyError(reply);
+                }
                 chainNext(LyricsBackend::LRCLIB, reqId);
                 return;
             }
@@ -1289,7 +1305,9 @@ void Lyrics::tryNetEase(int reqId) {
         }
         if (reply->error() != QNetworkReply::NoError) {
             qCDebug(lcLyrics) << "netease /search error:" << reply->errorString();
-            noteReplyError(reply);
+            if (!m_hasLyrics) {
+                noteReplyError(reply);
+            }
             chainNext(LyricsBackend::NetEase, reqId);
             return;
         }
@@ -1520,10 +1538,17 @@ void Lyrics::fetchLrclibById(const QString& id, int reqId) {
             return;
         }
         const QJsonDocument doc = QJsonDocument::fromJson(reply->readAll());
+        if (doc.isNull() || !doc.isObject()) {
+            setError(QStringLiteral("malformed JSON from LRCLIB"));
+            setOffline(false);
+            setLoading(false);
+            return;
+        }
         const QString synced = doc.object().value(u"syncedLyrics"_s).toString();
         if (synced.isEmpty()) {
             qCDebug(lcLyrics) << "lrclib /get/{id}: no syncedLyrics";
             setError(QStringLiteral("no synced lyrics for id %1").arg(id));
+            setOffline(false);
             setLoading(false);
             return;
         }
@@ -1557,10 +1582,23 @@ void Lyrics::fetchNetEaseLyricsById(const QString& id, int reqId) {
             return;
         }
         const QJsonDocument doc = QJsonDocument::fromJson(reply->readAll());
+        if (doc.isNull() || !doc.isObject()) {
+            setError(QStringLiteral("malformed JSON from NetEase"));
+            setOffline(false);
+            setLoading(false);
+            return;
+        }
+        if (doc.object().value(u"code"_s).toInt(200) == 404) {
+            setError(QStringLiteral("NetEase: lyric not found (404) for id %1").arg(id));
+            setOffline(false);
+            setLoading(false);
+            return;
+        }
         const QString lrc = doc.object().value(u"lrc"_s).toObject().value(u"lyric"_s).toString();
         if (lrc.isEmpty()) {
             qCDebug(lcLyrics) << "netease /lyric: empty for id" << id;
             setError(QStringLiteral("empty lyric for id %1").arg(id));
+            setOffline(false);
             setLoading(false);
             return;
         }
