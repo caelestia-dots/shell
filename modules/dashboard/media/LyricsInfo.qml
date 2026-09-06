@@ -1,4 +1,5 @@
 import QtQuick
+import QtQuick.Controls
 import QtQuick.Layouts
 import Quickshell
 import Caelestia
@@ -17,9 +18,9 @@ Item {
     property bool open
     readonly property real padding: Tokens.padding.medium
     readonly property real popupWidth: 320
-    readonly property real maxPopupHeight: 256
+    readonly property real maxPopupHeight: 290
     readonly property real maxListHeight: 104
-    readonly property bool hasDisplayableContent: (Lyrics.hasLyrics || Lyrics.lyricCandidates.length > 0) && !Lyrics.loading && !Lyrics.forceSearching
+    readonly property bool hasDisplayableContent: (Lyrics.hasLyrics || Lyrics.lyricCandidates.length > 0 || Lyrics.hasMetadataSuggestion) && !Lyrics.loading && !Lyrics.forceSearching
 
     implicitWidth: btn.implicitWidth * 0.9
     implicitHeight: btn.implicitHeight * 0.9
@@ -227,6 +228,56 @@ Item {
                     elide: Text.ElideRight
                 }
 
+                Rectangle {
+                    id: fixMetadataCard
+
+                    Layout.fillWidth: true
+                    implicitHeight: fixMetadataRow.implicitHeight + Tokens.padding.extraSmall * 2
+                    visible: Lyrics.hasMetadataSuggestion
+                    radius: Tokens.rounding.small
+                    color: fixMouseArea.containsMouse ? Colours.palette.m3secondaryContainer : Colours.palette.m3surfaceContainerLow
+
+                    Behavior on color {
+                        CAnim {}
+                    }
+
+                    MouseArea {
+                        id: fixMouseArea
+
+                        anchors.fill: parent
+                        cursorShape: Qt.PointingHandCursor
+                        hoverEnabled: true
+
+                        ToolTip.delay: 200
+                        ToolTip.text: qsTr("Suggested metadata:\nArtist: %1\nTitle: %2").arg(Lyrics.suggestedArtist, Lyrics.suggestedTitle)
+                        ToolTip.visible: containsMouse
+                    }
+
+                    RowLayout {
+                        id: fixMetadataRow
+
+                        anchors.fill: parent
+                        anchors.leftMargin: Tokens.padding.small
+                        anchors.rightMargin: Tokens.padding.small
+                        spacing: Tokens.spacing.extraSmall
+
+                        MaterialIcon {
+                            color: Colours.palette.m3primary
+                            fontStyle: Tokens.font.icon.small
+                            text: "auto_fix_high"
+                        }
+
+                        StyledText {
+                            Layout.fillWidth: true
+                            text: fixMouseArea.containsMouse ? `${Lyrics.suggestedArtist} - ${Lyrics.suggestedTitle}` : qsTr("Fix metadata!")
+                            color: fixMouseArea.containsMouse ? Colours.palette.m3onSecondaryContainer : Colours.palette.m3primary
+                            font: Tokens.font.label.medium
+                            elide: Text.ElideRight
+                            animate: true
+                        }
+                    }
+                }
+
                 RowLayout {
                     visible: Lyrics.hasLyrics
                     Layout.fillWidth: true
@@ -403,6 +454,20 @@ Item {
             anchors.centerIn: parent
             text: "more_vert"
             fontStyle: Tokens.font.icon.medium
+        }
+
+        Rectangle {
+            id: metadataDot
+
+            visible: Lyrics.hasMetadataSuggestion
+            anchors.top: parent.top
+            anchors.right: parent.right
+            anchors.topMargin: Tokens.padding.extraSmall / 2
+            anchors.rightMargin: Tokens.padding.extraSmall / 2
+            width: 6
+            height: 6
+            radius: width / 2
+            color: "white"
         }
     }
 }
