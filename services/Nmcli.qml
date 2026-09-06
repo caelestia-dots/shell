@@ -113,22 +113,6 @@ Singleton {
     }
 
     function connectToNetworkWithPasswordCheck(ssid: string, isSecure: bool, callback: var): void {
-        // A secure network with no profile always needs a password. Asking
-        // nmcli to connect without one has NetworkManager create the profile
-        // and only then fail for the missing secret, which leaves it behind
-        // looking saved even if the prompt is cancelled.
-        if (isSecure && !Profiles.has(ssid)) {
-            if (callback)
-                callback({
-                    success: false,
-                    needsPassword: true,
-                    output: "",
-                    error: "",
-                    exitCode: -1
-                });
-            return;
-        }
-
         if (isSecure) {
             connectWireless(ssid, "", result => {
                 if (result.success) {
@@ -327,9 +311,6 @@ Singleton {
             return;
         }
 
-        // Ask before the profile goes: afterwards there's nothing left to say
-        // whether the network broadcasts.
-        Wifi.noteForgotten(ssid);
         Profiles.forget(Profiles.nameFor(ssid), callback);
     }
 

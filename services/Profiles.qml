@@ -55,11 +55,6 @@ Singleton {
         return root.find(ssid)?.keyMgmt ?? "";
     }
 
-    // Whether the saved profile for an SSID says the network doesn't broadcast.
-    function isHidden(ssid: string): bool {
-        return root.find(ssid)?.hidden ?? false;
-    }
-
     // The profile name for an SSID. Falls back to the SSID itself, which is
     // what NetworkManager names a profile by default.
     function nameFor(ssid: string): string {

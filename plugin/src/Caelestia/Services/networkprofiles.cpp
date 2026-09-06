@@ -103,10 +103,6 @@ bool NmConnection::autoconnect() const {
     return m_autoconnect;
 }
 
-bool NmConnection::hidden() const {
-    return m_hidden;
-}
-
 QString NmConnection::ipv4Method() const {
     return m_ipv4Method;
 }
@@ -138,7 +134,6 @@ void NmConnection::update(const QMap<QString, QVariantMap>& settings) {
     const auto type = connection.value(QStringLiteral("type")).toString();
     const auto ssid = byteArrayToString(wireless.value(QStringLiteral("ssid")));
     const auto keyMgmt = security.value(QStringLiteral("key-mgmt")).toString();
-    const auto hidden = wireless.value(QStringLiteral("hidden")).toBool();
 
     // NetworkManager leaves autoconnect out when it's at its default, which is
     // on, so a missing key is not false.
@@ -166,9 +161,8 @@ void NmConnection::update(const QMap<QString, QVariantMap>& settings) {
         dnsData == ipv4.end() ? packedDnsToStrings(ipv4.value(QStringLiteral("dns"))) : dnsData.value().toStringList();
 
     if (id == m_id && uuid == m_uuid && type == m_type && ssid == m_ssid && keyMgmt == m_keyMgmt &&
-        autoconnect == m_autoconnect && hidden == m_hidden && ipv4Method == m_ipv4Method &&
-        ipv4Address == m_ipv4Address && ipv4Gateway == m_ipv4Gateway && ipv4Dns == m_ipv4Dns &&
-        ipv4IgnoreAutoDns == m_ipv4IgnoreAutoDns) {
+        autoconnect == m_autoconnect && ipv4Method == m_ipv4Method && ipv4Address == m_ipv4Address &&
+        ipv4Gateway == m_ipv4Gateway && ipv4Dns == m_ipv4Dns && ipv4IgnoreAutoDns == m_ipv4IgnoreAutoDns) {
         return;
     }
 
@@ -178,7 +172,6 @@ void NmConnection::update(const QMap<QString, QVariantMap>& settings) {
     m_ssid = ssid;
     m_keyMgmt = keyMgmt;
     m_autoconnect = autoconnect;
-    m_hidden = hidden;
     m_ipv4Method = ipv4Method;
     m_ipv4Address = ipv4Address;
     m_ipv4Gateway = ipv4Gateway;
