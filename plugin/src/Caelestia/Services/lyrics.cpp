@@ -1,5 +1,7 @@
 #include "lyrics.hpp"
 
+#include <qdatetime.h>
+#include <qdir.h>
 #include <qdiriterator.h>
 #include <qfileinfo.h>
 #include <qjsonarray.h>
@@ -9,6 +11,7 @@
 #include <qurlquery.h>
 
 #include <algorithm>
+#include <vector>
 
 #include "config/rootnodes.hpp"
 #include "config/serviceconfig.hpp"
@@ -29,6 +32,7 @@ namespace {
 
 constexpr int k_loadDebounceMs = 50;
 constexpr qreal k_indexFudge = 0.1;
+constexpr int k_maxLyricsMapEntries = 2000;
 
 [[nodiscard]] const QHash<QByteArray, QByteArray>& netEaseHeaders() {
     static const QHash<QByteArray, QByteArray> k_h = {
@@ -232,6 +236,68 @@ struct ArtistTitleSplit {
         }
     }
     return -1;
+
+struct LrcIndexEntry {
+    QString path;
+    QString fileName;
+};
+
+[[nodiscard]] const std::vector<LrcIndexEntry>& cachedLrcEntries(const QString& dir) {
+    static QString s_cachedDir;
+    static QDateTime s_cachedMtime;
+    static std::vector<LrcIndexEntry> s_cachedEntries;
+    static bool s_cacheValid = false;
+
+    const QDateTime curMtime = QFileInfo(dir).lastModified();
+    if (s_cacheValid && s_cachedDir == dir && s_cachedMtime == curMtime) {
+        return s_cachedEntries;
+    }
+
+    s_cachedDir = dir;
+    s_cachedMtime = curMtime;
+    s_cachedEntries.clear();
+
+    if (!dir.isEmpty()) {
+        QDirIterator it(dir, QStringList{ u"*.lrc"_s }, QDir::Files | QDir::NoDotAndDotDot,
+            QDirIterator::Subdirectories | QDirIterator::FollowSymlinks);
+        while (it.hasNext()) {
+            const QString path = it.next();
+            s_cachedEntries.push_back(LrcIndexEntry{ .path = path, .fileName = it.fileName() });
+        }
+    }
+
+    s_cacheValid = true;
+    return s_cachedEntries;
+}
+
+void pruneLyricsMap(QJsonObject& map, const QString& keepKey) {
+    if (map.size() <= k_maxLyricsMapEntries) {
+        return;
+    }
+
+    struct UsageEntry {
+        qint64 lastUsed = 0;
+        QString key;
+    };
+
+    std::vector<UsageEntry> usage;
+    usage.reserve(static_cast<std::size_t>(map.size()));
+    for (auto it = map.constBegin(); it != map.constEnd(); ++it) {
+        if (it.key() == keepKey) {
+            continue;
+        }
+        const qint64 lastUsed = static_cast<qint64>(it.value().toObject().value(u"lastUsed"_s).toDouble(0.0));
+        usage.push_back(UsageEntry{ .lastUsed = lastUsed, .key = it.key() });
+    }
+
+    std::ranges::sort(usage, [](const UsageEntry& a, const UsageEntry& b) {
+        return a.lastUsed < b.lastUsed;
+    });
+
+    const auto toRemove = static_cast<std::size_t>(map.size() - k_maxLyricsMapEntries);
+    for (std::size_t i = 0; i < toRemove && i < usage.size(); ++i) {
+        map.remove(usage[i].key);
+    }
 }
 
 } // namespace
@@ -1468,12 +1534,17 @@ void Lyrics::updateMetadataSuggestion() {
     }
 }
 
+// QNAM policy: PreferNetwork is fresh-first (network is always attempted first, HTTP cache
+// is only a fallback when offline or when validators allow it), so the no-stale-lyrics
+// requirement is preserved: a reachable backend always wins over any cached response.
+// Unlike the previous AlwaysNetwork + "Cache-Control: no-cache, no-store" + "Pragma: no-cache"
+// + "Connection: close", this allows QNAM HTTP caching and, crucially, HTTP/1.1 keep-alive
+// connection reuse across lrclib/NetEase requests. The on-disk LRC cache in cacheDir()
+// remains authoritative for offline reuse.
 QNetworkReply* Lyrics::getJson(const QUrl& url, const QHash<QByteArray, QByteArray>& headers) {
     QNetworkRequest req(url);
-    req.setAttribute(QNetworkRequest::CacheLoadControlAttribute, QNetworkRequest::AlwaysNetwork);
-    req.setRawHeader("Cache-Control"_ba, "no-cache, no-store"_ba);
-    req.setRawHeader("Pragma"_ba, "no-cache"_ba);
-    req.setRawHeader("Connection"_ba, "close"_ba);
+    req.setAttribute(QNetworkRequest::CacheLoadControlAttribute, QNetworkRequest::PreferNetwork);
+    req.setRawHeader("Connection"_ba, "keep-alive"_ba);
     req.setRawHeader("Accept"_ba, "application/json"_ba);
     for (auto it = headers.constBegin(); it != headers.constEnd(); ++it) {
         req.setRawHeader(it.key(), it.value());
@@ -1538,7 +1609,13 @@ void Lyrics::persistTrackPrefs() {
     if (entry.isEmpty() || (!hasOverrides && entry.size() == 1 && qFuzzyIsNull(entry.value(u"offset"_s).toDouble()))) {
         m_lyricsMap.remove(key);
     } else {
+        // MRU bookkeeping: "lastUsed" orders entries by recency (missing == 0 == oldest for
+        // pre-existing entries). QJsonObject keys are sorted, not insertion-ordered, so recency
+        // must be explicit to bound growth by most-recently-used.
+        entry.insert(u"lastUsed"_s, static_cast<double>(QDateTime::currentMSecsSinceEpoch()));
+        m_lyricsMap.remove(key);
         m_lyricsMap.insert(key, entry);
+        pruneLyricsMap(m_lyricsMap, key);
     }
 
     QDir().mkpath(stateDir());
@@ -1764,14 +1841,17 @@ QString Lyrics::findLocalLrcRecursive(const QString& dir, const QString& artist,
         return {};
     }
 
-    QDirIterator it(dir, QStringList{ u"*.lrc"_s }, QDir::Files | QDir::NoDotAndDotDot,
-        QDirIterator::Subdirectories | QDirIterator::FollowSymlinks);
-
-    while (it.hasNext()) {
-        const QString path = it.next();
-        const QString name = it.fileName();
-        if ((artist.isEmpty() || containsCi(name, artist)) && (title.isEmpty() || containsCi(name, title))) {
-            return path;
+    // Cached listing: a full recursive scan per track miss is O(tree) on every miss. Cache the
+    // *.lrc listing and invalidate only when the top-level directory mtime changes. Note the
+    // trade-off: creations inside subdirectories do not bump the top-level mtime on Linux, so
+    // such files appear on the next top-level change or restart; the flat fast-path in
+    // tryReadLocalLrc() still hits the filesystem directly, so exact "<artist> - <title>.lrc"
+    // matches are always fresh.
+    const std::vector<LrcIndexEntry>& entries = cachedLrcEntries(dir);
+    for (const LrcIndexEntry& entry : entries) {
+        if ((artist.isEmpty() || containsCi(entry.fileName, artist)) &&
+            (title.isEmpty() || containsCi(entry.fileName, title))) {
+            return entry.path;
         }
     }
     return {};
