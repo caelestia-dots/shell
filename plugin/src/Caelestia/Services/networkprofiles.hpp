@@ -33,6 +33,10 @@ class NmConnection : public QObject {
     // Raw key management, e.g. "wpa-psk" or "sae". Empty on an open network.
     Q_PROPERTY(QString keyMgmt READ keyMgmt NOTIFY changed)
     Q_PROPERTY(bool autoconnect READ autoconnect NOTIFY changed)
+    // Whether the network doesn't broadcast its SSID. NetworkManager learns the
+    // SSID of a hidden access point while associated and keeps it on the access
+    // point afterwards, so this is the only way to tell one apart later.
+    Q_PROPERTY(bool hidden READ hidden NOTIFY changed)
     // IPv4 configuration as saved on the profile, which is not the same thing
     // as what the device ended up with; that lives on NmDevice.
     Q_PROPERTY(QString ipv4Method READ ipv4Method NOTIFY changed)
@@ -52,6 +56,7 @@ public:
     [[nodiscard]] QString ssid() const;
     [[nodiscard]] QString keyMgmt() const;
     [[nodiscard]] bool autoconnect() const;
+    [[nodiscard]] bool hidden() const;
     [[nodiscard]] QString ipv4Method() const;
     [[nodiscard]] QString ipv4Address() const;
     [[nodiscard]] QString ipv4Gateway() const;
@@ -81,6 +86,7 @@ private:
     QString m_ssid;
     QString m_keyMgmt;
     bool m_autoconnect = true;
+    bool m_hidden = false;
     QString m_ipv4Method;
     QString m_ipv4Address;
     QString m_ipv4Gateway;

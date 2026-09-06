@@ -33,12 +33,22 @@ Singleton {
         return found;
     }
 
+    // SSIDs of hidden networks that have been forgotten. NetworkManager learns
+    // a hidden network's SSID while associated and keeps it on the access point
+    // afterwards, so it would otherwise sit in the list forever even though
+    // nothing is broadcasting it. Cleared when a profile for it exists again,
+    // and not remembered across restarts, since by then the access point has
+    // usually gone with it.
+    property var forgottenHidden: ({})
+
     // One entry per SSID: the active access point if there is one, otherwise the
     // strongest. Same rule Nmcli's deduplicateNetworks applied to nmcli output.
     readonly property list<var> networks: {
         const best = new Map();
         for (const ap of root.accessPoints) {
             if (!ap.ssid)
+                continue;
+            if (root.forgottenHidden[ap.ssid] && !Profiles.has(ap.ssid))
                 continue;
 
             const existing = best.get(ap.ssid);
@@ -90,6 +100,19 @@ Singleton {
     // handler wrote it would be a loop.
     property bool scanning: false
     property real scanBaseline: -1
+
+    // Called before the profile goes, while it can still be asked whether the
+    // network broadcasts.
+    function noteForgotten(ssid: string): void {
+        if (!ssid || !Profiles.isHidden(ssid))
+            return;
+
+        // A new object: assigning the same one back doesn't notify, so nothing
+        // bound to this would re-evaluate.
+        root.forgottenHidden = Object.assign({}, root.forgottenHidden, {
+            [ssid]: true
+        });
+    }
 
     function findNetwork(ssid: string): var {
         return root.networks.find(n => n.ssid === ssid) ?? null;

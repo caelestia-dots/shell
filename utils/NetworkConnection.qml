@@ -67,30 +67,26 @@ QtObject {
         }
 
         if (network.isSecure) {
-            const hasSavedProfile = Nmcli.hasSavedProfile(network.ssid);
-
-            if (hasSavedProfile) {
-                Nmcli.connectToNetwork(network.ssid, "", null);
-            } else {
-                // Use password check with callback
-                Nmcli.connectToNetworkWithPasswordCheck(network.ssid, network.isSecure, result => {
-                    if (result.needsPassword) {
-                        // Clear pending connection if exists
-                        if (Nmcli.pendingConnection) {
-                            Nmcli.connectionCheckTimer.stop();
-                            Nmcli.pendingConnection = null;
-                        }
-
-                        // Handle password dialog - use session if available, otherwise use callback
-                        if (session && session.network) {
-                            session.network.showPasswordDialog = true;
-                            session.network.pendingNetwork = network;
-                        } else if (onPasswordNeeded) {
-                            onPasswordNeeded(network);
-                        }
+            // Saved networks go through the same path: a profile whose password
+            // is missing or no longer right has to be able to ask for one, and
+            // a profile left behind by a cancelled prompt looks saved too.
+            Nmcli.connectToNetworkWithPasswordCheck(network.ssid, network.isSecure, result => {
+                if (result.needsPassword) {
+                    // Clear pending connection if exists
+                    if (Nmcli.pendingConnection) {
+                        Nmcli.connectionCheckTimer.stop();
+                        Nmcli.pendingConnection = null;
                     }
-                });
-            }
+
+                    // Handle password dialog - use session if available, otherwise use callback
+                    if (session && session.network) {
+                        session.network.showPasswordDialog = true;
+                        session.network.pendingNetwork = network;
+                    } else if (onPasswordNeeded) {
+                        onPasswordNeeded(network);
+                    }
+                }
+            });
         } else {
             Nmcli.connectToNetwork(network.ssid, "", null);
         }
