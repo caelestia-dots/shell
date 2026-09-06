@@ -2,10 +2,44 @@
 
 #include <qdir.h>
 #include <qfile.h>
+#include <qloggingcategory.h>
 #include <qprocess.h>
 #include <qtextstream.h>
 
+#include <algorithm>
 #include <utility>
+
+namespace {
+
+Q_LOGGING_CATEGORY(lcBatteryControl, "caelestia.services.batterycontrol", QtInfoMsg)
+
+bool isSafeSysfsPath(const QString& path) {
+    const bool prefixOk = path.startsWith(QStringLiteral("/sys/bus/platform/drivers/ideapad_acpi/")) ||
+                          path.startsWith(QStringLiteral("/sys/devices/platform/")) ||
+                          path.startsWith(QStringLiteral("/sys/class/power_supply/"));
+    if (!prefixOk) {
+        return false;
+    }
+    if (path.contains(QStringLiteral(".."))) {
+        return false;
+    }
+    return std::ranges::all_of(path, [](const QChar& c) {
+        const char16_t u = c.unicode();
+        return (u >= u'a' && u <= u'z') || (u >= u'A' && u <= u'Z') || (u >= u'0' && u <= u'9') || u == u'/' ||
+               u == u'_' || u == u'-' || u == u'.' || u == u':';
+    });
+}
+
+bool isSafeValue(const QString& val) {
+    if (val.isEmpty() || val.size() > 3) {
+        return false;
+    }
+    return std::ranges::all_of(val, [](const QChar& c) {
+        return c.isDigit();
+    });
+}
+
+} // namespace
 
 namespace caelestia::services {
 
@@ -201,16 +235,54 @@ bool BatteryControl::writeValue(const QString& val) {
         return true;
     }
 
-    // 2. Privilege escalation fallback: run via pkexec so the system polkit agent pops up a password dialog
-    const QString cmd = QStringLiteral("echo %1 | pkexec tee %2 > /dev/null").arg(val, m_path);
+    // 2. Privilege escalation fallback: run via pkexec so the system polkit agent pops up a password dialog.
+    // Hardened: argument-vector form (no shell), value via stdin, path validated, exit code checked.
+    if (!isSafeValue(val)) {
+        qCWarning(lcBatteryControl) << "Refusing to write unsafe value to" << m_path;
+        return false;
+    }
+    if (!isSafeSysfsPath(m_path)) {
+        qCWarning(lcBatteryControl) << "Refusing to write to unexpected sysfs path:" << m_path;
+        return false;
+    }
+
     auto* proc = new QProcess(this);
+    proc->setProgram(QStringLiteral("pkexec"));
+    proc->setArguments({ QStringLiteral("tee"), m_path });
+    proc->setStandardOutputFile(QProcess::nullDevice());
     proc->setProcessEnvironment(QProcessEnvironment::systemEnvironment());
+
     connect(proc, QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished), this,
-        [this, proc](int, QProcess::ExitStatus) {
-            refreshState();
+        [this, proc](int exitCode, QProcess::ExitStatus exitStatus) {
+            const QString err = QString::fromUtf8(proc->readAllStandardError()).trimmed();
+            if (exitStatus != QProcess::NormalExit || exitCode != 0) {
+                qCWarning(lcBatteryControl) << "pkexec tee failed:" << exitCode << err;
+            } else {
+                if (!err.isEmpty()) {
+                    qCWarning(lcBatteryControl) << "pkexec tee stderr:" << err;
+                }
+                refreshState();
+            }
             proc->deleteLater();
         });
-    proc->start(QStringLiteral("sh"), { QStringLiteral("-c"), cmd });
+    connect(proc, &QProcess::errorOccurred, this, [proc](QProcess::ProcessError err) {
+        if (err == QProcess::FailedToStart) {
+            qCWarning(lcBatteryControl) << "pkexec failed to start:" << proc->errorString();
+            proc->deleteLater();
+        }
+        // Other errors are reported via finished().
+    });
+
+    proc->start();
+    if (!proc->waitForStarted(3000)) {
+        qCWarning(lcBatteryControl) << "pkexec failed to start:" << proc->errorString();
+        proc->deleteLater();
+        return false;
+    }
+
+    // Byte-identical payload to the previous `echo %1` (value + newline).
+    proc->write((val + QStringLiteral("\n")).toUtf8());
+    proc->closeWriteChannel();
     return true;
 }
 
