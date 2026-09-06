@@ -148,6 +148,11 @@ private:
 
     void fetchLrclibById(const QString& id, int reqId);
     void fetchNetEaseLyricsById(const QString& id, int reqId);
+    void handleLrclibForceSearchReply(QNetworkReply* reply, int reqId, const std::function<void()>& checkFinished);
+    void handleNetEaseForceSearchReply(QNetworkReply* reply, int reqId, const std::function<void()>& checkFinished);
+    void handleNetEaseLyricsReply(QNetworkReply* reply, const QString& id, int reqId);
+    void noteGuardedReplyError(QNetworkReply* reply);
+    void setGuardedError(const QString& error);
 
     QNetworkReply* getJson(const QUrl& url, const QHash<QByteArray, QByteArray>& headers = {});
     void trackReply(int reqId, QNetworkReply* reply);
