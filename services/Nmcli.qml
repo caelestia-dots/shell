@@ -405,6 +405,17 @@ Singleton {
 
     // Writes an IPv4 configuration to a connection profile and reactivates it so
     // the change takes effect immediately.
+    // Whether a profile is the one currently up, on either transport.
+    function isActiveProfile(connectionName: string): bool {
+        if (!connectionName)
+            return false;
+
+        if (Wired.active?.connection === connectionName)
+            return true;
+
+        return !!root.active && Profiles.nameFor(root.active.ssid) === connectionName;
+    }
+
     function setIpv4Config(connectionName: string, config: var, callback: var): void {
         if (!connectionName || connectionName.length === 0) {
             if (callback)
@@ -448,8 +459,16 @@ Singleton {
                     callback(result);
                 return;
             }
-            // Reactivate so changes take effect immediately. Nothing to
-            // refresh afterwards; the new addresses arrive over dbus.
+            // Addressing only takes effect on activation, so the profile has
+            // to come back up - but only if it was up to begin with. Saving
+            // the addresses of a network you aren't on shouldn't connect you
+            // to it, which is what an unconditional `connection up` did.
+            if (!root.isActiveProfile(connectionName)) {
+                if (callback)
+                    callback(result);
+                return;
+            }
+
             executeCommand([root.nmcliCommandConnection, "up", connectionName], upResult => {
                 if (callback)
                     callback(upResult);
