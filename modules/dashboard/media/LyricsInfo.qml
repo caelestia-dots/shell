@@ -34,7 +34,7 @@ Item {
         const sugArtist = Lyrics.suggestedArtist;
         const sugTitle = Lyrics.suggestedTitle;
         const player = Players.active;
-        const rawUrl = player?.metadata?.["xesam:url"] ?? "";
+        const rawUrl = player?.metadata["xesam:url"] ?? "";
 
         Lyrics.applySuggestedMetadata();
 
