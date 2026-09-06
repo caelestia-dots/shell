@@ -1,4 +1,5 @@
 import QtQuick
+import QtQuick.Controls
 import QtQuick.Layouts
 import Quickshell
 import Caelestia
@@ -15,6 +16,12 @@ Item {
     id: root
 
     property bool open
+    // qmllint disable missing-property
+    readonly property string lyricsError: String(Lyrics?.error ?? "")
+    readonly property string lyricsOffline: String(Lyrics?.offline ?? "")
+    // qmllint enable missing-property
+    readonly property bool hasLyricsError: lyricsError.length > 0
+    readonly property bool isLyricsOffline: !hasLyricsError && lyricsOffline.length > 0
     readonly property real padding: Tokens.padding.medium
     readonly property real popupWidth: 320
     readonly property real maxPopupHeight: 320
@@ -393,13 +400,25 @@ Item {
                         font: Tokens.font.label.small
                     }
 
-                    TextButton {
-                        id: resetBtn
+                    Item {
+                        Layout.preferredWidth: resetBtn.implicitWidth
+                        Layout.preferredHeight: resetBtn.implicitHeight
+                        ToolTip.visible: resetHover.hovered && resetBtn.disabled
+                        ToolTip.text: qsTr("Select a different candidate to enable reset")
 
-                        disabled: !Lyrics.hasCandidateOverride
-                        type: TextButton.Text
-                        text: qsTr("Reset to Default")
-                        onClicked: Lyrics.resetToAuto()
+                        TextButton {
+                            id: resetBtn
+
+                            anchors.centerIn: parent
+                            disabled: !Lyrics.hasCandidateOverride
+                            type: TextButton.Text
+                            text: qsTr("Reset to Default")
+                            onClicked: Lyrics.resetToAuto()
+                        }
+
+                        HoverHandler {
+                            id: resetHover
+                        }
                     }
                 }
 
@@ -496,14 +515,43 @@ Item {
                 anchors.centerIn: parent
                 spacing: Tokens.spacing.small
 
+                MaterialIcon {
+                    visible: !Lyrics.loading && !Lyrics.forceSearching
+                    Layout.alignment: Qt.AlignHCenter
+                    text: root.hasLyricsError ? "error" : root.isLyricsOffline ? "cloud_off" : "sentiment_sad"
+                    fontStyle: Tokens.font.icon.medium
+                    color: root.hasLyricsError ? Colours.palette.m3error : Colours.palette.m3onSurfaceVariant
+                }
+
                 StyledText {
                     id: placeholderText
 
                     Layout.alignment: Qt.AlignHCenter
-                    text: Lyrics.forceSearching ? qsTr("Loading forced lyrics...") : (Lyrics.loading ? qsTr("Loading...") : qsTr("No lyrics found"))
-                    color: Colours.palette.m3onSurfaceVariant
+                    horizontalAlignment: Text.AlignHCenter
+                    text: Lyrics.forceSearching ? qsTr("Loading forced lyrics...") : Lyrics.loading ? qsTr("Loading...") : root.hasLyricsError ? qsTr("Couldn't load lyrics") : root.isLyricsOffline ? qsTr("You're offline") : qsTr("No lyrics found")
+                    color: root.hasLyricsError ? Colours.palette.m3error : Colours.palette.m3onSurfaceVariant
                     font: Tokens.font.body.medium
                     animate: true
+                }
+
+                StyledText {
+                    visible: !Lyrics.loading && !Lyrics.forceSearching && (root.hasLyricsError || root.isLyricsOffline)
+                    Layout.alignment: Qt.AlignHCenter
+                    Layout.fillWidth: true
+                    horizontalAlignment: Text.AlignHCenter
+                    text: root.hasLyricsError ? root.lyricsError : root.lyricsOffline
+                    color: Colours.palette.m3onSurfaceVariant
+                    font: Tokens.font.body.small
+                    wrapMode: Text.WrapAtWordBoundaryOrAnywhere
+                    elide: Text.ElideRight
+                }
+
+                TextButton {
+                    visible: !Lyrics.loading && !Lyrics.forceSearching && (root.hasLyricsError || root.isLyricsOffline)
+                    Layout.alignment: Qt.AlignHCenter
+                    type: TextButton.Text
+                    text: qsTr("Retry")
+                    onClicked: Lyrics.refresh()
                 }
 
                 TextButton {
