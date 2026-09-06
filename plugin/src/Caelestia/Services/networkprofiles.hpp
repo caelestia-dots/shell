@@ -25,7 +25,6 @@ class NmConnection : public QObject {
 
     // Profile name, i.e. what nmcli takes as a connection argument.
     Q_PROPERTY(QString id READ id NOTIFY changed)
-    Q_PROPERTY(QString uuid READ uuid NOTIFY changed)
     // NetworkManager's setting name, e.g. "802-11-wireless" or "802-3-ethernet".
     Q_PROPERTY(QString type READ type NOTIFY changed)
     // Wifi profiles only; empty for everything else.
@@ -47,7 +46,6 @@ public:
 
     [[nodiscard]] QString path() const;
     [[nodiscard]] QString id() const;
-    [[nodiscard]] QString uuid() const;
     [[nodiscard]] QString type() const;
     [[nodiscard]] QString ssid() const;
     [[nodiscard]] QString keyMgmt() const;
@@ -76,7 +74,6 @@ private slots:
 private:
     QString m_path;
     QString m_id;
-    QString m_uuid;
     QString m_type;
     QString m_ssid;
     QString m_keyMgmt;

@@ -83,10 +83,6 @@ QString NmConnection::id() const {
     return m_id;
 }
 
-QString NmConnection::uuid() const {
-    return m_uuid;
-}
-
 QString NmConnection::type() const {
     return m_type;
 }
@@ -130,7 +126,6 @@ void NmConnection::update(const QMap<QString, QVariantMap>& settings) {
     const auto ipv4 = settings.value(QString::fromUtf8(k_groupIpv4));
 
     const auto id = connection.value(QStringLiteral("id")).toString();
-    const auto uuid = connection.value(QStringLiteral("uuid")).toString();
     const auto type = connection.value(QStringLiteral("type")).toString();
     const auto ssid = byteArrayToString(wireless.value(QStringLiteral("ssid")));
     const auto keyMgmt = security.value(QStringLiteral("key-mgmt")).toString();
@@ -160,14 +155,13 @@ void NmConnection::update(const QMap<QString, QVariantMap>& settings) {
     const auto ipv4Dns =
         dnsData == ipv4.end() ? packedDnsToStrings(ipv4.value(QStringLiteral("dns"))) : dnsData.value().toStringList();
 
-    if (id == m_id && uuid == m_uuid && type == m_type && ssid == m_ssid && keyMgmt == m_keyMgmt &&
-        autoconnect == m_autoconnect && ipv4Method == m_ipv4Method && ipv4Address == m_ipv4Address &&
-        ipv4Gateway == m_ipv4Gateway && ipv4Dns == m_ipv4Dns && ipv4IgnoreAutoDns == m_ipv4IgnoreAutoDns) {
+    if (id == m_id && type == m_type && ssid == m_ssid && keyMgmt == m_keyMgmt && autoconnect == m_autoconnect &&
+        ipv4Method == m_ipv4Method && ipv4Address == m_ipv4Address && ipv4Gateway == m_ipv4Gateway &&
+        ipv4Dns == m_ipv4Dns && ipv4IgnoreAutoDns == m_ipv4IgnoreAutoDns) {
         return;
     }
 
     m_id = id;
-    m_uuid = uuid;
     m_type = type;
     m_ssid = ssid;
     m_keyMgmt = keyMgmt;

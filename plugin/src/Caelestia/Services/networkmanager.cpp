@@ -262,10 +262,6 @@ QString NmDevice::address() const {
     return m_address;
 }
 
-int NmDevice::prefix() const {
-    return m_prefix;
-}
-
 QString NmDevice::gateway() const {
     return m_gateway;
 }
@@ -274,13 +270,12 @@ QStringList NmDevice::dns() const {
     return m_dns;
 }
 
-void NmDevice::setIp4Config(const QString& address, int prefix, const QString& gateway, const QStringList& dns) {
-    if (address == m_address && prefix == m_prefix && gateway == m_gateway && dns == m_dns) {
+void NmDevice::setIp4Config(const QString& address, const QString& gateway, const QStringList& dns) {
+    if (address == m_address && gateway == m_gateway && dns == m_dns) {
         return;
     }
 
     m_address = address;
-    m_prefix = prefix;
     m_gateway = gateway;
     m_dns = dns;
 
@@ -486,7 +481,7 @@ void NetworkManager::readDevice(const QString& path) {
 
         const auto configPath = props.value(QStringLiteral("Ip4Config")).value<QDBusObjectPath>().path();
         if (configPath.isEmpty() || configPath == QStringLiteral("/")) {
-            device->setIp4Config(QString(), 0, QString(), {});
+            device->setIp4Config(QString(), QString(), {});
         } else {
             readIp4Config(path, configPath);
         }
@@ -697,10 +692,8 @@ void NetworkManager::readIp4Config(const QString& devicePath, const QString& con
         props.value(QStringLiteral("AddressData")).value<QDBusArgument>() >> addresses;
 
         QString address;
-        int prefix = 0;
         if (!addresses.isEmpty()) {
             address = addresses.first().value(QStringLiteral("address")).toString();
-            prefix = addresses.first().value(QStringLiteral("prefix")).toInt();
         }
 
         QList<QVariantMap> nameservers;
@@ -715,7 +708,7 @@ void NetworkManager::readIp4Config(const QString& devicePath, const QString& con
             }
         }
 
-        device->setIp4Config(address, prefix, props.value(QStringLiteral("Gateway")).toString(), dns);
+        device->setIp4Config(address, props.value(QStringLiteral("Gateway")).toString(), dns);
 
         step(-1);
     });

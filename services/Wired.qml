@@ -103,7 +103,7 @@ Singleton {
 
     // Follows whichever device is active, so consumers don't have to ask.
     onActiveChanged: {
-        refreshDataUsage(active?.interface ?? "");
+        refreshDataUsage(active?.iface ?? "");
     }
 
     Process {

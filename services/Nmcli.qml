@@ -11,7 +11,6 @@ import qs.services
 Singleton {
     id: root
 
-    readonly property bool connecting: Wifi.connecting
     // Wifi state lives in Wifi now, read from NetworkManager over dbus.
     // These forward it so existing consumers keep working unchanged.
     readonly property bool wifiEnabled: Wifi.enabled
@@ -336,42 +335,6 @@ Singleton {
         Wifi.disconnect(null);
     }
 
-    function bringInterfaceUp(interfaceName: string, callback: var): void {
-        if (interfaceName && interfaceName.length > 0) {
-            executeCommand([root.nmcliCommandDevice, "connect", interfaceName], result => {
-                if (callback) {
-                    callback(result);
-                }
-            });
-        } else {
-            if (callback)
-                callback({
-                    success: false,
-                    output: "",
-                    error: "No interface specified",
-                    exitCode: -1
-                });
-        }
-    }
-
-    function bringInterfaceDown(interfaceName: string, callback: var): void {
-        if (interfaceName && interfaceName.length > 0) {
-            executeCommand([root.nmcliCommandDevice, "disconnect", interfaceName], result => {
-                if (callback) {
-                    callback(result);
-                }
-            });
-        } else {
-            if (callback)
-                callback({
-                    success: false,
-                    output: "",
-                    error: "No interface specified",
-                    exitCode: -1
-                });
-        }
-    }
-
     function rescanWifi(): void {
         Wifi.scan();
     }
@@ -384,23 +347,8 @@ Singleton {
         Wifi.toggle(callback);
     }
 
-    // Kept for existing callers; wifiEnabled is a live binding now, so there is
-    // nothing to fetch.
-    function getWifiStatus(callback: var): void {
-        if (callback)
-            callback(root.wifiEnabled);
-    }
-
     function findNetwork(ssid: string): var {
         return Wifi.findNetwork(ssid);
-    }
-
-    // Kept so existing callers still get their callback; the network list is
-    // a live binding on Wifi now, so there is nothing to fetch.
-    function getNetworks(callback: var): void {
-        if (callback)
-            callback(root.networks);
-        checkPendingConnection();
     }
 
     function handlePasswordRequired(proc: var, error: string, output: string, exitCode: int): bool {
@@ -538,11 +486,9 @@ Singleton {
         CommandProcess {}
     }
 
-    // Nothing reports a connect that simply never happens, so this stays as the
-    // backstop. Success arrives on onActiveChanged and a rejected password on
-    // the process's own stderr, both immediately, so neither needs polling.
-    // Qt.callLater takes arguments to pass on, not a delay, so the retry used
-    // to fire straight away and put three attempts back to back.
+    // A Timer rather than Qt.callLater, whose second argument is passed to the
+    // function rather than used as a delay, so the retry used to fire straight
+    // away and put three attempts back to back.
     Timer {
         id: connectRetryTimer
 
@@ -577,6 +523,9 @@ Singleton {
         }
     }
 
+    // Nothing reports a connect that simply never happens, so this is the
+    // backstop. Success arrives on onActiveChanged and a rejected password on
+    // the process's own stderr, both immediately, so neither needs polling.
     Timer {
         id: connectionCheckTimer
 

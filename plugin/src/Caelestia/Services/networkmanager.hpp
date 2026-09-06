@@ -89,9 +89,7 @@ class NmDevice : public QObject {
     QML_ELEMENT
     QML_UNCREATABLE("NmDevice instances are owned by NetworkManager")
 
-    Q_PROPERTY(QString interface READ interface NOTIFY changed)
-    // Alias for `interface`. QML consumers have always called this `iface`, and
-    // aliasing here is cheaper than renaming it at every use site.
+    // `iface` in QML; the getter keeps the C++ spelling.
     Q_PROPERTY(QString iface READ interface NOTIFY changed)
     Q_PROPERTY(caelestia::config::NetworkTransport::Enum type READ type NOTIFY changed)
     Q_PROPERTY(uint state READ state NOTIFY changed)
@@ -112,8 +110,6 @@ class NmDevice : public QObject {
     Q_PROPERTY(QString hwAddress READ hwAddress NOTIFY changed)
     // Active IPv4 configuration. Empty while the device is down.
     Q_PROPERTY(QString address READ address NOTIFY changed)
-    // Prefix length of the address, e.g. 24, or 0 when there is none.
-    Q_PROPERTY(int prefix READ prefix NOTIFY changed)
     Q_PROPERTY(QString gateway READ gateway NOTIFY changed)
     Q_PROPERTY(QStringList dns READ dns NOTIFY changed)
     // Boot time in milliseconds at which the device last finished a scan, or -1
@@ -137,7 +133,6 @@ public:
     [[nodiscard]] uint speed() const;
     [[nodiscard]] QString hwAddress() const;
     [[nodiscard]] QString address() const;
-    [[nodiscard]] int prefix() const;
     [[nodiscard]] QString gateway() const;
     [[nodiscard]] QStringList dns() const;
     [[nodiscard]] NmAccessPoint* accessPoint(const QString& path) const;
@@ -151,7 +146,7 @@ public:
     void setWired(bool carrier, uint speed);
     // Set apart from update(): the addresses live on the device's Ip4Config
     // object, which is a second read.
-    void setIp4Config(const QString& address, int prefix, const QString& gateway, const QStringList& dns);
+    void setIp4Config(const QString& address, const QString& gateway, const QStringList& dns);
 
     void addAccessPoint(NmAccessPoint* accessPoint);
     // Drops any access point whose path isn't in `keep`. Returns whether the
@@ -177,7 +172,6 @@ private:
     uint m_speed = 0;
     QString m_hwAddress;
     QString m_address;
-    int m_prefix = 0;
     QString m_gateway;
     QStringList m_dns;
 

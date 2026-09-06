@@ -150,15 +150,6 @@ Singleton {
         NmAction.run(["device", "disconnect", iface], callback);
     }
 
-    function forget(connectionName: string, callback: var): void {
-        if (!connectionName) {
-            if (callback)
-                callback(false);
-            return;
-        }
-        NmAction.run(["connection", "delete", connectionName], callback);
-    }
-
     // The only word NetworkManager gives that a scan finished.
     onLastScanChanged: {
         if (root.scanning && root.lastScan !== root.scanBaseline) {
