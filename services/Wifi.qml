@@ -33,12 +33,29 @@ Singleton {
         return found;
     }
 
+    // Radios that are also seen broadcasting no name at all. A hidden network
+    // shows up twice: once as itself, with an empty SSID, and once more under
+    // the name NetworkManager learned from a directed probe while it was
+    // associated. That second entry is the only reason a hidden network is in
+    // this list, and it outlives the profile that produced it.
+    readonly property var hiddenRadios: {
+        const hidden = {};
+        for (const ap of root.accessPoints)
+            if (!ap.ssid && ap.bssid)
+                hidden[ap.bssid] = true;
+        return hidden;
+    }
+
     // One entry per SSID: the active access point if there is one, otherwise the
     // strongest. Same rule Nmcli's deduplicateNetworks applied to nmcli output.
     readonly property list<var> networks: {
         const best = new Map();
         for (const ap of root.accessPoints) {
             if (!ap.ssid)
+                continue;
+            // A network that isn't broadcasting its name is only worth offering
+            // while it's saved; without a profile, tapping it can't do anything.
+            if (root.hiddenRadios[ap.bssid] && !Profiles.has(ap.ssid))
                 continue;
 
             const existing = best.get(ap.ssid);
