@@ -11,28 +11,25 @@ import qs.services
 Singleton {
     id: root
 
-    // Wifi state lives in Wifi now, read from NetworkManager over dbus.
-    // These forward it so existing consumers keep working unchanged.
+    // State lives in Wired, Wifi and Profiles now, read from NetworkManager
+    // over dbus. These forward it so existing consumers keep working unchanged.
     readonly property bool wifiEnabled: Wifi.enabled
     readonly property bool scanning: Wifi.scanning
     readonly property list<var> networks: Wifi.networks
     readonly property var active: Wifi.active
-    // Saved profiles live in Profiles now, read from NetworkManager's Settings
-    // interface. These forward them so existing consumers keep working.
-    readonly property list<string> savedConnectionSsids: Profiles.ssids
-    // Map of saved Wi-Fi SSID (lowercased) -> security type
-
-    property var pendingConnection: null
-    // Device details come from NetworkManager's IP4Config over dbus now.
-    // These forward them so existing consumers keep working unchanged.
     readonly property var wirelessDeviceDetails: Wifi.details
-    readonly property var ethernetDeviceDetails: Wired.details
-    // Wired state lives in Wired now, read from NetworkManager over dbus.
-    // These forward it so existing consumers keep working unchanged.
-    readonly property string ethernetDataUsage: Wired.dataUsage
-    readonly property string ethernetSpeed: Wired.speed
+
     readonly property list<var> ethernetDevices: Wired.devices
     readonly property var activeEthernet: Wired.active
+    readonly property bool hasAvailableEthernet: Wired.available
+    readonly property string ethernetSpeed: Wired.speed
+    readonly property string ethernetDataUsage: Wired.dataUsage
+    readonly property var ethernetDeviceDetails: Wired.details
+
+    readonly property list<string> savedConnectionSsids: Profiles.ssids
+
+    property var pendingConnection: null
+    property list<var> activeProcesses: []
     // Whether traffic is actually leaving over a wired link, which isn't the
     // same question as whether a cable is plugged in - with both a cable and
     // wifi up, either can be carrying it. NetworkManager already tracks which
@@ -42,8 +39,6 @@ Singleton {
     // icon doesn't flicker through a wrong state on startup or if
     // NetworkManager isn't reachable.
     readonly property bool onEthernet: NetworkRoute.ready ? NetworkRoute.primaryTransport === NetworkTransport.Ethernet : !!activeEthernet
-    readonly property bool hasAvailableEthernet: Wired.available
-    property list<var> activeProcesses: []
 
     readonly property alias connectionCheckTimer: connectionCheckTimer
 

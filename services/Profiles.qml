@@ -55,23 +55,25 @@ Singleton {
         return root.find(ssid)?.keyMgmt ?? "";
     }
 
-    // The profile name for an SSID. Falls back to the SSID itself, which is
-    // what NetworkManager names a profile by default.
-    function nameFor(ssid: string): string {
-        if (!ssid)
-            return "";
+    // Looks a profile up by SSID first, then by name, since callers pass
+    // whichever they have.
+    function profileFor(nameOrSsid: string): var {
+        if (!nameOrSsid)
+            return null;
 
-        const wanted = ssid.toLowerCase().trim();
-        return root.find(ssid)?.id ?? root.names.find(n => n && n.toLowerCase().trim() === wanted) ?? ssid;
+        const wanted = nameOrSsid.toLowerCase().trim();
+        return root.find(nameOrSsid) ?? root.list.find(p => p.id && p.id.toLowerCase().trim() === wanted) ?? null;
     }
 
-    // Whether anything saved matches this SSID, by profile SSID or by name.
-    function hasName(ssid: string): bool {
-        if (!ssid)
-            return false;
+    // The profile name for an SSID. Falls back to the SSID itself, which is
+    // what NetworkManager names a profile by default.
+    function nameFor(nameOrSsid: string): string {
+        return root.profileFor(nameOrSsid)?.id ?? nameOrSsid ?? "";
+    }
 
-        const wanted = ssid.toLowerCase().trim();
-        return root.has(ssid) || root.names.some(n => n && n.toLowerCase().trim() === wanted);
+    // Whether anything saved matches, by profile SSID or by name.
+    function hasName(nameOrSsid: string): bool {
+        return root.profileFor(nameOrSsid) !== null;
     }
 
     // Turns NetworkManager's key management into the label the UI shows.
@@ -94,16 +96,6 @@ Singleton {
         default:
             return keyMgmt.trim();
         }
-    }
-
-    // Looks a profile up by SSID first, then by name, since callers pass
-    // whichever they have.
-    function profileFor(nameOrSsid: string): var {
-        if (!nameOrSsid)
-            return null;
-
-        const wanted = nameOrSsid.toLowerCase().trim();
-        return root.find(nameOrSsid) ?? root.list.find(p => p.id && p.id.toLowerCase().trim() === wanted) ?? null;
     }
 
     // The saved IPv4 configuration, in the shape the parsed nmcli output had.

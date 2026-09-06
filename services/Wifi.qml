@@ -91,9 +91,16 @@ Singleton {
         return state >= 40 && state < 100;
     }
 
-    // The profile being activated, which is the SSID for the profiles
-    // NetworkManager names after the network.
-    readonly property string connectingSsid: root.connecting ? (root.device?.connection ?? "") : ""
+    // SSID being connected to. The device reports the profile name, which is
+    // usually the SSID but isn't when the profile was created with an explicit
+    // con-name, and every consumer compares this against a network's SSID.
+    readonly property string connectingSsid: {
+        if (!root.connecting)
+            return "";
+
+        const profile = root.device?.connection ?? "";
+        return Profiles.profileFor(profile)?.ssid || profile;
+    }
 
     readonly property real lastScan: root.device?.lastScan ?? -1
 
@@ -132,22 +139,19 @@ Singleton {
         NmAction.run(["device", "wifi", "rescan"], null);
     }
 
-    // Brings down the profile on the wifi device, falling back to
-    // disconnecting the device itself when nothing is named.
+    // Brings the profile down rather than the device: `device disconnect` tells
+    // NetworkManager to stop activating connections on it by itself, and that
+    // survives a reboot. With no profile named there is nothing up to
+    // disconnect from anyway.
     function disconnect(callback: var): void {
         const connection = root.device?.connection ?? "";
-        if (connection) {
-            NmAction.run(["connection", "down", connection], callback);
-            return;
-        }
-
-        const iface = root.device?.iface ?? "";
-        if (!iface) {
+        if (!connection) {
             if (callback)
                 callback(false);
             return;
         }
-        NmAction.run(["device", "disconnect", iface], callback);
+
+        NmAction.run(["connection", "down", connection], callback);
     }
 
     // The only word NetworkManager gives that a scan finished.

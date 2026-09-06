@@ -93,7 +93,7 @@ PageBase {
                                 if (saved.ap)
                                     security = saved.ap.security || qsTr("Open");
                                 else
-                                    security = Nmcli.securityLabel(Nmcli.savedSecurityFor(saved.modelData)) || qsTr("Unknown");
+                                    security = Nmcli.securityLabel(Nmcli.savedSecurityFor(saved.modelData));
                                 if (saved.isActive)
                                     return qsTr("Connected • %1").arg(security);
                                 return security;
