@@ -174,6 +174,16 @@ Singleton {
         // read yet this falls through to the command below, which reuses the
         // profile anyway.
         const saved = Profiles.find(ssid);
+
+        // `nmcli device wifi connect` goes through AddAndActivateConnection:
+        // NetworkManager writes the profile and only then asks the secret agent
+        // for the password. Cancel that prompt, or get the password wrong, and
+        // the profile stays behind as a saved network that never connected.
+        // Until the profile list has been read, a saved network looks unsaved,
+        // and cleaning up after a failure would delete the user's own profile.
+        // Assume there was one when we can't tell.
+        const existed = !Profiles.ready || !!saved;
+
         let cmd;
         if (saved && !password) {
             cmd = [root.nmcliCommandConnection, "up", saved.id];
@@ -184,6 +194,14 @@ Singleton {
         }
 
         executeCommand(cmd, result => {
+            // Before the early returns below: cancelling the password prompt
+            // comes back as needsPassword, and that is exactly the case that
+            // leaves a profile behind.
+            if (!result.success && !existed) {
+                strayProfileTimer.ssid = ssid;
+                strayProfileTimer.restart();
+            }
+
             if (result.needsPassword) {
                 if (callback)
                     callback(result);
@@ -421,23 +439,26 @@ Singleton {
     }
 
     function checkPendingConnection(): void {
-        if (root.pendingConnection) {
-            Qt.callLater(() => {
-                const connected = root.active && root.active.ssid === root.pendingConnection.ssid;
-                if (connected) {
-                    connectionCheckTimer.stop();
-                    if (root.pendingConnection.callback) {
-                        root.pendingConnection.callback({
-                            success: true,
-                            output: "Connected",
-                            error: "",
-                            exitCode: 0
-                        });
-                    }
-                    root.pendingConnection = null;
-                }
+        if (!root.pendingConnection)
+            return;
+
+        Qt.callLater(() => {
+            // Read again rather than captured: this runs a turn later, and the
+            // password prompt or the timeout may have resolved the pending
+            // connect in between.
+            const pending = root.pendingConnection;
+            if (!pending || root.active?.ssid !== pending.ssid)
+                return;
+
+            connectionCheckTimer.stop();
+            root.pendingConnection = null;
+            pending.callback?.({
+                success: true,
+                output: "Connected",
+                error: "",
+                exitCode: 0
             });
-        }
+        });
     }
 
     // Reads the IPv4 configuration (method, address, gateway, DNS, autoconnect)
@@ -532,6 +553,28 @@ Singleton {
 
         interval: 1000
         onTriggered: root.connectWireless(connectRetryTimer.ssid, connectRetryTimer.password, connectRetryTimer.callback, connectRetryTimer.retries)
+    }
+
+    Timer {
+        id: strayProfileTimer
+
+        property string ssid: ""
+
+        // Long enough to see whether the connection came up on a second
+        // attempt, short enough that the network doesn't linger under saved
+        // networks while the user is looking at it.
+        interval: 1000
+        onTriggered: {
+            const ssid = strayProfileTimer.ssid;
+            strayProfileTimer.ssid = "";
+
+            // Connected after all, or another attempt is still running: the
+            // profile is in use, leave it alone.
+            if (!ssid || root.active?.ssid === ssid || root.pendingConnection)
+                return;
+
+            Profiles.forget(Profiles.nameFor(ssid), null);
+        }
     }
 
     Timer {
