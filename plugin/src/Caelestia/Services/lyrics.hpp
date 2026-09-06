@@ -32,6 +32,7 @@ class Lyrics : public QObject {
     Q_PROPERTY(caelestia::services::LyricCandidate autoCandidate READ autoCandidate NOTIFY autoCandidateChanged)
     Q_PROPERTY(bool hasCandidateOverride READ hasCandidateOverride NOTIFY hasCandidateOverrideChanged)
     Q_PROPERTY(bool loading READ loading NOTIFY loadingChanged)
+    Q_PROPERTY(bool forceSearching READ forceSearching NOTIFY forceSearchingChanged)
     Q_PROPERTY(bool hasLyrics READ hasLyrics NOTIFY lyricsChanged)
     Q_PROPERTY(qreal offset READ offset WRITE setOffset NOTIFY offsetChanged)
     Q_PROPERTY(QString trackArtist READ trackArtist NOTIFY trackChanged)
@@ -51,6 +52,7 @@ public:
     [[nodiscard]] LyricCandidate autoCandidate() const;
     [[nodiscard]] bool hasCandidateOverride() const;
     [[nodiscard]] bool loading() const;
+    [[nodiscard]] bool forceSearching() const;
     [[nodiscard]] bool hasLyrics() const;
     [[nodiscard]] qreal offset() const;
     void setOffset(qreal value);
@@ -75,6 +77,7 @@ signals:
     void autoCandidateChanged();
     void hasCandidateOverrideChanged();
     void loadingChanged();
+    void forceSearchingChanged();
     void hasLyricsChanged();
     void offsetChanged();
     void trackChanged();
@@ -82,6 +85,7 @@ signals:
 private:
     void setBackend(LyricsBackend value);
     void setLoading(bool value);
+    void setForceSearching(bool value);
     void setLines(QVector<LyricLine> lines, LyricsBackend source);
     void clearLines();
     void appendCandidates(const QList<LyricCandidate>& add);
@@ -164,6 +168,7 @@ private:
     LyricCandidate m_autoCandidate;
     bool m_hasCandidateOverride = false;
     bool m_loading = false;
+    bool m_forceSearching = false;
     bool m_hasLyrics = false;
     qreal m_offset = 0.0;
 

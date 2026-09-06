@@ -64,6 +64,8 @@ Item {
 
     state: {
         flag; // For some reason it doesn't update sometimes, so use this to force an update
+        if (Lyrics.forceSearching)
+            return "loading";
         if (Lyrics.hasLyrics)
             return "hasLyrics";
         if (Lyrics.loading)
@@ -157,6 +159,10 @@ Item {
             root.flag = !root.flag;
         }
 
+        function onForceSearchingChanged() {
+            root.flag = !root.flag;
+        }
+
         target: Lyrics
     }
 
@@ -188,7 +194,7 @@ Item {
             }
 
             StyledText {
-                text: qsTr("Loading lyrics...")
+                text: Lyrics.forceSearching ? qsTr("Loading forced lyrics...") : qsTr("Loading lyrics...")
                 color: Colours.palette.m3onSurfaceVariant
                 font: Tokens.font.title.medium
             }

@@ -19,7 +19,7 @@ Item {
     readonly property real popupWidth: 320
     readonly property real maxPopupHeight: 256
     readonly property real maxListHeight: 104
-    readonly property bool hasDisplayableContent: (Lyrics.hasLyrics || Lyrics.lyricCandidates.length > 0) && !Lyrics.loading
+    readonly property bool hasDisplayableContent: (Lyrics.hasLyrics || Lyrics.lyricCandidates.length > 0) && !Lyrics.loading && !Lyrics.forceSearching
 
     implicitWidth: btn.implicitWidth * 0.9
     implicitHeight: btn.implicitHeight * 0.9
@@ -272,6 +272,7 @@ Item {
                     }
 
                     TextButton {
+                        disabled: Lyrics.loading || Lyrics.forceSearching
                         type: TextButton.Text
                         text: qsTr("Force search")
                         onClicked: Lyrics.forceSearch()
@@ -376,14 +377,14 @@ Item {
                     id: placeholderText
 
                     Layout.alignment: Qt.AlignHCenter
-                    text: Lyrics.loading ? qsTr("Loading...") : qsTr("No lyrics found")
+                    text: Lyrics.forceSearching ? qsTr("Loading forced lyrics...") : (Lyrics.loading ? qsTr("Loading...") : qsTr("No lyrics found"))
                     color: Colours.palette.m3onSurfaceVariant
                     font: Tokens.font.body.medium
                     animate: true
                 }
 
                 TextButton {
-                    visible: !Lyrics.loading && !Lyrics.hasLyrics && Lyrics.lyricCandidates.length === 0
+                    visible: !Lyrics.loading && !Lyrics.forceSearching && !Lyrics.hasLyrics && Lyrics.lyricCandidates.length === 0
                     Layout.alignment: Qt.AlignHCenter
                     type: TextButton.Text
                     text: qsTr("Force search")
