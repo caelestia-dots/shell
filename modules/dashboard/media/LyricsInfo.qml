@@ -440,14 +440,8 @@ Item {
                                 implicitHeight: candRow.implicitHeight + Tokens.padding.extraSmall * 2
                                 radius: Tokens.rounding.small
                                 color: isSelected ? Colours.palette.m3secondaryContainer : Colours.palette.m3surfaceContainer
-                                border.color: isSelected ? Colours.palette.m3primary : "transparent"
-                                border.width: 1
 
                                 Behavior on color {
-                                    CAnim {}
-                                }
-
-                                Behavior on border.color {
                                     CAnim {}
                                 }
 
