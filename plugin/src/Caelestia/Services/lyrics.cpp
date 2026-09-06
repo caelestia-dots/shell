@@ -138,6 +138,74 @@ struct ArtistTitleSplit {
     return status.isValid() && status.toInt() == 404;
 }
 
+[[nodiscard]] QString normalizeForComp(QString s) {
+    s = s.trimmed().toLower();
+    s.replace(u'’', u'\'');
+    s.replace(u'“', u'\"');
+    s.replace(u'”', u'\"');
+    return s;
+}
+
+[[nodiscard]] QString cleanArtist(const QString& artist) {
+    if (artist.isEmpty()) {
+        return {};
+    }
+    QString s = artist.trimmed();
+    static const QRegularExpression k_channelSuffixRegex(
+        u"(?:\\s*[-–—]?\\s*topic|\\s*[-–—]?\\s*vevo|\\s+official(?:\\s*channel)?|\\s*[-–—]\\s*official(?:\\s*channel)?)\\s*$"_s,
+        QRegularExpression::CaseInsensitiveOption);
+    s.remove(k_channelSuffixRegex);
+    s = s.trimmed();
+    static const QRegularExpression k_trailingDashRegex(u"\\s*[-–—]\\s*$"_s);
+    s.remove(k_trailingDashRegex);
+    return s.isEmpty() ? artist.trimmed() : s;
+}
+
+[[nodiscard]] bool matchesArtist(const QString& a, const QString& b) {
+    if (a.isEmpty() || b.isEmpty()) {
+        return false;
+    }
+    const QString na = normalizeForComp(cleanArtist(a));
+    const QString nb = normalizeForComp(cleanArtist(b));
+    if (na == nb) {
+        return true;
+    }
+    const QString pa = normalizeForComp(Lyrics::extractPrimaryArtist(cleanArtist(a)));
+    const QString pb = normalizeForComp(Lyrics::extractPrimaryArtist(cleanArtist(b)));
+    return !pa.isEmpty() && !pb.isEmpty() && pa == pb;
+}
+
+[[nodiscard]] QString sanitizeSuggestedTitle(const QString& rawTitle, QString& sugArtist) {
+    if (rawTitle.isEmpty()) {
+        return {};
+    }
+    const QString cleaned = Lyrics::cleanTrackTitle(rawTitle);
+    QString target = cleaned.isEmpty() ? rawTitle : cleaned;
+    const ArtistTitleSplit split = splitArtistTitle(target);
+    if (split.valid) {
+        if (sugArtist.isEmpty() || matchesArtist(split.artist, sugArtist)) {
+            sugArtist = cleanArtist(split.artist);
+            return split.title;
+        }
+        if (matchesArtist(split.title, sugArtist)) {
+            sugArtist = cleanArtist(split.title);
+            const QString cleanedPrefix = Lyrics::cleanTrackTitle(split.artist);
+            return cleanedPrefix.isEmpty() ? split.artist : cleanedPrefix;
+        }
+    }
+    sugArtist = cleanArtist(sugArtist);
+    return target;
+}
+
+[[nodiscard]] std::pair<QString, QString> findCandidateMetadata(const QList<LyricCandidate>& candidates) {
+    for (const auto& cand : candidates) {
+        if (cand.isValid() && !cand.title().isEmpty() && !cand.artist().isEmpty()) {
+            return { cand.artist(), cand.title() };
+        }
+    }
+    return {};
+}
+
 } // namespace
 
 QString Lyrics::cleanTrackTitle(const QString& title) {
@@ -159,7 +227,12 @@ QString Lyrics::cleanTrackTitle(const QString& title) {
         u"(?:official\\s*(?:music\\s*video|video|audio|lyrics?(?:\\s*video)?|"
         u"visualizer)?|music\\s*video|lyrics?(?:\\s*video)?|visualizer|audio|"
         u"remaster(?:ed)?|4k|hd|hq|pv|mv|full\\s*ver(?:sion)?|live(?:"
-        u"\\s+at\\s+[^\\)\\]\\}]+)?|prod(?:\\.|\\s+by)[^\\)\\]\\}]+)"
+        u"\\s+at\\s+[^\\)\\]\\}]+)?|prod(?:\\.|\\s+by)[^\\)\\]\\}]+|"
+        u"from\\s+(?:the\\s+)?(?:original\\s+)?(?:motion\\s+picture|soundtrack|film|movie|series|anime|game|show)[^\\)"
+        u"\\]\\}]*|"
+        u"spider-man[^\\)\\]\\}]*|(?:original\\s+)?soundtrack|\\bost\\b|theme\\s+song|movie\\s+ver(?:sion)?|film\\s+"
+        u"ver(?:sion)?|anime\\s+ver(?:sion)"
+        u"?)"
         u"[^\\)\\]\\}\\x{FF09}\\x{FF3D}\\x{3011}\\x{300D}\\x{300F}]*?"
         u"[\\)\\]\\}\\x{FF09}\\x{FF3D}\\x{3011}\\x{300D}\\x{300F}]"_s,
         QRegularExpression::CaseInsensitiveOption);
@@ -173,7 +246,7 @@ QString Lyrics::cleanTrackTitle(const QString& title) {
 
     // 4. Strip trailing unbracketed feature tags: "Track Title feat. Artist"
     static const QRegularExpression k_trailingFeatRegex(
-        u"\\s*(?:\\bft\\.?|\\bfeat\\.?|\\bfeaturing|\\bwith)\\s+.*$"_s, QRegularExpression::CaseInsensitiveOption);
+        u"\\s*(?:\\bft\\.?|\\bfeat\\.?|\\bfeaturing)\\s+.*$"_s, QRegularExpression::CaseInsensitiveOption);
     s.remove(k_trailingFeatRegex);
 
     s = s.trimmed();
@@ -685,6 +758,7 @@ void Lyrics::appendCandidates(const QList<LyricCandidate>& add) {
         });
 
         emit lyricCandidatesChanged();
+        updateMetadataSuggestion();
     }
 }
 
@@ -845,6 +919,7 @@ bool Lyrics::tryLoadLocalFile(const QString& path) {
         m_selected = cand;
         emit selectedCandidateChanged();
     }
+    updateMetadataSuggestion();
     setLoading(false);
     return true;
 }
@@ -898,8 +973,8 @@ bool Lyrics::applyLrclibGetObject(const QJsonObject& obj, const QString& logTrac
         setLines(lines, LyricsBackend::LRCLIB);
         m_selected = cand;
         emit selectedCandidateChanged();
-        updateMetadataSuggestion();
     }
+    updateMetadataSuggestion();
     setLoading(false);
     return true;
 }
@@ -1119,8 +1194,8 @@ void Lyrics::applyLrclibCandidateUpgrade(const LyricCandidate& bestCand, const Q
         setLines(lines, LyricsBackend::LRCLIB);
         m_selected = bestCand;
         emit selectedCandidateChanged();
-        updateMetadataSuggestion();
     }
+    updateMetadataSuggestion();
     setLoading(false);
 }
 
@@ -1140,6 +1215,11 @@ void Lyrics::retryLrclibSearchSplit(int reqId, const QString& title, const QStri
         }
         const QJsonDocument retryDoc = QJsonDocument::fromJson(retry->readAll());
         const auto retryResult = parseLrclibSearchResult(retryDoc.array());
+        if (!m_autoCandidate.isValid() && retryResult.bestCandidate.isValid()) {
+            m_autoCandidate = retryResult.bestCandidate;
+            emit autoCandidateChanged();
+            updateMetadataSuggestion();
+        }
         appendCandidates(retryResult.candidates);
         applyLrclibCandidateUpgrade(retryResult.bestCandidate, retryResult.bestSynced);
     });
@@ -1173,6 +1253,11 @@ void Lyrics::searchLrclibCandidates(int reqId) {
                 retryLrclibSearchSplit(reqId, split.title, split.artist);
                 return;
             }
+        }
+        if (!m_autoCandidate.isValid() && result.bestCandidate.isValid()) {
+            m_autoCandidate = result.bestCandidate;
+            emit autoCandidateChanged();
+            updateMetadataSuggestion();
         }
         appendCandidates(result.candidates);
         applyLrclibCandidateUpgrade(result.bestCandidate, result.bestSynced);
@@ -1278,8 +1363,8 @@ void Lyrics::fetchNetEaseLyricsById(const QString& id, int reqId) {
             setLines(lines, LyricsBackend::NetEase);
             m_selected = cand;
             emit selectedCandidateChanged();
-            updateMetadataSuggestion();
         }
+        updateMetadataSuggestion();
         setLoading(false);
     });
 }
@@ -1295,27 +1380,21 @@ void Lyrics::updateMetadataSuggestion() {
         sugArtist = m_autoCandidate.artist();
         sugTitle = m_autoCandidate.title();
     } else {
-        const QString cleaned = cleanTrackTitle(m_title);
-        ArtistTitleSplit split = splitArtistTitle(cleaned);
-        if (!split.valid) {
-            split = splitArtistTitle(m_title);
-        }
-        if (split.valid) {
-            sugArtist = split.artist;
-            sugTitle = split.title;
-        } else if (cleaned != m_title.trimmed()) {
-            sugArtist = m_artist;
-            sugTitle = cleaned;
+        std::tie(sugArtist, sugTitle) = findCandidateMetadata(m_candidates);
+        if (sugArtist.isEmpty() || sugTitle.isEmpty()) {
+            const QString cleaned = cleanTrackTitle(m_title);
+            const ArtistTitleSplit split = splitArtistTitle(cleaned.isEmpty() ? m_title : cleaned);
+            if (split.valid) {
+                sugArtist = split.artist;
+                sugTitle = split.title;
+            } else if (cleaned != m_title.trimmed()) {
+                sugArtist = m_artist;
+                sugTitle = cleaned;
+            }
         }
     }
 
-    auto normalizeForComp = [](QString s) {
-        s = s.trimmed().toLower();
-        s.replace(u'’', u'\'');
-        s.replace(u'“', u'\"');
-        s.replace(u'”', u'\"');
-        return s;
-    };
+    sugTitle = sanitizeSuggestedTitle(sugTitle, sugArtist);
 
     const bool hasSuggestion = !sugArtist.isEmpty() && !sugTitle.isEmpty() &&
                                (!m_title.trimmed().isEmpty() || !m_artist.trimmed().isEmpty()) &&
