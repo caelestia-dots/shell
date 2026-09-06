@@ -600,22 +600,8 @@ void Lyrics::forceSearch() {
     const QUrl lrclibUrl = buildLrclibSearchUrl(rawTitle, rawArtist);
     auto* lrclibReply = getJson(lrclibUrl, lrclibHeaders());
     trackReply(reqId, lrclibReply);
-    QObject::connect(lrclibReply, &QNetworkReply::finished, this, [this, lrclibReply, reqId, checkFinished] {
-        lrclibReply->deleteLater();
-        if (reqId != m_currentRequestId) {
-            return;
-        }
-        if (lrclibReply->error() != QNetworkReply::NoError) {
-            if (!isLrclibNotFound(lrclibReply)) {
-                qCDebug(lcLyrics) << "lrclib force search error:" << lrclibReply->errorString();
-                noteReplyError(lrclibReply);
-            }
-            checkFinished();
-            return;
-        }
-        const QJsonDocument doc = QJsonDocument::fromJson(lrclibReply->readAll());
-        appendCandidates(parseLrclibSearchResult(doc.array()).candidates);
-        checkFinished();
+    connect(lrclibReply, &QNetworkReply::finished, this, [this, lrclibReply, reqId, checkFinished] {
+        handleLrclibForceSearchReply(lrclibReply, reqId, checkFinished);
     });
 
     if (m_cookieJar) {
@@ -629,21 +615,44 @@ void Lyrics::forceSearch() {
     netEaseUrl.setQuery(netEaseQuery);
     auto* netEaseReply = getJson(netEaseUrl, netEaseHeaders());
     trackReply(reqId, netEaseReply);
-    QObject::connect(netEaseReply, &QNetworkReply::finished, this, [this, netEaseReply, reqId, checkFinished] {
-        netEaseReply->deleteLater();
-        if (reqId != m_currentRequestId) {
-            return;
-        }
-        if (netEaseReply->error() != QNetworkReply::NoError) {
-            qCDebug(lcLyrics) << "netease force search error:" << netEaseReply->errorString();
-            noteReplyError(netEaseReply);
-            checkFinished();
-            return;
-        }
-        const QJsonDocument doc = QJsonDocument::fromJson(netEaseReply->readAll());
-        appendCandidates(parseNetEaseSearchResult(doc));
-        checkFinished();
+    connect(netEaseReply, &QNetworkReply::finished, this, [this, netEaseReply, reqId, checkFinished] {
+        handleNetEaseForceSearchReply(netEaseReply, reqId, checkFinished);
     });
+}
+
+void Lyrics::handleLrclibForceSearchReply(QNetworkReply* reply, int reqId, const std::function<void()>& checkFinished) {
+    reply->deleteLater();
+    if (reqId != m_currentRequestId) {
+        return;
+    }
+    if (reply->error() != QNetworkReply::NoError) {
+        if (!isLrclibNotFound(reply)) {
+            qCDebug(lcLyrics) << "lrclib force search error:" << reply->errorString();
+            noteGuardedReplyError(reply);
+        }
+        checkFinished();
+        return;
+    }
+    const QJsonDocument doc = QJsonDocument::fromJson(reply->readAll());
+    appendCandidates(parseLrclibSearchResult(doc.array()).candidates);
+    checkFinished();
+}
+
+void Lyrics::handleNetEaseForceSearchReply(
+    QNetworkReply* reply, int reqId, const std::function<void()>& checkFinished) {
+    reply->deleteLater();
+    if (reqId != m_currentRequestId) {
+        return;
+    }
+    if (reply->error() != QNetworkReply::NoError) {
+        qCDebug(lcLyrics) << "netease force search error:" << reply->errorString();
+        noteGuardedReplyError(reply);
+        checkFinished();
+        return;
+    }
+    const QJsonDocument doc = QJsonDocument::fromJson(reply->readAll());
+    appendCandidates(parseNetEaseSearchResult(doc));
+    checkFinished();
 }
 
 bool Lyrics::loading() const {
@@ -885,8 +894,10 @@ void Lyrics::setLines(QVector<LyricLine> lines, LyricsBackend source) {
         emit hasLyricsChanged();
     }
 
-    setError(QString());
-    setOffline(false);
+    if (!m_lines.isEmpty()) {
+        setError(QString());
+        setOffline(false);
+    }
 }
 
 void Lyrics::clearLines() {
@@ -1521,41 +1532,111 @@ void Lyrics::searchNetEaseCandidates(int reqId) {
     });
 }
 
+void Lyrics::noteGuardedReplyError(QNetworkReply* reply) {
+    if (!m_hasLyrics) {
+        noteReplyError(reply);
+    }
+}
+
+void Lyrics::setGuardedError(const QString& error) {
+    if (!m_hasLyrics) {
+        setError(error);
+        setOffline(false);
+    }
+}
+
 void Lyrics::fetchLrclibById(const QString& id, int reqId) {
     const QUrl url(u"https://lrclib.net/api/get/"_s + id);
     auto* reply = getJson(url, lrclibHeaders());
     trackReply(reqId, reply);
 
-    QObject::connect(reply, &QNetworkReply::finished, this, [this, reply, reqId, id] {
+    connect(reply, &QNetworkReply::finished, this, [this, reply, reqId, id] {
         reply->deleteLater();
         if (reqId != m_currentRequestId) {
             return;
         }
         if (reply->error() != QNetworkReply::NoError) {
             qCWarning(lcLyrics) << "lrclib /get/{id} error:" << reply->errorString();
-            noteReplyError(reply);
+            noteGuardedReplyError(reply);
             setLoading(false);
             return;
         }
         const QJsonDocument doc = QJsonDocument::fromJson(reply->readAll());
         if (doc.isNull() || !doc.isObject()) {
-            setError(QStringLiteral("malformed JSON from LRCLIB"));
-            setOffline(false);
+            setGuardedError(QStringLiteral("malformed JSON from LRCLIB"));
             setLoading(false);
             return;
         }
         const QString synced = doc.object().value(u"syncedLyrics"_s).toString();
         if (synced.isEmpty()) {
             qCDebug(lcLyrics) << "lrclib /get/{id}: no syncedLyrics";
-            setError(QStringLiteral("no synced lyrics for id %1").arg(id));
-            setOffline(false);
+            setGuardedError(QStringLiteral("no synced lyrics for id %1").arg(id));
+            setLoading(false);
+            return;
+        }
+        const auto lines = parseLrc(synced);
+        if (lines.isEmpty()) {
+            qCDebug(lcLyrics) << "lrclib /get/{id}: unparseable or untimed lyrics";
+            setGuardedError(QStringLiteral("unparseable or untimed lyrics from LRCLIB (id %1)").arg(id));
             setLoading(false);
             return;
         }
         writeCachedLrc(LyricsBackend::LRCLIB, id, synced);
-        setLines(parseLrc(synced), LyricsBackend::LRCLIB);
+        setLines(lines, LyricsBackend::LRCLIB);
         setLoading(false);
     });
+}
+
+void Lyrics::handleNetEaseLyricsReply(QNetworkReply* reply, const QString& id, int reqId) {
+    reply->deleteLater();
+    if (reqId != m_currentRequestId) {
+        return;
+    }
+    if (reply->error() != QNetworkReply::NoError) {
+        qCWarning(lcLyrics) << "netease /lyric error:" << reply->errorString();
+        noteGuardedReplyError(reply);
+        setLoading(false);
+        return;
+    }
+    const QJsonDocument doc = QJsonDocument::fromJson(reply->readAll());
+    if (doc.isNull() || !doc.isObject()) {
+        setGuardedError(QStringLiteral("malformed JSON from NetEase"));
+        setLoading(false);
+        return;
+    }
+    if (doc.object().value(u"code"_s).toInt(200) == 404) {
+        setGuardedError(QStringLiteral("NetEase: lyric not found (404) for id %1").arg(id));
+        setLoading(false);
+        return;
+    }
+    const QString lrc = doc.object().value(u"lrc"_s).toObject().value(u"lyric"_s).toString();
+    if (lrc.isEmpty()) {
+        qCDebug(lcLyrics) << "netease /lyric: empty for id" << id;
+        setGuardedError(QStringLiteral("empty lyric for id %1").arg(id));
+        setLoading(false);
+        return;
+    }
+    const auto lines = parseLrc(lrc);
+    if (lines.isEmpty()) {
+        qCDebug(lcLyrics) << "netease /lyric: unparseable or untimed lyrics for id" << id;
+        setGuardedError(QStringLiteral("unparseable or untimed lyrics from NetEase (id %1)").arg(id));
+        setLoading(false);
+        return;
+    }
+    writeCachedLrc(LyricsBackend::NetEase, id, lrc);
+    const LyricCandidate cand(LyricsBackend::NetEase, id, m_title, m_artist, m_album, m_duration);
+    if (!m_autoCandidate.isValid()) {
+        m_autoCandidate = cand;
+        emit autoCandidateChanged();
+    }
+    appendCandidates({ cand });
+    if (!m_hasCandidateOverride) {
+        setLines(lines, LyricsBackend::NetEase);
+        m_selected = cand;
+        emit selectedCandidateChanged();
+    }
+    updateMetadataSuggestion();
+    setLoading(false);
 }
 
 void Lyrics::fetchNetEaseLyricsById(const QString& id, int reqId) {
@@ -1569,54 +1650,8 @@ void Lyrics::fetchNetEaseLyricsById(const QString& id, int reqId) {
 
     auto* reply = getJson(url, netEaseHeaders());
     trackReply(reqId, reply);
-
-    QObject::connect(reply, &QNetworkReply::finished, this, [this, reply, reqId, id] {
-        reply->deleteLater();
-        if (reqId != m_currentRequestId) {
-            return;
-        }
-        if (reply->error() != QNetworkReply::NoError) {
-            qCWarning(lcLyrics) << "netease /lyric error:" << reply->errorString();
-            noteReplyError(reply);
-            setLoading(false);
-            return;
-        }
-        const QJsonDocument doc = QJsonDocument::fromJson(reply->readAll());
-        if (doc.isNull() || !doc.isObject()) {
-            setError(QStringLiteral("malformed JSON from NetEase"));
-            setOffline(false);
-            setLoading(false);
-            return;
-        }
-        if (doc.object().value(u"code"_s).toInt(200) == 404) {
-            setError(QStringLiteral("NetEase: lyric not found (404) for id %1").arg(id));
-            setOffline(false);
-            setLoading(false);
-            return;
-        }
-        const QString lrc = doc.object().value(u"lrc"_s).toObject().value(u"lyric"_s).toString();
-        if (lrc.isEmpty()) {
-            qCDebug(lcLyrics) << "netease /lyric: empty for id" << id;
-            setError(QStringLiteral("empty lyric for id %1").arg(id));
-            setOffline(false);
-            setLoading(false);
-            return;
-        }
-        writeCachedLrc(LyricsBackend::NetEase, id, lrc);
-        const auto lines = parseLrc(lrc);
-        const LyricCandidate cand(LyricsBackend::NetEase, id, m_title, m_artist, m_album, m_duration);
-        if (!m_autoCandidate.isValid()) {
-            m_autoCandidate = cand;
-            emit autoCandidateChanged();
-        }
-        appendCandidates({ cand });
-        if (!m_hasCandidateOverride) {
-            setLines(lines, LyricsBackend::NetEase);
-            m_selected = cand;
-            emit selectedCandidateChanged();
-        }
-        updateMetadataSuggestion();
-        setLoading(false);
+    connect(reply, &QNetworkReply::finished, this, [this, reply, reqId, id] {
+        handleNetEaseLyricsReply(reply, id, reqId);
     });
 }
 
