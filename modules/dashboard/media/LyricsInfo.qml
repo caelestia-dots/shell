@@ -430,17 +430,24 @@ Item {
                             delegate: Rectangle {
                                 id: candItem
 
+                                required property int index
                                 required property var modelData
 
-                                readonly property bool isSelected: Lyrics.selectedCandidate.id === modelData.id && Lyrics.selectedCandidate.backend === modelData.backend
-                                readonly property bool isAuto: Lyrics.autoCandidate.id === modelData.id && Lyrics.autoCandidate.backend === modelData.backend
+                                readonly property bool isAuto: (Lyrics.autoCandidate.valid && Lyrics.autoCandidate.id === modelData.id && Lyrics.autoCandidate.backend === modelData.backend) || (!Lyrics.hasCandidateOverride && index === 0)
+                                readonly property bool isSelected: Lyrics.hasCandidateOverride ? (Lyrics.selectedCandidate.valid && Lyrics.selectedCandidate.id === modelData.id && Lyrics.selectedCandidate.backend === modelData.backend) : (candItem.isAuto || (Lyrics.selectedCandidate.valid && Lyrics.selectedCandidate.id === modelData.id && Lyrics.selectedCandidate.backend === modelData.backend) || index === 0)
 
                                 Layout.fillWidth: true
                                 implicitHeight: candRow.implicitHeight + Tokens.padding.extraSmall * 2
                                 radius: Tokens.rounding.small
                                 color: isSelected ? Colours.palette.m3secondaryContainer : Colours.palette.m3surfaceContainer
+                                border.color: isSelected ? Colours.palette.m3primary : "transparent"
+                                border.width: 1
 
                                 Behavior on color {
+                                    CAnim {}
+                                }
+
+                                Behavior on border.color {
                                     CAnim {}
                                 }
 
@@ -460,10 +467,17 @@ Item {
 
                                     StyledText {
                                         Layout.fillWidth: true
-                                        text: candItem.isAuto ? `${candItem.modelData.title} • ${candItem.modelData.artist} (${qsTr("Auto")})` : `${candItem.modelData.title} • ${candItem.modelData.artist}`
+                                        text: `${candItem.modelData.title} • ${candItem.modelData.artist}`
                                         color: candItem.isSelected ? Colours.palette.m3onSecondaryContainer : Colours.palette.m3onSurface
                                         font: Tokens.font.body.small
                                         elide: Text.ElideRight
+                                    }
+
+                                    StyledText {
+                                        visible: candItem.isAuto
+                                        text: qsTr("(Default)")
+                                        color: candItem.isSelected ? Colours.palette.m3primary : Colours.palette.m3onSurfaceVariant
+                                        font: Tokens.font.label.small
                                     }
 
                                     StyledText {
