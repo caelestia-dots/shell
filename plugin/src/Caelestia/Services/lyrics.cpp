@@ -598,8 +598,10 @@ void Lyrics::forceSearch() {
             return;
         }
         if (lrclibReply->error() != QNetworkReply::NoError) {
-            qCDebug(lcLyrics) << "lrclib force search error:" << lrclibReply->errorString();
-            noteReplyError(lrclibReply);
+            if (!isLrclibNotFound(lrclibReply)) {
+                qCDebug(lcLyrics) << "lrclib force search error:" << lrclibReply->errorString();
+                noteReplyError(lrclibReply);
+            }
             checkFinished();
             return;
         }
@@ -793,6 +795,8 @@ void Lyrics::clearTrack() {
 
     clearCandidates();
     clearLines();
+    setError(QString());
+    setOffline(false);
     setLoading(false);
 }
 
@@ -842,9 +846,12 @@ void Lyrics::noteReplyError(QNetworkReply* reply) {
     if (reply == nullptr) {
         return;
     }
-    setError(reply->errorString());
     if (isOfflineNetworkError(reply->error())) {
         setOffline(true);
+        setError(QString());
+    } else {
+        setError(reply->errorString());
+        setOffline(false);
     }
 }
 
@@ -988,6 +995,8 @@ void Lyrics::doLoad() {
     setLoading(true);
     clearLines();
     clearCandidates();
+    setError(QString());
+    setOffline(false);
 
     m_autoCandidate = LyricCandidate();
     emit autoCandidateChanged();
@@ -1141,7 +1150,6 @@ void Lyrics::tryLocal(int reqId) {
     }
 
     qCDebug(lcLyrics) << "no local lrc for" << m_artist << "-" << m_title;
-    setError(QStringLiteral("no local lyrics for %1 - %2").arg(m_artist, m_title));
     chainNext(LyricsBackend::Local, reqId);
 }
 
@@ -1149,7 +1157,6 @@ bool Lyrics::applyLrclibGetObject(const QJsonObject& obj, const QString& logTrac
     const QString synced = obj.value(u"syncedLyrics"_s).toString();
     if (synced.isEmpty()) {
         qCDebug(lcLyrics) << "lrclib: no syncedLyrics for" << logArtist << "-" << logTrack;
-        setError(QStringLiteral("no synced lyrics for %1 - %2").arg(logArtist, logTrack));
         return false;
     }
     const auto lines = parseLrc(synced);
@@ -1190,6 +1197,10 @@ void Lyrics::retryLrclibGetSplit(
         if (retry->error() != QNetworkReply::NoError) {
             if (duration > 0.0 && isLrclibNotFound(retry)) {
                 retryLrclibGetSplit(reqId, title, artist, album, 0.0);
+                return;
+            }
+            if (isLrclibNotFound(retry)) {
+                chainNext(LyricsBackend::LRCLIB, reqId);
                 return;
             }
             qCDebug(lcLyrics) << "lrclib /get retry error:" << retry->errorString();
@@ -1236,6 +1247,8 @@ void Lyrics::tryLrclib(int reqId) {
                         retryLrclibGetSplit(reqId, split.title, split.artist, QString(), duration);
                         return;
                     }
+                    chainNext(LyricsBackend::LRCLIB, reqId);
+                    return;
                 }
                 qCDebug(lcLyrics) << "lrclib /get error:" << reply->errorString();
                 noteReplyError(reply);
@@ -1291,7 +1304,6 @@ void Lyrics::tryNetEase(int reqId) {
 
         if (bestId < 0) {
             qCDebug(lcLyrics) << "netease: no artist match for" << m_artist << "-" << cleanTitle;
-            setError(QStringLiteral("no match for %1 - %2").arg(m_artist, cleanTitle));
             chainNext(LyricsBackend::NetEase, reqId);
             return;
         }
@@ -1397,8 +1409,12 @@ void Lyrics::retryLrclibSearchSplit(int reqId, const QString& title, const QStri
             return;
         }
         if (retry->error() != QNetworkReply::NoError) {
-            qCDebug(lcLyrics) << "lrclib /search retry error:" << retry->errorString();
-            noteReplyError(retry);
+            if (!isLrclibNotFound(retry)) {
+                qCDebug(lcLyrics) << "lrclib /search retry error:" << retry->errorString();
+                if (!m_hasLyrics) {
+                    noteReplyError(retry);
+                }
+            }
             return;
         }
         const QJsonDocument retryDoc = QJsonDocument::fromJson(retry->readAll());
@@ -1427,8 +1443,12 @@ void Lyrics::searchLrclibCandidates(int reqId) {
             return;
         }
         if (reply->error() != QNetworkReply::NoError) {
-            qCDebug(lcLyrics) << "lrclib /search error:" << reply->errorString();
-            noteReplyError(reply);
+            if (!isLrclibNotFound(reply)) {
+                qCDebug(lcLyrics) << "lrclib /search error:" << reply->errorString();
+                if (!m_hasLyrics) {
+                    noteReplyError(reply);
+                }
+            }
             return;
         }
         const QJsonDocument doc = QJsonDocument::fromJson(reply->readAll());
@@ -1473,7 +1493,9 @@ void Lyrics::searchNetEaseCandidates(int reqId) {
         }
         if (reply->error() != QNetworkReply::NoError) {
             qCDebug(lcLyrics) << "netease candidates error:" << reply->errorString();
-            noteReplyError(reply);
+            if (!m_hasLyrics) {
+                noteReplyError(reply);
+            }
             return;
         }
         const QJsonDocument doc = QJsonDocument::fromJson(reply->readAll());

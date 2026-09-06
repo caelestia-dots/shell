@@ -18,10 +18,9 @@ Item {
     property bool open
     // qmllint disable missing-property
     readonly property string lyricsError: String(Lyrics?.error ?? "")
-    readonly property string lyricsOffline: String(Lyrics?.offline ?? "")
+    readonly property bool isLyricsOffline: Boolean(Lyrics?.offline ?? false)
     // qmllint enable missing-property
-    readonly property bool hasLyricsError: lyricsError.length > 0
-    readonly property bool isLyricsOffline: !hasLyricsError && lyricsOffline.length > 0
+    readonly property bool hasLyricsError: !isLyricsOffline && lyricsError.length > 0
     readonly property real padding: Tokens.padding.medium
     readonly property real popupWidth: 320
     readonly property real maxPopupHeight: 320
@@ -539,7 +538,7 @@ Item {
                     Layout.alignment: Qt.AlignHCenter
                     Layout.fillWidth: true
                     horizontalAlignment: Text.AlignHCenter
-                    text: root.hasLyricsError ? root.lyricsError : root.lyricsOffline
+                    text: root.hasLyricsError ? root.lyricsError : qsTr("Check your network connection")
                     color: Colours.palette.m3onSurfaceVariant
                     font: Tokens.font.body.small
                     wrapMode: Text.WrapAtWordBoundaryOrAnywhere
@@ -555,7 +554,7 @@ Item {
                 }
 
                 TextButton {
-                    visible: !Lyrics.loading && !Lyrics.forceSearching && !Lyrics.hasLyrics && Lyrics.lyricCandidates.length === 0
+                    visible: !Lyrics.loading && !Lyrics.forceSearching && !root.hasLyricsError && !root.isLyricsOffline && !Lyrics.hasLyrics && Lyrics.lyricCandidates.length === 0
                     Layout.alignment: Qt.AlignHCenter
                     type: TextButton.Text
                     text: qsTr("Force search")

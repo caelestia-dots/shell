@@ -20,10 +20,9 @@ Item {
 
     // qmllint disable missing-property
     readonly property string lyricsError: String(Lyrics?.error ?? "")
-    readonly property string lyricsOffline: String(Lyrics?.offline ?? "")
+    readonly property bool isLyricsOffline: Boolean(Lyrics?.offline ?? false)
     // qmllint enable missing-property
-    readonly property bool hasLyricsError: lyricsError.length > 0
-    readonly property bool isLyricsOffline: !hasLyricsError && lyricsOffline.length > 0
+    readonly property bool hasLyricsError: !isLyricsOffline && lyricsError.length > 0
 
     function syncTrack(): void {
         const p = Players.active;
@@ -211,7 +210,7 @@ Item {
 
         anchors.centerIn: parent
         asynchronous: true
-        active: root.state === "loading"
+        active: opacity > 0 || root.state === "loading"
         opacity: 0
 
         sourceComponent: ColumnLayout {
@@ -246,7 +245,7 @@ Item {
 
         anchors.centerIn: parent
         asynchronous: true
-        active: root.state === "noLyrics"
+        active: opacity > 0 || root.state === "noLyrics"
         opacity: 0
 
         sourceComponent: ColumnLayout {
@@ -272,7 +271,7 @@ Item {
                 Layout.alignment: Qt.AlignHCenter
                 Layout.fillWidth: true
                 horizontalAlignment: Text.AlignHCenter
-                text: root.hasLyricsError ? root.lyricsError : root.lyricsOffline
+                text: root.hasLyricsError ? root.lyricsError : qsTr("Check your network connection")
                 color: Colours.palette.m3onSurfaceVariant
                 font: Tokens.font.body.small
                 wrapMode: Text.WrapAtWordBoundaryOrAnywhere
