@@ -436,8 +436,8 @@ Item {
                                 required property int index
                                 required property var modelData
 
-                                readonly property bool isAuto: (Lyrics.autoCandidate.valid && Lyrics.autoCandidate.id === modelData.id && Lyrics.autoCandidate.backend === modelData.backend) || (!Lyrics.hasCandidateOverride && index === 0)
-                                readonly property bool isSelected: Lyrics.hasCandidateOverride ? (Lyrics.selectedCandidate.valid && Lyrics.selectedCandidate.id === modelData.id && Lyrics.selectedCandidate.backend === modelData.backend) : (candItem.isAuto || (Lyrics.selectedCandidate.valid && Lyrics.selectedCandidate.id === modelData.id && Lyrics.selectedCandidate.backend === modelData.backend) || index === 0)
+                                readonly property bool isAuto: (Lyrics.autoCandidate.valid && Lyrics.autoCandidate.id === modelData.id && Lyrics.autoCandidate.backend === modelData.backend) || (!Lyrics.hasCandidateOverride && index === 0 && (Lyrics.autoCandidate.valid || Lyrics.selectedCandidate.valid))
+                                readonly property bool isSelected: Lyrics.hasCandidateOverride ? (Lyrics.selectedCandidate.valid && Lyrics.selectedCandidate.id === modelData.id && Lyrics.selectedCandidate.backend === modelData.backend) : (candItem.isAuto || (Lyrics.selectedCandidate.valid && Lyrics.selectedCandidate.id === modelData.id && Lyrics.selectedCandidate.backend === modelData.backend) || (index === 0 && (Lyrics.autoCandidate.valid || Lyrics.selectedCandidate.valid)))
 
                                 Layout.fillWidth: true
                                 implicitHeight: candRow.implicitHeight + Tokens.padding.extraSmall * 2
@@ -546,7 +546,7 @@ Item {
             width: 8
             height: 8
             radius: width / 2
-            color: "white"
+            color: Colours.palette.m3primary
         }
     }
 }
