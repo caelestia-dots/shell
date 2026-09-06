@@ -15,6 +15,10 @@ ColumnLayout {
     required property PopoutState popouts
     property var network: null
     property bool isClosing: false
+    // Whether a profile for this network existed before the dialog opened.
+    // Only one this dialog created may be cleaned up after a failure; an
+    // existing profile is the user's, with whatever they set on it.
+    property bool wasSaved: false
 
     readonly property bool shouldBeVisible: root.popouts.currentName === "wirelesspassword"
 
@@ -43,8 +47,9 @@ ColumnLayout {
                 connectButton.enabled = true;
                 connectButton.text = qsTr("Connect");
                 passwordContainer.passwordBuffer = "";
-                // Delete the failed connection
-                if (root.network && root.network.ssid) {
+                // Remove the half-created profile, but only if this dialog
+                // is what created it.
+                if (!root.wasSaved && root.network && root.network.ssid) {
                     Nmcli.forgetNetwork(root.network.ssid);
                 }
             }
@@ -89,6 +94,9 @@ ColumnLayout {
             focusTimer.start();
         }
     }
+
+    // Captured as the dialog opens, before any attempt can create a profile.
+    onNetworkChanged: root.wasSaved = !!root.network && Nmcli.hasSavedProfile(root.network.ssid)
 
     Keys.onEscapePressed: closeDialog()
 
@@ -527,8 +535,9 @@ ColumnLayout {
                                 enabled = true;
                                 text = qsTr("Connect");
                                 passwordContainer.passwordBuffer = "";
-                                // Delete the failed connection
-                                if (root.network && root.network.ssid) {
+                                // Remove the half-created profile, but only if
+                                // this dialog is what created it.
+                                if (!root.wasSaved && root.network && root.network.ssid) {
                                     Nmcli.forgetNetwork(root.network.ssid);
                                 }
                             } else {
@@ -539,8 +548,9 @@ ColumnLayout {
                                 enabled = true;
                                 text = qsTr("Connect");
                                 passwordContainer.passwordBuffer = "";
-                                // Delete the failed connection
-                                if (root.network && root.network.ssid) {
+                                // Remove the half-created profile, but only if
+                                // this dialog is what created it.
+                                if (!root.wasSaved && root.network && root.network.ssid) {
                                     Nmcli.forgetNetwork(root.network.ssid);
                                 }
                             }
@@ -612,8 +622,10 @@ ColumnLayout {
                 connectButton.enabled = true;
                 connectButton.text = qsTr("Connect");
                 passwordContainer.passwordBuffer = "";
-                // Delete the failed connection
-                Nmcli.forgetNetwork(ssid);
+                // Remove the half-created profile, but only if this dialog is
+                // what created it.
+                if (!root.wasSaved)
+                    Nmcli.forgetNetwork(ssid);
             }
         }
 
