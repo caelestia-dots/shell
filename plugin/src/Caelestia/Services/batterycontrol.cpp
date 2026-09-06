@@ -289,7 +289,6 @@ bool BatteryControl::writeValue(const QString& val) {
     proc->setProcessEnvironment(QProcessEnvironment::systemEnvironment());
 
     connect(proc, QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished), this,
-    connect(proc, QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished), this,
         [this, proc](int exitCode, QProcess::ExitStatus exitStatus) {
             const QString err = QString::fromUtf8(proc->readAllStandardError()).trimmed();
             if (exitStatus != QProcess::NormalExit || exitCode != 0) {

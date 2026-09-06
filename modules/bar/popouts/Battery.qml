@@ -1,6 +1,7 @@
 pragma ComponentBehavior: Bound
 
 import QtQuick
+import QtQuick.Controls
 import QtQuick.Layouts
 import Quickshell.Services.UPower
 import Caelestia.Config
@@ -11,6 +12,13 @@ import qs.services
 
 Column {
     id: root
+
+    // qmllint disable missing-property
+    readonly property string batteryError: String(BatteryControl?.error ?? "")
+    readonly property string batteryOffline: String(BatteryControl?.offline ?? "")
+    // qmllint enable missing-property
+    readonly property bool hasBatteryError: batteryError.length > 0
+    readonly property bool isBatteryOffline: !hasBatteryError && batteryOffline.length > 0
 
     spacing: Tokens.spacing.medium
     width: Tokens.sizes.bar.batteryWidth
@@ -193,10 +201,13 @@ Column {
         implicitHeight: cardLayout.implicitHeight + Tokens.padding.medium * 2
         color: Colours.tPalette.m3surfaceContainer
         radius: Tokens.rounding.large
+        ToolTip.visible: batteryHover.hovered && !cardLayout.enabled
+        ToolTip.text: root.hasBatteryError ? qsTr("Unavailable: battery reported an error") : qsTr("Unavailable while offline")
 
         ColumnLayout {
             id: cardLayout
 
+            enabled: !root.hasBatteryError && !root.isBatteryOffline
             anchors.left: parent.left
             anchors.right: parent.right
             anchors.top: parent.top
@@ -277,6 +288,172 @@ Column {
                     BatteryControl.setThreshold(Math.max(from, Math.min(to, snapped)));
                 }
             }
+        }
+
+        HoverHandler {
+            id: batteryHover
+        }
+    }
+
+    StyledRect {
+        id: batteryErrorCard
+
+        visible: root.hasBatteryError
+        anchors.horizontalCenter: parent.horizontalCenter
+        implicitWidth: parent.width
+        implicitHeight: errorLayout.implicitHeight + Tokens.padding.medium * 2
+        color: Colours.palette.m3errorContainer
+        radius: Tokens.rounding.large
+
+        ColumnLayout {
+            id: errorLayout
+
+            anchors.left: parent.left
+            anchors.right: parent.right
+            anchors.top: parent.top
+            anchors.margins: Tokens.padding.medium
+            spacing: Tokens.spacing.small
+
+            RowLayout {
+                Layout.fillWidth: true
+                spacing: Tokens.spacing.small
+
+                MaterialIcon {
+                    text: "error"
+                    fontStyle: Tokens.font.icon.medium
+                    color: Colours.palette.m3onErrorContainer
+                }
+
+                StyledText {
+                    Layout.fillWidth: true
+                    elide: Text.ElideRight
+                    text: qsTr("Battery error")
+                    font: Tokens.font.body.builders.medium.weight(Font.Medium).build()
+                    color: Colours.palette.m3onErrorContainer
+                }
+            }
+
+            StyledText {
+                Layout.fillWidth: true
+                text: root.batteryError
+                color: Colours.palette.m3onErrorContainer
+                font: Tokens.font.body.builders.small.build()
+                wrapMode: Text.WrapAtWordBoundaryOrAnywhere
+            }
+
+            TextButton {
+                Layout.alignment: Qt.AlignHCenter
+                type: TextButton.Text
+                text: qsTr("Retry")
+                onClicked: BatteryControl.refresh()
+            }
+        }
+    }
+
+    StyledRect {
+        id: batteryOfflineCard
+
+        visible: root.isBatteryOffline
+        anchors.horizontalCenter: parent.horizontalCenter
+        implicitWidth: parent.width
+        implicitHeight: offlineLayout.implicitHeight + Tokens.padding.medium * 2
+        color: Colours.tPalette.m3surfaceContainer
+        radius: Tokens.rounding.large
+
+        ColumnLayout {
+            id: offlineLayout
+
+            anchors.left: parent.left
+            anchors.right: parent.right
+            anchors.top: parent.top
+            anchors.margins: Tokens.padding.medium
+            spacing: Tokens.spacing.small
+
+            RowLayout {
+                Layout.fillWidth: true
+                spacing: Tokens.spacing.small
+
+                MaterialIcon {
+                    text: "cloud_off"
+                    fontStyle: Tokens.font.icon.medium
+                    color: Colours.palette.m3onSurfaceVariant
+                }
+
+                StyledText {
+                    Layout.fillWidth: true
+                    elide: Text.ElideRight
+                    text: qsTr("Battery offline")
+                    font: Tokens.font.body.builders.medium.weight(Font.Medium).build()
+                }
+            }
+
+            StyledText {
+                Layout.fillWidth: true
+                text: root.batteryOffline
+                color: Colours.palette.m3onSurfaceVariant
+                font: Tokens.font.body.builders.small.build()
+                wrapMode: Text.WrapAtWordBoundaryOrAnywhere
+            }
+
+            TextButton {
+                Layout.alignment: Qt.AlignHCenter
+                type: TextButton.Text
+                text: qsTr("Retry")
+                onClicked: BatteryControl.refresh()
+            }
+        }
+    }
+
+    StyledRect {
+        id: unsupportedCard
+
+        visible: !BatteryControl.isSupported && !root.hasBatteryError && !root.isBatteryOffline
+        anchors.horizontalCenter: parent.horizontalCenter
+        implicitWidth: parent.width
+        implicitHeight: unsupportedLayout.implicitHeight + Tokens.padding.medium * 2
+        color: Colours.tPalette.m3surfaceContainer
+        radius: Tokens.rounding.large
+        ToolTip.visible: unsupportedHover.hovered
+        ToolTip.text: qsTr("Charge control needs a supported battery driver")
+
+        ColumnLayout {
+            id: unsupportedLayout
+
+            anchors.left: parent.left
+            anchors.right: parent.right
+            anchors.top: parent.top
+            anchors.margins: Tokens.padding.medium
+            spacing: Tokens.spacing.small
+
+            RowLayout {
+                Layout.fillWidth: true
+                spacing: Tokens.spacing.small
+
+                MaterialIcon {
+                    text: "battery_unknown"
+                    fontStyle: Tokens.font.icon.medium
+                    color: Colours.palette.m3onSurfaceVariant
+                }
+
+                StyledText {
+                    Layout.fillWidth: true
+                    elide: Text.ElideRight
+                    text: qsTr("Battery control unsupported")
+                    font: Tokens.font.body.builders.medium.weight(Font.Medium).build()
+                }
+            }
+
+            StyledText {
+                Layout.fillWidth: true
+                text: qsTr("Charge limits are not available on this device.")
+                color: Colours.palette.m3onSurfaceVariant
+                font: Tokens.font.body.builders.small.build()
+                wrapMode: Text.WrapAtWordBoundaryOrAnywhere
+            }
+        }
+
+        HoverHandler {
+            id: unsupportedHover
         }
     }
 
