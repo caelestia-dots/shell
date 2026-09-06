@@ -135,10 +135,10 @@ Singleton {
         NmAction.run(["connection", "delete", name], callback);
     }
 
-    // Turning autoconnect off also makes NetworkManager ask for the password on
-    // the next manual connect rather than silently reusing the stored one
-    // (psk-flags 2 = "not saved, always ask"); turning it back on restores
-    // psk-flags 0 so the next password is saved.
+    // Only touches autoconnect. It used to clear the stored password as well,
+    // by way of psk-flags 2, so turning off "connect automatically" silently
+    // lost the key and the next connect had to ask for it again - which is not
+    // what the setting says it does, and isn't undone by turning it back on.
     function setAutoconnect(name: string, autoconnect: bool, callback: var): void {
         if (!name) {
             if (callback)
@@ -146,20 +146,7 @@ Singleton {
             return;
         }
 
-        const base = ["connection", "modify", name, "connection.autoconnect", autoconnect ? "yes" : "no"];
-        const cmd = autoconnect ? [...base, "802-11-wireless-security.psk-flags", "0"] : [...base, "802-11-wireless-security.psk-flags", "2", "802-11-wireless-security.psk", ""];
-
         // No refetch afterwards: the profile reports its own edits over dbus.
-        NmAction.run(cmd, (success, error) => {
-            // Open networks have no security settings, so nmcli rejects those
-            // fields. Retry with just the autoconnect change.
-            if (!success && (error.includes("802-11-wireless-security") || error.includes("is not a valid property") || error.includes("Error: invalid"))) {
-                NmAction.run(base, callback);
-                return;
-            }
-
-            if (callback)
-                callback(success);
-        });
+        NmAction.run(["connection", "modify", name, "connection.autoconnect", autoconnect ? "yes" : "no"], callback);
     }
 }

@@ -6,13 +6,12 @@ import Quickshell.Io
 
 // One-shot nmcli calls for the network services.
 //
-// Only the exit code and, for the handful of callers that have to tell one
-// failure from another, stderr matter: there's no output to parse and no shared
-// state to race, since state comes from NetworkManager over dbus.
+// Only the exit code matters: there's no output to parse and no shared state to
+// race, since state comes from NetworkManager over dbus.
 Singleton {
     id: root
 
-    // Runs nmcli with `args`. The callback takes (success, error).
+    // Runs nmcli with `args`. The callback takes (success).
     function run(args: list<string>, callback: var): void {
         const proc = actionProc.createObject(root, {
             command: ["nmcli", ...args],
@@ -28,7 +27,6 @@ Singleton {
             id: proc
 
             property var callback: null
-            property string error: ""
 
             // qmllint disable incompatible-type
             environment: ({
@@ -36,15 +34,10 @@ Singleton {
                     LC_ALL: "C.UTF-8"
                 })
 
-            stderr: StdioCollector {
-                onStreamFinished: proc.error = text
-            }
-
             onExited: code => { // qmllint disable signal-handler-parameters
                 const callback = proc.callback;
-                const error = proc.error;
                 proc.destroy();
-                callback?.(code === 0, error);
+                callback?.(code === 0);
             }
         }
     }
