@@ -33,7 +33,10 @@ class Lyrics : public QObject {
     Q_PROPERTY(bool hasCandidateOverride READ hasCandidateOverride NOTIFY hasCandidateOverrideChanged)
     Q_PROPERTY(bool loading READ loading NOTIFY loadingChanged)
     Q_PROPERTY(bool forceSearching READ forceSearching NOTIFY forceSearchingChanged)
-    Q_PROPERTY(bool hasLyrics READ hasLyrics NOTIFY lyricsChanged)
+    Q_PROPERTY(bool hasLyrics READ hasLyrics NOTIFY hasLyricsChanged)
+    Q_PROPERTY(bool hasMetadataSuggestion READ hasMetadataSuggestion NOTIFY metadataSuggestionChanged)
+    Q_PROPERTY(QString suggestedArtist READ suggestedArtist NOTIFY metadataSuggestionChanged)
+    Q_PROPERTY(QString suggestedTitle READ suggestedTitle NOTIFY metadataSuggestionChanged)
     Q_PROPERTY(qreal offset READ offset WRITE setOffset NOTIFY offsetChanged)
     Q_PROPERTY(QString trackArtist READ trackArtist NOTIFY trackChanged)
     Q_PROPERTY(QString trackTitle READ trackTitle NOTIFY trackChanged)
@@ -54,6 +57,9 @@ public:
     [[nodiscard]] bool loading() const;
     [[nodiscard]] bool forceSearching() const;
     [[nodiscard]] bool hasLyrics() const;
+    [[nodiscard]] bool hasMetadataSuggestion() const;
+    [[nodiscard]] QString suggestedArtist() const;
+    [[nodiscard]] QString suggestedTitle() const;
     [[nodiscard]] qreal offset() const;
     void setOffset(qreal value);
     [[nodiscard]] QString trackArtist() const;
@@ -68,6 +74,9 @@ public:
     Q_INVOKABLE void resetToAuto();
     Q_INVOKABLE void forceSearch();
 
+    [[nodiscard]] static QString cleanTrackTitle(const QString& title);
+    [[nodiscard]] static QString extractPrimaryArtist(const QString& artist);
+
 signals:
     void lyricsChanged();
     void backendChanged();
@@ -79,6 +88,7 @@ signals:
     void loadingChanged();
     void forceSearchingChanged();
     void hasLyricsChanged();
+    void metadataSuggestionChanged();
     void offsetChanged();
     void trackChanged();
 
@@ -136,6 +146,8 @@ private:
     void loadLyricsMap();
     void persistTrackPrefs();
 
+    void updateMetadataSuggestion();
+
     [[nodiscard]] static QString lyricsDir();
     [[nodiscard]] static QString lyricsMapPath();
     [[nodiscard]] QString trackKey() const;
@@ -147,9 +159,6 @@ private:
     [[nodiscard]] static QString cachePathFor(LyricsBackend backend, const QString& id);
     [[nodiscard]] static QString readCachedLrc(LyricsBackend backend, const QString& id);
     static void writeCachedLrc(LyricsBackend backend, const QString& id, const QString& text);
-
-    [[nodiscard]] static QString cleanTrackTitle(const QString& title);
-    [[nodiscard]] static QString extractPrimaryArtist(const QString& artist);
 
     [[nodiscard]] static QVector<LyricLine> parseLrc(const QString& text);
     [[nodiscard]] static QString tryReadLocalLrc(const QString& dir, const QString& artist, const QString& title);
@@ -170,6 +179,9 @@ private:
     bool m_loading = false;
     bool m_forceSearching = false;
     bool m_hasLyrics = false;
+    bool m_hasMetadataSuggestion = false;
+    QString m_suggestedArtist;
+    QString m_suggestedTitle;
     qreal m_offset = 0.0;
 
     QString m_artist;
