@@ -11,6 +11,8 @@
 
 namespace caelestia::services {
 
+class ResettingCookieJar;
+
 struct LyricLine {
     qreal time = 0.0;
     QString text;
@@ -168,6 +170,7 @@ private:
     [[nodiscard]] static QString findLocalLrcRecursive(const QString& dir, const QString& artist, const QString& title);
 
     QNetworkAccessManager* m_nam;
+    ResettingCookieJar* m_cookieJar = nullptr;
     QTimer* m_loadDebounce;
     QTimer* m_saveDebounce;
 
