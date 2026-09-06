@@ -14,8 +14,11 @@ import qs.services
 Item {
     id: root
 
-    // Funny binding hack to make lyrics update
-    readonly property var _: {
+    readonly property real fadeAmount: 0.1
+    property bool flag
+    property list<string> lyricList: Lyrics.lyrics
+
+    function syncTrack(): void {
         const p = Players.active;
         if (p)
             Lyrics.setTrack(p.trackArtist, p.trackTitle, p.trackAlbum, p.length);
@@ -23,9 +26,7 @@ Item {
             Lyrics.clearTrack();
     }
 
-    readonly property real fadeAmount: 0.1
-    property bool flag
-    property list<string> lyricList: Lyrics.lyrics
+    Component.onCompleted: syncTrack()
 
     layer.enabled: true
     layer.effect: Mask {
@@ -166,12 +167,44 @@ Item {
         target: Lyrics
     }
 
+    Connections {
+        function onActiveChanged(): void {
+            root.syncTrack();
+        }
+
+        target: Players
+    }
+
+    Connections {
+        function onPostTrackChanged(): void {
+            root.syncTrack();
+        }
+
+        function onTrackTitleChanged(): void {
+            root.syncTrack();
+        }
+
+        function onTrackArtistChanged(): void {
+            root.syncTrack();
+        }
+
+        function onTrackAlbumChanged(): void {
+            root.syncTrack();
+        }
+
+        function onLengthChanged(): void {
+            root.syncTrack();
+        }
+
+        target: Players.active
+    }
+
     Loader {
         id: loadingIndicator
 
         anchors.centerIn: parent
         asynchronous: true
-        active: opacity > 0
+        active: root.state === "loading"
         opacity: 0
 
         sourceComponent: ColumnLayout {
@@ -199,12 +232,6 @@ Item {
                 font: Tokens.font.title.medium
             }
         }
-
-        Behavior on opacity {
-            Anim {
-                type: Anim.DefaultEffects
-            }
-        }
     }
 
     Loader {
@@ -212,7 +239,7 @@ Item {
 
         anchors.centerIn: parent
         asynchronous: true
-        active: opacity > 0
+        active: root.state === "noLyrics"
         opacity: 0
 
         sourceComponent: ColumnLayout {
@@ -261,7 +288,7 @@ Item {
 
         spacing: Tokens.spacing.small
         opacity: 0
-        enabled: opacity > 0
+        enabled: root.state === "hasLyrics"
 
         delegate: StyledText {
             id: lyric
@@ -304,30 +331,6 @@ Item {
                     if (p)
                         p.position = Lyrics.timeForIndex(lyric.index);
                 }
-            }
-        }
-
-        Behavior on opacity {
-            Anim {
-                type: Anim.SlowEffects
-            }
-        }
-    }
-
-    Behavior on lyricList {
-        SequentialAnimation {
-            Anim {
-                target: lyrics
-                property: "opacity"
-                to: 0
-                type: Anim.DefaultEffects
-            }
-            PropertyAction {}
-            Anim {
-                target: lyrics
-                property: "opacity"
-                to: 1
-                type: Anim.SlowEffects
             }
         }
     }
