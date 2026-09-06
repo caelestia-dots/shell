@@ -1,5 +1,4 @@
 import QtQuick
-import QtQuick.Controls
 import QtQuick.Layouts
 import Quickshell
 import Caelestia
@@ -18,7 +17,7 @@ Item {
     property bool open
     readonly property real padding: Tokens.padding.medium
     readonly property real popupWidth: 320
-    readonly property real maxPopupHeight: 290
+    readonly property real maxPopupHeight: 320
     readonly property real maxListHeight: 104
     readonly property bool hasDisplayableContent: (Lyrics.hasLyrics || Lyrics.lyricCandidates.length > 0 || Lyrics.hasMetadataSuggestion) && !Lyrics.loading && !Lyrics.forceSearching
 
@@ -232,13 +231,18 @@ Item {
                     id: fixMetadataCard
 
                     Layout.fillWidth: true
-                    implicitHeight: fixMetadataRow.implicitHeight + Tokens.padding.extraSmall * 2
+                    implicitHeight: fixContent.implicitHeight + Tokens.padding.small * 2
                     visible: Lyrics.hasMetadataSuggestion
                     radius: Tokens.rounding.small
                     color: fixMouseArea.containsMouse ? Colours.palette.m3secondaryContainer : Colours.palette.m3surfaceContainerLow
+                    clip: true
 
                     Behavior on color {
                         CAnim {}
+                    }
+
+                    Behavior on implicitHeight {
+                        Anim {}
                     }
 
                     MouseArea {
@@ -247,33 +251,54 @@ Item {
                         anchors.fill: parent
                         cursorShape: Qt.PointingHandCursor
                         hoverEnabled: true
-
-                        ToolTip.delay: 200
-                        ToolTip.text: qsTr("Suggested metadata:\nArtist: %1\nTitle: %2").arg(Lyrics.suggestedArtist, Lyrics.suggestedTitle)
-                        ToolTip.visible: containsMouse
+                        onClicked: Quickshell.clipboardText = `${Lyrics.suggestedArtist} - ${Lyrics.suggestedTitle}`
                     }
 
-                    RowLayout {
-                        id: fixMetadataRow
+                    ColumnLayout {
+                        id: fixContent
 
-                        anchors.fill: parent
-                        anchors.leftMargin: Tokens.padding.small
-                        anchors.rightMargin: Tokens.padding.small
+                        anchors.left: parent.left
+                        anchors.right: parent.right
+                        anchors.top: parent.top
+                        anchors.margins: Tokens.padding.small
                         spacing: Tokens.spacing.extraSmall
 
-                        MaterialIcon {
-                            color: Colours.palette.m3primary
-                            fontStyle: Tokens.font.icon.small
-                            text: "auto_fix_high"
+                        RowLayout {
+                            Layout.fillWidth: true
+                            spacing: Tokens.spacing.extraSmall
+
+                            MaterialIcon {
+                                color: fixMouseArea.containsMouse ? Colours.palette.m3onSecondaryContainer : Colours.palette.m3primary
+                                fontStyle: Tokens.font.icon.small
+                                text: "auto_fix_high"
+                            }
+
+                            StyledText {
+                                Layout.fillWidth: true
+                                color: fixMouseArea.containsMouse ? Colours.palette.m3onSecondaryContainer : Colours.palette.m3primary
+                                font: Tokens.font.label.medium
+                                text: fixMouseArea.containsMouse ? qsTr("Suggested metadata:") : qsTr("Fix metadata!")
+                            }
                         }
 
                         StyledText {
+                            visible: fixMouseArea.containsMouse
                             Layout.fillWidth: true
-                            text: fixMouseArea.containsMouse ? `${Lyrics.suggestedArtist} - ${Lyrics.suggestedTitle}` : qsTr("Fix metadata!")
-                            color: fixMouseArea.containsMouse ? Colours.palette.m3onSecondaryContainer : Colours.palette.m3primary
-                            font: Tokens.font.label.medium
+                            Layout.leftMargin: Tokens.padding.large
+                            color: Colours.palette.m3onSecondaryContainer
+                            font: Tokens.font.body.small
+                            text: qsTr("Artist: %1").arg(Lyrics.suggestedArtist)
                             elide: Text.ElideRight
-                            animate: true
+                        }
+
+                        StyledText {
+                            visible: fixMouseArea.containsMouse
+                            Layout.fillWidth: true
+                            Layout.leftMargin: Tokens.padding.large
+                            color: Colours.palette.m3onSecondaryContainer
+                            font: Tokens.font.body.small
+                            text: qsTr("Title: %1").arg(Lyrics.suggestedTitle)
+                            elide: Text.ElideRight
                         }
                     }
                 }
