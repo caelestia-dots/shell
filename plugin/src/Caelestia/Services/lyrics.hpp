@@ -42,6 +42,8 @@ class Lyrics : public QObject {
     Q_PROPERTY(qreal offset READ offset WRITE setOffset NOTIFY offsetChanged)
     Q_PROPERTY(QString trackArtist READ trackArtist NOTIFY trackChanged)
     Q_PROPERTY(QString trackTitle READ trackTitle NOTIFY trackChanged)
+    Q_PROPERTY(QString error READ error NOTIFY errorChanged)
+    Q_PROPERTY(bool offline READ offline NOTIFY offlineChanged)
 
 public:
     explicit Lyrics(QObject* parent = nullptr);
@@ -66,6 +68,8 @@ public:
     void setOffset(qreal value);
     [[nodiscard]] QString trackArtist() const;
     [[nodiscard]] QString trackTitle() const;
+    [[nodiscard]] QString error() const;
+    [[nodiscard]] bool offline() const;
 
     [[nodiscard]] Q_INVOKABLE int indexForTime(qreal time) const;
     [[nodiscard]] Q_INVOKABLE qreal timeForIndex(int index) const;
@@ -94,11 +98,16 @@ signals:
     void metadataSuggestionChanged();
     void offsetChanged();
     void trackChanged();
+    void errorChanged();
+    void offlineChanged();
 
 private:
     void setBackend(LyricsBackend value);
     void setLoading(bool value);
     void setForceSearching(bool value);
+    void setError(const QString& value);
+    void setOffline(bool value);
+    void noteReplyError(QNetworkReply* reply);
     void setLines(QVector<LyricLine> lines, LyricsBackend source);
     void clearLines();
     void appendCandidates(const QList<LyricCandidate>& add);
@@ -189,6 +198,8 @@ private:
     QString m_suggestedArtist;
     QString m_suggestedTitle;
     qreal m_offset = 0.0;
+    QString m_error;
+    bool m_offline = false;
 
     QString m_artist;
     QString m_title;
