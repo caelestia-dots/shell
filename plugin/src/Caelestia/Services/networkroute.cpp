@@ -7,8 +7,6 @@
 #include <qdbuspendingreply.h>
 #include <qloggingcategory.h>
 
-#include <utility>
-
 namespace caelestia::services {
 
 namespace {

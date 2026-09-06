@@ -3,8 +3,6 @@
 #include <qobject.h>
 #include <qqmlintegration.h>
 #include <qstring.h>
-#include <qstringlist.h>
-#include <qvariant.h>
 
 #include "config/enums.hpp"
 #include "networkwalker.hpp"
