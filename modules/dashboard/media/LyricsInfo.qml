@@ -274,7 +274,10 @@ Item {
                         anchors.fill: parent
                         cursorShape: Qt.PointingHandCursor
                         hoverEnabled: true
-                        onClicked: Quickshell.clipboardText = `${Lyrics.suggestedArtist} - ${Lyrics.suggestedTitle}`
+                        onClicked: {
+                            Quickshell.clipboardText = `${Lyrics.suggestedArtist} - ${Lyrics.suggestedTitle}`;
+                            Toaster.toast(qsTr("Copied to Clipboard"), `${Lyrics.suggestedArtist} - ${Lyrics.suggestedTitle}`, "content_copy");
+                        }
                     }
 
                     ColumnLayout {

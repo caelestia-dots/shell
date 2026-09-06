@@ -75,6 +75,11 @@ struct ArtistTitleSplit {
     bool valid = false;
 };
 
+// Multi-dash policy: First-separator split (A | B - C) is preferred over last-separator (A - B | C).
+// Example: "Billie Eilish - Ocean Eyes - Acoustic Version" -> artist: "Billie Eilish", title: "Ocean Eyes"
+// Example: "Rap Samurai - Sabrina Carpenter - Nobody’s Son (Lyrics)" -> prefix: "Rap Samurai", rest: "Sabrina Carpenter
+// - Nobody's Son" Last-separator would erroneously classify "Billie Eilish - Ocean Eyes" as artist and "Acoustic
+// Version" as title.
 [[nodiscard]] ArtistTitleSplit splitArtistTitle(const QString& title) {
     const QString trimmed = title.trimmed();
     if (trimmed.isEmpty()) {
