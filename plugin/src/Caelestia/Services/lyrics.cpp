@@ -251,6 +251,7 @@ struct ArtistTitleSplit {
         }
     }
     return -1;
+}
 
 struct LrcIndexEntry {
     QString path;
