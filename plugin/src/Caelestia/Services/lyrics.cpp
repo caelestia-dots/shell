@@ -3,6 +3,7 @@
 #include <qdiriterator.h>
 #include <qfileinfo.h>
 #include <qjsonarray.h>
+#include <qnetworkcookie.h>
 #include <qnetworkcookiejar.h>
 #include <qsavefile.h>
 #include <qurlquery.h>
@@ -264,11 +265,21 @@ QString Lyrics::extractPrimaryArtist(const QString& artist) {
     return parts.isEmpty() ? artist.trimmed() : parts.first().trimmed();
 }
 
+class ResettingCookieJar : public QNetworkCookieJar {
+public:
+    using QNetworkCookieJar::QNetworkCookieJar;
+
+    void clear() { setAllCookies({}); }
+};
+
 Lyrics::Lyrics(QObject* parent)
     : QObject(parent)
     , m_nam(new QNetworkAccessManager(this))
+    , m_cookieJar(new ResettingCookieJar(m_nam))
     , m_loadDebounce(new QTimer(this))
     , m_saveDebounce(new QTimer(this)) {
+    m_nam->setCookieJar(m_cookieJar);
+
     m_loadDebounce->setSingleShot(true);
     m_loadDebounce->setInterval(k_loadDebounceMs);
     QObject::connect(m_loadDebounce, &QTimer::timeout, this, &Lyrics::doLoad);
@@ -291,6 +302,10 @@ Lyrics::Lyrics(QObject* parent)
 }
 
 Lyrics::~Lyrics() {
+    if (m_loadDebounce) {
+        m_loadDebounce->stop();
+    }
+    cancelInFlight();
     if (m_saveDebounce && m_saveDebounce->isActive()) {
         m_saveDebounce->stop();
         persistTrackPrefs();
@@ -483,7 +498,9 @@ void Lyrics::forceSearch() {
         checkFinished();
     });
 
-    m_nam->setCookieJar(new QNetworkCookieJar(m_nam));
+    if (m_cookieJar) {
+        m_cookieJar->clear();
+    }
     QUrl netEaseUrl(u"https://music.163.com/api/search/get"_s);
     QUrlQuery netEaseQuery;
     netEaseQuery.addQueryItem(u"s"_s, u"%1 %2"_s.arg(rawTitle, rawArtist));
@@ -799,6 +816,16 @@ void Lyrics::trackReply(int reqId, QNetworkReply* reply) {
         return;
     }
     m_pendingReplies[reqId].append(QPointer<QNetworkReply>(reply));
+    QObject::connect(reply, &QObject::destroyed, this, [this, reqId, reply] {
+        if (auto it = m_pendingReplies.find(reqId); it != m_pendingReplies.end()) {
+            it.value().removeIf([reply](const QPointer<QNetworkReply>& ptr) {
+                return ptr.isNull() || ptr.data() == reply;
+            });
+            if (it.value().isEmpty()) {
+                m_pendingReplies.erase(it);
+            }
+        }
+    });
 }
 
 void Lyrics::doLoad() {
@@ -1058,7 +1085,9 @@ void Lyrics::tryNetEase(int reqId) {
     setBackend(LyricsBackend::NetEase);
 
     // Reset cookies (LyricsBackend::NetEase rejects requests with stale cookies sometimes)
-    m_nam->setCookieJar(new QNetworkCookieJar(m_nam));
+    if (m_cookieJar) {
+        m_cookieJar->clear();
+    }
 
     const QString cleanTitle = cleanTrackTitle(m_title);
     const QString primaryArtist = extractPrimaryArtist(m_artist);
@@ -1265,7 +1294,9 @@ void Lyrics::searchLrclibCandidates(int reqId) {
 }
 
 void Lyrics::searchNetEaseCandidates(int reqId) {
-    m_nam->setCookieJar(new QNetworkCookieJar(m_nam));
+    if (m_cookieJar) {
+        m_cookieJar->clear();
+    }
 
     const QString cleanTitle = cleanTrackTitle(m_title);
     const QString primaryArtist = extractPrimaryArtist(m_artist);
