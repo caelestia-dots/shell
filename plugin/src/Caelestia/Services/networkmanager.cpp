@@ -605,7 +605,7 @@ void NetworkManager::readWireless(const QString& devicePath) {
             if (accessPoint == nullptr) {
                 // Only new access points cost a read; the ones already held
                 // track their own properties.
-                readAccessPoint(devicePath, path.path());
+                readAccessPoint(devicePath, path.path(), path.path() == activePath);
             } else {
                 accessPoint->setActive(path.path() == activePath);
             }
@@ -618,7 +618,7 @@ void NetworkManager::readWireless(const QString& devicePath) {
     // NOLINTNEXTLINE(clang-analyzer-cplusplus.NewDeleteLeaks) watcher is parented and self-deletes
 }
 
-void NetworkManager::readAccessPoint(const QString& devicePath, const QString& accessPointPath) {
+void NetworkManager::readAccessPoint(const QString& devicePath, const QString& accessPointPath, bool active) {
     auto bus = systemBus();
     if (!bus) {
         return;
@@ -631,7 +631,7 @@ void NetworkManager::readAccessPoint(const QString& devicePath, const QString& a
     step(1);
     auto* watcher = new QDBusPendingCallWatcher(bus->asyncCall(msg), this);
     connect(watcher, &QDBusPendingCallWatcher::finished, this,
-        [this, devicePath, accessPointPath](QDBusPendingCallWatcher* call) {
+        [this, devicePath, accessPointPath, active](QDBusPendingCallWatcher* call) {
             call->deleteLater();
 
             const QDBusPendingReply<QVariantMap> reply = *call;
@@ -649,6 +649,7 @@ void NetworkManager::readAccessPoint(const QString& devicePath, const QString& a
             if (device->accessPoint(accessPointPath) == nullptr) {
                 auto* accessPoint = new NmAccessPoint(accessPointPath, device);
                 accessPoint->update(reply.value());
+                accessPoint->setActive(active);
                 accessPoint->watch();
                 device->addAccessPoint(accessPoint);
             }
@@ -663,6 +664,10 @@ void NetworkManager::readIp4Config(const QString& devicePath, const QString& con
     if (!bus) {
         return;
     }
+
+    // NetworkManager keeps the same config object across a DHCP renewal and
+    // edits it in place, so the device's own signal doesn't cover this.
+    watchObject(configPath);
 
     auto msg = QDBusMessage::createMethodCall(
         QString::fromUtf8(k_service), configPath, QString::fromUtf8(k_propsIface), QStringLiteral("GetAll"));

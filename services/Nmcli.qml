@@ -29,7 +29,6 @@ Singleton {
     readonly property list<string> savedConnectionSsids: Profiles.ssids
 
     property var pendingConnection: null
-    property list<var> activeProcesses: []
     // Whether traffic is actually leaving over a wired link, which isn't the
     // same question as whether a cable is plugged in - with both a cable and
     // wifi up, either can be carrying it. NetworkManager already tracks which
@@ -83,15 +82,6 @@ Singleton {
         const proc = commandProc.createObject(root);
         proc.cmdArgs = ["nmcli", ...args];
         proc.callback = callback;
-
-        activeProcesses.push(proc);
-
-        proc.processFinished.connect(() => {
-            const index = activeProcesses.indexOf(proc);
-            if (index >= 0) {
-                activeProcesses.splice(index, 1);
-            }
-        });
 
         Qt.callLater(() => {
             proc.exec(proc.cmdArgs);

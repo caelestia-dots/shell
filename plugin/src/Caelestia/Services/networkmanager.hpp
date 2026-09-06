@@ -212,7 +212,7 @@ private:
     void readWired(const QString& devicePath);
     void readWireless(const QString& devicePath);
     void readIp4Config(const QString& devicePath, const QString& configPath);
-    void readAccessPoint(const QString& devicePath, const QString& accessPointPath);
+    void readAccessPoint(const QString& devicePath, const QString& accessPointPath, bool active);
 
     bool m_wirelessEnabled = false;
 
