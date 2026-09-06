@@ -31,16 +31,16 @@ Column {
 
             let comps = [];
             if (day > 0)
-                comps.push(`${day} days`);
+                comps.push(qsTr("%1 days").arg(day));
             if (hr > 0)
-                comps.push(`${hr} hours`);
+                comps.push(qsTr("%1 hours").arg(hr));
             if (min > 0)
-                comps.push(`${min} mins`);
+                comps.push(qsTr("%1 mins").arg(min));
 
             return comps.join(", ") || fallback;
         }
 
-        text: UPower.displayDevice.isLaptopBattery ? qsTr("Time %1: %2").arg(UPower.onBattery ? "remaining" : "until charged").arg(UPower.onBattery ? formatSeconds(UPower.displayDevice.timeToEmpty, "Calculating...") : formatSeconds(UPower.displayDevice.timeToFull, "Fully charged!")) : qsTr("Power profile: %1").arg(PowerProfile.toString(PowerProfiles.profile))
+        text: UPower.displayDevice.isLaptopBattery ? qsTr("Time %1: %2").arg(UPower.onBattery ? qsTr("remaining") : qsTr("until charged")).arg(UPower.onBattery ? formatSeconds(UPower.displayDevice.timeToEmpty, qsTr("Calculating...")) : formatSeconds(UPower.displayDevice.timeToFull, qsTr("Fully charged!"))) : qsTr("Power profile: %1").arg(PowerProfile.toString(PowerProfiles.profile))
     }
 
     Loader {
