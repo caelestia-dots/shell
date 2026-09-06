@@ -102,6 +102,11 @@ private:
     void tryNetEase(int reqId);
     void chainNext(LyricsBackend justFailed, int reqId);
 
+    bool applyLrclibGetObject(const QJsonObject& obj, const QString& logTrack, const QString& logArtist);
+    void retryLrclibGetSplit(
+        int reqId, const QString& title, const QString& artist, const QString& album, qreal duration);
+    void retryLrclibSearchSplit(int reqId, const QString& title, const QString& artist);
+
     struct LrclibSearchResult {
         QList<LyricCandidate> candidates;
         LyricCandidate bestCandidate;
@@ -109,6 +114,7 @@ private:
     };
 
     [[nodiscard]] LrclibSearchResult parseLrclibSearchResult(const QJsonArray& arr) const;
+    [[nodiscard]] static QList<LyricCandidate> parseNetEaseSearchResult(const QJsonDocument& doc);
     void applyLrclibCandidateUpgrade(const LyricCandidate& bestCand, const QString& bestSynced);
 
     void searchLrclibCandidates(int reqId);
