@@ -244,6 +244,7 @@ Column {
 
                 StyledSwitch {
                     visible: BatteryControl.isSupported && BatteryControl.isBinary
+                    enabled: !BatteryControl.busy
                     Layout.alignment: Qt.AlignVCenter | Qt.AlignRight
                     checked: BatteryControl.enabled
                     onToggled: BatteryControl.toggle()
@@ -266,6 +267,7 @@ Column {
                         type: TextButton.Tonal
                         text: `${modelData}%`
                         checked: BatteryControl.threshold === modelData
+                        enabled: !BatteryControl.busy
                         onClicked: BatteryControl.setThreshold(modelData)
                     }
                 }
@@ -273,6 +275,7 @@ Column {
 
             StyledSlider {
                 visible: BatteryControl.isSupported && BatteryControl.isRange
+                enabled: !BatteryControl.busy
                 Layout.fillWidth: true
                 Layout.topMargin: Tokens.spacing.extraSmall
                 from: BatteryControl.minThreshold

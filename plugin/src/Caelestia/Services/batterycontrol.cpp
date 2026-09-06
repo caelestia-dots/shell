@@ -261,7 +261,9 @@ void BatteryControl::refreshState() {
         emit subtitleChanged();
     }
 
-    if (m_lastAttemptedValue.isEmpty()) {
+    if (m_lastAttemptedValue.isEmpty() || content == m_lastAttemptedValue ||
+        QString::number(val) == m_lastAttemptedValue) {
+        m_lastAttemptedValue.clear();
         setError(QString());
     }
 }
@@ -272,16 +274,18 @@ bool BatteryControl::writeValue(const QString& val) {
         return false;
     }
 
-    if (m_busy) {
-        return false;
-    }
-
     if (!isSafeValue(val)) {
         qCWarning(lcBatteryControl) << "Refusing to write unsafe value to" << m_path;
         return false;
     }
     if (!isSafeSysfsPath(m_path)) {
         qCWarning(lcBatteryControl) << "Refusing to write to unexpected sysfs path:" << m_path;
+        return false;
+    }
+
+    if (m_busy) {
+        m_queuedValue = val;
+        m_lastAttemptedValue = val;
         return false;
     }
 
@@ -309,24 +313,13 @@ bool BatteryControl::writeValue(const QString& val) {
 
     connect(proc, QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished), this,
         [this, proc](int exitCode, QProcess::ExitStatus exitStatus) {
-            const QString err = QString::fromUtf8(proc->readAllStandardError()).trimmed();
-            if (exitStatus != QProcess::NormalExit || exitCode != 0) {
-                qCWarning(lcBatteryControl) << "pkexec tee failed:" << exitCode << err;
-                setError(QStringLiteral("Write failed: %1").arg(err.isEmpty() ? QString::number(exitCode) : err));
-            } else {
-                if (!err.isEmpty()) {
-                    qCWarning(lcBatteryControl) << "pkexec tee stderr:" << err;
-                }
-                m_lastAttemptedValue.clear();
-                refreshState();
-            }
-            setBusy(false);
-            proc->deleteLater();
+            handlePkexecFinished(proc, exitCode, exitStatus);
         });
     connect(proc, &QProcess::errorOccurred, this, [this, proc](QProcess::ProcessError err) {
         if (err == QProcess::FailedToStart) {
             qCWarning(lcBatteryControl) << "pkexec failed to start:" << proc->errorString();
             setError(QStringLiteral("pkexec failed to start: %1").arg(proc->errorString()));
+            m_queuedValue.clear();
             setBusy(false);
             proc->deleteLater();
         }
@@ -338,6 +331,38 @@ bool BatteryControl::writeValue(const QString& val) {
     proc->write(val.toUtf8() + '\n');
     proc->closeWriteChannel();
     return true;
+}
+
+QString BatteryControl::currentControlValue() const {
+    if (m_controlType == ControlType::BinaryConservation) {
+        return m_enabled ? QStringLiteral("1") : QStringLiteral("0");
+    }
+    return QString::number(m_threshold);
+}
+
+void BatteryControl::handlePkexecFinished(QProcess* proc, int exitCode, QProcess::ExitStatus exitStatus) {
+    const QString err = QString::fromUtf8(proc->readAllStandardError()).trimmed();
+    if (exitStatus != QProcess::NormalExit || exitCode != 0) {
+        qCWarning(lcBatteryControl) << "pkexec tee failed:" << exitCode << err;
+        setError(QStringLiteral("Write failed: %1").arg(err.isEmpty() ? QString::number(exitCode) : err));
+        m_queuedValue.clear();
+        setBusy(false);
+    } else {
+        if (!err.isEmpty()) {
+            qCWarning(lcBatteryControl) << "pkexec tee stderr:" << err;
+        }
+        m_lastAttemptedValue.clear();
+        refreshState();
+        setBusy(false);
+        if (!m_queuedValue.isEmpty()) {
+            const QString nextVal = m_queuedValue;
+            m_queuedValue.clear();
+            if (nextVal != currentControlValue()) {
+                writeValue(nextVal);
+            }
+        }
+    }
+    proc->deleteLater();
 }
 
 void BatteryControl::toggle() {

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <qlist.h>
+#include <qprocess.h>
 #include <qqmlintegration.h>
 #include <qstring.h>
 #include <qtypes.h>
@@ -88,6 +89,8 @@ private:
     void detectInterface();
     void refreshState();
     bool writeValue(const QString& val);
+    void handlePkexecFinished(QProcess* proc, int exitCode, QProcess::ExitStatus exitStatus);
+    [[nodiscard]] QString currentControlValue() const;
     void setError(const QString& error);
     void setBusy(bool busy);
 
@@ -105,6 +108,7 @@ private:
     QString m_error;
     QString m_lastError;
     QString m_lastAttemptedValue;
+    QString m_queuedValue;
     bool m_busy = false;
 };
 
