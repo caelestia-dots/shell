@@ -202,7 +202,6 @@ void BatteryControl::refresh() {
 
 void BatteryControl::refreshState() {
     if (!m_isSupported || m_path.isEmpty()) {
-        setError(QStringLiteral("battery control not supported"));
         return;
     }
 
@@ -303,9 +302,11 @@ bool BatteryControl::writeValue(const QString& val) {
             setBusy(false);
             proc->deleteLater();
         });
-    connect(proc, &QProcess::errorOccurred, this, [proc](QProcess::ProcessError err) {
+    connect(proc, &QProcess::errorOccurred, this, [this, proc](QProcess::ProcessError err) {
         if (err == QProcess::FailedToStart) {
             qCWarning(lcBatteryControl) << "pkexec failed to start:" << proc->errorString();
+            setError(QStringLiteral("pkexec failed to start: %1").arg(proc->errorString()));
+            setBusy(false);
             proc->deleteLater();
         }
         // Other errors are reported via finished().
@@ -313,6 +314,8 @@ bool BatteryControl::writeValue(const QString& val) {
 
     setBusy(true);
     proc->start();
+    proc->write(val.toUtf8() + '\n');
+    proc->closeWriteChannel();
     return true;
 }
 

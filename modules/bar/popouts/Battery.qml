@@ -15,10 +15,8 @@ Column {
 
     // qmllint disable missing-property
     readonly property string batteryError: String(BatteryControl?.error ?? "")
-    readonly property string batteryOffline: String(BatteryControl?.offline ?? "")
     // qmllint enable missing-property
     readonly property bool hasBatteryError: batteryError.length > 0
-    readonly property bool isBatteryOffline: !hasBatteryError && batteryOffline.length > 0
 
     spacing: Tokens.spacing.medium
     width: Tokens.sizes.bar.batteryWidth
@@ -195,19 +193,19 @@ Column {
     StyledRect {
         id: batteryCard
 
-        visible: BatteryControl.isSupported
+        visible: BatteryControl.isSupported && !root.hasBatteryError
         anchors.horizontalCenter: parent.horizontalCenter
         implicitWidth: parent.width
         implicitHeight: cardLayout.implicitHeight + Tokens.padding.medium * 2
         color: Colours.tPalette.m3surfaceContainer
         radius: Tokens.rounding.large
         ToolTip.visible: batteryHover.hovered && !cardLayout.enabled
-        ToolTip.text: root.hasBatteryError ? qsTr("Unavailable: battery reported an error") : qsTr("Unavailable while offline")
+        ToolTip.text: qsTr("Battery control busy")
 
         ColumnLayout {
             id: cardLayout
 
-            enabled: !root.hasBatteryError && !root.isBatteryOffline
+            enabled: !BatteryControl.busy
             anchors.left: parent.left
             anchors.right: parent.right
             anchors.top: parent.top
@@ -298,7 +296,7 @@ Column {
     StyledRect {
         id: batteryErrorCard
 
-        visible: root.hasBatteryError
+        visible: BatteryControl.isSupported && root.hasBatteryError
         anchors.horizontalCenter: parent.horizontalCenter
         implicitWidth: parent.width
         implicitHeight: errorLayout.implicitHeight + Tokens.padding.medium * 2
@@ -351,63 +349,9 @@ Column {
     }
 
     StyledRect {
-        id: batteryOfflineCard
-
-        visible: root.isBatteryOffline
-        anchors.horizontalCenter: parent.horizontalCenter
-        implicitWidth: parent.width
-        implicitHeight: offlineLayout.implicitHeight + Tokens.padding.medium * 2
-        color: Colours.tPalette.m3surfaceContainer
-        radius: Tokens.rounding.large
-
-        ColumnLayout {
-            id: offlineLayout
-
-            anchors.left: parent.left
-            anchors.right: parent.right
-            anchors.top: parent.top
-            anchors.margins: Tokens.padding.medium
-            spacing: Tokens.spacing.small
-
-            RowLayout {
-                Layout.fillWidth: true
-                spacing: Tokens.spacing.small
-
-                MaterialIcon {
-                    text: "cloud_off"
-                    fontStyle: Tokens.font.icon.medium
-                    color: Colours.palette.m3onSurfaceVariant
-                }
-
-                StyledText {
-                    Layout.fillWidth: true
-                    elide: Text.ElideRight
-                    text: qsTr("Battery offline")
-                    font: Tokens.font.body.builders.medium.weight(Font.Medium).build()
-                }
-            }
-
-            StyledText {
-                Layout.fillWidth: true
-                text: root.batteryOffline
-                color: Colours.palette.m3onSurfaceVariant
-                font: Tokens.font.body.builders.small.build()
-                wrapMode: Text.WrapAtWordBoundaryOrAnywhere
-            }
-
-            TextButton {
-                Layout.alignment: Qt.AlignHCenter
-                type: TextButton.Text
-                text: qsTr("Retry")
-                onClicked: BatteryControl.refresh()
-            }
-        }
-    }
-
-    StyledRect {
         id: unsupportedCard
 
-        visible: !BatteryControl.isSupported && !root.hasBatteryError && !root.isBatteryOffline
+        visible: !BatteryControl.isSupported
         anchors.horizontalCenter: parent.horizontalCenter
         implicitWidth: parent.width
         implicitHeight: unsupportedLayout.implicitHeight + Tokens.padding.medium * 2
