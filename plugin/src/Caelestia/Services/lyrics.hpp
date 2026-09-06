@@ -73,6 +73,7 @@ public:
     Q_INVOKABLE void refresh();
     Q_INVOKABLE void resetToAuto();
     Q_INVOKABLE void forceSearch();
+    Q_INVOKABLE void applySuggestedMetadata();
 
     [[nodiscard]] static QString cleanTrackTitle(const QString& title);
     [[nodiscard]] static QString extractPrimaryArtist(const QString& artist);
@@ -151,6 +152,8 @@ private:
     [[nodiscard]] static QString lyricsDir();
     [[nodiscard]] static QString lyricsMapPath();
     [[nodiscard]] QString trackKey() const;
+    [[nodiscard]] QString rawTrackKey() const;
+    void resolveMetadataAlias(QString& artist, QString& title);
     [[nodiscard]] static QString backendKey(LyricsBackend value);
     [[nodiscard]] static LyricsBackend backendFromKey(const QString& key);
 
@@ -188,6 +191,8 @@ private:
     QString m_title;
     QString m_album;
     qreal m_duration = 0.0;
+    QString m_rawArtist;
+    QString m_rawTitle;
 
     int m_currentRequestId = 0;
     QHash<int, QList<QPointer<QNetworkReply>>> m_pendingReplies;

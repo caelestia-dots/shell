@@ -272,7 +272,7 @@ bool Lyrics::loadCachedLyrics(const LyricCandidate& value) {
     }
     setLines(lines, b);
     setLoading(false);
-    if (!m_settingFromPrefs && !trackKey().isEmpty() && m_saveDebounce) {
+    if (!m_settingFromPrefs && !rawTrackKey().isEmpty() && m_saveDebounce) {
         m_saveDebounce->start();
     }
     return true;
@@ -338,7 +338,7 @@ void Lyrics::setSelectedCandidate(const LyricCandidate& value) {
         loadLocalLyricFile(value.id());
     }
 
-    if (!m_settingFromPrefs && !trackKey().isEmpty() && m_saveDebounce) {
+    if (!m_settingFromPrefs && !rawTrackKey().isEmpty() && m_saveDebounce) {
         m_saveDebounce->start();
     }
 }
@@ -350,7 +350,7 @@ void Lyrics::resetToAuto() {
     m_hasCandidateOverride = false;
     emit hasCandidateOverrideChanged();
 
-    if (!trackKey().isEmpty() && m_saveDebounce) {
+    if (!rawTrackKey().isEmpty() && m_saveDebounce) {
         m_saveDebounce->start();
     }
 
@@ -463,7 +463,7 @@ void Lyrics::setOffset(qreal value) {
     m_offset = value;
     emit offsetChanged();
 
-    if (!m_settingFromPrefs && !trackKey().isEmpty()) {
+    if (!m_settingFromPrefs && !rawTrackKey().isEmpty()) {
         if (m_saveDebounce) {
             m_saveDebounce->start();
         }
@@ -507,7 +507,15 @@ void Lyrics::setTrack(const QString& artist, const QString& title, const QString
     const QString a = artist.trimmed();
     const QString t = title.trimmed();
 
-    if (a == m_artist && t == m_title && album == m_album && qFuzzyCompare(duration + 1.0, m_duration + 1.0)) {
+    m_rawArtist = a;
+    m_rawTitle = t;
+
+    QString effectiveArtist = a;
+    QString effectiveTitle = t;
+    resolveMetadataAlias(effectiveArtist, effectiveTitle);
+
+    if (effectiveArtist == m_artist && effectiveTitle == m_title && album == m_album &&
+        qFuzzyCompare(duration + 1.0, m_duration + 1.0)) {
         return;
     }
 
@@ -518,8 +526,8 @@ void Lyrics::setTrack(const QString& artist, const QString& title, const QString
 
     cancelInFlight();
 
-    m_artist = a;
-    m_title = t;
+    m_artist = effectiveArtist;
+    m_title = effectiveTitle;
     m_album = album;
     m_duration = duration;
     emit trackChanged();
@@ -545,6 +553,8 @@ void Lyrics::clearTrack() {
         persistTrackPrefs();
     }
     cancelInFlight();
+    m_rawArtist.clear();
+    m_rawTitle.clear();
     m_artist.clear();
     m_title.clear();
     m_album.clear();
@@ -730,7 +740,7 @@ void Lyrics::doLoad() {
 
     // Restore per-track prefs (offset, last-selected backend/id)
     m_settingFromPrefs = true;
-    const QJsonObject saved = m_lyricsMap.value(trackKey()).toObject();
+    const QJsonObject saved = m_lyricsMap.value(rawTrackKey()).toObject();
     setOffset(saved.value(u"offset"_s).toDouble(0.0));
     LyricCandidate restored;
     const QString savedBackendKey = saved.value(u"backend"_s).toString();
@@ -1363,10 +1373,10 @@ void Lyrics::loadLyricsMap() {
 }
 
 void Lyrics::persistTrackPrefs() {
-    if (!m_lyricsMapLoaded || trackKey().isEmpty()) {
+    if (!m_lyricsMapLoaded || rawTrackKey().isEmpty()) {
         return;
     }
-    const QString key = trackKey();
+    const QString key = rawTrackKey();
     QJsonObject entry = m_lyricsMap.value(key).toObject();
     entry.insert(u"offset"_s, m_offset);
     if (m_hasCandidateOverride && m_selected.isValid()) {
@@ -1378,7 +1388,8 @@ void Lyrics::persistTrackPrefs() {
         entry.remove(u"id"_s);
         entry.remove(u"duration"_s);
     }
-    if (entry.isEmpty() || (entry.size() == 1 && qFuzzyIsNull(entry.value(u"offset"_s).toDouble()))) {
+    const bool hasOverrides = (m_hasCandidateOverride && m_selected.isValid()) || entry.contains(u"appliedArtist"_s);
+    if (entry.isEmpty() || (!hasOverrides && entry.size() == 1 && qFuzzyIsNull(entry.value(u"offset"_s).toDouble()))) {
         m_lyricsMap.remove(key);
     } else {
         m_lyricsMap.insert(key, entry);
@@ -1427,6 +1438,58 @@ QString Lyrics::trackKey() const {
         return {};
     }
     return u"%1 - %2"_s.arg(joinArtists(m_artist), m_title);
+}
+
+QString Lyrics::rawTrackKey() const {
+    if (m_rawArtist.isEmpty() && m_rawTitle.isEmpty()) {
+        return trackKey();
+    }
+    return u"%1 - %2"_s.arg(joinArtists(m_rawArtist), m_rawTitle);
+}
+
+void Lyrics::resolveMetadataAlias(QString& artist, QString& title) {
+    if (!m_lyricsMapLoaded) {
+        loadLyricsMap();
+    }
+    const QString rawKey = rawTrackKey();
+    if (!rawKey.isEmpty() && m_lyricsMap.contains(rawKey)) {
+        const QJsonObject entry = m_lyricsMap.value(rawKey).toObject();
+        if (entry.contains(u"appliedArtist"_s) && entry.contains(u"appliedTitle"_s)) {
+            artist = entry.value(u"appliedArtist"_s).toString();
+            title = entry.value(u"appliedTitle"_s).toString();
+        }
+    }
+}
+
+void Lyrics::applySuggestedMetadata() {
+    if (!m_hasMetadataSuggestion || m_suggestedArtist.isEmpty() || m_suggestedTitle.isEmpty()) {
+        return;
+    }
+
+    const QString rawKey = rawTrackKey();
+    const QString newArtist = m_suggestedArtist;
+    const QString newTitle = m_suggestedTitle;
+
+    if (!rawKey.isEmpty()) {
+        if (!m_lyricsMapLoaded) {
+            loadLyricsMap();
+        }
+        QJsonObject entry = m_lyricsMap.value(rawKey).toObject();
+        entry.insert(u"appliedArtist"_s, newArtist);
+        entry.insert(u"appliedTitle"_s, newTitle);
+        m_lyricsMap.insert(rawKey, entry);
+        persistTrackPrefs();
+    }
+
+    m_artist = newArtist;
+    m_title = newTitle;
+    emit trackChanged();
+
+    updateMetadataSuggestion();
+
+    if (m_lines.isEmpty()) {
+        scheduleLoad();
+    }
 }
 
 QString Lyrics::backendKey(LyricsBackend value) {

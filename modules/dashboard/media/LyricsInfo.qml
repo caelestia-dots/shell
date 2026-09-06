@@ -21,6 +21,27 @@ Item {
     readonly property real maxListHeight: 104
     readonly property bool hasDisplayableContent: (Lyrics.hasLyrics || Lyrics.lyricCandidates.length > 0 || Lyrics.hasMetadataSuggestion) && !Lyrics.loading && !Lyrics.forceSearching
 
+    function applyMetadata(): void {
+        if (!Lyrics.hasMetadataSuggestion)
+            return;
+
+        const sugArtist = Lyrics.suggestedArtist;
+        const sugTitle = Lyrics.suggestedTitle;
+        const player = Players.active;
+        const rawUrl = player?.metadata?.["xesam:url"] ?? "";
+
+        Lyrics.applySuggestedMetadata();
+
+        if (rawUrl.startsWith("file://")) {
+            const filePath = decodeURIComponent(rawUrl.substring(7));
+            const cmd = ["bash", "-c", 'ext="${1##*.}"\n' + 'tmp="$(mktemp --suffix=.$ext)"\n' + 'args=("-y" "-i" "$1" "-c" "copy" "-metadata" "artist=$2" "-metadata" "title=$3")\n' + 'if [ "${ext,,}" = "mp3" ]; then args+=("-id3v2_version" "3"); fi\n' + 'if ffmpeg "${args[@]}" "$tmp" >/dev/null 2>&1; then mv -f "$tmp" "$1"; else rm -f "$tmp"; fi', "--", filePath, sugArtist, sugTitle];
+            Quickshell.execDetached(cmd);
+            Toaster.toast(qsTr("File Metadata Updated"), qsTr("Applied tags to: %1 - %2").arg(sugArtist, sugTitle), "check_circle");
+        } else {
+            Toaster.toast(qsTr("Streaming Metadata Applied"), qsTr("Saved stream alias: %1 - %2").arg(sugArtist, sugTitle), "check_circle");
+        }
+    }
+
     implicitWidth: btn.implicitWidth * 0.9
     implicitHeight: btn.implicitHeight * 0.9
 
@@ -230,11 +251,13 @@ Item {
                 Rectangle {
                     id: fixMetadataCard
 
+                    readonly property bool isHovered: fixMouseArea.containsMouse || applyBtn.hovered
+
                     Layout.fillWidth: true
                     implicitHeight: fixContent.implicitHeight + Tokens.padding.small * 2
                     visible: Lyrics.hasMetadataSuggestion
                     radius: Tokens.rounding.small
-                    color: fixMouseArea.containsMouse ? Colours.palette.m3secondaryContainer : Colours.palette.m3surfaceContainerLow
+                    color: isHovered ? Colours.palette.m3secondaryContainer : Colours.palette.m3surfaceContainerLow
                     clip: true
 
                     Behavior on color {
@@ -268,21 +291,21 @@ Item {
                             spacing: Tokens.spacing.extraSmall
 
                             MaterialIcon {
-                                color: fixMouseArea.containsMouse ? Colours.palette.m3onSecondaryContainer : Colours.palette.m3primary
+                                color: fixMetadataCard.isHovered ? Colours.palette.m3onSecondaryContainer : Colours.palette.m3primary
                                 fontStyle: Tokens.font.icon.small
                                 text: "auto_fix_high"
                             }
 
                             StyledText {
                                 Layout.fillWidth: true
-                                color: fixMouseArea.containsMouse ? Colours.palette.m3onSecondaryContainer : Colours.palette.m3primary
+                                color: fixMetadataCard.isHovered ? Colours.palette.m3onSecondaryContainer : Colours.palette.m3primary
                                 font: Tokens.font.label.medium
-                                text: fixMouseArea.containsMouse ? qsTr("Suggested metadata:") : qsTr("Fix metadata!")
+                                text: fixMetadataCard.isHovered ? qsTr("Suggested metadata:") : qsTr("Fix metadata!")
                             }
                         }
 
                         StyledText {
-                            visible: fixMouseArea.containsMouse
+                            visible: fixMetadataCard.isHovered
                             Layout.fillWidth: true
                             Layout.leftMargin: Tokens.padding.large
                             color: Colours.palette.m3onSecondaryContainer
@@ -292,13 +315,33 @@ Item {
                         }
 
                         StyledText {
-                            visible: fixMouseArea.containsMouse
+                            visible: fixMetadataCard.isHovered
                             Layout.fillWidth: true
                             Layout.leftMargin: Tokens.padding.large
                             color: Colours.palette.m3onSecondaryContainer
                             font: Tokens.font.body.small
                             text: qsTr("Title: %1").arg(Lyrics.suggestedTitle)
                             elide: Text.ElideRight
+                        }
+
+                        RowLayout {
+                            visible: fixMetadataCard.isHovered
+                            Layout.fillWidth: true
+
+                            Item {
+                                Layout.fillWidth: true
+                            }
+
+                            TextButton {
+                                id: applyBtn
+
+                                type: TextButton.Filled
+                                text: qsTr("Apply")
+                                font: Tokens.font.label.small
+                                horizontalPadding: Tokens.padding.small
+                                verticalPadding: Tokens.padding.extraSmall / 2
+                                onClicked: root.applyMetadata()
+                            }
                         }
                     }
                 }
