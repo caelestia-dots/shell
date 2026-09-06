@@ -530,10 +530,10 @@ Item {
             visible: Lyrics.hasMetadataSuggestion
             anchors.top: parent.top
             anchors.right: parent.right
-            anchors.topMargin: Tokens.padding.extraSmall / 2
-            anchors.rightMargin: Tokens.padding.extraSmall / 2
-            width: 6
-            height: 6
+            anchors.topMargin: 0
+            anchors.rightMargin: 0
+            width: 8
+            height: 8
             radius: width / 2
             color: "white"
         }
