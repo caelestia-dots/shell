@@ -244,9 +244,7 @@ template <typename Container> DecodeResult ListCodec<Container>::decode(const QJ
 
         // Reject the entire list if any element is invalid
         if (result.error) {
-            // The inner message is flattened, a marked arg cannot carry args of its own
-            result.error->message =
-                mark(u"Element %1: %2"_s, { QString::number(i), util::i18n::unmark(result.error->message) });
+            result.indexPath.prepend(i);
             return result;
         }
 

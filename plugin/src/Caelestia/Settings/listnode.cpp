@@ -188,7 +188,7 @@ void ListNode::clear() {
 }
 
 QString ListNode::pathFor(const QString& key) const {
-    return path() + u"[%1]"_s.arg(key);
+    return elementPath(path(), key);
 }
 
 const Schema& ListNode::schema() const {
@@ -289,7 +289,8 @@ QJsonValue ListNode::toJson(bool sparse) const {
 bool ListNode::syncJson(const QJsonValue& json, QList<Diagnostic>& diagnostics) {
     if (!json.isArray()) {
         const auto d = Diagnostic::mismatch(ExpectedType::Array, json, path());
-        qCWarning(lcSettings, "Error decoding option %s: %s", qUtf8Printable(d.option), qUtf8Printable(d.message));
+        qCWarning(lcSettings, "Error decoding option %s: %s", qUtf8Printable(d.option),
+            qUtf8Printable(util::i18n::unmark(d.message)));
         diagnostics << d;
         return false;
     }
