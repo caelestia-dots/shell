@@ -108,4 +108,16 @@ inline bool isMarked(const QString& text) {
     return text.startsWith(k_markChar);
 }
 
+inline QString unmark(const QString& text) {
+    if (!isMarked(text))
+        return text;
+
+    const auto marked = parseMarked(text);
+    // Convert plural using default English rules since we are converting to English
+    auto result = marked.n == 1 || marked.plural.isEmpty() ? marked.text : marked.plural;
+    for (const auto& arg : marked.args)
+        result = result.arg(arg);
+    return result;
+}
+
 } // namespace util::i18n
