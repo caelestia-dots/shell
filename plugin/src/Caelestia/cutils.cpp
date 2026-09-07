@@ -49,6 +49,10 @@ void CUtils::saveItem(
     }
 
     const auto grabResult = target->grabToImage();
+    if (!grabResult) {
+        qCWarning(lcCUtils) << "saveItem: unable to grab" << target << "while its window is not renderable";
+        return;
+    }
 
     QObject::connect(
         grabResult.data(), &QQuickItemGrabResult::ready, this, [grabResult, scaledRect, path, onSaved, onFailed, this] {
