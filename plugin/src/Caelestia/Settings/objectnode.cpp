@@ -2,6 +2,7 @@
 
 #include <qjsonobject.h>
 
+#include "util/i18n.hpp"
 #include "codecs.hpp"
 
 namespace caelestia::settings {
@@ -71,7 +72,7 @@ bool ObjectNode::syncJson(const QJsonValue& json, QList<Diagnostic>& diagnostics
     m_quarantine.reset(); // Clear out old quarantine
 
     if (!json.isObject()) {
-        const auto d = Diagnostic::mismatch(u"an object"_s, json, path());
+        const auto d = Diagnostic::mismatch(util::i18n::markCtx(u"an object"_s, u"json type"_s), json, path());
         qCWarning(lcSettings, "Error decoding option %s: %s", qUtf8Printable(d.option), qUtf8Printable(d.message));
         diagnostics << d;
         return false;
@@ -115,7 +116,7 @@ QSet<QString> ObjectNode::loadFromJson(const QJsonObject& json, QList<Diagnostic
             diagnostics << Diagnostic{
                 .type = DiagnosticType::UnknownOption,
                 .option = path,
-                .message = u"Unknown option %1"_s.arg(key),
+                .message = util::i18n::mark(u"Unknown option %1"_s, { key }),
             };
             SKIP;
         }
@@ -138,7 +139,7 @@ QSet<QString> ObjectNode::loadFromJson(const QJsonObject& json, QList<Diagnostic
             diagnostics << Diagnostic{
                 .type = DiagnosticType::GlobalOption,
                 .option = path,
-                .message = u"Global properties should not be defined in overlay files"_s,
+                .message = util::i18n::mark(u"Global properties should not be defined in overlay files"_s),
             };
             SKIP;
         }
@@ -153,8 +154,8 @@ QSet<QString> ObjectNode::loadFromJson(const QJsonObject& json, QList<Diagnostic
         auto val = codec->decode(v);
         if (val.error) {
             const auto path = pathFor(key);
-            qCWarning(
-                lcSettings, "Error decoding option %s: %s", qUtf8Printable(path), qUtf8Printable(val.error->message));
+            qCWarning(lcSettings, "Error decoding option %s: %s", qUtf8Printable(path),
+                qUtf8Printable(util::i18n::unmark(val.error->message)));
             val.error->option = path;
             diagnostics << *val.error;
             SKIP;

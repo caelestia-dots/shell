@@ -1,27 +1,31 @@
 #include "common.hpp"
 
+#include "util/i18n.hpp"
 #include "node.hpp"
 
 using Qt::StringLiterals::operator""_s;
+using util::i18n::mark;
+using util::i18n::markCtx;
 
 namespace {
 
+// Type names are marked, not translated, they are folded into a message and rendered with it
 QString jsonTypeName(const QJsonValue& value) {
     switch (value.type()) {
     case QJsonValue::Null:
-        return u"null"_s;
+        return markCtx(u"null"_s, u"json type"_s);
     case QJsonValue::Bool:
-        return u"a boolean"_s;
+        return markCtx(u"a boolean"_s, u"json type"_s);
     case QJsonValue::Double:
-        return u"a number"_s;
+        return markCtx(u"a number"_s, u"json type"_s);
     case QJsonValue::String:
-        return u"a string"_s;
+        return markCtx(u"a string"_s, u"json type"_s);
     case QJsonValue::Array:
-        return u"an array"_s;
+        return markCtx(u"an array"_s, u"json type"_s);
     case QJsonValue::Object:
-        return u"an object"_s;
+        return markCtx(u"an object"_s, u"json type"_s);
     default:
-        return u"nothing"_s;
+        return markCtx(u"nothing"_s, u"json type"_s);
     }
 }
 
@@ -60,7 +64,7 @@ Diagnostic Diagnostic::mismatch(const QString& expected, const QJsonValue& value
     return {
         .type = DiagnosticType::TypeMismatch,
         .option = option,
-        .message = u"Expected %1, got %2"_s.arg(expected, jsonTypeName(value)),
+        .message = mark(u"Expected %1, got %2"_s, { expected, jsonTypeName(value) }),
     };
 }
 
