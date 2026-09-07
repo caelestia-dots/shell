@@ -18,6 +18,16 @@ bool isDigit(char c) {
     return c >= '0' && c <= '9';
 }
 
+// gettext expressions are integer valued, so a comparison yields 1 or 0
+quint32 fromBool(bool value) {
+    return value ? 1 : 0;
+}
+
+// Fallback used when the header has no usable rule
+quint32 defaultIndex(quint32 n) {
+    return n == 1 ? 0 : 1;
+}
+
 // Trims the value of a `key=value;` pair out of a header line
 QByteArrayView valueFor(QByteArrayView line, QByteArrayView key) {
     const auto start = line.indexOf(key);
@@ -69,7 +79,7 @@ bool PluralRules::parse(QByteArrayView header) {
 
 quint32 PluralRules::evaluate(int n) const {
     const auto count = static_cast<quint32>(qMax(0, n));
-    const auto index = m_root < 0 ? (count == 1 ? 0 : 1) : eval(m_root, count);
+    const auto index = m_root < 0 ? defaultIndex(count) : eval(m_root, count);
     return index < m_nplurals ? index : 0;
 }
 
@@ -93,7 +103,7 @@ quint32 PluralRules::eval(qsizetype node, quint32 n) const {
     case Op::N:
         return n;
     case Op::Not:
-        return eval(a, n) == 0 ? 1 : 0;
+        return fromBool(eval(a, n) == 0);
     case Op::Mul:
         return eval(a, n) * eval(b, n);
     case Op::Div: {
@@ -109,21 +119,21 @@ quint32 PluralRules::eval(qsizetype node, quint32 n) const {
     case Op::Sub:
         return eval(a, n) - eval(b, n);
     case Op::Lt:
-        return eval(a, n) < eval(b, n) ? 1 : 0;
+        return fromBool(eval(a, n) < eval(b, n));
     case Op::Gt:
-        return eval(a, n) > eval(b, n) ? 1 : 0;
+        return fromBool(eval(a, n) > eval(b, n));
     case Op::Le:
-        return eval(a, n) <= eval(b, n) ? 1 : 0;
+        return fromBool(eval(a, n) <= eval(b, n));
     case Op::Ge:
-        return eval(a, n) >= eval(b, n) ? 1 : 0;
+        return fromBool(eval(a, n) >= eval(b, n));
     case Op::Eq:
-        return eval(a, n) == eval(b, n) ? 1 : 0;
+        return fromBool(eval(a, n) == eval(b, n));
     case Op::Ne:
-        return eval(a, n) != eval(b, n) ? 1 : 0;
+        return fromBool(eval(a, n) != eval(b, n));
     case Op::And:
-        return eval(a, n) != 0 && eval(b, n) != 0 ? 1 : 0;
+        return fromBool(eval(a, n) != 0 && eval(b, n) != 0);
     case Op::Or:
-        return eval(a, n) != 0 || eval(b, n) != 0 ? 1 : 0;
+        return fromBool(eval(a, n) != 0 || eval(b, n) != 0);
     case Op::Cond:
         return eval(a, n) != 0 ? eval(b, n) : eval(c, n);
     }

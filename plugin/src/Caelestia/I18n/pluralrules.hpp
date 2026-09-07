@@ -8,7 +8,7 @@ namespace caelestia::i18n {
 // A gettext `Plural-Forms` rule, compiled from a catalog header
 class PluralRules {
 public:
-    // Returns false when the header has no usable rule, leaving the germanic default in place
+    // Returns false when the header has no usable rule, leaving the default in place
     bool parse(QByteArrayView header);
     [[nodiscard]] quint32 evaluate(int n) const;
 
