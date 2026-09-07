@@ -11,8 +11,18 @@ Required ordering within each QML object (with blank line between sections):
   5. object properties (bindings)
   6. child objects
   7. component definitions
+
+By default every *.qml under the repo root is checked. Pass --file to check a
+single file, --file - to check an unsaved buffer piped in on stdin, and --json
+to get machine-readable output (for editors and language servers).
+
+The report always goes to stderr, in whichever format; stdout carries only the
+fixed source, and only for `--file - --fix`. Colour is dropped when stderr is
+not a terminal, and never appears in --json output.
 """
 
+import argparse
+import json
 import re
 import sys
 from enum import IntEnum
@@ -27,6 +37,17 @@ BOLD = "\033[1m"
 RESET = "\033[0m"
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
+
+
+def disable_colour() -> None:
+    """Blank every escape code so the report is plain text.
+
+    Called when stderr isn't a terminal (a pipe or a redirect to a file) and
+    for --json, whose consumers want the strings unadorned.
+    """
+    global RED, YELLOW, CYAN, GREEN, MAGENTA, BOLD, RESET, RULE_COLOURS
+    RED = YELLOW = CYAN = GREEN = MAGENTA = BOLD = RESET = ""
+    RULE_COLOURS = dict.fromkeys(RULE_COLOURS, "")
 
 
 class Section(IntEnum):
@@ -121,7 +142,7 @@ def parse_imports(lines: list[str]) -> tuple[int | None, int | None, list[str], 
     return first_import, last_import, relative_imports, module_imports
 
 
-def check_imports(filepath: Path, lines: list[str], rel: str) -> list[Violation]:
+def check_imports(lines: list[str], rel: str) -> list[Violation]:
     """Check that module imports are in the required order."""
     violations = []
     _, _, _, module_imports = parse_imports(lines)
@@ -374,6 +395,14 @@ def fix_section_separators(lines: list[str]) -> list[str]:
     return result
 
 
+def fix_lines(lines: list[str]) -> list[str]:
+    """Apply every auto-fix to the given lines and return the result."""
+    lines = fix_imports(lines)
+    lines = fix_file_structure(lines)
+    lines = fix_section_separators(lines)
+    return lines
+
+
 def fix_file(filepath: Path) -> bool:
     """Fix auto-fixable violations. Returns True if file was modified."""
     try:
@@ -381,10 +410,7 @@ def fix_file(filepath: Path) -> bool:
     except (OSError, UnicodeDecodeError):
         return False
 
-    lines = text.splitlines()
-    lines = fix_imports(lines)
-    lines = fix_file_structure(lines)
-    lines = fix_section_separators(lines)
+    lines = fix_lines(text.splitlines())
     new_text = "\n".join(lines)
     if text.endswith("\n"):
         new_text += "\n"
@@ -427,6 +453,9 @@ class Violation:
         c = RULE_COLOURS.get(self.rule, "")
         return f"{c}[{self.rule}]{RESET} {self.file}:{self.line}: {self.msg}"
 
+    def to_dict(self) -> dict[str, object]:
+        return {"file": self.file, "line": self.line, "rule": self.rule, "message": self.msg}
+
 
 class ScopeTracker:
     """Tracks the current section and last-seen state for one indent level."""
@@ -468,17 +497,30 @@ def classify_line(stripped: str) -> Section | None:
     return None
 
 
-def check_file(filepath: Path) -> list[Violation]:
-    violations = []
-    rel = str(filepath.relative_to(REPO_ROOT))
+def rel_path(filepath: Path) -> str:
+    """Reporting path: relative to the repo root when the file lives inside it."""
+    try:
+        return str(filepath.resolve().relative_to(REPO_ROOT))
+    except ValueError:
+        return str(filepath)
 
+
+def check_file(filepath: Path) -> list[Violation]:
+    """Check a file on disk. An unreadable file yields no violations."""
     try:
         lines = filepath.read_text().splitlines()
     except (OSError, UnicodeDecodeError):
-        return violations
+        return []
+
+    return check_lines(lines, rel_path(filepath))
+
+
+def check_lines(lines: list[str], rel: str) -> list[Violation]:
+    """Check already-loaded source. `rel` is only used to label violations."""
+    violations = []
 
     violations.extend(check_file_structure(lines, rel))
-    violations.extend(check_imports(filepath, lines, rel))
+    violations.extend(check_imports(lines, rel))
 
     scopes: dict[str, ScopeTracker] = {}  # indent -> tracker
     in_block_comment = False
@@ -613,35 +655,98 @@ def check_file(filepath: Path) -> list[Violation]:
     return violations
 
 
-def main():
-    fix_mode = "--fix" in sys.argv
-    qml_files = sorted(p for p in REPO_ROOT.rglob("*.qml") if "build" not in p.parts)
+def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
+    parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    parser.add_argument(
+        "--fix",
+        action="store_true",
+        help="rewrite auto-fixable violations in place; with --file - nothing "
+        "is written, the fixed source goes to stdout instead, and the report "
+        "covers only what is left to fix by hand (its line numbers refer to "
+        "that fixed source, not to what was piped in)",
+    )
+    parser.add_argument(
+        "--json",
+        action="store_true",
+        help='report as JSON on stderr: {"violations": [{"file", "line", "rule", "message"}]}',
+    )
+    parser.add_argument(
+        "--file",
+        metavar="PATH",
+        help="check only this file instead of every *.qml under the repo root; "
+        "pass - to read the source from stdin (for unsaved editor buffers)",
+    )
+    return parser.parse_args(argv)
 
-    if fix_mode:
-        fixed = sum(1 for f in qml_files if fix_file(f))
-        print(f"{BOLD}Fixed {fixed} file(s).{RESET}\n")
 
-    print(f"{BOLD}Checking {len(qml_files)} QML files for convention violations...{RESET}\n")
+def report(violations: list[Violation], args: argparse.Namespace, checked: int, fixed: int | None) -> int:
+    """Write the violations to stderr in the requested format.
 
-    all_violations: list[Violation] = []
-    for f in qml_files:
-        all_violations.extend(check_file(f))
+    Everything goes to stderr so stdout stays free for the fixed source of
+    `--file - --fix`. Returns the exit code.
+    """
+    err = sys.stderr
 
-    for v in all_violations:
-        print(v)
+    if args.json:
+        payload: dict[str, object] = {"violations": [v.to_dict() for v in violations]}
+        if fixed is not None:
+            payload["fixed"] = fixed
+        print(json.dumps(payload), file=err)
+        return 1 if violations else 0
 
-    print()
-    if all_violations:
+    if fixed is not None:
+        print(f"{BOLD}Fixed {fixed} file(s).{RESET}\n", file=err)
+
+    print(f"{BOLD}Checking {checked} QML file(s) for convention violations...{RESET}\n", file=err)
+
+    for v in violations:
+        print(v, file=err)
+
+    print(file=err)
+    if violations:
         by_rule: dict[str, int] = {}
-        for v in all_violations:
+        for v in violations:
             by_rule[v.rule] = by_rule.get(v.rule, 0) + 1
         for rule, count in sorted(by_rule.items()):
-            print(f"  {RULE_COLOURS.get(rule, '')}{rule}{RESET}: {count}")
-        print(f"\n{BOLD}Found {len(all_violations)} violation(s).{RESET}")
+            print(f"  {RULE_COLOURS.get(rule, '')}{rule}{RESET}: {count}", file=err)
+        print(f"\n{BOLD}Found {len(violations)} violation(s).{RESET}", file=err)
         return 1
     else:
-        print(f"{BOLD}No violations found.{RESET}")
+        print(f"{BOLD}No violations found.{RESET}", file=err)
         return 0
+
+
+def main() -> int:
+    args = parse_args()
+
+    if args.json or not sys.stderr.isatty():
+        disable_colour()
+
+    # Buffer mode: the source never touches disk, so --fix writes the fixed
+    # source to stdout and the report covers what it could not fix.
+    if args.file == "-":
+        text = sys.stdin.read()
+        lines = text.splitlines()
+        if args.fix:
+            lines = fix_lines(lines)
+            fixed_text = "\n".join(lines)
+            if text.endswith("\n"):
+                fixed_text += "\n"
+            sys.stdout.write(fixed_text)
+        return report(check_lines(lines, "<stdin>"), args, 1, None)
+
+    if args.file:
+        path = Path(args.file)
+        if not path.is_file():
+            print(f"{RED}no such file: {path}{RESET}", file=sys.stderr)
+            return 2
+        qml_files = [path]
+    else:
+        qml_files = sorted(p for p in REPO_ROOT.rglob("*.qml") if "build" not in p.parts)
+
+    fixed = sum(1 for f in qml_files if fix_file(f)) if args.fix else None
+    violations = [v for f in qml_files for v in check_file(f)]
+    return report(violations, args, len(qml_files), fixed)
 
 
 if __name__ == "__main__":
