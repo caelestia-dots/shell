@@ -87,6 +87,11 @@ QString Translator::language() const {
     return m_language;
 }
 
+void Translator::setLanguageQml(const QString& language) {
+    // The connection in the ctor will update the lang in this
+    config::ConfigSingleton::instance()->general()->set_language(language);
+}
+
 QString Translator::_tr(const QString& text, const QString& context, bool markedOnly) const {
     if (text.isEmpty())
         return text;

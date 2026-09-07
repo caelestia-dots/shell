@@ -14,7 +14,7 @@ class Translator : public QObject {
     Q_PROPERTY(bool __trsChanged READ trsChangedFlag NOTIFY languageChanged)
 
     Q_PROPERTY(QStringList supportedLanguages READ supportedLanguages CONSTANT)
-    Q_PROPERTY(QString language READ language NOTIFY languageChanged)
+    Q_PROPERTY(QString language READ language WRITE setLanguageQml NOTIFY languageChanged)
 
 public:
     explicit Translator(QObject* parent = nullptr);
@@ -23,6 +23,7 @@ public:
 
     [[nodiscard]] QStringList supportedLanguages() const;
     [[nodiscard]] QString language() const;
+    static void setLanguageQml(const QString& language);
 
     // NOLINTBEGIN(readability-identifier-naming)
     Q_INVOKABLE [[nodiscard]] QString _tr(const QString& text, const QString& context, bool markedOnly) const;
