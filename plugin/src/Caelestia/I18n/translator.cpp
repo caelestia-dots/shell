@@ -100,7 +100,7 @@ QString Translator::_tr(const QString& text, const QString& context, bool marked
         auto result = marked.n < 0 ? translate(marked.text, marked.context)
                                    : translatePlural(marked.text, marked.plural, marked.n, marked.context);
         for (const auto& arg : marked.args)
-            result = result.arg(arg);
+            result = result.arg(util::i18n::isMarked(arg) ? _tr(arg, {}, true) : arg);
         return result;
     }
 

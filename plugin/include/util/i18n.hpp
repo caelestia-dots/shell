@@ -22,6 +22,7 @@ struct MarkedString {
 namespace detail {
 
 // Marks a string with the given plural forms, context and args.
+// Args can be marked, however they must not carry args themselves.
 // The marked format is `markChar {<arg> argSep} [<context> contextSep] <text> [pluralSep <plural> pluralSep <n>]`
 inline QString doMark(
     const QString& text, const QString& plural, int n, const QString& context, const QStringList& args) {
@@ -116,7 +117,7 @@ inline QString unmark(const QString& text) {
     // Convert plural using default English rules since we are converting to English
     auto result = marked.n == 1 || marked.plural.isEmpty() ? marked.text : marked.plural;
     for (const auto& arg : marked.args)
-        result = result.arg(arg);
+        result = result.arg(unmark(arg));
     return result;
 }
 
