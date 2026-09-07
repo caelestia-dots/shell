@@ -21,11 +21,11 @@ DecodeResult error(DiagnosticType::Type type, const QString& message) {
     Diagnostic error;
     error.type = type;
     error.message = message;
-    return { .value = QVariant(), .error = error };
+    return { .value = QVariant(), .error = error, .indexPath = {} };
 }
 
 DecodeResult mismatch(ExpectedType expected, const QJsonValue& value) {
-    return { .value = QVariant(), .error = Diagnostic::mismatch(expected, value) };
+    return { .value = QVariant(), .error = Diagnostic::mismatch(expected, value), .indexPath = {} };
 }
 
 template <typename Container> ValueCodec* makeListCodec(const QMetaType& type) {
@@ -100,7 +100,7 @@ DecodeResult BoolCodec::decode(const QJsonValue& value) const {
     if (!value.isBool())
         return mismatch(ExpectedType::Bool, value);
 
-    return { .value = value.toBool(), .error = std::nullopt };
+    return { .value = value.toBool(), .error = std::nullopt, .indexPath = {} };
 }
 
 QJsonValue IntCodec::encode(const QVariant& value) const {
@@ -126,7 +126,7 @@ DecodeResult IntCodec::decode(const QJsonValue& value) const {
         return error(DiagnosticType::InvalidValue, message);
     }
 
-    return { .value = static_cast<int>(num), .error = std::nullopt };
+    return { .value = static_cast<int>(num), .error = std::nullopt, .indexPath = {} };
 }
 
 QJsonValue RealCodec::encode(const QVariant& value) const {
@@ -137,7 +137,7 @@ DecodeResult RealCodec::decode(const QJsonValue& value) const {
     if (!value.isDouble())
         return mismatch(ExpectedType::Real, value);
 
-    return { .value = QVariant::fromValue<qreal>(value.toDouble()), .error = std::nullopt };
+    return { .value = QVariant::fromValue<qreal>(value.toDouble()), .error = std::nullopt, .indexPath = {} };
 }
 
 QJsonValue StringCodec::encode(const QVariant& value) const {
@@ -148,7 +148,7 @@ DecodeResult StringCodec::decode(const QJsonValue& value) const {
     if (!value.isString())
         return mismatch(ExpectedType::String, value);
 
-    return { .value = value.toString(), .error = std::nullopt };
+    return { .value = value.toString(), .error = std::nullopt, .indexPath = {} };
 }
 
 QJsonValue VariantListCodec::encode(const QVariant& value) const {
@@ -159,7 +159,7 @@ DecodeResult VariantListCodec::decode(const QJsonValue& value) const {
     if (!value.isArray())
         return mismatch(ExpectedType::Array, value);
 
-    return { .value = value.toArray().toVariantList(), .error = std::nullopt };
+    return { .value = value.toArray().toVariantList(), .error = std::nullopt, .indexPath = {} };
 }
 
 QJsonValue VariantMapCodec::encode(const QVariant& value) const {
@@ -170,7 +170,7 @@ DecodeResult VariantMapCodec::decode(const QJsonValue& value) const {
     if (!value.isObject())
         return mismatch(ExpectedType::Object, value);
 
-    return { .value = value.toObject().toVariantMap(), .error = std::nullopt };
+    return { .value = value.toObject().toVariantMap(), .error = std::nullopt, .indexPath = {} };
 }
 
 EnumCodec::EnumCodec(const QMetaType& type, const QMetaEnum& metaEnum)
@@ -206,7 +206,7 @@ DecodeResult EnumCodec::decode(const QJsonValue& value) const {
                 mark(u"Could not convert %1 to %2"_s, { key, QString::fromUtf8(m_type.name()) }));
         }
 
-        return { .value = decoded, .error = std::nullopt };
+        return { .value = decoded, .error = std::nullopt, .indexPath = {} };
     }
 
     QStringList options;
@@ -251,7 +251,7 @@ template <typename Container> DecodeResult ListCodec<Container>::decode(const QJ
         list.append(result.value.value<Value>());
     }
 
-    return { QVariant::fromValue(list), std::nullopt };
+    return { .value = QVariant::fromValue(list), .error = std::nullopt, .indexPath = {} };
 }
 
 // Instantiated for types as needed

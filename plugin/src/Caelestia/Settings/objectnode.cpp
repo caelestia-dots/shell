@@ -154,7 +154,7 @@ QSet<QString> ObjectNode::loadFromJson(const QJsonObject& json, QList<Diagnostic
         auto val = codec->decode(v);
         if (val.error) {
             auto path = pathFor(key);
-            for (const auto index : val.indexPath)
+            for (const auto index : std::as_const(val.indexPath))
                 path = elementPath(path, QString::number(index));
             qCWarning(lcSettings, "Error decoding option %s: %s", qUtf8Printable(path),
                 qUtf8Printable(util::i18n::unmark(val.error->message)));
