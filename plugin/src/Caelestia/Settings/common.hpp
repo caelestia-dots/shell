@@ -49,6 +49,15 @@ public:
     Q_INVOKABLE static QString toString(Type t);
 };
 
+enum class ExpectedType : quint8 {
+    Bool,
+    Int,
+    Real,
+    String,
+    Array,
+    Object,
+};
+
 struct Diagnostic {
     Q_GADGET
     QML_VALUE_TYPE(diagnostic)
@@ -62,7 +71,7 @@ public:
     QString option;
     QString message;
 
-    static Diagnostic mismatch(const QString& expected, const QJsonValue& value, const QString& option = QString());
+    static Diagnostic mismatch(ExpectedType expected, const QJsonValue& value, const QString& option = QString());
 
     bool operator==(const Diagnostic& other) const = default;
 };

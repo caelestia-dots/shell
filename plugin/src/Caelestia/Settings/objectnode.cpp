@@ -72,7 +72,7 @@ bool ObjectNode::syncJson(const QJsonValue& json, QList<Diagnostic>& diagnostics
     m_quarantine.reset(); // Clear out old quarantine
 
     if (!json.isObject()) {
-        const auto d = Diagnostic::mismatch(util::i18n::markCtx(u"an object"_s, u"json type"_s), json, path());
+        const auto d = Diagnostic::mismatch(ExpectedType::Object, json, path());
         qCWarning(lcSettings, "Error decoding option %s: %s", qUtf8Printable(d.option), qUtf8Printable(d.message));
         diagnostics << d;
         return false;

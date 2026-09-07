@@ -288,7 +288,7 @@ QJsonValue ListNode::toJson(bool sparse) const {
 
 bool ListNode::syncJson(const QJsonValue& json, QList<Diagnostic>& diagnostics) {
     if (!json.isArray()) {
-        const auto d = Diagnostic::mismatch(util::i18n::markCtx(u"an array"_s, u"json type"_s), json, path());
+        const auto d = Diagnostic::mismatch(ExpectedType::Array, json, path());
         qCWarning(lcSettings, "Error decoding option %s: %s", qUtf8Printable(d.option), qUtf8Printable(d.message));
         diagnostics << d;
         return false;
