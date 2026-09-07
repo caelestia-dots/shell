@@ -220,9 +220,9 @@ PageBase {
                                 case "connected":
                                     return Tr.tr("Connected");
                                 case "needs-auth":
-                                    return VPN.status.reason || Tr.tr("Authentication required");
+                                    return VPN.status.reason ? Tr.trMarked(VPN.status.reason) : Tr.tr("Authentication required");
                                 case "error":
-                                    return VPN.status.reason || Tr.tr("An error occurred");
+                                    return VPN.status.reason ? Tr.trMarked(VPN.status.reason) : Tr.tr("An error occurred");
                                 default:
                                     return Tr.tr("Selected");
                                 }

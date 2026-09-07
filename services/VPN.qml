@@ -363,14 +363,14 @@ Singleton {
                 status.state = "connecting";
             } else if (backendState === "NeedsLogin" || backendState === "NeedsMachineAuth") {
                 status.state = "needs-auth";
-                status.reason = backendState === "NeedsLogin" ? "Login required" : "Machine authorization required";
+                status.reason = backendState === "NeedsLogin" ? Tr.mark("Login required") : Tr.mark("Machine authorization required");
                 status.authUrl = data.AuthURL || "";
             }
         } catch (e) {
             // JSON parsing failed - treat as disconnected unless it looks like an error
             if (output.includes("error") || output.includes("Error") || output.includes("failed")) {
                 status.state = "disconnected";
-                status.reason = "Tailscale may not be running";
+                status.reason = Tr.mark("Tailscale may not be running");
             } else {
                 status.state = "disconnected";
             }
@@ -402,14 +402,14 @@ Singleton {
                 const error = data.management.error;
                 if (error.includes("auth") || error.includes("login")) {
                     status.state = "needs-auth";
-                    status.reason = "Authentication required";
+                    status.reason = Tr.mark("Authentication required");
                 } else {
                     status.reason = error;
                 }
             }
         } catch (e) {
             status.state = "error";
-            status.reason = "Failed to parse status";
+            status.reason = Tr.mark("Failed to parse status");
         }
         return status;
     }
@@ -429,7 +429,7 @@ Singleton {
         // "Status update: Disconnected\nReason: ...".
         if (output.includes("Registration Missing") || output.includes("registration") || output.includes("register") || output.includes("Unable to connect")) {
             status.state = "needs-auth";
-            status.reason = "WARP registration required";
+            status.reason = Tr.mark("WARP registration required");
         } else if (output.includes("Disconnected")) {
             status.state = "disconnected";
         } else if (output.includes("Connecting")) {
@@ -439,7 +439,7 @@ Singleton {
             status.state = "connected";
         } else {
             status.state = "error";
-            status.reason = "Unknown WARP status";
+            status.reason = Tr.mark("Unknown WARP status");
         }
         return status;
     }
@@ -483,7 +483,7 @@ Singleton {
         return {
             connected: false,
             state: "needs-auth",
-            reason: "Authentication required",
+            reason: Tr.mark("Authentication required"),
             authUrl: authUrl,
             server: ""
         };
@@ -523,7 +523,7 @@ Singleton {
         if (!GlobalConfig.utilities.toasts.vpnChanged)
             return;
 
-        const displayName = active.displayName || "VPN";
+        const displayName = active.displayName || Tr.tr("VPN");
 
         switch (statusObj.state) {
         case "connected":
@@ -533,12 +533,12 @@ Singleton {
             Toaster.toast(Tr.tr("VPN disconnected"), Tr.tr("Disconnected from %1").arg(displayName), "vpn_key_off");
             break;
         case "needs-auth":
-            const authMsg = statusObj.reason || "Authentication required";
+            const authMsg = statusObj.reason ? Tr.trMarked(statusObj.reason) : Tr.tr("Authentication required");
             Toaster.toast(Tr.tr("VPN authentication required"), Tr.tr("%1: %2").arg(displayName).arg(authMsg), "vpn_lock");
             break;
         case "error":
             if (status.state === "connected" || status.state === "connecting" || status.state === "needs-auth") {
-                const errMsg = statusObj.reason || "Unknown error";
+                const errMsg = statusObj.reason ? Tr.trMarked(statusObj.reason) : Tr.tr("Unknown error");
                 Toaster.toast(Tr.tr("VPN error"), Tr.tr("%1: %2").arg(displayName).arg(errMsg), "error");
             }
             break;
@@ -660,7 +660,7 @@ Singleton {
         display: iface => iface
         connectCmd: iface => ["pkexec", "wg-quick", "up", iface]
         disconnectCmd: iface => ["pkexec", "wg-quick", "down", iface]
-        connectHint: error => error.includes("Unknown device type") || error.includes("Protocol not supported") ? "WireGuard module not loaded. Run: sudo modprobe wireguard" : ""
+        connectHint: error => error.includes("Unknown device type") || error.includes("Protocol not supported") ? Tr.mark("WireGuard module not loaded. Run: %1", ["sudo modprobe wireguard"]) : ""
     }
 
     Adapter {
@@ -703,7 +703,7 @@ Singleton {
         disconnectCmd: ["tailscale", "down"]
         statusCmd: ["tailscale", "status", "--json"]
         parse: out => root.parseTailscaleStatus(out)
-        connectHint: error => error.includes("Access denied") || error.includes("checkprefs access denied") ? "Permission denied. Run in terminal: sudo tailscale set --operator=$USER" : ""
+        connectHint: error => error.includes("Access denied") || error.includes("checkprefs access denied") ? Tr.mark("Permission denied. Run in terminal: %1", ["sudo tailscale set --operator=$USER"]) : ""
     }
 
     // ── Generic engine ──────────────────────────────────────────────────────
@@ -744,7 +744,7 @@ Singleton {
                     root.updateStatus({
                         connected: false,
                         state: "disconnected",
-                        reason: `Service not running (run: sudo systemctl start ${root.active.service})`,
+                        reason: Tr.mark("Service not running (run: %1)", [`sudo systemctl start ${root.active.service}`]),
                         authUrl: "",
                         server: ""
                     });
