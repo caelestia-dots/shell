@@ -19,13 +19,13 @@ PageBase {
 
         ToggleRow {
             first: true
-            text: Tr.tr("Compact")
+            text: Tr.trCtx("Compact", "taskbar active window layout")
             checked: Config.bar.activeWindow.compact
             onToggled: GlobalConfig.bar.activeWindow.compact = checked
         }
 
         ToggleRow {
-            text: Tr.tr("Inverted")
+            text: Tr.trCtx("Inverted", "taskbar active window: swap the title and class order")
             checked: Config.bar.activeWindow.inverted
             onToggled: GlobalConfig.bar.activeWindow.inverted = checked
         }

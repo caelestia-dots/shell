@@ -219,7 +219,7 @@ StackView {
 
                         StyledText {
                             anchors.verticalCenter: parent.verticalCenter
-                            text: Tr.tr("Back")
+                            text: Tr.trCtx("Back", "button")
                             color: Colours.palette.m3onSecondaryContainer
                         }
                     }

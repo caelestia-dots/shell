@@ -8,6 +8,7 @@ import Caelestia.I18n
 import qs.components
 import qs.components.controls
 import qs.services
+import qs.utils
 import qs.modules.nexus.common
 
 // Detail / settings sub-page for the active Wi-Fi network. Reached by tapping
@@ -198,35 +199,36 @@ PageBase {
             first: true
             icon: "signal_wifi_4_bar"
             label: Tr.tr("Signal")
-            value: root.ap ? Tr.tr("%1%").arg(root.ap.strength) : Tr.tr("—")
+            value: root.ap ? Strings.percent(root.ap.strength) : "—"
             visible: root.isActive
         }
 
         InfoRow {
             icon: "lock"
             label: Tr.tr("Security")
-            value: root.ap?.security || Tr.tr("Open")
+            value: root.ap?.security || Tr.trCtx("Open", "wifi security type")
             visible: root.isActive
         }
 
         InfoRow {
             icon: "graphic_eq"
             label: Tr.tr("Frequency")
-            value: root.ap && root.ap.frequency > 0 ? Tr.tr("%1 MHz").arg(root.ap.frequency) : Tr.tr("—")
+            // TRANSLATORS: %1 = channel frequency; MHz is a unit, leave it untranslated
+            value: root.ap && root.ap.frequency > 0 ? Tr.tr("%1 MHz").arg(root.ap.frequency) : "—"
             visible: root.isActive
         }
 
         InfoRow {
             icon: "lan"
             label: Tr.tr("IP address")
-            value: root.details?.ipAddress || Tr.tr("—")
+            value: root.details?.ipAddress || "—"
             visible: root.isActive
         }
 
         InfoRow {
             icon: "router"
             label: Tr.tr("Gateway")
-            value: root.details?.gateway || Tr.tr("—")
+            value: root.details?.gateway || "—"
             visible: root.isActive
         }
 
@@ -234,7 +236,7 @@ PageBase {
             last: true
             icon: "memory"
             label: Tr.tr("MAC address")
-            value: root.details?.macAddress || Tr.tr("—")
+            value: root.details?.macAddress || "—"
             visible: root.isActive
         }
 
@@ -269,6 +271,7 @@ PageBase {
             first: true
             last: root.ipMethod === "auto"
             label: Tr.tr("IP assignment")
+            // TRANSLATORS: DHCP and DNS are protocol names, leave them untranslated
             fallbackText: Tr.tr("Automatic (DHCP)")
             fallbackIcon: "lan"
 
@@ -291,7 +294,7 @@ PageBase {
                     id: manualItem
 
                     icon: "edit"
-                    text: Tr.tr("Manual")
+                    text: Tr.trCtx("Manual", "ip configuration method")
                 }
             ]
 
@@ -374,6 +377,7 @@ PageBase {
                             id: addressField
 
                             Layout.fillWidth: true
+                            // TRANSLATORS: CIDR is a networking term, leave it untranslated
                             placeholderText: Tr.tr("Address (CIDR)")
                             leadingIcon: "router"
                             supportingText: Tr.tr("IP and prefix, e.g. 192.168.1.50/24")
@@ -401,6 +405,7 @@ PageBase {
                     Layout.fillWidth: true
                     placeholderText: Tr.tr("DNS servers")
                     leadingIcon: "dns"
+                    // TRANSLATORS: describes the DNS servers field above: several addresses separated by commas
                     supportingText: Tr.tr("Comma-separated")
                     errorText: Tr.tr("Enter valid DNS server addresses")
                     inputMethodHints: Qt.ImhNoPredictiveText

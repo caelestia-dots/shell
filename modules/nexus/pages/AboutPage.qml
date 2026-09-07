@@ -96,7 +96,7 @@ PageBase {
         }
 
         InfoRow {
-            label: Tr.tr("Device")
+            label: Tr.trCtx("Device", "system model name")
             value: SysInfo.device
         }
 
@@ -112,6 +112,7 @@ PageBase {
 
         InfoRow {
             last: true
+            // TRANSLATORS: BIOS or UEFI firmware version
             label: Tr.tr("Firmware")
             value: SysInfo.firmware
         }
@@ -123,23 +124,23 @@ PageBase {
 
         InfoRow {
             first: true
-            label: Tr.tr("Shell")
+            label: Tr.trCtx("Shell", "the caelestia shell itself, not a unix shell")
             value: CUtils.version || "…"
         }
 
         InfoRow {
-            label: Tr.tr("CLI")
+            label: Tr.trCtx("CLI", "the caelestia command line tool")
             value: root.cliVersion || "…"
         }
 
         InfoRow {
-            label: Tr.tr("Quickshell")
+            label: "Quickshell"
             value: root.quickshellVersion || "…"
         }
 
         InfoRow {
             last: true
-            label: Tr.tr("Qt")
+            label: "Qt"
             value: CUtils.qtVersion || "…"
         }
 

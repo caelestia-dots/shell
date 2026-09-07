@@ -534,12 +534,12 @@ Singleton {
             break;
         case "needs-auth":
             const authMsg = statusObj.reason ? Tr.trMarked(statusObj.reason) : Tr.tr("Authentication required");
-            Toaster.toast(Tr.tr("VPN authentication required"), Tr.tr("%1: %2").arg(displayName).arg(authMsg), "vpn_lock");
+            Toaster.toast(Tr.tr("VPN authentication required"), Tr.trCtx("%1: %2", "vpn name and reason").arg(displayName).arg(authMsg), "vpn_lock");
             break;
         case "error":
             if (status.state === "connected" || status.state === "connecting" || status.state === "needs-auth") {
                 const errMsg = statusObj.reason ? Tr.trMarked(statusObj.reason) : Tr.tr("Unknown error");
-                Toaster.toast(Tr.tr("VPN error"), Tr.tr("%1: %2").arg(displayName).arg(errMsg), "error");
+                Toaster.toast(Tr.tr("VPN error"), Tr.trCtx("%1: %2", "vpn name and reason").arg(displayName).arg(errMsg), "error");
             }
             break;
         }
@@ -660,6 +660,7 @@ Singleton {
         display: iface => iface
         connectCmd: iface => ["pkexec", "wg-quick", "up", iface]
         disconnectCmd: iface => ["pkexec", "wg-quick", "down", iface]
+        // TRANSLATORS: %1 = a shell command, leave it untranslated
         connectHint: error => error.includes("Unknown device type") || error.includes("Protocol not supported") ? Tr.mark("WireGuard module not loaded. Run: %1", ["sudo modprobe wireguard"]) : ""
     }
 
@@ -703,6 +704,7 @@ Singleton {
         disconnectCmd: ["tailscale", "down"]
         statusCmd: ["tailscale", "status", "--json"]
         parse: out => root.parseTailscaleStatus(out)
+        // TRANSLATORS: %1 = a shell command, leave it untranslated
         connectHint: error => error.includes("Access denied") || error.includes("checkprefs access denied") ? Tr.mark("Permission denied. Run in terminal: %1", ["sudo tailscale set --operator=$USER"]) : ""
     }
 
@@ -744,6 +746,7 @@ Singleton {
                     root.updateStatus({
                         connected: false,
                         state: "disconnected",
+                        // TRANSLATORS: %1 = a shell command, leave it untranslated
                         reason: Tr.mark("Service not running (run: %1)", [`sudo systemctl start ${root.active.service}`]),
                         authUrl: "",
                         server: ""

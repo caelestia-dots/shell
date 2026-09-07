@@ -92,9 +92,9 @@ PageBase {
                             text: {
                                 let security;
                                 if (saved.ap)
-                                    security = saved.ap.security || Tr.tr("Open");
+                                    security = saved.ap.security || Tr.trCtx("Open", "wifi security type");
                                 else
-                                    security = Nmcli.securityLabel(Nmcli.savedSecurityFor(saved.modelData)) || Tr.tr("Unknown");
+                                    security = Nmcli.securityLabel(Nmcli.savedSecurityFor(saved.modelData)) || Tr.trCtx("Unknown", "unknown wifi security");
                                 if (saved.isActive)
                                     return Tr.trCtx("Connected", "network connected") + " • " + security;
                                 return security;

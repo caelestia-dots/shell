@@ -29,8 +29,8 @@ Searcher {
 
     component Action: QtObject {
         required property var modelData
-        readonly property string name: modelData.name ? Tr.trMarked(modelData.name) : Tr.tr("Unnamed")
-        readonly property string desc: modelData.description ? Tr.trMarked(modelData.description) : Tr.tr("No description")
+        readonly property string name: modelData.name ? Tr.trMarked(modelData.name) : Tr.trCtx("Unnamed", "launcher action with no name")
+        readonly property string desc: modelData.description ? Tr.trMarked(modelData.description) : Tr.trCtx("No description", "launcher action with no description")
         readonly property string icon: modelData.icon ?? "help_outline"
         readonly property list<string> command: modelData.command ?? []
         readonly property bool enabled: modelData.enabled ?? true

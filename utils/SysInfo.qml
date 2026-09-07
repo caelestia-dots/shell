@@ -18,6 +18,8 @@ Singleton {
     property bool isDefaultLogo: true
 
     property string uptime
+    // Uptime trimmed to its two largest components
+    property string uptimeShort
     readonly property string user: Quickshell.env("USER")
     readonly property string wm: Quickshell.env("XDG_CURRENT_DESKTOP") || Quickshell.env("XDG_SESSION_DESKTOP")
     readonly property string shell: Quickshell.env("SHELL").split("/").pop()
@@ -126,14 +128,19 @@ Singleton {
             const hours = Math.floor((up % 86400) / 3600);
             const minutes = Math.floor((up % 3600) / 60);
 
-            let str = "";
+            // TRANSLATORS: joins uptime components, e.g. "2 days, 3 hours"
+            const sep = Tr.trCtx(", ", "uptime component separator");
+
+            const parts = [];
             if (days > 0)
-                str += Tr.trN("%n day", "%n days", days);
+                parts.push(Tr.trN("%n day", "%n days", days));
             if (hours > 0)
-                str += (str ? ", " : "") + Tr.trN("%n hour", "%n hours", hours);
-            if (minutes > 0 || !str)
-                str += (str ? ", " : "") + Tr.trN("%n minute", "%n minutes", minutes);
-            root.uptime = str;
+                parts.push(Tr.trN("%n hour", "%n hours", hours));
+            if (minutes > 0 || parts.length === 0)
+                parts.push(Tr.trN("%n minute", "%n minutes", minutes));
+
+            root.uptime = parts.join(sep);
+            root.uptimeShort = parts.slice(0, 2).join(sep);
         }
     }
 }

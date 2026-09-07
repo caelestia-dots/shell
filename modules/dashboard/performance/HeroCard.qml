@@ -6,6 +6,7 @@ import Caelestia.I18n
 import qs.components
 import qs.components.controls
 import qs.services
+import qs.utils
 
 StyledRect {
     id: root
@@ -134,14 +135,15 @@ StyledRect {
             anchors.bottom: parent.top
             anchors.horizontalCenter: parent.horizontalCenter
 
-            text: Tr.tr("Usage")
+            // TRANSLATORS: labels the CPU or GPU utilisation percentage shown below it
+            text: Tr.trCtx("Usage", "resource usage")
             color: Colours.palette.m3onSurfaceVariant
             font: Tokens.font.body.small
         }
 
         StyledText {
             anchors.centerIn: parent
-            text: isNaN(root.usage) ? "...%" : Math.round(root.usage * 100) + "%"
+            text: isNaN(root.usage) ? "..." : Strings.percentOne(root.usage)
             color: root.accent
             font: Tokens.font.headline.builders.small.width(50).build()
         }

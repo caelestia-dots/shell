@@ -14,10 +14,10 @@ PageBase {
     // Lyrics backends, ordered to match config::LyricsBackend (Auto, Local, LRCLIB, NetEase)
     readonly property list<MenuItem> lyricsItems: [
         MenuItem {
-            text: Tr.tr("Auto")
+            text: Tr.trCtx("Auto", "lyrics backend")
         },
         MenuItem {
-            text: Tr.tr("Local")
+            text: Tr.trCtx("Local", "lyrics backend")
         },
         MenuItem {
             text: "LRCLIB"
@@ -30,16 +30,16 @@ PageBase {
     // GPU types, ordered to match config::GpuType (Auto, Nvidia, Generic, None)
     readonly property list<MenuItem> gpuItems: [
         MenuItem {
-            text: Tr.tr("Auto")
+            text: Tr.trCtx("Auto", "gpu type")
         },
         MenuItem {
             text: "NVIDIA"
         },
         MenuItem {
-            text: Tr.tr("Generic")
+            text: Tr.trCtx("Generic", "gpu type")
         },
         MenuItem {
-            text: Tr.tr("None")
+            text: Tr.trCtx("None", "gpu type")
         }
     ]
 
@@ -89,6 +89,7 @@ PageBase {
         StepperRow {
             first: true
             label: Tr.tr("Media refresh")
+            // TRANSLATORS: ms is the millisecond unit, leave it untranslated
             subtext: Tr.tr("How often the media position updates (ms)")
             value: GlobalConfig.dashboard.mediaUpdateInterval
             from: 100
@@ -99,6 +100,7 @@ PageBase {
 
         StepperRow {
             label: Tr.tr("System stats refresh")
+            // TRANSLATORS: CPU and GPU are hardware abbreviations, leave them untranslated
             subtext: Tr.tr("CPU, memory and GPU update interval (seconds)")
             value: GlobalConfig.dashboard.resourceUpdateInterval / 1000
             from: 0.5
@@ -139,7 +141,7 @@ PageBase {
             menuItems: playerVariants.instances
             active: menuItems.find(i => i.text === GlobalConfig.services.defaultPlayer) ?? null
             fallbackIcon: "music_note"
-            fallbackText: GlobalConfig.services.defaultPlayer || Tr.tr("Auto")
+            fallbackText: GlobalConfig.services.defaultPlayer || Tr.trCtx("Auto", "default media player")
             onSelected: item => GlobalConfig.services.defaultPlayer = item.text
         }
 
@@ -187,6 +189,7 @@ PageBase {
 
         StepperRow {
             first: true
+            // TRANSLATORS: bars of a spectrum analyser, not the taskbar
             label: Tr.tr("Visualiser bars")
             subtext: Tr.tr("Number of bars in the audio visualisers")
             value: GlobalConfig.services.visualiserBars

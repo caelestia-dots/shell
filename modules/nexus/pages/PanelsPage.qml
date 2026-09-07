@@ -18,7 +18,7 @@ PageBase {
             first: true
             icon: "dashboard"
             text: Tr.tr("Dashboard")
-            subtext: Config.dashboard.enabled ? Tr.tr("Enabled") : Tr.tr("Disabled")
+            subtext: Config.dashboard.enabled ? Tr.trCtx("Enabled", "panel status") : Tr.trCtx("Disabled", "panel status")
             onClicked: root.nState.openSubPage(1)
         }
 
@@ -32,14 +32,14 @@ PageBase {
         NavRow {
             icon: "apps"
             text: Tr.tr("Launcher")
-            subtext: Config.launcher.enabled ? Tr.tr("Enabled") : Tr.tr("Disabled")
+            subtext: Config.launcher.enabled ? Tr.trCtx("Enabled", "panel status") : Tr.trCtx("Disabled", "panel status")
             onClicked: root.nState.openSubPage(3)
         }
 
         NavRow {
             icon: "dock_to_right"
             text: Tr.tr("Sidebar")
-            subtext: Config.sidebar.enabled ? Tr.tr("Enabled") : Tr.tr("Disabled")
+            subtext: Config.sidebar.enabled ? Tr.trCtx("Enabled", "panel status") : Tr.trCtx("Disabled", "panel status")
             onClicked: root.nState.openSubPage(4)
         }
 
@@ -47,7 +47,7 @@ PageBase {
             last: true
             icon: "construction"
             text: Tr.tr("Utilities")
-            subtext: Config.utilities.enabled ? Tr.tr("Enabled") : Tr.tr("Disabled")
+            subtext: Config.utilities.enabled ? Tr.trCtx("Enabled", "panel status") : Tr.trCtx("Disabled", "panel status")
             onClicked: root.nState.openSubPage(5)
         }
     }

@@ -19,7 +19,7 @@ PageBase {
 
         StepperRow {
             first: true
-            label: Tr.tr("Shown")
+            label: Tr.trCtx("Shown", "number of workspaces")
             subtext: Tr.tr("Number of workspaces displayed")
             value: Config.bar.workspaces.shown
             from: 1
@@ -29,6 +29,7 @@ PageBase {
         }
 
         ToggleRow {
+            // TRANSLATORS: the three following labels name visual decorations drawn on the workspace pill
             text: Tr.tr("Active indicator")
             checked: Config.bar.workspaces.activeIndicator
             onToggled: GlobalConfig.bar.workspaces.activeIndicator = checked
@@ -60,6 +61,7 @@ PageBase {
         }
 
         StepperRow {
+            // TRANSLATORS: maximum number of window icons shown per workspace
             label: Tr.tr("Max window icons")
             value: Config.bar.workspaces.maxWindowIcons
             from: 0

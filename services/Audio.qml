@@ -101,9 +101,9 @@ Singleton {
 
     function getStreamName(stream: PwNode): string {
         if (!stream)
-            return Tr.tr("Unknown");
+            return Tr.trCtx("Unknown", "unknown audio stream");
         // Try application name first, then description, then name
-        return stream.properties["application.name"] || stream.description || stream.name || Tr.tr("Unknown Application");
+        return stream.properties["application.name"] || stream.description || stream.name || Tr.trCtx("Unknown application", "unknown application audio stream");
     }
 
     function refreshNodes(): void {
@@ -131,7 +131,7 @@ Singleton {
         if (!sink?.ready)
             return;
 
-        const newSinkName = sink.description || sink.name || Tr.tr("Unknown Device");
+        const newSinkName = sink.description || sink.name || Tr.trCtx("Unknown device", "unknown audio device");
 
         if (previousSinkName && previousSinkName !== newSinkName && GlobalConfig.utilities.toasts.audioOutputChanged)
             Toaster.toast(Tr.tr("Audio output changed"), Tr.tr("Now using: %1").arg(newSinkName), "volume_up");
@@ -143,7 +143,7 @@ Singleton {
         if (!source?.ready)
             return;
 
-        const newSourceName = source.description || source.name || Tr.tr("Unknown Device");
+        const newSourceName = source.description || source.name || Tr.trCtx("Unknown device", "unknown audio device");
 
         if (previousSourceName && previousSourceName !== newSourceName && GlobalConfig.utilities.toasts.audioInputChanged)
             Toaster.toast(Tr.tr("Audio input changed"), Tr.tr("Now using: %1").arg(newSourceName), "mic");
@@ -155,8 +155,8 @@ Singleton {
     // lazily-loaded singleton is created, so onValuesChanged would never fire.
     Component.onCompleted: {
         refreshNodes();
-        previousSinkName = sink?.description || sink?.name || Tr.tr("Unknown Device");
-        previousSourceName = source?.description || source?.name || Tr.tr("Unknown Device");
+        previousSinkName = sink?.description || sink?.name || Tr.trCtx("Unknown device", "unknown audio device");
+        previousSourceName = source?.description || source?.name || Tr.trCtx("Unknown device", "unknown audio device");
     }
 
     Connections {

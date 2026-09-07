@@ -116,6 +116,7 @@ QSet<QString> ObjectNode::loadFromJson(const QJsonObject& json, QList<Diagnostic
             diagnostics << Diagnostic{
                 .type = DiagnosticType::UnknownOption,
                 .option = path,
+                // TRANSLATORS: %1 = a config key name
                 .message = util::i18n::mark(u"Unknown option %1"_s, { key }),
             };
             SKIP;

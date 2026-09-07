@@ -96,6 +96,7 @@ PageBase {
         StyledText {
             Layout.fillWidth: true
             Layout.leftMargin: Tokens.padding.small
+            // TRANSLATORS: the four names in brackets are provider identifiers, leave them untranslated
             text: Tr.tr("Built-in names (wireguard, warp, tailscale, netbird) auto-fill their commands. For others, provide the connect/disconnect commands.")
             color: Colours.palette.m3onSurfaceVariant
             font: Tokens.font.body.small
@@ -109,6 +110,7 @@ PageBase {
             Layout.topMargin: Tokens.spacing.small
             placeholderText: Tr.tr("Provider name")
             leadingIcon: "vpn_key"
+            // TRANSLATORS: id here means the provider identifier, e.g. wireguard
             supportingText: Tr.tr("Built-in id or a custom name")
             errorText: Tr.tr("Provider name is required")
             inputMethodHints: Qt.ImhNoAutoUppercase | Qt.ImhNoPredictiveText
@@ -121,6 +123,7 @@ PageBase {
 
             Layout.fillWidth: true
             placeholderText: Tr.tr("Display name")
+            // TRANSLATORS: the name shown in the VPN provider list on the network page
             supportingText: Tr.tr("Shown in the list")
             leadingIcon: "label"
             inputMethodHints: Qt.ImhNoPredictiveText
@@ -132,7 +135,7 @@ PageBase {
             id: interfaceField
 
             Layout.fillWidth: true
-            placeholderText: Tr.tr("Interface")
+            placeholderText: Tr.trCtx("Interface", "network interface")
             leadingIcon: "lan"
             supportingText: Tr.tr("Network interface (for WireGuard / status checks)")
             inputMethodHints: Qt.ImhNoAutoUppercase | Qt.ImhNoPredictiveText
@@ -214,7 +217,7 @@ PageBase {
                     shapeMorph: true
                     horizontalPadding: Tokens.padding.extraLarge
                     verticalPadding: Tokens.padding.medium
-                    text: root.editing ? Tr.tr("Save") : Tr.tr("Add")
+                    text: root.editing ? Tr.trCtx("Save", "button") : Tr.trCtx("Add", "button")
                     disabled: !nameField.text.trim()
                     onClicked: root.submit()
                 }

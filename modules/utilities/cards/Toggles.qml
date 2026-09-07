@@ -53,7 +53,7 @@ StyledRect {
         spacing: Tokens.spacing.medium
 
         StyledText {
-            text: Tr.tr("Quick Toggles")
+            text: Tr.tr("Quick toggles")
             font: Tokens.font.body.medium
         }
 

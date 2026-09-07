@@ -9,6 +9,7 @@ import Caelestia.I18n
 import qs.components
 import qs.components.controls
 import qs.services
+import qs.utils
 import qs.modules.nexus.common
 
 PageBase {
@@ -21,10 +22,12 @@ PageBase {
     readonly property string statusText: {
         if (!device)
             return "";
-        let s = connected ? Tr.tr("Connected") : (device.bonded ? Tr.tr("Paired") : Tr.tr("Not paired"));
         if (connected && device.batteryAvailable)
-            s += " • " + Math.round(device.battery * 100) + "%";
-        return s;
+            // TRANSLATORS: %1 = battery level, already formatted as a percentage
+            return Tr.trCtx("Connected • %1", "bluetooth device state with battery").arg(Strings.percentOne(device.battery));
+        if (connected)
+            return Tr.trCtx("Connected", "bluetooth device state");
+        return device.bonded ? Tr.trCtx("Paired", "bluetooth device state") : Tr.trCtx("Not paired", "bluetooth device state");
     }
 
     onDeviceChanged: {
@@ -33,7 +36,7 @@ PageBase {
             nState.closeSubPage();
     }
 
-    title: device?.name ?? Tr.tr("Device")
+    title: device?.name ?? Tr.trCtx("Device", "unnamed bluetooth device")
     isSubPage: true
 
     ColumnLayout {
@@ -82,7 +85,7 @@ PageBase {
 
                     StyledText {
                         Layout.alignment: Qt.AlignHCenter
-                        text: Tr.tr("Forget")
+                        text: Tr.trCtx("Forget", "button")
                         color: forgetBtn.onColour
                     }
                 }
@@ -137,7 +140,7 @@ PageBase {
 
                         StyledText {
                             Layout.alignment: Qt.AlignHCenter
-                            text: root.connected ? Tr.tr("Disconnect") : Tr.tr("Connect")
+                            text: root.connected ? Tr.trCtx("Disconnect", "button") : Tr.trCtx("Connect", "button")
                             color: connectBtn.inactiveOnColour
                             animate: true
                         }
@@ -150,7 +153,7 @@ PageBase {
         ToggleRow {
             verticalPadding: Tokens.padding.large
             first: true
-            text: Tr.tr("Trusted")
+            text: Tr.trCtx("Trusted", "bluetooth device state")
             subtext: Tr.tr("Allow this device to connect automatically")
             checked: root.device?.trusted ?? false
             onToggled: {
@@ -161,7 +164,7 @@ PageBase {
 
         ToggleRow {
             verticalPadding: Tokens.padding.large
-            text: Tr.tr("Blocked")
+            text: Tr.trCtx("Blocked", "bluetooth device state")
             subtext: Tr.tr("Prevent this device from connecting")
             checked: root.device?.blocked ?? false
             onToggled: {
@@ -208,7 +211,7 @@ PageBase {
                     }
 
                     StyledText {
-                        text: root.device?.batteryAvailable ? Math.round(root.device.battery * 100) + "%" : Tr.tr("Unavailable")
+                        text: root.device?.batteryAvailable ? Strings.percentOne(root.device.battery) : Tr.trCtx("Unavailable", "bluetooth device state")
                         color: Colours.palette.m3outline
                         font: Tokens.font.body.small
                     }
@@ -244,7 +247,7 @@ PageBase {
 
                 StyledText {
                     Layout.fillWidth: true
-                    text: Tr.tr("Address")
+                    text: Tr.trCtx("Address", "bluetooth MAC address")
                 }
 
                 StyledText {

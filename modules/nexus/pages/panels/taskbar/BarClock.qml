@@ -19,7 +19,7 @@ PageBase {
 
         ToggleRow {
             first: true
-            text: Tr.tr("Background")
+            text: Tr.trCtx("Background", "taskbar clock: draw a background behind the clock")
             checked: Config.bar.clock.background
             onToggled: GlobalConfig.bar.clock.background = checked
         }

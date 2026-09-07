@@ -23,15 +23,15 @@ PageBase {
         SliderRow {
             first: true
             icon: Icons.getVolumeIcon(Audio.volume, Audio.muted)
-            label: Tr.tr("Output")
-            valueLabel: Math.round(value * 100) + "%"
+            label: Tr.trCtx("Output", "audio output")
+            valueLabel: Strings.percentOne(value)
             value: Audio.volume
             enabled: !Audio.muted
             onMoved: v => Audio.setVolume(v)
         }
 
         ToggleRow {
-            text: Tr.tr("Muted")
+            text: Tr.trCtx("Muted", "audio output muted")
             checked: Audio.muted
             onToggled: Audio.setStreamMuted(Audio.sink, checked)
         }
@@ -41,7 +41,7 @@ PageBase {
             currentId: Audio.sink?.id ?? -1
             iconName: "speaker"
             placeholderIcon: "speaker"
-            placeholderText: Tr.tr("No output devices")
+            placeholderText: Tr.trCtx("No output devices", "no audio outputs")
             onSelected: node => Audio.setAudioSink(node)
         }
 
@@ -50,15 +50,15 @@ PageBase {
             Layout.topMargin: Tokens.spacing.large - parent.spacing
             first: true
             icon: Icons.getMicVolumeIcon(Audio.sourceVolume, Audio.sourceMuted)
-            label: Tr.tr("Input")
-            valueLabel: Math.round(value * 100) + "%"
+            label: Tr.trCtx("Input", "audio input")
+            valueLabel: Strings.percentOne(value)
             value: Audio.sourceVolume
             enabled: !Audio.sourceMuted
             onMoved: v => Audio.setSourceVolume(v)
         }
 
         ToggleRow {
-            text: Tr.tr("Muted")
+            text: Tr.trCtx("Muted", "audio input muted")
             checked: Audio.sourceMuted
             onToggled: Audio.setStreamMuted(Audio.source, checked)
         }
@@ -68,7 +68,7 @@ PageBase {
             currentId: Audio.source?.id ?? -1
             iconName: "mic"
             placeholderIcon: "mic_off"
-            placeholderText: Tr.tr("No input devices")
+            placeholderText: Tr.trCtx("No input devices", "no audio inputs")
             onSelected: node => Audio.setAudioSource(node)
         }
 
@@ -80,7 +80,7 @@ PageBase {
 
             icon: "tune"
             text: Tr.tr("App volumes")
-            subtext: Audio.streams.length === 0 ? Tr.tr("No apps playing audio") : Audio.streams.length === 1 ? Tr.tr("1 app playing audio") : Tr.tr("%1 apps playing audio").arg(Audio.streams.length)
+            subtext: Audio.streams.length === 0 ? Tr.tr("No apps playing audio") : Tr.trN("%n app playing audio", "%n apps playing audio", Audio.streams.length)
             onClicked: root.nState.openSubPage(1)
         }
     }

@@ -45,6 +45,7 @@ ColumnLayout {
         visible: root.rootHeight > Tokens.sizes.lock.showWeatherDetailsHeight
         Layout.alignment: Qt.AlignHCenter
         animate: true
+        // TRANSLATORS: %1 = apparent temperature, unit already included
         text: Tr.tr("Feels like %1").arg(Weather.temp)
         color: Colours.palette.m3onSurfaceVariant
         font: Tokens.font.body.large
@@ -56,6 +57,7 @@ ColumnLayout {
         animate: true
         text: {
             const today = Weather.forecast[0];
+            // TRANSLATORS: %1/%2 = today's max and min temperature, units already included
             return Tr.tr("High %1 • Low %2").arg(Weather.formatTemp(today?.maxTempC)).arg(Weather.formatTemp(today?.minTempC));
         }
         color: Colours.palette.m3onSurfaceVariant

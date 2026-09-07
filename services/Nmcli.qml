@@ -628,7 +628,7 @@ Singleton {
         switch ((keyMgmt || "").trim().toLowerCase()) {
         case "":
         case "none":
-            return Tr.tr("Open");
+            return Tr.trCtx("Open", "wifi security type");
         case "sae":
             return "WPA3";
         case "wpa-psk":

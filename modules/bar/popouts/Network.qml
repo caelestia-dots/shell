@@ -36,7 +36,7 @@ ColumnLayout {
     Toggle {
         visible: root.view === "wireless"
         Layout.preferredHeight: visible ? implicitHeight : 0
-        label: Tr.tr("Enabled")
+        label: Tr.trCtx("Enabled", "toggle label")
         checked: Nmcli.wifiEnabled
         toggle.onToggled: Nmcli.enableWifi(checked)
     }
@@ -46,7 +46,7 @@ ColumnLayout {
         Layout.preferredHeight: visible ? implicitHeight : 0
         Layout.topMargin: visible ? Tokens.spacing.small : 0
         Layout.rightMargin: Tokens.padding.extraSmall
-        text: Tr.tr("%1 networks available").arg(Nmcli.networks.length) // qmllint disable missing-property
+        text: Tr.trN("%n network available", "%n networks available", Nmcli.networks.length) // qmllint disable missing-property
         color: Colours.palette.m3onSurfaceVariant
         font: Tokens.font.body.small
     }
@@ -236,7 +236,7 @@ ColumnLayout {
         Layout.preferredHeight: visible ? implicitHeight : 0
         Layout.topMargin: visible ? Tokens.spacing.small : 0
         Layout.rightMargin: Tokens.padding.extraSmall
-        text: Tr.tr("%1 devices available").arg(Nmcli.ethernetDevices.length)
+        text: Tr.trN("%n device available", "%n devices available", Nmcli.ethernetDevices.length)
         color: Colours.palette.m3onSurfaceVariant
         font: Tokens.font.body.small
     }
@@ -290,7 +290,7 @@ ColumnLayout {
                 Layout.leftMargin: Tokens.spacing.extraSmall
                 Layout.rightMargin: Tokens.spacing.extraSmall
                 Layout.fillWidth: true
-                text: ethernetItem.modelData.iface || Tr.tr("Unknown")
+                text: ethernetItem.modelData.iface || Tr.trCtx("Unknown", "unknown network interface")
                 elide: Text.ElideRight
                 font: Tokens.font.body.builders.medium.weight(ethernetItem.modelData.connected ? Font.Medium : Font.Normal).build()
                 color: ethernetItem.modelData.connected ? Colours.palette.m3primary : Colours.palette.m3onSurface

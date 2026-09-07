@@ -47,6 +47,7 @@ void toastKbLayout(const QString& layout) {
         return;
 
     Toaster::instance()->toast(
+        // TRANSLATORS: %1 = an XKB keyboard layout name, e.g. English (US)
         mark(u"Keyboard layout changed"_s), mark(u"Layout changed to: %1"_s, { layout }), u"keyboard"_s);
 }
 

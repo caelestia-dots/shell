@@ -33,21 +33,21 @@ PageBase {
         DefaultRow {
             first: true
             icon: "terminal"
-            label: Tr.tr("Terminal")
+            label: Tr.trCtx("Terminal", "default app category")
             status: GlobalConfig.general.apps.terminal.join(" ")
             onSelected: app => GlobalConfig.general.apps.terminal = app.command
         }
 
         DefaultRow {
             icon: "volume_up"
-            label: Tr.tr("Audio")
+            label: Tr.trCtx("Audio", "default app category")
             status: GlobalConfig.general.apps.audio.join(" ")
             onSelected: app => GlobalConfig.general.apps.audio = app.command
         }
 
         DefaultRow {
             icon: "play_circle"
-            label: Tr.tr("Media playback")
+            label: Tr.trCtx("Media playback", "default app category")
             status: GlobalConfig.general.apps.playback.join(" ")
             onSelected: app => GlobalConfig.general.apps.playback = app.command
         }
@@ -55,14 +55,14 @@ PageBase {
         DefaultRow {
             last: true
             icon: "folder"
-            label: Tr.tr("File manager")
+            label: Tr.trCtx("File manager", "default app category")
             status: GlobalConfig.general.apps.explorer.join(" ")
             onSelected: app => GlobalConfig.general.apps.explorer = app.command
         }
 
         // Library
         SectionHeader {
-            text: Tr.tr("Library")
+            text: Tr.trCtx("Library", "app library")
         }
 
         NavRow {

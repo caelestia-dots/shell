@@ -198,6 +198,7 @@ ColumnLayout {
                     if (root.network) {
                         const ssid = root.network.ssid;
                         if (ssid && ssid.length > 0) {
+                            // TRANSLATORS: %1 = the network SSID
                             return Tr.tr("Network: %1").arg(ssid);
                         }
                     }

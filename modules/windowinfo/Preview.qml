@@ -91,6 +91,7 @@ Item {
                 return Tr.tr("No active client");
 
             const mon = client.monitor;
+            // TRANSLATORS: %1 = window title, %2 = monitor name, %3/%4 = x/y position in pixels
             return Tr.tr("%1 on monitor %2 at %3, %4").arg(client.title).arg(mon.name).arg(client.lastIpcObject.at[0]).arg(client.lastIpcObject.at[1]);
         }
     }

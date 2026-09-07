@@ -41,9 +41,11 @@ void loadFailed(ConfigKind kind, const QString& error, const QString& screen) {
     QString title;
     if (kind == ConfigKind::Tokens)
         title = screen.isEmpty() ? mark(u"Failed to parse token config"_s)
+                                 // TRANSLATORS: %1 = a monitor name
                                  : mark(u"Failed to parse token config for %1"_s, { screen });
     else
         title =
+            // TRANSLATORS: %1 = a monitor name
             screen.isEmpty() ? mark(u"Failed to parse config"_s) : mark(u"Failed to parse config for %1"_s, { screen });
     Toaster::instance()->toast(title, error, u"settings_alert"_s, Toast::Type::Warning);
 }
@@ -53,6 +55,7 @@ void saveFailed(ConfigKind kind, const QString& error, const QString& screen) {
         return;
 
     const auto title =
+        // TRANSLATORS: %1 = a monitor name
         screen.isEmpty() ? mark(u"Failed to save config"_s) : mark(u"Failed to save config for %1"_s, { screen });
     Toaster::instance()->toast(title, error, u"settings_alert"_s, Toast::Type::Error);
 }

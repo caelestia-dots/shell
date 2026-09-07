@@ -76,7 +76,7 @@ ItemList {
 
             StyledText {
                 Layout.fillWidth: true
-                text: device.modelData?.description || device.modelData?.name || Tr.tr("Unknown")
+                text: device.modelData?.description || device.modelData?.name || Tr.trCtx("Unknown", "unknown audio device")
                 font: Tokens.font.body.small
                 elide: Text.ElideRight
             }

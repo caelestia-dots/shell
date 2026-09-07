@@ -62,7 +62,7 @@ Singleton {
             return;
 
         lastNowPlayingKey = key;
-        Toaster.toast(Tr.tr("Now Playing"), Tr.tr("%1 - %2").arg(artist).arg(title), "music_note");
+        Toaster.toast(Tr.tr("Now playing"), Tr.trCtx("%1 - %2", "track artist and title").arg(artist).arg(title), "music_note");
     }
 
     onActiveChanged: lastNowPlayingKey = ""

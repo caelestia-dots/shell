@@ -169,13 +169,13 @@ PageBase {
             first: true
             icon: "link"
             label: Tr.tr("Status")
-            value: root.device?.connected ? Tr.tr("Connected") : Tr.tr("Not connected")
+            value: root.device?.connected ? Tr.trCtx("Connected", "ethernet link state") : Tr.trCtx("Not connected", "ethernet link state")
         }
 
         InfoRow {
             icon: "settings_ethernet"
-            label: Tr.tr("Interface")
-            value: root.ifaceName || Tr.tr("—")
+            label: Tr.trCtx("Interface", "network interface")
+            value: root.ifaceName || "—"
         }
 
         InfoRow {
@@ -188,20 +188,20 @@ PageBase {
         InfoRow {
             icon: "lan"
             label: Tr.tr("IP address")
-            value: root.details?.ipAddress || Tr.tr("—")
+            value: root.details?.ipAddress || "—"
         }
 
         InfoRow {
             icon: "router"
             label: Tr.tr("Gateway")
-            value: root.details?.gateway || Tr.tr("—")
+            value: root.details?.gateway || "—"
         }
 
         InfoRow {
             last: true
             icon: "memory"
             label: Tr.tr("MAC address")
-            value: root.details?.macAddress || Tr.tr("—")
+            value: root.details?.macAddress || "—"
         }
 
         // ---- IPv4 ------------------------------------------------------------
@@ -241,7 +241,7 @@ PageBase {
                 id: manualItem
 
                 icon: "edit"
-                text: Tr.tr("Manual")
+                text: Tr.trCtx("Manual", "ip configuration method")
             }
         }
 

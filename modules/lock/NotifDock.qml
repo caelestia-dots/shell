@@ -63,7 +63,7 @@ ColumnLayout {
 
                 StyledText {
                     Layout.alignment: Qt.AlignHCenter
-                    text: Config.lock.hideNotifs ? Tr.tr("Unlock for Notifications") : Tr.tr("No Notifications")
+                    text: Config.lock.hideNotifs ? Tr.tr("Unlock for notifications") : Tr.tr("No notifications")
                     color: Colours.palette.m3outlineVariant
                     font: Tokens.font.mono.builders.large.weight(Font.Medium).build()
                 }

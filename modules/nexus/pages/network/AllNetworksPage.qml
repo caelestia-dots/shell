@@ -48,7 +48,7 @@ PageBase {
                 spacing: Tokens.spacing.extraSmall / 2
 
                 StyledText {
-                    text: Tr.tr("Filters")
+                    text: Tr.trCtx("Filters", "network filter heading")
                     font: Tokens.font.title.small
                 }
 
@@ -63,7 +63,7 @@ PageBase {
                         return Nmcli.hasSavedProfile(ap.ssid);
                     }
 
-                    text: Tr.tr("Saved")
+                    text: Tr.trCtx("Saved", "network filter")
                     topLeftRadius: pressed ? pressedRadius : implicitHeight / 2
                     bottomLeftRadius: pressed ? pressedRadius : implicitHeight / 2
 
@@ -87,7 +87,7 @@ PageBase {
                         return ap.security !== "none";
                     }
 
-                    text: Tr.tr("Secured")
+                    text: Tr.trCtx("Secured", "network filter")
                 }
 
                 FilterButton {
@@ -97,7 +97,7 @@ PageBase {
                         return ap.frequency >= 4900 && ap.frequency <= 5900;
                     }
 
-                    text: Tr.tr("5 GHz")
+                    text: Tr.trCtx("5 GHz", "network filter")
                 }
 
                 FilterButton {
@@ -107,7 +107,7 @@ PageBase {
                         return ap.frequency >= 2400 && ap.frequency <= 2500;
                     }
 
-                    text: Tr.tr("2.4 GHz")
+                    text: Tr.trCtx("2.4 GHz", "network filter")
                     topRightRadius: pressed ? pressedRadius : implicitHeight / 2
                     bottomRightRadius: pressed ? pressedRadius : implicitHeight / 2
 

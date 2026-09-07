@@ -116,11 +116,13 @@ DecodeResult IntCodec::decode(const QJsonValue& value) const {
     double integral;
     if (std::fpclassify(std::modf(num, &integral)) != FP_ZERO)
         return error(
+            // TRANSLATORS: %1 = the non-integer number that was found
             DiagnosticType::InvalidValue, mark(u"Expected an integer, got the real %1"_s, { QString::number(num) }));
 
     constexpr auto k_min = std::numeric_limits<int>::min();
     constexpr auto k_max = std::numeric_limits<int>::max();
     if (num < static_cast<double>(k_min) || num > static_cast<double>(k_max)) {
+        // TRANSLATORS: %1 = the value given, %2/%3 = the allowed minimum and maximum
         const auto message = mark(u"Integer %1 is out of range, expected between %2 and %3"_s,
             { QString::number(num, 'f', 0), QString::number(k_min), QString::number(k_max) });
         return error(DiagnosticType::InvalidValue, message);
@@ -203,6 +205,7 @@ DecodeResult EnumCodec::decode(const QJsonValue& value) const {
         if (!QMetaType::convert(QMetaType::fromType<int>(), &raw, m_type, decoded.data())) {
             qCCritical(lcSettings, "Failed to convert value %d to enum %s", raw, m_type.name());
             return error(DiagnosticType::InvalidValue,
+                // TRANSLATORS: %1 = a config key name, %2 = a C++ type name; both are untranslated identifiers
                 mark(u"Could not convert %1 to %2"_s, { key, QString::fromUtf8(m_type.name()) }));
         }
 
@@ -215,6 +218,7 @@ DecodeResult EnumCodec::decode(const QJsonValue& value) const {
         options << QString::fromUtf8(m_metaEnum.key(i));
 
     return error(DiagnosticType::InvalidValue,
+        // TRANSLATORS: %1 = a config key name, %2 = a comma-separated list of allowed values; both untranslated
         mark(u"Invalid enum value %1. Expected one of %2"_s, { key, options.join(u", "_s) }));
 }
 

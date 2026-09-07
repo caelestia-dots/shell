@@ -26,7 +26,7 @@ PageBase {
 
         ToggleRow {
             first: true
-            text: Tr.tr("Enabled")
+            text: Tr.trCtx("Enabled", "toggle label")
             checked: Config.launcher.enabled
             onToggled: GlobalConfig.launcher.enabled = checked
         }

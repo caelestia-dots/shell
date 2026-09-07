@@ -46,7 +46,7 @@ PageBase {
         ToggleRow {
             first: true
             last: true
-            text: Tr.tr("Enabled")
+            text: Tr.trCtx("Enabled", "toggle label")
             subtext: Tr.tr("Show the utilities panel")
             checked: Config.utilities.enabled
             onToggled: GlobalConfig.utilities.enabled = checked

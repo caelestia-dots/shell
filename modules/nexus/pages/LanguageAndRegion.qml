@@ -73,6 +73,7 @@ PageBase {
 
                     StyledText {
                         Layout.fillWidth: true
+                        // TRANSLATORS: %1 = a locale code such as en_AU
                         text: Tr.tr("Follows your system locale (%1)").arg(Qt.locale().name)
                         color: Colours.palette.m3outline
                         font: Tokens.font.label.small

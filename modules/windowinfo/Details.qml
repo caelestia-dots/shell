@@ -54,17 +54,20 @@ ColumnLayout {
 
     Detail {
         icon: "location_searching"
+        // TRANSLATORS: %1/%2 = x and y position in pixels
         text: Tr.tr("Position: %1, %2").arg(root.client?.lastIpcObject.at[0] ?? -1).arg(root.client?.lastIpcObject.at[1] ?? -1)
     }
 
     Detail {
         icon: "resize"
+        // TRANSLATORS: %1/%2 = width and height in pixels; the x is a multiplication sign
         text: Tr.tr("Size: %1 x %2").arg(root.client?.lastIpcObject.size[0] ?? -1).arg(root.client?.lastIpcObject.size[1] ?? -1)
         color: Colours.palette.m3tertiary
     }
 
     Detail {
         icon: "workspaces"
+        // TRANSLATORS: %1 = workspace name, %2 = workspace id
         text: Tr.tr("Workspace: %1 (%2)").arg(root.client?.workspace.name ?? -1).arg(root.client?.workspace.id ?? -1)
         color: Colours.palette.m3secondary
     }
@@ -74,6 +77,7 @@ ColumnLayout {
         text: {
             const mon = root.client?.monitor;
             if (mon)
+                // TRANSLATORS: %1 = monitor name, %2 = monitor id, %3/%4 = x/y position in pixels
                 return Tr.tr("Monitor: %1 (%2) at %3, %4").arg(mon.name).arg(mon.id).arg(mon.x).arg(mon.y);
             return Tr.tr("Monitor: unknown");
         }
@@ -102,6 +106,7 @@ ColumnLayout {
 
     Detail {
         icon: "account_tree"
+        // TRANSLATORS: %1 = process id
         text: Tr.tr("Process id: %1").arg(String(root.client?.lastIpcObject.pid ?? -1))
         color: Colours.palette.m3primary
     }

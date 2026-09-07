@@ -92,8 +92,10 @@ QPair<QString, QString> Qalculator::evaluate(const QString& expr) {
     if (!messages.isEmpty()) {
         const auto joined = messages.join(u"; "_s);
         if (hasError)
+            // TRANSLATORS: %1 = a message from Qalculate, we don't translate it
             return { mark(u"error: %1"_s, { joined }), joined };
         if (hasWarning)
+            // TRANSLATORS: %1 = a message from Qalculate, we don't translate it
             return { mark(u"warning: %1"_s, { joined }), joined };
         return { joined, joined };
     }

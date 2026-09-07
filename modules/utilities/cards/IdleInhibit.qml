@@ -49,14 +49,14 @@ StyledRect {
 
             StyledText {
                 Layout.fillWidth: true
-                text: Tr.tr("Keep Awake")
+                text: Tr.trCtx("Keep awake", "idle inhibitor")
                 font: Tokens.font.body.medium
                 elide: Text.ElideRight
             }
 
             StyledText {
                 Layout.fillWidth: true
-                text: IdleInhibitor.enabled ? Tr.tr("Preventing sleep mode") : Tr.tr("Normal power management")
+                text: IdleInhibitor.enabled ? Tr.trCtx("Preventing sleep mode", "idle inhibitor") : Tr.trCtx("Normal power management", "idle inhibitor")
                 color: Colours.palette.m3onSurfaceVariant
                 font: Tokens.font.body.small
                 elide: Text.ElideRight
@@ -95,6 +95,7 @@ StyledRect {
                 id: activeText
 
                 anchors.centerIn: parent
+                // TRANSLATORS: %1 = a clock time, e.g. 14:30
                 text: Tr.tr("Active since %1").arg(Qt.formatTime(IdleInhibitor.enabledSince, GlobalConfig.services.useTwelveHourClock ? "hh:mm a" : "hh:mm"))
                 color: Colours.palette.m3onPrimary
                 font: Tokens.font.body.builders.small.size(Math.round(Tokens.font.body.small.pointSize * 0.9)).build()

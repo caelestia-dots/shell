@@ -113,7 +113,7 @@ StyledRect {
             }
 
             StyledText {
-                text: Tr.tr("Download")
+                text: Tr.trCtx("Download", "network throughput")
                 font: Tokens.font.body.small
                 color: Colours.palette.m3onSurfaceVariant
             }
@@ -144,7 +144,7 @@ StyledRect {
             }
 
             StyledText {
-                text: Tr.tr("Upload")
+                text: Tr.trCtx("Upload", "network throughput")
                 font: Tokens.font.body.small
                 color: Colours.palette.m3onSurfaceVariant
             }
@@ -175,7 +175,7 @@ StyledRect {
             }
 
             StyledText {
-                text: Tr.tr("Total")
+                text: Tr.trCtx("Total", "total network data transferred")
                 font: Tokens.font.body.small
                 color: Colours.palette.m3onSurfaceVariant
             }

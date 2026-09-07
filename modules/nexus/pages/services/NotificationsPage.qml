@@ -11,11 +11,11 @@ PageBase {
     // Notification fullscreen visibility, ordered to match config::NotifsFullscreen (On, Off)
     readonly property list<MenuItem> notifFullscreenItems: [
         MenuItem {
-            text: Tr.tr("On")
+            text: Tr.trCtx("On", "show notifications over fullscreen apps")
             icon: "notifications"
         },
         MenuItem {
-            text: Tr.tr("Off")
+            text: Tr.trCtx("Off", "show notifications over fullscreen apps")
             icon: "notifications_off"
         }
     ]
@@ -23,15 +23,15 @@ PageBase {
     // Toast fullscreen visibility, mapped to GlobalConfig.utilities.toasts.fullscreen
     readonly property list<MenuItem> toastFullscreenItems: [
         MenuItem {
-            text: Tr.tr("Off")
+            text: Tr.trCtx("Off", "show toasts over fullscreen apps")
             icon: "notifications_off"
         },
         MenuItem {
-            text: Tr.tr("Important")
+            text: Tr.trCtx("Important", "show toasts over fullscreen apps: important ones only")
             icon: "priority_high"
         },
         MenuItem {
-            text: Tr.tr("On")
+            text: Tr.trCtx("On", "show toasts over fullscreen apps")
             icon: "notifications"
         }
     ]
@@ -77,6 +77,7 @@ PageBase {
 
         StepperRow {
             label: Tr.tr("Default timeout")
+            // TRANSLATORS: ms is the millisecond unit, leave it untranslated
             subtext: Tr.tr("Time before a notification dismisses (ms)")
             value: GlobalConfig.notifs.defaultExpireTimeout
             from: 1000

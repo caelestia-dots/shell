@@ -18,55 +18,55 @@ Searcher {
         Variant {
             variant: "vibrant"
             icon: "sentiment_very_dissatisfied"
-            name: Tr.tr("Vibrant")
+            name: Tr.trCtx("Vibrant", "M3 scheme variant name")
             description: Tr.tr("A high chroma palette. The primary palette's chroma is at maximum.")
         },
         Variant {
             variant: "tonalspot"
             icon: "android"
-            name: Tr.tr("Tonal Spot")
+            name: Tr.trCtx("Tonal Spot", "M3 scheme variant name")
             description: Tr.tr("Default for Material theme colours. A pastel palette with a low chroma.")
         },
         Variant {
             variant: "expressive"
             icon: "compare_arrows"
-            name: Tr.tr("Expressive")
+            name: Tr.trCtx("Expressive", "M3 scheme variant name")
             description: Tr.tr("A medium chroma palette. The primary palette's hue is different from the seed colour, for variety.")
         },
         Variant {
             variant: "fidelity"
             icon: "compare"
-            name: Tr.tr("Fidelity")
+            name: Tr.trCtx("Fidelity", "M3 scheme variant name")
             description: Tr.tr("Matches the seed colour, even if the seed colour is very bright (high chroma).")
         },
         Variant {
             variant: "content"
             icon: "sentiment_calm"
-            name: Tr.tr("Content")
+            name: Tr.trCtx("Content", "M3 scheme variant name")
             description: Tr.tr("Almost identical to fidelity.")
         },
         Variant {
             variant: "fruitsalad"
             icon: "nutrition"
-            name: Tr.tr("Fruit Salad")
+            name: Tr.trCtx("Fruit Salad", "M3 scheme variant name")
             description: Tr.tr("A playful theme - the seed colour's hue does not appear in the theme.")
         },
         Variant {
             variant: "rainbow"
             icon: "looks"
-            name: Tr.tr("Rainbow")
+            name: Tr.trCtx("Rainbow", "M3 scheme variant name")
             description: Tr.tr("A playful theme - the seed colour's hue does not appear in the theme.")
         },
         Variant {
             variant: "neutral"
             icon: "contrast"
-            name: Tr.tr("Neutral")
+            name: Tr.trCtx("Neutral", "M3 scheme variant name")
             description: Tr.tr("Close to greyscale, a hint of chroma.")
         },
         Variant {
             variant: "monochrome"
             icon: "filter_b_and_w"
-            name: Tr.tr("Monochrome")
+            name: Tr.trCtx("Monochrome", "M3 scheme variant name")
             description: Tr.tr("All colours are greyscale, no chroma.")
         }
     ]

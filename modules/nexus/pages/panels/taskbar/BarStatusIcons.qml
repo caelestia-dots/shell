@@ -61,7 +61,7 @@ PageBase {
             icon: "add"
             label: Tr.tr("Add entry")
             header: Tr.tr("Add new entry")
-            acceptLabel: Tr.tr("Add")
+            acceptLabel: Tr.trCtx("Add", "button")
 
             model: {
                 const builtins = Object.keys(root.builtinIcons).map(k => ({

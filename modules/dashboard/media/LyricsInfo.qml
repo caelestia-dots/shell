@@ -150,6 +150,7 @@ Item {
                 opacity: 0
 
                 StyledText {
+                    // TRANSLATORS: %1 = lyrics backend name, e.g. LRCLIB
                     text: Tr.tr("Backend: %1").arg(CUtils.enumToString(Lyrics, "backend"))
                     color: Colours.palette.m3onSurfaceVariant
                     animate: true
@@ -157,6 +158,7 @@ Item {
 
                 StyledText {
                     Layout.maximumWidth: Tokens.sizes.dashboard.mediaTabWidth / 2
+                    // TRANSLATORS: %1/%2/%3 = matched track title, artist and album
                     text: Tr.tr("Selected candidate: %1 | %2 | %3").arg(Lyrics.selectedCandidate.title).arg(Lyrics.selectedCandidate.artist).arg(Lyrics.selectedCandidate.album)
                     color: Colours.palette.m3onSurfaceVariant
                     wrapMode: Text.WrapAtWordBoundaryOrAnywhere
@@ -164,6 +166,7 @@ Item {
                 }
 
                 StyledText {
+                    // TRANSLATORS: %1 = lyric timing offset; ms is the millisecond unit, leave untranslated
                     text: Tr.tr("Offset: %1 ms").arg(Lyrics.offset)
                     color: Colours.palette.m3onSurfaceVariant
                     animate: true

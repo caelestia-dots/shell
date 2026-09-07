@@ -182,6 +182,7 @@ PageBase {
             Layout.topMargin: Tokens.spacing.extraSmall / 2 - parent.spacing
 
             text: Tr.tr("Transparency")
+            // TRANSLATORS: %1/%2 = opacity values from 0 to 1 for the base surface and layered surfaces
             subtext: Tr.tr("Base %1, layers %2").arg(Colours.transparency.base).arg(Colours.transparency.layers)
             checked: Colours.transparency.enabled
             onToggled: GlobalConfig.appearance.transparency.enabled = checked

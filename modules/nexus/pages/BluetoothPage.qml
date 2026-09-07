@@ -116,14 +116,21 @@ PageBase {
 
                         StyledText {
                             Layout.fillWidth: true
-                            text: device.modelData?.name ?? Tr.tr("Unknown")
+                            text: device.modelData?.name ?? Tr.trCtx("Unknown", "unknown bluetooth device")
                             font: Tokens.font.body.small
                             elide: Text.ElideRight
                         }
 
                         StyledText {
                             Layout.fillWidth: true
-                            text: device.connected ? Tr.tr("Connected%1").arg(device.modelData?.batteryAvailable ? " • " + Math.round(device.modelData.battery * 100) + "%" : "") : Tr.tr("Saved")
+                            text: {
+                                if (!device.connected)
+                                    return Tr.trCtx("Saved", "bluetooth device state");
+                                if (device.modelData?.batteryAvailable)
+                                    // TRANSLATORS: %1 = battery level, already formatted as a percentage
+                                    return Tr.trCtx("Connected • %1", "bluetooth device state with battery").arg(Strings.percentOne(device.modelData.battery));
+                                return Tr.trCtx("Connected", "bluetooth device state");
+                            }
                             color: Colours.palette.m3outline
                             font: Tokens.font.label.small
                             elide: Text.ElideRight
@@ -181,7 +188,8 @@ PageBase {
             Layout.topMargin: Tokens.spacing.large - parent.spacing
 
             first: true
-            text: Tr.tr("Discoverable")
+            // TRANSLATORS: adjective: other devices can find this computer
+            text: Tr.trCtx("Discoverable", "bluetooth setting")
             subtext: Tr.tr("Allow nearby devices to find this one")
             disabled: !root.btEnabled
             checked: root.adapter?.discoverable ?? false
@@ -197,7 +205,8 @@ PageBase {
 
         ToggleRow {
             last: true
-            text: Tr.tr("Pairable")
+            // TRANSLATORS: adjective: other devices are allowed to pair with this computer
+            text: Tr.trCtx("Pairable", "bluetooth setting")
             subtext: Tr.tr("Allow nearby devices to pair with this one")
             disabled: !root.btEnabled
             checked: root.adapter?.pairable ?? false

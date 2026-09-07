@@ -87,7 +87,9 @@ PageBase {
 
             Layout.fillWidth: true
             Layout.topMargin: Tokens.spacing.extraSmall
+            // TRANSLATORS: SSID is a protocol term, leave it untranslated
             placeholderText: Tr.tr("Network name (SSID)")
+            // TRANSLATORS: sample network name, translate the e.g. but the name is a placeholder
             supportingText: Tr.tr("e.g. MyHiddenNetwork")
             leadingIcon: "wifi"
             errorText: Tr.tr("Network name is required")
@@ -111,19 +113,21 @@ PageBase {
             Layout.topMargin: Tokens.spacing.extraSmall / 2 - parent.spacing
             last: !root.secured
             label: Tr.tr("Security")
+            // TRANSLATORS: WPA/WPA2/WPA3 are protocol names, leave them untranslated
             fallbackText: Tr.tr("WPA/WPA2/WPA3 Personal")
             fallbackIcon: "lock"
 
             menuItems: [
                 MenuItem {
                     icon: "lock"
+                    // TRANSLATORS: WPA/WPA2/WPA3 are protocol names, leave them untranslated
                     text: Tr.tr("WPA/WPA2/WPA3 Personal")
                 },
                 MenuItem {
                     id: noneItem
 
                     icon: "lock_open"
-                    text: Tr.tr("None (open)")
+                    text: Tr.trCtx("None (open)", "wifi security type")
                 }
             ]
 
@@ -174,6 +178,7 @@ PageBase {
                 placeholderText: Tr.tr("Password")
                 leadingIcon: "key"
                 echoMode: TextInput.Password
+                // TRANSLATORS: WPA is a protocol name, leave it untranslated
                 supportingText: Tr.tr("WPA passwords are at least 8 characters")
                 errorText: root.failed ? Tr.tr("Connection failed — check the password") : Tr.tr("Password must be at least 8 characters")
 

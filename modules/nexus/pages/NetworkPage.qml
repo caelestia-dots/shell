@@ -85,6 +85,7 @@ PageBase {
             clip: true
 
             icon: "expand_content"
+            // TRANSLATORS: %1 = number of networks found
             text: Tr.tr("Show all networks (%1)").arg(Nmcli.networks.length)
             trailingIcon: "chevron_right"
             onClicked: root.nState.openSubPage(5) // All networks sub-page
@@ -218,7 +219,7 @@ PageBase {
                                     return Tr.tr("Disconnecting...");
                                 switch (VPN.status.state) {
                                 case "connected":
-                                    return Tr.tr("Connected");
+                                    return Tr.trCtx("Connected", "vpn state");
                                 case "needs-auth":
                                     return VPN.status.reason ? Tr.trMarked(VPN.status.reason) : Tr.tr("Authentication required");
                                 case "error":
@@ -271,7 +272,7 @@ PageBase {
 
                                 StyledText {
                                     Layout.alignment: Qt.AlignRight
-                                    text: Tr.tr("Interface")
+                                    text: Tr.trCtx("Interface", "network interface")
                                     color: Colours.palette.m3onSurfaceVariant
                                     font: Tokens.font.label.small
                                     elide: Text.ElideRight
@@ -293,7 +294,7 @@ PageBase {
 
                                 StyledText {
                                     Layout.alignment: Qt.AlignRight
-                                    text: Tr.tr("Current Ping")
+                                    text: Tr.trCtx("Current ping", "round-trip latency to the VPN endpoint")
                                     color: Colours.palette.m3onSurfaceVariant
                                     font: Tokens.font.label.small
                                     elide: Text.ElideRight

@@ -112,6 +112,7 @@ Column {
 
                     StyledText {
                         anchors.verticalCenter: parent.verticalCenter
+                        // TRANSLATORS: charger or thermal warning: the battery cannot draw full power
                         text: Tr.tr("Performance degraded")
                         color: Colours.palette.m3onError
                         font: Tokens.font.title.small

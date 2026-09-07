@@ -25,7 +25,7 @@ PageBase {
 
         ToggleRow {
             first: true
-            text: Tr.tr("Enabled")
+            text: Tr.trCtx("Enabled", "toggle label")
             checked: Config.sidebar.enabled
             onToggled: GlobalConfig.sidebar.enabled = checked
         }

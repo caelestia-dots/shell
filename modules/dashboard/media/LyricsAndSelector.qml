@@ -51,7 +51,7 @@ Item {
 
             menuItems: playerList.instances
             fallbackIcon: "music_off"
-            fallbackText: Tr.tr("No players")
+            fallbackText: Tr.trCtx("No players", "no media players active")
 
             minLeftWidth: layout.width - expandBtn.implicitWidth - spacing
             label.Layout.maximumWidth: minLeftWidth - iconLabel.implicitWidth - textRow.spacing - textRow.anchors.horizontalCenterOffset / 2 - horizontalPadding * 2

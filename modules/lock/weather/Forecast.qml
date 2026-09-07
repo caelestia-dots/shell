@@ -6,6 +6,7 @@ import Caelestia.Config
 import Caelestia.I18n
 import qs.components
 import qs.services
+import qs.utils
 
 StyledRect {
     id: root
@@ -89,14 +90,14 @@ StyledRect {
 
                 StyledText {
                     Layout.alignment: Qt.AlignHCenter
-                    text: hour.cond.precipChance + "%"
+                    text: Strings.percent(hour.cond.precipChance)
                     color: Colours.palette.m3primary
                 }
 
                 StyledText {
                     Layout.topMargin: Tokens.spacing.extraSmall
                     Layout.alignment: Qt.AlignHCenter
-                    text: hour.index === 0 ? Tr.tr("Now") : Qt.formatDateTime(new Date(hour.cond.timestamp.replace("T", " ")), GlobalConfig.services.useTwelveHourClock ? "ha" : "hh:00")
+                    text: hour.index === 0 ? Tr.trCtx("Now", "forecast column") : Qt.formatDateTime(new Date(hour.cond.timestamp.replace("T", " ")), GlobalConfig.services.useTwelveHourClock ? "ha" : "hh:00")
                     color: Colours.palette.m3onSurfaceVariant
                     font: Tokens.font.body.medium
                 }
