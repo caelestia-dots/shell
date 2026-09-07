@@ -22,7 +22,8 @@ Warnings, which are merely suspicious:
 
 By default every *.qml, *.cpp and *.hpp under the repo root is checked. Pass
 --file to check a single file, --file - to check an unsaved buffer piped in on
-stdin, and --json to get machine-readable output. The report always goes to
+stdin, and --json to get machine-readable output, whose ranges are meant for a
+language server. The report always goes to
 stderr, and colour is dropped when stderr is not a terminal. The exit code is 1
 when there is an error, or with --strict when there is anything at all.
 """
@@ -80,7 +81,7 @@ FOREIGN_RE = re.compile(r"(?<![\w.])(qsTr|qsTranslate|qsTrId|QT_TR_NOOP|QT_TRANS
 USES_TR_RE = re.compile(r"(?<![\w.])Tr\.\w")
 IMPORT_RE = re.compile(r"^\s*import\s+Caelestia\.I18n\b", re.M)
 TRANSLATORS_RE = re.compile(r"^([^\n]*?)(?://|/\*)\s*TRANSLATORS:[^\n]*\n(\s*\n)?", re.M)
-ARG_CALL_RE = re.compile(r"\s*\.arg\s*\(")
+ARG_CALL_RE = re.compile(r"\s*(\.arg\s*\()")
 PLACEHOLDER_RE = re.compile(r"%L?(\d{1,2})")
 ESCAPE_RE = re.compile(r"\\(.)")
 
@@ -109,19 +110,35 @@ def disable_colour() -> None:
 
 
 class Issue:
-    def __init__(self, file: str, line: int, level: str, rule: str, msg: str):
+    """One reported issue, spanning the source from `start` to `end`.
+
+    Both positions are 1 based line/column pairs. The end is exclusive, sitting
+    just past the last character, which is what an LSP range wants.
+    """
+
+    def __init__(self, file: str, start: tuple[int, int], end: tuple[int, int], level: str, rule: str, msg: str):
         self.file = file
-        self.line = line
+        self.line, self.col = start
+        self.end_line, self.end_col = end
         self.level = level
         self.rule = rule
         self.msg = msg
 
     def __str__(self):
         c = LEVEL_COLOURS.get(self.level, "")
-        return f"{c}[{self.rule}]{RESET} {self.file}:{self.line}: {self.msg}"
+        return f"{c}[{self.rule}]{RESET} {self.file}:{self.line}:{self.col}: {self.msg}"
 
     def to_dict(self) -> dict[str, object]:
-        return {"file": self.file, "line": self.line, "level": self.level, "rule": self.rule, "message": self.msg}
+        return {
+            "file": self.file,
+            "line": self.line,
+            "column": self.col,
+            "endLine": self.end_line,
+            "endColumn": self.end_col,
+            "level": self.level,
+            "rule": self.rule,
+            "message": self.msg,
+        }
 
 
 def mask(src: str) -> str:
@@ -187,14 +204,31 @@ def skip_string(src: str, i: int) -> int:
     return i
 
 
-def split_args(src: str, i: int) -> tuple[list[str] | None, int]:
+class Arg:
+    """One argument of a call, with the span of its text in the source.
+
+    The span excludes the whitespace around the argument, so it can be pointed
+    at on its own.
+    """
+
+    def __init__(self, text: str, start: int, end: int):
+        self.text = text
+        self.start = start + len(text) - len(text.lstrip())
+        self.end = end - (len(text) - len(text.rstrip()))
+
+    @property
+    def span(self) -> tuple[int, int]:
+        return self.start, self.end
+
+
+def split_args(src: str, i: int) -> tuple[list[Arg] | None, int]:
     """Split a call's arg list, starting just after the opening paren.
 
     Returns the args and the offset just past the closing paren, or None when
     the call is never closed.
     """
-    args: list[str] = []
-    cur = []
+    args: list[Arg] = []
+    start = i
     depth = 0
     n = len(src)
 
@@ -202,15 +236,13 @@ def split_args(src: str, i: int) -> tuple[list[str] | None, int]:
         c = src[i]
 
         if c in QUOTES:
-            end = skip_string(src, i)
-            cur.append(src[i:end])
-            i = end
+            i = skip_string(src, i)
             continue
 
         if c == ")" and depth == 0:
-            text = "".join(cur)
+            text = src[start:i]
             if args or text.strip():
-                args.append(text)
+                args.append(Arg(text, start, i))
             return args, i + 1
 
         if c in "([{":
@@ -218,12 +250,11 @@ def split_args(src: str, i: int) -> tuple[list[str] | None, int]:
         elif c in ")]}":
             depth -= 1
         elif c == "," and depth == 0:
-            args.append("".join(cur))
-            cur = []
+            args.append(Arg(src[start:i], start, i))
             i += 1
+            start = i
             continue
 
-        cur.append(c)
         i += 1
 
     return None, n
@@ -282,26 +313,27 @@ def placeholders(text: str) -> list[int]:
     return sorted({int(n) for n in PLACEHOLDER_RE.findall(text.replace("%%", ""))})
 
 
-def arg_chain(src: str, i: int) -> tuple[int, bool]:
+def arg_chain(src: str, i: int) -> tuple[int, tuple[int, int] | None, int]:
     """Count the `.arg()` calls chained onto a call ending at `i`.
 
-    Also reports whether any of them passed several args, which only ever
-    substitutes the first.
+    Also returns the span of the first one passing several args, which only
+    ever substitutes the first, and the offset the chain ends at.
     """
     count = 0
-    multi = False
+    multi = None
 
     while True:
         m = ARG_CALL_RE.match(src, i)
         if not m:
-            return count, multi
+            return count, multi, i
 
         args, end = split_args(src, m.end())
         if args is None:
-            return count, multi
+            return count, multi, i
 
         count += 1
-        multi = multi or len(args) > 1
+        if multi is None and len(args) > 1:
+            multi = (m.start(1), end)
         i = end
 
 
@@ -316,11 +348,14 @@ class FileChecker:
         self.starts = [0] + [i + 1 for i, c in enumerate(src) if c == "\n"]
         self.issues: list[Issue] = []
 
-    def line_at(self, offset: int) -> int:
-        return bisect_right(self.starts, offset)
+    def pos_at(self, offset: int) -> tuple[int, int]:
+        """Return the 1 based line and column of an offset."""
+        line = bisect_right(self.starts, offset)
+        return line, offset - self.starts[line - 1] + 1
 
-    def report(self, offset: int, level: str, rule: str, msg: str) -> None:
-        self.issues.append(Issue(self.rel, self.line_at(offset), level, rule, msg))
+    def report(self, span: tuple[int, int], level: str, rule: str, msg: str) -> None:
+        start, end = span
+        self.issues.append(Issue(self.rel, self.pos_at(start), self.pos_at(max(end, start)), level, rule, msg))
 
     def check(self) -> list[Issue]:
         if not self.cpp:
@@ -331,16 +366,23 @@ class FileChecker:
 
         self.check_translator_comments()
 
-        self.issues.sort(key=lambda i: i.line)
+        self.issues.sort(key=lambda i: (i.line, i.col))
         return self.issues
 
     def check_qml_imports(self) -> None:
-        if USES_TR_RE.search(self.masked) and not IMPORT_RE.search(self.src):
-            self.report(0, ERROR, "missing-import", "uses Tr but is missing `import Caelestia.I18n`")
+        # Anchored to the first use, since that is what the missing import breaks
+        use = USES_TR_RE.search(self.masked)
+        if use and not IMPORT_RE.search(self.src):
+            self.report(
+                (use.start(), use.end()), ERROR, "missing-import", "uses Tr but is missing `import Caelestia.I18n`"
+            )
 
         for m in FOREIGN_RE.finditer(self.masked):
             self.report(
-                m.start(), ERROR, "foreign-helper", f"`{m.group(1)}()` is not extracted, use the Tr helpers instead"
+                (m.start(1), m.end(1)),
+                ERROR,
+                "foreign-helper",
+                f"`{m.group(1)}()` is not extracted, use the Tr helpers instead",
             )
 
     def check_call(self, m: re.Match[str]) -> None:
@@ -360,34 +402,37 @@ class FileChecker:
 
         args, end = split_args(self.masked, m.end())
         if args is None:
-            self.report(start, ERROR, "unterminated", f"unterminated argument list for `{name}()`")
+            self.report((start, m.end()), ERROR, "unterminated", f"unterminated argument list for `{name}()`")
             return
 
-        if not self.check_arity(start, name, args):
+        span = (start, end)
+        if not self.check_arity(span, name, args):
             return
 
         spec = SPEC[name]
-        text = literal(args[spec["text"]], self.cpp)
+        text_arg = args[spec["text"]]
+        text = literal(text_arg.text, self.cpp)
 
         if name == "trMarked":
             if text is not None:
                 self.report(
-                    start, WARNING, "redundant-marked", "`trMarked()` on a literal never translates, use `tr()`"
+                    span, WARNING, "redundant-marked", "`trMarked()` on a literal never translates, use `tr()`"
                 )
             return
 
-        plural = literal(args[spec["plural"]], self.cpp) if "plural" in spec else None
+        plural_arg = args[spec["plural"]] if "plural" in spec else None
+        plural = literal(plural_arg.text, self.cpp) if plural_arg else None
 
-        self.check_sources(start, name, spec, text, plural)
-        self.check_context(start, name, args, spec)
+        self.check_sources(name, text_arg, text, plural_arg, plural)
+        self.check_context(name, args, spec)
 
-        for what, value in (("source string", text), ("plural string", plural)):
+        for what, arg, value in (("source string", text_arg, text), ("plural string", plural_arg, plural)):
             if value is not None:
-                self.check_forms(start, name, what, value, "plural" in spec)
+                self.check_forms(arg.span, name, what, value, "plural" in spec)
 
-        self.check_args(start, name, end, args, spec, text)
+        self.check_args(span, name, args, spec, text)
 
-    def check_arity(self, start: int, name: str, args: list[str]) -> bool:
+    def check_arity(self, span: tuple[int, int], name: str, args: list[Arg]) -> bool:
         low, high = ARITY[name]
         count = len(args)
         if low <= count <= high:
@@ -400,76 +445,80 @@ class FileChecker:
         elif name == "trN" and count == 4:
             hint = " (use `trCtxN()` to add context)"
 
-        self.report(start, ERROR, "arity", f"`{name}()` takes {want}, got {count}{hint}")
+        self.report(span, ERROR, "arity", f"`{name}()` takes {want}, got {count}{hint}")
         return False
 
     def check_sources(
-        self, start: int, name: str, spec: dict[str, int], text: str | None, plural: str | None
+        self, name: str, text_arg: Arg, text: str | None, plural_arg: Arg | None, plural: str | None
     ) -> None:
         if text is None:
             hint = "" if self.cpp else " (mark the string at its source instead)"
             self.report(
-                start, ERROR, "non-literal", f"`{name}()` needs a literal source string to be extractable{hint}"
+                text_arg.span, ERROR, "non-literal", f"`{name}()` needs a literal source string to be extractable{hint}"
             )
         elif text == "":
-            self.report(start, ERROR, "empty-source", f"`{name}()` has an empty source string")
+            self.report(text_arg.span, ERROR, "empty-source", f"`{name}()` has an empty source string")
 
-        if "plural" in spec and plural is None:
-            self.report(start, ERROR, "non-literal", f"`{name}()` needs a literal plural string to be extractable")
+        if plural_arg is not None and plural is None:
+            self.report(
+                plural_arg.span, ERROR, "non-literal", f"`{name}()` needs a literal plural string to be extractable"
+            )
 
-    def check_context(self, start: int, name: str, args: list[str], spec: dict[str, int]) -> None:
+    def check_context(self, name: str, args: list[Arg], spec: dict[str, int]) -> None:
         if "ctx" not in spec:
             return
 
-        ctx = literal(args[spec["ctx"]], self.cpp)
+        arg = args[spec["ctx"]]
+        ctx = literal(arg.text, self.cpp)
         if ctx is None:
-            self.report(start, ERROR, "non-literal", f"`{name}()` needs a literal context to be extractable")
+            self.report(arg.span, ERROR, "non-literal", f"`{name}()` needs a literal context to be extractable")
         elif ctx == "":
             plain = name.replace("Ctx", "")
-            self.report(start, WARNING, "empty-context", f"`{name}()` has an empty context, use `{plain}()`")
+            self.report(arg.span, WARNING, "empty-context", f"`{name}()` has an empty context, use `{plain}()`")
 
-    def check_forms(self, start: int, name: str, what: str, value: str, has_plural: bool) -> None:
+    def check_forms(self, span: tuple[int, int], name: str, what: str, value: str, has_plural: bool) -> None:
         if not has_plural and re.search(r"%L?n", value):
-            self.report(start, WARNING, "plural-count", f"{what} of `{name}()` has a `%n` count but no plural forms")
+            self.report(span, WARNING, "plural-count", f"{what} of `{name}()` has a `%n` count but no plural forms")
 
         found = placeholders(value)
         if found and found != list(range(1, len(found) + 1)):
             listed = ", ".join(f"%{n}" for n in found)
             self.report(
-                start,
+                span,
                 ERROR,
                 "placeholders",
                 f"{what} of `{name}()` has non-contiguous placeholders ({listed}), number them from %1",
             )
 
     def check_args(
-        self, start: int, name: str, end: int, args: list[str], spec: dict[str, int], text: str | None
+        self, span: tuple[int, int], name: str, args: list[Arg], spec: dict[str, int], text: str | None
     ) -> None:
         found = placeholders(text) if text else []
         expected = found[-1] if found else 0
 
         if name.startswith("mark"):
             index = spec.get("args")
-            given = index is not None and index < len(args) and args[index].strip()
-            if given and literal(args[index], self.cpp) is not None:
-                self.report(start, ERROR, "mark-args", f"the args of `{name}()` must be a list of strings")
+            arg = args[index] if index is not None and index < len(args) else None
+            given = arg is not None and arg.text.strip()
+            if given and literal(arg.text, self.cpp) is not None:
+                self.report(arg.span, ERROR, "mark-args", f"the args of `{name}()` must be a list of strings")
             elif expected and not given:
                 self.report(
-                    start, WARNING, "arg-count", f"`{name}()` has placeholders but no args, they will not be filled in"
+                    span, WARNING, "arg-count", f"`{name}()` has placeholders but no args, they will not be filled in"
                 )
             return
 
-        count, multi = arg_chain(self.masked, end)
+        count, multi, chain_end = arg_chain(self.masked, span[1])
         if count != expected and (count > 0 or expected == 0):
             self.report(
-                start,
+                (span[0], chain_end),
                 WARNING,
                 "arg-count",
                 f"`{name}()` has {expected} placeholder(s) but {count} `.arg()` call(s)",
             )
         if multi:
             self.report(
-                start,
+                multi,
                 ERROR,
                 "arg-multi",
                 "only the first argument of `.arg()` is substituted, chain a call per placeholder",
@@ -478,16 +527,20 @@ class FileChecker:
     def check_translator_comments(self) -> None:
         """xgettext only picks up comments sitting on their own directly above the call."""
         for m in TRANSLATORS_RE.finditer(self.src):
+            start = m.start() + len(m.group(1))
+            eol = self.src.find("\n", start)
+            span = (start, eol if eol != -1 else len(self.src))
+
             if m.group(1).strip():
                 self.report(
-                    m.start(),
+                    span,
                     WARNING,
                     "translators-comment",
                     "trailing TRANSLATORS comment, xgettext only reads comments on their own line above the call",
                 )
             elif m.group(2) is not None:
                 self.report(
-                    m.start(),
+                    span,
                     WARNING,
                     "translators-comment",
                     "TRANSLATORS comment is not directly above a call, xgettext will drop it",
@@ -534,7 +587,8 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument(
         "--json",
         action="store_true",
-        help='report as JSON on stderr: {"issues": [{"file", "line", "level", "rule", "message"}]}',
+        help="report as JSON on stderr: every issue carries a 1 based start and "
+        "end position; the end is exclusive, as an LSP range is",
     )
     parser.add_argument("--strict", action="store_true", help="exit non-zero for warnings as well as errors")
     return parser.parse_args(argv)

@@ -14,7 +14,8 @@ Required ordering within each QML object (with blank line between sections):
 
 By default every *.qml under the repo root is checked. Pass --file to check a
 single file, --file - to check an unsaved buffer piped in on stdin, and --json
-to get machine-readable output (for editors and language servers).
+to get machine-readable output (for editors and language servers), whose
+ranges span the content of the offending line.
 
 The report always goes to stderr, in whichever format; stdout carries only the
 fixed source, and only for `--file - --fix`. Colour is dropped when stderr is
@@ -168,7 +169,7 @@ def check_imports(lines: list[str], rel: str) -> list[Violation]:
             violations.append(
                 Violation(
                     rel,
-                    lineno,
+                    *line_span(lines, lineno),
                     "import-order",
                     f"'{curr_mod}' should appear before '{prev_mod}'",
                 )
@@ -177,7 +178,7 @@ def check_imports(lines: list[str], rel: str) -> list[Violation]:
             violations.append(
                 Violation(
                     rel,
-                    lineno,
+                    *line_span(lines, lineno),
                     "import-order",
                     f"'{curr_mod}' should appear before '{prev_mod}' (less nested first)",
                 )
@@ -220,7 +221,12 @@ def check_file_structure(lines: list[str], rel: str) -> list[Violation]:
     if pragma_indices and import_indices:
         if pragma_indices[-1] > import_indices[0]:
             violations.append(
-                Violation(rel, pragma_indices[-1] + 1, "file-structure", "pragmas should appear before imports")
+                Violation(
+                    rel,
+                    *line_span(lines, pragma_indices[-1] + 1),
+                    "file-structure",
+                    "pragmas should appear before imports",
+                )
             )
 
     # Separator between pragmas and imports
@@ -229,14 +235,17 @@ def check_file_structure(lines: list[str], rel: str) -> list[Violation]:
         if gap == 0:
             violations.append(
                 Violation(
-                    rel, import_indices[0] + 1, "file-structure", "blank line expected between pragmas and imports"
+                    rel,
+                    *line_span(lines, import_indices[0] + 1),
+                    "file-structure",
+                    "blank line expected between pragmas and imports",
                 )
             )
         elif gap > 1:
             violations.append(
                 Violation(
                     rel,
-                    pragma_indices[-1] + 3,
+                    *line_span(lines, pragma_indices[-1] + 3),
                     "file-structure",
                     "only one blank line expected between pragmas and imports",
                 )
@@ -248,7 +257,12 @@ def check_file_structure(lines: list[str], rel: str) -> list[Violation]:
             for gap_line in range(import_indices[j - 1] + 1, import_indices[j]):
                 if not lines[gap_line].strip():
                     violations.append(
-                        Violation(rel, gap_line + 1, "file-structure", "no blank lines expected within imports")
+                        Violation(
+                            rel,
+                            *line_span(lines, gap_line + 1),
+                            "file-structure",
+                            "no blank lines expected within imports",
+                        )
                     )
 
     # Separator between imports/pragmas and content
@@ -259,14 +273,17 @@ def check_file_structure(lines: list[str], rel: str) -> list[Violation]:
         if gap == 0:
             violations.append(
                 Violation(
-                    rel, content_start + 1, "file-structure", f"blank line expected between {label} and content"
+                    rel,
+                    *line_span(lines, content_start + 1),
+                    "file-structure",
+                    f"blank line expected between {label} and content",
                 )
             )
         elif gap > 1:
             violations.append(
                 Violation(
                     rel,
-                    last_header + 3,
+                    *line_span(lines, last_header + 3),
                     "file-structure",
                     f"only one blank line expected between {label} and content",
                 )
@@ -443,18 +460,35 @@ ATTACHED_HANDLER_RE = re.compile(r"^[A-Z]\w+\.on[A-Z]\w*\s*:")
 
 
 class Violation:
-    def __init__(self, file: str, line: int, rule: str, msg: str):
+    """One reported violation, spanning the source from `start` to `end`.
+
+    Both positions are 1 based line/column pairs. The end is exclusive, sitting
+    just past the last character, which is what an LSP range wants. Every rule
+    here is line shaped, so a span covers one line's content; the blank line
+    rules have nothing to cover and collapse to a caret.
+    """
+
+    def __init__(self, file: str, start: tuple[int, int], end: tuple[int, int], rule: str, msg: str):
         self.file = file
-        self.line = line
+        self.line, self.col = start
+        self.end_line, self.end_col = end
         self.rule = rule
         self.msg = msg
 
     def __str__(self):
         c = RULE_COLOURS.get(self.rule, "")
-        return f"{c}[{self.rule}]{RESET} {self.file}:{self.line}: {self.msg}"
+        return f"{c}[{self.rule}]{RESET} {self.file}:{self.line}:{self.col}: {self.msg}"
 
     def to_dict(self) -> dict[str, object]:
-        return {"file": self.file, "line": self.line, "rule": self.rule, "message": self.msg}
+        return {
+            "file": self.file,
+            "line": self.line,
+            "column": self.col,
+            "endLine": self.end_line,
+            "endColumn": self.end_col,
+            "rule": self.rule,
+            "message": self.msg,
+        }
 
 
 class ScopeTracker:
@@ -468,6 +502,17 @@ class ScopeTracker:
 
 def get_indent(line: str) -> str:
     return line[: len(line) - len(line.lstrip())]
+
+
+def line_span(lines: list[str], lineno: int) -> tuple[tuple[int, int], tuple[int, int]]:
+    """Start and end position covering the content of a 1 based line.
+
+    Leading indent and trailing whitespace are left out, so a blank line gives
+    an empty span at its first column.
+    """
+    line = lines[lineno - 1] if 1 <= lineno <= len(lines) else ""
+    start = len(line) - len(line.lstrip()) + 1
+    return (lineno, start), (lineno, max(len(line.rstrip()) + 1, start))
 
 
 def classify_line(stripped: str) -> Section | None:
@@ -548,7 +593,7 @@ def check_lines(lines: list[str], rel: str) -> list[Violation]:
                 violations.append(
                     Violation(
                         rel,
-                        lineno,
+                        *line_span(lines, lineno),
                         "blank-after-open-brace",
                         "no blank line expected after opening brace",
                     )
@@ -576,7 +621,7 @@ def check_lines(lines: list[str], rel: str) -> list[Violation]:
                 violations.append(
                     Violation(
                         rel,
-                        lineno,
+                        *line_span(lines, lineno),
                         "blank-before-close-brace",
                         "no blank line expected before closing brace",
                     )
@@ -604,7 +649,7 @@ def check_lines(lines: list[str], rel: str) -> list[Violation]:
             violations.append(
                 Violation(
                     rel,
-                    lineno,
+                    *line_span(lines, lineno),
                     "section-order",
                     f"{SECTION_NAMES[section]} should appear before "
                     f"{SECTION_NAMES[tracker.last_section]} "
@@ -617,7 +662,7 @@ def check_lines(lines: list[str], rel: str) -> list[Violation]:
             violations.append(
                 Violation(
                     rel,
-                    lineno,
+                    *line_span(lines, lineno),
                     "missing-section-separator",
                     f"blank line expected between {SECTION_NAMES[tracker.last_section]} and {SECTION_NAMES[section]}",
                 )
@@ -668,7 +713,8 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument(
         "--json",
         action="store_true",
-        help='report as JSON on stderr: {"violations": [{"file", "line", "rule", "message"}]}',
+        help="report as JSON on stderr: every violation carries a 1 based start "
+        "and end position; the end is exclusive, as an LSP range is",
     )
     parser.add_argument(
         "--file",
