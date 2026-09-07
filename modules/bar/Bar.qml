@@ -7,6 +7,7 @@ import QtQuick
 import QtQuick.Layouts
 import Quickshell
 import Caelestia.Config
+import Caelestia.Plugins
 import qs.components
 import qs.services
 
@@ -72,6 +73,13 @@ ColumnLayout {
             popouts.currentName = id.toLowerCase();
             popouts.currentCenter = (ch.item as Item).mapToItem(root, 0, (ch.item as Item).implicitHeight / 2).y ?? 0;
             popouts.hasCurrent = true;
+        } else {
+            const pluginPopout = Plugins.entryPoints(EntryPointType.BarPopout).find(p => p.properties.entry === id);
+            if (pluginPopout) {
+                popouts.currentName = id.toLowerCase();
+                popouts.currentCenter = (ch.item as Item).mapToItem(root, 0, (ch.item as Item).implicitHeight / 2).y ?? 0;
+                popouts.hasCurrent = true;
+            }
         }
     }
 
@@ -180,7 +188,29 @@ ColumnLayout {
                     }
                 }
             }
+            DelegateChoice {
+                delegate: EntryWrapper {
+                    id: pluginEntryWrapper
+
+                    EntryPointLoader {
+                        entryPoint: {
+                            const id = pluginEntryWrapper.modelData.id;
+                            const entry = Plugins.entryPoints(EntryPointType.BarEntry).find(e => e.properties.name === id);
+                            if (!entry)
+                                console.warn(logCat, "No plugin entry point found for", id);
+                            return entry;
+                        }
+                    }
+                }
+            }
         }
+    }
+
+    LoggingCategory {
+        id: logCat
+
+        name: "caelestia.bar"
+        defaultLogLevel: LoggingCategory.Info
     }
 
     component EntryWrapper: Item {

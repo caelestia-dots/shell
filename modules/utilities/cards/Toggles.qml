@@ -5,6 +5,7 @@ import QtQuick.Layouts
 import Quickshell.Bluetooth
 import Caelestia.Components
 import Caelestia.Config
+import Caelestia.Plugins
 import qs.components
 import qs.components.controls
 import qs.services
@@ -36,8 +37,6 @@ StyledRect {
             return true;
         });
     }
-    readonly property int splitIndex: Math.ceil(quickToggles.length / 2)
-    readonly property bool needExtraRow: quickToggles.length > 6
 
     implicitHeight: layout.implicitHeight + Tokens.padding.extraLargeIncreased
 
@@ -49,31 +48,60 @@ StyledRect {
 
         anchors.fill: parent
         anchors.margins: Tokens.padding.large
-        spacing: Tokens.spacing.medium
+        spacing: Tokens.spacing.small
 
         StyledText {
+            Layout.bottomMargin: Tokens.spacing.medium - parent.spacing
             text: qsTr("Quick Toggles")
             font: Tokens.font.body.medium
         }
 
-        QuickToggleRow {
-            model: root.needExtraRow ? root.quickToggles.slice(0, root.splitIndex) : root.quickToggles
-        }
+        Repeater {
+            model: {
+                const arr = root.quickToggles;
+                const n = arr.length;
+                if (n < 3)
+                    return [arr];
 
-        QuickToggleRow {
-            visible: root.needExtraRow
-            model: root.needExtraRow ? root.quickToggles.slice(root.splitIndex) : []
+                const k = Math.ceil(n / 6);
+                const baseSize = Math.floor(n / k);
+                const remainder = n % k;
+
+                const subsets = [];
+                let start = 0;
+
+                for (let i = 0; i < k; i++) {
+                    const size = baseSize + (i < remainder ? 1 : 0);
+                    subsets.push(arr.slice(start, start + size));
+                    start += size;
+                }
+
+                return subsets;
+            }
+
+            QuickToggleRow {}
         }
     }
 
+    LoggingCategory {
+        id: logCat
+
+        name: "caelestia.utilities.toggles"
+        defaultLogLevel: LoggingCategory.Info
+    }
+
     component QuickToggleRow: ButtonRow {
-        property alias model: repeater.model
+        id: toggleRow
+
+        required property var modelData
 
         Layout.fillWidth: true
-        spacing: Tokens.spacing.small
+        spacing: Tokens.spacing.extraSmall
 
         Repeater {
             id: repeater
+
+            model: toggleRow.modelData
 
             delegate: DelegateChooser {
                 role: "id"
@@ -147,6 +175,27 @@ StyledRect {
                         isToggle: VPN.status.state !== "needs-auth" && VPN.status.state !== "error"
                         inactiveOnColour: Colours.palette.m3onSurfaceVariant
                         onClicked: VPN.toggle()
+                    }
+                }
+                DelegateChoice {
+                    delegate: EntryPointLoader {
+                        id: entryLoader
+
+                        required property var modelData
+
+                        // qmllint disable missing-property
+                        readonly property bool fillWidth: item?.fillWidth ?? true
+                        readonly property bool shapeMorph: item?.shapeMorph ?? true
+                        readonly property real shapeMorphExpansion: item?.shapeMorphExpansion ?? 0
+                        // qmllint enable missing-property
+
+                        entryPoint: {
+                            const id = modelData.id;
+                            const entry = Plugins.entryPoints(EntryPointType.QuickToggle).find(e => e.properties.name === id);
+                            if (!entry)
+                                console.warn(logCat, "No plugin entry point found for", id);
+                            return entry;
+                        }
                     }
                 }
             }
