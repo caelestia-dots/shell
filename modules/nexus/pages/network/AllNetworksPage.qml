@@ -21,12 +21,12 @@ PageBase {
         width: root.cappedWidth
         spacing: Tokens.spacing.extraSmall / 2
 
-        Timer {
-            running: root.visible && Nmcli.wifiEnabled
-            repeat: true
-            triggeredOnStart: true
-            interval: GlobalConfig.nexus.networkRescanInterval
-            onTriggered: Nmcli.rescanWifi()
+        Component.onCompleted: {
+            Nmcli.enableScanner(root.visible);
+        }
+
+        onVisibleChanged: {
+            Nmcli.enableScanner(root.visible);
         }
 
         ConnectedRect {
@@ -58,7 +58,7 @@ PageBase {
                 FilterButton {
                     id: savedFilter
 
-                    function internalFilter(ap: Nmcli.AccessPoint): bool {
+                    function internalFilter(ap: var): bool {
                         return Nmcli.hasSavedProfile(ap.ssid);
                     }
 
@@ -82,8 +82,8 @@ PageBase {
                 FilterButton {
                     id: secureFilter
 
-                    function internalFilter(ap: Nmcli.AccessPoint): bool {
-                        return ap.security !== "none";
+                    function internalFilter(ap: var): bool {
+                        return ap.isSecure;
                     }
 
                     text: qsTr("Secured")
@@ -92,7 +92,7 @@ PageBase {
                 FilterButton {
                     id: highFreqFilter
 
-                    function internalFilter(ap: Nmcli.AccessPoint): bool {
+                    function internalFilter(ap: var): bool {
                         return ap.frequency >= 4900 && ap.frequency <= 5900;
                     }
 
@@ -102,7 +102,7 @@ PageBase {
                 FilterButton {
                     id: lowFreqFilter
 
-                    function internalFilter(ap: Nmcli.AccessPoint): bool {
+                    function internalFilter(ap: var): bool {
                         return ap.frequency >= 2400 && ap.frequency <= 2500;
                     }
 
@@ -128,7 +128,7 @@ PageBase {
         NetworkList {
             id: networkList
 
-            function networkFilter(ap: Nmcli.AccessPoint): bool {
+            function networkFilter(ap: var): bool {
                 return savedFilter.filter(ap) && secureFilter.filter(ap) && highFreqFilter.filter(ap) && lowFreqFilter.filter(ap);
             }
 
@@ -143,7 +143,7 @@ PageBase {
 
         property int filterState // 0 = default, 1 = on, 2 = negate
 
-        function filter(ap: Nmcli.AccessPoint): bool {
+        function filter(ap: var): bool {
             if (filterState === 0)
                 return true;
             if (filterState === 1)
@@ -151,7 +151,7 @@ PageBase {
             return !internalFilter(ap);
         }
 
-        function internalFilter(ap: Nmcli.AccessPoint): bool {
+        function internalFilter(ap: var): bool {
             return true;
         }
 

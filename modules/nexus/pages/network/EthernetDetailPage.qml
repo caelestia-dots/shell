@@ -15,7 +15,7 @@ PageBase {
     id: root
 
     readonly property string ifaceName: nState.selectedEthernetInterface
-    readonly property Nmcli.EthernetDevice device: Nmcli.ethernetDevices.find(d => d.iface === root.ifaceName) ?? null
+    readonly property var device: Nmcli.ethernetDevices.find(d => d.iface === root.ifaceName) ?? null
     readonly property var details: Nmcli.ethernetDeviceDetails
     readonly property string connectionName: root.device?.connection ?? ""
 
@@ -35,20 +35,19 @@ PageBase {
     function loadIpConfig(): void {
         if (!root.connectionName)
             return;
-        Nmcli.getIpv4Config(root.connectionName, cfg => {
-            if (!cfg)
-                return;
-            root.ipMethod = cfg.method;
-            methodSelect.active = cfg.method === "manual" ? manualItem : (cfg.method === "auto-dns" ? autoDnsItem : autoItem);
-            addressField.text = cfg.address;
-            gatewayField.text = cfg.gateway;
-            dnsField.text = cfg.dns;
-            root.origMethod = cfg.method;
-            root.origAddress = cfg.address;
-            root.origGateway = cfg.gateway;
-            root.origDns = cfg.dns;
-            root.ipLoaded = true;
-        });
+        const cfg = Nmcli.getIpv4Config(root.connectionName);
+        if (!cfg)
+            return;
+        root.ipMethod = cfg.method;
+        methodSelect.active = cfg.method === "manual" ? manualItem : (cfg.method === "auto-dns" ? autoDnsItem : autoItem);
+        addressField.text = cfg.address;
+        gatewayField.text = cfg.gateway;
+        dnsField.text = cfg.dns;
+        root.origMethod = cfg.method;
+        root.origAddress = cfg.address;
+        root.origGateway = cfg.gateway;
+        root.origDns = cfg.dns;
+        root.ipLoaded = true;
     }
 
     function saveIpConfig(): void {
@@ -72,35 +71,32 @@ PageBase {
         }
 
         root.savingIp = true;
-        Nmcli.setIpv4Config(root.connectionName, {
+        const result = Nmcli.setIpv4Config(root.connectionName, {
             method: root.ipMethod,
             address: addressField.text.trim(),
             gateway: gatewayField.text.trim(),
             dns: dnsField.text.trim()
-        }, result => {
-            root.savingIp = false;
-            if (!(result && result.success)) {
-                if (root.ipMethod === "manual")
-                    addressField.isError = true;
-                else
-                    dnsField.isError = true;
-            } else {
-                // Persisted — make the current values the new baseline so the
-                // Apply button hides again until something else changes.
-                root.origMethod = root.ipMethod;
-                root.origAddress = addressField.text.trim();
-                root.origGateway = gatewayField.text.trim();
-                root.origDns = dnsField.text.trim();
-            }
         });
+        root.savingIp = false;
+        if (!result) {
+            if (root.ipMethod === "manual")
+                addressField.isError = true;
+            else
+                dnsField.isError = true;
+        } else {
+            // Persisted — make the current values the new baseline so the
+            // Apply button hides again until something else changes.
+            root.origMethod = root.ipMethod;
+            root.origAddress = addressField.text.trim();
+            root.origGateway = gatewayField.text.trim();
+            root.origDns = dnsField.text.trim();
+        }
     }
 
     title: root.device?.connection || root.ifaceName || qsTr("Ethernet")
     isSubPage: true
 
     Component.onCompleted: {
-        Nmcli.getEthernetDeviceDetails(root.ifaceName, () => {});
-        Nmcli.getEthernetSpeed(root.ifaceName);
         loadIpConfig();
     }
 

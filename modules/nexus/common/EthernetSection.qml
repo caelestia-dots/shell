@@ -18,22 +18,6 @@ ColumnLayout {
 
     spacing: Tokens.spacing.extraSmall / 2
 
-    // Keep ethernet state fresh while the page is visible.
-    Timer {
-        running: root.visible
-        repeat: true
-        triggeredOnStart: true
-        interval: 5000
-        onTriggered: {
-            Nmcli.getEthernetInterfaces(() => {});
-            if (Nmcli.activeEthernet) {
-                Nmcli.getEthernetDeviceDetails(Nmcli.activeEthernet.iface, () => {});
-                Nmcli.getEthernetDataUsage(Nmcli.activeEthernet.iface, () => {});
-                Nmcli.getEthernetSpeed(Nmcli.activeEthernet.iface);
-            }
-        }
-    }
-
     ConnectedRect {
         Layout.fillWidth: true
         first: true
@@ -86,7 +70,7 @@ ColumnLayout {
         delegate: ConnectedRect {
             id: ethRow
 
-            required property Nmcli.EthernetDevice modelData
+            required property var modelData
             required property int index
 
             readonly property bool isConnected: modelData.connected
@@ -167,13 +151,15 @@ ColumnLayout {
                     onVisibleChanged: {
                         if (visible) {
                             ethIpAddr.value = ethRow.details?.ipAddress ?? "";
-                            ethDns.value = ethRow.details?.dns[0] ?? "";
+                            const dnsVal = ethRow.details?.dns;
+                            ethDns.value = Array.isArray(dnsVal) ? (dnsVal[0] ?? "") : (typeof dnsVal === "string" ? (dnsVal.split(",")[0]?.trim() ?? "") : "");
                         }
                     }
                     Component.onCompleted: {
                         if (visible) {
                             ethIpAddr.value = ethRow.details?.ipAddress ?? "";
-                            ethDns.value = ethRow.details?.dns[0] ?? "";
+                            const dnsVal = ethRow.details?.dns;
+                            ethDns.value = Array.isArray(dnsVal) ? (dnsVal[0] ?? "") : (typeof dnsVal === "string" ? (dnsVal.split(",")[0]?.trim() ?? "") : "");
                         }
                     }
 

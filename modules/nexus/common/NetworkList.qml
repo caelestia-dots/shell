@@ -17,9 +17,9 @@ ItemList {
     property int limit: 0 // 0 = show all
     property bool enableFilter
 
-    signal networkSelected(ap: Nmcli.AccessPoint)
+    signal networkSelected(ap: var)
 
-    function networkFilter(ap: Nmcli.AccessPoint): bool {
+    function networkFilter(ap: var): bool {
         return true;
     }
 
@@ -46,10 +46,9 @@ ItemList {
 
         required property int index
         required property var modelData
-        property bool currentSelected
         property real textOpacity: disabled ? 0.5 : 1
 
-        disabled: currentSelected || Nmcli.connectingSsid() === modelData.ssid
+        disabled: Nmcli.connectingSsid() === modelData.ssid
 
         anchors.left: root.list.contentItem.left
         anchors.right: root.list.contentItem.right
@@ -62,7 +61,6 @@ ItemList {
         onClicked: {
             if (!modelData.active) {
                 NetworkConnection.handleConnect(modelData);
-                currentSelected = true;
                 root.networkSelected(modelData);
             } else {
                 // Active network: open its detail/settings sub-page.
@@ -76,24 +74,6 @@ ItemList {
             Anim {
                 type: Anim.DefaultEffects
             }
-        }
-
-        Connections {
-            function onActiveChanged(): void {
-                if (network.modelData.active)
-                    network.currentSelected = false;
-            }
-
-            target: network.modelData
-        }
-
-        Connections {
-            function onNetworkSelected(ap: Nmcli.AccessPoint): void {
-                if (ap !== network.modelData)
-                    network.currentSelected = false;
-            }
-
-            target: root
         }
 
         RowLayout {
