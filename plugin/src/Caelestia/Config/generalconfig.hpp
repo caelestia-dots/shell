@@ -5,8 +5,8 @@
 #include <qvariantlist.h>
 
 #include "settings/objectnode.hpp"
-#include "common.hpp"
 #include "util/i18n.hpp"
+#include "common.hpp"
 
 namespace caelestia::config {
 
