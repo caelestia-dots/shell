@@ -10,44 +10,69 @@ import qs.services
 Column {
     id: root
 
+    function formatSeconds(s: int): string {
+        const day = Math.floor(s / 86400);
+        const hr = Math.floor(s / 3600) % 24;
+        const min = Math.floor(s / 60) % 60;
+
+        let comps = [];
+        if (day > 0)
+            comps.push(Tr.trN("%n day", "%n days", day));
+        if (hr > 0)
+            comps.push(Tr.trN("%n hour", "%n hours", hr));
+        if (min > 0)
+            comps.push(Tr.trN("%n min", "%n mins", min));
+
+        return comps.join(Tr.trCtx(", ", "duration component separator"));
+    }
+
+    function powerProfileToString(p: int): string {
+        switch (p) {
+        case PowerProfile.Balanced:
+            return Tr.trCtx("Balanced", "power profile");
+        case PowerProfile.Performance:
+            return Tr.trCtx("Performance", "power profile");
+        case PowerProfile.PowerSaver:
+            return Tr.trCtx("Power saver", "power profile");
+        default:
+            return Tr.trCtx("Unknown", "power profile");
+        }
+    }
+
+    function perfDegradationToString(p: int): string {
+        switch (p) {
+        case PerformanceDegradationReason.HighTemperature:
+            return Tr.tr("The device is too hot");
+        case PerformanceDegradationReason.LapDetected:
+            return Tr.tr("The device is on a lap");
+        default:
+            return Tr.tr("Unknown reason");
+        }
+    }
+
     spacing: Tokens.spacing.medium
     width: Tokens.sizes.bar.batteryWidth
 
     StyledText {
-        text: UPower.displayDevice.isLaptopBattery ? Tr.tr("Remaining: %1%").arg(Math.round(UPower.displayDevice.percentage * 100)) : Tr.tr("No battery detected")
+        text: UPower.displayDevice.isLaptopBattery ? Tr.trCtx("Remaining: %1%", "battery remaining").arg(Math.round(UPower.displayDevice.percentage * 100)) : Tr.tr("No battery detected")
     }
 
     StyledText {
-        function formatSeconds(s: int): string {
-            const day = Math.floor(s / 86400);
-            const hr = Math.floor(s / 3600) % 24;
-            const min = Math.floor(s / 60) % 60;
-
-            let comps = [];
-            if (day > 0)
-                comps.push(Tr.trN("%n day", "%n days", day));
-            if (hr > 0)
-                comps.push(Tr.trN("%n hour", "%n hours", hr));
-            if (min > 0)
-                comps.push(Tr.trN("%n min", "%n mins", min));
-
-            return comps.join(Tr.trCtx(", ", "duration component separator"));
-        }
 
         text: {
             const dev = UPower.displayDevice;
             if (!dev.isLaptopBattery)
-                return Tr.tr("Power profile: %1").arg(PowerProfile.toString(PowerProfiles.profile));
+                return Tr.tr("Power profile: %1").arg(root.powerProfileToString(PowerProfiles.profile));
 
             if (UPower.onBattery) {
-                const time = formatSeconds(dev.timeToEmpty);
+                const time = root.formatSeconds(dev.timeToEmpty);
                 if (time)
                     return Tr.tr("Time remaining: %1").arg(time);
                 return Tr.tr("Calculating remaining battery life...");
             }
 
             if (dev.timeToFull > 0)
-                return Tr.tr("Time until charged: %1").arg(formatSeconds(dev.timeToFull));
+                return Tr.tr("Time until charged: %1").arg(root.formatSeconds(dev.timeToFull));
             if (Math.round(dev.percentage * 100) === 100)
                 return Tr.tr("Fully charged!");
             return Tr.tr("Calculating time until charged...");
@@ -88,9 +113,9 @@ Column {
 
                     StyledText {
                         anchors.verticalCenter: parent.verticalCenter
-                        text: Tr.tr("Performance Degraded")
+                        text: Tr.tr("Performance degraded")
                         color: Colours.palette.m3onError
-                        font: Tokens.font.mono.builders.medium.weight(Font.Medium).build()
+                        font: Tokens.font.title.small
                     }
 
                     MaterialIcon {
@@ -105,7 +130,7 @@ Column {
                 StyledText {
                     anchors.horizontalCenter: parent.horizontalCenter
 
-                    text: Tr.tr("Reason: %1").arg(PerformanceDegradationReason.toString(PowerProfiles.degradationReason))
+                    text: root.perfDegradationToString(PowerProfiles.degradationReason)
                     color: Colours.palette.m3onError
                 }
             }
