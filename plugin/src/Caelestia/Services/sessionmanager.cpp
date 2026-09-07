@@ -9,6 +9,7 @@
 #include <qloggingcategory.h>
 
 #include "core/toaster.hpp"
+#include "util/i18n.hpp"
 
 namespace {
 
@@ -19,6 +20,7 @@ Q_LOGGING_CATEGORY(lcSessionManager, "caelestia.services.sessionmanager", QtInfo
 namespace caelestia::services {
 
 using Qt::StringLiterals::operator""_s;
+using util::i18n::mark;
 
 namespace {
 
@@ -115,8 +117,8 @@ void SessionManager::hibernate() {
     } else {
         qCWarning(lcSessionManager) << "Hibernate unavailable, ignoring hibernate request";
 
-        Toaster::instance()->toast(
-            tr("Hibernate failed"), tr("Enable hibernation to use this feature."), u"warning"_s, Toast::Type::Warning);
+        Toaster::instance()->toast(mark(u"Hibernate failed"_s), mark(u"Enable hibernation to use this feature."_s),
+            u"warning"_s, Toast::Type::Warning);
     }
 }
 

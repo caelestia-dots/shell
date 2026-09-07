@@ -43,7 +43,12 @@ ColumnLayout {
 
     Detail {
         icon: "location_on"
-        text: Tr.tr("Address: %1").arg(`0x${root.client?.address}` ?? "unknown")
+        text: {
+            const addr = root.client?.address;
+            if (addr)
+                return Tr.trCtx("Address: %1", "window address").arg(`0x${addr}`);
+            return Tr.trCtx("Address: unknown", "window address");
+        }
         color: Colours.palette.m3primary
     }
 
@@ -76,13 +81,23 @@ ColumnLayout {
 
     Detail {
         icon: "page_header"
-        text: Tr.tr("Initial title: %1").arg(root.client?.lastIpcObject.initialTitle ?? "unknown")
+        text: {
+            const title = root.client?.lastIpcObject.initialTitle;
+            if (title)
+                return Tr.tr("Initial title: %1").arg(title);
+            return Tr.tr("Initial title: unknown");
+        }
         color: Colours.palette.m3tertiary
     }
 
     Detail {
         icon: "category"
-        text: Tr.tr("Initial class: %1").arg(root.client?.lastIpcObject.initialClass ?? "unknown")
+        text: {
+            const cls = root.client?.lastIpcObject.initialClass;
+            if (cls)
+                return Tr.tr("Initial class: %1").arg(cls);
+            return Tr.tr("Initial class: unknown");
+        }
     }
 
     Detail {
@@ -93,18 +108,18 @@ ColumnLayout {
 
     Detail {
         icon: "picture_in_picture_center"
-        text: Tr.tr("Floating: %1").arg(root.client?.lastIpcObject.floating ? "yes" : "no")
+        text: root.client?.lastIpcObject.floating ? Tr.tr("Floating: yes") : Tr.tr("Floating: no")
         color: Colours.palette.m3secondary
     }
 
     Detail {
         icon: "gradient"
-        text: Tr.tr("Xwayland: %1").arg(root.client?.lastIpcObject.xwayland ? "yes" : "no")
+        text: root.client?.lastIpcObject.xwayland ? Tr.tr("Xwayland: yes") : Tr.tr("Xwayland: no")
     }
 
     Detail {
         icon: "keep"
-        text: Tr.tr("Pinned: %1").arg(root.client?.lastIpcObject.pinned ? "yes" : "no")
+        text: root.client?.lastIpcObject.pinned ? Tr.tr("Pinned: yes") : Tr.tr("Pinned: no")
         color: Colours.palette.m3secondary
     }
 
@@ -112,8 +127,12 @@ ColumnLayout {
         icon: "fullscreen"
         text: {
             const fs = root.client?.lastIpcObject.fullscreen;
-            if (fs)
-                return Tr.tr("Fullscreen state: %1").arg(fs == 0 ? "off" : fs == 1 ? "maximised" : "on");
+            if (fs === 0)
+                return Tr.tr("Fullscreen state: off");
+            if (fs === 1)
+                return Tr.tr("Fullscreen state: maximised");
+            if (fs !== undefined)
+                return Tr.tr("Fullscreen state: on");
             return Tr.tr("Fullscreen state: unknown");
         }
         color: Colours.palette.m3tertiary

@@ -23,7 +23,7 @@ Singleton {
     property string pendingCoords
 
     readonly property string icon: cc ? Icons.getWeatherIcon(cc.weatherCode) : "cloud_alert"
-    readonly property string description: cc?.weatherDesc ?? Tr.tr("No weather")
+    readonly property string description: cc ? getWeatherCondition(cc.weatherCode) : Tr.tr("No weather")
     readonly property string temp: formatTemp(cc?.tempC)
     readonly property string feelsLike: formatTemp(cc?.feelsLikeC)
     readonly property int humidity: cc?.humidity ?? 0
@@ -237,7 +237,6 @@ Singleton {
 
             cc = {
                 weatherCode: json.current.weather_code,
-                weatherDesc: getWeatherCondition(json.current.weather_code),
                 tempC: json.current.temperature_2m,
                 feelsLikeC: json.current.apparent_temperature,
                 humidity: json.current.relative_humidity_2m,
@@ -296,36 +295,36 @@ Singleton {
 
     function getWeatherCondition(code: string): string {
         const conditions = {
-            "0": "Clear",
-            "1": "Clear",
-            "2": "Partly cloudy",
-            "3": "Overcast",
-            "45": "Fog",
-            "48": "Fog",
-            "51": "Drizzle",
-            "53": "Drizzle",
-            "55": "Drizzle",
-            "56": "Freezing drizzle",
-            "57": "Freezing drizzle",
-            "61": "Light rain",
-            "63": "Rain",
-            "65": "Heavy rain",
-            "66": "Light rain",
-            "67": "Heavy rain",
-            "71": "Light snow",
-            "73": "Snow",
-            "75": "Heavy snow",
-            "77": "Snow",
-            "80": "Light rain",
-            "81": "Rain",
-            "82": "Heavy rain",
-            "85": "Light snow showers",
-            "86": "Heavy snow showers",
-            "95": "Thunderstorm",
-            "96": "Thunderstorm with hail",
-            "99": "Thunderstorm with hail"
+            "0": Tr.tr("Clear"),
+            "1": Tr.tr("Clear"),
+            "2": Tr.tr("Partly cloudy"),
+            "3": Tr.tr("Overcast"),
+            "45": Tr.tr("Fog"),
+            "48": Tr.tr("Fog"),
+            "51": Tr.tr("Drizzle"),
+            "53": Tr.tr("Drizzle"),
+            "55": Tr.tr("Drizzle"),
+            "56": Tr.tr("Freezing drizzle"),
+            "57": Tr.tr("Freezing drizzle"),
+            "61": Tr.tr("Light rain"),
+            "63": Tr.tr("Rain"),
+            "65": Tr.tr("Heavy rain"),
+            "66": Tr.tr("Light rain"),
+            "67": Tr.tr("Heavy rain"),
+            "71": Tr.tr("Light snow"),
+            "73": Tr.tr("Snow"),
+            "75": Tr.tr("Heavy snow"),
+            "77": Tr.tr("Snow"),
+            "80": Tr.tr("Light rain"),
+            "81": Tr.tr("Rain"),
+            "82": Tr.tr("Heavy rain"),
+            "85": Tr.tr("Light snow showers"),
+            "86": Tr.tr("Heavy snow showers"),
+            "95": Tr.tr("Thunderstorm"),
+            "96": Tr.tr("Thunderstorm with hail"),
+            "99": Tr.tr("Thunderstorm with hail")
         };
-        return conditions[code] || "Unknown";
+        return conditions[code] || Tr.trCtx("Unknown", "weather condition");
     }
 
     onLocChanged: fetchWeatherData()

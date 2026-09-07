@@ -17,7 +17,7 @@ PageBase {
             text: Tr.tr("Auto")
         },
         MenuItem {
-            text: "Local"
+            text: Tr.tr("Local")
         },
         MenuItem {
             text: "LRCLIB"

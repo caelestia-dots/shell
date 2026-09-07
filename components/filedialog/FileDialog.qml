@@ -11,7 +11,7 @@ LazyLoader {
     id: loader
 
     property list<string> cwd: ["Home"]
-    property string filterLabel: "All files"
+    property string filterLabel: Tr.tr("All files")
     property list<string> filters: ["*"]
     property string title: Tr.tr("Select a file")
 

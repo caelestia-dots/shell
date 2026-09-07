@@ -25,16 +25,23 @@ Column {
 
             let comps = [];
             if (day > 0)
-                comps.push(`${day} days`);
+                comps.push(Tr.trN("%n day", "%n days", day));
             if (hr > 0)
-                comps.push(`${hr} hours`);
+                comps.push(Tr.trN("%n hour", "%n hours", hr));
             if (min > 0)
-                comps.push(`${min} mins`);
+                comps.push(Tr.trN("%n min", "%n mins", min));
 
-            return comps.join(", ") || fallback;
+            return comps.join(Tr.trCtx(", ", "duration component separator")) || fallback;
         }
 
-        text: UPower.displayDevice.isLaptopBattery ? Tr.tr("Time %1: %2").arg(UPower.onBattery ? "remaining" : "until charged").arg(UPower.onBattery ? formatSeconds(UPower.displayDevice.timeToEmpty, "Calculating...") : formatSeconds(UPower.displayDevice.timeToFull, "Fully charged!")) : Tr.tr("Power profile: %1").arg(PowerProfile.toString(PowerProfiles.profile))
+        text: {
+            const dev = UPower.displayDevice;
+            if (!dev.isLaptopBattery)
+                return Tr.tr("Power profile: %1").arg(PowerProfile.toString(PowerProfiles.profile));
+            if (UPower.onBattery)
+                return Tr.tr("Time remaining: %1").arg(formatSeconds(dev.timeToEmpty, Tr.tr("Calculating...")));
+            return Tr.tr("Time until charged: %1").arg(formatSeconds(dev.timeToFull, Tr.tr("Fully charged!")));
+        }
     }
 
     Loader {

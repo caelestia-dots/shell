@@ -181,13 +181,13 @@ QtObject {
             const d = Math.floor(h / 24);
 
             if (d > 0) {
-                timeStr = `${d}d`;
+                timeStr = Tr.trCtx("%1d", "abbreviated notification age, days").arg(d);
                 timeStrTimer.interval = 3600000;
             } else if (h > 0) {
-                timeStr = `${h}h`;
+                timeStr = Tr.trCtx("%1h", "abbreviated notification age, hours").arg(h);
                 timeStrTimer.interval = 300000;
             } else {
-                timeStr = `${m}m`;
+                timeStr = Tr.trCtx("%1m", "abbreviated notification age, minutes").arg(m);
                 timeStrTimer.interval = m < 10 ? 30000 : 60000;
             }
         }

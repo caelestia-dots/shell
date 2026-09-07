@@ -193,7 +193,7 @@ StyledRect {
 
                     anchors.centerIn: parent
                     animate: true
-                    text: Recorder.paused ? "PAUSED" : "REC"
+                    text: Recorder.paused ? Tr.trCtx("PAUSED", "recording status") : Tr.trCtx("REC", "recording status")
                     color: Recorder.paused ? Colours.palette.m3onTertiary : Colours.palette.m3onError
                     font: Tokens.font.mono.small
                 }

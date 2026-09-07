@@ -58,7 +58,7 @@ Item {
                 return Colours.palette.m3onSurface;
             }
 
-            text: root.math.length > 0 ? (Qalculator.result || Tr.tr("Calculating...")) : Tr.tr("Type an expression to calculate")
+            text: root.math.length > 0 ? (Qalculator.result ? Tr.trMarked(Qalculator.result) : Tr.tr("Calculating...")) : Tr.tr("Type an expression to calculate")
             elide: Text.ElideLeft
 
             Layout.fillWidth: true
