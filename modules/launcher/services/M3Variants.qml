@@ -61,13 +61,13 @@ Searcher {
             variant: "neutral"
             icon: "contrast"
             name: Tr.tr("Neutral")
-            description: Tr.tr("Close to grayscale, a hint of chroma.")
+            description: Tr.tr("Close to greyscale, a hint of chroma.")
         },
         Variant {
             variant: "monochrome"
             icon: "filter_b_and_w"
             name: Tr.tr("Monochrome")
-            description: Tr.tr("All colours are grayscale, no chroma.")
+            description: Tr.tr("All colours are greyscale, no chroma.")
         }
     ]
     useFuzzy: GlobalConfig.launcher.useFuzzy.variants

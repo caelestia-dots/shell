@@ -45,7 +45,7 @@ class LauncherConfig : public settings::ObjectNode {
             vmap({
                 { u"name"_s, markCtx(u"Calculator"_s, u"launcher action"_s) },
                 { u"icon"_s, u"calculate"_s },
-                { u"description"_s, mark(u"Do simple math equations (powered by Qalc)"_s) },
+                { u"description"_s, mark(u"Do simple maths equations (powered by Qalc)"_s) },
                 { u"command"_s, QStringList{ u"autocomplete"_s, u"calc"_s } },
             }),
             vmap({
