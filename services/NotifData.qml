@@ -17,7 +17,20 @@ QtObject {
     property var locks: new Set()
 
     property date time: new Date()
-    property string timeStr: Tr.tr("now")
+    property int ageMins: 0
+    readonly property string timeStr: {
+        if (ageMins < 1)
+            return Tr.tr("now");
+
+        const h = Math.floor(ageMins / 60);
+        const d = Math.floor(h / 24);
+
+        if (d > 0)
+            return Tr.trCtx("%1d", "abbreviated notification age, days").arg(d);
+        if (h > 0)
+            return Tr.trCtx("%1h", "abbreviated notification age, hours").arg(h);
+        return Tr.trCtx("%1m", "abbreviated notification age, minutes").arg(ageMins);
+    }
 
     readonly property Timer timeStrTimer: Timer {
         running: !notif.closed
@@ -172,24 +185,20 @@ QtObject {
     function updateTimeStr(): void {
         const diff = Date.now() - time.getTime();
         const m = Math.floor(diff / 60000);
+        ageMins = m;
 
         if (m < 1) {
-            timeStr = Tr.tr("now");
             timeStrTimer.interval = 5000;
         } else {
             const h = Math.floor(m / 60);
             const d = Math.floor(h / 24);
 
-            if (d > 0) {
-                timeStr = Tr.trCtx("%1d", "abbreviated notification age, days").arg(d);
+            if (d > 0)
                 timeStrTimer.interval = 3600000;
-            } else if (h > 0) {
-                timeStr = Tr.trCtx("%1h", "abbreviated notification age, hours").arg(h);
+            else if (h > 0)
                 timeStrTimer.interval = 300000;
-            } else {
-                timeStr = Tr.trCtx("%1m", "abbreviated notification age, minutes").arg(m);
+            else
                 timeStrTimer.interval = m < 10 ? 30000 : 60000;
-            }
         }
     }
 
