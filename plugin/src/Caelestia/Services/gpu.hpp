@@ -1,5 +1,6 @@
 #pragma once
 
+#include <qhash.h>
 #include <qprocess.h>
 #include <qqmlintegration.h>
 #include <qstringlist.h>
@@ -50,6 +51,7 @@ private:
     void finishNameSource(int index, int generation, QString name);
 
     void readGenericUsage();
+    void readIntelUsage();
     void startNvidiaUsage();
     void readGpuTemperature();
     void resetUsage();
@@ -72,6 +74,21 @@ private:
     // /sys/class/drm card busy files, enumerated once at construction (the card
     // set is static at runtime) and reused by resolution and the tick path.
     QStringList m_busyFiles;
+
+    // PCI slot (e.g. "0000:00:02.0") of the Intel i915 GPU, empty if none.
+    QString m_intelPdev;
+
+    // Per-client render+compute busy ns from the previous scan, kept as the baseline
+    // to diff against (NVTOP does the same).
+    struct IntelClientBusy {
+        quint64 render = 0;
+        quint64 compute = 0;
+    };
+
+    QHash<unsigned int, IntelClientBusy> m_lastFdinfo;
+
+    // Monotonic ns of the last scan, to scale busy-time deltas by elapsed wall time.
+    qint64 m_lastIntelNs = 0;
 
     // Bumped per resolution so callbacks from a superseded probe are dropped
     int m_generation = 0;
