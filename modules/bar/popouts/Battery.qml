@@ -58,7 +58,6 @@ Column {
     }
 
     StyledText {
-
         text: {
             const dev = UPower.displayDevice;
             if (!dev.isLaptopBattery)
