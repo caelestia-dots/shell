@@ -201,7 +201,7 @@ ColumnLayout {
                             return Tr.tr("Network: %1").arg(ssid);
                         }
                     }
-                    return Tr.tr("Network: Unknown");
+                    return Tr.tr("Unknown network");
                 }
                 color: Colours.palette.m3outline
                 font: Tokens.font.body.small

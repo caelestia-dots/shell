@@ -8,10 +8,10 @@ ColumnLayout {
     spacing: Tokens.spacing.small
 
     StyledText {
-        text: Hypr.capsLock ? Tr.tr("Capslock: Enabled") : Tr.tr("Capslock: Disabled")
+        text: Hypr.capsLock ? Tr.tr("Capslock enabled") : Tr.tr("Capslock disabled")
     }
 
     StyledText {
-        text: Hypr.numLock ? Tr.tr("Numlock: Enabled") : Tr.tr("Numlock: Disabled")
+        text: Hypr.numLock ? Tr.tr("Numlock enabled") : Tr.tr("Numlock disabled")
     }
 }
