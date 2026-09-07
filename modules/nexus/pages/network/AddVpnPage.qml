@@ -208,7 +208,7 @@ PageBase {
                     horizontalPadding: Tokens.padding.extraLarge
                     verticalPadding: Tokens.padding.medium
                     type: TextButton.Tonal
-                    text: Tr.tr("Cancel")
+                    text: Tr.trCtx("Cancel", "button")
                     onClicked: root.nState.closeSubPage()
                 }
 

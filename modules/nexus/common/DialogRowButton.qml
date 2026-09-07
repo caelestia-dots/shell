@@ -222,7 +222,7 @@ Item {
                             isRound: true
                             horizontalPadding: Tokens.padding.largeIncreased
                             verticalPadding: Tokens.padding.medium
-                            text: Tr.tr("Cancel")
+                            text: Tr.trCtx("Cancel", "button")
                             onClicked: {
                                 root.cancelled();
                                 root.open = false;

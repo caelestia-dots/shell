@@ -481,7 +481,7 @@ ColumnLayout {
                     Layout.minimumHeight: Tokens.font.body.medium.pointSize + Tokens.padding.medium * 2
                     inactiveColour: Colours.palette.m3secondaryContainer
                     inactiveOnColour: Colours.palette.m3onSecondaryContainer
-                    text: Tr.tr("Cancel")
+                    text: Tr.trCtx("Cancel", "button")
 
                     onClicked: root.closeDialog()
                 }

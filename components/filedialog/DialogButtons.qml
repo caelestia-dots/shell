@@ -23,7 +23,7 @@ StyledRect {
         spacing: Tokens.spacing.small
 
         StyledText {
-            text: Tr.tr("Filter:")
+            text: Tr.trCtx("Filter:", "file filter")
         }
 
         StyledRect {
@@ -38,7 +38,10 @@ StyledRect {
                 anchors.fill: parent
                 anchors.margins: Tokens.padding.medium
 
-                text: `${root.dialog.filterLabel} (${root.dialog.filters.map(f => `*.${f}`).join(", ")})`
+                text: {
+                    const filters = root.dialog.filters.map(f => `*.${f}`).join(Tr.trCtx(", ", "file filter separator"));
+                    return `${root.dialog.filterLabel} (${filters})`;
+                }
             }
         }
 
@@ -84,7 +87,7 @@ StyledRect {
                 anchors.centerIn: parent
                 anchors.margins: Tokens.padding.medium
 
-                text: Tr.tr("Cancel")
+                text: Tr.trCtx("Cancel", "button")
             }
         }
     }

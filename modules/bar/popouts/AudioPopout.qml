@@ -34,7 +34,7 @@ Item {
         spacing: Tokens.spacing.medium
 
         StyledText {
-            text: Tr.tr("Output device")
+            text: Tr.trCtx("Output device", "audio output device")
             font: Tokens.font.body.builders.medium.weight(Font.Medium).build()
         }
 
@@ -55,7 +55,7 @@ Item {
 
         StyledText {
             Layout.topMargin: Tokens.spacing.medium
-            text: Tr.tr("Input device")
+            text: Tr.trCtx("Input device", "audio input device")
             font: Tokens.font.body.builders.medium.weight(Font.Medium).build()
         }
 

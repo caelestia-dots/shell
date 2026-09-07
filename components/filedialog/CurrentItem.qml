@@ -83,7 +83,8 @@ Item {
             Connections {
                 function onCurrentItemChanged(): void {
                     if (root.currentItem)
-                        content.text = Tr.tr('"%1" selected').arg(root.currentItem.modelData.name);
+                        // TRANSLATORS: %1 = name of the selected file
+                        content.text = Tr.trCtx('"%1" selected', "selected file").arg(root.currentItem.modelData.name);
                 }
 
                 target: root

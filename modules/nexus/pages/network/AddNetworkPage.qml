@@ -196,7 +196,7 @@ PageBase {
                 isRound: true
                 horizontalPadding: Tokens.padding.extraLarge
                 type: TextButton.Tonal
-                text: Tr.tr("Cancel")
+                text: Tr.trCtx("Cancel", "button")
                 onClicked: root.nState.closeSubPage()
             }
 

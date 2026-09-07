@@ -186,13 +186,13 @@ Loader {
                     spacing: Tokens.spacing.medium
 
                     TextButton {
-                        text: Tr.tr("Cancel")
+                        text: Tr.trCtx("Cancel", "button")
                         type: TextButton.Text
                         onClicked: root.props.recordingConfirmDelete = ""
                     }
 
                     TextButton {
-                        text: Tr.tr("Delete")
+                        text: Tr.trCtx("Delete", "button")
                         type: TextButton.Text
                         onClicked: {
                             CUtils.deleteFile(Qt.resolvedUrl(root.props.recordingConfirmDelete));
