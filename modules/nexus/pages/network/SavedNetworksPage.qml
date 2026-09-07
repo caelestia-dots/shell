@@ -96,7 +96,7 @@ PageBase {
                                 else
                                     security = Nmcli.securityLabel(Nmcli.savedSecurityFor(saved.modelData)) || Tr.tr("Unknown");
                                 if (saved.isActive)
-                                    return Tr.tr("Connected • %1").arg(security);
+                                    return Tr.trCtx("Connected", "network connected") + " • " + security;
                                 return security;
                             }
                             color: saved.isActive ? Colours.palette.m3primary : Colours.palette.m3outline

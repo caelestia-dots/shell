@@ -127,7 +127,15 @@ ItemList {
 
                 StyledText {
                     Layout.fillWidth: true
-                    text: Tr.tr("Security: %1%2").arg(network.modelData.security).arg(network.modelData.active ? Tr.tr(" • Connected") : Nmcli.hasSavedProfile(network.modelData.ssid) ? Tr.tr(" • Saved") : "")
+                    text: {
+                        const net = network.modelData;
+                        let status = "";
+                        if (net.active)
+                            status = Tr.trCtx("Connected", "network connected");
+                        else if (Nmcli.hasSavedProfile(net.ssid))
+                            status = Tr.trCtx("Saved", "network saved");
+                        return Tr.trCtx("Security: %1", "network security").arg(net.security) + (status ? " • " + status : "");
+                    }
                     color: Colours.palette.m3outline
                     font: Tokens.font.label.small
                     elide: Text.ElideRight
