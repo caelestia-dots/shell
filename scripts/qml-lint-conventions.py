@@ -624,7 +624,7 @@ def check_lines(lines: list[str], rel: str) -> list[Violation]:
             )
 
         # Update tracker
-        if tracker.last_section is None or section >= tracker.last_section:
+        if tracker.last_section is None or section > tracker.last_section:
             tracker.last_section = section
             tracker.last_section_line = lineno
 
