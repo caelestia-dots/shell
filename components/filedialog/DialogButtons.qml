@@ -1,5 +1,6 @@
 import QtQuick.Layouts
 import Caelestia.Config
+import Caelestia.I18n
 import qs.components
 import qs.services
 
@@ -22,7 +23,7 @@ StyledRect {
         spacing: Tokens.spacing.small
 
         StyledText {
-            text: qsTr("Filter:")
+            text: Tr.trCtx("Filter:", "file filter")
         }
 
         StyledRect {
@@ -37,7 +38,10 @@ StyledRect {
                 anchors.fill: parent
                 anchors.margins: Tokens.padding.medium
 
-                text: `${root.dialog.filterLabel} (${root.dialog.filters.map(f => `*.${f}`).join(", ")})`
+                text: {
+                    const filters = root.dialog.filters.map(f => `*.${f}`).join(Tr.trCtx(", ", "file filter separator"));
+                    return `${root.dialog.filterLabel} (${filters})`;
+                }
             }
         }
 
@@ -59,7 +63,7 @@ StyledRect {
                 anchors.centerIn: parent
                 anchors.margins: Tokens.padding.medium
 
-                text: qsTr("Select")
+                text: Tr.trCtx("Select", "button")
                 color: root.dialog.selectionValid ? Colours.palette.m3onSurface : Colours.palette.m3outline
             }
         }
@@ -83,7 +87,7 @@ StyledRect {
                 anchors.centerIn: parent
                 anchors.margins: Tokens.padding.medium
 
-                text: qsTr("Cancel")
+                text: Tr.trCtx("Cancel", "button")
             }
         }
     }

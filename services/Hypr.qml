@@ -5,6 +5,7 @@ import Quickshell
 import Quickshell.Hyprland
 import Quickshell.Io
 import Caelestia.Config
+import Caelestia.I18n
 import Caelestia.Services
 import qs.components.misc
 
@@ -28,7 +29,7 @@ Singleton {
     readonly property bool capsLock: keyboard?.capsLock ?? false
     readonly property bool numLock: keyboard?.numLock ?? false
     readonly property string defaultKbLayout: keyboard?.layout.split(",")[0] ?? "??"
-    readonly property string kbLayoutFull: keyboard?.activeKeymap ?? "Unknown"
+    readonly property string kbLayoutFull: keyboard?.activeKeymap ?? Tr.trCtx("Unknown", "keyboard layout")
     readonly property string kbLayout: kbMap.get(kbLayoutFull) ?? "??"
     readonly property var kbMap: new Map()
 

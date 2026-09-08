@@ -11,6 +11,7 @@ namespace caelestia::settings {
 struct DecodeResult {
     QVariant value;
     std::optional<Diagnostic> error;
+    QList<qsizetype> indexPath; // Index path of the failing element, outermost list first
 };
 
 class ValueCodec {

@@ -9,6 +9,7 @@ import qs.components
 import qs.components.effects
 import qs.components.widgets
 import qs.services
+import qs.utils
 
 StyledRect {
     id: root
@@ -45,7 +46,7 @@ StyledRect {
             id: cpu
 
             icon: "memory"
-            value: Math.round(Cpu.percentage * 100) + "%"
+            value: Strings.percentOne(Cpu.percentage)
             fillValue: Cpu.percentage
             colour: Colours.palette.m3primary
             shapeColour: Colours.palette.m3primaryContainer
@@ -86,7 +87,7 @@ StyledRect {
 
         Resource {
             icon: "memory_alt"
-            value: Math.round(Memory.percentage * 100) + "%"
+            value: Strings.percentOne(Memory.percentage)
             fillValue: Memory.percentage
             colour: Colours.palette.m3tertiary
             shapeColour: Colours.palette.m3onTertiary
@@ -96,7 +97,7 @@ StyledRect {
 
         Resource {
             icon: "hard_disk"
-            value: Math.round(Storage.percentage * 100) + "%"
+            value: Strings.percentOne(Storage.percentage)
             fillValue: Storage.percentage
             colour: Colours.palette.m3secondary
             shapeColour: Colours.palette.m3secondaryContainer

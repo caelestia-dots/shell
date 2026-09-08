@@ -6,11 +6,13 @@
 
 #include <cmath>
 
+#include "util/i18n.hpp"
 #include "util/metaenum.hpp"
 
 namespace caelestia::settings {
 
 using Qt::StringLiterals::operator""_s;
+using util::i18n::mark;
 
 namespace {
 
@@ -19,11 +21,11 @@ DecodeResult error(DiagnosticType::Type type, const QString& message) {
     Diagnostic error;
     error.type = type;
     error.message = message;
-    return { .value = QVariant(), .error = error };
+    return { .value = QVariant(), .error = error, .indexPath = {} };
 }
 
-DecodeResult mismatch(const QString& expected, const QJsonValue& value) {
-    return { .value = QVariant(), .error = Diagnostic::mismatch(expected, value) };
+DecodeResult mismatch(ExpectedType expected, const QJsonValue& value) {
+    return { .value = QVariant(), .error = Diagnostic::mismatch(expected, value), .indexPath = {} };
 }
 
 template <typename Container> ValueCodec* makeListCodec(const QMetaType& type) {
@@ -96,9 +98,9 @@ QJsonValue BoolCodec::encode(const QVariant& value) const {
 DecodeResult BoolCodec::decode(const QJsonValue& value) const {
     // 1 and "true" are not booleans
     if (!value.isBool())
-        return mismatch(u"a boolean"_s, value);
+        return mismatch(ExpectedType::Bool, value);
 
-    return { .value = value.toBool(), .error = std::nullopt };
+    return { .value = value.toBool(), .error = std::nullopt, .indexPath = {} };
 }
 
 QJsonValue IntCodec::encode(const QVariant& value) const {
@@ -107,23 +109,26 @@ QJsonValue IntCodec::encode(const QVariant& value) const {
 
 DecodeResult IntCodec::decode(const QJsonValue& value) const {
     if (!value.isDouble())
-        return mismatch(u"an integer"_s, value);
+        return mismatch(ExpectedType::Int, value);
 
     const auto num = value.toDouble();
 
     double integral;
     if (std::fpclassify(std::modf(num, &integral)) != FP_ZERO)
-        return error(DiagnosticType::InvalidValue, u"Expected an integer, got the real %1"_s.arg(num));
+        return error(
+            // TRANSLATORS: %1 = the non-integer number that was found
+            DiagnosticType::InvalidValue, mark(u"Expected an integer, got the real %1"_s, { QString::number(num) }));
 
     constexpr auto k_min = std::numeric_limits<int>::min();
     constexpr auto k_max = std::numeric_limits<int>::max();
     if (num < static_cast<double>(k_min) || num > static_cast<double>(k_max)) {
-        const auto message =
-            u"Integer %1 is out of range, expected between %2 and %3"_s.arg(num, 0, 'f', 0).arg(k_min).arg(k_max);
+        // TRANSLATORS: %1 = the value given, %2/%3 = the allowed minimum and maximum
+        const auto message = mark(u"Integer %1 is out of range, expected between %2 and %3"_s,
+            { QString::number(num, 'f', 0), QString::number(k_min), QString::number(k_max) });
         return error(DiagnosticType::InvalidValue, message);
     }
 
-    return { .value = static_cast<int>(num), .error = std::nullopt };
+    return { .value = static_cast<int>(num), .error = std::nullopt, .indexPath = {} };
 }
 
 QJsonValue RealCodec::encode(const QVariant& value) const {
@@ -132,9 +137,9 @@ QJsonValue RealCodec::encode(const QVariant& value) const {
 
 DecodeResult RealCodec::decode(const QJsonValue& value) const {
     if (!value.isDouble())
-        return mismatch(u"a number"_s, value);
+        return mismatch(ExpectedType::Real, value);
 
-    return { .value = QVariant::fromValue<qreal>(value.toDouble()), .error = std::nullopt };
+    return { .value = QVariant::fromValue<qreal>(value.toDouble()), .error = std::nullopt, .indexPath = {} };
 }
 
 QJsonValue StringCodec::encode(const QVariant& value) const {
@@ -143,9 +148,9 @@ QJsonValue StringCodec::encode(const QVariant& value) const {
 
 DecodeResult StringCodec::decode(const QJsonValue& value) const {
     if (!value.isString())
-        return mismatch(u"a string"_s, value);
+        return mismatch(ExpectedType::String, value);
 
-    return { .value = value.toString(), .error = std::nullopt };
+    return { .value = value.toString(), .error = std::nullopt, .indexPath = {} };
 }
 
 QJsonValue VariantListCodec::encode(const QVariant& value) const {
@@ -154,9 +159,9 @@ QJsonValue VariantListCodec::encode(const QVariant& value) const {
 
 DecodeResult VariantListCodec::decode(const QJsonValue& value) const {
     if (!value.isArray())
-        return mismatch(u"an array"_s, value);
+        return mismatch(ExpectedType::Array, value);
 
-    return { .value = value.toArray().toVariantList(), .error = std::nullopt };
+    return { .value = value.toArray().toVariantList(), .error = std::nullopt, .indexPath = {} };
 }
 
 QJsonValue VariantMapCodec::encode(const QVariant& value) const {
@@ -165,9 +170,9 @@ QJsonValue VariantMapCodec::encode(const QVariant& value) const {
 
 DecodeResult VariantMapCodec::decode(const QJsonValue& value) const {
     if (!value.isObject())
-        return mismatch(u"an object"_s, value);
+        return mismatch(ExpectedType::Object, value);
 
-    return { .value = value.toObject().toVariantMap(), .error = std::nullopt };
+    return { .value = value.toObject().toVariantMap(), .error = std::nullopt, .indexPath = {} };
 }
 
 EnumCodec::EnumCodec(const QMetaType& type, const QMetaEnum& metaEnum)
@@ -187,7 +192,7 @@ QJsonValue EnumCodec::encode(const QVariant& value) const {
 
 DecodeResult EnumCodec::decode(const QJsonValue& value) const {
     if (!value.isString())
-        return mismatch(u"a string"_s, value);
+        return mismatch(ExpectedType::String, value);
 
     const auto key = value.toString();
 
@@ -200,10 +205,11 @@ DecodeResult EnumCodec::decode(const QJsonValue& value) const {
         if (!QMetaType::convert(QMetaType::fromType<int>(), &raw, m_type, decoded.data())) {
             qCCritical(lcSettings, "Failed to convert value %d to enum %s", raw, m_type.name());
             return error(DiagnosticType::InvalidValue,
-                u"Could not convert %1 to %2"_s.arg(key, QString::fromUtf8(m_type.name())));
+                // TRANSLATORS: %1 = a config key name, %2 = a C++ type name; both are untranslated identifiers
+                mark(u"Could not convert %1 to %2"_s, { key, QString::fromUtf8(m_type.name()) }));
         }
 
-        return { .value = decoded, .error = std::nullopt };
+        return { .value = decoded, .error = std::nullopt, .indexPath = {} };
     }
 
     QStringList options;
@@ -211,8 +217,9 @@ DecodeResult EnumCodec::decode(const QJsonValue& value) const {
     for (int i = 0; i < m_metaEnum.keyCount(); ++i)
         options << QString::fromUtf8(m_metaEnum.key(i));
 
-    return error(
-        DiagnosticType::InvalidValue, u"Invalid enum value %1. Expected one of %2"_s.arg(key, options.join(u", "_s)));
+    return error(DiagnosticType::InvalidValue,
+        // TRANSLATORS: %1 = a config key name, %2 = a comma-separated list of allowed values; both untranslated
+        mark(u"Invalid enum value %1. Expected one of %2"_s, { key, options.join(u", "_s) }));
 }
 
 template <typename Container>
@@ -230,7 +237,7 @@ template <typename Container> QJsonValue ListCodec<Container>::encode(const QVar
 
 template <typename Container> DecodeResult ListCodec<Container>::decode(const QJsonValue& value) const {
     if (!value.isArray())
-        return mismatch(u"an array"_s, value);
+        return mismatch(ExpectedType::Array, value);
 
     const auto array = value.toArray();
     Container list;
@@ -241,14 +248,14 @@ template <typename Container> DecodeResult ListCodec<Container>::decode(const QJ
 
         // Reject the entire list if any element is invalid
         if (result.error) {
-            result.error->message = u"Element %1: %2"_s.arg(i).arg(result.error->message);
+            result.indexPath.prepend(i);
             return result;
         }
 
         list.append(result.value.value<Value>());
     }
 
-    return { QVariant::fromValue(list), std::nullopt };
+    return { .value = QVariant::fromValue(list), .error = std::nullopt, .indexPath = {} };
 }
 
 // Instantiated for types as needed

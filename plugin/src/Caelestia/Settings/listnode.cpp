@@ -3,6 +3,8 @@
 #include <qjsonarray.h>
 #include <qjsonobject.h>
 
+#include "util/i18n.hpp"
+
 namespace caelestia::settings {
 
 using Qt::StringLiterals::operator""_s;
@@ -186,7 +188,7 @@ void ListNode::clear() {
 }
 
 QString ListNode::pathFor(const QString& key) const {
-    return path() + u"[%1]"_s.arg(key);
+    return elementPath(path(), key);
 }
 
 const Schema& ListNode::schema() const {
@@ -286,8 +288,9 @@ QJsonValue ListNode::toJson(bool sparse) const {
 
 bool ListNode::syncJson(const QJsonValue& json, QList<Diagnostic>& diagnostics) {
     if (!json.isArray()) {
-        const auto d = Diagnostic::mismatch(u"an array"_s, json, path());
-        qCWarning(lcSettings, "Error decoding option %s: %s", qUtf8Printable(d.option), qUtf8Printable(d.message));
+        const auto d = Diagnostic::mismatch(ExpectedType::Array, json, path());
+        qCWarning(lcSettings, "Error decoding option %s: %s", qUtf8Printable(d.option),
+            qUtf8Printable(util::i18n::unmark(d.message)));
         diagnostics << d;
         return false;
     }
@@ -299,7 +302,7 @@ bool ListNode::syncJson(const QJsonValue& json, QList<Diagnostic>& diagnostics) 
         diagnostics << Diagnostic{
             .type = DiagnosticType::GlobalOption,
             .option = p,
-            .message = u"Global properties should not be defined in overlay files"_s,
+            .message = util::i18n::mark(u"Global properties should not be defined in overlay files"_s),
         };
         return false;
     }

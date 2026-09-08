@@ -3,6 +3,7 @@ pragma Singleton
 import QtQuick
 import Quickshell
 import Caelestia.Config
+import Caelestia.I18n
 import qs.components
 import qs.services
 import qs.modules.nexus
@@ -41,7 +42,7 @@ Singleton {
             contentItem.Config.screen: screen.name
             contentItem.Tokens.screen: screen.name
 
-            title: qsTr("Nexus — %1").arg(PageRegistry.pages[nexus.nState.currentPageIdx].label)
+            title: Tr.tr("Nexus — %1").arg(PageRegistry.pages[nexus.nState.currentPageIdx].label)
 
             Nexus {
                 id: nexus

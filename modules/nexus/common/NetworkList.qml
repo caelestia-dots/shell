@@ -4,6 +4,7 @@ import QtQuick
 import QtQuick.Layouts
 import Quickshell
 import Caelestia.Config
+import Caelestia.I18n
 import qs.components
 import qs.components.controls
 import qs.services
@@ -25,7 +26,7 @@ ItemList {
 
     showList: Nmcli.wifiEnabled
     placeholderIcon: Nmcli.wifiEnabled ? "wifi_find" : "signal_wifi_off"
-    placeholderText: Nmcli.wifiEnabled ? qsTr("No networks found") : qsTr("Wi-Fi disabled")
+    placeholderText: Nmcli.wifiEnabled ? Tr.tr("No networks found") : Tr.tr("Wi-Fi disabled")
     extraHeight: Nmcli.scanning ? Tokens.rounding.extraSmall : 0 // Inline so it isn't affected by anim
     list.anchors.top: scanningIndicator.bottom
 
@@ -126,7 +127,15 @@ ItemList {
 
                 StyledText {
                     Layout.fillWidth: true
-                    text: qsTr("Security: %1%2").arg(network.modelData.security).arg(network.modelData.active ? qsTr(" • Connected") : Nmcli.hasSavedProfile(network.modelData.ssid) ? qsTr(" • Saved") : "")
+                    text: {
+                        const net = network.modelData;
+                        let status = "";
+                        if (net.active)
+                            status = Tr.trCtx("Connected", "network connected");
+                        else if (Nmcli.hasSavedProfile(net.ssid))
+                            status = Tr.trCtx("Saved", "network saved");
+                        return Tr.trCtx("Security: %1", "network security").arg(net.security) + (status ? " • " + status : "");
+                    }
                     color: Colours.palette.m3outline
                     font: Tokens.font.label.small
                     elide: Text.ElideRight
