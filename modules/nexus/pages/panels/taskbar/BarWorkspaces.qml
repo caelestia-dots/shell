@@ -55,6 +55,13 @@ PageBase {
         }
 
         ToggleRow {
+            text: Tr.tr("Show unoccupied")
+            subtext: Tr.tr("Show workspaces that are inactive and empty")
+            checked: Config.bar.workspaces.showUnoccupied
+            onToggled: GlobalConfig.bar.workspaces.showUnoccupied = checked
+        }
+
+        ToggleRow {
             text: Tr.tr("Windows on special workspaces")
             checked: Config.bar.workspaces.showWindowsOnSpecialWorkspaces
             onToggled: GlobalConfig.bar.workspaces.showWindowsOnSpecialWorkspaces = checked
