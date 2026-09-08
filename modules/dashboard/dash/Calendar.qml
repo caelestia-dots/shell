@@ -168,7 +168,7 @@ CustomMouseArea {
                 horizontalAlignment: Text.AlignHCenter
                 text: model.shortName
                 font: Tokens.font.body.builders.small.weight(Font.Medium).build()
-                color: (model.day === 0 || model.day === 6) ? Colours.palette.m3tertiary : Colours.palette.m3onSurface
+                color: (model.day === 6 || model.day === 7 || model.day === 0) ? Colours.palette.m3tertiary : Colours.palette.m3onSurface
             }
         }
 
@@ -196,14 +196,16 @@ CustomMouseArea {
                     id: dayItem
 
                     required property var model
+                    readonly property bool hasEvents: Events.hasEvents(Events.formatDateKey(dayItem.model.date))
 
                     implicitWidth: implicitHeight
-                    implicitHeight: text.implicitHeight + Tokens.padding.small
+                    implicitHeight: text.implicitHeight + Tokens.padding.small + 6
 
                     StyledText {
                         id: text
 
                         anchors.centerIn: parent
+                        anchors.verticalCenterOffset: dayItem.hasEvents ? -2 : 0
 
                         horizontalAlignment: Text.AlignHCenter
                         text: grid.locale.toString(dayItem.model.day)
@@ -217,13 +219,26 @@ CustomMouseArea {
                         opacity: dayItem.model.today || dayItem.model.month === grid.month ? 1 : 0.4
                         font: Tokens.font.body.small
                     }
+
+                    // Scheduled Event Dot Indicator
+                    StyledRect {
+                        visible: dayItem.hasEvents
+                        anchors.top: text.bottom
+                        anchors.topMargin: 1
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        width: 4
+                        height: 4
+                        radius: Tokens.rounding.full
+                        color: dayItem.model.today ? Colours.palette.m3onPrimary : Colours.palette.m3primary
+                        opacity: dayItem.model.month === grid.month ? 1 : 0.4
+                    }
                 }
             }
 
             MaterialShape {
                 id: todayIndicator
 
-                readonly property Item todayItem: grid.contentItem.children.find(c => c.model.today) ?? null
+                readonly property Item todayItem: grid.contentItem.children.find(c => c.model?.today) ?? null
                 property Item today
 
                 onTodayItemChanged: {

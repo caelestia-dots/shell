@@ -124,6 +124,13 @@ Item {
             sourceComponent: LockStatus {}
         }
 
+        Popout {
+            name: "clock"
+            sourceComponent: Calendar {
+                popouts: root.popouts
+            }
+        }
+
         Repeater {
             model: ScriptModel {
                 values: SystemTray.items.values.filter(i => i.hasMenu && i.status !== Status.Passive && !GlobalConfig.bar.tray.hiddenIcons.includes(i.id))
@@ -133,8 +140,9 @@ Item {
                 id: trayMenu
 
                 required property SystemTrayItem modelData
+                required property int index
 
-                name: `traymenu${root.trayItemsToIndices[modelData.id]}`
+                name: `traymenu${index}`
                 sourceComponent: trayMenuComp
 
                 Connections {
@@ -165,7 +173,6 @@ Item {
 
         required property string name
         readonly property bool shouldBeActive: root.popouts.currentName === name
-        property bool ready: true
 
         anchors.centerIn: parent
 
