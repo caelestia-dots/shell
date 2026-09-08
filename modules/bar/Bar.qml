@@ -24,7 +24,7 @@ ColumnLayout {
             return;
 
         for (let i = 0; i < repeater.count; i++) {
-            const tray = (repeater.itemAt(i) as EntryWrapper)?.item as Tray;
+            const tray = (repeater.itemAt(i) as EntryWrapper).item as Tray;
             if (tray)
                 tray.expanded = false;
         }
@@ -70,6 +70,10 @@ ColumnLayout {
             }
         } else if (id === "activeWindow" && Config.bar.popouts.activeWindow && Config.bar.activeWindow.showOnHover) {
             popouts.currentName = id.toLowerCase();
+            popouts.currentCenter = (ch.item as Item).mapToItem(root, 0, (ch.item as Item).implicitHeight / 2).y ?? 0;
+            popouts.hasCurrent = true;
+        } else if (id === "clock") {
+            popouts.currentName = "clock";
             popouts.currentCenter = (ch.item as Item).mapToItem(root, 0, (ch.item as Item).implicitHeight / 2).y ?? 0;
             popouts.hasCurrent = true;
         }
