@@ -22,6 +22,7 @@ qml_module(caelestia-services
         hyprdevices.cpp
         hyprextras.cpp
     LIBRARIES
+        Qt::Concurrent
         Qt::DBus
         Qt::Network
         PkgConfig::Pipewire
