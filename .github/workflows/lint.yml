@@ -13,8 +13,8 @@ on:
       - "!.vscode/**"
       - "!assets/**"
       - "!.gitignore"
-      - "**/flake.nix"
-      - "**/flake.lock"
+      - "!**/*.nix"
+      - "!**/flake.lock"
 
 jobs:
   lint-qml:
