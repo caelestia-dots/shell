@@ -50,7 +50,7 @@ void CUtils::saveItem(
 
     const auto grabResult = target->grabToImage();
     if (!grabResult) {
-        qCWarning(lcCUtils) << "saveItem: unable to grab" << target << "while its window is not renderable";
+        qCWarning(lcCUtils) << "saveItem: failed to grab" << target;
         return;
     }
 
