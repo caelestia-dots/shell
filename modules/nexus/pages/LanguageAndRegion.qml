@@ -1,5 +1,6 @@
 import QtQuick
 import QtQuick.Layouts
+import Quickshell
 import Caelestia.Config
 import Caelestia.I18n
 import qs.components
@@ -44,47 +45,36 @@ PageBase {
             text: Tr.tr("Language")
         }
 
-        // Read-only: the shell follows the system locale (no in-shell translations yet)
-        ConnectedRect {
-            Layout.fillWidth: true
+        SelectRow {
             first: true
             last: true
-            implicitHeight: localeLayout.implicitHeight + localeLayout.anchors.margins * 2
+            label: Tr.tr("UI language")
+            subtext: Tr.tr("The language used in the shell UI")
+            active: menuItems.find(i => i.modelData === Tr.language) ?? autoLang
+            onSelected: item => {
+                Tr.language = item.modelData ?? ""; // qmllint disable missing-property
+            }
 
-            RowLayout {
-                id: localeLayout
+            menuItems: [autoLang, ...langItems.instances]
 
-                anchors.fill: parent
-                anchors.margins: Tokens.padding.medium
-                anchors.leftMargin: Tokens.padding.largeIncreased
-                anchors.rightMargin: Tokens.padding.largeIncreased
-                spacing: Tokens.spacing.medium
+            MenuItem {
+                id: autoLang
 
-                ColumnLayout {
-                    Layout.fillWidth: true
-                    spacing: 0
+                text: Tr.tr("Auto")
+            }
 
-                    StyledText {
-                        Layout.fillWidth: true
-                        text: Tr.tr("System language")
-                        font: Tokens.font.body.small
-                        elide: Text.ElideRight
+            Variants {
+                id: langItems
+
+                model: Tr.supportedLanguages
+
+                MenuItem {
+                    required property string modelData
+
+                    text: {
+                        const locale = Qt.locale(modelData);
+                        return locale.name === "C" ? modelData : locale.nativeLanguageName || locale.name;
                     }
-
-                    StyledText {
-                        Layout.fillWidth: true
-                        // TRANSLATORS: %1 = a locale code such as en_AU
-                        text: Tr.tr("Follows your system locale (%1)").arg(Qt.locale().name)
-                        color: Colours.palette.m3outline
-                        font: Tokens.font.label.small
-                        elide: Text.ElideRight
-                    }
-                }
-
-                StyledText {
-                    text: Qt.locale().nativeLanguageName || Qt.locale().name
-                    color: Colours.palette.m3onSurfaceVariant
-                    font: Tokens.font.body.small
                 }
             }
         }
