@@ -52,7 +52,6 @@ Item {
                 checked: Audio.sink?.id === modelData.id
                 onClicked: Audio.setAudioSink(modelData)
                 text: modelData.description
-                maximumTextWidth: Math.max(0, layout.width - implicitIndicatorWidth - Tokens.spacing.medium)
             }
         }
 
@@ -73,7 +72,6 @@ Item {
                 checked: Audio.source?.id === modelData.id
                 onClicked: Audio.setAudioSource(modelData)
                 text: modelData.description
-                maximumTextWidth: Math.max(0, layout.width - implicitIndicatorWidth - Tokens.spacing.medium)
             }
         }
 
