@@ -5,6 +5,16 @@ on:
     branches:
       - main
   pull_request:
+    paths:
+      - "**"
+      - "!**/*.md"
+      - "!.github/**"
+      - ".github/workflows/build.yml"
+      - "!.vscode/**"
+      - "!assets/**"
+      - "!.gitignore"
+      - "**/flake.nix"
+      - "**/flake.lock"
 
 jobs:
   lint-qml:
