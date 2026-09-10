@@ -5,7 +5,6 @@ import QtQuick
 import Quickshell
 import Quickshell.Io
 import Caelestia.I18n
-import qs.utils
 
 Singleton {
     id: root
