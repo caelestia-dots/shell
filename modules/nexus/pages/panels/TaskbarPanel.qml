@@ -25,6 +25,7 @@ PageBase {
 
         ToggleRow {
             first: true
+            settingAnchor: "taskbar-persistent"
             text: Tr.tr("Persistent")
             subtext: Tr.tr("Keep the bar visible at all times")
             checked: Config.bar.persistent
@@ -32,6 +33,7 @@ PageBase {
         }
 
         ToggleRow {
+            settingAnchor: "taskbar-show-on-hover"
             text: Tr.tr("Show on hover")
             subtext: Tr.tr("Reveal the bar when the cursor reaches the screen edge")
             checked: Config.bar.showOnHover
@@ -40,6 +42,7 @@ PageBase {
 
         StepperRow {
             last: true
+            settingAnchor: "taskbar-drag-threshold"
             label: Tr.tr("Drag threshold")
             subtext: Tr.tr("Pixels dragged before the bar reveals")
             value: Config.bar.dragThreshold
@@ -57,6 +60,7 @@ PageBase {
         NavRow {
             first: true
             icon: "workspaces"
+            settingAnchor: "taskbar-workspaces"
             text: Tr.tr("Workspaces")
             subtext: Tr.tr("Indicators, window icons")
             onClicked: root.nState.openSubPage(6)
@@ -64,6 +68,7 @@ PageBase {
 
         NavRow {
             icon: "web_asset"
+            settingAnchor: "taskbar-active-window"
             text: Tr.tr("Active window")
             subtext: Tr.tr("Title display, popout")
             onClicked: root.nState.openSubPage(7)
@@ -71,6 +76,7 @@ PageBase {
 
         NavRow {
             icon: "widgets"
+            settingAnchor: "taskbar-tray"
             text: Tr.tr("Tray")
             subtext: Tr.tr("System tray icons")
             onClicked: root.nState.openSubPage(8)
@@ -78,6 +84,7 @@ PageBase {
 
         NavRow {
             icon: "signal_cellular_alt"
+            settingAnchor: "taskbar-status-icons"
             text: Tr.tr("Status icons")
             subtext: Tr.tr("Visible indicators")
             onClicked: root.nState.openSubPage(9)
@@ -86,6 +93,7 @@ PageBase {
         NavRow {
             last: true
             icon: "schedule"
+            settingAnchor: "taskbar-clock"
             text: Tr.tr("Clock")
             subtext: Tr.tr("Date, icon, background")
             onClicked: root.nState.openSubPage(10)
@@ -98,6 +106,7 @@ PageBase {
 
         ToggleRow {
             first: true
+            settingAnchor: "taskbar-workspaces-2"
             text: Tr.tr("Workspaces")
             subtext: Tr.tr("Scroll over the workspace indicator to switch workspaces")
             checked: Config.bar.scrollActions.workspaces
@@ -105,6 +114,7 @@ PageBase {
         }
 
         ToggleRow {
+            settingAnchor: "taskbar-volume"
             text: Tr.tr("Volume")
             subtext: Tr.tr("Scroll on the top half of the bar to adjust volume")
             checked: Config.bar.scrollActions.volume
@@ -113,6 +123,7 @@ PageBase {
 
         ToggleRow {
             last: true
+            settingAnchor: "taskbar-brightness"
             text: Tr.tr("Brightness")
             subtext: Tr.tr("Scroll on the bottom half of the bar to adjust brightness")
             checked: Config.bar.scrollActions.brightness
