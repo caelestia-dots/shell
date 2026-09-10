@@ -1,7 +1,7 @@
 #include "tickingservice.hpp"
 
-#include "../Config/dashboardconfig.hpp"
-#include "../Config/rootnodes.hpp"
+#include "config/dashboardconfig.hpp"
+#include "config/rootnodes.hpp"
 
 namespace caelestia::services {
 

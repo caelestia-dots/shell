@@ -2,6 +2,7 @@
 
 #include <qabstractitemmodel.h>
 #include <qdir.h>
+#include <qdiriterator.h>
 #include <qfilesystemwatcher.h>
 #include <qfuture.h>
 #include <qimagereader.h>
@@ -29,7 +30,7 @@ class FileSystemEntry : public QObject {
     Q_PROPERTY(QString mimeType READ mimeType CONSTANT)
 
 public:
-    explicit FileSystemEntry(const QString& path, const QString& relativePath, QObject* parent = nullptr);
+    explicit FileSystemEntry(const QString& path, QString relativePath, QObject* parent = nullptr);
 
     [[nodiscard]] QString path() const;
     [[nodiscard]] QString relativePath() const;
@@ -75,7 +76,7 @@ class FileSystemModel : public QAbstractListModel {
     Q_PROPERTY(QQmlListProperty<caelestia::models::FileSystemEntry> entries READ entries NOTIFY entriesChanged)
 
 public:
-    enum Filter {
+    enum class Filter : quint8 {
         NoFilter,
         Images,
         Files,
@@ -85,9 +86,9 @@ public:
 
     explicit FileSystemModel(QObject* parent = nullptr);
 
-    int rowCount(const QModelIndex& parent = QModelIndex()) const override;
-    QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override;
-    QHash<int, QByteArray> roleNames() const override;
+    [[nodiscard]] int rowCount(const QModelIndex& parent = QModelIndex()) const override;
+    [[nodiscard]] QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override;
+    [[nodiscard]] QHash<int, QByteArray> roleNames() const override;
 
     [[nodiscard]] QString path() const;
     void setPath(const QString& path);
@@ -123,10 +124,21 @@ signals:
     void entriesChanged();
 
 private:
+    struct PathDiff {
+        QSet<QString> removed;
+        QSet<QString> added;
+    };
+
+    struct ScanFilters {
+        QStringList nameFilters;
+        QDir::Filters filters;
+        std::function<bool(const QString&)> filterFn = nullptr;
+    };
+
     QDir m_dir;
     QFileSystemWatcher m_watcher;
     QList<FileSystemEntry*> m_entries;
-    QHash<QString, QFuture<QPair<QSet<QString>, QSet<QString>>>> m_futures;
+    QHash<QString, QFuture<PathDiff>> m_futures;
 
     QString m_path;
     bool m_recursive;
@@ -141,6 +153,9 @@ private:
     void updateWatcher();
     void updateEntries();
     void updateEntriesForDir(const QString& dir);
+    [[nodiscard]] static ScanFilters filtersFor(Filter filter, const QStringList& nameFilters, bool showHidden);
+    [[nodiscard]] static std::optional<QSet<QString>> scanDir(const QString& dir, const ScanFilters& filters,
+        QDirIterator::IteratorFlags flags, const QPromise<PathDiff>& promise);
     void applyChanges(const QSet<QString>& removedPaths, const QSet<QString>& addedPaths);
     [[nodiscard]] bool compareEntries(const FileSystemEntry* a, const FileSystemEntry* b) const;
 };

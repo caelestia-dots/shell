@@ -12,7 +12,7 @@ class FontBuilder {
 
 public:
     FontBuilder() = default;
-    explicit FontBuilder(QFont font);
+    explicit FontBuilder(const QFont& font);
 
     [[nodiscard]] Q_INVOKABLE FontBuilder family(const QString& family);
     [[nodiscard]] Q_INVOKABLE FontBuilder size(int pointSize);
@@ -22,7 +22,7 @@ public:
     [[nodiscard]] Q_INVOKABLE FontBuilder letterSpacing(qreal spacing, bool absolute = true);
     [[nodiscard]] Q_INVOKABLE FontBuilder capitalisation(QFont::Capitalization cap);
     [[nodiscard]] Q_INVOKABLE FontBuilder vaxis(const QString& tag, float value);
-    [[nodiscard]] Q_INVOKABLE FontBuilder vaxes(QVariantMap axes);
+    [[nodiscard]] Q_INVOKABLE FontBuilder vaxes(const QVariantMap& axes);
     [[nodiscard]] Q_INVOKABLE QFont build() const;
 
     // Common vaxes

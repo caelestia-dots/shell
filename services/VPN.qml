@@ -5,6 +5,7 @@ import Quickshell
 import Quickshell.Io
 import Caelestia
 import Caelestia.Config
+import Caelestia.I18n
 
 Singleton {
     id: root
@@ -269,33 +270,20 @@ Singleton {
         connected = false;
         connectedChanged(); // Force bindings to reeval (mainly for switches)
         if (GlobalConfig.utilities.toasts.vpnChanged)
-            Toaster.toast(qsTr("VPN connection failed"), reason, "vpn_key_alert");
+            Toaster.toast(Tr.tr("VPN connection failed"), reason, "vpn_key_alert");
     }
 
     function reportDisconnectFailure(reason: string): void {
         disconnectPending = false;
         connectedChanged(); // Force bindings to reeval (mainly for switches)
         if (GlobalConfig.utilities.toasts.vpnChanged)
-            Toaster.toast(qsTr("VPN disconnection failed"), reason, "vpn_key_alert");
+            Toaster.toast(Tr.tr("VPN disconnection failed"), reason, "vpn_key_alert");
     }
 
     function checkStatus(): void {
         if (root.selectedProvider.length > 0) {
             statusProc.running = true;
         }
-    }
-
-    function formatBytes(bytes: var): string {
-        if (!bytes || bytes <= 0)
-            return "0 B";
-        const units = ["B", "KB", "MB", "GB", "TB"];
-        let i = 0;
-        let v = bytes;
-        while (v >= 1024 && i < units.length - 1) {
-            v /= 1024;
-            i++;
-        }
-        return `${v.toFixed(v < 10 && i > 0 ? 1 : 0)} ${units[i]}`;
     }
 
     // Refresh live In/Out byte counters, tunnel latency and - for providers
@@ -362,14 +350,14 @@ Singleton {
                 status.state = "connecting";
             } else if (backendState === "NeedsLogin" || backendState === "NeedsMachineAuth") {
                 status.state = "needs-auth";
-                status.reason = backendState === "NeedsLogin" ? "Login required" : "Machine authorization required";
+                status.reason = backendState === "NeedsLogin" ? Tr.mark("Login required") : Tr.mark("Machine authorisation required");
                 status.authUrl = data.AuthURL || "";
             }
         } catch (e) {
             // JSON parsing failed - treat as disconnected unless it looks like an error
             if (output.includes("error") || output.includes("Error") || output.includes("failed")) {
                 status.state = "disconnected";
-                status.reason = "Tailscale may not be running";
+                status.reason = Tr.mark("Tailscale may not be running");
             } else {
                 status.state = "disconnected";
             }
@@ -401,14 +389,14 @@ Singleton {
                 const error = data.management.error;
                 if (error.includes("auth") || error.includes("login")) {
                     status.state = "needs-auth";
-                    status.reason = "Authentication required";
+                    status.reason = Tr.mark("Authentication required");
                 } else {
                     status.reason = error;
                 }
             }
         } catch (e) {
             status.state = "error";
-            status.reason = "Failed to parse status";
+            status.reason = Tr.mark("Failed to parse status");
         }
         return status;
     }
@@ -428,7 +416,7 @@ Singleton {
         // "Status update: Disconnected\nReason: ...".
         if (output.includes("Registration Missing") || output.includes("registration") || output.includes("register") || output.includes("Unable to connect")) {
             status.state = "needs-auth";
-            status.reason = "WARP registration required";
+            status.reason = Tr.mark("WARP registration required");
         } else if (output.includes("Disconnected")) {
             status.state = "disconnected";
         } else if (output.includes("Connecting")) {
@@ -438,7 +426,7 @@ Singleton {
             status.state = "connected";
         } else {
             status.state = "error";
-            status.reason = "Unknown WARP status";
+            status.reason = Tr.mark("Unknown WARP status");
         }
         return status;
     }
@@ -482,7 +470,7 @@ Singleton {
         return {
             connected: false,
             state: "needs-auth",
-            reason: "Authentication required",
+            reason: Tr.mark("Authentication required"),
             authUrl: authUrl,
             server: ""
         };
@@ -522,23 +510,23 @@ Singleton {
         if (!GlobalConfig.utilities.toasts.vpnChanged)
             return;
 
-        const displayName = active.displayName || "VPN";
+        const displayName = active.displayName || Tr.tr("VPN");
 
         switch (statusObj.state) {
         case "connected":
-            Toaster.toast(qsTr("VPN connected"), qsTr("Connected to %1").arg(displayName), "vpn_key");
+            Toaster.toast(Tr.tr("VPN connected"), Tr.tr("Connected to %1").arg(displayName), "vpn_key");
             break;
         case "disconnected":
-            Toaster.toast(qsTr("VPN disconnected"), qsTr("Disconnected from %1").arg(displayName), "vpn_key_off");
+            Toaster.toast(Tr.tr("VPN disconnected"), Tr.tr("Disconnected from %1").arg(displayName), "vpn_key_off");
             break;
         case "needs-auth":
-            const authMsg = statusObj.reason || "Authentication required";
-            Toaster.toast(qsTr("VPN authentication required"), qsTr("%1: %2").arg(displayName).arg(authMsg), "vpn_lock");
+            const authMsg = statusObj.reason ? Tr.trMarked(statusObj.reason) : Tr.tr("Authentication required");
+            Toaster.toast(Tr.tr("VPN authentication required"), Tr.trCtx("%1: %2", "vpn name and reason").arg(displayName).arg(authMsg), "vpn_lock");
             break;
         case "error":
             if (status.state === "connected" || status.state === "connecting" || status.state === "needs-auth") {
-                const errMsg = statusObj.reason || "Unknown error";
-                Toaster.toast(qsTr("VPN error"), qsTr("%1: %2").arg(displayName).arg(errMsg), "error");
+                const errMsg = statusObj.reason ? Tr.trMarked(statusObj.reason) : Tr.tr("Unknown error");
+                Toaster.toast(Tr.tr("VPN error"), Tr.trCtx("%1: %2", "vpn name and reason").arg(displayName).arg(errMsg), "error");
             }
             break;
         }
@@ -659,7 +647,8 @@ Singleton {
         display: iface => iface
         connectCmd: iface => ["pkexec", "wg-quick", "up", iface]
         disconnectCmd: iface => ["pkexec", "wg-quick", "down", iface]
-        connectHint: error => error.includes("Unknown device type") || error.includes("Protocol not supported") ? "WireGuard module not loaded. Run: sudo modprobe wireguard" : ""
+        // TRANSLATORS: %1 = a shell command, leave it untranslated
+        connectHint: error => error.includes("Unknown device type") || error.includes("Protocol not supported") ? Tr.mark("WireGuard module not loaded. Run: %1", ["sudo modprobe wireguard"]) : ""
     }
 
     Adapter {
@@ -702,7 +691,8 @@ Singleton {
         disconnectCmd: ["tailscale", "down"]
         statusCmd: ["tailscale", "status", "--json"]
         parse: out => root.parseTailscaleStatus(out)
-        connectHint: error => error.includes("Access denied") || error.includes("checkprefs access denied") ? "Permission denied. Run in terminal: sudo tailscale set --operator=$USER" : ""
+        // TRANSLATORS: %1 = a shell command, leave it untranslated
+        connectHint: error => error.includes("Access denied") || error.includes("checkprefs access denied") ? Tr.mark("Permission denied. Run in terminal: %1", ["sudo tailscale set --operator=$USER"]) : ""
     }
 
     // ── Generic engine ──────────────────────────────────────────────────────
@@ -743,7 +733,8 @@ Singleton {
                     root.updateStatus({
                         connected: false,
                         state: "disconnected",
-                        reason: `Service not running (run: sudo systemctl start ${root.active.service})`,
+                        // TRANSLATORS: %1 = a shell command, leave it untranslated
+                        reason: Tr.mark("Service not running (run: %1)", [`sudo systemctl start ${root.active.service}`]),
                         authUrl: "",
                         server: ""
                     });
@@ -763,7 +754,7 @@ Singleton {
 
             if (!root.connectExited) {
                 console.warn(lc, `Failed to start connect command '${command.join(" ")}'`);
-                root.reportConnectFailure(qsTr("Could not start %1. Is it installed?").arg(root.active.displayName));
+                root.reportConnectFailure(Tr.tr("Could not start %1. Is it installed?").arg(root.active.displayName));
             }
         }
 
@@ -777,7 +768,7 @@ Singleton {
 
                 if (exitCode !== 0) {
                     console.warn(lc, `Connect command '${command.join(" ")}' failed with exit code`, exitCode);
-                    root.reportConnectFailure(qsTr("Could not connect to %1").arg(root.active.displayName));
+                    root.reportConnectFailure(Tr.tr("Could not connect to %1").arg(root.active.displayName));
                     return;
                 }
 
@@ -832,7 +823,7 @@ Singleton {
 
             if (!root.disconnectExited) {
                 console.warn(lc, `Failed to start disconnect command '${command.join(" ")}'`);
-                root.reportDisconnectFailure(qsTr("Could not start %1. Is it installed?").arg(root.active.displayName));
+                root.reportDisconnectFailure(Tr.tr("Could not start %1. Is it installed?").arg(root.active.displayName));
             }
         }
 
@@ -868,8 +859,8 @@ Singleton {
             onStreamFinished: {
                 const nums = text.trim().split("\n").map(n => parseInt(n.trim(), 10)).filter(n => !isNaN(n));
                 if (nums.length >= 2) {
-                    root.bytesIn = root.formatBytes(nums[0]);
-                    root.bytesOut = root.formatBytes(nums[1]);
+                    root.bytesIn = Units.formatBytes(nums[0]);
+                    root.bytesOut = Units.formatBytes(nums[1]);
                 }
             }
         }

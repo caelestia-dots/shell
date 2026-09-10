@@ -1,8 +1,9 @@
 #pragma once
 
-#include "service.hpp"
 #include <qpointer.h>
 #include <qqmlintegration.h>
+
+#include "service.hpp"
 
 namespace caelestia::services {
 

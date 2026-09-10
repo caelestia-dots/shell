@@ -5,6 +5,8 @@
 
 namespace caelestia::services {
 
+using Qt::StringLiterals::operator""_s;
+
 Memory::Memory(QObject* parent)
     : TickingService(parent) {}
 
@@ -21,19 +23,19 @@ qreal Memory::percentage() const {
 }
 
 void Memory::tick() {
-    QFile f(QStringLiteral("/proc/meminfo"));
+    QFile f(u"/proc/meminfo"_s);
     if (!f.open(QIODevice::ReadOnly | QIODevice::Text)) {
         return;
     }
     const QByteArray data = f.readAll();
     f.close();
 
-    static const QRegularExpression reTotal(QStringLiteral("MemTotal: *(\\d+)"));
-    static const QRegularExpression reAvail(QStringLiteral("MemAvailable: *(\\d+)"));
+    static const QRegularExpression k_reTotal(u"MemTotal: *(\\d+)"_s);
+    static const QRegularExpression k_reAvail(u"MemAvailable: *(\\d+)"_s);
     const QString text = QString::fromLatin1(data);
 
-    const auto totalMatch = reTotal.match(text);
-    const auto availMatch = reAvail.match(text);
+    const auto totalMatch = k_reTotal.match(text);
+    const auto availMatch = k_reAvail.match(text);
     if (!totalMatch.hasMatch() || !availMatch.hasMatch()) {
         return;
     }

@@ -1,11 +1,11 @@
 #pragma once
 
-#include <QtQuick/qquickitem.h>
 #include <qfuture.h>
 #include <qfuturewatcher.h>
 #include <qobject.h>
 #include <qpointer.h>
 #include <qqmlintegration.h>
+#include <qquickitem.h>
 
 namespace caelestia::images {
 

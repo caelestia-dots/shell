@@ -1,24 +1,12 @@
 #pragma once
 
-#include "../circularbuffer.hpp"
-#include "tickingservice.hpp"
-
 #include <qelapsedtimer.h>
 #include <qqmlintegration.h>
 
+#include "core/circularbuffer.hpp"
+#include "tickingservice.hpp"
+
 namespace caelestia::services {
-
-struct NetworkFormatResult {
-    Q_GADGET
-    QML_ANONYMOUS
-
-    Q_PROPERTY(qreal value MEMBER value CONSTANT)
-    Q_PROPERTY(QString unit MEMBER unit CONSTANT)
-
-public:
-    qreal value = 0.0;
-    QString unit;
-};
 
 class NetworkUsage : public TickingService {
     Q_OBJECT
@@ -42,9 +30,6 @@ public:
     [[nodiscard]] qreal downloadTotal() const;
     [[nodiscard]] qreal uploadTotal() const;
     [[nodiscard]] int historyLength() const;
-
-    [[nodiscard]] Q_INVOKABLE NetworkFormatResult formatBytesRate(qreal bytes) const;
-    [[nodiscard]] Q_INVOKABLE NetworkFormatResult formatBytes(qreal bytes) const;
 
     [[nodiscard]] CircularBuffer* downloadBuffer() const;
     [[nodiscard]] CircularBuffer* uploadBuffer() const;

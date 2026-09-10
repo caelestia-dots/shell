@@ -29,7 +29,7 @@ jobs:
               sudo -u builder git clone https://aur.archlinux.org/yay-bin.git /home/builder/yay-bin && \
               cd /home/builder/yay-bin && \
               sudo -u builder makepkg -si --noconfirm && \
-              sudo -u builder yay -S --noconfirm quickshell-git libcava && \
+              sudo -u builder yay -S --noconfirm quickshell-git libcava qt6-m3shapes-git && \
               sudo -u builder yay -Yc --noconfirm && \
               pacman -Rns --noconfirm yay-bin && \
               sed -i '/builder ALL=(ALL) NOPASSWD:ALL/d' /etc/sudoers && \

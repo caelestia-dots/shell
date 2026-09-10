@@ -89,4 +89,4 @@ jobs:
           github_token: ${{ steps.app-token.outputs.token }}
           add: flake.lock
           default_author: github_actions
-          message: "[CI] chore: update flake"
+          message: "chore(nix): update flake inputs [CI]"

@@ -1,6 +1,7 @@
 #include "rootnodes.hpp"
 
-#include "../toaster.hpp"
+#include "core/toaster.hpp"
+#include "util/i18n.hpp"
 #include "common.hpp"
 
 namespace caelestia::config {
@@ -13,13 +14,12 @@ QString nameFor(const QString& key) {
     return key.isEmpty() ? u"global"_s : key;
 }
 
-QString forScreen(const QString& global, const QString& layer, const QString& screen) {
-    return screen.isEmpty() ? global : layer.arg(screen);
-}
-
 } // namespace
 
 namespace detail {
+
+using util::i18n::mark;
+using util::i18n::markN;
 
 void loaded(ConfigKind kind, settings::RootNode* layer, const QString& screen) {
     if (kind != ConfigKind::Shell || !screen.isEmpty())
@@ -29,21 +29,24 @@ void loaded(ConfigKind kind, settings::RootNode* layer, const QString& screen) {
     if (!config->utilities()->toasts()->configLoaded())
         return;
 
-    const auto issues = config->diagnostics().count();
-    // TODO: tr when translations added
+    const auto issues = static_cast<int>(config->diagnostics().count());
     const auto message = issues > 0
-                             ? u"Config loaded with %1 issue%2."_s.arg(issues).arg(issues > 1 ? u"s"_s : QString())
-                             : u"Config loaded successfully!"_s;
-    Toaster::instance()->toast(u"Config loaded"_s, message, issues > 0 ? u"settings_alert"_s : u"rule_settings"_s,
+                             ? markN(u"Config loaded with %n issue."_s, u"Config loaded with %n issues."_s, issues)
+                             : mark(u"Config loaded successfully!"_s);
+    Toaster::instance()->toast(mark(u"Config loaded"_s), message, issues > 0 ? u"settings_alert"_s : u"rule_settings"_s,
         issues > 0 ? Toast::Type::Warning : Toast::Type::Info);
 }
 
 void loadFailed(ConfigKind kind, const QString& error, const QString& screen) {
-    // TODO: tr when translations added
-    const auto title =
-        kind == ConfigKind::Tokens
-            ? forScreen(u"Failed to parse token config"_s, u"Failed to parse token config for %1"_s, screen)
-            : forScreen(u"Failed to parse config"_s, u"Failed to parse config for %1"_s, screen);
+    QString title;
+    if (kind == ConfigKind::Tokens)
+        title = screen.isEmpty() ? mark(u"Failed to parse token config"_s)
+                                 // TRANSLATORS: %1 = a monitor name
+                                 : mark(u"Failed to parse token config for %1"_s, { screen });
+    else
+        title =
+            // TRANSLATORS: %1 = a monitor name
+            screen.isEmpty() ? mark(u"Failed to parse config"_s) : mark(u"Failed to parse config for %1"_s, { screen });
     Toaster::instance()->toast(title, error, u"settings_alert"_s, Toast::Type::Warning);
 }
 
@@ -51,8 +54,9 @@ void saveFailed(ConfigKind kind, const QString& error, const QString& screen) {
     if (kind != ConfigKind::Shell)
         return;
 
-    // TODO: tr when translations added
-    const auto title = forScreen(u"Failed to save config"_s, u"Failed to save config for %1"_s, screen);
+    const auto title =
+        // TRANSLATORS: %1 = a monitor name
+        screen.isEmpty() ? mark(u"Failed to save config"_s) : mark(u"Failed to save config for %1"_s, { screen });
     Toaster::instance()->toast(title, error, u"settings_alert"_s, Toast::Type::Error);
 }
 
@@ -99,7 +103,7 @@ TokensRoot::TokensRoot(const QString& path, TokensRoot* fallback, QObject* paren
     }                                                                                                                  \
                                                                                                                        \
     Type::Type(QObject* parent)                                                                                        \
-        : Root(configDir() + QLatin1Char('/') + file, nullptr, parent)                                                 \
+        : Root(configDir() + u'/' + file, nullptr, parent)                                                             \
         , m_layers(monitorConfigDir(), file, this) {                                                                   \
         initLayer(this);                                                                                               \
     }                                                                                                                  \
@@ -123,8 +127,8 @@ TokensRoot::TokensRoot(const QString& path, TokensRoot* fallback, QObject* paren
         layer->load();                                                                                                 \
     }
 
-SINGLETON_IMPL(ConfigSingleton, ConfigRoot, QStringLiteral("shell.json"), detail::ConfigKind::Shell)
-SINGLETON_IMPL(TokensSingleton, TokensRoot, QStringLiteral("shell-tokens.json"), detail::ConfigKind::Tokens)
+SINGLETON_IMPL(ConfigSingleton, ConfigRoot, u"shell.json"_s, detail::ConfigKind::Shell)
+SINGLETON_IMPL(TokensSingleton, TokensRoot, u"shell-tokens.json"_s, detail::ConfigKind::Tokens)
 
 #undef SINGLETON_IMPL
 

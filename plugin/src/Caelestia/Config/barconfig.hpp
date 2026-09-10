@@ -4,9 +4,9 @@
 #include <qstringlist.h>
 #include <qvariantlist.h>
 
+#include "settings/objectnode.hpp"
 #include "common.hpp"
 #include "enums.hpp"
-#include "settings/objectnode.hpp"
 
 namespace caelestia::config {
 
@@ -84,6 +84,7 @@ class BarClock : public settings::ObjectNode {
     CONFIG_PROPERTY(bool, background, false)
     CONFIG_PROPERTY(bool, showDate, false)
     CONFIG_PROPERTY(bool, showIcon, true)
+    CONFIG_PROPERTY(bool, showSeconds, false)
 };
 
 class BarConfig : public settings::ObjectNode {

@@ -89,6 +89,7 @@ Dependencies:
 -   `qt6-base`
 -   `qt6-declarative`
 -   `qt6-imageformats`
+-   [`qt6-m3shapes-git`](https://github.com/soramanew/m3shapes)
 -   [`swappy`](https://github.com/jtheoof/swappy)
 -   [`fish`](https://github.com/fish-shell/fish-shell)
 -   [`bash`](https://www.gnu.org/software/bash)
@@ -235,7 +236,7 @@ For example, to automatically hide the bar on the monitor named `DP-1`:
 > - `nexus`: `networkRescanInterval`
 > - `notifs`: `actionOnClick`, `defaultExpireTimeout`, `expire`, `fullscreen`, `fullscreenExpireTimeout`
 > - `paths`: `lyricsDir`, `wallpaperDir`
-> - `services`: `audioIncrement`, `brightnessIncrement`, `defaultPlayer`, `gpuType`, `lyricsBackend`, `maxVolume`, `playerAliases`, `smartScheme`, `useFahrenheit`, `useFahrenheitPerformance`, `useTwelveHourClock`, `visualiserBars`, `weatherLocation`
+> - `services`: `audioIncrement`, `brightnessIncrement`, `dataUnits`, `defaultPlayer`, `gpuType`, `lyricsBackend`, `maxVolume`, `playerAliases`, `sensorUnits`, `smartScheme`, `useTwelveHourClock`, `visualiserBars`, `weatherLocation`, `weatherUnits`
 > - `utilities.toasts`: all except `fullscreen`
 > - `utilities.vpn`: `enabled`, `provider`, `selectedProvider`
 >
@@ -722,8 +723,9 @@ For example, to automatically hide the bar on the monitor named `DP-1`:
     },
     "services": {
         "weatherLocation": "",
-        "useFahrenheit": false,
-        "useFahrenheitPerformance": false,
+        "weatherUnits": "Celsius",
+        "sensorUnits": "Celsius",
+        "dataUnits": "Binary",
         "useTwelveHourClock": false,
         "gpuType": "Auto",
         "visualiserBars": 60,

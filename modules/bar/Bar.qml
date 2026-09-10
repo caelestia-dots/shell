@@ -24,7 +24,7 @@ ColumnLayout {
             return;
 
         for (let i = 0; i < repeater.count; i++) {
-            const tray = (repeater.itemAt(i) as EntryWrapper).item as Tray;
+            const tray = (repeater.itemAt(i) as EntryWrapper)?.item as Tray;
             if (tray)
                 tray.expanded = false;
         }

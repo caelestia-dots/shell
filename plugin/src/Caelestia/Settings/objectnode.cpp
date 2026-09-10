@@ -2,9 +2,12 @@
 
 #include <qjsonobject.h>
 
+#include "util/i18n.hpp"
 #include "codecs.hpp"
 
 namespace caelestia::settings {
+
+using Qt::StringLiterals::operator""_s;
 
 ObjectNode::ObjectNode(ObjectNode* fallback, QObject* parent, bool globalOnly)
     : Node(fallback, parent, globalOnly) {}
@@ -28,7 +31,7 @@ Descriptor ObjectNode::descriptorFor(const QString& key) const {
     const auto* desc = schema().get(key);
     if (!desc) {
         qCWarning(lcSettings) << "Attempted to get descriptor for unknown option" << pathFor(key);
-        return Descriptor();
+        return {};
     }
 
     return *desc;
@@ -49,7 +52,7 @@ QJsonValue ObjectNode::toJson(bool sparse) const {
         if (sparse && !isOverride(desc.key))
             continue;
 
-        const auto codec = ValueCodec::codecFor(desc.type);
+        auto* const codec = ValueCodec::codecFor(desc.type);
         if (!codec) { // This should not happen
             qCCritical(lcSettings, "No codec found for type %s, not serialising %s", desc.type.name(),
                 qUtf8Printable(pathFor(desc.key)));
@@ -69,7 +72,7 @@ bool ObjectNode::syncJson(const QJsonValue& json, QList<Diagnostic>& diagnostics
     m_quarantine.reset(); // Clear out old quarantine
 
     if (!json.isObject()) {
-        const auto d = Diagnostic::mismatch("an object", json, path());
+        const auto d = Diagnostic::mismatch(ExpectedType::Object, json, path());
         qCWarning(lcSettings, "Error decoding option %s: %s", qUtf8Printable(d.option), qUtf8Printable(d.message));
         diagnostics << d;
         return false;
@@ -111,9 +114,10 @@ QSet<QString> ObjectNode::loadFromJson(const QJsonObject& json, QList<Diagnostic
             const auto path = pathFor(key);
             qCWarning(lcSettings) << "Unknown option" << path;
             diagnostics << Diagnostic{
-                DiagnosticType::UnknownOption,
-                path,
-                QStringLiteral("Unknown option %1").arg(key),
+                .type = DiagnosticType::UnknownOption,
+                .option = path,
+                // TRANSLATORS: %1 = a config key name
+                .message = util::i18n::mark(u"Unknown option %1"_s, { key }),
             };
             SKIP;
         }
@@ -134,14 +138,14 @@ QSet<QString> ObjectNode::loadFromJson(const QJsonObject& json, QList<Diagnostic
             qCWarning(
                 lcSettings, "Global property definition %s found in overlay file, ignoring.", qUtf8Printable(path));
             diagnostics << Diagnostic{
-                DiagnosticType::GlobalOption,
-                path,
-                QStringLiteral("Global properties should not be defined in overlay files"),
+                .type = DiagnosticType::GlobalOption,
+                .option = path,
+                .message = util::i18n::mark(u"Global properties should not be defined in overlay files"_s),
             };
             SKIP;
         }
 
-        const auto codec = ValueCodec::codecFor(desc->type);
+        auto* const codec = ValueCodec::codecFor(desc->type);
         if (!codec) { // This should not happen
             qCCritical(lcSettings, "No codec found for type %s, not loading %s", desc->type.name(),
                 qUtf8Printable(pathFor(key)));
@@ -150,9 +154,11 @@ QSet<QString> ObjectNode::loadFromJson(const QJsonObject& json, QList<Diagnostic
 
         auto val = codec->decode(v);
         if (val.error) {
-            const auto path = pathFor(key);
-            qCWarning(
-                lcSettings, "Error decoding option %s: %s", qUtf8Printable(path), qUtf8Printable(val.error->message));
+            auto path = pathFor(key);
+            for (const auto index : std::as_const(val.indexPath))
+                path = elementPath(path, QString::number(index));
+            qCWarning(lcSettings, "Error decoding option %s: %s", qUtf8Printable(path),
+                qUtf8Printable(util::i18n::unmark(val.error->message)));
             val.error->option = path;
             diagnostics << *val.error;
             SKIP;

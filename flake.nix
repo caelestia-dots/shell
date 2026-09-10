@@ -16,8 +16,8 @@
     };
 
     m3shapes = {
-      url = "github:soramanew/m3shapes/bdc327b29f95394a732baf3c9b19658ba23755b6";
-      flake = false;
+      url = "github:soramanew/m3shapes/32ad9ce328bb77ed349b40a3be10ee9ea610b8ab";
+      inputs.nixpkgs.follows = "nixpkgs";
     };
   };
 
@@ -38,7 +38,6 @@
       pkgs = pkgsOf.${system};
     in rec {
       caelestia-shell = pkgs.callPackage ./nix {
-        inherit (inputs) m3shapes;
         rev = self.rev or self.dirtyRev;
         stdenv = pkgs.clangStdenv;
         quickshell = inputs.quickshell.packages.${system}.default.override {
@@ -46,6 +45,7 @@
           withI3 = false;
         };
         caelestia-cli = inputs.caelestia-cli.packages.${system}.default;
+        m3shapes = inputs.m3shapes.packages.${system}.default;
       };
       with-cli = caelestia-shell.override {withCli = true;};
       debug = caelestia-shell.override {debug = true;};
@@ -59,7 +59,7 @@
         mkShell = pkgs.mkShell.override {stdenv = shell.stdenv;};
       in
         mkShell {
-          inputsFrom = [shell shell.plugin shell.extras shell.m3shapesModule];
+          inputsFrom = [shell shell.plugin shell.extras];
           packages = with pkgs; [clazy material-symbols rubik nerd-fonts.caskaydia-cove];
           CAELESTIA_XKB_RULES_PATH = "${pkgs.xkeyboard-config}/share/xkeyboard-config-2/rules/base.lst";
         };

@@ -3,6 +3,7 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import M3Shapes
 import Caelestia.Config
+import Caelestia.I18n
 import qs.components
 import qs.components.effects
 import qs.components.filedialog
@@ -201,7 +202,8 @@ Item {
         anchors.leftMargin: Tokens.spacing.small
         anchors.verticalCenterOffset: Math.round(fontInfo.pointSize * 0.1)
 
-        text: "up " + SysInfo.uptime.split(",").slice(0, 2).join(",") // Max 2 components
+        // TRANSLATORS: %1 = system uptime, e.g. "2 days, 3 hours"
+        text: Tr.trCtx("up %1", "system uptime").arg(SysInfo.uptimeShort)
         width: Tokens.sizes.dashboard.userWidth - x - Tokens.padding.extraLarge
         elide: Text.ElideRight
     }
