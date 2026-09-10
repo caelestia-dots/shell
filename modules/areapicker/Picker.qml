@@ -46,8 +46,10 @@ MouseArea {
 
         return Hypr.toplevelsForWs(wsId).sort((a, b) => {
             // Pinned first, then fullscreen, then floating, then any other
-            const ac = a.lastIpcObject;
-            const bc = b.lastIpcObject;
+            const ac = a?.lastIpcObject;
+            const bc = b?.lastIpcObject;
+            if (!ac || !bc)
+                return !ac - !bc; // Missing IPC last
             return (bc.pinned - ac.pinned) || ((bc.fullscreen !== 0) - (ac.fullscreen !== 0)) || (bc.floating - ac.floating);
         });
     }
