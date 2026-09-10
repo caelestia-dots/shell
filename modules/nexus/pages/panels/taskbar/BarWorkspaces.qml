@@ -19,6 +19,7 @@ PageBase {
 
         StepperRow {
             first: true
+            settingAnchor: "bar-ws-shown"
             label: Tr.trCtx("Shown", "number of workspaces")
             subtext: Tr.tr("Number of workspaces displayed")
             value: Config.bar.workspaces.shown
@@ -30,24 +31,28 @@ PageBase {
 
         ToggleRow {
             // TRANSLATORS: the three following labels name visual decorations drawn on the workspace pill
+            settingAnchor: "bar-ws-active-indicator"
             text: Tr.tr("Active indicator")
             checked: Config.bar.workspaces.activeIndicator
             onToggled: GlobalConfig.bar.workspaces.activeIndicator = checked
         }
 
         ToggleRow {
+            settingAnchor: "bar-ws-active-trail"
             text: Tr.tr("Active trail")
             checked: Config.bar.workspaces.activeTrail
             onToggled: GlobalConfig.bar.workspaces.activeTrail = checked
         }
 
         ToggleRow {
+            settingAnchor: "bar-ws-occupied-background"
             text: Tr.tr("Occupied background")
             checked: Config.bar.workspaces.occupiedBg
             onToggled: GlobalConfig.bar.workspaces.occupiedBg = checked
         }
 
         ToggleRow {
+            settingAnchor: "bar-ws-show-windows"
             text: Tr.tr("Show windows")
             subtext: Tr.tr("Show icons of open windows on each workspace")
             checked: Config.bar.workspaces.showWindows
@@ -55,6 +60,7 @@ PageBase {
         }
 
         ToggleRow {
+            settingAnchor: "bar-ws-show-empty"
             text: Tr.tr("Show unoccupied")
             subtext: Tr.tr("Show workspaces that are inactive and empty")
             checked: Config.bar.workspaces.showUnoccupied
@@ -62,6 +68,7 @@ PageBase {
         }
 
         ToggleRow {
+            settingAnchor: "bar-ws-windows-on-special-workspaces"
             text: Tr.tr("Windows on special workspaces")
             checked: Config.bar.workspaces.showWindowsOnSpecialWorkspaces
             onToggled: GlobalConfig.bar.workspaces.showWindowsOnSpecialWorkspaces = checked
@@ -69,6 +76,7 @@ PageBase {
 
         StepperRow {
             // TRANSLATORS: maximum number of window icons shown per workspace
+            settingAnchor: "bar-ws-max-window-icons"
             label: Tr.tr("Max window icons")
             value: Config.bar.workspaces.maxWindowIcons
             from: 0

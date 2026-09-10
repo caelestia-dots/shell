@@ -76,6 +76,7 @@ PageBase {
             first: true
             last: true
             icon: "notifications"
+            settingAnchor: "services-notifications"
             text: Tr.tr("Notifications")
             subtext: Tr.tr("Notifications, toasts, timeouts")
             onClicked: root.nState.openSubPage(1)
@@ -88,6 +89,7 @@ PageBase {
 
         StepperRow {
             first: true
+            settingAnchor: "services-media-refresh"
             label: Tr.tr("Media refresh")
             // TRANSLATORS: ms is the millisecond unit, leave it untranslated
             subtext: Tr.tr("How often the media position updates (ms)")
@@ -99,6 +101,7 @@ PageBase {
         }
 
         StepperRow {
+            settingAnchor: "services-system-stats-refresh"
             label: Tr.tr("System stats refresh")
             // TRANSLATORS: CPU and GPU are hardware abbreviations, leave them untranslated
             subtext: Tr.tr("CPU, memory and GPU update interval (seconds)")
@@ -111,6 +114,7 @@ PageBase {
 
         StepperRow {
             last: true
+            settingAnchor: "services-wi-fi-rescan"
             label: Tr.tr("Wi-Fi rescan")
             subtext: Tr.tr("How often available networks are rescanned (seconds)")
             value: GlobalConfig.nexus.networkRescanInterval / 1000
@@ -127,6 +131,7 @@ PageBase {
 
         SelectRow {
             first: true
+            settingAnchor: "services-lyrics-backend"
             label: Tr.tr("Lyrics backend")
             subtext: Tr.tr("Source used to fetch synced lyrics")
             menuItems: root.lyricsItems
@@ -136,6 +141,7 @@ PageBase {
 
         SelectRow {
             last: true
+            settingAnchor: "services-default-player"
             label: Tr.tr("Default player")
             subtext: Tr.tr("Preferred media player when several are open")
             menuItems: playerVariants.instances
@@ -152,6 +158,7 @@ PageBase {
 
         StepperRow {
             first: true
+            settingAnchor: "services-volume-step"
             label: Tr.tr("Volume step")
             subtext: Tr.tr("Amount the volume changes per scroll (%)")
             value: Math.round(GlobalConfig.services.audioIncrement * 100)
@@ -162,6 +169,7 @@ PageBase {
         }
 
         StepperRow {
+            settingAnchor: "services-brightness-step"
             label: Tr.tr("Brightness step")
             subtext: Tr.tr("Amount the brightness changes per scroll (%)")
             value: Math.round(GlobalConfig.services.brightnessIncrement * 100)
@@ -173,6 +181,7 @@ PageBase {
 
         StepperRow {
             last: true
+            settingAnchor: "services-max-volume"
             label: Tr.tr("Max volume")
             subtext: Tr.tr("Upper limit for output volume (%)")
             value: Math.round(GlobalConfig.services.maxVolume * 100)
@@ -190,6 +199,7 @@ PageBase {
         StepperRow {
             first: true
             // TRANSLATORS: bars of a spectrum analyser, not the taskbar
+            settingAnchor: "services-visualiser-bars"
             label: Tr.tr("Visualiser bars")
             subtext: Tr.tr("Number of bars in the audio visualisers")
             value: GlobalConfig.services.visualiserBars
@@ -200,6 +210,7 @@ PageBase {
         }
 
         ToggleRow {
+            settingAnchor: "services-smart-colour-scheme"
             text: Tr.tr("Smart colour scheme")
             subtext: Tr.tr("Derive theme mode and variant from the wallpaper")
             checked: GlobalConfig.services.smartScheme
@@ -208,6 +219,7 @@ PageBase {
 
         SelectRow {
             last: true
+            settingAnchor: "services-gpu"
             label: Tr.tr("GPU")
             subtext: Gpu.name ? Tr.tr("Monitoring: %1").arg(Gpu.name) : Tr.tr("Override for GPU type")
             menuOnTop: true
