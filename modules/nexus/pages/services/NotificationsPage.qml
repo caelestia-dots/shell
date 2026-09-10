@@ -54,6 +54,7 @@ PageBase {
 
         SelectRow {
             first: true
+            settingAnchor: "notif-show-in-fullscreen"
             label: Tr.tr("Show in fullscreen")
             subtext: Tr.tr("Whether notifications appear over fullscreen apps")
             menuItems: root.notifFullscreenItems
@@ -62,6 +63,7 @@ PageBase {
         }
 
         ToggleRow {
+            settingAnchor: "notif-expire-automatically"
             text: Tr.tr("Expire automatically")
             subtext: Tr.tr("Dismiss notifications after their timeout")
             checked: GlobalConfig.notifs.expire
@@ -69,6 +71,7 @@ PageBase {
         }
 
         ToggleRow {
+            settingAnchor: "notif-open-expanded"
             text: Tr.tr("Open expanded")
             subtext: Tr.tr("Show notifications expanded by default")
             checked: GlobalConfig.notifs.openExpanded
@@ -76,6 +79,7 @@ PageBase {
         }
 
         StepperRow {
+            settingAnchor: "notif-default-timeout"
             label: Tr.tr("Default timeout")
             // TRANSLATORS: ms is the millisecond unit, leave it untranslated
             subtext: Tr.tr("Time before a notification dismisses (ms)")
@@ -88,6 +92,7 @@ PageBase {
 
         StepperRow {
             last: true
+            settingAnchor: "notif-group-preview-count"
             label: Tr.tr("Group preview count")
             subtext: Tr.tr("Notifications shown per group before collapsing")
             value: GlobalConfig.notifs.groupPreviewNum
@@ -104,6 +109,7 @@ PageBase {
 
         SelectRow {
             first: true
+            settingAnchor: "notif-show-in-fullscreen-2"
             label: Tr.tr("Show in fullscreen")
             subtext: Tr.tr("Whether toasts appear over fullscreen apps")
             menuItems: root.toastFullscreenItems
@@ -113,6 +119,7 @@ PageBase {
 
         StepperRow {
             last: true
+            settingAnchor: "notif-visible-toasts"
             label: Tr.tr("Visible toasts")
             subtext: Tr.tr("Maximum number of toasts shown at once")
             value: GlobalConfig.utilities.maxToasts
@@ -129,54 +136,63 @@ PageBase {
 
         ToggleRow {
             first: true
+            settingAnchor: "notif-charging-changes"
             text: Tr.tr("Charging changes")
             checked: GlobalConfig.utilities.toasts.chargingChanged
             onToggled: GlobalConfig.utilities.toasts.chargingChanged = checked
         }
 
         ToggleRow {
+            settingAnchor: "notif-game-mode-changes"
             text: Tr.tr("Game mode changes")
             checked: GlobalConfig.utilities.toasts.gameModeChanged
             onToggled: GlobalConfig.utilities.toasts.gameModeChanged = checked
         }
 
         ToggleRow {
+            settingAnchor: "notif-do-not-disturb-changes"
             text: Tr.tr("Do not disturb changes")
             checked: GlobalConfig.utilities.toasts.dndChanged
             onToggled: GlobalConfig.utilities.toasts.dndChanged = checked
         }
 
         ToggleRow {
+            settingAnchor: "notif-audio-output-changes"
             text: Tr.tr("Audio output changes")
             checked: GlobalConfig.utilities.toasts.audioOutputChanged
             onToggled: GlobalConfig.utilities.toasts.audioOutputChanged = checked
         }
 
         ToggleRow {
+            settingAnchor: "notif-audio-input-changes"
             text: Tr.tr("Audio input changes")
             checked: GlobalConfig.utilities.toasts.audioInputChanged
             onToggled: GlobalConfig.utilities.toasts.audioInputChanged = checked
         }
 
         ToggleRow {
+            settingAnchor: "notif-caps-lock-changes"
             text: Tr.tr("Caps lock changes")
             checked: GlobalConfig.utilities.toasts.capsLockChanged
             onToggled: GlobalConfig.utilities.toasts.capsLockChanged = checked
         }
 
         ToggleRow {
+            settingAnchor: "notif-num-lock-changes"
             text: Tr.tr("Num lock changes")
             checked: GlobalConfig.utilities.toasts.numLockChanged
             onToggled: GlobalConfig.utilities.toasts.numLockChanged = checked
         }
 
         ToggleRow {
+            settingAnchor: "notif-keyboard-layout-changes"
             text: Tr.tr("Keyboard layout changes")
             checked: GlobalConfig.utilities.toasts.kbLayoutChanged
             onToggled: GlobalConfig.utilities.toasts.kbLayoutChanged = checked
         }
 
         ToggleRow {
+            settingAnchor: "notif-vpn-changes"
             text: Tr.tr("VPN changes")
             checked: GlobalConfig.utilities.toasts.vpnChanged
             onToggled: GlobalConfig.utilities.toasts.vpnChanged = checked
@@ -184,6 +200,7 @@ PageBase {
 
         ToggleRow {
             last: true
+            settingAnchor: "notif-now-playing"
             text: Tr.tr("Now playing")
             checked: GlobalConfig.utilities.toasts.nowPlaying
             onToggled: GlobalConfig.utilities.toasts.nowPlaying = checked
