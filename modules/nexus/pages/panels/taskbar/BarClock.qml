@@ -31,10 +31,16 @@ PageBase {
         }
 
         ToggleRow {
-            last: true
             text: Tr.tr("Show icon")
             checked: Config.bar.clock.showIcon
             onToggled: GlobalConfig.bar.clock.showIcon = checked
+        }
+
+        ToggleRow {
+            last: true
+            text: Tr.tr("Show seconds")
+            checked: Config.bar.clock.showSeconds
+            onToggled: GlobalConfig.bar.clock.showSeconds = checked
         }
     }
 }

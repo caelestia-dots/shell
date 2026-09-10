@@ -32,11 +32,18 @@ PageBase {
         }
 
         ToggleRow {
-            last: true
             text: Tr.tr("Show on hover")
             subtext: Tr.tr("Reveal when the cursor reaches the screen edge")
             checked: Config.dashboard.showOnHover
             onToggled: GlobalConfig.dashboard.showOnHover = checked
+        }
+
+        ToggleRow {
+            last: true
+            text: Tr.tr("Show clock seconds")
+            subtext: Tr.tr("Display seconds for the clock in the main panel")
+            checked: Config.dashboard.showClockSeconds
+            onToggled: GlobalConfig.dashboard.showClockSeconds = checked
         }
 
         // Tabs
