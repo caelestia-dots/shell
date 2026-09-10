@@ -34,7 +34,9 @@ Singleton {
     readonly property var cachedCities: new Map()
 
     function formatTemp(temp: var): string {
-        return GlobalConfig.services.useFahrenheit ? `${temp !== undefined ? Math.round(toFahrenheit(temp)) : "--"}°F` : `${temp !== undefined ? Math.round(temp) : "--"}°C`;
+        const useF = GlobalConfig.services.useFahrenheit;
+        const value = temp !== undefined ? Math.round(useF ? toFahrenheit(temp) : temp) : "--";
+        return useF ? Tr.tr("%1°F").arg(value) : Tr.tr("%1°C").arg(value);
     }
 
     function reload(): void {

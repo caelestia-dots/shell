@@ -14,10 +14,10 @@ PageBase {
     // Temperature units (index 0 = Celsius, 1 = Fahrenheit — matches Weather.formatTemp)
     readonly property list<MenuItem> tempItems: [
         MenuItem {
-            text: "°C"
+            text: Tr.tr("°C")
         },
         MenuItem {
-            text: "°F"
+            text: Tr.tr("°F")
         }
     ]
 
