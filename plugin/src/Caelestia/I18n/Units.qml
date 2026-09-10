@@ -25,4 +25,10 @@ QtObject {
             return Tr.trCtx("%1 K", "temperature").arg(value);
         return Tr.trCtx("%1°C", "temperature").arg(value);
     }
+
+    // Converts and formats a sensor temperature in Celsius using the configured sensor units
+    function formatSensorTemp(celsius: real): string {
+        const unit = GlobalConfig.services.sensorUnits;
+        return formatTemp(Math.round(toTemperature(celsius, unit)), unit);
+    }
 }

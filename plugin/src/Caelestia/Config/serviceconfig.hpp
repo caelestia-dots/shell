@@ -23,7 +23,7 @@ class ServiceConfig : public settings::ObjectNode {
                 QLocale().measurementSystem() == QLocale::ImperialUKSystem
             ? TemperatureUnit::Fahrenheit
             : TemperatureUnit::Celsius)
-    // This is always false by default cause apparently even imperial system users don't use it for perf temps?
+    // Always Celsius by default cause apparently even imperial system users don't use Fahrenheit for perf temps?
     CONFIG_GLOBAL_ENUM_PROPERTY(TemperatureUnit, sensorUnits, TemperatureUnit::Celsius)
     // Attempt to guess based on locale
     CONFIG_GLOBAL_PROPERTY(

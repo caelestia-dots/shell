@@ -95,11 +95,7 @@ StyledRect {
             }
 
             StyledText {
-                text: {
-                    const unit = GlobalConfig.services.sensorUnits;
-                    const value = Math.ceil(Units.toTemperature(root.temperature, unit));
-                    return Units.formatTemp(value, unit);
-                }
+                text: Units.formatSensorTemp(root.temperature)
                 font: Tokens.font.body.builders.medium.build()
             }
         }
