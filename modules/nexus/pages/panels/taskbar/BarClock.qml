@@ -41,7 +41,7 @@ PageBase {
 
         ToggleRow {
             last: true
-            settingAnchor: "bar-clock-show-icon"
+            settingAnchor: "bar-clock-show-second"
             text: Tr.tr("Show seconds")
             checked: Config.bar.clock.showSeconds
             onToggled: GlobalConfig.bar.clock.showSeconds = checked
