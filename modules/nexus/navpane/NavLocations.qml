@@ -292,7 +292,7 @@ VerticalFadeFlickable {
                                     anchors.fill: parent
                                     anchors.margins: Tokens.padding.large
                                     // Leave room on the right for the toggle switch.
-                                    anchors.rightMargin: result.modelData.togglePath ? toggle.width + Tokens.padding.large * 2 : Tokens.padding.large
+                                    anchors.rightMargin: result.modelData.isToggle ? toggle.width + Tokens.padding.large * 2 : Tokens.padding.large
                                     spacing: Tokens.spacing.medium
 
                                     // The setting's own icon, baked into the
@@ -374,7 +374,7 @@ VerticalFadeFlickable {
                                     anchors.rightMargin: Tokens.padding.large
                                     anchors.verticalCenter: parent.verticalCenter
                                     z: 2
-                                    visible: result.modelData.togglePath
+                                    visible: result.modelData.isToggle
                                     checked: result.modelData.toggleValue
                                     cLayer: 3
                                     // A touch smaller than the in-page switches since

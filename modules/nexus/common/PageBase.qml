@@ -64,10 +64,16 @@ ColumnLayout {
         scrollRetry.restart();
     }
 
-    // Flash a row without scrolling (used when re-selecting the current setting).
+    // Flash a row when re-selecting the current setting, scrolling only if it
+    // has been scrolled out of view since.
     function highlightAnchor(anchor: string): void {
         const row = findAnchor(contentChild, anchor);
-        if (row && row.flashHighlight !== undefined) // qmllint disable missing-property
+        if (!row)
+            return;
+        const pos = row.mapToItem(flickable, 0, 0);
+        if (pos.y < 0 || pos.y + row.height > flickable.height)
+            scrollToAnchor(anchor);
+        else if (row.flashHighlight !== undefined) // qmllint disable missing-property
             row.flashHighlight(); // qmllint disable missing-property
     }
 
