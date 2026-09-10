@@ -18,6 +18,12 @@ ColumnLayout {
     SearchBar {
         id: searchField
 
+        // The list below is pulled up under this by a negative margin so its
+        // fade starts behind the field. That overlap is interactive - a
+        // scrolled result sitting in it would swallow clicks meant for the
+        // field - so keep the field on top.
+        z: 1
+
         Layout.fillWidth: true
 
         placeholderText: Tr.tr("Search settings")
@@ -38,6 +44,12 @@ ColumnLayout {
             target: root.nState
             property: "searchOpen"
             value: searchField.text.length > 0
+        }
+
+        Binding {
+            target: root.nState
+            property: "searchText"
+            value: searchField.text
         }
     }
 

@@ -25,6 +25,7 @@ PageBase {
 
         ToggleRow {
             first: true
+            settingAnchor: "sidebar-enabled"
             text: Tr.trCtx("Enabled", "toggle label")
             checked: Config.sidebar.enabled
             onToggled: GlobalConfig.sidebar.enabled = checked
@@ -39,6 +40,7 @@ PageBase {
 
         StepperRow {
             last: true
+            settingAnchor: "sidebar-drag-threshold"
             label: Tr.tr("Drag threshold")
             subtext: Tr.tr("Pixels dragged before the sidebar opens")
             value: Config.sidebar.dragThreshold
