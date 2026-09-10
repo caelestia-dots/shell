@@ -22,7 +22,7 @@ VerticalFadeFlickable {
     WheelHandler {
         onWheel: event => {
             if (root.contentHeight + root.topMargin + root.bottomMargin <= root.height) {
-                event.accepted = true
+                event.accepted = true;
             }
         }
     }
