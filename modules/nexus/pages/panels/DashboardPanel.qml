@@ -42,7 +42,7 @@ PageBase {
 
         ToggleRow {
             last: true
-            settingAnchor: "dash-show-on-second"
+            settingAnchor: "dash-clock-seconds"
             text: Tr.tr("Show clock seconds")
             subtext: Tr.tr("Display seconds for the clock in the main panel")
             checked: Config.dashboard.showClockSeconds
