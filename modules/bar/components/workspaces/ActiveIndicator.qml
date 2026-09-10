@@ -15,21 +15,23 @@ StyledRect {
     required property bool fullscreen
     required property bool layoutTransitionRunning
 
-    property int currentWsIdx: -1
-    property int lastWs: -1
+    property int currentWsId: -1
+    readonly property int currentWsIdx: currentWsId < 0 ? -1 : workspaceIndex(currentWsId)
 
     property real leading: workspaceOffset(currentWsIdx)
     property real trailing: workspaceOffset(currentWsIdx)
     property real currentSize: (workspaces.itemAt(currentWsIdx) as Workspace)?.size ?? 0
     property real offset: Math.min(leading, trailing)
     property real size: {
-        const s = Math.abs(leading - trailing) + currentSize;
-        if (Config.bar.workspaces.activeTrail && lastWs > currentWsIdx) {
-            const ws = workspaces.itemAt(lastWs) as Workspace;
-            return ws ? Math.min(workspaceOffset(lastWs) + ws.size - offset, s) : 0;
+        const naturalSize = Math.abs(leading - trailing) + currentSize;
+        if (Config.bar.workspaces.activeTrail && clampTrailEnd) {
+            const clampedSize = Math.min(trailEnd - offset, naturalSize);
+            return Math.max(currentSize, clampedSize);
         }
-        return s;
+        return naturalSize;
     }
+    property real trailEnd: 0
+    property bool clampTrailEnd: false
 
     property bool ready: false
     property bool workspaceSwitchRunning: false
@@ -45,7 +47,7 @@ StyledRect {
     }
 
     function workspaceOffset(index: int): real {
-        if (index < 0)
+        if (index < 0 || index >= workspaces.count)
             return 0;
 
         const ws = workspaces.itemAt(index) as Workspace;
@@ -53,18 +55,25 @@ StyledRect {
     }
 
     function updateCurrentWorkspace(withAnimation: bool): void {
-        const nextIndex = workspaceIndex(activeWsId);
-        if (nextIndex === currentWsIdx)
+        if (activeWsId === currentWsId)
             return;
 
+        const nextIndex = workspaceIndex(activeWsId);
+        const nextWorkspace = workspaces.itemAt(nextIndex) as Workspace;
+
+        const previousOffset = offset;
+        const previousEnd = previousOffset + size;
+
         if (withAnimation) {
+            trailEnd = previousEnd;
+            clampTrailEnd = Config.bar.workspaces.activeTrail && !!nextWorkspace && nextWorkspace.targetY < previousOffset;
             workspaceSwitchRunning = true;
-            lastWs = currentWsIdx;
         } else {
-            lastWs = nextIndex;
+            workspaceSwitchRunning = false;
+            clampTrailEnd = false;
         }
 
-        currentWsIdx = nextIndex;
+        currentWsId = activeWsId;
 
         if (withAnimation)
             workspaceSwitchTimer.restart();
@@ -100,6 +109,16 @@ StyledRect {
         anchors.horizontalCenter: parent.horizontalCenter
     }
 
+    Timer {
+        id: workspaceSwitchTimer
+
+        interval: root.Config.bar.workspaces.activeTrail ? Tokens.anim.durations.normal * 2 : Tokens.anim.durations.normal
+        onTriggered: {
+            root.workspaceSwitchRunning = false;
+            root.clampTrailEnd = false;
+        }
+    }
+
     Behavior on leading {
         enabled: root.Config.bar.workspaces.activeTrail && root.geometryAnimationEnabled
 
@@ -130,13 +149,6 @@ StyledRect {
         enabled: !root.Config.bar.workspaces.activeTrail && root.geometryAnimationEnabled
 
         EAnim {}
-    }
-
-    Timer {
-        id: workspaceSwitchTimer
-
-        interval: root.Config.bar.workspaces.activeTrail ? Tokens.anim.durations.normal * 2 : Tokens.anim.durations.normal
-        onTriggered: root.workspaceSwitchRunning = false
     }
 
     component EAnim: Anim {

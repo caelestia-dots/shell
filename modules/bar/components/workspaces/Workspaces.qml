@@ -24,6 +24,16 @@ StyledClippingRect {
         return occ;
     }
     readonly property int groupOffset: Math.floor((activeWsId - 1) / Config.bar.workspaces.shown) * Config.bar.workspaces.shown
+    readonly property real workspaceSpacing: Math.floor(Tokens.spacing.extraSmall)
+    readonly property bool revealTransitionRunning: {
+        for (let i = 0; i < workspaces.count; ++i) {
+            const workspace = workspaces.itemAt(i) as Workspace;
+            if (workspace?.revealTransitionRunning)
+                return true;
+        }
+
+        return false;
+    }
 
     property real blur: onSpecial ? 1 : 0
 
@@ -57,23 +67,12 @@ StyledClippingRect {
                 workspaces: workspaces
                 occupied: root.occupied
                 groupOffset: root.groupOffset
-                layoutTransitionRunning: layout.revealTransitionRunning
+                layoutTransitionRunning: root.revealTransitionRunning
             }
         }
 
         ColumnLayout {
             id: layout
-
-            readonly property real workspaceSpacing: Math.floor(Tokens.spacing.extraSmall)
-            readonly property bool revealTransitionRunning: {
-                for (let i = 0; i < workspaces.count; ++i) {
-                    const workspace = workspaces.itemAt(i) as Workspace;
-                    if (workspace?.revealTransitionRunning)
-                        return true;
-                }
-
-                return false;
-            }
 
             anchors.centerIn: parent
             spacing: 0
@@ -90,7 +89,7 @@ StyledClippingRect {
                     shouldShow: Config.bar.workspaces.showUnoccupied || isOccupied || Hypr.monitors.values.some(m => m.activeWorkspace?.id === ws)
 
                     workspaceRepeater: workspaces
-                    layoutSpacing: layout.workspaceSpacing
+                    layoutSpacing: root.workspaceSpacing
                 }
             }
         }
@@ -105,7 +104,7 @@ StyledClippingRect {
                 workspaces: workspaces
                 mask: layout
                 fullscreen: root.fullscreen
-                layoutTransitionRunning: layout.revealTransitionRunning
+                layoutTransitionRunning: root.revealTransitionRunning
             }
         }
 
