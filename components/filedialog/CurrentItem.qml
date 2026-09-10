@@ -1,0 +1,104 @@
+import QtQuick
+import QtQuick.Shapes
+import Caelestia.Config
+import Caelestia.I18n
+import qs.components
+import qs.services
+
+Item {
+    id: root
+
+    required property var currentItem
+
+    implicitWidth: content.implicitWidth + Tokens.padding.medium + content.anchors.rightMargin
+    implicitHeight: currentItem ? content.implicitHeight + Tokens.padding.medium + content.anchors.bottomMargin : 0
+
+    Shape {
+        preferredRendererType: Shape.CurveRenderer
+
+        ShapePath {
+            id: path
+
+            readonly property real rounding: root.Tokens.rounding.medium
+            readonly property bool flatten: root.implicitHeight < rounding * 2
+            readonly property real roundingY: flatten ? root.implicitHeight / 2 : rounding
+
+            strokeWidth: -1
+            fillColor: Colours.tPalette.m3surfaceContainer
+
+            startX: root.implicitWidth
+            startY: root.implicitHeight
+
+            PathLine {
+                relativeX: -(root.implicitWidth + path.rounding)
+                relativeY: 0
+            }
+            PathArc {
+                relativeX: path.rounding
+                relativeY: -path.roundingY
+                radiusX: path.rounding
+                radiusY: Math.min(path.rounding, root.implicitHeight)
+                direction: PathArc.Counterclockwise
+            }
+            PathLine {
+                relativeX: 0
+                relativeY: -(root.implicitHeight - path.roundingY * 2)
+            }
+            PathArc {
+                relativeX: path.rounding
+                relativeY: -path.roundingY
+                radiusX: path.rounding
+                radiusY: Math.min(path.rounding, root.implicitHeight)
+            }
+            PathLine {
+                relativeX: root.implicitHeight > 0 ? root.implicitWidth - path.rounding * 2 : root.implicitWidth
+                relativeY: 0
+            }
+            PathArc {
+                relativeX: path.rounding
+                relativeY: -path.rounding
+                radiusX: path.rounding
+                radiusY: path.rounding
+                direction: PathArc.Counterclockwise
+            }
+
+            Behavior on fillColor {
+                CAnim {}
+            }
+        }
+    }
+
+    Item {
+        anchors.fill: parent
+        clip: true
+
+        StyledText {
+            id: content
+
+            anchors.right: parent.right
+            anchors.bottom: parent.bottom
+            anchors.rightMargin: Tokens.padding.medium - Tokens.padding.extraSmall
+            anchors.bottomMargin: Tokens.padding.medium - Tokens.padding.extraSmall
+
+            Connections {
+                function onCurrentItemChanged(): void {
+                    if (root.currentItem)
+                        // TRANSLATORS: %1 = name of the selected file
+                        content.text = Tr.trCtx('"%1" selected', "selected file").arg(root.currentItem.modelData.name);
+                }
+
+                target: root
+            }
+        }
+    }
+
+    Behavior on implicitWidth {
+        enabled: !!root.currentItem
+
+        Anim {}
+    }
+
+    Behavior on implicitHeight {
+        Anim {}
+    }
+}

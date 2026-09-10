@@ -1,0 +1,57 @@
+name: Crash report
+description: Report a crash
+labels: ["bug", "crash"]
+type: "Bug"
+title: "[CRASH] "
+body:
+  - type: textarea
+    attributes:
+      label: What caused the crash
+      description: |
+        Any information likely to help debug the crash. What were you doing when the crash occurred,
+        what changes did you make, can you get it to happen again?
+
+  - type: upload
+    attributes:
+      label: Report file
+      description: Attach `report.txt` here.
+    validations:
+      required: true
+
+  - type: upload
+    attributes:
+      label: Log file
+      description: |
+        Attach `log.qslog.log` here. If it is too big to upload, compress it.
+
+        You can preview the log if you'd like using `qs log <path-to-log> -r '*=true'`.
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: "Version info"
+      description: Run `caelestia -v` and paste the result below.
+      value: |
+        <details><summary>Version info</summary>
+
+        ```
+        <!-- Run `caelestia -v` and paste the result here! -->
+        ```
+
+        </details>
+    validations:
+      required: true
+
+  - type: checkboxes
+    attributes:
+      label: Reminder
+      options:
+        - label: I've successfully updated to the latest versions following the [updating guide](https://github.com/caelestia-dots/caelestia?tab=readme-ov-file#updating).
+          required: false
+        - label: I've successfully updated the system packages to the latest.
+          required: false
+        - label: I agree that it's usually impossible for others to help me without my logs.
+          required: true
+        - label: I've ticked the checkboxes without reading their contents
+          required: false
