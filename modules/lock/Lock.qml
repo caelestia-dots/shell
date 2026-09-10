@@ -4,10 +4,28 @@ import QtQuick
 import Quickshell
 import Quickshell.Io
 import Quickshell.Wayland
+import Caelestia.Config
 import qs.components.misc
 
 Scope {
     property alias lock: lock
+
+    Component.onCompleted: lifecycle.initialize(lock.locked, lock.secure)
+
+    LockLifecycle {
+        id: lifecycle
+
+        function onSecureHookRequested(command): void {
+            Quickshell.execDetached(command);
+        }
+
+        function onReleaseHookRequested(command): void {
+            Quickshell.execDetached(command);
+        }
+
+        secureCommand: GlobalConfig.lock.onSecure
+        releaseCommand: GlobalConfig.lock.onRelease
+    }
 
     WlSessionLock {
         id: lock
@@ -18,6 +36,19 @@ Scope {
             lock: lock
             pam: pam
         }
+    }
+
+    Connections {
+        function onLockedChanged(): void {
+            lifecycle.update(lock.locked, lock.secure);
+        }
+
+        function onSecureChanged(): void {
+            lifecycle.update(lock.locked, lock.secure);
+        }
+
+        enabled: lifecycle.initialized
+        target: lock
     }
 
     Pam {
