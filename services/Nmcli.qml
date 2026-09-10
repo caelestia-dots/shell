@@ -1308,19 +1308,6 @@ Singleton {
         dataUsageProc.running = true;
     }
 
-    function formatBytes(bytes: var): string {
-        if (!bytes || bytes <= 0)
-            return Strings.withDataUnit(0, "B");
-        const units = ["B", "KB", "MB", "GB", "TB"];
-        let i = 0;
-        let v = bytes;
-        while (v >= 1024 && i < units.length - 1) {
-            v /= 1024;
-            i++;
-        }
-        return Strings.withDataUnit(v.toFixed(v < 10 && i > 0 ? 1 : 0), units[i]);
-    }
-
     function getEthernetDeviceDetails(interfaceName: string, callback: var): void {
         if (!interfaceName || interfaceName.length === 0) {
             const activeInterface = root.ethernetInterfaces.find(iface => {
@@ -1676,7 +1663,7 @@ Singleton {
                         dataUsageProc.cb("");
                     return;
                 }
-                const human = root.formatBytes(nums[0] + nums[1]);
+                const human = Units.formatBytes(nums[0] + nums[1]);
                 root.ethernetDataUsage = human;
                 if (dataUsageProc.cb)
                     dataUsageProc.cb(human);

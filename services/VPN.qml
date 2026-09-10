@@ -286,19 +286,6 @@ Singleton {
         }
     }
 
-    function formatBytes(bytes: var): string {
-        if (!bytes || bytes <= 0)
-            return "0 B";
-        const units = ["B", "KB", "MB", "GB", "TB"];
-        let i = 0;
-        let v = bytes;
-        while (v >= 1024 && i < units.length - 1) {
-            v /= 1024;
-            i++;
-        }
-        return `${v.toFixed(v < 10 && i > 0 ? 1 : 0)} ${units[i]}`;
-    }
-
     // Refresh live In/Out byte counters, tunnel latency and - for providers
     // that expose one - the server location.
     function refreshStats(): void {
@@ -872,8 +859,8 @@ Singleton {
             onStreamFinished: {
                 const nums = text.trim().split("\n").map(n => parseInt(n.trim(), 10)).filter(n => !isNaN(n));
                 if (nums.length >= 2) {
-                    root.bytesIn = root.formatBytes(nums[0]);
-                    root.bytesOut = root.formatBytes(nums[1]);
+                    root.bytesIn = Units.formatBytes(nums[0]);
+                    root.bytesOut = Units.formatBytes(nums[1]);
                 }
             }
         }

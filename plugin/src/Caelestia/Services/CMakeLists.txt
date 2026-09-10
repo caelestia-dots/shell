@@ -9,7 +9,6 @@ qml_module(caelestia-services
         cavaprovider.cpp
         tickingservice.cpp
         sensorslib.cpp
-        usagefmt.cpp
         cpu.cpp
         gpu.cpp
         memory.cpp

@@ -27,6 +27,18 @@ PageBase {
         }
     ]
 
+    // Data size units (there must be one for each value of the DataUnit enum)
+    readonly property list<MenuItem> dataItems: [
+        MenuItem {
+            text: Tr.tr("Binary (KiB, MiB)")
+            value: DataUnit.Binary
+        },
+        MenuItem {
+            text: Tr.tr("Decimal (KB, MB)")
+            value: DataUnit.Decimal
+        }
+    ]
+
     // Clock format (index 0 = 24-hour, 1 = 12-hour — matches Time.useTwelveHourClock)
     readonly property list<MenuItem> clockItems: [
         MenuItem {
@@ -144,12 +156,20 @@ PageBase {
         }
 
         SelectRow {
-            last: true
             label: Tr.tr("System temperatures")
             subtext: Tr.tr("Units for CPU and GPU temperatures")
             menuItems: root.tempItems
             active: root.tempItems.find(i => i.value === GlobalConfig.services.sensorUnits)
             onSelected: item => GlobalConfig.services.sensorUnits = item.value
+        }
+
+        SelectRow {
+            last: true
+            label: Tr.tr("Data sizes")
+            subtext: Tr.tr("Units for data sizes and network speeds")
+            menuItems: root.dataItems
+            active: root.dataItems.find(i => i.value === GlobalConfig.services.dataUnits)
+            onSelected: item => GlobalConfig.services.dataUnits = item.value
         }
 
         // Time & date
