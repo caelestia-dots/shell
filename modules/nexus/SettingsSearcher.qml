@@ -6,7 +6,7 @@ import QtQuick
 import Quickshell
 import Caelestia
 import Caelestia.Config
-import Caelestia.I18n // qmllint disable
+import Caelestia.I18n
 import qs.utils
 
 // Search service over the settings index. The index is built by the shell

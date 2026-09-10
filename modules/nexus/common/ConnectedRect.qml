@@ -1,3 +1,5 @@
+pragma ComponentBehavior: Bound
+
 import QtQuick
 import Caelestia.Config
 import qs.components
@@ -31,6 +33,8 @@ StyledRect {
         active: false
 
         sourceComponent: StyledRect {
+            id: flash
+
             topLeftRadius: root.topLeftRadius
             topRightRadius: root.topRightRadius
             bottomLeftRadius: root.bottomLeftRadius
@@ -38,22 +42,31 @@ StyledRect {
             color: Colours.palette.m3primary
             opacity: 0
 
-            SequentialAnimation on opacity {
+            SequentialAnimation {
+                running: true
                 onFinished: highlight.active = false
 
                 Anim {
+                    target: flash
+                    property: "opacity"
                     to: 0.2
                     duration: Tokens.anim.durations.small
                 }
                 Anim {
+                    target: flash
+                    property: "opacity"
                     to: 0.08
                     duration: Tokens.anim.durations.normal
                 }
                 Anim {
+                    target: flash
+                    property: "opacity"
                     to: 0.2
                     duration: Tokens.anim.durations.small
                 }
                 Anim {
+                    target: flash
+                    property: "opacity"
                     to: 0
                     duration: Tokens.anim.durations.extraLarge
                 }
