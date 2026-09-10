@@ -4,7 +4,7 @@
 // module stays a pure library - testable outside the shell.
 //
 // Labels are stored as marked strings (see plugin/include/util/i18n.hpp) built
-// from the Tr.tr()/Tr.trCtx() literals in the source, so the cached index is
+// from the Tr.tr()/Tr.trCtx() literals in the source, so the entries are
 // language independent and Tr.trMarked() resolves them to whatever the user
 // actually reads. buildSearch() then tokenises those translated strings.
 .pragma library
@@ -42,7 +42,7 @@ const SETTING_ICONS = {
     "dash-memory": "memory_alt",
     "dash-storage": "hard_drive",
     "dash-network": "network_check",
-    "dash-show-on-second" :"60fps_select",
+    "dash-clock-seconds": "timer",
     "dash-drag-threshold": "drag_pan",
     "taskbar-persistent": "push_pin",
     "taskbar-show-on-hover": "mouse",
@@ -83,7 +83,7 @@ const SETTING_ICONS = {
     "bar-clock-background": "format_color_fill",
     "bar-clock-show-date": "calendar_month",
     "bar-clock-show-icon": "visibility",
-    "bar-clock-show-second": "60fps_select",
+    "bar-clock-show-seconds": "timer",
     "launcher-enabled": "toggle_on",
     "launcher-show-on-hover": "mouse",
     "launcher-max-items-shown": "format_list_numbered",
@@ -641,8 +641,7 @@ function buildSearch(entries, translate) {
     };
 }
 
-// Builds the language independent part of the index, which is what gets
-// cached. readFile(path) -> string ("" if unreadable); listFiles(dir, suffix)
+// Builds the language independent part of the index. readFile(path) -> string ("" if unreadable); listFiles(dir, suffix)
 // -> recursive absolute paths.
 function buildIndex(nexusDir, readFile, listFiles) {
     const lineCache = {};
@@ -654,7 +653,6 @@ function buildIndex(nexusDir, readFile, listFiles) {
     const files = discoverFiles(nexusDir, listFiles);
     const nav = buildNavMap(nexusDir, files, readFile, readLines);
     return {
-        version: 4,
         entries: extractSettings(files, nav, readLines)
     };
 }

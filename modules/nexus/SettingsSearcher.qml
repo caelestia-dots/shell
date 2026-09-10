@@ -15,9 +15,9 @@ import qs.utils
 // by the plugin's git revision so an update rebuilds it. No build step, no
 // hand-maintained entries, no user-editable data file.
 //
-// The cache holds marked strings, never translations, so it stays valid across
-// languages. What is searched is tokenised from the translated labels and
-// rebuilt whenever the language changes.
+// Entries hold marked strings, so they only depend on the revision. The search
+// tokens come from the translated labels, so they're cached with the language
+// they were built in and rebuilt when it differs or changes.
 Singleton {
     id: root
 
@@ -35,6 +35,8 @@ Singleton {
     // when the exact/prefix index lookup comes up short. fzf is the same matcher
     // the launcher uses, so typo and mid-word matching behave consistently.
     property var fzfFinder: null
+    // Bump when the cached data's shape changes
+    readonly property int cacheVersion: 5
     // Declared here rather than inlined in loadIndex(): qmllint doesn't see
     // identifiers used inside template literals in a function body, so
     // referencing Paths only there had it report qs.utils as unused.
@@ -152,31 +154,38 @@ Singleton {
         if (cached) {
             try {
                 const parsed = JSON.parse(cached);
-                if (parsed.version === 4 && revision && parsed.revision === revision)
+                if (parsed.version === root.cacheVersion && revision && parsed.revision === revision)
                     return parsed;
             } catch (e) {}
         }
         const data = SettingsIndexer.buildIndex(`${Quickshell.shellDir}/modules/nexus`, p => CUtils.readTextFile(p), (d, s) => CUtils.listFiles(d, s));
-        data.revision = revision;
-        CUtils.writeTextFile(root.cachePath, JSON.stringify(data));
         console.log(`SettingsSearcher: indexed ${data.entries.length} settings (revision ${revision || "unknown"})`);
         return data;
     }
 
     // Tokenises the translated labels, so this runs again on a language change.
     function buildSearch(): void {
-        const raw = root.indexEntries;
-        const translate = text => Tr.trMarked(text);
-        const search = SettingsIndexer.buildSearch(raw, translate);
+        const search = SettingsIndexer.buildSearch(root.indexEntries, text => Tr.trMarked(text));
         root.inverted = search.inverted;
         root.ranking = search.ranking;
+        CUtils.writeTextFile(root.cachePath, JSON.stringify({
+            version: root.cacheVersion,
+            revision: CUtils.gitRevision,
+            language: Tr.language,
+            entries: root.indexEntries,
+            inverted: search.inverted,
+            ranking: search.ranking
+        }));
+        root.buildFinder();
+    }
 
-        // One searchable string per entry: the title. fzf provides typo and
-        // mid-word matching over titles as a fallback when the exact/prefix
-        // index lookup comes up short.
-        const docs = raw.map((e, i) => ({
+    // One searchable string per entry: the title. fzf provides typo and
+    // mid-word matching over titles as a fallback when the exact/prefix index
+    // lookup comes up short. Cheap, so never cached.
+    function buildFinder(): void {
+        const docs = root.indexEntries.map((e, i) => ({
                     idx: i,
-                    text: SettingsIndexer.fold(SettingsIndexer.cleanLabel(translate(e.title)))
+                    text: SettingsIndexer.fold(SettingsIndexer.cleanLabel(Tr.trMarked(e.title)))
                 }));
         root.fzfFinder = new Fzf.Finder(docs, {
             selector: d => d.text,
@@ -186,8 +195,15 @@ Singleton {
 
     Component.onCompleted: {
         try {
-            root.indexEntries = root.loadIndex().entries;
-            root.buildSearch();
+            const data = root.loadIndex();
+            root.indexEntries = data.entries;
+            if (data.inverted && data.language === Tr.language) {
+                root.inverted = data.inverted;
+                root.ranking = data.ranking;
+                root.buildFinder();
+            } else {
+                root.buildSearch();
+            }
         } catch (e) {
             console.warn("SettingsSearcher: failed to build settings index:", e);
             root.indexEntries = [];

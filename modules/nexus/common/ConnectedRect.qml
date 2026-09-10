@@ -13,7 +13,8 @@ StyledRect {
 
     // Briefly flash the row, used when the settings search jumps to it.
     function flashHighlight(): void {
-        flash.restart();
+        highlight.active = false;
+        highlight.active = true;
     }
 
     color: Colours.tPalette.m3surfaceContainer
@@ -22,45 +23,40 @@ StyledRect {
     bottomLeftRadius: last ? Tokens.rounding.extraLarge : Tokens.rounding.extraSmall
     bottomRightRadius: last ? Tokens.rounding.extraLarge : Tokens.rounding.extraSmall
 
-    StyledRect {
+    // Created only while flashing, so rows don't each carry the animation
+    Loader {
         id: highlight
 
         anchors.fill: parent
+        active: false
 
-        radius: parent.radius
-        topLeftRadius: parent.topLeftRadius
-        topRightRadius: parent.topRightRadius
-        bottomLeftRadius: parent.bottomLeftRadius
-        bottomRightRadius: parent.bottomRightRadius
-        color: Colours.palette.m3primary
-        opacity: 0
+        sourceComponent: StyledRect {
+            topLeftRadius: root.topLeftRadius
+            topRightRadius: root.topRightRadius
+            bottomLeftRadius: root.bottomLeftRadius
+            bottomRightRadius: root.bottomRightRadius
+            color: Colours.palette.m3primary
+            opacity: 0
 
-        SequentialAnimation {
-            id: flash
+            SequentialAnimation on opacity {
+                onFinished: highlight.active = false
 
-            Anim {
-                target: highlight
-                property: "opacity"
-                to: 0.2
-                duration: Tokens.anim.durations.small
-            }
-            Anim {
-                target: highlight
-                property: "opacity"
-                to: 0.08
-                duration: Tokens.anim.durations.normal
-            }
-            Anim {
-                target: highlight
-                property: "opacity"
-                to: 0.2
-                duration: Tokens.anim.durations.small
-            }
-            Anim {
-                target: highlight
-                property: "opacity"
-                to: 0
-                duration: Tokens.anim.durations.extraLarge
+                Anim {
+                    to: 0.2
+                    duration: Tokens.anim.durations.small
+                }
+                Anim {
+                    to: 0.08
+                    duration: Tokens.anim.durations.normal
+                }
+                Anim {
+                    to: 0.2
+                    duration: Tokens.anim.durations.small
+                }
+                Anim {
+                    to: 0
+                    duration: Tokens.anim.durations.extraLarge
+                }
             }
         }
     }
