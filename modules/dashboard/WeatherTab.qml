@@ -125,7 +125,7 @@ Item {
             DetailCard {
                 icon: "air"
                 label: Tr.tr("Wind")
-                value: Weather.windSpeed ? Weather.windSpeed + " km/h" : "--"
+                value: Weather.windSpeed ? Tr.tr("%1 km/h").arg(Weather.windSpeed) : "--"
                 colour: Colours.palette.m3tertiary
             }
         }

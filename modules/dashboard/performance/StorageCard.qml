@@ -95,7 +95,8 @@ StyledRect {
                             return Tr.tr("No disks detected");
 
                         const fmt = UsageFmt.formatKib(Storage.primaryDisk.used, Storage.primaryDisk.total);
-                        return `${+fmt.value.toFixed(1)} / ${+fmt.total.toFixed(1)} ${fmt.unit}`;
+                        // TRANSLATORS: %1 = used amount, %2 = total amount with unit
+                        return Tr.trCtx("%1 / %2", "used / total amount").arg(+fmt.value.toFixed(1)).arg(Strings.withDataUnit(+fmt.total.toFixed(1), fmt.unit));
                     }
                     font: Tokens.font.body.large
                     color: root.accent

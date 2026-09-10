@@ -5,6 +5,7 @@ import QtQuick
 import Quickshell
 import Quickshell.Io
 import Caelestia.I18n
+import qs.utils
 
 Singleton {
     id: root
@@ -1309,7 +1310,7 @@ Singleton {
 
     function formatBytes(bytes: var): string {
         if (!bytes || bytes <= 0)
-            return "0 B";
+            return Strings.withDataUnit(0, "B");
         const units = ["B", "KB", "MB", "GB", "TB"];
         let i = 0;
         let v = bytes;
@@ -1317,7 +1318,7 @@ Singleton {
             v /= 1024;
             i++;
         }
-        return `${v.toFixed(v < 10 && i > 0 ? 1 : 0)} ${units[i]}`;
+        return Strings.withDataUnit(v.toFixed(v < 10 && i > 0 ? 1 : 0), units[i]);
     }
 
     function getEthernetDeviceDetails(interfaceName: string, callback: var): void {
@@ -1694,9 +1695,11 @@ Singleton {
                     root.ethernetSpeed = "";
                 } else if (mbit >= 1000) {
                     const gbps = mbit / 1000;
-                    root.ethernetSpeed = `${Number.isInteger(gbps) ? gbps : gbps.toFixed(1)} Gbps`;
+                    // TRANSLATORS: %1 = a number
+                    root.ethernetSpeed = Tr.tr("%1 Gbps").arg(Number.isInteger(gbps) ? gbps : gbps.toFixed(1));
                 } else {
-                    root.ethernetSpeed = `${mbit} Mbps`;
+                    // TRANSLATORS: %1 = a number
+                    root.ethernetSpeed = Tr.tr("%1 Mbps").arg(mbit);
                 }
             }
         }

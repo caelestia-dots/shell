@@ -96,7 +96,8 @@ PageBase {
                                 else
                                     security = Nmcli.securityLabel(Nmcli.savedSecurityFor(saved.modelData)) || Tr.trCtx("Unknown", "unknown wifi security");
                                 if (saved.isActive)
-                                    return Tr.trCtx("Connected", "network connected") + " • " + security;
+                                    // TRANSLATORS: %1 = security type
+                                    return Tr.trCtx("Connected • %1", "network connected with security").arg(security);
                                 return security;
                             }
                             color: saved.isActive ? Colours.palette.m3primary : Colours.palette.m3outline
