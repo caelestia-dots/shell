@@ -75,7 +75,7 @@ StyledRect {
                         id: temp
 
                         anchors.centerIn: parent
-                        text: Weather.formatTemp(hour.cond.tempC).slice(0, -1) // Remove C/F
+                        text: Weather.formatTemp(hour.cond.tempC, true)
                         color: hour.index === 0 ? Colours.palette.m3onPrimary : Colours.palette.m3onSurface
                         font: Tokens.font.title.medium
                     }

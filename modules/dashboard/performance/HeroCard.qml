@@ -96,9 +96,9 @@ StyledRect {
 
             StyledText {
                 text: {
-                    const useF = GlobalConfig.services.useFahrenheitPerformance;
-                    const value = Math.ceil(useF ? root.temperature * 1.8 + 32 : root.temperature);
-                    return useF ? Tr.tr("%1°F").arg(value) : Tr.tr("%1°C").arg(value);
+                    const unit = GlobalConfig.services.sensorUnits;
+                    const value = Math.ceil(Units.toTemperature(root.temperature, unit));
+                    return Units.formatTemp(value, unit);
                 }
                 font: Tokens.font.body.builders.medium.build()
             }

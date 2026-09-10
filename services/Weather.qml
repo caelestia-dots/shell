@@ -33,10 +33,10 @@ Singleton {
 
     readonly property var cachedCities: new Map()
 
-    function formatTemp(temp: var): string {
-        const useF = GlobalConfig.services.useFahrenheit;
-        const value = temp !== undefined ? Math.round(useF ? toFahrenheit(temp) : temp) : "--";
-        return useF ? Tr.tr("%1°F").arg(value) : Tr.tr("%1°C").arg(value);
+    function formatTemp(temp: var, compact = false): string {
+        const unit = GlobalConfig.services.weatherUnits;
+        const value = temp !== undefined ? Math.round(Units.toTemperature(temp, unit)) : "--";
+        return Units.formatTemp(value, unit, compact);
     }
 
     function reload(): void {
@@ -278,10 +278,6 @@ Singleton {
             }
             hourlyForecast = hourlyList;
         });
-    }
-
-    function toFahrenheit(celsius: real): real {
-        return celsius * 9 / 5 + 32;
     }
 
     function getWeatherUrl(): string {

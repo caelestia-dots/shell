@@ -192,9 +192,9 @@ Item {
                         StyledText {
                             Layout.alignment: Qt.AlignHCenter
                             text: {
-                                const min = Weather.formatTemp(forecastItem.modelData.minTempC).slice(0, -1);
-                                const max = Weather.formatTemp(forecastItem.modelData.maxTempC).slice(0, -1);
-                                return `${min} / ${max}`;
+                                const min = Weather.formatTemp(forecastItem.modelData.minTempC, true);
+                                const max = Weather.formatTemp(forecastItem.modelData.maxTempC, true);
+                                return Tr.trCtx("%1 / %2", "min/max temperature").arg(min).arg(max);
                             }
                             font: Tokens.font.body.builders.small.weight(Font.DemiBold).build()
                             color: Colours.palette.m3tertiary
