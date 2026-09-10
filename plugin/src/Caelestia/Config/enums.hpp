@@ -24,6 +24,7 @@ ENUM(LyricsBackend, Auto, Local, LRCLIB, NetEase)
 ENUM(GpuType, Auto, Nvidia, Generic, None)
 ENUM(NotifsFullscreen, On, Off)
 ENUM(TemperatureUnit, Celsius, Fahrenheit, Kelvin)
+ENUM(DataUnit, Binary, Decimal)
 
 #undef ENUM
 
