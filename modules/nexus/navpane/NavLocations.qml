@@ -68,6 +68,16 @@ VerticalFadeFlickable {
     readonly property int activeFilter: allGroups.some(g => g.pageIdx === pageFilter) ? pageFilter : -1
     readonly property var groups: activeFilter < 0 ? allGroups : allGroups.filter(g => g.pageIdx === activeFilter)
     readonly property int resultCount: groups.reduce((n, g) => n + g.entries.length, 0)
+    // The group delegates are keyed by page and read their data from here. A
+    // ScriptModel given the group objects themselves moves a reordered group's
+    // row without replacing its value, so it would keep showing the previous
+    // query's results.
+    readonly property var groupsByPage: {
+        const out = {};
+        for (const g of groups)
+            out[g.pageIdx] = g;
+        return out;
+    }
     // What the arrow keys move through: the results left in expanded groups.
     readonly property var navigable: groups.filter(g => !collapsedPages.includes(g.pageIdx)).reduce((all, g) => all.concat(g.entries), [])
     // The selection falls back to the top result, which the query ranks best.
@@ -295,17 +305,22 @@ VerticalFadeFlickable {
 
             Repeater {
                 model: ScriptModel {
-                    objectProp: "pageIdx"
-                    values: root.groups
+                    values: root.groups.map(g => g.pageIdx)
                 }
 
                 ColumnLayout {
                     id: group
 
-                    required property var modelData
+                    // The page index
+                    required property int modelData
                     required property int index
 
-                    readonly property bool collapsed: root.collapsedPages.includes(modelData.pageIdx)
+                    // Empty while the group is on its way out
+                    readonly property var info: root.groupsByPage[modelData] ?? ({
+                            "page": "",
+                            "entries": []
+                        })
+                    readonly property bool collapsed: root.collapsedPages.includes(modelData)
 
                     width: resultList.width
                     spacing: Tokens.spacing.small
@@ -320,7 +335,7 @@ VerticalFadeFlickable {
                             anchors.fill: parent
                             radius: Tokens.rounding.full
 
-                            onClicked: root.toggleCollapsed(group.modelData.pageIdx)
+                            onClicked: root.toggleCollapsed(group.modelData)
                         }
 
                         RowLayout {
@@ -348,7 +363,7 @@ VerticalFadeFlickable {
 
                             StyledText {
                                 Layout.fillWidth: true
-                                text: group.modelData.page
+                                text: group.info.page
                                 color: Colours.palette.m3secondary
                                 font: Tokens.font.label.large
                                 elide: Text.ElideRight
@@ -364,7 +379,7 @@ VerticalFadeFlickable {
                                     id: count
 
                                     anchors.centerIn: parent
-                                    text: group.modelData.entries.length
+                                    text: group.info.entries.length
                                     color: Colours.palette.m3outline
                                     font: Tokens.font.label.small
                                 }
@@ -413,7 +428,7 @@ VerticalFadeFlickable {
                             Repeater {
                                 model: ScriptModel {
                                     objectProp: "anchor"
-                                    values: group.modelData.entries
+                                    values: group.info.entries
                                 }
 
                                 StyledRect {
@@ -423,7 +438,7 @@ VerticalFadeFlickable {
                                     required property int index
 
                                     readonly property bool isFirst: index === 0
-                                    readonly property bool isLast: index === group.modelData.entries.length - 1
+                                    readonly property bool isLast: index === group.info.entries.length - 1
                                     readonly property bool isCurrent: root.keyboardActive && root.currentAnchor === modelData.anchor
 
                                     width: cardList.width
@@ -438,10 +453,7 @@ VerticalFadeFlickable {
                                     topRightRadius: isFirst ? Tokens.rounding.extraLarge : 0
                                     bottomLeftRadius: isLast ? Tokens.rounding.extraLarge : 0
                                     bottomRightRadius: isLast ? Tokens.rounding.extraLarge : 0
-                                    color: {
-                                        const base = Colours.layer(Colours.palette.m3surfaceContainerHigh, 2);
-                                        return isCurrent ? Qt.tint(base, Qt.alpha(Colours.palette.m3onSurface, 0.08)) : base;
-                                    }
+                                    color: Colours.layer(Colours.palette.m3surfaceContainerHigh, 2)
 
                                     onIsCurrentChanged: {
                                         if (isCurrent && root.followSelection)
@@ -468,12 +480,44 @@ VerticalFadeFlickable {
                                         anchors.rightMargin: result.modelData.isToggle ? toggle.width + Tokens.padding.large * 2 : Tokens.padding.large
                                         spacing: Tokens.spacing.medium
 
-                                        // The setting's own icon, baked into the
-                                        // index per anchor.
-                                        MaterialIcon {
-                                            text: result.modelData.icon
-                                            color: Colours.palette.m3onSurfaceVariant
-                                            fontStyle: Tokens.font.icon.medium
+                                        // The setting's own icon, baked into the index
+                                        // per anchor. The keyboard selection swaps it
+                                        // for an accent bar.
+                                        Item {
+                                            Layout.fillHeight: true
+                                            implicitWidth: resultIcon.implicitWidth
+
+                                            MaterialIcon {
+                                                id: resultIcon
+
+                                                anchors.centerIn: parent
+                                                text: result.modelData.icon
+                                                color: Colours.palette.m3onSurfaceVariant
+                                                fontStyle: Tokens.font.icon.medium
+                                                opacity: result.isCurrent ? 0 : 1
+
+                                                Behavior on opacity {
+                                                    Anim {
+                                                        type: Anim.DefaultEffects
+                                                    }
+                                                }
+                                            }
+
+                                            StyledRect {
+                                                anchors.right: parent.right
+                                                anchors.top: parent.top
+                                                anchors.bottom: parent.bottom
+                                                implicitWidth: 3
+                                                radius: Tokens.rounding.full
+                                                color: Colours.palette.m3primary
+                                                opacity: result.isCurrent ? 1 : 0
+
+                                                Behavior on opacity {
+                                                    Anim {
+                                                        type: Anim.DefaultEffects
+                                                    }
+                                                }
+                                            }
                                         }
 
                                         ColumnLayout {
@@ -502,7 +546,7 @@ VerticalFadeFlickable {
                                                 // Only pay for rich-text parsing when the
                                                 // string actually carries a highlight tag.
                                                 textFormat: text.includes("<font") ? Text.StyledText : Text.PlainText
-                                                color: Colours.palette.m3onSurface
+                                                color: result.isCurrent ? Colours.palette.m3primary : Colours.palette.m3onSurface
                                                 font: Tokens.font.body.medium
                                                 elide: Text.ElideRight
                                             }
