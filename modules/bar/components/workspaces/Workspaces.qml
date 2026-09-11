@@ -16,11 +16,14 @@ StyledClippingRect {
 
     readonly property bool onSpecial: (GlobalConfig.bar.workspaces.perMonitorWorkspaces ? Hypr.monitorFor(screen) : Hypr.focusedMonitor)?.lastIpcObject.specialWorkspace?.name !== ""
     readonly property int activeWsId: GlobalConfig.bar.workspaces.perMonitorWorkspaces ? (Hypr.monitorFor(screen).activeWorkspace?.id ?? 1) : Hypr.activeWsId
+    readonly property int monitorWsId: Hypr.monitorFor(screen)?.activeWorkspace?.id ?? -1
 
     readonly property var occupied: {
+        // Other monitors' workspaces count as unoccupied when hiding unoccupied
+        const mon = GlobalConfig.bar.workspaces.perMonitorWorkspaces && !Config.bar.workspaces.showUnoccupied ? Hypr.monitorFor(screen) : null;
         const occ = {};
         for (const ws of Hypr.workspaces.values)
-            occ[ws.id] = ws.lastIpcObject.windows > 0;
+            occ[ws.id] = ws.lastIpcObject.windows > 0 && (!mon || ws.monitor === mon);
         return occ;
     }
     readonly property int groupOffset: Math.floor((activeWsId - 1) / Config.bar.workspaces.shown) * Config.bar.workspaces.shown
@@ -94,7 +97,7 @@ StyledClippingRect {
                     activeWsId: root.activeWsId
                     occupied: root.occupied
                     groupOffset: root.groupOffset
-                    shouldShow: Config.bar.workspaces.showUnoccupied || isOccupied || Hypr.monitors.values.some(m => m.activeWorkspace?.id === ws)
+                    shouldShow: Config.bar.workspaces.showUnoccupied || isOccupied || ws === root.activeWsId || ws === root.monitorWsId
 
                     workspaceRepeater: workspaces
                     layoutSpacing: root.workspaceSpacing
