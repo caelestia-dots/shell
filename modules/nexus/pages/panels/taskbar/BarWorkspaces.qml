@@ -68,6 +68,7 @@ PageBase {
         }
 
         StepperRow {
+            last: true
             // TRANSLATORS: maximum number of window icons shown per workspace
             label: Tr.tr("Max window icons")
             value: Config.bar.workspaces.maxWindowIcons
