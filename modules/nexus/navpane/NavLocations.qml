@@ -22,6 +22,10 @@ VerticalFadeFlickable {
     property int pageFilter: -1
     property list<int> collapsedPages
     property string selectedAnchor
+    // Only a key press moves the view along with the selection. When a new
+    // query or filter changes it, the rows haven't been laid out again yet and
+    // still report their old positions.
+    property bool followSelection
 
     readonly property string search: nState.searchText
     readonly property bool searching: search.length > 0
@@ -84,8 +88,11 @@ VerticalFadeFlickable {
     function moveSelection(delta: int): void {
         const i = navigable.findIndex(e => e.anchor === currentAnchor);
         const next = navigable[Math.max(0, Math.min(navigable.length - 1, i + delta))];
-        if (next)
-            selectedAnchor = next.anchor;
+        if (!next)
+            return;
+        followSelection = true;
+        selectedAnchor = next.anchor;
+        followSelection = false;
     }
 
     function openSelection(): void {
@@ -96,6 +103,12 @@ VerticalFadeFlickable {
 
     function toggleCollapsed(pageIdx: int): void {
         collapsedPages = collapsedPages.includes(pageIdx) ? collapsedPages.filter(i => i !== pageIdx) : collapsedPages.concat([pageIdx]);
+    }
+
+    // A different set of results starts from the top, like the launcher.
+    function scrollToTop(): void {
+        scrollAnim.stop();
+        contentY = -topMargin;
     }
 
     // Scrolls just far enough to bring a result out of the edge fades.
@@ -119,7 +132,11 @@ VerticalFadeFlickable {
     contentHeight: content.implicitHeight
 
     // A new query starts from its top result
-    onSearchChanged: selectedAnchor = ""
+    onSearchChanged: {
+        selectedAnchor = "";
+        scrollToTop();
+    }
+    onActiveFilterChanged: scrollToTop()
     onSearchingChanged: {
         if (!searching) {
             pageFilter = -1;
@@ -427,7 +444,7 @@ VerticalFadeFlickable {
                                     }
 
                                     onIsCurrentChanged: {
-                                        if (isCurrent)
+                                        if (isCurrent && root.followSelection)
                                             root.ensureVisible(result);
                                     }
 
