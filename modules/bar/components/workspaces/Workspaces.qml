@@ -14,13 +14,12 @@ StyledClippingRect {
     required property ShellScreen screen
     required property bool fullscreen
 
-    readonly property bool onSpecial: (GlobalConfig.bar.workspaces.perMonitorWorkspaces ? Hypr.monitorFor(screen) : Hypr.focusedMonitor)?.lastIpcObject.specialWorkspace?.name !== ""
-    readonly property int activeWsId: GlobalConfig.bar.workspaces.perMonitorWorkspaces ? (Hypr.monitorFor(screen).activeWorkspace?.id ?? 1) : Hypr.activeWsId
-    readonly property int monitorWsId: Hypr.monitorFor(screen)?.activeWorkspace?.id ?? -1
+    readonly property bool onSpecial: Hypr.monitorFor(screen)?.lastIpcObject.specialWorkspace?.name !== ""
+    readonly property int activeWsId: Hypr.monitorFor(screen).activeWorkspace?.id ?? 1
 
     readonly property var occupied: {
         // Other monitors' workspaces count as unoccupied when hiding unoccupied
-        const mon = GlobalConfig.bar.workspaces.perMonitorWorkspaces && !Config.bar.workspaces.showUnoccupied ? Hypr.monitorFor(screen) : null;
+        const mon = !Config.bar.workspaces.showUnoccupied ? Hypr.monitorFor(screen) : null;
         const occ = {};
         for (const ws of Hypr.workspaces.values)
             occ[ws.id] = ws.lastIpcObject.windows > 0 && (!mon || ws.monitor === mon);
@@ -97,7 +96,7 @@ StyledClippingRect {
                     activeWsId: root.activeWsId
                     occupied: root.occupied
                     groupOffset: root.groupOffset
-                    shouldShow: Config.bar.workspaces.showUnoccupied || isOccupied || ws === root.activeWsId || ws === root.monitorWsId
+                    shouldShow: Config.bar.workspaces.showUnoccupied || isOccupied || ws === root.activeWsId
 
                     workspaceRepeater: workspaces
                     layoutSpacing: root.workspaceSpacing

@@ -228,7 +228,7 @@ For example, to automatically hide the bar on the monitor named `DP-1`:
 >
 > - `appearance`: `anim.*`, `transparency.*`
 > - `bar.tray`: `hiddenIcons`, `iconSubs`
-> - `bar.workspaces`: `ignoredTags`, `perMonitorWorkspaces`, `specialWorkspaceIcons`, `windowIcons`
+> - `bar.workspaces`: `ignoredTags`, `specialWorkspaceIcons`, `windowIcons`
 > - `dashboard`: `mediaUpdateInterval`, `resourceUpdateInterval`
 > - `general`: `apps.*`, `battery.*`, `idle.*`, `logo`
 > - `launcher`: `actionPrefix`, `actions`, `enableDangerousActions`, `favouriteApps`, `hiddenApps`, `specialPrefix`, `useFuzzy.*`, `vimKeybinds`
@@ -430,7 +430,6 @@ For example, to automatically hide the bar on the monitor named `DP-1`:
             "showWindowsOnSpecialWorkspaces": true,
             "maxWindowIcons": 5,
             "activeTrail": false,
-            "perMonitorWorkspaces": true,
             "displayType": "shapes",
             "label": "  ",
             "occupiedLabel": "󰮯",
