@@ -21,7 +21,10 @@ StyledRect {
 
     property real leading: workspaceOffset(currentWsIdx)
     property real trailing: workspaceOffset(currentWsIdx)
-    property real currentSize: (workspaces.itemAt(currentWsIdx) as Workspace)?.size ?? 0
+    property real currentSize: {
+        workspaces.count;
+        return (workspaces.itemAt(currentWsIdx) as Workspace)?.size ?? 0;
+    }
     property real offset: Math.min(leading, trailing)
     property real size: {
         const naturalSize = Math.abs(leading - trailing) + currentSize;

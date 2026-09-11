@@ -54,8 +54,14 @@ Item {
 
             required property var modelData
 
-            readonly property Workspace start: root.workspaces.count > 0 ? root.workspaces.itemAt(root.workspaceIndex(modelData.start)) as Workspace ?? null : null
-            readonly property Workspace end: root.workspaces.count > 0 ? root.workspaces.itemAt(root.workspaceIndex(modelData.end)) as Workspace ?? null : null
+            readonly property Workspace start: {
+                root.workspaces.count;
+                return root.workspaces.itemAt(root.workspaceIndex(modelData.start)) as Workspace ?? null;
+            }
+            readonly property Workspace end: {
+                root.workspaces.count;
+                return root.workspaces.itemAt(root.workspaceIndex(modelData.end)) as Workspace ?? null;
+            }
 
             anchors.horizontalCenter: root.horizontalCenter
 
