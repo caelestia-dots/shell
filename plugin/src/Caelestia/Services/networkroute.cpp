@@ -259,6 +259,7 @@ void NetworkRoute::readManager() {
 
         step(-1);
     });
+    // NOLINTNEXTLINE(clang-analyzer-cplusplus.NewDeleteLeaks) watcher is parented and self-deletes
 }
 
 void NetworkRoute::readActiveConnection(const QString& path, bool isPrimary) {
@@ -305,6 +306,7 @@ void NetworkRoute::readActiveConnection(const QString& path, bool isPrimary) {
 
         step(-1);
     });
+    // NOLINTNEXTLINE(clang-analyzer-cplusplus.NewDeleteLeaks) watcher is parented and self-deletes
 }
 
 void NetworkRoute::readDevice(const QString& connPath, const QString& devicePath) {
@@ -336,6 +338,7 @@ void NetworkRoute::readDevice(const QString& connPath, const QString& devicePath
 
         step(-1);
     });
+    // NOLINTNEXTLINE(clang-analyzer-cplusplus.NewDeleteLeaks) watcher is parented and self-deletes
 }
 
 } // namespace caelestia::services

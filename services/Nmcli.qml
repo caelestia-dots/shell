@@ -42,10 +42,11 @@ Singleton {
     // wifi up, either can be carrying it. NetworkManager already tracks which
     // connection is primary, so this follows that rather than guessing.
     //
-    // Falls back to activeEthernet until a full snapshot has been read, so the
-    // icon doesn't flicker through a wrong state on startup or if
-    // NetworkManager isn't reachable.
-    readonly property bool onEthernet: NetworkRoute.ready ? NetworkRoute.primaryTransport === NetworkTransport.Ethernet : !!activeEthernet
+    // Only a definite answer is taken. Before the first snapshot has been read,
+    // and when the primary connection sits on a device that is neither wired
+    // nor wireless, this keeps the old behaviour rather than reporting wifi for
+    // something it couldn't classify.
+    readonly property bool onEthernet: NetworkRoute.primaryTransport === NetworkTransport.Ethernet || (NetworkRoute.primaryTransport !== NetworkTransport.Wifi && !!activeEthernet)
     // True when at least one wired device has a carrier (cable plugged in).
     // nmcli reports "unavailable" for ethernet NICs with no link, so we treat
     // anything other than that as a usable connection.
