@@ -79,11 +79,11 @@ Scope {
         config: "passwd"
         configDirectory: Quickshell.shellPath("assets/pam.d")
 
-        onMessageChanged: {
-            if (message.startsWith("The account is locked"))
-                root.lockMessage = message;
-            else if (root.lockMessage && message.endsWith(" left to unlock)"))
-                root.lockMessage += "\n" + message;
+        onPamMessage: {
+            if (!message || !messageIsError)
+                return;
+
+            root.lockMessage = root.lockMessage ? root.lockMessage + "\n" + message : message;
         }
 
         onResponseRequiredChanged: {
