@@ -1,6 +1,7 @@
 pragma ComponentBehavior: Bound
 
 import QtQuick
+import QtQuick.Controls
 import QtQuick.Layouts
 import Caelestia.Config
 import qs.components
@@ -17,6 +18,8 @@ ColumnLayout {
     property bool isSubPage
     readonly property int cappedWidth: Math.min(Tokens.sizes.nexus.maxContentWidth, width)
     readonly property alias flickable: flickable
+    // Where this page is in its sub-page stack; a page outside one counts as shown shown
+    readonly property int stackStatus: StackView.view ? StackView.status : StackView.Active
 
     default property Item contentChild
 
@@ -80,6 +83,11 @@ ColumnLayout {
     spacing: Tokens.spacing.extraLargeIncreased
 
     Component.onCompleted: applySearchAnchor()
+    // A page uncovered by closing the ones above it picks up a pending jump
+    StackView.onActivated: {
+        if (!scrollRetry.running)
+            applySearchAnchor();
+    }
 
     // Only search jumps animate, normal flicking stays direct
     Anim {
@@ -100,6 +108,14 @@ ColumnLayout {
         interval: 16
         repeat: true
         onTriggered: {
+            // A popped page lives on until its exit transition ends, so a jump
+            // that reopens the same sub-page briefly has two copies of it. The
+            // outgoing one must leave the anchor to the incoming one.
+            if (root.stackStatus === StackView.Deactivating) {
+                stop();
+                return;
+            }
+
             // Pages like the ethernet detail load their content asynchronously
             // (device info, IP config), so the layout keeps growing for a while.
             // Wait until contentHeight has held steady for a few frames (or we've
@@ -111,10 +127,14 @@ ColumnLayout {
                 stableFrames = 0;
             lastHeight = h;
 
+            // Only the page on show takes the anchor. One still coming in keeps
+            // waiting, one covered by another page gives up.
             const ready = stableFrames >= 3 || tries >= 30;
-            if (ready) {
+            if (ready && root.stackStatus === StackView.Active) {
                 if (root.scrollToAnchor(root.nState.searchAnchor))
                     root.nState.searchAnchor = "";
+                stop();
+            } else if (ready && root.stackStatus === StackView.Inactive) {
                 stop();
             }
             tries++;
@@ -127,7 +147,8 @@ ColumnLayout {
         }
 
         function onHighlightSetting(anchor: string): void {
-            root.highlightAnchor(anchor);
+            if (root.stackStatus === StackView.Active)
+                root.highlightAnchor(anchor);
         }
 
         target: root.nState
