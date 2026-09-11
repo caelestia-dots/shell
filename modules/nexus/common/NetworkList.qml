@@ -134,7 +134,10 @@ ItemList {
                             status = Tr.trCtx("Connected", "network connected");
                         else if (Nmcli.hasSavedProfile(net.ssid))
                             status = Tr.trCtx("Saved", "network saved");
-                        return Tr.trCtx("Security: %1", "network security").arg(net.security) + (status ? " • " + status : "");
+                        if (status)
+                            // TRANSLATORS: %1 = security type, %2 = connection status
+                            return Tr.trCtx("Security: %1 • %2", "network security and status").arg(net.security).arg(status);
+                        return Tr.trCtx("Security: %1", "network security").arg(net.security);
                     }
                     color: Colours.palette.m3outline
                     font: Tokens.font.label.small

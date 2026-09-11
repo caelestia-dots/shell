@@ -35,11 +35,11 @@ class BarWorkspaces : public settings::ObjectNode {
     CONFIG_PROPERTY(int, shown, 5)
     CONFIG_PROPERTY(bool, activeIndicator, true)
     CONFIG_PROPERTY(bool, occupiedBg, false)
+    CONFIG_PROPERTY(bool, showUnoccupied, true)
     CONFIG_PROPERTY(bool, showWindows, true)
     CONFIG_PROPERTY(bool, showWindowsOnSpecialWorkspaces, true)
     CONFIG_PROPERTY(int, maxWindowIcons, 5)
     CONFIG_PROPERTY(bool, activeTrail, false)
-    CONFIG_GLOBAL_PROPERTY(bool, perMonitorWorkspaces, true)
     CONFIG_ENUM_PROPERTY(BarWorkspaceDisplay, displayType, BarWorkspaceDisplay::Shapes)
     CONFIG_PROPERTY(QString, label, u"  "_s)
     CONFIG_PROPERTY(QString, occupiedLabel, u"󰮯"_s)
@@ -84,6 +84,7 @@ class BarClock : public settings::ObjectNode {
     CONFIG_PROPERTY(bool, background, false)
     CONFIG_PROPERTY(bool, showDate, false)
     CONFIG_PROPERTY(bool, showIcon, true)
+    CONFIG_PROPERTY(bool, showSeconds, false)
 };
 
 class BarConfig : public settings::ObjectNode {

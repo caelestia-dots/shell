@@ -90,13 +90,7 @@ StyledRect {
                 }
 
                 StyledText {
-                    text: {
-                        if (!Storage.primaryDisk)
-                            return Tr.tr("No disks detected");
-
-                        const fmt = UsageFmt.formatKib(Storage.primaryDisk.used, Storage.primaryDisk.total);
-                        return `${+fmt.value.toFixed(1)} / ${+fmt.total.toFixed(1)} ${fmt.unit}`;
-                    }
+                    text: Storage.primaryDisk ? Units.formatKibUsage(Storage.primaryDisk.used, Storage.primaryDisk.total) : Tr.tr("No disks detected")
                     font: Tokens.font.body.large
                     color: root.accent
                 }

@@ -55,6 +55,13 @@ PageBase {
         }
 
         ToggleRow {
+            text: Tr.tr("Show unoccupied")
+            subtext: Tr.tr("Show workspaces that are inactive and empty")
+            checked: Config.bar.workspaces.showUnoccupied
+            onToggled: GlobalConfig.bar.workspaces.showUnoccupied = checked
+        }
+
+        ToggleRow {
             text: Tr.tr("Windows on special workspaces")
             checked: Config.bar.workspaces.showWindowsOnSpecialWorkspaces
             onToggled: GlobalConfig.bar.workspaces.showWindowsOnSpecialWorkspaces = checked
@@ -68,14 +75,6 @@ PageBase {
             to: 20
             stepSize: 1
             onMoved: v => GlobalConfig.bar.workspaces.maxWindowIcons = v
-        }
-
-        ToggleRow {
-            last: true
-            text: Tr.tr("Per-monitor workspaces")
-            subtext: Tr.tr("Show each monitor's workspaces independently")
-            checked: GlobalConfig.bar.workspaces.perMonitorWorkspaces
-            onToggled: GlobalConfig.bar.workspaces.perMonitorWorkspaces = checked
         }
     }
 }

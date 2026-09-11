@@ -40,7 +40,8 @@ StyledRect {
 
                 text: {
                     const filters = root.dialog.filters.map(f => `*.${f}`).join(Tr.trCtx(", ", "file filter separator"));
-                    return `${root.dialog.filterLabel} (${filters})`;
+                    // TRANSLATORS: %1 = filter label, %2 = file patterns
+                    return Tr.trCtx("%1 (%2)", "file filter label and patterns").arg(root.dialog.filterLabel).arg(filters);
                 }
             }
         }

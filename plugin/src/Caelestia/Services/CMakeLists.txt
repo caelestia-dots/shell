@@ -9,7 +9,6 @@ qml_module(caelestia-services
         cavaprovider.cpp
         tickingservice.cpp
         sensorslib.cpp
-        usagefmt.cpp
         cpu.cpp
         gpu.cpp
         memory.cpp
@@ -22,6 +21,7 @@ qml_module(caelestia-services
         hyprdevices.cpp
         hyprextras.cpp
     LIBRARIES
+        Qt::Concurrent
         Qt::DBus
         Qt::Network
         PkgConfig::Pipewire

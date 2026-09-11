@@ -8,18 +8,6 @@
 
 namespace caelestia::services {
 
-struct NetworkFormatResult {
-    Q_GADGET
-    QML_ANONYMOUS
-
-    Q_PROPERTY(qreal value MEMBER value CONSTANT)
-    Q_PROPERTY(QString unit MEMBER unit CONSTANT)
-
-public:
-    qreal value = 0.0;
-    QString unit;
-};
-
 class NetworkUsage : public TickingService {
     Q_OBJECT
     QML_ELEMENT
@@ -42,9 +30,6 @@ public:
     [[nodiscard]] qreal downloadTotal() const;
     [[nodiscard]] qreal uploadTotal() const;
     [[nodiscard]] int historyLength() const;
-
-    [[nodiscard]] Q_INVOKABLE static NetworkFormatResult formatBytesRate(qreal bytes);
-    [[nodiscard]] Q_INVOKABLE static NetworkFormatResult formatBytes(qreal bytes);
 
     [[nodiscard]] CircularBuffer* downloadBuffer() const;
     [[nodiscard]] CircularBuffer* uploadBuffer() const;

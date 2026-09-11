@@ -47,6 +47,7 @@ qml_module(caelestia-i18n
         pluralrules.cpp
     QML_SINGLETONS
         Tr.qml
+        Units.qml
     RESOURCES
         ${mo_files}
     LIBRARIES

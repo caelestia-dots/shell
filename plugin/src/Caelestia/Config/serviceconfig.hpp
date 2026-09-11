@@ -18,11 +18,15 @@ class ServiceConfig : public settings::ObjectNode {
 
     CONFIG_GLOBAL_PROPERTY(QString, weatherLocation, QString())
     // Guess based on locale
-    CONFIG_GLOBAL_PROPERTY(bool, useFahrenheit,
+    CONFIG_GLOBAL_ENUM_PROPERTY(TemperatureUnit, weatherUnits,
         QLocale().measurementSystem() == QLocale::ImperialUSSystem ||
-            QLocale().measurementSystem() == QLocale::ImperialUKSystem)
-    // This is always false by default cause apparently even imperial system users don't use it for perf temps?
-    CONFIG_GLOBAL_PROPERTY(bool, useFahrenheitPerformance, false)
+                QLocale().measurementSystem() == QLocale::ImperialUKSystem
+            ? TemperatureUnit::Fahrenheit
+            : TemperatureUnit::Celsius)
+    // Always Celsius by default cause apparently even imperial system users don't use Fahrenheit for perf temps?
+    CONFIG_GLOBAL_ENUM_PROPERTY(TemperatureUnit, sensorUnits, TemperatureUnit::Celsius)
+    // Binary (KiB/MiB/GiB) or decimal (KB/MB/GB) data sizes
+    CONFIG_GLOBAL_ENUM_PROPERTY(DataUnit, dataUnits, DataUnit::Binary)
     // Attempt to guess based on locale
     CONFIG_GLOBAL_PROPERTY(
         bool, useTwelveHourClock, QLocale().timeFormat(QLocale::ShortFormat).toLower().contains(u"a"_s))

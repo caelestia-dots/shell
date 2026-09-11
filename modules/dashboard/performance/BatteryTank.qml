@@ -101,9 +101,11 @@ StyledClippingRect {
                 const hr = Math.floor(s / 3600);
                 const min = Math.floor((s % 3600) / 60);
                 if (hr > 0)
-                    return `${hr}h ${min}m`;
+                    // TRANSLATORS: %1 = hours, %2 = minutes
+                    return Tr.trCtx("%1h %2m", "battery time remaining").arg(hr).arg(min);
 
-                return `${min}m`;
+                // TRANSLATORS: %1 = minutes
+                return Tr.trCtx("%1m", "battery time remaining").arg(min);
             }
             color: contents.subTextColour
             font: Tokens.font.body.small
