@@ -27,6 +27,8 @@ VerticalFadeFlickable {
         }
     }
 
+
+
     TapHandler {
         onTapped: root.focus = true
     }
