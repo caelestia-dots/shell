@@ -76,13 +76,5 @@ PageBase {
             stepSize: 1
             onMoved: v => GlobalConfig.bar.workspaces.maxWindowIcons = v
         }
-
-        ToggleRow {
-            last: true
-            text: Tr.tr("Per-monitor workspaces")
-            subtext: Tr.tr("Show each monitor's workspaces independently")
-            checked: GlobalConfig.bar.workspaces.perMonitorWorkspaces
-            onToggled: GlobalConfig.bar.workspaces.perMonitorWorkspaces = checked
-        }
     }
 }
