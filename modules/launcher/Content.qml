@@ -18,6 +18,7 @@ Item {
 
     readonly property int padding: Tokens.padding.large
     readonly property int rounding: Tokens.rounding.extraLarge
+    readonly property bool wallpaperMode: screenState.launcherWallpaperMode
 
     implicitWidth: listWrapper.width + padding * 2
     implicitHeight: search.height + listWrapper.height + padding + search.anchors.bottomMargin
@@ -56,10 +57,11 @@ Item {
         anchors.margins: root.padding
         anchors.bottomMargin: CUtils.clamp(root.padding - Config.border.thickness, 0, root.padding)
 
+        leftPadding: root.wallpaperMode ? wallpaperPrefix.x + wallpaperPrefix.implicitWidth + Tokens.spacing.medium : searchIcon.width + searchIcon.anchors.leftMargin + Tokens.spacing.medium
         topPadding: Math.round((Tokens.padding.medium + Tokens.padding.large) / 2)
         bottomPadding: Math.round((Tokens.padding.medium + Tokens.padding.large) / 2)
 
-        placeholderText: Tr.tr("Type \"%1\" for commands").arg(GlobalConfig.launcher.actionPrefix)
+        placeholderText: root.wallpaperMode ? Tr.tr("Search") : Tr.tr("Type \"%1\" for commands").arg(GlobalConfig.launcher.actionPrefix)
 
         onAccepted: {
             const currentItem = list.currentList?.currentItem;
@@ -122,5 +124,20 @@ Item {
 
             target: root.screenState
         }
+    }
+
+    StyledText {
+        id: wallpaperPrefix
+
+        parent: search
+
+        anchors.verticalCenter: search.verticalCenter
+        x: search.searchIcon.x + search.searchIcon.width + Tokens.spacing.small
+        z: search.z + 1
+
+        visible: root.wallpaperMode
+        text: Tr.tr("Wallpapers")
+        color: Colours.palette.m3outline
+        font: search.font
     }
 }
